@@ -15,6 +15,8 @@ import {
   setSettingsLinksDisplay,
   setSettingsRelationsDisplay,
   setSettingsCommentaires,
+  setSettingsContextualInformationDisplay,
+  isContextualInformationDisplayEnabled,
   toggleSettingsShareVerseNumbers,
   toggleSettingsShareLineBreaks,
   toggleSettingsShareQuotes,
@@ -350,6 +352,23 @@ describe('Settings Reducer', () => {
       const state = createState({ commentsDisplay: true })
       const newState = userReducer(state, setSettingsCommentaires(false))
       expect(newState.bible.settings.commentsDisplay).toBe(false)
+    })
+  })
+
+  describe('setSettingsContextualInformationDisplay', () => {
+    it('keeps contextual information enabled for legacy settings', () => {
+      expect(isContextualInformationDisplayEnabled(undefined)).toBe(true)
+    })
+
+    it('can hide contextual information', () => {
+      const newState = userReducer(initialState, setSettingsContextualInformationDisplay(false))
+      expect(newState.bible.settings.contextualInformationDisplay).toBe(false)
+    })
+
+    it('can show contextual information', () => {
+      const state = createState({ contextualInformationDisplay: false })
+      const newState = userReducer(state, setSettingsContextualInformationDisplay(true))
+      expect(newState.bible.settings.contextualInformationDisplay).toBe(true)
     })
   })
 

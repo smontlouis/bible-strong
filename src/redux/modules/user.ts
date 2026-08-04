@@ -89,6 +89,7 @@ import {
   setDefaultColorType,
   setSettingsAlignContent,
   setSettingsCommentaires,
+  setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
   setSettingsLinksDisplay,
   setSettingsNotesDisplay,
@@ -549,6 +550,7 @@ export interface UserState {
       relationsDisplay?: 'inline' | 'block'
       tagsDisplay: 'inline' | 'block'
       commentsDisplay: boolean
+      contextualInformationDisplay?: boolean
       redWordsDisplay: boolean
       shareVerses: {
         hasVerseNumbers: boolean
@@ -646,6 +648,7 @@ const getInitialState = (): UserState => ({
       relationsDisplay: 'inline',
       tagsDisplay: 'inline',
       commentsDisplay: false,
+      contextualInformationDisplay: true,
       redWordsDisplay: true,
       shareVerses: {
         hasVerseNumbers: true,
@@ -1283,6 +1286,9 @@ const userSlice = createSlice({
     })
     builder.addCase(setSettingsCommentaires, (state, action) => {
       state.bible.settings.commentsDisplay = action.payload
+    })
+    builder.addCase(setSettingsContextualInformationDisplay, (state, action) => {
+      state.bible.settings.contextualInformationDisplay = action.payload
     })
     builder.addCase(setSettingsRedWordsDisplay, (state, action) => {
       state.bible.settings.redWordsDisplay = action.payload

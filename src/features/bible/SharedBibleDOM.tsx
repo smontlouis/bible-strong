@@ -95,6 +95,10 @@ const SharedBibleDOM = () => {
     setSelectedCode: noop,
     selectedCode: null,
     comments: null,
+    chapterEntities: [],
+    chapterEntitiesLoaded: false,
+    chapterEntityModuleStatus: null,
+    chapterEntityDownloadState: { progress: 0 },
   }
 
   const props = activeProps ?? defaultProps

@@ -20,11 +20,12 @@ jest.mock('~helpers/interlinearBibleSidecar', () => ({
 }))
 
 jest.mock('~features/resources/strongBibleResourceAccess', () => ({
-  localStrongBibleResourceAccess: { loadVerse: jest.fn() },
+  localStrongBibleResourceAccess: { loadVerse: jest.fn(), loadChapterCodes: jest.fn() },
 }))
 
 const createDependencies = () => ({
   strongBible: {
+    loadChapterCodes: jest.fn(),
     loadVerse: jest.fn(),
     loadCountsByBook: jest.fn(),
     loadFoundVersesByBook: jest.fn(),

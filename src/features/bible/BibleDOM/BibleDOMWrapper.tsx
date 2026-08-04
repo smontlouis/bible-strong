@@ -7,7 +7,7 @@ import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Platform } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
@@ -59,6 +59,9 @@ import {
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import type { RelationEndpoint, RelationKind, RelationType } from '~features/studyRelations/domain'
 import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelationEndpoint'
+import type { StrongLexiconChapterEntity } from '~features/resources/strongLexiconAccess'
+import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
+import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useBookAndVersionSelector } from '../BookSelectorSheet/BookSelectorSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
@@ -76,6 +79,9 @@ import {
   NAVIGATE_TO_BIBLE_LINK,
   NAVIGATE_TO_BIBLE_NOTE,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  NAVIGATE_TO_BIBLICAL_ENTITY,
+  DOWNLOAD_CHAPTER_ENTITIES,
+  DISMISS_CONTEXTUAL_INFORMATION,
   NAVIGATE_TO_BIBLE_VIEW,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_RELATION_ENDPOINT,
@@ -118,7 +124,10 @@ import {
 } from './bibleDomBridgeCommands'
 import AndroidWebViewWarningModal from '../AndroidWebViewWarningModal'
 import { downloadManager } from '~helpers/downloadManager'
-import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
+import {
+  createBibleDownloadItem,
+  createStrongLexiconModuleDownloadPlan,
+} from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { resetBiblesDb } from '~helpers/biblesDb'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
@@ -254,6 +263,11 @@ export type WebViewProps = {
   onEnterAnnotationMode?: () => void
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
+  chapterEntities: StrongLexiconChapterEntity[]
+  chapterEntitiesLoaded: boolean
+  chapterEntityModuleStatus: StrongLexiconModuleAvailability['status'] | null
+  chapterEntityDownloadState: BibleDOMDownloadState
+  onDisableContextualInformation?: () => void
   error?: BibleError | null
 }
 
@@ -366,6 +380,11 @@ export const BibleDOMWrapper = ({
   onEnterAnnotationMode,
   isFormSheet,
   redWords,
+  chapterEntities,
+  chapterEntitiesLoaded,
+  chapterEntityModuleStatus,
+  chapterEntityDownloadState,
+  onDisableContextualInformation,
   isLoading,
   personalBibleDataEnabled = true,
   error,
@@ -428,6 +447,23 @@ export const BibleDOMWrapper = ({
     openCanonicalBibleNote: t('Afficher la note'),
     pericopeIndex: t('Péricopes'),
   }
+  const chapterEntityTranslations = {
+    title: t('bible.chapterEntities.title'),
+    groups: {
+      person: t('bible.chapterEntities.people'),
+      place: t('bible.chapterEntities.places'),
+      group: t('bible.chapterEntities.groups'),
+      supernatural: t('bible.chapterEntities.supernatural'),
+      other: t('bible.chapterEntities.others'),
+    },
+    openEntity: t('bible.chapterEntities.open'),
+    empty: t('bible.chapterEntities.empty'),
+    downloadTitle: t('strongLexicon.biblicalEntities'),
+    downloadDescription: t('strongLexicon.biblicalEntitiesDescription'),
+    downloading: t('bible.error.downloading'),
+    downloadFailed: t('bible.chapterEntities.downloadFailed'),
+    dismiss: t('bible.chapterEntities.dismissAccessibility'),
+  }
   const dispatch: Dispatch = async action => {
     appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
     if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
@@ -440,6 +476,57 @@ export const BibleDOMWrapper = ({
         if (__DEV__) console.log(`[Bible] ${Livre}-${Chapitre}-${Verset}`)
         onOpenResourceForVerse?.('strong', `${Livre}-${Chapitre}-${Verset}`)
 
+        break
+      }
+      case NAVIGATE_TO_BIBLICAL_ENTITY: {
+        const entityKey = getStringPayload(action.payload)
+        if (!entityKey) break
+        pushRouteOnce(
+          createStrongDetailRoute(
+            'entity',
+            {
+              book: book.Numero,
+              bibleVersion: version,
+              bibleChapter: chapter,
+            },
+            { entityKey }
+          )
+        )
+        break
+      }
+      case DOWNLOAD_CHAPTER_ENTITIES: {
+        if (!chapterEntityModuleStatus || chapterEntityModuleStatus === 'available') break
+        Alert.alert(
+          t('Télécharger {{name}} ?', { name: t('strongLexicon.biblicalEntities') }),
+          t('strongLexicon.biblicalEntitiesDescription'),
+          [
+            { text: t('Annuler'), style: 'cancel' },
+            {
+              text: t('Télécharger'),
+              onPress: () =>
+                downloadManager.enqueue(
+                  createStrongLexiconModuleDownloadPlan(
+                    'entities',
+                    chapterEntityModuleStatus !== 'core-missing'
+                  )
+                ),
+            },
+          ]
+        )
+        break
+      }
+      case DISMISS_CONTEXTUAL_INFORMATION: {
+        Alert.alert(
+          t('bible.chapterEntities.dismissTitle'),
+          t('bible.chapterEntities.dismissMessage'),
+          [
+            { text: t('Annuler'), style: 'cancel' },
+            {
+              text: t('bible.chapterEntities.dismissConfirm'),
+              onPress: onDisableContextualInformation,
+            },
+          ]
+        )
         break
       }
       case NAVIGATE_TO_VERSE_LINKS: {
@@ -828,6 +915,7 @@ export const BibleDOMWrapper = ({
         comments={computedComments}
         dispatch={dispatch}
         translations={translations}
+        chapterEntityTranslations={chapterEntityTranslations}
         annotationMode={annotationMode}
         clearSelectionTrigger={clearSelectionTrigger}
         applyAnnotationTrigger={applyAnnotationTrigger}
@@ -839,6 +927,10 @@ export const BibleDOMWrapper = ({
         taggedVersesInChapter={taggedVersesInChapter}
         versesWithNonHighlightTags={versesWithNonHighlightTags}
         redWords={redWords}
+        chapterEntities={chapterEntities}
+        chapterEntitiesLoaded={chapterEntitiesLoaded}
+        chapterEntityModuleStatus={chapterEntityModuleStatus}
+        chapterEntityDownloadState={chapterEntityDownloadState}
         error={error}
         errorDownloadState={errorDownloadState}
         isResettingDatabase={isResettingDatabase}

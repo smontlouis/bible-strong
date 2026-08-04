@@ -26,6 +26,7 @@ import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRe
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { bibleChapterQueryOptions, loadBibleVerseTexts } from '~features/resources/resourceQueries'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { osisToBibleReferenceTarget } from '~helpers/bcvParser'
 import { getBook } from '~helpers/bibleBookCatalog'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
@@ -37,13 +38,16 @@ import type { StrongSelection } from '~helpers/strongSelection'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
 import { toast } from '~helpers/toast'
+import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
 import {
   addHighlight,
   createVerseEndpoint,
+  isContextualInformationDisplayEnabled,
   removeHighlight,
+  setSettingsContextualInformationDisplay,
   type RelationEndpoint,
 } from '~redux/modules/user'
 import {
@@ -76,7 +80,11 @@ import {
 } from '../../state/tabs'
 import AnnotationToolbar from './AnnotationToolbar'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
-import { BibleDOMWrapper, type StudyRelationsModalTarget } from './BibleDOM/BibleDOMWrapper'
+import {
+  BibleDOMWrapper,
+  type BibleDOMDownloadState,
+  type StudyRelationsModalTarget,
+} from './BibleDOM/BibleDOMWrapper'
 import BibleParamsModal from './BibleParamsModal'
 import {
   loadBibleReadingComments,
@@ -313,6 +321,9 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   }
   const extrasEnabled =
     Boolean(mainResult?.success && mainResult.data) && !mainReadingQuery.isPlaceholderData
+  const contextualInformationDisplay = isContextualInformationDisplayEnabled(
+    settings.contextualInformationDisplay
+  )
   const { data: parallelVerses = [] } = useQuery({
     queryKey: resourceQueryKeys.bibleParallel({
       book: book.Numero,
@@ -342,6 +353,89 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     staleTime: Infinity,
     ...localQueryOptions,
   })
+  const displayedChapterEntityStrongCodes = [
+    ...new Set(
+      verses.flatMap(verse =>
+        (verse.StrongSpans ?? []).flatMap(span => span.identities.map(identity => identity.code))
+      )
+    ),
+  ]
+  const chapterStrongCodesQuery = useQuery({
+    queryKey: resourceQueryKeys.strongBibleChapterCodes({
+      currentVersionId: version,
+      defaultVersionId: settings.defaultStrongBibleVersionId ?? 'LSG',
+      book: book.Numero,
+      chapter,
+    }),
+    queryFn: () =>
+      resources.strongBible.loadChapterCodes({
+        currentVersionId: version,
+        defaultVersionId: settings.defaultStrongBibleVersionId ?? 'LSG',
+        book: book.Numero,
+        chapter,
+      }),
+    enabled: extrasEnabled && contextualInformationDisplay && !isContextFocused,
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
+  const chapterEntityStrongCodes =
+    chapterStrongCodesQuery.data?.status === 'available'
+      ? chapterStrongCodesQuery.data.codes
+      : displayedChapterEntityStrongCodes
+  const chapterEntityAvailabilityQuery = useQuery({
+    queryKey: ['strong-lexicon', 'availability', 'entities'],
+    queryFn: () => resources.strongLexicon.getModuleAvailability('entities'),
+    enabled: contextualInformationDisplay,
+    networkMode: 'always',
+  })
+  const chapterEntityDownload = useDownloadItemStatus(
+    createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'entities' })
+  )
+  const chapterEntityDownloadState: BibleDOMDownloadState = {
+    status: chapterEntityDownload?.status,
+    progress: chapterEntityDownload
+      ? chapterEntityDownload.status === 'inserting'
+        ? 0.8 + chapterEntityDownload.insertProgress * 0.2
+        : chapterEntityDownload.downloadProgress * 0.8
+      : 0,
+    error: chapterEntityDownload?.error,
+  }
+  const refetchChapterEntityAvailability = useEffectEvent(() => {
+    void chapterEntityAvailabilityQuery.refetch()
+  })
+  useEffect(() => {
+    if (chapterEntityDownload?.status === 'completed') refetchChapterEntityAvailability()
+  }, [chapterEntityDownload?.status])
+  const chapterEntityModuleStatus =
+    contextualInformationDisplay && !isContextFocused
+      ? (chapterEntityAvailabilityQuery.data?.status ?? null)
+      : null
+  const chapterEntitiesAvailable =
+    contextualInformationDisplay &&
+    !isContextFocused &&
+    chapterEntityAvailabilityQuery.data?.status === 'available'
+  const chapterEntitiesQuery = useQuery({
+    queryKey: [
+      'strong-lexicon',
+      'chapter-entities',
+      lang,
+      book.Numero,
+      chapter,
+      chapterEntityStrongCodes.join(','),
+    ],
+    queryFn: () =>
+      resources.strongLexicon.loadChapterEntities(
+        book.Numero,
+        chapter,
+        lang,
+        chapterEntityStrongCodes
+      ),
+    enabled: extrasEnabled && chapterEntitiesAvailable,
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
+  const chapterEntities = chapterEntitiesQuery.data ?? []
+  const chapterEntitiesLoaded = chapterEntitiesQuery.isSuccess
 
   // Shared Bible DOM: detect if this tab is the active Bible tab
   const activeBibleTabId = useAtomValue(activeBibleTabIdAtom)
@@ -968,6 +1062,11 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       : handleEnterAnnotationModeFromDoubleTap,
     // Red words
     redWords: settings.redWordsDisplay ? redWords : null,
+    chapterEntities,
+    chapterEntitiesLoaded,
+    chapterEntityModuleStatus,
+    chapterEntityDownloadState,
+    onDisableContextualInformation: () => dispatch(setSettingsContextualInformationDisplay(false)),
     isFormSheet,
     error,
   } satisfies Parameters<typeof BibleDOMWrapper>[0]

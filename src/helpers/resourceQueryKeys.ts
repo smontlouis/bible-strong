@@ -66,6 +66,12 @@ export const resourceQueryKeys = {
   lexiconBibleVerseSelection: (request: LexiconBibleQueryRequest & { verseKeys: string[] }) =>
     [...lexiconBible, 'verse-selection', request] as const,
   strongBible: () => strongBible,
+  strongBibleChapterCodes: (request: {
+    currentVersionId: string
+    defaultVersionId: string
+    book: number
+    chapter: number
+  }) => [...strongBible, 'chapter-codes', request] as const,
   strongBibleCounts: (request: LexiconBibleQueryRequest) =>
     [...strongBible, 'counts', request] as const,
   strongBibleOccurrences: (request: LexiconBibleQueryRequest) =>

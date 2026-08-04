@@ -37,4 +37,20 @@ describe('resourceQueryKeys', () => {
       'en',
     ])
   })
+
+  it('keys chapter Strong codes by both the displayed and fallback versions', () => {
+    const request = {
+      currentVersionId: 'DBY',
+      defaultVersionId: 'LSG',
+      book: 1,
+      chapter: 1,
+    }
+
+    expect(resourceQueryKeys.strongBibleChapterCodes(request)).toEqual([
+      'resource',
+      'strong-bible',
+      'chapter-codes',
+      request,
+    ])
+  })
 })

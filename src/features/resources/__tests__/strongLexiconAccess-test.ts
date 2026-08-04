@@ -13,7 +13,11 @@ import {
 } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import type { SQLiteDatabase } from '~helpers/sqlite'
-import { formatStrongEntityDisplayName, localStrongLexiconAccess } from '../strongLexiconAccess'
+import {
+  formatStrongEntityDisplayName,
+  getTipnrBookCode,
+  localStrongLexiconAccess,
+} from '../strongLexiconAccess'
 
 const mockGetStrongLexiconModuleAvailability = jest.mocked(getStrongLexiconModuleAvailability)
 const mockWithStrongLexiconDatabase = jest.mocked(withStrongLexiconDatabase)
@@ -634,5 +638,146 @@ describe('strongLexiconAccess', () => {
     ['unknown_woman@Gen.10.11', 'unknown woman@Gen.10.11'],
   ])('formats the TIPNR display name %s', (input, expected) => {
     expect(formatStrongEntityDisplayName(input)).toBe(expected)
+  })
+
+  it.each([
+    [1, 'Gen'],
+    [11, '1Ki'],
+    [40, 'Mat'],
+    [43, 'Jhn'],
+    [66, 'Rev'],
+    [67, undefined],
+  ])('maps Bible book %s to its TIPNR code', (book, expected) => {
+    expect(getTipnrBookCode(book)).toBe(expected)
+  })
+
+  it('loads localized chapter entities with deduplicated verse occurrences', async () => {
+    const entitiesDatabase = {
+      getFirstAsync: jest.fn(),
+      getAllAsync: jest.fn().mockResolvedValue([
+        {
+          uniqueName: 'Abraham@Gen.11.26-1Pe',
+          displayName: 'Abraham',
+          localizedDisplayName: 'Abraham',
+          category: 'person',
+          type: 'Male',
+          verses: '1,3,3,9',
+        },
+        {
+          uniqueName: 'Moriah_Mount@Gen.22.2-2Ch',
+          displayName: 'Moriah_Mount',
+          localizedDisplayName: 'Mont_Moriah',
+          category: 'place',
+          type: 'Place',
+          verses: '2',
+        },
+        {
+          uniqueName: 'LORD@Gen.1.1-Rev',
+          displayName: 'LORD',
+          localizedDisplayName: 'SEIGNEUR',
+          category: 'other',
+          type: 'Supernatural',
+          verses: null,
+        },
+        {
+          uniqueName: 'morning@Gen.1.5-Rev',
+          displayName: 'morning',
+          localizedDisplayName: 'matin',
+          category: 'other',
+          type: 'Time',
+          verses: '1',
+        },
+      ]),
+    }
+    mockGetStrongLexiconModuleAvailability.mockResolvedValue({
+      status: 'available',
+      moduleId: 'entities',
+      schemaVersion: 1,
+    })
+    mockWithOptionalStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(entitiesDatabase as unknown as SQLiteDatabase)
+    )
+
+    await expect(
+      localStrongLexiconAccess.loadChapterEntities(1, 22, 'fr', [' H3068G ', 'H3068G'])
+    ).resolves.toEqual([
+      {
+        uniqueName: 'Abraham@Gen.11.26-1Pe',
+        name: 'Abraham',
+        category: 'person',
+        type: 'Male',
+        verses: [1, 3, 9],
+      },
+      {
+        uniqueName: 'Moriah_Mount@Gen.22.2-2Ch',
+        name: 'Mont Moriah',
+        category: 'place',
+        type: 'Place',
+        verses: [2],
+      },
+      {
+        uniqueName: 'LORD@Gen.1.1-Rev',
+        name: 'SEIGNEUR',
+        category: 'supernatural',
+        type: 'Supernatural',
+        verses: [],
+      },
+      {
+        uniqueName: 'morning@Gen.1.5-Rev',
+        name: 'matin',
+        category: 'other',
+        type: 'Time',
+        verses: [1],
+      },
+    ])
+    expect(entitiesDatabase.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining('LEFT JOIN EntityRefs refs'),
+      ['fr', 'Gen', 22, 'H3068G']
+    )
+    expect(entitiesDatabase.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining('e.uStrong IN (?)'),
+      expect.any(Array)
+    )
+    expect(entitiesDatabase.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining('SELECT COUNT(*) FROM Entities matching'),
+      expect.any(Array)
+    )
+  })
+
+  it('falls back to the source display name and returns an empty available chapter', async () => {
+    const entitiesDatabase = {
+      getAllAsync: jest
+        .fn()
+        .mockResolvedValueOnce([
+          {
+            uniqueName: 'Moriah_Mount@Gen.22.2-2Ch',
+            displayName: 'Moriah_Mount',
+            localizedDisplayName: null,
+            category: 'place',
+            type: 'Place',
+            verses: '2',
+          },
+        ])
+        .mockResolvedValueOnce([]),
+    }
+    mockGetStrongLexiconModuleAvailability.mockResolvedValue({
+      status: 'available',
+      moduleId: 'entities',
+      schemaVersion: 1,
+    })
+    mockWithOptionalStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(entitiesDatabase as unknown as SQLiteDatabase)
+    )
+
+    await expect(localStrongLexiconAccess.loadChapterEntities(1, 22, 'fr')).resolves.toEqual([
+      expect.objectContaining({ name: 'Moriah Mount' }),
+    ])
+    await expect(localStrongLexiconAccess.loadChapterEntities(1, 23, 'fr')).resolves.toEqual([])
+  })
+
+  it('does not query chapter entities when the module or book is unavailable', async () => {
+    await expect(localStrongLexiconAccess.loadChapterEntities(1, 1, 'fr')).resolves.toEqual([])
+    await expect(localStrongLexiconAccess.loadChapterEntities(67, 1, 'fr')).resolves.toEqual([])
+    expect(mockWithOptionalStrongLexiconDatabase).not.toHaveBeenCalled()
   })
 })

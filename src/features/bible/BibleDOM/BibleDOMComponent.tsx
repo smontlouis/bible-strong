@@ -26,9 +26,12 @@ import {
   SWIPE_DOWN,
   SWIPE_UP,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
+  NAVIGATE_TO_BIBLICAL_ENTITY,
   TOGGLE_SELECTED_VERSE,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
+  DOWNLOAD_CHAPTER_ENTITIES,
+  DISMISS_CONTEXTUAL_INFORMATION,
 } from './dispatch'
 import { BibleError } from '~helpers/bibleErrors'
 import { DispatchProvider } from './DispatchProvider'
@@ -58,6 +61,7 @@ import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
+import ChapterEntities from './ChapterEntities'
 
 declare global {
   interface Window {
@@ -104,6 +108,34 @@ const GlobalStyles = createGlobalStyles`
     initial-value: 0deg;
     inherits: false;
   }
+
+  .chapter-entity-button {
+    transition: opacity 100ms ease-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .chapter-entity-button:active {
+    opacity: 0.6;
+  }
+
+  @keyframes chapter-entity-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .chapter-entity-loader {
+    display: inline-flex;
+    animation: chapter-entity-spin 900ms linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chapter-entity-button {
+      transition: none;
+    }
+
+    .chapter-entity-loader {
+      animation: none;
+    }
+  }
 ` as React.FC
 
 type Props = Pick<
@@ -131,10 +163,25 @@ type Props = Pick<
   | 'isSelectionMode'
   | 'selectedCode'
   | 'redWords'
+  | 'chapterEntities'
+  | 'chapterEntitiesLoaded'
+  | 'chapterEntityModuleStatus'
+  | 'chapterEntityDownloadState'
 > & {
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
   translations: BibleDOMTranslations
+  chapterEntityTranslations: {
+    title: string
+    groups: { person: string; place: string; group: string; supernatural: string; other: string }
+    openEntity: string
+    empty: string
+    downloadTitle: string
+    downloadDescription: string
+    downloading: string
+    downloadFailed: string
+    dismiss: string
+  }
   // Pre-computed metadata from native side
   comments: { [key: string]: string } | null
   taggedVerses: TaggedVerse[] | null
@@ -501,6 +548,11 @@ const LoadedBibleContent = ({
   selectedCode,
   dispatch,
   translations,
+  chapterEntities,
+  chapterEntitiesLoaded,
+  chapterEntityModuleStatus,
+  chapterEntityDownloadState,
+  chapterEntityTranslations,
   annotationMode,
   clearSelectionTrigger,
   applyAnnotationTrigger,
@@ -1203,6 +1255,23 @@ const LoadedBibleContent = ({
               redWords={redWords}
             />
           </HorizontalScrollWrapper>
+          <ChapterEntities
+            entities={chapterEntities}
+            loaded={chapterEntitiesLoaded}
+            availabilityStatus={chapterEntityModuleStatus}
+            downloadState={chapterEntityDownloadState}
+            settings={settings}
+            translations={chapterEntityTranslations}
+            onOpenEntity={uniqueName => {
+              void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
+            }}
+            onDownload={() => {
+              void dispatch({ type: DOWNLOAD_CHAPTER_ENTITIES })
+            }}
+            onDismiss={() => {
+              void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
+            }}
+          />
           <ReturnToSelectedVerseButton
             type="button"
             settings={settings}

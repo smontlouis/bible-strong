@@ -121,7 +121,7 @@ const labels: VersionCatalogLabels = {
     en: 'Anglais',
     he: 'Hébreu',
     grc: 'Grec',
-    'he-grc': 'Hébreu et grec',
+    'he-grc': 'Interlinéaire Hébreu et Grec',
     la: 'Latin',
   },
   profiles: {
@@ -206,23 +206,36 @@ describe('Bible version catalog query', () => {
     ])
   })
 
-  it('puts the app language first and orders remaining language sections by label', () => {
+  it('puts the interlinear section directly after the app language', () => {
     const sections = getVersionCatalogSections({
-      catalog: [versions.VUL, versions.KJV, versions.LSG, versions.BHS, versions.LXX],
+      catalog: [versions.VUL, versions.KJV, versions.LSG, versions.BHG, versions.BHS, versions.LXX],
       grouping: 'language',
       query: '',
       uiLanguage: 'fr',
       labels,
     })
 
-    expect(sections.map(section => section.key)).toEqual(['fr', 'en', 'grc', 'he', 'la'])
+    expect(sections.map(section => section.key)).toEqual(['fr', 'he-grc', 'en', 'grc', 'he', 'la'])
     expect(sections.map(section => section.title)).toEqual([
       'Français',
+      'Interlinéaire Hébreu et Grec',
       'Anglais',
       'Grec',
       'Hébreu',
       'Latin',
     ])
+  })
+
+  it('moves the interlinear section after English when English is the app language', () => {
+    const sections = getVersionCatalogSections({
+      catalog: [versions.LSG, versions.KJV, versions.BHG, versions.VUL],
+      grouping: 'language',
+      query: '',
+      uiLanguage: 'en',
+      labels,
+    })
+
+    expect(sections.map(section => section.key)).toEqual(['en', 'he-grc', 'fr', 'la'])
   })
 
   it('orders style sections by the approved spectrum and collects null profiles under Other', () => {

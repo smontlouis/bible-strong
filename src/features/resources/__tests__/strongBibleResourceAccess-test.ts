@@ -15,6 +15,7 @@ jest.mock('~helpers/firebase', () => ({
 jest.mock('~helpers/strongBibleSidecar', () => ({
   getStrongBibleSidecarAvailability: jest.fn(),
   loadStrongBibleOccurrenceLocations: jest.fn(),
+  loadStrongBibleChapterSpans: jest.fn(),
   loadStrongBibleVerseCountsByBook: jest.fn(),
   loadStrongBibleVerseSpans: jest.fn(),
   loadStrongBibleVersesSpans: jest.fn(),
@@ -30,6 +31,7 @@ const available = (versionId: 'LSG' | 'DBY' | 'DBR') => ({
 
 const createDependencies = (): jest.Mocked<StrongBibleResourceAdapter> => ({
   getAvailability: jest.fn(),
+  loadChapterSpans: jest.fn(),
   loadVerse: jest.fn(),
   loadCountsByBook: jest.fn(),
   loadFoundVersesByBook: jest.fn(),
@@ -37,6 +39,35 @@ const createDependencies = (): jest.Mocked<StrongBibleResourceAdapter> => ({
 })
 
 describe('strongBibleResourceAccess', () => {
+  it('loads unique Strong codes for a chapter independently of the display mode', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability.mockResolvedValue(available('DBY'))
+    dependencies.loadChapterSpans.mockResolvedValue({
+      1: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 4,
+          identities: [
+            { kind: 'strong', code: 'H3068G' },
+            { kind: 'strong', code: 'H3068G' },
+          ],
+        },
+      ],
+    })
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    const result = await access.loadChapterCodes({
+      currentVersionId: 'DBY',
+      defaultVersionId: 'LSG',
+      book: 3,
+      chapter: 1,
+    })
+
+    expect(result).toEqual(expect.objectContaining({ status: 'available', codes: ['H3068G'] }))
+    expect(dependencies.loadChapterSpans).toHaveBeenCalledWith('DBY', { book: 3, chapter: 1 })
+  })
+
   it('keeps Strong spans on a contextual verse so untranslated occurrences remain positionable', async () => {
     const dependencies = createDependencies()
     const spans = [

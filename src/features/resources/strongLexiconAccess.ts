@@ -49,6 +49,8 @@ export type StrongLexiconEntityRelation = {
   targetName: string
 }
 
+export type StrongLexiconEntityCategory = 'person' | 'place' | 'group' | 'supernatural' | 'other'
+
 export type StrongLexiconEntity = {
   id: number
   uniqueName: string
@@ -70,6 +72,14 @@ export type StrongLexiconEntity = {
     palopenmapsUrl?: string
   }
   relations: StrongLexiconEntityRelation[]
+}
+
+export type StrongLexiconChapterEntity = {
+  uniqueName: string
+  name: string
+  category: StrongLexiconEntityCategory
+  type: string
+  verses: number[]
 }
 
 export type StrongLexiconEntry = {
@@ -436,6 +446,114 @@ type EntityRow = {
 
 export const formatStrongEntityDisplayName = (value: string): string => value.replace(/_+/gu, ' ')
 
+const normalizeStrongEntityCategory = (
+  value: string,
+  type: string
+): StrongLexiconEntityCategory => {
+  if (type.toLowerCase() === 'supernatural') return 'supernatural'
+  return value === 'person' || value === 'place' || value === 'group' ? value : 'other'
+}
+
+const TIPNR_BOOK_CODES = [
+  'Gen',
+  'Exo',
+  'Lev',
+  'Num',
+  'Deu',
+  'Jos',
+  'Jdg',
+  'Rut',
+  '1Sa',
+  '2Sa',
+  '1Ki',
+  '2Ki',
+  '1Ch',
+  '2Ch',
+  'Ezr',
+  'Neh',
+  'Est',
+  'Job',
+  'Psa',
+  'Pro',
+  'Ecc',
+  'Sng',
+  'Isa',
+  'Jer',
+  'Lam',
+  'Ezk',
+  'Dan',
+  'Hos',
+  'Jol',
+  'Amo',
+  'Oba',
+  'Jon',
+  'Mic',
+  'Nam',
+  'Hab',
+  'Zep',
+  'Hag',
+  'Zec',
+  'Mal',
+  'Mat',
+  'Mrk',
+  'Luk',
+  'Jhn',
+  'Act',
+  'Rom',
+  '1Co',
+  '2Co',
+  'Gal',
+  'Eph',
+  'Php',
+  'Col',
+  '1Th',
+  '2Th',
+  '1Ti',
+  '2Ti',
+  'Tit',
+  'Phm',
+  'Heb',
+  'Jas',
+  '1Pe',
+  '2Pe',
+  '1Jn',
+  '2Jn',
+  '3Jn',
+  'Jud',
+  'Rev',
+] as const
+
+export const getTipnrBookCode = (book: number): string | undefined => TIPNR_BOOK_CODES[book - 1]
+
+type ChapterEntityRow = {
+  uniqueName: string
+  displayName: string
+  localizedDisplayName: string | null
+  category: string
+  type: string
+  verses: string | null
+}
+
+const toChapterEntity = (
+  row: ChapterEntityRow,
+  language: ResourceLanguage
+): StrongLexiconChapterEntity => ({
+  uniqueName: row.uniqueName,
+  name: formatStrongEntityDisplayName(
+    chooseLocalized(language, row.localizedDisplayName, row.displayName)
+  ),
+  category: normalizeStrongEntityCategory(row.category, row.type),
+  type: row.type,
+  verses: [
+    ...new Set(
+      (row.verses ?? '')
+        .split(',')
+        .map(Number)
+        .filter(verse => Number.isInteger(verse) && verse > 0)
+    ),
+  ].sort((left, right) => left - right),
+})
+
 const loadEntityStrongCodeMap = async (
   database: SQLiteDatabase,
   uStrongValues: string[]
@@ -692,6 +810,12 @@ export type StrongLexiconAccess = {
     uniqueName: string,
     language: ResourceLanguage
   ) => Promise<StrongLexiconEntity | undefined>
+  loadChapterEntities: (
+    book: number,
+    chapter: number,
+    language: ResourceLanguage,
+    strongCodes?: string[]
+  ) => Promise<StrongLexiconChapterEntity[]>
   search: (
     query: string,
     language: ResourceLanguage,
@@ -794,6 +918,45 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
         return row ? hydrateEntity(database, core, row, language) : undefined
       }).then(entity => entity ?? undefined)
     )
+  },
+
+  async loadChapterEntities(book, chapter, language, strongCodes = []) {
+    const bookCode = getTipnrBookCode(book)
+    if (!bookCode) return []
+    const availability = await getStrongLexiconModuleAvailability('entities')
+    if (availability.status !== 'available') return []
+    const normalizedStrongCodes = [
+      ...new Set(strongCodes.map(code => code.trim().toUpperCase()).filter(Boolean)),
+    ]
+    const strongPlaceholders = normalizedStrongCodes.map(() => '?').join(', ')
+    const strongFilter = normalizedStrongCodes.length
+      ? ` OR (
+            e.uStrong IN (${strongPlaceholders})
+            AND (SELECT COUNT(*) FROM Entities matching WHERE matching.uStrong=e.uStrong)=1
+          )`
+      : ''
+
+    return withOptionalStrongLexiconDatabase('entities', async database => {
+      const rows = await database.getAllAsync<ChapterEntityRow>(
+        `SELECT e.uniqueName, e.displayName, e.category, e.type,
+                tr.displayName AS localizedDisplayName,
+                GROUP_CONCAT(DISTINCT refs.verse) AS verses
+           FROM Entities e
+           LEFT JOIN EntityTranslations tr ON tr.entityId=e.id AND tr.language=?
+           LEFT JOIN EntityRefs refs
+             ON refs.entityId=e.id AND refs.book=? AND refs.chapter=?
+          WHERE refs.entityId IS NOT NULL${strongFilter}
+          GROUP BY e.id
+          ORDER BY CASE e.category
+            WHEN 'person' THEN 0
+            WHEN 'place' THEN 1
+            WHEN 'group' THEN 2
+            ELSE 3
+          END, COALESCE(NULLIF(tr.displayName, ''), e.displayName), e.id`,
+        [language, bookCode, chapter, ...normalizedStrongCodes]
+      )
+      return rows.map(row => toChapterEntity(row, language))
+    }).then(entities => entities ?? [])
   },
 
   async loadEntry(identity, language) {

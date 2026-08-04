@@ -29,6 +29,8 @@ export const SET_DEFAULT_COLOR_TYPE = 'user/SET_DEFAULT_COLOR_TYPE'
 export const SET_DEFAULT_BIBLE_VERSION = 'user/SET_DEFAULT_BIBLE_VERSION'
 export const SET_DEFAULT_STRONG_BIBLE_VERSION = 'user/SET_DEFAULT_STRONG_BIBLE_VERSION'
 export const SET_SETTINGS_RED_WORDS_DISPLAY = 'user/SET_SETTINGS_RED_WORDS_DISPLAY'
+export const SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY =
+  'user/SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY'
 
 // RTK Action Creators
 export const setSettingsAlignContent = createAction(
@@ -137,3 +139,10 @@ export const setSettingsRedWordsDisplay = createAction(
   SET_SETTINGS_RED_WORDS_DISPLAY,
   (payload: boolean) => ({ payload })
 )
+
+export const setSettingsContextualInformationDisplay = createAction(
+  SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY,
+  (payload: boolean) => ({ payload })
+)
+
+export const isContextualInformationDisplayEnabled = (value?: boolean): boolean => value !== false

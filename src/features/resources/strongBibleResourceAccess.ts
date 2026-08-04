@@ -5,6 +5,7 @@ import {
   getStrongBibleSidecarAvailability,
   getResolvedStrongBibleConcordanceIdentity,
   loadStrongBibleLemmaStats,
+  loadStrongBibleChapterSpans,
   loadStrongBibleOccurrenceLocations,
   loadStrongBibleVerseCountsByBook,
   loadStrongBibleVerseSpans,
@@ -43,6 +44,11 @@ export interface StrongBibleVerseRequest extends StrongBibleResolutionRequest {
   verse: number
 }
 
+export interface StrongBibleChapterRequest extends StrongBibleResolutionRequest {
+  book: number
+  chapter: number
+}
+
 export interface StrongBibleConcordanceRequest extends StrongBibleResolutionRequest {
   book: number
   reference: string | number
@@ -74,6 +80,14 @@ export type StrongBibleVerseResult =
       status: 'available'
       provenance: StrongBibleProvenance
       verse: Verse
+    }
+
+export type StrongBibleChapterCodesResult =
+  | StrongBibleUnavailable
+  | {
+      status: 'available'
+      provenance: StrongBibleProvenance
+      codes: string[]
     }
 
 export type StrongBibleCountsResult =
@@ -110,6 +124,10 @@ export interface StrongBibleResourceAdapter {
     versionId: StrongBibleVersionId,
     request: Pick<StrongBibleVerseRequest, 'book' | 'chapter' | 'verse'>
   ) => Promise<{ text: string; spans: StrongBibleSpan[] } | undefined>
+  loadChapterSpans: (
+    versionId: StrongBibleVersionId,
+    request: Pick<StrongBibleChapterRequest, 'book' | 'chapter'>
+  ) => Promise<Record<number, StrongBibleSpan[]>>
   loadCountsByBook: (
     versionId: StrongBibleVersionId,
     request: StrongBibleAdapterConcordanceRequest
@@ -155,6 +173,7 @@ const toAdapterRequest = (
 
 export interface StrongBibleResourceAccess {
   loadVerse: (request: StrongBibleVerseRequest) => Promise<StrongBibleVerseResult>
+  loadChapterCodes: (request: StrongBibleChapterRequest) => Promise<StrongBibleChapterCodesResult>
   loadCountsByBook: (request: StrongBibleConcordanceRequest) => Promise<StrongBibleCountsResult>
   loadFoundVersesByBook: (
     request: StrongBibleConcordanceRequest
@@ -164,6 +183,9 @@ export interface StrongBibleResourceAccess {
 
 export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
   getAvailability: getStrongBibleSidecarAvailability,
+  loadChapterSpans(versionId, request) {
+    return loadStrongBibleChapterSpans(versionId, request.book, request.chapter)
+  },
   async loadVerse(versionId, request) {
     const [text, spans] = await Promise.all([
       getVerseText(versionId, request.book, request.chapter, request.verse),
@@ -269,6 +291,26 @@ export const createStrongBibleResourceAccess = (
   }
 
   return {
+    async loadChapterCodes(request) {
+      const resolution = await resolve(request)
+      if (resolution.status !== 'available') return resolution
+      const spansByVerse = await adapter.loadChapterSpans(resolution.provenance.versionId, {
+        book: request.book,
+        chapter: request.chapter,
+      })
+      return {
+        status: 'available',
+        provenance: resolution.provenance,
+        codes: [
+          ...new Set(
+            Object.values(spansByVerse).flatMap(spans =>
+              spans.flatMap(span => span.identities.map(identity => identity.code))
+            )
+          ),
+        ],
+      }
+    },
+
     async loadVerse(request) {
       const resolution = await resolve(request)
       if (resolution.status !== 'available') return resolution

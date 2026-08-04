@@ -1,6 +1,6 @@
 import { getStrongEntityAvatarKey } from './strongEntityPresentation'
 
-const ENTITY_AVATAR_IMAGES = {
+export const ENTITY_AVATAR_IMAGES = {
   male: require('~assets/images/entity-avatars/male.png'),
   female: require('~assets/images/entity-avatars/female.png'),
   group: require('~assets/images/entity-avatars/group.png'),
