@@ -11,7 +11,7 @@ export const resolveStrongBibleVersionId = (
   context.bibleVersion === 'BHG'
     ? 'BHG'
     : context.bibleVersion && isStrongCapableBibleVersion(context.bibleVersion)
-    ? context.bibleVersion
-    : context.strongBibleVersionId && isStrongCapableBibleVersion(context.strongBibleVersionId)
-      ? context.strongBibleVersionId
-      : defaultVersionId
+      ? context.bibleVersion
+      : context.strongBibleVersionId && isStrongCapableBibleVersion(context.strongBibleVersionId)
+        ? context.strongBibleVersionId
+        : defaultVersionId

@@ -45,6 +45,7 @@ module.exports = [
       'metro.config.js',
       'eslint.config.js',
       'src/helpers/react-native-htmlview/vendor/**',
+      'vendor/**',
       'src/helpers/lunr.*.min.js',
       '_bmad/**',
       '_bmad-output/**',

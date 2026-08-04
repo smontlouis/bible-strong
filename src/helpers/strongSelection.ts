@@ -201,8 +201,7 @@ export const getStrongSelectionPayload = (payload: unknown): StrongSelection | u
   }
 
   return createStrongSelection(candidate.identities, candidate.book, candidate.version, {
-    occurrenceId:
-      typeof candidate.occurrenceId === 'string' ? candidate.occurrenceId : undefined,
+    occurrenceId: typeof candidate.occurrenceId === 'string' ? candidate.occurrenceId : undefined,
     word: typeof candidate.word === 'string' ? candidate.word : undefined,
     chapter:
       typeof candidate.chapter === 'number' || typeof candidate.chapter === 'string'

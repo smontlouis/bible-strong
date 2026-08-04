@@ -521,7 +521,7 @@ const DownloadsScreen = () => {
       const downloadItem = createOfflineCopyDownloadItem(identity)
       const relatedResources =
         identity.kind === 'bible'
-          ? getBibleRelatedPublicationResources(identity.versionId) ?? []
+          ? (getBibleRelatedPublicationResources(identity.versionId) ?? [])
           : []
 
       return [
@@ -802,7 +802,9 @@ const DownloadsScreen = () => {
         {
           text: t('downloads.update'),
           onPress: () =>
-            enqueue(dedupeDownloadItems(itemsToUpdate.flatMap(item => createDownloadPlanForId(item.id)))),
+            enqueue(
+              dedupeDownloadItems(itemsToUpdate.flatMap(item => createDownloadPlanForId(item.id)))
+            ),
         },
       ]
     )
