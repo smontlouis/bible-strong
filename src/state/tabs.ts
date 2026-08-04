@@ -29,10 +29,12 @@ import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
 import {
+  getLegacyBibleTabReferenceVersionIds,
   migrateLegacyBibleTabData,
   migrateLegacyBibleVersionId,
   migrateLegacyParallelVersions,
 } from '~helpers/legacyBibleVersionMigration'
+import { tryRecordLegacyReferenceEvidence } from '../migrations/legacyResourceEvidence'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -411,6 +413,7 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
     // First migrate old tab types
     tab = migrateTabTypes(tab)
     if (tab.type === 'bible') {
+      tryRecordLegacyReferenceEvidence(getLegacyBibleTabReferenceVersionIds(tab.data), storage)
       const migratedData = migrateLegacyBibleTabData(
         tab.data as BibleTab['data'] & { selectedVersion: string }
       )
@@ -427,6 +430,12 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
         },
       }
     } else if (tab.type === 'strong') {
+      tryRecordLegacyReferenceEvidence(
+        [tab.data.strongBibleVersionId, tab.data.bibleVersion].filter(
+          (versionId): versionId is string => typeof versionId === 'string'
+        ),
+        storage
+      )
       tab = {
         ...tab,
         data: {
@@ -478,19 +487,16 @@ const migrateTabGroups = (groups: TabGroup[]): TabGroup[] => {
       const oldTabs = JSON.parse(oldTabsJson) as TabItem[]
       if (oldTabs.length > 0) {
         const activeIndex = oldActiveIndexJson ? JSON.parse(oldActiveIndexJson) : 0
+        const migratedTabs = migrateTabsToRemovable(oldTabs)
 
         console.log('[TabGroups] Migrating', oldTabs.length, 'tabs from old storage')
-
-        // Delete old storage keys after successful migration
-        storage.remove('tabsAtom')
-        storage.remove('activeTabIndexAtomOriginal')
 
         return [
           {
             id: DEFAULT_GROUP_ID,
             name: i18n.t('Principal'),
             isDefault: true,
-            tabs: migrateTabsToRemovable(oldTabs),
+            tabs: migratedTabs,
             activeTabIndex: Math.min(activeIndex, oldTabs.length - 1),
             createdAt: 0,
             updatedAt: 0,
@@ -531,7 +537,10 @@ export const savedParallelVersionsAtom = atomWithAsyncStorage<VersionCode[]>(
   'savedParallelVersions',
   [],
   {
-    migrate: versions => migrateLegacyParallelVersions(versions) as VersionCode[],
+    migrate: versions => {
+      tryRecordLegacyReferenceEvidence(versions, storage)
+      return migrateLegacyParallelVersions(versions) as VersionCode[]
+    },
   }
 )
 

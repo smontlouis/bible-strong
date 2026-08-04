@@ -42,6 +42,7 @@ export const migrateLegacyParallelVersions = (
 export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data: T): T => {
   const legacyVersion = data.selectedVersion
   const selectedVersion = migrateLegacyBibleVersionId(legacyVersion)
+  const hasLegacyModeAcquisition = isLegacyBibleVersionId(legacyVersion)
   const migrated = {
     ...data,
     selectedVersion,
@@ -49,13 +50,25 @@ export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data:
   } as PersistedBibleTabData
 
   if (legacyVersion === 'LSGS' || legacyVersion === 'KJVS') {
-    migrated.strongMode = 'visible'
+    migrated.strongMode = 'hidden'
+    migrated.pendingModeAcquisition = {
+      kind: 'strong',
+      versionId: selectedVersion,
+      mode: 'visible',
+      planIds: [`bible-strong:${selectedVersion}`],
+    }
   }
 
   if (legacyVersion === 'INT' || legacyVersion === 'INT_EN') {
     migrated.strongMode = 'hidden'
     migrated.interlinearMode = 'hidden'
     migrated.interlinearLocale = legacyVersion === 'INT' ? 'fr' : 'en'
+    migrated.pendingModeAcquisition = {
+      kind: 'interlinear',
+      mode: 'interlinear',
+      locale: migrated.interlinearLocale,
+      planIds: [`bible-interlinear:BHG:${migrated.interlinearLocale}`],
+    }
   }
 
   if (data.strongBibleSourceVersionId) {
@@ -66,10 +79,16 @@ export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data:
         : data.strongBibleSourceVersionId
   }
 
-  if (data.pendingModeAcquisition?.kind === 'strong' && data.pendingModeAcquisition.versionId) {
+  if (
+    !hasLegacyModeAcquisition &&
+    data.pendingModeAcquisition?.kind === 'strong' &&
+    data.pendingModeAcquisition.versionId
+  ) {
+    const pendingVersionId = migrateLegacyBibleVersionId(data.pendingModeAcquisition.versionId)
     migrated.pendingModeAcquisition = {
       ...data.pendingModeAcquisition,
-      versionId: migrateLegacyBibleVersionId(data.pendingModeAcquisition.versionId),
+      versionId: pendingVersionId,
+      planIds: [`bible-strong:${pendingVersionId}`],
     }
   }
 
@@ -82,6 +101,15 @@ export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data:
 
   return migrated as T
 }
+
+export const getLegacyBibleTabReferenceVersionIds = (data: PersistedBibleTabData): string[] =>
+  [
+    data.selectedVersion,
+    ...(data.parallelVersions ?? []),
+    data.strongBibleSourceVersionId,
+    data.pendingModeAcquisition?.versionId,
+    data.entityReference?.preferredVersion,
+  ].filter((versionId): versionId is string => typeof versionId === 'string')
 
 const isLegacyDownload = (value: unknown): boolean => {
   if (!value || typeof value !== 'object') return false

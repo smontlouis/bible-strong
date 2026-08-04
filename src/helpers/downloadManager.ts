@@ -12,26 +12,9 @@ import {
 } from '~state/downloadQueue'
 import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
 import { storage } from '~helpers/storage'
-import {
-  installResourceDatabaseItem,
-  synchronizeOptionalBibleResources,
-} from '~helpers/resourceDatabaseInstallation'
 import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
-import { getDownloadItemIdentity } from '~helpers/offlineCopy'
-import { invalidateOfflineCopyQueries } from '~helpers/offlineCopyQueries'
-import {
-  beginResourceInstallation,
-  commitResourceInstallation,
-  completeResourceInstallation,
-  reconcileResourceInstallationJournal,
-  rollbackResourceInstallation,
-  type ResourceInstallationJournal,
-  type ResourceInstallationRecoveryTarget,
-} from '~helpers/resourceInstallationJournal'
-import { getStrongBibleSidecarPath } from '~helpers/strongBibleSidecar'
-import { getInterlinearSidecarPath } from '~helpers/interlinearBibleSidecar'
-import { getStrongLexiconModulePath } from '~helpers/strongLexiconModules'
-import { isAtomicResourceFileRollbackError } from '~helpers/atomicResourceFile'
+import { reconcileResourceInstallationJournal } from '~helpers/resourceInstallationJournal'
+import { installManagedResource } from '~helpers/managedResourceInstallation'
 import {
   migrateLegacyDownloadQueue,
   preserveLegacyDownloadsInQueue,
@@ -40,26 +23,6 @@ import {
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
 const PERSIST_DEBOUNCE_MS = 2000
-
-const getResourceInstallationRecoveryTarget = (
-  item: DownloadItem
-): ResourceInstallationRecoveryTarget => {
-  switch (item.type) {
-    case 'bible':
-      return { kind: 'bible-sqlite', versionId: item.versionId }
-    case 'database':
-      return { kind: 'file', destinationPath: item.destinationPath }
-    case 'bible-strong-sidecar':
-      return { kind: 'file', destinationPath: getStrongBibleSidecarPath(item.versionId) }
-    case 'bible-interlinear-sidecar':
-      return { kind: 'file', destinationPath: getInterlinearSidecarPath(item.lang) }
-    case 'strong-lexicon-module':
-      return {
-        kind: 'file',
-        destinationPath: getStrongLexiconModulePath(item.strongLexiconModuleId),
-      }
-  }
-}
 
 // ---------------------------------------------------------------------------
 // DownloadManager — singleton
@@ -284,55 +247,15 @@ class DownloadManager {
     try {
       this.updateItemStatus(item.id, 'downloading')
 
-      let installationJournal: ResourceInstallationJournal | undefined
-      let installationCommitted = false
-      let installationCompleted = false
-      try {
-        await installResourceDatabaseItem(item, {
-          onDownloadProgress: progress => this.updateItemProgress(item.id, progress, 0),
-          onInsertProgress: progress => this.updateItemProgress(item.id, 1, progress),
-          onStatusInserting: () => this.updateItemStatus(item.id, 'inserting'),
-          onResumable: resumable => {
-            this.currentResumable = resumable
-          },
-          isCancelled: () => this.cancelledIds.has(item.id),
-          installationLifecycle: {
-            prepare: installed => {
-              installationJournal = beginResourceInstallation(
-                item.id,
-                installed,
-                getResourceInstallationRecoveryTarget(item)
-              )
-            },
-            commit: () => {
-              if (!installationJournal) {
-                throw new Error(`RESOURCE_INSTALLATION_NOT_PREPARED:${item.id}`)
-              }
-              commitResourceInstallation(installationJournal)
-              installationCommitted = true
-            },
-          },
-        })
-        if (!installationJournal || !installationCommitted) {
-          throw new Error(`RESOURCE_PUBLICATION_NOT_COMMITTED:${item.id}`)
-        }
-        installationCompleted = true
-        completeResourceInstallation(installationJournal)
-        if (item.type === 'bible') {
-          await synchronizeOptionalBibleResources(item, item.versionId)
-        }
-      } catch (error) {
-        if (
-          installationJournal &&
-          !installationCompleted &&
-          !isAtomicResourceFileRollbackError(error)
-        ) {
-          rollbackResourceInstallation(installationJournal)
-        }
-        throw error
-      }
-
-      await invalidateOfflineCopyQueries(getDownloadItemIdentity(item))
+      await installManagedResource(item, {
+        onDownloadProgress: progress => this.updateItemProgress(item.id, progress, 0),
+        onInsertProgress: progress => this.updateItemProgress(item.id, 1, progress),
+        onStatusInserting: () => this.updateItemStatus(item.id, 'inserting'),
+        onResumable: resumable => {
+          this.currentResumable = resumable
+        },
+        isCancelled: () => this.cancelledIds.has(item.id),
+      })
       this.updateItemStatus(item.id, 'completed')
 
       // Signal to VersionSelectorItem instances
