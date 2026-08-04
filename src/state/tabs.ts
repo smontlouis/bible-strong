@@ -406,7 +406,9 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
       tab = {
         ...tab,
         data: migrateLegacyBibleTabData(
-          tab.data as BibleTab['data'] & { selectedVersion: string }
+          tab.data as BibleTab['data'] & {
+            selectedVersion: string
+          }
         ),
       }
     }
