@@ -17,12 +17,15 @@ This directory is an authoring/research corpus. It is not bundled by the app and
 - `catalog.json`: normalized research view with category, proposed viewer suitability, plan occurrences, and known localization counterparts.
 - `localization-candidates.json`: up to eight ranked English counterparts for every French video, with scores, reasons, and explicit confirmation status.
 - `anchor-candidates.json`: exact title references, description references, inferred book scopes, and plan reading contexts kept as distinct provenance levels.
+- `book-overview-manifest.json`: the reviewed 73-work editorial manifest for book and Testament overviews, with strict-language editions and publishable book/section anchors.
+- `book-overview-audit.json`: exhaustive source assignment, edition counts, and per-language canonical book coverage for the overview manifest.
 - `audit.json`: coverage and unresolved-review queues.
 
 The two candidate files can be regenerated without network access:
 
 ```bash
 node scripts/derive-bible-project-candidates.mjs
+node scripts/derive-bible-project-book-overviews.mjs
 ```
 
 No video, audio, caption, transcript, poster, or thumbnail file is downloaded or stored. Thumbnail values are remote provider URLs.

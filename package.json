@@ -45,8 +45,9 @@
     "bible:lau:generate": "node scripts/generate-lau-bible.mjs",
     "bible:lxx:generate": "node scripts/generate-lxx-bibles.mjs",
     "bible:vul:generate": "node scripts/generate-vul-bible.mjs",
-    "bible-project:collect": "node scripts/collect-bible-project-videos.mjs && node scripts/derive-bible-project-candidates.mjs",
+    "bible-project:collect": "node scripts/collect-bible-project-videos.mjs && node scripts/derive-bible-project-candidates.mjs && node scripts/derive-bible-project-book-overviews.mjs",
     "bible-project:derive": "node scripts/derive-bible-project-candidates.mjs",
+    "bible-project:derive:books": "node scripts/derive-bible-project-book-overviews.mjs",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },

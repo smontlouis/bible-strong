@@ -86,6 +86,20 @@ Known data-quality examples:
 - One URL contains `&t=3s`; the current plan player derives the ID by removing a fixed URL prefix and would pass the timestamp as part of the video ID.
 - Repeated theme videos are intentional in the plan but must be represented as one catalog item with multiple anchors.
 
+## Reviewed book overview manifest
+
+The first publishable editorial subset is generated in `book-overview-manifest.json`. It contains
+73 language-independent works and all 145 official book/Testament overview editions: 73 English and
+72 French. Every source record is assigned exactly once. English editions completely cover the 66
+canonical Protestant books; French editions cover 65, with Philippians explicitly absent rather than
+falling back to English.
+
+Twenty works anchor split book sections, four works anchor multiple books, and two Testament-wide
+overviews remain library resources rather than appearing on every chapter. Per-language book indexes
+contain only works with an edition in that exact language. Full-book works use `book-intro`; later
+split sections use `before-range`. All anchors in this subset are reviewed from publisher titles and
+official playlist membership rather than inferred from plan reading context.
+
 ## Recommended editorial model
 
 Use a provider-neutral catalog record, for example:

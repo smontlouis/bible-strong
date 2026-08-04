@@ -758,5 +758,15 @@
     "videosWithHighConfidenceReference": 55,
     "videosWithBookScope": 141,
     "videosWithPlanReadingContext": 163
+  },
+  "bookOverviewManifest": {
+    "works": 73,
+    "editions": 145,
+    "englishBookCoverage": 66,
+    "frenchBookCoverage": 65,
+    "missingFrenchBooks": [
+      50
+    ],
+    "strictLanguageSelection": true
   }
 }
