@@ -205,6 +205,18 @@ describe('bcvParser', () => {
       })
     })
 
+    it('maps additional Septuagint OSIS codes to stable app book ids', () => {
+      expect(osisToBibleReferenceTarget('1Esd.2.3')).toEqual({
+        book: 74,
+        chapter: 2,
+        verse: 3,
+        focusVerses: [3],
+        osis: '1Esd.2.3',
+      })
+      expect(osisToBibleReferenceTarget('4Macc.18.24')?.book).toBe(76)
+      expect(osisToBibleReferenceTarget('PssSol.1.1')?.book).toBe(77)
+    })
+
     it('rejects apocryphal OSIS codes outside the supported Clementine canon', () => {
       expect(osisToBibleReferenceTarget('PrMan.1.1')).toBeUndefined()
     })

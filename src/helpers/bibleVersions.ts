@@ -9,6 +9,7 @@ export type BibleVersificationId =
   | 'bible-strong-default'
   | 'bible-strong-french-4-chapter-joel'
   | 'bible-strong-catholic-extended-esther-daniel'
+  | 'theotex-septuagint'
   | 'clementine-vulgate'
 
 export type BibleVersionLanguage = 'fr' | 'en' | 'he' | 'grc' | 'he-grc' | 'la'
@@ -626,6 +627,10 @@ export const versions: Record<string, Version> = {
     type: 'other',
     language: 'grc',
     readingProfile: null,
+    c: 'Texte grec-français édité par ThéoTeX Éditions - theotex.org',
+    sourceUrl: 'https://theotex.org/septuaginta/genese/genese_1.html',
+    canonId: 'theotex-septuagint',
+    versificationId: 'theotex-septuagint',
   },
   VUL: {
     id: 'VUL',

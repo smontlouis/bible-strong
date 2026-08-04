@@ -266,6 +266,31 @@ export const sections = [
     ],
   },
   {
+    title: 'Autres livres de la Septante',
+    data: [
+      {
+        Numero: 74,
+        Nom: '1 Esdras',
+        Chapitres: 9,
+      },
+      {
+        Numero: 75,
+        Nom: '3 Maccabées',
+        Chapitres: 7,
+      },
+      {
+        Numero: 76,
+        Nom: '4 Maccabées',
+        Chapitres: 18,
+      },
+      {
+        Numero: 77,
+        Nom: 'Psaumes de Salomon',
+        Chapitres: 18,
+      },
+    ],
+  },
+  {
     title: 'Évangiles',
     data: [
       {
@@ -792,6 +817,26 @@ const books = [
     Numero: 73,
     Nom: '2 Maccabées',
     Chapitres: 15,
+  },
+  {
+    Numero: 74,
+    Nom: '1 Esdras',
+    Chapitres: 9,
+  },
+  {
+    Numero: 75,
+    Nom: '3 Maccabées',
+    Chapitres: 7,
+  },
+  {
+    Numero: 76,
+    Nom: '4 Maccabées',
+    Chapitres: 18,
+  },
+  {
+    Numero: 77,
+    Nom: 'Psaumes de Salomon',
+    Chapitres: 18,
   },
 ] as const
 

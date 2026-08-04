@@ -76,6 +76,10 @@ const SUPPORTED_OSIS_BOOK_ENTRIES: [string, number][] = [
   ['Bar', 71],
   ['1Macc', 72],
   ['2Macc', 73],
+  ['1Esd', 74],
+  ['3Macc', 75],
+  ['4Macc', 76],
+  ['PssSol', 77],
 ]
 
 const SUPPORTED_OSIS_BOOK_NUMBERS = new Map(SUPPORTED_OSIS_BOOK_ENTRIES)
