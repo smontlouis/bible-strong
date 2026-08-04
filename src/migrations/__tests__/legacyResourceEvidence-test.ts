@@ -3,6 +3,7 @@ import {
   getLegacyResourceFileCandidates,
   getLegacyReferenceVersionIdsFromReduxState,
   getLegacyReferenceVersionIdsFromJotaiStorage,
+  getLegacyReferenceVersionIdsFromPersistedReduxRoot,
   inspectLegacyResourceEvidence,
   readLegacyReferenceEvidence,
   recordLegacyReferenceEvidence,
@@ -65,6 +66,26 @@ describe('legacyResourceEvidence', () => {
         remove: jest.fn(),
       })
     ).toEqual(['KJVS', 'INT_EN', 'LSG', 'LSGS', 'INT'])
+  })
+
+  it('reads legacy references imported into a serialized Redux persist root before hydration', () => {
+    const root = JSON.stringify({
+      user: JSON.stringify({
+        bible: {
+          settings: { defaultBibleVersion: 'KJVS' },
+          tabs: [{ selectedVersion: 'LSGS' }],
+        },
+      }),
+      malformed: '{broken',
+    })
+
+    expect(
+      getLegacyReferenceVersionIdsFromPersistedReduxRoot({
+        getString: key => (key === 'root' ? root : undefined),
+        set: jest.fn(),
+        remove: jest.fn(),
+      })
+    ).toEqual(['KJVS', 'LSGS'])
   })
 
   it('journals only removed Bible identities and preserves prior evidence', () => {

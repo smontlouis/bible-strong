@@ -24,6 +24,7 @@ interface Props {
   leftIcon?: JSX.Element
   rightIcon?: JSX.Element
   subTitle?: string
+  testID?: string
   theme?: Theme
 }
 
@@ -113,17 +114,19 @@ const Button = ({
   color,
   subTitle,
   fullWidth,
+  testID,
 }: Props) => {
   const sharedProps = {
     fullWidth,
     disabled: disabled || isLoading,
-    onPress: !disabled ? onPress : () => {},
+    onPress: !disabled && !isLoading ? onPress : () => {},
     style,
     small,
     reverse,
     secondary,
     success,
     color,
+    testID,
   }
 
   return (

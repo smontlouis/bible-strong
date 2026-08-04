@@ -145,7 +145,7 @@ const InitHooks = (_props: InitHooksProps) => {
     // Defer non-critical operations to after first interactions
     const deferred = InteractionManager.runAfterInteractions(() => {
       // Check legacy database storage (renamed/duplicate cleanup)
-      // Safe to defer: useMigrateToLanguageFolders is also deferred via InteractionManager
+      // Language-folder migration has already completed before the local migration gate.
       checkDatabasesStorage().catch(err =>
         console.error('[InitHooks] DB storage check failed:', err)
       )
