@@ -12,6 +12,13 @@ type MigrationStorage = {
   remove(key: string): void
 }
 
+export type LegacyBibleMigrationTerminalOutcome = 'completed' | 'abandoned-after-failure'
+
+export type LegacyBibleCleanupResult =
+  | 'awaiting-terminal-outcome'
+  | 'cleanup-already-completed'
+  | 'cleanup-completed'
+
 const withTemporaryFiles = (path: string): string[] => [path, `${path}.download`, `${path}.backup`]
 
 const withSqliteCompanionFiles = (path: string): string[] => [
@@ -59,13 +66,16 @@ const LEGACY_PUBLICATION_KEYS = [
 ]
 
 export const cleanupLegacyBibleResources = async ({
+  terminalOutcome,
   storage: backend = storage,
   deleteFile = (path: string) => FileSystem.deleteAsync(path, { idempotent: true }),
 }: {
+  terminalOutcome?: LegacyBibleMigrationTerminalOutcome
   storage?: MigrationStorage
   deleteFile?: (path: string) => Promise<void>
-} = {}): Promise<void> => {
-  if (backend.getBoolean(CLEANUP_KEY)) return
+} = {}): Promise<LegacyBibleCleanupResult> => {
+  if (!terminalOutcome) return 'awaiting-terminal-outcome'
+  if (backend.getBoolean(CLEANUP_KEY)) return 'cleanup-already-completed'
 
   await Promise.all(getLegacyBibleResourcePaths().map(deleteFile))
 
@@ -77,4 +87,5 @@ export const cleanupLegacyBibleResources = async ({
     backend.remove(key)
   }
   backend.set(CLEANUP_KEY, true)
+  return 'cleanup-completed'
 }

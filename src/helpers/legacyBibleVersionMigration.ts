@@ -1,4 +1,5 @@
 const LEGACY_BIBLE_IDS = new Set(['LSGS', 'KJVS', 'INT', 'INT_EN'])
+const LEGACY_DATABASE_IDS = new Set(['STRONG', 'INTERLINEAIRE'])
 
 type PersistedBibleTabData = {
   selectedVersion: string
@@ -88,8 +89,12 @@ const isLegacyDownload = (value: unknown): boolean => {
   if (!item || typeof item !== 'object') return false
   const versionId = 'versionId' in item && typeof item.versionId === 'string' ? item.versionId : ''
   if (isLegacyBibleVersionId(versionId)) return true
+  const databaseId =
+    'databaseId' in item && typeof item.databaseId === 'string' ? item.databaseId : ''
+  if (LEGACY_DATABASE_IDS.has(databaseId)) return true
   const id = 'id' in item && typeof item.id === 'string' ? item.id : ''
-  return [...LEGACY_BIBLE_IDS].some(legacyId => id.split(':').includes(legacyId))
+  const idParts = id.split(':')
+  return [...LEGACY_BIBLE_IDS, ...LEGACY_DATABASE_IDS].some(legacyId => idParts.includes(legacyId))
 }
 
 export const migrateLegacyDownloadQueue = (raw: string): string => {
@@ -99,5 +104,23 @@ export const migrateLegacyDownloadQueue = (raw: string): string => {
     return JSON.stringify(queue.filter(item => !isLegacyDownload(item)))
   } catch {
     return raw
+  }
+}
+
+export const preserveLegacyDownloadsInQueue = (
+  persistedQueue: string | undefined,
+  activeQueue: string
+): string => {
+  try {
+    const persisted = persistedQueue ? (JSON.parse(persistedQueue) as unknown) : []
+    const active = JSON.parse(activeQueue) as unknown
+    if (!Array.isArray(persisted) || !Array.isArray(active)) return activeQueue
+
+    return JSON.stringify([
+      ...persisted.filter(isLegacyDownload),
+      ...active.filter(item => !isLegacyDownload(item)),
+    ])
+  } catch {
+    return activeQueue
   }
 }
