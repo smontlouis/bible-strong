@@ -203,6 +203,35 @@ describe('LocalMigrationGate', () => {
     expect(backHandler?.()).toBe(true)
   })
 
+  it('localizes interlinear resources from their serialized migration identity', async () => {
+    const orchestrator = createFakeOrchestrator({
+      inspections: [
+        migrationSnapshot('awaiting-confirmation', {
+          plan: {
+            steps: [
+              {
+                id: 'install:interlinear',
+                label: 'BHG — Interlinéaire EN',
+                resourceId: JSON.stringify({
+                  kind: 'interlinear-index',
+                  versionId: 'BHG',
+                  language: 'en',
+                }),
+              },
+            ],
+          },
+        }),
+      ],
+    })
+
+    const renderer = await renderGate(orchestrator)
+
+    expect(
+      renderer.root.findAllByProps({ children: 'migration.resource.interlinear' }).length
+    ).toBeGreaterThan(0)
+    expect(renderer.root.findAllByProps({ children: 'BHG — Interlinéaire EN' })).toHaveLength(0)
+  })
+
   it('runs only after confirmation and enters the app after the terminal outcome', async () => {
     const orchestrator = createFakeOrchestrator({
       inspections: [

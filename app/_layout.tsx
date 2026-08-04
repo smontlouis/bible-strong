@@ -374,10 +374,16 @@ function RootLayout() {
     }
   }, [isLoadingCompleted])
 
+  const onLayoutLoadError = () => {
+    appLogger.warn('startup', 'root.layout.load_error_ready', { error: loadError })
+    SplashScreen.hide()
+  }
+
   if (!isLoadingCompleted) {
     if (loadError) {
       return (
         <View
+          onLayout={onLayoutLoadError}
           style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28 }}
         >
           <NativeText style={{ fontSize: 22, fontWeight: '700', textAlign: 'center' }}>

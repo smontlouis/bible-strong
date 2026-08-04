@@ -108,13 +108,27 @@ const getLocalizedResourceLabel = (
   t: TFunction
 ): string => {
   if (!resourceId) return fallback
+  let identity: Record<string, unknown> | undefined
+  try {
+    const parsed = JSON.parse(resourceId) as unknown
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      identity = parsed as Record<string, unknown>
+    }
+  } catch {}
+
+  if (identity?.kind === 'interlinear-index' && typeof identity.language === 'string') {
+    return t('migration.resource.interlinear', { language: identity.language.toUpperCase() })
+  }
   if (resourceId.startsWith('bible-interlinear:')) {
     const language = resourceId.split(':').at(-1)?.toUpperCase() ?? ''
     return t('migration.resource.interlinear', { language })
   }
-  const lexiconModule = resourceId.startsWith('strong-lexicon:')
-    ? resourceId.split(':').at(-1)
-    : undefined
+  const lexiconModule =
+    identity?.kind === 'strong-lexicon-module' && typeof identity.moduleId === 'string'
+      ? identity.moduleId
+      : resourceId.startsWith('strong-lexicon:')
+        ? resourceId.split(':').at(-1)
+        : undefined
   if (lexiconModule && ['core', 'resources', 'entities'].includes(lexiconModule)) {
     return t(`migration.resource.strongLexicon.${lexiconModule}`)
   }
