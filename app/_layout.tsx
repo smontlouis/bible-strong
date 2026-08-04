@@ -9,7 +9,14 @@ import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-rout
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, InteractionManager, LogBox, View } from 'react-native'
+import {
+  ActivityIndicator,
+  InteractionManager,
+  LogBox,
+  Pressable,
+  Text as NativeText,
+  View,
+} from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
@@ -37,24 +44,21 @@ import { StrongAudioProvider } from '~features/bible/StrongAudioProvider'
 import { FeatureOnboardingModal } from '~features/feature-onboarding'
 import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { ResourceAccessProvider } from '~features/resources/resourceAccess'
+import LocalMigrationGate from '~features/migrations/LocalMigrationGate'
 import { appLogger } from '~helpers/agentObservability'
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { configureQueryManagers, queryClient } from '~helpers/queryClient'
-import {
-  useMigrateFromAsyncStorage,
-  useMigrateFromFileSystemStorage,
-  useMigrateToLanguageFolders,
-} from '~helpers/storage'
+import { prepareLegacyStorageForLocalMigrations } from '~helpers/storage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import { RootState } from '~redux/modules/reducer'
-import { persistor, store } from '~redux/store'
+import { persistor, startPersistence, store } from '~redux/store'
 import { applyPreferredColorScheme } from '~redux/themeAppearanceMiddleware'
 import getTheme, { baseTheme, Theme } from '~themes/index'
-import { setI18n } from '../i18n'
+import i18n, { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
 import { PortalProvider } from 'react-native-teleport'
 import { downloadManager } from '~helpers/downloadManager'
@@ -120,37 +124,56 @@ configureQueryManagers()
 // Hook to load app resources
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
-
-  // Run migrations in background - don't block startup
-  useMigrateFromAsyncStorage()
-  useMigrateFromFileSystemStorage()
-  useMigrateToLanguageFolders()
+  const [loadError, setLoadError] = useState<string>()
+  const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
+    let active = true
     ;(async () => {
       try {
-        await downloadManager.restore()
+        setLoadError(undefined)
+        appLogger.info('startup', 'i18n.init.started')
+        await setI18n()
+        appLogger.info('startup', 'i18n.init.completed')
+        await prepareLegacyStorageForLocalMigrations()
+        startPersistence()
+        if (!active) return
+        setIsLoadingCompleted(true)
+        if (!__DEV__) {
+          logScreenView(getAnalytics(), {
+            screen_class: 'Bible',
+            screen_name: 'Bible',
+          })
+        }
       } catch (error) {
-        appLogger.error('startup', 'resource_recovery.failed', { error })
-      }
-      appLogger.info('startup', 'i18n.init.started')
-      await setI18n()
-      appLogger.info('startup', 'i18n.init.completed')
-      setIsLoadingCompleted(true)
-      if (!__DEV__) {
-        logScreenView(getAnalytics(), {
-          screen_class: 'Bible',
-          screen_name: 'Bible',
-        })
+        appLogger.error('startup', 'legacy_storage.preparation.failed', { error })
+        if (active) {
+          setLoadError(error instanceof Error ? error.message : 'STARTUP_PREPARATION_FAILED')
+        }
       }
     })()
-  }, [])
+    return () => {
+      active = false
+    }
+  }, [attempt])
 
   useRemoteConfig()
 
   return {
     isLoadingCompleted,
+    loadError,
+    retry: () => setAttempt(value => value + 1),
   }
+}
+
+const PostMigrationStartup = ({ children }: { children: React.ReactNode }) => {
+  useEffect(() => {
+    downloadManager.restore().catch(error => {
+      appLogger.error('startup', 'resource_recovery.failed', { error })
+    })
+  }, [])
+
+  return children
 }
 
 // Status bar style changer
@@ -279,54 +302,58 @@ function InnerApp() {
         >
           <DBStateProvider>
             <ErrorBoundary>
-              <AppSwitcherProvider>
-                <PortalProvider>
-                  <ResourceAccessProvider>
-                    <RootSiblingParent>
-                      <SheetProvider>
-                        <BookSelectorSheetProvider>
-                          <StrongAudioProvider>
-                            <InitHooks />
-                            <Stack screenOptions={{ headerShown: false }}>
-                              <Stack.Screen name="index" />
-                              <Stack.Screen
-                                name="(explore)"
-                                options={createFormSheetOptions(theme, {
-                                  contentStyle: {
-                                    bottom: 0,
-                                  },
-                                  sheetAllowedDetents: [0.45, 1],
-                                  sheetLargestUndimmedDetentIndex: 0,
-                                })}
-                              />
-                              <Stack.Screen
-                                name="(library)"
-                                options={{
-                                  contentStyle: {
-                                    bottom: 0,
-                                  },
-                                }}
-                              />
-                              <Stack.Screen
-                                name="strong"
-                                options={createFormSheetOptions(theme, {
-                                  contentStyle: {
-                                    bottom: 0,
-                                  },
-                                  sheetAllowedDetents: [1],
-                                  sheetExpandsWhenScrolledToEdge: true,
-                                })}
-                              />
-                            </Stack>
-                            <ThemedToaster />
-                            <DeferredModals />
-                          </StrongAudioProvider>
-                        </BookSelectorSheetProvider>
-                      </SheetProvider>
-                    </RootSiblingParent>
-                  </ResourceAccessProvider>
-                </PortalProvider>
-              </AppSwitcherProvider>
+              <LocalMigrationGate>
+                <PostMigrationStartup>
+                  <AppSwitcherProvider>
+                    <PortalProvider>
+                      <ResourceAccessProvider>
+                        <RootSiblingParent>
+                          <SheetProvider>
+                            <BookSelectorSheetProvider>
+                              <StrongAudioProvider>
+                                <InitHooks />
+                                <Stack screenOptions={{ headerShown: false }}>
+                                  <Stack.Screen name="index" />
+                                  <Stack.Screen
+                                    name="(explore)"
+                                    options={createFormSheetOptions(theme, {
+                                      contentStyle: {
+                                        bottom: 0,
+                                      },
+                                      sheetAllowedDetents: [0.45, 1],
+                                      sheetLargestUndimmedDetentIndex: 0,
+                                    })}
+                                  />
+                                  <Stack.Screen
+                                    name="(library)"
+                                    options={{
+                                      contentStyle: {
+                                        bottom: 0,
+                                      },
+                                    }}
+                                  />
+                                  <Stack.Screen
+                                    name="strong"
+                                    options={createFormSheetOptions(theme, {
+                                      contentStyle: {
+                                        bottom: 0,
+                                      },
+                                      sheetAllowedDetents: [1],
+                                      sheetExpandsWhenScrolledToEdge: true,
+                                    })}
+                                  />
+                                </Stack>
+                                <ThemedToaster />
+                                <DeferredModals />
+                              </StrongAudioProvider>
+                            </BookSelectorSheetProvider>
+                          </SheetProvider>
+                        </RootSiblingParent>
+                      </ResourceAccessProvider>
+                    </PortalProvider>
+                  </AppSwitcherProvider>
+                </PostMigrationStartup>
+              </LocalMigrationGate>
             </ErrorBoundary>
           </DBStateProvider>
         </PersistGate>
@@ -337,7 +364,7 @@ function InnerApp() {
 
 // Root layout component
 function RootLayout() {
-  const { isLoadingCompleted } = useAppLoad()
+  const { isLoadingCompleted, loadError, retry } = useAppLoad()
 
   const onLayoutRootView = useCallback(() => {
     if (isLoadingCompleted) {
@@ -347,7 +374,37 @@ function RootLayout() {
     }
   }, [isLoadingCompleted])
 
+  const onLayoutLoadError = () => {
+    appLogger.warn('startup', 'root.layout.load_error_ready', { error: loadError })
+    SplashScreen.hide()
+  }
+
   if (!isLoadingCompleted) {
+    if (loadError) {
+      return (
+        <View
+          onLayout={onLayoutLoadError}
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 28 }}
+        >
+          <NativeText style={{ fontSize: 22, fontWeight: '700', textAlign: 'center' }}>
+            {i18n.t('migration.checkFailedTitle')}
+          </NativeText>
+          <NativeText style={{ marginTop: 12, color: '#666', textAlign: 'center' }}>
+            {i18n.t('migration.checkFailedDescription')}
+          </NativeText>
+          <NativeText style={{ marginTop: 8, color: '#777', fontSize: 12 }}>{loadError}</NativeText>
+          <Pressable
+            accessibilityRole="button"
+            onPress={retry}
+            style={{ marginTop: 24, paddingHorizontal: 28, paddingVertical: 14 }}
+          >
+            <NativeText style={{ color: '#4776e6', fontSize: 16, fontWeight: '700' }}>
+              {i18n.t('migration.retry')}
+            </NativeText>
+          </Pressable>
+        </View>
+      )
+    }
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator />

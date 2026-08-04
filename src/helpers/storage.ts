@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react'
 import { InteractionManager } from 'react-native'
 import { createMMKV } from 'react-native-mmkv'
 import { Storage } from 'redux-persist'
+
+import { appLogger } from './agentObservability'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
 
@@ -185,4 +187,54 @@ export const useMigrateToLanguageFolders = () => {
   }, [])
 
   return hasMigrated
+}
+
+/**
+ * Complete historical storage moves before the local migration orchestrator
+ * inspects for legacy resources. This keeps newly imported references and
+ * relocated SQLite files inside the same startup safety boundary.
+ */
+interface LegacyStoragePreparationBackend {
+  getBoolean(key: string): boolean | undefined
+  set(key: string, value: boolean): void
+}
+
+interface LegacyStoragePreparationDependencies {
+  backend?: LegacyStoragePreparationBackend
+  migrateAsyncStorage?: () => Promise<void>
+  migrateFileSystemStorage?: () => Promise<void>
+  migrateLanguageFolders?: () => Promise<void>
+}
+
+const migrateLanguageFoldersForStartup = async (): Promise<void> => {
+  const { migrateToLanguageFolders } = await import('~helpers/databaseMigration')
+  const { getLanguage } = await import('~i18n')
+  await migrateToLanguageFolders(getLanguage())
+}
+
+export const prepareLegacyStorageForLocalMigrations = async ({
+  backend = storage,
+  migrateAsyncStorage = migrateFromAsyncStorage,
+  migrateFileSystemStorage = migrateFromFileSystemStorage,
+  migrateLanguageFolders = migrateLanguageFoldersForStartup,
+}: LegacyStoragePreparationDependencies = {}): Promise<void> => {
+  if (!backend.getBoolean('hasMigratedFromAsyncStorage')) {
+    await migrateAsyncStorage()
+  }
+
+  if (!backend.getBoolean('hasMigratedFromFileSystem')) {
+    await migrateFileSystemStorage()
+  }
+
+  if (!backend.getBoolean('hasMigratedToLanguageFolders')) {
+    try {
+      await migrateLanguageFolders()
+    } catch (error) {
+      // Evidence inspection also checks old root paths, so a failed move
+      // remains safely detectable under the historical recovery policy.
+      appLogger.warn('startup', 'legacy_storage.language_folders.failed', { error })
+    } finally {
+      backend.set('hasMigratedToLanguageFolders', true)
+    }
+  }
 }

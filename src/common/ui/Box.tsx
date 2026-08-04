@@ -21,6 +21,7 @@ import Text, { AnimatedText, TextProps } from './Text'
 
 export type BoxProps = {
   debug?: boolean
+  testID?: string
 
   as?: React.ElementType | undefined
   children?: React.ReactNode

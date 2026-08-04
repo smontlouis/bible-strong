@@ -189,6 +189,31 @@ export const getLegacyReferenceVersionIdsFromJotaiStorage = (
     }
   })
 
+export const getLegacyReferenceVersionIdsFromPersistedReduxRoot = (
+  backend: LegacyEvidenceStorage
+): string[] => {
+  const serialized = backend.getString('root')
+  if (typeof serialized === 'undefined') return []
+
+  try {
+    const root = JSON.parse(serialized) as unknown
+    if (!root || typeof root !== 'object' || Array.isArray(root)) return []
+
+    return Object.values(root).flatMap(persistedSlice => {
+      if (typeof persistedSlice !== 'string') {
+        return getLegacyReferenceVersionIdsFromReduxState(persistedSlice)
+      }
+      try {
+        return getLegacyReferenceVersionIdsFromReduxState(JSON.parse(persistedSlice) as unknown)
+      } catch {
+        return []
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
 const withTemporaryFiles = (path: string): string[] => [path, `${path}.download`, `${path}.backup`]
 
 const withSqliteCompanionFiles = (path: string): string[] => [
@@ -309,6 +334,9 @@ export const inspectLegacyResourceEvidence = async ({
     ...readLegacyReferenceEvidence(storage),
     ...volatileReferenceEvidence,
     ...getLegacyReferenceVersionIdsFromJotaiStorage(storage).filter(versionId =>
+      LEGACY_BIBLE_IDENTITIES.has(versionId as LegacyResourceIdentity)
+    ),
+    ...getLegacyReferenceVersionIdsFromPersistedReduxRoot(storage).filter(versionId =>
       LEGACY_BIBLE_IDENTITIES.has(versionId as LegacyResourceIdentity)
     ),
   ] as LegacyResourceIdentity[])

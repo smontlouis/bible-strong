@@ -65,12 +65,21 @@ function configureStore() {
       __DEV__ ? [...defaultEnhancers, devToolsEnhancer()] : defaultEnhancers,
   })
 
-  const persistor = persistStore(store, undefined, () => {
+  const manualPersistOptions = { manualPersist: true } as Parameters<typeof persistStore>[1] & {
+    manualPersist: boolean
+  }
+  const persistor = persistStore(store, manualPersistOptions, () => {
     const preferredColorScheme = store.getState().user.bible.settings.preferredColorScheme
     if (preferredColorScheme !== 'auto') {
       applyPreferredColorScheme(preferredColorScheme)
     }
   })
+  let persistenceStarted = false
+  const startPersistence = () => {
+    if (persistenceStarted) return
+    persistenceStarted = true
+    persistor.persist()
+  }
   // persistor.purge() // Purge async storage
   // storage.clearAll()
 
@@ -85,10 +94,10 @@ function configureStore() {
     }
   }
 
-  return { store, persistor }
+  return { store, persistor, startPersistence }
 }
 
-export const { store, persistor } = configureStore()
+export const { store, persistor, startPersistence } = configureStore()
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
