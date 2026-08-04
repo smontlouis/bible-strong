@@ -1,0 +1,762 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-04T19:02:03.090Z",
+  "refreshDueAt": "2026-09-03T19:02:03.090Z",
+  "totals": {
+    "videos": 795,
+    "playlists": 63,
+    "frenchVideos": 255,
+    "englishVideos": 540,
+    "inExistingPlans": 163,
+    "withLocalizedCounterpart": 149,
+    "withReferenceMentions": 109,
+    "metadataVerified": 795,
+    "metadataUnverified": 0,
+    "availabilityPublic": 795,
+    "embeddable": 795,
+    "notEmbeddable": 0,
+    "madeForKids": 0,
+    "captionsAvailable": 310,
+    "regionRestricted": 9
+  },
+  "byCategory": {
+    "book-collection": 44,
+    "book-overview": 145,
+    "classroom": 7,
+    "how-to-read": 45,
+    "long-form": 3,
+    "podcast": 56,
+    "short": 214,
+    "studio": 55,
+    "theme": 126,
+    "uncategorized": 15,
+    "visual-commentary": 44,
+    "word-study": 41
+  },
+  "bySuitability": {
+    "exclude": 118,
+    "inline-primary": 189,
+    "related": 256,
+    "review": 232
+  },
+  "duplicatePlanTitles": [
+    {
+      "id": "KOUV7mWDI34",
+      "titles": [
+        "Torah: Genèse 1-11",
+        "Torah: Genesis 1-11"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "1",
+          "readingSliceId": "3",
+          "title": "Torah: Genèse 1-11",
+          "references": [
+            {
+              "book": 1,
+              "chapters": "8-11"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "1",
+          "readingSliceId": "3",
+          "title": "Torah: Genesis 1-11",
+          "references": [
+            {
+              "book": 1,
+              "chapters": "8-11"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "VpbWbyx1008",
+      "titles": [
+        "Torah : Genèse 12-50",
+        "Torah: Genesis 12-50"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "2",
+          "readingSliceId": "11",
+          "title": "Torah : Genèse 12-50",
+          "references": [
+            {
+              "book": 1,
+              "chapters": "35-37"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "2",
+          "readingSliceId": "11",
+          "title": "Torah: Genesis 12-50",
+          "references": [
+            {
+              "book": 1,
+              "chapters": "35-37"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jxKoDvf2nXk",
+      "titles": [
+        "Vidéo : Sainteté",
+        "Vidéo associée : Sainteté"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "3",
+          "readingSliceId": "18",
+          "title": "Vidéo : Sainteté",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "4-6"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "4",
+          "readingSliceId": "33",
+          "title": "Vidéo associée : Sainteté",
+          "references": [
+            {
+              "book": 3,
+              "chapters": "11-13"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "5",
+          "readingSliceId": "41",
+          "title": "Vidéo : Sainteté",
+          "references": [
+            {
+              "book": 4,
+              "chapters": "5-7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0uf-PgW7rqE",
+      "titles": [
+        "Torah : Exode 1-18",
+        "Torah: Exodus 1-18"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "3",
+          "readingSliceId": "22",
+          "title": "Torah : Exode 1-18",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "16-18"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "3",
+          "readingSliceId": "22",
+          "title": "Torah: Exodus 1-18",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "16-18"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b0GhR-2kPKI",
+      "titles": [
+        "Torah : Exode 19-40",
+        "Torah: Exodus 19-40"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "4",
+          "readingSliceId": "29",
+          "title": "Torah : Exode 19-40",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "35-40"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "4",
+          "readingSliceId": "29",
+          "title": "Torah: Exodus 19-40",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "35-40"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WmvyrLXoQio",
+      "titles": [
+        "Torah : Lévitique",
+        "Torah: Leviticus"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "4",
+          "readingSliceId": "39",
+          "title": "Torah : Lévitique",
+          "references": [
+            {
+              "book": 3,
+              "chapters": "26-27"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "4",
+          "readingSliceId": "39",
+          "title": "Torah: Leviticus",
+          "references": [
+            {
+              "book": 3,
+              "chapters": "26-27"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zebxH-5o-SQ",
+      "titles": [
+        "Torah : Nombres",
+        "Torah: Numbers"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "5",
+          "readingSliceId": "52",
+          "title": "Torah : Nombres",
+          "references": [
+            {
+              "book": 4,
+              "chapters": "35-36"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "5",
+          "readingSliceId": "52",
+          "title": "Torah: Numbers",
+          "references": [
+            {
+              "book": 4,
+              "chapters": "35-36"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3BGO9Mmd_cU",
+      "titles": [
+        "Vidéo : La loi",
+        "Video: The Law"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "5",
+          "readingSliceId": "56",
+          "title": "Vidéo : La loi",
+          "references": [
+            {
+              "book": 5,
+              "chapters": "10-12"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "5",
+          "readingSliceId": "56",
+          "title": "Video: The Law",
+          "references": [
+            {
+              "book": 5,
+              "chapters": "10-12"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NMhmDPWeftw",
+      "titles": [
+        "Torah : Deutéronome",
+        "Torah: Deuteronomy"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "5",
+          "readingSliceId": "64",
+          "title": "Torah : Deutéronome",
+          "references": [
+            {
+              "book": 5,
+              "chapters": "32-34"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "5",
+          "readingSliceId": "64",
+          "title": "Torah: Deuteronomy",
+          "references": [
+            {
+              "book": 5,
+              "chapters": "32-34"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "onMgVuZ4q0Q",
+      "titles": [
+        "Vidéo : Proverbes",
+        "Sagesse : Proverbes"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "9",
+          "readingSliceId": "153",
+          "title": "Vidéo : Proverbes",
+          "references": [
+            {
+              "book": 20,
+              "chapters": "1-3"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "9",
+          "readingSliceId": "155",
+          "title": "Sagesse : Proverbes",
+          "references": [
+            {
+              "book": 20,
+              "chapters": "7-9"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "whrJ5C45tgU",
+      "titles": [
+        "Vidéo : Jude",
+        "Vidéo : Apocalypse 1-11"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "15",
+          "readingSliceId": "349",
+          "title": "Vidéo : Jude",
+          "references": [
+            {
+              "book": 65,
+              "chapters": "1"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "16",
+          "readingSliceId": "350",
+          "title": "Vidéo : Apocalypse 1-11",
+          "references": [
+            {
+              "book": 66,
+              "chapters": "1-3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l9vn5UvsHvM",
+      "titles": [
+        "Video: Holiness",
+        "Related Video: Holiness"
+      ],
+      "occurrences": [
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "3",
+          "readingSliceId": "18",
+          "title": "Video: Holiness",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "4-6"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "4",
+          "readingSliceId": "33",
+          "title": "Related Video: Holiness",
+          "references": [
+            {
+              "book": 3,
+              "chapters": "11-13"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "5",
+          "readingSliceId": "41",
+          "title": "Video: Holiness",
+          "references": [
+            {
+              "book": 4,
+              "chapters": "5-7"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pairingCorrections": [
+    {
+      "pairKey": "fr:350",
+      "expectedPlanVideoId": "whrJ5C45tgU",
+      "correctedVideoId": "cAOAPSfpbR4",
+      "reason": "French plan Apocalypse 1-11 entry points to the Jude video"
+    }
+  ],
+  "uncategorizedIds": [
+    "YB--nhzQbFs",
+    "39DTeVC-kCc",
+    "ENLyNE1qIc8",
+    "eIDKky8daeU",
+    "NcnHN7JbhpY",
+    "pmoZlNOkV1I",
+    "OVRixfameGY",
+    "xTk9w9J9yKo",
+    "p6fY39B25G4",
+    "WM4gmjMDL4Q",
+    "n_vEB11XKSE",
+    "8Tbcofs6l3o",
+    "lX7rZ7hp_gQ",
+    "V8-yWbv7fZY",
+    "ZjoRCeqpUSA"
+  ],
+  "reviewIds": [
+    "QnrkerkrC_c",
+    "SpEU4g1V9BI",
+    "pA00XwLIvoE",
+    "Zdlb_hQBxlg",
+    "V-jUmwxq5FE",
+    "LfH73O3A8kg",
+    "nRTy2olkOOQ",
+    "0kEPOu5lGyc",
+    "Vmd156koeFg",
+    "K4WzbcRa0VE",
+    "TQiK-8MLa2k",
+    "A20XEgiYNFg",
+    "QvfH0lUQZh8",
+    "R5o0Yb-4UYI",
+    "O_Wdx0Aru4o",
+    "YhV1bw3FYxY",
+    "HDYT6VjU0AQ",
+    "jGKFWfpAfZY",
+    "e5jz3caCBZY",
+    "c3_XU_BDbD0",
+    "joz0ZmGpwVA",
+    "dR93zi1Cp6c",
+    "YB--nhzQbFs",
+    "4C10hwwgIqI",
+    "WRYVhuvB6w0",
+    "Whl0jGlSGQk",
+    "bLRbr6VYM0k",
+    "cNjlc2FQpOM",
+    "gGoaMiVzx3s",
+    "39DTeVC-kCc",
+    "qnfHjb99Epk",
+    "vGQ2HbjOMUA",
+    "xmB5sEW-1u4",
+    "zrByn7GphtM",
+    "ENLyNE1qIc8",
+    "HFg2q430loc",
+    "D4wDBpYuOos",
+    "X_kvgW12pms",
+    "7oV3WsW6N28",
+    "GiaeixpDsPs",
+    "xWvOh6hh_eM",
+    "9q6o7a3oTKU",
+    "02ikaIziuJk",
+    "0RdKXK2Tm7w",
+    "pad0vij8fmg",
+    "vmAOIeSUwfo",
+    "MDSyIlUYJZc",
+    "OtkT7i8DVII",
+    "XqyQeI_VB5c",
+    "wJVuuWfZAiQ",
+    "WUoxD6FIlvU",
+    "20A247FecqY",
+    "5TpsSVCNqag",
+    "q5PqOP3s_Ag",
+    "eIDKky8daeU",
+    "O0kUBePMovM",
+    "9Nj3rIU9rvE",
+    "CuN4YZ7pup0",
+    "0p1iO45H9HE",
+    "DZ5PBs0_a-M",
+    "OBQNY_vIHGU",
+    "sstWHpIz_70",
+    "Q5zdV_LaHXs",
+    "YMOB4hWKqfw",
+    "kTUEGAxNWwo",
+    "tGVnZuS1iVs",
+    "qpmc9akBM_Y",
+    "THT_Yf0yF_k",
+    "9BMSnIT6664",
+    "-h4Nup9s5T0",
+    "L4Fr62mzDQU",
+    "NcnHN7JbhpY",
+    "pmoZlNOkV1I",
+    "lb5g24AaUM8",
+    "OVRixfameGY",
+    "-zS8GYz16BQ",
+    "7Od9dNzsNek",
+    "P_J2g6dGLeA",
+    "SRPE8s0CLhM",
+    "eY8Pw7vsZow",
+    "xTk9w9J9yKo",
+    "mHuq9GTA3-0",
+    "TV92NbeWj-Y",
+    "ddrQNHFQMyg",
+    "Ib3D_10gsE4",
+    "VHuEQOyUztw",
+    "9BJZO4qDX6Q",
+    "4zqu725_QMA",
+    "p6fY39B25G4",
+    "jitb8xMPSIE",
+    "WM4gmjMDL4Q",
+    "p5yl4tGhFJg",
+    "TaaW2ZTQQAU",
+    "st0dolCEi1U",
+    "JPSooPxcrvw",
+    "ISXJSFDiQ3c",
+    "ptAluq-lsl8",
+    "2g_3FNjSGHU",
+    "8q754EjXfKY",
+    "_jS5uR-YSAw",
+    "377jWExYeqc",
+    "c5UWxBnPaKA",
+    "rlFAnG_VR20",
+    "IcJMz5OOfqU",
+    "VSyBU0V4PM0",
+    "npk34pB5P4A",
+    "ReDWOkFsUK8",
+    "M93ZpF-n03A",
+    "nM0gkFgQ1so",
+    "uTbIEwwncNM",
+    "aLvcF1NLwYU",
+    "PagWXFv14iE",
+    "bXqQZiPmuEQ",
+    "wtp_zCElBaw",
+    "cvEdmYKN8VE",
+    "YMTR7M33eIQ",
+    "bKT9RCWFmkE",
+    "u5ALbcrXihk",
+    "m8CofD1Vm6o",
+    "NBaQaGvkQyg",
+    "n_vEB11XKSE",
+    "8c-W4vG-lgc",
+    "Faq6hWma4nE",
+    "qN51x6p5pKk",
+    "LUHbQQRd1pA",
+    "0j0OzreEhuM",
+    "82UtJjwiVVs",
+    "MWlL8xAkh10",
+    "hGRLz_Dc4Is",
+    "4tTTeUSdG5I",
+    "X9kuM-fL7Y4",
+    "4NF5VkiyMXA",
+    "IUTRrbiOikE",
+    "6XN3C_U_1nE",
+    "yOuumz8YMcY",
+    "iiSgoFwB-y0",
+    "XCIGtg8PQKQ",
+    "Xd_n-2Bg3Fo",
+    "GEbn7KX3exI",
+    "JLHc5PkBVVk",
+    "ouBc8zJzarY",
+    "78iscjeIzcM",
+    "y8tf5L_TTfI",
+    "ZeXyBc9Bfq4",
+    "ep0ephqgc2k",
+    "Kxn2sVASVCE",
+    "YYKC9WAoUNg",
+    "gSyhHIM2JZE",
+    "N6XdRzE7a-Y",
+    "C12IU9jUZiE",
+    "ygPs46lgKCs",
+    "wtuxIzTf9Ns",
+    "8Tbcofs6l3o",
+    "iUNrJxDwRko",
+    "x0bNz2I-wEw",
+    "At3zMoDMjXE",
+    "5G42lTO9F7o",
+    "lHaiueAL-4k",
+    "2MBekoWqJfA",
+    "SA1TTQS_t3Q",
+    "yqyVm3EUmbg",
+    "9QnIoPy-o50",
+    "rKjp3uyg9Vs",
+    "YppGwsyvflA",
+    "I5cEsO_tI3k",
+    "JFWgzy2wcEs",
+    "c2AZFMLSt0s",
+    "gy5UHXLhNZA",
+    "cLFZCLrmvyM",
+    "VLwvKV67Qjk",
+    "UD4YV-EDz6Q",
+    "yy2vVKdSoK8",
+    "LngLLRWKKIg",
+    "2pl886P4xMU",
+    "YoOgGeDfXDk",
+    "SrOOrmCzZxI",
+    "A5FDBHKtyRE",
+    "iP7vtiXtnI4",
+    "QMahg8Vb-6w",
+    "jLHPjKC7C2I",
+    "6jCCTqMPKd0",
+    "OKHknmD5kvw",
+    "Yb77-e9qJjI",
+    "rYgHOMq3yyQ",
+    "hhkafDU0XF0",
+    "aoGEmFZc9Vc",
+    "ww9xqJyDiks",
+    "20WBz6pZf-c",
+    "bgqD-PW5xrs",
+    "40-O2KZ7sKE",
+    "dSujxs4kdn8",
+    "DEC18-PozjA",
+    "8B48InLtlyY",
+    "4Noh_yJLflQ",
+    "BDHhKQlOpCU",
+    "D518fPdu3rM",
+    "Rq95M_DO52A",
+    "6k92PwQxRXE",
+    "do5pJNp38ZA",
+    "TAzccZJRe9s",
+    "1WTzAgrSRsI",
+    "ABQSKmiEcqg",
+    "XM57mtWwuvw",
+    "LNv0wXeV3Rw",
+    "TqqNmzabd5k",
+    "94-6nPzPyLQ",
+    "y3mRQKV894M",
+    "ppXRwGWZ8VA",
+    "FL-n3dnClY8",
+    "VZxb06PVFAE",
+    "mz0tAI2SdPk",
+    "tlwz151z_80",
+    "jbEcpK6MYQ4",
+    "_Ft03UTUZ3c",
+    "6Y_qk7x85nQ",
+    "djkL3msFBeE",
+    "0GxXFfDAhLA",
+    "O3aZlchhYx0",
+    "e0nkd-tDoS4",
+    "OW0nRWBEO4E",
+    "wG5sDW4ve38",
+    "_Ce-CIGnJ-Y",
+    "acAwSNYHxPc",
+    "w297GiFOc2U",
+    "TMCd7IpyIfw",
+    "lX7rZ7hp_gQ",
+    "V8-yWbv7fZY",
+    "YXYwyBixRu8",
+    "7jLH9b5nP3Y",
+    "RmNX39qBylE",
+    "2s6UILdhNRE",
+    "ZjoRCeqpUSA"
+  ],
+  "localizationCandidates": {
+    "frenchRecords": 255,
+    "confirmed": 83,
+    "highUnconfirmed": 18,
+    "mediumOnly": 17,
+    "lowOnlyOrNone": 137
+  },
+  "anchorCandidates": {
+    "videosWithAnyCandidate": 245,
+    "videosWithHighConfidenceReference": 55,
+    "videosWithBookScope": 141,
+    "videosWithPlanReadingContext": 163
+  }
+}
