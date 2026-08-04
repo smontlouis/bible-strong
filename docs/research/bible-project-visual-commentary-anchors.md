@@ -4,11 +4,11 @@ Research snapshot: 2026-08-04.
 
 ## Conclusion
 
-The current `visual-commentary` slice contains 44 YouTube source records. Forty-three are usable passage editions and one is a French trailer that should be excluded from the editorial manifest. The publishable records resolve to 24 conceptual works; the trailer remains an excluded source record rather than a work.
+The current `visual-commentary` slice contains 44 YouTube source records. Forty-three are usable passage editions and one is a French trailer that should be excluded from the editorial manifest. Full-catalog reconciliation adds the French Character of God edition currently classified as `word-study`, producing 44 publishable editions across 24 conceptual works; the trailer remains an excluded source record rather than a work.
 
-- 19 works have both French and English YouTube editions in the corpus;
+- 20 works have both French and English YouTube editions in the reconciled corpus;
 - three publishable works currently have only a French YouTube edition in the corpus;
-- two works currently have only an English YouTube edition in the corpus;
+- Psalm 8 is the only work currently limited to an English YouTube edition;
 - one additional French-only source record is the excluded trailer;
 - the app must select an edition strictly from the route/application language, with no cross-language fallback.
 
@@ -48,7 +48,8 @@ No plan-day context, transcript cross-reference, playlist recommendation, or the
 
 | Provider ID | Lang | Proposed work ID | Anchor | Confidence / review | Decision | First-party source |
 |---|---|---|---|---|---|---|
-| `nxwzq1PJImM` | en | `bp-vc-exodus-34-6-7` | `EXO.34.6-EXO.34.7` | reviewed/high | publish | [BibleProject](https://bibleproject.com/videos/character-of-god-exodus/) · [YouTube](https://www.youtube.com/watch?v=nxwzq1PJImM) |
+| `nxwzq1PJImM` | en | `exodus-34-6-7-visual-commentary` | `EXO.34.6-EXO.34.7` | reviewed/high | publish | [BibleProject](https://bibleproject.com/videos/character-of-god-exodus/) · [YouTube](https://www.youtube.com/watch?v=nxwzq1PJImM) |
+| `r4A91QVsUlI` | fr | `exodus-34-6-7-visual-commentary` | `EXO.34.6-EXO.34.7` | reviewed/high | publish; reconciled from `word-study` | [BibleProject](https://bibleproject.com/videos/character-of-god-exodus/) · [YouTube](https://www.youtube.com/watch?v=r4A91QVsUlI) |
 | `afVN-7vY0KA` | en | `bp-vc-genesis-1` | `GEN.1.1-GEN.1.31` | reviewed/high | publish | [BibleProject](https://bibleproject.com/videos/genesis-1/) · [YouTube](https://www.youtube.com/watch?v=afVN-7vY0KA) |
 | `-V8X5SJKIKY` | fr | `bp-vc-genesis-1` | `GEN.1.1-GEN.1.31` | reviewed/high | publish | [BibleProject](https://bibleproject.com/videos/genesis-1/) · [YouTube](https://www.youtube.com/watch?v=-V8X5SJKIKY) |
 | `E7k01kfBx6Y` | en | `bp-vc-psalm-1` | `PSA.1.1-PSA.1.6` | reviewed/high | publish | [BibleProject](https://bibleproject.com/videos/psalm-1/) · [YouTube](https://www.youtube.com/watch?v=E7k01kfBx6Y) |
@@ -99,6 +100,7 @@ The reviewed conceptual pairs are:
 
 | Work family | English provider ID | French provider ID |
 |---|---|---|
+| Character of God / Exodus 34:6-7 | `nxwzq1PJImM` | `r4A91QVsUlI` |
 | Genesis 1 | `afVN-7vY0KA` | `-V8X5SJKIKY` |
 | Psalm 1 | `E7k01kfBx6Y` | `dFLNnAF0Kno` |
 | Proverbs 8 | `k8P-x34iYRE` | `z37vJGdYEZw` |
@@ -121,7 +123,7 @@ The reviewed conceptual pairs are:
 
 The following works intentionally have no counterpart in the current corpus and must remain single-language:
 
-- English only: `bp-vc-exodus-34-6-7`, `bp-vc-psalm-8`.
+- English only: `bp-vc-psalm-8`.
 - French only: `bp-vc-sotm-generosity`, `bp-vc-sotm-prayer`, `bp-vc-sotm-wealth`.
 - French only and excluded: `bp-sotm-2024-trailer`.
 
@@ -146,12 +148,12 @@ The Lord's Prayer script cites Exodus, Ezekiel, Psalms, Matthew 5, Matthew 18, a
 
 A generator for this subset should fail unless all of the following remain true:
 
-- exactly 44 source editions are classified;
-- exactly 43 editions are publishable and one is excluded;
+- exactly 44 primary-category source editions are classified;
+- exactly 44 editions are publishable after cross-category reconciliation and one trailer is excluded;
 - exactly 24 publishable works exist and the trailer remains an excluded source record;
-- exactly 19 works have both `fr` and `en` editions;
+- exactly 20 works have both `fr` and `en` editions;
 - exactly three publishable works are French-only;
-- exactly two publishable works are English-only;
+- exactly one publishable work is English-only;
 - no work has more than one edition for the same language;
 - all publishable editions have at least one reviewed primary anchor;
 - `bp-sotm-2024-06-religious-practices` has exactly two anchors;

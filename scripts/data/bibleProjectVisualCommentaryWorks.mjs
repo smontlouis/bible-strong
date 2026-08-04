@@ -131,7 +131,7 @@ export const BIBLE_PROJECT_VISUAL_COMMENTARY_WORKS = [
     id: 'exodus-34-6-7-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/character-of-god-exodus/',
     anchors: [passage(2, 34, 6, 34, 7)],
-    editions: { en: 'nxwzq1PJImM' },
+    editions: { en: 'nxwzq1PJImM', fr: 'r4A91QVsUlI' },
   },
   {
     id: 'psalm-1-visual-commentary',

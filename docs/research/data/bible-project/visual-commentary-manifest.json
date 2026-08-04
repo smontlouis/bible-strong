@@ -888,6 +888,21 @@
       "sourceUrl": "https://bibleproject.com/videos/character-of-god-exodus/",
       "editions": [
         {
+          "id": "exodus-34-6-7-visual-commentary:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "r4A91QVsUlI",
+          "sourceUrl": "https://www.youtube.com/watch?v=r4A91QVsUlI",
+          "title": "Le caractère de Dieu",
+          "description": "Les auteurs bibliques faisaient souvent référence à leurs passages préférés des Écritures en les citant, et la liste des traits de caractère de Dieu que l'on trouve dans Exode 34, 6-7 est le passage le plus repris et le plus cité de la Bible. Dans cette vidéo, nous allons étudier cette description fondamentale des attributs de Dieu qui souligne ce qui Lui tient à cœur et motive ses actions.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#LecaracteredeDieu #BibleProject  #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/r4A91QVsUlI/maxresdefault.jpg",
+          "durationSeconds": 362,
+          "publishedAt": "2023-06-30T16:00:11Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
           "id": "exodus-34-6-7-visual-commentary:en",
           "language": "en",
           "provider": "youtube",
@@ -1229,7 +1244,9 @@
         "1": [
           "genesis-1-visual-commentary"
         ],
-        "2": [],
+        "2": [
+          "exodus-34-6-7-visual-commentary"
+        ],
         "3": [],
         "4": [],
         "5": [],
@@ -1350,6 +1367,9 @@
         ],
         "1:1": [
           "genesis-1-visual-commentary"
+        ],
+        "2:34": [
+          "exodus-34-6-7-visual-commentary"
         ],
         "19:1": [
           "psalm-1-visual-commentary"

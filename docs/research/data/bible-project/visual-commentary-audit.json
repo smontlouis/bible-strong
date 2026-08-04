@@ -3,18 +3,20 @@
   "generatedAt": "2026-08-04T19:02:03.090Z",
   "totals": {
     "works": 24,
-    "editions": 43,
+    "editions": 44,
     "englishEditions": 21,
-    "frenchEditions": 22,
-    "bilingualWorks": 19,
-    "englishOnlyWorks": 2,
+    "frenchEditions": 23,
+    "bilingualWorks": 20,
+    "englishOnlyWorks": 1,
     "frenchOnlyWorks": 3,
     "reviewedAnchors": 25,
-    "excludedSourceRecords": 1
+    "excludedSourceRecords": 1,
+    "crossCategoryEditions": 1
   },
   "canonicalBookCoverage": {
     "fr": [
       1,
+      2,
       19,
       20,
       23,
@@ -33,7 +35,6 @@
   },
   "missingEditions": {
     "fr": [
-      "exodus-34-6-7-visual-commentary",
       "psalm-8-visual-commentary"
     ],
     "en": [
@@ -54,6 +55,9 @@
     "expectedCategoryRecords": 44,
     "assignedCategoryRecords": 43,
     "excludedCategoryRecords": 1,
+    "crossCategoryEditionProviderIds": [
+      "r4A91QVsUlI"
+    ],
     "unassignedProviderIds": []
   }
 }

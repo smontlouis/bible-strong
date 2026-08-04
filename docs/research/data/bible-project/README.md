@@ -19,16 +19,19 @@ This directory is an authoring/research corpus. It is not bundled by the app and
 - `anchor-candidates.json`: exact title references, description references, inferred book scopes, and plan reading contexts kept as distinct provenance levels.
 - `book-overview-manifest.json`: the reviewed 73-work editorial manifest for book and Testament overviews, with strict-language editions and publishable book/section anchors.
 - `book-overview-audit.json`: exhaustive source assignment, edition counts, and per-language canonical book coverage for the overview manifest.
-- `visual-commentary-manifest.json`: 24 reviewed passage works and 43 localized editions, with exact verse ranges, strict-language book/chapter indexes, and first-party source pages.
+- `visual-commentary-manifest.json`: 24 reviewed passage works and 44 localized editions, including one reconciled cross-category French edition, with exact verse ranges, strict-language book/chapter indexes, and first-party source pages.
 - `visual-commentary-audit.json`: exhaustive assignment of the 44 source records, including the single excluded trailer and every intentionally missing localized edition.
+- `word-study-manifest.json`: 20 lexical works plus one shared visual/lexical work reference, covering 42 bilingual editions with reviewed Strong, family, composite, and primary-passage anchors.
+- `word-study-audit.json`: complete reconciliation of the 41 primary-category records and the one cross-category English edition, with Strong and binding-type coverage.
 - `audit.json`: coverage and unresolved-review queues.
 
-The two candidate files can be regenerated without network access:
+The candidate files and reviewed manifests can be regenerated without network access:
 
 ```bash
 node scripts/derive-bible-project-candidates.mjs
 node scripts/derive-bible-project-book-overviews.mjs
 node scripts/derive-bible-project-visual-commentaries.mjs
+node scripts/derive-bible-project-word-studies.mjs
 ```
 
 No video, audio, caption, transcript, poster, or thumbnail file is downloaded or stored. Thumbnail values are remote provider URLs.

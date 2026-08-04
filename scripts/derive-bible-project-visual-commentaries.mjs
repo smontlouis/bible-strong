@@ -60,8 +60,8 @@ const validateRegistry = catalogVideos => {
     throw new Error('A provider video is assigned to multiple visual commentary works')
   if (editionProviderIds.some(id => excludedProviderIds.includes(id)))
     throw new Error('A visual commentary provider video is both assigned and excluded')
-  if (editionProviderIds.length !== 43)
-    throw new Error(`Expected 43 visual commentary editions, received ${editionProviderIds.length}`)
+  if (editionProviderIds.length !== 44)
+    throw new Error(`Expected 44 visual commentary editions, received ${editionProviderIds.length}`)
 
   const categoryVideos = catalogVideos.filter(video => video.category === 'visual-commentary')
   if (categoryVideos.length !== 44)
@@ -74,14 +74,18 @@ const validateRegistry = catalogVideos => {
   const unassignedProviderIds = categoryVideos
     .map(video => video.id)
     .filter(id => !accountedProviderIds.includes(id))
-  const missingProviderIds = accountedProviderIds.filter(
-    id => !categoryVideos.some(video => video.id === id)
-  )
-  if (unassignedProviderIds.length || missingProviderIds.length) {
+  if (unassignedProviderIds.length) {
     throw new Error(
-      `Visual commentary registry mismatch: unassigned=${unassignedProviderIds.join(',') || 'none'} missing=${missingProviderIds.join(',') || 'none'}`
+      `Visual commentary registry mismatch: unassigned=${unassignedProviderIds.join(',')}`
     )
   }
+  const crossCategoryEditionProviderIds = editionProviderIds.filter(
+    id => !categoryVideos.some(video => video.id === id)
+  )
+  if (JSON.stringify(crossCategoryEditionProviderIds) !== JSON.stringify(['r4A91QVsUlI']))
+    throw new Error(
+      `Unexpected cross-category visual commentary editions: ${crossCategoryEditionProviderIds.join(',') || 'none'}`
+    )
 
   const catalogById = new Map(catalogVideos.map(video => [video.id, video]))
   for (const work of works) {
@@ -171,8 +175,8 @@ const main = async () => {
   const editionIds = works.flatMap(work => work.editions.map(edition => edition.id))
   if (new Set(editionIds).size !== editionIds.length)
     throw new Error('Visual commentary edition IDs must be unique')
-  if (manifest.languageIndexes.fr.books['2'].length)
-    throw new Error('French index must not expose the English-only Exodus work')
+  if (!manifest.languageIndexes.fr.books['2'].includes('exodus-34-6-7-visual-commentary'))
+    throw new Error('French index must expose the reconciled Exodus edition')
   if (manifest.languageIndexes.fr.books['19'].includes('psalm-8-visual-commentary'))
     throw new Error('French index must not expose the English-only Psalm 8 work')
   if (manifest.languageIndexes.en.books['40'].includes('sermon-on-mount-visual-generosity'))
@@ -182,6 +186,11 @@ const main = async () => {
   const categoryVideos = catalog.videos.filter(video => video.category === 'visual-commentary')
   const includedProviderIds = works.flatMap(work =>
     work.editions.map(edition => edition.providerId)
+  )
+  const categoryProviderIds = new Set(categoryVideos.map(video => video.id))
+  const assignedCategoryProviderIds = includedProviderIds.filter(id => categoryProviderIds.has(id))
+  const crossCategoryEditionProviderIds = includedProviderIds.filter(
+    id => !categoryProviderIds.has(id)
   )
   const audit = {
     schemaVersion: 1,
@@ -202,6 +211,7 @@ const main = async () => {
       ).length,
       reviewedAnchors: works.reduce((sum, work) => sum + work.anchors.length, 0),
       excludedSourceRecords: BIBLE_PROJECT_VISUAL_COMMENTARY_EXCLUSIONS.length,
+      crossCategoryEditions: crossCategoryEditionProviderIds.length,
     },
     canonicalBookCoverage: Object.fromEntries(
       LANGUAGES.map(language => [
@@ -222,15 +232,16 @@ const main = async () => {
     exclusions: BIBLE_PROJECT_VISUAL_COMMENTARY_EXCLUSIONS,
     sourceCoverage: {
       expectedCategoryRecords: categoryVideos.length,
-      assignedCategoryRecords: includedProviderIds.length,
+      assignedCategoryRecords: assignedCategoryProviderIds.length,
       excludedCategoryRecords: BIBLE_PROJECT_VISUAL_COMMENTARY_EXCLUSIONS.length,
+      crossCategoryEditionProviderIds,
       unassignedProviderIds: [],
     },
   }
   if (
-    audit.totals.bilingualWorks !== 19 ||
+    audit.totals.bilingualWorks !== 20 ||
     audit.totals.frenchOnlyWorks !== 3 ||
-    audit.totals.englishOnlyWorks !== 2
+    audit.totals.englishOnlyWorks !== 1
   )
     throw new Error('Unexpected visual commentary localization topology')
   await writeFile(MANIFEST_AUDIT_PATH, `${JSON.stringify(audit, null, 2)}\n`)
@@ -242,6 +253,7 @@ const main = async () => {
     englishEditions: audit.totals.englishEditions,
     frenchEditions: audit.totals.frenchEditions,
     excludedSourceRecords: audit.totals.excludedSourceRecords,
+    crossCategoryEditions: audit.totals.crossCategoryEditions,
     strictLanguageSelection: true,
   }
   await writeFile(CORPUS_AUDIT_PATH, `${JSON.stringify(corpusAudit, null, 2)}\n`)

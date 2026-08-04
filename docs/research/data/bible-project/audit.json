@@ -771,10 +771,22 @@
   },
   "visualCommentaryManifest": {
     "works": 24,
-    "editions": 43,
+    "editions": 44,
     "englishEditions": 21,
-    "frenchEditions": 22,
+    "frenchEditions": 23,
     "excludedSourceRecords": 1,
+    "crossCategoryEditions": 1,
+    "strictLanguageSelection": true
+  },
+  "wordStudyManifest": {
+    "conceptualWorks": 21,
+    "localWorks": 20,
+    "sharedWorks": 1,
+    "editions": 42,
+    "englishEditions": 21,
+    "frenchEditions": 21,
+    "reviewedStrongAnchors": 34,
+    "primaryPassageAnchors": 21,
     "strictLanguageSelection": true
   }
 }

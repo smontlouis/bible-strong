@@ -27,6 +27,13 @@ anchor uses `book-intro`, the first section of a split book also uses `book-intr
 section uses `before-range`. Testament-wide overviews remain `library` resources rather than being
 repeated on every book or chapter.
 
+Treat catalog categories and series as editorial projections, not work identity boundaries. When
+the same localized work appears in different official collections or primary catalog categories,
+retain one durable work ID and reference it from each relevant projection. Do not create duplicate
+works merely to make category-specific manifests self-contained. Strong bindings distinguish a
+direct lexeme, a reviewed family of related forms, and a multi-lexeme composite; a concept overview
+with no single lexical identity must not receive a synthetic Strong.
+
 ## Consequences
 
 A provider video can be replaced without changing the identity of the edition or work. French and
@@ -34,4 +41,7 @@ English catalogs can legitimately have different coverage; for example, Philippi
 in French even though an English edition exists. Viewer queries can use language-specific indexes
 without implementing fallback logic. Adding another language requires an explicit product decision
 and new editions, not an automatic reuse of English. Editorial review is required before inferred
-book, passage, verse, or Strong relationships become runtime anchors.
+book, passage, verse, or Strong relationships become runtime anchors. Category reconciliation can
+cross the collector's primary classification without duplicating a work. Lexical discovery can
+safely index exact Strong entries and related families while preserving multi-lexeme concepts such
+as “slow to anger” as composites.

@@ -103,16 +103,33 @@ official playlist membership rather than inferred from plan reading context.
 ## Reviewed visual commentary manifest
 
 The second publishable subset is generated in `visual-commentary-manifest.json`. All 44 records in
-the catalog category are accounted for: 43 localized editions belong to 24 reviewed passage works,
-and the French “Prochainement” trailer is explicitly excluded. Nineteen works are bilingual, three
-are French-only, and two are English-only. The language indexes never expose a work without an
-edition in the selected route language.
+the catalog category are accounted for, and the cross-category French Character of God edition is
+reconciled with its English visual commentary. The manifest contains 44 localized editions across
+24 reviewed passage works; the French “Prochainement” trailer is explicitly excluded. Twenty works
+are bilingual, three are French-only, and Psalm 8 is the only English-only work. The language
+indexes never expose a work without an edition in the selected route language.
 
 The 25 reviewed primary anchors preserve exact inclusive verse ranges. One work intentionally has
 two discontiguous anchors: the newer religious-practices episode treats Matthew 6:1-6 and 6:16-18.
 The John commentary is limited to the prologue (John 1:1-18), and the two distinct Sermon on the
-Mount series remain separate works even when they share a passage. Exact sources and the complete
-44-record review table are documented in `bible-project-visual-commentary-anchors.md`.
+Mount series remain separate works even when they share a passage. Exact sources, the 44-record
+primary category, and the reconciled cross-category edition are documented in
+`bible-project-visual-commentary-anchors.md`.
+
+## Reviewed word-study manifest
+
+The lexical subset is generated in `word-study-manifest.json`. It contains 20 dedicated word-study
+works and references the shared Character of God overview already owned by the visual-commentary
+manifest. Together they represent 21 bilingual works and 42 editions: all 41 records currently
+classified as `word-study`, plus the English cross-category overview.
+
+Each dedicated work has one reviewed primary passage and one of four explicit lexical binding
+types: direct Strong, lexical family, multi-Strong composite, or none for the shared overview. The
+34 reviewed Strong anchors preserve primary versus related forms. “Slow to Anger” remains the
+composite `H0750` + `H0639`; it is never reduced to one misleading Strong. Per-language indexes
+cover Strong entries and all 21 selected Bible passages, including the shared Exodus overview,
+without falling back across French and English. The complete evidence and exclusions are documented
+in `bible-project-word-study-anchors.md`.
 
 ## Recommended editorial model
 

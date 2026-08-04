@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-04T19:02:03.090Z",
+  "totals": {
+    "conceptualWorks": 21,
+    "localWorks": 20,
+    "sharedWorks": 1,
+    "editions": 42,
+    "localEditions": 40,
+    "sharedEditions": 2,
+    "englishEditions": 21,
+    "frenchEditions": 21,
+    "reviewedStrongAnchors": 34,
+    "primaryPassageAnchors": 21
+  },
+  "bindingTypes": {
+    "direct": [
+      "bp-word-shema-listen",
+      "bp-word-shema-yhwh",
+      "bp-word-shema-soul-nephesh",
+      "bp-word-shema-strength-meod",
+      "bp-word-advent-hope-yakhal",
+      "bp-word-advent-peace-shalom",
+      "bp-word-advent-joy-chara",
+      "bp-word-advent-love-agape",
+      "bp-word-character-compassion",
+      "bp-word-character-grace",
+      "bp-word-character-loyal-love",
+      "bp-word-character-faithful"
+    ],
+    "family": [
+      "bp-word-shema-love-ahavah",
+      "bp-word-shema-heart-lev",
+      "bp-word-bad-sin-khata",
+      "bp-word-bad-transgression-pesha",
+      "bp-word-bad-iniquity-avon",
+      "bp-word-gospel-euangelion",
+      "bp-word-witness-martus"
+    ],
+    "composite": [
+      "bp-word-character-slow-to-anger"
+    ],
+    "none": [
+      "exodus-34-6-7-visual-commentary"
+    ]
+  },
+  "strongCoverage": {
+    "uniqueCodes": [
+      "G0026",
+      "G0266",
+      "G0458",
+      "G2098",
+      "G3140",
+      "G3144",
+      "G3900",
+      "G5479",
+      "H0157",
+      "H0160",
+      "H0571",
+      "H0639",
+      "H0750",
+      "H1309",
+      "H1319",
+      "H2398",
+      "H2403",
+      "H2587",
+      "H2617",
+      "H3068",
+      "H3176",
+      "H3820",
+      "H3824",
+      "H3966",
+      "H5315",
+      "H5707",
+      "H5749",
+      "H5753",
+      "H5771",
+      "H6586",
+      "H6588",
+      "H7349",
+      "H7965",
+      "H8085"
+    ],
+    "hebrewCodes": [
+      "H0157",
+      "H0160",
+      "H0571",
+      "H0639",
+      "H0750",
+      "H1309",
+      "H1319",
+      "H2398",
+      "H2403",
+      "H2587",
+      "H2617",
+      "H3068",
+      "H3176",
+      "H3820",
+      "H3824",
+      "H3966",
+      "H5315",
+      "H5707",
+      "H5749",
+      "H5753",
+      "H5771",
+      "H6586",
+      "H6588",
+      "H7349",
+      "H7965",
+      "H8085"
+    ],
+    "greekCodes": [
+      "G0026",
+      "G0266",
+      "G0458",
+      "G2098",
+      "G3140",
+      "G3144",
+      "G3900",
+      "G5479"
+    ]
+  },
+  "sourceCoverage": {
+    "expectedCategoryRecords": 41,
+    "assignedCategoryRecords": 40,
+    "sharedCategoryRecords": 1,
+    "crossCategoryProviderIds": [
+      "nxwzq1PJImM"
+    ],
+    "unassignedProviderIds": []
+  }
+}
