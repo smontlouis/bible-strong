@@ -33,6 +33,13 @@ const initialMigrationProgress: MigrationProgress = {
 }
 
 export const migrationProgressAtom = atom<MigrationProgress>(initialMigrationProgress)
+const accountMigrationRunningAtom = atom(false)
+type AccountMigrationWriteMode = 'ready' | 'outgoing-only'
+interface AccountMigrationWriteScope {
+  userId: string
+  mode: AccountMigrationWriteMode
+}
+const accountMigrationWriteScopeAtom = atom<AccountMigrationWriteScope | null>(null)
 
 export const resetMigrationProgressAtom = atom(null, (get, set) => {
   set(migrationProgressAtom, initialMigrationProgress)
@@ -62,5 +69,25 @@ export function resetMigrationProgressFromOutsideReact() {
  */
 export function isMigrationInProgress(): boolean {
   const store = getDefaultStore()
-  return store.get(migrationProgressAtom).isMigrating
+  return store.get(migrationProgressAtom).isMigrating || store.get(accountMigrationRunningAtom)
+}
+
+export function setAccountMigrationInProgress(isRunning: boolean): void {
+  getDefaultStore().set(accountMigrationRunningAtom, isRunning)
+}
+
+export function setAccountMigrationWriteScope(
+  userId?: string,
+  mode: AccountMigrationWriteMode = 'ready'
+): void {
+  getDefaultStore().set(accountMigrationWriteScopeAtom, userId ? { userId, mode } : null)
+}
+
+export function isAccountMigrationWriteAllowedFor(userId: string): boolean {
+  return getDefaultStore().get(accountMigrationWriteScopeAtom)?.userId === userId
+}
+
+export function isAccountMigrationOutgoingOnlyFor(userId: string): boolean {
+  const scope = getDefaultStore().get(accountMigrationWriteScopeAtom)
+  return scope?.userId === userId && scope.mode === 'outgoing-only'
 }

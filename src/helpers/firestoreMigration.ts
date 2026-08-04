@@ -5,6 +5,7 @@ import {
   SUBCOLLECTION_NAMES,
   SubcollectionName,
   fetchSubcollection,
+  batchWriteSubcollection,
   writeAllToSubcollection,
   clearSubcollection,
   getInvalidSubcollectionDocumentIds,
@@ -33,12 +34,49 @@ import {
   type LegacyRelation,
   type RelationsObj,
 } from '~features/studyRelations/domain'
+import { migrateLegacyPersistedValue } from '../migrations/legacyPersistedReferences'
+import {
+  clearAccountMigrationMutationJournal,
+  readAccountMigrationMutationJournal,
+} from '../migrations/accountMigrationMutationJournal'
 
 // Batch chunk size (must match firestoreSubcollections.ts)
 const BATCH_CHUNK_SIZE = 400
 const RELATIONS_CLEANUP_VERSION = 1
 type EmbeddedBibleData = Partial<Record<SubcollectionName, SubcollectionData>>
 type ImportedBibleData = Partial<Record<SubcollectionName, Record<string, unknown>>>
+
+export const reconcileEmbeddedMigrationSources = async (
+  userId: string,
+  embeddedBible: EmbeddedBibleData,
+  localBible: EmbeddedBibleData = {}
+): Promise<EmbeddedBibleData> => {
+  const journal = readAccountMigrationMutationJournal(userId)
+  const existingCollections = await Promise.all(
+    SUBCOLLECTION_NAMES.map(collection => fetchSubcollection(userId, collection))
+  )
+  await Promise.all(
+    SUBCOLLECTION_NAMES.map(collection => {
+      const deletedIds = journal.deletedDocumentIds[collection] ?? []
+      if (deletedIds.length === 0) return Promise.resolve()
+      return batchWriteSubcollection(userId, collection, { set: {}, delete: deletedIds })
+    })
+  )
+
+  return SUBCOLLECTION_NAMES.reduce((result, collection, index) => {
+    const embedded = { ...(embeddedBible[collection] ?? {}) }
+    for (const deletedId of journal.deletedDocumentIds[collection] ?? []) {
+      delete embedded[deletedId]
+    }
+    for (const preferredId of journal.preferredDocumentIds[collection] ?? []) {
+      const preferred =
+        localBible[collection]?.[preferredId] ?? existingCollections[index][preferredId]
+      if (preferred) embedded[preferredId] = preferred
+    }
+    result[collection] = embedded
+    return result
+  }, {} as EmbeddedBibleData)
+}
 
 const getErrorMessage = (error: unknown, fallback = 'Unknown error'): string => {
   if (error instanceof Error) return error.message
@@ -80,10 +118,16 @@ const getCollectionDataForMigration = (
   bible: EmbeddedBibleData | ImportedBibleData,
   collection: SubcollectionName
 ): SubcollectionData => {
-  if (collection === 'relations') return normalizeRelationsData(bible)
-  if (collection === 'relationIndex') return rebuildRelationIndexes(normalizeRelationsData(bible))
-  if (collection === 'relationPairs') return rebuildRelationPairs(normalizeRelationsData(bible))
-  return (bible[collection] ?? {}) as SubcollectionData
+  let data: SubcollectionData
+  if (collection === 'relations') data = normalizeRelationsData(bible)
+  else if (collection === 'relationIndex') {
+    data = rebuildRelationIndexes(normalizeRelationsData(bible))
+  } else if (collection === 'relationPairs') {
+    data = rebuildRelationPairs(normalizeRelationsData(bible))
+  } else {
+    data = (bible[collection] ?? {}) as SubcollectionData
+  }
+  return migrateLegacyPersistedValue(data) as SubcollectionData
 }
 
 /**
@@ -239,6 +283,24 @@ const haveSameKeys = (
   return leftKeys.every(key => Object.prototype.hasOwnProperty.call(right, key))
 }
 
+/**
+ * Replaces the desired documents before deleting obsolete keys. If a migration is interrupted,
+ * every source relation remains available for the next normalization pass; derived indexes can
+ * always be rebuilt from that source collection.
+ */
+const reconcileSubcollection = async (
+  userId: string,
+  collection: 'relations' | 'relationIndex' | 'relationPairs',
+  current: SubcollectionData,
+  desired: SubcollectionData
+): Promise<void> => {
+  await batchWriteSubcollection(userId, collection, {
+    set: desired,
+    delete: Object.keys(current).filter(documentId => !(documentId in desired)),
+    merge: false,
+  })
+}
+
 async function cleanupDuplicateRelations(userId: string): Promise<void> {
   const [relations, relationIndex, relationPairs, notes, links, wordAnnotations] =
     await Promise.all([
@@ -267,12 +329,9 @@ async function cleanupDuplicateRelations(userId: string): Promise<void> {
     return
   }
 
-  await clearSubcollection(userId, 'relations')
-  await clearSubcollection(userId, 'relationIndex')
-  await clearSubcollection(userId, 'relationPairs')
-  await writeAllToSubcollection(userId, 'relations', normalizedRelations)
-  await writeAllToSubcollection(userId, 'relationIndex', rebuiltRelationIndex)
-  await writeAllToSubcollection(userId, 'relationPairs', rebuiltRelationPairs)
+  await reconcileSubcollection(userId, 'relations', relations, normalizedRelations)
+  await reconcileSubcollection(userId, 'relationIndex', relationIndex, rebuiltRelationIndex)
+  await reconcileSubcollection(userId, 'relationPairs', relationPairs, rebuiltRelationPairs)
 }
 
 export async function migrateUserRelationsArchitecture(
@@ -301,11 +360,20 @@ export async function migrateUserRelationsArchitecture(
     await autoBackupManager.createBackupNow(state, 'pre_migration')
 
     reportProgress('Lecture des notes et liens...', 0.3)
-    const [notes, links, wordAnnotations, existingRelations] = await Promise.all([
+    const [
+      notes,
+      links,
+      wordAnnotations,
+      existingRelations,
+      existingRelationIndex,
+      existingRelationPairs,
+    ] = await Promise.all([
       fetchSubcollection(userId, 'notes'),
       fetchSubcollection(userId, 'links'),
       fetchSubcollection(userId, 'wordAnnotations'),
       fetchSubcollection(userId, 'relations'),
+      fetchSubcollection(userId, 'relationIndex'),
+      fetchSubcollection(userId, 'relationPairs'),
     ])
 
     const relations = normalizeRelationsData({
@@ -318,12 +386,9 @@ export async function migrateUserRelationsArchitecture(
     const relationPairs = rebuildRelationPairs(relations)
 
     reportProgress('Écriture des relations...', 0.6)
-    await clearSubcollection(userId, 'relations')
-    await clearSubcollection(userId, 'relationIndex')
-    await clearSubcollection(userId, 'relationPairs')
-    await writeAllToSubcollection(userId, 'relations', relations)
-    await writeAllToSubcollection(userId, 'relationIndex', relationIndex)
-    await writeAllToSubcollection(userId, 'relationPairs', relationPairs)
+    await reconcileSubcollection(userId, 'relations', existingRelations, relations)
+    await reconcileSubcollection(userId, 'relationIndex', existingRelationIndex, relationIndex)
+    await reconcileSubcollection(userId, 'relationPairs', existingRelationPairs, relationPairs)
 
     reportProgress('Finalisation des relations...', 0.9)
     await markRelationsAsMigrated(userId)
@@ -354,27 +419,7 @@ export async function checkForEmbeddedData(userId: string): Promise<{
   collectionsWithData: SubcollectionName[]
 }> {
   try {
-    const userDocRef = doc(firebaseDb, 'users', userId)
-    const userDocSnap = await getDoc(userDocRef)
-    const userData = userDocSnap.data()
-
-    if (!userData?.bible) {
-      return { hasEmbeddedData: false, collectionsWithData: [] }
-    }
-
-    const bible = userData.bible as EmbeddedBibleData
-    const collectionsWithData: SubcollectionName[] = []
-
-    for (const collection of SUBCOLLECTION_NAMES) {
-      if (Object.keys(getCollectionDataForMigration(bible, collection)).length > 0) {
-        collectionsWithData.push(collection)
-      }
-    }
-
-    return {
-      hasEmbeddedData: collectionsWithData.length > 0,
-      collectionsWithData,
-    }
+    return await inspectEmbeddedDataMigration(userId)
   } catch (error) {
     console.error('[FirestoreMigration] Failed to check for embedded data:', error)
     Sentry.captureException(error, {
@@ -389,6 +434,47 @@ export async function checkForEmbeddedData(userId: string): Promise<{
     })
     return { hasEmbeddedData: false, collectionsWithData: [] }
   }
+}
+
+/**
+ * Strict account-migration inspection. Unlike the compatibility helper above,
+ * network/auth failures are propagated so the orchestrator can persist a
+ * retryable failure instead of treating an unknown account as already clean.
+ */
+export async function inspectEmbeddedDataMigration(userId: string): Promise<{
+  hasEmbeddedData: boolean
+  collectionsWithData: SubcollectionName[]
+}> {
+  const userDocRef = doc(firebaseDb, 'users', userId)
+  const userDocSnap = await getDoc(userDocRef)
+  const userData = userDocSnap.data()
+
+  if (!userData?.bible) {
+    return { hasEmbeddedData: false, collectionsWithData: [] }
+  }
+
+  const bible = userData.bible as EmbeddedBibleData
+  const collectionsWithData = SUBCOLLECTION_NAMES.filter(
+    collection => Object.keys(getCollectionDataForMigration(bible, collection)).length > 0
+  )
+
+  return {
+    hasEmbeddedData: collectionsWithData.length > 0,
+    collectionsWithData,
+  }
+}
+
+export async function inspectRelationsArchitectureMigration(
+  userId: string
+): Promise<{ required: boolean }> {
+  const userDocRef = doc(firebaseDb, 'users', userId)
+  const userDocSnap = await getDoc(userDocRef)
+  const userData = userDocSnap.data()
+  const relationsMigrated = userData?._relationsMigrated === true
+  const cleanupCurrent =
+    Number(userData?._relationsCleanupVersion || 0) >= RELATIONS_CLEANUP_VERSION
+
+  return { required: !relationsMigrated || !cleanupCurrent }
 }
 
 /**
@@ -683,7 +769,7 @@ export async function resumableMigrateUserData(
     // 1. Vérifier si des données embedded existent (IMPORTANT pour migration incrémentale)
     // Même si _migrated est true, une ancienne app peut avoir continué à synchroniser
     reportProgress({ message: 'Vérification des données...', overallProgress: 0 })
-    const { hasEmbeddedData, collectionsWithData } = await checkForEmbeddedData(userId)
+    const { hasEmbeddedData, collectionsWithData } = await inspectEmbeddedDataMigration(userId)
 
     if (!hasEmbeddedData) {
       // Pas de données embedded - s'assurer que _migrated est défini
@@ -737,7 +823,11 @@ export async function resumableMigrateUserData(
       return { success: true, partialFailure: false, failedCollections: [] }
     }
 
-    const bible = userData.bible as EmbeddedBibleData
+    const bible = await reconcileEmbeddedMigrationSources(
+      userId,
+      userData.bible as EmbeddedBibleData,
+      state.user.bible as EmbeddedBibleData
+    )
 
     // 5. Déterminer les collections à migrer
     const collectionsToMigrate = getCollectionsToMigrate(migrationState).filter(
@@ -759,6 +849,7 @@ export async function resumableMigrateUserData(
       console.log('[FirestoreMigration] No data to migrate, marking as migrated')
       await markAsMigrated(userId)
       clearMigrationState()
+      clearAccountMigrationMutationJournal(userId)
       return { success: true, partialFailure: false, failedCollections: [] }
     }
 
@@ -872,6 +963,7 @@ export async function resumableMigrateUserData(
 
       // 11. Nettoyer l'état de migration local
       clearMigrationState()
+      clearAccountMigrationMutationJournal(userId)
 
       reportProgress({ message: 'Migration terminée avec succès!', overallProgress: 1 })
       console.log('[FirestoreMigration] Migration completed successfully')

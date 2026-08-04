@@ -12,43 +12,14 @@ import {
   onSnapshot,
   writeBatch,
 } from './firebase'
+import { SUBCOLLECTION_NAMES, type SubcollectionName } from './firestoreSubcollectionNames'
+
+export { SUBCOLLECTION_NAMES }
+export type { SubcollectionName }
 
 /**
  * Types pour les sous-collections
  */
-export type SubcollectionName =
-  | 'bookmarks'
-  | 'highlights'
-  | 'notes'
-  | 'links'
-  | 'relations'
-  | 'relationIndex'
-  | 'relationPairs'
-  | 'tags'
-  | 'strongsHebreu'
-  | 'strongsGrec'
-  | 'words'
-  | 'naves'
-  | 'tabGroups'
-  | 'wordAnnotations'
-
-export const SUBCOLLECTION_NAMES: SubcollectionName[] = [
-  'bookmarks',
-  'highlights',
-  'notes',
-  'links',
-  'relations',
-  'relationIndex',
-  'relationPairs',
-  'tags',
-  'strongsHebreu',
-  'strongsGrec',
-  'words',
-  'naves',
-  'tabGroups',
-  'wordAnnotations',
-]
-
 export type UserDataSubcollectionName = Exclude<SubcollectionName, 'tabGroups'>
 
 export const USER_DATA_SUBCOLLECTION_NAMES: UserDataSubcollectionName[] =
@@ -187,6 +158,7 @@ export async function deleteFromSubcollection(
 export interface BatchChanges {
   set: SubcollectionData
   delete: string[]
+  merge?: boolean
 }
 
 /**
@@ -297,7 +269,11 @@ export async function batchWriteSubcollection(
       for (const op of chunk) {
         const docRef = doc(collectionRef, op.docId)
         if (op.type === 'set') {
-          batch.set(docRef, op.data, { merge: true })
+          if (changes.merge === false) {
+            batch.set(docRef, op.data)
+          } else {
+            batch.set(docRef, op.data, { merge: true })
+          }
         } else {
           batch.delete(docRef)
         }

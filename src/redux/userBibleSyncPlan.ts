@@ -134,7 +134,7 @@ export const planWordAnnotationSync = (diffBible: BibleSyncDiff): UserBibleSyncO
 
 export const planToggleTagEntitySync = (
   diffBible: BibleSyncDiff,
-  subcollections: SubcollectionName[]
+  subcollections: readonly SubcollectionName[]
 ): UserBibleSyncOperation[] => {
   const operations: UserBibleSyncOperation[] = []
 

@@ -76,6 +76,15 @@ import { diff } from '~helpers/deep-obj'
 import { toast } from '~helpers/toast'
 import { migrateImportedDataToSubcollections } from '~helpers/firestoreMigration'
 import {
+  isAccountMigrationOutgoingOnlyFor,
+  isAccountMigrationWriteAllowedFor,
+  setAccountMigrationWriteScope,
+} from '~state/migration'
+import {
+  recordAccountMigrationDeletedDocuments,
+  recordAccountMigrationPreferredDocuments,
+} from '../migrations/accountMigrationMutationJournal'
+import {
   batchWriteSubcollection,
   SUBCOLLECTION_NAMES,
   type BatchChanges,
@@ -431,6 +440,7 @@ const isStudyUpdateAction = isAnyOf(updateStudy, publishStudyAction)
 const firestoreMiddleware: Middleware = store => next => async action => {
   // Early return for logout - prevent race conditions with app lifecycle
   if (onUserLogout.match(action)) {
+    setAccountMigrationWriteScope()
     return next(action)
   }
 
@@ -447,6 +457,9 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   if (!currentUser) {
     return result
   }
+  if (!isAccountMigrationWriteAllowedFor(currentUser.uid)) {
+    return result
+  }
 
   const deleteMarker = deleteField()
   const diffState = diff(oldState, state, deleteMarker) as SyncDiffState
@@ -454,6 +467,30 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   const userId = currentUser.uid
   const { user, plan } = state
   const userDocRef = doc(firebaseDb, 'users', userId)
+
+  if (isAccountMigrationOutgoingOnlyFor(userId)) {
+    const previousBible = oldState.user.bible as unknown as Record<
+      string,
+      Record<string, unknown> | undefined
+    >
+    const currentBible = state.user.bible as unknown as Record<
+      string,
+      Record<string, unknown> | undefined
+    >
+    SUBCOLLECTION_NAMES.forEach(collection => {
+      if (collection === 'tabGroups') return
+      const currentIds = new Set(Object.keys(currentBible[collection] ?? {}))
+      const preferredIds = Object.keys(currentBible[collection] ?? {}).filter(
+        documentId =>
+          previousBible[collection]?.[documentId] !== currentBible[collection]?.[documentId]
+      )
+      const deletedIds = Object.keys(previousBible[collection] ?? {}).filter(
+        documentId => !currentIds.has(documentId)
+      )
+      recordAccountMigrationPreferredDocuments(userId, collection, preferredIds)
+      recordAccountMigrationDeletedDocuments(userId, collection, deletedIds)
+    })
+  }
 
   // Schedule un backup automatique après chaque changement (debounced 30s)
   autoBackupManager.scheduleBackup(state)
