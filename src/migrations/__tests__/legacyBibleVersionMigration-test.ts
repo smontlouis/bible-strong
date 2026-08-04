@@ -78,6 +78,28 @@ describe('legacy Bible version migration', () => {
     ])
   })
 
+  it('regenerates pending acquisition IDs when the selected Bible is already canonical', () => {
+    expect(
+      migrateLegacyBibleTabData({
+        selectedVersion: 'LSG',
+        pendingModeAcquisition: {
+          kind: 'strong',
+          versionId: 'LSGS',
+          mode: 'visible',
+          planIds: ['bible:LSGS', 'bible-strong:LSGS'],
+        },
+      })
+    ).toMatchObject({
+      selectedVersion: 'LSG',
+      pendingModeAcquisition: {
+        kind: 'strong',
+        versionId: 'LSG',
+        mode: 'visible',
+        planIds: ['bible-strong:LSG'],
+      },
+    })
+  })
+
   it('removes legacy resources from the queue during final migration cleanup', () => {
     expect(
       migrateLegacyDownloadQueue(

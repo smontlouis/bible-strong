@@ -24,6 +24,7 @@ import { type StrongBibleVersionId, type StrongMode } from '~helpers/strongBible
 import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
+import { migrateLegacyBibleTabData } from '../migrations/legacyBibleVersionMigration'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -401,6 +402,14 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
   return tabs.map(tab => {
     // First migrate old tab types
     tab = migrateTabTypes(tab)
+    if (tab.type === 'bible') {
+      tab = {
+        ...tab,
+        data: migrateLegacyBibleTabData(
+          tab.data as BibleTab['data'] & { selectedVersion: string }
+        ),
+      }
+    }
 
     const needsIdMigration = tab.id === 'bible'
     const needsRemovableMigration = tab.isRemovable === false
