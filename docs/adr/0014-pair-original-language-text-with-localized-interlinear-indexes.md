@@ -2,7 +2,9 @@
 
 ## Status
 
-Accepted
+Superseded by the legacy-resource removal decision added to ADR-0013. The BHG and localized-index
+architecture below remains current, but INT and INT_EN are now migrated and removed rather than
+retained as runtime fallbacks.
 
 ## Context
 

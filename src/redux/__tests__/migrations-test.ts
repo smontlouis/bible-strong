@@ -91,7 +91,33 @@ describe('redux migrations', () => {
     }
     state.user.bible.bookmarks = { bookmark: { version: 'KJVS' } }
     state.user.bible.highlights = { '1-1-1': { version: 'LSGS' } }
+    state.user.bible.links = {
+      '1-1-2': {
+        url: 'https://example.com',
+        linkType: 'website',
+        date: 1,
+        version: 'KJVS',
+      },
+    }
     state.user.bible.wordAnnotations = { annotation: { version: 'INT' } }
+    state.user.bible.relations = {
+      manual: {
+        id: 'manual',
+        kind: 'manual',
+        endpoints: [
+          { type: 'verse', verseKeys: ['1-1-1'], version: 'LSGS' },
+          { type: 'verse', verseKeys: ['1-1-2'], version: 'INT_EN' },
+        ],
+        endpointKeys: ['verse:1-1-1', 'verse:1-1-2'],
+        endpointTypes: ['verse', 'verse'],
+        pairKey: 'verse:1-1-1::verse:1-1-2',
+        duplicateKey: 'linked:none:verse:1-1-1::verse:1-1-2',
+        type: 'linked',
+        direction: 'none',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
 
     const migrated = migrations[36](state)
 
@@ -102,6 +128,23 @@ describe('redux migrations', () => {
     })
     expect(migrated.user.bible.bookmarks.bookmark.version).toBe('KJV')
     expect(migrated.user.bible.highlights['1-1-1'].version).toBe('LSG')
+    expect(migrated.user.bible.links['1-1-2'].version).toBe('KJV')
     expect(migrated.user.bible.wordAnnotations.annotation.version).toBe('BHG')
+    expect(migrated.user.bible.relations.manual.endpoints).toEqual([
+      expect.objectContaining({ type: 'verse', version: 'LSG' }),
+      expect.objectContaining({ type: 'verse', version: 'BHG' }),
+    ])
+    expect(Object.values(migrated.user.bible.relations)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: 'system',
+          type: 'externalLink',
+          endpoints: expect.arrayContaining([
+            expect.objectContaining({ type: 'verse', version: 'KJV' }),
+          ]),
+        }),
+      ])
+    )
+    expect(migrated.user.bible.relationIndex['verse:1-1-2']).toBeDefined()
   })
 })

@@ -138,7 +138,6 @@ const useAppLoad = () => {
         await downloadManager.restore()
       } catch (error) {
         appLogger.error('startup', 'resource_recovery.failed', { error })
-        return
       }
       appLogger.info('startup', 'i18n.init.started')
       await setI18n()

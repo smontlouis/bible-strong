@@ -468,7 +468,7 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` src/redux/firestoreMiddleware.ts:796 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/redux/logMiddleware.ts:53 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/redux/logMiddleware.ts:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/migrations.ts:36 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/redux/migrations.ts:37 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/redux/modules/user.ts:287 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/redux/modules/user.ts:1545 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/state/tabGroups.ts:49 - Prefer appLogger for app-owned diagnostic events that agents should query.

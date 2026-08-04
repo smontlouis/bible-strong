@@ -13,6 +13,7 @@ import {
   dedupeRelationsByDuplicateKey,
   rebuildRelationIndexes,
   rebuildRelationPairs,
+  type RelationEndpoint,
   type RelationsObj,
 } from '~features/studyRelations/domain'
 import { migrateLegacyBibleVersionId } from '~helpers/legacyBibleVersionMigration'
@@ -72,6 +73,22 @@ const migrateVersionedRecords = <T extends Record<string, unknown>>(records: T):
         : value,
     ])
   ) as T
+
+const migrateRelationEndpoint = (endpoint: RelationEndpoint): RelationEndpoint =>
+  endpoint.type === 'verse' && endpoint.version
+    ? { ...endpoint, version: migrateLegacyBibleVersionId(endpoint.version) }
+    : endpoint
+
+const migrateVersionedRelations = (relations: RelationsObj): RelationsObj =>
+  Object.fromEntries(
+    Object.entries(relations).map(([id, relation]) => [
+      id,
+      {
+        ...relation,
+        endpoints: relation.endpoints.map(migrateRelationEndpoint) as typeof relation.endpoints,
+      },
+    ])
+  )
 
 export default {
   // Added 'press' in 'settings'
@@ -569,6 +586,19 @@ export default {
   },
   36: (state: RootState) => {
     const settings = state.user.bible.settings
+    const bookmarks = migrateVersionedRecords(state.user.bible.bookmarks)
+    const highlights = migrateVersionedRecords(state.user.bible.highlights)
+    const notes = migrateVersionedRecords(state.user.bible.notes)
+    const links = migrateVersionedRecords(state.user.bible.links)
+    const wordAnnotations = migrateVersionedRecords(state.user.bible.wordAnnotations)
+    const relations = dedupeRelationsByDuplicateKey(
+      mergeRelationsWithSystemBackfill({
+        relations: migrateVersionedRelations(state.user.bible.relations ?? {}),
+        notes,
+        links,
+        wordAnnotations,
+      })
+    )
     const compare = Object.fromEntries(
       Object.entries(settings.compare).map(([versionId, enabled]) => [
         migrateLegacyBibleVersionId(versionId),
@@ -581,10 +611,14 @@ export default {
         ...state.user,
         bible: {
           ...state.user.bible,
-          bookmarks: migrateVersionedRecords(state.user.bible.bookmarks),
-          highlights: migrateVersionedRecords(state.user.bible.highlights),
-          notes: migrateVersionedRecords(state.user.bible.notes),
-          wordAnnotations: migrateVersionedRecords(state.user.bible.wordAnnotations),
+          bookmarks,
+          highlights,
+          notes,
+          links,
+          wordAnnotations,
+          relations,
+          relationIndex: rebuildRelationIndexes(relations),
+          relationPairs: rebuildRelationPairs(relations),
           settings: {
             ...settings,
             defaultBibleVersion: settings.defaultBibleVersion
