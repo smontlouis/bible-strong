@@ -32,7 +32,10 @@ import { getStrongBibleSidecarPath } from '~helpers/strongBibleSidecar'
 import { getInterlinearSidecarPath } from '~helpers/interlinearBibleSidecar'
 import { getStrongLexiconModulePath } from '~helpers/strongLexiconModules'
 import { isAtomicResourceFileRollbackError } from '~helpers/atomicResourceFile'
-import { migrateLegacyDownloadQueue } from '~helpers/legacyBibleVersionMigration'
+import {
+  migrateLegacyDownloadQueue,
+  preserveLegacyDownloadsInQueue,
+} from '~helpers/legacyBibleVersionMigration'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -191,7 +194,6 @@ class DownloadManager {
       const raw = storage.getString(PERSIST_KEY)
       if (!raw) return
       const migratedRaw = migrateLegacyDownloadQueue(raw)
-      if (migratedRaw !== raw) storage.set(PERSIST_KEY, migratedRaw)
 
       const persisted: DownloadItemState[] = JSON.parse(migratedRaw)
       const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
@@ -431,7 +433,11 @@ class DownloadManager {
         }
         return []
       })
-      storage.set(PERSIST_KEY, JSON.stringify(toPersist))
+      const activeQueue = JSON.stringify(toPersist)
+      storage.set(
+        PERSIST_KEY,
+        preserveLegacyDownloadsInQueue(storage.getString(PERSIST_KEY), activeQueue)
+      )
     } catch (e) {
       console.error('[DownloadManager] Persist failed:', e)
     }

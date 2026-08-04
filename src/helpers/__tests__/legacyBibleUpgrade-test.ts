@@ -21,6 +21,7 @@ import {
   migrateLegacyBibleTabData,
   migrateLegacyDownloadQueue,
   migrateLegacyParallelVersions,
+  preserveLegacyDownloadsInQueue,
 } from '../legacyBibleVersionMigration'
 
 const mockDeleteAsync = jest.mocked(FileSystem.deleteAsync)
@@ -87,9 +88,46 @@ describe('legacyBibleUpgrade', () => {
           { item: { id: 'bible:LSGS', versionId: 'LSGS' }, status: 'queued' },
           { item: { id: 'bible:KJV', versionId: 'KJV' }, status: 'queued' },
           { item: { id: 'bible:INT_EN', versionId: 'INT_EN' }, status: 'failed' },
+          {
+            item: { id: 'database:STRONG:fr', databaseId: 'STRONG', lang: 'fr' },
+            status: 'queued',
+          },
+          {
+            item: {
+              id: 'database:INTERLINEAIRE:en',
+              databaseId: 'INTERLINEAIRE',
+              lang: 'en',
+            },
+            status: 'failed',
+          },
         ])
       )
     ).toBe(JSON.stringify([{ item: { id: 'bible:KJV', versionId: 'KJV' }, status: 'queued' }]))
+  })
+
+  it('preserves obsolete downloads when the active download queue is persisted', () => {
+    const existingQueue = JSON.stringify([
+      { item: { id: 'bible:LSGS', versionId: 'LSGS' }, status: 'queued' },
+      {
+        item: { id: 'database:STRONG:fr', databaseId: 'STRONG', lang: 'fr' },
+        status: 'failed',
+      },
+      { item: { id: 'bible:KJV', versionId: 'KJV' }, status: 'queued' },
+    ])
+    const activeQueue = JSON.stringify([
+      { item: { id: 'bible:BHG', versionId: 'BHG' }, status: 'failed' },
+    ])
+
+    expect(preserveLegacyDownloadsInQueue(existingQueue, activeQueue)).toBe(
+      JSON.stringify([
+        { item: { id: 'bible:LSGS', versionId: 'LSGS' }, status: 'queued' },
+        {
+          item: { id: 'database:STRONG:fr', databaseId: 'STRONG', lang: 'fr' },
+          status: 'failed',
+        },
+        { item: { id: 'bible:BHG', versionId: 'BHG' }, status: 'failed' },
+      ])
+    )
   })
 
   it('deletes obsolete Bible files and both legacy interlinear databases once', async () => {
@@ -109,7 +147,10 @@ describe('legacyBibleUpgrade', () => {
       remove: jest.fn((key: string) => values.delete(key)),
     }
 
-    await cleanupLegacyBibleResources({ storage: backend })
+    await cleanupLegacyBibleResources({
+      terminalOutcome: 'completed',
+      storage: backend,
+    })
 
     const deletedPaths = mockDeleteAsync.mock.calls.map(([path]) => path)
     expect(deletedPaths).toEqual(
@@ -133,8 +174,27 @@ describe('legacyBibleUpgrade', () => {
     expect(values.get('hasCleanedLegacyBibleResourcesV1')).toBe(true)
 
     mockDeleteAsync.mockClear()
-    await cleanupLegacyBibleResources({ storage: backend })
+    await cleanupLegacyBibleResources({
+      terminalOutcome: 'completed',
+      storage: backend,
+    })
     expect(mockDeleteAsync).not.toHaveBeenCalled()
+  })
+
+  it('preserves obsolete resources until the migration reaches a terminal outcome', async () => {
+    const backend = {
+      getBoolean: jest.fn(() => undefined),
+      getString: jest.fn(() => undefined),
+      set: jest.fn(),
+      remove: jest.fn(),
+    }
+
+    const result = await cleanupLegacyBibleResources({ storage: backend })
+
+    expect(result).toBe('awaiting-terminal-outcome')
+    expect(mockDeleteAsync).not.toHaveBeenCalled()
+    expect(backend.remove).not.toHaveBeenCalled()
+    expect(backend.set).not.toHaveBeenCalled()
   })
 
   it('does not mark cleanup complete when a deletion fails', async () => {
@@ -146,7 +206,12 @@ describe('legacyBibleUpgrade', () => {
       remove: jest.fn(),
     }
 
-    await expect(cleanupLegacyBibleResources({ storage: backend })).rejects.toThrow('disk failure')
+    await expect(
+      cleanupLegacyBibleResources({
+        terminalOutcome: 'completed',
+        storage: backend,
+      })
+    ).rejects.toThrow('disk failure')
     expect(backend.set).not.toHaveBeenCalledWith('hasCleanedLegacyBibleResourcesV1', true)
   })
 })
