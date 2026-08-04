@@ -60,6 +60,8 @@ const migrateValue = (value: unknown, field?: string): unknown => {
     return value.map(item => migrateValue(item))
   }
   if (!value || typeof value !== 'object') return value
+  const prototype = Object.getPrototypeOf(value)
+  if (prototype !== Object.prototype && prototype !== null) return value
 
   const source = value as Record<string, unknown>
   const selectedVersion = source.selectedVersion
@@ -89,6 +91,8 @@ const migrateValue = (value: unknown, field?: string): unknown => {
   }
   return migrated
 }
+
+export const migrateLegacyPersistedValue = (value: unknown): unknown => migrateValue(value)
 
 const migrateJsonStorageKey = (
   backend: LegacyPersistedReferenceStorage,

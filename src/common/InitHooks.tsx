@@ -13,6 +13,7 @@ import {
 } from 'src/state/migration'
 import { bibleDataRefreshSignalAtom } from '~state/app'
 import MigrationModal from '~common/MigrationModal'
+import AccountMigrationModal from '~features/migrations/AccountMigrationModal'
 import { useAppRatingCheck } from '~features/app-rating/useAppRatingCheck'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { migrateBibleJsonToSqlite, needsBibleMigration } from '~helpers/bibleMigration'
@@ -21,7 +22,9 @@ import { checkDatabasesStorage } from '~helpers/sqlite'
 import { storage } from '~helpers/storage'
 import { toast } from '~helpers/toast'
 import useInitFireAuth from '~helpers/useInitFireAuth'
+import useLogin from '~helpers/useLogin'
 import useLiveUpdates from '~helpers/useLiveUpdates'
+import { useAccountMigrations } from '~helpers/useAccountMigrations'
 import { getChangelog } from '~redux/modules/user'
 import { useTabGroupsSync } from '~state/useTabGroupsSync'
 import { resumePendingAnnotationMigration } from '~helpers/annotationMigrationJournal'
@@ -41,16 +44,29 @@ const handleAppStateChange = async (nextAppState: AppStateStatus) => {
   }
 }
 
+let biblesDbOpenPromise: ReturnType<typeof openBiblesDb> | undefined
+const ensureBiblesDbOpen = (): ReturnType<typeof openBiblesDb> => {
+  if (!biblesDbOpenPromise) biblesDbOpenPromise = openBiblesDb()
+  return biblesDbOpenPromise
+}
+
 const InitHooks = (_props: InitHooksProps) => {
   useInitFireAuth()
   const { t } = useTranslation()
   const dispatch = useDispatch()
+  const { isLogged, user } = useLogin()
+  const accountMigrations = useAccountMigrations({
+    activeUserId: isLogged ? user.id : undefined,
+    onWriteScopeOpened: async () => {
+      await ensureBiblesDbOpen()
+      await resumePendingAnnotationMigration()
+    },
+  })
 
   useEffect(() => {
     // Initialize bibles.sqlite and run blocking migration if needed
-    openBiblesDb()
+    ensureBiblesDbOpen()
       .then(async () => {
-        await resumePendingAnnotationMigration()
         // Periodic health check — only run full PRAGMA quick_check once per week
         const HEALTH_CHECK_INTERVAL = 7 * 24 * 60 * 60 * 1000
         const lastCheck = storage.getNumber('biblesDbLastHealthCheck') || 0
@@ -173,11 +189,27 @@ const InitHooks = (_props: InitHooksProps) => {
     }
   }, [dispatch, t])
 
-  useLiveUpdates()
-  useTabGroupsSync()
+  useLiveUpdates({
+    runBeforeSync: accountMigrations.runBeforeSync,
+    resumeToken: accountMigrations.resumeToken,
+  })
+  useTabGroupsSync({
+    incomingEnabled: accountMigrations.isAccountSyncReady,
+    outgoingEnabled: accountMigrations.isAccountWriteReady,
+  })
   useAppRatingCheck()
 
-  return <MigrationModal />
+  return (
+    <>
+      <MigrationModal />
+      <AccountMigrationModal
+        presentation={accountMigrations.presentation}
+        isActionPending={accountMigrations.isActionPending}
+        onRetry={accountMigrations.retry}
+        onContinue={accountMigrations.continueAfterFailure}
+      />
+    </>
+  )
 }
 
 export default InitHooks

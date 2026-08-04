@@ -50,6 +50,20 @@ describe('firestoreSubcollections', () => {
     expect(batch.commit).toHaveBeenCalled()
   })
 
+  it('can replace canonical migration documents without retaining legacy fields', async () => {
+    await batchWriteSubcollection('user-1', 'relations', {
+      set: { relation: { id: 'relation', type: 'linked' } },
+      delete: [],
+      merge: false,
+    })
+
+    const batch = (writeBatch as jest.Mock).mock.results[0].value
+    expect(batch.set).toHaveBeenCalledWith(expect.anything(), {
+      id: 'relation',
+      type: 'linked',
+    })
+  })
+
   it('rejects invalid document IDs instead of silently skipping them', async () => {
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
 

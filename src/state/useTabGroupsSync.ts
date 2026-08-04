@@ -28,8 +28,11 @@ import {
 import { batchWriteSubcollection, type BatchChanges } from '~helpers/firestoreSubcollections'
 import { registerCleanup } from '~helpers/cleanupRegistry'
 import useLogin from '~helpers/useLogin'
-import { usePrevious } from '~helpers/usePrevious'
 import { isMigrationInProgress } from './migration'
+import {
+  recordAccountMigrationDeletedDocuments,
+  recordAccountMigrationPreferredDocuments,
+} from '../migrations/accountMigrationMutationJournal'
 
 const SYNC_DEBOUNCE_MS = 1000
 
@@ -61,9 +64,14 @@ registerCleanup('tabGroupsSubscription', cleanupTabGroupsSubscription)
  * - Handle initial migration on first login
  * - Handle login/logout transitions
  */
-export const useTabGroupsSync = () => {
+export const useTabGroupsSync = ({
+  incomingEnabled,
+  outgoingEnabled,
+}: {
+  incomingEnabled: boolean
+  outgoingEnabled: boolean
+}) => {
   const { isLogged, user } = useLogin()
-  const isLoggedPrev = usePrevious(isLogged)
   const groups = useAtomValue(tabGroupsAtom)
   const setGroups = useSetAtom(tabGroupsAtom)
   const setActiveGroupId = useSetAtom(activeGroupIdAtom)
@@ -77,8 +85,6 @@ export const useTabGroupsSync = () => {
 
   // Cooldown period: sync debounce + small buffer
   const REMOTE_UPDATE_COOLDOWN = SYNC_DEBOUNCE_MS + 100
-
-  const isNewlyLogged = isLogged && isLoggedPrev !== isLogged && typeof isLoggedPrev !== 'undefined'
 
   /**
    * Sync changed groups to Firestore
@@ -300,15 +306,15 @@ export const useTabGroupsSync = () => {
 
   // Effect: Handle login/logout transitions
   useEffect(() => {
-    if (isNewlyLogged && user.id) {
-      // Just logged in - load from Firestore
+    if (incomingEnabled && isLogged && user.id) {
+      // Load only after account migrations have reached a safe terminal state.
       handleInitialLoad(user.id)
     }
-  }, [isNewlyLogged, user.id, handleInitialLoad])
+  }, [incomingEnabled, isLogged, user.id, handleInitialLoad])
 
   // Effect: Setup Firestore subscription when logged in
   useEffect(() => {
-    if (isLogged && user.id) {
+    if (incomingEnabled && isLogged && user.id) {
       const unsubscribe = setupFirestoreSubscription(user.id)
       unsubscribeRef.current = unsubscribe
       // Also store at module level for cleanup before logout
@@ -322,11 +328,11 @@ export const useTabGroupsSync = () => {
         currentTabGroupsUnsubscribe = null
       }
     }
-  }, [isLogged, user.id, setupFirestoreSubscription])
+  }, [incomingEnabled, isLogged, user.id, setupFirestoreSubscription])
 
   // Effect: Watch local changes and sync to Firestore
   useEffect(() => {
-    if (!isLogged || !user.id) {
+    if (!outgoingEnabled || !isLogged || !user.id) {
       previousGroupsRef.current = groups
       return
     }
@@ -351,6 +357,14 @@ export const useTabGroupsSync = () => {
     // CRITICAL: Sync deletions IMMEDIATELY - bypass cooldown and debounce
     // Deletions are user-initiated and must propagate to Firestore right away
     // to prevent the subscription from re-adding the deleted group
+    if (deletedGroups.length > 0 && !incomingEnabled) {
+      recordAccountMigrationDeletedDocuments(
+        user.id,
+        'tabGroups',
+        deletedGroups.map(group => group.id)
+      )
+    }
+
     if (deletedGroups.length > 0 && !isSyncingRef.current) {
       console.log(`[TabGroupsSync] Syncing ${deletedGroups.length} deletion(s) immediately`)
       ;(async () => {
@@ -375,7 +389,7 @@ export const useTabGroupsSync = () => {
     // For additions/modifications: apply cooldown to prevent sync loops
     const timeSinceRemote = Date.now() - lastRemoteUpdateRef.current
     const isWithinCooldown = timeSinceRemote < REMOTE_UPDATE_COOLDOWN
-    const hasAdditionsOrModifications = groups.some(g => {
+    const additionsOrModifications = groups.filter(g => {
       const oldGroup = previousGroupsRef.current.find(og => og.id === g.id)
       return (
         !oldGroup ||
@@ -383,13 +397,43 @@ export const useTabGroupsSync = () => {
           JSON.stringify(prepareTabGroupForSync(oldGroup))
       )
     })
+    const hasAdditionsOrModifications = additionsOrModifications.length > 0
 
-    if (previousGroupsRef.current.length > 0 && hasAdditionsOrModifications && !isWithinCooldown) {
+    if (!incomingEnabled && hasAdditionsOrModifications) {
+      recordAccountMigrationPreferredDocuments(
+        user.id,
+        'tabGroups',
+        additionsOrModifications.map(group => group.id)
+      )
+      additionsOrModifications.forEach(group => {
+        syncTabGroupToFirestore(user.id, group).catch(error => {
+          console.error('[TabGroupsSync] Error syncing outgoing-only group:', error)
+          Sentry.captureException(error, {
+            tags: { feature: 'tabGroupsSync', action: 'outgoingOnlySync' },
+          })
+        })
+      })
+    }
+
+    if (
+      incomingEnabled &&
+      previousGroupsRef.current.length > 0 &&
+      hasAdditionsOrModifications &&
+      !isWithinCooldown
+    ) {
       debouncedSync(user.id, groups, previousGroupsRef.current)
     }
 
     previousGroupsRef.current = groups
-  }, [groups, isLogged, user.id, debouncedSync, REMOTE_UPDATE_COOLDOWN])
+  }, [
+    incomingEnabled,
+    outgoingEnabled,
+    groups,
+    isLogged,
+    user.id,
+    debouncedSync,
+    REMOTE_UPDATE_COOLDOWN,
+  ])
 
   // Cleanup debounce on unmount
   useEffect(() => {

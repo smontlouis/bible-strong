@@ -22,8 +22,6 @@ import { registerCleanup } from './cleanupRegistry'
 import useLogin from './useLogin'
 import { usePrevious } from './usePrevious'
 import { subscribeToSubcollection, USER_DATA_SUBCOLLECTION_NAMES } from './firestoreSubcollections'
-import { checkForEmbeddedData, migrateUserRelationsArchitecture } from './firestoreMigration'
-import { useFirestoreMigration } from './useFirestoreMigration'
 import { store } from '~redux/store'
 import { isMigrationInProgress } from 'src/state/migration'
 
@@ -69,12 +67,18 @@ export const cleanupFirestoreSubscriptions = () => {
 // Register cleanup function with the registry (breaks require cycle with FireAuth)
 registerCleanup('firestoreSubscriptions', cleanupFirestoreSubscriptions)
 
-const useLiveUpdates = () => {
+interface AccountMigrationCoordinator {
+  runBeforeSync(userId: string, state: RootState): Promise<boolean>
+  resumeToken: number
+}
+
+const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordinator) => {
   const { isLogged, user } = useLogin()
   const isLoggedPrev = usePrevious(isLogged)
   const dispatch = useDispatch()
-  const isMigrating = useRef(false)
-  const { startMigration } = useFirestoreMigration()
+  const migrationRunRef = useRef<Promise<boolean> | undefined>(undefined)
+  const migrationRunnerRef = useRef(runBeforeSync)
+  migrationRunnerRef.current = runBeforeSync
 
   const isNewlyLogged = isLogged && isLoggedPrev !== isLogged && typeof isLoggedPrev !== 'undefined'
 
@@ -89,11 +93,13 @@ const useLiveUpdates = () => {
     currentUnsubscribeStudies = undefined
     currentSubcollectionUnsubscribes = []
     let syncFallbackTimeout: ReturnType<typeof setTimeout> | undefined
+    let disposed = false
 
     const setupListeners = async () => {
       if (!isLogged || isLoading !== false || !user.id) {
         return
       }
+      const userId = user.id
 
       dispatch(startUserDataSync())
       syncFallbackTimeout = setTimeout(() => {
@@ -106,50 +112,43 @@ const useLiveUpdates = () => {
         dispatch(finishUserDataSync())
       }, SYNC_FALLBACK_TIMEOUT_MS)
 
-      // Vérifier et effectuer la migration si nécessaire
-      // IMPORTANT: On vérifie les données embedded, pas juste le flag _migrated
-      // Car une ancienne app sur un autre appareil peut continuer à synchroniser vers bible.*
-      if (!isMigrating.current) {
-        isMigrating.current = true
-        try {
-          const { hasEmbeddedData, collectionsWithData } = await checkForEmbeddedData(user.id)
-          if (hasEmbeddedData) {
-            console.log(
-              '[LiveUpdates] Found embedded data to migrate:',
-              collectionsWithData.join(', ')
-            )
-            const currentState = store.getState()
-            const result = await startMigration(user.id, currentState)
-            if (!result) {
-              console.error('[LiveUpdates] Migration failed or incomplete')
-              // Continue anyway - the user can use the app with local data
-              return
-            }
-          }
-
-          const relationsResult = await migrateUserRelationsArchitecture(user.id, store.getState())
-          if (!relationsResult.success) {
-            console.error('[LiveUpdates] Relations architecture migration failed')
-          }
-        } catch (error) {
-          console.error('[LiveUpdates] Migration check failed:', error)
-          const errorMessage = error instanceof Error ? error.message : String(error)
-          Sentry.captureException(error, {
-            tags: {
-              feature: 'firestore_migration',
-              action: 'check_embedded_data',
-            },
-            extra: {
-              userId: user.id,
-              errorMessage,
-            },
-          })
+      // Account migrations run serially through the shared orchestrator before
+      // live listeners can observe partially migrated cloud data.
+      const precedingRun = migrationRunRef.current
+      if (precedingRun) {
+        await precedingRun.catch(() => false)
+        if (disposed) return
+      }
+      let accountMigrationsCompleted = false
+      const migrationRun = migrationRunnerRef.current(userId, store.getState())
+      migrationRunRef.current = migrationRun
+      try {
+        accountMigrationsCompleted = await migrationRun
+      } catch (error) {
+        console.error('[LiveUpdates] Account migration failed:', error)
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        Sentry.captureException(error, {
+          tags: {
+            feature: 'firestore_migration',
+            action: 'run_account_migrations',
+          },
+          extra: {
+            userId,
+            errorMessage,
+          },
+        })
+      } finally {
+        if (migrationRunRef.current === migrationRun) {
+          migrationRunRef.current = undefined
         }
-        isMigrating.current = false
+      }
+      if (!accountMigrationsCompleted || disposed) {
+        if (!disposed) dispatch(finishUserDataSync())
+        return
       }
 
       // Subscribe to user document (settings, subscription, etc.)
-      currentUnsubscribeUsers = onSnapshot(doc(firebaseDb, 'users', user.id), docSnapshot => {
+      currentUnsubscribeUsers = onSnapshot(doc(firebaseDb, 'users', userId), docSnapshot => {
         const source = docSnapshot?.metadata.hasPendingWrites ? 'Local' : 'Server'
         if (source === 'Local' || !docSnapshot) return
 
@@ -186,7 +185,7 @@ const useLiveUpdates = () => {
       // Subscribe to each subcollection
       for (const collection of USER_DATA_SUBCOLLECTION_NAMES) {
         const unsubscribe = subscribeToSubcollection(
-          user.id,
+          userId,
           collection,
           (data, changes) => {
             // Skip updates while migration is in progress to prevent race conditions
@@ -221,7 +220,7 @@ const useLiveUpdates = () => {
 
       // Subscribe to studies collection
       currentUnsubscribeStudies = onSnapshot(
-        query(collection(firebaseDb, 'studies'), where('user.id', '==', user.id)),
+        query(collection(firebaseDb, 'studies'), where('user.id', '==', userId)),
         querySnapshot => {
           const source = querySnapshot?.metadata.hasPendingWrites ? 'Local' : 'Server'
           if (source === 'Local' || !querySnapshot) return
@@ -275,7 +274,7 @@ const useLiveUpdates = () => {
               action: 'subscribe_studies',
             },
             extra: {
-              userId: user.id,
+              userId,
             },
           })
           dispatch(markUserDataSyncCollectionLoaded({ collection: 'studies' }))
@@ -291,6 +290,7 @@ const useLiveUpdates = () => {
     }
 
     return () => {
+      disposed = true
       if (syncFallbackTimeout) {
         clearTimeout(syncFallbackTimeout)
       }
@@ -298,7 +298,7 @@ const useLiveUpdates = () => {
       cleanupFirestoreSubscriptions()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLogged, isLoading])
+  }, [isLogged, isLoading, resumeToken, user.id])
 }
 
 export default useLiveUpdates
