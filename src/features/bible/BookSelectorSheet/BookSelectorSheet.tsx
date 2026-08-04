@@ -19,11 +19,12 @@ import { BookSelectorParams } from './BookSelectorParams'
 import { BOOK_SELECTION_EVENT, SelectionEvent } from './constants'
 import VerseSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './VerseSheet'
 import { useQuery } from '@tanstack/react-query'
-import { getBibleVersionCoverage } from '~helpers/biblesDb'
 import { useTheme } from '@emotion/react'
 import { applyBookChapterSelection } from './bookSelectorSelection'
 import { getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
   sheetRef: React.RefObject<SheetRef | null>
@@ -56,10 +57,11 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const selectedVersion = bookSelectorData?.selectedVersion
   const canonId = getBibleVersionCanonId(selectedVersion || '')
   const theme = useTheme()
+  const resources = useResourceAccess()
 
   const { data: coverageData } = useQuery({
-    queryKey: ['bible-version-coverage', selectedVersion || ''],
-    queryFn: () => getBibleVersionCoverage(selectedVersion || 'LSG'),
+    queryKey: resourceQueryKeys.bibleCoverage(selectedVersion || 'LSG'),
+    queryFn: () => resources.bibleContent.loadCoverage(selectedVersion || 'LSG'),
     enabled: !!selectedVersion,
   })
 

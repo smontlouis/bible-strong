@@ -9,7 +9,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import ListenToStrong, { hasStrongAudio } from './ListenStrong'
 
-import { cleanParams, wp } from '~helpers/utils'
+import { cleanParams } from '~helpers/utils'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useRouter } from 'expo-router'
@@ -22,8 +22,10 @@ import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { createStrongIdentity } from '~helpers/strongIdentities'
 import type { StrongVerseContext } from './strongResourceCardContext'
 
-const Container = styled(Box)<{ isModal?: boolean }>(() => ({
-  flex: 1,
+const Container = styled(Box)<{ isModal?: boolean; cardHeight?: number }>(({ cardHeight }) => ({
+  flex: cardHeight === undefined ? 1 : undefined,
+  height: cardHeight,
+  maxHeight: cardHeight,
   paddingHorizontal: 10,
 }))
 
@@ -63,6 +65,7 @@ type Props = {
   isSelectionMode?: StudyNavigateBibleType
   onClosed?: () => void
   strongVerseContext?: StrongVerseContext
+  cardHeight?: number
 }
 
 const StrongCard = (props: Props) => {
@@ -151,7 +154,7 @@ const StrongCard = (props: Props) => {
     : strongEntry.morphology?.code
 
   return (
-    <Container overflow="visible">
+    <Container overflow="visible" cardHeight={props.cardHeight}>
       <Box mt={20} px={15} py={14} flex={1} bg="reverse" borderRadius={14} overflow="hidden">
         <TouchableBox
           onPress={openStrong}
@@ -208,6 +211,11 @@ const StrongCard = (props: Props) => {
           style={{ flex: 1, marginTop: 15 }}
           contentContainerStyle={{ paddingBottom: 15 }}
         >
+          {!!clickedWord && (
+            <Text color="tertiary" fontSize={12}>
+              {clickedWord}
+            </Text>
+          )}
           {!!Definition && (
             <ViewItem>
               <SubTitle color="darkGrey">{t('strongDetail.definition.title')}</SubTitle>

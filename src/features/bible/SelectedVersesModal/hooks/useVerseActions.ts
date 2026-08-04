@@ -11,6 +11,8 @@ import getVersesContent from '~helpers/getVersesContent'
 import { cleanParams } from '~helpers/utils'
 import type { VersionCode } from '../../../../state/tabs'
 import { useAtomValue } from 'jotai/react'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
 
 interface UseVerseActionsParams {
   selectedVerses: VerseIds
@@ -29,6 +31,7 @@ const useVerseActions = ({
 }: UseVerseActionsParams) => {
   const router = useRouter()
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const openedFromTab = useAtomValue(openedFromTabAtom)
   const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
 
@@ -40,6 +43,8 @@ const useVerseActions = ({
       hasInlineVerses,
       hasQuotes,
       hasAppName,
+      loadVerseTexts: (versionId, verseKeys) =>
+        loadBibleVerseTexts(resources, versionId, verseKeys),
     })
     await Share.share({ message })
   }
@@ -52,6 +57,8 @@ const useVerseActions = ({
       hasInlineVerses,
       hasQuotes,
       hasAppName,
+      loadVerseTexts: (versionId, verseKeys) =>
+        loadBibleVerseTexts(resources, versionId, verseKeys),
     })
     Clipboard.setString(message)
     toast(t('Copié dans le presse-papiers.'))
@@ -85,6 +92,8 @@ const useVerseActions = ({
     const { title, content } = await getVersesContent({
       verses: selectedVerses,
       version,
+      loadVerseTexts: (versionId, verseKeys) =>
+        loadBibleVerseTexts(resources, versionId, verseKeys),
     })
     const store = getDefaultStore()
     const currentStudyId = store.get(currentStudyIdAtom)

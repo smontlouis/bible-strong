@@ -13,12 +13,12 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
+import Empty from '~common/Empty'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
-import waitForNaveDB from '~common/waitForNaveDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -36,8 +36,9 @@ import ScrollView from '~common/ui/ScrollView'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { unwrapDatabaseResult } from '~helpers/queryResult'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
@@ -74,10 +75,22 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     }
   }, [isInTab, setNaveTab, router])
 
-  const { data: naveItem = null } = useQuery({
+  const naveAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.offlineDatabaseAvailability('NAVE', naveResourceLanguage),
+    queryFn: () =>
+      resources.nave.getAvailability?.(naveResourceLanguage) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
+  const {
+    data: naveItem = null,
+    isPending: isNavePending,
+    isError: isNaveError,
+  } = useQuery({
     queryKey: ['nave-detail', naveResourceLanguage, name_lower],
     queryFn: async () =>
-      name_lower ? (unwrapDatabaseResult(await resources.nave.loadItem(name_lower)) ?? null) : null,
+      name_lower ? ((await resources.nave.loadItem(name_lower)) ?? null) : null,
     enabled: !!name_lower,
     staleTime: Infinity,
     ...localQueryOptions,
@@ -113,7 +126,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     if (!naveItem) return
     addHistory({
       name: naveItem.name,
-      name_lower: naveItem.name_lower,
+      name_lower: naveItem.normalizedName,
       type: 'nave',
       date: Date.now(),
     })
@@ -177,11 +190,40 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     return null
   }
 
-  if (!naveItem) {
+  if (
+    naveAvailabilityQuery.data?.status === 'unavailable' &&
+    naveAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
+        title={t(
+          'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
+        )}
+        fileSize={7}
+        hasBackButton={hasBackButton}
+        hasHeader
+      />
+    )
+  }
+
+  if (isNavePending) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title="Thèmes Nave" />
         <Loading message={t('Chargement...')} />
+      </FormSheetScreen>
+    )
+  }
+
+  if (isNaveError || !naveItem) {
+    return (
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title="Thèmes Nave" />
+        <Empty
+          icon={require('~assets/images/empty-state-icons/inbox.svg')}
+          message={t('Impossible de charger la nave...')}
+        />
       </FormSheetScreen>
     )
   }
@@ -191,7 +233,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       <Header
         hasBackButton={hasBackButton}
         title={naveItem.name || name || ''}
-        subTitle={naveItem?.name_lower}
+        subTitle={naveItem?.normalizedName}
         rightComponent={
           <MenuView
             actions={
@@ -217,7 +259,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
                 case 'tags':
                   setUnifiedTagsModal({
                     mode: 'select',
-                    id: naveItem.name_lower,
+                    id: naveItem.normalizedName,
                     title: naveItem.name,
                     entity: 'naves',
                   })
@@ -265,4 +307,4 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   )
 }
 
-export default waitForNaveDB()(NaveDetailScreen)
+export default NaveDetailScreen

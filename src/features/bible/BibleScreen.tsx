@@ -8,7 +8,6 @@ import generateUUID from '~helpers/generateUUID'
 
 import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
-import { useAtomValue } from 'jotai/react'
 import {
   BibleContextDisplayMode,
   BibleTab,
@@ -25,7 +24,8 @@ import {
   shouldShowBibleReferenceUnavailable,
 } from '~helpers/bibleVerseResolver'
 import Box from '~common/ui/Box'
-import { bibleDataRefreshSignalAtom } from '~state/app'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import type { StrongMode } from '~helpers/strongBiblePublications'
 import {
   BiblePartialReferenceNotice,
@@ -99,7 +99,7 @@ const BibleScreen = () => {
   const chapter = params.chapter ? Number(params.chapter) : undefined
   const verse = params.verse ? Number(params.verse) : undefined
   const defaultVersion = useDefaultBibleVersion()
-  const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
+  const resources = useResourceAccess()
   const requestedVersion = params.version || undefined
   const strongMode = params.strongMode
   const bookNumber = typeof book === 'number' ? book : book?.Numero
@@ -113,18 +113,25 @@ const BibleScreen = () => {
   const shouldResolveVersion = Boolean(bookNumber && chapter)
   const resolutionQuery = useQuery({
     queryKey: [
-      'bible-screen-resolution',
+      ...resourceQueryKeys.bibleVerseSelection(
+        requestedVersion || defaultVersion,
+        requestedVerseKeys
+      ),
+      'screen-resolution',
       requestedVerseKeysSignature,
-      requestedVersion,
-      defaultVersion,
-      bibleDataRefreshSignal,
     ],
     queryFn: () =>
-      resolveBibleVerses({
-        verseKeys: requestedVerseKeys,
-        preferredVersion: requestedVersion,
-        defaultVersion,
-      }),
+      resolveBibleVerses(
+        {
+          verseKeys: requestedVerseKeys,
+          preferredVersion: requestedVersion,
+          defaultVersion,
+        },
+        {
+          loadVerseTexts: (version, verseKeys) =>
+            resources.bibleContent.loadVerseTexts({ version, verseKeys }),
+        }
+      ),
     enabled: shouldResolveVersion,
     staleTime: Infinity,
   })

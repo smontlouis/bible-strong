@@ -4,8 +4,9 @@ import React, { useState } from 'react'
 import { BibleTab } from 'src/state/tabs'
 import Box from '~common/ui/Box'
 import { Slide, Slides } from '~common/ui/Slider'
-import { getBibleVersionCoverage } from '~helpers/biblesDb'
 import { useQuery } from '@tanstack/react-query'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import BibleSelectTabBar from './BibleSelectTabBar'
 import BookSelector from './BookSelector'
 import ChapterSelector from './ChapterSelector'
@@ -20,10 +21,11 @@ export interface BibleSelectProps {
 const BibleSelect = ({ bibleAtom, onComplete, onLongPressComplete }: BibleSelectProps) => {
   const [index, setIndex] = useState(0)
   const bible = useAtomValue(bibleAtom)
+  const resources = useResourceAccess()
   const version = bible.data.selectedVersion
   const { data: coverageData } = useQuery({
-    queryKey: ['bible-version-coverage', version],
-    queryFn: () => getBibleVersionCoverage(version),
+    queryKey: resourceQueryKeys.bibleCoverage(version),
+    queryFn: () => resources.bibleContent.loadCoverage(version),
     enabled: !!version,
   })
 

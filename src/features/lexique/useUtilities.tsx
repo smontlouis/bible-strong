@@ -1,18 +1,18 @@
 import { useEffect, useState } from 'react'
 import { type QueryKey, useQuery } from '@tanstack/react-query'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 import useDebounce from '~helpers/useDebounce'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { useAtomValue } from 'jotai/react'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { getDatabaseQueryErrorCode, unwrapDatabaseResult } from '~helpers/queryResult'
+import {
+  getResourceAccessErrorCode,
+  ResourceAccessError,
+} from '~features/resources/resourceAccessError'
 
 interface UseSearchValueOptions {
   onDebouncedValue?: () => void
 }
 
-type QueryFunction<T> = (value: string) => Promise<T[] | DatabaseError>
+type QueryFunction<T> = (value: string) => Promise<T[]>
 
 interface QueryConfig<T> {
   queryKey?: QueryKey
@@ -39,7 +39,6 @@ export const useResultsByLetterOrSearch = <T,>(
   search: QueryConfig<T> = {},
   letter: QueryConfig<T> = {}
 ) => {
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const active = search.value && search.query ? search : letter
   const mode = active === search ? 'search' : 'letter'
   const enabled = Boolean(active.value && active.query)
@@ -48,11 +47,10 @@ export const useResultsByLetterOrSearch = <T,>(
       'resource-results',
       ...(active.queryKey ?? []),
       active.resourceLanguage,
-      downloadCompletionSignal,
       mode,
       active.value ?? '',
     ],
-    queryFn: async () => unwrapDatabaseResult(await active.query!(active.value!)),
+    queryFn: () => active.query!(active.value!),
     enabled,
     staleTime: Infinity,
     ...localQueryOptions,
@@ -61,6 +59,7 @@ export const useResultsByLetterOrSearch = <T,>(
   return {
     results: data ?? [],
     isLoading: enabled && (isPending || isFetching),
-    error: getDatabaseQueryErrorCode(error),
+    error: getResourceAccessErrorCode(error),
+    recoveries: error instanceof ResourceAccessError ? error.recoveries : [],
   }
 }

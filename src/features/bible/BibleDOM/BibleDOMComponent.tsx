@@ -1255,7 +1255,7 @@ const getErrorMessage = (error: BibleError, translations: BibleDOMTranslations) 
       return translations.versionNotFound
     case 'CHAPTER_NOT_FOUND':
       return translations.chapterNotFound
-    case 'DATABASE_CORRUPTED':
+    case 'OFFLINE_COPY_INVALID':
       return translations.databaseCorrupted
     default:
       return translations.unknownError
@@ -1281,6 +1281,9 @@ const BibleDOMErrorContent = ({
     errorDownloadState?.status === 'inserting'
   const progressLabel =
     errorDownloadState?.status === 'inserting' ? translations.inserting : translations.downloading
+  const canAcquire = error.recoveries?.includes('acquire-offline-copy')
+  const canManage = error.recoveries?.includes('manage-offline-copies')
+  const canReset = error.recoveries?.includes('reset-offline-store')
 
   return (
     <TranslationsProvider translations={translations}>
@@ -1296,7 +1299,7 @@ const BibleDOMErrorContent = ({
               />
             </ErrorIcon>
             <ErrorMessage settings={settings}>{getErrorMessage(error, translations)}</ErrorMessage>
-            {error.type === 'BIBLE_NOT_FOUND' &&
+            {canAcquire &&
               (isDownloading ? (
                 <>
                   <ProgressTrack settings={settings}>
@@ -1320,24 +1323,28 @@ const BibleDOMErrorContent = ({
                   {translations.downloadVersion}
                 </ErrorButton>
               ))}
-            {error.type === 'DATABASE_CORRUPTED' && (
+            {(canManage || canReset) && (
               <>
-                <ErrorButton
-                  settings={settings}
-                  type="button"
-                  onClick={() => dispatch({ type: OPEN_DOWNLOADS }).catch(console.error)}
-                >
-                  {translations.goToDownloads}
-                </ErrorButton>
-                <ErrorButton
-                  settings={settings}
-                  $secondary
-                  type="button"
-                  disabled={isResettingDatabase}
-                  onClick={() => dispatch({ type: RESET_BIBLE_DATABASE }).catch(console.error)}
-                >
-                  {translations.resetDatabase}
-                </ErrorButton>
+                {canManage && (
+                  <ErrorButton
+                    settings={settings}
+                    type="button"
+                    onClick={() => dispatch({ type: OPEN_DOWNLOADS }).catch(console.error)}
+                  >
+                    {translations.goToDownloads}
+                  </ErrorButton>
+                )}
+                {canReset && (
+                  <ErrorButton
+                    settings={settings}
+                    $secondary
+                    type="button"
+                    disabled={isResettingDatabase}
+                    onClick={() => dispatch({ type: RESET_BIBLE_DATABASE }).catch(console.error)}
+                  >
+                    {translations.resetDatabase}
+                  </ErrorButton>
+                )}
               </>
             )}
           </ErrorContent>

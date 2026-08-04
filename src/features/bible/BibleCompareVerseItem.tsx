@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from '@emotion/native'
 import { useQuery } from '@tanstack/react-query'
 
@@ -7,7 +6,6 @@ import Paragraph from '~common/ui/Paragraph'
 import Box from '~common/ui/Box'
 import Link from '~common/Link'
 import Text from '~common/ui/Text'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { removeBreakLines } from '~helpers/utils'
 import { getBook } from '~helpers/bibleBookCatalog'
 import type { VerseIds } from '~common/types'
@@ -21,6 +19,8 @@ import type { StrongSelection } from '~helpers/strongSelection'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import { localQueryOptions } from '~helpers/queryOptions'
 import CompareStrongVerseText from './CompareStrongVerseText'
+import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 
 const Container = styled.View(({ theme }) => ({
   padding: 20,
@@ -38,77 +38,58 @@ type CompareVerseItemProps = {
   onStrongSelect?: (selection: StrongSelection) => void
 }
 
-type CompareVerseItemState = {
-  content: string
-  versionNeedsDownload: boolean
-}
+const PlainCompareVerseItem = ({
+  versionId,
+  name,
+  selectedVerses,
+  position,
+}: CompareVerseItemProps) => {
+  const resources = useResourceAccess()
+  const selectedVerseKeys = Object.keys(selectedVerses)
+  const { data, error, isPending } = useQuery({
+    queryKey: resourceQueryKeys.bibleVerseSelection(versionId, selectedVerseKeys),
+    queryFn: () =>
+      getVersesContent({
+        verses: selectedVerses,
+        version: versionId,
+        position,
+        loadVerseTexts: (version, verseKeys) => loadBibleVerseTexts(resources, version, verseKeys),
+      }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
+  const content = error ? 'Impossible de charger ce verset' : (data?.content ?? '')
 
-class PlainCompareVerseItem extends React.Component<CompareVerseItemProps, CompareVerseItemState> {
-  state: CompareVerseItemState = {
-    content: '',
-    versionNeedsDownload: true,
-  }
+  const focusVerses = selectedVerseKeys.map(v => v.split('-')[v.split('-').length - 1]).map(Number)
 
-  async componentDidMount() {
-    const { selectedVerses, versionId, position } = this.props
-    const versionNeedsDownload = await getIfVersionNeedsDownload(versionId)
+  focusVerses.sort((a, b) => a - b)
 
-    if (!versionNeedsDownload) {
-      try {
-        const { content } = await getVersesContent({
-          verses: selectedVerses,
-          version: versionId,
-          position,
-        })
-        this.setState({ content, versionNeedsDownload })
-      } catch {
-        this.setState({
-          content: 'Impossible de charger ce verset',
-          versionNeedsDownload,
-        })
-      }
-    }
-  }
+  const [book, chapter, verse] = selectedVerseKeys[0].split('-').map(Number)
 
-  render() {
-    const { content, versionNeedsDownload } = this.state
-    const { versionId, name, selectedVerses } = this.props
+  if (isPending) return null
 
-    const focusVerses = Object.keys(selectedVerses)
-      .map(v => v.split('-')[v.split('-').length - 1])
-      .map(Number)
-
-    focusVerses.sort((a, b) => a - b)
-
-    const [book, chapter, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
-
-    if (!content && versionNeedsDownload) {
-      return null
-    }
-
-    return (
-      <Link
-        route="BibleView"
-        params={{
-          contextDisplayMode: 'focused',
-          book: getBook(book) || getBook(1)!,
-          chapter,
-          verse,
-          version: versionId,
-          focusVerses,
-        }}
-      >
-        <Container>
-          <Box row>
-            <Text color="darkGrey" bold fontSize={14} marginBottom={5}>
-              {versionId} - {name}
-            </Text>
-          </Box>
-          <Paragraph scale={-1}>{removeBreakLines(content)}</Paragraph>
-        </Container>
-      </Link>
-    )
-  }
+  return (
+    <Link
+      route="BibleView"
+      params={{
+        contextDisplayMode: 'focused',
+        book: getBook(book) || getBook(1)!,
+        chapter,
+        verse,
+        version: versionId,
+        focusVerses,
+      }}
+    >
+      <Container>
+        <Box row>
+          <Text color="darkGrey" bold fontSize={14} marginBottom={5}>
+            {versionId} - {name}
+          </Text>
+        </Box>
+        <Paragraph scale={-1}>{removeBreakLines(content)}</Paragraph>
+      </Container>
+    </Link>
+  )
 }
 
 const StrongCompareVerseItem = ({
@@ -123,7 +104,12 @@ const StrongCompareVerseItem = ({
   const strongLanguage = useResourcesLanguageValue().STRONG
   const selectedVerseKeys = Object.keys(selectedVerses)
   const { data: strongVerses } = useQuery({
-    queryKey: ['compare-strong-verses', versionId, selectedVerseKeys, strongLanguage],
+    queryKey: resourceQueryKeys.lexiconBibleVerseSelection({
+      currentVersionId: versionId,
+      defaultVersionId: versionId,
+      preferredInterlinearLocale: strongLanguage,
+      verseKeys: selectedVerseKeys,
+    }),
     queryFn: async () => {
       const results = await Promise.all(
         selectedVerseKeys.map(async verseKey => {

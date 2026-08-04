@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
@@ -17,7 +18,6 @@ import { getFirstLetterFrom } from '~helpers/alphabet'
 import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
 import { useTranslation } from 'react-i18next'
-import waitForStrongDB from '~common/waitForStrongDB'
 import LexiqueItem from './LexiqueItem'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
@@ -25,6 +25,8 @@ import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResol
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 
 interface LexiqueSection {
   title: string
@@ -79,6 +81,15 @@ const LexiqueListScreen = ({
   } = useStrongLexiconLanguage()
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
+  const coreAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryFn: async () => ({
+      availability: await resources.strongLexicon.getModuleAvailability('core'),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+    }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
 
   const { results, isLoading, error } = useResultsByLetterOrSearch(
     {
@@ -117,6 +128,21 @@ const LexiqueListScreen = ({
     onStrongSelect?.(book, reference)
   }
 
+  if (
+    coreAvailabilityQuery.data?.availability.status !== 'available' &&
+    coreAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        hasBackButton={showBackButton}
+        hasHeader
+        title={t('La base de données strong est requise pour accéder à cette page.')}
+        fileSize={35}
+      />
+    )
+  }
+
   if (error) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
@@ -126,7 +152,7 @@ const LexiqueListScreen = ({
             icon={require('~assets/images/empty-state-icons/inbox.svg')}
             message={`${t('Impossible de charger la strong pour ce verset...')}
             ${
-              error === 'CORRUPTED_DATABASE'
+              error === 'INVALID_OFFLINE_COPY'
                 ? t(
                     '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
                   )
@@ -213,7 +239,4 @@ const LexiqueListScreen = ({
   )
 }
 
-export default waitForStrongDB({
-  hasBackButton: true,
-  hasHeader: true,
-})(LexiqueListScreen)
+export default LexiqueListScreen

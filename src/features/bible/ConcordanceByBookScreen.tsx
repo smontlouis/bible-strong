@@ -10,7 +10,6 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Text from '~common/ui/Text'
-import waitForStrongDB from '~common/waitForStrongDB'
 import ConcordanceVerse from './ConcordanceVerse'
 import { FeatherIcon } from '~common/ui/Icon'
 
@@ -27,6 +26,7 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 
 const PAGE_SIZE = 50
 
@@ -54,13 +54,13 @@ const ConcordanceByBook = () => {
     : { Code: 0, Mot: '' }
   const { Code, Mot } = strongReference
   const occurrencesQuery = useInfiniteQuery({
-    queryKey: [
-      'strong-occurrences-by-book',
-      requestedStrongBibleVersionId,
-      defaultStrongBibleVersionId,
+    queryKey: resourceQueryKeys.strongBibleOccurrences({
+      currentVersionId: requestedStrongBibleVersionId,
+      defaultVersionId: defaultStrongBibleVersionId,
       book,
-      Code,
-    ],
+      reference: Code,
+      limit: PAGE_SIZE,
+    }),
     queryFn: ({ pageParam }) =>
       resources.strongBible.loadFoundVersesByBook({
         currentVersionId: requestedStrongBibleVersionId,
@@ -68,16 +68,11 @@ const ConcordanceByBook = () => {
         book,
         reference: Code,
         limit: PAGE_SIZE,
-        offset: pageParam,
+        pageToken: pageParam ?? undefined,
       }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage, pages) =>
-      lastPage.status === 'available' && lastPage.verses.length === PAGE_SIZE
-        ? pages.reduce(
-            (count, page) => count + (page.status === 'available' ? page.verses.length : 0),
-            0
-          )
-        : undefined,
+    initialPageParam: null as string | null,
+    getNextPageParam: lastPage =>
+      lastPage.status === 'available' ? lastPage.nextPageToken : undefined,
     enabled: Boolean(book && Code),
   })
   const verses =
@@ -190,8 +185,4 @@ const ConcordanceByBook = () => {
   )
 }
 
-export default waitForStrongDB({
-  hasBackButton: true,
-  hasHeader: true,
-  useStackBackButton: true,
-})(ConcordanceByBook)
+export default ConcordanceByBook

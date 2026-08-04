@@ -1,4 +1,4 @@
-import { getInstalledVersions, getMultipleVerses } from './biblesDb'
+import type { BibleRecoveryAction } from './bibleErrors'
 
 export type BibleVerseResolutionStatus = 'resolved' | 'partial' | 'reference-only'
 
@@ -7,6 +7,7 @@ export type BibleVerseResolution = {
   version?: string
   texts: Record<string, string>
   missingVerseKeys: string[]
+  recoveries?: BibleRecoveryAction[]
 }
 
 export const shouldShowBibleReferenceUnavailable = (status: BibleVerseResolutionStatus): boolean =>
@@ -22,13 +23,15 @@ export const getBibleVerseResolutionRequestKey = ({
   verseKeys,
   preferredVersion,
   defaultVersion,
-  dataRefreshSignal,
-}: ResolveBibleVersesOptions & { dataRefreshSignal: number }): string =>
-  JSON.stringify([verseKeys, preferredVersion || '', defaultVersion, dataRefreshSignal])
+}: ResolveBibleVersesOptions): string =>
+  JSON.stringify([verseKeys, preferredVersion || '', defaultVersion])
 
 type BibleVerseResolverDependencies = {
-  getInstalledVersions: () => Promise<string[]>
-  getMultipleVerses: (version: string, verseKeys: string[]) => Promise<Record<string, string>>
+  loadVerseTexts: (version: string, verseKeys: string[]) => Promise<Record<string, string>>
+  getAvailability?: (version: string) => Promise<{
+    status: 'available' | 'unavailable'
+    recoveries?: BibleRecoveryAction[]
+  }>
 }
 
 export const getBibleLocationVerseKeys = ({
@@ -48,19 +51,9 @@ export const getBibleLocationVerseKeys = ({
   )
 }
 
-const defaultDependencies: BibleVerseResolverDependencies = {
-  getInstalledVersions,
-  getMultipleVerses,
-}
-
-const unique = (values: (string | undefined)[]): string[] =>
-  values.filter(
-    (value, index): value is string => Boolean(value) && values.indexOf(value) === index
-  )
-
 export const resolveBibleVerses = async (
   { verseKeys, preferredVersion, defaultVersion }: ResolveBibleVersesOptions,
-  dependencies: BibleVerseResolverDependencies = defaultDependencies
+  dependencies: BibleVerseResolverDependencies
 ): Promise<BibleVerseResolution> => {
   const requestedVerseKeys = [...new Set(verseKeys)]
   if (!requestedVerseKeys.length) {
@@ -72,56 +65,29 @@ export const resolveBibleVerses = async (
     }
   }
 
-  let bestVersion: string | undefined
-  let bestTexts: Record<string, string> = {}
-
-  const tryCandidates = async (candidates: string[]): Promise<BibleVerseResolution | undefined> => {
-    for (const version of candidates) {
-      const texts = await dependencies.getMultipleVerses(version, requestedVerseKeys)
-      const foundCount = requestedVerseKeys.filter(key => Boolean(texts[key])).length
-
-      if (foundCount > Object.keys(bestTexts).length) {
-        bestVersion = version
-        bestTexts = texts
-      }
-
-      if (foundCount === requestedVerseKeys.length) {
-        return {
-          status: 'resolved',
-          version,
-          texts,
-          missingVerseKeys: [],
-        }
-      }
-    }
-    return undefined
+  const version = preferredVersion || defaultVersion
+  const texts = await dependencies.loadVerseTexts(version, requestedVerseKeys)
+  const missingVerseKeys = requestedVerseKeys.filter(key => !texts[key])
+  if (missingVerseKeys.length === 0) {
+    return { status: 'resolved', version, texts, missingVerseKeys: [] }
   }
-
-  const priorityCandidates = unique([preferredVersion, defaultVersion])
-  const priorityResolution = await tryCandidates(priorityCandidates)
-  if (priorityResolution) return priorityResolution
-
-  const installedVersions = await dependencies.getInstalledVersions()
-  const fallbackResolution = await tryCandidates(
-    installedVersions.filter(version => !priorityCandidates.includes(version))
-  )
-  if (fallbackResolution) return fallbackResolution
-
-  // Keep the best partial result when translations use different verse boundaries.
-  const missingVerseKeys = requestedVerseKeys.filter(key => !bestTexts[key])
-  if (bestVersion) {
+  if (Object.keys(texts).length > 0) {
     return {
       status: 'partial',
-      version: bestVersion,
-      texts: bestTexts,
+      version,
+      texts,
       missingVerseKeys,
     }
   }
 
+  const availability = await dependencies.getAvailability?.(version)
   return {
     status: 'reference-only',
-    version: undefined,
+    version,
     texts: {},
     missingVerseKeys,
+    ...(availability?.status === 'unavailable' && availability.recoveries
+      ? { recoveries: availability.recoveries }
+      : {}),
   }
 }

@@ -11,13 +11,14 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import truncate from '~helpers/truncate'
 import RandomButton from './RandomButton'
-import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { ResourceAccessError } from '~features/resources/resourceAccessError'
 
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
@@ -35,6 +36,15 @@ const StrongOfTheDay = ({
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
 
   const [randomSeed, setRandomSeed] = useState(0)
+  const availabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryFn: async () => ({
+      availability: await resources.strongLexicon.getModuleAvailability('core'),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+    }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
   const strongQuery = useQuery({
     queryKey: ['home-strong-random', type, resourceLanguage, randomSeed],
     queryFn: async (): Promise<StrongLexiconSearchResult | null> =>
@@ -45,6 +55,14 @@ const StrongOfTheDay = ({
     ...localQueryOptions,
   })
   const strongReference = strongQuery.data
+  if (
+    (availabilityQuery.data?.availability.status !== 'available' &&
+      availabilityQuery.data?.recoveries?.includes('acquire-offline-copy')) ||
+    (strongQuery.error instanceof ResourceAccessError &&
+      strongQuery.error.recoveries.includes('acquire-offline-copy'))
+  ) {
+    return null
+  }
   const error = strongQuery.isError
     ? true
     : strongQuery.isSuccess && !strongReference
@@ -123,4 +141,4 @@ const StrongOfTheDay = ({
   )
 }
 
-export default waitForStrongWidget(StrongOfTheDay)
+export default StrongOfTheDay

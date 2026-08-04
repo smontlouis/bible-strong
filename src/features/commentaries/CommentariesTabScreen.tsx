@@ -14,7 +14,7 @@ import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
-import useBibleVerses, { verseStringToObject } from '~helpers/useBibleVerses'
+import { useResolvedBibleVerses, verseStringToObject } from '~features/resources/useBibleVerses'
 import BibleVerseDetailFooter from '../bible/BibleVerseDetailFooter'
 import Comment from './Comment'
 import { Comment as CommentType, Comments } from './types'
@@ -35,9 +35,10 @@ import { localQueryOptions, remoteQueryOptions } from '~helpers/queryOptions'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
+import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus, useDownloadQueue } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
@@ -145,14 +146,16 @@ const useVerseInCurrentChapter = (
   chapter: string | number | undefined
 ) => {
   const defaultVersion = useDefaultBibleVersion()
-  const { data: versesInCurrentChapter } = useQuery({
-    queryKey: ['commentary-chapter-verse-count', defaultVersion, book, chapter],
-    queryFn: async () =>
-      (await getChapterVerseCountSafe(defaultVersion, Number(book), Number(chapter))) ||
-      countLsgChapters[`${book}-${chapter}`],
+  const resources = useResourceAccess()
+  const { data: coverage } = useQuery({
+    queryKey: resourceQueryKeys.bibleCoverage(defaultVersion),
+    queryFn: () => resources.bibleContent.loadCoverage(defaultVersion),
     enabled: !!book && !!chapter,
     ...localQueryOptions,
   })
+  const versesInCurrentChapter =
+    getChapterVerseCountFromCoverage(coverage, Number(book), Number(chapter)) ||
+    countLsgChapters[`${book}-${chapter}`]
   return { versesInCurrentChapter }
 }
 
@@ -196,17 +199,16 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
     : { title: t('Chargement') }
 
   const defaultVersion = useDefaultBibleVersion()
-  const [verseText] = useBibleVerses(verseFormatted)
+  const verseResolution = useResolvedBibleVerses(verseFormatted)
+  const [verseText] = verseResolution.verses
   const { versesInCurrentChapter } = useVerseInCurrentChapter(verseText?.Livre, verseText?.Chapitre)
   const { enqueue } = useDownloadQueue()
-  const { data: requiredBibleVersion = null } = useQuery({
-    queryKey: ['commentary-required-bible', defaultVersion, verse, !!verseText],
-    queryFn: async () => {
-      if (verseText || !verse) return null
-      return (await getIfVersionNeedsDownload(defaultVersion)) ? defaultVersion : null
-    },
-    ...localQueryOptions,
-  })
+  const requiredBibleVersion =
+    verse &&
+    !verseResolution.isLoading &&
+    verseResolution.recoveries?.includes('acquire-offline-copy')
+      ? defaultVersion
+      : null
   const requiredBibleDownloadStatus = useDownloadItemStatus(
     requiredBibleVersion
       ? createOfflineCopyId({ kind: 'bible', versionId: requiredBibleVersion })

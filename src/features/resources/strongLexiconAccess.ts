@@ -671,6 +671,7 @@ export type StrongLexiconAccess = {
   getModuleAvailability: (
     moduleId: StrongLexiconModuleId
   ) => Promise<StrongLexiconModuleAvailability>
+  getModuleRecoveryActions?: (moduleId: StrongLexiconModuleId) => Promise<'acquire-offline-copy'[]>
   loadPreview: (
     identities: StrongIdentity[],
     language: ResourceLanguage
@@ -733,6 +734,7 @@ const toSearchResult = (
 
 export const localStrongLexiconAccess: StrongLexiconAccess = {
   getModuleAvailability: getStrongLexiconModuleAvailability,
+  getModuleRecoveryActions: async () => ['acquire-offline-copy'],
 
   async loadPreview(identities, language) {
     return withStrongLexiconDatabase('core', async core => {

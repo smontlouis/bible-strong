@@ -3,12 +3,9 @@ import { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import type { SearchResult } from '~helpers/biblesDb'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import formatVerseContent from '~helpers/formatVerseContent'
-import type {
-  DictionnaireLetterRow,
-  DictionnaireSearchRow,
-} from '~features/resources/dictionaryAccess'
+import type { DictionarySummary } from '~features/resources/dictionaryAccess'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
-import type { NaveLetterRow, NaveSearchRow } from '~features/resources/naveAccess'
+import type { NaveTopicSummary } from '~features/resources/naveAccess'
 import i18n from '~i18n'
 import type { Link, Note, Study } from '~redux/modules/user'
 import { getNoteTitle } from '~helpers/getNoteTitle'
@@ -24,8 +21,8 @@ import {
   createVerseEndpoint,
 } from '~features/studyRelations/endpoints'
 
-export type DictionarySearchRow = DictionnaireSearchRow | DictionnaireLetterRow
-export type NaveSearchItemRow = NaveSearchRow | NaveLetterRow
+export type DictionarySearchRow = DictionarySummary
+export type NaveSearchItemRow = NaveTopicSummary
 type Translate = (key: string) => string
 
 const translate: Translate = key => i18n.t(key)
@@ -62,7 +59,7 @@ export const getStrongEndpoint = (
 export const getNaveEndpoint = (
   nave: NaveSearchItemRow
 ): NonNullable<SearchEntityResult['endpoint']> => ({
-  ...createNaveEndpoint({ nameLower: nave.name_lower, labelFallback: nave.name }),
+  ...createNaveEndpoint({ nameLower: nave.normalizedName, labelFallback: nave.name }),
 })
 
 export const getDictionaryEndpoint = (
@@ -74,7 +71,7 @@ export const getDictionaryEndpoint = (
 export const getDictionaryResultKey = (dictionary: DictionarySearchRow, index?: number) =>
   [
     'dictionary',
-    dictionary.rowid ?? dictionary.sanitized_word ?? dictionary.word,
+    dictionary.id ?? dictionary.normalizedWord ?? dictionary.word,
     dictionary.word,
     index,
   ]
@@ -238,7 +235,7 @@ export const getDictionarySearchItems = (results: DictionarySearchRow[]) =>
 
 export const getNaveSearchItems = (results: NaveSearchItemRow[]) =>
   results.map<SearchEntityResult>(nave => ({
-    id: `nave:${nave.name_lower}`,
+    id: `nave:${nave.normalizedName}`,
     type: 'nave',
     iconType: 'nave',
     title: nave.name,

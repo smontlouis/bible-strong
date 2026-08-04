@@ -17,7 +17,7 @@ export const useStrongEntryRoute = (context: StrongDetailRouteContext) => {
   const entryQuery = useQuery({
     queryKey: ['strong-lexicon', 'entry', languageState.language, identity],
     queryFn: () => resources.strongLexicon.loadEntry(identity!, languageState.language),
-    enabled: Boolean(identity && coreAvailability.data?.status === 'available'),
+    enabled: Boolean(identity),
     networkMode: 'always',
   })
 

@@ -37,14 +37,51 @@ import type { StrongLexiconPreview } from '../strongLexiconAccess'
 import { loadBibleContentChapter } from '../bibleContentAccess'
 
 const createDependencies = () => ({
+  ...(() => {
+    const getChapterVerses = jest.fn()
+    const getIfVersionNeedsDownload = jest.fn(async (_version: string) => false)
+    return {
+      getChapterVerses,
+      getIfVersionNeedsDownload,
+      chapterAdapter: {
+        loadChapter: jest.fn(async (version: string, book: number, chapter: number) => {
+          try {
+            const verses = await getChapterVerses(version, book, chapter)
+            if (verses.length > 0) return { status: 'available' as const, verses }
+            if (await getIfVersionNeedsDownload(version)) {
+              return {
+                status: 'unavailable' as const,
+                reason: 'publication-not-available' as const,
+                recoveries: ['acquire-offline-copy' as const],
+              }
+            }
+            return { status: 'unavailable' as const, reason: 'chapter-not-available' as const }
+          } catch (error) {
+            if (error instanceof BibleLoadingError && error.type === 'BIBLE_NOT_FOUND') {
+              return {
+                status: 'unavailable' as const,
+                reason: 'publication-not-available' as const,
+                recoveries: ['acquire-offline-copy' as const],
+              }
+            }
+            const message = String(error)
+            if (message.includes('no such table') || message.includes('corrupted')) {
+              return {
+                status: 'unavailable' as const,
+                reason: 'offline-copy-invalid' as const,
+                recoveries: ['manage-offline-copies' as const, 'reset-offline-store' as const],
+              }
+            }
+            throw error
+          }
+        }),
+      },
+    }
+  })(),
   strongLexicon: {
     loadPreview: jest.fn(async () => [] as StrongLexiconPreview[]),
   },
   getStrongResourceLanguage: jest.fn(() => 'fr' as const),
-  getChapterVerses: jest.fn(),
-  getIfVersionNeedsDownload: jest.fn(async () => false),
-  initStrongDatabase: jest.fn(async () => true),
-  isStrongDatabaseInitialized: jest.fn(() => true),
   logError: jest.fn(),
 })
 
@@ -60,11 +97,14 @@ describe('BibleContentAccess', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         success: true,
-        data: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'In the beginning' }],
+        data: {
+          kind: 'plain',
+          verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'In the beginning' }],
+        },
       })
     )
 
-    expect(dependencies.getChapterVerses).toHaveBeenCalledWith('LSG', 1, 1)
+    expect(dependencies.chapterAdapter.loadChapter).toHaveBeenCalledWith('LSG', 1, 1)
   })
 
   it('keeps BHG as a normal original-language Bible when interlinear mode is hidden', async () => {
@@ -82,7 +122,10 @@ describe('BibleContentAccess', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         success: true,
-        data: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' }],
+        data: {
+          kind: 'plain',
+          verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' }],
+        },
       })
     )
     expect(loadInterlinearChapterTokens).not.toHaveBeenCalled()
@@ -117,12 +160,15 @@ describe('BibleContentAccess', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         success: true,
-        data: [
-          expect.objectContaining({
-            Texte: 'בְּרֵאשִׁית',
-            InterlinearTokens: tokens,
-          }),
-        ],
+        data: {
+          kind: 'interlinear',
+          verses: [
+            expect.objectContaining({
+              Texte: 'בְּרֵאשִׁית',
+              InterlinearTokens: tokens,
+            }),
+          ],
+        },
       })
     )
     expect(loadInterlinearChapterTokens).toHaveBeenCalledWith('BHG', 'en', 1, 1)
@@ -145,7 +191,7 @@ describe('BibleContentAccess', () => {
         },
         { ...dependencies, loadInterlinearChapterTokens }
       )
-    ).resolves.toEqual(expect.objectContaining({ success: true, data: verses }))
+    ).resolves.toEqual(expect.objectContaining({ success: true, data: { kind: 'plain', verses } }))
     expect(dependencies.logError).toHaveBeenCalled()
     expect(loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
   })
@@ -176,7 +222,10 @@ describe('BibleContentAccess', () => {
     expect(result).toEqual(
       expect.objectContaining({
         success: true,
-        data: [expect.objectContaining({ InterlinearTokens: tokens })],
+        data: {
+          kind: 'interlinear',
+          verses: [expect.objectContaining({ InterlinearTokens: tokens })],
+        },
       })
     )
     expect(loadInterlinearChapterTokens).toHaveBeenNthCalledWith(1, 'BHG', 'fr', 1, 1)
@@ -279,28 +328,31 @@ describe('BibleContentAccess', () => {
     expect(result).toEqual(
       expect.objectContaining({
         success: true,
-        data: [
-          expect.objectContaining({
-            StrongSpans: [
-              expect.objectContaining({
-                identities: [
-                  { kind: 'dstrong', code: 'H3068G' },
-                  { kind: 'strong', code: 'H0413' },
-                ],
-                morphologies: [
-                  {
-                    identity: { kind: 'dstrong', code: 'H3068G' },
-                    codes: ['HNp'],
-                  },
-                  {
-                    identity: { kind: 'strong', code: 'H0413' },
-                    codes: ['HR'],
-                  },
-                ],
-              }),
-            ],
-          }),
-        ],
+        data: {
+          kind: 'strong',
+          verses: [
+            expect.objectContaining({
+              StrongSpans: [
+                expect.objectContaining({
+                  identities: [
+                    { kind: 'dstrong', code: 'H3068G' },
+                    { kind: 'strong', code: 'H0413' },
+                  ],
+                  morphologies: [
+                    {
+                      identity: { kind: 'dstrong', code: 'H3068G' },
+                      codes: ['HNp'],
+                    },
+                    {
+                      identity: { kind: 'strong', code: 'H0413' },
+                      codes: ['HR'],
+                    },
+                  ],
+                }),
+              ],
+            }),
+          ],
+        },
       })
     )
   })
@@ -379,23 +431,26 @@ describe('BibleContentAccess', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         success: true,
-        data: [
-          expect.objectContaining({
-            Texte: 'Au commencement',
-            ReverseInterlinearSpans: [
-              expect.objectContaining({
-                sourceTokens: [
-                  expect.objectContaining({ surface: 'בְּרֵאשִׁית' }),
-                  expect.objectContaining({
-                    surface: 'בָּרָא',
-                    lexicalFallback: true,
-                    segments: [expect.objectContaining({ morphology: '' })],
-                  }),
-                ],
-              }),
-            ],
-          }),
-        ],
+        data: {
+          kind: 'reverse-interlinear',
+          verses: [
+            expect.objectContaining({
+              Texte: 'Au commencement',
+              ReverseInterlinearSpans: [
+                expect.objectContaining({
+                  sourceTokens: [
+                    expect.objectContaining({ surface: 'בְּרֵאשִׁית' }),
+                    expect.objectContaining({
+                      surface: 'בָּרָא',
+                      lexicalFallback: true,
+                      segments: [expect.objectContaining({ morphology: '' })],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        },
       })
     )
 
@@ -417,7 +472,10 @@ describe('BibleContentAccess', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         success: false,
-        error: expect.objectContaining({ type: 'BIBLE_NOT_FOUND' }),
+        error: expect.objectContaining({
+          type: 'BIBLE_NOT_FOUND',
+          recoveries: ['acquire-offline-copy'],
+        }),
       })
     )
   })
@@ -445,7 +503,10 @@ describe('BibleContentAccess', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         success: false,
-        error: expect.objectContaining({ type: 'DATABASE_CORRUPTED' }),
+        error: expect.objectContaining({
+          type: 'OFFLINE_COPY_INVALID',
+          recoveries: ['manage-offline-copies', 'reset-offline-store'],
+        }),
       })
     )
   })

@@ -11,8 +11,13 @@
 export type BibleErrorType =
   | 'BIBLE_NOT_FOUND'
   | 'CHAPTER_NOT_FOUND'
-  | 'DATABASE_CORRUPTED'
+  | 'OFFLINE_COPY_INVALID'
   | 'UNKNOWN_ERROR'
+
+export type BibleRecoveryAction =
+  | 'acquire-offline-copy'
+  | 'manage-offline-copies'
+  | 'reset-offline-store'
 
 export interface BibleError {
   type: BibleErrorType
@@ -20,6 +25,7 @@ export interface BibleError {
   book?: number
   chapter?: number
   message: string
+  recoveries?: BibleRecoveryAction[]
 }
 
 export class BibleLoadingError extends Error {
@@ -55,8 +61,8 @@ function getBibleErrorMessage(
       return `Bible version ${version} not found`
     case 'CHAPTER_NOT_FOUND':
       return `Chapter ${chapter} of book ${book} not found in ${version}`
-    case 'DATABASE_CORRUPTED':
-      return `Database for ${version} appears to be corrupted`
+    case 'OFFLINE_COPY_INVALID':
+      return `The offline copy for ${version} appears to be invalid`
     default:
       return `Unknown error loading ${version}`
   }
@@ -65,11 +71,9 @@ function getBibleErrorMessage(
 /**
  * Result type for loadBibleChapter that can contain either verses or an error
  */
-export interface BibleChapterResult<T> {
-  success: boolean
-  data?: T
-  error?: BibleError
-}
+export type BibleChapterResult<T> =
+  | { success: true; data: T }
+  | { success: false; error: BibleError }
 
 /**
  * Creates a successful result
@@ -92,7 +96,8 @@ export function createBibleError(
   type: BibleErrorType,
   version: string,
   book?: number,
-  chapter?: number
+  chapter?: number,
+  recoveries?: BibleRecoveryAction[]
 ): BibleError {
   return {
     type,
@@ -100,5 +105,6 @@ export function createBibleError(
     book,
     chapter,
     message: getBibleErrorMessage(type, version, book, chapter),
+    ...(recoveries?.length ? { recoveries } : {}),
   }
 }

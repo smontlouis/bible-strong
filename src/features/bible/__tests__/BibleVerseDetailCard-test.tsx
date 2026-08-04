@@ -6,10 +6,18 @@ import BibleVerseDetailCard from '../BibleVerseDetailCard'
 
 const mockLoadVerse = jest.fn()
 const mockLoadEntries = jest.fn()
+const mockLoadCoverage = jest.fn()
+const mockGetModuleAvailability = jest.fn()
+const mockGetModuleRecoveryActions = jest.fn()
 const mockScrollTo = jest.fn()
 const mockResourceAccess = {
+  bibleContent: { loadCoverage: mockLoadCoverage },
   lexiconBible: { loadVerse: mockLoadVerse },
-  strongLexicon: { loadEntries: mockLoadEntries },
+  strongLexicon: {
+    loadEntries: mockLoadEntries,
+    getModuleAvailability: mockGetModuleAvailability,
+    getModuleRecoveryActions: mockGetModuleRecoveryActions,
+  },
 }
 let queryClient: QueryClient
 
@@ -76,6 +84,10 @@ jest.mock('react-native', () => {
   }
 })
 
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
+}))
+
 jest.mock('../StrongResourceScrollContext', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return {
@@ -91,13 +103,13 @@ jest.mock('~features/resources/resourceAccess', () => ({
   useResourceAccess: () => mockResourceAccess,
 }))
 
+jest.mock('~features/resources/OfflineResourceRecovery', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return () => ReactModule.createElement('OfflineResourceRecovery')
+})
+
 jest.mock('~state/resourcesLanguage', () => ({
   useResourcesLanguageValue: () => ({ STRONG: 'fr' }),
-}))
-
-jest.mock('~common/waitForStrongDB', () => ({
-  __esModule: true,
-  default: () => (Component: React.ComponentType) => Component,
 }))
 
 jest.mock('../CanonicalStrongVerseText', () => {
@@ -107,7 +119,11 @@ jest.mock('../CanonicalStrongVerseText', () => {
 })
 
 jest.mock('~helpers/bibleCoverage', () => ({
-  getChapterVerseCountSafe: jest.fn(async () => 31),
+  getChapterVerseCountFromCoverage: (
+    coverage: { verseCountByBookChapter?: Record<string, number> } | undefined,
+    book: number,
+    chapter: number
+  ) => coverage?.verseCountByBookChapter?.[`${book}-${chapter}`],
 }))
 
 jest.mock('~helpers/useLayoutSize', () => ({
@@ -253,6 +269,13 @@ describe('BibleVerseDetailCard', () => {
         gloss: 'Dieu',
       },
     ])
+    mockLoadCoverage.mockResolvedValue({
+      books: [1],
+      chaptersByBook: { 1: [1] },
+      verseCountByBookChapter: { '1-1': 31 },
+    })
+    mockGetModuleAvailability.mockResolvedValue({ status: 'available' })
+    mockGetModuleRecoveryActions.mockResolvedValue([])
     ;(
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true

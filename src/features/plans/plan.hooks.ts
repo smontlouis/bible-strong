@@ -203,7 +203,12 @@ export const getChaptersForPlan = async (
     chaptersRange.map(async (cRange: string[]) => {
       const [, chapter] = cRange.map(Number)
 
-      const verses = await resourceAccess.bibleContent.loadChapterVerses(version, book, chapter)
+      const chapterResult = await resourceAccess.bibleContent.loadChapter({
+        version,
+        book,
+        chapter,
+      })
+      const verses = chapterResult.success && chapterResult.data ? chapterResult.data.verses : []
       const chapterContent: VerseContent[] = verses.map(v => ({
         Pericope: pericope?.[book]?.[chapter]?.[v.Verset] || {},
         Verset: `${v.Verset}`,
@@ -268,20 +273,20 @@ export const getVersesForPlan = async (
 
   const pericope = await resourceAccess.bibleReading.loadPericope(version)
 
-  const content: VerseContent[] = await Promise.all(
-    versesRange.map(async (vRange: number[]) => {
-      const [bookNum, chapterNum, verse] = vRange
-
-      const text =
-        (await resourceAccess.bibleContent.loadVerseText(version, bookNum, chapterNum, verse)) ?? ''
-
-      return {
-        Pericope: pericope?.[book]?.[chapter]?.[verse] || {},
-        Verset: `${verse}`,
-        Texte: text,
-      }
-    })
+  const verseKeys = versesRange.map(
+    ([bookNum, chapterNum, verse]) => `${bookNum}-${chapterNum}-${verse}`
   )
+  const verseTexts = await resourceAccess.bibleContent.loadVerseTexts({ version, verseKeys })
+  const content: VerseContent[] = versesRange.map((vRange: number[]) => {
+    const [bookNum, chapterNum, verse] = vRange
+    const text = verseTexts[`${bookNum}-${chapterNum}-${verse}`] ?? ''
+
+    return {
+      Pericope: pericope?.[book]?.[chapter]?.[verse] || {},
+      Verset: `${verse}`,
+      Texte: text,
+    }
+  })
 
   return {
     bookName,

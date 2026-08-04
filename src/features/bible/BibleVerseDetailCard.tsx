@@ -3,8 +3,6 @@ import { useTheme } from '@emotion/react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import React, { useEffect, useRef, useState } from 'react'
 
-import waitForStrongDB from '~common/waitForStrongDB'
-
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
@@ -18,7 +16,6 @@ import StrongCard from './StrongCard'
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { useRouter } from 'expo-router'
-import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -29,23 +26,25 @@ import Button from '~common/ui/Button'
 import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleResourceAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
-import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
+import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import {
   getStrongBibleFallbackPriority,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import { areStrongIdentitiesEqual } from '~helpers/strongIdentities'
 import { wp } from '~helpers/utils'
+import { useLayoutSize } from '~helpers/useLayoutSize'
 import type { RootState } from '~redux/modules/reducer'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import type { VersionCode } from '~state/tabs'
 import { scaleFontSize } from './BibleDOM/scaleFontSize'
 import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
 import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
 import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -152,7 +151,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     (rootState: RootState) => rootState.user.bible.settings.lineHeight
   )
   const resources = useResourceAccess()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const strongResourceLanguage = useResourcesLanguageValue().STRONG
   const verseBook = verse.Livre
   const verseChapter = verse.Chapitre
@@ -164,23 +162,34 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const isProgrammaticCardsScrollRef = useRef(false)
   const hasDisplayedStrongVerseRef = useRef(false)
   const insets = useSafeAreaInsets()
+  const {
+    ref: strongCardsContainerRef,
+    size: strongCardsContainerSize,
+    onLayout: onStrongCardsContainerLayout,
+  } = useLayoutSize()
 
   const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
+  const coreAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryFn: async () => ({
+      availability: await resources.strongLexicon.getModuleAvailability('core'),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+    }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
 
   const strongVerseQuery = useQuery({
-    queryKey: [
-      'strong-verse-detail',
-      'step-aligned',
-      selectedVersion,
-      defaultStrongVersion,
-      preferredStrongVersionId,
+    queryKey: resourceQueryKeys.lexiconBibleVerse({
+      currentVersionId: selectedVersion,
+      defaultVersionId: defaultStrongVersion,
       preferredInterlinearLocale,
-      verseBook,
-      verseChapter,
-      verseNumber,
-      strongResourceLanguage,
-      downloadCompletionSignal,
-    ],
+      preferredVersionId: preferredStrongVersionId,
+      resourceLanguage: strongResourceLanguage,
+      book: verseBook,
+      chapter: verseChapter,
+      verse: verseNumber,
+    }),
     queryFn: async (): Promise<StrongVerseQueryData> => {
       const result = await resources.lexiconBible.loadVerse({
         currentVersionId: selectedVersion,
@@ -208,10 +217,12 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           ])
         ).values(),
       ]
-      const [versesInCurrentChapterResult, strongReferencesResult] = await Promise.all([
-        getChapterVerseCountSafe(result.provenance.versionId, verseBook, verseChapter),
+      const [coverage, strongReferencesResult] = await Promise.all([
+        resources.bibleContent.loadCoverage(result.provenance.versionId),
         resources.strongLexicon.loadEntries(strongIdentities, strongResourceLanguage),
       ])
+      const versesInCurrentChapterResult =
+        getChapterVerseCountFromCoverage(coverage, verseBook, verseChapter) ?? 0
       const strongCards = strongOccurrences.flatMap((occurrence, occurrenceIndex) => {
         const entry = strongReferencesResult.find(candidate =>
           areStrongIdentitiesEqual(candidate.selectedIdentity, occurrence.identity)
@@ -310,6 +321,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         book={String(strongVerseData?.displayedVerse?.Livre ?? verse.Livre)}
         strongEntry={item.entry}
         strongVerseContext={item.context}
+        cardHeight={Math.max(0, strongCardsContainerSize.height - bottomInset)}
         index={index}
       />
     )
@@ -346,6 +358,20 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       : !strongVerseData && strongVerseQuery.isError
         ? 'UNKNOWN_ERROR'
         : false
+
+  if (
+    coreAvailabilityQuery.data?.availability.status !== 'available' &&
+    coreAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        title={t('La base de données strong est requise pour accéder à cette page.')}
+        fileSize={35}
+        size="small"
+      />
+    )
+  }
 
   if (error) {
     if (error === 'STRONG_BIBLE_UNAVAILABLE') {
@@ -440,7 +466,12 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
-      <Box bg="lightGrey" flex={1}>
+      <Box
+        ref={strongCardsContainerRef}
+        bg="lightGrey"
+        flex={1}
+        onLayout={onStrongCardsContainerLayout}
+      >
         <ScrollView
           ref={strongCardsScrollRef}
           horizontal
@@ -476,4 +507,4 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   )
 }
 
-export default waitForStrongDB()(BibleVerseDetailCard)
+export default BibleVerseDetailCard

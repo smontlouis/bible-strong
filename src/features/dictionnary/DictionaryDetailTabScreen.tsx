@@ -12,6 +12,7 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
+import Empty from '~common/Empty'
 import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 
 import { useRouter } from 'expo-router'
@@ -21,7 +22,6 @@ import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
-import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
@@ -39,6 +39,8 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
@@ -64,7 +66,22 @@ const DictionnaryDetailScreen = ({
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
-  const { data: dictionnaireItem = null } = useQuery({
+  const dictionaryAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.offlineDatabaseAvailability(
+      'DICTIONNAIRE',
+      dictionaryResourceLanguage
+    ),
+    queryFn: () =>
+      resources.dictionary.getAvailability?.(dictionaryResourceLanguage) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
+  const {
+    data: dictionnaireItem = null,
+    isPending: isDictionaryPending,
+    isError: isDictionaryError,
+  } = useQuery({
     queryKey: ['dictionary-detail', dictionaryResourceLanguage, word],
     queryFn: async () => (word ? ((await resources.dictionary.loadItem(word)) ?? null) : null),
     enabled: !!word,
@@ -172,7 +189,26 @@ const DictionnaryDetailScreen = ({
     return null
   }
 
-  if (!dictionnaireItem) {
+  if (
+    dictionaryAvailabilityQuery.data?.status === 'unavailable' &&
+    dictionaryAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{
+          kind: 'database',
+          databaseId: 'DICTIONNAIRE',
+          language: dictionaryResourceLanguage,
+        }}
+        title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
+        fileSize={22}
+        hasBackButton={hasBackButton}
+        hasHeader
+      />
+    )
+  }
+
+  if (isDictionaryPending) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header
@@ -181,6 +217,22 @@ const DictionnaryDetailScreen = ({
           title={t('Dictionnaire')}
         />
         <Loading message={t('Chargement...')} />
+      </FormSheetScreen>
+    )
+  }
+
+  if (isDictionaryError || !dictionnaireItem) {
+    return (
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header
+          hasBackButton={hasBackButton}
+          onCustomBackPress={goBack}
+          title={t('Dictionnaire')}
+        />
+        <Empty
+          icon={require('~assets/images/empty-state-icons/inbox.svg')}
+          message={t('Impossible de charger le dictionnaire...')}
+        />
       </FormSheetScreen>
     )
   }
@@ -262,4 +314,4 @@ const DictionnaryDetailScreen = ({
   )
 }
 
-export default waitForDictionnaireDB()(DictionnaryDetailScreen)
+export default DictionnaryDetailScreen

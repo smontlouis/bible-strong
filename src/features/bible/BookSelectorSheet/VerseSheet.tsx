@@ -14,6 +14,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import generateUUID from '~helpers/generateUUID'
 import { useQuery } from '@tanstack/react-query'
+import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
 
 interface VerseSheetProps {
   sheetRef: React.RefObject<SheetRef | null>
@@ -43,22 +44,18 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
   const { setTempSelectedVerse, validateTempSelected } = actions || {}
 
   const { data: bibleChapterResult } = useQuery({
-    queryKey: [
-      'bible',
-      version || '',
-      tempSelectedBook?.Numero.toString() || '',
-      tempSelectedChapter?.toString() || '',
-    ],
-    queryFn: () =>
-      resources.bibleContent.loadChapter({
+    ...bibleChapterQueryOptions(
+      {
         book: tempSelectedBook?.Numero || 1,
         chapter: tempSelectedChapter || 1,
         version: version || 'LSG',
-      }),
+      },
+      resources
+    ),
     enabled: !!tempSelectedBook && !!tempSelectedChapter && !!version,
   })
 
-  const verses = bibleChapterResult?.data
+  const verses = bibleChapterResult?.success ? bibleChapterResult.data.verses : undefined
 
   const handleSelect = (verse: Verse) => {
     setTempSelectedVerse?.(Number(verse.Verset))

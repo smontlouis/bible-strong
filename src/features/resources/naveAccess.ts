@@ -1,34 +1,74 @@
-import type { DatabaseError } from '~helpers/catchDatabaseError'
-import loadNaveByLetter, { type NaveLetterRow } from '~helpers/loadNaveByLetter'
-import loadNaveByRandom, { type NaveRandomRow } from '~helpers/loadNaveByRandom'
-import loadNaveBySearch, { type NaveSearchRow } from '~helpers/loadNaveBySearch'
+import loadNaveByLetter from '~helpers/loadNaveByLetter'
+import loadNaveByRandom from '~helpers/loadNaveByRandom'
+import loadNaveBySearch from '~helpers/loadNaveBySearch'
 import loadNaveByVerset from '~helpers/loadNaveByVerset'
-import loadNaveItem, { type NaveItemRow } from '~helpers/loadNaveItem'
+import loadNaveItem from '~helpers/loadNaveItem'
+import { mapLocalResourceError, unwrapLocalResourceResult } from './resourceAccessError'
+import { getLocalResourceAvailability } from './resourceAvailability'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import type { ResourceAvailability } from './dictionaryAccess'
 
-export type { NaveLetterRow } from '~helpers/loadNaveByLetter'
-export type { NaveRandomRow } from '~helpers/loadNaveByRandom'
-export type { NaveSearchRow } from '~helpers/loadNaveBySearch'
-export type { NaveItemRow } from '~helpers/loadNaveItem'
-
-export type NaveVerseTopicRow = {
+export type NaveTopicSummary = {
+  normalizedName: string
   name: string
-  name_lower: string
+  initial: string
 }
 
-export type NaveVerseTopics = [NaveVerseTopicRow[] | undefined, NaveVerseTopicRow[] | undefined]
+export type NaveTopic = NaveTopicSummary & { description: string }
+
+export type NaveTopicReference = {
+  name: string
+  normalizedName: string
+}
+
+export type NaveVerseTopics = [NaveTopicReference[] | undefined, NaveTopicReference[] | undefined]
 
 export type NaveAccess = {
-  listByLetter: (letter: string) => Promise<NaveLetterRow[] | DatabaseError>
-  search: (searchValue: string) => Promise<NaveSearchRow[] | DatabaseError>
-  loadItem: (nameLower: string) => Promise<NaveItemRow | DatabaseError | undefined>
+  getAvailability?: (language: ResourceLanguage) => Promise<ResourceAvailability>
+  listByLetter: (letter: string) => Promise<NaveTopicSummary[]>
+  search: (searchValue: string) => Promise<NaveTopicSummary[]>
+  loadItem: (nameLower: string) => Promise<NaveTopic | undefined>
   loadByVerse: (verse: string) => Promise<NaveVerseTopics>
-  loadRandom: () => Promise<NaveRandomRow | DatabaseError | undefined>
+  loadRandom: () => Promise<NaveTopic | undefined>
 }
 
 export const localNaveAccess: NaveAccess = {
-  listByLetter: loadNaveByLetter,
-  search: loadNaveBySearch,
-  loadItem: loadNaveItem,
-  loadByVerse: loadNaveByVerset,
-  loadRandom: loadNaveByRandom,
+  getAvailability: async language =>
+    (
+      await getLocalResourceAvailability({
+        kind: 'database',
+        databaseId: 'NAVE',
+        language,
+      })
+    ).status === 'available'
+      ? { status: 'available' }
+      : { status: 'unavailable', recoveries: ['acquire-offline-copy'] },
+  listByLetter: async letter =>
+    unwrapLocalResourceResult(await loadNaveByLetter(letter)).map(mapLocalNaveTopic),
+  search: async searchValue =>
+    unwrapLocalResourceResult(await loadNaveBySearch(searchValue)).map(mapLocalNaveTopic),
+  loadItem: async nameLower => {
+    const item = unwrapLocalResourceResult(await loadNaveItem(nameLower))
+    return item ? { ...mapLocalNaveTopic(item), description: item.description } : undefined
+  },
+  loadByVerse: async verse => {
+    try {
+      const [verseTopics, chapterTopics] = await loadNaveByVerset(verse)
+      const mapTopics = (topics: { name: string; name_lower: string }[] | undefined) =>
+        topics?.map(topic => ({ name: topic.name, normalizedName: topic.name_lower }))
+      return [mapTopics(verseTopics), mapTopics(chapterTopics)]
+    } catch (error) {
+      throw mapLocalResourceError(error)
+    }
+  },
+  loadRandom: async () => {
+    const item = unwrapLocalResourceResult(await loadNaveByRandom())
+    return item ? { ...mapLocalNaveTopic(item), description: item.description } : undefined
+  },
 }
+
+const mapLocalNaveTopic = (item: { name_lower: string; name: string; letter: string }) => ({
+  normalizedName: item.name_lower,
+  name: item.name,
+  initial: item.letter,
+})

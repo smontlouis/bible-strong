@@ -11,13 +11,10 @@ import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
 import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import useBibleVerses from '~helpers/useBibleVerses'
+import useBibleVerses from '~features/resources/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
-import type {
-  DictionnaireLetterRow,
-  DictionnaireSearchRow,
-} from '~features/resources/dictionaryAccess'
-import type { NaveLetterRow, NaveSearchRow } from '~features/resources/naveAccess'
+import type { DictionarySummary } from '~features/resources/dictionaryAccess'
+import type { NaveTopicSummary } from '~features/resources/naveAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import SharedSearchEntityResultRow from '~features/search/shared/SearchEntityResultRow'
 import SearchItemFilterBar, {
@@ -48,11 +45,10 @@ import {
 } from './targetSearch'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 
 type BrowseMode = 'note' | 'link' | 'study' | 'strong' | 'nave' | 'dictionary'
-type NaveRow = NaveLetterRow | NaveSearchRow
-type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
+type NaveRow = NaveTopicSummary
+type DictionaryRow = DictionarySummary
 type MatchedRelationTargetResult = RelationTargetResult
 type RelationTargetSectionId =
   | 'passages'
@@ -133,12 +129,12 @@ const getSearchItemFiltersForTypes = (enabledTypes: SearchItemType[]) => {
 }
 
 const getNaveTargetResult = (nave: NaveRow): RelationTargetResult => ({
-  id: `nave:${nave.name_lower}`,
+  id: `nave:${nave.normalizedName}`,
   type: 'nave',
   iconType: 'nave',
   title: nave.name,
   subtitle: 'Nave',
-  endpoint: createNaveEndpoint({ nameLower: nave.name_lower, labelFallback: nave.name }),
+  endpoint: createNaveEndpoint({ nameLower: nave.normalizedName, labelFallback: nave.name }),
 })
 
 const getDictionaryTargetResult = (dictionary: DictionaryRow): RelationTargetResult => ({
@@ -153,7 +149,7 @@ const getDictionaryTargetResult = (dictionary: DictionaryRow): RelationTargetRes
 const getDictionaryTargetKey = (dictionary: DictionaryRow, index?: number) =>
   [
     'dictionary',
-    dictionary.rowid ?? dictionary.sanitized_word ?? dictionary.word,
+    dictionary.id ?? dictionary.normalizedWord ?? dictionary.word,
     dictionary.word,
     index,
   ]
@@ -276,7 +272,6 @@ const CreateEntityRelationModal = ({
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const dispatch = useDispatch<AppDispatch>()
   const allowedTypesKey = allowedTypes?.join('|') || ''
   const [searchValue, setSearchValue] = useState('')
@@ -353,7 +348,6 @@ const CreateEntityRelationModal = ({
     queryKey: [
       'relation-strong-targets',
       resourcesLanguage.STRONG,
-      downloadCompletionSignal,
       deferredStrongSearchValue,
       strongLetter,
     ],
@@ -379,7 +373,6 @@ const CreateEntityRelationModal = ({
     queryKey: [
       'relation-nave-targets',
       resourcesLanguage.NAVE,
-      downloadCompletionSignal,
       deferredResourceSearchValue,
       naveLetter,
     ],
@@ -398,7 +391,6 @@ const CreateEntityRelationModal = ({
     queryKey: [
       'relation-dictionary-targets',
       resourcesLanguage.DICTIONNAIRE,
-      downloadCompletionSignal,
       deferredResourceSearchValue,
       dictionaryLetter,
     ],

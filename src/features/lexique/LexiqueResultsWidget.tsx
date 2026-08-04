@@ -1,10 +1,9 @@
-import React, { ComponentType, useState } from 'react'
+import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { useWaitForDatabase } from '~common/waitForStrongDB'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 
@@ -12,17 +11,6 @@ import { useResultsByLetterOrSearch } from './useUtilities'
 import LexiqueResultItem from './LexiqueResultItem'
 import { useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-
-const hideIfNoDatabase =
-  <P extends object>(WrappedComponent: ComponentType<P>) =>
-  (props: P) => {
-    const { isLoading, proposeDownload } = useWaitForDatabase()
-
-    if (isLoading || proposeDownload) {
-      return null
-    }
-    return <WrappedComponent {...props} />
-  }
 
 const LIMIT = 5
 const height = 40
@@ -104,4 +92,4 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   )
 }
 
-export default hideIfNoDatabase(LexiqueResultsWidget)
+export default LexiqueResultsWidget

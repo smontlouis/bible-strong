@@ -1,7 +1,6 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { LegendList } from '@legendapp/list'
-import { useAtomValue } from 'jotai/react'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
@@ -11,16 +10,29 @@ import ConcordanceVerse from '~features/bible/ConcordanceVerse'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import {
-  isStrongCapableBibleVersion,
-  type StrongBibleVersionId,
-} from '~helpers/strongBiblePublications'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import type { Verse } from '~common/types'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { formatStrongLemmaPartOfSpeech } from './strongLemmaPartOfSpeech'
+import type {
+  LexiconBibleCountsResult,
+  LexiconBibleLemmaStatsResult,
+} from '~features/resources/lexiconBibleResourceAccess'
 
 const PAGE_SIZE = 60
 const PLACEHOLDER_COUNT = 6
+
+const getMatchingAvailableResult = <
+  TResult extends { status: string; provenance?: { versionId: string } },
+>(
+  result: TResult | undefined,
+  versionId: string
+): Extract<TResult, { status: 'available' }> | null => {
+  if (!result || result.status !== 'available' || result.provenance?.versionId !== versionId) {
+    return null
+  }
+  return result as Extract<TResult, { status: 'available' }>
+}
 
 const ConcordancePlaceholder = () => (
   <VStack minHeight={104} py={10} gap={7} borderBottomWidth={1} borderColor="border">
@@ -48,19 +60,9 @@ const StrongConcordancePage = ({
 }: Props) => {
   const { t, i18n } = useTranslation()
   const resources = useResourceAccess()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const [selectedLemmaId, setSelectedLemmaId] = useState<number>()
-  const sourceKey = `${currentVersionId}:${defaultVersionId}:${preferredInterlinearLocale}:${entry.stepCode}:${downloadCompletionSignal}`
-  const [fallbackSource, setFallbackSource] = useState<{
-    key: string
-    versionId?: StrongBibleVersionId
-  }>({ key: sourceKey })
-  const effectiveCurrentVersionId =
-    fallbackSource.key === sourceKey && fallbackSource.versionId
-      ? fallbackSource.versionId
-      : currentVersionId
   const request = {
-    currentVersionId: effectiveCurrentVersionId,
+    currentVersionId,
     defaultVersionId,
     preferredInterlinearLocale,
     book: entry.language === 'hebrew' ? 1 : 40,
@@ -68,124 +70,58 @@ const StrongConcordancePage = ({
     allBooks: true,
   }
   const countsQuery = useQuery({
-    queryKey: [
-      'strong-detail',
-      'concordance-counts',
-      effectiveCurrentVersionId,
-      defaultVersionId,
-      preferredInterlinearLocale,
-      downloadCompletionSignal,
-      entry.stepCode,
-    ],
+    queryKey: resourceQueryKeys.lexiconBibleCounts(request),
     queryFn: () => resources.lexiconBible.loadCountsByBook(request),
     networkMode: 'always',
     staleTime: Infinity,
     gcTime: Infinity,
   })
   const lemmaQuery = useQuery({
-    queryKey: [
-      'strong-detail',
-      'lemma-stats',
-      effectiveCurrentVersionId,
-      defaultVersionId,
-      preferredInterlinearLocale,
-      downloadCompletionSignal,
-      entry.stepCode,
-    ],
+    queryKey: resourceQueryKeys.lexiconBibleLemmaStats(request),
     queryFn: () => resources.lexiconBible.loadLemmaStats(request),
     networkMode: 'always',
     staleTime: Infinity,
     gcTime: Infinity,
   })
   const concordanceQuery = useInfiniteQuery({
-    queryKey: [
-      'strong-detail',
-      'concordance-pages',
-      effectiveCurrentVersionId,
-      defaultVersionId,
-      preferredInterlinearLocale,
-      downloadCompletionSignal,
-      entry.stepCode,
-      selectedLemmaId,
-      PAGE_SIZE,
-    ],
+    queryKey: resourceQueryKeys.lexiconBibleConcordance({
+      ...request,
+      lexemeId: selectedLemmaId,
+      limit: PAGE_SIZE,
+    }),
     queryFn: ({ pageParam }) =>
       resources.lexiconBible.loadFoundVersesByBook({
         ...request,
         limit: PAGE_SIZE,
-        offset: pageParam.offset,
-        cursor: pageParam.cursor,
+        pageToken: pageParam ?? undefined,
         lexemeId: selectedLemmaId,
       }),
-    initialPageParam: { offset: 0, cursor: undefined as string | undefined },
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.status !== 'available') return undefined
-      if (lastPage.provenance.versionId === 'BHG') {
-        return 'nextCursor' in lastPage && lastPage.nextCursor
-          ? { cursor: lastPage.nextCursor, offset: pages.length * PAGE_SIZE }
-          : undefined
-      }
-      const expectedCount =
-        selectedLemmaId == null
-          ? countsQuery.data?.status === 'available'
-            ? countsQuery.data.counts.reduce(
-                (total, current) => total + Number(current.versesCountByBook),
-                0
-              )
-            : undefined
-          : lemmaQuery.data?.status === 'available'
-            ? lemmaQuery.data.lemmas.find(lemma => lemma.id === selectedLemmaId)?.occurrenceCount
-            : undefined
-      const loadedCount = pages.reduce(
-        (total, page) => total + (page.status === 'available' ? page.verses.length : 0),
-        0
-      )
-      if (expectedCount != null && loadedCount >= expectedCount) return undefined
-      return lastPage.verses.length < PAGE_SIZE
-        ? undefined
-        : { cursor: undefined, offset: pages.length * PAGE_SIZE }
-    },
+    initialPageParam: null as string | null,
+    getNextPageParam: lastPage =>
+      lastPage.status === 'available' ? lastPage.nextPageToken : undefined,
     networkMode: 'always',
     staleTime: Infinity,
     gcTime: Infinity,
   })
-  const resolvedFallbackVersionId = [
-    countsQuery.data?.status === 'available' ? countsQuery.data.provenance.versionId : undefined,
-    lemmaQuery.data?.status === 'available' ? lemmaQuery.data.provenance.versionId : undefined,
-    concordanceQuery.data?.pages.find(page => page.status === 'available')?.status === 'available'
-      ? concordanceQuery.data.pages.find(page => page.status === 'available')!.provenance.versionId
-      : undefined,
-  ].find((versionId): versionId is StrongBibleVersionId =>
-    Boolean(versionId && versionId !== 'BHG' && isStrongCapableBibleVersion(versionId))
-  )
-  useEffect(() => {
-    if (
-      currentVersionId === 'BHG' &&
-      effectiveCurrentVersionId === 'BHG' &&
-      resolvedFallbackVersionId
-    ) {
-      setFallbackSource({ key: sourceKey, versionId: resolvedFallbackVersionId })
-    }
-  }, [currentVersionId, effectiveCurrentVersionId, resolvedFallbackVersionId, sourceKey])
   const verses =
     concordanceQuery.data?.pages.flatMap(page =>
       page.status === 'available' ? page.verses : []
     ) ?? []
+  const availablePage = concordanceQuery.data?.pages.find(page => page.status === 'available')
+  const version =
+    availablePage?.status === 'available' ? availablePage.provenance.versionId : currentVersionId
+  const counts = getMatchingAvailableResult<LexiconBibleCountsResult>(countsQuery.data, version)
+  const lemmaStats = getMatchingAvailableResult<LexiconBibleLemmaStatsResult>(
+    lemmaQuery.data,
+    version
+  )
   const count =
     selectedLemmaId == null
-      ? countsQuery.data?.status === 'available'
-        ? countsQuery.data.counts.reduce(
-            (total, current) => total + Number(current.versesCountByBook),
-            0
-          )
-        : 0
-      : lemmaQuery.data?.status === 'available'
-        ? (lemmaQuery.data.lemmas.find(lemma => lemma.id === selectedLemmaId)?.occurrenceCount ?? 0)
-        : 0
-  const version =
-    concordanceQuery.data?.pages.find(page => page.status === 'available')?.status === 'available'
-      ? concordanceQuery.data.pages.find(page => page.status === 'available')!.provenance.versionId
-      : effectiveCurrentVersionId
+      ? counts
+        ? counts.counts.reduce((total, current) => total + Number(current.versesCountByBook), 0)
+        : verses.length
+      : (lemmaStats?.lemmas.find(lemma => lemma.id === selectedLemmaId)?.occurrenceCount ??
+        verses.length)
 
   const placeholders = (
     <VStack>
@@ -220,7 +156,7 @@ const StrongConcordancePage = ({
             </Text>
           </HStack>
 
-          {lemmaQuery.data?.status === 'available' && lemmaQuery.data.lemmas.length > 0 && (
+          {lemmaStats && lemmaStats.lemmas.length > 0 && (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -236,8 +172,8 @@ const StrongConcordancePage = ({
                 >
                   <Text color={selectedLemmaId == null ? 'reverse' : 'default'} fontSize={12}>
                     {t('Tous')} ·{' '}
-                    {countsQuery.data?.status === 'available'
-                      ? countsQuery.data.counts.reduce(
+                    {counts
+                      ? counts.counts.reduce(
                           (total, current) => total + Number(current.versesCountByBook),
                           0
                         )
@@ -245,7 +181,7 @@ const StrongConcordancePage = ({
                   </Text>
                 </Box>
               </TouchableBox>
-              {lemmaQuery.data.lemmas.map(lemma => (
+              {lemmaStats.lemmas.map(lemma => (
                 <TouchableBox key={lemma.id} onPress={() => setSelectedLemmaId(lemma.id)}>
                   <Box
                     bg={selectedLemmaId === lemma.id ? 'primary' : 'lightGrey'}

@@ -1,28 +1,16 @@
-import React, { ComponentType, useState } from 'react'
+import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { DictionnaireSearchRow } from '~features/resources/dictionaryAccess'
+import type { DictionarySummary } from '~features/resources/dictionaryAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
 
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import DictionnaryResultItem from './DictionaryResultItem'
 import { useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-
-const hideIfNoDatabase =
-  <P extends object>(WrappedComponent: ComponentType<P>) =>
-  (props: P) => {
-    const { isLoading, proposeDownload } = useWaitForDatabase()
-
-    if (isLoading || proposeDownload) {
-      return null
-    }
-    return <WrappedComponent {...props} />
-  }
 
 const LIMIT = 5
 const height = 40
@@ -57,7 +45,7 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
 
   return (
     <>
-      {dictionaryResults.slice(0, limit).map((ref: DictionnaireSearchRow) => {
+      {dictionaryResults.slice(0, limit).map((ref: DictionarySummary) => {
         const { word } = ref
         return <DictionnaryResultItem key={word} word={word} />
       })}
@@ -94,4 +82,4 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   )
 }
 
-export default hideIfNoDatabase(LexiqueResultsWidget)
+export default LexiqueResultsWidget

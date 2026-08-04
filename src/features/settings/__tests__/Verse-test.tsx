@@ -38,7 +38,7 @@ jest.mock('react-i18next', () => ({
 }))
 
 jest.mock('date-fns/formatDistance', () => jest.fn(() => 'un instant'))
-jest.mock('~helpers/useBibleVerses', () => ({
+jest.mock('~features/resources/useBibleVerses', () => ({
   useResolvedBibleVerses: () => ({
     verses: [],
     version: undefined,

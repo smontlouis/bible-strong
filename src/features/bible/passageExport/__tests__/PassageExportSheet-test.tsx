@@ -70,6 +70,17 @@ jest.mock('~helpers/biblesDb', () => ({
   getMultipleVerses: jest.fn(async () => ({})),
 }))
 
+jest.mock('~features/resources/resourceAccess', () => ({
+  ...(() => {
+    const resources = {
+      bibleContent: {
+        loadVerseTexts: jest.fn(async () => ({})),
+      },
+    }
+    return { useResourceAccess: () => resources }
+  })(),
+}))
+
 jest.mock('~helpers/toast', () => ({
   toast: { error: jest.fn() },
 }))

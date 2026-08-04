@@ -17,24 +17,27 @@ const createResources = () =>
     bibleContent: {
       loadChapter: jest.fn().mockResolvedValue({
         success: true,
-        data: [
-          {
-            Livre: 1,
-            Chapitre: 1,
-            Verset: 1,
-            Texte: 'In the beginning',
-            Headings: [
-              {
-                offset: 0,
-                order: 0,
-                kind: 'pericope',
-                type: 'section',
-                text: 'The Creation',
-                markup: '<title type="section">The Creation</title>',
-              },
-            ],
-          },
-        ],
+        data: {
+          kind: 'plain',
+          verses: [
+            {
+              Livre: 1,
+              Chapitre: 1,
+              Verset: 1,
+              Texte: 'In the beginning',
+              Headings: [
+                {
+                  offset: 0,
+                  order: 0,
+                  kind: 'pericope',
+                  type: 'section',
+                  text: 'The Creation',
+                  markup: '<title type="section">The Creation</title>',
+                },
+              ],
+            },
+          ],
+        },
       }),
     },
     bibleReading: {

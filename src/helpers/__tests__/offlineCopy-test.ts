@@ -60,6 +60,9 @@ describe('Offline copy identity', () => {
         moduleId: 'core',
       })
     ).toEqual([
+      ['resource', 'lexicon-bible'],
+      ['resource', 'strong-lexicon'],
+      ['resource-results', 'strong-lexicon'],
       ['strong-lexicon'],
       ['strong-lexicon-entry'],
       ['strong-detail'],
@@ -72,6 +75,9 @@ describe('Offline copy identity', () => {
 
   it('declares Bible and publication invalidations for a Bible mutation', () => {
     expect(getOfflineCopyInvalidationKeys({ kind: 'bible', versionId: 'DBY' })).toEqual([
+      ['resource', 'bible-content'],
+      ['resource', 'lexicon-bible'],
+      ['resource', 'strong-bible'],
       ['bible'],
       ['strong-detail'],
       ['bible-version-coverage', 'DBY'],
@@ -85,6 +91,9 @@ describe('Offline copy identity', () => {
     expect(
       getOfflineCopyInvalidationKeys({ kind: 'strong-bible-index', versionId: 'DBY' })
     ).toEqual([
+      ['resource', 'bible-content'],
+      ['resource', 'lexicon-bible'],
+      ['resource', 'strong-bible'],
       ['bible'],
       ['strong-detail'],
       ['strong-index-availability', 'DBY'],
@@ -102,8 +111,9 @@ describe('Offline copy identity', () => {
       })
     ).toEqual(
       expect.arrayContaining([
-        ['resource-database', 'NAVE', 'en'],
+        ['resource', 'offline-database', 'availability', 'NAVE', 'en'],
         ['nave'],
+        ['resource-results', 'nave'],
         ['nave-detail'],
         ['home-nave-random'],
         ['sqlite-nave-search'],
@@ -111,5 +121,11 @@ describe('Offline copy identity', () => {
         ['resource-publication', 'database:NAVE:en'],
       ])
     )
+  })
+
+  it('invalidates Resource-backed chapter comments when a commentary copy changes', () => {
+    expect(
+      getOfflineCopyInvalidationKeys({ kind: 'database', databaseId: 'MHY', language: 'fr' })
+    ).toContainEqual(['resource', 'bible-content'])
   })
 })

@@ -23,7 +23,9 @@ import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatSheet from '~features/studies/VerseFormatSheet'
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
-import { getBibleVersionCoverage } from '~helpers/biblesDb'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { bibleChapterQueryOptions, loadBibleVerseTexts } from '~features/resources/resourceQueries'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { osisToBibleReferenceTarget } from '~helpers/bcvParser'
 import { getBook } from '~helpers/bibleBookCatalog'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
@@ -60,7 +62,7 @@ import {
 import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { selectIsLogged } from '~redux/selectors/user'
 import type { AppDispatch } from '~redux/store'
-import { bibleDataRefreshSignalAtom, historyAtom } from '../../state/app'
+import { historyAtom } from '../../state/app'
 import {
   activeBibleTabIdAtom,
   bibleDOMHostLayoutsAtom,
@@ -78,10 +80,11 @@ import { BibleDOMWrapper, type StudyRelationsModalTarget } from './BibleDOM/Bibl
 import BibleParamsModal from './BibleParamsModal'
 import {
   loadBibleReadingComments,
-  loadBibleReadingMain,
   loadBibleReadingParallelVerses,
   loadBibleReadingRedWords,
 } from './bibleReadingChapter'
+import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
+import { usesCanonicalBibleExtras } from '~helpers/strongBiblePublications'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
 import { useAnnotationMode } from './hooks'
@@ -147,7 +150,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const pushRouteOnce = usePushRouteOnce()
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
-  const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
+  const resources = useResourceAccess()
 
   const setUnifiedTagsModal = useUnifiedTagsModal()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
@@ -239,79 +242,64 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const isContextFocused = contextDisplayMode === 'focused'
   const selectedVersesReference = verseToReference(selectedVerses)
   const { data: coverageData } = useQuery({
-    queryKey: ['bible-version-coverage', version],
-    queryFn: () => getBibleVersionCoverage(version),
+    queryKey: resourceQueryKeys.bibleCoverage(version),
+    queryFn: () => resources.bibleContent.loadCoverage(version),
     enabled: !!version,
     ...localQueryOptions,
   })
   const goToPrevAvailableChapter = () => actions.goToPrevChapter(coverageData)
   const goToNextAvailableChapter = () => actions.goToNextChapter(coverageData)
-  const parallelVersionsKey = parallelVersions.join(',')
 
+  const mainChapterRequest = {
+    book: book.Numero,
+    chapter,
+    version,
+    strongMode,
+    interlinearMode,
+    interlinearLocale: interlinearLocale ?? lang,
+    interlinearLocaleAutomatic: !interlinearLocale,
+  }
   const mainReadingQuery = useQuery({
-    queryKey: [
-      'bible-reading-main',
-      version,
-      book.Numero,
-      chapter,
-      strongMode,
-      interlinearMode,
-      interlinearLocale ?? lang,
-      !interlinearLocale,
-      bibleDataRefreshSignal,
-    ],
-    queryFn: async () => {
-      const reading = await loadBibleReadingMain({
-        book: book.Numero,
-        chapter,
-        version,
-        strongMode,
-        interlinearMode,
-        interlinearLocale: interlinearLocale ?? lang,
-        interlinearLocaleAutomatic: !interlinearLocale,
-      })
-      if (!reading.mainResult.success) {
-        const readingError = reading.mainResult.error
-        throw new BibleLoadingError(
-          readingError?.type ?? 'UNKNOWN_ERROR',
-          readingError?.version ?? version,
-          readingError?.book ?? book.Numero,
-          readingError?.chapter ?? chapter,
-          readingError?.message
-        )
-      }
-      return reading
-    },
+    ...bibleChapterQueryOptions(mainChapterRequest, resources),
     placeholderData: keepPreviousData,
+  })
+  const mainResult = mainReadingQuery.data
+  const verses = mainResult?.success && mainResult.data ? mainResult.data.verses : EMPTY_VERSES
+  const legacyPericopeQuery = useQuery({
+    queryKey: resourceQueryKeys.biblePericope(version),
+    queryFn: () => resources.bibleReading.loadPericope(version),
+    enabled: Boolean(mainResult?.success && mainResult.data && !usesCanonicalBibleExtras(version)),
     staleTime: Infinity,
     ...localQueryOptions,
   })
-  const mainReading = mainReadingQuery.data
-  const mainResult = mainReading?.mainResult
-  const verses =
-    mainResult?.success && mainResult.data ? (mainResult.data as Verse[]) : EMPTY_VERSES
-  const pericope = mainReading?.pericope ?? null
+  const pericope =
+    mainResult?.success && mainResult.data && usesCanonicalBibleExtras(version)
+      ? getCanonicalChapterPericope(mainResult.data.verses)
+      : (legacyPericopeQuery.data ?? null)
   const isLoading = mainReadingQuery.isFetching
-  const error: BibleError | null = mainReadingQuery.error
-    ? mainReadingQuery.error instanceof BibleLoadingError
-      ? {
-          type: mainReadingQuery.error.type,
-          version: mainReadingQuery.error.version,
-          book: mainReadingQuery.error.book,
-          chapter: mainReadingQuery.error.chapter,
-          message: mainReadingQuery.error.message,
-        }
-      : {
-          type: 'UNKNOWN_ERROR',
-          version,
-          book: book.Numero,
-          chapter,
-          message:
-            mainReadingQuery.error instanceof Error
-              ? mainReadingQuery.error.message
-              : 'Unknown error',
-        }
-    : null
+  const resultError = mainResult?.success === false ? mainResult.error : undefined
+  const error: BibleError | null = resultError
+    ? resultError
+    : mainReadingQuery.error
+      ? mainReadingQuery.error instanceof BibleLoadingError
+        ? {
+            type: mainReadingQuery.error.type,
+            version: mainReadingQuery.error.version,
+            book: mainReadingQuery.error.book,
+            chapter: mainReadingQuery.error.chapter,
+            message: mainReadingQuery.error.message,
+          }
+        : {
+            type: 'UNKNOWN_ERROR',
+            version,
+            book: book.Numero,
+            chapter,
+            message:
+              mainReadingQuery.error instanceof Error
+                ? mainReadingQuery.error.message
+                : 'Unknown error',
+          }
+      : null
 
   const extrasRequest = {
     book: book.Numero,
@@ -326,40 +314,30 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const extrasEnabled =
     Boolean(mainResult?.success && mainResult.data) && !mainReadingQuery.isPlaceholderData
   const { data: parallelVerses = [] } = useQuery({
-    queryKey: [
-      'bible-reading-parallel',
-      version,
-      book.Numero,
+    queryKey: resourceQueryKeys.bibleParallel({
+      book: book.Numero,
       chapter,
-      parallelVersionsKey,
+      versions: parallelVersions,
       strongMode,
-      interlinearLocale ?? lang,
-      !interlinearLocale,
-      bibleDataRefreshSignal,
-    ],
-    queryFn: () => loadBibleReadingParallelVerses(extrasRequest),
+      interlinearLocale: interlinearLocale ?? lang,
+      interlinearLocaleAutomatic: !interlinearLocale,
+    }),
+    queryFn: () => loadBibleReadingParallelVerses(extrasRequest, resources),
     enabled: extrasEnabled,
     staleTime: Infinity,
     ...localQueryOptions,
   })
-  const { data: comments = null } = useQuery({
-    queryKey: [
-      'bible-reading-comments',
-      version,
-      book.Numero,
-      chapter,
-      settings.commentsDisplay,
-      lang,
-      bibleDataRefreshSignal,
-    ],
-    queryFn: () => loadBibleReadingComments(extrasRequest),
-    enabled: extrasEnabled,
+  const commentsQuery = useQuery({
+    queryKey: resourceQueryKeys.bibleComments({ book: book.Numero, chapter, language: lang }),
+    queryFn: () => loadBibleReadingComments(extrasRequest, resources),
+    enabled: extrasEnabled && settings.commentsDisplay,
     staleTime: Infinity,
     ...localQueryOptions,
   })
+  const comments = settings.commentsDisplay ? (commentsQuery.data ?? null) : null
   const { data: redWords = null } = useQuery({
-    queryKey: ['bible-reading-red-words', version, book.Numero, chapter, bibleDataRefreshSignal],
-    queryFn: () => loadBibleReadingRedWords(extrasRequest),
+    queryKey: resourceQueryKeys.bibleRedWords(version),
+    queryFn: () => loadBibleReadingRedWords(extrasRequest, resources),
     enabled: extrasEnabled,
     staleTime: Infinity,
     ...localQueryOptions,
@@ -704,6 +682,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       const { title, content } = await getVersesContent({
         verses: selectedVerses,
         version,
+        loadVerseTexts: (versionId, verseKeys) =>
+          loadBibleVerseTexts(resources, versionId, verseKeys),
       })
 
       const verseData = {
@@ -716,7 +696,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
       setPendingVerseData({ studyId, verseData })
       verseFormatModal.open()
     },
-    [selectedVerses, version, verseFormatModal]
+    [resources, selectedVerses, version, verseFormatModal]
   )
 
   const handleSelectFormat = useCallback(

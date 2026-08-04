@@ -11,16 +11,13 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import booksDesc from '~assets/bible_versions/books-desc'
 import { getBook } from '~helpers/bibleBookCatalog'
 import DropdownMenu from '~common/DropdownMenu'
-import DownloadRequired from '~common/DownloadRequired'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
-import Loading from '~common/Loading'
 import SearchInput from '~common/SearchInput'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import { Chip } from '~common/ui/NewChip'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import Progress from '~common/ui/Progress'
 import type {
   SearchOptions,
   SearchResult,
@@ -30,11 +27,8 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import useDebounce from '~helpers/useDebounce'
-import useBibleVerses from '~helpers/useBibleVerses'
+import useBibleVerses from '~features/resources/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
-import { useWaitForDatabase as useWaitForDictionaryDatabase } from '~common/waitForDictionnaireDB'
-import { useWaitForDatabase as useWaitForNaveDatabase } from '~common/waitForNaveDB'
-import { useWaitForDatabase as useWaitForStrongDatabase } from '~common/waitForStrongDB'
 import SearchEmptyState from '~features/search/SearchEmptyState'
 import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import type { RootState } from '~redux/modules/reducer'
@@ -70,7 +64,8 @@ import {
   type SearchSectionId,
 } from './searchResultsModel'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { unwrapDatabaseResult } from '~helpers/queryResult'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 
 type Props = {
   searchValue: string
@@ -104,9 +99,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
-  const strongDb = useWaitForStrongDatabase()
-  const dictionaryDb = useWaitForDictionaryDatabase()
-  const naveDb = useWaitForNaveDatabase()
 
   // Global persisted filters — read once at mount, write on every change
   const globalFilters = useAtomValue(searchFiltersAtom)
@@ -123,6 +115,35 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [strongLetter, setStrongLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
+
+  const strongAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryFn: async () => ({
+      availability: await resources.strongLexicon.getModuleAvailability('core'),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+    }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
+  const dictionaryAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.offlineDatabaseAvailability(
+      'DICTIONNAIRE',
+      resourcesLanguage.DICTIONNAIRE
+    ),
+    queryFn: () =>
+      resources.dictionary.getAvailability?.(resourcesLanguage.DICTIONNAIRE) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
+  const naveAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.offlineDatabaseAvailability('NAVE', resourcesLanguage.NAVE),
+    queryFn: () =>
+      resources.nave.getAvailability?.(resourcesLanguage.NAVE) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
 
   const [section, _setSection] = useState<SearchSection>(globalFilters.section)
   const [book, _setBook] = useState(globalFilters.book)
@@ -393,9 +414,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     ((browseItemType === 'strong' && searchValue.trim() === trimmedSearchValue) ||
       (browseItemType !== 'strong' &&
         searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-        trimmedSearchValue.length >= MIN_SEARCH_LENGTH)) &&
-    !strongDb.isLoading &&
-    !strongDb.proposeDownload
+        trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
   const strongQuery = useQuery({
     queryKey: [
       'sqlite-strong-search',
@@ -438,9 +457,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     ((browseItemType === 'dictionary' && searchValue.trim() === trimmedSearchValue) ||
       (browseItemType !== 'dictionary' &&
         searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-        trimmedSearchValue.length >= MIN_SEARCH_LENGTH)) &&
-    !dictionaryDb.isLoading &&
-    !dictionaryDb.proposeDownload
+        trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
   const dictionaryQuery = useQuery({
     queryKey: [
       'sqlite-dictionary-search',
@@ -455,7 +472,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           browseItemType === 'dictionary' && !trimmedSearchValue
             ? await resources.dictionary.listByLetter(dictionaryLetter)
             : await resources.dictionary.search(trimmedSearchValue)
-        return unwrapDatabaseResult(result)
+        return result
       } catch (error) {
         appLogger.error('database', 'search.dictionary.failed', { error })
         throw error
@@ -475,9 +492,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     ((browseItemType === 'nave' && searchValue.trim() === trimmedSearchValue) ||
       (browseItemType !== 'nave' &&
         searchValue.trim().length >= MIN_SEARCH_LENGTH &&
-        trimmedSearchValue.length >= MIN_SEARCH_LENGTH)) &&
-    !naveDb.isLoading &&
-    !naveDb.proposeDownload
+        trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
   const naveQuery = useQuery({
     queryKey: [
       'sqlite-nave-search',
@@ -492,7 +507,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           browseItemType === 'nave' && !trimmedSearchValue
             ? await resources.nave.listByLetter(naveLetter)
             : await resources.nave.search(trimmedSearchValue)
-        return unwrapDatabaseResult(result)
+        return result
       } catch (error) {
         appLogger.error('database', 'search.nave.failed', { error })
         throw error
@@ -585,75 +600,55 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const listBottomInset = alphabetFooterInset + keyboardFooterBottom
 
   const renderBrowseDatabaseState = () => {
-    if (browseItemType === 'strong') {
-      if (strongDb.isLoading && strongDb.startDownload) {
-        return (
-          <Loading message={t('Téléchargement de la base strong...')}>
-            <Progress progress={strongDb.progress} />
-          </Loading>
-        )
-      }
-      if (strongDb.isLoading && strongDb.proposeDownload) {
-        return (
-          <DownloadRequired
-            size="small"
-            title={t('La base de données strong est requise pour accéder à cette page.')}
-            setStartDownload={strongDb.setStartDownload}
-            fileSize={35}
-          />
-        )
-      }
-      if (strongDb.isLoading) {
-        return <Loading message={t('Chargement de la base strong...')} />
-      }
+    if (
+      browseItemType === 'strong' &&
+      strongAvailabilityQuery.data?.availability.status !== 'available' &&
+      strongAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+    ) {
+      return (
+        <OfflineResourceRecovery
+          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          title={t('La base de données strong est requise pour accéder à cette page.')}
+          fileSize={35}
+          size="small"
+        />
+      )
     }
 
-    if (browseItemType === 'dictionary') {
-      if (dictionaryDb.isLoading && dictionaryDb.startDownload) {
-        return (
-          <Loading message={t('Téléchargement du dictionnaire...')}>
-            <Progress progress={dictionaryDb.progress} />
-          </Loading>
-        )
-      }
-      if (dictionaryDb.isLoading && dictionaryDb.proposeDownload) {
-        return (
-          <DownloadRequired
-            size="small"
-            title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
-            setStartDownload={dictionaryDb.setStartDownload}
-            fileSize={22}
-          />
-        )
-      }
-      if (dictionaryDb.isLoading) {
-        return <Loading message={t('Chargement du dictionnaire...')} />
-      }
+    if (
+      browseItemType === 'dictionary' &&
+      dictionaryAvailabilityQuery.data?.status === 'unavailable' &&
+      dictionaryAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
+    ) {
+      return (
+        <OfflineResourceRecovery
+          identity={{
+            kind: 'database',
+            databaseId: 'DICTIONNAIRE',
+            language: resourcesLanguage.DICTIONNAIRE,
+          }}
+          title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
+          fileSize={22}
+          size="small"
+        />
+      )
     }
 
-    if (browseItemType === 'nave') {
-      if (naveDb.isLoading && naveDb.startDownload) {
-        return (
-          <Loading message={t('Téléchargement des thèmes...')}>
-            <Progress progress={naveDb.progress} />
-          </Loading>
-        )
-      }
-      if (naveDb.isLoading && naveDb.proposeDownload) {
-        return (
-          <DownloadRequired
-            size="small"
-            title={t(
-              'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
-            )}
-            setStartDownload={naveDb.setStartDownload}
-            fileSize={7}
-          />
-        )
-      }
-      if (naveDb.isLoading) {
-        return <Loading message={t('Chargement de la base de données...')} />
-      }
+    if (
+      browseItemType === 'nave' &&
+      naveAvailabilityQuery.data?.status === 'unavailable' &&
+      naveAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
+    ) {
+      return (
+        <OfflineResourceRecovery
+          identity={{ kind: 'database', databaseId: 'NAVE', language: resourcesLanguage.NAVE }}
+          title={t(
+            'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
+          )}
+          fileSize={7}
+          size="small"
+        />
+      )
     }
 
     return null

@@ -19,6 +19,8 @@ import booksDesc2 from '~assets/bible_versions/books-desc-2'
 import type { VerseRefContent } from '~common/types'
 import extractFirstName from '~helpers/extractFirstName'
 import getVersesContent from '~helpers/getVersesContent'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
 import useLogin from '~helpers/useLogin'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
@@ -46,6 +48,7 @@ const hasVerseContent = (
   !!verseOfTheDay && 'content' in verseOfTheDay
 
 const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
+  const resources = useResourceAccess()
   const requestedDay = getDayOfTheYear(addDay) + 1
   const dayOfTheYear = requestedDay < 1 || requestedDay > 366 ? 1 : requestedDay
   const query = useQuery({
@@ -57,6 +60,8 @@ const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
       const vod = await getVersesContent({
         verses: `${book}-${chapter}-${verse}`,
         version,
+        loadVerseTexts: (versionId, verseKeys) =>
+          loadBibleVerseTexts(resources, versionId, verseKeys),
       })
       return {
         v: reference,

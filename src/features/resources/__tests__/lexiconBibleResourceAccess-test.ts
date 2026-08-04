@@ -1,7 +1,6 @@
 import {
   createBhgStrongSpans,
   createLexiconBibleResourceAccess,
-  type LexiconBibleResourceDependencies,
 } from '../lexiconBibleResourceAccess'
 
 jest.mock('~helpers/firebase', () => ({
@@ -24,52 +23,54 @@ jest.mock('~features/resources/strongBibleResourceAccess', () => ({
   localStrongBibleResourceAccess: { loadVerse: jest.fn() },
 }))
 
-const createDependencies = (): jest.Mocked<LexiconBibleResourceDependencies> => ({
+const createDependencies = () => ({
   strongBible: {
     loadVerse: jest.fn(),
     loadCountsByBook: jest.fn(),
     loadFoundVersesByBook: jest.fn(),
     loadLemmaStats: jest.fn(),
   },
-  getInterlinearAvailability: jest.fn(),
-  loadInterlinearVerseTokens: jest.fn(),
-  loadInterlinearStrongOccurrencePage: jest.fn(),
-  loadInterlinearStrongVerseCountsByBook: jest.fn(),
-  getMultipleVerses: jest.fn(),
-  getVerseText: jest.fn(),
+  interlinear: {
+    getInterlinearAvailability: jest.fn(),
+    loadVerse: jest.fn(),
+    loadCountsByBook: jest.fn(),
+    loadFoundVersesByBook: jest.fn(),
+  },
 })
 
 describe('lexiconBibleResourceAccess', () => {
   it('uses the installed BHG interlinear index before regular Strong Bibles', async () => {
     const dependencies = createDependencies()
-    dependencies.getInterlinearAvailability.mockResolvedValue({
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
       locale: 'fr',
       textRevision: 'bhg-test',
     })
-    dependencies.getVerseText.mockResolvedValue('בְּרֵאשִׁית')
-    dependencies.loadInterlinearVerseTokens.mockResolvedValue([
-      {
-        ordinal: 0,
-        startOffset: 0,
-        length: 10,
-        segments: [
-          {
-            ordinal: 0,
-            startOffset: 0,
-            length: 10,
-            transliteration: 're.Shit',
-            lemma: 'רֵאשִׁית',
-            morphology: 'HNcfsa',
-            gloss: 'commencement',
-            identities: [
-              { kind: 'strong', code: 'H07225' },
-              { kind: 'dstrong', code: 'H07225A' },
-            ],
-          },
-        ],
-      },
-    ])
+    dependencies.interlinear.loadVerse.mockResolvedValue({
+      text: 'בְּרֵאשִׁית',
+      tokens: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 10,
+          segments: [
+            {
+              ordinal: 0,
+              startOffset: 0,
+              length: 10,
+              transliteration: 're.Shit',
+              lemma: 'רֵאשִׁית',
+              morphology: 'HNcfsa',
+              gloss: 'commencement',
+              identities: [
+                { kind: 'strong', code: 'H07225' },
+                { kind: 'dstrong', code: 'H07225A' },
+              ],
+            },
+          ],
+        },
+      ],
+    })
     const access = createLexiconBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -116,33 +117,35 @@ describe('lexiconBibleResourceAccess', () => {
 
   it('falls back to the other installed BHG locale', async () => {
     const dependencies = createDependencies()
-    dependencies.getInterlinearAvailability
+    dependencies.interlinear.getInterlinearAvailability
       .mockResolvedValueOnce({ status: 'missing' })
       .mockResolvedValueOnce({
         status: 'available',
         locale: 'en',
         textRevision: 'bhg-test',
       })
-    dependencies.getVerseText.mockResolvedValue('λόγος')
-    dependencies.loadInterlinearVerseTokens.mockResolvedValue([
-      {
-        ordinal: 0,
-        startOffset: 0,
-        length: 5,
-        segments: [
-          {
-            ordinal: 0,
-            startOffset: 0,
-            length: 5,
-            transliteration: 'logos',
-            lemma: 'λόγος',
-            morphology: 'N-NSM',
-            gloss: 'word',
-            identities: [{ kind: 'strong', code: 'G03056' }],
-          },
-        ],
-      },
-    ])
+    dependencies.interlinear.loadVerse.mockResolvedValue({
+      text: 'λόγος',
+      tokens: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 5,
+          segments: [
+            {
+              ordinal: 0,
+              startOffset: 0,
+              length: 5,
+              transliteration: 'logos',
+              lemma: 'λόγος',
+              morphology: 'N-NSM',
+              gloss: 'word',
+              identities: [{ kind: 'strong', code: 'G03056' }],
+            },
+          ],
+        },
+      ],
+    })
     const access = createLexiconBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -160,7 +163,10 @@ describe('lexiconBibleResourceAccess', () => {
         provenance: expect.objectContaining({ versionId: 'BHG', locale: 'en' }),
       })
     )
-    expect(dependencies.loadInterlinearVerseTokens).toHaveBeenCalledWith('BHG', 'en', 43, 1, 1)
+    expect(dependencies.interlinear.loadVerse).toHaveBeenCalledWith(
+      'en',
+      expect.objectContaining({ book: 43, chapter: 1, verse: 1 })
+    )
   })
 
   it('respects a manual Strong Bible source instead of BHG', async () => {
@@ -183,13 +189,13 @@ describe('lexiconBibleResourceAccess', () => {
     })
 
     expect(result).toEqual(expect.objectContaining({ status: 'available' }))
-    expect(dependencies.getInterlinearAvailability).toHaveBeenCalled()
+    expect(dependencies.interlinear.getInterlinearAvailability).toHaveBeenCalled()
     expect(dependencies.strongBible.loadVerse).toHaveBeenCalled()
   })
 
   it('adds aligned STEP identities to a regular Strong verse', async () => {
     const dependencies = createDependencies()
-    dependencies.getInterlinearAvailability.mockResolvedValue({
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
       locale: 'fr',
       textRevision: 'bhg-test',
@@ -213,29 +219,32 @@ describe('lexiconBibleResourceAccess', () => {
         ],
       },
     })
-    dependencies.loadInterlinearVerseTokens.mockResolvedValue([
-      {
-        id: 20615,
-        ordinal: 0,
-        startOffset: 0,
-        length: 5,
-        segments: [
-          {
-            ordinal: 0,
-            startOffset: 0,
-            length: 5,
-            transliteration: 'elleh',
-            lemma: 'אֵלֶּה',
-            morphology: 'H:DemP',
-            gloss: 'voici',
-            identities: [
-              { kind: 'strong', code: 'H0428' },
-              { kind: 'strong', code: 'H9002' },
-            ],
-          },
-        ],
-      },
-    ])
+    dependencies.interlinear.loadVerse.mockResolvedValue({
+      text: 'אֵלֶּה',
+      tokens: [
+        {
+          id: 20615,
+          ordinal: 0,
+          startOffset: 0,
+          length: 5,
+          segments: [
+            {
+              ordinal: 0,
+              startOffset: 0,
+              length: 5,
+              transliteration: 'elleh',
+              lemma: 'אֵלֶּה',
+              morphology: 'H:DemP',
+              gloss: 'voici',
+              identities: [
+                { kind: 'strong', code: 'H0428' },
+                { kind: 'strong', code: 'H9002' },
+              ],
+            },
+          ],
+        },
+      ],
+    })
     const access = createLexiconBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -266,7 +275,7 @@ describe('lexiconBibleResourceAccess', () => {
 
   it('falls back to regular Strong Bibles when no BHG index is installed', async () => {
     const dependencies = createDependencies()
-    dependencies.getInterlinearAvailability.mockResolvedValue({ status: 'missing' })
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({ status: 'missing' })
     ;(dependencies.strongBible.loadVerse as jest.Mock).mockResolvedValue({
       status: 'available',
       provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: true },
@@ -292,13 +301,12 @@ describe('lexiconBibleResourceAccess', () => {
 
   it('falls back to regular Strong Bibles when an installed BHG index cannot be read', async () => {
     const dependencies = createDependencies()
-    dependencies.getInterlinearAvailability.mockResolvedValue({
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
       locale: 'fr',
       textRevision: 'bhg-test',
     })
-    dependencies.getVerseText.mockResolvedValue('λόγος')
-    dependencies.loadInterlinearVerseTokens.mockRejectedValue(new Error('Unreadable sidecar'))
+    dependencies.interlinear.loadVerse.mockRejectedValue(new Error('Unreadable sidecar'))
     ;(dependencies.strongBible.loadVerse as jest.Mock).mockResolvedValue({
       status: 'available',
       provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: true },
@@ -322,34 +330,30 @@ describe('lexiconBibleResourceAccess', () => {
     )
   })
 
-  it('loads a BHG concordance page from the verse index without exposing storage ids', async () => {
+  it('loads a BHG concordance page with an opaque domain page token', async () => {
     const dependencies = createDependencies()
-    dependencies.getInterlinearAvailability.mockResolvedValue({
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
       locale: 'fr',
       textRevision: 'bhg-test',
     })
-    dependencies.loadInterlinearStrongOccurrencePage.mockResolvedValue({
-      occurrences: [
+    dependencies.interlinear.loadFoundVersesByBook.mockResolvedValue({
+      verses: [
         {
           Livre: 43,
           Chapitre: 1,
           Verset: 1,
-          tokens: [
+          Texte: 'Ἐν ἀρχῇ ἦν ὁ λόγος',
+          StrongSpans: [
             {
               ordinal: 5,
               startOffset: 14,
               length: 5,
-              segments: [
+              identities: [{ kind: 'strong', code: 'G03056' }],
+              morphologies: [
                 {
-                  ordinal: 0,
-                  startOffset: 0,
-                  length: 5,
-                  transliteration: 'logos',
-                  lemma: 'λόγος',
-                  morphology: 'N-NSM',
-                  gloss: 'parole',
-                  identities: [{ kind: 'strong', code: 'G03056' }],
+                  identity: { kind: 'strong', code: 'G03056' },
+                  codes: ['N-NSM'],
                 },
               ],
             },
@@ -358,7 +362,6 @@ describe('lexiconBibleResourceAccess', () => {
       ],
       nextCursor: 'bhg:26046',
     })
-    dependencies.getMultipleVerses.mockResolvedValue({ '43-1-1': 'Ἐν ἀρχῇ ἦν ὁ λόγος' })
     const access = createLexiconBibleResourceAccess(dependencies)
 
     const result = await access.loadFoundVersesByBook({
@@ -369,7 +372,6 @@ describe('lexiconBibleResourceAccess', () => {
       reference: 'G03056',
       allBooks: true,
       limit: 60,
-      offset: 0,
     })
 
     expect(result).toEqual({
@@ -397,23 +399,22 @@ describe('lexiconBibleResourceAccess', () => {
           ],
         },
       ],
-      nextCursor: 'bhg:26046',
+      nextPageToken: 'interlinear:bhg:26046',
     })
-    expect(dependencies.loadInterlinearStrongOccurrencePage).toHaveBeenCalledWith('fr', 'G03056', {
-      book: undefined,
-      limit: 60,
-      cursor: undefined,
-    })
+    expect(dependencies.interlinear.loadFoundVersesByBook).toHaveBeenCalledWith(
+      'fr',
+      expect.objectContaining({ reference: 'G03056', allBooks: true, limit: 60 })
+    )
   })
 
-  it('falls back to a traditional Strong Bible when the BHG concordance cannot be read', async () => {
+  it('does not mix a Strong fallback into an interlinear continuation failure', async () => {
     const dependencies = createDependencies()
-    dependencies.getInterlinearAvailability.mockResolvedValue({
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
       locale: 'fr',
       textRevision: 'bhg-test',
     })
-    dependencies.loadInterlinearStrongOccurrencePage.mockRejectedValue(
+    dependencies.interlinear.loadFoundVersesByBook.mockRejectedValue(
       new Error('Unreadable V5 index')
     )
     ;(dependencies.strongBible.loadFoundVersesByBook as jest.Mock).mockResolvedValue({
@@ -423,38 +424,71 @@ describe('lexiconBibleResourceAccess', () => {
     })
     const access = createLexiconBibleResourceAccess(dependencies)
 
-    const result = await access.loadFoundVersesByBook({
-      currentVersionId: 'BHG',
-      defaultVersionId: 'LSG',
-      preferredInterlinearLocale: 'fr',
+    await expect(
+      access.loadFoundVersesByBook({
+        currentVersionId: 'BHG',
+        defaultVersionId: 'LSG',
+        preferredInterlinearLocale: 'fr',
+        book: 40,
+        reference: 'G03056',
+        allBooks: true,
+        limit: 60,
+        pageToken: 'interlinear:bhg:26046',
+      })
+    ).rejects.toThrow('interlinear continuation')
+    expect(dependencies.strongBible.loadFoundVersesByBook).not.toHaveBeenCalled()
+  })
+
+  it('keeps Strong pagination offsets behind an opaque page token', async () => {
+    const dependencies = createDependencies()
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
+      status: 'missing',
+      locale: 'fr',
+      textRevision: 'bhg-test',
+    })
+    const verses = Array.from({ length: 2 }, (_, index) => ({
+      Livre: 43,
+      Chapitre: 1,
+      Verset: index + 1,
+      Texte: `Verse ${index + 1}`,
+    }))
+    ;(dependencies.strongBible.loadFoundVersesByBook as jest.Mock).mockResolvedValue({
+      status: 'available',
+      provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: false },
+      verses,
+      nextPageToken: 'strong:2',
+    })
+    const access = createLexiconBibleResourceAccess(dependencies)
+    const request = {
+      currentVersionId: 'LSG' as const,
+      defaultVersionId: 'LSG' as const,
+      preferredInterlinearLocale: 'fr' as const,
       book: 40,
       reference: 'G03056',
       allBooks: true,
-      limit: 60,
-      offset: 60,
-      cursor: 'bhg:26046',
-    })
+      limit: 2,
+    }
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        provenance: expect.objectContaining({ versionId: 'LSG' }),
-      })
-    )
-    expect(dependencies.strongBible.loadFoundVersesByBook).toHaveBeenCalledWith(
-      expect.objectContaining({ offset: 60 })
+    const firstPage = await access.loadFoundVersesByBook(request)
+    expect(firstPage).toEqual(expect.objectContaining({ nextPageToken: 'strong:2' }))
+
+    await access.loadFoundVersesByBook({
+      ...request,
+      pageToken: firstPage.status === 'available' ? firstPage.nextPageToken : undefined,
+    })
+    expect(dependencies.strongBible.loadFoundVersesByBook).toHaveBeenLastCalledWith(
+      expect.objectContaining({ pageToken: 'strong:2' })
     )
   })
 
   it('falls back to traditional Strong counts when the BHG verse index cannot be read', async () => {
     const dependencies = createDependencies()
-    dependencies.getInterlinearAvailability.mockResolvedValue({
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
       locale: 'fr',
       textRevision: 'bhg-test',
     })
-    dependencies.loadInterlinearStrongVerseCountsByBook.mockRejectedValue(
-      new Error('Unreadable V5 index')
-    )
+    dependencies.interlinear.loadCountsByBook.mockRejectedValue(new Error('Unreadable V5 index'))
     ;(dependencies.strongBible.loadCountsByBook as jest.Mock).mockResolvedValue({
       status: 'available',
       provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: true },

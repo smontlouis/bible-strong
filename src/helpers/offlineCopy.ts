@@ -1,4 +1,5 @@
 import type { QueryKey } from '@tanstack/react-query'
+import { resourceQueryKeys } from './resourceQueryKeys'
 
 import { versions } from './bibleVersions'
 import {
@@ -26,14 +27,17 @@ const STRONG_LEXICON_MODULE_IDS = new Set<StrongLexiconModuleId>(['core', 'resou
 const DATABASE_DOMAIN_QUERY_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, QueryKey[]> = {
   DICTIONNAIRE: [
     ['dictionary'],
+    ['resource-results', 'dictionary'],
     ['dictionary-detail'],
     ['dictionaryWords'],
+    ['words'],
     ['home-dictionary-random'],
     ['sqlite-dictionary-search'],
     ['relation-dictionary-targets'],
   ],
   NAVE: [
     ['nave'],
+    ['resource-results', 'nave'],
     ['nave-detail'],
     ['home-nave-random'],
     ['sqlite-nave-search'],
@@ -104,6 +108,9 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
   switch (identity.kind) {
     case 'strong-lexicon-module':
       return [
+        resourceQueryKeys.lexiconBible(),
+        resourceQueryKeys.strongLexicon(),
+        ['resource-results', 'strong-lexicon'],
         ['strong-lexicon'],
         ['strong-lexicon-entry'],
         ['strong-detail'],
@@ -114,6 +121,9 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
       ]
     case 'bible':
       return [
+        resourceQueryKeys.bibleContent(),
+        resourceQueryKeys.lexiconBible(),
+        resourceQueryKeys.strongBible(),
         ['bible'],
         ['strong-detail'],
         ['bible-version-coverage', identity.versionId],
@@ -123,6 +133,9 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
       ]
     case 'strong-bible-index':
       return [
+        resourceQueryKeys.bibleContent(),
+        resourceQueryKeys.lexiconBible(),
+        resourceQueryKeys.strongBible(),
         ['bible'],
         ['strong-detail'],
         ['strong-index-availability', identity.versionId],
@@ -131,6 +144,8 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
       ]
     case 'interlinear-index':
       return [
+        resourceQueryKeys.bibleContent(),
+        resourceQueryKeys.lexiconBible(),
         ['bible'],
         ['interlinear-index-availability', identity.language],
         ['interlinear-mode-availability'],
@@ -139,13 +154,21 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
       ]
     case 'database':
       return [
-        ['resource-database', identity.databaseId, identity.language],
+        ...(identity.databaseId === 'MHY' || identity.databaseId === 'TRESOR'
+          ? [resourceQueryKeys.bibleContent()]
+          : []),
+        resourceQueryKeys.offlineDatabaseAvailability(identity.databaseId, identity.language),
         ...DATABASE_DOMAIN_QUERY_KEYS[identity.databaseId],
         publicationKey,
       ]
     case 'bible-pericope':
     case 'bible-red-words':
-      return [['bible'], ['bible-version-coverage', identity.versionId], publicationKey]
+      return [
+        resourceQueryKeys.bibleContent(),
+        ['bible'],
+        ['bible-version-coverage', identity.versionId],
+        publicationKey,
+      ]
   }
 }
 

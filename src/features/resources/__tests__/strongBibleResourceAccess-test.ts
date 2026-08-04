@@ -1,6 +1,6 @@
 import {
   createStrongBibleResourceAccess,
-  type StrongBibleResourceDependencies,
+  type StrongBibleResourceAdapter,
 } from '../strongBibleResourceAccess'
 
 jest.mock('~helpers/biblesDb', () => ({
@@ -28,16 +28,12 @@ const available = (versionId: 'LSG' | 'DBY' | 'DBR') => ({
   strongRevision: `${versionId}-strong`,
 })
 
-const createDependencies = (): jest.Mocked<StrongBibleResourceDependencies> => ({
+const createDependencies = (): jest.Mocked<StrongBibleResourceAdapter> => ({
   getAvailability: jest.fn(),
-  getVerseText: jest.fn(),
-  getVerseSpans: jest.fn(),
-  getVersesSpans: jest.fn(),
-  getCountsByBook: jest.fn(),
-  getResolvedIdentity: jest.fn(),
-  getFoundVerseLocations: jest.fn(),
-  getLemmaStats: jest.fn(),
-  getMultipleVerses: jest.fn(),
+  loadVerse: jest.fn(),
+  loadCountsByBook: jest.fn(),
+  loadFoundVersesByBook: jest.fn(),
+  loadLemmaStats: jest.fn(),
 })
 
 describe('strongBibleResourceAccess', () => {
@@ -52,8 +48,7 @@ describe('strongBibleResourceAccess', () => {
       },
     ]
     dependencies.getAvailability.mockResolvedValue(available('LSG'))
-    dependencies.getVerseText.mockResolvedValue('Il prit la parole et dit :')
-    dependencies.getVerseSpans.mockResolvedValue(spans)
+    dependencies.loadVerse.mockResolvedValue({ text: 'Il prit la parole et dit :', spans })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -78,8 +73,7 @@ describe('strongBibleResourceAccess', () => {
   it('uses the current Bible when its compatible sidecar is installed', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBY'))
-    dependencies.getVerseText.mockResolvedValue('Au commencement')
-    dependencies.getVerseSpans.mockResolvedValue([])
+    dependencies.loadVerse.mockResolvedValue({ text: 'Au commencement', spans: [] })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -108,8 +102,7 @@ describe('strongBibleResourceAccess', () => {
     dependencies.getAvailability
       .mockResolvedValueOnce({ status: 'missing' })
       .mockResolvedValueOnce(available('LSG'))
-    dependencies.getVerseText.mockResolvedValue('Au commencement')
-    dependencies.getVerseSpans.mockResolvedValue([])
+    dependencies.loadVerse.mockResolvedValue({ text: 'Au commencement', spans: [] })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -137,8 +130,7 @@ describe('strongBibleResourceAccess', () => {
     dependencies.getAvailability.mockImplementation(async versionId =>
       versionId === 'LSG' ? available('LSG') : { status: 'missing' }
     )
-    dependencies.getVerseText.mockResolvedValue('Au commencement')
-    dependencies.getVerseSpans.mockResolvedValue([])
+    dependencies.loadVerse.mockResolvedValue({ text: 'Au commencement', spans: [] })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -169,8 +161,7 @@ describe('strongBibleResourceAccess', () => {
     dependencies.getAvailability.mockImplementation(async versionId =>
       versionId === 'DBY' ? available('DBY') : { status: 'missing' }
     )
-    dependencies.getVerseText.mockResolvedValue('Au commencement')
-    dependencies.getVerseSpans.mockResolvedValue([])
+    dependencies.loadVerse.mockResolvedValue({ text: 'Au commencement', spans: [] })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -203,8 +194,7 @@ describe('strongBibleResourceAccess', () => {
           }
         : { status: 'missing' }
     )
-    dependencies.getVerseText.mockResolvedValue('In the beginning')
-    dependencies.getVerseSpans.mockResolvedValue([])
+    dependencies.loadVerse.mockResolvedValue({ text: 'In the beginning', spans: [] })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -230,8 +220,7 @@ describe('strongBibleResourceAccess', () => {
     dependencies.getAvailability
       .mockResolvedValueOnce({ status: 'missing' })
       .mockResolvedValueOnce(available('DBY'))
-    dependencies.getVerseText.mockResolvedValue('Au commencement')
-    dependencies.getVerseSpans.mockResolvedValue([])
+    dependencies.loadVerse.mockResolvedValue({ text: 'Au commencement', spans: [] })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -259,8 +248,7 @@ describe('strongBibleResourceAccess', () => {
   it('uses an installed manual Strong Bible choice before the current Bible', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBR'))
-    dependencies.getVerseText.mockResolvedValue('Au commencement')
-    dependencies.getVerseSpans.mockResolvedValue([])
+    dependencies.loadVerse.mockResolvedValue({ text: 'Au commencement', spans: [] })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -292,8 +280,7 @@ describe('strongBibleResourceAccess', () => {
     dependencies.getAvailability
       .mockResolvedValueOnce({ status: 'missing' })
       .mockResolvedValueOnce(available('DBY'))
-    dependencies.getVerseText.mockResolvedValue('Au commencement')
-    dependencies.getVerseSpans.mockResolvedValue([])
+    dependencies.loadVerse.mockResolvedValue({ text: 'Au commencement', spans: [] })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadVerse({
@@ -348,31 +335,20 @@ describe('strongBibleResourceAccess', () => {
         { versionId: 'DBR', status: 'missing' },
       ],
     })
-    expect(dependencies.getVerseText).not.toHaveBeenCalled()
+    expect(dependencies.loadVerse).not.toHaveBeenCalled()
   })
 
-  it('paginates in SQLite and loads all requested sidecar spans in one batch', async () => {
+  it('delegates a concordance page as one atomic adapter operation', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBY'))
-    dependencies.getFoundVerseLocations.mockResolvedValue([
-      { Livre: 1, Chapitre: 1, Verset: 1 },
-      { Livre: 1, Chapitre: 1, Verset: 2 },
-      { Livre: 1, Chapitre: 2, Verset: 1 },
-    ])
-    dependencies.getResolvedIdentity.mockResolvedValue({
-      id: 42,
-      kind: 'dstrong',
-      code: 'H7225A',
-    })
-    dependencies.getMultipleVerses.mockResolvedValue({
-      '1-1-1': 'Au commencement',
-      '1-1-2': 'La terre',
-      '1-2-1': 'Ainsi furent achevés',
-    })
-    dependencies.getVersesSpans.mockResolvedValue({
-      '1-1-1': [],
-      '1-1-2': [],
-      '1-2-1': [],
+    dependencies.loadFoundVersesByBook.mockResolvedValue({
+      verses: [
+        { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'Au commencement', StrongSpans: [] },
+        { Livre: 1, Chapitre: 1, Verset: 2, Texte: 'La terre', StrongSpans: [] },
+        { Livre: 1, Chapitre: 2, Verset: 1, Texte: 'Ainsi furent achevés', StrongSpans: [] },
+      ],
+      identity: { id: 42, kind: 'dstrong', code: 'H7225A' },
+      nextOffset: 36,
     })
     const access = createStrongBibleResourceAccess(dependencies)
 
@@ -382,26 +358,20 @@ describe('strongBibleResourceAccess', () => {
       book: 1,
       reference: '7225',
       limit: 15,
-      offset: 30,
+      pageToken: 'strong:30',
     })
 
     expect(result.status).toBe('available')
     expect(result).toEqual(
       expect.objectContaining({
         identity: { id: 42, kind: 'dstrong', code: 'H7225A' },
+        nextPageToken: 'strong:36',
       })
     )
-    expect(dependencies.getFoundVerseLocations).toHaveBeenCalledWith('DBY', 1, '7225', {
-      limit: 15,
-      offset: 30,
-    })
-    expect(dependencies.getVersesSpans).toHaveBeenCalledTimes(1)
-    expect(dependencies.getVersesSpans).toHaveBeenCalledWith('DBY', [
-      { Livre: 1, Chapitre: 1, Verset: 1 },
-      { Livre: 1, Chapitre: 1, Verset: 2 },
-      { Livre: 1, Chapitre: 2, Verset: 1 },
-    ])
-    expect(dependencies.getVerseSpans).not.toHaveBeenCalled()
+    expect(dependencies.loadFoundVersesByBook).toHaveBeenCalledWith(
+      'DBY',
+      expect.objectContaining({ reference: '7225', limit: 15, offset: 30 })
+    )
   })
 
   it('keeps Strong spans on concordance verses so empty occurrences remain positionable', async () => {
@@ -415,16 +385,18 @@ describe('strongBibleResourceAccess', () => {
       },
     ]
     dependencies.getAvailability.mockResolvedValue(available('LSG'))
-    dependencies.getFoundVerseLocations.mockResolvedValue([{ Livre: 18, Chapitre: 3, Verset: 2 }])
-    dependencies.getResolvedIdentity.mockResolvedValue({
-      id: 347,
-      kind: 'strong',
-      code: 'H0347',
+    dependencies.loadFoundVersesByBook.mockResolvedValue({
+      verses: [
+        {
+          Livre: 18,
+          Chapitre: 3,
+          Verset: 2,
+          Texte: 'Il prit la parole et dit :',
+          StrongSpans: spans,
+        },
+      ],
+      identity: { id: 347, kind: 'strong', code: 'H0347' },
     })
-    dependencies.getMultipleVerses.mockResolvedValue({
-      '18-3-2': 'Il prit la parole et dit :',
-    })
-    dependencies.getVersesSpans.mockResolvedValue({ '18-3-2': spans })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadFoundVersesByBook({
@@ -450,17 +422,11 @@ describe('strongBibleResourceAccess', () => {
   it('loads an all-Bible concordance page with an optional French lemma filter', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBY'))
-    dependencies.getFoundVerseLocations.mockResolvedValue([
-      { Livre: 1, Chapitre: 1, Verset: 1 },
-      { Livre: 40, Chapitre: 1, Verset: 1 },
-    ])
-    dependencies.getMultipleVerses.mockResolvedValue({
-      '1-1-1': 'Au commencement',
-      '40-1-1': 'Généalogie',
-    })
-    dependencies.getVersesSpans.mockResolvedValue({
-      '1-1-1': [],
-      '40-1-1': [],
+    dependencies.loadFoundVersesByBook.mockResolvedValue({
+      verses: [
+        { Livre: 1, Chapitre: 1, Verset: 1, Texte: 'Au commencement', StrongSpans: [] },
+        { Livre: 40, Chapitre: 1, Verset: 1, Texte: 'Généalogie', StrongSpans: [] },
+      ],
     })
     const access = createStrongBibleResourceAccess(dependencies)
 
@@ -474,24 +440,23 @@ describe('strongBibleResourceAccess', () => {
       lexemeId: 2671,
     })
 
-    expect(dependencies.getFoundVerseLocations).toHaveBeenCalledWith('DBY', 1, 'H7225G', {
-      limit: 20,
-      offset: undefined,
-      allBooks: true,
-      lexemeId: 2671,
-    })
-    expect(dependencies.getVersesSpans).toHaveBeenCalledWith('DBY', [
-      { Livre: 1, Chapitre: 1, Verset: 1 },
-      { Livre: 40, Chapitre: 1, Verset: 1 },
-    ])
+    expect(dependencies.loadFoundVersesByBook).toHaveBeenCalledWith(
+      'DBY',
+      expect.objectContaining({
+        reference: 'H7225G',
+        limit: 20,
+        allBooks: true,
+        lexemeId: 2671,
+      })
+    )
   })
 
   it('returns grouped French lemma statistics for the resolved version', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBY'))
-    dependencies.getLemmaStats.mockResolvedValue([
-      { id: 1, lemma: 'commencement', partOfSpeech: 'n', occurrenceCount: 19 },
-    ])
+    dependencies.loadLemmaStats.mockResolvedValue({
+      lemmas: [{ id: 1, lemma: 'commencement', partOfSpeech: 'n', occurrenceCount: 19 }],
+    })
     const access = createStrongBibleResourceAccess(dependencies)
 
     const result = await access.loadLemmaStats({

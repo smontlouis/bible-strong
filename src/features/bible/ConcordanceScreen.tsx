@@ -18,6 +18,7 @@ import { IS_FORM_SHEET } from '~helpers/constants'
 import { useSelector } from 'react-redux'
 import type { RootState } from '~redux/modules/reducer'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { localQueryOptions } from '~helpers/queryOptions'
 
 const OccurencesNumber = styled.View(({ theme }) => ({
@@ -65,13 +66,12 @@ const ConcordanceScreen = () => {
     isPending,
     isSuccess,
   } = useQuery({
-    queryKey: [
-      'strong-counts-by-book',
-      requestedStrongBibleVersionId,
-      defaultStrongBibleVersionId,
+    queryKey: resourceQueryKeys.strongBibleCounts({
+      currentVersionId: requestedStrongBibleVersionId,
+      defaultVersionId: defaultStrongBibleVersionId,
       book,
-      strongReference.Code,
-    ],
+      reference: strongReference.Code,
+    }),
     queryFn: () =>
       resources.strongBible.loadCountsByBook({
         currentVersionId: requestedStrongBibleVersionId,

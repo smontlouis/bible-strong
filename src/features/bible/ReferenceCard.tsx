@@ -11,16 +11,28 @@ import { VerseRefContent } from '~common/types'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import waitForTresorModal from '~common/waitForTresorModal'
 import getVersesContent from '~helpers/getVersesContent'
 import type { TresorReferences } from '~features/resources/bibleReadingResourceAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { VersionCode } from '../../state/tabs'
+import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import useLanguage from '~helpers/useLanguage'
+import { ResourceAccessError } from '~features/resources/resourceAccessError'
 
 const ReferenceItem = ({ reference, version }: { reference: string; version: VersionCode }) => {
+  const resources = useResourceAccess()
   const { data: Verse } = useQuery<VerseRefContent>({
-    queryKey: ['reference-verse-content', version, reference],
-    queryFn: () => getVersesContent({ verses: reference, version }),
+    queryKey: resourceQueryKeys.bibleVerseSelection(version, [reference]),
+    queryFn: () =>
+      getVersesContent({
+        verses: reference,
+        version,
+        loadVerseTexts: (versionId, verseKeys) =>
+          loadBibleVerseTexts(resources, versionId, verseKeys),
+      }),
+    networkMode: 'always',
     staleTime: Infinity,
   })
 
@@ -53,48 +65,78 @@ const ReferenceItem = ({ reference, version }: { reference: string; version: Ver
   )
 }
 
-export const ReferenceCard = waitForTresorModal(
-  ({ selectedVerse, version }: { selectedVerse: string; version: VersionCode }) => {
-    const theme = useTheme()
-    const resources = useResourceAccess()
+export const ReferenceCard = ({
+  selectedVerse,
+  version,
+}: {
+  selectedVerse: string
+  version: VersionCode
+}) => {
+  const theme = useTheme()
+  const resources = useResourceAccess()
+  const resourceLanguage = useLanguage()
+  const availabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.offlineDatabaseAvailability('TRESOR', resourceLanguage),
+    queryFn: () =>
+      resources.bibleReading.getTresorAvailability?.(resourceLanguage) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
 
-    const { isLoading, error, data } = useQuery({
-      queryKey: ['references', selectedVerse],
-      queryFn: async () =>
-        (await resources.bibleReading.loadTresorReferences(selectedVerse)) ?? null,
-    })
+  const { isLoading, error, data } = useQuery({
+    queryKey: resourceQueryKeys.bibleReferences(selectedVerse),
+    queryFn: async () => (await resources.bibleReading.loadTresorReferences(selectedVerse)) ?? null,
+  })
 
-    if (error) {
-      return (
-        <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
-      )
-    }
-
-    if (isLoading) {
-      return (
-        <Box flex center minH={200}>
-          <ActivityIndicator color={theme.colors.grey} />
-        </Box>
-      )
-    }
-
-    if (!selectedVerse || !data) {
-      return null
-    }
-
+  if (
+    availabilityQuery.data?.status === 'unavailable' &&
+    availabilityQuery.data.recoveries.includes('acquire-offline-copy')
+  ) {
     return (
-      <Box flex padding={20}>
-        <References references={data} version={version} />
+      <OfflineResourceRecovery
+        identity={{ kind: 'database', databaseId: 'TRESOR', language: resourceLanguage }}
+        title="La base Trésor de la connaissance biblique est requise."
+        fileSize={10}
+        size="small"
+      />
+    )
+  }
+
+  if (error instanceof ResourceAccessError && error.recoveries.includes('acquire-offline-copy')) {
+    return (
+      <OfflineResourceRecovery
+        identity={{ kind: 'database', databaseId: 'TRESOR', language: resourceLanguage }}
+        title="La base Trésor doit être retéléchargée."
+        fileSize={10}
+        size="small"
+      />
+    )
+  }
+
+  if (error) {
+    return (
+      <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <Box flex center minH={200}>
+        <ActivityIndicator color={theme.colors.grey} />
       </Box>
     )
   }
-)
 
-const parseReferences = (references: TresorReferences): string[] => {
-  if (!references.commentaires) return []
+  if (!selectedVerse || !data) {
+    return null
+  }
 
-  const parsed: unknown = JSON.parse(references.commentaires)
-  return Array.isArray(parsed) ? parsed.filter((ref): ref is string => typeof ref === 'string') : []
+  return (
+    <Box flex padding={20}>
+      <References references={data} version={version} />
+    </Box>
+  )
 }
 
 const References = ({
@@ -104,9 +146,7 @@ const References = ({
   references: TresorReferences
   version: VersionCode
 }) => {
-  const refs = parseReferences(references)
-
-  if (!refs.length) {
+  if (!references.length) {
     return (
       <Empty
         source={require('~assets/images/empty.json')}
@@ -117,7 +157,7 @@ const References = ({
 
   return (
     <ScrollView>
-      {refs.map((ref, i) => {
+      {references.map((ref, i) => {
         const splittedRef = ref.split('-')
         if (splittedRef.length === 3 && Number(splittedRef[0]) > 0) {
           return <ReferenceItem key={ref + i} reference={ref} version={version} />

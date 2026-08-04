@@ -1,8 +1,8 @@
 import { produce } from 'immer'
 import React, { useEffect, useMemo } from 'react'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { useDispatch, useSelector } from 'react-redux'
-import { useAtom, useAtomValue } from 'jotai/react'
+import { useSelector } from 'react-redux'
+import { useAtom } from 'jotai/react'
 
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
@@ -16,21 +16,17 @@ import sunsetColors from '~themes/sunsetColors'
 import BibleViewer from './BibleViewer'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
-import { getIfLocalResourceNeedsDownload } from '~features/resources/resourceAvailability'
 import { RootState } from '~redux/modules/reducer'
-import { setSettingsCommentaires } from '~redux/modules/user'
 import { BibleTab, VersionCode } from '../../state/tabs'
 import { LocalUnifiedTagsModalProvider } from '~common/UnifiedTagsModalProvider'
 import { BookSelectorSheetProvider } from './BookSelectorSheet/BookSelectorSheetProvider'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import Box from '~common/ui/Box'
-import { useResolvedBibleVerses, verseStringToObject } from '~helpers/useBibleVerses'
+import { useResolvedBibleVerses, verseStringToObject } from '~features/resources/useBibleVerses'
 import {
   BiblePartialReferenceNotice,
   BibleReferenceUnavailable,
 } from './BibleReferenceAvailability'
-import useLanguage from '~helpers/useLanguage'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { resolveBibleTabResources } from '~helpers/bibleTabResourceResolution'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const deepmerge = require('@fastify/deepmerge')()
@@ -42,10 +38,7 @@ interface BibleTabScreenProps {
 }
 
 const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScreenProps) => {
-  const dispatch = useDispatch()
   const [bible, setBible] = useAtom(bibleAtom)
-  const lang = useLanguage()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const selectedVersion = bible.data.selectedVersion
   const strongMode = bible.data.strongMode
   const interlinearMode = bible.data.interlinearMode
@@ -83,23 +76,18 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
       selectedBook.Numero,
       selectedChapter,
       selectedVerse,
-      lang,
-      downloadCompletionSignal,
     ],
     queryFn: () =>
-      resolveBibleTabResources(
-        {
-          selectedVersion,
-          strongMode,
-          interlinearMode,
-          interlinearLocale,
-          parallelVersions,
-          selectedBook,
-          selectedChapter,
-          selectedVerse,
-        },
-        lang
-      ),
+      resolveBibleTabResources({
+        selectedVersion,
+        strongMode,
+        interlinearMode,
+        interlinearLocale,
+        parallelVersions,
+        selectedBook,
+        selectedChapter,
+        selectedVerse,
+      }),
     enabled: !entityReference,
     placeholderData: keepPreviousData,
   })
@@ -180,24 +168,6 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
       }),
     [rawSettings, fontFamily, currentTheme]
   )
-
-  const commentsAvailabilityQuery = useQuery({
-    queryKey: ['mhy-comments-availability', settings.commentsDisplay],
-    queryFn: () =>
-      getIfLocalResourceNeedsDownload({
-        kind: 'database',
-        databaseId: 'MHY',
-        language: lang,
-      }),
-    enabled: settings.commentsDisplay,
-  })
-
-  useEffect(() => {
-    if (commentsAvailabilityQuery.data) {
-      console.log('[Bible] Error with commentaires, deactivating...')
-      dispatch(setSettingsCommentaires(false))
-    }
-  }, [commentsAvailabilityQuery.data, dispatch])
 
   useEffect(() => {
     if (!entityReference || !resolvedEntityVersion) return

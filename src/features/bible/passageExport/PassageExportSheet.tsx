@@ -21,8 +21,9 @@ import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { versions } from '~helpers/bibleVersions'
-import { getMultipleVerses } from '~helpers/biblesDb'
 import { toast } from '~helpers/toast'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
 import type { RootState } from '~redux/modules/reducer'
 import type { VersionCode } from '~state/tabs'
 import {
@@ -101,6 +102,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
     const contentSheetRef = useRef<SheetRef>(null)
     const generationQueueRef = useRef<Promise<void>>(Promise.resolve())
     const { t } = useTranslation()
+    const resources = useResourceAccess()
     const theme = useTheme()
     const insets = useSafeAreaInsets()
     const notes = useSelector((state: RootState) => state.user.bible.notes)
@@ -210,7 +212,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
               words,
             },
             loadVerseTexts: verseKeys =>
-              getMultipleVerses(version, verseKeys, () => cancelled || timedOut),
+              loadBibleVerseTexts(resources, version, verseKeys, () => cancelled || timedOut),
           })
           const timeout = new Promise<never>((_, reject) => {
             timeoutId = setTimeout(() => {
@@ -274,6 +276,7 @@ const PassageExportSheet = forwardRef<SheetRef, PassageExportSheetProps>(
       strongsHebreu,
       naves,
       words,
+      resources,
       t,
     ])
 

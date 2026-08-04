@@ -201,11 +201,16 @@ const useLoadSound = ({
     versesData.current = {}
     ;(async () => {
       try {
-        const rows = await resources.bibleContent.loadChapterVerses(version, book.Numero, chapter)
+        const chapterResult = await resources.bibleContent.loadChapter({
+          version,
+          book: book.Numero,
+          chapter,
+        })
         if (cancelled) return
+        if (!chapterResult.success) throw chapterResult.error
 
         const obj: Record<number, string> = {}
-        for (const row of rows) {
+        for (const row of chapterResult.data.verses) {
           obj[Number(row.Verset)] = row.Texte
         }
         const sorted = Object.keys(obj)

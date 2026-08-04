@@ -1,4 +1,4 @@
-import type { Pericope, Verse } from '~common/types'
+import type { Pericope } from '~common/types'
 import { BibleError, BibleChapterResult } from '~helpers/bibleErrors'
 import type { RedWordsByVerse } from '~features/resources/bibleReadingResourceAccess'
 import {
@@ -10,6 +10,7 @@ import { type StrongMode, usesCanonicalBibleExtras } from '~helpers/strongBibleP
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
+import type { BibleChapterData } from '~features/resources/bibleContentAccess'
 import type { ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 
 export type CommentsByVerse = Record<string, string>
@@ -32,7 +33,7 @@ export interface BibleReadingExtrasRequest extends BibleReadingChapterRequest {
 
 export interface BibleReadingMainResult {
   pericope: Pericope
-  mainResult: BibleChapterResult<Verse[] | null>
+  mainResult: BibleChapterResult<BibleChapterData>
 }
 
 export const loadBibleReadingMain = async (
@@ -63,7 +64,7 @@ export const loadBibleReadingMain = async (
     ])
     return {
       pericope,
-      mainResult: mainResult as BibleChapterResult<Verse[] | null>,
+      mainResult,
     }
   }
 
@@ -77,13 +78,11 @@ export const loadBibleReadingMain = async (
     interlinearLocaleAutomatic,
   })
   const pericope =
-    mainResult.success && mainResult.data
-      ? getCanonicalChapterPericope(mainResult.data as Verse[])
-      : {}
+    mainResult.success && mainResult.data ? getCanonicalChapterPericope(mainResult.data.verses) : {}
 
   return {
     pericope,
-    mainResult: mainResult as BibleChapterResult<Verse[] | null>,
+    mainResult,
   }
 }
 
@@ -118,14 +117,14 @@ export const loadBibleReadingParallelVerses = async (
     if (result.success && result.data) {
       return {
         id,
-        verses: result.data as Verse[],
+        verses: result.data.verses,
       }
     }
 
     return {
       id,
       verses: [],
-      error: result.error as BibleError | undefined,
+      error: result.success ? undefined : (result.error as BibleError),
     }
   })
 }
@@ -137,9 +136,9 @@ export const loadBibleReadingComments = async (
   if (!commentsDisplay) return null
 
   const comments = await resourceAccess.bibleReading.loadMhyComments(book, chapter)
-  if (!comments || 'error' in comments) return null
+  if (!comments) return null
 
-  return JSON.parse(comments.commentaires) as CommentsByVerse
+  return JSON.parse(comments.serializedComments) as CommentsByVerse
 }
 
 export const loadBibleReadingRedWords = async (

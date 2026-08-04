@@ -12,10 +12,10 @@ import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import useLanguage from '~helpers/useLanguage'
 import RandomButton from './RandomButton'
-import waitForDictionnaireWidget from './waitForDictionnaireWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { unwrapDatabaseResult } from '~helpers/queryResult'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { ResourceAccessError } from '~features/resources/resourceAccessError'
 
 function randomIntFromInterval(min: number, max: number) {
   // min and max included
@@ -27,17 +27,31 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const resources = useResourceAccess()
   const lang = useLanguage()
   const [randomSeed, setRandomSeed] = useState(0)
+  const availabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', lang),
+    queryFn: () =>
+      resources.dictionary.getAvailability?.(lang) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
   const strongQuery = useQuery({
     queryKey: ['home-dictionary-random', lang, randomSeed],
     queryFn: async () =>
-      unwrapDatabaseResult(
-        await resources.dictionary.loadItemByRowId(
-          lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
-        )
-      ) ?? null,
+      (await resources.dictionary.loadItemByRowId(
+        lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
+      )) ?? null,
     ...localQueryOptions,
   })
   const strongReference = strongQuery.data
+
+  if (
+    availabilityQuery.data?.status === 'unavailable' ||
+    (strongQuery.error instanceof ResourceAccessError &&
+      strongQuery.error.recoveries.includes('acquire-offline-copy'))
+  ) {
+    return null
+  }
 
   if (strongQuery.isError || (strongQuery.isSuccess && !strongReference)) {
     return (
@@ -92,4 +106,4 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   )
 }
 
-export default waitForDictionnaireWidget(DictionnaireOfTheDay)
+export default DictionnaireOfTheDay
