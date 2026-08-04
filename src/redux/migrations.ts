@@ -16,7 +16,7 @@ import {
   type RelationEndpoint,
   type RelationsObj,
 } from '~features/studyRelations/domain'
-import { migrateLegacyBibleVersionId } from '~helpers/legacyBibleVersionMigration'
+import { migrateLegacyBibleVersionId } from '../migrations/legacyBibleVersionMigration'
 
 type LegacyRootState = RootState & {
   bible?: Record<string, unknown>

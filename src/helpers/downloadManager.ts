@@ -15,10 +15,6 @@ import { storage } from '~helpers/storage'
 import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
 import { reconcileResourceInstallationJournal } from '~helpers/resourceInstallationJournal'
 import { installManagedResource } from '~helpers/managedResourceInstallation'
-import {
-  migrateLegacyDownloadQueue,
-  preserveLegacyDownloadsInQueue,
-} from '~helpers/legacyBibleVersionMigration'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -156,9 +152,8 @@ class DownloadManager {
     try {
       const raw = storage.getString(PERSIST_KEY)
       if (!raw) return
-      const migratedRaw = migrateLegacyDownloadQueue(raw)
 
-      const persisted: DownloadItemState[] = JSON.parse(migratedRaw)
+      const persisted: DownloadItemState[] = JSON.parse(raw)
       const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
 
       for (const itemState of persisted) {
@@ -356,11 +351,7 @@ class DownloadManager {
         }
         return []
       })
-      const activeQueue = JSON.stringify(toPersist)
-      storage.set(
-        PERSIST_KEY,
-        preserveLegacyDownloadsInQueue(storage.getString(PERSIST_KEY), activeQueue)
-      )
+      storage.set(PERSIST_KEY, JSON.stringify(toPersist))
     } catch (e) {
       console.error('[DownloadManager] Persist failed:', e)
     }

@@ -33,12 +33,10 @@ Downloading an index also downloads BHG when its canonical text is absent or inc
 Removing BHG explicitly removes both localized indexes; removing one index never removes BHG or
 the other locale. A failed or missing index leaves BHG fully readable in simple mode.
 
-Hide `INT` and `INT_EN` from new catalogs while retaining their identifiers and existing loaders so
-persisted tabs and already downloaded legacy resources remain usable. Resolve a persisted legacy
-tab to BHG when the canonical BHG text is installed, preserving the legacy French or English gloss
-locale and enabling interlinear mode only when that localized index is compatible. If BHG is not
-installed, keep an available legacy interlinear rather than breaking the tab. If neither resource
-is available, fall back to an installed required Bible. This resolution never starts a download.
+The release migration maps persisted `INT` and `INT_EN` references to BHG, preserves the French or
+English gloss locale, installs the compatible localized index when the user confirms the migration,
+and then deletes the obsolete artifacts. Those historical identifiers and loaders are absent from
+the runtime; their mapping exists only in the one-time migration implementation and its tests.
 
 Advanced BHG rendering preserves the canonical source text through published UTF-16 offsets,
 including text between indexed tokens. It disables entry into word-annotation mode because its DOM
@@ -74,6 +72,6 @@ Users can download one compact original-language Bible and opt into only the int
 they need. French and English indexes remain independently replaceable, and their text compatibility
 is explicit rather than inferred from filenames.
 
-The app must maintain a second sidecar lifecycle alongside Strong sidecars and retain legacy
-interlinear loaders during the migration period. Any canonical source-text change requires new
-text-revision metadata and regenerated localized indexes.
+The app must maintain a second sidecar lifecycle alongside Strong sidecars. Any canonical
+source-text change requires new text-revision metadata and regenerated localized indexes. No legacy
+interlinear loader remains after the migration release.

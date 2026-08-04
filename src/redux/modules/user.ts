@@ -20,6 +20,7 @@ import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import { getLanguage } from '~i18n'
 import { TabGroup, tabGroupsAtom } from '~state/tabs'
+import { migrateLegacyPersistedValue } from '../../migrations/legacyPersistedReferences'
 import blackColors from '~themes/blackColors'
 import defaultColors from '~themes/colors'
 import darkColors from '~themes/darkColors'
@@ -942,7 +943,9 @@ const userSlice = createSlice({
       }
     },
     importData(state, action: PayloadAction<ImportDataPayload>) {
-      const { bible, studies, tabGroups } = action.payload
+      const { bible, studies, tabGroups } = migrateLegacyPersistedValue(
+        action.payload
+      ) as ImportDataPayload
       const currentChangelog = state.bible.changelog
 
       // Merge bible (clean corrupted data before merging)

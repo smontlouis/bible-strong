@@ -96,6 +96,7 @@ import i18n from '~i18n'
 import { RootState } from '~redux/modules/reducer'
 import { deleteDoc, deleteField, doc, firebaseDb, getDoc, setDoc } from '../helpers/firebase'
 import { fetchPlan, markAsRead, removePlan, resetPlan } from './modules/plan'
+import { canonicalizeImportedDataForFirestore } from './firestoreImportDataCanonicalization'
 import {
   groupUserBibleSyncOperations,
   planBookmarkSync,
@@ -774,7 +775,9 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       bible,
       studies,
       plan: importedPlan,
-    } = action.payload as ImportDataPayload & { plan?: RootState['plan']['ongoingPlans'] }
+    } = canonicalizeImportedDataForFirestore(action.payload) as ImportDataPayload & {
+      plan?: RootState['plan']['ongoingPlans']
+    }
 
     await handleSyncWithRetry(
       async () => {

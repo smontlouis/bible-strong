@@ -3,7 +3,7 @@ import {
   migrateLegacyBibleTabData,
   migrateLegacyBibleVersionId,
   migrateLegacyParallelVersions,
-} from '~helpers/legacyBibleVersionMigration'
+} from './legacyBibleVersionMigration'
 
 export interface LegacyPersistedReferenceStorage {
   getString(key: string): string | undefined

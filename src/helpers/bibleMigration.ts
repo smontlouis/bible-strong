@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 
 import { storage } from '~helpers/storage'
 import { insertBibleVersion, isVersionInstalled, openBiblesDb } from '~helpers/biblesDb'
-import { isLegacyBibleVersionId } from '~helpers/legacyBibleVersionMigration'
+import { versions } from '~helpers/bibleVersions'
 
 const MIGRATION_KEY = 'hasMigratedBiblesToSqlite'
 const MIGRATED_VERSIONS_KEY = 'migratedBibleVersions'
@@ -107,9 +107,8 @@ export async function migrateBibleJsonToSqlite(
     // Skip timeline events
     if (versionId === 'TIMELINE-EVENTS') continue
 
-    // Obsolete Bible identities are deleted by the upgrade cleanup and must never
-    // be imported into the canonical Bible database.
-    if (isLegacyBibleVersionId(versionId)) continue
+    // Only canonical catalog identities can enter the shared Bible database.
+    if (!Object.hasOwn(versions, versionId)) continue
 
     // Skip already migrated
     if (migratedSet.has(versionId)) continue
