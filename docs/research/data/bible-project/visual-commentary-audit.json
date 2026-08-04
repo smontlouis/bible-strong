@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-04T19:02:03.090Z",
+  "totals": {
+    "works": 24,
+    "editions": 43,
+    "englishEditions": 21,
+    "frenchEditions": 22,
+    "bilingualWorks": 19,
+    "englishOnlyWorks": 2,
+    "frenchOnlyWorks": 3,
+    "reviewedAnchors": 25,
+    "excludedSourceRecords": 1
+  },
+  "canonicalBookCoverage": {
+    "fr": [
+      1,
+      19,
+      20,
+      23,
+      40,
+      43
+    ],
+    "en": [
+      1,
+      2,
+      19,
+      20,
+      23,
+      40,
+      43
+    ]
+  },
+  "missingEditions": {
+    "fr": [
+      "exodus-34-6-7-visual-commentary",
+      "psalm-8-visual-commentary"
+    ],
+    "en": [
+      "sermon-on-mount-visual-generosity",
+      "sermon-on-mount-visual-lords-prayer",
+      "sermon-on-mount-visual-wealth"
+    ]
+  },
+  "exclusions": [
+    {
+      "providerId": "yIVUi1xSaMw",
+      "language": "fr",
+      "reason": "trailer-not-editorial-commentary",
+      "evidenceUrl": "https://www.youtube.com/watch?v=yIVUi1xSaMw"
+    }
+  ],
+  "sourceCoverage": {
+    "expectedCategoryRecords": 44,
+    "assignedCategoryRecords": 43,
+    "excludedCategoryRecords": 1,
+    "unassignedProviderIds": []
+  }
+}

@@ -1,0 +1,1519 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-04T19:02:03.090Z",
+  "refreshDueAt": "2026-09-03T19:02:03.090Z",
+  "languagePolicy": {
+    "selection": "strict-route-language",
+    "fallbackAcrossLanguages": false
+  },
+  "attribution": {
+    "owner": "BibleProject",
+    "url": "https://bibleproject.com/",
+    "termsUrl": "https://bibleproject.com/terms/"
+  },
+  "works": [
+    {
+      "id": "sermon-on-mount-series-intro",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/intro-to-sermon-on-the-mount/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-intro:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "ZIrt850LLIo",
+          "sourceUrl": "https://www.youtube.com/watch?v=ZIrt850LLIo",
+          "title": "À quel moment la volonté de Dieu est-elle faite sur la Terre ? Le Sermon sur la Montagne (Épisode 1)",
+          "description": "Démarrons ensemble l’introduction au recueil d’enseignements le plus populaire de Jésus, le Sermon sur la Montagne. Dans le prélude de cette série en dix épisodes, nous voyons sa conception bien pensée et son contexte dans le cadre d’ensemble du récit biblique.\n\nRendez-vous sur notre site web pour plus de ressources vous permettant de vivre la Bible comme une seule et même histoire menant à Jésus.\nhttps://bibleproject.com/francais/\n\n\n#Sermonsurlamontagne #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/ZIrt850LLIo/maxresdefault.jpg",
+          "durationSeconds": 346,
+          "publishedAt": "2025-05-16T10:00:16Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        },
+        {
+          "id": "sermon-on-mount-series-intro:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "NtKb7CJDUZc",
+          "sourceUrl": "https://www.youtube.com/watch?v=NtKb7CJDUZc",
+          "title": "Jesus Said 2,000 Words That Changed Human History",
+          "description": "Introducing the Weekly Playlist: https://bibleproject.com/playlists/\n\nJoin us for an introduction to the most well-known collection of Jesus' teachings, the Sermon on the Mount. We cover its intentional design and context within the story of the Bible as we begin this 10-part series.\n\n00:00 Overview of the Sermon on the Mount\n01:00 The design of the teachings\n01:35 What it means for God's Kingdom to come on earth\n02:07 God chose Israel to represent His Kingdom\n02:35 Jesus announces the arrival of God's Kingdom\n04:27 Credits\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/bibleproject\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/NtKb7CJDUZc/maxresdefault.jpg",
+          "durationSeconds": 325,
+          "publishedAt": "2024-01-01T18:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 5,
+          "verseStart": 1,
+          "chapterEnd": 7,
+          "verseEnd": 29,
+          "placement": "before-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/intro-to-sermon-on-the-mount/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-beatitudes",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/the-beatitudes/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-beatitudes:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "R4mDSe8tGuI",
+          "sourceUrl": "https://www.youtube.com/watch?v=R4mDSe8tGuI",
+          "title": "Voici ceux avec qui le Royaume de Dieu commence - Le Sermon sur la Montagne (Épisode 2)",
+          "description": "Poursuivons ensemble, à travers ce deuxième épisode, notre étude du recueil d’enseignements le plus populaire de Jésus, le Sermon sur la Montagne. Nous détaillons le premier paragraphe de l’enseignement, le sens des Béatitudes, et les catégories de personnes présentes dans la foule pendant que Jésus enseignait.\n\nRendez-vous sur notre site web pour plus de ressources vous permettant de vivre la Bible comme une seule et même histoire menant à Jésus. \nhttps://bibleproject.com/francais/\n\n#Sermonsurlamontagne #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/R4mDSe8tGuI/maxresdefault.jpg",
+          "durationSeconds": 405,
+          "publishedAt": "2025-05-29T22:00:26Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-beatitudes:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "s9246LGlngs",
+          "sourceUrl": "https://www.youtube.com/watch?v=s9246LGlngs",
+          "title": "“Blessed are the Poor in Spirit”: Explore the Meaning of the Beatitudes",
+          "description": "Join us for the second episode exploring the most well-known collection of Jesus' teachings, the Sermon on the Mount. We cover the first block of teaching, the meaning of the Beatitudes, and the kinds of people in the crowd when Jesus was teaching. \n\n00:00 Audience and background\n00:32 The kingdom of the skies\n01:21 The beatitudes\n04:42 The salt of the land\n05:03 The light of the world\n05:41 Credits\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/@bibleproject\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/s9246LGlngs/maxresdefault.jpg",
+          "durationSeconds": 406,
+          "publishedAt": "2024-02-05T17:00:09Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 5,
+          "verseStart": 3,
+          "chapterEnd": 5,
+          "verseEnd": 16,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/the-beatitudes/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-jesus-fulfills-law",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/jesus-fulfills-the-law/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-jesus-fulfills-law:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "ncszdDRy0-s",
+          "sourceUrl": "https://www.youtube.com/watch?v=ncszdDRy0-s",
+          "title": "Comment intégrer le Royaume de Dieu ? - Le Sermon sur la Montagne (Épisode 3)",
+          "description": "Poursuivons ensemble, à travers ce troisième épisode, notre étude du recueil d’enseignements le plus populaire de Jésus, le Sermon sur la Montagne. Dans cette vidéo, vous apprendrez :\n\nCe qu’on entend par le fait d’être une personne juste\nOù trouver la sagesse de Dieu\nLe sens de l’expression « Jésus a accompli la Loi et les Prophètes »\nCe que Jésus offrait au monde par le Sermon sur la Montagne\n\n00:00 Dieu à la rescousse du monde\n00:44 Comprendre le fait de faire ce qui est juste\n01:07 Comment obtenir la sagesse de Dieu\n02:18 Trouver la sagesse de Dieu dans la Loi\n03:24 Jésus accomplit la Torah et les Prophètes\n05:09 Crédits\n\nAbonnez-vous à notre chaine pour avoir plus de vidés explicatives de la Bible. \n\nRendez-vous sur notre site web pour plus de ressources vous permettant de vivre la Bible comme une seule et même histoire menant à Jésus.\nhttps://bibleproject.com/francais/\n\n#Sermonsurlamontagne #bibleproject  #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/ncszdDRy0-s/maxresdefault.jpg",
+          "durationSeconds": 377,
+          "publishedAt": "2025-06-13T16:00:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-jesus-fulfills-law:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "KUil1m3P2iI",
+          "sourceUrl": "https://www.youtube.com/watch?v=KUil1m3P2iI",
+          "title": "How Can You Know What’s Right? Here’s What Jesus Thought.",
+          "description": "Join us for the third episode of the Sermon on the Mount series as we explore the most well-known collection of Jesus’ teachings. In this video, you’ll learn:\n- What it means to be a righteous person\n- Where to find God’s wisdom\n- What it means that Jesus “fulfilled the Law and the Prophets”\n- What Jesus was offering the world in the Sermon on the Mount\n\n00:00 God's Rescue of the World\n00:44 Knowing What It Means to Do Right\n01:07 How You Get God’s Wisdom\n02:18 Finding God’s Wisdom in the Law\n03:24 Jesus Fulfills the Torah and Prophets\n05:09 Credits\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB  \n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/@bibleproject\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/KUil1m3P2iI/maxresdefault.jpg",
+          "durationSeconds": 370,
+          "publishedAt": "2024-03-10T20:00:07Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 5,
+          "verseStart": 17,
+          "chapterEnd": 5,
+          "verseEnd": 20,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/jesus-fulfills-the-law/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-murder-adultery-divorce",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/wisdom-underneath-laws/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-murder-adultery-divorce:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "XgL1itLMbZI",
+          "sourceUrl": "https://www.youtube.com/watch?v=XgL1itLMbZI",
+          "title": "Pourquoi Jésus a relié la colère au meurtre et la convoitise à l'adultère • SSLM E4",
+          "description": "Rejoignez-nous pour le quatrième épisode explorant le plus célèbre recueil d'enseignements de Jésus, le Sermon sur la montagne. Dans cette vidéo, vous apprendrez :\n\nComment discerner les moyens d’être juste avec les autres\nComment Jésus révèle la sagesse divine sous-jacente dans les commandements de la Torah\nComment Jésus a utilisé l'hyperbole pour éclaircir ses arguments\nComment Jésus a ciblé nos désirs et motivations les plus profonds, dans le Sermon sur la montagne\n\n00:00 Comment développer la justice\n00:43 Jésus énonce le commandement de ne pas tuer\n02:20 Jésus énonce le commandement de ne pas commettre l'adultère\n03:36 Jésus énonce le commandement sur le divorce\n06:21 Jésus précise l’enjeu central aux commandements\n07:09 Crédits\n\nConsultez notre site Web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus.\nhttps://bibleproject.com/francais/\n\n#Sermonsurlamontagne #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/XgL1itLMbZI/maxresdefault.jpg",
+          "durationSeconds": 503,
+          "publishedAt": "2025-06-26T22:00:42Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-murder-adultery-divorce:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "okFibMvn3t0",
+          "sourceUrl": "https://www.youtube.com/watch?v=okFibMvn3t0",
+          "title": "Why Jesus Connected Anger with Murder and Lust with Adultery",
+          "description": "Join us for the fourth episode exploring the most well-known collection of Jesus’ teachings, the Sermon on the Mount. In this video, you'll learn:\n- How we know how to do right by others\n- How Jesus reveals God’s wisdom underneath the Torah’s commands\n- How Jesus used hyperbole to make points\n- How Jesus took aim at our core desires and motivations in the Sermon on the Mount\n\n00:00 How to Learn Righteousness\n00:43 Jesus Addresses the Command to Not Murder\n02:20 Jesus Addresses the Command to Not Commit Adultery\n03:36 Jesus Addresses the Command About Divorce\n06:21 Jesus’ Main Point About the Commands\n07:09 Credits\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/@bibleproject\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/okFibMvn3t0/maxresdefault.jpg",
+          "durationSeconds": 494,
+          "publishedAt": "2024-04-14T20:00:07Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 5,
+          "verseStart": 21,
+          "chapterEnd": 5,
+          "verseEnd": 32,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/wisdom-underneath-laws/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-oaths-retaliation-enemy-love",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/wisdom-within-laws-about-oaths-retaliation-and-enemy-love/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-oaths-retaliation-enemy-love:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "AgnvQ-HGKwc",
+          "sourceUrl": "https://www.youtube.com/watch?v=AgnvQ-HGKwc",
+          "title": "Ne prêtez pas serment. Tendez l'autre joue. Aimez vos ennemis. Pourquoi donc ?",
+          "description": "Rejoignez-nous pour le cinquième épisode explorant le plus célèbre recueil d'enseignements de Jésus, le Sermon sur la Montagne. Dans cette vidéo, vous apprendrez :\n\nPourquoi Jésus a dit de ne pas prêter serment aux hommes En quoi Jésus prône les formes non-violentes pour résister au mal.\nCe que signifiait « tendre l'autre joue » dans le monde antique\nPourquoi Jésus a dit d'aimer ses ennemis Ce que signifie le fait d’être « parfaits, comme votre Père céleste est parfait ». \n\n00:00 Appliquer la sagesse de Dieu aux relations\n00:48 Ne prêtez aucun serment 02:06 Tendez l'autre joue\n03:55 Si quelqu'un prend votre chemise, laissez-lui aussi votre manteau\n04:33 Si quelqu'un vous force à faire un kilomètre, faites-en deux avec lui 05:17 Aimez vos ennemis\n07:00 Crédits\n\n\n #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/AgnvQ-HGKwc/maxresdefault.jpg",
+          "durationSeconds": 490,
+          "publishedAt": "2025-07-10T22:00:11Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-oaths-retaliation-enemy-love:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "3EkD-alQhT8",
+          "sourceUrl": "https://www.youtube.com/watch?v=3EkD-alQhT8",
+          "title": "What Does Peace Cost?",
+          "description": "Join us for the fifth episode exploring the most well-known collection of Jesus' teachings, the Sermon on the Mount. In this video, you'll learn:\n- Why Jesus said not to make oaths to people\n- How Jesus advocates a nonviolent resistance to evil\n- What it meant to “turn the other cheek” in the ancient world\n- Why Jesus said to love your enemies\n- What it means to “be complete, just as your heavenly Father is complete.”\n\n00:00 Finding God’s Wisdom for Relationships\n00:48 Do Not to Make Oaths at All\n02:06 Turn the Other Cheek\n03:55 If Someone Takes Your Shirt, Let Them Have Your Coat Also\n04:33 Whoever Forces You to Go One Mile, Go With Them Two\n05:17 Love Your Enemies\n07:00 Credits\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/@bibleproject\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/3EkD-alQhT8/maxresdefault.jpg",
+          "durationSeconds": 485,
+          "publishedAt": "2024-05-19T20:00:07Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 5,
+          "verseStart": 33,
+          "chapterEnd": 5,
+          "verseEnd": 48,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/wisdom-within-laws-about-oaths-retaliation-and-enemy-love/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-religious-practices",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/warnings-about-religious-practices/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-religious-practices:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "At-rlvIFjHg",
+          "sourceUrl": "https://www.youtube.com/watch?v=At-rlvIFjHg",
+          "title": "Pourquoi Jésus a suggéré de donner, de prier et de jeûner EN PRIVÉ",
+          "description": "Rejoignez-nous pour le sixième épisode explorant le plus célèbre recueil d'enseignements de Jésus, le Sermon sur la Montagne. Dans cette vidéo, vous apprendrez :\n\nCe que Jésus a enseigné sur la source d’où ruisselle la « bonne vie »\nPourquoi Jésus met en garde contre le fait de montrer publiquement sa dévotion à Dieu Ce que Jésus voulait dire lorsqu'il traitait les gens d'hypocrites\nComment évaluer vos motivations derrière chaque don, prière et jeûne\n\n00:00 Introduction\n00:44 Pratiquer la justice à la vue de tous\n01:31 Donner en privé\n03:00 Prier en privé\n04:23 Jeûner en privé\n\nConsultez notre site Web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus.\nhttps://bibleproject.com/francais/\n\n #Sermonsurlamontagne #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/At-rlvIFjHg/maxresdefault.jpg",
+          "durationSeconds": 397,
+          "publishedAt": "2025-07-24T22:00:22Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-religious-practices:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "wCo2LN7E6bo",
+          "sourceUrl": "https://www.youtube.com/watch?v=wCo2LN7E6bo",
+          "title": "How to Spot Religious Hypocrisy in Yourself",
+          "description": "Join us for the sixth episode exploring the most well-known collection of Jesus’ teachings, the Sermon on the Mount. In this video, you’ll learn:\n- What Jesus taught about where the “good life” comes from\n- Why Jesus warns about showing your devotion to God publicly\n- What Jesus meant when he called people hypocrites\n- How to check your motives for giving, praying, and fasting\n\n00:00 Introduction\n00:44 Doing Righteousness in Front of People\n01:31 Giving Privately\n03:00 Praying Privately\n04:23 Fasting Privately\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/@UCVfwlh9XpX2Y_tQfjeln9QA\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/wCo2LN7E6bo/maxresdefault.jpg",
+          "durationSeconds": 403,
+          "publishedAt": "2024-06-22T17:00:07Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 6,
+          "verseStart": 1,
+          "chapterEnd": 6,
+          "verseEnd": 6,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/SOTM-Episode-6/Premiere%20Video/SOTM06_Script%20References.pdf"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 6,
+          "verseStart": 16,
+          "chapterEnd": 6,
+          "verseEnd": 18,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/SOTM-Episode-6/Premiere%20Video/SOTM06_Script%20References.pdf"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-lords-prayer",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/lords-prayer/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-lords-prayer:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "Ws74bmmpf8w",
+          "sourceUrl": "https://www.youtube.com/watch?v=Ws74bmmpf8w",
+          "title": "Pour quels sujets Jésus a-t-il prié ? Voici ce qu'il a enseigné à ses disciples.",
+          "description": "Rejoignez-nous pour le septième épisode explorant le plus célèbre recueil d'enseignements de Jésus, le Sermon sur la montagne. Dans cette vidéo, vous apprendrez :\n\nOù le Notre Père se situe dans le Sermon sur la montagne\nPourquoi Jésus s’adresse à Dieu en tant que « notre Père »\nPourquoi le nom de Dieu doit être traité comme « saint » \nCe qu’on entend par le règne de Dieu qui vient sur la Terre comme au Ciel\nÀ quoi fait référence le « pain quotidien » \nPourquoi nous demandons à recevoir et à accorder le pardon\nLa nature des tentations dont nous demandons à être délivrés \n\n00:00 Introduction\n00:34 Notre Père, qui es aux cieux\n01:19 Que ton nom soit traité comme saint 02:24 Que ton règne vienne, et que ta volonté soit faite\n02:51 Donne-nous aujourd'hui notre pain quotidien\n03:30 Pardonne-nous nos dettes\n04:39 Ne nous expose pas aux tests 05:41 La prière de Jésus à Gethsémané\n06:46 Intermède chorale\n08:47 Crédits\n\nConsultez notre site web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus :\nhttps://bibleproject.com/francais/\n\n#Sermonsurlamontagne#BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/Ws74bmmpf8w/maxresdefault.jpg",
+          "durationSeconds": 588,
+          "publishedAt": "2025-09-04T22:00:42Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-lords-prayer:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "3-YlqQfKkKk",
+          "sourceUrl": "https://www.youtube.com/watch?v=3-YlqQfKkKk",
+          "title": "The Lord’s Prayer Could Rewire Your Daily Life",
+          "description": "Join us for the seventh episode exploring the most well-known collection of Jesus’ teachings, the Sermon on the Mount. In this video, you’ll learn:\n\n- Where the Lord’s Prayer is located in the Sermon on the Mount\n- Why Jesus refers to God as “our Father”\n- Why God’s name is to be recognized as “holy”\n- What it means for God’s Kingdom to come to Earth as it is in Heaven\n- What “daily bread” refers to\n- Why we ask to receive and give out forgiveness\n- What kind of temptation we are asking to be delivered from\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB",
+          "thumbnailUrl": "https://i.ytimg.com/vi/3-YlqQfKkKk/maxresdefault.jpg",
+          "durationSeconds": 566,
+          "publishedAt": "2024-07-29T17:00:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 6,
+          "verseStart": 9,
+          "chapterEnd": 6,
+          "verseEnd": 13,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/lords-prayer/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-wealth-worry",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/wealth-and-worry/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-wealth-worry:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "mBJrqtG_Cdk",
+          "sourceUrl": "https://www.youtube.com/watch?v=mBJrqtG_Cdk",
+          "title": "Ce que Jésus a enseigné sur les richesses et les biens",
+          "description": "Rejoignez-nous pour le huitième épisode explorant le plus célèbre recueil d'enseignements de Jésus, le Sermon sur la montagne. Dans cette vidéo, vous apprendrez :\n\n- Ce que Jésus entend par le mot « trésors »\n- Pourquoi Jésus a dit de ne pas amasser de trésors sur la terre \n- Ce que sont les « trésors du ciel » \n- Comment amasser des « trésors au ciel »\n- Le sens de « l’œil est la lampe du corps »\n- Le danger de se focaliser sur les richesses et les biens\n- Ce que Jésus dit sur le moyen de combler nos besoins\n\nRegardez la série de vidéos du Sermon sur la montagne ici : https://youtube.com/playlist?list=PLSEw5zAcWoz0PcrCcCEaWQen-_wALViEA&si=iLRsLXkLN6V9lx6M\n\nVisitez notre site Web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus : https://bibleproject.com/francais/\n\n#sermonsurlamontagne #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/mBJrqtG_Cdk/maxresdefault.jpg",
+          "durationSeconds": 417,
+          "publishedAt": "2025-09-18T22:00:56Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-wealth-worry:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "GpqOdHV3dmU",
+          "sourceUrl": "https://www.youtube.com/watch?v=GpqOdHV3dmU",
+          "title": "Jesus’ Perspective on Wealth in 6 Minutes",
+          "description": "Join us for the eighth episode exploring the most well-known collection of Jesus’ teachings, the Sermon on the Mount. In this video, you’ll learn:\n\n- What Jesus meant by the word “treasures”\n- Why Jesus said not to store up treasures on the land\n- What “treasures in Heaven” are\n- How to store up “treasures in Heaven”\n- The meaning of “the eye is the lamp of the body”\n- The danger of focusing on wealth and possessions\n- What Jesus says about meeting our needs\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/@UCVfwlh9XpX2Y_tQfjeln9QA\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/GpqOdHV3dmU/maxresdefault.jpg",
+          "durationSeconds": 415,
+          "publishedAt": "2024-09-02T17:00:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 6,
+          "verseStart": 19,
+          "chapterEnd": 6,
+          "verseEnd": 34,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/wealth-and-worry/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-wisdom-relationships",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/wisdom-in-relationships/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-wisdom-relationships:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "txV5-inh6GM",
+          "sourceUrl": "https://www.youtube.com/watch?v=txV5-inh6GM",
+          "title": "Jésus a dit « Ne jugez pas ».Que faisons-nous à la place ?",
+          "description": "Rejoignez-nous pour le neuvième épisode explorant le plus célèbre recueil d'enseignements de Jésus, le Sermon sur la montagne. Dans cette vidéo, vous apprendrez :\n\n- La nature du piège potentiel pour quiconque étudie la sagesse de Dieu dans les Écritures\n- Ce que Jésus nous invite à faire de notre instinct à juger les autres\n- Pourquoi Jésus a dit d’enlever d'abord la poutre de son propre œil avant de relever la paille dans l'œil d'autrui.\n- Ce que Jésus voulait dire par ses propos : « Ne jetez pas vos perles devant les porcs ».\n- Pourquoi Jésus nous a encouragés à « demander, chercher et frapper »\n- Comment initier des relations saines\n\nRegardez la série de vidéos du Sermon sur la montagne ici : https://youtu.be/yIVUi1xSaMw?si=LraNjBZ5uRHZanjM\n\nAbonnez-vous à notre chaîne pour plus de vidéos explicatives sur la Bible. \n\nVisitez notre site Web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus: https://bibleproject.com/francais/\n\n#bibleproject#Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/txV5-inh6GM/maxresdefault.jpg",
+          "durationSeconds": 325,
+          "publishedAt": "2025-10-03T04:01:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-wisdom-relationships:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "PqEiqCuIsvw",
+          "sourceUrl": "https://www.youtube.com/watch?v=PqEiqCuIsvw",
+          "title": "Why Sharing Your Wisdom Isn’t Always Wise",
+          "description": "Join us for the ninth episode exploring the most well-known collection of Jesus’ teachings, the Sermon on the Mount. In this video, you’ll learn:\n- About a potential trap for those that study God’s wisdom in Scripture\n- What Jesus invites us to do with our instinct to judge others\n- Why Jesus said to first take the beam out of your own eye before pointing out the speck in another’s eye\n- What Jesus meant when he said “don’t throw your pearls in front of pigs”\n- Why Jesus encouraged us to “ask, seek, and knock”\n- Where healthy relationships start\n\n00:00 Introduction\n00:25 Do Not Judge\n01:12 The Beam in Your Eye\n02:03 Don’t Throw Your Pearls to Pigs\n02:55 Ask, Seek, Knock\n03:29 The Golden Rule\n04:07 Credits\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/@UCVfwlh9XpX2Y_tQfjeln9QA\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/PqEiqCuIsvw/maxresdefault.jpg",
+          "durationSeconds": 324,
+          "publishedAt": "2024-10-07T17:00:16Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 7,
+          "verseStart": 1,
+          "chapterEnd": 7,
+          "verseEnd": 12,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/wisdom-in-relationships/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-series-choice",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/the-choice/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-series-choice:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "Ofmvixu-FIY",
+          "sourceUrl": "https://www.youtube.com/watch?v=Ofmvixu-FIY",
+          "title": "Jésus dépeint les choix les plus difficiles (et les plus importants)",
+          "description": "Rejoignez-nous pour le dixième épisode explorant le plus célèbre recueil d'enseignements de Jésus, le Sermon sur la montagne. Dans cette vidéo, vous apprendrez :\n\n- Ce que Jésus entendait par « le Royaume des cieux »\n- Le sens de la parabole sur la large porte et la porte étroite\n- Comment reconnaître les loups déguisés en agneaux\n- Le sens de la parabole de la maison bâtie sur le roc et celle bâtie sur le sable.\n\nRegardez la série de vidéos du Sermon sur la montagne ici : https://youtu.be/yIVUi1xSaMw?si=7Pponwb48VaVkHGn\n\nAbonnez-vous à notre chaîne pour plus de vidéos explicatives sur la Bible\n\nConsultez notre site web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus : https://bibleproject.com/francais/\n\n#bibleproject #Bible #sermonsurlamontagne",
+          "thumbnailUrl": "https://i.ytimg.com/vi/Ofmvixu-FIY/maxresdefault.jpg",
+          "durationSeconds": 426,
+          "publishedAt": "2025-10-17T02:00:33Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-series-choice:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "0iJ1-_nH47c",
+          "sourceUrl": "https://www.youtube.com/watch?v=0iJ1-_nH47c",
+          "title": "Jesus Explains What the Path to True Life is Like",
+          "description": "Join us for the tenth episode exploring the most well-known collection of Jesus' teachings, the Sermon on the Mount. In this video, you'll learn:\n- What Jesus meant by “the Kingdom of the skies”\n- The meaning of the parable of the wide and narrow gates\n- How to recognize “wolves in sheep’s clothing”\n- The meaning of the parable of the two house built on the rock and sand\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/@UCVfwlh9XpX2Y_tQfjeln9QA\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/0iJ1-_nH47c/maxresdefault.jpg",
+          "durationSeconds": 422,
+          "publishedAt": "2024-11-12T01:00:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 7,
+          "verseStart": 13,
+          "chapterEnd": 7,
+          "verseEnd": 27,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/the-choice/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-visual-overview",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/matthew-5-7-sermon-overview/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-visual-overview:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "lD91ISyYLns",
+          "sourceUrl": "https://www.youtube.com/watch?v=lD91ISyYLns",
+          "title": "Ce que Jésus a enseigné dans le Sermon sur la montagne",
+          "description": "Regardez notre commentaire visuel du Sermon sur la montagne pour comprendre ce que Jésus entend par son annonce « le Royaume des Cieux est proche », et comment se traduit le fait de prendre part au Royaume de Dieu. Dans cette vidéo, nous abordons…\n\n- La conception du texte dans l’évangile de Matthieu\n- Les types de personnes qui expérimentent le Royaume de Dieu en premier\n- La vision de la justice selon Jésus \n- La vraie récompense que Dieu réserve à son peuple\n- Comment la pratique de la justice affecte nos relations avec Dieu et avec notre prochain. \n- Le choix que Jésus présente à ses auditeurs.\n\nRegardez la série de vidéos du Sermon sur la montagne: https://www.youtube.com/playlist?list=PLSEw5zAcWoz0PcrCcCEaWQen-_wALViEA\nConsultez notre site web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus: https://bibleproject.com/francais/\n\n#bibleproject  #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/lD91ISyYLns/maxresdefault.jpg",
+          "durationSeconds": 554,
+          "publishedAt": "2025-06-20T16:00:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-visual-overview:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "ajwehw_AT0s",
+          "sourceUrl": "https://www.youtube.com/watch?v=ajwehw_AT0s",
+          "title": "What Jesus Taught in the Sermon on the Mount (Visual Commentary)",
+          "description": "Watch our visual commentary on the Sermon on the Mount, learn what Jesus means when he announces that “the Kingdom of the Skies has come near” and what it looks like to participate in God’s Kingdom. \n\nIn this video, we cover ...\n\n* The design of the text in the Gospel of Matthew\n* The types of people experiencing God's Kingdom first\n* Jesus' vision of righteousness\n* The real reward God has in store for his people\n* How doing righteousness affects our relationships with God and our neighbor\n* The choice Jesus places in front of his listeners\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\n00:00 What we learn from the Sermon on the Mount\n00:21 The design of the Sermon on the Mount\n01:35 Who enters God's Kingdom first\n02:00 The salt of the land\n02:17 The city on a hill\n02:42 Jesus' perspectives on righteousness\n03:00 Torah & Prophets\n04:01 Religious practices\n05:11 Right relationships\n07:22 The choice about how to live\n08:17 Overview of the Sermon on the Mount\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/bibleproject\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/ajwehw_AT0s/maxresdefault.jpg",
+          "durationSeconds": 549,
+          "publishedAt": "2024-01-29T16:00:01Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 5,
+          "verseStart": 1,
+          "chapterEnd": 7,
+          "verseEnd": 29,
+          "placement": "before-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/matthew-5-7-sermon-overview/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-visual-beatitudes",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/matthew-5-3-16-beatitudes/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-visual-beatitudes:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "fAtTege_8Uw",
+          "sourceUrl": "https://www.youtube.com/watch?v=fAtTege_8Uw",
+          "title": "Voici ceux qui vivent une bonne et belle vie (selon Jésus) • Commentaire visuel",
+          "description": "Regardez notre deuxième commentaire visuel du Sermon sur la montagne dans Matthieu chapitre 5 pour comprendre le sens des Béatitudes dans la Bible, notamment « Heureux les pauvres en esprit, car le Royaume des Cieux est à eux ». \n\nDans cette vidéo, nous abordons…\n- La surprenante bonne nouvelle de Jésus pour les vulnérables, les affligés et les débonnaires \n- Le caractère de ceux qui seront le plus à l'aise dans le Royaume de Dieu\n- Le chemin difficile qui attend ceux qui choisissent de suivre Jésus et d’intégrer le Royaume de Dieu \n- Pourquoi Jésus qualifie ses disciples de « sel de la terre » et de « lumière du monde » \n\n00:00 Introduction\n00:36 Heureux les pauvres en esprit \n01:59 Heureux les affligés \n02:14 Heureux les débonnaires \n03:09 Heureux ceux qui ont faim et soif de la justice \n03:59 Heureux les miséricordieux \n04:20 Heureux les cœurs purs\n05:20 Heureux les artisans de paix \n05:47 Heureux ceux qui sont persécutés pour la justice \n06:12 Heureux êtes-vous si l'on vous insulte \n06:55 Vous êtes le sel de la terre \n08:20 Vous êtes la lumière du monde \n\nAbonnez-vous à notre chaîne pour plus de vidéos explicatives de la Bible.\n\nConsultez notre site web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus : https://bibleproject.com/francais/\n\n #bibleproject  #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/fAtTege_8Uw/maxresdefault.jpg",
+          "durationSeconds": 638,
+          "publishedAt": "2025-07-04T16:00:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-visual-beatitudes:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "W9fR7sHw9Y8",
+          "sourceUrl": "https://www.youtube.com/watch?v=W9fR7sHw9Y8",
+          "title": "This Is Who Experiences the Good Life (According to Jesus) • Visual Commentary",
+          "description": "Watch our second visual commentary on the Sermon on the Mount in Matthew chapter 5 and learn the meaning of the Beatitudes in the Bible, like \"Blessed are the poor in spirit, for theirs is the Kingdom of Heaven.\"\n\nIn this video, we cover...\n\n* Jesus' surprising good news for the powerless, grieving, and unimportant\n* The character of those who will be most at home in God's Kingdom\n* The difficult path ahead for those who choose to follow Jesus and enter into God's Kingdom\n* Why Jesus calls his followers the \"salt of the land\" and \"light of the world\"\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\n00:00 Introduction\n00:36 Blessed are the poor in spirit\n01:59 Blessed are those who mourn\n02:14 Blessed are the meek\n03:09 Blessed are those who hunger and thirst for righteousness\n03:59 Blessed are the merciful\n04:20 Blessed are the pure in heart\n05:20 Blessed are the peacemakers\n05:47 Blessed are those who are persecuted because of righteousness\n06:12 Blessed are you when people insult you\n06:55 You are the salt of the land\n08:20 You are the light of the world\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/bibleproject\n\nVisit our website for more resources to experience the Bible as a unified story that leads to Jesus: https://bibleproject.com/",
+          "thumbnailUrl": "https://i.ytimg.com/vi/W9fR7sHw9Y8/maxresdefault.jpg",
+          "durationSeconds": 623,
+          "publishedAt": "2024-03-04T16:00:19Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 5,
+          "verseStart": 3,
+          "chapterEnd": 5,
+          "verseEnd": 16,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/matthew-5-3-16-beatitudes/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-visual-righteousness",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/matthew-5-17-20-righteousness-and-jesus-bible/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-visual-righteousness:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "hzheDBua6Ds",
+          "sourceUrl": "https://www.youtube.com/watch?v=hzheDBua6Ds",
+          "title": "Ce que Jésus voulait dire par « Je suis venu accomplir la Loi et les Prophètes ».",
+          "description": "Regardez notre troisième commentaire visuel du Sermon sur la montagne dans Matthieu chapitre 5, pour comprendre la perspective de Jésus sur la Torah et les Prophètes telle qu’abordée dans ce même Sermon. \n\nDans cette vidéo, nous abordons… \n- Ce que sont la « Torah et les Prophètes » \n- Ce que Jésus voulait dire en affirmant qu'il est venu « donner à la Torah et aux Prophètes leur plein sens »\n- Pourquoi les principaux experts bibliques d'Israël pensaient que Jésus voulait abolir la Torah et les Prophètes\n- Le sens des classifications de « petits » et de « grands » dans le Royaume. \n\n00:00 Introduction\n00:13 Jésus donne son plein sens à la Torah et aux Prophètes \n01:10 Jésus confronte le scepticisme des pharisiens\n02:42 Les points et les traits dans la Torah \n03:15 Le plus petit et le plus grand dans le Royaume des cieux \n04:41 Une meilleure voie que celle des scribes et des pharisiens\n05:56 Crédits \n\nAbonnez-vous à notre chaîne pour plus de vidéos explicatives de la Bible #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/hzheDBua6Ds/maxresdefault.jpg",
+          "durationSeconds": 379,
+          "publishedAt": "2025-07-18T15:32:16Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "sermon-on-mount-visual-righteousness:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "Bpk-sI4MY58",
+          "sourceUrl": "https://www.youtube.com/watch?v=Bpk-sI4MY58",
+          "title": "What Jesus Meant By “I Came to Fulfill the Law and the Prophets.” (Visual Commentary)",
+          "description": "Watch our third visual commentary on the Sermon on the Mount in Matthew chapter 5 and learn Jesus' perspective on the Torah and the Prophets in the Sermon on the Mount.\n\nIn this video, we cover ...\n* What the “Torah and the Prophets” are\n* What Jesus meant by saying he came to “fill-full the Torah and the Prophets”\n* Why Israel’s leading Bible scholars thought Jesus wanted to do away with the Torah and the Prophets\n* What it means that there are people who are “least” and people who are “great” in the Kingdom.\n\nWatch the Sermon on the Mount video series here: https://www.youtube.com/playlist?list=PLH0Szn1yYNefD9pHcnyRivKRGpYGc2yfB\n\n00:00 Introduction\n00:13 Jesus fills the Torah and the Prophets full\n01:10 Jesus addresses the skepticism of the Pharisees\n02:42 Dots and squiggles in the Torah\n03:15 The least and great in the Kingdom of the skies\n04:41 A better way than the scribes and Pharisees\n05:56 Credits\n\nSubscribe to our channel for more explainer videos about the Bible: https://www.youtube.com/bibleproject",
+          "thumbnailUrl": "https://i.ytimg.com/vi/Bpk-sI4MY58/maxresdefault.jpg",
+          "durationSeconds": 388,
+          "publishedAt": "2024-04-08T13:00:13Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 5,
+          "verseStart": 17,
+          "chapterEnd": 5,
+          "verseEnd": 20,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/matthew-5-17-20-righteousness-and-jesus-bible/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-visual-generosity",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/matthew-6-1-4-generosity-and-true-reward/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-visual-generosity:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "5xpP3ehZQ_Q",
+          "sourceUrl": "https://www.youtube.com/watch?v=5xpP3ehZQ_Q",
+          "title": "Commentaire visuel Matthieu 6:1-4",
+          "description": "Regardez ce commentaire visuel du Sermon sur la montagne dans Matthieu chapitre 6, pour comprendre pourquoi Jésus alerte ses disciples sur les pratiques religieuses couramment faites en public. \n\nDans cette vidéo, nous abordons : \n- Le sens du mot grec pour « justice » ou « droiture » \n- Le danger de faire le bien en public \n- Ceux que Jésus a qualifiés d'« hypocrites » \n- Les vraies récompenses du Royaume de Dieu.\n\nAbonnez-vous à notre chaîne pour plus de vidéos explicatives de la Bible\n\n#bibleproject  #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/5xpP3ehZQ_Q/maxresdefault.jpg",
+          "durationSeconds": 273,
+          "publishedAt": "2025-08-15T07:00:09Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 6,
+          "verseStart": 1,
+          "chapterEnd": 6,
+          "verseEnd": 4,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/matthew-6-1-4-generosity-and-true-reward/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-visual-lords-prayer",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/matthew-6-9-13-prayer-jesus/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-visual-lords-prayer:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "0hmvIRKOmWI",
+          "sourceUrl": "https://www.youtube.com/watch?v=0hmvIRKOmWI",
+          "title": "Nous décortiquons le Notre Père verset par verset.",
+          "description": "Regardez cette vidéo de Commentaire visuel du Sermon sur la montagne dans Matthieu chapitre 6, où nous détaillons la signification du Notre Père ligne par ligne.  Dans cette vidéo, nous abordons… \n- L'importance de l'emplacement du Notre Père dans le Sermon sur la montagne\n- Pourquoi Jésus commence la prière par « notre Père »\n- Les trois requêtes que Jésus adresse à Dieu pour qu'il agisse dans notre monde\n- Ce qu’implique le fait de demander le « pain quotidien »\n- Ce que sont les « dettes » et comment elles sont liées au pardon \n- Pourquoi nous demandons à Dieu de nous dispenser des tests \n\nConsultez notre site Web pour plus de ressources permettant de découvrir la Bible comme une seule et même histoire menant à Jésus : https://bibleproject.com/francais/\n\n#Sermonsurlamontagne #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/0hmvIRKOmWI/maxresdefault.jpg",
+          "durationSeconds": 369,
+          "publishedAt": "2025-09-11T22:00:02Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 6,
+          "verseStart": 9,
+          "chapterEnd": 6,
+          "verseEnd": 13,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/matthew-6-9-13-prayer-jesus/"
+        }
+      ]
+    },
+    {
+      "id": "sermon-on-mount-visual-wealth",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/matthew-619-23-true-wealth-and-generosity/",
+      "editions": [
+        {
+          "id": "sermon-on-mount-visual-wealth:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "JVCL1zZrEgU",
+          "sourceUrl": "https://www.youtube.com/watch?v=JVCL1zZrEgU",
+          "title": "Ce que Jésus enseigne sur la richesse et les biens (Commentaire visuel)",
+          "description": "Regardez notre quatrième commentaire visuel du Sermon sur la montagne et découvrez deux enseignements de Jésus sur la façon dont la richesse et les biens affectent notre relation avec Dieu et avec les autres. Dans cette vidéo, nous abordons : \n- Pourquoi Jésus a dit de ne pas amasser de trésors sur Terre \n- Ce que sont les trésors du ciel\n- Comment acquérir les trésors du ciel * Le lien entre la richesse et le cœur \n- Ce que signifiait « l'œil est la lampe du corps » dans le monde antique.\n\nAbonnez-vous à notre chaîne pour plus de vidéos explicatives de la Bible\n\n#BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/JVCL1zZrEgU/maxresdefault.jpg",
+          "durationSeconds": 341,
+          "publishedAt": "2025-10-10T02:00:29Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 6,
+          "verseStart": 19,
+          "chapterEnd": 6,
+          "verseEnd": 23,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/matthew-619-23-true-wealth-and-generosity/"
+        }
+      ]
+    },
+    {
+      "id": "genesis-1-visual-commentary",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/genesis-1/",
+      "editions": [
+        {
+          "id": "genesis-1-visual-commentary:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "-V8X5SJKIKY",
+          "sourceUrl": "https://www.youtube.com/watch?v=-V8X5SJKIKY",
+          "title": "Genèse 1",
+          "description": "En quoi le contexte culturel et historique de l’antiquité approfondit-il notre interprétation du récit de la création en Genèse 1? Dans cette vidéo de commentaire biblique, nous voyons comment la conception littéraire de Genèse 1 révèle la vision idéale de Dieu pour le cosmos.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#Genèse #BibleProject   #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/-V8X5SJKIKY/maxresdefault.jpg",
+          "durationSeconds": 449,
+          "publishedAt": "2024-07-05T10:00:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "genesis-1-visual-commentary:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "afVN-7vY0KA",
+          "sourceUrl": "https://www.youtube.com/watch?v=afVN-7vY0KA",
+          "title": "Is Genesis 1 Really About How the World Was Made?",
+          "description": "How is our interpretation of the creation story in Genesis 1 deepened when we consider its ancient historical and cultural context? In this Bible commentary video, we look at how the literary design of Genesis 1 reveals God’s ideal vision for the whole cosmos.\n\nView more resources on Genesis 1:\n- Explore Genesis 1: https://tbp.xyz/exploregen1\n- Genesis 1 Study Notes: https://tbp.xyz/gen1study\n- Genesis 1 Blog: https://tbp.xyz/gen1blog\n\n#Genesis #Creation #BibleProject",
+          "thumbnailUrl": "https://i.ytimg.com/vi/afVN-7vY0KA/maxresdefault.jpg",
+          "durationSeconds": 463,
+          "publishedAt": "2020-11-24T18:00:30Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 1,
+          "chapterStart": 1,
+          "verseStart": 1,
+          "chapterEnd": 1,
+          "verseEnd": 31,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/genesis-1/"
+        }
+      ]
+    },
+    {
+      "id": "exodus-34-6-7-visual-commentary",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/character-of-god-exodus/",
+      "editions": [
+        {
+          "id": "exodus-34-6-7-visual-commentary:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "nxwzq1PJImM",
+          "sourceUrl": "https://www.youtube.com/watch?v=nxwzq1PJImM",
+          "title": "Character of God • Character of God Series (Episode 1)",
+          "description": "Biblical authors often referenced and quoted their favorite parts of Scripture, and the list of God's character traits found in Exodus 34:6-7 is the most repeated and re-quoted text in the Bible. In this video, we'll explore this foundational description of God's attributes that illustrates what God values and why he acts the way he does.\n\nClick here to explore more resources on the Character of God: https://tbp.xyz/cog\n\n#BibleProject #Exodus #God",
+          "thumbnailUrl": "https://i.ytimg.com/vi/nxwzq1PJImM/maxresdefault.jpg",
+          "durationSeconds": 366,
+          "publishedAt": "2020-06-30T17:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 2,
+          "chapterStart": 34,
+          "verseStart": 6,
+          "chapterEnd": 34,
+          "verseEnd": 7,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/character-of-god-exodus/"
+        }
+      ]
+    },
+    {
+      "id": "psalm-1-visual-commentary",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/psalm-1/",
+      "editions": [
+        {
+          "id": "psalm-1-visual-commentary:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "dFLNnAF0Kno",
+          "sourceUrl": "https://www.youtube.com/watch?v=dFLNnAF0Kno",
+          "title": "Psaume 1",
+          "description": "Comment pouvons-nous vivre une belle vie fondée sur l’abondance de Dieu ? Le Psaume 1 propose deux choix représentés par deux types d’humains - l’un est comme un arbre robuste, pendant que l’autre s’effrite avec le vent comme une paille. Dans cette vidéo, nous réfléchissons aux choix qui façonnent nos vies et découvrons, par la même occasion, que l’objet de notre méditation fait toute la différence.\n\n#Psaume1 #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/dFLNnAF0Kno/maxresdefault.jpg",
+          "durationSeconds": 323,
+          "publishedAt": "2025-03-28T11:00:52Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "psalm-1-visual-commentary:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "E7k01kfBx6Y",
+          "sourceUrl": "https://www.youtube.com/watch?v=E7k01kfBx6Y",
+          "title": "Psalm 1",
+          "description": "How can we live good lives rooted in God’s abundance? Psalm 1 offers two choices represented by two types of humans—one who is like a solid tree and one who blows away in the wind like chaff. In this video, we reflect on the choices that shape our lives and discover that what we meditate on makes all the difference.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/E7k01kfBx6Y/maxresdefault.jpg",
+          "durationSeconds": 339,
+          "publishedAt": "2023-03-20T17:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 19,
+          "chapterStart": 1,
+          "verseStart": 1,
+          "chapterEnd": 1,
+          "verseEnd": 6,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/psalm-1/"
+        }
+      ]
+    },
+    {
+      "id": "psalm-8-visual-commentary",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/psalm-8/",
+      "editions": [
+        {
+          "id": "psalm-8-visual-commentary:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "d_-xvaK4wIw",
+          "sourceUrl": "https://www.youtube.com/watch?v=d_-xvaK4wIw",
+          "title": "Psalm 8",
+          "description": "What exactly is the role of humans in the story of the Bible? Why does God care so much about us as powerless, created beings, and why are we compared to babbling babies in Psalm 8? In this video, we explore a fascinating biblical poem and discover deep insight into God’s purpose for humanity and all creation. \n\nView more resources on Psalm 8:\n-Psalm 8 Study Notes: https://tbp.xyz/psalm8studynotes\n-Psalm 8 Script References: https://tbp.xyz/psalm8scriptreferences\n-Psalm 8 blog: https://tbp.xyz/psalm8blog\n-Psalm 8 podcast: https://tbp.xyz/psalm8podcast \n\n#Psalm #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/d_-xvaK4wIw/maxresdefault.jpg",
+          "durationSeconds": 385,
+          "publishedAt": "2021-03-09T18:00:15Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 19,
+          "chapterStart": 8,
+          "verseStart": 1,
+          "chapterEnd": 8,
+          "verseEnd": 9,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/psalm-8/"
+        }
+      ]
+    },
+    {
+      "id": "psalm-148-visual-commentary",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/psalm-148/",
+      "editions": [
+        {
+          "id": "psalm-148-visual-commentary:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "sEVljAVAjQE",
+          "sourceUrl": "https://www.youtube.com/watch?v=sEVljAVAjQE",
+          "title": "Psaume 148",
+          "description": "Le Psaume 148 est un appel invitant l’ensemble du cosmos à louer Dieu. La conclusion du Psaume 148 culmine avec une expression exhortant Israël à louer Dieu car il a relevé leur corne. Que peut bien signifier cette corne ? Et pourquoi Dieu la relève-t-il ? Dans cette vidéo, nous analysons en quoi le Psaume 148 s’inscrit dans l’ensemble de l’histoire contée par le livre des Psaumes - l’histoire de la promesse de Dieu de susciter un roi qui sera l’auteur de la victoire d’Israël et du salut de ce monde. \n\nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n#Psaume148 #bibleproject  #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/sEVljAVAjQE/maxresdefault.jpg",
+          "durationSeconds": 511,
+          "publishedAt": "2024-11-08T17:01:01Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "psalm-148-visual-commentary:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "XgCrFl4Mc5Q",
+          "sourceUrl": "https://www.youtube.com/watch?v=XgCrFl4Mc5Q",
+          "title": "Psalm 148",
+          "description": "Psalm 148 is a call for the whole cosmos to praise God. In the climactic conclusion of Psalm 148, we read that Israel should praise God because he has raised a horn for them. But what’s the deal with this horn? And why is God lifting it up? In this video, we explore how Psalm 148 fits into the overall story of the book of Psalms—the story of God’s promise to raise up a king who will bring victory to Israel and rescue the world. \n\nFor more information on Psalm 148, check out the following resources:\n-Psalm 148 Study Notes: https://tbp.xyz/psalm148sn\n-Psalm 148 Script References: https://tbp.xyz/psalm148script\n-Psalm 148 blog: https://tbp.xyz/psalm148blog\n-Psalm 148 podcast: https://tbp.xyz/psalm148podcast\n\n0:00 The story of the Psalms\n1:01 The meaning of hallelujah\n2:11 A call to praise Yahweh from the skies\n3:02 A call to praise Yahweh from the land\n4:21 A call to humanity to praise Yahweh\n4:59 The horn of victory for Israel\n\n#bibleproject #visualcommentaries #psalms #psalm #praise #praisethelord #praisegod #biblecommentary #biblevideo #biblevideos",
+          "thumbnailUrl": "https://i.ytimg.com/vi/XgCrFl4Mc5Q/maxresdefault.jpg",
+          "durationSeconds": 407,
+          "publishedAt": "2021-06-29T17:00:13Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 19,
+          "chapterStart": 148,
+          "verseStart": 1,
+          "chapterEnd": 148,
+          "verseEnd": 14,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/psalm-148/"
+        }
+      ]
+    },
+    {
+      "id": "proverbs-8-visual-commentary",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/proverbs-8/",
+      "editions": [
+        {
+          "id": "proverbs-8-visual-commentary:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "z37vJGdYEZw",
+          "sourceUrl": "https://www.youtube.com/watch?v=z37vJGdYEZw",
+          "title": "Proverbes 8",
+          "description": "Dans l’histoire de la Bible, Dieu établit les humains comme ses représentants pour gouverner le monde. Mais les humains ayant opté pour la folie et le péché, comment peuvent-ils revenir sur le droit chemin ? C’est tout l’intérêt de Proverbes 8 où la sagesse de Dieu est dépeinte sous les traits d’une femme élégante qui invite tout le monde à apprendre de ses voies, afin de trouver la vie. Dans cette vidéo, nous étudions ce poème remarquable qui nous met tous face à un choix : par quelle sagesse choisirons-nous de vivre ?\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#Proverbes8 #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/z37vJGdYEZw/maxresdefault.jpg",
+          "durationSeconds": 514,
+          "publishedAt": "2024-10-04T16:01:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "proverbs-8-visual-commentary:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "k8P-x34iYRE",
+          "sourceUrl": "https://www.youtube.com/watch?v=k8P-x34iYRE",
+          "title": "Proverbs 8",
+          "description": "In the story of the Bible, God appoints humans as his representatives in ruling the world. But once humans choose folly and death, how can they get back on track? Enter Proverbs 8, where God’s wisdom is depicted as an elegant woman who summons all people to learn her ways and find life. In this video, we explore this remarkable poem that forces us all to make a choice: whose wisdom will we choose to live by?\n\nView more resources on Proverbs 8:\n-Proverbs 8 Script References: https://tbp.xyz/proverbs8script\n-Proverbs 8 blog: https://tbp.xyz/proverbs8blog\n-Lady Wisdom podcast: https://tbp.xyz/ladywisdompod\n\n#BibleProject #Proverbs8 #Wisdom",
+          "thumbnailUrl": "https://i.ytimg.com/vi/k8P-x34iYRE/maxresdefault.jpg",
+          "durationSeconds": 437,
+          "publishedAt": "2021-05-04T17:00:16Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 20,
+          "chapterStart": 8,
+          "verseStart": 1,
+          "chapterEnd": 8,
+          "verseEnd": 36,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/proverbs-8/"
+        }
+      ]
+    },
+    {
+      "id": "isaiah-61-visual-commentary",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/isaiah-61/",
+      "editions": [
+        {
+          "id": "isaiah-61-visual-commentary:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "wvqT2nT7YQs",
+          "sourceUrl": "https://www.youtube.com/watch?v=wvqT2nT7YQs",
+          "title": "Ésaïe 61",
+          "description": "À quoi ressemble un monde restauré ? Les mots d’Ésaïe 61 décrivent une création marquée par l’abondance et l’ordre favorisé par des relations exemplaires. Dans cette vidéo, nous réfléchissons à la vision du prophète d’un nouvel Eden, confirmant la promesse de Dieu à ceux qui n’ont jamais perdu espoir.\n\n#Esaïe61 #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/wvqT2nT7YQs/maxresdefault.jpg",
+          "durationSeconds": 451,
+          "publishedAt": "2025-11-20T23:01:31Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "isaiah-61-visual-commentary:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "d_Q6WkD_Pas",
+          "sourceUrl": "https://www.youtube.com/watch?v=d_Q6WkD_Pas",
+          "title": "Isaiah 61 Visual Commentary • A Vision of the New Creation",
+          "description": "What does a restored world look like? The words of Isaiah 61 describe a new creation filled with abundance and ordered by right relationships. In this video, we reflect on the prophet's vision of a new Eden and how it reaffirms God's promises to the people who never lost hope.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/d_Q6WkD_Pas/maxresdefault.jpg",
+          "durationSeconds": 438,
+          "publishedAt": "2023-04-11T17:00:08Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 23,
+          "chapterStart": 61,
+          "verseStart": 1,
+          "chapterEnd": 61,
+          "verseEnd": 11,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/isaiah-61/"
+        }
+      ]
+    },
+    {
+      "id": "john-1-visual-commentary",
+      "category": "visual-commentary",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/john-1/",
+      "editions": [
+        {
+          "id": "john-1-visual-commentary:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "Ag43Hsy7I9g",
+          "sourceUrl": "https://www.youtube.com/watch?v=Ag43Hsy7I9g",
+          "title": "Jean 1",
+          "description": "Jean commence son Évangile en présentant Jésus comme la Parole de Dieu, faisant ainsi écho aux chapitres d’ouverture de la Genèse où Dieu créa la vie par l’expression de sa parole. Au commencement, tout était bon, mais quand les créatures de Dieu ont rejeté ses instructions, toute la création a sombré dans une spirale vers la mort. Le monde avait besoin d’un nouveau commencement, alors Dieu laissa sa parole divine s’exprimer à nouveau, sauf que cette fois, la parole prit une forme humaine appelée Jésus. \n\n#Jean1 #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/Ag43Hsy7I9g/maxresdefault.jpg",
+          "durationSeconds": 385,
+          "publishedAt": "2025-01-31T11:00:11Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "john-1-visual-commentary:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "XgslCbXOOIE",
+          "sourceUrl": "https://www.youtube.com/watch?v=XgslCbXOOIE",
+          "title": "What It Means for Jesus to Be the \"Word of God\"",
+          "description": "John begins his Gospel account by introducing Jesus as the Word of God, echoing the opening chapters of Genesis, where God created life through his spoken word. This beginning was good, but when God’s creatures rejected his instructions, all creation spiraled into death. The world needed a new beginning, so God's divine word spoke again, but this time, the word became a human named Jesus.\n\nFor more information on John 1, check out the following resources:\n-John 1 Study Notes: https://tbp.xyz/john1studynotes\n-John 1 Script References: https://tbp.xyz/john1script\n-John 1 Blog Post: https://tbp.xyz/john1blog\n-John 1 Podcast Episode: https://tbp.xyz/john1podcast\n\n#BibleProject #John1 #VisualCommentary",
+          "thumbnailUrl": "https://i.ytimg.com/vi/XgslCbXOOIE/maxresdefault.jpg",
+          "durationSeconds": 402,
+          "publishedAt": "2021-11-02T17:00:12Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "passage",
+          "book": 43,
+          "chapterStart": 1,
+          "verseStart": 1,
+          "chapterEnd": 1,
+          "verseEnd": 18,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-page-or-official-collection",
+          "evidenceUrl": "https://bibleproject.com/videos/john-1/"
+        }
+      ]
+    }
+  ],
+  "languageIndexes": {
+    "fr": {
+      "books": {
+        "1": [
+          "genesis-1-visual-commentary"
+        ],
+        "2": [],
+        "3": [],
+        "4": [],
+        "5": [],
+        "6": [],
+        "7": [],
+        "8": [],
+        "9": [],
+        "10": [],
+        "11": [],
+        "12": [],
+        "13": [],
+        "14": [],
+        "15": [],
+        "16": [],
+        "17": [],
+        "18": [],
+        "19": [
+          "psalm-1-visual-commentary",
+          "psalm-148-visual-commentary"
+        ],
+        "20": [
+          "proverbs-8-visual-commentary"
+        ],
+        "21": [],
+        "22": [],
+        "23": [
+          "isaiah-61-visual-commentary"
+        ],
+        "24": [],
+        "25": [],
+        "26": [],
+        "27": [],
+        "28": [],
+        "29": [],
+        "30": [],
+        "31": [],
+        "32": [],
+        "33": [],
+        "34": [],
+        "35": [],
+        "36": [],
+        "37": [],
+        "38": [],
+        "39": [],
+        "40": [
+          "sermon-on-mount-series-intro",
+          "sermon-on-mount-series-beatitudes",
+          "sermon-on-mount-series-jesus-fulfills-law",
+          "sermon-on-mount-series-murder-adultery-divorce",
+          "sermon-on-mount-series-oaths-retaliation-enemy-love",
+          "sermon-on-mount-series-religious-practices",
+          "sermon-on-mount-series-lords-prayer",
+          "sermon-on-mount-series-wealth-worry",
+          "sermon-on-mount-series-wisdom-relationships",
+          "sermon-on-mount-series-choice",
+          "sermon-on-mount-visual-overview",
+          "sermon-on-mount-visual-beatitudes",
+          "sermon-on-mount-visual-righteousness",
+          "sermon-on-mount-visual-generosity",
+          "sermon-on-mount-visual-lords-prayer",
+          "sermon-on-mount-visual-wealth"
+        ],
+        "41": [],
+        "42": [],
+        "43": [
+          "john-1-visual-commentary"
+        ],
+        "44": [],
+        "45": [],
+        "46": [],
+        "47": [],
+        "48": [],
+        "49": [],
+        "50": [],
+        "51": [],
+        "52": [],
+        "53": [],
+        "54": [],
+        "55": [],
+        "56": [],
+        "57": [],
+        "58": [],
+        "59": [],
+        "60": [],
+        "61": [],
+        "62": [],
+        "63": [],
+        "64": [],
+        "65": [],
+        "66": []
+      },
+      "chapters": {
+        "40:5": [
+          "sermon-on-mount-series-intro",
+          "sermon-on-mount-series-beatitudes",
+          "sermon-on-mount-series-jesus-fulfills-law",
+          "sermon-on-mount-series-murder-adultery-divorce",
+          "sermon-on-mount-series-oaths-retaliation-enemy-love",
+          "sermon-on-mount-visual-overview",
+          "sermon-on-mount-visual-beatitudes",
+          "sermon-on-mount-visual-righteousness"
+        ],
+        "40:6": [
+          "sermon-on-mount-series-intro",
+          "sermon-on-mount-series-religious-practices",
+          "sermon-on-mount-series-lords-prayer",
+          "sermon-on-mount-series-wealth-worry",
+          "sermon-on-mount-visual-overview",
+          "sermon-on-mount-visual-generosity",
+          "sermon-on-mount-visual-lords-prayer",
+          "sermon-on-mount-visual-wealth"
+        ],
+        "40:7": [
+          "sermon-on-mount-series-intro",
+          "sermon-on-mount-series-wisdom-relationships",
+          "sermon-on-mount-series-choice",
+          "sermon-on-mount-visual-overview"
+        ],
+        "1:1": [
+          "genesis-1-visual-commentary"
+        ],
+        "19:1": [
+          "psalm-1-visual-commentary"
+        ],
+        "19:148": [
+          "psalm-148-visual-commentary"
+        ],
+        "20:8": [
+          "proverbs-8-visual-commentary"
+        ],
+        "23:61": [
+          "isaiah-61-visual-commentary"
+        ],
+        "43:1": [
+          "john-1-visual-commentary"
+        ]
+      }
+    },
+    "en": {
+      "books": {
+        "1": [
+          "genesis-1-visual-commentary"
+        ],
+        "2": [
+          "exodus-34-6-7-visual-commentary"
+        ],
+        "3": [],
+        "4": [],
+        "5": [],
+        "6": [],
+        "7": [],
+        "8": [],
+        "9": [],
+        "10": [],
+        "11": [],
+        "12": [],
+        "13": [],
+        "14": [],
+        "15": [],
+        "16": [],
+        "17": [],
+        "18": [],
+        "19": [
+          "psalm-1-visual-commentary",
+          "psalm-8-visual-commentary",
+          "psalm-148-visual-commentary"
+        ],
+        "20": [
+          "proverbs-8-visual-commentary"
+        ],
+        "21": [],
+        "22": [],
+        "23": [
+          "isaiah-61-visual-commentary"
+        ],
+        "24": [],
+        "25": [],
+        "26": [],
+        "27": [],
+        "28": [],
+        "29": [],
+        "30": [],
+        "31": [],
+        "32": [],
+        "33": [],
+        "34": [],
+        "35": [],
+        "36": [],
+        "37": [],
+        "38": [],
+        "39": [],
+        "40": [
+          "sermon-on-mount-series-intro",
+          "sermon-on-mount-series-beatitudes",
+          "sermon-on-mount-series-jesus-fulfills-law",
+          "sermon-on-mount-series-murder-adultery-divorce",
+          "sermon-on-mount-series-oaths-retaliation-enemy-love",
+          "sermon-on-mount-series-religious-practices",
+          "sermon-on-mount-series-lords-prayer",
+          "sermon-on-mount-series-wealth-worry",
+          "sermon-on-mount-series-wisdom-relationships",
+          "sermon-on-mount-series-choice",
+          "sermon-on-mount-visual-overview",
+          "sermon-on-mount-visual-beatitudes",
+          "sermon-on-mount-visual-righteousness"
+        ],
+        "41": [],
+        "42": [],
+        "43": [
+          "john-1-visual-commentary"
+        ],
+        "44": [],
+        "45": [],
+        "46": [],
+        "47": [],
+        "48": [],
+        "49": [],
+        "50": [],
+        "51": [],
+        "52": [],
+        "53": [],
+        "54": [],
+        "55": [],
+        "56": [],
+        "57": [],
+        "58": [],
+        "59": [],
+        "60": [],
+        "61": [],
+        "62": [],
+        "63": [],
+        "64": [],
+        "65": [],
+        "66": []
+      },
+      "chapters": {
+        "40:5": [
+          "sermon-on-mount-series-intro",
+          "sermon-on-mount-series-beatitudes",
+          "sermon-on-mount-series-jesus-fulfills-law",
+          "sermon-on-mount-series-murder-adultery-divorce",
+          "sermon-on-mount-series-oaths-retaliation-enemy-love",
+          "sermon-on-mount-visual-overview",
+          "sermon-on-mount-visual-beatitudes",
+          "sermon-on-mount-visual-righteousness"
+        ],
+        "40:6": [
+          "sermon-on-mount-series-intro",
+          "sermon-on-mount-series-religious-practices",
+          "sermon-on-mount-series-lords-prayer",
+          "sermon-on-mount-series-wealth-worry",
+          "sermon-on-mount-visual-overview"
+        ],
+        "40:7": [
+          "sermon-on-mount-series-intro",
+          "sermon-on-mount-series-wisdom-relationships",
+          "sermon-on-mount-series-choice",
+          "sermon-on-mount-visual-overview"
+        ],
+        "1:1": [
+          "genesis-1-visual-commentary"
+        ],
+        "2:34": [
+          "exodus-34-6-7-visual-commentary"
+        ],
+        "19:1": [
+          "psalm-1-visual-commentary"
+        ],
+        "19:8": [
+          "psalm-8-visual-commentary"
+        ],
+        "19:148": [
+          "psalm-148-visual-commentary"
+        ],
+        "20:8": [
+          "proverbs-8-visual-commentary"
+        ],
+        "23:61": [
+          "isaiah-61-visual-commentary"
+        ],
+        "43:1": [
+          "john-1-visual-commentary"
+        ]
+      }
+    }
+  }
+}

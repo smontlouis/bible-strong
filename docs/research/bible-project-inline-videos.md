@@ -100,6 +100,20 @@ contain only works with an edition in that exact language. Full-book works use `
 split sections use `before-range`. All anchors in this subset are reviewed from publisher titles and
 official playlist membership rather than inferred from plan reading context.
 
+## Reviewed visual commentary manifest
+
+The second publishable subset is generated in `visual-commentary-manifest.json`. All 44 records in
+the catalog category are accounted for: 43 localized editions belong to 24 reviewed passage works,
+and the French “Prochainement” trailer is explicitly excluded. Nineteen works are bilingual, three
+are French-only, and two are English-only. The language indexes never expose a work without an
+edition in the selected route language.
+
+The 25 reviewed primary anchors preserve exact inclusive verse ranges. One work intentionally has
+two discontiguous anchors: the newer religious-practices episode treats Matthew 6:1-6 and 6:16-18.
+The John commentary is limited to the prologue (John 1:1-18), and the two distinct Sermon on the
+Mount series remain separate works even when they share a passage. Exact sources and the complete
+44-record review table are documented in `bible-project-visual-commentary-anchors.md`.
+
 ## Recommended editorial model
 
 Use a provider-neutral catalog record, for example:

@@ -768,5 +768,13 @@
       50
     ],
     "strictLanguageSelection": true
+  },
+  "visualCommentaryManifest": {
+    "works": 24,
+    "editions": 43,
+    "englishEditions": 21,
+    "frenchEditions": 22,
+    "excludedSourceRecords": 1,
+    "strictLanguageSelection": true
   }
 }
