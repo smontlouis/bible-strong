@@ -19,6 +19,7 @@ This report is a directional agent-readability score, not a product quality verd
 | `feature-onboarding` | 6/10 | 9 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 | `home` | 5/10 | 20 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 3 eslint-disable markers |
 | `lexique` | 8/10 | 41 | 14 | yes | no | no feature README; 1 eslint-disable markers |
+| `migrations` | 8/10 | 2 | 2 | no | no | no mapped smoke path; no feature README |
 | `nave` | 7/10 | 12 | 0 | yes | no | no colocated feature tests; 3 eslint-disable markers |
 | `notes` | 5/10 | 8 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 1 eslint-disable markers |
 | `onboarding` | 8/10 | 8 | 1 | yes | yes | 5 eslint-disable markers; sensitive user/account surface |

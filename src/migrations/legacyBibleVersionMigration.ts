@@ -102,15 +102,6 @@ export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data:
   return migrated as T
 }
 
-export const getLegacyBibleTabReferenceVersionIds = (data: PersistedBibleTabData): string[] =>
-  [
-    data.selectedVersion,
-    ...(data.parallelVersions ?? []),
-    data.strongBibleSourceVersionId,
-    data.pendingModeAcquisition?.versionId,
-    data.entityReference?.preferredVersion,
-  ].filter((versionId): versionId is string => typeof versionId === 'string')
-
 const isLegacyDownload = (value: unknown): boolean => {
   if (!value || typeof value !== 'object') return false
   const item = 'item' in value ? value.item : undefined
@@ -132,23 +123,5 @@ export const migrateLegacyDownloadQueue = (raw: string): string => {
     return JSON.stringify(queue.filter(item => !isLegacyDownload(item)))
   } catch {
     return raw
-  }
-}
-
-export const preserveLegacyDownloadsInQueue = (
-  persistedQueue: string | undefined,
-  activeQueue: string
-): string => {
-  try {
-    const persisted = persistedQueue ? (JSON.parse(persistedQueue) as unknown) : []
-    const active = JSON.parse(activeQueue) as unknown
-    if (!Array.isArray(persisted) || !Array.isArray(active)) return activeQueue
-
-    return JSON.stringify([
-      ...persisted.filter(isLegacyDownload),
-      ...active.filter(item => !isLegacyDownload(item)),
-    ])
-  } catch {
-    return activeQueue
   }
 }

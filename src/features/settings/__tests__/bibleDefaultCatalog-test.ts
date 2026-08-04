@@ -1,4 +1,5 @@
 import { getBibleDefaultCatalog } from '../bibleDefaultCatalog'
+import { versions } from '~helpers/bibleVersions'
 
 jest.mock('~i18n', () => ({
   getLanguage: () => 'fr',
@@ -13,6 +14,18 @@ jest.mock('~helpers/firebase', () => ({
 }))
 
 describe('Bible default catalogs', () => {
+  it('contains no removed runtime Bible identity', () => {
+    const removedIds = ['LSGS', 'KJVS', 'INT', 'INT_EN']
+
+    expect(Object.keys(versions)).toEqual(expect.not.arrayContaining(removedIds))
+    expect(getBibleDefaultCatalog('reading').map(version => version.id)).toEqual(
+      expect.not.arrayContaining(removedIds)
+    )
+    expect(getBibleDefaultCatalog('strong').map(version => version.id)).toEqual(
+      expect.not.arrayContaining(removedIds)
+    )
+  })
+
   it('offers visible French and English Bibles for the reading default', () => {
     const catalog = getBibleDefaultCatalog('reading')
 

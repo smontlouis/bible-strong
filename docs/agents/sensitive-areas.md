@@ -12,13 +12,15 @@ Ask for explicit human approval before changing behavior in these areas, and doc
 ## Cloud Sync And User Data
 
 - Firestore sync middleware in `src/redux/firestoreMiddleware.ts`.
-- Live updates and migrations in `src/helpers/useLiveUpdates.ts`, `src/helpers/useFirestoreMigration.ts`, and `src/state/useTabGroupsSync.ts`.
+- Live updates and account migrations in `src/helpers/useLiveUpdates.ts`,
+  `src/helpers/useAccountMigrations.ts`, `src/migrations/`, and `src/state/useTabGroupsSync.ts`.
 - User-owned notes, highlights, bookmarks, tags, studies, links, tab groups, and settings.
 
 ## Local Storage, SQLite, And Migrations
 
 - SQLite helpers and database reset/recovery in `src/helpers/sqlite.ts`, `src/helpers/databases.ts`, and `src/helpers/biblesDb.ts`.
-- Bible/resource migrations in `src/helpers/bibleMigration.ts`, `src/helpers/databaseMigration.ts`, and `src/helpers/storage.ts`.
+- Bible/resource migrations in `src/migrations/`, `src/features/migrations/`,
+  `src/helpers/bibleMigration.ts`, `src/helpers/databaseMigration.ts`, and `src/helpers/storage.ts`.
 - Download/delete flows for Bible versions and resources.
 - Full local reset behavior in `src/helpers/nukeApp.ts`.
 

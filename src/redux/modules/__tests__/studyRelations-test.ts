@@ -10,6 +10,8 @@ import { addNoteAction } from '../user/notes'
 import { addWordAnnotationAction } from '../user/wordAnnotations'
 import { normalizeRelation } from '~features/studyRelations/domain'
 
+const mockSetTabGroups = jest.fn()
+
 jest.mock('react-native', () => ({
   Appearance: {
     getColorScheme: jest.fn(() => 'light'),
@@ -31,7 +33,7 @@ jest.mock('~state/tabs', () => ({
   tabGroupsAtom: {},
 }))
 jest.mock('jotai/vanilla', () => ({
-  getDefaultStore: jest.fn(() => ({ set: jest.fn() })),
+  getDefaultStore: jest.fn(() => ({ set: mockSetTabGroups })),
 }))
 jest.mock('~helpers/firebase', () => ({
   firebaseDb: { collection: jest.fn() },
@@ -72,6 +74,10 @@ const createRelation = (overrides: Partial<StudyRelation> = {}): StudyRelation =
   })
 
 describe('study relation reducer', () => {
+  beforeEach(() => {
+    mockSetTabGroups.mockClear()
+  })
+
   it('adds a normalized study relation', () => {
     const state = userReducer(initialState, addStudyRelationAction(createRelation()))
 
@@ -310,6 +316,74 @@ describe('study relation reducer', () => {
     )
     expect(Object.keys(nextState.bible.relationIndex)).toEqual(
       expect.arrayContaining(['verse:1-1-1', 'note:1-1-1'])
+    )
+  })
+
+  it('canonicalizes removed Bible identities when importing a historical backup', () => {
+    const nextState = userReducer(
+      initialState,
+      importData({
+        bible: {
+          settings: {
+            defaultBibleVersion: 'KJVS',
+            defaultStrongBibleVersionId: 'LSGS',
+            compare: { INT_EN: true },
+          },
+          notes: {
+            note: { title: 'Imported note', description: 'LSGS in user text', version: 'INT' },
+          },
+        } as never,
+        studies: {},
+        tabGroups: [
+          {
+            id: 'imported',
+            name: 'Imported',
+            activeTabIndex: 0,
+            tabs: [
+              {
+                id: 'legacy-bible',
+                type: 'bible',
+                title: 'Legacy',
+                isRemovable: true,
+                data: {
+                  selectedVersion: 'LSGS',
+                  parallelVersions: ['KJVS', 'INT_EN'],
+                },
+              },
+            ],
+          },
+        ] as never,
+      })
+    )
+
+    expect(nextState.bible).toMatchObject({
+      settings: {
+        defaultBibleVersion: 'KJV',
+        defaultStrongBibleVersionId: 'LSG',
+        compare: { BHG: true },
+      },
+      notes: {
+        note: { description: 'LSGS in user text', version: 'BHG' },
+      },
+    })
+    expect(mockSetTabGroups).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.arrayContaining([
+        expect.objectContaining({
+          tabs: expect.arrayContaining([
+            expect.objectContaining({
+              data: expect.objectContaining({
+                selectedVersion: 'LSG',
+                parallelVersions: ['KJV', 'BHG'],
+                pendingModeAcquisition: expect.objectContaining({
+                  kind: 'strong',
+                  versionId: 'LSG',
+                }),
+              }),
+            }),
+          ]),
+        }),
+      ])
     )
   })
 })

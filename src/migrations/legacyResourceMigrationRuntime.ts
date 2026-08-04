@@ -16,7 +16,6 @@ import { getDownloadItemIdentity, type DownloadItem } from '~helpers/offlineCopy
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { BHG_INTERLINEAR_PUBLICATION } from '~helpers/interlinearBiblePublications'
 import { getInterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
-import { migrateLegacyDownloadQueue } from '~helpers/legacyBibleVersionMigration'
 import { storage } from '~helpers/storage'
 import { getStrongBiblePublication } from '~helpers/strongBiblePublications'
 import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
@@ -26,21 +25,13 @@ import { getStrongLexiconModuleAvailability } from '~helpers/strongLexiconModule
 import {
   createLegacyResourceMigration,
   type LegacyReplacementResource,
-  type LegacyResourceIdentity,
 } from './legacyResourceMigration'
 import {
-  LEGACY_PUBLICATION_CANDIDATES,
-  LEGACY_REFERENCE_EVIDENCE_KEY,
-  getLegacyResourceFileCandidates,
   inspectLegacyResourceEvidence,
   resetLegacyReferenceEvidenceCaptureState,
 } from './legacyResourceEvidence'
-import {
-  isPersistedCanonicalTabWorkspace,
-  migrateLegacyPersistedReferences,
-} from './legacyPersistedReferences'
-
-const CLEANUP_MARKER_KEY = 'hasCleanedLegacyBibleResourcesV1'
+import { migrateLegacyPersistedReferences } from './legacyPersistedReferences'
+import { createLegacyResourceCleanup } from './legacyResourceCleanup'
 
 const toReplacementResource = (item: DownloadItem): LegacyReplacementResource => ({
   identity: getDownloadItemIdentity(item),
@@ -135,47 +126,14 @@ const installReplacement = async (
   })
 }
 
-const cleanupPathsForIdentity = async (identity: LegacyResourceIdentity): Promise<void> => {
-  const documentDirectory = FileSystem.documentDirectory ?? ''
-  const candidates = [
-    ...getLegacyResourceFileCandidates(documentDirectory, 'fr'),
-    ...getLegacyResourceFileCandidates(documentDirectory, 'en'),
-  ].filter(candidate => candidate.identity === identity)
-  const paths = [...new Set(candidates.map(candidate => candidate.path))]
-  await Promise.all(paths.map(path => FileSystem.deleteAsync(path, { idempotent: true })))
-}
-
-const cleanupLegacyIdentity = async (identity: LegacyResourceIdentity): Promise<void> => {
-  await cleanupPathsForIdentity(identity)
-  if (identity !== 'STRONG') {
-    const installedVersions = await getInstalledVersions()
-    if (installedVersions.includes(identity)) await removeBibleVersion(identity)
-  }
-}
-
-const finalizeCleanup = async (): Promise<void> => {
-  const persistedQueue = storage.getString('downloadQueue')
-  if (typeof persistedQueue !== 'undefined') {
-    storage.set('downloadQueue', migrateLegacyDownloadQueue(persistedQueue))
-  }
-  for (const publication of LEGACY_PUBLICATION_CANDIDATES) {
-    storage.remove(publication.key)
-  }
-  storage.remove(LEGACY_REFERENCE_EVIDENCE_KEY)
-  const persistedTabGroups = storage.getString('tabGroupsAtom')
-  if (persistedTabGroups) {
-    try {
-      if (isPersistedCanonicalTabWorkspace(JSON.parse(persistedTabGroups) as unknown)) {
-        storage.remove('tabsAtom')
-        storage.remove('activeTabIndexAtomOriginal')
-      }
-    } catch {
-      // Preserve historical tab state until the canonical workspace is safely persisted.
-    }
-  }
-  resetLegacyReferenceEvidenceCaptureState()
-  storage.set(CLEANUP_MARKER_KEY, true)
-}
+const { cleanupLegacyIdentity, finalizeCleanup } = createLegacyResourceCleanup({
+  documentDirectory: FileSystem.documentDirectory ?? '',
+  deleteFile: path => FileSystem.deleteAsync(path, { idempotent: true }),
+  getInstalledBibleVersions: getInstalledVersions,
+  removeInstalledBibleVersion: removeBibleVersion,
+  storage,
+  resetReferenceEvidenceCapture: resetLegacyReferenceEvidenceCaptureState,
+})
 
 export const legacyResourceMigration = createLegacyResourceMigration({
   inspectEvidence: () =>
