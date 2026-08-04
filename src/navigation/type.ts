@@ -9,6 +9,7 @@ import {
   StudyNavigateBibleType,
 } from '~common/types'
 import { Theme } from '~themes/index'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 
 interface Verse {
   Livre: string
@@ -59,7 +60,7 @@ type BibleVerseLinksScreenProps = {
   withBack?: boolean
 }
 
-type StrongScreenProps =
+type StrongRouteParams =
   | {
       book: number
       reference: string
@@ -76,6 +77,7 @@ type DictionnaireVerseDetailScreenProps = {
 type ConcordanceByBookScreenProps = {
   strongReference: StrongReference
   book: number
+  strongBibleVersionId?: StrongBibleVersionId
 }
 
 type BibleScreenProps = {
@@ -88,6 +90,7 @@ type BibleScreenProps = {
   chapter?: number
   verse?: number
   version?: VersionCode
+  strongMode?: 'visible' | 'hidden'
 }
 
 type CompareVersesScreenProps = {
@@ -141,6 +144,7 @@ type EventScreenProps = {
 type ConcordanceScreenProps = {
   strongReference: StrongReference
   book: number
+  strongBibleVersionId?: StrongBibleVersionId
 }
 
 type CommentariesScreenProps = {
@@ -159,7 +163,7 @@ export type MainStackProps = {
   Note: NoteScreenProps
   BibleVerseLinks: BibleVerseLinksScreenProps
   Highlights: undefined
-  Strong: StrongScreenProps
+  Strong: StrongRouteParams
   DictionnaireVerseDetail: DictionnaireVerseDetailScreenProps
   ConcordanceByBook: ConcordanceByBookScreenProps
   BibleView: BibleScreenProps

@@ -2,9 +2,8 @@ import styled from '@emotion/native'
 import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
-import Checkbox from '~common/ui/Checkbox'
-import { FeatherIcon } from '~common/ui/Icon'
+import { Sheet, SheetFlatList, SheetHeader, type SheetRef } from '~common/sheet'
+import Radio from '~common/ui/Radio'
 import Text from '~common/ui/Text'
 
 const ChoiceRow = styled(TouchableOpacity)(({ theme }) => ({
@@ -31,21 +30,27 @@ const ChoiceFilterModalInner = <T extends string>(
   { title, selectedValue, options, onSelect }: Props<T>,
   ref: React.ForwardedRef<SheetRef>
 ) => (
-  <Sheet ref={ref} snapPoints={[0.5]} header={<SheetHeader title={title} />}>
-    <SheetScrollView>
-      {options.map(option => {
+  <Sheet ref={ref} header={<SheetHeader title={title} />}>
+    <SheetFlatList
+      data={options}
+      extraData={selectedValue}
+      keyExtractor={option => option.value}
+      renderItem={({ item: option }) => {
         const isSelected = option.value === selectedValue
         return (
-          <ChoiceRow key={option.value} onPress={() => onSelect(option.value)}>
-            <Checkbox checked={isSelected} marginRight={12} />
+          <ChoiceRow
+            accessibilityRole="radio"
+            accessibilityState={{ checked: isSelected }}
+            onPress={() => onSelect(option.value)}
+          >
+            <Radio selected={isSelected} marginRight={12} />
             <Text flex={1} fontSize={16}>
               {option.label}
             </Text>
-            {isSelected && <FeatherIcon name="check" size={20} color="primary" />}
           </ChoiceRow>
         )
-      })}
-    </SheetScrollView>
+      }}
+    />
   </Sheet>
 )
 

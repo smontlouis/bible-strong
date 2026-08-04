@@ -7,6 +7,7 @@ import { shallowEqual } from 'react-redux'
 import books, { Book } from '~assets/bible_versions/books-desc'
 import generateUUID from '~helpers/generateUUID'
 import { StrongReference, StudyNavigateBibleType, VerseIds } from '~common/types'
+import type { StrongIdentityKind } from '~helpers/strongIdentities'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import { storage } from '~helpers/storage'
 import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
@@ -19,6 +20,19 @@ import {
   getPreviousAvailableChapterLocation,
 } from '~helpers/bibleCoverage'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
+import {
+  resolveStrongBibleVersion,
+  type StrongBibleVersionId,
+  type StrongMode,
+} from '~helpers/strongBiblePublications'
+import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
+import {
+  migrateLegacyBibleTabData,
+  migrateLegacyBibleVersionId,
+  migrateLegacyParallelVersions,
+} from '~helpers/legacyBibleVersionMigration'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -53,6 +67,11 @@ export interface BibleTab extends TabBase {
   type: 'bible'
   data: {
     selectedVersion: VersionCode
+    strongMode?: StrongMode
+    strongBibleSourceVersionId?: StrongBibleVersionId
+    interlinearMode?: InterlinearMode
+    interlinearLocale?: ResourceLanguage
+    pendingModeAcquisition?: PendingBibleModeAcquisition
     selectedBook: Book
     selectedChapter: number
     selectedVerse: number
@@ -86,6 +105,7 @@ export interface CompareTab extends TabBase {
   type: 'compare'
   data: {
     selectedVerses: SelectedVerses
+    strongMode?: boolean
   }
 }
 
@@ -95,6 +115,14 @@ export interface StrongTab extends TabBase {
     book?: number
     reference?: string
     strongReference?: StrongReference
+    strongBibleVersionId?: StrongBibleVersionId
+    identityKind?: StrongIdentityKind
+    identityCode?: string
+    bibleVersion?: string
+    clickedWord?: string
+    bibleChapter?: number
+    bibleVerse?: number
+    morphologyCodes?: string[]
   }
 }
 
@@ -235,6 +263,8 @@ export const getDefaultBibleTab = (version?: VersionCode): BibleTab => ({
   type: 'bible',
   data: {
     selectedVersion: version || getDefaultBibleVersion(getLanguage()),
+    strongMode: 'hidden',
+    interlinearMode: 'hidden',
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
     selectedVerse: 1,
@@ -380,6 +410,40 @@ const migrateTabsToRemovable = (tabs: TabItem[]): TabItem[] => {
   return tabs.map(tab => {
     // First migrate old tab types
     tab = migrateTabTypes(tab)
+    if (tab.type === 'bible') {
+      const migratedData = migrateLegacyBibleTabData(
+        tab.data as BibleTab['data'] & { selectedVersion: string }
+      )
+      const resolved = resolveStrongBibleVersion(
+        migratedData.selectedVersion,
+        migratedData.strongMode
+      )
+      tab = {
+        ...tab,
+        data: {
+          ...migratedData,
+          selectedVersion: resolved.versionId as VersionCode,
+          strongMode: resolved.strongMode,
+        },
+      }
+    } else if (tab.type === 'strong') {
+      tab = {
+        ...tab,
+        data: {
+          ...tab.data,
+          ...(tab.data.strongBibleVersionId
+            ? {
+                strongBibleVersionId: migrateLegacyBibleVersionId(
+                  tab.data.strongBibleVersionId
+                ) as StrongBibleVersionId,
+              }
+            : {}),
+          ...(tab.data.bibleVersion
+            ? { bibleVersion: migrateLegacyBibleVersionId(tab.data.bibleVersion) }
+            : {}),
+        },
+      }
+    }
 
     const needsIdMigration = tab.id === 'bible'
     const needsRemovableMigration = tab.isRemovable === false
@@ -465,7 +529,10 @@ export const activeGroupIdAtom = atomWithAsyncStorage<string>('activeGroupIdAtom
 // Persisted atom for global parallel versions preference
 export const savedParallelVersionsAtom = atomWithAsyncStorage<VersionCode[]>(
   'savedParallelVersions',
-  []
+  [],
+  {
+    migrate: versions => migrateLegacyParallelVersions(versions) as VersionCode[],
+  }
 )
 
 // Persisted atom for parallel column width preference (75 or 50 percent)
@@ -722,6 +789,50 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
     setBibleTab(
       produce(draft => {
         draft.data = selectBibleTabVersion(draft.data, selectedVersion)
+      })
+    )
+
+  const setStrongMode = (strongMode: StrongMode) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.strongMode = strongMode
+        draft.data.pendingModeAcquisition = undefined
+      })
+    )
+
+  const setInterlinearMode = (
+    interlinearMode: InterlinearMode,
+    interlinearLocale?: ResourceLanguage
+  ) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.interlinearMode = interlinearMode
+        draft.data.interlinearLocale = interlinearLocale
+        draft.data.pendingModeAcquisition = undefined
+      })
+    )
+
+  const startBibleModeAcquisition = (acquisition: PendingBibleModeAcquisition) =>
+    setBibleTab(
+      produce(draft => {
+        draft.data.pendingModeAcquisition = acquisition
+      })
+    )
+
+  const finishBibleModeAcquisition = (succeeded: boolean) =>
+    setBibleTab(
+      produce(draft => {
+        const acquisition = draft.data.pendingModeAcquisition
+        draft.data.pendingModeAcquisition = undefined
+        if (!succeeded || !acquisition) return
+
+        if (acquisition.kind === 'strong' && draft.data.selectedVersion === acquisition.versionId) {
+          draft.data.strongMode = acquisition.mode
+        }
+        if (acquisition.kind === 'interlinear' && draft.data.selectedVersion === 'BHG') {
+          draft.data.interlinearMode = acquisition.mode
+          draft.data.interlinearLocale = acquisition.locale
+        }
       })
     )
 
@@ -1035,6 +1146,10 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
 
   return {
     setSelectedVersion,
+    setStrongMode,
+    setInterlinearMode,
+    startBibleModeAcquisition,
+    finishBibleModeAcquisition,
     setSelectedBook,
     setSelectedChapter,
     setSelectedVerse,

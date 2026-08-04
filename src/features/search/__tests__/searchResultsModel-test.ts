@@ -95,6 +95,31 @@ describe('searchResultsModel', () => {
     expect(model.sections[0].items).toEqual([noteResult])
   })
 
+  it('displays and opens the matched STEP Strong identity', () => {
+    const model = getSearchResultsModel({
+      ...baseInput,
+      strongResults: [
+        {
+          id: 11446,
+          stepCode: 'H0310A',
+          classicStrong: 'H0310',
+          language: 'hebrew',
+          original: 'כֵּן',
+          transliteration: 'kēn',
+          gloss: 'ainsi',
+        },
+      ],
+    })
+
+    expect(model.sections[0].items[0]).toEqual(
+      expect.objectContaining({
+        chip: 'H0310A',
+        endpoint: expect.objectContaining({ code: '310A' }),
+        strongReference: { language: 'hebrew', code: 'H0310A' },
+      })
+    )
+  })
+
   it('keeps an empty passages section visible while passages are loading', () => {
     const model = getSearchResultsModel({
       ...baseInput,

@@ -3,7 +3,8 @@ import * as DocumentPicker from 'expo-document-picker'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 import { getDefaultStore } from 'jotai/vanilla'
-import React, { useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -19,6 +20,7 @@ import { selectUserAndPlan } from '~redux/selectors/plan'
 import type { RootState } from '~redux/modules/reducer'
 import type { AppDispatch } from '~redux/store'
 import { tabGroupsAtom, TabGroup } from '~state/tabs'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 type ExistingFileInfo = Extract<FileSystem.FileInfo, { exists: true }>
 type BackupBibleData = Omit<RootState['user']['bible'], 'changelog' | 'studies'>
@@ -65,20 +67,17 @@ const ImportExport = () => {
 
 const LastSave = () => {
   const { t } = useTranslation()
-  const [lastSave, setLastSave] = React.useState<ExistingFileInfo>()
-
-  useEffect(() => {
-    const checkLastSave = async () => {
+  const queryClient = useQueryClient()
+  const lastSaveKey = ['last-exported-save'] as const
+  const { data: lastSave } = useQuery({
+    queryKey: lastSaveKey,
+    queryFn: async () => {
       const savePath = `${FileSystem.documentDirectory}/save.biblestrong`
       const saveFile = await FileSystem.getInfoAsync(savePath)
-      if (saveFile.exists) {
-        setLastSave(saveFile)
-      } else {
-        console.log('[Settings] File does not exist')
-      }
-    }
-    checkLastSave()
-  }, [])
+      return saveFile.exists ? saveFile : null
+    },
+    ...localQueryOptions,
+  })
 
   return (
     <Box marginTop={20}>
@@ -90,16 +89,16 @@ const LastSave = () => {
       ) : (
         <Text color="grey">{t('app.noSave')}</Text>
       )}
-      <ExportButton setLastSave={setLastSave} />
+      <ExportButton
+        onSaved={file => {
+          queryClient.setQueryData(lastSaveKey, file)
+        }}
+      />
     </Box>
   )
 }
 
-const ExportButton = ({
-  setLastSave,
-}: {
-  setLastSave: React.Dispatch<React.SetStateAction<ExistingFileInfo | undefined>>
-}) => {
+const ExportButton = ({ onSaved }: { onSaved: (file: ExistingFileInfo) => void }) => {
   const { t } = useTranslation()
 
   const [isSyncing, setIsSyncing] = useState(false)
@@ -165,7 +164,7 @@ const ExportButton = ({
 
       const saveFile = await FileSystem.getInfoAsync(fileUri)
       if (saveFile.exists) {
-        setLastSave(saveFile)
+        onSaved(saveFile)
       }
       toast.success(t('app.exported'))
     } catch {

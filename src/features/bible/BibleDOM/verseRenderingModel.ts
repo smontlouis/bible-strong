@@ -1,5 +1,6 @@
 import type { Verse as TVerse } from '~common/types'
 import type { BibleError } from '~helpers/bibleErrors'
+import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
 import type { WordAnnotationsObj } from '~redux/modules/user'
 import type { ParallelVerse, TaggedVerse, WebViewProps } from './BibleDOMWrapper'
 
@@ -100,6 +101,14 @@ export const getVersesWithWordAnnotations = (
   return verseKeys
 }
 
+export const shouldHighlightOnlyVerseNumber = ({
+  hasWordAnnotations,
+  isStrongModeVerse,
+}: {
+  hasWordAnnotations?: boolean
+  isStrongModeVerse?: boolean
+}) => Boolean(hasWordAnnotations) || Boolean(isStrongModeVerse)
+
 export const getParallelVerseRows = (
   index: number,
   parallelVerses: ParallelVerse[],
@@ -119,3 +128,16 @@ export const getParallelVerseRows = (
 
   return result
 }
+
+export const getParallelVerseModeProps = ({
+  columnIndex,
+  interlinearMode,
+}: {
+  columnIndex: number
+  interlinearMode?: InterlinearMode
+}) =>
+  columnIndex === 0
+    ? { interlinearMode }
+    : {
+        interlinearMode: undefined,
+      }

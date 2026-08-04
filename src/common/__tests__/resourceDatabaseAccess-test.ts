@@ -20,6 +20,15 @@ jest.mock('~helpers/toast', () => ({
     error: jest.fn(),
   },
 }))
+jest.mock('~helpers/downloadItemFactory', () => ({
+  createDatabaseDownloadItem: jest.fn(),
+}))
+jest.mock('~helpers/downloadManager', () => ({
+  downloadManager: { enqueue: jest.fn() },
+}))
+jest.mock('~helpers/useDownloadQueue', () => ({
+  useDownloadItemStatus: jest.fn(),
+}))
 
 import { getResourceDatabaseProgress } from '../resourceDatabaseAccess'
 

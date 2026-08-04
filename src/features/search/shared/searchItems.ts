@@ -3,12 +3,9 @@ import { parseBibleReference } from '~features/search/BibleReferenceWidget'
 import type { SearchResult } from '~helpers/biblesDb'
 import { deltaToPlainText } from '~helpers/deltaToPlainText'
 import formatVerseContent from '~helpers/formatVerseContent'
-import type {
-  DictionnaireLetterRow,
-  DictionnaireSearchRow,
-} from '~features/resources/dictionaryAccess'
-import type { LexiqueRow } from '~features/resources/strongAccess'
-import type { NaveLetterRow, NaveSearchRow } from '~features/resources/naveAccess'
+import type { DictionarySummary } from '~features/resources/dictionaryAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
+import type { NaveTopicSummary } from '~features/resources/naveAccess'
 import i18n from '~i18n'
 import type { Link, Note, Study } from '~redux/modules/user'
 import { getNoteTitle } from '~helpers/getNoteTitle'
@@ -24,8 +21,8 @@ import {
   createVerseEndpoint,
 } from '~features/studyRelations/endpoints'
 
-export type DictionarySearchRow = DictionnaireSearchRow | DictionnaireLetterRow
-export type NaveSearchItemRow = NaveSearchRow | NaveLetterRow
+export type DictionarySearchRow = DictionarySummary
+export type NaveSearchItemRow = NaveTopicSummary
 type Translate = (key: string) => string
 
 const translate: Translate = key => i18n.t(key)
@@ -41,26 +38,20 @@ export const createVerseKeys = (
     (_, index) => `${book}-${chapter}-${startVerse + index}`
   )
 
-export const getStrongCode = (strong: LexiqueRow) =>
-  String(
-    (strong as LexiqueRow & { code?: string | number }).Code ??
-      (strong as { code?: string | number }).code ??
-      ''
-  )
+export const getStrongDisplayCode = (strong: StrongLexiconSearchResult) => strong.stepCode
 
-export const getStrongOriginalWord = (strong: LexiqueRow) =>
-  'Grec' in strong ? strong.Grec : strong.Hebreu
+export const getStrongOriginalWord = (strong: StrongLexiconSearchResult) => strong.original
 
-export const isGreekStrong = (strong: LexiqueRow) => 'Grec' in strong
+export const isGreekStrong = (strong: StrongLexiconSearchResult) => strong.language === 'greek'
 
 export const getStrongEndpoint = (
-  strong: LexiqueRow
+  strong: StrongLexiconSearchResult
 ): NonNullable<SearchEntityResult['endpoint']> => {
   const isGreek = isGreekStrong(strong)
   return createStrongEndpoint({
     language: isGreek ? 'greek' : 'hebrew',
-    code: getStrongCode(strong),
-    labelFallback: strong.Mot,
+    code: strong.stepCode,
+    labelFallback: strong.gloss,
     originalWord: getStrongOriginalWord(strong),
   })
 }
@@ -68,7 +59,7 @@ export const getStrongEndpoint = (
 export const getNaveEndpoint = (
   nave: NaveSearchItemRow
 ): NonNullable<SearchEntityResult['endpoint']> => ({
-  ...createNaveEndpoint({ nameLower: nave.name_lower, labelFallback: nave.name }),
+  ...createNaveEndpoint({ nameLower: nave.normalizedName, labelFallback: nave.name }),
 })
 
 export const getDictionaryEndpoint = (
@@ -80,7 +71,7 @@ export const getDictionaryEndpoint = (
 export const getDictionaryResultKey = (dictionary: DictionarySearchRow, index?: number) =>
   [
     'dictionary',
-    dictionary.rowid ?? dictionary.sanitized_word ?? dictionary.word,
+    dictionary.id ?? dictionary.normalizedWord ?? dictionary.word,
     dictionary.word,
     index,
   ]
@@ -207,20 +198,28 @@ export const getReferenceSearchItems = (
     }
   })
 
-export const getStrongSearchItems = (results: LexiqueRow[], t: Translate = translate) =>
+export const getStrongSearchItems = (
+  results: StrongLexiconSearchResult[],
+  t: Translate = translate
+) =>
   results.map<SearchEntityResult>(strong => {
-    const code = getStrongCode(strong)
+    const code = getStrongDisplayCode(strong)
     const isGreek = isGreekStrong(strong)
     const prefix = isGreek ? 'G' : 'H'
+    const lexiqueType = isGreek ? 'Grec' : 'Hébreu'
     return {
-      id: `strong:${strong.lexiqueType}:${code}:${strong.Mot}`,
+      id: `strong:${strong.language}:${strong.id}:${code}`,
       type: 'strong',
       iconType: 'strong',
-      title: strong.Mot,
-      chip: `${prefix}${code}`,
-      subtitle: t(strong.lexiqueType),
+      title: strong.gloss,
+      chip: code.startsWith(prefix) ? code : `${prefix}${code}`,
+      subtitle: t(lexiqueType),
       description: getStrongOriginalWord(strong),
       endpoint: getStrongEndpoint(strong),
+      strongReference: {
+        language: strong.language,
+        code: strong.stepCode,
+      },
     }
   })
 
@@ -236,7 +235,7 @@ export const getDictionarySearchItems = (results: DictionarySearchRow[]) =>
 
 export const getNaveSearchItems = (results: NaveSearchItemRow[]) =>
   results.map<SearchEntityResult>(nave => ({
-    id: `nave:${nave.name_lower}`,
+    id: `nave:${nave.normalizedName}`,
     type: 'nave',
     iconType: 'nave',
     title: nave.name,

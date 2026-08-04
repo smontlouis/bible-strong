@@ -8,7 +8,8 @@ import { BibleTab, useBibleTabActions } from 'src/state/tabs'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
+import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
 
 type VerseSelectorPopupProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -28,8 +29,7 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
   } = bible
 
   const { data: verses } = useQuery({
-    queryKey: ['bible', version, book.Numero.toString(), chapter.toString()],
-    queryFn: () => resources.bibleContent.loadChapter({ book: book.Numero, chapter, version }),
+    ...bibleChapterQueryOptions({ book: book.Numero, chapter, version }, resources),
   })
 
   const ITEM_WIDTH = 40
@@ -64,8 +64,8 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
           }}
           showsVerticalScrollIndicator={false}
         >
-          {verses?.data?.length ? (
-            verses.data.map((verse, index) => (
+          {verses?.success && verses.data.verses.length ? (
+            verses.data.verses.map((verse, index) => (
               <TouchableBox
                 key={index}
                 backgroundColor="opacity5"

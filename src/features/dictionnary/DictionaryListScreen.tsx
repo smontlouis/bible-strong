@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -13,29 +14,25 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
-import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import type {
-  DictionnaireLetterRow,
-  DictionnaireSearchRow,
-} from '~features/resources/dictionaryAccess'
+import type { DictionarySummary } from '~features/resources/dictionaryAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { DictionaryTab } from '../../state/tabs'
 import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
+import { useAtomValue } from 'jotai/react'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 
-type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
+type DictionaryRow = DictionarySummary
 
 interface DictionarySection {
   title: string
   data: DictionaryRow[]
 }
-
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
 
 const getDictionaryItemLayout = sectionListGetItemLayout({
   getItemHeight: () => 60,
@@ -45,32 +42,21 @@ const getDictionaryItemLayout = sectionListGetItemLayout({
 })
 
 const useSectionResults = (results: DictionaryRow[]) => {
-  const [sectionResults, setSectionResults] = useState<DictionarySection[]>([])
-
-  useEffect(() => {
-    if (!results.length) {
-      setSectionResults([])
-      return
+  return results.reduce<DictionarySection[]>((list, dbItem) => {
+    const listItem = list.find(
+      item => item.title && item.title === getFirstLetterFrom(dbItem.normalizedWord)
+    )
+    if (!listItem) {
+      list.push({
+        title: getFirstLetterFrom(dbItem.normalizedWord),
+        data: [dbItem],
+      })
+    } else {
+      listItem.data.push(dbItem)
     }
-    const sectionResults = results.reduce<DictionarySection[]>((list, dbItem) => {
-      const listItem = list.find(
-        item => item.title && item.title === getFirstLetterFrom(dbItem.sanitized_word)
-      )
-      if (!listItem) {
-        list.push({
-          title: getFirstLetterFrom(dbItem.sanitized_word),
-          data: [dbItem],
-        })
-      } else {
-        listItem.data.push(dbItem)
-      }
 
-      return list
-    }, [])
-    setSectionResults(sectionResults)
-  }, [results])
-
-  return sectionResults
+    return list
+  }, [])
 }
 
 interface DictionaryListScreenProps {
@@ -91,26 +77,76 @@ const DictionaryListScreen = ({
 }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
+  const availabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.offlineDatabaseAvailability(
+      'DICTIONNAIRE',
+      dictionaryResourceLanguage
+    ),
+    queryFn: () =>
+      resources.dictionary.getAvailability?.(dictionaryResourceLanguage) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
 
-  const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: resources.dictionary.search, value: debouncedSearchValue },
-    { query: resources.dictionary.listByLetter, value: letter }
+  const { results, isLoading, error, recoveries } = useResultsByLetterOrSearch(
+    {
+      queryKey: ['dictionary'],
+      query: resources.dictionary.search,
+      value: debouncedSearchValue,
+      resourceLanguage: dictionaryResourceLanguage,
+    },
+    {
+      queryKey: ['dictionary'],
+      query: resources.dictionary.listByLetter,
+      value: letter,
+      resourceLanguage: dictionaryResourceLanguage,
+    }
   )
 
   const dictionaryResults = Array.isArray(results) ? results : []
   const sectionResults = useSectionResults(dictionaryResults)
 
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
+  if (
+    availabilityQuery.data?.status === 'unavailable' &&
+    availabilityQuery.data.recoveries.includes('acquire-offline-copy')
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{
+          kind: 'database',
+          databaseId: 'DICTIONNAIRE',
+          language: dictionaryResourceLanguage,
+        }}
+        title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
+        fileSize={22}
+        hasBackButton={showBackButton}
+        hasHeader
+      />
+    )
+  }
+
+  if (error === 'INVALID_OFFLINE_COPY' && recoveries.includes('acquire-offline-copy')) {
+    return (
+      <OfflineResourceRecovery
+        identity={{
+          kind: 'database',
+          databaseId: 'DICTIONNAIRE',
+          language: dictionaryResourceLanguage,
+        }}
+        title={t('Votre dictionnaire doit être retéléchargé.')}
+        fileSize={22}
+        hasBackButton={showBackButton}
+        hasHeader
+      />
+    )
+  }
 
   const selectWord = (word: string) => {
     if (isNewTabSelection) {
@@ -135,7 +171,7 @@ const DictionaryListScreen = ({
           <Empty
             icon={require('~assets/images/empty-state-icons/inbox.svg')}
             message={`${t('Impossible de charger le dictionnaire...')}${
-              error === 'CORRUPTED_DATABASE'
+              error === 'INVALID_OFFLINE_COPY'
                 ? t(
                     '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
                   )
@@ -186,7 +222,7 @@ const DictionaryListScreen = ({
               stickySectionHeadersEnabled
               sections={sectionResults}
               keyExtractor={(item, index) =>
-                item.rowid ? String(item.rowid) : `${item.sanitized_word}-${item.word}-${index}`
+                item.id ? String(item.id) : `${item.normalizedWord}-${item.word}-${index}`
               }
             />
           ) : (
@@ -202,7 +238,4 @@ const DictionaryListScreen = ({
   )
 }
 
-export default waitForDictionnaireDB({
-  hasBackButton: true,
-  hasHeader: true,
-})(DictionaryListScreen)
+export default DictionaryListScreen

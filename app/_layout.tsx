@@ -40,7 +40,8 @@ import { ResourceAccessProvider } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
-import { QueryClient, QueryClientProvider } from '~helpers/react-query-lite'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { configureQueryManagers, queryClient } from '~helpers/queryClient'
 import {
   useMigrateFromAsyncStorage,
   useMigrateFromFileSystemStorage,
@@ -56,6 +57,8 @@ import getTheme, { baseTheme, Theme } from '~themes/index'
 import { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
 import { PortalProvider } from 'react-native-teleport'
+import { downloadManager } from '~helpers/downloadManager'
+import { cleanupLegacyBibleResources } from '~helpers/legacyBibleUpgrade'
 
 // Register background event handler for Notifee
 // This prevents ANR when notifications fire while app is in background
@@ -113,7 +116,7 @@ const initSentry = () => {
   })
 }
 
-const queryClient = new QueryClient()
+configureQueryManagers()
 
 // Hook to load app resources
 const useAppLoad = () => {
@@ -126,6 +129,16 @@ const useAppLoad = () => {
 
   useEffect(() => {
     ;(async () => {
+      try {
+        await cleanupLegacyBibleResources()
+      } catch (error) {
+        appLogger.error('startup', 'legacy_bible_cleanup.failed', { error })
+      }
+      try {
+        await downloadManager.restore()
+      } catch (error) {
+        appLogger.error('startup', 'resource_recovery.failed', { error })
+      }
       appLogger.info('startup', 'i18n.init.started')
       await setI18n()
       appLogger.info('startup', 'i18n.init.completed')
@@ -299,6 +312,16 @@ function InnerApp() {
                                     bottom: 0,
                                   },
                                 }}
+                              />
+                              <Stack.Screen
+                                name="strong"
+                                options={createFormSheetOptions(theme, {
+                                  contentStyle: {
+                                    bottom: 0,
+                                  },
+                                  sheetAllowedDetents: [1],
+                                  sheetExpandsWhenScrolledToEdge: true,
+                                })}
                               />
                             </Stack>
                             <ThemedToaster />

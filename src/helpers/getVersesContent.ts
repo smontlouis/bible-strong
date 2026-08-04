@@ -1,8 +1,12 @@
 import { VerseIds, VerseRefContent } from '~common/types'
-import { getMultipleVerses } from '~helpers/biblesDb'
 import { VersionCode } from '../state/tabs'
 import verseToReference from './verseToReference'
 import * as Sentry from '@sentry/react-native'
+
+export type LoadVerseTexts = (
+  version: string,
+  verseKeys: string[]
+) => Promise<Record<string, string>>
 
 const orderVerses = (verses: VerseIds) => {
   const orderedVersesList = Object.keys(verses).sort((key1, key2) => {
@@ -22,6 +26,7 @@ export default async ({
   hasQuotes = false,
   hasAppName = true,
   position,
+  loadVerseTexts,
 }: {
   verses: string | VerseIds
   version?: VersionCode
@@ -30,6 +35,7 @@ export default async ({
   hasQuotes?: boolean
   hasAppName?: boolean
   position?: number
+  loadVerseTexts: LoadVerseTexts
 }): Promise<VerseRefContent> => {
   let verseIds = verses
   // if 1-1_1
@@ -42,7 +48,7 @@ export default async ({
   let versesContent = ''
   let reference = verseToReference(selectedVerses)
 
-  const versesMap = await getMultipleVerses(version, selectedVerses)
+  const versesMap = await loadVerseTexts(version, selectedVerses)
 
   for (let index = 0; index < selectedVerses.length; index++) {
     const key = selectedVerses[index]

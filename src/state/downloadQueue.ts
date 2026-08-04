@@ -1,34 +1,12 @@
 import { atom } from 'jotai/vanilla'
-import type { ResourceLanguage, DatabaseId } from '~helpers/databaseTypes'
-
-// ---------------------------------------------------------------------------
-// Per-item lookup atom factory
-// ---------------------------------------------------------------------------
-
 import type { Atom } from 'jotai/vanilla'
+import type { DownloadItem } from '~helpers/offlineCopy'
+
+export type { DownloadItem, DownloadItemType } from '~helpers/offlineCopy'
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-export type DownloadItemType = 'bible' | 'bible-strong' | 'database'
-
-export interface DownloadItem {
-  /** Unique identifier, e.g. "bible:LSG", "database:STRONG:fr" */
-  id: string
-  type: DownloadItemType
-  name: string
-  versionId?: string
-  databaseId?: DatabaseId
-  lang?: ResourceLanguage
-  url: string
-  destinationPath?: string
-  estimatedSize: number
-  hasRedWords?: boolean
-  hasPericope?: boolean
-  addedAt: number
-  retryCount: number
-}
 
 export type DownloadStatus =
   | 'queued'
@@ -44,6 +22,13 @@ export interface DownloadItemState {
   downloadProgress: number // 0..1
   insertProgress: number // 0..1 (bible type only)
   error?: string
+}
+
+export const getDownloadItemProgress = (state: DownloadItemState): number => {
+  if (state.status === 'completed') return 1
+  if (state.status === 'downloading') return state.downloadProgress * 0.8
+  if (state.status === 'inserting') return 0.8 + state.insertProgress * 0.2
+  return 0
 }
 
 // ---------------------------------------------------------------------------
@@ -103,10 +88,7 @@ export const overallProgressAtom = atom(get => {
 
   // Weight: downloading items contribute their downloadProgress, inserting items add insert progress
   const progressSum = active.reduce((sum, s) => {
-    if (s.status === 'completed') return sum + 1
-    if (s.status === 'downloading') return sum + s.downloadProgress * 0.8
-    if (s.status === 'inserting') return sum + 0.8 + s.insertProgress * 0.2
-    return sum // queued = 0
+    return sum + getDownloadItemProgress(s)
   }, 0)
 
   return {
@@ -117,9 +99,11 @@ export const overallProgressAtom = atom(get => {
 })
 
 const itemStatusCache = new Map<string, Atom<DownloadItemState | undefined>>()
+const missingItemStatusAtom = atom<DownloadItemState | undefined>(undefined)
 
 /** O(1) lookup atom for a single item's download status. */
-export const downloadStatusForIdAtom = (itemId: string): Atom<DownloadItemState | undefined> => {
+export const downloadStatusForIdAtom = (itemId?: string): Atom<DownloadItemState | undefined> => {
+  if (!itemId) return missingItemStatusAtom
   if (!itemStatusCache.has(itemId)) {
     itemStatusCache.set(
       itemId,

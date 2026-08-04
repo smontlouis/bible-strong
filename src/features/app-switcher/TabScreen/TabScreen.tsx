@@ -33,7 +33,7 @@ import {
   TabItem,
   TimelineTab,
 } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 import NewTabScreen from './NewTab/NewTabScreen'
 import useScrollToActiveTab from '../utils/useScrollToActiveTab'
 

@@ -1,6 +1,8 @@
 import {
+  getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
   getNumberPayload,
+  getStrongRelationSelectionPayload,
   getStringPayload,
   getStudyRelationsModalTarget,
   getToastPayload,
@@ -13,6 +15,23 @@ describe('bibleDomBridgeCommands', () => {
     expect(getStringPayload({ value: 'note-1' })).toBeUndefined()
     expect(getNumberPayload(2)).toBe(2)
     expect(getNumberPayload('2')).toBeUndefined()
+  })
+
+  it('turns Strong relation endpoints into viewer Strong selections', () => {
+    expect(
+      getStrongRelationSelectionPayload({ type: 'strong', language: 'hebrew', code: '3068' }, 'DBY')
+    ).toEqual({
+      book: 1,
+      reference: '3068',
+      identities: [{ kind: 'strong', code: 'H3068' }],
+      version: 'DBY',
+    })
+    expect(
+      getStrongRelationSelectionPayload(
+        { type: 'strong', language: 'unknown', code: '3068' },
+        'DBY'
+      )
+    ).toBeUndefined()
   })
 
   it('parses toast payloads from object messages only', () => {
@@ -59,5 +78,24 @@ describe('bibleDomBridgeCommands', () => {
       verseIds: ['1-1-1', '1-1-2'],
     })
     expect(getNoteNavigationPayload(null)).toEqual({ verseIds: [] })
+  })
+
+  it('accepts only complete canonical Bible note payloads from the DOM bridge', () => {
+    expect(
+      getCanonicalBibleNotePayload({
+        offset: 36,
+        order: 17,
+        kind: 'note',
+        markup: '<note n="a">le vide</note>',
+      })
+    ).toEqual({
+      offset: 36,
+      order: 17,
+      kind: 'note',
+      markup: '<note n="a">le vide</note>',
+    })
+    expect(
+      getCanonicalBibleNotePayload({ kind: 'note', markup: 'missing offsets' })
+    ).toBeUndefined()
   })
 })

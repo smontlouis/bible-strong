@@ -3,7 +3,6 @@ import { to } from 'await-to-js'
 
 import { getDatabasesRef } from '~helpers/firebase'
 import i18n, { getLanguage } from '~i18n'
-import { getI18n } from 'react-i18next'
 import {
   ResourceLanguage,
   DatabaseId,
@@ -15,8 +14,6 @@ import {
 } from '~helpers/databaseTypes'
 
 export const databaseDictionnaireName = 'dictionnaire.sqlite'
-export const databaseStrongName = 'strong.sqlite'
-export const databaseInterlineaireName = 'interlineaire.sqlite'
 export const databaseTresorName = 'commentaires-tresor.sqlite'
 export const databaseMhyName = 'mhy.sqlite'
 export const databaseNaveName = 'nave.sqlite'
@@ -25,12 +22,10 @@ export const databaseBiblesName = 'bibles.sqlite'
 
 // Map DatabaseId to file names
 export const databaseFileNames: Record<DatabaseId, string> = {
-  STRONG: databaseStrongName,
   DICTIONNAIRE: databaseDictionnaireName,
   NAVE: databaseNaveName,
   TRESOR: databaseTresorName,
   MHY: databaseMhyName,
-  INTERLINEAIRE: databaseInterlineaireName,
   TIMELINE: 'bible-timeline-events.json',
   BIBLES: databaseBiblesName,
 }
@@ -149,15 +144,6 @@ export const databases = (lang?: ResourceLanguage) => {
   const effectiveLang = lang || getLanguage()
 
   return {
-    STRONG: {
-      id: 'STRONG' as const,
-      name: getI18n().t('Lexique hébreu & grec'),
-      desc: i18n.t(
-        'Lexique contenu les strongs grecs et hébreu avec leur concordance et définitions'
-      ),
-      fileSize: 34941952,
-      path: getDbPath('STRONG', effectiveLang),
-    },
     DICTIONNAIRE: {
       id: 'DICTIONNAIRE' as const,
       name: i18n.t('Dictionnaire Westphal'),
@@ -187,13 +173,6 @@ export const databases = (lang?: ResourceLanguage) => {
       desc: i18n.t('Commentaires concis de Matthew Henry. Traduction Dominique Osché.'),
       fileSize: 6574080,
       path: getDbPath('MHY', effectiveLang),
-    },
-    INTERLINEAIRE: {
-      id: 'INTERLINEAIRE' as const,
-      name: i18n.t('Interlinéaire'),
-      desc: i18n.t('Texte interlinéaire hébreu/grec'),
-      fileSize: 0, // Size varies
-      path: getDbPath('INTERLINEAIRE', effectiveLang),
     },
     TIMELINE: {
       id: 'TIMELINE' as const,

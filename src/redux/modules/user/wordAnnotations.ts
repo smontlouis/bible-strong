@@ -15,6 +15,8 @@ export interface WordAnnotation {
   id: string
   version: VersionCode
   ranges: AnnotationRange[]
+  /** Canonical Bible text revision against which the word indices were validated. */
+  textRevision?: string
   color: string
   type: 'background' | 'underline' | 'circle'
   date: number
@@ -23,6 +25,8 @@ export interface WordAnnotation {
 }
 
 export type WordAnnotationsObj = { [id: string]: WordAnnotation }
+export type WordAnnotationRealignmentUpdate = Pick<WordAnnotation, 'ranges' | 'textRevision'> &
+  Partial<Pick<WordAnnotation, 'version'>>
 
 export const ADD_WORD_ANNOTATION = 'user/ADD_WORD_ANNOTATION'
 export const UPDATE_WORD_ANNOTATION = 'user/UPDATE_WORD_ANNOTATION'
@@ -30,6 +34,7 @@ export const REMOVE_WORD_ANNOTATION = 'user/REMOVE_WORD_ANNOTATION'
 export const REMOVE_WORD_ANNOTATIONS_IN_RANGE = 'user/removeWordAnnotationsInRange'
 export const CHANGE_WORD_ANNOTATION_COLOR = 'user/CHANGE_WORD_ANNOTATION_COLOR'
 export const CHANGE_WORD_ANNOTATION_TYPE = 'user/CHANGE_WORD_ANNOTATION_TYPE'
+export const REALIGN_WORD_ANNOTATIONS = 'user/REALIGN_WORD_ANNOTATIONS'
 
 export const addWordAnnotationAction = createAction(
   ADD_WORD_ANNOTATION,
@@ -55,6 +60,13 @@ export const changeWordAnnotationTypeAction = createAction(
   (id: string, type: 'background' | 'underline' | 'circle') => ({ payload: { id, type } })
 )
 
+export const realignWordAnnotationsAction = createAction(
+  REALIGN_WORD_ANNOTATIONS,
+  (updates: Record<string, WordAnnotationRealignmentUpdate>) => ({
+    payload: { updates },
+  })
+)
+
 interface WordPosition {
   verseKey: string
   wordIndex: number
@@ -73,6 +85,7 @@ export function addWordAnnotation({
   ranges,
   color,
   type,
+  textRevision,
   noteId,
   tags,
 }: {
@@ -81,6 +94,7 @@ export function addWordAnnotation({
   ranges: AnnotationRange[]
   color: string
   type: 'background' | 'underline' | 'circle'
+  textRevision?: string
   noteId?: string
   tags?: TagsObj
 }) {
@@ -91,6 +105,7 @@ export function addWordAnnotation({
       ranges,
       color,
       type,
+      ...(textRevision && { textRevision }),
       date: Date.now(),
       ...(noteId && { noteId }),
       ...(tags && { tags }),

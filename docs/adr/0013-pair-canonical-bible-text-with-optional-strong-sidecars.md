@@ -1,0 +1,146 @@
+# ADR-0013: Pair Canonical Bible Text With Optional Strong Sidecars
+
+## Status
+
+Accepted
+
+## Context
+
+LSG, DBY and DBR must be readable as normal Bibles without requiring a Strong download. Their
+Strong datasets contain indexed word ranges and concordance data whose offsets are meaningful only
+for one exact text revision. The historical LSGS version duplicated readable text and exposed a
+storage distinction as a separate Bible in the product.
+
+Bible updates can also invalidate persisted word-annotation offsets. User annotations must not be
+deleted merely because an automatic migration cannot locate an unambiguous replacement.
+
+## Decision
+
+Publish each Strong-capable Bible as two independently downloadable resources under one logical
+Bible version:
+
+1. a canonical JSON artifact containing the visible verse text, presentation events and publisher
+   notes;
+2. an optional, text-free SQLite sidecar containing Strong word spans, identities, lexemes and
+   concordance indexes.
+
+Import canonical JSON into the shared Bible text database. Keep each Strong sidecar as its own
+SQLite file and apply it as an overlay at read time. Require exact `textRevision` and `textSha256`
+agreement before using a sidecar. Installation verifies archive and content checksums and activates
+replacements atomically.
+
+Treat sidecar schema declarations as minimum reader contracts rather than exact publication pins.
+Sidecar formats evolve additively: readers accept newer schema versions when their required tables,
+columns, text identity and STEP runtime contract remain available. Extra compatible STEP runtime
+hashes are additive and do not invalidate an older reader.
+
+Treat DBR as the application version backed by the DBYR generation dataset. English Strong-capable
+publications use the same pair contract for KJV, NASB 2020, NASB 1995, BSB, ASV, Darby, RLT,
+Revised Webster and RV 1895. Remove the former LSGS, KJVS, INT and INT_EN Bible identities entirely:
+they are not catalog entries, downloadable resources, selectable versions or runtime aliases. A
+one-time persisted-state migration maps them to LSG, KJV or BHG with the corresponding mode and
+locale. The same upgrade deletes their obsolete local files, databases and queued downloads.
+Afterward, LSG, KJV and BHG are the only corresponding canonical Bible identities; optional
+sidecars provide Strong and interlinear placement without duplicating the Bible text.
+
+Reverse-interlinear display is a lexical reading surface rather than an annotation surface. While
+it is active, keep personal Bible data out of the viewer: selected verses, highlights, word
+annotations, notes, tags, bookmarks, links and study relations are neither rendered nor editable.
+Clear an active verse selection or annotation session when entering the mode, and ignore personal
+data actions that were already in flight. Normal text and Strong-number display retain the standard
+personal-data behavior. Publisher content and editorial comments are not personal Bible data and
+remain available.
+
+When a compatible BHG interlinear index supplies the STEP tokens aligned to a Strong span, Strong
+display forwards their contextual morphology into the Strong selection sheet together with the
+resolved identities. Strong display remains usable without that optional alignment; in that case
+the sheet simply has no contextual morphology to show.
+
+In the verse-resource modal, resolve Strong navigation from the compatible sidecar of the currently
+open Bible, then from the first installed sidecar in the LSG, DBY, DBR priority order. Expose the
+resolved Bible source and let the user override it for the current Bible tab. A missing manual
+choice returns to automatic resolution. Other Strong navigation first uses the configured default
+Strong Bible, then the remaining installed sidecars in that same priority order. Keep the existing
+global Strong database for shared lexical definitions; its French or English language setting
+changes definitions, not the Bible source used for Strong word placement.
+
+Removing a canonical Bible explicitly also removes its version-specific Strong sidecar. Replacing
+or re-downloading the Bible required by the active application language preserves that sidecar so
+it can be reused after the compatible canonical text has been installed again. The required Bible
+is LSG in French and KJV in English; the other language's Bible remains removable. Switching the
+application language must ensure the target language's required Bible is downloaded. Removing a
+sidecar never removes its Bible or the shared global Strong database.
+
+In download management, identify each sidecar as an index belonging to its canonical Bible and
+display the required Strong-number attribution from Concordances et Traductions de la Bible for the
+French publications, and the CrossWire/STEP provenance for the English publications.
+Availability and compatibility states continue to drive actions without replacing that provenance.
+
+Before activating a new canonical text revision, journal an idempotent word-annotation migration.
+Move an annotation only when its remembered text can be aligned deterministically. Leave ambiguous
+or missing annotations unchanged and visible.
+
+## Consequences
+
+Users can install and update readable text without Strong data, while Strong mode and concordances
+remain version-specific. The sidecar avoids duplicated text and can be queried efficiently, but
+publication must always ship compatible text/sidecar metadata and the app must handle missing,
+incompatible and corrupt sidecars explicitly.
+
+Canonical text presentation is now a publication contract rather than something reconstructed from
+Strong markup on the phone. Any text or layout change creates a new text revision and can trigger an
+annotation realignment attempt. Failed automatic realignment is deliberately non-destructive, so a
+small number of annotations may remain visually offset after a text update.
+
+Schema V3 stores publisher notes beside each canonical verse as ordered, offset-based events. The
+reader inserts an information control without adding text to the canonical verse. It parses only
+the publication's supported markup (`p`, `l`, `lg`, `i`, `divineName`, `small-caps`, `sup`, `ref`)
+and renders note content in a native bottom sheet. Publisher-note labels are generated by CSS
+rather than text nodes. In annotation mode they remain visible but ignore pointer and verse-touch
+events, so selectable text and persisted annotation offsets remain unchanged.
+
+References embedded in Schema V3 publisher notes use the internal
+`<ref id="…">` envelope, with `id` treated as an OSIS passage identifier and
+the human-readable label treated as display text only. For compatibility with
+the first V3 DBY publication, the reader expands a relative numeric range end
+to a complete OSIS endpoint before navigation. The normalizer accepts only
+supported canonical book identifiers. Because the reading surface has one
+current chapter, a multichapter range opens at its first endpoint; displaying
+the complete range requires a future multichapter viewer contract.
+
+Schema V4 additionally embeds headings/pericopes and red-letter layout in the canonical JSON.
+Persist headings in the shared Bible database and derive the existing pericope view model from
+them. Render the canonical `red` events directly. For V4 publications, neither installation nor
+reading may download or consult the historical pericope and red-word JSON side files. Space-
+separated OSIS identifiers in enriched notes normalize to the comma-separated passage contract
+understood by the viewer.
+
+## Validation
+
+The tab-scoped source choice was explicitly approved as part of issue 199. Automated validation
+covered resolver priority, manual override fallback, and Firestore tab-group serialization. An iOS
+simulator smoke test opened BCC1923 without an LSG sidecar, confirmed automatic DBY resolution,
+selected DBY manually, returned to automatic mode, verified unavailable LSG and DBR entries were
+disabled, and confirmed the separate lexical-language menu remained available.
+
+A follow-up iOS smoke test confirmed that the source pill shrinks for a manual three-letter source,
+expands only as far as `Auto · DBY`, avoids duplicate provenance below the header, and keeps the
+displayed verse and lexical cards visible while navigating to the next verse.
+
+For Schema V3, automated tests cover note-markup whitelisting, entity decoding, formatted note
+content, canonical note offsets, poetic line boundaries, selectable-text invariance, bridge payload
+validation, sidecar metadata without `VerseNotes`, and publication checksums/counts. The full Jest
+suite passes (92 suites, 650 tests), as do TypeScript, formatting and diff checks; ESLint reports
+only the existing repository warnings.
+
+An iOS simulator migration smoke replaced an incompatible DBR canonical Bible with the V3 archive,
+verified the imported notes in the shared SQLite Bible database, then installed and activated its
+matching text-free Strong sidecar. The first sidecar attempt reproduced an iOS URL-cache checksum
+mismatch; disabling Expo download caching and versioning the publication URL resolved it. The smoke
+then confirmed the Strong control changing from progress to active, Strong spans rendering, a
+publisher-note label opening its native sheet, and the same label remaining visible but inert in
+Mode libre without changing the selected Bible text.
+
+Reference parsing tests cover complete OSIS identifiers, the three relative
+DBY range forms, rejection of unknown book identifiers, same-chapter focus
+verses and the documented first-endpoint behavior for multichapter ranges.

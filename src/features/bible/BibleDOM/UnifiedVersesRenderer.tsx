@@ -18,6 +18,13 @@ import Verse from './Verse'
 import { scaleFontSize } from './scaleFontSize'
 import type { CrossVersionAnnotation } from '~redux/selectors/bible'
 import {
+  getCanonicalBibleHeadingReferences,
+  type CanonicalBibleHeading,
+} from '~helpers/canonicalBibleHeadings'
+import { OPEN_CANONICAL_BIBLE_REFERENCE } from './dispatch'
+import { useDispatch } from './DispatchProvider'
+import { useTranslations } from './TranslationsContext'
+import {
   createVerseKey,
   getAdjacentFocusVerses,
   getFadePosition,
@@ -88,17 +95,16 @@ export interface UnifiedVersesRendererProps {
   verses: TVerse[]
   parallelVerses: ParallelVerse[]
   focusVerses: WebViewProps['focusVerses']
-  secondaryVerses: TVerse[] | null
   selectedVerses: { [key: string]: boolean }
   highlightedVerses: HighlightsObj
   settings: RootStyles['settings']
   verseToScroll: number | undefined
   contextDisplayMode: WebViewProps['contextDisplayMode']
   version: string
+  interlinearMode?: WebViewProps['interlinearMode']
   pericopeChapter: PericopeChapter
   isSelectionMode: WebViewProps['isSelectionMode']
   selectedCode: WebViewProps['selectedCode']
-  isINTComplete: boolean
   isHebreu: boolean
   isParallelVerse: boolean
   comments: { [key: string]: string } | null
@@ -131,58 +137,115 @@ export interface UnifiedVersesRendererProps {
 
 /**
  * Renders pericope headers (h1-h4) for a verse.
- * In normal mode, headers are clickable and show an external icon.
+ * In normal mode, only canonical verse references and the external icon are clickable.
  * In annotation mode, headers are plain text.
  */
 function PericopeHeaders({
   pericope,
+  headings,
   settings,
   annotationMode,
   navigateToPericope,
 }: {
   pericope: ReturnType<typeof getPericopeVerse>
+  headings?: CanonicalBibleHeading[]
   settings: RootStyles['settings']
   annotationMode?: boolean
   navigateToPericope: () => void
 }): JSX.Element | null {
   const { h1, h2, h3, h4 } = pericope
+  const dispatch = useDispatch()
+  const translations = useTranslations()
   if (!h1 && !h2 && !h3 && !h4) return null
 
-  if (annotationMode) {
+  const renderHeadingContent = (text: string) => {
+    if (annotationMode) return text
+
+    const canonicalHeading = headings?.find(heading => heading.text.trim() === text)
+    if (!canonicalHeading) return text
+
+    const references = getCanonicalBibleHeadingReferences(canonicalHeading)
+    if (!references.length) return text
+
+    let cursor = 0
     return (
       <>
-        {h1 && <H1 settings={settings}>{h1}</H1>}
-        {h2 && <H2 settings={settings}>{h2}</H2>}
-        {h3 && <H3 settings={settings}>{h3}</H3>}
-        {h4 && <H4 settings={settings}>{h4}</H4>}
+        {references.map(reference => {
+          const before = text.slice(cursor, reference.start)
+          cursor = reference.end
+          return (
+            <span key={`${reference.start}-${reference.osis}`}>
+              {before}
+              <a
+                href={`#${reference.osis}`}
+                style={{
+                  color: settings.colors[settings.theme].primary,
+                  textDecoration: 'underline',
+                }}
+                onClick={event => {
+                  event.preventDefault()
+                  event.stopPropagation()
+                  dispatch({
+                    type: OPEN_CANONICAL_BIBLE_REFERENCE,
+                    payload: reference.osis,
+                  })
+                }}
+              >
+                {reference.text}
+              </a>
+            </span>
+          )
+        })}
+        {text.slice(cursor)}
       </>
     )
+  }
+
+  const renderExternalButton = () => (
+    <button
+      type="button"
+      aria-label={translations.pericopeIndex}
+      onClick={navigateToPericope}
+      style={{
+        appearance: 'none',
+        background: 'transparent',
+        border: 0,
+        cursor: 'pointer',
+        margin: 0,
+        padding: 0,
+      }}
+    >
+      <ExternalIcon style={{ marginLeft: 10, verticalAlign: 'middle' }} />
+    </button>
+  )
+  const stopHeadingClick = (event: React.MouseEvent<HTMLHeadingElement>) => {
+    event.stopPropagation()
   }
 
   return (
     <>
       {h1 && (
-        <H1 settings={settings} onClick={navigateToPericope}>
-          {h1}
-          <ExternalIcon />
+        <H1 settings={settings} data-ignore-verse-touch onClick={stopHeadingClick}>
+          {renderHeadingContent(h1)}
+          {!annotationMode && renderExternalButton()}
         </H1>
       )}
       {h2 && (
-        <H2 settings={settings} onClick={navigateToPericope}>
-          {h2}
-          <ExternalIcon />
+        <H2 settings={settings} data-ignore-verse-touch onClick={stopHeadingClick}>
+          {renderHeadingContent(h2)}
+          {!annotationMode && renderExternalButton()}
         </H2>
       )}
       {h3 && (
-        <H3 settings={settings} onClick={navigateToPericope}>
-          {h3}
-          <ExternalIcon />
+        <H3 settings={settings} data-ignore-verse-touch onClick={stopHeadingClick}>
+          {renderHeadingContent(h3)}
+          {!annotationMode && renderExternalButton()}
         </H3>
       )}
       {h4 && (
-        <H4 settings={settings} onClick={navigateToPericope}>
-          {h4}
-          <ExternalIcon />
+        <H4 settings={settings} data-ignore-verse-touch onClick={stopHeadingClick}>
+          {renderHeadingContent(h4)}
+          {!annotationMode && renderExternalButton()}
         </H4>
       )}
     </>
@@ -193,17 +256,16 @@ export function UnifiedVersesRenderer({
   verses,
   parallelVerses,
   focusVerses,
-  secondaryVerses,
   selectedVerses,
   highlightedVerses,
   settings,
   verseToScroll,
   contextDisplayMode,
   version,
+  interlinearMode,
   pericopeChapter,
   isSelectionMode,
   selectedCode,
-  isINTComplete,
   isHebreu,
   isParallelVerse,
   comments,
@@ -265,6 +327,7 @@ export function UnifiedVersesRenderer({
             <Span key={verseKey}>
               <PericopeHeaders
                 pericope={pericope}
+                headings={verse.Headings}
                 settings={settings}
                 annotationMode={annotationMode}
                 navigateToPericope={navigateToPericope}
@@ -323,7 +386,6 @@ export function UnifiedVersesRenderer({
 
         const comment = comments?.[Verset]
         const isVerseToScroll = !isContextFocused && verseToScroll == Verset
-        const secondaryVerse = secondaryVerses && secondaryVerses[i]
         const parallelVerse = isParallelVerse
           ? getParallelVerseRows(i, parallelVerses, verse, version)
           : []
@@ -334,6 +396,7 @@ export function UnifiedVersesRenderer({
           <Span key={verseKey}>
             <PericopeHeaders
               pericope={pericope}
+              headings={verse.Headings}
               settings={settings}
               annotationMode={annotationMode}
               navigateToPericope={navigateToPericope}
@@ -341,10 +404,10 @@ export function UnifiedVersesRenderer({
             <Verse
               isHebreu={isHebreu}
               version={version}
+              interlinearMode={interlinearMode}
               verse={verse}
               isParallelVerse={isParallelVerse}
               parallelVerse={parallelVerse}
-              secondaryVerse={secondaryVerse}
               settings={settings}
               isSelected={isSelected}
               isSelectedMode={hasSelectedVerses}
@@ -356,7 +419,6 @@ export function UnifiedVersesRenderer({
               isVerseToScroll={isVerseToScroll}
               selectedCode={selectedCode}
               isFocused={isFocused}
-              isINTComplete={isINTComplete}
               tag={tag}
               bookmark={bookmark}
               fadePosition={fadePosition}

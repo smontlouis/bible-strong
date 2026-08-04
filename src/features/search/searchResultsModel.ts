@@ -1,5 +1,5 @@
 import type { SearchResult } from '~helpers/biblesDb'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import type { SearchItemType } from '~state/searchFilters'
 import type { SearchResultSection } from './shared/SearchSectionBlock'
 import {
@@ -49,7 +49,7 @@ type SearchResultsModelInput = {
   noteResults: SearchEntityResult[]
   linkResults: SearchEntityResult[]
   studyResults: SearchEntityResult[]
-  strongResults: LexiqueRow[]
+  strongResults: StrongLexiconSearchResult[]
   dictionaryResults: DictionarySearchRow[]
   naveResults: NaveSearchItemRow[]
   passageResults: SearchResult[] | null

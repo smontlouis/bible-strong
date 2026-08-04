@@ -2,10 +2,8 @@ import * as FileSystem from 'expo-file-system/legacy'
 import * as SQLite from 'expo-sqlite'
 import {
   databaseDictionnaireName,
-  databaseInterlineaireName,
   databaseMhyName,
   databaseNaveName,
-  databaseStrongName,
   databaseTresorName,
   getDatabases,
   getDbPath,
@@ -19,6 +17,13 @@ import {
   getSharedSqliteDirPath,
 } from './databaseTypes'
 import { appLogger } from '~helpers/agentObservability'
+import { restoreOrphanedResourceBackup } from './atomicResourceFile'
+
+export type SQLiteDatabase = SQLite.SQLiteDatabase
+
+export const openSQLiteDatabase = (
+  ...args: Parameters<typeof SQLite.openDatabaseAsync>
+): ReturnType<typeof SQLite.openDatabaseAsync> => SQLite.openDatabaseAsync(...args)
 
 // Original DB class for backward compatibility
 class DB {
@@ -86,6 +91,7 @@ class LanguageAwareDB {
     this.initPromise = (async () => {
       // Ensure the directory exists
       await initLanguageDirs(this.lang)
+      await restoreOrphanedResourceBackup(this.path, `${this.path}.backup`)
 
       // Check if database file exists and has content BEFORE opening
       // This prevents SQLite from creating empty 0-byte files
@@ -247,11 +253,9 @@ export const dbManager = new DBManager()
 
 // Legacy exports for backward compatibility
 // These will be gradually replaced in the codebase
-export const strongDB = new DB(databaseStrongName)
 export const dictionnaireDB = new DB(databaseDictionnaireName)
 export const mhyDB = new DB(databaseMhyName)
 export const naveDB = new DB(databaseNaveName)
-export const interlineaireDB = new DB(databaseInterlineaireName)
 export const tresorDB = new DB(databaseTresorName)
 
 export const deleteAllDatabases = async () => {
@@ -259,17 +263,10 @@ export const deleteAllDatabases = async () => {
   await dbManager.closeAll()
 
   // Delete legacy databases
-  strongDB.delete()
   dictionnaireDB.delete()
   tresorDB.delete()
   mhyDB.delete()
   naveDB.delete()
-  interlineaireDB.delete()
-
-  const intFile = await FileSystem.getInfoAsync(
-    `${FileSystem.documentDirectory}SQLite/${databaseInterlineaireName}`
-  )
-  if (intFile.exists) FileSystem.deleteAsync(intFile.uri)
 
   await Promise.all(
     Object.values(getDatabases()).map(async db => {
@@ -320,14 +317,9 @@ export const checkDatabasesStorage = async () => {
 
   console.log('[DBManager] Checking databases...')
   await Promise.all(
-    [
-      databaseStrongName,
-      databaseDictionnaireName,
-      databaseInterlineaireName,
-      databaseTresorName,
-      databaseMhyName,
-      databaseNaveName,
-    ].map(dbName => checkForDatabase(dbName, dir))
+    [databaseDictionnaireName, databaseTresorName, databaseMhyName, databaseNaveName].map(dbName =>
+      checkForDatabase(dbName, dir)
+    )
   )
 }
 

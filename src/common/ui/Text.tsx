@@ -153,6 +153,11 @@ const Text = styled.Text<TextProps>((props): TextStyle => {
     bottom: props.bottom ?? props.b,
     borderWidth: props.borderWidth,
     borderColor: theme.colors[props.borderColor as keyof typeof theme.colors] ?? props.borderColor,
+    borderRadius: props.borderRadius,
+    borderTopLeftRadius: props.borderTopLeftRadius,
+    borderTopRightRadius: props.borderTopRightRadius,
+    borderBottomLeftRadius: props.borderBottomLeftRadius,
+    borderBottomRightRadius: props.borderBottomRightRadius,
     transform: props.transform,
 
     overflow: props.overflow ? 'visible' : 'hidden',

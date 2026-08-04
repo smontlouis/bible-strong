@@ -12,7 +12,7 @@ import Paragraph from '~common/ui/Paragraph'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
 import AccordionItem from '~features/bible/BookSelectorSheet/AccordionItem'
-import { useResolvedBibleVerses, verseStringToObject } from '~helpers/useBibleVerses'
+import { useResolvedBibleVerses, verseStringToObject } from '~features/resources/useBibleVerses'
 import verseToReference from '~helpers/verseToReference'
 
 interface VerseAccordionProps {

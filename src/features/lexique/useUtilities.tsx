@@ -1,18 +1,24 @@
 import { useEffect, useState } from 'react'
-import * as Sentry from '@sentry/react-native'
-
-import { DatabaseError } from '~helpers/catchDatabaseError'
+import { type QueryKey, useQuery } from '@tanstack/react-query'
 import useDebounce from '~helpers/useDebounce'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { localQueryOptions } from '~helpers/queryOptions'
+import {
+  getResourceAccessErrorCode,
+  ResourceAccessError,
+} from '~features/resources/resourceAccessError'
 
 interface UseSearchValueOptions {
   onDebouncedValue?: () => void
 }
 
-type QueryFunction<T> = (value: string) => Promise<T[] | DatabaseError>
+type QueryFunction<T> = (value: string) => Promise<T[]>
 
 interface QueryConfig<T> {
+  queryKey?: QueryKey
   query?: QueryFunction<T>
   value?: string
+  resourceLanguage?: ResourceLanguage
 }
 
 export const useSearchValue = ({ onDebouncedValue }: UseSearchValueOptions = {}) => {
@@ -29,50 +35,31 @@ export const useSearchValue = ({ onDebouncedValue }: UseSearchValueOptions = {})
   return { searchValue, debouncedSearchValue, setSearchValue }
 }
 
-export const useResults = <T, P>(asyncFunc: (parameter: P) => Promise<T>, parameter: P) => {
-  const [results, setResults] = useState<T | undefined>()
-  useEffect(() => {
-    asyncFunc(parameter).then(results => {
-      if (!results) {
-        Sentry.captureMessage('useResults: Results is undefined', {
-          extra: {
-            asyncFunc,
-          },
-        })
-      }
-      setResults(results)
-    })
-  }, [asyncFunc, parameter])
-
-  return results
-}
-
 export const useResultsByLetterOrSearch = <T,>(
   search: QueryConfig<T> = {},
   letter: QueryConfig<T> = {}
 ) => {
-  const [results, setResults] = useState<T[] | DatabaseError>([])
-  const [isLoading, setLoading] = useState(true)
-  useEffect(() => {
-    if (search.value && search.query) {
-      setLoading(true)
-      search.query(search.value).then(results => {
-        setResults(results)
-        setLoading(false)
-      })
-      return
-    }
+  const active = search.value && search.query ? search : letter
+  const mode = active === search ? 'search' : 'letter'
+  const enabled = Boolean(active.value && active.query)
+  const { data, error, isPending, isFetching } = useQuery({
+    queryKey: [
+      'resource-results',
+      ...(active.queryKey ?? []),
+      active.resourceLanguage,
+      mode,
+      active.value ?? '',
+    ],
+    queryFn: () => active.query!(active.value!),
+    enabled,
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
 
-    if (letter.value && letter.query) {
-      setLoading(true)
-      letter.query(letter.value).then(results => {
-        setResults(results)
-        setLoading(false)
-      })
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search.query, search.value, letter.query, letter.value])
-
-  return { results, isLoading }
+  return {
+    results: data ?? [],
+    isLoading: enabled && (isPending || isFetching),
+    error: getResourceAccessErrorCode(error),
+    recoveries: error instanceof ResourceAccessError ? error.recoveries : [],
+  }
 }

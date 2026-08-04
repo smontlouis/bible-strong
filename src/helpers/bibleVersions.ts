@@ -3,16 +3,38 @@ import { getIfLocalResourceNeedsDownload } from '~features/resources/resourceAva
 import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
 import type { BibleCanonId } from './bibleBookCatalog'
+import type { StrongBibleDatasetId } from './strongBiblePublications'
 
 export type BibleVersificationId =
   | 'bible-strong-default'
   | 'bible-strong-french-4-chapter-joel'
   | 'bible-strong-catholic-extended-esther-daniel'
+  | 'theotex-septuagint'
   | 'clementine-vulgate'
 
+export type BibleVersionLanguage = 'fr' | 'en' | 'he' | 'grc' | 'he-grc' | 'la'
+
+export type TranslationReadingProfile =
+  | 'word-for-word'
+  | 'balanced'
+  | 'thought-for-thought'
+  | 'paraphrase'
+
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
-  // Find a way to update the version
-  return false
+  const { getStrongBiblePublication, isStrongCapableBibleVersion } =
+    await import('./strongBiblePublications')
+  if (!isStrongCapableBibleVersion(versionId)) return false
+
+  const { getBibleVersionMetadata } = await import('./biblesDb')
+  const installedMetadata = await getBibleVersionMetadata(versionId)
+  if (!installedMetadata) return false
+
+  const publication = getStrongBiblePublication(versionId)
+  return (
+    installedMetadata.textRevision !== publication.canonical.textRevision ||
+    installedMetadata.textSha256 !== publication.canonical.textSha256 ||
+    installedMetadata.schemaVersion !== publication.canonical.schemaVersion
+  )
 }
 
 export const getIfVersionNeedsDownload = async (versionId: string) => {
@@ -95,12 +117,16 @@ export interface Version {
   c?: string
   sourceUrl?: string
   type?: 'en' | 'fr' | 'other'
+  language: BibleVersionLanguage
+  readingProfile: TranslationReadingProfile | null
   hasAudio?: boolean
   hasRedWords?: boolean
   hasPericope?: boolean
   getAudioUrl?: (bookNum: number, chapterNum: number) => string
   canonId?: BibleCanonId
   versificationId?: BibleVersificationId
+  strongDatasetId?: StrongBibleDatasetId
+  hidden?: boolean
 }
 
 const getLsgAudioUrl = (bookNum: number, chapterNum: number) => {
@@ -137,24 +163,21 @@ export const versions: Record<string, Version> = {
     name: 'Bible Segond 1910',
     c: '1910 - Libre de droit',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
     hasAudio: true,
     getAudioUrl: getLsgAudioUrl,
-  },
-  LSGS: {
-    id: 'LSGS',
-    name: 'Bible Segond 1910 + Strongs',
-    c: '1910 - Libre de droit',
-    type: 'fr',
-    hasAudio: true,
-    getAudioUrl: getLsgAudioUrl,
+    strongDatasetId: 'LSG',
   },
   NBS: {
     id: 'NBS',
     name: 'Nouvelle Bible Segond',
     c: '© 2002 Société Biblique Française',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -163,6 +186,8 @@ export const versions: Record<string, Version> = {
     name: 'Nouvelle Edition de Genève 1979',
     c: '© 1979 Société Biblique de Genève',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -171,6 +196,8 @@ export const versions: Record<string, Version> = {
     name: 'Nouvelle Segond révisée',
     c: '© Alliance Biblique Française',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -179,21 +206,28 @@ export const versions: Record<string, Version> = {
     name: 'Bible Segond 21',
     c: '© 2007 Société Biblique de Genève',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
   },
-  INT: {
-    id: 'INT',
-    name: 'Bible Interlinéaire',
-    name_en: 'Interlinear Bible (FR)',
-    c: '©',
-    type: 'fr',
+  BHG: {
+    id: 'BHG',
+    name: 'Bible hébraïque et grecque',
+    name_en: 'Hebrew & Greek Bible',
+    c: 'STEPBible.org / Tyndale House Cambridge — CC BY 4.0',
+    sourceUrl: 'https://github.com/STEPBible/STEPBible-Data',
+    type: 'other',
+    language: 'he-grc',
+    readingProfile: null,
   },
   KJF: {
     id: 'KJF',
     name: 'King James Française',
     c: '© 1611 Traduction française, Bible des réformateurs 2006',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
   },
   DBY: {
@@ -201,19 +235,27 @@ export const versions: Record<string, Version> = {
     name: 'Bible Darby',
     c: '1890 Libre de droit',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
+    strongDatasetId: 'DBY',
   },
   DBR: {
     id: 'DBR',
     name: 'Bible Darby révisée',
     c: '© Bibles et Publications Chrétiennes - CC BY-NC-ND',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
+    strongDatasetId: 'DBYR',
   },
   OST: {
     id: 'OST',
     name: 'Ostervald',
     c: '1881 Libre de droit',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
   },
   // JER: {
@@ -226,6 +268,8 @@ export const versions: Record<string, Version> = {
     name: 'Bible Chouraqui 1985',
     c: '© 1977 Editions Desclée de Brouwer',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
   },
   BDS: {
@@ -233,6 +277,8 @@ export const versions: Record<string, Version> = {
     name: 'Bible du Semeur',
     c: '© 2000 Société Biblique Internationale',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'thought-for-thought',
     hasRedWords: true,
     hasPericope: true,
     hasAudio: true,
@@ -247,6 +293,8 @@ export const versions: Record<string, Version> = {
     name: 'Martin 1744',
     c: '1744 Libre de droit',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -257,6 +305,8 @@ export const versions: Record<string, Version> = {
     c: '1872 - Domaine public',
     sourceUrl: 'https://sites.google.com/view/bibledelausanne',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     versificationId: 'bible-strong-french-4-chapter-joel',
   },
   BFC: {
@@ -264,6 +314,8 @@ export const versions: Record<string, Version> = {
     name: 'Bible en Français courant',
     c: '© Alliance Biblique Française',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'thought-for-thought',
     canonId: 'catholic-73',
     versificationId: 'bible-strong-default',
     hasRedWords: true,
@@ -274,6 +326,8 @@ export const versions: Record<string, Version> = {
     name: 'Français courant',
     c: '© Alliance Biblique Française',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'thought-for-thought',
     canonId: 'catholic-73',
     versificationId: 'bible-strong-default',
     hasRedWords: true,
@@ -284,6 +338,8 @@ export const versions: Record<string, Version> = {
     name: 'Nouvelle Français courant',
     c: "Alliance biblique française Bibli'0, ©2019",
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'thought-for-thought',
     canonId: 'catholic-73',
     versificationId: 'bible-strong-default',
     hasRedWords: true,
@@ -292,33 +348,91 @@ export const versions: Record<string, Version> = {
   KJV: {
     id: 'KJV',
     name: 'King James Version',
-    c: '1611 Libre de droit',
+    c: 'Public Domain except in the United Kingdom (Crown rights)',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=KJV',
     type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
     hasAudio: true,
     getAudioUrl: getWordPocketKjvAudioUrl,
+    strongDatasetId: 'KJV',
   },
-  KJVS: {
-    id: 'KJVS',
-    name: 'King James Version Strong',
-    c: '1611 Libre de droit',
+  BSB: {
+    id: 'BSB',
+    name: 'Berean Standard Bible',
+    c: '© Berean Bible — CC0 / Public Domain',
+    sourceUrl: 'https://berean.bible/licensing.htm',
     type: 'en',
-    hasAudio: true,
-    getAudioUrl: getWordPocketKjvAudioUrl,
+    language: 'en',
+    readingProfile: 'balanced',
+    hasPericope: true,
+    strongDatasetId: 'BSB',
   },
-  INT_EN: {
-    id: 'INT_EN',
-    name: 'Bible Interlinéaire (EN)',
-    name_en: 'Interlinear Bible',
-    c: '©',
+  ASV: {
+    id: 'ASV',
+    name: 'American Standard Version',
+    c: '1901 — Public Domain',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=ASV',
     type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasPericope: true,
+    strongDatasetId: 'ASV',
+  },
+  DARBY: {
+    id: 'DARBY',
+    name: 'Darby Bible',
+    c: '1889 — Public Domain',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=Darby',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasPericope: true,
+    strongDatasetId: 'DARBY_EN',
+  },
+  RLT: {
+    id: 'RLT',
+    name: 'Revised Literal Translation',
+    c: '© 2018 Michael W. Jones, Sr. — GPL',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=RLT',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasRedWords: true,
+    hasPericope: true,
+    strongDatasetId: 'RLT',
+  },
+  RWEBSTER: {
+    id: 'RWEBSTER',
+    name: "Revised Webster's Bible",
+    c: '1833 — Public Domain',
+    sourceUrl: 'https://www.crosswire.org/sword/modules/ModInfo.jsp?modName=RWebster',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasPericope: true,
+    strongDatasetId: 'RWEBSTER',
+  },
+  RV1895: {
+    id: 'RV1895',
+    name: 'Revised Version 1895',
+    c: '1895 — Public Domain',
+    sourceUrl: 'https://www.stepbible.org/',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    hasPericope: true,
+    strongDatasetId: 'RV1895',
   },
   NKJV: {
     id: 'NKJV',
     name: 'New King James Version',
     c: '© 1982 Thomas Nelson, Inc',
     type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -327,6 +441,8 @@ export const versions: Record<string, Version> = {
     name: 'English Standard Version',
     c: '© 2001 Crossway Bibles',
     type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
     hasAudio: true,
@@ -339,6 +455,8 @@ export const versions: Record<string, Version> = {
     name: 'New International Version',
     c: '© NIV® 1973, 1978, 1984, 2011 Biblica',
     type: 'en',
+    language: 'en',
+    readingProfile: 'balanced',
     hasRedWords: true,
     hasPericope: true,
     hasAudio: true,
@@ -356,6 +474,8 @@ export const versions: Record<string, Version> = {
     name: 'Bible catholique Crampon 1923',
     c: '© mission-web.com',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
     canonId: 'catholic-73',
     versificationId: 'bible-strong-catholic-extended-esther-daniel',
     hasRedWords: true,
@@ -366,6 +486,8 @@ export const versions: Record<string, Version> = {
     name: 'Parole de Vie 2017',
     c: "© 2000 Société biblique française - Bibli'O",
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'thought-for-thought',
     canonId: 'catholic-73',
     versificationId: 'bible-strong-default',
     hasRedWords: true,
@@ -376,6 +498,8 @@ export const versions: Record<string, Version> = {
     name: 'Parole vivante (NT)',
     c: '© 2013',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'paraphrase',
     hasRedWords: true,
   },
   LXX_FR: {
@@ -385,12 +509,16 @@ export const versions: Record<string, Version> = {
     c: 'Texte grec-français édité par ThéoTeX Éditions - theotex.org',
     sourceUrl: 'https://theotex.org/',
     type: 'fr',
+    language: 'fr',
+    readingProfile: 'word-for-word',
   },
   EASY: {
     id: 'EASY',
     name: 'EasyEnglish Bible 2018',
     c: 'Copyright © MissionAssist 2018',
     type: 'en',
+    language: 'en',
+    readingProfile: 'thought-for-thought',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -399,21 +527,43 @@ export const versions: Record<string, Version> = {
     name: 'Tree of Life Version',
     c: '© 2015 The Messianic Jewish Family Bible Society',
     type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
   },
   NASB2020: {
     id: 'NASB2020',
     name: 'New American Standard Bible 2020',
-    c: '© 2020 The Lockman Foundation',
+    c: '© 1960–2020 The Lockman Foundation. All rights reserved.',
+    sourceUrl: 'https://www.lockman.org/new-american-standard-bible-nasb/',
     type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
+    strongDatasetId: 'NASB2020',
+  },
+  NASB1995: {
+    id: 'NASB1995',
+    name: 'New American Standard Bible 1995',
+    c: '© 1960–1995 The Lockman Foundation. All rights reserved.',
+    sourceUrl: 'https://www.lockman.org/new-american-standard-bible-nasb/',
+    type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
+    canonId: 'protestant-66',
+    versificationId: 'bible-strong-default',
+    hasRedWords: true,
+    hasPericope: true,
+    strongDatasetId: 'NASB1995',
   },
   NET: {
     id: 'NET',
     name: 'New English Translation',
     c: '© 1996-2016 Biblical Studies Press, L.L.C.',
     type: 'en',
+    language: 'en',
+    readingProfile: 'balanced',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -422,6 +572,8 @@ export const versions: Record<string, Version> = {
     name: 'God\u2019s Word Translation',
     c: '\u00a9 1995 God\u2019s Word to the Nations Bible Society',
     type: 'en',
+    language: 'en',
+    readingProfile: 'balanced',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -430,6 +582,8 @@ export const versions: Record<string, Version> = {
     name: 'Christian Standard Bible',
     c: '© 2017 Holman Bible Publishers',
     type: 'en',
+    language: 'en',
+    readingProfile: 'balanced',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -438,6 +592,8 @@ export const versions: Record<string, Version> = {
     name: 'New Living Translation',
     c: '© 1996, 2004, 2015 Tyndale House Foundation',
     type: 'en',
+    language: 'en',
+    readingProfile: 'thought-for-thought',
     hasRedWords: true,
     hasPericope: true,
     hasAudio: true,
@@ -450,6 +606,8 @@ export const versions: Record<string, Version> = {
     name: 'Amplified Bible',
     c: '© 2015 by The Lockman Foundation, La Habra, CA 90631',
     type: 'en',
+    language: 'en',
+    readingProfile: 'word-for-word',
     hasRedWords: true,
     hasPericope: true,
   },
@@ -459,12 +617,20 @@ export const versions: Record<string, Version> = {
     name_en: 'Biblia Hebraica Stuttgartensia (OT)',
     c: '© Deutsche Bibelgesellschaft, Stuttgart 1967/77',
     type: 'other',
+    language: 'he',
+    readingProfile: null,
   },
   LXX: {
     id: 'LXX',
     name: 'Septante (AT)',
     name_en: 'Septuagint (OT)',
     type: 'other',
+    language: 'grc',
+    readingProfile: null,
+    c: 'Texte grec-français édité par ThéoTeX Éditions - theotex.org',
+    sourceUrl: 'https://theotex.org/septuaginta/genese/genese_1.html',
+    canonId: 'theotex-septuagint',
+    versificationId: 'theotex-septuagint',
   },
   VUL: {
     id: 'VUL',
@@ -474,6 +640,8 @@ export const versions: Record<string, Version> = {
     sourceUrl:
       'https://bitbucket.org/clementinetextproject/text/src/edc85da058be630183d26e4deb6714ade80e600c/',
     type: 'other',
+    language: 'la',
+    readingProfile: null,
     canonId: 'clementine-vulgate',
     versificationId: 'clementine-vulgate',
   },
@@ -483,22 +651,30 @@ export const versions: Record<string, Version> = {
     name_en: 'SBL NT. Greek (NT)',
     c: '© 2010 Society of Bible Litterature',
     type: 'other',
+    language: 'grc',
+    readingProfile: null,
   },
   TR1624: {
     id: 'TR1624',
     name: 'Elzevir Textus Receptus 1624 (NT)',
     type: 'other',
+    language: 'grc',
+    readingProfile: null,
   },
   TR1894: {
     id: 'TR1894',
     name: 'Scrivener’s Textus Receptus 1894 (NT)',
     type: 'other',
+    language: 'grc',
+    readingProfile: null,
   },
   DEL: {
     id: 'DEL',
     name: "Tanach and Delitzsch's Hebrew New Testament",
     c: '© Bible Society in Israel, 2018.',
     type: 'other',
+    language: 'he',
+    readingProfile: null,
   },
 }
 
@@ -518,9 +694,9 @@ interface VersionsBySection {
 }
 export const versionsBySections: VersionsBySection[] = Object.values(versions).reduce(
   (sectionArray, version) => {
+    if (version.hidden) return sectionArray
     switch (version.id) {
       case 'LSG':
-      case 'LSGS':
       case 'NBS':
       case 'NEG79':
       case 'NVS78P':
@@ -529,19 +705,18 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
         return sectionArray
       }
       case 'KJV':
-      case 'KJVS':
       case 'NKJV':
       case 'NIV':
       case 'ESV':
       case 'AMP':
+      case 'NASB1995':
       case 'NASB2020':
       case 'EASY':
       case 'TLV':
       case 'NET':
       case 'GW':
       case 'CSB':
-      case 'NLT':
-      case 'INT_EN': {
+      case 'NLT': {
         sectionArray[2].data.push(version)
         return sectionArray
       }
@@ -571,14 +746,14 @@ export const versionsBySections: VersionsBySection[] = Object.values(versions).r
 
 export const versionsBySections_en: VersionsBySection[] = Object.values(versions).reduce(
   (sectionArray, version) => {
+    if (version.hidden) return sectionArray
     const versionEn = { ...version, name: version.name_en || version.name }
     switch (version.id) {
       case 'KJV':
-      case 'KJVS':
-      case 'INT_EN':
       case 'NKJV':
       case 'NIV':
       case 'AMP':
+      case 'NASB1995':
       case 'NASB2020':
       case 'EASY':
       case 'TLV':
@@ -591,8 +766,6 @@ export const versionsBySections_en: VersionsBySection[] = Object.values(versions
         return sectionArray
       }
       case 'LSG':
-      case 'LSGS':
-      case 'INT':
       case 'NBS':
       case 'NEG79':
       case 'NVS78P':
@@ -644,6 +817,3 @@ export const getVersionsBySections = () => {
 
   return versionsBySections_en
 }
-
-export const isStrongVersion = (version: string) =>
-  version === 'INT' || version === 'INT_EN' || version === 'LSGS' || version === 'KJVS'

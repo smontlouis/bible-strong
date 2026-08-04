@@ -32,11 +32,9 @@ const getLanguageAwareSQLTransaction = (dbId: DatabaseId) => {
     if (!isSharedDB(dbId)) {
       // For user-selectable DBs, get the language from Jotai store
       const selectableDbIds: (keyof ResourcesLanguageState)[] = [
-        'STRONG',
         'DICTIONNAIRE',
         'NAVE',
         'MHY',
-        'INTERLINEAIRE',
         'TIMELINE',
       ]
       if (selectableDbIds.includes(dbId as keyof ResourcesLanguageState)) {
@@ -96,20 +94,16 @@ const getSQLTransactionForLang = (dbId: DatabaseId, lang: ResourceLanguage) => {
 
 // Language-aware transaction exports
 // These automatically use the correct language based on Redux state
-export const SQLStrongTransaction = getLanguageAwareSQLTransaction('STRONG')
 export const SQLDictionnaireTransaction = getLanguageAwareSQLTransaction('DICTIONNAIRE')
 export const SQLNaveTransaction = getLanguageAwareSQLTransaction('NAVE')
 export const SQLTresorTransaction = getLanguageAwareSQLTransaction('TRESOR')
 export const SQLMHYTransaction = getLanguageAwareSQLTransaction('MHY')
-export const SQLInterlineaireTransaction = getLanguageAwareSQLTransaction('INTERLINEAIRE')
 
 // Aliases for explicit naming (same as above)
-export const SQLStrongTransactionLang = SQLStrongTransaction
 export const SQLDictionnaireTransactionLang = SQLDictionnaireTransaction
 export const SQLNaveTransactionLang = SQLNaveTransaction
 export const SQLTresorTransactionLang = SQLTresorTransaction
 export const SQLMHYTransactionLang = SQLMHYTransaction
-export const SQLInterlineaireTransactionLang = SQLInterlineaireTransaction
 
 // Export factory functions for custom usage
 export { getSQLTransaction, getLanguageAwareSQLTransaction, getSQLTransactionForLang }

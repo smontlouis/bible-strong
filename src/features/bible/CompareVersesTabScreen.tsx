@@ -1,39 +1,27 @@
 import React, { useEffect } from 'react'
 import { MenuView } from '~common/ui/MenuView'
-import { shallowEqual, useSelector } from 'react-redux'
 
 import verseToReference from '~helpers/verseToReference'
 
-import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import ScrollView from '~common/ui/ScrollView'
-import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
-import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 
 import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import { versions } from '~helpers/bibleVersions'
-import { getMaxChapterVerseCount } from '~helpers/bibleCoverage'
-import { selectCompareVersions } from '~redux/selectors/user'
-import { CompareTab, SelectedVerses, VersionCode } from '../../state/tabs'
+import { CompareTab, SelectedVerses } from '../../state/tabs'
 import CompareVersionSelectorSheet from './CompareVersionSelectorSheet'
 import type { SheetRef } from '~common/sheet'
+import CompareCard from './resources/CompareCard'
 
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
-}
-
-type PrevNextItems = {
-  verseNumber: number
-  versesInCurrentChapter: number
 }
 
 const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) => {
@@ -53,49 +41,24 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
         draft.title = title
       })
     )
+  const toggleStrongMode = () =>
+    setCompareTab(
+      produce(draft => {
+        draft.data.strongMode = !draft.data.strongMode
+      })
+    )
 
   const {
     hasBackButton,
-    data: { selectedVerses },
+    data: { selectedVerses, strongMode = false },
   } = compareTab
 
-  const [prevNextItems, setPrevNextItems] = React.useState<PrevNextItems>()
   const title = verseToReference(selectedVerses)
   const openInNewTab = useOpenInNewTab()
-  const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
   useEffect(() => {
     setTitle(`${t('Comparer')} ${title}`)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title])
-
-  const goToVerse = (value: number) => {
-    const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
-    setSelectedVerses({ [`${livre}-${chapitre}-${verse + value}`]: true })
-  }
-
-  React.useEffect(() => {
-    const hasPrevNextButtons = Object.keys(selectedVerses).length === 1
-    let cancelled = false
-
-    const loadPrevNextData = async () => {
-      const [livre, chapitre, verse] = Object.keys(selectedVerses)[0].split('-').map(Number)
-      const versesInCurrentChapter =
-        (await getMaxChapterVerseCount(versionsToCompare, livre, chapitre)) ||
-        countLsgChapters[`${livre}-${chapitre}`]
-      if (cancelled) return
-      setPrevNextItems({
-        verseNumber: verse,
-        versesInCurrentChapter,
-      })
-    }
-
-    if (hasPrevNextButtons) {
-      loadPrevNextData()
-    }
-    return () => {
-      cancelled = true
-    }
-  }, [selectedVerses, versionsToCompare])
 
   return (
     <Container>
@@ -106,6 +69,12 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
         rightComponent={
           <MenuView
             actions={[
+              {
+                id: 'toggle-strong',
+                title: t('Mode Strong'),
+                image: 'number',
+                state: strongMode ? 'on' : 'off',
+              },
               {
                 id: 'choose-versions',
                 title: t('common.chooseCompareVersions'),
@@ -119,6 +88,9 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
             ]}
             onPressAction={({ nativeEvent }) => {
               switch (nativeEvent.event) {
+                case 'toggle-strong':
+                  toggleStrongMode()
+                  break
                 case 'choose-versions':
                   compareVersionSelectorRef.current?.present()
                   break
@@ -130,6 +102,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
                     type: 'compare',
                     data: {
                       selectedVerses,
+                      strongMode,
                     },
                   })
                   break
@@ -142,37 +115,13 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
           </MenuView>
         }
       />
-      <ScrollView>
-        {!Object.entries(versions).filter(([versionId]) => versionsToCompare.includes(versionId))
-          .length ? (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message="Aucune version à comparer..."
-          />
-        ) : (
-          Object.entries(versions)
-            .filter(([versionId]) => versionsToCompare.includes(versionId))
-            .map(([versionId, obj], position) => (
-              <BibleCompareVerseItem
-                key={`${versionId}-${title}`}
-                versionId={versionId as VersionCode}
-                name={obj.name}
-                selectedVerses={selectedVerses}
-                position={position}
-              />
-            ))
-        )}
+      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+        <CompareCard
+          selectedVerses={selectedVerses}
+          strongMode={strongMode}
+          onChangeVerse={verse => setSelectedVerses({ [verse]: true })}
+        />
       </ScrollView>
-      {prevNextItems && (
-        <Box bg="reverse" borderTopWidth={1} borderColor="border">
-          <BibleVerseDetailFooter
-            verseNumber={prevNextItems.verseNumber}
-            goToNextVerse={() => goToVerse(+1)}
-            goToPrevVerse={() => goToVerse(-1)}
-            versesInCurrentChapter={prevNextItems.versesInCurrentChapter}
-          />
-        </Box>
-      )}
       <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
     </Container>
   )

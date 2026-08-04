@@ -1,27 +1,16 @@
-import React, { ComponentType, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { DictionnaireSearchRow } from '~features/resources/dictionaryAccess'
+import type { DictionarySummary } from '~features/resources/dictionaryAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { useWaitForDatabase } from '~common/waitForDictionnaireDB'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 
 import { useResultsByLetterOrSearch } from '../lexique/useUtilities'
 import DictionnaryResultItem from './DictionaryResultItem'
-
-const hideIfNoDatabase =
-  <P extends object>(WrappedComponent: ComponentType<P>) =>
-  (props: P) => {
-    const { isLoading, proposeDownload } = useWaitForDatabase()
-
-    if (isLoading || proposeDownload) {
-      return null
-    }
-    return <WrappedComponent {...props} />
-  }
+import { useAtomValue } from 'jotai/react'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 const LIMIT = 5
 const height = 40
@@ -32,24 +21,17 @@ interface LexiqueResultsWidgetProps {
   searchValue: string
 }
 
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
-
 const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   const resources = useResourceAccess()
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
+  const resourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
   const [limit, setLimit] = useState(LIMIT)
 
-  const { results } = useResultsByLetterOrSearch({
+  const { results, error } = useResultsByLetterOrSearch({
+    queryKey: ['dictionary'],
     query: resources.dictionary.search,
     value: searchValue,
+    resourceLanguage,
   })
-
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
 
   if (error) {
     return null
@@ -63,7 +45,7 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
 
   return (
     <>
-      {dictionaryResults.slice(0, limit).map((ref: DictionnaireSearchRow) => {
+      {dictionaryResults.slice(0, limit).map((ref: DictionarySummary) => {
         const { word } = ref
         return <DictionnaryResultItem key={word} word={word} />
       })}
@@ -100,4 +82,4 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   )
 }
 
-export default hideIfNoDatabase(LexiqueResultsWidget)
+export default LexiqueResultsWidget

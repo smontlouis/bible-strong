@@ -1,95 +1,264 @@
-import * as Icon from '@expo/vector-icons'
-import * as FileSystem from 'expo-file-system/legacy'
 import React from 'react'
+import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Linking, TouchableOpacity } from 'react-native'
-import { useDispatch, useSelector } from 'react-redux'
-import { dbManager } from '~helpers/sqlite'
+import { useDispatch } from 'react-redux'
 
-import styled from '@emotion/native'
-import { useTheme } from '@emotion/react'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import Animated from 'react-native-reanimated'
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
+import Progress from '~common/ui/Progress'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import { getIfVersionNeedsDownload, isStrongVersion, Version } from '~helpers/bibleVersions'
-import { isVersionInstalled, removeBibleVersion } from '~helpers/biblesDb'
-import { requireBiblePath } from '~helpers/requireBiblePath'
-import { deleteRedWordsFile } from '~helpers/redWords'
-import { deletePericopeFile } from '~helpers/pericopes'
+import { getIfVersionNeedsDownload, Version } from '~helpers/bibleVersions'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
 import { downloadManager } from '~helpers/downloadManager'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
-import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
-import { RootState } from '~redux/modules/reducer'
-import { setDefaultBibleVersion, setVersionUpdated } from '~redux/modules/user'
-import { Theme } from '~themes'
+import {
+  createBibleDownloadItem,
+  createStrongSidecarDownloadPlan,
+} from '~helpers/downloadItemFactory'
+import { setDefaultBibleVersion } from '~redux/modules/user'
 import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
 import { store } from '~redux/store'
+import {
+  getStrongBibleAttributionKey,
+  isStrongCapableBibleVersion,
+} from '~helpers/strongBiblePublications'
+import {
+  getStrongBibleSidecarAvailability,
+  type StrongBibleSidecarAvailability,
+} from '~helpers/strongBibleSidecar'
+import StrongIndexSelectorItem from './StrongIndexSelectorItem'
+import StrongMark from './StrongMark'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
+import InterlinearIndexSelectorItem from './InterlinearIndexSelectorItem'
+import InterlinearMark from './InterlinearMark'
+import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
+import { getBibleRelatedPublicationResources } from '~helpers/bibleRelatedPublications'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import {
+  createDownloadedItemDeletionPlan,
+  deleteDownloadedItem,
+} from '~helpers/deleteDownloadedItem'
 
-const Container = styled.View<{ needsUpdate?: boolean }>(({ needsUpdate, theme }) => ({
-  padding: 20,
-  paddingTop: 10,
-  paddingBottom: 10,
-  ...(needsUpdate
-    ? {
-        borderLeftColor: theme.colors.success,
-        borderLeftWidth: 5,
-      }
-    : {}),
-}))
+const getVersionDownloadQueryKey = (
+  versionId: string,
+  isOnboardingCompleted: boolean,
+  installedVersionsSignal: number
+) =>
+  [
+    'bible-version-needs-download',
+    versionId,
+    isOnboardingCompleted,
+    installedVersionsSignal,
+  ] as const
 
-const TouchableContainer = Container.withComponent(TouchableOpacity)
+const VersionItemContainer = ({
+  children,
+  needsUpdate,
+  hasDependency,
+  onPress,
+}: React.PropsWithChildren<{
+  needsUpdate?: boolean
+  hasDependency?: boolean
+  onPress?: () => void
+}>) => {
+  const content = (
+    <Box
+      minHeight={76}
+      pl={20}
+      pr={4}
+      py={12}
+      borderBottomWidth={hasDependency ? 0 : 1}
+      borderColor="border"
+      borderLeftWidth={needsUpdate ? 5 : 0}
+      borderLeftColor={needsUpdate ? 'success' : undefined}
+    >
+      {children}
+    </Box>
+  )
 
-const TextVersion = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 12,
-  opacity: 0.5,
-  fontWeight: 'bold',
-}))
+  return onPress ? <TouchableOpacity onPress={onPress}>{content}</TouchableOpacity> : content
+}
 
-const TextCopyright = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 10,
-  backgroundColor: 'transparent',
-  opacity: 0.5,
-}))
+const ActionColumn = ({ children, opacity }: React.PropsWithChildren<{ opacity?: number }>) => (
+  <Box width={48} minHeight={48} center opacity={opacity}>
+    {children}
+  </Box>
+)
 
-const TextSourceLink = styled(TextCopyright)(({ theme }) => ({
-  color: theme.colors.primary,
-  textDecorationLine: 'underline',
-  opacity: 0.75,
-}))
+const ActionButton = ({ children, onPress }: React.PropsWithChildren<{ onPress: () => void }>) => (
+  <TouchableOpacity onPress={onPress}>
+    <ActionColumn>{children}</ActionColumn>
+  </TouchableOpacity>
+)
 
-const TextName = styled.Text<{ isSelected?: boolean }>(({ isSelected, theme }) => ({
-  color: isSelected ? theme.colors.primary : theme.colors.default,
-  fontSize: 16,
-  backgroundColor: 'transparent',
-}))
-
-const DeleteIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.quart,
-}))
-
-const UpdateIcon = styled(Icon.Feather)(({ theme }) => ({
-  color: theme.colors.success,
-}))
+const VersionIdentity = ({
+  version,
+  color,
+  showPublicationDetails = false,
+  showCapabilities = false,
+  copyrightColor,
+  copyrightOpacity,
+  copyrightStyle,
+  onCopyrightPress,
+  showStrongCapability,
+  isStrongIndexAvailable,
+  isStrongIndexExpanded,
+  onToggleStrongIndex,
+  strongToggleLabel,
+  strongAttribution,
+  showInterlinearCapability,
+  isInterlinearIndexAvailable,
+  isInterlinearIndexExpanded,
+  onToggleInterlinearIndex,
+  interlinearToggleLabel,
+  interlinearAttribution,
+}: {
+  version: Version & { displayName?: string }
+  color: string
+  showPublicationDetails?: boolean
+  showCapabilities?: boolean
+  copyrightColor?: string
+  copyrightOpacity?: number
+  copyrightStyle?: { textDecorationLine: 'underline' }
+  onCopyrightPress?: () => void
+  showStrongCapability?: boolean
+  isStrongIndexAvailable?: boolean
+  isStrongIndexExpanded?: boolean
+  onToggleStrongIndex?: () => void
+  strongToggleLabel?: string
+  strongAttribution?: string
+  showInterlinearCapability?: boolean
+  isInterlinearIndexAvailable?: boolean
+  isInterlinearIndexExpanded?: boolean
+  onToggleInterlinearIndex?: () => void
+  interlinearToggleLabel?: string
+  interlinearAttribution?: string
+}) => (
+  <Box flex>
+    <Text color={color} fontSize={12} opacity={0.5} bold>
+      {version.id}
+    </Text>
+    <HStack alignItems="center">
+      <Text color={color} fontSize={16}>
+        {version.displayName || version.name}
+      </Text>
+      {showCapabilities && version.hasAudio && (
+        <Box ml={4}>
+          <FeatherIcon name="volume-2" size={16} color="primary" />
+        </Box>
+      )}
+      {showCapabilities &&
+        showStrongCapability &&
+        (onToggleStrongIndex ? (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={strongToggleLabel}
+            accessibilityState={{ expanded: isStrongIndexExpanded }}
+            onPress={event => {
+              event.stopPropagation()
+              onToggleStrongIndex()
+            }}
+          >
+            <Box width={38} height={28} center ml={5} overflow="visible">
+              <Box position="relative" width={22} height={24} center overflow="visible">
+                <StrongMark highlighted={isStrongIndexAvailable} />
+                <Box position="absolute" width={16} height={16} center right={-10} bottom={0}>
+                  <FeatherIcon
+                    name={isStrongIndexExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={12}
+                    color="tertiary"
+                  />
+                </Box>
+              </Box>
+            </Box>
+          </TouchableOpacity>
+        ) : (
+          <Box ml={5}>
+            <StrongMark highlighted={isStrongIndexAvailable} />
+          </Box>
+        ))}
+      {showCapabilities &&
+        showInterlinearCapability &&
+        (onToggleInterlinearIndex ? (
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel={interlinearToggleLabel}
+            accessibilityState={{ expanded: isInterlinearIndexExpanded }}
+            onPress={event => {
+              event.stopPropagation()
+              onToggleInterlinearIndex()
+            }}
+          >
+            <Box width={38} height={28} center ml={5} overflow="visible">
+              <Box position="relative" width={22} height={24} center overflow="visible">
+                <InterlinearMark highlighted={isInterlinearIndexAvailable} />
+                <Box position="absolute" width={16} height={16} center right={-10} bottom={0}>
+                  <FeatherIcon
+                    name={isInterlinearIndexExpanded ? 'chevron-up' : 'chevron-down'}
+                    size={12}
+                    color="tertiary"
+                  />
+                </Box>
+              </Box>
+            </Box>
+          </TouchableOpacity>
+        ) : (
+          <Box ml={5}>
+            <InterlinearMark highlighted={isInterlinearIndexAvailable} />
+          </Box>
+        ))}
+    </HStack>
+    {showPublicationDetails && (
+      <Text
+        color={copyrightColor}
+        fontSize={10}
+        opacity={copyrightOpacity}
+        onPress={onCopyrightPress}
+        style={copyrightStyle}
+      >
+        {version.c}
+      </Text>
+    )}
+    {showPublicationDetails &&
+      isStrongIndexAvailable &&
+      !isStrongIndexExpanded &&
+      strongAttribution && (
+        <Text color={color} fontSize={10} opacity={0.5}>
+          {strongAttribution}
+        </Text>
+      )}
+    {showPublicationDetails &&
+      isInterlinearIndexAvailable &&
+      !isInterlinearIndexExpanded &&
+      interlinearAttribution && (
+        <Text color={color} fontSize={10} opacity={0.5}>
+          {interlinearAttribution}
+        </Text>
+      )}
+  </Box>
+)
 
 interface Props {
-  version: Version
+  version: Version & { displayName?: string }
   isSelected?: boolean
   onChange?: (id: VersionCode) => void
   isParameters?: boolean
   shareFn?: (fn: () => void) => void
+  onDownloadStart?: (id: VersionCode) => void
   onDownloadComplete?: (id: VersionCode) => void
   showSelectionCheckbox?: boolean
+  showStrongIndex?: boolean
+  strongCollapseKey?: number
+  selectionRequirement?: 'bible' | 'strong'
 }
 
 const VersionSelectorItem = ({
@@ -98,66 +267,167 @@ const VersionSelectorItem = ({
   onChange,
   isParameters,
   shareFn,
+  onDownloadStart,
   onDownloadComplete,
   showSelectionCheckbox,
+  showStrongIndex,
+  strongCollapseKey,
+  selectionRequirement = 'bible',
 }: Props) => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const theme: Theme = useTheme()
-  const [versionNeedsDownload, setVersionNeedsDownload] = React.useState<boolean>()
-  const needsUpdate = useSelector((state: RootState) => state.user.needsUpdate[version.id])
+  const [isStrongIndexAvailable, setStrongIndexAvailable] = React.useState<boolean>()
+  const [isStrongIndexExpanded, setStrongIndexExpanded] = React.useState(false)
+  const [isFrenchInterlinearIndexAvailable, setFrenchInterlinearIndexAvailable] =
+    React.useState<boolean>()
+  const [isEnglishInterlinearIndexAvailable, setEnglishInterlinearIndexAvailable] =
+    React.useState<boolean>()
+  const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
+  const queryClient = useQueryClient()
   const dispatch = useDispatch()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
 
   // Subscribe to download queue state for this item
-  const itemId = `bible:${version.id}`
+  const itemId = createOfflineCopyId({ kind: 'bible', versionId: version.id })
   const queueState = useDownloadItemStatus(itemId)
-  const isLoading = queueState?.status === 'downloading' || queueState?.status === 'inserting'
-  const isQueued = queueState?.status === 'queued'
-  const downloadProgress = queueState?.downloadProgress ?? 0
-  const CopyrightText = version.sourceUrl ? TextSourceLink : TextCopyright
+  const previousBibleDownloadStatusRef = React.useRef(queueState?.status)
+  const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
+  const requiresStrong = selectionRequirement === 'strong' && Boolean(strongVersionId)
+  const { data: versionNeedsDownload } = useQuery({
+    queryKey: getVersionDownloadQueryKey(
+      version.id,
+      isOnboardingCompleted,
+      installedVersionsSignal
+    ),
+    queryFn: () => getIfVersionNeedsDownload(version.id),
+    placeholderData: keepPreviousData,
+  })
+  const bibleDownloadItem = createBibleDownloadItem(version.id)
+  const publicationStatus = useResourcePublicationStatus({
+    resourceId: bibleDownloadItem.id,
+    url: bibleDownloadItem.url,
+    isInstalled: versionNeedsDownload === false,
+    relatedResources: getBibleRelatedPublicationResources(version.id),
+  })
+  const needsUpdate = publicationStatus.status === 'update-available'
+  const strongSelectionQuery = useQuery({
+    queryKey: [
+      'strong-selection-availability',
+      strongVersionId,
+      installedVersionsSignal,
+      downloadCompletionSignal,
+    ],
+    queryFn: () => getStrongBibleSidecarAvailability(strongVersionId!),
+    enabled: requiresStrong,
+    placeholderData: keepPreviousData,
+  })
+  const strongSelectionAvailability: StrongBibleSidecarAvailability | undefined =
+    strongSelectionQuery.data ?? (strongSelectionQuery.isError ? { status: 'missing' } : undefined)
+  const strongQueueState = useDownloadItemStatus(
+    isStrongCapableBibleVersion(version.id)
+      ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version.id })
+      : undefined
+  )
+  const activeQueueState = requiresStrong
+    ? [queueState, strongQueueState].find(
+        state =>
+          state?.status === 'queued' ||
+          state?.status === 'downloading' ||
+          state?.status === 'inserting'
+      )
+    : queueState
+  const isLoading =
+    activeQueueState?.status === 'downloading' || activeQueueState?.status === 'inserting'
+  const isQueued = activeQueueState?.status === 'queued'
+  const downloadProgress = activeQueueState ? getDownloadItemProgress(activeQueueState) : 0
+  const showStrongCapability = (showStrongIndex || requiresStrong) && Boolean(strongVersionId)
+  const toggleStrongIndex = () => setStrongIndexExpanded(expanded => !expanded)
+  const strongToggleLabel = isStrongIndexExpanded
+    ? t('versionSelector.hideStrongIndex', { bible: version.id })
+    : t('versionSelector.showStrongIndex', { bible: version.id })
+  const showInterlinearCapability = showStrongIndex && isInterlinearCapableBibleVersion(version.id)
+  const isInterlinearIndexAvailable =
+    isFrenchInterlinearIndexAvailable === true || isEnglishInterlinearIndexAvailable === true
+  const toggleInterlinearIndex = () => setInterlinearIndexExpanded(expanded => !expanded)
+  const interlinearToggleLabel = isInterlinearIndexExpanded
+    ? t('versionSelector.hideInterlinearIndex')
+    : t('versionSelector.showInterlinearIndex')
   const openSourceUrl = () => {
     if (version.sourceUrl) {
       Linking.openURL(version.sourceUrl)
     }
   }
 
-  React.useEffect(() => {
-    ;(async () => {
-      if (shareFn && !isStrongVersion(version.id)) {
-        shareFn(() => {
-          setVersionNeedsDownload(true)
-          startDownload()
-        })
-      }
+  const versionColor = isSelected ? 'primary' : 'default'
+  const copyrightColor = version.sourceUrl ? 'primary' : versionColor
+  const copyrightOpacity = version.sourceUrl ? 0.75 : 0.5
+  const copyrightStyle = version.sourceUrl
+    ? { textDecorationLine: 'underline' as const }
+    : undefined
 
-      const v = await getIfVersionNeedsDownload(version.id)
-      setVersionNeedsDownload(v)
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOnboardingCompleted, installedVersionsSignal])
-
-  // Watch for download completion
-  React.useEffect(() => {
-    if (queueState?.status === 'completed') {
-      setVersionNeedsDownload(false)
-      if (onDownloadComplete) {
-        onDownloadComplete(version.id)
-      }
+  const startDownload = async () => {
+    if (requiresStrong && strongVersionId) {
+      const availability =
+        strongSelectionAvailability ?? (await getStrongBibleSidecarAvailability(strongVersionId))
+      onDownloadStart?.(version.id)
+      downloadManager.enqueue(createStrongSidecarDownloadPlan(strongVersionId, availability.status))
+      return
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queueState?.status])
 
-  const startDownload = () => {
     const item = createBibleDownloadItem(version.id)
     downloadManager.enqueue([item])
   }
 
+  React.useEffect(() => {
+    if (shareFn) {
+      shareFn(() => {
+        queryClient.setQueryData(
+          getVersionDownloadQueryKey(version.id, isOnboardingCompleted, installedVersionsSignal),
+          true
+        )
+        void startDownload()
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOnboardingCompleted, installedVersionsSignal, queryClient, shareFn, version.id])
+
+  React.useEffect(() => {
+    if (requiresStrong) {
+      setStrongIndexAvailable(strongSelectionAvailability?.status === 'available')
+    }
+  }, [requiresStrong, strongSelectionAvailability?.status])
+
+  // Watch for Bible-only download completion
+  React.useEffect(() => {
+    const previousStatus = previousBibleDownloadStatusRef.current
+    previousBibleDownloadStatusRef.current = queueState?.status
+
+    if (!requiresStrong && previousStatus !== 'completed' && queueState?.status === 'completed') {
+      queryClient.setQueryData(
+        getVersionDownloadQueryKey(version.id, isOnboardingCompleted, installedVersionsSignal),
+        false
+      )
+      onDownloadComplete?.(version.id)
+    }
+  }, [
+    onDownloadComplete,
+    queryClient,
+    queueState?.status,
+    requiresStrong,
+    version.id,
+    installedVersionsSignal,
+    isOnboardingCompleted,
+  ])
+
+  React.useEffect(() => {
+    setStrongIndexExpanded(false)
+    setInterlinearIndexExpanded(false)
+  }, [strongCollapseKey])
+
   const updateVersion = async () => {
-    await deleteVersion()
-    startDownload()
-    dispatch(setVersionUpdated(version.id))
+    await startDownload()
   }
 
   const deleteVersion = async () => {
@@ -209,31 +479,15 @@ const VersionSelectorItem = ({
       jotaiStore.set(tabsAtom, updatedTabs)
     }
 
-    if (isStrongVersion(version.id)) {
-      const path = requireBiblePath(version.id)
-      const file = await FileSystem.getInfoAsync(path)
-      if (file.exists) {
-        await FileSystem.deleteAsync(file.uri)
-      }
-      if (version.id === 'INT' || version.id === 'INT_EN') {
-        const vLang = version.id === 'INT' ? 'fr' : 'en'
-        dbManager.getDB('INTERLINEAIRE', vLang).delete()
-      }
-    } else {
-      const installed = await isVersionInstalled(version.id)
-      if (installed) {
-        await removeBibleVersion(version.id)
-      }
-      const legacyPath = `${FileSystem.documentDirectory}bible-${version.id}.json`
-      const legacyFile = await FileSystem.getInfoAsync(legacyPath)
-      if (legacyFile.exists) {
-        await FileSystem.deleteAsync(legacyFile.uri)
-      }
-    }
-
-    deleteRedWordsFile(version.id)
-    deletePericopeFile(version.id)
-    setVersionNeedsDownload(true)
+    const bibleOfflineCopyId = createOfflineCopyId({
+      kind: 'bible',
+      versionId: version.id,
+    })
+    await deleteDownloadedItem(createDownloadedItemDeletionPlan(bibleOfflineCopyId))
+    queryClient.setQueryData(
+      getVersionDownloadQueryKey(version.id, isOnboardingCompleted, installedVersionsSignal),
+      true
+    )
 
     jotaiStore.set(installedVersionsSignalAtom, (c: number) => c + 1)
     // Trigger BibleViewer instances to reload so tabs that were showing
@@ -258,127 +512,188 @@ const VersionSelectorItem = ({
     }
 
     return (
-      <Box
-        width={32}
-        height={32}
-        alignItems="center"
-        justifyContent="center"
-        ml={12}
-        opacity={disabled ? 0.45 : 1}
-      >
+      <ActionColumn opacity={disabled ? 0.45 : 1}>
         <Checkbox checked={Boolean(isSelected)} variant="icon" size={22} />
-      </Box>
+      </ActionColumn>
     )
   }
 
-  if (
-    typeof versionNeedsDownload === 'undefined' ||
-    (isParameters && version.id === 'LSGS') ||
-    (isParameters && version.id === 'KJVS')
-  ) {
+  const renderSelectedIndicator = () => (
+    <ActionColumn>
+      {isSelected && (
+        <Box width={22} height={22} borderRadius={11} bg="primary" center>
+          <FeatherIcon name="check" size={14} color="white" />
+        </Box>
+      )}
+    </ActionColumn>
+  )
+
+  const interlinearIndexItems = showInterlinearCapability ? (
+    <>
+      <InterlinearIndexSelectorItem
+        locale="fr"
+        expanded={isInterlinearIndexExpanded}
+        onAvailabilityChange={setFrenchInterlinearIndexAvailable}
+      />
+      <InterlinearIndexSelectorItem
+        locale="en"
+        expanded={isInterlinearIndexExpanded}
+        onAvailabilityChange={setEnglishInterlinearIndexAvailable}
+      />
+    </>
+  ) : null
+
+  const selectionNeedsDownload = requiresStrong
+    ? strongSelectionAvailability
+      ? strongSelectionAvailability.status !== 'available'
+      : undefined
+    : versionNeedsDownload
+
+  if (typeof selectionNeedsDownload === 'undefined') {
     return null
   }
 
-  if (versionNeedsDownload) {
+  if (selectionNeedsDownload) {
     return (
-      <Container>
-        <Box flex row alignItems="center">
-          <Box disabled flex>
-            <TextVersion>{version.id}</TextVersion>
-            <HStack alignItems="center">
-              <TextName>{version.name}</TextName>
-              {version?.hasAudio && (
-                <Box>
-                  <FeatherIcon name="volume-2" size={16} color="primary" />
-                </Box>
-              )}
-            </HStack>
-            <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
-              {version.c}
-            </CopyrightText>
+      <Box>
+        <VersionItemContainer
+          hasDependency={
+            (showStrongCapability && isStrongIndexExpanded) ||
+            (showInterlinearCapability && isInterlinearIndexExpanded)
+          }
+        >
+          <Box flex row alignItems="center">
+            <Box disabled flex>
+              <VersionIdentity
+                version={version}
+                color="default"
+                showPublicationDetails
+                showCapabilities
+                copyrightColor={copyrightColor}
+                copyrightOpacity={copyrightOpacity}
+                copyrightStyle={copyrightStyle}
+                onCopyrightPress={version.sourceUrl ? openSourceUrl : undefined}
+                showStrongCapability={showStrongCapability}
+                isStrongIndexAvailable={isStrongIndexAvailable}
+                isStrongIndexExpanded={isStrongIndexExpanded}
+                onToggleStrongIndex={
+                  showStrongIndex && showStrongCapability ? toggleStrongIndex : undefined
+                }
+                strongToggleLabel={strongToggleLabel}
+                strongAttribution={
+                  strongVersionId ? t(getStrongBibleAttributionKey(strongVersionId)) : undefined
+                }
+                showInterlinearCapability={showInterlinearCapability}
+                isInterlinearIndexAvailable={isInterlinearIndexAvailable}
+                isInterlinearIndexExpanded={isInterlinearIndexExpanded}
+                onToggleInterlinearIndex={
+                  showInterlinearCapability ? toggleInterlinearIndex : undefined
+                }
+                interlinearToggleLabel={interlinearToggleLabel}
+                interlinearAttribution={t('versionSelector.interlinearAttribution')}
+              />
+            </Box>
+            {!isLoading && !isQueued && (
+              <ActionButton onPress={() => void startDownload()}>
+                <FeatherIcon name="download-cloud" size={16} />
+              </ActionButton>
+            )}
+            {renderSelectionCheckbox(true)}
+            {isQueued && (
+              <ActionColumn>
+                <FeatherIcon name="clock" size={18} color="tertiary" />
+              </ActionColumn>
+            )}
+            {isLoading && (
+              <ActionColumn>
+                <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
+              </ActionColumn>
+            )}
           </Box>
-          {!isLoading && !isQueued && version.id !== 'LSGS' && version.id !== 'KJVS' && (
-            <TouchableOpacity
-              onPress={startDownload}
-              style={{ padding: 10, alignItems: 'flex-end' }}
-            >
-              <FeatherIcon name="download" size={20} />
-              {(version.id === 'INT' || version.id === 'INT_EN') && (
-                <Box center marginTop={5}>
-                  <Text fontSize={10}>20Mo</Text>
-                </Box>
-              )}
-            </TouchableOpacity>
-          )}
-          {renderSelectionCheckbox(true)}
-          {isQueued && (
-            <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
-              <FeatherIcon name="clock" size={18} color="tertiary" />
-            </Box>
-          )}
-          {isLoading && (
-            <Box width={80} justifyContent="center" alignItems="flex-end" mr={10}>
-              <Box width={60} height={4} borderRadius={2} bg="border" overflow="hidden">
-                <Animated.View
-                  style={{
-                    height: 4,
-                    borderRadius: 2,
-                    backgroundColor: theme.colors.primary,
-                    width: `${Math.round(downloadProgress * 100)}%`,
-                    transitionProperty: 'width',
-                    transitionDuration: 150,
-                  }}
-                />
-              </Box>
-            </Box>
-          )}
-        </Box>
-      </Container>
+        </VersionItemContainer>
+        {showStrongIndex && showStrongCapability && strongVersionId && (
+          <StrongIndexSelectorItem
+            versionId={strongVersionId}
+            expanded={isStrongIndexExpanded}
+            onAvailabilityChange={setStrongIndexAvailable}
+          />
+        )}
+        {interlinearIndexItems}
+      </Box>
     )
   }
 
   if (isParameters) {
     return (
-      <Container needsUpdate={needsUpdate}>
+      <VersionItemContainer needsUpdate={needsUpdate}>
         <Box flex row center>
-          <Box flex>
-            <TextVersion>{version.id}</TextVersion>
-            <TextName>{version.name}</TextName>
-          </Box>
+          <VersionIdentity version={version} color="default" />
           {needsUpdate ? (
             <TouchableOpacity onPress={updateVersion} style={{ padding: 10 }}>
-              <UpdateIcon name="download" size={18} />
+              <FeatherIcon name="download" size={18} color="success" />
             </TouchableOpacity>
           ) : version.id !== getDefaultBibleVersion(lang) ? (
             <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
-              <DeleteIcon name="trash-2" size={18} />
+              <FeatherIcon name="trash-2" size={18} color="quart" />
             </TouchableOpacity>
           ) : null}
         </Box>
-      </Container>
+      </VersionItemContainer>
     )
   }
 
   return (
-    <TouchableContainer needsUpdate={needsUpdate} onPress={() => onChange && onChange(version.id)}>
-      <Box flex row alignItems="center">
-        <Box flex>
-          <TextVersion isSelected={isSelected}>{version.id}</TextVersion>
-          <HStack alignItems="center">
-            <TextName isSelected={isSelected}>{version.name}</TextName>
-            {version?.hasAudio && (
-              <Box>
-                <FeatherIcon name="volume-2" size={16} color="primary" />
-              </Box>
-            )}
-          </HStack>
-          <CopyrightText onPress={version.sourceUrl ? openSourceUrl : undefined}>
-            {version.c}
-          </CopyrightText>
+    <Box>
+      <VersionItemContainer
+        needsUpdate={needsUpdate}
+        hasDependency={
+          (showStrongCapability && isStrongIndexExpanded) ||
+          (showInterlinearCapability && isInterlinearIndexExpanded)
+        }
+        onPress={() => onChange && onChange(version.id)}
+      >
+        <Box flex row alignItems="center">
+          <VersionIdentity
+            version={version}
+            color={versionColor}
+            showPublicationDetails
+            showCapabilities
+            copyrightColor={copyrightColor}
+            copyrightOpacity={copyrightOpacity}
+            copyrightStyle={copyrightStyle}
+            onCopyrightPress={version.sourceUrl ? openSourceUrl : undefined}
+            showStrongCapability={showStrongCapability}
+            isStrongIndexAvailable={isStrongIndexAvailable}
+            isStrongIndexExpanded={isStrongIndexExpanded}
+            onToggleStrongIndex={
+              showStrongIndex && showStrongCapability ? toggleStrongIndex : undefined
+            }
+            strongToggleLabel={strongToggleLabel}
+            strongAttribution={
+              strongVersionId ? t(getStrongBibleAttributionKey(strongVersionId)) : undefined
+            }
+            showInterlinearCapability={showInterlinearCapability}
+            isInterlinearIndexAvailable={isInterlinearIndexAvailable}
+            isInterlinearIndexExpanded={isInterlinearIndexExpanded}
+            onToggleInterlinearIndex={
+              showInterlinearCapability ? toggleInterlinearIndex : undefined
+            }
+            interlinearToggleLabel={interlinearToggleLabel}
+            interlinearAttribution={t('versionSelector.interlinearAttribution')}
+          />
+          {renderSelectionCheckbox()}
+          {!showSelectionCheckbox && renderSelectedIndicator()}
         </Box>
-        {renderSelectionCheckbox()}
-      </Box>
-    </TouchableContainer>
+      </VersionItemContainer>
+      {showStrongIndex && showStrongCapability && strongVersionId && (
+        <StrongIndexSelectorItem
+          versionId={strongVersionId}
+          expanded={isStrongIndexExpanded}
+          onAvailabilityChange={setStrongIndexAvailable}
+        />
+      )}
+      {interlinearIndexItems}
+    </Box>
   )
 }
 

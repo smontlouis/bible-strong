@@ -26,10 +26,12 @@ import {
   SWIPE_DOWN,
   SWIPE_UP,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
-  TOGGLE_INT_COMPLETE,
+  NAVIGATE_TO_BIBLICAL_ENTITY,
   TOGGLE_SELECTED_VERSE,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
+  DOWNLOAD_CHAPTER_ENTITIES,
+  DISMISS_CONTEXTUAL_INFORMATION,
 } from './dispatch'
 import { BibleError } from '~helpers/bibleErrors'
 import { DispatchProvider } from './DispatchProvider'
@@ -58,6 +60,8 @@ import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
 import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
+import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
+import ChapterEntities from './ChapterEntities'
 
 declare global {
   interface Window {
@@ -104,6 +108,34 @@ const GlobalStyles = createGlobalStyles`
     initial-value: 0deg;
     inherits: false;
   }
+
+  .chapter-entity-button {
+    transition: opacity 100ms ease-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .chapter-entity-button:active {
+    opacity: 0.6;
+  }
+
+  @keyframes chapter-entity-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .chapter-entity-loader {
+    display: inline-flex;
+    animation: chapter-entity-spin 900ms linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chapter-entity-button {
+      transition: none;
+    }
+
+    .chapter-entity-loader {
+      animation: none;
+    }
+  }
 ` as React.FC
 
 type Props = Pick<
@@ -113,7 +145,6 @@ type Props = Pick<
   | 'parallelColumnWidth'
   | 'parallelDisplayMode'
   | 'focusVerses'
-  | 'secondaryVerses'
   | 'selectedVerses'
   | 'highlightedVerses'
   | 'bookmarkedVerses'
@@ -125,17 +156,32 @@ type Props = Pick<
   | 'verseToScroll'
   | 'contextDisplayMode'
   | 'version'
+  | 'interlinearMode'
   | 'pericopeChapter'
   | 'book'
   | 'chapter'
   | 'isSelectionMode'
   | 'selectedCode'
   | 'redWords'
+  | 'chapterEntities'
+  | 'chapterEntitiesLoaded'
+  | 'chapterEntityModuleStatus'
+  | 'chapterEntityDownloadState'
 > & {
   dispatch: Dispatch
   dom: import('expo/dom').DOMProps
   translations: BibleDOMTranslations
-  isINTComplete: boolean
+  chapterEntityTranslations: {
+    title: string
+    groups: { person: string; place: string; group: string; supernatural: string; other: string }
+    openEntity: string
+    empty: string
+    downloadTitle: string
+    downloadDescription: string
+    downloading: string
+    downloadFailed: string
+    dismiss: string
+  }
   // Pre-computed metadata from native side
   comments: { [key: string]: string } | null
   taggedVerses: TaggedVerse[] | null
@@ -197,34 +243,6 @@ const RightDirection = styled('div')<RootStyles>(({ settings: { theme, colors } 
   fontFamily: 'arial',
   fontSize: '13px',
   color: colors[theme].darkGrey,
-}))
-
-const IntMode = styled('div')<RootStyles>(({ settings: { theme, colors, fontFamily } }) => ({
-  fontFamily,
-  webkitTouchCallout: 'none',
-  mozUserSelect: 'none',
-  msUserSelect: 'none',
-  khtmlUserSelect: 'none',
-  webkitUserSelect: 'none',
-  color: colors[theme].default,
-  fontSize: '14px',
-  display: 'inline-block',
-
-  backgroundColor: colors[theme].reverse,
-  boxShadow: isDarkTheme(theme)
-    ? `0 0 10px 0 rgba(255, 255, 255, 0.1)`
-    : `0 0 10px 0 rgba(0, 0, 0, 0.2)`,
-  borderRadius: '8px',
-  paddingInline: '8px',
-  paddingBlock: '4px',
-  wordBreak: 'break-word',
-  marginInline: '4px',
-  transition: 'opacity 0.2s ease-in-out',
-
-  cursor: 'pointer',
-  '&:active': {
-    opacity: 0.6,
-  },
 }))
 
 const ReturnToSelectedVerseButton = styled('button')<
@@ -510,7 +528,6 @@ const LoadedBibleContent = ({
   parallelColumnWidth = 75,
   parallelDisplayMode = 'horizontal',
   focusVerses,
-  secondaryVerses,
   comments,
   selectedVerses,
   highlightedVerses,
@@ -523,6 +540,7 @@ const LoadedBibleContent = ({
   verseToScroll,
   contextDisplayMode,
   version,
+  interlinearMode,
   pericopeChapter,
   book,
   chapter,
@@ -530,13 +548,17 @@ const LoadedBibleContent = ({
   selectedCode,
   dispatch,
   translations,
+  chapterEntities,
+  chapterEntitiesLoaded,
+  chapterEntityModuleStatus,
+  chapterEntityDownloadState,
+  chapterEntityTranslations,
   annotationMode,
   clearSelectionTrigger,
   applyAnnotationTrigger,
   eraseSelectionTrigger,
   selectedAnnotationId,
   redWords,
-  isINTComplete,
   // Pre-computed metadata from native side
   taggedVerses,
   versesWithAnnotationNotes,
@@ -598,6 +620,9 @@ const LoadedBibleContent = ({
   })
 
   // Gesture handlers for unified touch selection
+  const hasReverseInterlinear = verses.some(verse => Boolean(verse.ReverseInterlinearSpans?.length))
+  const suppressVerseGestures =
+    shouldSuppressVerseGestures(version, interlinearMode) || hasReverseInterlinear
 
   const handleTapVerseAnnotationMode = (vKey: string, position: { x: number; y: number }) => {
     const containerRect = containerRef.current?.getBoundingClientRect()
@@ -695,6 +720,8 @@ const LoadedBibleContent = ({
   }
 
   const handleTapVerse = (verseKey: string, position: { x: number; y: number }) => {
+    if (suppressVerseGestures) return
+
     if (annotationMode) {
       handleTapVerseAnnotationMode(verseKey, position)
       return
@@ -709,6 +736,8 @@ const LoadedBibleContent = ({
   }
 
   const handleDoubleTapVerse = (vKey: string, position: { x: number; y: number }) => {
+    if (suppressVerseGestures) return
+
     // Find the word at the double-tap position
     const verse = versesMap.get(vKey)
     if (!verse) return
@@ -758,8 +787,12 @@ const LoadedBibleContent = ({
     // Normal mode: don't enter annotation mode if verses are selected
     if (Object.keys(selectedVerses).length > 0) return
 
-    // Don't enter annotation mode for interlinear versions (different DOM structure)
-    if (version === 'INT' || version === 'INT_EN') return
+    // Don't enter annotation mode for interlinear views (different DOM structure)
+    if (
+      (version === 'BHG' && verses.some(verse => Boolean(verse.InterlinearTokens?.length))) ||
+      hasReverseInterlinear
+    )
+      return
 
     // Don't enter annotation mode in parallel verse mode
     if (isParallelVerseMode) return
@@ -782,6 +815,7 @@ const LoadedBibleContent = ({
   }
 
   const handleLongPressVerse = (vKey: string) => {
+    if (suppressVerseGestures) return
     if (annotationMode) return // No long-press action in annotation mode
     if (isSelectionMode) return // No long-press in selection mode
 
@@ -827,7 +861,7 @@ const LoadedBibleContent = ({
       onTapVerse: handleTapVerse,
       onDoubleTapVerse: handleDoubleTapVerse,
       onLongPressVerse: handleLongPressVerse,
-      onTouchedVerseChange: setTouchedVerseKey,
+      onTouchedVerseChange: suppressVerseGestures ? undefined : setTouchedVerseKey,
       onTapEmpty: () => {
         // In annotation mode, tapping on empty space clears selection
         if (annotationMode) {
@@ -1094,9 +1128,7 @@ const LoadedBibleContent = ({
     })
   }
 
-  const isHebreu =
-    version === 'BHS' ||
-    ((version === 'INT' || version === 'INT_EN') && Number(verses[0].Livre) < 40)
+  const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
   const introComment = comments?.[0]
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse
@@ -1181,18 +1213,6 @@ const LoadedBibleContent = ({
                 : 1
             }
           >
-            {(version === 'INT' || version === 'INT_EN') && !isParallelVerse && (
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '40px' }}>
-                <IntMode
-                  settings={settings}
-                  onClick={() => dispatch({ type: TOGGLE_INT_COMPLETE })}
-                >
-                  {isINTComplete
-                    ? translations.interlinearDetailed
-                    : translations.interlinearCompact}
-                </IntMode>
-              </div>
-            )}
             {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
             {!!introComment && settings.commentsDisplay && (
               <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
@@ -1203,17 +1223,16 @@ const LoadedBibleContent = ({
               verses={verses}
               parallelVerses={parallelVerses}
               focusVerses={focusVerses}
-              secondaryVerses={secondaryVerses}
               selectedVerses={selectedVerses}
               highlightedVerses={highlightedVerses}
               settings={settings}
               verseToScroll={verseToScroll}
               contextDisplayMode={contextDisplayMode}
               version={version}
+              interlinearMode={interlinearMode}
               pericopeChapter={pericopeChapter}
               isSelectionMode={isSelectionMode}
               selectedCode={selectedCode}
-              isINTComplete={isINTComplete}
               isHebreu={isHebreu}
               isParallelVerse={isParallelVerse}
               comments={comments}
@@ -1236,6 +1255,23 @@ const LoadedBibleContent = ({
               redWords={redWords}
             />
           </HorizontalScrollWrapper>
+          <ChapterEntities
+            entities={chapterEntities}
+            loaded={chapterEntitiesLoaded}
+            availabilityStatus={chapterEntityModuleStatus}
+            downloadState={chapterEntityDownloadState}
+            settings={settings}
+            translations={chapterEntityTranslations}
+            onOpenEntity={uniqueName => {
+              void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
+            }}
+            onDownload={() => {
+              void dispatch({ type: DOWNLOAD_CHAPTER_ENTITIES })
+            }}
+            onDismiss={() => {
+              void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
+            }}
+          />
           <ReturnToSelectedVerseButton
             type="button"
             settings={settings}
@@ -1288,7 +1324,7 @@ const getErrorMessage = (error: BibleError, translations: BibleDOMTranslations) 
       return translations.versionNotFound
     case 'CHAPTER_NOT_FOUND':
       return translations.chapterNotFound
-    case 'DATABASE_CORRUPTED':
+    case 'OFFLINE_COPY_INVALID':
       return translations.databaseCorrupted
     default:
       return translations.unknownError
@@ -1314,6 +1350,9 @@ const BibleDOMErrorContent = ({
     errorDownloadState?.status === 'inserting'
   const progressLabel =
     errorDownloadState?.status === 'inserting' ? translations.inserting : translations.downloading
+  const canAcquire = error.recoveries?.includes('acquire-offline-copy')
+  const canManage = error.recoveries?.includes('manage-offline-copies')
+  const canReset = error.recoveries?.includes('reset-offline-store')
 
   return (
     <TranslationsProvider translations={translations}>
@@ -1329,7 +1368,7 @@ const BibleDOMErrorContent = ({
               />
             </ErrorIcon>
             <ErrorMessage settings={settings}>{getErrorMessage(error, translations)}</ErrorMessage>
-            {error.type === 'BIBLE_NOT_FOUND' &&
+            {canAcquire &&
               (isDownloading ? (
                 <>
                   <ProgressTrack settings={settings}>
@@ -1353,24 +1392,28 @@ const BibleDOMErrorContent = ({
                   {translations.downloadVersion}
                 </ErrorButton>
               ))}
-            {error.type === 'DATABASE_CORRUPTED' && (
+            {(canManage || canReset) && (
               <>
-                <ErrorButton
-                  settings={settings}
-                  type="button"
-                  onClick={() => dispatch({ type: OPEN_DOWNLOADS }).catch(console.error)}
-                >
-                  {translations.goToDownloads}
-                </ErrorButton>
-                <ErrorButton
-                  settings={settings}
-                  $secondary
-                  type="button"
-                  disabled={isResettingDatabase}
-                  onClick={() => dispatch({ type: RESET_BIBLE_DATABASE }).catch(console.error)}
-                >
-                  {translations.resetDatabase}
-                </ErrorButton>
+                {canManage && (
+                  <ErrorButton
+                    settings={settings}
+                    type="button"
+                    onClick={() => dispatch({ type: OPEN_DOWNLOADS }).catch(console.error)}
+                  >
+                    {translations.goToDownloads}
+                  </ErrorButton>
+                )}
+                {canReset && (
+                  <ErrorButton
+                    settings={settings}
+                    $secondary
+                    type="button"
+                    disabled={isResettingDatabase}
+                    onClick={() => dispatch({ type: RESET_BIBLE_DATABASE }).catch(console.error)}
+                  >
+                    {translations.resetDatabase}
+                  </ErrorButton>
+                )}
               </>
             )}
           </ErrorContent>

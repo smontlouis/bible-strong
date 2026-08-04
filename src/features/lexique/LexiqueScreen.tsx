@@ -1,10 +1,9 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 
-import { atom } from 'jotai/vanilla'
-import { useTranslation } from 'react-i18next'
-import generateUUID from '~helpers/generateUUID'
-import { StrongTab } from '../../state/tabs'
+import { createStrongIdentityForBook } from '~helpers/strongIdentities'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import LexiqueListScreen from './LexiqueListScreen'
+import { createStrongDetailRoute } from './strongDetailRoutes'
 
 type LexiqueScreenProps = {
   isFormSheet?: boolean
@@ -17,28 +16,26 @@ const LexiqueScreen = ({
   isNewTabSelection = false,
   newTabId,
 }: LexiqueScreenProps) => {
-  const { t } = useTranslation()
-  const onTheFlyAtom = useMemo(
-    () =>
-      atom<StrongTab>({
-        id: `strong-${generateUUID()}`,
-        title: t('Lexique'),
-        isRemovable: true,
-        hasBackButton: true,
-        type: 'strong',
-        data: {},
-      }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
+  const pushRouteOnce = usePushRouteOnce()
+  const openStrongDetail = (book: number, reference: string) => {
+    const identity = createStrongIdentityForBook(reference, book)
+    pushRouteOnce(
+      createStrongDetailRoute('index', {
+        book,
+        identityKind: identity.kind,
+        identityCode: identity.code,
+        reference: identity.code,
+      })
+    )
+  }
 
   return (
     <LexiqueListScreen
-      strongAtom={onTheFlyAtom}
       hasBackButton
       isFormSheet={isFormSheet}
       isNewTabSelection={isNewTabSelection}
       newTabId={newTabId}
+      onStrongSelect={openStrongDetail}
     />
   )
 }

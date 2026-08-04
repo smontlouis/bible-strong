@@ -40,6 +40,7 @@ const TRACKED_SYNC_COLLECTIONS: UserDataSyncCollection[] = [
   'highlights',
   'notes',
   'links',
+  'relations',
   'tags',
   'wordAnnotations',
   'studies',

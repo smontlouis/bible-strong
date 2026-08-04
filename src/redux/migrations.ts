@@ -13,8 +13,10 @@ import {
   dedupeRelationsByDuplicateKey,
   rebuildRelationIndexes,
   rebuildRelationPairs,
+  type RelationEndpoint,
   type RelationsObj,
 } from '~features/studyRelations/domain'
+import { migrateLegacyBibleVersionId } from '~helpers/legacyBibleVersionMigration'
 
 type LegacyRootState = RootState & {
   bible?: Record<string, unknown>
@@ -61,6 +63,32 @@ const migrateRelations = (state: LegacyRootState): RootState => {
     },
   } as RootState
 }
+
+const migrateVersionedRecords = <T extends Record<string, unknown>>(records: T): T =>
+  Object.fromEntries(
+    Object.entries(records).map(([key, value]) => [
+      key,
+      value && typeof value === 'object' && 'version' in value && typeof value.version === 'string'
+        ? { ...value, version: migrateLegacyBibleVersionId(value.version) }
+        : value,
+    ])
+  ) as T
+
+const migrateRelationEndpoint = (endpoint: RelationEndpoint): RelationEndpoint =>
+  endpoint.type === 'verse' && endpoint.version
+    ? { ...endpoint, version: migrateLegacyBibleVersionId(endpoint.version) }
+    : endpoint
+
+const migrateVersionedRelations = (relations: RelationsObj): RelationsObj =>
+  Object.fromEntries(
+    Object.entries(relations).map(([id, relation]) => [
+      id,
+      {
+        ...relation,
+        endpoints: relation.endpoints.map(migrateRelationEndpoint) as typeof relation.endpoints,
+      },
+    ])
+  )
 
 export default {
   // Added 'press' in 'settings'
@@ -552,6 +580,57 @@ export default {
           relations,
           relationIndex: rebuildRelationIndexes(relations),
           relationPairs: rebuildRelationPairs(relations),
+        },
+      },
+    }
+  },
+  36: (state: RootState) => {
+    const settings = state.user.bible.settings
+    const bookmarks = migrateVersionedRecords(state.user.bible.bookmarks)
+    const highlights = migrateVersionedRecords(state.user.bible.highlights)
+    const notes = migrateVersionedRecords(state.user.bible.notes)
+    const links = migrateVersionedRecords(state.user.bible.links)
+    const wordAnnotations = migrateVersionedRecords(state.user.bible.wordAnnotations)
+    const relations = dedupeRelationsByDuplicateKey(
+      mergeRelationsWithSystemBackfill({
+        relations: migrateVersionedRelations(state.user.bible.relations ?? {}),
+        notes,
+        links,
+        wordAnnotations,
+      })
+    )
+    const compare = Object.fromEntries(
+      Object.entries(settings.compare).map(([versionId, enabled]) => [
+        migrateLegacyBibleVersionId(versionId),
+        enabled,
+      ])
+    )
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          bookmarks,
+          highlights,
+          notes,
+          links,
+          wordAnnotations,
+          relations,
+          relationIndex: rebuildRelationIndexes(relations),
+          relationPairs: rebuildRelationPairs(relations),
+          settings: {
+            ...settings,
+            defaultBibleVersion: settings.defaultBibleVersion
+              ? migrateLegacyBibleVersionId(settings.defaultBibleVersion)
+              : settings.defaultBibleVersion,
+            defaultStrongBibleVersionId: settings.defaultStrongBibleVersionId
+              ? (migrateLegacyBibleVersionId(
+                  settings.defaultStrongBibleVersionId
+                ) as typeof settings.defaultStrongBibleVersionId)
+              : settings.defaultStrongBibleVersionId,
+            compare,
+          },
         },
       },
     }

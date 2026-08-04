@@ -110,6 +110,17 @@ export const getOpenableAction = (object: OpenableStudyObject): OpenableStudyObj
     }
   }
 
+  if ('strongReference' in object && object.strongReference) {
+    return {
+      type: 'route',
+      pathname: '/strong',
+      params: {
+        book: object.strongReference.language === 'hebrew' ? '1' : '40',
+        reference: object.strongReference.code,
+      },
+    }
+  }
+
   if ('endpoint' in object && object.endpoint) {
     return getOpenableActionForRelationEndpoint(object.endpoint)
   }

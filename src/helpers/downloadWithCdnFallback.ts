@@ -1,6 +1,11 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
 import { getCdnFallbackUrl } from './firebase'
+import {
+  assertResourceChecksum,
+  publicationFromHeaders,
+  type ResourcePublication,
+} from './resourcePublication'
 
 type DownloadWithCdnFallbackOptions = {
   url: string
@@ -12,6 +17,12 @@ type DownloadWithCdnFallbackOptions = {
   logTag: string
 }
 
+export interface DownloadWithCdnFallbackResult {
+  result: FileSystem.FileSystemDownloadResult
+  sourceUrl: string
+  publication: ResourcePublication
+}
+
 export const downloadWithCdnFallback = async ({
   url,
   destinationPath,
@@ -20,7 +31,7 @@ export const downloadWithCdnFallback = async ({
   onResumable,
   isCancelled,
   logTag,
-}: DownloadWithCdnFallbackOptions) => {
+}: DownloadWithCdnFallbackOptions): Promise<DownloadWithCdnFallbackResult> => {
   const fallbackUrl = getCdnFallbackUrl(url)
   const urls = fallbackUrl && fallbackUrl !== url ? [url, fallbackUrl] : [url]
   let lastError: unknown
@@ -29,16 +40,25 @@ export const downloadWithCdnFallback = async ({
     const resumable = FileSystem.createDownloadResumable(
       downloadUrl,
       destinationPath,
-      downloadOptions,
+      { ...downloadOptions, md5: true },
       onDownloadProgress
     )
 
     onResumable?.(resumable)
 
     try {
-      await resumable.downloadAsync()
+      const result = await resumable.downloadAsync()
+      if (!result) throw new Error('RESOURCE_DOWNLOAD_RESULT_MISSING')
       onResumable?.(null)
-      return
+      const publication = publicationFromHeaders({
+        get: name => result.headers[name] ?? result.headers[name.toLowerCase()] ?? null,
+      })
+      assertResourceChecksum(publication, result.md5)
+      return {
+        result,
+        sourceUrl: downloadUrl,
+        publication,
+      }
     } catch (error) {
       onResumable?.(null)
       lastError = error

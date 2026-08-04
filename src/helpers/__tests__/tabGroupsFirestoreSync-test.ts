@@ -36,6 +36,7 @@ const makeBibleTab = (): BibleTab => ({
   type: 'bible',
   data: {
     selectedVersion: 'LSG',
+    strongBibleSourceVersionId: 'DBY',
     selectedBook: { Numero: 1, Nom: 'Genèse', Chapitres: 50 },
     selectedChapter: 1,
     selectedVerse: 1,
@@ -86,6 +87,7 @@ describe('tabGroupsFirestoreSync', () => {
 
     expect(syncedTab.data.selectedVerses).toEqual({})
     expect(syncedTab.data.focusVerses).toEqual([1, 2])
+    expect(syncedTab.data.strongBibleSourceVersionId).toBe('DBY')
   })
 
   it('keeps the local active tab by tab id when hydrating reordered remote tabs', () => {

@@ -19,6 +19,7 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
             Gen: 1,
             Ps: 19,
             Acts: 44,
+            Rom: 45,
             John: 43,
             '1Cor': 46,
             Tob: 75,
@@ -67,9 +68,18 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
 }))
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { osisToBibleReferenceTarget, parseInlineBibleReferences } = require('../bcvParser')
+const { bcv, osisToBibleReferenceTarget, parseInlineBibleReferences } = require('../bcvParser')
 
 describe('bcvParser', () => {
+  it('uses strict book matching for prose extraction', () => {
+    expect(bcv.set_options).toHaveBeenCalledWith({
+      book_match_strategy: 'strict',
+      consecutive_combination_strategy: 'separate',
+      sequence_combination_strategy: 'separate',
+      testaments: 'ona',
+    })
+  })
+
   describe('parseInlineBibleReferences', () => {
     it('detects French references with source text positions', () => {
       const text = 'Lisez Jean 3:16 et 1 Corinthiens 13:4-8.'
@@ -155,6 +165,26 @@ describe('bcvParser', () => {
   })
 
   describe('osisToBibleReferenceTarget', () => {
+    it('normalizes a relative verse range from canonical Bible notes', () => {
+      expect(osisToBibleReferenceTarget('Rom.5.13-17')).toEqual({
+        book: 45,
+        chapter: 5,
+        verse: 13,
+        focusVerses: [13, 14, 15, 16, 17],
+        osis: 'Rom.5.13-Rom.5.17',
+      })
+    })
+
+    it('normalizes a relative chapter range from canonical Bible notes', () => {
+      expect(osisToBibleReferenceTarget('Rom.1-8')).toEqual({
+        book: 45,
+        chapter: 1,
+        verse: 1,
+        focusVerses: undefined,
+        osis: 'Rom.1-Rom.8',
+      })
+    })
+
     it('uses the first passage for multi-chapter ranges', () => {
       expect(osisToBibleReferenceTarget('Gen.1.31-Gen.2.3')).toEqual({
         book: 1,
@@ -173,6 +203,18 @@ describe('bcvParser', () => {
         focusVerses: [3],
         osis: 'Tob.2.3',
       })
+    })
+
+    it('maps additional Septuagint OSIS codes to stable app book ids', () => {
+      expect(osisToBibleReferenceTarget('1Esd.2.3')).toEqual({
+        book: 74,
+        chapter: 2,
+        verse: 3,
+        focusVerses: [3],
+        osis: '1Esd.2.3',
+      })
+      expect(osisToBibleReferenceTarget('4Macc.18.24')?.book).toBe(76)
+      expect(osisToBibleReferenceTarget('PssSol.1.1')?.book).toBe(77)
     })
 
     it('rejects apocryphal OSIS codes outside the supported Clementine canon', () => {

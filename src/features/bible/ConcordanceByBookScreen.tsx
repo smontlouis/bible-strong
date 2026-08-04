@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -8,7 +9,7 @@ import FlatList from '~common/ui/FlatList'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import waitForStrongDB from '~common/waitForStrongDB'
+import Text from '~common/ui/Text'
 import ConcordanceVerse from './ConcordanceVerse'
 import { FeatherIcon } from '~common/ui/Icon'
 
@@ -19,52 +20,75 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { FoundVerseRow } from '~features/resources/strongAccess'
+import type { Verse } from '~common/types'
 import { IS_FORM_SHEET } from '~helpers/constants'
-import type { StrongLexiconEntry } from '~helpers/strongVerseParser'
+import { useSelector } from 'react-redux'
+import type { RootState } from '~redux/modules/reducer'
+import type { StrongBibleProvenance } from '~features/resources/strongBibleResourceAccess'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+
+const PAGE_SIZE = 50
 
 const ConcordanceByBook = () => {
   const pushRouteOnce = usePushRouteOnce()
   const resources = useResourceAccess()
-  const params = useLocalSearchParams<{ book: string; strongReference: string }>()
+  const params = useLocalSearchParams<{
+    book: string
+    strongReference: string
+    strongBibleVersionId?: string
+  }>()
   const { t } = useTranslation()
-  const [verses, setVerses] = useState<FoundVerseRow[]>([])
   const isFormSheet = IS_FORM_SHEET
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : true
   const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
-
+  const defaultStrongBibleVersionId = useSelector(
+    (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
+  )
+  const requestedStrongBibleVersionId =
+    (params.strongBibleVersionId as StrongBibleVersionId | undefined) ?? defaultStrongBibleVersionId
   const book = params.book ? Number(params.book) : 0
   const strongReference = params.strongReference
     ? JSON.parse(params.strongReference)
     : { Code: 0, Mot: '' }
   const { Code, Mot } = strongReference
-  const routeLexiconLsg = strongReference.LSG || ''
-  const [lexiconEntry, setLexiconEntry] = useState<StrongLexiconEntry>({
-    Code,
-    LSG: routeLexiconLsg,
+  const occurrencesQuery = useInfiniteQuery({
+    queryKey: resourceQueryKeys.strongBibleOccurrences({
+      currentVersionId: requestedStrongBibleVersionId,
+      defaultVersionId: defaultStrongBibleVersionId,
+      book,
+      reference: Code,
+      limit: PAGE_SIZE,
+    }),
+    queryFn: ({ pageParam }) =>
+      resources.strongBible.loadFoundVersesByBook({
+        currentVersionId: requestedStrongBibleVersionId,
+        defaultVersionId: defaultStrongBibleVersionId,
+        book,
+        reference: Code,
+        limit: PAGE_SIZE,
+        pageToken: pageParam ?? undefined,
+      }),
+    initialPageParam: null as string | null,
+    getNextPageParam: lastPage =>
+      lastPage.status === 'available' ? lastPage.nextPageToken : undefined,
+    enabled: Boolean(book && Code),
   })
+  const verses =
+    occurrencesQuery.data?.pages.flatMap(page =>
+      page.status === 'available' ? page.verses : []
+    ) ?? []
+  const availablePage = occurrencesQuery.data?.pages.find(page => page.status === 'available')
+  const provenance: StrongBibleProvenance | null =
+    availablePage?.status === 'available' ? availablePage.provenance : null
+  const isLoading = occurrencesQuery.isPending || occurrencesQuery.isFetchingNextPage
 
   useEffect(() => {
-    let isCurrent = true
-    const loadVerses = async () => {
-      if (!book || !Code) return
-      setLexiconEntry({ Code, LSG: routeLexiconLsg })
-      const [foundVerses, currentLexiconEntry] = await Promise.all([
-        resources.strong.loadFoundVersesByBook(book, Code),
-        resources.strong.loadReference(String(Code), book),
-      ])
-      if (!isCurrent || 'error' in foundVerses) return
-      setVerses(foundVerses)
-      if (currentLexiconEntry && !('error' in currentLexiconEntry)) {
-        setLexiconEntry(currentLexiconEntry)
-      }
+    if (occurrencesQuery.isFetchNextPageError) {
+      toast(t('Impossible de charger les occurrences suivantes.'))
     }
-    loadVerses()
-    return () => {
-      isCurrent = false
-    }
-  }, [book, Code, resources.strong, routeLexiconLsg, strongResourceLanguage])
+  }, [occurrencesQuery.isFetchNextPageError, t])
 
   const toggleStrongLanguage = () => {
     const nextLanguage = strongResourceLanguage === 'fr' ? 'en' : 'fr'
@@ -78,7 +102,7 @@ const ConcordanceByBook = () => {
         hasBackButton={hasBackButton}
         title={`${truncate(Mot, 7)} dans ${
           getBook(book)?.Nom || t('Livre {{bookNumber}}', { bookNumber: book })
-        }`}
+        }${provenance ? ` · ${provenance.versionId}` : ''}`}
         rightComponent={
           <MenuView
             actions={[
@@ -100,22 +124,39 @@ const ConcordanceByBook = () => {
           </MenuView>
         }
       />
-      {!verses.length && (
+      {!verses.length && isLoading && (
         <Box flex>
           <Loading />
         </Box>
       )}
-      {!!verses.length && (
+      {(!isLoading || !!verses.length) && (
         <FlatList
           contentContainerStyle={{ padding: 20 }}
           removeClippedSubviews
           data={verses}
-          keyExtractor={(item: FoundVerseRow) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
-          renderItem={({ item }: { item: FoundVerseRow }) => {
+          onEndReached={() => {
+            if (occurrencesQuery.hasNextPage && !occurrencesQuery.isFetchingNextPage) {
+              occurrencesQuery.fetchNextPage()
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListEmptyComponent={
+            <Box py={40} px={20} center>
+              <Text color="grey">{t('Aucune occurrence disponible.')}</Text>
+            </Box>
+          }
+          ListFooterComponent={
+            isLoading && verses.length ? (
+              <Box height={72}>
+                <Loading />
+              </Box>
+            ) : null
+          }
+          keyExtractor={(item: Verse) => `${item.Livre}-${item.Chapitre}-${item.Verset}`}
+          renderItem={({ item }: { item: Verse }) => {
             return (
               <ConcordanceVerse
                 concordanceFor={Code}
-                lexiconEntry={lexiconEntry}
                 verse={item}
                 t={t}
                 onOpenVerse={verse => {
@@ -130,6 +171,8 @@ const ConcordanceByBook = () => {
                       chapter: String(verse.Chapitre),
                       verse: String(verseNumber),
                       focusVerses: JSON.stringify([verseNumber]),
+                      version: provenance?.versionId,
+                      strongMode: provenance ? 'visible' : undefined,
                     },
                   })
                 }}
@@ -142,8 +185,4 @@ const ConcordanceByBook = () => {
   )
 }
 
-export default waitForStrongDB({
-  hasBackButton: true,
-  hasHeader: true,
-  useStackBackButton: true,
-})(ConcordanceByBook)
+export default ConcordanceByBook

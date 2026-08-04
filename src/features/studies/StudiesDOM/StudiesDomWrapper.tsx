@@ -1,6 +1,10 @@
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
-import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller'
+import {
+  KeyboardAvoidingView,
+  KeyboardStickyView,
+  useKeyboardState,
+} from 'react-native-keyboard-controller'
 import { Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
 import { useTheme } from '@emotion/react'
@@ -20,6 +24,7 @@ import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
+import { getStudyEditorBottomInset, STUDY_FOOTER_HEIGHT } from '../studyEditorLayout'
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -51,7 +56,6 @@ const SELECTION_MODE_MAP: Record<string, StudyNavigateBibleType> = {
   SELECT_BIBLE_STRONG_BLOCK: 'strong-block',
 }
 
-const STUDY_FOOTER_HEIGHT = 50
 const STUDY_FOOTER_KEYBOARD_OFFSET = Platform.OS === 'android' ? -STUDY_FOOTER_HEIGHT : 0
 
 const encodeDeltaContent = (content: Study['content'] | undefined) =>
@@ -71,6 +75,7 @@ export default function StudiesDomWrapper({
   const pushRouteOnce = usePushRouteOnce()
   const theme = useTheme()
   const [activeFormats, setActiveFormats] = useState({})
+  const keyboardHeight = useKeyboardState(state => state.height)
   const { colorScheme } = useCurrentThemeSelector()
   const encodedContentToDisplay = encodeDeltaContent(contentToDisplay)
 
@@ -222,8 +227,14 @@ export default function StudiesDomWrapper({
   )
 
   if (isFormSheet) {
+    const editorBottomInset = getStudyEditorBottomInset({
+      isFormSheet,
+      footerVisible: Boolean(footer),
+      keyboardHeight,
+    })
+
     return (
-      <Box flex bg="reverse" pb={footer ? STUDY_FOOTER_HEIGHT : 0}>
+      <Box flex bg="reverse" pb={editorBottomInset}>
         {editor}
         {footer && (
           <KeyboardStickyView

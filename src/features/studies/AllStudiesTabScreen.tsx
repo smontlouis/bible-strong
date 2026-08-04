@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
 
 import Empty from '~common/Empty'
-import FiltersHeader, { getFiltersHeaderLabel } from '~common/FiltersHeader'
+import FiltersHeader from '~common/FiltersHeader'
 import RenameModal from '~common/RenameModal'
 import Box from '~common/ui/Box'
 import FabButton from '~common/ui/FabButton'
@@ -180,29 +180,12 @@ const StudiesScreen = ({
     })),
     queryState
   )
-  const activeFilters = Boolean(
-    queryState.query.trim() ||
-    queryState.tagId ||
-    queryState.publication !== 'all' ||
-    queryState.sort !== 'newest'
-  )
-  const filterLabel = getFiltersHeaderLabel(
-    [
-      ...queryFilters.activeLabels,
-      selectedChip?.name,
-      queryState.publication !== 'all' ? publicationLabels[queryState.publication] : undefined,
-    ],
-    count => `${count} ${t('filtres')}`
-  )
-
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
         <FiltersHeader
           title={t('Études')}
-          filterLabel={filterLabel}
           hasBackButton={showBackButton}
-          hasActiveFilters={activeFilters}
           onReset={() => setQueryState(defaultStudiesListQueryState)}
           filters={[
             ...queryFilters.filters,
@@ -211,6 +194,7 @@ const StudiesScreen = ({
               icon: 'tag',
               label: t('Tags'),
               value: selectedChip?.name || t('Tous'),
+              active: Boolean(queryState.tagId),
               onPress: openTagsModal,
             },
             {
@@ -218,6 +202,7 @@ const StudiesScreen = ({
               icon: 'send',
               label: t('Publication'),
               value: publicationLabels[queryState.publication],
+              active: queryState.publication !== 'all',
               onPress: () => publicationModalRef.current?.present(),
             },
           ]}

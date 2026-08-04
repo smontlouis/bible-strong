@@ -5,7 +5,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackHandler } from 'react-native'
 
-import { useQuery } from '~helpers/react-query-lite'
+import { useQuery } from '@tanstack/react-query'
 import { TimelineTab, useIsCurrentTab } from '~state/tabs'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getEvents } from './events'
@@ -24,7 +24,7 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
   const [timelineTab, setTimelineTab] = useAtom(timelineAtom)
   const isCurrentTab = useIsCurrentTab()
   const { data: sections } = useQuery({
-    queryKey: 'timeline',
+    queryKey: ['timeline'],
     queryFn: getEvents,
   })
 

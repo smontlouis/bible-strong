@@ -9,7 +9,7 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
 import { TAB_ICON_SIZE } from '../utils/constants'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 
 interface GroupActionsPopoverProps {
   children: React.ReactNode

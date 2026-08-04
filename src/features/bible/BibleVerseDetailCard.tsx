@@ -1,40 +1,57 @@
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import React, { useEffect, useRef, useState } from 'react'
-import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
-
-import waitForStrongDB from '~common/waitForStrongDB'
-import verseToStrong from '~helpers/verseToStrong'
 
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
+import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
+import CanonicalStrongVerseText from './CanonicalStrongVerseText'
 import StrongCard from './StrongCard'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
+import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useSelector } from 'react-redux'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
-import { StrongReference, StudyNavigateBibleType } from '~common/types'
-import { CarouselProvider } from '~helpers/CarouselContext'
-import { getChapterVerseCountSafe } from '~helpers/bibleCoverage'
-import { parseStrongVerse } from '~helpers/strongVerseParser'
-import { useLayoutSize } from '~helpers/useLayoutSize'
-import { wp } from '~helpers/utils'
-import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { StudyNavigateBibleType } from '~common/types'
+import Button from '~common/ui/Button'
+import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleResourceAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
+import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import {
+  getStrongBibleFallbackPriority,
+  type StrongBibleVersionId,
+} from '~helpers/strongBiblePublications'
+import { areStrongIdentitiesEqual } from '~helpers/strongIdentities'
+import { wp } from '~helpers/utils'
+import { useLayoutSize } from '~helpers/useLayoutSize'
+import type { RootState } from '~redux/modules/reducer'
+import { useResourcesLanguageValue } from '~state/resourcesLanguage'
+import type { VersionCode } from '~state/tabs'
+import { scaleFontSize } from './BibleDOM/scaleFontSize'
+import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
+import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
+import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth + itemHorizontalMargin * 2
 
 const VerseText = styled.View(() => ({
-  flex: 1,
-  flexWrap: 'wrap',
+  flexWrap: 'nowrap',
   alignItems: 'flex-start',
   flexDirection: 'row',
 }))
@@ -54,7 +71,7 @@ const NumberText = styled(Paragraph)({
   marginRight: 3,
 })
 
-const StyledVerse = styled.View(({ theme }) => ({
+const StyledVerse = styled.View(() => ({
   paddingLeft: 0,
   paddingRight: 10,
   marginBottom: 5,
@@ -70,168 +87,310 @@ interface Verse {
 
 interface Props {
   verse: Verse
+  selectedVersion: VersionCode
+  preferredStrongVersionId?: StrongBibleVersionId
+  preferredInterlinearLocale: ResourceLanguage
+  onStrongBibleProvenanceChange?: (provenance: LexiconBibleProvenance | null) => void
+  onOpenStrongBibleSourceSheet: () => void
   isSelectionMode?: StudyNavigateBibleType
   updateVerse: (direction: number) => void
+  bottomInset?: number
 }
 
-interface State {
-  error: boolean | 'CORRUPTED_DATABASE' | 'DISK_IO' | 'UNKNOWN_ERROR'
-  isCarouselLoading: boolean
-  strongReferences: StrongReference[]
-  currentStrongReference: StrongReference | null
+type StrongVerseQueryErrorCode =
+  | 'CORRUPTED_DATABASE'
+  | 'DISK_IO'
+  | 'UNKNOWN_ERROR'
+  | 'STRONG_BIBLE_UNAVAILABLE'
+
+class StrongVerseQueryError extends Error {
+  code: StrongVerseQueryErrorCode
+
+  constructor(code: StrongVerseQueryErrorCode) {
+    super(code)
+    this.name = 'StrongVerseQueryError'
+    this.code = code
+  }
+}
+
+interface StrongCardItem {
+  entry: StrongLexiconEntry
+  context: StrongVerseContext
+  occurrenceIndex: number
+}
+
+interface StrongVerseQueryData {
+  strongCards: StrongCardItem[]
   versesInCurrentChapter: number | null
-  formattedTexte: React.ReactNode | null
+  formattedTexte: React.ReactElement<React.ComponentProps<typeof CanonicalStrongVerseText>> | null
+  provenance: LexiconBibleProvenance | null
+  displayedVerse: Verse | null
 }
 
-const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateVerse }) => {
+const BibleVerseDetailCard: React.FC<Props> = ({
+  verse,
+  selectedVersion,
+  preferredStrongVersionId,
+  preferredInterlinearLocale,
+  onStrongBibleProvenanceChange,
+  onOpenStrongBibleSourceSheet,
+  isSelectionMode,
+  updateVerse,
+  bottomInset = 0,
+}) => {
   const theme = useTheme()
   const { t } = useTranslation()
-  const defaultVersion = useDefaultBibleVersion()
+  const router = useRouter()
+  const defaultStrongVersion = useSelector(
+    (rootState: RootState) => rootState.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
+  )
+  const fontSizeScale = useSelector(
+    (rootState: RootState) => rootState.user.bible.settings.fontSizeScale
+  )
+  const lineHeightSetting = useSelector(
+    (rootState: RootState) => rootState.user.bible.settings.lineHeight
+  )
   const resources = useResourceAccess()
+  const strongResourceLanguage = useResourcesLanguageValue().STRONG
   const verseBook = verse.Livre
   const verseChapter = verse.Chapitre
   const verseNumber = verse.Verset
-  const carouselRef = useRef<ICarouselInstance>(null)
-  const [boxHeight, setBoxHeight] = useState(0)
+  const verseScrollRef = useRef<ScrollView>(null)
+  const strongCardsScrollRef = useRef<ScrollView>(null)
+  const strongWordLayoutsRef = useRef(new Map<number, number>())
+  const currentStrongCardIndexRef = useRef(0)
+  const isProgrammaticCardsScrollRef = useRef(false)
+  const hasDisplayedStrongVerseRef = useRef(false)
+  const insets = useSafeAreaInsets()
   const {
-    ref: carouselContainerRef,
-    size: carouselContainerSize,
-    onLayout: onCarouselContainerLayout,
+    ref: strongCardsContainerRef,
+    size: strongCardsContainerSize,
+    onLayout: onStrongCardsContainerLayout,
   } = useLayoutSize()
-  const [state, setState] = useState<State>({
-    error: false,
-    isCarouselLoading: true,
-    strongReferences: [],
-    currentStrongReference: null,
-    versesInCurrentChapter: null,
-    formattedTexte: null,
+
+  const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
+  const coreAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryFn: async () => ({
+      availability: await resources.strongLexicon.getModuleAvailability('core'),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+    }),
+    networkMode: 'always',
+    staleTime: Infinity,
   })
 
-  const findRefIndex = (ref: string | number) =>
-    state.strongReferences.findIndex(r => Number(r.Code) === Number(ref))
+  const strongVerseQuery = useQuery({
+    queryKey: resourceQueryKeys.lexiconBibleVerse({
+      currentVersionId: selectedVersion,
+      defaultVersionId: defaultStrongVersion,
+      preferredInterlinearLocale,
+      preferredVersionId: preferredStrongVersionId,
+      resourceLanguage: strongResourceLanguage,
+      book: verseBook,
+      chapter: verseChapter,
+      verse: verseNumber,
+    }),
+    queryFn: async (): Promise<StrongVerseQueryData> => {
+      const result = await resources.lexiconBible.loadVerse({
+        currentVersionId: selectedVersion,
+        defaultVersionId: defaultStrongVersion,
+        preferredVersionId: preferredStrongVersionId,
+        preferredInterlinearLocale,
+        fallbackVersionIds: getStrongBibleFallbackPriority(selectedVersion),
+        book: verseBook,
+        chapter: verseChapter,
+        verse: verseNumber,
+      })
+      if (result.status !== 'available') {
+        throw new StrongVerseQueryError(
+          result.status === 'unavailable' ? 'STRONG_BIBLE_UNAVAILABLE' : 'UNKNOWN_ERROR'
+        )
+      }
 
-  const goToCarouselItem = (ref: string | number) => {
-    const index = findRefIndex(ref)
+      const strongVerse = result.verse
+      const strongOccurrences = getStrongWordOccurrences(strongVerse)
+      const strongIdentities = [
+        ...new Map(
+          strongOccurrences.map(occurrence => [
+            `${occurrence.identity.kind}:${occurrence.identity.code}`,
+            occurrence.identity,
+          ])
+        ).values(),
+      ]
+      const [coverage, strongReferencesResult] = await Promise.all([
+        resources.bibleContent.loadCoverage(result.provenance.versionId),
+        resources.strongLexicon.loadEntries(strongIdentities, strongResourceLanguage),
+      ])
+      const versesInCurrentChapterResult =
+        getChapterVerseCountFromCoverage(coverage, verseBook, verseChapter) ?? 0
+      const strongCards = strongOccurrences.flatMap((occurrence, occurrenceIndex) => {
+        const entry = strongReferencesResult.find(candidate =>
+          areStrongIdentitiesEqual(candidate.selectedIdentity, occurrence.identity)
+        )
+        if (!entry) return []
+
+        return [
+          {
+            entry,
+            occurrenceIndex,
+            context: {
+              bibleVersion: result.provenance.versionId,
+              ...(result.provenance.versionId === 'BHG'
+                ? {}
+                : { strongBibleVersionId: result.provenance.versionId }),
+              book: verseBook,
+              bibleChapter: verseChapter,
+              bibleVerse: verseNumber,
+              ...(occurrence.clickedWord ? { clickedWord: occurrence.clickedWord } : {}),
+              morphologyCodes: occurrence.morphologyCodes,
+            },
+          },
+        ]
+      })
+      const formattedTexte = (
+        <CanonicalStrongVerseText verse={{ ...strongVerse, Livre: verseBook }} />
+      )
+
+      return {
+        formattedTexte,
+        strongCards,
+        versesInCurrentChapter:
+          versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
+        provenance: result.provenance,
+        displayedVerse: {
+          Livre: verseBook,
+          Chapitre: verseChapter,
+          Verset: verseNumber,
+        },
+      }
+    },
+    placeholderData: keepPreviousData,
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
+  const strongVerseData = strongVerseQuery.data
+  const strongCards = strongVerseData?.strongCards ?? []
+
+  const findRefIndex = (ref: string | number, occurrenceIndex: number) =>
+    strongCards.findIndex(
+      card =>
+        card.occurrenceIndex === occurrenceIndex && Number(card.entry.baseCode) === Number(ref)
+    )
+
+  const scrollToStrongCard = (ref: string | number, occurrenceIndex: number) => {
+    const index = findRefIndex(ref, occurrenceIndex)
     if (index !== -1) {
-      carouselRef.current?.scrollTo({ index, animated: true })
+      isProgrammaticCardsScrollRef.current = true
+      strongCardsScrollRef.current?.scrollTo({ x: index * itemWidth, animated: true })
+      currentStrongCardIndexRef.current = index
+      setCurrentStrongCardIndex(index)
     }
-    setState(prev => ({
-      ...prev,
-      currentStrongReference:
-        prev.strongReferences.find(r => Number(r.Code) === Number(ref)) || null,
-    }))
   }
 
-  const onSnapToItem = (index: number) => {
-    setState(prev => ({
-      ...prev,
-      currentStrongReference: prev.strongReferences[index] || null,
-    }))
+  const registerStrongWordLayout = (occurrenceIndex: number, verseContentOffsetX: number) => {
+    strongWordLayoutsRef.current.set(occurrenceIndex, verseContentOffsetX)
   }
 
-  const renderItem = ({ item, index }: { item: StrongReference; index: number }) => {
+  const scrollVerseToOccurrence = (occurrenceIndex: number) => {
+    const x = strongWordLayoutsRef.current.get(occurrenceIndex)
+    if (x === undefined) return
+
+    verseScrollRef.current?.scrollTo({ x, animated: true })
+  }
+
+  const selectStrongCardFromOffset = (offsetX: number) => {
+    if (isProgrammaticCardsScrollRef.current) return
+
+    const index = Math.min(
+      Math.max(0, Math.round(offsetX / itemWidth)),
+      Math.max(0, strongCards.length - 1)
+    )
+    if (index === currentStrongCardIndexRef.current) return
+
+    currentStrongCardIndexRef.current = index
+    setCurrentStrongCardIndex(index)
+    const occurrenceIndex = strongCards[index]?.occurrenceIndex
+    if (occurrenceIndex !== undefined) scrollVerseToOccurrence(occurrenceIndex)
+  }
+
+  const renderStrongCard = ({ item, index }: { item: StrongCardItem; index: number }) => {
     return (
       <StrongCard
         theme={theme}
         isSelectionMode={isSelectionMode}
-        book={String(verse.Livre)}
-        strongReference={item}
+        book={String(strongVerseData?.displayedVerse?.Livre ?? verse.Livre)}
+        strongEntry={item.entry}
+        strongVerseContext={item.context}
+        cardHeight={Math.max(0, strongCardsContainerSize.height - bottomInset)}
         index={index}
       />
     )
   }
 
   useEffect(() => {
-    let isCurrent = true
+    if (!strongVerseData || strongVerseQuery.isPlaceholderData) return
+    hasDisplayedStrongVerseRef.current = true
+    currentStrongCardIndexRef.current = 0
+    isProgrammaticCardsScrollRef.current = false
+    setCurrentStrongCardIndex(0)
+    onStrongBibleProvenanceChange?.(strongVerseData.provenance)
+    verseScrollRef.current?.scrollTo({ x: 0, animated: false })
+    strongCardsScrollRef.current?.scrollTo({ x: 0, animated: false })
+  }, [onStrongBibleProvenanceChange, strongVerseData, strongVerseQuery.isPlaceholderData])
 
-    const loadPage = async () => {
-      setState(prev => ({
-        ...prev,
-        error: false,
-        isCarouselLoading: true,
-        strongReferences: [],
-        currentStrongReference: null,
-        versesInCurrentChapter: null,
-        formattedTexte: null,
-      }))
-
-      try {
-        const strongVerse = await resources.strong.loadVerse({
-          Livre: verseBook,
-          Chapitre: verseChapter,
-          Verset: verseNumber,
-        })
-        if (!isCurrent) return
-
-        if (!strongVerse || 'error' in strongVerse || !strongVerse.Texte) {
-          setState(prev => ({
-            ...prev,
-            isCarouselLoading: false,
-            error: strongVerse && 'error' in strongVerse ? strongVerse.error : true,
-          }))
-          return
-        }
-
-        const parsedVerse = parseStrongVerse(strongVerse.Texte, verseBook)
-        const [versesInCurrentChapterResult, strongReferencesResult] = await Promise.all([
-          getChapterVerseCountSafe(defaultVersion, verseBook, verseChapter),
-          resources.strong.loadReferences(parsedVerse.references, verseBook),
-        ])
-        if (!isCurrent) return
-
-        if (!strongReferencesResult || 'error' in strongReferencesResult) {
-          setState(prev => ({
-            ...prev,
-            isCarouselLoading: false,
-            error:
-              strongReferencesResult && 'error' in strongReferencesResult
-                ? strongReferencesResult.error
-                : true,
-          }))
-          return
-        }
-
-        const strongReferences = strongReferencesResult.filter(
-          (reference): reference is StrongReference => typeof reference !== 'string'
-        )
-        const { formattedTexte } = await verseToStrong(
-          { ...strongVerse, Livre: verseBook },
-          undefined,
-          undefined,
-          strongReferences
-        )
-        if (!isCurrent) return
-
-        setState(prev => ({
-          ...prev,
-          error: false,
-          isCarouselLoading: false,
-          formattedTexte,
-          strongReferences,
-          currentStrongReference: strongReferences[0] || null,
-          versesInCurrentChapter:
-            versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
-        }))
-        carouselRef.current?.scrollTo({ index: 0, animated: false })
-      } catch {
-        if (!isCurrent) return
-        setState(prev => ({
-          ...prev,
-          isCarouselLoading: false,
-          error: 'UNKNOWN_ERROR',
-        }))
-      }
+  useEffect(() => {
+    if (
+      !hasDisplayedStrongVerseRef.current &&
+      strongVerseQuery.error instanceof StrongVerseQueryError &&
+      strongVerseQuery.error.code === 'STRONG_BIBLE_UNAVAILABLE'
+    ) {
+      onStrongBibleProvenanceChange?.(null)
     }
+  }, [onStrongBibleProvenanceChange, strongVerseQuery.error])
 
-    loadPage()
-    return () => {
-      isCurrent = false
-    }
-  }, [defaultVersion, resources.strong, verseBook, verseChapter, verseNumber])
+  const { versesInCurrentChapter, formattedTexte } = strongVerseData ?? {
+    versesInCurrentChapter: null,
+    formattedTexte: null,
+  }
+  const error =
+    !strongVerseData && strongVerseQuery.error instanceof StrongVerseQueryError
+      ? strongVerseQuery.error.code
+      : !strongVerseData && strongVerseQuery.isError
+        ? 'UNKNOWN_ERROR'
+        : false
 
-  const { isCarouselLoading, versesInCurrentChapter, error, formattedTexte } = state
+  if (
+    coreAvailabilityQuery.data?.availability.status !== 'available' &&
+    coreAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        title={t('La base de données strong est requise pour accéder à cette page.')}
+        fileSize={35}
+        size="small"
+      />
+    )
+  }
 
   if (error) {
+    if (error === 'STRONG_BIBLE_UNAVAILABLE') {
+      return (
+        <Container>
+          <Empty
+            iconElement={<FeatherIcon name="book-open" size={36} color="tertiary" />}
+            message={t('strongSource.unavailableMessage')}
+          >
+            <Box mt={24} width={260}>
+              <Button onPress={onOpenStrongBibleSourceSheet}>
+                {t('strongSource.chooseAction')}
+              </Button>
+            </Box>
+          </Empty>
+        </Container>
+      )
+    }
+
     return (
       <Container>
         <Empty
@@ -244,6 +403,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
               : ''
           }`}
         />
+        <Box px={30} pb={30}>
+          <Button onPress={() => router.push('/downloads')}>
+            {t('Gérer les téléchargements Strong')}
+          </Button>
+        </Box>
       </Container>
     )
   }
@@ -252,77 +416,95 @@ const BibleVerseDetailCard: React.FC<Props> = ({ verse, isSelectionMode, updateV
     return <Loading />
   }
 
-  const currentStrongReferenceIndex = state.strongReferences.findIndex(
-    r => Number(r?.Code) === Number(state.currentStrongReference?.Code)
-  )
+  const verseTextStyle = {
+    fontSize: Number.parseFloat(scaleFontSize(24, fontSizeScale)),
+    lineHeight: Number.parseFloat(scaleLineHeight(30, lineHeightSetting, fontSizeScale)),
+  }
 
   return (
-    <Box flex={1} onLayout={e => setBoxHeight(e.nativeEvent.layout.height)}>
-      <Box maxHeight={boxHeight / 2} position="relative" zIndex={1}>
-        <ScrollView contentContainerStyle={{ paddingTop: 10 }}>
+    <Box flex={1}>
+      <Box position="relative" zIndex={1}>
+        <ScrollView
+          ref={verseScrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingTop: 10,
+            paddingRight: 20,
+            marginTop: 20,
+          }}
+        >
           <StyledVerse>
             <VersetWrapper>
-              <NumberText>{verse.Verset}</NumberText>
+              <NumberText>{strongVerseData?.displayedVerse?.Verset ?? verse.Verset}</NumberText>
             </VersetWrapper>
-            <CarouselProvider
+            <StrongResourceScrollProvider
               value={{
-                currentStrongReference: state.currentStrongReference,
-                goToCarouselItem,
+                currentTarget: strongCards[currentStrongCardIndex]
+                  ? {
+                      code: strongCards[currentStrongCardIndex].entry.baseCode,
+                      occurrenceIndex: strongCards[currentStrongCardIndex]?.occurrenceIndex,
+                    }
+                  : null,
+                registerStrongWordLayout,
+                scrollToStrongCard,
               }}
             >
-              <VerseText>{formattedTexte}</VerseText>
-            </CarouselProvider>
+              <VerseText>
+                {React.cloneElement(formattedTexte, { textStyle: verseTextStyle })}
+              </VerseText>
+            </StrongResourceScrollProvider>
           </StyledVerse>
         </ScrollView>
         <BibleVerseDetailFooter
           verseNumber={verse.Verset}
-          goToNextVerse={() => {
-            updateVerse(+1)
-            setState(prev => ({ ...prev, isCarouselLoading: true }))
-          }}
-          goToPrevVerse={() => {
-            updateVerse(-1)
-            setState(prev => ({ ...prev, isCarouselLoading: true }))
-          }}
+          goToNextVerse={() => updateVerse(+1)}
+          goToPrevVerse={() => updateVerse(-1)}
           versesInCurrentChapter={versesInCurrentChapter}
         />
       </Box>
       <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
-      <Box ref={carouselContainerRef} bg="lightGrey" flex={1} onLayout={onCarouselContainerLayout}>
-        {isCarouselLoading && <Loading />}
-        {!isCarouselLoading && (
-          <Carousel
-            ref={carouselRef}
-            mode="horizontal-stack"
-            scrollAnimationDuration={300}
-            itemWidth={itemWidth}
-            itemHeight={carouselContainerSize.height}
-            onConfigurePanGesture={gestureChain => {
-              gestureChain.activeOffsetX([-10, 10])
-            }}
-            modeConfig={{
-              opacityInterval: 0.8,
-              scaleInterval: 0,
-              stackInterval: itemWidth,
-              rotateZDeg: 0,
-            }}
-            style={{
-              paddingLeft: 20,
-              overflow: 'visible',
-              flex: 1,
-              width: '100%',
-            }}
-            data={state.strongReferences}
-            renderItem={renderItem}
-            onSnapToItem={onSnapToItem}
-            defaultIndex={currentStrongReferenceIndex === -1 ? 0 : currentStrongReferenceIndex}
-          />
-        )}
+      <Box
+        ref={strongCardsContainerRef}
+        bg="lightGrey"
+        flex={1}
+        onLayout={onStrongCardsContainerLayout}
+      >
+        <ScrollView
+          ref={strongCardsScrollRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          snapToInterval={itemWidth}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          onScrollBeginDrag={() => {
+            isProgrammaticCardsScrollRef.current = false
+          }}
+          onMomentumScrollEnd={() => {
+            isProgrammaticCardsScrollRef.current = false
+          }}
+          onScroll={event => selectStrongCardFromOffset(event.nativeEvent.contentOffset.x)}
+          scrollEventThrottle={16}
+          contentContainerStyle={{
+            paddingLeft: 20,
+            paddingRight: 20,
+            paddingBottom: insets.bottom + 180,
+          }}
+        >
+          {strongCards.map((item, index) => (
+            <Box
+              key={`${item.entry.selectedIdentity.kind}:${item.entry.selectedIdentity.code}:${item.occurrenceIndex}`}
+              width={itemWidth}
+            >
+              {renderStrongCard({ item, index })}
+            </Box>
+          ))}
+        </ScrollView>
       </Box>
     </Box>
   )
 }
 
-export default waitForStrongDB()(BibleVerseDetailCard)
+export default BibleVerseDetailCard

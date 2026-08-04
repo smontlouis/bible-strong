@@ -3,14 +3,10 @@ import React from 'react'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import NaveModalItem from './NaveModalItem'
-
-interface NaveModalVerseItem {
-  name: string
-  name_lower: string
-}
+import type { NaveTopicReference } from '~features/resources/naveAccess'
 
 interface NaveModalForVerseProps {
-  items?: NaveModalVerseItem[]
+  items?: NaveTopicReference[]
   label: string
 }
 
@@ -26,7 +22,10 @@ const NaveModalForVerse = ({ items, label }: NaveModalForVerseProps) => {
       </Text>
       <Box row wrap marginTop={5} marginBottom={20}>
         {items.map(item => (
-          <NaveModalItem key={item.name_lower} item={item} />
+          <NaveModalItem
+            key={item.normalizedName}
+            item={{ name: item.name, name_lower: item.normalizedName }}
+          />
         ))}
       </Box>
     </Box>

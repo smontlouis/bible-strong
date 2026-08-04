@@ -17,7 +17,7 @@ import {
   TabItem,
   tabsCountAtom,
 } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 import { useTabAnimations } from '../utils/useTabAnimations'
 import useTabConstants from '../utils/useTabConstants'
 

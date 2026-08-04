@@ -8,17 +8,18 @@ const height = 40
 
 interface Props {
   variant: 'grec' | 'hebreu'
-  id: string
+  displayCode: string
+  reference: string
   title: string
 }
-const LexiqueResultItem = ({ variant, id, title }: Props) => {
+const LexiqueResultItem = ({ variant, displayCode, reference, title }: Props) => {
   const isGrec = variant === 'grec'
 
   const color1 = isGrec ? 'rgb(69,150,220)' : 'rgba(248,131,121,1)'
   const color2 = isGrec ? 'rgb(89,131,240)' : 'rgba(255,77,93,1)'
 
   return (
-    <Link key={id + title} route="Strong" params={{ book: isGrec ? 40 : 1, reference: id }}>
+    <Link key={reference + title} route="Strong" params={{ book: isGrec ? 40 : 1, reference }}>
       <Box
         center
         borderRadius={8}
@@ -41,7 +42,7 @@ const LexiqueResultItem = ({ variant, id, title }: Props) => {
         </Box>
         <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={3} paddingVertical={2} rounded>
           <Text fontSize={7} style={{ color: 'white' }}>
-            {id} {isGrec ? 'Grec' : 'Hébreu'}
+            {displayCode} {isGrec ? 'Grec' : 'Hébreu'}
           </Text>
         </Box>
         <Text title fontSize={14} style={{ color: 'white' }}>

@@ -1,19 +1,15 @@
 import styled from '@emotion/native'
 import React from 'react'
-
-import { CarouselConsumer } from '~helpers/CarouselContext'
+import type { LayoutChangeEvent, TextStyle } from 'react-native'
 
 import Paragraph from '~common/ui/Paragraph'
-import type { CarouselContextValue } from '~helpers/CarouselContext'
+import { StrongResourceScrollConsumer } from './StrongResourceScrollContext'
 
 type SelectableProps = {
   isSelected?: boolean
 }
 
-const isStrongCarouselValue = (
-  value: CarouselContextValue
-): value is Extract<CarouselContextValue, { currentStrongReference: unknown }> =>
-  'currentStrongReference' in value
+export type StrongVerseTextStyle = Pick<TextStyle, 'fontSize' | 'lineHeight'>
 
 const StyledView = styled.TouchableOpacity<SelectableProps>(({ isSelected, theme }) => ({
   backgroundColor: isSelected ? theme.colors.primary : theme.colors.lightPrimary,
@@ -31,13 +27,16 @@ const StyledCircle = styled.TouchableOpacity<SelectableProps>(({ theme }) => ({
   backgroundColor: theme.colors.lightPrimary,
   alignItems: 'center',
   justifyContent: 'center',
+  marginHorizontal: 3,
 }))
 
 const StyledInsideCircle = styled.View<SelectableProps & { isConcordance?: boolean }>(
   ({ theme, isSelected, isConcordance }) => ({
-    width: 15,
-    height: 15,
-    borderRadius: 15 / 2,
+    width: isConcordance ? 12 : 15,
+    height: isConcordance ? 12 : 15,
+    borderRadius: isConcordance ? 15 : 15 / 2,
+    marginHorizontal: isConcordance ? 4 : 0,
+    marginTop: isConcordance ? 0 : 0,
     backgroundColor: isSelected || isConcordance ? theme.colors.primary : theme.colors.lightPrimary,
     alignItems: 'center',
     justifyContent: 'center',
@@ -76,9 +75,20 @@ type BibleStrongRefProps = {
   word?: string
   book?: string | number
   concordanceFor?: string | number
+  textStyle?: StrongVerseTextStyle
+  occurrenceIndex: number
+  selectionTargets?: Array<{ reference: string; occurrenceIndex: number }>
 }
 
-const BibleStrongRef = ({ small, reference, word, concordanceFor }: BibleStrongRefProps) => {
+const BibleStrongRef = ({
+  small,
+  reference,
+  word,
+  concordanceFor,
+  textStyle,
+  occurrenceIndex,
+  selectionTargets,
+}: BibleStrongRefProps) => {
   if (concordanceFor) {
     const isConcordance = `0${concordanceFor}` === reference || `${concordanceFor}` === reference
 
@@ -91,25 +101,36 @@ const BibleStrongRef = ({ small, reference, word, concordanceFor }: BibleStrongR
     }
 
     return (
-      <ConcordanceText small={small} isConcordance={isConcordance}>
+      <ConcordanceText small={small} isConcordance={isConcordance} style={textStyle}>
         {word}
       </ConcordanceText>
     )
   }
 
   return (
-    <CarouselConsumer>
+    <StrongResourceScrollConsumer>
       {value => {
-        if (!isStrongCarouselValue(value)) return null
-        const { currentStrongReference, goToCarouselItem } = value
-        const isSelected = currentStrongReference
-          ? Number(currentStrongReference.Code) === Number(reference)
-          : false
+        if (!value) return null
+        const { currentTarget, registerStrongWordLayout, scrollToStrongCard } = value
+        const registerLayout = (event: LayoutChangeEvent) => {
+          for (const target of selectionTargets ?? [{ reference, occurrenceIndex }]) {
+            registerStrongWordLayout(target.occurrenceIndex, event.nativeEvent.layout.x)
+          }
+        }
+        const isSelected = Boolean(
+          currentTarget &&
+          (selectionTargets ?? [{ reference, occurrenceIndex }]).some(
+            target =>
+              Number(currentTarget.code) === Number(target.reference) &&
+              currentTarget.occurrenceIndex === target.occurrenceIndex
+          )
+        )
         if (!word) {
           return (
             <StyledCircle
               activeOpacity={0.5}
-              onPress={() => goToCarouselItem(reference)}
+              onPress={() => scrollToStrongCard(reference, occurrenceIndex)}
+              onLayout={registerLayout}
               isSelected={isSelected}
             >
               <StyledInsideCircle isSelected={isSelected} />
@@ -120,14 +141,17 @@ const BibleStrongRef = ({ small, reference, word, concordanceFor }: BibleStrongR
         return (
           <StyledView
             activeOpacity={0.5}
-            onPress={() => goToCarouselItem(reference)}
+            onPress={() => scrollToStrongCard(reference, occurrenceIndex)}
+            onLayout={registerLayout}
             isSelected={isSelected}
           >
-            <StyledText isSelected={isSelected}>{word}</StyledText>
+            <StyledText isSelected={isSelected} style={textStyle}>
+              {word}
+            </StyledText>
           </StyledView>
         )
       }}
-    </CarouselConsumer>
+    </StrongResourceScrollConsumer>
   )
 }
 

@@ -18,6 +18,18 @@ jest.mock('~helpers/sqlite', () => ({
   initSQLiteDir: jest.fn(),
 }))
 
+jest.mock('~helpers/strongBibleSidecar', () => ({
+  getStrongBibleSidecarAvailability: jest.fn(),
+}))
+
+jest.mock('~helpers/interlinearBibleSidecar', () => ({
+  getInterlinearSidecarAvailability: jest.fn(),
+}))
+
+jest.mock('~helpers/strongLexiconModules', () => ({
+  getStrongLexiconModuleAvailability: jest.fn(),
+}))
+
 jest.mock('~i18n', () => ({
   getLanguage: jest.fn(() => 'fr'),
 }))
@@ -27,6 +39,9 @@ import {
   getLocalResourceAvailability,
   isLocalResourceAvailable,
 } from '../resourceAvailability'
+import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
+import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
+import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 
 const createDependencies = ({
   files = new Set<string>(),
@@ -43,15 +58,24 @@ const createDependencies = ({
   isVersionInstalled: jest.fn(async (versionId: string) => installedVersions.has(versionId)),
   getDbPath: jest.fn((dbId: string, lang: string) => {
     const fileNameByDb: Record<string, string> = {
-      STRONG: 'strong.sqlite',
-      INTERLINEAIRE: 'interlineaire.sqlite',
       NAVE: 'nave.sqlite',
     }
 
     return `file:///docs/SQLite/${lang}/${fileNameByDb[dbId] ?? `${dbId.toLowerCase()}.sqlite`}`
   }),
-  getDocumentDirectory: jest.fn(() => 'file:///docs/'),
   getCurrentResourceLanguage: jest.fn(() => currentLang),
+  getStrongBibleAvailability: jest.fn(
+    async (): Promise<StrongBibleSidecarAvailability> => ({ status: 'missing' })
+  ),
+  getInterlinearAvailability: jest.fn(
+    async (): Promise<InterlinearSidecarAvailability> => ({ status: 'missing' })
+  ),
+  getStrongLexiconAvailability: jest.fn(
+    async (moduleId): Promise<StrongLexiconModuleAvailability> => ({
+      status: 'missing',
+      moduleId,
+    })
+  ),
 })
 
 describe('resourceAvailability', () => {
@@ -69,59 +93,21 @@ describe('resourceAvailability', () => {
     ).resolves.toEqual(
       expect.objectContaining({
         status: 'available',
-        source: 'bibles-sqlite',
       })
     )
   })
 
-  it('falls back to a legacy Bible JSON file', async () => {
+  it('does not report a legacy JSON as readable before its SQLite migration succeeds', async () => {
     const dependencies = createDependencies({
       files: new Set(['file:///docs/bible-DBY.json']),
     })
 
     await expect(
       getLocalResourceAvailability({ kind: 'bible', versionId: 'DBY' }, dependencies)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        status: 'available',
-        source: 'legacy-bible-json',
-      })
-    )
-  })
-
-  it('maps interlinear Bible versions to the interlinear resource database', async () => {
-    const dependencies = createDependencies({
-      files: new Set(['file:///docs/SQLite/fr/interlineaire.sqlite']),
+    ).resolves.toEqual({
+      status: 'missing',
+      resource: { kind: 'bible', versionId: 'DBY' },
     })
-
-    await expect(
-      getLocalResourceAvailability({ kind: 'bible', versionId: 'INT' }, dependencies)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        status: 'available',
-        source: 'database-file',
-      })
-    )
-
-    expect(dependencies.initLanguageDirs).toHaveBeenCalledWith('fr')
-  })
-
-  it('maps Strong Bible versions to the active Strong resource database', async () => {
-    const dependencies = createDependencies({
-      currentLang: 'en',
-      files: new Set(['file:///docs/SQLite/en/strong.sqlite']),
-    })
-
-    await expect(
-      getLocalResourceAvailability({ kind: 'bible', versionId: 'KJVS' }, dependencies)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        status: 'available',
-        source: 'database-file',
-      })
-    )
-
-    expect(dependencies.initLanguageDirs).toHaveBeenCalledWith('en')
   })
 
   it('reports missing resources as needing download', async () => {
@@ -129,14 +115,14 @@ describe('resourceAvailability', () => {
 
     await expect(
       getIfLocalResourceNeedsDownload(
-        { kind: 'database', databaseId: 'NAVE', lang: 'fr' },
+        { kind: 'database', databaseId: 'NAVE', language: 'fr' },
         dependencies
       )
     ).resolves.toBe(true)
 
     await expect(
       getLocalResourceAvailability(
-        { kind: 'database', databaseId: 'NAVE', lang: 'fr' },
+        { kind: 'database', databaseId: 'NAVE', language: 'fr' },
         dependencies
       )
     ).resolves.toEqual(
@@ -144,6 +130,88 @@ describe('resourceAvailability', () => {
         status: 'missing',
         expectedPath: 'file:///docs/SQLite/fr/nave.sqlite',
       })
+    )
+  })
+
+  it('uses canonical child identities for pericope and red-word availability', async () => {
+    const dependencies = createDependencies({
+      files: new Set(['file:///docs/bible-dby-pericope.json', 'file:///docs/red-words-DBY.json']),
+    })
+
+    await expect(
+      isLocalResourceAvailable({ kind: 'bible-pericope', versionId: 'DBY' }, dependencies)
+    ).resolves.toBe(true)
+    await expect(
+      isLocalResourceAvailable({ kind: 'bible-red-words', versionId: 'DBY' }, dependencies)
+    ).resolves.toBe(true)
+  })
+
+  it('routes every canonical index and lexicon identity through availability', async () => {
+    const dependencies = createDependencies()
+    dependencies.getStrongBibleAvailability.mockResolvedValue({
+      status: 'available',
+      versionId: 'DBY',
+      datasetId: 'STEP',
+      textRevision: 'db-1',
+      strongRevision: 'strong-1',
+    })
+    dependencies.getInterlinearAvailability.mockResolvedValue({
+      status: 'available',
+      locale: 'fr',
+      textRevision: 'bhg-1',
+    })
+    dependencies.getStrongLexiconAvailability.mockResolvedValue({
+      status: 'available',
+      moduleId: 'core',
+      revision: 'lexicon-1',
+      schemaVersion: 1,
+    })
+
+    await expect(
+      getLocalResourceAvailability({ kind: 'strong-bible-index', versionId: 'DBY' }, dependencies)
+    ).resolves.toEqual(expect.objectContaining({ status: 'available' }))
+    await expect(
+      getLocalResourceAvailability(
+        { kind: 'interlinear-index', versionId: 'BHG', language: 'fr' },
+        dependencies
+      )
+    ).resolves.toEqual(expect.objectContaining({ status: 'available' }))
+    await expect(
+      getLocalResourceAvailability(
+        { kind: 'strong-lexicon-module', moduleId: 'core' },
+        dependencies
+      )
+    ).resolves.toEqual(expect.objectContaining({ status: 'available' }))
+  })
+
+  it('preserves incompatibility and corruption reasons from specialized resources', async () => {
+    const dependencies = createDependencies()
+    dependencies.getStrongBibleAvailability.mockResolvedValue({
+      status: 'incompatible',
+      baseTextRevision: 'db-2',
+      sidecarTextRevision: 'db-1',
+    })
+    dependencies.getInterlinearAvailability.mockResolvedValue({
+      status: 'corrupt',
+      reason: 'integrity-check-failed',
+    })
+
+    await expect(
+      getLocalResourceAvailability({ kind: 'strong-bible-index', versionId: 'DBY' }, dependencies)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        status: 'incompatible',
+        baseTextRevision: 'db-2',
+        sidecarTextRevision: 'db-1',
+      })
+    )
+    await expect(
+      getLocalResourceAvailability(
+        { kind: 'interlinear-index', versionId: 'BHG', language: 'fr' },
+        dependencies
+      )
+    ).resolves.toEqual(
+      expect.objectContaining({ status: 'corrupt', reason: 'integrity-check-failed' })
     )
   })
 })

@@ -51,9 +51,7 @@ export const databasesRef = {
   MHY: cdnUrl('databases/commentaires-mhy.sqlite'),
   TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'),
   DICTIONNAIRE: cdnUrl('databases/dictionnaire.sqlite'),
-  INTERLINEAIRE: cdnUrl('databases/interlineaire.sqlite'),
   NAVE: cdnUrl('databases/nave-fr.sqlite'),
-  STRONG: cdnUrl('databases/strong.sqlite'),
   TIMELINE: cdnUrl('databases/bible-timeline-events.json'),
 }
 
@@ -62,9 +60,7 @@ export const databasesEnRef = {
   MHY: cdnUrl('databases/en/commentaires-mhy.sqlite'),
   TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'), // Shared across languages
   DICTIONNAIRE: cdnUrl('databases/en/dictionnaire.sqlite'),
-  INTERLINEAIRE: cdnUrl('databases/en/interlineaire.sqlite'),
   NAVE: cdnUrl('databases/en/nave.sqlite'),
-  STRONG: cdnUrl('databases/en/strong.sqlite'),
   TIMELINE: cdnUrl('databases/en/bible-timeline-events.json'),
 }
 
@@ -73,9 +69,7 @@ interface DatabasesRef {
   MHY: string
   TRESOR: string
   DICTIONNAIRE: string
-  INTERLINEAIRE: string
   NAVE: string
-  STRONG: string
   TIMELINE: string
 }
 
@@ -132,6 +126,12 @@ export const biblesRef: {
   S21: cdnUrl('bibles/bible-s21.json'),
   KJF: cdnUrl('bibles/bible-kjf.json'),
   KJV: cdnUrl('bibles/bible-kjv.json'),
+  BSB: cdnUrl('bibles/bible-bsb.json'),
+  ASV: cdnUrl('bibles/bible-asv.json'),
+  DARBY: cdnUrl('bibles/bible-darby.json'),
+  RLT: cdnUrl('bibles/bible-rlt.json'),
+  RWEBSTER: cdnUrl('bibles/bible-rwebster.json'),
+  RV1895: cdnUrl('bibles/bible-rv1895.json'),
   NKJV: cdnUrl('bibles/bible-nkjv.json'),
   ESV: cdnUrl('bibles/bible-esv.json'),
   NIV: cdnUrl('bibles/bible-niv.json'),
@@ -150,6 +150,7 @@ export const biblesRef: {
   TR1894: cdnUrl('bibles/bible-TR1894.json'),
   AMP: cdnUrl('bibles/bible-amp.json'),
   DEL: cdnUrl('bibles/bible-del.json'),
+  NASB1995: cdnUrl('bibles/bible-nasb1995.json'),
   NASB2020: cdnUrl('bibles/bible-nasb2020.json'),
   EASY: cdnUrl('bibles/bible-easy.json'),
   TLV: cdnUrl('bibles/bible-tlv.json'),

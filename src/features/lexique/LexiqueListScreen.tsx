@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
@@ -13,30 +14,24 @@ import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import { DatabaseError } from '~helpers/catchDatabaseError'
 
 import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
-import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import waitForStrongDB from '~common/waitForStrongDB'
-import { StrongTab } from '../../state/tabs'
 import LexiqueItem from './LexiqueItem'
 import { FeatherIcon } from '~common/ui/Icon'
-import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
-import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
+import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 
 interface LexiqueSection {
   title: string
-  data: LexiqueRow[]
+  data: StrongLexiconSearchResult[]
 }
-
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
 
 const getLexiqueItemLayout = sectionListGetItemLayout({
   getItemHeight: () => 80,
@@ -45,34 +40,21 @@ const getLexiqueItemLayout = sectionListGetItemLayout({
   getSectionFooterHeight: () => 0,
 })
 
-const useSectionResults = (results: LexiqueRow[]) => {
-  const [sectionResults, setSectionResults] = useState<LexiqueSection[]>([])
-
-  useEffect(() => {
-    if (!results.length) {
-      setSectionResults([])
-      return
+const useSectionResults = (results: StrongLexiconSearchResult[]) => {
+  return results.reduce<LexiqueSection[]>((list, dbItem) => {
+    const initial = getFirstLetterFrom(dbItem.gloss)
+    const listItem = list.find(item => item.title && item.title === initial)
+    if (!listItem) {
+      list.push({ title: initial, data: [dbItem] })
+    } else {
+      listItem.data.push(dbItem)
     }
-    const sectionResults = results.reduce<LexiqueSection[]>((list, dbItem) => {
-      const listItem = list.find(
-        item => item.title && item.title === getFirstLetterFrom(dbItem.Mot)
-      )
-      if (!listItem) {
-        list.push({ title: getFirstLetterFrom(dbItem.Mot), data: [dbItem] })
-      } else {
-        listItem.data.push(dbItem)
-      }
 
-      return list
-    }, [])
-    setSectionResults(sectionResults)
-  }, [results])
-
-  return sectionResults
+    return list
+  }, [])
 }
 
 interface LexiqueListScreenProps {
-  strongAtom: PrimitiveAtom<StrongTab>
   hasBackButton?: boolean
   isFormSheet?: boolean
   isNewTabSelection?: boolean
@@ -81,7 +63,6 @@ interface LexiqueListScreenProps {
 }
 
 const LexiqueListScreen = ({
-  strongAtom,
   hasBackButton,
   isFormSheet = false,
   isNewTabSelection = false,
@@ -93,24 +74,41 @@ const LexiqueListScreen = ({
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
-  const [strongResourceLanguage, setStrongResourceLanguage] = useResourceLanguage('STRONG')
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
+  const {
+    language: strongResourceLanguage,
+    menuTitle: strongLanguageMenuTitle,
+    toggleLanguage: toggleStrongLanguage,
+  } = useStrongLexiconLanguage()
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
+  const coreAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryFn: async () => ({
+      availability: await resources.strongLexicon.getModuleAvailability('core'),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+    }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
 
-  const { results, isLoading } = useResultsByLetterOrSearch(
-    { query: resources.strong.searchLexicon, value: debouncedSearchValue },
-    { query: resources.strong.listLexiconByLetter, value: letter }
+  const { results, isLoading, error } = useResultsByLetterOrSearch(
+    {
+      queryKey: ['strong-lexicon'],
+      query: value => resources.strongLexicon.search(value, strongResourceLanguage, 200),
+      value: debouncedSearchValue,
+      resourceLanguage: strongResourceLanguage,
+    },
+    {
+      queryKey: ['strong-lexicon'],
+      query: value =>
+        resources.strongLexicon.browseByGlossPrefix(value, strongResourceLanguage, 500),
+      value: letter,
+      resourceLanguage: strongResourceLanguage,
+    }
   )
 
   const lexiqueResults = Array.isArray(results) ? results : []
   const sectionResults = useSectionResults(lexiqueResults)
-
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
 
   const selectStrong = (book: number, reference: string, title?: string) => {
     if (isNewTabSelection) {
@@ -130,10 +128,19 @@ const LexiqueListScreen = ({
     onStrongSelect?.(book, reference)
   }
 
-  const toggleStrongLanguage = () => {
-    const nextLanguage = strongResourceLanguage === 'fr' ? 'en' : 'fr'
-    setStrongResourceLanguage(nextLanguage)
-    toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
+  if (
+    coreAvailabilityQuery.data?.availability.status !== 'available' &&
+    coreAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        hasBackButton={showBackButton}
+        hasHeader
+        title={t('La base de données strong est requise pour accéder à cette page.')}
+        fileSize={35}
+      />
+    )
   }
 
   if (error) {
@@ -145,7 +152,7 @@ const LexiqueListScreen = ({
             icon={require('~assets/images/empty-state-icons/inbox.svg')}
             message={`${t('Impossible de charger la strong pour ce verset...')}
             ${
-              error === 'CORRUPTED_DATABASE'
+              error === 'INVALID_OFFLINE_COPY'
                 ? t(
                     '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
                   )
@@ -168,9 +175,7 @@ const LexiqueListScreen = ({
               actions={[
                 {
                   id: 'language',
-                  title: `${t('menu.language')}: ${
-                    strongResourceLanguage === 'fr' ? 'Français' : 'English'
-                  }`,
+                  title: strongLanguageMenuTitle,
                   image: 'globe',
                 },
               ]}
@@ -197,7 +202,7 @@ const LexiqueListScreen = ({
           {isLoading ? (
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
-            <SectionList<LexiqueRow, LexiqueSection>
+            <SectionList<StrongLexiconSearchResult, LexiqueSection>
               renderItem={({ item, index }) => (
                 <LexiqueItem
                   key={index}
@@ -219,7 +224,7 @@ const LexiqueListScreen = ({
               )}
               stickySectionHeadersEnabled
               sections={sectionResults}
-              keyExtractor={item => item.Mot + item.Code}
+              keyExtractor={item => `${item.id}:${item.stepCode}`}
             />
           ) : (
             <Empty
@@ -234,7 +239,4 @@ const LexiqueListScreen = ({
   )
 }
 
-export default waitForStrongDB({
-  hasBackButton: true,
-  hasHeader: true,
-})(LexiqueListScreen)
+export default LexiqueListScreen

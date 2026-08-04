@@ -2,7 +2,7 @@ import React from 'react'
 import { ActivityIndicator } from 'react-native'
 import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import { IonIcon } from '~common/ui/Icon'
 import { useStrongAudio } from './StrongAudioProvider'
 
 type AudioStatus = 'Idle' | 'Loading' | 'Playing'
@@ -10,9 +10,18 @@ type AudioStatus = 'Idle' | 'Loading' | 'Playing'
 interface Props {
   type: 'hebreu' | 'grec'
   code: string | number
+  iconSize?: number
+  touchSize?: number
 }
 
-const ListenToStrong = ({ type, code }: Props) => {
+export const hasStrongAudio = (type: Props['type'], code: Props['code']) => {
+  const numericCode = Number(code)
+  const maximumCode = type === 'hebreu' ? 8674 : 5624
+
+  return Number.isInteger(numericCode) && numericCode >= 1 && numericCode <= maximumCode
+}
+
+const ListenToStrong = ({ type, code, iconSize = 20, touchSize }: Props) => {
   const codeId = `${code}`.padStart(4, '0')
   const audioId = `${type}-${codeId}`
   const url =
@@ -23,6 +32,8 @@ const ListenToStrong = ({ type, code }: Props) => {
   const { getStatus, play } = useStrongAudio()
   const audioStatus = getStatus(audioId)
 
+  if (!hasStrongAudio(type, code)) return null
+
   const playAudio = () => {
     play({ id: audioId, url })
   }
@@ -30,8 +41,20 @@ const ListenToStrong = ({ type, code }: Props) => {
   return (
     <Box>
       {audioStatus === 'Idle' && (
-        <LinkBox onPress={playAudio}>
-          <FeatherIcon name="play-circle" size={20} color="primary" />
+        <LinkBox
+          onPress={playAudio}
+          style={
+            touchSize
+              ? {
+                  width: touchSize,
+                  height: touchSize,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }
+              : undefined
+          }
+        >
+          <IonIcon name="play" size={iconSize} color="primary" style={{ marginLeft: 2 }} />
         </LinkBox>
       )}
       {audioStatus === 'Loading' && (
@@ -41,7 +64,12 @@ const ListenToStrong = ({ type, code }: Props) => {
       )}
       {audioStatus === 'Playing' && (
         <Box>
-          <FeatherIcon name="play-circle" size={20} color="primary" style={{ opacity: 0.5 }} />
+          <IonIcon
+            name="play"
+            size={iconSize}
+            color="primary"
+            style={{ opacity: 0.3, marginLeft: 2 }}
+          />
         </Box>
       )}
     </Box>

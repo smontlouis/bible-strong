@@ -1,5 +1,6 @@
 import { produce } from 'immer'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
 import { Book } from '~assets/bible_versions/books-desc'
 import { getBook } from '~helpers/bibleBookCatalog'
@@ -7,7 +8,6 @@ import generateUUID from '~helpers/generateUUID'
 
 import { useLocalSearchParams } from 'expo-router'
 import { atom } from 'jotai/vanilla'
-import { useAtomValue } from 'jotai/react'
 import {
   BibleContextDisplayMode,
   BibleTab,
@@ -19,13 +19,14 @@ import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
 import BibleTabScreen from './BibleTabScreen'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import {
-  BibleVerseResolutionStatus,
   getBibleLocationVerseKeys,
   resolveBibleVerses,
   shouldShowBibleReferenceUnavailable,
 } from '~helpers/bibleVerseResolver'
 import Box from '~common/ui/Box'
-import { bibleDataRefreshSignalAtom } from '~state/app'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import type { StrongMode } from '~helpers/strongBiblePublications'
 import {
   BiblePartialReferenceNotice,
   BibleReferenceUnavailable,
@@ -39,6 +40,7 @@ type BibleScreenContentProps = {
   chapter?: number
   verse?: number
   version: string
+  strongMode?: StrongMode
 }
 
 const BibleScreenContent = ({
@@ -49,6 +51,7 @@ const BibleScreenContent = ({
   chapter,
   verse,
   version,
+  strongMode,
 }: BibleScreenContentProps) => {
   const initialValues = produce(getDefaultBibleTab(version as VersionCode), draft => {
     draft.id = `bible-${generateUUID()}`
@@ -64,6 +67,7 @@ const BibleScreenContent = ({
     if (contextDisplayMode) {
       draft.data.contextDisplayMode = contextDisplayMode
     }
+    if (strongMode) draft.data.strongMode = strongMode
   })
 
   // Always create an on-the-fly atom for this screen
@@ -83,6 +87,7 @@ const BibleScreen = () => {
     chapter?: string
     verse?: string
     version?: string
+    strongMode?: StrongMode
   }>()
 
   // Parse params from URL strings
@@ -94,13 +99,10 @@ const BibleScreen = () => {
   const chapter = params.chapter ? Number(params.chapter) : undefined
   const verse = params.verse ? Number(params.verse) : undefined
   const defaultVersion = useDefaultBibleVersion()
-  const bibleDataRefreshSignal = useAtomValue(bibleDataRefreshSignalAtom)
+  const resources = useResourceAccess()
   const requestedVersion = params.version || undefined
+  const strongMode = params.strongMode
   const bookNumber = typeof book === 'number' ? book : book?.Numero
-  const [resolvedVersion, setResolvedVersion] = useState(requestedVersion || defaultVersion)
-  const [resolutionStatus, setResolutionStatus] = useState<BibleVerseResolutionStatus>('resolved')
-  const [missingVerseKeys, setMissingVerseKeys] = useState<string[]>([])
-  const [isResolvingVersion, setIsResolvingVersion] = useState(Boolean(bookNumber && chapter))
   const requestedVerseKeys = getBibleLocationVerseKeys({
     book: bookNumber,
     chapter,
@@ -108,53 +110,41 @@ const BibleScreen = () => {
     focusVerses,
   })
   const requestedVerseKeysSignature = requestedVerseKeys.join('|')
-
-  useEffect(() => {
-    let cancelled = false
-
-    if (!bookNumber || !chapter) {
-      setResolvedVersion(requestedVersion || defaultVersion)
-      setResolutionStatus('resolved')
-      setMissingVerseKeys([])
-      setIsResolvingVersion(false)
-      return
-    }
-
-    setIsResolvingVersion(true)
-    resolveBibleVerses({
-      verseKeys: requestedVerseKeysSignature.split('|'),
-      preferredVersion: requestedVersion,
-      defaultVersion,
-    })
-      .then(resolution => {
-        if (!cancelled) {
-          setResolvedVersion(resolution.version || requestedVersion || defaultVersion)
-          setResolutionStatus(resolution.status)
-          setMissingVerseKeys(resolution.missingVerseKeys)
+  const shouldResolveVersion = Boolean(bookNumber && chapter)
+  const resolutionQuery = useQuery({
+    queryKey: [
+      ...resourceQueryKeys.bibleVerseSelection(
+        requestedVersion || defaultVersion,
+        requestedVerseKeys
+      ),
+      'screen-resolution',
+      requestedVerseKeysSignature,
+    ],
+    queryFn: () =>
+      resolveBibleVerses(
+        {
+          verseKeys: requestedVerseKeys,
+          preferredVersion: requestedVersion,
+          defaultVersion,
+        },
+        {
+          loadVerseTexts: (version, verseKeys) =>
+            resources.bibleContent.loadVerseTexts({ version, verseKeys }),
         }
-      })
-      .catch(error => {
-        console.error('[BibleScreen] Failed to resolve a compatible Bible version:', error)
-        if (!cancelled) {
-          setResolutionStatus('reference-only')
-          setMissingVerseKeys(requestedVerseKeysSignature.split('|'))
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setIsResolvingVersion(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [
-    bookNumber,
-    chapter,
-    requestedVerseKeysSignature,
-    requestedVersion,
-    defaultVersion,
-    bibleDataRefreshSignal,
-  ])
+      ),
+    enabled: shouldResolveVersion,
+    staleTime: Infinity,
+  })
+  const resolvedVersion = resolutionQuery.data?.version || requestedVersion || defaultVersion
+  const resolutionStatus = shouldResolveVersion
+    ? resolutionQuery.isError
+      ? 'reference-only'
+      : (resolutionQuery.data?.status ?? 'resolved')
+    : 'resolved'
+  const missingVerseKeys = resolutionQuery.isError
+    ? requestedVerseKeys
+    : (resolutionQuery.data?.missingVerseKeys ?? [])
+  const isResolvingVersion = shouldResolveVersion && resolutionQuery.isPending
 
   if (isResolvingVersion) return null
   if (shouldShowBibleReferenceUnavailable(resolutionStatus)) {
@@ -171,6 +161,7 @@ const BibleScreen = () => {
       chapter={chapter}
       verse={verse}
       version={resolvedVersion}
+      strongMode={strongMode}
     />
   )
 

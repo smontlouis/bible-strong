@@ -1,4 +1,4 @@
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 
 const useMeasureTabPreview = () => {
   const { tabPreviews } = useAppSwitcherContext()

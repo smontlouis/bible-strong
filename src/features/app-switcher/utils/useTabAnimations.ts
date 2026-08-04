@@ -4,7 +4,7 @@ import { type AnimatedRef, Easing, measure, withDelay, withTiming } from 'react-
 import { type View } from 'react-native'
 import { runOnJS } from 'react-native-worklets'
 import { activeTabIndexAtom, appSwitcherModeAtom, tabsCountAtom } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 import { resolveAndSetTabId, fadeInTabScreen } from './tabHelpers'
 import useTabConstants from './useTabConstants'
 import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'

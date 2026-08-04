@@ -49,7 +49,8 @@ BibleScreen/
 │   ├── BibleDOM/          # Rendu du contenu biblique
 │   │   ├── BibleDOMWrapper
 │   │   ├── Verse
-│   │   └── InterlinearVerse
+│   │   ├── StructuredInterlinearVerse
+│   │   └── ReverseInterlinearVerse
 │   └── BibleFooter        # Contrôles audio et navigation
 ├── Selectors/             # Composants de sélection
 │   ├── BookSelector
@@ -61,7 +62,6 @@ BibleScreen/
 └── Screens/               # Écrans spécialisés
     ├── BibleLinkScreen
     ├── NoteDetailTabScreen
-    ├── StrongScreen
     ├── CompareVersesScreen
     ├── HistoryScreen
     └── PericopeScreen

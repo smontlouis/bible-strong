@@ -39,6 +39,7 @@ import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
   changeWordAnnotationTypeAction,
+  realignWordAnnotationsAction,
   removeWordAnnotationAction,
   removeWordAnnotationsInRangeAction,
   updateWordAnnotationAction,
@@ -49,8 +50,10 @@ import {
   increaseSettingsFontSizeScale,
   setDefaultColorName,
   setDefaultColorType,
+  setDefaultStrongBibleVersion,
   setSettingsAlignContent,
   setSettingsCommentaires,
+  setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
   setSettingsLinksDisplay,
   setSettingsNotesDisplay,
@@ -380,6 +383,7 @@ const isSettingsAction = isAnyOf(
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsCommentaires,
+  setSettingsContextualInformationDisplay,
   changeColor,
   toggleCompareVersion,
   resetCompareVersion,
@@ -389,7 +393,8 @@ const isSettingsAction = isAnyOf(
   toggleSettingsShareVerseNumbers,
   saveAllLogsAsSeen,
   setDefaultColorName,
-  setDefaultColorType
+  setDefaultColorType,
+  setDefaultStrongBibleVersion
 )
 
 const isCustomColorAction = isAnyOf(addCustomColor, updateCustomColor, deleteCustomColor)
@@ -415,7 +420,8 @@ const isWordAnnotationAction = isAnyOf(
   removeWordAnnotationAction,
   removeWordAnnotationsInRangeAction,
   changeWordAnnotationColorAction,
-  changeWordAnnotationTypeAction
+  changeWordAnnotationTypeAction,
+  realignWordAnnotationsAction
 )
 
 const isTagAction = isAnyOf(addTag, removeTag, updateTag)

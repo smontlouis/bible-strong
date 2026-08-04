@@ -13,15 +13,28 @@ import {
 } from '~features/resources/bibleSearchAccess'
 import { localDictionaryAccess, type DictionaryAccess } from '~features/resources/dictionaryAccess'
 import { localNaveAccess, type NaveAccess } from '~features/resources/naveAccess'
-import { localStrongAccess, type StrongAccess } from '~features/resources/strongAccess'
+import {
+  localStrongLexiconAccess,
+  type StrongLexiconAccess,
+} from '~features/resources/strongLexiconAccess'
+import {
+  localStrongBibleResourceAccess,
+  type StrongBibleResourceAccess,
+} from '~features/resources/strongBibleResourceAccess'
+import {
+  localLexiconBibleResourceAccess,
+  type LexiconBibleResourceAccess,
+} from '~features/resources/lexiconBibleResourceAccess'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
   bibleReading: BibleReadingResourceAccess
   bibleSearch: BibleSearchAccess
   dictionary: DictionaryAccess
+  lexiconBible: LexiconBibleResourceAccess
   nave: NaveAccess
-  strong: StrongAccess
+  strongLexicon: StrongLexiconAccess
+  strongBible: StrongBibleResourceAccess
 }
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
@@ -29,8 +42,10 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleReading: localBibleReadingResourceAccess,
   bibleSearch: localBibleSearchAccess,
   dictionary: localDictionaryAccess,
+  lexiconBible: localLexiconBibleResourceAccess,
   nave: localNaveAccess,
-  strong: localStrongAccess,
+  strongLexicon: localStrongLexiconAccess,
+  strongBible: localStrongBibleResourceAccess,
 }
 
 const ResourceAccessContext = createContext<ResourceAccessRegistry>(defaultResourceAccess)

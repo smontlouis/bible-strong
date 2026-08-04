@@ -134,6 +134,32 @@ export interface Verse {
   Chapitre: string | number
   Verset: string | number
   Texte: string
+  TextRevision?: string
+  Layout?: {
+    offset: number
+    order: number
+    type: 'open' | 'close' | 'self'
+    tag: string
+    attributes?: Record<string, string>
+  }[]
+  StartTags?: {
+    tag: string
+    attributes?: Record<string, string>
+  }[]
+  Notes?: import('~helpers/canonicalBibleNotes').CanonicalBibleNote[]
+  Headings?: import('~helpers/canonicalBibleHeadings').CanonicalBibleHeading[]
+  StrongSpans?: {
+    ordinal: number
+    startOffset: number
+    length: number
+    identities: {
+      kind: 'strong' | 'estrong' | 'dstrong' | 'ustrong'
+      code: string
+    }[]
+    morphologies?: import('~helpers/strongSelection').StrongSelectionMorphology[]
+  }[]
+  ReverseInterlinearSpans?: import('~helpers/reverseInterlinearBible').ReverseInterlinearSpan[]
+  InterlinearTokens?: import('~helpers/interlinearBibleSidecar').InterlinearToken[]
 }
 
 export interface Pericope {

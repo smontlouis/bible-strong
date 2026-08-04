@@ -51,8 +51,9 @@ export interface InlineVersePayload {
 
 export interface InlineStrongPayload {
   title: string
-  codeStrong: string
-  book: string
+  codeStrong?: string | number
+  code?: string | number
+  book: string | number
 }
 
 export interface VerseBlockPayload {
@@ -64,8 +65,9 @@ export interface VerseBlockPayload {
 
 export interface StrongBlockPayload {
   title: string
-  codeStrong: string
-  book: string
+  codeStrong?: string | number
+  code?: string | number
+  book: string | number
   strongType?: string
   phonetique?: string
   definition?: string

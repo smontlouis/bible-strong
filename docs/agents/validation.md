@@ -20,12 +20,17 @@ Copy `.env.example` to the appropriate local environment file and fill required 
 | Typecheck | `yarn typecheck` | TypeScript, navigation params, Redux, Jotai, or helper changes |
 | Format check | `yarn format:check` | Before finishing docs/code formatting-sensitive changes |
 | Agent architecture | `yarn agents:architecture:check` | Feature boundary, helper, SQLite, Firebase, logging, or shared architecture changes |
+| Primitive styling guard | `yarn agents:styles:check` | UI or component changes; rejects new feature-level `styled` usage |
 | Agent domain quality | `yarn agents:quality:check` | Feature/domain changes, PR readiness, or harness changes |
 | i18n extraction | `yarn i18n` | User-facing string additions or translation key changes |
 
 `yarn agents:architecture:check` regenerates `docs/agents/architecture-lint.md` and `.scratch/architecture/architecture.json`, then fails on high-risk boundary errors. Warnings are intentionally non-blocking for the current brownfield baseline.
 
 `yarn agents:quality:check` regenerates `docs/agents/quality-score.md` and `.scratch/quality/quality.json`, then fails if a feature domain drops below the conservative readiness threshold.
+
+`yarn agents:styles:check` compares tracked and untracked TypeScript files with the versioned brownfield baseline in `scripts/agents-style-baseline.json`. Existing Emotion usage is tolerated, but increasing it or adding it to another feature file fails consistently in local clones and CI. Shared primitive implementations under `src/common/ui/` are the normal exception; a rare feature-level exception must include `// harness-allow-styled: <reason>`.
+
+When a legacy `styled` wrapper is removed, lower its baseline count in the same change. Do not raise the baseline to make a failing check pass; use primitives or document a genuine exception instead.
 
 If Jest fails before running tests because Watchman is unavailable in a sandboxed/local agent environment, rerun with:
 

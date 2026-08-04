@@ -17,6 +17,7 @@ import { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import { getLanguage } from '~i18n'
 import { TabGroup, tabGroupsAtom } from '~state/tabs'
 import blackColors from '~themes/blackColors'
@@ -67,6 +68,7 @@ import {
   addWordAnnotationAction,
   changeWordAnnotationColorAction,
   changeWordAnnotationTypeAction,
+  realignWordAnnotationsAction,
   removeWordAnnotationAction,
   removeWordAnnotationsInRangeAction,
   updateWordAnnotationAction,
@@ -82,10 +84,12 @@ import {
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
   setDefaultBibleVersion,
+  setDefaultStrongBibleVersion,
   setDefaultColorName,
   setDefaultColorType,
   setSettingsAlignContent,
   setSettingsCommentaires,
+  setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
   setSettingsLinksDisplay,
   setSettingsNotesDisplay,
@@ -135,6 +139,7 @@ export type UserDataSyncCollection =
   | 'highlights'
   | 'notes'
   | 'links'
+  | 'relations'
   | 'tags'
   | 'wordAnnotations'
   | 'studies'
@@ -156,6 +161,7 @@ const getInitialUserDataSyncState = (): UserDataSyncState => ({
     highlights: false,
     notes: false,
     links: false,
+    relations: false,
     tags: false,
     wordAnnotations: false,
     studies: false,
@@ -530,6 +536,7 @@ export interface UserState {
     wordAnnotations: WordAnnotationsObj
     settings: {
       defaultBibleVersion?: string
+      defaultStrongBibleVersionId?: StrongBibleVersionId
       alignContent: 'left' | 'justify'
       lineHeight: 'normal' | 'small' | 'large'
       fontSizeScale: number
@@ -543,6 +550,7 @@ export interface UserState {
       relationsDisplay?: 'inline' | 'block'
       tagsDisplay: 'inline' | 'block'
       commentsDisplay: boolean
+      contextualInformationDisplay?: boolean
       redWordsDisplay: boolean
       shareVerses: {
         hasVerseNumbers: boolean
@@ -626,6 +634,7 @@ const getInitialState = (): UserState => ({
     wordAnnotations: {},
     settings: {
       defaultBibleVersion: getDefaultBibleVersion(getLanguage()),
+      defaultStrongBibleVersionId: getLanguage() === 'en' ? 'KJV' : 'LSG',
       alignContent: 'left',
       lineHeight: 'normal',
       fontSizeScale: 0,
@@ -639,6 +648,7 @@ const getInitialState = (): UserState => ({
       relationsDisplay: 'inline',
       tagsDisplay: 'inline',
       commentsDisplay: false,
+      contextualInformationDisplay: true,
       redWordsDisplay: true,
       shareVerses: {
         hasVerseNumbers: true,
@@ -924,6 +934,7 @@ const userSlice = createSlice({
         collection === 'highlights' ||
         collection === 'notes' ||
         collection === 'links' ||
+        collection === 'relations' ||
         collection === 'tags' ||
         collection === 'wordAnnotations'
       ) {
@@ -1104,6 +1115,15 @@ const userSlice = createSlice({
         state.bible.wordAnnotations[id].type = type
       }
     })
+    builder.addCase(realignWordAnnotationsAction, (state, action) => {
+      for (const [id, changes] of Object.entries(action.payload.updates)) {
+        const annotation = state.bible.wordAnnotations[id]
+        if (!annotation) continue
+        annotation.ranges = changes.ranges
+        annotation.textRevision = changes.textRevision
+        if (changes.version) annotation.version = changes.version
+      }
+    })
     builder.addCase(removeWordAnnotationsInRangeAction, (state, action) => {
       const { version, start, end } = action.payload
       const selection = normalizeWordSelectionRange(start, end)
@@ -1267,6 +1287,9 @@ const userSlice = createSlice({
     builder.addCase(setSettingsCommentaires, (state, action) => {
       state.bible.settings.commentsDisplay = action.payload
     })
+    builder.addCase(setSettingsContextualInformationDisplay, (state, action) => {
+      state.bible.settings.contextualInformationDisplay = action.payload
+    })
     builder.addCase(setSettingsRedWordsDisplay, (state, action) => {
       state.bible.settings.redWordsDisplay = action.payload
     })
@@ -1383,6 +1406,9 @@ const userSlice = createSlice({
     })
     builder.addCase(setDefaultBibleVersion, (state, action) => {
       state.bible.settings.defaultBibleVersion = action.payload
+    })
+    builder.addCase(setDefaultStrongBibleVersion, (state, action) => {
+      state.bible.settings.defaultStrongBibleVersionId = action.payload
     })
 
     // Studies

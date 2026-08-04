@@ -1,4 +1,6 @@
 import type { Bookmark, StudyNavigateBibleType, Verse } from '~common/types'
+import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
+import { createStrongSelection, type StrongSelection } from '~helpers/strongSelection'
 
 export type StudyRelationsModalTarget =
   | string
@@ -28,6 +30,26 @@ export const getStringPayload = (payload: unknown): string | undefined =>
 
 export const getNumberPayload = (payload: unknown): number | undefined =>
   typeof payload === 'number' ? payload : undefined
+
+export const getStrongRelationSelectionPayload = (
+  payload: unknown,
+  version: string
+): StrongSelection | undefined => {
+  if (
+    !isRecord(payload) ||
+    payload.type !== 'strong' ||
+    typeof payload.code !== 'string' ||
+    (payload.language !== 'hebrew' && payload.language !== 'greek')
+  ) {
+    return undefined
+  }
+
+  return createStrongSelection(
+    [{ kind: 'strong', code: payload.code }],
+    payload.language === 'hebrew' ? 1 : 40,
+    version
+  )
+}
 
 export const getToastPayload = (payload: unknown): { message?: string; type?: string } => {
   if (!isRecord(payload)) return {}
@@ -78,3 +100,22 @@ export const getNoteNavigationPayload = (
 
 export const getBookmarkPayload = (payload: unknown): Bookmark | undefined =>
   isRecord(payload) ? (payload as unknown as Bookmark) : undefined
+
+export const getCanonicalBibleNotePayload = (payload: unknown): CanonicalBibleNote | undefined => {
+  if (
+    !isRecord(payload) ||
+    typeof payload.offset !== 'number' ||
+    typeof payload.order !== 'number' ||
+    payload.kind !== 'note' ||
+    typeof payload.markup !== 'string'
+  ) {
+    return undefined
+  }
+
+  return {
+    offset: payload.offset,
+    order: payload.order,
+    kind: 'note',
+    markup: payload.markup,
+  }
+}

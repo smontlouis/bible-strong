@@ -1,5 +1,6 @@
 import { to } from 'await-to-js'
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import i18n from '~i18n'
 
@@ -202,7 +203,12 @@ export const getChaptersForPlan = async (
     chaptersRange.map(async (cRange: string[]) => {
       const [, chapter] = cRange.map(Number)
 
-      const verses = await resourceAccess.bibleContent.loadChapterVerses(version, book, chapter)
+      const chapterResult = await resourceAccess.bibleContent.loadChapter({
+        version,
+        book,
+        chapter,
+      })
+      const verses = chapterResult.success && chapterResult.data ? chapterResult.data.verses : []
       const chapterContent: VerseContent[] = verses.map(v => ({
         Pericope: pericope?.[book]?.[chapter]?.[v.Verset] || {},
         Verset: `${v.Verset}`,
@@ -229,23 +235,17 @@ export const getChaptersForPlan = async (
 }
 
 export const useChapterToContent = (chapters: string) => {
-  const [status, setStatus] = React.useState<Status>('Idle')
-  const [content, setContent] = React.useState<ChapterForPlan>()
-
   const version = useDefaultBibleVersion()
-
-  React.useEffect(() => {
-    ;(async () => {
-      try {
-        setStatus('Pending')
-        const result = await getChaptersForPlan(chapters, version)
-        setContent(result)
-        setStatus('Resolved')
-      } catch {
-        setStatus('Rejected')
-      }
-    })()
-  }, [chapters, version])
+  const {
+    data: content,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ['plan-chapters', version, chapters],
+    queryFn: () => getChaptersForPlan(chapters, version),
+    staleTime: Infinity,
+  })
+  const status: Status = isPending ? 'Pending' : isError ? 'Rejected' : 'Resolved'
 
   return { status, content }
 }
@@ -273,20 +273,20 @@ export const getVersesForPlan = async (
 
   const pericope = await resourceAccess.bibleReading.loadPericope(version)
 
-  const content: VerseContent[] = await Promise.all(
-    versesRange.map(async (vRange: number[]) => {
-      const [bookNum, chapterNum, verse] = vRange
-
-      const text =
-        (await resourceAccess.bibleContent.loadVerseText(version, bookNum, chapterNum, verse)) ?? ''
-
-      return {
-        Pericope: pericope?.[book]?.[chapter]?.[verse] || {},
-        Verset: `${verse}`,
-        Texte: text,
-      }
-    })
+  const verseKeys = versesRange.map(
+    ([bookNum, chapterNum, verse]) => `${bookNum}-${chapterNum}-${verse}`
   )
+  const verseTexts = await resourceAccess.bibleContent.loadVerseTexts({ version, verseKeys })
+  const content: VerseContent[] = versesRange.map((vRange: number[]) => {
+    const [bookNum, chapterNum, verse] = vRange
+    const text = verseTexts[`${bookNum}-${chapterNum}-${verse}`] ?? ''
+
+    return {
+      Pericope: pericope?.[book]?.[chapter]?.[verse] || {},
+      Verset: `${verse}`,
+      Texte: text,
+    }
+  })
 
   return {
     bookName,
@@ -304,23 +304,17 @@ export const getVersesForPlan = async (
 }
 
 export const useVersesToContent = (verses: string) => {
-  const [status, setStatus] = React.useState<Status>('Idle')
-  const [content, setContent] = React.useState<VerseForPlan>()
-
   const version = useDefaultBibleVersion()
-
-  React.useEffect(() => {
-    ;(async () => {
-      try {
-        setStatus('Pending')
-        const result = await getVersesForPlan(verses, version)
-        setContent(result)
-        setStatus('Resolved')
-      } catch {
-        setStatus('Rejected')
-      }
-    })()
-  }, [verses, version])
+  const {
+    data: content,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ['plan-verses', version, verses],
+    queryFn: () => getVersesForPlan(verses, version),
+    staleTime: Infinity,
+  })
+  const status: Status = isPending ? 'Pending' : isError ? 'Rejected' : 'Resolved'
 
   return { status, content }
 }

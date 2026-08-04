@@ -4,6 +4,7 @@ import * as fr from 'bible-passage-reference-parser/esm/lang/fr.js'
 
 // import structuredClone from '@ungap/structured-clone'
 import { getLanguage } from '../../i18n'
+import { getSupportedOsisBookNumber, normalizeOsisReference } from './osisReference'
 
 // if (!('structuredClone' in globalThis)) {
 //   globalThis.structuredClone = structuredClone
@@ -43,6 +44,7 @@ const createBcvParser = (parserLanguage: BcvLanguage): BcvParserWithTranslations
   const parser = new bcv_parser(parserLanguage === 'fr' ? fr : en) as BcvParserWithTranslations
 
   parser.set_options({
+    book_match_strategy: 'strict',
     consecutive_combination_strategy: 'separate',
     sequence_combination_strategy: 'separate',
     testaments: 'ona',
@@ -64,27 +66,12 @@ export const bcv = getBcvParser()
 type BookID = string
 
 const trans = 'default'
-const DEUTEROCANONICAL_OSIS_BOOK_IDS: Record<string, number> = {
-  Tob: 67,
-  Jdt: 68,
-  Wis: 69,
-  Sir: 70,
-  Bar: 71,
-  '1Macc': 72,
-  '2Macc': 73,
-}
-
 function getLastVerseInChapter(book: BookID, chapter: number): number {
   return getBcvParser().translations.systems[trans].chapters[book][chapter - 1]
 }
 
-const getBookNumber = (book: BookID, parserLanguage?: BcvLanguage): number | undefined => {
-  const deuterocanonicalBookId = DEUTEROCANONICAL_OSIS_BOOK_IDS[book]
-  if (deuterocanonicalBookId) return deuterocanonicalBookId
-
-  const parserBookId = getBcvParser(parserLanguage).translations.systems[trans].order[book]
-  return parserBookId >= 1 && parserBookId <= 66 ? parserBookId : undefined
-}
+const getBookNumber = (book: BookID, _parserLanguage?: BcvLanguage): number | undefined =>
+  getSupportedOsisBookNumber(book)
 
 const parseOsisRef = (osisRef: string, parserLanguage?: BcvLanguage) => {
   const [book, chapterStr, verseStr] = osisRef.split('.')
@@ -147,7 +134,8 @@ export const osisToBibleReferenceTarget = (
   osis: string,
   parserLanguage?: BcvLanguage
 ): BibleReferenceTarget | undefined => {
-  const firstSegment = osis.split(',')[0]
+  const normalizedOsis = normalizeOsisReference(osis)
+  const firstSegment = normalizedOsis.split(',')[0]
   const firstRef = firstSegment.split('-')[0]
   const start = parseOsisRef(firstRef, parserLanguage)
 
@@ -159,8 +147,8 @@ export const osisToBibleReferenceTarget = (
     book: start.bookNumber,
     chapter: start.chapter,
     verse: start.verse ?? 1,
-    focusVerses: getFocusVersesFromOsis(osis, parserLanguage),
-    osis,
+    focusVerses: getFocusVersesFromOsis(normalizedOsis, parserLanguage),
+    osis: normalizedOsis,
   }
 }
 

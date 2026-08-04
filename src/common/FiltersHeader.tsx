@@ -1,97 +1,42 @@
-import styled from '@emotion/native'
 import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
-import React, { memo, useRef } from 'react'
+import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Back from '~common/Back'
-import Box from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-
-const TouchableBox = styled.TouchableOpacity({
-  flex: 1,
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  paddingRight: 15,
-  paddingVertical: 15,
-})
-
-const StyledText = styled(Text)({
-  fontSize: 14,
-  marginRight: 5,
-})
-
-const HeaderBox = styled(Box)(({ theme }) => ({
-  alignItems: 'center',
-  minHeight: 54,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
-
-const FilterRow = styled(TouchableOpacity)(({ theme }) => ({
-  flexDirection: 'row',
-  alignItems: 'center',
-  padding: 16,
-  borderBottomWidth: 1,
-  borderBottomColor: theme.colors.border,
-}))
-
-const ColorCircle = styled.View<{ color: string }>(({ color }) => ({
-  width: 20,
-  height: 20,
-  borderRadius: 10,
-  backgroundColor: color,
-  marginRight: 8,
-}))
-
-const ResetButton = styled(TouchableOpacity)({
-  paddingVertical: 4,
-  paddingHorizontal: 8,
-})
 
 export type FiltersHeaderItem = {
   key: string
   icon: React.ComponentProps<typeof FeatherIcon>['name']
   label: string
-  value: string
+  value?: string
   color?: string
+  active?: boolean
   onPress: () => void
 }
 
 type Props = {
   title: string
-  filterLabel?: string
   hasBackButton?: boolean
   filters: FiltersHeaderItem[]
-  hasActiveFilters?: boolean
   onReset?: () => void
 }
 
-export const getFiltersHeaderLabel = (
-  activeLabels: (string | undefined | null | false)[],
-  multipleFiltersLabel: (count: number) => string
-) => {
-  const labels = activeLabels.filter((label): label is string => Boolean(label))
-
-  if (labels.length === 0) return undefined
-  if (labels.length === 1) return labels[0]
-  return multipleFiltersLabel(labels.length)
-}
-
-const FiltersHeader = ({
-  title,
-  filterLabel,
-  hasBackButton,
-  filters,
-  hasActiveFilters,
-  onReset,
-}: Props) => {
+const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
   const filtersRef = useRef<SheetRef>(null)
+  const activeFilters = filters.filter(filter => filter.active)
+  const activeFilterCount = activeFilters.length
+  const activeFilterIcon = activeFilters[0]?.icon
+  const accessibilityLabel =
+    activeFilterCount === 0
+      ? t('Filtrer')
+      : activeFilterCount === 1
+        ? t('filters.activeCount_one', { count: activeFilterCount })
+        : t('filters.activeCount_other', { count: activeFilterCount })
 
   const openFilters = () => {
     filtersRef.current?.present()
@@ -99,7 +44,13 @@ const FiltersHeader = ({
 
   return (
     <>
-      <HeaderBox row bg="reverse">
+      <HStack
+        bg="reverse"
+        alignItems="center"
+        minHeight={54}
+        borderBottomWidth={1}
+        borderColor="border"
+      >
         {hasBackButton ? (
           <Back padding>
             <FeatherIcon name="arrow-left" size={20} />
@@ -112,23 +63,54 @@ const FiltersHeader = ({
             {title}
           </Text>
         </Box>
-        <TouchableBox onPress={openFilters}>
-          <StyledText numberOfLines={1}>{filterLabel || t('Filtrer')}</StyledText>
-          <FeatherIcon name="chevron-down" size={15} />
-        </TouchableBox>
-      </HeaderBox>
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          accessibilityLabel={accessibilityLabel}
+          onPress={openFilters}
+        >
+          <HStack flex alignItems="center" justifyContent="flex-end" pr={15} py={15}>
+            {activeFilterCount ? (
+              <HStack bg="primary" minWidth={50} height={22} borderRadius={13} alignItems="stretch">
+                <Box minWidth={28} pl={8} pr={6} center>
+                  {activeFilterCount === 1 && activeFilterIcon ? (
+                    <FeatherIcon name={activeFilterIcon} size={14} color="reverse" />
+                  ) : (
+                    <Text color="reverse" fontSize={14} bold>
+                      {activeFilterCount}
+                    </Text>
+                  )}
+                </Box>
+                <Box pl={4} pr={6} borderLeftWidth={2} borderLeftColor="reverse" center>
+                  <FeatherIcon name="chevron-down" size={13} color="reverse" />
+                </Box>
+              </HStack>
+            ) : (
+              <>
+                <Text fontSize={14} mr={5} numberOfLines={1}>
+                  {t('Filtrer')}
+                </Text>
+                <FeatherIcon name="chevron-down" size={15} />
+              </>
+            )}
+          </HStack>
+        </TouchableOpacity>
+      </HStack>
       <Sheet
         ref={filtersRef}
         header={
           <SheetHeader
             title={t('Filtres')}
             rightComponent={
-              hasActiveFilters && onReset ? (
-                <ResetButton onPress={onReset}>
-                  <Text color="primary" fontSize={14}>
-                    {t('Réinitialiser')}
-                  </Text>
-                </ResetButton>
+              activeFilterCount > 0 && onReset ? (
+                <Box mr={12}>
+                  <TouchableOpacity onPress={onReset}>
+                    <Box py={4} px={8}>
+                      <Text color="primary" fontSize={14}>
+                        {t('Réinitialiser')}
+                      </Text>
+                    </Box>
+                  </TouchableOpacity>
+                </Box>
               ) : undefined
             }
           />
@@ -136,27 +118,35 @@ const FiltersHeader = ({
       >
         <SheetView>
           {filters.map(filter => (
-            <FilterRow key={filter.key} onPress={filter.onPress}>
-              <Box row flex={1}>
-                <FeatherIcon name={filter.icon} size={20} color="tertiary" />
-                <Text marginLeft={12} fontSize={16}>
-                  {filter.label}
-                </Text>
-              </Box>
-              <Box row center>
-                {!!filter.color && <ColorCircle color={filter.color} />}
-                <Text
-                  color="tertiary"
-                  fontSize={14}
-                  marginRight={8}
-                  numberOfLines={1}
-                  maxWidth={200}
-                >
-                  {filter.value}
-                </Text>
-                <FeatherIcon name="chevron-right" size={20} color="tertiary" />
-              </Box>
-            </FilterRow>
+            <TouchableOpacity key={filter.key} onPress={filter.onPress}>
+              <HStack alignItems="center" p={16} borderBottomWidth={1} borderColor="border">
+                <Box row flex={1}>
+                  <FeatherIcon
+                    name={filter.icon}
+                    size={20}
+                    color={filter.active ? 'primary' : 'tertiary'}
+                  />
+                  <Text color={filter.active ? 'primary' : undefined} marginLeft={12} fontSize={16}>
+                    {filter.label}
+                  </Text>
+                </Box>
+                <Box row center>
+                  {!!filter.color && <Box size={20} borderRadius={10} bg={filter.color} mr={8} />}
+                  {!!filter.value && (
+                    <Text
+                      color="tertiary"
+                      fontSize={14}
+                      marginRight={8}
+                      numberOfLines={1}
+                      maxWidth={200}
+                    >
+                      {filter.value}
+                    </Text>
+                  )}
+                  <FeatherIcon name="chevron-right" size={20} color="tertiary" />
+                </Box>
+              </HStack>
+            </TouchableOpacity>
           ))}
         </SheetView>
       </Sheet>
@@ -164,4 +154,4 @@ const FiltersHeader = ({
   )
 }
 
-export default memo(FiltersHeader)
+export default FiltersHeader

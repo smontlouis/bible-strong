@@ -6,9 +6,6 @@ export interface BibleDOMTranslations {
   parallelChapterNotFound: string
   parallelLoadError: string
   exitFocus: string
-  // Interlinear mode
-  interlinearDetailed: string
-  interlinearCompact: string
   // Error/download state
   versionNotFound: string
   chapterNotFound: string
@@ -19,6 +16,8 @@ export interface BibleDOMTranslations {
   downloading: string
   inserting: string
   resetDatabase: string
+  openCanonicalBibleNote: string
+  pericopeIndex: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)

@@ -1,8 +1,8 @@
 import * as Sentry from '@sentry/react-native'
-import { to } from 'await-to-js'
+import { useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useAtomValue } from 'jotai'
-import React, { memo, useEffect, useMemo, useState } from 'react'
+import React, { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Share } from 'react-native'
 import { toast } from '~helpers/toast'
@@ -19,6 +19,7 @@ import { useFireStorage } from '~features/plans/plan.hooks'
 import { firebaseDb } from '~helpers/firebase'
 import { Comment as CommentProps, EGWComment } from './types'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { remoteQueryOptions } from '~helpers/queryOptions'
 
 const findBookNumber = (bookName: string) => {
   bookName = bookMappingComments[bookName] || bookName
@@ -32,83 +33,59 @@ interface Props {
 
 // Hook for automatic translation based on selected language
 const useCommentTranslation = (id: string, content: string) => {
-  const [status, setStatus] = useState<Status>('Idle')
-  const [translatedContent, setTranslatedContent] = useState('')
   const { t } = useTranslation()
 
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const commentLang = resourcesLanguage.COMMENTARIES
+  const query = useQuery({
+    queryKey: ['comment-translation', commentLang, id, content],
+    queryFn: async () => {
+      const commentRef = await firebaseDb.collection('commentaries-FR').doc(id.toString()).get()
+      if (commentRef.exists()) return commentRef.data()!.content as string
 
-  useEffect(() => {
-    // If English is selected, no translation needed
-    if (commentLang === 'en') {
-      setTranslatedContent('')
-      setStatus('Idle')
-      return
-    }
-
-    // French is selected - load translation automatically
-    const loadTranslation = async () => {
-      setStatus('Pending')
-
-      try {
-        // Check cache first
-        const commentRef = await firebaseDb.collection('commentaries-FR').doc(id.toString()).get()
-
-        if (commentRef.exists()) {
-          setTranslatedContent(commentRef.data()!.content)
-          setStatus('Resolved')
-          return
-        }
-
-        // Not in cache - translate via DeepL
-        const data = `auth_key=${process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY}&text=${encodeURIComponent(
-          content
-        )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
-
-        const [err, res] = await to(
-          fetch('https://api.deepl.com/v2/translate', {
-            method: 'POST',
-            body: data,
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'Content-Length': data.length.toString(),
-            },
-          })
-        )
-
-        if (err) {
-          console.log('[Commentaries] Error:', err)
-          setStatus('Rejected')
-          return
-        }
-
-        const result = await res?.json()
-
-        if (result.message === 'Quota Exceeded') {
-          toast.error(t('comment.quotaExceeded'))
-          setStatus('Rejected')
-          return
-        }
-
-        // Cache the translation
-        await firebaseDb
-          .collection('commentaries-FR')
-          .doc(id.toString())
-          .set({ content: result.translations[0].text })
-
-        setTranslatedContent(result.translations[0].text)
-        setStatus('Resolved')
-      } catch (e) {
-        console.log('[Commentaries] Translation error:', e)
-        setStatus('Rejected')
+      const data = `auth_key=${process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY}&text=${encodeURIComponent(
+        content
+      )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
+      const response = await fetch('https://api.deepl.com/v2/translate', {
+        method: 'POST',
+        body: data,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Content-Length': data.length.toString(),
+        },
+      })
+      if (!response.ok) throw new Error(`Translation request failed (${response.status})`)
+      const result = await response.json()
+      if (result.message === 'Quota Exceeded') {
+        toast.error(t('comment.quotaExceeded'))
+        throw new Error('TRANSLATION_QUOTA_EXCEEDED')
       }
-    }
+      const translatedContent = result.translations?.[0]?.text
+      if (!translatedContent) throw new Error('Translation response is empty')
 
-    loadTranslation()
-  }, [commentLang, id, content, t])
+      await firebaseDb
+        .collection('commentaries-FR')
+        .doc(id.toString())
+        .set({ content: translatedContent })
+      return translatedContent as string
+    },
+    enabled: commentLang !== 'en',
+    ...remoteQueryOptions,
+    staleTime: Infinity,
+    retry: false,
+  })
+  const status: Status =
+    commentLang === 'en'
+      ? 'Idle'
+      : query.fetchStatus === 'paused'
+        ? 'Rejected'
+        : query.isPending
+          ? 'Pending'
+          : query.isError
+            ? 'Rejected'
+            : 'Resolved'
 
-  return { status, translatedContent }
+  return { status, translatedContent: commentLang === 'en' ? '' : (query.data ?? '') }
 }
 
 const fastImageStyle = { width: 40, height: 40 }

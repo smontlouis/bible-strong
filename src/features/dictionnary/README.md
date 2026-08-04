@@ -43,8 +43,7 @@ dictionnary/
 ├── Cards/
 │   ├── DictionnaireCard      # Carte de contenu
 │   └── DictionnaireVerseDetailCard # Carte pour versets
-├── DictionnaryResultsWidget   # Widget résultats de recherche
-└── waitForDictionnaireDB.tsx  # HOC pour chargement DB
+└── DictionnaryResultsWidget   # Widget résultats de recherche
 ```
 
 ### Structure de la base de données
@@ -75,13 +74,11 @@ interface DictionaryEntry {
 
 ### Chargement
 ```typescript
-// HOC pour s'assurer du chargement
-export default waitForDictionnaireDB(DictionaryTabScreen)
+// Les surfaces passent par le provider Resource access actif.
+const resources = useResourceAccess()
+const entries = await resources.dictionary.listByLetter(letter)
 
-// Fonctions de chargement
-loadDictionnaireByLetter(letter: string): Promise<Entry[]>
-loadDictionnaireBySearch(query: string): Promise<Entry[]>
-loadDictionnaireWord(wordId: string): Promise<Entry>
+// L'adapter local conserve les détails SQLite et l'acquisition offline.
 ```
 
 ### Gestion des erreurs

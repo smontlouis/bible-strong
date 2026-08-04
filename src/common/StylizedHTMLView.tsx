@@ -1,16 +1,28 @@
-import React from 'react'
+import RenderHtml, { defaultSystemFonts, type MixedStyleDeclaration } from '@native-html/render'
 import { withTheme } from '@emotion/react'
-import { Text, TextStyle } from 'react-native'
+import { DomUtils } from 'htmlparser2'
+import { useEffect, useRef, useState } from 'react'
+import { Platform, useWindowDimensions } from 'react-native'
 
-import HTMLView, { HTMLNode, HTMLViewProps } from '~helpers/react-native-htmlview'
+import Box from '~common/ui/Box'
 import { Theme } from '~themes'
+import {
+  getLegacyLinkPressArguments,
+  hasWidthSensitiveHtmlContent,
+  LINK_TEXT_ATTRIBUTE,
+  linkifyStrongReferences,
+} from './stylizedHtmlUtils'
+
+export { linkifyStrongReferences } from './stylizedHtmlUtils'
 
 export const textStyle = {
   lineHeight: 29,
   fontSize: 19,
 }
 
-export const styles = (theme: Theme): Record<string, TextStyle> => ({
+const monospaceFontFamily = Platform.OS === 'ios' ? 'Menlo' : 'monospace'
+
+export const styles = (theme: Theme): Record<string, MixedStyleDeclaration> => ({
   h1: {
     fontWeight: 'bold',
     fontSize: 24,
@@ -71,6 +83,12 @@ export const styles = (theme: Theme): Record<string, TextStyle> => ({
     fontFamily: theme.fontFamily.paragraph,
     ...textStyle,
   },
+  pre: {
+    fontFamily: monospaceFontFamily,
+  },
+  code: {
+    fontFamily: monospaceFontFamily,
+  },
   li: {
     color: theme.colors.default,
     fontFamily: theme.fontFamily.paragraph,
@@ -88,30 +106,92 @@ export const styles = (theme: Theme): Record<string, TextStyle> => ({
   },
 })
 
-type StylizedHTMLViewProps = HTMLViewProps & {
-  htmlStyle?: Record<string, TextStyle>
+type LinkPressHandler = {
+  bivarianceHack(href: string, second?: string | number, third?: string): void
+}['bivarianceHack']
+
+type StylizedHTMLViewProps = {
+  value?: string
+  onLinkPress?: LinkPressHandler
+  htmlStyle?: Record<string, MixedStyleDeclaration>
+  additionalSystemFonts?: string[]
   theme: Theme
 }
 
-const StylizedHTMLView = ({ htmlStyle, theme, ...props }: StylizedHTMLViewProps) => {
-  function renderNode(
-    node: HTMLNode,
-    index: number,
-    siblings: HTMLNode[],
-    parent: HTMLNode | undefined,
-    defaultRenderer: (nodes: HTMLNode[] | undefined, parent?: HTMLNode) => React.ReactNode
-  ) {
-    if (node.name === 'span') {
-      return (
-        <Text selectable key={index}>
-          {defaultRenderer(node.children, parent)}
-        </Text>
-      )
+const StylizedHTMLView = ({
+  value,
+  htmlStyle,
+  additionalSystemFonts = [],
+  onLinkPress,
+  theme,
+}: StylizedHTMLViewProps) => {
+  const { width } = useWindowDimensions()
+  const [measuredContentWidth, setMeasuredContentWidth] = useState<number | null>(null)
+  const lastLayoutWidth = useRef<number | null>(null)
+  const tagStyles = { ...styles(theme), ...htmlStyle }
+
+  const html = value && onLinkPress ? linkifyStrongReferences(value) : (value ?? '')
+  const needsMeasuredContentWidth = hasWidthSensitiveHtmlContent(html)
+  const contentWidth = measuredContentWidth ?? (needsMeasuredContentWidth ? null : width)
+
+  useEffect(() => {
+    if (needsMeasuredContentWidth && measuredContentWidth === null && lastLayoutWidth.current) {
+      setMeasuredContentWidth(lastLayoutWidth.current)
     }
-  }
+  }, [measuredContentWidth, needsMeasuredContentWidth])
+
+  if (!value) return null
 
   return (
-    <HTMLView stylesheet={{ ...styles(theme), ...htmlStyle }} {...props} renderNode={renderNode} />
+    <Box
+      alignSelf="stretch"
+      onLayout={({ nativeEvent }) => {
+        const measuredWidth = nativeEvent.layout.width
+        lastLayoutWidth.current = measuredWidth
+        if (
+          (needsMeasuredContentWidth || measuredContentWidth !== null) &&
+          measuredWidth > 0 &&
+          measuredWidth !== measuredContentWidth
+        ) {
+          setMeasuredContentWidth(measuredWidth)
+        }
+      }}
+    >
+      {contentWidth !== null && (
+        <RenderHtml
+          contentWidth={contentWidth}
+          source={{ html }}
+          tagsStyles={tagStyles}
+          baseStyle={tagStyles.p}
+          defaultTextProps={{ selectable: true }}
+          enableUserAgentStyles={false}
+          systemFonts={[
+            ...defaultSystemFonts,
+            monospaceFontFamily,
+            ...Object.values(theme.fontFamily),
+            ...additionalSystemFonts,
+          ]}
+          domVisitors={{
+            onElement: element => {
+              if (element.name === 'a') {
+                element.attribs[LINK_TEXT_ATTRIBUTE] = DomUtils.textContent(element)
+              }
+            },
+          }}
+          renderersProps={
+            onLinkPress
+              ? {
+                  a: {
+                    onPress: (_event, href, attributes) => {
+                      onLinkPress(...getLegacyLinkPressArguments(href, attributes))
+                    },
+                  },
+                }
+              : undefined
+          }
+        />
+      )}
+    </Box>
   )
 }
 

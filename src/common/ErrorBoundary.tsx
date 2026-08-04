@@ -1,12 +1,13 @@
 import * as Icon from '@expo/vector-icons'
 import * as Sentry from '@sentry/react-native'
-import React, { PropsWithChildren } from 'react'
+import React, { PropsWithChildren, useEffect } from 'react'
 import { ScrollView, TextInput, Platform, ActivityIndicator } from 'react-native'
 import Clipboard from '@react-native-clipboard/clipboard'
 import { useTranslation } from 'react-i18next'
 import { toast } from '~helpers/toast'
 import * as Updates from 'expo-updates'
-import { useQuery } from '~helpers/react-query-lite'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { remoteQueryOptions } from '~helpers/queryOptions'
 
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
@@ -75,28 +76,42 @@ const ErrorFallback = ({ error, errorInfo }: ErrorFallbackProps) => {
   const { t } = useTranslation()
   const { logout } = useLogin()
 
-  const { isLoading, data } = useQuery({
+  const updateCheck = useQuery({
     queryKey: ['errorBoundaryUpdate'],
     queryFn: async () => {
       if (__DEV__) {
-        return { updated: false }
+        return false
       }
 
       const check = await Updates.checkForUpdateAsync()
-      if (!check.isAvailable) {
-        return { updated: false }
-      }
-
+      return check.isAvailable
+    },
+    staleTime: Infinity,
+    ...remoteQueryOptions,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
+  })
+  const update = useMutation({
+    mutationFn: async () => {
       await Updates.fetchUpdateAsync()
 
-      // Auto-reload after a short delay
       setTimeout(() => {
         Updates.reloadAsync()
       }, 1000)
 
-      return { updated: true }
+      return true
     },
   })
+  useEffect(() => {
+    if (updateCheck.data && update.isIdle) {
+      update.mutate()
+    }
+  }, [update, updateCheck.data])
+  const isLoading =
+    (updateCheck.isPending && updateCheck.fetchStatus === 'fetching') ||
+    (update.isPending && !update.isPaused)
+  const updateReady = update.data === true
 
   const errorDetails = `
 Error: ${error?.name || 'Unknown'}
@@ -139,7 +154,7 @@ Date: ${new Date().toISOString()}
           </Text>
 
           {/* Update status */}
-          {(isLoading || data?.updated) && (
+          {(isLoading || updateReady) && (
             <Box
               mt={20}
               p={16}
@@ -154,7 +169,7 @@ Date: ${new Date().toISOString()}
               <ActivityIndicator size="small" color="#3B82F6" />
               <Text fontSize={14} color="primary" ml={12}>
                 {isLoading && t('app.updateChecking')}
-                {data?.updated && t('app.updateReady')}
+                {updateReady && t('app.updateReady')}
               </Text>
             </Box>
           )}

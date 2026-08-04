@@ -1,6 +1,6 @@
 import styled from '@emotion/native'
 import { useAtomValue } from 'jotai'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import Empty from '~common/Empty'
@@ -10,27 +10,30 @@ import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
-import waitForDictionnaireDB from '~common/waitForDictionnaireDB'
 import { CarouselProvider } from '~helpers/CarouselContext'
 
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
-import { installedVersionsSignalAtom } from '~state/app'
 import { Verse } from '~common/types'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import captureError from '~helpers/captureError'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import type { DictionaryItem } from '~features/resources/dictionaryAccess'
-import { QueryStatus, useQuery } from '~helpers/react-query-lite'
+import type { DictionaryEntry } from '~features/resources/dictionaryAccess'
+import { useQuery } from '@tanstack/react-query'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadQueue, useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
+import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { ResourceAccessError } from '~features/resources/resourceAccessError'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -70,11 +73,11 @@ type BibleChapterText = Record<
   Record<string | number, Record<string | number, string>>
 >
 
-const verseToDictionnary = async (
+const verseToDictionnary = (
   { Livre, Chapitre, Verset }: Verse,
   dictionnaryWordsInVerse: string[],
   bible: BibleChapterText
-): Promise<JSX.Element | JSX.Element[] | undefined> => {
+): JSX.Element | JSX.Element[] | undefined => {
   try {
     const verseText = bible[Livre]?.[Chapitre]?.[Verset]
     if (!verseText) {
@@ -114,66 +117,28 @@ const verseToDictionnary = async (
 const useFormattedText = ({
   verse,
   wordsInVerse,
-  status,
   resourceLang,
 }: {
   verse: Verse
   wordsInVerse?: string[]
-  status: QueryStatus
   resourceLang: string
 }) => {
   const resources = useResourceAccess()
-  const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
-  const [currentWord, setCurrentWord] = useState<string>()
-  const [versesInCurrentChapter, setVersesInCurrentChapter] = useState(0)
-  const [formattedText, setFormattedText] = useState<JSX.Element | JSX.Element[] | undefined>()
-  const [requiredBibleVersion, setRequiredBibleVersion] = useState<string | null>(null)
+  const [selectedWord, setSelectedWord] = useState<string>()
 
   const { Livre, Chapitre, Verset } = verse
+  const defaultVersion = getDefaultBibleVersion(resourceLang)
+  const chapterRequest = {
+    version: defaultVersion,
+    book: Number(Livre),
+    chapter: Number(Chapitre),
+  }
+  const chapterQuery = useQuery({
+    ...bibleChapterQueryOptions(chapterRequest, resources),
+    enabled: !!wordsInVerse,
+  })
 
-  useEffect(() => {
-    ;(async () => {
-      if (!wordsInVerse) {
-        return
-      }
-      setRequiredBibleVersion(null)
-      setCurrentWord(wordsInVerse[0])
-
-      const defaultVersion = getDefaultBibleVersion(resourceLang)
-      const chapterVerses = await resources.bibleContent.loadChapterVerses(
-        defaultVersion,
-        Number(Livre),
-        Number(Chapitre)
-      )
-      const bible = {
-        [Livre]: {
-          [Chapitre]: Object.fromEntries(chapterVerses.map(v => [v.Verset, v.Texte])),
-        },
-      }
-      const verseText = bible[Livre]?.[Chapitre]?.[Verset]
-      if (!verseText && (await getIfVersionNeedsDownload(defaultVersion))) {
-        setRequiredBibleVersion(defaultVersion)
-        setFormattedText(undefined)
-        setVersesInCurrentChapter(0)
-        return
-      }
-
-      const verseToDictionnaryText = await verseToDictionnary(verse, wordsInVerse, bible)
-      setFormattedText(verseToDictionnaryText)
-      setVersesInCurrentChapter(Object.keys(bible[Livre][Chapitre]).length)
-    })()
-  }, [
-    wordsInVerse,
-    verse,
-    resourceLang,
-    Chapitre,
-    Livre,
-    Verset,
-    resources.bibleContent,
-    installedVersionsSignal,
-  ])
-
-  const { error: wordsError, data: words } = useQuery<(DictionaryItem | undefined)[]>({
+  const { error: wordsError, data: words } = useQuery<(DictionaryEntry | undefined)[]>({
     enabled: Boolean(wordsInVerse),
     queryKey: ['words', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () =>
@@ -183,15 +148,38 @@ const useFormattedText = ({
           return word
         })
       ),
+    ...localQueryOptions,
   })
+  const currentWord =
+    selectedWord && wordsInVerse?.includes(selectedWord) ? selectedWord : wordsInVerse?.[0]
+  const chapterResult = chapterQuery.data
+  const chapterVerses = chapterResult?.success ? chapterResult.data.verses : []
+  const bible = {
+    [Livre]: {
+      [Chapitre]: Object.fromEntries(chapterVerses.map(v => [v.Verset, v.Texte])),
+    },
+  }
+  const verseText = bible[Livre]?.[Chapitre]?.[Verset]
+  const requiredBibleVersion =
+    chapterResult &&
+    !chapterResult.success &&
+    chapterResult.error.recoveries?.includes('acquire-offline-copy')
+      ? defaultVersion
+      : null
+  const chapterDomainError =
+    (chapterResult && !chapterResult.success && !requiredBibleVersion) ||
+    (chapterResult?.success && !verseText)
 
   return {
-    wordsError,
-    formattedText,
+    wordsError:
+      wordsError ??
+      chapterQuery.error ??
+      (chapterDomainError ? new Error('CHAPTER_UNAVAILABLE') : null),
+    formattedText: verseText ? verseToDictionnary(verse, wordsInVerse ?? [], bible) : undefined,
     words,
     currentWord,
-    setCurrentWord,
-    versesInCurrentChapter,
+    setCurrentWord: setSelectedWord,
+    versesInCurrentChapter: chapterVerses.length,
     requiredBibleVersion,
   }
 }
@@ -218,14 +206,19 @@ const DictionnaireVerseDetailScreen = ({
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.DICTIONNAIRE
   const { enqueue } = useDownloadQueue()
+  const dictionaryAvailabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', resourceLang),
+    queryFn: () =>
+      resources.dictionary.getAvailability?.(resourceLang) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
 
-  const {
-    status,
-    error: dictionaryWordsError,
-    data: wordsInVerse,
-  } = useQuery<string[]>({
+  const { error: dictionaryWordsError, data: wordsInVerse } = useQuery<string[]>({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
     queryFn: () => resources.dictionary.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`),
+    ...localQueryOptions,
   })
 
   const {
@@ -236,9 +229,11 @@ const DictionnaireVerseDetailScreen = ({
     setCurrentWord,
     versesInCurrentChapter,
     requiredBibleVersion,
-  } = useFormattedText({ verse, wordsInVerse, status, resourceLang })
+  } = useFormattedText({ verse, wordsInVerse, resourceLang })
   const requiredBibleDownloadStatus = useDownloadItemStatus(
-    requiredBibleVersion ? `bible:${requiredBibleVersion}` : ''
+    requiredBibleVersion
+      ? createOfflineCopyId({ kind: 'bible', versionId: requiredBibleVersion })
+      : undefined
   )
 
   const goToWord = (word: string) => {
@@ -248,6 +243,36 @@ const DictionnaireVerseDetailScreen = ({
       carousel.current?.scrollTo({ index, animated: true })
     }
     setCurrentWord(word)
+  }
+
+  if (
+    dictionaryAvailabilityQuery.data?.status === 'unavailable' &&
+    dictionaryAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
+        title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
+        fileSize={22}
+        size="small"
+      />
+    )
+  }
+
+  if (
+    [dictionaryWordsError, wordsError].some(
+      error =>
+        error instanceof ResourceAccessError && error.recoveries.includes('acquire-offline-copy')
+    )
+  ) {
+    return (
+      <OfflineResourceRecovery
+        identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
+        title={t('Votre dictionnaire doit être retéléchargé.')}
+        fileSize={22}
+        size="small"
+      />
+    )
   }
 
   if (dictionaryWordsError || wordsError) {
@@ -293,7 +318,7 @@ const DictionnaireVerseDetailScreen = ({
 
   const loadedWords = words
     .map((word, index) => (word ? { wordKey: wordsInVerse[index], item: word } : null))
-    .filter((word): word is { wordKey: string; item: DictionaryItem } => Boolean(word))
+    .filter((word): word is { wordKey: string; item: DictionaryEntry } => Boolean(word))
   const currentLoadedWordIndex = loadedWords.findIndex(word => word.wordKey === currentWord)
 
   return (
@@ -363,4 +388,4 @@ const DictionnaireVerseDetailScreen = ({
   )
 }
 
-export default waitForDictionnaireDB()(DictionnaireVerseDetailScreen)
+export default DictionnaireVerseDetailScreen

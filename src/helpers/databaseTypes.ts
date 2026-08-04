@@ -5,38 +5,16 @@ import type { ActiveLanguage } from '~helpers/languageUtils'
 // This allows resource databases to support every active language in the app
 export type ResourceLanguage = ActiveLanguage
 
-export type DatabaseId =
-  | 'STRONG'
-  | 'DICTIONNAIRE'
-  | 'NAVE'
-  | 'TRESOR'
-  | 'MHY'
-  | 'INTERLINEAIRE'
-  | 'TIMELINE'
-  | 'BIBLES'
+export type DatabaseId = 'DICTIONNAIRE' | 'NAVE' | 'TRESOR' | 'MHY' | 'TIMELINE' | 'BIBLES'
 
 // Databases that have language-specific content
-export const LANGUAGE_SPECIFIC_DBS: DatabaseId[] = [
-  'STRONG',
-  'DICTIONNAIRE',
-  'NAVE',
-  'MHY',
-  'INTERLINEAIRE',
-  'TIMELINE',
-]
+export const LANGUAGE_SPECIFIC_DBS: DatabaseId[] = ['DICTIONNAIRE', 'NAVE', 'MHY', 'TIMELINE']
 
 // Databases that are shared across languages (no translation needed)
 export const SHARED_DBS: DatabaseId[] = ['TRESOR', 'BIBLES']
 
 // Databases that can have their language changed by the user
-export const USER_SELECTABLE_DBS: DatabaseId[] = [
-  'STRONG',
-  'DICTIONNAIRE',
-  'NAVE',
-  'MHY',
-  'INTERLINEAIRE',
-  'TIMELINE',
-]
+export const USER_SELECTABLE_DBS: DatabaseId[] = ['DICTIONNAIRE', 'NAVE', 'MHY', 'TIMELINE']
 
 // Databases that only exist in French
 export const FRENCH_ONLY_DBS: DatabaseId[] = ['MHY']

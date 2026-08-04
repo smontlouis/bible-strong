@@ -23,8 +23,10 @@ import { RootState } from '~redux/modules/reducer'
 import {
   decreaseSettingsFontSizeScale,
   increaseSettingsFontSizeScale,
+  isContextualInformationDisplayEnabled,
   setFontFamily,
   setSettingsAlignContent,
+  setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
   setSettingsRelationsDisplay,
   setSettingsPreferredColorScheme,
@@ -172,6 +174,9 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
   const press = useSelector((state: RootState) => state.user.bible.settings.press)
   const redWordsDisplay = useSelector(
     (state: RootState) => state.user.bible.settings.redWordsDisplay
+  )
+  const contextualInformationDisplay = useSelector((state: RootState) =>
+    isContextualInformationDisplayEnabled(state.user.bible.settings.contextualInformationDisplay)
   )
 
   const fontsViewRef = React.useRef(null)
@@ -340,6 +345,19 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
               const nextDisplay = tagsDisplay === 'inline' ? 'block' : 'inline'
               dispatch(setSettingsTagsDisplay(nextDisplay))
             }}
+          />
+        </HalfContainer>
+        <HalfContainer border>
+          <Text flex={5}>{t('Informations contextuelles')}</Text>
+          <Text marginLeft={5} fontSize={12} bold>
+            {contextualInformationDisplay ? t('Activé') : t('Désactivé')}
+          </Text>
+          <TouchableIcon
+            isSelected={contextualInformationDisplay}
+            name="info"
+            onPress={() =>
+              dispatch(setSettingsContextualInformationDisplay(!contextualInformationDisplay))
+            }
           />
         </HalfContainer>
         <HalfContainer border>

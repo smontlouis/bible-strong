@@ -7,6 +7,17 @@ describe('bibleBookCatalog', () => {
     expect(getBookCorpus(67)).toBe('deuterocanonical')
   })
 
+  it('exposes and orders the additional ThéoTeX Septuagint books', () => {
+    expect(getBook(74)?.Nom).toBe('1 Esdras')
+    expect(getBook(77)?.Nom).toBe('Psaumes de Salomon')
+    expect(getBookCorpus(74)).toBe('septuagint')
+
+    const bookNumbers = getBooksForCanon('theotex-septuagint').map(book => book.Numero)
+    expect(bookNumbers).toHaveLength(50)
+    expect(bookNumbers.slice(14, 19)).toEqual([74, 15, 16, 17, 68])
+    expect(bookNumbers.slice(20, 27)).toEqual([72, 73, 75, 76, 19, 20, 21])
+  })
+
   it('keeps the Protestant canon limited to the existing 66 books', () => {
     const books = getBooksForCanon('protestant-66')
 
@@ -39,5 +50,6 @@ describe('bibleBookCatalog', () => {
     expect(isBookInTestament(67, 'old')).toBe(true)
     expect(isBookInTestament(67, 'new')).toBe(false)
     expect(getBookCorpus(40)).toBe('new')
+    expect(isBookInTestament(74, 'old')).toBe(true)
   })
 })

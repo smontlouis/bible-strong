@@ -6,14 +6,12 @@ import {
 } from '../bibleVerseResolver'
 
 jest.mock('../biblesDb', () => ({
-  getInstalledVersions: jest.fn(),
   getMultipleVerses: jest.fn(),
 }))
 
 describe('resolveBibleVerses', () => {
   const createDependencies = (textsByVersion: Record<string, Record<string, string>>) => ({
-    getInstalledVersions: jest.fn(async () => Object.keys(textsByVersion)),
-    getMultipleVerses: jest.fn(async (version: string, verseKeys: string[]) =>
+    loadVerseTexts: jest.fn(async (version: string, verseKeys: string[]) =>
       Object.fromEntries(
         verseKeys
           .filter(key => textsByVersion[version]?.[key])
@@ -44,7 +42,7 @@ describe('resolveBibleVerses', () => {
     })
   })
 
-  it('falls back to an installed compatible Bible for a deuterocanonical verse', async () => {
+  it('keeps an explicitly selected compatible Bible for a deuterocanonical verse', async () => {
     const dependencies = createDependencies({
       LSG: {},
       VUL: { '67-1-1': 'Tobiae text' },
@@ -54,6 +52,7 @@ describe('resolveBibleVerses', () => {
       resolveBibleVerses(
         {
           verseKeys: ['67-1-1'],
+          preferredVersion: 'VUL',
           defaultVersion: 'LSG',
         },
         dependencies
@@ -79,7 +78,7 @@ describe('resolveBibleVerses', () => {
       )
     ).resolves.toEqual({
       status: 'reference-only',
-      version: undefined,
+      version: 'LSG',
       texts: {},
       missingVerseKeys: ['67-1-1'],
     })
@@ -95,6 +94,7 @@ describe('resolveBibleVerses', () => {
       resolveBibleVerses(
         {
           verseKeys: ['67-1-1', '67-1-2'],
+          preferredVersion: 'VUL',
           defaultVersion: 'LSG',
         },
         dependencies
@@ -132,11 +132,10 @@ describe('shouldShowBibleReferenceUnavailable', () => {
 })
 
 describe('getBibleVerseResolutionRequestKey', () => {
-  it('invalidates stale results when the selected version or installed data changes', () => {
+  it('changes when the selected version changes without storage lifecycle signals', () => {
     const baseRequest = {
       verseKeys: ['67-1-1'],
       defaultVersion: 'LSG',
-      dataRefreshSignal: 0,
     }
     const initialKey = getBibleVerseResolutionRequestKey({
       ...baseRequest,
@@ -147,13 +146,6 @@ describe('getBibleVerseResolutionRequestKey', () => {
       getBibleVerseResolutionRequestKey({
         ...baseRequest,
         preferredVersion: 'KJV',
-      })
-    ).not.toBe(initialKey)
-    expect(
-      getBibleVerseResolutionRequestKey({
-        ...baseRequest,
-        preferredVersion: 'VUL',
-        dataRefreshSignal: 1,
       })
     ).not.toBe(initialKey)
   })

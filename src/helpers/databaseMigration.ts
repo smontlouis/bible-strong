@@ -10,13 +10,7 @@ import {
 import { getDbFileName, initLanguageDirs } from '~helpers/databases'
 
 // SQLite databases that need migration
-const SQLITE_DBS_TO_MIGRATE: DatabaseId[] = [
-  'STRONG',
-  'DICTIONNAIRE',
-  'NAVE',
-  'MHY',
-  'INTERLINEAIRE',
-]
+const SQLITE_DBS_TO_MIGRATE: DatabaseId[] = ['DICTIONNAIRE', 'NAVE', 'MHY']
 
 // JSON files that need migration
 const JSON_DBS_TO_MIGRATE: DatabaseId[] = ['TIMELINE']
@@ -26,13 +20,10 @@ const JSON_DBS_TO_MIGRATE: DatabaseId[] = ['TIMELINE']
  * This function is called during Redux migration and should only run once.
  *
  * Old structure:
- *   SQLite/strong.sqlite
  *   SQLite/dictionnaire.sqlite
  *   bible-timeline-events.json
  *
  * New structure:
- *   SQLite/fr/strong.sqlite
- *   SQLite/en/strong.sqlite
  *   SQLite/shared/commentaires-tresor.sqlite
  *   fr/bible-timeline-events.json
  *   en/bible-timeline-events.json

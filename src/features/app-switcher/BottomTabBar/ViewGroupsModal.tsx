@@ -9,7 +9,7 @@ import Text from '~common/ui/Text'
 import { getDateLocale } from '~helpers/languageUtils'
 import useLanguage from '~helpers/useLanguage'
 import { activeGroupIdAtom, TabGroup, tabGroupsAtom } from '../../../state/tabs'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 import TabIcon from '../utils/getIconByTabType'
 
 interface TabPreviewGridProps {

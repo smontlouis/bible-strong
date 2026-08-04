@@ -20,11 +20,11 @@ import { checkBiblesDbHealth, openBiblesDb, resetBiblesDb } from '~helpers/bible
 import { checkDatabasesStorage } from '~helpers/sqlite'
 import { storage } from '~helpers/storage'
 import { toast } from '~helpers/toast'
-import useDownloadBibleResources from '~helpers/useDownloadBibleResources'
 import useInitFireAuth from '~helpers/useInitFireAuth'
 import useLiveUpdates from '~helpers/useLiveUpdates'
-import { getChangelog, getDatabaseUpdate, getVersionUpdate } from '~redux/modules/user'
+import { getChangelog } from '~redux/modules/user'
 import { useTabGroupsSync } from '~state/useTabGroupsSync'
+import { resumePendingAnnotationMigration } from '~helpers/annotationMigrationJournal'
 
 export type InitHooksProps = Record<string, never>
 
@@ -50,6 +50,7 @@ const InitHooks = (_props: InitHooksProps) => {
     // Initialize bibles.sqlite and run blocking migration if needed
     openBiblesDb()
       .then(async () => {
+        await resumePendingAnnotationMigration()
         // Periodic health check — only run full PRAGMA quick_check once per week
         const HEALTH_CHECK_INTERVAL = 7 * 24 * 60 * 60 * 1000
         const lastCheck = storage.getNumber('biblesDbLastHealthCheck') || 0
@@ -164,8 +165,6 @@ const InitHooks = (_props: InitHooksProps) => {
       })
 
       dispatch(getChangelog())
-      dispatch(getVersionUpdate())
-      dispatch(getDatabaseUpdate())
     })
 
     return () => {
@@ -176,7 +175,6 @@ const InitHooks = (_props: InitHooksProps) => {
 
   useLiveUpdates()
   useTabGroupsSync()
-  useDownloadBibleResources()
   useAppRatingCheck()
 
   return <MigrationModal />

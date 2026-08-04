@@ -1,39 +1,32 @@
 import styled from '@emotion/native'
-import * as Icon from '@expo/vector-icons'
 import React from 'react'
-
+import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
-import Link from '~common/Link'
-import StylizedHTMLView from '~common/StylizedHTMLView'
-import Box from '~common/ui/Box'
-import Text from '~common/ui/Text'
-import ListenToStrong from './ListenStrong'
 
-import capitalize from '~helpers/capitalize'
-import truncate from '~helpers/truncate'
-import { cleanParams, wp } from '~helpers/utils'
+import StylizedHTMLView from '~common/StylizedHTMLView'
+import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
+import Text from '~common/ui/Text'
+import ListenToStrong, { hasStrongAudio } from './ListenStrong'
+
+import { cleanParams } from '~helpers/utils'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import { useRouter } from 'expo-router'
 import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
-import { StrongReference, StudyNavigateBibleType } from '~common/types'
+import { StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
-import { SheetScrollView } from '~common/sheet'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
+import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
+import { createStrongIdentity } from '~helpers/strongIdentities'
+import type { StrongVerseContext } from './strongResourceCardContext'
 
-const slideWidth = wp(60)
-const itemHorizontalMargin = wp(2)
-const itemWidth = slideWidth
-
-const Container = styled(Box)<{ isModal?: boolean }>(({ isModal }) => ({
-  width: itemWidth,
-  flex: 1,
-  paddingHorizontal: itemHorizontalMargin,
-
-  ...(isModal && {
-    width: 'auto',
-    paddingHorizontal: 20,
-  }),
+const Container = styled(Box)<{ isModal?: boolean; cardHeight?: number }>(({ cardHeight }) => ({
+  flex: cardHeight === undefined ? 1 : undefined,
+  height: cardHeight,
+  maxHeight: cardHeight,
+  paddingHorizontal: 10,
 }))
 
 const TitleBorder = styled.View(({ theme }) => ({
@@ -52,19 +45,6 @@ const SubTitle = styled(Text)({
   marginBottom: 3,
 })
 
-const Header = styled.View(() => ({
-  flex: 1,
-  paddingTop: 5,
-  flexDirection: 'row',
-  alignItems: 'center',
-  // justifyContent: 'center'
-}))
-
-const IconFeather = styled(Icon.Feather)(({ theme }) => ({
-  paddingTop: 5,
-  color: theme.colors.default,
-}))
-
 const smallTextStyle = (theme: Theme) => ({
   lineHeight: 20,
   fontSize: 14,
@@ -74,28 +54,27 @@ const smallTextStyle = (theme: Theme) => ({
 
 const smallLinkStyle = (theme: Theme) => ({
   ...smallTextStyle(theme),
-  color: theme.colors.quart,
-  textDecorationLine: 'underline' as const,
-  textDecorationColor: theme.colors.quart,
+  color: theme.colors.primary,
 })
 
 type Props = {
   index?: number
   theme: Theme
   book: string
-  strongReference: StrongReference
+  strongEntry: StrongLexiconEntry
   isSelectionMode?: StudyNavigateBibleType
-  isModal?: boolean
   onClosed?: () => void
+  strongVerseContext?: StrongVerseContext
+  cardHeight?: number
 }
 
 const StrongCard = (props: Props) => {
-  const { t } = useTranslation()
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
   const openedFromTab = useAtomValue(openedFromTabAtom)
+  const { t } = useTranslation()
 
-  const linkToStrong = (str1: string, str2: number) => {
+  const linkToStrong = (str1: string, str2: string | number) => {
     const { book } = props
 
     let bookNum: string | undefined
@@ -115,19 +94,19 @@ const StrongCard = (props: Props) => {
       params: {
         book: bookNum,
         reference: reference,
+        strongBibleVersionId: props.strongVerseContext?.strongBibleVersionId,
       },
     })
   }
 
   const openStrong = () => {
-    const {
-      book,
-      strongReference,
-      isSelectionMode,
-      strongReference: { Code, Type, Mot, Phonetique, Definition, LSG, Hebreu, Grec },
-    } = props
-
-    // onClosed?.()
+    const { book, strongEntry, isSelectionMode } = props
+    const Type = strongEntry.morphology?.meaning ?? ''
+    const Mot = strongEntry.gloss
+    const Phonetique = strongEntry.transliteration
+    const Definition = strongEntry.definitionHtml ?? ''
+    const original = strongEntry.original
+    const stepStrongCode = strongEntry.stepCode
 
     if (isSelectionMode) {
       const store = getDefaultStore()
@@ -140,114 +119,124 @@ const StrongCard = (props: Props) => {
           studyId: currentStudyId,
           type: isSelectionMode,
           title: Mot,
-          codeStrong: Code,
+          codeStrong: stepStrongCode,
           strongType: Type,
           phonetique: Phonetique,
           definition: Definition,
-          translatedBy: LSG,
-          original: Hebreu || Grec,
+          translatedBy: '',
+          original,
           book,
         },
       })
     } else {
-      pushRouteOnce({
-        pathname: '/strong',
-        params: {
-          book: String(Number(book)),
-          strongReference: JSON.stringify(strongReference),
-        },
-      })
+      const stepStrongIdentity = createStrongIdentity(stepStrongCode, strongEntry.language)
+      pushRouteOnce(
+        createStrongDetailRoute('index', {
+          ...props.strongVerseContext,
+          book: props.strongVerseContext?.book ?? Number(book),
+          identityKind: stepStrongIdentity.kind,
+          identityCode: stepStrongIdentity.code,
+        })
+      )
     }
   }
 
-  const {
-    isSelectionMode,
-    strongReference: { Code, Hebreu, Grec, Mot, Phonetique, Definition, LSG },
-    theme,
-    isModal,
-  } = props
+  const { isSelectionMode, strongEntry, theme } = props
+  const Mot = strongEntry.gloss
+  const Phonetique = strongEntry.transliteration
+  const Pronunciation = strongEntry.pronunciation
+  const Definition = strongEntry.definitionHtml ?? ''
+  const original = strongEntry.original
+  const clickedWord = props.strongVerseContext?.clickedWord
+  const stepStrongCode = strongEntry.stepCode
+  const morphology = props.strongVerseContext?.morphologyCodes.length
+    ? props.strongVerseContext.morphologyCodes.join(' · ')
+    : strongEntry.morphology?.code
 
   return (
-    <Container overflow="visible" isModal={isModal}>
-      {/* <Shadow overflow /> */}
-      <Box paddingTop={20}>
-        <Box>
-          <Box row alignItems="flex-end">
-            <Header>
-              <Link onPress={openStrong} style={{ flex: 1 }}>
-                <Text title fontSize={18} flex>
-                  {truncate(capitalize(Mot), 7)}
-                  {!!Phonetique && (
-                    <Text title color="darkGrey" fontSize={16}>
-                      {' '}
-                      {truncate(Phonetique, 7)}
-                    </Text>
-                  )}
-                </Text>
-              </Link>
-              <Box mr={10} mt={3}>
-                <ListenToStrong type={Hebreu ? 'hebreu' : 'grec'} code={Code} />
-              </Box>
-              <Link onPress={openStrong}>
-                {isSelectionMode ? (
-                  <IconFeather name="share" size={20} />
-                ) : (
-                  <IconFeather name="maximize-2" size={17} />
-                )}
-              </Link>
-            </Header>
-          </Box>
-          <Text color="darkGrey" bold fontSize={16} textAlign="left">
-            {Hebreu || Grec}
-          </Text>
-          {/* {!!Type && (
-              <Text titleItalic color="darkGrey" fontSize={12}>
-                {Type}
+    <Container overflow="visible" cardHeight={props.cardHeight}>
+      <Box mt={20} px={15} py={14} flex={1} bg="reverse" borderRadius={14} overflow="hidden">
+        <TouchableBox
+          onPress={openStrong}
+          activeOpacity={0.7}
+          accessibilityRole="link"
+          accessibilityLabel={`${stepStrongCode} · ${Mot}`}
+        >
+          <HStack alignItems="flex-start" gap={10}>
+            <VStack flex gap={4}>
+              <Text color="primary" bold fontSize={12} textTransform="uppercase">
+                {stepStrongCode}
               </Text>
-            )} */}
-          <TitleBorder />
-        </Box>
-      </Box>
 
-      <SheetScrollView style={{ marginBottom: 15 }}>
-        {!!Definition && (
-          <ViewItem>
-            <SubTitle color="darkGrey">Définition - {Code}</SubTitle>
-            <StylizedHTMLView
-              htmlStyle={{
-                p: { ...smallTextStyle(theme) },
-                em: { ...smallTextStyle(theme) },
-                strong: { ...smallTextStyle(theme) },
-                a: { ...smallLinkStyle(theme) },
-                i: { ...smallTextStyle(theme) },
-                li: { ...smallTextStyle(theme) },
-                ol: { ...smallTextStyle(theme) },
-                ul: { ...smallTextStyle(theme) },
-              }}
-              value={Definition}
-              onLinkPress={linkToStrong}
-            />
-          </ViewItem>
-        )}
-        {!!LSG && (
-          <ViewItem>
-            <SubTitle color="darkGrey">{t('Généralement traduit par')}</SubTitle>
-            <StylizedHTMLView
-              htmlStyle={{
-                p: { ...smallTextStyle(theme) },
-                em: { ...smallTextStyle(theme) },
-                strong: { ...smallTextStyle(theme) },
-                a: { ...smallLinkStyle(theme) },
-                i: { ...smallTextStyle(theme) },
-                li: { ...smallTextStyle(theme) },
-                ol: { ...smallTextStyle(theme) },
-                ul: { ...smallTextStyle(theme) },
-              }}
-              value={LSG}
-            />
-          </ViewItem>
-        )}
-      </SheetScrollView>
+              <Text fontWeight="500" fontSize={16}>
+                {Mot}
+              </Text>
+
+              {!!(Phonetique || Pronunciation || original) && (
+                <Text color="tertiary" fontSize={12}>
+                  {[Phonetique, Pronunciation, original].filter(Boolean).join(' · ')}
+                </Text>
+              )}
+
+              {!!morphology && (
+                <Text color="tertiary" fontSize={11} style={{ fontFamily: 'Arial' }}>
+                  {morphology}
+                </Text>
+              )}
+            </VStack>
+            {isSelectionMode ? (
+              <Box bg="primary" bgOpacity="010" borderRadius={16} size={32} center>
+                <FeatherIcon name="share" size={17} color="primary" />
+              </Box>
+            ) : hasStrongAudio(
+                strongEntry.language === 'hebrew' ? 'hebreu' : 'grec',
+                strongEntry.baseCode
+              ) ? (
+              <Box bg="primary" bgOpacity="010" borderRadius={16} size={32} center>
+                <ListenToStrong
+                  type={strongEntry.language === 'hebrew' ? 'hebreu' : 'grec'}
+                  code={strongEntry.baseCode}
+                  iconSize={13}
+                  touchSize={32}
+                />
+              </Box>
+            ) : null}
+          </HStack>
+          <TitleBorder />
+        </TouchableBox>
+
+        <ScrollView
+          nestedScrollEnabled
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 1, marginTop: 15 }}
+          contentContainerStyle={{ paddingBottom: 15 }}
+        >
+          {!!clickedWord && (
+            <Text color="tertiary" fontSize={12}>
+              {clickedWord}
+            </Text>
+          )}
+          {!!Definition && (
+            <ViewItem>
+              <SubTitle color="darkGrey">{t('strongDetail.definition.title')}</SubTitle>
+              <StylizedHTMLView
+                htmlStyle={{
+                  p: { ...smallTextStyle(theme) },
+                  em: { ...smallTextStyle(theme) },
+                  strong: { ...smallTextStyle(theme) },
+                  a: { ...smallLinkStyle(theme) },
+                  i: { ...smallTextStyle(theme) },
+                  li: { ...smallTextStyle(theme) },
+                  ol: { ...smallTextStyle(theme) },
+                  ul: { ...smallTextStyle(theme) },
+                }}
+                value={Definition}
+                onLinkPress={linkToStrong}
+              />
+            </ViewItem>
+          )}
+        </ScrollView>
+      </Box>
     </Container>
   )
 }

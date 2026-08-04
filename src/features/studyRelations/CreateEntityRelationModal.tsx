@@ -1,5 +1,7 @@
 import { SheetFlashList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { useTheme } from '@emotion/react'
+import { useQuery } from '@tanstack/react-query'
+import { useAtomValue } from 'jotai/react'
 import { Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -9,13 +11,10 @@ import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
 import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import useBibleVerses from '~helpers/useBibleVerses'
+import useBibleVerses from '~features/resources/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
-import type {
-  DictionnaireLetterRow,
-  DictionnaireSearchRow,
-} from '~features/resources/dictionaryAccess'
-import type { NaveLetterRow, NaveSearchRow } from '~features/resources/naveAccess'
+import type { DictionarySummary } from '~features/resources/dictionaryAccess'
+import type { NaveTopicSummary } from '~features/resources/naveAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import SharedSearchEntityResultRow from '~features/search/shared/SearchEntityResultRow'
 import SearchItemFilterBar, {
@@ -44,11 +43,12 @@ import {
   searchReferenceAndStrongTargets,
   type RelationTargetResult,
 } from './targetSearch'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 type BrowseMode = 'note' | 'link' | 'study' | 'strong' | 'nave' | 'dictionary'
-type NaveRow = NaveLetterRow | NaveSearchRow
-type DictionaryRow = DictionnaireLetterRow | DictionnaireSearchRow
+type NaveRow = NaveTopicSummary
+type DictionaryRow = DictionarySummary
 type MatchedRelationTargetResult = RelationTargetResult
 type RelationTargetSectionId =
   | 'passages'
@@ -129,12 +129,12 @@ const getSearchItemFiltersForTypes = (enabledTypes: SearchItemType[]) => {
 }
 
 const getNaveTargetResult = (nave: NaveRow): RelationTargetResult => ({
-  id: `nave:${nave.name_lower}`,
+  id: `nave:${nave.normalizedName}`,
   type: 'nave',
   iconType: 'nave',
   title: nave.name,
   subtitle: 'Nave',
-  endpoint: createNaveEndpoint({ nameLower: nave.name_lower, labelFallback: nave.name }),
+  endpoint: createNaveEndpoint({ nameLower: nave.normalizedName, labelFallback: nave.name }),
 })
 
 const getDictionaryTargetResult = (dictionary: DictionaryRow): RelationTargetResult => ({
@@ -149,7 +149,7 @@ const getDictionaryTargetResult = (dictionary: DictionaryRow): RelationTargetRes
 const getDictionaryTargetKey = (dictionary: DictionaryRow, index?: number) =>
   [
     'dictionary',
-    dictionary.rowid ?? dictionary.sanitized_word ?? dictionary.word,
+    dictionary.id ?? dictionary.normalizedWord ?? dictionary.word,
     dictionary.word,
     index,
   ]
@@ -271,6 +271,7 @@ const CreateEntityRelationModal = ({
 }: Props) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const dispatch = useDispatch<AppDispatch>()
   const allowedTypesKey = allowedTypes?.join('|') || ''
   const [searchValue, setSearchValue] = useState('')
@@ -280,18 +281,9 @@ const CreateEntityRelationModal = ({
   const [strongLetter, setStrongLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
-  const [strongResults, setStrongResults] = useState<LexiqueRow[]>([])
-  const [naveResults, setNaveResults] = useState<NaveRow[]>([])
-  const [dictionaryResults, setDictionaryResults] = useState<DictionaryRow[]>([])
   const [visibleCounts, setVisibleCounts] = useState<
     Partial<Record<RelationTargetSectionId, number>>
   >({})
-  const [isStrongLoading, setIsStrongLoading] = useState(false)
-  const [isNaveLoading, setIsNaveLoading] = useState(false)
-  const [isDictionaryLoading, setIsDictionaryLoading] = useState(false)
-  const [strongError, setStrongError] = useState<string | null>(null)
-  const [naveError, setNaveError] = useState<string | null>(null)
-  const [dictionaryError, setDictionaryError] = useState<string | null>(null)
   const debouncedStrongSearchValue = useDebounce(searchValue, 300)
   const debouncedResourceSearchValue = useDebounce(searchValue, 300)
   const deferredSearchValue = useDeferredValue(searchValue)
@@ -352,35 +344,23 @@ const CreateEntityRelationModal = ({
     isAllowed('strong') &&
     (deferredBrowseMode === 'strong' || (!deferredBrowseMode && deferredSearchHasValue))
 
-  useEffect(() => {
-    if (!shouldLoadStrongTargets) {
-      setStrongResults([])
-      return
-    }
-
-    let isMounted = true
-    setIsStrongLoading(true)
-    setStrongError(null)
-
-    const loader = deferredStrongSearchValue.trim()
-      ? resources.strong.searchLexicon(deferredStrongSearchValue)
-      : resources.strong.listLexiconByLetter(strongLetter)
-
-    loader.then(results => {
-      if (!isMounted) return
-      if (isDatabaseError(results)) {
-        setStrongResults([])
-        setStrongError(results.error)
-      } else {
-        setStrongResults(results)
-      }
-      setIsStrongLoading(false)
-    })
-
-    return () => {
-      isMounted = false
-    }
-  }, [deferredStrongSearchValue, resources.strong, shouldLoadStrongTargets, strongLetter])
+  const strongQuery = useQuery({
+    queryKey: [
+      'relation-strong-targets',
+      resourcesLanguage.STRONG,
+      deferredStrongSearchValue,
+      strongLetter,
+    ],
+    queryFn: () =>
+      deferredStrongSearchValue.trim()
+        ? resources.strongLexicon.search(deferredStrongSearchValue, resourcesLanguage.STRONG, 200)
+        : resources.strongLexicon.browseByGlossPrefix(strongLetter, resourcesLanguage.STRONG, 500),
+    enabled: shouldLoadStrongTargets,
+  })
+  const strongError =
+    strongQuery.data && isDatabaseError(strongQuery.data) ? strongQuery.data.error : null
+  const strongResults: StrongLexiconSearchResult[] =
+    shouldLoadStrongTargets && strongQuery.data ? strongQuery.data : []
 
   const shouldLoadNaveTargets =
     isAllowed('nave') &&
@@ -389,70 +369,45 @@ const CreateEntityRelationModal = ({
     isAllowed('dictionary') &&
     (deferredBrowseMode === 'dictionary' || (!deferredBrowseMode && deferredSearchHasValue))
 
-  useEffect(() => {
-    if (!shouldLoadNaveTargets) {
-      setNaveResults([])
-      return
-    }
-
-    let isMounted = true
-    setIsNaveLoading(true)
-    setNaveError(null)
-
-    const loader = deferredResourceSearchValue.trim()
-      ? resources.nave.search(deferredResourceSearchValue)
-      : resources.nave.listByLetter(naveLetter)
-
-    loader.then(results => {
-      if (!isMounted) return
-      if (isDatabaseError(results)) {
-        setNaveResults([])
-        setNaveError(results.error)
-      } else {
-        setNaveResults(results)
-      }
-      setIsNaveLoading(false)
-    })
-
-    return () => {
-      isMounted = false
-    }
-  }, [deferredResourceSearchValue, naveLetter, resources.nave, shouldLoadNaveTargets])
-
-  useEffect(() => {
-    if (!shouldLoadDictionaryTargets) {
-      setDictionaryResults([])
-      return
-    }
-
-    let isMounted = true
-    setIsDictionaryLoading(true)
-    setDictionaryError(null)
-
-    const loader = deferredResourceSearchValue.trim()
-      ? resources.dictionary.search(deferredResourceSearchValue)
-      : resources.dictionary.listByLetter(dictionaryLetter)
-
-    loader.then(results => {
-      if (!isMounted) return
-      if (isDatabaseError(results)) {
-        setDictionaryResults([])
-        setDictionaryError(results.error)
-      } else {
-        setDictionaryResults(results)
-      }
-      setIsDictionaryLoading(false)
-    })
-
-    return () => {
-      isMounted = false
-    }
-  }, [
-    deferredResourceSearchValue,
-    dictionaryLetter,
-    resources.dictionary,
-    shouldLoadDictionaryTargets,
-  ])
+  const naveQuery = useQuery({
+    queryKey: [
+      'relation-nave-targets',
+      resourcesLanguage.NAVE,
+      deferredResourceSearchValue,
+      naveLetter,
+    ],
+    queryFn: () =>
+      deferredResourceSearchValue.trim()
+        ? resources.nave.search(deferredResourceSearchValue)
+        : resources.nave.listByLetter(naveLetter),
+    enabled: shouldLoadNaveTargets,
+  })
+  const naveError = naveQuery.data && isDatabaseError(naveQuery.data) ? naveQuery.data.error : null
+  const naveResults: NaveRow[] =
+    shouldLoadNaveTargets && naveQuery.data && !isDatabaseError(naveQuery.data)
+      ? naveQuery.data
+      : []
+  const dictionaryQuery = useQuery({
+    queryKey: [
+      'relation-dictionary-targets',
+      resourcesLanguage.DICTIONNAIRE,
+      deferredResourceSearchValue,
+      dictionaryLetter,
+    ],
+    queryFn: () =>
+      deferredResourceSearchValue.trim()
+        ? resources.dictionary.search(deferredResourceSearchValue)
+        : resources.dictionary.listByLetter(dictionaryLetter),
+    enabled: shouldLoadDictionaryTargets,
+  })
+  const dictionaryError =
+    dictionaryQuery.data && isDatabaseError(dictionaryQuery.data)
+      ? dictionaryQuery.data.error
+      : null
+  const dictionaryResults: DictionaryRow[] =
+    shouldLoadDictionaryTargets && dictionaryQuery.data && !isDatabaseError(dictionaryQuery.data)
+      ? dictionaryQuery.data
+      : []
 
   const handleSearch = (value: string) => {
     setSearchValue(value)
@@ -579,9 +534,9 @@ const CreateEntityRelationModal = ({
     isStrongPending ||
     isNavePending ||
     isDictionaryPending ||
-    isStrongLoading ||
-    isNaveLoading ||
-    isDictionaryLoading
+    (shouldLoadStrongTargets && strongQuery.isFetching) ||
+    (shouldLoadNaveTargets && naveQuery.isFetching) ||
+    (shouldLoadDictionaryTargets && dictionaryQuery.isFetching)
 
   const placeholder = browseMode
     ? {
@@ -698,9 +653,10 @@ const CreateEntityRelationModal = ({
                 onPressItem={() => undefined}
                 renderItem={renderTargetSearchItem}
                 isLoading={
-                  (section.id === 'strong' && (isStrongLoading || isStrongPending)) ||
-                  (section.id === 'dictionary' && (isDictionaryLoading || isDictionaryPending)) ||
-                  (section.id === 'nave' && (isNaveLoading || isNavePending))
+                  (section.id === 'strong' && (strongQuery.isFetching || isStrongPending)) ||
+                  (section.id === 'dictionary' &&
+                    (dictionaryQuery.isFetching || isDictionaryPending)) ||
+                  (section.id === 'nave' && (naveQuery.isFetching || isNavePending))
                 }
               />
             )}

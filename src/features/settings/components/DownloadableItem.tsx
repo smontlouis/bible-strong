@@ -11,6 +11,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import type { DownloadItemState } from '~state/downloadQueue'
 import { downloadManager } from '~helpers/downloadManager'
+import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
 
 interface DownloadableItemProps {
   itemId: string
@@ -27,6 +28,9 @@ interface DownloadableItemProps {
   isDownloaded?: boolean
   isDefault?: boolean
   needsUpdate?: boolean
+  resourceUrl: string
+  relatedResources?: { resourceId: string; url: string }[]
+  variant?: 'standard' | 'dependency'
 }
 
 const formatSize = (
@@ -53,10 +57,21 @@ const DownloadableItem = ({
   isDownloaded,
   isDefault,
   needsUpdate,
+  resourceUrl,
+  relatedResources,
+  variant = 'standard',
 }: DownloadableItemProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const queueState = useDownloadItemStatus(itemId)
+  const publication = useResourcePublicationStatus({
+    resourceId: itemId,
+    url: resourceUrl,
+    isInstalled: Boolean(isDownloaded),
+    relatedResources,
+  })
+  const effectiveNeedsUpdate = needsUpdate || publication.status === 'update-available'
+  const isDependency = variant === 'dependency'
 
   // Determine visual state
   const visualState = getVisualState({
@@ -64,7 +79,7 @@ const DownloadableItem = ({
     isSelectMode,
     isSelected,
     isDownloaded,
-    needsUpdate,
+    needsUpdate: effectiveNeedsUpdate,
   })
 
   const handlePress = () => {
@@ -101,16 +116,30 @@ const DownloadableItem = ({
       <Animated.View
         style={{
           paddingRight: 20,
-          paddingLeft: 45,
-          paddingVertical: 12,
+          paddingLeft: isDependency ? 78 : 45,
+          paddingVertical: isDependency ? 10 : 12,
           opacity: visualState === 'not-downloaded' ? 0.5 : 1,
           backgroundColor: visualState === 'selected' ? theme.colors.lightPrimary : 'transparent',
           borderLeftWidth: visualState === 'needs-update' ? 4 : 0,
           borderLeftColor: visualState === 'needs-update' ? theme.colors.success : 'transparent',
+          overflow: 'visible',
           transitionProperty: ['opacity', 'backgroundColor'],
           transitionDuration: 200,
         }}
       >
+        {isDependency ? (
+          <Box
+            pos="absolute"
+            top={-14}
+            left={52}
+            width={20}
+            height={36}
+            borderLeftWidth={2}
+            borderBottomWidth={2}
+            borderBottomLeftRadius={10}
+            borderColor="border"
+          />
+        ) : null}
         <Box row flex alignItems="center">
           {/* Checkbox in select mode */}
           {isSelectMode && (
@@ -128,7 +157,7 @@ const DownloadableItem = ({
 
           {/* Content */}
           <Box flex>
-            <Text fontSize={15} bold numberOfLines={1}>
+            <Text fontSize={isDependency ? 14 : 15} bold numberOfLines={1}>
               {name}
             </Text>
 
@@ -144,7 +173,7 @@ const DownloadableItem = ({
               </Text>
             )}
             {subtitle && visualState !== 'queued' && visualState !== 'failed' && (
-              <Text fontSize={12} color="tertiary" mt={2} numberOfLines={2}>
+              <Text fontSize={12} color="tertiary" mt={2} numberOfLines={isDependency ? 3 : 2}>
                 {subtitle}
               </Text>
             )}

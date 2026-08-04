@@ -7,24 +7,52 @@ type TagEntityType = (typeof entitiesArray)[number]
 
 export type TagEntityInventory = Partial<Record<TagEntityType, Readonly<Record<string, unknown>>>>
 
+export type TagEntityCounts = Record<TagEntityType, number>
+
 export type TagListRow = {
   id: string
   title: string
   itemCount: number
+  counts: TagEntityCounts
   tag: Tag
 }
 
-const getLiveItemCount = (tag: Tag, inventory: TagEntityInventory): number =>
-  entitiesArray.reduce((total, entityType) => {
-    const tagReferences = tag[entityType]
-    const liveEntities = inventory[entityType]
-    if (!tagReferences || !liveEntities) return total
+const getLiveEntityIds = (
+  tag: Tag,
+  inventory: TagEntityInventory,
+  entityType: TagEntityType
+): string[] => {
+  const tagReferences = tag[entityType]
+  const liveEntities = inventory[entityType]
+  if (!tagReferences || !liveEntities) return []
 
-    return (
-      total +
-      Object.keys(tagReferences).filter(entityId => liveEntities[entityId] !== undefined).length
-    )
-  }, 0)
+  return Object.keys(tagReferences).filter(entityId => liveEntities[entityId] !== undefined)
+}
+
+const getLiveEntitySummary = (
+  tag: Tag,
+  inventory: TagEntityInventory
+): { counts: TagEntityCounts; itemCount: number } => {
+  let itemCount = 0
+  const counts = Object.fromEntries(
+    entitiesArray.map(entityType => {
+      const liveEntityIds = getLiveEntityIds(tag, inventory, entityType)
+      itemCount += liveEntityIds.length
+
+      if (entityType === 'highlights') {
+        const highlights = inventory.highlights
+        const dates = new Set(
+          liveEntityIds.map(entityId => (highlights?.[entityId] as { date?: number })?.date)
+        )
+        return [entityType, dates.size]
+      }
+
+      return [entityType, liveEntityIds.length]
+    })
+  ) as TagEntityCounts
+
+  return { counts, itemCount }
+}
 
 export const buildTagListRows = (
   tags: readonly Tag[],
@@ -32,12 +60,11 @@ export const buildTagListRows = (
 ): TagListRow[] =>
   tags
     .filter(tag => tag.id)
-    .map(tag => ({
-      id: tag.id,
-      title: tag.name,
-      itemCount: getLiveItemCount(tag, inventory),
-      tag,
-    }))
+    .map(tag => {
+      const { counts, itemCount } = getLiveEntitySummary(tag, inventory)
+
+      return { id: tag.id, title: tag.name, itemCount, counts, tag }
+    })
 
 const compareTitle = (left: TagListRow, right: TagListRow) =>
   left.title.localeCompare(right.title, undefined, { sensitivity: 'base' }) ||

@@ -4,6 +4,9 @@ import * as SQLite from 'expo-sqlite'
 import { getSharedSqliteDirPath } from '~helpers/databaseTypes'
 import { databaseBiblesName } from '~helpers/databases'
 import { buildNearFtsQuery, sanitizeFtsQuery } from '~helpers/bibleSearchQuery'
+import { getImportableBibleVerses } from '~helpers/bibleJsonImport'
+import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
+import type { CanonicalBibleHeading } from '~helpers/canonicalBibleHeadings'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -14,6 +17,65 @@ export interface BibleVerse {
   Chapitre: number
   Verset: number
   Texte: string
+  Layout?: CanonicalBibleLayoutEvent[]
+  StartTags?: CanonicalBibleActiveTag[]
+  Notes?: CanonicalBibleNote[]
+  Headings?: CanonicalBibleHeading[]
+  TextRevision?: string
+}
+
+export interface CanonicalBibleActiveTag {
+  tag: string
+  attributes?: Record<string, string>
+}
+
+export interface CanonicalBibleLayoutEvent {
+  offset: number
+  order: number
+  type: 'open' | 'close' | 'self'
+  tag: string
+  attributes?: Record<string, string>
+}
+
+export interface CanonicalBibleVersePayload {
+  text: string
+  startTags: CanonicalBibleActiveTag[]
+  layout: CanonicalBibleLayoutEvent[]
+  notes?: CanonicalBibleNote[]
+  headings?: CanonicalBibleHeading[]
+}
+
+export interface CanonicalBibleJsonData {
+  format: 'bible-strong-canonical-bible'
+  schemaVersion: number
+  applicationVersionId: string
+  datasetId: string
+  sourceVersion: string
+  textRevision: string
+  textSha256: string
+  sourceSha256: string
+  verseCount: number
+  noteCount?: number
+  headingCount?: number
+  verses: Record<string, Record<string, Record<string, CanonicalBibleVersePayload>>>
+}
+
+export type LegacyBibleJsonData = Record<string, Record<string, Record<string, string>>>
+export type BibleJsonData = LegacyBibleJsonData | CanonicalBibleJsonData
+type BibleVerseImportData = Record<
+  string,
+  Record<string, Record<string, string | CanonicalBibleVersePayload>>
+>
+
+export interface BibleVersionMetadata {
+  version: string
+  installedAt: number
+  verseCount: number
+  textRevision?: string
+  textSha256?: string
+  sourceSha256?: string
+  schemaVersion?: number
+  resourceGeneration?: string
 }
 
 export interface SearchResult {
@@ -50,6 +112,13 @@ let db: SQLite.SQLiteDatabase | null = null
 let openPromise: Promise<SQLite.SQLiteDatabase> | null = null
 let inFlightCount = 0
 let dbLockedForReset = false
+
+class BibleQueryCancelledError extends Error {
+  constructor() {
+    super('Bible query cancelled')
+    this.name = 'BibleQueryCancelledError'
+  }
+}
 
 const POLL_MS = 20
 
@@ -116,7 +185,11 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
           book INTEGER NOT NULL,
           chapter INTEGER NOT NULL,
           verse INTEGER NOT NULL,
-          text TEXT NOT NULL
+          text TEXT NOT NULL,
+          start_tags_json TEXT NOT NULL DEFAULT '[]',
+          layout_json TEXT NOT NULL DEFAULT '[]',
+          notes_json TEXT NOT NULL DEFAULT '[]',
+          headings_json TEXT NOT NULL DEFAULT '[]'
         );
 
         CREATE UNIQUE INDEX IF NOT EXISTS idx_verses_lookup
@@ -135,9 +208,23 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
         CREATE TABLE IF NOT EXISTS versions_meta (
           version TEXT PRIMARY KEY,
           installed_at INTEGER NOT NULL,
-          verse_count INTEGER NOT NULL DEFAULT 0
+          verse_count INTEGER NOT NULL DEFAULT 0,
+          text_revision TEXT,
+          text_sha256 TEXT,
+          source_sha256 TEXT,
+          schema_version INTEGER,
+          resource_generation TEXT
         );
       `)
+      await ensureTableColumn(instance, 'verses', 'layout_json', "TEXT NOT NULL DEFAULT '[]'")
+      await ensureTableColumn(instance, 'verses', 'start_tags_json', "TEXT NOT NULL DEFAULT '[]'")
+      await ensureTableColumn(instance, 'verses', 'notes_json', "TEXT NOT NULL DEFAULT '[]'")
+      await ensureTableColumn(instance, 'verses', 'headings_json', "TEXT NOT NULL DEFAULT '[]'")
+      await ensureTableColumn(instance, 'versions_meta', 'text_revision', 'TEXT')
+      await ensureTableColumn(instance, 'versions_meta', 'text_sha256', 'TEXT')
+      await ensureTableColumn(instance, 'versions_meta', 'source_sha256', 'TEXT')
+      await ensureTableColumn(instance, 'versions_meta', 'schema_version', 'INTEGER')
+      await ensureTableColumn(instance, 'versions_meta', 'resource_generation', 'TEXT')
 
       db = instance
       openPromise = null
@@ -240,6 +327,18 @@ async function getDb(): Promise<SQLite.SQLiteDatabase> {
   return db
 }
 
+async function ensureTableColumn(
+  database: SQLite.SQLiteDatabase,
+  table: string,
+  column: string,
+  definition: string
+): Promise<void> {
+  const columns = await database.getAllAsync<{ name: string }>(`PRAGMA table_info(${table})`)
+  if (!columns.some(item => item.name === column)) {
+    await database.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Error wrapper — logs + reports to Sentry, then re-throws
 // ---------------------------------------------------------------------------
@@ -281,6 +380,7 @@ async function withDbError<T>(operation: string, fn: () => Promise<T>): Promise<
     try {
       return await fn()
     } catch (e) {
+      if (e instanceof BibleQueryCancelledError) throw e
       if (attempt === 0 && isReleasedHandleError(e)) {
         // DB handle was released concurrently — drop the singleton so the
         // next getDb() reopens a fresh connection, then retry once.
@@ -323,8 +423,18 @@ export function getChapterVerses(
       chapter: number
       verse: number
       text: string
+      layout_json: string
+      start_tags_json: string
+      notes_json: string
+      headings_json: string
+      text_revision: string | null
     }>(
-      'SELECT book, chapter, verse, text FROM verses WHERE version = ? AND book = ? AND chapter = ? ORDER BY verse',
+      `SELECT v.book, v.chapter, v.verse, v.text, v.start_tags_json,
+              v.layout_json, v.notes_json, v.headings_json, m.text_revision
+       FROM verses v
+       LEFT JOIN versions_meta m ON m.version = v.version
+       WHERE v.version = ? AND v.book = ? AND v.chapter = ?
+       ORDER BY v.verse`,
       [version, book, chapter]
     )
 
@@ -333,6 +443,37 @@ export function getChapterVerses(
       Chapitre: r.chapter,
       Verset: r.verse,
       Texte: r.text,
+      Layout: parseCanonicalLayout(r.layout_json),
+      StartTags: parseCanonicalStartTags(r.start_tags_json),
+      Notes: parseCanonicalNotes(r.notes_json),
+      Headings: parseCanonicalHeadings(r.headings_json),
+      ...(r.text_revision ? { TextRevision: r.text_revision } : {}),
+    }))
+  })
+}
+
+export function getBibleCanonicalHeadingVerses(version: string): Promise<BibleVerse[]> {
+  return withDbError('getBibleCanonicalHeadingVerses', async () => {
+    const d = await getDb()
+    const rows = await d.getAllAsync<{
+      book: number
+      chapter: number
+      verse: number
+      headings_json: string
+    }>(
+      `SELECT book, chapter, verse, headings_json
+       FROM verses
+       WHERE version = ? AND headings_json != '[]'
+       ORDER BY book, chapter, verse`,
+      [version]
+    )
+
+    return rows.map(row => ({
+      Livre: row.book,
+      Chapitre: row.chapter,
+      Verset: row.verse,
+      Texte: '',
+      Headings: parseCanonicalHeadings(row.headings_json),
     }))
   })
 }
@@ -363,7 +504,8 @@ export function getVerseText(
  */
 export function getMultipleVerses(
   version: string,
-  verseKeys: string[]
+  verseKeys: string[],
+  shouldCancel?: () => boolean
 ): Promise<Record<string, string>> {
   if (verseKeys.length === 0) return Promise.resolve({})
 
@@ -374,6 +516,7 @@ export function getMultipleVerses(
     // Build a single query using OR clauses, batched to avoid SQL limits
     const BATCH_SIZE = 200
     for (let i = 0; i < verseKeys.length; i += BATCH_SIZE) {
+      if (shouldCancel?.()) throw new BibleQueryCancelledError()
       const batch = verseKeys.slice(i, i + BATCH_SIZE)
       const conditions = batch.map(() => '(book = ? AND chapter = ? AND verse = ?)').join(' OR ')
       const params: (string | number)[] = [version]
@@ -392,6 +535,7 @@ export function getMultipleVerses(
         `SELECT book, chapter, verse, text FROM verses WHERE version = ? AND (${conditions})`,
         params
       )
+      if (shouldCancel?.()) throw new BibleQueryCancelledError()
 
       for (const row of rows) {
         result[`${row.book}-${row.chapter}-${row.verse}`] = row.text
@@ -480,6 +624,38 @@ export function getInstalledVersions(): Promise<string[]> {
   })
 }
 
+export function getBibleVersionMetadata(version: string): Promise<BibleVersionMetadata | null> {
+  return withDbError('getBibleVersionMetadata', async () => {
+    const d = await getDb()
+    const row = await d.getFirstAsync<{
+      version: string
+      installed_at: number
+      verse_count: number
+      text_revision: string | null
+      text_sha256: string | null
+      source_sha256: string | null
+      schema_version: number | null
+      resource_generation: string | null
+    }>(
+      `SELECT version, installed_at, verse_count, text_revision, text_sha256,
+              source_sha256, schema_version, resource_generation
+       FROM versions_meta WHERE version = ?`,
+      [version]
+    )
+    if (!row) return null
+    return {
+      version: row.version,
+      installedAt: row.installed_at,
+      verseCount: row.verse_count,
+      ...(row.text_revision ? { textRevision: row.text_revision } : {}),
+      ...(row.text_sha256 ? { textSha256: row.text_sha256 } : {}),
+      ...(row.source_sha256 ? { sourceSha256: row.source_sha256 } : {}),
+      ...(row.schema_version != null ? { schemaVersion: row.schema_version } : {}),
+      ...(row.resource_generation ? { resourceGeneration: row.resource_generation } : {}),
+    }
+  })
+}
+
 /**
  * Batch-insert an entire Bible version from parsed JSON data.
  *
@@ -494,11 +670,20 @@ export function getInstalledVersions(): Promise<string[]> {
 export interface InsertBibleOptions {
   onInsertProgress?: (progress: number) => void
   isCancelled?: () => boolean
+  beforeCommit?: () => void | Promise<void>
+  publicationMetadata?: {
+    textRevision: string
+    textSha256: string
+    sourceSha256?: string
+    schemaVersion: number
+    verseCount: number
+    resourceGeneration?: string
+  }
 }
 
 export function insertBibleVersion(
   version: string,
-  jsonData: Record<string, Record<string, Record<string, string>>>,
+  jsonData: BibleJsonData,
   options?: InsertBibleOptions
 ): Promise<void> {
   return withDbError(`insertBibleVersion(${version})`, async () => {
@@ -519,24 +704,76 @@ export function insertBibleVersion(
       const BATCH_SIZE = 500
 
       // Collect all rows first
-      const allRows: [string, number, number, number, string][] = []
-      for (const bookStr of Object.keys(jsonData)) {
-        const bookNum = Number(bookStr)
-        if (isNaN(bookNum)) continue
-        const chapters = jsonData[bookStr]
-        for (const chapterStr of Object.keys(chapters)) {
-          const chapterNum = Number(chapterStr)
-          if (isNaN(chapterNum)) continue
-          const verses = chapters[chapterStr]
-          for (const verseStr of Object.keys(verses)) {
-            // Skip non-numeric verse keys (e.g. "12a", "20+NUM" — variant verses)
-            if (!/^\d+$/.test(verseStr)) continue
-            const verseNum = Number(verseStr)
-            const text = verses[verseStr]
-            if (typeof text !== 'string') continue
-            allRows.push([version, bookNum, chapterNum, verseNum, text])
-          }
+      const canonicalPublication = isCanonicalBibleJsonData(jsonData) ? jsonData : undefined
+      if (canonicalPublication && canonicalPublication.applicationVersionId !== version) {
+        throw new Error(
+          `CANONICAL_BIBLE_VERSION_MISMATCH:${canonicalPublication.applicationVersionId}:${version}`
+        )
+      }
+      const versesData: BibleVerseImportData =
+        canonicalPublication?.verses ?? (jsonData as LegacyBibleJsonData)
+      const allRows: [string, number, number, number, string, string, string, string, string][] = []
+      let canonicalNoteCount = 0
+      let canonicalHeadingCount = 0
+      for (const { bookNumber, chapterNumber, verseNumber, verseData } of getImportableBibleVerses(
+        versesData
+      )) {
+        if (typeof verseData === 'string') {
+          allRows.push([
+            version,
+            bookNumber,
+            chapterNumber,
+            verseNumber,
+            verseData,
+            '[]',
+            '[]',
+            '[]',
+            '[]',
+          ])
+          continue
         }
+        canonicalNoteCount += verseData.notes?.length ?? 0
+        canonicalHeadingCount += verseData.headings?.length ?? 0
+        allRows.push([
+          version,
+          bookNumber,
+          chapterNumber,
+          verseNumber,
+          verseData.text,
+          JSON.stringify(verseData.startTags ?? []),
+          JSON.stringify(verseData.layout ?? []),
+          JSON.stringify(verseData.notes ?? []),
+          JSON.stringify(verseData.headings ?? []),
+        ])
+      }
+      if (canonicalPublication && allRows.length !== canonicalPublication.verseCount) {
+        throw new Error(
+          `CANONICAL_BIBLE_VERSE_COUNT_MISMATCH:${allRows.length}:${canonicalPublication.verseCount}`
+        )
+      }
+      if (
+        options?.publicationMetadata &&
+        allRows.length !== options.publicationMetadata.verseCount
+      ) {
+        throw new Error(
+          `BIBLE_PUBLICATION_VERSE_COUNT_MISMATCH:${allRows.length}:${options.publicationMetadata.verseCount}`
+        )
+      }
+      if (
+        canonicalPublication?.headingCount !== undefined &&
+        canonicalHeadingCount !== canonicalPublication.headingCount
+      ) {
+        throw new Error(
+          `CANONICAL_BIBLE_HEADING_COUNT_MISMATCH:${canonicalHeadingCount}:${canonicalPublication.headingCount}`
+        )
+      }
+      if (
+        canonicalPublication?.noteCount !== undefined &&
+        canonicalNoteCount !== canonicalPublication.noteCount
+      ) {
+        throw new Error(
+          `CANONICAL_BIBLE_NOTE_COUNT_MISMATCH:${canonicalNoteCount}:${canonicalPublication.noteCount}`
+        )
       }
 
       const totalBatches = Math.ceil(allRows.length / BATCH_SIZE)
@@ -549,14 +786,18 @@ export function insertBibleVersion(
         }
 
         const batch = allRows.slice(i, i + BATCH_SIZE)
-        const placeholders = batch.map(() => '(?, ?, ?, ?, ?)').join(', ')
+        const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
         const flatParams: (string | number)[] = []
         for (const row of batch) {
           flatParams.push(...row)
         }
 
         await d.runAsync(
-          `INSERT INTO verses (version, book, chapter, verse, text) VALUES ${placeholders}`,
+          `INSERT INTO verses (
+             version, book, chapter, verse, text, start_tags_json, layout_json, notes_json,
+             headings_json
+           )
+           VALUES ${placeholders}`,
           flatParams
         )
         totalCount += batch.length
@@ -574,14 +815,58 @@ export function insertBibleVersion(
       )
 
       // Record metadata
+      const publicationMetadata = canonicalPublication ?? options?.publicationMetadata
       await d.runAsync(
-        'INSERT INTO versions_meta (version, installed_at, verse_count) VALUES (?, ?, ?)',
-        [version, Date.now(), totalCount]
+        `INSERT INTO versions_meta(
+           version, installed_at, verse_count, text_revision,
+           text_sha256, source_sha256, schema_version, resource_generation
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          version,
+          Date.now(),
+          totalCount,
+          publicationMetadata?.textRevision ?? null,
+          publicationMetadata?.textSha256 ?? null,
+          publicationMetadata?.sourceSha256 ?? null,
+          publicationMetadata?.schemaVersion ?? null,
+          options?.publicationMetadata?.resourceGeneration ?? null,
+        ]
       )
+      await options?.beforeCommit?.()
     })
 
     console.log(`[BiblesDB] Inserted version ${version}`)
   })
+}
+
+function parseCanonicalJsonArray<T>(value: string): T[] {
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
+const parseCanonicalLayout = (value: string): CanonicalBibleLayoutEvent[] =>
+  parseCanonicalJsonArray<CanonicalBibleLayoutEvent>(value)
+
+const parseCanonicalStartTags = (value: string): CanonicalBibleActiveTag[] =>
+  parseCanonicalJsonArray<CanonicalBibleActiveTag>(value)
+
+const parseCanonicalNotes = (value: string): CanonicalBibleNote[] =>
+  parseCanonicalJsonArray<CanonicalBibleNote>(value)
+
+const parseCanonicalHeadings = (value: string): CanonicalBibleHeading[] =>
+  parseCanonicalJsonArray<CanonicalBibleHeading>(value)
+
+function isCanonicalBibleJsonData(data: BibleJsonData): data is CanonicalBibleJsonData {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'format' in data &&
+    data.format === 'bible-strong-canonical-bible'
+  )
 }
 
 /**
@@ -635,7 +920,7 @@ function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
     existsParams.push(options.book)
   }
   if (options?.section === 'ot') {
-    existsConditions.push('(vf.book BETWEEN 1 AND 39 OR vf.book BETWEEN 67 AND 73)')
+    existsConditions.push('(vf.book BETWEEN 1 AND 39 OR vf.book BETWEEN 67 AND 77)')
   } else if (options?.section === 'nt') {
     existsConditions.push('vf.book BETWEEN 40 AND 66')
   }

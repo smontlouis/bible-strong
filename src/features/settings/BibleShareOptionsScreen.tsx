@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React from 'react'
 import { ScrollView } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -17,6 +18,9 @@ import {
   toggleSettingsShareQuotes,
   toggleSettingsShareVerseNumbers,
 } from '~redux/modules/user'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
 
 export const useShareOptions = () => {
   const hasVerseNumbers = useSelector(
@@ -43,12 +47,11 @@ export const useShareOptions = () => {
 const BibleShareOptionsScreen = () => {
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
-  const [message, setMessage] = useState('')
-
+  const resources = useResourceAccess()
   const { hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName } = useShareOptions()
-
-  useEffect(() => {
-    ;(async () => {
+  const { data: message = '' } = useQuery({
+    queryKey: ['bible-share-preview', hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName],
+    queryFn: async () => {
       const { all } = await getVersesContent({
         verses: {
           '1-1-1': true,
@@ -59,11 +62,13 @@ const BibleShareOptionsScreen = () => {
         hasInlineVerses,
         hasQuotes,
         hasAppName,
+        loadVerseTexts: (versionId, verseKeys) =>
+          loadBibleVerseTexts(resources, versionId, verseKeys),
       })
-
-      setMessage(all)
-    })()
-  }, [hasVerseNumbers, hasInlineVerses, hasQuotes, hasAppName])
+      return all
+    },
+    ...localQueryOptions,
+  })
 
   return (
     <Container>

@@ -11,7 +11,7 @@ const colors = {
   secondary: 'rgb(255,240,187)',
   lightSecondary: 'rgba(255,240,187, 0.3)',
   tertiary: 'rgb(160,220,255)',
-  quart: 'rgb(194,40,57)',
+  quart: 'rgb(224,128,138)',
   quint: 'rgb(253, 121, 168)',
   success: '#2ecc71',
 

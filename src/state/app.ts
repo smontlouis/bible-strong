@@ -2,6 +2,7 @@ import { produce } from 'immer'
 import { atom } from 'jotai/vanilla'
 import { Tag, VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
+import { getHistoryStrongReference } from '~helpers/historyStrongReference'
 import {
   tabGroupsAtom,
   activeGroupIdAtom,
@@ -97,6 +98,8 @@ export type HistoryStrongItem = BaseHistoryItem & {
   Grec: string
   Mot: string
   book: number
+  reference?: string
+  Code?: string | number
 }
 
 export type HistoryVerseItem = BaseHistoryItem & {
@@ -155,7 +158,12 @@ export const historyAtom = atom(
           checkHistoryItemType<HistoryStrongItem>(prevItem, 'strong') &&
           checkHistoryItemType<HistoryStrongItem>(newItem, 'strong')
         ) {
-          if (prevItem.Mot === newItem.Mot) {
+          const previousReference = getHistoryStrongReference(prevItem)
+          const nextReference = getHistoryStrongReference(newItem)
+          if (
+            (previousReference && previousReference === nextReference) ||
+            (!previousReference && !nextReference && prevItem.Mot === newItem.Mot)
+          ) {
             return
           }
         }

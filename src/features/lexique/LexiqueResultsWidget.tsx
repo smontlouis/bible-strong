@@ -1,27 +1,16 @@
-import React, { ComponentType, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { DatabaseError } from '~helpers/catchDatabaseError'
-import { useWaitForDatabase } from '~common/waitForStrongDB'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { LexiqueRow } from '~features/resources/strongAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 
 import { useResultsByLetterOrSearch } from './useUtilities'
 import LexiqueResultItem from './LexiqueResultItem'
-
-const hideIfNoDatabase =
-  <P extends object>(WrappedComponent: ComponentType<P>) =>
-  (props: P) => {
-    const { isLoading, proposeDownload } = useWaitForDatabase()
-
-    if (isLoading || proposeDownload) {
-      return null
-    }
-    return <WrappedComponent {...props} />
-  }
+import { useAtomValue } from 'jotai/react'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 const LIMIT = 5
 const height = 40
@@ -30,24 +19,17 @@ interface LexiqueResultsWidgetProps {
   searchValue: string
 }
 
-const isDatabaseError = (value: unknown): value is DatabaseError =>
-  typeof value === 'object' && value !== null && 'error' in value
-
 const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   const resources = useResourceAccess()
-  const [error, setError] = useState<DatabaseError['error'] | null>(null)
+  const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
   const [limit, setLimit] = useState(LIMIT)
 
-  const { results } = useResultsByLetterOrSearch({
-    query: resources.strong.searchLexicon,
+  const { results, error } = useResultsByLetterOrSearch({
+    queryKey: ['strong-lexicon'],
+    query: value => resources.strongLexicon.search(value, resourceLanguage, 200),
     value: searchValue,
+    resourceLanguage,
   })
-
-  useEffect(() => {
-    if (isDatabaseError(results)) {
-      setError(results.error)
-    }
-  }, [results])
 
   if (error) {
     return null
@@ -61,10 +43,17 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
 
   return (
     <>
-      {lexiqueResults.slice(0, limit).map((strong: LexiqueRow) => {
-        const { Mot, Code } = strong
-        const variant = 'Grec' in strong ? 'grec' : 'hebreu'
-        return <LexiqueResultItem key={Code + Mot} id={Code} title={Mot} variant={variant} />
+      {lexiqueResults.slice(0, limit).map((strong: StrongLexiconSearchResult) => {
+        const variant = strong.language === 'greek' ? 'grec' : 'hebreu'
+        return (
+          <LexiqueResultItem
+            key={`${strong.id}:${strong.stepCode}`}
+            displayCode={strong.stepCode}
+            reference={strong.stepCode}
+            title={strong.gloss}
+            variant={variant}
+          />
+        )
       })}
       {lexiqueResults.length > limit && (
         <Link onPress={() => setLimit(l => l + 5)}>
@@ -103,4 +92,4 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
   )
 }
 
-export default hideIfNoDatabase(LexiqueResultsWidget)
+export default LexiqueResultsWidget

@@ -5,12 +5,7 @@ interface DictionnaireCarouselValue {
   setCurrent: (value: string) => void
 }
 
-interface StrongCarouselValue {
-  currentStrongReference: { Code: string | number } | null
-  goToCarouselItem: (ref: string | number) => void
-}
-
-export type CarouselContextValue = DictionnaireCarouselValue | StrongCarouselValue
+export type CarouselContextValue = DictionnaireCarouselValue
 
 const CarouselContext = React.createContext<CarouselContextValue>({
   current: null,

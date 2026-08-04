@@ -1,5 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
-import React, { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import React, { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
 import LexiqueIcon from '~common/LexiqueIcon'
@@ -10,10 +11,14 @@ import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import truncate from '~helpers/truncate'
 import RandomButton from './RandomButton'
-import waitForStrongWidget from './waitForStrongWidget'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
-import { StrongReference } from '~common/types'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { useAtomValue } from 'jotai/react'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { ResourceAccessError } from '~features/resources/resourceAccessError'
 
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
@@ -28,33 +33,41 @@ const StrongOfTheDay = ({
 }: StrongOfTheDayProps) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
 
-  const [error, setError] = useState<'NOT_FOUND' | true | false>(false)
-  const [startRandom, setStartRandom] = useState(true)
-  const [strongReference, setStrongRef] = useState<StrongReference | undefined>(undefined)
-
-  useEffect(() => {
-    const loadStrong = async () => {
-      if (!startRandom) return
-
-      const strongReference = await resources.strong.loadRandomReference(type === 'grec' ? 40 : 1)
-
-      if (!strongReference) {
-        setError('NOT_FOUND')
-      }
-
-      if (strongReference && 'error' in strongReference) {
-        console.log(`[Home] Failed to load strong for type ${type}`)
-
-        setError(true)
-        return
-      }
-
-      setStrongRef(strongReference as StrongReference | undefined)
-      setStartRandom(false)
-    }
-    loadStrong()
-  }, [resources.strong, type, startRandom])
+  const [randomSeed, setRandomSeed] = useState(0)
+  const availabilityQuery = useQuery({
+    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryFn: async () => ({
+      availability: await resources.strongLexicon.getModuleAvailability('core'),
+      recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
+    }),
+    networkMode: 'always',
+    staleTime: Infinity,
+  })
+  const strongQuery = useQuery({
+    queryKey: ['home-strong-random', type, resourceLanguage, randomSeed],
+    queryFn: async (): Promise<StrongLexiconSearchResult | null> =>
+      (await resources.strongLexicon.random(
+        type === 'grec' ? 'greek' : 'hebrew',
+        resourceLanguage
+      )) ?? null,
+    ...localQueryOptions,
+  })
+  const strongReference = strongQuery.data
+  if (
+    (availabilityQuery.data?.availability.status !== 'available' &&
+      availabilityQuery.data?.recoveries?.includes('acquire-offline-copy')) ||
+    (strongQuery.error instanceof ResourceAccessError &&
+      strongQuery.error.recoveries.includes('acquire-offline-copy'))
+  ) {
+    return null
+  }
+  const error = strongQuery.isError
+    ? true
+    : strongQuery.isSuccess && !strongReference
+      ? 'NOT_FOUND'
+      : false
 
   if (error) {
     return (
@@ -74,14 +87,15 @@ const StrongOfTheDay = ({
     )
   }
 
-  if (!strongReference) {
+  if (strongQuery.isPending || !strongReference) {
     return <WidgetLoading />
   }
 
-  const { Grec, Hebreu, Mot } = strongReference
+  const { original, gloss, stepCode, language } = strongReference
+  const book = language === 'greek' ? 40 : 1
 
   return (
-    <Link route="Strong" params={{ book: Grec ? 40 : 1, strongReference }}>
+    <Link route="Strong" params={{ book, reference: stepCode }}>
       <WidgetContainer>
         <Box
           style={{
@@ -95,7 +109,7 @@ const StrongOfTheDay = ({
         >
           <LinearGradient start={[0.1, 0.2]} style={{ height: 130 }} colors={[color1, color2]} />
         </Box>
-        <RandomButton onPress={() => setStartRandom(true)} />
+        <RandomButton onPress={() => setRandomSeed(seed => seed + 1)} />
         <Box flex={1} center mt={20}>
           <Box backgroundColor="rgba(0,0,0,0.1)" paddingHorizontal={5} paddingVertical={3} rounded>
             <Text fontSize={10} style={{ color: 'white' }}>
@@ -103,7 +117,7 @@ const StrongOfTheDay = ({
             </Text>
           </Box>
           <Paragraph title scale={-2} style={{ color: 'white' }}>
-            {truncate(Mot, 10)}
+            {truncate(gloss, 10)}
           </Paragraph>
           <Paragraph
             style={{ color: 'white', opacity: 0.5 }}
@@ -111,7 +125,7 @@ const StrongOfTheDay = ({
             scaleLineHeight={-2}
             marginBottom={3}
           >
-            {truncate(Grec, 10) || truncate(Hebreu, 10)}
+            {truncate(original, 10)}
           </Paragraph>
         </Box>
         <Link route="Lexique" style={{ width: '100%' }}>
@@ -127,4 +141,4 @@ const StrongOfTheDay = ({
   )
 }
 
-export default waitForStrongWidget(StrongOfTheDay)
+export default StrongOfTheDay

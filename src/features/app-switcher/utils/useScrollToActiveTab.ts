@@ -1,5 +1,5 @@
 import wait from '~helpers/wait'
-import { useAppSwitcherContext } from '../AppSwitcherProvider'
+import { useAppSwitcherContext } from '../AppSwitcherContext'
 import useScrollToTab from './useScrollToTab'
 
 /**

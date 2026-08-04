@@ -31,6 +31,7 @@ import Box, {
 import { FormSheetHandle } from '~common/ui/FormSheetScreen'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
 import Text, { AnimatedText } from '~common/ui/Text'
+import Progress from '~common/ui/Progress'
 import {
   BIBLE_FORM_SHEET_HEADER_HEIGHT,
   HEADER_HEIGHT,
@@ -52,7 +53,21 @@ import { RootState } from '~redux/modules/reducer'
 import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
 import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheetProvider'
+import PassageExportSheet from './passageExport/PassageExportSheet'
 import { VerseSelectorPopup } from './VerseSelectorPopup'
+import { shouldShowBibleBackButton } from './bibleHeaderNavigation'
+import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
+import StrongMark from './StrongMark'
+import {
+  isInterlinearCapableBibleVersion,
+  isInterlinearModeEnabled,
+} from '~helpers/interlinearBiblePublications'
+import { downloadItemStatesAtom } from '~state/downloadQueue'
+import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
+import InterlinearMark from './InterlinearMark'
+import InterlinearModeSelectorSheet from './InterlinearModeSelectorSheet'
+import StrongModeSelectorSheet from './StrongModeSelectorSheet'
+import { useBibleModeAcquisitionCompletion } from './useBibleModeAcquisitionCompletion'
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -61,6 +76,7 @@ interface BibleHeaderProps {
   commentsDisplay?: boolean
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
+  hidePersonalBibleData?: boolean
   onEditFocusTags?: () => void
   isInTab?: boolean
 }
@@ -72,6 +88,7 @@ const Header = ({
   commentsDisplay,
   onExitAnnotationMode,
   annotationModeEnabled,
+  hidePersonalBibleData = false,
   onEditFocusTags,
   isInTab,
 }: BibleHeaderProps) => {
@@ -91,12 +108,19 @@ const Header = ({
   const displayMode = useAtomValue(parallelDisplayModeAtom)
   const setDisplayMode = useSetAtom(parallelDisplayModeAtom)
   const canGoBackInStack = useCanGoBackInStack()
-  const hasBackButton = !isInTab || Boolean(isFormSheet && canGoBackInStack)
+  const hasBackButton = shouldShowBibleBackButton({
+    isFormSheet,
+    isInTab,
+    canGoBackInStack,
+  })
   const openInNewTab = useOpenInNewTab()
   const openEntityRelations = useOpenEntityRelations()
 
   // Bookmark ref
   const bookmarkModalRef = useRef<SheetRef>(null)
+  const exportSheetRef = useRef<SheetRef>(null)
+  const interlinearModeSheetRef = useRef<SheetRef>(null)
+  const strongModeSheetRef = useRef<SheetRef>(null)
   const bible = useAtomValue(bibleAtom)
   const contextDisplayMode = getBibleContextDisplayMode(bible.data)
   const isContextFocused = contextDisplayMode === 'focused'
@@ -108,21 +132,49 @@ const Header = ({
     isSelectionMode,
     parallelVersions,
     focusVerses,
+    strongMode = 'hidden',
+    interlinearMode = 'hidden',
+    pendingModeAcquisition,
   } = bible.data
   const bookNumber = book.Numero
   const bookName = book.Nom
   const isParallel = parallelVersions.length > 0
   const displayVerses = focusVerses
+  const downloadStates = useAtomValue(downloadItemStatesAtom)
+  const acquisitionPresentation = getBibleModeAcquisitionPresentation(
+    pendingModeAcquisition,
+    downloadStates
+  )
+  const isInterlinearDownloadVisible =
+    interlinearMode === 'hidden' &&
+    pendingModeAcquisition?.kind === 'interlinear' &&
+    (acquisitionPresentation.status === 'active' || acquisitionPresentation.status === 'completed')
+  const isStrongDownloadVisible =
+    strongMode === 'hidden' &&
+    pendingModeAcquisition?.kind === 'strong' &&
+    pendingModeAcquisition.versionId === version &&
+    (acquisitionPresentation.status === 'active' || acquisitionPresentation.status === 'completed')
+
+  useBibleModeAcquisitionCompletion({
+    acquisition: pendingModeAcquisition,
+    finish: actions.finishBibleModeAcquisition,
+    onSucceeded: acquisition => {
+      const sheetRef = acquisition.kind === 'strong' ? strongModeSheetRef : interlinearModeSheetRef
+      sheetRef.current?.dismiss()
+    },
+  })
 
   // Check if verses are selected
-  const hasSelectedVerses = selectedVerses && Object.keys(selectedVerses).length > 0
+  const hasSelectedVerses =
+    !hidePersonalBibleData && selectedVerses && Object.keys(selectedVerses).length > 0
   const selectedVersesReference = verseToReference(selectedVerses)
 
   // Check if current chapter has a bookmark
   const selectBookmarkForChapter = makeSelectBookmarkForChapter()
-  const currentChapterBookmark = useSelector((state: RootState) =>
+  const storedCurrentChapterBookmark = useSelector((state: RootState) =>
     selectBookmarkForChapter(state, bookNumber, chapter)
   )
+  const currentChapterBookmark = hidePersonalBibleData ? undefined : storedCurrentChapterBookmark
 
   const hasFocusVerses = focusVerses && focusVerses.length > 0
   const focusedReference = hasFocusVerses
@@ -135,16 +187,16 @@ const Header = ({
         version
       )
     : null
-  const focusedVerseRelationCount = useRelationCount(focusedVerseEndpoint)
+  const storedFocusedVerseRelationCount = useRelationCount(focusedVerseEndpoint)
+  const focusedVerseRelationCount = hidePersonalBibleData ? 0 : storedFocusedVerseRelationCount
   const highlights = useSelector((state: RootState) => state.user.bible.highlights)
-  const focusedVerseTags = (hasFocusVerses ? focusVerses : []).reduce<TagsObj>(
-    (acc, focusVerse) => {
-      const verseKey = `${bookNumber}-${chapter}-${focusVerse}`
-      const tags = highlights[verseKey]?.tags
-      return tags ? { ...acc, ...tags } : acc
-    },
-    {}
-  )
+  const focusedVerseTags = (
+    hasFocusVerses && !hidePersonalBibleData ? focusVerses : []
+  ).reduce<TagsObj>((acc, focusVerse) => {
+    const verseKey = `${bookNumber}-${chapter}-${focusVerse}`
+    const tags = highlights[verseKey]?.tags
+    return tags ? { ...acc, ...tags } : acc
+  }, {})
   const hasFocusedVerseTags = Object.keys(focusedVerseTags).length > 0
   const hasFocusEntityChips = hasFocusedVerseTags || focusedVerseRelationCount > 0
 
@@ -218,12 +270,7 @@ const Header = ({
         ? 'arrow.up.left.and.arrow.down.right'
         : 'arrow.down.right.and.arrow.up.left',
     },
-    {
-      id: 'open-tab',
-      title: t('tab.openInNewTab'),
-      image: 'arrow.up.forward.square',
-    },
-    ...(hasFocusVerses && onEditFocusTags
+    ...(hasFocusVerses && !hidePersonalBibleData && onEditFocusTags
       ? [
           {
             id: 'tags',
@@ -232,7 +279,7 @@ const Header = ({
           },
         ]
       : []),
-    ...(focusedVerseEndpoint
+    ...(focusedVerseEndpoint && !hidePersonalBibleData
       ? [
           {
             id: 'relations',
@@ -241,6 +288,16 @@ const Header = ({
           },
         ]
       : []),
+    {
+      id: 'export',
+      title: t('passageExport.menuAction'),
+      image: 'square.and.arrow.up',
+    },
+    {
+      id: 'open-tab',
+      title: t('tab.openInNewTab'),
+      image: 'arrow.up.forward.square',
+    },
     {
       id: 'clear-focus',
       title: t('Quitter le mode focus'),
@@ -320,10 +377,21 @@ const Header = ({
       state: isParallel ? 'on' : 'off',
     },
     { id: 'history', title: t('Historique'), image: 'clock.arrow.circlepath' },
+    ...(!hidePersonalBibleData
+      ? [
+          {
+            id: 'bookmark',
+            title: currentChapterBookmark
+              ? t('Modifier le marque-page')
+              : t('Ajouter un marque-page'),
+            image: 'bookmark' as const,
+          },
+        ]
+      : []),
     {
-      id: 'bookmark',
-      title: currentChapterBookmark ? t('Modifier le marque-page') : t('Ajouter un marque-page'),
-      image: 'bookmark',
+      id: 'export',
+      title: t('passageExport.menuAction'),
+      image: 'square.and.arrow.up',
     },
     {
       id: 'open-tab',
@@ -331,6 +399,70 @@ const Header = ({
       image: 'arrow.up.forward.square',
     },
   ]
+
+  const strongModeButton = isStrongCapableBibleVersion(version) ? (
+    <AnimatedTouchableBox
+      onPress={() => strongModeSheetRef.current?.present()}
+      disabled={isStrongDownloadVisible}
+      center
+      width={40}
+      height={40}
+      accessibilityRole="button"
+      accessibilityLabel={
+        isStrongDownloadVisible
+          ? t('Téléchargement en cours')
+          : t('Choisir l’affichage de la Bible Strong')
+      }
+      accessibilityState={{
+        disabled: isStrongDownloadVisible,
+        selected: strongMode !== 'hidden',
+      }}
+      style={{
+        opacity: fullScreenOpacity,
+        transitionProperty: 'opacity',
+        transitionDuration: 300,
+      }}
+    >
+      {isStrongDownloadVisible ? (
+        <Progress
+          progress={Math.max(acquisitionPresentation.progress, 0.04)}
+          size={22}
+          thickness={2.5}
+        />
+      ) : (
+        <StrongMark highlighted={strongMode !== 'hidden'} />
+      )}
+    </AnimatedTouchableBox>
+  ) : null
+
+  const interlinearModeButton = isInterlinearCapableBibleVersion(version) ? (
+    <AnimatedTouchableBox
+      onPress={() => interlinearModeSheetRef.current?.present()}
+      disabled={isInterlinearDownloadVisible}
+      center
+      width={40}
+      height={40}
+      accessibilityRole="button"
+      accessibilityLabel={
+        isInterlinearDownloadVisible ? t('Téléchargement en cours') : t('Options du texte original')
+      }
+      accessibilityState={{
+        disabled: isInterlinearDownloadVisible,
+        selected: isInterlinearModeEnabled(interlinearMode),
+      }}
+      style={opacityTransitionStyle}
+    >
+      {isInterlinearDownloadVisible ? (
+        <Progress
+          progress={Math.max(acquisitionPresentation.progress, 0.04)}
+          size={22}
+          thickness={2.5}
+        />
+      ) : (
+        <InterlinearMark highlighted={isInterlinearModeEnabled(interlinearMode)} />
+      )}
+    </AnimatedTouchableBox>
+  ) : null
 
   if (annotationModeEnabled) {
     return (
@@ -354,7 +486,7 @@ const Header = ({
       >
         {isFormSheet && <FormSheetHandle />}
 
-        <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
+        <HStack maxWidth={830} mx="auto" alignItems="center" width="100%" overflow="visible">
           {hasBackButton && (
             <Box position="absolute" left={0} top={5} zIndex={2}>
               <Back
@@ -379,7 +511,7 @@ const Header = ({
             onPress={onExitAnnotationMode}
             position="absolute"
             right={0}
-            bottom={10}
+            bottom={isFormSheet ? -10 : 0}
           >
             <Box bg="reverse" borderRadius={8} height={28} px={12} center>
               <Text color="primary" bold fontSize={12}>
@@ -496,6 +628,8 @@ const Header = ({
                     limit={2}
                   />
                 </Box>
+                {strongModeButton}
+                {interlinearModeButton}
                 <MenuView
                   actions={focusMenuActions}
                   onPressAction={({ nativeEvent }) => {
@@ -512,6 +646,9 @@ const Header = ({
                         break
                       case 'relations':
                         openFocusedVerseRelations()
+                        break
+                      case 'export':
+                        exportSheetRef.current?.present()
                         break
                       case 'clear-focus':
                         actions.clearFocusVerses()
@@ -665,6 +802,9 @@ const Header = ({
                   </MenuView>
                 )}
 
+                {strongModeButton}
+                {interlinearModeButton}
+
                 {/* Three-dots menu */}
                 <MenuView
                   actions={mainMenuActions}
@@ -688,6 +828,9 @@ const Header = ({
                         break
                       case 'bookmark':
                         bookmarkModalRef.current?.present()
+                        break
+                      case 'export':
+                        exportSheetRef.current?.present()
                         break
                       case 'open-tab':
                         openInBibleTab()
@@ -730,6 +873,19 @@ const Header = ({
         version={version}
         existingBookmark={currentChapterBookmark || undefined}
       />
+      <PassageExportSheet
+        ref={exportSheetRef}
+        sourceType="chapter"
+        bookNumber={bookNumber}
+        chapterNumber={chapter}
+        version={version}
+      />
+      {isInterlinearCapableBibleVersion(version) && (
+        <InterlinearModeSelectorSheet bibleAtom={bibleAtom} sheetRef={interlinearModeSheetRef} />
+      )}
+      {isStrongCapableBibleVersion(version) && (
+        <StrongModeSelectorSheet bibleAtom={bibleAtom} sheetRef={strongModeSheetRef} />
+      )}
       {currentChapterBookmark && (
         <Box position="absolute" right={24} bottom={-18}>
           <TouchableBox center height="100%" onPress={() => bookmarkModalRef.current?.present()}>
