@@ -137,7 +137,7 @@ export const BIBLE_PROJECT_VISUAL_COMMENTARY_WORKS = [
     id: 'psalm-1-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/psalm-1/',
     anchors: [passage(19, 1, 1, 1, 6)],
-    editions: { en: 'E7k01kfBx6Y', fr: 'dFLNnAF0Kno' },
+    editions: { fr: 'dFLNnAF0Kno' },
   },
   {
     id: 'psalm-8-visual-commentary',
@@ -161,7 +161,7 @@ export const BIBLE_PROJECT_VISUAL_COMMENTARY_WORKS = [
     id: 'isaiah-61-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/isaiah-61/',
     anchors: [passage(23, 61, 1, 61, 11)],
-    editions: { en: 'd_Q6WkD_Pas', fr: 'wvqT2nT7YQs' },
+    editions: { fr: 'wvqT2nT7YQs' },
   },
   {
     id: 'john-1-visual-commentary',
@@ -177,5 +177,17 @@ export const BIBLE_PROJECT_VISUAL_COMMENTARY_EXCLUSIONS = [
     language: 'fr',
     reason: 'trailer-not-editorial-commentary',
     evidenceUrl: 'https://www.youtube.com/watch?v=yIVUi1xSaMw',
+  },
+  {
+    providerId: 'E7k01kfBx6Y',
+    language: 'en',
+    reason: 'vertical-9-16-format',
+    evidenceUrl: 'https://www.youtube.com/watch?v=E7k01kfBx6Y',
+  },
+  {
+    providerId: 'd_Q6WkD_Pas',
+    language: 'en',
+    reason: 'vertical-9-16-format',
+    evidenceUrl: 'https://www.youtube.com/watch?v=d_Q6WkD_Pas',
   },
 ]

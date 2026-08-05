@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-05T06:55:47.222Z",
+  "totals": {
+    "works": 57,
+    "editions": 111,
+    "englishEditions": 57,
+    "frenchEditions": 54,
+    "bilingualWorks": 54,
+    "englishOnlyWorks": 3,
+    "frenchOnlyWorks": 0,
+    "reviewedAnchors": 141,
+    "primaryAnchors": 57,
+    "relatedAnchors": 84,
+    "excludedSourceRecords": 22,
+    "crossCategoryEditions": 7
+  },
+  "series": {
+    "biblical-themes": 32,
+    "royal-priest": 6,
+    "spiritual-beings": 8,
+    "ten-commandments": 11
+  },
+  "canonicalBookCoverage": {
+    "fr": [
+      1,
+      2,
+      3,
+      10,
+      16,
+      19,
+      24,
+      27,
+      29,
+      33,
+      41,
+      43,
+      47,
+      60
+    ],
+    "en": [
+      1,
+      2,
+      3,
+      10,
+      16,
+      19,
+      24,
+      27,
+      29,
+      33,
+      41,
+      43,
+      47,
+      60
+    ]
+  },
+  "missingEditions": {
+    "fr": [
+      "bp-theme-ten-commandments-09-truthful-witness",
+      "bp-theme-ten-commandments-10-desire",
+      "bp-theme-son-of-man"
+    ],
+    "en": []
+  },
+  "exclusionsByReason": {
+    "behind-the-scenes": 4,
+    "derivative-short": 2,
+    "duplicate-long-form-compilation": 1,
+    "group-study-promotion": 1,
+    "question-and-response": 2,
+    "reading-plan-promotion": 1,
+    "studio-teaser": 8,
+    "superseded-duplicate": 1,
+    "trailer": 1,
+    "vertical-9-16-format": 1
+  },
+  "anchorsByProvenance": {
+    "publisher-passage": 72,
+    "editorial-review": 69
+  },
+  "exclusions": [
+    {
+      "providerId": "GOXEADdM0ZI",
+      "language": "en",
+      "reason": "question-and-response",
+      "evidenceUrl": "https://www.youtube.com/watch?v=GOXEADdM0ZI"
+    },
+    {
+      "providerId": "NluVlZCToSg",
+      "language": "en",
+      "reason": "question-and-response",
+      "evidenceUrl": "https://www.youtube.com/watch?v=NluVlZCToSg"
+    },
+    {
+      "providerId": "mWze68PQa3A",
+      "language": "en",
+      "reason": "behind-the-scenes",
+      "evidenceUrl": "https://www.youtube.com/watch?v=mWze68PQa3A"
+    },
+    {
+      "providerId": "x8CuY56_wk4",
+      "language": "en",
+      "reason": "behind-the-scenes",
+      "evidenceUrl": "https://www.youtube.com/watch?v=x8CuY56_wk4"
+    },
+    {
+      "providerId": "1s7AjhVxDPs",
+      "language": "en",
+      "reason": "behind-the-scenes",
+      "evidenceUrl": "https://www.youtube.com/watch?v=1s7AjhVxDPs"
+    },
+    {
+      "providerId": "zx1YJNZWmuc",
+      "language": "en",
+      "reason": "behind-the-scenes",
+      "evidenceUrl": "https://www.youtube.com/watch?v=zx1YJNZWmuc"
+    },
+    {
+      "providerId": "z4__yO5yBfU",
+      "language": "en",
+      "reason": "studio-teaser",
+      "evidenceUrl": "https://www.youtube.com/watch?v=z4__yO5yBfU"
+    },
+    {
+      "providerId": "eiJbjmqOD54",
+      "language": "en",
+      "reason": "studio-teaser",
+      "evidenceUrl": "https://www.youtube.com/watch?v=eiJbjmqOD54"
+    },
+    {
+      "providerId": "npkMrWPDpWI",
+      "language": "en",
+      "reason": "studio-teaser",
+      "evidenceUrl": "https://www.youtube.com/watch?v=npkMrWPDpWI"
+    },
+    {
+      "providerId": "EgF5fMp4RNM",
+      "language": "en",
+      "reason": "studio-teaser",
+      "evidenceUrl": "https://www.youtube.com/watch?v=EgF5fMp4RNM"
+    },
+    {
+      "providerId": "AKmdcNfnvjc",
+      "language": "en",
+      "reason": "studio-teaser",
+      "evidenceUrl": "https://www.youtube.com/watch?v=AKmdcNfnvjc"
+    },
+    {
+      "providerId": "MlAzDJUE1zY",
+      "language": "en",
+      "reason": "studio-teaser",
+      "evidenceUrl": "https://www.youtube.com/watch?v=MlAzDJUE1zY"
+    },
+    {
+      "providerId": "mI7_EGPyluc",
+      "language": "en",
+      "reason": "studio-teaser",
+      "evidenceUrl": "https://www.youtube.com/watch?v=mI7_EGPyluc"
+    },
+    {
+      "providerId": "sDwmRiwVzQo",
+      "language": "en",
+      "reason": "studio-teaser",
+      "evidenceUrl": "https://www.youtube.com/watch?v=sDwmRiwVzQo"
+    },
+    {
+      "providerId": "IiQjNBdzsrM",
+      "language": "en",
+      "reason": "trailer",
+      "evidenceUrl": "https://www.youtube.com/watch?v=IiQjNBdzsrM"
+    },
+    {
+      "providerId": "EvldOJ0Z7Jc",
+      "language": "en",
+      "reason": "group-study-promotion",
+      "evidenceUrl": "https://www.youtube.com/watch?v=EvldOJ0Z7Jc"
+    },
+    {
+      "providerId": "yy7Hesk4NZg",
+      "language": "en",
+      "reason": "reading-plan-promotion",
+      "evidenceUrl": "https://www.youtube.com/watch?v=yy7Hesk4NZg"
+    },
+    {
+      "providerId": "w0iZ-hc7G9M",
+      "language": "en",
+      "reason": "derivative-short",
+      "evidenceUrl": "https://www.youtube.com/watch?v=w0iZ-hc7G9M"
+    },
+    {
+      "providerId": "V_UL7evhaBg",
+      "language": "en",
+      "reason": "derivative-short",
+      "evidenceUrl": "https://www.youtube.com/watch?v=V_UL7evhaBg"
+    },
+    {
+      "providerId": "O1nDieIu8Xc",
+      "language": "en",
+      "reason": "vertical-9-16-format",
+      "evidenceUrl": "https://www.youtube.com/watch?v=O1nDieIu8Xc"
+    },
+    {
+      "providerId": "Ya-EbpCXWpw",
+      "language": "en",
+      "reason": "duplicate-long-form-compilation",
+      "evidenceUrl": "https://www.youtube.com/watch?v=Ya-EbpCXWpw"
+    },
+    {
+      "providerId": "FVzc7zXuQzA",
+      "language": "fr",
+      "reason": "superseded-duplicate",
+      "evidenceUrl": "https://www.youtube.com/watch?v=FVzc7zXuQzA"
+    }
+  ],
+  "sourceCoverage": {
+    "expectedCategoryRecords": 126,
+    "assignedCategoryRecords": 104,
+    "excludedCategoryRecords": 22,
+    "crossCategoryEditionProviderIds": [
+      "lX7rZ7hp_gQ",
+      "sDnohPQxLD8",
+      "G_OlRWGLdnw",
+      "ZjoRCeqpUSA",
+      "4eBBvA8zzxI",
+      "62CliEkRCso",
+      "sR4AT0LMJ5c"
+    ],
+    "unassignedProviderIds": []
+  }
+}

@@ -98,6 +98,7 @@ Core user activities:
 - Any **Plan slice** can be the active content of a **Plan tab**, regardless of whether it contains Bible text, meditation text, image, video, chapter, or verse content.
 - A **Passage media work** can have multiple localized **Passage media editions** and multiple **Passage media anchors**.
 - A **Passage media anchor** describes where an editorial resource is relevant; the resource category describes what the content is. Book, passage, verse, and Strong are anchor targets rather than media categories.
+- A thematic **Passage media work** has exactly one primary **Passage media anchor** for automatic Bible view placement; its related anchors support discovery without creating additional automatic placements.
 - If the followed **Reading plan** no longer exists, its **Plan tab** has no reading content to recover.
 - A **Tag** groups user study objects by theme or category.
 - A **Relation** connects exactly two **Relation endpoints**.

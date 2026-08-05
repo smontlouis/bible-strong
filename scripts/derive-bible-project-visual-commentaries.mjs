@@ -47,8 +47,8 @@ const validateRegistry = catalogVideos => {
   const exclusions = BIBLE_PROJECT_VISUAL_COMMENTARY_EXCLUSIONS
   if (works.length !== 24)
     throw new Error(`Expected 24 visual commentary works, received ${works.length}`)
-  if (exclusions.length !== 1)
-    throw new Error(`Expected one visual commentary exclusion, received ${exclusions.length}`)
+  if (exclusions.length !== 3)
+    throw new Error(`Expected three visual commentary exclusions, received ${exclusions.length}`)
 
   const workIds = works.map(work => work.id)
   if (new Set(workIds).size !== workIds.length)
@@ -60,8 +60,8 @@ const validateRegistry = catalogVideos => {
     throw new Error('A provider video is assigned to multiple visual commentary works')
   if (editionProviderIds.some(id => excludedProviderIds.includes(id)))
     throw new Error('A visual commentary provider video is both assigned and excluded')
-  if (editionProviderIds.length !== 44)
-    throw new Error(`Expected 44 visual commentary editions, received ${editionProviderIds.length}`)
+  if (editionProviderIds.length !== 42)
+    throw new Error(`Expected 42 visual commentary editions, received ${editionProviderIds.length}`)
 
   const categoryVideos = catalogVideos.filter(video => video.category === 'visual-commentary')
   if (categoryVideos.length !== 44)
@@ -239,8 +239,8 @@ const main = async () => {
     },
   }
   if (
-    audit.totals.bilingualWorks !== 20 ||
-    audit.totals.frenchOnlyWorks !== 3 ||
+    audit.totals.bilingualWorks !== 18 ||
+    audit.totals.frenchOnlyWorks !== 5 ||
     audit.totals.englishOnlyWorks !== 1
   )
     throw new Error('Unexpected visual commentary localization topology')

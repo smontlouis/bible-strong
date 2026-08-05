@@ -4,10 +4,10 @@ Research snapshot: 2026-08-04.
 
 ## Conclusion
 
-The current `visual-commentary` slice contains 44 YouTube source records. Forty-three are usable passage editions and one is a French trailer that should be excluded from the editorial manifest. Full-catalog reconciliation adds the French Character of God edition currently classified as `word-study`, producing 44 publishable editions across 24 conceptual works; the trailer remains an excluded source record rather than a work.
+The current `visual-commentary` slice contains 44 YouTube source records. Forty-one are usable passage editions; one French trailer and two English vertical 9:16 editions are excluded from the editorial manifest. Full-catalog reconciliation adds the French Character of God edition currently classified as `word-study`, producing 42 publishable editions across 24 conceptual works; all rejected records remain explicit in the audit rather than becoming works.
 
-- 20 works have both French and English YouTube editions in the reconciled corpus;
-- three publishable works currently have only a French YouTube edition in the corpus;
+- 18 works have both French and English YouTube editions in the reconciled corpus;
+- five publishable works currently have only a French YouTube edition in the corpus;
 - Psalm 8 is the only work currently limited to an English YouTube edition;
 - one additional French-only source record is the excluded trailer;
 - the app must select an edition strictly from the route/application language, with no cross-language fallback.
@@ -149,10 +149,10 @@ The Lord's Prayer script cites Exodus, Ezekiel, Psalms, Matthew 5, Matthew 18, a
 A generator for this subset should fail unless all of the following remain true:
 
 - exactly 44 primary-category source editions are classified;
-- exactly 44 editions are publishable after cross-category reconciliation and one trailer is excluded;
-- exactly 24 publishable works exist and the trailer remains an excluded source record;
-- exactly 20 works have both `fr` and `en` editions;
-- exactly three publishable works are French-only;
+- exactly 42 editions are publishable after cross-category reconciliation; one trailer and two vertical 9:16 editions are excluded;
+- exactly 24 publishable works exist and all three rejected source records remain in the audit;
+- exactly 18 works have both `fr` and `en` editions;
+- exactly five publishable works are French-only;
 - exactly one publishable work is English-only;
 - no work has more than one edition for the same language;
 - all publishable editions have at least one reviewed primary anchor;

@@ -55,6 +55,17 @@ const anchorScope = scope => {
   ]
 }
 
+const entryPointAnchor = entryPoint => ({
+  kind: 'passage',
+  book: entryPoint.book,
+  chapterStart: entryPoint.chapter,
+  chapterEnd: entryPoint.chapter,
+  placement: 'chapter-resources',
+  relevance: 'primary',
+  reviewStatus: 'reviewed',
+  provenance: 'editorial-review',
+})
+
 const editionFromVideo = (workId, video, language) => ({
   id: `${workId}:${language}`,
   language,
@@ -177,7 +188,10 @@ const main = async () => {
     editions: LANGUAGES.filter(language => definition.editions[language]).map(language =>
       editionFromVideo(definition.id, catalogById.get(definition.editions[language]), language)
     ),
-    anchors: anchorScope(definition.scope),
+    anchors: [
+      ...anchorScope(definition.scope),
+      ...(definition.entryPoint ? [entryPointAnchor(definition.entryPoint)] : []),
+    ],
   }))
 
   const coverage = Object.fromEntries(

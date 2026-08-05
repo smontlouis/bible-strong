@@ -6,11 +6,13 @@ const section = (bookNumber, chapterStart, chapterEnd) => ({
   chapterEnd,
 })
 const testament = value => ({ kind: 'testament', testament: value })
+const chapterResource = (book, chapter) => ({ book, chapter })
 
 export const BIBLE_PROJECT_BOOK_OVERVIEW_WORKS = [
   {
     id: 'old-testament-overview',
     scope: testament('old'),
+    entryPoint: chapterResource(1, 1),
     editions: { en: 'ALsluAKBZ-c', fr: 'rUSQ1uS-yI0' },
   },
   {
@@ -116,6 +118,7 @@ export const BIBLE_PROJECT_BOOK_OVERVIEW_WORKS = [
   {
     id: 'new-testament-overview',
     scope: testament('new'),
+    entryPoint: chapterResource(40, 1),
     editions: { en: 'Q0BrP8bqj0c', fr: '52AO0zKCnA4' },
   },
   {

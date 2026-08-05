@@ -95,7 +95,9 @@ canonical Protestant books; French editions cover 65, with Philippians explicitl
 falling back to English.
 
 Twenty works anchor split book sections, four works anchor multiple books, and two Testament-wide
-overviews remain library resources rather than appearing on every chapter. Per-language book indexes
+overviews remain library resources rather than appearing on every chapter. They have one reviewed
+end-of-chapter entry point each: the Old Testament overview at Genesis 1 and the New Testament
+overview at Matthew 1. Per-language book indexes
 contain only works with an edition in that exact language. Full-book works use `book-intro`; later
 split sections use `before-range`. All anchors in this subset are reviewed from publisher titles and
 official playlist membership rather than inferred from plan reading context.
@@ -104,9 +106,10 @@ official playlist membership rather than inferred from plan reading context.
 
 The second publishable subset is generated in `visual-commentary-manifest.json`. All 44 records in
 the catalog category are accounted for, and the cross-category French Character of God edition is
-reconciled with its English visual commentary. The manifest contains 44 localized editions across
-24 reviewed passage works; the French “Prochainement” trailer is explicitly excluded. Twenty works
-are bilingual, three are French-only, and Psalm 8 is the only English-only work. The language
+reconciled with its English visual commentary. The manifest contains 42 localized editions across
+24 reviewed passage works; the French “Prochainement” trailer and two English vertical 9:16
+editions are explicitly excluded. Eighteen works are bilingual, five are French-only, and Psalm 8
+is the only English-only work. The language
 indexes never expose a work without an edition in the selected route language.
 
 The 25 reviewed primary anchors preserve exact inclusive verse ranges. One work intentionally has
@@ -130,6 +133,20 @@ composite `H0750` + `H0639`; it is never reduced to one misleading Strong. Per-l
 cover Strong entries and all 21 selected Bible passages, including the shared Exodus overview,
 without falling back across French and English. The complete evidence and exclusions are documented
 in `bible-project-word-study-anchors.md`.
+
+## Reviewed theme manifest
+
+The Bible View thematic subset is generated in `theme-manifest.json`. The 126 records initially
+classified as `theme` are exhaustively reviewed: 104 are retained, 21 unsuitable English uploads are
+excluded, and one obsolete French Covenants upload is retained only in the audit as a superseded
+provider identity. Seven matching editions are reconciled from other collector categories.
+
+The resulting 57 works contain 111 editions: 54 bilingual works and three English-only works. Every
+work has exactly one reviewed primary passage used for chapter-end “Pour aller plus loin” placement.
+The 85 broader related passages remain searchable metadata in a separate index and never create
+automatic Bible View cards. Edition lookup remains strict to the route language, and no Nave
+resource participates in placement. The complete curation and exclusion evidence is documented in
+`bible-project-theme-anchors.md`.
 
 ## Recommended editorial model
 
@@ -157,7 +174,12 @@ type PassageMedia = {
     verseStart?: number
     chapterEnd?: number
     verseEnd?: number
-    placement: 'book-intro' | 'before-range' | 'after-range' | 'chapter-resources'
+    placement:
+      | 'book-intro'
+      | 'before-range'
+      | 'after-range'
+      | 'chapter-resources'
+      | 'related-resource'
     relevance: 'primary' | 'related'
   }>
   sourceUrl: string

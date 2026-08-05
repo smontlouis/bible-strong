@@ -24,8 +24,16 @@ Keep content category separate from Passage media anchors. Anchors target books,
 ranges, Strong entries, or related study contexts and declare placement, relevance, review status,
 and provenance. Only reviewed anchors are publishable. For reviewed book overviews, a full-book
 anchor uses `book-intro`, the first section of a split book also uses `book-intro`, and each later
-section uses `before-range`. Testament-wide overviews remain `library` resources rather than being
+section uses `before-range`. Testament-wide overviews remain `library` resources and also expose one
+reviewed `chapter-resources` entry point (Old Testament at Genesis 1, New Testament at Matthew 1), rather than being
 repeated on every book or chapter.
+
+For thematic works, exactly one reviewed primary passage determines automatic chapter-end placement
+in the Bible view. Additional related passages remain discoverability metadata and use a separate
+index; they never multiply automatic “Pour aller plus loin” cards. Nave is not a dependency of
+thematic placement. Provider records that are trailers, promotions, Q+R, studio material,
+derivative clips, superseded uploads, or redundant compilations remain auditable source records but
+are excluded from the publishable manifest.
 
 Treat catalog categories and series as editorial projections, not work identity boundaries. When
 the same localized work appears in different official collections or primary catalog categories,
@@ -44,4 +52,5 @@ and new editions, not an automatic reuse of English. Editorial review is require
 book, passage, verse, or Strong relationships become runtime anchors. Category reconciliation can
 cross the collector's primary classification without duplicating a work. Lexical discovery can
 safely index exact Strong entries and related families while preserving multi-lexeme concepts such
-as “slow to anger” as composites.
+as “slow to anger” as composites. The raw provider inventory remains complete even when editorial
+noise is removed from every publishable language index.

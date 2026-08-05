@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-04T19:02:03.090Z",
-  "refreshDueAt": "2026-09-03T19:02:03.090Z",
+  "generatedAt": "2026-08-05T06:55:47.222Z",
+  "refreshDueAt": "2026-09-04T06:55:47.222Z",
   "languagePolicy": {
     "selection": "strict-route-language",
     "fallbackAcrossLanguages": false
@@ -954,21 +954,6 @@
           "embeddable": true,
           "madeForKids": false,
           "captionsAvailable": false
-        },
-        {
-          "id": "psalm-1-visual-commentary:en",
-          "language": "en",
-          "provider": "youtube",
-          "providerId": "E7k01kfBx6Y",
-          "sourceUrl": "https://www.youtube.com/watch?v=E7k01kfBx6Y",
-          "title": "Psalm 1",
-          "description": "How can we live good lives rooted in God’s abundance? Psalm 1 offers two choices represented by two types of humans—one who is like a solid tree and one who blows away in the wind like chaff. In this video, we reflect on the choices that shape our lives and discover that what we meditate on makes all the difference.",
-          "thumbnailUrl": "https://i.ytimg.com/vi/E7k01kfBx6Y/maxresdefault.jpg",
-          "durationSeconds": 339,
-          "publishedAt": "2023-03-20T17:00:10Z",
-          "embeddable": true,
-          "madeForKids": false,
-          "captionsAvailable": true
         }
       ],
       "anchors": [
@@ -1151,21 +1136,6 @@
           "embeddable": true,
           "madeForKids": false,
           "captionsAvailable": false
-        },
-        {
-          "id": "isaiah-61-visual-commentary:en",
-          "language": "en",
-          "provider": "youtube",
-          "providerId": "d_Q6WkD_Pas",
-          "sourceUrl": "https://www.youtube.com/watch?v=d_Q6WkD_Pas",
-          "title": "Isaiah 61 Visual Commentary • A Vision of the New Creation",
-          "description": "What does a restored world look like? The words of Isaiah 61 describe a new creation filled with abundance and ordered by right relationships. In this video, we reflect on the prophet's vision of a new Eden and how it reaffirms God's promises to the people who never lost hope.",
-          "thumbnailUrl": "https://i.ytimg.com/vi/d_Q6WkD_Pas/maxresdefault.jpg",
-          "durationSeconds": 438,
-          "publishedAt": "2023-04-11T17:00:08Z",
-          "embeddable": true,
-          "madeForKids": false,
-          "captionsAvailable": true
         }
       ],
       "anchors": [
@@ -1413,7 +1383,6 @@
         "17": [],
         "18": [],
         "19": [
-          "psalm-1-visual-commentary",
           "psalm-8-visual-commentary",
           "psalm-148-visual-commentary"
         ],
@@ -1422,9 +1391,7 @@
         ],
         "21": [],
         "22": [],
-        "23": [
-          "isaiah-61-visual-commentary"
-        ],
+        "23": [],
         "24": [],
         "25": [],
         "26": [],
@@ -1515,9 +1482,6 @@
         "2:34": [
           "exodus-34-6-7-visual-commentary"
         ],
-        "19:1": [
-          "psalm-1-visual-commentary"
-        ],
         "19:8": [
           "psalm-8-visual-commentary"
         ],
@@ -1526,9 +1490,6 @@
         ],
         "20:8": [
           "proverbs-8-visual-commentary"
-        ],
-        "23:61": [
-          "isaiah-61-visual-commentary"
         ],
         "43:1": [
           "john-1-visual-commentary"

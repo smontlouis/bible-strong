@@ -197,6 +197,28 @@ const parseDurationSeconds = duration => {
   )
 }
 
+const videoDisplay = player => {
+  const embedWidth = Number(player?.embedWidth || 0)
+  const embedHeight = Number(player?.embedHeight || 0)
+  if (!embedWidth || !embedHeight) {
+    return {
+      embedWidth: null,
+      embedHeight: null,
+      aspectRatio: null,
+      orientation: 'unknown',
+      isVertical9By16: false,
+    }
+  }
+  const aspectRatio = embedWidth / embedHeight
+  return {
+    embedWidth,
+    embedHeight,
+    aspectRatio: Number(aspectRatio.toFixed(4)),
+    orientation: aspectRatio < 1 ? 'portrait' : aspectRatio > 1 ? 'landscape' : 'square',
+    isVertical9By16: Math.abs(aspectRatio - 9 / 16) < 0.03,
+  }
+}
+
 const bestThumbnailUrl = thumbnails => {
   const values = Object.values(thumbnails || {}).filter(item => item?.url)
   return (
@@ -337,14 +359,15 @@ const classifyVideo = video => {
     else category = 'uncategorized'
   }
 
-  const suitability =
-    category === 'visual-commentary' || category === 'book-overview'
+  const suitability = video.isVertical9By16
+    ? 'exclude'
+    : category === 'visual-commentary' || category === 'book-overview'
       ? 'inline-primary'
-      : ['book-collection', 'word-study', 'how-to-read', 'theme'].includes(category)
+      : ['book-collection', 'word-study', 'how-to-read', 'theme', 'podcast'].includes(category)
         ? 'related'
-        : ['studio', 'classroom', 'podcast'].includes(category)
+        : category === 'studio'
           ? 'exclude'
-          : 'review'
+          : 'related'
   return { category, suitability }
 }
 
@@ -430,6 +453,7 @@ const sanitizeVideo = (item, language, playlists) => {
   const contentDetails = item.contentDetails || {}
   const status = item.status || {}
   const statistics = item.statistics || {}
+  const display = videoDisplay(item.player)
   const detectedLanguage = snippet.defaultAudioLanguage || snippet.defaultLanguage || null
   const availability =
     status.privacyStatus === 'public' && status.uploadStatus === 'processed'
@@ -445,6 +469,7 @@ const sanitizeVideo = (item, language, playlists) => {
     thumbnails: snippet.thumbnails || {},
     duration: contentDetails.duration || null,
     durationSeconds: parseDurationSeconds(contentDetails.duration),
+    ...display,
     publishedAt: snippet.publishedAt || null,
     language,
     channelId: snippet.channelId || null,
@@ -623,9 +648,10 @@ const main = async () => {
   const videoItems = (
     await mapLimit(chunk(uploadVideoIds, 50), CONCURRENCY, ids =>
       youtubeGet(apiKey, 'videos', {
-        part: 'snippet,contentDetails,status,statistics,topicDetails,recordingDetails,liveStreamingDetails,localizations',
+        part: 'snippet,contentDetails,status,statistics,topicDetails,recordingDetails,liveStreamingDetails,localizations,player',
         id: ids.join(','),
         maxResults: '50',
+        maxHeight: '1000',
       })
     )
   ).flatMap(body => body.items || [])
@@ -641,7 +667,7 @@ const main = async () => {
 
   enriched.sort((a, b) => a.language.localeCompare(b.language) || a.title.localeCompare(b.title))
   const source = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt: new Date().toISOString(),
     collector: 'scripts/collect-bible-project-videos.mjs',
     provider: 'youtube-data-api-v3',
@@ -671,6 +697,11 @@ const main = async () => {
       thumbnailUrl: video.thumbnailUrl,
       description: video.description,
       durationSeconds: video.durationSeconds,
+      embedWidth: video.embedWidth,
+      embedHeight: video.embedHeight,
+      aspectRatio: video.aspectRatio,
+      orientation: video.orientation,
+      isVertical9By16: video.isVertical9By16,
       publishedAt: video.publishedAt,
       metadataStatus: video.metadataStatus,
       availability: video.availability,
@@ -691,7 +722,7 @@ const main = async () => {
   })
 
   const catalog = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt: source.generatedAt,
     refreshDueAt: source.refreshDueAt,
     attribution: {
@@ -717,7 +748,7 @@ const main = async () => {
       occurrences,
     }))
   const audit = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     generatedAt: source.generatedAt,
     refreshDueAt: source.refreshDueAt,
     totals: {
@@ -737,6 +768,8 @@ const main = async () => {
       madeForKids: catalogVideos.filter(video => video.madeForKids === true).length,
       captionsAvailable: catalogVideos.filter(video => video.captionsAvailable === true).length,
       regionRestricted: catalogVideos.filter(video => video.regionRestriction).length,
+      vertical9By16: catalogVideos.filter(video => video.isVertical9By16).length,
+      missingPlayerDimensions: catalogVideos.filter(video => !video.aspectRatio).length,
     },
     byCategory: countBy(catalogVideos, 'category'),
     bySuitability: countBy(catalogVideos, 'suitability'),

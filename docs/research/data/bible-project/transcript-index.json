@@ -1,0 +1,1733 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-05T07:03:59.363Z",
+  "sourceGeneratedAt": "2026-08-05T06:55:47.222Z",
+  "totals": {
+    "candidates": 173,
+    "available": 170,
+    "missing": 2,
+    "empty": 0,
+    "errors": 1
+  },
+  "entries": [
+    {
+      "providerId": "HTEyJ0ozoaM",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/HTEyJ0ozoaM.en.json3",
+      "sha256": "d4e44ae2ae6197f95d5b041a62bdd9b4a171b7a30564618d0aa452e26a767f37",
+      "segmentCount": 1287,
+      "characterCount": 45426
+    },
+    {
+      "providerId": "bft2GnpK50A",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/bft2GnpK50A.en.json3",
+      "sha256": "0e47487a086585cf2fa8c3ddd67551d72ae332ad692f70d09e3d0d17511a640d",
+      "segmentCount": 1705,
+      "characterCount": 61228
+    },
+    {
+      "providerId": "E65KV3M8RZE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/E65KV3M8RZE.en.json3",
+      "sha256": "fafcc56699f27ac809428f211ee6e51a4544fe7229467038928287718bf64971",
+      "segmentCount": 689,
+      "characterCount": 24952
+    },
+    {
+      "providerId": "WmvyrLXoQio",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/WmvyrLXoQio.en.json3",
+      "sha256": "8718b24c951a14ecbbcbb460780688737945c30f2679c3c27a4628671d17670b",
+      "segmentCount": 110,
+      "characterCount": 6694
+    },
+    {
+      "providerId": "Sew1kBIe-W0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Sew1kBIe-W0.en.json3",
+      "sha256": "93c92ee4886c524cfbe8ef4a48d735561c0baeb5dd5d2eda4e82591fff0c4ddb",
+      "segmentCount": 89,
+      "characterCount": 5931
+    },
+    {
+      "providerId": "FJsiwOB0Pvg",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/FJsiwOB0Pvg.en.json3",
+      "sha256": "f92edc80de0e9c939a02cc3cf9d7b6c5e764825b46ca661d8f26ebbe37b46875",
+      "segmentCount": 77,
+      "characterCount": 4400
+    },
+    {
+      "providerId": "0EQDGax19xk",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/0EQDGax19xk.en.json3",
+      "sha256": "81f240dbfd7f4b7f2aeea01ad92f7ad8956d1cdfa293f4d0dd1483950594eefd",
+      "segmentCount": 81,
+      "characterCount": 5502
+    },
+    {
+      "providerId": "DwnHiF7_tTA",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/DwnHiF7_tTA.en.json3",
+      "sha256": "349822b47b13deac69dd2dc5a42b2322816a8680f67751de11c89dae427a3620",
+      "segmentCount": 1469,
+      "characterCount": 51195
+    },
+    {
+      "providerId": "rkqsQpck8YU",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/rkqsQpck8YU.en.json3",
+      "sha256": "8c74fb9542f8ea959b1ec57c726f9852f28b79bdc573d9f75d201c751655bfeb",
+      "segmentCount": 91,
+      "characterCount": 5620
+    },
+    {
+      "providerId": "RN3wYVRkmno",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/RN3wYVRkmno.en.json3",
+      "sha256": "97a9ee2027b56e5e290a319ae9703aa81992c2dcaea740089fa7864c507b10d5",
+      "segmentCount": 1530,
+      "characterCount": 55560
+    },
+    {
+      "providerId": "h_zIJt0Kpes",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/h_zIJt0Kpes.en.json3",
+      "sha256": "467bf1625322f66ca1ece5406f5ba35f1a9f891ba5511278173dbefb9619a37c",
+      "segmentCount": 352,
+      "characterCount": 12978
+    },
+    {
+      "providerId": "c3_XU_BDbD0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/c3_XU_BDbD0.en.json3",
+      "sha256": "6e5831a71e934dda8454ece34672aeb27491a88bb9b53a76b2bb0387cfdcb1e6",
+      "segmentCount": 1630,
+      "characterCount": 60866
+    },
+    {
+      "providerId": "YB--nhzQbFs",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/YB--nhzQbFs.en.json3",
+      "sha256": "37d237b6f67789f1b749aae5c6187a024641d94cbaaa23b4089c9bff58fbdf27",
+      "segmentCount": 96,
+      "characterCount": 4598
+    },
+    {
+      "providerId": "cNjlc2FQpOM",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/cNjlc2FQpOM.en.json3",
+      "sha256": "cb65d2d3e02653e25b4ac2142013445b9089553272cd7f3f4ee6aa946db148c1",
+      "segmentCount": 16,
+      "characterCount": 536
+    },
+    {
+      "providerId": "39DTeVC-kCc",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/39DTeVC-kCc.en.json3",
+      "sha256": "fe353b88befae8c4a6baa35cfd25cd1702478cdc50addde4a335570ae2cdb511",
+      "segmentCount": 266,
+      "characterCount": 8125
+    },
+    {
+      "providerId": "92UjGNLabiE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/92UjGNLabiE.en.json3",
+      "sha256": "1425e2715946c165e6ccd1741528ca7e0913d4d2e5603268e2064ec0a5931eb7",
+      "segmentCount": 1221,
+      "characterCount": 42314
+    },
+    {
+      "providerId": "ury3MaC6HFE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/ury3MaC6HFE.en.json3",
+      "sha256": "cfffeb1279f9e3f4f6db4ea31a1853b1946cf2e69beec9291a0e39a60a580056",
+      "segmentCount": 1056,
+      "characterCount": 36709
+    },
+    {
+      "providerId": "Vn_g8xIRMjY",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Vn_g8xIRMjY.en.json3",
+      "sha256": "0ed9df574b59711548269fa24284496f2c4e99e92500b5968a0ef58313ca94bf",
+      "segmentCount": 1258,
+      "characterCount": 43731
+    },
+    {
+      "providerId": "Y1miaVsdCvM",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Y1miaVsdCvM.en.json3",
+      "sha256": "dfe0c6e0329bfa53528fe7ca827227a42480231ea25feb9abd5939a4bf010ff5",
+      "segmentCount": 2100,
+      "characterCount": 75733
+    },
+    {
+      "providerId": "MV2T9y6qG7c",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/MV2T9y6qG7c.en.json3",
+      "sha256": "ba82a504515f0bc9baaad62fabcefd1ab8da62349766df5146b05b5462e6da80",
+      "segmentCount": 1079,
+      "characterCount": 38484
+    },
+    {
+      "providerId": "z_GrJddY0so",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/z_GrJddY0so.en.json3",
+      "sha256": "d691b9c73b86584d53e594cd5f27d4ac672c4f95c0d956f0e909627337d77dd5",
+      "segmentCount": 1614,
+      "characterCount": 57300
+    },
+    {
+      "providerId": "kw_tqkQGJJk",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/kw_tqkQGJJk.en.json3",
+      "sha256": "092be208d2db3a976909315bd5602707846270e401d6a18dbc4b690c09855bbc",
+      "segmentCount": 1319,
+      "characterCount": 48348
+    },
+    {
+      "providerId": "_mvgar5zUT0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/_mvgar5zUT0.en.json3",
+      "sha256": "76898f366294367fbb3be02cf2e5766d9c3e8337abd3fc8970b867e57e063c60",
+      "segmentCount": 1389,
+      "characterCount": 51327
+    },
+    {
+      "providerId": "PT1annWmldE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/PT1annWmldE.en.json3",
+      "sha256": "da6ae875c42fe5052884a7bc5751aab31018acd81c172d3602092b8af8aa407b",
+      "segmentCount": 1165,
+      "characterCount": 41696
+    },
+    {
+      "providerId": "gFKcychCzak",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/gFKcychCzak.en.json3",
+      "sha256": "a9c693501d25576de747aac31b1d8425108c655fcaa48955749f49e4affd3e0e",
+      "segmentCount": 1065,
+      "characterCount": 36948
+    },
+    {
+      "providerId": "dNLfrrIw38c",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/dNLfrrIw38c.en.json3",
+      "sha256": "9b8dc5922d6d18b05199792f32887ed1dfe96c872722f0de75098ae16ef90b12",
+      "segmentCount": 1354,
+      "characterCount": 42740
+    },
+    {
+      "providerId": "ENLyNE1qIc8",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/ENLyNE1qIc8.en.json3",
+      "sha256": "716305e7e9ee95b2c7b7bdf486c31234a547a40bfe837f82ca5ff2eae4d7e66f",
+      "segmentCount": 250,
+      "characterCount": 9502
+    },
+    {
+      "providerId": "jAphvWLUZKc",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/jAphvWLUZKc.en.json3",
+      "sha256": "0893b3a6982e42d892f66050a79900e37f585f09373a28fde989c98e15decb22",
+      "segmentCount": 849,
+      "characterCount": 30061
+    },
+    {
+      "providerId": "VhmlJBUIoLk",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/VhmlJBUIoLk.en.json3",
+      "sha256": "190d3ffb8bbc1226bb16f4b2f75c14b5a8062e539a096d5bf844244e1315b302",
+      "segmentCount": 118,
+      "characterCount": 4888
+    },
+    {
+      "providerId": "edcqUu_BtN0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/edcqUu_BtN0.en.json3",
+      "sha256": "fdc3d922550fc706c4152d0bd9189452affd6630d548502c51c58b1665ce673d",
+      "segmentCount": 86,
+      "characterCount": 5396
+    },
+    {
+      "providerId": "plSNIwhAn5o",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/plSNIwhAn5o.en.json3",
+      "sha256": "40a270e8aa658901822b2517a32315811cd001c9f038a7b0810e36be9cba2be0",
+      "segmentCount": 32,
+      "characterCount": 1191
+    },
+    {
+      "providerId": "UNDX4tUdj1Y",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/UNDX4tUdj1Y.en.json3",
+      "sha256": "a45d1fd9593e3dbfe473ccc535bf91810869798fd9f6f405c044ead7af76e1de",
+      "segmentCount": 149,
+      "characterCount": 6320
+    },
+    {
+      "providerId": "nP5b-545hb8",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/nP5b-545hb8.en.json3",
+      "sha256": "896fe17b478b9896ed91e0dce2f612e43cc2a5fb02efc16fad41276d3ea1c9dc",
+      "segmentCount": 1701,
+      "characterCount": 59316
+    },
+    {
+      "providerId": "QwlQpMuVM4g",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/QwlQpMuVM4g.en.json3",
+      "sha256": "f08040cbccb78fa9cc2aba79ee2ff47600fd2a95e1dcb9368a8a7a45aa403d6f",
+      "segmentCount": 1106,
+      "characterCount": 34120
+    },
+    {
+      "providerId": "eIDKky8daeU",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/eIDKky8daeU.en.json3",
+      "sha256": "3e98a36926c09666c0fee6eadad7f35a7793cc622a64e5c676ed8be5d687a339",
+      "segmentCount": 98,
+      "characterCount": 3299
+    },
+    {
+      "providerId": "86V8VTUVBmo",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/86V8VTUVBmo.en.json3",
+      "sha256": "7feb5240bb74852d51184109e1ec2368dc7e639380e503c2ce52a599625be5c8",
+      "segmentCount": 759,
+      "characterCount": 28355
+    },
+    {
+      "providerId": "CuN4YZ7pup0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/CuN4YZ7pup0.en.json3",
+      "sha256": "0d2103b9d6cc368082589b04ad29f049bf937573b03c45f940778097effe9e06",
+      "segmentCount": 1631,
+      "characterCount": 60319
+    },
+    {
+      "providerId": "jYiIJtBsCpU",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/jYiIJtBsCpU.en.json3",
+      "sha256": "9687e4518b5b09512313ef484ff3876a677607024e96341396c1fba68ae371a3",
+      "segmentCount": 1495,
+      "characterCount": 52437
+    },
+    {
+      "providerId": "9IVQ8qTi9rE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/9IVQ8qTi9rE.en.json3",
+      "sha256": "67ccbd55e6fa6264790d1e4923ddf8cf859dee4b6108902d58e0f4d7a57e88da",
+      "segmentCount": 984,
+      "characterCount": 33984
+    },
+    {
+      "providerId": "9leTsKB1geI",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/9leTsKB1geI.en.json3",
+      "sha256": "572a71223fdab8a99f7914c5d931236eeffb4a9cfeb7f839b5aff01ae3f47d64",
+      "segmentCount": 1609,
+      "characterCount": 56089
+    },
+    {
+      "providerId": "ZJm1lJw79CE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/ZJm1lJw79CE.en.json3",
+      "sha256": "16b02fd3a273720a8638272a5a3ba88adad161ba6f03591ed239f578cb375fdd",
+      "segmentCount": 1629,
+      "characterCount": 59124
+    },
+    {
+      "providerId": "qpmc9akBM_Y",
+      "language": "en",
+      "status": "missing",
+      "source": null
+    },
+    {
+      "providerId": "NcnHN7JbhpY",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/NcnHN7JbhpY.en.json3",
+      "sha256": "f3d44e8d2f200c25033eb86f104008f40c35c3d93710ec7f49654bb404f88fe1",
+      "segmentCount": 46,
+      "characterCount": 3419
+    },
+    {
+      "providerId": "F6_efk-LRO4",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/F6_efk-LRO4.en.json3",
+      "sha256": "172d2a12006684f32a68d8eb5adc04ff47883fc938e42e854f97f5dd9918d3a0",
+      "segmentCount": 654,
+      "characterCount": 21220
+    },
+    {
+      "providerId": "pmoZlNOkV1I",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/pmoZlNOkV1I.en.json3",
+      "sha256": "cb2850e41a4473fc60ae6ed2b2d6fa3f951543ed8cb4ca579603bfbb8d6f652b",
+      "segmentCount": 65,
+      "characterCount": 2557
+    },
+    {
+      "providerId": "OVRixfameGY",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/OVRixfameGY.en.json3",
+      "sha256": "b0cee252a22306a2e303c8d15df90d2ec459d92c33c15b716d4dbbdad2fa36f6",
+      "segmentCount": 163,
+      "characterCount": 6041
+    },
+    {
+      "providerId": "L9W5afjndtU",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/L9W5afjndtU.en.json3",
+      "sha256": "84f91c9a29b927fd6d7a4061c06fb1bbe0920905e73ac9548d08824d45b476eb",
+      "segmentCount": 79,
+      "characterCount": 4713
+    },
+    {
+      "providerId": "xTk9w9J9yKo",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/xTk9w9J9yKo.en.json3",
+      "sha256": "66a223e01eed95e38345680afa2fd6b52de1780960e34be273a381bf43b0b2cf",
+      "segmentCount": 68,
+      "characterCount": 2898
+    },
+    {
+      "providerId": "GZuceW7eh5M",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/GZuceW7eh5M.en.json3",
+      "sha256": "f0345c20f6679b6672862373689f2a2f759dfe4ac38815d937cf4819d718f732",
+      "segmentCount": 130,
+      "characterCount": 5032
+    },
+    {
+      "providerId": "ZPZ2uABVMKA",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/ZPZ2uABVMKA.en.json3",
+      "sha256": "e9824903c4e1b6fc4e8b8441b2c7dbf7ff1517dee006f40d558eee907196c7e0",
+      "segmentCount": 135,
+      "characterCount": 5345
+    },
+    {
+      "providerId": "fglsbcGSr3A",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/fglsbcGSr3A.en.json3",
+      "sha256": "3fe42eeede099cf6d5c41be5196f59a7d799a137b3c494711baa03ffeb07c10c",
+      "segmentCount": 67,
+      "characterCount": 4506
+    },
+    {
+      "providerId": "dLFCE8z__hw",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/dLFCE8z__hw.en.json3",
+      "sha256": "81db8dcf44b55e3e682cdace87dde563421e027658803d259fa520bf52bc2c1d",
+      "segmentCount": 83,
+      "characterCount": 5154
+    },
+    {
+      "providerId": "TNUw2SsPjiw",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/TNUw2SsPjiw.en.json3",
+      "sha256": "eb04558cbd6b2ba2e9581c868e67d99576d8f291ddea1859a2bb06d05577d884",
+      "segmentCount": 1542,
+      "characterCount": 57620
+    },
+    {
+      "providerId": "g-_h6TekF9M",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/g-_h6TekF9M.en.json3",
+      "sha256": "21487a36447db05a7f91301adc9a4875ce689aa3cf3558e1dbbc70baf3ed1f6a",
+      "segmentCount": 1108,
+      "characterCount": 39766
+    },
+    {
+      "providerId": "oKl9mpS1sS8",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/oKl9mpS1sS8.en.json3",
+      "sha256": "c68310bb413a9c107d7f506c514f52bc35c94acc511b98642f21c0f228828dd1",
+      "segmentCount": 1608,
+      "characterCount": 56758
+    },
+    {
+      "providerId": "tMP7U5a_spY",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/tMP7U5a_spY.en.json3",
+      "sha256": "bf45db811a7cd3186a22517f598bed0b0f65a94f77bf757cd54b3422f0ab2f33",
+      "segmentCount": 1588,
+      "characterCount": 55880
+    },
+    {
+      "providerId": "VHuEQOyUztw",
+      "language": "en",
+      "status": "error",
+      "source": null,
+      "error": "ERROR: [youtube] VHuEQOyUztw: Offline."
+    },
+    {
+      "providerId": "Nw9EsXoQCbA",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Nw9EsXoQCbA.en.json3",
+      "sha256": "8bbe64a8091cda4488458289ecb02a73d1ccdf579c510ce23a5e6dd131e4d8b2",
+      "segmentCount": 1545,
+      "characterCount": 54424
+    },
+    {
+      "providerId": "7FuT8WtoAK0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/7FuT8WtoAK0.en.json3",
+      "sha256": "5c8bd75dfd5482a831caeb633d677b1c7a0ef2291e750776c650aed41c13436c",
+      "segmentCount": 73,
+      "characterCount": 5775
+    },
+    {
+      "providerId": "DOU4PdLzWCg",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/DOU4PdLzWCg.en.json3",
+      "sha256": "6d95c53136cc796caa3301c13e459017a2e0dc9c3bd6625d8499553b6779d30a",
+      "segmentCount": 1198,
+      "characterCount": 46733
+    },
+    {
+      "providerId": "wGwK4VfCGt0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/wGwK4VfCGt0.en.json3",
+      "sha256": "d8b8bc6a4ae059e7c73422dbdad42b84ba2b5baed642e02df130c00304bca57e",
+      "segmentCount": 1799,
+      "characterCount": 64109
+    },
+    {
+      "providerId": "p6fY39B25G4",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/p6fY39B25G4.en.json3",
+      "sha256": "c7ac39dc1a5c7e6f5424c26b3fe6b9553e4b3eb50ceafd8d86ceb9765b416735",
+      "segmentCount": 144,
+      "characterCount": 5178
+    },
+    {
+      "providerId": "WM4gmjMDL4Q",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/WM4gmjMDL4Q.en.json3",
+      "sha256": "e25e7b8fe75a51b90654d4a579731d3bbe8992b79e9b695ed7def926f6093007",
+      "segmentCount": 146,
+      "characterCount": 5288
+    },
+    {
+      "providerId": "p5yl4tGhFJg",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/p5yl4tGhFJg.en.json3",
+      "sha256": "bff9a42a29797a0bc0d3b63a6bfdcd0be67abc88fcc19ec851dd98c81a640e4c",
+      "segmentCount": 136,
+      "characterCount": 2750
+    },
+    {
+      "providerId": "hHqZxg-oH_o",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/hHqZxg-oH_o.en.json3",
+      "sha256": "5e4ca17207db25820fdbdefc346da45286ab63edd667146d2ea25d1cc6e72391",
+      "segmentCount": 1160,
+      "characterCount": 42030
+    },
+    {
+      "providerId": "3Bz1cwFmAd0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/3Bz1cwFmAd0.en.json3",
+      "sha256": "e0bfcb559c51c846dc1c72d3fd7f346540d020e49ffdbb3f245d90f2873fa60f",
+      "segmentCount": 1561,
+      "characterCount": 54523
+    },
+    {
+      "providerId": "GpgzhwYzSZ0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/GpgzhwYzSZ0.en.json3",
+      "sha256": "319fa66e74c3ba472b00ae13d599701ba7b643dbcab7b83bd89cde843899226d",
+      "segmentCount": 1348,
+      "characterCount": 45833
+    },
+    {
+      "providerId": "oiVAbkINtRU",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/oiVAbkINtRU.en.json3",
+      "sha256": "d0f30a48069c40f595080a69a0e1d9bf0cdaed409759122ee21518c1734f138a",
+      "segmentCount": 89,
+      "characterCount": 6007
+    },
+    {
+      "providerId": "q9yp1ZXbsEg",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/q9yp1ZXbsEg.en.json3",
+      "sha256": "63dbffaea986595808a9dc69fd25b4d0095a2843d10e7e403dd689a533a0529f",
+      "segmentCount": 104,
+      "characterCount": 5258
+    },
+    {
+      "providerId": "0k4GbvZUPuo",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/0k4GbvZUPuo.en.json3",
+      "sha256": "513e8f3da3d0e22ad833a6eb92d46b0a62c4675acda8a697cb96b11f477d138d",
+      "segmentCount": 79,
+      "characterCount": 5201
+    },
+    {
+      "providerId": "AVrs_dLJf7k",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/AVrs_dLJf7k.en.json3",
+      "sha256": "1734406b4c10c55c66a09b63b6892e027bcf4e67d2613c329d3ff6dba88a47f2",
+      "segmentCount": 1363,
+      "characterCount": 47927
+    },
+    {
+      "providerId": "_OLezoUvOEQ",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/_OLezoUvOEQ.en.json3",
+      "sha256": "cb2b18f55d10b8b27ef24ef278b5ea383855f6a5d735e623c8f6c3bfad91b8c1",
+      "segmentCount": 94,
+      "characterCount": 4073
+    },
+    {
+      "providerId": "NMhmDPWeftw",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/NMhmDPWeftw.en.json3",
+      "sha256": "ad1f26d58491c96837d62cc4e37b2fc37be1c9bfda9baad1ad4bac7517e1c1dc",
+      "segmentCount": 91,
+      "characterCount": 6656
+    },
+    {
+      "providerId": "0uf-PgW7rqE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/0uf-PgW7rqE.en.json3",
+      "sha256": "7b14dcff907e75f2411d18b49b6bab79c53c89b690fdd6a8edaa5e4599b434ae",
+      "segmentCount": 82,
+      "characterCount": 5349
+    },
+    {
+      "providerId": "b0GhR-2kPKI",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/b0GhR-2kPKI.en.json3",
+      "sha256": "029ad3260743a040cce063932a1991c43a5c31c7e45293b77ff0fc3043871d94",
+      "segmentCount": 81,
+      "characterCount": 5168
+    },
+    {
+      "providerId": "GswSg2ohqmA",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/GswSg2ohqmA.en.json3",
+      "sha256": "483dbcfc645fce41fec3e30f7ab5953add90df3c2ba0e40bd6b2f68d78bcc81b",
+      "segmentCount": 128,
+      "characterCount": 6546
+    },
+    {
+      "providerId": "Gab04dPs_uA",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Gab04dPs_uA.en.json3",
+      "sha256": "217429b2108d596a7e865487d62762416bac61c8c113e9e593e37b309ceb85a0",
+      "segmentCount": 81,
+      "characterCount": 5505
+    },
+    {
+      "providerId": "dpny22k_7uk",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/dpny22k_7uk.en.json3",
+      "sha256": "066625ea9bdf9d203acccd07118c543870cc309d644473446a3b5031886284d4",
+      "segmentCount": 74,
+      "characterCount": 5288
+    },
+    {
+      "providerId": "WJgt1vRkPbI",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/WJgt1vRkPbI.en.json3",
+      "sha256": "5de9d9c11ddcf5a01857fa2249fdbf085559c7753a927e3076d007cf34b9e8b6",
+      "segmentCount": 78,
+      "characterCount": 4753
+    },
+    {
+      "providerId": "_unHmAf7INk",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/_unHmAf7INk.en.json3",
+      "sha256": "9c6a2b2c993a8c0eba68877099db0ebda334327f11b07fdfde812d15b0edfd6d",
+      "segmentCount": 66,
+      "characterCount": 3937
+    },
+    {
+      "providerId": "VeUiuSK81-0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/VeUiuSK81-0.en.json3",
+      "sha256": "8956352088b25544ed3ae254517a6d843ff9b01600f1e0a9d7fd5bafcea5243d",
+      "segmentCount": 115,
+      "characterCount": 6102
+    },
+    {
+      "providerId": "w7iB2atlRZY",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/w7iB2atlRZY.en.json3",
+      "sha256": "d1e92b9e76de7c799f35de45e20a86a1c84f1ed963b0e7f63226e36a0d5b5aac",
+      "segmentCount": 1508,
+      "characterCount": 54884
+    },
+    {
+      "providerId": "2I73In_xNQw",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/2I73In_xNQw.en.json3",
+      "sha256": "122ac4b6c4a1f13b782d87076c37f815c1af3a777e2dba86bf93288332cd036a",
+      "segmentCount": 1549,
+      "characterCount": 55590
+    },
+    {
+      "providerId": "xrzq_X1NNaA",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/xrzq_X1NNaA.en.json3",
+      "sha256": "8f034af742c85a996333ed1a30e5e56b54182711c7569fe6ef002100b75ad993",
+      "segmentCount": 139,
+      "characterCount": 5268
+    },
+    {
+      "providerId": "KOUV7mWDI34",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/KOUV7mWDI34.en.json3",
+      "sha256": "2b54996aa9b135a1d097f579784611a9f1f5dbd71e37687868d4b401964ee2d7",
+      "segmentCount": 74,
+      "characterCount": 5198
+    },
+    {
+      "providerId": "VpbWbyx1008",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/VpbWbyx1008.en.json3",
+      "sha256": "f35fe81129d00d00d69174d4cb1318935b4e8e893619d3f0ff2a4d61c72f70e7",
+      "segmentCount": 83,
+      "characterCount": 5055
+    },
+    {
+      "providerId": "mjiWx5wcEjs",
+      "language": "en",
+      "status": "missing",
+      "source": null
+    },
+    {
+      "providerId": "jUCCUHurV0I",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/jUCCUHurV0I.en.json3",
+      "sha256": "f152e827e4eb7b6caaabe15da23596ffe592c0094daad7c0ab14fe8ccb39b74d",
+      "segmentCount": 78,
+      "characterCount": 4667
+    },
+    {
+      "providerId": "IcJMz5OOfqU",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/IcJMz5OOfqU.en.json3",
+      "sha256": "7648f2863a545b0c2556c0776ea22e00d0ada80fa03b19666b00af46e94db868",
+      "segmentCount": 8,
+      "characterCount": 237
+    },
+    {
+      "providerId": "LVYszo2DasM",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/LVYszo2DasM.en.json3",
+      "sha256": "0f46404df9b7a4d1c931f4574979b71365d450fcb409e73687dee3ccc700f5ba",
+      "segmentCount": 1108,
+      "characterCount": 37461
+    },
+    {
+      "providerId": "Vb24Lk1Oh5M",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Vb24Lk1Oh5M.en.json3",
+      "sha256": "0830e32cc3f47a028e212223bbaa8b125fcfb862f5b0cae719f695680a870175",
+      "segmentCount": 101,
+      "characterCount": 4857
+    },
+    {
+      "providerId": "npk34pB5P4A",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/npk34pB5P4A.en.json3",
+      "sha256": "43e864ae434542d21e3d78db3d67afc3dfa4ffde1c7fc0cac86bc0e628825557",
+      "segmentCount": 623,
+      "characterCount": 40108
+    },
+    {
+      "providerId": "7_CGP-12AE0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/7_CGP-12AE0.en.json3",
+      "sha256": "9900b356f580e350af83e2cba9bf6e284638cfa6e34cb1e3e8f1242ed576a23e",
+      "segmentCount": 193,
+      "characterCount": 6862
+    },
+    {
+      "providerId": "geSZzv2EB6U",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/geSZzv2EB6U.en.json3",
+      "sha256": "dcd7b690cc602ef3b1612db6d2fbb03e019f8ba27081db06fd08f50b9d794e17",
+      "segmentCount": 1602,
+      "characterCount": 57010
+    },
+    {
+      "providerId": "aLvcF1NLwYU",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/aLvcF1NLwYU.en.json3",
+      "sha256": "831ebc778f8fb3e0d55b1ca1f503ea85087a11defbaff2e53815b481a5f595b3",
+      "segmentCount": 23,
+      "characterCount": 848
+    },
+    {
+      "providerId": "YMTR7M33eIQ",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/YMTR7M33eIQ.en.json3",
+      "sha256": "310ed5c1144145ccc00cc0a83ee987bdbea878a2a15d664573be4bc3dbcff662",
+      "segmentCount": 16,
+      "characterCount": 676
+    },
+    {
+      "providerId": "n_vEB11XKSE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/n_vEB11XKSE.en.json3",
+      "sha256": "bb802c0669ba1282f42ef7b7b0e2c1a1e729030710800e943f0b540e52f9270d",
+      "segmentCount": 143,
+      "characterCount": 5863
+    },
+    {
+      "providerId": "OHYvZSazXi8",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/OHYvZSazXi8.en.json3",
+      "sha256": "ca850fde6b4ebfdb3eb802c82518d7c9f27a45db26092eb31d5af2a5acb908ad",
+      "segmentCount": 629,
+      "characterCount": 21942
+    },
+    {
+      "providerId": "qUuoCXcM9CU",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/qUuoCXcM9CU.en.json3",
+      "sha256": "9da09824a8811d7ae139614e0f40a542c7ada320e12772325ce1924a7861972f",
+      "segmentCount": 1223,
+      "characterCount": 44453
+    },
+    {
+      "providerId": "iTj6ShRlHuc",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/iTj6ShRlHuc.en.json3",
+      "sha256": "064913fea80679d7344143cface71b40c1ed62fd40cd9d59d44ecdd86e8a98cc",
+      "segmentCount": 1775,
+      "characterCount": 64492
+    },
+    {
+      "providerId": "JQhkWmFJKnA",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/JQhkWmFJKnA.en.json3",
+      "sha256": "ffcd7063da4853a1f289308047ebd501b5216d9d785a603583553cd65540f8b3",
+      "segmentCount": 103,
+      "characterCount": 6103
+    },
+    {
+      "providerId": "zebxH-5o-SQ",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/zebxH-5o-SQ.en.json3",
+      "sha256": "982cde953346d052a648181a8c786342d3decc31be2d72d95b0f93b70dea7fd9",
+      "segmentCount": 82,
+      "characterCount": 5614
+    },
+    {
+      "providerId": "vQTWVz5QVxg",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/vQTWVz5QVxg.en.json3",
+      "sha256": "96a3214cc52232fc1422b9ae4238a392437bfc245c18540a2cd526730ce264bd",
+      "segmentCount": 1327,
+      "characterCount": 44371
+    },
+    {
+      "providerId": "wtuxIzTf9Ns",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/wtuxIzTf9Ns.en.json3",
+      "sha256": "c4bb7e08cadbf8953bb9b3f2c38f971aa2fd76097e88125ed45dea4402c7a72f",
+      "segmentCount": 25,
+      "characterCount": 1768
+    },
+    {
+      "providerId": "8Tbcofs6l3o",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/8Tbcofs6l3o.en.json3",
+      "sha256": "9fb33f8b1c1cdce493fbf8b7278bfb1016eef775b184c319b844aa003473ea75",
+      "segmentCount": 30,
+      "characterCount": 2272
+    },
+    {
+      "providerId": "ak06MSETeo4",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/ak06MSETeo4.en.json3",
+      "sha256": "91d21dd1aa0f9dbe9537608618d890326c604a0f531b22ce216df5010dcc1809",
+      "segmentCount": 162,
+      "characterCount": 6431
+    },
+    {
+      "providerId": "Yr_TNzpwQVE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Yr_TNzpwQVE.en.json3",
+      "sha256": "bc68c21072191f91dbaa343810ed81e5c41fe3cacd6648f6210ce365520ec9db",
+      "segmentCount": 953,
+      "characterCount": 33784
+    },
+    {
+      "providerId": "NVRY8Uv9R28",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/NVRY8Uv9R28.en.json3",
+      "sha256": "4854d9bad9be09a090fb57fccb0cb649275065582e1a05e3047f90ed8bb37588",
+      "segmentCount": 533,
+      "characterCount": 16307
+    },
+    {
+      "providerId": "xV4l1gylTlk",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/xV4l1gylTlk.en.json3",
+      "sha256": "61fc36249c33e87c515124458e13e4bb4e7c0f199ae08169f641d463a5a1d40d",
+      "segmentCount": 1264,
+      "characterCount": 53206
+    },
+    {
+      "providerId": "-gDnlAhYPRk",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/-gDnlAhYPRk.en.json3",
+      "sha256": "f9e2df73b3eed3cb2f15f9928a55d9a8f1b0ec8ca739cf79df40414e995cd23a",
+      "segmentCount": 1236,
+      "characterCount": 43161
+    },
+    {
+      "providerId": "8FbreCK6yUs",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/8FbreCK6yUs.en.json3",
+      "sha256": "c06c4a3114e9f0f32a74b6c32992919f75b7c6f169e285c6b9421a9d2d81916d",
+      "segmentCount": 1505,
+      "characterCount": 53898
+    },
+    {
+      "providerId": "yXv3k6KtaLc",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/yXv3k6KtaLc.en.json3",
+      "sha256": "098055d9bc9ee3f4a86936b5d74c37ec67fb4dd79d87e2852b992a3154dcee37",
+      "segmentCount": 703,
+      "characterCount": 23707
+    },
+    {
+      "providerId": "-u0INqrL0AM",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/-u0INqrL0AM.en.json3",
+      "sha256": "4b84ef798b2b05fe5e53b9fe013f99edf6cc9d296811a8057f747e7a2e69a5bd",
+      "segmentCount": 917,
+      "characterCount": 32584
+    },
+    {
+      "providerId": "mP_f5MWSKKc",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/mP_f5MWSKKc.en.json3",
+      "sha256": "6c66cb683757047b028c7f02ad2058bfc219a9e9f90b0624c3c4a2d1ee439e86",
+      "segmentCount": 1402,
+      "characterCount": 50640
+    },
+    {
+      "providerId": "YoOgGeDfXDk",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/YoOgGeDfXDk.en.json3",
+      "sha256": "fcc3e6c74a3eb2fa41cae693c311cb21dfe0fa7180e13f719d91a632d8529443",
+      "segmentCount": 25,
+      "characterCount": 925
+    },
+    {
+      "providerId": "sAHdBY_KNPE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/sAHdBY_KNPE.en.json3",
+      "sha256": "46ee478208d10db0695e907559c7e0b5832513ab0a34b3fd7b32edd1f2547267",
+      "segmentCount": 1733,
+      "characterCount": 61051
+    },
+    {
+      "providerId": "-YrZ1iPiBQM",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/-YrZ1iPiBQM.en.json3",
+      "sha256": "1b130e76912488d5dc6447f2094d421a2b71785d8294bb0bf26579efd41b0e31",
+      "segmentCount": 1047,
+      "characterCount": 40109
+    },
+    {
+      "providerId": "APEO0FNzwoM",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/APEO0FNzwoM.en.json3",
+      "sha256": "74cdf34981a1b35caf34a8c55728c1c495c274872e7723e960a54c5dc5a561c9",
+      "segmentCount": 642,
+      "characterCount": 23073
+    },
+    {
+      "providerId": "XX-aAg4_U2Q",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/XX-aAg4_U2Q.en.json3",
+      "sha256": "cecdc11526eff3ac4661b3409b8b90d12f9751784b1f4dc67042622ca2714026",
+      "segmentCount": 139,
+      "characterCount": 5305
+    },
+    {
+      "providerId": "4Yx9ODvfuDE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/4Yx9ODvfuDE.en.json3",
+      "sha256": "64c15eea46c1178ece967c7360f9b020b3a3f79331092271ca5f35744c5cf1a1",
+      "segmentCount": 1012,
+      "characterCount": 37250
+    },
+    {
+      "providerId": "g_oZTU3b-tE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/g_oZTU3b-tE.en.json3",
+      "sha256": "44141552cebc6ee5cd060fc1fc95c55bcf7ffe6347253087051102b577a4f201",
+      "segmentCount": 706,
+      "characterCount": 22166
+    },
+    {
+      "providerId": "hhkafDU0XF0",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/hhkafDU0XF0.en.json3",
+      "sha256": "157e9486f243973c7d9ec661df17e48812f0e8b385c9957dfc1f7e48b58096b0",
+      "segmentCount": 24,
+      "characterCount": 768
+    },
+    {
+      "providerId": "qcixj8qS0KE",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/qcixj8qS0KE.en.json3",
+      "sha256": "ff21a580100b507c59c4c904a17a439a194dc72217e3572e6d4742dba2510907",
+      "segmentCount": 1871,
+      "characterCount": 67234
+    },
+    {
+      "providerId": "ED1AV2hb1uw",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/ED1AV2hb1uw.en.json3",
+      "sha256": "4cefb1afeba48aaa93247c2ce414c57592b808c650b07cc756e713054f2061c4",
+      "segmentCount": 1217,
+      "characterCount": 44026
+    },
+    {
+      "providerId": "oUXJ8Owes8E",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/oUXJ8Owes8E.en.json3",
+      "sha256": "e384e5d4aec999c80145d8d33e75be42bc7098fbd30a01d4bb07db1df5b88e21",
+      "segmentCount": 147,
+      "characterCount": 5970
+    },
+    {
+      "providerId": "Rymqrmdn9Z8",
+      "language": "en",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Rymqrmdn9Z8.en.json3",
+      "sha256": "13eb0194823d7ab1d182c8398299545e0a7d49ad2e95ad0e552b9afba44ec34c",
+      "segmentCount": 676,
+      "characterCount": 21130
+    },
+    {
+      "providerId": "yqqA8r-tfIA",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/yqqA8r-tfIA.fr.json3",
+      "sha256": "4b6eacf980eb07ea46dd38a6b4b741132f3c005963fe98d75bbb780f6fc7bbc3",
+      "segmentCount": 212,
+      "characterCount": 7550
+    },
+    {
+      "providerId": "n_u_37FbGbs",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/n_u_37FbGbs.fr.json3",
+      "sha256": "6171129a45ae6053ded771ba12200a68e883e110d965e376b960e1b77ce02836",
+      "segmentCount": 155,
+      "characterCount": 5510
+    },
+    {
+      "providerId": "Z8zuhzlVJ8Q",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Z8zuhzlVJ8Q.fr.json3",
+      "sha256": "394ada5ec837a040e6d3283577492198e16b8950ca834add1b43dab90fc39cae",
+      "segmentCount": 153,
+      "characterCount": 5453
+    },
+    {
+      "providerId": "_ZtMVynNx0s",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/_ZtMVynNx0s.fr.json3",
+      "sha256": "9e45f8635aeb298001bba5c600bbee0a623f5ea4c54ef9470804630cc2e1eb9e",
+      "segmentCount": 184,
+      "characterCount": 6600
+    },
+    {
+      "providerId": "dSujxs4kdn8",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/dSujxs4kdn8.fr.json3",
+      "sha256": "a73bc2dd8c8320f01adf3f9d84399fb8d7f89a4e58215b3fc712a89cb75c3004",
+      "segmentCount": 79,
+      "characterCount": 2862
+    },
+    {
+      "providerId": "FL-n3dnClY8",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/FL-n3dnClY8.fr.json3",
+      "sha256": "e505cdaa0504054ba3bc923f0a4b4eee0741ee6d05ff38e6dca46a27583b819e",
+      "segmentCount": 25,
+      "characterCount": 902
+    },
+    {
+      "providerId": "VZxb06PVFAE",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/VZxb06PVFAE.fr.json3",
+      "sha256": "d849bed69d3b75312d6c9fa412f2c8064a3cec01c7122331b6fb930bda50daab",
+      "segmentCount": 25,
+      "characterCount": 936
+    },
+    {
+      "providerId": "mz0tAI2SdPk",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/mz0tAI2SdPk.fr.json3",
+      "sha256": "99a4682ab0c02f7961e022a96f47d15ec17e36e8098d3e33ca5dc832ac29d91d",
+      "segmentCount": 16,
+      "characterCount": 872
+    },
+    {
+      "providerId": "tlwz151z_80",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/tlwz151z_80.fr.json3",
+      "sha256": "2299419ec4710a24fa39aa893418fab0a061885dc3b95bab124ca82502680150",
+      "segmentCount": 15,
+      "characterCount": 758
+    },
+    {
+      "providerId": "6Y_qk7x85nQ",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/6Y_qk7x85nQ.fr.json3",
+      "sha256": "701bcf8feb714ea90808cb6bd4c9fab65b8c62b2bc8299f6f989b742803b32b3",
+      "segmentCount": 17,
+      "characterCount": 551
+    },
+    {
+      "providerId": "9lxl6CS1RJk",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/9lxl6CS1RJk.fr.json3",
+      "sha256": "1eb3eaaa8fe85e457a5dbcafc064503a1b8e11732cf7baa65e8ad14f2985f0a0",
+      "segmentCount": 163,
+      "characterCount": 5895
+    },
+    {
+      "providerId": "IQhUpoYAnKQ",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/IQhUpoYAnKQ.fr.json3",
+      "sha256": "6b556baa297fa08f71ef37e9634bfe9a51d291d1ac406a2d5b15fb35c4a8f46f",
+      "segmentCount": 147,
+      "characterCount": 5216
+    },
+    {
+      "providerId": "HDrHAWukRR8",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/HDrHAWukRR8.fr.json3",
+      "sha256": "ee458314ca0d71b95c31969444394fcd15a226e5d8bbf9bd02ef4402d102790c",
+      "segmentCount": 128,
+      "characterCount": 4584
+    },
+    {
+      "providerId": "higvLX003DY",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/higvLX003DY.fr.json3",
+      "sha256": "7ece79bd9c6ae01a546084112c9a8095de1d6cbeb8d43d0473902e973aaedd98",
+      "segmentCount": 123,
+      "characterCount": 4308
+    },
+    {
+      "providerId": "DbFhZxEyEdc",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/DbFhZxEyEdc.fr.json3",
+      "sha256": "fb91899c96fbe6f51d2c97fbe4754ebd41457c8676fd56aab1493d3de74a1a1f",
+      "segmentCount": 164,
+      "characterCount": 5765
+    },
+    {
+      "providerId": "ZR6nFRw9JbQ",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/ZR6nFRw9JbQ.fr.json3",
+      "sha256": "4e494a0808d4806d8a20cce91fe1e5c4dfa91f51d0c7a60991a6f9b43ee74e92",
+      "segmentCount": 164,
+      "characterCount": 5778
+    },
+    {
+      "providerId": "NRG4AmocCPA",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/NRG4AmocCPA.fr.json3",
+      "sha256": "5a4255b8a894cffa54c416dd7b7400d961b3c6bb445b6c7294b33df27ed2b193",
+      "segmentCount": 157,
+      "characterCount": 5550
+    },
+    {
+      "providerId": "CZEo5S5veYQ",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/CZEo5S5veYQ.fr.json3",
+      "sha256": "9407d1cc115628d751d55468678dfd2a9eb7dbc5943ed44e483485527fa5fdae",
+      "segmentCount": 147,
+      "characterCount": 5265
+    },
+    {
+      "providerId": "gWJaxlYRSc0",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/gWJaxlYRSc0.fr.json3",
+      "sha256": "2129f29529ac3e4b3e4ae09f6074490df173fb5d9c46795e16c262e610646f55",
+      "segmentCount": 182,
+      "characterCount": 6443
+    },
+    {
+      "providerId": "sIOnEbHB4Fk",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/sIOnEbHB4Fk.fr.json3",
+      "sha256": "a2d50d3c2d3eaa73f426cd0205bf0c3a192a14af100804c35003d2a48f1d48de",
+      "segmentCount": 144,
+      "characterCount": 5157
+    },
+    {
+      "providerId": "pYYIYRhlVoI",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/pYYIYRhlVoI.fr.json3",
+      "sha256": "7e4b605922334c272fb24d569f87977c1ab2676a7e9fd8ff3336e37e75417f96",
+      "segmentCount": 179,
+      "characterCount": 6170
+    },
+    {
+      "providerId": "eFx-W3P6MeY",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/eFx-W3P6MeY.fr.json3",
+      "sha256": "68b51333ddfae63ab1991b83076a9031a8a8a82754d9c45c0f0d25ac1817211d",
+      "segmentCount": 192,
+      "characterCount": 6964
+    },
+    {
+      "providerId": "vRkq3_M6uMs",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/vRkq3_M6uMs.fr.json3",
+      "sha256": "3817c16929ea0e402d43966b3af8f5a4859463080fd4c33500b132f2917d477d",
+      "segmentCount": 186,
+      "characterCount": 6471
+    },
+    {
+      "providerId": "2eb3BHpw0X8",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/2eb3BHpw0X8.fr.json3",
+      "sha256": "0a91996781f6074f91a7ab8c5b1aca793b824135e7c1feaa586aa9150ed69e65",
+      "segmentCount": 170,
+      "characterCount": 6010
+    },
+    {
+      "providerId": "m8gavTyySCk",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/m8gavTyySCk.fr.json3",
+      "sha256": "29b315b85ca00f5bddd061e63b2bdaff595cc5c33c44bf4f53f649885e14dd01",
+      "segmentCount": 175,
+      "characterCount": 6126
+    },
+    {
+      "providerId": "jbf0nxJT8wI",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/jbf0nxJT8wI.fr.json3",
+      "sha256": "3447e71c4ec5699913ef4bcc224a8c720607aee8933dc6d6fecd5371aeeb4c1a",
+      "segmentCount": 145,
+      "characterCount": 5435
+    },
+    {
+      "providerId": "QvjQyA4er_E",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/QvjQyA4er_E.fr.json3",
+      "sha256": "a2028cc65329b680ffe2035270d6a6674884ac532e845e78fd40f78a5af38ec3",
+      "segmentCount": 145,
+      "characterCount": 5474
+    },
+    {
+      "providerId": "HliwPZ6395I",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/HliwPZ6395I.fr.json3",
+      "sha256": "7ce8fc0e9a0a89ec2a2eee1c5b4b6ed4032f71782881e7aff55e205575201cf5",
+      "segmentCount": 144,
+      "characterCount": 5360
+    },
+    {
+      "providerId": "2mCFk6oug6Y",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/2mCFk6oug6Y.fr.json3",
+      "sha256": "dd324e919c2c07ffe7fad4dc50c34aad8bf167ff6f8a29b44019df667ffeea2e",
+      "segmentCount": 123,
+      "characterCount": 4349
+    },
+    {
+      "providerId": "mdbtTT3HzFQ",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/mdbtTT3HzFQ.fr.json3",
+      "sha256": "79c832f596e85baf8c35469748e77d50a6b5b1e0a7b40f0fe44b84fb5df1c1fb",
+      "segmentCount": 171,
+      "characterCount": 6082
+    },
+    {
+      "providerId": "onMgVuZ4q0Q",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/onMgVuZ4q0Q.fr.json3",
+      "sha256": "7420ef26084e689fadb9c18ecdd9573844181ff830de3817fee949ee635a6422",
+      "segmentCount": 143,
+      "characterCount": 5042
+    },
+    {
+      "providerId": "u893rxHGrWU",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/u893rxHGrWU.fr.json3",
+      "sha256": "60949cb319d00f8d361e82a2513b5b29735350b1231b85340f6b34e852c040dd",
+      "segmentCount": 184,
+      "characterCount": 6612
+    },
+    {
+      "providerId": "WwTg5i2kvTs",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/WwTg5i2kvTs.fr.json3",
+      "sha256": "62134afd057d2d87b86e8f869a208216d79c7a0d48eb31f44589b4a7621eaebc",
+      "segmentCount": 176,
+      "characterCount": 6265
+    },
+    {
+      "providerId": "2uAxufq24xI",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/2uAxufq24xI.fr.json3",
+      "sha256": "8361fb1bb3f5e68b3559eb981a83b1c47864250c8fa03e4c258f92f2274cec13",
+      "segmentCount": 193,
+      "characterCount": 7266
+    },
+    {
+      "providerId": "FqXKc81z7Oc",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/FqXKc81z7Oc.fr.json3",
+      "sha256": "8410ecde11ae8f3472aca925376b4445a19fc05271b97bad6f66a9f1afb67a2f",
+      "segmentCount": 159,
+      "characterCount": 5725
+    },
+    {
+      "providerId": "L0-8nUbfW5w",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/L0-8nUbfW5w.fr.json3",
+      "sha256": "419d0ab13a314d808958a04898409e4f082443ebe812d3e26f4395e6a0d8412a",
+      "segmentCount": 157,
+      "characterCount": 5481
+    },
+    {
+      "providerId": "ebI_4ZxcAMk",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/ebI_4ZxcAMk.fr.json3",
+      "sha256": "48234feee81c136bac12da490f63dd5545afcfc50ad9a08e3962322451e416d8",
+      "segmentCount": 167,
+      "characterCount": 6045
+    },
+    {
+      "providerId": "j3rlwb50pHo",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/j3rlwb50pHo.fr.json3",
+      "sha256": "daf5c0d09a5b9157460c44fa45ef4dbbf871843b64aea7d92fec5b3b991deefa",
+      "segmentCount": 142,
+      "characterCount": 5085
+    },
+    {
+      "providerId": "dBXtH8uE_ig",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/dBXtH8uE_ig.fr.json3",
+      "sha256": "2555ecc7085b8f902201bada935c3d17391b8b55a45aee78f5c965484241292f",
+      "segmentCount": 152,
+      "characterCount": 5339
+    },
+    {
+      "providerId": "YEv5AkBF56c",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/YEv5AkBF56c.fr.json3",
+      "sha256": "7cb4f52a5d402774b2df598adb857219ae0110d031174b14b3dbad1ece7a3cf7",
+      "segmentCount": 158,
+      "characterCount": 5586
+    },
+    {
+      "providerId": "U7wdHldVoqg",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/U7wdHldVoqg.fr.json3",
+      "sha256": "926b6bc9e1c075347c68b9c31fcd7b4057d14b002f4f9793e097d2a0f98588bf",
+      "segmentCount": 155,
+      "characterCount": 5577
+    },
+    {
+      "providerId": "IT3LVWWuDDo",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/IT3LVWWuDDo.fr.json3",
+      "sha256": "dd096848d2ce4e9b8f6226e95321fd23730d4dd7ddab097c4197f447146ac5ed",
+      "segmentCount": 156,
+      "characterCount": 5460
+    },
+    {
+      "providerId": "9_2HEqFsIoI",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/9_2HEqFsIoI.fr.json3",
+      "sha256": "62ab65c9714ffcdf09a09b64fee26aa541fa4554664f67dd091f01b68c395e6f",
+      "segmentCount": 172,
+      "characterCount": 6114
+    },
+    {
+      "providerId": "QmrpB52gWwM",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/QmrpB52gWwM.fr.json3",
+      "sha256": "e0cdfa530ab2a5f371f67d64bb2f565b4f3f788758faad9a26497b47f017df5d",
+      "segmentCount": 175,
+      "characterCount": 6254
+    },
+    {
+      "providerId": "V8-yWbv7fZY",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/V8-yWbv7fZY.fr.json3",
+      "sha256": "9e0db45eed5b924474b5ec2f2a43ce6970913a39d62c566a37331fae48de43cf",
+      "segmentCount": 152,
+      "characterCount": 5709
+    },
+    {
+      "providerId": "j5qdaWO9wp8",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/j5qdaWO9wp8.fr.json3",
+      "sha256": "6f054e3572599e7c6e471d0584dc0accc93b6829b26712428c46146bdc708c37",
+      "segmentCount": 185,
+      "characterCount": 6465
+    },
+    {
+      "providerId": "Tn09RdxfqbM",
+      "language": "fr",
+      "status": "available",
+      "source": "youtube-caption",
+      "cachePath": ".scratch/generated/bible-project-transcripts/youtube/Tn09RdxfqbM.fr.json3",
+      "sha256": "89d8ca96be23fe281b578f8cef251c556e78c18430e5cce6d515373ce87e9820",
+      "segmentCount": 183,
+      "characterCount": 6468
+    }
+  ]
+}
