@@ -47,6 +47,8 @@ import { getCanonicalBibleNoteLabel, type CanonicalBibleNote } from '~helpers/ca
 import { isInterlinearModeEnabled, type InterlinearMode } from '~helpers/interlinearDisplayMode'
 import { getParallelVerseModeProps, shouldHighlightOnlyVerseNumber } from './verseRenderingModel'
 import { getBibleTextFontSize } from './verseTypography'
+import type { ResolvedPassageMedia } from '../passageMedia'
+import PassageMediaThumbnails from './PassageMediaThumbnails'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -490,6 +492,7 @@ interface Props {
   parallelDisplayMode?: ParallelDisplayMode
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
+  passageMedia?: ResolvedPassageMedia[]
 }
 
 const Verse = ({
@@ -524,6 +527,7 @@ const Verse = ({
   columnWidth = 75,
   parallelDisplayMode = 'horizontal',
   redWords,
+  passageMedia,
 }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
@@ -684,6 +688,7 @@ const Verse = ({
                     isFocused={isFocused}
                     tag={isMainVersion ? tag : undefined}
                     isTouched={isTouched}
+                    passageMedia={isMainVersion ? passageMedia : undefined}
                   />
                 ) : null}
               </div>
@@ -758,6 +763,7 @@ const Verse = ({
                 isFocused={isFocused}
                 tag={isMainVersion ? tag : undefined}
                 isTouched={isTouched}
+                passageMedia={isMainVersion ? passageMedia : undefined}
               />
             </div>
           )
@@ -856,6 +862,14 @@ const Verse = ({
               text
             )}
           </VerseText>
+          {!annotationMode && passageMedia && (
+            <PassageMediaThumbnails
+              items={passageMedia}
+              placement="inline"
+              settings={settings}
+              isParallel={isParallel}
+            />
+          )}
         </ContainerText>
         {otherVersionAnnotations && otherVersionAnnotations.length > 0 && !isSelectionMode && (
           <VersionAnnotationIndicator

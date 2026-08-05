@@ -35,7 +35,6 @@ import {
   shouldRenderVerseInFocusedContext,
 } from './verseRenderingModel'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
-import PassageMediaCards from './PassageMediaCards'
 
 // ============================================================================
 // STYLED COMPONENTS
@@ -437,16 +436,10 @@ export function UnifiedVersesRenderer({
               columnWidth={columnWidth}
               parallelDisplayMode={parallelDisplayMode}
               redWords={redWords}
+              passageMedia={passageMediaAfterVerses[verseNumber]}
             />
             {!!comment && settings.commentsDisplay && (
               <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />
-            )}
-            {!annotationMode && (
-              <PassageMediaCards
-                items={passageMediaAfterVerses[verseNumber] ?? []}
-                placement="inline"
-                settings={settings}
-              />
             )}
           </Span>
         )

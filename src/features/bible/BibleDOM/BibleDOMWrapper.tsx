@@ -7,7 +7,7 @@ import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Linking, Platform } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
@@ -93,7 +93,6 @@ import {
   OPEN_BOOKMARK_MODAL,
   OPEN_CANONICAL_BIBLE_NOTE,
   OPEN_CANONICAL_BIBLE_REFERENCE,
-  OPEN_PASSAGE_MEDIA,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
   OPEN_VERSE_TAGS_MODAL,
@@ -450,9 +449,6 @@ export const BibleDOMWrapper = ({
     resetDatabase: t('bible.error.resetDatabase'),
     openCanonicalBibleNote: t('Afficher la note'),
     pericopeIndex: t('Péricopes'),
-    passageMediaIntroduction: t('bible.passageMedia.introduction'),
-    passageMediaChapterResources: t('bible.passageMedia.chapterResources'),
-    passageMediaOpen: t('bible.passageMedia.open'),
   }
   const chapterEntityTranslations = {
     title: t('bible.chapterEntities.title'),
@@ -724,17 +720,6 @@ export const BibleDOMWrapper = ({
       case OPEN_CANONICAL_BIBLE_REFERENCE: {
         const osis = getStringPayload(action.payload)
         if (osis) onOpenCanonicalBibleReference?.(osis)
-        break
-      }
-
-      case OPEN_PASSAGE_MEDIA: {
-        const sourceUrl = getStringPayload(action.payload)
-        if (!sourceUrl || !/^https:\/\/(?:www\.)?youtube\.com\/watch\?/u.test(sourceUrl)) break
-        try {
-          await Linking.openURL(sourceUrl)
-        } catch {
-          toast.error(t('bible.error.unknown'))
-        }
         break
       }
 

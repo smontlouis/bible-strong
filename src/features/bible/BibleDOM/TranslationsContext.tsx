@@ -18,9 +18,6 @@ export interface BibleDOMTranslations {
   resetDatabase: string
   openCanonicalBibleNote: string
   pericopeIndex: string
-  passageMediaIntroduction: string
-  passageMediaChapterResources: string
-  passageMediaOpen: string
 }
 
 const TranslationsContext = createContext<BibleDOMTranslations | null>(null)

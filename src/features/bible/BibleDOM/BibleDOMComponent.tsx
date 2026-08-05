@@ -62,7 +62,7 @@ import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
-import PassageMediaCards from './PassageMediaCards'
+import PassageMediaThumbnails from './PassageMediaThumbnails'
 
 declare global {
   interface Window {
@@ -1221,9 +1221,8 @@ const LoadedBibleContent = ({
               <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
             )}
             {!annotationMode && !isContextFocused && (
-              <PassageMediaCards
+              <PassageMediaThumbnails
                 items={passageMedia.introduction}
-                title={translations.passageMediaIntroduction}
                 placement="introduction"
                 settings={settings}
               />
@@ -1285,9 +1284,8 @@ const LoadedBibleContent = ({
             }}
           />
           {!annotationMode && !isContextFocused && (
-            <PassageMediaCards
+            <PassageMediaThumbnails
               items={passageMedia.chapterResources}
-              title={translations.passageMediaChapterResources}
               placement="chapter-resources"
               settings={settings}
             />
