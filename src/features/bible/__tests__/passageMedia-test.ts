@@ -1,6 +1,7 @@
 import type { PassageMediaCatalog } from '../passageMedia'
 import {
   formatPassageMediaDuration,
+  getPassageMediaForChapter,
   getPassageMediaEmbedUrl,
   resolvePassageMediaChapter,
   resolvePassageMediaStrong,
@@ -224,6 +225,15 @@ const catalog: PassageMediaCatalog = {
 }
 
 describe('resolvePassageMediaChapter', () => {
+  it('keeps a media work biblical scope instead of replacing it with the current chapter', () => {
+    const result = getPassageMediaForChapter({ book: 3, chapter: 25, language: 'en' })
+    const biblicalLaw = result.introduction.find(
+      item => item.workId === 'associated-resource-Sew1kBIe-W0'
+    )
+
+    expect(biblicalLaw?.reference).toBe('Exodus–Deuteronomy')
+  })
+
   it('places localized primary and related media at their Bible Viewer positions', () => {
     expect(resolvePassageMediaChapter(catalog, { book: 1, chapter: 1, language: 'fr' })).toEqual({
       introduction: [

@@ -7365,7 +7365,6 @@ __metadata:
     expo-system-ui: "npm:~56.0.5"
     expo-updates: "npm:~56.0.19"
     firestore-size: "npm:^2.0.7"
-    framer-motion: "npm:12.23.26"
     fuse.js: "npm:^7.3.0"
     global: "npm:^4.4.0"
     goober: "npm:^2.1.16"
@@ -7383,6 +7382,7 @@ __metadata:
     lottie-react-native: "npm:~7.3.4"
     lunr-languages: "npm:^1.9.0"
     metro: "npm:^0.84.2"
+    motion: "npm:^13.0.0"
     postinstall-postinstall: "npm:^2.1.0"
     pressto: "npm:^0.6.0"
     prettier: "npm:^3.8.1"
@@ -10714,7 +10714,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"framer-motion@npm:12.23.26, framer-motion@npm:^12.23.12":
+"framer-motion@npm:^12.23.12":
   version: 12.23.26
   resolution: "framer-motion@npm:12.23.26"
   dependencies:
@@ -10733,6 +10733,25 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10c0/7dbbc4a392b969804e04a056e3d89a55bf31572dc7f6cd79050b90616fbb84a1762e4ac4e2537c735d347bbf4ceebea126f5c090234149b12cffa3ea6c518a34
+  languageName: node
+  linkType: hard
+
+"framer-motion@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "framer-motion@npm:13.0.0"
+  dependencies:
+    motion-dom: "npm:^13.0.0"
+    motion-utils: "npm:^13.0.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/96647614a9dd1b89f3243d766772b3641ee5b84c49b59f0578090c1e66985203eb9d635c4933b5923477206f7f89e33de7359bb0d3d7b3334788fe8c64445759
   languageName: node
   linkType: hard
 
@@ -14116,10 +14135,44 @@ __metadata:
   languageName: node
   linkType: hard
 
+"motion-dom@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "motion-dom@npm:13.0.0"
+  dependencies:
+    motion-utils: "npm:^13.0.0"
+  checksum: 10c0/3029e249515976f1eea67b26c88cfc6037e3ed3a821400e9e10a211dafad7b70f1d0e9243878dcc3011249e8fd84bc0c587a667fe750c74ad41418a85365f61e
+  languageName: node
+  linkType: hard
+
 "motion-utils@npm:^12.23.6":
   version: 12.23.6
   resolution: "motion-utils@npm:12.23.6"
   checksum: 10c0/c058e8ba6423b3baa63e985bcc669877ee7d9579d938f5348b4e60c5ea1b4b33dd7f4877434436a4a5807f3cf00370d3fd4079a6fdd6309c5c87aa62b311a897
+  languageName: node
+  linkType: hard
+
+"motion-utils@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "motion-utils@npm:13.0.0"
+  checksum: 10c0/4b279ce85f71926d668ff5966feb898b174541d16952a61c7150982388553266602ecd2a76e057530076ff8f38d06672e585639ddc73c41dd1a67d04aaa3662d
+  languageName: node
+  linkType: hard
+
+"motion@npm:^13.0.0":
+  version: 13.0.0
+  resolution: "motion@npm:13.0.0"
+  dependencies:
+    framer-motion: "npm:^13.0.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/08d32acb63fff8763d6591d6e4f114b0e16aea878969aecea65de696481e7af3eecd0a5c1a1ba91e504e82e5a9b851b4f8387da7afbfbb2db3d77f5d941fa6a4
   languageName: node
   linkType: hard
 

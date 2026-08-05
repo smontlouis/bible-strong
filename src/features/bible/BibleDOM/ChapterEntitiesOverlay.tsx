@@ -1,4 +1,4 @@
-import { m, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'motion/react'
 import { useEffect, useEffectEvent, useRef } from 'react'
 import { createPortal } from 'react-dom'
 

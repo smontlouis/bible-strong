@@ -1,5 +1,5 @@
 import Feather from '@expo/vector-icons/Feather'
-import { domMax, LayoutGroup, LazyMotion, m, useReducedMotion } from 'framer-motion'
+import { LayoutGroup, m, useReducedMotion } from 'motion/react'
 import { useEffect, useId, useState, type CSSProperties, type ReactNode } from 'react'
 
 import type {
@@ -244,80 +244,78 @@ const ChapterEntities = ({
             </div>
           )}
           {viewMode === 'entities' && (
-            <LazyMotion features={domMax} strict>
-              <LayoutGroup id={layoutGroupId}>
-                <m.button
-                  type="button"
-                  className="chapter-entity-button"
-                  data-ignore-verse-touch
-                  aria-label={entities.map(entity => entity.name).join(', ')}
-                  whileTap={{ opacity: 0.55 }}
-                  onClick={() => setIsOverlayOpen(true)}
-                  style={{
-                    position: 'relative',
-                    display: 'grid',
-                    width: 78,
-                    height: 70,
-                    margin: 0,
-                    padding: 0,
-                    border: 0,
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    isolation: 'isolate',
-                  }}
-                >
-                  {stackedEntities.map((entity, index) => {
-                    const position =
-                      stackedEntities.length <= 1
-                        ? 0
-                        : (index / (stackedEntities.length - 1)) * 2 - 1
+            <LayoutGroup id={layoutGroupId}>
+              <m.button
+                layoutDependency={isOverlayOpen}
+                type="button"
+                className="chapter-entity-button"
+                data-ignore-verse-touch
+                aria-label={entities.map(entity => entity.name).join(', ')}
+                whileTap={{ opacity: 0.55 }}
+                onClick={() => setIsOverlayOpen(true)}
+                style={{
+                  position: 'relative',
+                  display: 'grid',
+                  width: 78,
+                  height: 70,
+                  margin: 0,
+                  padding: 0,
+                  border: 0,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  isolation: 'isolate',
+                }}
+              >
+                {stackedEntities.map((entity, index) => {
+                  const position =
+                    stackedEntities.length <= 1 ? 0 : (index / (stackedEntities.length - 1)) * 2 - 1
 
-                    return (
-                      <m.img
-                        key={entity.uniqueName}
-                        layoutId={`chapter-entity-${entity.uniqueName}`}
-                        src={getChapterEntityAvatarUri(entity)}
-                        alt=""
-                        transition={{
-                          layout: shouldReduceMotion
-                            ? { duration: 0 }
-                            : { type: 'spring', stiffness: 360, damping: 34, mass: 0.8 },
-                        }}
-                        style={{
-                          gridArea: '1 / 1',
-                          display: 'block',
-                          width: 62,
-                          height: 62,
-                          placeSelf: 'center',
-                          border: `2px solid ${colors.reverse}`,
-                          borderRadius: 33,
-                          boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
-                          objectFit: 'contain',
-                          x: position * 6,
-                          y: Math.abs(position) * 2,
-                          rotate: position * 5,
-                          transformOrigin: 'center',
-                          zIndex: index + 1,
-                        }}
-                      />
-                    )
-                  })}
-                </m.button>
-                <ChapterEntitiesOverlay
-                  entities={entities}
-                  groupLabels={translations.groups}
-                  openEntityLabel={translations.openEntity}
-                  colors={colors}
-                  fontFamily={settings.fontFamily}
-                  visibleStackItemCount={stackedEntities.length}
-                  isOpen={isOverlayOpen}
-                  onClose={() => setIsOverlayOpen(false)}
-                  onSelect={uniqueName => {
-                    onOpenEntity(uniqueName)
-                  }}
-                />
-              </LayoutGroup>
-            </LazyMotion>
+                  return (
+                    <m.img
+                      key={entity.uniqueName}
+                      layoutId={`chapter-entity-${entity.uniqueName}`}
+                      layoutDependency={isOverlayOpen}
+                      src={getChapterEntityAvatarUri(entity)}
+                      alt=""
+                      transition={{
+                        layout: shouldReduceMotion
+                          ? { duration: 0 }
+                          : { type: 'spring', stiffness: 360, damping: 34, mass: 0.8 },
+                      }}
+                      style={{
+                        gridArea: '1 / 1',
+                        display: 'block',
+                        width: 62,
+                        height: 62,
+                        placeSelf: 'center',
+                        border: `2px solid ${colors.reverse}`,
+                        borderRadius: 33,
+                        boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
+                        objectFit: 'contain',
+                        x: position * 6,
+                        y: Math.abs(position) * 2,
+                        rotate: position * 5,
+                        transformOrigin: 'center',
+                        zIndex: index + 1,
+                      }}
+                    />
+                  )
+                })}
+              </m.button>
+              <ChapterEntitiesOverlay
+                entities={entities}
+                groupLabels={translations.groups}
+                openEntityLabel={translations.openEntity}
+                colors={colors}
+                fontFamily={settings.fontFamily}
+                visibleStackItemCount={stackedEntities.length}
+                isOpen={isOverlayOpen}
+                onClose={() => setIsOverlayOpen(false)}
+                onSelect={uniqueName => {
+                  onOpenEntity(uniqueName)
+                }}
+              />
+            </LayoutGroup>
           )}
           {chapterResources}
         </div>

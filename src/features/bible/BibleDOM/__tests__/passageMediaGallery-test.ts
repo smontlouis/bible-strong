@@ -5,6 +5,7 @@ const media = (editionId: string): ResolvedPassageMedia => ({
   workId: editionId,
   editionId,
   attributionLabel: 'BibleProject',
+  reference: `Référence ${editionId}`,
   strongCodes: [],
   provider: 'youtube',
   providerId: editionId,
@@ -29,8 +30,6 @@ describe('getPassageMediaGallerySections', () => {
           afterVerses: { 3: [passage], 5: [passage] },
           chapterResources: [chapterResource],
         },
-        bookName: 'Genèse',
-        chapter: 1,
         sectionTitles: {
           introduction: 'Introduction',
           passages: 'Passages bibliques',
@@ -41,12 +40,12 @@ describe('getPassageMediaGallerySections', () => {
       {
         id: 'chapter-resources',
         title: 'Ressources du chapitre',
-        items: [{ ...chapterResource, reference: 'Genèse 1' }],
+        items: [chapterResource],
       },
       {
         id: 'passages',
         title: 'Passages bibliques',
-        items: [{ ...passage, reference: 'Genèse 1:3, 5' }],
+        items: [passage],
       },
     ])
   })
@@ -60,8 +59,6 @@ describe('getPassageMediaGallerySections', () => {
         afterVerses: { 7: [passage] },
         chapterResources: [],
       },
-      bookName: '1 Corinthiens',
-      chapter: 13,
       sectionTitles: {
         introduction: 'Introduction',
         passages: 'Passages bibliques',

@@ -1,14 +1,14 @@
-import { domMax, LayoutGroup, LazyMotion, m, useMotionValue, useReducedMotion } from 'framer-motion'
+import { LayoutGroup, m, useMotionValue, useReducedMotion } from 'motion/react'
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import type { ResolvedPassageMedia } from '../passageMedia'
 import type { RootStyles } from './BibleDOMWrapper'
-import { scaleFontSize } from './scaleFontSize'
 import { getDisabledStyles } from './disabledStyles'
-import PassageMediaImage from './PassageMediaImage'
-import PassageMediaOverlay from './PassageMediaOverlay'
-import type { PassageMediaGallerySection } from './passageMediaGallery'
 import { SET_BIBLE_OVERLAY_OPEN } from './dispatch'
 import { useDispatch } from './DispatchProvider'
+import type { PassageMediaGallerySection } from './passageMediaGallery'
+import PassageMediaImage from './PassageMediaImage'
+import PassageMediaOverlay from './PassageMediaOverlay'
+import { scaleFontSize } from './scaleFontSize'
 import { registerVisibleScrollEffect } from './visibleScrollEffects'
 
 type Props = RootStyles & {
@@ -85,6 +85,7 @@ const PassageMediaThumbnails = ({
   const [mode, setMode] = useState<'closed' | 'gallery' | 'playing'>('closed')
   const [selectedItem, setSelectedItem] = useState<ResolvedPassageMedia | null>(null)
   const isOverlayOpen = mode !== 'closed'
+  const layoutDependency = `${mode}:${isCompact ? 'compact' : 'featured'}`
 
   useEffect(() => {
     if (!isOverlayOpen) return
@@ -176,11 +177,11 @@ const PassageMediaThumbnails = ({
   }
 
   return (
-    <LazyMotion features={domMax} strict>
       <LayoutGroup id={layoutGroupId}>
         <m.button
           ref={stackRef}
           layoutId={placement === 'introduction' ? 'passage-media-introduction-stack' : undefined}
+          layoutDependency={layoutDependency}
           type="button"
           disabled={isDisabled}
           aria-disabled={isDisabled}
@@ -212,6 +213,7 @@ const PassageMediaThumbnails = ({
               <PassageMediaImage
                 item={item}
                 layoutId={item.editionId}
+                layoutDependency={layoutDependency}
                 key={item.editionId}
                 loading="lazy"
                 transition={{ layout: layoutTransition }}
@@ -251,7 +253,6 @@ const PassageMediaThumbnails = ({
           }}
         />
       </LayoutGroup>
-    </LazyMotion>
   )
 }
 

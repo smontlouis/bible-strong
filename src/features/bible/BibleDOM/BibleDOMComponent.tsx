@@ -2,7 +2,9 @@
 
 import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
+import { m } from 'motion/react'
 import Feather from '@expo/vector-icons/Feather'
+import { domMax, LazyMotion } from 'motion/react'
 import React, { useEffect, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
 import {
@@ -1136,8 +1138,6 @@ const LoadedBibleContent = ({
   const isContextFocused = contextDisplayMode === 'focused'
   const passageMediaGallerySections = getPassageMediaGallerySections({
     passageMedia,
-    bookName: translations.passageMediaBookName,
-    chapter,
     sectionTitles: translations.passageMediaSections,
   })
   const passageMediaGalleryItems = getPassageMediaGalleryItems(passageMediaGallerySections)
@@ -1233,7 +1233,7 @@ const LoadedBibleContent = ({
                 isCompact={!passageMedia.isIntroductionStartChapter}
               />
             )}
-
+<m.div layout="position">
             {/* Unified verse rendering for all modes */}
             <UnifiedVersesRenderer
               verses={verses}
@@ -1271,7 +1271,8 @@ const LoadedBibleContent = ({
               redWords={redWords}
               passageMediaAfterVerses={passageMedia.afterVerses}
               passageMediaGallerySections={passageMediaGallerySections}
-            />
+              />
+              </m.div>
           </HorizontalScrollWrapper>
           <ChapterEntities
             entities={chapterEntities}
@@ -1453,7 +1454,7 @@ const BibleDOMErrorContent = ({
   )
 }
 
-const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: Props) => {
+const VersesRendererContent = ({ settings, dispatch, translations, verses, ...rest }: Props) => {
   useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
@@ -1523,5 +1524,11 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
     />
   )
 }
+
+const VersesRenderer = (props: Props) => (
+  <LazyMotion features={domMax} strict>
+    <VersesRendererContent {...props} />
+  </LazyMotion>
+)
 
 export default VersesRenderer

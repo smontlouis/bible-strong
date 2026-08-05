@@ -1,5 +1,7 @@
 import passageMediaJson from '~assets/passage-media.json'
+import { getBook } from '~helpers/bibleBookCatalog'
 import type { ActiveLanguage } from '~helpers/languageUtils'
+import englishBookNames from '../../../i18n/locales/en/translation_book.json'
 
 type PassageMediaPlacement =
   | 'introduction'
@@ -67,6 +69,7 @@ export type ResolvedPassageMedia = Pick<
   workId: string
   editionId: string
   attributionLabel: string
+  reference: string
   strongCodes: string[]
 }
 
@@ -133,6 +136,68 @@ const getWorkStrongCodes = (work: PassageMediaWork): string[] => {
   return Array.from(strongCodes)
 }
 
+const getLocalizedBookName = (book: number, language: ActiveLanguage): string => {
+  const bookName = getBook(book)?.Nom
+  if (!bookName) return language === 'en' ? `Book ${book}` : `Livre ${book}`
+  if (language === 'fr') return bookName
+
+  return englishBookNames[bookName as keyof typeof englishBookNames] ?? bookName
+}
+
+const formatPassageAnchorReference = (
+  anchor: PassageMediaAnchor,
+  language: ActiveLanguage
+): string => {
+  if (anchor.book === undefined) return ''
+
+  const bookName = getLocalizedBookName(anchor.book, language)
+  if (anchor.kind === 'book' || anchor.chapterStart === undefined) return bookName
+
+  const chapterEnd = anchor.chapterEnd ?? anchor.chapterStart
+  const start = anchor.verseStart
+    ? `${anchor.chapterStart}:${anchor.verseStart}`
+    : `${anchor.chapterStart}`
+  const end = anchor.verseEnd
+    ? chapterEnd === anchor.chapterStart
+      ? `${anchor.verseEnd}`
+      : `${chapterEnd}:${anchor.verseEnd}`
+    : `${chapterEnd}`
+
+  return start === end ? `${bookName} ${start}` : `${bookName} ${start}–${end}`
+}
+
+const getWorkReference = (work: PassageMediaWork, language: ActiveLanguage): string => {
+  const bibleAnchors = work.anchors.filter(
+    anchor => (anchor.kind === 'book' || anchor.kind === 'passage') && anchor.book !== undefined
+  )
+  const bookAnchors = bibleAnchors.filter(anchor => anchor.kind === 'book')
+  const passageAnchors = bibleAnchors.filter(anchor => anchor.kind === 'passage')
+  const references: string[] = []
+
+  if (bookAnchors.length) {
+    const bookNumbers = [...new Set(bookAnchors.map(anchor => anchor.book as number))].sort(
+      (left, right) => left - right
+    )
+    const areContiguous = bookNumbers.every(
+      (bookNumber, index) => index === 0 || bookNumber === bookNumbers[index - 1] + 1
+    )
+
+    if (areContiguous && bookNumbers.length > 1) {
+      references.push(
+        `${getLocalizedBookName(bookNumbers[0], language)}–${getLocalizedBookName(bookNumbers[bookNumbers.length - 1], language)}`
+      )
+    } else {
+      references.push(...bookNumbers.map(book => getLocalizedBookName(book, language)))
+    }
+  }
+
+  references.push(
+    ...passageAnchors.map(anchor => formatPassageAnchorReference(anchor, language)).filter(Boolean)
+  )
+
+  return [...new Set(references)].join(' · ')
+}
+
 const resolveEdition = (
   work: PassageMediaWork,
   language: ActiveLanguage,
@@ -145,6 +210,7 @@ const resolveEdition = (
     workId: work.id,
     editionId: edition.id,
     attributionLabel,
+    reference: getWorkReference(work, language),
     strongCodes: getWorkStrongCodes(work),
     provider: edition.provider,
     providerId: edition.providerId,

@@ -1,4 +1,10 @@
-import { m, type MotionStyle, type TargetAndTransition, type Transition } from 'framer-motion'
+import {
+  m,
+  type MotionProps,
+  type MotionStyle,
+  type TargetAndTransition,
+  type Transition,
+} from 'motion/react'
 import { useState, type ImgHTMLAttributes, type ReactNode } from 'react'
 import { Blurhash } from 'react-blurhash'
 import type { ResolvedPassageMedia } from '../passageMedia'
@@ -8,6 +14,7 @@ type Props = {
   layoutId: string
   style: MotionStyle
   transition?: Transition
+  layoutDependency?: MotionProps['layoutDependency']
   animate?: TargetAndTransition
   loading?: ImgHTMLAttributes<HTMLImageElement>['loading']
   imageOpacity?: number
@@ -19,6 +26,7 @@ const PassageMediaImage = ({
   layoutId,
   style,
   transition,
+  layoutDependency,
   animate,
   loading,
   imageOpacity = 1,
@@ -29,6 +37,7 @@ const PassageMediaImage = ({
   return (
     <m.div
       layoutId={layoutId}
+      layoutDependency={layoutDependency}
       transition={transition}
       animate={animate}
       style={{ position: 'relative', overflow: 'hidden', ...style }}

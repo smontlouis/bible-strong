@@ -1,4 +1,4 @@
-import { m, useReducedMotion, type Transition } from 'framer-motion'
+import { m, useReducedMotion, type Transition } from 'motion/react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -138,7 +138,7 @@ const PassageMediaGalleryCard = ({
         }}
         style={{ padding: '10px 2px 0' }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10,  }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div
             style={{
               display: '-webkit-box',
@@ -247,7 +247,7 @@ const PassageMediaOverlay = ({
     isAdditionalItem ? getAdditionalItemDelay(editionId) : getSourceItemDelay(editionId) + 0.18
   const getItemReference = (item: ResolvedPassageMedia) =>
     sections.flatMap(section => section.items).find(entry => entry.editionId === item.editionId)
-      ?.reference ?? chapterReference
+      ?.reference || item.reference || chapterReference
 
   useEffect(() => {
     if (!isOpen) return
