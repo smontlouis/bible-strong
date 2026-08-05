@@ -17,13 +17,23 @@ import {
   updateStudy,
 } from '~redux/modules/user'
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
-import { firebaseDb, doc, collection, query, where, onSnapshot } from './firebase'
+import { firebaseDb, doc, collection, query, where, onSnapshot, updateDoc } from './firebase'
 import { registerCleanup } from './cleanupRegistry'
 import useLogin from './useLogin'
 import { usePrevious } from './usePrevious'
-import { subscribeToSubcollection, USER_DATA_SUBCOLLECTION_NAMES } from './firestoreSubcollections'
+import {
+  batchWriteSubcollection,
+  subscribeToSubcollection,
+  type SubcollectionData,
+  USER_DATA_SUBCOLLECTION_NAMES,
+} from './firestoreSubcollections'
 import { store } from '~redux/store'
 import { isMigrationInProgress } from 'src/state/migration'
+import {
+  canonicalizeLegacySubcollectionData,
+  migrateLegacyPersistedValue,
+} from '../migrations/legacyPersistedReferences'
+import { appLogger } from './agentObservability'
 
 let isFirstSnapshotListener = true
 
@@ -125,7 +135,7 @@ const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordina
       try {
         accountMigrationsCompleted = await migrationRun
       } catch (error) {
-        console.error('[LiveUpdates] Account migration failed:', error)
+        appLogger.error('startup', 'account_sync.migration_failed', { error })
         const errorMessage = error instanceof Error ? error.message : String(error)
         Sentry.captureException(error, {
           tags: {
@@ -137,10 +147,9 @@ const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordina
             errorMessage,
           },
         })
-      } finally {
-        if (migrationRunRef.current === migrationRun) {
-          migrationRunRef.current = undefined
-        }
+      }
+      if (migrationRunRef.current === migrationRun) {
+        migrationRunRef.current = undefined
       }
       if (!accountMigrationsCompleted || disposed) {
         if (!disposed) dispatch(finishUserDataSync())
@@ -171,12 +180,21 @@ const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordina
           naves: _nv,
           ...otherBible
         } = bible || {}
+        const canonicalBible = migrateLegacyPersistedValue(otherBible)
+        const canonicalSettings = migrateLegacyPersistedValue(otherBible.settings)
+        if (JSON.stringify(canonicalSettings) !== JSON.stringify(otherBible.settings)) {
+          updateDoc(doc(firebaseDb, 'users', userId), {
+            'bible.settings': canonicalSettings,
+          }).catch(error => {
+            appLogger.error('startup', 'account_sync.legacy_settings_writeback_failed', { error })
+          })
+        }
 
         dispatch(
           receiveLiveUpdates({
             remoteUserData: {
               ...otherUserData,
-              bible: otherBible,
+              bible: canonicalBible,
             } as unknown as FireStoreUserData,
           })
         )
@@ -198,13 +216,34 @@ const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordina
 
             console.log(`[LiveUpdates] ${collection} updated:`, Object.keys(data).length, 'items')
 
+            const canonical = canonicalizeLegacySubcollectionData(data)
+            const canonicalAdded = canonicalizeLegacySubcollectionData(changes.added).data
+            const canonicalModified = canonicalizeLegacySubcollectionData(changes.modified).data
+            if (Object.keys(canonical.changedDocuments).length > 0) {
+              batchWriteSubcollection(userId, collection, {
+                set: canonical.changedDocuments as SubcollectionData,
+                delete: [],
+                merge: false,
+              }).catch(error => {
+                appLogger.error('startup', 'account_sync.legacy_reference_writeback_failed', {
+                  collection,
+                  error,
+                })
+              })
+            }
+
             // Dispatch l'update pour cette collection spécifique
             dispatch(
               receiveSubcollectionUpdates({
                 collection,
-                data,
-                changes,
-                isInitialLoad: Object.keys(changes.added).length === Object.keys(data).length,
+                data: canonical.data as SubcollectionData,
+                changes: {
+                  added: canonicalAdded as SubcollectionData,
+                  modified: canonicalModified as SubcollectionData,
+                  removed: changes.removed,
+                },
+                isInitialLoad:
+                  Object.keys(canonicalAdded).length === Object.keys(canonical.data).length,
               })
             )
           },

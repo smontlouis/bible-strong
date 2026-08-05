@@ -28,6 +28,7 @@ describe('mmkvMigrationStateStore', () => {
     await expect(store.load()).resolves.toBeNull()
     await store.save(state)
     await expect(store.load()).resolves.toEqual(state)
+    expect(store.loadSync!()).toEqual(state)
   })
 
   it('fails closed when the persisted JSON is corrupt', async () => {

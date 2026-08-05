@@ -1,9 +1,26 @@
 import {
+  canonicalizeLegacySubcollectionData,
   isPersistedCanonicalTabWorkspace,
   migrateLegacyPersistedReferences,
 } from '../legacyPersistedReferences'
 
 describe('migrateLegacyPersistedReferences', () => {
+  it('canonicalizes incoming legacy references and reports only documents that need write-back', () => {
+    expect(
+      canonicalizeLegacySubcollectionData({
+        legacy: { id: 'legacy', version: 'LSGS', content: 'LSGS stays in authored text' },
+        canonical: { id: 'canonical', version: 'LSG' },
+      })
+    ).toEqual({
+      data: {
+        legacy: { id: 'legacy', version: 'LSG', content: 'LSGS stays in authored text' },
+        canonical: { id: 'canonical', version: 'LSG' },
+      },
+      changedDocuments: {
+        legacy: { id: 'legacy', version: 'LSG', content: 'LSGS stays in authored text' },
+      },
+    })
+  })
   it('recognizes only a non-empty, structurally complete canonical tab workspace', () => {
     expect(isPersistedCanonicalTabWorkspace([])).toBe(false)
     expect(isPersistedCanonicalTabWorkspace([{}])).toBe(false)

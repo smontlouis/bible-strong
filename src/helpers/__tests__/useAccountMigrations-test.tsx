@@ -24,6 +24,7 @@ jest.mock('../../migrations/accountMigrationMutationJournal', () => ({
 
 jest.mock('../../migrations/accountMigrationRuntime', () => ({
   accountMigrationOrchestrator: {},
+  prepareAccountMigrationContext: async (context: AccountMigrationContext) => context,
 }))
 
 const state = { user: { id: 'user-1' } } as RootState
@@ -75,10 +76,19 @@ describe('useAccountMigrations', () => {
   }
 
   it('continues local app sync only after an explicit decision on account migration failure', async () => {
+    const abandonedSnapshot = {
+      ...failedSnapshot,
+      status: 'abandoned-after-failure',
+      errorCode: undefined,
+    } as Exclude<MigrationSnapshot, { status: 'idle' }>
     const orchestrator: AppMigrationOrchestrator<AccountMigrationContext> = {
+      getStartupDisposition: () => ({ kind: 'inspect' }),
       inspect: jest.fn(async () => failedSnapshot),
       run: jest.fn(),
-      abandon: jest.fn(),
+      abandon: jest.fn(async (_context, onChange) => {
+        onChange?.(abandonedSnapshot)
+        return abandonedSnapshot
+      }),
     }
     const getController = await renderController(orchestrator)
     let ready = true
@@ -94,20 +104,26 @@ describe('useAccountMigrations', () => {
     expect(getController().isAccountSyncReady).toBe(false)
     expect(mockSetAccountMigrationWriteScope).not.toHaveBeenCalledWith('user-1')
 
-    act(() => getController().continueAfterFailure())
+    await act(async () => getController().continueAfterFailure())
+
+    expect(orchestrator.abandon).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-1' }),
+      expect.any(Function)
+    )
 
     await act(async () => {
       ready = await getController().runBeforeSync('user-1', state)
     })
-    expect(ready).toBe(false)
+    expect(ready).toBe(true)
     expect(getController().presentation).toEqual({ kind: 'hidden' })
-    expect(getController().resumeToken).toBe(0)
-    expect(getController().isAccountSyncReady).toBe(false)
-    expect(mockSetAccountMigrationWriteScope).toHaveBeenLastCalledWith('user-1', 'outgoing-only')
+    expect(getController().resumeToken).toBe(1)
+    expect(getController().isAccountSyncReady).toBe(true)
+    expect(mockSetAccountMigrationWriteScope).toHaveBeenLastCalledWith('user-1')
   })
 
-  it('opens outgoing sync only after a clean account inspection for the active UID', async () => {
+  it('opens journaled outgoing sync while inspection keeps incoming sync disabled', async () => {
     const orchestrator: AppMigrationOrchestrator<AccountMigrationContext> = {
+      getStartupDisposition: () => ({ kind: 'inspect' }),
       inspect: jest.fn(
         async (): Promise<MigrationSnapshot> => ({ status: 'idle', isResuming: false })
       ),
@@ -116,8 +132,26 @@ describe('useAccountMigrations', () => {
     }
     const getController = await renderController(orchestrator)
 
+    let releaseInspection = () => {}
+    const inspectionPending = new Promise<MigrationSnapshot>(resolve => {
+      releaseInspection = () => resolve({ status: 'idle', isResuming: false })
+    })
+    jest.mocked(orchestrator.inspect).mockImplementationOnce(async () => inspectionPending)
+
+    let inspection: Promise<boolean>
     await act(async () => {
-      await expect(getController().runBeforeSync('user-1', state)).resolves.toBe(true)
+      inspection = getController().runBeforeSync('user-1', state)
+      await Promise.resolve()
+    })
+
+    expect(getController().presentation).toEqual({ kind: 'hidden' })
+    expect(getController().isAccountSyncReady).toBe(false)
+    expect(getController().isAccountWriteReady).toBe(true)
+    expect(mockSetAccountMigrationWriteScope).toHaveBeenLastCalledWith('user-1', 'outgoing-only')
+
+    await act(async () => {
+      releaseInspection()
+      await expect(inspection!).resolves.toBe(true)
     })
 
     expect(getController().presentation).toEqual({ kind: 'hidden' })
@@ -127,6 +161,7 @@ describe('useAccountMigrations', () => {
 
   it('replays gated startup work after opening writes and before enabling incoming sync', async () => {
     const orchestrator: AppMigrationOrchestrator<AccountMigrationContext> = {
+      getStartupDisposition: () => ({ kind: 'inspect' }),
       inspect: jest.fn(
         async (): Promise<MigrationSnapshot> => ({ status: 'idle', isResuming: false })
       ),
@@ -157,8 +192,9 @@ describe('useAccountMigrations', () => {
     expect(getController().isAccountSyncReady).toBe(true)
   })
 
-  it('surfaces an initial inspection failure so sync is never disabled silently', async () => {
+  it('keeps local data usable with journaled writes when remote inspection is unavailable', async () => {
     const orchestrator: AppMigrationOrchestrator<AccountMigrationContext> = {
+      getStartupDisposition: () => ({ kind: 'inspect' }),
       inspect: jest.fn(async () => {
         throw new Error('offline')
       }),
@@ -171,15 +207,15 @@ describe('useAccountMigrations', () => {
       await expect(getController().runBeforeSync('user-1', state)).resolves.toBe(false)
     })
 
-    expect(getController().presentation).toEqual({
-      kind: 'failed',
-      errorCode: 'APP_MIGRATION_ACCOUNT_INSPECTION_FAILED',
-    })
+    expect(getController().presentation).toEqual({ kind: 'hidden' })
     expect(getController().isAccountSyncReady).toBe(false)
+    expect(getController().isAccountWriteReady).toBe(true)
+    expect(mockSetAccountMigrationWriteScope).toHaveBeenLastCalledWith('user-1', 'outgoing-only')
   })
 
   it('does not reuse account readiness across a direct UID replacement', async () => {
     const orchestrator: AppMigrationOrchestrator<AccountMigrationContext> = {
+      getStartupDisposition: () => ({ kind: 'inspect' }),
       inspect: jest.fn(
         async (): Promise<MigrationSnapshot> => ({ status: 'idle', isResuming: false })
       ),
@@ -221,6 +257,7 @@ describe('useAccountMigrations', () => {
       { status: 'idle' }
     >
     const orchestrator: AppMigrationOrchestrator<AccountMigrationContext> = {
+      getStartupDisposition: () => ({ kind: 'inspect' }),
       inspect: jest
         .fn<Promise<MigrationSnapshot>, [AccountMigrationContext]>()
         .mockResolvedValueOnce(failedSnapshot)

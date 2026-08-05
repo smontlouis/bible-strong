@@ -337,12 +337,6 @@ export const useTabGroupsSync = ({
       return
     }
 
-    // Skip if migration is in progress
-    if (isMigrationInProgress()) {
-      previousGroupsRef.current = groups
-      return
-    }
-
     // Detect deleted groups
     const currentIds = new Set(groups.map(g => g.id))
     const deletedGroups: TabGroup[] = []

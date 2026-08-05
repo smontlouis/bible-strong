@@ -11,6 +11,8 @@ export const localMigrationContext: MigrationContext = {
   scopeId: 'device',
 }
 
+let defaultPreparationPromise: Promise<void> | undefined
+
 export const prepareLocalMigrationInspection = async ({
   prepareStorage = prepareLegacyStorageForLocalMigrations,
   reconcileInstallationJournal = reconcileResourceInstallationJournal,
@@ -18,8 +20,23 @@ export const prepareLocalMigrationInspection = async ({
   prepareStorage?: () => Promise<void>
   reconcileInstallationJournal?: () => Promise<void>
 } = {}): Promise<void> => {
-  await prepareStorage()
-  await reconcileInstallationJournal()
+  const runPreparation = async (): Promise<void> => {
+    await prepareStorage()
+    await reconcileInstallationJournal()
+  }
+  const usesDefaultDependencies =
+    prepareStorage === prepareLegacyStorageForLocalMigrations &&
+    reconcileInstallationJournal === reconcileResourceInstallationJournal
+  if (!usesDefaultDependencies) {
+    await runPreparation()
+    return
+  }
+
+  defaultPreparationPromise ??= runPreparation().catch(error => {
+    defaultPreparationPromise = undefined
+    throw error
+  })
+  await defaultPreparationPromise
 }
 
 export const localMigrationOrchestrator = createAppMigrationOrchestrator({
@@ -41,3 +58,17 @@ export const localMigrationOrchestrator = createAppMigrationOrchestrator({
     }
   },
 })
+
+export const prepareLocalMigrationStartup = async ({
+  orchestrator = localMigrationOrchestrator,
+  context = localMigrationContext,
+  prepareInspection = prepareLocalMigrationInspection,
+}: {
+  orchestrator?: Pick<typeof localMigrationOrchestrator, 'getStartupDisposition'>
+  context?: MigrationContext
+  prepareInspection?: () => Promise<void>
+} = {}): Promise<void> => {
+  if (orchestrator.getStartupDisposition(context).kind !== 'ready') {
+    await prepareInspection()
+  }
+}

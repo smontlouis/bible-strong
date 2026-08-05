@@ -205,6 +205,7 @@ const InitHooks = (_props: InitHooksProps) => {
       <AccountMigrationModal
         presentation={accountMigrations.presentation}
         isActionPending={accountMigrations.isActionPending}
+        onConfirm={accountMigrations.confirm}
         onRetry={accountMigrations.retry}
         onContinue={accountMigrations.continueAfterFailure}
       />

@@ -50,7 +50,6 @@ import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { configureQueryManagers, queryClient } from '~helpers/queryClient'
-import { prepareLegacyStorageForLocalMigrations } from '~helpers/storage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import { createFormSheetOptions } from '~navigation/formSheetOptions'
@@ -62,6 +61,7 @@ import i18n, { setI18n } from '../i18n'
 import { PlaybackService } from '../playbackService'
 import { PortalProvider } from 'react-native-teleport'
 import { downloadManager } from '~helpers/downloadManager'
+import { prepareLocalMigrationStartup } from '../src/migrations/localMigrationRegistry'
 
 // Register background event handler for Notifee
 // This prevents ANR when notifications fire while app is in background
@@ -135,7 +135,7 @@ const useAppLoad = () => {
         appLogger.info('startup', 'i18n.init.started')
         await setI18n()
         appLogger.info('startup', 'i18n.init.completed')
-        await prepareLegacyStorageForLocalMigrations()
+        await prepareLocalMigrationStartup()
         startPersistence()
         if (!active) return
         setIsLoadingCompleted(true)
@@ -389,16 +389,16 @@ function RootLayout() {
           <NativeText style={{ fontSize: 22, fontWeight: '700', textAlign: 'center' }}>
             {i18n.t('migration.checkFailedTitle')}
           </NativeText>
-          <NativeText style={{ marginTop: 12, color: '#666', textAlign: 'center' }}>
+          <NativeText style={{ marginTop: 12, opacity: 0.7, textAlign: 'center' }}>
             {i18n.t('migration.checkFailedDescription')}
           </NativeText>
-          <NativeText style={{ marginTop: 8, color: '#777', fontSize: 12 }}>{loadError}</NativeText>
+          <NativeText style={{ marginTop: 8, opacity: 0.6, fontSize: 12 }}>{loadError}</NativeText>
           <Pressable
             accessibilityRole="button"
             onPress={retry}
             style={{ marginTop: 24, paddingHorizontal: 28, paddingVertical: 14 }}
           >
-            <NativeText style={{ color: '#4776e6', fontSize: 16, fontWeight: '700' }}>
+            <NativeText style={{ fontSize: 16, fontWeight: '700' }}>
               {i18n.t('migration.retry')}
             </NativeText>
           </Pressable>

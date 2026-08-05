@@ -9,6 +9,7 @@ import {
   createFirestoreLegacyReferencesMigration,
   createRelationsArchitectureMigration,
   type FirestoreLegacyReferenceTarget,
+  type AccountMigrationContext,
   runAccountMigrationSequence,
 } from '../accountMigrationRegistry'
 import {
@@ -91,12 +92,15 @@ describe('account migration registry', () => {
       snapshots.push(snapshot)
     })
 
-    expect(inspectEmbeddedData).toHaveBeenCalledWith('user-1')
+    expect(inspectEmbeddedData).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-1', scopeId: 'user-1' })
+    )
     expect(migrate).toHaveBeenCalledWith(
       'user-1',
       state,
       expect.objectContaining({ userId: 'user-1' }),
-      expect.any(Function)
+      expect.any(Function),
+      undefined
     )
     expect(snapshots).toEqual(
       expect.arrayContaining([
@@ -112,6 +116,34 @@ describe('account migration registry', () => {
       status: 'idle',
       isResuming: false,
     })
+  })
+
+  it('refreshes account inspection data after a recurring migration completes', async () => {
+    const migration = createFirestoreEmbeddedDataMigration({
+      inspectEmbeddedData: async context => ({
+        hasEmbeddedData: Boolean(context.userDocument?.bible),
+        collectionsWithData: context.userDocument?.bible ? ['notes'] : [],
+      }),
+      getLegacyState: () => null,
+      migrate: async () => ({ success: true, partialFailure: false, failedCollections: [] }),
+    })
+    const orchestrator = createAppMigrationOrchestrator({
+      migrations: [migration],
+      store: createMemoryStore(),
+    })
+    const context: AccountMigrationContext = {
+      ...createAccountMigrationContext('user-1', state),
+      userDocument: { bible: { notes: { note: {} } } },
+    }
+    const refreshContext = jest.fn(async (current: AccountMigrationContext) => ({
+      ...current,
+      userDocument: {},
+    }))
+
+    await expect(
+      runAccountMigrationSequence(orchestrator, context, undefined, { refreshContext })
+    ).resolves.toEqual({ status: 'idle', isResuming: false })
+    expect(refreshContext).toHaveBeenCalledTimes(1)
   })
 
   it('keeps a failed cloud migration resumable without leaking its raw error into state', async () => {

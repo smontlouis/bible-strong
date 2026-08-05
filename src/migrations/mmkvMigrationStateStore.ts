@@ -21,8 +21,8 @@ export const createMmkvMigrationStateStore = ({
 }: {
   storage?: MigrationStorage
   key?: string
-} = {}): MigrationStateStore => ({
-  async load() {
+} = {}): MigrationStateStore => {
+  const loadSync = () => {
     const serialized = backend.getString(key)
     if (typeof serialized === 'undefined') return null
 
@@ -31,22 +31,29 @@ export const createMmkvMigrationStateStore = ({
     } catch {
       throw new MigrationExecutionError('APP_MIGRATION_STATE_CORRUPT')
     }
-  },
-  async save(state: PersistedMigrationState) {
-    backend.set(key, JSON.stringify(state))
-  },
-  async runExclusive(operation) {
-    const locks = activeLocks.get(backend) ?? new Set<string>()
-    activeLocks.set(backend, locks)
-    if (locks.has(key)) {
-      throw new MigrationExecutionError('APP_MIGRATION_RUNNER_BUSY')
-    }
+  }
 
-    locks.add(key)
-    try {
-      return await operation()
-    } finally {
-      locks.delete(key)
-    }
-  },
-})
+  return {
+    async load() {
+      return loadSync()
+    },
+    loadSync,
+    async save(state: PersistedMigrationState) {
+      backend.set(key, JSON.stringify(state))
+    },
+    async runExclusive(operation) {
+      const locks = activeLocks.get(backend) ?? new Set<string>()
+      activeLocks.set(backend, locks)
+      if (locks.has(key)) {
+        throw new MigrationExecutionError('APP_MIGRATION_RUNNER_BUSY')
+      }
+
+      locks.add(key)
+      try {
+        return await operation()
+      } finally {
+        locks.delete(key)
+      }
+    },
+  }
+}

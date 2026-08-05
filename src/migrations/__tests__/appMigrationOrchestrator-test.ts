@@ -34,6 +34,9 @@ const createMemoryStore = (): MemoryMigrationStateStore => {
     async load() {
       return clone(value)
     },
+    loadSync() {
+      return clone(value)
+    },
     async save(nextValue) {
       if (saveFailurePredicate?.(nextValue)) {
         saveFailurePredicate = undefined
@@ -107,6 +110,36 @@ describe('appMigrationOrchestrator', () => {
           status: 'awaiting-confirmation',
           createdAt: 1_000,
           updatedAt: 1_000,
+        },
+      ],
+    })
+  })
+
+  it('checkpoints a clean one-time inspection and exposes a synchronous ready fast-path', async () => {
+    const store = createMemoryStore()
+    const detect = jest.fn(async () => null)
+    const orchestrator = createAppMigrationOrchestrator({
+      migrations: [createMigration({ id: 'one-time', order: 10, detect })],
+      store,
+      now: () => 1_000,
+    })
+
+    await expect(orchestrator.inspect(context)).resolves.toEqual({
+      status: 'idle',
+      isResuming: false,
+    })
+    expect(orchestrator.getStartupDisposition(context)).toEqual({ kind: 'ready' })
+
+    await orchestrator.inspect(context)
+    expect(detect).toHaveBeenCalledTimes(1)
+    expect(store.value).toMatchObject({
+      cleanInspections: [
+        {
+          scopeId: 'device',
+          phase: 'local',
+          migrationId: 'one-time',
+          migrationVersion: 1,
+          inspectedAt: 1_000,
         },
       ],
     })
@@ -804,6 +837,32 @@ describe('appMigrationOrchestrator', () => {
       status: 'awaiting-confirmation',
       migrationId: 'recurring',
       completedStepIds: [],
+    })
+  })
+
+  it('does not redetect a recurring migration after explicit durable abandonment', async () => {
+    const store = createMemoryStore()
+    const migration = createMigration({
+      id: 'recurring-abandoned',
+      order: 10,
+      completionPolicy: 'recheck',
+      async detect() {
+        return { steps: [{ id: 'sync', label: 'recurring.sync' }] }
+      },
+      async executeStep() {
+        throw new Error('offline')
+      },
+    })
+    const orchestrator = createAppMigrationOrchestrator({ migrations: [migration], store })
+
+    await orchestrator.inspect(context)
+    await expect(orchestrator.run(context)).resolves.toMatchObject({ status: 'failed' })
+    await expect(orchestrator.abandon(context)).resolves.toMatchObject({
+      status: 'abandoned-after-failure',
+    })
+    await expect(orchestrator.inspect(context)).resolves.toEqual({
+      status: 'idle',
+      isResuming: false,
     })
   })
 
