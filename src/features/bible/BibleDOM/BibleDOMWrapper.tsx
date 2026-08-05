@@ -95,6 +95,7 @@ import {
   OPEN_CANONICAL_BIBLE_REFERENCE,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
+  OPEN_PASSAGE_MEDIA,
   OPEN_VERSE_TAGS_MODAL,
   OPEN_DOWNLOADS,
   REMOVE_PARALLEL_VERSION,
@@ -113,6 +114,7 @@ import {
   getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
   getNumberPayload,
+  getPassageMediaPayload,
   getStrongRelationSelectionPayload,
   getStringPayload,
   getStudyRelationsModalTarget,
@@ -132,7 +134,7 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { resetBiblesDb } from '~helpers/biblesDb'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strongSelection'
-import type { ResolvedPassageMediaChapter } from '../passageMedia'
+import type { ResolvedPassageMedia, ResolvedPassageMediaChapter } from '../passageMedia'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -219,6 +221,7 @@ export type WebViewProps = {
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
   passageMedia: ResolvedPassageMediaChapter
+  onOpenPassageMedia?: (items: ResolvedPassageMedia[]) => void
   openNote?: (noteId: string, verseIds?: string[]) => void
   openLink?: (linkId: string) => void
   setSelectedCode: (selectedCode: StrongSelection) => void
@@ -358,6 +361,7 @@ export const BibleDOMWrapper = ({
   onOpenResourceForVerse,
   onOpenStudyRelationsModal,
   onOpenCanonicalBibleReference,
+  onOpenPassageMedia,
   openNote,
   openLink,
   removeParallelVersion,
@@ -720,6 +724,12 @@ export const BibleDOMWrapper = ({
       case OPEN_CANONICAL_BIBLE_REFERENCE: {
         const osis = getStringPayload(action.payload)
         if (osis) onOpenCanonicalBibleReference?.(osis)
+        break
+      }
+
+      case OPEN_PASSAGE_MEDIA: {
+        const items = getPassageMediaPayload(action.payload)
+        if (items.length) onOpenPassageMedia?.(items)
         break
       }
 

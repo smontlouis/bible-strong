@@ -1220,11 +1220,12 @@ const LoadedBibleContent = ({
             {!!introComment && settings.commentsDisplay && (
               <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
             )}
-            {!annotationMode && !isContextFocused && (
+            {!isContextFocused && (
               <PassageMediaThumbnails
                 items={passageMedia.introduction}
                 placement="introduction"
                 settings={settings}
+                isDisabled={annotationMode}
               />
             )}
 
@@ -1283,11 +1284,12 @@ const LoadedBibleContent = ({
               void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
             }}
           />
-          {!annotationMode && !isContextFocused && (
+          {!isContextFocused && (
             <PassageMediaThumbnails
               items={passageMedia.chapterResources}
               placement="chapter-resources"
               settings={settings}
+              isDisabled={annotationMode}
             />
           )}
           <ReturnToSelectedVerseButton

@@ -123,7 +123,8 @@ import {
   getStrongSelectionRenderedContentKey,
   shouldDismissStrongSelectionForViewerState,
 } from './strongSelectionLifecycle'
-import { getPassageMediaForChapter } from './passageMedia'
+import { getPassageMediaForChapter, type ResolvedPassageMedia } from './passageMedia'
+import PassageMediaSheet from './PassageMediaSheet'
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -195,6 +196,8 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const strongSelectionModal = useSheet()
   const strongSelectionModalRef = strongSelectionModal.getRef()
   const [strongSelectionData, setStrongSelectionData] = useState<StrongSelection | null>(null)
+  const passageMediaModal = useSheet()
+  const [selectedPassageMedia, setSelectedPassageMedia] = useState<ResolvedPassageMedia[]>([])
 
   const [createRelationSourceEndpoint, setCreateRelationSourceEndpoint] =
     useState<RelationEndpoint | null>(null)
@@ -933,6 +936,11 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     canonicalBibleNoteModal.open()
   }
 
+  const handleOpenPassageMedia = (items: ResolvedPassageMedia[]) => {
+    setSelectedPassageMedia(items)
+    passageMediaModal.open()
+  }
+
   const handleCanonicalBibleReferencePress = (osis: string) => {
     const target = osisToBibleReferenceTarget(osis)
     if (!target) return
@@ -1062,6 +1070,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     versesWithNonHighlightTags: viewerPersonalData.versesWithNonHighlightTags,
     onOpenVerseTagsModal: hidePersonalBibleData ? undefined : handleOpenVerseTagsModal,
     onOpenCanonicalBibleNote: handleOpenCanonicalBibleNote,
+    onOpenPassageMedia: handleOpenPassageMedia,
     onOpenStudyRelationsModal: hidePersonalBibleData ? undefined : openVerseStudyRelationsModal,
     // Double-tap to enter annotation mode
     onEnterAnnotationMode: hidePersonalBibleData
@@ -1302,6 +1311,11 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         sheetRef={canonicalBibleNoteModal.getRef()}
         note={canonicalBibleNote}
         onReferencePress={handleCanonicalBibleReferencePress}
+      />
+      <PassageMediaSheet
+        sheetRef={passageMediaModal.getRef()}
+        items={selectedPassageMedia}
+        onClose={() => setSelectedPassageMedia([])}
       />
       <StrongSelectionSheet
         sheetRef={strongSelectionModalRef}

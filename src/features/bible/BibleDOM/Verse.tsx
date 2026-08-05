@@ -862,12 +862,13 @@ const Verse = ({
               text
             )}
           </VerseText>
-          {!annotationMode && passageMedia && (
+          {passageMedia && (
             <PassageMediaThumbnails
               items={passageMedia}
               placement="inline"
               settings={settings}
               isParallel={isParallel}
+              isDisabled={annotationMode}
             />
           )}
         </ContainerText>

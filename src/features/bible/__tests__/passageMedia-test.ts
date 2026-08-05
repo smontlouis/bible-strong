@@ -1,5 +1,5 @@
 import type { PassageMediaCatalog } from '../passageMedia'
-import { resolvePassageMediaChapter } from '../passageMedia'
+import { formatPassageMediaDuration, resolvePassageMediaChapter } from '../passageMedia'
 
 const catalog: PassageMediaCatalog = {
   attribution: {
@@ -145,5 +145,12 @@ describe('resolvePassageMediaChapter', () => {
         expect.objectContaining({ workId: 'chapter-context', title: 'Contexte du chapitre' }),
       ],
     })
+  })
+})
+
+describe('formatPassageMediaDuration', () => {
+  it('formats minute and hour-long video durations', () => {
+    expect(formatPassageMediaDuration(428)).toBe('7:08')
+    expect(formatPassageMediaDuration(3723)).toBe('1:02:03')
   })
 })

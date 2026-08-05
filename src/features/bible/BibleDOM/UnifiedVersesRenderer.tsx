@@ -358,6 +358,7 @@ export function UnifiedVersesRenderer({
                 taggedItemsCount={taggedVersesInChapter?.[verseNumber] || 0}
                 hasNonHighlightTags={versesWithNonHighlightTags?.[verseNumber]}
                 redWords={redWords}
+                passageMedia={passageMediaAfterVerses[verseNumber]}
               />
             </Span>
           )

@@ -2,6 +2,7 @@ import {
   getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
   getNumberPayload,
+  getPassageMediaPayload,
   getStrongRelationSelectionPayload,
   getStringPayload,
   getStudyRelationsModalTarget,
@@ -97,5 +98,22 @@ describe('bibleDomBridgeCommands', () => {
     expect(
       getCanonicalBibleNotePayload({ kind: 'note', markup: 'missing offsets' })
     ).toBeUndefined()
+  })
+
+  it('accepts only complete passage media items from the DOM bridge', () => {
+    const media = {
+      workId: 'genesis-overview',
+      editionId: 'genesis-overview:fr',
+      attributionLabel: 'BibleProject',
+      provider: 'youtube',
+      providerId: 'video-1',
+      sourceUrl: 'https://www.youtube.com/watch?v=video-1',
+      thumbnailUrl: 'https://img.test/video-1.jpg',
+      title: 'Genèse - Panorama',
+      durationSeconds: 428,
+    }
+
+    expect(getPassageMediaPayload([media, { ...media, title: null }])).toEqual([media])
+    expect(getPassageMediaPayload({ media })).toEqual([])
   })
 })
