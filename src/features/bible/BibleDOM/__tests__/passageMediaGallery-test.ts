@@ -25,6 +25,7 @@ describe('getPassageMediaGallerySections', () => {
       getPassageMediaGallerySections({
         passageMedia: {
           introduction: [introduction],
+          isIntroductionStartChapter: true,
           afterVerses: { 3: [passage], 5: [passage] },
           chapterResources: [chapterResource],
         },
@@ -55,6 +56,7 @@ describe('getPassageMediaGallerySections', () => {
     const sections = getPassageMediaGallerySections({
       passageMedia: {
         introduction: [],
+        isIntroductionStartChapter: false,
         afterVerses: { 7: [passage] },
         chapterResources: [],
       },

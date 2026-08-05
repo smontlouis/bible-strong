@@ -72,6 +72,7 @@ export type ResolvedPassageMedia = Pick<
 
 export type ResolvedPassageMediaChapter = {
   introduction: ResolvedPassageMedia[]
+  isIntroductionStartChapter: boolean
   afterVerses: Record<number, ResolvedPassageMedia[]>
   chapterResources: ResolvedPassageMedia[]
 }
@@ -167,10 +168,16 @@ export const resolvePassageMediaChapter = (
 ): ResolvedPassageMediaChapter => {
   const result: ResolvedPassageMediaChapter = {
     introduction: [],
+    isIntroductionStartChapter: false,
     afterVerses: {},
     chapterResources: [],
   }
-  const workIds = catalog.indexes.chapters[`${book}:${chapter}`] ?? []
+  const workIds = new Set(catalog.indexes.chapters[`${book}:${chapter}`] ?? [])
+  catalog.works.forEach(work => {
+    if (work.anchors.some(anchor => anchor.book === book && anchor.placement === 'introduction')) {
+      workIds.add(work.id)
+    }
+  })
   const works = getWorksById(catalog)
 
   for (const workId of workIds) {
@@ -186,10 +193,15 @@ export const resolvePassageMediaChapter = (
       if (
         anchor.relevance === 'primary' &&
         anchor.placement === 'introduction' &&
-        ((anchor.kind === 'book' && chapter === 1) ||
-          (anchor.kind === 'passage' && anchor.chapterStart === chapter))
+        (anchor.kind === 'book' ||
+          (anchor.kind === 'passage' &&
+            anchor.chapterStart !== undefined &&
+            chapter >= anchor.chapterStart &&
+            chapter <= (anchor.chapterEnd ?? anchor.chapterStart)))
       ) {
         result.introduction = appendUniqueEdition(result.introduction, edition)
+        const introductionStartChapter = anchor.kind === 'book' ? 1 : anchor.chapterStart
+        if (chapter === introductionStartChapter) result.isIntroductionStartChapter = true
         continue
       }
 

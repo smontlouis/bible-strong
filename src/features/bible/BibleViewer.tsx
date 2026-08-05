@@ -127,6 +127,7 @@ import { getPassageMediaForChapter } from './passageMedia'
 
 const EMPTY_PASSAGE_MEDIA = {
   introduction: [],
+  isIntroductionStartChapter: false,
   afterVerses: {},
   chapterResources: [],
 } satisfies ReturnType<typeof getPassageMediaForChapter>

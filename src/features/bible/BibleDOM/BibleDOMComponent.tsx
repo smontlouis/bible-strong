@@ -1230,6 +1230,7 @@ const LoadedBibleContent = ({
                 placement="introduction"
                 settings={settings}
                 isDisabled={annotationMode}
+                isCompact={!passageMedia.isIntroductionStartChapter}
               />
             )}
 

@@ -16,6 +16,7 @@ type Props = RootStyles & {
   placement: 'introduction' | 'inline' | 'chapter-resources'
   isParallel?: boolean
   isDisabled?: boolean
+  isCompact?: boolean
   blockMargin?: CSSProperties['margin']
   gallerySections: PassageMediaGallerySection[]
 }
@@ -32,6 +33,12 @@ const INTRODUCTION_THUMBNAIL = {
   height: 76,
   aspectRatio: 16 / 9,
   margin: '10px auto 28px',
+}
+
+const COMPACT_INTRODUCTION_THUMBNAIL = {
+  height: 30,
+  aspectRatio: 1.6,
+  margin: '-18px 0 20px',
 }
 
 const CHAPTER_RESOURCES_THUMBNAIL = {
@@ -65,6 +72,7 @@ const PassageMediaThumbnails = ({
   settings,
   isParallel,
   isDisabled = false,
+  isCompact = false,
   blockMargin,
   gallerySections,
 }: Props) => {
@@ -116,19 +124,17 @@ const PassageMediaThumbnails = ({
       )
       inlineScrollScale.set(1 - progress * (1 - INLINE_SCROLL_SCALE.minimumScale))
     })
-  }, [
-    inlineScrollScale,
-    introductionParallaxScale,
-    mode,
-    placement,
-    shouldReduceMotion,
-  ])
+  }, [inlineScrollScale, introductionParallaxScale, mode, placement, shouldReduceMotion])
 
   if (!items.length) return null
 
   const isInline = placement === 'inline'
   const blockThumbnail =
-    placement === 'introduction' ? INTRODUCTION_THUMBNAIL : CHAPTER_RESOURCES_THUMBNAIL
+    placement === 'introduction'
+      ? isCompact
+        ? COMPACT_INTRODUCTION_THUMBNAIL
+        : INTRODUCTION_THUMBNAIL
+      : CHAPTER_RESOURCES_THUMBNAIL
   const inlineCardHeight =
     INLINE_THUMBNAIL.height * (isParallel ? INLINE_THUMBNAIL.parallelScale : 1)
   const inlineCardWidth = inlineCardHeight * INLINE_THUMBNAIL.aspectRatio
@@ -146,6 +152,9 @@ const PassageMediaThumbnails = ({
     : cardWidth
   const colors = settings.colors[settings.theme]
   const stackedItems = items.slice(0, MAX_STACKED_THUMBNAILS)
+  const layoutTransition = shouldReduceMotion
+    ? { duration: 0 }
+    : { type: 'spring' as const, stiffness: 360, damping: 34, mass: 0.8 }
   const stackStyle: CSSProperties = {
     position: 'relative',
     display: isInline ? 'inline-grid' : 'grid',
@@ -171,6 +180,7 @@ const PassageMediaThumbnails = ({
       <LayoutGroup id={layoutGroupId}>
         <m.button
           ref={stackRef}
+          layoutId={placement === 'introduction' ? 'passage-media-introduction-stack' : undefined}
           type="button"
           disabled={isDisabled}
           aria-disabled={isDisabled}
@@ -204,11 +214,7 @@ const PassageMediaThumbnails = ({
                 layoutId={item.editionId}
                 key={item.editionId}
                 loading="lazy"
-                transition={{
-                  layout: shouldReduceMotion
-                    ? { duration: 0 }
-                    : { type: 'spring', stiffness: 360, damping: 34, mass: 0.8 },
-                }}
+                transition={{ layout: layoutTransition }}
                 style={{
                   gridArea: '1 / 1',
                   display: 'block',
@@ -217,7 +223,7 @@ const PassageMediaThumbnails = ({
                   boxSizing: 'border-box',
                   placeSelf: 'center',
                   border: `2px solid ${colors.reverse}`,
-                  borderRadius: isInline ? 5 : 9,
+                  borderRadius: isCompact ? 7 : isInline ? 5 : 9,
                   boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
                   x: transform.x,
                   rotate: transform.rotate,

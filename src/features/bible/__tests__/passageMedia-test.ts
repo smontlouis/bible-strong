@@ -179,6 +179,32 @@ const catalog: PassageMediaCatalog = {
         },
       ],
     },
+    {
+      id: 'section-overview',
+      editions: {
+        fr: {
+          id: 'section-overview:fr',
+          language: 'fr',
+          provider: 'youtube',
+          providerId: 'section-overview-fr',
+          sourceUrl: 'https://www.youtube.com/watch?v=section-overview-fr',
+          title: 'Vue d’ensemble de la section',
+          thumbnailUrl: 'https://img.test/section-overview.jpg',
+          blurHash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+          durationSeconds: 300,
+        },
+      },
+      anchors: [
+        {
+          kind: 'passage',
+          book: 1,
+          chapterStart: 12,
+          chapterEnd: 50,
+          placement: 'introduction',
+          relevance: 'primary',
+        },
+      ],
+    },
   ],
   indexes: {
     chapters: {
@@ -208,6 +234,7 @@ describe('resolvePassageMediaChapter', () => {
           blurHash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
         }),
       ],
+      isIntroductionStartChapter: true,
       afterVerses: {
         3: [expect.objectContaining({ workId: 'creation', title: 'La création' })],
         5: [
@@ -222,6 +249,26 @@ describe('resolvePassageMediaChapter', () => {
         expect.objectContaining({ workId: 'chapter-context', title: 'Contexte du chapitre' }),
       ],
     })
+  })
+
+  it('marks a section introduction as large only on its first linked chapter', () => {
+    const firstChapter = resolvePassageMediaChapter(catalog, {
+      book: 1,
+      chapter: 12,
+      language: 'fr',
+    })
+    const followingChapter = resolvePassageMediaChapter(catalog, {
+      book: 1,
+      chapter: 13,
+      language: 'fr',
+    })
+
+    expect(firstChapter.introduction).toEqual([
+      expect.objectContaining({ workId: 'genesis-overview' }),
+      expect.objectContaining({ workId: 'section-overview' }),
+    ])
+    expect(firstChapter.isIntroductionStartChapter).toBe(true)
+    expect(followingChapter.isIntroductionStartChapter).toBe(false)
   })
 })
 
