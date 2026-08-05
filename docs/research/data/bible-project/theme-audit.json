@@ -3,17 +3,17 @@
   "generatedAt": "2026-08-05T06:55:47.222Z",
   "totals": {
     "works": 57,
-    "editions": 111,
+    "editions": 112,
     "englishEditions": 57,
-    "frenchEditions": 54,
-    "bilingualWorks": 54,
-    "englishOnlyWorks": 3,
+    "frenchEditions": 55,
+    "bilingualWorks": 55,
+    "englishOnlyWorks": 2,
     "frenchOnlyWorks": 0,
     "reviewedAnchors": 141,
     "primaryAnchors": 57,
     "relatedAnchors": 84,
     "excludedSourceRecords": 22,
-    "crossCategoryEditions": 7
+    "crossCategoryEditions": 8
   },
   "series": {
     "biblical-themes": 32,
@@ -58,8 +58,7 @@
   "missingEditions": {
     "fr": [
       "bp-theme-ten-commandments-09-truthful-witness",
-      "bp-theme-ten-commandments-10-desire",
-      "bp-theme-son-of-man"
+      "bp-theme-ten-commandments-10-desire"
     ],
     "en": []
   },
@@ -222,6 +221,7 @@
       "sDnohPQxLD8",
       "G_OlRWGLdnw",
       "ZjoRCeqpUSA",
+      "9lxl6CS1RJk",
       "4eBBvA8zzxI",
       "62CliEkRCso",
       "sR4AT0LMJ5c"

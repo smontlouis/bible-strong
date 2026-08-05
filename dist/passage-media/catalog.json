@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "passage-media",
+  "revision": "sha256:d3a1fa72bd6d1bc43030354a1b4fd0d6e847c68b24752c6b4c9afc789ebb37ee",
+  "generatedAt": "2026-08-05T06:55:47.222Z",
+  "languages": [
+    "fr",
+    "en"
+  ],
+  "languagePolicy": "strict-route-language-no-fallback",
+  "access": "free",
+  "attribution": {
+    "label": "BibleProject",
+    "url": "https://bibleproject.com/",
+    "termsUrl": "https://bibleproject.com/terms/"
+  },
+  "artifact": {
+    "path": "passage-media.json",
+    "sha256": "0a9804642b7e51c745859de711cc2f9c9939c662baf743452a8ca06880a3437c",
+    "bytes": 470197
+  },
+  "counts": {
+    "works": 286,
+    "editions": 491,
+    "frEditions": 214,
+    "enEditions": 277,
+    "anchors": 515,
+    "indexedChapters": 493,
+    "indexedStrongs": 43,
+    "libraryWorks": 28
+  }
+}

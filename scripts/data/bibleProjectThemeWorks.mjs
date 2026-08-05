@@ -491,7 +491,7 @@ export const BIBLE_PROJECT_THEME_WORKS = [
     'bp-theme-son-of-man',
     'biblical-themes',
     'https://bibleproject.com/videos/son-of-man/',
-    { en: 'z6cWEcqxhlI' },
+    { en: 'z6cWEcqxhlI', fr: '9lxl6CS1RJk' },
     passage(27, 7, 13, 7, 14),
     [related(41, 14, 61, 14, 64)]
   ),

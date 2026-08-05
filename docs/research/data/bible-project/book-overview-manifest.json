@@ -62,7 +62,7 @@
           "book": 1,
           "chapterStart": 1,
           "chapterEnd": 1,
-          "placement": "chapter-resources",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "editorial-review"
@@ -111,7 +111,7 @@
           "book": 1,
           "chapterStart": 1,
           "chapterEnd": 11,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -160,7 +160,7 @@
           "book": 1,
           "chapterStart": 12,
           "chapterEnd": 50,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -209,7 +209,7 @@
           "book": 2,
           "chapterStart": 1,
           "chapterEnd": 18,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -258,7 +258,7 @@
           "book": 2,
           "chapterStart": 19,
           "chapterEnd": 40,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -305,7 +305,7 @@
         {
           "kind": "book",
           "book": 3,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -352,7 +352,7 @@
         {
           "kind": "book",
           "book": 4,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -399,7 +399,7 @@
         {
           "kind": "book",
           "book": 5,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -446,7 +446,7 @@
         {
           "kind": "book",
           "book": 6,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -493,7 +493,7 @@
         {
           "kind": "book",
           "book": 7,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -540,7 +540,7 @@
         {
           "kind": "book",
           "book": 8,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -587,7 +587,7 @@
         {
           "kind": "book",
           "book": 9,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -634,7 +634,7 @@
         {
           "kind": "book",
           "book": 10,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -681,7 +681,7 @@
         {
           "kind": "book",
           "book": 11,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -689,7 +689,7 @@
         {
           "kind": "book",
           "book": 12,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -736,7 +736,7 @@
         {
           "kind": "book",
           "book": 13,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -744,7 +744,7 @@
         {
           "kind": "book",
           "book": 14,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -791,7 +791,7 @@
         {
           "kind": "book",
           "book": 15,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -799,7 +799,7 @@
         {
           "kind": "book",
           "book": 16,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -846,7 +846,7 @@
         {
           "kind": "book",
           "book": 17,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -893,7 +893,7 @@
         {
           "kind": "book",
           "book": 18,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -940,7 +940,7 @@
         {
           "kind": "book",
           "book": 19,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -987,7 +987,7 @@
         {
           "kind": "book",
           "book": 20,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1034,7 +1034,7 @@
         {
           "kind": "book",
           "book": 21,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1081,7 +1081,7 @@
         {
           "kind": "book",
           "book": 22,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1130,7 +1130,7 @@
           "book": 23,
           "chapterStart": 1,
           "chapterEnd": 39,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -1179,7 +1179,7 @@
           "book": 23,
           "chapterStart": 40,
           "chapterEnd": 66,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -1226,7 +1226,7 @@
         {
           "kind": "book",
           "book": 24,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1273,7 +1273,7 @@
         {
           "kind": "book",
           "book": 25,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1322,7 +1322,7 @@
           "book": 26,
           "chapterStart": 1,
           "chapterEnd": 33,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -1371,7 +1371,7 @@
           "book": 26,
           "chapterStart": 34,
           "chapterEnd": 48,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -1418,7 +1418,7 @@
         {
           "kind": "book",
           "book": 27,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1465,7 +1465,7 @@
         {
           "kind": "book",
           "book": 28,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1512,7 +1512,7 @@
         {
           "kind": "book",
           "book": 29,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1559,7 +1559,7 @@
         {
           "kind": "book",
           "book": 30,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1606,7 +1606,7 @@
         {
           "kind": "book",
           "book": 31,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1653,7 +1653,7 @@
         {
           "kind": "book",
           "book": 32,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1700,7 +1700,7 @@
         {
           "kind": "book",
           "book": 33,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1747,7 +1747,7 @@
         {
           "kind": "book",
           "book": 34,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1794,7 +1794,7 @@
         {
           "kind": "book",
           "book": 35,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1841,7 +1841,7 @@
         {
           "kind": "book",
           "book": 36,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1888,7 +1888,7 @@
         {
           "kind": "book",
           "book": 37,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1935,7 +1935,7 @@
         {
           "kind": "book",
           "book": 38,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -1982,7 +1982,7 @@
         {
           "kind": "book",
           "book": 39,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2039,7 +2039,7 @@
           "book": 40,
           "chapterStart": 1,
           "chapterEnd": 1,
-          "placement": "chapter-resources",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "editorial-review"
@@ -2088,7 +2088,7 @@
           "book": 40,
           "chapterStart": 1,
           "chapterEnd": 13,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2137,7 +2137,7 @@
           "book": 40,
           "chapterStart": 14,
           "chapterEnd": 28,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2184,7 +2184,7 @@
         {
           "kind": "book",
           "book": 41,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2233,7 +2233,7 @@
           "book": 42,
           "chapterStart": 1,
           "chapterEnd": 9,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2282,7 +2282,7 @@
           "book": 42,
           "chapterStart": 10,
           "chapterEnd": 24,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2331,7 +2331,7 @@
           "book": 43,
           "chapterStart": 1,
           "chapterEnd": 12,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2380,7 +2380,7 @@
           "book": 43,
           "chapterStart": 13,
           "chapterEnd": 21,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2429,7 +2429,7 @@
           "book": 44,
           "chapterStart": 1,
           "chapterEnd": 12,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2478,7 +2478,7 @@
           "book": 44,
           "chapterStart": 13,
           "chapterEnd": 28,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2527,7 +2527,7 @@
           "book": 45,
           "chapterStart": 1,
           "chapterEnd": 4,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2576,7 +2576,7 @@
           "book": 45,
           "chapterStart": 5,
           "chapterEnd": 16,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -2623,7 +2623,7 @@
         {
           "kind": "book",
           "book": 46,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2670,7 +2670,7 @@
         {
           "kind": "book",
           "book": 47,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2717,7 +2717,7 @@
         {
           "kind": "book",
           "book": 48,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2764,7 +2764,7 @@
         {
           "kind": "book",
           "book": 49,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2796,7 +2796,7 @@
         {
           "kind": "book",
           "book": 50,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2843,7 +2843,7 @@
         {
           "kind": "book",
           "book": 51,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2890,7 +2890,7 @@
         {
           "kind": "book",
           "book": 52,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2937,7 +2937,7 @@
         {
           "kind": "book",
           "book": 53,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -2984,7 +2984,7 @@
         {
           "kind": "book",
           "book": 54,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3031,7 +3031,7 @@
         {
           "kind": "book",
           "book": 55,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3078,7 +3078,7 @@
         {
           "kind": "book",
           "book": 56,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3125,7 +3125,7 @@
         {
           "kind": "book",
           "book": 57,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3172,7 +3172,7 @@
         {
           "kind": "book",
           "book": 58,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3219,7 +3219,7 @@
         {
           "kind": "book",
           "book": 59,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3266,7 +3266,7 @@
         {
           "kind": "book",
           "book": 60,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3313,7 +3313,7 @@
         {
           "kind": "book",
           "book": 61,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3360,7 +3360,7 @@
         {
           "kind": "book",
           "book": 62,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3368,7 +3368,7 @@
         {
           "kind": "book",
           "book": 63,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3376,7 +3376,7 @@
         {
           "kind": "book",
           "book": 64,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3423,7 +3423,7 @@
         {
           "kind": "book",
           "book": 65,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-official-playlist"
@@ -3472,7 +3472,7 @@
           "book": 66,
           "chapterStart": 1,
           "chapterEnd": 11,
-          "placement": "book-intro",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"
@@ -3521,7 +3521,7 @@
           "book": 66,
           "chapterStart": 12,
           "chapterEnd": 22,
-          "placement": "before-range",
+          "placement": "introduction",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "publisher-title-and-localized-edition-range"

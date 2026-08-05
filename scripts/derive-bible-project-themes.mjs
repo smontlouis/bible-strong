@@ -37,7 +37,7 @@ const reviewedAnchor = (anchor, defaultEvidenceUrl) => {
   const { evidenceUrl, relevance = 'primary', provenance, ...range } = anchor
   return {
     ...range,
-    placement: relevance === 'primary' ? 'chapter-resources' : 'related-resource',
+    placement: relevance === 'primary' ? 'after-range' : 'related-resource',
     relevance,
     reviewStatus: 'reviewed',
     provenance,
@@ -208,8 +208,8 @@ const main = async () => {
     throw new Error('Theme edition IDs must be unique')
   if (
     works.length !== 57 ||
-    editionIds.length !== 111 ||
-    works.filter(work => work.editions.length === 2).length !== 54
+    editionIds.length !== 112 ||
+    works.filter(work => work.editions.length === 2).length !== 55
   )
     throw new Error('Unexpected reviewed theme corpus topology')
   await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`)
@@ -298,12 +298,12 @@ const main = async () => {
   }
   if (
     audit.totals.englishEditions !== 57 ||
-    audit.totals.frenchEditions !== 54 ||
-    audit.totals.englishOnlyWorks !== 3 ||
+    audit.totals.frenchEditions !== 55 ||
+    audit.totals.englishOnlyWorks !== 2 ||
     audit.totals.frenchOnlyWorks !== 0 ||
     audit.totals.primaryAnchors !== 57 ||
     audit.totals.excludedSourceRecords !== 22 ||
-    audit.totals.crossCategoryEditions !== 7 ||
+    audit.totals.crossCategoryEditions !== 8 ||
     audit.sourceCoverage.expectedCategoryRecords !== 126 ||
     audit.sourceCoverage.assignedCategoryRecords !== 104
   )

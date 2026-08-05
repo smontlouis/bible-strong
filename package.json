@@ -56,8 +56,11 @@
     "bible-project:derive:anchor-dossiers": "node scripts/derive-bible-project-anchor-dossiers.mjs",
     "bible-project:prepare:anchor-agents": "node scripts/prepare-bible-project-anchor-agent-batches.mjs",
     "bible-project:aggregate:anchor-proposals": "node scripts/aggregate-bible-project-anchor-proposals.mjs",
+    "bible-project:derive:associated-resources": "node scripts/derive-bible-project-associated-resources.mjs",
+    "bible-project:curation:apply": "node scripts/apply-bible-project-curation.mjs",
+    "bible-project:export:production": "node scripts/export-bible-project-production.mjs",
     "bible-project:anchors:prepare": "yarn bible-project:transcripts && yarn bible-project:derive:anchor-dossiers && yarn bible-project:prepare:anchor-agents",
-    "bible-project:anchors:finalize": "yarn bible-project:aggregate:anchor-proposals && yarn bible-project:derive:presentation",
+    "bible-project:anchors:finalize": "yarn bible-project:aggregate:anchor-proposals && yarn bible-project:derive:associated-resources && yarn bible-project:derive:presentation",
     "android": "expo run:android",
     "ios": "expo run:ios"
   },

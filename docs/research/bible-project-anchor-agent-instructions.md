@@ -19,7 +19,7 @@ text or biblical locus actually taught, not every verse mentioned in passing.
 ## Placement rules
 
 - Exact commentary/exposition: `after-range`.
-- Whole-book literary material: `book-intro`.
+- Whole-book literary material: `introduction`.
 - Broad theme with a representative primary chapter: `chapter-resources`.
 - Lexical study with a reliable code: `strong-resource`.
 - No honest biblical target: `library`.

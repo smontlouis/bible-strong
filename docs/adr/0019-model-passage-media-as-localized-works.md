@@ -23,12 +23,12 @@ never fall back from French to English or from English to French.
 Keep content category separate from Passage media anchors. Anchors target books, passages, verse
 ranges, Strong entries, or related study contexts and declare placement, relevance, review status,
 and provenance. Only reviewed anchors are publishable. For reviewed book overviews, a full-book
-anchor uses `book-intro`, the first section of a split book also uses `book-intro`, and each later
-section uses `before-range`. Testament-wide overviews remain `library` resources and also expose one
+anchor uses `introduction`, the first section of a split book also uses `introduction`, and each later
+section uses `introduction`. Testament-wide overviews remain `library` resources and also expose one
 reviewed `chapter-resources` entry point (Old Testament at Genesis 1, New Testament at Matthew 1), rather than being
 repeated on every book or chapter.
 
-For thematic works, exactly one reviewed primary passage determines automatic chapter-end placement
+For thematic works, exactly one reviewed primary passage determines automatic `after-range` placement
 in the Bible view. Additional related passages remain discoverability metadata and use a separate
 index; they never multiply automatic “Pour aller plus loin” cards. Nave is not a dependency of
 thematic placement. Provider records that are trailers, promotions, Q+R, studio material,

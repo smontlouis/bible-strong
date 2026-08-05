@@ -98,8 +98,8 @@ Twenty works anchor split book sections, four works anchor multiple books, and t
 overviews remain library resources rather than appearing on every chapter. They have one reviewed
 end-of-chapter entry point each: the Old Testament overview at Genesis 1 and the New Testament
 overview at Matthew 1. Per-language book indexes
-contain only works with an edition in that exact language. Full-book works use `book-intro`; later
-split sections use `before-range`. All anchors in this subset are reviewed from publisher titles and
+contain only works with an edition in that exact language. Full-book works use `introduction`; later
+split sections use `introduction`. All anchors in this subset are reviewed from publisher titles and
 official playlist membership rather than inferred from plan reading context.
 
 ## Reviewed visual commentary manifest
@@ -175,8 +175,8 @@ type PassageMedia = {
     chapterEnd?: number
     verseEnd?: number
     placement:
-      | 'book-intro'
-      | 'before-range'
+      | 'introduction'
+      | 'introduction'
       | 'after-range'
       | 'chapter-resources'
       | 'related-resource'

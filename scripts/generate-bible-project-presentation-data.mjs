@@ -64,6 +64,7 @@ const main = async () => {
     visualCommentary,
     wordStudy,
     themes,
+    associatedResources,
     visualCommentaryAudit,
     themeAudit,
     anchorProposals,
@@ -73,13 +74,14 @@ const main = async () => {
     readJson('visual-commentary-manifest.json'),
     readJson('word-study-manifest.json'),
     readJson('theme-manifest.json'),
+    readJson('associated-resource-manifest.json'),
     readJson('visual-commentary-audit.json'),
     readJson('theme-audit.json'),
     readJson('anchor-proposals.json'),
   ])
 
   const worksById = new Map()
-  for (const manifest of [bookOverview, visualCommentary, wordStudy, themes]) {
+  for (const manifest of [bookOverview, visualCommentary, wordStudy, themes, associatedResources]) {
     for (const sourceWork of manifest.works) {
       if (worksById.has(sourceWork.id))
         throw new Error(`Concrete work ${sourceWork.id} is owned by more than one manifest`)
@@ -115,9 +117,9 @@ const main = async () => {
       ])
     }
   }
-  if (works.length !== 174) throw new Error(`Expected 174 unique works, received ${works.length}`)
-  if (editions.length !== 338)
-    throw new Error(`Expected 338 concrete editions, received ${editions.length}`)
+  if (works.length !== 286) throw new Error(`Expected 286 unique works, received ${works.length}`)
+  if (editions.length !== 491)
+    throw new Error(`Expected 491 concrete editions, received ${editions.length}`)
   if (new Set(providerIds).size !== providerIds.length)
     throw new Error('A provider video is published by more than one concrete work')
   const unsupportedFormatIds = providerIds.filter(providerId => {
@@ -136,7 +138,28 @@ const main = async () => {
   if (exclusionByProviderId.size !== exclusions.length)
     throw new Error('A provider video is excluded by more than one editorial audit')
 
-  const rejectionReasonsFor = video => {
+  const allProposalIds = anchorProposals.records.map(proposal => proposal.providerId)
+  if (new Set(allProposalIds).size !== allProposalIds.length)
+    throw new Error('Anchor proposals contain duplicate provider IDs')
+  const associatedProviderIds = new Set(
+    associatedResources.works.flatMap(work => work.editions.map(edition => edition.providerId))
+  )
+  const acceptedAnchorProposals = anchorProposals.records.filter(
+    proposal =>
+      proposal.reviewStatus === 'human-accepted' && associatedProviderIds.has(proposal.providerId)
+  )
+  const curatedRejectedIds = new Set(
+    anchorProposals.records
+      .filter(proposal => proposal.reviewStatus === 'human-rejected')
+      .map(proposal => proposal.providerId)
+  )
+  const unresolvedProposalIds = anchorProposals.records
+    .filter(proposal => !['human-accepted', 'human-rejected'].includes(proposal.reviewStatus))
+    .map(proposal => proposal.providerId)
+  if (unresolvedProposalIds.length)
+    throw new Error(`Anchor proposals still need human review: ${unresolvedProposalIds.join(', ')}`)
+
+  const baselineRejectionReasonsFor = video => {
     const explicitReason = exclusionByProviderId.get(video.id)?.reason
     return [
       explicitReason,
@@ -144,6 +167,23 @@ const main = async () => {
       video.category === 'studio' ? 'studio-content' : null,
     ].filter((reason, index, reasons) => reason && reasons.indexOf(reason) === index)
   }
+  const rejectionReasonsFor = video => [
+    ...(curatedRejectedIds.has(video.id) ? ['human-editorial-rejection'] : []),
+    ...baselineRejectionReasonsFor(video),
+  ]
+
+  const baselineRejectedIds = new Set(
+    catalog.videos.filter(video => baselineRejectionReasonsFor(video).length).map(video => video.id)
+  )
+  if (baselineRejectedIds.size !== 284)
+    throw new Error(`Expected 284 baseline rejected videos, received ${baselineRejectedIds.size}`)
+  const alreadyRejectedCuratedIds = [...curatedRejectedIds].filter(providerId =>
+    baselineRejectedIds.has(providerId)
+  )
+  if (alreadyRejectedCuratedIds.length)
+    throw new Error(
+      `Human curation redundantly rejects baseline exclusions: ${alreadyRejectedCuratedIds.join(', ')}`
+    )
 
   const excludedVideos = catalog.videos.flatMap(video => {
     const reasons = rejectionReasonsFor(video)
@@ -170,17 +210,11 @@ const main = async () => {
   if (placedRejectedIds.length)
     throw new Error(`Rejected videos are still placed: ${placedRejectedIds.join(', ')}`)
 
-  const proposalIds = anchorProposals.records.map(proposal => proposal.providerId)
-  if (new Set(proposalIds).size !== proposalIds.length)
-    throw new Error('Anchor proposals contain duplicate provider IDs')
+  const proposalIds = acceptedAnchorProposals.map(proposal => proposal.providerId)
   const anchorProposalByProviderId = new Map(
-    anchorProposals.records.map(proposal => [proposal.providerId, proposal])
+    acceptedAnchorProposals.map(proposal => [proposal.providerId, proposal])
   )
-  const expectedProposalIds = new Set(
-    catalog.videos
-      .filter(video => !rejectedProviderIds.has(video.id) && !workIdsByProviderId.has(video.id))
-      .map(video => video.id)
-  )
+  const expectedProposalIds = associatedProviderIds
   const missingProposalIds = [...expectedProposalIds].filter(
     providerId => !anchorProposalByProviderId.has(providerId)
   )
@@ -199,13 +233,15 @@ const main = async () => {
       ? 'placed'
       : exclusionReasons.length
         ? 'rejected-reviewed'
-        : video.suitability === 'exclude'
-          ? 'classified-out-of-scope'
-          : video.suitability === 'inline-primary'
-            ? 'inline-candidate'
-            : video.suitability === 'related'
-              ? 'related-candidate'
-              : 'needs-review'
+        : anchorProposalByProviderId.has(video.id)
+          ? 'associated-placed'
+          : video.suitability === 'exclude'
+            ? 'classified-out-of-scope'
+            : video.suitability === 'inline-primary'
+              ? 'inline-candidate'
+              : video.suitability === 'related'
+                ? 'related-candidate'
+                : 'needs-review'
     return {
       id: video.id,
       language: video.language,
@@ -217,7 +253,7 @@ const main = async () => {
       ...(exclusionReasons.length
         ? { exclusionReason: exclusionReasons[0], exclusionReasons }
         : {}),
-      ...(anchorProposalByProviderId.has(video.id)
+      ...(anchorProposalByProviderId.has(video.id) && !workIds.length
         ? { anchorProposal: anchorProposalByProviderId.get(video.id) }
         : {}),
       thumbnailUrl: video.thumbnailUrl,
@@ -238,11 +274,19 @@ const main = async () => {
 
   if (inventory.length !== 795)
     throw new Error(`Expected 795 inventory records, received ${inventory.length}`)
-  if (excludedVideos.length !== 284)
-    throw new Error(`Expected 284 rejected videos, received ${excludedVideos.length}`)
+  const expectedExclusionCount = baselineRejectedIds.size + curatedRejectedIds.size
+  if (excludedVideos.length !== expectedExclusionCount)
+    throw new Error(
+      `Expected ${expectedExclusionCount} rejected videos, received ${excludedVideos.length}`
+    )
+  const unownedProviderIds = catalog.videos
+    .filter(video => !workIdsByProviderId.has(video.id) && !rejectedProviderIds.has(video.id))
+    .map(video => video.id)
+  if (unownedProviderIds.length)
+    throw new Error(`Published videos are missing a resource: ${unownedProviderIds.join(', ')}`)
 
   const output = {
-    schemaVersion: 4,
+    schemaVersion: 5,
     generatedAt: catalog.generatedAt,
     totals: {
       works: works.length,

@@ -539,11 +539,11 @@
   },
   "visualCommentaryManifest": {
     "works": 24,
-    "editions": 42,
+    "editions": 43,
     "englishEditions": 19,
-    "frenchEditions": 23,
+    "frenchEditions": 24,
     "excludedSourceRecords": 3,
-    "crossCategoryEditions": 1,
+    "crossCategoryEditions": 2,
     "strictLanguageSelection": true
   },
   "wordStudyManifest": {
@@ -559,11 +559,11 @@
   },
   "themeManifest": {
     "works": 57,
-    "editions": 111,
+    "editions": 112,
     "englishEditions": 57,
-    "frenchEditions": 54,
+    "frenchEditions": 55,
     "excludedSourceRecords": 22,
-    "crossCategoryEditions": 7,
+    "crossCategoryEditions": 8,
     "strictLanguageSelection": true,
     "bibleViewOnly": true
   }

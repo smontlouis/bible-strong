@@ -11,6 +11,10 @@ config.js
 config.ts
 
 dist/
+!/dist/
+/dist/*
+!/dist/passage-media/
+!/dist/passage-media/*.json
 .expo/
 src/assets/db/
 

@@ -60,8 +60,8 @@ const validateRegistry = catalogVideos => {
     throw new Error('A provider video is assigned to multiple visual commentary works')
   if (editionProviderIds.some(id => excludedProviderIds.includes(id)))
     throw new Error('A visual commentary provider video is both assigned and excluded')
-  if (editionProviderIds.length !== 42)
-    throw new Error(`Expected 42 visual commentary editions, received ${editionProviderIds.length}`)
+  if (editionProviderIds.length !== 43)
+    throw new Error(`Expected 43 visual commentary editions, received ${editionProviderIds.length}`)
 
   const categoryVideos = catalogVideos.filter(video => video.category === 'visual-commentary')
   if (categoryVideos.length !== 44)
@@ -82,7 +82,10 @@ const validateRegistry = catalogVideos => {
   const crossCategoryEditionProviderIds = editionProviderIds.filter(
     id => !categoryVideos.some(video => video.id === id)
   )
-  if (JSON.stringify(crossCategoryEditionProviderIds) !== JSON.stringify(['r4A91QVsUlI']))
+  if (
+    JSON.stringify([...crossCategoryEditionProviderIds].sort()) !==
+    JSON.stringify(['V8-yWbv7fZY', 'r4A91QVsUlI'].sort())
+  )
     throw new Error(
       `Unexpected cross-category visual commentary editions: ${crossCategoryEditionProviderIds.join(',') || 'none'}`
     )
@@ -95,6 +98,8 @@ const validateRegistry = catalogVideos => {
     for (const anchor of work.anchors) {
       if (anchor.kind !== 'passage' || !anchor.book || !anchor.chapterStart)
         throw new Error(`${work.id} has an invalid passage anchor`)
+      if (anchor.placement === 'introduction')
+        throw new Error(`${work.id} cannot place a visual commentary as an introduction`)
       if (anchor.chapterEnd && anchor.chapterEnd < anchor.chapterStart)
         throw new Error(`${work.id} has a reversed chapter range`)
       if (anchor.verseEnd && !anchor.verseStart)
@@ -177,8 +182,8 @@ const main = async () => {
     throw new Error('Visual commentary edition IDs must be unique')
   if (!manifest.languageIndexes.fr.books['2'].includes('exodus-34-6-7-visual-commentary'))
     throw new Error('French index must expose the reconciled Exodus edition')
-  if (manifest.languageIndexes.fr.books['19'].includes('psalm-8-visual-commentary'))
-    throw new Error('French index must not expose the English-only Psalm 8 work')
+  if (!manifest.languageIndexes.fr.books['19'].includes('psalm-8-visual-commentary'))
+    throw new Error('French index must expose the localized Psalm 8 work')
   if (manifest.languageIndexes.en.books['40'].includes('sermon-on-mount-visual-generosity'))
     throw new Error('English index must not expose French-only Sermon works')
   await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`)
@@ -239,9 +244,9 @@ const main = async () => {
     },
   }
   if (
-    audit.totals.bilingualWorks !== 18 ||
+    audit.totals.bilingualWorks !== 19 ||
     audit.totals.frenchOnlyWorks !== 5 ||
-    audit.totals.englishOnlyWorks !== 1
+    audit.totals.englishOnlyWorks !== 0
   )
     throw new Error('Unexpected visual commentary localization topology')
   await writeFile(MANIFEST_AUDIT_PATH, `${JSON.stringify(audit, null, 2)}\n`)

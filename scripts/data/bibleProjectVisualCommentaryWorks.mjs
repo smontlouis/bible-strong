@@ -24,7 +24,7 @@ export const BIBLE_PROJECT_VISUAL_COMMENTARY_WORKS = [
   {
     id: 'sermon-on-mount-series-intro',
     sourceUrl: 'https://bibleproject.com/videos/intro-to-sermon-on-the-mount/',
-    anchors: [passage(40, 5, 1, 7, 29, 'before-range')],
+    anchors: [passage(40, 5, 1, 7, 29, 'chapter-resources')],
     editions: { en: 'NtKb7CJDUZc', fr: 'ZIrt850LLIo' },
   },
   {
@@ -88,7 +88,7 @@ export const BIBLE_PROJECT_VISUAL_COMMENTARY_WORKS = [
   {
     id: 'sermon-on-mount-visual-overview',
     sourceUrl: 'https://bibleproject.com/videos/matthew-5-7-sermon-overview/',
-    anchors: [passage(40, 5, 1, 7, 29, 'before-range')],
+    anchors: [passage(40, 5, 1, 7, 29, 'chapter-resources')],
     editions: { en: 'ajwehw_AT0s', fr: 'lD91ISyYLns' },
   },
   {
@@ -124,7 +124,7 @@ export const BIBLE_PROJECT_VISUAL_COMMENTARY_WORKS = [
   {
     id: 'genesis-1-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/genesis-1/',
-    anchors: [passage(1, 1, 1, 1, 31)],
+    anchors: [passage(1, 1, undefined, 1, undefined, 'chapter-resources')],
     editions: { en: 'afVN-7vY0KA', fr: '-V8X5SJKIKY' },
   },
   {
@@ -136,31 +136,31 @@ export const BIBLE_PROJECT_VISUAL_COMMENTARY_WORKS = [
   {
     id: 'psalm-1-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/psalm-1/',
-    anchors: [passage(19, 1, 1, 1, 6)],
+    anchors: [passage(19, 1, undefined, 1, undefined, 'chapter-resources')],
     editions: { fr: 'dFLNnAF0Kno' },
   },
   {
     id: 'psalm-8-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/psalm-8/',
-    anchors: [passage(19, 8, 1, 8, 9)],
-    editions: { en: 'd_-xvaK4wIw' },
+    anchors: [passage(19, 8, undefined, 8, undefined, 'chapter-resources')],
+    editions: { en: 'd_-xvaK4wIw', fr: 'V8-yWbv7fZY' },
   },
   {
     id: 'psalm-148-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/psalm-148/',
-    anchors: [passage(19, 148, 1, 148, 14)],
+    anchors: [passage(19, 148, undefined, 148, undefined, 'chapter-resources')],
     editions: { en: 'XgCrFl4Mc5Q', fr: 'sEVljAVAjQE' },
   },
   {
     id: 'proverbs-8-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/proverbs-8/',
-    anchors: [passage(20, 8, 1, 8, 36)],
+    anchors: [passage(20, 8, undefined, 8, undefined, 'chapter-resources')],
     editions: { en: 'k8P-x34iYRE', fr: 'z37vJGdYEZw' },
   },
   {
     id: 'isaiah-61-visual-commentary',
     sourceUrl: 'https://bibleproject.com/videos/isaiah-61/',
-    anchors: [passage(23, 61, 1, 61, 11)],
+    anchors: [passage(23, 61, undefined, 61, undefined, 'chapter-resources')],
     editions: { fr: 'wvqT2nT7YQs' },
   },
   {

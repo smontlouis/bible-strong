@@ -3,15 +3,15 @@
   "generatedAt": "2026-08-05T06:55:47.222Z",
   "totals": {
     "works": 24,
-    "editions": 42,
+    "editions": 43,
     "englishEditions": 19,
-    "frenchEditions": 23,
-    "bilingualWorks": 18,
-    "englishOnlyWorks": 1,
+    "frenchEditions": 24,
+    "bilingualWorks": 19,
+    "englishOnlyWorks": 0,
     "frenchOnlyWorks": 5,
     "reviewedAnchors": 25,
     "excludedSourceRecords": 3,
-    "crossCategoryEditions": 1
+    "crossCategoryEditions": 2
   },
   "canonicalBookCoverage": {
     "fr": [
@@ -33,9 +33,7 @@
     ]
   },
   "missingEditions": {
-    "fr": [
-      "psalm-8-visual-commentary"
-    ],
+    "fr": [],
     "en": [
       "sermon-on-mount-visual-generosity",
       "sermon-on-mount-visual-lords-prayer",
@@ -69,7 +67,8 @@
     "assignedCategoryRecords": 41,
     "excludedCategoryRecords": 3,
     "crossCategoryEditionProviderIds": [
-      "r4A91QVsUlI"
+      "r4A91QVsUlI",
+      "V8-yWbv7fZY"
     ],
     "unassignedProviderIds": []
   }
