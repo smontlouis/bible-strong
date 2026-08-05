@@ -1,16 +1,23 @@
-import { useState, type CSSProperties } from 'react'
+import { domMax, LayoutGroup, LazyMotion, m, useMotionValue, useReducedMotion } from 'framer-motion'
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import type { ResolvedPassageMedia } from '../passageMedia'
 import type { RootStyles } from './BibleDOMWrapper'
 import { scaleFontSize } from './scaleFontSize'
-import { useDispatch } from './DispatchProvider'
-import { OPEN_PASSAGE_MEDIA } from './dispatch'
 import { getDisabledStyles } from './disabledStyles'
+import PassageMediaImage from './PassageMediaImage'
+import PassageMediaOverlay from './PassageMediaOverlay'
+import type { PassageMediaGallerySection } from './passageMediaGallery'
+import { SET_BIBLE_OVERLAY_OPEN } from './dispatch'
+import { useDispatch } from './DispatchProvider'
+import { registerVisibleScrollEffect } from './visibleScrollEffects'
 
 type Props = RootStyles & {
   items: ResolvedPassageMedia[]
   placement: 'introduction' | 'inline' | 'chapter-resources'
   isParallel?: boolean
   isDisabled?: boolean
+  blockMargin?: CSSProperties['margin']
+  gallerySections: PassageMediaGallerySection[]
 }
 
 const INLINE_THUMBNAIL = {
@@ -33,11 +40,23 @@ const CHAPTER_RESOURCES_THUMBNAIL = {
   margin: '42px auto 0',
 }
 
+const MAX_STACKED_THUMBNAILS = 3
+
+const INTRODUCTION_PARALLAX = {
+  scrollDistance: 90,
+  minimumScale: 0,
+}
+
+const INLINE_SCROLL_SCALE = {
+  distanceFromHeader: 30,
+  minimumScale: 0.2,
+}
+
 const getStackTransform = (index: number, count: number) => {
-  if (count <= 1) return 'none'
+  if (count <= 1) return { x: 0, rotate: 0 }
 
   const position = (index / (count - 1)) * 2 - 1
-  return `translateX(${position * 3}px) rotate(${position * 5}deg)`
+  return { x: position * 3, rotate: position * 5 }
 }
 
 const PassageMediaThumbnails = ({
@@ -46,9 +65,64 @@ const PassageMediaThumbnails = ({
   settings,
   isParallel,
   isDisabled = false,
+  blockMargin,
+  gallerySections,
 }: Props) => {
+  const layoutGroupId = useId()
   const dispatch = useDispatch()
-  const [isPressed, setIsPressed] = useState(false)
+  const shouldReduceMotion = useReducedMotion()
+  const stackRef = useRef<HTMLButtonElement>(null)
+  const introductionParallaxScale = useMotionValue(1)
+  const inlineScrollScale = useMotionValue(1)
+  const [mode, setMode] = useState<'closed' | 'gallery' | 'playing'>('closed')
+  const [selectedItem, setSelectedItem] = useState<ResolvedPassageMedia | null>(null)
+  const isOverlayOpen = mode !== 'closed'
+
+  useEffect(() => {
+    if (!isOverlayOpen) return
+
+    void dispatch({ type: SET_BIBLE_OVERLAY_OPEN, payload: true })
+    return () => {
+      void dispatch({ type: SET_BIBLE_OVERLAY_OPEN, payload: false })
+    }
+  }, [dispatch, isOverlayOpen])
+
+  useEffect(() => {
+    const stackElement = stackRef.current
+    if (shouldReduceMotion) {
+      introductionParallaxScale.set(1)
+      inlineScrollScale.set(1)
+      return
+    }
+    if (mode !== 'closed' || !stackElement) return
+
+    if (placement === 'introduction') {
+      return registerVisibleScrollEffect(stackElement, ({ scrollY }) => {
+        const progress = Math.min(Math.max(scrollY / INTRODUCTION_PARALLAX.scrollDistance, 0), 1)
+        introductionParallaxScale.set(1 - progress * (1 - INTRODUCTION_PARALLAX.minimumScale))
+      })
+    }
+
+    if (placement !== 'inline') return
+
+    return registerVisibleScrollEffect(stackElement, ({ elementTop, headerHeight }) => {
+      const progress = Math.min(
+        Math.max(
+          (headerHeight + INLINE_SCROLL_SCALE.distanceFromHeader - elementTop) /
+            INLINE_SCROLL_SCALE.distanceFromHeader,
+          0
+        ),
+        1
+      )
+      inlineScrollScale.set(1 - progress * (1 - INLINE_SCROLL_SCALE.minimumScale))
+    })
+  }, [
+    inlineScrollScale,
+    introductionParallaxScale,
+    mode,
+    placement,
+    shouldReduceMotion,
+  ])
 
   if (!items.length) return null
 
@@ -71,12 +145,13 @@ const PassageMediaThumbnails = ({
     ? scaleFontSize(inlineCardWidth * INLINE_THUMBNAIL.containerScale, settings.fontSizeScale)
     : cardWidth
   const colors = settings.colors[settings.theme]
+  const stackedItems = items.slice(0, MAX_STACKED_THUMBNAILS)
   const stackStyle: CSSProperties = {
     position: 'relative',
     display: isInline ? 'inline-grid' : 'grid',
     width: containerWidth,
     height: containerHeight,
-    margin: isInline ? `0 ${INLINE_THUMBNAIL.margin}px` : blockThumbnail.margin,
+    margin: isInline ? `0 ${INLINE_THUMBNAIL.margin}px` : (blockMargin ?? blockThumbnail.margin),
     overflow: 'visible',
     direction: 'ltr',
     isolation: 'isolate',
@@ -84,59 +159,93 @@ const PassageMediaThumbnails = ({
     border: 0,
     background: 'transparent',
     cursor: isDisabled ? 'default' : 'pointer',
-    opacity: isPressed ? 0.55 : 1,
-    transition: 'opacity 90ms ease',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
     WebkitTapHighlightColor: 'transparent',
+    transformOrigin: 'center bottom',
     ...getDisabledStyles(isDisabled),
   }
 
   return (
-    <button
-      type="button"
-      disabled={isDisabled}
-      aria-disabled={isDisabled}
-      data-ignore-verse-touch
-      aria-label={items.map(item => item.title).join(', ')}
-      style={stackStyle}
-      onPointerDown={isDisabled ? undefined : () => setIsPressed(true)}
-      onPointerUp={isDisabled ? undefined : () => setIsPressed(false)}
-      onPointerCancel={isDisabled ? undefined : () => setIsPressed(false)}
-      onPointerLeave={isDisabled ? undefined : () => setIsPressed(false)}
-      onBlur={isDisabled ? undefined : () => setIsPressed(false)}
-      onClick={
-        isDisabled
-          ? undefined
-          : event => {
-              event.stopPropagation()
-              setIsPressed(false)
-              void dispatch({ type: OPEN_PASSAGE_MEDIA, payload: items })
-            }
-      }
-    >
-      {items.map((item, index) => (
-        <img
-          key={item.editionId}
-          src={item.thumbnailUrl}
-          alt=""
-          loading="lazy"
+    <LazyMotion features={domMax} strict>
+      <LayoutGroup id={layoutGroupId}>
+        <m.button
+          ref={stackRef}
+          type="button"
+          disabled={isDisabled}
+          aria-disabled={isDisabled}
+          data-ignore-verse-touch
+          aria-label={items.map(item => item.title).join(', ')}
           style={{
-            gridArea: '1 / 1',
-            display: 'block',
-            width: cardWidth,
-            height: cardHeight,
-            boxSizing: 'border-box',
-            objectFit: 'cover',
-            placeSelf: 'center',
-            border: `2px solid ${colors.reverse}`,
-            borderRadius: isInline ? 5 : 9,
-            boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
-            transform: getStackTransform(index, items.length),
-            transformOrigin: 'center',
-            zIndex: index + 1,
+            ...stackStyle,
+            scale:
+              placement === 'introduction'
+                ? introductionParallaxScale
+                : placement === 'inline'
+                  ? inlineScrollScale
+                  : 1,
+          }}
+          whileTap={isDisabled ? undefined : { opacity: 0.55 }}
+          onClick={
+            isDisabled
+              ? undefined
+              : event => {
+                  event.stopPropagation()
+                  setMode('gallery')
+                }
+          }
+        >
+          {stackedItems.map((item, index) => {
+            const transform = getStackTransform(index, stackedItems.length)
+
+            return (
+              <PassageMediaImage
+                item={item}
+                layoutId={item.editionId}
+                key={item.editionId}
+                loading="lazy"
+                transition={{
+                  layout: shouldReduceMotion
+                    ? { duration: 0 }
+                    : { type: 'spring', stiffness: 360, damping: 34, mass: 0.8 },
+                }}
+                style={{
+                  gridArea: '1 / 1',
+                  display: 'block',
+                  width: cardWidth,
+                  height: cardHeight,
+                  boxSizing: 'border-box',
+                  placeSelf: 'center',
+                  border: `2px solid ${colors.reverse}`,
+                  borderRadius: isInline ? 5 : 9,
+                  boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
+                  x: transform.x,
+                  rotate: transform.rotate,
+                  transformOrigin: 'center',
+                  zIndex: index + 1,
+                }}
+              />
+            )
+          })}
+        </m.button>
+        <PassageMediaOverlay
+          items={items}
+          sections={gallerySections}
+          showSections={placement === 'chapter-resources'}
+          sourceItemIds={stackedItems.map(item => item.editionId)}
+          mode={mode}
+          selectedItem={selectedItem}
+          onSelect={item => {
+            setSelectedItem(item)
+            setMode('playing')
+          }}
+          onClose={() => {
+            setMode('closed')
+            setSelectedItem(null)
           }}
         />
-      ))}
-    </button>
+      </LayoutGroup>
+    </LazyMotion>
   )
 }
 

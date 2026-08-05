@@ -1,7 +1,6 @@
 import type { Bookmark, StudyNavigateBibleType, Verse } from '~common/types'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { createStrongSelection, type StrongSelection } from '~helpers/strongSelection'
-import type { ResolvedPassageMedia } from '../passageMedia'
 
 export type StudyRelationsModalTarget =
   | string
@@ -120,19 +119,3 @@ export const getCanonicalBibleNotePayload = (payload: unknown): CanonicalBibleNo
     markup: payload.markup,
   }
 }
-
-const isPassageMediaPayload = (value: unknown): value is ResolvedPassageMedia =>
-  isRecord(value) &&
-  value.provider === 'youtube' &&
-  typeof value.workId === 'string' &&
-  typeof value.editionId === 'string' &&
-  typeof value.attributionLabel === 'string' &&
-  typeof value.providerId === 'string' &&
-  typeof value.sourceUrl === 'string' &&
-  typeof value.thumbnailUrl === 'string' &&
-  typeof value.title === 'string' &&
-  typeof value.durationSeconds === 'number' &&
-  Number.isFinite(value.durationSeconds)
-
-export const getPassageMediaPayload = (payload: unknown): ResolvedPassageMedia[] =>
-  Array.isArray(payload) ? payload.filter(isPassageMediaPayload) : []

@@ -1,0 +1,74 @@
+import type { ResolvedPassageMedia } from '../../passageMedia'
+import { getPassageMediaGalleryItems, getPassageMediaGallerySections } from '../passageMediaGallery'
+
+const media = (editionId: string): ResolvedPassageMedia => ({
+  workId: editionId,
+  editionId,
+  attributionLabel: 'BibleProject',
+  strongCodes: [],
+  provider: 'youtube',
+  providerId: editionId,
+  sourceUrl: `https://youtube.test/${editionId}`,
+  thumbnailUrl: `https://img.test/${editionId}.jpg`,
+  blurHash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+  title: editionId,
+  durationSeconds: 60,
+})
+
+describe('getPassageMediaGallerySections', () => {
+  it('groups chapter resources before passage media and replaces attribution with references', () => {
+    const introduction = media('introduction')
+    const passage = media('passage')
+    const chapterResource = media('chapter-resource')
+
+    expect(
+      getPassageMediaGallerySections({
+        passageMedia: {
+          introduction: [introduction],
+          afterVerses: { 3: [passage], 5: [passage] },
+          chapterResources: [chapterResource],
+        },
+        bookName: 'Genèse',
+        chapter: 1,
+        sectionTitles: {
+          introduction: 'Introduction',
+          passages: 'Passages bibliques',
+          chapterResources: 'Ressources du chapitre',
+        },
+      })
+    ).toEqual([
+      {
+        id: 'chapter-resources',
+        title: 'Ressources du chapitre',
+        items: [{ ...chapterResource, reference: 'Genèse 1' }],
+      },
+      {
+        id: 'passages',
+        title: 'Passages bibliques',
+        items: [{ ...passage, reference: 'Genèse 1:3, 5' }],
+      },
+    ])
+  })
+
+  it('exposes passage media in the final chapter stack when there are no chapter resources', () => {
+    const passage = media('agape')
+    const sections = getPassageMediaGallerySections({
+      passageMedia: {
+        introduction: [],
+        afterVerses: { 7: [passage] },
+        chapterResources: [],
+      },
+      bookName: '1 Corinthiens',
+      chapter: 13,
+      sectionTitles: {
+        introduction: 'Introduction',
+        passages: 'Passages bibliques',
+        chapterResources: 'Ressources du chapitre',
+      },
+    })
+
+    expect(getPassageMediaGalleryItems(sections)).toEqual([
+      expect.objectContaining({ editionId: 'agape' }),
+    ])
+  })
+})

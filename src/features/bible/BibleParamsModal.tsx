@@ -348,13 +348,13 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           />
         </HalfContainer>
         <HalfContainer border>
-          <Text flex={5}>{t('Informations contextuelles')}</Text>
+          <Text flex={5}>{t('Contexte et médias')}</Text>
           <Text marginLeft={5} fontSize={12} bold>
             {contextualInformationDisplay ? t('Activé') : t('Désactivé')}
           </Text>
           <TouchableIcon
             isSelected={contextualInformationDisplay}
-            name="info"
+            name="film"
             onPress={() =>
               dispatch(setSettingsContextualInformationDisplay(!contextualInformationDisplay))
             }

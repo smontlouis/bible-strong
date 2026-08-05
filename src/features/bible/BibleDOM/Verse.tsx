@@ -49,6 +49,7 @@ import { getParallelVerseModeProps, shouldHighlightOnlyVerseNumber } from './ver
 import { getBibleTextFontSize } from './verseTypography'
 import type { ResolvedPassageMedia } from '../passageMedia'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
+import type { PassageMediaGallerySection } from './passageMediaGallery'
 
 const VerseText = styled('span')<RootStyles & { isParallel?: boolean }>(
   ({ isParallel, settings: { fontSizeScale, lineHeight } }) => ({
@@ -493,6 +494,7 @@ interface Props {
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
   passageMedia?: ResolvedPassageMedia[]
+  passageMediaGallerySections: PassageMediaGallerySection[]
 }
 
 const Verse = ({
@@ -528,6 +530,7 @@ const Verse = ({
   parallelDisplayMode = 'horizontal',
   redWords,
   passageMedia,
+  passageMediaGallerySections,
 }: Props) => {
   const dispatch = useDispatch()
   const translations = useTranslations()
@@ -689,6 +692,7 @@ const Verse = ({
                     tag={isMainVersion ? tag : undefined}
                     isTouched={isTouched}
                     passageMedia={isMainVersion ? passageMedia : undefined}
+                    passageMediaGallerySections={passageMediaGallerySections}
                   />
                 ) : null}
               </div>
@@ -764,6 +768,7 @@ const Verse = ({
                 tag={isMainVersion ? tag : undefined}
                 isTouched={isTouched}
                 passageMedia={isMainVersion ? passageMedia : undefined}
+                passageMediaGallerySections={passageMediaGallerySections}
               />
             </div>
           )
@@ -865,6 +870,7 @@ const Verse = ({
           {passageMedia && (
             <PassageMediaThumbnails
               items={passageMedia}
+              gallerySections={passageMediaGallerySections}
               placement="inline"
               settings={settings}
               isParallel={isParallel}

@@ -63,6 +63,7 @@ import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
+import { getPassageMediaGalleryItems, getPassageMediaGallerySections } from './passageMediaGallery'
 
 declare global {
   interface Window {
@@ -111,7 +112,6 @@ const GlobalStyles = createGlobalStyles`
   }
 
   .chapter-entity-button {
-    transition: opacity 100ms ease-out;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -129,10 +129,6 @@ const GlobalStyles = createGlobalStyles`
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .chapter-entity-button {
-      transition: none;
-    }
-
     .chapter-entity-loader {
       animation: none;
     }
@@ -1138,6 +1134,13 @@ const LoadedBibleContent = ({
     ? extractParallelVersionTitles(parallelVerses, version)
     : []
   const isContextFocused = contextDisplayMode === 'focused'
+  const passageMediaGallerySections = getPassageMediaGallerySections({
+    passageMedia,
+    bookName: translations.passageMediaBookName,
+    chapter,
+    sectionTitles: translations.passageMediaSections,
+  })
+  const passageMediaGalleryItems = getPassageMediaGalleryItems(passageMediaGallerySections)
 
   return (
     <TranslationsProvider translations={translations}>
@@ -1223,6 +1226,7 @@ const LoadedBibleContent = ({
             {!isContextFocused && (
               <PassageMediaThumbnails
                 items={passageMedia.introduction}
+                gallerySections={passageMediaGallerySections}
                 placement="introduction"
                 settings={settings}
                 isDisabled={annotationMode}
@@ -1265,6 +1269,7 @@ const LoadedBibleContent = ({
               parallelDisplayMode={parallelDisplayMode}
               redWords={redWords}
               passageMediaAfterVerses={passageMedia.afterVerses}
+              passageMediaGallerySections={passageMediaGallerySections}
             />
           </HorizontalScrollWrapper>
           <ChapterEntities
@@ -1274,6 +1279,18 @@ const LoadedBibleContent = ({
             downloadState={chapterEntityDownloadState}
             settings={settings}
             translations={chapterEntityTranslations}
+            chapterResources={
+              !isContextFocused && passageMediaGalleryItems.length ? (
+                <PassageMediaThumbnails
+                  items={passageMediaGalleryItems}
+                  gallerySections={passageMediaGallerySections}
+                  placement="chapter-resources"
+                  settings={settings}
+                  isDisabled={annotationMode}
+                  blockMargin={0}
+                />
+              ) : null
+            }
             onOpenEntity={uniqueName => {
               void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
             }}
@@ -1284,14 +1301,6 @@ const LoadedBibleContent = ({
               void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
             }}
           />
-          {!isContextFocused && (
-            <PassageMediaThumbnails
-              items={passageMedia.chapterResources}
-              placement="chapter-resources"
-              settings={settings}
-              isDisabled={annotationMode}
-            />
-          )}
           <ReturnToSelectedVerseButton
             type="button"
             settings={settings}
@@ -1459,9 +1468,10 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
   useEffect(() => {
     const reverseColor = settings.colors[settings.theme].reverse
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
+    document.documentElement.style.setProperty('--safe-area-top', `${rest.safeAreaTop ?? 0}px`)
     document.documentElement.style.backgroundColor = reverseColor
     document.body.style.backgroundColor = reverseColor
-  }, [dispatch, headerHeight, settings.colors, settings.theme])
+  }, [dispatch, headerHeight, rest.safeAreaTop, settings.colors, settings.theme])
 
   // Keep the WebView document background in sync when Expo DOM reuses the same page.
   useEffect(() => {

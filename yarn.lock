@@ -5936,6 +5936,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/react-dom@npm:^19.2.3":
+  version: 19.2.4
+  resolution: "@types/react-dom@npm:19.2.4"
+  peerDependencies:
+    "@types/react": ^19.2.0
+  checksum: 10c0/b7d854ce17bb51a3a067168268a90f0123d10dc490f63f1ff5409f07ac715febeb8f5b7b473404a9d437106571e0312fc2937a945634d590abfc9aa46a14b01b
+  languageName: node
+  linkType: hard
+
 "@types/react-redux@npm:^7.1.33":
   version: 7.1.34
   resolution: "@types/react-redux@npm:7.1.34"
@@ -7309,6 +7318,7 @@ __metadata:
     "@types/debounce": "npm:^1.2.4"
     "@types/jest": "npm:^29.5.12"
     "@types/react": "npm:~19.2.14"
+    "@types/react-dom": "npm:^19.2.3"
     "@types/react-redux": "npm:^7.1.33"
     "@types/react-test-renderer": "npm:^19.1.0"
     "@vitejs/plugin-react": "npm:^6.0.2"
@@ -7318,6 +7328,7 @@ __metadata:
     babel-plugin-transform-remove-console: "npm:^6.9.4"
     babel-preset-expo: "npm:~56.0.0"
     bible-passage-reference-parser: "file:./vendor/bcv-parser"
+    blurhash: "npm:^2.0.5"
     color: "npm:^4.2.3"
     colorsys: "npm:^1.0.22"
     date-fns: "npm:^2.9.0"
@@ -7354,6 +7365,7 @@ __metadata:
     expo-system-ui: "npm:~56.0.5"
     expo-updates: "npm:~56.0.19"
     firestore-size: "npm:^2.0.7"
+    framer-motion: "npm:12.23.26"
     fuse.js: "npm:^7.3.0"
     global: "npm:^4.4.0"
     goober: "npm:^2.1.16"
@@ -7376,6 +7388,7 @@ __metadata:
     prettier: "npm:^3.8.1"
     promise: "npm:^8.3.0"
     react: "npm:19.2.3"
+    react-blurhash: "npm:^0.3.0"
     react-dom: "npm:19.2.3"
     react-i18next: "npm:11.18.6"
     react-native: "patch:react-native@npm%3A0.85.3#~/.yarn/patches/react-native-npm-0.85.3-2292697f2f.patch"
@@ -7453,6 +7466,13 @@ __metadata:
     inherits: "npm:^2.0.4"
     readable-stream: "npm:^3.4.0"
   checksum: 10c0/528a9c3d7d6b87af98c46f10a887654d027c28c503c7f7de87440e643f0056d7a2319a967762b8ec18150c64799d2825a277147a752a0570a7407c0b705b0d01
+  languageName: node
+  linkType: hard
+
+"blurhash@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "blurhash@npm:2.0.5"
+  checksum: 10c0/75d5f042b5bb8ead977524a985048378a033af866534abbaee73c80030cc9fc34e6c5b7d483c68bbdb600e0ae438f2ea6140b1f46d75fcfa57a902208ae8b85e
   languageName: node
   linkType: hard
 
@@ -10694,7 +10714,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"framer-motion@npm:^12.23.12":
+"framer-motion@npm:12.23.26, framer-motion@npm:^12.23.12":
   version: 12.23.26
   resolution: "framer-motion@npm:12.23.26"
   dependencies:
@@ -15197,6 +15217,16 @@ __metadata:
     csstype: "npm:^3.0.10"
     lodash.curry: "npm:^4.1.1"
   checksum: 10c0/00ed3bbc4b7cf829117eb38d2e350b03ef6a746a3b58e57494a2cf8a3de6f98494ee9209543a399d474e8a6c0172584b3b61309e59e57c2b2694b5dc910a14a1
+  languageName: node
+  linkType: hard
+
+"react-blurhash@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "react-blurhash@npm:0.3.0"
+  peerDependencies:
+    blurhash: ^2.0.3
+    react: ">=15"
+  checksum: 10c0/9eb9a52ab599a0c73baa15085006bbe06a21b0c8525980f1f77b5cfbd5e0aa4f9594ee3d5f5c179273b6673127622cb65822d9bf11f6cbf3dd5240d66e6a66f7
   languageName: node
   linkType: hard
 

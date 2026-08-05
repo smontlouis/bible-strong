@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
 import type { Verse } from '~common/types'
+import { getPassageMediaForStrong } from '~features/bible/passageMedia'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
@@ -219,6 +220,9 @@ const StrongMainScreen = ({
     selectedLemmaId == null
       ? concordanceTotalCount
       : (lemmaStats.find(lemma => lemma.id === selectedLemmaId)?.occurrenceCount ?? 0)
+  const passageMedia = entry
+    ? getPassageMediaForStrong({ strongCode: entry.stepCode, language: resourceLanguage })
+    : []
   return (
     <StrongEntryRouteScaffold
       context={activeContext}
@@ -237,6 +241,7 @@ const StrongMainScreen = ({
       {entry && (
         <StrongDetailMainPage
           entry={entry}
+          passageMedia={passageMedia}
           contextVerse={contextVerse}
           contextReference={contextReference}
           contextVersion={

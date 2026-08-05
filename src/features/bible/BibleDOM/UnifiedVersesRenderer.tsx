@@ -35,6 +35,7 @@ import {
   shouldRenderVerseInFocusedContext,
 } from './verseRenderingModel'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
+import type { PassageMediaGallerySection } from './passageMediaGallery'
 
 // ============================================================================
 // STYLED COMPONENTS
@@ -135,6 +136,7 @@ export interface UnifiedVersesRendererProps {
   // Red words data
   redWords?: Record<string, { start: number; end: number }[]> | null
   passageMediaAfterVerses: ResolvedPassageMediaChapter['afterVerses']
+  passageMediaGallerySections: PassageMediaGallerySection[]
 }
 
 /**
@@ -289,6 +291,7 @@ export function UnifiedVersesRenderer({
   parallelDisplayMode = 'horizontal',
   redWords,
   passageMediaAfterVerses,
+  passageMediaGallerySections,
 }: UnifiedVersesRendererProps) {
   // Pre-compute numeric focus verses once to avoid repeated .map(Number) calls
   const focusVersesNumeric = getFocusVerseNumbers(focusVerses)
@@ -359,6 +362,7 @@ export function UnifiedVersesRenderer({
                 hasNonHighlightTags={versesWithNonHighlightTags?.[verseNumber]}
                 redWords={redWords}
                 passageMedia={passageMediaAfterVerses[verseNumber]}
+                passageMediaGallerySections={passageMediaGallerySections}
               />
             </Span>
           )
@@ -438,6 +442,7 @@ export function UnifiedVersesRenderer({
               parallelDisplayMode={parallelDisplayMode}
               redWords={redWords}
               passageMedia={passageMediaAfterVerses[verseNumber]}
+              passageMediaGallerySections={passageMediaGallerySections}
             />
             {!!comment && settings.commentsDisplay && (
               <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />
