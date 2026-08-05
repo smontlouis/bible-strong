@@ -78,4 +78,14 @@ describe('resolveBibleTabResources', () => {
 
     expect(result.parallelVersions).toEqual(['BFC'])
   })
+
+  it('preserves the main Bible version when it is also selected in parallel', async () => {
+    const data = {
+      ...createData('LSG'),
+      parallelVersions: ['LSG'] as BibleTab['data']['parallelVersions'],
+    }
+    const result = await resolveBibleTabResources(data)
+
+    expect(result.parallelVersions).toEqual(['LSG'])
+  })
 })
