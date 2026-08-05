@@ -92,6 +92,7 @@ const SharedBibleDOM = () => {
     settings,
     verseToScroll: undefined,
     pericopeChapter: {},
+    passageMedia: { introduction: [], afterVerses: {}, chapterResources: [] },
     setSelectedCode: noop,
     selectedCode: null,
     comments: null,

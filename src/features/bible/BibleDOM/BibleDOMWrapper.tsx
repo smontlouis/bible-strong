@@ -7,7 +7,7 @@ import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, Platform } from 'react-native'
+import { Alert, Linking, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
@@ -93,6 +93,7 @@ import {
   OPEN_BOOKMARK_MODAL,
   OPEN_CANONICAL_BIBLE_NOTE,
   OPEN_CANONICAL_BIBLE_REFERENCE,
+  OPEN_PASSAGE_MEDIA,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
   OPEN_VERSE_TAGS_MODAL,
@@ -132,6 +133,7 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { resetBiblesDb } from '~helpers/biblesDb'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strongSelection'
+import type { ResolvedPassageMediaChapter } from '../passageMedia'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -217,6 +219,7 @@ export type WebViewProps = {
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
+  passageMedia: ResolvedPassageMediaChapter
   openNote?: (noteId: string, verseIds?: string[]) => void
   openLink?: (linkId: string) => void
   setSelectedCode: (selectedCode: StrongSelection) => void
@@ -338,6 +341,7 @@ export const BibleDOMWrapper = ({
   version,
   interlinearMode,
   pericopeChapter,
+  passageMedia,
   book,
   chapter,
   isSelectionMode,
@@ -446,6 +450,9 @@ export const BibleDOMWrapper = ({
     resetDatabase: t('bible.error.resetDatabase'),
     openCanonicalBibleNote: t('Afficher la note'),
     pericopeIndex: t('Péricopes'),
+    passageMediaIntroduction: t('bible.passageMedia.introduction'),
+    passageMediaChapterResources: t('bible.passageMedia.chapterResources'),
+    passageMediaOpen: t('bible.passageMedia.open'),
   }
   const chapterEntityTranslations = {
     title: t('bible.chapterEntities.title'),
@@ -720,6 +727,17 @@ export const BibleDOMWrapper = ({
         break
       }
 
+      case OPEN_PASSAGE_MEDIA: {
+        const sourceUrl = getStringPayload(action.payload)
+        if (!sourceUrl || !/^https:\/\/(?:www\.)?youtube\.com\/watch\?/u.test(sourceUrl)) break
+        try {
+          await Linking.openURL(sourceUrl)
+        } catch {
+          toast.error(t('bible.error.unknown'))
+        }
+        break
+      }
+
       case NAVIGATE_TO_TAG: {
         if (!isRecord(action.payload) || typeof action.payload.tagId !== 'string') break
         const { tagId } = action.payload
@@ -908,6 +926,7 @@ export const BibleDOMWrapper = ({
         version={version}
         interlinearMode={interlinearMode}
         pericopeChapter={pericopeChapter}
+        passageMedia={passageMedia}
         book={book}
         chapter={chapter}
         isSelectionMode={isSelectionMode}

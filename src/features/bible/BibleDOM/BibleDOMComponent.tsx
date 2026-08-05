@@ -62,6 +62,7 @@ import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
+import PassageMediaCards from './PassageMediaCards'
 
 declare global {
   interface Window {
@@ -158,6 +159,7 @@ type Props = Pick<
   | 'version'
   | 'interlinearMode'
   | 'pericopeChapter'
+  | 'passageMedia'
   | 'book'
   | 'chapter'
   | 'isSelectionMode'
@@ -542,6 +544,7 @@ const LoadedBibleContent = ({
   version,
   interlinearMode,
   pericopeChapter,
+  passageMedia,
   book,
   chapter,
   isSelectionMode,
@@ -1217,6 +1220,14 @@ const LoadedBibleContent = ({
             {!!introComment && settings.commentsDisplay && (
               <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
             )}
+            {!annotationMode && !isContextFocused && (
+              <PassageMediaCards
+                items={passageMedia.introduction}
+                title={translations.passageMediaIntroduction}
+                placement="introduction"
+                settings={settings}
+              />
+            )}
 
             {/* Unified verse rendering for all modes */}
             <UnifiedVersesRenderer
@@ -1253,6 +1264,7 @@ const LoadedBibleContent = ({
               columnWidth={parallelColumnWidth}
               parallelDisplayMode={parallelDisplayMode}
               redWords={redWords}
+              passageMediaAfterVerses={passageMedia.afterVerses}
             />
           </HorizontalScrollWrapper>
           <ChapterEntities
@@ -1272,6 +1284,14 @@ const LoadedBibleContent = ({
               void dispatch({ type: DISMISS_CONTEXTUAL_INFORMATION })
             }}
           />
+          {!annotationMode && !isContextFocused && (
+            <PassageMediaCards
+              items={passageMedia.chapterResources}
+              title={translations.passageMediaChapterResources}
+              placement="chapter-resources"
+              settings={settings}
+            />
+          )}
           <ReturnToSelectedVerseButton
             type="button"
             settings={settings}
