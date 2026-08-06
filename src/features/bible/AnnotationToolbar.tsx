@@ -1,7 +1,7 @@
 import { useTheme } from '@emotion/react'
-import { type SheetRef, Sheet, SheetHeader, SheetView } from '~common/sheet'
+import { type SheetRef, Sheet, SheetView } from '~common/sheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
-import { useAtomValue, useSetAtom } from 'jotai/react'
+import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 
@@ -17,10 +17,8 @@ import Box, {
 } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { BOTTOM_INSET } from '~helpers/constants'
 import verseToReference from '~helpers/verseToReference'
-import { colorPickerModalAtom, isFullScreenBibleAtom } from 'src/state/app'
+import { colorPickerModalAtom } from 'src/state/app'
 import type { AnnotationType, SelectionRange } from './hooks/useAnnotationMode'
 
 import { LinearTransition } from 'react-native-reanimated'
@@ -80,37 +78,24 @@ type Props = {
 interface IconButtonProps extends BoxProps {
   disabled?: boolean
   children: React.ReactNode
-  buttonPosition?: 'start' | 'center' | 'end'
   isSelected?: boolean
   label?: string
 }
 
-const IconButton = ({
-  disabled,
-  children,
-  buttonPosition = 'center',
-  isSelected,
-  label,
-  ...props
-}: IconButtonProps) => (
+const IconButton = ({ disabled, children, isSelected, label, ...props }: IconButtonProps) => (
   <Box
-    width={98}
-    height={32}
-    borderRadius={12}
+    width="100%"
+    height={96}
+    borderRadius={18}
     center
-    row
-    gap={6}
-    borderColor="opacity5"
-    borderTopLeftRadius={buttonPosition === 'start' ? 8 : 0}
-    borderTopRightRadius={buttonPosition === 'end' ? 8 : 0}
-    borderBottomLeftRadius={buttonPosition === 'start' ? 8 : 0}
-    borderBottomRightRadius={buttonPosition === 'end' ? 8 : 0}
-    borderWidth={1}
-    bg={isSelected ? 'lightPrimary' : disabled ? 'lightGrey' : 'transparent'}
-    opacity={isSelected ? 1 : disabled ? 0.5 : 0.7}
+    gap={10}
+    borderColor={isSelected ? 'secondary' : 'border'}
+    borderWidth={isSelected ? 2 : 1}
+    bg={isSelected ? 'lightSecondary' : disabled ? 'lightGrey' : 'reverse'}
+    opacity={isSelected ? 1 : disabled ? 0.5 : 0.85}
     style={
       {
-        transitionProperty: ['backgroundColor', 'opacity'],
+        transitionProperty: ['backgroundColor', 'borderColor', 'opacity'],
         transitionDuration: 300,
       } as unknown as ViewStyle
     }
@@ -118,7 +103,7 @@ const IconButton = ({
   >
     {children}
     {label && (
-      <Text fontSize={12} bold color={isSelected ? 'default' : 'tertiary'} numberOfLines={1}>
+      <Text fontSize={14} bold color={isSelected ? 'default' : 'tertiary'} numberOfLines={1}>
         {label}
       </Text>
     )}
@@ -131,7 +116,6 @@ type AnnotationTypeButtonProps = {
   activeType: AnnotationType
   onPress: (type: AnnotationType) => void
   children: React.ReactNode
-  buttonPosition?: 'start' | 'center' | 'end'
   label: string
 }
 
@@ -141,16 +125,10 @@ const AnnotationTypeButton = ({
   activeType,
   onPress,
   children,
-  buttonPosition,
   label,
 }: AnnotationTypeButtonProps) => (
-  <TouchableBox disabled={disabled} onPress={() => onPress(type)}>
-    <IconButton
-      disabled={disabled}
-      buttonPosition={buttonPosition}
-      isSelected={!disabled && activeType === type}
-      label={label}
-    >
+  <TouchableBox flex height={96} disabled={disabled} onPress={() => onPress(type)}>
+    <IconButton disabled={disabled} isSelected={!disabled && activeType === type} label={label}>
       {children}
     </IconButton>
   </TouchableBox>
@@ -244,6 +222,9 @@ const AnnotationToolbar = ({
   }, [selectedAnnotation?.id, selectedAnnotation?.type])
 
   const getColor = (type: AnnotationType) => {
+    if (activeAnnotationType === type) {
+      return selectedAnnotation?.type === type ? resolvedColor : theme.colors.secondary
+    }
     if (selectedAnnotation) {
       return selectedAnnotation.type === type ? resolvedColor : theme.colors.grey
     }
@@ -260,154 +241,150 @@ const AnnotationToolbar = ({
   }
 
   return (
-    <Sheet
-      ref={ref}
-      backdrop={false}
-      onClose={onClose}
-      header={<SheetHeader title={t('Mode libre')} centerTitle />}
-    >
-      <SheetView pt={20}>
-        <FadingBox
-          keyProp={
-            selectedAnnotation ? 'selectedAnnotation' : hasSelection ? 'hasSelection' : 'empty'
-          }
-        >
-          {selectedAnnotation ? (
+    <Sheet ref={ref} backdrop={false} onClose={onClose}>
+      <SheetView pt={14}>
+        <Box px={20} minH={92} justifyContent="center" position="relative">
+          <Text bold fontSize={20} textAlign="center" px={76}>
+            {t('Mode libre')}
+          </Text>
+
+          {(selectedAnnotation || hasSelection) && (
+            <AnimatedBox layout={LinearTransition} position="absolute" right={20} top={0}>
+              <TouchableOpacity
+                onPress={selectedAnnotation ? onDeleteAnnotation : onEraseAnnotations}
+                disabled={disabled}
+              >
+                <Box
+                  width={32}
+                  height={32}
+                  borderRadius={10}
+                  center
+                  borderColor="quart"
+                  borderWidth={1}
+                >
+                  <FeatherIcon name="trash-2" size={17} color="quart" />
+                </Box>
+              </TouchableOpacity>
+            </AnimatedBox>
+          )}
+
+          {selectedAnnotation && (
             <AnimatedBox
-              row
-              alignItems="center"
-              justifyContent="center"
-              gap={10}
               layout={LinearTransition}
+              row
+              gap={6}
+              position="absolute"
+              left={20}
+              top={0}
               overflow="visible"
             >
-              <AnimatedBox layout={LinearTransition} bg="opacity5" borderRadius={8} py={8} px={10}>
-                <FadingText fontSize={16} numberOfLines={1} maxWidth={200}>
-                  {selectedAnnotation.text}
-                </FadingText>
-              </AnimatedBox>
-              <AnimatedBox layout={LinearTransition} center>
-                <TouchableOpacity onPress={onNotePress} disabled={disabled}>
-                  <Box
-                    width={32}
-                    height={32}
-                    borderRadius={8}
-                    center
-                    borderColor="opacity5"
-                    borderWidth={1}
-                  >
-                    <FeatherIcon
-                      name={selectedAnnotation?.noteId ? 'file-text' : 'file-plus'}
-                      size={18}
-                      color={selectedAnnotation?.noteId ? 'primary' : 'grey'}
-                    />
-                  </Box>
-                </TouchableOpacity>
-              </AnimatedBox>
-              <AnimatedBox layout={LinearTransition} center overflow="visible">
-                <TouchableOpacity
-                  onPress={onTagsPress}
-                  disabled={disabled}
-                  style={{ overflow: 'visible' }}
+              <TouchableOpacity onPress={onNotePress} disabled={disabled}>
+                <Box
+                  width={32}
+                  height={32}
+                  borderRadius={10}
+                  center
+                  borderColor="border"
+                  borderWidth={1}
                 >
-                  <Box position="relative" overflow="visible">
+                  <FeatherIcon
+                    name={selectedAnnotation.noteId ? 'file-text' : 'file-plus'}
+                    size={17}
+                    color={selectedAnnotation.noteId ? 'primary' : 'grey'}
+                  />
+                </Box>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onTagsPress} disabled={disabled}>
+                <Box position="relative" overflow="visible">
+                  <Box
+                    width={32}
+                    height={32}
+                    borderRadius={10}
+                    center
+                    borderColor="border"
+                    borderWidth={1}
+                  >
+                    <FeatherIcon name="tag" size={18} color={tagsCount > 0 ? 'primary' : 'grey'} />
+                  </Box>
+                  {tagsCount > 0 && (
                     <Box
-                      width={32}
-                      height={32}
+                      position="absolute"
+                      bottom={-1}
+                      right={-4}
+                      bg="primary"
                       borderRadius={8}
+                      width={14}
+                      height={14}
                       center
-                      borderColor="opacity5"
-                      borderWidth={1}
                     >
-                      <FeatherIcon
-                        name="tag"
-                        size={18}
-                        color={tagsCount > 0 ? 'primary' : 'grey'}
-                      />
+                      <Text fontSize={8} color="reverse" bold>
+                        {tagsCount}
+                      </Text>
                     </Box>
-                    {tagsCount > 0 && (
-                      <Box
-                        position="absolute"
-                        bottom={-1}
-                        right={-4}
-                        bg="primary"
-                        borderRadius={8}
-                        width={14}
-                        height={14}
-                        center
-                      >
-                        <Text fontSize={8} color="reverse" bold>
-                          {tagsCount}
-                        </Text>
-                      </Box>
-                    )}
-                  </Box>
-                </TouchableOpacity>
-              </AnimatedBox>
-              <AnimatedBox layout={LinearTransition} center>
-                <TouchableOpacity onPress={onDeleteAnnotation} disabled={disabled}>
-                  <Box
-                    width={32}
-                    height={32}
-                    borderRadius={8}
-                    center
-                    borderColor="opacity5"
-                    borderWidth={1}
-                  >
-                    <FeatherIcon name="trash-2" size={18} color="quart" />
-                  </Box>
-                </TouchableOpacity>
-              </AnimatedBox>
+                  )}
+                </Box>
+              </TouchableOpacity>
             </AnimatedBox>
-          ) : hasSelection && selection?.start && selection?.end ? (
-            <AnimatedBox
-              row
-              alignItems="center"
-              justifyContent="center"
-              gap={10}
-              layout={LinearTransition}
-            >
-              <AnimatedBox layout={LinearTransition} bg="opacity5" borderRadius={8} py={8} px={10}>
-                <FadingText fontSize={16} numberOfLines={1} maxWidth={200}>
-                  {formatSelectionRange(selection)}
-                </FadingText>
-              </AnimatedBox>
-              <AnimatedBox layout={LinearTransition} center>
-                <TouchableOpacity onPress={onEraseAnnotations}>
-                  <Box
-                    width={32}
-                    height={32}
-                    borderRadius={8}
-                    center
-                    borderColor="opacity5"
-                    borderWidth={1}
-                  >
-                    <FeatherIcon name="trash-2" size={18} color="quart" />
-                  </Box>
-                </TouchableOpacity>
-              </AnimatedBox>
-            </AnimatedBox>
-          ) : (
-            <Box px={20} center>
-              <FadingText fontSize={13} color="grey" textAlign="center">
-                {t('Sélectionnez du texte dans la Bible')}
-              </FadingText>
-            </Box>
           )}
-        </FadingBox>
+
+          <FadingBox
+            keyProp={
+              selectedAnnotation ? 'selectedAnnotation' : hasSelection ? 'hasSelection' : 'empty'
+            }
+          >
+            {selectedAnnotation ? (
+              <AnimatedBox
+                alignItems="center"
+                justifyContent="center"
+                layout={LinearTransition}
+                mt={8}
+              >
+                <AnimatedBox layout={LinearTransition}>
+                  <FadingText fontSize={15} color="grey" numberOfLines={1} maxWidth={220}>
+                    {t('Appliquer à')}{' '}
+                    <Text fontSize={15} bold>
+                      {verseToReference([selectedAnnotation.verseKey])}
+                    </Text>
+                  </FadingText>
+                </AnimatedBox>
+              </AnimatedBox>
+            ) : hasSelection && selection?.start && selection?.end ? (
+              <AnimatedBox
+                alignItems="center"
+                justifyContent="center"
+                layout={LinearTransition}
+                mt={8}
+              >
+                <AnimatedBox layout={LinearTransition}>
+                  <FadingText fontSize={15} color="grey" numberOfLines={1} maxWidth={220}>
+                    {t('Appliquer à')}{' '}
+                    <Text fontSize={15} bold>
+                      {formatSelectionRange(selection)}
+                    </Text>
+                  </FadingText>
+                </AnimatedBox>
+              </AnimatedBox>
+            ) : (
+              <Box center mt={8}>
+                <FadingText fontSize={13} color="grey" textAlign="center">
+                  {t('Sélectionnez du texte dans la Bible')}
+                </FadingText>
+              </Box>
+            )}
+          </FadingBox>
+        </Box>
 
         <AnimatedBox layout={LinearTransition}>
-          <HStack center pt={20} pb={12} px={18}>
-            <HStack>
+          <HStack center pt={14} pb={18} px={20}>
+            <HStack flex gap={10}>
               <AnnotationTypeButton
                 disabled={disabled}
                 type="background"
                 activeType={activeAnnotationType}
                 onPress={setActiveAnnotationType}
-                buttonPosition="start"
                 label={t('Surligner')}
               >
-                <BackgroundIcon width={24} height={24} color={getColor('background')} />
+                <BackgroundIcon width={30} height={30} color={getColor('background')} />
               </AnnotationTypeButton>
 
               <AnnotationTypeButton
@@ -417,7 +394,7 @@ const AnnotationToolbar = ({
                 onPress={setActiveAnnotationType}
                 label={t('Souligner')}
               >
-                <FeatherIcon name="underline" size={20} color={getColor('underline')} />
+                <FeatherIcon name="underline" size={28} color={getColor('underline')} />
               </AnnotationTypeButton>
 
               <AnnotationTypeButton
@@ -425,23 +402,29 @@ const AnnotationToolbar = ({
                 type="circle"
                 activeType={activeAnnotationType}
                 onPress={setActiveAnnotationType}
-                buttonPosition="end"
                 label={t('Entourer')}
               >
-                <CircleSketchIcon width={20} height={20} color={getColor('circle')} />
+                <CircleSketchIcon width={28} height={28} color={getColor('circle')} />
               </AnnotationTypeButton>
             </HStack>
           </HStack>
-          <AnnotationColorPalette
-            disabled={disabled}
-            type={activeAnnotationType}
-            selectedColor={
-              selectedAnnotation?.type === activeAnnotationType
-                ? selectedAnnotation.color
-                : undefined
-            }
-            onSelectColor={handleApply}
-          />
+          {!disabled && (
+            <Box borderTopWidth={1} borderColor="border" pt={12}>
+              <Text px={20} pb={10} fontSize={13} bold color="grey">
+                {t('Couleur')}
+              </Text>
+              <AnnotationColorPalette
+                disabled={disabled}
+                type={activeAnnotationType}
+                selectedColor={
+                  selectedAnnotation?.type === activeAnnotationType
+                    ? selectedAnnotation.color
+                    : undefined
+                }
+                onSelectColor={handleApply}
+              />
+            </Box>
+          )}
         </AnimatedBox>
       </SheetView>
     </Sheet>
