@@ -26,9 +26,11 @@ type Props = {
   selectedItem: ResolvedPassageMedia | null
   onClose: () => void
   onSelect: (item: ResolvedPassageMedia) => void
+  placement: "inline" | "introduction" | "chapter-resources"
 }
 
 type GalleryItemProps = {
+  layoutId: string
   item: ResolvedPassageMedia
   reference: string
   isAdditionalItem: boolean
@@ -42,6 +44,7 @@ type GalleryItemProps = {
 }
 
 const PassageMediaGalleryCard = ({
+  layoutId,
   item,
   reference,
   isAdditionalItem,
@@ -99,7 +102,7 @@ const PassageMediaGalleryCard = ({
       >
         <PassageMediaImage
           item={item}
-          layoutId={item.editionId}
+          layoutId={layoutId}
           transition={{ layout: delayedLayoutTransition }}
           style={{
             display: 'block',
@@ -202,6 +205,7 @@ const PassageMediaGalleryCard = ({
 }
 
 const PassageMediaOverlay = ({
+  placement,
   items,
   sections,
   showSections,
@@ -348,13 +352,17 @@ const PassageMediaOverlay = ({
   const spring = shouldReduceMotion
     ? { duration: 0 }
     : { type: 'spring' as const, stiffness: 360, damping: 34, mass: 0.8 }
-  const renderGalleryCard = (item: ResolvedPassageMedia, reference: string) => {
+  const getItemLayoutId = (item: ResolvedPassageMedia, index: number) =>
+    placement === 'introduction' ? `introduction:${index}` : item.editionId
+  const renderGalleryCard = (item: ResolvedPassageMedia, reference: string, index: number) => {
     const isAdditionalItem = !sourceItemIds.includes(item.editionId)
     const sourceDelay = isAdditionalItem ? 0 : getSourceItemDelay(item.editionId)
+    const layoutId = getItemLayoutId(item, index)
 
     return (
       <PassageMediaGalleryCard
-        key={item.editionId}
+        key={layoutId}
+        layoutId={layoutId}
         item={item}
         reference={reference}
         isAdditionalItem={isAdditionalItem}
@@ -431,7 +439,7 @@ const PassageMediaOverlay = ({
             overscrollBehavior: 'contain',
           }}
         >
-          {items.map(item => renderGalleryCard(item, getItemReference(item)))}
+          {items.map((item, index) => renderGalleryCard(item, getItemReference(item), index))}
         </m.div>
       )}
 
@@ -461,10 +469,13 @@ const PassageMediaOverlay = ({
               gap: 28,
             }}
           >
-            {sections.map(section => (
+            {sections.map((section, sectionIndex) => (
               <section key={section.id}>
                 {itemCount > 1 && (
-                  <h2
+                  <m.h2
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.22, delay: 0.08 + sectionIndex * 0.06 }}
                     style={{
                       margin: '0 0 14px 2px',
                       color: '#5d87ed',
@@ -477,7 +488,7 @@ const PassageMediaOverlay = ({
                     }}
                   >
                     {section.title}
-                  </h2>
+                  </m.h2>
                 )}
                 <div
                   style={{
@@ -491,7 +502,7 @@ const PassageMediaOverlay = ({
                     gap: 14,
                   }}
                 >
-                  {section.items.map(item => renderGalleryCard(item, item.reference))}
+                  {section.items.map((item, index) => renderGalleryCard(item, item.reference, index))}
                 </div>
               </section>
             ))}
@@ -513,7 +524,10 @@ const PassageMediaOverlay = ({
         >
           <PassageMediaImage
             item={selectedItem}
-            layoutId={selectedItem.editionId}
+            layoutId={getItemLayoutId(
+              selectedItem,
+              items.findIndex(item => item.editionId === selectedItem.editionId)
+            )}
             transition={{ layout: spring }}
             imageOpacity={playerReady ? 0 : 1}
             style={{

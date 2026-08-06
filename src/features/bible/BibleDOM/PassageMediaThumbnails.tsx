@@ -212,9 +212,9 @@ const PassageMediaThumbnails = ({
             return (
               <PassageMediaImage
                 item={item}
-                layoutId={item.editionId}
+                layoutId={placement === 'introduction' ? `introduction:${index}` : item.editionId}
                 layoutDependency={layoutDependency}
-                key={item.editionId}
+                key={placement === 'introduction' ? `introduction:${index}` : item.editionId}
                 loading="lazy"
                 transition={{ layout: layoutTransition }}
                 style={{
@@ -236,7 +236,8 @@ const PassageMediaThumbnails = ({
             )
           })}
         </m.button>
-        <PassageMediaOverlay
+      <PassageMediaOverlay
+          placement={placement}
           items={items}
           sections={gallerySections}
           showSections={placement === 'chapter-resources'}
