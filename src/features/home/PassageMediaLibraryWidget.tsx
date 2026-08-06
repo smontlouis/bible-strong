@@ -44,8 +44,8 @@ const PassageMediaLibraryWidget = () => {
             }}
           />
         </Box>
-        <Box flex height="100%"  px={16} pb={24} pt={30}>
-          <Text title fontSize={20} numberOfLines={2} >
+        <Box flex height="100%" px={16} pb={24} pt={30}>
+          <Text title fontSize={20} numberOfLines={2}>
             {t('passageMediaLibrary.title')}
           </Text>
           <Box

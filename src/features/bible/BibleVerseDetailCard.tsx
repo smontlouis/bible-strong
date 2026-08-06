@@ -36,7 +36,6 @@ import {
 } from '~helpers/strongBiblePublications'
 import { areStrongIdentitiesEqual } from '~helpers/strongIdentities'
 import { wp } from '~helpers/utils'
-import { useLayoutSize } from '~helpers/useLayoutSize'
 import type { RootState } from '~redux/modules/reducer'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import type { VersionCode } from '~state/tabs'
@@ -94,7 +93,6 @@ interface Props {
   onOpenStrongBibleSourceSheet: () => void
   isSelectionMode?: StudyNavigateBibleType
   updateVerse: (direction: number) => void
-  bottomInset?: number
 }
 
 type StrongVerseQueryErrorCode =
@@ -136,7 +134,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   onOpenStrongBibleSourceSheet,
   isSelectionMode,
   updateVerse,
-  bottomInset = 0,
 }) => {
   const theme = useTheme()
   const { t } = useTranslation()
@@ -162,12 +159,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const isProgrammaticCardsScrollRef = useRef(false)
   const hasDisplayedStrongVerseRef = useRef(false)
   const insets = useSafeAreaInsets()
-  const {
-    ref: strongCardsContainerRef,
-    size: strongCardsContainerSize,
-    onLayout: onStrongCardsContainerLayout,
-  } = useLayoutSize()
-
   const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
   const coreAvailabilityQuery = useQuery({
     queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
@@ -321,7 +312,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         book={String(strongVerseData?.displayedVerse?.Livre ?? verse.Livre)}
         strongEntry={item.entry}
         strongVerseContext={item.context}
-        cardHeight={Math.max(0, strongCardsContainerSize.height - bottomInset)}
         index={index}
       />
     )
@@ -466,12 +456,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       <Box bg="lightGrey" mt={-30} position="relative" zIndex={0}>
         <RoundedCorner />
       </Box>
-      <Box
-        ref={strongCardsContainerRef}
-        bg="lightGrey"
-        flex={1}
-        onLayout={onStrongCardsContainerLayout}
-      >
+      <Box bg="lightGrey" flex={1}>
         <ScrollView
           ref={strongCardsScrollRef}
           horizontal

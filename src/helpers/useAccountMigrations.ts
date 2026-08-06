@@ -11,8 +11,12 @@ import {
   runAccountMigrationSequence,
   type AccountMigrationContext,
 } from '../migrations/accountMigrationRegistry'
-import { accountMigrationOrchestrator } from '../migrations/accountMigrationRuntime'
+import {
+  accountMigrationOrchestrator,
+  prepareAccountMigrationContext,
+} from '../migrations/accountMigrationRuntime'
 import { clearAccountMigrationMutationJournal } from '../migrations/accountMigrationMutationJournal'
+import { appLogger } from './agentObservability'
 
 type ActiveMigrationSnapshot = Exclude<MigrationSnapshot, { status: 'idle' }>
 
@@ -23,9 +27,11 @@ export type AccountMigrationPresentation =
   | { kind: 'failed'; snapshot?: ActiveMigrationSnapshot; errorCode: string }
 
 interface UseAccountMigrationsOptions {
+  getCurrentState: () => RootState
   activeUserId?: string
   orchestrator?: AppMigrationOrchestrator<AccountMigrationContext>
   onWriteScopeOpened?: () => Promise<void>
+  prepareContext?: (context: AccountMigrationContext) => Promise<AccountMigrationContext>
 }
 
 const isTerminal = (snapshot: MigrationSnapshot): boolean =>
@@ -39,10 +45,12 @@ const safeInspectionErrorCode = (error: unknown): string => {
 }
 
 export const useAccountMigrations = ({
+  getCurrentState,
   activeUserId,
   orchestrator = accountMigrationOrchestrator,
   onWriteScopeOpened,
-}: UseAccountMigrationsOptions = {}) => {
+  prepareContext = prepareAccountMigrationContext,
+}: UseAccountMigrationsOptions) => {
   const [presentation, setPresentation] = useState<AccountMigrationPresentation>({
     kind: 'hidden',
   })
@@ -80,81 +88,147 @@ export const useAccountMigrations = ({
     }
   }
 
+  const refreshContext = async (
+    context: AccountMigrationContext
+  ): Promise<AccountMigrationContext> => {
+    const preparedContext = await prepareContext(
+      createAccountMigrationContext(context.userId, getCurrentState())
+    )
+    return { ...preparedContext, state: getCurrentState() }
+  }
+
   const execute = async (
     context: AccountMigrationContext,
-    retryFailed: boolean
+    retryFailed: boolean,
+    requireConfirmation: boolean
   ): Promise<boolean> => {
+    const startedAt = Date.now()
     lastContextRef.current = context
-    setPresentation({ kind: 'checking' })
+    setPresentation({ kind: 'hidden' })
     setReadyUserId(undefined)
-    setWriteUserId(undefined)
-    setAccountMigrationWriteScope()
+    setWriteUserId(context.userId)
+    // The app remains usable with local data while remote inspection runs. Incoming
+    // hydration stays closed, while outgoing mutations are journaled so a migration
+    // detected moments later can reconcile them without losing user work.
+    setAccountMigrationWriteScope(context.userId, 'outgoing-only')
     setAccountMigrationInProgress(true)
 
+    let completed = false
     try {
-      const result = await runAccountMigrationSequence(orchestrator, context, showSnapshot, {
-        retryFailed,
-      })
-      if (activeUserRef.current !== context.userId) return false
-      if (result.status === 'idle') {
+      const preparedContext = context.userDocument ? context : await refreshContext(context)
+      lastContextRef.current = preparedContext
+      const result = await runAccountMigrationSequence(
+        orchestrator,
+        preparedContext,
+        showSnapshot,
+        {
+          retryFailed,
+          requireConfirmation,
+          refreshContext,
+        }
+      )
+      if (activeUserRef.current !== context.userId) {
+        completed = false
+      } else if (result.status === 'idle') {
         setAccountMigrationWriteScope(context.userId)
         await onWriteScopeOpened?.()
-        if (activeUserRef.current !== context.userId) return false
-        clearAccountMigrationMutationJournal(context.userId)
-        setPresentation({ kind: 'hidden' })
-        setReadyUserId(context.userId)
-        setWriteUserId(context.userId)
-        return true
-      }
-      if (result.status === 'failed') {
+        if (activeUserRef.current === context.userId) {
+          clearAccountMigrationMutationJournal(context.userId)
+          setPresentation({ kind: 'hidden' })
+          setReadyUserId(context.userId)
+          setWriteUserId(context.userId)
+          appLogger.info('startup', 'account_migration.inspection_completed', {
+            durationMs: Date.now() - startedAt,
+          })
+          completed = true
+        }
+      } else if (result.status === 'failed') {
         setAccountMigrationWriteScope()
         setPresentation({
           kind: 'failed',
           snapshot: result,
           errorCode: result.errorCode ?? 'APP_MIGRATION_UNEXPECTED_ERROR',
         })
-        return false
+      } else if (result.status === 'detected' || result.status === 'awaiting-confirmation') {
+        setPresentation({ kind: 'active', snapshot: result })
       }
-      return false
     } catch (error) {
+      appLogger.error('startup', 'account_migration.inspection_failed', { error })
       if (activeUserRef.current === context.userId) {
         setReadyUserId(undefined)
-        setAccountMigrationWriteScope()
-        setPresentation({ kind: 'failed', errorCode: safeInspectionErrorCode(error) })
-      }
-      return false
-    } finally {
-      if (activeUserRef.current === context.userId) {
-        setAccountMigrationInProgress(false)
+        setWriteUserId(context.userId)
+        setAccountMigrationWriteScope(context.userId, 'outgoing-only')
+        setPresentation({ kind: 'hidden' })
+        appLogger.warn('startup', 'account_migration.local_only', {
+          errorCode: safeInspectionErrorCode(error),
+        })
       }
     }
+    if (activeUserRef.current === context.userId) setAccountMigrationInProgress(false)
+    return completed
   }
 
   const runBeforeSync = async (userId: string, state: RootState): Promise<boolean> => {
     if (readyUserId === userId && activeUserRef.current === userId) return true
     if (dismissedScopeRef.current === userId) return false
-    return execute(createAccountMigrationContext(userId, state), false)
+    return execute(createAccountMigrationContext(userId, state), false, true)
+  }
+
+  const confirm = async (): Promise<void> => {
+    const context = lastContextRef.current
+    if (!context || activeUserRef.current !== context.userId) return
+    setActionPending(true)
+    const currentContext = createAccountMigrationContext(context.userId, getCurrentState())
+    const completed = await execute(currentContext, false, false).catch(() => false)
+    setActionPending(false)
+    if (completed) setResumeToken(value => value + 1)
   }
 
   const retry = async (): Promise<void> => {
     const context = lastContextRef.current
     if (!context || activeUserRef.current !== context.userId) return
     setActionPending(true)
-    const completed = await execute(context, true)
+    const currentContext = createAccountMigrationContext(context.userId, getCurrentState())
+    const completed = await execute(currentContext, true, false).catch(() => false)
     setActionPending(false)
     if (completed) setResumeToken(value => value + 1)
   }
 
-  const continueAfterFailure = (): void => {
+  const continueAfterFailure = async (): Promise<void> => {
     const context = lastContextRef.current
     if (!context || presentation.kind !== 'failed') return
-    dismissedScopeRef.current = context.userId
-    setReadyUserId(undefined)
-    setWriteUserId(context.userId)
-    // Incoming listeners remain blocked, while new canonical local mutations can still use
-    // Firestore's durable offline queue until the account migration is retried next launch.
-    setAccountMigrationWriteScope(context.userId, 'outgoing-only')
-    setPresentation({ kind: 'hidden' })
+    setActionPending(true)
+    setAccountMigrationInProgress(true)
+    try {
+      const result = await orchestrator.abandon(context, showSnapshot)
+      if (result.status !== 'abandoned-after-failure') {
+        setPresentation({
+          kind: 'failed',
+          snapshot: result.status === 'idle' ? undefined : result,
+          errorCode:
+            result.status === 'idle'
+              ? 'APP_MIGRATION_ABANDON_INCOMPLETE'
+              : (result.errorCode ?? 'APP_MIGRATION_ABANDON_INCOMPLETE'),
+        })
+      } else {
+        dismissedScopeRef.current = context.userId
+        setAccountMigrationWriteScope(context.userId)
+        await onWriteScopeOpened?.()
+        if (activeUserRef.current !== context.userId) return
+        clearAccountMigrationMutationJournal(context.userId)
+        setReadyUserId(context.userId)
+        setWriteUserId(context.userId)
+        setPresentation({ kind: 'hidden' })
+        setResumeToken(value => value + 1)
+      }
+    } catch (error) {
+      setPresentation({
+        kind: 'failed',
+        snapshot: presentation.snapshot,
+        errorCode: safeInspectionErrorCode(error),
+      })
+    }
+    setActionPending(false)
     setAccountMigrationInProgress(false)
   }
 
@@ -166,6 +240,7 @@ export const useAccountMigrations = ({
     isAccountWriteReady: Boolean(activeUserId && writeUserId === activeUserId),
     runBeforeSync,
     retry,
+    confirm,
     continueAfterFailure,
   }
 }

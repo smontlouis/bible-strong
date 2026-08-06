@@ -231,8 +231,7 @@ const renderCard = (
   verseNumber: number,
   onOpenStrongBibleSourceSheet = jest.fn(),
   onStrongBibleProvenanceChange = jest.fn(),
-  selectedVersion: 'BFC' | 'BHG' = 'BFC',
-  bottomInset = 0
+  selectedVersion: 'BFC' | 'BHG' = 'BFC'
 ) => (
   <QueryClientProvider client={queryClient}>
     <BibleVerseDetailCard
@@ -242,7 +241,6 @@ const renderCard = (
       updateVerse={jest.fn()}
       onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
       onStrongBibleProvenanceChange={onStrongBibleProvenanceChange}
-      bottomInset={bottomInset}
     />
   </QueryClientProvider>
 )
@@ -406,7 +404,7 @@ describe('BibleVerseDetailCard', () => {
     )
   })
 
-  it('limits Strong cards above the ResourceModal footer and safe-area inset', async () => {
+  it('renders Strong cards in the horizontally snapping resource area', async () => {
     mockLoadVerse.mockResolvedValueOnce(
       makeAvailableVerse('Dieu', [
         {
@@ -419,11 +417,11 @@ describe('BibleVerseDetailCard', () => {
     )
 
     await act(async () => {
-      renderer = create(renderCard(1, jest.fn(), jest.fn(), 'BFC', 120))
+      renderer = create(renderCard(1, jest.fn(), jest.fn(), 'BFC'))
       await flushQueryUpdates()
     })
     await act(async () => {
-      renderer.update(renderCard(1, jest.fn(), jest.fn(), 'BFC', 120))
+      renderer.update(renderCard(1, jest.fn(), jest.fn(), 'BFC'))
       await flushQueryUpdates()
     })
 
@@ -431,9 +429,7 @@ describe('BibleVerseDetailCard', () => {
       .findAll(node => String(node.type) === 'ScrollView')
       .find(node => node.props.snapToInterval === 64)
     expect(cardsScrollView).toBeDefined()
-    expect(renderer.root.find(node => String(node.type) === 'StrongCard').props.cardHeight).toBe(
-      280
-    )
+    expect(renderer.root.find(node => String(node.type) === 'StrongCard')).toBeDefined()
   })
 
   it('renders repeated Strong words as distinct cards with occurrence morphology', async () => {

@@ -50,7 +50,7 @@ jest.mock('~common/ui/Icon', () => ({
 }))
 
 const activePresentation = (
-  status: 'running' | 'failed',
+  status: 'awaiting-confirmation' | 'running' | 'failed',
   overrides: Record<string, unknown> = {}
 ): AccountMigrationPresentation =>
   ({
@@ -85,6 +85,7 @@ const renderModal = (presentation: AccountMigrationPresentation) => {
       <AccountMigrationModal
         presentation={presentation}
         isActionPending={false}
+        onConfirm={jest.fn()}
         onRetry={jest.fn()}
         onContinue={jest.fn()}
       />
@@ -105,11 +106,8 @@ describe('AccountMigrationModal', () => {
     expect(renderModal({ kind: 'hidden' }).toJSON()).toBeNull()
   })
 
-  it('blocks interactions with a lightweight sync check before the account is declared clean', () => {
-    const renderer = renderModal({ kind: 'checking' })
-
-    expect(renderer.root.findByProps({ testID: 'account-migration-checking' })).toBeTruthy()
-    expect(renderer.root.findAllByProps({ testID: 'account-migration-modal' })).toHaveLength(0)
+  it('renders no migration surface while the account is only being inspected', () => {
+    expect(renderModal({ kind: 'checking' }).toJSON()).toBeNull()
   })
 
   it('shows generic orchestrator progress without a migration-specific branch', () => {
@@ -119,6 +117,13 @@ describe('AccountMigrationModal', () => {
     expect(renderer.root.findByProps({ accessibilityRole: 'progressbar' }).props).toMatchObject({
       accessibilityValue: { min: 0, max: 100, now: 40 },
     })
+    expect(renderer.root.findAllByProps({ testID: 'account-migration-retry' })).toHaveLength(0)
+  })
+
+  it('requires explicit confirmation before an account migration starts', () => {
+    const renderer = renderModal(activePresentation('awaiting-confirmation'))
+
+    expect(renderer.root.findByProps({ testID: 'account-migration-confirm' })).toBeTruthy()
     expect(renderer.root.findAllByProps({ testID: 'account-migration-retry' })).toHaveLength(0)
   })
 

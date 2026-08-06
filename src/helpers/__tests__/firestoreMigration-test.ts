@@ -232,6 +232,16 @@ describe('embedded migration reconciliation', () => {
       set: {},
       delete: ['deleted-note'],
     })
+    expect(fetchSubcollection).not.toHaveBeenCalled()
+  })
+
+  it('reads only collections whose preferred journal entries are absent locally', async () => {
+    await reconcileEmbeddedMigrationSources('user-1', {
+      notes: { 'updated-note': { title: 'Stale embedded copy' } },
+    })
+
+    expect(fetchSubcollection).toHaveBeenCalledTimes(1)
+    expect(fetchSubcollection).toHaveBeenCalledWith('user-1', 'notes')
   })
 })
 

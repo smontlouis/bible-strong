@@ -94,6 +94,21 @@ const migrateValue = (value: unknown, field?: string): unknown => {
 
 export const migrateLegacyPersistedValue = (value: unknown): unknown => migrateValue(value)
 
+export const canonicalizeLegacySubcollectionData = (
+  data: Record<string, unknown>
+): { data: Record<string, unknown>; changedDocuments: Record<string, unknown> } => {
+  const canonicalData: Record<string, unknown> = {}
+  const changedDocuments: Record<string, unknown> = {}
+  for (const [documentId, document] of Object.entries(data)) {
+    const canonical = migrateValue(document)
+    canonicalData[documentId] = canonical
+    if (JSON.stringify(canonical) !== JSON.stringify(document)) {
+      changedDocuments[documentId] = canonical
+    }
+  }
+  return { data: canonicalData, changedDocuments }
+}
+
 const migrateJsonStorageKey = (
   backend: LegacyPersistedReferenceStorage,
   key: string,

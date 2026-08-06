@@ -52,8 +52,17 @@ export const reconcileEmbeddedMigrationSources = async (
   localBible: EmbeddedBibleData = {}
 ): Promise<EmbeddedBibleData> => {
   const journal = readAccountMigrationMutationJournal(userId)
-  const existingCollections = await Promise.all(
-    SUBCOLLECTION_NAMES.map(collection => fetchSubcollection(userId, collection))
+  const collectionsNeedingRemoteFallback = SUBCOLLECTION_NAMES.filter(collection =>
+    (journal.preferredDocumentIds[collection] ?? []).some(
+      documentId => !localBible[collection]?.[documentId]
+    )
+  )
+  const existingCollections = new Map(
+    await Promise.all(
+      collectionsNeedingRemoteFallback.map(
+        async collection => [collection, await fetchSubcollection(userId, collection)] as const
+      )
+    )
   )
   await Promise.all(
     SUBCOLLECTION_NAMES.map(collection => {
@@ -63,14 +72,14 @@ export const reconcileEmbeddedMigrationSources = async (
     })
   )
 
-  return SUBCOLLECTION_NAMES.reduce((result, collection, index) => {
+  return SUBCOLLECTION_NAMES.reduce((result, collection) => {
     const embedded = { ...(embeddedBible[collection] ?? {}) }
     for (const deletedId of journal.deletedDocumentIds[collection] ?? []) {
       delete embedded[deletedId]
     }
     for (const preferredId of journal.preferredDocumentIds[collection] ?? []) {
       const preferred =
-        localBible[collection]?.[preferredId] ?? existingCollections[index][preferredId]
+        localBible[collection]?.[preferredId] ?? existingCollections.get(collection)?.[preferredId]
       if (preferred) embedded[preferredId] = preferred
     }
     result[collection] = embedded
@@ -447,13 +456,20 @@ export async function inspectEmbeddedDataMigration(userId: string): Promise<{
 }> {
   const userDocRef = doc(firebaseDb, 'users', userId)
   const userDocSnap = await getDoc(userDocRef)
-  const userData = userDocSnap.data()
+  return inspectEmbeddedDataFromUserDocument(userDocSnap.data())
+}
 
-  if (!userData?.bible) {
+export function inspectEmbeddedDataFromUserDocument(userData: unknown): {
+  hasEmbeddedData: boolean
+  collectionsWithData: SubcollectionName[]
+} {
+  const record = userData as { bible?: EmbeddedBibleData } | undefined
+
+  if (!record?.bible) {
     return { hasEmbeddedData: false, collectionsWithData: [] }
   }
 
-  const bible = userData.bible as EmbeddedBibleData
+  const bible = record.bible
   const collectionsWithData = SUBCOLLECTION_NAMES.filter(
     collection => Object.keys(getCollectionDataForMigration(bible, collection)).length > 0
   )
@@ -469,10 +485,17 @@ export async function inspectRelationsArchitectureMigration(
 ): Promise<{ required: boolean }> {
   const userDocRef = doc(firebaseDb, 'users', userId)
   const userDocSnap = await getDoc(userDocRef)
-  const userData = userDocSnap.data()
-  const relationsMigrated = userData?._relationsMigrated === true
-  const cleanupCurrent =
-    Number(userData?._relationsCleanupVersion || 0) >= RELATIONS_CLEANUP_VERSION
+  return inspectRelationsArchitectureFromUserDocument(userDocSnap.data())
+}
+
+export function inspectRelationsArchitectureFromUserDocument(userData: unknown): {
+  required: boolean
+} {
+  const record = userData as
+    | { _relationsMigrated?: boolean; _relationsCleanupVersion?: number }
+    | undefined
+  const relationsMigrated = record?._relationsMigrated === true
+  const cleanupCurrent = Number(record?._relationsCleanupVersion || 0) >= RELATIONS_CLEANUP_VERSION
 
   return { required: !relationsMigrated || !cleanupCurrent }
 }
@@ -745,7 +768,8 @@ export async function resumableMigrateUserData(
   userId: string,
   state: RootState,
   existingMigrationState: MigrationState | null,
-  onProgress: (progress: MigrationProgressUpdate) => void
+  onProgress: (progress: MigrationProgressUpdate) => void,
+  preparedUserDocument?: Record<string, unknown>
 ): Promise<MigrationResult> {
   const failedCollections: SubcollectionName[] = []
   let completedCollections: SubcollectionName[] = []
@@ -766,15 +790,19 @@ export async function resumableMigrateUserData(
   }
 
   try {
-    // 1. Vérifier si des données embedded existent (IMPORTANT pour migration incrémentale)
-    // Même si _migrated est true, une ancienne app peut avoir continué à synchroniser
+    // 1. Reuse the account inspection snapshot. Direct legacy callers fall back to one read.
     reportProgress({ message: 'Vérification des données...', overallProgress: 0 })
-    const { hasEmbeddedData, collectionsWithData } = await inspectEmbeddedDataMigration(userId)
+    const userData =
+      preparedUserDocument ??
+      ((await getDoc(doc(firebaseDb, 'users', userId))).data() as
+        | Record<string, unknown>
+        | undefined)
+    const { hasEmbeddedData, collectionsWithData } = inspectEmbeddedDataFromUserDocument(userData)
 
     if (!hasEmbeddedData) {
       // Pas de données embedded - s'assurer que _migrated est défini
       console.log('[FirestoreMigration] No embedded data found')
-      const alreadyMigrated = await isUserMigrated(userId)
+      const alreadyMigrated = userData?._migrated === true
       if (!alreadyMigrated) {
         console.log('[FirestoreMigration] Marking user as migrated (no data to migrate)')
         await markAsMigrated(userId)
@@ -810,13 +838,10 @@ export async function resumableMigrateUserData(
       }
     }
 
-    // 4. Lire les données embedded du document user
+    // 4. Use the embedded data captured by the inspection that built this plan.
     reportProgress({ message: 'Lecture des données existantes...', overallProgress: 0.1 })
-    const userDocRef = doc(firebaseDb, 'users', userId)
-    const userDocSnap = await getDoc(userDocRef)
-    const userData = userDocSnap.data()
-
-    if (!userData?.bible) {
+    const embeddedBible = userData?.bible
+    if (!embeddedBible || typeof embeddedBible !== 'object') {
       console.log('[FirestoreMigration] No bible data found, marking as migrated')
       await markAsMigrated(userId)
       clearMigrationState()
@@ -825,7 +850,7 @@ export async function resumableMigrateUserData(
 
     const bible = await reconcileEmbeddedMigrationSources(
       userId,
-      userData.bible as EmbeddedBibleData,
+      embeddedBible as EmbeddedBibleData,
       state.user.bible as EmbeddedBibleData
     )
 

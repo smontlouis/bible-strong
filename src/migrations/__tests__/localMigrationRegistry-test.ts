@@ -31,6 +31,7 @@ import {
   localMigrationContext,
   localMigrationOrchestrator,
   prepareLocalMigrationInspection,
+  prepareLocalMigrationStartup,
 } from '../localMigrationRegistry'
 
 const mockCreateAppMigrationOrchestrator = jest.mocked(
@@ -61,5 +62,27 @@ describe('localMigrationRegistry', () => {
     })
     expect(mockPrepareLegacyStorage).toHaveBeenCalledTimes(1)
     expect(mockReconcileInstallationJournal).toHaveBeenCalledTimes(1)
+  })
+
+  it('skips asynchronous preparation when the synchronous checkpoint is clean', async () => {
+    const prepareInspection = jest.fn(async () => undefined)
+
+    await prepareLocalMigrationStartup({
+      orchestrator: { getStartupDisposition: () => ({ kind: 'ready' }) },
+      prepareInspection,
+    })
+
+    expect(prepareInspection).not.toHaveBeenCalled()
+  })
+
+  it('prepares legacy storage before persistence when inspection is still required', async () => {
+    const prepareInspection = jest.fn(async () => undefined)
+
+    await prepareLocalMigrationStartup({
+      orchestrator: { getStartupDisposition: () => ({ kind: 'inspect' }) },
+      prepareInspection,
+    })
+
+    expect(prepareInspection).toHaveBeenCalledTimes(1)
   })
 })

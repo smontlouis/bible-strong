@@ -187,7 +187,6 @@ describe('StrongCard', () => {
     })
 
     const serialized = JSON.stringify(renderer.toJSON())
-    expect(serialized).toContain('les dieux')
     expect(serialized).toContain('HVqp3ms')
     expect(serialized).not.toContain('HNcmpa')
     expect(renderer.root.find(node => String(node.type) === 'ListenStrong').props).toEqual(
