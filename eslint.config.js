@@ -39,6 +39,7 @@ module.exports = [
       'builds/**',
       'dist/**',
       'docs/assets/app-flows/dist/**',
+      'docs/research/data/bible-project/presentation-data.js',
       '.agents/**',
       '*.config.js',
       'babel.config.js',

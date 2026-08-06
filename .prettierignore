@@ -26,3 +26,6 @@ src/helpers/lunr.*.min.js
 *.apk
 *.aab
 *.ipa
+
+# Generated research projections
+docs/research/data/bible-project/presentation-data.js

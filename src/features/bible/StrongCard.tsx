@@ -22,7 +22,6 @@ import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { createStrongIdentity } from '~helpers/strongIdentities'
 import type { StrongVerseContext } from './strongResourceCardContext'
 
-
 const TitleBorder = styled.View(({ theme }) => ({
   marginTop: 10,
   width: 35,

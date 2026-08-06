@@ -1233,46 +1233,46 @@ const LoadedBibleContent = ({
                 isCompact={!passageMedia.isIntroductionStartChapter}
               />
             )}
-<m.div layout="position">
-            {/* Unified verse rendering for all modes */}
-            <UnifiedVersesRenderer
-              verses={verses}
-              parallelVerses={parallelVerses}
-              focusVerses={focusVerses}
-              selectedVerses={selectedVerses}
-              highlightedVerses={highlightedVerses}
-              settings={settings}
-              verseToScroll={verseToScroll}
-              contextDisplayMode={contextDisplayMode}
-              version={version}
-              interlinearMode={interlinearMode}
-              pericopeChapter={pericopeChapter}
-              isSelectionMode={isSelectionMode}
-              selectedCode={selectedCode}
-              isHebreu={isHebreu}
-              isParallelVerse={isParallelVerse}
-              comments={comments}
-              wordAnnotations={wordAnnotations}
-              wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
-              taggedVerses={taggedVerses}
-              bookmarkedVerses={bookmarkedVerses}
-              annotationNotesCountByVerse={annotationNotesCountByVerse}
-              relationItemsCount={relationItemsCount}
-              relationItemsText={relationItemsText}
-              versesWithAnnotationNotes={versesWithAnnotationNotes}
-              navigateToPericope={navigateToPericope}
-              annotationMode={annotationMode}
-              touchedVerseKey={touchedVerseKey}
-              taggedVersesInChapter={taggedVersesInChapter}
-              versesWithNonHighlightTags={versesWithNonHighlightTags}
-              columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
-              columnWidth={parallelColumnWidth}
-              parallelDisplayMode={parallelDisplayMode}
-              redWords={redWords}
-              passageMediaAfterVerses={passageMedia.afterVerses}
-              passageMediaGallerySections={passageMediaGallerySections}
+            <m.div layout="position">
+              {/* Unified verse rendering for all modes */}
+              <UnifiedVersesRenderer
+                verses={verses}
+                parallelVerses={parallelVerses}
+                focusVerses={focusVerses}
+                selectedVerses={selectedVerses}
+                highlightedVerses={highlightedVerses}
+                settings={settings}
+                verseToScroll={verseToScroll}
+                contextDisplayMode={contextDisplayMode}
+                version={version}
+                interlinearMode={interlinearMode}
+                pericopeChapter={pericopeChapter}
+                isSelectionMode={isSelectionMode}
+                selectedCode={selectedCode}
+                isHebreu={isHebreu}
+                isParallelVerse={isParallelVerse}
+                comments={comments}
+                wordAnnotations={wordAnnotations}
+                wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
+                taggedVerses={taggedVerses}
+                bookmarkedVerses={bookmarkedVerses}
+                annotationNotesCountByVerse={annotationNotesCountByVerse}
+                relationItemsCount={relationItemsCount}
+                relationItemsText={relationItemsText}
+                versesWithAnnotationNotes={versesWithAnnotationNotes}
+                navigateToPericope={navigateToPericope}
+                annotationMode={annotationMode}
+                touchedVerseKey={touchedVerseKey}
+                taggedVersesInChapter={taggedVersesInChapter}
+                versesWithNonHighlightTags={versesWithNonHighlightTags}
+                columnCount={isParallelVerse ? parallelVersionTitles.length : 1}
+                columnWidth={parallelColumnWidth}
+                parallelDisplayMode={parallelDisplayMode}
+                redWords={redWords}
+                passageMediaAfterVerses={passageMedia.afterVerses}
+                passageMediaGallerySections={passageMediaGallerySections}
               />
-              </m.div>
+            </m.div>
           </HorizontalScrollWrapper>
           <ChapterEntities
             entities={chapterEntities}
