@@ -383,6 +383,7 @@ export type BackupTrigger =
   | 'sync_error' // Après erreur de sync
   | 'manual' // Déclenché manuellement par l'utilisateur
   | 'pre_migration' // Avant migration vers sous-collections Firestore
+  | 'account_entry' // Avant adoption ou hydratation lors de l'entrée dans un compte
 
 export interface BackupData {
   version: number

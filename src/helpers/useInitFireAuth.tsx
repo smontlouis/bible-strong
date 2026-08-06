@@ -1,13 +1,19 @@
 import { useSetAtom } from 'jotai/react'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useStore } from 'react-redux'
 import { toast } from '~helpers/toast'
-import FireAuth, { FireAuthProfile } from '~helpers/FireAuth'
+import FireAuth, { type FireAuthProfile } from '~helpers/FireAuth'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import i18n from '~i18n'
 import * as UserActions from '~redux/modules/user'
 import { resetUserAtomsAtom } from '../state/app'
 import { RootState } from '~redux/modules/reducer'
+import {
+  createAccountEntryState,
+  reduceAccountEntry,
+  type AccountEntryClassification,
+} from '~helpers/accountEntry'
+import { appLogger } from '~helpers/agentObservability'
 
 interface AuthError {
   code?: string
@@ -24,17 +30,53 @@ const useInitFireAuth = () => {
   const dispatch = useDispatch()
   const resetAtoms = useSetAtom(resetUserAtomsAtom)
   const store = useStore<RootState>()
+  const [accountEntryState, setAccountEntryState] = useState(createAccountEntryState)
+  const activeEntryUserIdRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {
-    const onLogin = ({ profile }: { profile: FireAuthProfile }) => {
+    const onLogin = async ({
+      profile,
+      accountEntryClassification,
+    }: {
+      profile: FireAuthProfile
+      accountEntryClassification: AccountEntryClassification
+    }) => {
       console.log(`[Auth] Bienvenue ${profile.displayName}.`)
+      activeEntryUserIdRef.current = profile.id
+      let nextEntryState = reduceAccountEntry(createAccountEntryState(), {
+        type: 'authentication-started',
+      })
+      nextEntryState = reduceAccountEntry(nextEntryState, {
+        type: 'account-classified',
+        classification: accountEntryClassification,
+        userId: profile.id,
+      })
+      setAccountEntryState(nextEntryState)
+
+      const guestState = store.getState()
       dispatch(UserActions.onUserLoginSuccess({ profile }))
+
+      if (nextEntryState.phase !== 'backing-up-guest-data') return
+
+      const backupCompleted = await autoBackupManager.createBackupNow(guestState, 'account_entry')
+      if (activeEntryUserIdRef.current !== profile.id) return
+
+      nextEntryState = reduceAccountEntry(nextEntryState, {
+        type: backupCompleted ? 'backup-finished' : 'backup-failed',
+      })
+      setAccountEntryState(nextEntryState)
+      appLogger.info('sync', 'account_entry.backup_finished', {
+        lifecycleState: nextEntryState.phase,
+        classification: accountEntryClassification,
+        backupCompleted,
+      })
     }
 
     const emailVerified = () => dispatch(UserActions.verifyEmail())
     const onUserChange = (profile: FireAuthProfile) =>
       console.log('[Auth] User changed', profile.id)
     const onLogout = async () => {
+      activeEntryUserIdRef.current = undefined
       // PROTECTION: Créer un backup avant de déconnecter
       // Garantit qu'aucune donnée non-sync ne peut être perdue
       try {
@@ -48,6 +90,7 @@ const useInitFireAuth = () => {
       }
 
       dispatch(UserActions.onUserLogout())
+      setAccountEntryState(createAccountEntryState())
       resetAtoms()
     }
     const onError = (error: unknown) => {
@@ -81,6 +124,8 @@ const useInitFireAuth = () => {
 
     FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError, dispatch)
   }, [dispatch, store, resetAtoms])
+
+  return accountEntryState
 }
 
 export default useInitFireAuth

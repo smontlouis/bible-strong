@@ -23,7 +23,7 @@ import useLogin from './useLogin'
 import { usePrevious } from './usePrevious'
 import { subscribeToSubcollection, USER_DATA_SUBCOLLECTION_NAMES } from './firestoreSubcollections'
 import { store } from '~redux/store'
-import { isMigrationInProgress } from 'src/state/migration'
+import { isMigrationInProgress } from '~state/migration'
 
 let isFirstSnapshotListener = true
 
@@ -68,11 +68,12 @@ export const cleanupFirestoreSubscriptions = () => {
 registerCleanup('firestoreSubscriptions', cleanupFirestoreSubscriptions)
 
 interface AccountMigrationCoordinator {
+  enabled: boolean
   runBeforeSync(userId: string, state: RootState): Promise<boolean>
   resumeToken: number
 }
 
-const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordinator) => {
+const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigrationCoordinator) => {
   const { isLogged, user } = useLogin()
   const isLoggedPrev = usePrevious(isLogged)
   const dispatch = useDispatch()
@@ -96,7 +97,7 @@ const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordina
     let disposed = false
 
     const setupListeners = async () => {
-      if (!isLogged || isLoading !== false || !user.id) {
+      if (!enabled || !isLogged || isLoading !== false || !user.id) {
         return
       }
       const userId = user.id
@@ -282,7 +283,7 @@ const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordina
       )
     }
 
-    if (isLogged && isLoading === false) {
+    if (enabled && isLogged && isLoading === false) {
       setupListeners()
     } else {
       // Cleanup when user logs out (detected via isLogged change)
@@ -298,7 +299,7 @@ const useLiveUpdates = ({ runBeforeSync, resumeToken }: AccountMigrationCoordina
       cleanupFirestoreSubscriptions()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLogged, isLoading, resumeToken, user.id])
+  }, [enabled, isLogged, isLoading, resumeToken, user.id])
 }
 
 export default useLiveUpdates

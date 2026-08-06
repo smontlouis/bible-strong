@@ -28,6 +28,7 @@ import { useAccountMigrations } from '~helpers/useAccountMigrations'
 import { getChangelog } from '~redux/modules/user'
 import { useTabGroupsSync } from '~state/useTabGroupsSync'
 import { resumePendingAnnotationMigration } from '~helpers/annotationMigrationJournal'
+import { canStartRemoteHydration } from '~helpers/accountEntry'
 
 export type InitHooksProps = Record<string, never>
 
@@ -51,12 +52,13 @@ const ensureBiblesDbOpen = (): ReturnType<typeof openBiblesDb> => {
 }
 
 const InitHooks = (_props: InitHooksProps) => {
-  useInitFireAuth()
+  const accountEntryState = useInitFireAuth()
   const { t } = useTranslation()
   const dispatch = useDispatch()
   const { isLogged, user } = useLogin()
+  const accountEntryHydrationEnabled = canStartRemoteHydration(accountEntryState)
   const accountMigrations = useAccountMigrations({
-    activeUserId: isLogged ? user.id : undefined,
+    activeUserId: isLogged && accountEntryHydrationEnabled ? user.id : undefined,
     onWriteScopeOpened: async () => {
       await ensureBiblesDbOpen()
       await resumePendingAnnotationMigration()
@@ -190,12 +192,13 @@ const InitHooks = (_props: InitHooksProps) => {
   }, [dispatch, t])
 
   useLiveUpdates({
+    enabled: accountEntryHydrationEnabled,
     runBeforeSync: accountMigrations.runBeforeSync,
     resumeToken: accountMigrations.resumeToken,
   })
   useTabGroupsSync({
-    incomingEnabled: accountMigrations.isAccountSyncReady,
-    outgoingEnabled: accountMigrations.isAccountWriteReady,
+    incomingEnabled: accountEntryHydrationEnabled && accountMigrations.isAccountSyncReady,
+    outgoingEnabled: accountEntryHydrationEnabled && accountMigrations.isAccountWriteReady,
   })
   useAppRatingCheck()
 
