@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "resourceId": "passage-media",
-  "revision": "sha256:d3a1fa72bd6d1bc43030354a1b4fd0d6e847c68b24752c6b4c9afc789ebb37ee",
+  "revision": "sha256:2e27b6f9f44de368037ec61bee8294b2e8aee55a3d359bb5af50e4f9822259fd",
   "generatedAt": "2026-08-05T06:55:47.222Z",
   "languages": [
     "fr",
@@ -16,17 +16,17 @@
   },
   "artifact": {
     "path": "passage-media.json",
-    "sha256": "0a9804642b7e51c745859de711cc2f9c9939c662baf743452a8ca06880a3437c",
-    "bytes": 470197
+    "sha256": "d7eff9e230e626eb0f1ab992a563922fee41f823eaadd7cb34586b23606ba104",
+    "bytes": 472967
   },
   "counts": {
-    "works": 286,
-    "editions": 491,
+    "works": 284,
+    "editions": 489,
     "frEditions": 214,
-    "enEditions": 277,
-    "anchors": 515,
+    "enEditions": 275,
+    "anchors": 517,
     "indexedChapters": 493,
     "indexedStrongs": 43,
-    "libraryWorks": 28
+    "libraryWorks": 27
   }
 }

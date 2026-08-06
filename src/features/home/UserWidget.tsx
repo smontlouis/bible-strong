@@ -6,7 +6,6 @@ import Carousel from 'react-native-reanimated-carousel'
 import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
-import Text from '~common/ui/Text'
 import useLogin from '~helpers/useLogin'
 import OfflineNotice from './OfflineNotice'
 import PreloadBible from './PreloadBible'
@@ -22,32 +21,7 @@ const Container = styled.View(({ theme }) => ({
 }))
 
 const UserWidget = () => {
-  const { isLogged } = useLogin()
-  const { t } = useTranslation()
   const [carouselWidth, setCarouselWidth] = React.useState(0)
-
-  if (!isLogged) {
-    return (
-      <Container>
-        <Box paddingHorizontal={20} borderRadius={30} marginHorizontal={20} bg="reverse" py={20}>
-          <Text marginTop={20} title fontSize={25} flex>
-            {t('Bienvenue')}
-          </Text>
-          <Paragraph marginTop={20} marginBottom={20}>
-            {t('Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !')}
-          </Paragraph>
-          <Button
-            route="Login"
-            rightIcon={
-              <Icon.Feather name="arrow-right" size={20} color="white" style={{ marginLeft: 10 }} />
-            }
-          >
-            {t('Je me connecte')}
-          </Button>
-        </Box>
-      </Container>
-    )
-  }
 
   return (
     <Container>
@@ -96,6 +70,30 @@ const UserWidget = () => {
         </Box>
       </PreloadBible>
     </Container>
+  )
+}
+
+export const LoginPrompt = () => {
+  const { isLogged } = useLogin()
+  const { t } = useTranslation()
+
+  if (isLogged) return null
+
+  return (
+    <Box paddingHorizontal={20} borderRadius={30} marginHorizontal={20} bg="primary" py={20}>
+      <Paragraph scale={-1} bold color="reverse" marginBottom={20}>
+        {t('Connectez-vous pour profiter de toutes les fonctionnalités de la Bible Strong !')}
+      </Paragraph>
+      <Button
+        reverse
+        route="Login"
+        rightIcon={
+          <Icon.Feather name="arrow-right" size={20} color="white" style={{ marginLeft: 10 }} />
+        }
+      >
+        {t('Je me connecte')}
+      </Button>
+    </Box>
   )
 }
 

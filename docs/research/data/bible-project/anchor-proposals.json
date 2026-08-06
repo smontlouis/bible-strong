@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-05T11:36:31.643Z",
+  "generatedAt": "2026-08-06T09:26:54.210Z",
   "sourceGeneratedAt": "2026-08-05T06:55:47.222Z",
   "method": "Agent proposals from official metadata and cached YouTube transcripts, finalized by human editorial review.",
   "totals": {
@@ -25,8 +25,8 @@
       "uncategorized": 13
     },
     "byReviewStatus": {
-      "human-accepted": 153,
-      "human-rejected": 20
+      "human-accepted": 151,
+      "human-rejected": 22
     }
   },
   "records": [
@@ -1428,7 +1428,7 @@
       },
       "relatedAnchors": [],
       "confidence": "high",
-      "reviewStatus": "human-accepted",
+      "reviewStatus": "human-rejected",
       "rationale": "La vidéo explique les choix artistiques de The Exodus Way; elle ne commente pas un passage biblique de manière autonome.",
       "evidence": [
         {
@@ -3278,7 +3278,7 @@
       },
       "relatedAnchors": [],
       "confidence": "high",
-      "reviewStatus": "human-accepted",
+      "reviewStatus": "human-rejected",
       "rationale": "This is an organizational year-in-review, not instruction centered on a biblical text; a Bible View anchor would misrepresent it.",
       "evidence": [
         {

@@ -117,9 +117,9 @@ const main = async () => {
       ])
     }
   }
-  if (works.length !== 286) throw new Error(`Expected 286 unique works, received ${works.length}`)
-  if (editions.length !== 491)
-    throw new Error(`Expected 491 concrete editions, received ${editions.length}`)
+  if (works.length !== 284) throw new Error(`Expected 284 unique works, received ${works.length}`)
+  if (editions.length !== 489)
+    throw new Error(`Expected 489 concrete editions, received ${editions.length}`)
   if (new Set(providerIds).size !== providerIds.length)
     throw new Error('A provider video is published by more than one concrete work')
   const unsupportedFormatIds = providerIds.filter(providerId => {

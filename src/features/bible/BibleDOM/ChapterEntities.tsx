@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather'
 import { LayoutGroup, m, useReducedMotion } from 'motion/react'
-import { useEffect, useId, useState, type CSSProperties, type ReactNode } from 'react'
+import { useId, useState, type CSSProperties, type ReactNode } from 'react'
 
 import type {
   StrongLexiconChapterEntity,
@@ -8,10 +8,11 @@ import type {
 } from '~features/resources/strongLexiconAccess'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import type { BibleDOMDownloadState, RootStyles } from './BibleDOMWrapper'
-import ChapterEntitiesOverlay, { getChapterEntityAvatarUri } from './ChapterEntitiesOverlay'
+import ChapterEntitiesOverlay from './ChapterEntitiesOverlay'
+import { getChapterEntityAvatarUri } from './chapterEntityAvatar'
 import { getChapterEntitiesViewMode } from './chapterEntitiesPresentation'
-import { SET_BIBLE_OVERLAY_OPEN } from './dispatch'
-import { useDispatch } from './DispatchProvider'
+import { useBibleOverlayOpen } from './overlayLifecycle'
+import { getOverlayLayoutTransition } from './overlayStagger'
 
 const MAX_STACKED_ENTITIES = 3
 
@@ -52,18 +53,10 @@ const ChapterEntities = ({
   onDismiss,
 }: Props) => {
   const layoutGroupId = useId()
-  const dispatch = useDispatch()
   const shouldReduceMotion = useReducedMotion()
   const [isOverlayOpen, setIsOverlayOpen] = useState(false)
 
-  useEffect(() => {
-    if (!isOverlayOpen) return
-
-    void dispatch({ type: SET_BIBLE_OVERLAY_OPEN, payload: true })
-    return () => {
-      void dispatch({ type: SET_BIBLE_OVERLAY_OPEN, payload: false })
-    }
-  }, [dispatch, isOverlayOpen])
+  useBibleOverlayOpen(isOverlayOpen)
   const viewMode = getChapterEntitiesViewMode(availabilityStatus, loaded, entities.length)
   if (viewMode === 'hidden' && !chapterResources) return null
 
@@ -71,6 +64,7 @@ const ChapterEntities = ({
   const isDownloading = ['queued', 'downloading', 'inserting'].includes(downloadState.status ?? '')
   const progress = Math.max(0, Math.min(1, downloadState.progress))
   const stackedEntities = entities.slice(0, MAX_STACKED_ENTITIES)
+  const layoutTransition = getOverlayLayoutTransition(shouldReduceMotion)
   const sectionStyle: CSSProperties = {
     direction: 'ltr',
     marginTop: 64,
@@ -277,11 +271,7 @@ const ChapterEntities = ({
                       layoutDependency={isOverlayOpen}
                       src={getChapterEntityAvatarUri(entity)}
                       alt=""
-                      transition={{
-                        layout: shouldReduceMotion
-                          ? { duration: 0 }
-                          : { type: 'spring', stiffness: 360, damping: 34, mass: 0.8 },
-                      }}
+                      transition={{ layout: layoutTransition }}
                       style={{
                         gridArea: '1 / 1',
                         display: 'block',

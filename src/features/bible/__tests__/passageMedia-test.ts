@@ -4,6 +4,7 @@ import {
   getPassageMediaForChapter,
   getPassageMediaEmbedUrl,
   resolvePassageMediaChapter,
+  resolvePassageMediaLibrary,
   resolvePassageMediaStrong,
 } from '../passageMedia'
 
@@ -14,6 +15,30 @@ const catalog: PassageMediaCatalog = {
     termsUrl: 'https://bibleproject.test/terms/',
   },
   works: [
+    {
+      id: 'reading-library',
+      categories: ['how-to-read'],
+      editions: {
+        fr: {
+          id: 'reading-library:fr',
+          language: 'fr',
+          provider: 'youtube',
+          providerId: 'reading-library-fr',
+          sourceUrl: 'https://www.youtube.com/watch?v=reading-library-fr',
+          title: 'Comment lire la Bible',
+          thumbnailUrl: 'https://img.test/reading-library.jpg',
+          blurHash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+          durationSeconds: 420,
+        },
+      },
+      anchors: [
+        {
+          kind: 'library',
+          placement: 'library',
+          relevance: 'primary',
+        },
+      ],
+    },
     {
       id: 'genesis-overview',
       editions: {
@@ -221,10 +246,28 @@ const catalog: PassageMediaCatalog = {
     strongs: {
       G0026: ['agape'],
     },
+    library: ['reading-library', 'english-only'],
   },
 }
 
 describe('resolvePassageMediaChapter', () => {
+  it.each([
+    ['Job', 18, 1],
+    ['Job', 18, 42],
+    ['Proverbs', 20, 1],
+    ['Proverbs', 20, 31],
+    ['Ecclesiastes', 21, 1],
+    ['Ecclesiastes', 21, 12],
+  ])('adds the wisdom introduction to %s %i:%i', (_bookName, book, chapter) => {
+    const result = getPassageMediaForChapter({ book, chapter, language: 'en' })
+
+    expect(result.chapterResources).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ workId: 'associated-resource-86V8VTUVBmo' }),
+      ])
+    )
+  })
+
   it('keeps a media work biblical scope instead of replacing it with the current chapter', () => {
     const result = getPassageMediaForChapter({ book: 3, chapter: 25, language: 'en' })
     const biblicalLaw = result.introduction.find(
@@ -302,6 +345,18 @@ describe('resolvePassageMediaStrong', () => {
 
   it('does not fall back to another edition language', () => {
     expect(resolvePassageMediaStrong(catalog, { strongCode: 'G0026', language: 'en' })).toEqual([])
+  })
+})
+
+describe('resolvePassageMediaLibrary', () => {
+  it('preserves library order and only returns the requested language', () => {
+    expect(resolvePassageMediaLibrary(catalog, { language: 'fr' })).toEqual([
+      expect.objectContaining({
+        workId: 'reading-library',
+        title: 'Comment lire la Bible',
+        categories: ['how-to-read'],
+      }),
+    ])
   })
 })
 

@@ -1,33 +1,18 @@
 import { m, useReducedMotion } from 'motion/react'
-import { useEffect, useEffectEvent, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
 import type {
   StrongLexiconChapterEntity,
   StrongLexiconEntityCategory,
 } from '~features/resources/strongLexiconAccess'
-import {
-  getStrongEntityAvatarKey,
-  type StrongEntityPresentationKind,
-} from '~features/lexique/strongEntityPresentation'
-import { ENTITY_AVATAR_IMAGES } from '~features/lexique/strongEntityAvatars'
+import { getChapterEntityAvatarUri } from './chapterEntityAvatar'
+import { useModalOverlayLifecycle } from './overlayLifecycle'
 import {
   getOverlayAdditionalStartDelay,
+  getOverlayLayoutTransition,
   getOverlaySourceDelay,
   OVERLAY_ADDITIONAL_STAGGER_SECONDS,
 } from './overlayStagger'
-
-type RasterAsset = string | { uri?: string; default?: string }
-
-const resolveRasterAssetUri = (source: RasterAsset): string =>
-  typeof source === 'string' ? source : source.uri || source.default || ''
-
-export const getChapterEntityAvatarUri = (entity: StrongLexiconChapterEntity) => {
-  const presentationKind: StrongEntityPresentationKind =
-    entity.category === 'supernatural' ? 'other' : entity.category
-  const avatar = getStrongEntityAvatarKey(presentationKind, entity.type)
-  return resolveRasterAssetUri(ENTITY_AVATAR_IMAGES[avatar])
-}
 
 type Props = {
   entities: StrongLexiconChapterEntity[]
@@ -57,51 +42,8 @@ const ChapterEntitiesOverlay = ({
   onSelect,
 }: Props) => {
   const shouldReduceMotion = useReducedMotion()
-  const overlayRef = useRef<HTMLDivElement>(null)
-  const handleCloseEvent = useEffectEvent(onClose)
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    const previousOverflow = document.documentElement.style.overflow
-    const previousSwipeDownEvent = window.disableSwipeDownEvent
-    const overlayElement = overlayRef.current
-    const backgroundElements = Array.from(document.body.children).filter(
-      element => element !== overlayElement
-    ) as HTMLElement[]
-    const backgroundStates = backgroundElements.map(element => ({
-      element,
-      inert: element.inert,
-      ariaHidden: element.getAttribute('aria-hidden'),
-    }))
-
-    window.disableSwipeDownEvent = true
-    document.documentElement.style.overflow = 'hidden'
-    backgroundElements.forEach(element => {
-      element.inert = true
-      element.setAttribute('aria-hidden', 'true')
-    })
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') handleCloseEvent()
-    }
-    document.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.documentElement.style.overflow = previousOverflow
-      window.disableSwipeDownEvent = previousSwipeDownEvent
-      backgroundStates.forEach(({ element, inert, ariaHidden }) => {
-        element.inert = inert
-        if (ariaHidden === null) element.removeAttribute('aria-hidden')
-        else element.setAttribute('aria-hidden', ariaHidden)
-      })
-    }
-  }, [isOpen])
-
-  const spring = shouldReduceMotion
-    ? { duration: 0 }
-    : { type: 'spring' as const, stiffness: 360, damping: 34, mass: 0.8 }
+  const overlayRef = useModalOverlayLifecycle({ isOpen, onClose })
+  const spring = getOverlayLayoutTransition(shouldReduceMotion)
   const itemIndexes = new Map(entities.map((entity, index) => [entity.uniqueName, index]))
   const sourceItemCount = Math.min(visibleStackItemCount, entities.length)
   const additionalItemsStartDelay = getOverlayAdditionalStartDelay(

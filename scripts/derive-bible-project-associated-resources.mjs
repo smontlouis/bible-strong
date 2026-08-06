@@ -51,6 +51,7 @@ const ACTIVE_STRONG_PROVIDER_IDS = new Set([
   'mz0tAI2SdPk',
   'tlwz151z_80',
 ])
+const HOW_TO_READ_LIBRARY_PROVIDER_IDS = new Set(['WJgt1vRkPbI', 'YEv5AkBF56c'])
 
 const readJson = async filename => JSON.parse(await readFile(`${DATA_DIR}/${filename}`, 'utf8'))
 
@@ -170,11 +171,15 @@ const main = async () => {
     const hasActiveStrongTarget = providerIds.some(providerId =>
       ACTIVE_STRONG_PROVIDER_IDS.has(providerId)
     )
+    const isHowToReadLibraryWork = providerIds.some(providerId =>
+      HOW_TO_READ_LIBRARY_PROVIDER_IDS.has(providerId)
+    )
     const categories = videos.map(video => video.category)
     const category = categories.find(value => value !== 'uncategorized') || categories[0]
     return {
       id: workId,
       category,
+      ...(isHowToReadLibraryWork ? { categories: [category, 'how-to-read'] } : {}),
       reviewStatus: 'reviewed',
       editions: videos
         .map(video => editionFromVideo(video, workId))
@@ -190,15 +195,18 @@ const main = async () => {
               : 'related'
           )
         ),
+        ...(isHowToReadLibraryWork
+          ? [reviewedAnchor({ kind: 'library', placement: 'library' }, 'primary')]
+          : []),
       ],
     }
   })
 
   const editions = works.flatMap(work => work.editions)
-  if (works.length !== 112)
-    throw new Error(`Expected 112 associated resources, got ${works.length}`)
-  if (editions.length !== 151)
-    throw new Error(`Expected 151 associated editions, got ${editions.length}`)
+  if (works.length !== 110)
+    throw new Error(`Expected 110 associated resources, got ${works.length}`)
+  if (editions.length !== 149)
+    throw new Error(`Expected 149 associated editions, got ${editions.length}`)
   if (new Set(editions.map(edition => edition.providerId)).size !== accepted.length)
     throw new Error('Associated manifest does not own every accepted video exactly once')
 

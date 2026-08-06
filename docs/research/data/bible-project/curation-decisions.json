@@ -10,8 +10,8 @@
   "proposalSetHash": "sha256:91d8ac1b4eb10e1669187aed656d51748b22663dcb5d72a6a6f9e81b4a2247ce",
   "totals": {
     "proposals": 173,
-    "accepted": 153,
-    "rejected": 20
+    "accepted": 151,
+    "rejected": 22
   },
   "acceptedProviderIds": [
     "-YrZ1iPiBQM",
@@ -44,7 +44,6 @@
     "DwnHiF7_tTA",
     "E65KV3M8RZE",
     "ED1AV2hb1uw",
-    "ENLyNE1qIc8",
     "FJsiwOB0Pvg",
     "FL-n3dnClY8",
     "FqXKc81z7Oc",
@@ -69,7 +68,6 @@
     "Nw9EsXoQCbA",
     "OHYvZSazXi8",
     "OVRixfameGY",
-    "PT1annWmldE",
     "QmrpB52gWwM",
     "QvjQyA4er_E",
     "QwlQpMuVM4g",
@@ -172,9 +170,11 @@
     "39DTeVC-kCc",
     "6Y_qk7x85nQ",
     "8Tbcofs6l3o",
+    "ENLyNE1qIc8",
     "F6_efk-LRO4",
     "IcJMz5OOfqU",
     "NcnHN7JbhpY",
+    "PT1annWmldE",
     "VHuEQOyUztw",
     "WM4gmjMDL4Q",
     "YB--nhzQbFs",

@@ -37,9 +37,9 @@ const main = async () => {
     (count, work) => count + Object.keys(work.editions).length,
     0
   )
-  if (pack.works.length !== 286 || editionCount !== 491) {
+  if (pack.works.length !== 284 || editionCount !== 489) {
     throw new Error(
-      `Publication baseline changed: expected 286 works / 491 editions, received ${pack.works.length} / ${editionCount}`
+      `Publication baseline changed: expected 284 works / 489 editions, received ${pack.works.length} / ${editionCount}`
     )
   }
 

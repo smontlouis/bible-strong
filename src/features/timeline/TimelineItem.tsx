@@ -7,6 +7,7 @@ import { TimelineSection } from './types'
 import { Image } from 'expo-image'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import { getTimelinePeriodImageSource } from './timelinePeriodImages'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -65,7 +66,7 @@ const TimelineItem = ({
       </Box>
       <Box width="55%" height={250} borderRadius={10}>
         <Image
-          source={{ uri: image }}
+          source={getTimelinePeriodImageSource(image)}
           contentFit="cover"
           style={{ width: '100%', height: '100%' }}
         />

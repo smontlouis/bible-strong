@@ -2,7 +2,7 @@ import Color from 'color'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React from 'react'
 import { Linking, ScrollView as RNScrollView } from 'react-native'
-import Box, { TouchableBox, VStack } from '~common/ui/Box'
+import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HomeScrollView } from '~common/ui/ScrollView'
@@ -13,7 +13,7 @@ import PlanHome from './PlanHome'
 import StrongOfTheDay from './StrongOfTheDay'
 import TheBibleProject from './TheBibleProjectPlan'
 import TimelineWidget from './TimelineWidget'
-import UserWidget from './UserWidget'
+import UserWidget, { LoginPrompt } from './UserWidget'
 import WordOfTheDay from './WordOfTheDay'
 
 import { useTheme } from '@emotion/react'
@@ -24,6 +24,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Events } from './Events'
 import ProfileStats from '~features/profile/components/ProfileStats'
+import PassageMediaLibraryWidget from './PassageMediaLibraryWidget'
 
 // local react props
 type HomeProps = {
@@ -42,12 +43,16 @@ export const Home = ({ closeHome }: HomeProps) => {
         <Events />
         <UserWidget />
         <ProfileStats />
+        <LoginPrompt />
         <Box pt={40} px={20}>
           <Text title fontSize={23} flex>
             {t('Apprendre')}
           </Text>
-          <TheBibleProject />
-          <TimelineWidget />
+          <PassageMediaLibraryWidget />
+          <HStack mt={12} height={174} gap={12} alignItems="stretch">
+            <TheBibleProject />
+            <TimelineWidget />
+          </HStack>
         </Box>
         <Box bg="lightGrey" pt={40} px={20}>
           <Text title fontSize={23} flex>

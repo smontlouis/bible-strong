@@ -113,7 +113,7 @@
               "type": "Video",
               "title": "Video: The Covenants",
               "description": "See how God's covenant with Noah fits into the overall story of the Bible",
-              "url": "https://www.youtube.com/watch?v=8ferLIsvlmI"
+              "url": "https://www.youtube.com/watch?v=6v4jKkFj3TI"
             },
             { "id": "1", "src": "1_genesis_2", "type": "Image" },
             { "id": "2", "chapters": "1|16-18", "type": "Chapter" },
@@ -1236,7 +1236,7 @@
               "type": "Video",
               "title": "Video: Ruth",
               "description": "An Israelite family is struck by a series of tragic deaths, and God mysteriously provides for the widows through the generous acts of an Israelite farmer. The story explores how God can use all life experiences as part of His plan to bless and redeem His people.",
-              "url": "https://www.youtube.com/watch?v=nl-Nlu17_ao"
+              "url": "https://www.youtube.com/watch?v=0h1eoBeR4Jk"
             },
             { "id": "1", "src": "10", "type": "Image" },
             { "id": "2", "chapters": "8|1-4", "type": "Chapter" },
@@ -3610,7 +3610,7 @@
               "type": "Video",
               "title": "Video: Matthew 1-13",
               "description": "Matthew presents Jesus as the God of Israel who comes to be with his people. He is a new Moses who brings God's kingdom and a new Torah to Israel.",
-              "url": "https://www.youtube.com/watch?v=NUh9Bsiee_U"
+              "url": "https://www.youtube.com/watch?v=3Dv4-n6OYGI"
             },
             { "id": "1", "src": "42", "type": "Image" },
             { "id": "2", "chapters": "40|1-2", "type": "Chapter" },
@@ -4547,7 +4547,7 @@
               "type": "Video",
               "title": "Video: 1 Corinthians",
               "description": "Paul addresses a host of problems in the ancient church of Corinth. As he does so, he shows us what it means to see all of life's complexities through the lens of the Gospel about Jesus.",
-              "url": "https://www.youtube.com/watch?v=veU6dB3996o"
+              "url": "https://www.youtube.com/watch?v=yiHf8klCCc4"
             },
             { "id": "1", "src": "52", "type": "Image" },
             { "id": "2", "chapters": "46|1-2", "type": "Chapter" },
@@ -5033,7 +5033,7 @@
               "type": "Video",
               "title": "Video: Titus",
               "description": "Paul comissions Titus to bring order to the house churches on the Island of Crete. He shows how the Gospel can transform Cretan culture from within as Jesus' followers depend on the Spirit to empower a totally new way of life.",
-              "url": "https://www.youtube.com/watch?v=qgAZH5ExwrM"
+              "url": "https://www.youtube.com/watch?v=PUEYCVXJM3k"
             },
             { "id": "1", "src": "62", "type": "Image" },
             { "id": "2", "chapters": "56|1-3", "type": "Chapter" },
@@ -5073,7 +5073,7 @@
               "type": "Video",
               "title": "Video: Hebrews",
               "description": "Hebrew is a powerful and pastoral teaching showing how Jesus is the perfect representation and expression of the Creator God. We are challenged to follow him at all costs.",
-              "url": "https://www.youtube.com/watch?v=z9wqN-nwSzE"
+              "url": "https://www.youtube.com/watch?v=1fNWTZZwgbs"
             },
             { "id": "1", "src": "63", "type": "Image" },
             { "id": "2", "chapters": "58|1-2", "type": "Chapter" },

@@ -13,6 +13,13 @@ type PassageMediaPlacement =
 
 type PassageMediaRelevance = 'primary' | 'related'
 
+export type PassageMediaCategory =
+  | 'how-to-read'
+  | 'podcast'
+  | 'classroom'
+  | 'long-form'
+  | 'uncategorized'
+
 export type PassageMediaEdition = {
   id: string
   language: ActiveLanguage
@@ -39,6 +46,7 @@ type PassageMediaAnchor = {
 
 type PassageMediaWork = {
   id: string
+  categories?: PassageMediaCategory[]
   editions: Partial<Record<ActiveLanguage, PassageMediaEdition>>
   anchors: PassageMediaAnchor[]
 }
@@ -53,6 +61,7 @@ export type PassageMediaCatalog = {
   indexes: {
     chapters: Record<string, string[]>
     strongs: Record<string, string[]>
+    library?: string[]
   }
 }
 
@@ -80,6 +89,10 @@ export type ResolvedPassageMediaChapter = {
   chapterResources: ResolvedPassageMedia[]
 }
 
+export type ResolvedPassageMediaLibraryItem = ResolvedPassageMedia & {
+  categories: PassageMediaCategory[]
+}
+
 export const formatPassageMediaDuration = (durationSeconds: number): string => {
   const totalSeconds = Math.max(0, Math.floor(durationSeconds))
   const hours = Math.floor(totalSeconds / 3600)
@@ -104,6 +117,10 @@ type ResolvePassageMediaChapterInput = {
 
 type ResolvePassageMediaStrongInput = {
   strongCode: string
+  language: ActiveLanguage
+}
+
+type ResolvePassageMediaLibraryInput = {
   language: ActiveLanguage
 }
 
@@ -342,6 +359,34 @@ export const resolvePassageMediaStrong = (
   return result
 }
 
+export const resolvePassageMediaLibrary = (
+  catalog: PassageMediaCatalog,
+  { language }: ResolvePassageMediaLibraryInput
+): ResolvedPassageMediaLibraryItem[] => {
+  const works = getWorksById(catalog)
+  const result: ResolvedPassageMediaLibraryItem[] = []
+
+  for (const workId of catalog.indexes.library ?? []) {
+    const work = works.get(workId)
+    if (!work) continue
+
+    const belongsToLibrary = work.anchors.some(
+      anchor => anchor.kind === 'library' && anchor.placement === 'library'
+    )
+    if (!belongsToLibrary) continue
+
+    const edition = resolveEdition(work, language, catalog.attribution.label)
+    if (!edition || result.some(item => item.editionId === edition.editionId)) continue
+
+    result.push({
+      ...edition,
+      categories: work.categories?.length ? work.categories : ['uncategorized'],
+    })
+  }
+
+  return result
+}
+
 const passageMediaCatalog = passageMediaJson as PassageMediaCatalog
 
 export const getPassageMediaForChapter = (input: ResolvePassageMediaChapterInput) =>
@@ -349,3 +394,6 @@ export const getPassageMediaForChapter = (input: ResolvePassageMediaChapterInput
 
 export const getPassageMediaForStrong = (input: ResolvePassageMediaStrongInput) =>
   resolvePassageMediaStrong(passageMediaCatalog, input)
+
+export const getPassageMediaLibrary = (input: ResolvePassageMediaLibraryInput) =>
+  resolvePassageMediaLibrary(passageMediaCatalog, input)

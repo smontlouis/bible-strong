@@ -3,8 +3,8 @@ import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import type { ResolvedPassageMedia } from '../passageMedia'
 import type { RootStyles } from './BibleDOMWrapper'
 import { getDisabledStyles } from './disabledStyles'
-import { SET_BIBLE_OVERLAY_OPEN } from './dispatch'
-import { useDispatch } from './DispatchProvider'
+import { useBibleOverlayOpen } from './overlayLifecycle'
+import { getOverlayLayoutTransition } from './overlayStagger'
 import type { PassageMediaGallerySection } from './passageMediaGallery'
 import PassageMediaImage from './PassageMediaImage'
 import PassageMediaOverlay from './PassageMediaOverlay'
@@ -77,7 +77,6 @@ const PassageMediaThumbnails = ({
   gallerySections,
 }: Props) => {
   const layoutGroupId = useId()
-  const dispatch = useDispatch()
   const shouldReduceMotion = useReducedMotion()
   const stackRef = useRef<HTMLButtonElement>(null)
   const introductionParallaxScale = useMotionValue(1)
@@ -87,14 +86,7 @@ const PassageMediaThumbnails = ({
   const isOverlayOpen = mode !== 'closed'
   const layoutDependency = `${mode}:${isCompact ? 'compact' : 'featured'}`
 
-  useEffect(() => {
-    if (!isOverlayOpen) return
-
-    void dispatch({ type: SET_BIBLE_OVERLAY_OPEN, payload: true })
-    return () => {
-      void dispatch({ type: SET_BIBLE_OVERLAY_OPEN, payload: false })
-    }
-  }, [dispatch, isOverlayOpen])
+  useBibleOverlayOpen(isOverlayOpen)
 
   useEffect(() => {
     const stackElement = stackRef.current
@@ -153,9 +145,7 @@ const PassageMediaThumbnails = ({
     : cardWidth
   const colors = settings.colors[settings.theme]
   const stackedItems = items.slice(0, MAX_STACKED_THUMBNAILS)
-  const layoutTransition = shouldReduceMotion
-    ? { duration: 0 }
-    : { type: 'spring' as const, stiffness: 360, damping: 34, mass: 0.8 }
+  const layoutTransition = getOverlayLayoutTransition(shouldReduceMotion)
   const stackStyle: CSSProperties = {
     position: 'relative',
     display: isInline ? 'inline-grid' : 'grid',
@@ -177,83 +167,83 @@ const PassageMediaThumbnails = ({
   }
 
   return (
-      <LayoutGroup id={layoutGroupId}>
-        <m.button
-          ref={stackRef}
-          layoutId={placement === 'introduction' ? 'passage-media-introduction-stack' : undefined}
-          layoutDependency={layoutDependency}
-          type="button"
-          disabled={isDisabled}
-          aria-disabled={isDisabled}
-          data-ignore-verse-touch
-          aria-label={items.map(item => item.title).join(', ')}
-          style={{
-            ...stackStyle,
-            scale:
-              placement === 'introduction'
-                ? introductionParallaxScale
-                : placement === 'inline'
-                  ? inlineScrollScale
-                  : 1,
-          }}
-          whileTap={isDisabled ? undefined : { opacity: 0.55 }}
-          onClick={
-            isDisabled
-              ? undefined
-              : event => {
-                  event.stopPropagation()
-                  setMode('gallery')
-                }
-          }
-        >
-          {stackedItems.map((item, index) => {
-            const transform = getStackTransform(index, stackedItems.length)
+    <LayoutGroup id={layoutGroupId}>
+      <m.button
+        ref={stackRef}
+        layoutId={placement === 'introduction' ? 'passage-media-introduction-stack' : undefined}
+        layoutDependency={layoutDependency}
+        type="button"
+        disabled={isDisabled}
+        aria-disabled={isDisabled}
+        data-ignore-verse-touch
+        aria-label={items.map(item => item.title).join(', ')}
+        style={{
+          ...stackStyle,
+          scale:
+            placement === 'introduction'
+              ? introductionParallaxScale
+              : placement === 'inline'
+                ? inlineScrollScale
+                : 1,
+        }}
+        whileTap={isDisabled ? undefined : { opacity: 0.55 }}
+        onClick={
+          isDisabled
+            ? undefined
+            : event => {
+                event.stopPropagation()
+                setMode('gallery')
+              }
+        }
+      >
+        {stackedItems.map((item, index) => {
+          const transform = getStackTransform(index, stackedItems.length)
 
-            return (
-              <PassageMediaImage
-                item={item}
-                layoutId={placement === 'introduction' ? `introduction:${index}` : item.editionId}
-                layoutDependency={layoutDependency}
-                key={placement === 'introduction' ? `introduction:${index}` : item.editionId}
-                loading="lazy"
-                transition={{ layout: layoutTransition }}
-                style={{
-                  gridArea: '1 / 1',
-                  display: 'block',
-                  width: cardWidth,
-                  height: cardHeight,
-                  boxSizing: 'border-box',
-                  placeSelf: 'center',
-                  border: `2px solid ${colors.reverse}`,
-                  borderRadius: isCompact ? 7 : isInline ? 5 : 9,
-                  boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
-                  x: transform.x,
-                  rotate: transform.rotate,
-                  transformOrigin: 'center',
-                  zIndex: index + 1,
-                }}
-              />
-            )
-          })}
-        </m.button>
+          return (
+            <PassageMediaImage
+              item={item}
+              layoutId={placement === 'introduction' ? `introduction:${index}` : item.editionId}
+              layoutDependency={layoutDependency}
+              key={placement === 'introduction' ? `introduction:${index}` : item.editionId}
+              loading="lazy"
+              transition={{ layout: layoutTransition }}
+              style={{
+                gridArea: '1 / 1',
+                display: 'block',
+                width: cardWidth,
+                height: cardHeight,
+                boxSizing: 'border-box',
+                placeSelf: 'center',
+                border: `2px solid ${colors.reverse}`,
+                borderRadius: isCompact ? 7 : isInline ? 5 : 9,
+                boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
+                x: transform.x,
+                rotate: transform.rotate,
+                transformOrigin: 'center',
+                zIndex: index + 1,
+              }}
+            />
+          )
+        })}
+      </m.button>
       <PassageMediaOverlay
-          placement={placement}
-          items={items}
-          sections={gallerySections}
-          showSections={placement === 'chapter-resources'}
-          sourceItemIds={stackedItems.map(item => item.editionId)}
-          mode={mode}
-          selectedItem={selectedItem}
-          onSelect={item => {
-            setSelectedItem(item)
-            setMode('playing')
-          }}
-          onClose={() => {
-            setMode('closed')
-            setSelectedItem(null)
-          }}
-        />
-      </LayoutGroup>
+        placement={placement}
+        items={items}
+        sections={gallerySections}
+        showSections={placement === 'chapter-resources'}
+        sourceItemIds={stackedItems.map(item => item.editionId)}
+        mode={mode}
+        selectedItem={selectedItem}
+        onSelect={item => {
+          setSelectedItem(item)
+          setMode('playing')
+        }}
+        onClose={() => {
+          setMode('closed')
+          setSelectedItem(null)
+        }}
+      />
+    </LayoutGroup>
   )
 }
 

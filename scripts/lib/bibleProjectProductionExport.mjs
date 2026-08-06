@@ -50,7 +50,7 @@ const compactAnchor = anchor => ({
 
 const compactWork = work => ({
   id: work.id,
-  categories: [work.category],
+  categories: uniqueSorted(work.categories || [work.category]),
   ...(work.series ? { series: work.series } : {}),
   ...(work.sourceUrl ? { sourceUrl: work.sourceUrl } : {}),
   ...(work.strongBinding ? { strongBinding: work.strongBinding } : {}),

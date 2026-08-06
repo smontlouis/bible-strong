@@ -12,8 +12,8 @@
     "termsUrl": "https://bibleproject.com/terms/"
   },
   "totals": {
-    "works": 112,
-    "editions": 151,
+    "works": 110,
+    "editions": 149,
     "localizedWorks": 39
   },
   "works": [
@@ -623,6 +623,36 @@
       ],
       "anchors": [
         {
+          "kind": "passage",
+          "book": 20,
+          "chapterStart": 1,
+          "chapterEnd": 31,
+          "placement": "chapter-resources",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "human-editorial-curation"
+        },
+        {
+          "kind": "passage",
+          "book": 18,
+          "chapterStart": 1,
+          "chapterEnd": 42,
+          "placement": "chapter-resources",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "human-editorial-curation"
+        },
+        {
+          "kind": "passage",
+          "book": 21,
+          "chapterStart": 1,
+          "chapterEnd": 12,
+          "placement": "chapter-resources",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "human-editorial-curation"
+        },
+        {
           "kind": "library",
           "placement": "library",
           "relevance": "primary",
@@ -1094,37 +1124,6 @@
           "kind": "book",
           "book": 21,
           "placement": "introduction",
-          "relevance": "primary",
-          "reviewStatus": "reviewed",
-          "provenance": "human-editorial-curation"
-        }
-      ]
-    },
-    {
-      "id": "associated-resource-ENLyNE1qIc8",
-      "category": "uncategorized",
-      "reviewStatus": "reviewed",
-      "editions": [
-        {
-          "id": "associated-resource-ENLyNE1qIc8:en",
-          "language": "en",
-          "provider": "youtube",
-          "providerId": "ENLyNE1qIc8",
-          "sourceUrl": "https://www.youtube.com/watch?v=ENLyNE1qIc8",
-          "title": "How Board Games Inspired The Exodus Way's Art Style",
-          "description": "Go behind the scenes with director Allan and animator Josh to learn how classic board games shaped their vision for The Exodus Way. Also, discover the origins of their \"doodle deluxe\" animation technique—a new take on a classic BibleProject style.",
-          "thumbnailUrl": "https://i.ytimg.com/vi/ENLyNE1qIc8/maxresdefault.jpg",
-          "durationSeconds": 556,
-          "publishedAt": "2025-04-29T14:00:18Z",
-          "embeddable": true,
-          "madeForKids": false,
-          "captionsAvailable": false
-        }
-      ],
-      "anchors": [
-        {
-          "kind": "library",
-          "placement": "library",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "human-editorial-curation"
@@ -2487,37 +2486,6 @@
       ]
     },
     {
-      "id": "associated-resource-PT1annWmldE",
-      "category": "podcast",
-      "reviewStatus": "reviewed",
-      "editions": [
-        {
-          "id": "associated-resource-PT1annWmldE:en",
-          "language": "en",
-          "provider": "youtube",
-          "providerId": "PT1annWmldE",
-          "sourceUrl": "https://www.youtube.com/watch?v=PT1annWmldE",
-          "title": "Happy New Year From BibleProject!",
-          "description": "We shared a lot of firsts together in 2022—from launching our first app, to reading the Torah movement by movement as an international community, to experiencing the Bible through new classes and videos. In our final episode of 2022, Tim, Jon, and BibleProject CEO, Steve, reflect on the year behind us and look forward to the years ahead.",
-          "thumbnailUrl": "https://i.ytimg.com/vi/PT1annWmldE/maxresdefault.jpg",
-          "durationSeconds": 2842,
-          "publishedAt": "2022-12-26T08:00:07Z",
-          "embeddable": true,
-          "madeForKids": false,
-          "captionsAvailable": true
-        }
-      ],
-      "anchors": [
-        {
-          "kind": "library",
-          "placement": "library",
-          "relevance": "primary",
-          "reviewStatus": "reviewed",
-          "provenance": "human-editorial-curation"
-        }
-      ]
-    },
-    {
       "id": "associated-resource-QmrpB52gWwM",
       "category": "how-to-read",
       "reviewStatus": "reviewed",
@@ -3139,6 +3107,10 @@
     {
       "id": "associated-resource-WJgt1vRkPbI",
       "category": "book-collection",
+      "categories": [
+        "book-collection",
+        "how-to-read"
+      ],
       "reviewStatus": "reviewed",
       "editions": [
         {
@@ -3199,6 +3171,13 @@
           "chapterStart": 1,
           "chapterEnd": 8,
           "placement": "chapter-resources",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "human-editorial-curation"
+        },
+        {
+          "kind": "library",
+          "placement": "library",
           "relevance": "primary",
           "reviewStatus": "reviewed",
           "provenance": "human-editorial-curation"

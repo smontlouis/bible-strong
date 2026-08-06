@@ -60,3 +60,12 @@ test('resolves only the requested route language without fallback', () => {
   assert.equal(editionForLanguage(pack.works[0], 'fr').language, 'fr')
   assert.equal(editionForLanguage(pack.works[0], 'en'), undefined)
 })
+
+test('preserves curated secondary categories', () => {
+  const pack = buildPassageMediaPack({
+    manifests: [{ works: [{ ...work, categories: ['theme', 'how-to-read'] }] }],
+    generatedAt: '2026-01-01T00:00:00Z',
+  })
+
+  assert.deepEqual(pack.works[0].categories, ['how-to-read', 'theme'])
+})

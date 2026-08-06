@@ -491,6 +491,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             paddingLeft: 20,
             paddingRight: 20,
             paddingBottom: insets.bottom + 180,
+            gap: 10,
           }}
         >
           {strongCards.map((item, index) => (

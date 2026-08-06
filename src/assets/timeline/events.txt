@@ -1,7 +1,7 @@
 [
   {
     "id": "1",
-    "image": "http://timeline.biblehistory.com/css/img/period_1.jpg",
+    "image": "timeline-period-1",
     "description": "De la création d'Adam et Eve, au meurtre d'Abel par Caïn, et à l'histoire de l'humanité avant le déluge.",
     "startYear": -4100,
     "endYear": -2900,
@@ -166,7 +166,7 @@
   },
   {
     "id": "2",
-    "image": "http://timeline.biblehistory.com/css/img/period_2.jpg",
+    "image": "timeline-period-2",
     "description": "Du ministère de Noé et du déluge mondial à Cush, Nimrod et la tour de Babel.",
     "startYear": -2900,
     "endYear": -1950,
@@ -509,7 +509,7 @@
   },
   {
     "id": "3",
-    "image": "http://timeline.biblehistory.com/css/img/period_3.jpg",
+    "image": "timeline-period-3",
     "description": "De l'appel d'Abraham, à Sodome et Gomorrhe, à l'ascension des 12 tribus juives en passant par Isaac et Jacob.",
     "startYear": -1950,
     "endYear": -1650,
@@ -1441,7 +1441,7 @@
   },
   {
     "id": "4",
-    "image": "http://timeline.biblehistory.com/css/img/period_4.jpg",
+    "image": "timeline-period-4",
     "description": "De la vente de Joseph en esclavage, à sa montée en puissance en Egypte, en passant par Moïse et l'Exode.",
     "startYear": -1650,
     "endYear": -1450,
@@ -1849,7 +1849,7 @@
   },
   {
     "id": "5",
-    "image": "http://timeline.biblehistory.com/css/img/period_5.jpg",
+    "image": "timeline-period-5",
     "description": "De Moïse et les dix commandements à l'entrée de Josué et à l'expansion juive en Terre promise.",
     "startYear": -1450,
     "endYear": -1100,
@@ -2305,7 +2305,7 @@
   },
   {
     "id": "6",
-    "image": "http://timeline.biblehistory.com/css/img/period_6.jpg",
+    "image": "timeline-period-6",
     "description": "Du roi Saül au prophète Samuel et au jeune roi David et sa dynastie royale en passant par Salomon.",
     "startYear": -1100,
     "endYear": -930,
@@ -3072,7 +3072,7 @@
   },
   {
     "id": "7",
-    "image": "http://timeline.biblehistory.com/css/img/period_7.jpg",
+    "image": "timeline-period-7",
     "description": "Des conflits internes qui ont divisé la nation d'Israël aux prophètes qui ont averti de l'exil à venir.",
     "startYear": -930,
     "endYear": -620,
@@ -4438,7 +4438,7 @@
   },
   {
     "id": "8",
-    "image": "http://timeline.biblehistory.com/css/img/period_8.jpg",
+    "image": "timeline-period-8",
     "description": "De la chute d'Israël à l'exil à Babylone et aux grands prophètes déclarant le Messie à venir.",
     "startYear": -620,
     "endYear": -100,
@@ -5479,7 +5479,7 @@
   },
   {
     "id": "9",
-    "image": "http://timeline.biblehistory.com/css/img/period_9.jpg",
+    "image": "timeline-period-9",
     "description": "Depuis la naissance du Messie promis, Jésus le Christ, jusqu'à son ministère, sa mort et sa résurrection.",
     "startYear": -100,
     "endYear": 35,
@@ -6204,7 +6204,7 @@
   },
   {
     "id": "10",
-    "image": "http://timeline.biblehistory.com/css/img/period_10.jpg",
+    "image": "timeline-period-10",
     "description": "Du martyre d'Étienne à la persécution et à l'ascension de l'Église par Paul et les apôtres.",
     "startYear": 35,
     "endYear": 350,
@@ -6729,7 +6729,7 @@
   },
   {
     "id": "11",
-    "image": "http://timeline.biblehistory.com/css/img/period_11.jpg",
+    "image": "timeline-period-11",
     "description": "De la légalisation du christianisme sous Constantin à la persécution de l'âge des ténèbres..",
     "startYear": 350,
     "endYear": 1520,
@@ -7209,7 +7209,7 @@
   },
   {
     "id": "12",
-    "image": "http://timeline.biblehistory.com/css/img/period_12.jpg",
+    "image": "timeline-period-12",
     "description": "Des grands réformateurs, tels que Luther et Wycliffe, à l'expansion du mouvement protestant.",
     "startYear": 1520,
     "endYear": 1840,
@@ -8008,7 +8008,7 @@
   },
   {
     "id": "13",
-    "image": "http://timeline.biblehistory.com/css/img/period_13.jpg",
+    "image": "timeline-period-13",
     "description": "De la montée de l'Antéchrist, la marque de la bête, au retour du Christ et à la restauration du paradis.",
     "startYear": 1840,
     "endYear": 3100,

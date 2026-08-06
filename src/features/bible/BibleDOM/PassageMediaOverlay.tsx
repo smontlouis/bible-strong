@@ -1,16 +1,14 @@
 import { m, useReducedMotion, type Transition } from 'motion/react'
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  formatPassageMediaDuration,
-  getPassageMediaEmbedUrl,
-  type ResolvedPassageMedia,
-} from '../passageMedia'
+import { formatPassageMediaDuration, type ResolvedPassageMedia } from '../passageMedia'
 import { useTranslations } from './TranslationsContext'
 import PassageMediaImage from './PassageMediaImage'
+import PassageMediaPlayer from './PassageMediaPlayer'
+import { useModalOverlayLifecycle } from './overlayLifecycle'
 import type { PassageMediaGallerySection } from './passageMediaGallery'
 import {
   getOverlayAdditionalStartDelay,
+  getOverlayLayoutTransition,
   getOverlaySourceDelay,
   OVERLAY_ADDITIONAL_STAGGER_SECONDS,
 } from './overlayStagger'
@@ -26,7 +24,7 @@ type Props = {
   selectedItem: ResolvedPassageMedia | null
   onClose: () => void
   onSelect: (item: ResolvedPassageMedia) => void
-  placement: "inline" | "introduction" | "chapter-resources"
+  placement: 'inline' | 'introduction' | 'chapter-resources'
 }
 
 type GalleryItemProps = {
@@ -218,24 +216,35 @@ const PassageMediaOverlay = ({
   const translations = useTranslations()
   const dispatch = useDispatch()
   const shouldReduceMotion = useReducedMotion()
-  const [playerReady, setPlayerReady] = useState(false)
-  const playerReadyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const overlayRef = useRef<HTMLDivElement>(null)
-  const handleCloseEvent = useEffectEvent(onClose)
   const isOpen = mode !== 'closed'
+  const overlayRef = useModalOverlayLifecycle({
+    isOpen,
+    onClose,
+    focus: {
+      selector: 'button:not([disabled]), iframe, [href], [tabindex]:not([tabindex="-1"])',
+      refreshKey: mode,
+      trap: true,
+    },
+  })
   const itemCount = sections.reduce((count, section) => count + section.items.length, 0)
   const chapterReference = `${translations.passageMediaBookName} ${translations.passageMediaChapter}`
   const displayedItems = showSections ? sections.flatMap(section => section.items) : items
   const displayedItemIds = new Set(displayedItems.map(item => item.editionId))
+  const sourceItemIdSet = new Set(sourceItemIds)
   const displayedSourceItemIds = sourceItemIds.filter(editionId => displayedItemIds.has(editionId))
   const sourceItemIndexes = new Map(
     displayedSourceItemIds.map((editionId, index) => [editionId, index])
   )
-  const additionalItemIndexes = new Map(
-    displayedItems
-      .filter(item => !sourceItemIds.includes(item.editionId))
-      .map((item, index) => [item.editionId, index])
-  )
+  const additionalItemIndexes = new Map<string, number>()
+  displayedItems.forEach(item => {
+    if (!sourceItemIdSet.has(item.editionId)) {
+      additionalItemIndexes.set(item.editionId, additionalItemIndexes.size)
+    }
+  })
+  const sectionReferenceByEdition = new Map<string, string>()
+  sections.forEach(section => {
+    section.items.forEach(item => sectionReferenceByEdition.set(item.editionId, item.reference))
+  })
   const additionalItemsStartDelay = getOverlayAdditionalStartDelay(
     displayedSourceItemIds.length,
     shouldReduceMotion
@@ -250,112 +259,17 @@ const PassageMediaOverlay = ({
   const getItemRevealDelay = (editionId: string, isAdditionalItem: boolean) =>
     isAdditionalItem ? getAdditionalItemDelay(editionId) : getSourceItemDelay(editionId) + 0.18
   const getItemReference = (item: ResolvedPassageMedia) =>
-    sections.flatMap(section => section.items).find(entry => entry.editionId === item.editionId)
-      ?.reference || item.reference || chapterReference
-
-  useEffect(() => {
-    if (!isOpen) return
-
-    const previousOverflow = document.documentElement.style.overflow
-    const previousSwipeDownEvent = window.disableSwipeDownEvent
-    const previouslyFocusedElement = document.activeElement as HTMLElement | null
-    const overlayElement = overlayRef.current
-    const backgroundElements = Array.from(document.body.children).filter(
-      element => element !== overlayElement
-    ) as HTMLElement[]
-    const backgroundStates = backgroundElements.map(element => ({
-      element,
-      inert: element.inert,
-      ariaHidden: element.getAttribute('aria-hidden'),
-    }))
-
-    window.disableSwipeDownEvent = true
-    document.documentElement.style.overflow = 'hidden'
-    backgroundElements.forEach(element => {
-      element.inert = true
-      element.setAttribute('aria-hidden', 'true')
-    })
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        handleCloseEvent()
-        return
-      }
-
-      if (event.key !== 'Tab' || !overlayElement) return
-      const focusableElements = Array.from(
-        overlayElement.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), iframe, [href], [tabindex]:not([tabindex="-1"])'
-        )
-      )
-      if (!focusableElements.length) return
-
-      const firstElement = focusableElements[0]
-      const lastElement = focusableElements[focusableElements.length - 1]
-      if (event.shiftKey && document.activeElement === firstElement) {
-        event.preventDefault()
-        lastElement.focus()
-      } else if (!event.shiftKey && document.activeElement === lastElement) {
-        event.preventDefault()
-        firstElement.focus()
-      }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    requestAnimationFrame(() =>
-      overlayRef.current?.querySelector<HTMLElement>('button, iframe')?.focus()
-    )
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.documentElement.style.overflow = previousOverflow
-      window.disableSwipeDownEvent = previousSwipeDownEvent
-      backgroundStates.forEach(({ element, inert, ariaHidden }) => {
-        element.inert = inert
-        if (ariaHidden === null) element.removeAttribute('aria-hidden')
-        else element.setAttribute('aria-hidden', ariaHidden)
-      })
-      previouslyFocusedElement?.focus()
-    }
-  }, [isOpen])
-
-  useEffect(() => {
-    if (isOpen) {
-      requestAnimationFrame(() =>
-        overlayRef.current?.querySelector<HTMLElement>('button, iframe')?.focus()
-      )
-    }
-  }, [isOpen, mode])
-
-  useEffect(
-    () => () => {
-      if (playerReadyTimeout.current) clearTimeout(playerReadyTimeout.current)
-    },
-    []
-  )
+    sectionReferenceByEdition.get(item.editionId) || item.reference || chapterReference
 
   const closeOverlay = () => {
-    if (playerReadyTimeout.current) clearTimeout(playerReadyTimeout.current)
-    setPlayerReady(false)
     requestAnimationFrame(onClose)
   }
 
-  const selectItem = (item: ResolvedPassageMedia) => {
-    setPlayerReady(false)
-    onSelect(item)
-  }
-
-  const revealPlayer = () => {
-    if (playerReadyTimeout.current) clearTimeout(playerReadyTimeout.current)
-    playerReadyTimeout.current = setTimeout(() => setPlayerReady(true), 220)
-  }
-
-  const spring = shouldReduceMotion
-    ? { duration: 0 }
-    : { type: 'spring' as const, stiffness: 360, damping: 34, mass: 0.8 }
+  const spring = getOverlayLayoutTransition(shouldReduceMotion)
   const getItemLayoutId = (item: ResolvedPassageMedia, index: number) =>
     placement === 'introduction' ? `introduction:${index}` : item.editionId
   const renderGalleryCard = (item: ResolvedPassageMedia, reference: string, index: number) => {
-    const isAdditionalItem = !sourceItemIds.includes(item.editionId)
+    const isAdditionalItem = !sourceItemIdSet.has(item.editionId)
     const sourceDelay = isAdditionalItem ? 0 : getSourceItemDelay(item.editionId)
     const layoutId = getItemLayoutId(item, index)
 
@@ -371,7 +285,7 @@ const PassageMediaOverlay = ({
         itemRevealDelay={getItemRevealDelay(item.editionId, isAdditionalItem)}
         shouldReduceMotion={shouldReduceMotion}
         layoutTransition={spring}
-        onSelect={selectItem}
+        onSelect={onSelect}
         onOpenStrong={strongCode => {
           void dispatch({ type: NAVIGATE_TO_STRONG, payload: strongCode })
         }}
@@ -502,7 +416,9 @@ const PassageMediaOverlay = ({
                     gap: 14,
                   }}
                 >
-                  {section.items.map((item, index) => renderGalleryCard(item, item.reference, index))}
+                  {section.items.map((item, index) =>
+                    renderGalleryCard(item, item.reference, index)
+                  )}
                 </div>
               </section>
             ))}
@@ -511,59 +427,15 @@ const PassageMediaOverlay = ({
       )}
 
       {mode === 'playing' && selectedItem && (
-        <m.div
+        <PassageMediaPlayer
           key="player"
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'transparent',
-          }}
-        >
-          <PassageMediaImage
-            item={selectedItem}
-            layoutId={getItemLayoutId(
-              selectedItem,
-              items.findIndex(item => item.editionId === selectedItem.editionId)
-            )}
-            transition={{ layout: spring }}
-            imageOpacity={playerReady ? 0 : 1}
-            style={{
-              position: 'relative',
-              width: 'min(100vw, 177.7778vh)',
-              maxWidth: '100vw',
-              maxHeight: '100vh',
-              aspectRatio: '16 / 9',
-              boxSizing: 'border-box',
-              overflow: 'hidden',
-              border: '2px solid #fff',
-              borderRadius: 11,
-              boxShadow: '0 7px 22px rgba(0, 0, 0, 0.25)',
-              background: 'transparent',
-            }}
-          >
-            <m.iframe
-              key={selectedItem.editionId}
-              src={getPassageMediaEmbedUrl(selectedItem.providerId)}
-              title={selectedItem.title}
-              allow="autoplay; encrypted-media; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-presentation"
-              allowFullScreen
-              onLoad={revealPlayer}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                border: 0,
-                opacity: playerReady ? 1 : 0,
-                transition: `opacity ${shouldReduceMotion ? 0 : 0.22}s ease`,
-              }}
-            />
-          </PassageMediaImage>
-        </m.div>
+          item={selectedItem}
+          layoutId={getItemLayoutId(
+            selectedItem,
+            items.findIndex(item => item.editionId === selectedItem.editionId)
+          )}
+          layoutTransition={spring}
+        />
       )}
     </m.div>,
     document.body

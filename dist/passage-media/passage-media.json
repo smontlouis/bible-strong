@@ -1319,6 +1319,30 @@
       },
       "anchors": [
         {
+          "kind": "passage",
+          "book": 20,
+          "chapterStart": 1,
+          "chapterEnd": 31,
+          "placement": "chapter-resources",
+          "relevance": "primary"
+        },
+        {
+          "kind": "passage",
+          "book": 18,
+          "chapterStart": 1,
+          "chapterEnd": 42,
+          "placement": "chapter-resources",
+          "relevance": "primary"
+        },
+        {
+          "kind": "passage",
+          "book": 21,
+          "chapterStart": 1,
+          "chapterEnd": 12,
+          "placement": "chapter-resources",
+          "relevance": "primary"
+        },
+        {
           "kind": "library",
           "placement": "library",
           "relevance": "primary"
@@ -1995,33 +2019,6 @@
           "kind": "book",
           "book": 21,
           "placement": "introduction",
-          "relevance": "primary"
-        }
-      ]
-    },
-    {
-      "id": "associated-resource-ENLyNE1qIc8",
-      "categories": [
-        "uncategorized"
-      ],
-      "editions": {
-        "en": {
-          "id": "associated-resource-ENLyNE1qIc8:en",
-          "language": "en",
-          "provider": "youtube",
-          "providerId": "ENLyNE1qIc8",
-          "sourceUrl": "https://www.youtube.com/watch?v=ENLyNE1qIc8",
-          "title": "How Board Games Inspired The Exodus Way's Art Style",
-          "thumbnailUrl": "https://i.ytimg.com/vi/ENLyNE1qIc8/maxresdefault.jpg",
-          "durationSeconds": 556,
-          "publishedAt": "2025-04-29T14:00:18Z",
-          "captionsAvailable": false
-        }
-      },
-      "anchors": [
-        {
-          "kind": "library",
-          "placement": "library",
           "relevance": "primary"
         }
       ]
@@ -3831,33 +3828,6 @@
       ]
     },
     {
-      "id": "associated-resource-PT1annWmldE",
-      "categories": [
-        "podcast"
-      ],
-      "editions": {
-        "en": {
-          "id": "associated-resource-PT1annWmldE:en",
-          "language": "en",
-          "provider": "youtube",
-          "providerId": "PT1annWmldE",
-          "sourceUrl": "https://www.youtube.com/watch?v=PT1annWmldE",
-          "title": "Happy New Year From BibleProject!",
-          "thumbnailUrl": "https://i.ytimg.com/vi/PT1annWmldE/maxresdefault.jpg",
-          "durationSeconds": 2842,
-          "publishedAt": "2022-12-26T08:00:07Z",
-          "captionsAvailable": true
-        }
-      },
-      "anchors": [
-        {
-          "kind": "library",
-          "placement": "library",
-          "relevance": "primary"
-        }
-      ]
-    },
-    {
       "id": "associated-resource-qcixj8qS0KE",
       "categories": [
         "podcast"
@@ -4656,7 +4626,8 @@
     {
       "id": "associated-resource-WJgt1vRkPbI",
       "categories": [
-        "book-collection"
+        "book-collection",
+        "how-to-read"
       ],
       "editions": {
         "fr": {
@@ -4707,6 +4678,11 @@
           "chapterStart": 1,
           "chapterEnd": 8,
           "placement": "chapter-resources",
+          "relevance": "primary"
+        },
+        {
+          "kind": "library",
+          "placement": "library",
           "relevance": "primary"
         }
       ]
@@ -14102,6 +14078,7 @@
       ],
       "18:1": [
         "associated-resource--u0INqrL0AM",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA",
         "associated-resource-hHqZxg-oH_o",
         "associated-resource-qUuoCXcM9CU",
@@ -14109,126 +14086,167 @@
         "job-overview"
       ],
       "18:2": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:3": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:4": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:5": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:6": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:7": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:8": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:9": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:10": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:11": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:12": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:13": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:14": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:15": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:16": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:17": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:18": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:19": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:20": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:21": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:22": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:23": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:24": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:25": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:26": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:27": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:28": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:29": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:30": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:31": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:32": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:33": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:34": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:35": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:36": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:37": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:38": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:39": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:40": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:41": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "18:42": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-GswSg2ohqmA"
       ],
       "19:1": [
@@ -14274,129 +14292,160 @@
         "psalm-148-visual-commentary"
       ],
       "20:1": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-g-_h6TekF9M",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI",
         "proverbs-overview"
       ],
       "20:2": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:3": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:4": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:5": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:6": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:7": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:8": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI",
         "proverbs-8-visual-commentary"
       ],
       "20:9": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:10": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:11": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:12": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:13": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:14": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:15": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:16": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:17": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:18": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:19": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:20": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:21": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:22": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:23": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:24": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:25": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:26": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:27": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:28": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:29": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:30": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI"
       ],
       "20:31": [
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-Gab04dPs_uA",
         "associated-resource-WJgt1vRkPbI",
         "bp-theme-justice"
@@ -14404,52 +14453,64 @@
       "21:1": [
         "associated-resource-2eb3BHpw0X8",
         "associated-resource-3Bz1cwFmAd0",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-ED1AV2hb1uw",
         "associated-resource-WJgt1vRkPbI",
         "ecclesiastes-overview"
       ],
       "21:2": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:3": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:4": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:5": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:6": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:7": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:8": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:9": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:10": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:11": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "21:12": [
         "associated-resource-2eb3BHpw0X8",
+        "associated-resource-86V8VTUVBmo",
         "associated-resource-WJgt1vRkPbI"
       ],
       "22:1": [
@@ -15267,7 +15328,6 @@
       "associated-resource-dNLfrrIw38c",
       "associated-resource-dpny22k_7uk",
       "associated-resource-ebI_4ZxcAMk",
-      "associated-resource-ENLyNE1qIc8",
       "associated-resource-FqXKc81z7Oc",
       "associated-resource-gFKcychCzak",
       "associated-resource-GZuceW7eh5M",
@@ -15277,15 +15337,15 @@
       "associated-resource-L0-8nUbfW5w",
       "associated-resource-L9W5afjndtU",
       "associated-resource-plSNIwhAn5o",
-      "associated-resource-PT1annWmldE",
       "associated-resource-QmrpB52gWwM",
       "associated-resource-Rymqrmdn9Z8",
       "associated-resource-Sew1kBIe-W0",
       "associated-resource-Tn09RdxfqbM",
       "associated-resource-VhmlJBUIoLk",
       "associated-resource-wGwK4VfCGt0",
+      "associated-resource-WJgt1vRkPbI",
       "associated-resource-ZPZ2uABVMKA"
     ]
   },
-  "revision": "sha256:d3a1fa72bd6d1bc43030354a1b4fd0d6e847c68b24752c6b4c9afc789ebb37ee"
+  "revision": "sha256:2e27b6f9f44de368037ec61bee8294b2e8aee55a3d359bb5af50e4f9822259fd"
 }
