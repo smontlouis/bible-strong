@@ -9,6 +9,7 @@ import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import { ProgressBar } from '~common/ui/ProgressBar'
 import Text from '~common/ui/Text'
+import { appLogger } from '~helpers/agentObservability'
 import {
   localMigrationContext,
   localMigrationOrchestrator,
@@ -142,7 +143,23 @@ const LocalMigrationGate = ({
   prepareInspection = prepareLocalMigrationInspection,
 }: LocalMigrationGateProps) => {
   const { t, i18n } = useTranslation()
-  const [state, setState] = useState<GateState>({ kind: 'checking' })
+  const [startupDisposition] = useState(() => {
+    try {
+      return orchestrator.getStartupDisposition(context)
+    } catch (error) {
+      return { kind: 'error' as const, errorCode: getErrorCode(error) }
+    }
+  })
+  const [state, setState] = useState<GateState>(() => {
+    if (startupDisposition.kind === 'ready') return { kind: 'ready' }
+    if (startupDisposition.kind === 'resume') {
+      return { kind: 'blocked', snapshot: startupDisposition.snapshot }
+    }
+    if (startupDisposition.kind === 'error') {
+      return { kind: 'inspection-error', errorCode: startupDisposition.errorCode }
+    }
+    return { kind: 'checking' }
+  })
   const [actionPending, setActionPending] = useState(false)
 
   const showSnapshot: MigrationSnapshotListener = snapshot => {
@@ -162,22 +179,35 @@ const LocalMigrationGate = ({
   }
 
   const inspectGate = async (): Promise<void> => {
+    const startedAt = Date.now()
     try {
       applyInspectionResult(
         await inspectUntilBlocked(orchestrator, context, showSnapshot, prepareInspection)
       )
+      appLogger.info('startup', 'app_migration.inspection_completed', {
+        phase: context.phase,
+        durationMs: Date.now() - startedAt,
+      })
     } catch (error) {
+      appLogger.error('startup', 'app_migration.inspection_failed', {
+        phase: context.phase,
+        error,
+      })
       setState({ kind: 'inspection-error', errorCode: getErrorCode(error) })
     }
   }
 
   const retryInspection = async (): Promise<void> => {
     setActionPending(true)
-    await inspectGate()
-    setActionPending(false)
+    await inspectGate().finally(() => setActionPending(false))
   }
 
   useEffect(() => {
+    if (startupDisposition.kind === 'ready') {
+      appLogger.info('startup', 'app_migration.fast_path', { phase: context.phase })
+      return
+    }
+    if (startupDisposition.kind === 'error') return
     let active = true
     const onChange: MigrationSnapshotListener = snapshot => {
       if (!active) return
@@ -192,13 +222,19 @@ const LocalMigrationGate = ({
         else setState({ kind: 'blocked', snapshot })
       })
       .catch(error => {
-        if (active) setState({ kind: 'inspection-error', errorCode: getErrorCode(error) })
+        if (active) {
+          appLogger.error('startup', 'app_migration.inspection_failed', {
+            phase: context.phase,
+            error,
+          })
+          setState({ kind: 'inspection-error', errorCode: getErrorCode(error) })
+        }
       })
 
     return () => {
       active = false
     }
-  }, [orchestrator, context, prepareInspection])
+  }, [orchestrator, context, prepareInspection, startupDisposition.kind])
 
   useEffect(() => {
     if (state.kind === 'ready') return
@@ -237,9 +273,9 @@ const LocalMigrationGate = ({
   if (state.kind === 'checking') {
     return (
       <Container flex={1} center bg="reverse" testID="migration-checking">
-        <ActivityIndicator accessibilityLabel={t('migration.checking')} />
+        <ActivityIndicator accessibilityLabel={t('Chargement...')} />
         <Text color="grey" mt={12} textAlign="center">
-          {t('migration.checking')}
+          {t('Chargement...')}
         </Text>
       </Container>
     )

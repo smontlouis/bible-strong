@@ -1,7 +1,7 @@
 import { appLogger } from '~helpers/agentObservability'
 import {
-  inspectEmbeddedDataMigration,
-  inspectRelationsArchitectureMigration,
+  inspectEmbeddedDataFromUserDocument,
+  inspectRelationsArchitectureFromUserDocument,
   migrateUserRelationsArchitecture,
   resumableMigrateUserData,
 } from '~helpers/firestoreMigration'
@@ -15,17 +15,36 @@ import {
 } from './accountMigrationRegistry'
 import { legacyFirestoreReferencesAdapter } from './legacyFirestoreReferencesRuntime'
 import { createMmkvMigrationStateStore } from './mmkvMigrationStateStore'
+import { firebaseDb, doc, getDoc } from '~helpers/firebase'
+import type { AccountMigrationContext } from './accountMigrationRegistry'
+
+export const prepareAccountMigrationContext = async (
+  context: AccountMigrationContext
+): Promise<AccountMigrationContext> => {
+  const snapshot = await getDoc(doc(firebaseDb, 'users', context.userId))
+  return {
+    ...context,
+    userDocument: (snapshot.data() as Record<string, unknown> | undefined) ?? {},
+  }
+}
 
 export const accountMigrationOrchestrator = createAppMigrationOrchestrator({
   migrations: [
-    createFirestoreLegacyReferencesMigration(legacyFirestoreReferencesAdapter),
+    createFirestoreLegacyReferencesMigration({
+      // New legacy references are canonicalized from normal listener snapshots. Keep the
+      // definition registered so an execution detected by an older build can still resume.
+      inspectTargets: async () => [],
+      migrateTarget: legacyFirestoreReferencesAdapter.migrateTarget,
+    }),
     createFirestoreEmbeddedDataMigration({
-      inspectEmbeddedData: inspectEmbeddedDataMigration,
+      inspectEmbeddedData: async context =>
+        inspectEmbeddedDataFromUserDocument(context.userDocument),
       getLegacyState: getMigrationState,
       migrate: resumableMigrateUserData,
     }),
     createRelationsArchitectureMigration({
-      inspectNeed: inspectRelationsArchitectureMigration,
+      inspectNeed: async context =>
+        inspectRelationsArchitectureFromUserDocument(context.userDocument),
       migrate: migrateUserRelationsArchitecture,
     }),
   ],

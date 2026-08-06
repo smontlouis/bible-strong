@@ -1,4 +1,4 @@
-import { ActivityIndicator, Modal, View } from 'react-native'
+import { Modal, View } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
 import Box, { HStack, VStack } from '~common/ui/Box'
@@ -11,6 +11,7 @@ import type { AccountMigrationPresentation } from '~helpers/useAccountMigrations
 interface AccountMigrationModalProps {
   presentation: AccountMigrationPresentation
   isActionPending: boolean
+  onConfirm(): void
   onRetry(): void
   onContinue(): void
 }
@@ -43,37 +44,21 @@ const getCurrentStepLabel = (presentation: AccountMigrationPresentation): string
 const AccountMigrationModal = ({
   presentation,
   isActionPending,
+  onConfirm,
   onRetry,
   onContinue,
 }: AccountMigrationModalProps) => {
   const { t } = useTranslation()
 
-  if (presentation.kind === 'hidden') return null
-
-  if (presentation.kind === 'checking') {
-    return (
-      <Modal
-        visible
-        animationType="none"
-        presentationStyle="fullScreen"
-        statusBarTranslucent
-        onRequestClose={() => undefined}
-      >
-        <Box flex={1} center bg="reverse" testID="account-migration-checking">
-          <VStack alignItems="center" gap={12}>
-            <ActivityIndicator accessibilityLabel={t('migration.account.checking')} />
-            <Text color="grey" fontSize={13} textAlign="center">
-              {t('migration.account.checking')}
-            </Text>
-          </VStack>
-        </Box>
-      </Modal>
-    )
-  }
+  if (presentation.kind === 'hidden' || presentation.kind === 'checking') return null
 
   const isFailure = presentation.kind === 'failed'
   const progress = getOverallProgress(presentation)
   const currentStepLabel = getCurrentStepLabel(presentation)
+  const isConfirmation =
+    presentation.kind === 'active' &&
+    (presentation.snapshot.status === 'detected' ||
+      presentation.snapshot.status === 'awaiting-confirmation')
 
   return (
     <Modal
@@ -130,6 +115,15 @@ const AccountMigrationModal = ({
                 <Text color="darkGrey" fontSize={12} textAlign="center">
                   {t(currentStepLabel)}
                 </Text>
+              )}
+              {isConfirmation && (
+                <Button
+                  testID="account-migration-confirm"
+                  isLoading={isActionPending}
+                  onPress={onConfirm}
+                >
+                  {t('migration.start')}
+                </Button>
               )}
             </VStack>
           )}

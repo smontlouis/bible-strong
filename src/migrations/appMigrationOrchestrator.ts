@@ -100,10 +100,20 @@ export interface PersistedMigrationExecution {
 export interface PersistedMigrationState {
   schemaVersion: 1
   executions: PersistedMigrationExecution[]
+  cleanInspections?: PersistedCleanMigrationInspection[]
+}
+
+export interface PersistedCleanMigrationInspection {
+  scopeId: string
+  migrationId: string
+  migrationVersion: number
+  phase: MigrationPhase
+  inspectedAt: number
 }
 
 export interface MigrationStateStore {
   load(): Promise<unknown | null>
+  loadSync?(): unknown | null
   save(state: PersistedMigrationState): Promise<void>
   runExclusive<T>(operation: () => Promise<T>): Promise<T>
 }
@@ -135,7 +145,13 @@ export type MigrationSnapshot =
 
 export type MigrationSnapshotListener = (snapshot: MigrationSnapshot) => void
 
+export type MigrationStartupDisposition =
+  | { kind: 'ready' }
+  | { kind: 'inspect' }
+  | { kind: 'resume'; snapshot: Exclude<MigrationSnapshot, { status: 'idle' }> }
+
 export interface AppMigrationOrchestrator<TContext extends MigrationContext = MigrationContext> {
+  getStartupDisposition(context: TContext): MigrationStartupDisposition
   inspect(context: TContext): Promise<MigrationSnapshot>
   run(context: TContext, onChange?: MigrationSnapshotListener): Promise<MigrationSnapshot>
   abandon(context: TContext, onChange?: MigrationSnapshotListener): Promise<MigrationSnapshot>
@@ -151,6 +167,7 @@ interface AppMigrationOrchestratorOptions<TContext extends MigrationContext> {
 const createEmptyState = (): PersistedMigrationState => ({
   schemaVersion: 1,
   executions: [],
+  cleanInspections: [],
 })
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -368,6 +385,27 @@ const parseState = (value: unknown): PersistedMigrationState => {
     throw new MigrationExecutionError('APP_MIGRATION_STATE_INVALID')
   }
 
+  const cleanInspections = 'cleanInspections' in value ? value.cleanInspections : []
+  if (
+    !Array.isArray(cleanInspections) ||
+    cleanInspections.some(
+      inspection =>
+        !isRecord(inspection) ||
+        typeof inspection.scopeId !== 'string' ||
+        !inspection.scopeId.trim() ||
+        typeof inspection.migrationId !== 'string' ||
+        !inspection.migrationId.trim() ||
+        typeof inspection.migrationVersion !== 'number' ||
+        !Number.isInteger(inspection.migrationVersion) ||
+        inspection.migrationVersion < 1 ||
+        (inspection.phase !== 'local' && inspection.phase !== 'account') ||
+        typeof inspection.inspectedAt !== 'number' ||
+        !Number.isFinite(inspection.inspectedAt)
+    )
+  ) {
+    throw new MigrationExecutionError('APP_MIGRATION_STATE_INVALID')
+  }
+
   const executionKeys = value.executions.map(execution =>
     JSON.stringify([
       execution.scopeId,
@@ -379,7 +417,18 @@ const parseState = (value: unknown): PersistedMigrationState => {
   if (new Set(executionKeys).size !== executionKeys.length) {
     throw new MigrationExecutionError('APP_MIGRATION_STATE_INVALID')
   }
-  return value as PersistedMigrationState
+  const inspectionKeys = cleanInspections.map(inspection =>
+    JSON.stringify([
+      inspection.scopeId,
+      inspection.phase,
+      inspection.migrationId,
+      inspection.migrationVersion,
+    ])
+  )
+  if (new Set(inspectionKeys).size !== inspectionKeys.length) {
+    throw new MigrationExecutionError('APP_MIGRATION_STATE_INVALID')
+  }
+  return { ...(value as PersistedMigrationState), cleanInspections }
 }
 
 const isTerminal = (status: MigrationExecutionStatus): boolean =>
@@ -453,8 +502,7 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
       compareCodeUnits(left.id, right.id) ||
       left.version - right.version
   )
-  const loadState = async (context: TContext): Promise<PersistedMigrationState> => {
-    const state = parseState(await store.load())
+  const assertKnownActiveExecutions = (state: PersistedMigrationState, context: TContext): void => {
     const hasUnknownNonTerminalExecution = state.executions.some(
       execution =>
         execution.scopeId === context.scopeId &&
@@ -470,6 +518,10 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
     if (hasUnknownNonTerminalExecution) {
       throw new MigrationExecutionError('APP_MIGRATION_DEFINITION_MISSING')
     }
+  }
+  const loadState = async (context: TContext): Promise<PersistedMigrationState> => {
+    const state = parseState(await store.load())
+    assertKnownActiveExecutions(state, context)
     return state
   }
   const touchExecution = (execution: PersistedMigrationExecution): void => {
@@ -510,12 +562,39 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
     context: TContext
   ): Promise<PersistedMigrationExecution | null> => {
     const existing = findExecution(state, migration, context)
-    if (existing && (!isTerminal(existing.status) || migration.completionPolicy !== 'recheck')) {
+    if (
+      existing &&
+      (!isTerminal(existing.status) ||
+        migration.completionPolicy !== 'recheck' ||
+        existing.status === 'abandoned-after-failure')
+    ) {
       return isTerminal(existing.status) ? null : existing
     }
 
+    const cleanInspection = state.cleanInspections?.some(
+      inspection =>
+        inspection.scopeId === context.scopeId &&
+        inspection.phase === migration.phase &&
+        inspection.migrationId === migration.id &&
+        inspection.migrationVersion === migration.version
+    )
+    if (cleanInspection && migration.completionPolicy !== 'recheck') return null
+
     const plan = await migration.detect(context)
-    if (!plan) return null
+    if (!plan) {
+      if (!cleanInspection) {
+        state.cleanInspections ??= []
+        state.cleanInspections.push({
+          scopeId: context.scopeId,
+          migrationId: migration.id,
+          migrationVersion: migration.version,
+          phase: migration.phase,
+          inspectedAt: now(),
+        })
+        await store.save(state)
+      }
+      return null
+    }
     assertValidPlan(plan)
     if (plan.cleanupSteps?.length && !migration.finalizeIdempotently) {
       throw new MigrationExecutionError('APP_MIGRATION_CLEANUP_HANDLER_MISSING')
@@ -860,7 +939,48 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
     throw new MigrationExecutionError('APP_MIGRATION_ABANDON_NOT_ALLOWED')
   }
 
+  const getStartupDisposition = (context: TContext): MigrationStartupDisposition => {
+    if (!store.loadSync) return { kind: 'inspect' }
+    const state = parseState(store.loadSync())
+    assertKnownActiveExecutions(state, context)
+    const activeExecution = state.executions.find(
+      execution =>
+        execution.scopeId === context.scopeId &&
+        execution.phase === context.phase &&
+        !isTerminal(execution.status)
+    )
+    if (activeExecution) {
+      return {
+        kind: 'resume',
+        snapshot: toSnapshot(activeExecution) as Exclude<MigrationSnapshot, { status: 'idle' }>,
+      }
+    }
+
+    for (const migration of orderedMigrations) {
+      if (migration.phase !== context.phase) continue
+      const execution = findExecution(state, migration, context)
+      if (
+        execution &&
+        isTerminal(execution.status) &&
+        (migration.completionPolicy !== 'recheck' || execution.status === 'abandoned-after-failure')
+      ) {
+        continue
+      }
+      const inspectedClean = state.cleanInspections?.some(
+        inspection =>
+          inspection.scopeId === context.scopeId &&
+          inspection.phase === migration.phase &&
+          inspection.migrationId === migration.id &&
+          inspection.migrationVersion === migration.version
+      )
+      if (inspectedClean && migration.completionPolicy !== 'recheck') continue
+      return { kind: 'inspect' }
+    }
+    return { kind: 'ready' }
+  }
+
   return {
+    getStartupDisposition,
     inspect: context => store.runExclusive(() => inspectUnlocked(context)),
     run: (context, onChange) => store.runExclusive(() => runUnlocked(context, onChange)),
     abandon: (context, onChange) => store.runExclusive(() => abandonUnlocked(context, onChange)),

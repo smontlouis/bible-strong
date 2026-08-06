@@ -59,9 +59,14 @@ export const createLegacyFirestoreReferencesAdapter = (
   persistence: LegacyFirestoreReferencesPersistence,
   collections: readonly SubcollectionName[]
 ) => ({
-  async inspectTargets(userId: string): Promise<FirestoreLegacyReferenceTarget[]> {
+  async inspectTargets(
+    userId: string,
+    options: { userSettings?: unknown; userSettingsLoaded?: boolean } = {}
+  ): Promise<FirestoreLegacyReferenceTarget[]> {
     const [settings, ...subcollections] = await Promise.all([
-      persistence.readUserSettings(userId),
+      options.userSettingsLoaded
+        ? Promise.resolve(options.userSettings)
+        : persistence.readUserSettings(userId),
       ...collections.map(collection => persistence.readSubcollection(userId, collection)),
     ])
     const targets: FirestoreLegacyReferenceTarget[] = []

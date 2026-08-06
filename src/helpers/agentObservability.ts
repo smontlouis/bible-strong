@@ -62,7 +62,7 @@ const writeAgentLog = (
   event: string,
   payload?: AgentLogPayload
 ) => {
-  if (!__DEV__) return
+  if (typeof __DEV__ === 'undefined' || !__DEV__) return
 
   const entry: AgentLogEvent = {
     area,

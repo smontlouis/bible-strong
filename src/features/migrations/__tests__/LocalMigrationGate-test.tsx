@@ -6,6 +6,7 @@ import type {
   MigrationContext,
   MigrationSnapshot,
   MigrationSnapshotListener,
+  MigrationStartupDisposition,
 } from '../../../migrations/appMigrationOrchestrator'
 import LocalMigrationGate from '../LocalMigrationGate'
 
@@ -104,13 +105,16 @@ const createFakeOrchestrator = ({
   inspections,
   runResult,
   abandonResult,
+  startupDisposition = { kind: 'inspect' },
 }: {
   inspections: MigrationSnapshot[]
   runResult?: MigrationSnapshot
   abandonResult?: MigrationSnapshot
+  startupDisposition?: MigrationStartupDisposition
 }): AppMigrationOrchestrator => {
   let inspectionIndex = 0
   return {
+    getStartupDisposition: () => startupDisposition,
     inspect: jest.fn(async () => inspections[Math.min(inspectionIndex++, inspections.length - 1)]),
     run: jest.fn(async (_context, onChange?: MigrationSnapshotListener) => {
       const result = runResult ?? migrationSnapshot('completed')
@@ -174,6 +178,18 @@ describe('LocalMigrationGate', () => {
 
     expect(renderer.toJSON()).toBe('Application')
     expect(orchestrator.run).not.toHaveBeenCalled()
+  })
+
+  it('uses the synchronous clean checkpoint without running inspection or showing migration UI', async () => {
+    const orchestrator = createFakeOrchestrator({
+      inspections: [{ status: 'idle', isResuming: false }],
+      startupDisposition: { kind: 'ready' },
+    })
+
+    const renderer = await renderGate(orchestrator)
+
+    expect(renderer.toJSON()).toBe('Application')
+    expect(orchestrator.inspect).not.toHaveBeenCalled()
   })
 
   it('completes historical storage preparation before inspecting migration evidence', async () => {

@@ -4,7 +4,7 @@ import * as Speech from 'expo-speech'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, InteractionManager, Platform } from 'react-native'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useStore } from 'react-redux'
 import { getDefaultStore } from 'jotai/vanilla'
 
 import {
@@ -26,6 +26,7 @@ import useLogin from '~helpers/useLogin'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 import { useAccountMigrations } from '~helpers/useAccountMigrations'
 import { getChangelog } from '~redux/modules/user'
+import type { RootState } from '~redux/modules/reducer'
 import { useTabGroupsSync } from '~state/useTabGroupsSync'
 import { resumePendingAnnotationMigration } from '~helpers/annotationMigrationJournal'
 import { canStartRemoteHydration } from '~helpers/accountEntry'
@@ -55,9 +56,11 @@ const InitHooks = (_props: InitHooksProps) => {
   const accountEntryState = useInitFireAuth()
   const { t } = useTranslation()
   const dispatch = useDispatch()
+  const store = useStore<RootState>()
   const { isLogged, user } = useLogin()
   const accountEntryHydrationEnabled = canStartRemoteHydration(accountEntryState)
   const accountMigrations = useAccountMigrations({
+    getCurrentState: store.getState,
     activeUserId: isLogged && accountEntryHydrationEnabled ? user.id : undefined,
     onWriteScopeOpened: async () => {
       await ensureBiblesDbOpen()
@@ -208,6 +211,7 @@ const InitHooks = (_props: InitHooksProps) => {
       <AccountMigrationModal
         presentation={accountMigrations.presentation}
         isActionPending={accountMigrations.isActionPending}
+        onConfirm={accountMigrations.confirm}
         onRetry={accountMigrations.retry}
         onContinue={accountMigrations.continueAfterFailure}
       />
