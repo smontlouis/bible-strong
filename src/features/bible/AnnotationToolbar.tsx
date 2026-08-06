@@ -89,9 +89,9 @@ const IconButton = ({ disabled, children, isSelected, label, ...props }: IconBut
     borderRadius={18}
     center
     gap={10}
-    borderColor={isSelected ? 'secondary' : 'border'}
+    borderColor={isSelected ? 'primary' : 'border'}
     borderWidth={isSelected ? 2 : 1}
-    bg={isSelected ? 'lightSecondary' : disabled ? 'lightGrey' : 'reverse'}
+    bg={isSelected ? 'lightPrimary' : disabled ? 'lightGrey' : 'reverse'}
     opacity={isSelected ? 1 : disabled ? 0.5 : 0.85}
     style={
       {
@@ -103,7 +103,7 @@ const IconButton = ({ disabled, children, isSelected, label, ...props }: IconBut
   >
     {children}
     {label && (
-      <Text fontSize={14} bold color={isSelected ? 'default' : 'tertiary'} numberOfLines={1}>
+      <Text fontSize={14} bold color={isSelected ? 'primary' : 'tertiary'} numberOfLines={1}>
         {label}
       </Text>
     )}
@@ -223,7 +223,7 @@ const AnnotationToolbar = ({
 
   const getColor = (type: AnnotationType) => {
     if (activeAnnotationType === type) {
-      return selectedAnnotation?.type === type ? resolvedColor : theme.colors.secondary
+      return selectedAnnotation?.type === type ? resolvedColor : theme.colors.tertiary
     }
     if (selectedAnnotation) {
       return selectedAnnotation.type === type ? resolvedColor : theme.colors.grey
@@ -244,7 +244,7 @@ const AnnotationToolbar = ({
     <Sheet ref={ref} backdrop={false} onClose={onClose}>
       <SheetView pt={14}>
         <Box px={20} minH={92} justifyContent="center" position="relative">
-          <Text bold fontSize={20} textAlign="center" px={76}>
+          <Text bold fontSize={18} textAlign="center" px={76}>
             {t('Mode libre')}
           </Text>
 
@@ -337,7 +337,7 @@ const AnnotationToolbar = ({
                 alignItems="center"
                 justifyContent="center"
                 layout={LinearTransition}
-                mt={8}
+                mt={6}
               >
                 <AnimatedBox layout={LinearTransition}>
                   <FadingText fontSize={15} color="grey" numberOfLines={1} maxWidth={220}>
@@ -410,9 +410,6 @@ const AnnotationToolbar = ({
           </HStack>
           {!disabled && (
             <Box borderTopWidth={1} borderColor="border" pt={12}>
-              <Text px={20} pb={10} fontSize={13} bold color="grey">
-                {t('Couleur')}
-              </Text>
               <AnnotationColorPalette
                 disabled={disabled}
                 type={activeAnnotationType}
