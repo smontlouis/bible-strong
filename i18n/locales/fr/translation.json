@@ -1355,5 +1355,6 @@
   "strongDetail.entity.relation.sibling.female": "Sœur",
   "strongDetail.entity.relation.offspring": "descendant",
   "strongDetail.entity.relation.founder_or_origin": "fondateur ou origine",
-  "strongDetail.entity.relation.resident": "résident"
+  "strongDetail.entity.relation.resident": "résident",
+  "accountEntry.adoptionPending": "Vos données locales restent en sécurité sur cet appareil. Leur synchronisation reprendra automatiquement lorsque votre compte sera de nouveau disponible."
 }
