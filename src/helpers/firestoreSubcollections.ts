@@ -166,6 +166,12 @@ export interface BatchChanges {
  */
 export type ChunkProgressCallback = (chunkIndex: number, totalChunks: number) => void
 
+export type BatchWriteDiagnostics = 'default' | 'aggregate-only'
+
+export type BatchWriteOptions = {
+  diagnostics?: BatchWriteDiagnostics
+}
+
 /**
  * Écrit plusieurs documents en batch avec chunking automatique
  * Gère les batchs de plus de 500 opérations
@@ -174,8 +180,10 @@ export async function batchWriteSubcollection(
   userId: string,
   collectionName: SubcollectionName,
   changes: BatchChanges,
-  onChunkProgress?: ChunkProgressCallback
+  onChunkProgress?: ChunkProgressCallback,
+  options: BatchWriteOptions = {}
 ): Promise<void> {
+  const aggregateOnly = options.diagnostics === 'aggregate-only'
   const collectionRef = getSubcollectionRef(userId, collectionName)
 
   // Préparer toutes les opérations
@@ -222,13 +230,15 @@ export async function batchWriteSubcollection(
 
     for (const [reason, docIds] of Object.entries(byReason)) {
       console.warn(`[Subcollections]   - ${reason}: ${docIds.length} item(s)`)
-      // Show first 10 IDs for each reason (for debugging)
-      if (docIds.length <= 10) {
-        console.warn(`[Subcollections]     IDs: ${docIds.join(', ')}`)
-      } else {
-        console.warn(
-          `[Subcollections]     IDs: ${docIds.slice(0, 10).join(', ')} ... and ${docIds.length - 10} more`
-        )
+      if (!aggregateOnly) {
+        // Show first 10 IDs for each reason (for debugging)
+        if (docIds.length <= 10) {
+          console.warn(`[Subcollections]     IDs: ${docIds.join(', ')}`)
+        } else {
+          console.warn(
+            `[Subcollections]     IDs: ${docIds.slice(0, 10).join(', ')} ... and ${docIds.length - 10} more`
+          )
+        }
       }
     }
 
@@ -238,7 +248,7 @@ export async function batchWriteSubcollection(
     Sentry.captureException(error, {
       tags: { feature: 'subcollections', action: 'validate_ids', collection: collectionName },
       extra: {
-        userId,
+        ...(aggregateOnly ? {} : { userId }),
         skippedCount: skippedItems.length,
         reasons: [...new Set(skippedItems.map(item => item.reason))].join(', '),
       },
@@ -297,10 +307,14 @@ export async function batchWriteSubcollection(
       `[Subcollections] ✅ ${collectionName} batch complete: ${totalProcessed} processed, ${totalSkipped} skipped`
     )
   } catch (error) {
-    console.error(`[Subcollections] Batch write failed for ${collectionName}:`, error)
-    Sentry.captureException(error, {
+    if (aggregateOnly) {
+      console.error(`[Subcollections] Batch write failed for ${collectionName}`)
+    } else {
+      console.error(`[Subcollections] Batch write failed for ${collectionName}:`, error)
+    }
+    Sentry.captureException(aggregateOnly ? new Error('Subcollection batch write failed') : error, {
       tags: { feature: 'subcollections', action: 'batch_write', collection: collectionName },
-      extra: { userId, operationsCount: operations.length },
+      extra: { ...(aggregateOnly ? {} : { userId }), operationsCount: operations.length },
     })
     throw error
   }

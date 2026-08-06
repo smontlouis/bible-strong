@@ -1,3 +1,5 @@
+import type { GuestAdoptionErrorCode } from '~helpers/guestDataAdoption'
+
 export type AccountEntryClassification =
   | 'new-account'
   | 'existing-account'
@@ -15,6 +17,66 @@ export type AccountEntryOperation =
 export type AccountEntryClassificationInput = {
   operation: AccountEntryOperation
   credentialIsNewUser?: boolean
+}
+
+const UNRESOLVED_ACCOUNT_ENTRY_STORAGE_KEY = 'accountEntry.unresolved.v1'
+
+export interface AccountEntryClassificationStorage {
+  getString(key: string): string | undefined
+  set(key: string, value: string): void
+  remove(key: string): void
+}
+
+export interface UnresolvedAccountEntryRepository {
+  has(userId: string): boolean
+  remember(userId: string): void
+  clear(userId: string): void
+}
+
+export const createUnresolvedAccountEntryRepository = (
+  storage: AccountEntryClassificationStorage
+): UnresolvedAccountEntryRepository => ({
+  has(userId) {
+    const raw = storage.getString(UNRESOLVED_ACCOUNT_ENTRY_STORAGE_KEY)
+    if (!raw) return false
+    try {
+      const checkpoint = JSON.parse(raw) as { version?: unknown; userId?: unknown }
+      if (checkpoint.version !== 1 || typeof checkpoint.userId !== 'string') return true
+      return checkpoint.userId === userId
+    } catch {
+      return true
+    }
+  },
+  remember(userId) {
+    storage.set(UNRESOLVED_ACCOUNT_ENTRY_STORAGE_KEY, JSON.stringify({ version: 1, userId }))
+  },
+  clear(userId) {
+    const raw = storage.getString(UNRESOLVED_ACCOUNT_ENTRY_STORAGE_KEY)
+    if (!raw) return
+    try {
+      const checkpoint = JSON.parse(raw) as { userId?: unknown }
+      if (checkpoint.userId !== userId) return
+    } catch {
+      // A successful explicit classification may recover an invalid local checkpoint.
+    }
+    storage.remove(UNRESOLVED_ACCOUNT_ENTRY_STORAGE_KEY)
+  },
+})
+
+export const preserveUnresolvedAccountEntryClassification = ({
+  classification,
+  userId,
+  repository,
+}: {
+  classification: AccountEntryClassification
+  userId: string
+  repository: UnresolvedAccountEntryRepository
+}): AccountEntryClassification => {
+  const resolved =
+    classification === 'restore-session' && repository.has(userId) ? 'unknown' : classification
+  if (resolved === 'unknown') repository.remember(userId)
+  else repository.clear(userId)
+  return resolved
 }
 
 export const classifyAccountEntry = ({
@@ -109,7 +171,7 @@ export type AccountEntryState = {
   phase: AccountEntryPhase
   classification?: AccountEntryClassification
   userId?: string
-  errorCode?: 'ACCOUNT_ENTRY_UID_CHANGED'
+  errorCode?: 'ACCOUNT_ENTRY_UID_CHANGED' | GuestAdoptionErrorCode
 }
 
 export type AccountEntryEvent =
@@ -121,7 +183,17 @@ export type AccountEntryEvent =
     }
   | { type: 'backup-finished' }
   | { type: 'backup-failed' }
+  | { type: 'pending-adoption-found'; userId: string }
   | { type: 'adoption-finished'; userId: string }
+  | {
+      type: 'account-entry-failed'
+      errorCode: Exclude<NonNullable<AccountEntryState['errorCode']>, 'ACCOUNT_ENTRY_UID_CHANGED'>
+    }
+  | {
+      type: 'adoption-failed'
+      userId: string
+      errorCode: Exclude<NonNullable<AccountEntryState['errorCode']>, 'ACCOUNT_ENTRY_UID_CHANGED'>
+    }
 
 export const createAccountEntryState = (): AccountEntryState => ({ phase: 'guest-active' })
 
@@ -158,12 +230,25 @@ export const reduceAccountEntry = (
     }
   }
 
+  if (event.type === 'account-entry-failed') {
+    if (state.phase === 'guest-active') return state
+    return { ...state, phase: 'recoverable-error', errorCode: event.errorCode }
+  }
+
   if (event.type === 'backup-finished' || event.type === 'backup-failed') {
     if (state.phase !== 'backing-up-guest-data') return state
     return {
       ...state,
       phase: state.classification === 'new-account' ? 'adopting-guest-data' : 'hydrating-account',
     }
+  }
+
+  if (event.type === 'pending-adoption-found') {
+    if (state.phase !== 'hydrating-account') return state
+    if (event.userId !== state.userId) {
+      return { ...state, phase: 'recoverable-error', errorCode: 'ACCOUNT_ENTRY_UID_CHANGED' }
+    }
+    return { ...state, phase: 'adopting-guest-data', errorCode: undefined }
   }
 
   if (state.phase !== 'adopting-guest-data') return state
@@ -175,7 +260,11 @@ export const reduceAccountEntry = (
     }
   }
 
-  return { ...state, phase: 'hydrating-account' }
+  if (event.type === 'adoption-failed') {
+    return { ...state, phase: 'recoverable-error', errorCode: event.errorCode }
+  }
+
+  return { ...state, phase: 'hydrating-account', errorCode: undefined }
 }
 
 export const canStartRemoteHydration = (state: AccountEntryState): boolean =>

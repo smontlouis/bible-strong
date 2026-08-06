@@ -29,9 +29,12 @@ import { appLogger } from './agentObservability'
 import {
   AccountEntryAttemptCoordinator,
   classifyAccountEntry,
+  createUnresolvedAccountEntryRepository,
+  preserveUnresolvedAccountEntryClassification,
   type AccountEntryClassification,
   type AccountEntryOperation,
 } from './accountEntry'
+import { storage } from './storage'
 
 export type FireAuthProfile = {
   id: string
@@ -83,6 +86,8 @@ const FireAuth = class {
   previousEmailVerified = false
 
   accountEntryAttempts = new AccountEntryAttemptCoordinator()
+
+  unresolvedAccountEntries = createUnresolvedAccountEntryRepository(storage)
 
   private beginAccountEntryAttempt(
     operation: AccountEntryOperation,
@@ -153,8 +158,11 @@ const FireAuth = class {
       if (user) {
         console.log('[Auth] User exists')
 
-        const accountEntryClassification =
-          await this.accountEntryAttempts.classifyAuthenticatedUser(user.uid)
+        const accountEntryClassification = preserveUnresolvedAccountEntryClassification({
+          classification: await this.accountEntryAttempts.classifyAuthenticatedUser(user.uid),
+          userId: user.uid,
+          repository: this.unresolvedAccountEntries,
+        })
         appLogger.info('sync', 'account_entry.classified', {
           lifecycleState: 'classifying-account-transition',
           classification: accountEntryClassification,

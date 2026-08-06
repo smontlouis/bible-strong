@@ -91,4 +91,54 @@ describe('firestoreSubcollections', () => {
 
     warnSpy.mockRestore()
   })
+
+  it('keeps adoption diagnostics aggregate-only', async () => {
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+
+    await expect(
+      batchWriteSubcollection(
+        'sensitive-user-id',
+        'notes',
+        {
+          set: { ['sensitive-document-id'.repeat(100)]: { title: 'Invalid' } },
+          delete: [],
+        },
+        undefined,
+        { diagnostics: 'aggregate-only' }
+      )
+    ).rejects.toThrow('invalid document ID')
+
+    expect(warnSpy.mock.calls.flat().join(' ')).not.toContain('sensitive-document-id')
+    expect(JSON.stringify((Sentry.captureException as jest.Mock).mock.calls)).not.toContain(
+      'sensitive-user-id'
+    )
+
+    warnSpy.mockRestore()
+  })
+
+  it('does not report raw batch errors in aggregate-only mode', async () => {
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+    ;(writeBatch as jest.Mock).mockReturnValueOnce({
+      set: jest.fn(),
+      delete: jest.fn(),
+      commit: jest.fn().mockRejectedValue(new Error('path/users/sensitive-user-id/private-doc')),
+    })
+
+    await expect(
+      batchWriteSubcollection(
+        'sensitive-user-id',
+        'notes',
+        { set: { private: { title: 'Private' } }, delete: [] },
+        undefined,
+        { diagnostics: 'aggregate-only' }
+      )
+    ).rejects.toThrow('sensitive-user-id')
+
+    expect(JSON.stringify(errorSpy.mock.calls)).not.toContain('sensitive-user-id')
+    expect(JSON.stringify((Sentry.captureException as jest.Mock).mock.calls)).not.toContain(
+      'sensitive-user-id'
+    )
+
+    errorSpy.mockRestore()
+  })
 })

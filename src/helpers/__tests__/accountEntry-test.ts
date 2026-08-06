@@ -2,9 +2,27 @@ import {
   AccountEntryAttemptCoordinator,
   canStartRemoteHydration,
   classifyAccountEntry,
+  createUnresolvedAccountEntryRepository,
   createAccountEntryState,
+  preserveUnresolvedAccountEntryClassification,
   reduceAccountEntry,
 } from '~helpers/accountEntry'
+
+class MemoryClassificationStorage {
+  value?: string
+
+  getString() {
+    return this.value
+  }
+
+  set(_key: string, value: string) {
+    this.value = value
+  }
+
+  remove() {
+    this.value = undefined
+  }
+}
 
 describe('account-entry classification', () => {
   it.each([
@@ -30,6 +48,37 @@ describe('account-entry classification', () => {
     { operation: 'restore-session', credentialIsNewUser: true },
   ] as const)('keeps contradictory metadata unknown for %o', input => {
     expect(classifyAccountEntry(input)).toBe('unknown')
+  })
+
+  it('keeps an unresolved classification gated across process restart', () => {
+    const storage = new MemoryClassificationStorage()
+    let repository = createUnresolvedAccountEntryRepository(storage)
+
+    expect(
+      preserveUnresolvedAccountEntryClassification({
+        classification: 'unknown',
+        userId: 'unresolved-user',
+        repository,
+      })
+    ).toBe('unknown')
+
+    repository = createUnresolvedAccountEntryRepository(storage)
+    expect(
+      preserveUnresolvedAccountEntryClassification({
+        classification: 'restore-session',
+        userId: 'unresolved-user',
+        repository,
+      })
+    ).toBe('unknown')
+
+    expect(
+      preserveUnresolvedAccountEntryClassification({
+        classification: 'existing-account',
+        userId: 'unresolved-user',
+        repository,
+      })
+    ).toBe('existing-account')
+    expect(repository.has('unresolved-user')).toBe(false)
   })
 })
 
@@ -115,6 +164,65 @@ describe('account-entry hydration gate', () => {
       errorCode: 'ACCOUNT_ENTRY_UID_CHANGED',
     })
     expect(canStartRemoteHydration(state)).toBe(false)
+  })
+
+  it('resumes a pending adoption for the same restored account before hydration', () => {
+    let state = createAccountEntryState()
+    state = reduceAccountEntry(state, { type: 'authentication-started' })
+    state = reduceAccountEntry(state, {
+      type: 'account-classified',
+      classification: 'restore-session',
+      userId: 'returning-user',
+    })
+    state = reduceAccountEntry(state, {
+      type: 'pending-adoption-found',
+      userId: 'returning-user',
+    })
+
+    expect(state.phase).toBe('adopting-guest-data')
+    expect(canStartRemoteHydration(state)).toBe(false)
+  })
+
+  it('keeps local data visible when adoption fails recoverably', () => {
+    let state = createAccountEntryState()
+    state = reduceAccountEntry(state, { type: 'authentication-started' })
+    state = reduceAccountEntry(state, {
+      type: 'account-classified',
+      classification: 'new-account',
+      userId: 'new-user',
+    })
+    state = reduceAccountEntry(state, { type: 'backup-finished' })
+    state = reduceAccountEntry(state, {
+      type: 'adoption-failed',
+      userId: 'new-user',
+      errorCode: 'GUEST_ADOPTION_UNAVAILABLE',
+    })
+
+    expect(state).toMatchObject({
+      phase: 'recoverable-error',
+      errorCode: 'GUEST_ADOPTION_UNAVAILABLE',
+    })
+    expect(canStartRemoteHydration(state)).toBe(false)
+  })
+
+  it('moves checkpoint failures through the same deterministic state machine', () => {
+    let state = createAccountEntryState()
+    state = reduceAccountEntry(state, { type: 'authentication-started' })
+    state = reduceAccountEntry(state, {
+      type: 'account-classified',
+      classification: 'new-account',
+      userId: 'new-user',
+    })
+    state = reduceAccountEntry(state, {
+      type: 'account-entry-failed',
+      errorCode: 'GUEST_ADOPTION_CHECKPOINT_INVALID',
+    })
+
+    expect(state).toMatchObject({
+      phase: 'recoverable-error',
+      errorCode: 'GUEST_ADOPTION_CHECKPOINT_INVALID',
+      userId: 'new-user',
+    })
   })
 
   it('does not open hydration for an out-of-order backup event', () => {

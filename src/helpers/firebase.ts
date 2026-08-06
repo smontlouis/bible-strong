@@ -13,6 +13,7 @@ import {
   writeBatch,
   query,
   where,
+  waitForPendingWrites,
 } from '@react-native-firebase/firestore'
 import { getStorage, ref } from '@react-native-firebase/storage'
 import { getLanguage } from '~i18n'
@@ -38,6 +39,7 @@ export {
   where,
   firestoreDeleteField as deleteField,
   firestoreIncrement,
+  waitForPendingWrites,
 }
 
 export const CDN_URL = 'https://assets.bible-strong.app/'
