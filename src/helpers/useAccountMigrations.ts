@@ -27,6 +27,7 @@ export type AccountMigrationPresentation =
   | { kind: 'failed'; snapshot?: ActiveMigrationSnapshot; errorCode: string }
 
 interface UseAccountMigrationsOptions {
+  getCurrentState: () => RootState
   activeUserId?: string
   orchestrator?: AppMigrationOrchestrator<AccountMigrationContext>
   onWriteScopeOpened?: () => Promise<void>
@@ -44,11 +45,12 @@ const safeInspectionErrorCode = (error: unknown): string => {
 }
 
 export const useAccountMigrations = ({
+  getCurrentState,
   activeUserId,
   orchestrator = accountMigrationOrchestrator,
   onWriteScopeOpened,
   prepareContext = prepareAccountMigrationContext,
-}: UseAccountMigrationsOptions = {}) => {
+}: UseAccountMigrationsOptions) => {
   const [presentation, setPresentation] = useState<AccountMigrationPresentation>({
     kind: 'hidden',
   })
@@ -86,6 +88,15 @@ export const useAccountMigrations = ({
     }
   }
 
+  const refreshContext = async (
+    context: AccountMigrationContext
+  ): Promise<AccountMigrationContext> => {
+    const preparedContext = await prepareContext(
+      createAccountMigrationContext(context.userId, getCurrentState())
+    )
+    return { ...preparedContext, state: getCurrentState() }
+  }
+
   const execute = async (
     context: AccountMigrationContext,
     retryFailed: boolean,
@@ -104,7 +115,7 @@ export const useAccountMigrations = ({
 
     let completed = false
     try {
-      const preparedContext = context.userDocument ? context : await prepareContext(context)
+      const preparedContext = context.userDocument ? context : await refreshContext(context)
       lastContextRef.current = preparedContext
       const result = await runAccountMigrationSequence(
         orchestrator,
@@ -113,7 +124,7 @@ export const useAccountMigrations = ({
         {
           retryFailed,
           requireConfirmation,
-          refreshContext: prepareContext,
+          refreshContext,
         }
       )
       if (activeUserRef.current !== context.userId) {
@@ -167,7 +178,8 @@ export const useAccountMigrations = ({
     const context = lastContextRef.current
     if (!context || activeUserRef.current !== context.userId) return
     setActionPending(true)
-    const completed = await execute(context, false, false).catch(() => false)
+    const currentContext = createAccountMigrationContext(context.userId, getCurrentState())
+    const completed = await execute(currentContext, false, false).catch(() => false)
     setActionPending(false)
     if (completed) setResumeToken(value => value + 1)
   }
@@ -176,7 +188,8 @@ export const useAccountMigrations = ({
     const context = lastContextRef.current
     if (!context || activeUserRef.current !== context.userId) return
     setActionPending(true)
-    const completed = await execute(context, true, false).catch(() => false)
+    const currentContext = createAccountMigrationContext(context.userId, getCurrentState())
+    const completed = await execute(currentContext, true, false).catch(() => false)
     setActionPending(false)
     if (completed) setResumeToken(value => value + 1)
   }

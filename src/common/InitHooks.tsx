@@ -4,7 +4,7 @@ import * as Speech from 'expo-speech'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AppState, AppStateStatus, InteractionManager, Platform } from 'react-native'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useStore } from 'react-redux'
 import { getDefaultStore } from 'jotai/vanilla'
 
 import {
@@ -26,6 +26,7 @@ import useLogin from '~helpers/useLogin'
 import useLiveUpdates from '~helpers/useLiveUpdates'
 import { useAccountMigrations } from '~helpers/useAccountMigrations'
 import { getChangelog } from '~redux/modules/user'
+import type { RootState } from '~redux/modules/reducer'
 import { useTabGroupsSync } from '~state/useTabGroupsSync'
 import { resumePendingAnnotationMigration } from '~helpers/annotationMigrationJournal'
 
@@ -54,8 +55,10 @@ const InitHooks = (_props: InitHooksProps) => {
   useInitFireAuth()
   const { t } = useTranslation()
   const dispatch = useDispatch()
+  const store = useStore<RootState>()
   const { isLogged, user } = useLogin()
   const accountMigrations = useAccountMigrations({
+    getCurrentState: store.getState,
     activeUserId: isLogged ? user.id : undefined,
     onWriteScopeOpened: async () => {
       await ensureBiblesDbOpen()

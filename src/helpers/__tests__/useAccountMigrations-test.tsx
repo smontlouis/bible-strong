@@ -56,14 +56,18 @@ describe('useAccountMigrations', () => {
 
   const renderController = async (
     orchestrator: AppMigrationOrchestrator<AccountMigrationContext>,
-    onWriteScopeOpened?: () => Promise<void>
+    onWriteScopeOpened?: () => Promise<void>,
+    getCurrentState: () => RootState = () => state,
+    prepareContext?: (context: AccountMigrationContext) => Promise<AccountMigrationContext>
   ) => {
     let controller: ReturnType<typeof useAccountMigrations>
     const Harness = () => {
       controller = useAccountMigrations({
+        getCurrentState,
         activeUserId: 'user-1',
         orchestrator,
         onWriteScopeOpened,
+        prepareContext,
       })
       return null
     }
@@ -74,6 +78,76 @@ describe('useAccountMigrations', () => {
     consoleError.mockRestore()
     return () => controller!
   }
+
+  it('refreshes local and remote data before executing a confirmed migration', async () => {
+    const detectedSnapshot: Exclude<MigrationSnapshot, { status: 'idle' }> = {
+      status: 'awaiting-confirmation',
+      migrationId: 'firestore-embedded-user-data',
+      migrationVersion: 1,
+      plan: {
+        steps: [{ id: 'migrate', label: 'migration.account.embedded.step' }],
+      },
+      completedStepIds: [],
+      completedCleanupStepIds: [],
+      isResuming: false,
+    }
+    const completedSnapshot = {
+      ...detectedSnapshot,
+      status: 'completed',
+      completedStepIds: ['migrate'],
+    } as Exclude<MigrationSnapshot, { status: 'idle' }>
+    const orchestrator: AppMigrationOrchestrator<AccountMigrationContext> = {
+      getStartupDisposition: () => ({ kind: 'inspect' }),
+      inspect: jest
+        .fn<Promise<MigrationSnapshot>, [AccountMigrationContext]>()
+        .mockResolvedValueOnce(detectedSnapshot)
+        .mockResolvedValueOnce(detectedSnapshot)
+        .mockResolvedValueOnce({ status: 'idle', isResuming: false }),
+      run: jest.fn(async () => completedSnapshot),
+      abandon: jest.fn(),
+    }
+    const initialState = {
+      user: { id: 'user-1', bible: { notes: { old: true } } },
+    } as unknown as RootState
+    const currentState = {
+      user: { id: 'user-1', bible: { notes: { old: true, new: true } } },
+    } as unknown as RootState
+    let liveState = initialState
+    let liveUserDocument: Record<string, unknown> = { revision: 'initial' }
+    let preparationCount = 0
+    const prepareContext = jest.fn(async (context: AccountMigrationContext) => {
+      preparationCount += 1
+      if (preparationCount === 2) liveState = currentState
+      return {
+        ...context,
+        userDocument: liveUserDocument,
+      }
+    })
+    const getController = await renderController(
+      orchestrator,
+      undefined,
+      () => liveState,
+      prepareContext
+    )
+
+    await act(async () => {
+      await getController().runBeforeSync('user-1', initialState)
+    })
+
+    liveUserDocument = { revision: 'current' }
+    await act(async () => {
+      await getController().confirm()
+    })
+
+    expect(orchestrator.run).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: currentState,
+        userDocument: { revision: 'current' },
+      }),
+      expect.any(Function)
+    )
+    expect(getController().isAccountSyncReady).toBe(true)
+  })
 
   it('continues local app sync only after an explicit decision on account migration failure', async () => {
     const abandonedSnapshot = {
@@ -224,7 +298,11 @@ describe('useAccountMigrations', () => {
     }
     let controller: ReturnType<typeof useAccountMigrations>
     const Harness = ({ userId }: { userId: string }) => {
-      controller = useAccountMigrations({ activeUserId: userId, orchestrator })
+      controller = useAccountMigrations({
+        getCurrentState: () => state,
+        activeUserId: userId,
+        orchestrator,
+      })
       return null
     }
     let renderer: ReturnType<typeof create>
