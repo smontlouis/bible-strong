@@ -13,7 +13,6 @@ import {
   SheetScrollView,
   type SheetFooterProps,
   type SheetRef,
-  useSheetFooterInset,
 } from '~common/sheet'
 import { BibleResource, StudyNavigateBibleType, VerseIds } from '~common/types'
 import Box from '~common/ui/Box'
@@ -362,7 +361,6 @@ const Resource = ({
   compareStrongMode: boolean
   onChangeVerse?: (verseKey: string) => void
 }) => {
-  const bottomInset = useSheetFooterInset()
   const actions = useBibleTabActions(bibleAtom)
   const selectedVerse = Object.keys(selectedVerses)[0]
   const [Livre, Chapitre, Verset] = selectedVerse ? selectedVerse?.split('-') : []
@@ -403,7 +401,6 @@ const Resource = ({
             onOpenStrongBibleSourceSheet={onOpenStrongBibleSourceSheet}
             updateVerse={updateVerse}
             isSelectionMode={isSelectionMode}
-            bottomInset={bottomInset}
           />
         </View>
       </Slide>
