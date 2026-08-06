@@ -2,7 +2,9 @@
 
 import { setup, styled, keyframes } from 'goober'
 import { createGlobalStyles } from 'goober/global'
+import { m } from 'motion/react'
 import Feather from '@expo/vector-icons/Feather'
+import { domMax, LazyMotion } from 'motion/react'
 import React, { useEffect, useState, useRef } from 'react'
 import { Verse as TVerse } from '~common/types'
 import {
@@ -62,6 +64,8 @@ import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
+import PassageMediaThumbnails from './PassageMediaThumbnails'
+import { getPassageMediaGalleryItems, getPassageMediaGallerySections } from './passageMediaGallery'
 
 declare global {
   interface Window {
@@ -110,7 +114,6 @@ const GlobalStyles = createGlobalStyles`
   }
 
   .chapter-entity-button {
-    transition: opacity 100ms ease-out;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -128,10 +131,6 @@ const GlobalStyles = createGlobalStyles`
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .chapter-entity-button {
-      transition: none;
-    }
-
     .chapter-entity-loader {
       animation: none;
     }
@@ -158,6 +157,7 @@ type Props = Pick<
   | 'version'
   | 'interlinearMode'
   | 'pericopeChapter'
+  | 'passageMedia'
   | 'book'
   | 'chapter'
   | 'isSelectionMode'
@@ -542,6 +542,7 @@ const LoadedBibleContent = ({
   version,
   interlinearMode,
   pericopeChapter,
+  passageMedia,
   book,
   chapter,
   isSelectionMode,
@@ -1135,6 +1136,11 @@ const LoadedBibleContent = ({
     ? extractParallelVersionTitles(parallelVerses, version)
     : []
   const isContextFocused = contextDisplayMode === 'focused'
+  const passageMediaGallerySections = getPassageMediaGallerySections({
+    passageMedia,
+    sectionTitles: translations.passageMediaSections,
+  })
+  const passageMediaGalleryItems = getPassageMediaGalleryItems(passageMediaGallerySections)
 
   return (
     <TranslationsProvider translations={translations}>
@@ -1217,7 +1223,17 @@ const LoadedBibleContent = ({
             {!!introComment && settings.commentsDisplay && (
               <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
             )}
-
+            {!isContextFocused && (
+              <PassageMediaThumbnails
+                items={passageMedia.introduction}
+                gallerySections={passageMediaGallerySections}
+                placement="introduction"
+                settings={settings}
+                isDisabled={annotationMode}
+                isCompact={!passageMedia.isIntroductionStartChapter}
+              />
+            )}
+<m.div layout="position">
             {/* Unified verse rendering for all modes */}
             <UnifiedVersesRenderer
               verses={verses}
@@ -1253,7 +1269,10 @@ const LoadedBibleContent = ({
               columnWidth={parallelColumnWidth}
               parallelDisplayMode={parallelDisplayMode}
               redWords={redWords}
-            />
+              passageMediaAfterVerses={passageMedia.afterVerses}
+              passageMediaGallerySections={passageMediaGallerySections}
+              />
+              </m.div>
           </HorizontalScrollWrapper>
           <ChapterEntities
             entities={chapterEntities}
@@ -1262,6 +1281,18 @@ const LoadedBibleContent = ({
             downloadState={chapterEntityDownloadState}
             settings={settings}
             translations={chapterEntityTranslations}
+            chapterResources={
+              !isContextFocused && passageMediaGalleryItems.length ? (
+                <PassageMediaThumbnails
+                  items={passageMediaGalleryItems}
+                  gallerySections={passageMediaGallerySections}
+                  placement="chapter-resources"
+                  settings={settings}
+                  isDisabled={annotationMode}
+                  blockMargin={0}
+                />
+              ) : null
+            }
             onOpenEntity={uniqueName => {
               void dispatch({ type: NAVIGATE_TO_BIBLICAL_ENTITY, payload: uniqueName })
             }}
@@ -1423,7 +1454,7 @@ const BibleDOMErrorContent = ({
   )
 }
 
-const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: Props) => {
+const VersesRendererContent = ({ settings, dispatch, translations, verses, ...rest }: Props) => {
   useFonts({
     'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
   })
@@ -1439,9 +1470,10 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
   useEffect(() => {
     const reverseColor = settings.colors[settings.theme].reverse
     document.documentElement.style.setProperty('--header-height', `${headerHeight}px`)
+    document.documentElement.style.setProperty('--safe-area-top', `${rest.safeAreaTop ?? 0}px`)
     document.documentElement.style.backgroundColor = reverseColor
     document.body.style.backgroundColor = reverseColor
-  }, [dispatch, headerHeight, settings.colors, settings.theme])
+  }, [dispatch, headerHeight, rest.safeAreaTop, settings.colors, settings.theme])
 
   // Keep the WebView document background in sync when Expo DOM reuses the same page.
   useEffect(() => {
@@ -1492,5 +1524,11 @@ const VersesRenderer = ({ settings, dispatch, translations, verses, ...rest }: P
     />
   )
 }
+
+const VersesRenderer = (props: Props) => (
+  <LazyMotion features={domMax} strict>
+    <VersesRendererContent {...props} />
+  </LazyMotion>
+)
 
 export default VersesRenderer

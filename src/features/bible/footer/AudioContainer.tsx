@@ -1,7 +1,7 @@
 import React from 'react'
 import { Linking, TouchableOpacityProps } from 'react-native'
 import { useAtomValue } from 'jotai/react'
-import { isFullScreenBibleAtom } from 'src/state/app'
+import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import Link from '~common/Link'
 import Box, { AnimatedBox, BoxProps, HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -40,6 +40,9 @@ const Chip = ({ children, isActive, ...props }: ChipProps & BoxProps & Touchable
 const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioContainerProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+  const isBibleOverlayOpen = useAtomValue(isBibleOverlayOpenAtom)
+
+  if (isBibleOverlayOpen) return null
 
   return (
     <AnimatedBox

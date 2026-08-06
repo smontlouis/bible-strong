@@ -16,8 +16,6 @@ const ScrollView = styled.ScrollView<StyledScrollViewProps>(
     backgroundColor: backgroundColor
       ? theme.colors[backgroundColor as keyof typeof theme.colors] || backgroundColor
       : theme.colors.reverse,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
     maxWidth: orientation.maxWidth,
     marginLeft: 'auto',
     marginRight: 'auto',

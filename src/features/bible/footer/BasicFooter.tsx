@@ -1,6 +1,6 @@
 import { useAtomValue } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleAtom } from 'src/state/app'
+import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -31,9 +31,12 @@ const BasicFooter = ({
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const insets = useSafeAreaInsets()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
+  const isBibleOverlayOpen = useAtomValue(isBibleOverlayOpenAtom)
 
   const fullScreenTranslateY = isFullScreenBible ? HEADER_HEIGHT + insets.bottom + 60 : 0
   const centerTranslateY = isFullScreenBible ? HEADER_HEIGHT : 0
+
+  if (isBibleOverlayOpen) return null
 
   return (
     <>

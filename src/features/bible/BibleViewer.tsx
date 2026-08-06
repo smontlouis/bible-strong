@@ -123,6 +123,14 @@ import {
   getStrongSelectionRenderedContentKey,
   shouldDismissStrongSelectionForViewerState,
 } from './strongSelectionLifecycle'
+import { getPassageMediaForChapter } from './passageMedia'
+
+const EMPTY_PASSAGE_MEDIA = {
+  introduction: [],
+  isIntroductionStartChapter: false,
+  afterVerses: {},
+  chapterResources: [],
+} satisfies ReturnType<typeof getPassageMediaForChapter>
 
 const getPericopeChapter = (pericope: Pericope | null, book: number, chapter: number) => {
   if (pericope && pericope[book] && pericope[book][chapter]) {
@@ -453,6 +461,13 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const [displayedBook, setDisplayedBook] = useState(book.Numero)
   const [displayedChapter, setDisplayedChapter] = useState(chapter)
   const [displayedVersion, setDisplayedVersion] = useState(version)
+  const passageMedia = contextualInformationDisplay
+    ? getPassageMediaForChapter({
+        book: displayedBook,
+        chapter: displayedChapter,
+        language: lang,
+      })
+    : EMPTY_PASSAGE_MEDIA
 
   // Handler for entering annotation mode (from SelectedVersesModal)
   const handleEnterAnnotationMode = useCallback(() => {
@@ -1018,6 +1033,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     settings,
     verseToScroll: verse,
     pericopeChapter: getPericopeChapter(pericope, displayedBook, displayedChapter),
+    passageMedia,
     openNote: hidePersonalBibleData ? undefined : openBibleNote,
     openLink: hidePersonalBibleData ? undefined : openLink,
     setSelectedCode,

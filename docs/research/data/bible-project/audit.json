@@ -1,0 +1,570 @@
+{
+  "schemaVersion": 3,
+  "generatedAt": "2026-08-05T06:55:47.222Z",
+  "refreshDueAt": "2026-09-04T06:55:47.222Z",
+  "totals": {
+    "videos": 795,
+    "playlists": 63,
+    "frenchVideos": 255,
+    "englishVideos": 540,
+    "inExistingPlans": 163,
+    "withLocalizedCounterpart": 149,
+    "withReferenceMentions": 109,
+    "metadataVerified": 795,
+    "metadataUnverified": 0,
+    "availabilityPublic": 795,
+    "embeddable": 795,
+    "notEmbeddable": 0,
+    "madeForKids": 0,
+    "captionsAvailable": 310,
+    "regionRestricted": 9,
+    "vertical9By16": 227,
+    "missingPlayerDimensions": 1
+  },
+  "byCategory": {
+    "book-collection": 44,
+    "book-overview": 145,
+    "classroom": 7,
+    "how-to-read": 45,
+    "long-form": 3,
+    "podcast": 56,
+    "short": 214,
+    "studio": 55,
+    "theme": 126,
+    "uncategorized": 15,
+    "visual-commentary": 44,
+    "word-study": 41
+  },
+  "bySuitability": {
+    "exclude": 277,
+    "inline-primary": 187,
+    "related": 331
+  },
+  "duplicatePlanTitles": [
+    {
+      "id": "KOUV7mWDI34",
+      "titles": [
+        "Torah: Genèse 1-11",
+        "Torah: Genesis 1-11"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "1",
+          "readingSliceId": "3",
+          "title": "Torah: Genèse 1-11",
+          "references": [
+            {
+              "book": 1,
+              "chapters": "8-11"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "1",
+          "readingSliceId": "3",
+          "title": "Torah: Genesis 1-11",
+          "references": [
+            {
+              "book": 1,
+              "chapters": "8-11"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "VpbWbyx1008",
+      "titles": [
+        "Torah : Genèse 12-50",
+        "Torah: Genesis 12-50"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "2",
+          "readingSliceId": "11",
+          "title": "Torah : Genèse 12-50",
+          "references": [
+            {
+              "book": 1,
+              "chapters": "35-37"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "2",
+          "readingSliceId": "11",
+          "title": "Torah: Genesis 12-50",
+          "references": [
+            {
+              "book": 1,
+              "chapters": "35-37"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jxKoDvf2nXk",
+      "titles": [
+        "Vidéo : Sainteté",
+        "Vidéo associée : Sainteté"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "3",
+          "readingSliceId": "18",
+          "title": "Vidéo : Sainteté",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "4-6"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "4",
+          "readingSliceId": "33",
+          "title": "Vidéo associée : Sainteté",
+          "references": [
+            {
+              "book": 3,
+              "chapters": "11-13"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "5",
+          "readingSliceId": "41",
+          "title": "Vidéo : Sainteté",
+          "references": [
+            {
+              "book": 4,
+              "chapters": "5-7"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "0uf-PgW7rqE",
+      "titles": [
+        "Torah : Exode 1-18",
+        "Torah: Exodus 1-18"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "3",
+          "readingSliceId": "22",
+          "title": "Torah : Exode 1-18",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "16-18"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "3",
+          "readingSliceId": "22",
+          "title": "Torah: Exodus 1-18",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "16-18"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "b0GhR-2kPKI",
+      "titles": [
+        "Torah : Exode 19-40",
+        "Torah: Exodus 19-40"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "4",
+          "readingSliceId": "29",
+          "title": "Torah : Exode 19-40",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "35-40"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "4",
+          "readingSliceId": "29",
+          "title": "Torah: Exodus 19-40",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "35-40"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "WmvyrLXoQio",
+      "titles": [
+        "Torah : Lévitique",
+        "Torah: Leviticus"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "4",
+          "readingSliceId": "39",
+          "title": "Torah : Lévitique",
+          "references": [
+            {
+              "book": 3,
+              "chapters": "26-27"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "4",
+          "readingSliceId": "39",
+          "title": "Torah: Leviticus",
+          "references": [
+            {
+              "book": 3,
+              "chapters": "26-27"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "zebxH-5o-SQ",
+      "titles": [
+        "Torah : Nombres",
+        "Torah: Numbers"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "5",
+          "readingSliceId": "52",
+          "title": "Torah : Nombres",
+          "references": [
+            {
+              "book": 4,
+              "chapters": "35-36"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "5",
+          "readingSliceId": "52",
+          "title": "Torah: Numbers",
+          "references": [
+            {
+              "book": 4,
+              "chapters": "35-36"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "3BGO9Mmd_cU",
+      "titles": [
+        "Vidéo : La loi",
+        "Video: The Law"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "5",
+          "readingSliceId": "56",
+          "title": "Vidéo : La loi",
+          "references": [
+            {
+              "book": 5,
+              "chapters": "10-12"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "5",
+          "readingSliceId": "56",
+          "title": "Video: The Law",
+          "references": [
+            {
+              "book": 5,
+              "chapters": "10-12"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NMhmDPWeftw",
+      "titles": [
+        "Torah : Deutéronome",
+        "Torah: Deuteronomy"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "5",
+          "readingSliceId": "64",
+          "title": "Torah : Deutéronome",
+          "references": [
+            {
+              "book": 5,
+              "chapters": "32-34"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "5",
+          "readingSliceId": "64",
+          "title": "Torah: Deuteronomy",
+          "references": [
+            {
+              "book": 5,
+              "chapters": "32-34"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "onMgVuZ4q0Q",
+      "titles": [
+        "Vidéo : Proverbes",
+        "Sagesse : Proverbes"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "9",
+          "readingSliceId": "153",
+          "title": "Vidéo : Proverbes",
+          "references": [
+            {
+              "book": 20,
+              "chapters": "1-3"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "9",
+          "readingSliceId": "155",
+          "title": "Sagesse : Proverbes",
+          "references": [
+            {
+              "book": 20,
+              "chapters": "7-9"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "whrJ5C45tgU",
+      "titles": [
+        "Vidéo : Jude",
+        "Vidéo : Apocalypse 1-11"
+      ],
+      "occurrences": [
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "15",
+          "readingSliceId": "349",
+          "title": "Vidéo : Jude",
+          "references": [
+            {
+              "book": 65,
+              "chapters": "1"
+            }
+          ]
+        },
+        {
+          "language": "fr",
+          "planId": "bible-project-plan",
+          "sectionId": "16",
+          "readingSliceId": "350",
+          "title": "Vidéo : Apocalypse 1-11",
+          "references": [
+            {
+              "book": 66,
+              "chapters": "1-3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "l9vn5UvsHvM",
+      "titles": [
+        "Video: Holiness",
+        "Related Video: Holiness"
+      ],
+      "occurrences": [
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "3",
+          "readingSliceId": "18",
+          "title": "Video: Holiness",
+          "references": [
+            {
+              "book": 2,
+              "chapters": "4-6"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "4",
+          "readingSliceId": "33",
+          "title": "Related Video: Holiness",
+          "references": [
+            {
+              "book": 3,
+              "chapters": "11-13"
+            }
+          ]
+        },
+        {
+          "language": "en",
+          "planId": "bible-project-plan-en",
+          "sectionId": "5",
+          "readingSliceId": "41",
+          "title": "Video: Holiness",
+          "references": [
+            {
+              "book": 4,
+              "chapters": "5-7"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "pairingCorrections": [
+    {
+      "pairKey": "fr:350",
+      "expectedPlanVideoId": "whrJ5C45tgU",
+      "correctedVideoId": "cAOAPSfpbR4",
+      "reason": "French plan Apocalypse 1-11 entry points to the Jude video"
+    }
+  ],
+  "uncategorizedIds": [
+    "YB--nhzQbFs",
+    "39DTeVC-kCc",
+    "ENLyNE1qIc8",
+    "eIDKky8daeU",
+    "NcnHN7JbhpY",
+    "pmoZlNOkV1I",
+    "OVRixfameGY",
+    "xTk9w9J9yKo",
+    "p6fY39B25G4",
+    "WM4gmjMDL4Q",
+    "n_vEB11XKSE",
+    "8Tbcofs6l3o",
+    "lX7rZ7hp_gQ",
+    "V8-yWbv7fZY",
+    "ZjoRCeqpUSA"
+  ],
+  "reviewIds": [],
+  "localizationCandidates": {
+    "frenchRecords": 255,
+    "confirmed": 83,
+    "highUnconfirmed": 18,
+    "mediumOnly": 17,
+    "lowOnlyOrNone": 137
+  },
+  "anchorCandidates": {
+    "videosWithAnyCandidate": 245,
+    "videosWithHighConfidenceReference": 55,
+    "videosWithBookScope": 141,
+    "videosWithPlanReadingContext": 163
+  },
+  "bookOverviewManifest": {
+    "works": 73,
+    "editions": 145,
+    "englishBookCoverage": 66,
+    "frenchBookCoverage": 65,
+    "missingFrenchBooks": [
+      50
+    ],
+    "strictLanguageSelection": true
+  },
+  "visualCommentaryManifest": {
+    "works": 24,
+    "editions": 43,
+    "englishEditions": 19,
+    "frenchEditions": 24,
+    "excludedSourceRecords": 3,
+    "crossCategoryEditions": 2,
+    "strictLanguageSelection": true
+  },
+  "wordStudyManifest": {
+    "conceptualWorks": 21,
+    "localWorks": 20,
+    "sharedWorks": 1,
+    "editions": 42,
+    "englishEditions": 21,
+    "frenchEditions": 21,
+    "reviewedStrongAnchors": 34,
+    "primaryPassageAnchors": 21,
+    "strictLanguageSelection": true
+  },
+  "themeManifest": {
+    "works": 57,
+    "editions": 112,
+    "englishEditions": 57,
+    "frenchEditions": 55,
+    "excludedSourceRecords": 22,
+    "crossCategoryEditions": 8,
+    "strictLanguageSelection": true,
+    "bibleViewOnly": true
+  }
+}

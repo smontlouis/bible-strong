@@ -25,6 +25,7 @@ const ExploreLayout = () => {
       <Stack.Screen name="tag" />
       <Stack.Screen name="event" />
       <Stack.Screen name="pericope" />
+      <Stack.Screen name="passage-media-player" />
     </Stack>
   )
 }

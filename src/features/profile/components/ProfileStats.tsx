@@ -10,6 +10,7 @@ import Link from '~common/Link'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLogin from '~helpers/useLogin'
+import { toast } from '~helpers/toast'
 import { RootState } from '~redux/modules/reducer'
 
 const ProfileStats = () => {
@@ -32,10 +33,6 @@ const ProfileStats = () => {
   const sync = useSelector((state: RootState) => state.user.sync)
   const isSyncing = (collections: (keyof RootState['user']['sync']['loaded'])[]) =>
     Boolean(sync?.isLoading) && collections.some(collection => !sync?.loaded?.[collection])
-
-  if (!isLogged) {
-    return null
-  }
 
   return (
     <Box bg="lightGrey" borderRadius={30} paddingVertical={20} marginHorizontal={20}>
@@ -82,7 +79,16 @@ const ProfileStats = () => {
         </HStack>
 
         <HStack gap={10}>
-          <StatCard route="Studies">
+          <StatCard
+            {...(isLogged
+              ? { route: 'Studies' as const }
+              : { onPress: () => toast.info(t('study.loginRequired')) })}
+          >
+            {!isLogged && (
+              <Box pos="absolute" top={8} right={8} pointerEvents="none">
+                <Icon.Feather name="lock" size={12} color={theme.colors.grey} />
+              </Box>
+            )}
             <StatValue icon="feather" count={studies} isLoading={isSyncing(['studies'])} />
             <Text fontSize={11} color="grey" numberOfLines={1}>
               {isSyncing(['studies']) && studies === 0

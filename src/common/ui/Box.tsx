@@ -74,6 +74,7 @@ export type BoxProps = {
   borderTopWidth?: number
   borderLeftWidth?: number
   borderRightWidth?: number
+  borderStyle?: ViewStyle['borderStyle']
   borderColor?: string
   borderLeftColor?: string
   transform?: ViewStyle['transform']
@@ -169,6 +170,7 @@ const Box = styled.View<BoxProps>(props => ({
   borderTopWidth: props.borderTopWidth,
   borderLeftWidth: props.borderLeftWidth,
   borderRightWidth: props.borderRightWidth,
+  borderStyle: props.borderStyle,
   borderColor:
     props.theme.colors[props.borderColor as keyof typeof props.theme.colors] ?? props.borderColor,
   borderLeftColor:

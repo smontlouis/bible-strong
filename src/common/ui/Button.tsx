@@ -88,7 +88,7 @@ const WrapperLink = styled(ButtonLink)<Partial<Props>>(buttonStyles)
 
 const TextButton = styled.Text(
   ({ theme, small, reverse }: { theme?: Theme; small?: boolean; reverse?: boolean }) => ({
-    color: reverse ? theme?.colors.darkGrey : 'white',
+    color: reverse ? theme?.colors.default : 'white',
     fontWeight: 'bold',
     fontSize: 16,
 

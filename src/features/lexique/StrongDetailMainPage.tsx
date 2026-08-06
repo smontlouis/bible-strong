@@ -7,6 +7,7 @@ import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import ConcordanceVerse from '~features/bible/ConcordanceVerse'
 import ListenToStrong, { hasStrongAudio } from '~features/bible/ListenStrong'
+import type { ResolvedPassageMedia } from '~features/bible/passageMedia'
 import type {
   StrongLexiconEntry,
   StrongLexiconEntityRelation,
@@ -38,11 +39,13 @@ import { hasHiddenStrongPreviewItems } from './strongDetailPreview'
 import { getScaledStrongTextStyle, type StrongReadingTypography } from './strongEditorialHtmlStyles'
 import { formatStrongLemmaPartOfSpeech } from './strongLemmaPartOfSpeech'
 import { isStrongOriginalUnnamed } from './strongOriginalPresentation'
+import StrongPassageMediaSection from './StrongPassageMediaSection'
 
-type Anchor = 'context' | 'definition' | 'entity' | 'related' | 'concordance'
+type Anchor = 'context' | 'definition' | 'media' | 'entity' | 'related' | 'concordance'
 
 type Props = {
   entry: StrongLexiconEntry
+  passageMedia: ResolvedPassageMedia[]
   contextVerse?: Verse
   contextReference?: string
   contextVersion?: string
@@ -139,6 +142,7 @@ const JumpNavigationContent = ({
 
 const StrongDetailMainPage = ({
   entry,
+  passageMedia,
   contextVerse,
   contextReference,
   contextVersion,
@@ -264,6 +268,11 @@ const StrongDetailMainPage = ({
               visible: Boolean(contextVerse),
             },
             { id: 'definition', label: t('strongDetail.jump.definition'), visible: true },
+            {
+              id: 'media',
+              label: t('strongDetail.jump.media'),
+              visible: passageMedia.length > 0,
+            },
             { id: 'entity', label: entityLabel, visible: Boolean(entry.entity) },
             {
               id: 'related',
@@ -384,6 +393,14 @@ const StrongDetailMainPage = ({
             dismissible
           />
         ) : null)}
+
+      {passageMedia.length > 0 && (
+        <StrongPassageMediaSection
+          media={passageMedia}
+          title={t('strongDetail.media.title')}
+          onLayout={event => setAnchor('media', event.nativeEvent.layout.y)}
+        />
+      )}
 
       {!!entry.entity ? (
         <VStack

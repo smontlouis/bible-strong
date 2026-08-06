@@ -64,7 +64,7 @@
               "type": "Video",
               "title": "Torah: Genèse 1-11",
               "description": "Récapitulez ce chapitre sur la création et la chute avec notre vidéo de la série animée Torah sur Genèse 1-11",
-              "url": "https://www.youtube.com/watch?v=KOUV7mWDI34"
+              "url": "https://www.youtube.com/watch?v=HliwPZ6395I"
             },
             { "id": "1", "src": "1_genesis_1", "type": "Image" },
             { "id": "2", "chapters": "1|8-11", "type": "Chapter" },
@@ -197,7 +197,7 @@
               "type": "Video",
               "title": "Torah : Genèse 12-50",
               "description": "Vous avez presque terminé le livre de la Genèse ! Regardez la vidéo de notre série animée sur la Torah sur Genèse 12-50 pour vous rappeler ce que vous avez couvert et où vous allez.",
-              "url": "https://www.youtube.com/watch?v=VpbWbyx1008"
+              "url": "https://www.youtube.com/watch?v=2mCFk6oug6Y"
             },
             { "id": "1", "src": "1_genesis_2", "type": "Image" },
             { "id": "2", "chapters": "1|35-37", "type": "Chapter" },
@@ -376,7 +376,7 @@
               "type": "Video",
               "title": "Torah : Exode 1-18",
               "description": "Résumons ce chapitre sur l'Exode d'Egypte avec une vidéo animée de l'Exode 1-18.",
-              "url": "https://www.youtube.com/watch?v=0uf-PgW7rqE"
+              "url": "https://www.youtube.com/watch?v=jbf0nxJT8wI"
             },
             { "id": "1", "src": "02", "type": "Image" },
             { "id": "2", "chapters": "2|16-18", "type": "Chapter" },
@@ -496,7 +496,7 @@
               "type": "Video",
               "title": "Torah : Exode 19-40",
               "description": "Regardez un résumé animé d'Exodus 19-40 en terminant le livre de l'Exodus aujourd'hui.",
-              "url": "https://www.youtube.com/watch?v=b0GhR-2kPKI"
+              "url": "https://www.youtube.com/watch?v=QvjQyA4er_E"
             },
             { "id": "1", "src": "02", "type": "Image" },
             { "id": "2", "chapters": "2|35-40", "type": "Chapter" },
@@ -654,7 +654,7 @@
               "type": "Video",
               "title": "Torah : Lévitique",
               "description": "Félicitations ! Vous allez finir le Lévitique aujourd'hui. Voici un résumé animé du livre.",
-              "url": "https://www.youtube.com/watch?v=WmvyrLXoQio"
+              "url": "https://www.youtube.com/watch?v=2uAxufq24xI"
             },
             { "id": "1", "src": "03", "type": "Image" },
             { "id": "2", "chapters": "3|26-27", "type": "Chapter" },
@@ -852,7 +852,7 @@
               "type": "Video",
               "title": "Torah : Nombres",
               "description": "Aujourd'hui est votre dernier jour dans le livre des nombres ! Regardez un récapitulatif animé de ce que vous avez couvert.",
-              "url": "https://www.youtube.com/watch?v=zebxH-5o-SQ"
+              "url": "https://www.youtube.com/watch?v=mdbtTT3HzFQ"
             },
             { "id": "1", "src": "04", "type": "Image" },
             { "id": "2", "chapters": "4|35-36", "type": "Chapter" },
@@ -918,7 +918,7 @@
               "type": "Video",
               "title": "Vidéo : La loi",
               "description": "La loi de l'Ancien Testament est souvent source de confusion pour les gens. Regardez cette vidéo thématique animée pour en savoir plus sur le droit dans son contexte.",
-              "url": "https://www.youtube.com/watch?v=3BGO9Mmd_cU"
+              "url": "https://www.youtube.com/watch?v=IDS6LONO8Sw"
             },
             { "id": "1", "src": "05", "type": "Image" },
             { "id": "2", "chapters": "5|10-12", "type": "Chapter" },
@@ -1029,7 +1029,7 @@
               "type": "Video",
               "title": "Torah : Deutéronome",
               "description": "Voici un résumé animé du livre du Deutéronome ! Félicitations pour avoir terminé un autre livre aujourd'hui.",
-              "url": "https://www.youtube.com/watch?v=NMhmDPWeftw"
+              "url": "https://www.youtube.com/watch?v=WwTg5i2kvTs"
             },
             { "id": "1", "src": "05", "type": "Image" },
             { "id": "2", "chapters": "5|32-34", "type": "Chapter" },
@@ -4834,7 +4834,7 @@
               "type": "Video",
               "title": "Vidéo : Phillipiens",
               "description": "Paul remercie les chrétiens de Philadelphie pour leur soutien, et il montre comment l'amour du don de soi de Jésus est le modèle du mode de vie chrétien.",
-              "url": "https://www.youtube.com/watch?v=ei_5jKbrUJM"
+              "url": "https://www.youtube.com/watch?v=oE9qqW1-BkU"
             },
             { "id": "1", "src": "56", "type": "Image" },
             { "id": "2", "chapters": "50|1-2", "type": "Chapter" },
@@ -5319,7 +5319,7 @@
               "type": "Video",
               "title": "Vidéo : Apocalypse 1-11",
               "description": "John addresses seven churches with a challenge to remain faithful to Jesus despite persecution and the temptation to apathy. His visions open up an alternate vision of human history, showing how Jesus is the true king of history.",
-              "url": "https://www.youtube.com/watch?v=whrJ5C45tgU"
+              "url": "https://www.youtube.com/watch?v=cAOAPSfpbR4"
             },
             { "id": "1", "src": "69", "type": "Image" },
             { "id": "2", "chapters": "66|1-3", "type": "Chapter" },

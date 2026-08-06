@@ -1,0 +1,5010 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-06T09:26:54.210Z",
+  "sourceGeneratedAt": "2026-08-05T06:55:47.222Z",
+  "method": "Agent proposals from official metadata and cached YouTube transcripts, finalized by human editorial review.",
+  "totals": {
+    "records": 173,
+    "byKind": {
+      "book": 25,
+      "library": 44,
+      "passage": 104
+    },
+    "byConfidence": {
+      "high": 145,
+      "low": 6,
+      "medium": 22
+    },
+    "byCategory": {
+      "book-collection": 40,
+      "classroom": 6,
+      "how-to-read": 39,
+      "long-form": 3,
+      "podcast": 56,
+      "short": 16,
+      "uncategorized": 13
+    },
+    "byReviewStatus": {
+      "human-accepted": 151,
+      "human-rejected": 22
+    }
+  },
+  "records": [
+    {
+      "providerId": "_mvgar5zUT0",
+      "language": "en",
+      "title": "Hannah’s Poem and Power Reversals • Firstborn Ep. 6",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 9,
+        "chapterStart": 1,
+        "chapterEnd": 2,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Hannah’s story and poem in 1 Samuel 1–2 are the sustained text behind the episode’s power-reversal theme.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Hannah … trusted Yahweh … as they trace the theme … in Samuel."
+        }
+      ]
+    },
+    {
+      "providerId": "_OLezoUvOEQ",
+      "language": "en",
+      "title": "The Birth of Jesus: Luke 1-2",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 1,
+        "chapterEnd": 2,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode sustains attention on Luke's infancy narrative.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Birth of Jesus: Luke 1-2"
+        }
+      ]
+    },
+    {
+      "providerId": "_unHmAf7INk",
+      "language": "en",
+      "title": "The Crucifixion of Jesus: Luke 19-23",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 19,
+        "chapterEnd": 23,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The video explicitly covers Luke 19–23 and Jesus' final week.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Crucifixion of Jesus: Luke 19-23"
+        }
+      ]
+    },
+    {
+      "providerId": "_ZtMVynNx0s",
+      "language": "fr",
+      "title": "Actes Ch. 8-12",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 8,
+        "chapterEnd": 12,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le titre et la description ciblent précisément Actes 8–12.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Actes Ch. 8-12"
+        }
+      ]
+    },
+    {
+      "providerId": "-gDnlAhYPRk",
+      "language": "en",
+      "title": "What’s So Special About Oil? • The Anointed Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 30,
+        "verseStart": 22,
+        "chapterEnd": 30,
+        "verseEnd": 33,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The Torah’s recipe and purpose for sacred anointing oil are the concrete text driving the episode’s question.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "There’s a recipe for special anointing oil … in the Torah."
+        }
+      ]
+    },
+    {
+      "providerId": "-u0INqrL0AM",
+      "language": "en",
+      "title": "Where on Earth is Uz? • Wisdom E6",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 18,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode considers Job’s setting, place among wisdom books, and relationship to Scripture as a whole-book discussion.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "How exactly does Job fit in with the other wisdom book[s] of the Bible?"
+        }
+      ]
+    },
+    {
+      "providerId": "-YrZ1iPiBQM",
+      "language": "en",
+      "title": "Why Humans Can't Obey the Law (and God's Plan to Fix It) • The Law Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 40,
+        "chapterStart": 5,
+        "chapterEnd": 5,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The theme spans prophets and apostles, but Matthew 5 is the clearest representative locus for Jesus’ fulfillment of the law.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "How Jesus challenged the common interpretations of the law in the Gospels."
+        }
+      ]
+    },
+    {
+      "providerId": "0EQDGax19xk",
+      "language": "en",
+      "title": "Character in Biblical Narrative",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The video teaches a narrative-reading skill through multiple characters rather than one biblical text.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Character in Biblical Narrative"
+        }
+      ]
+    },
+    {
+      "providerId": "0k4GbvZUPuo",
+      "language": "en",
+      "title": "The Baptism of Jesus: Luke 3-9",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 3,
+        "chapterEnd": 9,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode is explicitly the second Luke installment covering chapters 3–9.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Baptism of Jesus: Luke 3-9"
+        }
+      ]
+    },
+    {
+      "providerId": "0uf-PgW7rqE",
+      "language": "en",
+      "title": "The Book of Exodus - Part 1",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 1,
+        "chapterEnd": 18,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Part one follows Exodus from slavery in Egypt through the journey to Sinai.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "From Egypt, they set out into the wilderness on the way to Mt. Sinai."
+        }
+      ]
+    },
+    {
+      "providerId": "2eb3BHpw0X8",
+      "language": "fr",
+      "title": "Le Livre d'Écclésiaste",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 21,
+        "chapterStart": 1,
+        "chapterEnd": 12,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo résume l'argument et la sagesse de l'Ecclésiaste entier.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le Livre d'Écclésiaste"
+        }
+      ]
+    },
+    {
+      "providerId": "2I73In_xNQw",
+      "language": "en",
+      "title": "The Garden Was Not Perfect • Image of God Ep. 3",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 3,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode’s argument about the unfinished garden and human vocation is rooted throughout Genesis 1–3.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Humans are made in the image of God … a greater responsibility."
+        }
+      ]
+    },
+    {
+      "providerId": "2mCFk6oug6Y",
+      "language": "fr",
+      "title": "Le livre de la Genèse – partie 2",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 12,
+        "chapterEnd": 50,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La seconde partie suit la famille d'Abraham dans le reste de la Genèse.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Bénir toutes les nations à travers la famille d'Abraham."
+        }
+      ]
+    },
+    {
+      "providerId": "2uAxufq24xI",
+      "language": "fr",
+      "title": "Le livre du Lévitique",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 3,
+        "chapterStart": 1,
+        "chapterEnd": 27,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo expose la structure et le message du Lévitique entier.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le livre du Lévitique"
+        }
+      ]
+    },
+    {
+      "providerId": "39DTeVC-kCc",
+      "language": "en",
+      "title": "Global Stories: Japan",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Ce reportage porte sur la localisation de BibleProject au Japon, pas sur l’enseignement d’un locus biblique.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "documented the localization process for our audience and supporters"
+        }
+      ]
+    },
+    {
+      "providerId": "3Bz1cwFmAd0",
+      "language": "en",
+      "title": "The \"Teacher\" vs. Jesus • Wisdom Ep. 4",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 21,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode interprets Ecclesiastes’ Teacher and the book’s overall confrontation with mortality.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The teacher is trying to … dismantle the illusions of the reader."
+        }
+      ]
+    },
+    {
+      "providerId": "4Yx9ODvfuDE",
+      "language": "en",
+      "title": "Why the Circumstances Around Jesus' Birth Matter • Luke-Acts  (Episode 1)",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 42,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode introduces Luke as a historical and interpreted account before the series moves through Jesus’ life.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "An introduction to the gospel of Luke."
+        }
+      ]
+    },
+    {
+      "providerId": "6Y_qk7x85nQ",
+      "language": "fr",
+      "title": "Étudiants des Écritures",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Cette courte communication invite à utiliser les ressources BibleProject et ne développe pas un texte biblique propre.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "Nous créons des ressources pour les personnes curieuses d'apprendre la Bible"
+        }
+      ]
+    },
+    {
+      "providerId": "7_CGP-12AE0",
+      "language": "en",
+      "title": "The Story of the Bible • What It's About From Beginning to End",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This traces the entire biblical story, so a local Bible View target would be misleading.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Story of the Bible"
+        }
+      ]
+    },
+    {
+      "providerId": "7FuT8WtoAK0",
+      "language": "en",
+      "title": "Setting in Biblical Narrative",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Biblical settings are surveyed as a literary technique, not as exposition of one passage.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Setting in Biblical Narrative"
+        }
+      ]
+    },
+    {
+      "providerId": "86V8VTUVBmo",
+      "language": "en",
+      "title": "Intro to Wisdom Literature • Wisdom Ep. 1",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This comparative introduction treats Proverbs, Job, and Ecclesiastes together; selecting one book or chapter would hide its actual scope.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Proverbs, Job, and Ecclesiastes are considered wisdom literature."
+        }
+      ]
+    },
+    {
+      "providerId": "8FbreCK6yUs",
+      "language": "en",
+      "title": "When Do Words Become A Blessing? – Torah Q+R",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This Torah Q+R combines several distinct audience questions; no one passage represents the whole program without distortion.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Respond to audience questions … about the Torah."
+        }
+      ]
+    },
+    {
+      "providerId": "8Tbcofs6l3o",
+      "language": "en",
+      "title": "What is The Bible Project?",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "La vidéo explique le projet et son catalogue de ressources; ce contenu institutionnel n’a pas de locus biblique honnête.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "What is The Bible Project?"
+        }
+      ]
+    },
+    {
+      "providerId": "9_2HEqFsIoI",
+      "language": "fr",
+      "title": "Les Personnages des Récits Bibliques",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Les personnages sont étudiés comme technique narrative à travers de multiples histoires.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Les Personnages des Récits Bibliques"
+        }
+      ]
+    },
+    {
+      "providerId": "92UjGNLabiE",
+      "language": "en",
+      "title": "Glory of God • Image of God Ep. 4",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 1,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The glory theme is developed through humanity’s vocation as God’s image, rooted repeatedly in Genesis 1.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "This all connects us back to … the image of God."
+        }
+      ]
+    },
+    {
+      "providerId": "9IVQ8qTi9rE",
+      "language": "en",
+      "title": "Jesus Followers and the Connection Between Heaven and Earth • Heaven and Earth Ep. 3",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 2,
+        "chapterEnd": 2,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "Acts 2 is the representative locus for God’s presence dwelling in the community of Jesus’ followers.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "God’s presence exists in followers of Jesus."
+        }
+      ]
+    },
+    {
+      "providerId": "9leTsKB1geI",
+      "language": "en",
+      "title": "Jesus’ Anointing Ceremony • The Anointed Ep. 6",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 41,
+        "chapterStart": 1,
+        "verseStart": 9,
+        "chapterEnd": 1,
+        "verseEnd": 11,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Jesus’ baptism in Mark is explicitly treated as his anointing ceremony.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The gospel writers depict [Jesus’ baptism] as his anointing ceremony."
+        }
+      ]
+    },
+    {
+      "providerId": "9lxl6CS1RJk",
+      "language": "fr",
+      "title": "Fils de l'Homme",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 27,
+        "chapterStart": 7,
+        "chapterEnd": 7,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "Daniel 7 est le locus représentatif du titre « Fils de l'Homme », mais la vidéo développe le thème dans l'ensemble du récit biblique.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "L'appellation dont Jésus se servait le plus ... est « Fils de l'Homme »."
+        }
+      ]
+    },
+    {
+      "providerId": "ak06MSETeo4",
+      "language": "en",
+      "title": "What is the Bible? [Animated Explainer]",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This introduces the Bible as a collection and has no narrower textual locus.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "What is the Bible?"
+        }
+      ]
+    },
+    {
+      "providerId": "aLvcF1NLwYU",
+      "language": "en",
+      "title": "These Two Hebrew Words Both Mean “Outcry”",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 2,
+        "verseStart": 23,
+        "chapterEnd": 2,
+        "verseEnd": 25,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "strong",
+          "code": "H6818",
+          "language": "hebrew",
+          "lemma": "צְעָקָה",
+          "transliteration": "tse'aqah",
+          "placement": "strong-resource"
+        },
+        {
+          "kind": "strong",
+          "code": "H2201",
+          "language": "hebrew",
+          "lemma": "זְעָקָה",
+          "transliteration": "ze'aqah",
+          "placement": "strong-resource"
+        }
+      ],
+      "confidence": "low",
+      "reviewStatus": "human-accepted",
+      "rationale": "L’étude lexicale couvre plusieurs occurrences; l’appel d’Israël en Exode 2 est le locus représentatif le plus directement relié à l’Exode.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "Israel's exodus from Egypt begins with the tse'aqah from the people"
+        }
+      ]
+    },
+    {
+      "providerId": "APEO0FNzwoM",
+      "language": "en",
+      "title": "Why Is Jesus Always Talking About the Kingdom of God? • Gospel of the Kingdom Ep. 1",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 1,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "This opening Kingdom survey repeatedly starts with Genesis 1 and humanity commissioned to represent God’s reign.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "A theme … that begins at the very beginning of Scripture."
+        }
+      ]
+    },
+    {
+      "providerId": "AVrs_dLJf7k",
+      "language": "en",
+      "title": "The Biggest, Baddest City in the Bible • The City Ep. 4",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 10,
+        "verseStart": 8,
+        "chapterEnd": 11,
+        "verseEnd": 9,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The sustained argument begins with Nimrod’s imperial cities in Genesis 10:8–12 and culminates in Babel in Genesis 11:1–9.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "The Biggest, Baddest City in the Bible."
+        }
+      ]
+    },
+    {
+      "providerId": "b0GhR-2kPKI",
+      "language": "en",
+      "title": "The Book of Exodus - Part 2",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 19,
+        "chapterEnd": 40,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Part two covers the Sinai covenant, tabernacle, and golden-calf half of Exodus.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "The Israelites come to Mt. Sinai."
+        }
+      ]
+    },
+    {
+      "providerId": "bft2GnpK50A",
+      "language": "en",
+      "title": "A Symptom of Human Violence • The City Ep. 3",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 4,
+        "chapterEnd": 6,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The discussion follows escalating violence from Cain and Lamech through the conditions preceding the flood.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Cain’s descendants are more violent, prompting God to flood the earth."
+        }
+      ]
+    },
+    {
+      "providerId": "c3_XU_BDbD0",
+      "language": "en",
+      "title": "Does the Bible Predict the End of the World? - BibleProject Podcast on Apocalypse",
+      "category": "long-form",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 66,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Cette séance de questions-réponses traite le genre apocalyptique à travers de nombreux livres; choisir un seul passage déformerait son objet.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "answer your questions about how to read apocalyptic literature"
+        }
+      ]
+    },
+    {
+      "providerId": "cNjlc2FQpOM",
+      "language": "en",
+      "title": "Generosity is central to the teachings of Jesus.",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 54,
+        "chapterStart": 6,
+        "verseStart": 17,
+        "chapterEnd": 6,
+        "verseEnd": 19,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-rejected",
+      "rationale": "La courte exhortation reprend l’enseignement de Paul à Timothée sur la générosité et la vraie vie.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "Paul said to Timothy that when we live generously we take hold of life"
+        }
+      ]
+    },
+    {
+      "providerId": "CuN4YZ7pup0",
+      "language": "en",
+      "title": "Is the Tree of Life Practical? - BibleProject Podcast",
+      "category": "long-form",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 2,
+        "chapterEnd": 3,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "Cette séance conclut la série Tree of Life; Genèse 2–3 fournit son locus représentatif, même si les questions parcourent toute la Bible.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 2154,
+          "excerpt": "The tree of knowing good and bad is never called the tree of death"
+        }
+      ]
+    },
+    {
+      "providerId": "CZEo5S5veYQ",
+      "language": "fr",
+      "title": "L'Évangile selon Marc",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 41,
+        "chapterStart": 1,
+        "chapterEnd": 16,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Il s'agit d'un panorama littéraire de l'Évangile selon Marc entier.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "L'Évangile selon Marc"
+        }
+      ]
+    },
+    {
+      "providerId": "DbFhZxEyEdc",
+      "language": "fr",
+      "title": "L'Évangile selon Luc Ch. 24",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 24,
+        "chapterEnd": 24,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo commente le récit de résurrection qui clôt Luc.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "L'Évangile selon Luc Ch. 24"
+        }
+      ]
+    },
+    {
+      "providerId": "dBXtH8uE_ig",
+      "language": "fr",
+      "title": "Les lettres du Nouveau Testament : contexte littéraire",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 45,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 46,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 47,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 48,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 49,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 50,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 51,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 52,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 53,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 54,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 55,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 56,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 57,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 58,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 59,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 60,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 61,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 62,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 63,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 64,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 65,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Cette leçon concerne la forme littéraire de toutes les lettres néotestamentaires.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Les lettres du Nouveau Testament : contexte littéraire"
+        }
+      ]
+    },
+    {
+      "providerId": "dLFCE8z__hw",
+      "language": "en",
+      "title": "Plot in Biblical Narrative",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Plot is taught as a general narrative-reading method across many stories.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Plot in Biblical Narrative"
+        }
+      ]
+    },
+    {
+      "providerId": "dNLfrrIw38c",
+      "language": "en",
+      "title": "Holiness Q+R",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This multi-question holiness Q+R moves among unrelated texts and has no sustained primary passage.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Answer listener questions on the subject of Holiness."
+        }
+      ]
+    },
+    {
+      "providerId": "DOU4PdLzWCg",
+      "language": "en",
+      "title": "Should Today's Christians Live by Israel's Laws? • Deuteronomy Ep. 5",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 12,
+        "chapterEnd": 25,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The sustained discussion treats the central Deuteronomic law collection and its wisdom for later Jesus followers.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 171,
+          "excerpt": "The center section of Deuteronomy, chapters 12 through 25."
+        }
+      ]
+    },
+    {
+      "providerId": "dpny22k_7uk",
+      "language": "en",
+      "title": "The Book of Psalms",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 19,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "It teaches the five-part literary design of the Psalter as a complete book.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Book of Psalms"
+        }
+      ]
+    },
+    {
+      "providerId": "dSujxs4kdn8",
+      "language": "fr",
+      "title": "BibleProject: qu’est-ce que c’est ?",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Cette présentation francophone explique la mission et les formats de BibleProject plutôt qu’un texte biblique.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "nous créons des vidéos d’animation qui étudient autant les livres que les thèmes"
+        }
+      ]
+    },
+    {
+      "providerId": "DwnHiF7_tTA",
+      "language": "en",
+      "title": "David, the Latecomer King • Firstborn Ep. 7",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 9,
+        "chapterStart": 8,
+        "chapterEnd": 16,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode follows Israel’s request for a king and the contrasting careers of Saul and David in 1 Samuel 8–16.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Israel demands a king … and the role of Israel’s first kings, Saul and David."
+        }
+      ]
+    },
+    {
+      "providerId": "E65KV3M8RZE",
+      "language": "en",
+      "title": "An Overview of Luke • Luke-Acts Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 42,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is explicitly a literary overview of the whole Gospel of Luke.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "A quick overview of the entire Book of Luke."
+        }
+      ]
+    },
+    {
+      "providerId": "ebI_4ZxcAMk",
+      "language": "fr",
+      "title": "Les Genres Littéraires dans la Bible",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Les genres littéraires sont étudiés dans toute la Bible.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Les Genres Littéraires dans la Bible"
+        }
+      ]
+    },
+    {
+      "providerId": "ED1AV2hb1uw",
+      "language": "en",
+      "title": "Wisdom of Ecclesiastes • Wisdom Ep. 3",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 21,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is a whole-book introduction to Ecclesiastes and the Teacher’s experimental wisdom.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Begin their discussion on the book of Ecclesiastes."
+        }
+      ]
+    },
+    {
+      "providerId": "edcqUu_BtN0",
+      "language": "en",
+      "title": "How to Read the 15 Prophetic Books in the Bible",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 23,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 24,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 26,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 28,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 29,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 30,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 31,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 32,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 33,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 34,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 35,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 36,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 37,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 38,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 39,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "It teaches how to read a fifteen-book prophetic collection, with no honest single-book target.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "How to Read the 15 Prophetic Books in the Bible"
+        }
+      ]
+    },
+    {
+      "providerId": "eFx-W3P6MeY",
+      "language": "fr",
+      "title": "La Loi",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 2,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 3,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 4,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 5,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La loi biblique est étudiée à travers plusieurs livres du Pentateuque.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Pourquoi toutes ces anciennes lois ont-elles été données à Israël ?"
+        }
+      ]
+    },
+    {
+      "providerId": "eIDKky8daeU",
+      "language": "en",
+      "title": "Inside the studio with our Wilderness artists",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Ces coulisses présentent les motifs visuels de Wilderness sans établir un texte principal suffisamment précis.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "Spend time in the studio with our artists"
+        }
+      ]
+    },
+    {
+      "providerId": "ENLyNE1qIc8",
+      "language": "en",
+      "title": "How Board Games Inspired The Exodus Way's Art Style",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "La vidéo explique les choix artistiques de The Exodus Way; elle ne commente pas un passage biblique de manière autonome.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "classic board games shaped their vision for The Exodus Way"
+        }
+      ]
+    },
+    {
+      "providerId": "F6_efk-LRO4",
+      "language": "en",
+      "title": "Learn the Most Important Skill in Biblical Interpretation",
+      "category": "classroom",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 32,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "La session suit les mots répétés et la composition à travers plusieurs chapitres de Jonas; le livre entier est la bonne unité.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "finding repeated keywords in different chapters of Jonah"
+        }
+      ]
+    },
+    {
+      "providerId": "fglsbcGSr3A",
+      "language": "en",
+      "title": "Paul's Missionary Journeys: Acts 13-20",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 13,
+        "chapterEnd": 20,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode explicitly follows Paul's mission in Acts 13–20.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Paul's Missionary Journeys: Acts 13-20"
+        }
+      ]
+    },
+    {
+      "providerId": "FJsiwOB0Pvg",
+      "language": "en",
+      "title": "Bound for Rome: Acts 21-28",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 21,
+        "chapterEnd": 28,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The title and description explicitly delimit the final movement of Acts.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Bound for Rome: Acts 21-28"
+        }
+      ]
+    },
+    {
+      "providerId": "FL-n3dnClY8",
+      "language": "fr",
+      "title": "Découvrez le sens de “Test/Épreuve” (Nissah) dans la Bible",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 16,
+        "verseStart": 4,
+        "chapterEnd": 16,
+        "verseEnd": 30,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "strong",
+          "code": "H5254",
+          "language": "hebrew",
+          "lemma": "נָסָה",
+          "transliteration": "nissah",
+          "placement": "strong-resource"
+        }
+      ],
+      "confidence": "low",
+      "reviewStatus": "human-accepted",
+      "rationale": "Nissah est étudié à travers plusieurs exemples; l’épreuve de la manne en Exode 16 est le développement central et une cible représentative.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "Dieu donnait du pain céleste à Israël dans le désert"
+        }
+      ]
+    },
+    {
+      "providerId": "FqXKc81z7Oc",
+      "language": "fr",
+      "title": "Le Scénario dans le Récit Biblique",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le scénario est une méthode de lecture narrative appliquée à de nombreux récits.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le Scénario dans le Récit Biblique"
+        }
+      ]
+    },
+    {
+      "providerId": "g_oZTU3b-tE",
+      "language": "en",
+      "title": "Why the Design of Noah’s Ark Matters",
+      "category": "classroom",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 6,
+        "verseStart": 9,
+        "chapterEnd": 6,
+        "verseEnd": 22,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "La classe examine de façon soutenue la conception de l’arche prescrite dans Genèse 6.9–22.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "take a closer look at the design of Noah’s ark"
+        }
+      ]
+    },
+    {
+      "providerId": "g-_h6TekF9M",
+      "language": "en",
+      "title": "Proverbs • Wisdom Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 20,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is a whole-book orientation to Proverbs and its concept of wisdom.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The ancient wisdom found in the book of Proverbs."
+        }
+      ]
+    },
+    {
+      "providerId": "Gab04dPs_uA",
+      "language": "en",
+      "title": "The Book of Proverbs • What It Teaches About Being Good at Life",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 20,
+        "chapterStart": 1,
+        "chapterEnd": 31,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The subject is the message of Proverbs as a whole.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Book of Proverbs"
+        }
+      ]
+    },
+    {
+      "providerId": "geSZzv2EB6U",
+      "language": "en",
+      "title": "The Surprise of the City • The City Ep. 1",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 66,
+        "chapterStart": 21,
+        "chapterEnd": 22,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The survey’s central surprise is that the biblical story ends with renewed creation portrayed as a city.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "In the book of Revelation, the new creation Jesus brings is a city."
+        }
+      ]
+    },
+    {
+      "providerId": "gFKcychCzak",
+      "language": "en",
+      "title": "Heaven and Earth Q+R",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The audience Q+R ranges across unrelated questions and passages, so no single Bible View locus honestly represents it.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Respond to questions about the theme of Heaven and Earth."
+        }
+      ]
+    },
+    {
+      "providerId": "GpgzhwYzSZ0",
+      "language": "en",
+      "title": "The Anointed King in Psalms • The Anointed Ep. 5",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 19,
+        "chapterStart": 2,
+        "chapterEnd": 2,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "passage",
+          "book": 19,
+          "chapterStart": 3,
+          "chapterEnd": 3,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 19,
+          "chapterStart": 20,
+          "chapterEnd": 22,
+          "placement": "chapter-resources"
+        }
+      ],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "Psalm 2 is the representative programmatic royal psalm, while Psalms 3 and 20–22 are also treated as a sustained sequence.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "The Anointed King in Psalms."
+        }
+      ]
+    },
+    {
+      "providerId": "GswSg2ohqmA",
+      "language": "en",
+      "title": "The Book of Job's Wisdom on How God Runs the World",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 18,
+        "chapterStart": 1,
+        "chapterEnd": 42,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The video traces Job's complete literary argument and resolution.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Book of Job's Wisdom on How God Runs the World"
+        }
+      ]
+    },
+    {
+      "providerId": "gWJaxlYRSc0",
+      "language": "fr",
+      "title": "L'Histoire de la Bible",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo parcourt toute l'histoire biblique, sans locus local honnête.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "L'Histoire de la Bible"
+        }
+      ]
+    },
+    {
+      "providerId": "GZuceW7eh5M",
+      "language": "en",
+      "title": "New Testament Letters: Historical Context",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 45,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 46,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 47,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 48,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 49,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 50,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 51,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 52,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 53,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 54,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 55,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 56,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 57,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 58,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 59,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 60,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 61,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 62,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 63,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 64,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 65,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "It teaches historical context for all New Testament letters rather than one letter.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "There are 21 letters or epistles written by early Christian leaders."
+        }
+      ]
+    },
+    {
+      "providerId": "h_zIJt0Kpes",
+      "language": "en",
+      "title": "Does God Punish Women with Pain in Childbirth?",
+      "category": "classroom",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 3,
+        "verseStart": 16,
+        "chapterEnd": 3,
+        "verseEnd": 16,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La session annonce puis commente de façon soutenue Genèse 3.16 et son vocabulaire hébreu.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 17,
+          "excerpt": "the students have arrived at a difficult passage, Genesis 3:16"
+        }
+      ]
+    },
+    {
+      "providerId": "HDrHAWukRR8",
+      "language": "fr",
+      "title": "L'Évangile selon Luc Ch. 1-2 - La naissance de Jésus",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 1,
+        "chapterEnd": 2,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "L'épisode est consacré au récit de la naissance en Luc 1–2.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "L'Évangile selon Luc Ch. 1-2"
+        }
+      ]
+    },
+    {
+      "providerId": "hhkafDU0XF0",
+      "language": "en",
+      "title": "Why this Hebrew Word Can Mean Something Good – or Something Terrible",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 3,
+        "verseStart": 7,
+        "chapterEnd": 3,
+        "verseEnd": 12,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "strong",
+          "code": "H5647",
+          "language": "hebrew",
+          "lemma": "עָבַד",
+          "transliteration": "'avad",
+          "placement": "strong-resource"
+        }
+      ],
+      "confidence": "low",
+      "reviewStatus": "human-accepted",
+      "rationale": "L’étude de 'avad oppose plusieurs contextes; Exode 3 concentre le passage de l’asservissement au service de Dieu.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "God rescues the Israelites so that they can 'avad him"
+        }
+      ]
+    },
+    {
+      "providerId": "hHqZxg-oH_o",
+      "language": "en",
+      "title": "Suffering Well • Wisdom E5",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 18,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode takes a bird’s-eye view of Job’s treatment of justice, suffering, and God.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "A bird’s eye view of the book of Job."
+        }
+      ]
+    },
+    {
+      "providerId": "higvLX003DY",
+      "language": "fr",
+      "title": "L'Évangile selon Luc Ch. 19-23",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 19,
+        "chapterEnd": 23,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La description confirme une étude suivie de Luc 19–23.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "L'Évangile selon Luc Ch. 19-23"
+        }
+      ]
+    },
+    {
+      "providerId": "HliwPZ6395I",
+      "language": "fr",
+      "title": "Le livre de la Genèse – partie 1",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 11,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La première partie suit l'histoire primitive de la création jusqu'à Babylone.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "La fondation de la cité de Babylone."
+        }
+      ]
+    },
+    {
+      "providerId": "HTEyJ0ozoaM",
+      "language": "en",
+      "title": "\"Christ\" Is Not a Name • The Anointed Ep. 1",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 3,
+        "chapterStart": 8,
+        "chapterEnd": 8,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode traces anointing across Scripture; Leviticus 8 is its clearest representative locus for the enacted anointing ritual.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 1458,
+          "excerpt": "The ritual actually happens in Leviticus chapter 8."
+        }
+      ]
+    },
+    {
+      "providerId": "IcJMz5OOfqU",
+      "language": "en",
+      "title": "The Project Continues",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Cette bande-annonce institutionnelle n’enseigne aucun texte biblique déterminé.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "The project continues"
+        }
+      ]
+    },
+    {
+      "providerId": "IQhUpoYAnKQ",
+      "language": "fr",
+      "title": "L'Art de la Poésie Biblique",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo enseigne l'art poétique à travers plusieurs textes sans commentaire principal unique.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "L'Art de la Poésie Biblique"
+        }
+      ]
+    },
+    {
+      "providerId": "IT3LVWWuDDo",
+      "language": "fr",
+      "title": "Les paraboles de Jésus",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 40,
+        "chapterStart": 13,
+        "chapterEnd": 13,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 18,
+          "chapterEnd": 18,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 20,
+          "chapterEnd": 20,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 21,
+          "chapterEnd": 21,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 22,
+          "chapterEnd": 22,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 25,
+          "chapterEnd": 25,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 41,
+          "chapterStart": 4,
+          "chapterEnd": 4,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 41,
+          "chapterStart": 12,
+          "chapterEnd": 12,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 8,
+          "chapterEnd": 8,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 10,
+          "chapterEnd": 10,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 12,
+          "chapterEnd": 12,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 13,
+          "chapterEnd": 13,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 14,
+          "chapterEnd": 14,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 15,
+          "chapterEnd": 15,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 16,
+          "chapterEnd": 16,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 18,
+          "chapterEnd": 18,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 19,
+          "chapterEnd": 19,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 20,
+          "chapterEnd": 20,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo étudie les paraboles à travers les Évangiles plutôt qu'un passage précis.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Les paraboles de Jésus"
+        }
+      ]
+    },
+    {
+      "providerId": "iTj6ShRlHuc",
+      "language": "en",
+      "title": "What God Wanted Moses to Tell Israel Before He Died • Deuteronomy Ep. 9",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 32,
+        "chapterEnd": 32,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Moses’ song in Deuteronomy 32 is explicitly the close reading at the center of this concluding episode.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Looking closely at a song Moses wrote in chapter 32."
+        }
+      ]
+    },
+    {
+      "providerId": "j3rlwb50pHo",
+      "language": "fr",
+      "title": "Les lettres du Nouveau Testament : contexte historique",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 45,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 46,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 47,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 48,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 49,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 50,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 51,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 52,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 53,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 54,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 55,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 56,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 57,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 58,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 59,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 60,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 61,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 62,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 63,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 64,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 65,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Cette leçon concerne le contexte historique des 21 lettres du Nouveau Testament.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Les lettres du Nouveau Testament : contexte historique"
+        }
+      ]
+    },
+    {
+      "providerId": "j5qdaWO9wp8",
+      "language": "fr",
+      "title": "Schémas Récurrents du Récit Biblique",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Les schémas récurrents traversent les deux Testaments; chaque récit cité reste un exemple.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "De l'Ancien au Nouveau Testament."
+        }
+      ]
+    },
+    {
+      "providerId": "jAphvWLUZKc",
+      "language": "en",
+      "title": "How the Bible Is About the Reunion of Heaven and Earth • Heaven and Earth Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 23,
+        "chapterStart": 65,
+        "chapterEnd": 65,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The theme spans Scripture, while Isaiah 65 is the strongest recurring locus for renewed creation and reunited divine-human space.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The concept of resurrection and new creation relates to Heaven and Earth."
+        }
+      ]
+    },
+    {
+      "providerId": "jbf0nxJT8wI",
+      "language": "fr",
+      "title": "Le livre de l’Exode – partie 1",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 1,
+        "chapterEnd": 18,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La première partie suit la sortie d'Égypte jusqu'à l'arrivée au Sinaï.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "D'Egypte, ils partent dans le désert, en route pour le Mont Sinaï."
+        }
+      ]
+    },
+    {
+      "providerId": "JQhkWmFJKnA",
+      "language": "en",
+      "title": "What Happened at Pentecost and Why It's Important",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 1,
+        "chapterEnd": 7,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is the first Acts-series movement, centered on Pentecost and the renewed Israel community.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Jesus and the Spirit renew the people of Israel."
+        }
+      ]
+    },
+    {
+      "providerId": "jUCCUHurV0I",
+      "language": "en",
+      "title": "The Prodigal Son: Luke 9-19",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 9,
+        "chapterEnd": 19,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode follows Luke's central journey section, not only one parable.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Prodigal Son: Luke 9-19"
+        }
+      ]
+    },
+    {
+      "providerId": "jYiIJtBsCpU",
+      "language": "en",
+      "title": "Isaiah's Anointed One • The Anointed Ep. 4",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 23,
+        "chapterStart": 11,
+        "chapterEnd": 11,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "passage",
+          "book": 10,
+          "chapterStart": 7,
+          "chapterEnd": 7,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 23,
+          "chapterStart": 53,
+          "chapterEnd": 53,
+          "placement": "chapter-resources"
+        }
+      ],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "Isaiah 11 is the representative primary prophecy, while 2 Samuel 7 and Isaiah 53 also carry substantial parts of the argument.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "The final anointed one … will come from the line of David."
+        }
+      ]
+    },
+    {
+      "providerId": "KOUV7mWDI34",
+      "language": "en",
+      "title": "The Main Message of the Book of Genesis • Part 1 • Torah Series (Episode 1)",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 11,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Part one traces Genesis' primeval history from creation through Babylon.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "The creation story ... Noah's flood ... The Tower of Babel."
+        }
+      ]
+    },
+    {
+      "providerId": "kw_tqkQGJJk",
+      "language": "en",
+      "title": "Good News for the Poor • Luke-Acts Ep. 3",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 1,
+        "chapterEnd": 6,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode explicitly works through Luke 1–6 and Jesus’ good news for poor and marginalized people.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The first six chapters of the gospel of Luke."
+        }
+      ]
+    },
+    {
+      "providerId": "L0-8nUbfW5w",
+      "language": "fr",
+      "title": "Les Evangiles",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 40,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 41,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 42,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 43,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo apprend à lire les quatre Évangiles comme genre, sans en privilégier un.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Le Nouveau Testament contient quatre antiques biographies de Jésus."
+        }
+      ]
+    },
+    {
+      "providerId": "L9W5afjndtU",
+      "language": "en",
+      "title": "Metaphor in Biblical Poetry",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Multiple passages merely demonstrate metaphor, so choosing one would misstate the lesson.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Metaphor in Biblical Poetry"
+        }
+      ]
+    },
+    {
+      "providerId": "LVYszo2DasM",
+      "language": "en",
+      "title": "The Reason the Old Testament Laws Exist  • The Law Ep. 1",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 19,
+        "chapterEnd": 20,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode broadly explains Israel’s laws; Sinai and the covenantal giving of the law in Exodus 19–20 are the representative locus.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Why God gave laws to the ancient Israelites."
+        }
+      ]
+    },
+    {
+      "providerId": "m8gavTyySCk",
+      "language": "fr",
+      "title": "Le Livre de Job",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 18,
+        "chapterStart": 1,
+        "chapterEnd": 42,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo expose la question et le message du livre de Job entier.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le Livre de Job"
+        }
+      ]
+    },
+    {
+      "providerId": "mdbtTT3HzFQ",
+      "language": "fr",
+      "title": "Le livre des Nombres",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 4,
+        "chapterStart": 1,
+        "chapterEnd": 36,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo présente le mouvement et le message du livre des Nombres entier.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le livre des Nombres"
+        }
+      ]
+    },
+    {
+      "providerId": "mjiWx5wcEjs",
+      "language": "en",
+      "title": "The Plague of the Firstborn • Firstborn Ep. 5",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 11,
+        "chapterEnd": 12,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The plague of the firstborn and Israel as Yahweh’s firstborn converge in the Exodus plague and Passover narrative.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The plague of the firstborn from Exodus … Yahweh calls Israel his firstborn son."
+        }
+      ]
+    },
+    {
+      "providerId": "mP_f5MWSKKc",
+      "language": "en",
+      "title": "Which Laws Still Apply? – Deuteronomy Scroll Q+R",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 5,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The Q+R explicitly addresses interpretation and contemporary relevance across the Deuteronomy scroll as a whole.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Audience questions about the Deuteronomy scroll."
+        }
+      ]
+    },
+    {
+      "providerId": "MV2T9y6qG7c",
+      "language": "en",
+      "title": "God's Plan to Establish His Kingdom on Earth • Gospel of the Kingdom Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 1,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "This Kingdom survey ranges across Scripture; Genesis 1 is the repeated representative chapter for God delegating rule to humanity.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "The theme of the Kingdom of God … fits into the story of the Bible."
+        }
+      ]
+    },
+    {
+      "providerId": "mz0tAI2SdPk",
+      "language": "fr",
+      "title": "Découvrez le sens du mot “Demeure” (Mishkan) dans la Bible",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 25,
+        "chapterEnd": 31,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "strong",
+          "code": "H4908",
+          "language": "hebrew",
+          "lemma": "מִשְׁכָּן",
+          "transliteration": "mishkan",
+          "placement": "strong-resource"
+        }
+      ],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "La définition de mishkan porte principalement sur le tabernacle où Dieu demeure au milieu d’Israël, conçu en Exode 25–31.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 4,
+          "excerpt": "la tente où Dieu habite au milieu de son peuple, Le tabernacle"
+        }
+      ]
+    },
+    {
+      "providerId": "n_u_37FbGbs",
+      "language": "fr",
+      "title": "Actes Ch. 13-20",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 13,
+        "chapterEnd": 20,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo suit les voyages missionnaires racontés en Actes 13–20.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Actes Ch. 13-20"
+        }
+      ]
+    },
+    {
+      "providerId": "n_vEB11XKSE",
+      "language": "en",
+      "title": "We Break Down the Lord’s Prayer Verse By Verse",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 40,
+        "chapterStart": 6,
+        "verseStart": 9,
+        "chapterEnd": 6,
+        "verseEnd": 13,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo explique explicitement le Notre Père ligne par ligne dans Matthieu 6.9–13.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "explain the meaning of the Lord’s Prayer line by line"
+        }
+      ]
+    },
+    {
+      "providerId": "NcnHN7JbhpY",
+      "language": "en",
+      "title": "Last Week of a King: A VR Short",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 19,
+        "verseStart": 28,
+        "chapterEnd": 22,
+        "verseEnd": 20,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-rejected",
+      "rationale": "L’expérience dramatise explicitement la dernière semaine de Jésus dans Luc, de l’entrée à Jérusalem au repas pascal.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "Follow Jesus as he enters Jerusalem ... and shares the Passover meal"
+        }
+      ]
+    },
+    {
+      "providerId": "NMhmDPWeftw",
+      "language": "en",
+      "title": "The Book of Deuteronomy • These Were Moses' Final Words (Torah Series Episode 7)",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 1,
+        "chapterEnd": 34,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is a whole-book literary overview of Deuteronomy.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Moses delivers his final words of warning and wisdom."
+        }
+      ]
+    },
+    {
+      "providerId": "nP5b-545hb8",
+      "language": "en",
+      "title": "How Will Jesus Use His Power? • Firstborn Ep. 9",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 4,
+        "chapterEnd": 9,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode’s stated focus is how Jesus exercises authority throughout the early ministry movement of Luke 4–9.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The way Jesus uses his power and authority as the cosmic firstborn."
+        }
+      ]
+    },
+    {
+      "providerId": "npk34pB5P4A",
+      "language": "en",
+      "title": "The Satan and Demons Question and Response - BibleProject",
+      "category": "long-form",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Les questions sur Satan et les démons parcourent Genèse, les prophètes et les Évangiles; une cible unique serait trompeuse.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "some of the strangest passages in the entire Bible"
+        }
+      ]
+    },
+    {
+      "providerId": "NRG4AmocCPA",
+      "language": "fr",
+      "title": "L'Évangile selon Luc Ch. 9-19",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 9,
+        "chapterEnd": 19,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo couvre la section centrale du voyage vers Jérusalem en Luc 9–19.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "L'Évangile selon Luc Ch. 9-19"
+        }
+      ]
+    },
+    {
+      "providerId": "NVRY8Uv9R28",
+      "language": "en",
+      "title": "What the Biblical Authors Meant by the Word \"Earth\"",
+      "category": "classroom",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "verseStart": 1,
+        "chapterEnd": 1,
+        "verseEnd": 31,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La session étudie le sens de « terre » dans le récit de création de Genèse 1 et sa cosmologie littéraire.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 8,
+          "excerpt": "one of our class sessions exploring the creation narrative in Genesis 1"
+        }
+      ]
+    },
+    {
+      "providerId": "Nw9EsXoQCbA",
+      "language": "en",
+      "title": "Seizing vs. Receiving Power • Firstborn Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 3,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode explicitly locates its firstborn and power theme in Genesis 1–3.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The theme of the firstborn in Genesis 1-3."
+        }
+      ]
+    },
+    {
+      "providerId": "OHYvZSazXi8",
+      "language": "en",
+      "title": "What Does It Mean to Join God's Kingdom? • Gospel of the Kingdom Ep. 3",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 1,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "This broad Kingdom conclusion repeatedly grounds divine and human rule in Genesis 1 before tracing its fulfillment in Jesus.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "Genesis Chapter 1 … we are to represent his reign on earth."
+        }
+      ]
+    },
+    {
+      "providerId": "oiVAbkINtRU",
+      "language": "en",
+      "title": "The Apostle Paul: Acts 8-12",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 8,
+        "chapterEnd": 12,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The official title and description delimit Acts 8–12.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Apostle Paul: Acts 8-12"
+        }
+      ]
+    },
+    {
+      "providerId": "oKl9mpS1sS8",
+      "language": "en",
+      "title": "Rivalry Among Brothers • Firstborn Ep. 3",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 4,
+        "chapterEnd": 5,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "passage",
+          "book": 1,
+          "chapterStart": 9,
+          "verseStart": 20,
+          "chapterEnd": 9,
+          "verseEnd": 27,
+          "placement": "after-range"
+        }
+      ],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "Genesis 4–5 remains the primary locus, with Noah’s later family episode in Genesis 9 treated as a substantial related text.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 165,
+          "excerpt": "The generations of families in Genesis 4 and following."
+        }
+      ]
+    },
+    {
+      "providerId": "onMgVuZ4q0Q",
+      "language": "fr",
+      "title": "Le Livre des Proverbes",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 20,
+        "chapterStart": 1,
+        "chapterEnd": 31,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo présente la sagesse et la finalité du livre des Proverbes entier.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le Livre des Proverbes"
+        }
+      ]
+    },
+    {
+      "providerId": "oUXJ8Owes8E",
+      "language": "en",
+      "title": "Writing Styles of the Bible & Why They're Important to Understand",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "It surveys writing styles throughout Scripture, so examples cannot supply a primary anchor.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Writing Styles of the Bible"
+        }
+      ]
+    },
+    {
+      "providerId": "OVRixfameGY",
+      "language": "en",
+      "title": "Mark",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 41,
+        "chapterStart": 1,
+        "chapterEnd": 16,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo expose la conception globale de l’Évangile selon Marc et la question messianique qui structure tout le livre.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "The Gospel of Mark is a book in the Bible about the life of Jesus"
+        }
+      ]
+    },
+    {
+      "providerId": "p5yl4tGhFJg",
+      "language": "en",
+      "title": "Strange Bible Podcast Intro",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Il s’agit de l’introduction promotionnelle d’un podcast composé de multiples séries et livres.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "We have released a brand-new podcast"
+        }
+      ]
+    },
+    {
+      "providerId": "p6fY39B25G4",
+      "language": "en",
+      "title": "Sneak Peek: The Gospel of The Kingdom",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Ce sneak peek décrit la fabrication d’une future vidéo sur le Royaume; il ne développe pas lui-même un passage biblique.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "Sneak Peek: The Gospel of The Kingdom"
+        }
+      ]
+    },
+    {
+      "providerId": "plSNIwhAn5o",
+      "language": "en",
+      "title": "How to Read the Bible Overview",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is an overview of reading the whole Bible and its genres.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "How to Read the Bible Overview"
+        }
+      ]
+    },
+    {
+      "providerId": "pmoZlNOkV1I",
+      "language": "en",
+      "title": "Links",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Cette ressource enseigne une méthode de lecture et l’usage des liens dans l’application, non un texte biblique particulier.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "explain how links work and invite you to practice"
+        }
+      ]
+    },
+    {
+      "providerId": "PT1annWmldE",
+      "language": "en",
+      "title": "Happy New Year From BibleProject!",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "This is an organizational year-in-review, not instruction centered on a biblical text; a Bible View anchor would misrepresent it.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Reflect on the year behind us and look forward to the years ahead."
+        }
+      ]
+    },
+    {
+      "providerId": "pYYIYRhlVoI",
+      "language": "fr",
+      "title": "La Bible, qu'est-ce que c'est ?",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Cette introduction porte sur la nature de la Bible comme collection.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "La Bible, qu'est-ce que c'est ?"
+        }
+      ]
+    },
+    {
+      "providerId": "q9yp1ZXbsEg",
+      "language": "en",
+      "title": "The Art of Biblical Poetry",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is general instruction on biblical poetry rather than commentary on one poem.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Art of Biblical Poetry"
+        }
+      ]
+    },
+    {
+      "providerId": "qcixj8qS0KE",
+      "language": "en",
+      "title": "Will Israel Be Formed by God's Wisdom? • Deuteronomy Ep. 4",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 12,
+        "chapterEnd": 26,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The podcast explicitly begins the second movement of Deuteronomy and treats its law collection as formative wisdom.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "The law in the second movement of Deuteronomy."
+        }
+      ]
+    },
+    {
+      "providerId": "QmrpB52gWwM",
+      "language": "fr",
+      "title": "Les Prophètes",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 23,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 24,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 26,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 28,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 29,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 30,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 31,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 32,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 33,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 34,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 35,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 36,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 37,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 38,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 39,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo explique comment lire une collection de quinze livres prophétiques.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Les Prophètes"
+        }
+      ]
+    },
+    {
+      "providerId": "qpmc9akBM_Y",
+      "language": "en",
+      "title": "Join us for the premiere of Chaos Dragon",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "C’est une annonce de première, sans enseignement biblique propre à placer dans Bible View.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "Join us for the premiere of Chaos Dragon"
+        }
+      ]
+    },
+    {
+      "providerId": "qUuoCXcM9CU",
+      "language": "en",
+      "title": "What Friend Surprises Job and Says Something Different • Wisdom  (Episode 7)",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 18,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The conversation ranges across Elihu, Job 28, and Job’s final speeches, making the whole book the honest target.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Elihu … Job’s speech in chapter 28 … Job’s final [speech]."
+        }
+      ]
+    },
+    {
+      "providerId": "QvjQyA4er_E",
+      "language": "fr",
+      "title": "Le livre de l’Exode – partie 2",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 19,
+        "chapterEnd": 40,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La seconde partie couvre l'alliance au Sinaï, le tabernacle et le veau d'or.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Les Israélites arrivent au Mont Sinaï."
+        }
+      ]
+    },
+    {
+      "providerId": "QwlQpMuVM4g",
+      "language": "en",
+      "title": "Humans as Middle Management • Image of God Ep. 1",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "verseStart": 26,
+        "chapterEnd": 1,
+        "verseEnd": 28,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Genesis 1’s image-of-God commission is explicitly and repeatedly the episode’s central text.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "What does it mean that humans were created in the image of God?"
+        }
+      ]
+    },
+    {
+      "providerId": "rkqsQpck8YU",
+      "language": "en",
+      "title": "Design Patterns in Biblical Narrative",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Design patterns are taught across both Testaments; individual examples are illustrative.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Individual stories across the Old and New Testaments have been coordinated."
+        }
+      ]
+    },
+    {
+      "providerId": "RN3wYVRkmno",
+      "language": "en",
+      "title": "Does A Good Christian Tithe 10%? (It's Not That Simple)",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 14,
+        "chapterEnd": 14,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The podcast is topical rather than an exposition, but Deuteronomy 14 supplies its principal biblical locus for tithing.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "A biblical view of money … Does a good Christian tithe 10%?"
+        }
+      ]
+    },
+    {
+      "providerId": "Rymqrmdn9Z8",
+      "language": "en",
+      "title": "You Can Understand the Old Testament (2 Simple Ideas Help!)",
+      "category": "classroom",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 1,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La classe enseigne une méthode générale d’interprétation de la Bible hébraïque; aucun livre ou passage n’en est l’objet principal.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "two simple ideas are at the core of the process"
+        }
+      ]
+    },
+    {
+      "providerId": "sAHdBY_KNPE",
+      "language": "en",
+      "title": "Why Cain Builds a City • The City Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 4,
+        "chapterEnd": 4,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Cain’s founding of the first city in Genesis 4 is the episode’s stated narrative focus.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Why Cain Builds a City."
+        }
+      ]
+    },
+    {
+      "providerId": "Sew1kBIe-W0",
+      "language": "en",
+      "title": "Biblical Law",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 2,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 3,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 4,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 5,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is instruction for reading biblical law across Exodus through Deuteronomy, not exposition of one locus.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "We explore why the laws were given to ancient Israel."
+        }
+      ]
+    },
+    {
+      "providerId": "sIOnEbHB4Fk",
+      "language": "fr",
+      "title": "La Bible dans la Littérature Juive Méditative",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le sujet est la Bible comme littérature méditative dans son ensemble.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "La Bible dans la Littérature Juive Méditative"
+        }
+      ]
+    },
+    {
+      "providerId": "tlwz151z_80",
+      "language": "fr",
+      "title": "Découvrez le sens du mot “gloire” (kavod) dans la Bible",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 33,
+        "verseStart": 18,
+        "chapterEnd": 34,
+        "verseEnd": 9,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "strong",
+          "code": "H3519",
+          "language": "hebrew",
+          "lemma": "כָּבוֹד",
+          "transliteration": "kavod",
+          "placement": "strong-resource"
+        }
+      ],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "Kavod est un thème étendu, mais la rencontre de Moïse avec la gloire divine en Exode 33–34 est l’exemple central explicite.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 19,
+          "excerpt": "La Kavod de Dieu passe à côté de Moïse"
+        }
+      ]
+    },
+    {
+      "providerId": "tMP7U5a_spY",
+      "language": "en",
+      "title": "Saul the Anti-Anointed • The Anointed Ep. 3",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 9,
+        "chapterStart": 9,
+        "chapterEnd": 24,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The podcast traces Saul’s anointing and failure against David through the narrative culminating in 1 Samuel 24.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 2715,
+          "excerpt": "Leading up to First Samuel 24 … First Samuel 18 to 23."
+        }
+      ]
+    },
+    {
+      "providerId": "Tn09RdxfqbM",
+      "language": "fr",
+      "title": "Textes apocalyptiques",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 66,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo enseigne le genre apocalyptique à travers plusieurs livres; Genèse 1 est seulement comparatif.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Textes apocalyptiques"
+        }
+      ]
+    },
+    {
+      "providerId": "TNUw2SsPjiw",
+      "language": "en",
+      "title": "Power Grabs and Patriarchs • Firstborn Ep. 4",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 12,
+        "chapterEnd": 36,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode deliberately follows firstborn rivalry and power in the Abraham, Isaac, and Jacob narratives.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "The narratives of Abraham, Isaac, and Jacob."
+        }
+      ]
+    },
+    {
+      "providerId": "U7wdHldVoqg",
+      "language": "fr",
+      "title": "Les Métaphores dans la Poésie Biblique",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Les psaumes cités servent d'exemples d'une leçon générale sur la métaphore.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Les Métaphores dans la Poésie Biblique"
+        }
+      ]
+    },
+    {
+      "providerId": "u893rxHGrWU",
+      "language": "fr",
+      "title": "Le Livre des Psaumes",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 19,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo enseigne la structure en cinq parties du Psautier entier.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le Livre des Psaumes"
+        }
+      ]
+    },
+    {
+      "providerId": "UNDX4tUdj1Y",
+      "language": "en",
+      "title": "How to Read the Bible: Apocalyptic Literature",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 66,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The subject is apocalyptic literature across several books; Genesis 1 is incidental comparison.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "The Bible is filled with dreams and visions."
+        }
+      ]
+    },
+    {
+      "providerId": "ury3MaC6HFE",
+      "language": "en",
+      "title": "God and Human's Makeover • Image of God Ep. 2",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "verseStart": 26,
+        "chapterEnd": 1,
+        "verseEnd": 28,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The sustained subject is humanity made in God’s image and restored to that vocation through Jesus.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Being remade into the Image of God … to participate in that reign."
+        }
+      ]
+    },
+    {
+      "providerId": "V8-yWbv7fZY",
+      "language": "fr",
+      "title": "Psaume 8",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 19,
+        "chapterStart": 8,
+        "verseStart": 1,
+        "chapterEnd": 8,
+        "verseEnd": 10,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le commentaire parcourt le Psaume 8, sa place dans le Psautier et sa vision de la vocation humaine.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 1,
+          "excerpt": "voici les premiers mots du psaume 8 de la Bible"
+        }
+      ]
+    },
+    {
+      "providerId": "Vb24Lk1Oh5M",
+      "language": "en",
+      "title": "The Resurrection of Jesus: Luke 24",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 24,
+        "chapterEnd": 24,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The whole episode comments on Luke's resurrection chapter.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Resurrection of Jesus: Luke 24"
+        }
+      ]
+    },
+    {
+      "providerId": "VeUiuSK81-0",
+      "language": "en",
+      "title": "The Disturbing But Surprising Wisdom of Ecclesiastes",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 21,
+        "chapterStart": 1,
+        "chapterEnd": 12,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode summarizes Ecclesiastes' whole argument about wisdom and mortality.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Disturbing But Surprising Wisdom of Ecclesiastes"
+        }
+      ]
+    },
+    {
+      "providerId": "VhmlJBUIoLk",
+      "language": "en",
+      "title": "How the Bible Is Unique as Literature (and Why It Matters)",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This concerns the Bible's global literary design; Psalm 1 is an example, not the sustained locus.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "The Bible is designed as a multi-layered work."
+        }
+      ]
+    },
+    {
+      "providerId": "VHuEQOyUztw",
+      "language": "en",
+      "title": "Season 5 Premiere + Live Question and Response!",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "La fiche ne contient qu’une annonce d’événement et aucun contenu biblique exploitable.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "This event starts on September 6th"
+        }
+      ]
+    },
+    {
+      "providerId": "Vn_g8xIRMjY",
+      "language": "en",
+      "title": "God's Firstborn Son • Firstborn Ep. 8",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 3,
+        "verseStart": 21,
+        "chapterEnd": 4,
+        "verseEnd": 13,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Jesus’ sonship and use of power are explored through his baptism and wilderness testing in Luke.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Jesus is God’s Son through the stories of his baptism and testing in the wilderness."
+        }
+      ]
+    },
+    {
+      "providerId": "VpbWbyx1008",
+      "language": "en",
+      "title": "The Main Message of the Book of Genesis • Part 2 • Torah Series (Episode 2)",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 12,
+        "chapterEnd": 50,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Part two follows Abraham's family through the remainder of Genesis.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "God makes a promise that He will bless all nations through Abraham's family."
+        }
+      ]
+    },
+    {
+      "providerId": "vQTWVz5QVxg",
+      "language": "en",
+      "title": "What Happens When We Die According to the Bible? • Heaven and Earth Ep. 4",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 43,
+        "chapterStart": 14,
+        "chapterEnd": 14,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Jesus’ words in John 14 are the repeated central text for correcting ideas about death, heaven, and God’s dwelling.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "What Jesus was trying to communicate about Heaven in the Gospel of John."
+        }
+      ]
+    },
+    {
+      "providerId": "vRkq3_M6uMs",
+      "language": "fr",
+      "title": "Le Cadre dans le Récit Biblique",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le cadre est enseigné comme technique narrative générale au moyen de plusieurs récits.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le Cadre dans le Récit Biblique"
+        }
+      ]
+    },
+    {
+      "providerId": "VZxb06PVFAE",
+      "language": "fr",
+      "title": "Découvrez le sens du “désert” (Midbar) dans la Bible",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 16,
+        "chapterEnd": 17,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "strong",
+          "code": "H4057",
+          "language": "hebrew",
+          "lemma": "מִדְבָּר",
+          "transliteration": "midbar",
+          "placement": "strong-resource"
+        }
+      ],
+      "confidence": "low",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le thème du midbar traverse plusieurs récits; les épreuves d’Israël au désert en Exode 16–17 en sont le locus représentatif.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "Pendant 40 ans, les Israélites erent dans le midbar"
+        }
+      ]
+    },
+    {
+      "providerId": "w7iB2atlRZY",
+      "language": "en",
+      "title": "The Firstborn of Creation • Firstborn Ep. 10",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 51,
+        "chapterStart": 1,
+        "verseStart": 15,
+        "chapterEnd": 1,
+        "verseEnd": 20,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Paul’s firstborn-of-creation poem in Colossians 1 is the stated destination and principal text of the series finale.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "In Colossians Paul calls Jesus … the firstborn over all creation."
+        }
+      ]
+    },
+    {
+      "providerId": "wGwK4VfCGt0",
+      "language": "en",
+      "title": "Simkhat Torah: Celebrating a Year of Reading • Deuteronomy Ep. 12",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "This is a retrospective on a year of Torah reading and the Simkhat Torah practice, not an exposition with one biblical locus.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Reflect on our year-long journey through the Torah."
+        }
+      ]
+    },
+    {
+      "providerId": "WJgt1vRkPbI",
+      "language": "en",
+      "title": "The Books of Solomon",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 20,
+        "chapterStart": 1,
+        "chapterEnd": 31,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "passage",
+          "book": 21,
+          "chapterStart": 1,
+          "chapterEnd": 12,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 22,
+          "chapterStart": 1,
+          "chapterEnd": 8,
+          "placement": "chapter-resources"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The lesson compares Proverbs, Ecclesiastes, and Song of Songs; each book receives the collection as an introduction.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Three books of the Bible: Proverbs, Ecclesiastes, and the Song of Songs."
+        }
+      ]
+    },
+    {
+      "providerId": "WM4gmjMDL4Q",
+      "language": "en",
+      "title": "Stories of Hope and What's Coming in 2026",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Cette actualité institutionnelle rassemble témoignages et annonces pour 2026, sans ancre biblique principale.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "share stories ... and get a sneak peek of what’s coming"
+        }
+      ]
+    },
+    {
+      "providerId": "WmvyrLXoQio",
+      "language": "en",
+      "title": "Avoiding the Book of Leviticus? • We Break It Down For You (Torah Series Ep. 5)",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 3,
+        "chapterStart": 1,
+        "chapterEnd": 27,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode explains the literary structure and message of Leviticus as a whole.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "In Leviticus, God invites Israel to live in close proximity to His holy presence."
+        }
+      ]
+    },
+    {
+      "providerId": "wtuxIzTf9Ns",
+      "language": "en",
+      "title": "What is The Bible Project (2017)",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Cette présentation générale de BibleProject décrit ses formats et sa mission, sans enseigner un passage particulier.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "We make videos and resources that help people see how the Bible is one"
+        }
+      ]
+    },
+    {
+      "providerId": "WwTg5i2kvTs",
+      "language": "fr",
+      "title": "Le livre du Deutéronome",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 1,
+        "chapterEnd": 34,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Il s'agit d'un panorama du Deutéronome comme livre complet.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Le livre du Deutéronome"
+        }
+      ]
+    },
+    {
+      "providerId": "xrzq_X1NNaA",
+      "language": "en",
+      "title": "The Gospel",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 40,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 41,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 42,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 43,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The video explains the Gospel literary genre across four books, not one biblical locus.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "The Gospel"
+        }
+      ]
+    },
+    {
+      "providerId": "xTk9w9J9yKo",
+      "language": "en",
+      "title": "Movements",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "La vidéo présente la notion générale de mouvements littéraires et une fonctionnalité de lecture, sans locus biblique unique.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "introduce you to movements—groups of stories or poems"
+        }
+      ]
+    },
+    {
+      "providerId": "xV4l1gylTlk",
+      "language": "en",
+      "title": "What’s at Stake in God’s Covenant With Israel? • Deuteronomy Ep. 7",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 27,
+        "chapterEnd": 28,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode begins the final Deuteronomy movement by focusing on covenant blessings and curses concentrated in chapters 27–28.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Blessings and curses … in the final movement of Deuteronomy."
+        }
+      ]
+    },
+    {
+      "providerId": "XX-aAg4_U2Q",
+      "language": "en",
+      "title": "Why Jesus Told Parables (and How You Can Understand Them)",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 40,
+        "chapterStart": 13,
+        "chapterEnd": 13,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 18,
+          "chapterEnd": 18,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 20,
+          "chapterEnd": 20,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 21,
+          "chapterEnd": 21,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 22,
+          "chapterEnd": 22,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 40,
+          "chapterStart": 25,
+          "chapterEnd": 25,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 41,
+          "chapterStart": 4,
+          "chapterEnd": 4,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 41,
+          "chapterStart": 12,
+          "chapterEnd": 12,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 8,
+          "chapterEnd": 8,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 10,
+          "chapterEnd": 10,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 12,
+          "chapterEnd": 12,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 13,
+          "chapterEnd": 13,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 14,
+          "chapterEnd": 14,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 15,
+          "chapterEnd": 15,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 16,
+          "chapterEnd": 16,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 18,
+          "chapterEnd": 18,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 19,
+          "chapterEnd": 19,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 20,
+          "chapterEnd": 20,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The video surveys Jesus' parables as a teaching form across the Gospels.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Why Jesus Told Parables"
+        }
+      ]
+    },
+    {
+      "providerId": "Y1miaVsdCvM",
+      "language": "en",
+      "title": "God's Plan to Bless Israel In Spite of Their Failure • Deuteronomy Ep. 8",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 30,
+        "chapterEnd": 30,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Deuteronomy 30 and especially the circumcision-of-heart promise organize the episode’s account of failure and restoration.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "The final movement of Deuteronomy … God turned Israel’s failure into something good."
+        }
+      ]
+    },
+    {
+      "providerId": "YB--nhzQbFs",
+      "language": "en",
+      "title": "Explore the Redemption Theme With Our Artists",
+      "category": "uncategorized",
+      "primaryAnchor": {
+        "kind": "library",
+        "placement": "library"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-rejected",
+      "rationale": "Il s’agit de coulisses artistiques du thème de la rédemption, sans exposition soutenue d’un texte biblique précis.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "behind-the-scenes look at our Redemption theme video"
+        }
+      ]
+    },
+    {
+      "providerId": "YEv5AkBF56c",
+      "language": "fr",
+      "title": "Les livres de Salomon",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 20,
+        "chapterStart": 1,
+        "chapterEnd": 31,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "passage",
+          "book": 21,
+          "chapterStart": 1,
+          "chapterEnd": 12,
+          "placement": "chapter-resources"
+        },
+        {
+          "kind": "passage",
+          "book": 22,
+          "chapterStart": 1,
+          "chapterEnd": 8,
+          "placement": "chapter-resources"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo compare Proverbes, Ecclésiaste et Cantique des Cantiques sans livre principal.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "Trois livres de la Bible sont attribués à Salomon."
+        }
+      ]
+    },
+    {
+      "providerId": "YMTR7M33eIQ",
+      "language": "en",
+      "title": "This Hebrew Word Is Translated as “Sign”",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 4,
+        "verseStart": 1,
+        "chapterEnd": 4,
+        "verseEnd": 9,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "strong",
+          "code": "H0226",
+          "language": "hebrew",
+          "lemma": "אוֹת",
+          "transliteration": "'ot",
+          "placement": "strong-resource"
+        }
+      ],
+      "confidence": "low",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le mot 'ot est illustré dans plusieurs récits; les signes donnés à Moïse en Exode 4 constituent une cible représentative, non exhaustive.",
+      "evidence": [
+        {
+          "source": "description",
+          "timestampSeconds": 0,
+          "excerpt": "Moses’ serpent-staff, representing the divine power he receives"
+        }
+      ]
+    },
+    {
+      "providerId": "YoOgGeDfXDk",
+      "language": "en",
+      "title": "Why  \"Remember\" Means So Much in the Bible",
+      "category": "short",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 2,
+        "chapterStart": 2,
+        "verseStart": 23,
+        "chapterEnd": 2,
+        "verseEnd": 25,
+        "placement": "after-range"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "strong",
+          "code": "H2142",
+          "language": "hebrew",
+          "lemma": "זָכַר",
+          "transliteration": "zakar",
+          "placement": "strong-resource"
+        }
+      ],
+      "confidence": "low",
+      "reviewStatus": "human-accepted",
+      "rationale": "Zakar est illustré dans plusieurs livres; le souvenir agissant de l’alliance en Exode 2 résume le mieux la définition donnée.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "God heard their groaning and God zakar his covenant"
+        }
+      ]
+    },
+    {
+      "providerId": "yqqA8r-tfIA",
+      "language": "fr",
+      "title": "Actes Ch. 1-7",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 1,
+        "chapterEnd": 7,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le titre délimite explicitement la première section des Actes.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Actes Ch. 1-7"
+        }
+      ]
+    },
+    {
+      "providerId": "Yr_TNzpwQVE",
+      "language": "en",
+      "title": "What the Bible Has to Say About Heaven and Earth • Heaven and Earth Ep. 1",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 1,
+        "chapterStart": 1,
+        "chapterEnd": 1,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The Heaven-and-Earth theme begins and is repeatedly framed by the cosmic geography of Genesis 1.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Starting in Genesis 1."
+        }
+      ]
+    },
+    {
+      "providerId": "yXv3k6KtaLc",
+      "language": "en",
+      "title": "Where Is There Idolatry in Modern Culture?",
+      "category": "classroom",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 26,
+        "chapterStart": 8,
+        "chapterEnd": 11,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La session suit la vision du temple et l’idolâtrie dans l’unité littéraire d’Ézéchiel 8–11.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 0,
+          "excerpt": "we're going to overview all of chapters 8 through 11"
+        }
+      ]
+    },
+    {
+      "providerId": "z_GrJddY0so",
+      "language": "en",
+      "title": "God's Response to Human Power Structures • Firstborn Ep. 1",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 5,
+        "chapterStart": 21,
+        "verseStart": 15,
+        "chapterEnd": 21,
+        "verseEnd": 17,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "medium",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode is a broad firstborn-theme introduction; Deuteronomy’s firstborn law is its clearest explicit legal locus.",
+      "evidence": [
+        {
+          "source": "metadata",
+          "excerpt": "Firstborn sons … inherited special privileges and authority simply because of birth order."
+        }
+      ]
+    },
+    {
+      "providerId": "Z8zuhzlVJ8Q",
+      "language": "fr",
+      "title": "Actes Ch. 21-28",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 44,
+        "chapterStart": 21,
+        "chapterEnd": 28,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "La vidéo suit le dernier mouvement du livre des Actes.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "Actes Ch. 21-28"
+        }
+      ]
+    },
+    {
+      "providerId": "zebxH-5o-SQ",
+      "language": "en",
+      "title": "What Happened on Israel's Journey to the Promised Land • Torah Series (Episode 6)",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 4,
+        "chapterStart": 1,
+        "chapterEnd": 36,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "The episode gives the whole literary movement and message of Numbers.",
+      "evidence": [
+        {
+          "source": "description",
+          "excerpt": "In Numbers, Israel leaves Mt. Sinai."
+        }
+      ]
+    },
+    {
+      "providerId": "ZJm1lJw79CE",
+      "language": "en",
+      "title": "Jesus' Method of Interpreting Israel's Laws • Deuteronomy Ep. 6",
+      "category": "podcast",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 40,
+        "chapterStart": 19,
+        "chapterEnd": 19,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Matthew 19 supplies the sustained case study for how Jesus interprets Deuteronomy’s divorce law.",
+      "evidence": [
+        {
+          "source": "transcript",
+          "timestampSeconds": 1554,
+          "excerpt": "Let’s watch Jesus navigate this conversation … in Matthew chapter 19."
+        }
+      ]
+    },
+    {
+      "providerId": "ZPZ2uABVMKA",
+      "language": "en",
+      "title": "New Testament Letters: Literary Context",
+      "category": "how-to-read",
+      "primaryAnchor": {
+        "kind": "book",
+        "book": 45,
+        "placement": "introduction"
+      },
+      "relatedAnchors": [
+        {
+          "kind": "book",
+          "book": 46,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 47,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 48,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 49,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 50,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 51,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 52,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 53,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 54,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 55,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 56,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 57,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 58,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 59,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 60,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 61,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 62,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 63,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 64,
+          "placement": "introduction"
+        },
+        {
+          "kind": "book",
+          "book": 65,
+          "placement": "introduction"
+        },
+        {
+          "kind": "library",
+          "placement": "library"
+        }
+      ],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "It teaches the literary form of New Testament letters generally.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "New Testament Letters: Literary Context"
+        }
+      ]
+    },
+    {
+      "providerId": "ZR6nFRw9JbQ",
+      "language": "fr",
+      "title": "L'Évangile selon Luc Ch. 3-9",
+      "category": "book-collection",
+      "primaryAnchor": {
+        "kind": "passage",
+        "book": 42,
+        "chapterStart": 3,
+        "chapterEnd": 9,
+        "placement": "chapter-resources"
+      },
+      "relatedAnchors": [],
+      "confidence": "high",
+      "reviewStatus": "human-accepted",
+      "rationale": "Le titre et la description délimitent Luc 3–9.",
+      "evidence": [
+        {
+          "source": "title",
+          "excerpt": "L'Évangile selon Luc Ch. 3-9"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "status": "valid",
+  "revision": "sha256:2e27b6f9f44de368037ec61bee8294b2e8aee55a3d359bb5af50e4f9822259fd",
+  "generatedAt": "2026-08-05T06:55:47.222Z",
+  "sourceManifests": [
+    "book-overview-manifest.json",
+    "visual-commentary-manifest.json",
+    "word-study-manifest.json",
+    "theme-manifest.json",
+    "associated-resource-manifest.json"
+  ],
+  "checks": [
+    {
+      "id": "reviewed-works-and-anchors",
+      "status": "passed"
+    },
+    {
+      "id": "languages-fr-en-only",
+      "status": "passed"
+    },
+    {
+      "id": "strict-language-no-fallback",
+      "status": "passed"
+    },
+    {
+      "id": "youtube-editions-unique",
+      "status": "passed"
+    },
+    {
+      "id": "vertical-formats-excluded",
+      "status": "passed"
+    },
+    {
+      "id": "publication-baseline",
+      "status": "passed",
+      "counts": {
+        "works": 284,
+        "editions": 489,
+        "frEditions": 214,
+        "enEditions": 275,
+        "anchors": 517,
+        "indexedChapters": 493,
+        "indexedStrongs": 43,
+        "libraryWorks": 27
+      }
+    },
+    {
+      "id": "artifact-sha256",
+      "status": "passed",
+      "sha256": "d7eff9e230e626eb0f1ab992a563922fee41f823eaadd7cb34586b23606ba104"
+    }
+  ]
+}

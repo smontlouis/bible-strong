@@ -61,6 +61,9 @@ Core user activities:
 | Reading plan | Structured sequence of Bible readings, meditations, media, or teaching slices followed by the user. | `src/features/plans/`, `src/redux/modules/plan.ts` |
 | Plan slice | One reading unit inside a reading plan; it can contain Bible text, meditation text, image, video, or a chapter/verse reference. | `src/features/plans/PlanSliceScreen/` |
 | Plan tab | App tab anchored to one reading plan, with a plan slice optionally opened inside the tab. | `src/features/plans/`, `src/state/tabs.ts` |
+| Passage media work | One language-independent editorial resource concept that can have independently hosted localized editions, such as a BibleProject book overview, passage commentary, theme, or word study. | Passage media catalog |
+| Passage media edition | One language-specific hosted realization of a Passage media work, identified independently from its provider URL or video ID. French and English editions are alternatives selected by application language, never runtime fallbacks for one another. | Passage media catalog |
+| Passage media anchor | A reviewed relationship that makes one Passage media work discoverable from a Bible book, passage, verse range, Strong entry, or related study context, with explicit placement and relevance. | Passage media catalog |
 | Strong | Hebrew/Greek lexical identifiers resolved by the modular core lexicon, with optional LSJ/TIPNR enrichments and version-specific concordance sidecars. Standalone Strong pages are owned by the `/strong` route hierarchy rather than Explore. | `app/strong/`, `src/features/resources/strongLexiconAccess.ts`, `src/helpers/strongLexiconModules.ts`, `src/helpers/strongBibleSidecar.ts` |
 | Strong verse context | Optional Bible passage, selected surface word, and contextual morphology carried when a Strong entry is opened from Bible reading. It is absent when the entry is opened without a source passage and is never inferred from an example verse. | Strong selection and Strong detail surfaces |
 | Biblical entity | Optional real-world referent linked to a Strong entry, categorized as a person, place, group, or another typed entity such as supernatural being, time, musical concept, title, star, or language. | `src/features/resources/strongLexiconAccess.ts`, Strong lexicon entities module |
@@ -93,6 +96,9 @@ Core user activities:
 - A **Plan tab** is anchored to exactly one followed **Reading plan** and may display one active **Plan slice**.
 - Leaving a **Plan slice** inside a **Plan tab** returns to the parent **Reading plan**.
 - Any **Plan slice** can be the active content of a **Plan tab**, regardless of whether it contains Bible text, meditation text, image, video, chapter, or verse content.
+- A **Passage media work** can have multiple localized **Passage media editions** and multiple **Passage media anchors**.
+- A **Passage media anchor** describes where an editorial resource is relevant; the resource category describes what the content is. Book, passage, verse, and Strong are anchor targets rather than media categories.
+- A thematic **Passage media work** has exactly one primary **Passage media anchor** for automatic Bible view placement; its related anchors support discovery without creating additional automatic placements.
 - If the followed **Reading plan** no longer exists, its **Plan tab** has no reading content to recover.
 - A **Tag** groups user study objects by theme or category.
 - A **Relation** connects exactly two **Relation endpoints**.
@@ -132,6 +138,7 @@ Core user activities:
 ## Invariants
 
 - The app is expected to work offline for already downloaded Bible/resource data.
+- Passage media discovery uses the application or route language strictly. A missing French edition is not replaced by an English edition, and a missing English edition is not replaced by a French edition.
 - Resource access modules should preserve the offline behavior of downloaded Bible/resource data while creating seams for future remote adapters.
 - Resource consumers use one query interface regardless of source. Resource access chooses between an installed Offline copy and remote access; the Query cache does not replace either source.
 - Local and remote adapters return the same Resource domain contract; SQLite rows and HTTP payload shapes do not escape their adapters.

@@ -1,0 +1,56 @@
+# ADR-0019: Model passage media as localized works with reviewed anchors
+
+## Status
+
+Accepted
+
+## Context
+
+BibleProject publishes localized French and English videos for many of the same editorial works,
+while YouTube IDs and presentation metadata can change independently. Bible Strong needs durable
+media identities, predictable discovery in the Bible view, and language behavior that never mixes
+resources unexpectedly. A content category such as book overview or word study also does not say
+where that content belongs in Scripture.
+
+## Decision
+
+Model each editorial concept as a provider-independent Passage media work. Model each localized
+realization as a Passage media edition with the durable identity `<work-id>:<language>` and keep its
+provider and provider ID as replaceable hosting details. The initial BibleProject integration
+supports only French and English. Select editions strictly from the application or route language;
+never fall back from French to English or from English to French.
+
+Keep content category separate from Passage media anchors. Anchors target books, passages, verse
+ranges, Strong entries, or related study contexts and declare placement, relevance, review status,
+and provenance. Only reviewed anchors are publishable. For reviewed book overviews, a full-book
+anchor uses `introduction`, the first section of a split book also uses `introduction`, and each later
+section uses `introduction`. Testament-wide overviews remain `library` resources and also expose one
+reviewed `chapter-resources` entry point (Old Testament at Genesis 1, New Testament at Matthew 1), rather than being
+repeated on every book or chapter.
+
+For thematic works, exactly one reviewed primary passage determines automatic `after-range` placement
+in the Bible view. Additional related passages remain discoverability metadata and use a separate
+index; they never multiply automatic “Pour aller plus loin” cards. Nave is not a dependency of
+thematic placement. Provider records that are trailers, promotions, Q+R, studio material,
+derivative clips, superseded uploads, or redundant compilations remain auditable source records but
+are excluded from the publishable manifest.
+
+Treat catalog categories and series as editorial projections, not work identity boundaries. When
+the same localized work appears in different official collections or primary catalog categories,
+retain one durable work ID and reference it from each relevant projection. Do not create duplicate
+works merely to make category-specific manifests self-contained. Strong bindings distinguish a
+direct lexeme, a reviewed family of related forms, and a multi-lexeme composite; a concept overview
+with no single lexical identity must not receive a synthetic Strong.
+
+## Consequences
+
+A provider video can be replaced without changing the identity of the edition or work. French and
+English catalogs can legitimately have different coverage; for example, Philippians remains absent
+in French even though an English edition exists. Viewer queries can use language-specific indexes
+without implementing fallback logic. Adding another language requires an explicit product decision
+and new editions, not an automatic reuse of English. Editorial review is required before inferred
+book, passage, verse, or Strong relationships become runtime anchors. Category reconciliation can
+cross the collector's primary classification without duplicating a work. Lexical discovery can
+safely index exact Strong entries and related families while preserving multi-lexeme concepts such
+as “slow to anger” as composites. The raw provider inventory remains complete even when editorial
+noise is removed from every publishable language index.

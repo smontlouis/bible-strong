@@ -20,6 +20,7 @@ export interface Diff {
 }
 
 export const isFullScreenBibleAtom = atom(false)
+export const isBibleOverlayOpenAtom = atom(false)
 
 export const IAPInitializedAtom = atom(false)
 

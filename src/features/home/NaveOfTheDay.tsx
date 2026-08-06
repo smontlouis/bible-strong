@@ -16,6 +16,7 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { useResourceLanguage } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import ResourceDownloadWidget from './ResourceDownloadWidget'
 
 const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)' }) => {
   const { t } = useTranslation()
@@ -42,7 +43,13 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     (naveQuery.error instanceof ResourceAccessError &&
       naveQuery.error.recoveries.includes('acquire-offline-copy'))
   ) {
-    return null
+    return (
+      <ResourceDownloadWidget
+        identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLanguage }}
+        title={t('Thématique nave requise')}
+        fileSize={7}
+      />
+    )
   }
 
   if (naveQuery.isError || (naveQuery.isSuccess && !naveReference)) {

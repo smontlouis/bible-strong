@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { isFullScreenBibleAtom } from 'src/state/app'
+import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import {
   BibleContextDisplayMode,
@@ -62,6 +62,7 @@ import { useOpenRelationEndpoint } from '~features/studyRelations/useOpenRelatio
 import type { StrongLexiconChapterEntity } from '~features/resources/strongLexiconAccess'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
+import { createStrongIdentity } from '~helpers/strongIdentities'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { useBookAndVersionSelector } from '../BookSelectorSheet/BookSelectorSheetProvider'
 import type { AnnotationType, SelectionRange, WordPosition } from '../hooks/useAnnotationMode'
@@ -80,6 +81,7 @@ import {
   NAVIGATE_TO_BIBLE_NOTE,
   NAVIGATE_TO_BIBLE_VERSE_DETAIL,
   NAVIGATE_TO_BIBLICAL_ENTITY,
+  NAVIGATE_TO_STRONG,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
   NAVIGATE_TO_BIBLE_VIEW,
@@ -99,6 +101,7 @@ import {
   OPEN_DOWNLOADS,
   REMOVE_PARALLEL_VERSION,
   RESET_BIBLE_DATABASE,
+  SET_BIBLE_OVERLAY_OPEN,
   SELECTION_CHANGED,
   SHOW_TOAST,
   SWIPE_DOWN,
@@ -132,6 +135,7 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { resetBiblesDb } from '~helpers/biblesDb'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strongSelection'
+import type { ResolvedPassageMediaChapter } from '../passageMedia'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -217,6 +221,7 @@ export type WebViewProps = {
   settings: RootState['user']['bible']['settings']
   verseToScroll: number | undefined
   pericopeChapter: PericopeChapter
+  passageMedia: ResolvedPassageMediaChapter
   openNote?: (noteId: string, verseIds?: string[]) => void
   openLink?: (linkId: string) => void
   setSelectedCode: (selectedCode: StrongSelection) => void
@@ -338,6 +343,7 @@ export const BibleDOMWrapper = ({
   version,
   interlinearMode,
   pericopeChapter,
+  passageMedia,
   book,
   chapter,
   isSelectionMode,
@@ -393,6 +399,9 @@ export const BibleDOMWrapper = ({
   const openRelationEndpoint = useOpenRelationEndpoint()
   const isContextFocused = contextDisplayMode === 'focused'
   const setIsFullScreenBible = useSetAtom(isFullScreenBibleAtom)
+  const setIsBibleOverlayOpen = useSetAtom(isBibleOverlayOpenAtom)
+  const isBibleOverlayOpenRef = useRef(false)
+  const wasFullScreenBeforeOverlayRef = useRef(false)
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
@@ -416,6 +425,16 @@ export const BibleDOMWrapper = ({
     : undefined
 
   const stableVerses = useStabilizedVerses(verses, isLoading)
+
+  useEffect(
+    () => () => {
+      if (!isBibleOverlayOpenRef.current) return
+      isBibleOverlayOpenRef.current = false
+      setIsBibleOverlayOpen(false)
+      setIsFullScreenBible(wasFullScreenBeforeOverlayRef.current)
+    },
+    [setIsBibleOverlayOpen, setIsFullScreenBible]
+  )
 
   // Gate verses delivery: don't send real data until the DOM component
   // has mounted and its bridge message listener is active. This prevents
@@ -446,6 +465,15 @@ export const BibleDOMWrapper = ({
     resetDatabase: t('bible.error.resetDatabase'),
     openCanonicalBibleNote: t('Afficher la note'),
     pericopeIndex: t('Péricopes'),
+    passageMediaTitle: t('bible.passageMedia.title'),
+    passageMediaClose: t('Fermer'),
+    passageMediaBookName: t(book.Nom),
+    passageMediaChapter: chapter,
+    passageMediaSections: {
+      introduction: t('bible.passageMedia.sections.introduction'),
+      passages: t('bible.passageMedia.sections.passages'),
+      chapterResources: t('bible.passageMedia.sections.chapterResources'),
+    },
   }
   const chapterEntityTranslations = {
     title: t('bible.chapterEntities.title'),
@@ -470,6 +498,23 @@ export const BibleDOMWrapper = ({
     if (!personalBibleDataEnabled && isPersonalBibleDataAction(action.type)) return
 
     switch (action.type) {
+      case SET_BIBLE_OVERLAY_OPEN: {
+        if (
+          typeof action.payload !== 'boolean' ||
+          action.payload === isBibleOverlayOpenRef.current
+        ) {
+          break
+        }
+
+        if (action.payload) {
+          wasFullScreenBeforeOverlayRef.current = getDefaultStore().get(isFullScreenBibleAtom)
+        }
+
+        isBibleOverlayOpenRef.current = action.payload
+        setIsBibleOverlayOpen(action.payload)
+        setIsFullScreenBible(action.payload ? true : wasFullScreenBeforeOverlayRef.current)
+        break
+      }
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
         if (!action.params) break
         const { Livre, Chapitre, Verset } = action.params.verse
@@ -491,6 +536,23 @@ export const BibleDOMWrapper = ({
             },
             { entityKey }
           )
+        )
+        break
+      }
+      case NAVIGATE_TO_STRONG: {
+        const strongCode = getStringPayload(action.payload)
+        if (!strongCode) break
+        const lexicalLanguage = strongCode.trim().toUpperCase().startsWith('G') ? 'greek' : 'hebrew'
+        const identity = createStrongIdentity(strongCode, lexicalLanguage)
+        pushRouteOnce(
+          createStrongDetailRoute('index', {
+            book: lexicalLanguage === 'greek' ? 40 : 1,
+            reference: identity.code,
+            identityKind: identity.kind,
+            identityCode: identity.code,
+            bibleVersion: version,
+            bibleChapter: chapter,
+          })
         )
         break
       }
@@ -880,6 +942,9 @@ export const BibleDOMWrapper = ({
         dom={{
           useExpoDOMWebView: false,
           webviewDebuggingEnabled: __DEV__,
+          allowsInlineMediaPlayback: true,
+          allowsFullscreenVideo: true,
+          mediaPlaybackRequiresUserAction: false,
           style: {
             flex: 1,
             backgroundColor: theme.colors.reverse,
@@ -908,6 +973,7 @@ export const BibleDOMWrapper = ({
         version={version}
         interlinearMode={interlinearMode}
         pericopeChapter={pericopeChapter}
+        passageMedia={passageMedia}
         book={book}
         chapter={chapter}
         isSelectionMode={isSelectionMode}

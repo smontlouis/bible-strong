@@ -1,31 +1,20 @@
 import Feather from '@expo/vector-icons/Feather'
-import type { CSSProperties } from 'react'
+import { LayoutGroup, m, useReducedMotion } from 'motion/react'
+import { useId, useState, type CSSProperties, type ReactNode } from 'react'
 
 import type {
   StrongLexiconChapterEntity,
   StrongLexiconEntityCategory,
 } from '~features/resources/strongLexiconAccess'
-import {
-  getStrongEntityAvatarKey,
-  type StrongEntityPresentationKind,
-} from '~features/lexique/strongEntityPresentation'
-import { ENTITY_AVATAR_IMAGES } from '~features/lexique/strongEntityAvatars'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import type { BibleDOMDownloadState, RootStyles } from './BibleDOMWrapper'
+import ChapterEntitiesOverlay from './ChapterEntitiesOverlay'
+import { getChapterEntityAvatarUri } from './chapterEntityAvatar'
 import { getChapterEntitiesViewMode } from './chapterEntitiesPresentation'
+import { useBibleOverlayOpen } from './overlayLifecycle'
+import { getOverlayLayoutTransition } from './overlayStagger'
 
-type RasterAsset = string | { uri?: string; default?: string }
-
-const resolveRasterAssetUri = (source: RasterAsset): string =>
-  typeof source === 'string' ? source : source.uri || source.default || ''
-
-const GROUP_ORDER: StrongLexiconEntityCategory[] = [
-  'supernatural',
-  'person',
-  'place',
-  'group',
-  'other',
-]
+const MAX_STACKED_ENTITIES = 3
 
 type ChapterEntityTranslations = {
   title: string
@@ -45,6 +34,7 @@ type Props = RootStyles & {
   availabilityStatus: StrongLexiconModuleAvailability['status'] | null
   downloadState: BibleDOMDownloadState
   translations: ChapterEntityTranslations
+  chapterResources?: ReactNode
   onOpenEntity: (uniqueName: string) => void
   onDownload: () => void
   onDismiss: () => void
@@ -57,237 +47,269 @@ const ChapterEntities = ({
   downloadState,
   settings,
   translations,
+  chapterResources,
   onOpenEntity,
   onDownload,
   onDismiss,
 }: Props) => {
+  const layoutGroupId = useId()
+  const shouldReduceMotion = useReducedMotion()
+  const [isOverlayOpen, setIsOverlayOpen] = useState(false)
+
+  useBibleOverlayOpen(isOverlayOpen)
   const viewMode = getChapterEntitiesViewMode(availabilityStatus, loaded, entities.length)
-  if (viewMode === 'hidden') return null
+  if (viewMode === 'hidden' && !chapterResources) return null
 
   const colors = settings.colors[settings.theme]
   const isDownloading = ['queued', 'downloading', 'inserting'].includes(downloadState.status ?? '')
   const progress = Math.max(0, Math.min(1, downloadState.progress))
+  const stackedEntities = entities.slice(0, MAX_STACKED_ENTITIES)
+  const layoutTransition = getOverlayLayoutTransition(shouldReduceMotion)
   const sectionStyle: CSSProperties = {
     direction: 'ltr',
-    marginTop: 44,
-    paddingTop: 28,
-    borderTop: `1px solid ${colors.border}`,
+    marginTop: 64,
     fontFamily: settings.fontFamily,
-    textAlign: 'left',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
   }
   const titleStyle: CSSProperties = {
     margin: 0,
-    color: colors.default,
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    color: colors.tertiary,
     fontFamily: settings.fontFamily,
-    fontSize: 22,
-    lineHeight: 1.25,
-    fontWeight: 700,
+    fontSize: 12,
+    lineHeight: 1.2,
+    fontWeight: 600,
+    letterSpacing: '0.08em',
+    textAlign: 'center',
+    textTransform: 'uppercase',
+    opacity: 0.62,
+  }
+  const dividerStyle: CSSProperties = {
+    flex: 1,
+    height: 1,
+    background: `linear-gradient(to right, transparent, ${colors.border})`,
   }
 
   return (
     <section style={sectionStyle} aria-label={translations.title}>
-      <h2 style={titleStyle}>{translations.title}</h2>
-      {viewMode === 'download' && (
-        <div
+      <h2 style={titleStyle}>
+        <span aria-hidden style={dividerStyle} />
+        <span>{translations.title}</span>
+        <span
+          aria-hidden
           style={{
-            position: 'relative',
-            marginTop: 20,
-            padding: 14,
-            border: `1px dashed ${colors.border}`,
-            borderRadius: 14,
-            background: colors.reverse,
-            opacity: 0.5,
+            ...dividerStyle,
+            background: `linear-gradient(to left, transparent, ${colors.border})`,
           }}
-        >
-          <button
-            type="button"
-            className="chapter-entity-button"
-            disabled={isDownloading}
-            onClick={onDownload}
-            style={{
-              display: 'flex',
-              width: '100%',
-              alignItems: 'center',
-              gap: 12,
-              margin: 0,
-              padding: 0,
-              border: 0,
-              background: 'transparent',
-              color: colors.default,
-              textAlign: 'left',
-              cursor: isDownloading ? 'default' : 'pointer',
-            }}
-          >
-            <span className={isDownloading ? 'chapter-entity-loader' : undefined}>
-              <Feather name={isDownloading ? 'loader' : 'download-cloud'} size={25} />
-            </span>
-            <span style={{ flex: 1, minWidth: 0 }}>
-              <strong
-                style={{
-                  display: 'block',
-                  fontFamily: settings.fontFamily,
-                  fontSize: 14,
-                  lineHeight: 1.25,
-                }}
-              >
-                {translations.downloadTitle}
-              </strong>
-              <span
-                style={{
-                  display: 'block',
-                  marginTop: 3,
-                  color: colors.tertiary,
-                  fontFamily: settings.fontFamily,
-                  fontSize: 12,
-                  lineHeight: 1.35,
-                }}
-              >
-                {isDownloading
-                  ? `${translations.downloading} ${Math.round(progress * 100)}%`
-                  : downloadState.status === 'failed'
-                    ? translations.downloadFailed
-                    : translations.downloadDescription}
-              </span>
-            </span>
-          </button>
-          {!isDownloading && (
-            <button
-              type="button"
-              className="chapter-entity-button"
-              onClick={onDismiss}
-              aria-label={translations.dismiss}
-              style={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                display: 'grid',
-                width: 30,
-                height: 30,
-                placeItems: 'center',
-                margin: 0,
-                padding: 0,
-                border: 0,
-                borderRadius: 15,
-                background: colors.reverse,
-                color: colors.default,
-                cursor: 'pointer',
-              }}
-            >
-              <Feather name="x" size={18} />
-            </button>
-          )}
-          {isDownloading && (
-            <div
-              style={{
-                height: 4,
-                marginTop: 12,
-                overflow: 'hidden',
-                borderRadius: 2,
-                background: colors.border,
-              }}
-            >
-              <div
-                style={{
-                  width: `${progress * 100}%`,
-                  height: '100%',
-                  borderRadius: 2,
-                  background: colors.primary,
-                  transition: 'width 180ms ease-out',
-                }}
-              />
-            </div>
-          )}
-        </div>
-      )}
+        />
+      </h2>
       {viewMode === 'empty' && (
         <p style={{ margin: '16px 0 0', color: colors.tertiary, fontSize: 14 }}>
           {translations.empty}
         </p>
       )}
-      {viewMode === 'entities' &&
-        GROUP_ORDER.map(group => {
-          const groupEntities = entities.filter(entity => entity.category === group)
-          if (!groupEntities.length) return null
-
-          return (
-            <div key={group} style={{ marginTop: 24 }}>
-              <h3
+      {(viewMode === 'download' || viewMode === 'entities' || chapterResources) && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 38,
+            marginTop: 20,
+          }}
+        >
+          {viewMode === 'download' && (
+            <div
+              style={{
+                position: 'relative',
+                display: 'flex',
+                width: 82,
+                flexDirection: 'column',
+                alignItems: 'center',
+                alignSelf: 'flex-start',
+              }}
+            >
+              <button
+                type="button"
+                className="chapter-entity-button"
+                disabled={isDownloading}
+                onClick={onDownload}
+                aria-label={
+                  isDownloading
+                    ? `${translations.downloading} ${Math.round(progress * 100)}%`
+                    : translations.downloadTitle
+                }
                 style={{
-                  margin: '0 0 14px',
-                  color: colors.primary,
-                  fontFamily: settings.fontFamily,
-                  fontSize: 12,
-                  lineHeight: 1.2,
-                  fontWeight: 700,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
+                  display: 'flex',
+                  width: 82,
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  margin: 0,
+                  padding: 0,
+                  border: 0,
+                  background: 'transparent',
+                  color: colors.default,
+                  cursor: isDownloading ? 'default' : 'pointer',
                 }}
               >
-                {translations.groups[group]}
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px 12px' }}>
-                {groupEntities.map(entity => {
-                  const presentationKind: StrongEntityPresentationKind =
-                    entity.category === 'supernatural' ? 'other' : entity.category
-                  const avatar = getStrongEntityAvatarKey(presentationKind, entity.type)
-                  const accessibilityLabel = translations.openEntity.replace(
-                    '{{name}}',
-                    entity.name
-                  )
+                <span
+                  style={{
+                    display: 'grid',
+                    width: 62,
+                    height: 62,
+                    placeItems: 'center',
+                    border: `2px dashed ${colors.border}`,
+                    borderRadius: 33,
+                    background: colors.reverse,
+                    color: colors.tertiary,
+                  }}
+                >
+                  <span className={isDownloading ? 'chapter-entity-loader' : undefined}>
+                    <Feather
+                      name={isDownloading ? 'loader' : 'download-cloud'}
+                      size={25}
+                      color={colors.tertiary}
+                    />
+                  </span>
+                </span>
+                <strong
+                  style={{
+                    display: '-webkit-box',
+                    width: '100%',
+                    marginTop: 7,
+                    overflow: 'hidden',
+                    color: colors.tertiary,
+                    fontFamily: settings.fontFamily,
+                    fontSize: 11,
+                    lineHeight: 1.2,
+                    fontWeight: 600,
+                    textAlign: 'center',
+                    WebkitBoxOrient: 'vertical',
+                    WebkitLineClamp: 2,
+                  }}
+                >
+                  {translations.downloadTitle}
+                </strong>
+                {(isDownloading || downloadState.status === 'failed') && (
+                  <span
+                    style={{
+                      marginTop: 3,
+                      color: colors.tertiary,
+                      fontFamily: settings.fontFamily,
+                      fontSize: 9,
+                      lineHeight: 1.15,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {isDownloading ? `${Math.round(progress * 100)}%` : translations.downloadFailed}
+                  </span>
+                )}
+              </button>
+              {!isDownloading && (
+                <button
+                  type="button"
+                  className="chapter-entity-button"
+                  onClick={onDismiss}
+                  aria-label={translations.dismiss}
+                  style={{
+                    position: 'absolute',
+                    top: -6,
+                    right: 0,
+                    display: 'grid',
+                    width: 24,
+                    height: 24,
+                    placeItems: 'center',
+                    margin: 0,
+                    padding: 0,
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: 12,
+                    background: colors.reverse,
+                    color: colors.tertiary,
+                    boxShadow: '0 1px 4px rgba(0, 0, 0, 0.14)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Feather name="x" size={14} />
+                </button>
+              )}
+            </div>
+          )}
+          {viewMode === 'entities' && (
+            <LayoutGroup id={layoutGroupId}>
+              <m.button
+                layoutDependency={isOverlayOpen}
+                type="button"
+                className="chapter-entity-button"
+                data-ignore-verse-touch
+                aria-label={entities.map(entity => entity.name).join(', ')}
+                whileTap={{ opacity: 0.55 }}
+                onClick={() => setIsOverlayOpen(true)}
+                style={{
+                  position: 'relative',
+                  display: 'grid',
+                  width: 78,
+                  height: 70,
+                  margin: 0,
+                  padding: 0,
+                  border: 0,
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  isolation: 'isolate',
+                }}
+              >
+                {stackedEntities.map((entity, index) => {
+                  const position =
+                    stackedEntities.length <= 1 ? 0 : (index / (stackedEntities.length - 1)) * 2 - 1
 
                   return (
-                    <button
+                    <m.img
                       key={entity.uniqueName}
-                      className="chapter-entity-button"
-                      type="button"
-                      onClick={() => onOpenEntity(entity.uniqueName)}
-                      aria-label={accessibilityLabel}
+                      layoutId={`chapter-entity-${entity.uniqueName}`}
+                      layoutDependency={isOverlayOpen}
+                      src={getChapterEntityAvatarUri(entity)}
+                      alt=""
+                      transition={{ layout: layoutTransition }}
                       style={{
-                        width: 78,
-                        margin: 0,
-                        padding: 0,
-                        border: 0,
-                        background: 'transparent',
-                        color: colors.default,
-                        fontFamily: settings.fontFamily,
-                        cursor: 'pointer',
+                        gridArea: '1 / 1',
+                        display: 'block',
+                        width: 62,
+                        height: 62,
+                        placeSelf: 'center',
+                        border: `2px solid ${colors.reverse}`,
+                        borderRadius: 33,
+                        boxShadow: '0 2px 7px rgba(0, 0, 0, 0.22)',
+                        objectFit: 'contain',
+                        x: position * 6,
+                        y: Math.abs(position) * 2,
+                        rotate: position * 5,
+                        transformOrigin: 'center',
+                        zIndex: index + 1,
                       }}
-                    >
-                      <img
-                        src={resolveRasterAssetUri(ENTITY_AVATAR_IMAGES[avatar])}
-                        alt=""
-                        style={{
-                          display: 'block',
-                          width: 62,
-                          height: 62,
-                          margin: '0 auto 7px',
-                          borderRadius: 31,
-                          objectFit: 'contain',
-                        }}
-                      />
-                      <span
-                        style={{
-                          display: 'block',
-                          overflow: 'hidden',
-                          color: colors.default,
-                          fontFamily: settings.fontFamily,
-                          fontSize: 13,
-                          lineHeight: 1.25,
-                          fontWeight: 600,
-                          textAlign: 'center',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {entity.name}
-                      </span>
-                    </button>
+                    />
                   )
                 })}
-              </div>
-            </div>
-          )
-        })}
+              </m.button>
+              <ChapterEntitiesOverlay
+                entities={entities}
+                groupLabels={translations.groups}
+                openEntityLabel={translations.openEntity}
+                colors={colors}
+                fontFamily={settings.fontFamily}
+                visibleStackItemCount={stackedEntities.length}
+                isOpen={isOverlayOpen}
+                onClose={() => setIsOverlayOpen(false)}
+                onSelect={uniqueName => {
+                  onOpenEntity(uniqueName)
+                }}
+              />
+            </LayoutGroup>
+          )}
+          {chapterResources}
+        </div>
+      )}
     </section>
   )
 }

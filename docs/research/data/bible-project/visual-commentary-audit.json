@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-05T06:55:47.222Z",
+  "totals": {
+    "works": 24,
+    "editions": 43,
+    "englishEditions": 19,
+    "frenchEditions": 24,
+    "bilingualWorks": 19,
+    "englishOnlyWorks": 0,
+    "frenchOnlyWorks": 5,
+    "reviewedAnchors": 25,
+    "excludedSourceRecords": 3,
+    "crossCategoryEditions": 2
+  },
+  "canonicalBookCoverage": {
+    "fr": [
+      1,
+      2,
+      19,
+      20,
+      23,
+      40,
+      43
+    ],
+    "en": [
+      1,
+      2,
+      19,
+      20,
+      40,
+      43
+    ]
+  },
+  "missingEditions": {
+    "fr": [],
+    "en": [
+      "sermon-on-mount-visual-generosity",
+      "sermon-on-mount-visual-lords-prayer",
+      "sermon-on-mount-visual-wealth",
+      "psalm-1-visual-commentary",
+      "isaiah-61-visual-commentary"
+    ]
+  },
+  "exclusions": [
+    {
+      "providerId": "yIVUi1xSaMw",
+      "language": "fr",
+      "reason": "trailer-not-editorial-commentary",
+      "evidenceUrl": "https://www.youtube.com/watch?v=yIVUi1xSaMw"
+    },
+    {
+      "providerId": "E7k01kfBx6Y",
+      "language": "en",
+      "reason": "vertical-9-16-format",
+      "evidenceUrl": "https://www.youtube.com/watch?v=E7k01kfBx6Y"
+    },
+    {
+      "providerId": "d_Q6WkD_Pas",
+      "language": "en",
+      "reason": "vertical-9-16-format",
+      "evidenceUrl": "https://www.youtube.com/watch?v=d_Q6WkD_Pas"
+    }
+  ],
+  "sourceCoverage": {
+    "expectedCategoryRecords": 44,
+    "assignedCategoryRecords": 41,
+    "excludedCategoryRecords": 3,
+    "crossCategoryEditionProviderIds": [
+      "r4A91QVsUlI",
+      "V8-yWbv7fZY"
+    ],
+    "unassignedProviderIds": []
+  }
+}

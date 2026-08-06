@@ -88,6 +88,7 @@ export const useVerseOfTheDay = (addDay: number) => {
     (state: RootState) => state.user.notifications.verseOfTheDay
   )
   const displayName = user?.displayName
+  const firstName = extractFirstName(displayName ?? '')
   const verseOfTheDay = useGetVerseOfTheDay(version, addDay)
   const verseOfTheDayPlus1 = useGetVerseOfTheDay(version, 1 + addDay)
 
@@ -147,7 +148,7 @@ export const useVerseOfTheDay = (addDay: number) => {
 
         await notifee.createTriggerNotification(
           {
-            title: `${t('Bonjour')} ${extractFirstName(displayName)}`,
+            title: firstName ? `${t('Bonjour')} ${firstName}` : t('Bonjour'),
             body: !addDay
               ? `${removeBreakLines(verseOfTheDayContent)}\n${verseOfTheDayReference}`
               : `${removeBreakLines(verseOfTheDayPlus1Content)}\n${verseOfTheDayPlus1Reference}`,
@@ -202,7 +203,7 @@ export const useVerseOfTheDay = (addDay: number) => {
     verseOfTheDayReference,
     verseOfTheDayPlus1Content,
     verseOfTheDayPlus1Reference,
-    displayName,
+    firstName,
     addDay,
     dispatch,
     t,

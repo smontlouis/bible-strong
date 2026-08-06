@@ -1,0 +1,2073 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-05T06:55:47.222Z",
+  "refreshDueAt": "2026-09-04T06:55:47.222Z",
+  "languagePolicy": {
+    "selection": "strict-route-language",
+    "fallbackAcrossLanguages": false
+  },
+  "lexiconReview": {
+    "resource": "strong-lexicon-core",
+    "schemaVersion": 2,
+    "reviewStatus": "reviewed",
+    "verifiedFields": [
+      "code",
+      "language",
+      "lemma"
+    ]
+  },
+  "attribution": {
+    "owner": "BibleProject",
+    "url": "https://bibleproject.com/",
+    "termsUrl": "https://bibleproject.com/terms/"
+  },
+  "works": [
+    {
+      "id": "bp-word-shema-listen",
+      "category": "word-study",
+      "series": "shema",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/shema-listen/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-shema-listen:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "1g4u57TSY0g",
+          "sourceUrl": "https://www.youtube.com/watch?v=1g4u57TSY0g",
+          "title": "Shema / Écouter",
+          "description": "Le premier volet de notre série en six épisodes intitulée Étude de Mots, est une analyse de la très ancienne prière biblique appelée \"Le Shema\" (voir Deutéronome 6:4-6). Depuis des milliers d'années, le peuple juif récite chaque jour cette courte prière qui résume l'expression de sa fidélité et de sa dévotion à Dieu. Nous étudierons tous les mots-clés de cette prière ainsi que leurs sens originels en hébreu, en tenant compte de leur contexte historique.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/1g4u57TSY0g/maxresdefault.jpg",
+          "durationSeconds": 205,
+          "publishedAt": "2020-01-04T09:00:00Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-shema-listen:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "6KQLOuIKaRA",
+          "sourceUrl": "https://www.youtube.com/watch?v=6KQLOuIKaRA",
+          "title": "Shema - Listen",
+          "description": "Is hearing and listening the same thing? In this video, discover how sound entering your ear-drums isn't synonymous with \"listening\", at least from a biblical perspective. This video is the first installment of our Word Studies series, a six-part exploration of the ancient biblical prayer called “The Shema.”\n\n#Shema #BibleProject #BibleVideo",
+          "thumbnailUrl": "https://i.ytimg.com/vi/6KQLOuIKaRA/maxresdefault.jpg",
+          "durationSeconds": 206,
+          "publishedAt": "2017-03-24T21:52:43Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H8085",
+          "language": "hebrew",
+          "lemma": "שָׁמַע",
+          "transliteration": "shema",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/word_studies/Shema-Listen_script-references_UPDATED.pdf"
+        },
+        {
+          "kind": "passage",
+          "book": 5,
+          "chapterStart": 6,
+          "verseStart": 4,
+          "chapterEnd": 6,
+          "verseEnd": 4,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/word_studies/Shema-Listen_script-references_UPDATED.pdf"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-shema-yhwh",
+      "category": "word-study",
+      "series": "shema",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/yhwh-lord/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-shema-yhwh:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "vxPgZ_-tzLU",
+          "sourceUrl": "https://www.youtube.com/watch?v=vxPgZ_-tzLU",
+          "title": "YHWH / L'Éternel",
+          "description": "Le second volet de notre série en six épisodes intitulée Étude de Mots, notre analyse de la très ancienne prière biblique appelée \"Le Shema\" (voir Deutéronome 6:4-6). Depuis des milliers d'années, le peuple juif récite chaque jour cette courte prière qui résume l'expression de sa fidélité et de sa dévotion à Dieu. Nous étudierons tous les mots-clés de cette prière ainsi que leurs sens originels en hébreu, en tenant compte de leur contexte historique.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/vxPgZ_-tzLU/maxresdefault.jpg",
+          "durationSeconds": 238,
+          "publishedAt": "2020-01-11T09:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-shema-yhwh:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "eLrGM26pmM0",
+          "sourceUrl": "https://www.youtube.com/watch?v=eLrGM26pmM0",
+          "title": "God's Name Has Changed?! (Learn Its Interesting Biblical History)",
+          "description": "Yahweh, Adonai, LORD, Jehovah... God seems to have a lot of names, what exactly am I supposed to call Him? We invite you into the fascinating journey behind all the different names Jews and Christians have referred to their creator throughout the centuries, and more importantly, why! Check out our second installment in a six-part exploration of the ancient biblical prayer called “The Shema.”\n\n#Yahweh #BibleProject #Lord",
+          "thumbnailUrl": "https://i.ytimg.com/vi/eLrGM26pmM0/maxresdefault.jpg",
+          "durationSeconds": 240,
+          "publishedAt": "2017-06-01T21:30:01Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H3068",
+          "language": "hebrew",
+          "lemma": "יְהֹוָה",
+          "transliteration": "YHWH",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/yhwh-lord/"
+        },
+        {
+          "kind": "passage",
+          "book": 5,
+          "chapterStart": 6,
+          "verseStart": 4,
+          "chapterEnd": 6,
+          "verseEnd": 4,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/yhwh-lord/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-shema-love-ahavah",
+      "category": "word-study",
+      "series": "shema",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/ahavah-love/",
+      "strongBinding": "family",
+      "editions": [
+        {
+          "id": "bp-word-shema-love-ahavah:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "nJ-9YpX7IRs",
+          "sourceUrl": "https://www.youtube.com/watch?v=nJ-9YpX7IRs",
+          "title": "Ahavah / Aimer",
+          "description": "Et si on parlait d'amour, en mode Ancien Testament ! Dans cette vidéo, nous verrons les différentes manières dont les auteurs hébreux traduisaient l'amour, et comment ils dépeignaient Dieu comme étant à la fois, la source et le but suprêmes de toute forme d'amour humain. Cette vidéo est le troisième volet de notre série en six épisodes intitulée Étude de Mots, notre analyse de la très ancienne prière biblique appelée \"Le Shema\". Nous étudierons tous les mots-clés de cette prière ainsi que leurs sens originels en hébreu, en tenant compte de leur contexte historique.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/nJ-9YpX7IRs/maxresdefault.jpg",
+          "durationSeconds": 249,
+          "publishedAt": "2020-01-18T09:00:13Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-shema-love-ahavah:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "HV_LUs2lnIQ",
+          "sourceUrl": "https://www.youtube.com/watch?v=HV_LUs2lnIQ",
+          "title": "What It Means to \"Love\" God (With All Your Heart, Soul and Strength)",
+          "description": "Let's talk about love, Old Testament style! In this video, we'll explore the various ways the Hebrew authors used the word \"love,\" and how they depicted God as the ultimate source and goal of all human love.\n\n#Shema #BibleProject #Love",
+          "thumbnailUrl": "https://i.ytimg.com/vi/HV_LUs2lnIQ/maxresdefault.jpg",
+          "durationSeconds": 247,
+          "publishedAt": "2017-07-20T23:03:00Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H0157",
+          "language": "hebrew",
+          "lemma": "אָהֵב",
+          "transliteration": "ahav",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Shema_Love_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "H0160",
+          "language": "hebrew",
+          "lemma": "אַהֲבָה",
+          "transliteration": "ahavah",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Shema_Love_Script-References.pdf"
+        },
+        {
+          "kind": "passage",
+          "book": 5,
+          "chapterStart": 6,
+          "verseStart": 5,
+          "chapterEnd": 6,
+          "verseEnd": 5,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Shema_Love_Script-References.pdf"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-shema-heart-lev",
+      "category": "word-study",
+      "series": "shema",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/lev-heart/",
+      "strongBinding": "family",
+      "editions": [
+        {
+          "id": "bp-word-shema-heart-lev:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "FuQp4baBpPU",
+          "sourceUrl": "https://www.youtube.com/watch?v=FuQp4baBpPU",
+          "title": "Lev / Cœur",
+          "description": "Les conceptions liées à la nature et au fonctionnement du cœur humain varient selon les cultures, et les auteurs bibliques n'échappent pas à la règle. Étudions les mots utilisés dans l'hébreu ancien pour désigner le \"cœur\" avec tout ce qu'il représente, et découvrons ensemble combien ce riche terme biblique est le seul à traduire aussi bien l'essence de la pensée, des émotions et de la volonté humaines. Cette vidéo est le quatrième volet de notre série en six épisodes intitulée Étude de Mots, notre analyse de la très ancienne prière biblique appelée \"Le Shema\". Nous étudierons tous les mots-clés de cette prière ainsi que leurs sens originels en hébreu, en tenant compte de leur contexte historique.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/FuQp4baBpPU/maxresdefault.jpg",
+          "durationSeconds": 240,
+          "publishedAt": "2020-01-25T09:00:02Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-shema-heart-lev:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "aS4iM6KpPYo",
+          "sourceUrl": "https://www.youtube.com/watch?v=aS4iM6KpPYo",
+          "title": "What It Means to Love God With \"All Your Heart\"",
+          "description": "Different cultures have different conceptions of the human heart, what it is and what it does, and the biblical authors are no exception. In this video, we'll explore the ancient Hebrew words for \"heart\" as well as the different ideas of what our hearts represent. There is no biblical word that captures better the essence of human thought, feeling, and desire than this rich and wonderful word.\n\n#Shema #BibleProject #Heart",
+          "thumbnailUrl": "https://i.ytimg.com/vi/aS4iM6KpPYo/maxresdefault.jpg",
+          "durationSeconds": 230,
+          "publishedAt": "2017-09-01T00:12:47Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H3824",
+          "language": "hebrew",
+          "lemma": "לֵבָב",
+          "transliteration": "levav",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/lev-heart/"
+        },
+        {
+          "kind": "strong",
+          "code": "H3820",
+          "language": "hebrew",
+          "lemma": "לֵב",
+          "transliteration": "lev",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/lev-heart/"
+        },
+        {
+          "kind": "passage",
+          "book": 5,
+          "chapterStart": 6,
+          "verseStart": 5,
+          "chapterEnd": 6,
+          "verseEnd": 5,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/lev-heart/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-shema-soul-nephesh",
+      "category": "word-study",
+      "series": "shema",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/nephesh-soul/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-shema-soul-nephesh:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "FLrm_KlwLv8",
+          "sourceUrl": "https://www.youtube.com/watch?v=FLrm_KlwLv8",
+          "title": "Nephesh / Âme",
+          "description": "Dans cet avant-dernier volet de notre série Étude de Mots sur le Shema, on en arrive au mot \"nephesh\" qui se traduit souvent par \"âme\". Même si son équivalent français définit la plupart du temps, l'essence humaine immatérielle qui demeure après la mort, le terme nephesh traduit quelque chose de différent. Il définit les humains en tant qu'êtres physiques, vivants et qui respirent ou alors, il peut désigner la vie elle-même. Préparez-vous à être surpris par le sens de ce fascinant terme biblique !\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/FLrm_KlwLv8/maxresdefault.jpg",
+          "durationSeconds": 257,
+          "publishedAt": "2020-02-01T09:00:02Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-shema-soul-nephesh:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "g_igCcWAMAM",
+          "sourceUrl": "https://www.youtube.com/watch?v=g_igCcWAMAM",
+          "title": "What It Means to Love God With \"All Your Soul\"",
+          "description": "We explore the Hebrew word \"nephesh\" that often gets translated as \"soul.\" The English word usually refers to a non-material essence of a human that survives after death, but nephesh means something different. It is referring to humans as living, breathing, physical beings, or just to life itself. Prepare to be surprised at the biblical meaning of this fascinating word.\n\n#Soul #BibleProject #Shema",
+          "thumbnailUrl": "https://i.ytimg.com/vi/g_igCcWAMAM/maxresdefault.jpg",
+          "durationSeconds": 263,
+          "publishedAt": "2017-11-09T21:57:36Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H5315",
+          "language": "hebrew",
+          "lemma": "נֶפֶשׁ",
+          "transliteration": "nephesh",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/nephesh-soul/"
+        },
+        {
+          "kind": "passage",
+          "book": 5,
+          "chapterStart": 6,
+          "verseStart": 5,
+          "chapterEnd": 6,
+          "verseEnd": 5,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/nephesh-soul/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-shema-strength-meod",
+      "category": "word-study",
+      "series": "shema",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/meod-strength/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-shema-strength-meod:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "cXwM1xW8LEI",
+          "sourceUrl": "https://www.youtube.com/watch?v=cXwM1xW8LEI",
+          "title": "Me'od / Force",
+          "description": "Que veut dire le fait d'aimer Dieu \"de toute sa force\" ? Dans ce dernier volet de nos vidéos sur le Shema, nous analysons le mot clé hébreu de cette expression. Et on vous prévient: \"force\" n'est qu'un mot parmi toutes les traductions possibles qu'offre ce très riche terme !\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/cXwM1xW8LEI/maxresdefault.jpg",
+          "durationSeconds": 281,
+          "publishedAt": "2020-02-08T09:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-shema-strength-meod:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "9aaVy1AmFX4",
+          "sourceUrl": "https://www.youtube.com/watch?v=9aaVy1AmFX4",
+          "title": "What It Means to Love God With \"All Your Strength\"",
+          "description": "What does it mean to love God \"with all of your strength\"? In this final installment of our videos on the Shema, we explore the Hebrew word underneath this phrase. And spoiler alert: \"strength\" is only one of many ways this rich word could be translated.\n\n#Strength #BibleProject #Shema",
+          "thumbnailUrl": "https://i.ytimg.com/vi/9aaVy1AmFX4/maxresdefault.jpg",
+          "durationSeconds": 283,
+          "publishedAt": "2018-02-15T22:05:03Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H3966",
+          "language": "hebrew",
+          "lemma": "מְאֹד",
+          "transliteration": "meod",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/meod-strength/"
+        },
+        {
+          "kind": "passage",
+          "book": 5,
+          "chapterStart": 6,
+          "verseStart": 5,
+          "chapterEnd": 6,
+          "verseEnd": 5,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/meod-strength/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-advent-hope-yakhal",
+      "category": "word-study",
+      "series": "advent",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/yakhal-hope/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-advent-hope-yakhal:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "ILFWnQ3izNw",
+          "sourceUrl": "https://www.youtube.com/watch?v=ILFWnQ3izNw",
+          "title": "Yakhal / Espérance",
+          "description": "La définition biblique de l'espérance est totalement différente de l'optimisme. Nous apprendrons comment l'espérance biblique s'appuie uniquement sur la nature de Dieu qui est le fondement de la foi dans le fait que l'avenir sera préférable au présent.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/ILFWnQ3izNw/maxresdefault.jpg",
+          "durationSeconds": 282,
+          "publishedAt": "2020-02-29T09:00:04Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-advent-hope-yakhal:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "4WYNBjJSYvE",
+          "sourceUrl": "https://www.youtube.com/watch?v=4WYNBjJSYvE",
+          "title": "Hope",
+          "description": "In the Bible people who have hope are very different from optimists! In this video, we’ll explore how biblical hope looks to God’s character alone as a basis for trusting that the future will be better than the present.\n\n#Advent #Hope #BibleProject",
+          "thumbnailUrl": "https://i.ytimg.com/vi/4WYNBjJSYvE/maxresdefault.jpg",
+          "durationSeconds": 274,
+          "publishedAt": "2017-12-07T20:39:22Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H3176",
+          "language": "hebrew",
+          "lemma": "יָחַל",
+          "transliteration": "yakhal",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/yakhal-hope/"
+        },
+        {
+          "kind": "passage",
+          "book": 19,
+          "chapterStart": 130,
+          "verseStart": 5,
+          "chapterEnd": 130,
+          "verseEnd": 5,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/yakhal-hope/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-advent-peace-shalom",
+      "category": "word-study",
+      "series": "advent",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/shalom-peace/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-advent-peace-shalom:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "66mFOG3ukGY",
+          "sourceUrl": "https://www.youtube.com/watch?v=66mFOG3ukGY",
+          "title": "Shalom / Paix",
+          "description": "La \"Paix\" est un mot assez courant dans la langue française qui peut revêtir différents sens pour différentes personnes. C'est aussi un terme très important dans la Bible qui ne se limite pas à l'absence de conflit, car il implique aussi la présence d'autre chose. Dans cette vidéo, nous analysons en profondeur le sens biblique de la paix et découvrons comment le tout mène à Jésus.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/66mFOG3ukGY/maxresdefault.jpg",
+          "durationSeconds": 234,
+          "publishedAt": "2020-02-15T09:00:02Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-advent-peace-shalom:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "oLYORLZOaZE",
+          "sourceUrl": "https://www.youtube.com/watch?v=oLYORLZOaZE",
+          "title": "Shalom - Peace",
+          "description": "\"Peace\" is a very common word in English, that means different things to different people. It's also a very important word in the Bible that refers not only to the absence of conflict but also to the presence of something else. In this video, we'll explore the core meaning of biblical peace, or Shalom, and how it all leads to Jesus.\n\n#Shalom #Peace #BibleProject",
+          "thumbnailUrl": "https://i.ytimg.com/vi/oLYORLZOaZE/maxresdefault.jpg",
+          "durationSeconds": 229,
+          "publishedAt": "2017-11-30T19:48:37Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H7965",
+          "language": "hebrew",
+          "lemma": "שָׁלוֹם",
+          "transliteration": "shalom",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/shalom-peace/"
+        },
+        {
+          "kind": "passage",
+          "book": 23,
+          "chapterStart": 9,
+          "verseStart": 6,
+          "chapterEnd": 9,
+          "verseEnd": 7,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/shalom-peace/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-advent-joy-chara",
+      "category": "word-study",
+      "series": "advent",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/chara-joy/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-advent-joy-chara:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "KcenGEY1w-U",
+          "sourceUrl": "https://www.youtube.com/watch?v=KcenGEY1w-U",
+          "title": "Chara / Joie",
+          "description": "Dans cette vidéo, nous étudions le genre de joie unique auquel le peuple de Dieu doit aspirer. Elle dépasse le simple cadre de la bonne humeur, et représente plutôt le choix d'avoir confiance au fait que Dieu accomplira ses promesses.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/KcenGEY1w-U/maxresdefault.jpg",
+          "durationSeconds": 275,
+          "publishedAt": "2020-02-22T09:00:06Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-advent-joy-chara:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "qvOhQTuD2e0",
+          "sourceUrl": "https://www.youtube.com/watch?v=qvOhQTuD2e0",
+          "title": "Joy",
+          "description": "In this video, we explore the unique type of joy to which God’s people are called. It’s more than happy mood, but rather a choice to trust that God will fulfill his promises.\n\n#Advent #Joy #BibleProject",
+          "thumbnailUrl": "https://i.ytimg.com/vi/qvOhQTuD2e0/maxresdefault.jpg",
+          "durationSeconds": 272,
+          "publishedAt": "2017-12-14T20:01:09Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "G5479",
+          "language": "greek",
+          "lemma": "χαρά",
+          "transliteration": "chara",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/chara-joy/"
+        },
+        {
+          "kind": "passage",
+          "book": 42,
+          "chapterStart": 2,
+          "verseStart": 9,
+          "chapterEnd": 2,
+          "verseEnd": 11,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/chara-joy/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-advent-love-agape",
+      "category": "word-study",
+      "series": "advent",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/agape-love/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-advent-love-agape:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "6CByTcTzbKI",
+          "sourceUrl": "https://www.youtube.com/watch?v=6CByTcTzbKI",
+          "title": "Agape / Amour",
+          "description": "Le mot \"amour\" est l'un des termes les plus perméables de notre langue parce qu'il décrit avant tout, les sentiments qu'une personne éprouve. Dans le Nouveau Testament, Jésus définit \"l'amour\" comme étant une manière de traiter les autres: chercher le bien-être de nos semblables indépendamment de leur attitude.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/6CByTcTzbKI/maxresdefault.jpg",
+          "durationSeconds": 281,
+          "publishedAt": "2020-02-14T09:00:00Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-advent-love-agape:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "slyevQ1LW7A",
+          "sourceUrl": "https://www.youtube.com/watch?v=slyevQ1LW7A",
+          "title": "Agape - Love",
+          "description": "The word “love” is one of the sloppiest words in our language, as it primarily refers to a feeling that happens to a person. In the New Testament, “love” or \"Agape\" refers to a way of treating people that was defined by Jesus himself: seeking the well-being of others regardless of their response.\n\n#Advent #Love #Agape",
+          "thumbnailUrl": "https://i.ytimg.com/vi/slyevQ1LW7A/maxresdefault.jpg",
+          "durationSeconds": 289,
+          "publishedAt": "2017-12-21T20:09:47Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "G0026",
+          "language": "greek",
+          "lemma": "ἀγάπη",
+          "transliteration": "agape",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/agape-love/"
+        },
+        {
+          "kind": "passage",
+          "book": 46,
+          "chapterStart": 13,
+          "verseStart": 1,
+          "chapterEnd": 13,
+          "verseEnd": 7,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/agape-love/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-bad-sin-khata",
+      "category": "word-study",
+      "series": "bad-words",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/khata-sin/",
+      "strongBinding": "family",
+      "editions": [
+        {
+          "id": "bp-word-bad-sin-khata:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "8QfBEhOvux4",
+          "sourceUrl": "https://www.youtube.com/watch?v=8QfBEhOvux4",
+          "title": "Khata / Péché",
+          "description": "Parmi les termes négatifs de la Bible, le mot \"péché\" fait partie des plus répandus; mais que veut-il vraiment dire ? Dans cette vidéo, nous étudierons le principe de \"l'échec moral\" relié à ce mot clé de la Bible. Préparez-vous à découvrir un portrait représentatif de la condition humaine.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/8QfBEhOvux4/maxresdefault.jpg",
+          "durationSeconds": 330,
+          "publishedAt": "2020-05-06T13:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-bad-sin-khata:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "aNOZ7ocLD74",
+          "sourceUrl": "https://www.youtube.com/watch?v=aNOZ7ocLD74",
+          "title": "Sin Is Not Rule-Breaking",
+          "description": "The word “sin” is one of the most common bad words in the Bible, but what does it really mean? In this video, we’ll explore the concept of “moral failure” that underlies this important biblical word. Get ready to discover a profound and realistic portrait of the human condition.\n\n#Sin #BibleVideo #BibleProject",
+          "thumbnailUrl": "https://i.ytimg.com/vi/aNOZ7ocLD74/maxresdefault.jpg",
+          "durationSeconds": 343,
+          "publishedAt": "2018-03-15T21:09:54Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H2398",
+          "language": "hebrew",
+          "lemma": "חָטָא",
+          "transliteration": "khata",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/word_studies/sin_script-reference_UPDATED.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "H2403",
+          "language": "hebrew",
+          "lemma": "חַטָּאת",
+          "transliteration": "khatta",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/word_studies/sin_script-reference_UPDATED.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "G0266",
+          "language": "greek",
+          "lemma": "ἁμαρτία",
+          "transliteration": "hamartia",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/word_studies/sin_script-reference_UPDATED.pdf"
+        },
+        {
+          "kind": "passage",
+          "book": 1,
+          "chapterStart": 4,
+          "verseStart": 7,
+          "chapterEnd": 4,
+          "verseEnd": 7,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/word_studies/sin_script-reference_UPDATED.pdf"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-bad-transgression-pesha",
+      "category": "word-study",
+      "series": "bad-words",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/pesha-transgression/",
+      "strongBinding": "family",
+      "editions": [
+        {
+          "id": "bp-word-bad-transgression-pesha:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "d1YadwvBp9o",
+          "sourceUrl": "https://www.youtube.com/watch?v=d1YadwvBp9o",
+          "title": "Pesha / Transgression",
+          "description": "La \"transgression\" fait partie des termes de la Bible qu'on pense comprendre, jusqu'à ce qu'on ait besoin de le définir à quelqu'un d'autre. Dans cette vidéo, nous étudions le sens de ce fascinant et complexe \"terme négatif\" présent dans la Bible. Préparez-vous à entamer une réflexion méditative sur la nature humaine.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/d1YadwvBp9o/maxresdefault.jpg",
+          "durationSeconds": 333,
+          "publishedAt": "2020-07-29T13:00:08Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-bad-transgression-pesha:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "cq-r9FFN5ew",
+          "sourceUrl": "https://www.youtube.com/watch?v=cq-r9FFN5ew",
+          "title": "Transgression",
+          "description": "\"Transgression\" is one of those Bible words that seems clear until you have to explain it to somebody. In this video, we'll explore the fascinating and sophisticated meaning of this biblical \"bad word.\" Get ready for a sobering reflection on human nature.\n\n#Transgression #BibleVideo #BibleProject",
+          "thumbnailUrl": "https://i.ytimg.com/vi/cq-r9FFN5ew/maxresdefault.jpg",
+          "durationSeconds": 346,
+          "publishedAt": "2018-05-10T21:28:29Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H6588",
+          "language": "hebrew",
+          "lemma": "פֶּשַׁע",
+          "transliteration": "pesha",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Transgression_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "H6586",
+          "language": "hebrew",
+          "lemma": "פָּשַׁע",
+          "transliteration": "pasha",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Transgression_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "G3900",
+          "language": "greek",
+          "lemma": "παράπτωμα",
+          "transliteration": "paraptoma",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Transgression_Script-References.pdf"
+        },
+        {
+          "kind": "passage",
+          "book": 2,
+          "chapterStart": 34,
+          "verseStart": 7,
+          "chapterEnd": 34,
+          "verseEnd": 7,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Transgression_Script-References.pdf"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-bad-iniquity-avon",
+      "category": "word-study",
+      "series": "bad-words",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/avon-iniquity/",
+      "strongBinding": "family",
+      "editions": [
+        {
+          "id": "bp-word-bad-iniquity-avon:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "OfruTm0lwqE",
+          "sourceUrl": "https://www.youtube.com/watch?v=OfruTm0lwqE",
+          "title": "Avon / Iniquité",
+          "description": "\"Iniquité\" est un mot biblique que très peu de personnes utilisent de nos jours, et encore moins de personnes savent ce qu'il veut dire. Dans cette vidéo, nous en étudierons le sens originel dans l'hébreu ancien et découvrirons une toute nouvelle manière de méditer sur nos tendances égoïstes, ainsi que leurs conséquences.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.",
+          "thumbnailUrl": "https://i.ytimg.com/vi/OfruTm0lwqE/maxresdefault.jpg",
+          "durationSeconds": 299,
+          "publishedAt": "2020-03-18T14:00:07Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-bad-iniquity-avon:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "w1zkwkI9oAw",
+          "sourceUrl": "https://www.youtube.com/watch?v=w1zkwkI9oAw",
+          "title": "Iniquity",
+          "description": "Iniquity is a biblical word that very few people use anymore, and even fewer people know what it means! In this video, we’ll explore the significance of this word in ancient Hebrew, and discover a whole new way to think about our selfish decisions and their consequences.\n\n#Iniquity #BibleVideo #BibleProject",
+          "thumbnailUrl": "https://i.ytimg.com/vi/w1zkwkI9oAw/maxresdefault.jpg",
+          "durationSeconds": 300,
+          "publishedAt": "2018-09-07T21:00:54Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H5771",
+          "language": "hebrew",
+          "lemma": "עָוֺן",
+          "transliteration": "avon",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Iniquity_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "H5753",
+          "language": "hebrew",
+          "lemma": "עָוָה",
+          "transliteration": "avah",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Iniquity_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "G0458",
+          "language": "greek",
+          "lemma": "ἀνομία",
+          "transliteration": "anomia",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Iniquity_Script-References.pdf"
+        },
+        {
+          "kind": "passage",
+          "book": 2,
+          "chapterStart": 34,
+          "verseStart": 7,
+          "chapterEnd": 34,
+          "verseEnd": 7,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Iniquity_Script-References.pdf"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-gospel-euangelion",
+      "category": "word-study",
+      "series": "word-studies",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/euangelion-gospel/",
+      "strongBinding": "family",
+      "editions": [
+        {
+          "id": "bp-word-gospel-euangelion:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "uNPKcNKRwb8",
+          "sourceUrl": "https://www.youtube.com/watch?v=uNPKcNKRwb8",
+          "title": "Évangile",
+          "description": "« Évangile » est un des termes les plus courants du vocabulaire chrétien, mais que signifie-t-il dans les langues bibliques originales ? Dans cette vidéo, nous découvrirons qu’il s’agit d’une annonce royale concernant Jésus, le Roi du monde, crucifié et ressuscité, qui a vaincu la mort par son amour.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#Bible #BibleProject #Évangile",
+          "thumbnailUrl": "https://i.ytimg.com/vi/uNPKcNKRwb8/maxresdefault.jpg",
+          "durationSeconds": 277,
+          "publishedAt": "2021-05-20T16:00:14Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-gospel-euangelion:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "HT41M013X3A",
+          "sourceUrl": "https://www.youtube.com/watch?v=HT41M013X3A",
+          "title": "Gospel",
+          "description": "“Gospel” is one of the most common words in a Christian’s vocabulary. But what does it mean in the original languages of the Bible? In this video, we’ll discover that “gospel” is a royal announcement about Jesus, who is the crucified and risen King of the world who overcame death with his love.\n\n0:00 What the word gospel means in the Bible\n0:41 The gospel in the Old Testament\n1:27 Jesus' gospel of God's kingdom\n2:51 Jesus' followers spread the gospel\n\n#BibleProject #gospel #wordstudy #gospelmessage #biblevideo #biblevideos",
+          "thumbnailUrl": "https://i.ytimg.com/vi/HT41M013X3A/maxresdefault.jpg",
+          "durationSeconds": 271,
+          "publishedAt": "2019-10-03T21:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "G2098",
+          "language": "greek",
+          "lemma": "εὐαγγέλιον",
+          "transliteration": "euangelion",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Gospel-Word-Study_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "H1319",
+          "language": "hebrew",
+          "lemma": "בָּשַׂר",
+          "transliteration": "basar",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Gospel-Word-Study_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "H1309",
+          "language": "hebrew",
+          "lemma": "בְּשׂוֹרָה",
+          "transliteration": "besorah",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Gospel-Word-Study_Script-References.pdf"
+        },
+        {
+          "kind": "passage",
+          "book": 41,
+          "chapterStart": 1,
+          "verseStart": 14,
+          "chapterEnd": 1,
+          "verseEnd": 15,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Gospel-Word-Study_Script-References.pdf"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-witness-martus",
+      "category": "word-study",
+      "series": "word-studies",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/martus-witness/",
+      "strongBinding": "family",
+      "editions": [
+        {
+          "id": "bp-word-witness-martus:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "W2-G9yjdgtg",
+          "sourceUrl": "https://www.youtube.com/watch?v=W2-G9yjdgtg",
+          "title": "Témoin",
+          "description": "Dans la Bible, les termes « témoin » et « témoignage » sont employés à la fois pour décrire la personne et l’acte de celui qui voit quelque chose, puis parle de ce qu’il a vu. De même qu’aujourd’hui, ces termes sont employés à la fois dans un cadre légal et pour décrire une expérience avec Dieu ; mais le plus intéressant est la manière dont ils éclairent le récit des Ecritures, surtout le rôle du peuple de Dieu. Dans cette vidéo, nous découvrirons en quoi ces termes contribuent au récit global de la Bible.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#Bible #BibleProject #Témoin",
+          "thumbnailUrl": "https://i.ytimg.com/vi/W2-G9yjdgtg/maxresdefault.jpg",
+          "durationSeconds": 265,
+          "publishedAt": "2021-05-27T16:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-witness-martus:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "jhcmzjwbvyk",
+          "sourceUrl": "https://www.youtube.com/watch?v=jhcmzjwbvyk",
+          "title": "Witness",
+          "description": "In the Bible, the word “witness” is used to describe both a person and an action—someone who sees something and then talks about what they’ve seen. Similar to today, this word is used in both legal settings and to describe an experience with God. But what’s most interesting about the word witness is how it illuminates the story of Scripture, especially the role of the people of God. In this video, we explore how this word contributes to the overarching story of the Bible.\n\n#BibleProject #Witness #BibleVideo",
+          "thumbnailUrl": "https://i.ytimg.com/vi/jhcmzjwbvyk/maxresdefault.jpg",
+          "durationSeconds": 268,
+          "publishedAt": "2019-11-26T01:00:11Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "G3144",
+          "language": "greek",
+          "lemma": "μάρτυς",
+          "transliteration": "martus",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Witness_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "H5707",
+          "language": "hebrew",
+          "lemma": "עֵד",
+          "transliteration": "ed",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Witness_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "H5749",
+          "language": "hebrew",
+          "lemma": "עוּד",
+          "transliteration": "uwd",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Witness_Script-References.pdf"
+        },
+        {
+          "kind": "strong",
+          "code": "G3140",
+          "language": "greek",
+          "lemma": "μαρτυρέω",
+          "transliteration": "martureo",
+          "relationship": "related",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Witness_Script-References.pdf"
+        },
+        {
+          "kind": "passage",
+          "book": 44,
+          "chapterStart": 1,
+          "verseStart": 8,
+          "chapterEnd": 1,
+          "verseEnd": 8,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://d1bsmz3sdihplr.cloudfront.net/media/Script%20References/Witness_Script-References.pdf"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-character-compassion",
+      "category": "word-study",
+      "series": "character-of-god",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/character-of-god-compassion/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-character-compassion:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "69_vtfw-0mA",
+          "sourceUrl": "https://www.youtube.com/watch?v=69_vtfw-0mA",
+          "title": "La Compassion",
+          "description": "La compassion est un terme profondément lié aux émotions, permettant de décrire la force du lien unissant un parent à son enfant. Dans cette vidéo, nous étudions la richesse de ce mot dont Dieu se sert, en tout premier lieu, pour se décrire dans Exode 34:6-7. Tout au long des Écritures, Dieu est dépeint comme un parent compatissant, tantôt comme un père, tantôt comme une mère; et sa compassion prend littéralement vie en la personne de Jésus.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#BibleProject #Bible #Compassion",
+          "thumbnailUrl": "https://i.ytimg.com/vi/69_vtfw-0mA/maxresdefault.jpg",
+          "durationSeconds": 290,
+          "publishedAt": "2022-09-23T16:00:11Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-character-compassion:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "qJEtyAiAQik",
+          "sourceUrl": "https://www.youtube.com/watch?v=qJEtyAiAQik",
+          "title": "How God Begins to Describe Himself in the Bible",
+          "description": "Compassion is a deeply emotional word used to convey the strong bond between a parent and their child. In this video, we look at this rich Hebrew word, the first one God uses to describe himself in Exodus 34:6-7. God is portrayed as a compassionate parent throughout Scripture—both as a mother and a father, and his compassion is embodied in the person of Jesus.\n\n#Compassion #BibleProject #BibleVideo",
+          "thumbnailUrl": "https://i.ytimg.com/vi/qJEtyAiAQik/maxresdefault.jpg",
+          "durationSeconds": 306,
+          "publishedAt": "2020-09-01T17:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H7349",
+          "language": "hebrew",
+          "lemma": "רַחוּם",
+          "transliteration": "rakhum",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/character-of-god-compassion/"
+        },
+        {
+          "kind": "passage",
+          "book": 2,
+          "chapterStart": 34,
+          "verseStart": 6,
+          "chapterEnd": 34,
+          "verseEnd": 6,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/character-of-god-compassion/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-character-grace",
+      "category": "word-study",
+      "series": "character-of-god",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/character-of-god-grace/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-character-grace:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "wktA2VE4yhY",
+          "sourceUrl": "https://www.youtube.com/watch?v=wktA2VE4yhY",
+          "title": "Grâce",
+          "description": "Que veut dire l'expression selon laquelle le Dieu de la Bible est plein de grâce ? Dans cette vidéo, nous analyserons les mots hébreux signifiant \"plein de grâce\" et nous comprendrons la richesse de leur concept, dont les profondes implications influent sur notre perception de Dieu. Lorsque nous nous penchons sur la signification biblique de la grâce et que nous comprenons que Dieu est plein de grâce, nous découvrons un Dieu qui aime faire des dons généreux à des personnes non méritantes.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#Grace #bibleproject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/wktA2VE4yhY/maxresdefault.jpg",
+          "durationSeconds": 273,
+          "publishedAt": "2022-11-11T17:00:11Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-character-grace:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "ABPVVw_aw44",
+          "sourceUrl": "https://www.youtube.com/watch?v=ABPVVw_aw44",
+          "title": "God's Consistent Posture Toward All Humanity",
+          "description": "What does it mean to say that the God of the Bible is gracious? In this video, we’ll look at the Hebrew words for grace and understand it to be a rich concept that has profound implications for how we see God. When we look to the biblical meaning of grace and understand God as gracious, we see a God who loves to give generous gifts to undeserving people.\n\nView more resources on Grace:\n- Grace Study Notes: https://tbp.xyz/gracestudynotes\n- Grace Script References: https://tbp.xyz/gracescriptreferences\n- Podcast: The Uniquely Biblical View of Grace: https://tbp.xyz/gracepodcast\n- Explore the Character of God series: https://tbp.xyz/cogseries\n\n#BibleProject #CharacterofGod #Grace",
+          "thumbnailUrl": "https://i.ytimg.com/vi/ABPVVw_aw44/maxresdefault.jpg",
+          "durationSeconds": 279,
+          "publishedAt": "2020-09-22T17:00:12Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H2587",
+          "language": "hebrew",
+          "lemma": "חַנּוּן",
+          "transliteration": "khanun",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/character-of-god-grace/"
+        },
+        {
+          "kind": "passage",
+          "book": 2,
+          "chapterStart": 34,
+          "verseStart": 6,
+          "chapterEnd": 34,
+          "verseEnd": 6,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/character-of-god-grace/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-character-slow-to-anger",
+      "category": "word-study",
+      "series": "character-of-god",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/slow-to-anger/",
+      "strongBinding": "composite",
+      "editions": [
+        {
+          "id": "bp-word-character-slow-to-anger:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "M1cvdmKMfGI",
+          "sourceUrl": "https://www.youtube.com/watch?v=M1cvdmKMfGI",
+          "title": "Lent à la colère",
+          "description": "Que veut dire l'expression selon laquelle Dieu est lent à la colère ? Dans la Bible, la colère de Dieu est une réponse adéquate au mal humain, et elle est motivée par la justice et l'amour de Dieu. Dans cette vidéo, nous allons analyser la colère et la justice de Dieu dans le récit biblique et voir comment tout cela mène à Jésus.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#LentalaColere #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/M1cvdmKMfGI/maxresdefault.jpg",
+          "durationSeconds": 318,
+          "publishedAt": "2023-03-10T17:00:09Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-character-slow-to-anger:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "TeQ1nq_YJD0",
+          "sourceUrl": "https://www.youtube.com/watch?v=TeQ1nq_YJD0",
+          "title": "Don’t Miss the Point of God’s Anger in the Bible",
+          "description": "What does it mean to say that God is slow to anger? In the Bible, God’s anger is a just response to human evil, which is motivated by God’s justice and love. In this video, we’ll explore God’s anger and justice in the biblical story and see how it all leads to Jesus.\n\nView more resources on Slow to Anger:\n- Explore Character of God: https://tbp.xyz/characterofgod\n- Study Notes: https://tbp.xyz/slowtoangerstudynotes\n- Blog: https://tbp.xyz/slowtoangerblog\n\n#BibleProject #CharacterofGod #Anger",
+          "thumbnailUrl": "https://i.ytimg.com/vi/TeQ1nq_YJD0/maxresdefault.jpg",
+          "durationSeconds": 321,
+          "publishedAt": "2020-11-10T18:00:10Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H0750",
+          "language": "hebrew",
+          "lemma": "אָרֵךְ",
+          "transliteration": "erekh",
+          "relationship": "component",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/slow-to-anger/"
+        },
+        {
+          "kind": "strong",
+          "code": "H0639",
+          "language": "hebrew",
+          "lemma": "אַף",
+          "transliteration": "appayim",
+          "relationship": "component",
+          "placement": "strong-resource",
+          "relevance": "related",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/slow-to-anger/"
+        },
+        {
+          "kind": "passage",
+          "book": 2,
+          "chapterStart": 34,
+          "verseStart": 6,
+          "chapterEnd": 34,
+          "verseEnd": 6,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/slow-to-anger/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-character-loyal-love",
+      "category": "word-study",
+      "series": "character-of-god",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/loyal-love/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-character-loyal-love:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "4U-KtmcHrGI",
+          "sourceUrl": "https://www.youtube.com/watch?v=4U-KtmcHrGI",
+          "title": "Amour Loyal",
+          "description": "Le mot hébreu khesed est l'une des descriptions les plus courantes de Dieu dans la Bible hébraïque, et il est quasiment impossible à traduire dans une autre langue ! Ce mot riche de sens, combine les idées d'amour, de loyauté et de générosité. Joignez-vous à nous alors que nous analysons ce fascinant mot hébreu, et sa manière de façonner notre compréhension du caractère de Dieu.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#AmourLoyal #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/4U-KtmcHrGI/maxresdefault.jpg",
+          "durationSeconds": 307,
+          "publishedAt": "2023-04-16T16:00:05Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-character-loyal-love:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "UfbyFLgs_NM",
+          "sourceUrl": "https://www.youtube.com/watch?v=UfbyFLgs_NM",
+          "title": "God Loves You, But What Does That Mean? (According to the Bible)",
+          "description": "The Hebrew word khesed is one of the most common descriptions of God in the Hebrew Bible, and it’s almost impossible to translate into any other language! This word is rich with meaning, combining the ideas of love, loyalty, and generosity. Join us as we explore this fascinating Hebrew word and how it shapes our understanding of God’s character.\n\nView more resources on God's Loyal Love:\n- Explore Character of God: https://tbp.xyz/exploreloyallove\n- Blog: https://tbp.xyz/blogloyallove\n- Podcast: https://tbp.xyz/podloyallove\n\n#BibleProject #Love #Khesed",
+          "thumbnailUrl": "https://i.ytimg.com/vi/UfbyFLgs_NM/maxresdefault.jpg",
+          "durationSeconds": 311,
+          "publishedAt": "2021-01-12T18:00:11Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H2617",
+          "language": "hebrew",
+          "lemma": "חֶסֶד",
+          "transliteration": "khesed",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/loyal-love/"
+        },
+        {
+          "kind": "passage",
+          "book": 2,
+          "chapterStart": 34,
+          "verseStart": 6,
+          "chapterEnd": 34,
+          "verseEnd": 6,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/loyal-love/"
+        }
+      ]
+    },
+    {
+      "id": "bp-word-character-faithful",
+      "category": "word-study",
+      "series": "character-of-god",
+      "reviewStatus": "reviewed",
+      "sourceUrl": "https://bibleproject.com/videos/faithful/",
+      "strongBinding": "direct",
+      "editions": [
+        {
+          "id": "bp-word-character-faithful:fr",
+          "language": "fr",
+          "provider": "youtube",
+          "providerId": "xqUPT7BoX-w",
+          "sourceUrl": "https://www.youtube.com/watch?v=xqUPT7BoX-w",
+          "title": "Fidèle",
+          "description": "Le mot emet est un terme utilisé couramment dans la Bible pour décrire Dieu. On peut le traduire par les mots « fidélité » et « vérité ». Ainsi, lorsque les auteurs bibliques précisent que Dieu est « riche en emet », ils veulent dire qu’il est digne de confiance et fidèle — en somme, nous pouvons Lui faire confiance. Sauf que la confiance n’est pas toujours facile à manifester. Dans cette vidéo, nous relevons pourquoi nous pouvons asseoir notre confiance dans le fait que Dieu est riche en emet.\n\nBibleProject élabore des ressources gracieusement offertes pour vous aider à expérimenter la Bible. Tout ce que nous produisons est financé par de généreux donateurs à travers le globe. Pour en savoir plus et voir toutes nos ressources, rendez-vous sur bibleproject.com/francais.\n \nBibleProject travaille en collaboration avec L’Alliance Biblique Française dans le cadre de la traduction de ses contenus en français. Si vous souhaitez soutenir ces efforts de traduction, vous pouvez faire un don à L’Alliance Biblique Française via https://alliancebiblique.fr/bibleproject ou à BibleProject via https://bible.to/fra-c.\n\nRetrouvez-nous sur les autres plateformes:\nhttps://instagram.com/bibleprojectfrancais\nhttps://facebook.com/BibleProjectfrancais\n\nVous parlez une autre langue en plus du français ? Découvrez nos vidéos, posters, et plans de lecture dans plus de 50 autres langues à bibleproject.com/languages.\n\n\n#Fidèle #BibleProject #Bible",
+          "thumbnailUrl": "https://i.ytimg.com/vi/xqUPT7BoX-w/maxresdefault.jpg",
+          "durationSeconds": 312,
+          "publishedAt": "2023-05-12T16:00:54Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": false
+        },
+        {
+          "id": "bp-word-character-faithful:en",
+          "language": "en",
+          "provider": "youtube",
+          "providerId": "HCLuq_5o7_o",
+          "sourceUrl": "https://www.youtube.com/watch?v=HCLuq_5o7_o",
+          "title": "The Reason You Can Trust God (Even When It Seems Risky)",
+          "description": "The word emet is a common word used to describe God in the Bible. It can be translated as “faithfulness” or “truth.” So when the authors say that God is “full of emet,” they are saying that he is trustworthy and faithful—we can trust him. But trusting isn’t always an easy thing. In this video, we look at why we can trust that God is full of emet. \n\nView more resources on God's faithful character:\n- Explore Character of God: https://tbp.xyz/explorefaithful\n- Blog: https://tbp.xyz/faithfulblog\n- Podcast: https://tbp.xyz/faithfulpodcast\n\n#BibleProject #Faithful #Emet",
+          "thumbnailUrl": "https://i.ytimg.com/vi/HCLuq_5o7_o/maxresdefault.jpg",
+          "durationSeconds": 312,
+          "publishedAt": "2021-02-09T18:00:14Z",
+          "embeddable": true,
+          "madeForKids": false,
+          "captionsAvailable": true
+        }
+      ],
+      "anchors": [
+        {
+          "kind": "strong",
+          "code": "H0571",
+          "language": "hebrew",
+          "lemma": "אֱמֶת",
+          "transliteration": "emet",
+          "relationship": "primary",
+          "placement": "strong-resource",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-lexeme-and-bible-strong-core-lexicon",
+          "evidenceUrl": "https://bibleproject.com/videos/faithful/"
+        },
+        {
+          "kind": "passage",
+          "book": 2,
+          "chapterStart": 34,
+          "verseStart": 6,
+          "chapterEnd": 34,
+          "verseEnd": 6,
+          "placement": "after-range",
+          "relevance": "primary",
+          "reviewStatus": "reviewed",
+          "provenance": "publisher-video-page-or-script",
+          "evidenceUrl": "https://bibleproject.com/videos/faithful/"
+        }
+      ]
+    }
+  ],
+  "sharedWorkReferences": [
+    {
+      "id": "exodus-34-6-7-visual-commentary",
+      "series": "character-of-god",
+      "sourceManifest": "visual-commentary-manifest.json",
+      "strongBinding": "none",
+      "editionIds": {
+        "fr": "exodus-34-6-7-visual-commentary:fr",
+        "en": "exodus-34-6-7-visual-commentary:en"
+      },
+      "reason": "shared-cross-category-passage-and-series-overview"
+    }
+  ],
+  "languageIndexes": {
+    "fr": {
+      "strongs": {
+        "H8085": [
+          "bp-word-shema-listen"
+        ],
+        "H3068": [
+          "bp-word-shema-yhwh"
+        ],
+        "H0157": [
+          "bp-word-shema-love-ahavah"
+        ],
+        "H0160": [
+          "bp-word-shema-love-ahavah"
+        ],
+        "H3824": [
+          "bp-word-shema-heart-lev"
+        ],
+        "H3820": [
+          "bp-word-shema-heart-lev"
+        ],
+        "H5315": [
+          "bp-word-shema-soul-nephesh"
+        ],
+        "H3966": [
+          "bp-word-shema-strength-meod"
+        ],
+        "H3176": [
+          "bp-word-advent-hope-yakhal"
+        ],
+        "H7965": [
+          "bp-word-advent-peace-shalom"
+        ],
+        "G5479": [
+          "bp-word-advent-joy-chara"
+        ],
+        "G0026": [
+          "bp-word-advent-love-agape"
+        ],
+        "H2398": [
+          "bp-word-bad-sin-khata"
+        ],
+        "H2403": [
+          "bp-word-bad-sin-khata"
+        ],
+        "G0266": [
+          "bp-word-bad-sin-khata"
+        ],
+        "H6588": [
+          "bp-word-bad-transgression-pesha"
+        ],
+        "H6586": [
+          "bp-word-bad-transgression-pesha"
+        ],
+        "G3900": [
+          "bp-word-bad-transgression-pesha"
+        ],
+        "H5771": [
+          "bp-word-bad-iniquity-avon"
+        ],
+        "H5753": [
+          "bp-word-bad-iniquity-avon"
+        ],
+        "G0458": [
+          "bp-word-bad-iniquity-avon"
+        ],
+        "G2098": [
+          "bp-word-gospel-euangelion"
+        ],
+        "H1319": [
+          "bp-word-gospel-euangelion"
+        ],
+        "H1309": [
+          "bp-word-gospel-euangelion"
+        ],
+        "G3144": [
+          "bp-word-witness-martus"
+        ],
+        "H5707": [
+          "bp-word-witness-martus"
+        ],
+        "H5749": [
+          "bp-word-witness-martus"
+        ],
+        "G3140": [
+          "bp-word-witness-martus"
+        ],
+        "H7349": [
+          "bp-word-character-compassion"
+        ],
+        "H2587": [
+          "bp-word-character-grace"
+        ],
+        "H0750": [
+          "bp-word-character-slow-to-anger"
+        ],
+        "H0639": [
+          "bp-word-character-slow-to-anger"
+        ],
+        "H2617": [
+          "bp-word-character-loyal-love"
+        ],
+        "H0571": [
+          "bp-word-character-faithful"
+        ]
+      },
+      "books": {
+        "1": [
+          "bp-word-bad-sin-khata"
+        ],
+        "2": [
+          "bp-word-bad-transgression-pesha",
+          "bp-word-bad-iniquity-avon",
+          "bp-word-character-compassion",
+          "bp-word-character-grace",
+          "bp-word-character-slow-to-anger",
+          "bp-word-character-loyal-love",
+          "bp-word-character-faithful",
+          "exodus-34-6-7-visual-commentary"
+        ],
+        "3": [],
+        "4": [],
+        "5": [
+          "bp-word-shema-listen",
+          "bp-word-shema-yhwh",
+          "bp-word-shema-love-ahavah",
+          "bp-word-shema-heart-lev",
+          "bp-word-shema-soul-nephesh",
+          "bp-word-shema-strength-meod"
+        ],
+        "6": [],
+        "7": [],
+        "8": [],
+        "9": [],
+        "10": [],
+        "11": [],
+        "12": [],
+        "13": [],
+        "14": [],
+        "15": [],
+        "16": [],
+        "17": [],
+        "18": [],
+        "19": [
+          "bp-word-advent-hope-yakhal"
+        ],
+        "20": [],
+        "21": [],
+        "22": [],
+        "23": [
+          "bp-word-advent-peace-shalom"
+        ],
+        "24": [],
+        "25": [],
+        "26": [],
+        "27": [],
+        "28": [],
+        "29": [],
+        "30": [],
+        "31": [],
+        "32": [],
+        "33": [],
+        "34": [],
+        "35": [],
+        "36": [],
+        "37": [],
+        "38": [],
+        "39": [],
+        "40": [],
+        "41": [
+          "bp-word-gospel-euangelion"
+        ],
+        "42": [
+          "bp-word-advent-joy-chara"
+        ],
+        "43": [],
+        "44": [
+          "bp-word-witness-martus"
+        ],
+        "45": [],
+        "46": [
+          "bp-word-advent-love-agape"
+        ],
+        "47": [],
+        "48": [],
+        "49": [],
+        "50": [],
+        "51": [],
+        "52": [],
+        "53": [],
+        "54": [],
+        "55": [],
+        "56": [],
+        "57": [],
+        "58": [],
+        "59": [],
+        "60": [],
+        "61": [],
+        "62": [],
+        "63": [],
+        "64": [],
+        "65": [],
+        "66": []
+      },
+      "chapters": {
+        "5:6": [
+          "bp-word-shema-listen",
+          "bp-word-shema-yhwh",
+          "bp-word-shema-love-ahavah",
+          "bp-word-shema-heart-lev",
+          "bp-word-shema-soul-nephesh",
+          "bp-word-shema-strength-meod"
+        ],
+        "19:130": [
+          "bp-word-advent-hope-yakhal"
+        ],
+        "23:9": [
+          "bp-word-advent-peace-shalom"
+        ],
+        "42:2": [
+          "bp-word-advent-joy-chara"
+        ],
+        "46:13": [
+          "bp-word-advent-love-agape"
+        ],
+        "1:4": [
+          "bp-word-bad-sin-khata"
+        ],
+        "2:34": [
+          "bp-word-bad-transgression-pesha",
+          "bp-word-bad-iniquity-avon",
+          "bp-word-character-compassion",
+          "bp-word-character-grace",
+          "bp-word-character-slow-to-anger",
+          "bp-word-character-loyal-love",
+          "bp-word-character-faithful",
+          "exodus-34-6-7-visual-commentary"
+        ],
+        "41:1": [
+          "bp-word-gospel-euangelion"
+        ],
+        "44:1": [
+          "bp-word-witness-martus"
+        ]
+      }
+    },
+    "en": {
+      "strongs": {
+        "H8085": [
+          "bp-word-shema-listen"
+        ],
+        "H3068": [
+          "bp-word-shema-yhwh"
+        ],
+        "H0157": [
+          "bp-word-shema-love-ahavah"
+        ],
+        "H0160": [
+          "bp-word-shema-love-ahavah"
+        ],
+        "H3824": [
+          "bp-word-shema-heart-lev"
+        ],
+        "H3820": [
+          "bp-word-shema-heart-lev"
+        ],
+        "H5315": [
+          "bp-word-shema-soul-nephesh"
+        ],
+        "H3966": [
+          "bp-word-shema-strength-meod"
+        ],
+        "H3176": [
+          "bp-word-advent-hope-yakhal"
+        ],
+        "H7965": [
+          "bp-word-advent-peace-shalom"
+        ],
+        "G5479": [
+          "bp-word-advent-joy-chara"
+        ],
+        "G0026": [
+          "bp-word-advent-love-agape"
+        ],
+        "H2398": [
+          "bp-word-bad-sin-khata"
+        ],
+        "H2403": [
+          "bp-word-bad-sin-khata"
+        ],
+        "G0266": [
+          "bp-word-bad-sin-khata"
+        ],
+        "H6588": [
+          "bp-word-bad-transgression-pesha"
+        ],
+        "H6586": [
+          "bp-word-bad-transgression-pesha"
+        ],
+        "G3900": [
+          "bp-word-bad-transgression-pesha"
+        ],
+        "H5771": [
+          "bp-word-bad-iniquity-avon"
+        ],
+        "H5753": [
+          "bp-word-bad-iniquity-avon"
+        ],
+        "G0458": [
+          "bp-word-bad-iniquity-avon"
+        ],
+        "G2098": [
+          "bp-word-gospel-euangelion"
+        ],
+        "H1319": [
+          "bp-word-gospel-euangelion"
+        ],
+        "H1309": [
+          "bp-word-gospel-euangelion"
+        ],
+        "G3144": [
+          "bp-word-witness-martus"
+        ],
+        "H5707": [
+          "bp-word-witness-martus"
+        ],
+        "H5749": [
+          "bp-word-witness-martus"
+        ],
+        "G3140": [
+          "bp-word-witness-martus"
+        ],
+        "H7349": [
+          "bp-word-character-compassion"
+        ],
+        "H2587": [
+          "bp-word-character-grace"
+        ],
+        "H0750": [
+          "bp-word-character-slow-to-anger"
+        ],
+        "H0639": [
+          "bp-word-character-slow-to-anger"
+        ],
+        "H2617": [
+          "bp-word-character-loyal-love"
+        ],
+        "H0571": [
+          "bp-word-character-faithful"
+        ]
+      },
+      "books": {
+        "1": [
+          "bp-word-bad-sin-khata"
+        ],
+        "2": [
+          "bp-word-bad-transgression-pesha",
+          "bp-word-bad-iniquity-avon",
+          "bp-word-character-compassion",
+          "bp-word-character-grace",
+          "bp-word-character-slow-to-anger",
+          "bp-word-character-loyal-love",
+          "bp-word-character-faithful",
+          "exodus-34-6-7-visual-commentary"
+        ],
+        "3": [],
+        "4": [],
+        "5": [
+          "bp-word-shema-listen",
+          "bp-word-shema-yhwh",
+          "bp-word-shema-love-ahavah",
+          "bp-word-shema-heart-lev",
+          "bp-word-shema-soul-nephesh",
+          "bp-word-shema-strength-meod"
+        ],
+        "6": [],
+        "7": [],
+        "8": [],
+        "9": [],
+        "10": [],
+        "11": [],
+        "12": [],
+        "13": [],
+        "14": [],
+        "15": [],
+        "16": [],
+        "17": [],
+        "18": [],
+        "19": [
+          "bp-word-advent-hope-yakhal"
+        ],
+        "20": [],
+        "21": [],
+        "22": [],
+        "23": [
+          "bp-word-advent-peace-shalom"
+        ],
+        "24": [],
+        "25": [],
+        "26": [],
+        "27": [],
+        "28": [],
+        "29": [],
+        "30": [],
+        "31": [],
+        "32": [],
+        "33": [],
+        "34": [],
+        "35": [],
+        "36": [],
+        "37": [],
+        "38": [],
+        "39": [],
+        "40": [],
+        "41": [
+          "bp-word-gospel-euangelion"
+        ],
+        "42": [
+          "bp-word-advent-joy-chara"
+        ],
+        "43": [],
+        "44": [
+          "bp-word-witness-martus"
+        ],
+        "45": [],
+        "46": [
+          "bp-word-advent-love-agape"
+        ],
+        "47": [],
+        "48": [],
+        "49": [],
+        "50": [],
+        "51": [],
+        "52": [],
+        "53": [],
+        "54": [],
+        "55": [],
+        "56": [],
+        "57": [],
+        "58": [],
+        "59": [],
+        "60": [],
+        "61": [],
+        "62": [],
+        "63": [],
+        "64": [],
+        "65": [],
+        "66": []
+      },
+      "chapters": {
+        "5:6": [
+          "bp-word-shema-listen",
+          "bp-word-shema-yhwh",
+          "bp-word-shema-love-ahavah",
+          "bp-word-shema-heart-lev",
+          "bp-word-shema-soul-nephesh",
+          "bp-word-shema-strength-meod"
+        ],
+        "19:130": [
+          "bp-word-advent-hope-yakhal"
+        ],
+        "23:9": [
+          "bp-word-advent-peace-shalom"
+        ],
+        "42:2": [
+          "bp-word-advent-joy-chara"
+        ],
+        "46:13": [
+          "bp-word-advent-love-agape"
+        ],
+        "1:4": [
+          "bp-word-bad-sin-khata"
+        ],
+        "2:34": [
+          "bp-word-bad-transgression-pesha",
+          "bp-word-bad-iniquity-avon",
+          "bp-word-character-compassion",
+          "bp-word-character-grace",
+          "bp-word-character-slow-to-anger",
+          "bp-word-character-loyal-love",
+          "bp-word-character-faithful",
+          "exodus-34-6-7-visual-commentary"
+        ],
+        "41:1": [
+          "bp-word-gospel-euangelion"
+        ],
+        "44:1": [
+          "bp-word-witness-martus"
+        ]
+      }
+    }
+  }
+}

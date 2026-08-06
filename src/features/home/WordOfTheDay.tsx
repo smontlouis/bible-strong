@@ -16,6 +16,7 @@ import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import ResourceDownloadWidget from './ResourceDownloadWidget'
 
 function randomIntFromInterval(min: number, max: number) {
   // min and max included
@@ -50,7 +51,13 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     (strongQuery.error instanceof ResourceAccessError &&
       strongQuery.error.recoveries.includes('acquire-offline-copy'))
   ) {
-    return null
+    return (
+      <ResourceDownloadWidget
+        identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
+        title={t('Dictionnaire requis')}
+        fileSize={22}
+      />
+    )
   }
 
   if (strongQuery.isError || (strongQuery.isSuccess && !strongReference)) {

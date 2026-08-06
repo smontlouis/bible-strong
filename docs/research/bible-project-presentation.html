@@ -1,0 +1,2688 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Explorateur du catalogue BibleProject et de ses placements dans la Bible View."
+    />
+    <link rel="icon" href="data:," />
+    <title>Atlas BibleProject — Bible View</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f4f0e5;
+        --paper-deep: #e9e2d2;
+        --ink: #152724;
+        --muted: #65726d;
+        --line: #c9c5b9;
+        --blue: #1548c0;
+        --blue-soft: #dfe7ff;
+        --yellow: #f3cf55;
+        --red: #c54c3e;
+        --green: #26735a;
+        --white: #fffdf7;
+        --shadow: 0 18px 48px rgba(34, 44, 39, 0.12);
+        --radius: 6px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(rgba(21, 39, 36, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(21, 39, 36, 0.025) 1px, transparent 1px), var(--paper);
+        background-size: 24px 24px;
+        color: var(--ink);
+        font-family: 'Avenir Next', Avenir, 'Gill Sans', sans-serif;
+        line-height: 1.45;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button,
+      select {
+        cursor: pointer;
+      }
+
+      a {
+        color: var(--blue);
+      }
+
+      .shell {
+        width: min(1500px, calc(100% - 32px));
+        margin-inline: auto;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-bottom: 1px solid var(--line);
+        background: rgba(244, 240, 229, 0.94);
+        backdrop-filter: blur(16px);
+      }
+
+      .header-inner {
+        min-height: 62px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .brand-mark {
+        padding: 4px 7px;
+        background: var(--blue);
+        color: white;
+        font-family: 'Iowan Old Style', Baskerville, Georgia, serif;
+        font-size: 0.95rem;
+        transform: rotate(-2deg);
+      }
+
+      .brand small,
+      .snapshot {
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 500;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .jump-link {
+        color: var(--ink);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(420px, 0.55fr);
+        align-items: end;
+        gap: 55px;
+        padding: 54px 0 40px;
+      }
+
+      .overline {
+        margin: 0 0 13px;
+        color: var(--blue);
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 920px;
+        margin-bottom: 16px;
+        font-family: 'Iowan Old Style', Baskerville, Georgia, serif;
+        font-size: clamp(3rem, 6.2vw, 6.5rem);
+        font-weight: 500;
+        letter-spacing: -0.065em;
+        line-height: 0.87;
+      }
+
+      h1 mark {
+        padding: 0 0.08em;
+        background: linear-gradient(transparent 57%, var(--yellow) 57%);
+        color: inherit;
+      }
+
+      .hero-copy {
+        max-width: 760px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+
+      .metric-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border: 1px solid var(--ink);
+        background: var(--ink);
+        gap: 1px;
+        box-shadow: 8px 8px 0 var(--yellow);
+      }
+
+      .metric {
+        padding: 17px;
+        background: var(--paper);
+      }
+
+      .metric strong {
+        display: block;
+        font-family: 'Iowan Old Style', Baskerville, Georgia, serif;
+        font-size: 2rem;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      .metric span {
+        color: var(--muted);
+        font-size: 0.66rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .workspace,
+      .simulator {
+        margin-bottom: 46px;
+        border: 1px solid var(--ink);
+        background: var(--white);
+        box-shadow: var(--shadow);
+      }
+
+      .workspace-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 24px;
+        padding: 20px 22px 0;
+        border-bottom: 1px solid var(--ink);
+      }
+
+      .tabs {
+        display: flex;
+        gap: 2px;
+        overflow-x: auto;
+      }
+
+      .tab {
+        position: relative;
+        min-height: 45px;
+        padding: 9px 14px 12px;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 750;
+        white-space: nowrap;
+      }
+
+      .tab[aria-selected='true'] {
+        color: var(--ink);
+      }
+
+      .tab[aria-selected='true']::after {
+        content: '';
+        position: absolute;
+        right: 9px;
+        bottom: -1px;
+        left: 9px;
+        height: 4px;
+        background: var(--blue);
+      }
+
+      .tab-count {
+        margin-left: 5px;
+        color: var(--blue);
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.68rem;
+      }
+
+      .results-count {
+        padding-bottom: 13px;
+        color: var(--muted);
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.7rem;
+        white-space: nowrap;
+      }
+
+      .toolbar {
+        display: grid;
+        grid-template-columns: minmax(240px, 1.7fr) repeat(5, minmax(120px, 0.72fr));
+        gap: 9px;
+        padding: 14px;
+        border-bottom: 1px solid var(--line);
+        background: var(--paper-deep);
+      }
+
+      .curation-bar {
+        position: sticky;
+        top: 62px;
+        z-index: 8;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 16px;
+        min-height: 62px;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--ink);
+        background: rgba(255, 253, 247, 0.97);
+        box-shadow: 0 8px 18px rgba(21, 39, 36, 0.08);
+        backdrop-filter: blur(14px);
+      }
+
+      .curation-progress,
+      .curation-actions,
+      .bulk-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .progress-pill {
+        min-height: 34px;
+        padding: 6px 9px;
+        border: 1px solid var(--line);
+        background: var(--paper);
+        color: var(--muted);
+        font-size: 0.62rem;
+        font-weight: 750;
+        text-align: left;
+      }
+
+      button.progress-pill:hover,
+      button.progress-pill.is-active {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+
+      .progress-pill strong {
+        margin-right: 4px;
+        color: var(--ink);
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.76rem;
+      }
+
+      .bulk-panel {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--blue);
+        background: var(--blue-soft);
+      }
+
+      .bulk-panel.is-visible {
+        display: flex;
+      }
+
+      .bulk-summary {
+        color: var(--blue);
+        font-size: 0.68rem;
+        font-weight: 800;
+      }
+
+      .compact-button,
+      .row-action {
+        min-height: 30px;
+        padding: 5px 8px;
+        border: 1px solid var(--ink);
+        background: var(--white);
+        color: var(--ink);
+        font-size: 0.61rem;
+        font-weight: 800;
+        line-height: 1.1;
+      }
+
+      .compact-button:hover,
+      .row-action:hover,
+      .row-action.is-active {
+        border-color: var(--blue);
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+
+      .compact-button.danger,
+      .row-action.danger {
+        border-color: #9f2d20;
+        color: #7d2117;
+      }
+
+      .compact-button.danger:hover,
+      .row-action.danger:hover {
+        background: #fff0eb;
+      }
+
+      .control {
+        position: relative;
+      }
+
+      .control label {
+        position: absolute;
+        z-index: 1;
+        top: 6px;
+        left: 10px;
+        color: var(--muted);
+        font-size: 0.56rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        pointer-events: none;
+        text-transform: uppercase;
+      }
+
+      .control input,
+      .control select {
+        width: 100%;
+        height: 50px;
+        padding: 19px 10px 5px;
+        border: 1px solid var(--line);
+        border-radius: 0;
+        outline: none;
+        background: var(--white);
+        color: var(--ink);
+        font-size: 0.78rem;
+      }
+
+      .control input:focus,
+      .control select:focus {
+        border-color: var(--blue);
+        box-shadow: inset 0 0 0 1px var(--blue);
+      }
+
+      .table-scroll {
+        min-height: 620px;
+        overflow: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+      }
+
+      th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--ink);
+        background: var(--white);
+        color: var(--muted);
+        font-size: 0.6rem;
+        letter-spacing: 0.08em;
+        text-align: left;
+        text-transform: uppercase;
+      }
+
+      td {
+        padding: 11px 12px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: middle;
+        font-size: 0.75rem;
+      }
+
+      tbody tr {
+        transition: background 120ms ease;
+      }
+
+      tbody tr[data-open] {
+        cursor: pointer;
+      }
+
+      tbody tr[data-open]:hover,
+      tbody tr[data-open]:focus-within {
+        background: #f3f6ff;
+      }
+
+      .col-select {
+        width: 42px;
+        text-align: center;
+      }
+
+      .col-video {
+        width: 26%;
+      }
+
+      .col-category {
+        width: 11%;
+      }
+
+      .col-language {
+        width: 6%;
+      }
+
+      .col-status {
+        width: 12%;
+      }
+
+      .col-placement {
+        width: 13%;
+      }
+
+      .col-target {
+        width: 20%;
+      }
+
+      .col-actions {
+        width: 132px;
+      }
+
+      .row-selector,
+      #select-page {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--blue);
+      }
+
+      .workspace:not([data-raw='true']) #select-page {
+        visibility: hidden;
+      }
+
+      .workspace:not([data-raw='true']) #review-filter-control {
+        opacity: 0.45;
+        pointer-events: none;
+      }
+
+      .row-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 4px;
+      }
+
+      .row-action.details {
+        grid-column: 1 / -1;
+      }
+
+      .status-stack {
+        display: grid;
+        gap: 5px;
+        justify-items: start;
+      }
+
+      .review-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.61rem;
+        font-weight: 800;
+      }
+
+      .review-status::before {
+        width: 8px;
+        height: 8px;
+        border: 1px solid currentColor;
+        border-radius: 50%;
+        content: '';
+      }
+
+      .review-status.accepted {
+        color: var(--green);
+      }
+
+      .review-status.accepted::before {
+        background: var(--green);
+      }
+
+      .review-status.needs-correction {
+        color: #9b5a05;
+      }
+
+      .review-status.pending {
+        color: var(--blue);
+      }
+
+      .video-cell {
+        display: grid;
+        grid-template-columns: 104px minmax(0, 1fr);
+        align-items: center;
+        gap: 12px;
+      }
+
+      .thumb {
+        position: relative;
+        width: 104px;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border: 1px solid var(--ink);
+        background: var(--paper-deep);
+      }
+
+      .thumb img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
+
+      .play-dot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 24px;
+        height: 24px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(21, 39, 36, 0.84);
+        color: white;
+        font-size: 0.58rem;
+        transform: translate(-50%, -50%);
+      }
+
+      .video-title {
+        display: -webkit-box;
+        overflow: hidden;
+        color: var(--ink);
+        font-weight: 750;
+        line-height: 1.25;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+      }
+
+      .video-id {
+        display: block;
+        margin-top: 5px;
+        overflow: hidden;
+        color: var(--muted);
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.61rem;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 21px;
+        padding: 3px 6px;
+        border: 1px solid currentColor;
+        color: var(--blue);
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.035em;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+
+      .badge.visual-commentary {
+        color: #7d369e;
+      }
+
+      .badge.word-study {
+        color: var(--green);
+      }
+
+      .badge.theme {
+        color: #9b5a05;
+      }
+
+      .badge.excluded,
+      .badge.exclude {
+        color: var(--red);
+      }
+
+      .language-badge {
+        padding: 3px 5px;
+        background: var(--ink);
+        color: white;
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.58rem;
+        font-weight: 800;
+      }
+
+      .anchor-lines {
+        display: grid;
+        gap: 4px;
+      }
+
+      .anchor-line {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+        line-height: 1.25;
+      }
+
+      .anchor-kind {
+        color: var(--blue);
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.56rem;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .more {
+        color: var(--muted);
+        font-size: 0.6rem;
+      }
+
+      .empty-state {
+        padding: 80px 24px;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 58px;
+        padding: 10px 14px;
+        border-top: 1px solid var(--ink);
+        background: var(--paper-deep);
+      }
+
+      .pagination button,
+      .secondary-button {
+        min-height: 34px;
+        padding: 7px 11px;
+        border: 1px solid var(--ink);
+        background: var(--white);
+        color: var(--ink);
+        font-size: 0.68rem;
+        font-weight: 750;
+      }
+
+      .decision-actions {
+        position: sticky;
+        bottom: -25px;
+        z-index: 3;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 22px -25px -25px;
+        padding: 12px 25px;
+        border-top: 1px solid var(--ink);
+        background: rgba(255, 253, 247, 0.97);
+        backdrop-filter: blur(12px);
+      }
+
+      .reject-button {
+        border-color: #9f2d20;
+        background: #fff5f1;
+        color: #7d2117;
+      }
+
+      .pagination button:disabled {
+        cursor: default;
+        opacity: 0.35;
+      }
+
+      .page-label {
+        color: var(--muted);
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.67rem;
+      }
+
+      .simulator {
+        scroll-margin-top: 80px;
+      }
+
+      .simulator-head {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+        gap: 30px;
+        padding: 25px;
+        border-bottom: 1px solid var(--ink);
+        background: var(--ink);
+        color: white;
+      }
+
+      h2 {
+        margin-bottom: 7px;
+        font-family: 'Iowan Old Style', Baskerville, Georgia, serif;
+        font-size: clamp(2rem, 4vw, 3.8rem);
+        font-weight: 500;
+        letter-spacing: -0.045em;
+        line-height: 1;
+      }
+
+      .simulator-head p {
+        max-width: 700px;
+        margin-bottom: 0;
+        color: #bac5c1;
+        font-size: 0.82rem;
+      }
+
+      .sim-controls {
+        display: grid;
+        grid-template-columns: 220px 110px 100px auto;
+        align-items: end;
+        gap: 8px;
+      }
+
+      .sim-controls label {
+        display: grid;
+        gap: 5px;
+        color: #bac5c1;
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+      }
+
+      .sim-controls select,
+      .sim-controls input {
+        height: 40px;
+        min-width: 0;
+        padding: 6px 8px;
+        border: 1px solid #60706b;
+        background: #243733;
+        color: white;
+      }
+
+      .check-label {
+        min-height: 40px;
+        display: flex !important;
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 7px !important;
+        text-transform: none !important;
+      }
+
+      .check-label input {
+        width: 16px;
+        height: 16px;
+      }
+
+      .sim-results {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1px;
+        background: var(--line);
+      }
+
+      .sim-card {
+        min-height: 170px;
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 14px;
+        padding: 16px;
+        background: var(--white);
+        cursor: pointer;
+      }
+
+      .sim-card:hover {
+        background: #f3f6ff;
+      }
+
+      .sim-card img {
+        width: 120px;
+        aspect-ratio: 16 / 9;
+        border: 1px solid var(--ink);
+        object-fit: cover;
+      }
+
+      .sim-card h3 {
+        margin-bottom: 7px;
+        font-size: 0.84rem;
+        line-height: 1.25;
+      }
+
+      .sim-card p {
+        margin-bottom: 10px;
+        color: var(--muted);
+        font-size: 0.68rem;
+      }
+
+      .sim-empty {
+        grid-column: 1 / -1;
+        padding: 60px 25px;
+        background: var(--white);
+        color: var(--muted);
+        text-align: center;
+      }
+
+      dialog {
+        width: min(920px, calc(100% - 30px));
+        height: min(880px, calc(100dvh - 30px));
+        max-height: min(880px, calc(100vh - 30px));
+        padding: 0;
+        overflow: hidden;
+        border: 1px solid var(--ink);
+        border-radius: 0;
+        background: var(--white);
+        color: var(--ink);
+        box-shadow: 18px 18px 0 rgba(21, 39, 36, 0.28);
+      }
+
+      dialog[open] {
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      dialog::backdrop {
+        background: rgba(21, 39, 36, 0.7);
+        backdrop-filter: blur(3px);
+      }
+
+      .dialog-head {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        min-height: 54px;
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--ink);
+        background: var(--paper);
+      }
+
+      .dialog-head span {
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.67rem;
+      }
+
+      .dialog-close {
+        width: 34px;
+        height: 34px;
+        border: 1px solid var(--ink);
+        background: var(--white);
+        font-weight: 900;
+      }
+
+      .dialog-body {
+        min-height: 0;
+        padding: 25px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+
+      .toast {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 100;
+        max-width: 380px;
+        padding: 12px 15px;
+        border: 1px solid var(--ink);
+        background: var(--ink);
+        color: white;
+        box-shadow: 7px 7px 0 var(--yellow);
+        font-size: 0.72rem;
+        font-weight: 700;
+        transform: translateY(140%);
+        transition: transform 180ms ease;
+      }
+
+      .toast.is-visible {
+        transform: translateY(0);
+      }
+
+      .dialog-title {
+        max-width: 760px;
+        margin-bottom: 8px;
+        font-family: 'Iowan Old Style', Baskerville, Georgia, serif;
+        font-size: clamp(2rem, 5vw, 4rem);
+        font-weight: 500;
+        letter-spacing: -0.045em;
+        line-height: 0.98;
+      }
+
+      .dialog-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 26px;
+      }
+
+      .detail-section {
+        margin-top: 28px;
+        padding-top: 18px;
+        border-top: 1px solid var(--ink);
+      }
+
+      .detail-section h3 {
+        margin-bottom: 14px;
+        font-size: 0.7rem;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .edition-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .edition-card {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 13px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .edition-card:hover {
+        border-color: var(--blue);
+      }
+
+      .edition-card img {
+        width: 150px;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+      }
+
+      .edition-card strong {
+        display: block;
+        margin: 7px 0;
+        font-size: 0.78rem;
+        line-height: 1.25;
+      }
+
+      .edition-card small,
+      .description {
+        color: var(--muted);
+        font-size: 0.66rem;
+      }
+
+      .review-note {
+        display: grid;
+        gap: 7px;
+        margin-top: 16px;
+        padding: 12px;
+        border: 1px solid #c78b2f;
+        background: #fff8e9;
+      }
+
+      .review-note label {
+        color: #765018;
+        font-size: 0.62rem;
+        font-weight: 850;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .review-note textarea {
+        width: 100%;
+        min-height: 92px;
+        padding: 9px;
+        resize: vertical;
+        border: 1px solid #c78b2f;
+        background: var(--white);
+        color: var(--ink);
+        font: inherit;
+        font-size: 0.76rem;
+      }
+
+      .anchor-table {
+        border: 1px solid var(--line);
+      }
+
+      .anchor-table td,
+      .anchor-table th {
+        position: static;
+        padding: 9px;
+      }
+
+      .provenance {
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-size: 0.6rem;
+      }
+
+      .raw-detail {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        gap: 22px;
+      }
+
+      .raw-detail img {
+        width: 260px;
+        border: 1px solid var(--ink);
+      }
+
+      footer {
+        padding: 20px 0 45px;
+        color: var(--muted);
+        font-size: 0.68rem;
+      }
+
+      @media (max-width: 1050px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .metric-grid {
+          max-width: 600px;
+        }
+
+        .toolbar {
+          grid-template-columns: repeat(3, 1fr);
+        }
+
+        .toolbar .control:first-child {
+          grid-column: span 3;
+        }
+
+        .simulator-head {
+          grid-template-columns: 1fr;
+        }
+
+        .sim-results {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .edition-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .curation-bar {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .snapshot,
+        .jump-link {
+          display: none;
+        }
+
+        .brand small {
+          display: none;
+        }
+
+        .hero {
+          padding-top: 38px;
+        }
+
+        .workspace-head {
+          display: block;
+          padding-top: 8px;
+        }
+
+        .results-count {
+          padding: 8px 5px 12px;
+        }
+
+        .toolbar {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .toolbar .control:first-child {
+          grid-column: span 2;
+        }
+
+        .bulk-panel {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        table {
+          min-width: 1280px;
+        }
+
+        .sim-controls {
+          grid-template-columns: 1fr 90px;
+        }
+
+        .sim-results {
+          grid-template-columns: 1fr;
+        }
+
+        .raw-detail {
+          grid-template-columns: 1fr;
+        }
+
+        .raw-detail img {
+          width: 100%;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <div class="brand">
+          <span class="brand-mark">BP</span>
+          <span>Atlas Bible View</span>
+          <small>BibleProject × Bible Strong</small>
+        </div>
+        <div class="header-actions">
+          <a class="jump-link" href="#simulateur">Simuler un chapitre ↓</a>
+          <span class="snapshot">snapshot <span id="snapshot-date"></span></span>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="overline">Catalogue éditorial inspectable</p>
+          <h1>Où va <mark>chaque vidéo</mark> dans la Bible&nbsp;?</h1>
+          <p class="hero-copy">
+            Cherche un titre, filtre une catégorie, trie les ressources et ouvre une ligne pour voir
+            les versions linguistiques, les versets, livres, chapitres, Strong, placements et
+            preuves éditoriales.
+          </p>
+        </div>
+        <div class="metric-grid" aria-label="Résumé du corpus">
+          <div class="metric">
+            <strong id="metric-works"></strong><span>ressources bibliques</span>
+          </div>
+          <div class="metric">
+            <strong id="metric-editions"></strong><span>vidéos publiées</span>
+          </div>
+          <div class="metric">
+            <strong id="metric-inventory"></strong><span>vidéos inventoriées</span>
+          </div>
+          <div class="metric">
+            <strong id="metric-exclusions"></strong><span>rejets décidés</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Explorateur du catalogue">
+        <div class="workspace-head">
+          <div class="tabs" role="tablist" aria-label="Jeu de données affiché">
+            <button class="tab" type="button" role="tab" data-tab="works" aria-selected="true">
+              Ressources bibliques <span class="tab-count" id="tab-count-works"></span>
+            </button>
+            <button class="tab" type="button" role="tab" data-tab="editions" aria-selected="false">
+              Vidéos publiées <span class="tab-count" id="tab-count-editions"></span>
+            </button>
+            <button class="tab" type="button" role="tab" data-tab="inventory" aria-selected="false">
+              Inventaire brut <span class="tab-count" id="tab-count-inventory"></span>
+            </button>
+            <button class="tab" type="button" role="tab" data-tab="excluded" aria-selected="false">
+              Rejets <span class="tab-count" id="tab-count-exclusions"></span>
+            </button>
+          </div>
+          <div class="results-count" id="results-count" aria-live="polite"></div>
+        </div>
+
+        <div class="toolbar">
+          <div class="control">
+            <label for="search">Recherche</label>
+            <input id="search" type="search" placeholder="Titre, ID, Strong, référence…" />
+          </div>
+          <div class="control">
+            <label for="category-filter">Catégorie</label>
+            <select id="category-filter"></select>
+          </div>
+          <div class="control">
+            <label for="language-filter">Langue</label>
+            <select id="language-filter">
+              <option value="fr">Français</option>
+              <option value="en">English</option>
+              <option value="all">Toutes</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="anchor-filter">Type de cible</label>
+            <select id="anchor-filter">
+              <option value="all">Toutes les cibles</option>
+              <option value="book">Livre</option>
+              <option value="passage">Passage / verset</option>
+              <option value="strong">Strong</option>
+              <option value="testament">Testament</option>
+              <option value="library">Bibliothèque</option>
+              <option value="none">Sans cible</option>
+            </select>
+          </div>
+          <div class="control">
+            <label for="sort-filter">Trier par</label>
+            <select id="sort-filter">
+              <option value="location">Position biblique</option>
+              <option value="category">Catégorie</option>
+              <option value="title">Titre</option>
+              <option value="published">Publication récente</option>
+            </select>
+          </div>
+          <div class="control" id="review-filter-control">
+            <label for="review-filter">État de revue</label>
+            <select id="review-filter">
+              <option value="all">Tous les états</option>
+              <option value="pending">À valider</option>
+              <option value="needs-correction">À corriger</option>
+              <option value="placed">Déjà publiée</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="curation-bar" id="curation-bar">
+          <div class="curation-progress" aria-label="Avancement de la revue">
+            <button class="progress-pill" type="button" data-review-shortcut="pending">
+              <strong id="review-count-pending">0</strong> à valider
+            </button>
+            <button class="progress-pill" type="button" data-review-shortcut="accepted">
+              <strong id="review-count-accepted">0</strong> validées
+            </button>
+            <button class="progress-pill" type="button" data-review-shortcut="needs-correction">
+              <strong id="review-count-correction">0</strong> à corriger
+            </button>
+            <span class="progress-pill"><strong id="review-count-total">0</strong> candidates</span>
+          </div>
+          <div class="curation-actions">
+            <button class="compact-button" id="export-decisions" type="button">
+              Exporter le travail
+            </button>
+            <button class="compact-button" id="import-decisions" type="button">Importer</button>
+            <input id="import-decisions-file" type="file" accept="application/json,.json" hidden />
+          </div>
+        </div>
+
+        <div class="bulk-panel" id="bulk-panel">
+          <span class="bulk-summary" id="bulk-summary">0 vidéo sélectionnée</span>
+          <div class="bulk-actions">
+            <button class="compact-button" id="select-filtered" type="button">
+              Tout sélectionner dans ce filtre
+            </button>
+            <button class="compact-button" type="button" data-bulk-action="accepted">
+              Valider les cibles
+            </button>
+            <button class="compact-button" type="button" data-bulk-action="needs-correction">
+              Marquer à corriger
+            </button>
+            <button class="compact-button danger" type="button" data-bulk-action="reject">
+              Rejeter
+            </button>
+            <button class="compact-button" type="button" data-bulk-action="restore">
+              Restaurer
+            </button>
+            <button class="compact-button" type="button" data-bulk-action="clear">Annuler</button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table aria-describedby="results-count">
+            <thead>
+              <tr>
+                <th class="col-select">
+                  <input id="select-page" type="checkbox" aria-label="Sélectionner cette page" />
+                </th>
+                <th class="col-video">Vidéo / ressource</th>
+                <th class="col-category">Catégorie</th>
+                <th class="col-language">Langue</th>
+                <th class="col-status">État</th>
+                <th class="col-placement">Placement précis</th>
+                <th class="col-target">Cible biblique / lexicale</th>
+                <th class="col-actions">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <button id="previous-page" type="button">← Précédent</button>
+          <span class="page-label" id="page-label"></span>
+          <button id="next-page" type="button">Suivant →</button>
+        </div>
+      </section>
+
+      <section class="simulator" id="simulateur">
+        <div class="simulator-head">
+          <div>
+            <p class="overline" style="color: var(--yellow)">Simulation Bible View</p>
+            <h2>Que voit-on dans ce chapitre&nbsp;?</h2>
+            <p>
+              Le résultat respecte la langue choisie et affiche uniquement les ancres principales
+              qui produiront réellement une carte dans Bible View.
+            </p>
+          </div>
+          <div class="sim-controls">
+            <label>
+              Livre
+              <select id="sim-book"></select>
+            </label>
+            <label>
+              Chapitre
+              <input id="sim-chapter" type="number" min="1" value="20" />
+            </label>
+            <label>
+              Langue
+              <select id="sim-language">
+                <option value="fr">FR</option>
+                <option value="en">EN</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="sim-results" id="sim-results"></div>
+      </section>
+    </main>
+
+    <dialog id="detail-dialog" aria-label="Détail de la vidéo BibleProject">
+      <div class="dialog-head">
+        <span id="dialog-reference">Détail éditorial</span>
+        <button class="dialog-close" id="dialog-close" type="button" aria-label="Fermer">×</button>
+      </div>
+      <div class="dialog-body" id="dialog-body"></div>
+    </dialog>
+
+    <footer class="shell">
+      Données générées depuis les manifests versionnés. Les miniatures et vidéos restent hébergées
+      par YouTube. Les mentions détectées dans l’inventaire brut sont des candidates, pas des ancres
+      publiées.
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="data/bible-project/presentation-data.js"></script>
+    <script>
+      const DATA = globalThis.BIBLE_PROJECT_PRESENTATION_DATA
+      const DECISIONS_STORAGE_KEY = 'bible-project-presentation-decisions-v1'
+      const ANCHOR_REVIEWS_STORAGE_KEY = 'bible-project-presentation-anchor-reviews-v2'
+      const BASE_REJECTIONS = new Map(DATA.excludedVideos.map(video => [video.id, video]))
+      const anchorProposalSignature = proposal =>
+        JSON.stringify({
+          primaryAnchor: proposal?.primaryAnchor,
+          relatedAnchors: proposal?.relatedAnchors || [],
+        })
+      const proposalSignatures = new Map(
+        DATA.inventory
+          .filter(video => video.anchorProposal)
+          .map(video => [video.id, anchorProposalSignature(video.anchorProposal)])
+      )
+      const loadDecisions = () => {
+        try {
+          const value = JSON.parse(localStorage.getItem(DECISIONS_STORAGE_KEY) || '{}')
+          return new Map(
+            Object.entries(value.overrides || {}).filter(([, action]) =>
+              ['reject', 'restore'].includes(action)
+            )
+          )
+        } catch {
+          return new Map()
+        }
+      }
+      const decisionOverrides = loadDecisions()
+      const loadAnchorReviews = () => {
+        try {
+          const value = JSON.parse(localStorage.getItem(ANCHOR_REVIEWS_STORAGE_KEY) || '{}')
+          return new Map(
+            Object.entries(value.reviews || {}).filter(
+              ([providerId, review]) =>
+                ['accepted', 'needs-correction'].includes(review?.status) &&
+                review.signature === proposalSignatures.get(providerId)
+            )
+          )
+        } catch {
+          return new Map()
+        }
+      }
+      const anchorReviews = loadAnchorReviews()
+      const saveDecisions = () => {
+        try {
+          localStorage.setItem(
+            DECISIONS_STORAGE_KEY,
+            JSON.stringify({ overrides: Object.fromEntries(decisionOverrides) })
+          )
+        } catch {
+          // The explorer remains usable when local storage is unavailable on a file URL.
+        }
+      }
+      const saveAnchorReviews = () => {
+        try {
+          localStorage.setItem(
+            ANCHOR_REVIEWS_STORAGE_KEY,
+            JSON.stringify({ reviews: Object.fromEntries(anchorReviews) })
+          )
+        } catch {
+          // Review remains available for the current session without local storage.
+        }
+      }
+      const showToast = message => {
+        clearTimeout(toastTimeout)
+        elements.toast.textContent = message
+        elements.toast.classList.add('is-visible')
+        toastTimeout = setTimeout(() => elements.toast.classList.remove('is-visible'), 2600)
+      }
+      const reviewStatusForVideo = video => {
+        if (video.anchorReviewStatus === 'needs-correction') return 'needs-correction'
+        if (
+          video.workIds?.length ||
+          video.disposition === 'associated-placed' ||
+          video.anchorReviewStatus === 'accepted' ||
+          video.anchorProposal?.reviewStatus === 'human-accepted'
+        )
+          return 'placed'
+        if (!video.anchorProposal) return 'without-proposal'
+        return video.anchorReviewStatus || 'pending'
+      }
+      const reviewCandidates = () =>
+        currentNonRejectedInventory().filter(
+          video =>
+            !video.workIds?.length &&
+            video.anchorProposal &&
+            ['pending', 'needs-correction'].includes(reviewStatusForVideo(video))
+        )
+      const updateReviewCounts = () => {
+        const candidates = reviewCandidates()
+        const counts = candidates.reduce(
+          (result, video) => {
+            result[reviewStatusForVideo(video)] += 1
+            return result
+          },
+          { pending: 0, accepted: 0, 'needs-correction': 0 }
+        )
+        document.querySelector('#review-count-pending').textContent = counts.pending
+        document.querySelector('#review-count-accepted').textContent = counts.accepted
+        document.querySelector('#review-count-correction').textContent = counts['needs-correction']
+        document.querySelector('#review-count-total').textContent = candidates.length
+        document
+          .querySelectorAll('[data-review-shortcut]')
+          .forEach(button =>
+            button.classList.toggle('is-active', button.dataset.reviewShortcut === state.review)
+          )
+      }
+      const isRejectedVideo = video => {
+        const override = decisionOverrides.get(video.id)
+        return override ? override === 'reject' : BASE_REJECTIONS.has(video.id)
+      }
+      const currentRejectionReasons = video => {
+        const baseReasons = BASE_REJECTIONS.get(video.id)?.reasons || []
+        return [
+          ...(decisionOverrides.get(video.id) === 'reject' ? ['manual-decision'] : []),
+          ...baseReasons,
+        ].filter((reason, index, reasons) => reasons.indexOf(reason) === index)
+      }
+      const currentInventoryVideo = video => {
+        const { exclusionReason, exclusionReasons, workIds, ...cleanVideo } = video
+        const anchorReview = anchorReviews.get(video.id)
+        const reviewState = anchorReview
+          ? {
+              anchorReviewStatus: anchorReview.status,
+              ...(anchorReview.note ? { anchorReviewNote: anchorReview.note } : {}),
+            }
+          : {}
+        if (isRejectedVideo(video)) {
+          const reasons = currentRejectionReasons(video)
+          return {
+            ...cleanVideo,
+            disposition: 'rejected-reviewed',
+            exclusionReason: reasons[0],
+            exclusionReasons: reasons,
+          }
+        }
+        if (BASE_REJECTIONS.has(video.id))
+          return {
+            ...cleanVideo,
+            ...(workIds ? { workIds } : {}),
+            ...reviewState,
+            disposition: 'restored-to-inventory',
+          }
+        if (['classified-out-of-scope', 'needs-review'].includes(video.disposition))
+          return {
+            ...cleanVideo,
+            ...(workIds ? { workIds } : {}),
+            ...reviewState,
+            suitability: 'related',
+            disposition: 'related-candidate',
+          }
+        return {
+          ...cleanVideo,
+          ...(workIds ? { workIds } : {}),
+          ...reviewState,
+        }
+      }
+      const currentRejectedVideos = () =>
+        DATA.inventory.filter(isRejectedVideo).map(video => {
+          const currentVideo = currentInventoryVideo(video)
+          return {
+            ...currentVideo,
+            reason: currentVideo.exclusionReasons[0],
+            reasons: currentVideo.exclusionReasons,
+          }
+        })
+      const currentNonRejectedInventory = () =>
+        DATA.inventory.filter(video => !isRejectedVideo(video)).map(currentInventoryVideo)
+      const currentWorks = () =>
+        DATA.works.flatMap(work => {
+          const editions = work.editions.filter(
+            edition => !isRejectedVideo({ id: edition.providerId })
+          )
+          return editions.length ? [{ ...work, editions }] : []
+        })
+      const PAGE_SIZE = 30
+      const BOOKS = [
+        'Genèse',
+        'Exode',
+        'Lévitique',
+        'Nombres',
+        'Deutéronome',
+        'Josué',
+        'Juges',
+        'Ruth',
+        '1 Samuel',
+        '2 Samuel',
+        '1 Rois',
+        '2 Rois',
+        '1 Chroniques',
+        '2 Chroniques',
+        'Esdras',
+        'Néhémie',
+        'Esther',
+        'Job',
+        'Psaumes',
+        'Proverbes',
+        'Ecclésiaste',
+        'Cantique des cantiques',
+        'Ésaïe',
+        'Jérémie',
+        'Lamentations',
+        'Ézéchiel',
+        'Daniel',
+        'Osée',
+        'Joël',
+        'Amos',
+        'Abdias',
+        'Jonas',
+        'Michée',
+        'Nahum',
+        'Habacuc',
+        'Sophonie',
+        'Aggée',
+        'Zacharie',
+        'Malachie',
+        'Matthieu',
+        'Marc',
+        'Luc',
+        'Jean',
+        'Actes',
+        'Romains',
+        '1 Corinthiens',
+        '2 Corinthiens',
+        'Galates',
+        'Éphésiens',
+        'Philippiens',
+        'Colossiens',
+        '1 Thessaloniciens',
+        '2 Thessaloniciens',
+        '1 Timothée',
+        '2 Timothée',
+        'Tite',
+        'Philémon',
+        'Hébreux',
+        'Jacques',
+        '1 Pierre',
+        '2 Pierre',
+        '1 Jean',
+        '2 Jean',
+        '3 Jean',
+        'Jude',
+        'Apocalypse',
+      ]
+      const CATEGORY_LABELS = {
+        'book-overview': 'Panorama de livre',
+        'visual-commentary': 'Commentaire visuel',
+        'word-study': 'Étude de mot',
+        theme: 'Thème',
+        'book-collection': 'Collection de livres',
+        'how-to-read': 'Comment lire',
+        short: 'Format court',
+        studio: 'Studio',
+        podcast: 'Podcast',
+        classroom: 'Classroom',
+        'long-form': 'Format long',
+        uncategorized: 'Non classé',
+      }
+      const PLACEMENT_LABELS = {
+        introduction: 'Introduction',
+        'after-range': 'Après les versets',
+        'chapter-resources': 'Fin du chapitre',
+        'related-resource': 'Ressource associée',
+        'strong-resource': 'Fiche Strong',
+        library: 'Bibliothèque',
+      }
+      const EXCLUSION_LABELS = {
+        'question-and-response': 'Questions-réponses',
+        'behind-the-scenes': 'Coulisses',
+        'studio-teaser': 'Teaser studio',
+        trailer: 'Bande-annonce',
+        'trailer-not-editorial-commentary': 'Bande-annonce sans contenu éditorial',
+        'group-study-promotion': 'Promotion étude de groupe',
+        'reading-plan-promotion': 'Promotion plan de lecture',
+        'derivative-short': 'Extrait dérivé',
+        'duplicate-long-form-compilation': 'Compilation redondante',
+        'superseded-duplicate': 'Doublon obsolète',
+        'vertical-9-16-format': 'Format vertical 9:16',
+        'studio-content': 'Contenu Studio',
+        'manual-decision': 'Décision manuelle',
+        'human-editorial-rejection': 'Décision éditoriale validée',
+      }
+      const DISPOSITION_LABELS = {
+        placed: 'Placée dans Bible View',
+        'associated-placed': 'Placée dans Bible View',
+        'rejected-reviewed': 'Rejet éditorial',
+        'classified-out-of-scope': 'Classée hors Bible View',
+        'inline-candidate': 'Candidate inline',
+        'related-candidate': 'Candidate associée',
+        'restored-to-inventory': 'Remise dans l’inventaire',
+        'needs-review': 'À revoir',
+      }
+      const ANCHOR_REVIEW_LABELS = {
+        accepted: 'Ressource publiée localement',
+        'needs-correction': 'Cible à corriger',
+      }
+      const state = {
+        tab: 'works',
+        search: '',
+        category: 'all',
+        language: 'fr',
+        anchor: 'all',
+        review: 'all',
+        sort: 'location',
+        page: 1,
+      }
+      let curatedLanguage = state.language
+      const selectedVideoIds = new Set()
+      let filteredRawVideoIds = []
+      let pageRawVideoIds = []
+      let toastTimeout
+
+      const elements = {
+        workspace: document.querySelector('.workspace'),
+        body: document.querySelector('#results-body'),
+        count: document.querySelector('#results-count'),
+        pageLabel: document.querySelector('#page-label'),
+        previous: document.querySelector('#previous-page'),
+        next: document.querySelector('#next-page'),
+        search: document.querySelector('#search'),
+        category: document.querySelector('#category-filter'),
+        language: document.querySelector('#language-filter'),
+        anchor: document.querySelector('#anchor-filter'),
+        review: document.querySelector('#review-filter'),
+        sort: document.querySelector('#sort-filter'),
+        selectPage: document.querySelector('#select-page'),
+        bulkPanel: document.querySelector('#bulk-panel'),
+        bulkSummary: document.querySelector('#bulk-summary'),
+        selectFiltered: document.querySelector('#select-filtered'),
+        toast: document.querySelector('#toast'),
+        dialog: document.querySelector('#detail-dialog'),
+        dialogBody: document.querySelector('#dialog-body'),
+        dialogReference: document.querySelector('#dialog-reference'),
+      }
+
+      document.querySelector('#snapshot-date').textContent = new Date(
+        DATA.generatedAt
+      ).toLocaleDateString('fr-FR')
+      for (const [key, value] of Object.entries(DATA.totals)) {
+        document.querySelector(`#metric-${key}`).textContent = value.toLocaleString('fr-FR')
+        document.querySelector(`#tab-count-${key}`).textContent = value.toLocaleString('fr-FR')
+      }
+      const updateDecisionCounts = () => {
+        const works = currentWorks()
+        const workCount = works.length
+        const editionCount = works.flatMap(work => work.editions).length
+        const inventoryCount = currentNonRejectedInventory().length
+        const rejectionCount = currentRejectedVideos().length
+        document.querySelector('#metric-works').textContent = workCount.toLocaleString('fr-FR')
+        document.querySelector('#tab-count-works').textContent = workCount.toLocaleString('fr-FR')
+        document.querySelector('#metric-editions').textContent =
+          editionCount.toLocaleString('fr-FR')
+        document.querySelector('#tab-count-editions').textContent =
+          editionCount.toLocaleString('fr-FR')
+        document.querySelector('#tab-count-inventory').textContent =
+          inventoryCount.toLocaleString('fr-FR')
+        document.querySelector('#tab-count-exclusions').textContent =
+          rejectionCount.toLocaleString('fr-FR')
+        document.querySelector('#metric-exclusions').textContent =
+          rejectionCount.toLocaleString('fr-FR')
+      }
+      updateDecisionCounts()
+
+      const escapeHtml = value =>
+        String(value ?? '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#039;')
+
+      const formatDuration = seconds => {
+        if (!seconds) return '—'
+        const minutes = Math.floor(seconds / 60)
+        const rest = seconds % 60
+        return `${minutes}:${String(rest).padStart(2, '0')}`
+      }
+
+      const formatTimestamp = seconds => {
+        const minutes = Math.floor(Number(seconds || 0) / 60)
+        const rest = Math.floor(Number(seconds || 0) % 60)
+        return `${minutes}:${String(rest).padStart(2, '0')}`
+      }
+
+      const formatPassage = anchor => {
+        if (anchor.kind === 'library') return 'Bibliothèque de ressources'
+        if (anchor.kind === 'strong') {
+          const lexical = [anchor.code, anchor.lemma, anchor.transliteration]
+            .filter(Boolean)
+            .join(' · ')
+          return lexical
+        }
+        if (anchor.kind === 'testament')
+          return anchor.testament === 'old' ? 'Ancien Testament' : 'Nouveau Testament'
+        const book = BOOKS[(anchor.book || 1) - 1] || `Livre ${anchor.book}`
+        if (anchor.kind === 'book') return book
+        const start = `${book} ${anchor.chapterStart}${anchor.verseStart ? `:${anchor.verseStart}` : ''}`
+        const endChapter = anchor.chapterEnd || anchor.chapterStart
+        const hasEnd =
+          endChapter !== anchor.chapterStart ||
+          (anchor.verseEnd && anchor.verseEnd !== anchor.verseStart)
+        if (!hasEnd) return start
+        const end =
+          endChapter === anchor.chapterStart
+            ? `${anchor.verseEnd || ''}`
+            : `${endChapter}${anchor.verseEnd ? `:${anchor.verseEnd}` : ''}`
+        return `${start}–${end}`
+      }
+
+      const formatDetectedReference = reference => {
+        const book = BOOKS[(reference.book || 1) - 1] || `Livre ${reference.book}`
+        if (!reference.chapterStart) return book
+        return `${book} ${reference.chapterStart}${reference.verseStart ? `:${reference.verseStart}` : ''}`
+      }
+
+      const categoryBadges = categories =>
+        categories
+          .map(
+            category =>
+              `<span class="badge ${escapeHtml(category)}">${escapeHtml(CATEGORY_LABELS[category] || category)}</span>`
+          )
+          .join('')
+
+      const languageBadges = languages =>
+        [...new Set(languages)]
+          .map(
+            language => `<span class="language-badge">${escapeHtml(language.toUpperCase())}</span>`
+          )
+          .join(' ')
+
+      const selectedEdition = work => {
+        if (state.language === 'all')
+          return work.editions.find(edition => edition.language === 'fr') || work.editions[0]
+        return (
+          work.editions.find(edition => edition.language === state.language) || work.editions[0]
+        )
+      }
+
+      const primaryAnchors = work => work.anchors.filter(anchor => anchor.relevance !== 'related')
+
+      const worksForVideo = video =>
+        (video.workIds || [])
+          .map(workId => currentWorks().find(work => work.id === workId))
+          .filter(Boolean)
+
+      const reviewedAnchorsForVideo = video => {
+        const workAnchors = worksForVideo(video).flatMap(work => primaryAnchors(work))
+        if (workAnchors.length) return workAnchors
+        return reviewStatusForVideo(video) === 'placed' ? proposedAnchorsForVideo(video) : []
+      }
+
+      const proposedAnchorsForVideo = video => {
+        if (!video.anchorProposal) return []
+        const anchors = [
+          video.anchorProposal.primaryAnchor,
+          ...(video.anchorProposal.relatedAnchors || []),
+        ]
+        return [
+          ...anchors,
+          ...(video.category === 'how-to-read' && !anchors.some(anchor => anchor.kind === 'library')
+            ? [{ kind: 'library', placement: 'library' }]
+            : []),
+        ]
+      }
+
+      const effectiveAnchorsForVideo = video => {
+        const reviewed = reviewedAnchorsForVideo(video)
+        return reviewed.length ? reviewed : proposedAnchorsForVideo(video)
+      }
+
+      const reviewStatusHtml = video => {
+        const status = reviewStatusForVideo(video)
+        if (status === 'placed') return '<span class="review-status accepted">Publiée</span>'
+        if (status === 'needs-correction')
+          return `<span class="review-status needs-correction">À corriger${video.anchorReviewNote ? ' · note' : ''}</span>`
+        if (status === 'pending') return '<span class="review-status pending">À valider</span>'
+        return '<span class="review-status">Sans proposition</span>'
+      }
+
+      const rowActionsHtml = (video, isRejected) => {
+        if (isRejected)
+          return `<div class="row-actions"><button class="row-action" type="button" data-decision-action="restore" data-decision-id="${escapeHtml(video.id)}">Restaurer</button><button class="row-action details" type="button" data-open-details="${escapeHtml(video.id)}">Détails</button></div>`
+        const reviewStatus = reviewStatusForVideo(video)
+        const reviewActions = video.anchorProposal
+          ? reviewStatus === 'placed'
+            ? `<button class="row-action" type="button" data-anchor-review-action="needs-correction" data-anchor-review-id="${escapeHtml(video.id)}">Corriger</button>`
+            : `<button class="row-action" type="button" data-anchor-review-action="accepted" data-anchor-review-id="${escapeHtml(video.id)}">Publier</button><button class="row-action ${reviewStatus === 'needs-correction' ? 'is-active' : ''}" type="button" data-anchor-review-action="needs-correction" data-anchor-review-id="${escapeHtml(video.id)}">Corriger</button>`
+          : ''
+        return `<div class="row-actions">${reviewActions}<button class="row-action danger" type="button" data-decision-action="reject" data-decision-id="${escapeHtml(video.id)}">Rejeter</button><button class="row-action details" type="button" data-open-details="${escapeHtml(video.id)}">Détails</button></div>`
+      }
+
+      const tableAnchors = work => {
+        const primary = primaryAnchors(work)
+        if (state.anchor === 'all' || state.anchor === 'none') return primary
+        const matching = work.anchors.filter(anchor => anchor.kind === state.anchor)
+        return [...matching, ...primary.filter(anchor => !matching.includes(anchor))]
+      }
+
+      const anchorsHtml = (anchors, limit = 2) => {
+        if (!anchors.length) return '<span class="more">Aucune ancre publiée</span>'
+        const visible = anchors.slice(0, limit)
+        const more = anchors.length - visible.length
+        return `<div class="anchor-lines">${visible
+          .map(
+            anchor =>
+              `<div class="anchor-line"><span class="anchor-kind">${escapeHtml(anchor.kind)}</span><span>${escapeHtml(formatPassage(anchor))}</span></div>`
+          )
+          .join(
+            ''
+          )}${more ? `<span class="more">+ ${more} autre${more > 1 ? 's' : ''}</span>` : ''}</div>`
+      }
+
+      const placementsHtml = anchors => {
+        const placements = [...new Set(anchors.map(anchor => anchor.placement).filter(Boolean))]
+        return placements.length
+          ? `<div class="badges">${placements.map(placement => `<span class="badge">${escapeHtml(PLACEMENT_LABELS[placement] || placement)}</span>`).join('')}</div>`
+          : '<span class="more">Non publié</span>'
+      }
+
+      const thumbnail = (url, title) =>
+        `<div class="thumb"><img src="${escapeHtml(url)}" alt="" loading="lazy" referrerpolicy="no-referrer" /><span class="play-dot" aria-hidden="true">▶</span></div>`
+
+      const normalize = value =>
+        String(value || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+
+      const workSearchText = work =>
+        normalize(
+          [
+            work.id,
+            work.series,
+            ...work.categories,
+            ...work.editions.flatMap(edition => [edition.title, edition.providerId]),
+            ...work.anchors.flatMap(anchor => [
+              formatPassage(anchor),
+              anchor.code,
+              anchor.lemma,
+              anchor.transliteration,
+            ]),
+          ].join(' ')
+        )
+
+      const anchorLocation = anchor => {
+        if (!anchor) return 999999
+        if (anchor.kind === 'testament') return anchor.testament === 'old' ? 0 : 390000
+        if (anchor.kind === 'strong') return 900000 + Number(anchor.code?.slice(1) || 0)
+        if (anchor.kind === 'library') return 999998
+        return (
+          (anchor.book || 99) * 10000 + (anchor.chapterStart || 0) * 100 + (anchor.verseStart || 0)
+        )
+      }
+
+      const workLocation = work => anchorLocation(primaryAnchors(work)[0] || work.anchors[0])
+
+      const videoLocation = video => {
+        const semanticAnchors = reviewedAnchorsForVideo(video).length
+          ? reviewedAnchorsForVideo(video)
+          : proposedAnchorsForVideo(video)
+        if (semanticAnchors.length) return anchorLocation(semanticAnchors[0])
+        if (video.referenceMentions?.length) return anchorLocation(video.referenceMentions[0])
+        if (video.bookMentions?.length)
+          return anchorLocation({ kind: 'book', book: video.bookMentions[0] })
+        return 999999
+      }
+
+      const categoryOptions = () => {
+        const categories =
+          state.tab === 'works' || state.tab === 'editions'
+            ? [...new Set(currentWorks().flatMap(work => work.categories))]
+            : [
+                ...new Set(
+                  (state.tab === 'excluded'
+                    ? currentRejectedVideos()
+                    : currentNonRejectedInventory()
+                  ).map(video => video.category)
+                ),
+              ]
+        elements.category.innerHTML = `<option value="all">Toutes les catégories</option>${categories
+          .sort((a, b) => (CATEGORY_LABELS[a] || a).localeCompare(CATEGORY_LABELS[b] || b, 'fr'))
+          .map(
+            category =>
+              `<option value="${escapeHtml(category)}">${escapeHtml(CATEGORY_LABELS[category] || category)}</option>`
+          )
+          .join('')}`
+        if (!categories.includes(state.category)) state.category = 'all'
+        elements.category.value = state.category
+      }
+
+      const getWorkRows = () => {
+        const rows =
+          state.tab === 'editions'
+            ? currentWorks().flatMap(work =>
+                work.editions.map(edition => ({ type: 'edition', work, edition }))
+              )
+            : currentWorks().map(work => ({ type: 'work', work, edition: selectedEdition(work) }))
+        return rows.filter(({ work, edition }) => {
+          const hasLanguage =
+            state.language === 'all' ||
+            (state.tab === 'editions'
+              ? edition.language === state.language
+              : work.editions.some(item => item.language === state.language))
+          const hasCategory = state.category === 'all' || work.categories.includes(state.category)
+          const hasAnchor =
+            state.anchor === 'all' ||
+            (state.anchor === 'none'
+              ? work.anchors.length === 0
+              : work.anchors.some(anchor => anchor.kind === state.anchor))
+          const matchesSearch =
+            !state.search || workSearchText(work).includes(normalize(state.search))
+          return hasLanguage && hasCategory && hasAnchor && matchesSearch
+        })
+      }
+
+      const rawSearchText = video =>
+        normalize(
+          [
+            video.id,
+            video.title,
+            video.category,
+            video.reason,
+            ...(video.reasons || video.exclusionReasons || []),
+            video.disposition,
+            DISPOSITION_LABELS[video.disposition],
+            video.anchorProposal?.confidence,
+            video.anchorProposal?.rationale,
+            ANCHOR_REVIEW_LABELS[video.anchorReviewStatus],
+            ...(video.workIds || []),
+            ...[...reviewedAnchorsForVideo(video), ...proposedAnchorsForVideo(video)].flatMap(
+              anchor => [formatPassage(anchor), anchor.code, anchor.lemma, anchor.transliteration]
+            ),
+            ...(video.bookMentions || []).map(book => BOOKS[book - 1]),
+            ...(video.referenceMentions || []).map(formatDetectedReference),
+          ].join(' ')
+        )
+
+      const getRawRows = () => {
+        const source =
+          state.tab === 'excluded' ? currentRejectedVideos() : currentNonRejectedInventory()
+        return source
+          .filter(video => {
+            const hasLanguage = state.language === 'all' || video.language === state.language
+            const hasCategory = state.category === 'all' || video.category === state.category
+            const referenceMentions = video.referenceMentions || []
+            const bookMentions = video.bookMentions || []
+            const detectedAnchors = [...referenceMentions, ...bookMentions]
+            const reviewedAnchors = reviewedAnchorsForVideo(video)
+            const proposedAnchors = proposedAnchorsForVideo(video)
+            const semanticAnchors = reviewedAnchors.length ? reviewedAnchors : proposedAnchors
+            const hasAnchor =
+              state.anchor === 'all' ||
+              (state.anchor === 'none'
+                ? semanticAnchors.length === 0
+                : semanticAnchors.length
+                  ? semanticAnchors.some(anchor => anchor.kind === state.anchor)
+                  : state.anchor === 'passage'
+                    ? referenceMentions.length > 0
+                    : state.anchor === 'book'
+                      ? bookMentions.length > 0
+                      : false)
+            const matchesSearch =
+              !state.search || rawSearchText(video).includes(normalize(state.search))
+            const hasReview =
+              state.tab === 'excluded' ||
+              state.review === 'all' ||
+              reviewStatusForVideo(video) === state.review
+            return hasLanguage && hasCategory && hasAnchor && hasReview && matchesSearch
+          })
+          .map(video => ({ type: state.tab === 'excluded' ? 'excluded' : 'inventory', video }))
+      }
+
+      const sortRows = rows =>
+        rows.sort((left, right) => {
+          if (state.sort === 'location') {
+            const leftLocation = left.work ? workLocation(left.work) : videoLocation(left.video)
+            const rightLocation = right.work ? workLocation(right.work) : videoLocation(right.video)
+            if (leftLocation !== rightLocation) return leftLocation - rightLocation
+          }
+          if (state.sort === 'published')
+            return String(
+              right.edition?.publishedAt || right.video?.publishedAt || ''
+            ).localeCompare(String(left.edition?.publishedAt || left.video?.publishedAt || ''))
+          if (state.sort === 'category') {
+            const leftCategory = left.work?.categories[0] || left.video?.category || ''
+            const rightCategory = right.work?.categories[0] || right.video?.category || ''
+            return leftCategory.localeCompare(rightCategory)
+          }
+          const leftTitle = left.edition?.title || left.video?.title || left.work?.id || ''
+          const rightTitle = right.edition?.title || right.video?.title || right.work?.id || ''
+          return leftTitle.localeCompare(rightTitle, 'fr')
+        })
+
+      const workRowHtml = ({ type, work, edition }) => {
+        const anchors = tableAnchors(work)
+        const title = edition?.title || work.id
+        return `<tr data-open="work" data-id="${escapeHtml(work.id)}" tabindex="0">
+          <td></td>
+          <td><div class="video-cell">${thumbnail(edition?.thumbnailUrl, title)}<div><span class="video-title">${escapeHtml(title)}</span><span class="video-id">${escapeHtml(work.id)}${type === 'edition' ? ` · ${escapeHtml(edition.providerId)}` : ''}</span></div></div></td>
+          <td><div class="badges">${categoryBadges(work.categories)}</div></td>
+          <td>${languageBadges(type === 'edition' ? [edition.language] : work.editions.map(item => item.language))}</td>
+          <td><span class="review-status accepted">Publiée</span></td>
+          <td>${placementsHtml(anchors)}</td>
+          <td>${anchorsHtml(anchors)}</td>
+          <td><button class="row-action details" type="button" data-open-work="${escapeHtml(work.id)}">Détails</button></td>
+        </tr>`
+      }
+
+      const rawAnchorsHtml = video => {
+        const references = (video.referenceMentions || []).map(reference => ({
+          kind: 'candidate',
+          label: formatDetectedReference(reference),
+        }))
+        const books = (video.bookMentions || []).map(book => ({
+          kind: 'livre',
+          label: BOOKS[book - 1],
+        }))
+        const candidates = [...references, ...books]
+        if (!candidates.length) return '<span class="more">Aucune mention détectée</span>'
+        return `<div class="anchor-lines">${candidates
+          .slice(0, 2)
+          .map(
+            candidate =>
+              `<div class="anchor-line"><span class="anchor-kind">${candidate.kind}</span><span>${escapeHtml(candidate.label)}</span></div>`
+          )
+          .join(
+            ''
+          )}${candidates.length > 2 ? `<span class="more">+ ${candidates.length - 2} autre(s)</span>` : ''}</div>`
+      }
+
+      const proposalEvidenceHtml = proposal => {
+        const evidence = proposal?.evidence || []
+        if (!evidence.length) return '<span class="more">Aucun extrait conservé</span>'
+        return `<div class="anchor-lines">${evidence
+          .map(
+            item =>
+              `<div class="anchor-line"><span class="anchor-kind">${escapeHtml(item.source)}${Number.isFinite(item.timestampSeconds) ? ` · ${formatTimestamp(item.timestampSeconds)}` : ''}</span><span>${escapeHtml(item.excerpt)}</span></div>`
+          )
+          .join('')}</div>`
+      }
+
+      const rawRowHtml = ({ type, video }) => {
+        const isExcluded = type === 'excluded'
+        const isRejected = isExcluded || video.disposition === 'rejected-reviewed'
+        const reviewedAnchors = reviewedAnchorsForVideo(video)
+        const proposedAnchors = proposedAnchorsForVideo(video)
+        const rejectionReasons = video.reasons || video.exclusionReasons || [video.reason]
+        const rejectionBadges = rejectionReasons
+          .filter(Boolean)
+          .map(
+            reason =>
+              `<span class="badge excluded">${escapeHtml(EXCLUSION_LABELS[reason] || reason)}</span>`
+          )
+          .join('')
+        const disposition =
+          DISPOSITION_LABELS[video.disposition] || video.suitability || 'inventaire'
+        const effectiveAnchors = reviewedAnchors.length ? reviewedAnchors : proposedAnchors
+        return `<tr data-open="${type}" data-id="${escapeHtml(video.id)}" tabindex="0">
+          <td class="col-select"><input class="row-selector" type="checkbox" data-select-video="${escapeHtml(video.id)}" aria-label="Sélectionner ${escapeHtml(video.title)}" ${selectedVideoIds.has(video.id) ? 'checked' : ''} /></td>
+          <td><div class="video-cell">${thumbnail(video.thumbnailUrl, video.title)}<div><span class="video-title">${escapeHtml(video.title)}</span><span class="video-id">${escapeHtml(video.id)}</span></div></div></td>
+          <td><div class="badges">${categoryBadges([video.category])}${isRejected ? '<span class="badge excluded">Rejet</span>' : ''}</div></td>
+          <td>${languageBadges([video.language])}</td>
+          <td><div class="status-stack">${isRejected ? '<span class="review-status needs-correction">Rejetée</span>' : reviewStatusHtml(video)}<span class="more">${escapeHtml(disposition)}</span>${video.workIds?.length ? `<span class="more">${escapeHtml(video.workIds.join(', '))}</span>` : ''}</div></td>
+          <td>${isRejected ? rejectionBadges : effectiveAnchors.length ? placementsHtml(effectiveAnchors) : '<span class="more">Aucun placement</span>'}</td>
+          <td>${isRejected ? '<span class="more">Ne pas publier dans Bible View</span>' : effectiveAnchors.length ? `${anchorsHtml(effectiveAnchors)}${reviewedAnchors.length ? '' : `<span class="more">Proposition · confiance ${escapeHtml(video.anchorProposal.confidence)}</span>`}` : rawAnchorsHtml(video)}</td>
+          <td>${rowActionsHtml(video, isRejected)}</td>
+        </tr>`
+      }
+
+      const updateSelectionUi = () => {
+        const selectedCount = selectedVideoIds.size
+        const selectedOnPage = pageRawVideoIds.filter(id => selectedVideoIds.has(id)).length
+        elements.selectPage.checked =
+          pageRawVideoIds.length > 0 && selectedOnPage === pageRawVideoIds.length
+        elements.selectPage.indeterminate =
+          selectedOnPage > 0 && selectedOnPage < pageRawVideoIds.length
+        elements.bulkPanel.classList.toggle('is-visible', selectedCount > 0)
+        elements.bulkSummary.textContent = `${selectedCount} vidéo${selectedCount > 1 ? 's' : ''} sélectionnée${selectedCount > 1 ? 's' : ''}`
+        elements.selectFiltered.textContent = `Tout sélectionner dans ce filtre (${filteredRawVideoIds.length})`
+      }
+
+      const render = () => {
+        const rows = sortRows(
+          state.tab === 'works' || state.tab === 'editions' ? getWorkRows() : getRawRows()
+        )
+        const isRawTab = state.tab === 'inventory' || state.tab === 'excluded'
+        elements.workspace.dataset.raw = String(isRawTab)
+        filteredRawVideoIds = isRawTab ? rows.map(row => row.video.id) : []
+        const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+        state.page = Math.min(state.page, pageCount)
+        const start = (state.page - 1) * PAGE_SIZE
+        const pageRows = rows.slice(start, start + PAGE_SIZE)
+        pageRawVideoIds = isRawTab ? pageRows.map(row => row.video.id) : []
+        elements.body.innerHTML = pageRows.length
+          ? pageRows.map(row => (row.work ? workRowHtml(row) : rawRowHtml(row))).join('')
+          : '<tr><td colspan="8"><div class="empty-state">Aucun résultat avec ces filtres.</div></td></tr>'
+        const total =
+          state.tab === 'excluded'
+            ? currentRejectedVideos().length
+            : state.tab === 'inventory'
+              ? currentNonRejectedInventory().length
+              : state.tab === 'works'
+                ? currentWorks().length
+                : currentWorks().flatMap(work => work.editions).length
+        elements.count.textContent =
+          rows.length === total
+            ? `${rows.length} résultat${rows.length > 1 ? 's' : ''}`
+            : `${rows.length} affiché${rows.length > 1 ? 's' : ''} sur ${total}`
+        elements.pageLabel.textContent = `page ${state.page} / ${pageCount}`
+        elements.previous.disabled = state.page === 1
+        elements.next.disabled = state.page === pageCount
+        updateReviewCounts()
+        updateSelectionUi()
+      }
+
+      const renderWorkDetail = work => {
+        const preferred =
+          work.editions.find(
+            edition => edition.language === (state.language === 'all' ? 'fr' : state.language)
+          ) || work.editions[0]
+        elements.dialogReference.textContent = work.id
+        elements.dialogBody.innerHTML = `
+          <h2 class="dialog-title">${escapeHtml(preferred.title)}</h2>
+          <div class="dialog-meta">${categoryBadges(work.categories)} ${languageBadges(work.editions.map(edition => edition.language))}${work.series ? `<span class="badge">série · ${escapeHtml(work.series)}</span>` : ''}${work.strongBinding ? `<span class="badge word-study">binding · ${escapeHtml(work.strongBinding)}</span>` : ''}</div>
+          <section class="detail-section"><h3>Versions linguistiques</h3><div class="edition-grid">${work.editions
+            .map(
+              edition =>
+                `<a class="edition-card" href="${escapeHtml(edition.sourceUrl)}" target="_blank" rel="noreferrer"><img src="${escapeHtml(edition.thumbnailUrl)}" alt="" referrerpolicy="no-referrer" /><div><span class="language-badge">${escapeHtml(edition.language.toUpperCase())}</span><strong>${escapeHtml(edition.title)}</strong><small>${escapeHtml(edition.providerId)} · ${formatDuration(edition.durationSeconds)} · ${edition.captionsAvailable ? 'sous-titres' : 'sans sous-titres signalés'}</small></div></a>`
+            )
+            .join(
+              ''
+            )}</div>${preferred.description ? `<p class="description" style="margin-top:14px">${escapeHtml(preferred.description)}…</p>` : ''}</section>
+          <section class="detail-section"><h3>Ancres et placement</h3><div class="table-scroll" style="min-height:0"><table class="anchor-table"><thead><tr><th>Type</th><th>Cible exacte</th><th>Placement</th><th>Rôle</th><th>Provenance</th></tr></thead><tbody>${work.anchors
+            .map(
+              anchor =>
+                `<tr><td><span class="anchor-kind">${escapeHtml(anchor.kind)}</span></td><td>${escapeHtml(formatPassage(anchor))}</td><td>${escapeHtml(PLACEMENT_LABELS[anchor.placement] || anchor.placement)}</td><td>${escapeHtml(anchor.relevance || '—')}${anchor.relationship ? ` · ${escapeHtml(anchor.relationship)}` : ''}</td><td class="provenance">${anchor.evidenceUrl ? `<a href="${escapeHtml(anchor.evidenceUrl)}" target="_blank" rel="noreferrer">${escapeHtml(anchor.provenance)}</a>` : escapeHtml(anchor.provenance)}</td></tr>`
+            )
+            .join('')}</tbody></table></div></section>
+          ${work.sourceUrl ? `<section class="detail-section"><h3>Source éditoriale</h3><a href="${escapeHtml(work.sourceUrl)}" target="_blank" rel="noreferrer">${escapeHtml(work.sourceUrl)}</a></section>` : ''}`
+        elements.dialog.showModal()
+      }
+
+      const renderRawDetail = (video, excluded = false) => {
+        const isRejected = excluded || video.disposition === 'rejected-reviewed'
+        const reviewedAnchors = reviewedAnchorsForVideo(video)
+        const proposedAnchors = proposedAnchorsForVideo(video)
+        const rejectionReasons = video.reasons || video.exclusionReasons || [video.reason]
+        const rejectionLabels = rejectionReasons
+          .filter(Boolean)
+          .map(reason => EXCLUSION_LABELS[reason] || reason)
+        const rejectionBadges = rejectionLabels
+          .map(label => `<span class="badge excluded">${escapeHtml(label)}</span>`)
+          .join('')
+        const disposition =
+          DISPOSITION_LABELS[video.disposition] || video.suitability || 'inventaire'
+        const isPublished = reviewStatusForVideo(video) === 'placed'
+        const dispositionDetail = video.workIds?.length
+          ? `${disposition} : ${video.workIds.join(', ')}.`
+          : video.exclusionReason
+            ? `${disposition} : ${EXCLUSION_LABELS[video.exclusionReason] || video.exclusionReason}.`
+            : disposition
+        const anchorReviewActions =
+          video.anchorProposal && !isRejected
+            ? isPublished
+              ? `<button class="secondary-button reject-button" type="button" data-anchor-review-action="needs-correction" data-anchor-review-id="${escapeHtml(video.id)}">Corriger la publication</button>`
+              : `<button class="secondary-button" type="button" data-anchor-review-action="accepted" data-anchor-review-id="${escapeHtml(video.id)}">Publier cette cible</button><button class="secondary-button reject-button" type="button" data-anchor-review-action="needs-correction" data-anchor-review-id="${escapeHtml(video.id)}">${video.anchorReviewStatus === 'needs-correction' ? 'Remettre à valider' : 'À corriger'}</button>`
+            : ''
+        elements.dialogReference.textContent = video.id
+        elements.dialogBody.innerHTML = `
+          <h2 class="dialog-title">${escapeHtml(video.title)}</h2>
+          <div class="dialog-meta">${categoryBadges([video.category])}${languageBadges([video.language])}${isRejected ? rejectionBadges : `<span class="badge ${video.disposition === 'classified-out-of-scope' ? 'excluded' : ''}">${escapeHtml(disposition)}</span>`}</div>
+          <div class="raw-detail"><a href="${escapeHtml(video.sourceUrl)}" target="_blank" rel="noreferrer"><img src="${escapeHtml(video.thumbnailUrl)}" alt="" referrerpolicy="no-referrer" /></a><div><p><strong>ID fournisseur</strong><br /><span class="video-id">${escapeHtml(video.id)}</span></p><p><strong>Durée</strong><br />${formatDuration(video.durationSeconds)}</p><p><strong>Format fournisseur</strong><br />${video.embedWidth && video.embedHeight ? `${video.embedWidth} × ${video.embedHeight} · ${escapeHtml(video.orientation)}` : 'Dimensions inconnues'}</p><p><strong>Disposition</strong><br />${escapeHtml(isRejected ? `Rejet : ${rejectionLabels.join(' · ')}.` : dispositionDetail)}</p>${excluded ? '' : `${reviewedAnchors.length ? `<p><strong>Cibles validées</strong><br />${anchorsHtml(reviewedAnchors, reviewedAnchors.length)}</p><p><strong>Placement validé</strong><br />${placementsHtml(reviewedAnchors)}</p>` : proposedAnchors.length ? `<p><strong>Cible proposée par analyse</strong><br />${anchorsHtml(proposedAnchors, proposedAnchors.length)}</p><p><strong>Placement proposé</strong><br />${placementsHtml(proposedAnchors)}</p><p><strong>Confiance</strong><br />${escapeHtml(video.anchorProposal.confidence)}</p><p><strong>État de revue</strong><br />${escapeHtml(ANCHOR_REVIEW_LABELS[video.anchorReviewStatus] || 'À valider')}</p><p><strong>Justification</strong><br />${escapeHtml(video.anchorProposal.rationale)}</p><p><strong>Preuves</strong><br />${proposalEvidenceHtml(video.anchorProposal)}</p>` : ''}<p><strong>Mentions détectées dans YouTube</strong><br />${rawAnchorsHtml(video)}</p><p class="description">${isPublished ? 'Cette ressource et ses cibles sont publiées.' : 'Cette proposition reste à valider avant publication.'}</p>`}</div></div>
+          ${video.anchorReviewStatus === 'needs-correction' ? `<div class="review-note"><label for="review-note-${escapeHtml(video.id)}">Note de correction</label><textarea id="review-note-${escapeHtml(video.id)}" data-review-note-id="${escapeHtml(video.id)}" placeholder="Indique ce qui doit changer : cible, placement, portée…">${escapeHtml(video.anchorReviewNote || '')}</textarea><button class="secondary-button" type="button" data-save-review-note="${escapeHtml(video.id)}">Enregistrer la note</button></div>` : ''}
+          <div class="decision-actions">${anchorReviewActions}<button class="secondary-button ${isRejected ? '' : 'reject-button'}" type="button" data-decision-action="${isRejected ? 'restore' : 'reject'}" data-decision-id="${escapeHtml(video.id)}">${isRejected ? 'Remettre dans l’inventaire' : 'Rejeter cette vidéo'}</button></div>`
+        elements.dialog.showModal()
+      }
+
+      const applyVideoDecision = (videoId, action, closeDialog = elements.dialog.open) => {
+        if (action === 'reject') {
+          decisionOverrides.set(videoId, 'reject')
+        } else if (action === 'restore') {
+          decisionOverrides.set(videoId, 'restore')
+        } else return
+        selectedVideoIds.delete(videoId)
+        saveDecisions()
+        updateDecisionCounts()
+        if (closeDialog) elements.dialog.close()
+        categoryOptions()
+        render()
+        renderSimulator()
+        showToast(action === 'reject' ? 'Vidéo déplacée dans les rejets.' : 'Vidéo restaurée.')
+      }
+
+      const applyAnchorReview = (videoId, status, closeDialog = elements.dialog.open) => {
+        if (!['accepted', 'needs-correction'].includes(status)) return
+        const signature = proposalSignatures.get(videoId)
+        if (!signature) return
+        const currentReview = anchorReviews.get(videoId)
+        const currentStatus = currentReview?.status
+        if (currentStatus === status) anchorReviews.delete(videoId)
+        else
+          anchorReviews.set(videoId, {
+            status,
+            signature,
+            ...(currentReview?.note ? { note: currentReview.note } : {}),
+          })
+        saveAnchorReviews()
+        if (closeDialog) elements.dialog.close()
+        render()
+        showToast(
+          currentStatus === status
+            ? 'Décision de revue annulée.'
+            : status === 'accepted'
+              ? 'Ressource publiée.'
+              : 'Cible marquée à corriger.'
+        )
+      }
+
+      const saveReviewNote = videoId => {
+        const currentReview = anchorReviews.get(videoId)
+        const input = elements.dialogBody.querySelector(`[data-review-note-id="${videoId}"]`)
+        if (!currentReview || !input) return
+        const note = input.value.trim()
+        anchorReviews.set(videoId, {
+          ...currentReview,
+          ...(note ? { note } : {}),
+        })
+        if (!note) delete anchorReviews.get(videoId).note
+        saveAnchorReviews()
+        showToast('Note de correction enregistrée.')
+      }
+
+      const applyBulkAction = action => {
+        const ids = [...selectedVideoIds]
+        if (action === 'clear') {
+          selectedVideoIds.clear()
+          render()
+          return
+        }
+        let changed = 0
+        for (const videoId of ids) {
+          const sourceVideo = DATA.inventory.find(video => video.id === videoId)
+          if (!sourceVideo) continue
+          if (['accepted', 'needs-correction'].includes(action)) {
+            const signature = proposalSignatures.get(videoId)
+            if (!signature || isRejectedVideo(sourceVideo)) continue
+            const currentReview = anchorReviews.get(videoId)
+            anchorReviews.set(videoId, {
+              status: action,
+              signature,
+              ...(currentReview?.note ? { note: currentReview.note } : {}),
+            })
+            changed += 1
+          } else if (action === 'reject' && !isRejectedVideo(sourceVideo)) {
+            decisionOverrides.set(videoId, 'reject')
+            changed += 1
+          } else if (action === 'restore' && isRejectedVideo(sourceVideo)) {
+            decisionOverrides.set(videoId, 'restore')
+            changed += 1
+          }
+        }
+        selectedVideoIds.clear()
+        saveAnchorReviews()
+        saveDecisions()
+        updateDecisionCounts()
+        categoryOptions()
+        render()
+        renderSimulator()
+        showToast(`${changed} vidéo${changed > 1 ? 's' : ''} mise${changed > 1 ? 's' : ''} à jour.`)
+      }
+
+      const exportDecisions = () => {
+        const payload = {
+          schemaVersion: 1,
+          exportedAt: new Date().toISOString(),
+          sourceGeneratedAt: DATA.generatedAt,
+          decisions: { overrides: Object.fromEntries(decisionOverrides) },
+          anchorReviews: { reviews: Object.fromEntries(anchorReviews) },
+        }
+        const url = URL.createObjectURL(
+          new Blob([`${JSON.stringify(payload, null, 2)}\n`], { type: 'application/json' })
+        )
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `bible-project-curation-${new Date().toISOString().slice(0, 10)}.json`
+        link.click()
+        URL.revokeObjectURL(url)
+        showToast('Travail de curation exporté.')
+      }
+
+      const importDecisions = async file => {
+        try {
+          const payload = JSON.parse(await file.text())
+          let imported = 0
+          for (const [videoId, action] of Object.entries(
+            payload.decisions?.overrides || payload.overrides || {}
+          )) {
+            if (!['reject', 'restore'].includes(action)) continue
+            decisionOverrides.set(videoId, action)
+            imported += 1
+          }
+          for (const [videoId, review] of Object.entries(
+            payload.anchorReviews?.reviews || payload.reviews || {}
+          )) {
+            if (
+              !['accepted', 'needs-correction'].includes(review?.status) ||
+              review.signature !== proposalSignatures.get(videoId)
+            )
+              continue
+            anchorReviews.set(videoId, review)
+            imported += 1
+          }
+          saveDecisions()
+          saveAnchorReviews()
+          updateDecisionCounts()
+          categoryOptions()
+          render()
+          renderSimulator()
+          showToast(
+            `${imported} décision${imported > 1 ? 's' : ''} importée${imported > 1 ? 's' : ''}.`
+          )
+        } catch {
+          showToast('Import impossible : fichier de curation invalide.')
+        }
+      }
+
+      const openRow = row => {
+        const type = row.dataset.open
+        const id = row.dataset.id
+        if (type === 'work') return renderWorkDetail(currentWorks().find(work => work.id === id))
+        const source = type === 'excluded' ? currentRejectedVideos() : currentNonRejectedInventory()
+        const video = source.find(item => item.id === id)
+        renderRawDetail(video, type === 'excluded')
+      }
+
+      const anchorMatchesChapter = (anchor, book, chapter) => {
+        if (anchor.relevance === 'related') return false
+        if (anchor.kind === 'book') return anchor.book === book && chapter === 1
+        if (anchor.kind !== 'passage' || anchor.book !== book) return false
+        const end = anchor.chapterEnd || anchor.chapterStart
+        if (anchor.placement === 'introduction') return chapter === anchor.chapterStart
+        if (anchor.placement === 'after-range') return chapter === end
+        return chapter >= anchor.chapterStart && chapter <= end
+      }
+
+      const renderSimulator = () => {
+        const book = Number(document.querySelector('#sim-book').value)
+        const chapter = Math.max(1, Number(document.querySelector('#sim-chapter').value) || 1)
+        const language = document.querySelector('#sim-language').value
+        const workMatches = currentWorks()
+          .filter(work => work.editions.some(edition => edition.language === language))
+          .map(work => {
+            const edition = work.editions.find(item => item.language === language)
+            return {
+              id: work.id,
+              detailType: 'work',
+              title: edition.title,
+              thumbnailUrl: edition.thumbnailUrl,
+              categories: work.categories,
+              anchors: work.anchors.filter(anchor => anchorMatchesChapter(anchor, book, chapter)),
+            }
+          })
+          .filter(item => item.anchors.length)
+        const associatedMatches = currentNonRejectedInventory()
+          .filter(
+            video =>
+              video.language === language &&
+              video.disposition === 'associated-placed' &&
+              reviewStatusForVideo(video) === 'placed'
+          )
+          .map(video => ({
+            id: video.id,
+            detailType: 'video',
+            title: video.title,
+            thumbnailUrl: video.thumbnailUrl,
+            categories: [video.category],
+            anchors: effectiveAnchorsForVideo(video).filter(anchor =>
+              anchorMatchesChapter(anchor, book, chapter)
+            ),
+          }))
+          .filter(item => item.anchors.length)
+        const matches = [...workMatches, ...associatedMatches].sort(
+          (left, right) => anchorLocation(left.anchors[0]) - anchorLocation(right.anchors[0])
+        )
+        const container = document.querySelector('#sim-results')
+        container.innerHTML = matches.length
+          ? matches
+              .map(
+                ({ id, detailType, title, thumbnailUrl, categories, anchors }) =>
+                  `<article class="sim-card" data-sim-${detailType}="${escapeHtml(id)}" tabindex="0"><img src="${escapeHtml(thumbnailUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer" /><div><div class="badges">${categoryBadges(categories)}</div><h3>${escapeHtml(title)}</h3><p>${escapeHtml(PLACEMENT_LABELS[anchors[0].placement] || anchors[0].placement)} · ${escapeHtml(formatPassage(anchors[0]))}</p>${languageBadges([language])}</div></article>`
+              )
+              .join('')
+          : `<div class="sim-empty">Aucune ressource publiée pour ${escapeHtml(BOOKS[book - 1])} ${chapter} dans cette langue.</div>`
+      }
+
+      document.querySelector('#sim-book').innerHTML = BOOKS.map(
+        (book, index) =>
+          `<option value="${index + 1}" ${index === 1 ? 'selected' : ''}>${escapeHtml(book)}</option>`
+      ).join('')
+
+      document.querySelectorAll('[data-tab]').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const previousTab = state.tab
+          const nextTab = tab.dataset.tab
+          const previousIsRaw = previousTab === 'inventory' || previousTab === 'excluded'
+          const nextIsRaw = nextTab === 'inventory' || nextTab === 'excluded'
+          if (!previousIsRaw && nextIsRaw) curatedLanguage = state.language
+          state.language = nextIsRaw ? 'all' : previousIsRaw ? curatedLanguage : state.language
+          elements.language.value = state.language
+          state.tab = nextTab
+          state.page = 1
+          state.category = 'all'
+          state.anchor = 'all'
+          if (nextTab === 'excluded') state.review = 'all'
+          selectedVideoIds.clear()
+          elements.anchor.value = 'all'
+          elements.review.value = state.review
+          document
+            .querySelectorAll('[data-tab]')
+            .forEach(item => item.setAttribute('aria-selected', String(item === tab)))
+          categoryOptions()
+          render()
+        })
+      })
+
+      const bindFilter = (element, key, event = 'change') => {
+        element.addEventListener(event, () => {
+          state[key] = element.value
+          state.page = 1
+          render()
+        })
+      }
+      bindFilter(elements.search, 'search', 'input')
+      bindFilter(elements.category, 'category')
+      bindFilter(elements.language, 'language')
+      bindFilter(elements.anchor, 'anchor')
+      bindFilter(elements.review, 'review')
+      bindFilter(elements.sort, 'sort')
+
+      document.querySelectorAll('[data-review-shortcut]').forEach(button => {
+        button.addEventListener('click', () => {
+          if (state.tab !== 'inventory') document.querySelector('[data-tab="inventory"]').click()
+          state.review = button.dataset.reviewShortcut
+          state.page = 1
+          elements.review.value = state.review
+          render()
+        })
+      })
+
+      elements.previous.addEventListener('click', () => {
+        state.page -= 1
+        render()
+      })
+      elements.next.addEventListener('click', () => {
+        state.page += 1
+        render()
+      })
+      elements.selectPage.addEventListener('change', () => {
+        for (const videoId of pageRawVideoIds) {
+          if (elements.selectPage.checked) selectedVideoIds.add(videoId)
+          else selectedVideoIds.delete(videoId)
+        }
+        render()
+      })
+      elements.selectFiltered.addEventListener('click', () => {
+        for (const videoId of filteredRawVideoIds) selectedVideoIds.add(videoId)
+        render()
+      })
+      document.querySelector('#bulk-panel').addEventListener('click', event => {
+        const button = event.target.closest('[data-bulk-action]')
+        if (button) applyBulkAction(button.dataset.bulkAction)
+      })
+      elements.body.addEventListener('click', event => {
+        const selector = event.target.closest('[data-select-video]')
+        if (selector) {
+          if (selector.checked) selectedVideoIds.add(selector.dataset.selectVideo)
+          else selectedVideoIds.delete(selector.dataset.selectVideo)
+          updateSelectionUi()
+          return
+        }
+        const anchorButton = event.target.closest('[data-anchor-review-action]')
+        if (anchorButton) {
+          applyAnchorReview(
+            anchorButton.dataset.anchorReviewId,
+            anchorButton.dataset.anchorReviewAction,
+            false
+          )
+          return
+        }
+        const decisionButton = event.target.closest('[data-decision-action]')
+        if (decisionButton) {
+          applyVideoDecision(
+            decisionButton.dataset.decisionId,
+            decisionButton.dataset.decisionAction,
+            false
+          )
+          return
+        }
+        const workButton = event.target.closest('[data-open-work]')
+        if (workButton) {
+          renderWorkDetail(currentWorks().find(work => work.id === workButton.dataset.openWork))
+          return
+        }
+        const detailButton = event.target.closest('[data-open-details]')
+        if (detailButton) {
+          const source =
+            state.tab === 'excluded' ? currentRejectedVideos() : currentNonRejectedInventory()
+          renderRawDetail(
+            source.find(video => video.id === detailButton.dataset.openDetails),
+            state.tab === 'excluded'
+          )
+          return
+        }
+        const row = event.target.closest('[data-open]')
+        if (row) openRow(row)
+      })
+      elements.body.addEventListener('keydown', event => {
+        const row = event.target.closest('[data-open]')
+        const interactive = event.target.closest('button, input, a, select')
+        if (row && !interactive && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault()
+          openRow(row)
+        }
+      })
+      document.querySelector('#sim-results').addEventListener('click', event => {
+        const workCard = event.target.closest('[data-sim-work]')
+        const videoCard = event.target.closest('[data-sim-video]')
+        if (workCard)
+          renderWorkDetail(currentWorks().find(work => work.id === workCard.dataset.simWork))
+        if (videoCard)
+          renderRawDetail(
+            currentNonRejectedInventory().find(video => video.id === videoCard.dataset.simVideo),
+            false
+          )
+      })
+      document.querySelector('#sim-results').addEventListener('keydown', event => {
+        const workCard = event.target.closest('[data-sim-work]')
+        const videoCard = event.target.closest('[data-sim-video]')
+        if ((workCard || videoCard) && (event.key === 'Enter' || event.key === ' ')) {
+          event.preventDefault()
+          if (workCard)
+            renderWorkDetail(currentWorks().find(work => work.id === workCard.dataset.simWork))
+          if (videoCard)
+            renderRawDetail(
+              currentNonRejectedInventory().find(video => video.id === videoCard.dataset.simVideo),
+              false
+            )
+        }
+      })
+      ;['#sim-book', '#sim-chapter', '#sim-language'].forEach(selector =>
+        document.querySelector(selector).addEventListener('change', renderSimulator)
+      )
+      document
+        .querySelector('#dialog-close')
+        .addEventListener('click', () => elements.dialog.close())
+      document.querySelector('#export-decisions').addEventListener('click', exportDecisions)
+      document
+        .querySelector('#import-decisions')
+        .addEventListener('click', () => document.querySelector('#import-decisions-file').click())
+      document.querySelector('#import-decisions-file').addEventListener('change', event => {
+        const [file] = event.target.files
+        if (file) importDecisions(file)
+        event.target.value = ''
+      })
+      elements.dialogBody.addEventListener('click', event => {
+        const noteButton = event.target.closest('[data-save-review-note]')
+        if (noteButton) {
+          saveReviewNote(noteButton.dataset.saveReviewNote)
+          return
+        }
+        const anchorButton = event.target.closest('[data-anchor-review-action]')
+        if (anchorButton) {
+          applyAnchorReview(
+            anchorButton.dataset.anchorReviewId,
+            anchorButton.dataset.anchorReviewAction
+          )
+          return
+        }
+        const button = event.target.closest('[data-decision-action]')
+        if (button) applyVideoDecision(button.dataset.decisionId, button.dataset.decisionAction)
+      })
+      elements.dialog.addEventListener('click', event => {
+        if (event.target === elements.dialog) elements.dialog.close()
+      })
+
+      categoryOptions()
+      render()
+      renderSimulator()
+    </script>
+  </body>
+</html>
