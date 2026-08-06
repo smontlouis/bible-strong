@@ -20,17 +20,31 @@ export const subscribeToBibleLayoutChanges = (
   }
 }
 
+type VersePositionLayoutOptions = {
+  eventTarget?: BibleLayoutEventTarget
+  onAnimationStart: () => void
+  onAnimationSettled: () => void
+  requestFrame?: (callback: FrameRequestCallback) => unknown
+}
+
 /**
  * Motion uses FLIP transforms for position layout animations. DOM ranges measured
  * while that transform is active reflect the visual starting position, so the
- * annotation overlay must be measured again after the transform settles.
+ * annotation overlay stays hidden until it has been measured again after the
+ * transform settles.
  */
-export const createVersePositionLayoutProps = (eventTarget: BibleLayoutEventTarget) => ({
+export const createVersePositionLayoutProps = ({
+  eventTarget = window,
+  onAnimationStart,
+  onAnimationSettled,
+  requestFrame = requestAnimationFrame,
+}: VersePositionLayoutOptions) => ({
   layout: 'position' as const,
-  onLayoutAnimationComplete: () => notifyBibleLayoutChanged(eventTarget),
+  onLayoutAnimationStart: onAnimationStart,
+  onLayoutAnimationComplete: () => {
+    requestFrame(() => {
+      notifyBibleLayoutChanged(eventTarget)
+      requestFrame(onAnimationSettled)
+    })
+  },
 })
-
-export const VERSE_POSITION_LAYOUT_PROPS = {
-  layout: 'position' as const,
-  onLayoutAnimationComplete: () => notifyBibleLayoutChanged(),
-}
