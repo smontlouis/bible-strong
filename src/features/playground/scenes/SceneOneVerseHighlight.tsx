@@ -277,9 +277,7 @@ export const SceneOneVerseHighlightControls = ({
 const SceneOneVerseHighlight = (props: SceneOneVerseHighlightProps) => (
   <>
     <SceneOneVerseHighlightBackground {...props} />
-    <Scene.Layer zIndex={5}>
-      <SceneOneVerseHighlightControls {...props} />
-    </Scene.Layer>
+    <SceneOneVerseHighlightControls {...props} />
   </>
 )
 
@@ -305,7 +303,9 @@ export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps)
         metrics={props.metrics}
       />
     </Scene.Node>
-    <SceneOneVerseHighlightControls {...props} />
+    <Scene.Layer zIndex={5}>
+      <SceneOneVerseHighlightControls {...props} />
+    </Scene.Layer>
   </Scene>
 )
 

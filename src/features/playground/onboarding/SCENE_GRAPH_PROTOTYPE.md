@@ -131,7 +131,8 @@ client, and the current Metro bundle. Across scene 1 to scene 2, the verse kept 
 breaks (`Elle enfanta encore son frère`, `. Abel fut berger,`, `et Caïn fut laboureur.`) while
 moving, rotating, and scaling. The six SVG connections ended on their declared visual anchors,
 and a second transition added no new Reanimated warnings or runtime errors. The scene-one color
-palette and edit control were also checked after introducing explicit scene layers.
+palette and edit control were also checked after introducing explicit scene layers: selecting
+turquoise updated the highlighted word and the color remained turquoise in scene 2.
 
 ## Verdict
 

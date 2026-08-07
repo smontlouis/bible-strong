@@ -341,7 +341,7 @@ const NodeRenderer = ({
       height={initialFrame.height * metrics.scale}
       overflow="visible"
       zIndex={descriptor.frame.zIndex ?? 4}
-      entering={reduceMotion ? undefined : FadeIn.duration(280)}
+      entering={isExiting || reduceMotion ? undefined : FadeIn.duration(280)}
     >
       <AnimatedBox position="absolute" left={0} top={0} style={animatedStyle}>
         <AnimatedBox
@@ -486,7 +486,7 @@ export const SceneGraph = ({
 
     const timeout = setTimeout(
       () => setTransition(current => ({ ...current, exitingNodes: [] })),
-      reduceMotion ? 0 : NODE_EXIT_DURATION
+      reduceMotion ? 0 : NODE_EXIT_DURATION + 16
     )
 
     return () => clearTimeout(timeout)
@@ -495,6 +495,10 @@ export const SceneGraph = ({
   const nodesById = new Map(activeScene.nodes.map(node => [node.id, node]))
   const exitingNodes =
     transition.sceneId === activeSceneId ? transition.exitingNodes : lastCommittedNodes.current
+  const renderedNodes = [
+    ...activeScene.nodes.map(node => ({ node, isExiting: false })),
+    ...exitingNodes.map(node => ({ node, isExiting: true })),
+  ]
 
   return (
     <Box flex={1} overflow="visible">
@@ -538,22 +542,11 @@ export const SceneGraph = ({
         ))}
       </Box>
 
-      {activeScene.nodes.map(node => (
+      {renderedNodes.map(({ node, isExiting }) => (
         <NodeRenderer
           key={node.id}
           descriptor={node}
-          isExiting={false}
-          metrics={metrics}
-          reduceMotion={reduceMotion}
-          geometries={geometries}
-          notifyGeometryChange={notifyGeometryChange}
-        />
-      ))}
-      {exitingNodes.map(node => (
-        <NodeRenderer
-          key={node.id}
-          descriptor={node}
-          isExiting
+          isExiting={isExiting}
           metrics={metrics}
           reduceMotion={reduceMotion}
           geometries={geometries}
