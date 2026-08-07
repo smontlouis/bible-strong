@@ -1357,5 +1357,19 @@
   "strongDetail.entity.relation.offspring": "descendant",
   "strongDetail.entity.relation.founder_or_origin": "fondateur ou origine",
   "strongDetail.entity.relation.resident": "résident",
-  "accountEntry.adoptionPending": "Vos données locales restent en sécurité sur cet appareil. Leur synchronisation reprendra automatiquement lorsque votre compte sera de nouveau disponible."
+  "accountEntry.adoptionPending": "Vos données locales restent en sécurité sur cet appareil. Leur synchronisation reprendra automatiquement lorsque votre compte sera de nouveau disponible.",
+  "playground.badge": "Bible Strong · Playground",
+  "playground.development": "DÉVELOPPEMENT",
+  "playground.title": "Construire l’expérience.",
+  "playground.description": "Un espace léger pour développer le dashboard et tester les écrans du nouvel onboarding sans lancer toute l’application.",
+  "playground.activeTitle": "Mode playground actif",
+  "playground.activeDescription": "Les providers essentiels sont conservés ; la navigation et les initialisations non nécessaires sont désactivées.",
+  "playground.workspaces": "Espaces de travail",
+  "playground.abelEyebrow": "Onboarding",
+  "playground.abelTitle": "Parcours Abel",
+  "playground.abelDescription": "Construire l’enchaînement des scènes, des interactions et des animations autour d’une étude biblique.",
+  "playground.designEyebrow": "Design system",
+  "playground.designTitle": "Composants & animations",
+  "playground.designDescription": "Centraliser les variantes d’écran, les transitions et les éléments réutilisables du dashboard.",
+  "playground.fullAppHint": "Pour revenir à l’application complète, désactivez EXPO_PUBLIC_PLAYGROUND puis relancez Metro avec le cache nettoyé."
 }

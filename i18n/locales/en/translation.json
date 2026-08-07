@@ -1398,5 +1398,19 @@
   "strongDetail.entity.relation.offspring": "offspring",
   "strongDetail.entity.relation.founder_or_origin": "founder or origin",
   "strongDetail.entity.relation.resident": "resident",
-  "accountEntry.adoptionPending": "Your local data remains safe on this device. Synchronization will resume automatically when your account is available again."
+  "accountEntry.adoptionPending": "Your local data remains safe on this device. Synchronization will resume automatically when your account is available again.",
+  "playground.badge": "Bible Strong · Playground",
+  "playground.development": "DEVELOPMENT",
+  "playground.title": "Build the experience.",
+  "playground.description": "A lightweight space for developing the dashboard and testing the new onboarding screens without launching the full application.",
+  "playground.activeTitle": "Playground mode active",
+  "playground.activeDescription": "Core providers stay available; navigation and non-essential initialization are disabled.",
+  "playground.workspaces": "Workspaces",
+  "playground.abelEyebrow": "Onboarding",
+  "playground.abelTitle": "Abel journey",
+  "playground.abelDescription": "Build the sequence of scenes, interactions, and animations around a Bible study.",
+  "playground.designEyebrow": "Design system",
+  "playground.designTitle": "Components & animations",
+  "playground.designDescription": "Centralize screen variants, transitions, and reusable dashboard elements.",
+  "playground.fullAppHint": "To return to the complete application, disable EXPO_PUBLIC_PLAYGROUND and restart Metro with a cleared cache."
 }

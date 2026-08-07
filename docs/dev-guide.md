@@ -23,6 +23,19 @@ yarn android
 
 The app uses a custom Expo development client. It is not expected to run in Expo Go.
 
+## Playground mode
+
+Set `EXPO_PUBLIC_PLAYGROUND=true` (or `1`) to boot the lightweight development dashboard. It
+keeps the Redux/persistence, theme, query, database, resource-access, and error-boundary providers,
+but does not mount the full Expo Router stack or the app's background initialization hooks.
+
+```bash
+EXPO_PUBLIC_PLAYGROUND=true yarn start --clear
+```
+
+The flag is evaluated when Metro builds the bundle, so restart Metro after changing it. Set it to
+`false` to return to the complete application.
+
 ## Validation Commands
 
 ```bash

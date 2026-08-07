@@ -1,50 +1,23 @@
 // installReduxDevToolsPolyfill()
 
 import { ThemeProvider } from '@emotion/react'
-import { SheetProvider } from '~common/sheet'
-import { getAnalytics, logScreenView } from '@react-native-firebase/analytics'
 import * as Sentry from '@sentry/react-native'
 
-import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { setAutoFreeze } from 'immer'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  ActivityIndicator,
-  InteractionManager,
-  LogBox,
-  Pressable,
-  Text as NativeText,
-  View,
-} from 'react-native'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
+import { ActivityIndicator, LogBox, Pressable, Text as NativeText, View } from 'react-native'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { configureReanimatedLogger } from 'react-native-reanimated'
-import { RootSiblingParent } from 'react-native-root-siblings'
 import { initialWindowMetrics, SafeAreaProvider } from 'react-native-safe-area-context'
 import { Provider as ReduxProvider, useSelector } from 'react-redux'
 
-import notifee, { EventType } from '@notifee/react-native'
-import { useKeepAwake } from 'expo-keep-awake'
-import TrackPlayer from 'react-native-track-player'
 import { PersistGate } from 'redux-persist/integration/react'
-import ChangelogModal from '~common/Changelog'
-import ColorChangeModal from '~common/ColorChangeModal'
-import ColorPickerModal from '~common/ColorPickerModal'
 import ErrorBoundary from '~common/ErrorBoundary'
-import InitHooks from '~common/InitHooks'
-import ThemedToaster from '~common/ThemedToaster'
 import { CurrentTheme } from '~common/types'
-import UnifiedTagsModal from '~common/UnifiedTagsModal'
-import { AppRatingModal } from '~features/app-rating'
-import { AppSwitcherProvider } from '~features/app-switcher/AppSwitcherProvider'
-import { BookSelectorSheetProvider } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
-import { StrongAudioProvider } from '~features/bible/StrongAudioProvider'
-import { FeatureOnboardingModal } from '~features/feature-onboarding'
-import OnBoardingModal from '~features/onboarding/OnBoarding'
 import { ResourceAccessProvider } from '~features/resources/resourceAccess'
-import LocalMigrationGate from '~features/migrations/LocalMigrationGate'
 import { appLogger } from '~helpers/agentObservability'
 import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
@@ -52,36 +25,33 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { configureQueryManagers, queryClient } from '~helpers/queryClient'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
-import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import { RootState } from '~redux/modules/reducer'
 import { persistor, startPersistence, store } from '~redux/store'
 import { applyPreferredColorScheme } from '~redux/themeAppearanceMiddleware'
 import getTheme, { baseTheme, Theme } from '~themes/index'
+import { isPlaygroundEnabled } from '~helpers/runtimeConfig'
 import i18n, { setI18n } from '../i18n'
-import { PlaybackService } from '../playbackService'
-import { PortalProvider } from 'react-native-teleport'
-import { downloadManager } from '~helpers/downloadManager'
-import { prepareLocalMigrationStartup } from '../src/migrations/localMigrationRegistry'
 
-// Register background event handler for Notifee
-// This prevents ANR when notifications fire while app is in background
-// by handling events without spinning up the full React Native context
-notifee.onBackgroundEvent(async ({ type, detail }) => {
-  // Handle notification press in background
-  if (type === EventType.PRESS) {
-    // Notification was pressed - app will open and handle in foreground
-    return
-  }
+const loadFullAppRuntime = () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require('~features/app/FullAppRuntime').default
+}
 
-  // Handle notification dismissed
-  if (type === EventType.DISMISSED) {
-    return
-  }
+const FullAppRuntime = isPlaygroundEnabled
+  ? lazy(() => import('~features/app/FullAppRuntime'))
+  : loadFullAppRuntime()
+const PlaygroundScreen = lazy(() => import('~features/playground/PlaygroundScreen'))
 
-  // For trigger notifications (like Verse of the Day), just acknowledge
-  // The notification has already been displayed by the system
-  return
-})
+if (!isPlaygroundEnabled) {
+  // Keep this registration synchronous in normal mode so a background
+  // notification never depends on the React tree finishing its startup.
+  const { default: notifee, EventType } =
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    require('@notifee/react-native') as typeof import('@notifee/react-native')
+  notifee.onBackgroundEvent(async ({ type }) => {
+    if (type === EventType.PRESS || type === EventType.DISMISSED) return
+  })
+}
 
 // Configure Reanimated logger
 configureReanimatedLogger({
@@ -121,6 +91,12 @@ const initSentry = () => {
 
 configureQueryManagers()
 
+const StartupLoading = () => (
+  <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <ActivityIndicator />
+  </View>
+)
+
 // Hook to load app resources
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
@@ -135,11 +111,18 @@ const useAppLoad = () => {
         appLogger.info('startup', 'i18n.init.started')
         await setI18n()
         appLogger.info('startup', 'i18n.init.completed')
-        await prepareLocalMigrationStartup()
+        if (!isPlaygroundEnabled) {
+          const { prepareLocalMigrationStartup } =
+            await import('../src/migrations/localMigrationRegistry')
+          await prepareLocalMigrationStartup()
+        } else {
+          appLogger.info('startup', 'playground.mode_enabled')
+        }
         startPersistence()
         if (!active) return
         setIsLoadingCompleted(true)
-        if (!__DEV__) {
+        if (!isPlaygroundEnabled && !__DEV__) {
+          const { getAnalytics, logScreenView } = await import('@react-native-firebase/analytics')
           logScreenView(getAnalytics(), {
             screen_class: 'Bible',
             screen_name: 'Bible',
@@ -157,23 +140,13 @@ const useAppLoad = () => {
     }
   }, [attempt])
 
-  useRemoteConfig()
+  useRemoteConfig(!isPlaygroundEnabled)
 
   return {
     isLoadingCompleted,
     loadError,
     retry: () => setAttempt(value => value + 1),
   }
-}
-
-const PostMigrationStartup = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    downloadManager.restore().catch(error => {
-      appLogger.error('startup', 'resource_recovery.failed', { error })
-    })
-  }, [])
-
-  return children
 }
 
 // Status bar style changer
@@ -185,70 +158,6 @@ const changeStatusBarStyle = (currentTheme: CurrentTheme) => {
   }
 }
 
-// Analytics tracking for navigation
-const useNavigationTracking = () => {
-  const pathname = usePathname()
-  const segments = useSegments()
-  const params = useLocalSearchParams()
-  const prevPathnameRef = useRef<string | undefined>(undefined)
-
-  useEffect(() => {
-    if (prevPathnameRef.current !== pathname) {
-      const screenName = segments[segments.length - 1] || 'index'
-      appLogger.info('navigation', 'screen.changed', {
-        pathname,
-        screenName,
-        segments,
-      })
-
-      if (__DEV__) {
-        console.log('[Navigation]', {
-          pathname,
-          segments,
-          params: Object.keys(params).length > 0 ? params : undefined,
-        })
-      } else {
-        logScreenView(getAnalytics(), {
-          screen_class: screenName,
-          screen_name: screenName,
-        })
-      }
-
-      Sentry.addBreadcrumb({
-        category: 'screen',
-        message: `Navigated to: ${pathname}`,
-        data: { pathname, segments },
-      })
-
-      prevPathnameRef.current = pathname
-    }
-  }, [pathname, segments, params])
-}
-
-// Deferred modal components - mounted after first interactions complete
-function DeferredModals() {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    const handle = InteractionManager.runAfterInteractions(() => setMounted(true))
-    return () => handle.cancel()
-  }, [])
-
-  if (!mounted) return null
-
-  return (
-    <>
-      <ChangelogModal />
-      <OnBoardingModal />
-      <UnifiedTagsModal />
-      <ColorPickerModal />
-      <ColorChangeModal />
-      <FeatureOnboardingModal />
-      <AppRatingModal />
-    </>
-  )
-}
-
 // Inner app with all providers (needs Redux context)
 function InnerApp() {
   const fontFamily = useSelector((state: RootState) => state.user.fontFamily)
@@ -256,17 +165,6 @@ function InnerApp() {
     (state: RootState) => state.user.bible.settings.preferredColorScheme || 'auto'
   )
   const { theme: currentTheme } = useCurrentThemeSelector()
-
-  useKeepAwake()
-
-  useEffect(() => {
-    // Defer TrackPlayer registration to after first interactions
-    InteractionManager.runAfterInteractions(() => {
-      TrackPlayer.registerPlaybackService(() => PlaybackService)
-    })
-  }, [])
-  useNavigationTracking()
-  // useAtomsDevtools('jotai')
 
   useEffect(() => {
     changeStatusBarStyle(currentTheme)
@@ -289,71 +187,23 @@ function InnerApp() {
     }
   }, [currentTheme, fontFamily])
 
+  const appContent = isPlaygroundEnabled ? (
+    <Suspense fallback={<StartupLoading />}>
+      <PlaygroundScreen />
+    </Suspense>
+  ) : (
+    <Suspense fallback={<StartupLoading />}>
+      <FullAppRuntime theme={theme} />
+    </Suspense>
+  )
+
   return (
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
-        <PersistGate
-          loading={
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <ActivityIndicator />
-            </View>
-          }
-          persistor={persistor}
-        >
+        <PersistGate loading={<StartupLoading />} persistor={persistor}>
           <DBStateProvider>
             <ErrorBoundary>
-              <LocalMigrationGate>
-                <PostMigrationStartup>
-                  <AppSwitcherProvider>
-                    <PortalProvider>
-                      <ResourceAccessProvider>
-                        <RootSiblingParent>
-                          <SheetProvider>
-                            <BookSelectorSheetProvider>
-                              <StrongAudioProvider>
-                                <InitHooks />
-                                <Stack screenOptions={{ headerShown: false }}>
-                                  <Stack.Screen name="index" />
-                                  <Stack.Screen
-                                    name="(explore)"
-                                    options={createFormSheetOptions(theme, {
-                                      contentStyle: {
-                                        bottom: 0,
-                                      },
-                                      sheetAllowedDetents: [0.45, 1],
-                                      sheetLargestUndimmedDetentIndex: 0,
-                                    })}
-                                  />
-                                  <Stack.Screen
-                                    name="(library)"
-                                    options={{
-                                      contentStyle: {
-                                        bottom: 0,
-                                      },
-                                    }}
-                                  />
-                                  <Stack.Screen
-                                    name="strong"
-                                    options={createFormSheetOptions(theme, {
-                                      contentStyle: {
-                                        bottom: 0,
-                                      },
-                                      sheetAllowedDetents: [1],
-                                      sheetExpandsWhenScrolledToEdge: true,
-                                    })}
-                                  />
-                                </Stack>
-                                <ThemedToaster />
-                                <DeferredModals />
-                              </StrongAudioProvider>
-                            </BookSelectorSheetProvider>
-                          </SheetProvider>
-                        </RootSiblingParent>
-                      </ResourceAccessProvider>
-                    </PortalProvider>
-                  </AppSwitcherProvider>
-                </PostMigrationStartup>
-              </LocalMigrationGate>
+              <ResourceAccessProvider>{appContent}</ResourceAccessProvider>
             </ErrorBoundary>
           </DBStateProvider>
         </PersistGate>
@@ -370,7 +220,7 @@ function RootLayout() {
     if (isLoadingCompleted) {
       appLogger.info('startup', 'root.layout.ready')
       SplashScreen.hide()
-      initSentry()
+      if (!isPlaygroundEnabled) initSentry()
     }
   }, [isLoadingCompleted])
 
@@ -405,11 +255,7 @@ function RootLayout() {
         </View>
       )
     }
-    return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator />
-      </View>
-    )
+    return <StartupLoading />
   }
 
   return (
@@ -430,6 +276,6 @@ function RootLayout() {
   )
 }
 
-initSentry()
+if (!isPlaygroundEnabled) initSentry()
 
 export default Sentry.wrap(RootLayout)

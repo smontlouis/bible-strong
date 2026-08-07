@@ -4,7 +4,9 @@ Bible Strong is an Expo SDK 54 / React Native 0.81 app using Expo Router, TypeSc
 
 ## Runtime Shape
 
-`app/_layout.tsx` is the app root. It initializes i18n, remote config, Sentry, splash handling, theme providers, Redux, persisted state, database state, app switcher context, bottom sheet providers, global modals, and the Expo Router stack.
+`app/_layout.tsx` is the app root. It initializes i18n, splash handling, theme providers, Redux, persisted state, database state, resource access, the error boundary, and (in normal mode) remote config. The complete application runtime is lazy-loaded from `src/features/app/FullAppRuntime.tsx`; it adds migrations, app switcher context, bottom-sheet providers, global modals, audio registration, download recovery, and the Expo Router stack.
+
+When `EXPO_PUBLIC_PLAYGROUND` is truthy (`true`, `1`, `yes`, or `on`), the root keeps the core provider tree and renders `src/features/playground/PlaygroundScreen.tsx` instead of loading the complete runtime. This mode is intended for fast dashboard and onboarding development and skips remote config, local migration preparation, background initialization hooks, and router navigation.
 
 The root route `app/index.tsx` renders `AppSwitcherScreen`, which is the main workspace. Feature routes under `app/` mostly re-export feature screens and are mapped from legacy React Navigation names in `src/navigation/routeMapping.ts`.
 
@@ -14,11 +16,12 @@ Provider stack:
 2. `SafeAreaProvider`
 3. Redux `Provider`
 4. Emotion `ThemeProvider`
-5. popup menu/query/persist/database/error-boundary providers
-6. `AppSwitcherProvider`
-7. portal/bottom-sheet/book-selector providers
-8. Expo Router `Stack`
-9. deferred global modals
+5. query/persist/database/error-boundary/resource-access providers
+6. `FullAppRuntime` (normal mode only)
+7. `AppSwitcherProvider`
+8. portal/bottom-sheet/book-selector providers
+9. Expo Router `Stack`
+10. deferred global modals
 
 ## State Model
 
@@ -91,9 +94,8 @@ Changes to sync, auth, backup, import/export, and migrations are sensitive. See 
 
 ## Audio
 
-Audio is integrated mainly under `src/features/bible/footer/` and `playbackService`. The app supports TTS through Expo Speech and remote audio through `react-native-track-player`. TrackPlayer registration is deferred after first interactions in `app/_layout.tsx`.
+Audio is integrated mainly under `src/features/bible/footer/` and `playbackService`. The app supports TTS through Expo Speech and remote audio through `react-native-track-player`. TrackPlayer registration is deferred after first interactions in `src/features/app/FullAppRuntime.tsx`.
 
 ## Observability
 
 Sentry initializes after the splash screen. Navigation adds breadcrumbs. Redux middleware includes logger/crash reporting. See `docs/agents/observability.md`.
-
