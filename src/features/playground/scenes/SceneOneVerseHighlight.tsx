@@ -19,7 +19,11 @@ import Animated, {
 
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
+import {
+  DESIGN_CONTENT_WIDTH,
+  DESIGN_STAGE_HEIGHT,
+  type OnboardingStageMetrics,
+} from '../onboarding/OnboardingStage'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { HIGHLIGHT_COLORS, type HighlightColor } from '../onboarding/VerseCard'
 
@@ -196,7 +200,7 @@ export const SceneOneVerseHighlightControls = ({
   }))
 
   const pressIn = () => {
-    fabScale.set(reduceMotion ? 0.94 : withSpring(0.94, { damping: 15, stiffness: 240 }))
+    fabScale.set(reduceMotion ? 0.96 : withSpring(0.96, { damping: 15, stiffness: 240 }))
   }
 
   const pressOut = () => {
@@ -303,9 +307,19 @@ export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps)
         metrics={props.metrics}
       />
     </Scene.Node>
-    <Scene.Layer zIndex={5}>
+    <Scene.Node
+      id="highlight-controls"
+      layout="position"
+      frame={{
+        x: 0,
+        y: 0,
+        width: DESIGN_CONTENT_WIDTH,
+        height: DESIGN_STAGE_HEIGHT,
+        zIndex: 5,
+      }}
+    >
       <SceneOneVerseHighlightControls {...props} />
-    </Scene.Layer>
+    </Scene.Node>
   </Scene>
 )
 
