@@ -16,18 +16,15 @@ import Animated, {
 
 import Box, { AnimatedBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import {
-  OnboardingSceneLayer,
-  OnboardingStage,
-  PersistentActor,
-} from './onboarding/OnboardingStage'
+import { OnboardingStage } from './onboarding/OnboardingStage'
+import { Scene, SceneGraph } from './onboarding/SceneGraph'
 import { ONBOARDING_SCENE_COUNT, ONBOARDING_SCENES } from './onboarding/sceneRegistry'
 import VerseCard, { type HighlightColor } from './onboarding/VerseCard'
 import {
   SceneOneVerseHighlightBackground,
   SceneOneVerseHighlightControls,
 } from './scenes/SceneOneVerseHighlight'
-import SceneTwoLexique from './scenes/SceneTwoLexique'
+import { SceneTwoBackground, SceneTwoNodeCard } from './scenes/SceneTwoLexique'
 
 type PlaygroundOnboardingProps = {
   onComplete: () => void
@@ -149,51 +146,143 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
           ) : (
             <OnboardingStage availableHeight={sceneViewportHeight}>
               {metrics => (
-                <>
-                  <PersistentActor
-                    layout={currentScene.actorLayouts['verse-card']}
-                    metrics={metrics}
-                    reduceMotion={reduceMotion}
-                  >
-                    <VerseCard
-                      reduceMotion={reduceMotion}
-                      highlightColor={activeColor}
+                <SceneGraph
+                  activeSceneId={currentScene.id}
+                  connectionColor={theme.colors.primary}
+                  metrics={metrics}
+                  reduceMotion={reduceMotion}
+                >
+                  <Scene id="scene-one">
+                    <SceneOneVerseHighlightBackground
                       metrics={metrics}
+                      reduceMotion={reduceMotion}
                     />
-                  </PersistentActor>
-
-                  <OnboardingSceneLayer
-                    sceneKey={`${currentScene.id}-background`}
-                    metrics={metrics}
-                    reduceMotion={reduceMotion}
-                    zIndex={1}
-                  >
-                    {currentScene.id === 'scene-one' ? (
-                      <SceneOneVerseHighlightBackground
-                        metrics={metrics}
+                    <Scene.Node
+                      id="verse-card"
+                      layout="scale"
+                      frame={{
+                        x: -16,
+                        y: 82,
+                        width: 382,
+                        height: 294,
+                        rotation: -1,
+                        zIndex: 4,
+                        anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
+                      }}
+                    >
+                      <VerseCard
                         reduceMotion={reduceMotion}
+                        highlightColor={activeColor}
+                        metrics={metrics}
                       />
-                    ) : (
-                      <SceneTwoLexique metrics={metrics} reduceMotion={reduceMotion} />
-                    )}
-                  </OnboardingSceneLayer>
-
-                  {currentScene.id === 'scene-one' ? (
-                    <OnboardingSceneLayer
-                      sceneKey={`${currentScene.id}-controls`}
+                    </Scene.Node>
+                    <SceneOneVerseHighlightControls
                       metrics={metrics}
                       reduceMotion={reduceMotion}
-                      zIndex={5}
+                      activeColor={activeColor}
+                      onColorSelect={setActiveColor}
+                    />
+                  </Scene>
+
+                  <Scene id="scene-two">
+                    <SceneTwoBackground metrics={metrics} reduceMotion={reduceMotion} />
+                    <Scene.Node
+                      id="verse-card"
+                      layout="scale"
+                      frame={{
+                        x: -90,
+                        y: 221,
+                        width: 382,
+                        height: 294,
+                        scale: 0.5,
+                        rotation: -2,
+                        zIndex: 4,
+                        anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
+                      }}
                     >
-                      <SceneOneVerseHighlightControls
-                        metrics={metrics}
+                      <VerseCard
                         reduceMotion={reduceMotion}
-                        activeColor={activeColor}
-                        onColorSelect={setActiveColor}
+                        highlightColor={activeColor}
+                        metrics={metrics}
                       />
-                    </OnboardingSceneLayer>
-                  ) : null}
-                </>
+                    </Scene.Node>
+
+                    <Scene.Node id="dictionary" frame={{ x: 16, y: 62, width: 98, height: 47 }}>
+                      <SceneTwoNodeCard
+                        label={t('playground.sceneTwo.dictionary')}
+                        icon="book-open"
+                        metrics={metrics}
+                      />
+                    </Scene.Node>
+                    <Scene.Node id="references" frame={{ x: 226, y: 46, width: 100, height: 47 }}>
+                      <SceneTwoNodeCard
+                        label={t('playground.sceneTwo.references')}
+                        icon="git-branch"
+                        metrics={metrics}
+                      />
+                    </Scene.Node>
+                    <Scene.Node id="lexique" frame={{ x: 118, y: 131, width: 158, height: 72 }}>
+                      <SceneTwoNodeCard
+                        label={t('playground.sceneTwo.lexique')}
+                        icon="book"
+                        metrics={metrics}
+                        active
+                        onPress={() => undefined}
+                      />
+                    </Scene.Node>
+                    <Scene.Node id="comments" frame={{ x: 212, y: 256, width: 114, height: 47 }}>
+                      <SceneTwoNodeCard
+                        label={t('playground.sceneTwo.comments')}
+                        icon="message-square"
+                        metrics={metrics}
+                      />
+                    </Scene.Node>
+                    <Scene.Node id="themes" frame={{ x: 254, y: 316, width: 100, height: 47 }}>
+                      <SceneTwoNodeCard
+                        label={t('playground.sceneTwo.themes')}
+                        icon="tag"
+                        metrics={metrics}
+                      />
+                    </Scene.Node>
+                    <Scene.Node
+                      id="translations"
+                      frame={{ x: 213, y: 380, width: 126, height: 47 }}
+                    >
+                      <SceneTwoNodeCard
+                        label={t('playground.sceneTwo.translations')}
+                        icon="globe"
+                        metrics={metrics}
+                      />
+                    </Scene.Node>
+
+                    <Scene.Connection
+                      from={{ node: 'verse-card', anchor: 'topLeft' }}
+                      to={{ node: 'dictionary', anchor: 'bottom' }}
+                    />
+                    <Scene.Connection
+                      from={{ node: 'verse-card', anchor: 'topRight' }}
+                      to={{ node: 'references', anchor: 'bottom' }}
+                    />
+                    <Scene.Connection
+                      from={{ node: 'verse-card', anchor: 'highlightedWord' }}
+                      to={{ node: 'lexique', anchor: 'bottom' }}
+                      opacity={0.8}
+                      width={2}
+                    />
+                    <Scene.Connection
+                      from={{ node: 'verse-card', anchor: 'right' }}
+                      to={{ node: 'comments', anchor: 'left' }}
+                    />
+                    <Scene.Connection
+                      from={{ node: 'verse-card', anchor: 'right' }}
+                      to={{ node: 'themes', anchor: 'left' }}
+                    />
+                    <Scene.Connection
+                      from={{ node: 'verse-card', anchor: 'bottomRight' }}
+                      to={{ node: 'translations', anchor: 'left' }}
+                    />
+                  </Scene>
+                </SceneGraph>
               )}
             </OnboardingStage>
           )}
