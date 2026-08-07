@@ -9,11 +9,11 @@ import Animated, {
   FadeIn,
   FadeInDown,
   FadeInUp,
-  FadeOutDown,
   interpolate,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withSpring,
 } from 'react-native-reanimated'
 
@@ -44,6 +44,44 @@ type ColorSwatchProps = {
   reduceMotion: boolean
   scale: number
   onPress: () => void
+}
+
+const paletteEntering = (translateX: number, translateY: number) => () => {
+  'worklet'
+
+  return {
+    initialValues: {
+      opacity: 0,
+      transform: [{ translateX }, { translateY }, { scale: 0.62 }],
+    },
+    animations: {
+      opacity: withDelay(120, withSpring(1)),
+      transform: [
+        { translateX: withDelay(120, withSpring(0)) },
+        { translateY: withDelay(120, withSpring(0)) },
+        { scale: withDelay(120, withSpring(1)) },
+      ],
+    },
+  }
+}
+
+const paletteExiting = (translateX: number, translateY: number) => () => {
+  'worklet'
+
+  return {
+    initialValues: {
+      opacity: 1,
+      transform: [{ translateX: 0 }, { translateY: 0 }, { scale: 1 }],
+    },
+    animations: {
+      opacity: withSpring(0),
+      transform: [
+        { translateX: withSpring(translateX) },
+        { translateY: withSpring(translateY) },
+        { scale: withSpring(0.62) },
+      ],
+    },
+  }
 }
 
 const ColorSwatch = ({
@@ -192,6 +230,8 @@ export const SceneOneVerseHighlightControls = ({
   }
 
   const s = metrics.s
+  const paletteTranslateX = s(30)
+  const paletteTranslateY = s(-30)
 
   return (
     <Box flex width="100%" overflow="visible">
@@ -213,14 +253,16 @@ export const SceneOneVerseHighlightControls = ({
           zIndex: 3,
         }}
       >
-        <AnimatedBox style={fabStyle} zIndex={3}>
+        <AnimatedBox style={fabStyle} zIndex={3} overflow="visible">
           <Box
             size={s(48)}
             borderRadius={s(24)}
             bg="primary"
             center
-            lightShadow
             transform={[{ rotate: '5deg' }]}
+            style={{
+              boxShadow: '0 4px 6px rgba(89,131,240, 0.5)',
+            }}
           >
             <Feather name="edit-3" size={s(22)} color={theme.colors.reverse} />
           </Box>
@@ -240,8 +282,10 @@ export const SceneOneVerseHighlightControls = ({
           py={s(10)}
           lightShadow
           zIndex={2}
-          entering={reduceMotion ? undefined : FadeInDown.springify().delay(120)}
-          exiting={reduceMotion ? undefined : FadeOutDown.springify()}
+          entering={
+            reduceMotion ? undefined : paletteEntering(paletteTranslateX, paletteTranslateY)
+          }
+          exiting={reduceMotion ? undefined : paletteExiting(paletteTranslateX, paletteTranslateY)}
         >
           <HStack alignItems="center" gap={s(6)}>
             {HIGHLIGHT_COLORS.map(colorKey => (
@@ -288,7 +332,7 @@ export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps)
         width: 382,
         height: 294,
         rotation: -1,
-        zIndex: 4,
+        zIndex: 5,
         anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
       }}
     >

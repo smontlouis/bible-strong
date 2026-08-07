@@ -12,6 +12,23 @@ import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
 
+const SCENE_TWO_ENTRANCE_TIMING = {
+  start: 200,
+  stagger: 80,
+} as const
+
+const entranceDelay = (index: number) =>
+  SCENE_TWO_ENTRANCE_TIMING.start + SCENE_TWO_ENTRANCE_TIMING.stagger * index
+
+const SCENE_TWO_ENTRANCE_DELAYS = {
+  dictionary: entranceDelay(0),
+  references: entranceDelay(1),
+  lexique: entranceDelay(2),
+  comments: entranceDelay(3),
+  themes: entranceDelay(4),
+  translations: entranceDelay(5),
+} as const
+
 type SceneTwoNodeCardProps = {
   label: string
   icon: ComponentProps<typeof Feather>['name']
@@ -143,7 +160,7 @@ export const createSceneTwoLexique = ({
         height: 294,
         scale: 0.5,
         rotation: -2,
-        zIndex: 4,
+        zIndex: 5,
         anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
       }}
     >
@@ -153,8 +170,9 @@ export const createSceneTwoLexique = ({
     <Scene.Node
       id="dictionary"
       frame={{ x: 16, y: 62, width: 98, height: 47 }}
-      enterDelay={660}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.dictionary}
       enterFrom={{ x: 4, y: 30 }}
+      exitTo={{ x: 4, y: 30 }}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.dictionary')}
@@ -165,8 +183,9 @@ export const createSceneTwoLexique = ({
     <Scene.Node
       id="references"
       frame={{ x: 226, y: 46, width: 100, height: 47 }}
-      enterDelay={740}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.references}
       enterFrom={{ x: -15, y: 26 }}
+      exitTo={{ x: -15, y: 26 }}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.references')}
@@ -177,8 +196,9 @@ export const createSceneTwoLexique = ({
     <Scene.Node
       id="lexique"
       frame={{ x: 118, y: 131, width: 158, height: 72 }}
-      enterDelay={1120}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.lexique}
       enterFrom={{ x: -13, y: 27 }}
+      exitTo={{ x: -13, y: 27 }}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.lexique')}
@@ -191,8 +211,9 @@ export const createSceneTwoLexique = ({
     <Scene.Node
       id="comments"
       frame={{ x: 212, y: 256, width: 114, height: 47 }}
-      enterDelay={820}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.comments}
       enterFrom={{ x: -26, y: 14 }}
+      exitTo={{ x: -26, y: 14 }}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.comments')}
@@ -203,16 +224,18 @@ export const createSceneTwoLexique = ({
     <Scene.Node
       id="themes"
       frame={{ x: 254, y: 316, width: 100, height: 47 }}
-      enterDelay={900}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.themes}
       enterFrom={{ x: -30, y: 4 }}
+      exitTo={{ x: -30, y: 4 }}
     >
       <SceneTwoNodeCard label={t('playground.sceneTwo.themes')} icon="tag" metrics={metrics} />
     </Scene.Node>
     <Scene.Node
       id="translations"
       frame={{ x: 213, y: 380, width: 126, height: 47 }}
-      enterDelay={980}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.translations}
       enterFrom={{ x: -29, y: -6 }}
+      exitTo={{ x: -29, y: -6 }}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.translations')}
@@ -225,19 +248,19 @@ export const createSceneTwoLexique = ({
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'dictionary', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
-      enterDelay={660}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.dictionary}
     />
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'references', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
-      enterDelay={740}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.references}
     />
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'lexique', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
-      enterDelay={1120}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.lexique}
       opacity={0.8}
       width={2}
     />
@@ -245,19 +268,19 @@ export const createSceneTwoLexique = ({
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'comments', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
-      enterDelay={820}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.comments}
     />
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'themes', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
-      enterDelay={900}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.themes}
     />
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'translations', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
-      enterDelay={980}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.translations}
     />
   </Scene>
 )

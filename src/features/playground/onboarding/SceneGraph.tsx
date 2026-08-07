@@ -13,6 +13,7 @@ import {
   createAnimatedComponent,
   FadeIn,
   FadeOut,
+  type EntryOrExitLayoutType,
   type SharedValue,
   useAnimatedProps,
   useAnimatedStyle,
@@ -69,6 +70,9 @@ type SceneNodeProps = {
   layout?: SceneLayoutMode
   enterDelay?: number
   enterFrom?: SceneNodeOffset
+  exitTo?: SceneNodeOffset
+  entering?: EntryOrExitLayoutType | false
+  exiting?: EntryOrExitLayoutType | false
   children: ReactElement
 }
 
@@ -125,7 +129,6 @@ type NodeGeometry = {
 
 type NodeRendererProps = {
   descriptor: NodeDescriptor
-  isExiting: boolean
   metrics: OnboardingStageMetrics
   reduceMotion: boolean
   geometries: React.MutableRefObject<Map<string, NodeGeometry>>
@@ -142,7 +145,6 @@ type ConnectionRendererProps = {
 }
 
 const AnimatedPath = createAnimatedComponent(Path)
-const NODE_EXIT_RETENTION_MS = 600
 const contentTypeIds = new WeakMap<object, number>()
 let nextContentTypeId = 0
 
@@ -258,7 +260,6 @@ const withSceneSpring = (value: number, reduceMotion: boolean) =>
 
 const NodeRenderer = ({
   descriptor,
-  isExiting,
   metrics,
   reduceMotion,
   geometries,
@@ -310,19 +311,12 @@ const NodeRenderer = ({
       )
     )
     rotation.set(withSceneSpring(descriptor.frame.rotation ?? 0, reduceMotion))
-    opacity.set(
-      isExiting
-        ? reduceMotion
-          ? 0
-          : withSpring(0)
-        : withSceneSpring(descriptor.frame.opacity ?? 1, reduceMotion)
-    )
+    opacity.set(withSceneSpring(descriptor.frame.opacity ?? 1, reduceMotion))
   }, [
     descriptor.frame,
     descriptor.layout,
     height,
     initialFrame,
-    isExiting,
     opacity,
     reduceMotion,
     rotation,
@@ -345,6 +339,8 @@ const NodeRenderer = ({
   }))
   const enterFromX = (descriptor.enterFrom?.x ?? 0) * metrics.scale
   const enterFromY = (descriptor.enterFrom?.y ?? 0) * metrics.scale
+  const exitToX = (descriptor.exitTo?.x ?? 0) * metrics.scale
+  const exitToY = (descriptor.exitTo?.y ?? 0) * metrics.scale
   const enteringAnimation = () => {
     'worklet'
     const delay = descriptor.enterDelay ?? 0
@@ -363,6 +359,26 @@ const NodeRenderer = ({
       },
     }
   }
+  const exitingAnimation = () => {
+    'worklet'
+
+    return {
+      initialValues: {
+        opacity: 1,
+        transform: [{ translateX: 0 }, { translateY: 0 }],
+      },
+      animations: {
+        opacity: withSpring(0),
+        transform: [{ translateX: withSpring(exitToX) }, { translateY: withSpring(exitToY) }],
+      },
+    }
+  }
+  const resolvedEntering =
+    descriptor.entering === false ? undefined : (descriptor.entering ?? enteringAnimation)
+  const resolvedExiting =
+    descriptor.exiting === false
+      ? undefined
+      : (descriptor.exiting ?? (descriptor.exitTo ? exitingAnimation : FadeOut.springify()))
 
   return (
     <AnimatedBox
@@ -373,15 +389,11 @@ const NodeRenderer = ({
       height={initialFrame.height * metrics.scale}
       overflow="visible"
       zIndex={descriptor.frame.zIndex ?? 4}
-      entering={isExiting || reduceMotion ? undefined : enteringAnimation}
+      entering={reduceMotion ? undefined : resolvedEntering}
+      exiting={reduceMotion ? undefined : resolvedExiting}
     >
       <AnimatedBox position="absolute" left={0} top={0} style={animatedStyle}>
-        <AnimatedBox
-          key={descriptor.contentIdentity}
-          entering={reduceMotion ? undefined : FadeIn.springify()}
-          exiting={reduceMotion ? undefined : FadeOut.springify()}
-          style={{ position: 'absolute', inset: 0 }}
-        >
+        <AnimatedBox key={descriptor.contentIdentity} style={{ position: 'absolute', inset: 0 }}>
           {descriptor.children}
         </AnimatedBox>
       </AnimatedBox>
@@ -501,44 +513,10 @@ export const SceneGraph = ({
   const activeScene = scenes.find(scene => scene.id === activeSceneId)
   const geometries = useRef(new Map<string, NodeGeometry>())
   const [, notifyGeometryChange] = useState(0)
-  const lastCommittedNodes = useRef(activeScene?.nodes ?? [])
-  const [transition, setTransition] = useState<{
-    sceneId: string
-    exitingNodes: NodeDescriptor[]
-  }>({ sceneId: activeSceneId, exitingNodes: [] })
 
   if (!activeScene) throw new Error(`Unknown onboarding scene: ${activeSceneId}`)
 
-  if (transition.sceneId !== activeSceneId) {
-    const incomingIds = new Set(activeScene.nodes.map(node => node.id))
-    setTransition({
-      sceneId: activeSceneId,
-      exitingNodes: lastCommittedNodes.current.filter(node => !incomingIds.has(node.id)),
-    })
-  }
-
-  useLayoutEffect(() => {
-    lastCommittedNodes.current = activeScene.nodes
-  }, [activeScene.nodes])
-
-  useEffect(() => {
-    if (transition.exitingNodes.length === 0) return
-
-    const timeout = setTimeout(
-      () => setTransition(current => ({ ...current, exitingNodes: [] })),
-      reduceMotion ? 0 : NODE_EXIT_RETENTION_MS
-    )
-
-    return () => clearTimeout(timeout)
-  }, [reduceMotion, transition.exitingNodes])
-
   const nodesById = new Map(activeScene.nodes.map(node => [node.id, node]))
-  const exitingNodes =
-    transition.sceneId === activeSceneId ? transition.exitingNodes : lastCommittedNodes.current
-  const renderedNodes = [
-    ...activeScene.nodes.map(node => ({ node, isExiting: false })),
-    ...exitingNodes.map(node => ({ node, isExiting: true })),
-  ]
 
   return (
     <Box flex={1} overflow="visible">
@@ -582,11 +560,10 @@ export const SceneGraph = ({
         ))}
       </Box>
 
-      {renderedNodes.map(({ node, isExiting }) => (
+      {activeScene.nodes.map(node => (
         <NodeRenderer
           key={node.id}
           descriptor={node}
-          isExiting={isExiting}
           metrics={metrics}
           reduceMotion={reduceMotion}
           geometries={geometries}

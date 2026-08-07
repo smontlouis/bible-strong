@@ -33,6 +33,15 @@ children are configuration elements, not independently mounted React subtrees.
       <LexiqueCard />
     </Scene.Node>
 
+    <Scene.Node
+      id="custom-node"
+      frame={{ x: 24, y: 48, width: 120, height: 56 }}
+      enterFrom={{ x: 24, y: -16 }}
+      exitTo={{ x: 24, y: -16 }}
+    >
+      <CustomCard />
+    </Scene.Node>
+
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'highlightedWord' }}
       to={{ node: 'lexique', anchor: 'bottom' }}
@@ -49,8 +58,11 @@ children are configuration elements, not independently mounted React subtrees.
 The interface consists of:
 
 - `Scene`: one declarative graph selected by `id`.
-- `Scene.Node`: a stable identity, one root React element, a frame, optional named anchors, and
-  `layout="scale" | "resize" | "position" | "auto"`.
+- `Scene.Node`: a stable identity, one root React element, a frame, optional named anchors,
+  independently configurable `entering` and `exiting` Reanimated animations, and
+  `layout="scale" | "resize" | "position" | "auto"`. Passing `false` disables either animation.
+  `enterFrom` and `exitTo` are convenience offsets using the default spring. A custom `entering`
+  or `exiting` animation takes precedence over its corresponding offset.
 - `Scene.Connection`: two node/anchor endpoints plus optional stroke presentation.
 - `Scene.Layer`: optional stacking for ordinary scene-owned content that must sit above or below
   graph nodes. It does not create persistent identity.
@@ -71,11 +83,12 @@ descriptors. React keys each stable node container by node `id`:
 
 - Same `id`, same root React type: the container and child type reconcile in place, preserving
   hooks and local state while SharedValues animate to the next frame.
-- Same `id`, different root React type: the container remains stable and keyed inner content uses
-  a fade-through.
-- Incoming-only `id`: a node container mounts with an entry fade.
-- Outgoing-only `id`: the reconciler retains its descriptor and React instance while opacity
-  animates out, then removes it after the exit duration.
+- Same `id`, different root React type: the container remains stable while React replaces its
+  keyed inner content. Node-level entry and exit animations remain reserved for mount/unmount.
+- Incoming-only `id`: a node container mounts with its configured `entering` animation, or the
+  default delayed spring fade/translation.
+- Outgoing-only `id`: React removes the node immediately and Reanimated keeps its native view
+  alive until its configured `exiting` animation, or the default spring fade, completes.
 - Unwrapped content: the whole ordinary layer is keyed by scene `id`.
 
 Each mounted node publishes stable SharedValues for x, y, width, height, scale, and rotation.
@@ -110,7 +123,7 @@ The explicit-frame prototype never double-mounts node content. A future intrinsi
 prepass would either mount a measurement shell without the real child or accept a documented
 double mount; this decision remains open. Stable nodes use their frame `zIndex`; connections use
 layer 2; ordinary content defaults to layer 1; and `Scene.Layer` explicitly places controls such
-as the scene-one palette above nodes. Exiting unique nodes retain their previous z-index.
+as the scene-one palette above nodes. Reanimated owns the native lifetime of exiting nodes.
 
 ## Comparison with the previous implementation
 
