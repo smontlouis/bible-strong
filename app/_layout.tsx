@@ -4,6 +4,8 @@ import { ThemeProvider } from '@emotion/react'
 import * as Sentry from '@sentry/react-native'
 
 import * as SplashScreen from 'expo-splash-screen'
+import * as Font from 'expo-font'
+import * as Icon from '@expo/vector-icons'
 import { setAutoFreeze } from 'immer'
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, LogBox, Pressable, Text as NativeText, View } from 'react-native'
@@ -97,6 +99,18 @@ const StartupLoading = () => (
   </View>
 )
 
+const preparePlaygroundFonts = async () => {
+  try {
+    await Font.loadAsync({
+      ...Icon.Feather.font,
+      'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
+      'eina-03-bold': require('~assets/fonts/eina-03-bold.otf'),
+    })
+  } catch (error) {
+    appLogger.warn('startup', 'playground.fonts.failed', { error })
+  }
+}
+
 // Hook to load app resources
 const useAppLoad = () => {
   const [isLoadingCompleted, setIsLoadingCompleted] = useState(false)
@@ -116,6 +130,7 @@ const useAppLoad = () => {
             await import('../src/migrations/localMigrationRegistry')
           await prepareLocalMigrationStartup()
         } else {
+          await preparePlaygroundFonts()
           appLogger.info('startup', 'playground.mode_enabled')
         }
         startPersistence()
@@ -164,14 +179,17 @@ function InnerApp() {
   const preferredColorScheme = useSelector(
     (state: RootState) => state.user.bible.settings.preferredColorScheme || 'auto'
   )
-  const { theme: currentTheme } = useCurrentThemeSelector()
+  const { theme: selectedTheme } = useCurrentThemeSelector()
+  // Playground visuals are authored in the light Bible Strong palette so they
+  // remain comparable across devices and persisted user theme preferences.
+  const currentTheme = isPlaygroundEnabled ? 'default' : selectedTheme
 
   useEffect(() => {
     changeStatusBarStyle(currentTheme)
   }, [currentTheme])
 
   useEffect(() => {
-    if (preferredColorScheme === 'auto') return
+    if (isPlaygroundEnabled || preferredColorScheme === 'auto') return
 
     applyPreferredColorScheme(preferredColorScheme)
   }, [preferredColorScheme])
