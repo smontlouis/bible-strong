@@ -1415,6 +1415,7 @@
   "playground.fullAppHint": "To return to the complete application, disable EXPO_PUBLIC_PLAYGROUND and restart Metro with a cleared cache.",
   "playground.replay": "Replay scene 1",
   "playground.onboarding.skip": "Skip",
+  "playground.onboarding.back": "Go back to the previous scene",
   "playground.onboarding.continue": "Continue",
   "playground.onboarding.complete": "Your workspace is ready.",
   "playground.sceneOne.chapter": "Genesis 4:2",

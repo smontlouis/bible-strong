@@ -14,7 +14,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import Box, { AnimatedBox, VStack } from '~common/ui/Box'
+import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { OnboardingStage } from './onboarding/OnboardingStage'
 import { SceneGraph } from './onboarding/SceneGraph'
@@ -38,6 +38,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   const [activeColor, setActiveColor] = useState<HighlightColor>('color2')
   const [sceneViewportHeight, setSceneViewportHeight] = useState<number>()
   const currentScene = ONBOARDING_SCENES[sceneIndex]
+  const canGoBack = sceneIndex > 0
   const progress = isFinishing ? 1 : (sceneIndex + 1) / ONBOARDING_SCENE_COUNT
   const progressValue = useSharedValue(progress)
   // The storyboard is authored at 390 pt wide with a 350 pt content column.
@@ -70,6 +71,10 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
     }
 
     finish()
+  }
+
+  const goBack = () => {
+    if (canGoBack) setSceneIndex(value => value - 1)
   }
 
   return (
@@ -178,26 +183,68 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
         >
           {t(currentScene.promptKey)}
         </Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('playground.onboarding.continue')}
-          onPress={advance}
-          style={({ pressed }) => ({ opacity: pressed ? 0.86 : 1 })}
-        >
-          <Box
-            bg="primary"
-            borderRadius={29}
-            height={58}
-            center
-            lightShadow
-            style={{ flexDirection: 'row', gap: 12 }}
+        <HStack height={58} alignItems="center">
+          <Animated.View
+            pointerEvents={canGoBack ? 'auto' : 'none'}
+            style={{
+              width: canGoBack ? 70 : 0,
+              overflow: 'hidden',
+              transitionProperty: 'width',
+              transitionDuration: reduceMotion ? 0 : 320,
+              transitionTimingFunction: 'ease-in-out',
+            }}
           >
-            <Text color="reverse" fontSize={17} bold>
-              {t('playground.onboarding.continue')}
-            </Text>
-            <Feather name="arrow-right" size={23} color={theme.colors.reverse} />
-          </Box>
-        </Pressable>
+            <Animated.View
+              style={{
+                width: 58,
+                height: 58,
+                opacity: canGoBack ? 1 : 0,
+                transform: [{ scale: canGoBack ? 1 : 0.25 }],
+                transitionProperty: ['opacity', 'transform'],
+                transitionDuration: reduceMotion ? 0 : 280,
+                transitionTimingFunction: 'ease-in-out',
+              }}
+            >
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('playground.onboarding.back')}
+                disabled={!canGoBack}
+                onPress={goBack}
+                style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.96 : 1 }] })}
+              >
+                <Box size={58} borderRadius={29} bg="primary" center lightShadow>
+                  <Feather name="arrow-left" size={24} color={theme.colors.reverse} />
+                </Box>
+              </Pressable>
+            </Animated.View>
+          </Animated.View>
+
+          <Animated.View style={{ flex: 1 }}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('playground.onboarding.continue')}
+              onPress={advance}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.9 : 1,
+                transform: [{ scale: pressed ? 0.96 : 1 }],
+              })}
+            >
+              <Box
+                bg="primary"
+                borderRadius={29}
+                height={58}
+                center
+                lightShadow
+                style={{ flexDirection: 'row', gap: 12 }}
+              >
+                <Text color="reverse" fontSize={17} bold>
+                  {t('playground.onboarding.continue')}
+                </Text>
+                <Feather name="arrow-right" size={23} color={theme.colors.reverse} />
+              </Box>
+            </Pressable>
+          </Animated.View>
+        </HStack>
       </VStack>
     </Box>
   )

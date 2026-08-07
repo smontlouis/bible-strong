@@ -1374,6 +1374,7 @@
   "playground.fullAppHint": "Pour revenir à l’application complète, désactivez EXPO_PUBLIC_PLAYGROUND puis relancez Metro avec le cache nettoyé.",
   "playground.replay": "Rejouer la scène 1",
   "playground.onboarding.skip": "Passer",
+  "playground.onboarding.back": "Revenir à la scène précédente",
   "playground.onboarding.continue": "Continuer",
   "playground.onboarding.complete": "Votre espace est prêt.",
   "playground.sceneOne.chapter": "Genèse 4.2",
