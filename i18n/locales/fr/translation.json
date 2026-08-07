@@ -1389,5 +1389,12 @@
   "playground.sceneOne.color2": "Corail",
   "playground.sceneOne.color3": "Jaune doré",
   "playground.sceneOne.color4": "Bleu ciel",
-  "playground.sceneOne.color5": "Ardoise"
+  "playground.sceneOne.color5": "Ardoise",
+  "playground.sceneTwo.phrase": "Chaque verset peut devenir un point de départ.",
+  "playground.sceneTwo.dictionary": "Dictionnaire",
+  "playground.sceneTwo.references": "Références",
+  "playground.sceneTwo.lexique": "LEXIQUE",
+  "playground.sceneTwo.comments": "Commentaires",
+  "playground.sceneTwo.themes": "Thèmes",
+  "playground.sceneTwo.translations": "Traductions"
 }

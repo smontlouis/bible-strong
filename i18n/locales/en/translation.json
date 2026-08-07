@@ -1430,5 +1430,12 @@
   "playground.sceneOne.color2": "Coral",
   "playground.sceneOne.color3": "Golden yellow",
   "playground.sceneOne.color4": "Sky blue",
-  "playground.sceneOne.color5": "Slate"
+  "playground.sceneOne.color5": "Slate",
+  "playground.sceneTwo.phrase": "Every verse can become a starting point.",
+  "playground.sceneTwo.dictionary": "Dictionary",
+  "playground.sceneTwo.references": "References",
+  "playground.sceneTwo.lexique": "LEXICON",
+  "playground.sceneTwo.comments": "Comments",
+  "playground.sceneTwo.themes": "Themes",
+  "playground.sceneTwo.translations": "Translations"
 }

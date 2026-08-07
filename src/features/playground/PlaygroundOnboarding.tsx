@@ -16,9 +16,18 @@ import Animated, {
 
 import Box, { AnimatedBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import SceneOneVerseHighlight from './scenes/SceneOneVerseHighlight'
-
-const SCENE_COUNT = 8
+import {
+  OnboardingSceneLayer,
+  OnboardingStage,
+  PersistentActor,
+} from './onboarding/OnboardingStage'
+import { ONBOARDING_SCENE_COUNT, ONBOARDING_SCENES } from './onboarding/sceneRegistry'
+import VerseCard, { type HighlightColor } from './onboarding/VerseCard'
+import {
+  SceneOneVerseHighlightBackground,
+  SceneOneVerseHighlightControls,
+} from './scenes/SceneOneVerseHighlight'
+import SceneTwoLexique from './scenes/SceneTwoLexique'
 
 type PlaygroundOnboardingProps = {
   onComplete: () => void
@@ -30,9 +39,12 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
   const reduceMotion = useReducedMotion()
+  const [sceneIndex, setSceneIndex] = useState(0)
   const [isFinishing, setIsFinishing] = useState(false)
+  const [activeColor, setActiveColor] = useState<HighlightColor>('color2')
   const [sceneViewportHeight, setSceneViewportHeight] = useState<number>()
-  const progress = isFinishing ? 1 : 1 / SCENE_COUNT
+  const currentScene = ONBOARDING_SCENES[sceneIndex]
+  const progress = isFinishing ? 1 : (sceneIndex + 1) / ONBOARDING_SCENE_COUNT
   const progressValue = useSharedValue(progress)
   // The storyboard is authored at 390 pt wide with a 350 pt content column.
   // Keep that column centered, but let it shrink on narrower phones.
@@ -55,6 +67,15 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
 
   const finish = () => {
     if (!isFinishing) setIsFinishing(true)
+  }
+
+  const advance = () => {
+    if (sceneIndex < ONBOARDING_SCENES.length - 1) {
+      setSceneIndex(value => value + 1)
+      return
+    }
+
+    finish()
   }
 
   return (
@@ -104,7 +125,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
         }}
       >
         <AnimatedBox
-          key={isFinishing ? 'playground-complete' : 'playground-scene-one'}
+          key={isFinishing ? 'playground-complete' : 'playground-scenes'}
           flex={1}
           overflow="visible"
           entering={reduceMotion ? undefined : FadeIn.duration(300)}
@@ -126,10 +147,55 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
               </Text>
             </VStack>
           ) : (
-            <SceneOneVerseHighlight
-              reduceMotion={reduceMotion}
-              availableHeight={sceneViewportHeight}
-            />
+            <OnboardingStage availableHeight={sceneViewportHeight}>
+              {metrics => (
+                <>
+                  <PersistentActor
+                    layout={currentScene.actorLayouts['verse-card']}
+                    metrics={metrics}
+                    reduceMotion={reduceMotion}
+                  >
+                    <VerseCard
+                      reduceMotion={reduceMotion}
+                      highlightColor={activeColor}
+                      metrics={metrics}
+                    />
+                  </PersistentActor>
+
+                  <OnboardingSceneLayer
+                    sceneKey={`${currentScene.id}-background`}
+                    metrics={metrics}
+                    reduceMotion={reduceMotion}
+                    zIndex={1}
+                  >
+                    {currentScene.id === 'scene-one' ? (
+                      <SceneOneVerseHighlightBackground
+                        metrics={metrics}
+                        reduceMotion={reduceMotion}
+                      />
+                    ) : (
+                      <SceneTwoLexique metrics={metrics} reduceMotion={reduceMotion} />
+                    )}
+                  </OnboardingSceneLayer>
+
+                  {currentScene.id === 'scene-one' ? (
+                    <OnboardingSceneLayer
+                      sceneKey={`${currentScene.id}-controls`}
+                      metrics={metrics}
+                      reduceMotion={reduceMotion}
+                      zIndex={5}
+                    >
+                      <SceneOneVerseHighlightControls
+                        metrics={metrics}
+                        reduceMotion={reduceMotion}
+                        activeColor={activeColor}
+                        onColorSelect={setActiveColor}
+                      />
+                    </OnboardingSceneLayer>
+                  ) : null}
+                </>
+              )}
+            </OnboardingStage>
           )}
         </AnimatedBox>
       </View>
@@ -137,17 +203,17 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
       <VStack width={contentWidth} alignSelf="center" pb={Math.max(insets.bottom, 24)} gap={20}>
         <Text
           title
-          fontSize={32}
-          lineHeight={38}
+          fontSize={currentScene.id === 'scene-two' ? 25 : 32}
+          lineHeight={currentScene.id === 'scene-two' ? 32 : 38}
           textAlign="center"
           style={{ fontFamily: 'Literata Book' }}
         >
-          {t('playground.sceneOne.phrase')}
+          {t(currentScene.promptKey)}
         </Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('playground.onboarding.continue')}
-          onPress={finish}
+          onPress={advance}
           style={({ pressed }) => ({ opacity: pressed ? 0.86 : 1 })}
         >
           <Box
