@@ -11,7 +11,7 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withTiming,
+  withSpring,
 } from 'react-native-reanimated'
 
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
@@ -41,14 +41,23 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   const canGoBack = sceneIndex > 0
   const progress = isFinishing ? 1 : (sceneIndex + 1) / ONBOARDING_SCENE_COUNT
   const progressValue = useSharedValue(progress)
+  const backSlotWidth = useSharedValue(canGoBack ? 70 : 0)
+  const backOpacity = useSharedValue(canGoBack ? 1 : 0)
+  const backScale = useSharedValue(canGoBack ? 1 : 0.25)
   // The storyboard is authored at 390 pt wide with a 350 pt content column.
   // Keep that column centered, but let it shrink on narrower phones.
   const contentWidth = Math.min(350, Math.max(width - 40, 1))
   const progressWidth = Math.min(145, contentWidth * 0.42)
 
   useEffect(() => {
-    progressValue.set(withTiming(progress, { duration: reduceMotion ? 0 : 520 }))
+    progressValue.set(reduceMotion ? progress : withSpring(progress))
   }, [progress, progressValue, reduceMotion])
+
+  useEffect(() => {
+    backSlotWidth.set(reduceMotion ? (canGoBack ? 70 : 0) : withSpring(canGoBack ? 70 : 0))
+    backOpacity.set(reduceMotion ? (canGoBack ? 1 : 0) : withSpring(canGoBack ? 1 : 0))
+    backScale.set(reduceMotion ? (canGoBack ? 1 : 0.25) : withSpring(canGoBack ? 1 : 0.25))
+  }, [backOpacity, backScale, backSlotWidth, canGoBack, reduceMotion])
 
   useEffect(() => {
     if (!isFinishing) return
@@ -58,6 +67,13 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
 
   const progressStyle = useAnimatedStyle(() => ({
     width: progressValue.get() * progressWidth,
+  }))
+  const backSlotStyle = useAnimatedStyle(() => ({
+    width: backSlotWidth.get(),
+  }))
+  const backButtonStyle = useAnimatedStyle(() => ({
+    opacity: backOpacity.get(),
+    transform: [{ scale: backScale.get() }],
   }))
 
   const finish = () => {
@@ -127,8 +143,8 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
           key={isFinishing ? 'playground-complete' : 'playground-scenes'}
           flex={1}
           overflow="visible"
-          entering={reduceMotion ? undefined : FadeIn.duration(300)}
-          exiting={reduceMotion ? undefined : FadeOut.duration(260)}
+          entering={reduceMotion ? undefined : FadeIn.springify()}
+          exiting={reduceMotion ? undefined : FadeOut.springify()}
         >
           {isFinishing ? (
             <VStack flex={1} alignItems="center" justifyContent="center" gap={12}>
@@ -137,7 +153,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                 borderRadius={36}
                 bg="lightPrimary"
                 center
-                entering={reduceMotion ? undefined : FadeInDown.duration(420)}
+                entering={reduceMotion ? undefined : FadeInDown.springify()}
               >
                 <Feather name="check" size={30} color={theme.colors.primary} />
               </AnimatedBox>
@@ -174,37 +190,23 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
       </View>
 
       <VStack width={contentWidth} alignSelf="center" pb={Math.max(insets.bottom, 24)} gap={20}>
-        <Text
-          title
-          fontSize={currentScene.id === 'scene-two' ? 25 : 32}
-          lineHeight={currentScene.id === 'scene-two' ? 32 : 38}
-          textAlign="center"
-          style={{ fontFamily: 'Literata Book' }}
-        >
-          {t(currentScene.promptKey)}
-        </Text>
+        <Box height={76} center>
+          <Text
+            title
+            fontSize={currentScene.id === 'scene-two' ? 25 : 32}
+            lineHeight={currentScene.id === 'scene-two' ? 32 : 38}
+            textAlign="center"
+            style={{ fontFamily: 'Literata Book' }}
+          >
+            {t(currentScene.promptKey)}
+          </Text>
+        </Box>
         <HStack height={58} alignItems="center">
           <Animated.View
             pointerEvents={canGoBack ? 'auto' : 'none'}
-            style={{
-              width: canGoBack ? 70 : 0,
-              overflow: 'hidden',
-              transitionProperty: 'width',
-              transitionDuration: reduceMotion ? 0 : 320,
-              transitionTimingFunction: 'ease-in-out',
-            }}
+            style={[{ overflow: 'hidden' }, backSlotStyle]}
           >
-            <Animated.View
-              style={{
-                width: 58,
-                height: 58,
-                opacity: canGoBack ? 1 : 0,
-                transform: [{ scale: canGoBack ? 1 : 0.25 }],
-                transitionProperty: ['opacity', 'transform'],
-                transitionDuration: reduceMotion ? 0 : 280,
-                transitionTimingFunction: 'ease-in-out',
-              }}
-            >
+            <Animated.View style={[{ width: 58, height: 58 }, backButtonStyle]}>
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('playground.onboarding.back')}

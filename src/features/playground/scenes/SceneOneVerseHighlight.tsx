@@ -24,6 +24,7 @@ import {
   DESIGN_STAGE_HEIGHT,
   type OnboardingStageMetrics,
 } from '../onboarding/OnboardingStage'
+import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { HIGHLIGHT_COLORS, type HighlightColor } from '../onboarding/VerseCard'
 
@@ -58,13 +59,7 @@ const ColorSwatch = ({
   const selectedFrameColor = Color(color).alpha(0.12).rgb().string()
 
   useEffect(() => {
-    selectedProgress.set(
-      reduceMotion
-        ? selected
-          ? 1
-          : 0
-        : withSpring(selected ? 1 : 0, { damping: 15, stiffness: 190 })
-    )
+    selectedProgress.set(reduceMotion ? (selected ? 1 : 0) : withSpring(selected ? 1 : 0))
   }, [reduceMotion, selected, selectedProgress])
 
   const frameStyle = useAnimatedStyle(() => ({
@@ -129,17 +124,6 @@ export const SceneOneVerseHighlightBackground = ({ reduceMotion, metrics }: Scen
     <Box flex width="100%" overflow="visible">
       <AnimatedBox
         position="absolute"
-        width={s(310)}
-        height={s(310)}
-        borderRadius={s(155)}
-        bg="lightPrimary"
-        opacity={0.66}
-        top={s(56)}
-        left={s(-52)}
-        entering={reduceMotion ? undefined : FadeIn.duration(720).delay(40)}
-      />
-      <AnimatedBox
-        position="absolute"
         width={s(105)}
         height={s(105)}
         borderRadius={s(52.5)}
@@ -148,13 +132,13 @@ export const SceneOneVerseHighlightBackground = ({ reduceMotion, metrics }: Scen
         opacity={0.72}
         top={s(278)}
         left={s(252)}
-        entering={reduceMotion ? undefined : FadeIn.duration(600).delay(220)}
+        entering={reduceMotion ? undefined : FadeIn.springify().delay(220)}
       />
       <AnimatedBox
         position="absolute"
         top={s(38)}
         left={s(302)}
-        entering={reduceMotion ? undefined : FadeInDown.duration(450).delay(340)}
+        entering={reduceMotion ? undefined : FadeInDown.springify().delay(340)}
       >
         <Text color="secondary" fontSize={s(19)} bold>
           +
@@ -164,7 +148,7 @@ export const SceneOneVerseHighlightBackground = ({ reduceMotion, metrics }: Scen
         position="absolute"
         top={s(342)}
         left={s(8)}
-        entering={reduceMotion ? undefined : FadeInUp.duration(450).delay(430)}
+        entering={reduceMotion ? undefined : FadeInUp.springify().delay(430)}
       >
         <Text color="primary" fontSize={s(16)} bold>
           +
@@ -174,7 +158,7 @@ export const SceneOneVerseHighlightBackground = ({ reduceMotion, metrics }: Scen
         position="absolute"
         top={s(390)}
         left={s(326)}
-        entering={reduceMotion ? undefined : FadeInUp.duration(450).delay(510)}
+        entering={reduceMotion ? undefined : FadeInUp.springify().delay(510)}
       >
         <Text color="secondary" fontSize={s(11)} bold>
           +
@@ -200,11 +184,11 @@ export const SceneOneVerseHighlightControls = ({
   }))
 
   const pressIn = () => {
-    fabScale.set(reduceMotion ? 0.96 : withSpring(0.96, { damping: 15, stiffness: 240 }))
+    fabScale.set(reduceMotion ? 0.96 : withSpring(0.96))
   }
 
   const pressOut = () => {
-    fabScale.set(reduceMotion ? 1 : withSpring(1, { damping: 14, stiffness: 220 }))
+    fabScale.set(reduceMotion ? 1 : withSpring(1))
   }
 
   const s = metrics.s
@@ -256,8 +240,8 @@ export const SceneOneVerseHighlightControls = ({
           py={s(10)}
           lightShadow
           zIndex={2}
-          entering={reduceMotion ? undefined : FadeInDown.duration(420).delay(120)}
-          exiting={reduceMotion ? undefined : FadeOutDown.duration(240)}
+          entering={reduceMotion ? undefined : FadeInDown.springify().delay(120)}
+          exiting={reduceMotion ? undefined : FadeOutDown.springify()}
         >
           <HStack alignItems="center" gap={s(6)}>
             {HIGHLIGHT_COLORS.map(colorKey => (
@@ -288,6 +272,13 @@ const SceneOneVerseHighlight = (props: SceneOneVerseHighlightProps) => (
 export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps) => (
   <Scene id="scene-one">
     <SceneOneVerseHighlightBackground metrics={props.metrics} reduceMotion={props.reduceMotion} />
+    <Scene.Node
+      id="scene-background"
+      layout="resize"
+      frame={{ x: -52, y: 56, width: 310, height: 310, opacity: 0.66, zIndex: 0 }}
+    >
+      <SceneBackgroundShape borderRadius={props.metrics.s(155)} reduceMotion={props.reduceMotion} />
+    </Scene.Node>
     <Scene.Node
       id="verse-card"
       layout="scale"

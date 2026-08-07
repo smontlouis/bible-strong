@@ -17,9 +17,10 @@ import {
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
+  withDelay,
+  withSpring,
 } from 'react-native-reanimated'
-import Svg, { Line, type LineProps } from 'react-native-svg'
+import Svg, { Path, type PathProps } from 'react-native-svg'
 
 import Box, { AnimatedBox } from '~common/ui/Box'
 import type { OnboardingStageMetrics } from './OnboardingStage'
@@ -27,6 +28,11 @@ import type { OnboardingStageMetrics } from './OnboardingStage'
 export type SceneLayoutMode = 'auto' | 'position' | 'resize' | 'scale'
 
 export type SceneNodeAnchor = {
+  x: number
+  y: number
+}
+
+export type SceneNodeOffset = {
   x: number
   y: number
 }
@@ -50,6 +56,8 @@ export type SceneConnectionEndpoint =
       anchor?: string
     }
 
+export type SceneConnectionCurve = { type: 'straight' } | { type: 'quadratic'; bend?: number }
+
 type SceneProps = {
   id: string
   children: ReactNode
@@ -59,12 +67,16 @@ type SceneNodeProps = {
   id: string
   frame: SceneNodeFrame
   layout?: SceneLayoutMode
+  enterDelay?: number
+  enterFrom?: SceneNodeOffset
   children: ReactElement
 }
 
 type SceneConnectionProps = {
   from: SceneConnectionEndpoint
   to: SceneConnectionEndpoint
+  curve?: SceneConnectionCurve
+  enterDelay?: number
   color?: string
   opacity?: number
   width?: number
@@ -129,8 +141,8 @@ type ConnectionRendererProps = {
   reduceMotion: boolean
 }
 
-const AnimatedLine = createAnimatedComponent(Line)
-const NODE_EXIT_DURATION = 220
+const AnimatedPath = createAnimatedComponent(Path)
+const NODE_EXIT_RETENTION_MS = 600
 const contentTypeIds = new WeakMap<object, number>()
 let nextContentTypeId = 0
 
@@ -241,8 +253,8 @@ const compileScenes = (children: ReactNode) =>
     return [compileScene(child)]
   })
 
-const withSceneTiming = (value: number, reduceMotion: boolean) =>
-  reduceMotion ? value : withTiming(value, { duration: 560 })
+const withSceneSpring = (value: number, reduceMotion: boolean) =>
+  reduceMotion ? value : withSpring(value)
 
 const NodeRenderer = ({
   descriptor,
@@ -283,27 +295,27 @@ const NodeRenderer = ({
         (descriptor.frame.width !== initialFrame.width ||
           descriptor.frame.height !== initialFrame.height))
 
-    x.set(withSceneTiming(descriptor.frame.x, reduceMotion))
-    y.set(withSceneTiming(descriptor.frame.y, reduceMotion))
+    x.set(withSceneSpring(descriptor.frame.x, reduceMotion))
+    y.set(withSceneSpring(descriptor.frame.y, reduceMotion))
     width.set(
-      withSceneTiming(shouldResize ? descriptor.frame.width : initialFrame.width, reduceMotion)
+      withSceneSpring(shouldResize ? descriptor.frame.width : initialFrame.width, reduceMotion)
     )
     height.set(
-      withSceneTiming(shouldResize ? descriptor.frame.height : initialFrame.height, reduceMotion)
+      withSceneSpring(shouldResize ? descriptor.frame.height : initialFrame.height, reduceMotion)
     )
     scale.set(
-      withSceneTiming(
+      withSceneSpring(
         mode === 'position' || shouldResize ? 1 : (descriptor.frame.scale ?? 1),
         reduceMotion
       )
     )
-    rotation.set(withSceneTiming(descriptor.frame.rotation ?? 0, reduceMotion))
+    rotation.set(withSceneSpring(descriptor.frame.rotation ?? 0, reduceMotion))
     opacity.set(
       isExiting
         ? reduceMotion
           ? 0
-          : withTiming(0, { duration: NODE_EXIT_DURATION })
-        : withSceneTiming(descriptor.frame.opacity ?? 1, reduceMotion)
+          : withSpring(0)
+        : withSceneSpring(descriptor.frame.opacity ?? 1, reduceMotion)
     )
   }, [
     descriptor.frame,
@@ -331,6 +343,26 @@ const NodeRenderer = ({
       { scale: scale.get() },
     ],
   }))
+  const enterFromX = (descriptor.enterFrom?.x ?? 0) * metrics.scale
+  const enterFromY = (descriptor.enterFrom?.y ?? 0) * metrics.scale
+  const enteringAnimation = () => {
+    'worklet'
+    const delay = descriptor.enterDelay ?? 0
+
+    return {
+      initialValues: {
+        opacity: 0,
+        transform: [{ translateX: enterFromX }, { translateY: enterFromY }],
+      },
+      animations: {
+        opacity: withDelay(delay, withSpring(1)),
+        transform: [
+          { translateX: withDelay(delay, withSpring(0)) },
+          { translateY: withDelay(delay, withSpring(0)) },
+        ],
+      },
+    }
+  }
 
   return (
     <AnimatedBox
@@ -341,13 +373,13 @@ const NodeRenderer = ({
       height={initialFrame.height * metrics.scale}
       overflow="visible"
       zIndex={descriptor.frame.zIndex ?? 4}
-      entering={isExiting || reduceMotion ? undefined : FadeIn.duration(280)}
+      entering={isExiting || reduceMotion ? undefined : enteringAnimation}
     >
       <AnimatedBox position="absolute" left={0} top={0} style={animatedStyle}>
         <AnimatedBox
           key={descriptor.contentIdentity}
-          entering={reduceMotion ? undefined : FadeIn.duration(260)}
-          exiting={reduceMotion ? undefined : FadeOut.duration(220)}
+          entering={reduceMotion ? undefined : FadeIn.springify()}
+          exiting={reduceMotion ? undefined : FadeOut.springify()}
           style={{ position: 'absolute', inset: 0 }}
         >
           {descriptor.children}
@@ -391,7 +423,7 @@ const ConnectionRenderer = ({
   const fromGeometry = geometries.get(from.nodeId)
   const toGeometry = geometries.get(to.nodeId)
 
-  const animatedProps = useAnimatedProps<LineProps>(() => {
+  const animatedProps = useAnimatedProps<PathProps>(() => {
     const point = (geometry: NodeGeometry, anchor: SceneNodeAnchor) => {
       'worklet'
 
@@ -407,17 +439,24 @@ const ConnectionRenderer = ({
       }
     }
 
-    if (!fromGeometry || !toGeometry) return { x1: 0, y1: 0, x2: 0, y2: 0 }
+    if (!fromGeometry || !toGeometry) return { d: '' }
 
     const start = point(fromGeometry, from.anchor)
     const end = point(toGeometry, to.anchor)
+    const x1 = start.x * metrics.scale
+    const y1 = start.y * metrics.scale
+    const x2 = end.x * metrics.scale
+    const y2 = end.y * metrics.scale
 
-    return {
-      x1: start.x * metrics.scale,
-      y1: start.y * metrics.scale,
-      x2: end.x * metrics.scale,
-      y2: end.y * metrics.scale,
+    if (connection.curve?.type === 'quadratic') {
+      const bend = Math.max(-1, Math.min(1, connection.curve.bend ?? 0.25))
+      const controlX = (x1 + x2) / 2 - (y2 - y1) * bend
+      const controlY = (y1 + y2) / 2 + (x2 - x1) * bend
+
+      return { d: `M ${x1} ${y1} Q ${controlX} ${controlY} ${x2} ${y2}` }
     }
+
+    return { d: `M ${x1} ${y1} L ${x2} ${y2}` }
   })
 
   if (!fromGeometry || !toGeometry) return null
@@ -429,13 +468,14 @@ const ConnectionRenderer = ({
       top={0}
       width={metrics.width}
       height={metrics.height}
-      entering={reduceMotion ? undefined : FadeIn.duration(360)}
-      exiting={reduceMotion ? undefined : FadeOut.duration(180)}
+      entering={reduceMotion ? undefined : FadeIn.springify().delay(connection.enterDelay ?? 0)}
+      exiting={reduceMotion ? undefined : FadeOut.springify()}
       pointerEvents="none"
     >
       <Svg width={metrics.width} height={metrics.height}>
-        <AnimatedLine
+        <AnimatedPath
           animatedProps={animatedProps}
+          fill="none"
           stroke={connection.color ?? defaultColor}
           strokeOpacity={connection.opacity ?? 0.35}
           strokeWidth={(connection.width ?? 1.5) * metrics.scale}
@@ -486,7 +526,7 @@ export const SceneGraph = ({
 
     const timeout = setTimeout(
       () => setTransition(current => ({ ...current, exitingNodes: [] })),
-      reduceMotion ? 0 : NODE_EXIT_DURATION + 16
+      reduceMotion ? 0 : NODE_EXIT_RETENTION_MS
     )
 
     return () => clearTimeout(timeout)
@@ -512,8 +552,8 @@ export const SceneGraph = ({
           height={metrics.height}
           zIndex={layer.zIndex}
           overflow="visible"
-          entering={reduceMotion ? undefined : FadeIn.duration(260)}
-          exiting={reduceMotion ? undefined : FadeOut.duration(220)}
+          entering={reduceMotion ? undefined : FadeIn.springify()}
+          exiting={reduceMotion ? undefined : FadeOut.springify()}
           pointerEvents="box-none"
         >
           {layer.children}

@@ -8,7 +8,7 @@ import {
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
+  withSpring,
 } from 'react-native-reanimated'
 
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
@@ -25,7 +25,7 @@ type VerseCardProps = {
 }
 
 const lineEntering = (delay: number, reduceMotion: boolean) =>
-  reduceMotion ? undefined : FadeInUp.duration(520).delay(delay)
+  reduceMotion ? undefined : FadeInUp.springify().delay(delay)
 
 const VerseCard = ({ reduceMotion, highlightColor, metrics }: VerseCardProps) => {
   const theme = useTheme()
@@ -40,7 +40,7 @@ const VerseCard = ({ reduceMotion, highlightColor, metrics }: VerseCardProps) =>
     previousHighlightColor.set(targetHighlightColor.get())
     targetHighlightColor.set(nextColor)
     highlightProgress.set(0)
-    highlightProgress.set(reduceMotion ? 1 : withTiming(1, { duration: 420 }))
+    highlightProgress.set(reduceMotion ? 1 : withSpring(1))
   }, [
     highlightColor,
     reduceMotion,
