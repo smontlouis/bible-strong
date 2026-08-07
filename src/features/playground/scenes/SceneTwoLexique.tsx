@@ -1,5 +1,6 @@
 import { useTheme } from '@emotion/react'
 import { Feather } from '@expo/vector-icons'
+import type { TFunction } from 'i18next'
 import type { ComponentProps } from 'react'
 import { Pressable } from 'react-native'
 import { FadeInDown, FadeInUp } from 'react-native-reanimated'
@@ -7,6 +8,8 @@ import { FadeInDown, FadeInUp } from 'react-native-reanimated'
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
+import { Scene } from '../onboarding/SceneGraph'
+import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
 
 type SceneTwoNodeCardProps = {
   label: string
@@ -120,3 +123,103 @@ export const SceneTwoBackground = ({ metrics, reduceMotion }: SceneTwoBackground
     </Box>
   )
 }
+
+type CreateSceneTwoLexiqueProps = SceneTwoBackgroundProps & {
+  highlightColor: HighlightColor
+  t: TFunction
+}
+
+export const createSceneTwoLexique = ({
+  highlightColor,
+  metrics,
+  reduceMotion,
+  t,
+}: CreateSceneTwoLexiqueProps) => (
+  <Scene id="scene-two">
+    <SceneTwoBackground metrics={metrics} reduceMotion={reduceMotion} />
+    <Scene.Node
+      id="verse-card"
+      layout="scale"
+      frame={{
+        x: -90,
+        y: 221,
+        width: 382,
+        height: 294,
+        scale: 0.5,
+        rotation: -2,
+        zIndex: 4,
+        anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
+      }}
+    >
+      <VerseCard reduceMotion={reduceMotion} highlightColor={highlightColor} metrics={metrics} />
+    </Scene.Node>
+
+    <Scene.Node id="dictionary" frame={{ x: 16, y: 62, width: 98, height: 47 }}>
+      <SceneTwoNodeCard
+        label={t('playground.sceneTwo.dictionary')}
+        icon="book-open"
+        metrics={metrics}
+      />
+    </Scene.Node>
+    <Scene.Node id="references" frame={{ x: 226, y: 46, width: 100, height: 47 }}>
+      <SceneTwoNodeCard
+        label={t('playground.sceneTwo.references')}
+        icon="git-branch"
+        metrics={metrics}
+      />
+    </Scene.Node>
+    <Scene.Node id="lexique" frame={{ x: 118, y: 131, width: 158, height: 72 }}>
+      <SceneTwoNodeCard
+        label={t('playground.sceneTwo.lexique')}
+        icon="book"
+        metrics={metrics}
+        active
+        onPress={() => undefined}
+      />
+    </Scene.Node>
+    <Scene.Node id="comments" frame={{ x: 212, y: 256, width: 114, height: 47 }}>
+      <SceneTwoNodeCard
+        label={t('playground.sceneTwo.comments')}
+        icon="message-square"
+        metrics={metrics}
+      />
+    </Scene.Node>
+    <Scene.Node id="themes" frame={{ x: 254, y: 316, width: 100, height: 47 }}>
+      <SceneTwoNodeCard label={t('playground.sceneTwo.themes')} icon="tag" metrics={metrics} />
+    </Scene.Node>
+    <Scene.Node id="translations" frame={{ x: 213, y: 380, width: 126, height: 47 }}>
+      <SceneTwoNodeCard
+        label={t('playground.sceneTwo.translations')}
+        icon="globe"
+        metrics={metrics}
+      />
+    </Scene.Node>
+
+    <Scene.Connection
+      from={{ node: 'verse-card', anchor: 'topLeft' }}
+      to={{ node: 'dictionary', anchor: 'bottom' }}
+    />
+    <Scene.Connection
+      from={{ node: 'verse-card', anchor: 'topRight' }}
+      to={{ node: 'references', anchor: 'bottom' }}
+    />
+    <Scene.Connection
+      from={{ node: 'verse-card', anchor: 'highlightedWord' }}
+      to={{ node: 'lexique', anchor: 'bottom' }}
+      opacity={0.8}
+      width={2}
+    />
+    <Scene.Connection
+      from={{ node: 'verse-card', anchor: 'right' }}
+      to={{ node: 'comments', anchor: 'left' }}
+    />
+    <Scene.Connection
+      from={{ node: 'verse-card', anchor: 'right' }}
+      to={{ node: 'themes', anchor: 'left' }}
+    />
+    <Scene.Connection
+      from={{ node: 'verse-card', anchor: 'bottomRight' }}
+      to={{ node: 'translations', anchor: 'left' }}
+    />
+  </Scene>
+)

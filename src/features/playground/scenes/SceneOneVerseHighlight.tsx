@@ -20,7 +20,8 @@ import Animated, {
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
-import { HIGHLIGHT_COLORS, type HighlightColor } from '../onboarding/VerseCard'
+import { Scene } from '../onboarding/SceneGraph'
+import VerseCard, { HIGHLIGHT_COLORS, type HighlightColor } from '../onboarding/VerseCard'
 
 type SceneOneVerseHighlightProps = {
   reduceMotion: boolean
@@ -276,8 +277,36 @@ export const SceneOneVerseHighlightControls = ({
 const SceneOneVerseHighlight = (props: SceneOneVerseHighlightProps) => (
   <>
     <SceneOneVerseHighlightBackground {...props} />
-    <SceneOneVerseHighlightControls {...props} />
+    <Scene.Layer zIndex={5}>
+      <SceneOneVerseHighlightControls {...props} />
+    </Scene.Layer>
   </>
+)
+
+export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps) => (
+  <Scene id="scene-one">
+    <SceneOneVerseHighlightBackground metrics={props.metrics} reduceMotion={props.reduceMotion} />
+    <Scene.Node
+      id="verse-card"
+      layout="scale"
+      frame={{
+        x: -16,
+        y: 82,
+        width: 382,
+        height: 294,
+        rotation: -1,
+        zIndex: 4,
+        anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
+      }}
+    >
+      <VerseCard
+        reduceMotion={props.reduceMotion}
+        highlightColor={props.activeColor}
+        metrics={props.metrics}
+      />
+    </Scene.Node>
+    <SceneOneVerseHighlightControls {...props} />
+  </Scene>
 )
 
 export default SceneOneVerseHighlight

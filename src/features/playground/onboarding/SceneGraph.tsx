@@ -9,8 +9,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { View } from 'react-native'
-import Animated, {
+import {
   createAnimatedComponent,
   FadeIn,
   FadeOut,
@@ -22,6 +21,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import Svg, { Line, type LineProps } from 'react-native-svg'
 
+import Box, { AnimatedBox } from '~common/ui/Box'
 import type { OnboardingStageMetrics } from './OnboardingStage'
 
 export type SceneLayoutMode = 'auto' | 'position' | 'resize' | 'scale'
@@ -70,6 +70,11 @@ type SceneConnectionProps = {
   width?: number
 }
 
+type SceneLayerProps = {
+  zIndex: number
+  children: ReactNode
+}
+
 type SceneGraphProps = {
   activeSceneId: string
   connectionColor: string
@@ -90,7 +95,11 @@ type SceneDescriptor = {
   id: string
   nodes: NodeDescriptor[]
   connections: ConnectionDescriptor[]
-  ordinaryChildren: ReactNode[]
+  layers: {
+    key: string
+    zIndex: number
+    children: ReactNode
+  }[]
 }
 
 type NodeGeometry = {
@@ -104,6 +113,7 @@ type NodeGeometry = {
 
 type NodeRendererProps = {
   descriptor: NodeDescriptor
+  isExiting: boolean
   metrics: OnboardingStageMetrics
   reduceMotion: boolean
   geometries: React.MutableRefObject<Map<string, NodeGeometry>>
@@ -120,10 +130,11 @@ type ConnectionRendererProps = {
 }
 
 const AnimatedLine = createAnimatedComponent(Line)
+const NODE_EXIT_DURATION = 220
 const contentTypeIds = new WeakMap<object, number>()
 let nextContentTypeId = 0
 
-type SceneMarker = 'connection' | 'node' | 'scene'
+type SceneMarker = 'connection' | 'layer' | 'node' | 'scene'
 type MarkedSceneElement = {
   sceneGraphMarker?: SceneMarker
 }
@@ -137,10 +148,14 @@ const SceneNode = Object.assign((_props: SceneNodeProps) => null, {
 const SceneConnection = Object.assign((_props: SceneConnectionProps) => null, {
   sceneGraphMarker: 'connection' as const,
 })
+const SceneLayer = Object.assign((_props: SceneLayerProps) => null, {
+  sceneGraphMarker: 'layer' as const,
+})
 
 export const Scene = Object.assign(SceneRoot, {
   Node: SceneNode,
   Connection: SceneConnection,
+  Layer: SceneLayer,
 })
 
 const getSceneMarker = (element: ReactElement) =>
@@ -169,6 +184,7 @@ const compileScene = (element: ReactElement<SceneProps>): SceneDescriptor => {
   const nodes: NodeDescriptor[] = []
   const connections: ConnectionDescriptor[] = []
   const ordinaryChildren: ReactNode[] = []
+  const layers: SceneDescriptor['layers'] = []
 
   const visit = (child: ReactNode) => {
     if (!isValidElement(child)) {
@@ -193,6 +209,12 @@ const compileScene = (element: ReactElement<SceneProps>): SceneDescriptor => {
       return
     }
 
+    if (getSceneMarker(child) === 'layer') {
+      const props = child.props as SceneLayerProps
+      layers.push({ key: `layer:${layers.length}`, zIndex: props.zIndex, children: props.children })
+      return
+    }
+
     ordinaryChildren.push(child)
   }
 
@@ -206,7 +228,11 @@ const compileScene = (element: ReactElement<SceneProps>): SceneDescriptor => {
     })
   }
 
-  return { id: element.props.id, nodes, connections, ordinaryChildren }
+  if (ordinaryChildren.length > 0) {
+    layers.unshift({ key: 'ordinary', zIndex: 1, children: ordinaryChildren })
+  }
+
+  return { id: element.props.id, nodes, connections, layers }
 }
 
 const compileScenes = (children: ReactNode) =>
@@ -215,11 +241,12 @@ const compileScenes = (children: ReactNode) =>
     return [compileScene(child)]
   })
 
-const animated = (value: number, reduceMotion: boolean) =>
+const withSceneTiming = (value: number, reduceMotion: boolean) =>
   reduceMotion ? value : withTiming(value, { duration: 560 })
 
 const NodeRenderer = ({
   descriptor,
+  isExiting,
   metrics,
   reduceMotion,
   geometries,
@@ -256,23 +283,34 @@ const NodeRenderer = ({
         (descriptor.frame.width !== initialFrame.width ||
           descriptor.frame.height !== initialFrame.height))
 
-    x.set(animated(descriptor.frame.x, reduceMotion))
-    y.set(animated(descriptor.frame.y, reduceMotion))
-    width.set(animated(shouldResize ? descriptor.frame.width : initialFrame.width, reduceMotion))
-    height.set(animated(shouldResize ? descriptor.frame.height : initialFrame.height, reduceMotion))
+    x.set(withSceneTiming(descriptor.frame.x, reduceMotion))
+    y.set(withSceneTiming(descriptor.frame.y, reduceMotion))
+    width.set(
+      withSceneTiming(shouldResize ? descriptor.frame.width : initialFrame.width, reduceMotion)
+    )
+    height.set(
+      withSceneTiming(shouldResize ? descriptor.frame.height : initialFrame.height, reduceMotion)
+    )
     scale.set(
-      animated(
+      withSceneTiming(
         mode === 'position' || shouldResize ? 1 : (descriptor.frame.scale ?? 1),
         reduceMotion
       )
     )
-    rotation.set(animated(descriptor.frame.rotation ?? 0, reduceMotion))
-    opacity.set(animated(descriptor.frame.opacity ?? 1, reduceMotion))
+    rotation.set(withSceneTiming(descriptor.frame.rotation ?? 0, reduceMotion))
+    opacity.set(
+      isExiting
+        ? reduceMotion
+          ? 0
+          : withTiming(0, { duration: NODE_EXIT_DURATION })
+        : withSceneTiming(descriptor.frame.opacity ?? 1, reduceMotion)
+    )
   }, [
     descriptor.frame,
     descriptor.layout,
     height,
     initialFrame,
+    isExiting,
     opacity,
     reduceMotion,
     rotation,
@@ -295,30 +333,27 @@ const NodeRenderer = ({
   }))
 
   return (
-    <Animated.View
+    <AnimatedBox
+      position="absolute"
+      left={initialFrame.x * metrics.scale}
+      top={initialFrame.y * metrics.scale}
+      width={initialFrame.width * metrics.scale}
+      height={initialFrame.height * metrics.scale}
+      overflow="visible"
+      zIndex={descriptor.frame.zIndex ?? 4}
       entering={reduceMotion ? undefined : FadeIn.duration(280)}
-      exiting={reduceMotion ? undefined : FadeOut.duration(240)}
-      style={{
-        position: 'absolute',
-        left: initialFrame.x * metrics.scale,
-        top: initialFrame.y * metrics.scale,
-        width: initialFrame.width * metrics.scale,
-        height: initialFrame.height * metrics.scale,
-        overflow: 'visible',
-        zIndex: descriptor.frame.zIndex ?? 4,
-      }}
     >
-      <Animated.View style={[{ position: 'absolute', left: 0, top: 0 }, animatedStyle]}>
-        <Animated.View
+      <AnimatedBox position="absolute" left={0} top={0} style={animatedStyle}>
+        <AnimatedBox
           key={descriptor.contentIdentity}
           entering={reduceMotion ? undefined : FadeIn.duration(260)}
           exiting={reduceMotion ? undefined : FadeOut.duration(220)}
           style={{ position: 'absolute', inset: 0 }}
         >
           {descriptor.children}
-        </Animated.View>
-      </Animated.View>
-    </Animated.View>
+        </AnimatedBox>
+      </AnimatedBox>
+    </AnimatedBox>
   )
 }
 
@@ -388,11 +423,15 @@ const ConnectionRenderer = ({
   if (!fromGeometry || !toGeometry) return null
 
   return (
-    <Animated.View
+    <AnimatedBox
+      position="absolute"
+      left={0}
+      top={0}
+      width={metrics.width}
+      height={metrics.height}
       entering={reduceMotion ? undefined : FadeIn.duration(360)}
       exiting={reduceMotion ? undefined : FadeOut.duration(180)}
       pointerEvents="none"
-      style={{ position: 'absolute', inset: 0 }}
     >
       <Svg width={metrics.width} height={metrics.height}>
         <AnimatedLine
@@ -402,7 +441,7 @@ const ConnectionRenderer = ({
           strokeWidth={(connection.width ?? 1.5) * metrics.scale}
         />
       </Svg>
-    </Animated.View>
+    </AnimatedBox>
   )
 }
 
@@ -422,24 +461,70 @@ export const SceneGraph = ({
   const activeScene = scenes.find(scene => scene.id === activeSceneId)
   const geometries = useRef(new Map<string, NodeGeometry>())
   const [, notifyGeometryChange] = useState(0)
+  const lastCommittedNodes = useRef(activeScene?.nodes ?? [])
+  const [transition, setTransition] = useState<{
+    sceneId: string
+    exitingNodes: NodeDescriptor[]
+  }>({ sceneId: activeSceneId, exitingNodes: [] })
 
   if (!activeScene) throw new Error(`Unknown onboarding scene: ${activeSceneId}`)
 
+  if (transition.sceneId !== activeSceneId) {
+    const incomingIds = new Set(activeScene.nodes.map(node => node.id))
+    setTransition({
+      sceneId: activeSceneId,
+      exitingNodes: lastCommittedNodes.current.filter(node => !incomingIds.has(node.id)),
+    })
+  }
+
+  useLayoutEffect(() => {
+    lastCommittedNodes.current = activeScene.nodes
+  }, [activeScene.nodes])
+
+  useEffect(() => {
+    if (transition.exitingNodes.length === 0) return
+
+    const timeout = setTimeout(
+      () => setTransition(current => ({ ...current, exitingNodes: [] })),
+      reduceMotion ? 0 : NODE_EXIT_DURATION
+    )
+
+    return () => clearTimeout(timeout)
+  }, [reduceMotion, transition.exitingNodes])
+
   const nodesById = new Map(activeScene.nodes.map(node => [node.id, node]))
+  const exitingNodes =
+    transition.sceneId === activeSceneId ? transition.exitingNodes : lastCommittedNodes.current
 
   return (
-    <View style={{ flex: 1, overflow: 'visible' }}>
-      <Animated.View
-        key={activeScene.id}
-        entering={reduceMotion ? undefined : FadeIn.duration(260)}
-        exiting={reduceMotion ? undefined : FadeOut.duration(220)}
-        pointerEvents="box-none"
-        style={{ position: 'absolute', inset: 0, zIndex: 1 }}
-      >
-        {activeScene.ordinaryChildren}
-      </Animated.View>
+    <Box flex={1} overflow="visible">
+      {activeScene.layers.map(layer => (
+        <AnimatedBox
+          key={`${activeScene.id}:${layer.key}`}
+          position="absolute"
+          left={0}
+          top={0}
+          width={metrics.width}
+          height={metrics.height}
+          zIndex={layer.zIndex}
+          overflow="visible"
+          entering={reduceMotion ? undefined : FadeIn.duration(260)}
+          exiting={reduceMotion ? undefined : FadeOut.duration(220)}
+          pointerEvents="box-none"
+        >
+          {layer.children}
+        </AnimatedBox>
+      ))}
 
-      <View pointerEvents="none" style={{ position: 'absolute', inset: 0, zIndex: 2 }}>
+      <Box
+        position="absolute"
+        left={0}
+        top={0}
+        width={metrics.width}
+        height={metrics.height}
+        zIndex={2}
+        pointerEvents="none"
+      >
         {activeScene.connections.map(connection => (
           <ConnectionRenderer
             key={connection.key}
@@ -451,18 +536,30 @@ export const SceneGraph = ({
             reduceMotion={reduceMotion}
           />
         ))}
-      </View>
+      </Box>
 
       {activeScene.nodes.map(node => (
         <NodeRenderer
           key={node.id}
           descriptor={node}
+          isExiting={false}
           metrics={metrics}
           reduceMotion={reduceMotion}
           geometries={geometries}
           notifyGeometryChange={notifyGeometryChange}
         />
       ))}
-    </View>
+      {exitingNodes.map(node => (
+        <NodeRenderer
+          key={node.id}
+          descriptor={node}
+          isExiting
+          metrics={metrics}
+          reduceMotion={reduceMotion}
+          geometries={geometries}
+          notifyGeometryChange={notifyGeometryChange}
+        />
+      ))}
+    </Box>
   )
 }
