@@ -180,6 +180,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                     metrics,
                     reduceMotion,
                     highlightColor: activeColor,
+                    onLexiquePress: advance,
                     t,
                   })}
                 </SceneGraph>

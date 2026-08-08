@@ -9,7 +9,10 @@ import {
   useRef,
   useState,
 } from 'react'
+import type { ViewProps } from 'react-native'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import {
+  cancelAnimation,
   createAnimatedComponent,
   FadeIn,
   FadeOut,
@@ -18,10 +21,12 @@ import {
   useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
+  withDecay,
   withDelay,
   withSpring,
 } from 'react-native-reanimated'
 import Svg, { Path, type PathProps } from 'react-native-svg'
+import { runOnJS } from 'react-native-worklets'
 
 import Box, { AnimatedBox } from '~common/ui/Box'
 import type { OnboardingStageMetrics } from './OnboardingStage'
@@ -73,6 +78,14 @@ type SceneNodeProps = {
   exitTo?: SceneNodeOffset
   entering?: EntryOrExitLayoutType | false
   exiting?: EntryOrExitLayoutType | false
+  draggable?: boolean
+  dragBounds?: string
+  dragFriction?: number
+  dragReturnToOrigin?: boolean
+  onPress?: () => void
+  pressScale?: number
+  accessibilityLabel?: string
+  pointerEvents?: ViewProps['pointerEvents']
   children: ReactElement
 }
 
@@ -121,6 +134,8 @@ type SceneDescriptor = {
 type NodeGeometry = {
   x: SharedValue<number>
   y: SharedValue<number>
+  dragX: SharedValue<number>
+  dragY: SharedValue<number>
   width: SharedValue<number>
   height: SharedValue<number>
   scale: SharedValue<number>
@@ -240,6 +255,13 @@ const compileScene = (element: ReactElement<SceneProps>): SceneDescriptor => {
       if (ids.has(node.id)) throw new Error(`Duplicate Scene.Node id: ${node.id}`)
       ids.add(node.id)
     })
+    nodes.forEach(node => {
+      if (node.dragBounds && !ids.has(node.dragBounds)) {
+        throw new Error(
+          `Scene.Node "${node.id}" references unknown dragBounds node "${node.dragBounds}"`
+        )
+      }
+    })
   }
 
   if (ordinaryChildren.length > 0) {
@@ -258,6 +280,82 @@ const compileScenes = (children: ReactNode) =>
 const withSceneSpring = (value: number, reduceMotion: boolean) =>
   reduceMotion ? value : withSpring(value)
 
+const resolveDragLimits = (
+  x: SharedValue<number>,
+  y: SharedValue<number>,
+  width: SharedValue<number>,
+  height: SharedValue<number>,
+  scale: SharedValue<number>,
+  rotation: SharedValue<number>,
+  bounds: NodeGeometry
+) => {
+  'worklet'
+
+  const nodeRadians = (rotation.get() * Math.PI) / 180
+  const nodeHalfWidth =
+    (Math.abs(Math.cos(nodeRadians)) * width.get() * scale.get() +
+      Math.abs(Math.sin(nodeRadians)) * height.get() * scale.get()) /
+    2
+  const nodeHalfHeight =
+    (Math.abs(Math.sin(nodeRadians)) * width.get() * scale.get() +
+      Math.abs(Math.cos(nodeRadians)) * height.get() * scale.get()) /
+    2
+  const boundsRadians = (bounds.rotation.get() * Math.PI) / 180
+  const boundsHalfWidth =
+    (Math.abs(Math.cos(boundsRadians)) * bounds.width.get() * bounds.scale.get() +
+      Math.abs(Math.sin(boundsRadians)) * bounds.height.get() * bounds.scale.get()) /
+    2
+  const boundsHalfHeight =
+    (Math.abs(Math.sin(boundsRadians)) * bounds.width.get() * bounds.scale.get() +
+      Math.abs(Math.cos(boundsRadians)) * bounds.height.get() * bounds.scale.get()) /
+    2
+  const nodeCenterX = x.get() + width.get() / 2
+  const nodeCenterY = y.get() + height.get() / 2
+  const boundsCenterX = bounds.x.get() + bounds.dragX.get() + bounds.width.get() / 2
+  const boundsCenterY = bounds.y.get() + bounds.dragY.get() + bounds.height.get() / 2
+
+  return {
+    minX: boundsCenterX - boundsHalfWidth - (nodeCenterX - nodeHalfWidth),
+    maxX: boundsCenterX + boundsHalfWidth - (nodeCenterX + nodeHalfWidth),
+    minY: boundsCenterY - boundsHalfHeight - (nodeCenterY - nodeHalfHeight),
+    maxY: boundsCenterY + boundsHalfHeight - (nodeCenterY + nodeHalfHeight),
+  }
+}
+
+const applyBoundedDragDelta = (current: number, delta: number, min: number, max: number) => {
+  'worklet'
+
+  const position = Math.max(min, Math.min(max, current))
+  if (delta === 0) return position
+
+  const direction = delta > 0 ? 1 : -1
+  const availableDistance = direction > 0 ? max - position : position - min
+  if (availableDistance <= 0) return position
+
+  const resistedDistance = availableDistance * (1 - Math.exp(-Math.abs(delta) / availableDistance))
+
+  return position + direction * resistedDistance
+}
+
+const resistDecayVelocity = (
+  current: number,
+  velocity: number,
+  min: number,
+  max: number,
+  deceleration: number
+) => {
+  'worklet'
+
+  if (velocity === 0) return 0
+
+  const position = Math.max(min, Math.min(max, current))
+  const availableDistance = velocity > 0 ? max - position : position - min
+  const stoppingRate = 100 * (1 - deceleration)
+  const maxVelocity = Math.max(0, availableDistance * stoppingRate * 0.8)
+
+  return Math.max(-maxVelocity, Math.min(maxVelocity, velocity))
+}
+
 const NodeRenderer = ({
   descriptor,
   metrics,
@@ -268,6 +366,11 @@ const NodeRenderer = ({
   const initialFrame = useRef(descriptor.frame).current
   const x = useSharedValue(initialFrame.x)
   const y = useSharedValue(initialFrame.y)
+  const dragX = useSharedValue(0)
+  const dragY = useSharedValue(0)
+  const previousTranslationX = useSharedValue(0)
+  const previousTranslationY = useSharedValue(0)
+  const interactionScale = useSharedValue(1)
   const width = useSharedValue(initialFrame.width)
   const height = useSharedValue(initialFrame.height)
   const scale = useSharedValue(initialFrame.scale ?? 1)
@@ -276,7 +379,7 @@ const NodeRenderer = ({
 
   useLayoutEffect(() => {
     const geometryRegistry = geometries.current
-    const geometry = { x, y, width, height, scale, rotation }
+    const geometry = { x, y, dragX, dragY, width, height, scale, rotation }
     geometryRegistry.set(descriptor.id, geometry)
     notifyGeometryChange(version => version + 1)
 
@@ -286,7 +389,19 @@ const NodeRenderer = ({
         notifyGeometryChange(version => version + 1)
       }
     }
-  }, [descriptor.id, geometries, height, notifyGeometryChange, rotation, scale, width, x, y])
+  }, [
+    descriptor.id,
+    dragX,
+    dragY,
+    geometries,
+    height,
+    notifyGeometryChange,
+    rotation,
+    scale,
+    width,
+    x,
+    y,
+  ])
 
   useEffect(() => {
     const mode = descriptor.layout ?? 'auto'
@@ -326,17 +441,134 @@ const NodeRenderer = ({
     y,
   ])
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.get(),
-    width: width.get() * metrics.scale,
-    height: height.get() * metrics.scale,
-    transform: [
-      { translateX: (x.get() - initialFrame.x) * metrics.scale },
-      { translateY: (y.get() - initialFrame.y) * metrics.scale },
-      { rotate: `${rotation.get()}deg` },
-      { scale: scale.get() },
-    ],
-  }))
+  const animatedStyle = useAnimatedStyle(() => {
+    const resolvedDragX = dragX.get()
+    const resolvedDragY = dragY.get()
+    const safeDragX = Number.isFinite(resolvedDragX) ? resolvedDragX : 0
+    const safeDragY = Number.isFinite(resolvedDragY) ? resolvedDragY : 0
+
+    return {
+      opacity: opacity.get(),
+      width: width.get() * metrics.scale,
+      height: height.get() * metrics.scale,
+      transform: [
+        { translateX: (x.get() - initialFrame.x + safeDragX) * metrics.scale },
+        { translateY: (y.get() - initialFrame.y + safeDragY) * metrics.scale },
+        { rotate: `${rotation.get()}deg` },
+        { scale: scale.get() * interactionScale.get() },
+      ],
+    }
+  })
+  const boundsGeometry = descriptor.dragBounds
+    ? geometries.current.get(descriptor.dragBounds)
+    : undefined
+  const dragFriction = Math.max(0.05, Math.min(1, descriptor.dragFriction ?? 0.45))
+  const dragReturnToOrigin = descriptor.dragReturnToOrigin !== false
+  const pressedScale = descriptor.pressScale ?? 0.96
+  const sceneScale = metrics.scale
+  const decayDeceleration = 0.99 + dragFriction * 0.008
+  const maxDecayVelocity = 1200 * dragFriction
+  const panGesture = Gesture.Pan()
+    .enabled(Boolean(descriptor.draggable))
+    .minDistance(5)
+    .onBegin(() => {
+      cancelAnimation(dragX)
+      cancelAnimation(dragY)
+      if (!Number.isFinite(dragX.get())) dragX.set(0)
+      if (!Number.isFinite(dragY.get())) dragY.set(0)
+      previousTranslationX.set(0)
+      previousTranslationY.set(0)
+    })
+    .onUpdate(event => {
+      const translationX = event.translationX
+      const translationY = event.translationY
+      const deltaX = ((translationX - previousTranslationX.get()) / sceneScale) * dragFriction
+      const deltaY = ((translationY - previousTranslationY.get()) / sceneScale) * dragFriction
+      previousTranslationX.set(translationX)
+      previousTranslationY.set(translationY)
+
+      if (!Number.isFinite(deltaX) || !Number.isFinite(deltaY)) return
+
+      if (!boundsGeometry) {
+        dragX.set(current => current + deltaX)
+        dragY.set(current => current + deltaY)
+        return
+      }
+
+      const limits = resolveDragLimits(x, y, width, height, scale, rotation, boundsGeometry)
+
+      dragX.set(applyBoundedDragDelta(dragX.get(), deltaX, limits.minX, limits.maxX))
+      dragY.set(applyBoundedDragDelta(dragY.get(), deltaY, limits.minY, limits.maxY))
+    })
+    .onEnd(event => {
+      if (dragReturnToOrigin || reduceMotion) return
+
+      const rawVelocityX = (event.velocityX / sceneScale) * dragFriction
+      const rawVelocityY = (event.velocityY / sceneScale) * dragFriction
+      const velocityX = Math.max(-maxDecayVelocity, Math.min(maxDecayVelocity, rawVelocityX))
+      const velocityY = Math.max(-maxDecayVelocity, Math.min(maxDecayVelocity, rawVelocityY))
+
+      if (!boundsGeometry) {
+        dragX.set(withDecay({ velocity: velocityX, deceleration: decayDeceleration }))
+        dragY.set(withDecay({ velocity: velocityY, deceleration: decayDeceleration }))
+        return
+      }
+
+      const limits = resolveDragLimits(x, y, width, height, scale, rotation, boundsGeometry)
+      const resistedVelocityX = resistDecayVelocity(
+        dragX.get(),
+        velocityX,
+        limits.minX,
+        limits.maxX,
+        decayDeceleration
+      )
+      const resistedVelocityY = resistDecayVelocity(
+        dragY.get(),
+        velocityY,
+        limits.minY,
+        limits.maxY,
+        decayDeceleration
+      )
+      dragX.set(
+        withDecay({
+          velocity: resistedVelocityX,
+          deceleration: decayDeceleration,
+          clamp: [limits.minX, limits.maxX],
+        })
+      )
+      dragY.set(
+        withDecay({
+          velocity: resistedVelocityY,
+          deceleration: decayDeceleration,
+          clamp: [limits.minY, limits.maxY],
+        })
+      )
+    })
+    .onFinalize(() => {
+      if (dragReturnToOrigin) {
+        dragX.set(reduceMotion ? 0 : withSpring(0))
+        dragY.set(reduceMotion ? 0 : withSpring(0))
+      }
+    })
+  const onPress = descriptor.onPress
+  const tapGesture = Gesture.Tap()
+    .enabled(Boolean(onPress))
+    .maxDistance(5)
+    .onBegin(() => {
+      interactionScale.set(reduceMotion ? 1 : withSpring(pressedScale))
+    })
+    .onEnd((_event, success) => {
+      if (success && onPress) runOnJS(onPress)()
+    })
+    .onFinalize(() => {
+      interactionScale.set(reduceMotion ? 1 : withSpring(1))
+    })
+  const interactionGesture =
+    descriptor.draggable && onPress
+      ? Gesture.Race(panGesture, tapGesture)
+      : descriptor.draggable
+        ? panGesture
+        : tapGesture
   const enterFromX = (descriptor.enterFrom?.x ?? 0) * metrics.scale
   const enterFromY = (descriptor.enterFrom?.y ?? 0) * metrics.scale
   const exitToX = (descriptor.exitTo?.x ?? 0) * metrics.scale
@@ -380,6 +612,36 @@ const NodeRenderer = ({
       ? undefined
       : (descriptor.exiting ?? (descriptor.exitTo ? exitingAnimation : FadeOut.springify()))
 
+  const visualNode = (
+    <AnimatedBox
+      position="absolute"
+      left={0}
+      top={0}
+      overflow="visible"
+      style={animatedStyle}
+      accessible={Boolean(onPress)}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityLabel={descriptor.accessibilityLabel}
+      onAccessibilityTap={onPress}
+      pointerEvents={descriptor.pointerEvents}
+    >
+      <AnimatedBox
+        key={descriptor.contentIdentity}
+        style={{ position: 'absolute', inset: 0 }}
+        pointerEvents={descriptor.pointerEvents}
+        overflow="visible"
+      >
+        {descriptor.children}
+      </AnimatedBox>
+    </AnimatedBox>
+  )
+  const interactiveNode =
+    descriptor.draggable || onPress ? (
+      <GestureDetector gesture={interactionGesture}>{visualNode}</GestureDetector>
+    ) : (
+      visualNode
+    )
+
   return (
     <AnimatedBox
       position="absolute"
@@ -391,12 +653,9 @@ const NodeRenderer = ({
       zIndex={descriptor.frame.zIndex ?? 4}
       entering={reduceMotion ? undefined : resolvedEntering}
       exiting={reduceMotion ? undefined : resolvedExiting}
+      pointerEvents={descriptor.pointerEvents === 'none' ? 'none' : 'box-none'}
     >
-      <AnimatedBox position="absolute" left={0} top={0} style={animatedStyle}>
-        <AnimatedBox key={descriptor.contentIdentity} style={{ position: 'absolute', inset: 0 }}>
-          {descriptor.children}
-        </AnimatedBox>
-      </AnimatedBox>
+      {interactiveNode}
     </AnimatedBox>
   )
 }
@@ -439,8 +698,8 @@ const ConnectionRenderer = ({
     const point = (geometry: NodeGeometry, anchor: SceneNodeAnchor) => {
       'worklet'
 
-      const centerX = geometry.x.get() + geometry.width.get() / 2
-      const centerY = geometry.y.get() + geometry.height.get() / 2
+      const centerX = geometry.x.get() + geometry.dragX.get() + geometry.width.get() / 2
+      const centerY = geometry.y.get() + geometry.dragY.get() + geometry.height.get() / 2
       const localX = (anchor.x - 0.5) * geometry.width.get() * geometry.scale.get()
       const localY = (anchor.y - 0.5) * geometry.height.get() * geometry.scale.get()
       const radians = (geometry.rotation.get() * Math.PI) / 180
@@ -459,6 +718,15 @@ const ConnectionRenderer = ({
     const y1 = start.y * metrics.scale
     const x2 = end.x * metrics.scale
     const y2 = end.y * metrics.scale
+
+    if (
+      !Number.isFinite(x1) ||
+      !Number.isFinite(y1) ||
+      !Number.isFinite(x2) ||
+      !Number.isFinite(y2)
+    ) {
+      return { d: '' }
+    }
 
     if (connection.curve?.type === 'quadratic') {
       const bend = Math.max(-1, Math.min(1, connection.curve.bend ?? 0.25))

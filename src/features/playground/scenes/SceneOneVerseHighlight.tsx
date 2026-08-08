@@ -320,6 +320,7 @@ export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps)
       id="scene-background"
       layout="resize"
       frame={{ x: -52, y: 56, width: 310, height: 310, opacity: 0.66, zIndex: 0 }}
+      pointerEvents="none"
     >
       <SceneBackgroundShape borderRadius={props.metrics.s(155)} reduceMotion={props.reduceMotion} />
     </Scene.Node>
@@ -335,6 +336,8 @@ export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps)
         zIndex: 5,
         anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
       }}
+      draggable
+      dragFriction={0.1}
     >
       <VerseCard
         reduceMotion={props.reduceMotion}
@@ -345,6 +348,7 @@ export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps)
     <Scene.Node
       id="highlight-controls"
       layout="position"
+      pointerEvents="box-none"
       frame={{
         x: 0,
         y: 0,

@@ -1,10 +1,13 @@
 import { useTheme } from '@emotion/react'
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
-import type { ComponentProps } from 'react'
-import { Pressable } from 'react-native'
 import { FadeInUp } from 'react-native-reanimated'
 
+import CommentIcon from '~common/CommentIcon'
+import DictionnaryIcon from '~common/DictionnaryIcon'
+import LexiqueIcon from '~common/LexiqueIcon'
+import NaveIcon from '~common/NaveIcon'
+import RefIcon from '~common/RefIcon'
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
@@ -31,12 +34,44 @@ const SCENE_TWO_ENTRANCE_DELAYS = {
 
 type SceneTwoNodeCardProps = {
   label: string
-  icon: ComponentProps<typeof Feather>['name']
+  icon: SceneTwoNodeIcon
   metrics: OnboardingStageMetrics
   active?: boolean
   iconSize?: number
   fontSize?: number
-  onPress?: () => void
+}
+
+type SceneTwoNodeIcon =
+  | 'dictionary'
+  | 'references'
+  | 'lexique'
+  | 'comments'
+  | 'themes'
+  | 'translations'
+
+const SceneTwoFeatureIcon = ({
+  icon,
+  size,
+  color,
+}: {
+  icon: SceneTwoNodeIcon
+  size: number
+  color: string
+}) => {
+  switch (icon) {
+    case 'dictionary':
+      return <DictionnaryIcon size={size} color={color} />
+    case 'references':
+      return <RefIcon size={size} color={color} />
+    case 'lexique':
+      return <LexiqueIcon size={size} color={color} />
+    case 'comments':
+      return <CommentIcon size={size} color={color} />
+    case 'themes':
+      return <NaveIcon size={size} color={color} />
+    case 'translations':
+      return <Feather name="globe" size={size} color={color} />
+  }
 }
 
 export const SceneTwoNodeCard = ({
@@ -46,43 +81,42 @@ export const SceneTwoNodeCard = ({
   active = false,
   iconSize,
   fontSize,
-  onPress,
 }: SceneTwoNodeCardProps) => {
   const theme = useTheme()
   const s = metrics.s
-  const resolvedIconSize = iconSize ?? (active ? 30 : 14)
+  const resolvedIconSize = iconSize ?? (active ? 26 : 14)
   const resolvedFontSize = fontSize ?? (active ? 16 : 8)
+  const iconColor = {
+    dictionary: theme.colors.secondary,
+    references: theme.colors.quart,
+    lexique: theme.colors.primary,
+    comments: 'rgb(38,166,154)',
+    themes: theme.colors.quint,
+    translations: theme.colors.primary,
+  }[icon]
+  const shadowOpacity = active ? 0.32 : 0.1
+  const shadowColor = iconColor.replace('rgb(', 'rgba(').replace(')', `,${shadowOpacity})`)
 
-  const card = (
+  return (
     <Box
       flex={1}
       bg="reverse"
-      borderRadius={active ? s(17) : s(12)}
+      borderRadius={active ? s(20) : s(12)}
       borderWidth={active ? s(2) : 0}
       borderColor={active ? 'primary' : undefined}
-      lightShadow
+      overflow="visible"
+      style={{
+        boxShadow: `0 ${s(3)}px ${s(active ? 10 : 7)}px 0 ${shadowColor}`,
+      }}
       center
     >
-      <HStack alignItems="center" gap={s(active ? 5 : 6)} px={s(active ? 16 : 10)}>
-        <Feather name={icon} size={s(resolvedIconSize)} color={theme.colors.primary} />
+      <HStack alignItems="center" gap={s(active ? 9 : 6)} px={s(active ? 16 : 10)}>
+        <SceneTwoFeatureIcon icon={icon} size={s(resolvedIconSize)} color={iconColor} />
         <Text title={active} bold={!active} fontSize={s(resolvedFontSize)} numberOfLines={1}>
           {label}
         </Text>
       </HStack>
     </Box>
-  )
-
-  if (!onPress) return card
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.82 : 1 })}
-    >
-      {card}
-    </Pressable>
   )
 }
 
@@ -132,6 +166,7 @@ export const SceneTwoBackground = ({ metrics, reduceMotion }: SceneTwoBackground
 
 type CreateSceneTwoLexiqueProps = SceneTwoBackgroundProps & {
   highlightColor: HighlightColor
+  onLexiquePress: () => void
   t: TFunction
 }
 
@@ -140,6 +175,7 @@ export const createSceneTwoLexique = ({
   metrics,
   reduceMotion,
   t,
+  onLexiquePress,
 }: CreateSceneTwoLexiqueProps) => (
   <Scene id="scene-two">
     <SceneTwoBackground metrics={metrics} reduceMotion={reduceMotion} />
@@ -147,6 +183,7 @@ export const createSceneTwoLexique = ({
       id="scene-background"
       layout="resize"
       frame={{ x: 10, y: 24, width: 330, height: 430, opacity: 0.62, zIndex: 0 }}
+      pointerEvents="none"
     >
       <SceneBackgroundShape borderRadius={metrics.s(28)} reduceMotion={reduceMotion} />
     </Scene.Node>
@@ -159,10 +196,12 @@ export const createSceneTwoLexique = ({
         width: 382,
         height: 294,
         scale: 0.5,
-        rotation: -2,
+        rotation: -5,
         zIndex: 5,
         anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
       }}
+      draggable
+      dragFriction={0.1}
     >
       <VerseCard reduceMotion={reduceMotion} highlightColor={highlightColor} metrics={metrics} />
     </Scene.Node>
@@ -173,10 +212,12 @@ export const createSceneTwoLexique = ({
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.dictionary}
       enterFrom={{ x: 4, y: 30 }}
       exitTo={{ x: 4, y: 30 }}
+      draggable
+      dragFriction={0.1}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.dictionary')}
-        icon="book-open"
+        icon="dictionary"
         metrics={metrics}
       />
     </Scene.Node>
@@ -186,10 +227,12 @@ export const createSceneTwoLexique = ({
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.references}
       enterFrom={{ x: -15, y: 26 }}
       exitTo={{ x: -15, y: 26 }}
+      draggable
+      dragFriction={0.1}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.references')}
-        icon="git-branch"
+        icon="references"
         metrics={metrics}
       />
     </Scene.Node>
@@ -199,13 +242,17 @@ export const createSceneTwoLexique = ({
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.lexique}
       enterFrom={{ x: -13, y: 27 }}
       exitTo={{ x: -13, y: 27 }}
+      draggable
+      dragFriction={0.1}
+      onPress={onLexiquePress}
+      pressScale={0.96}
+      accessibilityLabel={t('playground.sceneTwo.lexique')}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.lexique')}
-        icon="book"
+        icon="lexique"
         metrics={metrics}
         active
-        onPress={() => undefined}
       />
     </Scene.Node>
     <Scene.Node
@@ -214,10 +261,12 @@ export const createSceneTwoLexique = ({
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.comments}
       enterFrom={{ x: -26, y: 14 }}
       exitTo={{ x: -26, y: 14 }}
+      draggable
+      dragFriction={0.1}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.comments')}
-        icon="message-square"
+        icon="comments"
         metrics={metrics}
       />
     </Scene.Node>
@@ -227,8 +276,10 @@ export const createSceneTwoLexique = ({
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.themes}
       enterFrom={{ x: -30, y: 4 }}
       exitTo={{ x: -30, y: 4 }}
+      draggable
+      dragFriction={0.1}
     >
-      <SceneTwoNodeCard label={t('playground.sceneTwo.themes')} icon="tag" metrics={metrics} />
+      <SceneTwoNodeCard label={t('playground.sceneTwo.themes')} icon="themes" metrics={metrics} />
     </Scene.Node>
     <Scene.Node
       id="translations"
@@ -236,10 +287,12 @@ export const createSceneTwoLexique = ({
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.translations}
       enterFrom={{ x: -29, y: -6 }}
       exitTo={{ x: -29, y: -6 }}
+      draggable
+      dragFriction={0.1}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.translations')}
-        icon="globe"
+        icon="translations"
         metrics={metrics}
       />
     </Scene.Node>
