@@ -1400,20 +1400,12 @@
   "strongDetail.entity.relation.resident": "resident",
   "accountEntry.adoptionPending": "Your local data remains safe on this device. Synchronization will resume automatically when your account is available again.",
   "playground.badge": "Bible Strong · Playground",
-  "playground.development": "DEVELOPMENT",
-  "playground.title": "Build the experience.",
-  "playground.description": "A lightweight space for developing the dashboard and testing the new onboarding screens without launching the full application.",
-  "playground.activeTitle": "Playground mode active",
-  "playground.activeDescription": "Core providers stay available; navigation and non-essential initialization are disabled.",
-  "playground.workspaces": "Workspaces",
+  "playground.title": "Playground",
+  "playground.description": "An isolated space for discovering and testing experiences currently being built for Bible Strong.",
+  "playground.experiences": "Available journeys",
   "playground.abelEyebrow": "Onboarding",
-  "playground.abelTitle": "Abel journey",
-  "playground.abelDescription": "Build the sequence of scenes, interactions, and animations around a Bible study.",
-  "playground.designEyebrow": "Design system",
-  "playground.designTitle": "Components & animations",
-  "playground.designDescription": "Centralize screen variants, transitions, and reusable dashboard elements.",
-  "playground.fullAppHint": "To return to the complete application, disable EXPO_PUBLIC_PLAYGROUND and restart Metro with a cleared cache.",
-  "playground.replay": "Replay scene 1",
+  "playground.abelTitle": "Abel onboarding journey",
+  "playground.abelDescription": "Explore an interactive Bible study, from Genesis 4:2 to Strong’s words, notes, and relationships.",
   "playground.onboarding.skip": "Skip",
   "playground.onboarding.back": "Go back to the previous scene",
   "playground.onboarding.continue": "Continue",
@@ -1445,7 +1437,7 @@
   "playground.sceneTwo.comparisons": "Comparisons"
   ,"playground.sceneThree.properPhrase": "Find the word behind the translation."
   ,"playground.sceneThree.commonPhrase": "One word can reveal another."
-  ,"playground.sceneThree.strongLabel": "STRONG · HE"
+  ,"playground.sceneThree.strongLabel": "STRONG"
   ,"playground.sceneThree.listen": "Listen to the pronunciation"
   ,"playground.sceneThree.properTitle": "Abel"
   ,"playground.sceneThree.properDefinition": "Son of Adam and Eve"
@@ -1500,9 +1492,9 @@
   ,"playground.sceneFive.phrase": "Write down what you discover."
   ,"playground.sceneFive.genesisLabel": "GENESIS 4:2"
   ,"playground.sceneFive.genesisTitle": "Abel, son of Adam and Eve"
-  ,"playground.sceneFive.abelLabel": "LEXICON · H1893"
+  ,"playground.sceneFive.abelLabel": "H1893"
   ,"playground.sceneFive.abelMeta": "proper noun · Hebrew"
-  ,"playground.sceneFive.hevelLabel": "LEXICON · H1892"
+  ,"playground.sceneFive.hevelLabel": "H1892"
   ,"playground.sceneFive.hevelMeta": "breath · vapor · vanity"
   ,"playground.sceneFive.noteLabel": "NOTE"
   ,"playground.sceneFive.noteQuestion": "Abel is written like hevel, breath or vapor. Why this name?"

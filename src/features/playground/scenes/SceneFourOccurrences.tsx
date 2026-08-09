@@ -1,4 +1,3 @@
-import { useTheme } from '@emotion/react'
 import type { TFunction } from 'i18next'
 import { useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
@@ -17,6 +16,7 @@ import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
 import { Scene } from '../onboarding/SceneGraph'
+import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
 
 const OCCURRENCE_ENTER_START = 520
 const OCCURRENCE_STAGGER = 120
@@ -289,7 +289,6 @@ const OccurrenceVerseCard = ({
   reference,
   travel,
 }: OccurrenceVerseCardProps) => {
-  const theme = useTheme()
   const s = metrics.s
   const [currentContent, setCurrentContent] = useState<OccurrenceContent>({
     children,
@@ -405,6 +404,7 @@ const OccurrenceVerseCard = ({
 type CreateSceneFourOccurrencesProps = {
   activeFilter: OccurrenceFilterId
   filterDirection: OccurrenceFilterDirection
+  highlightColor: HighlightColor
   metrics: OnboardingStageMetrics
   onFilterChange: (filter: OccurrenceFilterId) => void
   reduceMotion: boolean
@@ -414,6 +414,7 @@ type CreateSceneFourOccurrencesProps = {
 export const createSceneFourOccurrences = ({
   activeFilter,
   filterDirection,
+  highlightColor,
   metrics,
   onFilterChange,
   reduceMotion,
@@ -438,6 +439,30 @@ export const createSceneFourOccurrences = ({
         pointerEvents="none"
       >
         <SceneBackgroundShape borderRadius={metrics.s(67)} reduceMotion={reduceMotion} />
+      </Scene.Node>
+
+      <Scene.Node
+        id="verse-card"
+        layout="scale"
+        frame={{
+          x: -99,
+          y: -59,
+          width: 382,
+          height: 294,
+          scale: 0.38,
+          rotation: -6,
+          opacity: 0.5,
+          zIndex: 2,
+        }}
+        draggable
+        dragFriction={0.1}
+      >
+        <VerseCard
+          mode="small"
+          reduceMotion={reduceMotion}
+          highlightColor={highlightColor}
+          metrics={metrics}
+        />
       </Scene.Node>
 
       <Scene.Node

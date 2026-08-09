@@ -5,6 +5,7 @@ import {
   FadeInUp,
   interpolate,
   interpolateColor,
+  type SharedValue,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
@@ -21,12 +22,20 @@ type VerseCardProps = {
   reduceMotion: boolean
   highlightColor: HighlightColor
   metrics: OnboardingStageMetrics
+  mode?: 'small' | 'normal'
+  shakeRotation?: SharedValue<number>
 }
 
 const lineEntering = (delay: number, reduceMotion: boolean) =>
   reduceMotion ? undefined : FadeInUp.springify().delay(delay)
 
-const VerseCard = ({ reduceMotion, highlightColor, metrics }: VerseCardProps) => {
+const VerseCard = ({
+  reduceMotion,
+  highlightColor,
+  metrics,
+  mode,
+  shakeRotation,
+}: VerseCardProps) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const s = metrics.s
@@ -57,50 +66,61 @@ const VerseCard = ({ reduceMotion, highlightColor, metrics }: VerseCardProps) =>
     ),
     transform: [{ scale: interpolate(highlightProgress.get(), [0, 1], [0.96, 1]) }],
   }))
+  const shakeStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${shakeRotation?.get() ?? 0}deg` }],
+  }))
 
   return (
-    <Box flex={1} bg="reverse" borderRadius={s(28)} p={s(24)} lightShadow overflow="visible">
-      <HStack alignItems="center">
-        <AnimatedBox entering={lineEntering(120, reduceMotion)}>
-          <Text title fontSize={s(31)} lineHeight={s(38)} style={{ fontFamily: 'Literata Book' }}>
-            {t('playground.sceneOne.chapter')}
-          </Text>
-        </AnimatedBox>
-      </HStack>
-
-      <VStack mt={s(22)} gap={s(3)}>
-        <AnimatedBox entering={lineEntering(220, reduceMotion)}>
-          <Text fontSize={s(23)} lineHeight={s(34)}>
-            {t('playground.sceneOne.lineOne')}
-          </Text>
-        </AnimatedBox>
-        <AnimatedBox entering={lineEntering(300, reduceMotion)}>
-          <HStack alignItems="center">
-            <AnimatedText
-              fontSize={s(23)}
-              lineHeight={s(34)}
-              style={[{ paddingHorizontal: s(4), borderRadius: s(9) }, highlightStyle]}
+    <AnimatedBox flex style={shakeStyle}>
+      <Box flex={1} bg="reverse" borderRadius={s(28)} p={s(24)} lightShadow overflow="visible">
+        <HStack alignItems="center">
+          <AnimatedBox entering={lineEntering(120, reduceMotion)}>
+            <Text
+              title
+              color="primary"
+              fontSize={s(31)}
+              lineHeight={s(38)}
+              style={{ fontFamily: 'Literata Book' }}
             >
-              {t('playground.sceneOne.highlightWord')}
-            </AnimatedText>
-            <Text fontSize={s(23)} lineHeight={s(34)}>
-              {t('playground.sceneOne.lineTwo')}
+              {t('playground.sceneOne.chapter')}
             </Text>
-          </HStack>
-        </AnimatedBox>
-        <AnimatedBox entering={lineEntering(360, reduceMotion)}>
-          <Text fontSize={s(23)} lineHeight={s(34)}>
-            {t('playground.sceneOne.lineThree')}
+          </AnimatedBox>
+        </HStack>
+
+        <VStack mt={s(22)} gap={s(3)}>
+          <AnimatedBox entering={lineEntering(220, reduceMotion)}>
+            <Text fontSize={s(23)} lineHeight={s(34)}>
+              {t('playground.sceneOne.lineOne')}
+            </Text>
+          </AnimatedBox>
+          <AnimatedBox entering={lineEntering(300, reduceMotion)}>
+            <HStack alignItems="center">
+              <AnimatedText
+                fontSize={s(23)}
+                lineHeight={s(34)}
+                style={[{ paddingHorizontal: s(4), borderRadius: s(9) }, highlightStyle]}
+              >
+                {t('playground.sceneOne.highlightWord')}
+              </AnimatedText>
+              <Text fontSize={s(23)} lineHeight={s(34)}>
+                {t('playground.sceneOne.lineTwo')}
+              </Text>
+            </HStack>
+          </AnimatedBox>
+          <AnimatedBox entering={lineEntering(360, reduceMotion)}>
+            <Text fontSize={s(23)} lineHeight={s(34)}>
+              {t('playground.sceneOne.lineThree')}
+            </Text>
+          </AnimatedBox>
+        </VStack>
+
+        <AnimatedBox mt={s(26)} entering={lineEntering(450, reduceMotion)}>
+          <Text color="tertiary" fontSize={s(12)} bold style={{ letterSpacing: s(2.4) }}>
+            {t('playground.sceneOne.translation')}
           </Text>
         </AnimatedBox>
-      </VStack>
-
-      <AnimatedBox mt={s(26)} entering={lineEntering(450, reduceMotion)}>
-        <Text color="tertiary" fontSize={s(12)} bold style={{ letterSpacing: s(2.4) }}>
-          {t('playground.sceneOne.translation')}
-        </Text>
-      </AnimatedBox>
-    </Box>
+      </Box>
+    </AnimatedBox>
   )
 }
 

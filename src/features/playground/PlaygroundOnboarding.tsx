@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Animated, {
   type EntryExitAnimationFunction,
+  EntryOrExitLayoutType,
   Extrapolation,
   FadeIn,
   FadeInDown,
@@ -87,6 +88,8 @@ type StrongCarouselPromptProps = {
   commonPrompt: string
   properPrompt: string
   reduceMotion: boolean
+  entering?: EntryOrExitLayoutType | undefined
+  exiting?: EntryOrExitLayoutType | undefined
 }
 
 const StrongCarouselPrompt = ({
@@ -94,6 +97,8 @@ const StrongCarouselPrompt = ({
   commonPrompt,
   properPrompt,
   reduceMotion,
+  entering,
+  exiting,
 }: StrongCarouselPromptProps) => {
   const properPromptStyle = useAnimatedStyle(() => {
     const rawPhase = carouselProgress.get() % 2
@@ -144,7 +149,7 @@ const StrongCarouselPrompt = ({
   )
 
   return (
-    <AnimatedBox flex width="100%" position="relative" entering={FadeIn.springify().delay(200)}>
+    <AnimatedBox flex width="100%" position="relative" entering={entering} exiting={exiting}>
       <AnimatedBox absoluteFill center style={properPromptStyle}>
         {renderPrompt(properPrompt)}
       </AnimatedBox>
@@ -360,12 +365,14 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                   {createSceneFourOccurrences({
                     activeFilter: occurrenceFilter,
                     filterDirection: occurrenceFilterDirection,
+                    highlightColor: activeColor,
                     metrics,
                     onFilterChange: changeOccurrenceFilter,
                     reduceMotion,
                     t,
                   })}
                   {createSceneFiveNotes({
+                    highlightColor: activeColor,
                     metrics,
                     reduceMotion,
                     shakeRotations: {
@@ -376,8 +383,13 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                     t,
                   })}
                   {createSceneSixRelations({
+                    highlightColor: activeColor,
                     metrics,
                     reduceMotion,
+                    shakeRotations: {
+                      abel: sceneFiveAbelRotation,
+                      hevel: sceneFiveHevelRotation,
+                    },
                     t,
                   })}
                 </SceneGraph>
@@ -395,6 +407,8 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
               properPrompt={t(currentScene.promptKey)}
               commonPrompt={t('playground.sceneThree.commonPhrase')}
               reduceMotion={reduceMotion}
+              entering={reduceMotion ? undefined : promptEntering}
+              exiting={reduceMotion ? undefined : promptExiting}
             />
           ) : (
             <AnimatedBox

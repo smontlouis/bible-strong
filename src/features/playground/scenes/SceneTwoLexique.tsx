@@ -223,7 +223,12 @@ export const createSceneTwoLexique = ({
       draggable
       dragFriction={0.1}
     >
-      <VerseCard reduceMotion={reduceMotion} highlightColor={highlightColor} metrics={metrics} />
+      <VerseCard
+        mode="small"
+        reduceMotion={reduceMotion}
+        highlightColor={highlightColor}
+        metrics={metrics}
+      />
     </Scene.Node>
 
     <Scene.Node

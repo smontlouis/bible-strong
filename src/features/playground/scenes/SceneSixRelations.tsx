@@ -1,11 +1,15 @@
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
+import type { SharedValue } from 'react-native-reanimated'
 
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
 import { Scene } from '../onboarding/SceneGraph'
+import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
+import { AbelSourceCard, HevelSourceCard, SourceCard } from './GenesisSourceCard'
+import NoteCard from './NoteCard'
 
 const RELATION_ENTER_START = 420
 const RELATION_STAGGER = 90
@@ -15,106 +19,11 @@ type SceneSixElementProps = {
   t: TFunction
 }
 
-type RelationEntityCardProps = {
-  backgroundColor?: string
-  borderColor?: string
-  detail: React.ReactNode
-  detailColor?: string
-  markerColor?: string
-  markerLeft?: number
-  metrics: OnboardingStageMetrics
-  title: string
-}
-
-const RelationEntityCard = ({
-  backgroundColor = '#FFFFFF',
-  borderColor = '#DDE7F5',
-  detail,
-  detailColor = '#6F7B91',
-  markerColor,
-  markerLeft,
-  metrics,
-  title,
-}: RelationEntityCardProps) => {
-  const s = metrics.s
-
-  return (
-    <VStack
-      flex
-      borderRadius={s(14)}
-      borderWidth={s(1)}
-      px={s(8)}
-      py={s(8)}
-      gap={s(3)}
-      overflow="visible"
-      style={{ backgroundColor, borderColor }}
-    >
-      {markerColor && markerLeft !== undefined ? (
-        <Box
-          position="absolute"
-          left={s(markerLeft - 3.5)}
-          bottom={s(-3.5)}
-          size={s(7)}
-          borderRadius={s(3.5)}
-          style={{
-            backgroundColor: markerColor,
-            boxShadow: `0 0 8px ${markerColor}80`,
-          }}
-        />
-      ) : null}
-      <Text bold fontSize={s(11)} lineHeight={s(14)}>
-        {title}
-      </Text>
-      {typeof detail === 'string' ? (
-        <Text
-          fontSize={s(8)}
-          lineHeight={s(11)}
-          style={{ color: detailColor, fontFamily: 'Courier' }}
-        >
-          {detail}
-        </Text>
-      ) : (
-        detail
-      )}
-    </VStack>
-  )
-}
-
-type StrongRelationDetailProps = {
-  descriptor: string
-  hebrew: string
-  metrics: OnboardingStageMetrics
-}
-
-const StrongRelationDetail = ({ descriptor, hebrew, metrics }: StrongRelationDetailProps) => (
-  <HStack alignItems="center" gap={metrics.s(7)}>
-    <Text
-      color="tertiary"
-      fontSize={metrics.s(8)}
-      lineHeight={metrics.s(11)}
-      style={{ writingDirection: 'rtl' }}
-    >
-      {hebrew}
-    </Text>
-    <Text color="tertiary" fontSize={metrics.s(8)} lineHeight={metrics.s(11)}>
-      ·
-    </Text>
-    <Text
-      color="tertiary"
-      fontSize={metrics.s(8)}
-      lineHeight={metrics.s(11)}
-      style={{ fontFamily: 'Courier' }}
-    >
-      {descriptor}
-    </Text>
-  </HStack>
-)
-
 const AbelTag = ({ metrics }: { metrics: OnboardingStageMetrics }) => (
   <HStack
     flex
     bg="primary"
-    borderRadius={metrics.s(14)}
+    borderRadius={metrics.s(8)}
     px={metrics.s(10)}
     alignItems="center"
     gap={metrics.s(5)}
@@ -146,12 +55,19 @@ const RelationLabel = ({ color, label, metrics }: RelationLabelProps) => (
 )
 
 type CreateSceneSixRelationsProps = SceneSixElementProps & {
+  highlightColor: HighlightColor
   reduceMotion: boolean
+  shakeRotations: {
+    abel: SharedValue<number>
+    hevel: SharedValue<number>
+  }
 }
 
 export const createSceneSixRelations = ({
+  highlightColor,
   metrics,
   reduceMotion,
+  shakeRotations,
   t,
 }: CreateSceneSixRelationsProps) => (
   <Scene id="scene-six">
@@ -181,16 +97,25 @@ export const createSceneSixRelations = ({
     </Scene.Node>
 
     <Scene.Node
-      id="genesis-source"
-      layout="resize"
-      frame={{ x: 48, y: 111, width: 124, height: 60, zIndex: 5 }}
+      id="verse-card"
+      layout="scale"
+      frame={{
+        x: -16,
+        y: 93,
+        width: 382,
+        height: 294,
+        scale: 0.38,
+        opacity: 0.1,
+        zIndex: 2,
+      }}
       draggable
       dragFriction={0.1}
     >
-      <RelationEntityCard
-        detail={t('playground.sceneSix.genesisDetail')}
+      <VerseCard
+        mode="small"
+        reduceMotion={reduceMotion}
+        highlightColor={highlightColor}
         metrics={metrics}
-        title={t('playground.sceneSix.genesisTitle')}
       />
     </Scene.Node>
 
@@ -198,69 +123,45 @@ export const createSceneSixRelations = ({
       id="abel-source"
       layout="resize"
       frame={{
-        x: 48,
-        y: 187,
-        width: 104,
-        height: 50,
+        x: 35,
+        y: 137,
+        width: 140,
+        height: 74,
         zIndex: 5,
         anchors: { explains: { x: 0.5, y: 1 } },
       }}
       draggable
       dragFriction={0.1}
     >
-      <RelationEntityCard
-        detail={
-          <StrongRelationDetail
-            descriptor={t('playground.sceneSix.abelDetail')}
-            hebrew="אָבֶל"
-            metrics={metrics}
-          />
-        }
-        markerColor="#5983F0"
-        markerLeft={52}
-        metrics={metrics}
-        title="H1893"
-      />
+      <AbelSourceCard metrics={metrics} shakeRotation={shakeRotations.abel} t={t} />
     </Scene.Node>
 
     <Scene.Node
       id="strong-stack"
       layout="resize"
       frame={{
-        x: 198,
-        y: 137,
-        width: 104,
-        height: 50,
+        x: 190,
+        y: 100,
+        width: 154,
+        height: 74,
         zIndex: 5,
         anchors: { mentions: { x: 0.5, y: 1 } },
       }}
       draggable
       dragFriction={0.1}
     >
-      <RelationEntityCard
-        detail={
-          <StrongRelationDetail
-            descriptor={t('playground.sceneSix.hevelDetail')}
-            hebrew="הֶבֶל"
-            metrics={metrics}
-          />
-        }
-        markerColor="#FF7675"
-        markerLeft={52}
-        metrics={metrics}
-        title="H1892"
-      />
+      <HevelSourceCard metrics={metrics} shakeRotation={shakeRotations.hevel} t={t} />
     </Scene.Node>
 
     <Scene.Node
       id="ecclesiastes-occurrence"
       frame={{
-        x: 131,
-        y: 215,
-        width: 168,
-        height: 52,
+        x: 130,
+        y: 200,
+        width: 170,
+        height: 60,
         zIndex: 6,
-        anchors: { referencedBy: { x: 0.31, y: 1 } },
+        anchors: { referencedBy: { x: 0.5, y: 1 } },
       }}
       enterDelay={270}
       enterFrom={{ x: 0, y: -20 }}
@@ -268,12 +169,12 @@ export const createSceneSixRelations = ({
       draggable
       dragFriction={0.1}
     >
-      <RelationEntityCard
-        detail={t('playground.sceneSix.ecclesiastesDetail')}
+      <SourceCard
+        label={String(t('playground.sceneSix.ecclesiastesDetail')).toUpperCase()}
         markerColor="#FF8400"
-        markerLeft={52}
         metrics={metrics}
         title={t('playground.sceneSix.ecclesiastesTitle')}
+        variant="small"
       />
     </Scene.Node>
 
@@ -281,10 +182,10 @@ export const createSceneSixRelations = ({
       id="question-note"
       layout="resize"
       frame={{
-        x: 47,
-        y: 340,
-        width: 96,
-        height: 36,
+        x: 35,
+        y: 322,
+        width: 120,
+        height: 60,
         zIndex: 6,
         anchors: {
           explains: { x: 0.34, y: 0 },
@@ -296,23 +197,25 @@ export const createSceneSixRelations = ({
       draggable
       dragFriction={0.1}
     >
-      <RelationEntityCard
-        backgroundColor="#FFF2E8"
-        borderColor="#FF8400"
-        detail="Abel"
-        detailColor="#B76A00"
-        metrics={metrics}
-        title={t('playground.sceneSix.noteTitle')}
-      />
+      <NoteCard metrics={metrics} t={t} variant="small">
+        <Text
+          fontSize={metrics.s(14)}
+          lineHeight={metrics.s(18)}
+          mt={metrics.s(9)}
+          style={{ fontFamily: 'Courier' }}
+        >
+          Abel
+        </Text>
+      </NoteCard>
     </Scene.Node>
 
     <Scene.Node
       id="study-card"
       frame={{
         x: 220,
-        y: 322,
-        width: 116,
-        height: 50,
+        y: 325,
+        width: 130,
+        height: 70,
         zIndex: 6,
         anchors: { linkedFrom: { x: 0, y: 0.6 } },
       }}
@@ -322,19 +225,18 @@ export const createSceneSixRelations = ({
       draggable
       dragFriction={0.1}
     >
-      <RelationEntityCard
-        backgroundColor="#F0F3FF"
-        borderColor="#AFC4FF"
-        detail={t('playground.sceneSix.studyDetail')}
-        detailColor="#5983F0"
+      <SourceCard
+        label={String(t('playground.sceneSix.studyTitle')).toUpperCase()}
+        markerColor="#AFC4FF"
         metrics={metrics}
-        title={t('playground.sceneSix.studyTitle')}
+        title={t('playground.sceneSix.studyDetail')}
+        variant="small"
       />
     </Scene.Node>
 
     <Scene.Connection
-      from={{ node: 'question-note', anchor: 'explains' }}
-      to={{ node: 'abel-source', anchor: 'explains' }}
+      from={{ node: 'question-note', anchor: 'center' }}
+      to={{ node: 'abel-source', anchor: 'bottom' }}
       curve={{ type: 'quadratic', bend: -0.16 }}
       color="#5983F0"
       opacity={0.68}
@@ -342,7 +244,7 @@ export const createSceneSixRelations = ({
       enterDelay={RELATION_ENTER_START}
     />
     <Scene.Connection
-      from={{ node: 'question-note', anchor: 'references' }}
+      from={{ node: 'question-note', anchor: 'center' }}
       to={{ node: 'ecclesiastes-occurrence', anchor: 'referencedBy' }}
       curve={{ type: 'quadratic', bend: 0.12 }}
       color="#FF8400"
@@ -351,8 +253,8 @@ export const createSceneSixRelations = ({
       enterDelay={RELATION_ENTER_START + RELATION_STAGGER}
     />
     <Scene.Connection
-      from={{ node: 'question-note', anchor: 'mentions' }}
-      to={{ node: 'strong-stack', anchor: 'mentions' }}
+      from={{ node: 'question-note', anchor: 'center' }}
+      to={{ node: 'strong-stack', anchor: 'bottom' }}
       curve={{ type: 'quadratic', bend: -0.16 }}
       color="#FF7675"
       opacity={0.72}
@@ -360,7 +262,7 @@ export const createSceneSixRelations = ({
       enterDelay={RELATION_ENTER_START + RELATION_STAGGER * 2}
     />
     <Scene.Connection
-      from={{ node: 'question-note', anchor: 'linkedTo' }}
+      from={{ node: 'question-note', anchor: 'center' }}
       to={{ node: 'study-card', anchor: 'linkedFrom' }}
       curve={{ type: 'quadratic', bend: -0.08 }}
       color="#AFC4FF"
@@ -371,7 +273,7 @@ export const createSceneSixRelations = ({
 
     <Scene.Node
       id="relation-label-explains"
-      frame={{ x: 41, y: 273, width: 62, height: 20, zIndex: 7 }}
+      frame={{ x: 50, y: 264, width: 62, height: 20, zIndex: 7 }}
       enterDelay={RELATION_ENTER_START}
       enterFrom={{ x: 0, y: 8 }}
       exitTo={{ x: 0, y: 8 }}
@@ -381,7 +283,7 @@ export const createSceneSixRelations = ({
     </Scene.Node>
     <Scene.Node
       id="relation-label-references"
-      frame={{ x: 119, y: 283, width: 70, height: 20, zIndex: 7 }}
+      frame={{ x: 140, y: 290, width: 70, height: 20, zIndex: 7 }}
       enterDelay={RELATION_ENTER_START + RELATION_STAGGER}
       enterFrom={{ x: 0, y: 8 }}
       exitTo={{ x: 0, y: 8 }}
@@ -395,7 +297,7 @@ export const createSceneSixRelations = ({
     </Scene.Node>
     <Scene.Node
       id="relation-label-mentions"
-      frame={{ x: 204, y: 277, width: 68, height: 20, zIndex: 7 }}
+      frame={{ x: 120, y: 264, width: 68, height: 20, zIndex: 7 }}
       enterDelay={RELATION_ENTER_START + RELATION_STAGGER * 2}
       enterFrom={{ x: 0, y: 8 }}
       exitTo={{ x: 0, y: 8 }}
@@ -405,7 +307,7 @@ export const createSceneSixRelations = ({
     </Scene.Node>
     <Scene.Node
       id="relation-label-linked"
-      frame={{ x: 158, y: 353, width: 48, height: 20, zIndex: 7 }}
+      frame={{ x: 164, y: 350, width: 48, height: 20, zIndex: 7 }}
       enterDelay={RELATION_ENTER_START + RELATION_STAGGER * 3}
       enterFrom={{ x: 0, y: 8 }}
       exitTo={{ x: 0, y: 8 }}

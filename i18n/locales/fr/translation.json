@@ -1359,20 +1359,12 @@
   "strongDetail.entity.relation.resident": "résident",
   "accountEntry.adoptionPending": "Vos données locales restent en sécurité sur cet appareil. Leur synchronisation reprendra automatiquement lorsque votre compte sera de nouveau disponible.",
   "playground.badge": "Bible Strong · Playground",
-  "playground.development": "DÉVELOPPEMENT",
-  "playground.title": "Construire l’expérience.",
-  "playground.description": "Un espace léger pour développer le dashboard et tester les écrans du nouvel onboarding sans lancer toute l’application.",
-  "playground.activeTitle": "Mode playground actif",
-  "playground.activeDescription": "Les providers essentiels sont conservés ; la navigation et les initialisations non nécessaires sont désactivées.",
-  "playground.workspaces": "Espaces de travail",
+  "playground.title": "Playground",
+  "playground.description": "Un espace isolé pour découvrir et tester les expériences en cours de construction dans Bible Strong.",
+  "playground.experiences": "Parcours disponibles",
   "playground.abelEyebrow": "Onboarding",
-  "playground.abelTitle": "Parcours Abel",
-  "playground.abelDescription": "Construire l’enchaînement des scènes, des interactions et des animations autour d’une étude biblique.",
-  "playground.designEyebrow": "Design system",
-  "playground.designTitle": "Composants & animations",
-  "playground.designDescription": "Centraliser les variantes d’écran, les transitions et les éléments réutilisables du dashboard.",
-  "playground.fullAppHint": "Pour revenir à l’application complète, désactivez EXPO_PUBLIC_PLAYGROUND puis relancez Metro avec le cache nettoyé.",
-  "playground.replay": "Rejouer la scène 1",
+  "playground.abelTitle": "Parcours onboarding Abel",
+  "playground.abelDescription": "Parcourez une étude biblique interactive, du verset de Genèse 4.2 jusqu’aux mots Strong, aux notes et aux relations.",
   "playground.onboarding.skip": "Passer",
   "playground.onboarding.back": "Revenir à la scène précédente",
   "playground.onboarding.continue": "Continuer",
@@ -1404,7 +1396,7 @@
   "playground.sceneTwo.comparisons": "Comparaisons"
   ,"playground.sceneThree.properPhrase": "Retrouvez le mot derrière la traduction."
   ,"playground.sceneThree.commonPhrase": "Un mot peut en révéler un autre."
-  ,"playground.sceneThree.strongLabel": "STRONG · HE"
+  ,"playground.sceneThree.strongLabel": "STRONG"
   ,"playground.sceneThree.listen": "Écouter la prononciation"
   ,"playground.sceneThree.properTitle": "Abel"
   ,"playground.sceneThree.properDefinition": "Fils d’Adam et Ève"
@@ -1458,10 +1450,10 @@
   ,"playground.sceneFour.breathPsalmOneFortyFourAfter": ", ses jours sont comme l’ombre qui passe."
   ,"playground.sceneFive.phrase": "Notez ce que vous découvrez."
   ,"playground.sceneFive.genesisLabel": "GENÈSE 4.2"
-  ,"playground.sceneFive.genesisTitle": "Abel, fils d’Adam et Ève"
-  ,"playground.sceneFive.abelLabel": "LEXIQUE · H1893"
+  ,"playground.sceneFive.genesisTitle": "Elle enfanta Abel"
+  ,"playground.sceneFive.abelLabel": "H1893"
   ,"playground.sceneFive.abelMeta": "nom propre · hébreu"
-  ,"playground.sceneFive.hevelLabel": "LEXIQUE · H1892"
+  ,"playground.sceneFive.hevelLabel": "H1892"
   ,"playground.sceneFive.hevelMeta": "souffle · vapeur · vanité"
   ,"playground.sceneFive.noteLabel": "NOTE"
   ,"playground.sceneFive.noteQuestion": "Abel s’écrit comme hevel, souffle ou vapeur. Pourquoi ce nom ?"

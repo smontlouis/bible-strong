@@ -81,7 +81,7 @@ const StrongDefinitionCard = ({ definition, metrics, t }: StrongDefinitionCardPr
       overflow="visible"
       style={{ boxShadow: '0 10px 26px rgba(40,67,128,0.16)' }}
     >
-      <HStack justifyContent="space-between" alignItems="center" overflow='visible'>
+      <HStack justifyContent="space-between" alignItems="center" overflow="visible">
         <Box bg="lightPrimary" borderRadius={s(11)} px={s(10)} py={s(8)}>
           <Text color="primary" bold fontSize={s(10)} style={{ letterSpacing: s(1.8) }}>
             {t('playground.sceneThree.strongLabel')}
@@ -92,8 +92,8 @@ const StrongDefinitionCard = ({ definition, metrics, t }: StrongDefinitionCardPr
           accessibilityLabel={t('playground.sceneThree.listen')}
           onPress={playAudio}
           style={({ pressed }) => ({
-            overflow: 'visible' ,
-            transform: [{ scale: pressed ? 0.92 : 1, }],
+            overflow: 'visible',
+            transform: [{ scale: pressed ? 0.92 : 1 }],
           })}
         >
           <Box
@@ -356,7 +356,7 @@ export const createSceneThreeStrong = ({
         height: 294,
         scale: 0.42,
         rotation: 4,
-        opacity: activeIndex === 1 ? 0.42 : 0.28,
+        opacity: 0.5,
         zIndex: 1,
         anchors: { highlightedWord: { x: 0.43, y: 0.52 } },
       }}
@@ -364,7 +364,12 @@ export const createSceneThreeStrong = ({
       dragFriction={0.1}
       pointerEvents="none"
     >
-      <VerseCard reduceMotion={reduceMotion} highlightColor={highlightColor} metrics={metrics} />
+      <VerseCard
+        mode="small"
+        reduceMotion={reduceMotion}
+        highlightColor={highlightColor}
+        metrics={metrics}
+      />
     </Scene.Node>
     <Scene.Node
       id="strong-stack"

@@ -3,12 +3,12 @@ import PlaygroundHome from './PlaygroundHome'
 import PlaygroundOnboarding from './PlaygroundOnboarding'
 
 const PlaygroundScreen = () => {
-  const [isOnboardingVisible, setIsOnboardingVisible] = useState(true)
+  const [isOnboardingVisible, setIsOnboardingVisible] = useState(false)
 
   return isOnboardingVisible ? (
     <PlaygroundOnboarding onComplete={() => setIsOnboardingVisible(false)} />
   ) : (
-    <PlaygroundHome onReplay={() => setIsOnboardingVisible(true)} />
+    <PlaygroundHome onOpenAbelOnboarding={() => setIsOnboardingVisible(true)} />
   )
 }
 
