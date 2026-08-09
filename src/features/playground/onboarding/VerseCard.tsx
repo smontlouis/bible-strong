@@ -1,5 +1,4 @@
 import { useTheme } from '@emotion/react'
-import { Feather } from '@expo/vector-icons'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -31,8 +30,8 @@ const VerseCard = ({ reduceMotion, highlightColor, metrics }: VerseCardProps) =>
   const theme = useTheme()
   const { t } = useTranslation()
   const s = metrics.s
-  const previousHighlightColor = useSharedValue(theme.colors.color2)
-  const targetHighlightColor = useSharedValue(theme.colors.color2)
+  const previousHighlightColor = useSharedValue(theme.colors.color1)
+  const targetHighlightColor = useSharedValue(theme.colors.color1)
   const highlightProgress = useSharedValue(1)
 
   useEffect(() => {
@@ -61,13 +60,12 @@ const VerseCard = ({ reduceMotion, highlightColor, metrics }: VerseCardProps) =>
 
   return (
     <Box flex={1} bg="reverse" borderRadius={s(28)} p={s(24)} lightShadow overflow="visible">
-      <HStack alignItems="center" justifyContent="space-between">
+      <HStack alignItems="center">
         <AnimatedBox entering={lineEntering(120, reduceMotion)}>
           <Text title fontSize={s(31)} lineHeight={s(38)} style={{ fontFamily: 'Literata Book' }}>
             {t('playground.sceneOne.chapter')}
           </Text>
         </AnimatedBox>
-        <Feather name="plus" size={s(23)} color={theme.colors.primary} />
       </HStack>
 
       <VStack mt={s(22)} gap={s(3)}>

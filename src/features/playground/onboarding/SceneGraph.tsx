@@ -23,6 +23,7 @@ import {
   useSharedValue,
   withDecay,
   withDelay,
+  withSequence,
   withSpring,
 } from 'react-native-reanimated'
 import Svg, { Path, type PathProps } from 'react-native-svg'
@@ -72,6 +73,9 @@ type SceneProps = {
 type SceneNodeProps = {
   id: string
   frame: SceneNodeFrame
+  contentKey?: string
+  contentEntering?: EntryOrExitLayoutType | false
+  contentExiting?: EntryOrExitLayoutType | false
   layout?: SceneLayoutMode
   enterDelay?: number
   enterFrom?: SceneNodeOffset
@@ -94,6 +98,9 @@ type SceneConnectionProps = {
   to: SceneConnectionEndpoint
   curve?: SceneConnectionCurve
   enterDelay?: number
+  exiting?: EntryOrExitLayoutType | false
+  transitionDelay?: number
+  transitionKey?: string
   color?: string
   opacity?: number
   width?: number
@@ -190,17 +197,17 @@ export const Scene = Object.assign(SceneRoot, {
 const getSceneMarker = (element: ReactElement) =>
   (element.type as MarkedSceneElement).sceneGraphMarker
 
-const getContentIdentity = (content: ReactElement) => {
+const getContentIdentity = (content: ReactElement, contentKey?: string) => {
   const type = content.type
 
-  if (typeof type === 'string') return `host:${type}`
+  if (typeof type === 'string') return `host:${type}:${contentKey ?? ''}`
 
   if (!contentTypeIds.has(type)) {
     nextContentTypeId += 1
     contentTypeIds.set(type, nextContentTypeId)
   }
 
-  return `component:${contentTypeIds.get(type)}`
+  return `component:${contentTypeIds.get(type)}:${contentKey ?? ''}`
 }
 
 const endpointNodeId = (endpoint: SceneConnectionEndpoint) =>
@@ -228,7 +235,10 @@ const compileScene = (element: ReactElement<SceneProps>): SceneDescriptor => {
 
     if (getSceneMarker(child) === 'node') {
       const props = child.props as SceneNodeProps
-      nodes.push({ ...props, contentIdentity: getContentIdentity(props.children) })
+      nodes.push({
+        ...props,
+        contentIdentity: getContentIdentity(props.children, props.contentKey),
+      })
       return
     }
 
@@ -371,6 +381,7 @@ const NodeRenderer = ({
   const previousTranslationX = useSharedValue(0)
   const previousTranslationY = useSharedValue(0)
   const interactionScale = useSharedValue(1)
+  const panActive = useSharedValue(false)
   const width = useSharedValue(initialFrame.width)
   const height = useSharedValue(initialFrame.height)
   const scale = useSharedValue(initialFrame.scale ?? 1)
@@ -472,6 +483,8 @@ const NodeRenderer = ({
     .enabled(Boolean(descriptor.draggable))
     .minDistance(5)
     .onBegin(() => {
+      panActive.set(true)
+      interactionScale.set(reduceMotion ? pressedScale : withSpring(pressedScale))
       cancelAnimation(dragX)
       cancelAnimation(dragY)
       if (!Number.isFinite(dragX.get())) dragX.set(0)
@@ -545,6 +558,8 @@ const NodeRenderer = ({
       )
     })
     .onFinalize(() => {
+      panActive.set(false)
+      interactionScale.set(reduceMotion ? 1 : withSpring(1))
       if (dragReturnToOrigin) {
         dragX.set(reduceMotion ? 0 : withSpring(0))
         dragY.set(reduceMotion ? 0 : withSpring(0))
@@ -555,13 +570,13 @@ const NodeRenderer = ({
     .enabled(Boolean(onPress))
     .maxDistance(5)
     .onBegin(() => {
-      interactionScale.set(reduceMotion ? 1 : withSpring(pressedScale))
+      interactionScale.set(reduceMotion ? pressedScale : withSpring(pressedScale))
     })
     .onEnd((_event, success) => {
       if (success && onPress) runOnJS(onPress)()
     })
     .onFinalize(() => {
-      interactionScale.set(reduceMotion ? 1 : withSpring(1))
+      if (!panActive.get()) interactionScale.set(reduceMotion ? 1 : withSpring(1))
     })
   const interactionGesture =
     descriptor.draggable && onPress
@@ -630,6 +645,16 @@ const NodeRenderer = ({
         style={{ position: 'absolute', inset: 0 }}
         pointerEvents={descriptor.pointerEvents}
         overflow="visible"
+        entering={
+          reduceMotion || descriptor.contentEntering === false
+            ? undefined
+            : (descriptor.contentEntering ?? FadeIn.springify())
+        }
+        exiting={
+          reduceMotion || descriptor.contentExiting === false
+            ? undefined
+            : (descriptor.contentExiting ?? FadeOut.springify())
+        }
       >
         {descriptor.children}
       </AnimatedBox>
@@ -693,6 +718,24 @@ const ConnectionRenderer = ({
   const to = resolveEndpoint(connection.to, nodes)
   const fromGeometry = geometries.get(from.nodeId)
   const toGeometry = geometries.get(to.nodeId)
+  const transitionOpacity = useSharedValue(1)
+  const previousTransitionKey = useRef(connection.transitionKey)
+
+  useEffect(() => {
+    if (previousTransitionKey.current === connection.transitionKey) return
+
+    previousTransitionKey.current = connection.transitionKey
+    if (reduceMotion) {
+      transitionOpacity.set(1)
+      return
+    }
+
+    transitionOpacity.set(
+      withDelay(connection.transitionDelay ?? 0, withSequence(withSpring(0.18), withSpring(1)))
+    )
+  }, [connection.transitionDelay, connection.transitionKey, reduceMotion, transitionOpacity])
+
+  const transitionStyle = useAnimatedStyle(() => ({ opacity: transitionOpacity.get() }))
 
   const animatedProps = useAnimatedProps<PathProps>(() => {
     const point = (geometry: NodeGeometry, anchor: SceneNodeAnchor) => {
@@ -741,6 +784,9 @@ const ConnectionRenderer = ({
 
   if (!fromGeometry || !toGeometry) return null
 
+  const resolvedExiting =
+    connection.exiting === false ? undefined : (connection.exiting ?? FadeOut.springify())
+
   return (
     <AnimatedBox
       position="absolute"
@@ -749,18 +795,20 @@ const ConnectionRenderer = ({
       width={metrics.width}
       height={metrics.height}
       entering={reduceMotion ? undefined : FadeIn.springify().delay(connection.enterDelay ?? 0)}
-      exiting={reduceMotion ? undefined : FadeOut.springify()}
+      exiting={reduceMotion ? undefined : resolvedExiting}
       pointerEvents="none"
     >
-      <Svg width={metrics.width} height={metrics.height}>
-        <AnimatedPath
-          animatedProps={animatedProps}
-          fill="none"
-          stroke={connection.color ?? defaultColor}
-          strokeOpacity={connection.opacity ?? 0.35}
-          strokeWidth={(connection.width ?? 1.5) * metrics.scale}
-        />
-      </Svg>
+      <AnimatedBox absoluteFill style={transitionStyle} pointerEvents="none">
+        <Svg width={metrics.width} height={metrics.height}>
+          <AnimatedPath
+            animatedProps={animatedProps}
+            fill="none"
+            stroke={connection.color ?? defaultColor}
+            strokeOpacity={connection.opacity ?? 0.35}
+            strokeWidth={(connection.width ?? 1.5) * metrics.scale}
+          />
+        </Svg>
+      </AnimatedBox>
     </AnimatedBox>
   )
 }

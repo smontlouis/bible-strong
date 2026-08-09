@@ -1,7 +1,8 @@
 import { useTheme } from '@emotion/react'
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
-import { FadeInUp } from 'react-native-reanimated'
+import { FadeInUp, FadeOut } from 'react-native-reanimated'
+import Color from 'color'
 
 import CommentIcon from '~common/CommentIcon'
 import DictionnaryIcon from '~common/DictionnaryIcon'
@@ -29,8 +30,10 @@ const SCENE_TWO_ENTRANCE_DELAYS = {
   lexique: entranceDelay(2),
   comments: entranceDelay(3),
   themes: entranceDelay(4),
-  translations: entranceDelay(5),
+  comparisons: entranceDelay(5),
 } as const
+
+const SCENE_TWO_CONNECTION_EXIT = FadeOut.duration(1)
 
 type SceneTwoNodeCardProps = {
   label: string
@@ -47,7 +50,7 @@ type SceneTwoNodeIcon =
   | 'lexique'
   | 'comments'
   | 'themes'
-  | 'translations'
+  | 'comparisons'
 
 const SceneTwoFeatureIcon = ({
   icon,
@@ -69,8 +72,8 @@ const SceneTwoFeatureIcon = ({
       return <CommentIcon size={size} color={color} />
     case 'themes':
       return <NaveIcon size={size} color={color} />
-    case 'translations':
-      return <Feather name="globe" size={size} color={color} />
+    case 'comparisons':
+      return <Feather name="layers" size={size} color={color} />
   }
 }
 
@@ -84,35 +87,52 @@ export const SceneTwoNodeCard = ({
 }: SceneTwoNodeCardProps) => {
   const theme = useTheme()
   const s = metrics.s
-  const resolvedIconSize = iconSize ?? (active ? 26 : 14)
+  const resolvedIconSize = iconSize ?? (active ? 20 : 14)
   const resolvedFontSize = fontSize ?? (active ? 16 : 8)
   const iconColor = {
     dictionary: theme.colors.secondary,
-    references: theme.colors.quart,
+    references: Color(theme.colors.quart).lighten(0.4).rgb().toString(),
     lexique: theme.colors.primary,
-    comments: 'rgb(38,166,154)',
-    themes: theme.colors.quint,
-    translations: theme.colors.primary,
+    comments: 'rgba(38,166,154,0.8)',
+    themes: Color(theme.colors.quint).lighten(0.4).toString(),
+    comparisons: Color('#C7B8FF').rgb().toString(),
   }[icon]
   const shadowOpacity = active ? 0.32 : 0.1
   const shadowColor = iconColor.replace('rgb(', 'rgba(').replace(')', `,${shadowOpacity})`)
 
   return (
     <Box
-      flex={1}
-      bg="reverse"
+      h="100%"
+      bg={active ? 'primary' : 'reverse'}
       borderRadius={active ? s(20) : s(12)}
-      borderWidth={active ? s(2) : 0}
-      borderColor={active ? 'primary' : undefined}
       overflow="visible"
       style={{
         boxShadow: `0 ${s(3)}px ${s(active ? 10 : 7)}px 0 ${shadowColor}`,
       }}
-      center
+      justifyContent="center"
     >
       <HStack alignItems="center" gap={s(active ? 9 : 6)} px={s(active ? 16 : 10)}>
-        <SceneTwoFeatureIcon icon={icon} size={s(resolvedIconSize)} color={iconColor} />
-        <Text title={active} bold={!active} fontSize={s(resolvedFontSize)} numberOfLines={1}>
+        <Box
+          size={s(active ? 38 : 28)}
+          borderRadius={s(active ? 13 : 9)}
+          center
+          style={{
+            backgroundColor: active ? 'rgba(255,255,255,0.18)' : iconColor,
+          }}
+        >
+          <SceneTwoFeatureIcon
+            icon={icon}
+            size={s(resolvedIconSize)}
+            color={theme.colors.reverse}
+          />
+        </Box>
+        <Text
+          title={active}
+          bold={!active}
+          color={active ? 'reverse' : undefined}
+          fontSize={s(resolvedFontSize)}
+          numberOfLines={1}
+        >
           {label}
         </Text>
       </HStack>
@@ -208,7 +228,7 @@ export const createSceneTwoLexique = ({
 
     <Scene.Node
       id="dictionary"
-      frame={{ x: 16, y: 62, width: 98, height: 47 }}
+      frame={{ x: 16, y: 62, width: 110, height: 47 }}
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.dictionary}
       enterFrom={{ x: 4, y: 30 }}
       exitTo={{ x: 4, y: 30 }}
@@ -282,17 +302,17 @@ export const createSceneTwoLexique = ({
       <SceneTwoNodeCard label={t('playground.sceneTwo.themes')} icon="themes" metrics={metrics} />
     </Scene.Node>
     <Scene.Node
-      id="translations"
+      id="comparisons"
       frame={{ x: 213, y: 380, width: 126, height: 47 }}
-      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.translations}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.comparisons}
       enterFrom={{ x: -29, y: -6 }}
       exitTo={{ x: -29, y: -6 }}
       draggable
       dragFriction={0.1}
     >
       <SceneTwoNodeCard
-        label={t('playground.sceneTwo.translations')}
-        icon="translations"
+        label={t('playground.sceneTwo.comparisons')}
+        icon="comparisons"
         metrics={metrics}
       />
     </Scene.Node>
@@ -302,18 +322,21 @@ export const createSceneTwoLexique = ({
       to={{ node: 'dictionary', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.dictionary}
+      exiting={SCENE_TWO_CONNECTION_EXIT}
     />
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'references', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.references}
+      exiting={SCENE_TWO_CONNECTION_EXIT}
     />
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'lexique', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.lexique}
+      exiting={SCENE_TWO_CONNECTION_EXIT}
       opacity={0.8}
       width={2}
     />
@@ -322,18 +345,21 @@ export const createSceneTwoLexique = ({
       to={{ node: 'comments', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.comments}
+      exiting={SCENE_TWO_CONNECTION_EXIT}
     />
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'center' }}
       to={{ node: 'themes', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
       enterDelay={SCENE_TWO_ENTRANCE_DELAYS.themes}
+      exiting={SCENE_TWO_CONNECTION_EXIT}
     />
     <Scene.Connection
       from={{ node: 'verse-card', anchor: 'center' }}
-      to={{ node: 'translations', anchor: 'center' }}
+      to={{ node: 'comparisons', anchor: 'center' }}
       curve={{ type: 'quadratic', bend: 0.08 }}
-      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.translations}
+      enterDelay={SCENE_TWO_ENTRANCE_DELAYS.comparisons}
+      exiting={SCENE_TWO_CONNECTION_EXIT}
     />
   </Scene>
 )
