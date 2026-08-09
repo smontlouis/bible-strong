@@ -34,6 +34,7 @@ import {
   type OccurrenceFilterId,
 } from './scenes/SceneFourOccurrences'
 import { createSceneSixRelations } from './scenes/SceneSixRelations'
+import { createSceneSevenReturnToVerse, SCENE_SEVEN_REVEAL } from './scenes/SceneSevenReturnToVerse'
 import { createSceneThreeStrong, type StrongCardIndex } from './scenes/SceneThreeStrong'
 import { createSceneTwoLexique } from './scenes/SceneTwoLexique'
 
@@ -50,23 +51,28 @@ const SCENE_ONE_PROMPT_KEYS: Record<HighlightColor, string> = {
   color5: 'playground.sceneOne.colorPrompt.color5',
 }
 
-const promptEntering: EntryExitAnimationFunction = () => {
-  'worklet'
+const createPromptEntering =
+  (delay: number): EntryExitAnimationFunction =>
+  () => {
+    'worklet'
 
-  return {
-    initialValues: {
-      opacity: 0,
-      transform: [{ translateY: 5 }, { scale: 0.98 }],
-    },
-    animations: {
-      opacity: withDelay(200, withSpring(1)),
-      transform: [
-        { translateY: withDelay(200, withSpring(0)) },
-        { scale: withDelay(200, withSpring(1)) },
-      ],
-    },
+    return {
+      initialValues: {
+        opacity: 0,
+        transform: [{ translateY: 5 }, { scale: 0.98 }],
+      },
+      animations: {
+        opacity: withDelay(delay, withSpring(1)),
+        transform: [
+          { translateY: withDelay(delay, withSpring(0)) },
+          { scale: withDelay(delay, withSpring(1)) },
+        ],
+      },
+    }
   }
-}
+
+const promptEntering = createPromptEntering(200)
+const finalPromptEntering = createPromptEntering(SCENE_SEVEN_REVEAL.promptDelay)
 
 const promptExiting: EntryExitAnimationFunction = () => {
   'worklet'
@@ -178,13 +184,12 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   const sceneFiveGenesisRotation = useSharedValue(0)
   const sceneFiveAbelRotation = useSharedValue(0)
   const sceneFiveHevelRotation = useSharedValue(0)
+  const navigationDirection = useSharedValue<1 | -1>(1)
   const [sceneViewportHeight, setSceneViewportHeight] = useState<number>()
   const currentScene = ONBOARDING_SCENES[sceneIndex]
   const canGoBack = sceneIndex > 0
-  const sceneProgress =
-    currentScene.id === 'scene-three'
-      ? (2.5 + strongCardIndex * 0.5) / ONBOARDING_SCENE_COUNT
-      : (sceneIndex + 1) / ONBOARDING_SCENE_COUNT
+  const isFinalScene = currentScene.id === 'scene-seven'
+  const sceneProgress = (sceneIndex + 1) / ONBOARDING_SCENE_COUNT
   const progress = isFinishing ? 1 : sceneProgress
   const progressValue = useSharedValue(progress)
   const strongCarouselProgress = useSharedValue<number>(strongCardIndex)
@@ -194,7 +199,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   // The storyboard is authored at 390 pt wide with a 350 pt content column.
   // Keep that column centered, but let it shrink on narrower phones.
   const contentWidth = Math.min(350, Math.max(width - 40, 1))
-  const progressWidth = Math.min(145, contentWidth * 0.42)
+  const progressWidth = Math.min(145, contentWidth * 0.3)
   const promptKey =
     currentScene.id === 'scene-one' ? SCENE_ONE_PROMPT_KEYS[activeColor] : currentScene.promptKey
 
@@ -230,6 +235,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
 
   const advance = () => {
     if (sceneIndex < ONBOARDING_SCENES.length - 1) {
+      navigationDirection.set(1)
       setSceneIndex(value => value + 1)
       return
     }
@@ -238,7 +244,10 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   }
 
   const goBack = () => {
-    if (canGoBack) setSceneIndex(value => value - 1)
+    if (canGoBack) {
+      navigationDirection.set(-1)
+      setSceneIndex(value => value - 1)
+    }
   }
 
   const changeOccurrenceFilter = (nextFilter: OccurrenceFilterId) => {
@@ -269,14 +278,14 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
         <Box position="absolute" left={0} right={0} top={10} alignItems="center">
           <Box
             width={progressWidth}
-            height={8}
+            height={6}
             borderRadius={4}
             bg="lightPrimary"
             overflow="visible"
           >
             <Animated.View
               style={[
-                { height: 8, borderRadius: 4, backgroundColor: theme.colors.primary },
+                { height: 6, borderRadius: 4, backgroundColor: theme.colors.primary },
                 progressStyle,
               ]}
             />
@@ -294,7 +303,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
             opacity: pressed ? 0.62 : 1,
           })}
         >
-          <Text color="primary" fontSize={16} bold>
+          <Text color="primary" fontSize={13} bold>
             {t('playground.onboarding.skip')}
           </Text>
         </Pressable>
@@ -385,11 +394,18 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                   {createSceneSixRelations({
                     highlightColor: activeColor,
                     metrics,
+                    navigationDirection,
                     reduceMotion,
                     shakeRotations: {
                       abel: sceneFiveAbelRotation,
                       hevel: sceneFiveHevelRotation,
                     },
+                    t,
+                  })}
+                  {createSceneSevenReturnToVerse({
+                    highlightColor: activeColor,
+                    metrics,
+                    reduceMotion,
                     t,
                   })}
                 </SceneGraph>
@@ -413,13 +429,15 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
           ) : (
             <AnimatedBox
               key={promptKey}
-              entering={reduceMotion ? undefined : promptEntering}
+              entering={
+                reduceMotion ? undefined : isFinalScene ? finalPromptEntering : promptEntering
+              }
               exiting={reduceMotion ? undefined : promptExiting}
             >
               <Text
                 title
-                fontSize={currentScene.id === 'scene-one' ? 32 : 25}
-                lineHeight={currentScene.id === 'scene-one' ? 38 : 32}
+                fontSize={currentScene.id === 'scene-one' ? 32 : isFinalScene ? 22 : 25}
+                lineHeight={currentScene.id === 'scene-one' ? 38 : isFinalScene ? 26 : 32}
                 textAlign="center"
                 style={{ fontFamily: 'Literata Book' }}
               >
@@ -451,7 +469,9 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
           <Animated.View style={{ flex: 1 }}>
             <AnimatedPressable
               accessibilityRole="button"
-              accessibilityLabel={t('playground.onboarding.continue')}
+              accessibilityLabel={t(
+                isFinalScene ? 'playground.onboarding.start' : 'playground.onboarding.continue'
+              )}
               onPress={advance}
               onPressIn={handlePressIn}
               onPressOut={handlePressOut}
@@ -466,7 +486,9 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                 style={{ flexDirection: 'row', gap: 12 }}
               >
                 <Text color="reverse" fontSize={17} bold>
-                  {t('playground.onboarding.continue')}
+                  {t(
+                    isFinalScene ? 'playground.onboarding.start' : 'playground.onboarding.continue'
+                  )}
                 </Text>
                 <Feather name="arrow-right" size={23} color={theme.colors.reverse} />
               </Box>

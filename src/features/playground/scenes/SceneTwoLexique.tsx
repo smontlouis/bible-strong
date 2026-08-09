@@ -1,7 +1,7 @@
 import { useTheme } from '@emotion/react'
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
-import { FadeInUp, FadeOut } from 'react-native-reanimated'
+import { FadeOut } from 'react-native-reanimated'
 import Color from 'color'
 
 import CommentIcon from '~common/CommentIcon'
@@ -9,10 +9,11 @@ import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
-import Box, { AnimatedBox, HStack } from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
 
@@ -146,42 +147,7 @@ type SceneTwoBackgroundProps = {
 }
 
 export const SceneTwoBackground = ({ metrics, reduceMotion }: SceneTwoBackgroundProps) => {
-  const s = metrics.s
-
-  return (
-    <Box flex width="100%" overflow="visible">
-      <AnimatedBox
-        position="absolute"
-        left={s(30)}
-        top={s(40)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(260)}
-      >
-        <Text color="secondary" fontSize={s(18)} bold>
-          +
-        </Text>
-      </AnimatedBox>
-      <AnimatedBox
-        position="absolute"
-        left={s(308)}
-        top={s(118)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(420)}
-      >
-        <Text color="primary" fontSize={s(13)} bold>
-          +
-        </Text>
-      </AnimatedBox>
-      <AnimatedBox
-        position="absolute"
-        left={s(194)}
-        top={s(423)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(500)}
-      >
-        <Text color="primary" fontSize={s(14)} bold>
-          +
-        </Text>
-      </AnimatedBox>
-    </Box>
-  )
+  return <SceneDecorativePluses metrics={metrics} reduceMotion={reduceMotion} scene="two" />
 }
 
 type CreateSceneTwoLexiqueProps = SceneTwoBackgroundProps & {

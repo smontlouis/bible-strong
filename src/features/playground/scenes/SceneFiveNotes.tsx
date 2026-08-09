@@ -6,7 +6,6 @@ import { Pressable, TextInput } from 'react-native'
 import Animated, {
   cancelAnimation,
   Easing,
-  FadeInUp,
   type SharedValue,
   useAnimatedProps,
   useDerivedValue,
@@ -18,10 +17,11 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import Box, { AnimatedBox, HStack } from '~common/ui/Box'
+import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
 import { AbelSourceCard, HevelSourceCard } from './GenesisSourceCard'
@@ -298,26 +298,7 @@ export const createSceneFiveNotes = ({
         </NoteCard>
       </Scene.Node>
 
-      <AnimatedBox
-        position="absolute"
-        left={metrics.s(16)}
-        top={metrics.s(306)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(520)}
-      >
-        <Text color="primary" bold fontSize={metrics.s(18)}>
-          +
-        </Text>
-      </AnimatedBox>
-      <AnimatedBox
-        position="absolute"
-        left={metrics.s(322)}
-        top={metrics.s(334)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(640)}
-      >
-        <Text color="primary" bold fontSize={metrics.s(14)}>
-          +
-        </Text>
-      </AnimatedBox>
+      <SceneDecorativePluses metrics={metrics} reduceMotion={reduceMotion} scene="five" />
     </Scene>
   )
 }

@@ -71,8 +71,9 @@ The interface consists of:
 
 Mode semantics in the prototype:
 
-- `scale`: preserves the first mounted width and height and animates position, rotation, opacity,
-  and scale. This is the verse-card contract and prevents text reflow.
+- `scale`: preserves the node's current width and height and animates position, rotation, opacity,
+  and scale. This is the verse-card contract and prevents text reflow, including after a previous
+  scene resized the same node.
 - `resize`: animates width and height and may cause content reflow.
 - `position`: preserves the first width and height and ignores scale changes.
 - `auto`: uses resize if the declared dimensions change; otherwise it behaves like scale.
@@ -125,6 +126,40 @@ velocity-based decay. Its velocity also decreases with the remaining distance to
 bound. When a node is both draggable and pressable, a pan cancels its tap.
 Every draggable node applies its `pressScale` (0.96 by default) as soon as the finger goes down,
 keeps that scale throughout the pan, and springs back to 1 when the gesture ends.
+
+## Orbital depth
+
+Nodes can share a scene-level orbital clock while keeping an individual phase:
+
+```tsx
+<Scene.Node
+  id="related-note"
+  frame={...}
+  orbit={{
+    centerX: 175,
+    centerY: 245,
+    radiusX: 165,
+    radiusY: 75,
+    rotationDegrees: -50,
+    phase: 0.84,
+    frontPhase: 0.18,
+    duration: 16000,
+    minScale: 0.76,
+    maxScale: 1.16,
+    backZIndex: 3,
+    frontZIndex: 8,
+  }}
+>
+  <RelatedNote />
+</Scene.Node>
+```
+
+`radiusX` and `radiusY` define the ellipse before `rotationDegrees` tilts it. `phase` places the
+node on that ellipse, while `frontPhase` independently selects where the node reaches its maximum
+scale, opacity, and z-index. All orbital nodes in the active scene read the same normalized
+progress SharedValue. Containers can therefore mount together while `contentEntering` staggers
+only their visual reveal; every hidden child is already moving before it appears, without orbital
+drift. The first orbital node supplies the shared `duration` and optional `startDelay`.
 
 The gesture detector is attached to the animated visual node rather than its stable outer
 container. Scale-mode nodes therefore use their current translated, rotated, and scaled hit area;

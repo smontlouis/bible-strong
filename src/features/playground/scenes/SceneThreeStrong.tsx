@@ -5,12 +5,13 @@ import type { TFunction } from 'i18next'
 import { useState } from 'react'
 import { ActivityIndicator, Pressable } from 'react-native'
 import Carousel, { Pagination, type TAnimationStyle } from 'react-native-reanimated-carousel'
-import { Extrapolation, FadeInUp, interpolate, type SharedValue } from 'react-native-reanimated'
+import { Extrapolation, interpolate, type SharedValue } from 'react-native-reanimated'
 
-import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
+import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
 
@@ -295,28 +296,7 @@ type SceneThreeBackgroundProps = {
 }
 
 const SceneThreeBackground = ({ metrics, reduceMotion }: SceneThreeBackgroundProps) => (
-  <Box flex width="100%" overflow="visible">
-    <AnimatedBox
-      position="absolute"
-      left={metrics.s(310)}
-      top={metrics.s(30)}
-      entering={reduceMotion ? undefined : FadeInUp.springify().delay(300)}
-    >
-      <Text color="secondary" fontSize={metrics.s(18)} bold>
-        +
-      </Text>
-    </AnimatedBox>
-    <AnimatedBox
-      position="absolute"
-      left={metrics.s(18)}
-      top={metrics.s(400)}
-      entering={reduceMotion ? undefined : FadeInUp.springify().delay(420)}
-    >
-      <Text color="primary" fontSize={metrics.s(14)} bold>
-        +
-      </Text>
-    </AnimatedBox>
-  </Box>
+  <SceneDecorativePluses metrics={metrics} reduceMotion={reduceMotion} scene="three" />
 )
 
 type CreateSceneThreeStrongProps = SceneThreeBackgroundProps & {

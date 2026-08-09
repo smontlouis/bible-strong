@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
 import {
   Extrapolation,
-  FadeInUp,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
@@ -15,6 +14,7 @@ import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
 
@@ -607,26 +607,7 @@ export const createSceneFourOccurrences = ({
         </OccurrenceVerseCard>
       </Scene.Node>
 
-      <AnimatedBox
-        position="absolute"
-        left={metrics.s(14)}
-        top={metrics.s(205)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(520)}
-      >
-        <Text color="primary" bold fontSize={metrics.s(18)}>
-          +
-        </Text>
-      </AnimatedBox>
-      <AnimatedBox
-        position="absolute"
-        left={metrics.s(324)}
-        top={metrics.s(214)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(640)}
-      >
-        <Text color="primary" bold fontSize={metrics.s(14)}>
-          +
-        </Text>
-      </AnimatedBox>
+      <SceneDecorativePluses metrics={metrics} reduceMotion={reduceMotion} scene="four" />
     </Scene>
   )
 }

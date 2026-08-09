@@ -7,8 +7,6 @@ import { useTranslation } from 'react-i18next'
 import Animated, {
   Extrapolation,
   FadeIn,
-  FadeInDown,
-  FadeInUp,
   interpolate,
   interpolateColor,
   useAnimatedStyle,
@@ -18,13 +16,13 @@ import Animated, {
 } from 'react-native-reanimated'
 
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
-import Text from '~common/ui/Text'
 import {
   DESIGN_CONTENT_WIDTH,
   DESIGN_STAGE_HEIGHT,
   type OnboardingStageMetrics,
 } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { HIGHLIGHT_COLORS, type HighlightColor } from '../onboarding/VerseCard'
 
@@ -172,36 +170,7 @@ export const SceneOneVerseHighlightBackground = ({ reduceMotion, metrics }: Scen
         left={s(252)}
         entering={reduceMotion ? undefined : FadeIn.springify().delay(220)}
       />
-      <AnimatedBox
-        position="absolute"
-        top={s(38)}
-        left={s(302)}
-        entering={reduceMotion ? undefined : FadeInDown.springify().delay(340)}
-      >
-        <Text color="secondary" fontSize={s(19)} bold>
-          +
-        </Text>
-      </AnimatedBox>
-      <AnimatedBox
-        position="absolute"
-        top={s(342)}
-        left={s(8)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(430)}
-      >
-        <Text color="primary" fontSize={s(16)} bold>
-          +
-        </Text>
-      </AnimatedBox>
-      <AnimatedBox
-        position="absolute"
-        top={s(390)}
-        left={s(326)}
-        entering={reduceMotion ? undefined : FadeInUp.springify().delay(510)}
-      >
-        <Text color="secondary" fontSize={s(11)} bold>
-          +
-        </Text>
-      </AnimatedBox>
+      <SceneDecorativePluses metrics={metrics} reduceMotion={reduceMotion} scene="one" />
     </Box>
   )
 }

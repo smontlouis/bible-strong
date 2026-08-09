@@ -72,7 +72,7 @@ export const SourceCard = ({
 
 type ShakableSourceCardProps = {
   metrics: OnboardingStageMetrics
-  shakeRotation: SharedValue<number>
+  shakeRotation?: SharedValue<number>
   t: TFunction
 }
 

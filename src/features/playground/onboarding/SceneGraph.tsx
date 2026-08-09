@@ -14,6 +14,7 @@ import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import {
   cancelAnimation,
   createAnimatedComponent,
+  Easing,
   FadeIn,
   FadeOut,
   type EntryOrExitLayoutType,
@@ -23,8 +24,10 @@ import {
   useSharedValue,
   withDecay,
   withDelay,
+  withRepeat,
   withSequence,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated'
 import Svg, { Path, type PathProps } from 'react-native-svg'
 import { runOnJS } from 'react-native-worklets'
@@ -42,6 +45,25 @@ export type SceneNodeAnchor = {
 export type SceneNodeOffset = {
   x: number
   y: number
+}
+
+export type SceneNodeOrbit = {
+  centerX: number
+  centerY: number
+  radiusX: number
+  radiusY: number
+  rotationDegrees?: number
+  phase: number
+  frontPhase?: number
+  duration: number
+  startDelay?: number
+  direction?: 1 | -1
+  minScale?: number
+  maxScale?: number
+  minOpacity?: number
+  maxOpacity?: number
+  backZIndex?: number
+  frontZIndex?: number
 }
 
 export type SceneNodeFrame = {
@@ -77,6 +99,11 @@ type SceneNodeProps = {
   contentEntering?: EntryOrExitLayoutType | false
   contentExiting?: EntryOrExitLayoutType | false
   layout?: SceneLayoutMode
+  transitionDelay?: number
+  transitionDuration?: number
+  opacityTransitionDelay?: number
+  opacityTransitionDuration?: number
+  orbit?: SceneNodeOrbit
   enterDelay?: number
   enterFrom?: SceneNodeOffset
   exitTo?: SceneNodeOffset
@@ -151,6 +178,7 @@ type NodeGeometry = {
 
 type NodeRendererProps = {
   descriptor: NodeDescriptor
+  orbitProgress: SharedValue<number>
   metrics: OnboardingStageMetrics
   reduceMotion: boolean
   geometries: React.MutableRefObject<Map<string, NodeGeometry>>
@@ -287,8 +315,12 @@ const compileScenes = (children: ReactNode) =>
     return [compileScene(child)]
   })
 
-const withSceneSpring = (value: number, reduceMotion: boolean) =>
-  reduceMotion ? value : withSpring(value)
+const withSceneSpring = (value: number, reduceMotion: boolean, delay = 0, duration?: number) => {
+  if (reduceMotion) return value
+
+  const animation = duration === undefined ? withSpring(value) : withSpring(value, { duration })
+  return delay > 0 ? withDelay(delay, animation) : animation
+}
 
 const resolveDragLimits = (
   x: SharedValue<number>,
@@ -368,6 +400,7 @@ const resistDecayVelocity = (
 
 const NodeRenderer = ({
   descriptor,
+  orbitProgress,
   metrics,
   reduceMotion,
   geometries,
@@ -416,31 +449,68 @@ const NodeRenderer = ({
 
   useEffect(() => {
     const mode = descriptor.layout ?? 'auto'
+    const transitionDelay = descriptor.transitionDelay ?? 0
+    const transitionDuration = descriptor.transitionDuration
     const shouldResize =
       mode === 'resize' ||
       (mode === 'auto' &&
         (descriptor.frame.width !== initialFrame.width ||
           descriptor.frame.height !== initialFrame.height))
 
-    x.set(withSceneSpring(descriptor.frame.x, reduceMotion))
-    y.set(withSceneSpring(descriptor.frame.y, reduceMotion))
-    width.set(
-      withSceneSpring(shouldResize ? descriptor.frame.width : initialFrame.width, reduceMotion)
-    )
-    height.set(
-      withSceneSpring(shouldResize ? descriptor.frame.height : initialFrame.height, reduceMotion)
-    )
+    x.set(withSceneSpring(descriptor.frame.x, reduceMotion, transitionDelay, transitionDuration))
+    y.set(withSceneSpring(descriptor.frame.y, reduceMotion, transitionDelay, transitionDuration))
+    if (mode === 'scale') {
+      cancelAnimation(width)
+      cancelAnimation(height)
+    } else {
+      width.set(
+        withSceneSpring(
+          shouldResize ? descriptor.frame.width : initialFrame.width,
+          reduceMotion,
+          transitionDelay,
+          transitionDuration
+        )
+      )
+      height.set(
+        withSceneSpring(
+          shouldResize ? descriptor.frame.height : initialFrame.height,
+          reduceMotion,
+          transitionDelay,
+          transitionDuration
+        )
+      )
+    }
     scale.set(
       withSceneSpring(
         mode === 'position' || shouldResize ? 1 : (descriptor.frame.scale ?? 1),
-        reduceMotion
+        reduceMotion,
+        transitionDelay,
+        transitionDuration
       )
     )
-    rotation.set(withSceneSpring(descriptor.frame.rotation ?? 0, reduceMotion))
-    opacity.set(withSceneSpring(descriptor.frame.opacity ?? 1, reduceMotion))
+    rotation.set(
+      withSceneSpring(
+        descriptor.frame.rotation ?? 0,
+        reduceMotion,
+        transitionDelay,
+        transitionDuration
+      )
+    )
+    opacity.set(
+      withSceneSpring(
+        descriptor.frame.opacity ?? 1,
+        reduceMotion,
+        descriptor.opacityTransitionDelay ?? transitionDelay,
+        descriptor.opacityTransitionDuration ?? transitionDuration
+      )
+    )
   }, [
     descriptor.frame,
     descriptor.layout,
+    descriptor.opacityTransitionDelay,
+    descriptor.opacityTransitionDuration,
+    descriptor.transitionDelay,
+    descriptor.transitionDuration,
     height,
     initialFrame,
     opacity,
@@ -457,17 +527,64 @@ const NodeRenderer = ({
     const resolvedDragY = dragY.get()
     const safeDragX = Number.isFinite(resolvedDragX) ? resolvedDragX : 0
     const safeDragY = Number.isFinite(resolvedDragY) ? resolvedDragY : 0
+    const orbit = descriptor.orbit
+    let orbitTranslateX = 0
+    let orbitTranslateY = 0
+    let orbitScale = 1
+    let orbitOpacity = 1
+
+    if (orbit) {
+      const progress = reduceMotion ? 0 : orbitProgress.get()
+      const orbitPhase = orbit.phase + progress * (orbit.direction ?? 1)
+      const angle = orbitPhase * Math.PI * 2
+      const rotationRadians = ((orbit.rotationDegrees ?? 0) * Math.PI) / 180
+      const ellipseX = Math.cos(angle) * orbit.radiusX
+      const ellipseY = Math.sin(angle) * orbit.radiusY
+      const targetCenterX =
+        orbit.centerX + ellipseX * Math.cos(rotationRadians) - ellipseY * Math.sin(rotationRadians)
+      const targetCenterY =
+        orbit.centerY + ellipseX * Math.sin(rotationRadians) + ellipseY * Math.cos(rotationRadians)
+      const depthAngle = (orbitPhase - (orbit.frontPhase ?? 0.25)) * Math.PI * 2
+      const depth = (Math.cos(depthAngle) + 1) / 2
+      const nodeCenterX = x.get() + width.get() / 2
+      const nodeCenterY = y.get() + height.get() / 2
+      orbitTranslateX = targetCenterX - nodeCenterX
+      orbitTranslateY = targetCenterY - nodeCenterY
+      orbitScale =
+        (orbit.minScale ?? 0.78) + depth * ((orbit.maxScale ?? 1.14) - (orbit.minScale ?? 0.78))
+      orbitOpacity =
+        (orbit.minOpacity ?? 0.78) + depth * ((orbit.maxOpacity ?? 1) - (orbit.minOpacity ?? 0.78))
+    }
 
     return {
-      opacity: opacity.get(),
+      opacity: opacity.get() * orbitOpacity,
       width: width.get() * metrics.scale,
       height: height.get() * metrics.scale,
       transform: [
-        { translateX: (x.get() - initialFrame.x + safeDragX) * metrics.scale },
-        { translateY: (y.get() - initialFrame.y + safeDragY) * metrics.scale },
+        {
+          translateX: (x.get() - initialFrame.x + safeDragX + orbitTranslateX) * metrics.scale,
+        },
+        {
+          translateY: (y.get() - initialFrame.y + safeDragY + orbitTranslateY) * metrics.scale,
+        },
         { rotate: `${rotation.get()}deg` },
-        { scale: scale.get() * interactionScale.get() },
+        { scale: scale.get() * interactionScale.get() * orbitScale },
       ],
+    }
+  })
+  const orbitLayerStyle = useAnimatedStyle(() => {
+    const orbit = descriptor.orbit
+    if (!orbit) return { zIndex: descriptor.frame.zIndex ?? 4 }
+
+    const progress = reduceMotion ? 0 : orbitProgress.get()
+    const orbitPhase = orbit.phase + progress * (orbit.direction ?? 1)
+    const depthAngle = (orbitPhase - (orbit.frontPhase ?? 0.25)) * Math.PI * 2
+    const depth = (Math.cos(depthAngle) + 1) / 2
+    const backZIndex = orbit.backZIndex ?? 3
+    const frontZIndex = orbit.frontZIndex ?? 8
+
+    return {
+      zIndex: Math.round(backZIndex + depth * (frontZIndex - backZIndex)),
     }
   })
   const boundsGeometry = descriptor.dragBounds
@@ -676,6 +793,7 @@ const NodeRenderer = ({
       height={initialFrame.height * metrics.scale}
       overflow="visible"
       zIndex={descriptor.frame.zIndex ?? 4}
+      style={orbitLayerStyle}
       entering={reduceMotion ? undefined : resolvedEntering}
       exiting={reduceMotion ? undefined : resolvedExiting}
       pointerEvents={descriptor.pointerEvents === 'none' ? 'none' : 'box-none'}
@@ -829,10 +947,37 @@ export const SceneGraph = ({
   const activeScene = scenes.find(scene => scene.id === activeSceneId)
   const geometries = useRef(new Map<string, NodeGeometry>())
   const [, notifyGeometryChange] = useState(0)
+  const orbitProgress = useSharedValue(0)
 
   if (!activeScene) throw new Error(`Unknown onboarding scene: ${activeSceneId}`)
 
+  const sceneOrbit = activeScene.nodes.find(node => node.orbit)?.orbit
+  const orbitDuration = sceneOrbit?.duration
+  const orbitStartDelay = sceneOrbit?.startDelay ?? 0
   const nodesById = new Map(activeScene.nodes.map(node => [node.id, node]))
+
+  useEffect(() => {
+    cancelAnimation(orbitProgress)
+    orbitProgress.set(0)
+
+    if (orbitDuration === undefined || reduceMotion) return
+
+    orbitProgress.set(
+      withDelay(
+        orbitStartDelay,
+        withRepeat(
+          withTiming(1, {
+            duration: orbitDuration,
+            easing: Easing.linear,
+          }),
+          -1,
+          false
+        )
+      )
+    )
+
+    return () => cancelAnimation(orbitProgress)
+  }, [activeSceneId, orbitDuration, orbitProgress, orbitStartDelay, reduceMotion])
 
   return (
     <Box flex={1} overflow="visible">
@@ -880,6 +1025,7 @@ export const SceneGraph = ({
         <NodeRenderer
           key={node.id}
           descriptor={node}
+          orbitProgress={orbitProgress}
           metrics={metrics}
           reduceMotion={reduceMotion}
           geometries={geometries}
