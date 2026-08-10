@@ -119,6 +119,7 @@ describe('offline setup folders', () => {
     expect(sections.slice(0, -1).flatMap(section => section.options)).toHaveLength(3)
     expect(sections.at(-1)?.options).toHaveLength(9)
     expect(sections.at(-1)?.options.every(option => option.language === 'en')).toBe(true)
+    expect(sections.at(-1)?.collapsedByDefault).toBe(true)
     expect(options.filter(option => option.id === 'bible:LSG')).toHaveLength(1)
   })
 
@@ -147,6 +148,7 @@ describe('offline setup folders', () => {
       'bible-strong:DARBY',
       'bible-strong:KJV',
     ])
+    expect(sections.at(-1)?.collapsedByDefault).toBe(true)
   })
 
   it('expands a Strong Bible into its base, index, and shared lexicon without duplicates', () => {
@@ -183,6 +185,11 @@ describe('offline setup folders', () => {
   it('offers localized exploration resources and keeps biblical entities', () => {
     const sections = getOfflineSetupFolderSections('explore-bible', 'en')
     const options = sections.flatMap(section => section.options)
+    expect(sections.map(section => section.id)).toEqual(['primary-language', 'other-languages'])
+    expect(sections[0]?.options.map(option => option.id)).toEqual(
+      expect.arrayContaining(['database:TRESOR:fr', 'strong-lexicon:entities'])
+    )
+    expect(sections[1]?.collapsedByDefault).toBe(true)
     expect(options.map(option => option.id)).toEqual(
       expect.arrayContaining([
         'database:DICTIONNAIRE:en',
@@ -195,4 +202,22 @@ describe('offline setup folders', () => {
     )
     expect(options.map(option => option.id)).not.toContain('database:MHY:en')
   })
+
+  it.each([
+    ['fr', 'en'],
+    ['en', 'fr'],
+  ] as const)(
+    "collapses the %s interface's other-language interlinear option",
+    (lang, otherLang) => {
+      const sections = getOfflineSetupFolderSections('original-languages', lang)
+      const interlinear = sections.find(section => section.id === 'interlinear')
+      const otherLanguages = sections.find(section => section.id === 'other-languages')
+
+      expect(interlinear?.options.map(option => option.id)).toEqual([`bible-interlinear:${lang}`])
+      expect(otherLanguages?.collapsedByDefault).toBe(true)
+      expect(otherLanguages?.options.map(option => option.id)).toEqual([
+        `bible-interlinear:${otherLang}`,
+      ])
+    }
+  )
 })

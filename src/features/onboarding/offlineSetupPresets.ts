@@ -38,6 +38,7 @@ export type OfflineSetupOption = {
 export type OfflineSetupSection = {
   id: string
   titleKey?: string
+  collapsedByDefault?: boolean
   options: OfflineSetupOption[]
 }
 
@@ -117,6 +118,7 @@ const getBibleFolderCatalogSections = (kind: BibleDefaultSelectionKind, lang: Re
   }).map(section => ({
     key: `style-${section.key}`,
     titleKey: section.title,
+    collapsedByDefault: false,
     data: section.data,
   }))
   const otherLanguagesSection = getVersionCatalogSections({
@@ -133,6 +135,7 @@ const getBibleFolderCatalogSections = (kind: BibleDefaultSelectionKind, lang: Re
         {
           key: 'other-languages',
           titleKey: 'offlineSetup.section.otherLanguages',
+          collapsedByDefault: true,
           data: otherLanguagesSection.data,
         },
       ]
@@ -153,6 +156,7 @@ const getReadableBibleSections = (lang: ResourceLanguage): OfflineSetupSection[]
         result.push({
           id: `bible-${section.key}`,
           titleKey: section.titleKey,
+          collapsedByDefault: section.collapsedByDefault,
           options,
         })
       }
@@ -188,6 +192,7 @@ const getStrongSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
     ...getBibleFolderCatalogSections('strong', lang).map(section => ({
       id: `strong-bible-${section.key}`,
       titleKey: section.titleKey,
+      collapsedByDefault: section.collapsedByDefault,
       options: section.data.map(version =>
         createStrongBibleOption(version.id as StrongBibleVersionId, lang, version.displayName)
       ),
@@ -208,12 +213,8 @@ const getExploreSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
     {
       id: 'primary-language',
       titleKey: 'offlineSetup.section.primaryLanguage',
-      options: primaryDatabaseIds.map(databaseId => createDatabaseOption(databaseId, lang, lang)),
-    },
-    {
-      id: 'shared',
-      titleKey: 'offlineSetup.section.sharedResources',
       options: [
+        ...primaryDatabaseIds.map(databaseId => createDatabaseOption(databaseId, lang, lang)),
         // Cross references use one shared physical copy with a canonical identity.
         createDatabaseOption('TRESOR', 'fr', 'fr'),
         {
@@ -231,6 +232,7 @@ const getExploreSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
     {
       id: 'other-languages',
       titleKey: 'offlineSetup.section.otherLanguages',
+      collapsedByDefault: true,
       options: [
         ...(['DICTIONNAIRE', 'NAVE'] as const),
         ...(otherLang === 'fr' ? (['MHY'] as const) : []),
@@ -239,6 +241,18 @@ const getExploreSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
     },
   ]
 }
+
+const createInterlinearOption = (lang: ResourceLanguage): OfflineSetupOption => ({
+  id: `bible-interlinear:${lang}`,
+  label: '',
+  labelKey: `offlineSetup.option.interlinear.${lang}`,
+  language: lang,
+  requires: ['bible:BHG'],
+  selections: [
+    { kind: 'bible', versionId: 'BHG' },
+    { kind: 'bible-interlinear', lang },
+  ],
+})
 
 const getOriginalLanguageSections = (lang: ResourceLanguage): OfflineSetupSection[] => [
   {
@@ -256,17 +270,13 @@ const getOriginalLanguageSections = (lang: ResourceLanguage): OfflineSetupSectio
   {
     id: 'interlinear',
     titleKey: 'offlineSetup.section.interlinearLanguages',
-    options: (['fr', 'en'] as const).map(resourceLang => ({
-      id: `bible-interlinear:${resourceLang}`,
-      label: '',
-      labelKey: `offlineSetup.option.interlinear.${resourceLang}`,
-      language: resourceLang,
-      requires: ['bible:BHG'],
-      selections: [
-        { kind: 'bible', versionId: 'BHG' },
-        { kind: 'bible-interlinear', lang: resourceLang },
-      ],
-    })),
+    options: [createInterlinearOption(lang)],
+  },
+  {
+    id: 'other-languages',
+    titleKey: 'offlineSetup.section.otherLanguages',
+    collapsedByDefault: true,
+    options: [createInterlinearOption(lang === 'fr' ? 'en' : 'fr')],
   },
   {
     id: 'language-tools',

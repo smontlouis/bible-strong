@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons'
+import { useState } from 'react'
 import { Pressable, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -61,6 +62,16 @@ const OfflineSetupFolderDetail = ({
   const insets = useSafeAreaInsets()
   const selectedIds = new Set(selectedOptionIds)
   const allOptions = sections.flatMap(section => section.options)
+  const [expandedSectionIds, setExpandedSectionIds] = useState<Set<string>>(() => new Set())
+
+  const toggleSection = (sectionId: string) => {
+    setExpandedSectionIds(current => {
+      const next = new Set(current)
+      if (next.has(sectionId)) next.delete(sectionId)
+      else next.add(sectionId)
+      return next
+    })
+  }
 
   const getOptionLabel = (option: OfflineSetupOption): string => {
     if (!option.labelKey) return option.label
@@ -112,85 +123,117 @@ const OfflineSetupFolderDetail = ({
         </Text>
 
         <VStack gap={22}>
-          {sections.map(section => (
-            <VStack key={section.id} gap={8}>
-              {section.titleKey ? (
-                <Text color="#68758C" fontSize={11} bold textTransform="uppercase" px={4}>
-                  {t(section.titleKey)}
-                </Text>
-              ) : null}
-              {section.options.map(option => {
-                const selected = selectedIds.has(option.id)
-                const locked = isOfflineSetupOptionLocked(option, selectedOptionIds, allOptions)
-                const description = getOptionDescription(option)
-                return (
-                  <Pressable
-                    key={option.id}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: selected, disabled: locked }}
-                    accessibilityLabel={getOptionLabel(option)}
-                    onPress={() => onToggleOption(option)}
-                    style={({ pressed }) => ({ opacity: pressed && !locked ? 0.8 : 1 })}
-                  >
-                    <HStack
-                      minHeight={68}
-                      px={14}
-                      py={11}
-                      borderRadius={17}
-                      bg="#FFFFFF"
-                      borderWidth={selected ? 1.5 : 1}
-                      borderColor={selected ? visual.colors.frontEnd : '#E6EAF2'}
-                      alignItems="center"
-                      gap={12}
+          {sections.map(section => {
+            const collapsed = Boolean(
+              section.collapsedByDefault && !expandedSectionIds.has(section.id)
+            )
+            return (
+              <VStack key={section.id} gap={8}>
+                {section.titleKey ? (
+                  section.collapsedByDefault ? (
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={t(section.titleKey)}
+                      accessibilityState={{ expanded: !collapsed }}
+                      onPress={() => toggleSection(section.id)}
+                      hitSlop={8}
                     >
-                      <Box flex>
-                        <HStack alignItems="center" gap={7} wrap>
-                          <Text title fontSize={14} lineHeight={18} style={{ flexShrink: 1 }}>
-                            {getOptionLabel(option)}
-                          </Text>
-                          {locked ? (
-                            <Box px={7} py={3} borderRadius={9} bg={visual.colors.back}>
-                              <Text color={visual.colors.icon} fontSize={9} bold>
-                                {t(
-                                  option.required
-                                    ? 'offlineSetup.requiredBadge'
-                                    : 'offlineSetup.includedBadge'
-                                )}
+                      <HStack alignItems="center" justifyContent="space-between" px={4} py={4}>
+                        <Text color="#68758C" fontSize={11} bold textTransform="uppercase">
+                          {t(section.titleKey)}
+                        </Text>
+                        <Feather
+                          name={collapsed ? 'chevron-right' : 'chevron-down'}
+                          size={17}
+                          color="#68758C"
+                        />
+                      </HStack>
+                    </Pressable>
+                  ) : (
+                    <Text color="#68758C" fontSize={11} bold textTransform="uppercase" px={4}>
+                      {t(section.titleKey)}
+                    </Text>
+                  )
+                ) : null}
+                {collapsed
+                  ? null
+                  : section.options.map(option => {
+                      const selected = selectedIds.has(option.id)
+                      const locked = isOfflineSetupOptionLocked(
+                        option,
+                        selectedOptionIds,
+                        allOptions
+                      )
+                      const description = getOptionDescription(option)
+                      return (
+                        <Pressable
+                          key={option.id}
+                          accessibilityRole="checkbox"
+                          accessibilityState={{ checked: selected, disabled: locked }}
+                          accessibilityLabel={getOptionLabel(option)}
+                          onPress={() => onToggleOption(option)}
+                          style={({ pressed }) => ({ opacity: pressed && !locked ? 0.8 : 1 })}
+                        >
+                          <HStack
+                            minHeight={68}
+                            px={14}
+                            py={11}
+                            borderRadius={17}
+                            bg="#FFFFFF"
+                            borderWidth={selected ? 1.5 : 1}
+                            borderColor={selected ? visual.colors.frontEnd : '#E6EAF2'}
+                            alignItems="center"
+                            gap={12}
+                          >
+                            <Box flex>
+                              <HStack alignItems="center" gap={7} wrap>
+                                <Text title fontSize={14} lineHeight={18} style={{ flexShrink: 1 }}>
+                                  {getOptionLabel(option)}
+                                </Text>
+                                {locked ? (
+                                  <Box px={7} py={3} borderRadius={9} bg={visual.colors.back}>
+                                    <Text color={visual.colors.icon} fontSize={9} bold>
+                                      {t(
+                                        option.required
+                                          ? 'offlineSetup.requiredBadge'
+                                          : 'offlineSetup.includedBadge'
+                                      )}
+                                    </Text>
+                                  </Box>
+                                ) : null}
+                              </HStack>
+                              {description ? (
+                                <Text
+                                  color="#748096"
+                                  fontSize={11}
+                                  lineHeight={15}
+                                  mt={3}
+                                  numberOfLines={2}
+                                >
+                                  {description}
+                                </Text>
+                              ) : null}
+                              <Text color="#8A94A7" fontSize={10} mt={4}>
+                                {formatResourceSize(getOptionBytes(option), lang)}
                               </Text>
                             </Box>
-                          ) : null}
-                        </HStack>
-                        {description ? (
-                          <Text
-                            color="#748096"
-                            fontSize={11}
-                            lineHeight={15}
-                            mt={3}
-                            numberOfLines={2}
-                          >
-                            {description}
-                          </Text>
-                        ) : null}
-                        <Text color="#8A94A7" fontSize={10} mt={4}>
-                          {formatResourceSize(getOptionBytes(option), lang)}
-                        </Text>
-                      </Box>
-                      <Box
-                        size={22}
-                        borderRadius={11}
-                        borderWidth={1.5}
-                        borderColor={selected ? visual.colors.frontEnd : '#C8CFDA'}
-                        bg={selected ? visual.colors.frontEnd : '#FFFFFF'}
-                        center
-                      >
-                        {selected ? <Feather name="check" size={13} color="#FFFFFF" /> : null}
-                      </Box>
-                    </HStack>
-                  </Pressable>
-                )
-              })}
-            </VStack>
-          ))}
+                            <Box
+                              size={22}
+                              borderRadius={11}
+                              borderWidth={1.5}
+                              borderColor={selected ? visual.colors.frontEnd : '#C8CFDA'}
+                              bg={selected ? visual.colors.frontEnd : '#FFFFFF'}
+                              center
+                            >
+                              {selected ? <Feather name="check" size={13} color="#FFFFFF" /> : null}
+                            </Box>
+                          </HStack>
+                        </Pressable>
+                      )
+                    })}
+              </VStack>
+            )
+          })}
         </VStack>
       </ScrollView>
 
