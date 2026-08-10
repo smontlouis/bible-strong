@@ -105,15 +105,15 @@ describe('offline setup folders', () => {
     expect(options.map(option => option.id)).not.toContain('bible:BHG')
     expect(sections.map(section => section.titleKey)).toEqual([
       undefined,
-      'versionCatalog.style.wordForWord',
-      'versionCatalog.style.balanced',
       'offlineSetup.section.otherLanguages',
     ])
-    expect(sections[0]?.options.map(option => option.id)).toEqual(['bible:LSG'])
+    expect(sections[0]?.options.map(option => option.id)).toEqual([
+      'bible:LSG',
+      'bible:DBY',
+      'bible:DBR',
+    ])
     expect(sections[0]?.options[0]?.required).toBe(true)
-    expect(sections[1]?.options.map(option => option.id)).toEqual(['bible:DBY'])
-    expect(sections[2]?.options.map(option => option.id)).toEqual(['bible:DBR'])
-    expect(sections[3]?.options.map(option => option.id)).toEqual(
+    expect(sections[1]?.options.map(option => option.id)).toEqual(
       expect.arrayContaining(['bible:ASV', 'bible:KJV', 'bible:RLT'])
     )
     expect(sections.slice(0, -1).flatMap(section => section.options)).toHaveLength(3)
@@ -128,7 +128,7 @@ describe('offline setup folders', () => {
     const options = sections.flatMap(section => section.options)
 
     expect(sections[0]?.titleKey).toBeUndefined()
-    expect(sections[0]?.options.map(option => option.id)).toEqual(['bible:KJV'])
+    expect(sections[0]?.options[0]?.id).toBe('bible:KJV')
     expect(sections[0]?.options[0]?.required).toBe(true)
     expect(options.filter(option => option.id === 'bible:KJV')).toHaveLength(1)
   })
@@ -137,13 +137,11 @@ describe('offline setup folders', () => {
     const sections = getOfflineSetupFolderSections('understand-words', 'en')
 
     expect(sections.map(section => section.titleKey)).toEqual([
-      'offlineSetup.section.sharedTools',
-      'versionCatalog.style.wordForWord',
-      'versionCatalog.style.balanced',
-      'versionCatalog.style.thoughtForThought',
+      undefined,
       'offlineSetup.section.otherLanguages',
     ])
-    expect(sections[1]?.options.slice(0, 3).map(option => option.id)).toEqual([
+    expect(sections[0]?.options.slice(0, 4).map(option => option.id)).toEqual([
+      'strong-lexicon:core',
       'bible-strong:ASV',
       'bible-strong:DARBY',
       'bible-strong:KJV',
@@ -185,7 +183,7 @@ describe('offline setup folders', () => {
   it('offers localized exploration resources and keeps biblical entities', () => {
     const sections = getOfflineSetupFolderSections('explore-bible', 'en')
     const options = sections.flatMap(section => section.options)
-    expect(sections.map(section => section.id)).toEqual(['primary-language', 'other-languages'])
+    expect(sections.map(section => section.id)).toEqual(['resources', 'other-languages'])
     expect(sections[0]?.options.map(option => option.id)).toEqual(
       expect.arrayContaining(['database:TRESOR:fr', 'strong-lexicon:entities'])
     )
@@ -210,14 +208,33 @@ describe('offline setup folders', () => {
     "collapses the %s interface's other-language interlinear option",
     (lang, otherLang) => {
       const sections = getOfflineSetupFolderSections('original-languages', lang)
-      const interlinear = sections.find(section => section.id === 'interlinear')
+      const resources = sections.find(section => section.id === 'resources')
       const otherLanguages = sections.find(section => section.id === 'other-languages')
 
-      expect(interlinear?.options.map(option => option.id)).toEqual([`bible-interlinear:${lang}`])
+      expect(resources?.titleKey).toBeUndefined()
+      expect(resources?.options.map(option => option.id)).toEqual(
+        expect.arrayContaining([
+          'bible:BHG',
+          'strong-lexicon:core',
+          'strong-lexicon:resources',
+          `bible-interlinear:${lang}`,
+        ])
+      )
       expect(otherLanguages?.collapsedByDefault).toBe(true)
       expect(otherLanguages?.options.map(option => option.id)).toEqual([
         `bible-interlinear:${otherLang}`,
       ])
+    }
+  )
+
+  it.each(['read-bible', 'understand-words', 'explore-bible', 'original-languages'] as const)(
+    'keeps only Other languages as a titled section in %s',
+    folderId => {
+      const sections = getOfflineSetupFolderSections(folderId, 'fr')
+
+      expect(sections.filter(section => section.titleKey).map(section => section.titleKey)).toEqual(
+        ['offlineSetup.section.otherLanguages']
+      )
     }
   )
 })

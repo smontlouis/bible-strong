@@ -208,7 +208,7 @@ const OfflineSetupFolderDetail = ({
                                   fontSize={11}
                                   lineHeight={15}
                                   mt={3}
-                                  numberOfLines={2}
+                                  numberOfLines={1}
                                 >
                                   {description}
                                 </Text>

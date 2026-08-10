@@ -154,7 +154,7 @@ const getReadableBibleSections = (lang: ResourceLanguage): OfflineSetupSection[]
       }, [])
       if (options.length) {
         result.push({
-          id: `bible-${section.key}`,
+          id: section.key === 'other-languages' ? 'other-languages' : `bible-${section.key}`,
           titleKey: section.titleKey,
           collapsedByDefault: section.collapsedByDefault,
           options,
@@ -190,7 +190,7 @@ const getStrongSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
       ],
     },
     ...getBibleFolderCatalogSections('strong', lang).map(section => ({
-      id: `strong-bible-${section.key}`,
+      id: section.key === 'other-languages' ? 'other-languages' : `strong-bible-${section.key}`,
       titleKey: section.titleKey,
       collapsedByDefault: section.collapsedByDefault,
       options: section.data.map(version =>
@@ -265,23 +265,6 @@ const getOriginalLanguageSections = (lang: ResourceLanguage): OfflineSetupSectio
         description: versions.BHG.c,
         selections: [{ kind: 'bible', versionId: 'BHG' }],
       },
-    ],
-  },
-  {
-    id: 'interlinear',
-    titleKey: 'offlineSetup.section.interlinearLanguages',
-    options: [createInterlinearOption(lang)],
-  },
-  {
-    id: 'other-languages',
-    titleKey: 'offlineSetup.section.otherLanguages',
-    collapsedByDefault: true,
-    options: [createInterlinearOption(lang === 'fr' ? 'en' : 'fr')],
-  },
-  {
-    id: 'language-tools',
-    titleKey: 'offlineSetup.section.sharedTools',
-    options: [
       {
         id: 'strong-lexicon:core',
         label: '',
@@ -302,7 +285,33 @@ const getOriginalLanguageSections = (lang: ResourceLanguage): OfflineSetupSectio
       },
     ],
   },
+  {
+    id: 'interlinear',
+    titleKey: 'offlineSetup.section.interlinearLanguages',
+    options: [createInterlinearOption(lang)],
+  },
+  {
+    id: 'other-languages',
+    titleKey: 'offlineSetup.section.otherLanguages',
+    collapsedByDefault: true,
+    options: [createInterlinearOption(lang === 'fr' ? 'en' : 'fr')],
+  },
 ]
+
+const flattenResourceSections = (sections: OfflineSetupSection[]): OfflineSetupSection[] => {
+  const options: OfflineSetupOption[] = []
+  let otherLanguages: OfflineSetupSection | undefined
+
+  for (const section of sections) {
+    if (section.id === 'other-languages') {
+      otherLanguages = section
+    } else {
+      options.push(...section.options)
+    }
+  }
+
+  return [{ id: 'resources', options }, ...(otherLanguages ? [otherLanguages] : [])]
+}
 
 export const getOfflineSetupFolderSections = (
   folderId: OfflineSetupFolderId,
@@ -310,13 +319,13 @@ export const getOfflineSetupFolderSections = (
 ): OfflineSetupSection[] => {
   switch (folderId) {
     case 'read-bible':
-      return getReadableBibleSections(lang)
+      return flattenResourceSections(getReadableBibleSections(lang))
     case 'understand-words':
-      return getStrongSections(lang)
+      return flattenResourceSections(getStrongSections(lang))
     case 'explore-bible':
-      return getExploreSections(lang)
+      return flattenResourceSections(getExploreSections(lang))
     case 'original-languages':
-      return getOriginalLanguageSections(lang)
+      return flattenResourceSections(getOriginalLanguageSections(lang))
   }
 }
 
