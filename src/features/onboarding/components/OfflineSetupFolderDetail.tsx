@@ -110,6 +110,7 @@ const OfflineSetupFolderDetail = ({
 
         <Box width={190} height={172} alignSelf="center" mt={24}>
           <OfflineResourceFolder
+            width={190}
             title={t(`offlineSetup.presets.${folderId}.title`)}
             subtitle={t('offlineSetup.selectedCount', { count: selectedOptionIds.length })}
             icon={visual.icon}

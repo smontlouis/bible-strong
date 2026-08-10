@@ -83,6 +83,7 @@ const SelectResources = (props: SelectResourcesProps) => {
   const [availableSelectionIds, setAvailableSelectionIds] = useState<Set<string>>(new Set())
   const [checkedSelectionKey, setCheckedSelectionKey] = useState<string>()
   const contentWidth = Math.min(350, width - 40)
+  const folderWidth = (contentWidth - 50) / 2
   const folderOptionIdsKey = JSON.stringify(folderOptionIds)
   const selections = resolveOfflineSetupFolderOptionIds(folderOptionIds, lang)
   const missingSelections = selections.filter(
@@ -281,12 +282,13 @@ const SelectResources = (props: SelectResourcesProps) => {
 
         <VStack gap={38}>
           {[0, 2].map(startIndex => (
-            <HStack key={startIndex} gap={10}>
+            <HStack key={startIndex} gap={10} px={20}>
               {FOLDER_VISUALS.slice(startIndex, startIndex + 2).map(visual => {
                 const count = folderOptionIds[visual.id].length
                 return (
                   <OfflineResourceFolder
                     key={visual.id}
+                    width={folderWidth}
                     title={t(`offlineSetup.presets.${visual.id}.title`)}
                     subtitle={t(
                       visual.id === 'read-bible'
