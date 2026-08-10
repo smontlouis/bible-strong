@@ -1,164 +1,395 @@
-import { useAtom } from 'jotai/react'
-import React, { useEffect } from 'react'
+import { Feather } from '@expo/vector-icons'
+import { useAtom, useSetAtom } from 'jotai/react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SectionList } from 'react-native'
-import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
-import Button from '~common/ui/Button'
-import Container from '~common/ui/Container'
-import Paragraph from '~common/ui/Paragraph'
-import Text from '~common/ui/Text'
-import { getVersionsBySections } from '~helpers/bibleVersions'
-import useLanguage from '~helpers/useLanguage'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import {
-  getStrongBiblePublication,
-  isStrongCapableBibleVersion,
-  type StrongBibleVersionId,
-} from '~helpers/strongBiblePublications'
-import { selectedResourcesAtom } from './atom'
-import {
-  getDefaultOnboardingResourceSelection,
-  getOnboardingDatabaseResourceOptions,
-  getOnboardingResourceSelectionId,
-  toggleOnboardingResourceSelection,
-  type OnboardingResourceSelection,
-} from './onboardingResources'
-import ResourceItem from './ResourceItem'
-import { getStrongLexiconPublication } from '~helpers/strongLexiconPublications'
+import { Pressable, ScrollView, useWindowDimensions } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) => {
+import Box, { HStack, VStack } from '~common/ui/Box'
+import Text from '~common/ui/Text'
+import { isLocalResourceAvailable } from '~features/resources/resourceAvailability'
+import useLanguage from '~helpers/useLanguage'
+import {
+  createDownloadItemFromOnboardingSelection,
+  getOnboardingResourceIdentity,
+  getOnboardingResourceSelectionId,
+} from './onboardingResources'
+import {
+  getOfflineSetupPresetSelections,
+  resolveOfflineSetupSelections,
+  type OfflineSetupPresetId,
+} from './offlineSetupPresets'
+import OfflineResourceFolder from './components/OfflineResourceFolder'
+import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
+
+type SelectResourcesProps = {
+  setStep: React.Dispatch<React.SetStateAction<number>>
+}
+
+type PresetVisual = {
+  id: OfflineSetupPresetId
+  icon: React.ComponentProps<typeof Feather>['name']
+  colors: {
+    back: string
+    frontStart: string
+    frontEnd: string
+    icon: string
+  }
+}
+
+const PRESET_VISUALS: PresetVisual[] = [
+  {
+    id: 'read-bible',
+    icon: 'book-open',
+    colors: { back: '#C9DAFF', frontStart: '#76A0FA', frontEnd: '#5983F0', icon: '#5983F0' },
+  },
+  {
+    id: 'understand-words',
+    icon: 'type',
+    colors: { back: '#E0C8F8', frontStart: '#B578EE', frontEnd: '#9654D8', icon: '#9654D8' },
+  },
+  {
+    id: 'explore-bible',
+    icon: 'share-2',
+    colors: { back: '#FAD9A8', frontStart: '#F8B663', frontEnd: '#EE9D39', icon: '#D97D18' },
+  },
+  {
+    id: 'original-languages',
+    icon: 'globe',
+    colors: { back: '#F7C7D1', frontStart: '#EB879C', frontEnd: '#DD617C', icon: '#D84D6D' },
+  },
+]
+
+const DETAIL_KEYS: Record<OfflineSetupPresetId, string[]> = {
+  'read-bible': ['bible'],
+  'understand-words': ['bible', 'strongIndex', 'strongLexicon', 'dictionary'],
+  'explore-bible': [
+    'nave',
+    'crossReferences',
+    'commentaries',
+    'timeline',
+    'strongFoundation',
+    'entities',
+  ],
+  'original-languages': ['originalBible', 'interlinear', 'strongLexicon', 'greekDictionary'],
+}
+
+const formatMegabytes = (bytes: number, lang: string): string => {
+  const value = bytes / 1_000_000
+  return `${new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }).format(value)} ${
+    lang === 'fr' ? 'Mo' : 'MB'
+  }`
+}
+
+const SelectResources = ({ setStep }: SelectResourcesProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
-  const databases = getOnboardingDatabaseResourceOptions(lang)
-  const [selectedResources, setSelectedResources] = useAtom(selectedResourcesAtom)
+  const insets = useSafeAreaInsets()
+  const { width } = useWindowDimensions()
+  const [, setSelectedResources] = useAtom(selectedResourcesAtom)
+  const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
+  const [selectedPresets, setSelectedPresets] = useState<Set<OfflineSetupPresetId>>(
+    new Set(['read-bible'])
+  )
+  const [activePreset, setActivePreset] = useState<OfflineSetupPresetId>()
+  const [installedBytes, setInstalledBytes] = useState(0)
+  const [availableSelectionIds, setAvailableSelectionIds] = useState<Set<string>>(new Set())
+  const [checkedSelectionKey, setCheckedSelectionKey] = useState<string>()
+  const contentWidth = Math.min(350, width - 40)
+  const selectedPresetKey = Array.from(selectedPresets).sort().join(',')
+  const selections = resolveOfflineSetupSelections(selectedPresets, lang)
+  const missingSelections = selections.filter(
+    selection => !availableSelectionIds.has(getOnboardingResourceSelectionId(selection))
+  )
+  const downloadBytes = missingSelections.reduce(
+    (total, selection) =>
+      total + createDownloadItemFromOnboardingSelection(selection).estimatedSize,
+    0
+  )
 
-  // Set default version
   useEffect(() => {
-    setSelectedResources([getDefaultOnboardingResourceSelection(lang)])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    let cancelled = false
+    const currentSelections = resolveOfflineSetupSelections(
+      selectedPresetKey ? (selectedPresetKey.split(',') as OfflineSetupPresetId[]) : [],
+      lang
+    )
 
-  const onPressItem = (resource: OnboardingResourceSelection) => {
-    setSelectedResources(res => toggleOnboardingResourceSelection(res, resource))
+    Promise.all(
+      currentSelections.map(async selection => ({
+        selection,
+        available: await isLocalResourceAvailable(getOnboardingResourceIdentity(selection)),
+      }))
+    )
+      .then(results => {
+        if (cancelled) return
+        setInstalledBytes(
+          results.reduce(
+            (total, result) =>
+              total +
+              (result.available
+                ? createDownloadItemFromOnboardingSelection(result.selection).estimatedSize
+                : 0),
+            0
+          )
+        )
+        setAvailableSelectionIds(
+          new Set(
+            results
+              .filter(result => result.available)
+              .map(result => getOnboardingResourceSelectionId(result.selection))
+          )
+        )
+        setCheckedSelectionKey(selectedPresetKey)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setInstalledBytes(0)
+          setAvailableSelectionIds(new Set())
+          setCheckedSelectionKey(selectedPresetKey)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [lang, selectedPresetKey])
+
+  const togglePreset = (presetId: OfflineSetupPresetId) => {
+    // The current production reader still requires its primary Bible locally.
+    if (presetId === 'read-bible') return
+    setSelectedPresets(current => {
+      const next = new Set(current)
+      if (next.has(presetId)) next.delete(presetId)
+      else next.add(presetId)
+      return next
+    })
   }
 
-  const isSelected = (resource: OnboardingResourceSelection) => {
-    const resourceId = getOnboardingResourceSelectionId(resource)
-    return selectedResources.some(r => getOnboardingResourceSelectionId(r) === resourceId)
+  const continueToDownloads = () => {
+    if (checkedSelectionKey !== selectedPresetKey) return
+    if (missingSelections.length === 0) {
+      setIsOnboardingCompleted(true)
+      return
+    }
+    setSelectedResources(missingSelections)
+    setStep(2)
+  }
+
+  const renderManifest = () => (
+    <Box
+      mx={20}
+      mb={Math.max(insets.bottom, 16)}
+      px={14}
+      pt={18}
+      pb={12}
+      borderRadius={36}
+      bg="#172840"
+      style={{ boxShadow: '0 8px 22px rgba(28,51,88,0.18)' }}
+    >
+      <HStack alignItems="center" px={12} gap={14}>
+        <Box size={36} borderRadius={18} bg="#5983F0" center>
+          <Feather name="archive" size={20} color="#FFFFFF" />
+        </Box>
+        <Box flex>
+          <Text color="#B8C2D1" fontSize={11}>
+            {t('offlineSetup.toDownload')}
+          </Text>
+          <Text color="#FFFFFF" fontSize={18} style={{ fontFamily: 'FiraCode' }}>
+            {formatMegabytes(downloadBytes, lang)}
+          </Text>
+        </Box>
+        <Box height={34} width={1} bg="rgba(255,255,255,0.24)" />
+        <Box flex>
+          <Text color="#B8C2D1" fontSize={11}>
+            {t('offlineSetup.onDevice')}
+          </Text>
+          <Text color="#FFFFFF" fontSize={18} style={{ fontFamily: 'FiraCode' }}>
+            {formatMegabytes(installedBytes, lang)}
+          </Text>
+        </Box>
+      </HStack>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('offlineSetup.continue')}
+        disabled={selections.length === 0 || checkedSelectionKey !== selectedPresetKey}
+        onPress={continueToDownloads}
+        style={({ pressed }) => ({
+          opacity:
+            selections.length === 0 || checkedSelectionKey !== selectedPresetKey
+              ? 0.45
+              : pressed
+                ? 0.82
+                : 1,
+        })}
+      >
+        <Box height={56} mt={16} borderRadius={28} bg="#5983F0" center row gap={12}>
+          <Text color="#FFFFFF" title fontSize={16}>
+            {t('offlineSetup.continue')}
+          </Text>
+          <Feather name="arrow-right" size={22} color="#FFFFFF" />
+        </Box>
+      </Pressable>
+    </Box>
+  )
+
+  if (activePreset) {
+    const visual = PRESET_VISUALS.find(item => item.id === activePreset)!
+    const presetSelections = getOfflineSetupPresetSelections(activePreset, lang)
+    const selected = selectedPresets.has(activePreset)
+
+    return (
+      <Box flex bg="#F4F7FF" pt={insets.top}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('offlineSetup.back')}
+            onPress={() => setActivePreset(undefined)}
+            hitSlop={10}
+          >
+            <Box size={44} borderRadius={22} bg="#FFFFFF" center mt={8}>
+              <Feather name="arrow-left" size={21} color="#142033" />
+            </Box>
+          </Pressable>
+
+          <Text title fontSize={34} lineHeight={38} mt={22}>
+            {t(`offlineSetup.presets.${activePreset}.title`)}
+          </Text>
+          <Text color="#68758C" fontSize={15} lineHeight={22} mt={10}>
+            {t(`offlineSetup.presets.${activePreset}.description`)}
+          </Text>
+
+          <Box width={190} height={172} alignSelf="center" mt={24}>
+            <OfflineResourceFolder
+              title={t(`offlineSetup.presets.${activePreset}.title`)}
+              subtitle={t(`offlineSetup.presets.${activePreset}.subtitle`, {
+                count: presetSelections.length,
+              })}
+              icon={visual.icon}
+              selected={selected}
+              colors={visual.colors}
+            />
+          </Box>
+
+          <Text title fontSize={20} mt={26} mb={8}>
+            {t('offlineSetup.included')}
+          </Text>
+          <VStack gap={8}>
+            {(activePreset === 'explore-bible' && lang !== 'fr'
+              ? DETAIL_KEYS[activePreset].filter(key => key !== 'commentaries')
+              : DETAIL_KEYS[activePreset]
+            ).map((key, index) => {
+              const item = createDownloadItemFromOnboardingSelection(presetSelections[index])
+              return (
+                <HStack
+                  key={key}
+                  minHeight={58}
+                  px={14}
+                  py={10}
+                  borderRadius={16}
+                  bg="#FFFFFF"
+                  alignItems="center"
+                  gap={12}
+                >
+                  <Box size={34} borderRadius={11} bg={visual.colors.back} center>
+                    <Feather name="check" size={18} color={visual.colors.icon} />
+                  </Box>
+                  <Box flex>
+                    <Text title fontSize={14}>
+                      {t(`offlineSetup.resources.${key}`)}
+                    </Text>
+                    <Text color="#748096" fontSize={11} mt={2}>
+                      {formatMegabytes(item.estimatedSize, lang)}
+                    </Text>
+                  </Box>
+                </HStack>
+              )
+            })}
+          </VStack>
+        </ScrollView>
+
+        <Box px={20} pb={Math.max(insets.bottom, 16)} pt={10} bg="#F4F7FF">
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => {
+              togglePreset(activePreset)
+              setActivePreset(undefined)
+            }}
+            style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
+          >
+            <Box
+              height={58}
+              borderRadius={29}
+              bg={selected ? '#FFFFFF' : visual.colors.frontEnd}
+              borderWidth={selected ? 1 : 0}
+              borderColor={visual.colors.frontEnd}
+              center
+              row
+              gap={10}
+            >
+              <Feather
+                name={
+                  activePreset === 'read-bible'
+                    ? 'check-circle'
+                    : selected
+                      ? 'minus-circle'
+                      : 'plus-circle'
+                }
+                size={20}
+                color={selected ? visual.colors.frontEnd : '#FFFFFF'}
+              />
+              <Text color={selected ? visual.colors.frontEnd : '#FFFFFF'} title fontSize={16}>
+                {t(
+                  activePreset === 'read-bible'
+                    ? 'offlineSetup.required'
+                    : selected
+                      ? 'offlineSetup.remove'
+                      : 'offlineSetup.add'
+                )}
+              </Text>
+            </Box>
+          </Pressable>
+        </Box>
+      </Box>
+    )
   }
 
   return (
-    <Container>
-      <SectionList
-        ListHeaderComponent={
-          <>
-            <Box paddingTop={100} paddingBottom={30}>
-              <Box>
-                <Text padding={20} title fontSize={40}>
-                  {t('Vous êtes presque prêt !')}
-                </Text>
-              </Box>
-              <Box>
-                <Paragraph fontFamily="text" px={20} mt={40}>
-                  {t(
-                    'Choisissez les bases de données et les bibles que vous souhaitez télécharger.'
-                  )}
-                </Paragraph>
-              </Box>
-            </Box>
-            <Text padding={20} title fontSize={25}>
-              {t('Bases de données')}
-            </Text>
-            <ResourceItem
-              name={t('Lexique Strong')}
-              subTitle={t('Définitions françaises et anglaises, morphologie et mots liés')}
-              fileSize={getStrongLexiconPublication('core').archiveBytes}
-              isSelected={isSelected({ kind: 'strong-lexicon' })}
-              onPress={() => onPressItem({ kind: 'strong-lexicon' })}
-            />
-            {Object.values(databases).map(db => (
-              <ResourceItem
-                key={db.id}
-                name={db.name}
-                subTitle={db.desc}
-                fileSize={db.fileSize}
-                isSelected={isSelected({
-                  kind: 'database',
-                  databaseId: db.id,
-                  lang,
-                })}
-                onPress={() =>
-                  onPressItem({
-                    kind: 'database',
-                    databaseId: db.id,
-                    lang,
-                  })
-                }
-              />
-            ))}
+    <Box flex bg="#F4F7FF" pt={insets.top}>
+      <ScrollView
+        contentContainerStyle={{ width: contentWidth, alignSelf: 'center', paddingBottom: 28 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text title fontSize={40} lineHeight={42} mt={26}>
+          {t('offlineSetup.title')}
+        </Text>
+        <Text color="#68758C" fontSize={15} lineHeight={21} mt={10} mb={28}>
+          {t('offlineSetup.subtitle')}
+        </Text>
 
-            <Text padding={20} paddingBottom={0} title fontSize={25}>
-              {t('Bibles')}
-            </Text>
-          </>
-        }
-        stickySectionHeadersEnabled={false}
-        sections={getVersionsBySections()}
-        keyExtractor={item => item.id}
-        renderSectionHeader={({ section: { title } }) => (
-          <Box paddingHorizontal={20} marginTop={20}>
-            <Text fontSize={16} color="tertiary">
-              {title}
-            </Text>
-            <Border marginTop={10} />
-          </Box>
-        )}
-        renderItem={({ item: version }) => (
-          <>
-            <ResourceItem
-              name={version.name}
-              isSelected={isSelected({ kind: 'bible', versionId: version.id })}
-              isDisabled={version.id === getDefaultBibleVersion(lang)}
-              onPress={() => {
-                onPressItem({
-                  kind: 'bible',
-                  versionId: version.id,
-                })
-              }}
-            />
-            {isStrongCapableBibleVersion(version.id) && (
-              <Box pl={20}>
-                <ResourceItem
-                  name={t('Mode Strong')}
-                  subTitle={t(
-                    'Ajoute les numéros Strong à cette Bible. Le texte biblique reste utilisable sans ce téléchargement.'
-                  )}
-                  fileSize={
-                    getStrongBiblePublication(version.id as StrongBibleVersionId).strong
-                      .archiveBytes
-                  }
-                  isSelected={isSelected({
-                    kind: 'bible-strong',
-                    versionId: version.id as StrongBibleVersionId,
-                  })}
-                  onPress={() =>
-                    onPressItem({
-                      kind: 'bible-strong',
-                      versionId: version.id as StrongBibleVersionId,
-                    })
-                  }
-                />
-              </Box>
-            )}
-          </>
-        )}
-      />
-      <Box padding={20}>
-        <Button onPress={() => setStep(2)}>{t('Continuer')}</Button>
-      </Box>
-    </Container>
+        <VStack gap={38}>
+          {[0, 2].map(startIndex => (
+            <HStack key={startIndex} gap={10}>
+              {PRESET_VISUALS.slice(startIndex, startIndex + 2).map(visual => {
+                const count = getOfflineSetupPresetSelections(visual.id, lang).length
+                return (
+                  <OfflineResourceFolder
+                    key={visual.id}
+                    title={t(`offlineSetup.presets.${visual.id}.title`)}
+                    subtitle={t(`offlineSetup.presets.${visual.id}.subtitle`, { count })}
+                    icon={visual.icon}
+                    selected={selectedPresets.has(visual.id)}
+                    colors={visual.colors}
+                    onPress={() => setActivePreset(visual.id)}
+                  />
+                )
+              })}
+            </HStack>
+          ))}
+        </VStack>
+      </ScrollView>
+      {renderManifest()}
+    </Box>
   )
 }
 
-export default DownloadFiles
+export default SelectResources

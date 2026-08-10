@@ -2,6 +2,7 @@ import type { DownloadItem } from '~state/downloadQueue'
 import {
   createBibleDownloadItem,
   createDatabaseDownloadItem,
+  createInterlinearSidecarDownloadItem,
   createStrongSidecarDownloadItem,
   createStrongLexiconModuleDownloadItem,
 } from '~helpers/downloadItemFactory'
@@ -9,7 +10,8 @@ import { databases } from '~helpers/databases'
 import { getDefaultBibleVersion, type ActiveLanguage } from '~helpers/languageUtils'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
-import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
+import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
 
 type DownloadableDatabaseResources = ReturnType<typeof databases>
 export type OnboardingDatabaseResourceOption =
@@ -31,6 +33,11 @@ export type OnboardingResourceSelection =
     }
   | {
       kind: 'strong-lexicon'
+      moduleId?: StrongLexiconModuleId
+    }
+  | {
+      kind: 'bible-interlinear'
+      lang: ResourceLanguage
     }
 
 export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSelection): string => {
@@ -44,7 +51,17 @@ export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSel
     })
   }
   if (resource.kind === 'strong-lexicon') {
-    return createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
+    return createOfflineCopyId({
+      kind: 'strong-lexicon-module',
+      moduleId: resource.moduleId ?? 'core',
+    })
+  }
+  if (resource.kind === 'bible-interlinear') {
+    return createOfflineCopyId({
+      kind: 'interlinear-index',
+      versionId: 'BHG',
+      language: resource.lang,
+    })
   }
 
   return createOfflineCopyId({
@@ -52,6 +69,22 @@ export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSel
     databaseId: resource.databaseId,
     language: resource.lang,
   })
+}
+
+export const getOnboardingResourceIdentity = (
+  resource: OnboardingResourceSelection
+): OfflineCopyIdentity => {
+  if (resource.kind === 'bible') return { kind: 'bible', versionId: resource.versionId }
+  if (resource.kind === 'bible-strong') {
+    return { kind: 'strong-bible-index', versionId: resource.versionId }
+  }
+  if (resource.kind === 'strong-lexicon') {
+    return { kind: 'strong-lexicon-module', moduleId: resource.moduleId ?? 'core' }
+  }
+  if (resource.kind === 'bible-interlinear') {
+    return { kind: 'interlinear-index', versionId: 'BHG', language: resource.lang }
+  }
+  return { kind: 'database', databaseId: resource.databaseId, language: resource.lang }
 }
 
 export const toggleOnboardingResourceSelection = (
@@ -107,10 +140,29 @@ export const createDownloadItemFromOnboardingSelection = (
     return createBibleDownloadItem(resource.versionId)
   }
   if (resource.kind === 'bible-strong') {
-    return createStrongSidecarDownloadItem(resource.versionId)
+    return {
+      ...createStrongSidecarDownloadItem(resource.versionId),
+      dependsOnId: createOfflineCopyId({ kind: 'bible', versionId: resource.versionId }),
+    }
   }
   if (resource.kind === 'strong-lexicon') {
-    return createStrongLexiconModuleDownloadItem('core')
+    const moduleId = resource.moduleId ?? 'core'
+    const item = createStrongLexiconModuleDownloadItem(moduleId)
+    return moduleId === 'core'
+      ? item
+      : {
+          ...item,
+          dependsOnId: createOfflineCopyId({
+            kind: 'strong-lexicon-module',
+            moduleId: 'core',
+          }),
+        }
+  }
+  if (resource.kind === 'bible-interlinear') {
+    return {
+      ...createInterlinearSidecarDownloadItem(resource.lang),
+      dependsOnId: createOfflineCopyId({ kind: 'bible', versionId: 'BHG' }),
+    }
   }
 
   return createDatabaseDownloadItem(resource.databaseId, resource.lang)

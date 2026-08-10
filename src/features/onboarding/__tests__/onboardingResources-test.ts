@@ -40,6 +40,24 @@ jest.mock('~helpers/downloadItemFactory', () => ({
         versionId,
       }) as DownloadItem
   ),
+  createInterlinearSidecarDownloadItem: jest.fn(
+    (lang: string): DownloadItem =>
+      ({
+        id: `bible-interlinear:BHG:${lang}`,
+        type: 'bible-interlinear-sidecar',
+        name: `BHG ${lang}`,
+        lang,
+      }) as DownloadItem
+  ),
+  createStrongLexiconModuleDownloadItem: jest.fn(
+    (moduleId: string): DownloadItem =>
+      ({
+        id: `strong-lexicon:${moduleId}`,
+        type: 'strong-lexicon-module',
+        name: moduleId,
+        strongLexiconModuleId: moduleId,
+      }) as DownloadItem
+  ),
 }))
 
 jest.mock('~helpers/databases', () => ({
@@ -115,8 +133,21 @@ describe('onboardingResources', () => {
       expect.objectContaining({
         id: 'bible-strong:DBR',
         versionId: 'DBR',
+        dependsOnId: 'bible:DBR',
       })
     )
+  })
+
+  it('encodes onboarding download dependencies in the queue items', () => {
+    expect(
+      createDownloadItemFromOnboardingSelection({
+        kind: 'strong-lexicon',
+        moduleId: 'entities',
+      })
+    ).toEqual(expect.objectContaining({ dependsOnId: 'strong-lexicon:core' }))
+    expect(
+      createDownloadItemFromOnboardingSelection({ kind: 'bible-interlinear', lang: 'fr' })
+    ).toEqual(expect.objectContaining({ dependsOnId: 'bible:BHG' }))
   })
 
   it('selecting Strong also selects its base Bible and deselecting the base removes Strong', () => {

@@ -177,6 +177,7 @@ const InitHooks = (_props: InitHooksProps) => {
         ...Icon.Ionicons.font,
         'Literata Book': require('~assets/fonts/LiterataBook-Regular.otf'),
         'eina-03-bold': require('~assets/fonts/eina-03-bold.otf'),
+        FiraCode: require('~assets/fonts/FiraCode-Regular.otf'),
       }).catch(err => {
         console.error('Failed to load fonts:', err)
       })

@@ -1366,6 +1366,10 @@
   "playground.abelTitle": "Parcours onboarding Abel",
   "playground.abelDescription": "Parcourez une étude biblique interactive, du verset de Genèse 4.2 jusqu’aux mots Strong, aux notes et aux relations.",
   "playground.onboarding.skip": "Passer",
+  "playground.onboarding.skipConfirmTitle": "Passer la découverte ?",
+  "playground.onboarding.skipConfirmMessage": "Vous pourrez relancer ce parcours depuis le Playground.",
+  "playground.onboarding.keepDiscovering": "Continuer la découverte",
+  "playground.onboarding.progress": "Étape {{current}} sur {{total}}",
   "playground.onboarding.back": "Revenir à la scène précédente",
   "playground.onboarding.continue": "Continuer",
   "playground.onboarding.complete": "Votre espace est prêt.",
@@ -1376,6 +1380,7 @@
   "playground.sceneOne.lineThree": "et Caïn fut laboureur.",
   "playground.sceneOne.translation": "LOUIS SEGOND 1910",
   "playground.sceneOne.phrase": "Lisez. Surlignez. Découvrez.",
+  "playground.sceneOne.openLexique": "Ouvrir le lexique du verset",
   "playground.sceneOne.colorPrompt.color2": "Une couleur, un fil à retrouver.",
   "playground.sceneOne.colorPrompt.color3": "Gardez en lumière ce qui compte.",
   "playground.sceneOne.colorPrompt.color4": "Classez vos intuitions par couleur.",
@@ -1398,15 +1403,20 @@
   ,"playground.sceneThree.commonPhrase": "Un mot peut en révéler un autre."
   ,"playground.sceneThree.strongLabel": "STRONG"
   ,"playground.sceneThree.listen": "Écouter la prononciation"
+  ,"playground.sceneThree.openStrong": "Ouvrir Strong H1892"
+  ,"playground.sceneThree.properTransliteration": "Hevel"
   ,"playground.sceneThree.properTitle": "Abel"
   ,"playground.sceneThree.properDefinition": "Fils d’Adam et Ève"
   ,"playground.sceneThree.properType": "NOM PROPRE"
+  ,"playground.sceneThree.commonTransliteration": "hevel"
   ,"playground.sceneThree.commonTitle": "hevel"
   ,"playground.sceneThree.commonDefinition": "souffle, vapeur, vanité"
   ,"playground.sceneThree.commonType": "NOM COMMUN"
   ,"playground.sceneFour.phrase": "Un même mot traverse toute la Bible."
+  ,"playground.sceneFour.addNote": "Ajouter une note"
   ,"playground.sceneFour.hebrew": "HÉBREU"
   ,"playground.sceneFour.lemmaDetails": "H1892  ·  vapeur · souffle · vanité"
+  ,"playground.sceneFour.occurrenceCount": "64"
   ,"playground.sceneFour.usageCount": "emplois dans la LSG"
   ,"playground.sceneFour.filterAll": "Tous · 64"
   ,"playground.sceneFour.filterVanity": "vanité [n] · 51"
@@ -1449,6 +1459,7 @@
   ,"playground.sceneFour.breathPsalmOneFortyFourHighlight": "souffle"
   ,"playground.sceneFour.breathPsalmOneFortyFourAfter": ", ses jours sont comme l’ombre qui passe."
   ,"playground.sceneFive.phrase": "Notez ce que vous découvrez."
+  ,"playground.sceneFive.addTag": "Ajouter le tag Abel"
   ,"playground.sceneFive.genesisLabel": "GENÈSE 4.2"
   ,"playground.sceneFive.genesisTitle": "Elle enfanta Abel"
   ,"playground.sceneFive.abelLabel": "H1893"
@@ -1460,6 +1471,7 @@
   ,"playground.sceneFive.relations": "Relations"
   ,"playground.sceneFive.genesisChip": "Genèse 4.2"
   ,"playground.sceneSix.phrase": "Classez, reliez, approfondissez."
+  ,"playground.sceneSix.closeRelations": "Refermer les relations"
   ,"playground.sceneSix.genesisTitle": "Genèse 4.2"
   ,"playground.sceneSix.genesisDetail": "occurrence"
   ,"playground.sceneSix.abelDetail": "nom"
@@ -1478,4 +1490,40 @@
   ,"playground.sceneSeven.note": "Note"
   ,"playground.sceneSeven.study": "Étude"
   ,"playground.sceneSeven.ecclesiastes": "Ecclésiaste 1.2"
+  ,"offlineSetup.title": "Que souhaitez-vous télécharger ?"
+  ,"offlineSetup.subtitle": "Ouvrez un dossier pour découvrir son contenu et choisir ce que vous souhaitez garder sur cet appareil."
+  ,"offlineSetup.toDownload": "À télécharger"
+  ,"offlineSetup.onDevice": "Sur le téléphone"
+  ,"offlineSetup.continue": "Continuer"
+  ,"offlineSetup.back": "Retour aux dossiers"
+  ,"offlineSetup.included": "Ce dossier contient"
+  ,"offlineSetup.add": "Ajouter à ma bibliothèque"
+  ,"offlineSetup.remove": "Retirer de ma sélection"
+  ,"offlineSetup.required": "Inclus pour lire la Bible"
+  ,"offlineSetup.resourceCount": "{{count}} ressources"
+  ,"offlineSetup.presets.read-bible.title": "Lire la Bible"
+  ,"offlineSetup.presets.read-bible.subtitle": "1 traduction"
+  ,"offlineSetup.presets.read-bible.description": "Gardez votre traduction principale sur cet appareil pour lire la Bible où que vous soyez."
+  ,"offlineSetup.presets.understand-words.title": "Comprendre les mots"
+  ,"offlineSetup.presets.understand-words.subtitle": "4 ressources"
+  ,"offlineSetup.presets.understand-words.description": "Explorez le sens des mots avec les numéros Strong, le lexique et le dictionnaire biblique."
+  ,"offlineSetup.presets.explore-bible.title": "Explorer la Bible"
+  ,"offlineSetup.presets.explore-bible.subtitle": "6 ressources"
+  ,"offlineSetup.presets.explore-bible.description": "Approfondissez les thèmes, les liens, les commentaires, la chronologie et les entités bibliques."
+  ,"offlineSetup.presets.original-languages.title": "Langues originales"
+  ,"offlineSetup.presets.original-languages.subtitle": "4 ressources"
+  ,"offlineSetup.presets.original-languages.description": "Étudiez les textes hébreux et grecs avec l’interlinéaire et le dictionnaire grec détaillé."
+  ,"offlineSetup.resources.bible": "Bible principale"
+  ,"offlineSetup.resources.strongIndex": "Index Strong de la Bible"
+  ,"offlineSetup.resources.strongLexicon": "Lexique Strong"
+  ,"offlineSetup.resources.dictionary": "Dictionnaire biblique"
+  ,"offlineSetup.resources.nave": "Bible thématique Nave"
+  ,"offlineSetup.resources.crossReferences": "Références croisées"
+  ,"offlineSetup.resources.commentaries": "Commentaires bibliques"
+  ,"offlineSetup.resources.timeline": "Chronologie de la Bible"
+  ,"offlineSetup.resources.entities": "Entités bibliques"
+  ,"offlineSetup.resources.strongFoundation": "Données Strong partagées"
+  ,"offlineSetup.resources.originalBible": "Bible hébraïque et grecque"
+  ,"offlineSetup.resources.interlinear": "Interlinéaire en français"
+  ,"offlineSetup.resources.greekDictionary": "Dictionnaire grec détaillé"
 }
