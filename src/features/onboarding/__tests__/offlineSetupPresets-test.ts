@@ -7,19 +7,34 @@ import {
 
 jest.mock('~helpers/bibleVersions', () => ({
   versions: {
-    LSG: { id: 'LSG', name: 'Segond', language: 'fr' },
-    DBY: { id: 'DBY', name: 'Darby FR', language: 'fr' },
-    DBR: { id: 'DBR', name: 'Rabbinat', language: 'fr' },
-    KJV: { id: 'KJV', name: 'King James', language: 'en' },
-    NASB2020: { id: 'NASB2020', name: 'NASB', language: 'en' },
-    NASB1995: { id: 'NASB1995', name: 'NASB 1995', language: 'en' },
-    BSB: { id: 'BSB', name: 'BSB', language: 'en' },
-    ASV: { id: 'ASV', name: 'ASV', language: 'en' },
-    DARBY: { id: 'DARBY', name: 'Darby EN', language: 'en' },
-    RLT: { id: 'RLT', name: 'RLT', language: 'en' },
-    RWEBSTER: { id: 'RWEBSTER', name: 'RWebster', language: 'en' },
-    RV1895: { id: 'RV1895', name: 'RV1895', language: 'en' },
-    BHG: { id: 'BHG', name: 'Hebrew & Greek', language: 'he-grc' },
+    LSG: { id: 'LSG', name: 'Segond', language: 'fr', readingProfile: 'word-for-word' },
+    DBY: { id: 'DBY', name: 'Darby FR', language: 'fr', readingProfile: 'word-for-word' },
+    DBR: { id: 'DBR', name: 'Rabbinat', language: 'fr', readingProfile: 'balanced' },
+    KJV: { id: 'KJV', name: 'King James', language: 'en', readingProfile: 'word-for-word' },
+    NASB2020: {
+      id: 'NASB2020',
+      name: 'NASB',
+      language: 'en',
+      readingProfile: 'word-for-word',
+    },
+    NASB1995: {
+      id: 'NASB1995',
+      name: 'NASB 1995',
+      language: 'en',
+      readingProfile: 'word-for-word',
+    },
+    BSB: { id: 'BSB', name: 'BSB', language: 'en', readingProfile: 'balanced' },
+    ASV: { id: 'ASV', name: 'ASV', language: 'en', readingProfile: 'word-for-word' },
+    DARBY: { id: 'DARBY', name: 'Darby EN', language: 'en', readingProfile: 'word-for-word' },
+    RLT: { id: 'RLT', name: 'RLT', language: 'en', readingProfile: 'thought-for-thought' },
+    RWEBSTER: {
+      id: 'RWEBSTER',
+      name: 'RWebster',
+      language: 'en',
+      readingProfile: 'word-for-word',
+    },
+    RV1895: { id: 'RV1895', name: 'RV1895', language: 'en', readingProfile: 'word-for-word' },
+    BHG: { id: 'BHG', name: 'Hebrew & Greek', language: 'he-grc', readingProfile: null },
   },
 }))
 
@@ -89,14 +104,23 @@ describe('offline setup folders', () => {
     )
     expect(options.map(option => option.id)).not.toContain('bible:BHG')
     expect(sections.map(section => section.titleKey)).toEqual([
-      'versionCatalog.language.fr',
-      'versionCatalog.language.en',
+      'versionCatalog.style.wordForWord',
+      'versionCatalog.style.balanced',
+      'offlineSetup.section.otherLanguages',
     ])
-    expect(sections[0]?.options.map(option => option.id)).toEqual([
-      'bible:DBY',
-      'bible:DBR',
-      'bible:LSG',
-    ])
+    expect(sections[0]?.options.map(option => option.id)).toEqual(['bible:DBY', 'bible:LSG'])
+    expect(sections[1]?.options.map(option => option.id)).toEqual(['bible:DBR'])
+    expect(sections[2]?.options.map(option => option.id)).toEqual(
+      expect.arrayContaining(['bible:ASV', 'bible:KJV', 'bible:RLT'])
+    )
+    expect(
+      sections
+        .slice(0, -1)
+        .flatMap(section => section.options)
+        .every(option => option.language === 'fr')
+    ).toBe(true)
+    expect(sections.at(-1)?.options).toHaveLength(9)
+    expect(sections.at(-1)?.options.every(option => option.language === 'en')).toBe(true)
   })
 
   it('uses the default Strong Bible catalog sections and ordering', () => {
@@ -104,13 +128,15 @@ describe('offline setup folders', () => {
 
     expect(sections.map(section => section.titleKey)).toEqual([
       'offlineSetup.section.sharedTools',
-      'versionCatalog.language.en',
-      'versionCatalog.language.fr',
+      'versionCatalog.style.wordForWord',
+      'versionCatalog.style.balanced',
+      'versionCatalog.style.thoughtForThought',
+      'offlineSetup.section.otherLanguages',
     ])
     expect(sections[1]?.options.slice(0, 3).map(option => option.id)).toEqual([
       'bible-strong:ASV',
-      'bible-strong:BSB',
       'bible-strong:DARBY',
+      'bible-strong:KJV',
     ])
   })
 

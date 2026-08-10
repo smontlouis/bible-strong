@@ -98,28 +98,52 @@ const createDatabaseOption = (
 const VERSION_CATALOG_LABELS: VersionCatalogLabels = {
   languages: { fr: 'fr', en: 'en', he: 'he', grc: 'grc', 'he-grc': 'he-grc', la: 'la' },
   profiles: {
-    'word-for-word': 'word-for-word',
-    balanced: 'balanced',
-    'thought-for-thought': 'thought-for-thought',
-    paraphrase: 'paraphrase',
+    'word-for-word': 'versionCatalog.style.wordForWord',
+    balanced: 'versionCatalog.style.balanced',
+    'thought-for-thought': 'versionCatalog.style.thoughtForThought',
+    paraphrase: 'versionCatalog.style.paraphrase',
   },
-  other: 'other',
+  other: 'versionCatalog.style.other',
 }
 
-const getBibleFolderCatalogSections = (kind: BibleDefaultSelectionKind, lang: ResourceLanguage) =>
-  getVersionCatalogSections({
-    catalog: getBibleDefaultCatalog(kind),
-    grouping: 'language',
+const getBibleFolderCatalogSections = (kind: BibleDefaultSelectionKind, lang: ResourceLanguage) => {
+  const catalog = getBibleDefaultCatalog(kind)
+  const primarySections = getVersionCatalogSections({
+    catalog: catalog.filter(version => version.language === lang),
+    grouping: 'style',
     query: '',
     uiLanguage: lang,
     labels: VERSION_CATALOG_LABELS,
-  })
+  }).map(section => ({
+    key: `style-${section.key}`,
+    titleKey: section.title,
+    data: section.data,
+  }))
+  const otherLanguagesSection = getVersionCatalogSections({
+    catalog: catalog.filter(version => version.language !== lang),
+    grouping: 'alphabetical',
+    query: '',
+    uiLanguage: lang,
+    labels: VERSION_CATALOG_LABELS,
+  })[0]
+
+  return otherLanguagesSection
+    ? [
+        ...primarySections,
+        {
+          key: 'other-languages',
+          titleKey: 'offlineSetup.section.otherLanguages',
+          data: otherLanguagesSection.data,
+        },
+      ]
+    : primarySections
+}
 
 const getReadableBibleSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
   const requiredVersionId = getDefaultBibleVersion(lang)
   return getBibleFolderCatalogSections('reading', lang).map(section => ({
-    id: `bible-language-${section.key}`,
-    titleKey: `versionCatalog.language.${section.key}`,
+    id: `bible-${section.key}`,
+    titleKey: section.titleKey,
     options: section.data.map(version =>
       createBibleOption(version.id, lang, version.id === requiredVersionId, version.displayName)
     ),
@@ -142,8 +166,8 @@ const getStrongSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
       ],
     },
     ...getBibleFolderCatalogSections('strong', lang).map(section => ({
-      id: `strong-bible-language-${section.key}`,
-      titleKey: `versionCatalog.language.${section.key}`,
+      id: `strong-bible-${section.key}`,
+      titleKey: section.titleKey,
       options: section.data.map(version =>
         createStrongBibleOption(version.id as StrongBibleVersionId, lang, version.displayName)
       ),
