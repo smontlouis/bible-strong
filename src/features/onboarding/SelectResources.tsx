@@ -22,9 +22,15 @@ import {
 import OfflineResourceFolder from './components/OfflineResourceFolder'
 import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
 
-type SelectResourcesProps = {
-  setStep: React.Dispatch<React.SetStateAction<number>>
-}
+type SelectResourcesProps =
+  | {
+      mode?: 'onboarding'
+      setStep: React.Dispatch<React.SetStateAction<number>>
+    }
+  | {
+      mode: 'preview'
+      onClose: () => void
+    }
 
 type PresetVisual = {
   id: OfflineSetupPresetId
@@ -81,7 +87,7 @@ const formatMegabytes = (bytes: number, lang: string): string => {
   }`
 }
 
-const SelectResources = ({ setStep }: SelectResourcesProps) => {
+const SelectResources = (props: SelectResourcesProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
   const insets = useSafeAreaInsets()
@@ -167,12 +173,16 @@ const SelectResources = ({ setStep }: SelectResourcesProps) => {
 
   const continueToDownloads = () => {
     if (checkedSelectionKey !== selectedPresetKey) return
+    if (props.mode === 'preview') {
+      props.onClose()
+      return
+    }
     if (missingSelections.length === 0) {
       setIsOnboardingCompleted(true)
       return
     }
     setSelectedResources(missingSelections)
-    setStep(2)
+    props.setStep(2)
   }
 
   const renderManifest = () => (
@@ -210,7 +220,9 @@ const SelectResources = ({ setStep }: SelectResourcesProps) => {
       </HStack>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={t('offlineSetup.continue')}
+        accessibilityLabel={t(
+          props.mode === 'preview' ? 'offlineSetup.closePreview' : 'offlineSetup.continue'
+        )}
         disabled={selections.length === 0 || checkedSelectionKey !== selectedPresetKey}
         onPress={continueToDownloads}
         style={({ pressed }) => ({
@@ -224,9 +236,13 @@ const SelectResources = ({ setStep }: SelectResourcesProps) => {
       >
         <Box height={56} mt={16} borderRadius={28} bg="#5983F0" center row gap={12}>
           <Text color="#FFFFFF" title fontSize={16}>
-            {t('offlineSetup.continue')}
+            {t(props.mode === 'preview' ? 'offlineSetup.closePreview' : 'offlineSetup.continue')}
           </Text>
-          <Feather name="arrow-right" size={22} color="#FFFFFF" />
+          <Feather
+            name={props.mode === 'preview' ? 'x' : 'arrow-right'}
+            size={22}
+            color="#FFFFFF"
+          />
         </Box>
       </Pressable>
     </Box>
@@ -355,11 +371,29 @@ const SelectResources = ({ setStep }: SelectResourcesProps) => {
 
   return (
     <Box flex bg="#F4F7FF" pt={insets.top}>
+      {props.mode === 'preview' ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('offlineSetup.closePreview')}
+          onPress={props.onClose}
+          hitSlop={10}
+          style={{
+            position: 'absolute',
+            left: Math.max((width - contentWidth) / 2, 20),
+            top: insets.top + 8,
+            zIndex: 10,
+          }}
+        >
+          <Box size={44} borderRadius={22} bg="#FFFFFF" center>
+            <Feather name="arrow-left" size={21} color="#142033" />
+          </Box>
+        </Pressable>
+      ) : null}
       <ScrollView
         contentContainerStyle={{ width: contentWidth, alignSelf: 'center', paddingBottom: 28 }}
         showsVerticalScrollIndicator={false}
       >
-        <Text title fontSize={40} lineHeight={42} mt={26}>
+        <Text title fontSize={40} lineHeight={42} mt={props.mode === 'preview' ? 76 : 26}>
           {t('offlineSetup.title')}
         </Text>
         <Text color="#68758C" fontSize={15} lineHeight={21} mt={10} mb={28}>

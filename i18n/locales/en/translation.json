@@ -1555,4 +1555,8 @@
   ,"offlineSetup.resources.originalBible": "Hebrew and Greek Bible"
   ,"offlineSetup.resources.interlinear": "English interlinear"
   ,"offlineSetup.resources.greekDictionary": "Detailed Greek dictionary"
+  ,"offlineSetup.closePreview": "Close preview"
+  ,"playground.resourcesEyebrow": "Onboarding"
+  ,"playground.resourcesTitle": "Resources screen"
+  ,"playground.resourcesDescription": "Preview the folders shown at the end of onboarding and open their details."
 }

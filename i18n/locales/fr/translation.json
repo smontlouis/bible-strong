@@ -1526,4 +1526,8 @@
   ,"offlineSetup.resources.originalBible": "Bible hébraïque et grecque"
   ,"offlineSetup.resources.interlinear": "Interlinéaire en français"
   ,"offlineSetup.resources.greekDictionary": "Dictionnaire grec détaillé"
+  ,"offlineSetup.closePreview": "Fermer l’aperçu"
+  ,"playground.resourcesEyebrow": "Onboarding"
+  ,"playground.resourcesTitle": "Écran des ressources"
+  ,"playground.resourcesDescription": "Prévisualisez les dossiers proposés à la fin de l’onboarding et ouvrez leur détail."
 }

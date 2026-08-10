@@ -10,11 +10,12 @@ import Text from '~common/ui/Text'
 type PlaygroundLinkProps = {
   description: string
   eyebrow: string
+  icon: React.ComponentProps<typeof Feather>['name']
   onPress: () => void
   title: string
 }
 
-const PlaygroundLink = ({ description, eyebrow, onPress, title }: PlaygroundLinkProps) => {
+const PlaygroundLink = ({ description, eyebrow, icon, onPress, title }: PlaygroundLinkProps) => {
   const theme = useTheme()
 
   return (
@@ -30,7 +31,7 @@ const PlaygroundLink = ({ description, eyebrow, onPress, title }: PlaygroundLink
       <Box bg="reverse" borderColor="border" borderWidth={1} borderRadius={22} p={18} lightShadow>
         <HStack alignItems="center" gap={14}>
           <Box size={46} borderRadius={15} bg="primary" center>
-            <Feather name="compass" size={21} color={theme.colors.reverse} />
+            <Feather name={icon} size={21} color={theme.colors.reverse} />
           </Box>
           <VStack flex={1} gap={3}>
             <Text color="primary" fontSize={10} bold textTransform="uppercase">
@@ -52,9 +53,10 @@ const PlaygroundLink = ({ description, eyebrow, onPress, title }: PlaygroundLink
 
 type PlaygroundHomeProps = {
   onOpenAbelOnboarding: () => void
+  onOpenOfflineSetup: () => void
 }
 
-const PlaygroundHome = ({ onOpenAbelOnboarding }: PlaygroundHomeProps) => {
+const PlaygroundHome = ({ onOpenAbelOnboarding, onOpenOfflineSetup }: PlaygroundHomeProps) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
@@ -98,7 +100,15 @@ const PlaygroundHome = ({ onOpenAbelOnboarding }: PlaygroundHomeProps) => {
               eyebrow={t('playground.abelEyebrow')}
               title={t('playground.abelTitle')}
               description={t('playground.abelDescription')}
+              icon="compass"
               onPress={onOpenAbelOnboarding}
+            />
+            <PlaygroundLink
+              eyebrow={t('playground.resourcesEyebrow')}
+              title={t('playground.resourcesTitle')}
+              description={t('playground.resourcesDescription')}
+              icon="archive"
+              onPress={onOpenOfflineSetup}
             />
           </VStack>
         </VStack>
