@@ -104,23 +104,32 @@ describe('offline setup folders', () => {
     )
     expect(options.map(option => option.id)).not.toContain('bible:BHG')
     expect(sections.map(section => section.titleKey)).toEqual([
+      undefined,
       'versionCatalog.style.wordForWord',
       'versionCatalog.style.balanced',
       'offlineSetup.section.otherLanguages',
     ])
-    expect(sections[0]?.options.map(option => option.id)).toEqual(['bible:DBY', 'bible:LSG'])
-    expect(sections[1]?.options.map(option => option.id)).toEqual(['bible:DBR'])
-    expect(sections[2]?.options.map(option => option.id)).toEqual(
+    expect(sections[0]?.options.map(option => option.id)).toEqual(['bible:LSG'])
+    expect(sections[0]?.options[0]?.required).toBe(true)
+    expect(sections[1]?.options.map(option => option.id)).toEqual(['bible:DBY'])
+    expect(sections[2]?.options.map(option => option.id)).toEqual(['bible:DBR'])
+    expect(sections[3]?.options.map(option => option.id)).toEqual(
       expect.arrayContaining(['bible:ASV', 'bible:KJV', 'bible:RLT'])
     )
-    expect(
-      sections
-        .slice(0, -1)
-        .flatMap(section => section.options)
-        .every(option => option.language === 'fr')
-    ).toBe(true)
+    expect(sections.slice(0, -1).flatMap(section => section.options)).toHaveLength(3)
     expect(sections.at(-1)?.options).toHaveLength(9)
     expect(sections.at(-1)?.options.every(option => option.language === 'en')).toBe(true)
+    expect(options.filter(option => option.id === 'bible:LSG')).toHaveLength(1)
+  })
+
+  it('pins KJV above every section for English without duplicating it', () => {
+    const sections = getOfflineSetupFolderSections('read-bible', 'en')
+    const options = sections.flatMap(section => section.options)
+
+    expect(sections[0]?.titleKey).toBeUndefined()
+    expect(sections[0]?.options.map(option => option.id)).toEqual(['bible:KJV'])
+    expect(sections[0]?.options[0]?.required).toBe(true)
+    expect(options.filter(option => option.id === 'bible:KJV')).toHaveLength(1)
   })
 
   it('uses the default Strong Bible catalog sections and ordering', () => {

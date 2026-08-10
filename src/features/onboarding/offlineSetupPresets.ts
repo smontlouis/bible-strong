@@ -37,7 +37,7 @@ export type OfflineSetupOption = {
 
 export type OfflineSetupSection = {
   id: string
-  titleKey: string
+  titleKey?: string
   options: OfflineSetupOption[]
 }
 
@@ -141,13 +141,33 @@ const getBibleFolderCatalogSections = (kind: BibleDefaultSelectionKind, lang: Re
 
 const getReadableBibleSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
   const requiredVersionId = getDefaultBibleVersion(lang)
-  return getBibleFolderCatalogSections('reading', lang).map(section => ({
-    id: `bible-${section.key}`,
-    titleKey: section.titleKey,
-    options: section.data.map(version =>
-      createBibleOption(version.id, lang, version.id === requiredVersionId, version.displayName)
-    ),
-  }))
+  const catalogSections = getBibleFolderCatalogSections('reading', lang).reduce(
+    (result, section) => {
+      const options = section.data.reduce<OfflineSetupOption[]>((sectionOptions, version) => {
+        if (version.id !== requiredVersionId) {
+          sectionOptions.push(createBibleOption(version.id, lang, false, version.displayName))
+        }
+        return sectionOptions
+      }, [])
+      if (options.length) {
+        result.push({
+          id: `bible-${section.key}`,
+          titleKey: section.titleKey,
+          options,
+        })
+      }
+      return result
+    },
+    [] as OfflineSetupSection[]
+  )
+
+  return [
+    {
+      id: 'required-bible',
+      options: [createBibleOption(requiredVersionId, lang, true)],
+    },
+    ...catalogSections,
+  ]
 }
 
 const getStrongSections = (lang: ResourceLanguage): OfflineSetupSection[] => {

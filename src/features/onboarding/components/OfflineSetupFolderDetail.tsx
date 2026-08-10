@@ -114,9 +114,11 @@ const OfflineSetupFolderDetail = ({
         <VStack gap={22}>
           {sections.map(section => (
             <VStack key={section.id} gap={8}>
-              <Text color="#68758C" fontSize={11} bold textTransform="uppercase" px={4}>
-                {t(section.titleKey)}
-              </Text>
+              {section.titleKey ? (
+                <Text color="#68758C" fontSize={11} bold textTransform="uppercase" px={4}>
+                  {t(section.titleKey)}
+                </Text>
+              ) : null}
               {section.options.map(option => {
                 const selected = selectedIds.has(option.id)
                 const locked = isOfflineSetupOptionLocked(option, selectedOptionIds, allOptions)
@@ -141,18 +143,6 @@ const OfflineSetupFolderDetail = ({
                       alignItems="center"
                       gap={12}
                     >
-                      <Box
-                        size={34}
-                        borderRadius={11}
-                        bg={selected ? visual.colors.back : '#F1F3F7'}
-                        center
-                      >
-                        <Feather
-                          name={locked ? 'lock' : selected ? 'check' : 'plus'}
-                          size={17}
-                          color={selected ? visual.colors.icon : '#8A94A7'}
-                        />
-                      </Box>
                       <Box flex>
                         <HStack alignItems="center" gap={7} wrap>
                           <Text title fontSize={14} lineHeight={18} style={{ flexShrink: 1 }}>
