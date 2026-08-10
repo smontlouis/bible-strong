@@ -12,6 +12,9 @@ import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
+import { getOnboardingResourceSelectionId } from './onboardingResourceSelectionId'
+
+export { getOnboardingResourceSelectionId } from './onboardingResourceSelectionId'
 
 type DownloadableDatabaseResources = ReturnType<typeof databases>
 export type OnboardingDatabaseResourceOption =
@@ -39,37 +42,6 @@ export type OnboardingResourceSelection =
       kind: 'bible-interlinear'
       lang: ResourceLanguage
     }
-
-export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSelection): string => {
-  if (resource.kind === 'bible') {
-    return createOfflineCopyId({ kind: 'bible', versionId: resource.versionId })
-  }
-  if (resource.kind === 'bible-strong') {
-    return createOfflineCopyId({
-      kind: 'strong-bible-index',
-      versionId: resource.versionId,
-    })
-  }
-  if (resource.kind === 'strong-lexicon') {
-    return createOfflineCopyId({
-      kind: 'strong-lexicon-module',
-      moduleId: resource.moduleId ?? 'core',
-    })
-  }
-  if (resource.kind === 'bible-interlinear') {
-    return createOfflineCopyId({
-      kind: 'interlinear-index',
-      versionId: 'BHG',
-      language: resource.lang,
-    })
-  }
-
-  return createOfflineCopyId({
-    kind: 'database',
-    databaseId: resource.databaseId,
-    language: resource.lang,
-  })
-}
 
 export const getOnboardingResourceIdentity = (
   resource: OnboardingResourceSelection

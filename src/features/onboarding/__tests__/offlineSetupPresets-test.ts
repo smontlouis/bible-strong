@@ -1,49 +1,126 @@
 import {
-  OFFLINE_SETUP_PRESET_IDS,
-  getOfflineSetupPresetSelections,
-  resolveOfflineSetupSelections,
+  getDefaultOfflineSetupFolderOptionIds,
+  getOfflineSetupFolderSections,
+  resolveOfflineSetupFolderOptionIds,
+  toggleOfflineSetupOptionId,
 } from '../offlineSetupPresets'
 
-const getSelectionId = (
-  selection: ReturnType<typeof getOfflineSetupPresetSelections>[number]
-): string => {
-  if (selection.kind === 'database') {
-    return `database:${selection.databaseId}:${selection.lang}`
-  }
-  if (selection.kind === 'bible' || selection.kind === 'bible-strong') {
-    return `${selection.kind}:${selection.versionId}`
-  }
-  if (selection.kind === 'bible-interlinear') {
-    return `${selection.kind}:${selection.lang}`
-  }
-  return `${selection.kind}:${selection.moduleId ?? 'core'}`
-}
+jest.mock('~helpers/bibleVersions', () => ({
+  versions: {
+    LSG: { id: 'LSG', name: 'Segond', language: 'fr' },
+    DBY: { id: 'DBY', name: 'Darby FR', language: 'fr' },
+    DBR: { id: 'DBR', name: 'Rabbinat', language: 'fr' },
+    KJV: { id: 'KJV', name: 'King James', language: 'en' },
+    NASB2020: { id: 'NASB2020', name: 'NASB', language: 'en' },
+    NASB1995: { id: 'NASB1995', name: 'NASB 1995', language: 'en' },
+    BSB: { id: 'BSB', name: 'BSB', language: 'en' },
+    ASV: { id: 'ASV', name: 'ASV', language: 'en' },
+    DARBY: { id: 'DARBY', name: 'Darby EN', language: 'en' },
+    RLT: { id: 'RLT', name: 'RLT', language: 'en' },
+    RWEBSTER: { id: 'RWEBSTER', name: 'RWebster', language: 'en' },
+    RV1895: { id: 'RV1895', name: 'RV1895', language: 'en' },
+    BHG: { id: 'BHG', name: 'Hebrew & Greek', language: 'he-grc' },
+  },
+}))
 
-describe('offline setup presets', () => {
-  it('includes biblical entities and its core dependency in Explore the Bible', () => {
-    const ids = getOfflineSetupPresetSelections('explore-bible', 'fr').map(getSelectionId)
+jest.mock('~helpers/databases', () => ({
+  databases: jest.fn((lang: string) => ({
+    DICTIONNAIRE: { name: `Dictionary ${lang}`, desc: '' },
+    NAVE: { name: `Nave ${lang}`, desc: '' },
+    TRESOR: { name: 'Cross references', desc: '' },
+    MHY: { name: 'Commentary', desc: '' },
+    TIMELINE: { name: `Timeline ${lang}`, desc: '' },
+  })),
+}))
 
-    expect(ids).toContain('strong-lexicon:entities')
-    expect(ids).toContain('strong-lexicon:core')
-    expect(ids).toHaveLength(6)
+jest.mock('~helpers/languageUtils', () => ({
+  getDefaultBibleVersion: jest.fn((lang: string) => (lang === 'fr' ? 'LSG' : 'KJV')),
+}))
+
+jest.mock('~helpers/strongBiblePublications', () => ({
+  FRENCH_STRONG_BIBLE_PRIORITY: ['LSG', 'DBY', 'DBR'],
+  ENGLISH_STRONG_BIBLE_PRIORITY: [
+    'KJV',
+    'NASB2020',
+    'NASB1995',
+    'BSB',
+    'ASV',
+    'DARBY',
+    'RLT',
+    'RWEBSTER',
+    'RV1895',
+  ],
+}))
+
+describe('offline setup folders', () => {
+  it('locks the language-specific startup Bible as the only default selection', () => {
+    expect(getDefaultOfflineSetupFolderOptionIds('fr')).toEqual({
+      'read-bible': ['bible:LSG'],
+      'understand-words': [],
+      'explore-bible': [],
+      'original-languages': [],
+    })
+    const required = getOfflineSetupFolderSections('read-bible', 'fr')
+      .flatMap(section => section.options)
+      .find(option => option.id === 'bible:LSG')
+    expect(required?.required).toBe(true)
+    expect(toggleOfflineSetupOptionId(['bible:LSG'], required!)).toEqual(['bible:LSG'])
   })
 
-  it('uses the localized default Bible for reading and Strong study', () => {
-    expect(getOfflineSetupPresetSelections('read-bible', 'fr')).toContainEqual({
-      kind: 'bible',
-      versionId: 'LSG',
-    })
-    expect(getOfflineSetupPresetSelections('understand-words', 'en')).toContainEqual({
-      kind: 'bible-strong',
-      versionId: 'KJV',
-    })
+  it('lists only French and English Bibles in the reading folder', () => {
+    const options = getOfflineSetupFolderSections('read-bible', 'fr').flatMap(
+      section => section.options
+    )
+    expect(options.map(option => option.id)).toEqual(
+      expect.arrayContaining(['bible:LSG', 'bible:KJV'])
+    )
+    expect(options.map(option => option.id)).not.toContain('bible:BHG')
   })
 
-  it('deduplicates shared technical dependencies when every need is selected', () => {
-    const selections = resolveOfflineSetupSelections(OFFLINE_SETUP_PRESET_IDS, 'fr')
-    const ids = selections.map(getSelectionId)
+  it('expands a Strong Bible into its base, index, and shared lexicon without duplicates', () => {
+    const ids = getDefaultOfflineSetupFolderOptionIds('fr')
+    ids['understand-words'] = ['bible-strong:LSG', 'strong-lexicon:core']
+    const resolved = resolveOfflineSetupFolderOptionIds(ids, 'fr')
+    const resolvedIds = resolved.map(selection => {
+      if (selection.kind === 'bible') return `bible:${selection.versionId}`
+      if (selection.kind === 'bible-strong') return `bible-strong:${selection.versionId}`
+      if (selection.kind === 'strong-lexicon') {
+        return `strong-lexicon:${selection.moduleId ?? 'core'}`
+      }
+      return selection.kind
+    })
 
-    expect(new Set(ids).size).toBe(ids.length)
-    expect(ids.filter(id => id === 'strong-lexicon:core')).toHaveLength(1)
+    expect(resolvedIds).toHaveLength(3)
+    expect(resolvedIds).toEqual(
+      expect.arrayContaining(['bible:LSG', 'bible-strong:LSG', 'strong-lexicon:core'])
+    )
+  })
+
+  it('checks visible dependencies and prevents removing them while still required', () => {
+    const options = getOfflineSetupFolderSections('understand-words', 'fr').flatMap(
+      section => section.options
+    )
+    const lsgStrong = options.find(option => option.id === 'bible-strong:LSG')!
+    const core = options.find(option => option.id === 'strong-lexicon:core')!
+    const selected = toggleOfflineSetupOptionId([], lsgStrong, options)
+
+    expect(selected).toEqual(['bible-strong:LSG', 'strong-lexicon:core'])
+    expect(toggleOfflineSetupOptionId(selected, core, options)).toEqual(selected)
+  })
+
+  it('offers localized exploration resources and keeps biblical entities', () => {
+    const sections = getOfflineSetupFolderSections('explore-bible', 'en')
+    const options = sections.flatMap(section => section.options)
+    expect(options.map(option => option.id)).toEqual(
+      expect.arrayContaining([
+        'database:DICTIONNAIRE:en',
+        'database:NAVE:en',
+        'database:TRESOR:fr',
+        'strong-lexicon:entities',
+        'database:DICTIONNAIRE:fr',
+        'database:MHY:fr',
+      ])
+    )
+    expect(options.map(option => option.id)).not.toContain('database:MHY:en')
   })
 })

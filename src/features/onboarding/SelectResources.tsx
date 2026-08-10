@@ -15,12 +15,20 @@ import {
   getOnboardingResourceSelectionId,
 } from './onboardingResources'
 import {
-  getOfflineSetupPresetSelections,
-  resolveOfflineSetupSelections,
-  type OfflineSetupPresetId,
+  getDefaultOfflineSetupFolderOptionIds,
+  getOfflineSetupFolderSections,
+  resolveOfflineSetupFolderOptionIds,
+  toggleOfflineSetupOptionId,
+  type OfflineSetupFolderOptionIds,
+  type OfflineSetupOption,
+  type OfflineSetupFolderId,
 } from './offlineSetupPresets'
 import OfflineResourceFolder from './components/OfflineResourceFolder'
+import OfflineSetupFolderDetail, {
+  type OfflineSetupFolderVisual,
+} from './components/OfflineSetupFolderDetail'
 import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
+import formatResourceSize from './formatResourceSize'
 
 type SelectResourcesProps =
   | {
@@ -32,18 +40,11 @@ type SelectResourcesProps =
       onClose: () => void
     }
 
-type PresetVisual = {
-  id: OfflineSetupPresetId
-  icon: React.ComponentProps<typeof Feather>['name']
-  colors: {
-    back: string
-    frontStart: string
-    frontEnd: string
-    icon: string
-  }
+type FolderVisual = OfflineSetupFolderVisual & {
+  id: OfflineSetupFolderId
 }
 
-const PRESET_VISUALS: PresetVisual[] = [
+const FOLDER_VISUALS: FolderVisual[] = [
   {
     id: 'read-bible',
     icon: 'book-open',
@@ -66,27 +67,6 @@ const PRESET_VISUALS: PresetVisual[] = [
   },
 ]
 
-const DETAIL_KEYS: Record<OfflineSetupPresetId, string[]> = {
-  'read-bible': ['bible'],
-  'understand-words': ['bible', 'strongIndex', 'strongLexicon', 'dictionary'],
-  'explore-bible': [
-    'nave',
-    'crossReferences',
-    'commentaries',
-    'timeline',
-    'strongFoundation',
-    'entities',
-  ],
-  'original-languages': ['originalBible', 'interlinear', 'strongLexicon', 'greekDictionary'],
-}
-
-const formatMegabytes = (bytes: number, lang: string): string => {
-  const value = bytes / 1_000_000
-  return `${new Intl.NumberFormat(lang, { maximumFractionDigits: 1 }).format(value)} ${
-    lang === 'fr' ? 'Mo' : 'MB'
-  }`
-}
-
 const SelectResources = (props: SelectResourcesProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
@@ -94,16 +74,17 @@ const SelectResources = (props: SelectResourcesProps) => {
   const { width } = useWindowDimensions()
   const [, setSelectedResources] = useAtom(selectedResourcesAtom)
   const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
-  const [selectedPresets, setSelectedPresets] = useState<Set<OfflineSetupPresetId>>(
-    new Set(['read-bible'])
+  const [folderOptionIds, setFolderOptionIds] = useState<OfflineSetupFolderOptionIds>(() =>
+    getDefaultOfflineSetupFolderOptionIds(lang)
   )
-  const [activePreset, setActivePreset] = useState<OfflineSetupPresetId>()
+  const [activeFolder, setActiveFolder] = useState<OfflineSetupFolderId>()
+  const [draftOptionIds, setDraftOptionIds] = useState<string[]>([])
   const [installedBytes, setInstalledBytes] = useState(0)
   const [availableSelectionIds, setAvailableSelectionIds] = useState<Set<string>>(new Set())
   const [checkedSelectionKey, setCheckedSelectionKey] = useState<string>()
   const contentWidth = Math.min(350, width - 40)
-  const selectedPresetKey = Array.from(selectedPresets).sort().join(',')
-  const selections = resolveOfflineSetupSelections(selectedPresets, lang)
+  const folderOptionIdsKey = JSON.stringify(folderOptionIds)
+  const selections = resolveOfflineSetupFolderOptionIds(folderOptionIds, lang)
   const missingSelections = selections.filter(
     selection => !availableSelectionIds.has(getOnboardingResourceSelectionId(selection))
   )
@@ -115,8 +96,8 @@ const SelectResources = (props: SelectResourcesProps) => {
 
   useEffect(() => {
     let cancelled = false
-    const currentSelections = resolveOfflineSetupSelections(
-      selectedPresetKey ? (selectedPresetKey.split(',') as OfflineSetupPresetId[]) : [],
+    const currentSelections = resolveOfflineSetupFolderOptionIds(
+      JSON.parse(folderOptionIdsKey) as OfflineSetupFolderOptionIds,
       lang
     )
 
@@ -128,51 +109,54 @@ const SelectResources = (props: SelectResourcesProps) => {
     )
       .then(results => {
         if (cancelled) return
-        setInstalledBytes(
-          results.reduce(
-            (total, result) =>
-              total +
-              (result.available
-                ? createDownloadItemFromOnboardingSelection(result.selection).estimatedSize
-                : 0),
-            0
-          )
+        const availability = results.reduce(
+          (summary, result) => {
+            if (!result.available) return summary
+            summary.ids.add(getOnboardingResourceSelectionId(result.selection))
+            summary.bytes += createDownloadItemFromOnboardingSelection(
+              result.selection
+            ).estimatedSize
+            return summary
+          },
+          { bytes: 0, ids: new Set<string>() }
         )
-        setAvailableSelectionIds(
-          new Set(
-            results
-              .filter(result => result.available)
-              .map(result => getOnboardingResourceSelectionId(result.selection))
-          )
-        )
-        setCheckedSelectionKey(selectedPresetKey)
+        setInstalledBytes(availability.bytes)
+        setAvailableSelectionIds(availability.ids)
+        setCheckedSelectionKey(folderOptionIdsKey)
       })
       .catch(() => {
         if (!cancelled) {
           setInstalledBytes(0)
           setAvailableSelectionIds(new Set())
-          setCheckedSelectionKey(selectedPresetKey)
+          setCheckedSelectionKey(folderOptionIdsKey)
         }
       })
 
     return () => {
       cancelled = true
     }
-  }, [lang, selectedPresetKey])
+  }, [folderOptionIdsKey, lang])
 
-  const togglePreset = (presetId: OfflineSetupPresetId) => {
-    // The current production reader still requires its primary Bible locally.
-    if (presetId === 'read-bible') return
-    setSelectedPresets(current => {
-      const next = new Set(current)
-      if (next.has(presetId)) next.delete(presetId)
-      else next.add(presetId)
-      return next
-    })
+  const openFolder = (folderId: OfflineSetupFolderId) => {
+    setDraftOptionIds(folderOptionIds[folderId])
+    setActiveFolder(folderId)
+  }
+
+  const toggleDraftOption = (option: OfflineSetupOption) => {
+    const folderOptions = activeFolder
+      ? getOfflineSetupFolderSections(activeFolder, lang).flatMap(section => section.options)
+      : []
+    setDraftOptionIds(current => toggleOfflineSetupOptionId(current, option, folderOptions))
+  }
+
+  const saveActiveFolder = () => {
+    if (!activeFolder) return
+    setFolderOptionIds(current => ({ ...current, [activeFolder]: draftOptionIds }))
+    setActiveFolder(undefined)
   }
 
   const continueToDownloads = () => {
-    if (checkedSelectionKey !== selectedPresetKey) return
+    if (checkedSelectionKey !== folderOptionIdsKey) return
     if (props.mode === 'preview') {
       props.onClose()
       return
@@ -205,7 +189,7 @@ const SelectResources = (props: SelectResourcesProps) => {
             {t('offlineSetup.toDownload')}
           </Text>
           <Text color="#FFFFFF" fontSize={18} style={{ fontFamily: 'FiraCode' }}>
-            {formatMegabytes(downloadBytes, lang)}
+            {formatResourceSize(downloadBytes, lang)}
           </Text>
         </Box>
         <Box height={34} width={1} bg="rgba(255,255,255,0.24)" />
@@ -214,7 +198,7 @@ const SelectResources = (props: SelectResourcesProps) => {
             {t('offlineSetup.onDevice')}
           </Text>
           <Text color="#FFFFFF" fontSize={18} style={{ fontFamily: 'FiraCode' }}>
-            {formatMegabytes(installedBytes, lang)}
+            {formatResourceSize(installedBytes, lang)}
           </Text>
         </Box>
       </HStack>
@@ -223,11 +207,11 @@ const SelectResources = (props: SelectResourcesProps) => {
         accessibilityLabel={t(
           props.mode === 'preview' ? 'offlineSetup.closePreview' : 'offlineSetup.continue'
         )}
-        disabled={selections.length === 0 || checkedSelectionKey !== selectedPresetKey}
+        disabled={selections.length === 0 || checkedSelectionKey !== folderOptionIdsKey}
         onPress={continueToDownloads}
         style={({ pressed }) => ({
           opacity:
-            selections.length === 0 || checkedSelectionKey !== selectedPresetKey
+            selections.length === 0 || checkedSelectionKey !== folderOptionIdsKey
               ? 0.45
               : pressed
                 ? 0.82
@@ -248,124 +232,19 @@ const SelectResources = (props: SelectResourcesProps) => {
     </Box>
   )
 
-  if (activePreset) {
-    const visual = PRESET_VISUALS.find(item => item.id === activePreset)!
-    const presetSelections = getOfflineSetupPresetSelections(activePreset, lang)
-    const selected = selectedPresets.has(activePreset)
-
+  if (activeFolder) {
+    const visual = FOLDER_VISUALS.find(item => item.id === activeFolder)!
     return (
-      <Box flex bg="#F4F7FF" pt={insets.top}>
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('offlineSetup.back')}
-            onPress={() => setActivePreset(undefined)}
-            hitSlop={10}
-          >
-            <Box size={44} borderRadius={22} bg="#FFFFFF" center mt={8}>
-              <Feather name="arrow-left" size={21} color="#142033" />
-            </Box>
-          </Pressable>
-
-          <Text title fontSize={34} lineHeight={38} mt={22}>
-            {t(`offlineSetup.presets.${activePreset}.title`)}
-          </Text>
-          <Text color="#68758C" fontSize={15} lineHeight={22} mt={10}>
-            {t(`offlineSetup.presets.${activePreset}.description`)}
-          </Text>
-
-          <Box width={190} height={172} alignSelf="center" mt={24}>
-            <OfflineResourceFolder
-              title={t(`offlineSetup.presets.${activePreset}.title`)}
-              subtitle={t(`offlineSetup.presets.${activePreset}.subtitle`, {
-                count: presetSelections.length,
-              })}
-              icon={visual.icon}
-              selected={selected}
-              colors={visual.colors}
-            />
-          </Box>
-
-          <Text title fontSize={20} mt={26} mb={8}>
-            {t('offlineSetup.included')}
-          </Text>
-          <VStack gap={8}>
-            {(activePreset === 'explore-bible' && lang !== 'fr'
-              ? DETAIL_KEYS[activePreset].filter(key => key !== 'commentaries')
-              : DETAIL_KEYS[activePreset]
-            ).map((key, index) => {
-              const item = createDownloadItemFromOnboardingSelection(presetSelections[index])
-              return (
-                <HStack
-                  key={key}
-                  minHeight={58}
-                  px={14}
-                  py={10}
-                  borderRadius={16}
-                  bg="#FFFFFF"
-                  alignItems="center"
-                  gap={12}
-                >
-                  <Box size={34} borderRadius={11} bg={visual.colors.back} center>
-                    <Feather name="check" size={18} color={visual.colors.icon} />
-                  </Box>
-                  <Box flex>
-                    <Text title fontSize={14}>
-                      {t(`offlineSetup.resources.${key}`)}
-                    </Text>
-                    <Text color="#748096" fontSize={11} mt={2}>
-                      {formatMegabytes(item.estimatedSize, lang)}
-                    </Text>
-                  </Box>
-                </HStack>
-              )
-            })}
-          </VStack>
-        </ScrollView>
-
-        <Box px={20} pb={Math.max(insets.bottom, 16)} pt={10} bg="#F4F7FF">
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => {
-              togglePreset(activePreset)
-              setActivePreset(undefined)
-            }}
-            style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
-          >
-            <Box
-              height={58}
-              borderRadius={29}
-              bg={selected ? '#FFFFFF' : visual.colors.frontEnd}
-              borderWidth={selected ? 1 : 0}
-              borderColor={visual.colors.frontEnd}
-              center
-              row
-              gap={10}
-            >
-              <Feather
-                name={
-                  activePreset === 'read-bible'
-                    ? 'check-circle'
-                    : selected
-                      ? 'minus-circle'
-                      : 'plus-circle'
-                }
-                size={20}
-                color={selected ? visual.colors.frontEnd : '#FFFFFF'}
-              />
-              <Text color={selected ? visual.colors.frontEnd : '#FFFFFF'} title fontSize={16}>
-                {t(
-                  activePreset === 'read-bible'
-                    ? 'offlineSetup.required'
-                    : selected
-                      ? 'offlineSetup.remove'
-                      : 'offlineSetup.add'
-                )}
-              </Text>
-            </Box>
-          </Pressable>
-        </Box>
-      </Box>
+      <OfflineSetupFolderDetail
+        folderId={activeFolder}
+        lang={lang}
+        sections={getOfflineSetupFolderSections(activeFolder, lang)}
+        selectedOptionIds={draftOptionIds}
+        visual={visual}
+        onBack={() => setActiveFolder(undefined)}
+        onToggleOption={toggleDraftOption}
+        onSave={saveActiveFolder}
+      />
     )
   }
 
@@ -403,17 +282,22 @@ const SelectResources = (props: SelectResourcesProps) => {
         <VStack gap={38}>
           {[0, 2].map(startIndex => (
             <HStack key={startIndex} gap={10}>
-              {PRESET_VISUALS.slice(startIndex, startIndex + 2).map(visual => {
-                const count = getOfflineSetupPresetSelections(visual.id, lang).length
+              {FOLDER_VISUALS.slice(startIndex, startIndex + 2).map(visual => {
+                const count = folderOptionIds[visual.id].length
                 return (
                   <OfflineResourceFolder
                     key={visual.id}
                     title={t(`offlineSetup.presets.${visual.id}.title`)}
-                    subtitle={t(`offlineSetup.presets.${visual.id}.subtitle`, { count })}
+                    subtitle={t(
+                      visual.id === 'read-bible'
+                        ? 'offlineSetup.translationCount'
+                        : 'offlineSetup.selectedCount',
+                      { count }
+                    )}
                     icon={visual.icon}
-                    selected={selectedPresets.has(visual.id)}
+                    selected={count > 0}
                     colors={visual.colors}
-                    onPress={() => setActivePreset(visual.id)}
+                    onPress={() => openFolder(visual.id)}
                   />
                 )
               })}
