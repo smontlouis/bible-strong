@@ -1,4 +1,4 @@
-import { getBibleDefaultCatalog } from '../bibleDefaultCatalog'
+import { getBibleDefaultCatalog } from '~features/bible/bibleDefaultCatalog'
 import { versions } from '~helpers/bibleVersions'
 
 jest.mock('~i18n', () => ({

@@ -2,10 +2,15 @@ import { versions } from '~helpers/bibleVersions'
 import { databases } from '~helpers/databases'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import {
-  ENGLISH_STRONG_BIBLE_PRIORITY,
-  FRENCH_STRONG_BIBLE_PRIORITY,
-} from '~helpers/strongBiblePublications'
+  getVersionCatalogSections,
+  type VersionCatalogLabels,
+} from '~features/bible/versionCatalog'
+import {
+  getBibleDefaultCatalog,
+  type BibleDefaultSelectionKind,
+} from '~features/bible/bibleDefaultCatalog'
 import type { OnboardingResourceSelection } from './onboardingResources'
 import { getOnboardingResourceSelectionId } from './onboardingResourceSelectionId'
 
@@ -46,10 +51,11 @@ const getBibleLabel = (versionId: string, lang: ResourceLanguage): string => {
 const createBibleOption = (
   versionId: string,
   lang: ResourceLanguage,
-  required = false
+  required = false,
+  label = getBibleLabel(versionId, lang)
 ): OfflineSetupOption => ({
   id: `bible:${versionId}`,
-  label: getBibleLabel(versionId, lang),
+  label,
   description: versions[versionId].c,
   language: versions[versionId].language,
   required,
@@ -57,13 +63,12 @@ const createBibleOption = (
 })
 
 const createStrongBibleOption = (
-  versionId:
-    | (typeof FRENCH_STRONG_BIBLE_PRIORITY)[number]
-    | (typeof ENGLISH_STRONG_BIBLE_PRIORITY)[number],
-  lang: ResourceLanguage
+  versionId: StrongBibleVersionId,
+  lang: ResourceLanguage,
+  label = getBibleLabel(versionId, lang)
 ): OfflineSetupOption => ({
   id: `bible-strong:${versionId}`,
-  label: getBibleLabel(versionId, lang),
+  label,
   labelKey: 'offlineSetup.option.strongBible',
   language: versions[versionId].language,
   requires: ['strong-lexicon:core'],
@@ -90,38 +95,38 @@ const createDatabaseOption = (
   }
 }
 
+const VERSION_CATALOG_LABELS: VersionCatalogLabels = {
+  languages: { fr: 'fr', en: 'en', he: 'he', grc: 'grc', 'he-grc': 'he-grc', la: 'la' },
+  profiles: {
+    'word-for-word': 'word-for-word',
+    balanced: 'balanced',
+    'thought-for-thought': 'thought-for-thought',
+    paraphrase: 'paraphrase',
+  },
+  other: 'other',
+}
+
+const getBibleFolderCatalogSections = (kind: BibleDefaultSelectionKind, lang: ResourceLanguage) =>
+  getVersionCatalogSections({
+    catalog: getBibleDefaultCatalog(kind),
+    grouping: 'language',
+    query: '',
+    uiLanguage: lang,
+    labels: VERSION_CATALOG_LABELS,
+  })
+
 const getReadableBibleSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
   const requiredVersionId = getDefaultBibleVersion(lang)
-  const toOption = (versionId: string) =>
-    createBibleOption(versionId, lang, versionId === requiredVersionId)
-  const groupedOptions = Object.values(versions).reduce(
-    (groups, version) => {
-      if (version.hidden || (version.language !== 'fr' && version.language !== 'en')) return groups
-      const target = version.language === lang ? groups.primary : groups.other
-      target.push(toOption(version.id))
-      return groups
-    },
-    { primary: [] as OfflineSetupOption[], other: [] as OfflineSetupOption[] }
-  )
-
-  return [
-    {
-      id: 'primary-language',
-      titleKey: 'offlineSetup.section.primaryLanguage',
-      options: groupedOptions.primary,
-    },
-    {
-      id: 'other-languages',
-      titleKey: 'offlineSetup.section.otherLanguages',
-      options: groupedOptions.other,
-    },
-  ]
+  return getBibleFolderCatalogSections('reading', lang).map(section => ({
+    id: `bible-language-${section.key}`,
+    titleKey: `versionCatalog.language.${section.key}`,
+    options: section.data.map(version =>
+      createBibleOption(version.id, lang, version.id === requiredVersionId, version.displayName)
+    ),
+  }))
 }
 
 const getStrongSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
-  const primaryIds = lang === 'fr' ? FRENCH_STRONG_BIBLE_PRIORITY : ENGLISH_STRONG_BIBLE_PRIORITY
-  const otherIds = lang === 'fr' ? ENGLISH_STRONG_BIBLE_PRIORITY : FRENCH_STRONG_BIBLE_PRIORITY
-
   return [
     {
       id: 'strong-tools',
@@ -136,16 +141,13 @@ const getStrongSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
         },
       ],
     },
-    {
-      id: 'primary-language',
-      titleKey: 'offlineSetup.section.strongBiblesPrimary',
-      options: primaryIds.map(versionId => createStrongBibleOption(versionId, lang)),
-    },
-    {
-      id: 'other-languages',
-      titleKey: 'offlineSetup.section.strongBiblesOther',
-      options: otherIds.map(versionId => createStrongBibleOption(versionId, lang)),
-    },
+    ...getBibleFolderCatalogSections('strong', lang).map(section => ({
+      id: `strong-bible-language-${section.key}`,
+      titleKey: `versionCatalog.language.${section.key}`,
+      options: section.data.map(version =>
+        createStrongBibleOption(version.id as StrongBibleVersionId, lang, version.displayName)
+      ),
+    })),
   ]
 }
 

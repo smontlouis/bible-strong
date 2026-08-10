@@ -38,6 +38,20 @@ jest.mock('~helpers/languageUtils', () => ({
 }))
 
 jest.mock('~helpers/strongBiblePublications', () => ({
+  STRONG_BIBLE_PUBLICATIONS: {
+    LSG: {},
+    DBY: {},
+    DBR: {},
+    KJV: {},
+    NASB2020: {},
+    NASB1995: {},
+    BSB: {},
+    ASV: {},
+    DARBY: {},
+    RLT: {},
+    RWEBSTER: {},
+    RV1895: {},
+  },
   FRENCH_STRONG_BIBLE_PRIORITY: ['LSG', 'DBY', 'DBR'],
   ENGLISH_STRONG_BIBLE_PRIORITY: [
     'KJV',
@@ -68,13 +82,36 @@ describe('offline setup folders', () => {
   })
 
   it('lists only French and English Bibles in the reading folder', () => {
-    const options = getOfflineSetupFolderSections('read-bible', 'fr').flatMap(
-      section => section.options
-    )
+    const sections = getOfflineSetupFolderSections('read-bible', 'fr')
+    const options = sections.flatMap(section => section.options)
     expect(options.map(option => option.id)).toEqual(
       expect.arrayContaining(['bible:LSG', 'bible:KJV'])
     )
     expect(options.map(option => option.id)).not.toContain('bible:BHG')
+    expect(sections.map(section => section.titleKey)).toEqual([
+      'versionCatalog.language.fr',
+      'versionCatalog.language.en',
+    ])
+    expect(sections[0]?.options.map(option => option.id)).toEqual([
+      'bible:DBY',
+      'bible:DBR',
+      'bible:LSG',
+    ])
+  })
+
+  it('uses the default Strong Bible catalog sections and ordering', () => {
+    const sections = getOfflineSetupFolderSections('understand-words', 'en')
+
+    expect(sections.map(section => section.titleKey)).toEqual([
+      'offlineSetup.section.sharedTools',
+      'versionCatalog.language.en',
+      'versionCatalog.language.fr',
+    ])
+    expect(sections[1]?.options.slice(0, 3).map(option => option.id)).toEqual([
+      'bible-strong:ASV',
+      'bible-strong:BSB',
+      'bible-strong:DARBY',
+    ])
   })
 
   it('expands a Strong Bible into its base, index, and shared lexicon without duplicates', () => {
