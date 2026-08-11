@@ -5,6 +5,8 @@ import { Pressable, ScrollView, useWindowDimensions } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import {
   Extrapolation,
+  FadeIn,
+  FadeOut,
   interpolate,
   useAnimatedStyle,
   useDerivedValue,
@@ -25,20 +27,22 @@ import {
   getOfflineSetupReviewLayout,
   getOfflineSetupReviewListTopInset,
   getOfflineSetupReviewSnapPoint,
-  type OfflineSetupReviewItem,
+  type OfflineSetupReviewFolderContext,
+  type OfflineSetupReviewSummary,
 } from '../offlineSetupReview'
 import formatResourceSize from '../formatResourceSize'
+import useOfflineSetupFolderHeroHandoff from '../useOfflineSetupFolderHeroHandoff'
+import OfflineSetupReviewHeader from './OfflineSetupReviewHeader'
 
 type OfflineSetupReviewSheetProps = {
   availabilityReady: boolean
   bottomInset: number
-  downloadBytes: number
   downloading: boolean
-  installedBytes: number
-  items: readonly OfflineSetupReviewItem[]
+  folderContext?: OfflineSetupReviewFolderContext
   lang: ResourceLanguage
   reduceMotion: boolean
   safeAreaTop: number
+  summary: OfflineSetupReviewSummary
   onDownload: () => void
   onOpenChange?: (open: boolean) => void
 }
@@ -50,6 +54,18 @@ const getButtonOpacity = (disabled: boolean, pressed: boolean) => {
   if (disabled) return 0.45
   if (pressed) return 0.82
   return 1
+}
+
+const getButtonTranslationKey = ({
+  folderContext,
+  reviewOpen,
+}: {
+  folderContext: boolean
+  reviewOpen: boolean
+}) => {
+  if (folderContext) return 'offlineSetup.done'
+  if (reviewOpen) return 'offlineSetup.download'
+  return 'offlineSetup.review'
 }
 
 const buttonLabelFadeIn = () => {
@@ -104,27 +120,36 @@ const buttonLabelFadeOut = () => {
 const OfflineSetupReviewSheet = ({
   availabilityReady,
   bottomInset,
-  downloadBytes,
   downloading,
-  installedBytes,
-  items,
+  folderContext,
   lang,
   onDownload,
   onOpenChange,
   reduceMotion,
   safeAreaTop,
+  summary,
 }: OfflineSetupReviewSheetProps) => {
   const { t } = useTranslation()
   const viewport = useWindowDimensions()
   const reviewMotion = OFFLINE_SETUP_MOTION.reviewSheet
   const layout = reviewMotion.layout
+  const displayedSummary = folderContext?.summary ?? summary
+  const displayedItems = displayedSummary.items
+  const displayedDownloadBytes = displayedSummary.downloadBytes
+  const displayedInstalledBytes = displayedSummary.installedBytes
+  const sheetSurface = folderContext?.visual.colors.surface ?? '#172840'
+  const transparentSheetSurface =
+    folderContext?.visual.colors.surfaceTransparent ?? 'rgba(23,40,64,0)'
+  const accentColor = folderContext?.visual.colors.frontEnd ?? '#5983F0'
+  const accentColorSoft = folderContext?.visual.colors.accentSoft ?? 'rgba(89,131,240,0.22)'
+  const accentColorLight = folderContext?.visual.colors.frontStart ?? '#9BB8FF'
   const maxExpandedHeight = Math.max(
     reviewMotion.closedHeight,
     viewport.height - safeAreaTop - SHEET_TOP_INSET
   )
   const reviewLayout = getOfflineSetupReviewLayout({
     bottomInset,
-    itemCount: items.length,
+    itemCount: displayedItems.length,
     maxHeight: maxExpandedHeight,
   })
   const expandedHeight = reviewLayout.expandedHeight
@@ -138,8 +163,14 @@ const OfflineSetupReviewSheet = ({
   const dragStartProgress = useSharedValue(0)
   const [reviewOpen, setReviewOpen] = useState(false)
   const [overlayActive, setOverlayActive] = useState(false)
-  const disabled = downloading || items.length === 0 || !availabilityReady
-  const buttonTranslationKey = reviewOpen ? 'offlineSetup.download' : 'offlineSetup.review'
+  const canReview = displayedItems.length > 0
+  const disabled = folderContext
+    ? false
+    : downloading || displayedItems.length === 0 || !availabilityReady
+  const buttonTranslationKey = getButtonTranslationKey({
+    folderContext: Boolean(folderContext),
+    reviewOpen,
+  })
   const buttonLabel = t(buttonTranslationKey)
 
   const settle = (open: boolean) => {
@@ -160,7 +191,13 @@ const OfflineSetupReviewSheet = ({
     )
   }
 
+  const { closeFolder, folderBadgeRef, reportFolderHeroTarget } = useOfflineSetupFolderHeroHandoff({
+    context: folderContext,
+    onCloseSheet: () => settle(false),
+  })
+
   const panGesture = Gesture.Pan()
+    .enabled(canReview)
     .minDistance(2)
     .onBegin(() => {
       dragStartProgress.set(progress.get())
@@ -295,6 +332,10 @@ const OfflineSetupReviewSheet = ({
 
   const handleButtonPress = () => {
     if (disabled) return
+    if (folderContext) {
+      closeFolder()
+      return
+    }
     if (!reviewOpen) {
       settle(true)
       return
@@ -330,7 +371,19 @@ const OfflineSetupReviewSheet = ({
           },
         ]}
       >
-        <AnimatedBox absoluteFill bg="#172840" style={[clippingStyle, { overflow: 'hidden' }]}>
+        <AnimatedBox
+          absoluteFill
+          style={[
+            clippingStyle,
+            {
+              overflow: 'hidden',
+              backgroundColor: sheetSurface,
+              transitionProperty: 'backgroundColor',
+              transitionDuration: 220,
+              transitionTimingFunction: 'ease-out',
+            },
+          ]}
+        >
           <GestureDetector gesture={panGesture}>
             <AnimatedBox position="absolute" top={0} left={0} right={0} height={72} zIndex={4}>
               <Pressable
@@ -338,6 +391,7 @@ const OfflineSetupReviewSheet = ({
                 accessibilityLabel={t(
                   reviewOpen ? 'offlineSetup.closeReview' : 'offlineSetup.openReview'
                 )}
+                disabled={!canReview}
                 onPress={() => settle(!reviewOpen)}
                 style={{ flex: 1, alignItems: 'center' }}
               >
@@ -354,28 +408,23 @@ const OfflineSetupReviewSheet = ({
             zIndex={3}
             pointerEvents="none"
           >
-            <HStack height={layout.summaryHeight} alignItems="center" px={12} gap={14}>
-              <Box size={36} borderRadius={18} bg="#5983F0" center>
-                <Feather name="archive" size={20} color="#FFFFFF" />
-              </Box>
-              <Box flex>
-                <Text color="#B8C2D1" fontSize={11}>
-                  {t('offlineSetup.toDownload')}
-                </Text>
-                <Text color="#FFFFFF" fontSize={18} style={{ fontFamily: 'FiraCode' }}>
-                  {formatResourceSize(downloadBytes, lang)}
-                </Text>
-              </Box>
-              <Box height={34} width={1} bg="rgba(255,255,255,0.24)" />
-              <Box flex>
-                <Text color="#B8C2D1" fontSize={11}>
-                  {t('offlineSetup.onDevice')}
-                </Text>
-                <Text color="#FFFFFF" fontSize={18} style={{ fontFamily: 'FiraCode' }}>
-                  {formatResourceSize(installedBytes, lang)}
-                </Text>
-              </Box>
-            </HStack>
+            <FadingBox
+              keyProp={folderContext?.folderId ?? 'overview'}
+              animateLayout={false}
+              entering={FadeIn.duration(170)}
+              exiting={FadeOut.duration(110)}
+              height={layout.summaryHeight}
+            >
+              <OfflineSetupReviewHeader
+                downloadBytes={displayedDownloadBytes}
+                folderBadgeRef={folderBadgeRef}
+                folderContext={folderContext}
+                height={layout.summaryHeight}
+                installedBytes={displayedInstalledBytes}
+                lang={lang}
+                onFolderBadgeLayout={reportFolderHeroTarget}
+              />
+            </FadingBox>
           </AnimatedBox>
 
           <AnimatedBox
@@ -400,7 +449,7 @@ const OfflineSetupReviewSheet = ({
               scrollEnabled={reviewLayout.scrollEnabled}
               nestedScrollEnabled={reviewLayout.scrollEnabled}
             >
-              {items.map(item => (
+              {displayedItems.map(item => (
                 <HStack
                   key={item.id}
                   minHeight={layout.resourceRowHeight}
@@ -411,8 +460,8 @@ const OfflineSetupReviewSheet = ({
                   alignItems="center"
                   gap={11}
                 >
-                  <Box size={34} borderRadius={12} bg="rgba(89,131,240,0.22)" center>
-                    <Feather name="file-text" size={17} color="#9BB8FF" />
+                  <Box size={34} borderRadius={12} bg={accentColorSoft} center>
+                    <Feather name="file-text" size={17} color={accentColorLight} />
                   </Box>
                   <Box flex>
                     <Text color="#FFFFFF" fontSize={13} bold numberOfLines={1}>
@@ -425,14 +474,14 @@ const OfflineSetupReviewSheet = ({
                       })}
                     </Text>
                   </Box>
-                  <Feather name="check" size={17} color="#9BB8FF" />
+                  <Feather name="check" size={17} color={accentColorLight} />
                 </HStack>
               ))}
             </ScrollView>
 
             <LinearGradient
               pointerEvents="none"
-              colors={['#172840', 'rgba(23,40,64,0)']}
+              colors={[sheetSurface, transparentSheetSurface]}
               locations={[0.52, 1]}
               style={{
                 position: 'absolute',
@@ -453,7 +502,7 @@ const OfflineSetupReviewSheet = ({
               pointerEvents="none"
             >
               <Text color="#AEB9CA" fontSize={13} lineHeight={layout.subtitleHeight}>
-                {t('offlineSetup.reviewSubtitle', { count: items.length })}
+                {t('offlineSetup.reviewSubtitle', { count: displayedItems.length })}
               </Text>
             </Box>
           </AnimatedBox>
@@ -469,7 +518,7 @@ const OfflineSetupReviewSheet = ({
             style={reviewGradientStyle}
           >
             <LinearGradient
-              colors={['rgba(23,40,64,0)', '#172840']}
+              colors={[transparentSheetSurface, sheetSurface]}
               locations={[0, 0.48]}
               style={{ flex: 1 }}
             />
@@ -490,7 +539,7 @@ const OfflineSetupReviewSheet = ({
               onPress={handleButtonPress}
               style={({ pressed }) => ({ opacity: getButtonOpacity(disabled, pressed) })}
             >
-              <Box height={layout.buttonHeight} borderRadius={28} bg="#5983F0" center>
+              <Box height={layout.buttonHeight} borderRadius={28} bg={accentColor} center>
                 <FadingBox
                   keyProp={buttonLabel}
                   animateLayout={false}

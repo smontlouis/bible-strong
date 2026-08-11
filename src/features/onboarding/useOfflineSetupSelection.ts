@@ -7,21 +7,25 @@ import {
   loadOfflineResourceSizeManifest,
 } from '~helpers/offlineResourceSizeManifest'
 import {
-  createDownloadItemFromOnboardingSelection,
   getOnboardingResourceIdentity,
   getOnboardingResourceSelectionId,
 } from './onboardingResources'
 import {
   getDefaultOfflineSetupFolderOptionIds,
   getOfflineSetupLockedOptionIds,
+  OFFLINE_SETUP_FOLDER_IDS,
+  resolveOfflineSetupFolderSelections,
   resolveOfflineSetupFolderOptionIds,
   toggleOfflineSetupFolderOption,
   type OfflineSetupFolderId,
   type OfflineSetupFolderOptionIds,
   type OfflineSetupOption,
 } from './offlineSetupPresets'
-import { getOfflineSetupSizeSummary } from './offlineSetupSizeSummary'
-import { getOfflineSetupReviewItems } from './offlineSetupReview'
+import {
+  getOfflineSetupReviewItems,
+  getOfflineSetupReviewSummary,
+  type OfflineSetupReviewSummary,
+} from './offlineSetupReview'
 
 type AvailabilitySummary = {
   ids: Set<string>
@@ -67,9 +71,20 @@ const useOfflineSetupSelection = (lang: ResourceLanguage) => {
   const selectionKey = JSON.stringify(folderOptionIds)
   const selections = resolveOfflineSetupFolderOptionIds(folderOptionIds, lang)
   const lockedOptionIds = getOfflineSetupLockedOptionIds(folderOptionIds, lang)
-  const selectedItems = selections.map(createDownloadItemFromOnboardingSelection)
-  const sizeSummary = getOfflineSetupSizeSummary(selectedItems, sizeManifest)
-  const reviewItems = getOfflineSetupReviewItems(selections, sizeManifest)
+  const reviewSummary = getOfflineSetupReviewSummary(
+    getOfflineSetupReviewItems(selections, sizeManifest)
+  )
+  const folderReviewSummaries = Object.fromEntries(
+    OFFLINE_SETUP_FOLDER_IDS.map(folderId => {
+      const folderSelections = resolveOfflineSetupFolderSelections(
+        folderId,
+        folderOptionIds[folderId],
+        lang
+      )
+      const folderItems = getOfflineSetupReviewItems(folderSelections, sizeManifest)
+      return [folderId, getOfflineSetupReviewSummary(folderItems)]
+    })
+  ) as Record<OfflineSetupFolderId, OfflineSetupReviewSummary>
   const missingSelections = selections.filter(
     selection => !availability.ids.has(getOnboardingResourceSelectionId(selection))
   )
@@ -111,12 +126,11 @@ const useOfflineSetupSelection = (lang: ResourceLanguage) => {
 
   return {
     availabilityReady: checkedSelectionKey === selectionKey,
-    downloadBytes: sizeSummary.downloadBytes,
     folderOptionIds,
-    installedBytes: sizeSummary.installedBytes,
+    folderReviewSummaries,
     lockedOptionIds,
     missingSelections,
-    reviewItems,
+    reviewSummary,
     selections,
     sizeManifest,
     toggleOption,

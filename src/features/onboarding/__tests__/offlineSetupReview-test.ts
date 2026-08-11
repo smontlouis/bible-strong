@@ -5,6 +5,7 @@ import {
   getOfflineSetupReviewExpandedHeight,
   getOfflineSetupReviewItems,
   getOfflineSetupReviewLayout,
+  getOfflineSetupReviewSummary,
   getOfflineSetupReviewSnapPoint,
 } from '../offlineSetupReview'
 
@@ -130,6 +131,19 @@ describe('offline setup review', () => {
     ).toEqual({
       expandedHeight: 600,
       scrollEnabled: true,
+    })
+  })
+
+  it('keeps review items and both size totals in one summary', () => {
+    const items = [
+      { id: 'one', name: 'One', downloadBytes: 5, installedBytes: 12 },
+      { id: 'two', name: 'Two', downloadBytes: 7, installedBytes: 20 },
+    ]
+
+    expect(getOfflineSetupReviewSummary(items)).toEqual({
+      downloadBytes: 12,
+      installedBytes: 32,
+      items,
     })
   })
 })

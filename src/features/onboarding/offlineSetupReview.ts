@@ -6,12 +6,45 @@ import {
 import type { OnboardingResourceSelection } from './onboardingResources'
 import { createDownloadItemFromOnboardingSelection } from './onboardingResources'
 import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
+import type { OfflineSetupFolderId } from './offlineSetupPresets'
+import type { OfflineSetupFolderVisual, OfflineSetupFrame } from './offlineSetupPresentation'
 
 export type OfflineSetupReviewItem = {
   id: string
   name: string
   downloadBytes: number
   installedBytes: number
+}
+
+export type OfflineSetupReviewSummary = {
+  downloadBytes: number
+  installedBytes: number
+  items: readonly OfflineSetupReviewItem[]
+}
+
+export type OfflineSetupReviewFolderContext = {
+  folderId: OfflineSetupFolderId
+  heroOverlayActive: boolean
+  selectedCount: number
+  summary: OfflineSetupReviewSummary
+  title: string
+  visual: OfflineSetupFolderVisual
+  onClose: (heroFrame?: OfflineSetupFrame) => void
+  onHeroTargetLayout: (heroFrame: OfflineSetupFrame) => void
+}
+
+export const getOfflineSetupReviewSummary = (
+  items: readonly OfflineSetupReviewItem[]
+): OfflineSetupReviewSummary => {
+  let downloadBytes = 0
+  let installedBytes = 0
+
+  for (const item of items) {
+    downloadBytes += item.downloadBytes
+    installedBytes += item.installedBytes
+  }
+
+  return { downloadBytes, installedBytes, items }
 }
 
 type OfflineSetupReviewLayoutParams = {

@@ -3,7 +3,7 @@ import { useSetAtom } from 'jotai/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, useWindowDimensions } from 'react-native'
-import { FadeIn, useReducedMotion } from 'react-native-reanimated'
+import { FadeIn, FadeInUp, useReducedMotion } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
@@ -14,7 +14,10 @@ import DownloadResources from './DownloadResources'
 import OfflineResourceFolderHero from './components/OfflineResourceFolderHero'
 import OfflineSetupFolderDetail from './components/OfflineSetupFolderDetail'
 import OfflineSetupOverview from './components/OfflineSetupOverview'
+import OfflineSetupReviewSheet from './components/OfflineSetupReviewSheet'
+import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
 import { getOfflineSetupFolderSections } from './offlineSetupPresets'
+import type { OfflineSetupReviewFolderContext } from './offlineSetupReview'
 import { OFFLINE_SETUP_FOLDER_PRESENTATIONS } from './offlineSetupPresentation'
 import useOfflineSetupScene from './useOfflineSetupScene'
 import useOfflineSetupSelection from './useOfflineSetupSelection'
@@ -43,6 +46,24 @@ const SelectResources = (props: SelectResourcesProps) => {
   const heroCount = state.hero ? selection.folderOptionIds[state.hero.folderId].length : 0
   const isClosingFolder = state.hero?.direction === 'closing'
   const downloading = state.downloadSceneActive && !state.downloadSceneSettled
+  const activeFolderSummary = activeFolder
+    ? selection.folderReviewSummaries[activeFolder]
+    : undefined
+  let folderContext: OfflineSetupReviewFolderContext | undefined
+
+  if (activeFolder && activeVisual && activeFolderSummary) {
+    folderContext = {
+      folderId: activeFolder,
+      heroOverlayActive:
+        state.hero?.folderId === activeFolder && state.hero.direction !== 'settled',
+      selectedCount: selection.folderOptionIds[activeFolder].length,
+      summary: activeFolderSummary,
+      title: t(`offlineSetup.presets.${activeFolder}.title`),
+      visual: activeVisual,
+      onClose: scene.closeFolder,
+      onHeroTargetLayout: scene.handleHeroTargetLayout,
+    }
+  }
 
   const startDownload = () => {
     if (!selection.availabilityReady) return
@@ -66,17 +87,12 @@ const SelectResources = (props: SelectResourcesProps) => {
         <OfflineSetupFolderDetail
           contentVisible={state.detailContentVisible}
           folderId={activeFolder}
-          heroOverlayActive={
-            state.hero?.folderId === activeFolder && state.hero.direction !== 'settled'
-          }
           lang={lang}
           lockedOptionIds={selection.lockedOptionIds}
           sizeManifest={selection.sizeManifest}
           sections={getOfflineSetupFolderSections(activeFolder, lang)}
           selectedOptionIds={selection.folderOptionIds[activeFolder]}
           visual={activeVisual}
-          onClose={scene.closeFolder}
-          onHeroTargetLayout={scene.handleHeroTargetLayout}
           onToggleOption={option => selection.toggleOption(activeFolder, option)}
         />
       ) : null}
@@ -88,26 +104,48 @@ const SelectResources = (props: SelectResourcesProps) => {
           entering={reduceMotion || !isClosingFolder ? undefined : FadeIn.duration(100)}
         >
           <OfflineSetupOverview
-            availabilityReady={selection.availabilityReady}
             bottomInset={bottomInset}
             contentWidth={contentWidth}
-            downloadBytes={selection.downloadBytes}
             downloading={downloading}
             folderOptionIds={selection.folderOptionIds}
             folderWidth={folderWidth}
             hero={state.hero}
-            installedBytes={selection.installedBytes}
-            lang={lang}
             mergeOffsets={state.folderMergeOffsets}
             openingFolder={state.openingFolder}
             reduceMotion={reduceMotion}
-            reviewItems={selection.reviewItems}
             returningFolder={state.returningFolder}
             safeAreaTop={insets.top}
-            onDownload={startDownload}
             onFolderPress={scene.openFolder}
-            onReviewOpenChange={setReviewOpen}
             registerFolder={scene.registerFolder}
+          />
+        </AnimatedBox>
+      ) : null}
+
+      {!state.downloadSceneSettled ? (
+        <AnimatedBox
+          absoluteFill
+          zIndex={20}
+          pointerEvents={downloading ? 'none' : 'box-none'}
+          entering={reduceMotion ? undefined : FadeInUp.duration(400).delay(450)}
+          style={{
+            opacity: downloading ? 0 : 1,
+            transform: [{ translateY: downloading ? 10 : 0 }],
+            transitionProperty: ['opacity', 'transform'],
+            transitionDuration: OFFLINE_SETUP_MOTION.overview.downloadFadeDuration,
+            transitionTimingFunction: 'ease-out',
+          }}
+        >
+          <OfflineSetupReviewSheet
+            availabilityReady={selection.availabilityReady}
+            bottomInset={bottomInset}
+            downloading={downloading}
+            folderContext={folderContext}
+            lang={lang}
+            reduceMotion={reduceMotion}
+            safeAreaTop={insets.top}
+            summary={selection.reviewSummary}
+            onDownload={startDownload}
+            onOpenChange={setReviewOpen}
           />
         </AnimatedBox>
       ) : null}

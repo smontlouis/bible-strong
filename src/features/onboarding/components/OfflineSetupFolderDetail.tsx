@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons'
-import { useRef, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { useState } from 'react'
+import { Pressable, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -13,18 +13,15 @@ import type {
   OfflineSetupFolderId,
   OfflineSetupSection,
 } from '../offlineSetupPresets'
-import type { OfflineSetupFolderVisual, OfflineSetupFrame } from '../offlineSetupPresentation'
-import OfflineResourceFolder from './OfflineResourceFolder'
+import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
+import type { OfflineSetupFolderVisual } from '../offlineSetupPresentation'
 import OfflineSetupResourceOption from './OfflineSetupResourceOption'
 
 type OfflineSetupFolderDetailProps = {
   contentVisible: boolean
   folderId: OfflineSetupFolderId
-  heroOverlayActive: boolean
   lang: ResourceLanguage
   lockedOptionIds: ReadonlySet<string>
-  onClose: (heroFrame?: OfflineSetupFrame) => void
-  onHeroTargetLayout: (heroFrame: OfflineSetupFrame) => void
   onToggleOption: (option: OfflineSetupOption) => void
   sections: OfflineSetupSection[]
   selectedOptionIds: readonly string[]
@@ -32,7 +29,7 @@ type OfflineSetupFolderDetailProps = {
   visual: OfflineSetupFolderVisual
 }
 
-const DETAIL_FOOTER_HEIGHT = 68
+const DETAIL_SHEET_HEIGHT = OFFLINE_SETUP_MOTION.reviewSheet.closedHeight
 
 const OfflineSetupSectionTitle = ({
   collapsed,
@@ -78,11 +75,8 @@ const OfflineSetupSectionTitle = ({
 const OfflineSetupFolderDetail = ({
   contentVisible,
   folderId,
-  heroOverlayActive,
   lang,
   lockedOptionIds,
-  onClose,
-  onHeroTargetLayout,
   onToggleOption,
   sections,
   selectedOptionIds,
@@ -93,25 +87,7 @@ const OfflineSetupFolderDetail = ({
   const insets = useSafeAreaInsets()
   const selectedIds = new Set(selectedOptionIds)
   const [expandedSectionIds, setExpandedSectionIds] = useState<Set<string>>(() => new Set())
-  const heroRef = useRef<View | null>(null)
   const footerBottomInset = Math.max(insets.bottom, 16)
-
-  const measureHero = (onMeasured: (frame?: OfflineSetupFrame) => void) => {
-    if (!heroRef.current) {
-      onMeasured(undefined)
-      return
-    }
-
-    heroRef.current.measureInWindow((x, y, width, height) => {
-      onMeasured({ x, y, width, height })
-    })
-  }
-
-  const reportHeroTarget = () => {
-    measureHero(frame => {
-      if (frame) onHeroTargetLayout(frame)
-    })
-  }
 
   const toggleSection = (sectionId: string) => {
     setExpandedSectionIds(current => {
@@ -128,7 +104,7 @@ const OfflineSetupFolderDetail = ({
         contentContainerStyle={{
           paddingHorizontal: 20,
           paddingTop: insets.top + 26,
-          paddingBottom: DETAIL_FOOTER_HEIGHT + footerBottomInset + 24,
+          paddingBottom: DETAIL_SHEET_HEIGHT + footerBottomInset + 24,
         }}
         showsVerticalScrollIndicator={false}
         scrollEnabled={contentVisible}
@@ -139,85 +115,30 @@ const OfflineSetupFolderDetail = ({
             opacity: contentVisible ? 1 : 0,
             transform: [{ translateY: contentVisible ? 0 : -10 }],
             transitionProperty: ['opacity', 'transform'],
-            transitionDuration: contentVisible ? 360 : 190,
-            transitionDelay: contentVisible ? 40 : 0,
+            transitionDuration: contentVisible ? 300 : 190,
+            transitionDelay: 0,
             transitionTimingFunction: 'ease-out',
           }}
         >
-          <Text title fontSize={34} lineHeight={38}>
-            {t(`offlineSetup.presets.${folderId}.title`)}
+          <Text title fontSize={34} lineHeight={38} maxWidth={280}>
+            {t('offlineSetup.chooseResources')}
           </Text>
           <Text color="#68758C" fontSize={15} lineHeight={22} mt={10}>
             {t(`offlineSetup.presets.${folderId}.description`)}
           </Text>
         </AnimatedBox>
 
-        <Box width={190} height={172} alignSelf="center" mt={24} overflow="visible">
-          <View
-            ref={heroRef}
-            collapsable={false}
-            onLayout={reportHeroTarget}
-            style={{ overflow: 'visible' }}
-          >
-            <Box opacity={heroOverlayActive ? 0 : 1} overflow="visible">
-              <OfflineResourceFolder
-                width={190}
-                title={t(`offlineSetup.presets.${folderId}.title`)}
-                subtitle={t('offlineSetup.selectedCount', { count: selectedOptionIds.length })}
-                icon={visual.icon}
-                itemCount={selectedOptionIds.length}
-                selected={selectedOptionIds.length > 0}
-                showChevron={false}
-                colors={visual.colors}
-              />
-            </Box>
-          </View>
-
-          <AnimatedBox
-            position="absolute"
-            left={-58}
-            top={64}
-            style={{
-              opacity: contentVisible ? 1 : 0,
-              transform: [{ translateX: contentVisible ? 0 : 8 }],
-              transitionProperty: ['opacity', 'transform'],
-              transitionDuration: contentVisible ? 260 : 170,
-              transitionDelay: contentVisible ? 90 : 0,
-              transitionTimingFunction: 'ease-out',
-            }}
-          >
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('offlineSetup.back')}
-              onPress={() => measureHero(onClose)}
-              hitSlop={10}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.8 : 1,
-                transform: [{ scale: pressed ? 0.9 : 1 }],
-              })}
-            >
-              <Box size={44} borderRadius={22} bg="#FFFFFF" center>
-                <Feather name="arrow-left" size={21} color="#142033" />
-              </Box>
-            </Pressable>
-          </AnimatedBox>
-        </Box>
-
         <AnimatedBox
           style={{
             opacity: contentVisible ? 1 : 0,
             transform: [{ translateY: contentVisible ? 0 : 14 }],
             transitionProperty: ['opacity', 'transform'],
-            transitionDuration: contentVisible ? 400 : 210,
-            transitionDelay: contentVisible ? 120 : 0,
+            transitionDuration: contentVisible ? 340 : 210,
+            transitionDelay: contentVisible ? 40 : 0,
             transitionTimingFunction: 'ease-out',
           }}
         >
-          <Text title fontSize={20} mt={26} mb={10}>
-            {t('offlineSetup.chooseResources')}
-          </Text>
-
-          <VStack gap={22}>
+          <VStack gap={22} mt={28}>
             {sections.map(section => {
               const collapsed = Boolean(
                 section.collapsedByDefault && !expandedSectionIds.has(section.id)
@@ -254,39 +175,6 @@ const OfflineSetupFolderDetail = ({
           </VStack>
         </AnimatedBox>
       </ScrollView>
-
-      <AnimatedBox
-        position="absolute"
-        left={0}
-        right={0}
-        bottom={0}
-        zIndex={20}
-        px={20}
-        pb={footerBottomInset}
-        pt={10}
-        style={{
-          opacity: contentVisible ? 1 : 0,
-          transform: [{ translateY: contentVisible ? 0 : 14 }],
-          transitionProperty: ['opacity', 'transform'],
-          transitionDuration: contentVisible ? 360 : 190,
-          transitionDelay: contentVisible ? 170 : 0,
-          transitionTimingFunction: 'ease-out',
-        }}
-      >
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('offlineSetup.add')}
-          onPress={() => measureHero(onClose)}
-          style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
-        >
-          <Box height={58} borderRadius={29} bg={visual.colors.frontEnd} center row gap={10}>
-            <Feather name="check" size={20} color="#FFFFFF" />
-            <Text color="#FFFFFF" title fontSize={16}>
-              {t('offlineSetup.add')}
-            </Text>
-          </Box>
-        </Pressable>
-      </AnimatedBox>
     </Box>
   )
 }

@@ -463,6 +463,27 @@ export const getOfflineSetupLockedOptionIds = (
   return lockedIds
 }
 
+const getUniqueResourceSelections = (
+  selections: OnboardingResourceSelection[]
+): OnboardingResourceSelection[] => [
+  ...new Map(
+    selections.map(selection => [getOnboardingResourceSelectionId(selection), selection])
+  ).values(),
+]
+
+export const resolveOfflineSetupFolderSelections = (
+  folderId: OfflineSetupFolderId,
+  optionIds: readonly string[],
+  lang: ResourceLanguage
+): OnboardingResourceSelection[] => {
+  const selectedIds = new Set(optionIds)
+  const selections = getOfflineSetupFolderSections(folderId, lang).flatMap(section =>
+    section.options.flatMap(option => (selectedIds.has(option.id) ? option.selections : []))
+  )
+
+  return getUniqueResourceSelections(selections)
+}
+
 export const resolveOfflineSetupFolderOptionIds = (
   optionIdsByFolder: OfflineSetupFolderOptionIds,
   lang: ResourceLanguage
@@ -471,19 +492,9 @@ export const resolveOfflineSetupFolderOptionIds = (
     kind: 'bible',
     versionId: getDefaultBibleVersion(lang),
   }
-  const selections = OFFLINE_SETUP_FOLDER_IDS.flatMap(folderId => {
-    const selectedIds = new Set(optionIdsByFolder[folderId])
-    return getOfflineSetupFolderSections(folderId, lang).flatMap(section =>
-      section.options.flatMap(option => (selectedIds.has(option.id) ? option.selections : []))
-    )
-  })
+  const selections = OFFLINE_SETUP_FOLDER_IDS.flatMap(folderId =>
+    resolveOfflineSetupFolderSelections(folderId, optionIdsByFolder[folderId], lang)
+  )
 
-  return [
-    ...new Map(
-      [requiredBible, ...selections].map(selection => [
-        getOnboardingResourceSelectionId(selection),
-        selection,
-      ])
-    ).values(),
-  ]
+  return getUniqueResourceSelections([requiredBible, ...selections])
 }

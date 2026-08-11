@@ -4,10 +4,8 @@ import { Easing, FadeInDown, FadeInUp } from 'react-native-reanimated'
 
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { OfflineSetupFolderId, OfflineSetupFolderOptionIds } from '../offlineSetupPresets'
 import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
-import type { OfflineSetupReviewItem } from '../offlineSetupReview'
 import {
   OFFLINE_SETUP_FOLDER_PRESENTATIONS,
   type OfflineSetupFolderMergeOffset,
@@ -15,28 +13,20 @@ import {
 import type { OfflineSetupHeroTransition } from '../offlineSetupScene'
 import OfflineResourceFolder from './OfflineResourceFolder'
 import OfflineSetupMergingFolder from './OfflineSetupMergingFolder'
-import OfflineSetupReviewSheet from './OfflineSetupReviewSheet'
 
 type OfflineSetupOverviewProps = {
-  availabilityReady: boolean
   bottomInset: number
   contentWidth: number
-  downloadBytes: number
   downloading: boolean
   folderOptionIds: OfflineSetupFolderOptionIds
   folderWidth: number
   hero?: OfflineSetupHeroTransition
-  installedBytes: number
-  lang: ResourceLanguage
   openingFolder?: OfflineSetupFolderId
   reduceMotion: boolean
-  reviewItems: readonly OfflineSetupReviewItem[]
   returningFolder?: OfflineSetupFolderId
   safeAreaTop: number
   mergeOffsets: Partial<Record<OfflineSetupFolderId, OfflineSetupFolderMergeOffset>>
-  onDownload: () => void
   onFolderPress: (folderId: OfflineSetupFolderId) => void
-  onReviewOpenChange?: (open: boolean) => void
   registerFolder: (folderId: OfflineSetupFolderId, node: View | null) => void
 }
 
@@ -98,38 +88,23 @@ const getFolderEnteringAnimation = ({
     .easing(OVERVIEW_ENTRANCE_EASING)
 }
 
-const getFooterEnteringAnimation = (reduceMotion: boolean, returning: boolean) => {
-  if (reduceMotion) return undefined
-
-  const duration = returning ? 300 : 400
-  const delay = returning ? 140 : 450
-  return FadeInUp.duration(duration).delay(delay).easing(OVERVIEW_ENTRANCE_EASING)
-}
-
 const getHeaderEnteringAnimation = (reduceMotion: boolean) => {
   if (reduceMotion) return undefined
   return FadeInDown.duration(400).delay(40).easing(OVERVIEW_ENTRANCE_EASING)
 }
 
 const OfflineSetupOverview = ({
-  availabilityReady,
   bottomInset,
   contentWidth,
-  downloadBytes,
   downloading,
   folderOptionIds,
   folderWidth,
   hero,
-  installedBytes,
-  lang,
   mergeOffsets,
-  onDownload,
   onFolderPress,
-  onReviewOpenChange,
   openingFolder,
   reduceMotion,
   registerFolder,
-  reviewItems,
   returningFolder,
   safeAreaTop,
 }: OfflineSetupOverviewProps) => {
@@ -240,35 +215,6 @@ const OfflineSetupOverview = ({
           ))}
         </VStack>
       </ScrollView>
-
-      <AnimatedBox
-        absoluteFill
-        pointerEvents={openingFolder || downloading ? 'none' : 'box-none'}
-        entering={getFooterEnteringAnimation(reduceMotion, returning)}
-        style={{
-          opacity: openingFolder || downloading ? 0 : 1,
-          transform: [{ translateY: openingFolder || downloading ? 10 : 0 }],
-          transitionProperty: ['opacity', 'transform'],
-          transitionDuration: downloading
-            ? OFFLINE_SETUP_MOTION.overview.downloadFadeDuration
-            : OFFLINE_SETUP_MOTION.overview.exitDuration,
-          transitionTimingFunction: 'ease-out',
-        }}
-      >
-        <OfflineSetupReviewSheet
-          availabilityReady={availabilityReady}
-          bottomInset={bottomInset}
-          downloadBytes={downloadBytes}
-          downloading={downloading}
-          installedBytes={installedBytes}
-          items={reviewItems}
-          lang={lang}
-          reduceMotion={reduceMotion}
-          safeAreaTop={safeAreaTop}
-          onDownload={onDownload}
-          onOpenChange={onReviewOpenChange}
-        />
-      </AnimatedBox>
     </Box>
   )
 }

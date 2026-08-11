@@ -2,6 +2,7 @@ import {
   getDefaultOfflineSetupFolderOptionIds,
   getOfflineSetupFolderSections,
   getOfflineSetupLockedOptionIds,
+  resolveOfflineSetupFolderSelections,
   resolveOfflineSetupFolderOptionIds,
   toggleOfflineSetupFolderOption,
 } from '../offlineSetupPresets'
@@ -252,6 +253,18 @@ describe('offline setup folders', () => {
     )
 
     expect(coreSelections).toHaveLength(1)
+  })
+
+  it('resolves only the physical resources represented by one folder', () => {
+    const selections = resolveOfflineSetupFolderSelections(
+      'understand-words',
+      ['strong-lexicon:core', 'bible-strong:LSG'],
+      'fr'
+    )
+    const selectionKinds = selections.map(selection => selection.kind)
+
+    expect(selectionKinds).toEqual(['strong-lexicon', 'bible', 'bible-strong'])
+    expect(selectionKinds).not.toContain('database')
   })
 
   it('offers localized exploration resources and keeps biblical entities', () => {
