@@ -7,6 +7,7 @@ import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { OfflineSetupReviewFolderContext } from '../offlineSetupReview'
+import type { OfflineSetupPalette } from '../offlineSetupPalette'
 import formatResourceSize from '../formatResourceSize'
 import OfflineResourceFolderBadge from './OfflineResourceFolderBadge'
 
@@ -17,6 +18,7 @@ type OfflineSetupReviewHeaderProps = {
   height: number
   installedBytes: number
   lang: ResourceLanguage
+  palette: OfflineSetupPalette
   onFolderBadgeLayout: () => void
 }
 
@@ -27,12 +29,14 @@ const OfflineSetupFolderReviewHeader = ({
   installedBytes,
   lang,
   onFolderBadgeLayout,
+  palette,
 }: {
   context: OfflineSetupReviewFolderContext
   folderBadgeRef: RefObject<View | null>
   height: number
   installedBytes: number
   lang: ResourceLanguage
+  palette: OfflineSetupPalette
   onFolderBadgeLayout: () => void
 }) => {
   const { t } = useTranslation()
@@ -48,10 +52,10 @@ const OfflineSetupFolderReviewHeader = ({
         <OfflineResourceFolderBadge itemCount={context.selectedCount} visual={context.visual} />
       </View>
       <Box flex>
-        <Text color="#FFFFFF" title fontSize={14} lineHeight={17} numberOfLines={1}>
+        <Text color={palette.onSheet} title fontSize={14} lineHeight={17} numberOfLines={1}>
           {context.title}
         </Text>
-        <Text color="#B8C2D1" fontSize={10} lineHeight={14} numberOfLines={1}>
+        <Text color={palette.onSheetMuted} fontSize={10} lineHeight={14} numberOfLines={1}>
           {t('offlineSetup.folderReviewSummary', {
             count: context.selectedCount,
             size: formatResourceSize(installedBytes, lang),
@@ -67,33 +71,35 @@ const OfflineSetupGlobalReviewHeader = ({
   height,
   installedBytes,
   lang,
+  palette,
 }: {
   downloadBytes: number
   height: number
   installedBytes: number
   lang: ResourceLanguage
+  palette: OfflineSetupPalette
 }) => {
   const { t } = useTranslation()
 
   return (
     <HStack height={height} alignItems="center" px={12} gap={14}>
-      <Box size={36} borderRadius={18} bg="#5983F0" center>
-        <Feather name="archive" size={20} color="#FFFFFF" />
+      <Box size={36} borderRadius={18} bg={palette.accent} center>
+        <Feather name="archive" size={20} color={palette.onAccent} />
       </Box>
       <Box flex>
-        <Text color="#B8C2D1" fontSize={11}>
+        <Text color={palette.onSheetMuted} fontSize={11}>
           {t('offlineSetup.toDownload')}
         </Text>
-        <Text color="#FFFFFF" fontSize={18} style={{ fontFamily: 'FiraCode' }}>
+        <Text color={palette.onSheet} fontSize={18} style={{ fontFamily: 'FiraCode' }}>
           {formatResourceSize(downloadBytes, lang)}
         </Text>
       </Box>
-      <Box height={34} width={1} bg="rgba(255,255,255,0.24)" />
+      <Box height={34} width={1} bg={palette.divider} />
       <Box flex>
-        <Text color="#B8C2D1" fontSize={11}>
+        <Text color={palette.onSheetMuted} fontSize={11}>
           {t('offlineSetup.onDevice')}
         </Text>
-        <Text color="#FFFFFF" fontSize={18} style={{ fontFamily: 'FiraCode' }}>
+        <Text color={palette.onSheet} fontSize={18} style={{ fontFamily: 'FiraCode' }}>
           {formatResourceSize(installedBytes, lang)}
         </Text>
       </Box>
@@ -109,6 +115,7 @@ const OfflineSetupReviewHeader = ({
   installedBytes,
   lang,
   onFolderBadgeLayout,
+  palette,
 }: OfflineSetupReviewHeaderProps) => {
   if (folderContext) {
     return (
@@ -119,6 +126,7 @@ const OfflineSetupReviewHeader = ({
         installedBytes={installedBytes}
         lang={lang}
         onFolderBadgeLayout={onFolderBadgeLayout}
+        palette={palette}
       />
     )
   }
@@ -129,6 +137,7 @@ const OfflineSetupReviewHeader = ({
       height={height}
       installedBytes={installedBytes}
       lang={lang}
+      palette={palette}
     />
   )
 }

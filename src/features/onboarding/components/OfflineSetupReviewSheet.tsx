@@ -20,6 +20,7 @@ import Box, { AnimatedBox, FadingBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
+import type { OfflineSetupPalette } from '../offlineSetupPalette'
 import {
   getOfflineSetupReviewButtonLabelTransition,
   getOfflineSetupReviewDragProgress,
@@ -39,6 +40,7 @@ type OfflineSetupReviewSheetProps = {
   downloading: boolean
   folderContext?: OfflineSetupReviewFolderContext
   lang: ResourceLanguage
+  overviewPalette: OfflineSetupPalette
   reduceMotion: boolean
   safeAreaTop: number
   summary: OfflineSetupReviewSummary
@@ -75,6 +77,7 @@ const OfflineSetupReviewSheet = ({
   lang,
   onDownload,
   onOpenChange,
+  overviewPalette,
   reduceMotion,
   safeAreaTop,
   summary,
@@ -87,12 +90,7 @@ const OfflineSetupReviewSheet = ({
   const displayedItems = displayedSummary.items
   const displayedDownloadBytes = displayedSummary.downloadBytes
   const displayedInstalledBytes = displayedSummary.installedBytes
-  const sheetSurface = folderContext?.visual.colors.surface ?? '#172840'
-  const transparentSheetSurface =
-    folderContext?.visual.colors.surfaceTransparent ?? 'rgba(23,40,64,0)'
-  const accentColor = folderContext?.visual.colors.frontEnd ?? '#5983F0'
-  const accentColorSoft = folderContext?.visual.colors.accentSoft ?? 'rgba(89,131,240,0.22)'
-  const accentColorLight = folderContext?.visual.colors.frontStart ?? '#9BB8FF'
+  const palette = folderContext?.palette ?? overviewPalette
   const maxExpandedHeight = Math.max(
     reviewMotion.closedHeight,
     viewport.height - safeAreaTop - SHEET_TOP_INSET
@@ -311,7 +309,7 @@ const OfflineSetupReviewSheet = ({
   const renderButtonLabel = () => {
     if (folderContext) {
       return (
-        <Text color="#FFFFFF" title fontSize={16}>
+        <Text color={palette.onAccent} title fontSize={16}>
           {buttonLabel}
         </Text>
       )
@@ -320,12 +318,12 @@ const OfflineSetupReviewSheet = ({
     return (
       <>
         <AnimatedBox absoluteFill center style={closedButtonLabelStyle}>
-          <Text color="#FFFFFF" title fontSize={16}>
+          <Text color={palette.onAccent} title fontSize={16}>
             {closedButtonLabel}
           </Text>
         </AnimatedBox>
         <AnimatedBox absoluteFill center style={openButtonLabelStyle}>
-          <Text color="#FFFFFF" title fontSize={16}>
+          <Text color={palette.onAccent} title fontSize={16}>
             {openButtonLabel}
           </Text>
         </AnimatedBox>
@@ -352,7 +350,7 @@ const OfflineSetupReviewSheet = ({
         absoluteFill
         zIndex={20}
         pointerEvents={overlayActive ? 'auto' : 'none'}
-        bg="#0B1524"
+        bg={palette.overlay}
         style={overlayStyle}
       >
         <Pressable
@@ -380,7 +378,7 @@ const OfflineSetupReviewSheet = ({
             clippingStyle,
             {
               overflow: 'hidden',
-              backgroundColor: sheetSurface,
+              backgroundColor: palette.sheetSurface,
               transitionProperty: 'backgroundColor',
               transitionDuration: 220,
               transitionTimingFunction: 'ease-out',
@@ -398,7 +396,7 @@ const OfflineSetupReviewSheet = ({
                 onPress={() => settle(!reviewOpen)}
                 style={{ flex: 1, alignItems: 'center' }}
               >
-                <Box width={42} height={4} mt={9} borderRadius={2} bg="rgba(255,255,255,0.56)" />
+                <Box width={42} height={4} mt={9} borderRadius={2} bg={palette.handle} />
               </Pressable>
             </AnimatedBox>
           </GestureDetector>
@@ -426,6 +424,7 @@ const OfflineSetupReviewSheet = ({
                 installedBytes={displayedInstalledBytes}
                 lang={lang}
                 onFolderBadgeLayout={reportFolderHeroTarget}
+                palette={palette}
               />
             </FadingBox>
           </AnimatedBox>
@@ -459,32 +458,32 @@ const OfflineSetupReviewSheet = ({
                   px={13}
                   py={10}
                   borderRadius={17}
-                  bg="rgba(255,255,255,0.075)"
+                  bg={palette.sheetRaised}
                   alignItems="center"
                   gap={11}
                 >
-                  <Box size={34} borderRadius={12} bg={accentColorSoft} center>
-                    <Feather name="file-text" size={17} color={accentColorLight} />
+                  <Box size={34} borderRadius={12} bg={palette.sheetAccentSoft} center>
+                    <Feather name="file-text" size={17} color={palette.accentLight} />
                   </Box>
                   <Box flex>
-                    <Text color="#FFFFFF" fontSize={13} bold numberOfLines={1}>
+                    <Text color={palette.onSheet} fontSize={13} bold numberOfLines={1}>
                       {item.name}
                     </Text>
-                    <Text color="#AEB9CA" fontSize={10} mt={3} numberOfLines={1}>
+                    <Text color={palette.onSheetMuted} fontSize={10} mt={3} numberOfLines={1}>
                       {t('offlineSetup.reviewItemSize', {
                         download: formatResourceSize(item.downloadBytes, lang),
                         installed: formatResourceSize(item.installedBytes, lang),
                       })}
                     </Text>
                   </Box>
-                  <Feather name="check" size={17} color={accentColorLight} />
+                  <Feather name="check" size={17} color={palette.accentLight} />
                 </HStack>
               ))}
             </ScrollView>
 
             <LinearGradient
               pointerEvents="none"
-              colors={[sheetSurface, transparentSheetSurface]}
+              colors={[palette.sheetSurface, palette.sheetSurfaceTransparent]}
               locations={[0.52, 1]}
               style={{
                 position: 'absolute',
@@ -505,7 +504,7 @@ const OfflineSetupReviewSheet = ({
                 zIndex={3}
                 pointerEvents="none"
               >
-                <Text color="#AEB9CA" fontSize={13} lineHeight={layout.subtitleHeight}>
+                <Text color={palette.onSheetMuted} fontSize={13} lineHeight={layout.subtitleHeight}>
                   {t('offlineSetup.reviewSubtitle', { count: displayedItems.length })}
                 </Text>
               </Box>
@@ -523,7 +522,7 @@ const OfflineSetupReviewSheet = ({
             style={reviewGradientStyle}
           >
             <LinearGradient
-              colors={[transparentSheetSurface, sheetSurface]}
+              colors={[palette.sheetSurfaceTransparent, palette.sheetSurface]}
               locations={[0, 0.48]}
               style={{ flex: 1 }}
             />
@@ -544,7 +543,7 @@ const OfflineSetupReviewSheet = ({
               onPress={handleButtonPress}
               style={({ pressed }) => ({ opacity: getButtonOpacity(disabled, pressed) })}
             >
-              <Box height={layout.buttonHeight} borderRadius={28} bg={accentColor} center>
+              <Box height={layout.buttonHeight} borderRadius={28} bg={palette.accent} center>
                 {renderButtonLabel()}
               </Box>
             </Pressable>

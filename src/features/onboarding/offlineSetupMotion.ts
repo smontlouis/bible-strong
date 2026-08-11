@@ -7,6 +7,7 @@
  */
 export const OFFLINE_SETUP_MOTION = {
   overview: {
+    backgroundColorDuration: 320,
     entranceBezier: [0.22, 1, 0.36, 1] as const,
     exitDuration: 120,
     downloadFadeDuration: 220,

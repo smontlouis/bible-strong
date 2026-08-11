@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons'
-import { useTheme } from '@emotion/react'
 import { useState } from 'react'
 import { Pressable, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -15,7 +14,7 @@ import type {
   OfflineSetupSection,
 } from '../offlineSetupPresets'
 import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
-import type { OfflineSetupFolderVisual } from '../offlineSetupPresentation'
+import type { OfflineSetupPalette } from '../offlineSetupPalette'
 import OfflineSetupResourceOption from './OfflineSetupResourceOption'
 
 type OfflineSetupFolderDetailProps = {
@@ -24,10 +23,10 @@ type OfflineSetupFolderDetailProps = {
   lang: ResourceLanguage
   lockedOptionIds: ReadonlySet<string>
   onToggleOption: (option: OfflineSetupOption) => void
+  palette: OfflineSetupPalette
   sections: OfflineSetupSection[]
   selectedOptionIds: readonly string[]
   sizeManifest: OfflineResourceSizeManifest
-  visual: OfflineSetupFolderVisual
 }
 
 const DETAIL_SHEET_HEIGHT = OFFLINE_SETUP_MOTION.reviewSheet.closedHeight
@@ -36,20 +35,21 @@ const OfflineSetupSectionTitle = ({
   collapsed,
   collapsible,
   onToggle,
+  palette,
   titleKey,
 }: {
   collapsed: boolean
   collapsible: boolean
   onToggle: () => void
+  palette: OfflineSetupPalette
   titleKey?: string
 }) => {
   const { t } = useTranslation()
-  const theme = useTheme()
   if (!titleKey) return null
 
   if (!collapsible) {
     return (
-      <Text color="tertiary" fontSize={11} bold textTransform="uppercase" px={4}>
+      <Text color={palette.description} fontSize={11} bold textTransform="uppercase" px={4}>
         {t(titleKey)}
       </Text>
     )
@@ -65,10 +65,10 @@ const OfflineSetupSectionTitle = ({
       hitSlop={8}
     >
       <HStack alignItems="center" justifyContent="space-between" px={4} py={4}>
-        <Text color="tertiary" fontSize={11} bold textTransform="uppercase">
+        <Text color={palette.description} fontSize={11} bold textTransform="uppercase">
           {t(titleKey)}
         </Text>
-        <Feather name={chevronIcon} size={17} color={theme.colors.tertiary} />
+        <Feather name={chevronIcon} size={17} color={palette.description} />
       </HStack>
     </Pressable>
   )
@@ -80,10 +80,10 @@ const OfflineSetupFolderDetail = ({
   lang,
   lockedOptionIds,
   onToggleOption,
+  palette,
   sections,
   selectedOptionIds,
   sizeManifest,
-  visual,
 }: OfflineSetupFolderDetailProps) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
@@ -101,7 +101,7 @@ const OfflineSetupFolderDetail = ({
   }
 
   return (
-    <Box flex bg="lightGrey">
+    <Box flex>
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 20,
@@ -124,10 +124,10 @@ const OfflineSetupFolderDetail = ({
             transitionTimingFunction: 'ease-out',
           }}
         >
-          <Text title fontSize={34} lineHeight={38} maxWidth={280}>
+          <Text color={palette.title} title fontSize={34} lineHeight={38} maxWidth={280}>
             {t('offlineSetup.chooseResources')}
           </Text>
-          <Text color="tertiary" fontSize={15} lineHeight={22} mt={10}>
+          <Text color={palette.description} fontSize={15} lineHeight={22} mt={10}>
             {t(`offlineSetup.presets.${folderId}.description`)}
           </Text>
         </AnimatedBox>
@@ -157,6 +157,7 @@ const OfflineSetupFolderDetail = ({
                     collapsed={collapsed}
                     collapsible={Boolean(section.collapsedByDefault)}
                     onToggle={() => toggleSection(section.id)}
+                    palette={palette}
                     titleKey={section.titleKey}
                   />
                   {!collapsed
@@ -172,7 +173,7 @@ const OfflineSetupFolderDetail = ({
                             option={option}
                             selected={selected}
                             sizeManifest={sizeManifest}
-                            visual={visual}
+                            palette={palette}
                           />
                         )
                       })

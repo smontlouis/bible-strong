@@ -8,6 +8,7 @@ import { createDownloadItemFromOnboardingSelection } from './onboardingResources
 import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
 import type { OfflineSetupFolderId } from './offlineSetupPresets'
 import type { OfflineSetupFolderVisual, OfflineSetupFrame } from './offlineSetupPresentation'
+import type { OfflineSetupPalette } from './offlineSetupPalette'
 
 export type OfflineSetupReviewItem = {
   id: string
@@ -26,6 +27,7 @@ export type OfflineSetupReviewFolderContext = {
   folderId: OfflineSetupFolderId
   heroOverlayActive: boolean
   selectedCount: number
+  palette: OfflineSetupPalette
   summary: OfflineSetupReviewSummary
   title: string
   visual: OfflineSetupFolderVisual

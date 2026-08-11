@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons'
+import { useTheme } from '@emotion/react'
 import { useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
 import Animated, {
@@ -20,9 +21,11 @@ import Svg, { Circle, G, type CircleProps } from 'react-native-svg'
 
 import Box, { AnimatedBox, FadingBox, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useTranslation } from 'react-i18next'
 import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
 import { getNextBibleFactIndex, OFFLINE_SETUP_BIBLE_FACT_KEYS } from './offlineSetupBibleFacts'
+import { getOfflineSetupOverviewPalette, type OfflineSetupPalette } from './offlineSetupPalette'
 import useOfflineSetupDownload, {
   type OfflineSetupDownloadPhase,
   type OfflineSetupSuccessMessage,
@@ -140,11 +143,13 @@ const useStaggeredRevealStyle = ({
 const DownloadProgressContent = ({
   animatedProps,
   displayProgress,
+  palette,
   reduceMotion,
   transitioning,
 }: {
   animatedProps: RingAnimatedProps
   displayProgress: number
+  palette: OfflineSetupPalette
   reduceMotion: boolean
   transitioning: boolean
 }) => {
@@ -179,7 +184,7 @@ const DownloadProgressContent = ({
         borderRadius={RING_SIZE / 2}
         center
         overflow="visible"
-        style={[{ boxShadow: '0 22px 55px rgba(89,131,240,0.22)' }, progressRevealStyle]}
+        style={[{ boxShadow: `0 22px 55px ${palette.accentShadow}` }, progressRevealStyle]}
       >
         <Svg width={RING_SIZE} height={RING_SIZE} style={{ position: 'absolute' }}>
           <G rotation="-90" origin={`${RING_SIZE / 2}, ${RING_SIZE / 2}`}>
@@ -187,8 +192,8 @@ const DownloadProgressContent = ({
               cx={RING_SIZE / 2}
               cy={RING_SIZE / 2}
               r={RING_RADIUS}
-              fill="#FFFFFF"
-              stroke="#DEE7FA"
+              fill={palette.itemSurface}
+              stroke={palette.itemBorder}
               strokeWidth={8}
             />
             <AnimatedCircle
@@ -197,20 +202,20 @@ const DownloadProgressContent = ({
               cy={RING_SIZE / 2}
               r={RING_RADIUS}
               fill="transparent"
-              stroke="#5983F0"
+              stroke={palette.accent}
               strokeWidth={8}
               strokeLinecap="round"
               strokeDasharray={`${RING_CIRCUMFERENCE} ${RING_CIRCUMFERENCE}`}
             />
           </G>
         </Svg>
-        <Text title fontSize={31} style={{ fontFamily: 'FiraCode' }}>
+        <Text color={palette.title} title fontSize={31} style={{ fontFamily: 'FiraCode' }}>
           {Math.round(displayProgress * 100)}%
         </Text>
       </AnimatedBox>
 
       <AnimatedBox alignItems="center" style={titleRevealStyle}>
-        <Text title fontSize={25} lineHeight={30} textAlign="center" mt={30}>
+        <Text color={palette.title} title fontSize={25} lineHeight={30} textAlign="center" mt={30}>
           {t('offlineSetup.didYouKnow')}
         </Text>
       </AnimatedBox>
@@ -225,7 +230,7 @@ const DownloadProgressContent = ({
           skipExiting={false}
         >
           <Text
-            color="tertiary"
+            color={palette.description}
             fontSize={14}
             lineHeight={20}
             textAlign="center"
@@ -243,9 +248,11 @@ const DownloadProgressContent = ({
 const DownloadSuccessContent = ({
   reduceMotion,
   successMessage,
+  palette,
 }: {
   reduceMotion: boolean
   successMessage: OfflineSetupSuccessMessage
+  palette: OfflineSetupPalette
 }) => {
   const { t } = useTranslation()
 
@@ -253,6 +260,7 @@ const DownloadSuccessContent = ({
     if (successMessage === 'ready') {
       return (
         <Text
+          color={palette.title}
           fontSize={31}
           lineHeight={38}
           textAlign="center"
@@ -266,7 +274,7 @@ const DownloadSuccessContent = ({
     return (
       <VStack alignItems="center">
         <Text
-          color="tertiary"
+          color={palette.description}
           fontSize={18}
           lineHeight={24}
           textAlign="center"
@@ -275,6 +283,7 @@ const DownloadSuccessContent = ({
           {t('offlineSetup.downloadWelcomePrefix')}
         </Text>
         <Text
+          color={palette.title}
           fontSize={31}
           lineHeight={38}
           textAlign="center"
@@ -292,13 +301,13 @@ const DownloadSuccessContent = ({
         <AnimatedBox
           size={132}
           borderRadius={66}
-          bg="#5983F0"
+          bg={palette.accent}
           center
           overflow="visible"
           entering={reduceMotion ? undefined : ZoomIn.springify().damping(15).stiffness(165)}
-          style={{ boxShadow: '0 22px 55px rgba(89,131,240,0.28)' }}
+          style={{ boxShadow: `0 22px 55px ${palette.accentShadow}` }}
         >
-          <Feather name="check" size={56} color="#FFFFFF" />
+          <Feather name="check" size={56} color={palette.onAccent} />
         </AnimatedBox>
       </Box>
       <Box width="100%" height={84} mt={16} center overflow="visible">
@@ -321,7 +330,15 @@ const DownloadSuccessContent = ({
   )
 }
 
-const DownloadErrorContent = ({ error, onRetry }: { error: Error | null; onRetry: () => void }) => {
+const DownloadErrorContent = ({
+  error,
+  onRetry,
+  palette,
+}: {
+  error: Error | null
+  onRetry: () => void
+  palette: OfflineSetupPalette
+}) => {
   const { t } = useTranslation()
 
   return (
@@ -329,10 +346,10 @@ const DownloadErrorContent = ({ error, onRetry }: { error: Error | null; onRetry
       <Box size={88} borderRadius={44} bg="#FCE4E8" center>
         <Feather name="alert-circle" size={38} color="#D84D6D" />
       </Box>
-      <Text title fontSize={24} textAlign="center" mt={24}>
+      <Text color={palette.title} title fontSize={24} textAlign="center" mt={24}>
         {t('offlineSetup.downloadError')}
       </Text>
-      <Text color="tertiary" fontSize={13} lineHeight={19} textAlign="center" mt={9}>
+      <Text color={palette.description} fontSize={13} lineHeight={19} textAlign="center" mt={9}>
         {error?.message}
       </Text>
       <Pressable accessibilityRole="button" onPress={onRetry}>
@@ -343,11 +360,11 @@ const DownloadErrorContent = ({ error, onRetry }: { error: Error | null; onRetry
             height={48}
             px={24}
             borderRadius={24}
-            bg="#5983F0"
+            bg={palette.accent}
             center
             opacity={pressed ? 0.76 : 1}
           >
-            <Text color="#FFFFFF" bold fontSize={15}>
+            <Text color={palette.onAccent} bold fontSize={15}>
               {t('downloads.retry')}
             </Text>
           </Box>
@@ -362,6 +379,7 @@ const DownloadPhaseContent = ({
   displayProgress,
   error,
   phase,
+  palette,
   reduceMotion,
   retry,
   successMessage,
@@ -371,6 +389,7 @@ const DownloadPhaseContent = ({
   displayProgress: number
   error: Error | null
   phase: OfflineSetupDownloadPhase
+  palette: OfflineSetupPalette
   reduceMotion: boolean
   retry: () => void
   successMessage: OfflineSetupSuccessMessage
@@ -381,6 +400,7 @@ const DownloadPhaseContent = ({
       <DownloadProgressContent
         animatedProps={animatedProps}
         displayProgress={displayProgress}
+        palette={palette}
         reduceMotion={reduceMotion}
         transitioning={transitioning}
       />
@@ -388,13 +408,22 @@ const DownloadPhaseContent = ({
   }
 
   if (phase === 'success') {
-    return <DownloadSuccessContent reduceMotion={reduceMotion} successMessage={successMessage} />
+    return (
+      <DownloadSuccessContent
+        palette={palette}
+        reduceMotion={reduceMotion}
+        successMessage={successMessage}
+      />
+    )
   }
 
-  return <DownloadErrorContent error={error} onRetry={retry} />
+  return <DownloadErrorContent error={error} onRetry={retry} palette={palette} />
 }
 
 const DownloadResources = (props: DownloadResourcesProps) => {
+  const theme = useTheme()
+  const { colorScheme } = useCurrentThemeSelector()
+  const palette = getOfflineSetupOverviewPalette(theme, colorScheme)
   const reduceMotion = useReducedMotion()
   const { closing, displayProgress, error, phase, retry, successMessage } = useOfflineSetupDownload(
     {
@@ -423,7 +452,7 @@ const DownloadResources = (props: DownloadResourcesProps) => {
   return (
     <AnimatedBox
       flex
-      bg={transitioning ? 'transparent' : 'lightGrey'}
+      bg={transitioning ? 'transparent' : palette.canvas}
       center
       px={32}
       overflow="hidden"
@@ -438,7 +467,7 @@ const DownloadResources = (props: DownloadResourcesProps) => {
         position="absolute"
         size={330}
         borderRadius={165}
-        bg="rgba(89,131,240,0.08)"
+        bg={palette.ambientAccentSoft}
         style={backgroundRevealStyle}
       />
 
@@ -457,6 +486,7 @@ const DownloadResources = (props: DownloadResourcesProps) => {
           displayProgress={displayProgress}
           error={error}
           phase={phase}
+          palette={palette}
           reduceMotion={reduceMotion}
           retry={retry}
           successMessage={successMessage}

@@ -115,7 +115,7 @@ const OfflineSetupOverview = ({
   const returning = hero?.direction === 'closing' || Boolean(returningFolder)
 
   return (
-    <Box flex bg="lightGrey">
+    <Box flex>
       <ScrollView
         style={{ overflow: 'visible' }}
         contentContainerStyle={{

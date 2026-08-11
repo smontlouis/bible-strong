@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons'
+import { useTheme } from '@emotion/react'
 import { useSetAtom } from 'jotai/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,6 +10,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { selectedResourcesAtom } from './atom'
 import DownloadResources from './DownloadResources'
 import OfflineResourceFolderHero from './components/OfflineResourceFolderHero'
@@ -16,6 +18,7 @@ import OfflineSetupFolderDetail from './components/OfflineSetupFolderDetail'
 import OfflineSetupOverview from './components/OfflineSetupOverview'
 import OfflineSetupReviewSheet from './components/OfflineSetupReviewSheet'
 import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
+import { getOfflineSetupFolderPalette, getOfflineSetupOverviewPalette } from './offlineSetupPalette'
 import { getOfflineSetupFolderSections } from './offlineSetupPresets'
 import type { OfflineSetupReviewFolderContext } from './offlineSetupReview'
 import { OFFLINE_SETUP_FOLDER_PRESENTATIONS } from './offlineSetupPresentation'
@@ -28,6 +31,8 @@ type SelectResourcesProps =
 
 const SelectResources = (props: SelectResourcesProps) => {
   const { t } = useTranslation()
+  const theme = useTheme()
+  const { colorScheme } = useCurrentThemeSelector()
   const lang = useLanguage()
   const insets = useSafeAreaInsets()
   const viewport = useWindowDimensions()
@@ -51,14 +56,20 @@ const SelectResources = (props: SelectResourcesProps) => {
   const activeFolderSummary = activeFolder
     ? selection.folderReviewSummaries[activeFolder]
     : undefined
+  const overviewPalette = getOfflineSetupOverviewPalette(theme, colorScheme)
+  const activePalette = activeVisual
+    ? getOfflineSetupFolderPalette(activeVisual, theme, colorScheme)
+    : undefined
+  const sceneBackground = activePalette?.canvas ?? theme.colors.lightGrey
   let folderContext: OfflineSetupReviewFolderContext | undefined
 
-  if (activeFolder && activeVisual && activeFolderSummary) {
+  if (activeFolder && activeVisual && activeFolderSummary && activePalette) {
     folderContext = {
       folderId: activeFolder,
       heroOverlayActive:
         state.hero?.folderId === activeFolder && state.hero.direction !== 'settled',
       selectedCount: selection.folderOptionIds[activeFolder].length,
+      palette: activePalette,
       summary: activeFolderSummary,
       title: t(`offlineSetup.presets.${activeFolder}.title`),
       visual: activeVisual,
@@ -75,7 +86,17 @@ const SelectResources = (props: SelectResourcesProps) => {
   }
 
   return (
-    <Box flex bg="lightGrey">
+    <AnimatedBox
+      flex
+      style={{
+        backgroundColor: sceneBackground,
+        transitionProperty: 'backgroundColor',
+        transitionDuration: reduceMotion
+          ? 0
+          : OFFLINE_SETUP_MOTION.overview.backgroundColorDuration,
+        transitionTimingFunction: 'ease-out',
+      }}
+    >
       {state.downloadSceneActive ? (
         <AnimatedBox absoluteFill zIndex={state.downloadSceneSettled ? 30 : 15}>
           {props.mode === 'preview' ? (
@@ -90,7 +111,7 @@ const SelectResources = (props: SelectResourcesProps) => {
         </AnimatedBox>
       ) : null}
 
-      {!state.downloadSceneSettled && activeFolder && activeVisual ? (
+      {!state.downloadSceneSettled && activeFolder && activeVisual && activePalette ? (
         <OfflineSetupFolderDetail
           contentVisible={state.detailContentVisible}
           folderId={activeFolder}
@@ -99,7 +120,7 @@ const SelectResources = (props: SelectResourcesProps) => {
           sizeManifest={selection.sizeManifest}
           sections={getOfflineSetupFolderSections(activeFolder, lang)}
           selectedOptionIds={selection.folderOptionIds[activeFolder]}
-          visual={activeVisual}
+          palette={activePalette}
           onToggleOption={option => selection.toggleOption(activeFolder, option)}
         />
       ) : null}
@@ -148,6 +169,7 @@ const SelectResources = (props: SelectResourcesProps) => {
             downloading={downloading}
             folderContext={folderContext}
             lang={lang}
+            overviewPalette={overviewPalette}
             reduceMotion={reduceMotion}
             safeAreaTop={insets.top}
             summary={selection.reviewSummary}
@@ -212,7 +234,7 @@ const SelectResources = (props: SelectResourcesProps) => {
           </Pressable>
         </AnimatedBox>
       ) : null}
-    </Box>
+    </AnimatedBox>
   )
 }
 

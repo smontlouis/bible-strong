@@ -1,5 +1,4 @@
 import { Feather } from '@expo/vector-icons'
-import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
 import { Pressable } from 'react-native'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
@@ -14,16 +13,16 @@ import {
 import formatResourceSize from '../formatResourceSize'
 import { createDownloadItemFromOnboardingSelection } from '../onboardingResources'
 import type { OfflineSetupOption } from '../offlineSetupPresets'
-import type { OfflineSetupFolderVisual } from '../offlineSetupPresentation'
+import type { OfflineSetupPalette } from '../offlineSetupPalette'
 
 type OfflineSetupResourceOptionProps = {
   lang: ResourceLanguage
   locked: boolean
   onPress: () => void
   option: OfflineSetupOption
+  palette: OfflineSetupPalette
   selected: boolean
   sizeManifest: OfflineResourceSizeManifest
-  visual: OfflineSetupFolderVisual
 }
 
 const getOptionBytes = (
@@ -48,12 +47,11 @@ const OfflineSetupResourceOption = ({
   locked,
   onPress,
   option,
+  palette,
   selected,
   sizeManifest,
-  visual,
 }: OfflineSetupResourceOptionProps) => {
   const { t } = useTranslation()
-  const theme = useTheme()
   let label = option.label
   if (option.labelKey) {
     label = t(option.labelKey, {
@@ -66,9 +64,9 @@ const OfflineSetupResourceOption = ({
   if (option.descriptionKey) description = t(option.descriptionKey)
 
   const badgeKey = option.required ? 'offlineSetup.requiredBadge' : 'offlineSetup.includedBadge'
-  const selectedBorderColor = selected ? visual.colors.frontEnd : theme.colors.border
-  const checkboxBorderColor = selected ? visual.colors.frontEnd : theme.colors.tertiary
-  const checkboxBackground = selected ? visual.colors.frontEnd : theme.colors.reverse
+  const selectedBorderColor = selected ? palette.accent : palette.itemBorder
+  const checkboxBorderColor = selected ? palette.accent : palette.description
+  const checkboxBackground = selected ? palette.accent : palette.itemSurface
 
   return (
     <Pressable
@@ -83,7 +81,7 @@ const OfflineSetupResourceOption = ({
         px={14}
         py={11}
         borderRadius={17}
-        bg="reverse"
+        bg={palette.itemSurface}
         borderWidth={1.5}
         borderColor={selectedBorderColor}
         alignItems="center"
@@ -91,7 +89,13 @@ const OfflineSetupResourceOption = ({
       >
         <Box flex>
           <HStack alignItems="center" gap={7} wrap>
-            <Text title fontSize={14} lineHeight={18} style={{ flexShrink: 1 }}>
+            <Text
+              color={palette.title}
+              title
+              fontSize={14}
+              lineHeight={18}
+              style={{ flexShrink: 1 }}
+            >
               {label}
             </Text>
             {locked ? (
@@ -102,8 +106,8 @@ const OfflineSetupResourceOption = ({
                 skipEntering={false}
                 skipExiting={false}
               >
-                <Box px={7} py={3} borderRadius={9} bg={visual.colors.back}>
-                  <Text color={visual.colors.icon} fontSize={9} bold>
+                <Box px={7} py={3} borderRadius={9} bg={palette.itemAccentSoft}>
+                  <Text color={palette.itemAccentText} fontSize={9} bold>
                     {t(badgeKey)}
                   </Text>
                 </Box>
@@ -111,11 +115,17 @@ const OfflineSetupResourceOption = ({
             ) : null}
           </HStack>
           {description ? (
-            <Text color="tertiary" fontSize={11} lineHeight={15} mt={3} numberOfLines={1}>
+            <Text
+              color={palette.description}
+              fontSize={11}
+              lineHeight={15}
+              mt={3}
+              numberOfLines={1}
+            >
               {description}
             </Text>
           ) : null}
-          <Text color="tertiary" fontSize={10} mt={4}>
+          <Text color={palette.description} fontSize={10} mt={4}>
             {formatResourceSize(getOptionBytes(option, sizeManifest), lang)}
           </Text>
         </Box>
@@ -132,7 +142,7 @@ const OfflineSetupResourceOption = ({
           bg={checkboxBackground}
           center
         >
-          {selected ? <Feather name="check" size={13} color="#FFFFFF" /> : null}
+          {selected ? <Feather name="check" size={13} color={palette.onAccent} /> : null}
         </FadingBox>
       </HStack>
     </Pressable>
