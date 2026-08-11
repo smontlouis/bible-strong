@@ -1,12 +1,11 @@
 import type { DownloadItem } from '~state/downloadQueue'
-import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
+import { isSharedDB, type DatabaseId, type ResourceLanguage } from '~helpers/databaseTypes'
 import { versions, type Version } from '~helpers/bibleVersions'
-import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
 import { databases, getDbPath } from '~helpers/databases'
+import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
 import {
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
-  usesCanonicalBibleExtras,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import type { StrongBibleSidecarAvailability } from './strongBibleSidecar'
@@ -25,8 +24,6 @@ export {
   createStrongLexiconModuleDownloadPlan,
 } from './strongLexiconDownloadItems'
 
-const BIBLE_ESTIMATED_SIZE = 2_500_000
-
 /**
  * Create a DownloadItem for a Bible version.
  */
@@ -40,26 +37,29 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
   const interlinearPublication = isInterlinearCapableBibleVersion(versionId)
     ? BHG_INTERLINEAR_PUBLICATION
     : undefined
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    createOfflineCopyId({ kind: 'bible', versionId })
+  )
 
-  const url = interlinearPublication
-    ? interlinearPublication.canonical.url
-    : publication
-      ? publication.canonical.url
-      : biblesRef[versionId]
-
-  const estimatedSize =
-    interlinearPublication?.canonical.archiveBytes ??
-    publication?.canonical.archiveBytes ??
-    BIBLE_ESTIMATED_SIZE
+  const url = catalogArtifact.url
+  const estimatedSize = catalogArtifact.archiveBytes
 
   const common = {
     id: createOfflineCopyId({ kind: 'bible', versionId }),
     name: version.name,
     versionId,
     url,
+    archiveEntry: catalogArtifact.entry,
+    archiveEntries: {
+      canonical: catalogArtifact.entries.canonical?.entry ?? catalogArtifact.entry,
+      ...(catalogArtifact.entries.pericope
+        ? { pericope: catalogArtifact.entries.pericope.entry }
+        : {}),
+      ...(catalogArtifact.entries.redWords
+        ? { redWords: catalogArtifact.entries.redWords.entry }
+        : {}),
+    },
     estimatedSize,
-    hasRedWords: usesCanonicalBibleExtras(versionId) ? false : Boolean(version.hasRedWords),
-    hasPericope: usesCanonicalBibleExtras(versionId) ? false : Boolean(version.hasPericope),
     addedAt: Date.now(),
     retryCount: 0,
   }
@@ -203,22 +203,27 @@ export function createDatabaseDownloadItem(
   databaseId: Exclude<DatabaseId, 'BIBLES'>,
   lang: ResourceLanguage
 ): DownloadItem {
-  const allDbs = databases(lang)
+  const resourceLang = isSharedDB(databaseId) ? 'fr' : lang
+  const allDbs = databases(resourceLang)
   const db = allDbs[databaseId as keyof typeof allDbs]
   if (!db) throw new Error(`Unknown database: ${databaseId}`)
 
-  const url = getDatabaseUrl(databaseId as Exclude<DatabaseId, 'BIBLES'>, lang)
-  const destinationPath = getDbPath(databaseId, lang)
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    createOfflineCopyId({ kind: 'database', databaseId, language: resourceLang })
+  )
+  const url = catalogArtifact.url
+  const destinationPath = getDbPath(databaseId, resourceLang)
 
   return {
-    id: createOfflineCopyId({ kind: 'database', databaseId, language: lang }),
+    id: createOfflineCopyId({ kind: 'database', databaseId, language: resourceLang }),
     type: 'database',
     name: db.name,
     databaseId,
-    lang,
+    lang: resourceLang,
     url,
     destinationPath,
-    estimatedSize: db.fileSize,
+    archiveEntry: catalogArtifact.entry,
+    estimatedSize: catalogArtifact.archiveBytes,
     addedAt: Date.now(),
     retryCount: 0,
   }

@@ -135,4 +135,94 @@ describe('resource installation journal', () => {
 
     expect(resourcePublicationStore.read('bible:DBY')?.generation).toBe('2')
   })
+
+  it('keeps committed Bible bundle files and removes their recovery backups', async () => {
+    const journal = beginResourceInstallation('bible:NBS', downloadResult, {
+      kind: 'bible-sqlite',
+      versionId: 'NBS',
+      bundleFiles: [
+        { destinationPath: '/pericope.json', previousCopyExisted: true },
+        { destinationPath: '/red-words.json', previousCopyExisted: true },
+      ],
+    })
+    commitResourceInstallation(journal)
+    mockGetBibleVersionMetadata.mockResolvedValue({ resourceGeneration: '2' })
+
+    await reconcileResourceInstallationJournal()
+
+    expect(mockDeleteAsync).toHaveBeenCalledWith('/pericope.json.bundle-backup', {
+      idempotent: true,
+    })
+    expect(mockDeleteAsync).toHaveBeenCalledWith('/red-words.json.bundle-backup', {
+      idempotent: true,
+    })
+  })
+
+  it('restores every Bible bundle file when SQLite did not commit', async () => {
+    resourcePublicationStore.write('bible:NBS', previousPublication)
+    beginResourceInstallation('bible:NBS', downloadResult, {
+      kind: 'bible-sqlite',
+      versionId: 'NBS',
+      bundleFiles: [
+        { destinationPath: '/pericope.json', previousCopyExisted: true },
+        { destinationPath: '/red-words.json', previousCopyExisted: true },
+      ],
+    })
+    mockGetBibleVersionMetadata.mockResolvedValue({ resourceGeneration: '1' })
+    mockGetInfoAsync.mockResolvedValue({ exists: true })
+
+    await reconcileResourceInstallationJournal()
+
+    expect(mockMoveAsync).toHaveBeenCalledWith({
+      from: '/pericope.json.bundle-backup',
+      to: '/pericope.json',
+    })
+    expect(mockMoveAsync).toHaveBeenCalledWith({
+      from: '/red-words.json.bundle-backup',
+      to: '/red-words.json',
+    })
+    expect(resourcePublicationStore.read('bible:NBS')).toEqual(previousPublication)
+  })
+
+  it('leaves old bundle files intact when a crash happens before their activation', async () => {
+    resourcePublicationStore.write('bible:NBS', previousPublication)
+    beginResourceInstallation('bible:NBS', downloadResult, {
+      kind: 'bible-sqlite',
+      versionId: 'NBS',
+      bundleFiles: [
+        { destinationPath: '/pericope.json', previousCopyExisted: true },
+        { destinationPath: '/red-words.json', previousCopyExisted: true },
+      ],
+    })
+    mockGetBibleVersionMetadata.mockResolvedValue({ resourceGeneration: '1' })
+    mockGetInfoAsync.mockResolvedValue({ exists: false })
+
+    await reconcileResourceInstallationJournal()
+
+    expect(mockDeleteAsync).not.toHaveBeenCalledWith('/pericope.json', { idempotent: true })
+    expect(mockDeleteAsync).not.toHaveBeenCalledWith('/red-words.json', { idempotent: true })
+  })
+
+  it('restores only the bundle file activated before a partial crash', async () => {
+    beginResourceInstallation('bible:NBS', downloadResult, {
+      kind: 'bible-sqlite',
+      versionId: 'NBS',
+      bundleFiles: [
+        { destinationPath: '/pericope.json', previousCopyExisted: true },
+        { destinationPath: '/red-words.json', previousCopyExisted: true },
+      ],
+    })
+    mockGetBibleVersionMetadata.mockResolvedValue({ resourceGeneration: '1' })
+    mockGetInfoAsync
+      .mockResolvedValueOnce({ exists: true })
+      .mockResolvedValueOnce({ exists: false })
+
+    await reconcileResourceInstallationJournal()
+
+    expect(mockMoveAsync).toHaveBeenCalledWith({
+      from: '/pericope.json.bundle-backup',
+      to: '/pericope.json',
+    })
+    expect(mockDeleteAsync).not.toHaveBeenCalledWith('/red-words.json', { idempotent: true })
+  })
 })

@@ -1,0 +1,726 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-11T09:12:23.578Z",
+  "resources": {
+    "bible-interlinear:BHG:en": {
+      "id": "bible-interlinear:BHG:en",
+      "url": "https://assets.bible-strong.app/bibles/bible-step-interlinear-en.sqlite.zip",
+      "downloadBytes": 22735720,
+      "contentBytes": 55119872,
+      "installedBytes": 55119872,
+      "peakInstallationBytes": 89533931,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-interlinear:BHG:fr": {
+      "id": "bible-interlinear:BHG:fr",
+      "url": "https://assets.bible-strong.app/bibles/bible-step-interlinear-fr.sqlite.zip",
+      "downloadBytes": 22341508,
+      "contentBytes": 54296576,
+      "installedBytes": 54296576,
+      "peakInstallationBytes": 88133797,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:ASV": {
+      "id": "bible-strong:ASV",
+      "url": "https://assets.bible-strong.app/bibles/bible-asv-strong.sqlite.zip",
+      "downloadBytes": 10804774,
+      "contentBytes": 25235456,
+      "installedBytes": 25235456,
+      "peakInstallationBytes": 41446265,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:BSB": {
+      "id": "bible-strong:BSB",
+      "url": "https://assets.bible-strong.app/bibles/bible-bsb-strong.sqlite.zip",
+      "downloadBytes": 13297425,
+      "contentBytes": 30302208,
+      "installedBytes": 30302208,
+      "peakInstallationBytes": 50139578,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:DARBY": {
+      "id": "bible-strong:DARBY",
+      "url": "https://assets.bible-strong.app/bibles/bible-darby-strong.sqlite.zip",
+      "downloadBytes": 10619085,
+      "contentBytes": 24993792,
+      "installedBytes": 24993792,
+      "peakInstallationBytes": 40954809,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:DBR": {
+      "id": "bible-strong:DBR",
+      "url": "https://assets.bible-strong.app/bibles/bible-dbr-strong.sqlite.zip",
+      "downloadBytes": 13059752,
+      "contentBytes": 30068736,
+      "installedBytes": 30068736,
+      "peakInstallationBytes": 49597762,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:DBY": {
+      "id": "bible-strong:DBY",
+      "url": "https://assets.bible-strong.app/bibles/bible-dby-strong.sqlite.zip",
+      "downloadBytes": 13052625,
+      "contentBytes": 30113792,
+      "installedBytes": 30113792,
+      "peakInstallationBytes": 49641380,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:KJV": {
+      "id": "bible-strong:KJV",
+      "url": "https://assets.bible-strong.app/bibles/bible-kjv-strong.sqlite.zip",
+      "downloadBytes": 11368761,
+      "contentBytes": 26411008,
+      "installedBytes": 26411008,
+      "peakInstallationBytes": 43446735,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:LSG": {
+      "id": "bible-strong:LSG",
+      "url": "https://assets.bible-strong.app/bibles/bible-lsg-strong.sqlite.zip",
+      "downloadBytes": 12998572,
+      "contentBytes": 29999104,
+      "installedBytes": 29999104,
+      "peakInstallationBytes": 49447328,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:NASB1995": {
+      "id": "bible-strong:NASB1995",
+      "url": "https://assets.bible-strong.app/bibles/bible-nasb1995-strong.sqlite.zip",
+      "downloadBytes": 11421825,
+      "contentBytes": 26009600,
+      "installedBytes": 26009600,
+      "peakInstallationBytes": 43046139,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:NASB2020": {
+      "id": "bible-strong:NASB2020",
+      "url": "https://assets.bible-strong.app/bibles/bible-nasb2020-strong.sqlite.zip",
+      "downloadBytes": 11713422,
+      "contentBytes": 26746880,
+      "installedBytes": 26746880,
+      "peakInstallationBytes": 44229348,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:RLT": {
+      "id": "bible-strong:RLT",
+      "url": "https://assets.bible-strong.app/bibles/bible-rlt-strong.sqlite.zip",
+      "downloadBytes": 11360309,
+      "contentBytes": 26386432,
+      "installedBytes": 26386432,
+      "peakInstallationBytes": 43408753,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:RV1895": {
+      "id": "bible-strong:RV1895",
+      "url": "https://assets.bible-strong.app/bibles/bible-rv1895-strong.sqlite.zip",
+      "downloadBytes": 10988842,
+      "contentBytes": 26120192,
+      "installedBytes": 26120192,
+      "peakInstallationBytes": 42675390,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible-strong:RWEBSTER": {
+      "id": "bible-strong:RWEBSTER",
+      "url": "https://assets.bible-strong.app/bibles/bible-rwebster-strong.sqlite.zip",
+      "downloadBytes": 10861244,
+      "contentBytes": 25235456,
+      "installedBytes": 25235456,
+      "peakInstallationBytes": 41511205,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "bible:AMP": {
+      "id": "bible:AMP",
+      "url": "https://assets.bible-strong.app/bibles/bible-amp.json.zip",
+      "downloadBytes": 1630871,
+      "contentBytes": 5204111,
+      "installedBytes": 6505139,
+      "peakInstallationBytes": 17585413,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:ASV": {
+      "id": "bible:ASV",
+      "url": "https://assets.bible-strong.app/bibles/bible-asv.json.zip",
+      "downloadBytes": 1723130,
+      "contentBytes": 9768444,
+      "installedBytes": 12210555,
+      "peakInstallationBytes": 31470090,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:BCC1923": {
+      "id": "bible:BCC1923",
+      "url": "https://assets.bible-strong.app/bibles/bible-bcc1923.json.zip",
+      "downloadBytes": 1637626,
+      "contentBytes": 5275172,
+      "installedBytes": 6593965,
+      "peakInstallationBytes": 17807696,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:BDS": {
+      "id": "bible:BDS",
+      "url": "https://assets.bible-strong.app/bibles/bible-bds.json.zip",
+      "downloadBytes": 1626416,
+      "contentBytes": 5172908,
+      "installedBytes": 6466135,
+      "peakInstallationBytes": 17486095,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:BFC": {
+      "id": "bible:BFC",
+      "url": "https://assets.bible-strong.app/bibles/bible-bfc.json.zip",
+      "downloadBytes": 1798751,
+      "contentBytes": 5612680,
+      "installedBytes": 7015850,
+      "peakInstallationBytes": 19011842,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:BHG": {
+      "id": "bible:BHG",
+      "url": "https://assets.bible-strong.app/bibles/bible-step.json.zip",
+      "downloadBytes": 1783949,
+      "contentBytes": 7305397,
+      "installedBytes": 9131747,
+      "peakInstallationBytes": 24104710,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:BHS": {
+      "id": "bible:BHS",
+      "url": "https://assets.bible-strong.app/bibles/bible-hebrew.json.zip",
+      "downloadBytes": 1381187,
+      "contentBytes": 5566623,
+      "installedBytes": 6958279,
+      "peakInstallationBytes": 18392609,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:BSB": {
+      "id": "bible:BSB",
+      "url": "https://assets.bible-strong.app/bibles/bible-bsb.json.zip",
+      "downloadBytes": 2368762,
+      "contentBytes": 14459769,
+      "installedBytes": 18074712,
+      "peakInstallationBytes": 46374506,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:CHU": {
+      "id": "bible:CHU",
+      "url": "https://assets.bible-strong.app/bibles/bible-chu.json.zip",
+      "downloadBytes": 1318218,
+      "contentBytes": 4421010,
+      "installedBytes": 5526263,
+      "peakInstallationBytes": 14861876,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:CSB": {
+      "id": "bible:CSB",
+      "url": "https://assets.bible-strong.app/bibles/bible-csb.json.zip",
+      "downloadBytes": 1329849,
+      "contentBytes": 4383010,
+      "installedBytes": 5478763,
+      "peakInstallationBytes": 14760539,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:DARBY": {
+      "id": "bible:DARBY",
+      "url": "https://assets.bible-strong.app/bibles/bible-darby.json.zip",
+      "downloadBytes": 1513871,
+      "contentBytes": 7548450,
+      "installedBytes": 9435563,
+      "peakInstallationBytes": 24527836,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:DBR": {
+      "id": "bible:DBR",
+      "url": "https://assets.bible-strong.app/bibles/bible-dbr.json.zip",
+      "downloadBytes": 2025688,
+      "contentBytes": 10304872,
+      "installedBytes": 12881090,
+      "peakInstallationBytes": 33437374,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:DBY": {
+      "id": "bible:DBY",
+      "url": "https://assets.bible-strong.app/bibles/bible-dby.json.zip",
+      "downloadBytes": 1912899,
+      "contentBytes": 9907553,
+      "installedBytes": 12384442,
+      "peakInstallationBytes": 32108261,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:DEL": {
+      "id": "bible:DEL",
+      "url": "https://assets.bible-strong.app/bibles/bible-del.json.zip",
+      "downloadBytes": 1808513,
+      "contentBytes": 7415456,
+      "installedBytes": 9269320,
+      "peakInstallationBytes": 24465198,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:EASY": {
+      "id": "bible:EASY",
+      "url": "https://assets.bible-strong.app/bibles/bible-easy.json.zip",
+      "downloadBytes": 1512764,
+      "contentBytes": 5391351,
+      "installedBytes": 6739189,
+      "peakInstallationBytes": 18014820,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:ESV": {
+      "id": "bible:ESV",
+      "url": "https://assets.bible-strong.app/bibles/bible-esv.json.zip",
+      "downloadBytes": 1292881,
+      "contentBytes": 4329558,
+      "installedBytes": 5411948,
+      "peakInstallationBytes": 14556668,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:FMAR": {
+      "id": "bible:FMAR",
+      "url": "https://assets.bible-strong.app/bibles/bible-fmar.json.zip",
+      "downloadBytes": 1463136,
+      "contentBytes": 4912893,
+      "installedBytes": 6141117,
+      "peakInstallationBytes": 16513404,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:FRC97": {
+      "id": "bible:FRC97",
+      "url": "https://assets.bible-strong.app/bibles/bible-frc97.json.zip",
+      "downloadBytes": 1782450,
+      "contentBytes": 5546351,
+      "installedBytes": 6932939,
+      "peakInstallationBytes": 18792865,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:GW": {
+      "id": "bible:GW",
+      "url": "https://assets.bible-strong.app/bibles/bible-gw.json.zip",
+      "downloadBytes": 1342435,
+      "contentBytes": 4449378,
+      "installedBytes": 5561723,
+      "peakInstallationBytes": 14975361,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:KJF": {
+      "id": "bible:KJF",
+      "url": "https://assets.bible-strong.app/bibles/bible-kjf.json.zip",
+      "downloadBytes": 1399373,
+      "contentBytes": 4698673,
+      "installedBytes": 5873342,
+      "peakInstallationBytes": 15793400,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:KJV": {
+      "id": "bible:KJV",
+      "url": "https://assets.bible-strong.app/bibles/bible-kjv.json.zip",
+      "downloadBytes": 1968288,
+      "contentBytes": 12459817,
+      "installedBytes": 15574772,
+      "peakInstallationBytes": 39876605,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:LAU": {
+      "id": "bible:LAU",
+      "url": "https://assets.bible-strong.app/bibles/bible-lau.json.zip",
+      "downloadBytes": 1456664,
+      "contentBytes": 4768656,
+      "installedBytes": 5960820,
+      "peakInstallationBytes": 16070544,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:LSG": {
+      "id": "bible:LSG",
+      "url": "https://assets.bible-strong.app/bibles/bible-lsg.json.zip",
+      "downloadBytes": 1472395,
+      "contentBytes": 6502332,
+      "installedBytes": 8127915,
+      "peakInstallationBytes": 21322169,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:LXX": {
+      "id": "bible:LXX",
+      "url": "https://assets.bible-strong.app/bibles/bible-lxx.json.zip",
+      "downloadBytes": 1581981,
+      "contentBytes": 7321171,
+      "installedBytes": 9151464,
+      "peakInstallationBytes": 23920064,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:LXX_FR": {
+      "id": "bible:LXX_FR",
+      "url": "https://assets.bible-strong.app/bibles/bible-lxx-french.json.zip",
+      "downloadBytes": 1092727,
+      "contentBytes": 3692798,
+      "installedBytes": 4615998,
+      "peakInstallationBytes": 12404271,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NASB1995": {
+      "id": "bible:NASB1995",
+      "url": "https://assets.bible-strong.app/bibles/bible-nasb1995.json.zip",
+      "downloadBytes": 3941192,
+      "contentBytes": 28865428,
+      "installedBytes": 36081785,
+      "peakInstallationBytes": 91669882,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NASB2020": {
+      "id": "bible:NASB2020",
+      "url": "https://assets.bible-strong.app/bibles/bible-nasb2020.json.zip",
+      "downloadBytes": 4028375,
+      "contentBytes": 29500427,
+      "installedBytes": 36875534,
+      "peakInstallationBytes": 93687046,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NBS": {
+      "id": "bible:NBS",
+      "url": "https://assets.bible-strong.app/bibles/bible-nbs.json.zip",
+      "downloadBytes": 1419138,
+      "contentBytes": 4732569,
+      "installedBytes": 5915712,
+      "peakInstallationBytes": 15918453,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NEG79": {
+      "id": "bible:NEG79",
+      "url": "https://assets.bible-strong.app/bibles/bible-neg79.json.zip",
+      "downloadBytes": 1385973,
+      "contentBytes": 4604265,
+      "installedBytes": 5755332,
+      "peakInstallationBytes": 15492996,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NET": {
+      "id": "bible:NET",
+      "url": "https://assets.bible-strong.app/bibles/bible-net.json.zip",
+      "downloadBytes": 1406602,
+      "contentBytes": 4601791,
+      "installedBytes": 5752239,
+      "peakInstallationBytes": 15509250,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NFC": {
+      "id": "bible:NFC",
+      "url": "https://assets.bible-strong.app/bibles/bible-nfc.json.zip",
+      "downloadBytes": 1792249,
+      "contentBytes": 5635235,
+      "installedBytes": 7044044,
+      "peakInstallationBytes": 19072453,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NIV": {
+      "id": "bible:NIV",
+      "url": "https://assets.bible-strong.app/bibles/bible-niv.json.zip",
+      "downloadBytes": 1326772,
+      "contentBytes": 4334502,
+      "installedBytes": 5418128,
+      "peakInstallationBytes": 14610567,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NKJV": {
+      "id": "bible:NKJV",
+      "url": "https://assets.bible-strong.app/bibles/bible-nkjv.json.zip",
+      "downloadBytes": 1327574,
+      "contentBytes": 4472213,
+      "installedBytes": 5590267,
+      "peakInstallationBytes": 15027205,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NLT": {
+      "id": "bible:NLT",
+      "url": "https://assets.bible-strong.app/bibles/bible-nlt.json.zip",
+      "downloadBytes": 1404773,
+      "contentBytes": 4517022,
+      "installedBytes": 5646278,
+      "peakInstallationBytes": 15251250,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:NVS78P": {
+      "id": "bible:NVS78P",
+      "url": "https://assets.bible-strong.app/bibles/bible-nvs78p.json.zip",
+      "downloadBytes": 1428952,
+      "contentBytes": 4640864,
+      "installedBytes": 5801080,
+      "peakInstallationBytes": 15652903,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:OST": {
+      "id": "bible:OST",
+      "url": "https://assets.bible-strong.app/bibles/bible-ost.json.zip",
+      "downloadBytes": 1426583,
+      "contentBytes": 5071357,
+      "installedBytes": 6339197,
+      "peakInstallationBytes": 16949731,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:PDV2017": {
+      "id": "bible:PDV2017",
+      "url": "https://assets.bible-strong.app/bibles/bible-pdv2017.json.zip",
+      "downloadBytes": 1711865,
+      "contentBytes": 5768634,
+      "installedBytes": 7210793,
+      "peakInstallationBytes": 19382710,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:POV": {
+      "id": "bible:POV",
+      "url": "https://assets.bible-strong.app/bibles/bible-pov.json.zip",
+      "downloadBytes": 521881,
+      "contentBytes": 1621139,
+      "installedBytes": 2026424,
+      "peakInstallationBytes": 5493977,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:RLT": {
+      "id": "bible:RLT",
+      "url": "https://assets.bible-strong.app/bibles/bible-rlt.json.zip",
+      "downloadBytes": 1980896,
+      "contentBytes": 12724834,
+      "installedBytes": 15906043,
+      "peakInstallationBytes": 40691124,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:RV1895": {
+      "id": "bible:RV1895",
+      "url": "https://assets.bible-strong.app/bibles/bible-rv1895.json.zip",
+      "downloadBytes": 1526762,
+      "contentBytes": 7884754,
+      "installedBytes": 9855943,
+      "peakInstallationBytes": 25557879,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:RWEBSTER": {
+      "id": "bible:RWEBSTER",
+      "url": "https://assets.bible-strong.app/bibles/bible-rwebster.json.zip",
+      "downloadBytes": 1885169,
+      "contentBytes": 11148277,
+      "installedBytes": 13935347,
+      "peakInstallationBytes": 35821807,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:S21": {
+      "id": "bible:S21",
+      "url": "https://assets.bible-strong.app/bibles/bible-s21.json.zip",
+      "downloadBytes": 1451177,
+      "contentBytes": 4721717,
+      "installedBytes": 5902147,
+      "peakInstallationBytes": 15922538,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:SBLGNT": {
+      "id": "bible:SBLGNT",
+      "url": "https://assets.bible-strong.app/bibles/bible-greek.json.zip",
+      "downloadBytes": 429367,
+      "contentBytes": 1735842,
+      "installedBytes": 2169803,
+      "peakInstallationBytes": 5733846,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:TLV": {
+      "id": "bible:TLV",
+      "url": "https://assets.bible-strong.app/bibles/bible-tlv.json.zip",
+      "downloadBytes": 1316181,
+      "contentBytes": 4290233,
+      "installedBytes": 5362792,
+      "peakInstallationBytes": 14464751,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:TR1624": {
+      "id": "bible:TR1624",
+      "url": "https://assets.bible-strong.app/bibles/bible-TR1624.json.zip",
+      "downloadBytes": 346138,
+      "contentBytes": 1581364,
+      "installedBytes": 1976705,
+      "peakInstallationBytes": 5171802,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:TR1894": {
+      "id": "bible:TR1894",
+      "url": "https://assets.bible-strong.app/bibles/bible-TR1894.json.zip",
+      "downloadBytes": 420289,
+      "contentBytes": 1742040,
+      "installedBytes": 2177550,
+      "peakInstallationBytes": 5742116,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "bible:VUL": {
+      "id": "bible:VUL",
+      "url": "https://assets.bible-strong.app/bibles/bible-vul.json.zip",
+      "downloadBytes": 1452560,
+      "contentBytes": 4321077,
+      "installedBytes": 5401347,
+      "peakInstallationBytes": 14714697,
+      "strategy": "sqlite-import",
+      "confidence": "estimated"
+    },
+    "database:DICTIONNAIRE:en": {
+      "id": "database:DICTIONNAIRE:en",
+      "url": "https://assets.bible-strong.app/databases/en/dictionnaire.sqlite.zip",
+      "downloadBytes": 6819016,
+      "contentBytes": 22532096,
+      "installedBytes": 22532096,
+      "peakInstallationBytes": 33753779,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "database:DICTIONNAIRE:fr": {
+      "id": "database:DICTIONNAIRE:fr",
+      "url": "https://assets.bible-strong.app/databases/dictionnaire.sqlite.zip",
+      "downloadBytes": 6602308,
+      "contentBytes": 24455168,
+      "installedBytes": 24455168,
+      "peakInstallationBytes": 35716098,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "database:MHY:fr": {
+      "id": "database:MHY:fr",
+      "url": "https://assets.bible-strong.app/databases/commentaires-mhy.sqlite.zip",
+      "downloadBytes": 1916604,
+      "contentBytes": 6574080,
+      "installedBytes": 6574080,
+      "peakInstallationBytes": 9764287,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "database:NAVE:en": {
+      "id": "database:NAVE:en",
+      "url": "https://assets.bible-strong.app/databases/en/nave.sqlite.zip",
+      "downloadBytes": 2010635,
+      "contentBytes": 7401472,
+      "installedBytes": 7401472,
+      "peakInstallationBytes": 10823924,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "database:NAVE:fr": {
+      "id": "database:NAVE:fr",
+      "url": "https://assets.bible-strong.app/databases/nave-fr.sqlite.zip",
+      "downloadBytes": 2068625,
+      "contentBytes": 7790592,
+      "installedBytes": 7790592,
+      "peakInstallationBytes": 11338100,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "database:TIMELINE:en": {
+      "id": "database:TIMELINE:en",
+      "url": "https://assets.bible-strong.app/databases/en/bible-timeline-events.json.zip",
+      "downloadBytes": 574945,
+      "contentBytes": 1822033,
+      "installedBytes": 1822033,
+      "peakInstallationBytes": 2756525,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "database:TIMELINE:fr": {
+      "id": "database:TIMELINE:fr",
+      "url": "https://assets.bible-strong.app/databases/bible-timeline-events.json.zip",
+      "downloadBytes": 542735,
+      "contentBytes": 1512391,
+      "installedBytes": 1512391,
+      "peakInstallationBytes": 2363395,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "database:TRESOR:fr": {
+      "id": "database:TRESOR:fr",
+      "url": "https://assets.bible-strong.app/databases/commentaires-tresor.sqlite.zip",
+      "downloadBytes": 1851318,
+      "contentBytes": 5434368,
+      "installedBytes": 5434368,
+      "peakInstallationBytes": 8378539,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "strong-lexicon:core": {
+      "id": "strong-lexicon:core",
+      "url": "https://assets.bible-strong.app/databases/strong_lexicon.core.sqlite.zip",
+      "downloadBytes": 5621474,
+      "contentBytes": 22228992,
+      "installedBytes": 22228992,
+      "peakInstallationBytes": 32028036,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "strong-lexicon:entities": {
+      "id": "strong-lexicon:entities",
+      "url": "https://assets.bible-strong.app/databases/bible_entities.sqlite.zip",
+      "downloadBytes": 5315076,
+      "contentBytes": 19873792,
+      "installedBytes": 19873792,
+      "peakInstallationBytes": 28967199,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    },
+    "strong-lexicon:resources": {
+      "id": "strong-lexicon:resources",
+      "url": "https://assets.bible-strong.app/databases/strong_lexicon.resources.sqlite.zip",
+      "downloadBytes": 13438540,
+      "contentBytes": 60190720,
+      "installedBytes": 60190720,
+      "peakInstallationBytes": 84673649,
+      "strategy": "archive-extract",
+      "confidence": "exact"
+    }
+  }
+}

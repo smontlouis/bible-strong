@@ -3,7 +3,6 @@
 import type { DownloadItem } from '~state/downloadQueue'
 
 const mockInstallResourceDatabaseItem = jest.fn()
-const mockSynchronizeOptionalBibleResources = jest.fn()
 const mockBeginResourceInstallation = jest.fn()
 const mockCommitResourceInstallation = jest.fn()
 const mockCompleteResourceInstallation = jest.fn()
@@ -13,8 +12,6 @@ const mockIsAtomicResourceFileRollbackError = jest.fn()
 
 jest.mock('../resourceDatabaseInstallation', () => ({
   installResourceDatabaseItem: (...args: unknown[]) => mockInstallResourceDatabaseItem(...args),
-  synchronizeOptionalBibleResources: (...args: unknown[]) =>
-    mockSynchronizeOptionalBibleResources(...args),
 }))
 
 jest.mock('../resourceInstallationJournal', () => ({
@@ -53,6 +50,14 @@ jest.mock('../strongLexiconModules', () => ({
   getStrongLexiconModulePath: (moduleId: string) => `/strong-lexicon/${moduleId}.sqlite`,
 }))
 
+jest.mock('../pericopes', () => ({
+  requirePericopePath: (versionId: string) => `/pericopes/${versionId}.json`,
+}))
+
+jest.mock('../redWords', () => ({
+  requireRedWordsPath: (versionId: string) => `/red-words/${versionId}.json`,
+}))
+
 import { installManagedResource } from '../managedResourceInstallation'
 
 const databaseItem: DownloadItem = {
@@ -63,6 +68,7 @@ const databaseItem: DownloadItem = {
   lang: 'fr',
   url: 'https://example.com/nave.sqlite',
   destinationPath: '/documents/SQLite/fr/nave.sqlite',
+  archiveEntry: 'nave-fr.sqlite',
   estimatedSize: 10,
   addedAt: 1,
   retryCount: 0,

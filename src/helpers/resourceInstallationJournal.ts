@@ -9,7 +9,11 @@ const JOURNAL_KEY = 'resource-installation-journal'
 
 export type ResourceInstallationRecoveryTarget =
   | { kind: 'file'; destinationPath: string }
-  | { kind: 'bible-sqlite'; versionId: string }
+  | {
+      kind: 'bible-sqlite'
+      versionId: string
+      bundleFiles?: { destinationPath: string; previousCopyExisted: boolean }[]
+    }
 
 export type ResourceInstallationJournal = {
   resourceId: string
@@ -108,7 +112,23 @@ const reconcileBibleInstallation = async (journal: ResourceInstallationJournal) 
   const metadata = await getBibleVersionMetadata(journal.recoveryTarget.versionId)
   if (metadata?.resourceGeneration === journal.nextPublication.generation) {
     resourcePublicationStore.write(journal.resourceId, journal.nextPublication)
+    await Promise.all(
+      (journal.recoveryTarget.bundleFiles ?? []).map(file =>
+        FileSystem.deleteAsync(`${file.destinationPath}.bundle-backup`, { idempotent: true })
+      )
+    )
   } else {
+    for (const file of journal.recoveryTarget.bundleFiles ?? []) {
+      const { destinationPath, previousCopyExisted } = file
+      const backupPath = `${destinationPath}.bundle-backup`
+      const backup = await FileSystem.getInfoAsync(backupPath)
+      if (backup.exists) {
+        await FileSystem.deleteAsync(destinationPath, { idempotent: true })
+        await FileSystem.moveAsync({ from: backupPath, to: destinationPath })
+      } else if (!previousCopyExisted) {
+        await FileSystem.deleteAsync(destinationPath, { idempotent: true })
+      }
+    }
     restorePublication(journal)
   }
 }

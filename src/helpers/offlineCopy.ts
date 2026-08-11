@@ -186,8 +186,12 @@ export type BibleDownloadItem = DownloadItemCommon & {
   type: 'bible'
   versionId: string
   destinationPath?: string
-  hasRedWords: boolean
-  hasPericope: boolean
+  archiveEntry: string
+  archiveEntries: {
+    canonical: string
+    pericope?: string
+    redWords?: string
+  }
   canonicalArtifact?: StrongBiblePublication['canonical']
   archiveArtifact?: InterlinearPublicationArtifact
 }
@@ -218,6 +222,7 @@ export type DatabaseDownloadItem = DownloadItemCommon & {
   databaseId: Exclude<DatabaseId, 'BIBLES'>
   lang: ResourceLanguage
   destinationPath: string
+  archiveEntry: string
 }
 
 export type DownloadItem =

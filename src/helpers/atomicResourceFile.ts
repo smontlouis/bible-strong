@@ -38,6 +38,39 @@ export const isAtomicResourceFileRollbackError = (
   error: unknown
 ): error is AtomicResourceFileRollbackError => error instanceof AtomicResourceFileRollbackError
 
+export type ActivatedResourceFile = {
+  destinationPath: string
+  backupPath: string
+  previousCopyMoved: boolean
+}
+
+export const rollbackActivatedResourceFiles = async (
+  activations: readonly ActivatedResourceFile[],
+  originalError: unknown
+): Promise<void> => {
+  const rollbackErrors: unknown[] = []
+  for (const activation of [...activations].reverse()) {
+    try {
+      await FileSystem.deleteAsync(activation.destinationPath, { idempotent: true })
+    } catch (error) {
+      rollbackErrors.push(error)
+    }
+    if (activation.previousCopyMoved) {
+      try {
+        await FileSystem.moveAsync({
+          from: activation.backupPath,
+          to: activation.destinationPath,
+        })
+      } catch (error) {
+        rollbackErrors.push(error)
+      }
+    }
+  }
+  if (rollbackErrors.length > 0) {
+    throw new AtomicResourceFileRollbackError(originalError, rollbackErrors)
+  }
+}
+
 export const installAtomicResourceFile = async ({
   candidatePath,
   destinationPath,

@@ -15,6 +15,7 @@ import { storage } from '~helpers/storage'
 import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
 import { reconcileResourceInstallationJournal } from '~helpers/resourceInstallationJournal'
 import { installManagedResource } from '~helpers/managedResourceInstallation'
+import { refreshPersistedDownloadItem } from '~helpers/persistedDownloadItem'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -165,6 +166,7 @@ class DownloadManager {
         ) {
           states.set(itemState.item.id, {
             ...itemState,
+            item: refreshPersistedDownloadItem(itemState.item),
             status:
               itemState.status === 'downloading' || itemState.status === 'inserting'
                 ? 'queued'

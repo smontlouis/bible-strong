@@ -1,10 +1,9 @@
 import * as FileSystem from 'expo-file-system/legacy'
+import { unzip } from 'react-native-zip-archive'
 
 import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
 import { downloadWithCdnFallback } from '~helpers/downloadWithCdnFallback'
 import { dbManager, openSQLiteDatabase } from '~helpers/sqlite'
-import { downloadRedWordsFile, versionHasRedWords } from '~helpers/redWords'
-import { downloadPericopeFile, versionHasPericope } from '~helpers/pericopes'
 import type { DatabaseId } from '~helpers/databaseTypes'
 import type { DownloadItem } from '~state/downloadQueue'
 import type {
@@ -21,6 +20,7 @@ import type { DownloadWithCdnFallbackResult } from './downloadWithCdnFallback'
 import { installAtomicResourceFile } from './atomicResourceFile'
 import { installStrongLexiconModule } from './strongLexiconModules'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
+import { toNativeFilePath } from './fileIntegrity'
 
 export interface ResourceInstallationCallbacks {
   onDownloadProgress: (progress: number) => void
@@ -29,39 +29,6 @@ export interface ResourceInstallationCallbacks {
   onResumable: (resumable: FileSystem.DownloadResumable | null) => void
   isCancelled: () => boolean
   installationLifecycle: ResourceInstallationLifecycle
-}
-
-export const synchronizeOptionalBibleResources = async (
-  item: BibleDownloadItem,
-  versionId: string
-) => {
-  const downloads: (() => Promise<boolean>)[] = []
-  if (item.hasRedWords && versionHasRedWords(versionId)) {
-    downloads.push(() => downloadRedWordsFile(versionId))
-  }
-  if (item.hasPericope && versionHasPericope(versionId)) {
-    downloads.push(() => downloadPericopeFile(versionId))
-  }
-  // The durable installation journal is intentionally single-writer.
-  const results = await downloads.reduce<Promise<PromiseSettledResult<boolean>[]>>(
-    (previous, download) =>
-      previous.then(settled =>
-        download().then(
-          value => [...settled, { status: 'fulfilled' as const, value }],
-          reason => [...settled, { status: 'rejected' as const, reason }]
-        )
-      ),
-    Promise.resolve([])
-  )
-  if (
-    results.some(
-      result => result.status === 'rejected' || (result.status === 'fulfilled' && !result.value)
-    )
-  ) {
-    console.warn(
-      `[ResourceInstallation] Optional Bible resources could not all be refreshed: ${versionId}`
-    )
-  }
 }
 
 const downloadFile = async (
@@ -99,6 +66,8 @@ const installBible = async (item: BibleDownloadItem, callbacks: ResourceInstalla
     isCancelled: callbacks.isCancelled,
     canonicalArtifact: item.canonicalArtifact,
     archiveArtifact: item.archiveArtifact,
+    archiveEntry: item.archiveEntry,
+    archiveEntries: item.archiveEntries,
     installationLifecycle: callbacks.installationLifecycle,
   })
 
@@ -113,12 +82,21 @@ const installDatabase = async (
   const dbId = item.databaseId
   const lang = item.lang
   const destinationPath = item.destinationPath
-  const temporaryPath = `${destinationPath}.download`
-  await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
-  const result = await downloadFile(item, callbacks, temporaryPath)
+  const archivePath = `${destinationPath}.download.zip`
+  const extractionDirectory = `${destinationPath}.extract/`
+  await FileSystem.deleteAsync(archivePath, { idempotent: true })
+  await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
+  const result = await downloadFile(item, callbacks, archivePath)
   await callbacks.installationLifecycle.prepare(result)
 
   try {
+    await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
+    await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
+    const temporaryPath = `${extractionDirectory}${item.archiveEntry}`
+    const extractedInfo = await FileSystem.getInfoAsync(temporaryPath)
+    if (!extractedInfo.exists || extractedInfo.isDirectory) {
+      throw new Error(`RESOURCE_DATABASE_ARCHIVE_ENTRY_MISSING:${dbId}:${lang}`)
+    }
     if (dbId === 'TIMELINE') {
       const timeline = JSON.parse(await FileSystem.readAsStringAsync(temporaryPath)) as unknown
       if (
@@ -178,7 +156,8 @@ const installDatabase = async (
     })
     return result
   } finally {
-    await FileSystem.deleteAsync(temporaryPath, { idempotent: true })
+    await FileSystem.deleteAsync(archivePath, { idempotent: true })
+    await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
   }
 }
 

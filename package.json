@@ -35,6 +35,7 @@
     "agents:logs:errors": "node scripts/agents-log-session.mjs errors",
     "agents:logs:startup": "node scripts/agents-log-session.mjs startup",
     "agents:logs:navigation": "node scripts/agents-log-session.mjs navigation",
+    "resources:sizes:generate": "node scripts/generate-offline-resource-size-manifest.mjs",
     "agents:issue:start": "node scripts/agents-issue-start.mjs",
     "agents:issue:pr": "node scripts/agents-issue-pr.mjs",
     "agents:issue:run": "node scripts/agents-issue-run.mjs",

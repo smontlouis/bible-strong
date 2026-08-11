@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import { to } from 'await-to-js'
 
-import { getDatabasesRef } from '~helpers/firebase'
+import { getDatabaseUrl } from '~helpers/firebase'
 import i18n, { getLanguage } from '~i18n'
 import {
   ResourceLanguage,
@@ -12,6 +12,12 @@ import {
   isSharedDB,
   BASE_SQLITE_DIR,
 } from '~helpers/databaseTypes'
+import {
+  compareResourcePublications,
+  fetchResourcePublication,
+  resourcePublicationStore,
+} from '~helpers/resourcePublication'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 export const databaseDictionnaireName = 'dictionnaire.sqlite'
 export const databaseTresorName = 'commentaires-tresor.sqlite'
@@ -88,6 +94,8 @@ const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
 
 export const getIfDatabaseNeedsUpdate = async (dbId: IdDatabase) => {
   const { path } = databases()[dbId]
+  const lang = getLanguage()
+  if (dbId === 'MHY' && lang !== 'fr') return false
 
   const [errF, file] = await to(FileSystem.getInfoAsync(path))
 
@@ -95,15 +103,24 @@ export const getIfDatabaseNeedsUpdate = async (dbId: IdDatabase) => {
     return false
   }
 
-  const [errRF, response] = await to(fetch(getDatabasesRef()[dbId], { method: 'HEAD' }))
+  const resourceLang = isSharedDB(dbId) ? 'fr' : lang
+  const resourceId = createOfflineCopyId({
+    kind: 'database',
+    databaseId: dbId,
+    language: resourceLang,
+  })
+  const installed = resourcePublicationStore.read(resourceId)
+  // A database installed by an older app has no publication metadata yet.
+  // Offer one managed reinstall so future generation-based updates can work.
+  if (!installed) return true
+  const [errRF, remote] = await to(fetchResourcePublication(getDatabaseUrl(dbId, resourceLang)))
 
-  if (errF || errRF) {
+  if (errF || errRF || !remote) {
     console.log(`Error for${dbId}`, errF, errRF)
     return false
   }
 
-  const remoteSize = Number(response?.headers.get('content-length'))
-  return Number.isFinite(remoteSize) && file.size !== remoteSize
+  return compareResourcePublications(installed, remote) === 'update-available'
 }
 
 export const getIfDatabaseNeedsDownload = async (dbId: IdDatabase) => {

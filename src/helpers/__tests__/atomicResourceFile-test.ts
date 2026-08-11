@@ -12,6 +12,7 @@ jest.mock('expo-file-system/legacy', () => ({
 import {
   AtomicResourceFileRollbackError,
   installAtomicResourceFile,
+  rollbackActivatedResourceFiles,
   restoreOrphanedResourceBackup,
 } from '../atomicResourceFile'
 
@@ -39,6 +40,29 @@ describe('atomic resource file recovery', () => {
     await restoreOrphanedResourceBackup('/resource.sqlite', '/resource.sqlite.backup')
 
     expect(mockMoveAsync).not.toHaveBeenCalled()
+  })
+
+  it('aggregates bundle rollback errors and still attempts every restore', async () => {
+    const originalError = new Error('install-failed')
+    const restoreError = new Error('restore-failed')
+    mockDeleteAsync.mockResolvedValue(undefined)
+    mockMoveAsync.mockRejectedValueOnce(restoreError).mockResolvedValueOnce(undefined)
+
+    await expect(
+      rollbackActivatedResourceFiles(
+        [
+          { destinationPath: '/first', backupPath: '/first.backup', previousCopyMoved: true },
+          { destinationPath: '/second', backupPath: '/second.backup', previousCopyMoved: true },
+        ],
+        originalError
+      )
+    ).rejects.toMatchObject({
+      name: 'AtomicResourceFileRollbackError',
+      originalError,
+      rollbackErrors: [restoreError],
+    })
+    expect(mockDeleteAsync).toHaveBeenCalledTimes(2)
+    expect(mockMoveAsync).toHaveBeenCalledTimes(2)
   })
 })
 
