@@ -1,11 +1,12 @@
 import { useAtom, useSetAtom } from 'jotai/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Modal } from 'react-native'
 import { useDispatch } from 'react-redux'
 
 import Box from '~common/ui/Box'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import { isOnboardingForced } from '~helpers/runtimeConfig'
 import { deleteAllDatabases } from '~helpers/sqlite'
 import useLanguage from '~helpers/useLanguage'
 import { setDefaultBibleVersion } from '~redux/modules/user'
@@ -18,8 +19,14 @@ const useCheckMandatoryVersions = () => {
   const dispatch = useDispatch()
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useAtom(isOnboardingCompletedAtom)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const forcedOnboardingDismissed = useRef(false)
 
   useEffect(() => {
+    if (isOnboardingForced) {
+      if (!forcedOnboardingDismissed.current) setShowOnboarding(true)
+      return
+    }
+
     // Skip file check if onboarding was already completed (fast path via MMKV)
     if (isOnboardingCompleted) {
       console.log('[Onboarding] Already completed, skipping file check.')
@@ -53,13 +60,26 @@ const useCheckMandatoryVersions = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, dispatch, isOnboardingCompleted])
 
-  return showOnboarding
+  const hideOnboarding = () => {
+    forcedOnboardingDismissed.current = true
+    setShowOnboarding(false)
+  }
+
+  return { hideOnboarding, showOnboarding }
 }
 
 const OnBoarding = () => {
   const [step, setStep] = useState<'abel' | 'resources'>('abel')
   const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
-  const showOnboarding = useCheckMandatoryVersions()
+  const { hideOnboarding, showOnboarding } = useCheckMandatoryVersions()
+
+  const completeOnboarding = () => {
+    if (isOnboardingForced) {
+      hideOnboarding()
+      return
+    }
+    setIsOnboardingCompleted(true)
+  }
 
   return (
     <Modal
@@ -72,7 +92,7 @@ const OnBoarding = () => {
         {step === 'abel' ? (
           <AbelOnboarding onComplete={() => setStep('resources')} />
         ) : (
-          <SelectResources onComplete={() => setIsOnboardingCompleted(true)} />
+          <SelectResources onComplete={completeOnboarding} />
         )}
       </Box>
     </Modal>
