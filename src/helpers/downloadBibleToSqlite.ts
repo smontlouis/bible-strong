@@ -19,7 +19,7 @@ import type { InterlinearPublicationArtifact } from '~helpers/interlinearBiblePu
 import { planWordAnnotationRealignment } from '~helpers/wordAnnotationRealignment'
 import { realignWordAnnotationsAction } from '~redux/modules/user'
 import { persistor, store } from '~redux/store'
-import { getFileSha256, toNativeFilePath } from './fileIntegrity'
+import { getFileSha256, toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
 import {
   clearAnnotationMigrationJournal,
   persistAnnotationMigrationJournal,
@@ -43,6 +43,7 @@ export interface DownloadAndInsertOptions extends InsertBibleOptions {
   archiveArtifact?: InterlinearPublicationArtifact
   archiveEntry?: string
   archiveEntries?: BibleArchiveEntries
+  expectedArchiveSha256?: string
   installationLifecycle?: ResourceInstallationLifecycle
 }
 
@@ -93,6 +94,14 @@ export async function downloadAndInsertBible(
     // Check cancellation after download
     if (opts.isCancelled?.()) {
       throw new Error('CANCELLED')
+    }
+
+    if (opts.expectedArchiveSha256) {
+      await verifyFileSha256(
+        tempPath,
+        opts.expectedArchiveSha256,
+        `BIBLE_ARCHIVE_CHECKSUM_MISMATCH:${versionId}`
+      )
     }
 
     const jsonPath = await resolveDownloadedBibleJson({

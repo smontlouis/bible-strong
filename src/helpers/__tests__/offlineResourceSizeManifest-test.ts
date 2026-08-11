@@ -1,13 +1,16 @@
 import {
   bundledOfflineResourceSizeManifest,
   getOfflineResourceSizeEntry,
-  isOfflineResourceSizeManifest,
+  toOfflineResourceSizeManifest,
 } from '../offlineResourceSizeManifest'
+import { BUNDLED_MOBILE_RESOURCE_CATALOG } from '../mobileResourceCatalog'
 
 describe('offlineResourceSizeManifest', () => {
   it('ships a valid bundled fallback', () => {
-    expect(isOfflineResourceSizeManifest(bundledOfflineResourceSizeManifest)).toBe(true)
-    expect(Object.keys(bundledOfflineResourceSizeManifest.resources).length).toBeGreaterThan(0)
+    expect(bundledOfflineResourceSizeManifest).toEqual(
+      toOfflineResourceSizeManifest(BUNDLED_MOBILE_RESOURCE_CATALOG)
+    )
+    expect(Object.keys(bundledOfflineResourceSizeManifest.resources)).toHaveLength(72)
   })
 
   it('uses decompressed installed bytes from the manifest', () => {

@@ -1,7 +1,16 @@
-import { getMobileResourceCatalogEntry, MOBILE_RESOURCE_CATALOG } from '../mobileResourceCatalog'
+import {
+  BUNDLED_MOBILE_RESOURCE_CATALOG,
+  getMobileResourceCatalogEntry,
+  isMobileResourceCatalog,
+  loadMobileResourceCatalog,
+  MOBILE_RESOURCE_CATALOG,
+  MOBILE_RESOURCE_CATALOG_URL,
+  resolveMobileResourceCatalog,
+} from '../mobileResourceCatalog'
 
 describe('mobile resource catalog', () => {
   it('contains every downloadable resource as a ZIP', () => {
+    expect(isMobileResourceCatalog(BUNDLED_MOBILE_RESOURCE_CATALOG)).toBe(true)
     expect(MOBILE_RESOURCE_CATALOG.resourceCount).toBe(72)
     expect(Object.values(MOBILE_RESOURCE_CATALOG.resources)).toHaveLength(72)
     expect(
@@ -9,6 +18,84 @@ describe('mobile resource catalog', () => {
         resource.url.endsWith('.zip')
       )
     ).toBe(true)
+  })
+
+  it('uses the single CDN catalog with the bundled catalog as network fallback', async () => {
+    const fetcher = jest.fn(async () => new Response(null, { status: 503 }))
+
+    await expect(loadMobileResourceCatalog(fetcher)).resolves.toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
+    expect(fetcher).toHaveBeenCalledWith(MOBILE_RESOURCE_CATALOG_URL, {
+      headers: { Accept: 'application/json' },
+      signal: expect.any(AbortSignal),
+    })
+  })
+
+  it('accepts a complete catalog with additional resources for older app versions', () => {
+    const newerCatalog = {
+      ...BUNDLED_MOBILE_RESOURCE_CATALOG,
+      generatedAt: '2099-01-01T00:00:00.000Z',
+      resourceCount: BUNDLED_MOBILE_RESOURCE_CATALOG.resourceCount + 1,
+      resources: {
+        ...BUNDLED_MOBILE_RESOURCE_CATALOG.resources,
+        'bible:FUTURE': {
+          ...BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:NBS'],
+          id: 'bible:FUTURE',
+        },
+      },
+    }
+    expect(resolveMobileResourceCatalog(newerCatalog)).toBe(newerCatalog)
+    expect(
+      resolveMobileResourceCatalog({
+        ...newerCatalog,
+        resources: {},
+        resourceCount: 0,
+      })
+    ).toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
+    expect(
+      resolveMobileResourceCatalog({
+        ...BUNDLED_MOBILE_RESOURCE_CATALOG,
+        generatedAt: '2000-01-01T00:00:00.000Z',
+      })
+    ).toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
+  })
+
+  it('rejects malformed archive metadata at the network boundary', () => {
+    const malformedCatalog = {
+      ...BUNDLED_MOBILE_RESOURCE_CATALOG,
+      generatedAt: '2099-01-01T00:00:00.000Z',
+      resources: {
+        ...BUNDLED_MOBILE_RESOURCE_CATALOG.resources,
+        'bible:NBS': {
+          ...BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:NBS'],
+          archiveSha256: undefined,
+          entries: {
+            canonical: {
+              entry: '../bible-nbs.json',
+              bytes: 0,
+              sha256: 'not-a-sha256',
+            },
+          },
+        },
+      },
+    }
+
+    expect(isMobileResourceCatalog(malformedCatalog)).toBe(false)
+    expect(resolveMobileResourceCatalog(malformedCatalog)).toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
+  })
+
+  it('retries the CDN after a transient failure', async () => {
+    const newerCatalog = {
+      ...BUNDLED_MOBILE_RESOURCE_CATALOG,
+      generatedAt: '2099-01-01T00:00:00.000Z',
+    }
+    const fetcher = jest
+      .fn()
+      .mockResolvedValueOnce(new Response(null, { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(newerCatalog), { status: 200 }))
+
+    await expect(loadMobileResourceCatalog(fetcher)).resolves.toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
+    await expect(loadMobileResourceCatalog(fetcher)).resolves.toEqual(newerCatalog)
+    expect(fetcher).toHaveBeenCalledTimes(2)
   })
 
   it('bundles optional pericope and red-word JSON files with legacy Bibles', () => {

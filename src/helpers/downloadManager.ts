@@ -111,6 +111,7 @@ class DownloadManager {
     this.cancelledIds.delete(itemId)
     states.set(itemId, {
       ...state,
+      item: refreshPersistedDownloadItem(state.item),
       status: 'queued',
       downloadProgress: 0,
       insertProgress: 0,
@@ -131,6 +132,7 @@ class DownloadManager {
         this.cancelledIds.delete(id)
         states.set(id, {
           ...state,
+          item: refreshPersistedDownloadItem(state.item),
           status: 'queued',
           downloadProgress: 0,
           insertProgress: 0,

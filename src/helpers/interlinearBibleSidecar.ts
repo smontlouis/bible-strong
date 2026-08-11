@@ -4,7 +4,7 @@ import { unzip } from 'react-native-zip-archive'
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath, type ResourceLanguage } from './databaseTypes'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
-import { toNativeFilePath } from './fileIntegrity'
+import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
 import {
   BHG_INTERLINEAR_PUBLICATION,
   type InterlinearBibleVersionId,
@@ -192,6 +192,11 @@ export const installInterlinearSidecar = async (
       logTag: 'InterlinearBibleSidecar',
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
+    await verifyFileSha256(
+      archivePath,
+      artifact.archiveSha256,
+      `INTERLINEAR_ARCHIVE_CHECKSUM_MISMATCH:${locale}`
+    )
     await callbacks.installationLifecycle?.prepare(downloadResult)
     callbacks.onStatusInserting?.()
     callbacks.onInsertProgress?.(0)

@@ -4,7 +4,7 @@ import { unzip } from 'react-native-zip-archive'
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath } from './databaseTypes'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
-import { toNativeFilePath } from './fileIntegrity'
+import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
 import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
 import {
@@ -18,6 +18,7 @@ import {
 import {
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
+  type StrongBiblePublication,
   type StrongBibleVersionId,
 } from './strongBiblePublications'
 import type { StrongBibleIdentityKind, StrongBibleSpan } from './canonicalStrongVerse'
@@ -146,17 +147,17 @@ export const getStrongBibleSidecarAvailability = async (
 
 export const installStrongBibleSidecar = async (
   versionId: StrongBibleVersionId,
+  artifact: StrongBiblePublication['strong'],
   callbacks: StrongBibleSidecarInstallCallbacks = {}
 ) => {
-  const publication = getStrongBiblePublication(versionId)
   const baseMetadata = await getBibleVersionMetadata(versionId)
   if (!baseMetadata) throw new Error(`STRONG_BIBLE_BASE_MISSING:${versionId}`)
   const archivePath = `${FileSystem.cacheDirectory}bible-${versionId}-strong-temp.zip`
   const extractionDirectory = `${FileSystem.cacheDirectory}bible-${versionId}-strong-extract/`
-  const extractedPath = `${extractionDirectory}${publication.strong.entry}`
+  const extractedPath = `${extractionDirectory}${artifact.entry}`
   try {
     const downloadResult = await downloadWithCdnFallback({
-      url: publication.strong.url,
+      url: artifact.url,
       destinationPath: archivePath,
       downloadOptions: { cache: false },
       onDownloadProgress: callbacks.onDownloadProgress,
@@ -165,6 +166,11 @@ export const installStrongBibleSidecar = async (
       logTag: 'StrongBibleSidecar',
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
+    await verifyFileSha256(
+      archivePath,
+      artifact.archiveSha256,
+      `STRONG_BIBLE_ARCHIVE_CHECKSUM_MISMATCH:${versionId}`
+    )
     await callbacks.installationLifecycle?.prepare(downloadResult)
 
     callbacks.onStatusInserting?.()

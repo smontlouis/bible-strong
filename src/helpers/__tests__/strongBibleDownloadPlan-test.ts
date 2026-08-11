@@ -89,6 +89,7 @@ describe('Strong Bible download planning', () => {
       expect.objectContaining({
         url: 'https://assets.bible-strong.app/bibles/bible-ost.json.zip',
         archiveEntry: 'bible-ost.json',
+        expectedArchiveSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
       })
     )
   })
@@ -141,6 +142,7 @@ describe('historical resource database download planning', () => {
         url: 'https://assets.bible-strong.app/databases/nave-fr.sqlite.zip',
         archiveEntry: 'nave-fr.sqlite',
         destinationPath: '/documents/SQLite/fr/nave.sqlite',
+        expectedArchiveSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
       })
     )
   })

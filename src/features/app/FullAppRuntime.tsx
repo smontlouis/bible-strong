@@ -29,12 +29,15 @@ import { createFormSheetOptions } from '~navigation/formSheetOptions'
 import { Theme } from '~themes/index'
 import { PlaybackService } from '../../../playbackService'
 import { downloadManager } from '~helpers/downloadManager'
+import { loadMobileResourceCatalog } from '~helpers/mobileResourceCatalog'
 
 const PostMigrationStartup = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
-    downloadManager.restore().catch(error => {
-      appLogger.error('startup', 'resource_recovery.failed', { error })
-    })
+    void loadMobileResourceCatalog().then(() =>
+      downloadManager.restore().catch(error => {
+        appLogger.error('startup', 'resource_recovery.failed', { error })
+      })
+    )
   }, [])
 
   return children

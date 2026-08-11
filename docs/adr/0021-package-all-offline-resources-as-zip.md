@@ -25,13 +25,15 @@ existing JSON or SQLite names and schemas; ZIP is a delivery envelope, not a sch
 
 `bible-lexicon-maker/config/mobile-resource-inventory.json` is the complete publication inventory.
 Its mobile resource release command packages historical direct sources deterministically, validates
-already-zipped sources, and emits one global `catalog.json` with every identity, stable artifact URL,
+already-zipped sources, and emits one global `mobile-resource-catalog.json` with every identity, stable artifact URL,
 archive entries and roles, SHA-256 checksums, byte sizes, installation strategy, and peak-space
 estimate. The build fails on an omitted/duplicate identity contract, a non-ZIP target, a missing
 canonical entry, duplicate roles, or an unexpected archive entry.
 
-The app bundles the generated catalog and derives download URLs, archive entries, and size metadata
-from it. All Bible bundle entries are extracted and validated from one download. The text is imported
+The exact same catalog is uploaded to `/manifests/mobile-resource-catalog.json` and bundled in the
+app as its offline fallback. The app loads the CDN copy at startup and derives download URLs, archive
+entries, and size metadata from it; a network or validation failure keeps the bundled copy active.
+There is no separate size manifest. All Bible bundle entries are extracted and validated from one download. The text is imported
 into `bibles.sqlite`, while legacy pericope and red-word files keep their historical on-device paths.
 They no longer have independent download or publication identities. SQLite and timeline resources
 are extracted before their existing schema/integrity validation and atomic file swap. Publication

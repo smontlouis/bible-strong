@@ -60,6 +60,7 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
         : {}),
     },
     estimatedSize,
+    expectedArchiveSha256: catalogArtifact.archiveSha256,
     addedAt: Date.now(),
     retryCount: 0,
   }
@@ -73,7 +74,19 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
 }
 
 export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): DownloadItem {
-  const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[lang]
+  const publicationArtifact = BHG_INTERLINEAR_PUBLICATION.indexes[lang]
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: lang })
+  )
+  const artifact = {
+    ...publicationArtifact,
+    url: catalogArtifact.url,
+    entry: catalogArtifact.entry,
+    archiveSha256: catalogArtifact.archiveSha256,
+    archiveBytes: catalogArtifact.archiveBytes,
+    contentSha256: catalogArtifact.contentSha256,
+    contentBytes: catalogArtifact.contentBytes,
+  }
   return {
     id: createOfflineCopyId({
       kind: 'interlinear-index',
@@ -86,6 +99,7 @@ export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): Do
     lang,
     url: artifact.url,
     estimatedSize: artifact.archiveBytes,
+    expectedArchiveSha256: artifact.archiveSha256,
     interlinearArtifact: artifact,
     interlinearDatasetId: BHG_INTERLINEAR_PUBLICATION.datasetId,
     addedAt: Date.now(),
@@ -108,14 +122,27 @@ export const createInterlinearSidecarDownloadPlan = (
 export function createStrongSidecarDownloadItem(versionId: StrongBibleVersionId): DownloadItem {
   const version = versions[versionId]
   const publication = getStrongBiblePublication(versionId)
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    createOfflineCopyId({ kind: 'strong-bible-index', versionId })
+  )
+  const strongArtifact = {
+    ...publication.strong,
+    url: catalogArtifact.url,
+    entry: catalogArtifact.entry,
+    archiveSha256: catalogArtifact.archiveSha256,
+    archiveBytes: catalogArtifact.archiveBytes,
+    contentSha256: catalogArtifact.contentSha256,
+    contentBytes: catalogArtifact.contentBytes,
+  }
   return {
     id: createOfflineCopyId({ kind: 'strong-bible-index', versionId }),
     type: 'bible-strong-sidecar',
     name: `${version.name} — Strong`,
     versionId,
-    url: publication.strong.url,
-    estimatedSize: publication.strong.archiveBytes,
-    strongArtifact: publication.strong,
+    url: strongArtifact.url,
+    estimatedSize: strongArtifact.archiveBytes,
+    expectedArchiveSha256: strongArtifact.archiveSha256,
+    strongArtifact,
     strongDatasetId: publication.datasetId,
     addedAt: Date.now(),
     retryCount: 0,
@@ -224,6 +251,7 @@ export function createDatabaseDownloadItem(
     destinationPath,
     archiveEntry: catalogArtifact.entry,
     estimatedSize: catalogArtifact.archiveBytes,
+    expectedArchiveSha256: catalogArtifact.archiveSha256,
     addedAt: Date.now(),
     retryCount: 0,
   }

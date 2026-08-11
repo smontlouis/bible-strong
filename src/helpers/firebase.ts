@@ -19,8 +19,8 @@ import { getStorage, ref } from '@react-native-firebase/storage'
 import { getLanguage } from '~i18n'
 import { ResourceLanguage, DatabaseId, isSharedDB } from '~helpers/databaseTypes'
 import {
+  BUNDLED_MOBILE_RESOURCE_CATALOG,
   getMobileResourceCatalogEntry,
-  MOBILE_RESOURCE_CATALOG,
 } from '~helpers/mobileResourceCatalog'
 
 // Firebase instances (modular API)
@@ -75,18 +75,8 @@ type DatabasesRef = Partial<Record<RemoteDatabaseId, string>>
 
 // Get database URL for a specific database and language
 export const getDatabaseUrl = (dbId: RemoteDatabaseId, lang: ResourceLanguage): string => {
-  // Shared databases always use the same URL
-  if (isSharedDB(dbId)) {
-    return databasesRef[dbId]
-  }
-
-  if (lang === 'fr') {
-    return databasesRef[dbId]
-  }
-
-  const url = databasesEnRef[dbId]
-  if (!url) throw new Error(`RESOURCE_DATABASE_NOT_PUBLISHED:${dbId}:${lang}`)
-  return url
+  const resourceLang = isSharedDB(dbId) ? 'fr' : lang
+  return getMobileResourceCatalogEntry(`database:${dbId}:${resourceLang}`).url
 }
 
 // Legacy function for backward compatibility
@@ -110,7 +100,7 @@ export const getDatabasesRefForLang = (lang: ResourceLanguage): DatabasesRef => 
 export const biblesRef: {
   [version: string]: string
 } = Object.fromEntries(
-  Object.entries(MOBILE_RESOURCE_CATALOG.resources).flatMap(([id, resource]) =>
+  Object.entries(BUNDLED_MOBILE_RESOURCE_CATALOG.resources).flatMap(([id, resource]) =>
     id.startsWith('bible:') ? [[id.slice('bible:'.length), resource.url]] : []
   )
 )

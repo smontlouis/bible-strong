@@ -20,7 +20,7 @@ import type { DownloadWithCdnFallbackResult } from './downloadWithCdnFallback'
 import { installAtomicResourceFile } from './atomicResourceFile'
 import { installStrongLexiconModule } from './strongLexiconModules'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
-import { toNativeFilePath } from './fileIntegrity'
+import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
 
 export interface ResourceInstallationCallbacks {
   onDownloadProgress: (progress: number) => void
@@ -68,6 +68,7 @@ const installBible = async (item: BibleDownloadItem, callbacks: ResourceInstalla
     archiveArtifact: item.archiveArtifact,
     archiveEntry: item.archiveEntry,
     archiveEntries: item.archiveEntries,
+    expectedArchiveSha256: item.expectedArchiveSha256,
     installationLifecycle: callbacks.installationLifecycle,
   })
 
@@ -86,10 +87,17 @@ const installDatabase = async (
   const extractionDirectory = `${destinationPath}.extract/`
   await FileSystem.deleteAsync(archivePath, { idempotent: true })
   await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
-  const result = await downloadFile(item, callbacks, archivePath)
-  await callbacks.installationLifecycle.prepare(result)
-
   try {
+    const result = await downloadFile(item, callbacks, archivePath)
+    if (item.expectedArchiveSha256) {
+      await verifyFileSha256(
+        archivePath,
+        item.expectedArchiveSha256,
+        `RESOURCE_DATABASE_ARCHIVE_CHECKSUM_MISMATCH:${dbId}:${lang}`
+      )
+    }
+    await callbacks.installationLifecycle.prepare(result)
+
     await FileSystem.makeDirectoryAsync(extractionDirectory, { intermediates: true })
     await unzip(toNativeFilePath(archivePath), toNativeFilePath(extractionDirectory), 'UTF-8')
     const temporaryPath = `${extractionDirectory}${item.archiveEntry}`
@@ -165,7 +173,7 @@ const installBibleStrongSidecar = async (
   item: StrongBibleIndexDownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
-  return installStrongBibleSidecar(item.versionId as StrongBibleVersionId, {
+  return installStrongBibleSidecar(item.versionId as StrongBibleVersionId, item.strongArtifact, {
     onDownloadProgress: ({ totalBytesWritten }) => {
       callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
     },
@@ -203,7 +211,7 @@ const installLexiconModule = async (
   if (item.url !== item.strongLexiconArtifact.url) {
     throw new Error(`INVALID_STRONG_LEXICON_DOWNLOAD_ITEM:${item.id}`)
   }
-  return installStrongLexiconModule(item.strongLexiconModuleId, {
+  return installStrongLexiconModule(item.strongLexiconModuleId, item.strongLexiconArtifact, {
     onDownloadProgress: ({ totalBytesWritten }) => {
       callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
     },
