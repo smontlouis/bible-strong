@@ -135,7 +135,8 @@ const RelationChip = ({ label, metrics, onPress }: RelationChipProps) => (
       borderRadius={metrics.s(10)}
       px={metrics.s(11)}
       center
-      style={{ backgroundColor: '#E9F3FC' }}
+      bg="lightPrimary"
+      bgOpacity="050"
     >
       <Text color="primary" bold fontSize={metrics.s(8.5)}>
         {label}

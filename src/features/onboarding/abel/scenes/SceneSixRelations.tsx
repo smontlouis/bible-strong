@@ -203,7 +203,7 @@ const RelationLabel = ({ color, label, metrics }: RelationLabelProps) => (
     center
     style={{ backgroundColor: 'rgba(255,255,255,0.92)' }}
   >
-    <Text bold fontSize={metrics.s(9)} style={{ color, fontFamily: 'Courier' }}>
+    <Text bold fontSize={metrics.s(9)} style={{ color, fontFamily: 'Courier' }} numberOfLines={1}>
       {label}
     </Text>
   </Box>
@@ -268,9 +268,8 @@ export const createSceneSixRelations = ({
         <Box
           absoluteFill
           borderRadius={metrics.s(22)}
-          style={{
-            backgroundColor: depthDebug ? SCENE_SIX_DEPTH_DEBUG.backgroundColor : '#F7F9FF',
-          }}
+          bg={depthDebug ? SCENE_SIX_DEPTH_DEBUG.backgroundColor : 'lightPrimary'}
+          bgOpacity={depthDebug ? undefined : '020'}
         />
       </Scene.Layer>
 
@@ -550,7 +549,7 @@ export const createSceneSixRelations = ({
       {!depthDebug && (
         <Scene.Node
           id="relation-label-linked"
-          frame={{ x: 164, y: 350, width: 48, height: 20, zIndex: 7 }}
+          frame={{ x: 164, y: 350, width: 52, height: 20, zIndex: 7 }}
           enterDelay={RELATION_ENTER_START + RELATION_STAGGER * 3}
           enterFrom={{ x: 0, y: 8 }}
           exiting={GRAPH_EXIT}
