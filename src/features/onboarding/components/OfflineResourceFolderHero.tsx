@@ -116,6 +116,7 @@ const OfflineResourceFolderHero = ({
       pointerEvents="none"
       style={[
         {
+          overflow: 'visible',
           position: 'absolute',
           width: HERO_WIDTH,
           height: HERO_HEIGHT,
@@ -128,7 +129,7 @@ const OfflineResourceFolderHero = ({
         animatedStyle,
       ]}
     >
-      <Animated.View style={[{ position: 'absolute', inset: 0 }, folderStyle]}>
+      <Animated.View style={[{ position: 'absolute', inset: 0, overflow: 'visible' }, folderStyle]}>
         <OfflineResourceFolder
           width={HERO_WIDTH}
           title={title}
@@ -140,7 +141,7 @@ const OfflineResourceFolderHero = ({
           colors={visual.colors}
         />
       </Animated.View>
-      <Animated.View style={[{ position: 'absolute', inset: 0 }, badgeStyle]}>
+      <Animated.View style={[{ position: 'absolute', inset: 0, overflow: 'visible' }, badgeStyle]}>
         <OfflineResourceFolderBadge itemCount={itemCount} visual={visual} width={HERO_WIDTH} />
       </Animated.View>
     </Animated.View>

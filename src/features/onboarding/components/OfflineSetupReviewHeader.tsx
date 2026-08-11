@@ -42,12 +42,12 @@ const OfflineSetupFolderReviewHeader = ({
   const { t } = useTranslation()
 
   return (
-    <HStack height={height} alignItems="center" px={12} gap={13}>
+    <HStack height={height} alignItems="center" px={12} gap={13} style={{ overflow: 'visible' }}>
       <View
         ref={folderBadgeRef}
         collapsable={false}
         onLayout={onFolderBadgeLayout}
-        style={{ opacity: context.heroOverlayActive ? 0 : 1 }}
+        style={{ opacity: context.heroOverlayActive ? 0 : 1, overflow: 'visible' }}
       >
         <OfflineResourceFolderBadge itemCount={context.selectedCount} visual={context.visual} />
       </View>

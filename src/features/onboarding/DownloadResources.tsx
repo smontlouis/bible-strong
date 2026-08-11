@@ -32,6 +32,7 @@ import useOfflineSetupDownload, {
 } from './useOfflineSetupDownload'
 
 type DownloadResourcesProps = {
+  canvasVisible?: boolean
   transitioning?: boolean
 } & ({ mode?: 'onboarding'; onComplete: () => void } | { mode: 'preview'; onComplete?: never })
 
@@ -433,6 +434,7 @@ const DownloadResources = (props: DownloadResourcesProps) => {
     }
   )
   const ringProgress = useSharedValue(0)
+  const canvasVisible = props.canvasVisible ?? true
   const transitioning = props.transitioning ?? false
   const backgroundRevealStyle = useStaggeredRevealStyle({
     delay: DOWNLOAD_REVEAL.backgroundDelay,
@@ -452,7 +454,7 @@ const DownloadResources = (props: DownloadResourcesProps) => {
   return (
     <AnimatedBox
       flex
-      bg={transitioning ? 'transparent' : palette.canvas}
+      bg={canvasVisible ? palette.canvas : 'transparent'}
       center
       px={32}
       overflow="hidden"

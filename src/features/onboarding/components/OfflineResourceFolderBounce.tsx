@@ -40,7 +40,7 @@ const OfflineResourceFolderBounce = ({
   const bounceStyle = useAnimatedStyle(() => ({
     transform: [
       { translateY: -bounceDistance * bounceProgress.get() },
-      { scale: 1 + 0.012 * bounceProgress.get() },
+      { scale: 1 + 0.04 * bounceProgress.get() },
     ],
   }))
 

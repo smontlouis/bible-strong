@@ -7,7 +7,7 @@ import { Pressable, useWindowDimensions } from 'react-native'
 import { FadeIn, FadeInUp, useReducedMotion } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import Box, { AnimatedBox, HStack } from '~common/ui/Box'
+import { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
@@ -100,9 +100,14 @@ const SelectResources = (props: SelectResourcesProps) => {
       {state.downloadSceneActive ? (
         <AnimatedBox absoluteFill zIndex={state.downloadSceneSettled ? 30 : 15}>
           {props.mode === 'preview' ? (
-            <DownloadResources mode="preview" transitioning={!state.downloadContentVisible} />
+            <DownloadResources
+              canvasVisible={state.downloadSceneSettled}
+              mode="preview"
+              transitioning={!state.downloadContentVisible}
+            />
           ) : (
             <DownloadResources
+              canvasVisible={state.downloadSceneSettled}
               mode="onboarding"
               onComplete={props.onComplete}
               transitioning={!state.downloadContentVisible}

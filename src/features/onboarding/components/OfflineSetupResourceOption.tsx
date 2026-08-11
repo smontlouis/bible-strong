@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Pressable } from 'react-native'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
 
-import Box, { FadingBox, HStack } from '~common/ui/Box'
+import Box, { AnimatedBox, FadingBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import {
@@ -12,6 +12,7 @@ import {
 } from '~helpers/offlineResourceSizeManifest'
 import formatResourceSize from '../formatResourceSize'
 import { createDownloadItemFromOnboardingSelection } from '../onboardingResources'
+import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
 import type { OfflineSetupOption } from '../offlineSetupPresets'
 import type { OfflineSetupPalette } from '../offlineSetupPalette'
 
@@ -67,6 +68,7 @@ const OfflineSetupResourceOption = ({
   const selectedBorderColor = selected ? palette.accent : palette.itemBorder
   const checkboxBorderColor = selected ? palette.accent : palette.description
   const checkboxBackground = selected ? palette.accent : palette.itemSurface
+  const pressMotion = OFFLINE_SETUP_MOTION.detail.resourceItem
 
   return (
     <Pressable
@@ -74,77 +76,90 @@ const OfflineSetupResourceOption = ({
       accessibilityState={{ checked: selected, disabled: option.required }}
       accessibilityLabel={label}
       onPress={onPress}
-      style={({ pressed }) => ({ opacity: pressed && !option.required ? 0.8 : 1 })}
+      style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1 })}
     >
-      <HStack
-        minHeight={68}
-        px={14}
-        py={11}
-        borderRadius={17}
-        bg={palette.itemSurface}
-        borderWidth={1.5}
-        borderColor={selectedBorderColor}
-        alignItems="center"
-        gap={12}
-      >
-        <Box flex>
-          <HStack alignItems="center" gap={7} wrap>
-            <Text
-              color={palette.title}
-              title
-              fontSize={14}
-              lineHeight={18}
-              style={{ flexShrink: 1 }}
-            >
-              {label}
-            </Text>
-            {locked ? (
-              <FadingBox
-                keyProp={option.required ? 'required' : 'included'}
-                entering={FadeIn.duration(140)}
-                exiting={FadeOut.duration(140)}
-                skipEntering={false}
-                skipExiting={false}
-              >
-                <Box px={7} py={3} borderRadius={9} bg={palette.itemAccentSoft}>
-                  <Text color={palette.itemAccentText} fontSize={9} bold>
-                    {t(badgeKey)}
-                  </Text>
-                </Box>
-              </FadingBox>
-            ) : null}
-          </HStack>
-          {description ? (
-            <Text
-              color={palette.description}
-              fontSize={11}
-              lineHeight={15}
-              mt={3}
-              numberOfLines={1}
-            >
-              {description}
-            </Text>
-          ) : null}
-          <Text color={palette.description} fontSize={10} mt={4}>
-            {formatResourceSize(getOptionBytes(option, sizeManifest), lang)}
-          </Text>
-        </Box>
-        <FadingBox
-          keyProp={selected ? 'selected' : 'unselected'}
-          entering={FadeIn.duration(140)}
-          exiting={FadeOut.duration(140)}
-          skipEntering={false}
-          skipExiting={false}
-          size={22}
-          borderRadius={11}
-          borderWidth={1.5}
-          borderColor={checkboxBorderColor}
-          bg={checkboxBackground}
-          center
+      {({ pressed }) => (
+        <AnimatedBox
+          style={{
+            transform: [{ scale: pressed ? pressMotion.pressedScale : 1 }],
+            transitionProperty: 'transform',
+            transitionDuration: pressed
+              ? pressMotion.pressInDuration
+              : pressMotion.pressOutDuration,
+            transitionTimingFunction: 'ease-out',
+          }}
         >
-          {selected ? <Feather name="check" size={13} color={palette.onAccent} /> : null}
-        </FadingBox>
-      </HStack>
+          <HStack
+            minHeight={68}
+            px={14}
+            py={11}
+            borderRadius={17}
+            bg={palette.itemSurface}
+            borderWidth={1.5}
+            borderColor={selectedBorderColor}
+            alignItems="center"
+            gap={12}
+          >
+            <Box flex>
+              <HStack alignItems="center" gap={7} wrap>
+                <Text
+                  color={palette.title}
+                  title
+                  fontSize={14}
+                  lineHeight={18}
+                  style={{ flexShrink: 1 }}
+                >
+                  {label}
+                </Text>
+                {locked ? (
+                  <FadingBox
+                    keyProp={option.required ? 'required' : 'included'}
+                    entering={FadeIn.duration(140)}
+                    exiting={FadeOut.duration(140)}
+                    skipEntering={false}
+                    skipExiting={false}
+                  >
+                    <Box px={7} py={3} borderRadius={9} bg={palette.itemAccentSoft}>
+                      <Text color={palette.itemAccentText} fontSize={9} bold>
+                        {t(badgeKey)}
+                      </Text>
+                    </Box>
+                  </FadingBox>
+                ) : null}
+              </HStack>
+              {description ? (
+                <Text
+                  color={palette.description}
+                  fontSize={11}
+                  lineHeight={15}
+                  mt={3}
+                  numberOfLines={1}
+                >
+                  {description}
+                </Text>
+              ) : null}
+              <Text color={palette.description} fontSize={10} mt={4}>
+                {formatResourceSize(getOptionBytes(option, sizeManifest), lang)}
+              </Text>
+            </Box>
+            <FadingBox
+              keyProp={selected ? 'selected' : 'unselected'}
+              entering={FadeIn.duration(140)}
+              exiting={FadeOut.duration(140)}
+              skipEntering={false}
+              skipExiting={false}
+              size={22}
+              borderRadius={11}
+              borderWidth={1.5}
+              borderColor={checkboxBorderColor}
+              bg={checkboxBackground}
+              center
+            >
+              {selected ? <Feather name="check" size={13} color={palette.onAccent} /> : null}
+            </FadingBox>
+          </HStack>
+        </AnimatedBox>
+      )}
     </Pressable>
   )
 }

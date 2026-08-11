@@ -2,7 +2,11 @@ import { useEffect, useReducer, useRef } from 'react'
 import type { View } from 'react-native'
 
 import type { OfflineSetupFolderId } from './offlineSetupPresets'
-import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
+import {
+  getOfflineSetupDownloadRevealStart,
+  getOfflineSetupMergeDuration,
+  OFFLINE_SETUP_MOTION,
+} from './offlineSetupMotion'
 import {
   getFolderMergeOffset,
   OFFLINE_SETUP_FOLDER_PRESENTATIONS,
@@ -86,7 +90,11 @@ const useOfflineSetupScene = ({
       return
     }
 
-    const target = { x: viewport.width / 2, y: viewport.height / 2 }
+    const mergeMotion = OFFLINE_SETUP_MOTION.download.merge
+    const target = {
+      x: viewport.width / 2 + mergeMotion.targetOffsetX,
+      y: viewport.height / 2 + mergeMotion.targetOffsetY,
+    }
     const offsets: Partial<Record<OfflineSetupFolderId, OfflineSetupFolderMergeOffset>> = {}
     let remaining = OFFLINE_SETUP_FOLDER_PRESENTATIONS.length
 
@@ -96,9 +104,12 @@ const useOfflineSetupScene = ({
       dispatch({ type: 'download.start', offsets })
       schedule(
         () => dispatch({ type: 'download.reveal' }),
-        OFFLINE_SETUP_MOTION.download.revealStart
+        getOfflineSetupDownloadRevealStart(OFFLINE_SETUP_FOLDER_PRESENTATIONS.length)
       )
-      schedule(() => dispatch({ type: 'download.settled' }), OFFLINE_SETUP_MOTION.download.mergeEnd)
+      schedule(
+        () => dispatch({ type: 'download.settled' }),
+        getOfflineSetupMergeDuration(OFFLINE_SETUP_FOLDER_PRESENTATIONS.length)
+      )
     }
 
     OFFLINE_SETUP_FOLDER_PRESENTATIONS.forEach(folder => {

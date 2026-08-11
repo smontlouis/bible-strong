@@ -1,5 +1,10 @@
 import { getFolderMergeOffset } from '../offlineSetupPresentation'
 import {
+  getOfflineSetupDownloadRevealStart,
+  getOfflineSetupMergeDuration,
+  OFFLINE_SETUP_MOTION,
+} from '../offlineSetupMotion'
+import {
   initialOfflineSetupSceneState,
   offlineSetupSceneReducer,
   type OfflineSetupSceneState,
@@ -85,5 +90,29 @@ describe('getFolderMergeOffset', () => {
     expect(
       getFolderMergeOffset({ x: 10, y: 30, width: 100, height: 80 }, { x: 200, y: 300 })
     ).toEqual({ x: 140, y: 230 })
+  })
+})
+
+describe('getOfflineSetupMergeDuration', () => {
+  it('keeps the merge container mounted past the last folder animation', () => {
+    const folderCount = 4
+    const merge = OFFLINE_SETUP_MOTION.download.merge
+    const lastFolderEnd =
+      (folderCount - 1) * merge.folderStagger +
+      merge.anticipationDuration +
+      merge.convergenceDuration
+
+    expect(getOfflineSetupMergeDuration(folderCount)).toBe(lastFolderEnd + merge.settleBuffer)
+    expect(getOfflineSetupMergeDuration(folderCount)).toBeGreaterThanOrEqual(lastFolderEnd)
+  })
+
+  it('keeps the download reveal relative to the computed merge duration', () => {
+    const folderCount = 4
+    const expectedRevealStart =
+      getOfflineSetupMergeDuration(folderCount) -
+      OFFLINE_SETUP_MOTION.download.merge.settleBuffer -
+      OFFLINE_SETUP_MOTION.download.revealBeforeMergeEnd
+
+    expect(getOfflineSetupDownloadRevealStart(folderCount)).toBe(expectedRevealStart)
   })
 })

@@ -5,13 +5,13 @@ import { Pressable, ScrollView, useWindowDimensions } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import {
   Extrapolation,
-  FadeIn,
-  FadeOut,
   interpolate,
+  type EntryExitAnimationFunction,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
   withSpring,
+  withTiming,
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useTranslation } from 'react-i18next'
@@ -50,6 +50,82 @@ type OfflineSetupReviewSheetProps = {
 
 const SHEET_TOP_INSET = 200
 const CLOSED_BUTTON_TOP = 80
+
+const reviewHeaderEntering: EntryExitAnimationFunction = () => {
+  'worklet'
+  const transition = OFFLINE_SETUP_MOTION.reviewSheet.contextTransition
+
+  return {
+    initialValues: {
+      opacity: 0,
+      transform: [{ translateY: transition.slideDistance }],
+    },
+    animations: {
+      opacity: withTiming(1, { duration: transition.enterDuration }),
+      transform: [{ translateY: withTiming(0, { duration: transition.enterDuration }) }],
+    },
+  }
+}
+
+const reviewHeaderExiting: EntryExitAnimationFunction = () => {
+  'worklet'
+  const transition = OFFLINE_SETUP_MOTION.reviewSheet.contextTransition
+
+  return {
+    initialValues: {
+      opacity: 1,
+      transform: [{ translateY: 0 }],
+    },
+    animations: {
+      opacity: withTiming(0, { duration: transition.exitDuration }),
+      transform: [
+        {
+          translateY: withTiming(-transition.slideDistance, {
+            duration: transition.exitDuration,
+          }),
+        },
+      ],
+    },
+  }
+}
+
+const reviewButtonLabelEntering: EntryExitAnimationFunction = () => {
+  'worklet'
+  const transition = OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.contextTransition
+
+  return {
+    initialValues: {
+      opacity: 0,
+      transform: [{ translateY: transition.slideDistance }],
+    },
+    animations: {
+      opacity: withTiming(1, { duration: transition.enterDuration }),
+      transform: [{ translateY: withTiming(0, { duration: transition.enterDuration }) }],
+    },
+  }
+}
+
+const reviewButtonLabelExiting: EntryExitAnimationFunction = () => {
+  'worklet'
+  const transition = OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.contextTransition
+
+  return {
+    initialValues: {
+      opacity: 1,
+      transform: [{ translateY: 0 }],
+    },
+    animations: {
+      opacity: withTiming(0, { duration: transition.exitDuration }),
+      transform: [
+        {
+          translateY: withTiming(-transition.slideDistance, {
+            duration: transition.exitDuration,
+          }),
+        },
+      ],
+    },
+  }
+}
 
 const getButtonOpacity = (disabled: boolean, pressed: boolean) => {
   if (disabled) return 0.45
@@ -307,27 +383,38 @@ const OfflineSetupReviewSheet = ({
   })
 
   const renderButtonLabel = () => {
-    if (folderContext) {
-      return (
-        <Text color={palette.onAccent} title fontSize={16}>
-          {buttonLabel}
-        </Text>
-      )
-    }
+    const contextKey = folderContext?.folderId ?? 'overview'
 
     return (
-      <>
-        <AnimatedBox absoluteFill center style={closedButtonLabelStyle}>
+      <FadingBox
+        keyProp={contextKey}
+        absoluteFill
+        center
+        animateLayout={false}
+        entering={reviewButtonLabelEntering}
+        exiting={reviewButtonLabelExiting}
+        skipEntering={false}
+        skipExiting={false}
+      >
+        {folderContext ? (
           <Text color={palette.onAccent} title fontSize={16}>
-            {closedButtonLabel}
+            {buttonLabel}
           </Text>
-        </AnimatedBox>
-        <AnimatedBox absoluteFill center style={openButtonLabelStyle}>
-          <Text color={palette.onAccent} title fontSize={16}>
-            {openButtonLabel}
-          </Text>
-        </AnimatedBox>
-      </>
+        ) : (
+          <>
+            <AnimatedBox absoluteFill center style={closedButtonLabelStyle}>
+              <Text color={palette.onAccent} title fontSize={16}>
+                {closedButtonLabel}
+              </Text>
+            </AnimatedBox>
+            <AnimatedBox absoluteFill center style={openButtonLabelStyle}>
+              <Text color={palette.onAccent} title fontSize={16}>
+                {openButtonLabel}
+              </Text>
+            </AnimatedBox>
+          </>
+        )}
+      </FadingBox>
     )
   }
 
@@ -408,13 +495,17 @@ const OfflineSetupReviewSheet = ({
             right={14}
             zIndex={3}
             pointerEvents="none"
+            overflow="visible"
           >
             <FadingBox
               keyProp={folderContext?.folderId ?? 'overview'}
               animateLayout={false}
-              entering={FadeIn.duration(170)}
-              exiting={FadeOut.duration(110)}
+              entering={reviewHeaderEntering}
+              exiting={reviewHeaderExiting}
+              skipEntering={false}
+              skipExiting={false}
               height={layout.summaryHeight}
+              overflow='visible'
             >
               <OfflineSetupReviewHeader
                 downloadBytes={displayedDownloadBytes}

@@ -2,7 +2,7 @@
  * Single source of truth for the offline onboarding choreography.
  * All durations and delays are expressed in milliseconds.
  *
- * Lower `download.revealStart` to reveal the complete download scene earlier.
+ * Increase `download.revealBeforeMergeEnd` to reveal the download scene earlier.
  * Change a delay under `download.reveal` to move only that element.
  */
 export const OFFLINE_SETUP_MOTION = {
@@ -34,6 +34,11 @@ export const OFFLINE_SETUP_MOTION = {
       enterDelay: 40,
       exitDuration: 210,
     },
+    resourceItem: {
+      pressedScale: 0.985,
+      pressInDuration: 70,
+      pressOutDuration: 170,
+    },
   },
   hero: {
     duration: 520,
@@ -58,6 +63,16 @@ export const OFFLINE_SETUP_MOTION = {
       openFadeStart: 0.3,
       openFadeEnd: 0.9,
       slideDistance: 14,
+      contextTransition: {
+        enterDuration: 190,
+        exitDuration: 130,
+        slideDistance: 7,
+      },
+    },
+    contextTransition: {
+      enterDuration: 190,
+      exitDuration: 130,
+      slideDistance: 7,
     },
     layout: {
       headerTop: 25,
@@ -75,8 +90,7 @@ export const OFFLINE_SETUP_MOTION = {
     },
   },
   download: {
-    revealStart: 250,
-    mergeEnd: 720,
+    revealBeforeMergeEnd: 600,
     preview: {
       duration: 15_000,
       progressTick: 100,
@@ -90,10 +104,13 @@ export const OFFLINE_SETUP_MOTION = {
       fadeOutDuration: 400,
     },
     merge: {
-      folderStagger: 34,
-      anticipationDuration: 90,
-      anticipationProgress: -0.065,
-      convergenceDuration: 520,
+      targetOffsetX: 0,
+      targetOffsetY: -70,
+      folderStagger: 50,
+      anticipationDuration: 100,
+      anticipationProgress: -0.05,
+      convergenceDuration: 600,
+      settleBuffer: 0,
     },
     reveal: {
       backgroundDelay: 0,
@@ -110,3 +127,22 @@ export const OFFLINE_SETUP_MOTION = {
     },
   },
 } as const
+
+export const getOfflineSetupMergeDuration = (folderCount: number): number => {
+  const merge = OFFLINE_SETUP_MOTION.download.merge
+  const lastFolderIndex = Math.max(0, folderCount - 1)
+
+  return (
+    lastFolderIndex * merge.folderStagger +
+    merge.anticipationDuration +
+    merge.convergenceDuration +
+    merge.settleBuffer
+  )
+}
+
+export const getOfflineSetupDownloadRevealStart = (folderCount: number): number => {
+  const merge = OFFLINE_SETUP_MOTION.download.merge
+  const lastFolderEnd = getOfflineSetupMergeDuration(folderCount) - merge.settleBuffer
+
+  return Math.max(0, lastFolderEnd - OFFLINE_SETUP_MOTION.download.revealBeforeMergeEnd)
+}
