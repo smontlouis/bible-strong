@@ -45,8 +45,9 @@ Every resource-producing release must finish through this global command.
 
 The command downloads the current sources, wraps historical plain JSON/SQLite
 files in deterministic ZIP archives, validates existing archives, and emits
-`catalog.json`, the app-compatible `offline-resource-sizes.v1.json`, and
-`SHA256SUMS`. The build fails on duplicate identities,
+the canonical `mobile-resource-catalog.json` plus `SHA256SUMS`. Upload that
+exact catalog to `/manifests/mobile-resource-catalog.json` after every ZIP has
+been uploaded and verified. The build fails on duplicate identities,
 duplicate artifact URLs, roles or entries, non-ZIP targets, or an unexpected archive entry. A
 resource publication must update the inventory when its source or artifact
 path changes and rebuild this complete catalog; publishing a resource without
@@ -55,7 +56,7 @@ the matching catalog is incomplete.
 The command only creates a candidate. Upload/activation remains a protected
 publication step and must place every candidate file at the catalog's stable
 object path before replacing the global catalog. `--app-root` atomically
-synchronizes both generated manifests into the app; omitting it is appropriate
+synchronizes the same catalog into the app fallback asset; omitting it is appropriate
 only for an isolated maker validation build.
 
 Generate the canonical Strong ledger first. This is the production source of

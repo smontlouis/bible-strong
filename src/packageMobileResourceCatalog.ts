@@ -26,6 +26,7 @@ export const DEFAULT_MOBILE_RESOURCE_REQUIRED_IDS =
   "config/mobile-resource-required-ids.json";
 export const DEFAULT_MOBILE_RESOURCE_RELEASE =
   "outputs/releases/mobile-resources-current";
+export const MOBILE_RESOURCE_CATALOG_FILE = "mobile-resource-catalog.json";
 
 export type MobileResourceInstallationStrategy =
   | "sqlite-import"
@@ -301,9 +302,8 @@ export async function buildMobileResourceCatalog(
       resourceCount: entries.length,
       resources
     };
-    const catalogPath = path.join(temporaryDir, "catalog.json");
+    const catalogPath = path.join(temporaryDir, MOBILE_RESOURCE_CATALOG_FILE);
     await writeFile(catalogPath, `${JSON.stringify(catalog, null, 2)}\n`);
-    await writeOfflineSizeManifest(temporaryDir, catalog);
     await writeChecksums(temporaryDir, entries);
     await rm(downloadDir, { recursive: true, force: true });
     await rm(stagingDir, { recursive: true, force: true });
@@ -318,7 +318,7 @@ export async function buildMobileResourceCatalog(
     }
     return {
       outputDir,
-      catalogPath: path.join(outputDir, "catalog.json"),
+      catalogPath: path.join(outputDir, MOBILE_RESOURCE_CATALOG_FILE),
       catalogSha256,
       resourceCount: entries.length
     };
@@ -647,15 +647,8 @@ async function synchronizeCatalogWithApp(options: {
   await mkdir(assetsDirectory, { recursive: true });
   const files = [
     {
-      source: path.join(options.outputDir, "catalog.json"),
+      source: path.join(options.outputDir, MOBILE_RESOURCE_CATALOG_FILE),
       destination: path.join(assetsDirectory, "mobile-resource-catalog.json")
-    },
-    {
-      source: path.join(options.outputDir, "offline-resource-sizes.v1.json"),
-      destination: path.join(
-        assetsDirectory,
-        "offline-resource-size-manifest.json"
-      )
     }
   ].map((file) => ({
     ...file,
@@ -706,46 +699,9 @@ async function writeChecksums(
 ): Promise<void> {
   const lines = entries.map((entry) => `${entry.archiveSha256}  ${entry.file}`);
   lines.push(
-    `${await sha256File(path.join(directory, "catalog.json"))}  catalog.json`
-  );
-  lines.push(
-    `${await sha256File(path.join(directory, "offline-resource-sizes.v1.json"))}  offline-resource-sizes.v1.json`
+    `${await sha256File(path.join(directory, MOBILE_RESOURCE_CATALOG_FILE))}  ${MOBILE_RESOURCE_CATALOG_FILE}`
   );
   await writeFile(path.join(directory, "SHA256SUMS"), `${lines.join("\n")}\n`);
-}
-
-async function writeOfflineSizeManifest(
-  directory: string,
-  catalog: MobileResourceCatalog
-): Promise<void> {
-  const resources = Object.fromEntries(
-    Object.entries(catalog.resources).map(([id, artifact]) => [
-      id,
-      {
-        id,
-        url: artifact.url,
-        downloadBytes: artifact.archiveBytes,
-        contentBytes: artifact.contentBytes,
-        installedBytes: artifact.installedBytes,
-        peakInstallationBytes: artifact.peakInstallationBytes,
-        strategy: artifact.strategy,
-        confidence:
-          artifact.strategy === "sqlite-import" ? "estimated" : "exact"
-      }
-    ])
-  );
-  await writeFile(
-    path.join(directory, "offline-resource-sizes.v1.json"),
-    `${JSON.stringify(
-      {
-        schemaVersion: 1,
-        generatedAt: catalog.generatedAt,
-        resources
-      },
-      null,
-      2
-    )}\n`
-  );
 }
 
 async function mapConcurrent<Input, Output>(

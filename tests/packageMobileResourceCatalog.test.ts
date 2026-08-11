@@ -245,6 +245,10 @@ describe("mobile resource catalog", () => {
     );
     assert.match(artifact.archiveSha256, /^[a-f0-9]{64}$/);
     assert.match(artifact.contentSha256, /^[a-f0-9]{64}$/);
+    assert.equal(
+      path.basename(result.catalogPath),
+      "mobile-resource-catalog.json"
+    );
     assert.deepEqual(
       (
         await execFileAsync("unzip", [
@@ -257,24 +261,6 @@ describe("mobile resource catalog", () => {
         .sort(),
       ["bible-test-pericope.json", "bible-test.json", "red-words-TEST.json"]
     );
-    const sizeManifest = JSON.parse(
-      await readFile(
-        path.join(outputDir, "offline-resource-sizes.v1.json"),
-        "utf8"
-      )
-    );
-    assert.deepEqual(sizeManifest.resources["bible:TEST"], {
-      id: "bible:TEST",
-      url: "https://assets.test/bibles/bible-test.json.zip",
-      downloadBytes: artifact.archiveBytes,
-      contentBytes: content.length + pericope.length + redWords.length,
-      installedBytes: Math.ceil(
-        (content.length + pericope.length + redWords.length) * 1.25
-      ),
-      peakInstallationBytes: artifact.peakInstallationBytes,
-      strategy: "sqlite-import",
-      confidence: "estimated"
-    });
     assert.notDeepEqual(
       await readFile(path.join(outputDir, "bibles/bible-test.json.zip")),
       content
@@ -288,14 +274,11 @@ describe("mobile resource catalog", () => {
       ),
       catalog
     );
-    assert.deepEqual(
-      JSON.parse(
-        await readFile(
-          path.join(appRoot, "src/assets/offline-resource-size-manifest.json"),
-          "utf8"
-        )
+    await assert.rejects(
+      stat(
+        path.join(appRoot, "src/assets/offline-resource-size-manifest.json")
       ),
-      sizeManifest
+      /ENOENT/
     );
 
     const secondOutputDir = path.join(temporaryRoot, "release-second");
