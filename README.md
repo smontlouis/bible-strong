@@ -11,6 +11,53 @@ npm install
 
 ## Recommended Workflow
 
+### Complete mobile resource release
+
+The mobile release inventory is owned by
+`config/mobile-resource-inventory.json`. It lists every downloadable Bible,
+SQLite database, timeline JSON, Strong sidecar, interlinear index, and modular
+lexicon resource. Every published artifact is a ZIP containing its declared
+entries. Legacy Bible artifacts group the canonical text with their optional
+pericope and red-word JSON files.
+
+Build a complete candidate and its global catalog with:
+
+```sh
+npm run resources:release:mobile -- \
+  --output-dir outputs/releases/mobile-resources-<revision> \
+  --app-root ../bible-strong-app
+```
+
+When a producer has just generated new local bytes, pass a JSON override map so
+the global release is built from that exact candidate instead of the currently
+deployed object:
+
+```sh
+npm run resources:release:mobile -- \
+  --output-dir outputs/releases/mobile-resources-<revision> \
+  --source-overrides outputs/releases/source-overrides.json \
+  --app-root ../bible-strong-app
+```
+
+The override shape is `{ "bible:NBS": { "canonical": "path/to/new.json",
+"pericope": "path/to/pericope.json", "redWords": "path/to/red-words.json" } }`.
+Every resource-producing release must finish through this global command.
+
+The command downloads the current sources, wraps historical plain JSON/SQLite
+files in deterministic ZIP archives, validates existing archives, and emits
+`catalog.json`, the app-compatible `offline-resource-sizes.v1.json`, and
+`SHA256SUMS`. The build fails on duplicate identities,
+duplicate artifact URLs, roles or entries, non-ZIP targets, or an unexpected archive entry. A
+resource publication must update the inventory when its source or artifact
+path changes and rebuild this complete catalog; publishing a resource without
+the matching catalog is incomplete.
+
+The command only creates a candidate. Upload/activation remains a protected
+publication step and must place every candidate file at the catalog's stable
+object path before replacing the global catalog. `--app-root` atomically
+synchronizes both generated manifests into the app; omitting it is appropriate
+only for an isolated maker validation build.
+
 Generate the canonical Strong ledger first. This is the production source of
 truth and includes both `reader` and `advanced` views:
 
