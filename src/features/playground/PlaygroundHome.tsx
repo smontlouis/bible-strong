@@ -6,6 +6,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import type { CurrentTheme } from '~common/types'
+import PlaygroundPreferences from './PlaygroundPreferences'
 
 type PlaygroundLinkProps = {
   description: string
@@ -52,11 +54,18 @@ const PlaygroundLink = ({ description, eyebrow, icon, onPress, title }: Playgrou
 }
 
 type PlaygroundHomeProps = {
+  selectedTheme: CurrentTheme
+  onSelectTheme: (theme: CurrentTheme) => void
   onOpenAbelOnboarding: () => void
   onOpenOfflineSetup: () => void
 }
 
-const PlaygroundHome = ({ onOpenAbelOnboarding, onOpenOfflineSetup }: PlaygroundHomeProps) => {
+const PlaygroundHome = ({
+  selectedTheme,
+  onSelectTheme,
+  onOpenAbelOnboarding,
+  onOpenOfflineSetup,
+}: PlaygroundHomeProps) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const { width } = useWindowDimensions()
@@ -91,6 +100,8 @@ const PlaygroundHome = ({ onOpenAbelOnboarding, onOpenOfflineSetup }: Playground
               </Text>
             </VStack>
           </VStack>
+
+          <PlaygroundPreferences selectedTheme={selectedTheme} onSelectTheme={onSelectTheme} />
 
           <VStack gap={12}>
             <Text color="darkGrey" fontSize={11} bold textTransform="uppercase">

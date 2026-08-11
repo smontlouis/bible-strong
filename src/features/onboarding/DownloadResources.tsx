@@ -204,7 +204,7 @@ const DownloadProgressContent = ({
             />
           </G>
         </Svg>
-        <Text color="#142033" title fontSize={31} style={{ fontFamily: 'FiraCode' }}>
+        <Text title fontSize={31} style={{ fontFamily: 'FiraCode' }}>
           {Math.round(displayProgress * 100)}%
         </Text>
       </AnimatedBox>
@@ -225,7 +225,7 @@ const DownloadProgressContent = ({
           skipExiting={false}
         >
           <Text
-            color="#68758C"
+            color="tertiary"
             fontSize={14}
             lineHeight={20}
             textAlign="center"
@@ -266,7 +266,7 @@ const DownloadSuccessContent = ({
     return (
       <VStack alignItems="center">
         <Text
-          color="#68758C"
+          color="tertiary"
           fontSize={18}
           lineHeight={24}
           textAlign="center"
@@ -332,7 +332,7 @@ const DownloadErrorContent = ({ error, onRetry }: { error: Error | null; onRetry
       <Text title fontSize={24} textAlign="center" mt={24}>
         {t('offlineSetup.downloadError')}
       </Text>
-      <Text color="#68758C" fontSize={13} lineHeight={19} textAlign="center" mt={9}>
+      <Text color="tertiary" fontSize={13} lineHeight={19} textAlign="center" mt={9}>
         {error?.message}
       </Text>
       <Pressable accessibilityRole="button" onPress={onRetry}>
@@ -423,7 +423,7 @@ const DownloadResources = (props: DownloadResourcesProps) => {
   return (
     <AnimatedBox
       flex
-      bg={transitioning ? 'transparent' : '#F4F7FF'}
+      bg={transitioning ? 'transparent' : 'lightGrey'}
       center
       px={32}
       overflow="hidden"

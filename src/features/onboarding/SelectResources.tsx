@@ -75,7 +75,7 @@ const SelectResources = (props: SelectResourcesProps) => {
   }
 
   return (
-    <Box flex bg="#F4F7FF">
+    <Box flex bg="lightGrey">
       {state.downloadSceneActive ? (
         <AnimatedBox absoluteFill zIndex={state.downloadSceneSettled ? 30 : 15}>
           {props.mode === 'preview' ? (

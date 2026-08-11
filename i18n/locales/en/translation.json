@@ -1595,6 +1595,8 @@
   ,"playground.resourcesEyebrow": "Onboarding"
   ,"playground.resourcesTitle": "Resources screen"
   ,"playground.resourcesDescription": "Preview the folders shown at the end of onboarding and open their details."
+  ,"playground.previewSettings": "Preview settings"
+  ,"playground.previewSettingsDescription": "Applied to both playground journeys."
   ,"offlineSetup.chooseResources": "Choose your resources"
   ,"offlineSetup.selectedCount": "{{count}} selection"
   ,"offlineSetup.selectedCount_plural": "{{count}} selections"

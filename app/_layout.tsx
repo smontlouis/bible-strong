@@ -167,10 +167,10 @@ const useAppLoad = () => {
 // Status bar style changer
 const changeStatusBarStyle = (currentTheme: CurrentTheme) => {
   if (['mauve', 'dark', 'night', 'black'].includes(currentTheme)) {
-    SystemBars.pushStackEntry({ style: 'light' })
-  } else {
-    SystemBars.pushStackEntry({ style: 'dark' })
+    return SystemBars.pushStackEntry({ style: 'light' })
   }
+
+  return SystemBars.pushStackEntry({ style: 'dark' })
 }
 
 // Inner app with all providers (needs Redux context)
@@ -180,12 +180,11 @@ function InnerApp() {
     (state: RootState) => state.user.bible.settings.preferredColorScheme || 'auto'
   )
   const { theme: selectedTheme } = useCurrentThemeSelector()
-  // Playground visuals are authored in the light Bible Strong palette so they
-  // remain comparable across devices and persisted user theme preferences.
   const currentTheme = isPlaygroundEnabled ? 'default' : selectedTheme
 
   useEffect(() => {
-    changeStatusBarStyle(currentTheme)
+    const entry = changeStatusBarStyle(currentTheme)
+    return () => SystemBars.popStackEntry(entry)
   }, [currentTheme])
 
   useEffect(() => {
@@ -278,7 +277,6 @@ function RootLayout() {
 
   return (
     <>
-      <SystemBars style="light" />
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
           <KeyboardProvider>

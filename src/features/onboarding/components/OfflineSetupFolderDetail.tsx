@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons'
+import { useTheme } from '@emotion/react'
 import { useState } from 'react'
 import { Pressable, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -43,11 +44,12 @@ const OfflineSetupSectionTitle = ({
   titleKey?: string
 }) => {
   const { t } = useTranslation()
+  const theme = useTheme()
   if (!titleKey) return null
 
   if (!collapsible) {
     return (
-      <Text color="#68758C" fontSize={11} bold textTransform="uppercase" px={4}>
+      <Text color="tertiary" fontSize={11} bold textTransform="uppercase" px={4}>
         {t(titleKey)}
       </Text>
     )
@@ -63,10 +65,10 @@ const OfflineSetupSectionTitle = ({
       hitSlop={8}
     >
       <HStack alignItems="center" justifyContent="space-between" px={4} py={4}>
-        <Text color="#68758C" fontSize={11} bold textTransform="uppercase">
+        <Text color="tertiary" fontSize={11} bold textTransform="uppercase">
           {t(titleKey)}
         </Text>
-        <Feather name={chevronIcon} size={17} color="#68758C" />
+        <Feather name={chevronIcon} size={17} color={theme.colors.tertiary} />
       </HStack>
     </Pressable>
   )
@@ -99,7 +101,7 @@ const OfflineSetupFolderDetail = ({
   }
 
   return (
-    <Box flex bg="#F4F7FF">
+    <Box flex bg="lightGrey">
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 20,
@@ -125,7 +127,7 @@ const OfflineSetupFolderDetail = ({
           <Text title fontSize={34} lineHeight={38} maxWidth={280}>
             {t('offlineSetup.chooseResources')}
           </Text>
-          <Text color="#68758C" fontSize={15} lineHeight={22} mt={10}>
+          <Text color="tertiary" fontSize={15} lineHeight={22} mt={10}>
             {t(`offlineSetup.presets.${folderId}.description`)}
           </Text>
         </AnimatedBox>

@@ -1554,6 +1554,8 @@
   ,"playground.resourcesEyebrow": "Onboarding"
   ,"playground.resourcesTitle": "Écran des ressources"
   ,"playground.resourcesDescription": "Prévisualisez les dossiers proposés à la fin de l’onboarding et ouvrez leur détail."
+  ,"playground.previewSettings": "Réglages de l’aperçu"
+  ,"playground.previewSettingsDescription": "Appliqués aux deux parcours du playground."
   ,"offlineSetup.chooseResources": "Choisissez vos ressources"
   ,"offlineSetup.selectedCount": "{{count}} sélection"
   ,"offlineSetup.selectedCount_plural": "{{count}} sélections"

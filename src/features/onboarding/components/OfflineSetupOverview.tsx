@@ -115,7 +115,7 @@ const OfflineSetupOverview = ({
   const returning = hero?.direction === 'closing' || Boolean(returningFolder)
 
   return (
-    <Box flex bg="#F4F7FF">
+    <Box flex bg="lightGrey">
       <ScrollView
         style={{ overflow: 'visible' }}
         contentContainerStyle={{
@@ -143,7 +143,7 @@ const OfflineSetupOverview = ({
             <Text title fontSize={40} lineHeight={42}>
               {t('offlineSetup.title')}
             </Text>
-            <Text color="#68758C" fontSize={15} lineHeight={21} mt={10} mb={28}>
+            <Text color="tertiary" fontSize={15} lineHeight={21} mt={10} mb={28}>
               {t('offlineSetup.subtitle')}
             </Text>
           </AnimatedBox>
