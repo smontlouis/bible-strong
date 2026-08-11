@@ -11,9 +11,7 @@ import {
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
-  withDelay,
   withSpring,
-  withTiming,
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useTranslation } from 'react-i18next'
@@ -23,6 +21,7 @@ import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
 import {
+  getOfflineSetupReviewButtonLabelTransition,
   getOfflineSetupReviewDragProgress,
   getOfflineSetupReviewLayout,
   getOfflineSetupReviewListTopInset,
@@ -66,55 +65,6 @@ const getButtonTranslationKey = ({
   if (folderContext) return 'offlineSetup.done'
   if (reviewOpen) return 'offlineSetup.download'
   return 'offlineSetup.review'
-}
-
-const buttonLabelFadeIn = () => {
-  'worklet'
-
-  return {
-    initialValues: {
-      opacity: 0,
-      transform: [{ translateY: OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.slideDistance }],
-    },
-    animations: {
-      opacity: withDelay(
-        OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.enterDelay,
-        withTiming(1, {
-          duration: OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.enterDuration,
-        })
-      ),
-      transform: [
-        {
-          translateY: withDelay(
-            OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.enterDelay,
-            withTiming(0, {
-              duration: OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.enterDuration,
-            })
-          ),
-        },
-      ],
-    },
-  }
-}
-
-const buttonLabelFadeOut = () => {
-  'worklet'
-
-  return {
-    initialValues: { opacity: 1, transform: [{ translateY: 0 }] },
-    animations: {
-      opacity: withTiming(0, {
-        duration: OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.exitDuration,
-      }),
-      transform: [
-        {
-          translateY: withTiming(-OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.slideDistance, {
-            duration: OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.exitDuration,
-          }),
-        },
-      ],
-    },
-  }
 }
 
 const OfflineSetupReviewSheet = ({
@@ -174,6 +124,8 @@ const OfflineSetupReviewSheet = ({
     reviewOpen,
   })
   const buttonLabel = t(buttonTranslationKey)
+  const closedButtonLabel = t('offlineSetup.review')
+  const openButtonLabel = t('offlineSetup.download')
 
   const settle = (open: boolean) => {
     setReviewOpen(open)
@@ -335,6 +287,51 @@ const OfflineSetupReviewSheet = ({
       },
     ],
   }))
+
+  const buttonLabelTransition = useDerivedValue(() =>
+    getOfflineSetupReviewButtonLabelTransition(progress.get())
+  )
+
+  const closedButtonLabelStyle = useAnimatedStyle(() => {
+    const transition = buttonLabelTransition.get()
+    return {
+      opacity: transition.closedOpacity,
+      transform: [{ translateY: transition.closedTranslateY }],
+    }
+  })
+
+  const openButtonLabelStyle = useAnimatedStyle(() => {
+    const transition = buttonLabelTransition.get()
+    return {
+      opacity: transition.openOpacity,
+      transform: [{ translateY: transition.openTranslateY }],
+    }
+  })
+
+  const renderButtonLabel = () => {
+    if (folderContext) {
+      return (
+        <Text color="#FFFFFF" title fontSize={16}>
+          {buttonLabel}
+        </Text>
+      )
+    }
+
+    return (
+      <>
+        <AnimatedBox absoluteFill center style={closedButtonLabelStyle}>
+          <Text color="#FFFFFF" title fontSize={16}>
+            {closedButtonLabel}
+          </Text>
+        </AnimatedBox>
+        <AnimatedBox absoluteFill center style={openButtonLabelStyle}>
+          <Text color="#FFFFFF" title fontSize={16}>
+            {openButtonLabel}
+          </Text>
+        </AnimatedBox>
+      </>
+    )
+  }
 
   const handleButtonPress = () => {
     if (disabled) return
@@ -548,16 +545,7 @@ const OfflineSetupReviewSheet = ({
               style={({ pressed }) => ({ opacity: getButtonOpacity(disabled, pressed) })}
             >
               <Box height={layout.buttonHeight} borderRadius={28} bg={accentColor} center>
-                <FadingBox
-                  keyProp={buttonLabel}
-                  animateLayout={false}
-                  entering={buttonLabelFadeIn}
-                  exiting={buttonLabelFadeOut}
-                >
-                  <Text color="#FFFFFF" title fontSize={16}>
-                    {buttonLabel}
-                  </Text>
-                </FadingBox>
+                {renderButtonLabel()}
               </Box>
             </Pressable>
           </AnimatedBox>

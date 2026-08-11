@@ -1,6 +1,8 @@
 import type { OfflineResourceSizeManifest } from '~helpers/offlineResourceSizeManifest'
 import type { OnboardingResourceSelection } from '../onboardingResources'
+import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
 import {
+  getOfflineSetupReviewButtonLabelTransition,
   getOfflineSetupReviewDragProgress,
   getOfflineSetupReviewExpandedHeight,
   getOfflineSetupReviewItems,
@@ -35,6 +37,34 @@ const manifest: OfflineResourceSizeManifest = {
 }
 
 describe('offline setup review', () => {
+  it('links both button labels directly to the sheet progress', () => {
+    const slideDistance = OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel.slideDistance
+
+    expect(getOfflineSetupReviewButtonLabelTransition(0)).toEqual({
+      closedOpacity: 1,
+      closedTranslateY: -0,
+      openOpacity: 0,
+      openTranslateY: slideDistance,
+    })
+
+    const labelMotion = OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel
+    const closedFadeMidpoint = (labelMotion.closedFadeStart + labelMotion.closedFadeEnd) / 2
+    const openFadeMidpoint = (labelMotion.openFadeStart + labelMotion.openFadeEnd) / 2
+    const closedHalfway = getOfflineSetupReviewButtonLabelTransition(closedFadeMidpoint)
+    const openHalfway = getOfflineSetupReviewButtonLabelTransition(openFadeMidpoint)
+    expect(closedHalfway.closedOpacity).toBeCloseTo(0.5)
+    expect(closedHalfway.closedTranslateY).toBeCloseTo(-slideDistance / 2)
+    expect(openHalfway.openOpacity).toBeCloseTo(0.5)
+    expect(openHalfway.openTranslateY).toBeCloseTo(slideDistance / 2)
+
+    expect(getOfflineSetupReviewButtonLabelTransition(1)).toEqual({
+      closedOpacity: 0,
+      closedTranslateY: -slideDistance,
+      openOpacity: 1,
+      openTranslateY: 0,
+    })
+  })
+
   it('lists a shared physical resource only once', () => {
     const selection = {
       id: 'shared',

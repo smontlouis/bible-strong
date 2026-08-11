@@ -52,10 +52,11 @@ export const OFFLINE_SETUP_MOTION = {
     snapThreshold: 0.5,
     velocityInfluence: 0.0002,
     buttonLabel: {
-      enterDelay: 45,
-      enterDuration: 120,
-      exitDuration: 90,
-      slideDistance: 4,
+      closedFadeStart: 0.1,
+      closedFadeEnd: 0.6,
+      openFadeStart: 0.3,
+      openFadeEnd: 0.9,
+      slideDistance: 14,
     },
     layout: {
       headerTop: 25,

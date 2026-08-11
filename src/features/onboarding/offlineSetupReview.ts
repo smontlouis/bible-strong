@@ -163,3 +163,35 @@ export const getOfflineSetupReviewDragProgress = ({
   if (rawProgress < boundary) return boundary - resistedProgress
   return boundary + resistedProgress
 }
+
+export type OfflineSetupReviewButtonLabelTransition = {
+  closedOpacity: number
+  closedTranslateY: number
+  openOpacity: number
+  openTranslateY: number
+}
+
+export const getOfflineSetupReviewButtonLabelTransition = (
+  progress: number
+): OfflineSetupReviewButtonLabelTransition => {
+  'worklet'
+
+  const labelMotion = OFFLINE_SETUP_MOTION.reviewSheet.buttonLabel
+  const closedFadeRange = labelMotion.closedFadeEnd - labelMotion.closedFadeStart
+  const openFadeRange = labelMotion.openFadeEnd - labelMotion.openFadeStart
+  const closedFadeProgress = Math.min(
+    1,
+    Math.max(0, (progress - labelMotion.closedFadeStart) / closedFadeRange)
+  )
+  const openFadeProgress = Math.min(
+    1,
+    Math.max(0, (progress - labelMotion.openFadeStart) / openFadeRange)
+  )
+
+  return {
+    closedOpacity: 1 - closedFadeProgress,
+    closedTranslateY: -labelMotion.slideDistance * closedFadeProgress,
+    openOpacity: openFadeProgress,
+    openTranslateY: labelMotion.slideDistance * (1 - openFadeProgress),
+  }
+}
