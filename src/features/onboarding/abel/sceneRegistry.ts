@@ -17,30 +17,30 @@ export const ONBOARDING_SCENE_COUNT = 7
 export const ONBOARDING_SCENES: readonly OnboardingSceneDefinition[] = [
   {
     id: 'scene-one',
-    promptKey: 'playground.sceneOne.phrase',
+    promptKey: 'onboarding.abel.sceneOne.phrase',
   },
   {
     id: 'scene-two',
-    promptKey: 'playground.sceneTwo.phrase',
+    promptKey: 'onboarding.abel.sceneTwo.phrase',
   },
   {
     id: 'scene-three',
-    promptKey: 'playground.sceneThree.properPhrase',
+    promptKey: 'onboarding.abel.sceneThree.properPhrase',
   },
   {
     id: 'scene-four',
-    promptKey: 'playground.sceneFour.phrase',
+    promptKey: 'onboarding.abel.sceneFour.phrase',
   },
   {
     id: 'scene-five',
-    promptKey: 'playground.sceneFive.phrase',
+    promptKey: 'onboarding.abel.sceneFive.phrase',
   },
   {
     id: 'scene-six',
-    promptKey: 'playground.sceneSix.phrase',
+    promptKey: 'onboarding.abel.sceneSix.phrase',
   },
   {
     id: 'scene-seven',
-    promptKey: 'playground.sceneSeven.phrase',
+    promptKey: 'onboarding.abel.sceneSeven.phrase',
   },
 ]

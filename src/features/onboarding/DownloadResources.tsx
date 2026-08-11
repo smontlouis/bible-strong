@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
+import { Pressable } from 'react-native'
 import Animated, {
   FadeIn,
   FadeOut,
@@ -29,7 +30,7 @@ import useOfflineSetupDownload, {
 
 type DownloadResourcesProps = {
   transitioning?: boolean
-} & ({ mode?: 'onboarding' } | { mode: 'preview' })
+} & ({ mode?: 'onboarding'; onComplete: () => void } | { mode: 'preview'; onComplete?: never })
 
 const RING_SIZE = 184
 const RING_RADIUS = 72
@@ -320,7 +321,7 @@ const DownloadSuccessContent = ({
   )
 }
 
-const DownloadErrorContent = ({ error }: { error: Error | null }) => {
+const DownloadErrorContent = ({ error, onRetry }: { error: Error | null; onRetry: () => void }) => {
   const { t } = useTranslation()
 
   return (
@@ -334,6 +335,24 @@ const DownloadErrorContent = ({ error }: { error: Error | null }) => {
       <Text color="#68758C" fontSize={13} lineHeight={19} textAlign="center" mt={9}>
         {error?.message}
       </Text>
+      <Pressable accessibilityRole="button" onPress={onRetry}>
+        {({ pressed }) => (
+          <Box
+            mt={24}
+            minWidth={150}
+            height={48}
+            px={24}
+            borderRadius={24}
+            bg="#5983F0"
+            center
+            opacity={pressed ? 0.76 : 1}
+          >
+            <Text color="#FFFFFF" bold fontSize={15}>
+              {t('downloads.retry')}
+            </Text>
+          </Box>
+        )}
+      </Pressable>
     </VStack>
   )
 }
@@ -344,6 +363,7 @@ const DownloadPhaseContent = ({
   error,
   phase,
   reduceMotion,
+  retry,
   successMessage,
   transitioning,
 }: {
@@ -352,6 +372,7 @@ const DownloadPhaseContent = ({
   error: Error | null
   phase: OfflineSetupDownloadPhase
   reduceMotion: boolean
+  retry: () => void
   successMessage: OfflineSetupSuccessMessage
   transitioning: boolean
 }) => {
@@ -370,15 +391,18 @@ const DownloadPhaseContent = ({
     return <DownloadSuccessContent reduceMotion={reduceMotion} successMessage={successMessage} />
   }
 
-  return <DownloadErrorContent error={error} />
+  return <DownloadErrorContent error={error} onRetry={retry} />
 }
 
 const DownloadResources = (props: DownloadResourcesProps) => {
   const reduceMotion = useReducedMotion()
-  const { closing, displayProgress, error, phase, successMessage } = useOfflineSetupDownload({
-    mode: props.mode ?? 'onboarding',
-    reduceMotion,
-  })
+  const { closing, displayProgress, error, phase, retry, successMessage } = useOfflineSetupDownload(
+    {
+      mode: props.mode ?? 'onboarding',
+      onComplete: props.onComplete,
+      reduceMotion,
+    }
+  )
   const ringProgress = useSharedValue(0)
   const transitioning = props.transitioning ?? false
   const backgroundRevealStyle = useStaggeredRevealStyle({
@@ -434,6 +458,7 @@ const DownloadResources = (props: DownloadResourcesProps) => {
           error={error}
           phase={phase}
           reduceMotion={reduceMotion}
+          retry={retry}
           successMessage={successMessage}
           transitioning={transitioning}
         />

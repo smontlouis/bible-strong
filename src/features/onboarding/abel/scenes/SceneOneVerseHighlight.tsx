@@ -20,12 +20,12 @@ import {
   DESIGN_CONTENT_WIDTH,
   DESIGN_STAGE_HEIGHT,
   type OnboardingStageMetrics,
-} from '../onboarding/OnboardingStage'
-import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
-import SceneActionButton from '../onboarding/SceneActionButton'
-import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
-import { Scene } from '../onboarding/SceneGraph'
-import VerseCard, { HIGHLIGHT_COLORS, type HighlightColor } from '../onboarding/VerseCard'
+} from '../OnboardingStage'
+import SceneBackgroundShape from '../SceneBackgroundShape'
+import SceneActionButton from '../SceneActionButton'
+import SceneDecorativePluses from '../SceneDecorativePluses'
+import { Scene } from '../SceneGraph'
+import VerseCard, { HIGHLIGHT_COLORS, type HighlightColor } from '../VerseCard'
 
 type SceneOneVerseHighlightProps = {
   reduceMotion: boolean
@@ -210,7 +210,7 @@ export const SceneOneVerseHighlightControls = ({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t(
-          `playground.sceneOne.togglePalette.${isPaletteOpen ? 'hide' : 'show'}`
+          `onboarding.abel.sceneOne.togglePalette.${isPaletteOpen ? 'hide' : 'show'}`
         )}
         accessibilityState={{ expanded: isPaletteOpen }}
         onPress={() => setIsPaletteOpen(value => !value)}
@@ -264,7 +264,7 @@ export const SceneOneVerseHighlightControls = ({
               <ColorSwatch
                 key={colorKey}
                 color={theme.colors[colorKey]}
-                label={t(`playground.sceneOne.${colorKey}`)}
+                label={t(`onboarding.abel.sceneOne.${colorKey}`)}
                 selected={colorKey === activeColor}
                 reduceMotion={reduceMotion}
                 scale={metrics.scale}

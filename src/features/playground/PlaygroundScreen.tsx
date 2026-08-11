@@ -1,7 +1,7 @@
 import { useState } from 'react'
+import AbelOnboarding from '~features/onboarding/AbelOnboarding'
 import SelectResources from '~features/onboarding/SelectResources'
 import PlaygroundHome from './PlaygroundHome'
-import PlaygroundOnboarding from './PlaygroundOnboarding'
 
 type PlaygroundView = 'home' | 'abel-onboarding' | 'offline-setup'
 
@@ -9,7 +9,7 @@ const PlaygroundScreen = () => {
   const [view, setView] = useState<PlaygroundView>('home')
 
   if (view === 'abel-onboarding') {
-    return <PlaygroundOnboarding onComplete={() => setView('home')} />
+    return <AbelOnboarding completionMode="confirmation" onComplete={() => setView('home')} />
   }
 
   if (view === 'offline-setup') {

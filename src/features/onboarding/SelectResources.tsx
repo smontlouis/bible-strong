@@ -22,7 +22,9 @@ import { OFFLINE_SETUP_FOLDER_PRESENTATIONS } from './offlineSetupPresentation'
 import useOfflineSetupScene from './useOfflineSetupScene'
 import useOfflineSetupSelection from './useOfflineSetupSelection'
 
-type SelectResourcesProps = { mode?: 'onboarding' } | { mode: 'preview'; onClose: () => void }
+type SelectResourcesProps =
+  | { mode?: 'onboarding'; onComplete: () => void }
+  | { mode: 'preview'; onClose: () => void }
 
 const SelectResources = (props: SelectResourcesProps) => {
   const { t } = useTranslation()
@@ -76,10 +78,15 @@ const SelectResources = (props: SelectResourcesProps) => {
     <Box flex bg="#F4F7FF">
       {state.downloadSceneActive ? (
         <AnimatedBox absoluteFill zIndex={state.downloadSceneSettled ? 30 : 15}>
-          <DownloadResources
-            mode={props.mode === 'preview' ? 'preview' : 'onboarding'}
-            transitioning={!state.downloadContentVisible}
-          />
+          {props.mode === 'preview' ? (
+            <DownloadResources mode="preview" transitioning={!state.downloadContentVisible} />
+          ) : (
+            <DownloadResources
+              mode="onboarding"
+              onComplete={props.onComplete}
+              transitioning={!state.downloadContentVisible}
+            />
+          )}
         </AnimatedBox>
       ) : null}
 

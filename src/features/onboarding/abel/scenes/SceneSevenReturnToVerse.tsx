@@ -5,11 +5,11 @@ import { ZoomIn } from 'react-native-reanimated'
 import LexiqueIcon from '~common/LexiqueIcon'
 import { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
-import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
-import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
-import { Scene } from '../onboarding/SceneGraph'
-import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
+import type { OnboardingStageMetrics } from '../OnboardingStage'
+import SceneBackgroundShape from '../SceneBackgroundShape'
+import SceneDecorativePluses from '../SceneDecorativePluses'
+import { Scene } from '../SceneGraph'
+import VerseCard, { type HighlightColor } from '../VerseCard'
 
 export const SCENE_SEVEN_REVEAL = {
   verseDelay: 1200,
@@ -140,7 +140,7 @@ export const createSceneSevenReturnToVerse = ({
       <FinalChip
         color="#FF7675"
         icon="file-text"
-        label={t('playground.sceneSeven.note')}
+        label={t('onboarding.abel.sceneSeven.note')}
         metrics={metrics}
       />
     </Scene.Node>
@@ -185,7 +185,7 @@ export const createSceneSevenReturnToVerse = ({
       <FinalChip
         color="#7D8FEA"
         icon="feather"
-        label={t('playground.sceneSeven.study')}
+        label={t('onboarding.abel.sceneSeven.study')}
         metrics={metrics}
       />
     </Scene.Node>
@@ -200,7 +200,7 @@ export const createSceneSevenReturnToVerse = ({
       <FinalChip
         color="#FF8400"
         icon="book-open"
-        label={t('playground.sceneSeven.ecclesiastes')}
+        label={t('onboarding.abel.sceneSeven.ecclesiastes')}
         metrics={metrics}
       />
     </Scene.Node>

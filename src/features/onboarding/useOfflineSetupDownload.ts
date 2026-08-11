@@ -9,13 +9,14 @@ import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { requireBiblePath } from '~helpers/requireBiblePath'
 import useLanguage from '~helpers/useLanguage'
 import { bibleDomRemountSignalAtom } from '~state/app'
-import { activeQueueAtom, failedItemsAtom, overallProgressAtom } from '~state/downloadQueue'
-import { isOnboardingCompletedAtom, selectedResourcesAtom } from './atom'
+import { downloadItemStatesAtom } from '~state/downloadQueue'
+import { selectedResourcesAtom } from './atom'
 import {
   createDownloadItemFromOnboardingSelection,
   getOnboardingResourceSelectionId,
 } from './onboardingResources'
 import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
+import { getOfflineSetupDownloadTracking } from './offlineSetupDownloadTracking'
 import { getPreviewDownloadProgress } from './offlineSetupPreviewDownload'
 import { getOfflineSetupSuccessTimeline } from './offlineSetupSuccessTimeline'
 
@@ -47,33 +48,35 @@ const toError = (reason: unknown) => {
 
 const useOfflineSetupDownload = ({
   mode,
+  onComplete,
   reduceMotion,
 }: {
   mode: 'onboarding' | 'preview'
+  onComplete?: () => void
   reduceMotion: boolean
 }) => {
   const selectedResources = useAtomValue(selectedResourcesAtom)
-  const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
   const bumpBibleDomRemountSignal = useSetAtom(bibleDomRemountSignalAtom)
-  const progress = useAtomValue(overallProgressAtom)
-  const activeQueue = useAtomValue(activeQueueAtom)
-  const failedItems = useAtomValue(failedItemsAtom)
+  const downloadItemStates = useAtomValue(downloadItemStatesAtom)
   const lang = useLanguage()
   const [phase, setPhase] = useState<OfflineSetupDownloadPhase>('downloading')
   const [error, setError] = useState<Error | null>(null)
   const [previewProgress, setPreviewProgress] = useState(0)
   const [closing, setClosing] = useState(false)
   const [successMessage, setSuccessMessage] = useState<OfflineSetupSuccessMessage>('ready')
+  const [trackingStarted, setTrackingStarted] = useState(false)
+  const [trackedItemIds] = useState(() => selectedResources.map(getOnboardingResourceSelectionId))
   const timers = useRef<Set<Timer>>(new Set())
   const previewInterval = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
   const verificationStarted = useRef(false)
   const finished = useRef(false)
   const isPreview = mode === 'preview'
+  const tracking = getOfflineSetupDownloadTracking(trackedItemIds, downloadItemStates)
   const displayProgress = getDisplayedProgress({
     isPreview,
     previewProgress,
-    queueProgress: progress.progress,
-    queueTotal: progress.total,
+    queueProgress: tracking.progress,
+    queueTotal: trackedItemIds.length,
   })
   const schedule = (action: () => void, delay: number) => {
     const timer = setTimeout(() => {
@@ -91,14 +94,39 @@ const useOfflineSetupDownload = ({
     schedule(() => setSuccessMessage(undefined), timeline.readyEndsAt)
     schedule(() => setSuccessMessage('welcome'), timeline.welcomeStartsAt)
     schedule(() => setClosing(true), timeline.fadeOutStartsAt)
-    if (!isPreview) {
-      schedule(() => setIsOnboardingCompleted(true), timeline.completesAt)
-    }
+    if (!isPreview && onComplete) schedule(onComplete, timeline.completesAt)
   }
 
   const fail = (reason: unknown) => {
     setError(toError(reason))
     setPhase('error')
+  }
+
+  const enqueueSelectedResources = () => {
+    const items = selectedResources.map(resource =>
+      createDownloadItemFromOnboardingSelection(resource)
+    )
+    if (items.length > 0) downloadManager.enqueue(items)
+    return items.length
+  }
+
+  const retry = () => {
+    try {
+      verificationStarted.current = false
+      setError(null)
+      setPhase('downloading')
+      const failedItemIds = trackedItemIds.filter(
+        itemId => downloadItemStates.get(itemId)?.status === 'failed'
+      )
+      if (failedItemIds.length > 0) {
+        failedItemIds.forEach(itemId => downloadManager.retry(itemId))
+        return
+      }
+
+      if (enqueueSelectedResources() === 0) void verifyAndComplete()
+    } catch (itemError) {
+      fail(itemError)
+    }
   }
 
   const verifyAndComplete = async () => {
@@ -140,11 +168,12 @@ const useOfflineSetupDownload = ({
     }
 
     try {
-      const items = selectedResources.map(resource =>
-        createDownloadItemFromOnboardingSelection(resource)
-      )
-      if (items.length > 0) downloadManager.enqueue(items)
-      else void verifyAndComplete()
+      if (enqueueSelectedResources() > 0) {
+        setTrackingStarted(true)
+      } else {
+        setTrackingStarted(true)
+        void verifyAndComplete()
+      }
     } catch (itemError) {
       console.error(
         `Failed to create onboarding download item ${selectedResources
@@ -167,17 +196,15 @@ const useOfflineSetupDownload = ({
   }, [isPreview, phase, previewProgress])
 
   useEffect(() => {
-    if (isPreview || phase !== 'downloading') return
-    if (activeQueue.length === 0 && progress.total > 0 && progress.completed === progress.total) {
-      void verifyAndComplete()
-    }
+    if (isPreview || !trackingStarted || phase !== 'downloading' || !tracking.completed) return
+    void verifyAndComplete()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeQueue.length, isPreview, phase, progress.completed, progress.total])
+  }, [isPreview, phase, tracking.completed, trackingStarted])
 
   useEffect(() => {
-    if (isPreview || failedItems.length === 0) return
-    fail(new Error(failedItems[0].error || 'Download failed'))
-  }, [failedItems, isPreview])
+    if (isPreview || !trackingStarted || !tracking.failedItem) return
+    fail(new Error(tracking.failedItem.error || 'Download failed'))
+  }, [isPreview, tracking.failedItem, trackingStarted])
 
   useEffect(
     () => () => {
@@ -188,7 +215,7 @@ const useOfflineSetupDownload = ({
     []
   )
 
-  return { closing, displayProgress, error, phase, successMessage }
+  return { closing, displayProgress, error, phase, retry, successMessage }
 }
 
 export default useOfflineSetupDownload

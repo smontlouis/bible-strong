@@ -12,12 +12,12 @@ import { runOnJS } from 'react-native-worklets'
 
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
-import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
-import SceneActionButton from '../onboarding/SceneActionButton'
-import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
-import { Scene } from '../onboarding/SceneGraph'
-import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
+import type { OnboardingStageMetrics } from '../OnboardingStage'
+import SceneBackgroundShape from '../SceneBackgroundShape'
+import SceneActionButton from '../SceneActionButton'
+import SceneDecorativePluses from '../SceneDecorativePluses'
+import { Scene } from '../SceneGraph'
+import VerseCard, { type HighlightColor } from '../VerseCard'
 
 const OCCURRENCE_ENTER_START = 520
 const OCCURRENCE_STAGGER = 120
@@ -39,22 +39,22 @@ const getOccurrenceVerses = (
   if (filter === 'idol') {
     return [
       {
-        reference: t('playground.sceneFour.idolDeuteronomyReference'),
-        before: t('playground.sceneFour.idolDeuteronomyBefore'),
-        highlight: t('playground.sceneFour.idolDeuteronomyHighlight'),
-        after: t('playground.sceneFour.idolDeuteronomyAfter'),
+        reference: t('onboarding.abel.sceneFour.idolDeuteronomyReference'),
+        before: t('onboarding.abel.sceneFour.idolDeuteronomyBefore'),
+        highlight: t('onboarding.abel.sceneFour.idolDeuteronomyHighlight'),
+        after: t('onboarding.abel.sceneFour.idolDeuteronomyAfter'),
       },
       {
-        reference: t('playground.sceneFour.idolKingsReference'),
-        before: t('playground.sceneFour.idolKingsBefore'),
-        highlight: t('playground.sceneFour.idolKingsHighlight'),
-        after: t('playground.sceneFour.idolKingsAfter'),
+        reference: t('onboarding.abel.sceneFour.idolKingsReference'),
+        before: t('onboarding.abel.sceneFour.idolKingsBefore'),
+        highlight: t('onboarding.abel.sceneFour.idolKingsHighlight'),
+        after: t('onboarding.abel.sceneFour.idolKingsAfter'),
       },
       {
-        reference: t('playground.sceneFour.idolPsalmsReference'),
-        before: t('playground.sceneFour.idolPsalmsBefore'),
-        highlight: t('playground.sceneFour.idolPsalmsHighlight'),
-        after: t('playground.sceneFour.idolPsalmsAfter'),
+        reference: t('onboarding.abel.sceneFour.idolPsalmsReference'),
+        before: t('onboarding.abel.sceneFour.idolPsalmsBefore'),
+        highlight: t('onboarding.abel.sceneFour.idolPsalmsHighlight'),
+        after: t('onboarding.abel.sceneFour.idolPsalmsAfter'),
       },
     ]
   }
@@ -62,43 +62,43 @@ const getOccurrenceVerses = (
   if (filter === 'breath') {
     return [
       {
-        reference: t('playground.sceneFour.breathJobReference'),
-        before: t('playground.sceneFour.breathJobBefore'),
-        highlight: t('playground.sceneFour.breathJobHighlight'),
-        after: t('playground.sceneFour.breathJobAfter'),
+        reference: t('onboarding.abel.sceneFour.breathJobReference'),
+        before: t('onboarding.abel.sceneFour.breathJobBefore'),
+        highlight: t('onboarding.abel.sceneFour.breathJobHighlight'),
+        after: t('onboarding.abel.sceneFour.breathJobAfter'),
       },
       {
-        reference: t('playground.sceneFour.breathPsalmThirtyNineReference'),
-        before: t('playground.sceneFour.breathPsalmThirtyNineBefore'),
-        highlight: t('playground.sceneFour.breathPsalmThirtyNineHighlight'),
-        after: t('playground.sceneFour.breathPsalmThirtyNineAfter'),
+        reference: t('onboarding.abel.sceneFour.breathPsalmThirtyNineReference'),
+        before: t('onboarding.abel.sceneFour.breathPsalmThirtyNineBefore'),
+        highlight: t('onboarding.abel.sceneFour.breathPsalmThirtyNineHighlight'),
+        after: t('onboarding.abel.sceneFour.breathPsalmThirtyNineAfter'),
       },
       {
-        reference: t('playground.sceneFour.breathPsalmOneFortyFourReference'),
-        before: t('playground.sceneFour.breathPsalmOneFortyFourBefore'),
-        highlight: t('playground.sceneFour.breathPsalmOneFortyFourHighlight'),
-        after: t('playground.sceneFour.breathPsalmOneFortyFourAfter'),
+        reference: t('onboarding.abel.sceneFour.breathPsalmOneFortyFourReference'),
+        before: t('onboarding.abel.sceneFour.breathPsalmOneFortyFourBefore'),
+        highlight: t('onboarding.abel.sceneFour.breathPsalmOneFortyFourHighlight'),
+        after: t('onboarding.abel.sceneFour.breathPsalmOneFortyFourAfter'),
       },
     ]
   }
 
   return [
     {
-      reference: t('playground.sceneFour.proverbsReference'),
-      before: t('playground.sceneFour.proverbsBefore'),
-      highlight: t('playground.sceneFour.proverbsHighlight'),
+      reference: t('onboarding.abel.sceneFour.proverbsReference'),
+      before: t('onboarding.abel.sceneFour.proverbsBefore'),
+      highlight: t('onboarding.abel.sceneFour.proverbsHighlight'),
     },
     {
-      reference: t('playground.sceneFour.jobReference'),
-      before: t('playground.sceneFour.jobBefore'),
-      highlight: t('playground.sceneFour.jobHighlight'),
-      after: t('playground.sceneFour.jobAfter'),
+      reference: t('onboarding.abel.sceneFour.jobReference'),
+      before: t('onboarding.abel.sceneFour.jobBefore'),
+      highlight: t('onboarding.abel.sceneFour.jobHighlight'),
+      after: t('onboarding.abel.sceneFour.jobAfter'),
     },
     {
-      reference: t('playground.sceneFour.ecclesiastesReference'),
-      before: t('playground.sceneFour.ecclesiastesHighlightOne'),
-      highlight: t('playground.sceneFour.ecclesiastesHighlightTwo'),
-      after: t('playground.sceneFour.ecclesiastesAfter'),
+      reference: t('onboarding.abel.sceneFour.ecclesiastesReference'),
+      before: t('onboarding.abel.sceneFour.ecclesiastesHighlightOne'),
+      highlight: t('onboarding.abel.sceneFour.ecclesiastesHighlightTwo'),
+      after: t('onboarding.abel.sceneFour.ecclesiastesAfter'),
     },
   ]
 }
@@ -125,10 +125,10 @@ const OccurrenceCounter = ({ metrics, t }: StrongLemmaCardProps) => {
       gap={s(3)}
     >
       <Text title bold fontSize={s(9)} lineHeight={s(16)}>
-        {t('playground.sceneFour.occurrenceCount')}
+        {t('onboarding.abel.sceneFour.occurrenceCount')}
       </Text>
       <Text color="tertiary" bold fontSize={s(7)}>
-        {t('playground.sceneFour.usageCount')}
+        {t('onboarding.abel.sceneFour.usageCount')}
       </Text>
     </HStack>
   )
@@ -151,7 +151,7 @@ const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
       overflow="visible"
     >
       <Text color="primary" bold fontSize={s(9)} style={{ letterSpacing: s(1.1) }}>
-        {t('playground.sceneFour.hebrew')}
+        {t('onboarding.abel.sceneFour.hebrew')}
       </Text>
       <Text
         fontSize={s(30)}
@@ -169,10 +169,10 @@ const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
         lineHeight={s(24)}
         style={{ fontFamily: 'Literata Book', fontStyle: 'italic' }}
       >
-        {t('playground.sceneThree.commonTransliteration')}
+        {t('onboarding.abel.sceneThree.commonTransliteration')}
       </Text>
       <Text color="tertiary" fontSize={s(9.5)} textAlign="center">
-        {t('playground.sceneFour.lemmaDetails')}
+        {t('onboarding.abel.sceneFour.lemmaDetails')}
       </Text>
       <OccurrenceCounter metrics={metrics} t={t} />
     </VStack>
@@ -244,21 +244,21 @@ const OccurrenceFilters = ({
     <OccurrenceFilter
       active={activeFilter === 'vanity'}
       id="vanity"
-      label={t('playground.sceneFour.filterVanity')}
+      label={t('onboarding.abel.sceneFour.filterVanity')}
       metrics={metrics}
       onPress={onFilterChange}
     />
     <OccurrenceFilter
       active={activeFilter === 'idol'}
       id="idol"
-      label={t('playground.sceneFour.filterIdol')}
+      label={t('onboarding.abel.sceneFour.filterIdol')}
       metrics={metrics}
       onPress={onFilterChange}
     />
     <OccurrenceFilter
       active={activeFilter === 'breath'}
       id="breath"
-      label={t('playground.sceneFour.filterBreath')}
+      label={t('onboarding.abel.sceneFour.filterBreath')}
       metrics={metrics}
       onPress={onFilterChange}
     />
@@ -600,9 +600,9 @@ export const createSceneFourOccurrences = ({
           {activeFilter === 'vanity' ? (
             <>
               <Text color="primary" bold fontSize={metrics.s(12.3)}>
-                {t('playground.sceneFour.ecclesiastesHighlightOne')}
+                {t('onboarding.abel.sceneFour.ecclesiastesHighlightOne')}
               </Text>
-              {t('playground.sceneFour.ecclesiastesMiddle')}
+              {t('onboarding.abel.sceneFour.ecclesiastesMiddle')}
               <Text color="primary" bold fontSize={metrics.s(12.3)}>
                 {verses[2].highlight}
               </Text>
@@ -623,7 +623,7 @@ export const createSceneFourOccurrences = ({
         exitTo={{ scale: 1.5 }}
         enterDelay={1100}
         pressScale={0.96}
-        accessibilityLabel={t('playground.sceneFour.addNote')}
+        accessibilityLabel={t('onboarding.abel.sceneFour.addNote')}
       >
         <SceneActionButton icon="file-plus" metrics={metrics} />
       </Scene.Node>

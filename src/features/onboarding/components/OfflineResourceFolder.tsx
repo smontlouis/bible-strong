@@ -5,6 +5,7 @@ import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg'
 
 import Box, { FadingBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import type { OfflineSetupFolderVisual } from '../offlineSetupPresentation'
 import OfflineResourceFolderBounce from './OfflineResourceFolderBounce'
 import OfflineResourceFolderItems from './OfflineResourceFolderItems'
 
@@ -16,12 +17,7 @@ type OfflineResourceFolderProps = {
   itemCount: number
   selected: boolean
   showChevron?: boolean
-  colors: {
-    back: string
-    frontStart: string
-    frontEnd: string
-    icon: string
-  }
+  colors: OfflineSetupFolderVisual['colors']
   onPress?: () => void
 }
 

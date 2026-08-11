@@ -1,22 +1,17 @@
-import styled from '@emotion/native'
-import { useAtom } from 'jotai/react'
-import React, { useEffect, useState } from 'react'
+import { useAtom, useSetAtom } from 'jotai/react'
+import { useEffect, useState } from 'react'
 import { Modal } from 'react-native'
 import { useDispatch } from 'react-redux'
+
+import Box from '~common/ui/Box'
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { deleteAllDatabases } from '~helpers/sqlite'
 import useLanguage from '~helpers/useLanguage'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
-
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { setDefaultBibleVersion } from '~redux/modules/user'
 import { isOnboardingCompletedAtom } from './atom'
-import OnBoardingSlides from './OnBoardingSlides'
+import AbelOnboarding from './AbelOnboarding'
 import SelectResources from './SelectResources'
-
-const ModalContainer = styled.View(({ theme }) => ({
-  flex: 1,
-  backgroundColor: theme.colors.reverse,
-}))
 
 const useCheckMandatoryVersions = () => {
   const lang = useLanguage()
@@ -62,15 +57,24 @@ const useCheckMandatoryVersions = () => {
 }
 
 const OnBoarding = () => {
-  const [step, setStep] = React.useState<number>(0)
+  const [step, setStep] = useState<'abel' | 'resources'>('abel')
+  const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
   const showOnboarding = useCheckMandatoryVersions()
 
   return (
-    <Modal visible={showOnboarding} animationType="slide" presentationStyle="fullScreen">
-      <ModalContainer>
-        {step === 0 && <OnBoardingSlides setStep={setStep} />}
-        {step === 1 && <SelectResources />}
-      </ModalContainer>
+    <Modal
+      visible={showOnboarding}
+      animationType="fade"
+      presentationStyle="fullScreen"
+      onRequestClose={() => undefined}
+    >
+      <Box flex bg="reverse">
+        {step === 'abel' ? (
+          <AbelOnboarding onComplete={() => setStep('resources')} />
+        ) : (
+          <SelectResources onComplete={() => setIsOnboardingCompleted(true)} />
+        )}
+      </Box>
     </Modal>
   )
 }

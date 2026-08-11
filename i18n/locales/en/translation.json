@@ -1406,131 +1406,131 @@
   "playground.abelEyebrow": "Onboarding",
   "playground.abelTitle": "Abel onboarding journey",
   "playground.abelDescription": "Follow an interactive study from Genesis 4:2 into Strong’s lexicon, notes, and connections.",
-  "playground.onboarding.skip": "Skip",
-  "playground.onboarding.skipConfirmTitle": "Skip the discovery?",
-  "playground.onboarding.skipConfirmMessage": "You can restart this journey from the Playground.",
-  "playground.onboarding.keepDiscovering": "Keep discovering",
-  "playground.onboarding.progress": "Step {{current}} of {{total}}",
-  "playground.onboarding.back": "Go back to the previous scene",
-  "playground.onboarding.continue": "Continue",
-  "playground.onboarding.complete": "Your study space is ready.",
-  "playground.sceneOne.chapter": "Genesis 4:2",
-  "playground.sceneOne.lineOne": "And she again bare his brother",
-  "playground.sceneOne.highlightWord": "Abel",
-  "playground.sceneOne.lineTwo": ".",
-  "playground.sceneOne.lineThree": "And Abel was a keeper\nof sheep, but Cain was a tiller\nof the ground.",
-  "playground.sceneOne.translation": "KJV",
-  "playground.sceneOne.phrase": "Read. Highlight. Discover.",
-  "playground.sceneOne.openLexique": "Explore this verse",
-  "playground.sceneOne.colorPrompt.color2": "A color becomes a thread you can follow.",
-  "playground.sceneOne.colorPrompt.color3": "Keep what matters in view.",
-  "playground.sceneOne.colorPrompt.color4": "Organize your insights with color.",
-  "playground.sceneOne.colorPrompt.color5": "Keep track of what you discover.",
-  "playground.sceneOne.togglePalette.show": "Show highlight colors",
-  "playground.sceneOne.togglePalette.hide": "Hide highlight colors",
-  "playground.sceneOne.color1": "Turquoise",
-  "playground.sceneOne.color2": "Coral",
-  "playground.sceneOne.color3": "Golden yellow",
-  "playground.sceneOne.color4": "Sky blue",
-  "playground.sceneOne.color5": "Slate",
-  "playground.sceneTwo.phrase": "Every verse can open a path.",
-  "playground.sceneTwo.dictionary": "Dictionary",
-  "playground.sceneTwo.references": "Cross-refs",
-  "playground.sceneTwo.lexique": "Lexicon",
-  "playground.sceneTwo.comments": "Commentaries",
-  "playground.sceneTwo.themes": "Topics",
-  "playground.sceneTwo.comparisons": "Compare"
-  ,"playground.sceneThree.properPhrase": "Discover the word behind the translation."
-  ,"playground.sceneThree.commonPhrase": "One word can uncover another."
-  ,"playground.sceneThree.strongLabel": "STRONG"
-  ,"playground.sceneThree.listen": "Listen to the pronunciation"
-  ,"playground.sceneThree.openStrong": "Open Strong H1892"
-  ,"playground.sceneThree.properTransliteration": "Hebel"
-  ,"playground.sceneThree.properTitle": "Abel"
-  ,"playground.sceneThree.properDefinition": "Second son of Adam and Eve"
-  ,"playground.sceneThree.properType": "PROPER NAME"
-  ,"playground.sceneThree.commonTransliteration": "hebel"
-  ,"playground.sceneThree.commonTitle": "hebel"
-  ,"playground.sceneThree.commonDefinition": "emptiness, vanity, transience"
-  ,"playground.sceneThree.commonType": "MASCULINE NOUN"
-  ,"playground.sceneFour.phrase": "Follow one word throughout Scripture."
-  ,"playground.sceneFour.addNote": "Add a note"
-  ,"playground.sceneFour.hebrew": "HEBREW"
-  ,"playground.sceneFour.lemmaDetails": "H1892  ·  emptiness · vanity"
-  ,"playground.sceneFour.occurrenceCount": "73"
-  ,"playground.sceneFour.usageCount": "KJV occurrences"
-  ,"playground.sceneFour.filterAll": "All · 73"
-  ,"playground.sceneFour.filterVanity": "vanity · 61"
-  ,"playground.sceneFour.filterIdol": "vain · 11"
-  ,"playground.sceneFour.filterBreath": "all · 73"
-  ,"playground.sceneFour.proverbsReference": "PSALM 94:11"
-  ,"playground.sceneFour.proverbsBefore": "The LORD knoweth the thoughts of man, that they are "
-  ,"playground.sceneFour.proverbsHighlight": "vanity."
-  ,"playground.sceneFour.jobReference": "JOB 7:16"
-  ,"playground.sceneFour.jobBefore": "I loathe it; I would not live alway: let me alone; for my days are "
-  ,"playground.sceneFour.jobHighlight": "vanity"
-  ,"playground.sceneFour.jobAfter": "."
-  ,"playground.sceneFour.ecclesiastesReference": "ECCLESIASTES 1:2"
-  ,"playground.sceneFour.ecclesiastesHighlightOne": "Vanity"
-  ,"playground.sceneFour.ecclesiastesMiddle": " of vanities, saith the Preacher, vanity of vanities; all is "
-  ,"playground.sceneFour.ecclesiastesHighlightTwo": "vanity"
-  ,"playground.sceneFour.ecclesiastesAfter": "."
-  ,"playground.sceneFour.idolDeuteronomyReference": "JOB 9:29"
-  ,"playground.sceneFour.idolDeuteronomyBefore": "If I be wicked, why then labour I in "
-  ,"playground.sceneFour.idolDeuteronomyHighlight": "vain"
-  ,"playground.sceneFour.idolDeuteronomyAfter": "?"
-  ,"playground.sceneFour.idolKingsReference": "PROVERBS 31:30"
-  ,"playground.sceneFour.idolKingsBefore": "Favour is deceitful, and beauty is "
-  ,"playground.sceneFour.idolKingsHighlight": "vain"
-  ,"playground.sceneFour.idolKingsAfter": "."
-  ,"playground.sceneFour.idolPsalmsReference": "ZECHARIAH 10:2"
-  ,"playground.sceneFour.idolPsalmsBefore": "The idols have spoken vanity… they comfort in "
-  ,"playground.sceneFour.idolPsalmsHighlight": "vain"
-  ,"playground.sceneFour.idolPsalmsAfter": "."
-  ,"playground.sceneFour.breathJobReference": "DEUTERONOMY 32:21"
-  ,"playground.sceneFour.breathJobBefore": "They have provoked me to anger with their "
-  ,"playground.sceneFour.breathJobHighlight": "vanities"
-  ,"playground.sceneFour.breathJobAfter": "."
-  ,"playground.sceneFour.breathPsalmThirtyNineReference": "PSALMS 39:5"
-  ,"playground.sceneFour.breathPsalmThirtyNineBefore": "Every man at his best state is altogether "
-  ,"playground.sceneFour.breathPsalmThirtyNineHighlight": "vanity"
-  ,"playground.sceneFour.breathPsalmThirtyNineAfter": ". Selah."
-  ,"playground.sceneFour.breathPsalmOneFortyFourReference": "PSALMS 144:4"
-  ,"playground.sceneFour.breathPsalmOneFortyFourBefore": "Man is like to "
-  ,"playground.sceneFour.breathPsalmOneFortyFourHighlight": "vanity"
-  ,"playground.sceneFour.breathPsalmOneFortyFourAfter": ": his days are as a shadow that passeth away."
-  ,"playground.sceneFive.phrase": "Write down what you discover."
-  ,"playground.sceneFive.addTag": "Add the Abel tag"
-  ,"playground.sceneFive.genesisLabel": "GENESIS 4:2"
-  ,"playground.sceneFive.genesisTitle": "And she again bare his brother Abel."
-  ,"playground.sceneFive.abelLabel": "H1893"
-  ,"playground.sceneFive.abelMeta": "proper name · Hebrew"
-  ,"playground.sceneFive.hevelLabel": "H1892"
-  ,"playground.sceneFive.hevelMeta": "emptiness · vanity · transience"
-  ,"playground.sceneFive.noteLabel": "NOTE"
-  ,"playground.sceneFive.noteQuestion": "Abel’s name echoes hebel: breath, vapour, vanity. Why this name?"
-  ,"playground.sceneFive.relations": "Relations"
-  ,"playground.sceneFive.genesisChip": "Genesis 4:2"
-  ,"playground.sceneSix.phrase": "Organize, connect, go deeper."
-  ,"playground.sceneSix.closeRelations": "Close the relations"
-  ,"playground.sceneSix.genesisTitle": "Genesis 4:2"
-  ,"playground.sceneSix.genesisDetail": "occurrence"
-  ,"playground.sceneSix.abelDetail": "proper name"
-  ,"playground.sceneSix.hevelDetail": "vanity"
-  ,"playground.sceneSix.ecclesiastesTitle": "Ecclesiastes 1:2"
-  ,"playground.sceneSix.ecclesiastesDetail": "vanity  ·  occurrence"
-  ,"playground.sceneSix.noteTitle": "Note"
-  ,"playground.sceneSix.studyTitle": "Study"
-  ,"playground.sceneSix.studyDetail": "Names & meanings"
-  ,"playground.sceneSix.explains": "explains"
-  ,"playground.sceneSix.references": "references"
-  ,"playground.sceneSix.mentions": "mentions"
-  ,"playground.sceneSix.linkedTo": "linked to"
-  ,"playground.onboarding.start": "Start"
-  ,"playground.sceneSeven.phrase": "Read simply.\nExplore as deeply as you like."
-  ,"playground.sceneSeven.note": "Note"
-  ,"playground.sceneSeven.study": "Study"
-  ,"playground.sceneSeven.ecclesiastes": "Ecclesiastes 1:2"
+  "onboarding.abel.skip": "Skip",
+  "onboarding.abel.skipConfirmTitle": "Skip the discovery?",
+  "onboarding.abel.skipConfirmMessage": "You'll go directly to choosing your resources.",
+  "onboarding.abel.keepDiscovering": "Keep discovering",
+  "onboarding.abel.progress": "Step {{current}} of {{total}}",
+  "onboarding.abel.back": "Go back to the previous scene",
+  "onboarding.abel.continue": "Continue",
+  "onboarding.abel.complete": "Your study space is ready.",
+  "onboarding.abel.sceneOne.chapter": "Genesis 4:2",
+  "onboarding.abel.sceneOne.lineOne": "And she again bare his brother",
+  "onboarding.abel.sceneOne.highlightWord": "Abel",
+  "onboarding.abel.sceneOne.lineTwo": ".",
+  "onboarding.abel.sceneOne.lineThree": "And Abel was a keeper\nof sheep, but Cain was a tiller\nof the ground.",
+  "onboarding.abel.sceneOne.translation": "KJV",
+  "onboarding.abel.sceneOne.phrase": "Read. Highlight. Discover.",
+  "onboarding.abel.sceneOne.openLexique": "Explore this verse",
+  "onboarding.abel.sceneOne.colorPrompt.color2": "A color becomes a thread you can follow.",
+  "onboarding.abel.sceneOne.colorPrompt.color3": "Keep what matters in view.",
+  "onboarding.abel.sceneOne.colorPrompt.color4": "Organize your insights with color.",
+  "onboarding.abel.sceneOne.colorPrompt.color5": "Keep track of what you discover.",
+  "onboarding.abel.sceneOne.togglePalette.show": "Show highlight colors",
+  "onboarding.abel.sceneOne.togglePalette.hide": "Hide highlight colors",
+  "onboarding.abel.sceneOne.color1": "Turquoise",
+  "onboarding.abel.sceneOne.color2": "Coral",
+  "onboarding.abel.sceneOne.color3": "Golden yellow",
+  "onboarding.abel.sceneOne.color4": "Sky blue",
+  "onboarding.abel.sceneOne.color5": "Slate",
+  "onboarding.abel.sceneTwo.phrase": "Every verse can open a path.",
+  "onboarding.abel.sceneTwo.dictionary": "Dictionary",
+  "onboarding.abel.sceneTwo.references": "Cross-refs",
+  "onboarding.abel.sceneTwo.lexique": "Lexicon",
+  "onboarding.abel.sceneTwo.comments": "Commentaries",
+  "onboarding.abel.sceneTwo.themes": "Topics",
+  "onboarding.abel.sceneTwo.comparisons": "Compare"
+  ,"onboarding.abel.sceneThree.properPhrase": "Discover the word behind the translation."
+  ,"onboarding.abel.sceneThree.commonPhrase": "One word can uncover another."
+  ,"onboarding.abel.sceneThree.strongLabel": "STRONG"
+  ,"onboarding.abel.sceneThree.listen": "Listen to the pronunciation"
+  ,"onboarding.abel.sceneThree.openStrong": "Open Strong H1892"
+  ,"onboarding.abel.sceneThree.properTransliteration": "Hebel"
+  ,"onboarding.abel.sceneThree.properTitle": "Abel"
+  ,"onboarding.abel.sceneThree.properDefinition": "Second son of Adam and Eve"
+  ,"onboarding.abel.sceneThree.properType": "PROPER NAME"
+  ,"onboarding.abel.sceneThree.commonTransliteration": "hebel"
+  ,"onboarding.abel.sceneThree.commonTitle": "hebel"
+  ,"onboarding.abel.sceneThree.commonDefinition": "emptiness, vanity, transience"
+  ,"onboarding.abel.sceneThree.commonType": "MASCULINE NOUN"
+  ,"onboarding.abel.sceneFour.phrase": "Follow one word throughout Scripture."
+  ,"onboarding.abel.sceneFour.addNote": "Add a note"
+  ,"onboarding.abel.sceneFour.hebrew": "HEBREW"
+  ,"onboarding.abel.sceneFour.lemmaDetails": "H1892  ·  emptiness · vanity"
+  ,"onboarding.abel.sceneFour.occurrenceCount": "73"
+  ,"onboarding.abel.sceneFour.usageCount": "KJV occurrences"
+  ,"onboarding.abel.sceneFour.filterAll": "All · 73"
+  ,"onboarding.abel.sceneFour.filterVanity": "vanity · 61"
+  ,"onboarding.abel.sceneFour.filterIdol": "vain · 11"
+  ,"onboarding.abel.sceneFour.filterBreath": "all · 73"
+  ,"onboarding.abel.sceneFour.proverbsReference": "PSALM 94:11"
+  ,"onboarding.abel.sceneFour.proverbsBefore": "The LORD knoweth the thoughts of man, that they are "
+  ,"onboarding.abel.sceneFour.proverbsHighlight": "vanity."
+  ,"onboarding.abel.sceneFour.jobReference": "JOB 7:16"
+  ,"onboarding.abel.sceneFour.jobBefore": "I loathe it; I would not live alway: let me alone; for my days are "
+  ,"onboarding.abel.sceneFour.jobHighlight": "vanity"
+  ,"onboarding.abel.sceneFour.jobAfter": "."
+  ,"onboarding.abel.sceneFour.ecclesiastesReference": "ECCLESIASTES 1:2"
+  ,"onboarding.abel.sceneFour.ecclesiastesHighlightOne": "Vanity"
+  ,"onboarding.abel.sceneFour.ecclesiastesMiddle": " of vanities, saith the Preacher, vanity of vanities; all is "
+  ,"onboarding.abel.sceneFour.ecclesiastesHighlightTwo": "vanity"
+  ,"onboarding.abel.sceneFour.ecclesiastesAfter": "."
+  ,"onboarding.abel.sceneFour.idolDeuteronomyReference": "JOB 9:29"
+  ,"onboarding.abel.sceneFour.idolDeuteronomyBefore": "If I be wicked, why then labour I in "
+  ,"onboarding.abel.sceneFour.idolDeuteronomyHighlight": "vain"
+  ,"onboarding.abel.sceneFour.idolDeuteronomyAfter": "?"
+  ,"onboarding.abel.sceneFour.idolKingsReference": "PROVERBS 31:30"
+  ,"onboarding.abel.sceneFour.idolKingsBefore": "Favour is deceitful, and beauty is "
+  ,"onboarding.abel.sceneFour.idolKingsHighlight": "vain"
+  ,"onboarding.abel.sceneFour.idolKingsAfter": "."
+  ,"onboarding.abel.sceneFour.idolPsalmsReference": "ZECHARIAH 10:2"
+  ,"onboarding.abel.sceneFour.idolPsalmsBefore": "The idols have spoken vanity… they comfort in "
+  ,"onboarding.abel.sceneFour.idolPsalmsHighlight": "vain"
+  ,"onboarding.abel.sceneFour.idolPsalmsAfter": "."
+  ,"onboarding.abel.sceneFour.breathJobReference": "DEUTERONOMY 32:21"
+  ,"onboarding.abel.sceneFour.breathJobBefore": "They have provoked me to anger with their "
+  ,"onboarding.abel.sceneFour.breathJobHighlight": "vanities"
+  ,"onboarding.abel.sceneFour.breathJobAfter": "."
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineReference": "PSALMS 39:5"
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineBefore": "Every man at his best state is altogether "
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineHighlight": "vanity"
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineAfter": ". Selah."
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourReference": "PSALMS 144:4"
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourBefore": "Man is like to "
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourHighlight": "vanity"
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourAfter": ": his days are as a shadow that passeth away."
+  ,"onboarding.abel.sceneFive.phrase": "Write down what you discover."
+  ,"onboarding.abel.sceneFive.addTag": "Add the Abel tag"
+  ,"onboarding.abel.sceneFive.genesisLabel": "GENESIS 4:2"
+  ,"onboarding.abel.sceneFive.genesisTitle": "And she again bare his brother Abel."
+  ,"onboarding.abel.sceneFive.abelLabel": "H1893"
+  ,"onboarding.abel.sceneFive.abelMeta": "proper name · Hebrew"
+  ,"onboarding.abel.sceneFive.hevelLabel": "H1892"
+  ,"onboarding.abel.sceneFive.hevelMeta": "emptiness · vanity · transience"
+  ,"onboarding.abel.sceneFive.noteLabel": "NOTE"
+  ,"onboarding.abel.sceneFive.noteQuestion": "Abel’s name echoes hebel: breath, vapour, vanity. Why this name?"
+  ,"onboarding.abel.sceneFive.relations": "Relations"
+  ,"onboarding.abel.sceneFive.genesisChip": "Genesis 4:2"
+  ,"onboarding.abel.sceneSix.phrase": "Organize, connect, go deeper."
+  ,"onboarding.abel.sceneSix.closeRelations": "Close the relations"
+  ,"onboarding.abel.sceneSix.genesisTitle": "Genesis 4:2"
+  ,"onboarding.abel.sceneSix.genesisDetail": "occurrence"
+  ,"onboarding.abel.sceneSix.abelDetail": "proper name"
+  ,"onboarding.abel.sceneSix.hevelDetail": "vanity"
+  ,"onboarding.abel.sceneSix.ecclesiastesTitle": "Ecclesiastes 1:2"
+  ,"onboarding.abel.sceneSix.ecclesiastesDetail": "vanity  ·  occurrence"
+  ,"onboarding.abel.sceneSix.noteTitle": "Note"
+  ,"onboarding.abel.sceneSix.studyTitle": "Study"
+  ,"onboarding.abel.sceneSix.studyDetail": "Names & meanings"
+  ,"onboarding.abel.sceneSix.explains": "explains"
+  ,"onboarding.abel.sceneSix.references": "references"
+  ,"onboarding.abel.sceneSix.mentions": "mentions"
+  ,"onboarding.abel.sceneSix.linkedTo": "linked to"
+  ,"onboarding.abel.start": "Start"
+  ,"onboarding.abel.sceneSeven.phrase": "Read simply.\nExplore as deeply as you like."
+  ,"onboarding.abel.sceneSeven.note": "Note"
+  ,"onboarding.abel.sceneSeven.study": "Study"
+  ,"onboarding.abel.sceneSeven.ecclesiastes": "Ecclesiastes 1:2"
   ,"offlineSetup.title": "Prepare your library"
   ,"offlineSetup.subtitle": "Choose the translations and study tools you want to keep on this device."
   ,"offlineSetup.toDownload": "To download"

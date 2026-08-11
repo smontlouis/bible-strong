@@ -9,11 +9,11 @@ import { Extrapolation, interpolate, type SharedValue } from 'react-native-reani
 
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
-import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
-import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
-import { Scene } from '../onboarding/SceneGraph'
-import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
+import type { OnboardingStageMetrics } from '../OnboardingStage'
+import SceneBackgroundShape from '../SceneBackgroundShape'
+import SceneDecorativePluses from '../SceneDecorativePluses'
+import { Scene } from '../SceneGraph'
+import VerseCard, { type HighlightColor } from '../VerseCard'
 
 type StrongCardIndex = 0 | 1
 
@@ -28,17 +28,17 @@ type StrongDefinition = {
 const STRONG_DEFINITIONS: readonly StrongDefinition[] = [
   {
     code: '1893',
-    transliterationKey: 'playground.sceneThree.properTransliteration',
-    titleKey: 'playground.sceneThree.properTitle',
-    definitionKey: 'playground.sceneThree.properDefinition',
-    typeKey: 'playground.sceneThree.properType',
+    transliterationKey: 'onboarding.abel.sceneThree.properTransliteration',
+    titleKey: 'onboarding.abel.sceneThree.properTitle',
+    definitionKey: 'onboarding.abel.sceneThree.properDefinition',
+    typeKey: 'onboarding.abel.sceneThree.properType',
   },
   {
     code: '1892',
-    transliterationKey: 'playground.sceneThree.commonTransliteration',
-    titleKey: 'playground.sceneThree.commonTitle',
-    definitionKey: 'playground.sceneThree.commonDefinition',
-    typeKey: 'playground.sceneThree.commonType',
+    transliterationKey: 'onboarding.abel.sceneThree.commonTransliteration',
+    titleKey: 'onboarding.abel.sceneThree.commonTitle',
+    definitionKey: 'onboarding.abel.sceneThree.commonDefinition',
+    typeKey: 'onboarding.abel.sceneThree.commonType',
   },
 ] as const
 
@@ -92,12 +92,12 @@ const StrongDefinitionCard = ({
       <HStack justifyContent="space-between" alignItems="center" overflow="visible">
         <Box bg="lightPrimary" borderRadius={s(11)} px={s(10)} py={s(8)}>
           <Text color="primary" bold fontSize={s(10)} style={{ letterSpacing: s(1.8) }}>
-            {t('playground.sceneThree.strongLabel')}
+            {t('onboarding.abel.sceneThree.strongLabel')}
           </Text>
         </Box>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('playground.sceneThree.listen')}
+          accessibilityLabel={t('onboarding.abel.sceneThree.listen')}
           onPress={playAudio}
           style={({ pressed }) => ({
             overflow: 'visible',
@@ -149,7 +149,7 @@ const StrongDefinitionCard = ({
       <HStack alignItems="center" gap={s(14)} overflow="visible">
         <Pressable
           accessibilityRole={isAction ? 'button' : undefined}
-          accessibilityLabel={isAction ? t('playground.sceneThree.openStrong') : undefined}
+          accessibilityLabel={isAction ? t('onboarding.abel.sceneThree.openStrong') : undefined}
           disabled={!isAction}
           hitSlop={s(4)}
           onPress={isAction ? onActionPress : undefined}

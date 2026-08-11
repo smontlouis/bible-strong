@@ -12,11 +12,11 @@ import RefIcon from '~common/RefIcon'
 import Box, { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { Theme } from '~themes'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
-import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
-import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
-import { Scene } from '../onboarding/SceneGraph'
-import VerseCard, { type HighlightColor, type ResourceIllustration } from '../onboarding/VerseCard'
+import type { OnboardingStageMetrics } from '../OnboardingStage'
+import SceneBackgroundShape from '../SceneBackgroundShape'
+import SceneDecorativePluses from '../SceneDecorativePluses'
+import { Scene } from '../SceneGraph'
+import VerseCard, { type HighlightColor, type ResourceIllustration } from '../VerseCard'
 
 const SCENE_TWO_ENTRANCE_TIMING = {
   start: 200,
@@ -239,10 +239,10 @@ export const createSceneTwoLexique = ({
       dragFriction={0.1}
       onPress={onDictionaryPress}
       pressScale={0.96}
-      accessibilityLabel={t('playground.sceneTwo.dictionary')}
+      accessibilityLabel={t('onboarding.abel.sceneTwo.dictionary')}
     >
       <SceneTwoNodeCard
-        label={t('playground.sceneTwo.dictionary')}
+        label={t('onboarding.abel.sceneTwo.dictionary')}
         icon="dictionary"
         metrics={metrics}
         reduceMotion={reduceMotion}
@@ -259,10 +259,10 @@ export const createSceneTwoLexique = ({
       dragFriction={0.1}
       onPress={onReferencesPress}
       pressScale={0.96}
-      accessibilityLabel={t('playground.sceneTwo.references')}
+      accessibilityLabel={t('onboarding.abel.sceneTwo.references')}
     >
       <SceneTwoNodeCard
-        label={t('playground.sceneTwo.references')}
+        label={t('onboarding.abel.sceneTwo.references')}
         icon="references"
         metrics={metrics}
         reduceMotion={reduceMotion}
@@ -279,10 +279,10 @@ export const createSceneTwoLexique = ({
       dragFriction={0.1}
       onPress={onLexiquePress}
       pressScale={0.96}
-      accessibilityLabel={t('playground.sceneTwo.lexique')}
+      accessibilityLabel={t('onboarding.abel.sceneTwo.lexique')}
     >
       <SceneTwoNodeCard
-        label={t('playground.sceneTwo.lexique')}
+        label={t('onboarding.abel.sceneTwo.lexique')}
         icon="lexique"
         metrics={metrics}
         reduceMotion={reduceMotion}
@@ -299,10 +299,10 @@ export const createSceneTwoLexique = ({
       dragFriction={0.1}
       onPress={onCommentsPress}
       pressScale={0.96}
-      accessibilityLabel={t('playground.sceneTwo.comments')}
+      accessibilityLabel={t('onboarding.abel.sceneTwo.comments')}
     >
       <SceneTwoNodeCard
-        label={t('playground.sceneTwo.comments')}
+        label={t('onboarding.abel.sceneTwo.comments')}
         icon="comments"
         metrics={metrics}
         reduceMotion={reduceMotion}
@@ -319,10 +319,10 @@ export const createSceneTwoLexique = ({
       dragFriction={0.1}
       onPress={onThemesPress}
       pressScale={0.96}
-      accessibilityLabel={t('playground.sceneTwo.themes')}
+      accessibilityLabel={t('onboarding.abel.sceneTwo.themes')}
     >
       <SceneTwoNodeCard
-        label={t('playground.sceneTwo.themes')}
+        label={t('onboarding.abel.sceneTwo.themes')}
         icon="themes"
         metrics={metrics}
         reduceMotion={reduceMotion}
@@ -339,10 +339,10 @@ export const createSceneTwoLexique = ({
       dragFriction={0.1}
       onPress={onComparisonsPress}
       pressScale={0.96}
-      accessibilityLabel={t('playground.sceneTwo.comparisons')}
+      accessibilityLabel={t('onboarding.abel.sceneTwo.comparisons')}
     >
       <SceneTwoNodeCard
-        label={t('playground.sceneTwo.comparisons')}
+        label={t('onboarding.abel.sceneTwo.comparisons')}
         icon="comparisons"
         metrics={metrics}
         reduceMotion={reduceMotion}

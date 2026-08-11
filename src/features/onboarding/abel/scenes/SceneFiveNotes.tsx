@@ -19,12 +19,12 @@ import Animated, {
 
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
-import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
-import SceneActionButton from '../onboarding/SceneActionButton'
-import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
-import { Scene } from '../onboarding/SceneGraph'
-import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
+import type { OnboardingStageMetrics } from '../OnboardingStage'
+import SceneBackgroundShape from '../SceneBackgroundShape'
+import SceneActionButton from '../SceneActionButton'
+import SceneDecorativePluses from '../SceneDecorativePluses'
+import { Scene } from '../SceneGraph'
+import VerseCard, { type HighlightColor } from '../VerseCard'
 import { AbelSourceCard, HevelSourceCard } from './GenesisSourceCard'
 import NoteCard from './NoteCard'
 
@@ -167,18 +167,18 @@ const QuestionNoteContent = ({
       <TypewriterText
         metrics={metrics}
         reduceMotion={reduceMotion}
-        text={t('playground.sceneFive.noteQuestion')}
+        text={t('onboarding.abel.sceneFive.noteQuestion')}
       />
       <Box width={s(32)} height={s(2)} borderRadius={s(1)} bg="#FF6B6B" mt={s(13)} />
       <HStack mt={s(10)} alignItems="center" gap={s(5)}>
         <Feather name="git-merge" size={s(10)} color={theme.colors.tertiary} />
         <Text color="tertiary" bold fontSize={s(8)} style={{ letterSpacing: s(0.7) }}>
-          {t('playground.sceneFive.relations')}
+          {t('onboarding.abel.sceneFive.relations')}
         </Text>
       </HStack>
       <HStack mt={s(7)} gap={s(6)}>
         <RelationChip
-          label={t('playground.sceneFive.genesisChip')}
+          label={t('onboarding.abel.sceneFive.genesisChip')}
           metrics={metrics}
           onPress={onGenesisPress}
         />
@@ -310,7 +310,7 @@ export const createSceneFiveNotes = ({
         enterDelay={3800}
         enterFrom={{ scale: 0.5 }}
         exitTo={{ scale: 1.5 }}
-        accessibilityLabel={t('playground.sceneFive.addTag')}
+        accessibilityLabel={t('onboarding.abel.sceneFive.addTag')}
       >
         <SceneActionButton icon="tag" metrics={metrics} />
       </Scene.Node>

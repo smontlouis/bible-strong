@@ -145,7 +145,7 @@ const VerseCard = ({
               lineHeight={s(38)}
               style={[{ fontFamily: 'Literata Book' }, dimmedTextStyle]}
             >
-              {t('playground.sceneOne.chapter')}
+              {t('onboarding.abel.sceneOne.chapter')}
             </AnimatedText>
           </AnimatedBox>
         </HStack>
@@ -157,7 +157,7 @@ const VerseCard = ({
               lineHeight={verseLineHeight}
               style={dimmedTextStyle}
             >
-              {t('playground.sceneOne.lineOne')}
+              {t('onboarding.abel.sceneOne.lineOne')}
             </AnimatedText>
           </AnimatedBox>
           <AnimatedBox entering={lineEntering(300, reduceMotion)}>
@@ -175,14 +175,14 @@ const VerseCard = ({
                   highlightStyle,
                 ]}
               >
-                {t('playground.sceneOne.highlightWord')}
+                {t('onboarding.abel.sceneOne.highlightWord')}
               </AnimatedText>
               <AnimatedText
                 fontSize={verseFontSize}
                 lineHeight={verseLineHeight}
                 style={dimmedTextStyle}
               >
-                {t('playground.sceneOne.lineTwo')}
+                {t('onboarding.abel.sceneOne.lineTwo')}
               </AnimatedText>
             </HStack>
           </AnimatedBox>
@@ -192,7 +192,7 @@ const VerseCard = ({
               lineHeight={verseLineHeight}
               style={dimmedTextStyle}
             >
-              {t('playground.sceneOne.lineThree')}
+              {t('onboarding.abel.sceneOne.lineThree')}
             </AnimatedText>
           </AnimatedBox>
         </VStack>
@@ -204,7 +204,7 @@ const VerseCard = ({
             bold
             style={[{ letterSpacing: s(2.4) }, dimmedTextStyle]}
           >
-            {t('playground.sceneOne.translation')}
+            {t('onboarding.abel.sceneOne.translation')}
           </AnimatedText>
         </AnimatedBox>
 

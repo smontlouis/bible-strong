@@ -1,7 +1,7 @@
 import { useTheme } from '@emotion/react'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Alert, Pressable, useWindowDimensions, View } from 'react-native'
+import { Alert, Pressable, useWindowDimensions } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Animated, {
@@ -23,33 +23,37 @@ import Animated, {
 
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { OnboardingStage } from './onboarding/OnboardingStage'
-import { SceneGraph } from './onboarding/SceneGraph'
-import { ONBOARDING_SCENE_COUNT, ONBOARDING_SCENES } from './onboarding/sceneRegistry'
-import { type HighlightColor, type ResourceIllustration } from './onboarding/VerseCard'
-import { createSceneOneVerseHighlight } from './scenes/SceneOneVerseHighlight'
-import { createSceneFiveNotes } from './scenes/SceneFiveNotes'
+import { OnboardingStage } from './abel/OnboardingStage'
+import { SceneGraph } from './abel/SceneGraph'
+import { ONBOARDING_SCENE_COUNT, ONBOARDING_SCENES } from './abel/sceneRegistry'
+import { type HighlightColor, type ResourceIllustration } from './abel/VerseCard'
+import { createSceneOneVerseHighlight } from './abel/scenes/SceneOneVerseHighlight'
+import { createSceneFiveNotes } from './abel/scenes/SceneFiveNotes'
 import {
   createSceneFourOccurrences,
   type OccurrenceFilterDirection,
   type OccurrenceFilterId,
-} from './scenes/SceneFourOccurrences'
-import { createSceneSixRelations } from './scenes/SceneSixRelations'
-import { createSceneSevenReturnToVerse, SCENE_SEVEN_REVEAL } from './scenes/SceneSevenReturnToVerse'
-import { createSceneThreeStrong, type StrongCardIndex } from './scenes/SceneThreeStrong'
-import { createSceneTwoLexique, getSceneTwoNodeColor } from './scenes/SceneTwoLexique'
+} from './abel/scenes/SceneFourOccurrences'
+import { createSceneSixRelations } from './abel/scenes/SceneSixRelations'
+import {
+  createSceneSevenReturnToVerse,
+  SCENE_SEVEN_REVEAL,
+} from './abel/scenes/SceneSevenReturnToVerse'
+import { createSceneThreeStrong, type StrongCardIndex } from './abel/scenes/SceneThreeStrong'
+import { createSceneTwoLexique, getSceneTwoNodeColor } from './abel/scenes/SceneTwoLexique'
 
-type PlaygroundOnboardingProps = {
+type AbelOnboardingProps = {
+  completionMode?: 'confirmation' | 'handoff'
   onComplete: () => void
 }
 
 const OCCURRENCE_FILTER_ORDER: OccurrenceFilterId[] = ['vanity', 'idol', 'breath']
 const SCENE_ONE_PROMPT_KEYS: Record<HighlightColor, string> = {
-  color1: 'playground.sceneOne.phrase',
-  color2: 'playground.sceneOne.colorPrompt.color2',
-  color3: 'playground.sceneOne.colorPrompt.color3',
-  color4: 'playground.sceneOne.colorPrompt.color4',
-  color5: 'playground.sceneOne.colorPrompt.color5',
+  color1: 'onboarding.abel.sceneOne.phrase',
+  color2: 'onboarding.abel.sceneOne.colorPrompt.color2',
+  color3: 'onboarding.abel.sceneOne.colorPrompt.color3',
+  color4: 'onboarding.abel.sceneOne.colorPrompt.color4',
+  color5: 'onboarding.abel.sceneOne.colorPrompt.color5',
 }
 
 const createPromptEntering =
@@ -170,7 +174,7 @@ const StrongCarouselPrompt = ({
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
-const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
+const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardingProps) => {
   const theme = useTheme()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
@@ -217,9 +221,10 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
 
   useEffect(() => {
     if (!isFinishing) return
-    const timeout = setTimeout(onComplete, reduceMotion ? 0 : 620)
+    const completionDelay = completionMode === 'handoff' ? 240 : 620
+    const timeout = setTimeout(onComplete, reduceMotion ? 0 : completionDelay)
     return () => clearTimeout(timeout)
-  }, [isFinishing, onComplete, reduceMotion])
+  }, [completionMode, isFinishing, onComplete, reduceMotion])
 
   useEffect(() => {
     if (!isFinalScene) return
@@ -248,20 +253,16 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   }
 
   const confirmSkip = () => {
-    Alert.alert(
-      t('playground.onboarding.skipConfirmTitle'),
-      t('playground.onboarding.skipConfirmMessage'),
-      [
-        {
-          text: t('playground.onboarding.keepDiscovering'),
-          style: 'cancel',
-        },
-        {
-          text: t('playground.onboarding.skip'),
-          onPress: finish,
-        },
-      ]
-    )
+    Alert.alert(t('onboarding.abel.skipConfirmTitle'), t('onboarding.abel.skipConfirmMessage'), [
+      {
+        text: t('onboarding.abel.keepDiscovering'),
+        style: 'cancel',
+      },
+      {
+        text: t('onboarding.abel.skip'),
+        onPress: finish,
+      },
+    ])
   }
 
   const advance = () => {
@@ -321,11 +322,22 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   }
 
   return (
-    <Box flex bg="lightGrey" pt={insets.top}>
+    <AnimatedBox
+      flex
+      bg="lightGrey"
+      pt={insets.top}
+      pointerEvents={isFinishing ? 'none' : 'auto'}
+      style={{
+        opacity: isFinishing && completionMode === 'handoff' ? 0 : 1,
+        transitionProperty: 'opacity',
+        transitionDuration: reduceMotion ? 0 : 240,
+        transitionTimingFunction: 'ease-out',
+      }}
+    >
       <AnimatedPressable
         pointerEvents={canGoBack ? 'auto' : 'none'}
         accessibilityRole="button"
-        accessibilityLabel={t('playground.onboarding.back')}
+        accessibilityLabel={t('onboarding.abel.back')}
         disabled={!canGoBack}
         onPress={goBack}
         onPressIn={handleBackPressIn}
@@ -360,7 +372,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
       >
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('playground.onboarding.skip')}
+          accessibilityLabel={t('onboarding.abel.skip')}
           onPress={confirmSkip}
           hitSlop={10}
           style={({ pressed }) => ({
@@ -372,13 +384,15 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
           })}
         >
           <Text color="tertiary" fontSize={13}>
-            {t('playground.onboarding.skip')}
+            {t('onboarding.abel.skip')}
           </Text>
         </Pressable>
       </Box>
 
-      <View
-        style={{ flex: 1, paddingHorizontal: 12, overflow: 'visible' }}
+      <Box
+        flex
+        px={12}
+        overflow="visible"
         onLayout={({ nativeEvent }) => {
           const nextHeight = nativeEvent.layout.height
           setSceneViewportHeight(currentHeight =>
@@ -387,13 +401,13 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
         }}
       >
         <AnimatedBox
-          key={isFinishing ? 'playground-complete' : 'playground-scenes'}
+          key={isFinishing && completionMode === 'confirmation' ? 'confirmation' : 'scenes'}
           flex={1}
           overflow="visible"
           entering={reduceMotion ? undefined : FadeIn.springify()}
           exiting={reduceMotion ? undefined : FadeOut.springify()}
         >
-          {isFinishing ? (
+          {isFinishing && completionMode === 'confirmation' ? (
             <VStack flex={1} alignItems="center" justifyContent="center" gap={12}>
               <AnimatedBox
                 size={72}
@@ -405,7 +419,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                 <Feather name="check" size={30} color={theme.colors.primary} />
               </AnimatedBox>
               <Text title fontSize={27} textAlign="center">
-                {t('playground.onboarding.complete')}
+                {t('onboarding.abel.complete')}
               </Text>
             </VStack>
           ) : (
@@ -421,7 +435,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                     metrics,
                     reduceMotion,
                     activeColor,
-                    actionLabel: t('playground.sceneOne.openLexique'),
+                    actionLabel: t('onboarding.abel.sceneOne.openLexique'),
                     onVersePress: advance,
                     onColorSelect: setActiveColor,
                   })}
@@ -511,7 +525,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
             </OnboardingStage>
           )}
         </AnimatedBox>
-      </View>
+      </Box>
 
       <VStack width={contentWidth} alignSelf="center" pb={Math.max(insets.bottom, 24)} gap={20}>
         <Box height={76} center>
@@ -519,7 +533,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
             <StrongCarouselPrompt
               carouselProgress={strongCarouselProgress}
               properPrompt={t(currentScene.promptKey)}
-              commonPrompt={t('playground.sceneThree.commonPhrase')}
+              commonPrompt={t('onboarding.abel.sceneThree.commonPhrase')}
               reduceMotion={reduceMotion}
               entering={reduceMotion ? undefined : promptEntering}
               exiting={reduceMotion ? undefined : promptExiting}
@@ -557,8 +571,8 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
               accessibilityRole={showFinalAction ? 'button' : 'progressbar'}
               accessibilityLabel={
                 showFinalAction
-                  ? t('playground.onboarding.start')
-                  : t('playground.onboarding.progress', {
+                  ? t('onboarding.abel.start')
+                  : t('onboarding.abel.progress', {
                       current: sceneIndex + 1,
                       total: ONBOARDING_SCENE_COUNT,
                     })
@@ -627,7 +641,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                 >
                   <HStack alignItems="center" gap={12}>
                     <Text color="reverse" fontSize={17} bold>
-                      {t('playground.onboarding.start')}
+                      {t('onboarding.abel.start')}
                     </Text>
                     <Feather name="arrow-right" size={23} color={theme.colors.reverse} />
                   </HStack>
@@ -637,8 +651,8 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
           </Animated.View>
         </Box>
       </VStack>
-    </Box>
+    </AnimatedBox>
   )
 }
 
-export default PlaygroundOnboarding
+export default AbelOnboarding

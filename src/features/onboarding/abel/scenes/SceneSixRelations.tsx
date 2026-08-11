@@ -12,12 +12,12 @@ import {
 
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
-import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
-import SceneActionButton from '../onboarding/SceneActionButton'
-import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
-import { Scene } from '../onboarding/SceneGraph'
-import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
+import type { OnboardingStageMetrics } from '../OnboardingStage'
+import SceneBackgroundShape from '../SceneBackgroundShape'
+import SceneActionButton from '../SceneActionButton'
+import SceneDecorativePluses from '../SceneDecorativePluses'
+import { Scene } from '../SceneGraph'
+import VerseCard, { type HighlightColor } from '../VerseCard'
 import { AbelSourceCard, HevelSourceCard, SourceCard } from './GenesisSourceCard'
 import NoteCard from './NoteCard'
 
@@ -380,10 +380,10 @@ export const createSceneSixRelations = ({
           <DepthMapNode depth={DEPTH_NODES.ecclesiastes.depth} metrics={metrics} />
         ) : (
           <SourceCard
-            label={String(t('playground.sceneSix.ecclesiastesDetail')).toUpperCase()}
+            label={String(t('onboarding.abel.sceneSix.ecclesiastesDetail')).toUpperCase()}
             markerColor="#FF8400"
             metrics={metrics}
-            title={t('playground.sceneSix.ecclesiastesTitle')}
+            title={t('onboarding.abel.sceneSix.ecclesiastesTitle')}
             variant="small"
           />
         )}
@@ -441,10 +441,10 @@ export const createSceneSixRelations = ({
           <DepthMapNode depth={DEPTH_NODES.study.depth} metrics={metrics} />
         ) : (
           <SourceCard
-            label={String(t('playground.sceneSix.studyTitle')).toUpperCase()}
+            label={String(t('onboarding.abel.sceneSix.studyTitle')).toUpperCase()}
             markerColor="#AFC4FF"
             metrics={metrics}
-            title={t('playground.sceneSix.studyDetail')}
+            title={t('onboarding.abel.sceneSix.studyDetail')}
             variant="small"
           />
         )}
@@ -510,7 +510,7 @@ export const createSceneSixRelations = ({
         >
           <RelationLabel
             color="#5983F0"
-            label={t('playground.sceneSix.explains')}
+            label={t('onboarding.abel.sceneSix.explains')}
             metrics={metrics}
           />
         </Scene.Node>
@@ -526,7 +526,7 @@ export const createSceneSixRelations = ({
         >
           <RelationLabel
             color="#B76A00"
-            label={t('playground.sceneSix.references')}
+            label={t('onboarding.abel.sceneSix.references')}
             metrics={metrics}
           />
         </Scene.Node>
@@ -542,7 +542,7 @@ export const createSceneSixRelations = ({
         >
           <RelationLabel
             color="#FF7675"
-            label={t('playground.sceneSix.mentions')}
+            label={t('onboarding.abel.sceneSix.mentions')}
             metrics={metrics}
           />
         </Scene.Node>
@@ -558,7 +558,7 @@ export const createSceneSixRelations = ({
         >
           <RelationLabel
             color="#5983F0"
-            label={t('playground.sceneSix.linkedTo')}
+            label={t('onboarding.abel.sceneSix.linkedTo')}
             metrics={metrics}
           />
         </Scene.Node>
@@ -573,7 +573,7 @@ export const createSceneSixRelations = ({
           exitTo={{ scale: 1.5 }}
           onPress={onCollapsePress}
           pressScale={0.96}
-          accessibilityLabel={t('playground.sceneSix.closeRelations')}
+          accessibilityLabel={t('onboarding.abel.sceneSix.closeRelations')}
         >
           <SceneActionButton icon="maximize-2" metrics={metrics} />
         </Scene.Node>

@@ -3,7 +3,7 @@ import { type SharedValue, useAnimatedStyle } from 'react-native-reanimated'
 
 import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
+import type { OnboardingStageMetrics } from '../OnboardingStage'
 
 type SourceCardProps = {
   label: string
@@ -78,9 +78,9 @@ type ShakableSourceCardProps = {
 
 export const AbelSourceCard = ({ metrics, shakeRotation, t }: ShakableSourceCardProps) => (
   <SourceCard
-    label={t('playground.sceneFive.abelLabel')}
+    label={t('onboarding.abel.sceneFive.abelLabel')}
     markerColor="#FF6B6B"
-    meta={t('playground.sceneFive.abelMeta')}
+    meta={t('onboarding.abel.sceneFive.abelMeta')}
     metrics={metrics}
     shakeRotation={shakeRotation}
     title="Abel"
@@ -90,12 +90,12 @@ export const AbelSourceCard = ({ metrics, shakeRotation, t }: ShakableSourceCard
 
 export const HevelSourceCard = ({ metrics, shakeRotation, t }: ShakableSourceCardProps) => (
   <SourceCard
-    label={t('playground.sceneFive.hevelLabel')}
+    label={t('onboarding.abel.sceneFive.hevelLabel')}
     markerColor="#FDCB6E"
-    meta={t('playground.sceneFive.hevelMeta')}
+    meta={t('onboarding.abel.sceneFive.hevelMeta')}
     metrics={metrics}
     shakeRotation={shakeRotation}
-    title={t('playground.sceneThree.commonTitle')}
+    title={t('onboarding.abel.sceneThree.commonTitle')}
     titleItalic
     variant="small"
   />
@@ -109,11 +109,11 @@ type GenesisSourceCardProps = {
 
 const GenesisSourceCard = ({ metrics, shakeRotation, t }: GenesisSourceCardProps) => (
   <SourceCard
-    label={t('playground.sceneFive.genesisLabel')}
+    label={t('onboarding.abel.sceneFive.genesisLabel')}
     markerColor="#5983F0"
     metrics={metrics}
     shakeRotation={shakeRotation}
-    title={t('playground.sceneFive.genesisTitle')}
+    title={t('onboarding.abel.sceneFive.genesisTitle')}
   />
 )
 

@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
+import type { OnboardingStageMetrics } from '../OnboardingStage'
 
 type NoteCardProps = {
   children: ReactNode
@@ -47,7 +47,7 @@ const NoteCard = ({ children, metrics, t, variant = 'default' }: NoteCardProps) 
         <HStack alignItems="center" gap={s(5)}>
           <Feather name="file-plus" size={s(11)} color={theme.colors.quart} />
           <Text color="quart" bold fontSize={s(8.5)} style={{ letterSpacing: s(1) }}>
-            {t('playground.sceneFive.noteLabel')}
+            {t('onboarding.abel.sceneFive.noteLabel')}
           </Text>
         </HStack>
         <Text color="#FF6B6B" fontSize={s(14)}>

@@ -1365,131 +1365,131 @@
   "playground.abelEyebrow": "Onboarding",
   "playground.abelTitle": "Parcours onboarding Abel",
   "playground.abelDescription": "Parcourez une étude biblique interactive, du verset de Genèse 4.2 jusqu’aux mots Strong, aux notes et aux relations.",
-  "playground.onboarding.skip": "Passer",
-  "playground.onboarding.skipConfirmTitle": "Passer la découverte ?",
-  "playground.onboarding.skipConfirmMessage": "Vous pourrez relancer ce parcours depuis le Playground.",
-  "playground.onboarding.keepDiscovering": "Continuer la découverte",
-  "playground.onboarding.progress": "Étape {{current}} sur {{total}}",
-  "playground.onboarding.back": "Revenir à la scène précédente",
-  "playground.onboarding.continue": "Continuer",
-  "playground.onboarding.complete": "Votre espace est prêt.",
-  "playground.sceneOne.chapter": "Genèse 4.2",
-  "playground.sceneOne.lineOne": "Elle enfanta encore son frère",
-  "playground.sceneOne.highlightWord": "Abel",
-  "playground.sceneOne.lineTwo": ". Abel fut berger,",
-  "playground.sceneOne.lineThree": "et Caïn fut laboureur.",
-  "playground.sceneOne.translation": "LOUIS SEGOND 1910",
-  "playground.sceneOne.phrase": "Lisez. Surlignez. Découvrez.",
-  "playground.sceneOne.openLexique": "Ouvrir le lexique du verset",
-  "playground.sceneOne.colorPrompt.color2": "Une couleur, un fil à retrouver.",
-  "playground.sceneOne.colorPrompt.color3": "Gardez en lumière ce qui compte.",
-  "playground.sceneOne.colorPrompt.color4": "Classez vos intuitions par couleur.",
-  "playground.sceneOne.colorPrompt.color5": "Gardez une trace de vos découvertes.",
-  "playground.sceneOne.togglePalette.show": "Afficher les couleurs de surlignage",
-  "playground.sceneOne.togglePalette.hide": "Masquer les couleurs de surlignage",
-  "playground.sceneOne.color1": "Turquoise",
-  "playground.sceneOne.color2": "Corail",
-  "playground.sceneOne.color3": "Jaune doré",
-  "playground.sceneOne.color4": "Bleu ciel",
-  "playground.sceneOne.color5": "Ardoise",
-  "playground.sceneTwo.phrase": "Chaque verset peut devenir un point de départ.",
-  "playground.sceneTwo.dictionary": "Dictionnaire",
-  "playground.sceneTwo.references": "Références",
-  "playground.sceneTwo.lexique": "Lexique",
-  "playground.sceneTwo.comments": "Commentaires",
-  "playground.sceneTwo.themes": "Thèmes",
-  "playground.sceneTwo.comparisons": "Comparaisons"
-  ,"playground.sceneThree.properPhrase": "Retrouvez le mot derrière la traduction."
-  ,"playground.sceneThree.commonPhrase": "Un mot peut en révéler un autre."
-  ,"playground.sceneThree.strongLabel": "STRONG"
-  ,"playground.sceneThree.listen": "Écouter la prononciation"
-  ,"playground.sceneThree.openStrong": "Ouvrir Strong H1892"
-  ,"playground.sceneThree.properTransliteration": "Hevel"
-  ,"playground.sceneThree.properTitle": "Abel"
-  ,"playground.sceneThree.properDefinition": "Fils d’Adam et Ève"
-  ,"playground.sceneThree.properType": "NOM PROPRE"
-  ,"playground.sceneThree.commonTransliteration": "hevel"
-  ,"playground.sceneThree.commonTitle": "hevel"
-  ,"playground.sceneThree.commonDefinition": "souffle, vapeur, vanité"
-  ,"playground.sceneThree.commonType": "NOM COMMUN"
-  ,"playground.sceneFour.phrase": "Un même mot traverse toute la Bible."
-  ,"playground.sceneFour.addNote": "Ajouter une note"
-  ,"playground.sceneFour.hebrew": "HÉBREU"
-  ,"playground.sceneFour.lemmaDetails": "H1892  ·  vapeur · souffle · vanité"
-  ,"playground.sceneFour.occurrenceCount": "64"
-  ,"playground.sceneFour.usageCount": "emplois dans la LSG"
-  ,"playground.sceneFour.filterAll": "Tous · 64"
-  ,"playground.sceneFour.filterVanity": "vanité [n] · 51"
-  ,"playground.sceneFour.filterIdol": "idole [n] · 7"
-  ,"playground.sceneFour.filterBreath": "souffle [n] · 6"
-  ,"playground.sceneFour.proverbsReference": "PROVERBES 31.30"
-  ,"playground.sceneFour.proverbsBefore": "La grâce est trompeuse, et la beauté est "
-  ,"playground.sceneFour.proverbsHighlight": "vaine…"
-  ,"playground.sceneFour.jobReference": "JOB 7.16"
-  ,"playground.sceneFour.jobBefore": "Laisse-moi, car mes jours ne sont que "
-  ,"playground.sceneFour.jobHighlight": "vanité"
-  ,"playground.sceneFour.jobAfter": "."
-  ,"playground.sceneFour.ecclesiastesReference": "ECCLÉSIASTE 1.2"
-  ,"playground.sceneFour.ecclesiastesHighlightOne": "Vanité"
-  ,"playground.sceneFour.ecclesiastesMiddle": " des vanités, dit l’Ecclésiaste, vanité des vanités, tout est "
-  ,"playground.sceneFour.ecclesiastesHighlightTwo": "vanité"
-  ,"playground.sceneFour.ecclesiastesAfter": "."
-  ,"playground.sceneFour.idolDeuteronomyReference": "DEUTÉRONOME 32.21"
-  ,"playground.sceneFour.idolDeuteronomyBefore": "Ils m’ont irrité par leurs vaines "
-  ,"playground.sceneFour.idolDeuteronomyHighlight": "idoles"
-  ,"playground.sceneFour.idolDeuteronomyAfter": "."
-  ,"playground.sceneFour.idolKingsReference": "1 ROIS 16.13"
-  ,"playground.sceneFour.idolKingsBefore": "Ils avaient irrité par leurs "
-  ,"playground.sceneFour.idolKingsHighlight": "idoles"
-  ,"playground.sceneFour.idolKingsAfter": " l’Éternel, le Dieu d’Israël."
-  ,"playground.sceneFour.idolPsalmsReference": "PSAUMES 31.6"
-  ,"playground.sceneFour.idolPsalmsBefore": "Je hais ceux qui s’attachent à de vaines "
-  ,"playground.sceneFour.idolPsalmsHighlight": "idoles"
-  ,"playground.sceneFour.idolPsalmsAfter": ", et je me confie en l’Éternel."
-  ,"playground.sceneFour.breathJobReference": "JOB 7.16"
-  ,"playground.sceneFour.breathJobBefore": "Laisse-moi, car ma vie n’est qu’un "
-  ,"playground.sceneFour.breathJobHighlight": "souffle"
-  ,"playground.sceneFour.breathJobAfter": "."
-  ,"playground.sceneFour.breathPsalmThirtyNineReference": "PSAUMES 39.5"
-  ,"playground.sceneFour.breathPsalmThirtyNineBefore": "Oui, tout homme debout n’est qu’un "
-  ,"playground.sceneFour.breathPsalmThirtyNineHighlight": "souffle"
-  ,"playground.sceneFour.breathPsalmThirtyNineAfter": "."
-  ,"playground.sceneFour.breathPsalmOneFortyFourReference": "PSAUMES 144.4"
-  ,"playground.sceneFour.breathPsalmOneFortyFourBefore": "L’homme est semblable à un "
-  ,"playground.sceneFour.breathPsalmOneFortyFourHighlight": "souffle"
-  ,"playground.sceneFour.breathPsalmOneFortyFourAfter": ", ses jours sont comme l’ombre qui passe."
-  ,"playground.sceneFive.phrase": "Notez ce que vous découvrez."
-  ,"playground.sceneFive.addTag": "Ajouter le tag Abel"
-  ,"playground.sceneFive.genesisLabel": "GENÈSE 4.2"
-  ,"playground.sceneFive.genesisTitle": "Elle enfanta Abel"
-  ,"playground.sceneFive.abelLabel": "H1893"
-  ,"playground.sceneFive.abelMeta": "nom propre · hébreu"
-  ,"playground.sceneFive.hevelLabel": "H1892"
-  ,"playground.sceneFive.hevelMeta": "souffle · vapeur · vanité"
-  ,"playground.sceneFive.noteLabel": "NOTE"
-  ,"playground.sceneFive.noteQuestion": "Abel s’écrit comme hevel, souffle ou vapeur. Pourquoi ce nom ?"
-  ,"playground.sceneFive.relations": "Relations"
-  ,"playground.sceneFive.genesisChip": "Genèse 4.2"
-  ,"playground.sceneSix.phrase": "Classez, reliez, approfondissez."
-  ,"playground.sceneSix.closeRelations": "Refermer les relations"
-  ,"playground.sceneSix.genesisTitle": "Genèse 4.2"
-  ,"playground.sceneSix.genesisDetail": "occurrence"
-  ,"playground.sceneSix.abelDetail": "nom"
-  ,"playground.sceneSix.hevelDetail": "souffle"
-  ,"playground.sceneSix.ecclesiastesTitle": "Ecclésiaste 1.2"
-  ,"playground.sceneSix.ecclesiastesDetail": "vanité  ·  occurrence"
-  ,"playground.sceneSix.noteTitle": "Note"
-  ,"playground.sceneSix.studyTitle": "Étude"
-  ,"playground.sceneSix.studyDetail": "Personnages & sens"
-  ,"playground.sceneSix.explains": "explique"
-  ,"playground.sceneSix.references": "référence"
-  ,"playground.sceneSix.mentions": "mentionne"
-  ,"playground.sceneSix.linkedTo": "lié à"
-  ,"playground.onboarding.start": "Commencer"
-  ,"playground.sceneSeven.phrase": "Lisez simplement.\nExplorez aussi loin que vous le souhaitez."
-  ,"playground.sceneSeven.note": "Note"
-  ,"playground.sceneSeven.study": "Étude"
-  ,"playground.sceneSeven.ecclesiastes": "Ecclésiaste 1.2"
+  "onboarding.abel.skip": "Passer",
+  "onboarding.abel.skipConfirmTitle": "Passer la découverte ?",
+  "onboarding.abel.skipConfirmMessage": "Vous passerez directement au choix de vos ressources.",
+  "onboarding.abel.keepDiscovering": "Continuer la découverte",
+  "onboarding.abel.progress": "Étape {{current}} sur {{total}}",
+  "onboarding.abel.back": "Revenir à la scène précédente",
+  "onboarding.abel.continue": "Continuer",
+  "onboarding.abel.complete": "Votre espace est prêt.",
+  "onboarding.abel.sceneOne.chapter": "Genèse 4.2",
+  "onboarding.abel.sceneOne.lineOne": "Elle enfanta encore son frère",
+  "onboarding.abel.sceneOne.highlightWord": "Abel",
+  "onboarding.abel.sceneOne.lineTwo": ". Abel fut berger,",
+  "onboarding.abel.sceneOne.lineThree": "et Caïn fut laboureur.",
+  "onboarding.abel.sceneOne.translation": "LOUIS SEGOND 1910",
+  "onboarding.abel.sceneOne.phrase": "Lisez. Surlignez. Découvrez.",
+  "onboarding.abel.sceneOne.openLexique": "Ouvrir le lexique du verset",
+  "onboarding.abel.sceneOne.colorPrompt.color2": "Une couleur, un fil à retrouver.",
+  "onboarding.abel.sceneOne.colorPrompt.color3": "Gardez en lumière ce qui compte.",
+  "onboarding.abel.sceneOne.colorPrompt.color4": "Classez vos intuitions par couleur.",
+  "onboarding.abel.sceneOne.colorPrompt.color5": "Gardez une trace de vos découvertes.",
+  "onboarding.abel.sceneOne.togglePalette.show": "Afficher les couleurs de surlignage",
+  "onboarding.abel.sceneOne.togglePalette.hide": "Masquer les couleurs de surlignage",
+  "onboarding.abel.sceneOne.color1": "Turquoise",
+  "onboarding.abel.sceneOne.color2": "Corail",
+  "onboarding.abel.sceneOne.color3": "Jaune doré",
+  "onboarding.abel.sceneOne.color4": "Bleu ciel",
+  "onboarding.abel.sceneOne.color5": "Ardoise",
+  "onboarding.abel.sceneTwo.phrase": "Chaque verset peut devenir un point de départ.",
+  "onboarding.abel.sceneTwo.dictionary": "Dictionnaire",
+  "onboarding.abel.sceneTwo.references": "Références",
+  "onboarding.abel.sceneTwo.lexique": "Lexique",
+  "onboarding.abel.sceneTwo.comments": "Commentaires",
+  "onboarding.abel.sceneTwo.themes": "Thèmes",
+  "onboarding.abel.sceneTwo.comparisons": "Comparaisons"
+  ,"onboarding.abel.sceneThree.properPhrase": "Retrouvez le mot derrière la traduction."
+  ,"onboarding.abel.sceneThree.commonPhrase": "Un mot peut en révéler un autre."
+  ,"onboarding.abel.sceneThree.strongLabel": "STRONG"
+  ,"onboarding.abel.sceneThree.listen": "Écouter la prononciation"
+  ,"onboarding.abel.sceneThree.openStrong": "Ouvrir Strong H1892"
+  ,"onboarding.abel.sceneThree.properTransliteration": "Hevel"
+  ,"onboarding.abel.sceneThree.properTitle": "Abel"
+  ,"onboarding.abel.sceneThree.properDefinition": "Fils d’Adam et Ève"
+  ,"onboarding.abel.sceneThree.properType": "NOM PROPRE"
+  ,"onboarding.abel.sceneThree.commonTransliteration": "hevel"
+  ,"onboarding.abel.sceneThree.commonTitle": "hevel"
+  ,"onboarding.abel.sceneThree.commonDefinition": "souffle, vapeur, vanité"
+  ,"onboarding.abel.sceneThree.commonType": "NOM COMMUN"
+  ,"onboarding.abel.sceneFour.phrase": "Un même mot traverse toute la Bible."
+  ,"onboarding.abel.sceneFour.addNote": "Ajouter une note"
+  ,"onboarding.abel.sceneFour.hebrew": "HÉBREU"
+  ,"onboarding.abel.sceneFour.lemmaDetails": "H1892  ·  vapeur · souffle · vanité"
+  ,"onboarding.abel.sceneFour.occurrenceCount": "64"
+  ,"onboarding.abel.sceneFour.usageCount": "emplois dans la LSG"
+  ,"onboarding.abel.sceneFour.filterAll": "Tous · 64"
+  ,"onboarding.abel.sceneFour.filterVanity": "vanité [n] · 51"
+  ,"onboarding.abel.sceneFour.filterIdol": "idole [n] · 7"
+  ,"onboarding.abel.sceneFour.filterBreath": "souffle [n] · 6"
+  ,"onboarding.abel.sceneFour.proverbsReference": "PROVERBES 31.30"
+  ,"onboarding.abel.sceneFour.proverbsBefore": "La grâce est trompeuse, et la beauté est "
+  ,"onboarding.abel.sceneFour.proverbsHighlight": "vaine…"
+  ,"onboarding.abel.sceneFour.jobReference": "JOB 7.16"
+  ,"onboarding.abel.sceneFour.jobBefore": "Laisse-moi, car mes jours ne sont que "
+  ,"onboarding.abel.sceneFour.jobHighlight": "vanité"
+  ,"onboarding.abel.sceneFour.jobAfter": "."
+  ,"onboarding.abel.sceneFour.ecclesiastesReference": "ECCLÉSIASTE 1.2"
+  ,"onboarding.abel.sceneFour.ecclesiastesHighlightOne": "Vanité"
+  ,"onboarding.abel.sceneFour.ecclesiastesMiddle": " des vanités, dit l’Ecclésiaste, vanité des vanités, tout est "
+  ,"onboarding.abel.sceneFour.ecclesiastesHighlightTwo": "vanité"
+  ,"onboarding.abel.sceneFour.ecclesiastesAfter": "."
+  ,"onboarding.abel.sceneFour.idolDeuteronomyReference": "DEUTÉRONOME 32.21"
+  ,"onboarding.abel.sceneFour.idolDeuteronomyBefore": "Ils m’ont irrité par leurs vaines "
+  ,"onboarding.abel.sceneFour.idolDeuteronomyHighlight": "idoles"
+  ,"onboarding.abel.sceneFour.idolDeuteronomyAfter": "."
+  ,"onboarding.abel.sceneFour.idolKingsReference": "1 ROIS 16.13"
+  ,"onboarding.abel.sceneFour.idolKingsBefore": "Ils avaient irrité par leurs "
+  ,"onboarding.abel.sceneFour.idolKingsHighlight": "idoles"
+  ,"onboarding.abel.sceneFour.idolKingsAfter": " l’Éternel, le Dieu d’Israël."
+  ,"onboarding.abel.sceneFour.idolPsalmsReference": "PSAUMES 31.6"
+  ,"onboarding.abel.sceneFour.idolPsalmsBefore": "Je hais ceux qui s’attachent à de vaines "
+  ,"onboarding.abel.sceneFour.idolPsalmsHighlight": "idoles"
+  ,"onboarding.abel.sceneFour.idolPsalmsAfter": ", et je me confie en l’Éternel."
+  ,"onboarding.abel.sceneFour.breathJobReference": "JOB 7.16"
+  ,"onboarding.abel.sceneFour.breathJobBefore": "Laisse-moi, car ma vie n’est qu’un "
+  ,"onboarding.abel.sceneFour.breathJobHighlight": "souffle"
+  ,"onboarding.abel.sceneFour.breathJobAfter": "."
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineReference": "PSAUMES 39.5"
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineBefore": "Oui, tout homme debout n’est qu’un "
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineHighlight": "souffle"
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineAfter": "."
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourReference": "PSAUMES 144.4"
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourBefore": "L’homme est semblable à un "
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourHighlight": "souffle"
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourAfter": ", ses jours sont comme l’ombre qui passe."
+  ,"onboarding.abel.sceneFive.phrase": "Notez ce que vous découvrez."
+  ,"onboarding.abel.sceneFive.addTag": "Ajouter le tag Abel"
+  ,"onboarding.abel.sceneFive.genesisLabel": "GENÈSE 4.2"
+  ,"onboarding.abel.sceneFive.genesisTitle": "Elle enfanta Abel"
+  ,"onboarding.abel.sceneFive.abelLabel": "H1893"
+  ,"onboarding.abel.sceneFive.abelMeta": "nom propre · hébreu"
+  ,"onboarding.abel.sceneFive.hevelLabel": "H1892"
+  ,"onboarding.abel.sceneFive.hevelMeta": "souffle · vapeur · vanité"
+  ,"onboarding.abel.sceneFive.noteLabel": "NOTE"
+  ,"onboarding.abel.sceneFive.noteQuestion": "Abel s’écrit comme hevel, souffle ou vapeur. Pourquoi ce nom ?"
+  ,"onboarding.abel.sceneFive.relations": "Relations"
+  ,"onboarding.abel.sceneFive.genesisChip": "Genèse 4.2"
+  ,"onboarding.abel.sceneSix.phrase": "Classez, reliez, approfondissez."
+  ,"onboarding.abel.sceneSix.closeRelations": "Refermer les relations"
+  ,"onboarding.abel.sceneSix.genesisTitle": "Genèse 4.2"
+  ,"onboarding.abel.sceneSix.genesisDetail": "occurrence"
+  ,"onboarding.abel.sceneSix.abelDetail": "nom"
+  ,"onboarding.abel.sceneSix.hevelDetail": "souffle"
+  ,"onboarding.abel.sceneSix.ecclesiastesTitle": "Ecclésiaste 1.2"
+  ,"onboarding.abel.sceneSix.ecclesiastesDetail": "vanité  ·  occurrence"
+  ,"onboarding.abel.sceneSix.noteTitle": "Note"
+  ,"onboarding.abel.sceneSix.studyTitle": "Étude"
+  ,"onboarding.abel.sceneSix.studyDetail": "Personnages & sens"
+  ,"onboarding.abel.sceneSix.explains": "explique"
+  ,"onboarding.abel.sceneSix.references": "référence"
+  ,"onboarding.abel.sceneSix.mentions": "mentionne"
+  ,"onboarding.abel.sceneSix.linkedTo": "lié à"
+  ,"onboarding.abel.start": "Commencer"
+  ,"onboarding.abel.sceneSeven.phrase": "Lisez simplement.\nExplorez aussi loin que vous le souhaitez."
+  ,"onboarding.abel.sceneSeven.note": "Note"
+  ,"onboarding.abel.sceneSeven.study": "Étude"
+  ,"onboarding.abel.sceneSeven.ecclesiastes": "Ecclésiaste 1.2"
   ,"offlineSetup.title": "Préparez votre bibliothèque"
   ,"offlineSetup.subtitle": "Choisissez les traductions et les outils d’étude que vous souhaitez garder sur cet appareil."
   ,"offlineSetup.toDownload": "À télécharger"
