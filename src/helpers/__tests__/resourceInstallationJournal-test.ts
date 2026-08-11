@@ -72,10 +72,16 @@ describe('resource installation journal', () => {
   })
 
   it('keeps committed file content and removes its stale backup after restart', async () => {
-    const journal = beginResourceInstallation('database:NAVE:fr', downloadResult, {
-      kind: 'file',
-      destinationPath: '/resource.sqlite',
-    })
+    const archiveSha256 = 'a'.repeat(64)
+    const journal = beginResourceInstallation(
+      'database:NAVE:fr',
+      downloadResult,
+      {
+        kind: 'file',
+        destinationPath: '/resource.sqlite',
+      },
+      archiveSha256
+    )
     commitResourceInstallation(journal)
     mockGetInfoAsync.mockResolvedValue({ exists: true })
 
@@ -85,6 +91,7 @@ describe('resource installation journal', () => {
       idempotent: true,
     })
     expect(resourcePublicationStore.read('database:NAVE:fr')?.generation).toBe('2')
+    expect(resourcePublicationStore.read('database:NAVE:fr')?.archiveSha256).toBe(archiveSha256)
   })
 
   it('restores an interrupted same-generation reinstall instead of inferring a commit', async () => {

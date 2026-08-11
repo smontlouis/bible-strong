@@ -52,7 +52,8 @@ const restorePublication = (journal: ResourceInstallationJournal) => {
 export const beginResourceInstallation = (
   resourceId: string,
   result: DownloadWithCdnFallbackResult,
-  recoveryTarget: ResourceInstallationRecoveryTarget
+  recoveryTarget: ResourceInstallationRecoveryTarget,
+  archiveSha256?: string
 ): ResourceInstallationJournal => {
   if (readJournal()) throw new Error('RESOURCE_INSTALLATION_RECOVERY_REQUIRED')
   const journal: ResourceInstallationJournal = {
@@ -63,6 +64,7 @@ export const beginResourceInstallation = (
       ...result.publication,
       sourceUrl: result.sourceUrl,
       installedAt: Date.now(),
+      ...(archiveSha256 ? { archiveSha256 } : {}),
     },
     recoveryTarget,
     startedAt: Date.now(),

@@ -1,4 +1,5 @@
 import { storage } from './storage'
+import { MOBILE_RESOURCE_CATALOG, type MobileResourceCatalog } from './mobileResourceCatalog'
 
 export interface ResourcePublication {
   generation: string
@@ -11,6 +12,8 @@ export interface ResourcePublication {
 export interface InstalledResourcePublication extends ResourcePublication {
   sourceUrl: string
   installedAt: number
+  archiveSha256?: string
+  legacyCatalogUpdateDetected?: boolean
 }
 
 export type ResourcePublicationStatus = 'current' | 'update-available'
@@ -107,6 +110,51 @@ export const compareResourcePublications = (
   remote: ResourcePublication
 ): ResourcePublicationStatus =>
   installed?.generation === remote.generation ? 'current' : 'update-available'
+
+type ResourcePublicationReaderWriter = Pick<
+  ReturnType<typeof createResourcePublicationStore>,
+  'read' | 'write'
+>
+
+export const resolveResourceCatalogStatus = async (
+  resourceId: string,
+  {
+    catalog = MOBILE_RESOURCE_CATALOG,
+    store = resourcePublicationStore,
+    fetcher = fetch,
+  }: {
+    catalog?: MobileResourceCatalog
+    store?: ResourcePublicationReaderWriter
+    fetcher?: (url: string, init: RequestInit) => Promise<FetchResponse>
+  } = {}
+): Promise<ResourcePublicationStatus | undefined> => {
+  const catalogEntry = catalog.resources[resourceId]
+  const installed = store.read(resourceId)
+  if (!catalogEntry) return undefined
+  if (!installed) return 'update-available'
+
+  if (installed.legacyCatalogUpdateDetected) return 'update-available'
+
+  if (installed.archiveSha256) {
+    return installed.archiveSha256 === catalogEntry.archiveSha256 ? 'current' : 'update-available'
+  }
+
+  const remote = await fetchResourcePublication(catalogEntry.url, { fetcher })
+  const legacyStatus = compareResourcePublications(installed, remote)
+  if (legacyStatus === 'current') {
+    store.write(resourceId, {
+      ...installed,
+      archiveSha256: catalogEntry.archiveSha256,
+      sourceUrl: catalogEntry.url,
+    })
+  } else {
+    store.write(resourceId, {
+      ...installed,
+      legacyCatalogUpdateDetected: true,
+    })
+  }
+  return legacyStatus
+}
 
 export const createResourcePublicationStore = (backend: ResourcePublicationStorage) => ({
   read(resourceId: string): InstalledResourcePublication | undefined {

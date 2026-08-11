@@ -1,7 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import { to } from 'await-to-js'
 
-import { getDatabaseUrl } from '~helpers/firebase'
 import i18n, { getLanguage } from '~i18n'
 import {
   ResourceLanguage,
@@ -12,11 +11,7 @@ import {
   isSharedDB,
   BASE_SQLITE_DIR,
 } from '~helpers/databaseTypes'
-import {
-  compareResourcePublications,
-  fetchResourcePublication,
-  resourcePublicationStore,
-} from '~helpers/resourcePublication'
+import { resolveResourceCatalogStatus } from '~helpers/resourcePublication'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 export const databaseDictionnaireName = 'dictionnaire.sqlite'
@@ -109,18 +104,12 @@ export const getIfDatabaseNeedsUpdate = async (dbId: IdDatabase) => {
     databaseId: dbId,
     language: resourceLang,
   })
-  const installed = resourcePublicationStore.read(resourceId)
-  // A database installed by an older app has no publication metadata yet.
-  // Offer one managed reinstall so future generation-based updates can work.
-  if (!installed) return true
-  const [errRF, remote] = await to(fetchResourcePublication(getDatabaseUrl(dbId, resourceLang)))
-
-  if (errF || errRF || !remote) {
-    console.log(`Error for${dbId}`, errF, errRF)
+  const [statusError, status] = await to(resolveResourceCatalogStatus(resourceId))
+  if (errF || statusError || !status) {
+    console.log(`Error for${dbId}`, errF, statusError)
     return false
   }
-
-  return compareResourcePublications(installed, remote) === 'update-available'
+  return status === 'update-available'
 }
 
 export const getIfDatabaseNeedsDownload = async (dbId: IdDatabase) => {

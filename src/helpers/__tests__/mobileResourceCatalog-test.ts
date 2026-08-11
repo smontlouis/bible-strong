@@ -83,7 +83,7 @@ describe('mobile resource catalog', () => {
     expect(resolveMobileResourceCatalog(malformedCatalog)).toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
   })
 
-  it('retries the CDN after a transient failure', async () => {
+  it('reuses the bundled fallback after a transient failure for the rest of the session', async () => {
     const newerCatalog = {
       ...BUNDLED_MOBILE_RESOURCE_CATALOG,
       generatedAt: '2099-01-01T00:00:00.000Z',
@@ -94,8 +94,8 @@ describe('mobile resource catalog', () => {
       .mockResolvedValueOnce(new Response(JSON.stringify(newerCatalog), { status: 200 }))
 
     await expect(loadMobileResourceCatalog(fetcher)).resolves.toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
-    await expect(loadMobileResourceCatalog(fetcher)).resolves.toEqual(newerCatalog)
-    expect(fetcher).toHaveBeenCalledTimes(2)
+    await expect(loadMobileResourceCatalog(fetcher)).resolves.toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
+    expect(fetcher).toHaveBeenCalledTimes(1)
   })
 
   it('bundles optional pericope and red-word JSON files with legacy Bibles', () => {

@@ -33,7 +33,11 @@ canonical entry, duplicate roles, or an unexpected archive entry.
 The exact same catalog is uploaded to `/manifests/mobile-resource-catalog.json` and bundled in the
 app as its offline fallback. The app loads the CDN copy at startup and derives download URLs, archive
 entries, and size metadata from it; a network or validation failure keeps the bundled copy active.
-There is no separate size manifest. All Bible bundle entries are extracted and validated from one download. The text is imported
+There is no separate size manifest. The installer persists each installed archive SHA-256, and update
+checks compare it locally with the active catalog instead of issuing one metadata request per ZIP.
+Installations created before catalog SHA tracking perform at most one legacy HEAD reconciliation; a
+matching object generation is then permanently associated with the catalog SHA. All Bible bundle
+entries are extracted and validated from one download. The text is imported
 into `bibles.sqlite`, while legacy pericope and red-word files keep their historical on-device paths.
 They no longer have independent download or publication identities. SQLite and timeline resources
 are extracted before their existing schema/integrity validation and atomic file swap. Publication

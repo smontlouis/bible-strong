@@ -307,7 +307,6 @@ const VersionSelectorItem = ({
   const bibleDownloadItem = createBibleDownloadItem(version.id)
   const publicationStatus = useResourcePublicationStatus({
     resourceId: bibleDownloadItem.id,
-    url: bibleDownloadItem.url,
     isInstalled: versionNeedsDownload === false,
     relatedResources: getBibleRelatedPublicationResources(version.id),
   })

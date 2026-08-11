@@ -1,4 +1,5 @@
 import catalogJson from '~assets/mobile-resource-catalog.json'
+import { atom, getDefaultStore } from 'jotai/vanilla'
 
 export type MobileResourceInstallationStrategy = 'sqlite-import' | 'archive-extract'
 export type MobileResourceEntryRole = 'canonical' | 'pericope' | 'redWords'
@@ -119,6 +120,9 @@ if (!isMobileResourceCatalog(catalogJson)) throw new Error('MOBILE_RESOURCE_CATA
 
 export const BUNDLED_MOBILE_RESOURCE_CATALOG: MobileResourceCatalog = catalogJson
 export let MOBILE_RESOURCE_CATALOG: MobileResourceCatalog = BUNDLED_MOBILE_RESOURCE_CATALOG
+export const mobileResourceCatalogAtom = atom<MobileResourceCatalog>(
+  BUNDLED_MOBILE_RESOURCE_CATALOG
+)
 
 const hasBundledResourceIdentities = (catalog: MobileResourceCatalog): boolean => {
   const bundledIds = Object.keys(BUNDLED_MOBILE_RESOURCE_CATALOG.resources).sort()
@@ -137,12 +141,15 @@ export const resolveMobileResourceCatalog = (value: unknown): MobileResourceCata
 }
 
 let catalogRequest: Promise<MobileResourceCatalog> | undefined
-let remoteCatalogLoaded = false
+let catalogResolved = false
+let resolvedFetcher: typeof fetch | undefined
 
 export const loadMobileResourceCatalog = (
   fetcher: typeof fetch = fetch
 ): Promise<MobileResourceCatalog> => {
-  if (remoteCatalogLoaded) return Promise.resolve(MOBILE_RESOURCE_CATALOG)
+  if (catalogResolved && resolvedFetcher === fetcher) {
+    return Promise.resolve(MOBILE_RESOURCE_CATALOG)
+  }
   if (catalogRequest) return catalogRequest
 
   const abortController = new AbortController()
@@ -171,12 +178,18 @@ export const loadMobileResourceCatalog = (
         throw new Error('MOBILE_RESOURCE_REMOTE_CATALOG_INVALID')
       }
       MOBILE_RESOURCE_CATALOG = resolvedCatalog
-      remoteCatalogLoaded = true
+      getDefaultStore().set(mobileResourceCatalogAtom, resolvedCatalog)
       return MOBILE_RESOURCE_CATALOG
     })
-    .catch(() => BUNDLED_MOBILE_RESOURCE_CATALOG)
+    .catch(() => {
+      MOBILE_RESOURCE_CATALOG = BUNDLED_MOBILE_RESOURCE_CATALOG
+      getDefaultStore().set(mobileResourceCatalogAtom, BUNDLED_MOBILE_RESOURCE_CATALOG)
+      return BUNDLED_MOBILE_RESOURCE_CATALOG
+    })
     .finally(() => {
       if (timeout) clearTimeout(timeout)
+      catalogResolved = true
+      resolvedFetcher = fetcher
       catalogRequest = undefined
     })
 

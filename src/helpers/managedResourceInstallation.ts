@@ -61,7 +61,8 @@ export const installManagedResource = async (
           installationJournal = beginResourceInstallation(
             item.id,
             installed,
-            recoveryTarget ?? getResourceInstallationRecoveryTarget(item)
+            recoveryTarget ?? getResourceInstallationRecoveryTarget(item),
+            item.expectedArchiveSha256
           )
         },
         commit: () => {

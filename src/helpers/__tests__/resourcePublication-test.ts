@@ -1,3 +1,5 @@
+/* eslint-disable import/first */
+
 jest.mock('../storage', () => ({
   storage: {
     getString: jest.fn(),
@@ -13,7 +15,9 @@ import {
   fetchResourcePublication,
   type ResourcePublicationStorage,
   createResourcePublicationStore,
+  resolveResourceCatalogStatus,
 } from '../resourcePublication'
+import { BUNDLED_MOBILE_RESOURCE_CATALOG } from '../mobileResourceCatalog'
 
 const memoryStorage = (): ResourcePublicationStorage & { values: Map<string, string> } => {
   const values = new Map<string, string>()
@@ -103,5 +107,122 @@ describe('resource publications', () => {
     expect(store.read('database:STRONG:en')).toBeUndefined()
     store.remove('database:STRONG:fr')
     expect(store.read('database:STRONG:fr')).toBeUndefined()
+  })
+
+  it('compares installed resources with the catalog SHA without fetching the artifact', async () => {
+    const backend = memoryStorage()
+    const store = createResourcePublicationStore(backend)
+    const resourceId = 'database:NAVE:fr'
+    const catalogEntry = BUNDLED_MOBILE_RESOURCE_CATALOG.resources[resourceId]
+    const fetcher = jest.fn()
+    store.write(resourceId, {
+      generation: '7',
+      size: catalogEntry.archiveBytes,
+      sourceUrl: catalogEntry.url,
+      installedAt: 123,
+      archiveSha256: catalogEntry.archiveSha256,
+    })
+
+    await expect(
+      resolveResourceCatalogStatus(resourceId, {
+        catalog: BUNDLED_MOBILE_RESOURCE_CATALOG,
+        store,
+        fetcher,
+      })
+    ).resolves.toBe('current')
+    expect(fetcher).not.toHaveBeenCalled()
+
+    store.write(resourceId, {
+      ...store.read(resourceId)!,
+      archiveSha256: '0'.repeat(64),
+    })
+    await expect(
+      resolveResourceCatalogStatus(resourceId, {
+        catalog: BUNDLED_MOBILE_RESOURCE_CATALOG,
+        store,
+        fetcher,
+      })
+    ).resolves.toBe('update-available')
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+
+  it('performs one legacy HEAD then records the catalog SHA for future local checks', async () => {
+    const backend = memoryStorage()
+    const store = createResourcePublicationStore(backend)
+    const resourceId = 'database:NAVE:fr'
+    const catalogEntry = BUNDLED_MOBILE_RESOURCE_CATALOG.resources[resourceId]
+    store.write(resourceId, {
+      generation: 'legacy-generation',
+      size: catalogEntry.archiveBytes,
+      sourceUrl: catalogEntry.url,
+      installedAt: 123,
+    })
+    const fetcher = jest.fn().mockResolvedValue({
+      ok: true,
+      headers: {
+        get: (name: string) =>
+          ({
+            'x-goog-generation': 'legacy-generation',
+            'content-length': String(catalogEntry.archiveBytes),
+          })[name.toLowerCase()] ?? null,
+      },
+    })
+
+    await expect(
+      resolveResourceCatalogStatus(resourceId, {
+        catalog: BUNDLED_MOBILE_RESOURCE_CATALOG,
+        store,
+        fetcher,
+      })
+    ).resolves.toBe('current')
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(store.read(resourceId)?.archiveSha256).toBe(catalogEntry.archiveSha256)
+
+    await resolveResourceCatalogStatus(resourceId, {
+      catalog: BUNDLED_MOBILE_RESOURCE_CATALOG,
+      store,
+      fetcher,
+    })
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
+
+  it('remembers a legacy generation mismatch without repeating HEAD requests', async () => {
+    const backend = memoryStorage()
+    const store = createResourcePublicationStore(backend)
+    const resourceId = 'database:NAVE:fr'
+    const catalogEntry = BUNDLED_MOBILE_RESOURCE_CATALOG.resources[resourceId]
+    store.write(resourceId, {
+      generation: 'installed-generation',
+      size: catalogEntry.archiveBytes,
+      sourceUrl: catalogEntry.url,
+      installedAt: 123,
+    })
+    const fetcher = jest.fn().mockResolvedValue({
+      ok: true,
+      headers: {
+        get: (name: string) =>
+          ({
+            'x-goog-generation': 'new-generation',
+            'content-length': String(catalogEntry.archiveBytes),
+          })[name.toLowerCase()] ?? null,
+      },
+    })
+
+    await expect(
+      resolveResourceCatalogStatus(resourceId, {
+        catalog: BUNDLED_MOBILE_RESOURCE_CATALOG,
+        store,
+        fetcher,
+      })
+    ).resolves.toBe('update-available')
+    await expect(
+      resolveResourceCatalogStatus(resourceId, {
+        catalog: BUNDLED_MOBILE_RESOURCE_CATALOG,
+        store,
+        fetcher,
+      })
+    ).resolves.toBe('update-available')
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(store.read(resourceId)?.legacyCatalogUpdateDetected).toBe(true)
   })
 })

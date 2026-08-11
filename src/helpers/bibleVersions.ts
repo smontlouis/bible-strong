@@ -4,6 +4,7 @@ import { audioDefault, audioV2 } from './topBibleAudio'
 import { zeroFill } from './zeroFill'
 import type { BibleCanonId } from './bibleBookCatalog'
 import type { StrongBibleDatasetId } from './strongBiblePublications'
+import { createOfflineCopyId } from './offlineCopyId'
 
 export type BibleVersificationId =
   | 'bible-strong-default'
@@ -21,20 +22,12 @@ export type TranslationReadingProfile =
   | 'paraphrase'
 
 export const getIfVersionNeedsUpdate = async (versionId: string) => {
-  const { getStrongBiblePublication, isStrongCapableBibleVersion } =
-    await import('./strongBiblePublications')
-  if (!isStrongCapableBibleVersion(versionId)) return false
-
-  const { getBibleVersionMetadata } = await import('./biblesDb')
-  const installedMetadata = await getBibleVersionMetadata(versionId)
-  if (!installedMetadata) return false
-
-  const publication = getStrongBiblePublication(versionId)
-  return (
-    installedMetadata.textRevision !== publication.canonical.textRevision ||
-    installedMetadata.textSha256 !== publication.canonical.textSha256 ||
-    installedMetadata.schemaVersion !== publication.canonical.schemaVersion
+  if (await getIfVersionNeedsDownload(versionId)) return false
+  const { resolveResourceCatalogStatus } = await import('./resourcePublication')
+  const status = await resolveResourceCatalogStatus(
+    createOfflineCopyId({ kind: 'bible', versionId })
   )
+  return status === 'update-available'
 }
 
 export const getIfVersionNeedsDownload = async (versionId: string) => {

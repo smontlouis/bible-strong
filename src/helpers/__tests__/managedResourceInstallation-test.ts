@@ -70,6 +70,7 @@ const databaseItem: DownloadItem = {
   destinationPath: '/documents/SQLite/fr/nave.sqlite',
   archiveEntry: 'nave-fr.sqlite',
   estimatedSize: 10,
+  expectedArchiveSha256: 'a'.repeat(64),
   addedAt: 1,
   retryCount: 0,
 }
@@ -103,10 +104,15 @@ describe('installManagedResource', () => {
 
     await installManagedResource(databaseItem, callbacks)
 
-    expect(mockBeginResourceInstallation).toHaveBeenCalledWith(databaseItem.id, installedResource, {
-      kind: 'file',
-      destinationPath: databaseItem.destinationPath,
-    })
+    expect(mockBeginResourceInstallation).toHaveBeenCalledWith(
+      databaseItem.id,
+      installedResource,
+      {
+        kind: 'file',
+        destinationPath: databaseItem.destinationPath,
+      },
+      databaseItem.expectedArchiveSha256
+    )
     expect(mockCommitResourceInstallation).toHaveBeenCalledWith({ id: 'journal' })
     expect(mockCompleteResourceInstallation).toHaveBeenCalledWith({ id: 'journal' })
     expect(mockRollbackResourceInstallation).not.toHaveBeenCalled()
