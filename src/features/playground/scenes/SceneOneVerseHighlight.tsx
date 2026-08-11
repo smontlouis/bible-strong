@@ -22,6 +22,7 @@ import {
   type OnboardingStageMetrics,
 } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneActionButton from '../onboarding/SceneActionButton'
 import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { HIGHLIGHT_COLORS, type HighlightColor } from '../onboarding/VerseCard'
@@ -30,6 +31,8 @@ type SceneOneVerseHighlightProps = {
   reduceMotion: boolean
   metrics: OnboardingStageMetrics
   activeColor: HighlightColor
+  actionLabel: string
+  onVersePress: () => void
   onColorSelect: (color: HighlightColor) => void
 }
 
@@ -226,14 +229,14 @@ export const SceneOneVerseHighlightControls = ({
           <Box
             size={s(48)}
             borderRadius={s(24)}
-            bg="primary"
+            bg="reverse"
             center
             transform={[{ rotate: '5deg' }]}
             style={{
-              boxShadow: '0 4px 6px rgba(89,131,240, 0.5)',
+              boxShadow: '0 5px 14px rgba(40,67,128,0.18)',
             }}
           >
-            <Feather name="edit-3" size={s(22)} color={theme.colors.reverse} />
+            <Feather name="edit-3" size={s(22)} color={theme.colors.primary} />
           </Box>
         </AnimatedBox>
       </Pressable>
@@ -313,6 +316,18 @@ export const createSceneOneVerseHighlight = (props: SceneOneVerseHighlightProps)
         highlightColor={props.activeColor}
         metrics={props.metrics}
       />
+    </Scene.Node>
+    <Scene.Node
+      id="chevron-right"
+      frame={{ x: 260, y: 220, width: 36, height: 36, zIndex: 8, rotation: -3 }}
+      enterFrom={{ scale: 0.5 }}
+      enterDelay={700}
+      exitTo={{ scale: 1.5 }}
+      onPress={props.onVersePress}
+      pressScale={0.96}
+      accessibilityLabel={props.actionLabel}
+    >
+      <SceneActionButton icon="chevron-right" metrics={props.metrics} />
     </Scene.Node>
     <Scene.Node
       id="highlight-controls"

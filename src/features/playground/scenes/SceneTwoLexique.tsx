@@ -9,13 +9,14 @@ import DictionnaryIcon from '~common/DictionnaryIcon'
 import LexiqueIcon from '~common/LexiqueIcon'
 import NaveIcon from '~common/NaveIcon'
 import RefIcon from '~common/RefIcon'
-import Box, { HStack } from '~common/ui/Box'
+import Box, { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import type { Theme } from '~themes'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
 import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
-import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
+import VerseCard, { type HighlightColor, type ResourceIllustration } from '../onboarding/VerseCard'
 
 const SCENE_TWO_ENTRANCE_TIMING = {
   start: 200,
@@ -40,7 +41,9 @@ type SceneTwoNodeCardProps = {
   label: string
   icon: SceneTwoNodeIcon
   metrics: OnboardingStageMetrics
+  reduceMotion: boolean
   active?: boolean
+  toggled?: boolean
   iconSize?: number
   fontSize?: number
 }
@@ -52,6 +55,16 @@ type SceneTwoNodeIcon =
   | 'comments'
   | 'themes'
   | 'comparisons'
+
+export const getSceneTwoNodeColor = (icon: SceneTwoNodeIcon, theme: Theme) =>
+  ({
+    dictionary: theme.colors.secondary,
+    references: Color(theme.colors.quart).lighten(0.4).rgb().toString(),
+    lexique: theme.colors.primary,
+    comments: 'rgba(38,166,154,0.8)',
+    themes: Color(theme.colors.quint).lighten(0.4).toString(),
+    comparisons: Color('#C7B8FF').rgb().toString(),
+  })[icon]
 
 const SceneTwoFeatureIcon = ({
   icon,
@@ -82,7 +95,9 @@ export const SceneTwoNodeCard = ({
   label,
   icon,
   metrics,
+  reduceMotion,
   active = false,
+  toggled = false,
   iconSize,
   fontSize,
 }: SceneTwoNodeCardProps) => {
@@ -90,25 +105,26 @@ export const SceneTwoNodeCard = ({
   const s = metrics.s
   const resolvedIconSize = iconSize ?? (active ? 20 : 14)
   const resolvedFontSize = fontSize ?? (active ? 16 : 8)
-  const iconColor = {
-    dictionary: theme.colors.secondary,
-    references: Color(theme.colors.quart).lighten(0.4).rgb().toString(),
-    lexique: theme.colors.primary,
-    comments: 'rgba(38,166,154,0.8)',
-    themes: Color(theme.colors.quint).lighten(0.4).toString(),
-    comparisons: Color('#C7B8FF').rgb().toString(),
-  }[icon]
-  const shadowOpacity = active ? 0.32 : 0.1
-  const shadowColor = iconColor.replace('rgb(', 'rgba(').replace(')', `,${shadowOpacity})`)
+  const iconColor = getSceneTwoNodeColor(icon, theme)
+  const shadowOpacity = active ? 0.32 : toggled ? 0.18 : 0.1
+  const shadowColor = Color(iconColor).alpha(shadowOpacity).rgb().toString()
+  const backgroundColor = active
+    ? theme.colors.primary
+    : toggled
+      ? Color(theme.colors.reverse).mix(Color(iconColor), 0.14).rgb().toString()
+      : theme.colors.reverse
 
   return (
-    <Box
+    <AnimatedBox
       h="100%"
-      bg={active ? 'primary' : 'reverse'}
       borderRadius={active ? s(20) : s(12)}
       overflow="visible"
       style={{
+        backgroundColor,
         boxShadow: `0 ${s(3)}px ${s(active ? 10 : 7)}px 0 ${shadowColor}`,
+        transitionProperty: ['backgroundColor', 'boxShadow'],
+        transitionDuration: reduceMotion ? 0 : 280,
+        transitionTimingFunction: 'ease-in-out',
       }}
       justifyContent="center"
     >
@@ -137,7 +153,7 @@ export const SceneTwoNodeCard = ({
           {label}
         </Text>
       </HStack>
-    </Box>
+    </AnimatedBox>
   )
 }
 
@@ -152,16 +168,30 @@ export const SceneTwoBackground = ({ metrics, reduceMotion }: SceneTwoBackground
 
 type CreateSceneTwoLexiqueProps = SceneTwoBackgroundProps & {
   highlightColor: HighlightColor
+  resourceIllustration?: ResourceIllustration
+  resourceColor?: string
+  onCommentsPress: () => void
+  onComparisonsPress: () => void
+  onDictionaryPress: () => void
   onLexiquePress: () => void
+  onReferencesPress: () => void
+  onThemesPress: () => void
   t: TFunction
 }
 
 export const createSceneTwoLexique = ({
   highlightColor,
+  resourceIllustration,
+  resourceColor,
   metrics,
+  onCommentsPress,
+  onComparisonsPress,
+  onDictionaryPress,
   reduceMotion,
   t,
   onLexiquePress,
+  onReferencesPress,
+  onThemesPress,
 }: CreateSceneTwoLexiqueProps) => (
   <Scene id="scene-two">
     <SceneTwoBackground metrics={metrics} reduceMotion={reduceMotion} />
@@ -193,7 +223,9 @@ export const createSceneTwoLexique = ({
         mode="small"
         reduceMotion={reduceMotion}
         highlightColor={highlightColor}
+        highlightOverrideColor={resourceColor}
         metrics={metrics}
+        resourceIllustration={resourceIllustration}
       />
     </Scene.Node>
 
@@ -205,11 +237,16 @@ export const createSceneTwoLexique = ({
       exitTo={{ x: 4, y: 30 }}
       draggable
       dragFriction={0.1}
+      onPress={onDictionaryPress}
+      pressScale={0.96}
+      accessibilityLabel={t('playground.sceneTwo.dictionary')}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.dictionary')}
         icon="dictionary"
         metrics={metrics}
+        reduceMotion={reduceMotion}
+        toggled={resourceIllustration === 'dictionary'}
       />
     </Scene.Node>
     <Scene.Node
@@ -220,11 +257,16 @@ export const createSceneTwoLexique = ({
       exitTo={{ x: -15, y: 26 }}
       draggable
       dragFriction={0.1}
+      onPress={onReferencesPress}
+      pressScale={0.96}
+      accessibilityLabel={t('playground.sceneTwo.references')}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.references')}
         icon="references"
         metrics={metrics}
+        reduceMotion={reduceMotion}
+        toggled={resourceIllustration === 'references'}
       />
     </Scene.Node>
     <Scene.Node
@@ -243,6 +285,7 @@ export const createSceneTwoLexique = ({
         label={t('playground.sceneTwo.lexique')}
         icon="lexique"
         metrics={metrics}
+        reduceMotion={reduceMotion}
         active
       />
     </Scene.Node>
@@ -254,11 +297,16 @@ export const createSceneTwoLexique = ({
       exitTo={{ x: -26, y: 14 }}
       draggable
       dragFriction={0.1}
+      onPress={onCommentsPress}
+      pressScale={0.96}
+      accessibilityLabel={t('playground.sceneTwo.comments')}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.comments')}
         icon="comments"
         metrics={metrics}
+        reduceMotion={reduceMotion}
+        toggled={resourceIllustration === 'comments'}
       />
     </Scene.Node>
     <Scene.Node
@@ -269,8 +317,17 @@ export const createSceneTwoLexique = ({
       exitTo={{ x: -30, y: 4 }}
       draggable
       dragFriction={0.1}
+      onPress={onThemesPress}
+      pressScale={0.96}
+      accessibilityLabel={t('playground.sceneTwo.themes')}
     >
-      <SceneTwoNodeCard label={t('playground.sceneTwo.themes')} icon="themes" metrics={metrics} />
+      <SceneTwoNodeCard
+        label={t('playground.sceneTwo.themes')}
+        icon="themes"
+        metrics={metrics}
+        reduceMotion={reduceMotion}
+        toggled={resourceIllustration === 'themes'}
+      />
     </Scene.Node>
     <Scene.Node
       id="comparisons"
@@ -280,11 +337,16 @@ export const createSceneTwoLexique = ({
       exitTo={{ x: -29, y: -6 }}
       draggable
       dragFriction={0.1}
+      onPress={onComparisonsPress}
+      pressScale={0.96}
+      accessibilityLabel={t('playground.sceneTwo.comparisons')}
     >
       <SceneTwoNodeCard
         label={t('playground.sceneTwo.comparisons')}
         icon="comparisons"
         metrics={metrics}
+        reduceMotion={reduceMotion}
+        toggled={resourceIllustration === 'comparisons'}
       />
     </Scene.Node>
 

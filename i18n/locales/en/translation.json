@@ -1405,22 +1405,27 @@
   "playground.experiences": "Available journeys",
   "playground.abelEyebrow": "Onboarding",
   "playground.abelTitle": "Abel onboarding journey",
-  "playground.abelDescription": "Explore an interactive Bible study, from Genesis 4:2 to Strong’s words, notes, and relationships.",
+  "playground.abelDescription": "Follow an interactive study from Genesis 4:2 into Strong’s lexicon, notes, and connections.",
   "playground.onboarding.skip": "Skip",
+  "playground.onboarding.skipConfirmTitle": "Skip the discovery?",
+  "playground.onboarding.skipConfirmMessage": "You can restart this journey from the Playground.",
+  "playground.onboarding.keepDiscovering": "Keep discovering",
+  "playground.onboarding.progress": "Step {{current}} of {{total}}",
   "playground.onboarding.back": "Go back to the previous scene",
   "playground.onboarding.continue": "Continue",
-  "playground.onboarding.complete": "Your workspace is ready.",
+  "playground.onboarding.complete": "Your study space is ready.",
   "playground.sceneOne.chapter": "Genesis 4:2",
-  "playground.sceneOne.lineOne": "She gave birth again to his brother",
+  "playground.sceneOne.lineOne": "And she again bare his brother",
   "playground.sceneOne.highlightWord": "Abel",
-  "playground.sceneOne.lineTwo": ". Abel was a shepherd,",
-  "playground.sceneOne.lineThree": "and Cain was a worker of the ground.",
-  "playground.sceneOne.translation": "LOUIS SEGOND 1910",
+  "playground.sceneOne.lineTwo": ".",
+  "playground.sceneOne.lineThree": "And Abel was a keeper\nof sheep, but Cain was a tiller\nof the ground.",
+  "playground.sceneOne.translation": "KJV",
   "playground.sceneOne.phrase": "Read. Highlight. Discover.",
-  "playground.sceneOne.colorPrompt.color2": "One color, a thread to find again.",
-  "playground.sceneOne.colorPrompt.color3": "Keep what matters in the light.",
-  "playground.sceneOne.colorPrompt.color4": "Organize your insights by color.",
-  "playground.sceneOne.colorPrompt.color5": "Keep a record of your discoveries.",
+  "playground.sceneOne.openLexique": "Explore this verse",
+  "playground.sceneOne.colorPrompt.color2": "A color becomes a thread you can follow.",
+  "playground.sceneOne.colorPrompt.color3": "Keep what matters in view.",
+  "playground.sceneOne.colorPrompt.color4": "Organize your insights with color.",
+  "playground.sceneOne.colorPrompt.color5": "Keep track of what you discover.",
   "playground.sceneOne.togglePalette.show": "Show highlight colors",
   "playground.sceneOne.togglePalette.hide": "Hide highlight colors",
   "playground.sceneOne.color1": "Turquoise",
@@ -1428,34 +1433,39 @@
   "playground.sceneOne.color3": "Golden yellow",
   "playground.sceneOne.color4": "Sky blue",
   "playground.sceneOne.color5": "Slate",
-  "playground.sceneTwo.phrase": "Every verse can become a starting point.",
+  "playground.sceneTwo.phrase": "Every verse can open a path.",
   "playground.sceneTwo.dictionary": "Dictionary",
-  "playground.sceneTwo.references": "References",
+  "playground.sceneTwo.references": "Cross-refs",
   "playground.sceneTwo.lexique": "Lexicon",
-  "playground.sceneTwo.comments": "Comments",
-  "playground.sceneTwo.themes": "Themes",
-  "playground.sceneTwo.comparisons": "Comparisons"
-  ,"playground.sceneThree.properPhrase": "Find the word behind the translation."
-  ,"playground.sceneThree.commonPhrase": "One word can reveal another."
+  "playground.sceneTwo.comments": "Commentaries",
+  "playground.sceneTwo.themes": "Topics",
+  "playground.sceneTwo.comparisons": "Compare"
+  ,"playground.sceneThree.properPhrase": "Discover the word behind the translation."
+  ,"playground.sceneThree.commonPhrase": "One word can uncover another."
   ,"playground.sceneThree.strongLabel": "STRONG"
   ,"playground.sceneThree.listen": "Listen to the pronunciation"
+  ,"playground.sceneThree.openStrong": "Open Strong H1892"
+  ,"playground.sceneThree.properTransliteration": "Hebel"
   ,"playground.sceneThree.properTitle": "Abel"
-  ,"playground.sceneThree.properDefinition": "Son of Adam and Eve"
-  ,"playground.sceneThree.properType": "PROPER NOUN"
-  ,"playground.sceneThree.commonTitle": "hevel"
-  ,"playground.sceneThree.commonDefinition": "breath, vapor, vanity"
-  ,"playground.sceneThree.commonType": "COMMON NOUN"
-  ,"playground.sceneFour.phrase": "The same word runs throughout the Bible."
+  ,"playground.sceneThree.properDefinition": "Second son of Adam and Eve"
+  ,"playground.sceneThree.properType": "PROPER NAME"
+  ,"playground.sceneThree.commonTransliteration": "hebel"
+  ,"playground.sceneThree.commonTitle": "hebel"
+  ,"playground.sceneThree.commonDefinition": "emptiness, vanity, transience"
+  ,"playground.sceneThree.commonType": "MASCULINE NOUN"
+  ,"playground.sceneFour.phrase": "Follow one word throughout Scripture."
+  ,"playground.sceneFour.addNote": "Add a note"
   ,"playground.sceneFour.hebrew": "HEBREW"
-  ,"playground.sceneFour.lemmaDetails": "H1892  ·  vapor · breath · vanity"
-  ,"playground.sceneFour.usageCount": "uses in the KJV"
-  ,"playground.sceneFour.filterAll": "All · 64"
-  ,"playground.sceneFour.filterVanity": "vanity [n] · 51"
-  ,"playground.sceneFour.filterIdol": "idol [n] · 7"
-  ,"playground.sceneFour.filterBreath": "breath [n] · 6"
-  ,"playground.sceneFour.proverbsReference": "PROVERBS 31:30"
-  ,"playground.sceneFour.proverbsBefore": "Favor is deceitful, and beauty is "
-  ,"playground.sceneFour.proverbsHighlight": "vain…"
+  ,"playground.sceneFour.lemmaDetails": "H1892  ·  emptiness · vanity"
+  ,"playground.sceneFour.occurrenceCount": "73"
+  ,"playground.sceneFour.usageCount": "KJV occurrences"
+  ,"playground.sceneFour.filterAll": "All · 73"
+  ,"playground.sceneFour.filterVanity": "vanity · 61"
+  ,"playground.sceneFour.filterIdol": "vain · 11"
+  ,"playground.sceneFour.filterBreath": "all · 73"
+  ,"playground.sceneFour.proverbsReference": "PSALM 94:11"
+  ,"playground.sceneFour.proverbsBefore": "The LORD knoweth the thoughts of man, that they are "
+  ,"playground.sceneFour.proverbsHighlight": "vanity."
   ,"playground.sceneFour.jobReference": "JOB 7:16"
   ,"playground.sceneFour.jobBefore": "I loathe it; I would not live alway: let me alone; for my days are "
   ,"playground.sceneFour.jobHighlight": "vanity"
@@ -1465,65 +1475,88 @@
   ,"playground.sceneFour.ecclesiastesMiddle": " of vanities, saith the Preacher, vanity of vanities; all is "
   ,"playground.sceneFour.ecclesiastesHighlightTwo": "vanity"
   ,"playground.sceneFour.ecclesiastesAfter": "."
-  ,"playground.sceneFour.idolDeuteronomyReference": "DEUTERONOMY 32:21"
-  ,"playground.sceneFour.idolDeuteronomyBefore": "They have moved me to anger with their vain "
-  ,"playground.sceneFour.idolDeuteronomyHighlight": "idols"
-  ,"playground.sceneFour.idolDeuteronomyAfter": "."
-  ,"playground.sceneFour.idolKingsReference": "1 KINGS 16:13"
-  ,"playground.sceneFour.idolKingsBefore": "They provoked the Lord God of Israel with their "
-  ,"playground.sceneFour.idolKingsHighlight": "vanities"
+  ,"playground.sceneFour.idolDeuteronomyReference": "JOB 9:29"
+  ,"playground.sceneFour.idolDeuteronomyBefore": "If I be wicked, why then labour I in "
+  ,"playground.sceneFour.idolDeuteronomyHighlight": "vain"
+  ,"playground.sceneFour.idolDeuteronomyAfter": "?"
+  ,"playground.sceneFour.idolKingsReference": "PROVERBS 31:30"
+  ,"playground.sceneFour.idolKingsBefore": "Favour is deceitful, and beauty is "
+  ,"playground.sceneFour.idolKingsHighlight": "vain"
   ,"playground.sceneFour.idolKingsAfter": "."
-  ,"playground.sceneFour.idolPsalmsReference": "PSALMS 31:6"
-  ,"playground.sceneFour.idolPsalmsBefore": "I have hated them that regard lying "
-  ,"playground.sceneFour.idolPsalmsHighlight": "vanities"
-  ,"playground.sceneFour.idolPsalmsAfter": ": but I trust in the Lord."
-  ,"playground.sceneFour.breathJobReference": "JOB 7:16"
-  ,"playground.sceneFour.breathJobBefore": "Let me alone; for my days are "
-  ,"playground.sceneFour.breathJobHighlight": "vanity"
+  ,"playground.sceneFour.idolPsalmsReference": "ZECHARIAH 10:2"
+  ,"playground.sceneFour.idolPsalmsBefore": "The idols have spoken vanity… they comfort in "
+  ,"playground.sceneFour.idolPsalmsHighlight": "vain"
+  ,"playground.sceneFour.idolPsalmsAfter": "."
+  ,"playground.sceneFour.breathJobReference": "DEUTERONOMY 32:21"
+  ,"playground.sceneFour.breathJobBefore": "They have provoked me to anger with their "
+  ,"playground.sceneFour.breathJobHighlight": "vanities"
   ,"playground.sceneFour.breathJobAfter": "."
   ,"playground.sceneFour.breathPsalmThirtyNineReference": "PSALMS 39:5"
   ,"playground.sceneFour.breathPsalmThirtyNineBefore": "Every man at his best state is altogether "
   ,"playground.sceneFour.breathPsalmThirtyNineHighlight": "vanity"
-  ,"playground.sceneFour.breathPsalmThirtyNineAfter": "."
+  ,"playground.sceneFour.breathPsalmThirtyNineAfter": ". Selah."
   ,"playground.sceneFour.breathPsalmOneFortyFourReference": "PSALMS 144:4"
   ,"playground.sceneFour.breathPsalmOneFortyFourBefore": "Man is like to "
   ,"playground.sceneFour.breathPsalmOneFortyFourHighlight": "vanity"
   ,"playground.sceneFour.breathPsalmOneFortyFourAfter": ": his days are as a shadow that passeth away."
   ,"playground.sceneFive.phrase": "Write down what you discover."
+  ,"playground.sceneFive.addTag": "Add the Abel tag"
   ,"playground.sceneFive.genesisLabel": "GENESIS 4:2"
-  ,"playground.sceneFive.genesisTitle": "Abel, son of Adam and Eve"
+  ,"playground.sceneFive.genesisTitle": "And she again bare his brother Abel."
   ,"playground.sceneFive.abelLabel": "H1893"
-  ,"playground.sceneFive.abelMeta": "proper noun · Hebrew"
+  ,"playground.sceneFive.abelMeta": "proper name · Hebrew"
   ,"playground.sceneFive.hevelLabel": "H1892"
-  ,"playground.sceneFive.hevelMeta": "breath · vapor · vanity"
+  ,"playground.sceneFive.hevelMeta": "emptiness · vanity · transience"
   ,"playground.sceneFive.noteLabel": "NOTE"
-  ,"playground.sceneFive.noteQuestion": "Abel is written like hevel, breath or vapor. Why this name?"
+  ,"playground.sceneFive.noteQuestion": "Abel’s name echoes hebel: breath, vapour, vanity. Why this name?"
   ,"playground.sceneFive.relations": "Relations"
   ,"playground.sceneFive.genesisChip": "Genesis 4:2"
   ,"playground.sceneSix.phrase": "Organize, connect, go deeper."
+  ,"playground.sceneSix.closeRelations": "Close the relations"
   ,"playground.sceneSix.genesisTitle": "Genesis 4:2"
   ,"playground.sceneSix.genesisDetail": "occurrence"
-  ,"playground.sceneSix.abelDetail": "noun"
-  ,"playground.sceneSix.hevelDetail": "breath"
+  ,"playground.sceneSix.abelDetail": "proper name"
+  ,"playground.sceneSix.hevelDetail": "vanity"
   ,"playground.sceneSix.ecclesiastesTitle": "Ecclesiastes 1:2"
   ,"playground.sceneSix.ecclesiastesDetail": "vanity  ·  occurrence"
   ,"playground.sceneSix.noteTitle": "Note"
   ,"playground.sceneSix.studyTitle": "Study"
-  ,"playground.sceneSix.studyDetail": "Characters & meanings"
+  ,"playground.sceneSix.studyDetail": "Names & meanings"
   ,"playground.sceneSix.explains": "explains"
   ,"playground.sceneSix.references": "references"
   ,"playground.sceneSix.mentions": "mentions"
   ,"playground.sceneSix.linkedTo": "linked to"
   ,"playground.onboarding.start": "Start"
-  ,"playground.sceneSeven.phrase": "Read simply.\nExplore as deeply as you wish."
+  ,"playground.sceneSeven.phrase": "Read simply.\nExplore as deeply as you like."
   ,"playground.sceneSeven.note": "Note"
   ,"playground.sceneSeven.study": "Study"
   ,"playground.sceneSeven.ecclesiastes": "Ecclesiastes 1:2"
-  ,"offlineSetup.title": "What would you like to download?"
-  ,"offlineSetup.subtitle": "Open a folder to discover its contents and choose what you want to keep on this device."
+  ,"offlineSetup.title": "Prepare your library"
+  ,"offlineSetup.subtitle": "Choose the translations and study tools you want to keep on this device."
   ,"offlineSetup.toDownload": "To download"
-  ,"offlineSetup.onDevice": "On this phone"
+  ,"offlineSetup.onDevice": "Storage used"
   ,"offlineSetup.continue": "Continue"
+  ,"offlineSetup.download": "Download"
+  ,"offlineSetup.review": "Review"
+  ,"offlineSetup.reviewSubtitle": "{{count}} resource will be added to your library."
+  ,"offlineSetup.reviewSubtitle_plural": "{{count}} resources will be added to your library."
+  ,"offlineSetup.reviewItemSize": "{{download}} download · {{installed}} installed"
+  ,"offlineSetup.openReview": "Open download review"
+  ,"offlineSetup.closeReview": "Close download review"
+  ,"offlineSetup.downloadReady": "You're ready"
+  ,"offlineSetup.downloadWelcomePrefix": "Welcome to"
+  ,"offlineSetup.downloadError": "The download failed"
+  ,"offlineSetup.didYouKnow": "Did you know?"
+  ,"offlineSetup.bibleFacts.methuselah": "Methuselah lived 969 years, the greatest age mentioned in the Bible. — Genesis 5:27"
+  ,"offlineSetup.bibleFacts.talkingDonkey": "In Balaam’s story, a donkey speaks to its master. — Numbers 22:28"
+  ,"offlineSetup.bibleFacts.ehud": "Ehud was left-handed and concealed his sword on his right thigh. — Judges 3:15–21"
+  ,"offlineSetup.bibleFacts.elijah": "Elijah ran ahead of King Ahab’s chariot all the way to Jezreel. — 1 Kings 18:46"
+  ,"offlineSetup.bibleFacts.floatingIron": "Elisha made an iron axe head float to the surface of the water. — 2 Kings 6:6"
+  ,"offlineSetup.bibleFacts.eutychus": "Eutychus fell asleep during Paul’s long speech and fell from the third story. — Acts 20:9"
+  ,"offlineSetup.bibleFacts.sunStoodStill": "The book of Joshua says the sun stood still in the middle of the sky during a battle. — Joshua 10:13"
+  ,"offlineSetup.bibleFacts.psalm119": "Psalm 119 follows the 22 letters of the Hebrew alphabet, with one stanza for each letter."
+  ,"offlineSetup.bibleFacts.gideon": "Gideon’s army went from 32,000 men to just 300 before the battle. — Judges 7:3–7"
+  ,"offlineSetup.bibleFacts.fishCoin": "Jesus told Peter he would find a coin in the mouth of a fish. — Matthew 17:27"
   ,"offlineSetup.back": "Back to folders"
   ,"offlineSetup.included": "This folder contains"
   ,"offlineSetup.add": "Add to my library"
@@ -1532,13 +1565,13 @@
   ,"offlineSetup.resourceCount": "{{count}} resources"
   ,"offlineSetup.presets.read-bible.title": "Read the Bible"
   ,"offlineSetup.presets.read-bible.subtitle": "1 translation"
-  ,"offlineSetup.presets.read-bible.description": "Keep your primary translation on this device so you can read the Bible wherever you are."
+  ,"offlineSetup.presets.read-bible.description": "Choose from several Bible versions and keep the ones you love to read close at hand."
   ,"offlineSetup.presets.understand-words.title": "Understand the words"
   ,"offlineSetup.presets.understand-words.subtitle": "4 resources"
-  ,"offlineSetup.presets.understand-words.description": "Choose the Strong Bibles and tools you want for understanding the original words."
+  ,"offlineSetup.presets.understand-words.description": "Discover the words behind the text with several Bibles enriched with Strong’s numbers. Choose the study Bibles that suit you."
   ,"offlineSetup.presets.explore-bible.title": "Explore the Bible"
   ,"offlineSetup.presets.explore-bible.subtitle": "5 resources"
-  ,"offlineSetup.presets.explore-bible.description": "Choose dictionaries, topics, cross-references, commentaries, timelines, and biblical entities."
+  ,"offlineSetup.presets.explore-bible.description": "Meet the people and places of the Bible, follow its major themes, connect related passages, and bring new depth to your reading with study tools."
   ,"offlineSetup.presets.original-languages.title": "Original languages"
   ,"offlineSetup.presets.original-languages.subtitle": "4 resources"
   ,"offlineSetup.presets.original-languages.description": "Study the Hebrew and Greek texts with the interlinear and detailed Greek dictionary."

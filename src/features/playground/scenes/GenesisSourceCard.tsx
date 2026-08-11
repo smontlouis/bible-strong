@@ -95,7 +95,7 @@ export const HevelSourceCard = ({ metrics, shakeRotation, t }: ShakableSourceCar
     meta={t('playground.sceneFive.hevelMeta')}
     metrics={metrics}
     shakeRotation={shakeRotation}
-    title="hevel"
+    title={t('playground.sceneThree.commonTitle')}
     titleItalic
     variant="small"
   />

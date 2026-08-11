@@ -14,6 +14,7 @@ import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneActionButton from '../onboarding/SceneActionButton'
 import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
@@ -28,8 +29,8 @@ export const SCENE_SIX_DEPTH_EXIT = {
   nearDistance: 1,
   farDistance: 2.5,
   maxProjection: 999,
-  duration: 1200,
-  movementEasing: Easing.in(Easing.poly(8)),
+  duration: 800,
+  movementEasing: Easing.in(Easing.poly(6)),
   opacityStartProgress: 0.8,
   graphDuration: 500,
 } as const
@@ -175,14 +176,15 @@ type SceneSixElementProps = {
 const AbelTag = ({ metrics }: { metrics: OnboardingStageMetrics }) => (
   <HStack
     flex
-    bg="primary"
+    bg="reverse"
     borderRadius={metrics.s(8)}
     px={metrics.s(10)}
     alignItems="center"
     gap={metrics.s(5)}
+    lightShadow
   >
-    <Feather name="tag" size={metrics.s(12)} color="#FFFFFF" />
-    <Text color="reverse" bold fontSize={metrics.s(10)} style={{ fontFamily: 'Courier' }}>
+    <Feather name="tag" size={metrics.s(12)} color="#F2B94B" />
+    <Text bold fontSize={metrics.s(10)} style={{ fontFamily: 'Courier' }}>
       Abel
     </Text>
   </HStack>
@@ -211,6 +213,7 @@ type CreateSceneSixRelationsProps = SceneSixElementProps & {
   depthDebug?: boolean
   highlightColor: HighlightColor
   navigationDirection: SharedValue<1 | -1>
+  onCollapsePress: () => void
   reduceMotion: boolean
   shakeRotations: {
     abel: SharedValue<number>
@@ -223,6 +226,7 @@ export const createSceneSixRelations = ({
   highlightColor,
   metrics,
   navigationDirection,
+  onCollapsePress,
   reduceMotion,
   shakeRotations,
   t,
@@ -557,6 +561,21 @@ export const createSceneSixRelations = ({
             label={t('playground.sceneSix.linkedTo')}
             metrics={metrics}
           />
+        </Scene.Node>
+      )}
+
+      {!depthDebug && (
+        <Scene.Node
+          id="relations-action"
+          frame={{ x: 303, y: 271, width: 36, height: 36, zIndex: 9 }}
+          enterDelay={RELATION_ENTER_START + RELATION_STAGGER * 4}
+          enterFrom={{ scale: 0.5 }}
+          exitTo={{ scale: 1.5 }}
+          onPress={onCollapsePress}
+          pressScale={0.96}
+          accessibilityLabel={t('playground.sceneSix.closeRelations')}
+        >
+          <SceneActionButton icon="maximize-2" metrics={metrics} />
         </Scene.Node>
       )}
 

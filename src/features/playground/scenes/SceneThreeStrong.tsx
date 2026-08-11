@@ -19,7 +19,7 @@ type StrongCardIndex = 0 | 1
 
 type StrongDefinition = {
   code: '1892' | '1893'
-  transliteration: string
+  transliterationKey: string
   titleKey: string
   definitionKey: string
   typeKey: string
@@ -28,14 +28,14 @@ type StrongDefinition = {
 const STRONG_DEFINITIONS: readonly StrongDefinition[] = [
   {
     code: '1893',
-    transliteration: 'Hevel',
+    transliterationKey: 'playground.sceneThree.properTransliteration',
     titleKey: 'playground.sceneThree.properTitle',
     definitionKey: 'playground.sceneThree.properDefinition',
     typeKey: 'playground.sceneThree.properType',
   },
   {
     code: '1892',
-    transliteration: 'hevel',
+    transliterationKey: 'playground.sceneThree.commonTransliteration',
     titleKey: 'playground.sceneThree.commonTitle',
     definitionKey: 'playground.sceneThree.commonDefinition',
     typeKey: 'playground.sceneThree.commonType',
@@ -48,12 +48,19 @@ const strongAudioUrl = (code: StrongDefinition['code']) =>
 type StrongDefinitionCardProps = {
   definition: StrongDefinition
   metrics: OnboardingStageMetrics
+  onActionPress: () => void
   t: TFunction
 }
 
-const StrongDefinitionCard = ({ definition, metrics, t }: StrongDefinitionCardProps) => {
+const StrongDefinitionCard = ({
+  definition,
+  metrics,
+  onActionPress,
+  t,
+}: StrongDefinitionCardProps) => {
   const theme = useTheme()
   const s = metrics.s
+  const isAction = definition.code === '1892'
   const player = useAudioPlayer(null)
   const audioStatus = useAudioPlayerStatus(player)
   const [hasRequestedAudio, setHasRequestedAudio] = useState(false)
@@ -133,18 +140,38 @@ const StrongDefinitionCard = ({ definition, metrics, t }: StrongDefinitionCardPr
           lineHeight={s(34)}
           style={{ fontFamily: 'Literata Book', fontStyle: 'italic' }}
         >
-          {definition.transliteration}
+          {t(definition.transliterationKey)}
         </Text>
       </VStack>
 
       <Box height={1} bg="border" mt={s(18)} mb={s(18)} />
 
-      <HStack alignItems="center" gap={s(14)}>
-        <Box bg="primary" borderRadius={s(7)} px={s(12)} py={s(7)}>
-          <Text color="reverse" bold fontSize={s(16)}>
-            H{definition.code}
-          </Text>
-        </Box>
+      <HStack alignItems="center" gap={s(14)} overflow="visible">
+        <Pressable
+          accessibilityRole={isAction ? 'button' : undefined}
+          accessibilityLabel={isAction ? t('playground.sceneThree.openStrong') : undefined}
+          disabled={!isAction}
+          hitSlop={s(4)}
+          onPress={isAction ? onActionPress : undefined}
+          style={({ pressed }) => ({
+            overflow: 'visible',
+            transform: [{ scale: pressed ? 0.96 : 1 }],
+          })}
+        >
+          <HStack
+            minHeight={s(34)}
+            borderRadius={s(12)}
+            px={s(10)}
+            alignItems="center"
+            bg={isAction ? 'primary' : 'lightPrimary'}
+            lightShadow
+            overflow="visible"
+          >
+            <Text color={isAction ? 'reverse' : 'primary'} bold fontSize={s(14)}>
+              H{definition.code}
+            </Text>
+          </HStack>
+        </Pressable>
         <Text title fontSize={s(28)} lineHeight={s(32)}>
           {t(definition.titleKey)}
         </Text>
@@ -219,6 +246,7 @@ type StrongCardStackProps = {
   carouselProgress: SharedValue<number>
   metrics: OnboardingStageMetrics
   onIndexChange: (index: StrongCardIndex) => void
+  onStrongPress: () => void
   reduceMotion: boolean
   t: TFunction
 }
@@ -228,6 +256,7 @@ const StrongCardStack = ({
   carouselProgress,
   metrics,
   onIndexChange,
+  onStrongPress,
   t,
 }: StrongCardStackProps) => {
   const cardWidth = metrics.s(272)
@@ -256,7 +285,14 @@ const StrongCardStack = ({
       style={{ width: cardWidth, height: cardHeight, overflow: 'visible' }}
       contentContainerStyle={{ overflow: 'visible' }}
       onSnapToItem={index => onIndexChange(index === 0 ? 0 : 1)}
-      renderItem={({ item }) => <StrongDefinitionCard definition={item} metrics={metrics} t={t} />}
+      renderItem={({ item }) => (
+        <StrongDefinitionCard
+          definition={item}
+          metrics={metrics}
+          onActionPress={onStrongPress}
+          t={t}
+        />
+      )}
     />
   )
 }
@@ -270,7 +306,7 @@ const StrongPagination = ({
 }) => {
   const theme = useTheme()
   const dotSize = metrics.s(9)
-  const activeDotSize = metrics.s(12)
+  const activeDotSize = metrics.s(10)
 
   return (
     <Pagination.Custom
@@ -278,7 +314,7 @@ const StrongPagination = ({
       data={[...STRONG_DEFINITIONS]}
       size={dotSize}
       containerStyle={{ gap: metrics.s(8) }}
-      dotStyle={{ borderRadius: dotSize / 2, backgroundColor: theme.colors.border }}
+      dotStyle={{ borderRadius: dotSize / 2, backgroundColor: theme.colors.lightPrimary }}
       activeDotStyle={{
         width: activeDotSize,
         height: activeDotSize,
@@ -304,6 +340,7 @@ type CreateSceneThreeStrongProps = SceneThreeBackgroundProps & {
   carouselProgress: SharedValue<number>
   highlightColor: HighlightColor
   onIndexChange: (index: StrongCardIndex) => void
+  onStrongPress: () => void
   t: TFunction
 }
 
@@ -313,6 +350,7 @@ export const createSceneThreeStrong = ({
   highlightColor,
   metrics,
   onIndexChange,
+  onStrongPress,
   reduceMotion,
   t,
 }: CreateSceneThreeStrongProps) => (
@@ -363,6 +401,7 @@ export const createSceneThreeStrong = ({
         carouselProgress={carouselProgress}
         metrics={metrics}
         onIndexChange={onIndexChange}
+        onStrongPress={onStrongPress}
         reduceMotion={reduceMotion}
         t={t}
       />

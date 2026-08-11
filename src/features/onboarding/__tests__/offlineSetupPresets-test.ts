@@ -1,8 +1,9 @@
 import {
   getDefaultOfflineSetupFolderOptionIds,
   getOfflineSetupFolderSections,
+  getOfflineSetupLockedOptionIds,
   resolveOfflineSetupFolderOptionIds,
-  toggleOfflineSetupOptionId,
+  toggleOfflineSetupFolderOption,
 } from '../offlineSetupPresets'
 
 jest.mock('~helpers/bibleVersions', () => ({
@@ -93,7 +94,14 @@ describe('offline setup folders', () => {
       .flatMap(section => section.options)
       .find(option => option.id === 'bible:LSG')
     expect(required?.required).toBe(true)
-    expect(toggleOfflineSetupOptionId(['bible:LSG'], required!)).toEqual(['bible:LSG'])
+    expect(
+      toggleOfflineSetupFolderOption(
+        getDefaultOfflineSetupFolderOptionIds('fr'),
+        'read-bible',
+        required!,
+        'fr'
+      )
+    ).toEqual(getDefaultOfflineSetupFolderOptionIds('fr'))
   })
 
   it('lists only French and English Bibles in the reading folder', () => {
@@ -168,16 +176,82 @@ describe('offline setup folders', () => {
     )
   })
 
-  it('checks visible dependencies and prevents removing them while still required', () => {
-    const options = getOfflineSetupFolderSections('understand-words', 'fr').flatMap(
-      section => section.options
-    )
-    const lsgStrong = options.find(option => option.id === 'bible-strong:LSG')!
-    const core = options.find(option => option.id === 'strong-lexicon:core')!
-    const selected = toggleOfflineSetupOptionId([], lsgStrong, options)
+  it('synchronizes a shared option across every folder that exposes it', () => {
+    const folderOptionIds = getDefaultOfflineSetupFolderOptionIds('fr')
+    const core = getOfflineSetupFolderSections('understand-words', 'fr')
+      .flatMap(section => section.options)
+      .find(option => option.id === 'strong-lexicon:core')!
 
-    expect(selected).toEqual(['bible-strong:LSG', 'strong-lexicon:core'])
-    expect(toggleOfflineSetupOptionId(selected, core, options)).toEqual(selected)
+    const selected = toggleOfflineSetupFolderOption(folderOptionIds, 'understand-words', core, 'fr')
+
+    expect(selected['understand-words']).toContain('strong-lexicon:core')
+    expect(selected['original-languages']).toContain('strong-lexicon:core')
+    expect(getOfflineSetupLockedOptionIds(selected, 'fr').has('strong-lexicon:core')).toBe(false)
+  })
+
+  it('removes shared dependencies and all their dependents across folders', () => {
+    const folderOptionIds = getDefaultOfflineSetupFolderOptionIds('fr')
+    folderOptionIds['understand-words'] = ['strong-lexicon:core', 'bible-strong:LSG']
+    folderOptionIds['explore-bible'] = ['strong-lexicon:entities']
+    folderOptionIds['original-languages'] = ['strong-lexicon:core', 'strong-lexicon:resources']
+    const core = getOfflineSetupFolderSections('understand-words', 'fr')
+      .flatMap(section => section.options)
+      .find(option => option.id === 'strong-lexicon:core')!
+
+    const selected = toggleOfflineSetupFolderOption(folderOptionIds, 'understand-words', core, 'fr')
+
+    expect(selected).toEqual({
+      'read-bible': ['bible:LSG'],
+      'understand-words': [],
+      'explore-bible': [],
+      'original-languages': [],
+    })
+  })
+
+  it('links a Strong Bible to the matching reading Bible across folders', () => {
+    const folderOptionIds = getDefaultOfflineSetupFolderOptionIds('fr')
+    const strongBible = getOfflineSetupFolderSections('understand-words', 'fr')
+      .flatMap(section => section.options)
+      .find(option => option.id === 'bible-strong:ASV')!
+
+    const selected = toggleOfflineSetupFolderOption(
+      folderOptionIds,
+      'understand-words',
+      strongBible,
+      'fr'
+    )
+
+    expect(selected['read-bible']).toContain('bible:ASV')
+    expect(selected['understand-words']).toContain('bible-strong:ASV')
+    expect(selected['original-languages']).toContain('strong-lexicon:core')
+    const lockedOptionIds = getOfflineSetupLockedOptionIds(selected, 'fr')
+    expect(lockedOptionIds.has('bible:ASV')).toBe(true)
+    expect(lockedOptionIds.has('strong-lexicon:core')).toBe(true)
+
+    const readingBible = getOfflineSetupFolderSections('read-bible', 'fr')
+      .flatMap(section => section.options)
+      .find(option => option.id === 'bible:ASV')!
+    const withoutReadingBible = toggleOfflineSetupFolderOption(
+      selected,
+      'read-bible',
+      readingBible,
+      'fr'
+    )
+
+    expect(withoutReadingBible['read-bible']).not.toContain('bible:ASV')
+    expect(withoutReadingBible['understand-words']).not.toContain('bible-strong:ASV')
+  })
+
+  it('resolves a shared resource only once when it is checked in two folders', () => {
+    const folderOptionIds = getDefaultOfflineSetupFolderOptionIds('fr')
+    folderOptionIds['understand-words'] = ['strong-lexicon:core']
+    folderOptionIds['original-languages'] = ['strong-lexicon:core']
+
+    const coreSelections = resolveOfflineSetupFolderOptionIds(folderOptionIds, 'fr').filter(
+      selection => selection.kind === 'strong-lexicon' && selection.moduleId === 'core'
+    )
+
+    expect(coreSelections).toHaveLength(1)
   })
 
   it('offers localized exploration resources and keeps biblical entities', () => {

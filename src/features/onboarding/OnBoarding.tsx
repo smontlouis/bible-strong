@@ -10,7 +10,6 @@ import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { setDefaultBibleVersion } from '~redux/modules/user'
 import { isOnboardingCompletedAtom } from './atom'
-import DownloadResources from './DownloadResources'
 import OnBoardingSlides from './OnBoardingSlides'
 import SelectResources from './SelectResources'
 
@@ -70,8 +69,7 @@ const OnBoarding = () => {
     <Modal visible={showOnboarding} animationType="slide" presentationStyle="fullScreen">
       <ModalContainer>
         {step === 0 && <OnBoardingSlides setStep={setStep} />}
-        {step === 1 && <SelectResources setStep={setStep} />}
-        {step === 2 && <DownloadResources />}
+        {step === 1 && <SelectResources />}
       </ModalContainer>
     </Modal>
   )

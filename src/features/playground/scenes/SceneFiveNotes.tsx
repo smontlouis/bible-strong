@@ -21,6 +21,7 @@ import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneActionButton from '../onboarding/SceneActionButton'
 import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
@@ -190,6 +191,7 @@ const QuestionNoteContent = ({
 
 type CreateSceneFiveNotesProps = SceneFiveElementProps & {
   highlightColor: HighlightColor
+  onAddTagPress: () => void
   reduceMotion: boolean
   shakeRotations: {
     abel: SharedValue<number>
@@ -201,6 +203,7 @@ type CreateSceneFiveNotesProps = SceneFiveElementProps & {
 export const createSceneFiveNotes = ({
   highlightColor,
   metrics,
+  onAddTagPress,
   reduceMotion,
   shakeRotations,
   t,
@@ -296,6 +299,20 @@ export const createSceneFiveNotes = ({
             t={t}
           />
         </NoteCard>
+      </Scene.Node>
+
+      <Scene.Node
+        id="abel-tag-new"
+        layout="resize"
+        frame={{ x: 265, y: 255, width: 42, height: 42, zIndex: 9 }}
+        onPress={onAddTagPress}
+        pressScale={0.96}
+        enterDelay={3800}
+        enterFrom={{ scale: 0.5 }}
+        exitTo={{ scale: 1.5 }}
+        accessibilityLabel={t('playground.sceneFive.addTag')}
+      >
+        <SceneActionButton icon="tag" metrics={metrics} />
       </Scene.Node>
 
       <SceneDecorativePluses metrics={metrics} reduceMotion={reduceMotion} scene="five" />

@@ -1,0 +1,127 @@
+import type { DownloadItem } from '~helpers/offlineCopy'
+import {
+  getOfflineResourceSizeEntry,
+  type OfflineResourceSizeManifest,
+} from '~helpers/offlineResourceSizeManifest'
+import type { OnboardingResourceSelection } from './onboardingResources'
+import { createDownloadItemFromOnboardingSelection } from './onboardingResources'
+import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
+
+export type OfflineSetupReviewItem = {
+  id: string
+  name: string
+  downloadBytes: number
+  installedBytes: number
+}
+
+type OfflineSetupReviewLayoutParams = {
+  bottomInset: number
+  itemCount: number
+  maxHeight: number
+}
+
+export type OfflineSetupReviewLayout = {
+  expandedHeight: number
+  scrollEnabled: boolean
+}
+
+export const getOfflineSetupReviewListTopInset = (): number => {
+  const layout = OFFLINE_SETUP_MOTION.reviewSheet.layout
+
+  return (
+    layout.headerTop +
+    layout.summaryHeight +
+    layout.subtitleMarginTop +
+    layout.subtitleHeight +
+    layout.listMarginTop
+  )
+}
+
+export const getOfflineSetupReviewLayout = ({
+  bottomInset,
+  itemCount,
+  maxHeight,
+}: OfflineSetupReviewLayoutParams): OfflineSetupReviewLayout => {
+  const reviewMotion = OFFLINE_SETUP_MOTION.reviewSheet
+  const layout = reviewMotion.layout
+  const rowCount = Math.max(0, itemCount)
+  const rowGaps = Math.max(0, rowCount - 1)
+  const headerHeight = getOfflineSetupReviewListTopInset()
+  const rowsHeight = rowCount * layout.resourceRowHeight + rowGaps * layout.resourceRowGap
+  const buttonClearance =
+    layout.buttonHeight + layout.buttonBottom + bottomInset + layout.bottomSpacing
+  const contentHeight = headerHeight + rowsHeight + buttonClearance
+  const expandedHeight = Math.max(reviewMotion.closedHeight, Math.min(maxHeight, contentHeight))
+
+  return {
+    expandedHeight,
+    scrollEnabled: contentHeight > maxHeight,
+  }
+}
+
+export const getOfflineSetupReviewExpandedHeight = (
+  params: OfflineSetupReviewLayoutParams
+): number => getOfflineSetupReviewLayout(params).expandedHeight
+
+const getUniqueDownloadItems = (
+  selections: readonly OnboardingResourceSelection[]
+): DownloadItem[] => [
+  ...new Map(
+    selections.map(selection => {
+      const item = createDownloadItemFromOnboardingSelection(selection)
+      return [item.id, item]
+    })
+  ).values(),
+]
+
+export const getOfflineSetupReviewItems = (
+  selections: readonly OnboardingResourceSelection[],
+  manifest: OfflineResourceSizeManifest
+): OfflineSetupReviewItem[] =>
+  getUniqueDownloadItems(selections).map(item => {
+    const size = getOfflineResourceSizeEntry(item.id, item.estimatedSize, manifest)
+    return {
+      id: item.id,
+      name: item.name,
+      downloadBytes: size.downloadBytes,
+      installedBytes: size.installedBytes,
+    }
+  })
+
+export const getOfflineSetupReviewSnapPoint = ({
+  progress,
+  velocityY,
+}: {
+  progress: number
+  velocityY: number
+}): 0 | 1 => {
+  'worklet'
+
+  const reviewMotion = OFFLINE_SETUP_MOTION.reviewSheet
+  const projectedProgress = progress - velocityY * reviewMotion.velocityInfluence
+  if (projectedProgress >= reviewMotion.snapThreshold) return 1
+  return 0
+}
+
+export const getOfflineSetupReviewDragProgress = ({
+  rawProgress,
+  sheetTravel,
+}: {
+  rawProgress: number
+  sheetTravel: number
+}): number => {
+  'worklet'
+
+  if (rawProgress >= 0 && rawProgress <= 1) return rawProgress
+
+  const reviewMotion = OFFLINE_SETUP_MOTION.reviewSheet
+  const overflowProgress = rawProgress < 0 ? -rawProgress : rawProgress - 1
+  const overflowDistance = overflowProgress * sheetTravel
+  const resistance =
+    1 + (overflowDistance * reviewMotion.rubberBandCoefficient) / reviewMotion.maxOverdrag
+  const resistedDistance = reviewMotion.maxOverdrag * (1 - 1 / resistance)
+  const resistedProgress = resistedDistance / sheetTravel
+
+  if (rawProgress < 0) return -resistedProgress
+  return 1 + resistedProgress
+}

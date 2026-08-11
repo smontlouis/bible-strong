@@ -72,7 +72,7 @@ const createStrongBibleOption = (
   label,
   labelKey: 'offlineSetup.option.strongBible',
   language: versions[versionId].language,
-  requires: ['strong-lexicon:core'],
+  requires: [`bible:${versionId}`, 'strong-lexicon:core'],
   selections: [
     { kind: 'bible', versionId },
     { kind: 'bible-strong', versionId },
@@ -222,6 +222,7 @@ const getExploreSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
           label: '',
           labelKey: 'offlineSetup.resources.entities',
           descriptionKey: 'offlineSetup.option.entitiesDescription',
+          requires: ['strong-lexicon:core'],
           selections: [
             { kind: 'strong-lexicon', moduleId: 'core' },
             { kind: 'strong-lexicon', moduleId: 'entities' },
@@ -338,35 +339,128 @@ export const getDefaultOfflineSetupFolderOptionIds = (
   'original-languages': [],
 })
 
-export const toggleOfflineSetupOptionId = (
-  selectedIds: readonly string[],
-  option: Pick<OfflineSetupOption, 'id' | 'required' | 'requires'>,
-  folderOptions: readonly Pick<OfflineSetupOption, 'id' | 'requires'>[] = []
-): string[] => {
-  if (option.required) return [...selectedIds]
-  const selectedIdSet = new Set(selectedIds)
-  if (selectedIdSet.has(option.id)) {
-    return isOfflineSetupOptionLocked(option, selectedIds, folderOptions)
-      ? [...selectedIds]
-      : selectedIds.filter(id => id !== option.id)
-  }
-
-  return [...new Set([...selectedIds, option.id, ...(option.requires ?? [])])]
+const getFolderOptions = (
+  lang: ResourceLanguage
+): Record<OfflineSetupFolderId, OfflineSetupOption[]> => {
+  const entries = OFFLINE_SETUP_FOLDER_IDS.map(folderId => [
+    folderId,
+    getOfflineSetupFolderSections(folderId, lang).flatMap(section => section.options),
+  ])
+  return Object.fromEntries(entries) as Record<OfflineSetupFolderId, OfflineSetupOption[]>
 }
 
-export const isOfflineSetupOptionLocked = (
-  option: Pick<OfflineSetupOption, 'id' | 'required'>,
-  selectedIds: readonly string[],
-  folderOptions: readonly Pick<OfflineSetupOption, 'id' | 'requires'>[] = []
-): boolean => {
-  if (option.required) return true
-  const selectedIdSet = new Set(selectedIds)
-  return folderOptions.some(
-    candidate =>
-      candidate.id !== option.id &&
-      selectedIdSet.has(candidate.id) &&
-      candidate.requires?.includes(option.id)
-  )
+const collectRequiredOptionIds = (
+  option: OfflineSetupOption,
+  folderOptions: Record<OfflineSetupFolderId, OfflineSetupOption[]>
+): Set<string> => {
+  const optionIds = new Set<string>()
+  const pendingIds = [option.id]
+
+  while (pendingIds.length > 0) {
+    const optionId = pendingIds.shift()
+    if (!optionId || optionIds.has(optionId)) continue
+    optionIds.add(optionId)
+
+    for (const folderId of OFFLINE_SETUP_FOLDER_IDS) {
+      for (const candidate of folderOptions[folderId]) {
+        if (candidate.id === optionId) pendingIds.push(...(candidate.requires ?? []))
+      }
+    }
+  }
+
+  return optionIds
+}
+
+const collectDependentOptionIds = (
+  optionId: string,
+  selectedIdsByFolder: OfflineSetupFolderOptionIds,
+  folderOptions: Record<OfflineSetupFolderId, OfflineSetupOption[]>
+): Set<string> => {
+  const removedIds = new Set([optionId])
+  let foundDependent = true
+
+  while (foundDependent) {
+    foundDependent = false
+    for (const folderId of OFFLINE_SETUP_FOLDER_IDS) {
+      const selectedIds = new Set(selectedIdsByFolder[folderId])
+      for (const candidate of folderOptions[folderId]) {
+        if (!selectedIds.has(candidate.id) || removedIds.has(candidate.id)) continue
+        if (!candidate.requires?.some(requiredId => removedIds.has(requiredId))) continue
+        removedIds.add(candidate.id)
+        foundDependent = true
+      }
+    }
+  }
+
+  return removedIds
+}
+
+const addOptionIdsToFolders = (
+  selectedIdsByFolder: OfflineSetupFolderOptionIds,
+  optionIds: ReadonlySet<string>,
+  folderOptions: Record<OfflineSetupFolderId, OfflineSetupOption[]>
+): OfflineSetupFolderOptionIds => {
+  const result = { ...selectedIdsByFolder }
+
+  for (const folderId of OFFLINE_SETUP_FOLDER_IDS) {
+    const visibleOptionIds = new Set(folderOptions[folderId].map(option => option.id))
+    const additions = Array.from(optionIds).filter(optionId => visibleOptionIds.has(optionId))
+    result[folderId] = [...new Set([...selectedIdsByFolder[folderId], ...additions])]
+  }
+
+  return result
+}
+
+const removeOptionIdsFromFolders = (
+  selectedIdsByFolder: OfflineSetupFolderOptionIds,
+  optionIds: ReadonlySet<string>
+): OfflineSetupFolderOptionIds => {
+  const result = { ...selectedIdsByFolder }
+  for (const folderId of OFFLINE_SETUP_FOLDER_IDS) {
+    result[folderId] = selectedIdsByFolder[folderId].filter(optionId => !optionIds.has(optionId))
+  }
+  return result
+}
+
+export const toggleOfflineSetupFolderOption = (
+  selectedIdsByFolder: OfflineSetupFolderOptionIds,
+  sourceFolderId: OfflineSetupFolderId,
+  option: OfflineSetupOption,
+  lang: ResourceLanguage
+): OfflineSetupFolderOptionIds => {
+  if (option.required) return { ...selectedIdsByFolder }
+
+  const folderOptions = getFolderOptions(lang)
+  const isSelected = selectedIdsByFolder[sourceFolderId].includes(option.id)
+  if (!isSelected) {
+    const requiredOptionIds = collectRequiredOptionIds(option, folderOptions)
+    return addOptionIdsToFolders(selectedIdsByFolder, requiredOptionIds, folderOptions)
+  }
+
+  const removedOptionIds = collectDependentOptionIds(option.id, selectedIdsByFolder, folderOptions)
+  return removeOptionIdsFromFolders(selectedIdsByFolder, removedOptionIds)
+}
+
+export const getOfflineSetupLockedOptionIds = (
+  selectedIdsByFolder: OfflineSetupFolderOptionIds,
+  lang: ResourceLanguage
+): Set<string> => {
+  const folderOptions = getFolderOptions(lang)
+  const lockedIds = new Set<string>()
+
+  for (const folderId of OFFLINE_SETUP_FOLDER_IDS) {
+    const selectedIds = new Set(selectedIdsByFolder[folderId])
+    for (const option of folderOptions[folderId]) {
+      if (option.required) lockedIds.add(option.id)
+      if (!selectedIds.has(option.id)) continue
+
+      const requiredIds = collectRequiredOptionIds(option, folderOptions)
+      requiredIds.delete(option.id)
+      requiredIds.forEach(requiredId => lockedIds.add(requiredId))
+    }
+  }
+
+  return lockedIds
 }
 
 export const resolveOfflineSetupFolderOptionIds = (

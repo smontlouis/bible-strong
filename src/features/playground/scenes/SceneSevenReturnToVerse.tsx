@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons'
 import type { TFunction } from 'i18next'
-import { FadeIn } from 'react-native-reanimated'
+import { ZoomIn } from 'react-native-reanimated'
 
 import LexiqueIcon from '~common/LexiqueIcon'
 import { HStack } from '~common/ui/Box'
@@ -16,7 +16,8 @@ export const SCENE_SEVEN_REVEAL = {
   verseDuration: 1350,
   promptDelay: 1800,
   nodeStart: 2350,
-  nodeStagger: 220,
+  nodeStagger: 100,
+  actionDelay: 1800,
 } as const
 
 export const SCENE_SEVEN_ORBIT = {
@@ -77,7 +78,7 @@ const revealDelay = (order: number) =>
   SCENE_SEVEN_REVEAL.nodeStart + order * SCENE_SEVEN_REVEAL.nodeStagger
 
 const orbitAt = (phase: number) => ({ ...SCENE_SEVEN_ORBIT, phase })
-const revealOrbitContent = (order: number) => FadeIn.delay(revealDelay(order)).springify()
+const revealOrbitContent = (order: number) => ZoomIn.delay(revealDelay(order)).springify()
 
 export const createSceneSevenReturnToVerse = ({
   highlightColor,

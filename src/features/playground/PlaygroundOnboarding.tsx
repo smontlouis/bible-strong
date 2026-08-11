@@ -1,10 +1,11 @@
 import { useTheme } from '@emotion/react'
 import { Feather } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Pressable, useWindowDimensions, View } from 'react-native'
-import { useEffect, useState } from 'react'
+import { Alert, Pressable, useWindowDimensions, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Animated, {
+  cubicBezier,
   type EntryExitAnimationFunction,
   EntryOrExitLayoutType,
   Extrapolation,
@@ -25,7 +26,7 @@ import Text from '~common/ui/Text'
 import { OnboardingStage } from './onboarding/OnboardingStage'
 import { SceneGraph } from './onboarding/SceneGraph'
 import { ONBOARDING_SCENE_COUNT, ONBOARDING_SCENES } from './onboarding/sceneRegistry'
-import { type HighlightColor } from './onboarding/VerseCard'
+import { type HighlightColor, type ResourceIllustration } from './onboarding/VerseCard'
 import { createSceneOneVerseHighlight } from './scenes/SceneOneVerseHighlight'
 import { createSceneFiveNotes } from './scenes/SceneFiveNotes'
 import {
@@ -36,7 +37,7 @@ import {
 import { createSceneSixRelations } from './scenes/SceneSixRelations'
 import { createSceneSevenReturnToVerse, SCENE_SEVEN_REVEAL } from './scenes/SceneSevenReturnToVerse'
 import { createSceneThreeStrong, type StrongCardIndex } from './scenes/SceneThreeStrong'
-import { createSceneTwoLexique } from './scenes/SceneTwoLexique'
+import { createSceneTwoLexique, getSceneTwoNodeColor } from './scenes/SceneTwoLexique'
 
 type PlaygroundOnboardingProps = {
   onComplete: () => void
@@ -71,8 +72,9 @@ const createPromptEntering =
     }
   }
 
-const promptEntering = createPromptEntering(200)
+const promptEntering = createPromptEntering(400)
 const finalPromptEntering = createPromptEntering(SCENE_SEVEN_REVEAL.promptDelay)
+const finalActionLabelEntering = FadeIn.delay(180).springify()
 
 const promptExiting: EntryExitAnimationFunction = () => {
   'worklet'
@@ -176,7 +178,11 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   const reduceMotion = useReducedMotion()
   const [sceneIndex, setSceneIndex] = useState(0)
   const [isFinishing, setIsFinishing] = useState(false)
+  const [isFinalActionReady, setIsFinalActionReady] = useState(false)
+  const [delayProgressAfterFinalBack, setDelayProgressAfterFinalBack] = useState(false)
+  const progressDelayTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [activeColor, setActiveColor] = useState<HighlightColor>('color1')
+  const [sceneTwoIllustration, setSceneTwoIllustration] = useState<ResourceIllustration>()
   const [strongCardIndex, setStrongCardIndex] = useState<StrongCardIndex>(0)
   const [occurrenceFilter, setOccurrenceFilter] = useState<OccurrenceFilterId>('vanity')
   const [occurrenceFilterDirection, setOccurrenceFilterDirection] =
@@ -191,27 +197,23 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
   const isFinalScene = currentScene.id === 'scene-seven'
   const sceneProgress = (sceneIndex + 1) / ONBOARDING_SCENE_COUNT
   const progress = isFinishing ? 1 : sceneProgress
-  const progressValue = useSharedValue(progress)
   const strongCarouselProgress = useSharedValue<number>(strongCardIndex)
-  const backSlotWidth = useSharedValue(canGoBack ? 70 : 0)
   const backOpacity = useSharedValue(canGoBack ? 1 : 0)
   const backScale = useSharedValue(canGoBack ? 1 : 0.25)
   // The storyboard is authored at 390 pt wide with a 350 pt content column.
   // Keep that column centered, but let it shrink on narrower phones.
   const contentWidth = Math.min(350, Math.max(width - 40, 1))
-  const progressWidth = Math.min(145, contentWidth * 0.3)
+  const compactProgressWidth = Math.min(145, contentWidth * 0.3)
+  const compactHorizontalInset = (contentWidth - compactProgressWidth) / 2
+  const compactVerticalInset = (58 - 6) / 2
+  const showFinalAction = isFinalScene && isFinalActionReady
   const promptKey =
     currentScene.id === 'scene-one' ? SCENE_ONE_PROMPT_KEYS[activeColor] : currentScene.promptKey
 
   useEffect(() => {
-    progressValue.set(reduceMotion ? progress : withSpring(progress))
-  }, [progress, progressValue, reduceMotion])
-
-  useEffect(() => {
-    backSlotWidth.set(reduceMotion ? (canGoBack ? 70 : 0) : withSpring(canGoBack ? 70 : 0))
     backOpacity.set(reduceMotion ? (canGoBack ? 1 : 0) : withSpring(canGoBack ? 1 : 0))
     backScale.set(reduceMotion ? (canGoBack ? 1 : 0.25) : withSpring(canGoBack ? 1 : 0.25))
-  }, [backOpacity, backScale, backSlotWidth, canGoBack, reduceMotion])
+  }, [backOpacity, backScale, canGoBack, reduceMotion])
 
   useEffect(() => {
     if (!isFinishing) return
@@ -219,22 +221,54 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
     return () => clearTimeout(timeout)
   }, [isFinishing, onComplete, reduceMotion])
 
-  const progressStyle = useAnimatedStyle(() => ({
-    width: progressValue.get() * progressWidth,
-  }))
-  const backSlotStyle = useAnimatedStyle(() => ({
-    width: backSlotWidth.get(),
-  }))
+  useEffect(() => {
+    if (!isFinalScene) return
+
+    const timeout = setTimeout(
+      () => setIsFinalActionReady(true),
+      reduceMotion ? 0 : SCENE_SEVEN_REVEAL.actionDelay
+    )
+    return () => clearTimeout(timeout)
+  }, [isFinalScene, reduceMotion])
+
+  useEffect(
+    () => () => {
+      if (progressDelayTimeout.current) clearTimeout(progressDelayTimeout.current)
+    },
+    []
+  )
+
   const backButtonStyle = useAnimatedStyle(() => ({
     opacity: backOpacity.get(),
+    transform: [{ scale: backScale.get() }],
   }))
 
   const finish = () => {
     if (!isFinishing) setIsFinishing(true)
   }
 
+  const confirmSkip = () => {
+    Alert.alert(
+      t('playground.onboarding.skipConfirmTitle'),
+      t('playground.onboarding.skipConfirmMessage'),
+      [
+        {
+          text: t('playground.onboarding.keepDiscovering'),
+          style: 'cancel',
+        },
+        {
+          text: t('playground.onboarding.skip'),
+          onPress: finish,
+        },
+      ]
+    )
+  }
+
   const advance = () => {
+    if (progressDelayTimeout.current) clearTimeout(progressDelayTimeout.current)
+    setDelayProgressAfterFinalBack(false)
     if (sceneIndex < ONBOARDING_SCENES.length - 1) {
+      if (sceneIndex === ONBOARDING_SCENES.length - 2) setIsFinalActionReady(false)
       navigationDirection.set(1)
       setSceneIndex(value => value + 1)
       return
@@ -245,6 +279,12 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
 
   const goBack = () => {
     if (canGoBack) {
+      if (progressDelayTimeout.current) clearTimeout(progressDelayTimeout.current)
+      setDelayProgressAfterFinalBack(isFinalScene)
+      if (isFinalScene) {
+        progressDelayTimeout.current = setTimeout(() => setDelayProgressAfterFinalBack(false), 1000)
+      }
+      setIsFinalActionReady(false)
       navigationDirection.set(-1)
       setSceneIndex(value => value - 1)
     }
@@ -272,38 +312,66 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
     scaleButton.set(withSpring(1))
   }
 
+  const handleBackPressIn = () => {
+    backScale.set(reduceMotion ? 0.96 : withSpring(0.96))
+  }
+
+  const handleBackPressOut = () => {
+    backScale.set(reduceMotion ? 1 : withSpring(1))
+  }
+
   return (
     <Box flex bg="lightGrey" pt={insets.top}>
-      <Box width={contentWidth} height={28} mt={19} alignSelf="center" position="relative">
-        <Box position="absolute" left={0} right={0} top={10} alignItems="center">
-          <Box
-            width={progressWidth}
-            height={6}
-            borderRadius={4}
-            bg="lightPrimary"
-            overflow="visible"
-          >
-            <Animated.View
-              style={[
-                { height: 6, borderRadius: 4, backgroundColor: theme.colors.primary },
-                progressStyle,
-              ]}
-            />
-          </Box>
-        </Box>
+      <AnimatedPressable
+        pointerEvents={canGoBack ? 'auto' : 'none'}
+        accessibilityRole="button"
+        accessibilityLabel={t('playground.onboarding.back')}
+        disabled={!canGoBack}
+        onPress={goBack}
+        onPressIn={handleBackPressIn}
+        onPressOut={handleBackPressOut}
+        style={[
+          {
+            position: 'absolute',
+            left: Math.max((width - contentWidth) / 2, 20),
+            top: insets.top + 9,
+            width: 44,
+            height: 44,
+            zIndex: 1100,
+            borderRadius: 22,
+            backgroundColor: theme.colors.reverse,
+            boxShadow: '0 4px 10px rgba(40,67,128,0.12)',
+            alignItems: 'center',
+            justifyContent: 'center',
+          },
+          backButtonStyle,
+        ]}
+      >
+        <Feather name="arrow-left" size={21} color={theme.colors.primary} />
+      </AnimatedPressable>
+
+      <Box
+        width={contentWidth}
+        height={28}
+        mt={19}
+        alignSelf="center"
+        position="relative"
+        style={{ zIndex: 1000 }}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('playground.onboarding.skip')}
-          onPress={finish}
+          onPress={confirmSkip}
           hitSlop={10}
           style={({ pressed }) => ({
             position: 'absolute',
             right: 0,
             top: 0,
+            zIndex: 10,
             opacity: pressed ? 0.62 : 1,
           })}
         >
-          <Text color="primary" fontSize={13} bold>
+          <Text color="tertiary" fontSize={13}>
             {t('playground.onboarding.skip')}
           </Text>
         </Pressable>
@@ -353,12 +421,38 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                     metrics,
                     reduceMotion,
                     activeColor,
+                    actionLabel: t('playground.sceneOne.openLexique'),
+                    onVersePress: advance,
                     onColorSelect: setActiveColor,
                   })}
                   {createSceneTwoLexique({
                     metrics,
                     reduceMotion,
                     highlightColor: activeColor,
+                    resourceIllustration: sceneTwoIllustration,
+                    resourceColor: sceneTwoIllustration
+                      ? getSceneTwoNodeColor(sceneTwoIllustration, theme)
+                      : undefined,
+                    onCommentsPress: () =>
+                      setSceneTwoIllustration(current =>
+                        current === 'comments' ? undefined : 'comments'
+                      ),
+                    onComparisonsPress: () =>
+                      setSceneTwoIllustration(current =>
+                        current === 'comparisons' ? undefined : 'comparisons'
+                      ),
+                    onDictionaryPress: () =>
+                      setSceneTwoIllustration(current =>
+                        current === 'dictionary' ? undefined : 'dictionary'
+                      ),
+                    onReferencesPress: () =>
+                      setSceneTwoIllustration(current =>
+                        current === 'references' ? undefined : 'references'
+                      ),
+                    onThemesPress: () =>
+                      setSceneTwoIllustration(current =>
+                        current === 'themes' ? undefined : 'themes'
+                      ),
                     onLexiquePress: advance,
                     t,
                   })}
@@ -369,6 +463,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                     reduceMotion,
                     highlightColor: activeColor,
                     onIndexChange: setStrongCardIndex,
+                    onStrongPress: advance,
                     t,
                   })}
                   {createSceneFourOccurrences({
@@ -376,6 +471,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                     filterDirection: occurrenceFilterDirection,
                     highlightColor: activeColor,
                     metrics,
+                    onAddNotePress: advance,
                     onFilterChange: changeOccurrenceFilter,
                     reduceMotion,
                     t,
@@ -383,6 +479,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                   {createSceneFiveNotes({
                     highlightColor: activeColor,
                     metrics,
+                    onAddTagPress: advance,
                     reduceMotion,
                     shakeRotations: {
                       abel: sceneFiveAbelRotation,
@@ -395,6 +492,7 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
                     highlightColor: activeColor,
                     metrics,
                     navigationDirection,
+                    onCollapsePress: advance,
                     reduceMotion,
                     shakeRotations: {
                       abel: sceneFiveAbelRotation,
@@ -446,55 +544,98 @@ const PlaygroundOnboarding = ({ onComplete }: PlaygroundOnboardingProps) => {
             </AnimatedBox>
           )}
         </Box>
-        <HStack height={58} alignItems="center">
+        <Box height={58} center>
           <Animated.View
-            pointerEvents={canGoBack ? 'auto' : 'none'}
-            style={[{ overflow: 'hidden' }, backSlotStyle]}
+            style={{
+              width: contentWidth,
+              height: 58,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
-            <Animated.View style={[{ width: 58, height: 58 }, backButtonStyle]}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('playground.onboarding.back')}
-                disabled={!canGoBack}
-                onPress={goBack}
-                style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.96 : 1 }] })}
-              >
-                <Box size={58} borderRadius={29} bg="reverse" center lightShadow>
-                  <Feather name="arrow-left" size={24} color={theme.colors.primary} />
-                </Box>
-              </Pressable>
-            </Animated.View>
-          </Animated.View>
-
-          <Animated.View style={{ flex: 1 }}>
             <AnimatedPressable
-              accessibilityRole="button"
-              accessibilityLabel={t(
-                isFinalScene ? 'playground.onboarding.start' : 'playground.onboarding.continue'
-              )}
-              onPress={advance}
-              onPressIn={handlePressIn}
-              onPressOut={handlePressOut}
-              style={{ opacity: opacityButton, transform: [{ scale: scaleButton }] }}
+              accessibilityRole={showFinalAction ? 'button' : 'progressbar'}
+              accessibilityLabel={
+                showFinalAction
+                  ? t('playground.onboarding.start')
+                  : t('playground.onboarding.progress', {
+                      current: sceneIndex + 1,
+                      total: ONBOARDING_SCENE_COUNT,
+                    })
+              }
+              accessibilityValue={
+                showFinalAction
+                  ? undefined
+                  : { min: 0, max: ONBOARDING_SCENE_COUNT, now: sceneIndex + 1 }
+              }
+              onPress={showFinalAction ? advance : undefined}
+              onPressIn={showFinalAction ? handlePressIn : undefined}
+              onPressOut={showFinalAction ? handlePressOut : undefined}
+              style={{
+                width: contentWidth,
+                height: 58,
+                opacity: opacityButton,
+                transform: [{ scale: scaleButton }],
+              }}
             >
-              <Box
-                bg="primary"
-                borderRadius={29}
-                height={58}
-                center
-                lightShadow
-                style={{ flexDirection: 'row', gap: 12 }}
+              <Animated.View
+                style={{
+                  position: 'absolute',
+                  left: showFinalAction ? 0 : compactHorizontalInset,
+                  right: showFinalAction ? 0 : compactHorizontalInset,
+                  top: showFinalAction ? 0 : compactVerticalInset,
+                  bottom: showFinalAction ? 0 : compactVerticalInset,
+                  borderRadius: showFinalAction ? 29 : 6,
+                  backgroundColor: theme.colors.lightPrimary,
+                  boxShadow: showFinalAction ? '0 5px 12px rgba(40,67,128,0.16)' : 'none',
+                  overflow: 'hidden',
+                  transitionProperty: [
+                    'left',
+                    'right',
+                    'top',
+                    'bottom',
+                    'borderRadius',
+                    'boxShadow',
+                  ],
+                  transitionDuration: 800,
+                  transitionTimingFunction: cubicBezier(0.86, 0, 0.07, 1),
+                }}
               >
-                <Text color="reverse" fontSize={17} bold>
-                  {t(
-                    isFinalScene ? 'playground.onboarding.start' : 'playground.onboarding.continue'
-                  )}
-                </Text>
-                <Feather name="arrow-right" size={23} color={theme.colors.reverse} />
-              </Box>
+                <Animated.View
+                  style={[
+                    {
+                      position: 'absolute',
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      width: `${progress * 100}%`,
+                      backgroundColor: theme.colors.primary,
+                      transitionProperty: 'width',
+                      transitionDuration: 420,
+                      transitionDelay: delayProgressAfterFinalBack && !reduceMotion ? 520 : 0,
+                      transitionTimingFunction: 'ease-in-out',
+                    },
+                  ]}
+                />
+              </Animated.View>
+              {showFinalAction ? (
+                <AnimatedBox
+                  absoluteFill
+                  center
+                  entering={reduceMotion ? undefined : finalActionLabelEntering}
+                  exiting={FadeOut}
+                >
+                  <HStack alignItems="center" gap={12}>
+                    <Text color="reverse" fontSize={17} bold>
+                      {t('playground.onboarding.start')}
+                    </Text>
+                    <Feather name="arrow-right" size={23} color={theme.colors.reverse} />
+                  </HStack>
+                </AnimatedBox>
+              ) : null}
             </AnimatedPressable>
           </Animated.View>
-        </HStack>
+        </Box>
       </VStack>
     </Box>
   )

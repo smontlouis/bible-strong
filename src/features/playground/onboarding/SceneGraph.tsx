@@ -43,8 +43,10 @@ export type SceneNodeAnchor = {
 }
 
 export type SceneNodeOffset = {
-  x: number
-  y: number
+  x?: number
+  y?: number
+  rotation?: number
+  scale?: number
 }
 
 export type SceneNodeOrbit = {
@@ -703,8 +705,12 @@ const NodeRenderer = ({
         : tapGesture
   const enterFromX = (descriptor.enterFrom?.x ?? 0) * metrics.scale
   const enterFromY = (descriptor.enterFrom?.y ?? 0) * metrics.scale
+  const enterFromRotation = descriptor.enterFrom?.rotation ?? 0
+  const enterFromScale = descriptor.enterFrom?.scale ?? 1
   const exitToX = (descriptor.exitTo?.x ?? 0) * metrics.scale
   const exitToY = (descriptor.exitTo?.y ?? 0) * metrics.scale
+  const exitToRotation = descriptor.exitTo?.rotation ?? 0
+  const exitToScale = descriptor.exitTo?.scale ?? 1
   const enteringAnimation = () => {
     'worklet'
     const delay = descriptor.enterDelay ?? 0
@@ -712,13 +718,20 @@ const NodeRenderer = ({
     return {
       initialValues: {
         opacity: 0,
-        transform: [{ translateX: enterFromX }, { translateY: enterFromY }],
+        transform: [
+          { translateX: enterFromX },
+          { translateY: enterFromY },
+          { scale: enterFromScale },
+          { rotate: `${enterFromRotation}deg` },
+        ],
       },
       animations: {
         opacity: withDelay(delay, withSpring(1)),
         transform: [
           { translateX: withDelay(delay, withSpring(0)) },
           { translateY: withDelay(delay, withSpring(0)) },
+          { scale: withDelay(delay, withSpring(1)) },
+          { rotate: withDelay(delay, withSpring('0deg')) },
         ],
       },
     }
@@ -729,11 +742,16 @@ const NodeRenderer = ({
     return {
       initialValues: {
         opacity: 1,
-        transform: [{ translateX: 0 }, { translateY: 0 }],
+        transform: [{ translateX: 0 }, { translateY: 0 }, { scale: 1 }, { rotate: '0deg' }],
       },
       animations: {
         opacity: withSpring(0),
-        transform: [{ translateX: withSpring(exitToX) }, { translateY: withSpring(exitToY) }],
+        transform: [
+          { translateX: withSpring(exitToX) },
+          { translateY: withSpring(exitToY) },
+          { scale: withSpring(exitToScale) },
+          { rotate: withSpring(`${exitToRotation}deg`) },
+        ],
       },
     }
   }

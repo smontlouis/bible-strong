@@ -14,6 +14,7 @@ import Box, { AnimatedBox, HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import type { OnboardingStageMetrics } from '../onboarding/OnboardingStage'
 import SceneBackgroundShape from '../onboarding/SceneBackgroundShape'
+import SceneActionButton from '../onboarding/SceneActionButton'
 import SceneDecorativePluses from '../onboarding/SceneDecorativePluses'
 import { Scene } from '../onboarding/SceneGraph'
 import VerseCard, { type HighlightColor } from '../onboarding/VerseCard'
@@ -124,7 +125,7 @@ const OccurrenceCounter = ({ metrics, t }: StrongLemmaCardProps) => {
       gap={s(3)}
     >
       <Text title bold fontSize={s(9)} lineHeight={s(16)}>
-        64
+        {t('playground.sceneFour.occurrenceCount')}
       </Text>
       <Text color="tertiary" bold fontSize={s(7)}>
         {t('playground.sceneFour.usageCount')}
@@ -168,7 +169,7 @@ const StrongLemmaCard = ({ metrics, t }: StrongLemmaCardProps) => {
         lineHeight={s(24)}
         style={{ fontFamily: 'Literata Book', fontStyle: 'italic' }}
       >
-        hevel
+        {t('playground.sceneThree.commonTransliteration')}
       </Text>
       <Text color="tertiary" fontSize={s(9.5)} textAlign="center">
         {t('playground.sceneFour.lemmaDetails')}
@@ -200,17 +201,21 @@ const OccurrenceFilter = ({
     hitSlop={metrics.s(4)}
     style={({ pressed }) => ({ opacity: pressed ? 0.72 : 1 })}
   >
-    <Box
-      bg={active ? 'primary' : 'reverse'}
+    <AnimatedBox
+      bg={active ? 'lightPrimary' : 'reverse'}
       borderRadius={metrics.s(14)}
-      px={metrics.s(active ? 11 : 9)}
+      px={metrics.s(10)}
       py={metrics.s(6)}
       center
+      style={{
+        transitionProperty: 'backgroundColor',
+        transitionDelay: 800,
+      }}
     >
-      <Text color={active ? 'reverse' : 'tertiary'} bold fontSize={metrics.s(8.5)}>
+      <Text color={active ? 'primary' : 'tertiary'} bold fontSize={metrics.s(8.5)}>
         {label}
       </Text>
-    </Box>
+    </AnimatedBox>
   </Pressable>
 )
 
@@ -406,6 +411,7 @@ type CreateSceneFourOccurrencesProps = {
   filterDirection: OccurrenceFilterDirection
   highlightColor: HighlightColor
   metrics: OnboardingStageMetrics
+  onAddNotePress: () => void
   onFilterChange: (filter: OccurrenceFilterId) => void
   reduceMotion: boolean
   t: TFunction
@@ -416,6 +422,7 @@ export const createSceneFourOccurrences = ({
   filterDirection,
   highlightColor,
   metrics,
+  onAddNotePress,
   onFilterChange,
   reduceMotion,
   t,
@@ -605,6 +612,20 @@ export const createSceneFourOccurrences = ({
             renderVerse(verses[2], 12.3)
           )}
         </OccurrenceVerseCard>
+      </Scene.Node>
+
+      <Scene.Node
+        id="note-create"
+        layout="resize"
+        frame={{ x: 246, y: 405, width: 42, height: 42, zIndex: 8 }}
+        onPress={onAddNotePress}
+        enterFrom={{ scale: 0.5 }}
+        exitTo={{ scale: 1.5 }}
+        enterDelay={1100}
+        pressScale={0.96}
+        accessibilityLabel={t('playground.sceneFour.addNote')}
+      >
+        <SceneActionButton icon="file-plus" metrics={metrics} />
       </Scene.Node>
 
       <SceneDecorativePluses metrics={metrics} reduceMotion={reduceMotion} scene="four" />
