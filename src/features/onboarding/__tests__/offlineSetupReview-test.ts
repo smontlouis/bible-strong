@@ -88,6 +88,24 @@ describe('offline setup review', () => {
     expect(longPull - shortPull).toBeLessThan(0.02)
   })
 
+  it('rubber-bands around the closed position when review is locked', () => {
+    const upwardPull = getOfflineSetupReviewDragProgress({
+      locked: true,
+      rawProgress: 0.8,
+      sheetTravel: 100,
+    })
+    const downwardPull = getOfflineSetupReviewDragProgress({
+      locked: true,
+      rawProgress: -0.8,
+      sheetTravel: 100,
+    })
+
+    expect(upwardPull).toBeGreaterThan(0)
+    expect(upwardPull).toBeLessThan(28 / 100)
+    expect(downwardPull).toBeLessThan(0)
+    expect(downwardPull).toBeGreaterThan(-28 / 100)
+  })
+
   it('sizes the expanded sheet from its rows until it reaches the maximum height', () => {
     const oneItemHeight = getOfflineSetupReviewExpandedHeight({
       bottomInset: 34,

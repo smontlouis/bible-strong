@@ -45,7 +45,7 @@ const OfflineSetupFolderReviewHeader = ({
         onLayout={onFolderBadgeLayout}
         style={{ opacity: context.heroOverlayActive ? 0 : 1 }}
       >
-        <OfflineResourceFolderBadge visual={context.visual} />
+        <OfflineResourceFolderBadge itemCount={context.selectedCount} visual={context.visual} />
       </View>
       <Box flex>
         <Text color="#FFFFFF" title fontSize={14} lineHeight={17} numberOfLines={1}>

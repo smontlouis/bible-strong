@@ -164,6 +164,8 @@ const OfflineSetupReviewSheet = ({
   const [reviewOpen, setReviewOpen] = useState(false)
   const [overlayActive, setOverlayActive] = useState(false)
   const canReview = displayedItems.length > 0
+  const gestureEnabled = canReview || Boolean(folderContext)
+  const gestureLocked = !canReview
   const disabled = folderContext
     ? false
     : downloading || displayedItems.length === 0 || !availabilityReady
@@ -197,7 +199,7 @@ const OfflineSetupReviewSheet = ({
   })
 
   const panGesture = Gesture.Pan()
-    .enabled(canReview)
+    .enabled(gestureEnabled)
     .minDistance(2)
     .onBegin(() => {
       dragStartProgress.set(progress.get())
@@ -208,16 +210,20 @@ const OfflineSetupReviewSheet = ({
       const rawProgress = dragStartProgress.get() - dragDistance / sheetTravel
       progress.set(
         getOfflineSetupReviewDragProgress({
+          locked: gestureLocked,
           rawProgress,
           sheetTravel,
         })
       )
     })
     .onEnd(event => {
-      const target = getOfflineSetupReviewSnapPoint({
-        progress: progress.get(),
-        velocityY: event.velocityY,
-      })
+      let target: 0 | 1 = 0
+      if (!gestureLocked) {
+        target = getOfflineSetupReviewSnapPoint({
+          progress: progress.get(),
+          velocityY: event.velocityY,
+        })
+      }
       scheduleOnRN(setReviewOpen, target === 1)
       if (onOpenChange) scheduleOnRN(onOpenChange, target === 1)
       progress.set(
@@ -493,18 +499,20 @@ const OfflineSetupReviewSheet = ({
               }}
             />
 
-            <Box
-              position="absolute"
-              top={layout.headerTop + layout.summaryHeight + layout.subtitleMarginTop}
-              left={26}
-              right={26}
-              zIndex={3}
-              pointerEvents="none"
-            >
-              <Text color="#AEB9CA" fontSize={13} lineHeight={layout.subtitleHeight}>
-                {t('offlineSetup.reviewSubtitle', { count: displayedItems.length })}
-              </Text>
-            </Box>
+            {!folderContext ? (
+              <Box
+                position="absolute"
+                top={layout.headerTop + layout.summaryHeight + layout.subtitleMarginTop}
+                left={26}
+                right={26}
+                zIndex={3}
+                pointerEvents="none"
+              >
+                <Text color="#AEB9CA" fontSize={13} lineHeight={layout.subtitleHeight}>
+                  {t('offlineSetup.reviewSubtitle', { count: displayedItems.length })}
+                </Text>
+              </Box>
+            ) : null}
           </AnimatedBox>
 
           <AnimatedBox

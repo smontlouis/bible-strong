@@ -87,6 +87,7 @@ export const offlineSetupSceneReducer = (
       }
       return {
         ...state,
+        activeFolder: undefined,
         detailContentVisible: false,
         hero: {
           direction: 'closing',

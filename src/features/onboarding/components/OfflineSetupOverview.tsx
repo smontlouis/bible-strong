@@ -80,17 +80,20 @@ const getFolderEnteringAnimation = ({
 }) => {
   if (reduceMotion || isReturningFolder) return undefined
 
-  const duration = returning ? 300 : 460
-  const initialDelay = returning ? 20 : 120
-  const stagger = returning ? 45 : 70
-  return FadeInUp.duration(duration)
-    .delay(initialDelay + index * stagger)
+  const motion = returning
+    ? OFFLINE_SETUP_MOTION.overview.returnEntrance
+    : OFFLINE_SETUP_MOTION.overview.initialEntrance
+  return FadeInUp.duration(motion.folderDuration)
+    .delay(motion.initialDelay + index * motion.folderStagger)
     .easing(OVERVIEW_ENTRANCE_EASING)
 }
 
 const getHeaderEnteringAnimation = (reduceMotion: boolean) => {
   if (reduceMotion) return undefined
-  return FadeInDown.duration(400).delay(40).easing(OVERVIEW_ENTRANCE_EASING)
+  const motion = OFFLINE_SETUP_MOTION.overview.initialEntrance
+  return FadeInDown.duration(motion.headerDuration)
+    .delay(motion.headerDelay)
+    .easing(OVERVIEW_ENTRANCE_EASING)
 }
 
 const OfflineSetupOverview = ({

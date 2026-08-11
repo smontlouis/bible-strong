@@ -115,7 +115,9 @@ const OfflineSetupFolderDetail = ({
             opacity: contentVisible ? 1 : 0,
             transform: [{ translateY: contentVisible ? 0 : -10 }],
             transitionProperty: ['opacity', 'transform'],
-            transitionDuration: contentVisible ? 300 : 190,
+            transitionDuration: contentVisible
+              ? OFFLINE_SETUP_MOTION.detail.header.enterDuration
+              : OFFLINE_SETUP_MOTION.detail.header.exitDuration,
             transitionDelay: 0,
             transitionTimingFunction: 'ease-out',
           }}
@@ -133,8 +135,12 @@ const OfflineSetupFolderDetail = ({
             opacity: contentVisible ? 1 : 0,
             transform: [{ translateY: contentVisible ? 0 : 14 }],
             transitionProperty: ['opacity', 'transform'],
-            transitionDuration: contentVisible ? 340 : 210,
-            transitionDelay: contentVisible ? 40 : 0,
+            transitionDuration: contentVisible
+              ? OFFLINE_SETUP_MOTION.detail.resourceList.enterDuration
+              : OFFLINE_SETUP_MOTION.detail.resourceList.exitDuration,
+            transitionDelay: contentVisible
+              ? OFFLINE_SETUP_MOTION.detail.resourceList.enterDelay
+              : 0,
             transitionTimingFunction: 'ease-out',
           }}
         >

@@ -16,6 +16,7 @@ import type {
   OfflineSetupHeroDirection,
 } from '../offlineSetupPresentation'
 import OfflineResourceFolder from './OfflineResourceFolder'
+import OfflineResourceFolderBadge from './OfflineResourceFolderBadge'
 
 export type OfflineResourceFolderHeroDirection = OfflineSetupHeroDirection
 
@@ -32,7 +33,7 @@ type OfflineResourceFolderHeroProps = {
 }
 
 const HERO_WIDTH = 190
-const HERO_HEIGHT = 172
+const HERO_HEIGHT = HERO_WIDTH * (40 / 44)
 const OfflineResourceFolderHero = ({
   direction,
   origin,
@@ -92,6 +93,24 @@ const OfflineResourceFolderHero = ({
     }
   })
 
+  const folderStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      progress.get(),
+      [OFFLINE_SETUP_MOTION.hero.handoffStartProgress, 1],
+      [1, 0],
+      Extrapolation.CLAMP
+    ),
+  }))
+
+  const badgeStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(
+      progress.get(),
+      [OFFLINE_SETUP_MOTION.hero.handoffStartProgress, 1],
+      [0, 1],
+      Extrapolation.CLAMP
+    ),
+  }))
+
   return (
     <Animated.View
       pointerEvents="none"
@@ -109,16 +128,21 @@ const OfflineResourceFolderHero = ({
         animatedStyle,
       ]}
     >
-      <OfflineResourceFolder
-        width={HERO_WIDTH}
-        title={title}
-        subtitle={subtitle}
-        icon={visual.icon}
-        itemCount={itemCount}
-        selected={selected}
-        showChevron={false}
-        colors={visual.colors}
-      />
+      <Animated.View style={[{ position: 'absolute', inset: 0 }, folderStyle]}>
+        <OfflineResourceFolder
+          width={HERO_WIDTH}
+          title={title}
+          subtitle={subtitle}
+          icon={visual.icon}
+          itemCount={itemCount}
+          selected={selected}
+          showChevron={false}
+          colors={visual.colors}
+        />
+      </Animated.View>
+      <Animated.View style={[{ position: 'absolute', inset: 0 }, badgeStyle]}>
+        <OfflineResourceFolderBadge itemCount={itemCount} visual={visual} width={HERO_WIDTH} />
+      </Animated.View>
     </Animated.View>
   )
 }

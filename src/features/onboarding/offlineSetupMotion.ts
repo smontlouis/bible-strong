@@ -10,9 +10,33 @@ export const OFFLINE_SETUP_MOTION = {
     entranceBezier: [0.22, 1, 0.36, 1] as const,
     exitDuration: 120,
     downloadFadeDuration: 220,
+    initialEntrance: {
+      folderDuration: 460,
+      initialDelay: 120,
+      folderStagger: 120,
+      headerDuration: 600,
+      headerDelay: 40,
+    },
+    returnEntrance: {
+      folderDuration: 300,
+      initialDelay: 250,
+      folderStagger: 45,
+    },
+  },
+  detail: {
+    header: {
+      enterDuration: 500,
+      exitDuration: 190,
+    },
+    resourceList: {
+      enterDuration: 340,
+      enterDelay: 40,
+      exitDuration: 210,
+    },
   },
   hero: {
     duration: 520,
+    handoffStartProgress: 0.72,
     handoffDuration: 140,
   },
   reviewSheet: {

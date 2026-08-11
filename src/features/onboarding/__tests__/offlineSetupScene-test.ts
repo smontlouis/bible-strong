@@ -38,6 +38,7 @@ describe('offline setup scene', () => {
     const settled = { ...opened, hero: undefined, openingFolder: undefined }
     const closing = reduce(settled, { type: 'folder.close', target })
 
+    expect(closing.activeFolder).toBeUndefined()
     expect(closing.detailContentVisible).toBe(false)
     expect(closing.hero).toEqual({
       direction: 'closing',

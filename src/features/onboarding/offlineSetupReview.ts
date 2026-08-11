@@ -137,24 +137,29 @@ export const getOfflineSetupReviewSnapPoint = ({
 }
 
 export const getOfflineSetupReviewDragProgress = ({
+  locked,
   rawProgress,
   sheetTravel,
 }: {
+  locked?: boolean
   rawProgress: number
   sheetTravel: number
 }): number => {
   'worklet'
 
-  if (rawProgress >= 0 && rawProgress <= 1) return rawProgress
+  if (!locked && rawProgress >= 0 && rawProgress <= 1) return rawProgress
 
   const reviewMotion = OFFLINE_SETUP_MOTION.reviewSheet
-  const overflowProgress = rawProgress < 0 ? -rawProgress : rawProgress - 1
+  let boundary = 0
+  if (!locked && rawProgress > 1) boundary = 1
+
+  const overflowProgress = Math.abs(rawProgress - boundary)
   const overflowDistance = overflowProgress * sheetTravel
   const resistance =
     1 + (overflowDistance * reviewMotion.rubberBandCoefficient) / reviewMotion.maxOverdrag
   const resistedDistance = reviewMotion.maxOverdrag * (1 - 1 / resistance)
   const resistedProgress = resistedDistance / sheetTravel
 
-  if (rawProgress < 0) return -resistedProgress
-  return 1 + resistedProgress
+  if (rawProgress < boundary) return boundary - resistedProgress
+  return boundary + resistedProgress
 }
