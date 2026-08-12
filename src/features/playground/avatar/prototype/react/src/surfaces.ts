@@ -1,6 +1,6 @@
 import type { Point3 } from './geometry'
 
-export type SurfaceType = 'sphere' | 'cube' | 'capsule' | 'cylinder' | 'cone' | 'diamond'
+export type SurfaceType = 'sphere' | 'mickey' | 'cube' | 'capsule' | 'cylinder' | 'cone' | 'diamond'
 
 export type SurfaceConfig = {
   type: SurfaceType
@@ -20,6 +20,7 @@ export type SurfaceSample = {
 
 export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
   sphere: { type: 'sphere', width: 240, height: 240, depth: 240, roundness: 1 },
+  mickey: { type: 'mickey', width: 220, height: 210, depth: 145, roundness: 1 },
   cube: { type: 'cube', width: 245, height: 245, depth: 220, roundness: 0 },
   capsule: { type: 'capsule', width: 205, height: 270, depth: 205, roundness: 1 },
   cylinder: {
@@ -45,6 +46,7 @@ export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
 
 export const surfaceLabels: Record<SurfaceType, string> = {
   sphere: 'Sphère',
+  mickey: 'Mickey',
   cube: 'Cube',
   capsule: 'Capsule',
   cylinder: 'Cylindre',
@@ -286,6 +288,7 @@ export const surfacePointAt = (
   const { width, height, depth } = config
   switch (config.type) {
     case 'sphere':
+    case 'mickey':
       return superellipsoid(longitude, latitude, width, height, depth, 1, 1)
     case 'cube':
       return cube(config, longitude, latitude)
@@ -493,6 +496,7 @@ export const surfaceFrontSampleAt = (
 
   switch (config.type) {
     case 'sphere':
+    case 'mickey':
       return ellipsoidFrontSample(x, y, radiusX, radiusY, radiusZ)
 
     case 'cube':
@@ -525,7 +529,7 @@ export const surfaceNormalAt = (
 
   // An ellipsoid has a cheap exact normal. This is also the overwhelmingly
   // common path for the default spherical head.
-  if (config.type === 'sphere') {
+  if (config.type === 'sphere' || config.type === 'mickey') {
     const halfWidth = config.width / 2 || 1
     const halfHeight = config.height / 2 || 1
     const halfDepth = config.depth / 2 || 1
@@ -562,7 +566,7 @@ export const surfaceSampleAt = (
 ): SurfaceSample => {
   const point = surfacePointAt(config, longitude, latitude)
 
-  if (config.type === 'sphere') {
+  if (config.type === 'sphere' || config.type === 'mickey') {
     const halfWidth = config.width / 2 || 1
     const halfHeight = config.height / 2 || 1
     const halfDepth = config.depth / 2 || 1

@@ -349,6 +349,7 @@ function AvatarCanvas({
   surface,
   wirePaths,
   showWire,
+  backPaths,
   headPath,
   leftPath,
   rightPath,
@@ -363,6 +364,7 @@ function AvatarCanvas({
   surface: SurfaceConfig
   wirePaths: MotionValue<string>[]
   showWire: boolean
+  backPaths: MotionValue<string>[]
   headPath: MotionValue<string>
   leftPath: MotionValue<string>
   rightPath: MotionValue<string>
@@ -552,6 +554,14 @@ function AvatarCanvas({
             <motion.path d={headPath} />
           </clipPath>
         </defs>
+        {backPaths.map((pathValue, index) => (
+          <motion.path
+            className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
+            d={pathValue}
+            key={index}
+            onPointerDown={startDrag}
+          />
+        ))}
         <motion.path
           className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
           d={headPath}
@@ -683,6 +693,9 @@ function SurfaceThumbnail({ surface }: { surface: SurfaceConfig }) {
   const geometry = getPreviewGeometry(defaultExpression, surface)
   return (
     <svg viewBox="-150 -150 300 300" aria-hidden="true">
+      {geometry.backPaths.map((pathValue, index) => (
+        <path d={pathValue} key={index} />
+      ))}
       <path d={geometry.headPath} />
     </svg>
   )
@@ -706,6 +719,9 @@ function ExpressionPreview({
           <path d={geometry.headPath} />
         </clipPath>
       </defs>
+      {geometry.backPaths.map((pathValue, index) => (
+        <path className="preview-head" d={pathValue} key={index} />
+      ))}
       <path className="preview-head" d={geometry.headPath} />
       <g clipPath={`url(#${clipId})`}>
         <path
@@ -986,6 +1002,7 @@ export default function App() {
   const blinkControls = useRef<ReturnType<typeof animate> | null>(null)
   const blinkValue = useMotionValue(1)
   const headPath = useMotionValue(initialGeometry.headPath)
+  const [backPaths] = useState(() => [motionValue(''), motionValue('')])
   const leftPath = useMotionValue(initialGeometry.leftPath)
   const rightPath = useMotionValue(initialGeometry.rightPath)
   const leftOpacity = useMotionValue(initialGeometry.leftVisible ? 1 : 0)
@@ -1000,6 +1017,7 @@ export default function App() {
       includeWire: showWireRef.current || highlightRef.current === 'head',
     })
     headPath.set(geometry.headPath)
+    backPaths.forEach((pathValue, index) => pathValue.set(geometry.backPaths[index] ?? ''))
     leftPath.set(geometry.leftPath)
     rightPath.set(geometry.rightPath)
     leftOpacity.set(geometry.leftVisible ? 1 : 0)
@@ -1262,6 +1280,7 @@ export default function App() {
           surface={surface}
           wirePaths={wirePaths}
           showWire={showWire}
+          backPaths={backPaths}
           headPath={headPath}
           leftPath={leftPath}
           rightPath={rightPath}

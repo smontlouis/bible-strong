@@ -32,6 +32,7 @@ export type AvatarPose = {
 }
 
 export type AvatarGeometry = {
+  backPaths: string[]
   headPath: string
   leftPath: string
   rightPath: string
@@ -844,6 +845,21 @@ const projectedEllipsoidPath = (pose: AvatarPose, surface: SurfaceConfig) => {
   return ellipse ? ellipsePath(ellipse) : null
 }
 
+const mickeyEarPaths = (pose: AvatarPose, surface: SurfaceConfig) => {
+  if (surface.type !== 'mickey') return []
+
+  const radius = Math.min(surface.width, surface.height) * 0.23
+  const depthRadius = Math.min(radius, surface.depth * 0.29)
+  const centerX = surface.width * 0.37
+  const centerY = -surface.height * 0.39
+  const centerZ = -surface.depth * 0.12
+  const axes: Point3 = [radius, radius, depthRadius]
+  return [-1, 1]
+    .map(side => projectedEllipsoid(pose, axes, [side * centerX, centerY, centerZ]))
+    .filter((ear): ear is ProjectedEllipse => ear !== null)
+    .map(ellipsePath)
+}
+
 const ellipsePoints = (ellipse: ProjectedEllipse) =>
   Array.from({ length: PRIMITIVE_RING_SAMPLES }, (_, index) => {
     const angle = (index / PRIMITIVE_RING_SAMPLES) * Math.PI * 2
@@ -898,7 +914,7 @@ const projectedCapsulePath = (pose: AvatarPose, surface: SurfaceConfig) => {
 }
 
 const headPath = (pose: AvatarPose, surface: SurfaceConfig) => {
-  if (surface.type === 'sphere') {
+  if (surface.type === 'sphere' || surface.type === 'mickey') {
     const exactPath = projectedEllipsoidPath(pose, surface)
     if (exactPath) return exactPath
   }
@@ -942,6 +958,7 @@ export const renderAvatar = (
   const left = leftSamples.map(sample => sample.point)
   const right = rightSamples.map(sample => sample.point)
   return {
+    backPaths: mickeyEarPaths(pose, surface),
     headPath: headPath(pose, surface),
     leftPath: path(left),
     rightPath: path(right),
