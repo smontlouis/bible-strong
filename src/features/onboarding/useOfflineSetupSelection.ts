@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import { isLocalResourceAvailable } from '~features/resources/resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
@@ -8,6 +9,7 @@ import {
 } from '~helpers/offlineResourceSizeManifest'
 import {
   getOnboardingResourceIdentity,
+  getOnboardingResourceDisplayName,
   getOnboardingResourceSelectionId,
 } from './onboardingResources'
 import {
@@ -60,6 +62,7 @@ const checkAvailability = async (
 }
 
 const useOfflineSetupSelection = (lang: ResourceLanguage) => {
+  const { t } = useTranslation()
   const [folderOptionIds, setFolderOptionIds] = useState<OfflineSetupFolderOptionIds>(() =>
     getDefaultOfflineSetupFolderOptionIds(lang)
   )
@@ -71,8 +74,10 @@ const useOfflineSetupSelection = (lang: ResourceLanguage) => {
   const selectionKey = JSON.stringify(folderOptionIds)
   const selections = resolveOfflineSetupFolderOptionIds(folderOptionIds, lang)
   const lockedOptionIds = getOfflineSetupLockedOptionIds(folderOptionIds, lang)
+  const getDisplayName = (selection: Parameters<typeof getOnboardingResourceDisplayName>[0]) =>
+    getOnboardingResourceDisplayName(selection, lang, (key, options) => t(key, options))
   const reviewSummary = getOfflineSetupReviewSummary(
-    getOfflineSetupReviewItems(selections, sizeManifest)
+    getOfflineSetupReviewItems(selections, sizeManifest, getDisplayName)
   )
   const folderReviewSummaries = Object.fromEntries(
     OFFLINE_SETUP_FOLDER_IDS.map(folderId => {
@@ -81,7 +86,7 @@ const useOfflineSetupSelection = (lang: ResourceLanguage) => {
         folderOptionIds[folderId],
         lang
       )
-      const folderItems = getOfflineSetupReviewItems(folderSelections, sizeManifest)
+      const folderItems = getOfflineSetupReviewItems(folderSelections, sizeManifest, getDisplayName)
       return [folderId, getOfflineSetupReviewSummary(folderItems)]
     })
   ) as Record<OfflineSetupFolderId, OfflineSetupReviewSummary>

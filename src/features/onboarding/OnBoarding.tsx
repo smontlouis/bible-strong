@@ -23,7 +23,10 @@ const useCheckMandatoryVersions = () => {
 
   useEffect(() => {
     if (isOnboardingForced) {
-      if (!forcedOnboardingDismissed.current) setShowOnboarding(true)
+      if (!forcedOnboardingDismissed.current) {
+        console.log('[Onboarding] Force onboarding.')
+        setShowOnboarding(true)
+      }
       return
     }
 

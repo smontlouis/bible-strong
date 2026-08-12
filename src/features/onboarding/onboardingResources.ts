@@ -7,6 +7,7 @@ import {
   createStrongLexiconModuleDownloadItem,
 } from '~helpers/downloadItemFactory'
 import { databases } from '~helpers/databases'
+import { versions } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion, type ActiveLanguage } from '~helpers/languageUtils'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
@@ -42,6 +43,50 @@ export type OnboardingResourceSelection =
       kind: 'bible-interlinear'
       lang: ResourceLanguage
     }
+
+type TranslateResourceName = (key: string, options?: Record<string, string | undefined>) => string
+
+const DATABASE_RESOURCE_NAME_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, string> = {
+  DICTIONNAIRE: 'Dictionnaire Westphal',
+  NAVE: 'Bible thématique Nave',
+  TRESOR: 'Références croisées',
+  MHY: 'Commentaires',
+  TIMELINE: 'Chronologie de la Bible',
+}
+
+const STRONG_LEXICON_RESOURCE_NAME_KEYS: Record<StrongLexiconModuleId, string> = {
+  core: 'offlineSetup.resources.strongLexicon',
+  resources: 'offlineSetup.resources.greekDictionary',
+  entities: 'offlineSetup.resources.entities',
+}
+
+const getLocalizedBibleName = (versionId: string, lang: ResourceLanguage): string => {
+  const version = versions[versionId]
+  if (!version) return versionId
+  return lang === 'en' ? (version.name_en ?? version.name) : version.name
+}
+
+export const getOnboardingResourceDisplayName = (
+  resource: OnboardingResourceSelection,
+  uiLanguage: ResourceLanguage,
+  translate: TranslateResourceName
+): string => {
+  if (resource.kind === 'bible') {
+    return getLocalizedBibleName(resource.versionId, uiLanguage)
+  }
+  if (resource.kind === 'bible-strong') {
+    return translate('offlineSetup.option.strongBible', {
+      name: getLocalizedBibleName(resource.versionId, uiLanguage),
+    })
+  }
+  if (resource.kind === 'strong-lexicon') {
+    return translate(STRONG_LEXICON_RESOURCE_NAME_KEYS[resource.moduleId ?? 'core'])
+  }
+  if (resource.kind === 'bible-interlinear') {
+    return translate(`offlineSetup.option.interlinear.${resource.lang}`)
+  }
+  return translate(DATABASE_RESOURCE_NAME_KEYS[resource.databaseId])
+}
 
 export const getOnboardingResourceIdentity = (
   resource: OnboardingResourceSelection

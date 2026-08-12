@@ -1,4 +1,5 @@
 import { ThemeProvider } from '@emotion/react'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { SystemBars } from 'react-native-edge-to-edge'
 import { ThemeSelectionOverrideContext } from '~common/ThemeSelectionOverrideContext'
@@ -7,12 +8,17 @@ import Box from '~common/ui/Box'
 import AbelOnboarding from '~features/onboarding/AbelOnboarding'
 import SelectResources from '~features/onboarding/SelectResources'
 import themes from '~themes'
+import AvatarPlayground from './avatar/AvatarPlayground'
 import PlaygroundHome from './PlaygroundHome'
 
-type PlaygroundView = 'home' | 'abel-onboarding' | 'offline-setup'
+type PlaygroundView = 'home' | 'abel-onboarding' | 'avatar' | 'offline-setup'
 
 const PlaygroundScreen = () => {
-  const [view, setView] = useState<PlaygroundView>('home')
+  const params = useLocalSearchParams<{ playground?: string }>()
+  const router = useRouter()
+  const [view, setView] = useState<PlaygroundView>(() =>
+    params.playground === 'avatar' ? 'avatar' : 'home'
+  )
   const [selectedTheme, setSelectedTheme] = useState<CurrentTheme>('default')
   const colorScheme = ['dark', 'black', 'mauve', 'night'].includes(selectedTheme) ? 'dark' : 'light'
 
@@ -30,11 +36,26 @@ const PlaygroundScreen = () => {
       return <SelectResources mode="preview" onClose={() => setView('home')} />
     }
 
+    if (view === 'avatar') {
+      return (
+        <AvatarPlayground
+          onClose={() => {
+            setView('home')
+            router.setParams({ playground: undefined, variant: undefined })
+          }}
+        />
+      )
+    }
+
     return (
       <PlaygroundHome
         selectedTheme={selectedTheme}
         onSelectTheme={setSelectedTheme}
         onOpenAbelOnboarding={() => setView('abel-onboarding')}
+        onOpenAvatar={() => {
+          setView('avatar')
+          router.setParams({ playground: 'avatar' })
+        }}
         onOpenOfflineSetup={() => setView('offline-setup')}
       />
     )

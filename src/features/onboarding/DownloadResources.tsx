@@ -24,7 +24,7 @@ import Text from '~common/ui/Text'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useTranslation } from 'react-i18next'
 import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
-import { getNextBibleFactIndex, OFFLINE_SETUP_BIBLE_FACT_KEYS } from './offlineSetupBibleFacts'
+import { getRandomBibleFactIndex, OFFLINE_SETUP_BIBLE_FACT_KEYS } from './offlineSetupBibleFacts'
 import { getOfflineSetupOverviewPalette, type OfflineSetupPalette } from './offlineSetupPalette'
 import useOfflineSetupDownload, {
   type OfflineSetupDownloadPhase,
@@ -44,12 +44,12 @@ const DOWNLOAD_REVEAL = OFFLINE_SETUP_MOTION.download.reveal
 const DOWNLOAD_SUCCESS = OFFLINE_SETUP_MOTION.download.success
 
 const useRotatingBibleFact = (active: boolean) => {
-  const [factIndex, setFactIndex] = useState(0)
+  const [factIndex, setFactIndex] = useState(() => getRandomBibleFactIndex())
 
   useEffect(() => {
     if (!active) return undefined
     const interval = setInterval(() => {
-      setFactIndex(getNextBibleFactIndex)
+      setFactIndex(getRandomBibleFactIndex)
     }, OFFLINE_SETUP_MOTION.download.preview.factRotationDuration)
     return () => clearInterval(interval)
   }, [active])

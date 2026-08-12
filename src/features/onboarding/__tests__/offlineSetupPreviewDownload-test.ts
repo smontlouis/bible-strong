@@ -1,5 +1,5 @@
 import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
-import { getNextBibleFactIndex, OFFLINE_SETUP_BIBLE_FACT_KEYS } from '../offlineSetupBibleFacts'
+import { getRandomBibleFactIndex, OFFLINE_SETUP_BIBLE_FACT_KEYS } from '../offlineSetupBibleFacts'
 import { getPreviewDownloadProgress } from '../offlineSetupPreviewDownload'
 
 describe('offline setup preview download', () => {
@@ -15,9 +15,11 @@ describe('offline setup preview download', () => {
     expect(getPreviewDownloadProgress(30_000)).toBe(1)
   })
 
-  it('cycles through ten Bible facts', () => {
-    expect(OFFLINE_SETUP_BIBLE_FACT_KEYS).toHaveLength(10)
-    expect(getNextBibleFactIndex(0)).toBe(1)
-    expect(getNextBibleFactIndex(OFFLINE_SETUP_BIBLE_FACT_KEYS.length - 1)).toBe(0)
+  it('randomly selects among the Bible facts without repeating the current one', () => {
+    expect(OFFLINE_SETUP_BIBLE_FACT_KEYS).toHaveLength(13)
+    expect(getRandomBibleFactIndex(undefined, () => 0)).toBe(0)
+    expect(getRandomBibleFactIndex(undefined, () => 0.999)).toBe(12)
+    expect(getRandomBibleFactIndex(0, () => 0)).toBe(1)
+    expect(getRandomBibleFactIndex(6, () => 0.5)).not.toBe(6)
   })
 })

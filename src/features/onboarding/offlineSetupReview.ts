@@ -1,4 +1,3 @@
-import type { DownloadItem } from '~helpers/offlineCopy'
 import {
   getOfflineResourceSizeEntry,
   type OfflineResourceSizeManifest,
@@ -98,26 +97,23 @@ export const getOfflineSetupReviewExpandedHeight = (
   params: OfflineSetupReviewLayoutParams
 ): number => getOfflineSetupReviewLayout(params).expandedHeight
 
-const getUniqueDownloadItems = (
-  selections: readonly OnboardingResourceSelection[]
-): DownloadItem[] => [
-  ...new Map(
-    selections.map(selection => {
-      const item = createDownloadItemFromOnboardingSelection(selection)
-      return [item.id, item]
-    })
-  ).values(),
-]
-
 export const getOfflineSetupReviewItems = (
   selections: readonly OnboardingResourceSelection[],
-  manifest: OfflineResourceSizeManifest
+  manifest: OfflineResourceSizeManifest,
+  getDisplayName?: (selection: OnboardingResourceSelection) => string
 ): OfflineSetupReviewItem[] =>
-  getUniqueDownloadItems(selections).map(item => {
+  [
+    ...new Map(
+      selections.map(selection => {
+        const item = createDownloadItemFromOnboardingSelection(selection)
+        return [item.id, { item, selection }]
+      })
+    ).values(),
+  ].map(({ item, selection }) => {
     const size = getOfflineResourceSizeEntry(item.id, item.estimatedSize, manifest)
     return {
       id: item.id,
-      name: item.name,
+      name: getDisplayName ? getDisplayName(selection) : item.name,
       downloadBytes: size.downloadBytes,
       installedBytes: size.installedBytes,
     }

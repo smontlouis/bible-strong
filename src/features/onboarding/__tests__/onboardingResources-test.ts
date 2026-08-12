@@ -3,12 +3,23 @@ import {
   createDownloadItemFromOnboardingSelection,
   getDefaultOnboardingResourceSelection,
   getOnboardingDatabaseResourceOptions,
+  getOnboardingResourceDisplayName,
   getOnboardingResourceSelectionId,
   toggleOnboardingResourceSelection,
 } from '../onboardingResources'
 
 jest.mock('~helpers/languageUtils', () => ({
   getDefaultBibleVersion: jest.fn((lang: string) => (lang === 'en' ? 'KJV' : 'LSG')),
+}))
+
+jest.mock('~helpers/bibleVersions', () => ({
+  versions: {
+    BHG: {
+      id: 'BHG',
+      name: 'Bible hébraïque et grecque',
+      name_en: 'Hebrew & Greek Bible',
+    },
+  },
 }))
 
 jest.mock('~helpers/downloadItemFactory', () => ({
@@ -148,6 +159,40 @@ describe('onboardingResources', () => {
     expect(
       createDownloadItemFromOnboardingSelection({ kind: 'bible-interlinear', lang: 'fr' })
     ).toEqual(expect.objectContaining({ dependsOnId: 'bible:BHG' }))
+  })
+
+  it('localizes technical resource names for the English review', () => {
+    const labels: Record<string, string> = {
+      'offlineSetup.resources.strongLexicon': 'Strong lexicon',
+      'offlineSetup.resources.entities': 'Biblical entities',
+      'offlineSetup.resources.greekDictionary': 'Detailed Greek dictionary',
+    }
+    const translate = (key: string) => labels[key] ?? key
+
+    expect(
+      getOnboardingResourceDisplayName(
+        { kind: 'strong-lexicon', moduleId: 'core' },
+        'en',
+        translate
+      )
+    ).toBe('Strong lexicon')
+    expect(
+      getOnboardingResourceDisplayName(
+        { kind: 'strong-lexicon', moduleId: 'entities' },
+        'en',
+        translate
+      )
+    ).toBe('Biblical entities')
+    expect(
+      getOnboardingResourceDisplayName(
+        { kind: 'strong-lexicon', moduleId: 'resources' },
+        'en',
+        translate
+      )
+    ).toBe('Detailed Greek dictionary')
+    expect(
+      getOnboardingResourceDisplayName({ kind: 'bible', versionId: 'BHG' }, 'en', translate)
+    ).toBe('Hebrew & Greek Bible')
   })
 
   it('selecting Strong also selects its base Bible and deselecting the base removes Strong', () => {
