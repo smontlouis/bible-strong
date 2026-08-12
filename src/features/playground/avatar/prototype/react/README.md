@@ -11,7 +11,7 @@ Puis ouvrir `http://127.0.0.1:5173/`.
 
 - React gère l’éditeur et les presets en mémoire.
 - Motion gère les ressorts, les interruptions et les clignements.
-- `surfaces.ts` décrit les surfaces interchangeables (sphère, cube arrondi, capsule, etc.).
+- `surfaces.ts` décrit les surfaces interchangeables (sphère, cube, capsule, etc.).
 - Le cône expose des rondeurs indépendantes pour sa pointe et sa base.
 - Le cylindre expose une rondeur commune pour ses deux arêtes.
 - Le diamant peut être progressivement adouci jusqu’à une forme ellipsoïdale.

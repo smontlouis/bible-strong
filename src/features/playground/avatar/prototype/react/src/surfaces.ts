@@ -4,7 +4,6 @@ export type SurfaceType =
   | 'sphere'
   | 'ellipsoid'
   | 'cube'
-  | 'roundedBox'
   | 'capsule'
   | 'cylinder'
   | 'cone'
@@ -30,7 +29,6 @@ export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
   sphere: { type: 'sphere', width: 240, height: 240, depth: 240, roundness: 1 },
   ellipsoid: { type: 'ellipsoid', width: 250, height: 210, depth: 220, roundness: 1 },
   cube: { type: 'cube', width: 245, height: 245, depth: 220, roundness: 0 },
-  roundedBox: { type: 'roundedBox', width: 250, height: 225, depth: 215, roundness: 0.32 },
   capsule: { type: 'capsule', width: 205, height: 270, depth: 205, roundness: 1 },
   cylinder: {
     type: 'cylinder',
@@ -57,7 +55,6 @@ export const surfaceLabels: Record<SurfaceType, string> = {
   sphere: 'Sphère',
   ellipsoid: 'Ellipsoïde',
   cube: 'Cube',
-  roundedBox: 'Cube arrondi',
   capsule: 'Capsule',
   cylinder: 'Cylindre',
   cone: 'Cône',
@@ -302,10 +299,6 @@ export const surfacePointAt = (
       return superellipsoid(longitude, latitude, width, height, depth, 1, 1)
     case 'cube':
       return cube(config, longitude, latitude)
-    case 'roundedBox': {
-      const exponent = 0.16 + config.roundness * 0.84
-      return superellipsoid(longitude, latitude, width, height, depth, exponent, exponent)
-    }
     case 'cylinder': {
       const progress = (latitude + Math.PI / 2) / Math.PI
       const profile = morphedCylinderProfileAt(config, progress)
@@ -515,26 +508,6 @@ export const surfaceFrontSampleAt = (
 
     case 'cube':
       return lpFrontSample(config, x, y, cubeExponent(config), cubeNormal)
-
-    case 'roundedBox': {
-      const exponent = 0.16 + config.roundness * 0.84
-      const power = 2 / exponent
-      const normalizedX = x / radiusX
-      const normalizedY = y / radiusY
-      const remaining = Math.max(
-        0,
-        1 - Math.abs(normalizedX) ** power - Math.abs(normalizedY) ** power
-      )
-      const normalizedZ = remaining ** (1 / power)
-      return {
-        point: [x, y, radiusZ * normalizedZ],
-        normal: normalize([
-          signedMagnitude(normalizedX, power - 1) / radiusX,
-          signedMagnitude(normalizedY, power - 1) / radiusY,
-          normalizedZ ** (power - 1) / radiusZ,
-        ]),
-      }
-    }
 
     case 'capsule': {
       const capRadiusY = Math.min(radiusX, radiusY)
