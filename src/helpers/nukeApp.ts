@@ -1,4 +1,5 @@
 import { getAuth, signOut } from '@react-native-firebase/auth'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Updates from 'expo-updates'
 
@@ -11,6 +12,7 @@ import { persistor } from '~redux/store'
  * - Signs out the user from Firebase
  * - Closes all SQLite connections
  * - Clears MMKV storage
+ * - Clears legacy AsyncStorage data
  * - Purges redux-persist
  * - Deletes app files in the document directory (databases, JSON, backups…)
  * - Reloads the app
@@ -53,7 +55,14 @@ export const nukeApp = async (): Promise<void> => {
     console.log('[Nuke] storage.clearAll failed:', e)
   }
 
-  // 5. Wipe app files under the document directory, but keep MMKV's backing folder.
+  // 5. Clear legacy AsyncStorage so stale values cannot be migrated back into MMKV on reload.
+  try {
+    await AsyncStorage.clear()
+  } catch (e) {
+    console.log('[Nuke] AsyncStorage.clear failed:', e)
+  }
+
+  // 6. Wipe app files under the document directory, but keep MMKV's backing folder.
   try {
     const docDir = FileSystem.documentDirectory
     if (docDir) {
@@ -69,7 +78,7 @@ export const nukeApp = async (): Promise<void> => {
     console.log('[Nuke] FileSystem wipe failed:', e)
   }
 
-  // 6. Reload the app
+  // 7. Reload the app
   console.log('[Nuke] Done. Reloading…')
   await Updates.reloadAsync()
 }
