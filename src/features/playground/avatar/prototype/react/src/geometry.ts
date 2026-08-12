@@ -334,11 +334,21 @@ const MAX_SURFACE_CACHE_ENTRIES = 24
 const HEAD_LATITUDE_SAMPLES = 25
 const HEAD_LONGITUDE_SAMPLES = 73
 const PRIMITIVE_RING_SAMPLES = 144
+const ROUNDED_CONE_LATITUDE_SAMPLES = 33
+const ROUNDED_CONE_LONGITUDE_SAMPLES = 73
 const headSamplesCache = new Map<string, Point3[]>()
 const wireSamplesCache = new Map<string, LocalSurfacePoint[][]>()
 
 const surfaceCacheKey = (surface: SurfaceConfig) =>
-  [surface.type, surface.width, surface.height, surface.depth, surface.roundness]
+  [
+    surface.type,
+    surface.width,
+    surface.height,
+    surface.depth,
+    surface.roundness,
+    surface.tipRoundness,
+    surface.baseRoundness,
+  ]
     .map(value => (typeof value === 'number' ? value.toFixed(4) : value))
     .join(':')
 
@@ -601,6 +611,25 @@ const projectedCylinderPath = (pose: AvatarPose, surface: SurfaceConfig) => {
 }
 
 const projectedConePath = (pose: AvatarPose, surface: SurfaceConfig) => {
+  if ((surface.tipRoundness ?? 0) > 0 || (surface.baseRoundness ?? 0) > 0) {
+    const key = surfaceCacheKey(surface)
+    let localSamples = headSamplesCache.get(key)
+    if (!localSamples) {
+      localSamples = Array.from({ length: ROUNDED_CONE_LATITUDE_SAMPLES }, (_, latitudeIndex) => {
+        const latitude =
+          -Math.PI / 2 + (latitudeIndex / (ROUNDED_CONE_LATITUDE_SAMPLES - 1)) * Math.PI
+        return Array.from({ length: ROUNDED_CONE_LONGITUDE_SAMPLES }, (_, longitudeIndex) => {
+          const longitude =
+            -Math.PI + (longitudeIndex / (ROUNDED_CONE_LONGITUDE_SAMPLES - 1)) * Math.PI * 2
+          return surfacePointAt(surface, longitude, latitude)
+        })
+      }).flat()
+      cacheSurfaceValue(headSamplesCache, key, localSamples)
+    }
+    const projected = localSamples.map(point => projectLocalPoint(pose, point))
+    return smoothClosedPath(densifyClosedPoints(convexHull(projected)))
+  }
+
   const apex = projectLocalPoint(pose, [0, surface.height / 2, 0])
   const base = ringPoints(surface.width, surface.depth, -surface.height / 2).map(point =>
     projectLocalPoint(pose, point)

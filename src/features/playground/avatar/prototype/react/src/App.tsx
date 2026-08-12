@@ -93,9 +93,10 @@ const persistExpressions = (expressions: Expression[]) => {
 const loadSurface = (): SurfaceConfig => {
   try {
     const stored = window.localStorage.getItem(SURFACE_STORAGE_KEY)
-    return stored
-      ? { ...surfacePresets.sphere, ...JSON.parse(stored) }
-      : { ...surfacePresets.sphere }
+    if (!stored) return { ...surfacePresets.sphere }
+    const parsed = JSON.parse(stored) as Partial<SurfaceConfig>
+    const type = parsed.type && surfaceTypes.includes(parsed.type) ? parsed.type : 'sphere'
+    return { ...surfacePresets[type], ...parsed, type }
   } catch {
     return { ...surfacePresets.sphere }
   }
@@ -1358,6 +1359,28 @@ export default function App() {
                     step={0.01}
                     onChange={roundness => updateSurface({ ...surface, roundness })}
                   />
+                )}
+                {surface.type === 'cone' && (
+                  <>
+                    <NumericField
+                      label="Rondeur pointe"
+                      value={surface.tipRoundness ?? 0}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                      onChange={tipRoundness => updateSurface({ ...surface, tipRoundness })}
+                    />
+                    <NumericField
+                      label="Rondeur base"
+                      value={surface.baseRoundness ?? 0}
+                      min={0}
+                      max={1}
+                      step={0.01}
+                      onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                      onChange={baseRoundness => updateSurface({ ...surface, baseRoundness })}
+                    />
+                  </>
                 )}
               </div>
             </section>

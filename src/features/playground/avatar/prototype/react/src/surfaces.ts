@@ -15,6 +15,8 @@ export type SurfaceConfig = {
   height: number
   depth: number
   roundness: number
+  tipRoundness?: number
+  baseRoundness?: number
 }
 
 export type SurfaceSample = {
@@ -28,7 +30,15 @@ export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
   roundedBox: { type: 'roundedBox', width: 250, height: 225, depth: 215, roundness: 0.32 },
   capsule: { type: 'capsule', width: 205, height: 270, depth: 205, roundness: 1 },
   cylinder: { type: 'cylinder', width: 235, height: 250, depth: 215, roundness: 0.2 },
-  cone: { type: 'cone', width: 250, height: 265, depth: 225, roundness: 0 },
+  cone: {
+    type: 'cone',
+    width: 250,
+    height: 265,
+    depth: 225,
+    roundness: 0,
+    tipRoundness: 0.55,
+    baseRoundness: 0.45,
+  },
   diamond: { type: 'diamond', width: 235, height: 260, depth: 215, roundness: 0 },
 }
 
@@ -106,6 +116,80 @@ const diamond = (config: SurfaceConfig, longitude: number, latitude: number): Po
   ]
 }
 
+const MAX_CONE_TIP_FRACTION = 0.24
+const MAX_CONE_BASE_FRACTION = 0.2
+
+type ConeProfile = {
+  radiusScale: number
+  verticalProgress: number
+}
+
+const cubic = (
+  start: number,
+  firstControl: number,
+  secondControl: number,
+  end: number,
+  progress: number
+) => {
+  const inverse = 1 - progress
+  return (
+    inverse ** 3 * start +
+    3 * inverse * inverse * progress * firstControl +
+    3 * inverse * progress * progress * secondControl +
+    progress ** 3 * end
+  )
+}
+
+const coneRounding = (config: SurfaceConfig) => ({
+  tipFraction: (config.tipRoundness ?? 0) * MAX_CONE_TIP_FRACTION,
+  baseFraction: (config.baseRoundness ?? 0) * MAX_CONE_BASE_FRACTION,
+})
+
+/** Rounded half-profile revolved around the cone's vertical axis. */
+const coneProfileAt = (config: SurfaceConfig, progress: number): ConeProfile => {
+  const clampedProgress = Math.max(0, Math.min(1, progress))
+  const { tipFraction, baseFraction } = coneRounding(config)
+
+  if (baseFraction > 0 && clampedProgress < baseFraction) {
+    const curveProgress = clampedProgress / baseFraction
+    return {
+      radiusScale: cubic(
+        1 - baseFraction,
+        1,
+        1 - baseFraction / 2,
+        1 - baseFraction,
+        curveProgress
+      ),
+      verticalProgress: cubic(0, 0, baseFraction / 2, baseFraction, curveProgress),
+    }
+  }
+
+  if (tipFraction > 0 && clampedProgress > 1 - tipFraction) {
+    const curveProgress = (clampedProgress - (1 - tipFraction)) / tipFraction
+    return {
+      radiusScale: cubic(tipFraction, tipFraction / 2, tipFraction / 4, 0, curveProgress),
+      verticalProgress: cubic(1 - tipFraction, 1 - tipFraction / 2, 1, 1, curveProgress),
+    }
+  }
+
+  return {
+    radiusScale: 1 - clampedProgress,
+    verticalProgress: clampedProgress,
+  }
+}
+
+const coneRadiusScaleAtVerticalProgress = (config: SurfaceConfig, verticalProgress: number) => {
+  const progress = Math.max(0, Math.min(1, verticalProgress))
+  let lower = 0
+  let upper = 1
+  for (let iteration = 0; iteration < 14; iteration += 1) {
+    const candidate = (lower + upper) / 2
+    if (coneProfileAt(config, candidate).verticalProgress < progress) lower = candidate
+    else upper = candidate
+  }
+  return coneProfileAt(config, (lower + upper) / 2).radiusScale
+}
+
 export const surfacePointAt = (
   config: SurfaceConfig,
   longitude: number,
@@ -128,11 +212,11 @@ export const surfacePointAt = (
       return capsule(config, longitude, latitude)
     case 'cone': {
       const progress = (latitude + Math.PI / 2) / Math.PI
-      const radialScale = Math.max(0, 1 - progress)
+      const profile = coneProfileAt(config, progress)
       return [
-        (width / 2) * radialScale * Math.sin(longitude),
-        -height / 2 + height * progress,
-        (depth / 2) * radialScale * Math.cos(longitude),
+        (width / 2) * profile.radiusScale * Math.sin(longitude),
+        -height / 2 + height * profile.verticalProgress,
+        (depth / 2) * profile.radiusScale * Math.cos(longitude),
       ]
     }
   }
@@ -224,18 +308,33 @@ export const surfaceFrontSampleAt = (
     }
 
     case 'cone': {
-      const radialScale = Math.max(0, Math.min(1, (radiusY - y) / config.height))
+      const verticalProgress = Math.max(0, Math.min(1, y / config.height + 0.5))
+      const radialScale = coneRadiusScaleAtVerticalProgress(config, verticalProgress)
       const sectionRadiusX = radiusX * radialScale
       const sectionRadiusZ = radiusZ * radialScale
-      const remaining = sectionRadiusX > 0 ? Math.max(0, 1 - (x / sectionRadiusX) ** 2) : 0
+      const surfaceX = Math.max(-sectionRadiusX, Math.min(sectionRadiusX, x))
+      const remaining = sectionRadiusX > 0 ? Math.max(0, 1 - (surfaceX / sectionRadiusX) ** 2) : 0
       const z = sectionRadiusZ * Math.sqrt(remaining)
+      const derivativeStep = 0.0001
+      const previousScale = coneRadiusScaleAtVerticalProgress(
+        config,
+        Math.max(0, verticalProgress - derivativeStep)
+      )
+      const nextScale = coneRadiusScaleAtVerticalProgress(
+        config,
+        Math.min(1, verticalProgress + derivativeStep)
+      )
+      const scaleDerivative =
+        (nextScale - previousScale) /
+        (Math.min(1, verticalProgress + derivativeStep) -
+          Math.max(0, verticalProgress - derivativeStep) || 1)
+      const radialRemainder = Math.max(Math.sqrt(remaining), 0.0001)
+      const depthRatio = radiusZ / radiusX
+      const depthXDerivative = (-depthRatio * surfaceX) / (sectionRadiusX * radialRemainder || 1)
+      const depthYDerivative = (radiusZ * scaleDerivative) / (config.height * radialRemainder || 1)
       return {
-        point: [x, y, z],
-        normal: normalize([
-          x / (radiusX * radiusX),
-          (2 * radialScale) / config.height,
-          z / (radiusZ * radiusZ),
-        ]),
+        point: [surfaceX, y, z],
+        normal: normalize([-depthXDerivative, -depthYDerivative, 1]),
       }
     }
 
