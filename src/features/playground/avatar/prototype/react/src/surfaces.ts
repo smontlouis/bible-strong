@@ -29,7 +29,7 @@ export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
   ellipsoid: { type: 'ellipsoid', width: 250, height: 210, depth: 220, roundness: 1 },
   roundedBox: { type: 'roundedBox', width: 250, height: 225, depth: 215, roundness: 0.32 },
   capsule: { type: 'capsule', width: 205, height: 270, depth: 205, roundness: 1 },
-  cylinder: { type: 'cylinder', width: 235, height: 250, depth: 215, roundness: 0.2 },
+  cylinder: { type: 'cylinder', width: 235, height: 250, depth: 215, roundness: 0.45 },
   cone: {
     type: 'cone',
     width: 250,
@@ -98,12 +98,6 @@ const capsule = (config: SurfaceConfig, longitude: number, latitude: number): Po
   return [radial * Math.sin(longitude), y, radial * depthScale * Math.cos(longitude)]
 }
 
-const cylinder = (config: SurfaceConfig, longitude: number, latitude: number): Point3 => [
-  (config.width / 2) * Math.sin(longitude),
-  (config.height / 2) * Math.sin(latitude),
-  (config.depth / 2) * Math.cos(longitude),
-]
-
 const diamond = (config: SurfaceConfig, longitude: number, latitude: number): Point3 => {
   const sphereX = Math.cos(latitude) * Math.sin(longitude)
   const sphereY = Math.sin(latitude)
@@ -118,8 +112,9 @@ const diamond = (config: SurfaceConfig, longitude: number, latitude: number): Po
 
 const MAX_CONE_TIP_FRACTION = 0.24
 const MAX_CONE_BASE_FRACTION = 0.2
+const MAX_CYLINDER_EDGE_FRACTION = 0.22
 
-type ConeProfile = {
+type RadialProfile = {
   radiusScale: number
   verticalProgress: number
 }
@@ -145,8 +140,58 @@ const coneRounding = (config: SurfaceConfig) => ({
   baseFraction: (config.baseRoundness ?? 0) * MAX_CONE_BASE_FRACTION,
 })
 
+/** Cylinder half-profile with a quarter-round transition at both caps. */
+const cylinderProfileAt = (config: SurfaceConfig, progress: number): RadialProfile => {
+  const clampedProgress = Math.max(0, Math.min(1, progress))
+  const edgeFraction = config.roundness * MAX_CYLINDER_EDGE_FRACTION
+  if (edgeFraction <= 0) {
+    return {
+      radiusScale: 1,
+      verticalProgress: (Math.sin((clampedProgress - 0.5) * Math.PI) + 1) / 2,
+    }
+  }
+
+  if (clampedProgress < edgeFraction) {
+    const angle = -Math.PI / 2 + (clampedProgress / edgeFraction) * (Math.PI / 2)
+    return {
+      radiusScale: 1 - edgeFraction + edgeFraction * Math.cos(angle),
+      verticalProgress: (edgeFraction + edgeFraction * Math.sin(angle)) / 2,
+    }
+  }
+
+  if (clampedProgress > 1 - edgeFraction) {
+    const angle = ((clampedProgress - (1 - edgeFraction)) / edgeFraction) * (Math.PI / 2)
+    return {
+      radiusScale: 1 - edgeFraction + edgeFraction * Math.cos(angle),
+      verticalProgress: 1 - edgeFraction / 2 + (edgeFraction * Math.sin(angle)) / 2,
+    }
+  }
+
+  const middleProgress = (clampedProgress - edgeFraction) / (1 - edgeFraction * 2)
+  return {
+    radiusScale: 1,
+    verticalProgress: edgeFraction / 2 + middleProgress * (1 - edgeFraction),
+  }
+}
+
+const radiusScaleAtVerticalProgress = (
+  config: SurfaceConfig,
+  verticalProgress: number,
+  profileAt: (config: SurfaceConfig, progress: number) => RadialProfile
+) => {
+  const progress = Math.max(0, Math.min(1, verticalProgress))
+  let lower = 0
+  let upper = 1
+  for (let iteration = 0; iteration < 14; iteration += 1) {
+    const candidate = (lower + upper) / 2
+    if (profileAt(config, candidate).verticalProgress < progress) lower = candidate
+    else upper = candidate
+  }
+  return profileAt(config, (lower + upper) / 2).radiusScale
+}
+
 /** Rounded half-profile revolved around the cone's vertical axis. */
-const coneProfileAt = (config: SurfaceConfig, progress: number): ConeProfile => {
+const coneProfileAt = (config: SurfaceConfig, progress: number): RadialProfile => {
   const clampedProgress = Math.max(0, Math.min(1, progress))
   const { tipFraction, baseFraction } = coneRounding(config)
 
@@ -178,18 +223,6 @@ const coneProfileAt = (config: SurfaceConfig, progress: number): ConeProfile => 
   }
 }
 
-const coneRadiusScaleAtVerticalProgress = (config: SurfaceConfig, verticalProgress: number) => {
-  const progress = Math.max(0, Math.min(1, verticalProgress))
-  let lower = 0
-  let upper = 1
-  for (let iteration = 0; iteration < 14; iteration += 1) {
-    const candidate = (lower + upper) / 2
-    if (coneProfileAt(config, candidate).verticalProgress < progress) lower = candidate
-    else upper = candidate
-  }
-  return coneProfileAt(config, (lower + upper) / 2).radiusScale
-}
-
 export const surfacePointAt = (
   config: SurfaceConfig,
   longitude: number,
@@ -204,8 +237,15 @@ export const surfacePointAt = (
       const exponent = 0.16 + config.roundness * 0.84
       return superellipsoid(longitude, latitude, width, height, depth, exponent, exponent)
     }
-    case 'cylinder':
-      return cylinder(config, longitude, latitude)
+    case 'cylinder': {
+      const progress = (latitude + Math.PI / 2) / Math.PI
+      const profile = cylinderProfileAt(config, progress)
+      return [
+        (width / 2) * profile.radiusScale * Math.sin(longitude),
+        -height / 2 + height * profile.verticalProgress,
+        (depth / 2) * profile.radiusScale * Math.cos(longitude),
+      ]
+    }
     case 'diamond':
       return diamond(config, longitude, latitude)
     case 'capsule':
@@ -215,7 +255,7 @@ export const surfacePointAt = (
       const profile = coneProfileAt(config, progress)
       return [
         (width / 2) * profile.radiusScale * Math.sin(longitude),
-        -height / 2 + height * profile.verticalProgress,
+        height / 2 - height * profile.verticalProgress,
         (depth / 2) * profile.radiusScale * Math.cos(longitude),
       ]
     }
@@ -231,6 +271,40 @@ const subtract = (left: Point3, right: Point3): Point3 => [
 const normalize = ([x, y, z]: Point3): Point3 => {
   const length = Math.hypot(x, y, z) || 1
   return [x / length, y / length, z / length]
+}
+
+const normalFromTangents = (
+  config: SurfaceConfig,
+  longitudeTangent: Point3,
+  latitudeTangent: Point3
+) => {
+  const orientation = config.type === 'cone' ? -1 : 1
+  return normalize([
+    orientation *
+      (longitudeTangent[1] * latitudeTangent[2] - longitudeTangent[2] * latitudeTangent[1]),
+    orientation *
+      (longitudeTangent[2] * latitudeTangent[0] - longitudeTangent[0] * latitudeTangent[2]),
+    orientation *
+      (longitudeTangent[0] * latitudeTangent[1] - longitudeTangent[1] * latitudeTangent[0]),
+  ])
+}
+
+const tangentNormalAt = (config: SurfaceConfig, longitude: number, latitude: number) => {
+  const epsilon = 0.0005
+  if (config.type === 'cone' && latitude >= Math.PI / 2 - epsilon) return [0, -1, 0] as Point3
+  const longitudeBefore = surfacePointAt(config, longitude - epsilon, latitude)
+  const longitudeAfter = surfacePointAt(config, longitude + epsilon, latitude)
+  const latitudeBefore = surfacePointAt(
+    config,
+    longitude,
+    Math.max(-Math.PI / 2, latitude - epsilon)
+  )
+  const latitudeAfter = surfacePointAt(config, longitude, Math.min(Math.PI / 2, latitude + epsilon))
+  return normalFromTangents(
+    config,
+    subtract(longitudeAfter, longitudeBefore),
+    subtract(latitudeAfter, latitudeBefore)
+  )
 }
 
 const signedMagnitude = (value: number, exponent: number) =>
@@ -254,6 +328,39 @@ const ellipsoidFrontSample = (
       localY / (radiusY * radiusY || 1),
       z / (radiusZ * radiusZ || 1),
     ]),
+  }
+}
+
+const radialProfileFrontSample = (
+  config: SurfaceConfig,
+  x: number,
+  y: number,
+  profileAt: (config: SurfaceConfig, progress: number) => RadialProfile,
+  verticalDirection: -1 | 1
+): SurfaceSample => {
+  const radiusX = config.width / 2 || 1
+  const radiusZ = config.depth / 2 || 1
+  const verticalProgress = Math.max(0, Math.min(1, 0.5 + verticalDirection * (y / config.height)))
+  const radialScale = radiusScaleAtVerticalProgress(config, verticalProgress, profileAt)
+  const sectionRadiusX = radiusX * radialScale
+  const sectionRadiusZ = radiusZ * radialScale
+  const surfaceX = Math.max(-sectionRadiusX, Math.min(sectionRadiusX, x))
+  const remaining = sectionRadiusX > 0 ? Math.max(0, 1 - (surfaceX / sectionRadiusX) ** 2) : 0
+  const z = sectionRadiusZ * Math.sqrt(remaining)
+  const derivativeStep = 0.0001
+  const previousProgress = Math.max(0, verticalProgress - derivativeStep)
+  const nextProgress = Math.min(1, verticalProgress + derivativeStep)
+  const previousScale = radiusScaleAtVerticalProgress(config, previousProgress, profileAt)
+  const nextScale = radiusScaleAtVerticalProgress(config, nextProgress, profileAt)
+  const scaleDerivative = (nextScale - previousScale) / (nextProgress - previousProgress || 1)
+  const radialRemainder = Math.max(Math.sqrt(remaining), 0.0001)
+  const depthRatio = radiusZ / radiusX
+  const depthXDerivative = (-depthRatio * surfaceX) / (sectionRadiusX * radialRemainder || 1)
+  const depthYDerivative =
+    (verticalDirection * radiusZ * scaleDerivative) / (config.height * radialRemainder || 1)
+  return {
+    point: [surfaceX, y, z],
+    normal: normalize([-depthXDerivative, -depthYDerivative, 1]),
   }
 }
 
@@ -299,44 +406,11 @@ export const surfaceFrontSampleAt = (
       return ellipsoidFrontSample(x, y, radiusX, capRadiusY, radiusZ, capCenterY)
     }
 
-    case 'cylinder': {
-      const z = radiusZ * Math.sqrt(Math.max(0, 1 - (x / radiusX) ** 2))
-      return {
-        point: [x, y, z],
-        normal: normalize([x / (radiusX * radiusX), 0, z / (radiusZ * radiusZ)]),
-      }
-    }
+    case 'cylinder':
+      return radialProfileFrontSample(config, x, y, cylinderProfileAt, 1)
 
-    case 'cone': {
-      const verticalProgress = Math.max(0, Math.min(1, y / config.height + 0.5))
-      const radialScale = coneRadiusScaleAtVerticalProgress(config, verticalProgress)
-      const sectionRadiusX = radiusX * radialScale
-      const sectionRadiusZ = radiusZ * radialScale
-      const surfaceX = Math.max(-sectionRadiusX, Math.min(sectionRadiusX, x))
-      const remaining = sectionRadiusX > 0 ? Math.max(0, 1 - (surfaceX / sectionRadiusX) ** 2) : 0
-      const z = sectionRadiusZ * Math.sqrt(remaining)
-      const derivativeStep = 0.0001
-      const previousScale = coneRadiusScaleAtVerticalProgress(
-        config,
-        Math.max(0, verticalProgress - derivativeStep)
-      )
-      const nextScale = coneRadiusScaleAtVerticalProgress(
-        config,
-        Math.min(1, verticalProgress + derivativeStep)
-      )
-      const scaleDerivative =
-        (nextScale - previousScale) /
-        (Math.min(1, verticalProgress + derivativeStep) -
-          Math.max(0, verticalProgress - derivativeStep) || 1)
-      const radialRemainder = Math.max(Math.sqrt(remaining), 0.0001)
-      const depthRatio = radiusZ / radiusX
-      const depthXDerivative = (-depthRatio * surfaceX) / (sectionRadiusX * radialRemainder || 1)
-      const depthYDerivative = (radiusZ * scaleDerivative) / (config.height * radialRemainder || 1)
-      return {
-        point: [surfaceX, y, z],
-        normal: normalize([-depthXDerivative, -depthYDerivative, 1]),
-      }
-    }
+    case 'cone':
+      return radialProfileFrontSample(config, x, y, coneProfileAt, -1)
 
     case 'diamond': {
       const normalizedZ = Math.max(0, 1 - Math.abs(x) / radiusX - Math.abs(y) / radiusY)
@@ -369,7 +443,7 @@ export const surfaceNormalAt = (
     ])
   }
 
-  if (config.type === 'cylinder') {
+  if (config.type === 'cylinder' && config.roundness <= 0) {
     return normalize([
       Math.sin(longitude) / (config.width / 2 || 1),
       0,
@@ -385,14 +459,7 @@ export const surfaceNormalAt = (
     ])
   }
 
-  const epsilon = 0.0005
-  const longitudeTangent = subtract(surfacePointAt(config, longitude + epsilon, latitude), point)
-  const latitudeTangent = subtract(surfacePointAt(config, longitude, latitude + epsilon), point)
-  return normalize([
-    longitudeTangent[1] * latitudeTangent[2] - longitudeTangent[2] * latitudeTangent[1],
-    longitudeTangent[2] * latitudeTangent[0] - longitudeTangent[0] * latitudeTangent[2],
-    longitudeTangent[0] * latitudeTangent[1] - longitudeTangent[1] * latitudeTangent[0],
-  ])
+  return tangentNormalAt(config, longitude, latitude)
 }
 
 export const surfaceSampleAt = (
@@ -416,7 +483,7 @@ export const surfaceSampleAt = (
     }
   }
 
-  if (config.type === 'cylinder') {
+  if (config.type === 'cylinder' && config.roundness <= 0) {
     return {
       point,
       normal: normalize([
@@ -438,15 +505,8 @@ export const surfaceSampleAt = (
     }
   }
 
-  const epsilon = 0.0005
-  const longitudeTangent = subtract(surfacePointAt(config, longitude + epsilon, latitude), point)
-  const latitudeTangent = subtract(surfacePointAt(config, longitude, latitude + epsilon), point)
   return {
     point,
-    normal: normalize([
-      longitudeTangent[1] * latitudeTangent[2] - longitudeTangent[2] * latitudeTangent[1],
-      longitudeTangent[2] * latitudeTangent[0] - longitudeTangent[0] * latitudeTangent[2],
-      longitudeTangent[0] * latitudeTangent[1] - longitudeTangent[1] * latitudeTangent[0],
-    ]),
+    normal: tangentNormalAt(config, longitude, latitude),
   }
 }

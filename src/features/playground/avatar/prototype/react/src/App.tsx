@@ -1350,13 +1350,14 @@ export default function App() {
                   unit="u"
                   onChange={depth => updateSurface({ ...surface, depth })}
                 />
-                {surface.type === 'roundedBox' && (
+                {(surface.type === 'roundedBox' || surface.type === 'cylinder') && (
                   <NumericField
                     label="Rondeur"
                     value={surface.roundness}
                     min={0}
                     max={1}
                     step={0.01}
+                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
                     onChange={roundness => updateSurface({ ...surface, roundness })}
                   />
                 )}
