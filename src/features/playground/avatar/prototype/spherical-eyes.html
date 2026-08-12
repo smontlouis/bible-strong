@@ -205,11 +205,11 @@
       }
 
       .rotation-axis-ring[data-rotation-axis='x'] {
-        stroke: #ff4d4d;
+        stroke: #3ee66f;
       }
 
       .rotation-axis-ring[data-rotation-axis='y'] {
-        stroke: #3ee66f;
+        stroke: #ff4d4d;
       }
 
       .rotation-axis-ring[data-rotation-axis='z'] {
@@ -273,6 +273,353 @@
         color: #81858e;
         font-size: 13px;
         line-height: 1.5;
+      }
+
+      .mode-tabs {
+        position: sticky;
+        z-index: 5;
+        top: 16px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        margin: 0 0 18px;
+        padding: 6px;
+        border: 1px solid #dfe1e7;
+        border-radius: 16px;
+        background: rgb(255 255 255 / 92%);
+        box-shadow: 0 10px 28px rgb(25 28 36 / 10%);
+        backdrop-filter: blur(14px);
+      }
+
+      .mode-tab {
+        min-height: 38px;
+        border: 0;
+        border-radius: 11px;
+        background: transparent;
+      }
+
+      .mode-tab[aria-selected='true'] {
+        background: #111316;
+        color: white;
+      }
+
+      .mode-panel[hidden] {
+        display: none;
+      }
+
+      .expression-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .expression-button {
+        position: relative;
+        min-height: 76px;
+        overflow: hidden;
+        padding: 4px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .expression-button svg {
+        display: block;
+        width: 100%;
+        height: 62px;
+        pointer-events: none;
+      }
+
+      .expression-button .expression-number {
+        position: absolute;
+        right: 6px;
+        bottom: 4px;
+        padding: 2px 4px;
+        border-radius: 5px;
+        background: rgb(255 255 255 / 80%);
+        color: #30343b;
+        font-size: 9px;
+        font-weight: 800;
+        line-height: 1;
+      }
+
+      .expression-button[aria-pressed='true'] .expression-number {
+        background: rgb(17 19 22 / 80%);
+        color: white;
+      }
+
+      .expression-add {
+        display: grid;
+        min-height: 76px;
+        place-items: center;
+        border-style: dashed;
+        color: #5c7fe7;
+        font-size: 28px;
+        font-weight: 400;
+      }
+
+      .expression-hint {
+        margin: 12px 0 0;
+        color: #81858e;
+        font-size: 11px;
+        text-align: center;
+      }
+
+      .expression-editor {
+        width: min(760px, calc(100vw - 32px));
+        max-height: calc(100vh - 32px);
+        overflow: hidden;
+        padding: 0;
+        border: 1px solid #dfe1e7;
+        border-radius: 24px;
+        background: #f5f6f8;
+        box-shadow: 0 28px 90px rgb(17 19 22 / 30%);
+      }
+
+      .expression-editor::backdrop {
+        background: rgb(17 19 22 / 54%);
+        backdrop-filter: blur(5px);
+      }
+
+      .expression-editor-shell {
+        display: grid;
+        max-height: calc(100vh - 32px);
+        grid-template-rows: auto minmax(0, 1fr) auto;
+      }
+
+      .expression-editor-header,
+      .expression-editor-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 22px;
+        background: white;
+      }
+
+      .expression-editor-header {
+        border-bottom: 1px solid #e3e4e8;
+      }
+
+      .expression-editor-header h2,
+      .expression-editor-header p {
+        margin: 0;
+      }
+
+      .expression-editor-header p {
+        margin-top: 3px;
+        color: #81858e;
+        font-size: 12px;
+      }
+
+      .expression-editor-close {
+        width: 36px;
+        min-height: 36px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 20px;
+      }
+
+      .expression-editor-body {
+        display: grid;
+        overflow: auto;
+        padding: 18px;
+        grid-template-columns: 190px minmax(0, 1fr);
+        gap: 18px;
+      }
+
+      .expression-editor-preview {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        padding: 14px;
+        border: 1px solid #e3e4e8;
+        border-radius: 18px;
+        background: white;
+      }
+
+      .expression-editor-preview svg {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1;
+      }
+
+      .expression-editor-preview strong,
+      .expression-editor-preview span {
+        display: block;
+        text-align: center;
+      }
+
+      .expression-editor-preview span {
+        margin-top: 4px;
+        color: #81858e;
+        font-size: 11px;
+      }
+
+      .expression-editor-fields {
+        display: grid;
+        gap: 14px;
+      }
+
+      .expression-editor-group {
+        padding: 14px;
+        border: 1px solid #e3e4e8;
+        border-radius: 16px;
+        background: white;
+      }
+
+      .expression-editor-group h3 {
+        margin: 0 0 12px;
+        font-size: 12px;
+      }
+
+      .expression-field {
+        display: grid;
+        align-items: center;
+        grid-template-columns: minmax(92px, 0.8fr) minmax(120px, 1fr) 66px;
+        gap: 10px;
+      }
+
+      .expression-field + .expression-field {
+        margin-top: 10px;
+      }
+
+      .expression-field > span {
+        color: #4b5059;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .expression-field input[type='number'] {
+        width: 100%;
+        min-width: 0;
+        padding: 7px 8px;
+        border: 1px solid #d6d8df;
+        border-radius: 8px;
+        background: #f7f8fa;
+        color: #24272d;
+        font: inherit;
+        font-size: 11px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .expression-editor-actions {
+        justify-content: flex-end;
+        border-top: 1px solid #e3e4e8;
+      }
+
+      .expression-editor-actions button {
+        min-width: 120px;
+      }
+
+      .expression-editor-save {
+        border-color: #111316;
+        background: #111316;
+        color: white;
+      }
+
+      @media (max-width: 620px) {
+        .expression-editor-body {
+          grid-template-columns: 1fr;
+        }
+
+        .expression-editor-preview {
+          position: static;
+        }
+
+        .expression-editor-preview svg {
+          max-height: 180px;
+        }
+
+        .expression-field {
+          grid-template-columns: 88px minmax(100px, 1fr) 60px;
+        }
+      }
+
+      .state-groups {
+        display: grid;
+        gap: 18px;
+      }
+
+      .state-group-title {
+        display: block;
+        margin-bottom: 9px;
+        color: #81858e;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .state-buttons,
+      .state-pool {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .state-button,
+      .pool-button {
+        min-height: 34px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+      }
+
+      .state-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 9px;
+        margin: 16px 0;
+      }
+
+      .state-summary div {
+        padding: 11px;
+        border-radius: 12px;
+        background: #f3f4f7;
+      }
+
+      .state-summary span,
+      .state-summary strong {
+        display: block;
+      }
+
+      .state-summary span {
+        margin-bottom: 4px;
+        color: #81858e;
+        font-size: 10px;
+      }
+
+      .state-summary strong {
+        font-size: 12px;
+      }
+
+      .button-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .button-row button {
+        flex: 1;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 14px;
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: #edf1ff;
+        color: #5577d7;
+        font-size: 11px;
+        font-weight: 750;
+      }
+
+      .status-pill::before {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+        content: '';
       }
 
       .control {
@@ -468,7 +815,7 @@
             </desc>
             <defs>
               <clipPath id="head-clip">
-                <circle cx="0" cy="0" r="120" />
+                <circle id="head-clip-circle" cx="0" cy="0" r="120" />
               </clipPath>
             </defs>
             <circle class="head" cx="0" cy="0" r="120" />
@@ -535,200 +882,326 @@
           3D avant de le ramener dans le SVG.
         </p>
 
-        <section class="panel">
-          <h2>Expressions rapides</h2>
-          <p class="panel-description">
-            Ces boutons ne chargent aucun nouveau dessin : ils changent seulement les rotations
-            locales des deux capsules.
-          </p>
-          <div class="preset-grid" id="presets">
-            <button type="button" data-preset="neutral" aria-pressed="true">Neutre</button>
-            <button type="button" data-preset="angry" aria-pressed="false">Fâché</button>
-            <button type="button" data-preset="sad" aria-pressed="false">Triste</button>
-          </div>
-        </section>
+        <nav class="mode-tabs" role="tablist" aria-label="Mode d’édition">
+          <button class="mode-tab" type="button" role="tab" data-mode="manual" aria-selected="true">
+            Manuel
+          </button>
+          <button
+            class="mode-tab"
+            type="button"
+            role="tab"
+            data-mode="expressions"
+            aria-selected="false"
+          >
+            Expressions
+          </button>
+          <button
+            class="mode-tab"
+            type="button"
+            role="tab"
+            data-mode="states"
+            aria-selected="false"
+          >
+            États
+          </button>
+        </nav>
 
-        <section class="panel">
-          <h2>Rotation de la tête</h2>
-          <p class="panel-description">
-            Les trois axes utilisent de vraies rotations 3D successives. Le drag de la boule est
-            libre ; les anneaux colorés contraignent X/Y/Z et l’anneau jaune suit la caméra.
-          </p>
-          <label class="control">
-            <span class="control-head"
-              ><span>Rotation X · tangage (haut/bas)</span><output id="head-x-output"></output
-            ></span>
-            <input id="head-x" type="range" min="-365" max="365" value="17" step="1" />
-          </label>
-          <label class="control">
-            <span class="control-head"
-              ><span>Rotation Y · lacet (gauche/droite)</span><output id="head-y-output"></output
-            ></span>
-            <input id="head-y" type="range" min="-365" max="365" value="34" step="1" />
-          </label>
-          <label class="control">
-            <span class="control-head"
-              ><span>Rotation Z · roulis (inclinaison)</span><output id="head-z-output"></output
-            ></span>
-            <input id="head-z" type="range" min="-365" max="365" value="-21" step="1" />
-          </label>
-          <div class="readout">
-            <span class="wide" id="arcball-output">arcball · q(1, 0, 0, 0)</span>
-          </div>
-        </section>
+        <div class="mode-panel" id="mode-manual" role="tabpanel">
+          <section class="panel">
+            <h2>Rotation de la tête</h2>
+            <p class="panel-description">
+              Les trois axes utilisent de vraies rotations 3D successives. Le drag de la boule est
+              libre ; les anneaux colorés contraignent X/Y/Z et l’anneau jaune suit la caméra.
+            </p>
+            <label class="control">
+              <span class="control-head"
+                ><span>Rotation X · tangage (haut/bas)</span><output id="head-x-output"></output
+              ></span>
+              <input id="head-x" type="range" min="-365" max="365" value="17" step="0.1" />
+            </label>
+            <label class="control">
+              <span class="control-head"
+                ><span>Rotation Y · lacet (gauche/droite)</span><output id="head-y-output"></output
+              ></span>
+              <input id="head-y" type="range" min="-365" max="365" value="34" step="0.1" />
+            </label>
+            <label class="control">
+              <span class="control-head"
+                ><span>Rotation Z · roulis (inclinaison)</span><output id="head-z-output"></output
+              ></span>
+              <input id="head-z" type="range" min="-365" max="365" value="-21" step="0.1" />
+            </label>
+            <div class="readout">
+              <span class="wide" id="arcball-output">arcball · q(1, 0, 0, 0)</span>
+            </div>
+          </section>
 
-        <section class="panel">
-          <h2>Forme commune</h2>
-          <p class="panel-description">
-            Les deux yeux partagent la même capsule de base. On peut l’allonger, l’épaissir,
-            l’écarter et redimensionner tout le regard.
-          </p>
-          <div class="dimension-control">
-            <div class="dimension-head">
-              <span>Largeur</span>
-              <button
-                class="link-button"
-                type="button"
-                data-link="width"
-                aria-label="Lier les largeurs"
-                aria-pressed="true"
-                title="Lier ou délier les deux yeux"
+          <section class="panel">
+            <h2>Forme commune</h2>
+            <p class="panel-description">
+              Les deux yeux partagent la même capsule de base. On peut l’allonger, l’épaissir,
+              l’écarter et redimensionner tout le regard.
+            </p>
+            <div class="dimension-control">
+              <div class="dimension-head">
+                <span>Largeur</span>
+                <button
+                  class="link-button"
+                  type="button"
+                  data-link="width"
+                  aria-label="Lier les largeurs"
+                  aria-pressed="true"
+                  title="Lier ou délier les deux yeux"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" />
+                    <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" />
+                  </svg>
+                </button>
+              </div>
+              <div class="eye-pair-controls">
+                <label class="eye-control">
+                  <span>Gauche <output id="width-left-output"></output></span>
+                  <input id="width-left" type="range" min="12" max="100" value="20" step="0.1" />
+                </label>
+                <label class="eye-control">
+                  <span>Droite <output id="width-right-output"></output></span>
+                  <input id="width-right" type="range" min="12" max="100" value="20" step="0.1" />
+                </label>
+              </div>
+            </div>
+            <div class="dimension-control">
+              <div class="dimension-head">
+                <span>Hauteur</span>
+                <button
+                  class="link-button"
+                  type="button"
+                  data-link="height"
+                  aria-label="Lier les hauteurs"
+                  aria-pressed="true"
+                  title="Lier ou délier les deux yeux"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" />
+                    <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" />
+                  </svg>
+                </button>
+              </div>
+              <div class="eye-pair-controls">
+                <label class="eye-control">
+                  <span>Gauche <output id="height-left-output"></output></span>
+                  <input id="height-left" type="range" min="5" max="100" value="50" step="0.1" />
+                </label>
+                <label class="eye-control">
+                  <span>Droite <output id="height-right-output"></output></span>
+                  <input id="height-right" type="range" min="5" max="100" value="50" step="0.1" />
+                </label>
+              </div>
+            </div>
+            <div class="dimension-control">
+              <div class="dimension-head">
+                <span>Taille globale</span>
+                <button
+                  class="link-button"
+                  type="button"
+                  data-link="scale"
+                  aria-label="Lier les tailles"
+                  aria-pressed="true"
+                  title="Lier ou délier les deux yeux"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" />
+                    <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" />
+                  </svg>
+                </button>
+              </div>
+              <div class="eye-pair-controls">
+                <label class="eye-control">
+                  <span>Gauche <output id="scale-left-output"></output></span>
+                  <input id="scale-left" type="range" min="8" max="100" value="31.6" step="0.1" />
+                </label>
+                <label class="eye-control">
+                  <span>Droite <output id="scale-right-output"></output></span>
+                  <input id="scale-right" type="range" min="8" max="100" value="31.6" step="0.1" />
+                </label>
+              </div>
+            </div>
+            <label class="control">
+              <span class="control-head"
+                ><span>Espacement</span><output id="spacing-output"></output
+              ></span>
+              <input id="spacing" type="range" min="8" max="82" value="35" step="0.1" />
+            </label>
+            <label class="control">
+              <span class="control-head"
+                ><span>Position verticale</span><output id="latitude-output"></output
+              ></span>
+              <input id="latitude" type="range" min="-42" max="42" value="-7" step="0.1" />
+            </label>
+          </section>
+
+          <section class="panel">
+            <h2>Rotation des yeux</h2>
+            <p class="panel-description">
+              La rotation se fait avant la projection : même inclinée, la capsule épouse ensuite la
+              courbure de la tête.
+            </p>
+            <label class="control">
+              <span class="control-head"
+                ><span>Œil gauche</span><output id="left-angle-output"></output
+              ></span>
+              <input id="left-angle" type="range" min="-365" max="365" value="0" step="0.1" />
+            </label>
+            <label class="control">
+              <span class="control-head"
+                ><span>Œil droit</span><output id="right-angle-output"></output
+              ></span>
+              <input id="right-angle" type="range" min="-365" max="365" value="0" step="0.1" />
+            </label>
+          </section>
+
+          <section class="panel">
+            <h2>Inspection</h2>
+            <p class="panel-description">
+              Les guides permettent de voir que le résultat vient de points 3D et non d’une simple
+              transformation CSS du SVG entier.
+            </p>
+            <label class="switch-line">
+              <span>Afficher les points échantillonnés</span>
+              <input id="show-points" type="checkbox" />
+            </label>
+            <label class="switch-line">
+              <span>Afficher le maillage sphérique</span>
+              <input id="show-wire" type="checkbox" />
+            </label>
+            <label class="control">
+              <span class="control-head"
+                ><span>Force de la perspective</span><output id="perspective-output"></output
+              ></span>
+              <input id="perspective" type="range" min="0" max="3" value="1" step="0.01" />
+            </label>
+            <div class="readout">
+              <span id="visible-left">gauche · visible</span>
+              <span id="visible-right">droite · visible</span>
+              <span class="wide" id="head-radius-output">silhouette · rayon 120.00 u</span>
+            </div>
+            <button class="reset" id="reset" type="button">Réinitialiser</button>
+          </section>
+        </div>
+
+        <div class="mode-panel" id="mode-expressions" role="tabpanel" hidden>
+          <section class="panel">
+            <span class="status-pill"
+              >Expression active <strong id="active-expression">00</strong></span
+            >
+            <h2>Presets d’expressions</h2>
+            <p class="panel-description">
+              Chaque preset mémorise la tête, les deux yeux et la perspective. Clique pour
+              l’appliquer ou double-clique pour modifier tous ses paramètres.
+            </p>
+            <div class="expression-grid" id="expression-grid"></div>
+            <p class="expression-hint">Double-clic · modifier le preset</p>
+          </section>
+
+          <section class="panel">
+            <h2>Transition</h2>
+            <p class="panel-description">
+              Le ressort interpole toutes les propriétés simultanément. Une valeur élevée rejoint la
+              cible plus vite tout en conservant un léger amortissement.
+            </p>
+            <label class="control">
+              <span class="control-head"
+                ><span>Vitesse du ressort</span><output id="spring-speed-output">7.0</output></span
               >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" />
-                  <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" />
-                </svg>
-              </button>
-            </div>
-            <div class="eye-pair-controls">
-              <label class="eye-control">
-                <span>Gauche <output id="width-left-output"></output></span>
-                <input id="width-left" type="range" min="12" max="100" value="20" step="1" />
-              </label>
-              <label class="eye-control">
-                <span>Droite <output id="width-right-output"></output></span>
-                <input id="width-right" type="range" min="12" max="100" value="20" step="1" />
-              </label>
-            </div>
-          </div>
-          <div class="dimension-control">
-            <div class="dimension-head">
-              <span>Hauteur</span>
-              <button
-                class="link-button"
-                type="button"
-                data-link="height"
-                aria-label="Lier les hauteurs"
-                aria-pressed="true"
-                title="Lier ou délier les deux yeux"
+              <input id="spring-speed" type="range" min="3" max="16" value="7" step="0.5" />
+            </label>
+            <label class="control">
+              <span class="control-head"
+                ><span>Durée du clignement</span
+                ><output id="blink-duration-output">320 ms</output></span
               >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" />
-                  <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" />
-                </svg>
-              </button>
+              <input id="blink-duration" type="range" min="140" max="800" value="320" step="10" />
+            </label>
+            <div class="button-row">
+              <button type="button" id="blink-now">Cligner maintenant</button>
+              <button type="button" id="random-expression">Expression aléatoire</button>
             </div>
-            <div class="eye-pair-controls">
-              <label class="eye-control">
-                <span>Gauche <output id="height-left-output"></output></span>
-                <input id="height-left" type="range" min="5" max="100" value="50" step="1" />
-              </label>
-              <label class="eye-control">
-                <span>Droite <output id="height-right-output"></output></span>
-                <input id="height-right" type="range" min="5" max="100" value="50" step="1" />
-              </label>
-            </div>
-          </div>
-          <div class="dimension-control">
-            <div class="dimension-head">
-              <span>Taille globale</span>
-              <button
-                class="link-button"
-                type="button"
-                data-link="scale"
-                aria-label="Lier les tailles"
-                aria-pressed="true"
-                title="Lier ou délier les deux yeux"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" />
-                  <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" />
-                </svg>
-              </button>
-            </div>
-            <div class="eye-pair-controls">
-              <label class="eye-control">
-                <span>Gauche <output id="scale-left-output"></output></span>
-                <input id="scale-left" type="range" min="0.35" max="2" value="0.98" step="0.01" />
-              </label>
-              <label class="eye-control">
-                <span>Droite <output id="scale-right-output"></output></span>
-                <input id="scale-right" type="range" min="0.35" max="2" value="0.98" step="0.01" />
-              </label>
-            </div>
-          </div>
-          <label class="control">
-            <span class="control-head"
-              ><span>Espacement</span><output id="spacing-output"></output
-            ></span>
-            <input id="spacing" type="range" min="8" max="82" value="35" step="1" />
-          </label>
-          <label class="control">
-            <span class="control-head"
-              ><span>Position verticale</span><output id="latitude-output"></output
-            ></span>
-            <input id="latitude" type="range" min="-42" max="42" value="-7" step="1" />
-          </label>
-        </section>
+          </section>
+        </div>
 
-        <section class="panel">
-          <h2>Rotation des yeux</h2>
-          <p class="panel-description">
-            La rotation se fait avant la projection : même inclinée, la capsule épouse ensuite la
-            courbure de la tête.
-          </p>
-          <label class="control">
-            <span class="control-head"
-              ><span>Œil gauche</span><output id="left-angle-output"></output
-            ></span>
-            <input id="left-angle" type="range" min="-365" max="365" value="0" step="1" />
-          </label>
-          <label class="control">
-            <span class="control-head"
-              ><span>Œil droit</span><output id="right-angle-output"></output
-            ></span>
-            <input id="right-angle" type="range" min="-365" max="365" value="0" step="1" />
-          </label>
-        </section>
+        <div class="mode-panel" id="mode-states" role="tabpanel" hidden>
+          <section class="panel">
+            <span class="status-pill">État actif <strong id="active-state">idle</strong></span>
+            <h2>États animés</h2>
+            <p class="panel-description">
+              Un état choisit un pool d’expressions, une cadence de changement et une cadence de
+              clignement. Sélectionne un état puis lance-le pour observer la séquence.
+            </p>
+            <div class="state-groups" id="state-groups"></div>
+          </section>
 
-        <section class="panel">
-          <h2>Inspection</h2>
-          <p class="panel-description">
-            Les guides permettent de voir que le résultat vient de points 3D et non d’une simple
-            transformation CSS du SVG entier.
-          </p>
-          <label class="switch-line">
-            <span>Afficher les points échantillonnés</span>
-            <input id="show-points" type="checkbox" />
-          </label>
-          <label class="switch-line">
-            <span>Afficher le maillage sphérique</span>
-            <input id="show-wire" type="checkbox" />
-          </label>
-          <label class="control">
-            <span class="control-head"
-              ><span>Force de la perspective</span><output id="perspective-output"></output
-            ></span>
-            <input id="perspective" type="range" min="0" max="3" value="1" step="0.01" />
-          </label>
-          <div class="readout">
-            <span id="visible-left">gauche · visible</span>
-            <span id="visible-right">droite · visible</span>
-          </div>
-          <button class="reset" id="reset" type="button">Réinitialiser</button>
-        </section>
+          <section class="panel">
+            <h2 id="state-title">idle</h2>
+            <p class="panel-description" id="state-description"></p>
+            <strong>Pool d’expressions</strong>
+            <div class="state-pool" id="state-pool"></div>
+            <div class="state-summary">
+              <div>
+                <span>Changement d’expression</span>
+                <strong id="state-expression-cadence"></strong>
+              </div>
+              <div>
+                <span>Clignement</span>
+                <strong id="state-blink-cadence"></strong>
+              </div>
+            </div>
+            <label class="switch-line">
+              <span>Expressions automatiques</span>
+              <input id="auto-expression" type="checkbox" checked />
+            </label>
+            <label class="switch-line">
+              <span>Clignement automatique</span>
+              <input id="auto-blink" type="checkbox" checked />
+            </label>
+            <div class="button-row">
+              <button type="button" id="apply-state">Lancer cet état</button>
+              <button type="button" id="stop-state">Mettre en pause</button>
+            </div>
+          </section>
+        </div>
       </main>
     </div>
+
+    <dialog class="expression-editor" id="expression-editor">
+      <form class="expression-editor-shell" id="expression-editor-form" method="dialog">
+        <header class="expression-editor-header">
+          <div>
+            <h2 id="expression-editor-title">Modifier l’expression 00</h2>
+            <p>Les modifications restent locales à ce prototype.</p>
+          </div>
+          <button
+            class="expression-editor-close"
+            id="expression-editor-close"
+            type="button"
+            aria-label="Fermer"
+          >
+            ×
+          </button>
+        </header>
+        <div class="expression-editor-body">
+          <aside class="expression-editor-preview">
+            <div id="expression-editor-preview"></div>
+            <strong id="expression-editor-number">Expression 00</strong>
+            <span>Aperçu sphérique en direct</span>
+          </aside>
+          <div class="expression-editor-fields" id="expression-editor-fields"></div>
+        </div>
+        <footer class="expression-editor-actions">
+          <button id="expression-editor-cancel" type="button">Annuler</button>
+          <button class="expression-editor-save" type="submit">Enregistrer</button>
+        </footer>
+      </form>
+    </dialog>
 
     <script>
       ;(() => {
@@ -747,8 +1220,6 @@
           'width-right': 20,
           'height-left': 50,
           'height-right': 50,
-          'scale-left': 0.98,
-          'scale-right': 0.98,
           spacing: 35,
           latitude: -7,
           'left-angle': 0,
@@ -761,12 +1232,261 @@
           angry: [24, -24],
           sad: [-24, 24],
         }
+        // Jeu initial de 25 presets, désormais éditables directement dans ce playground.
+        // [headX, headY, headZ, leftWidth, rightWidth, leftHeight, rightHeight,
+        //  spacing, latitude, leftAngle, rightAngle]
+        const calibratedExpressionPresets = [
+          [7.3, 27.8, -16.1, 24.2, 27.6, 38.9, 40.7, 54.3, -20.5, 0, 0],
+          [-35.6, 0.7, -8.5, 29.4, 27.3, 49.5, 49.8, 57.7, -42, 0, 0],
+          [-36.2, 13.1, 15.5, 44.3, 51.3, 74.2, 76, 68.7, -40.7, 0, 0],
+          [15.6, -16.5, -11.3, 54, 51, 49.6, 48.5, 70.9, 30.1, 0, 0],
+          [3.4, 13, 8.9, 42.6, 44, 17.3, 16, 57.9, 4.9, 0, 0],
+          [-17.7, -1.4, -8.8, 29.5, 19.2, 51.6, 41.9, 56.3, 0, 0, 90],
+          [14.8, 14.5, 5.5, 22.9, 22.2, 32.4, 33.4, 50.9, 39.2, 0, 0],
+          [25.7, 16.5, -13.5, 48.5, 48.3, 33.5, 33, 53.3, 41.3, 61.3, -80],
+          [-22.8, -15.9, 6.2, 44.5, 43.9, 32.3, 24.6, 54.9, -42, -60.9, 69.2],
+          [-11.6, 8.3, -12.7, 42.5, 22.1, 41.8, 22.2, 61.7, 12.3, 0, 0],
+          [20.3, 7, 8.7, 30.2, 28.1, 48.8, 49.2, 56.8, 39.9, 0, 0],
+          [17.5, -15.2, -8.7, 51, 49.2, 75.3, 73.4, 70.2, 41.6, 0, 0],
+          [-10.4, 15.2, 11.8, 50.6, 51.6, 50, 50.7, 69.5, 16.7, 0, 0],
+          [-6, -7.7, -9.4, 43.6, 42.8, 15.5, 18.1, 57.9, 3.5, 0, 0],
+          [0.2, -3.1, 9, 29.6, 16.8, 51.5, 41.3, 56.4, -7.8, 0, 90],
+          [-16.2, 38.4, 2.4, 23.7, 26.2, 32.7, 34.6, 53.9, -41.1, 0, 0],
+          [3.5, -16.1, 15.8, 51, 48.5, 34.9, 33, 55.1, 41.9, 80, -62.2],
+          [-17.3, 11.2, -9.1, 24.2, 44.5, 44.5, 32.2, 55, -36.5, 18.5, 67.9],
+          [-0.7, 3.6, 12.2, 42.1, 22.2, 41.7, 22.1, 60.4, -9.1, 0, 0],
+          [-25.3, -12.4, -13.3, 30.5, 26.8, 49.9, 48.8, 56.2, -35.8, 0, 0],
+          [-41.1, 20.2, 18.8, 44.6, 53, 74.9, 77.8, 70.8, -40.6, 0, 0],
+          [-14.6, -12.5, -16.1, 51.4, 50.5, 50.1, 49.4, 69, -20, 0, 0],
+          [10, 2.7, 8.8, 42.9, 43.3, 16.4, 17.8, 57.9, 2.7, 0, 0],
+          [-17.8, 10, -6.3, 28.8, 17.3, 51.4, 42.7, 56.6, -9.8, 0, 90],
+          [-29.6, 7.5, 10.1, 21.5, 23.2, 32, 33.5, 51.2, -37.4, 0, 0],
+        ]
+        const expressionPresets = calibratedExpressionPresets.map(
+          ([
+            headX,
+            headY,
+            headZ,
+            leftWidth,
+            rightWidth,
+            leftHeight,
+            rightHeight,
+            spacing,
+            latitude,
+            leftAngle,
+            rightAngle,
+          ]) => ({
+            'head-x': headX,
+            'head-y': headY,
+            'head-z': headZ,
+            'width-left': leftWidth,
+            'width-right': rightWidth,
+            'height-left': leftHeight,
+            'height-right': rightHeight,
+            spacing,
+            latitude,
+            'left-angle': leftAngle,
+            'right-angle': rightAngle,
+            perspective: 1,
+          })
+        )
+        const stateGroups = {
+          'Cycle de vie': [
+            'sleeping',
+            'waking',
+            'idle',
+            'listening',
+            'thinking',
+            'searching',
+            'working',
+          ],
+          Réactions: [
+            'excited',
+            'surprised',
+            'suspicious',
+            'angry',
+            'drowsy',
+            'happy',
+            'curious',
+            'confused',
+            'bored',
+            'proud',
+            'shy',
+            'sad',
+            'laughing',
+            'scared',
+            'playful',
+            'celebrate',
+          ],
+          'Morphes agent': ['orbit', 'radar', 'progress'],
+          'Cycle produit': [
+            'spawning',
+            'humming',
+            'loading',
+            'dictating',
+            'writing',
+            'sending',
+            'receiving',
+            'uploading',
+            'notifying',
+            'alerting',
+            'dragging',
+            'bouncing',
+            'powering-down',
+          ],
+        }
+        const statePools = {
+          sleeping: [13, 22, 4],
+          waking: [13],
+          idle: [0, 8],
+          listening: [10, 1, 19],
+          thinking: [8, 16, 14, 17, 5],
+          searching: [15, 9, 3, 20, 12, 18],
+          working: [7, 16, 11, 10],
+          excited: [2, 17, 21, 3, 11],
+          surprised: [3, 21],
+          suspicious: [14, 5, 23],
+          angry: [7, 16],
+          drowsy: [4, 22, 13],
+          happy: [2, 11, 17, 19],
+          curious: [3, 21, 0, 15],
+          confused: [14, 5, 8],
+          bored: [4, 22, 0],
+          proud: [15, 8, 2],
+          shy: [0, 24, 13],
+          sad: [4, 13, 22],
+          laughing: [2, 11, 17],
+          scared: [3, 21],
+          playful: [2, 17, 11, 8],
+          celebrate: [2, 8, 17],
+          orbit: [0, 8],
+          radar: [0, 8],
+          progress: [0, 8],
+          spawning: [3, 0],
+          humming: [0, 8],
+          loading: [0, 8],
+          dictating: [10, 1, 19],
+          sending: [0, 8],
+          receiving: [19, 0, 8],
+          uploading: [15, 9, 8],
+          writing: [15, 9],
+          notifying: [3, 21, 0],
+          alerting: [3, 21],
+          bouncing: [2, 17],
+          dragging: [3, 15, 0],
+          'powering-down': [13, 22],
+        }
+        const expressionCadences = {
+          sleeping: [6000, 10000],
+          waking: [800, 800],
+          idle: [9000, 16000],
+          listening: [2800, 5000],
+          thinking: [2000, 3600],
+          searching: [1000, 1800],
+          working: [1800, 3200],
+          excited: [1100, 2000],
+          surprised: [2500, 4000],
+          suspicious: [2600, 4500],
+          angry: [2200, 3800],
+          drowsy: [4000, 8000],
+          happy: [2500, 4500],
+          curious: [1800, 3200],
+          confused: [2200, 3800],
+          bored: [3500, 6000],
+          proud: [3500, 6000],
+          shy: [3000, 5500],
+          sad: [4000, 7000],
+          laughing: [1200, 2400],
+          scared: [900, 1800],
+          playful: [1500, 3000],
+          celebrate: [1400, 2600],
+          orbit: [4000, 8000],
+          radar: [4000, 8000],
+          progress: [4000, 8000],
+          spawning: [1200, 1200],
+          humming: [5000, 9000],
+          loading: [6000, 10000],
+          dictating: [4000, 8000],
+          sending: [4000, 8000],
+          receiving: [4000, 8000],
+          uploading: [4000, 8000],
+          writing: [4000, 8000],
+          notifying: [1500, 2600],
+          alerting: [2000, 3600],
+          bouncing: [3000, 6000],
+          dragging: [1600, 3000],
+          'powering-down': [6000, 9000],
+        }
+        const blinkCadences = {
+          sleeping: null,
+          waking: null,
+          idle: [6000, 14000],
+          listening: [3000, 7000],
+          thinking: [3500, 7000],
+          searching: [1600, 4000],
+          working: [2800, 5500],
+          excited: [2000, 4000],
+          surprised: [1800, 3500],
+          suspicious: [4500, 8000],
+          angry: [3500, 7000],
+          drowsy: null,
+          happy: [2500, 5000],
+          curious: [2500, 5500],
+          confused: [2800, 5500],
+          bored: [4000, 8000],
+          proud: [3500, 7000],
+          shy: [3000, 6000],
+          sad: [4000, 8000],
+          laughing: [2500, 5000],
+          scared: [1200, 3000],
+          playful: [2000, 4500],
+          celebrate: [2200, 4500],
+          orbit: null,
+          radar: null,
+          progress: null,
+          spawning: null,
+          humming: [4000, 8000],
+          loading: null,
+          dictating: null,
+          sending: null,
+          receiving: null,
+          uploading: null,
+          writing: null,
+          notifying: [2000, 4000],
+          alerting: null,
+          bouncing: null,
+          dragging: [2200, 4500],
+          'powering-down': null,
+        }
+        const stateNotes = {
+          sleeping: 'Yeux presque fermés, respiration lente et expression de sommeil.',
+          waking: 'Séquence courte de réveil avant retour vers une expression neutre.',
+          idle: 'Micro-mouvements lents, expressions 00 et 08, clignement rare.',
+          listening: 'Expressions 10, 01 et 19, regard stable et clignement attentif.',
+          thinking: 'Regard haut et latéral, expressions asymétriques et changements fréquents.',
+          searching: 'Balayage rapide et changements très fréquents.',
+          working: 'Rythme régulier et expressions concentrées.',
+          excited: 'Grandes expressions et transitions rapides.',
+          curious: 'Inclinaisons et forte asymétrie.',
+        }
         let selectedSide = null
         let interaction = null
-        let arcballRotation = [1, 0, 0, 0]
+        let headOrientation = [1, 0, 0, 0]
+        const headControlValues = { x: 0, y: 0, z: 0 }
         let viewRollDegrees = 0
         let selectedRotationControl = null
         const linkedDimensions = { width: true, height: true, scale: true }
+        let activeExpression = 0
+        let selectedState = 'idle'
+        let activeState = 'idle'
+        let expressionTimer = null
+        let blinkTimer = null
+        let blinkFrame = null
+        let expressionFrame = null
+        let expressionAnimation = null
+        let blinkFactor = 1
+        let editingExpressionIndex = null
+        let expressionDraft = null
 
         const radians = degrees => (degrees * Math.PI) / 180
         const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
@@ -848,6 +1568,70 @@
           return normalizeQuaternion([Math.cos(halfAngle), x * sine, y * sine, z * sine])
         }
 
+        function quaternionFromEuler(x, y, z) {
+          const xRotation = quaternionFromAxisAngle([1, 0, 0], x)
+          const yRotation = quaternionFromAxisAngle([0, 1, 0], y)
+          const zRotation = quaternionFromAxisAngle([0, 0, 1], z)
+          return multiplyQuaternions(multiplyQuaternions(zRotation, xRotation), yRotation)
+        }
+
+        function quaternionToEuler([w, x, y, z]) {
+          const matrix00 = 1 - 2 * (y * y + z * z)
+          const matrix01 = 2 * (x * y - z * w)
+          const matrix10 = 2 * (x * y + z * w)
+          const matrix11 = 1 - 2 * (x * x + z * z)
+          const matrix20 = 2 * (x * z - y * w)
+          const matrix21 = 2 * (y * z + x * w)
+          const matrix22 = 1 - 2 * (x * x + y * y)
+          const headX = Math.asin(clamp(matrix21, -1, 1))
+          const cosineX = Math.cos(headX)
+
+          if (Math.abs(cosineX) < 0.00001) {
+            return [headX, 0, Math.atan2(matrix10, matrix00)]
+          }
+          return [headX, Math.atan2(-matrix20, matrix22), Math.atan2(-matrix01, matrix11)]
+        }
+
+        function nearestEquivalentAngle(angle, current) {
+          let result = angle
+          while (result - current > 180) result -= 360
+          while (result - current < -180) result += 360
+          return clamp(result, -365, 365)
+        }
+
+        function syncOrientationFromControls() {
+          headControlValues.x = Number($('head-x').value)
+          headControlValues.y = Number($('head-y').value)
+          headControlValues.z = Number($('head-z').value)
+          headOrientation = quaternionFromEuler(
+            radians(headControlValues.x),
+            radians(headControlValues.y),
+            radians(headControlValues.z)
+          )
+        }
+
+        function syncControlsFromOrientation() {
+          const [headX, headY, headZ] = quaternionToEuler(headOrientation).map(
+            angle => (angle * 180) / Math.PI
+          )
+          $('head-x').value = nearestEquivalentAngle(headX, Number($('head-x').value))
+          $('head-y').value = nearestEquivalentAngle(headY, Number($('head-y').value))
+          $('head-z').value = nearestEquivalentAngle(headZ, Number($('head-z').value))
+          headControlValues.x = Number($('head-x').value)
+          headControlValues.y = Number($('head-y').value)
+          headControlValues.z = Number($('head-z').value)
+        }
+
+        function applyAxisControlValue(axis, nextValue) {
+          const previousValue = headControlValues[axis]
+          const worldAxis = rotateWithQuaternion(headOrientation, axisVector(axis))
+          headOrientation = multiplyQuaternions(
+            quaternionFromAxisAngle(worldAxis, radians(nextValue - previousValue)),
+            headOrientation
+          )
+          headControlValues[axis] = nextValue
+        }
+
         function quaternionFromVectors(from, to) {
           const dot = from[0] * to[0] + from[1] * to[1] + from[2] * to[2]
           const cross = [
@@ -870,11 +1654,7 @@
         }
 
         function rotateHead(point) {
-          const headX = radians(Number($('head-x').value))
-          const headY = radians(Number($('head-y').value))
-          const headZ = radians(Number($('head-z').value))
-          const eulerRotation = rotateZ(rotateX(rotateY(point, headY), headX), headZ)
-          return rotateWithQuaternion(arcballRotation, eulerRotation)
+          return rotateWithQuaternion(headOrientation, point)
         }
 
         function spherePoint(longitude, latitude) {
@@ -887,21 +1667,56 @@
         }
 
         function project(point) {
-          const strength = Number($('perspective').value)
+          const strength = animatedControlValue('perspective')
           const naturalPerspective = focalLength / (focalLength - point[2])
           const perspectiveScale = 1 + (naturalPerspective - 1) * strength
           return [point[0] * perspectiveScale, point[1] * perspectiveScale, point[2]]
         }
 
+        function projectedHeadRadiusFor(strength) {
+          let lowerAngle = 0
+          let upperAngle = Math.PI / 2
+          const projectedRadiusAt = angle => {
+            const depth = radius * Math.cos(angle)
+            const naturalPerspective = focalLength / (focalLength - depth)
+            const perspectiveScale = 1 + (naturalPerspective - 1) * strength
+            return radius * Math.sin(angle) * perspectiveScale
+          }
+
+          // La projection interpolée du playground n’est une caméra physique exacte
+          // qu’à strength = 1. Cette recherche du maximum reste donc correcte sur 0…3.
+          for (let iteration = 0; iteration < 28; iteration += 1) {
+            const first = lowerAngle + (upperAngle - lowerAngle) / 3
+            const second = upperAngle - (upperAngle - lowerAngle) / 3
+            if (projectedRadiusAt(first) < projectedRadiusAt(second)) {
+              lowerAngle = first
+            } else {
+              upperAngle = second
+            }
+          }
+          return projectedRadiusAt((lowerAngle + upperAngle) / 2)
+        }
+
+        function projectedHeadRadius() {
+          return projectedHeadRadiusFor(animatedControlValue('perspective'))
+        }
+
+        function renderHeadSilhouette() {
+          const apparentRadius = projectedHeadRadius()
+          $('avatar').querySelector('.head').setAttribute('r', apparentRadius.toFixed(3))
+          $('head-clip-circle').setAttribute('r', apparentRadius.toFixed(3))
+          $('head-radius-output').textContent = `silhouette · rayon ${apparentRadius.toFixed(2)} u`
+        }
+
         function eyeSettings(side) {
           const suffix = side < 0 ? 'left' : 'right'
-          const scale = Number($(`scale-${suffix}`).value)
-          const width = Number($(`width-${suffix}`).value) * scale
-          const height = Number($(`height-${suffix}`).value) * scale
-          const spacing = Number($('spacing').value)
+          const width = animatedControlValue(`width-${suffix}`)
+          const restingHeight = animatedControlValue(`height-${suffix}`)
+          const height = 5 + (restingHeight - 5) * blinkFactor
+          const spacing = animatedControlValue('spacing')
           const eyeCenterX = (side * spacing) / 2
-          const eyeCenterY = Number($('latitude').value)
-          const angle = radians(Number($(side < 0 ? 'left-angle' : 'right-angle').value))
+          const eyeCenterY = animatedControlValue('latitude')
+          const angle = radians(animatedControlValue(side < 0 ? 'left-angle' : 'right-angle'))
           return { width, height, eyeCenterX, eyeCenterY, angle }
         }
 
@@ -914,6 +1729,337 @@
           if (linkedDimensions[dimension]) {
             $(dimensionId(dimension, -side)).value = value
           }
+        }
+
+        function eyeSize(side) {
+          return Math.sqrt(
+            Number($(dimensionId('width', side)).value) *
+              Number($(dimensionId('height', side)).value)
+          )
+        }
+
+        function resizeEye(side, factor, sourceDimensions = null) {
+          const suffix = side < 0 ? 'left' : 'right'
+          const width = sourceDimensions?.[`width-${suffix}`] ?? Number($(`width-${suffix}`).value)
+          const height =
+            sourceDimensions?.[`height-${suffix}`] ?? Number($(`height-${suffix}`).value)
+          $(`width-${suffix}`).value = clamp(width * factor, 12, 100)
+          $(`height-${suffix}`).value = clamp(height * factor, 5, 100)
+        }
+
+        function resizeEyesFromSizeControl(side, targetSize) {
+          const currentSize = eyeSize(side)
+          if (!currentSize) return
+          const factor = targetSize / currentSize
+          resizeEye(side, factor)
+          if (linkedDimensions.scale) resizeEye(-side, factor)
+        }
+
+        const expressionControlIds = [
+          'head-x',
+          'head-y',
+          'head-z',
+          'width-left',
+          'width-right',
+          'height-left',
+          'height-right',
+          'spacing',
+          'latitude',
+          'left-angle',
+          'right-angle',
+          'perspective',
+        ]
+
+        function expressionTargets(index) {
+          return { ...expressionPresets[index] }
+        }
+
+        const expressionEditorGroups = [
+          {
+            title: 'Rotation de la tête',
+            fields: [
+              ['head-x', 'Rotation X'],
+              ['head-y', 'Rotation Y'],
+              ['head-z', 'Rotation Z'],
+            ],
+          },
+          {
+            title: 'Œil gauche',
+            fields: [
+              ['width-left', 'Largeur'],
+              ['height-left', 'Hauteur'],
+              ['left-angle', 'Rotation locale'],
+            ],
+          },
+          {
+            title: 'Œil droit',
+            fields: [
+              ['width-right', 'Largeur'],
+              ['height-right', 'Hauteur'],
+              ['right-angle', 'Rotation locale'],
+            ],
+          },
+          {
+            title: 'Placement et caméra',
+            fields: [
+              ['spacing', 'Espacement'],
+              ['latitude', 'Position verticale'],
+              ['perspective', 'Perspective'],
+            ],
+          },
+        ]
+
+        function previewEyePoints(targets, side) {
+          const suffix = side < 0 ? 'left' : 'right'
+          const width = targets[`width-${suffix}`]
+          const height = targets[`height-${suffix}`]
+          const eyeCenterX = (side * targets.spacing) / 2
+          const angle = radians(targets[side < 0 ? 'left-angle' : 'right-angle'])
+          const orientation = quaternionFromEuler(
+            radians(targets['head-x']),
+            radians(targets['head-y']),
+            radians(targets['head-z'])
+          )
+          return roundedRectangle(width, height).map(([localX, localY]) => {
+            const rotatedX = localX * Math.cos(angle) - localY * Math.sin(angle)
+            const rotatedY = localX * Math.sin(angle) + localY * Math.cos(angle)
+            const surface = spherePoint(
+              (eyeCenterX + rotatedX) / radius,
+              (targets.latitude + rotatedY) / radius
+            )
+            const rotated = rotateWithQuaternion(orientation, surface)
+            const naturalPerspective = focalLength / (focalLength - rotated[2])
+            const perspectiveScale = 1 + (naturalPerspective - 1) * Number(targets.perspective)
+            return [rotated[0] * perspectiveScale, rotated[1] * perspectiveScale, rotated[2]]
+          })
+        }
+
+        function expressionPreviewSvg(targets, key) {
+          const left = previewEyePoints(targets, -1)
+          const right = previewEyePoints(targets, 1)
+          const clipId = `expression-preview-${key}`
+          const headRadius = projectedHeadRadiusFor(Number(targets.perspective))
+          const eyePath = points =>
+            `<path d="${path(points)}" fill="#111316" opacity="${
+              averageDepth(points) > 0 ? 1 : 0
+            }" />`
+          return `<svg viewBox="-150 -150 300 300" aria-hidden="true">
+            <defs><clipPath id="${clipId}"><circle cx="0" cy="0" r="${headRadius.toFixed(
+              3
+            )}" /></clipPath></defs>
+            <circle cx="0" cy="0" r="${headRadius.toFixed(3)}" fill="#5b7fe5" />
+            <g clip-path="url(#${clipId})">${eyePath(left)}${eyePath(right)}</g>
+          </svg>`
+        }
+
+        function renderExpressionEditorPreview() {
+          if (!expressionDraft) return
+          $('expression-editor-preview').innerHTML = expressionPreviewSvg(expressionDraft, 'editor')
+        }
+
+        function buildExpressionEditorFields() {
+          $('expression-editor-fields').replaceChildren()
+          expressionEditorGroups.forEach(group => {
+            const section = document.createElement('section')
+            const title = document.createElement('h3')
+            section.className = 'expression-editor-group'
+            title.textContent = group.title
+            section.appendChild(title)
+            group.fields.forEach(([id, label]) => {
+              const source = $(id)
+              const row = document.createElement('label')
+              const name = document.createElement('span')
+              const range = document.createElement('input')
+              const number = document.createElement('input')
+              row.className = 'expression-field'
+              name.textContent = label
+              range.type = 'range'
+              range.min = source.min
+              range.max = source.max
+              range.step = source.step
+              range.dataset.expressionField = id
+              number.type = 'number'
+              number.min = source.min
+              number.max = source.max
+              number.step = source.step
+              number.dataset.expressionNumber = id
+              const updateDraft = value => {
+                const parsed = Number(value)
+                if (!Number.isFinite(parsed)) return
+                const next = clamp(parsed, Number(source.min), Number(source.max))
+                expressionDraft[id] = next
+                range.value = next
+                number.value = next
+                renderExpressionEditorPreview()
+              }
+              range.addEventListener('input', event => updateDraft(event.currentTarget.value))
+              number.addEventListener('input', event => updateDraft(event.currentTarget.value))
+              row.append(name, range, number)
+              section.appendChild(row)
+            })
+            $('expression-editor-fields').appendChild(section)
+          })
+        }
+
+        function openExpressionEditor(index = null) {
+          cancelExpressionAnimation()
+          editingExpressionIndex = index
+          expressionDraft =
+            index === null
+              ? Object.fromEntries(expressionControlIds.map(id => [id, animatedControlValue(id)]))
+              : expressionTargets(index)
+          const displayIndex = index ?? expressionPresets.length
+          const number = String(displayIndex).padStart(2, '0')
+          $('expression-editor-title').textContent =
+            index === null ? 'Créer une nouvelle expression' : `Modifier l’expression ${number}`
+          $('expression-editor-number').textContent =
+            index === null ? `Nouvelle expression ${number}` : `Expression ${number}`
+          expressionControlIds.forEach(id => {
+            const value = expressionDraft[id]
+            document.querySelector(`[data-expression-field="${id}"]`).value = value
+            document.querySelector(`[data-expression-number="${id}"]`).value = value
+          })
+          renderExpressionEditorPreview()
+          $('expression-editor').showModal()
+        }
+
+        function closeExpressionEditor() {
+          $('expression-editor').close()
+          editingExpressionIndex = null
+          expressionDraft = null
+        }
+
+        function cancelExpressionAnimation() {
+          if (expressionFrame !== null) cancelAnimationFrame(expressionFrame)
+          expressionFrame = null
+          expressionAnimation = null
+        }
+
+        function animatedControlValue(id) {
+          return expressionAnimation?.values?.[id] ?? Number($(id).value)
+        }
+
+        function lerp(start, end, progress) {
+          return start + (end - start) * progress
+        }
+
+        function slerpQuaternion(start, end, progress) {
+          let target = end
+          let dot = start.reduce((total, value, index) => total + value * target[index], 0)
+          if (dot < 0) {
+            target = target.map(value => -value)
+            dot = -dot
+          }
+          if (dot > 0.9995) {
+            return normalizeQuaternion(
+              start.map((value, index) => lerp(value, target[index], progress))
+            )
+          }
+          const angle = Math.acos(clamp(dot, -1, 1))
+          const sine = Math.sin(angle)
+          const startWeight = Math.sin((1 - progress) * angle) / sine
+          const targetWeight = Math.sin(progress * angle) / sine
+          return normalizeQuaternion(
+            start.map((value, index) => value * startWeight + target[index] * targetWeight)
+          )
+        }
+
+        function selectExpression(index, immediate = false) {
+          const startValues = Object.fromEntries(
+            expressionControlIds.map(id => [id, animatedControlValue(id)])
+          )
+          const startOrientation = [...headOrientation]
+          cancelExpressionAnimation()
+          selectedSide = null
+          selectedRotationControl = null
+          activeExpression = index
+          $('active-expression').textContent = String(index).padStart(2, '0')
+          document.querySelectorAll('[data-expression]').forEach(button => {
+            button.setAttribute('aria-pressed', String(Number(button.dataset.expression) === index))
+          })
+          ;['width', 'height', 'scale'].forEach(dimension => {
+            linkedDimensions[dimension] = false
+            document
+              .querySelector(`[data-link="${dimension}"]`)
+              .setAttribute('aria-pressed', 'false')
+          })
+          const targets = expressionTargets(index)
+          if (immediate) {
+            Object.entries(targets).forEach(([id, value]) => ($(id).value = value))
+            syncOrientationFromControls()
+            render()
+            return
+          }
+          expressionAnimation = {
+            startedAt: performance.now(),
+            values: { ...startValues },
+            startValues,
+            targets,
+            startOrientation,
+            targetOrientation: quaternionFromEuler(
+              radians(targets['head-x']),
+              radians(targets['head-y']),
+              radians(targets['head-z'])
+            ),
+          }
+          const animateExpression = now => {
+            if (!expressionAnimation) return
+            const frequency = Number($('spring-speed').value)
+            const elapsed = Math.max(0, (now - expressionAnimation.startedAt) / 1000)
+            const progress = 1 - (1 + frequency * elapsed) * Math.exp(-frequency * elapsed)
+            expressionControlIds.forEach(id => {
+              const next = lerp(
+                expressionAnimation.startValues[id],
+                expressionAnimation.targets[id],
+                progress
+              )
+              expressionAnimation.values[id] = next
+              $(id).value = next
+            })
+            headControlValues.x = expressionAnimation.values['head-x']
+            headControlValues.y = expressionAnimation.values['head-y']
+            headControlValues.z = expressionAnimation.values['head-z']
+            headOrientation = slerpQuaternion(
+              expressionAnimation.startOrientation,
+              expressionAnimation.targetOrientation,
+              progress
+            )
+            render()
+            if (progress < 0.9995) {
+              expressionFrame = requestAnimationFrame(animateExpression)
+            } else {
+              Object.entries(expressionAnimation.targets).forEach(
+                ([id, value]) => ($(id).value = value)
+              )
+              headControlValues.x = expressionAnimation.targets['head-x']
+              headControlValues.y = expressionAnimation.targets['head-y']
+              headControlValues.z = expressionAnimation.targets['head-z']
+              headOrientation = expressionAnimation.targetOrientation
+              expressionFrame = null
+              expressionAnimation = null
+              render()
+            }
+          }
+          expressionFrame = requestAnimationFrame(animateExpression)
+        }
+
+        function blink() {
+          if (blinkFrame !== null) cancelAnimationFrame(blinkFrame)
+          const startedAt = performance.now()
+          const duration = Number($('blink-duration').value)
+          const animateBlink = now => {
+            const progress = (now - startedAt) / duration
+            if (progress >= 1) {
+              blinkFactor = 1
+              blinkFrame = null
+              render()
+              return
+            }
+            blinkFactor = progress < 0.42 ? 1 - progress / 0.42 : (progress - 0.42) / 0.58
+            render()
+            blinkFrame = requestAnimationFrame(animateBlink)
+          }
+          blinkFrame = requestAnimationFrame(animateBlink)
         }
 
         function projectEyePoint(side, localX, localY) {
@@ -1104,13 +2250,47 @@
                 : axis === 'y'
                   ? [cosine, 0, sine]
                   : [cosine, sine, 0]
-            const rotated = rotateHead(point)
+            const rotated = rotateWithQuaternion(headOrientation, point)
             return [
               gizmoCenter[0] + rotated[0] * gizmoRadius,
               gizmoCenter[1] + rotated[1] * gizmoRadius,
               rotated[2],
             ]
           })
+        }
+
+        function axisVector(axis) {
+          return axis === 'x' ? [1, 0, 0] : axis === 'y' ? [0, 1, 0] : [0, 0, 1]
+        }
+
+        function dotProduct(first, second) {
+          return first[0] * second[0] + first[1] * second[1] + first[2] * second[2]
+        }
+
+        function cameraRollWeights(orientation) {
+          const cameraAxis = [0, 0, 1]
+          return Object.fromEntries(
+            ['x', 'y', 'z'].map(axis => [
+              axis,
+              dotProduct(cameraAxis, rotateWithQuaternion(orientation, axisVector(axis))),
+            ])
+          )
+        }
+
+        function ringTangentAtPoint(axis, point) {
+          const ring = rotationRing(axis)
+          let closestIndex = 0
+          let closestDistance = Number.POSITIVE_INFINITY
+          ring.slice(0, -1).forEach((ringPoint, index) => {
+            const distance = Math.hypot(ringPoint[0] - point[0], ringPoint[1] - point[1])
+            if (distance < closestDistance) {
+              closestDistance = distance
+              closestIndex = index
+            }
+          })
+          const previous = ring[(closestIndex - 1 + ring.length - 1) % (ring.length - 1)]
+          const next = ring[(closestIndex + 1) % (ring.length - 1)]
+          return unitVector(previous, next)
         }
 
         function renderRotationGizmo() {
@@ -1133,27 +2313,30 @@
         }
 
         function updateOutputs() {
-          const units = id => `${Number($(id).value).toFixed(0)} u`
-          $('head-y-output').textContent = `${$('head-y').value}°`
-          $('head-x-output').textContent = `${$('head-x').value}°`
-          $('head-z-output').textContent = `${$('head-z').value}°`
+          const units = id => `${animatedControlValue(id).toFixed(1)} u`
+          $('head-y-output').textContent = `${animatedControlValue('head-y').toFixed(1)}°`
+          $('head-x-output').textContent = `${animatedControlValue('head-x').toFixed(1)}°`
+          $('head-z-output').textContent = `${animatedControlValue('head-z').toFixed(1)}°`
           ;['left', 'right'].forEach(side => {
             $(`width-${side}-output`).textContent = units(`width-${side}`)
             $(`height-${side}-output`).textContent = units(`height-${side}`)
-            $(`scale-${side}-output`).textContent =
-              `${Number($(`scale-${side}`).value).toFixed(2)}×`
+            const sideValue = side === 'left' ? -1 : 1
+            const size = eyeSize(sideValue)
+            $(`scale-${side}`).value = size
+            $(`scale-${side}-output`).textContent = `${size.toFixed(1)} u`
           })
           $('spacing-output').textContent = units('spacing')
           $('latitude-output').textContent = units('latitude')
-          $('left-angle-output').textContent = `${$('left-angle').value}°`
-          $('right-angle-output').textContent = `${$('right-angle').value}°`
-          $('perspective-output').textContent = `${Number($('perspective').value).toFixed(2)}×`
-          $('arcball-output').textContent = `arcball · q(${arcballRotation
+          $('left-angle-output').textContent = `${animatedControlValue('left-angle').toFixed(1)}°`
+          $('right-angle-output').textContent = `${animatedControlValue('right-angle').toFixed(1)}°`
+          $('perspective-output').textContent = `${animatedControlValue('perspective').toFixed(2)}×`
+          $('arcball-output').textContent = `orientation · q(${headOrientation
             .map(value => value.toFixed(3))
             .join(', ')})`
         }
 
         function render() {
+          renderHeadSilhouette()
           const left = projectedEye(-1)
           const right = projectedEye(1)
           const leftVisible = averageDepth(left) > 0
@@ -1181,16 +2364,170 @@
           render()
         }
 
-        const pairedDimensions = ['width', 'height', 'scale']
+        const formatCadence = cadence =>
+          cadence
+            ? `${(cadence[0] / 1000).toFixed(cadence[0] % 1000 ? 1 : 0)}–${(
+                cadence[1] / 1000
+              ).toFixed(cadence[1] % 1000 ? 1 : 0)} s`
+            : 'désactivé'
+
+        const randomDelay = cadence => cadence[0] + Math.random() * (cadence[1] - cadence[0])
+
+        function stopStateTimers() {
+          clearTimeout(expressionTimer)
+          clearTimeout(blinkTimer)
+          expressionTimer = null
+          blinkTimer = null
+        }
+
+        function scheduleStateExpression() {
+          clearTimeout(expressionTimer)
+          if (!$('auto-expression').checked) return
+          const cadence = expressionCadences[activeState]
+          expressionTimer = setTimeout(() => {
+            const pool = statePools[activeState]
+            const alternatives = pool.filter(index => index !== activeExpression)
+            selectExpression(
+              alternatives.length
+                ? alternatives[Math.floor(Math.random() * alternatives.length)]
+                : pool[0]
+            )
+            scheduleStateExpression()
+          }, randomDelay(cadence))
+        }
+
+        function scheduleStateBlink() {
+          clearTimeout(blinkTimer)
+          const cadence = blinkCadences[activeState]
+          if (!$('auto-blink').checked || !cadence) return
+          blinkTimer = setTimeout(() => {
+            blink()
+            scheduleStateBlink()
+          }, randomDelay(cadence))
+        }
+
+        function startState(name) {
+          activeState = name
+          $('active-state').textContent = name
+          selectExpression(statePools[name][0])
+          scheduleStateExpression()
+          scheduleStateBlink()
+        }
+
+        function renderStateDetail() {
+          $('state-title').textContent = selectedState
+          $('state-description').textContent =
+            stateNotes[selectedState] ||
+            'Cet état combine son pool d’expressions, ses cadences et ses clignements.'
+          $('state-expression-cadence').textContent = formatCadence(
+            expressionCadences[selectedState]
+          )
+          $('state-blink-cadence').textContent = formatCadence(blinkCadences[selectedState])
+          $('state-pool').innerHTML = ''
+          statePools[selectedState].forEach(index => {
+            const button = document.createElement('button')
+            button.type = 'button'
+            button.className = 'pool-button'
+            button.dataset.expression = String(index)
+            button.textContent = String(index).padStart(2, '0')
+            button.setAttribute('aria-pressed', String(index === activeExpression))
+            button.addEventListener('click', () => selectExpression(index))
+            $('state-pool').appendChild(button)
+          })
+        }
+
+        function renderExpressionGrid() {
+          $('expression-grid').replaceChildren()
+          expressionPresets.forEach((preset, index) => {
+            const button = document.createElement('button')
+            const number = String(index).padStart(2, '0')
+            button.type = 'button'
+            button.className = 'expression-button'
+            button.dataset.expression = String(index)
+            button.setAttribute('aria-label', `Expression ${number} — double-clic pour modifier`)
+            button.setAttribute('aria-pressed', String(index === activeExpression))
+            button.innerHTML = `${expressionPreviewSvg(
+              preset,
+              `preset-${index}`
+            )}<span class="expression-number">${number}</span>`
+            button.addEventListener('click', () => selectExpression(index))
+            button.addEventListener('dblclick', () => openExpressionEditor(index))
+            $('expression-grid').appendChild(button)
+          })
+          const addButton = document.createElement('button')
+          addButton.type = 'button'
+          addButton.className = 'expression-add'
+          addButton.setAttribute('aria-label', 'Créer une nouvelle expression')
+          addButton.title = 'Créer une expression depuis les réglages actuels'
+          addButton.textContent = '+'
+          addButton.addEventListener('click', () => openExpressionEditor())
+          $('expression-grid').appendChild(addButton)
+        }
+
+        buildExpressionEditorFields()
+        renderExpressionGrid()
+
+        Object.entries(stateGroups).forEach(([label, states]) => {
+          const section = document.createElement('section')
+          const title = document.createElement('strong')
+          const buttons = document.createElement('div')
+          title.className = 'state-group-title'
+          title.textContent = label
+          buttons.className = 'state-buttons'
+          states.forEach(name => {
+            const button = document.createElement('button')
+            button.type = 'button'
+            button.className = 'state-button'
+            button.dataset.state = name
+            button.textContent = name
+            button.setAttribute('aria-pressed', String(name === selectedState))
+            button.addEventListener('click', () => {
+              selectedState = name
+              document.querySelectorAll('[data-state]').forEach(candidate => {
+                candidate.setAttribute('aria-pressed', String(candidate === button))
+              })
+              renderStateDetail()
+            })
+            buttons.appendChild(button)
+          })
+          section.append(title, buttons)
+          $('state-groups').appendChild(section)
+        })
+
+        document.querySelectorAll('[data-mode]').forEach(tab => {
+          tab.addEventListener('click', () => {
+            const mode = tab.dataset.mode
+            document.querySelectorAll('[data-mode]').forEach(candidate => {
+              candidate.setAttribute('aria-selected', String(candidate === tab))
+            })
+            document.querySelectorAll('.mode-panel').forEach(panel => {
+              panel.hidden = panel.id !== `mode-${mode}`
+            })
+          })
+        })
+
+        renderStateDetail()
+
+        const pairedDimensions = ['width', 'height']
         const pairedControlIds = new Set(
           pairedDimensions.flatMap(dimension => [`${dimension}-left`, `${dimension}-right`])
         )
         controls
           .filter(id => !pairedControlIds.has(id))
-          .forEach(id => $(id).addEventListener('input', render))
+          .forEach(id =>
+            $(id).addEventListener('input', () => {
+              cancelExpressionAnimation()
+              if (id === 'head-x' || id === 'head-y' || id === 'head-z') {
+                const axis = id.slice(-1)
+                applyAxisControlValue(axis, Number($(id).value))
+              }
+              render()
+            })
+          )
         pairedDimensions.forEach(dimension => {
           ;['left', 'right'].forEach(side => {
             $(`${dimension}-${side}`).addEventListener('input', event => {
+              cancelExpressionAnimation()
               if (linkedDimensions[dimension]) {
                 const otherSide = side === 'left' ? 'right' : 'left'
                 $(`${dimension}-${otherSide}`).value = event.currentTarget.value
@@ -1199,12 +2536,20 @@
             })
           })
         })
+        ;['left', 'right'].forEach(side => {
+          $(`scale-${side}`).addEventListener('input', event => {
+            cancelExpressionAnimation()
+            resizeEyesFromSizeControl(side === 'left' ? -1 : 1, Number(event.currentTarget.value))
+            render()
+          })
+        })
         document.querySelectorAll('[data-link]').forEach(button => {
           button.addEventListener('click', () => {
+            cancelExpressionAnimation()
             const dimension = button.dataset.link
             linkedDimensions[dimension] = !linkedDimensions[dimension]
             button.setAttribute('aria-pressed', String(linkedDimensions[dimension]))
-            if (linkedDimensions[dimension]) {
+            if (linkedDimensions[dimension] && dimension !== 'scale') {
               $(`${dimension}-right`).value = $(`${dimension}-left`).value
             }
             render()
@@ -1217,22 +2562,76 @@
             button.addEventListener('click', () => applyPreset(button.dataset.preset))
           )
 
+        $('spring-speed').addEventListener('input', () => {
+          $('spring-speed-output').textContent = Number($('spring-speed').value).toFixed(1)
+        })
+        $('blink-duration').addEventListener('input', () => {
+          $('blink-duration-output').textContent = `${$('blink-duration').value} ms`
+        })
+        $('blink-now').addEventListener('click', blink)
+        $('random-expression').addEventListener('click', () => {
+          let next = Math.floor(Math.random() * expressionPresets.length)
+          if (next === activeExpression) next = (next + 1) % expressionPresets.length
+          selectExpression(next)
+        })
+        $('expression-editor-close').addEventListener('click', closeExpressionEditor)
+        $('expression-editor-cancel').addEventListener('click', closeExpressionEditor)
+        $('expression-editor').addEventListener('click', event => {
+          if (event.target === $('expression-editor')) closeExpressionEditor()
+        })
+        $('expression-editor-form').addEventListener('submit', event => {
+          event.preventDefault()
+          const index = editingExpressionIndex ?? expressionPresets.length
+          if (editingExpressionIndex === null) {
+            expressionPresets.push({ ...expressionDraft })
+          } else {
+            expressionPresets[index] = { ...expressionDraft }
+          }
+          closeExpressionEditor()
+          activeExpression = index
+          renderExpressionGrid()
+          renderStateDetail()
+          selectExpression(index)
+        })
+        $('apply-state').addEventListener('click', () => startState(selectedState))
+        $('stop-state').addEventListener('click', stopStateTimers)
+        $('auto-expression').addEventListener('change', scheduleStateExpression)
+        $('auto-blink').addEventListener('change', scheduleStateBlink)
+
         $('reset').addEventListener('click', () => {
+          stopStateTimers()
+          cancelExpressionAnimation()
+          if (blinkFrame !== null) cancelAnimationFrame(blinkFrame)
+          blinkFrame = null
+          blinkFactor = 1
           Object.entries(defaultValues).forEach(([id, value]) => {
             $(id).value = value
           })
           $('show-points').checked = false
           $('show-wire').checked = false
           selectedSide = null
-          arcballRotation = [1, 0, 0, 0]
+          headOrientation = [1, 0, 0, 0]
           viewRollDegrees = 0
           selectedRotationControl = null
-          pairedDimensions.forEach(dimension => {
+          activeExpression = 0
+          activeState = 'idle'
+          selectedState = 'idle'
+          $('active-expression').textContent = '00'
+          $('active-state').textContent = 'idle'
+          document.querySelectorAll('[data-expression]').forEach(button => {
+            button.setAttribute('aria-pressed', String(Number(button.dataset.expression) === 0))
+          })
+          document.querySelectorAll('[data-state]').forEach(button => {
+            button.setAttribute('aria-pressed', String(button.dataset.state === 'idle'))
+          })
+          ;['width', 'height', 'scale'].forEach(dimension => {
             linkedDimensions[dimension] = true
             document
               .querySelector(`[data-link="${dimension}"]`)
               .setAttribute('aria-pressed', 'true')
           })
+          renderStateDetail()
+          syncOrientationFromControls()
           applyPreset('neutral')
         })
 
@@ -1269,13 +2668,14 @@
         }
 
         function beginHeadDrag(event) {
+          cancelExpressionAnimation()
           selectedSide = null
           selectedRotationControl = 'arcball'
           interaction = {
             type: 'arcball',
             pointerId: event.pointerId,
             startVector: arcballVector(clientToSvg(event)),
-            startArcball: [...arcballRotation],
+            startOrientation: [...headOrientation],
           }
           $('avatar').setPointerCapture(event.pointerId)
           render()
@@ -1288,6 +2688,7 @@
         }
 
         function beginViewRollDrag(event) {
+          cancelExpressionAnimation()
           event.stopPropagation()
           selectedRotationControl = 'view'
           const point = clientToSvg(event)
@@ -1296,29 +2697,35 @@
             pointerId: event.pointerId,
             center: gizmoCenter,
             startPointerAngle: pointerAngle(point, gizmoCenter),
-            startArcball: [...arcballRotation],
+            startOrientation: [...headOrientation],
             startViewRoll: viewRollDegrees,
+            startControlValues: { ...headControlValues },
+            controlWeights: cameraRollWeights(headOrientation),
           }
           $('avatar').setPointerCapture(event.pointerId)
         }
 
         function beginAxisDrag(axis, event) {
+          cancelExpressionAnimation()
           event.stopPropagation()
           selectedRotationControl = axis
           const point = clientToSvg(event)
+          const startOrientation = [...headOrientation]
           interaction = {
             type: 'axis-ring',
             axis,
             pointerId: event.pointerId,
-            startClient: [event.clientX, event.clientY],
             startPoint: point,
-            startPointerAngle: pointerAngle(point, gizmoCenter),
-            startValue: Number($(`head-${axis}`).value),
+            tangent: ringTangentAtPoint(axis, point),
+            worldAxis: rotateWithQuaternion(startOrientation, axisVector(axis)),
+            startOrientation,
+            startValue: headControlValues[axis],
           }
           $('avatar').setPointerCapture(event.pointerId)
         }
 
         function beginHandleDrag(type, event) {
+          cancelExpressionAnimation()
           event.stopPropagation()
           if (selectedSide === null) return
           const point = clientToSvg(event)
@@ -1339,7 +2746,12 @@
             startPointerAngle: pointerAngle(point, center),
             startWidth: Number($(dimensionId('width', selectedSide)).value),
             startHeight: Number($(dimensionId('height', selectedSide)).value),
-            startScale: Number($(dimensionId('scale', selectedSide)).value),
+            startDimensions: Object.fromEntries(
+              ['width-left', 'width-right', 'height-left', 'height-right'].map(id => [
+                id,
+                Number($(id).value),
+              ])
+            ),
             startSpacing: Number($('spacing').value),
             startAngle: Number($(selectedSide < 0 ? 'left-angle' : 'right-angle').value),
             startDistance: Math.max(Math.hypot(point[0] - center[0], point[1] - center[1]), 1),
@@ -1353,7 +2765,8 @@
           if (interaction.type === 'arcball') {
             const currentVector = arcballVector(clientToSvg(event))
             const deltaRotation = quaternionFromVectors(interaction.startVector, currentVector)
-            arcballRotation = multiplyQuaternions(deltaRotation, interaction.startArcball)
+            headOrientation = multiplyQuaternions(deltaRotation, interaction.startOrientation)
+            syncControlsFromOrientation()
             render()
             return
           }
@@ -1363,34 +2776,44 @@
             const deltaAngle = normalizedAngleDelta(
               pointerAngle(point, interaction.center) - interaction.startPointerAngle
             )
-            arcballRotation = multiplyQuaternions(
+            headOrientation = multiplyQuaternions(
               quaternionFromAxisAngle([0, 0, 1], deltaAngle),
-              interaction.startArcball
+              interaction.startOrientation
             )
-            viewRollDegrees = interaction.startViewRoll + (deltaAngle * 180) / Math.PI
+            const deltaDegrees = (deltaAngle * 180) / Math.PI
+            viewRollDegrees = interaction.startViewRoll + deltaDegrees
+            ;['x', 'y', 'z'].forEach(axis => {
+              const nextValue = clamp(
+                interaction.startControlValues[axis] +
+                  deltaDegrees * interaction.controlWeights[axis],
+                -365,
+                365
+              )
+              headControlValues[axis] = nextValue
+              $(`head-${axis}`).value = nextValue
+            })
             render()
             return
           }
 
           if (interaction.type === 'axis-ring') {
-            let deltaDegrees
-            if (interaction.axis === 'x') {
-              deltaDegrees = -(event.clientY - interaction.startClient[1]) * 0.65
-            } else if (interaction.axis === 'y') {
-              deltaDegrees = (event.clientX - interaction.startClient[0]) * 0.65
-            } else {
-              deltaDegrees =
-                (normalizedAngleDelta(
-                  pointerAngle(point, gizmoCenter) - interaction.startPointerAngle
-                ) *
-                  180) /
-                Math.PI
-            }
-            $(`head-${interaction.axis}`).value = clamp(
-              interaction.startValue + deltaDegrees,
-              -365,
-              365
+            const displacement = [
+              point[0] - interaction.startPoint[0],
+              point[1] - interaction.startPoint[1],
+            ]
+            const signedDistance =
+              displacement[0] * interaction.tangent[0] + displacement[1] * interaction.tangent[1]
+            const deltaDegrees = signedDistance * 1.5
+            const nextValue = clamp(interaction.startValue + deltaDegrees, -365, 365)
+            headOrientation = multiplyQuaternions(
+              quaternionFromAxisAngle(
+                interaction.worldAxis,
+                radians(nextValue - interaction.startValue)
+              ),
+              interaction.startOrientation
             )
+            headControlValues[interaction.axis] = nextValue
+            $(`head-${interaction.axis}`).value = nextValue
             render()
             return
           }
@@ -1402,34 +2825,24 @@
             setEyeDimension(
               'width',
               interaction.side,
-              clamp(
-                interaction.startWidth +
-                  (along(interaction.widthAxis) * 2) / interaction.startScale,
-                12,
-                100
-              )
+              clamp(interaction.startWidth + along(interaction.widthAxis) * 2, 12, 100)
             )
           } else if (interaction.type === 'height') {
             setEyeDimension(
               'height',
               interaction.side,
-              clamp(
-                interaction.startHeight +
-                  (along(interaction.heightAxis) * 2) / interaction.startScale,
-                5,
-                100
-              )
+              clamp(interaction.startHeight + along(interaction.heightAxis) * 2, 5, 100)
             )
           } else if (interaction.type === 'scale') {
             const distance = Math.hypot(
               point[0] - interaction.center[0],
               point[1] - interaction.center[1]
             )
-            setEyeDimension(
-              'scale',
-              interaction.side,
-              clamp(interaction.startScale * (distance / interaction.startDistance), 0.35, 2)
-            )
+            const factor = clamp(distance / interaction.startDistance, 0.2, 4)
+            resizeEye(interaction.side, factor, interaction.startDimensions)
+            if (linkedDimensions.scale) {
+              resizeEye(-interaction.side, factor, interaction.startDimensions)
+            }
           } else if (interaction.type === 'spacing') {
             $('spacing').value = clamp(
               interaction.startSpacing + along(interaction.spacingAxis),
@@ -1473,6 +2886,7 @@
         $('avatar').addEventListener('pointerup', endInteraction)
         $('avatar').addEventListener('pointercancel', endInteraction)
 
+        syncOrientationFromControls()
         render()
       })()
     </script>

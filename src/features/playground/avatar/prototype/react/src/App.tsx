@@ -1,0 +1,1508 @@
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+} from 'motion/react'
+import { motionValue, type MotionValue } from 'motion'
+import { useEffect, useRef, useState } from 'react'
+
+import {
+  expressionFields,
+  poseFromExpression,
+  renderAvatar,
+  renderEyeEditor,
+  rotateExpressionAroundAxis,
+  rotateExpressionAroundCamera,
+  rotateExpressionWithArcball,
+  rotationRing,
+  type AvatarPose,
+  type Expression,
+  type Point3,
+} from './geometry'
+import {
+  defaultExpression,
+  initialExpressions,
+  stateGroups,
+  stateNotes,
+  statePools,
+} from './presets'
+
+type Mode = 'manual' | 'expressions' | 'states'
+type Side = 'Left' | 'Right'
+type NumericProps = {
+  label: string
+  value: number
+  min?: number
+  max?: number
+  step?: number
+  unit?: string
+  onChange: (value: number) => void
+  onActiveChange?: (active: boolean) => void
+}
+type Highlight = 'head' | 'left' | 'right' | 'both' | null
+
+const EXPRESSIONS_STORAGE_KEY = 'bible-strong-avatar-expressions-v1'
+
+const loadExpressions = (): Expression[] => {
+  try {
+    const stored = window.localStorage.getItem(EXPRESSIONS_STORAGE_KEY)
+    if (!stored) return initialExpressions.map(item => ({ ...item }))
+    const parsed = JSON.parse(stored)
+    return Array.isArray(parsed) && parsed.length
+      ? parsed.map(item => ({ ...defaultExpression, ...item }))
+      : initialExpressions.map(item => ({ ...item }))
+  } catch {
+    return initialExpressions.map(item => ({ ...item }))
+  }
+}
+
+const persistExpressions = (expressions: Expression[]) => {
+  try {
+    window.localStorage.setItem(EXPRESSIONS_STORAGE_KEY, JSON.stringify(expressions))
+  } catch {
+    // Le prototype reste utilisable en mémoire si le stockage local est indisponible.
+  }
+}
+
+const bounded = (value: number, min?: number, max?: number) =>
+  Math.min(max ?? Infinity, Math.max(min ?? -Infinity, value))
+
+function NumericField({
+  label,
+  value,
+  min,
+  max,
+  step = 0.1,
+  unit = '',
+  onChange,
+  onActiveChange,
+}: NumericProps) {
+  const dragRef = useRef<{ x: number; value: number } | null>(null)
+
+  const startScrub = (event: React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    onActiveChange?.(true)
+    dragRef.current = { x: event.clientX, value }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const scrub = (event: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragRef.current || !event.currentTarget.hasPointerCapture(event.pointerId)) return
+    const speed = event.shiftKey ? 10 : event.altKey ? 0.1 : 1
+    const next = dragRef.current.value + (event.clientX - dragRef.current.x) * step * speed
+    onChange(bounded(next, min, max))
+  }
+
+  const stopScrub = () => {
+    dragRef.current = null
+    onActiveChange?.(false)
+  }
+
+  return (
+    <div className="numeric-field">
+      <button
+        className="scrub-label"
+        type="button"
+        title="Glisser horizontalement pour modifier"
+        onPointerDown={startScrub}
+        onPointerMove={scrub}
+        onPointerUp={stopScrub}
+        onPointerCancel={stopScrub}
+      >
+        <span>{label}</span>
+        <span className="scrub-icon" aria-hidden="true">
+          ↔
+        </span>
+      </button>
+      <label className="number-shell">
+        <input
+          type="number"
+          min={min}
+          max={max}
+          step={step}
+          value={Number(value.toFixed(step < 0.1 ? 2 : 1))}
+          onFocus={() => onActiveChange?.(true)}
+          onBlur={() => onActiveChange?.(false)}
+          onChange={event => onChange(bounded(Number(event.currentTarget.value), min, max))}
+        />
+        <span>{unit}</span>
+      </label>
+    </div>
+  )
+}
+
+function LinkButton({
+  linked,
+  onClick,
+  label,
+}: {
+  linked: boolean
+  onClick: () => void
+  label: string
+}) {
+  return (
+    <button
+      type="button"
+      className="link-button"
+      aria-pressed={linked}
+      aria-label={label}
+      onClick={onClick}
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" />
+        <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" />
+      </svg>
+    </button>
+  )
+}
+
+function RotationGizmo({
+  expression,
+  onChange,
+  onActiveChange,
+}: {
+  expression: Expression
+  onChange: (next: Expression) => void
+  onActiveChange: (active: boolean) => void
+}) {
+  const drag = useRef<
+    | {
+        type: 'axis'
+        axis: 'x' | 'y' | 'z'
+        startPoint: readonly [number, number]
+        tangent: readonly [number, number]
+        expression: Expression
+      }
+    | { type: 'view'; startAngle: number; expression: Expression }
+    | null
+  >(null)
+  const pose = poseFromExpression(expression)
+  const rings = {
+    x: rotationRing(pose, 'x'),
+    y: rotationRing(pose, 'y'),
+    z: rotationRing(pose, 'z'),
+  }
+  const toLocal = (event: React.PointerEvent<SVGElement>): readonly [number, number] => {
+    const rectangle = event.currentTarget.ownerSVGElement!.getBoundingClientRect()
+    return [
+      ((event.clientX - rectangle.left) / rectangle.width) * 86 - 43,
+      ((event.clientY - rectangle.top) / rectangle.height) * 86 - 43,
+    ]
+  }
+  const ringPath = (points: Point3[]) =>
+    `M${points[0][0]} ${points[0][1]}${points
+      .slice(1)
+      .map(point => `L${point[0]} ${point[1]}`)
+      .join('')}Z`
+  const unitVector = (from: Point3, to: Point3): readonly [number, number] => {
+    const x = to[0] - from[0]
+    const y = to[1] - from[1]
+    const length = Math.hypot(x, y) || 1
+    return [x / length, y / length]
+  }
+  const startAxis = (axis: 'x' | 'y' | 'z', event: React.PointerEvent<SVGElement>) => {
+    event.stopPropagation()
+    onActiveChange(true)
+    const point = toLocal(event)
+    const ring = rings[axis]
+    let closestIndex = 0
+    let closestDistance = Number.POSITIVE_INFINITY
+    ring.slice(0, -1).forEach((ringPoint, index) => {
+      const distance = Math.hypot(ringPoint[0] - point[0], ringPoint[1] - point[1])
+      if (distance < closestDistance) {
+        closestIndex = index
+        closestDistance = distance
+      }
+    })
+    const previous = ring[(closestIndex - 1 + ring.length - 1) % (ring.length - 1)]
+    const next = ring[(closestIndex + 1) % (ring.length - 1)]
+    drag.current = {
+      type: 'axis',
+      axis,
+      startPoint: point,
+      tangent: unitVector(previous, next),
+      expression,
+    }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  const startView = (event: React.PointerEvent<SVGElement>) => {
+    event.stopPropagation()
+    onActiveChange(true)
+    const point = toLocal(event)
+    drag.current = { type: 'view', startAngle: Math.atan2(point[1], point[0]), expression }
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  const move = (event: React.PointerEvent<SVGElement>) => {
+    if (!drag.current) return
+    const point = toLocal(event)
+    if (drag.current.type === 'view') {
+      const currentAngle = Math.atan2(point[1], point[0])
+      const delta = Math.atan2(
+        Math.sin(currentAngle - drag.current.startAngle),
+        Math.cos(currentAngle - drag.current.startAngle)
+      )
+      onChange(rotateExpressionAroundCamera(drag.current.expression, delta))
+      return
+    }
+    const signedDistance =
+      (point[0] - drag.current.startPoint[0]) * drag.current.tangent[0] +
+      (point[1] - drag.current.startPoint[1]) * drag.current.tangent[1]
+    onChange(
+      rotateExpressionAroundAxis(drag.current.expression, drag.current.axis, signedDistance * 1.5)
+    )
+  }
+  const stop = () => {
+    drag.current = null
+    onActiveChange(false)
+  }
+  return (
+    <svg className="gizmo" viewBox="-43 -43 86 86" aria-label="Gizmo de rotation">
+      <circle
+        className="gizmo-orbit gizmo-camera"
+        cx="0"
+        cy="0"
+        r="38"
+        onPointerDown={startView}
+        onPointerMove={move}
+        onPointerUp={stop}
+      />
+      <path
+        className="gizmo-orbit gizmo-y"
+        d={ringPath(rings.y)}
+        onPointerDown={event => startAxis('y', event)}
+        onPointerMove={move}
+        onPointerUp={stop}
+      />
+      <path
+        className="gizmo-orbit gizmo-x"
+        d={ringPath(rings.x)}
+        onPointerDown={event => startAxis('x', event)}
+        onPointerMove={move}
+        onPointerUp={stop}
+      />
+      <path
+        className="gizmo-orbit gizmo-z"
+        d={ringPath(rings.z)}
+        onPointerDown={event => startAxis('z', event)}
+        onPointerMove={move}
+        onPointerUp={stop}
+      />
+    </svg>
+  )
+}
+
+function AvatarCanvas({
+  expression,
+  wirePaths,
+  showWire,
+  headRadius,
+  leftPath,
+  rightPath,
+  leftOpacity,
+  rightOpacity,
+  linked,
+  highlight,
+  onHighlightChange,
+  onChange,
+}: {
+  expression: Expression
+  wirePaths: MotionValue<string>[]
+  showWire: boolean
+  headRadius: MotionValue<number>
+  leftPath: MotionValue<string>
+  rightPath: MotionValue<string>
+  leftOpacity: MotionValue<number>
+  rightOpacity: MotionValue<number>
+  linked: { width: boolean; height: boolean; size: boolean }
+  highlight: Highlight
+  onHighlightChange: (highlight: Highlight) => void
+  onChange: (next: Expression) => void
+}) {
+  const svgRef = useRef<SVGSVGElement>(null)
+  const [selectedSide, setSelectedSide] = useState<-1 | 1 | null>(null)
+  const drag = useRef<
+    | {
+        type: 'arcball'
+        startPoint: readonly [number, number]
+        expression: Expression
+      }
+    | {
+        type: 'width' | 'height' | 'size' | 'spacing' | 'rotate'
+        side: -1 | 1
+        startPoint: readonly [number, number]
+        expression: Expression
+        center: Point3
+        widthAxis: readonly [number, number]
+        heightAxis: readonly [number, number]
+        spacingAxis: readonly [number, number]
+        startPointerAngle: number
+        startDistance: number
+      }
+    | null
+  >(null)
+  const editor =
+    selectedSide === null ? null : renderEyeEditor(poseFromExpression(expression), selectedSide)
+  const toSvg = (event: React.PointerEvent<SVGElement>): readonly [number, number] => {
+    const rectangle = svgRef.current!.getBoundingClientRect()
+    return [
+      ((event.clientX - rectangle.left) / rectangle.width) * 300 - 150,
+      ((event.clientY - rectangle.top) / rectangle.height) * 300 - 150,
+    ]
+  }
+  const unitVector = (from: Point3, to: Point3): readonly [number, number] => {
+    const x = to[0] - from[0]
+    const y = to[1] - from[1]
+    const length = Math.hypot(x, y) || 1
+    return [x / length, y / length]
+  }
+  const startDrag = (event: React.PointerEvent<SVGCircleElement>) => {
+    setSelectedSide(null)
+    onHighlightChange('head')
+    drag.current = {
+      type: 'arcball',
+      startPoint: toSvg(event),
+      expression,
+    }
+    svgRef.current!.setPointerCapture(event.pointerId)
+  }
+  const selectEye = (side: -1 | 1, event: React.PointerEvent<SVGPathElement>) => {
+    event.stopPropagation()
+    setSelectedSide(side)
+  }
+  const startHandle = (
+    type: 'width' | 'height' | 'size' | 'spacing' | 'rotate',
+    event: React.PointerEvent<SVGElement>
+  ) => {
+    event.stopPropagation()
+    if (selectedSide === null || !editor) return
+    onHighlightChange(selectedSide < 0 ? 'left' : 'right')
+    const point = toSvg(event)
+    const leftEditor = renderEyeEditor(poseFromExpression(expression), -1)
+    const rightEditor = renderEyeEditor(poseFromExpression(expression), 1)
+    drag.current = {
+      type,
+      side: selectedSide,
+      startPoint: point,
+      expression,
+      center: editor.center,
+      widthAxis: unitVector(editor.center, editor.widthHandle),
+      heightAxis: unitVector(editor.center, editor.heightHandle),
+      spacingAxis: unitVector(leftEditor.center, rightEditor.center),
+      startPointerAngle: Math.atan2(point[1] - editor.center[1], point[0] - editor.center[0]),
+      startDistance: Math.max(
+        Math.hypot(point[0] - editor.center[0], point[1] - editor.center[1]),
+        1
+      ),
+    }
+    svgRef.current!.setPointerCapture(event.pointerId)
+  }
+  const move = (event: React.PointerEvent<SVGSVGElement>) => {
+    if (!drag.current) return
+    const point = toSvg(event)
+    if (drag.current.type === 'arcball') {
+      onChange(rotateExpressionWithArcball(drag.current.expression, drag.current.startPoint, point))
+      return
+    }
+    const interaction = drag.current
+    const suffix = interaction.side < 0 ? 'Left' : 'Right'
+    const otherSuffix = interaction.side < 0 ? 'Right' : 'Left'
+    const deltaX = point[0] - interaction.startPoint[0]
+    const deltaY = point[1] - interaction.startPoint[1]
+    const along = (axis: readonly [number, number]) => deltaX * axis[0] + deltaY * axis[1]
+    const next = { ...interaction.expression }
+    if (interaction.type === 'width') {
+      const value = bounded(
+        interaction.expression[`width${suffix}`] + along(interaction.widthAxis) * 2,
+        10,
+        100
+      )
+      next[`width${suffix}`] = value
+      if (linked.width) next[`width${otherSuffix}`] = value
+    } else if (interaction.type === 'height') {
+      const value = bounded(
+        interaction.expression[`height${suffix}`] + along(interaction.heightAxis) * 2,
+        10,
+        100
+      )
+      next[`height${suffix}`] = value
+      if (linked.height) next[`height${otherSuffix}`] = value
+    } else if (interaction.type === 'size') {
+      const distance = Math.hypot(
+        point[0] - interaction.center[0],
+        point[1] - interaction.center[1]
+      )
+      const factor = distance / interaction.startDistance
+      next[`width${suffix}`] = bounded(interaction.expression[`width${suffix}`] * factor, 10, 110)
+      next[`height${suffix}`] = bounded(interaction.expression[`height${suffix}`] * factor, 10, 110)
+      if (linked.size) {
+        next[`width${otherSuffix}`] = bounded(
+          interaction.expression[`width${otherSuffix}`] * factor,
+          10,
+          110
+        )
+        next[`height${otherSuffix}`] = bounded(
+          interaction.expression[`height${otherSuffix}`] * factor,
+          10,
+          110
+        )
+      }
+    } else if (interaction.type === 'spacing') {
+      const startSpacing = interaction.expression.spacing
+      const spacing = bounded(startSpacing + along(interaction.spacingAxis), 0, 150)
+      next.spacing = spacing
+    } else {
+      const currentAngle = Math.atan2(
+        point[1] - interaction.center[1],
+        point[0] - interaction.center[0]
+      )
+      const deltaAngle = Math.atan2(
+        Math.sin(currentAngle - interaction.startPointerAngle),
+        Math.cos(currentAngle - interaction.startPointerAngle)
+      )
+      next[interaction.side < 0 ? 'leftAngle' : 'rightAngle'] =
+        interaction.expression[interaction.side < 0 ? 'leftAngle' : 'rightAngle'] +
+        (deltaAngle * 180) / Math.PI
+    }
+    onChange(next)
+  }
+  return (
+    <div className="avatar-wrap">
+      <svg
+        ref={svgRef}
+        className="avatar"
+        viewBox="-150 -150 300 300"
+        role="img"
+        aria-label="Avatar procédural"
+        onPointerMove={move}
+        onPointerUp={() => {
+          drag.current = null
+          onHighlightChange(null)
+        }}
+        onPointerCancel={() => {
+          drag.current = null
+          onHighlightChange(null)
+        }}
+      >
+        <defs>
+          <clipPath id="avatar-head-clip">
+            <motion.circle cx="0" cy="0" r={headRadius} />
+          </clipPath>
+        </defs>
+        <motion.circle
+          className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
+          cx="0"
+          cy="0"
+          r={headRadius}
+          onPointerDown={startDrag}
+        />
+        <g clipPath="url(#avatar-head-clip)">
+          {(showWire || highlight === 'head') &&
+            wirePaths.map((pathValue, index) => (
+              <motion.path className="wire" d={pathValue} key={index} />
+            ))}
+          <motion.path
+            className={`avatar-eye ${highlight === 'left' || highlight === 'both' ? 'cyan-outline' : ''}`}
+            d={leftPath}
+            opacity={leftOpacity}
+            onPointerDown={event => selectEye(-1, event)}
+          />
+          <motion.path
+            className={`avatar-eye ${highlight === 'right' || highlight === 'both' ? 'cyan-outline' : ''}`}
+            d={rightPath}
+            opacity={rightOpacity}
+            onPointerDown={event => selectEye(1, event)}
+          />
+        </g>
+        {editor?.visible && (
+          <g className="eye-editor">
+            {drag.current?.type !== 'arcball' && drag.current && (
+              <path className="selection-outline" d={editor.selectionPath} />
+            )}
+            <path className="editor-guide" d={editor.widthGuide} />
+            <path className="editor-guide" d={editor.heightGuide} />
+            <path className="editor-guide" d={editor.rotationGuide} />
+            <path className="editor-guide" d={editor.spacingGuide} />
+            <EditorCircle point={editor.widthHandle} label="L" type="width" onStart={startHandle} />
+            <EditorCircle
+              point={editor.heightHandle}
+              label="H"
+              type="height"
+              onStart={startHandle}
+            />
+            <EditorCircle
+              point={editor.rotateHandle}
+              label="R"
+              type="rotate"
+              onStart={startHandle}
+            />
+            <EditorSquare point={editor.sizeHandle} label="S" type="size" onStart={startHandle} />
+            <EditorSquare
+              point={editor.spacingHandle}
+              label="E"
+              type="spacing"
+              onStart={startHandle}
+            />
+          </g>
+        )}
+      </svg>
+      <RotationGizmo
+        expression={expression}
+        onChange={onChange}
+        onActiveChange={active => onHighlightChange(active ? 'head' : null)}
+      />
+      <div className="axis-key">
+        <i className="x" />X <i className="y" />Y <i className="z" />Z
+      </div>
+    </div>
+  )
+}
+
+type EyeHandle = 'width' | 'height' | 'size' | 'spacing' | 'rotate'
+type HandleStart = (type: EyeHandle, event: React.PointerEvent<SVGElement>) => void
+
+function EditorCircle({
+  point,
+  label,
+  type,
+  onStart,
+}: {
+  point: Point3
+  label: string
+  type: EyeHandle
+  onStart: HandleStart
+}) {
+  return (
+    <g
+      className="editor-control"
+      data-eye-handle={type}
+      onPointerDown={event => onStart(type, event)}
+    >
+      <circle className="editor-handle" cx={point[0]} cy={point[1]} r="5.5" />
+      <text className="editor-label" x={point[0]} y={point[1] + 2.6}>
+        {label}
+      </text>
+    </g>
+  )
+}
+
+function EditorSquare({
+  point,
+  label,
+  type,
+  onStart,
+}: {
+  point: Point3
+  label: string
+  type: EyeHandle
+  onStart: HandleStart
+}) {
+  return (
+    <g
+      className="editor-control"
+      data-eye-handle={type}
+      onPointerDown={event => onStart(type, event)}
+    >
+      <rect
+        className="editor-handle"
+        x={point[0] - 5}
+        y={point[1] - 5}
+        width="10"
+        height="10"
+        rx="2"
+      />
+      <text className="editor-label" x={point[0]} y={point[1] + 2.6}>
+        {label}
+      </text>
+    </g>
+  )
+}
+
+function ExpressionPreview({ expression, id }: { expression: Expression; id: string }) {
+  const geometry = renderAvatar(poseFromExpression(expression))
+  const clipId = `preview-${id}`
+  return (
+    <svg viewBox="-150 -150 300 300" aria-hidden="true">
+      <defs>
+        <clipPath id={clipId}>
+          <circle cx="0" cy="0" r={geometry.headRadius} />
+        </clipPath>
+      </defs>
+      <circle className="preview-head" cx="0" cy="0" r={geometry.headRadius} />
+      <g clipPath={`url(#${clipId})`}>
+        <path
+          className="preview-eye"
+          d={geometry.leftPath}
+          opacity={geometry.leftVisible ? 1 : 0}
+        />
+        <path
+          className="preview-eye"
+          d={geometry.rightPath}
+          opacity={geometry.rightVisible ? 1 : 0}
+        />
+      </g>
+    </svg>
+  )
+}
+
+function ExpressionDialog({
+  editing,
+  onChange,
+  onCancel,
+  onSave,
+  onDelete,
+}: {
+  editing: { index: number | null; draft: Expression }
+  onChange: (draft: Expression) => void
+  onCancel: () => void
+  onSave: () => void
+  onDelete: () => void
+}) {
+  const [linked, setLinked] = useState({ width: true, height: true, size: true })
+  const update = (changes: Partial<Expression>) => onChange({ ...editing.draft, ...changes })
+  const updateDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
+    const key = `${dimension}${side}` as 'widthLeft' | 'widthRight' | 'heightLeft' | 'heightRight'
+    const other = `${dimension}${side === 'Left' ? 'Right' : 'Left'}` as typeof key
+    update({ [key]: value, ...(linked[dimension] ? { [other]: value } : {}) })
+  }
+  const updateSize = (side: Side, value: number) => {
+    const widthKey = `width${side}` as 'widthLeft' | 'widthRight'
+    const heightKey = `height${side}` as 'heightLeft' | 'heightRight'
+    const factor = value / (Math.max(editing.draft[widthKey], editing.draft[heightKey]) || 1)
+    const changes: Partial<Expression> = {
+      [widthKey]: bounded(editing.draft[widthKey] * factor, 10, 110),
+      [heightKey]: bounded(editing.draft[heightKey] * factor, 10, 110),
+    }
+    if (linked.size) {
+      const otherSide = side === 'Left' ? 'Right' : 'Left'
+      const otherWidth = `width${otherSide}` as 'widthLeft' | 'widthRight'
+      const otherHeight = `height${otherSide}` as 'heightLeft' | 'heightRight'
+      changes[otherWidth] = bounded(editing.draft[otherWidth] * factor, 10, 110)
+      changes[otherHeight] = bounded(editing.draft[otherHeight] * factor, 10, 110)
+    }
+    update(changes)
+  }
+
+  return (
+    <div
+      className="dialog-backdrop"
+      role="presentation"
+      onMouseDown={event => {
+        if (event.target === event.currentTarget) onCancel()
+      }}
+    >
+      <motion.section
+        className="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dialog-title"
+        initial={{ opacity: 0, y: 18, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+      >
+        <header className="dialog-header">
+          <div>
+            <p className="eyebrow">Preset en mémoire</p>
+            <h2 id="dialog-title">
+              {editing.index === null
+                ? 'Nouvelle expression'
+                : `Modifier l’expression ${String(editing.index).padStart(2, '0')}`}
+            </h2>
+          </div>
+          <button className="icon-button" type="button" onClick={onCancel} aria-label="Fermer">
+            ×
+          </button>
+        </header>
+        <div className="dialog-body">
+          <aside className="dialog-preview">
+            <ExpressionPreview expression={editing.draft} id="dialog" />
+            <strong>Aperçu en direct</strong>
+            <span>Projection sphérique réelle</span>
+          </aside>
+          <div className="dialog-fields">
+            <section className="dialog-group">
+              <h3>Rotation de la tête</h3>
+              {(['headX', 'headY', 'headZ'] as const).map(field => (
+                <NumericField
+                  key={field}
+                  label={`Rotation ${field.at(-1)?.toUpperCase()}`}
+                  value={editing.draft[field]}
+                  unit="°"
+                  onChange={value => update({ [field]: value })}
+                />
+              ))}
+            </section>
+            {(['width', 'height', 'size'] as const).map(dimension => (
+              <section className="dialog-group" key={dimension}>
+                <div className="panel-inline-title">
+                  <h3>
+                    {
+                      { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
+                        dimension
+                      ]
+                    }
+                  </h3>
+                  <LinkButton
+                    linked={linked[dimension]}
+                    label={`Lier ${dimension}`}
+                    onClick={() =>
+                      setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                    }
+                  />
+                </div>
+                <div className="eye-columns">
+                  {(['Left', 'Right'] as Side[]).map(side => {
+                    const width = editing.draft[`width${side}`]
+                    const height = editing.draft[`height${side}`]
+                    const value =
+                      dimension === 'width'
+                        ? width
+                        : dimension === 'height'
+                          ? height
+                          : Math.max(width, height)
+                    return (
+                      <NumericField
+                        key={side}
+                        label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
+                        value={value}
+                        min={10}
+                        max={dimension === 'size' ? 110 : 100}
+                        unit="u"
+                        onChange={next =>
+                          dimension === 'size'
+                            ? updateSize(side, next)
+                            : updateDimension(side, dimension, next)
+                        }
+                      />
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
+            <section className="dialog-group">
+              <h3>Position des yeux</h3>
+              <div className="eye-columns">
+                {(['Left', 'Right'] as Side[]).map(side => (
+                  <div className="eye-column" key={side}>
+                    <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
+                    <NumericField
+                      label="Horizontale"
+                      value={editing.draft[`positionX${side}`]}
+                      unit="u"
+                      onChange={value => update({ [`positionX${side}`]: value })}
+                    />
+                    <NumericField
+                      label="Verticale"
+                      value={editing.draft[`positionY${side}`]}
+                      unit="u"
+                      onChange={value => update({ [`positionY${side}`]: value })}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section className="dialog-group">
+              <h3>Rotation locale</h3>
+              <div className="eye-columns">
+                <NumericField
+                  label="Œil gauche"
+                  value={editing.draft.leftAngle}
+                  unit="°"
+                  onChange={value => update({ leftAngle: value })}
+                />
+                <NumericField
+                  label="Œil droit"
+                  value={editing.draft.rightAngle}
+                  unit="°"
+                  onChange={value => update({ rightAngle: value })}
+                />
+              </div>
+            </section>
+            <section className="dialog-group">
+              <h3>Disposition générale</h3>
+              <NumericField
+                label="Espacement"
+                value={editing.draft.spacing}
+                min={0}
+                max={150}
+                unit="u"
+                onChange={value => update({ spacing: value })}
+              />
+            </section>
+            <section className="dialog-group">
+              <h3>Projection</h3>
+              <NumericField
+                label="Perspective"
+                value={editing.draft.perspective}
+                step={0.01}
+                unit="×"
+                onChange={value => update({ perspective: value })}
+              />
+            </section>
+          </div>
+        </div>
+        <footer className="dialog-actions">
+          {editing.index !== null && (
+            <button className="danger" type="button" onClick={onDelete}>
+              Supprimer
+            </button>
+          )}
+          <div className="dialog-actions-main">
+            <button type="button" onClick={onCancel}>
+              Annuler
+            </button>
+            <button className="primary" type="button" onClick={onSave}>
+              Enregistrer
+            </button>
+          </div>
+        </footer>
+      </motion.section>
+    </div>
+  )
+}
+
+export default function App() {
+  const [mode, setMode] = useState<Mode>('manual')
+  const [expressions, setExpressions] = useState(loadExpressions)
+  const [expression, setExpression] = useState<Expression>({ ...defaultExpression })
+  const [activeExpression, setActiveExpression] = useState<number | null>(null)
+  const [editing, setEditing] = useState<{ index: number | null; draft: Expression } | null>(null)
+  const [showWire, setShowWire] = useState(false)
+  const [springSpeed, setSpringSpeed] = useState(7)
+  const [linked, setLinked] = useState({ width: true, height: true, size: true })
+  const [highlight, setHighlight] = useState<Highlight>(null)
+  const [selectedState, setSelectedState] = useState('idle')
+  const [activeState, setActiveState] = useState<string | null>(null)
+  const stateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const reduceMotion = useReducedMotion()
+
+  const initialPose = poseFromExpression(defaultExpression)
+  const initialGeometry = renderAvatar(initialPose)
+  const displayedPose = useRef<AvatarPose>(initialPose)
+  const transitionFrame = useRef<number | null>(null)
+  const transitionTarget = useRef<Expression>({ ...defaultExpression })
+  const canonicalTarget = useRef<Expression>({ ...defaultExpression })
+  const transitionVelocity = useRef(
+    Object.fromEntries(expressionFields.map(field => [field, 0])) as Record<
+      keyof Expression,
+      number
+    >
+  )
+  const lastTransitionTime = useRef<number | null>(null)
+  const springSpeedRef = useRef(springSpeed)
+  const blinkControls = useRef<ReturnType<typeof animate> | null>(null)
+  const blinkValue = useMotionValue(1)
+  const headRadius = useMotionValue(initialGeometry.headRadius)
+  const leftPath = useMotionValue(initialGeometry.leftPath)
+  const rightPath = useMotionValue(initialGeometry.rightPath)
+  const leftOpacity = useMotionValue(initialGeometry.leftVisible ? 1 : 0)
+  const rightOpacity = useMotionValue(initialGeometry.rightVisible ? 1 : 0)
+  const wirePaths = useRef(
+    initialGeometry.wirePaths.map(pathValue => motionValue(pathValue))
+  ).current
+
+  const paintPose = (pose: AvatarPose, blink = blinkValue.get()) => {
+    displayedPose.current = pose
+    const geometry = renderAvatar(pose, blink)
+    headRadius.set(geometry.headRadius)
+    leftPath.set(geometry.leftPath)
+    rightPath.set(geometry.rightPath)
+    leftOpacity.set(geometry.leftVisible ? 1 : 0)
+    rightOpacity.set(geometry.rightVisible ? 1 : 0)
+    geometry.wirePaths.forEach((pathValue, index) => wirePaths[index].set(pathValue))
+  }
+
+  useMotionValueEvent(blinkValue, 'change', latest => paintPose(displayedPose.current, latest))
+
+  springSpeedRef.current = springSpeed
+
+  useEffect(
+    () => () => {
+      if (transitionFrame.current !== null) cancelAnimationFrame(transitionFrame.current)
+      blinkControls.current?.stop()
+      if (stateTimer.current) clearTimeout(stateTimer.current)
+      if (blinkTimer.current) clearTimeout(blinkTimer.current)
+    },
+    []
+  )
+
+  const stopTransition = (resetVelocity: boolean) => {
+    if (transitionFrame.current !== null) cancelAnimationFrame(transitionFrame.current)
+    transitionFrame.current = null
+    lastTransitionTime.current = null
+    if (resetVelocity) {
+      expressionFields.forEach(field => {
+        transitionVelocity.current[field] = 0
+      })
+    }
+  }
+
+  const updateImmediate = (next: Expression) => {
+    stopTransition(true)
+    const pose = poseFromExpression(next)
+    transitionTarget.current = next
+    canonicalTarget.current = next
+    setExpression(next)
+    setActiveExpression(null)
+    paintPose(pose)
+  }
+
+  const transitionToExpression = (next: Expression, index: number | null = null) => {
+    setActiveExpression(index)
+    if (reduceMotion) {
+      updateImmediate(next)
+      return
+    }
+    const current = displayedPose.current.expression
+    const nearestAngle = (target: number, from: number) => {
+      let resolved = target
+      while (resolved - from > 180) resolved -= 360
+      while (resolved - from < -180) resolved += 360
+      return resolved
+    }
+    canonicalTarget.current = next
+    transitionTarget.current = {
+      ...next,
+      headX: nearestAngle(next.headX, current.headX),
+      headY: nearestAngle(next.headY, current.headY),
+      headZ: nearestAngle(next.headZ, current.headZ),
+      leftAngle: nearestAngle(next.leftAngle, current.leftAngle),
+      rightAngle: nearestAngle(next.rightAngle, current.rightAngle),
+    }
+
+    if (transitionFrame.current !== null) return
+    const tick = (time: number) => {
+      const previousTime = lastTransitionTime.current ?? time
+      const deltaTime = Math.min(Math.max((time - previousTime) / 1000, 1 / 240), 1 / 30)
+      lastTransitionTime.current = time
+      const stiffness = 70 + springSpeedRef.current * 24
+      const damping = 17 + springSpeedRef.current * 1.7
+      const mass = 0.85
+      const currentExpression = displayedPose.current.expression
+      const target = transitionTarget.current
+      let settled = true
+      const animated = { ...currentExpression }
+
+      expressionFields.forEach(field => {
+        const displacement = target[field] - currentExpression[field]
+        const acceleration =
+          (stiffness * displacement - damping * transitionVelocity.current[field]) / mass
+        const velocity = transitionVelocity.current[field] + acceleration * deltaTime
+        const value = currentExpression[field] + velocity * deltaTime
+        transitionVelocity.current[field] = velocity
+        animated[field] = value
+        const tolerance = field === 'perspective' ? 0.0001 : 0.005
+        if (Math.abs(displacement) > tolerance || Math.abs(velocity) > tolerance) settled = false
+      })
+
+      if (settled) {
+        const finalExpression = canonicalTarget.current
+        stopTransition(true)
+        setExpression(finalExpression)
+        paintPose(poseFromExpression(finalExpression))
+        return
+      }
+
+      setExpression(animated)
+      paintPose(poseFromExpression(animated))
+      transitionFrame.current = requestAnimationFrame(tick)
+    }
+    transitionFrame.current = requestAnimationFrame(tick)
+  }
+
+  const blink = () => {
+    blinkControls.current?.stop()
+    blinkValue.jump(1)
+    blinkControls.current = animate(blinkValue, [1, 0, 1], {
+      duration: reduceMotion ? 0 : 0.28,
+      times: [0, 0.42, 1],
+      ease: ['easeIn', 'easeOut'],
+    })
+  }
+
+  const updateDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
+    const key = `${dimension}${side}` as 'widthLeft' | 'widthRight' | 'heightLeft' | 'heightRight'
+    const other = `${dimension}${side === 'Left' ? 'Right' : 'Left'}` as typeof key
+    updateImmediate({
+      ...expression,
+      [key]: value,
+      ...(linked[dimension] ? { [other]: value } : {}),
+    })
+  }
+
+  const updateSize = (side: Side, value: number) => {
+    const widthKey = `width${side}` as 'widthLeft' | 'widthRight'
+    const heightKey = `height${side}` as 'heightLeft' | 'heightRight'
+    const size = Math.max(expression[widthKey], expression[heightKey]) || 1
+    const factor = value / size
+    const next = {
+      ...expression,
+      [widthKey]: bounded(expression[widthKey] * factor, 10, 110),
+      [heightKey]: bounded(expression[heightKey] * factor, 10, 110),
+    }
+    if (linked.size) {
+      const otherSide = side === 'Left' ? 'Right' : 'Left'
+      const otherWidth = `width${otherSide}` as 'widthLeft' | 'widthRight'
+      const otherHeight = `height${otherSide}` as 'heightLeft' | 'heightRight'
+      next[otherWidth] = bounded(expression[otherWidth] * factor, 10, 110)
+      next[otherHeight] = bounded(expression[otherHeight] * factor, 10, 110)
+    }
+    updateImmediate(next)
+  }
+
+  const updateSpacing = (value: number) => {
+    updateImmediate({ ...expression, spacing: value })
+  }
+
+  const stopState = () => {
+    if (stateTimer.current) clearTimeout(stateTimer.current)
+    if (blinkTimer.current) clearTimeout(blinkTimer.current)
+    stateTimer.current = null
+    blinkTimer.current = null
+    setActiveState(null)
+  }
+
+  const launchState = (name: string) => {
+    stopState()
+    setActiveState(name)
+    const pool = statePools[name]
+    let position = 0
+    const cycle = () => {
+      const index = pool[position % pool.length]
+      transitionToExpression(expressions[index], index)
+      position += 1
+      stateTimer.current = setTimeout(cycle, name === 'idle' ? 5200 : 2300)
+    }
+    const blinkLoop = () => {
+      blink()
+      blinkTimer.current = setTimeout(blinkLoop, 3400 + Math.random() * 2800)
+    }
+    cycle()
+    blinkTimer.current = setTimeout(blinkLoop, 2600)
+  }
+
+  const saveEditing = () => {
+    if (!editing) return
+    const index = editing.index ?? expressions.length
+    setExpressions(current => {
+      const next =
+        editing.index === null
+          ? [...current, { ...editing.draft }]
+          : current.map((item, itemIndex) =>
+              itemIndex === editing.index ? { ...editing.draft } : item
+            )
+      persistExpressions(next)
+      return next
+    })
+    setEditing(null)
+    transitionToExpression(editing.draft, index)
+  }
+
+  const deleteEditing = () => {
+    if (editing?.index === null || editing?.index === undefined) return
+    if (!window.confirm(`Supprimer l’expression ${String(editing.index).padStart(2, '0')} ?`))
+      return
+    setExpressions(current => {
+      const next = current.filter((_, index) => index !== editing.index)
+      persistExpressions(next)
+      return next
+    })
+    setActiveExpression(null)
+    setEditing(null)
+  }
+
+  return (
+    <div className="studio">
+      <section className="stage-column">
+        <div className="brand">
+          <span className="brand-mark" />
+          Bible Strong <em>Avatar Lab</em>
+        </div>
+        <AvatarCanvas
+          expression={expression}
+          wirePaths={wirePaths}
+          showWire={showWire}
+          headRadius={headRadius}
+          leftPath={leftPath}
+          rightPath={rightPath}
+          leftOpacity={leftOpacity}
+          rightOpacity={rightOpacity}
+          linked={linked}
+          highlight={highlight}
+          onHighlightChange={setHighlight}
+          onChange={updateImmediate}
+        />
+        <p className="stage-help">
+          Glisse sur la sphère pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.
+        </p>
+      </section>
+
+      <main className="inspector">
+        <header className="inspector-header">
+          <div>
+            <p className="eyebrow">Prototype React + Motion</p>
+            <h1>Avatar Studio</h1>
+          </div>
+          <span className="motion-status">
+            <i />
+            Motion actif
+          </span>
+        </header>
+        <nav className="tabs" aria-label="Mode d’édition">
+          {(['manual', 'expressions', 'states'] as Mode[]).map(item => (
+            <button
+              key={item}
+              type="button"
+              aria-pressed={mode === item}
+              onClick={() => setMode(item)}
+            >
+              {{ manual: 'Manuel', expressions: 'Expressions', states: 'États' }[item]}
+            </button>
+          ))}
+        </nav>
+
+        {mode === 'manual' && (
+          <div className="panel-stack">
+            <section className="panel">
+              <PanelTitle
+                title="Rotation de la tête"
+                subtitle="Les libellés ↔ sont scrubbables, comme dans Figma."
+              />
+              <NumericField
+                label="Rotation X"
+                value={expression.headX}
+                unit="°"
+                onActiveChange={active => setHighlight(active ? 'head' : null)}
+                onChange={value => updateImmediate({ ...expression, headX: value })}
+              />
+              <NumericField
+                label="Rotation Y"
+                value={expression.headY}
+                unit="°"
+                onActiveChange={active => setHighlight(active ? 'head' : null)}
+                onChange={value => updateImmediate({ ...expression, headY: value })}
+              />
+              <NumericField
+                label="Rotation Z"
+                value={expression.headZ}
+                unit="°"
+                onActiveChange={active => setHighlight(active ? 'head' : null)}
+                onChange={value => updateImmediate({ ...expression, headZ: value })}
+              />
+            </section>
+            {(['width', 'height', 'size'] as const).map(dimension => (
+              <section className="panel compact" key={dimension}>
+                <div className="panel-inline-title">
+                  <h2>
+                    {
+                      { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
+                        dimension
+                      ]
+                    }
+                  </h2>
+                  <LinkButton
+                    linked={linked[dimension]}
+                    label={`Lier ${dimension}`}
+                    onClick={() =>
+                      setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                    }
+                  />
+                </div>
+                <div className="eye-columns">
+                  {(['Left', 'Right'] as Side[]).map(side => {
+                    const width = expression[`width${side}`]
+                    const height = expression[`height${side}`]
+                    const value =
+                      dimension === 'width'
+                        ? width
+                        : dimension === 'height'
+                          ? height
+                          : Math.max(width, height)
+                    return (
+                      <NumericField
+                        key={side}
+                        label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
+                        value={value}
+                        min={10}
+                        max={dimension === 'size' ? 110 : 100}
+                        unit="u"
+                        onActiveChange={active =>
+                          setHighlight(
+                            active
+                              ? linked[dimension]
+                                ? 'both'
+                                : side === 'Left'
+                                  ? 'left'
+                                  : 'right'
+                              : null
+                          )
+                        }
+                        onChange={next =>
+                          dimension === 'size'
+                            ? updateSize(side, next)
+                            : updateDimension(side, dimension, next)
+                        }
+                      />
+                    )
+                  })}
+                </div>
+              </section>
+            ))}
+            <section className="panel">
+              <PanelTitle
+                title="Position des yeux"
+                subtitle="Coordonnées locales indépendantes sur la sphère."
+              />
+              <div className="eye-columns">
+                <div className="eye-column">
+                  <h3>Œil gauche</h3>
+                  <NumericField
+                    label="Horizontale"
+                    value={expression.positionXLeft}
+                    unit="u"
+                    onActiveChange={active => setHighlight(active ? 'left' : null)}
+                    onChange={value => updateImmediate({ ...expression, positionXLeft: value })}
+                  />
+                  <NumericField
+                    label="Verticale"
+                    value={expression.positionYLeft}
+                    unit="u"
+                    onActiveChange={active => setHighlight(active ? 'left' : null)}
+                    onChange={value => updateImmediate({ ...expression, positionYLeft: value })}
+                  />
+                </div>
+                <div className="eye-column">
+                  <h3>Œil droit</h3>
+                  <NumericField
+                    label="Horizontale"
+                    value={expression.positionXRight}
+                    unit="u"
+                    onActiveChange={active => setHighlight(active ? 'right' : null)}
+                    onChange={value => updateImmediate({ ...expression, positionXRight: value })}
+                  />
+                  <NumericField
+                    label="Verticale"
+                    value={expression.positionYRight}
+                    unit="u"
+                    onActiveChange={active => setHighlight(active ? 'right' : null)}
+                    onChange={value => updateImmediate({ ...expression, positionYRight: value })}
+                  />
+                </div>
+              </div>
+            </section>
+            <section className="panel">
+              <PanelTitle title="Rotation locale" subtitle="Inclinaison propre à chaque œil." />
+              <div className="eye-columns">
+                <NumericField
+                  label="Œil gauche"
+                  value={expression.leftAngle}
+                  unit="°"
+                  onActiveChange={active => setHighlight(active ? 'left' : null)}
+                  onChange={value => updateImmediate({ ...expression, leftAngle: value })}
+                />
+                <NumericField
+                  label="Œil droit"
+                  value={expression.rightAngle}
+                  unit="°"
+                  onActiveChange={active => setHighlight(active ? 'right' : null)}
+                  onChange={value => updateImmediate({ ...expression, rightAngle: value })}
+                />
+              </div>
+            </section>
+            <section className="panel">
+              <PanelTitle
+                title="Disposition générale"
+                subtitle="Écarte ou rapproche les yeux autour de leur centre commun."
+              />
+              <NumericField
+                label="Espacement"
+                value={expression.spacing}
+                min={0}
+                max={150}
+                unit="u"
+                onActiveChange={active => setHighlight(active ? 'both' : null)}
+                onChange={updateSpacing}
+              />
+            </section>
+            <section className="panel">
+              <PanelTitle title="Projection" subtitle="Perspective et repères de la sphère." />
+              <NumericField
+                label="Perspective"
+                value={expression.perspective}
+                step={0.01}
+                unit="×"
+                onChange={value => updateImmediate({ ...expression, perspective: value })}
+              />
+              <label className="switch">
+                <span>Afficher le maillage</span>
+                <input
+                  type="checkbox"
+                  checked={showWire}
+                  onChange={event => setShowWire(event.currentTarget.checked)}
+                />
+              </label>
+              <button
+                className="reset"
+                type="button"
+                onClick={() => transitionToExpression({ ...defaultExpression })}
+              >
+                Réinitialiser
+              </button>
+            </section>
+          </div>
+        )}
+
+        {mode === 'expressions' && (
+          <div className="panel-stack">
+            <section className="panel">
+              <div className="preset-header">
+                <div>
+                  <p className="eyebrow">{expressions.length} presets</p>
+                  <h2>Expressions</h2>
+                </div>
+                <span>Double-clic pour modifier</span>
+              </div>
+              <div className="expression-grid">
+                {expressions.map((preset, index) => (
+                  <button
+                    className="expression-card"
+                    aria-pressed={activeExpression === index}
+                    type="button"
+                    key={index}
+                    onClick={() => transitionToExpression(preset, index)}
+                    onDoubleClick={() => setEditing({ index, draft: { ...preset } })}
+                  >
+                    <ExpressionPreview expression={preset} id={String(index)} />
+                    <span>{String(index).padStart(2, '0')}</span>
+                  </button>
+                ))}
+                <button
+                  className="expression-add"
+                  type="button"
+                  onClick={() => setEditing({ index: null, draft: { ...expression } })}
+                  aria-label="Nouvelle expression"
+                >
+                  +
+                </button>
+              </div>
+            </section>
+            <section className="panel">
+              <PanelTitle
+                title="Mouvement"
+                subtitle="Motion interpole les valeurs et notre moteur effectue le slerp quaternion."
+              />
+              <NumericField
+                label="Vitesse du ressort"
+                value={springSpeed}
+                step={0.5}
+                onChange={setSpringSpeed}
+              />
+              <div className="button-row">
+                <button type="button" onClick={blink}>
+                  Cligner
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const index = Math.floor(Math.random() * expressions.length)
+                    transitionToExpression(expressions[index], index)
+                  }}
+                >
+                  Expression aléatoire
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
+
+        {mode === 'states' && (
+          <div className="panel-stack">
+            <section className="panel">
+              <div className="preset-header">
+                <div>
+                  <p className="eyebrow">Séquences</p>
+                  <h2>États animés</h2>
+                </div>
+                {activeState && (
+                  <span className="live-state">
+                    <i />
+                    {activeState}
+                  </span>
+                )}
+              </div>
+              <div className="state-groups">
+                {Object.entries(stateGroups).map(([group, states]) => (
+                  <div key={group}>
+                    <strong>{group}</strong>
+                    <div className="state-buttons">
+                      {states.map(name => (
+                        <button
+                          type="button"
+                          key={name}
+                          aria-pressed={selectedState === name}
+                          onClick={() => setSelectedState(name)}
+                        >
+                          {name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+            <section className="panel state-detail">
+              <h2>{selectedState}</h2>
+              <p>
+                {stateNotes[selectedState] ??
+                  'Cet état enchaîne un pool de presets et des clignements.'}
+              </p>
+              <div className="pool">
+                {statePools[selectedState].map(index => (
+                  <button
+                    type="button"
+                    key={index}
+                    onClick={() => transitionToExpression(expressions[index], index)}
+                  >
+                    {String(index).padStart(2, '0')}
+                  </button>
+                ))}
+              </div>
+              <div className="button-row">
+                <button
+                  className="primary"
+                  type="button"
+                  onClick={() => launchState(selectedState)}
+                >
+                  Lancer
+                </button>
+                <button type="button" onClick={stopState}>
+                  Pause
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
+      </main>
+      {editing && (
+        <ExpressionDialog
+          editing={editing}
+          onChange={draft => setEditing({ ...editing, draft })}
+          onCancel={() => setEditing(null)}
+          onSave={saveEditing}
+          onDelete={deleteEditing}
+        />
+      )}
+    </div>
+  )
+}
+
+function PanelTitle({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="panel-title">
+      <h2>{title}</h2>
+      <p>{subtitle}</p>
+    </div>
+  )
+}
