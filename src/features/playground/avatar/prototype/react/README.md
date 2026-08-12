@@ -14,5 +14,6 @@ Puis ouvrir `http://127.0.0.1:5173/`.
 - `surfaces.ts` décrit les surfaces interchangeables (sphère, cube arrondi, capsule, etc.).
 - Le cône expose des rondeurs indépendantes pour sa pointe et sa base.
 - Le cylindre expose une rondeur commune pour ses deux arêtes.
+- Le diamant peut être progressivement adouci jusqu’à une forme ellipsoïdale.
 - Un repère facial commun conserve les expressions puis les projette sur la surface réelle.
 - `geometry.ts` reste indépendant du framework et projette expressions et maillages sur la surface active.

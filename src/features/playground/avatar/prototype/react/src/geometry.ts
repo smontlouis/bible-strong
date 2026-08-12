@@ -656,6 +656,8 @@ const projectedConePath = (pose: AvatarPose, surface: SurfaceConfig) => {
 }
 
 const projectedDiamondPath = (pose: AvatarPose, surface: SurfaceConfig) => {
+  if (surface.roundness > 0) return projectedRoundedPrimitivePath(pose, surface)
+
   const halfWidth = surface.width / 2
   const halfHeight = surface.height / 2
   const halfDepth = surface.depth / 2

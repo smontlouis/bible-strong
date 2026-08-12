@@ -1350,12 +1350,14 @@ export default function App() {
                   unit="u"
                   onChange={depth => updateSurface({ ...surface, depth })}
                 />
-                {(surface.type === 'roundedBox' || surface.type === 'cylinder') && (
+                {(surface.type === 'roundedBox' ||
+                  surface.type === 'cylinder' ||
+                  surface.type === 'diamond') && (
                   <NumericField
                     label="Rondeur"
                     value={surface.roundness}
                     min={0}
-                    max={1}
+                    max={surface.type === 'roundedBox' ? 1 : 2}
                     step={0.01}
                     onActiveChange={active => updateHighlight(active ? 'head' : null)}
                     onChange={roundness => updateSurface({ ...surface, roundness })}
@@ -1367,7 +1369,7 @@ export default function App() {
                       label="Rondeur pointe"
                       value={surface.tipRoundness ?? 0}
                       min={0}
-                      max={1}
+                      max={2}
                       step={0.01}
                       onActiveChange={active => updateHighlight(active ? 'head' : null)}
                       onChange={tipRoundness => updateSurface({ ...surface, tipRoundness })}
@@ -1376,7 +1378,7 @@ export default function App() {
                       label="Rondeur base"
                       value={surface.baseRoundness ?? 0}
                       min={0}
-                      max={1}
+                      max={2}
                       step={0.01}
                       onActiveChange={active => updateHighlight(active ? 'head' : null)}
                       onChange={baseRoundness => updateSurface({ ...surface, baseRoundness })}

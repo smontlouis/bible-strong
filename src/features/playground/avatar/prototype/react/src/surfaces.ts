@@ -98,11 +98,19 @@ const capsule = (config: SurfaceConfig, longitude: number, latitude: number): Po
   return [radial * Math.sin(longitude), y, radial * depthScale * Math.cos(longitude)]
 }
 
+const diamondExponent = (config: SurfaceConfig) =>
+  1 + Math.max(0, Math.min(2, config.roundness)) / 2
+
 const diamond = (config: SurfaceConfig, longitude: number, latitude: number): Point3 => {
   const sphereX = Math.cos(latitude) * Math.sin(longitude)
   const sphereY = Math.sin(latitude)
   const sphereZ = Math.cos(latitude) * Math.cos(longitude)
-  const length = Math.abs(sphereX) + Math.abs(sphereY) + Math.abs(sphereZ) || 1
+  const exponent = diamondExponent(config)
+  const length =
+    (Math.abs(sphereX) ** exponent +
+      Math.abs(sphereY) ** exponent +
+      Math.abs(sphereZ) ** exponent) **
+      (1 / exponent) || 1
   return [
     (config.width / 2) * (sphereX / length),
     (config.height / 2) * (sphereY / length),
@@ -310,6 +318,18 @@ const tangentNormalAt = (config: SurfaceConfig, longitude: number, latitude: num
 const signedMagnitude = (value: number, exponent: number) =>
   Math.sign(value) * Math.abs(value) ** exponent
 
+const diamondNormal = (config: SurfaceConfig, point: Point3): Point3 => {
+  const radiusX = config.width / 2 || 1
+  const radiusY = config.height / 2 || 1
+  const radiusZ = config.depth / 2 || 1
+  const exponent = diamondExponent(config)
+  return normalize([
+    signedMagnitude(point[0] / radiusX, exponent - 1) / radiusX,
+    signedMagnitude(point[1] / radiusY, exponent - 1) / radiusY,
+    signedMagnitude(point[2] / radiusZ, exponent - 1) / radiusZ,
+  ])
+}
+
 const ellipsoidFrontSample = (
   x: number,
   y: number,
@@ -413,11 +433,18 @@ export const surfaceFrontSampleAt = (
       return radialProfileFrontSample(config, x, y, coneProfileAt, -1)
 
     case 'diamond': {
-      const normalizedZ = Math.max(0, 1 - Math.abs(x) / radiusX - Math.abs(y) / radiusY)
-      const z = radiusZ * normalizedZ
+      const exponent = diamondExponent(config)
+      const normalizedY = y / radiusY
+      const availableX = Math.max(0, 1 - Math.abs(normalizedY) ** exponent) ** (1 / exponent)
+      const surfaceX = Math.max(-radiusX * availableX, Math.min(radiusX * availableX, x))
+      const normalizedX = surfaceX / radiusX
+      const normalizedZ =
+        Math.max(0, 1 - Math.abs(normalizedX) ** exponent - Math.abs(normalizedY) ** exponent) **
+        (1 / exponent)
+      const point: Point3 = [surfaceX, y, radiusZ * normalizedZ]
       return {
-        point: [x, y, z],
-        normal: normalize([Math.sign(x) / radiusX, Math.sign(y) / radiusY, 1 / radiusZ]),
+        point,
+        normal: diamondNormal(config, point),
       }
     }
   }
@@ -452,11 +479,7 @@ export const surfaceNormalAt = (
   }
 
   if (config.type === 'diamond') {
-    return normalize([
-      Math.sign(point[0]) / (config.width / 2 || 1),
-      Math.sign(point[1]) / (config.height / 2 || 1),
-      Math.sign(point[2]) / (config.depth / 2 || 1),
-    ])
+    return diamondNormal(config, point)
   }
 
   return tangentNormalAt(config, longitude, latitude)
@@ -497,11 +520,7 @@ export const surfaceSampleAt = (
   if (config.type === 'diamond') {
     return {
       point,
-      normal: normalize([
-        Math.sign(point[0]) / (config.width / 2 || 1),
-        Math.sign(point[1]) / (config.height / 2 || 1),
-        Math.sign(point[2]) / (config.depth / 2 || 1),
-      ]),
+      normal: diamondNormal(config, point),
     }
   }
 
