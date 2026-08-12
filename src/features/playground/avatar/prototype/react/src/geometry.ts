@@ -346,6 +346,7 @@ const surfaceCacheKey = (surface: SurfaceConfig) =>
     surface.height,
     surface.depth,
     surface.roundness,
+    surface.morphRoundness,
     surface.tipRoundness,
     surface.baseRoundness,
   ]
@@ -624,7 +625,9 @@ const projectedRoundedPrimitivePath = (pose: AvatarPose, surface: SurfaceConfig)
 }
 
 const projectedCylinderPath = (pose: AvatarPose, surface: SurfaceConfig) => {
-  if (surface.roundness > 0) return projectedRoundedPrimitivePath(pose, surface)
+  if (surface.roundness > 0 || (surface.morphRoundness ?? 0) > 0) {
+    return projectedRoundedPrimitivePath(pose, surface)
+  }
 
   const halfHeight = surface.height / 2
   const projected = [
@@ -635,7 +638,11 @@ const projectedCylinderPath = (pose: AvatarPose, surface: SurfaceConfig) => {
 }
 
 const projectedConePath = (pose: AvatarPose, surface: SurfaceConfig) => {
-  if ((surface.tipRoundness ?? 0) > 0 || (surface.baseRoundness ?? 0) > 0) {
+  if (
+    (surface.morphRoundness ?? 0) > 0 ||
+    (surface.tipRoundness ?? 0) > 0 ||
+    (surface.baseRoundness ?? 0) > 0
+  ) {
     return projectedRoundedPrimitivePath(pose, surface)
   }
 
@@ -653,6 +660,18 @@ const projectedConePath = (pose: AvatarPose, surface: SurfaceConfig) => {
   const baseArc = ordered.slice(1)
   if (baseArc.length < 2) return path(hull)
   return `M${apex[0].toFixed(2)} ${apex[1].toFixed(2)}L${baseArc[0][0].toFixed(2)} ${baseArc[0][1].toFixed(2)}${smoothOpenPath(baseArc)}L${apex[0].toFixed(2)} ${apex[1].toFixed(2)}Z`
+}
+
+const projectedCubePath = (pose: AvatarPose, surface: SurfaceConfig) => {
+  if (surface.roundness > 0) return projectedRoundedPrimitivePath(pose, surface)
+
+  const halfWidth = surface.width / 2
+  const halfHeight = surface.height / 2
+  const halfDepth = surface.depth / 2
+  const vertices = [-1, 1].flatMap(x =>
+    [-1, 1].flatMap(y => [-1, 1].map(z => [x * halfWidth, y * halfHeight, z * halfDepth] as Point3))
+  )
+  return path(convexHull(vertices.map(point => projectLocalPoint(pose, point))))
 }
 
 const projectedDiamondPath = (pose: AvatarPose, surface: SurfaceConfig) => {
@@ -891,6 +910,7 @@ const headPath = (pose: AvatarPose, surface: SurfaceConfig) => {
 
   if (surface.type === 'cylinder') return projectedCylinderPath(pose, surface)
   if (surface.type === 'cone') return projectedConePath(pose, surface)
+  if (surface.type === 'cube') return projectedCubePath(pose, surface)
   if (surface.type === 'diamond') return projectedDiamondPath(pose, surface)
 
   const key = surfaceCacheKey(surface)

@@ -3,6 +3,7 @@ import type { Point3 } from './geometry'
 export type SurfaceType =
   | 'sphere'
   | 'ellipsoid'
+  | 'cube'
   | 'roundedBox'
   | 'capsule'
   | 'cylinder'
@@ -15,6 +16,7 @@ export type SurfaceConfig = {
   height: number
   depth: number
   roundness: number
+  morphRoundness?: number
   tipRoundness?: number
   baseRoundness?: number
 }
@@ -27,15 +29,24 @@ export type SurfaceSample = {
 export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
   sphere: { type: 'sphere', width: 240, height: 240, depth: 240, roundness: 1 },
   ellipsoid: { type: 'ellipsoid', width: 250, height: 210, depth: 220, roundness: 1 },
+  cube: { type: 'cube', width: 245, height: 245, depth: 220, roundness: 0 },
   roundedBox: { type: 'roundedBox', width: 250, height: 225, depth: 215, roundness: 0.32 },
   capsule: { type: 'capsule', width: 205, height: 270, depth: 205, roundness: 1 },
-  cylinder: { type: 'cylinder', width: 235, height: 250, depth: 215, roundness: 0.45 },
+  cylinder: {
+    type: 'cylinder',
+    width: 235,
+    height: 250,
+    depth: 215,
+    roundness: 0.45,
+    morphRoundness: 0,
+  },
   cone: {
     type: 'cone',
     width: 250,
     height: 265,
     depth: 225,
     roundness: 0,
+    morphRoundness: 0,
     tipRoundness: 0.55,
     baseRoundness: 0.45,
   },
@@ -45,6 +56,7 @@ export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
 export const surfaceLabels: Record<SurfaceType, string> = {
   sphere: 'Sphère',
   ellipsoid: 'Ellipsoïde',
+  cube: 'Cube',
   roundedBox: 'Cube arrondi',
   capsule: 'Capsule',
   cylinder: 'Cylindre',
@@ -98,25 +110,48 @@ const capsule = (config: SurfaceConfig, longitude: number, latitude: number): Po
   return [radial * Math.sin(longitude), y, radial * depthScale * Math.cos(longitude)]
 }
 
-const diamondExponent = (config: SurfaceConfig) =>
-  1 + Math.max(0, Math.min(2, config.roundness)) / 2
+const clampRoundness = (roundness: number | undefined) => Math.max(0, Math.min(2, roundness ?? 0))
 
-const diamond = (config: SurfaceConfig, longitude: number, latitude: number): Point3 => {
+const diamondExponent = (config: SurfaceConfig) => 1 + clampRoundness(config.roundness) / 2
+
+const MIN_CUBE_SURFACE_POWER = 0.04
+
+const cubeExponent = (config: SurfaceConfig) => {
+  if (config.roundness <= 0) return Infinity
+  // The implicit superellipsoid power moves from an almost-flat cube to an ellipsoid.
+  const surfacePower =
+    MIN_CUBE_SURFACE_POWER + (clampRoundness(config.roundness) / 2) * (1 - MIN_CUBE_SURFACE_POWER)
+  return 2 / surfacePower
+}
+
+const lpSurface = (
+  config: SurfaceConfig,
+  longitude: number,
+  latitude: number,
+  exponent: number
+): Point3 => {
   const sphereX = Math.cos(latitude) * Math.sin(longitude)
   const sphereY = Math.sin(latitude)
   const sphereZ = Math.cos(latitude) * Math.cos(longitude)
-  const exponent = diamondExponent(config)
-  const length =
-    (Math.abs(sphereX) ** exponent +
-      Math.abs(sphereY) ** exponent +
-      Math.abs(sphereZ) ** exponent) **
-      (1 / exponent) || 1
+  const length = Number.isFinite(exponent)
+    ? (Math.abs(sphereX) ** exponent +
+        Math.abs(sphereY) ** exponent +
+        Math.abs(sphereZ) ** exponent) **
+        (1 / exponent) || 1
+    : Math.max(Math.abs(sphereX), Math.abs(sphereY), Math.abs(sphereZ)) || 1
   return [
     (config.width / 2) * (sphereX / length),
     (config.height / 2) * (sphereY / length),
     (config.depth / 2) * (sphereZ / length),
   ]
 }
+
+const diamond = (config: SurfaceConfig, longitude: number, latitude: number): Point3 => {
+  return lpSurface(config, longitude, latitude, diamondExponent(config))
+}
+
+const cube = (config: SurfaceConfig, longitude: number, latitude: number): Point3 =>
+  lpSurface(config, longitude, latitude, cubeExponent(config))
 
 const MAX_CONE_TIP_FRACTION = 0.24
 const MAX_CONE_BASE_FRACTION = 0.2
@@ -125,6 +160,24 @@ const MAX_CYLINDER_EDGE_FRACTION = 0.22
 type RadialProfile = {
   radiusScale: number
   verticalProgress: number
+}
+
+const morphProgress = (config: SurfaceConfig) => clampRoundness(config.morphRoundness) / 2
+
+const morphProfileToEllipsoid = (
+  config: SurfaceConfig,
+  progress: number,
+  profile: RadialProfile
+): RadialProfile => {
+  const amount = morphProgress(config)
+  const clampedProgress = Math.max(0, Math.min(1, progress))
+  const ellipsoidRadius = Math.sin(clampedProgress * Math.PI)
+  const ellipsoidVerticalProgress = (1 - Math.cos(clampedProgress * Math.PI)) / 2
+  return {
+    radiusScale: profile.radiusScale + (ellipsoidRadius - profile.radiusScale) * amount,
+    verticalProgress:
+      profile.verticalProgress + (ellipsoidVerticalProgress - profile.verticalProgress) * amount,
+  }
 }
 
 const cubic = (
@@ -182,6 +235,9 @@ const cylinderProfileAt = (config: SurfaceConfig, progress: number): RadialProfi
   }
 }
 
+const morphedCylinderProfileAt = (config: SurfaceConfig, progress: number) =>
+  morphProfileToEllipsoid(config, progress, cylinderProfileAt(config, progress))
+
 const radiusScaleAtVerticalProgress = (
   config: SurfaceConfig,
   verticalProgress: number,
@@ -231,6 +287,9 @@ const coneProfileAt = (config: SurfaceConfig, progress: number): RadialProfile =
   }
 }
 
+const morphedConeProfileAt = (config: SurfaceConfig, progress: number) =>
+  morphProfileToEllipsoid(config, progress, coneProfileAt(config, progress))
+
 export const surfacePointAt = (
   config: SurfaceConfig,
   longitude: number,
@@ -241,13 +300,15 @@ export const surfacePointAt = (
     case 'sphere':
     case 'ellipsoid':
       return superellipsoid(longitude, latitude, width, height, depth, 1, 1)
+    case 'cube':
+      return cube(config, longitude, latitude)
     case 'roundedBox': {
       const exponent = 0.16 + config.roundness * 0.84
       return superellipsoid(longitude, latitude, width, height, depth, exponent, exponent)
     }
     case 'cylinder': {
       const progress = (latitude + Math.PI / 2) / Math.PI
-      const profile = cylinderProfileAt(config, progress)
+      const profile = morphedCylinderProfileAt(config, progress)
       return [
         (width / 2) * profile.radiusScale * Math.sin(longitude),
         -height / 2 + height * profile.verticalProgress,
@@ -260,7 +321,7 @@ export const surfacePointAt = (
       return capsule(config, longitude, latitude)
     case 'cone': {
       const progress = (latitude + Math.PI / 2) / Math.PI
-      const profile = coneProfileAt(config, progress)
+      const profile = morphedConeProfileAt(config, progress)
       return [
         (width / 2) * profile.radiusScale * Math.sin(longitude),
         height / 2 - height * profile.verticalProgress,
@@ -318,16 +379,69 @@ const tangentNormalAt = (config: SurfaceConfig, longitude: number, latitude: num
 const signedMagnitude = (value: number, exponent: number) =>
   Math.sign(value) * Math.abs(value) ** exponent
 
-const diamondNormal = (config: SurfaceConfig, point: Point3): Point3 => {
+const lpNormal = (config: SurfaceConfig, point: Point3, exponent: number): Point3 => {
   const radiusX = config.width / 2 || 1
   const radiusY = config.height / 2 || 1
   const radiusZ = config.depth / 2 || 1
-  const exponent = diamondExponent(config)
   return normalize([
     signedMagnitude(point[0] / radiusX, exponent - 1) / radiusX,
     signedMagnitude(point[1] / radiusY, exponent - 1) / radiusY,
     signedMagnitude(point[2] / radiusZ, exponent - 1) / radiusZ,
   ])
+}
+
+const diamondNormal = (config: SurfaceConfig, point: Point3): Point3 =>
+  lpNormal(config, point, diamondExponent(config))
+
+const cubeNormal = (config: SurfaceConfig, point: Point3): Point3 => {
+  const exponent = cubeExponent(config)
+  if (Number.isFinite(exponent)) return lpNormal(config, point, exponent)
+
+  const normalized = [
+    point[0] / (config.width / 2 || 1),
+    point[1] / (config.height / 2 || 1),
+    point[2] / (config.depth / 2 || 1),
+  ] as Point3
+  const dominantAxis = normalized.reduce(
+    (largest, value, index) => (Math.abs(value) > Math.abs(normalized[largest]) ? index : largest),
+    0
+  )
+  const normal: Point3 = [
+    dominantAxis === 0 ? Math.sign(normalized[0]) : 0,
+    dominantAxis === 1 ? Math.sign(normalized[1]) : 0,
+    dominantAxis === 2 ? Math.sign(normalized[2]) : 0,
+  ]
+  return normal
+}
+
+const lpFrontSample = (
+  config: SurfaceConfig,
+  x: number,
+  y: number,
+  exponent: number,
+  normalAt: (config: SurfaceConfig, point: Point3) => Point3
+): SurfaceSample => {
+  const radiusX = config.width / 2 || 1
+  const radiusY = config.height / 2 || 1
+  const radiusZ = config.depth / 2 || 1
+  if (!Number.isFinite(exponent)) {
+    const point: Point3 = [
+      Math.max(-radiusX, Math.min(radiusX, x)),
+      Math.max(-radiusY, Math.min(radiusY, y)),
+      radiusZ,
+    ]
+    return { point, normal: normalAt(config, point) }
+  }
+
+  const normalizedY = Math.max(-1, Math.min(1, y / radiusY))
+  const availableX = Math.max(0, 1 - Math.abs(normalizedY) ** exponent) ** (1 / exponent)
+  const surfaceX = Math.max(-radiusX * availableX, Math.min(radiusX * availableX, x))
+  const normalizedX = surfaceX / radiusX
+  const normalizedZ =
+    Math.max(0, 1 - Math.abs(normalizedX) ** exponent - Math.abs(normalizedY) ** exponent) **
+    (1 / exponent)
+  const point: Point3 = [surfaceX, normalizedY * radiusY, radiusZ * normalizedZ]
+  return { point, normal: normalAt(config, point) }
 }
 
 const ellipsoidFrontSample = (
@@ -399,6 +513,9 @@ export const surfaceFrontSampleAt = (
     case 'ellipsoid':
       return ellipsoidFrontSample(x, y, radiusX, radiusY, radiusZ)
 
+    case 'cube':
+      return lpFrontSample(config, x, y, cubeExponent(config), cubeNormal)
+
     case 'roundedBox': {
       const exponent = 0.16 + config.roundness * 0.84
       const power = 2 / exponent
@@ -427,26 +544,13 @@ export const surfaceFrontSampleAt = (
     }
 
     case 'cylinder':
-      return radialProfileFrontSample(config, x, y, cylinderProfileAt, 1)
+      return radialProfileFrontSample(config, x, y, morphedCylinderProfileAt, 1)
 
     case 'cone':
-      return radialProfileFrontSample(config, x, y, coneProfileAt, -1)
+      return radialProfileFrontSample(config, x, y, morphedConeProfileAt, -1)
 
-    case 'diamond': {
-      const exponent = diamondExponent(config)
-      const normalizedY = y / radiusY
-      const availableX = Math.max(0, 1 - Math.abs(normalizedY) ** exponent) ** (1 / exponent)
-      const surfaceX = Math.max(-radiusX * availableX, Math.min(radiusX * availableX, x))
-      const normalizedX = surfaceX / radiusX
-      const normalizedZ =
-        Math.max(0, 1 - Math.abs(normalizedX) ** exponent - Math.abs(normalizedY) ** exponent) **
-        (1 / exponent)
-      const point: Point3 = [surfaceX, y, radiusZ * normalizedZ]
-      return {
-        point,
-        normal: diamondNormal(config, point),
-      }
-    }
+    case 'diamond':
+      return lpFrontSample(config, x, y, diamondExponent(config), diamondNormal)
   }
 }
 
@@ -470,7 +574,7 @@ export const surfaceNormalAt = (
     ])
   }
 
-  if (config.type === 'cylinder' && config.roundness <= 0) {
+  if (config.type === 'cylinder' && config.roundness <= 0 && (config.morphRoundness ?? 0) <= 0) {
     return normalize([
       Math.sin(longitude) / (config.width / 2 || 1),
       0,
@@ -480,6 +584,10 @@ export const surfaceNormalAt = (
 
   if (config.type === 'diamond') {
     return diamondNormal(config, point)
+  }
+
+  if (config.type === 'cube') {
+    return cubeNormal(config, point)
   }
 
   return tangentNormalAt(config, longitude, latitude)
@@ -506,7 +614,7 @@ export const surfaceSampleAt = (
     }
   }
 
-  if (config.type === 'cylinder' && config.roundness <= 0) {
+  if (config.type === 'cylinder' && config.roundness <= 0 && (config.morphRoundness ?? 0) <= 0) {
     return {
       point,
       normal: normalize([
@@ -521,6 +629,13 @@ export const surfaceSampleAt = (
     return {
       point,
       normal: diamondNormal(config, point),
+    }
+  }
+
+  if (config.type === 'cube') {
+    return {
+      point,
+      normal: cubeNormal(config, point),
     }
   }
 

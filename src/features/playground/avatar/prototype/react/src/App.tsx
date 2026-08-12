@@ -1350,17 +1350,37 @@ export default function App() {
                   unit="u"
                   onChange={depth => updateSurface({ ...surface, depth })}
                 />
-                {(surface.type === 'roundedBox' ||
-                  surface.type === 'cylinder' ||
-                  surface.type === 'diamond') && (
+                {(surface.type === 'cube' || surface.type === 'diamond') && (
                   <NumericField
                     label="Rondeur"
+                    value={surface.roundness}
+                    min={0}
+                    max={2}
+                    step={0.01}
+                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                    onChange={roundness => updateSurface({ ...surface, roundness })}
+                  />
+                )}
+                {(surface.type === 'roundedBox' || surface.type === 'cylinder') && (
+                  <NumericField
+                    label="Rondeur des arêtes"
                     value={surface.roundness}
                     min={0}
                     max={surface.type === 'roundedBox' ? 1 : 2}
                     step={0.01}
                     onActiveChange={active => updateHighlight(active ? 'head' : null)}
                     onChange={roundness => updateSurface({ ...surface, roundness })}
+                  />
+                )}
+                {(surface.type === 'cylinder' || surface.type === 'cone') && (
+                  <NumericField
+                    label="Rondeur globale"
+                    value={surface.morphRoundness ?? 0}
+                    min={0}
+                    max={2}
+                    step={0.01}
+                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                    onChange={morphRoundness => updateSurface({ ...surface, morphRoundness })}
                   />
                 )}
                 {surface.type === 'cone' && (
