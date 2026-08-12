@@ -14,6 +14,7 @@ Puis ouvrir `http://127.0.0.1:5173/`.
 - `surfaces.ts` décrit les surfaces interchangeables (sphère, cube, capsule, etc.).
 - La sphère devient naturellement un ellipsoïde lorsque ses trois dimensions diffèrent.
 - La forme Mickey assemble une tête ellipsoïdale et deux oreilles sphériques liées à sa rotation.
+- La forme Curseur assemble un corps cylindrique et une pointe conique dans le même repère 3D.
 - Le cône expose des rondeurs indépendantes pour sa pointe et sa base.
 - Le cylindre expose une rondeur commune pour ses deux arêtes.
 - Le diamant peut être progressivement adouci jusqu’à une forme ellipsoïdale.

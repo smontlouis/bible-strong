@@ -1,4 +1,5 @@
 import {
+  cursorLayout,
   surfaceFrontSampleAt,
   surfacePointAt,
   surfaceSampleAt,
@@ -638,6 +639,25 @@ const projectedCylinderPath = (pose: AvatarPose, surface: SurfaceConfig) => {
   return smoothClosedPath(densifyClosedPoints(convexHull(projected)))
 }
 
+const projectedCursorBodyPath = (pose: AvatarPose, surface: SurfaceConfig) => {
+  const layout = cursorLayout(surface)
+  const halfHeight = layout.bodyHeight / 2
+  const projected = [
+    ...ringPoints(surface.width, surface.depth, layout.bodyCenterY - halfHeight),
+    ...ringPoints(surface.width, surface.depth, layout.bodyCenterY + halfHeight),
+  ].map(point => projectLocalPoint(pose, point))
+  return smoothClosedPath(densifyClosedPoints(convexHull(projected)))
+}
+
+const projectedCursorConePath = (pose: AvatarPose, surface: SurfaceConfig) => {
+  const layout = cursorLayout(surface)
+  const apex = projectLocalPoint(pose, [0, layout.coneApexY, 0])
+  const base = ringPoints(surface.width, surface.depth, layout.coneBaseY).map(point =>
+    projectLocalPoint(pose, point)
+  )
+  return smoothClosedPath(densifyClosedPoints(convexHull([...base, apex])))
+}
+
 const projectedConePath = (pose: AvatarPose, surface: SurfaceConfig) => {
   if (
     (surface.morphRoundness ?? 0) > 0 ||
@@ -860,6 +880,12 @@ const mickeyEarPaths = (pose: AvatarPose, surface: SurfaceConfig) => {
     .map(ellipsePath)
 }
 
+const compositeBackPaths = (pose: AvatarPose, surface: SurfaceConfig) => {
+  if (surface.type === 'mickey') return mickeyEarPaths(pose, surface)
+  if (surface.type === 'cursor') return [projectedCursorConePath(pose, surface)]
+  return []
+}
+
 const ellipsePoints = (ellipse: ProjectedEllipse) =>
   Array.from({ length: PRIMITIVE_RING_SAMPLES }, (_, index) => {
     const angle = (index / PRIMITIVE_RING_SAMPLES) * Math.PI * 2
@@ -925,6 +951,7 @@ const headPath = (pose: AvatarPose, surface: SurfaceConfig) => {
   }
 
   if (surface.type === 'cylinder') return projectedCylinderPath(pose, surface)
+  if (surface.type === 'cursor') return projectedCursorBodyPath(pose, surface)
   if (surface.type === 'cone') return projectedConePath(pose, surface)
   if (surface.type === 'cube') return projectedCubePath(pose, surface)
   if (surface.type === 'diamond') return projectedDiamondPath(pose, surface)
@@ -958,7 +985,7 @@ export const renderAvatar = (
   const left = leftSamples.map(sample => sample.point)
   const right = rightSamples.map(sample => sample.point)
   return {
-    backPaths: mickeyEarPaths(pose, surface),
+    backPaths: compositeBackPaths(pose, surface),
     headPath: headPath(pose, surface),
     leftPath: path(left),
     rightPath: path(right),

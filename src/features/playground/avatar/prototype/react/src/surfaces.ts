@@ -1,6 +1,14 @@
 import type { Point3 } from './geometry'
 
-export type SurfaceType = 'sphere' | 'mickey' | 'cube' | 'capsule' | 'cylinder' | 'cone' | 'diamond'
+export type SurfaceType =
+  | 'sphere'
+  | 'mickey'
+  | 'cursor'
+  | 'cube'
+  | 'capsule'
+  | 'cylinder'
+  | 'cone'
+  | 'diamond'
 
 export type SurfaceConfig = {
   type: SurfaceType
@@ -21,6 +29,7 @@ export type SurfaceSample = {
 export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
   sphere: { type: 'sphere', width: 240, height: 240, depth: 240, roundness: 1 },
   mickey: { type: 'mickey', width: 220, height: 210, depth: 145, roundness: 1 },
+  cursor: { type: 'cursor', width: 175, height: 260, depth: 145, roundness: 0 },
   cube: { type: 'cube', width: 245, height: 245, depth: 220, roundness: 0 },
   capsule: { type: 'capsule', width: 205, height: 270, depth: 205, roundness: 1 },
   cylinder: {
@@ -47,6 +56,7 @@ export const surfacePresets: Record<SurfaceType, SurfaceConfig> = {
 export const surfaceLabels: Record<SurfaceType, string> = {
   sphere: 'Sphère',
   mickey: 'Mickey',
+  cursor: 'Curseur',
   cube: 'Cube',
   capsule: 'Capsule',
   cylinder: 'Cylindre',
@@ -280,6 +290,17 @@ const coneProfileAt = (config: SurfaceConfig, progress: number): RadialProfile =
 const morphedConeProfileAt = (config: SurfaceConfig, progress: number) =>
   morphProfileToEllipsoid(config, progress, coneProfileAt(config, progress))
 
+export const cursorLayout = (config: SurfaceConfig) => {
+  const coneHeight = config.height * 0.36
+  const bodyHeight = config.height - coneHeight
+  return {
+    coneApexY: -config.height / 2,
+    coneBaseY: -config.height / 2 + coneHeight,
+    bodyHeight,
+    bodyCenterY: config.height / 2 - bodyHeight / 2,
+  }
+}
+
 export const surfacePointAt = (
   config: SurfaceConfig,
   longitude: number,
@@ -298,6 +319,17 @@ export const surfacePointAt = (
       return [
         (width / 2) * profile.radiusScale * Math.sin(longitude),
         -height / 2 + height * profile.verticalProgress,
+        (depth / 2) * profile.radiusScale * Math.cos(longitude),
+      ]
+    }
+    case 'cursor': {
+      const layout = cursorLayout(config)
+      const progress = (latitude + Math.PI / 2) / Math.PI
+      const bodyConfig = { ...config, height: layout.bodyHeight }
+      const profile = cylinderProfileAt(bodyConfig, progress)
+      return [
+        (width / 2) * profile.radiusScale * Math.sin(longitude),
+        layout.bodyCenterY - layout.bodyHeight / 2 + layout.bodyHeight * profile.verticalProgress,
         (depth / 2) * profile.radiusScale * Math.cos(longitude),
       ]
     }
@@ -512,6 +544,22 @@ export const surfaceFrontSampleAt = (
     case 'cylinder':
       return radialProfileFrontSample(config, x, y, morphedCylinderProfileAt, 1)
 
+    case 'cursor': {
+      const layout = cursorLayout(config)
+      const bodyConfig = { ...config, height: layout.bodyHeight }
+      const sample = radialProfileFrontSample(
+        bodyConfig,
+        x,
+        y - layout.bodyCenterY,
+        cylinderProfileAt,
+        1
+      )
+      return {
+        point: [sample.point[0], sample.point[1] + layout.bodyCenterY, sample.point[2]],
+        normal: sample.normal,
+      }
+    }
+
     case 'cone':
       return radialProfileFrontSample(config, x, y, morphedConeProfileAt, -1)
 
@@ -540,7 +588,11 @@ export const surfaceNormalAt = (
     ])
   }
 
-  if (config.type === 'cylinder' && config.roundness <= 0 && (config.morphRoundness ?? 0) <= 0) {
+  if (
+    (config.type === 'cylinder' || config.type === 'cursor') &&
+    config.roundness <= 0 &&
+    (config.morphRoundness ?? 0) <= 0
+  ) {
     return normalize([
       Math.sin(longitude) / (config.width / 2 || 1),
       0,
@@ -580,7 +632,11 @@ export const surfaceSampleAt = (
     }
   }
 
-  if (config.type === 'cylinder' && config.roundness <= 0 && (config.morphRoundness ?? 0) <= 0) {
+  if (
+    (config.type === 'cylinder' || config.type === 'cursor') &&
+    config.roundness <= 0 &&
+    (config.morphRoundness ?? 0) <= 0
+  ) {
     return {
       point,
       normal: normalize([
