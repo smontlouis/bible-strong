@@ -11,4 +11,6 @@ Puis ouvrir `http://127.0.0.1:5173/`.
 
 - React gère l’éditeur et les presets en mémoire.
 - Motion gère les ressorts, les interruptions et les clignements.
-- `geometry.ts` reste indépendant du framework et calcule la projection sphérique et les paths SVG.
+- `surfaces.ts` décrit les surfaces interchangeables (sphère, cube arrondi, capsule, etc.).
+- Un repère facial commun conserve les expressions puis les projette sur la surface réelle.
+- `geometry.ts` reste indépendant du framework et projette expressions et maillages sur la surface active.

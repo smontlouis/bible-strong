@@ -337,6 +337,61 @@ p {
 .panel.compact {
   padding-top: 16px;
 }
+.surface-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+.surface-card {
+  display: grid;
+  min-width: 0;
+  min-height: 82px;
+  padding: 6px 4px 7px;
+  place-items: center;
+  border: 1px solid #e1e3e8;
+  border-radius: 11px;
+  background: #f7f8fa;
+  color: #767c87;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 780;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
+}
+.surface-card:hover {
+  border-color: #c7cfdf;
+  transform: translateY(-1px);
+}
+.surface-card[aria-pressed='true'] {
+  border-color: #7796ec;
+  background: #edf1ff;
+  color: #3f63c6;
+  box-shadow: 0 0 0 2px rgb(91 127 229 / 12%);
+}
+.surface-card svg {
+  width: 48px;
+  height: 48px;
+}
+.surface-card svg path {
+  fill: currentColor;
+}
+.surface-fields {
+  display: grid;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #eceef2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 14px;
+}
+.surface-fields .numeric-field {
+  grid-template-columns: minmax(0, 1fr) 72px;
+}
+.surface-fields .numeric-field + .numeric-field {
+  border-top: 0;
+}
 .panel-title h2,
 .panel-inline-title h2,
 .preset-header h2,
@@ -746,6 +801,9 @@ button.primary {
   }
   .expression-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .surface-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .dialog-body {
     grid-template-columns: 1fr;

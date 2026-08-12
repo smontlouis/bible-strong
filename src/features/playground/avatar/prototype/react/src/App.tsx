@@ -28,6 +28,7 @@ import {
   stateNotes,
   statePools,
 } from './presets'
+import { surfaceLabels, surfacePresets, type SurfaceConfig, type SurfaceType } from './surfaces'
 
 type Mode = 'manual' | 'expressions' | 'states'
 type Side = 'Left' | 'Right'
@@ -44,6 +45,29 @@ type NumericProps = {
 type Highlight = 'head' | 'left' | 'right' | 'both' | null
 
 const EXPRESSIONS_STORAGE_KEY = 'bible-strong-avatar-expressions-v1'
+const SURFACE_STORAGE_KEY = 'bible-strong-avatar-surface-v1'
+const RETARGET_BLEND_MS = 120
+const INSPECTOR_FRAME_MS = 1000 / 24
+const surfaceTypes = Object.keys(surfacePresets) as SurfaceType[]
+const previewGeometryCache = new WeakMap<
+  Expression,
+  WeakMap<SurfaceConfig, ReturnType<typeof renderAvatar>>
+>()
+
+const getPreviewGeometry = (expression: Expression, surface: SurfaceConfig) => {
+  let surfaceCache = previewGeometryCache.get(expression)
+  if (!surfaceCache) {
+    surfaceCache = new WeakMap()
+    previewGeometryCache.set(expression, surfaceCache)
+  }
+  const cached = surfaceCache.get(surface)
+  if (cached) return cached
+  const geometry = renderAvatar(poseFromExpression(expression), surface, 1, {
+    includeWire: false,
+  })
+  surfaceCache.set(surface, geometry)
+  return geometry
+}
 
 const loadExpressions = (): Expression[] => {
   try {
@@ -63,6 +87,25 @@ const persistExpressions = (expressions: Expression[]) => {
     window.localStorage.setItem(EXPRESSIONS_STORAGE_KEY, JSON.stringify(expressions))
   } catch {
     // Le prototype reste utilisable en mémoire si le stockage local est indisponible.
+  }
+}
+
+const loadSurface = (): SurfaceConfig => {
+  try {
+    const stored = window.localStorage.getItem(SURFACE_STORAGE_KEY)
+    return stored
+      ? { ...surfacePresets.sphere, ...JSON.parse(stored) }
+      : { ...surfacePresets.sphere }
+  } catch {
+    return { ...surfacePresets.sphere }
+  }
+}
+
+const persistSurface = (surface: SurfaceConfig) => {
+  try {
+    window.localStorage.setItem(SURFACE_STORAGE_KEY, JSON.stringify(surface))
+  } catch {
+    // La forme reste modifiable en mémoire si le stockage local est indisponible.
   }
 }
 
@@ -125,7 +168,10 @@ function NumericField({
           value={Number(value.toFixed(step < 0.1 ? 2 : 1))}
           onFocus={() => onActiveChange?.(true)}
           onBlur={() => onActiveChange?.(false)}
-          onChange={event => onChange(bounded(Number(event.currentTarget.value), min, max))}
+          onChange={event => {
+            const next = event.currentTarget.valueAsNumber
+            if (Number.isFinite(next)) onChange(bounded(next, min, max))
+          }}
         />
         <span>{unit}</span>
       </label>
@@ -267,6 +313,7 @@ function RotationGizmo({
         onPointerDown={startView}
         onPointerMove={move}
         onPointerUp={stop}
+        onPointerCancel={stop}
       />
       <path
         className="gizmo-orbit gizmo-y"
@@ -274,6 +321,7 @@ function RotationGizmo({
         onPointerDown={event => startAxis('y', event)}
         onPointerMove={move}
         onPointerUp={stop}
+        onPointerCancel={stop}
       />
       <path
         className="gizmo-orbit gizmo-x"
@@ -281,6 +329,7 @@ function RotationGizmo({
         onPointerDown={event => startAxis('x', event)}
         onPointerMove={move}
         onPointerUp={stop}
+        onPointerCancel={stop}
       />
       <path
         className="gizmo-orbit gizmo-z"
@@ -288,6 +337,7 @@ function RotationGizmo({
         onPointerDown={event => startAxis('z', event)}
         onPointerMove={move}
         onPointerUp={stop}
+        onPointerCancel={stop}
       />
     </svg>
   )
@@ -295,9 +345,10 @@ function RotationGizmo({
 
 function AvatarCanvas({
   expression,
+  surface,
   wirePaths,
   showWire,
-  headRadius,
+  headPath,
   leftPath,
   rightPath,
   leftOpacity,
@@ -308,9 +359,10 @@ function AvatarCanvas({
   onChange,
 }: {
   expression: Expression
+  surface: SurfaceConfig
   wirePaths: MotionValue<string>[]
   showWire: boolean
-  headRadius: MotionValue<number>
+  headPath: MotionValue<string>
   leftPath: MotionValue<string>
   rightPath: MotionValue<string>
   leftOpacity: MotionValue<number>
@@ -322,6 +374,9 @@ function AvatarCanvas({
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [selectedSide, setSelectedSide] = useState<-1 | 1 | null>(null)
+  const [activeDragType, setActiveDragType] = useState<
+    'arcball' | 'width' | 'height' | 'size' | 'spacing' | 'rotate' | null
+  >(null)
   const drag = useRef<
     | {
         type: 'arcball'
@@ -343,7 +398,9 @@ function AvatarCanvas({
     | null
   >(null)
   const editor =
-    selectedSide === null ? null : renderEyeEditor(poseFromExpression(expression), selectedSide)
+    selectedSide === null
+      ? null
+      : renderEyeEditor(poseFromExpression(expression), surface, selectedSide)
   const toSvg = (event: React.PointerEvent<SVGElement>): readonly [number, number] => {
     const rectangle = svgRef.current!.getBoundingClientRect()
     return [
@@ -365,6 +422,7 @@ function AvatarCanvas({
       startPoint: toSvg(event),
       expression,
     }
+    setActiveDragType('arcball')
     svgRef.current!.setPointerCapture(event.pointerId)
   }
   const selectEye = (side: -1 | 1, event: React.PointerEvent<SVGPathElement>) => {
@@ -379,8 +437,8 @@ function AvatarCanvas({
     if (selectedSide === null || !editor) return
     onHighlightChange(selectedSide < 0 ? 'left' : 'right')
     const point = toSvg(event)
-    const leftEditor = renderEyeEditor(poseFromExpression(expression), -1)
-    const rightEditor = renderEyeEditor(poseFromExpression(expression), 1)
+    const leftEditor = renderEyeEditor(poseFromExpression(expression), surface, -1)
+    const rightEditor = renderEyeEditor(poseFromExpression(expression), surface, 1)
     drag.current = {
       type,
       side: selectedSide,
@@ -396,6 +454,7 @@ function AvatarCanvas({
         1
       ),
     }
+    setActiveDragType(type)
     svgRef.current!.setPointerCapture(event.pointerId)
   }
   const move = (event: React.PointerEvent<SVGSVGElement>) => {
@@ -478,23 +537,23 @@ function AvatarCanvas({
         onPointerMove={move}
         onPointerUp={() => {
           drag.current = null
+          setActiveDragType(null)
           onHighlightChange(null)
         }}
         onPointerCancel={() => {
           drag.current = null
+          setActiveDragType(null)
           onHighlightChange(null)
         }}
       >
         <defs>
           <clipPath id="avatar-head-clip">
-            <motion.circle cx="0" cy="0" r={headRadius} />
+            <motion.path d={headPath} />
           </clipPath>
         </defs>
-        <motion.circle
+        <motion.path
           className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
-          cx="0"
-          cy="0"
-          r={headRadius}
+          d={headPath}
           onPointerDown={startDrag}
         />
         <g clipPath="url(#avatar-head-clip)">
@@ -517,7 +576,7 @@ function AvatarCanvas({
         </g>
         {editor?.visible && (
           <g className="eye-editor">
-            {drag.current?.type !== 'arcball' && drag.current && (
+            {activeDragType !== null && activeDragType !== 'arcball' && (
               <path className="selection-outline" d={editor.selectionPath} />
             )}
             <path className="editor-guide" d={editor.widthGuide} />
@@ -619,17 +678,34 @@ function EditorSquare({
   )
 }
 
-function ExpressionPreview({ expression, id }: { expression: Expression; id: string }) {
-  const geometry = renderAvatar(poseFromExpression(expression))
+function SurfaceThumbnail({ surface }: { surface: SurfaceConfig }) {
+  const geometry = getPreviewGeometry(defaultExpression, surface)
+  return (
+    <svg viewBox="-150 -150 300 300" aria-hidden="true">
+      <path d={geometry.headPath} />
+    </svg>
+  )
+}
+
+function ExpressionPreview({
+  expression,
+  surface,
+  id,
+}: {
+  expression: Expression
+  surface: SurfaceConfig
+  id: string
+}) {
+  const geometry = getPreviewGeometry(expression, surface)
   const clipId = `preview-${id}`
   return (
     <svg viewBox="-150 -150 300 300" aria-hidden="true">
       <defs>
         <clipPath id={clipId}>
-          <circle cx="0" cy="0" r={geometry.headRadius} />
+          <path d={geometry.headPath} />
         </clipPath>
       </defs>
-      <circle className="preview-head" cx="0" cy="0" r={geometry.headRadius} />
+      <path className="preview-head" d={geometry.headPath} />
       <g clipPath={`url(#${clipId})`}>
         <path
           className="preview-eye"
@@ -648,12 +724,14 @@ function ExpressionPreview({ expression, id }: { expression: Expression; id: str
 
 function ExpressionDialog({
   editing,
+  surface,
   onChange,
   onCancel,
   onSave,
   onDelete,
 }: {
   editing: { index: number | null; draft: Expression }
+  surface: SurfaceConfig
   onChange: (draft: Expression) => void
   onCancel: () => void
   onSave: () => void
@@ -716,9 +794,9 @@ function ExpressionDialog({
         </header>
         <div className="dialog-body">
           <aside className="dialog-preview">
-            <ExpressionPreview expression={editing.draft} id="dialog" />
+            <ExpressionPreview expression={editing.draft} surface={surface} id="dialog" />
             <strong>Aperçu en direct</strong>
-            <span>Projection sphérique réelle</span>
+            <span>Projection sur la forme active</span>
           </aside>
           <div className="dialog-fields">
             <section className="dialog-group">
@@ -864,6 +942,7 @@ function ExpressionDialog({
 
 export default function App() {
   const [mode, setMode] = useState<Mode>('manual')
+  const [surface, setSurface] = useState(loadSurface)
   const [expressions, setExpressions] = useState(loadExpressions)
   const [expression, setExpression] = useState<Expression>({ ...defaultExpression })
   const [activeExpression, setActiveExpression] = useState<number | null>(null)
@@ -878,35 +957,48 @@ export default function App() {
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reduceMotion = useReducedMotion()
 
-  const initialPose = poseFromExpression(defaultExpression)
-  const initialGeometry = renderAvatar(initialPose)
+  const surfaceRef = useRef(surface)
+  const showWireRef = useRef(showWire)
+  const highlightRef = useRef(highlight)
+  const [initialRender] = useState(() => {
+    const pose = poseFromExpression(defaultExpression)
+    return { pose, geometry: renderAvatar(pose, surface) }
+  })
+  const { pose: initialPose, geometry: initialGeometry } = initialRender
   const displayedPose = useRef<AvatarPose>(initialPose)
   const transitionFrame = useRef<number | null>(null)
   const transitionTarget = useRef<Expression>({ ...defaultExpression })
   const canonicalTarget = useRef<Expression>({ ...defaultExpression })
-  const transitionVelocity = useRef(
-    Object.fromEntries(expressionFields.map(field => [field, 0])) as Record<
-      keyof Expression,
-      number
-    >
+  const retargetFrom = useRef<Expression | null>(null)
+  const retargetTo = useRef<Expression | null>(null)
+  const retargetStartedAt = useRef<number | null>(null)
+  const [transitionVelocity] = useState(
+    () =>
+      Object.fromEntries(expressionFields.map(field => [field, 0])) as Record<
+        keyof Expression,
+        number
+      >
   )
   const lastTransitionTime = useRef<number | null>(null)
+  const lastInspectorFrame = useRef(0)
   const springSpeedRef = useRef(springSpeed)
   const blinkControls = useRef<ReturnType<typeof animate> | null>(null)
   const blinkValue = useMotionValue(1)
-  const headRadius = useMotionValue(initialGeometry.headRadius)
+  const headPath = useMotionValue(initialGeometry.headPath)
   const leftPath = useMotionValue(initialGeometry.leftPath)
   const rightPath = useMotionValue(initialGeometry.rightPath)
   const leftOpacity = useMotionValue(initialGeometry.leftVisible ? 1 : 0)
   const rightOpacity = useMotionValue(initialGeometry.rightVisible ? 1 : 0)
-  const wirePaths = useRef(
+  const [wirePaths] = useState(() =>
     initialGeometry.wirePaths.map(pathValue => motionValue(pathValue))
-  ).current
+  )
 
-  const paintPose = (pose: AvatarPose, blink = blinkValue.get()) => {
+  const paintPose = (pose: AvatarPose, blink?: number) => {
     displayedPose.current = pose
-    const geometry = renderAvatar(pose, blink)
-    headRadius.set(geometry.headRadius)
+    const geometry = renderAvatar(pose, surfaceRef.current, blink ?? blinkValue.get(), {
+      includeWire: showWireRef.current || highlightRef.current === 'head',
+    })
+    headPath.set(geometry.headPath)
     leftPath.set(geometry.leftPath)
     rightPath.set(geometry.rightPath)
     leftOpacity.set(geometry.leftVisible ? 1 : 0)
@@ -915,8 +1007,6 @@ export default function App() {
   }
 
   useMotionValueEvent(blinkValue, 'change', latest => paintPose(displayedPose.current, latest))
-
-  springSpeedRef.current = springSpeed
 
   useEffect(
     () => () => {
@@ -932,9 +1022,13 @@ export default function App() {
     if (transitionFrame.current !== null) cancelAnimationFrame(transitionFrame.current)
     transitionFrame.current = null
     lastTransitionTime.current = null
+    retargetFrom.current = null
+    retargetTo.current = null
+    retargetStartedAt.current = null
+    lastInspectorFrame.current = 0
     if (resetVelocity) {
       expressionFields.forEach(field => {
-        transitionVelocity.current[field] = 0
+        transitionVelocity[field] = 0
       })
     }
   }
@@ -963,7 +1057,7 @@ export default function App() {
       return resolved
     }
     canonicalTarget.current = next
-    transitionTarget.current = {
+    const resolvedTarget = {
       ...next,
       headX: nearestAngle(next.headX, current.headX),
       headY: nearestAngle(next.headY, current.headY),
@@ -972,7 +1066,13 @@ export default function App() {
       rightAngle: nearestAngle(next.rightAngle, current.rightAngle),
     }
 
-    if (transitionFrame.current !== null) return
+    if (transitionFrame.current !== null) {
+      retargetFrom.current = { ...transitionTarget.current }
+      retargetTo.current = resolvedTarget
+      retargetStartedAt.current = -1
+      return
+    }
+    transitionTarget.current = resolvedTarget
     const tick = (time: number) => {
       const previousTime = lastTransitionTime.current ?? time
       const deltaTime = Math.min(Math.max((time - previousTime) / 1000, 1 / 240), 1 / 30)
@@ -981,17 +1081,35 @@ export default function App() {
       const damping = 17 + springSpeedRef.current * 1.7
       const mass = 0.85
       const currentExpression = displayedPose.current.expression
+      if (retargetStartedAt.current !== null && retargetFrom.current && retargetTo.current) {
+        if (retargetStartedAt.current < 0) retargetStartedAt.current = time
+        const linearProgress = Math.min((time - retargetStartedAt.current) / RETARGET_BLEND_MS, 1)
+        const smoothProgress =
+          linearProgress ** 3 * (linearProgress * (linearProgress * 6 - 15) + 10)
+        const blendedTarget = { ...retargetTo.current }
+        expressionFields.forEach(field => {
+          blendedTarget[field] =
+            retargetFrom.current![field] +
+            (retargetTo.current![field] - retargetFrom.current![field]) * smoothProgress
+        })
+        transitionTarget.current = blendedTarget
+        if (linearProgress === 1) {
+          transitionTarget.current = retargetTo.current
+          retargetFrom.current = null
+          retargetTo.current = null
+          retargetStartedAt.current = null
+        }
+      }
       const target = transitionTarget.current
       let settled = true
       const animated = { ...currentExpression }
 
       expressionFields.forEach(field => {
         const displacement = target[field] - currentExpression[field]
-        const acceleration =
-          (stiffness * displacement - damping * transitionVelocity.current[field]) / mass
-        const velocity = transitionVelocity.current[field] + acceleration * deltaTime
+        const acceleration = (stiffness * displacement - damping * transitionVelocity[field]) / mass
+        const velocity = transitionVelocity[field] + acceleration * deltaTime
         const value = currentExpression[field] + velocity * deltaTime
-        transitionVelocity.current[field] = velocity
+        transitionVelocity[field] = velocity
         animated[field] = value
         const tolerance = field === 'perspective' ? 0.0001 : 0.005
         if (Math.abs(displacement) > tolerance || Math.abs(velocity) > tolerance) settled = false
@@ -1005,8 +1123,11 @@ export default function App() {
         return
       }
 
-      setExpression(animated)
       paintPose(poseFromExpression(animated))
+      if (time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS) {
+        lastInspectorFrame.current = time
+        setExpression(animated)
+      }
       transitionFrame.current = requestAnimationFrame(tick)
     }
     transitionFrame.current = requestAnimationFrame(tick)
@@ -1056,6 +1177,25 @@ export default function App() {
     updateImmediate({ ...expression, spacing: value })
   }
 
+  const updateSurface = (next: SurfaceConfig) => {
+    surfaceRef.current = next
+    setSurface(next)
+    persistSurface(next)
+    paintPose(displayedPose.current)
+  }
+
+  const updateHighlight = (next: Highlight) => {
+    highlightRef.current = next
+    setHighlight(next)
+    if (next === 'head') paintPose(displayedPose.current)
+  }
+
+  const updateWireVisibility = (next: boolean) => {
+    showWireRef.current = next
+    setShowWire(next)
+    if (next) paintPose(displayedPose.current)
+  }
+
   const stopState = () => {
     if (stateTimer.current) clearTimeout(stateTimer.current)
     if (blinkTimer.current) clearTimeout(blinkTimer.current)
@@ -1086,16 +1226,14 @@ export default function App() {
   const saveEditing = () => {
     if (!editing) return
     const index = editing.index ?? expressions.length
-    setExpressions(current => {
-      const next =
-        editing.index === null
-          ? [...current, { ...editing.draft }]
-          : current.map((item, itemIndex) =>
-              itemIndex === editing.index ? { ...editing.draft } : item
-            )
-      persistExpressions(next)
-      return next
-    })
+    const next =
+      editing.index === null
+        ? [...expressions, { ...editing.draft }]
+        : expressions.map((item, itemIndex) =>
+            itemIndex === editing.index ? { ...editing.draft } : item
+          )
+    setExpressions(next)
+    persistExpressions(next)
     setEditing(null)
     transitionToExpression(editing.draft, index)
   }
@@ -1104,11 +1242,9 @@ export default function App() {
     if (editing?.index === null || editing?.index === undefined) return
     if (!window.confirm(`Supprimer l’expression ${String(editing.index).padStart(2, '0')} ?`))
       return
-    setExpressions(current => {
-      const next = current.filter((_, index) => index !== editing.index)
-      persistExpressions(next)
-      return next
-    })
+    const next = expressions.filter((_, index) => index !== editing.index)
+    setExpressions(next)
+    persistExpressions(next)
     setActiveExpression(null)
     setEditing(null)
   }
@@ -1122,20 +1258,21 @@ export default function App() {
         </div>
         <AvatarCanvas
           expression={expression}
+          surface={surface}
           wirePaths={wirePaths}
           showWire={showWire}
-          headRadius={headRadius}
+          headPath={headPath}
           leftPath={leftPath}
           rightPath={rightPath}
           leftOpacity={leftOpacity}
           rightOpacity={rightOpacity}
           linked={linked}
           highlight={highlight}
-          onHighlightChange={setHighlight}
+          onHighlightChange={updateHighlight}
           onChange={updateImmediate}
         />
         <p className="stage-help">
-          Glisse sur la sphère pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.
+          Glisse sur la surface pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.
         </p>
       </section>
 
@@ -1165,6 +1302,65 @@ export default function App() {
 
         {mode === 'manual' && (
           <div className="panel-stack">
+            <section className="panel surface-panel">
+              <PanelTitle
+                title="Forme de la tête"
+                subtitle="La surface change, les expressions et les états restent compatibles."
+              />
+              <div className="surface-grid">
+                {surfaceTypes.map(type => {
+                  const previewSurface = type === surface.type ? surface : surfacePresets[type]
+                  return (
+                    <button
+                      className="surface-card"
+                      type="button"
+                      key={type}
+                      aria-pressed={surface.type === type}
+                      onClick={() => updateSurface({ ...surfacePresets[type] })}
+                    >
+                      <SurfaceThumbnail surface={previewSurface} />
+                      <span>{surfaceLabels[type]}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="surface-fields">
+                <NumericField
+                  label="Largeur"
+                  value={surface.width}
+                  min={120}
+                  max={300}
+                  unit="u"
+                  onChange={width => updateSurface({ ...surface, width })}
+                />
+                <NumericField
+                  label="Hauteur"
+                  value={surface.height}
+                  min={120}
+                  max={300}
+                  unit="u"
+                  onChange={height => updateSurface({ ...surface, height })}
+                />
+                <NumericField
+                  label="Profondeur"
+                  value={surface.depth}
+                  min={100}
+                  max={300}
+                  unit="u"
+                  onChange={depth => updateSurface({ ...surface, depth })}
+                />
+                {surface.type === 'roundedBox' && (
+                  <NumericField
+                    label="Rondeur"
+                    value={surface.roundness}
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    onChange={roundness => updateSurface({ ...surface, roundness })}
+                  />
+                )}
+              </div>
+            </section>
             <section className="panel">
               <PanelTitle
                 title="Rotation de la tête"
@@ -1174,21 +1370,21 @@ export default function App() {
                 label="Rotation X"
                 value={expression.headX}
                 unit="°"
-                onActiveChange={active => setHighlight(active ? 'head' : null)}
+                onActiveChange={active => updateHighlight(active ? 'head' : null)}
                 onChange={value => updateImmediate({ ...expression, headX: value })}
               />
               <NumericField
                 label="Rotation Y"
                 value={expression.headY}
                 unit="°"
-                onActiveChange={active => setHighlight(active ? 'head' : null)}
+                onActiveChange={active => updateHighlight(active ? 'head' : null)}
                 onChange={value => updateImmediate({ ...expression, headY: value })}
               />
               <NumericField
                 label="Rotation Z"
                 value={expression.headZ}
                 unit="°"
-                onActiveChange={active => setHighlight(active ? 'head' : null)}
+                onActiveChange={active => updateHighlight(active ? 'head' : null)}
                 onChange={value => updateImmediate({ ...expression, headZ: value })}
               />
             </section>
@@ -1229,7 +1425,7 @@ export default function App() {
                         max={dimension === 'size' ? 110 : 100}
                         unit="u"
                         onActiveChange={active =>
-                          setHighlight(
+                          updateHighlight(
                             active
                               ? linked[dimension]
                                 ? 'both'
@@ -1253,7 +1449,7 @@ export default function App() {
             <section className="panel">
               <PanelTitle
                 title="Position des yeux"
-                subtitle="Coordonnées locales indépendantes sur la sphère."
+                subtitle="Coordonnées communes projetées sur la forme choisie."
               />
               <div className="eye-columns">
                 <div className="eye-column">
@@ -1262,14 +1458,14 @@ export default function App() {
                     label="Horizontale"
                     value={expression.positionXLeft}
                     unit="u"
-                    onActiveChange={active => setHighlight(active ? 'left' : null)}
+                    onActiveChange={active => updateHighlight(active ? 'left' : null)}
                     onChange={value => updateImmediate({ ...expression, positionXLeft: value })}
                   />
                   <NumericField
                     label="Verticale"
                     value={expression.positionYLeft}
                     unit="u"
-                    onActiveChange={active => setHighlight(active ? 'left' : null)}
+                    onActiveChange={active => updateHighlight(active ? 'left' : null)}
                     onChange={value => updateImmediate({ ...expression, positionYLeft: value })}
                   />
                 </div>
@@ -1279,14 +1475,14 @@ export default function App() {
                     label="Horizontale"
                     value={expression.positionXRight}
                     unit="u"
-                    onActiveChange={active => setHighlight(active ? 'right' : null)}
+                    onActiveChange={active => updateHighlight(active ? 'right' : null)}
                     onChange={value => updateImmediate({ ...expression, positionXRight: value })}
                   />
                   <NumericField
                     label="Verticale"
                     value={expression.positionYRight}
                     unit="u"
-                    onActiveChange={active => setHighlight(active ? 'right' : null)}
+                    onActiveChange={active => updateHighlight(active ? 'right' : null)}
                     onChange={value => updateImmediate({ ...expression, positionYRight: value })}
                   />
                 </div>
@@ -1299,14 +1495,14 @@ export default function App() {
                   label="Œil gauche"
                   value={expression.leftAngle}
                   unit="°"
-                  onActiveChange={active => setHighlight(active ? 'left' : null)}
+                  onActiveChange={active => updateHighlight(active ? 'left' : null)}
                   onChange={value => updateImmediate({ ...expression, leftAngle: value })}
                 />
                 <NumericField
                   label="Œil droit"
                   value={expression.rightAngle}
                   unit="°"
-                  onActiveChange={active => setHighlight(active ? 'right' : null)}
+                  onActiveChange={active => updateHighlight(active ? 'right' : null)}
                   onChange={value => updateImmediate({ ...expression, rightAngle: value })}
                 />
               </div>
@@ -1322,12 +1518,12 @@ export default function App() {
                 min={0}
                 max={150}
                 unit="u"
-                onActiveChange={active => setHighlight(active ? 'both' : null)}
+                onActiveChange={active => updateHighlight(active ? 'both' : null)}
                 onChange={updateSpacing}
               />
             </section>
             <section className="panel">
-              <PanelTitle title="Projection" subtitle="Perspective et repères de la sphère." />
+              <PanelTitle title="Projection" subtitle="Perspective et repères de la tête." />
               <NumericField
                 label="Perspective"
                 value={expression.perspective}
@@ -1340,7 +1536,7 @@ export default function App() {
                 <input
                   type="checkbox"
                   checked={showWire}
-                  onChange={event => setShowWire(event.currentTarget.checked)}
+                  onChange={event => updateWireVisibility(event.currentTarget.checked)}
                 />
               </label>
               <button
@@ -1374,7 +1570,7 @@ export default function App() {
                     onClick={() => transitionToExpression(preset, index)}
                     onDoubleClick={() => setEditing({ index, draft: { ...preset } })}
                   >
-                    <ExpressionPreview expression={preset} id={String(index)} />
+                    <ExpressionPreview expression={preset} surface={surface} id={String(index)} />
                     <span>{String(index).padStart(2, '0')}</span>
                   </button>
                 ))}
@@ -1397,7 +1593,10 @@ export default function App() {
                 label="Vitesse du ressort"
                 value={springSpeed}
                 step={0.5}
-                onChange={setSpringSpeed}
+                onChange={value => {
+                  springSpeedRef.current = value
+                  setSpringSpeed(value)
+                }}
               />
               <div className="button-row">
                 <button type="button" onClick={blink}>
@@ -1488,6 +1687,7 @@ export default function App() {
       {editing && (
         <ExpressionDialog
           editing={editing}
+          surface={surface}
           onChange={draft => setEditing({ ...editing, draft })}
           onCancel={() => setEditing(null)}
           onSave={saveEditing}
