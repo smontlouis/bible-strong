@@ -898,7 +898,7 @@ const projectedCapsulePath = (pose: AvatarPose, surface: SurfaceConfig) => {
 }
 
 const headPath = (pose: AvatarPose, surface: SurfaceConfig) => {
-  if (surface.type === 'sphere' || surface.type === 'ellipsoid') {
+  if (surface.type === 'sphere') {
     const exactPath = projectedEllipsoidPath(pose, surface)
     if (exactPath) return exactPath
   }
