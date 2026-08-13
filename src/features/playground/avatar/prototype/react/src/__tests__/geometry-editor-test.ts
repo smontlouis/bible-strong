@@ -3,6 +3,7 @@ import {
   poseFromExpression,
   renderBodyNodeEditor,
   rotateBodyNodeAroundLocalAxis,
+  translateBodyNodeInCameraPlane,
   translateBodyNodeAlongLocalAxis,
 } from '../geometry'
 import { defaultExpression } from '../presets'
@@ -44,6 +45,17 @@ describe('body node editor geometry', () => {
     expect(translated.position[0]).toBeCloseTo(0)
     expect(translated.position[1]).toBeCloseTo(20)
     expect(translated.position[2]).toBeCloseTo(-20)
+  })
+
+  it('moves freely in the camera plane regardless of head rotation', () => {
+    const pose = poseFromExpression({ ...defaultExpression, headX: 24, headY: -31, headZ: 18 })
+    const before = renderBodyNodeEditor(pose, node).center
+    const translated = translateBodyNodeInCameraPlane(node, pose, 18, -9)
+    const after = renderBodyNodeEditor(pose, translated).center
+
+    expect(after[0] - before[0]).toBeCloseTo(18)
+    expect(after[1] - before[1]).toBeCloseTo(-9)
+    expect(translated.position[2]).not.toBe(node.position[2])
   })
 
   it('composes a local rotation instead of incrementing a raw Euler field', () => {

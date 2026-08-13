@@ -66,6 +66,7 @@ const english: Record<string, string> = {
   'Ajouter une forme': 'Add a shape',
   Dupliquer: 'Duplicate',
   'Gizmo local': 'Local gizmo',
+  'Déplacer dans le plan de la caméra': 'Move in camera plane',
   Transformer: 'Transform',
   copie: 'copy',
   'Glisse un axe pour déplacer la forme, ou un anneau pour la faire tourner.':

@@ -394,6 +394,31 @@ export const translateBodyNodeAlongLocalAxis = (
   }
 }
 
+export const translateBodyNodeInCameraPlane = (
+  node: BodyNode,
+  pose: AvatarPose,
+  screenDeltaX: number,
+  screenDeltaY: number
+): BodyNode => {
+  const cameraPosition = rotateWithQuaternion(pose.orientation, node.position)
+  const denominator = FOCAL_LENGTH - cameraPosition[2] * pose.expression.perspective
+  const perspectiveScale =
+    Math.abs(denominator) < 0.0001 ? FOCAL_LENGTH / 0.0001 : FOCAL_LENGTH / denominator
+  const [w, x, y, z] = pose.orientation
+  const headDelta = rotateWithQuaternion(
+    [w, -x, -y, -z],
+    [screenDeltaX / perspectiveScale, screenDeltaY / perspectiveScale, 0]
+  )
+  return {
+    ...node,
+    position: [
+      node.position[0] + headDelta[0],
+      node.position[1] + headDelta[1],
+      node.position[2] + headDelta[2],
+    ],
+  }
+}
+
 export const rotateBodyNodeAroundLocalAxis = (
   node: BodyNode,
   axis: 'x' | 'y' | 'z',

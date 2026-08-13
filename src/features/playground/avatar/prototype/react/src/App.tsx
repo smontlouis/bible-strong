@@ -60,6 +60,7 @@ import {
   rotateExpressionAroundCamera,
   rotateExpressionWithArcball,
   rotationRing,
+  translateBodyNodeInCameraPlane,
   translateBodyNodeAlongLocalAxis,
   type AvatarPose,
   type Expression,
@@ -457,7 +458,7 @@ function BodyNodeGizmo({
   const { t } = useStudioLanguage()
   const geometry = renderBodyNodeEditor(pose, node)
   const [activeControl, setActiveControl] = useState<
-    { mode: 'translate' | 'rotate'; axis: TransformAxis } | undefined
+    { mode: 'translate' | 'rotate'; axis: TransformAxis } | { mode: 'plane' } | undefined
   >(undefined)
   const drag = useRef<
     | {
@@ -466,6 +467,11 @@ function BodyNodeGizmo({
         startPoint: readonly [number, number]
         direction: readonly [number, number]
         scale: number
+        node: BodyNode
+      }
+    | {
+        mode: 'plane'
+        startPoint: readonly [number, number]
         node: BodyNode
       }
     | undefined
@@ -541,18 +547,29 @@ function BodyNodeGizmo({
     latestNode.current = node
     event.currentTarget.setPointerCapture(event.pointerId)
   }
+  const startPlaneTranslate = (event: React.PointerEvent<SVGElement>) => {
+    event.stopPropagation()
+    drag.current = { mode: 'plane', startPoint: toSvg(event), node }
+    setActiveControl({ mode: 'plane' })
+    latestNode.current = node
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
   const move = (event: React.PointerEvent<SVGElement>) => {
     if (!drag.current) return
     const interaction = drag.current
     const point = toSvg(event)
     const deltaX = point[0] - interaction.startPoint[0]
     const deltaY = point[1] - interaction.startPoint[1]
-    const delta =
-      (deltaX * interaction.direction[0] + deltaY * interaction.direction[1]) * interaction.scale
-    const next =
-      interaction.mode === 'translate'
+    const next = (() => {
+      if (interaction.mode === 'plane') {
+        return translateBodyNodeInCameraPlane(interaction.node, pose, deltaX, deltaY)
+      }
+      const delta =
+        (deltaX * interaction.direction[0] + deltaY * interaction.direction[1]) * interaction.scale
+      return interaction.mode === 'translate'
         ? translateBodyNodeAlongLocalAxis(interaction.node, interaction.axis, delta)
         : rotateBodyNodeAroundLocalAxis(interaction.node, interaction.axis, delta)
+    })()
     latestNode.current = next
     if (previewFrame.current !== undefined) return
     previewFrame.current = requestAnimationFrame(() => {
@@ -631,7 +648,24 @@ function BodyNodeGizmo({
           </text>
         </g>
       ))}
-      <circle className="body-gizmo-origin" cx={geometry.center[0]} cy={geometry.center[1]} r="3" />
+      <circle
+        className="body-gizmo-plane-hitbox"
+        cx={geometry.center[0]}
+        cy={geometry.center[1]}
+        r="11"
+        aria-label={t('Déplacer dans le plan de la caméra')}
+        onPointerDown={startPlaneTranslate}
+        onPointerMove={move}
+        onPointerUp={stop}
+        onPointerCancel={stop}
+      />
+      <circle
+        className={`body-gizmo-origin${activeControl?.mode === 'plane' ? ' is-active' : ''}`}
+        cx={geometry.center[0]}
+        cy={geometry.center[1]}
+        r="4"
+        pointerEvents="none"
+      />
       <g
         className="body-gizmo-reset"
         role="button"

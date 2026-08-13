@@ -258,6 +258,21 @@ input {
   stroke: #11161d;
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
+  transition:
+    r 120ms ease,
+    stroke-width 120ms ease,
+    filter 120ms ease;
+}
+.body-gizmo-plane-hitbox {
+  fill: transparent;
+  cursor: move;
+  touch-action: none;
+}
+.body-gizmo-plane-hitbox:hover + .body-gizmo-origin,
+.body-gizmo-origin.is-active {
+  stroke: #51ddff;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 3px rgb(81 221 255 / 72%));
 }
 .body-gizmo-reset {
   cursor: pointer;
