@@ -3466,7 +3466,7 @@ function StudioApp() {
     const extension = isReact ? 'tsx' : 'zip'
     const blob = isReact
       ? new Blob([generateReactAvatarComponent(payload)], { type: 'text/typescript' })
-      : generateJavaScriptAvatarPackage(payload)
+      : generateJavaScriptAvatarPackage(payload, language)
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url

@@ -61,6 +61,29 @@ describe('avatar export', () => {
     expect(source).toContain('avatar.play("idle")')
   })
 
+  it('generates an interactive playground for the exported animations', () => {
+    const source = generateJavaScriptAvatarHtml(payload)
+
+    expect(source).toContain('id="animation-list"')
+    expect(source).toContain('id="play-animation"')
+    expect(source).toContain('id="pause-animation"')
+    expect(source).toContain('id="stop-animation"')
+    expect(source).toContain('availableAnimations.forEach')
+    expect(source).toContain('avatar.play(activeAnimation)')
+    expect(source).toContain('avatar.pause()')
+    expect(source).toContain('avatar.stop()')
+    expect(source).toContain("createAvatar('#avatar'")
+  })
+
+  it('localizes the exported playground', () => {
+    const source = generateJavaScriptAvatarHtml(payload, 'fr')
+
+    expect(source).toContain('<html lang="fr">')
+    expect(source).toContain('Choisissez une animation exportée')
+    expect(source).toContain('▶ Lire')
+    expect(source).toContain('En pause')
+  })
+
   it('keeps user-authored names and descriptions inside the generated script', () => {
     const source = generateJavaScriptAvatarHtml({
       ...payload,

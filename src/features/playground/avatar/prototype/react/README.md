@@ -28,5 +28,6 @@ Puis ouvrir `http://127.0.0.1:5173/`.
 - `geometry.ts` reste indépendant du framework et projette expressions et maillages sur la surface active.
 - L’onglet Export génère soit un composant React/TypeScript autonome, soit un module JavaScript ES autonome.
 - Le module JavaScript expose `createAvatar(target, options)`, puis `play(name)`, `pause()`, `stop()` et `destroy()`.
+- Le ZIP JavaScript contient aussi un `index.html` ouvrable directement : il sert de playground avec la liste des animations exportées et les commandes lecture, pause et arrêt.
 - Les exports n’embarquent que les animations sélectionnées et les expressions qu’elles utilisent.
 - Les exports embarquent le même moteur procédural que le Studio : les poses, couleurs, clignements et mouvements ambiants sont recalculés pendant chaque transition, sans dépendance à Motion.

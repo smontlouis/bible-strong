@@ -3,6 +3,20 @@ import { createContext, createElement, useContext, useState, type ReactNode } fr
 export type StudioLanguage = 'en' | 'fr'
 
 const english: Record<string, string> = {
+  'Playground de l’avatar': 'Avatar playground',
+  Arrêté: 'Stopped',
+  'Aperçu procédural en direct': 'Live procedural preview',
+  'Aperçu de l’avatar': 'Avatar preview',
+  'Choisissez une animation exportée pour la lancer.': 'Choose an exported animation to play it.',
+  Lecture: 'Playback',
+  'Contrôlez l’animation active.': 'Control the active animation.',
+  Lire: 'Play',
+  Arrêter: 'Stop',
+  'API JavaScript': 'JavaScript API',
+  'Le module réutilisable est disponible dans avatar.js.':
+    'The reusable module is available as avatar.js.',
+  'Ouvrez cette démo directement, ou servez le dossier localement pour importer avatar.js depuis un autre module.':
+    'Open this demo directly, or serve the folder locally to import avatar.js from another module.',
   'Langue de l’interface': 'Interface language',
   'Nom de l’avatar': 'Avatar name',
   sélecteur: 'picker',
