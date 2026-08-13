@@ -226,6 +226,29 @@ input {
   stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
 }
+.body-gizmo-reset {
+  cursor: pointer;
+  outline: none;
+}
+.body-gizmo-reset circle {
+  fill: rgb(17 22 29 / 92%);
+  stroke: #8da7ef;
+  stroke-width: 1.3;
+  vector-effect: non-scaling-stroke;
+}
+.body-gizmo-reset text {
+  fill: #f8fafc;
+  font-size: 8px;
+  font-weight: 800;
+  pointer-events: none;
+  text-anchor: middle;
+}
+.body-gizmo-reset:hover circle,
+.body-gizmo-reset:focus-visible circle {
+  fill: #2c4d9d;
+  stroke: #c6d5ff;
+  stroke-width: 2.5;
+}
 .body-gizmo-label {
   fill: #f8fafc;
   font-size: 7px;
@@ -270,13 +293,31 @@ input {
   vector-effect: non-scaling-stroke;
 }
 
-.gizmo {
+.gizmo-cluster {
   position: absolute;
   top: 2%;
   right: 2%;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  gap: 5px;
+}
+.gizmo {
   width: 94px;
   height: 94px;
   overflow: visible;
+}
+.gizmo-reset {
+  width: 26px;
+  height: 26px;
+  border-color: rgb(255 255 255 / 12%);
+  background: rgb(24 29 36 / 82%);
+  color: #dbe4f3;
+  backdrop-filter: blur(8px);
+}
+.gizmo-reset:hover {
+  background: rgb(46 54 65 / 92%);
+  color: white;
 }
 .gizmo-orbit {
   fill: none;

@@ -7,7 +7,7 @@ import {
 } from 'motion/react'
 import { motionValue, type MotionValue } from 'motion'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Pause, Pencil, Play, Plus, Square, Trash2 } from 'lucide-react'
+import { Pause, Pencil, Play, Plus, RotateCcw, Square, Trash2 } from 'lucide-react'
 
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
@@ -282,10 +282,12 @@ function RotationGizmo({
   expression,
   onChange,
   onActiveChange,
+  onReset,
 }: {
   expression: Expression
   onChange: (next: Expression) => void
   onActiveChange: (active: boolean) => void
+  onReset: () => void
 }) {
   const drag = useRef<
     | {
@@ -378,42 +380,53 @@ function RotationGizmo({
     onActiveChange(false)
   }
   return (
-    <svg className="gizmo" viewBox="-43 -43 86 86" aria-label="Gizmo de rotation">
-      <circle
-        className="gizmo-orbit gizmo-camera"
-        cx="0"
-        cy="0"
-        r="38"
-        onPointerDown={startView}
-        onPointerMove={move}
-        onPointerUp={stop}
-        onPointerCancel={stop}
-      />
-      <path
-        className="gizmo-orbit gizmo-y"
-        d={ringPath(rings.y)}
-        onPointerDown={event => startAxis('y', event)}
-        onPointerMove={move}
-        onPointerUp={stop}
-        onPointerCancel={stop}
-      />
-      <path
-        className="gizmo-orbit gizmo-x"
-        d={ringPath(rings.x)}
-        onPointerDown={event => startAxis('x', event)}
-        onPointerMove={move}
-        onPointerUp={stop}
-        onPointerCancel={stop}
-      />
-      <path
-        className="gizmo-orbit gizmo-z"
-        d={ringPath(rings.z)}
-        onPointerDown={event => startAxis('z', event)}
-        onPointerMove={move}
-        onPointerUp={stop}
-        onPointerCancel={stop}
-      />
-    </svg>
+    <div className="gizmo-cluster">
+      <svg className="gizmo" viewBox="-43 -43 86 86" aria-label="Gizmo de rotation">
+        <circle
+          className="gizmo-orbit gizmo-camera"
+          cx="0"
+          cy="0"
+          r="38"
+          onPointerDown={startView}
+          onPointerMove={move}
+          onPointerUp={stop}
+          onPointerCancel={stop}
+        />
+        <path
+          className="gizmo-orbit gizmo-y"
+          d={ringPath(rings.y)}
+          onPointerDown={event => startAxis('y', event)}
+          onPointerMove={move}
+          onPointerUp={stop}
+          onPointerCancel={stop}
+        />
+        <path
+          className="gizmo-orbit gizmo-x"
+          d={ringPath(rings.x)}
+          onPointerDown={event => startAxis('x', event)}
+          onPointerMove={move}
+          onPointerUp={stop}
+          onPointerCancel={stop}
+        />
+        <path
+          className="gizmo-orbit gizmo-z"
+          d={ringPath(rings.z)}
+          onPointerDown={event => startAxis('z', event)}
+          onPointerMove={move}
+          onPointerUp={stop}
+          onPointerCancel={stop}
+        />
+      </svg>
+      <Button
+        className="gizmo-reset"
+        variant="secondary"
+        size="icon-sm"
+        aria-label="Réinitialiser la rotation de la tête"
+        onClick={onReset}
+      >
+        <RotateCcw />
+      </Button>
+    </div>
   )
 }
 
@@ -544,6 +557,12 @@ function BodyNodeGizmo({
     drag.current = undefined
     setActiveControl(undefined)
   }
+  const resetTransform = (event: React.MouseEvent<SVGGElement>) => {
+    event.stopPropagation()
+    const resetNode: BodyNode = { ...node, position: [0, 0, 0], rotation: [0, 0, 0] }
+    latestNode.current = resetNode
+    onCommit(resetNode)
+  }
 
   useEffect(
     () => () => {
@@ -603,6 +622,24 @@ function BodyNodeGizmo({
         </g>
       ))}
       <circle className="body-gizmo-origin" cx={geometry.center[0]} cy={geometry.center[1]} r="3" />
+      <g
+        className="body-gizmo-reset"
+        role="button"
+        tabIndex={0}
+        aria-label={`Réinitialiser la position et la rotation de ${node.name}`}
+        transform={`translate(${bounded(geometry.center[0] + 32, -140, 140)} ${bounded(geometry.center[1] - 32, -140, 140)})`}
+        onClick={resetTransform}
+        onKeyDown={event => {
+          if (event.key !== 'Enter' && event.key !== ' ') return
+          event.preventDefault()
+          const resetNode: BodyNode = { ...node, position: [0, 0, 0], rotation: [0, 0, 0] }
+          latestNode.current = resetNode
+          onCommit(resetNode)
+        }}
+      >
+        <circle r="6.5" />
+        <text y="2.5">↺</text>
+      </g>
     </g>
   )
 }
@@ -956,6 +993,7 @@ function AvatarCanvas({
         expression={expression}
         onChange={onChange}
         onActiveChange={active => onHighlightChange(active ? 'head' : null)}
+        onReset={() => onChange({ ...expression, headX: 0, headY: 0, headZ: 0 })}
       />
       <div className="axis-key">
         <i className="x" />X <i className="y" />Y <i className="z" />Z
