@@ -9,6 +9,8 @@ import type { BodyNode } from './body'
 
 export type Quaternion = readonly [number, number, number, number]
 export type Point3 = readonly [number, number, number]
+export type EyeMotion = 'none' | 'microSaccades' | 'shake'
+export type BodyMotion = 'none' | 'slowDrift' | 'shake'
 
 export type Expression = {
   headX: number
@@ -26,11 +28,16 @@ export type Expression = {
   leftAngle: number
   rightAngle: number
   perspective: number
+  eyeMotion: EyeMotion
+  bodyMotion: BodyMotion
   bodyColor?: string
   eyeColor?: string
 }
 
-export type ExpressionNumericField = Exclude<keyof Expression, 'bodyColor' | 'eyeColor'>
+export type ExpressionNumericField = Exclude<
+  keyof Expression,
+  'bodyColor' | 'eyeColor' | 'eyeMotion' | 'bodyMotion'
+>
 
 export type AvatarPose = {
   expression: Expression

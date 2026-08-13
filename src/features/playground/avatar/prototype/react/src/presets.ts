@@ -57,6 +57,8 @@ export const initialExpressions: Expression[] = calibrated.map(
     leftAngle,
     rightAngle,
     perspective: 1,
+    eyeMotion: 'none',
+    bodyMotion: 'none',
   })
 )
 
@@ -76,6 +78,8 @@ export const defaultExpression: Expression = {
   leftAngle: 0,
   rightAngle: 0,
   perspective: 1,
+  eyeMotion: 'none',
+  bodyMotion: 'none',
 }
 
 export const stateGroups = {
@@ -97,22 +101,6 @@ export const stateGroups = {
     'scared',
     'playful',
     'celebrate',
-  ],
-  'Morphes agent': ['orbit', 'radar', 'progress'],
-  'Cycle produit': [
-    'spawning',
-    'humming',
-    'loading',
-    'dictating',
-    'writing',
-    'sending',
-    'receiving',
-    'uploading',
-    'notifying',
-    'alerting',
-    'dragging',
-    'bouncing',
-    'powering-down',
   ],
 } as const
 
@@ -140,22 +128,6 @@ export const statePools: Record<string, number[]> = {
   scared: [3, 21],
   playful: [2, 17, 11, 8],
   celebrate: [2, 8, 17],
-  orbit: [0, 8],
-  radar: [0, 8],
-  progress: [0, 8],
-  spawning: [3, 0],
-  humming: [0, 8],
-  loading: [0, 8],
-  dictating: [10, 1, 19],
-  sending: [0, 8],
-  receiving: [19, 0, 8],
-  uploading: [15, 9, 8],
-  writing: [15, 9],
-  notifying: [3, 21, 0],
-  alerting: [3, 21],
-  bouncing: [2, 17],
-  dragging: [3, 15, 0],
-  'powering-down': [13, 22],
 }
 
 export type StatePlaybackConfig = {
@@ -201,8 +173,8 @@ const blinkProfiles = {
   },
 } as const
 
-const calmStates = new Set(['sleeping', 'drowsy', 'bored', 'sad', 'powering-down'])
-const attentiveStates = new Set(['listening', 'dictating', 'receiving', 'humming'])
+const calmStates = new Set(['sleeping', 'drowsy', 'bored', 'sad'])
+const attentiveStates = new Set(['listening'])
 const reactiveStates = new Set([
   'waking',
   'excited',
@@ -210,8 +182,6 @@ const reactiveStates = new Set([
   'laughing',
   'scared',
   'celebrate',
-  'alerting',
-  'bouncing',
 ])
 
 export const getStatePlaybackConfig = (name: string): StatePlaybackConfig => {

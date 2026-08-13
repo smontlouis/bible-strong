@@ -2,6 +2,7 @@ import { parseAvatarBody, parseSurfaceConfig, type AvatarBody } from './body'
 import { defaultExpression, initialExpressions } from './presets'
 import { surfacePresets, type SurfaceConfig, type SurfaceType } from './surfaces'
 import type { Expression } from './geometry'
+import { isBodyMotion, isEyeMotion } from './ambientMotion'
 
 export type StudioAvatar = {
   id: string
@@ -86,6 +87,10 @@ export const applyAvatarEyeDefaults = (
   eyeDefaultFields.forEach(field => {
     result[field] = expression[field] + eyes[field] - defaultAvatarEyes[field]
   })
+  result.widthLeft = Math.max(10, result.widthLeft)
+  result.widthRight = Math.max(10, result.widthRight)
+  result.heightLeft = Math.max(10, result.heightLeft)
+  result.heightRight = Math.max(10, result.heightRight)
   return result
 }
 
@@ -106,6 +111,8 @@ const parseExpressions = (value: unknown): Expression[] => {
   return value.map(item => {
     if (!item || typeof item !== 'object') return { ...defaultExpression }
     const candidate = item as Partial<Expression>
+    const storedEyeMotion = (item as { eyeMotion?: unknown }).eyeMotion
+    const storedBodyMotion = (item as { bodyMotion?: unknown }).bodyMotion
     const parsed = Object.fromEntries(
       Object.entries(defaultExpression).map(([field, fallback]) => {
         const stored = candidate[field as keyof Expression]
@@ -116,6 +123,16 @@ const parseExpressions = (value: unknown): Expression[] => {
       parsed.bodyColor = candidate.bodyColor
     if (typeof candidate.eyeColor === 'string' && hexColor.test(candidate.eyeColor))
       parsed.eyeColor = candidate.eyeColor
+    parsed.eyeMotion = isEyeMotion(storedEyeMotion)
+      ? storedEyeMotion
+      : storedEyeMotion === 'subtle'
+        ? 'microSaccades'
+        : defaultExpression.eyeMotion
+    parsed.bodyMotion = isBodyMotion(storedBodyMotion)
+      ? storedBodyMotion
+      : storedBodyMotion === 'subtle'
+        ? 'slowDrift'
+        : defaultExpression.bodyMotion
     return parsed
   })
 }

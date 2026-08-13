@@ -109,6 +109,15 @@ const english: Record<string, string> = {
   'Afficher le maillage': 'Show wireframe',
   Réinitialiser: 'Reset',
   Mouvement: 'Motion',
+  'Mouvement perpétuel': 'Perpetual motion',
+  'Aucun mouvement': 'No motion',
+  'Dérive lente': 'Slow drift',
+  'Micro-ajustements': 'Micro-adjustments',
+  Tremblement: 'Shake',
+  'Ajoute une légère présence ou un tremblement continu au corps.':
+    'Adds a subtle living presence or a continuous shake to the body.',
+  'Anime le regard par petites saccades naturelles ou par tremblement.':
+    'Animates the gaze with natural micro-saccades or a continuous shake.',
   'Motion interpole les valeurs et notre moteur effectue le slerp quaternion.':
     'Motion interpolates values while the engine performs quaternion slerp.',
   'Vitesse du ressort': 'Spring speed',
@@ -117,8 +126,6 @@ const english: Record<string, string> = {
   Séquences: 'Sequences',
   'Cycle de vie': 'Life cycle',
   Réactions: 'Reactions',
-  'Morphes agent': 'Agent morphs',
-  'Cycle produit': 'Product cycle',
   'États animés': 'Animated states',
   'Cet état enchaîne un pool de presets et des clignements.':
     'This state cycles through presets and blinks.',

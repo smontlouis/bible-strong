@@ -6,7 +6,14 @@ import {
   useReducedMotion,
 } from 'motion/react'
 import { motionValue, type MotionValue } from 'motion'
-import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
+import {
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from 'react'
 import { ArrowLeft, Pause, Pencil, Play, Plus, RotateCcw, Square, Trash2 } from 'lucide-react'
 
 import { Button } from './components/ui/button'
@@ -73,6 +80,7 @@ import {
   stateNotes,
   statePools,
 } from './presets'
+import { applyAmbientMotion, hasAmbientMotion } from './ambientMotion'
 import { surfaceLabels, surfacePresets, type SurfaceConfig } from './surfaces'
 
 type Mode = 'manual' | 'expressions' | 'states'
@@ -92,6 +100,7 @@ type Highlight = 'head' | 'left' | 'right' | 'both' | null
 const BODY_RENDER_PATH_SLOTS = MAX_BODY_NODES + 2
 const RETARGET_BLEND_MS = 120
 const INSPECTOR_FRAME_MS = 1000 / 24
+const AMBIENT_FRAME_MS = 1000 / 30
 const emptyBodyNodes: BodyNode[] = []
 const previewGeometryCache = new WeakMap<
   Expression,
@@ -183,6 +192,36 @@ function ColorField({
           }}
         />
       </span>
+    </Field>
+  )
+}
+
+function AmbientMotionField<Motion extends string>({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: Motion
+  options: { value: Motion; label: string }[]
+  onChange: (value: Motion) => void
+}) {
+  const { t } = useStudioLanguage()
+  return (
+    <Field className="ambient-motion-field" orientation="horizontal">
+      <FieldTitle>{t(label)}</FieldTitle>
+      <select
+        aria-label={t(label)}
+        value={value}
+        onChange={event => onChange(event.currentTarget.value as Motion)}
+      >
+        {options.map(option => (
+          <option key={option.value} value={option.value}>
+            {t(option.label)}
+          </option>
+        ))}
+      </select>
     </Field>
   )
 }
@@ -1296,15 +1335,46 @@ function ExpressionWorkspace({
             subtitle="Apparence et orientation générale de l’avatar."
             compact
           >
-            <Card className="dialog-group">
+            <Card className="dialog-group color-panel">
               <h3>{t('Couleur du corps')}</h3>
               <ColorField
                 label="Corps"
                 value={editing.draft.bodyColor ?? avatarColors.body}
                 onChange={bodyColor => update({ bodyColor })}
               />
+              {editing.draft.bodyColor && (
+                <Button
+                  className="inherit-colors"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t('Reprendre la couleur de l’avatar')}
+                  onClick={() => {
+                    const draft = { ...editing.draft }
+                    delete draft.bodyColor
+                    onChange(draft)
+                  }}
+                >
+                  <RotateCcw />
+                </Button>
+              )}
             </Card>
             <Card className="dialog-group">
+              <h3>{t('Mouvement perpétuel')}</h3>
+              <AmbientMotionField
+                label="Corps"
+                value={editing.draft.bodyMotion}
+                options={[
+                  { value: 'none', label: 'Aucun mouvement' },
+                  { value: 'slowDrift', label: 'Dérive lente' },
+                  { value: 'shake', label: 'Tremblement' },
+                ]}
+                onChange={bodyMotion => update({ bodyMotion })}
+              />
+              <p className="field-help">
+                {t('Ajoute une légère présence ou un tremblement continu au corps.')}
+              </p>
+            </Card>
+            <Card className="dialog-group color-panel">
               <h3>{t('Rotation de la tête')}</h3>
               {(['headX', 'headY', 'headZ'] as const).map(field => (
                 <NumericField
@@ -1329,6 +1399,37 @@ function ExpressionWorkspace({
                 value={editing.draft.eyeColor ?? avatarColors.eyes}
                 onChange={eyeColor => update({ eyeColor })}
               />
+              {editing.draft.eyeColor && (
+                <Button
+                  className="inherit-colors"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={t('Reprendre la couleur de l’avatar')}
+                  onClick={() => {
+                    const draft = { ...editing.draft }
+                    delete draft.eyeColor
+                    onChange(draft)
+                  }}
+                >
+                  <RotateCcw />
+                </Button>
+              )}
+            </Card>
+            <Card className="dialog-group">
+              <h3>{t('Mouvement perpétuel')}</h3>
+              <AmbientMotionField
+                label="Yeux"
+                value={editing.draft.eyeMotion}
+                options={[
+                  { value: 'none', label: 'Aucun mouvement' },
+                  { value: 'microSaccades', label: 'Micro-ajustements' },
+                  { value: 'shake', label: 'Tremblement' },
+                ]}
+                onChange={eyeMotion => update({ eyeMotion })}
+              />
+              <p className="field-help">
+                {t('Anime le regard par petites saccades naturelles ou par tremblement.')}
+              </p>
             </Card>
             {(['width', 'height', 'size'] as const).map(dimension => (
               <Card className="dialog-group" key={dimension}>
@@ -1474,6 +1575,10 @@ function StudioApp() {
   const [selectedEyeSide, setSelectedEyeSide] = useState<-1 | 1 | null>(null)
   const [expressions, setExpressions] = useState(loadGlobalExpressions)
   const [bodyEditing, setBodyEditing] = useState(false)
+  const avatarEditSnapshot = useRef<{
+    avatars: StudioAvatar[]
+    activeAvatarId: string
+  } | null>(null)
   const workspaceBackButtonRef = useRef<HTMLButtonElement>(null)
   const [focusAvatarName, setFocusAvatarName] = useState(false)
   const [expression, setExpression] = useState<Expression>({ ...defaultExpression })
@@ -1524,6 +1629,11 @@ function StudioApp() {
   const { pose: initialPose, geometry: initialGeometry } = initialRender
   const displayedPose = useRef<AvatarPose>(initialPose)
   const transitionFrame = useRef<number | null>(null)
+  const ambientFrame = useRef<number | null>(null)
+  const ambientStartedAt = useRef(0)
+  const lastAmbientElapsed = useRef(0)
+  const lastAmbientFrame = useRef(0)
+  const ambientSignature = useRef('none:none')
   const transitionTarget = useRef<Expression>({ ...defaultExpression })
   const canonicalTarget = useRef<Expression>({ ...defaultExpression })
   const retargetFrom = useRef<Expression | null>(null)
@@ -1562,12 +1672,26 @@ function StudioApp() {
     initialGeometry.wirePaths.map(pathValue => motionValue(pathValue))
   )
 
-  const paintPose = (pose: AvatarPose, blink?: number) => {
+  const paintPose = (pose: AvatarPose, blink?: number, frameTimeMs?: number) => {
     displayedPose.current = pose
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    const signature = `${pose.expression.eyeMotion}:${pose.expression.bodyMotion}`
+    if (signature !== ambientSignature.current) {
+      ambientSignature.current = signature
+      ambientStartedAt.current = -1
+      lastAmbientElapsed.current = 0
+    }
+    if (frameTimeMs !== undefined) {
+      if (ambientStartedAt.current < 0) ambientStartedAt.current = frameTimeMs
+      lastAmbientElapsed.current = frameTimeMs - ambientStartedAt.current
+    }
+    const renderedExpression =
+      !reduceMotion && hasAmbientMotion(pose.expression)
+        ? applyAmbientMotion(pose.expression, lastAmbientElapsed.current)
+        : pose.expression
     const renderPose = avatar
-      ? poseWithAvatarEyes(pose.expression, avatar.eyes ?? defaultAvatarEyes)
-      : pose
+      ? poseWithAvatarEyes(renderedExpression, avatar.eyes ?? defaultAvatarEyes)
+      : poseFromExpression(renderedExpression)
     const geometry = renderAvatar(renderPose, surfaceRef.current, blink ?? blinkValue.get(), {
       includeWire: showWireRef.current || highlightRef.current === 'head',
       bodyNodes: bodyNodesRef.current,
@@ -1585,6 +1709,26 @@ function StudioApp() {
   }
 
   useMotionValueEvent(blinkValue, 'change', latest => paintPose(displayedPose.current, latest))
+
+  const paintAmbientFrame = useEffectEvent((time: number) => {
+    if (transitionFrame.current === null && time - lastAmbientFrame.current >= AMBIENT_FRAME_MS) {
+      lastAmbientFrame.current = time
+      paintPose(displayedPose.current, undefined, time)
+    }
+  })
+
+  const ambientLoopActive = !reduceMotion && hasAmbientMotion(editing?.draft ?? expression)
+  useEffect(() => {
+    if (!ambientLoopActive) return
+    const tick = (time: number) => {
+      paintAmbientFrame(time)
+      ambientFrame.current = requestAnimationFrame(tick)
+    }
+    ambientFrame.current = requestAnimationFrame(tick)
+    return () => {
+      if (ambientFrame.current !== null) cancelAnimationFrame(ambientFrame.current)
+    }
+  }, [ambientLoopActive])
 
   useEffect(
     () => () => {
@@ -1685,6 +1829,8 @@ function StudioApp() {
       const target = transitionTarget.current
       let settled = true
       const animated = { ...currentExpression }
+      animated.eyeMotion = target.eyeMotion
+      animated.bodyMotion = target.bodyMotion
 
       expressionFields.forEach(field => {
         const displacement = target[field] - currentExpression[field]
@@ -1705,7 +1851,7 @@ function StudioApp() {
         return
       }
 
-      paintPose(poseFromExpression(animated))
+      paintPose(poseFromExpression(animated), undefined, time)
       if (time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS) {
         lastInspectorFrame.current = time
         setExpression(animated)
@@ -1766,7 +1912,9 @@ function StudioApp() {
     )
     avatarsRef.current = next
     setAvatars(next)
-    persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
+    if (!avatarEditSnapshot.current) {
+      persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
+    }
   }
 
   const selectBodyNode = (id: 'primary' | string | null) => {
@@ -1813,6 +1961,12 @@ function StudioApp() {
   const activateAvatar = (id: string, editBody = false, preserveMode = false) => {
     const avatar = avatarsRef.current.find(item => item.id === id)
     if (!avatar) return
+    if (editBody && !avatarEditSnapshot.current) {
+      avatarEditSnapshot.current = {
+        avatars: avatarsRef.current,
+        activeAvatarId: activeAvatarIdRef.current,
+      }
+    }
     const currentStateExpression = displayedPose.current.expression
     stopTransition(true)
     activeAvatarIdRef.current = id
@@ -1832,17 +1986,40 @@ function StudioApp() {
     canonicalTarget.current = nextExpression
     transitionTarget.current = nextExpression
     paintPose(poseFromExpression(nextExpression))
-    persistAvatarLibrary({ activeAvatarId: id, avatars: avatarsRef.current })
+    if (!avatarEditSnapshot.current) {
+      persistAvatarLibrary({ activeAvatarId: id, avatars: avatarsRef.current })
+    }
   }
 
   const createNewAvatar = () => {
+    avatarEditSnapshot.current = {
+      avatars: avatarsRef.current,
+      activeAvatarId: activeAvatarIdRef.current,
+    }
     const avatar = createAvatar('Unknown')
     const next = [...avatarsRef.current, avatar]
     avatarsRef.current = next
     setAvatars(next)
     setFocusAvatarName(true)
-    persistAvatarLibrary({ activeAvatarId: avatar.id, avatars: next })
     activateAvatar(avatar.id, true)
+  }
+
+  const cancelAvatarEditing = () => {
+    const snapshot = avatarEditSnapshot.current
+    if (!snapshot) {
+      setBodyEditing(false)
+      return
+    }
+    avatarEditSnapshot.current = null
+    avatarsRef.current = snapshot.avatars
+    setAvatars(snapshot.avatars)
+    activateAvatar(snapshot.activeAvatarId, false, true)
+  }
+
+  const saveAvatarEditing = () => {
+    avatarEditSnapshot.current = null
+    persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: avatarsRef.current })
+    setBodyEditing(false)
   }
 
   const renameActiveAvatar = (name: string) => {
@@ -1851,6 +2028,7 @@ function StudioApp() {
 
   const deleteActiveAvatar = () => {
     if (avatarsRef.current.length <= 1) return
+    avatarEditSnapshot.current = null
     const remaining = avatarsRef.current.filter(avatar => avatar.id !== activeAvatarIdRef.current)
     avatarsRef.current = remaining
     setAvatars(remaining)
@@ -2196,7 +2374,7 @@ function StudioApp() {
                 ref={workspaceBackButtonRef}
                 variant="ghost"
                 size="icon"
-                onClick={() => setBodyEditing(false)}
+                onClick={cancelAvatarEditing}
                 aria-label={t('Retour au studio')}
               >
                 <ArrowLeft />
@@ -2851,14 +3029,15 @@ function StudioApp() {
                       <Button
                         className="inherit-colors"
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
+                        aria-label={t('Reprendre la couleur de l’avatar')}
                         onClick={() => {
                           const next = { ...expression }
                           delete next.bodyColor
                           updateImmediate(next)
                         }}
                       >
-                        {t('Reprendre la couleur de l’avatar')}
+                        <RotateCcw />
                       </Button>
                     )}
                   </InspectorCard>
@@ -2910,14 +3089,15 @@ function StudioApp() {
                       <Button
                         className="inherit-colors"
                         variant="ghost"
-                        size="sm"
+                        size="icon-sm"
+                        aria-label={t('Reprendre la couleur de l’avatar')}
                         onClick={() => {
                           const next = { ...expression }
                           delete next.eyeColor
                           updateImmediate(next)
                         }}
                       >
-                        {t('Reprendre la couleur de l’avatar')}
+                        <RotateCcw />
                       </Button>
                     )}
                   </InspectorCard>
@@ -3120,7 +3300,7 @@ function StudioApp() {
               <Trash2 />
               {t('Supprimer')}
             </Button>
-            <Button onClick={() => setBodyEditing(false)}>{t('Enregistrer')}</Button>
+            <Button onClick={saveAvatarEditing}>{t('Enregistrer')}</Button>
           </footer>
         )}
 
