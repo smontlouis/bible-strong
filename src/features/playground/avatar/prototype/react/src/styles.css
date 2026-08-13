@@ -1,4 +1,42 @@
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
 :root {
+  scrollbar-gutter: stable;
+  --background: #ffffff;
+  --foreground: #17191d;
+  --card: #ffffff;
+  --card-foreground: #17191d;
+  --popover: #ffffff;
+  --popover-foreground: #17191d;
+  --primary: #17191d;
+  --primary-foreground: #ffffff;
+  --secondary: #edf1ff;
+  --secondary-foreground: #4168d5;
+  --muted: #f0f1f4;
+  --muted-foreground: #767d88;
+  --destructive: #c83737;
+  --border: #dcdfe6;
+  --input: #d9dce3;
+  --ring: #5b7fe5;
   color: #17191d;
   background: #eef0f4;
   font-family:
@@ -23,10 +61,6 @@ button,
 input {
   font: inherit;
 }
-button {
-  color: inherit;
-}
-
 .studio {
   display: grid;
   min-height: 100vh;
@@ -102,11 +136,15 @@ button {
 }
 .avatar-head,
 .preview-head {
-  fill: #5b7fe5;
+  fill: var(--avatar-body-color, #5b7fe5);
 }
 .avatar-eye,
 .preview-eye {
-  fill: #111316;
+  fill: var(--avatar-eye-color, #111316);
+}
+.avatar-head,
+.avatar-eye {
+  transition: fill 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .avatar-eye {
   cursor: pointer;
@@ -284,26 +322,9 @@ p {
   background: currentColor;
   box-shadow: 0 0 0 4px rgb(51 131 75 / 10%);
 }
-.body-workspace-header button,
-.avatar-create-dialog button {
-  min-height: 36px;
-  border: 1px solid #dcdfe6;
-  border-radius: 9px;
-  background: white;
-  color: #22252b;
-  font-size: 11px;
-  font-weight: 780;
-}
-.body-workspace-header button,
-.avatar-create-dialog button {
+.body-workspace-header [data-slot='button'] {
   align-self: center;
-  padding: 0 12px;
   cursor: pointer;
-}
-.avatar-create-dialog .primary {
-  border-color: #cad7ff;
-  background: #edf2ff;
-  color: #4f72d8;
 }
 .body-workspace-header {
   display: flex;
@@ -314,8 +335,27 @@ p {
   padding: 3px 2px 16px;
   border-bottom: 1px solid #d9dce3;
 }
-.body-workspace-header h1 {
+.avatar-name-input {
+  width: min(330px, 100%);
+  margin: 0;
+  padding: 1px 5px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  outline: 0;
+  background: transparent;
+  color: #17191d;
   font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+.avatar-name-input:hover {
+  border-color: #d9dce3;
+  background: white;
+}
+.avatar-name-input:focus {
+  border-color: #7895ee;
+  background: white;
+  box-shadow: 0 0 0 3px rgb(95 131 232 / 12%);
 }
 .body-workspace-header p:not(.eyebrow) {
   margin: 6px 0 0;
@@ -323,21 +363,11 @@ p {
   font-size: 11px;
   line-height: 1.45;
 }
-.body-workspace-header button {
-  border-color: #1c1e23;
-  background: #1c1e23;
-  color: white;
-}
 .body-workspace-header > div:last-child {
   display: flex;
   gap: 8px;
 }
-.body-workspace-header button.danger {
-  border-color: #efc5c5;
-  background: #fff5f5;
-  color: #bc3030;
-}
-.body-workspace-header button:disabled {
+.body-workspace-header [data-slot='button']:disabled {
   cursor: not-allowed;
   opacity: 0.4;
 }
@@ -367,7 +397,7 @@ p {
 .avatar-shelf .avatar-grid {
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
-  padding-right: 92px;
+  padding-right: 38px;
 }
 .avatar-shelf .avatar-card,
 .avatar-shelf .avatar-add {
@@ -385,16 +415,7 @@ p {
   position: absolute;
   right: 11px;
   bottom: 11px;
-  width: 82px;
-  min-height: 74px;
-  padding: 8px;
-  border: 1px solid #cad7ff;
-  border-radius: 10px;
-  background: #edf2ff;
   color: #4f72d8;
-  cursor: pointer;
-  font-size: 9px;
-  font-weight: 800;
 }
 
 .tabs {
@@ -416,8 +437,7 @@ p {
 .state-buttons button,
 .pool button,
 .button-row button,
-.reset,
-.dialog-actions button {
+.reset {
   min-height: 36px;
   border: 1px solid #dcdfe6;
   border-radius: 9px;
@@ -430,9 +450,49 @@ p {
   border: 0;
   background: transparent;
 }
-.tabs button[aria-pressed='true'] {
+.tabs button[data-active] {
   background: #15171b;
   color: white;
+}
+
+.color-field {
+  display: grid;
+  gap: 8px;
+  color: #3d424b;
+  font-size: 10px;
+  font-weight: 780;
+}
+.color-control {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 5px 9px 5px 5px;
+  border: 1px solid #dcdfe6;
+  border-radius: 10px;
+  background: #f8f9fb;
+}
+.color-swatch {
+  width: 38px;
+  height: 30px;
+  padding: 2px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.color-control .color-value {
+  width: 86px;
+  height: 28px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #656c77;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+}
+.inherit-colors {
+  margin-top: 12px;
 }
 
 .panel-stack {
@@ -921,50 +981,6 @@ button.primary {
   border-radius: 22px;
   background: #f5f6f8;
   box-shadow: 0 35px 100px rgb(0 0 0 / 32%);
-}
-.avatar-create-dialog {
-  width: min(430px, calc(100vw - 32px));
-  padding: 24px;
-  border: 1px solid #d8dbe2;
-  border-radius: 20px;
-  background: white;
-  box-shadow: 0 35px 100px rgb(0 0 0 / 32%);
-}
-.avatar-create-dialog h2 {
-  margin-bottom: 8px;
-  font-size: 22px;
-}
-.avatar-create-dialog > p:not(.eyebrow) {
-  color: #7d838e;
-  font-size: 11px;
-  line-height: 1.5;
-}
-.avatar-create-dialog label {
-  display: grid;
-  gap: 7px;
-  margin-top: 20px;
-  color: #4e535d;
-  font-size: 10px;
-  font-weight: 800;
-}
-.avatar-create-dialog input {
-  height: 42px;
-  padding: 0 12px;
-  border: 1px solid #d9dce3;
-  border-radius: 10px;
-  outline: 0;
-  font: inherit;
-  font-size: 13px;
-}
-.avatar-create-dialog input:focus {
-  border-color: #7895ee;
-  box-shadow: 0 0 0 3px rgb(95 131 232 / 12%);
-}
-.avatar-create-dialog > div {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 22px;
 }
 .dialog-header,
 .dialog-actions {

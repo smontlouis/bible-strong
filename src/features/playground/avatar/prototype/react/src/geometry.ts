@@ -26,7 +26,11 @@ export type Expression = {
   leftAngle: number
   rightAngle: number
   perspective: number
+  bodyColor?: string
+  eyeColor?: string
 }
+
+export type ExpressionNumericField = Exclude<keyof Expression, 'bodyColor' | 'eyeColor'>
 
 export type AvatarPose = {
   expression: Expression
@@ -36,8 +40,8 @@ export type AvatarPose = {
 export type AvatarGeometry = {
   backPaths: string[]
   frontPaths: string[]
-  backNodeIds: Array<string | null>
-  frontNodeIds: Array<string | null>
+  backNodeIds: (string | null)[]
+  frontNodeIds: (string | null)[]
   headPath: string
   leftPath: string
   rightPath: string
@@ -70,7 +74,7 @@ export const RADIUS = 120
 const FOCAL_LENGTH = 620
 const QUARTER_ARC_SAMPLES = 14
 
-export const expressionFields: (keyof Expression)[] = [
+export const expressionFields: ExpressionNumericField[] = [
   'headX',
   'headY',
   'headZ',
@@ -322,12 +326,11 @@ export const poseFromExpression = (expression: Expression): AvatarPose => ({
 })
 
 export const interpolatePose = (from: AvatarPose, to: AvatarPose, progress: number): AvatarPose => {
-  const expression = Object.fromEntries(
-    expressionFields.map(field => [
-      field,
-      from.expression[field] + (to.expression[field] - from.expression[field]) * progress,
-    ])
-  ) as Expression
+  const expression: Expression = { ...from.expression }
+  expressionFields.forEach(field => {
+    expression[field] =
+      from.expression[field] + (to.expression[field] - from.expression[field]) * progress
+  })
   return {
     expression,
     orientation: slerpQuaternion(from.orientation, to.orientation, progress),

@@ -7,6 +7,24 @@ export type StudioAvatar = {
   id: string
   name: string
   body: AvatarBody
+  colors: AvatarColors
+}
+
+export type AvatarColors = { body: string; eyes: string }
+export const defaultAvatarColors: AvatarColors = { body: '#5b7fe5', eyes: '#111316' }
+const hexColor = /^#[0-9a-f]{6}$/i
+const parseColors = (value: unknown): AvatarColors => {
+  const candidate = value as Partial<AvatarColors> | null
+  return {
+    body:
+      typeof candidate?.body === 'string' && hexColor.test(candidate.body)
+        ? candidate.body
+        : defaultAvatarColors.body,
+    eyes:
+      typeof candidate?.eyes === 'string' && hexColor.test(candidate.eyes)
+        ? candidate.eyes
+        : defaultAvatarColors.eyes,
+  }
 }
 
 export type AvatarLibrary = {
@@ -26,12 +44,17 @@ const parseExpressions = (value: unknown): Expression[] => {
   return value.map(item => {
     if (!item || typeof item !== 'object') return { ...defaultExpression }
     const candidate = item as Partial<Expression>
-    return Object.fromEntries(
+    const parsed = Object.fromEntries(
       Object.entries(defaultExpression).map(([field, fallback]) => {
         const stored = candidate[field as keyof Expression]
         return [field, typeof stored === 'number' && Number.isFinite(stored) ? stored : fallback]
       })
     ) as Expression
+    if (typeof candidate.bodyColor === 'string' && hexColor.test(candidate.bodyColor))
+      parsed.bodyColor = candidate.bodyColor
+    if (typeof candidate.eyeColor === 'string' && hexColor.test(candidate.eyeColor))
+      parsed.eyeColor = candidate.eyeColor
+    return parsed
   })
 }
 
@@ -76,13 +99,14 @@ const createStrobi = (): StudioAvatar => {
   } catch {
     // Les valeurs par défaut restent disponibles si la migration locale est invalide.
   }
-  return { id: 'strobi', name: 'Strobi', body }
+  return { id: 'strobi', name: 'Strobi', body, colors: { ...defaultAvatarColors } }
 }
 
 export const createAvatar = (name: string): StudioAvatar => ({
   id: `avatar-${crypto.randomUUID()}`,
   name: name.trim() || 'Nouvel avatar',
   body: { primary: { ...surfacePresets.sphere }, nodes: [] },
+  colors: { ...defaultAvatarColors },
 })
 
 export const loadAvatarLibrary = (): AvatarLibrary => {
@@ -104,6 +128,7 @@ export const loadAvatarLibrary = (): AvatarLibrary => {
         id: avatar.id,
         name: avatar.name,
         body: parseAvatarBody(avatar.body, surfacePresets.sphere),
+        colors: parseColors(avatar.colors),
       }))
     if (!avatars.length) throw new Error()
     const activeAvatarId = avatars.some(avatar => avatar.id === parsed.activeAvatarId)

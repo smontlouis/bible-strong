@@ -6,7 +6,23 @@ import {
   useReducedMotion,
 } from 'motion/react'
 import { motionValue, type MotionValue } from 'motion'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { Pencil, Plus, Trash2 } from 'lucide-react'
+
+import { Button } from './components/ui/button'
+import { Input } from './components/ui/input'
+import { Tabs, TabsList, TabsTrigger } from './components/ui/tabs'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from './components/ui/alert-dialog'
 
 import {
   bodyPrimitiveTypes,
@@ -22,6 +38,7 @@ import {
   persistAvatarLibrary,
   persistGlobalExpressions,
   type StudioAvatar,
+  type AvatarColors,
 } from './avatars'
 import {
   expressionFields,
@@ -90,6 +107,52 @@ const getPreviewGeometry = (
 const bounded = (value: number, min?: number, max?: number) =>
   Math.min(max ?? Infinity, Math.max(min ?? -Infinity, value))
 
+const resolveColors = (expression: Expression, colors: AvatarColors): AvatarColors => ({
+  body: expression.bodyColor ?? colors.body,
+  eyes: expression.eyeColor ?? colors.eyes,
+})
+
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+}) {
+  return (
+    <label className="color-field">
+      <span>{label}</span>
+      <span className="color-control">
+        <Input
+          aria-label={`${label} · sélecteur`}
+          className="color-swatch"
+          type="color"
+          value={value}
+          onChange={event => onChange(event.currentTarget.value)}
+        />
+        <Input
+          aria-label={`${label} · hexadécimal`}
+          className="color-value"
+          key={value}
+          defaultValue={value.toUpperCase()}
+          spellCheck={false}
+          onChange={event => {
+            const next = event.currentTarget.value.toUpperCase()
+            if (/^#[0-9A-F]{6}$/.test(next)) onChange(next.toLowerCase())
+          }}
+          onBlur={event => {
+            if (!/^#[0-9A-F]{6}$/.test(event.currentTarget.value.toUpperCase())) {
+              event.currentTarget.value = value.toUpperCase()
+            }
+          }}
+        />
+      </span>
+    </label>
+  )
+}
+
 function NumericField({
   label,
   value,
@@ -138,7 +201,7 @@ function NumericField({
         </span>
       </button>
       <label className="number-shell">
-        <input
+        <Input
           type="number"
           min={min}
           max={max}
@@ -348,8 +411,8 @@ function AvatarCanvas({
   showWire: boolean
   backPaths: MotionValue<string>[]
   frontPaths: MotionValue<string>[]
-  backNodeIds: { current: Array<string | null> }
-  frontNodeIds: { current: Array<string | null> }
+  backNodeIds: { current: (string | null)[] }
+  frontNodeIds: { current: (string | null)[] }
   bodyEditing: boolean
   headPath: MotionValue<string>
   leftPath: MotionValue<string>
@@ -715,14 +778,17 @@ function ExpressionPreview({
   expression,
   surface,
   bodyNodes,
+  colors,
   id,
 }: {
   expression: Expression
   surface: SurfaceConfig
   bodyNodes: BodyNode[]
+  colors: AvatarColors
   id: string
 }) {
   const geometry = getPreviewGeometry(expression, surface, bodyNodes)
+  const resolvedColors = resolveColors(expression, colors)
   const clipId = `preview-${id}`
   return (
     <svg viewBox="-150 -150 300 300" aria-hidden="true">
@@ -732,23 +798,35 @@ function ExpressionPreview({
         </clipPath>
       </defs>
       {geometry.backPaths.map((pathValue, index) => (
-        <path className="preview-head" d={pathValue} key={index} />
+        <path
+          className="preview-head"
+          d={pathValue}
+          key={index}
+          style={{ fill: resolvedColors.body }}
+        />
       ))}
-      <path className="preview-head" d={geometry.headPath} />
+      <path className="preview-head" d={geometry.headPath} style={{ fill: resolvedColors.body }} />
       <g clipPath={`url(#${clipId})`}>
         <path
           className="preview-eye"
           d={geometry.leftPath}
           opacity={geometry.leftVisible ? 1 : 0}
+          style={{ fill: resolvedColors.eyes }}
         />
         <path
           className="preview-eye"
           d={geometry.rightPath}
           opacity={geometry.rightVisible ? 1 : 0}
+          style={{ fill: resolvedColors.eyes }}
         />
       </g>
       {geometry.frontPaths.map((pathValue, index) => (
-        <path className="preview-head" d={pathValue} key={`front-${index}`} />
+        <path
+          className="preview-head"
+          d={pathValue}
+          key={`front-${index}`}
+          style={{ fill: resolvedColors.body }}
+        />
       ))}
     </svg>
   )
@@ -758,6 +836,7 @@ function ExpressionDialog({
   editing,
   surface,
   bodyNodes,
+  avatarColors,
   onChange,
   onCancel,
   onSave,
@@ -766,6 +845,7 @@ function ExpressionDialog({
   editing: { index: number | null; draft: Expression }
   surface: SurfaceConfig
   bodyNodes: BodyNode[]
+  avatarColors: AvatarColors
   onChange: (draft: Expression) => void
   onCancel: () => void
   onSave: () => void
@@ -822,9 +902,15 @@ function ExpressionDialog({
                 : `Modifier l’expression ${String(editing.index).padStart(2, '0')}`}
             </h2>
           </div>
-          <button className="icon-button" type="button" onClick={onCancel} aria-label="Fermer">
+          <Button
+            className="icon-button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onCancel}
+            aria-label="Fermer"
+          >
             ×
-          </button>
+          </Button>
         </header>
         <div className="dialog-body">
           <aside className="dialog-preview">
@@ -832,12 +918,28 @@ function ExpressionDialog({
               expression={editing.draft}
               surface={surface}
               bodyNodes={bodyNodes}
+              colors={avatarColors}
               id="dialog"
             />
             <strong>Aperçu en direct</strong>
             <span>Projection sur la forme active</span>
           </aside>
           <div className="dialog-fields">
+            <section className="dialog-group">
+              <h3>Couleurs</h3>
+              <div className="eye-columns">
+                <ColorField
+                  label="Corps"
+                  value={editing.draft.bodyColor ?? avatarColors.body}
+                  onChange={bodyColor => update({ bodyColor })}
+                />
+                <ColorField
+                  label="Yeux"
+                  value={editing.draft.eyeColor ?? avatarColors.eyes}
+                  onChange={eyeColor => update({ eyeColor })}
+                />
+              </div>
+            </section>
             <section className="dialog-group">
               <h3>Rotation de la tête</h3>
               {(['headX', 'headY', 'headZ'] as const).map(field => (
@@ -961,17 +1063,16 @@ function ExpressionDialog({
         </div>
         <footer className="dialog-actions">
           {editing.index !== null && (
-            <button className="danger" type="button" onClick={onDelete}>
+            <Button variant="destructive" onClick={onDelete}>
+              <Trash2 />
               Supprimer
-            </button>
+            </Button>
           )}
           <div className="dialog-actions-main">
-            <button type="button" onClick={onCancel}>
+            <Button variant="outline" onClick={onCancel}>
               Annuler
-            </button>
-            <button className="primary" type="button" onClick={onSave}>
-              Enregistrer
-            </button>
+            </Button>
+            <Button onClick={onSave}>Enregistrer</Button>
           </div>
         </footer>
       </motion.section>
@@ -992,9 +1093,13 @@ export default function App() {
   const [selectedBodyNodeId, setSelectedBodyNodeId] = useState<'primary' | string>('primary')
   const [expressions, setExpressions] = useState(loadGlobalExpressions)
   const [bodyEditing, setBodyEditing] = useState(false)
-  const [creatingAvatar, setCreatingAvatar] = useState(false)
-  const [newAvatarName, setNewAvatarName] = useState('')
+  const [focusAvatarName, setFocusAvatarName] = useState(false)
   const [expression, setExpression] = useState<Expression>({ ...defaultExpression })
+  const [displayColors, setDisplayColors] = useState<AvatarColors>(() =>
+    resolveColors(defaultExpression, initialAvatar.colors)
+  )
+  const [deleteAvatarOpen, setDeleteAvatarOpen] = useState(false)
+  const [deleteExpressionOpen, setDeleteExpressionOpen] = useState(false)
   const [activeExpression, setActiveExpression] = useState<number | null>(null)
   const [editing, setEditing] = useState<{ index: number | null; draft: Expression } | null>(null)
   const [showWire, setShowWire] = useState(false)
@@ -1031,7 +1136,7 @@ export default function App() {
   const [transitionVelocity] = useState(
     () =>
       Object.fromEntries(expressionFields.map(field => [field, 0])) as Record<
-        keyof Expression,
+        (typeof expressionFields)[number],
         number
       >
   )
@@ -1112,12 +1217,16 @@ export default function App() {
     transitionTarget.current = next
     canonicalTarget.current = next
     setExpression(next)
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (avatar) setDisplayColors(resolveColors(next, avatar.colors))
     setActiveExpression(null)
     paintPose(pose)
   }
 
   const transitionToExpression = (next: Expression, index: number | null = null) => {
     setActiveExpression(index)
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (avatar) setDisplayColors(resolveColors(next, avatar.colors))
     if (reduceMotion) {
       updateImmediate(next)
       return
@@ -1279,6 +1388,14 @@ export default function App() {
     paintPose(displayedPose.current)
   }
 
+  const updateAvatarColors = (changes: Partial<AvatarColors>) => {
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (!avatar) return
+    const colors = { ...avatar.colors, ...changes }
+    updateActiveAvatar(current => ({ ...current, colors }))
+    setDisplayColors(resolveColors(expression, colors))
+  }
+
   const activateAvatar = (id: string, editBody = false, preserveMode = false) => {
     const avatar = avatarsRef.current.find(item => item.id === id)
     if (!avatar) return
@@ -1296,31 +1413,34 @@ export default function App() {
     if (!preserveMode || editBody) setMode('manual')
     const neutral = { ...defaultExpression }
     setExpression(neutral)
+    setDisplayColors(resolveColors(neutral, avatar.colors))
     canonicalTarget.current = neutral
     transitionTarget.current = neutral
     paintPose(poseFromExpression(neutral))
     persistAvatarLibrary({ activeAvatarId: id, avatars: avatarsRef.current })
   }
 
-  const submitNewAvatar = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    const avatar = createAvatar(newAvatarName)
+  const createNewAvatar = () => {
+    const avatar = createAvatar('Unknown')
     const next = [...avatarsRef.current, avatar]
     avatarsRef.current = next
     setAvatars(next)
-    setCreatingAvatar(false)
-    setNewAvatarName('')
+    setFocusAvatarName(true)
     persistAvatarLibrary({ activeAvatarId: avatar.id, avatars: next })
     activateAvatar(avatar.id, true)
   }
 
+  const renameActiveAvatar = (name: string) => {
+    updateActiveAvatar(avatar => ({ ...avatar, name }))
+  }
+
   const deleteActiveAvatar = () => {
     if (avatarsRef.current.length <= 1) return
-    if (!window.confirm(`Supprimer l’avatar ${activeAvatar.name} ?`)) return
     const remaining = avatarsRef.current.filter(avatar => avatar.id !== activeAvatarIdRef.current)
     avatarsRef.current = remaining
     setAvatars(remaining)
     persistAvatarLibrary({ activeAvatarId: remaining[0].id, avatars: remaining })
+    setDeleteAvatarOpen(false)
     activateAvatar(remaining[0].id)
   }
 
@@ -1410,13 +1530,12 @@ export default function App() {
 
   const deleteEditing = () => {
     if (editing?.index === null || editing?.index === undefined) return
-    if (!window.confirm(`Supprimer l’expression ${String(editing.index).padStart(2, '0')} ?`))
-      return
     const next = expressions.filter((_, index) => index !== editing.index)
     setExpressions(next)
     persistGlobalExpressions(next)
     setActiveExpression(null)
     setEditing(null)
+    setDeleteExpressionOpen(false)
   }
 
   const selectedBodyNode =
@@ -1435,7 +1554,15 @@ export default function App() {
 
   return (
     <div className="studio">
-      <section className="stage-column">
+      <section
+        className="stage-column"
+        style={
+          {
+            '--avatar-body-color': displayColors.body,
+            '--avatar-eye-color': displayColors.eyes,
+          } as CSSProperties
+        }
+      >
         <div className="brand">
           <span className="brand-mark" />
           Bible Strong <em>Avatar Lab</em>
@@ -1471,21 +1598,32 @@ export default function App() {
           <header className="body-workspace-header">
             <div>
               <p className="eyebrow">Construction du corps</p>
-              <h1>{activeAvatar.name}</h1>
+              <Input
+                className="avatar-name-input"
+                aria-label="Nom de l’avatar"
+                autoFocus={focusAvatarName}
+                value={activeAvatar.name}
+                onChange={event => renameActiveAvatar(event.currentTarget.value)}
+                onFocus={event => {
+                  if (focusAvatarName) event.currentTarget.select()
+                }}
+                onBlur={event => {
+                  if (!event.currentTarget.value.trim()) renameActiveAvatar('Unknown')
+                  setFocusAvatarName(false)
+                }}
+              />
               <p>Choisis la forme principale puis assemble les primitives autour d’elle.</p>
             </div>
             <div>
-              <button
-                className="danger"
-                type="button"
+              <Button
+                variant="destructive"
                 disabled={avatars.length <= 1}
-                onClick={deleteActiveAvatar}
+                onClick={() => setDeleteAvatarOpen(true)}
               >
+                <Trash2 />
                 Supprimer
-              </button>
-              <button type="button" onClick={() => setBodyEditing(false)}>
-                Terminer
-              </button>
+              </Button>
+              <Button onClick={() => setBodyEditing(false)}>Terminer</Button>
             </div>
           </header>
         ) : (
@@ -1513,55 +1651,60 @@ export default function App() {
                     type="button"
                     key={avatar.id}
                     onClick={() => activateAvatar(avatar.id, false, true)}
-                    onDoubleClick={() => activateAvatar(avatar.id, true)}
+                    onDoubleClick={() => {
+                      setFocusAvatarName(false)
+                      activateAvatar(avatar.id, true)
+                    }}
                   >
                     <ExpressionPreview
                       expression={expressions[0] ?? defaultExpression}
                       surface={avatar.body.primary}
                       bodyNodes={avatar.body.nodes}
+                      colors={avatar.colors}
                       id={`avatar-${avatar.id}`}
                     />
                     <span>{avatar.name}</span>
                   </button>
                 ))}
-                <button
+                <Button
+                  variant="outline"
+                  size="icon"
                   className="avatar-add"
-                  type="button"
-                  onClick={() => setCreatingAvatar(true)}
+                  onClick={createNewAvatar}
                   aria-label="Nouvel avatar"
                 >
-                  +
-                </button>
+                  <Plus />
+                </Button>
               </div>
-              <button
-                className="avatar-edit"
-                type="button"
-                onClick={() => {
-                  setMode('manual')
-                  setBodyEditing(true)
-                }}
-              >
-                Modifier {activeAvatar.name}
-              </button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        className="avatar-edit"
+                        variant="secondary"
+                        size="icon"
+                        aria-label={`Modifier ${activeAvatar.name}`}
+                        onClick={() => {
+                          setFocusAvatarName(false)
+                          activateAvatar(activeAvatar.id, true)
+                        }}
+                      />
+                    }
+                  >
+                    <Pencil />
+                  </TooltipTrigger>
+                  <TooltipContent>Modifier {activeAvatar.name}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </section>
-            <nav className="tabs" aria-label="Mode d’édition">
-              {(['manual', 'expressions', 'states'] as Mode[]).map(item => (
-                <button
-                  key={item}
-                  type="button"
-                  aria-pressed={mode === item}
-                  onClick={() => setMode(item)}
-                >
-                  {
-                    {
-                      manual: 'Manuel',
-                      expressions: 'Expressions',
-                      states: 'États',
-                    }[item]
-                  }
-                </button>
-              ))}
-            </nav>
+            <Tabs value={mode} onValueChange={value => setMode(value as Mode)}>
+              <TabsList className="tabs" aria-label="Mode d’édition">
+                <TabsTrigger value="manual">Pose</TabsTrigger>
+                <TabsTrigger value="expressions">Expressions</TabsTrigger>
+                <TabsTrigger value="states">États</TabsTrigger>
+              </TabsList>
+            </Tabs>
           </>
         )}
 
@@ -1862,10 +2005,61 @@ export default function App() {
                     )}
                   </div>
                 </section>
+                <section className="panel color-panel">
+                  <PanelTitle
+                    title="Couleurs de l’avatar"
+                    subtitle="Ces couleurs servent de base à toutes les poses et expressions."
+                  />
+                  <div className="eye-columns">
+                    <ColorField
+                      label="Corps"
+                      value={activeAvatar.colors.body}
+                      onChange={body => updateAvatarColors({ body })}
+                    />
+                    <ColorField
+                      label="Yeux"
+                      value={activeAvatar.colors.eyes}
+                      onChange={eyes => updateAvatarColors({ eyes })}
+                    />
+                  </div>
+                </section>
               </>
             )}
             {!bodyEditing && (
               <>
+                <section className="panel color-panel">
+                  <PanelTitle
+                    title="Couleurs de la pose"
+                    subtitle="Une pose peut remplacer temporairement les couleurs de l’avatar."
+                  />
+                  <div className="eye-columns">
+                    <ColorField
+                      label="Corps"
+                      value={expression.bodyColor ?? activeAvatar.colors.body}
+                      onChange={bodyColor => updateImmediate({ ...expression, bodyColor })}
+                    />
+                    <ColorField
+                      label="Yeux"
+                      value={expression.eyeColor ?? activeAvatar.colors.eyes}
+                      onChange={eyeColor => updateImmediate({ ...expression, eyeColor })}
+                    />
+                  </div>
+                  {(expression.bodyColor || expression.eyeColor) && (
+                    <Button
+                      className="inherit-colors"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const next = { ...expression }
+                        delete next.bodyColor
+                        delete next.eyeColor
+                        updateImmediate(next)
+                      }}
+                    >
+                      Reprendre les couleurs de l’avatar
+                    </Button>
+                  )}
+                </section>
                 <section className="panel">
                   <PanelTitle
                     title="Rotation de la tête"
@@ -2085,6 +2279,7 @@ export default function App() {
                       expression={preset}
                       surface={surface}
                       bodyNodes={bodyNodes}
+                      colors={activeAvatar.colors}
                       id={String(index)}
                     />
                     <span>{String(index).padStart(2, '0')}</span>
@@ -2200,47 +2395,47 @@ export default function App() {
           </div>
         )}
       </main>
-      {creatingAvatar && (
-        <div className="dialog-backdrop">
-          <form className="avatar-create-dialog" onSubmit={submitNewAvatar}>
-            <p className="eyebrow">Nouvel avatar</p>
-            <h2>Comment s’appelle-t-il&nbsp;?</h2>
-            <p>
-              Il utilisera les expressions et les états globaux du Studio, puis tu construiras son
-              corps.
-            </p>
-            <label>
-              Nom de l’avatar
-              <input
-                autoFocus
-                required
-                value={newAvatarName}
-                onChange={event => setNewAvatarName(event.currentTarget.value)}
-                placeholder="Mon avatar"
-              />
-            </label>
-            <div>
-              <button type="button" onClick={() => setCreatingAvatar(false)}>
-                Annuler
-              </button>
-              <button className="primary" type="submit">
-                Créer l’avatar
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
       {editing && (
         <ExpressionDialog
           editing={editing}
           surface={surface}
           bodyNodes={bodyNodes}
+          avatarColors={activeAvatar.colors}
           onChange={draft => setEditing({ ...editing, draft })}
           onCancel={() => setEditing(null)}
           onSave={saveEditing}
-          onDelete={deleteEditing}
+          onDelete={() => setDeleteExpressionOpen(true)}
         />
       )}
+      <AlertDialog open={deleteAvatarOpen} onOpenChange={setDeleteAvatarOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer {activeAvatar.name} ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Le corps et les couleurs de cet avatar seront définitivement supprimés. Les
+              expressions globales seront conservées.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteActiveAvatar}>Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={deleteExpressionOpen} onOpenChange={setDeleteExpressionOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette expression ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action retirera définitivement le preset de la bibliothèque globale.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteEditing}>Supprimer</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
