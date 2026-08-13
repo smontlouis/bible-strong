@@ -1,6 +1,7 @@
 import type { BodyNode } from '../body'
 import {
   poseFromExpression,
+  renderAvatar,
   renderBodyNodeEditor,
   rotateBodyNodeAroundLocalAxis,
   translateBodyNodeInCameraPlane,
@@ -69,5 +70,22 @@ describe('body node editor geometry', () => {
     const rotated = rotateBodyNodeAroundLocalAxis({ ...node, rotation: [0, 0, 350] }, 'x', 1)
 
     expect(rotated.rotation[2]).toBeGreaterThan(300)
+  })
+
+  it('keeps a spherical silhouette path stable across head rotations', () => {
+    const neutralPath = renderAvatar(
+      poseFromExpression(defaultExpression),
+      surfacePresets.sphere,
+      1,
+      { includeWire: false }
+    ).headPath
+    const rotatedPath = renderAvatar(
+      poseFromExpression({ ...defaultExpression, headX: 17, headY: 34, headZ: -21 }),
+      surfacePresets.sphere,
+      1,
+      { includeWire: false }
+    ).headPath
+
+    expect(rotatedPath).toBe(neutralPath)
   })
 })

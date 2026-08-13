@@ -15,7 +15,11 @@ import {
 } from 'react'
 import {
   ArrowLeft,
+  ChevronDown,
+  ChevronUp,
   Copy,
+  Download,
+  FileCode2,
   GripVertical,
   Pause,
   Pencil,
@@ -106,7 +110,7 @@ import {
   type AvatarSequence,
   type SequenceStep,
 } from './sequences'
-import { applyAmbientMotion, hasAmbientMotion } from './ambientMotion'
+import { ambientBodyOffset, applyAmbientMotion, hasAmbientMotion } from './ambientMotion'
 import { surfaceLabels, surfacePresets, type SurfaceConfig } from './surfaces'
 import {
   createStudioDocumentStore,
@@ -127,6 +131,7 @@ import {
   createRenderedScene,
   findBodyNodePath,
   paintRenderedColors,
+  paintRenderedOffset,
   paintRenderedScene,
   type RenderedScene,
 } from './renderedScene'
@@ -137,8 +142,15 @@ import {
   previewManipulation,
   type ManipulationSession,
 } from './manipulationSession'
+import {
+  avatarExportFileName,
+  createAvatarExportPayload,
+  generateJavaScriptAvatarModule,
+  generateReactAvatarComponent,
+} from './exporter'
 
-type Mode = 'manual' | 'expressions' | 'states'
+type Mode = 'manual' | 'expressions' | 'states' | 'export'
+type ExportFormat = 'react' | 'javascript'
 type Side = 'Left' | 'Right'
 type NumericProps = {
   label: string
@@ -939,6 +951,8 @@ function AvatarCanvas({
     rightPath,
     leftOpacity,
     rightOpacity,
+    offsetX,
+    offsetY,
   } = scene
   const svgRef = useRef<SVGSVGElement>(null)
   const [activeDragType, setActiveDragType] = useState<
@@ -1158,48 +1172,50 @@ function AvatarCanvas({
             <motion.path d={headPath} />
           </clipPath>
         </defs>
-        {backPaths.map((pathValue, index) => (
+        <motion.g style={{ x: offsetX, y: offsetY }}>
+          {backPaths.map((pathValue, index) => (
+            <motion.path
+              className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
+              d={pathValue}
+              key={index}
+              onPointerDown={event => selectBodyPath(event, backNodeIds.current[index])}
+            />
+          ))}
           <motion.path
             className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
-            d={pathValue}
-            key={index}
-            onPointerDown={event => selectBodyPath(event, backNodeIds.current[index])}
+            d={headPath}
+            onPointerDown={event => {
+              onBodyNodeSelect('primary')
+              startDrag(event)
+            }}
           />
-        ))}
-        <motion.path
-          className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
-          d={headPath}
-          onPointerDown={event => {
-            onBodyNodeSelect('primary')
-            startDrag(event)
-          }}
-        />
-        <g clipPath="url(#avatar-head-clip)">
-          {(showWire || highlight === 'head') &&
-            wirePaths.map((pathValue, index) => (
-              <motion.path className="wire" d={pathValue} key={index} />
-            ))}
-          <motion.path
-            className={`avatar-eye ${selectedSide === -1 || highlight === 'left' || highlight === 'both' ? 'cyan-outline' : ''}`}
-            d={leftPath}
-            opacity={leftOpacity}
-            onPointerDown={event => selectEye(-1, event)}
-          />
-          <motion.path
-            className={`avatar-eye ${selectedSide === 1 || highlight === 'right' || highlight === 'both' ? 'cyan-outline' : ''}`}
-            d={rightPath}
-            opacity={rightOpacity}
-            onPointerDown={event => selectEye(1, event)}
-          />
-        </g>
-        {frontPaths.map((pathValue, index) => (
-          <motion.path
-            className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
-            d={pathValue}
-            key={index}
-            onPointerDown={event => selectBodyPath(event, frontNodeIds.current[index])}
-          />
-        ))}
+          <g clipPath="url(#avatar-head-clip)">
+            {(showWire || highlight === 'head') &&
+              wirePaths.map((pathValue, index) => (
+                <motion.path className="wire" d={pathValue} key={index} />
+              ))}
+            <motion.path
+              className={`avatar-eye ${selectedSide === -1 || highlight === 'left' || highlight === 'both' ? 'cyan-outline' : ''}`}
+              d={leftPath}
+              opacity={leftOpacity}
+              onPointerDown={event => selectEye(-1, event)}
+            />
+            <motion.path
+              className={`avatar-eye ${selectedSide === 1 || highlight === 'right' || highlight === 'both' ? 'cyan-outline' : ''}`}
+              d={rightPath}
+              opacity={rightOpacity}
+              onPointerDown={event => selectEye(1, event)}
+            />
+          </g>
+          {frontPaths.map((pathValue, index) => (
+            <motion.path
+              className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
+              d={pathValue}
+              key={index}
+              onPointerDown={event => selectBodyPath(event, frontNodeIds.current[index])}
+            />
+          ))}
+        </motion.g>
         {selectedBodyPath && (
           <motion.path className="selection-outline body-selection-outline" d={selectedBodyPath} />
         )}
@@ -1402,6 +1418,12 @@ function ExpressionCard({
   onEdit,
   onDuplicate,
   onDelete,
+  draggable,
+  onDragStart,
+  onDragEnter,
+  onDragOver,
+  onDrop,
+  onDragEnd,
 }: {
   expression: Expression
   index: number
@@ -1415,6 +1437,12 @@ function ExpressionCard({
   onEdit?: () => void
   onDuplicate?: () => void
   onDelete?: () => void
+  draggable?: boolean
+  onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void
+  onDragEnter?: () => void
+  onDragOver?: (event: React.DragEvent<HTMLButtonElement>) => void
+  onDrop?: (event: React.DragEvent<HTMLButtonElement>) => void
+  onDragEnd?: () => void
 }) {
   const { t } = useStudioLanguage()
   const card = (
@@ -1423,6 +1451,12 @@ function ExpressionCard({
       variant="outline"
       aria-pressed={active}
       type="button"
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onDragEnter={onDragEnter}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
       onClick={onSelect}
       onDoubleClick={onEdit}
     >
@@ -1483,13 +1517,25 @@ function ExpressionWorkspace({
   onDelete: () => void
 }) {
   const { t } = useStudioLanguage()
-  const [linked, setLinked] = useState({ width: true, height: true, size: true })
+  const [linked, setLinked] = useState({
+    width: true,
+    height: true,
+    size: true,
+    rotation: true,
+  })
   const update = (changes: Partial<Expression>) => onChange({ ...editing.draft, ...changes })
   const updateDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
     onChange(updateEyeDimension(editing.draft, side, dimension, value, linked[dimension]))
   }
   const updateSize = (side: Side, value: number) => {
     onChange(scaleEye(editing.draft, side, value, linked.size))
+  }
+  const updateRotation = (side: Side, value: number) => {
+    onChange({
+      ...editing.draft,
+      [side === 'Left' ? 'leftAngle' : 'rightAngle']: value,
+      ...(linked.rotation ? { [side === 'Left' ? 'rightAngle' : 'leftAngle']: -value } : {}),
+    })
   }
 
   return (
@@ -1697,19 +1743,28 @@ function ExpressionWorkspace({
               </div>
             </Card>
             <Card className="dialog-group">
-              <h3>{t('Rotation locale')}</h3>
+              <div className="panel-inline-title">
+                <h3>{t('Rotation locale')}</h3>
+                <LinkButton
+                  linked={linked.rotation}
+                  label="Lier les rotations"
+                  onClick={() =>
+                    setLinked(current => ({ ...current, rotation: !current.rotation }))
+                  }
+                />
+              </div>
               <div className="eye-columns">
                 <NumericField
                   label="Œil gauche"
                   value={editing.draft.leftAngle}
                   unit="°"
-                  onChange={value => update({ leftAngle: value })}
+                  onChange={value => updateRotation('Left', value)}
                 />
                 <NumericField
                   label="Œil droit"
                   value={editing.draft.rightAngle}
                   unit="°"
-                  onChange={value => update({ rightAngle: value })}
+                  onChange={value => updateRotation('Right', value)}
                 />
               </div>
             </Card>
@@ -1833,14 +1888,14 @@ function SequenceWorkspace({
           variant="ghost"
           size="icon"
           onClick={onCancel}
-          aria-label={t('Retour aux états')}
+          aria-label={t('Retour aux animations')}
         >
           <ArrowLeft />
         </Button>
         <div className="workspace-heading">
-          <p className="eyebrow">{t('Éditeur de séquence')}</p>
-          <h1>{editing.sourceId ? t('Modifier la séquence') : t('Nouvelle séquence')}</h1>
-          <p>{t('Compose les expressions, leur cadence et les clignements de cet état.')}</p>
+          <p className="eyebrow">{t('Éditeur d’animation')}</p>
+          <h1>{editing.sourceId ? t('Modifier l’animation') : t('Nouvelle animation')}</h1>
+          <p>{t('Compose les expressions, leur cadence et les clignements de cette animation.')}</p>
         </div>
         <div className="workspace-header-actions">
           <Button
@@ -1848,19 +1903,19 @@ function SequenceWorkspace({
             size="icon"
             onClick={active && playing ? onPause : onPlay}
             aria-label={t(
-              active && playing ? 'Pause' : active ? 'Reprendre' : 'Prévisualiser la séquence'
+              active && playing ? 'Pause' : active ? 'Reprendre' : 'Prévisualiser l’animation'
             )}
           >
-            {active && playing ? <Pause /> : <Play />}
+            {active && playing ? <Pause /> : <Play fill="currentColor" />}
           </Button>
           {active && (
             <Button
               variant="outline"
               size="icon"
               onClick={onStop}
-              aria-label={t('Arrêter la séquence')}
+              aria-label={t('Arrêter l’animation')}
             >
-              <Square />
+              <Square fill="currentColor" />
             </Button>
           )}
         </div>
@@ -1869,7 +1924,7 @@ function SequenceWorkspace({
       <div className="workspace-scroll sequence-workspace-scroll">
         <ControlSection
           title="Identité"
-          subtitle="Nom, catégorie et comportement de lecture de la séquence."
+          subtitle="Nom, catégorie et comportement de lecture de l’animation."
           compact
         >
           <InspectorCard>
@@ -2239,6 +2294,10 @@ function StudioApp() {
   const [selectedEyeSide, setSelectedEyeSide] = useState<-1 | 1 | null>(null)
   const [expressions, setExpressions] = useState(initialDocument.expressions)
   const [sequences, setSequences] = useState(initialDocument.sequences)
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('react')
+  const [exportAnimationIds, setExportAnimationIds] = useState(() =>
+    initialDocument.sequences.map(animation => animation.id)
+  )
   const initialStatePlayback = initialDocument.playback
   const persistAvatarLibrary = (library: typeof initialDocument.library) =>
     documentStore.update({ library })
@@ -2269,6 +2328,7 @@ function StudioApp() {
   const [deleteAvatarOpen, setDeleteAvatarOpen] = useState(false)
   const [deleteExpressionOpen, setDeleteExpressionOpen] = useState(false)
   const [deleteSequenceOpen, setDeleteSequenceOpen] = useState(false)
+  const [statePlayerExpanded, setStatePlayerExpanded] = useState(false)
   const [activeExpression, setActiveExpression] = useState<number | null>(null)
   const [editing, setEditing] = useState<{ index: number | null; draft: Expression } | null>(null)
   const [showWire, setShowWire] = useState(false)
@@ -2278,6 +2338,7 @@ function StudioApp() {
     height: true,
     size: true,
     position: true,
+    rotation: true,
   })
   const [highlight, setHighlight] = useState<Highlight>(null)
   const [selectedState, setSelectedState] = useState(() =>
@@ -2289,6 +2350,11 @@ function StudioApp() {
   )
   const [activeState, setActiveState] = useState<string | null>(null)
   const [statePlaying, setStatePlaying] = useState(false)
+  const [playbackVisual, setPlaybackVisual] = useState({
+    position: null as number | null,
+    run: 0,
+    durationMs: 0,
+  })
   const [sequenceEditing, setSequenceEditing] = useState<{
     sourceId: string | null
     draft: AvatarSequence
@@ -2312,6 +2378,14 @@ function StudioApp() {
   const avatarDragOrigin = useRef<StudioAvatar[] | null>(null)
   const avatarDragPreview = useRef(avatars)
   const [draggingAvatarId, setDraggingAvatarId] = useState<string | null>(null)
+  const draggedExpressionId = useRef<string | null>(null)
+  const expressionDragOrigin = useRef<Expression[] | null>(null)
+  const expressionDragPreview = useRef(expressions)
+  const [draggingExpressionId, setDraggingExpressionId] = useState<string | null>(null)
+  const draggedStateId = useRef<string | null>(null)
+  const stateDragOrigin = useRef<AvatarSequence[] | null>(null)
+  const stateDragPreview = useRef(sequences)
+  const [draggingStateId, setDraggingStateId] = useState<string | null>(null)
   const activeAvatarIdRef = useRef(activeAvatarId)
   const surfaceRef = useRef(surface)
   const bodyNodesRef = useRef(bodyNodes)
@@ -2393,6 +2467,10 @@ function StudioApp() {
       bodyNodes: bodyNodesRef.current,
     })
     paintRenderedScene(renderedScene, geometry)
+    paintRenderedOffset(
+      renderedScene,
+      ambientBodyOffset(pose.expression, lastAmbientElapsed.current)
+    )
   }
 
   useMotionValueEvent(blinkValue, 'change', latest => paintPose(displayedPose.current, latest))
@@ -2530,7 +2608,10 @@ function StudioApp() {
           eyes: interpolateHexColor(fromColors.eyes, targetColors.eyes, bounded(eased, 0, 1)),
         })
         paintPose(poseFromExpression(animated), undefined, time)
-        if (modeRef.current === 'manual' && time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS) {
+        if (
+          modeRef.current === 'manual' &&
+          time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS
+        ) {
           lastInspectorFrame.current = time
           setExpression(animated)
         }
@@ -2550,7 +2631,11 @@ function StudioApp() {
       return
     }
 
-    if (avatar) setDisplayColors(resolveColors(next, avatar.colors))
+    if (avatar) {
+      const targetColors = resolveColors(next, avatar.colors)
+      animate(renderedColors.body, targetColors.body, { duration: 0.35, ease: 'easeInOut' })
+      animate(renderedColors.eyes, targetColors.eyes, { duration: 0.35, ease: 'easeInOut' })
+    }
 
     if (transitionFrame.current !== null) {
       retargetFrom.current = { ...transitionTarget.current }
@@ -2762,9 +2847,7 @@ function StudioApp() {
       id: `avatar-${crypto.randomUUID()}`,
       name: `${source.name} ${t('copie')}`,
     }
-    const insertionIndex = Math.max(baseAvatars.findIndex(avatar => avatar.id === source.id) + 1, 0)
-    const next = [...baseAvatars]
-    next.splice(insertionIndex, 0, duplicate)
+    const next = [...baseAvatars, duplicate]
     avatarEditSnapshot.current = null
     avatarsRef.current = next
     setAvatars(next)
@@ -2931,10 +3014,9 @@ function StudioApp() {
     blinkAnimating.current = false
     blinkValue.jump(1)
     paintPose(displayedPose.current, 1)
-    activeSequenceRef.current = null
     setStatePlaying(false)
-    setActiveState(null)
-    if (persist) persistStatePlayback({ stateId: null, playing: false })
+    setPlaybackVisual(current => ({ ...current, position: null }))
+    if (persist) persistStatePlayback({ stateId: activeState ?? selectedState, playing: false })
   }
 
   const launchSequence = (sequence: AvatarSequence, resume = false, persist = true) => {
@@ -2963,10 +3045,16 @@ function StudioApp() {
       const step = sequence.steps[playbackTimeline.current.position]
       const expressionIndex = findExpressionIndex(expressions, step.expressionId)
       const preset = expressions[expressionIndex]
+      const durationMs = (reduceMotion ? 0 : step.transitionMs) + step.holdMs
+      setPlaybackVisual(current => ({
+        position: playbackTimeline.current.position,
+        run: current.run + 1,
+        durationMs,
+      }))
       if (preset) {
         transitionToExpression(preset, expressionIndex, step)
       }
-      scheduleAdvance((reduceMotion ? 0 : step.transitionMs) + step.holdMs)
+      scheduleAdvance(durationMs)
     }
     const advance = () => {
       const advanced = advancePlaybackTimeline(playbackTimeline.current, sequence)
@@ -2977,7 +3065,7 @@ function StudioApp() {
         blinkTimer.current = null
         playbackTimeline.current = { ...playbackTimeline.current, blinkDueAt: null }
         setStatePlaying(false)
-        setActiveState(null)
+        setPlaybackVisual(current => ({ ...current, position: null }))
         return
       }
       playCurrentStep()
@@ -3023,15 +3111,6 @@ function StudioApp() {
           : sequence.blink.initialDelayMs
       )
     }
-  }
-
-  const launchState = (id: string, resume = false) => {
-    const sequence = sequences.find(item => item.id === id)
-    if (!sequence) {
-      stopState()
-      return
-    }
-    launchSequence(sequence, resume)
   }
 
   const toggleStatePlayback = () => {
@@ -3100,15 +3179,47 @@ function StudioApp() {
     if (!sequenceEditing) restoreStateAfterEditor()
   }
 
-  const duplicateExpression = (index: number | null, draft: Expression, editDuplicate = false) => {
-    const insertionIndex = index === null ? expressions.length : index + 1
+  const duplicateExpression = (_index: number | null, draft: Expression, editDuplicate = false) => {
     const duplicate = { ...draft, id: createExpressionId() }
-    const next = [...expressions]
-    next.splice(insertionIndex, 0, duplicate)
+    const next = [...expressions, duplicate]
+    const duplicateIndex = next.length - 1
     setExpressions(next)
     persistGlobalExpressions(next)
-    if (editDuplicate) openExpressionEditor(insertionIndex, duplicate)
-    else transitionToExpression(duplicate, insertionIndex)
+    if (editDuplicate) openExpressionEditor(duplicateIndex, duplicate)
+    else transitionToExpression(duplicate, duplicateIndex)
+  }
+
+  const previewExpressionMove = (targetId: string | null) => {
+    const draggedId = draggedExpressionId.current
+    if (!draggedId || draggedId === targetId) return
+    const current = expressionDragPreview.current
+    const dragged = current.find(item => item.id === draggedId)
+    if (!dragged) return
+    const activeId = activeExpression === null ? null : current[activeExpression]?.id
+    const next = current.filter(item => item.id !== draggedId)
+    const targetIndex = targetId ? next.findIndex(item => item.id === targetId) : next.length
+    next.splice(targetIndex < 0 ? next.length : targetIndex, 0, dragged)
+    expressionDragPreview.current = next
+    setExpressions(next)
+    if (activeId) setActiveExpression(next.findIndex(item => item.id === activeId))
+  }
+
+  const commitExpressionMove = (targetId: string | null) => {
+    previewExpressionMove(targetId)
+    persistGlobalExpressions(expressionDragPreview.current)
+    expressionDragOrigin.current = null
+    draggedExpressionId.current = null
+    setDraggingExpressionId(null)
+  }
+
+  const cancelExpressionMove = () => {
+    if (draggedExpressionId.current && expressionDragOrigin.current) {
+      expressionDragPreview.current = expressionDragOrigin.current
+      setExpressions(expressionDragOrigin.current)
+    }
+    expressionDragOrigin.current = null
+    draggedExpressionId.current = null
+    setDraggingExpressionId(null)
   }
 
   const previewExpressionDraft = (draft: Expression) => {
@@ -3251,6 +3362,52 @@ function StudioApp() {
     setSelectedSequenceStepId(duplicate.steps[0]?.id ?? null)
   }
 
+  const duplicateState = (sequence: AvatarSequence) => {
+    if (activeState === sequence.id) stopState(false)
+    const duplicate = duplicateSequence(sequence)
+    const next = [...sequences, duplicate]
+    setSequences(next)
+    persistSequences(next)
+    setSelectedState(duplicate.id)
+  }
+
+  const previewStateMove = (targetId: string | null, targetGroup: string) => {
+    const draggedId = draggedStateId.current
+    if (!draggedId || draggedId === targetId) return
+    const current = stateDragPreview.current
+    const dragged = current.find(sequence => sequence.id === draggedId)
+    if (!dragged) return
+    const next = current.filter(sequence => sequence.id !== draggedId)
+    const moved = { ...dragged, group: targetGroup }
+    if (targetId) {
+      const targetIndex = next.findIndex(sequence => sequence.id === targetId)
+      next.splice(targetIndex < 0 ? next.length : targetIndex, 0, moved)
+    } else {
+      const lastGroupIndex = next.findLastIndex(sequence => sequence.group === targetGroup)
+      next.splice(lastGroupIndex + 1, 0, moved)
+    }
+    stateDragPreview.current = next
+    setSequences(next)
+  }
+
+  const commitStateMove = (targetId: string | null, targetGroup: string) => {
+    previewStateMove(targetId, targetGroup)
+    persistSequences(stateDragPreview.current)
+    stateDragOrigin.current = null
+    draggedStateId.current = null
+    setDraggingStateId(null)
+  }
+
+  const cancelStateMove = () => {
+    if (draggedStateId.current && stateDragOrigin.current) {
+      stateDragPreview.current = stateDragOrigin.current
+      setSequences(stateDragOrigin.current)
+    }
+    stateDragOrigin.current = null
+    draggedStateId.current = null
+    setDraggingStateId(null)
+  }
+
   const deleteSequenceEditing = () => {
     if (!sequenceEditing?.sourceId) return
     const next = sequences.filter(sequence => sequence.id !== sequenceEditing.sourceId)
@@ -3285,8 +3442,38 @@ function StudioApp() {
       ? t(activeSequence.name)
       : activeSequence.name
     : null
+  const expressionById = new Map(expressions.map(item => [item.id, item]))
+  const exportAnimationIdSet = new Set(exportAnimationIds)
+  const selectedExportAnimations = sequences.filter(animation =>
+    exportAnimationIdSet.has(animation.id)
+  )
+  const toggleExportAnimation = (animationId: string) => {
+    setExportAnimationIds(current =>
+      current.includes(animationId)
+        ? current.filter(id => id !== animationId)
+        : [...current, animationId]
+    )
+  }
+  const downloadAvatarExport = () => {
+    if (!selectedExportAnimations.length) return
+    const payload = createAvatarExportPayload(activeAvatar, expressions, selectedExportAnimations)
+    const isReact = exportFormat === 'react'
+    const source = isReact
+      ? generateReactAvatarComponent(payload)
+      : generateJavaScriptAvatarModule(payload)
+    const extension = isReact ? 'tsx' : 'js'
+    const url = URL.createObjectURL(
+      new Blob([source], { type: isReact ? 'text/typescript' : 'text/javascript' })
+    )
+    const link = document.createElement('a')
+    link.href = url
+    link.download = avatarExportFileName(activeAvatar.name, extension)
+    document.body.append(link)
+    link.click()
+    link.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 0)
+  }
   const canvasExpression = editing?.draft ?? expression
-  const canvasColors = editing ? resolveColors(editing.draft, activeAvatar.colors) : null
   const editorPageOpen = bodyEditing || editing !== null || sequenceEditing !== null
 
   useEffect(() => {
@@ -3295,7 +3482,6 @@ function StudioApp() {
     return () => cancelAnimationFrame(frame)
   }, [editorPageOpen, focusAvatarName])
 
-  const selectedSequence = sequences.find(sequence => sequence.id === selectedState) ?? sequences[0]
   const updateAvatarEyeDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
     const next = updateEyeDimension(
       { ...defaultExpression, ...activeAvatarEyes },
@@ -3353,8 +3539,8 @@ function StudioApp() {
         className="stage-column"
         style={
           {
-            '--avatar-body-color': canvasColors?.body ?? renderedColors.body,
-            '--avatar-eye-color': canvasColors?.eyes ?? renderedColors.eyes,
+            '--avatar-body-color': renderedColors.body,
+            '--avatar-eye-color': renderedColors.eyes,
           } as CSSProperties
         }
       >
@@ -3418,7 +3604,7 @@ function StudioApp() {
       </motion.section>
 
       <main
-        className={`inspector ${editing ? 'expression-workspace-active' : sequenceEditing ? 'sequence-workspace-active' : bodyEditing ? 'body-workspace' : 'studio-workspace'}`}
+        className={`inspector ${editing ? 'expression-workspace-active' : sequenceEditing ? 'sequence-workspace-active' : bodyEditing ? 'body-workspace' : 'studio-workspace'}${activeSequence && !editorPageOpen ? ' state-player-active' : ''}`}
       >
         {sequenceEditing && !editing && (
           <motion.div
@@ -3513,25 +3699,11 @@ function StudioApp() {
                   {t('Choisis la forme principale puis assemble les primitives autour d’elle.')}
                 </p>
               </div>
-              <div className="workspace-header-actions">
-                <StatePlayer
-                  name={activeSequenceLabel}
-                  playing={statePlaying}
-                  onToggle={toggleStatePlayback}
-                  onStop={stopState}
-                />
-              </div>
             </header>
           ) : (
             <>
               <header className="inspector-header">
                 <h1>Avatar Studio</h1>
-                <StatePlayer
-                  name={activeSequenceLabel}
-                  playing={statePlaying}
-                  onToggle={toggleStatePlayback}
-                  onStop={stopState}
-                />
               </header>
               <section className="avatar-shelf" aria-label={t('Choisir un avatar')}>
                 <div className="avatar-shelf-heading">
@@ -3628,42 +3800,20 @@ function StudioApp() {
                   ))}
                   <Button
                     variant="outline"
-                    className="avatar-add"
+                    className="avatar-add creation-card"
                     onClick={createNewAvatar}
                     aria-label={t('Nouvel avatar')}
                   >
                     <Plus />
                   </Button>
                 </div>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <Button
-                          className="avatar-edit"
-                          variant="secondary"
-                          size="icon"
-                          aria-label={`${t('Modifier')} ${activeAvatar.name}`}
-                          onClick={() => {
-                            setFocusAvatarName(false)
-                            activateAvatar(activeAvatar.id, true)
-                          }}
-                        />
-                      }
-                    >
-                      <Pencil />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {t('Modifier')} {activeAvatar.name}
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
               </section>
               <Tabs value={mode} onValueChange={value => setMode(value as Mode)}>
                 <TabsList className="tabs" aria-label={t('Mode d’édition')}>
                   <TabsTrigger value="manual">{t('Pose')}</TabsTrigger>
                   <TabsTrigger value="expressions">{t('Expressions')}</TabsTrigger>
-                  <TabsTrigger value="states">{t('États')}</TabsTrigger>
+                  <TabsTrigger value="states">{t('Animations')}</TabsTrigger>
+                  <TabsTrigger value="export">{t('Exporter')}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </>
@@ -3690,7 +3840,9 @@ function StudioApp() {
                         aria-pressed={selectedBodyNodeId === 'primary'}
                         onClick={() => selectBodyNode('primary')}
                       >
-                        <span className="body-node-icon">●</span>
+                        <span className="body-node-icon body-node-icon-primary">
+                          <SurfaceThumbnail surface={surface} />
+                        </span>
                         <span>
                           <strong>{t('Forme principale')}</strong>
                           <small>
@@ -3706,7 +3858,9 @@ function StudioApp() {
                           aria-pressed={selectedBodyNodeId === node.id}
                           onClick={() => selectBodyNode(node.id)}
                         >
-                          <span className="body-node-icon">◇</span>
+                          <span className="body-node-icon">
+                            <SurfaceThumbnail surface={node.surface} />
+                          </span>
                           <span>
                             <strong>{t(node.name)}</strong>
                             <small>{t(surfaceLabels[node.surface.type])}</small>
@@ -3721,14 +3875,15 @@ function StudioApp() {
                       <div>
                         {bodyPrimitiveTypes.map(type => (
                           <Button
+                            className="surface-card body-add-card"
                             variant="outline"
-                            size="sm"
                             type="button"
                             key={type}
                             disabled={bodyNodes.length >= MAX_BODY_NODES}
                             onClick={() => addBodyNode(type)}
                           >
-                            + {t(surfaceLabels[type])}
+                            <SurfaceThumbnail surface={surfacePresets[type]} />
+                            <span>{t(surfaceLabels[type])}</span>
                           </Button>
                         ))}
                       </div>
@@ -4437,25 +4592,50 @@ function StudioApp() {
                     </div>
                   </InspectorCard>
                   <InspectorCard>
-                    <PanelTitle
-                      level={3}
-                      title="Rotation locale"
-                      subtitle="Inclinaison propre à chaque œil."
-                    />
+                    <div className="panel-inline-title">
+                      <PanelTitle
+                        level={3}
+                        title="Rotation locale"
+                        subtitle="Inclinaison propre à chaque œil."
+                      />
+                      <LinkButton
+                        linked={linked.rotation}
+                        label="Lier les rotations"
+                        onClick={() =>
+                          setLinked(current => ({ ...current, rotation: !current.rotation }))
+                        }
+                      />
+                    </div>
                     <div className="eye-columns">
                       <NumericField
                         label="Œil gauche"
                         value={expression.leftAngle}
                         unit="°"
-                        onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                        onChange={value => updateImmediate({ ...expression, leftAngle: value })}
+                        onActiveChange={active =>
+                          updateHighlight(active ? (linked.rotation ? 'both' : 'left') : null)
+                        }
+                        onChange={value =>
+                          updateImmediate({
+                            ...expression,
+                            leftAngle: value,
+                            ...(linked.rotation ? { rightAngle: -value } : {}),
+                          })
+                        }
                       />
                       <NumericField
                         label="Œil droit"
                         value={expression.rightAngle}
                         unit="°"
-                        onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                        onChange={value => updateImmediate({ ...expression, rightAngle: value })}
+                        onActiveChange={active =>
+                          updateHighlight(active ? (linked.rotation ? 'both' : 'right') : null)
+                        }
+                        onChange={value =>
+                          updateImmediate({
+                            ...expression,
+                            rightAngle: value,
+                            ...(linked.rotation ? { leftAngle: -value } : {}),
+                          })
+                        }
                       />
                     </div>
                   </InspectorCard>
@@ -4532,33 +4712,72 @@ function StudioApp() {
               </div>
               <div className="expression-grid">
                 {expressions.map((preset, index) => (
-                  <ExpressionCard
-                    key={index}
-                    expression={preset}
-                    index={index}
-                    active={activeExpression === index}
-                    surface={surface}
-                    bodyNodes={bodyNodes}
-                    colors={activeAvatar.colors}
-                    avatarEyes={activeAvatarEyes}
-                    previewId={String(index)}
-                    onSelect={() => transitionToExpression(preset, index)}
-                    onEdit={() => openExpressionEditor(index, preset)}
-                    onDuplicate={() => duplicateExpression(index, preset)}
-                    onDelete={() => {
-                      openExpressionEditor(index, preset)
-                      setDeleteExpressionOpen(true)
+                  <motion.div
+                    className="expression-sort-item"
+                    data-dragging={draggingExpressionId === preset.id || undefined}
+                    key={preset.id}
+                    layout="position"
+                    layoutId={`expression-${preset.id}`}
+                    animate={{
+                      opacity: draggingExpressionId === preset.id ? 0.28 : 1,
+                      scale: draggingExpressionId === preset.id ? 0.96 : 1,
                     }}
-                  />
+                    transition={
+                      reduceMotion
+                        ? { duration: 0 }
+                        : { type: 'spring', stiffness: 520, damping: 42, mass: 0.7 }
+                    }
+                  >
+                    <ExpressionCard
+                      expression={preset}
+                      index={index}
+                      active={activeExpression === index}
+                      surface={surface}
+                      bodyNodes={bodyNodes}
+                      colors={activeAvatar.colors}
+                      avatarEyes={activeAvatarEyes}
+                      previewId={String(index)}
+                      onSelect={() => transitionToExpression(preset, index)}
+                      onEdit={() => openExpressionEditor(index, preset)}
+                      onDuplicate={() => duplicateExpression(index, preset)}
+                      onDelete={() => {
+                        openExpressionEditor(index, preset)
+                        setDeleteExpressionOpen(true)
+                      }}
+                      draggable
+                      onDragStart={event => {
+                        expressionDragOrigin.current = expressions
+                        expressionDragPreview.current = expressions
+                        draggedExpressionId.current = preset.id
+                        setDraggingExpressionId(preset.id)
+                        event.dataTransfer.effectAllowed = 'move'
+                      }}
+                      onDragEnter={() => previewExpressionMove(preset.id)}
+                      onDragOver={event => {
+                        event.preventDefault()
+                        event.dataTransfer.dropEffect = 'move'
+                      }}
+                      onDrop={event => {
+                        event.preventDefault()
+                        commitExpressionMove(preset.id)
+                      }}
+                      onDragEnd={cancelExpressionMove}
+                    />
+                  </motion.div>
                 ))}
                 <Button
-                  className="expression-add"
+                  className="expression-add creation-card"
                   variant="outline"
                   type="button"
+                  onDragOver={event => event.preventDefault()}
+                  onDrop={event => {
+                    event.preventDefault()
+                    commitExpressionMove(null)
+                  }}
                   onClick={() => openExpressionEditor(null, expression)}
                   aria-label={t('Nouvelle expression')}
                 >
-                  +
+                  <Plus />
                 </Button>
               </div>
             </InspectorCard>
@@ -4601,22 +4820,21 @@ function StudioApp() {
               <div className="preset-header">
                 <div>
                   <p className="eyebrow">
-                    {sequences.length} {t('séquences')}
+                    {sequences.length} {t('animations')}
                   </p>
-                  <h2>{t('États animés')}</h2>
+                  <h2>{t('Animations')}</h2>
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => openSequenceEditor()}
-                  aria-label={t('Nouvelle séquence')}
-                >
-                  <Plus />
-                </Button>
               </div>
               <div className="state-groups">
                 {groupSequences(sequences).map(group => (
-                  <div key={group.name}>
+                  <div
+                    key={group.name}
+                    onDragOver={event => event.preventDefault()}
+                    onDrop={event => {
+                      event.preventDefault()
+                      commitStateMove(null, group.name)
+                    }}
+                  >
                     <strong>
                       {group.sequences.every(sequence => sequence.builtIn)
                         ? t(group.name)
@@ -4626,18 +4844,35 @@ function StudioApp() {
                       {group.sequences.map(sequence => {
                         const firstStep = sequence.steps[0]
                         const firstExpression = firstStep
-                          ? expressions[
-                              findExpressionIndex(expressions, firstStep.expressionId)
-                            ]
+                          ? expressionById.get(firstStep.expressionId)
                           : undefined
-                        return (
+                        const card = (
                           <Button
                             className="expression-card state-card"
                             variant="outline"
                             type="button"
-                            key={sequence.id}
+                            draggable
                             aria-pressed={selectedState === sequence.id}
-                            onClick={() => setSelectedState(sequence.id)}
+                            onDragStart={event => {
+                              stateDragOrigin.current = sequences
+                              stateDragPreview.current = sequences
+                              draggedStateId.current = sequence.id
+                              setDraggingStateId(sequence.id)
+                              event.dataTransfer.effectAllowed = 'move'
+                            }}
+                            onDragEnter={() => previewStateMove(sequence.id, group.name)}
+                            onDragOver={event => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              event.dataTransfer.dropEffect = 'move'
+                            }}
+                            onDrop={event => {
+                              event.preventDefault()
+                              event.stopPropagation()
+                              commitStateMove(sequence.id, group.name)
+                            }}
+                            onDragEnd={cancelStateMove}
+                            onClick={() => launchSequence(sequence)}
                             onDoubleClick={() => openSequenceEditor(sequence)}
                           >
                             <ExpressionPreview
@@ -4651,122 +4886,321 @@ function StudioApp() {
                             <span>{sequence.builtIn ? t(sequence.name) : sequence.name}</span>
                           </Button>
                         )
+                        return (
+                          <motion.div
+                            className="state-sort-item"
+                            data-dragging={draggingStateId === sequence.id || undefined}
+                            key={sequence.id}
+                            layout="position"
+                            layoutId={`state-${sequence.id}`}
+                            animate={{
+                              opacity: draggingStateId === sequence.id ? 0.28 : 1,
+                              scale: draggingStateId === sequence.id ? 0.96 : 1,
+                            }}
+                            transition={
+                              reduceMotion
+                                ? { duration: 0 }
+                                : { type: 'spring', stiffness: 520, damping: 42, mass: 0.7 }
+                            }
+                          >
+                            <ContextMenu>
+                              <ContextMenuTrigger render={card} />
+                              <ContextMenuContent>
+                                <ContextMenuItem onClick={() => openSequenceEditor(sequence)}>
+                                  <Pencil />
+                                  {t('Modifier')}
+                                </ContextMenuItem>
+                                <ContextMenuItem onClick={() => duplicateState(sequence)}>
+                                  <Copy />
+                                  {t('Dupliquer')}
+                                </ContextMenuItem>
+                                <ContextMenuSeparator />
+                                <ContextMenuItem
+                                  variant="destructive"
+                                  onClick={() => {
+                                    openSequenceEditor(sequence)
+                                    setDeleteSequenceOpen(true)
+                                  }}
+                                >
+                                  <Trash2 />
+                                  {t('Supprimer')}
+                                </ContextMenuItem>
+                              </ContextMenuContent>
+                            </ContextMenu>
+                          </motion.div>
+                        )
                       })}
                     </div>
                   </div>
                 ))}
+                <div className="state-buttons">
+                  <Button
+                    className="expression-add creation-card"
+                    variant="outline"
+                    type="button"
+                    onClick={() => openSequenceEditor()}
+                    aria-label={t('Nouvelle animation')}
+                  >
+                    <Plus />
+                  </Button>
+                </div>
               </div>
             </InspectorCard>
-            {selectedSequence && (
-              <InspectorCard className="state-detail">
-                <div className="state-detail-header">
+          </div>
+        )}
+
+        {!sequenceEditing && !editing && !bodyEditing && mode === 'export' && (
+          <div className="panel-stack export-panel">
+            <InspectorCard>
+              <PanelTitle
+                title="Exporter l’avatar"
+                subtitle="Télécharge un composant autonome avec les animations de ton choix."
+              />
+              <div className="export-avatar-summary">
+                <ExpressionPreview
+                  expression={expressions[0] ?? defaultExpression}
+                  surface={activeAvatar.body.primary}
+                  bodyNodes={activeAvatar.body.nodes}
+                  colors={activeAvatar.colors}
+                  avatarEyes={activeAvatarEyes}
+                  id={`export-avatar-${activeAvatar.id}`}
+                />
+                <div>
+                  <small>{t('Avatar sélectionné')}</small>
+                  <strong>{activeAvatar.name}</strong>
+                </div>
+              </div>
+            </InspectorCard>
+
+            <InspectorCard>
+              <PanelTitle
+                title="Format"
+                subtitle="Choisis l’intégration correspondant à ton projet."
+              />
+              <div className="export-format-grid">
+                <Button
+                  variant="outline"
+                  type="button"
+                  aria-pressed={exportFormat === 'react'}
+                  onClick={() => setExportFormat('react')}
+                >
+                  <FileCode2 />
+                  <span>
+                    <strong>React / TypeScript</strong>
+                    <small>{t('Composant TSX autonome')}</small>
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  type="button"
+                  aria-pressed={exportFormat === 'javascript'}
+                  onClick={() => setExportFormat('javascript')}
+                >
+                  <FileCode2 />
+                  <span>
+                    <strong>{t('Module JavaScript')}</strong>
+                    <small>{t('Module ES autonome')}</small>
+                  </span>
+                </Button>
+              </div>
+            </InspectorCard>
+
+            <InspectorCard>
+              <div className="preset-header export-animation-header">
+                <div>
+                  <p className="eyebrow">
+                    {selectedExportAnimations.length}/{sequences.length} {t('sélectionnées')}
+                  </p>
+                  <h2>{t('Animations à exporter')}</h2>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  type="button"
+                  onClick={() =>
+                    setExportAnimationIds(
+                      selectedExportAnimations.length === sequences.length
+                        ? []
+                        : sequences.map(animation => animation.id)
+                    )
+                  }
+                >
+                  {t(
+                    selectedExportAnimations.length === sequences.length
+                      ? 'Tout désélectionner'
+                      : 'Tout sélectionner'
+                  )}
+                </Button>
+              </div>
+              <div className="state-buttons export-animation-grid">
+                {sequences.map(animation => {
+                  const firstStep = animation.steps[0]
+                  const firstExpression = firstStep
+                    ? expressionById.get(firstStep.expressionId)
+                    : undefined
+                  return (
+                    <Button
+                      className="expression-card state-card"
+                      variant="outline"
+                      type="button"
+                      key={animation.id}
+                      aria-pressed={exportAnimationIdSet.has(animation.id)}
+                      onClick={() => toggleExportAnimation(animation.id)}
+                    >
+                      <ExpressionPreview
+                        expression={firstExpression ?? expressions[0] ?? defaultExpression}
+                        surface={surface}
+                        bodyNodes={bodyNodes}
+                        colors={activeAvatar.colors}
+                        avatarEyes={activeAvatarEyes}
+                        id={`export-animation-${animation.id}`}
+                      />
+                      <span>{animation.builtIn ? t(animation.name) : animation.name}</span>
+                    </Button>
+                  )
+                })}
+              </div>
+            </InspectorCard>
+
+            <Button
+              className="export-download"
+              type="button"
+              disabled={!selectedExportAnimations.length}
+              onClick={downloadAvatarExport}
+            >
+              <Download />
+              {t(
+                exportFormat === 'react' ? 'Télécharger le composant TSX' : 'Télécharger le module'
+              )}
+            </Button>
+          </div>
+        )}
+        {activeSequence && !editorPageOpen && (
+          <motion.footer
+            className={`state-playback-footer${statePlayerExpanded ? ' is-expanded' : ''}`}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Button
+              className="state-playback-expand"
+              variant="outline"
+              size="icon-sm"
+              type="button"
+              aria-expanded={statePlayerExpanded}
+              aria-label={t(
+                statePlayerExpanded
+                  ? 'Masquer les détails de l’animation'
+                  : 'Afficher les détails de l’animation'
+              )}
+              onClick={() => setStatePlayerExpanded(expanded => !expanded)}
+            >
+              {statePlayerExpanded ? <ChevronDown /> : <ChevronUp />}
+            </Button>
+            {statePlayerExpanded && (
+              <motion.div
+                className="state-playback-details"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="state-playback-details-header">
                   <div>
-                    <h2>
-                      {selectedSequence.builtIn ? t(selectedSequence.name) : selectedSequence.name}
-                    </h2>
+                    <p className="eyebrow">{t('Détails de l’animation')}</p>
+                    <h2>{activeSequenceLabel}</h2>
                     <p>
-                      {selectedSequence.builtIn
-                        ? t(selectedSequence.description)
-                        : selectedSequence.description}
+                      {activeSequence.builtIn
+                        ? t(activeSequence.description)
+                        : activeSequence.description}
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="icon-sm"
-                    onClick={() => openSequenceEditor(selectedSequence)}
-                    aria-label={t('Modifier la séquence')}
-                  >
-                    <Pencil />
-                  </Button>
+                  <Badge variant="secondary">
+                    {t('Mode de lecture')} · {t(activeSequence.playbackMode)}
+                  </Badge>
                 </div>
-                <div className="state-expression-section">
-                  <div className="state-section-heading">
-                    <div>
-                      <h3>{t('Expressions de la séquence')}</h3>
-                      <p>{t('Chaque étape possède sa propre durée et sa propre transition.')}</p>
-                    </div>
-                    <Badge variant="secondary">
-                      {selectedSequence.steps.length} expressions ·{' '}
-                      {t(selectedSequence.playbackMode)}
-                    </Badge>
+                <div className="state-playback-detail-grid">
+                  <div>
+                    <span>{t('Expressions')}</span>
+                    <strong>{activeSequence.steps.length}</strong>
+                    <small>
+                      {activeSequence.steps
+                        .map(step => formatSeconds(step.holdMs, language))
+                        .join(' · ')}
+                    </small>
                   </div>
-                  <div className="expression-grid state-expression-grid">
-                    {selectedSequence.steps.map((step, position) => {
-                      const expressionIndex = findExpressionIndex(expressions, step.expressionId)
-                      const preset = expressions[expressionIndex]
-                      if (!preset) return null
-                      return (
-                        <div className="state-step-preview" key={step.id}>
-                          <ExpressionCard
-                            expression={preset}
-                            index={expressionIndex}
-                            active={activeExpression === expressionIndex}
-                            surface={surface}
-                            bodyNodes={bodyNodes}
-                            colors={activeAvatar.colors}
-                            avatarEyes={activeAvatarEyes}
-                            previewId={`state-${selectedSequence.id}-${position}-${step.expressionId}`}
-                            onSelect={() => transitionToExpression(preset, expressionIndex, step)}
-                            onEdit={() => openExpressionEditor(expressionIndex, preset)}
-                          />
-                          <small>{formatSeconds(step.holdMs, language)}</small>
-                        </div>
-                      )
-                    })}
+                  <div>
+                    <span>{t('Premier clignement')}</span>
+                    <strong>
+                      {activeSequence.blink.enabled
+                        ? formatSeconds(activeSequence.blink.initialDelayMs, language)
+                        : t('Désactivé')}
+                    </strong>
+                    <small>{t('après le lancement')}</small>
+                  </div>
+                  <div>
+                    <span>{t('Intervalle du clignement')}</span>
+                    <strong>
+                      {formatSeconds(activeSequence.blink.minIntervalMs, language)}–
+                      {formatSeconds(activeSequence.blink.maxIntervalMs, language)}
+                    </strong>
+                    <small>{t('tirage aléatoire')}</small>
+                  </div>
+                  <div>
+                    <span>{t('Durée du clignement')}</span>
+                    <strong>{activeSequence.blink.durationMs} ms</strong>
+                    <small>{t('fermeture et ouverture')}</small>
                   </div>
                 </div>
-                <div className="state-blink-section">
-                  <div className="state-section-heading">
-                    <div>
-                      <h3>{t('Logique de clignement')}</h3>
-                      <p>
-                        {t('Le rythme reste naturel grâce à un intervalle légèrement aléatoire.')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="state-logic-grid">
-                    <div>
-                      <span>{t('Premier clignement')}</span>
-                      <strong>
-                        {selectedSequence.blink.enabled
-                          ? formatSeconds(selectedSequence.blink.initialDelayMs, language)
-                          : t('Désactivé')}
-                      </strong>
-                      <small>{t('après le lancement')}</small>
-                    </div>
-                    <div>
-                      <span>{t('Intervalle')}</span>
-                      <strong>
-                        {formatSeconds(selectedSequence.blink.minIntervalMs, language)}–
-                        {formatSeconds(selectedSequence.blink.maxIntervalMs, language)}
-                      </strong>
-                      <small>{t('tirage aléatoire')}</small>
-                    </div>
-                    <div>
-                      <span>{t('Durée')}</span>
-                      <strong>{selectedSequence.blink.durationMs} ms</strong>
-                      <small>{t('fermeture et ouverture')}</small>
-                    </div>
-                    <div>
-                      <span>{t('Mode de lecture')}</span>
-                      <strong>{t(selectedSequence.playbackMode)}</strong>
-                      <small>{t('comportement de la timeline')}</small>
-                    </div>
-                  </div>
-                </div>
-                <div className="button-row">
-                  <Button type="button" onClick={() => launchState(selectedSequence.id)}>
-                    {t(activeState === selectedSequence.id ? 'Relancer' : 'Lancer')}
-                  </Button>
-                  {activeState === selectedSequence.id && (
-                    <Button variant="outline" type="button" onClick={toggleStatePlayback}>
-                      {t(statePlaying ? 'Pause' : 'Reprendre')}
-                    </Button>
-                  )}
-                </div>
-              </InspectorCard>
+              </motion.div>
             )}
-          </div>
+            <div className="state-playback-bar">
+              <div className="state-playback-timeline">
+                {activeSequence.steps.map((step, position) => {
+                  const expressionIndex = findExpressionIndex(expressions, step.expressionId)
+                  const preset = expressions[expressionIndex]
+                  if (!preset) return null
+                  return (
+                    <Button
+                      className="state-playback-step"
+                      variant="outline"
+                      type="button"
+                      key={step.id}
+                      aria-pressed={activeExpression === expressionIndex}
+                      onClick={() => transitionToExpression(preset, expressionIndex, step)}
+                    >
+                      <ExpressionPreview
+                        expression={preset}
+                        surface={surface}
+                        bodyNodes={bodyNodes}
+                        colors={activeAvatar.colors}
+                        avatarEyes={activeAvatarEyes}
+                        id={`player-${activeSequence.id}-${position}`}
+                      />
+                      {playbackVisual.position === position && (
+                        <span
+                          className="state-playback-progress"
+                          key={`${step.id}-${playbackVisual.run}`}
+                          aria-hidden="true"
+                          style={
+                            {
+                              animationDuration: `${Math.max(playbackVisual.durationMs, 1)}ms`,
+                              animationPlayState: statePlaying ? 'running' : 'paused',
+                            } as CSSProperties
+                          }
+                        />
+                      )}
+                    </Button>
+                  )
+                })}
+              </div>
+              <div className="state-playback-controls">
+                <StatePlayer
+                  name={activeSequenceLabel}
+                  playing={statePlaying}
+                  onToggle={toggleStatePlayback}
+                  onStop={stopState}
+                />
+              </div>
+            </div>
+          </motion.footer>
         )}
       </main>
       <AlertDialog open={deleteAvatarOpen} onOpenChange={setDeleteAvatarOpen}>
@@ -4802,9 +5236,9 @@ function StudioApp() {
       <AlertDialog open={deleteSequenceOpen} onOpenChange={setDeleteSequenceOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('Supprimer cette séquence ?')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('Supprimer cette animation ?')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('Cette action supprimera définitivement cet état animé.')}
+              {t('Cette action supprimera définitivement cette animation.')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -4859,7 +5293,7 @@ function StatePlayer({
   const { t } = useStudioLanguage()
   if (!name) return null
   return (
-    <div className="state-player" aria-label={t(`État en cours : ${name}`)}>
+    <div className="state-player" aria-label={t(`Animation en cours : ${name}`)}>
       <span className={playing ? 'is-playing' : 'is-paused'}>
         <i />
         <span>
@@ -4873,10 +5307,10 @@ function StatePlayer({
         aria-label={t(playing ? `Mettre ${name} en pause` : `Reprendre ${name}`)}
         onClick={onToggle}
       >
-        {playing ? <Pause /> : <Play />}
+        {playing ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}
       </Button>
       <Button variant="ghost" size="icon-sm" aria-label={t(`Arrêter ${name}`)} onClick={onStop}>
-        <Square />
+        <Square fill="currentColor" />
       </Button>
     </div>
   )

@@ -70,7 +70,8 @@ export const createInitialSequences = (): AvatarSequence[] =>
         id,
         name: id,
         group,
-        description: stateNotes[id] ?? 'Cet état enchaîne un pool de presets et des clignements.',
+        description:
+          stateNotes[id] ?? 'Cette animation enchaîne un pool de presets et des clignements.',
         builtIn: true,
         playbackMode: 'loop',
         steps: (statePools[id] ?? [0]).map((expressionIndex, index) => ({
@@ -232,7 +233,7 @@ export const groupSequences = (sequences: AvatarSequence[]) => {
 
 export const createSequence = (expressionId = initialExpressions[0].id): AvatarSequence => ({
   id: createId('sequence'),
-  name: 'Untitled sequence',
+  name: 'Untitled animation',
   group: 'Custom',
   description: '',
   builtIn: false,

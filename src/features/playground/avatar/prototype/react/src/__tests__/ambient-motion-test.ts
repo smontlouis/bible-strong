@@ -1,4 +1,4 @@
-import { applyAmbientMotion, hasAmbientMotion } from '../ambientMotion'
+import { ambientBodyOffset, applyAmbientMotion, hasAmbientMotion } from '../ambientMotion'
 import { defaultExpression } from '../presets'
 
 describe('perpetual expression motion', () => {
@@ -30,5 +30,17 @@ describe('perpetual expression motion', () => {
     expect(animated.headY).not.toBe(expression.headY)
     expect(animated.positionXLeft).toBe(expression.positionXLeft)
     expect(animated.positionYRight).toBe(expression.positionYRight)
+  })
+
+  it('visibly offsets a symmetric body when it shakes', () => {
+    const expression = { ...defaultExpression, bodyMotion: 'shake' as const }
+
+    expect(ambientBodyOffset(expression, 500)).not.toEqual({ x: 0, y: 0 })
+  })
+
+  it('visibly offsets a symmetric body during slow drift', () => {
+    const expression = { ...defaultExpression, bodyMotion: 'slowDrift' as const }
+
+    expect(ambientBodyOffset(expression, 1500)).not.toEqual({ x: 0, y: 0 })
   })
 })

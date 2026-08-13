@@ -42,6 +42,24 @@ const saccade = (elapsedMs: number, axis: number, seed: number) => {
 export const hasAmbientMotion = (expression: Expression) =>
   expression.eyeMotion !== 'none' || expression.bodyMotion !== 'none'
 
+export const ambientBodyOffset = (expression: Expression, elapsedMs: number) => {
+  const seed = expressionSeed(expression)
+  if (expression.bodyMotion === 'slowDrift') {
+    return {
+      x: smoothNoise(elapsedMs, 3, seed, 2900) * 1.45,
+      y: smoothNoise(elapsedMs, 4, seed, 3700) * 1.1,
+    }
+  }
+  if (expression.bodyMotion === 'shake') {
+    const time = elapsedMs / 1000
+    return {
+      x: (Math.sin(time * 31) + Math.sin(time * 53) * 0.45) * 1.35,
+      y: (Math.sin(time * 37) + Math.sin(time * 61) * 0.4) * 1.1,
+    }
+  }
+  return { x: 0, y: 0 }
+}
+
 export const applyAmbientMotion = (expression: Expression, elapsedMs: number): Expression => {
   const next = { ...expression }
   const seed = expressionSeed(expression)

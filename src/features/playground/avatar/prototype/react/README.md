@@ -10,7 +10,7 @@ yarn avatar:prototype
 Puis ouvrir `http://127.0.0.1:5173/`.
 
 - React gère une bibliothèque locale d’avatars. Le premier avatar s’appelle Strobi.
-- Chaque avatar conserve son propre corps ; les expressions et les états restent globaux au Studio.
+- Chaque avatar conserve son propre corps ; les expressions et les animations restent globales au Studio.
 - La galerie Avatars affiche chaque corps avec l’expression 00 et ouvre sa construction au double-clic.
 - Le constructeur de corps s’ouvre à la création d’un avatar ou via « Modifier le corps ».
 - Motion gère les ressorts, les interruptions et les clignements.
@@ -26,3 +26,6 @@ Puis ouvrir `http://127.0.0.1:5173/`.
 - Le cube, le cylindre et le cône proposent aussi un morphing global vers l’ellipsoïde.
 - Un repère facial commun conserve les expressions puis les projette sur la surface réelle.
 - `geometry.ts` reste indépendant du framework et projette expressions et maillages sur la surface active.
+- L’onglet Export génère soit un composant React/TypeScript autonome, soit un module JavaScript ES autonome.
+- Le module JavaScript expose `createAvatar(target, options)`, puis `play(name)`, `pause()`, `stop()` et `destroy()`.
+- Les exports n’embarquent que les animations sélectionnées et les expressions qu’elles utilisent.

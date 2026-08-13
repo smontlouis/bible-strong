@@ -1019,6 +1019,17 @@ const projectedEllipsoidPath = (pose: AvatarPose, surface: SurfaceConfig) => {
     surface.height / 2,
     surface.depth / 2,
   ])
+  const isSphere = surface.width === surface.height && surface.height === surface.depth
+  if (ellipse && isSphere) {
+    const radius = (ellipse.majorRadius + ellipse.minorRadius) / 2
+    return ellipsePath({
+      centerX: 0,
+      centerY: 0,
+      majorRadius: radius,
+      minorRadius: radius,
+      rotation: 0,
+    })
+  }
   return ellipse ? ellipsePath(ellipse) : null
 }
 

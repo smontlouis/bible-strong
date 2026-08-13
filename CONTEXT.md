@@ -110,13 +110,13 @@ The avatar's current temporary visual configuration. A Pose is not persisted dir
 A saved global visual preset whose eye values are relative to an Avatar's Neutral appearance. Optional color overrides are temporary and do not change the Avatar.
 _Avoid_: Pose preset
 
-**State**:
-An animated sequence of Expressions, including its transitions and blink behavior.
-_Avoid_: Animation
+**Animation**:
+A saved animated sequence of Expressions, including its transitions and blink behavior.
+_Avoid_: State in user-facing copy
 
 **Playback**:
-The active execution of one State. It exclusively controls the animated Pose until a direct user manipulation pauses it.
-_Avoid_: State
+The active execution of one Animation. It exclusively controls the animated Pose until a direct user manipulation pauses it.
+_Avoid_: Animation when referring specifically to the running playback instance
 
 ## Domain Relationships
 

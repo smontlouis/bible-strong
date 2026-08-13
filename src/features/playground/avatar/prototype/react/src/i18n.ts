@@ -19,7 +19,7 @@ const english: Record<string, string> = {
   'Avatar procédural': 'Procedural avatar',
   'Gizmo de rotation': 'Rotation gizmo',
   'Retour aux expressions': 'Back to expressions',
-  'Retour aux états': 'Back to states',
+  'Retour aux animations': 'Back to animations',
   'Retour au studio': 'Back to studio',
   'Preset en mémoire': 'Saved preset',
   'Nouvelle expression': 'New expression',
@@ -58,7 +58,24 @@ const english: Record<string, string> = {
   'Mode d’édition': 'Editing mode',
   Pose: 'Pose',
   Expressions: 'Expressions',
-  États: 'States',
+  Animations: 'Animations',
+  Exporter: 'Export',
+  'Exporter l’avatar': 'Export avatar',
+  'Télécharge un composant autonome avec les animations de ton choix.':
+    'Download a standalone component with the animations you choose.',
+  'Avatar sélectionné': 'Selected avatar',
+  Format: 'Format',
+  'Choisis l’intégration correspondant à ton projet.':
+    'Choose the integration that matches your project.',
+  'Composant TSX autonome': 'Standalone TSX component',
+  'Module JavaScript': 'JavaScript module',
+  'Module ES autonome': 'Standalone ES module',
+  sélectionnées: 'selected',
+  'Animations à exporter': 'Animations to export',
+  'Tout sélectionner': 'Select all',
+  'Tout désélectionner': 'Deselect all',
+  'Télécharger le composant TSX': 'Download TSX component',
+  'Télécharger le module': 'Download module',
   'Construction, forme et couleur de la tête de l’avatar.':
     'Build, shape and color of the avatar head.',
   'Une forme principale porte les yeux. Les autres primitives se placent autour d’elle.':
@@ -123,27 +140,25 @@ const english: Record<string, string> = {
   'Motion interpole les valeurs et notre moteur effectue le slerp quaternion.':
     'Motion interpolates values while the engine performs quaternion slerp.',
   'Vitesse du ressort': 'Spring speed',
-  'Un état est en cours de lecture': 'A state is currently playing',
-  'Mettez l’état en pause avant de manipuler les paramètres de pose.':
-    'Pause the state before adjusting pose parameters.',
-  'Mettez l’état en pause avant de choisir ou personnaliser une expression.':
-    'Pause the state before selecting or customizing an expression.',
+  'Une animation est en cours de lecture': 'An animation is currently playing',
+  'Mettez l’animation en pause avant de manipuler les paramètres de pose.':
+    'Pause the animation before adjusting pose parameters.',
+  'Mettez l’animation en pause avant de choisir ou personnaliser une expression.':
+    'Pause the animation before selecting or customizing an expression.',
   Cligner: 'Blink',
   'Expression aléatoire': 'Random expression',
-  Séquences: 'Sequences',
   'Cycle de vie': 'Life cycle',
   Réactions: 'Reactions',
-  'États animés': 'Animated states',
-  'Éditeur de séquence': 'Sequence editor',
-  'Modifier la séquence': 'Edit sequence',
-  'Nouvelle séquence': 'New sequence',
-  'Compose les expressions, leur cadence et les clignements de cet état.':
-    'Compose the expressions, timing and blinks for this state.',
-  'Prévisualiser la séquence': 'Preview sequence',
-  'Arrêter la séquence': 'Stop sequence',
+  'Éditeur d’animation': 'Animation editor',
+  'Modifier l’animation': 'Edit animation',
+  'Nouvelle animation': 'New animation',
+  'Compose les expressions, leur cadence et les clignements de cette animation.':
+    'Compose the expressions, timing and blinks for this animation.',
+  'Prévisualiser l’animation': 'Preview animation',
+  'Arrêter l’animation': 'Stop animation',
   Identité: 'Identity',
-  'Nom, catégorie et comportement de lecture de la séquence.':
-    'Sequence name, category and playback behavior.',
+  'Nom, catégorie et comportement de lecture de l’animation.':
+    'Animation name, category and playback behavior.',
   Nom: 'Name',
   Catégorie: 'Category',
   Description: 'Description',
@@ -174,18 +189,21 @@ const english: Record<string, string> = {
   'Activer les clignements': 'Enable blinking',
   'Intervalle minimum': 'Minimum interval',
   'Intervalle maximum': 'Maximum interval',
+  'Intervalle du clignement': 'Blink interval',
   'Durée du clignement': 'Blink duration',
-  séquences: 'sequences',
+  animations: 'animations',
   'Chaque étape possède sa propre durée et sa propre transition.':
     'Each step has its own duration and transition.',
   Désactivé: 'Disabled',
   'comportement de la timeline': 'timeline behavior',
-  'Supprimer cette séquence ?': 'Delete this sequence?',
-  'Cette action supprimera définitivement cet état animé.':
-    'This permanently deletes this animated state.',
+  'Supprimer cette animation ?': 'Delete this animation?',
+  'Cette action supprimera définitivement cette animation.':
+    'This permanently deletes this animation.',
+  'Cette animation enchaîne un pool de presets et des clignements.':
+    'This animation cycles through presets and blinks.',
   'Cet état enchaîne un pool de presets et des clignements.':
-    'This state cycles through presets and blinks.',
-  'Expressions de la séquence': 'Sequence expressions',
+    'This animation cycles through presets and blinks.',
+  'Expressions de l’animation': 'Animation expressions',
   'Les presets sont joués dans cet ordre, puis la boucle recommence.':
     'Presets play in this order, then the loop starts again.',
   'Logique de clignement': 'Blink behavior',
@@ -198,7 +216,10 @@ const english: Record<string, string> = {
   Durée: 'Duration',
   'fermeture et ouverture': 'close and open',
   'Changement d’expression': 'Expression change',
-  'cadence de la séquence': 'sequence tempo',
+  'cadence de l’animation': 'animation tempo',
+  'Détails de l’animation': 'Animation details',
+  'Afficher les détails de l’animation': 'Show animation details',
+  'Masquer les détails de l’animation': 'Hide animation details',
   Relancer: 'Restart',
   Lancer: 'Play',
   Pause: 'Pause',
@@ -218,8 +239,10 @@ const english: Record<string, string> = {
   Diamant: 'Diamond',
   'Yeux presque fermés, respiration lente et expression de sommeil.':
     'Nearly closed eyes, slow breathing and a sleepy expression.',
+  'Animation courte de réveil avant retour vers une expression neutre.':
+    'Short waking animation before returning to a neutral expression.',
   'Séquence courte de réveil avant retour vers une expression neutre.':
-    'Short waking sequence before returning to a neutral expression.',
+    'Short waking animation before returning to a neutral expression.',
   'Micro-mouvements lents, expressions 00 et 08, clignement rare.':
     'Slow micro-movements, expressions 00 and 08, infrequent blinking.',
   'Expressions 10, 01 et 19, regard stable et clignement attentif.':
@@ -282,7 +305,13 @@ const frenchStates: Record<string, string> = {
   once: 'une fois',
   pingPong: 'aller-retour',
   Custom: 'Personnalisé',
-  'Untitled sequence': 'Séquence sans titre',
+  'Untitled animation': 'Animation sans titre',
+  // Compatibilité avec les animations intégrées déjà persistées avant le renommage.
+  'Untitled sequence': 'Animation sans titre',
+  'Cet état enchaîne un pool de presets et des clignements.':
+    'Cette animation enchaîne un pool de presets et des clignements.',
+  'Séquence courte de réveil avant retour vers une expression neutre.':
+    'Animation courte de réveil avant retour vers une expression neutre.',
   sleeping: 'sommeil',
   waking: 'réveil',
   idle: 'au repos',
@@ -330,7 +359,7 @@ const dynamicTranslations: [RegExp, string][] = [
   [/^Supprimer (.+) \?$/, 'Delete $1?'],
   [/^Ajouter une forme · (.+)$/, 'Add a shape · $1'],
   [/^Réinitialiser la position et la rotation de (.+)$/, 'Reset position and rotation of $1'],
-  [/^État en cours : (.+)$/, 'Active state: $1'],
+  [/^Animation en cours : (.+)$/, 'Active animation: $1'],
   [/^Mettre (.+) en pause$/, 'Pause $1'],
   [/^Reprendre (.+)$/, 'Resume $1'],
   [/^Arrêter (.+)$/, 'Stop $1'],

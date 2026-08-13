@@ -208,7 +208,7 @@ export const getStatePlaybackConfig = (name: string): StatePlaybackConfig => {
 
 export const stateNotes: Record<string, string> = {
   sleeping: 'Yeux presque fermés, respiration lente et expression de sommeil.',
-  waking: 'Séquence courte de réveil avant retour vers une expression neutre.',
+  waking: 'Animation courte de réveil avant retour vers une expression neutre.',
   idle: 'Micro-mouvements lents, expressions 00 et 08, clignement rare.',
   listening: 'Expressions 10, 01 et 19, regard stable et clignement attentif.',
   thinking: 'Regard haut et latéral, expressions asymétriques et changements fréquents.',

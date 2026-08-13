@@ -14,6 +14,8 @@ export type RenderedScene = {
   rightPath: MotionValue<string>
   leftOpacity: MotionValue<number>
   rightOpacity: MotionValue<number>
+  offsetX: MotionValue<number>
+  offsetY: MotionValue<number>
   wirePaths: MotionValue<string>[]
 }
 
@@ -38,6 +40,8 @@ export const createRenderedScene = (geometry: AvatarGeometry): RenderedScene => 
   rightPath: motionValue(geometry.rightPath),
   leftOpacity: motionValue(geometry.leftVisible ? 1 : 0),
   rightOpacity: motionValue(geometry.rightVisible ? 1 : 0),
+  offsetX: motionValue(0),
+  offsetY: motionValue(0),
   wirePaths: geometry.wirePaths.map(path => motionValue(path)),
 })
 
@@ -49,6 +53,11 @@ export const createRenderedColors = (colors: AvatarColors): RenderedColors => ({
 export const paintRenderedColors = (rendered: RenderedColors, colors: AvatarColors) => {
   rendered.body.set(colors.body)
   rendered.eyes.set(colors.eyes)
+}
+
+export const paintRenderedOffset = (scene: RenderedScene, offset: { x: number; y: number }) => {
+  scene.offsetX.set(offset.x)
+  scene.offsetY.set(offset.y)
 }
 
 export const paintRenderedScene = (scene: RenderedScene, geometry: AvatarGeometry) => {
