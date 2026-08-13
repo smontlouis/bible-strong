@@ -750,6 +750,34 @@ p {
   padding: 5px;
   backdrop-filter: blur(14px);
 }
+.playback-warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid #e9c868;
+  border-radius: 12px;
+  background: #fff9e8;
+  color: #594716;
+}
+.playback-warning > div {
+  display: grid;
+  gap: 3px;
+}
+.playback-warning strong {
+  font-size: 11px;
+}
+.playback-warning span {
+  color: #796329;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.playback-warning svg {
+  width: 13px;
+  height: 13px;
+}
 .state-buttons button,
 .button-row button,
 .reset {

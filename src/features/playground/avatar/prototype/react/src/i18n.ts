@@ -34,6 +34,7 @@ const english: Record<string, string> = {
   'Couleur des yeux': 'Eye color',
   Largeur: 'Width',
   Hauteur: 'Height',
+  Échelle: 'Scale',
   'Taille proportionnelle': 'Proportional size',
   'Œil gauche': 'Left eye',
   'Œil droit': 'Right eye',
@@ -122,6 +123,11 @@ const english: Record<string, string> = {
   'Motion interpole les valeurs et notre moteur effectue le slerp quaternion.':
     'Motion interpolates values while the engine performs quaternion slerp.',
   'Vitesse du ressort': 'Spring speed',
+  'Un état est en cours de lecture': 'A state is currently playing',
+  'Mettez l’état en pause avant de manipuler les paramètres de pose.':
+    'Pause the state before adjusting pose parameters.',
+  'Mettez l’état en pause avant de choisir ou personnaliser une expression.':
+    'Pause the state before selecting or customizing an expression.',
   Cligner: 'Blink',
   'Expression aléatoire': 'Random expression',
   Séquences: 'Sequences',

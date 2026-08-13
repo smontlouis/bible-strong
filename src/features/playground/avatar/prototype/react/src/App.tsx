@@ -178,10 +178,46 @@ const getPreviewGeometry = (
 const bounded = (value: number, min?: number, max?: number) =>
   Math.min(max ?? Infinity, Math.max(min ?? -Infinity, value))
 
+const scaleSurface = (
+  surface: SurfaceConfig,
+  size: number,
+  minimums: Pick<SurfaceConfig, 'width' | 'height' | 'depth'>
+) => {
+  const currentSize = Math.max(surface.width, surface.height, surface.depth) || 1
+  const factor = size / currentSize
+  return {
+    ...surface,
+    width: bounded(surface.width * factor, minimums.width, 300),
+    height: bounded(surface.height * factor, minimums.height, 300),
+    depth: bounded(surface.depth * factor, minimums.depth, 300),
+  }
+}
+
 const formatSeconds = (milliseconds: number, language: StudioLanguage) =>
   `${new Intl.NumberFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
     maximumFractionDigits: 1,
   }).format(milliseconds / 1000)} s`
+
+const STATE_PLAYBACK_STORAGE_KEY = 'bible-strong-avatar-state-playback-v1'
+type StoredStatePlayback = { stateId: string | null; playing: boolean }
+const loadStatePlayback = (): StoredStatePlayback => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(STATE_PLAYBACK_STORAGE_KEY) ?? 'null')
+    if (stored && (typeof stored.stateId === 'string' || stored.stateId === null)) {
+      return { stateId: stored.stateId, playing: stored.playing === true }
+    }
+  } catch {
+    // Le state idle reste le défaut si le stockage local est indisponible.
+  }
+  return { stateId: 'idle', playing: true }
+}
+const persistStatePlayback = (playback: StoredStatePlayback) => {
+  try {
+    window.localStorage.setItem(STATE_PLAYBACK_STORAGE_KEY, JSON.stringify(playback))
+  } catch {
+    // La lecture continue en mémoire si le stockage local est indisponible.
+  }
+}
 
 const parseHexColor = (color: string) => {
   const value = color.replace('#', '')
@@ -296,6 +332,26 @@ function NumericField({
   const { t } = useStudioLanguage()
   const translatedLabel = t(label)
   const dragRef = useRef<{ x: number; value: number } | null>(null)
+  const editingRef = useRef(false)
+  const [draftValue, setDraftValue] = useState(() =>
+    String(Number(value.toFixed(step < 0.1 ? 2 : 1))),
+  )
+
+  useEffect(() => {
+    if (!editingRef.current) {
+      setDraftValue(String(Number(value.toFixed(step < 0.1 ? 2 : 1))))
+    }
+  }, [step, value])
+
+  const commitDraftValue = (rawValue: string) => {
+    const parsedValue = Number(rawValue.replace(',', '.'))
+    const nextValue = Number.isFinite(parsedValue) && rawValue.trim() !== ''
+      ? bounded(parsedValue, min, max)
+      : value
+
+    setDraftValue(String(Number(nextValue.toFixed(step < 0.1 ? 2 : 1))))
+    onChange(nextValue)
+  }
 
   const startScrub = (event: React.PointerEvent<HTMLButtonElement>) => {
     event.preventDefault()
@@ -341,12 +397,19 @@ function NumericField({
           min={min}
           max={max}
           step={step}
-          value={Number(value.toFixed(step < 0.1 ? 2 : 1))}
-          onFocus={() => onActiveChange?.(true)}
-          onBlur={() => onActiveChange?.(false)}
-          onChange={event => {
-            const next = event.currentTarget.valueAsNumber
-            if (Number.isFinite(next)) onChange(bounded(next, min, max))
+          value={draftValue}
+          onFocus={() => {
+            editingRef.current = true
+            onActiveChange?.(true)
+          }}
+          onBlur={event => {
+            editingRef.current = false
+            commitDraftValue(event.currentTarget.value)
+            onActiveChange?.(false)
+          }}
+          onChange={event => setDraftValue(event.currentTarget.value)}
+          onKeyDown={event => {
+            if (event.key === 'Enter') event.currentTarget.blur()
           }}
         />
         <span>{unit}</span>
@@ -2105,6 +2168,7 @@ function StudioApp() {
   const [sequences, setSequences] = useState(() =>
     normalizeSequencesForExpressions(loadSequences(), expressions.length)
   )
+  const [initialStatePlayback] = useState(loadStatePlayback)
   const [bodyEditing, setBodyEditing] = useState(false)
   const avatarEditSnapshot = useRef<{
     avatars: StudioAvatar[]
@@ -2112,9 +2176,10 @@ function StudioApp() {
   } | null>(null)
   const workspaceBackButtonRef = useRef<HTMLButtonElement>(null)
   const [focusAvatarName, setFocusAvatarName] = useState(false)
-  const [expression, setExpression] = useState<Expression>({ ...defaultExpression })
+  const initialExpression = expressions[0] ?? defaultExpression
+  const [expression, setExpression] = useState<Expression>({ ...initialExpression })
   const [displayColors, setDisplayColors] = useState<AvatarColors>(() =>
-    resolveColors(defaultExpression, initialAvatar.colors)
+    resolveColors(initialExpression, initialAvatar.colors)
   )
   const [deleteAvatarOpen, setDeleteAvatarOpen] = useState(false)
   const [deleteExpressionOpen, setDeleteExpressionOpen] = useState(false)
@@ -2131,7 +2196,11 @@ function StudioApp() {
   })
   const [highlight, setHighlight] = useState<Highlight>(null)
   const [selectedState, setSelectedState] = useState(() =>
-    sequences.some(sequence => sequence.id === 'idle') ? 'idle' : (sequences[0]?.id ?? '')
+    sequences.some(sequence => sequence.id === initialStatePlayback.stateId)
+      ? initialStatePlayback.stateId!
+      : sequences.some(sequence => sequence.id === 'idle')
+        ? 'idle'
+        : (sequences[0]?.id ?? '')
   )
   const [activeState, setActiveState] = useState<string | null>(null)
   const [statePlaying, setStatePlaying] = useState(false)
@@ -2142,6 +2211,12 @@ function StudioApp() {
   const [selectedSequenceStepId, setSelectedSequenceStepId] = useState<string | null>(null)
   const stateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const activeSequenceRef = useRef<AvatarSequence | null>(null)
+  const editorStateSnapshot = useRef<{
+    stateId: string
+    playing: boolean
+    expression: Expression
+  } | null>(null)
+  const initialStatePlaybackApplied = useRef(false)
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const statePosition = useRef(0)
   const stateDirection = useRef<1 | -1>(1)
@@ -2162,11 +2237,11 @@ function StudioApp() {
   const showWireRef = useRef(showWire)
   const highlightRef = useRef(highlight)
   const [initialRender] = useState(() => {
-    const pose = poseFromExpression(defaultExpression)
+    const pose = poseFromExpression(initialExpression)
     return {
       pose,
       geometry: renderAvatar(
-        poseWithAvatarEyes(defaultExpression, initialAvatar.eyes),
+        poseWithAvatarEyes(initialExpression, initialAvatar.eyes),
         surface,
         1,
         { bodyNodes }
@@ -2181,8 +2256,8 @@ function StudioApp() {
   const lastAmbientElapsed = useRef(0)
   const lastAmbientFrame = useRef(0)
   const ambientSignature = useRef('none:none')
-  const transitionTarget = useRef<Expression>({ ...defaultExpression })
-  const canonicalTarget = useRef<Expression>({ ...defaultExpression })
+  const transitionTarget = useRef<Expression>({ ...initialExpression })
+  const canonicalTarget = useRef<Expression>({ ...initialExpression })
   const retargetFrom = useRef<Expression | null>(null)
   const retargetTo = useRef<Expression | null>(null)
   const retargetStartedAt = useRef<number | null>(null)
@@ -2198,7 +2273,7 @@ function StudioApp() {
   const springSpeedRef = useRef(springSpeed)
   const sequenceTransitionRef = useRef<Pick<SequenceStep, 'transitionMs' | 'transition'>>({
     transitionMs: 500,
-    transition: 'spring',
+    transition: 'smooth',
   })
   const activeSequenceTransition = useRef<{
     target: Expression
@@ -2333,7 +2408,7 @@ function StudioApp() {
   ) => {
     sequenceTransitionRef.current = transitionSettings ?? {
       transitionMs: 500,
-      transition: 'spring',
+      transition: 'smooth',
     }
     setActiveExpression(index)
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
@@ -2596,6 +2671,7 @@ function StudioApp() {
   const activateAvatar = (id: string, editBody = false, preserveMode = false) => {
     const avatar = avatarsRef.current.find(item => item.id === id)
     if (!avatar) return
+    if (editBody) suspendStateForEditor()
     if (editBody && !avatarEditSnapshot.current) {
       avatarEditSnapshot.current = {
         avatars: avatarsRef.current,
@@ -2697,18 +2773,21 @@ function StudioApp() {
     const snapshot = avatarEditSnapshot.current
     if (!snapshot) {
       setBodyEditing(false)
+      restoreStateAfterEditor()
       return
     }
     avatarEditSnapshot.current = null
     avatarsRef.current = snapshot.avatars
     setAvatars(snapshot.avatars)
     activateAvatar(snapshot.activeAvatarId, false, true)
+    restoreStateAfterEditor()
   }
 
   const saveAvatarEditing = () => {
     avatarEditSnapshot.current = null
     persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: avatarsRef.current })
     setBodyEditing(false)
+    restoreStateAfterEditor()
   }
 
   const renameActiveAvatar = (name: string) => {
@@ -2724,6 +2803,7 @@ function StudioApp() {
     persistAvatarLibrary({ activeAvatarId: remaining[0].id, avatars: remaining })
     setDeleteAvatarOpen(false)
     activateAvatar(remaining[0].id)
+    restoreStateAfterEditor()
   }
 
   const addBodyNode = (type: (typeof bodyPrimitiveTypes)[number]) => {
@@ -2787,7 +2867,7 @@ function StudioApp() {
     blinkNextDueAt.current = null
   }
 
-  const pauseState = () => {
+  const pauseState = (persist = true) => {
     if (stateNextDueAt.current !== null) {
       stateRemainingDelay.current = Math.max(stateNextDueAt.current - readSequenceClock(), 0)
     }
@@ -2803,9 +2883,10 @@ function StudioApp() {
     if (blinkAnimating.current) blinkControls.current?.pause()
     clearStateTimers()
     setStatePlaying(false)
+    if (persist && activeState) persistStatePlayback({ stateId: activeState, playing: false })
   }
 
-  const stopState = () => {
+  const stopState = (persist = true) => {
     clearStateTimers()
     statePosition.current = 0
     stateDirection.current = 1
@@ -2821,16 +2902,17 @@ function StudioApp() {
     activeSequenceRef.current = null
     setStatePlaying(false)
     setActiveState(null)
+    if (persist) persistStatePlayback({ stateId: null, playing: false })
   }
 
-  const launchSequence = (sequence: AvatarSequence, resume = false) => {
+  const launchSequence = (sequence: AvatarSequence, resume = false, persist = true) => {
     clearStateTimers()
     if (!sequence.steps.length) {
-      stopState()
+      stopState(persist)
       return
     }
     const id = sequence.id
-    if (!resume || activeState !== id) {
+    if (!resume) {
       statePosition.current = 0
       stateDirection.current = 1
     }
@@ -2838,6 +2920,7 @@ function StudioApp() {
     setActiveState(id)
     activeSequenceRef.current = sequence
     setStatePlaying(true)
+    if (persist) persistStatePlayback({ stateId: id, playing: true })
     const scheduleAdvance = (delay: number) => {
       stateRemainingDelay.current = delay
       stateNextDueAt.current = readSequenceClock() + delay
@@ -2922,6 +3005,48 @@ function StudioApp() {
     else launchSequence(activeSequenceRef.current, true)
   }
 
+  const suspendStateForEditor = () => {
+    if (editorStateSnapshot.current || !activeState) return
+    editorStateSnapshot.current = {
+      stateId: activeState,
+      playing: statePlaying,
+      expression: { ...displayedPose.current.expression },
+    }
+    if (statePlaying) pauseState(false)
+    setActiveState(null)
+  }
+
+  const restoreStateAfterEditor = (availableSequences = sequences) => {
+    const snapshot = editorStateSnapshot.current
+    editorStateSnapshot.current = null
+    if (!snapshot) return
+    const sequence = availableSequences.find(item => item.id === snapshot.stateId)
+    if (!sequence) {
+      stopState(false)
+      persistStatePlayback({ stateId: null, playing: false })
+      return
+    }
+    activeSequenceRef.current = sequence
+    setSelectedState(sequence.id)
+    setActiveState(sequence.id)
+    if (snapshot.playing) {
+      launchSequence(sequence, true, false)
+      return
+    }
+    setStatePlaying(false)
+    transitionToExpression(snapshot.expression)
+  }
+
+  useEffect(() => {
+    if (initialStatePlaybackApplied.current) return
+    initialStatePlaybackApplied.current = true
+    const sequence = sequences.find(item => item.id === selectedState)
+    if (!sequence || initialStatePlayback.stateId === null) return
+    activeSequenceRef.current = sequence
+    setActiveState(sequence.id)
+    if (initialStatePlayback.playing) launchSequence(sequence, false, false)
+  }, [])
+
   const saveEditing = () => {
     if (!editing) return
     const index = editing.index ?? expressions.length
@@ -2935,6 +3060,7 @@ function StudioApp() {
     persistGlobalExpressions(next)
     setEditing(null)
     transitionToExpression(editing.draft, index)
+    restoreStateAfterEditor()
   }
 
   const duplicateExpression = (index: number | null, draft: Expression, editDuplicate = false) => {
@@ -2959,7 +3085,7 @@ function StudioApp() {
   }
 
   const openExpressionEditor = (index: number | null, draft: Expression) => {
-    stopState()
+    suspendStateForEditor()
     setBodyEditing(false)
     setMode('expressions')
     setEditing({ index, draft: { ...draft } })
@@ -2973,6 +3099,7 @@ function StudioApp() {
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
     if (avatar) setDisplayColors(resolveColors(expression, avatar.colors))
     paintPose(poseFromExpression(expression))
+    restoreStateAfterEditor()
   }
 
   const deleteEditing = () => {
@@ -2997,10 +3124,11 @@ function StudioApp() {
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
     if (avatar) setDisplayColors(resolveColors(fallback, avatar.colors))
     paintPose(poseFromExpression(fallback))
+    restoreStateAfterEditor()
   }
 
   const openSequenceEditor = (sequence?: AvatarSequence) => {
-    stopState()
+    suspendStateForEditor()
     setEditing(null)
     setBodyEditing(false)
     setMode('states')
@@ -3019,9 +3147,10 @@ function StudioApp() {
   }
 
   const cancelSequenceEditing = () => {
-    if (activeState === sequenceEditing?.draft.id) stopState()
+    if (activeState === sequenceEditing?.draft.id) stopState(false)
     setSequenceEditing(null)
     setSelectedSequenceStepId(null)
+    restoreStateAfterEditor()
   }
 
   const saveSequenceEditing = () => {
@@ -3037,14 +3166,15 @@ function StudioApp() {
     setSequences(next)
     persistSequences(next)
     setSelectedState(saved.id)
-    if (activeState === saved.id) stopState()
+    if (activeState === saved.id) stopState(false)
     setSequenceEditing(null)
     setSelectedSequenceStepId(null)
+    restoreStateAfterEditor(next)
   }
 
   const duplicateSequenceEditing = () => {
     if (!sequenceEditing) return
-    if (activeState === sequenceEditing.draft.id) stopState()
+    if (activeState === sequenceEditing.draft.id) stopState(false)
     const duplicate = duplicateSequence(sequenceEditing.draft)
     const next = [...sequences, duplicate]
     setSequences(next)
@@ -3060,11 +3190,12 @@ function StudioApp() {
     const fallback = next[0]
     setSequences(next)
     persistSequences(next)
-    if (activeState === sequenceEditing.sourceId) stopState()
+    if (activeState === sequenceEditing.sourceId) stopState(false)
     setSelectedState(fallback?.id ?? '')
     setSequenceEditing(null)
     setSelectedSequenceStepId(null)
     setDeleteSequenceOpen(false)
+    restoreStateAfterEditor(next)
   }
 
   const selectedBodyNode =
@@ -3242,9 +3373,9 @@ function StudioApp() {
                 const preset = expressions[step.expressionIndex]
                 if (preset) transitionToExpression(preset, step.expressionIndex, step)
               }}
-              onPlay={() => launchSequence(sequenceEditing.draft)}
-              onPause={pauseState}
-              onStop={stopState}
+              onPlay={() => launchSequence(sequenceEditing.draft, false, false)}
+              onPause={() => pauseState(false)}
+              onStop={() => stopState(false)}
               playing={statePlaying}
               active={activeState === sequenceEditing.draft.id}
               onCancel={cancelSequenceEditing}
@@ -3463,6 +3594,29 @@ function StudioApp() {
             </>
           ))}
 
+        {!sequenceEditing &&
+          !editing &&
+          !bodyEditing &&
+          statePlaying &&
+          (mode === 'manual' || mode === 'expressions') && (
+            <div className="playback-warning" role="alert">
+              <div>
+                <strong>{t('Un état est en cours de lecture')}</strong>
+                <span>
+                  {t(
+                    mode === 'manual'
+                      ? 'Mettez l’état en pause avant de manipuler les paramètres de pose.'
+                      : 'Mettez l’état en pause avant de choisir ou personnaliser une expression.'
+                  )}
+                </span>
+              </div>
+              <Button variant="outline" size="sm" type="button" onClick={() => pauseState()}>
+                <Pause />
+                {t('Pause')}
+              </Button>
+            </div>
+          )}
+
         {!editing && mode === 'manual' && (
           <div className="panel-stack">
             {bodyEditing && (
@@ -3558,6 +3712,27 @@ function StudioApp() {
                           )}
                         </p>
                         <div className="surface-fields">
+                          <NumericField
+                            label="Échelle"
+                            value={Math.max(
+                              selectedBodyNode.surface.width,
+                              selectedBodyNode.surface.height,
+                              selectedBodyNode.surface.depth
+                            )}
+                            min={10}
+                            max={300}
+                            unit="u"
+                            onChange={size =>
+                              updateSelectedBodyNode(node => ({
+                                ...node,
+                                surface: scaleSurface(node.surface, size, {
+                                  width: 10,
+                                  height: 10,
+                                  depth: 10,
+                                }),
+                              }))
+                            }
+                          />
                           {(['width', 'height', 'depth'] as const).map(dimension => (
                             <NumericField
                               key={dimension}
@@ -3706,6 +3881,18 @@ function StudioApp() {
                       })}
                     </div>
                     <div className="surface-fields">
+                      <NumericField
+                        label="Échelle"
+                        value={Math.max(surface.width, surface.height, surface.depth)}
+                        min={120}
+                        max={300}
+                        unit="u"
+                        onChange={size =>
+                          updateSurface(
+                            scaleSurface(surface, size, { width: 120, height: 120, depth: 100 })
+                          )
+                        }
+                      />
                       <NumericField
                         label="Largeur"
                         value={surface.width}

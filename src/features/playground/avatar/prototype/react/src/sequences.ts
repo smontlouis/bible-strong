@@ -71,7 +71,7 @@ export const createInitialSequences = (): AvatarSequence[] =>
           expressionIndex,
           holdMs: playback.expressionIntervalMs,
           transitionMs: 500,
-          transition: 'spring',
+          transition: 'smooth',
         })),
         blink: { enabled: true, ...playback.blink },
       }
@@ -100,7 +100,7 @@ const parseSequence = (value: unknown, fallback: AvatarSequence): AvatarSequence
     expressionIndex: 0,
     holdMs: 3000,
     transitionMs: 500,
-    transition: 'spring' as const,
+    transition: 'smooth' as const,
   }
   const steps = Array.isArray(candidate?.steps)
     ? candidate.steps.map(step => parseStep(step, fallbackStep))
@@ -214,7 +214,7 @@ export const createSequence = (expressionIndex = 0): AvatarSequence => ({
       expressionIndex,
       holdMs: 3000,
       transitionMs: 500,
-      transition: 'spring',
+      transition: 'smooth',
     },
   ],
   blink: {
@@ -239,7 +239,7 @@ export const createSequenceStep = (expressionIndex: number): SequenceStep => ({
   expressionIndex,
   holdMs: 3000,
   transitionMs: 500,
-  transition: 'spring',
+  transition: 'smooth',
 })
 
 export const advanceSequenceCursor = (
