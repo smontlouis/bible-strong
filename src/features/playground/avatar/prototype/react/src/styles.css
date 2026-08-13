@@ -135,16 +135,19 @@ input {
   font-size: 15px;
   line-height: 1;
 }
-.language-picker select {
+.language-picker [data-slot='select-trigger'] {
+  width: auto;
+  height: 24px;
+  min-width: 82px;
+  padding: 0 4px;
   border: 0;
-  outline: 0;
   background: transparent;
+  box-shadow: none;
   color: #f6f7f8;
   font-size: 10px;
   font-weight: 750;
-  cursor: pointer;
 }
-.language-picker select:focus-visible {
+.language-picker [data-slot='select-trigger']:focus-visible {
   border-radius: 5px;
   box-shadow: 0 0 0 2px #7895ee;
 }
@@ -530,6 +533,11 @@ input {
 .workspace-footer .dialog-actions-main [data-slot='button'] {
   min-width: 120px;
 }
+.workspace-footer-secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .inspector-header {
   display: flex;
   align-items: center;
@@ -696,9 +704,24 @@ p {
   min-height: 74px;
   border-radius: 10px;
 }
+.avatar-sort-item {
+  min-width: 0;
+  will-change: transform;
+}
+.avatar-sort-item .avatar-card {
+  width: 100%;
+}
+.avatar-sort-item[data-dragging='true'] .avatar-card {
+  border-style: dashed;
+  box-shadow: none;
+}
 .avatar-shelf .avatar-card {
   flex-direction: column;
   align-items: stretch;
+  cursor: grab;
+}
+.avatar-shelf .avatar-card:active {
+  cursor: grabbing;
 }
 .avatar-shelf .avatar-card svg {
   height: 48px;
@@ -772,7 +795,7 @@ p {
 .ambient-motion-field {
   grid-template-columns: minmax(0, 1fr) 170px;
 }
-.ambient-motion-field select {
+.ambient-motion-field [data-slot='select-trigger'] {
   height: 34px;
   padding: 0 30px 0 10px;
   border: 1px solid #d8dce5;
@@ -782,7 +805,7 @@ p {
   color: #272b33;
   font-size: 12px;
 }
-.ambient-motion-field select:focus-visible {
+.ambient-motion-field [data-slot='select-trigger']:focus-visible {
   border-color: #7897f4;
   box-shadow: 0 0 0 3px rgb(91 127 229 / 14%);
 }
@@ -1317,6 +1340,25 @@ p {
   font-size: 11px;
   line-height: 1.5;
 }
+.state-detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.state-detail-header > div {
+  min-width: 0;
+}
+.state-step-preview {
+  display: grid;
+  gap: 4px;
+}
+.state-step-preview > small {
+  color: #8a909b;
+  font-size: 8px;
+  font-weight: 750;
+  text-align: center;
+}
 .state-expression-section,
 .state-blink-section {
   padding-top: 16px;
@@ -1373,6 +1415,100 @@ p {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.sequence-workspace-scroll {
+  padding-bottom: 6px;
+}
+.sequence-workspace [data-slot='card'] {
+  gap: 14px;
+}
+.sequence-timeline {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 3px 3px 9px;
+  scrollbar-width: thin;
+}
+.sequence-step {
+  position: relative;
+  flex: 0 0 90px;
+  cursor: grab;
+}
+.sequence-step:active {
+  cursor: grabbing;
+}
+.sequence-step > [data-slot='button'] {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 94px;
+  overflow: hidden;
+  padding: 4px;
+}
+.sequence-step > [data-slot='button'][aria-pressed='true'] {
+  border-color: #5b7fe5;
+  box-shadow: 0 0 0 2px rgb(91 127 229 / 18%);
+}
+.sequence-step svg:not(.sequence-grip) {
+  display: block;
+  width: 100%;
+  height: 76px;
+}
+.sequence-step .sequence-grip {
+  position: absolute;
+  z-index: 2;
+  top: 6px;
+  left: 5px;
+  width: 13px;
+  height: 13px;
+  padding: 2px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 82%);
+  color: #7f8794;
+}
+.sequence-step span,
+.sequence-step small {
+  position: absolute;
+  z-index: 2;
+  bottom: 5px;
+  padding: 2px 4px;
+  border-radius: 5px;
+  background: rgb(255 255 255 / 82%);
+  font-size: 8px;
+  font-weight: 850;
+}
+.sequence-step span {
+  right: 5px;
+}
+.sequence-step small {
+  left: 5px;
+  color: #727a87;
+}
+.sequence-empty {
+  margin: 0;
+  padding: 24px 12px;
+  border: 1px dashed #d6dae3;
+  border-radius: 10px;
+  color: #858b96;
+  font-size: 11px;
+  text-align: center;
+}
+.sequence-step-settings {
+  display: grid;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 14px;
+  border-top: 1px solid #eceef2;
+}
+.sequence-transition-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 170px;
+}
+.sequence-expression-library {
+  max-height: 264px;
+  overflow-y: auto;
+  padding: 2px;
 }
 .state-logic-grid strong {
   color: #303640;

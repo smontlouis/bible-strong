@@ -19,6 +19,7 @@ const english: Record<string, string> = {
   'Avatar procédural': 'Procedural avatar',
   'Gizmo de rotation': 'Rotation gizmo',
   'Retour aux expressions': 'Back to expressions',
+  'Retour aux états': 'Back to states',
   'Retour au studio': 'Back to studio',
   'Preset en mémoire': 'Saved preset',
   'Nouvelle expression': 'New expression',
@@ -127,6 +128,55 @@ const english: Record<string, string> = {
   'Cycle de vie': 'Life cycle',
   Réactions: 'Reactions',
   'États animés': 'Animated states',
+  'Éditeur de séquence': 'Sequence editor',
+  'Modifier la séquence': 'Edit sequence',
+  'Nouvelle séquence': 'New sequence',
+  'Compose les expressions, leur cadence et les clignements de cet état.':
+    'Compose the expressions, timing and blinks for this state.',
+  'Prévisualiser la séquence': 'Preview sequence',
+  'Arrêter la séquence': 'Stop sequence',
+  Identité: 'Identity',
+  'Nom, catégorie et comportement de lecture de la séquence.':
+    'Sequence name, category and playback behavior.',
+  Nom: 'Name',
+  Catégorie: 'Category',
+  Description: 'Description',
+  'Mode de lecture': 'Playback mode',
+  Boucle: 'Loop',
+  'Une fois': 'Once',
+  'Aller-retour': 'Ping-pong',
+  Timeline: 'Timeline',
+  'Glisse les étapes pour les réordonner, puis sélectionne-en une pour régler sa cadence.':
+    'Drag steps to reorder them, then select one to adjust its timing.',
+  'Ajoute une expression pour commencer.': 'Add an expression to get started.',
+  'Étape sélectionnée': 'Selected step',
+  'Durée visible avant de passer à l’expression suivante.':
+    'Visible duration before moving to the next expression.',
+  'Supprimer cette étape': 'Delete this step',
+  'Temps d’affichage': 'Display time',
+  'Durée de transition': 'Transition duration',
+  Transition: 'Transition',
+  Ressort: 'Spring',
+  Douce: 'Smooth',
+  Rapide: 'Snappy',
+  'Ajouter une expression': 'Add expression',
+  'Sélectionne un preset pour l’ajouter à la fin de la timeline.':
+    'Select a preset to append it to the timeline.',
+  Clignements: 'Blinks',
+  'Le blink fonctionne indépendamment des changements d’expression.':
+    'Blinking runs independently from expression changes.',
+  'Activer les clignements': 'Enable blinking',
+  'Intervalle minimum': 'Minimum interval',
+  'Intervalle maximum': 'Maximum interval',
+  'Durée du clignement': 'Blink duration',
+  séquences: 'sequences',
+  'Chaque étape possède sa propre durée et sa propre transition.':
+    'Each step has its own duration and transition.',
+  Désactivé: 'Disabled',
+  'comportement de la timeline': 'timeline behavior',
+  'Supprimer cette séquence ?': 'Delete this sequence?',
+  'Cette action supprimera définitivement cet état animé.':
+    'This permanently deletes this animated state.',
   'Cet état enchaîne un pool de presets et des clignements.':
     'This state cycles through presets and blinks.',
   'Expressions de la séquence': 'Sequence expressions',
@@ -222,6 +272,11 @@ const english: Record<string, string> = {
 }
 
 const frenchStates: Record<string, string> = {
+  loop: 'boucle',
+  once: 'une fois',
+  pingPong: 'aller-retour',
+  Custom: 'Personnalisé',
+  'Untitled sequence': 'Séquence sans titre',
   sleeping: 'sommeil',
   waking: 'réveil',
   idle: 'au repos',
@@ -263,7 +318,7 @@ const frenchStates: Record<string, string> = {
   'powering-down': 'extinction',
 }
 
-const dynamicTranslations: Array<[RegExp, string]> = [
+const dynamicTranslations: [RegExp, string][] = [
   [/^Modifier l’expression (.+)$/, 'Edit expression $1'],
   [/^Modifier (.+)$/, 'Edit $1'],
   [/^Supprimer (.+) \?$/, 'Delete $1?'],

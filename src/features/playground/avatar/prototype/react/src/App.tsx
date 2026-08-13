@@ -14,7 +14,18 @@ import {
   type CSSProperties,
   type RefObject,
 } from 'react'
-import { ArrowLeft, Pause, Pencil, Play, Plus, RotateCcw, Square, Trash2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  Copy,
+  GripVertical,
+  Pause,
+  Pencil,
+  Play,
+  Plus,
+  RotateCcw,
+  Square,
+  Trash2,
+} from 'lucide-react'
 
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
@@ -22,9 +33,23 @@ import { Card, CardDescription, CardHeader, CardTitle } from './components/ui/ca
 import { Field, FieldTitle } from './components/ui/field'
 import { Input } from './components/ui/input'
 import { Separator } from './components/ui/separator'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './components/ui/select'
 import { Switch } from './components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from './components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from './components/ui/context-menu'
 import { StudioLanguageProvider, useStudioLanguage, type StudioLanguage } from './i18n'
 import {
   AlertDialog,
@@ -73,13 +98,23 @@ import {
   type Expression,
   type Point3,
 } from './geometry'
+import { defaultExpression } from './presets'
 import {
-  defaultExpression,
-  getStatePlaybackConfig,
-  stateGroups,
-  stateNotes,
-  statePools,
-} from './presets'
+  advanceSequenceCursor,
+  createSequence,
+  createSequenceStep,
+  duplicateSequence,
+  getSequenceSpring,
+  groupSequences,
+  loadSequences,
+  normalizeSequencesForExpressions,
+  persistSequences,
+  readSequenceClock,
+  remapSequencesAfterExpressionDelete,
+  remapSequencesAfterExpressionInsert,
+  type AvatarSequence,
+  type SequenceStep,
+} from './sequences'
 import { applyAmbientMotion, hasAmbientMotion } from './ambientMotion'
 import { surfaceLabels, surfacePresets, type SurfaceConfig } from './surfaces'
 
@@ -148,6 +183,23 @@ const formatSeconds = (milliseconds: number, language: StudioLanguage) =>
     maximumFractionDigits: 1,
   }).format(milliseconds / 1000)} s`
 
+const parseHexColor = (color: string) => {
+  const value = color.replace('#', '')
+  return [0, 2, 4].map(offset => Number.parseInt(value.slice(offset, offset + 2), 16))
+}
+
+const interpolateHexColor = (from: string, to: string, progress: number) => {
+  const fromChannels = parseHexColor(from)
+  const toChannels = parseHexColor(to)
+  return `#${fromChannels
+    .map((channel, index) =>
+      Math.round(channel + (toChannels[index] - channel) * progress)
+        .toString(16)
+        .padStart(2, '0')
+    )
+    .join('')}`
+}
+
 const resolveColors = (expression: Expression, colors: AvatarColors): AvatarColors => ({
   body: expression.bodyColor ?? colors.body,
   eyes: expression.eyeColor ?? colors.eyes,
@@ -211,17 +263,22 @@ function AmbientMotionField<Motion extends string>({
   return (
     <Field className="ambient-motion-field" orientation="horizontal">
       <FieldTitle>{t(label)}</FieldTitle>
-      <select
-        aria-label={t(label)}
+      <Select
         value={value}
-        onChange={event => onChange(event.currentTarget.value as Motion)}
+        items={options.map(option => ({ value: option.value, label: t(option.label) }))}
+        onValueChange={next => next && onChange(next as Motion)}
       >
-        {options.map(option => (
-          <option key={option.value} value={option.value}>
-            {t(option.label)}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger aria-label={t(label)}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(option => (
+            <SelectItem key={option.value} value={option.value}>
+              {t(option.label)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </Field>
   )
 }
@@ -1229,6 +1286,8 @@ function ExpressionCard({
   previewId,
   onSelect,
   onEdit,
+  onDuplicate,
+  onDelete,
 }: {
   expression: Expression
   index: number
@@ -1240,8 +1299,11 @@ function ExpressionCard({
   previewId: string
   onSelect: () => void
   onEdit?: () => void
+  onDuplicate?: () => void
+  onDelete?: () => void
 }) {
-  return (
+  const { t } = useStudioLanguage()
+  const card = (
     <Button
       className="expression-card"
       variant="outline"
@@ -1261,6 +1323,24 @@ function ExpressionCard({
       <span>{String(index).padStart(2, '0')}</span>
     </Button>
   )
+  if (!onEdit || !onDuplicate || !onDelete) return card
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger render={card} />
+      <ContextMenuContent>
+        <ContextMenuItem onClick={onEdit}>
+          <Pencil /> {t('Modifier')}
+        </ContextMenuItem>
+        <ContextMenuItem onClick={onDuplicate}>
+          <Copy /> {t('Dupliquer')}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem variant="destructive" onClick={onDelete}>
+          <Trash2 /> {t('Supprimer')}
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  )
 }
 
 function ExpressionWorkspace({
@@ -1270,6 +1350,7 @@ function ExpressionWorkspace({
   onChange,
   onCancel,
   onSave,
+  onDuplicate,
   onDelete,
 }: {
   editing: { index: number | null; draft: Expression }
@@ -1278,6 +1359,7 @@ function ExpressionWorkspace({
   onChange: (draft: Expression) => void
   onCancel: () => void
   onSave: () => void
+  onDuplicate: () => void
   onDelete: () => void
 }) {
   const { t } = useStudioLanguage()
@@ -1392,7 +1474,7 @@ function ExpressionWorkspace({
             subtitle="Forme, placement et orientation propres au regard."
             compact
           >
-            <Card className="dialog-group">
+            <Card className="dialog-group color-panel">
               <h3>{t('Couleur des yeux')}</h3>
               <ColorField
                 label="Yeux"
@@ -1546,15 +1628,461 @@ function ExpressionWorkspace({
         </div>
       </div>
       <footer className="workspace-footer">
-        {editing.index !== null && (
-          <Button variant="destructive" onClick={onDelete}>
-            <Trash2 />
-            {t('Supprimer')}
+        <div className="workspace-footer-secondary">
+          {editing.index !== null && (
+            <Button variant="destructive" onClick={onDelete}>
+              <Trash2 />
+              {t('Supprimer')}
+            </Button>
+          )}
+          <Button variant="outline" onClick={onDuplicate}>
+            <Copy />
+            {t('Dupliquer')}
           </Button>
-        )}
+        </div>
         <div className="dialog-actions-main">
           <Button onClick={onSave}>{t('Enregistrer')}</Button>
         </div>
+      </footer>
+    </>
+  )
+}
+
+function SequenceWorkspace({
+  editing,
+  expressions,
+  surface,
+  bodyNodes,
+  colors,
+  avatarEyes,
+  selectedStepId,
+  backButtonRef,
+  reduceMotion,
+  onSelectedStepChange,
+  onChange,
+  onPreviewStep,
+  onPlay,
+  onPause,
+  onStop,
+  playing,
+  active,
+  onCancel,
+  onSave,
+  onDuplicate,
+  onDelete,
+}: {
+  editing: { sourceId: string | null; draft: AvatarSequence }
+  expressions: Expression[]
+  surface: SurfaceConfig
+  bodyNodes: BodyNode[]
+  colors: AvatarColors
+  avatarEyes: AvatarEyeDefaults
+  selectedStepId: string | null
+  backButtonRef: RefObject<HTMLButtonElement | null>
+  reduceMotion: boolean
+  onSelectedStepChange: (id: string | null) => void
+  onChange: (draft: AvatarSequence) => void
+  onPreviewStep: (step: SequenceStep) => void
+  onPlay: () => void
+  onPause: () => void
+  onStop: () => void
+  playing: boolean
+  active: boolean
+  onCancel: () => void
+  onSave: () => void
+  onDuplicate: () => void
+  onDelete: () => void
+}) {
+  const { t } = useStudioLanguage()
+  const draggedStepId = useRef<string | null>(null)
+  const selectedStep =
+    editing.draft.steps.find(step => step.id === selectedStepId) ?? editing.draft.steps[0]
+
+  const updateStep = (changes: Partial<SequenceStep>) => {
+    if (!selectedStep) return
+    onChange({
+      ...editing.draft,
+      steps: editing.draft.steps.map(step =>
+        step.id === selectedStep.id ? { ...step, ...changes } : step
+      ),
+    })
+  }
+
+  const moveStep = (targetId: string) => {
+    const draggedId = draggedStepId.current
+    if (!draggedId || draggedId === targetId) return
+    const dragged = editing.draft.steps.find(step => step.id === draggedId)
+    const targetIndex = editing.draft.steps.findIndex(step => step.id === targetId)
+    if (!dragged || targetIndex < 0) return
+    const next = editing.draft.steps.filter(step => step.id !== draggedId)
+    next.splice(targetIndex, 0, dragged)
+    onChange({ ...editing.draft, steps: next })
+  }
+
+  return (
+    <>
+      <header className="workspace-header">
+        <Button
+          ref={backButtonRef}
+          variant="ghost"
+          size="icon"
+          onClick={onCancel}
+          aria-label={t('Retour aux états')}
+        >
+          <ArrowLeft />
+        </Button>
+        <div className="workspace-heading">
+          <p className="eyebrow">{t('Éditeur de séquence')}</p>
+          <h1>{editing.sourceId ? t('Modifier la séquence') : t('Nouvelle séquence')}</h1>
+          <p>{t('Compose les expressions, leur cadence et les clignements de cet état.')}</p>
+        </div>
+        <div className="workspace-header-actions">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={active && playing ? onPause : onPlay}
+            aria-label={t(
+              active && playing ? 'Pause' : active ? 'Reprendre' : 'Prévisualiser la séquence'
+            )}
+          >
+            {active && playing ? <Pause /> : <Play />}
+          </Button>
+          {active && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onStop}
+              aria-label={t('Arrêter la séquence')}
+            >
+              <Square />
+            </Button>
+          )}
+        </div>
+      </header>
+
+      <div className="workspace-scroll sequence-workspace-scroll">
+        <ControlSection
+          title="Identité"
+          subtitle="Nom, catégorie et comportement de lecture de la séquence."
+          compact
+        >
+          <InspectorCard>
+            <Field>
+              <FieldTitle>{t('Nom')}</FieldTitle>
+              <Input
+                value={editing.draft.name}
+                onChange={event => onChange({ ...editing.draft, name: event.currentTarget.value })}
+              />
+            </Field>
+            <Field>
+              <FieldTitle>{t('Catégorie')}</FieldTitle>
+              <Input
+                value={editing.draft.group}
+                onChange={event => onChange({ ...editing.draft, group: event.currentTarget.value })}
+              />
+            </Field>
+            <Field>
+              <FieldTitle>{t('Description')}</FieldTitle>
+              <Input
+                value={editing.draft.description}
+                onChange={event =>
+                  onChange({ ...editing.draft, description: event.currentTarget.value })
+                }
+              />
+            </Field>
+            <Field>
+              <FieldTitle>{t('Mode de lecture')}</FieldTitle>
+              <Select
+                value={editing.draft.playbackMode}
+                items={[
+                  { value: 'loop', label: t('Boucle') },
+                  { value: 'once', label: t('Une fois') },
+                  { value: 'pingPong', label: t('Aller-retour') },
+                ]}
+                onValueChange={value =>
+                  value &&
+                  onChange({
+                    ...editing.draft,
+                    playbackMode: value as AvatarSequence['playbackMode'],
+                  })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="loop">{t('Boucle')}</SelectItem>
+                  <SelectItem value="once">{t('Une fois')}</SelectItem>
+                  <SelectItem value="pingPong">{t('Aller-retour')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          </InspectorCard>
+        </ControlSection>
+
+        <ControlSection
+          title="Timeline"
+          subtitle="Glisse les étapes pour les réordonner, puis sélectionne-en une pour régler sa cadence."
+          compact
+        >
+          <InspectorCard>
+            {editing.draft.steps.length ? (
+              <div className="sequence-timeline">
+                {editing.draft.steps.map((step, position) => {
+                  const preset = expressions[step.expressionIndex]
+                  if (!preset) return null
+                  return (
+                    <motion.div
+                      className="sequence-step"
+                      data-selected={selectedStep?.id === step.id || undefined}
+                      key={step.id}
+                      layout="position"
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { type: 'spring', stiffness: 500, damping: 40 }
+                      }
+                      draggable
+                      onDragStart={() => {
+                        draggedStepId.current = step.id
+                        onSelectedStepChange(step.id)
+                      }}
+                      onDragEnter={() => moveStep(step.id)}
+                      onDragOver={event => event.preventDefault()}
+                      onDragEnd={() => {
+                        draggedStepId.current = null
+                      }}
+                    >
+                      <Button
+                        variant="outline"
+                        type="button"
+                        aria-pressed={selectedStep?.id === step.id}
+                        onClick={() => {
+                          onSelectedStepChange(step.id)
+                          onPreviewStep(step)
+                        }}
+                      >
+                        <GripVertical className="sequence-grip" />
+                        <ExpressionPreview
+                          expression={preset}
+                          surface={surface}
+                          bodyNodes={bodyNodes}
+                          colors={colors}
+                          avatarEyes={avatarEyes}
+                          id={`sequence-${editing.draft.id}-${step.id}`}
+                        />
+                        <span>{String(step.expressionIndex).padStart(2, '0')}</span>
+                        <small>{position + 1}</small>
+                      </Button>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="sequence-empty">{t('Ajoute une expression pour commencer.')}</p>
+            )}
+
+            {selectedStep ? (
+              <div className="sequence-step-settings">
+                <div className="state-section-heading">
+                  <div>
+                    <h3>{t('Étape sélectionnée')}</h3>
+                    <p>{t('Durée visible avant de passer à l’expression suivante.')}</p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="icon-sm"
+                    onClick={() => {
+                      const next = editing.draft.steps.filter(step => step.id !== selectedStep.id)
+                      onChange({ ...editing.draft, steps: next })
+                      onSelectedStepChange(next[0]?.id ?? null)
+                    }}
+                    aria-label={t('Supprimer cette étape')}
+                  >
+                    <Trash2 />
+                  </Button>
+                </div>
+                <NumericField
+                  label="Temps d’affichage"
+                  value={selectedStep.holdMs}
+                  min={100}
+                  max={60000}
+                  step={100}
+                  unit="ms"
+                  onChange={holdMs => updateStep({ holdMs })}
+                />
+                <NumericField
+                  label="Durée de transition"
+                  value={selectedStep.transitionMs}
+                  min={0}
+                  max={5000}
+                  step={50}
+                  unit="ms"
+                  onChange={transitionMs => updateStep({ transitionMs })}
+                />
+                <Field className="sequence-transition-field" orientation="horizontal">
+                  <FieldTitle>{t('Transition')}</FieldTitle>
+                  <Select
+                    value={selectedStep.transition}
+                    items={[
+                      { value: 'spring', label: t('Ressort') },
+                      { value: 'smooth', label: t('Douce') },
+                      { value: 'snappy', label: t('Rapide') },
+                    ]}
+                    onValueChange={value =>
+                      value && updateStep({ transition: value as SequenceStep['transition'] })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="spring">{t('Ressort')}</SelectItem>
+                      <SelectItem value="smooth">{t('Douce')}</SelectItem>
+                      <SelectItem value="snappy">{t('Rapide')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </div>
+            ) : null}
+          </InspectorCard>
+
+          <InspectorCard>
+            <PanelTitle
+              level={3}
+              title="Ajouter une expression"
+              subtitle="Sélectionne un preset pour l’ajouter à la fin de la timeline."
+            />
+            <div className="expression-grid sequence-expression-library">
+              {expressions.map((preset, index) => (
+                <Button
+                  className="expression-card"
+                  variant="outline"
+                  type="button"
+                  key={index}
+                  onClick={() => {
+                    const step = createSequenceStep(index)
+                    onChange({ ...editing.draft, steps: [...editing.draft.steps, step] })
+                    onSelectedStepChange(step.id)
+                    onPreviewStep(step)
+                  }}
+                >
+                  <ExpressionPreview
+                    expression={preset}
+                    surface={surface}
+                    bodyNodes={bodyNodes}
+                    colors={colors}
+                    avatarEyes={avatarEyes}
+                    id={`sequence-library-${index}`}
+                  />
+                  <span>{String(index).padStart(2, '0')}</span>
+                </Button>
+              ))}
+            </div>
+          </InspectorCard>
+        </ControlSection>
+
+        <ControlSection
+          title="Clignements"
+          subtitle="Le blink fonctionne indépendamment des changements d’expression."
+          compact
+        >
+          <InspectorCard>
+            <div className="switch">
+              <span>{t('Activer les clignements')}</span>
+              <Switch
+                checked={editing.draft.blink.enabled}
+                onCheckedChange={enabled =>
+                  onChange({
+                    ...editing.draft,
+                    blink: { ...editing.draft.blink, enabled },
+                  })
+                }
+              />
+            </div>
+            <NumericField
+              label="Premier clignement"
+              value={editing.draft.blink.initialDelayMs}
+              min={0}
+              max={60000}
+              step={100}
+              unit="ms"
+              onChange={initialDelayMs =>
+                onChange({
+                  ...editing.draft,
+                  blink: { ...editing.draft.blink, initialDelayMs },
+                })
+              }
+            />
+            <div className="eye-columns">
+              <NumericField
+                label="Intervalle minimum"
+                value={editing.draft.blink.minIntervalMs}
+                min={100}
+                max={60000}
+                step={100}
+                unit="ms"
+                onChange={minIntervalMs =>
+                  onChange({
+                    ...editing.draft,
+                    blink: {
+                      ...editing.draft.blink,
+                      minIntervalMs,
+                      maxIntervalMs: Math.max(minIntervalMs, editing.draft.blink.maxIntervalMs),
+                    },
+                  })
+                }
+              />
+              <NumericField
+                label="Intervalle maximum"
+                value={editing.draft.blink.maxIntervalMs}
+                min={editing.draft.blink.minIntervalMs}
+                max={60000}
+                step={100}
+                unit="ms"
+                onChange={maxIntervalMs =>
+                  onChange({
+                    ...editing.draft,
+                    blink: { ...editing.draft.blink, maxIntervalMs },
+                  })
+                }
+              />
+            </div>
+            <NumericField
+              label="Durée du clignement"
+              value={editing.draft.blink.durationMs}
+              min={40}
+              max={3000}
+              step={20}
+              unit="ms"
+              onChange={durationMs =>
+                onChange({
+                  ...editing.draft,
+                  blink: { ...editing.draft.blink, durationMs },
+                })
+              }
+            />
+          </InspectorCard>
+        </ControlSection>
+      </div>
+
+      <footer className="workspace-footer">
+        <div className="workspace-footer-secondary">
+          {editing.sourceId && (
+            <Button variant="destructive" onClick={onDelete}>
+              <Trash2 /> {t('Supprimer')}
+            </Button>
+          )}
+          <Button variant="outline" onClick={onDuplicate}>
+            <Copy /> {t('Dupliquer')}
+          </Button>
+        </div>
+        <Button
+          disabled={!editing.draft.steps.length || !editing.draft.name.trim()}
+          onClick={onSave}
+        >
+          {t('Enregistrer')}
+        </Button>
       </footer>
     </>
   )
@@ -1574,6 +2102,9 @@ function StudioApp() {
   const [selectedBodyNodeId, setSelectedBodyNodeId] = useState<'primary' | string | null>('primary')
   const [selectedEyeSide, setSelectedEyeSide] = useState<-1 | 1 | null>(null)
   const [expressions, setExpressions] = useState(loadGlobalExpressions)
+  const [sequences, setSequences] = useState(() =>
+    normalizeSequencesForExpressions(loadSequences(), expressions.length)
+  )
   const [bodyEditing, setBodyEditing] = useState(false)
   const avatarEditSnapshot = useRef<{
     avatars: StudioAvatar[]
@@ -1587,6 +2118,7 @@ function StudioApp() {
   )
   const [deleteAvatarOpen, setDeleteAvatarOpen] = useState(false)
   const [deleteExpressionOpen, setDeleteExpressionOpen] = useState(false)
+  const [deleteSequenceOpen, setDeleteSequenceOpen] = useState(false)
   const [activeExpression, setActiveExpression] = useState<number | null>(null)
   const [editing, setEditing] = useState<{ index: number | null; draft: Expression } | null>(null)
   const [showWire, setShowWire] = useState(false)
@@ -1598,17 +2130,32 @@ function StudioApp() {
     position: true,
   })
   const [highlight, setHighlight] = useState<Highlight>(null)
-  const [selectedState, setSelectedState] = useState('idle')
+  const [selectedState, setSelectedState] = useState(() =>
+    sequences.some(sequence => sequence.id === 'idle') ? 'idle' : (sequences[0]?.id ?? '')
+  )
   const [activeState, setActiveState] = useState<string | null>(null)
   const [statePlaying, setStatePlaying] = useState(false)
+  const [sequenceEditing, setSequenceEditing] = useState<{
+    sourceId: string | null
+    draft: AvatarSequence
+  } | null>(null)
+  const [selectedSequenceStepId, setSelectedSequenceStepId] = useState<string | null>(null)
   const stateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const activeSequenceRef = useRef<AvatarSequence | null>(null)
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const statePosition = useRef(0)
+  const stateDirection = useRef<1 | -1>(1)
   const stateNextDueAt = useRef<number | null>(null)
   const stateRemainingDelay = useRef(0)
+  const blinkNextDueAt = useRef<number | null>(null)
+  const blinkRemainingDelay = useRef(0)
   const reduceMotion = useReducedMotion()
 
   const avatarsRef = useRef(avatars)
+  const draggedAvatarId = useRef<string | null>(null)
+  const avatarDragOrigin = useRef<StudioAvatar[] | null>(null)
+  const avatarDragPreview = useRef(avatars)
+  const [draggingAvatarId, setDraggingAvatarId] = useState<string | null>(null)
   const activeAvatarIdRef = useRef(activeAvatarId)
   const surfaceRef = useRef(surface)
   const bodyNodesRef = useRef(bodyNodes)
@@ -1649,7 +2196,19 @@ function StudioApp() {
   const lastTransitionTime = useRef<number | null>(null)
   const lastInspectorFrame = useRef(0)
   const springSpeedRef = useRef(springSpeed)
+  const sequenceTransitionRef = useRef<Pick<SequenceStep, 'transitionMs' | 'transition'>>({
+    transitionMs: 500,
+    transition: 'spring',
+  })
+  const activeSequenceTransition = useRef<{
+    target: Expression
+    index: number | null
+    settings: Pick<SequenceStep, 'transitionMs' | 'transition'>
+    remainingMs: number
+  } | null>(null)
+  const pausedSequenceTransition = useRef<typeof activeSequenceTransition.current>(null)
   const blinkControls = useRef<ReturnType<typeof animate> | null>(null)
+  const blinkAnimating = useRef(false)
   const blinkValue = useMotionValue(1)
   const headPath = useMotionValue(initialGeometry.headPath)
   const backNodeIds = useRef(initialGeometry.backNodeIds)
@@ -1767,12 +2326,20 @@ function StudioApp() {
     paintPose(pose)
   }
 
-  const transitionToExpression = (next: Expression, index: number | null = null) => {
+  const transitionToExpression = (
+    next: Expression,
+    index: number | null = null,
+    transitionSettings?: Pick<SequenceStep, 'transitionMs' | 'transition'>
+  ) => {
+    sequenceTransitionRef.current = transitionSettings ?? {
+      transitionMs: 500,
+      transition: 'spring',
+    }
     setActiveExpression(index)
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
-    if (avatar) setDisplayColors(resolveColors(next, avatar.colors))
-    if (reduceMotion) {
+    if (reduceMotion || transitionSettings?.transitionMs === 0) {
       updateImmediate(next)
+      setActiveExpression(index)
       return
     }
     const current = displayedPose.current.expression
@@ -1792,6 +2359,66 @@ function StudioApp() {
       rightAngle: nearestAngle(next.rightAngle, current.rightAngle),
     }
 
+    if (transitionSettings) {
+      stopTransition(true)
+      const durationMs = transitionSettings.transitionMs
+      const from = { ...current }
+      const fromColors = { ...displayColors }
+      const targetColors = avatar ? resolveColors(next, avatar.colors) : fromColors
+      let startedAt: number | null = null
+      activeSequenceTransition.current = {
+        target: next,
+        index,
+        settings: transitionSettings,
+        remainingMs: durationMs,
+      }
+      const tickSequenceTransition = (time: number) => {
+        if (startedAt === null) startedAt = time
+        const elapsed = time - startedAt
+        const progress = Math.min(elapsed / durationMs, 1)
+        const eased =
+          transitionSettings.transition === 'smooth'
+            ? progress * progress * (3 - 2 * progress)
+            : transitionSettings.transition === 'snappy'
+              ? 1 - (1 - progress) ** 3
+              : 1 - Math.exp(-6 * progress) * Math.cos(8 * progress)
+        const animated = { ...from, eyeMotion: next.eyeMotion, bodyMotion: next.bodyMotion }
+        expressionFields.forEach(field => {
+          animated[field] = from[field] + (resolvedTarget[field] - from[field]) * eased
+        })
+        activeSequenceTransition.current = {
+          target: next,
+          index,
+          settings: transitionSettings,
+          remainingMs: Math.max(durationMs - elapsed, 0),
+        }
+        setDisplayColors({
+          body: interpolateHexColor(fromColors.body, targetColors.body, bounded(eased, 0, 1)),
+          eyes: interpolateHexColor(fromColors.eyes, targetColors.eyes, bounded(eased, 0, 1)),
+        })
+        paintPose(poseFromExpression(animated), undefined, time)
+        if (time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS) {
+          lastInspectorFrame.current = time
+          setExpression(animated)
+        }
+        if (progress < 1) {
+          transitionFrame.current = requestAnimationFrame(tickSequenceTransition)
+          return
+        }
+        transitionFrame.current = null
+        activeSequenceTransition.current = null
+        canonicalTarget.current = next
+        transitionTarget.current = next
+        setExpression(next)
+        setDisplayColors(targetColors)
+        paintPose(poseFromExpression(next))
+      }
+      transitionFrame.current = requestAnimationFrame(tickSequenceTransition)
+      return
+    }
+
+    if (avatar) setDisplayColors(resolveColors(next, avatar.colors))
+
     if (transitionFrame.current !== null) {
       retargetFrom.current = { ...transitionTarget.current }
       retargetTo.current = resolvedTarget
@@ -1803,8 +2430,11 @@ function StudioApp() {
       const previousTime = lastTransitionTime.current ?? time
       const deltaTime = Math.min(Math.max((time - previousTime) / 1000, 1 / 240), 1 / 30)
       lastTransitionTime.current = time
-      const stiffness = 70 + springSpeedRef.current * 24
-      const damping = 17 + springSpeedRef.current * 1.7
+      const { stiffness, damping } = getSequenceSpring(
+        sequenceTransitionRef.current.transition,
+        sequenceTransitionRef.current.transitionMs,
+        springSpeedRef.current
+      )
       const mass = 0.85
       const currentExpression = displayedPose.current.expression
       if (retargetStartedAt.current !== null && retargetFrom.current && retargetTo.current) {
@@ -1861,14 +2491,19 @@ function StudioApp() {
     transitionFrame.current = requestAnimationFrame(tick)
   }
 
-  const blink = () => {
+  const blink = (durationMs?: number) => {
     blinkControls.current?.stop()
     blinkValue.jump(1)
-    const blinkDuration = getStatePlaybackConfig(activeState ?? selectedState).blink.durationMs
+    blinkAnimating.current = true
+    const sequence = sequences.find(item => item.id === (activeState ?? selectedState))
+    const blinkDuration = durationMs ?? sequence?.blink.durationMs ?? 280
     blinkControls.current = animate(blinkValue, [1, 0, 1], {
       duration: reduceMotion ? 0 : blinkDuration / 1000,
       times: [0, 0.42, 1],
       ease: ['easeIn', 'easeOut'],
+      onComplete: () => {
+        blinkAnimating.current = false
+      },
     })
   }
 
@@ -1980,7 +2615,9 @@ function StudioApp() {
     setEditing(null)
     setBodyEditing(editBody)
     if (!preserveMode || editBody) setMode('manual')
-    const nextExpression = activeState ? currentStateExpression : { ...defaultExpression }
+    const nextExpression = activeState
+      ? currentStateExpression
+      : { ...(expressions[0] ?? defaultExpression) }
     setExpression(nextExpression)
     setDisplayColors(resolveColors(nextExpression, avatar.colors))
     canonicalTarget.current = nextExpression
@@ -2002,6 +2639,58 @@ function StudioApp() {
     setAvatars(next)
     setFocusAvatarName(true)
     activateAvatar(avatar.id, true)
+  }
+
+  const duplicateAvatar = (source: StudioAvatar, editDuplicate = false) => {
+    const snapshotAvatars = avatarEditSnapshot.current?.avatars ?? avatarsRef.current
+    const sourceIndex = snapshotAvatars.findIndex(avatar => avatar.id === source.id)
+    const baseAvatars = sourceIndex < 0 ? [...snapshotAvatars, source] : snapshotAvatars
+    const duplicate: StudioAvatar = {
+      ...structuredClone(source),
+      id: `avatar-${crypto.randomUUID()}`,
+      name: `${source.name} ${t('copie')}`,
+    }
+    const insertionIndex = Math.max(baseAvatars.findIndex(avatar => avatar.id === source.id) + 1, 0)
+    const next = [...baseAvatars]
+    next.splice(insertionIndex, 0, duplicate)
+    avatarEditSnapshot.current = null
+    avatarsRef.current = next
+    setAvatars(next)
+    persistAvatarLibrary({ activeAvatarId: duplicate.id, avatars: next })
+    activateAvatar(duplicate.id, editDuplicate)
+  }
+
+  const previewAvatarMove = (targetId: string) => {
+    const draggedId = draggedAvatarId.current
+    if (!draggedId || draggedId === targetId) return
+    const current = avatarDragPreview.current
+    const dragged = current.find(avatar => avatar.id === draggedId)
+    const targetIndex = current.findIndex(avatar => avatar.id === targetId)
+    if (!dragged || targetIndex < 0) return
+    const next = current.filter(avatar => avatar.id !== draggedId)
+    next.splice(targetIndex, 0, dragged)
+    avatarDragPreview.current = next
+    setAvatars(next)
+  }
+
+  const commitAvatarMove = (targetId: string) => {
+    previewAvatarMove(targetId)
+    const next = avatarDragPreview.current
+    avatarsRef.current = next
+    persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
+    avatarDragOrigin.current = null
+    draggedAvatarId.current = null
+    setDraggingAvatarId(null)
+  }
+
+  const cancelAvatarMove = () => {
+    if (draggedAvatarId.current && avatarDragOrigin.current) {
+      avatarDragPreview.current = avatarDragOrigin.current
+      setAvatars(avatarDragOrigin.current)
+    }
+    avatarDragOrigin.current = null
+    draggedAvatarId.current = null
+    setDraggingAvatarId(null)
   }
 
   const cancelAvatarEditing = () => {
@@ -2095,12 +2784,23 @@ function StudioApp() {
     stateTimer.current = null
     blinkTimer.current = null
     stateNextDueAt.current = null
+    blinkNextDueAt.current = null
   }
 
   const pauseState = () => {
     if (stateNextDueAt.current !== null) {
-      stateRemainingDelay.current = Math.max(stateNextDueAt.current - performance.now(), 0)
+      stateRemainingDelay.current = Math.max(stateNextDueAt.current - readSequenceClock(), 0)
     }
+    if (blinkNextDueAt.current !== null) {
+      blinkRemainingDelay.current = Math.max(blinkNextDueAt.current - readSequenceClock(), 0)
+    }
+    if (transitionFrame.current !== null && activeSequenceTransition.current) {
+      cancelAnimationFrame(transitionFrame.current)
+      transitionFrame.current = null
+      pausedSequenceTransition.current = activeSequenceTransition.current
+      activeSequenceTransition.current = null
+    }
+    if (blinkAnimating.current) blinkControls.current?.pause()
     clearStateTimers()
     setStatePlaying(false)
   }
@@ -2108,55 +2808,118 @@ function StudioApp() {
   const stopState = () => {
     clearStateTimers()
     statePosition.current = 0
+    stateDirection.current = 1
     stateRemainingDelay.current = 0
+    blinkRemainingDelay.current = 0
+    activeSequenceTransition.current = null
+    pausedSequenceTransition.current = null
     stopTransition(true)
     blinkControls.current?.stop()
+    blinkAnimating.current = false
+    blinkValue.jump(1)
+    paintPose(displayedPose.current, 1)
+    activeSequenceRef.current = null
     setStatePlaying(false)
     setActiveState(null)
   }
 
-  const launchState = (name: string, resume = false) => {
+  const launchSequence = (sequence: AvatarSequence, resume = false) => {
     clearStateTimers()
-    const pool = statePools[name]
-    if (!pool?.length) {
+    if (!sequence.steps.length) {
       stopState()
       return
     }
-    if (!resume || activeState !== name) statePosition.current = 0
-    setSelectedState(name)
-    setActiveState(name)
-    setStatePlaying(true)
-    const playback = getStatePlaybackConfig(name)
-    const cycleDelay = playback.expressionIntervalMs
-    const scheduleCycle = (delay: number) => {
-      stateRemainingDelay.current = delay
-      stateNextDueAt.current = performance.now() + delay
-      stateTimer.current = setTimeout(cycle, delay)
+    const id = sequence.id
+    if (!resume || activeState !== id) {
+      statePosition.current = 0
+      stateDirection.current = 1
     }
-    const cycle = () => {
+    setSelectedState(id)
+    setActiveState(id)
+    activeSequenceRef.current = sequence
+    setStatePlaying(true)
+    const scheduleAdvance = (delay: number) => {
+      stateRemainingDelay.current = delay
+      stateNextDueAt.current = readSequenceClock() + delay
+      stateTimer.current = setTimeout(advance, delay)
+    }
+    const playCurrentStep = () => {
       stateNextDueAt.current = null
-      const index = pool[statePosition.current % pool.length]
-      transitionToExpression(expressions[index], index)
-      statePosition.current += 1
-      scheduleCycle(cycleDelay)
+      const step = sequence.steps[statePosition.current]
+      const preset = expressions[step.expressionIndex]
+      if (preset) {
+        transitionToExpression(preset, step.expressionIndex, step)
+      }
+      scheduleAdvance((reduceMotion ? 0 : step.transitionMs) + step.holdMs)
+    }
+    const advance = () => {
+      stateNextDueAt.current = null
+      const cursor = advanceSequenceCursor(sequence, statePosition.current, stateDirection.current)
+      if (cursor.complete) {
+        if (blinkTimer.current) clearTimeout(blinkTimer.current)
+        blinkTimer.current = null
+        blinkNextDueAt.current = null
+        setStatePlaying(false)
+        setActiveState(null)
+        return
+      }
+      statePosition.current = cursor.index
+      stateDirection.current = cursor.direction
+      playCurrentStep()
+    }
+    const scheduleBlink = (delay: number) => {
+      blinkRemainingDelay.current = delay
+      blinkNextDueAt.current = readSequenceClock() + delay
+      blinkTimer.current = setTimeout(blinkLoop, delay)
     }
     const blinkLoop = () => {
-      blink()
-      const { minIntervalMs, maxIntervalMs } = playback.blink
-      blinkTimer.current = setTimeout(
-        blinkLoop,
-        minIntervalMs + Math.random() * (maxIntervalMs - minIntervalMs)
+      blinkNextDueAt.current = null
+      blink(sequence.blink.durationMs)
+      const { minIntervalMs, maxIntervalMs } = sequence.blink
+      scheduleBlink(
+        sequence.blink.durationMs + minIntervalMs + Math.random() * (maxIntervalMs - minIntervalMs)
       )
     }
-    if (resume) scheduleCycle(stateRemainingDelay.current || cycleDelay)
-    else cycle()
-    blinkTimer.current = setTimeout(blinkLoop, playback.blink.initialDelayMs)
+    if (resume) {
+      const pausedTransition = pausedSequenceTransition.current
+      if (pausedTransition) {
+        transitionToExpression(pausedTransition.target, pausedTransition.index, {
+          ...pausedTransition.settings,
+          transitionMs: pausedTransition.remainingMs,
+        })
+        pausedSequenceTransition.current = null
+      }
+      if (blinkAnimating.current) blinkControls.current?.play()
+      const currentStep = sequence.steps[statePosition.current]
+      scheduleAdvance(
+        stateRemainingDelay.current ||
+          (reduceMotion ? 0 : currentStep.transitionMs) + currentStep.holdMs
+      )
+    } else {
+      playCurrentStep()
+    }
+    if (sequence.blink.enabled) {
+      scheduleBlink(
+        resume
+          ? blinkRemainingDelay.current || sequence.blink.initialDelayMs
+          : sequence.blink.initialDelayMs
+      )
+    }
+  }
+
+  const launchState = (id: string, resume = false) => {
+    const sequence = sequences.find(item => item.id === id)
+    if (!sequence) {
+      stopState()
+      return
+    }
+    launchSequence(sequence, resume)
   }
 
   const toggleStatePlayback = () => {
-    if (!activeState) return
+    if (!activeState || !activeSequenceRef.current) return
     if (statePlaying) pauseState()
-    else launchState(activeState, true)
+    else launchSequence(activeSequenceRef.current, true)
   }
 
   const saveEditing = () => {
@@ -2172,6 +2935,20 @@ function StudioApp() {
     persistGlobalExpressions(next)
     setEditing(null)
     transitionToExpression(editing.draft, index)
+  }
+
+  const duplicateExpression = (index: number | null, draft: Expression, editDuplicate = false) => {
+    const insertionIndex = index === null ? expressions.length : index + 1
+    const duplicate = { ...draft }
+    const next = [...expressions]
+    next.splice(insertionIndex, 0, duplicate)
+    const nextSequences = remapSequencesAfterExpressionInsert(sequences, insertionIndex)
+    setExpressions(next)
+    setSequences(nextSequences)
+    persistGlobalExpressions(next)
+    persistSequences(nextSequences)
+    if (editDuplicate) openExpressionEditor(insertionIndex, duplicate)
+    else transitionToExpression(duplicate, insertionIndex)
   }
 
   const previewExpressionDraft = (draft: Expression) => {
@@ -2200,10 +2977,19 @@ function StudioApp() {
 
   const deleteEditing = () => {
     if (editing?.index === null || editing?.index === undefined) return
-    const next = expressions.filter((_, index) => index !== editing.index)
+    const next =
+      expressions.length <= 1
+        ? [{ ...defaultExpression }]
+        : expressions.filter((_, index) => index !== editing.index)
     const fallback = next[Math.min(editing.index, next.length - 1)] ?? defaultExpression
+    const nextSequences =
+      expressions.length <= 1
+        ? normalizeSequencesForExpressions(sequences, 1)
+        : remapSequencesAfterExpressionDelete(sequences, editing.index)
     setExpressions(next)
+    setSequences(nextSequences)
     persistGlobalExpressions(next)
+    persistSequences(nextSequences)
     setActiveExpression(null)
     setEditing(null)
     setDeleteExpressionOpen(false)
@@ -2211,6 +2997,74 @@ function StudioApp() {
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
     if (avatar) setDisplayColors(resolveColors(fallback, avatar.colors))
     paintPose(poseFromExpression(fallback))
+  }
+
+  const openSequenceEditor = (sequence?: AvatarSequence) => {
+    stopState()
+    setEditing(null)
+    setBodyEditing(false)
+    setMode('states')
+    const draft = sequence
+      ? {
+          ...sequence,
+          steps: sequence.steps.map(step => ({ ...step })),
+          blink: { ...sequence.blink },
+        }
+      : createSequence(activeExpression ?? 0)
+    setSequenceEditing({ sourceId: sequence?.id ?? null, draft })
+    setSelectedSequenceStepId(draft.steps[0]?.id ?? null)
+    const firstStep = draft.steps[0]
+    const preset = firstStep && expressions[firstStep.expressionIndex]
+    if (preset) transitionToExpression(preset, firstStep.expressionIndex, firstStep)
+  }
+
+  const cancelSequenceEditing = () => {
+    if (activeState === sequenceEditing?.draft.id) stopState()
+    setSequenceEditing(null)
+    setSelectedSequenceStepId(null)
+  }
+
+  const saveSequenceEditing = () => {
+    if (!sequenceEditing?.draft.steps.length || !sequenceEditing.draft.name.trim()) return
+    const saved = {
+      ...sequenceEditing.draft,
+      name: sequenceEditing.draft.name.trim(),
+      group: sequenceEditing.draft.group.trim() || 'Custom',
+    }
+    const next = sequenceEditing.sourceId
+      ? sequences.map(sequence => (sequence.id === sequenceEditing.sourceId ? saved : sequence))
+      : [...sequences, saved]
+    setSequences(next)
+    persistSequences(next)
+    setSelectedState(saved.id)
+    if (activeState === saved.id) stopState()
+    setSequenceEditing(null)
+    setSelectedSequenceStepId(null)
+  }
+
+  const duplicateSequenceEditing = () => {
+    if (!sequenceEditing) return
+    if (activeState === sequenceEditing.draft.id) stopState()
+    const duplicate = duplicateSequence(sequenceEditing.draft)
+    const next = [...sequences, duplicate]
+    setSequences(next)
+    persistSequences(next)
+    setSelectedState(duplicate.id)
+    setSequenceEditing({ sourceId: duplicate.id, draft: duplicate })
+    setSelectedSequenceStepId(duplicate.steps[0]?.id ?? null)
+  }
+
+  const deleteSequenceEditing = () => {
+    if (!sequenceEditing?.sourceId) return
+    const next = sequences.filter(sequence => sequence.id !== sequenceEditing.sourceId)
+    const fallback = next[0]
+    setSequences(next)
+    persistSequences(next)
+    if (activeState === sequenceEditing.sourceId) stopState()
+    setSelectedState(fallback?.id ?? '')
+    setSequenceEditing(null)
+    setSelectedSequenceStepId(null)
+    setDeleteSequenceOpen(false)
   }
 
   const selectedBodyNode =
@@ -2227,9 +3081,15 @@ function StudioApp() {
   }
   const activeAvatar = avatars.find(avatar => avatar.id === activeAvatarId) ?? avatars[0]
   const activeAvatarEyes = activeAvatar.eyes ?? defaultAvatarEyes
+  const activeSequence = sequences.find(sequence => sequence.id === activeState) ?? null
+  const activeSequenceLabel = activeSequence
+    ? activeSequence.builtIn
+      ? t(activeSequence.name)
+      : activeSequence.name
+    : null
   const canvasExpression = editing?.draft ?? expression
   const canvasColors = editing ? resolveColors(editing.draft, activeAvatar.colors) : displayColors
-  const editorPageOpen = bodyEditing || editing !== null
+  const editorPageOpen = bodyEditing || editing !== null || sequenceEditing !== null
 
   useEffect(() => {
     if (!editorPageOpen || focusAvatarName) return
@@ -2237,7 +3097,7 @@ function StudioApp() {
     return () => cancelAnimationFrame(frame)
   }, [editorPageOpen, focusAvatarName])
 
-  const selectedStatePlayback = getStatePlaybackConfig(selectedState)
+  const selectedSequence = sequences.find(sequence => sequence.id === selectedState) ?? sequences[0]
   const updateAvatarEyeDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
     const field = `${dimension}${side}` as keyof AvatarEyeDefaults
     const other = `${dimension}${side === 'Left' ? 'Right' : 'Left'}` as keyof AvatarEyeDefaults
@@ -2296,17 +3156,25 @@ function StudioApp() {
           <span className="brand-mark" />
           Bible Strong <em>Avatar Lab</em>
         </div>
-        <label className="language-picker">
+        <div className="language-picker">
           <span aria-hidden="true">{language === 'en' ? '🇬🇧' : '🇫🇷'}</span>
-          <select
-            aria-label={t('Langue de l’interface')}
+          <Select
             value={language}
-            onChange={event => setLanguage(event.currentTarget.value as StudioLanguage)}
+            items={[
+              { value: 'en', label: 'English' },
+              { value: 'fr', label: 'Français' },
+            ]}
+            onValueChange={next => next && setLanguage(next as StudioLanguage)}
           >
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-          </select>
-        </label>
+            <SelectTrigger aria-label={t('Langue de l’interface')}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="en">English</SelectItem>
+              <SelectItem value="fr">Français</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <AvatarCanvas
           expression={canvasExpression}
           avatarEyes={activeAvatarEyes}
@@ -2346,9 +3214,47 @@ function StudioApp() {
       </section>
 
       <main
-        className={`inspector ${editing ? 'expression-workspace-active' : bodyEditing ? 'body-workspace' : 'studio-workspace'}`}
+        className={`inspector ${sequenceEditing ? 'sequence-workspace-active' : editing ? 'expression-workspace-active' : bodyEditing ? 'body-workspace' : 'studio-workspace'}`}
       >
-        {editing && (
+        {sequenceEditing && (
+          <motion.div
+            key={`sequence-${sequenceEditing.sourceId ?? 'new'}`}
+            className="workspace-page sequence-workspace"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <SequenceWorkspace
+              editing={sequenceEditing}
+              expressions={expressions}
+              surface={surface}
+              bodyNodes={bodyNodes}
+              colors={activeAvatar.colors}
+              avatarEyes={activeAvatarEyes}
+              selectedStepId={selectedSequenceStepId}
+              backButtonRef={workspaceBackButtonRef}
+              reduceMotion={Boolean(reduceMotion)}
+              onSelectedStepChange={setSelectedSequenceStepId}
+              onChange={draft =>
+                setSequenceEditing(current => (current ? { ...current, draft } : current))
+              }
+              onPreviewStep={step => {
+                const preset = expressions[step.expressionIndex]
+                if (preset) transitionToExpression(preset, step.expressionIndex, step)
+              }}
+              onPlay={() => launchSequence(sequenceEditing.draft)}
+              onPause={pauseState}
+              onStop={stopState}
+              playing={statePlaying}
+              active={activeState === sequenceEditing.draft.id}
+              onCancel={cancelSequenceEditing}
+              onSave={saveSequenceEditing}
+              onDuplicate={duplicateSequenceEditing}
+              onDelete={() => setDeleteSequenceOpen(true)}
+            />
+          </motion.div>
+        )}
+        {!sequenceEditing && editing && (
           <motion.div
             key={`expression-${editing.index ?? 'new'}`}
             className="workspace-page expression-workspace"
@@ -2363,11 +3269,13 @@ function StudioApp() {
               onChange={previewExpressionDraft}
               onCancel={cancelExpressionEditing}
               onSave={saveEditing}
+              onDuplicate={() => duplicateExpression(editing.index, editing.draft, true)}
               onDelete={() => setDeleteExpressionOpen(true)}
             />
           </motion.div>
         )}
-        {!editing &&
+        {!sequenceEditing &&
+          !editing &&
           (bodyEditing ? (
             <header className="workspace-header body-workspace-header">
               <Button
@@ -2401,7 +3309,7 @@ function StudioApp() {
               </div>
               <div className="workspace-header-actions">
                 <StatePlayer
-                  name={activeState}
+                  name={activeSequenceLabel}
                   playing={statePlaying}
                   onToggle={toggleStatePlayback}
                   onStop={stopState}
@@ -2413,7 +3321,7 @@ function StudioApp() {
               <header className="inspector-header">
                 <h1>Avatar Studio</h1>
                 <StatePlayer
-                  name={activeState}
+                  name={activeSequenceLabel}
                   playing={statePlaying}
                   onToggle={toggleStatePlayback}
                   onStop={stopState}
@@ -2426,28 +3334,91 @@ function StudioApp() {
                 </div>
                 <div className="avatar-grid">
                   {avatars.map(avatar => (
-                    <Button
-                      className="avatar-card"
-                      variant="outline"
-                      aria-pressed={activeAvatarId === avatar.id}
-                      type="button"
+                    <motion.div
+                      className="avatar-sort-item"
+                      data-dragging={draggingAvatarId === avatar.id || undefined}
                       key={avatar.id}
-                      onClick={() => activateAvatar(avatar.id, false, true)}
-                      onDoubleClick={() => {
-                        setFocusAvatarName(false)
-                        activateAvatar(avatar.id, true)
+                      layout="position"
+                      animate={{
+                        opacity: draggingAvatarId === avatar.id ? 0.28 : 1,
+                        scale: draggingAvatarId === avatar.id ? 0.96 : 1,
                       }}
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { type: 'spring', stiffness: 520, damping: 42, mass: 0.7 }
+                      }
                     >
-                      <ExpressionPreview
-                        expression={expressions[0] ?? defaultExpression}
-                        surface={avatar.body.primary}
-                        bodyNodes={avatar.body.nodes}
-                        colors={avatar.colors}
-                        avatarEyes={avatar.eyes ?? defaultAvatarEyes}
-                        id={`avatar-${avatar.id}`}
-                      />
-                      <span>{avatar.name}</span>
-                    </Button>
+                      <ContextMenu>
+                        <ContextMenuTrigger
+                          render={
+                            <Button
+                              className="avatar-card"
+                              variant="outline"
+                              aria-pressed={activeAvatarId === avatar.id}
+                              type="button"
+                              draggable
+                              onDragStart={event => {
+                                avatarDragOrigin.current = avatarsRef.current
+                                avatarDragPreview.current = avatarsRef.current
+                                draggedAvatarId.current = avatar.id
+                                setDraggingAvatarId(avatar.id)
+                                event.dataTransfer.effectAllowed = 'move'
+                              }}
+                              onDragEnter={() => previewAvatarMove(avatar.id)}
+                              onDragOver={event => {
+                                event.preventDefault()
+                                event.dataTransfer.dropEffect = 'move'
+                              }}
+                              onDrop={event => {
+                                event.preventDefault()
+                                commitAvatarMove(avatar.id)
+                              }}
+                              onDragEnd={cancelAvatarMove}
+                              onClick={() => activateAvatar(avatar.id, false, true)}
+                              onDoubleClick={() => {
+                                setFocusAvatarName(false)
+                                activateAvatar(avatar.id, true)
+                              }}
+                            >
+                              <ExpressionPreview
+                                expression={expressions[0] ?? defaultExpression}
+                                surface={avatar.body.primary}
+                                bodyNodes={avatar.body.nodes}
+                                colors={avatar.colors}
+                                avatarEyes={avatar.eyes ?? defaultAvatarEyes}
+                                id={`avatar-${avatar.id}`}
+                              />
+                              <span>{avatar.name}</span>
+                            </Button>
+                          }
+                        />
+                        <ContextMenuContent>
+                          <ContextMenuItem
+                            onClick={() => {
+                              setFocusAvatarName(false)
+                              activateAvatar(avatar.id, true)
+                            }}
+                          >
+                            <Pencil /> {t('Modifier')}
+                          </ContextMenuItem>
+                          <ContextMenuItem onClick={() => duplicateAvatar(avatar)}>
+                            <Copy /> {t('Dupliquer')}
+                          </ContextMenuItem>
+                          <ContextMenuSeparator />
+                          <ContextMenuItem
+                            variant="destructive"
+                            disabled={avatars.length <= 1}
+                            onClick={() => {
+                              activateAvatar(avatar.id, false, true)
+                              setDeleteAvatarOpen(true)
+                            }}
+                          >
+                            <Trash2 /> {t('Supprimer')}
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
+                    </motion.div>
                   ))}
                   <Button
                     variant="outline"
@@ -3290,21 +4261,27 @@ function StudioApp() {
           </div>
         )}
 
-        {!editing && bodyEditing && (
+        {!sequenceEditing && !editing && bodyEditing && (
           <footer className="workspace-footer">
-            <Button
-              variant="destructive"
-              disabled={avatars.length <= 1}
-              onClick={() => setDeleteAvatarOpen(true)}
-            >
-              <Trash2 />
-              {t('Supprimer')}
-            </Button>
+            <div className="workspace-footer-secondary">
+              <Button
+                variant="destructive"
+                disabled={avatars.length <= 1}
+                onClick={() => setDeleteAvatarOpen(true)}
+              >
+                <Trash2 />
+                {t('Supprimer')}
+              </Button>
+              <Button variant="outline" onClick={() => duplicateAvatar(activeAvatar, true)}>
+                <Copy />
+                {t('Dupliquer')}
+              </Button>
+            </div>
             <Button onClick={saveAvatarEditing}>{t('Enregistrer')}</Button>
           </footer>
         )}
 
-        {!editing && !bodyEditing && mode === 'expressions' && (
+        {!sequenceEditing && !editing && !bodyEditing && mode === 'expressions' && (
           <div className="panel-stack">
             <InspectorCard>
               <div className="preset-header">
@@ -3328,6 +4305,11 @@ function StudioApp() {
                     previewId={String(index)}
                     onSelect={() => transitionToExpression(preset, index)}
                     onEdit={() => openExpressionEditor(index, preset)}
+                    onDuplicate={() => duplicateExpression(index, preset)}
+                    onDelete={() => {
+                      openExpressionEditor(index, preset)
+                      setDeleteExpressionOpen(true)
+                    }}
                   />
                 ))}
                 <Button
@@ -3356,7 +4338,7 @@ function StudioApp() {
                 }}
               />
               <div className="button-row">
-                <Button variant="outline" type="button" onClick={blink}>
+                <Button variant="outline" type="button" onClick={() => blink()}>
                   {t('Cligner')}
                 </Button>
                 <Button
@@ -3374,30 +4356,45 @@ function StudioApp() {
           </div>
         )}
 
-        {!editing && !bodyEditing && mode === 'states' && (
+        {!sequenceEditing && !editing && !bodyEditing && mode === 'states' && (
           <div className="panel-stack">
             <InspectorCard>
               <div className="preset-header">
                 <div>
-                  <p className="eyebrow">{t('Séquences')}</p>
+                  <p className="eyebrow">
+                    {sequences.length} {t('séquences')}
+                  </p>
                   <h2>{t('États animés')}</h2>
                 </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => openSequenceEditor()}
+                  aria-label={t('Nouvelle séquence')}
+                >
+                  <Plus />
+                </Button>
               </div>
               <div className="state-groups">
-                {Object.entries(stateGroups).map(([group, states]) => (
-                  <div key={group}>
-                    <strong>{t(group)}</strong>
+                {groupSequences(sequences).map(group => (
+                  <div key={group.name}>
+                    <strong>
+                      {group.sequences.every(sequence => sequence.builtIn)
+                        ? t(group.name)
+                        : group.name}
+                    </strong>
                     <div className="state-buttons">
-                      {states.map(name => (
+                      {group.sequences.map(sequence => (
                         <Button
                           variant="outline"
                           size="sm"
                           type="button"
-                          key={name}
-                          aria-pressed={selectedState === name}
-                          onClick={() => setSelectedState(name)}
+                          key={sequence.id}
+                          aria-pressed={selectedState === sequence.id}
+                          onClick={() => setSelectedState(sequence.id)}
+                          onDoubleClick={() => openSequenceEditor(sequence)}
                         >
-                          {t(name)}
+                          {sequence.builtIn ? t(sequence.name) : sequence.name}
                         </Button>
                       ))}
                     </div>
@@ -3405,93 +4402,115 @@ function StudioApp() {
                 ))}
               </div>
             </InspectorCard>
-            <InspectorCard className="state-detail">
-              <h2>{t(selectedState)}</h2>
-              <p>
-                {t(
-                  stateNotes[selectedState] ??
-                    'Cet état enchaîne un pool de presets et des clignements.'
-                )}
-              </p>
-              <div className="state-expression-section">
-                <div className="state-section-heading">
+            {selectedSequence && (
+              <InspectorCard className="state-detail">
+                <div className="state-detail-header">
                   <div>
-                    <h3>{t('Expressions de la séquence')}</h3>
-                    <p>{t('Les presets sont joués dans cet ordre, puis la boucle recommence.')}</p>
-                  </div>
-                  <Badge variant="secondary">{statePools[selectedState].length} expressions</Badge>
-                </div>
-                <div className="expression-grid state-expression-grid">
-                  {statePools[selectedState].map((index, position) => {
-                    const preset = expressions[index]
-                    if (!preset) return null
-                    return (
-                      <ExpressionCard
-                        key={`${selectedState}-${position}-${index}`}
-                        expression={preset}
-                        index={index}
-                        active={activeExpression === index}
-                        surface={surface}
-                        bodyNodes={bodyNodes}
-                        colors={activeAvatar.colors}
-                        avatarEyes={activeAvatarEyes}
-                        previewId={`state-${selectedState}-${position}-${index}`}
-                        onSelect={() => transitionToExpression(preset, index)}
-                      />
-                    )
-                  })}
-                </div>
-              </div>
-              <div className="state-blink-section">
-                <div className="state-section-heading">
-                  <div>
-                    <h3>{t('Logique de clignement')}</h3>
+                    <h2>
+                      {selectedSequence.builtIn ? t(selectedSequence.name) : selectedSequence.name}
+                    </h2>
                     <p>
-                      {t('Le rythme reste naturel grâce à un intervalle légèrement aléatoire.')}
+                      {selectedSequence.builtIn
+                        ? t(selectedSequence.description)
+                        : selectedSequence.description}
                     </p>
                   </div>
-                </div>
-                <div className="state-logic-grid">
-                  <div>
-                    <span>{t('Premier clignement')}</span>
-                    <strong>
-                      {formatSeconds(selectedStatePlayback.blink.initialDelayMs, language)}
-                    </strong>
-                    <small>{t('après le lancement')}</small>
-                  </div>
-                  <div>
-                    <span>{t('Intervalle')}</span>
-                    <strong>
-                      {formatSeconds(selectedStatePlayback.blink.minIntervalMs, language)}–
-                      {formatSeconds(selectedStatePlayback.blink.maxIntervalMs, language)}
-                    </strong>
-                    <small>{t('tirage aléatoire')}</small>
-                  </div>
-                  <div>
-                    <span>{t('Durée')}</span>
-                    <strong>{selectedStatePlayback.blink.durationMs} ms</strong>
-                    <small>{t('fermeture et ouverture')}</small>
-                  </div>
-                  <div>
-                    <span>{t('Changement d’expression')}</span>
-                    <strong>
-                      {formatSeconds(selectedStatePlayback.expressionIntervalMs, language)}
-                    </strong>
-                    <small>{t('cadence de la séquence')}</small>
-                  </div>
-                </div>
-              </div>
-              <div className="button-row">
-                <Button type="button" onClick={() => launchState(selectedState)}>
-                  {t(activeState === selectedState ? 'Relancer' : 'Lancer')}
-                </Button>
-                {activeState === selectedState && (
-                  <Button variant="outline" type="button" onClick={toggleStatePlayback}>
-                    {t(statePlaying ? 'Pause' : 'Reprendre')}
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    onClick={() => openSequenceEditor(selectedSequence)}
+                    aria-label={t('Modifier la séquence')}
+                  >
+                    <Pencil />
                   </Button>
-                )}
-              </div>
-            </InspectorCard>
+                </div>
+                <div className="state-expression-section">
+                  <div className="state-section-heading">
+                    <div>
+                      <h3>{t('Expressions de la séquence')}</h3>
+                      <p>{t('Chaque étape possède sa propre durée et sa propre transition.')}</p>
+                    </div>
+                    <Badge variant="secondary">
+                      {selectedSequence.steps.length} expressions ·{' '}
+                      {t(selectedSequence.playbackMode)}
+                    </Badge>
+                  </div>
+                  <div className="expression-grid state-expression-grid">
+                    {selectedSequence.steps.map((step, position) => {
+                      const preset = expressions[step.expressionIndex]
+                      if (!preset) return null
+                      return (
+                        <div className="state-step-preview" key={step.id}>
+                          <ExpressionCard
+                            expression={preset}
+                            index={step.expressionIndex}
+                            active={activeExpression === step.expressionIndex}
+                            surface={surface}
+                            bodyNodes={bodyNodes}
+                            colors={activeAvatar.colors}
+                            avatarEyes={activeAvatarEyes}
+                            previewId={`state-${selectedSequence.id}-${position}-${step.expressionIndex}`}
+                            onSelect={() =>
+                              transitionToExpression(preset, step.expressionIndex, step)
+                            }
+                          />
+                          <small>{formatSeconds(step.holdMs, language)}</small>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+                <div className="state-blink-section">
+                  <div className="state-section-heading">
+                    <div>
+                      <h3>{t('Logique de clignement')}</h3>
+                      <p>
+                        {t('Le rythme reste naturel grâce à un intervalle légèrement aléatoire.')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="state-logic-grid">
+                    <div>
+                      <span>{t('Premier clignement')}</span>
+                      <strong>
+                        {selectedSequence.blink.enabled
+                          ? formatSeconds(selectedSequence.blink.initialDelayMs, language)
+                          : t('Désactivé')}
+                      </strong>
+                      <small>{t('après le lancement')}</small>
+                    </div>
+                    <div>
+                      <span>{t('Intervalle')}</span>
+                      <strong>
+                        {formatSeconds(selectedSequence.blink.minIntervalMs, language)}–
+                        {formatSeconds(selectedSequence.blink.maxIntervalMs, language)}
+                      </strong>
+                      <small>{t('tirage aléatoire')}</small>
+                    </div>
+                    <div>
+                      <span>{t('Durée')}</span>
+                      <strong>{selectedSequence.blink.durationMs} ms</strong>
+                      <small>{t('fermeture et ouverture')}</small>
+                    </div>
+                    <div>
+                      <span>{t('Mode de lecture')}</span>
+                      <strong>{t(selectedSequence.playbackMode)}</strong>
+                      <small>{t('comportement de la timeline')}</small>
+                    </div>
+                  </div>
+                </div>
+                <div className="button-row">
+                  <Button type="button" onClick={() => launchState(selectedSequence.id)}>
+                    {t(activeState === selectedSequence.id ? 'Relancer' : 'Lancer')}
+                  </Button>
+                  {activeState === selectedSequence.id && (
+                    <Button variant="outline" type="button" onClick={toggleStatePlayback}>
+                      {t(statePlaying ? 'Pause' : 'Reprendre')}
+                    </Button>
+                  )}
+                </div>
+              </InspectorCard>
+            )}
           </div>
         )}
       </main>
@@ -3522,6 +4541,20 @@ function StudioApp() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('Annuler')}</AlertDialogCancel>
             <AlertDialogAction onClick={deleteEditing}>{t('Supprimer')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={deleteSequenceOpen} onOpenChange={setDeleteSequenceOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Supprimer cette séquence ?')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('Cette action supprimera définitivement cet état animé.')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('Annuler')}</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteSequenceEditing}>{t('Supprimer')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -3576,7 +4609,7 @@ function StatePlayer({
         <i />
         <span>
           <small>{t(playing ? 'En lecture' : 'En pause')}</small>
-          <strong>{t(name)}</strong>
+          <strong>{name}</strong>
         </span>
       </span>
       <Button
