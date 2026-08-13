@@ -115,6 +115,39 @@ input {
   background: #5b7fe5;
   box-shadow: 0 0 0 5px rgb(91 127 229 / 15%);
 }
+.language-picker {
+  position: absolute;
+  z-index: 5;
+  top: 24px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 4px 8px 4px 10px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 10px;
+  background: rgb(26 30 34 / 86%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  backdrop-filter: blur(12px);
+}
+.language-picker > span {
+  font-size: 15px;
+  line-height: 1;
+}
+.language-picker select {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f6f7f8;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.language-picker select:focus-visible {
+  border-radius: 5px;
+  box-shadow: 0 0 0 2px #7895ee;
+}
 
 .avatar-wrap {
   position: relative;
@@ -641,14 +674,21 @@ p {
 }
 .avatar-shelf .avatar-card,
 .avatar-shelf .avatar-add {
+  height: 74px;
   min-height: 74px;
   border-radius: 10px;
 }
+.avatar-shelf .avatar-card {
+  flex-direction: column;
+  align-items: stretch;
+}
 .avatar-shelf .avatar-card svg {
-  height: 54px;
+  height: 48px;
+  flex: 0 1 48px;
 }
 .avatar-shelf .avatar-card > span {
-  padding: 2px 3px;
+  min-height: 12px;
+  padding: 0 3px;
   font-size: 8px;
 }
 .avatar-edit {

@@ -18,6 +18,7 @@ import { Separator } from './components/ui/separator'
 import { Switch } from './components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from './components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
+import { StudioLanguageProvider, useStudioLanguage, type StudioLanguage } from './i18n'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -132,8 +133,10 @@ const getPreviewGeometry = (
 const bounded = (value: number, min?: number, max?: number) =>
   Math.min(max ?? Infinity, Math.max(min ?? -Infinity, value))
 
-const secondsFormatter = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 })
-const formatSeconds = (milliseconds: number) => `${secondsFormatter.format(milliseconds / 1000)} s`
+const formatSeconds = (milliseconds: number, language: StudioLanguage) =>
+  `${new Intl.NumberFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+    maximumFractionDigits: 1,
+  }).format(milliseconds / 1000)} s`
 
 const resolveColors = (expression: Expression, colors: AvatarColors): AvatarColors => ({
   body: expression.bodyColor ?? colors.body,
@@ -149,19 +152,21 @@ function ColorField({
   value: string
   onChange: (value: string) => void
 }) {
+  const { t } = useStudioLanguage()
+  const translatedLabel = t(label)
   return (
     <Field className="color-field">
-      <FieldTitle>{label}</FieldTitle>
+      <FieldTitle>{translatedLabel}</FieldTitle>
       <span className="color-control">
         <Input
-          aria-label={`${label} · sélecteur`}
+          aria-label={`${translatedLabel} · ${t('sélecteur')}`}
           className="color-swatch"
           type="color"
           value={value}
           onChange={event => onChange(event.currentTarget.value)}
         />
         <Input
-          aria-label={`${label} · hexadécimal`}
+          aria-label={`${translatedLabel} · ${t('hexadécimal')}`}
           className="color-value"
           key={value}
           defaultValue={value.toUpperCase()}
@@ -191,6 +196,8 @@ function NumericField({
   onChange,
   onActiveChange,
 }: NumericProps) {
+  const { t } = useStudioLanguage()
+  const translatedLabel = t(label)
   const dragRef = useRef<{ x: number; value: number } | null>(null)
 
   const startScrub = (event: React.PointerEvent<HTMLButtonElement>) => {
@@ -219,13 +226,13 @@ function NumericField({
         variant="ghost"
         size="sm"
         type="button"
-        title="Glisser horizontalement pour modifier"
+        title={t('Glisser horizontalement pour modifier')}
         onPointerDown={startScrub}
         onPointerMove={scrub}
         onPointerUp={stopScrub}
         onPointerCancel={stopScrub}
       >
-        <span>{label}</span>
+        <span>{translatedLabel}</span>
         <span className="scrub-icon" aria-hidden="true">
           ↔
         </span>
@@ -233,7 +240,7 @@ function NumericField({
       <label className="number-shell">
         <Input
           type="number"
-          aria-label={label}
+          aria-label={translatedLabel}
           min={min}
           max={max}
           step={step}
@@ -260,6 +267,7 @@ function LinkButton({
   onClick: () => void
   label: string
 }) {
+  const { t } = useStudioLanguage()
   return (
     <Button
       type="button"
@@ -267,7 +275,7 @@ function LinkButton({
       variant="outline"
       size="icon-sm"
       aria-pressed={linked}
-      aria-label={label}
+      aria-label={t(label)}
       onClick={onClick}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -289,6 +297,7 @@ function RotationGizmo({
   onActiveChange: (active: boolean) => void
   onReset: () => void
 }) {
+  const { t } = useStudioLanguage()
   const drag = useRef<
     | {
         type: 'axis'
@@ -381,7 +390,7 @@ function RotationGizmo({
   }
   return (
     <div className="gizmo-cluster">
-      <svg className="gizmo" viewBox="-43 -43 86 86" aria-label="Gizmo de rotation">
+      <svg className="gizmo" viewBox="-43 -43 86 86" aria-label={t('Gizmo de rotation')}>
         <circle
           className="gizmo-orbit gizmo-camera"
           cx="0"
@@ -421,7 +430,7 @@ function RotationGizmo({
         className="gizmo-reset"
         variant="secondary"
         size="icon-sm"
-        aria-label="Réinitialiser la rotation de la tête"
+        aria-label={t('Réinitialiser la rotation de la tête')}
         onClick={onReset}
       >
         <RotateCcw />
@@ -445,6 +454,7 @@ function BodyNodeGizmo({
   onPreview: (next: BodyNode) => void
   onCommit: (next: BodyNode) => void
 }) {
+  const { t } = useStudioLanguage()
   const geometry = renderBodyNodeEditor(pose, node)
   const [activeControl, setActiveControl] = useState<
     { mode: 'translate' | 'rotate'; axis: TransformAxis } | undefined
@@ -572,7 +582,7 @@ function BodyNodeGizmo({
   )
 
   return (
-    <g className="body-node-gizmo" aria-label={`Transformer ${node.name}`}>
+    <g className="body-node-gizmo" aria-label={`${t('Transformer')} ${t(node.name)}`}>
       {axes.map(axis => (
         <g key={`ring-${axis}`}>
           <path
@@ -626,7 +636,7 @@ function BodyNodeGizmo({
         className="body-gizmo-reset"
         role="button"
         tabIndex={0}
-        aria-label={`Réinitialiser la position et la rotation de ${node.name}`}
+        aria-label={t(`Réinitialiser la position et la rotation de ${node.name}`)}
         transform={`translate(${bounded(geometry.center[0] + 32, -140, 140)} ${bounded(geometry.center[1] - 32, -140, 140)})`}
         onClick={resetTransform}
         onKeyDown={event => {
@@ -701,6 +711,7 @@ function AvatarCanvas({
   onChange: (next: Expression) => void
   onEyeChange?: (next: Expression) => void
 }) {
+  const { t } = useStudioLanguage()
   const svgRef = useRef<SVGSVGElement>(null)
   const [activeDragType, setActiveDragType] = useState<
     'arcball' | 'width' | 'height' | 'size' | 'spacing' | 'rotate' | null
@@ -885,7 +896,7 @@ function AvatarCanvas({
         className="avatar"
         viewBox="-150 -150 300 300"
         role="img"
-        aria-label="Avatar procédural"
+        aria-label={t('Avatar procédural')}
         onPointerMove={move}
         onPointerUp={() => {
           drag.current = null
@@ -1196,6 +1207,7 @@ function ExpressionWorkspace({
   onSave: () => void
   onDelete: () => void
 }) {
+  const { t } = useStudioLanguage()
   const [linked, setLinked] = useState({ width: true, height: true, size: true })
   const update = (changes: Partial<Expression>) => onChange({ ...editing.draft, ...changes })
   const updateDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
@@ -1229,18 +1241,18 @@ function ExpressionWorkspace({
           variant="ghost"
           size="icon"
           onClick={onCancel}
-          aria-label="Retour aux expressions"
+          aria-label={t('Retour aux expressions')}
         >
           <ArrowLeft />
         </Button>
         <div className="workspace-heading">
-          <p className="eyebrow">Preset en mémoire</p>
+          <p className="eyebrow">{t('Preset en mémoire')}</p>
           <h1>
             {editing.index === null
-              ? 'Nouvelle expression'
-              : `Modifier l’expression ${String(editing.index).padStart(2, '0')}`}
+              ? t('Nouvelle expression')
+              : t(`Modifier l’expression ${String(editing.index).padStart(2, '0')}`)}
           </h1>
-          <p>L’avatar à gauche affiche cette expression en direct.</p>
+          <p>{t('L’avatar à gauche affiche cette expression en direct.')}</p>
         </div>
       </header>
       <div className="workspace-scroll">
@@ -1251,7 +1263,7 @@ function ExpressionWorkspace({
             compact
           >
             <Card className="dialog-group">
-              <h3>Couleur du corps</h3>
+              <h3>{t('Couleur du corps')}</h3>
               <ColorField
                 label="Corps"
                 value={editing.draft.bodyColor ?? avatarColors.body}
@@ -1259,7 +1271,7 @@ function ExpressionWorkspace({
               />
             </Card>
             <Card className="dialog-group">
-              <h3>Rotation de la tête</h3>
+              <h3>{t('Rotation de la tête')}</h3>
               {(['headX', 'headY', 'headZ'] as const).map(field => (
                 <NumericField
                   key={field}
@@ -1277,7 +1289,7 @@ function ExpressionWorkspace({
             compact
           >
             <Card className="dialog-group">
-              <h3>Couleur des yeux</h3>
+              <h3>{t('Couleur des yeux')}</h3>
               <ColorField
                 label="Yeux"
                 value={editing.draft.eyeColor ?? avatarColors.eyes}
@@ -1288,11 +1300,11 @@ function ExpressionWorkspace({
               <Card className="dialog-group" key={dimension}>
                 <div className="panel-inline-title">
                   <h3>
-                    {
+                    {t(
                       { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
                         dimension
                       ]
-                    }
+                    )}
                   </h3>
                   <LinkButton
                     linked={linked[dimension]}
@@ -1332,11 +1344,11 @@ function ExpressionWorkspace({
               </Card>
             ))}
             <Card className="dialog-group">
-              <h3>Position et espacement</h3>
+              <h3>{t('Position et espacement')}</h3>
               <div className="eye-columns">
                 {(['Left', 'Right'] as Side[]).map(side => (
                   <div className="eye-column" key={side}>
-                    <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
+                    <h3>{t(side === 'Left' ? 'Œil gauche' : 'Œil droit')}</h3>
                     <NumericField
                       label="Horizontale"
                       value={editing.draft[`positionX${side}`]}
@@ -1364,7 +1376,7 @@ function ExpressionWorkspace({
               </div>
             </Card>
             <Card className="dialog-group">
-              <h3>Rotation locale</h3>
+              <h3>{t('Rotation locale')}</h3>
               <div className="eye-columns">
                 <NumericField
                   label="Œil gauche"
@@ -1402,18 +1414,19 @@ function ExpressionWorkspace({
         {editing.index !== null && (
           <Button variant="destructive" onClick={onDelete}>
             <Trash2 />
-            Supprimer
+            {t('Supprimer')}
           </Button>
         )}
         <div className="dialog-actions-main">
-          <Button onClick={onSave}>Enregistrer</Button>
+          <Button onClick={onSave}>{t('Enregistrer')}</Button>
         </div>
       </footer>
     </>
   )
 }
 
-export default function App() {
+function StudioApp() {
+  const { language, setLanguage, t } = useStudioLanguage()
   const [mode, setMode] = useState<Mode>('manual')
   const [initialLibrary] = useState(loadAvatarLibrary)
   const [avatars, setAvatars] = useState(initialLibrary.avatars)
@@ -2011,6 +2024,7 @@ export default function App() {
     const frame = requestAnimationFrame(() => workspaceBackButtonRef.current?.focus())
     return () => cancelAnimationFrame(frame)
   }, [editorPageOpen, focusAvatarName])
+
   const selectedStatePlayback = getStatePlaybackConfig(selectedState)
   const updateAvatarEyeDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
     const field = `${dimension}${side}` as keyof AvatarEyeDefaults
@@ -2056,7 +2070,7 @@ export default function App() {
   }
 
   return (
-    <div className="studio">
+    <div className="studio" lang={language}>
       <section
         className="stage-column"
         style={
@@ -2070,6 +2084,17 @@ export default function App() {
           <span className="brand-mark" />
           Bible Strong <em>Avatar Lab</em>
         </div>
+        <label className="language-picker">
+          <span aria-hidden="true">{language === 'en' ? '🇬🇧' : '🇫🇷'}</span>
+          <select
+            aria-label={t('Langue de l’interface')}
+            value={language}
+            onChange={event => setLanguage(event.currentTarget.value as StudioLanguage)}
+          >
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+          </select>
+        </label>
         <AvatarCanvas
           expression={canvasExpression}
           avatarEyes={activeAvatarEyes}
@@ -2102,7 +2127,9 @@ export default function App() {
           }
         />
         <p className="stage-help">
-          Glisse sur la surface pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.
+          {t(
+            'Glisse sur la surface pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.'
+          )}
         </p>
       </section>
 
@@ -2136,15 +2163,15 @@ export default function App() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setBodyEditing(false)}
-                aria-label="Retour au studio"
+                aria-label={t('Retour au studio')}
               >
                 <ArrowLeft />
               </Button>
               <div className="workspace-heading">
-                <p className="eyebrow">Construction du corps</p>
+                <p className="eyebrow">{t('Construction du corps')}</p>
                 <Input
                   className="avatar-name-input"
-                  aria-label="Nom de l’avatar"
+                  aria-label={t('Nom de l’avatar')}
                   autoFocus={focusAvatarName}
                   value={activeAvatar.name}
                   onChange={event => renameActiveAvatar(event.currentTarget.value)}
@@ -2156,7 +2183,9 @@ export default function App() {
                     setFocusAvatarName(false)
                   }}
                 />
-                <p>Choisis la forme principale puis assemble les primitives autour d’elle.</p>
+                <p>
+                  {t('Choisis la forme principale puis assemble les primitives autour d’elle.')}
+                </p>
               </div>
               <div className="workspace-header-actions">
                 <StatePlayer
@@ -2178,10 +2207,10 @@ export default function App() {
                   onStop={stopState}
                 />
               </header>
-              <section className="avatar-shelf" aria-label="Choisir un avatar">
+              <section className="avatar-shelf" aria-label={t('Choisir un avatar')}>
                 <div className="avatar-shelf-heading">
                   <strong>Avatars</strong>
-                  <span>Double-clic pour modifier</span>
+                  <span>{t('Double-clic pour modifier')}</span>
                 </div>
                 <div className="avatar-grid">
                   {avatars.map(avatar => (
@@ -2210,10 +2239,9 @@ export default function App() {
                   ))}
                   <Button
                     variant="outline"
-                    size="icon"
                     className="avatar-add"
                     onClick={createNewAvatar}
-                    aria-label="Nouvel avatar"
+                    aria-label={t('Nouvel avatar')}
                   >
                     <Plus />
                   </Button>
@@ -2226,7 +2254,7 @@ export default function App() {
                           className="avatar-edit"
                           variant="secondary"
                           size="icon"
-                          aria-label={`Modifier ${activeAvatar.name}`}
+                          aria-label={`${t('Modifier')} ${activeAvatar.name}`}
                           onClick={() => {
                             setFocusAvatarName(false)
                             activateAvatar(activeAvatar.id, true)
@@ -2236,15 +2264,17 @@ export default function App() {
                     >
                       <Pencil />
                     </TooltipTrigger>
-                    <TooltipContent>Modifier {activeAvatar.name}</TooltipContent>
+                    <TooltipContent>
+                      {t('Modifier')} {activeAvatar.name}
+                    </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </section>
               <Tabs value={mode} onValueChange={value => setMode(value as Mode)}>
-                <TabsList className="tabs" aria-label="Mode d’édition">
-                  <TabsTrigger value="manual">Pose</TabsTrigger>
-                  <TabsTrigger value="expressions">Expressions</TabsTrigger>
-                  <TabsTrigger value="states">États</TabsTrigger>
+                <TabsList className="tabs" aria-label={t('Mode d’édition')}>
+                  <TabsTrigger value="manual">{t('Pose')}</TabsTrigger>
+                  <TabsTrigger value="expressions">{t('Expressions')}</TabsTrigger>
+                  <TabsTrigger value="states">{t('États')}</TabsTrigger>
                 </TabsList>
               </Tabs>
             </>
@@ -2273,8 +2303,10 @@ export default function App() {
                       >
                         <span className="body-node-icon">●</span>
                         <span>
-                          <strong>Forme principale</strong>
-                          <small>{surfaceLabels[surface.type]} · porte les yeux</small>
+                          <strong>{t('Forme principale')}</strong>
+                          <small>
+                            {t(surfaceLabels[surface.type])} · {t('porte les yeux')}
+                          </small>
                         </span>
                       </Button>
                       {bodyNodes.map(node => (
@@ -2287,15 +2319,15 @@ export default function App() {
                         >
                           <span className="body-node-icon">◇</span>
                           <span>
-                            <strong>{node.name}</strong>
-                            <small>{surfaceLabels[node.surface.type]}</small>
+                            <strong>{t(node.name)}</strong>
+                            <small>{t(surfaceLabels[node.surface.type])}</small>
                           </span>
                         </Button>
                       ))}
                     </div>
                     <div className="body-add">
                       <span>
-                        Ajouter une forme · {bodyNodes.length}/{MAX_BODY_NODES}
+                        {t('Ajouter une forme')} · {bodyNodes.length}/{MAX_BODY_NODES}
                       </span>
                       <div>
                         {bodyPrimitiveTypes.map(type => (
@@ -2307,7 +2339,7 @@ export default function App() {
                             disabled={bodyNodes.length >= MAX_BODY_NODES}
                             onClick={() => addBodyNode(type)}
                           >
-                            + {surfaceLabels[type]}
+                            + {t(surfaceLabels[type])}
                           </Button>
                         ))}
                       </div>
@@ -2324,7 +2356,7 @@ export default function App() {
                               disabled={bodyNodes.length >= MAX_BODY_NODES}
                               onClick={duplicateSelectedBodyNode}
                             >
-                              Dupliquer
+                              {t('Dupliquer')}
                             </Button>
                             <Button
                               variant="destructive"
@@ -2332,13 +2364,15 @@ export default function App() {
                               type="button"
                               onClick={deleteSelectedBodyNode}
                             >
-                              Supprimer
+                              {t('Supprimer')}
                             </Button>
                           </div>
                         </div>
                         <p className="body-gizmo-help">
-                          <Badge variant="outline">Gizmo local</Badge>
-                          Glisse un axe pour déplacer la forme, ou un anneau pour la faire tourner.
+                          <Badge variant="outline">{t('Gizmo local')}</Badge>
+                          {t(
+                            'Glisse un axe pour déplacer la forme, ou un anneau pour la faire tourner.'
+                          )}
                         </p>
                         <div className="surface-fields">
                           {(['width', 'height', 'depth'] as const).map(dimension => (
@@ -2427,7 +2461,7 @@ export default function App() {
                         </div>
                         <div className="body-transform-grid">
                           <div>
-                            <h3>Position locale</h3>
+                            <h3>{t('Position locale')}</h3>
                             {(['X', 'Y', 'Z'] as const).map((axis, index) => (
                               <NumericField
                                 key={axis}
@@ -2441,7 +2475,7 @@ export default function App() {
                             ))}
                           </div>
                           <div>
-                            <h3>Rotation locale</h3>
+                            <h3>{t('Rotation locale')}</h3>
                             {(['X', 'Y', 'Z'] as const).map((axis, index) => (
                               <NumericField
                                 key={axis}
@@ -2483,7 +2517,7 @@ export default function App() {
                             }}
                           >
                             <SurfaceThumbnail surface={previewSurface} />
-                            <span>{surfaceLabels[type]}</span>
+                            <span>{t(surfaceLabels[type])}</span>
                           </Button>
                         )
                       })}
@@ -2588,20 +2622,21 @@ export default function App() {
                   subtitle="Forme, placement, orientation et couleur du regard par défaut."
                 >
                   <p className="section-description">
-                    Définis l’identité du regard de cet avatar. Les poses s’ajoutent ensuite à cette
-                    base.
+                    {t(
+                      'Définis l’identité du regard de cet avatar. Les poses s’ajoutent ensuite à cette base.'
+                    )}
                   </p>
                   {(['width', 'height', 'size'] as const).map(dimension => (
                     <InspectorCard className="compact" key={`avatar-${dimension}`}>
                       <div className="panel-inline-title">
                         <h3>
-                          {
+                          {t(
                             {
                               width: 'Largeur',
                               height: 'Hauteur',
                               size: 'Taille proportionnelle',
                             }[dimension]
-                          }
+                          )}
                         </h3>
                         <LinkButton
                           linked={linked[dimension]}
@@ -2657,9 +2692,9 @@ export default function App() {
                   <InspectorCard>
                     <div className="panel-inline-title">
                       <div>
-                        <h3>Position et espacement</h3>
+                        <h3>{t('Position et espacement')}</h3>
                         <p className="panel-inline-subtitle">
-                          Coordonnées propres à l’avatar, indépendantes des poses.
+                          {t('Coordonnées propres à l’avatar, indépendantes des poses.')}
                         </p>
                       </div>
                       <LinkButton
@@ -2673,7 +2708,7 @@ export default function App() {
                     <div className="eye-columns">
                       {(['Left', 'Right'] as Side[]).map(side => (
                         <div className="eye-column" key={side}>
-                          <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
+                          <h3>{t(side === 'Left' ? 'Œil gauche' : 'Œil droit')}</h3>
                           <NumericField
                             label="Horizontale"
                             value={activeAvatarEyes[`positionX${side}`]}
@@ -2789,7 +2824,7 @@ export default function App() {
                           updateImmediate(next)
                         }}
                       >
-                        Reprendre la couleur de l’avatar
+                        {t('Reprendre la couleur de l’avatar')}
                       </Button>
                     )}
                   </InspectorCard>
@@ -2848,7 +2883,7 @@ export default function App() {
                           updateImmediate(next)
                         }}
                       >
-                        Reprendre la couleur de l’avatar
+                        {t('Reprendre la couleur de l’avatar')}
                       </Button>
                     )}
                   </InspectorCard>
@@ -2856,13 +2891,13 @@ export default function App() {
                     <InspectorCard className="compact" key={dimension}>
                       <div className="panel-inline-title">
                         <h3>
-                          {
+                          {t(
                             {
                               width: 'Largeur',
                               height: 'Hauteur',
                               size: 'Taille proportionnelle',
                             }[dimension]
-                          }
+                          )}
                         </h3>
                         <LinkButton
                           linked={linked[dimension]}
@@ -2923,7 +2958,7 @@ export default function App() {
                     />
                     <div className="eye-columns">
                       <div className="eye-column">
-                        <h3>Œil gauche</h3>
+                        <h3>{t('Œil gauche')}</h3>
                         <NumericField
                           label="Horizontale"
                           value={expression.positionXLeft}
@@ -2944,7 +2979,7 @@ export default function App() {
                         />
                       </div>
                       <div className="eye-column">
-                        <h3>Œil droit</h3>
+                        <h3>{t('Œil droit')}</h3>
                         <NumericField
                           label="Horizontale"
                           value={expression.positionXRight}
@@ -3019,11 +3054,11 @@ export default function App() {
                       onChange={value => updateImmediate({ ...expression, perspective: value })}
                     />
                     <div className="switch">
-                      <span>Afficher le maillage</span>
+                      <span>{t('Afficher le maillage')}</span>
                       <Switch
                         checked={showWire}
                         onCheckedChange={updateWireVisibility}
-                        aria-label="Afficher le maillage"
+                        aria-label={t('Afficher le maillage')}
                       />
                     </div>
                     <Button
@@ -3032,7 +3067,7 @@ export default function App() {
                       type="button"
                       onClick={() => transitionToExpression({ ...defaultExpression })}
                     >
-                      Réinitialiser
+                      {t('Réinitialiser')}
                     </Button>
                   </InspectorCard>
                 </ControlSection>
@@ -3049,9 +3084,9 @@ export default function App() {
               onClick={() => setDeleteAvatarOpen(true)}
             >
               <Trash2 />
-              Supprimer
+              {t('Supprimer')}
             </Button>
-            <Button onClick={() => setBodyEditing(false)}>Enregistrer</Button>
+            <Button onClick={() => setBodyEditing(false)}>{t('Enregistrer')}</Button>
           </footer>
         )}
 
@@ -3061,9 +3096,9 @@ export default function App() {
               <div className="preset-header">
                 <div>
                   <p className="eyebrow">{expressions.length} presets</p>
-                  <h2>Expressions</h2>
+                  <h2>{t('Expressions')}</h2>
                 </div>
-                <span>Double-clic pour modifier</span>
+                <span>{t('Double-clic pour modifier')}</span>
               </div>
               <div className="expression-grid">
                 {expressions.map((preset, index) => (
@@ -3086,7 +3121,7 @@ export default function App() {
                   variant="outline"
                   type="button"
                   onClick={() => openExpressionEditor(null, expression)}
-                  aria-label="Nouvelle expression"
+                  aria-label={t('Nouvelle expression')}
                 >
                   +
                 </Button>
@@ -3108,7 +3143,7 @@ export default function App() {
               />
               <div className="button-row">
                 <Button variant="outline" type="button" onClick={blink}>
-                  Cligner
+                  {t('Cligner')}
                 </Button>
                 <Button
                   variant="outline"
@@ -3118,7 +3153,7 @@ export default function App() {
                     transitionToExpression(expressions[index], index)
                   }}
                 >
-                  Expression aléatoire
+                  {t('Expression aléatoire')}
                 </Button>
               </div>
             </InspectorCard>
@@ -3130,14 +3165,14 @@ export default function App() {
             <InspectorCard>
               <div className="preset-header">
                 <div>
-                  <p className="eyebrow">Séquences</p>
-                  <h2>États animés</h2>
+                  <p className="eyebrow">{t('Séquences')}</p>
+                  <h2>{t('États animés')}</h2>
                 </div>
               </div>
               <div className="state-groups">
                 {Object.entries(stateGroups).map(([group, states]) => (
                   <div key={group}>
-                    <strong>{group}</strong>
+                    <strong>{t(group)}</strong>
                     <div className="state-buttons">
                       {states.map(name => (
                         <Button
@@ -3148,7 +3183,7 @@ export default function App() {
                           aria-pressed={selectedState === name}
                           onClick={() => setSelectedState(name)}
                         >
-                          {name}
+                          {t(name)}
                         </Button>
                       ))}
                     </div>
@@ -3157,16 +3192,18 @@ export default function App() {
               </div>
             </InspectorCard>
             <InspectorCard className="state-detail">
-              <h2>{selectedState}</h2>
+              <h2>{t(selectedState)}</h2>
               <p>
-                {stateNotes[selectedState] ??
-                  'Cet état enchaîne un pool de presets et des clignements.'}
+                {t(
+                  stateNotes[selectedState] ??
+                    'Cet état enchaîne un pool de presets et des clignements.'
+                )}
               </p>
               <div className="state-expression-section">
                 <div className="state-section-heading">
                   <div>
-                    <h3>Expressions de la séquence</h3>
-                    <p>Les presets sont joués dans cet ordre, puis la boucle recommence.</p>
+                    <h3>{t('Expressions de la séquence')}</h3>
+                    <p>{t('Les presets sont joués dans cet ordre, puis la boucle recommence.')}</p>
                   </div>
                   <Badge variant="secondary">{statePools[selectedState].length} expressions</Badge>
                 </div>
@@ -3194,43 +3231,49 @@ export default function App() {
               <div className="state-blink-section">
                 <div className="state-section-heading">
                   <div>
-                    <h3>Logique de clignement</h3>
-                    <p>Le rythme reste naturel grâce à un intervalle légèrement aléatoire.</p>
+                    <h3>{t('Logique de clignement')}</h3>
+                    <p>
+                      {t('Le rythme reste naturel grâce à un intervalle légèrement aléatoire.')}
+                    </p>
                   </div>
                 </div>
                 <div className="state-logic-grid">
                   <div>
-                    <span>Premier clignement</span>
-                    <strong>{formatSeconds(selectedStatePlayback.blink.initialDelayMs)}</strong>
-                    <small>après le lancement</small>
-                  </div>
-                  <div>
-                    <span>Intervalle</span>
+                    <span>{t('Premier clignement')}</span>
                     <strong>
-                      {formatSeconds(selectedStatePlayback.blink.minIntervalMs)}–
-                      {formatSeconds(selectedStatePlayback.blink.maxIntervalMs)}
+                      {formatSeconds(selectedStatePlayback.blink.initialDelayMs, language)}
                     </strong>
-                    <small>tirage aléatoire</small>
+                    <small>{t('après le lancement')}</small>
                   </div>
                   <div>
-                    <span>Durée</span>
+                    <span>{t('Intervalle')}</span>
+                    <strong>
+                      {formatSeconds(selectedStatePlayback.blink.minIntervalMs, language)}–
+                      {formatSeconds(selectedStatePlayback.blink.maxIntervalMs, language)}
+                    </strong>
+                    <small>{t('tirage aléatoire')}</small>
+                  </div>
+                  <div>
+                    <span>{t('Durée')}</span>
                     <strong>{selectedStatePlayback.blink.durationMs} ms</strong>
-                    <small>fermeture et ouverture</small>
+                    <small>{t('fermeture et ouverture')}</small>
                   </div>
                   <div>
-                    <span>Changement d’expression</span>
-                    <strong>{formatSeconds(selectedStatePlayback.expressionIntervalMs)}</strong>
-                    <small>cadence de la séquence</small>
+                    <span>{t('Changement d’expression')}</span>
+                    <strong>
+                      {formatSeconds(selectedStatePlayback.expressionIntervalMs, language)}
+                    </strong>
+                    <small>{t('cadence de la séquence')}</small>
                   </div>
                 </div>
               </div>
               <div className="button-row">
                 <Button type="button" onClick={() => launchState(selectedState)}>
-                  {activeState === selectedState ? 'Relancer' : 'Lancer'}
+                  {t(activeState === selectedState ? 'Relancer' : 'Lancer')}
                 </Button>
                 {activeState === selectedState && (
                   <Button variant="outline" type="button" onClick={toggleStatePlayback}>
-                    {statePlaying ? 'Pause' : 'Reprendre'}
+                    {t(statePlaying ? 'Pause' : 'Reprendre')}
                   </Button>
                 )}
               </div>
@@ -3241,29 +3284,30 @@ export default function App() {
       <AlertDialog open={deleteAvatarOpen} onOpenChange={setDeleteAvatarOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer {activeAvatar.name} ?</AlertDialogTitle>
+            <AlertDialogTitle>{t(`Supprimer ${activeAvatar.name} ?`)}</AlertDialogTitle>
             <AlertDialogDescription>
-              Le corps et les couleurs de cet avatar seront définitivement supprimés. Les
-              expressions globales seront conservées.
+              {t(
+                'Le corps et les couleurs de cet avatar seront définitivement supprimés. Les expressions globales seront conservées.'
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={deleteActiveAvatar}>Supprimer</AlertDialogAction>
+            <AlertDialogCancel>{t('Annuler')}</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteActiveAvatar}>{t('Supprimer')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
       <AlertDialog open={deleteExpressionOpen} onOpenChange={setDeleteExpressionOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer cette expression ?</AlertDialogTitle>
+            <AlertDialogTitle>{t('Supprimer cette expression ?')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action retirera définitivement le preset de la bibliothèque globale.
+              {t('Cette action retirera définitivement le preset de la bibliothèque globale.')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={deleteEditing}>Supprimer</AlertDialogAction>
+            <AlertDialogCancel>{t('Annuler')}</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteEditing}>{t('Supprimer')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -3282,11 +3326,12 @@ function ControlSection({
   compact?: boolean
   children: React.ReactNode
 }) {
+  const { t } = useStudioLanguage()
   return (
     <section className={`control-section${compact ? ' control-section-compact' : ''}`}>
       <header className="control-section-header">
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
+        <h2>{t(title)}</h2>
+        <p>{t(subtitle)}</p>
       </header>
       <Separator className="control-section-separator" />
       <div className="control-section-content">{children}</div>
@@ -3309,25 +3354,26 @@ function StatePlayer({
   onToggle: () => void
   onStop: () => void
 }) {
+  const { t } = useStudioLanguage()
   if (!name) return null
   return (
-    <div className="state-player" aria-label={`État en cours : ${name}`}>
+    <div className="state-player" aria-label={t(`État en cours : ${name}`)}>
       <span className={playing ? 'is-playing' : 'is-paused'}>
         <i />
         <span>
-          <small>{playing ? 'En lecture' : 'En pause'}</small>
-          <strong>{name}</strong>
+          <small>{t(playing ? 'En lecture' : 'En pause')}</small>
+          <strong>{t(name)}</strong>
         </span>
       </span>
       <Button
         variant="secondary"
         size="icon-sm"
-        aria-label={playing ? `Mettre ${name} en pause` : `Reprendre ${name}`}
+        aria-label={t(playing ? `Mettre ${name} en pause` : `Reprendre ${name}`)}
         onClick={onToggle}
       >
         {playing ? <Pause /> : <Play />}
       </Button>
-      <Button variant="ghost" size="icon-sm" aria-label={`Arrêter ${name}`} onClick={onStop}>
+      <Button variant="ghost" size="icon-sm" aria-label={t(`Arrêter ${name}`)} onClick={onStop}>
         <Square />
       </Button>
     </div>
@@ -3343,11 +3389,20 @@ function PanelTitle({
   subtitle: string
   level?: 2 | 3
 }) {
+  const { t } = useStudioLanguage()
   const Heading = level === 3 ? 'h3' : 'h2'
   return (
     <CardHeader className="panel-title">
-      <CardTitle as={Heading}>{title}</CardTitle>
-      <CardDescription>{subtitle}</CardDescription>
+      <CardTitle as={Heading}>{t(title)}</CardTitle>
+      <CardDescription>{t(subtitle)}</CardDescription>
     </CardHeader>
+  )
+}
+
+export default function App() {
+  return (
+    <StudioLanguageProvider>
+      <StudioApp />
+    </StudioLanguageProvider>
   )
 }
