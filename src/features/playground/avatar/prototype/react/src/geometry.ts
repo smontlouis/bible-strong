@@ -70,6 +70,12 @@ export type EyeEditorGeometry = {
   spacingHandle: Point3
 }
 
+export type BodyNodeEditorGeometry = {
+  center: Point3
+  axes: Record<'x' | 'y' | 'z', Point3>
+  rings: Record<'x' | 'y' | 'z', Point3[]>
+}
+
 export const RADIUS = 120
 const FOCAL_LENGTH = 620
 const QUARTER_ARC_SAMPLES = 14
@@ -307,6 +313,115 @@ export const rotationRing = (pose: AvatarPose, axis: 'x' | 'y' | 'z', radius = 3
     const rotated = rotateWithQuaternion(pose.orientation, point)
     return [rotated[0] * radius, rotated[1] * radius, rotated[2]]
   })
+
+export const renderBodyNodeEditor = (
+  pose: AvatarPose,
+  node: BodyNode,
+  axisLength = 34,
+  ringRadius = 26
+): BodyNodeEditorGeometry => {
+  const projectInHeadSpace = (point: Point3) =>
+    project(rotateWithQuaternion(pose.orientation, point), pose.expression.perspective)
+  const center = projectInHeadSpace(node.position)
+  const localOrientation = quaternionFromEuler(
+    radians(node.rotation[0]),
+    radians(node.rotation[1]),
+    radians(node.rotation[2])
+  )
+  const axes = Object.fromEntries(
+    (['x', 'y', 'z'] as const).map(axis => {
+      const vector = rotateWithQuaternion(localOrientation, axisVector(axis))
+      return [
+        axis,
+        projectInHeadSpace([
+          node.position[0] + vector[0] * axisLength,
+          node.position[1] + vector[1] * axisLength,
+          node.position[2] + vector[2] * axisLength,
+        ]),
+      ]
+    })
+  ) as BodyNodeEditorGeometry['axes']
+  ;(['x', 'y', 'z'] as const).forEach(axis => {
+    const endpoint = axes[axis]
+    if (Math.hypot(endpoint[0] - center[0], endpoint[1] - center[1]) >= 12) return
+    const fallback: Point3 =
+      axis === 'x'
+        ? [center[0] + 18, center[1], endpoint[2]]
+        : axis === 'y'
+          ? [center[0], center[1] + 18, endpoint[2]]
+          : [center[0] + 14, center[1] + 14, endpoint[2]]
+    axes[axis] = fallback
+  })
+  const rings = Object.fromEntries(
+    (['x', 'y', 'z'] as const).map(axis => [
+      axis,
+      Array.from({ length: 65 }, (_, index) => {
+        const angle = (index / 64) * Math.PI * 2
+        const cosine = Math.cos(angle) * ringRadius
+        const sine = Math.sin(angle) * ringRadius
+        const localPoint: Point3 =
+          axis === 'x' ? [0, cosine, sine] : axis === 'y' ? [cosine, 0, sine] : [cosine, sine, 0]
+        const rotated = rotateWithQuaternion(localOrientation, localPoint)
+        return projectInHeadSpace([
+          node.position[0] + rotated[0],
+          node.position[1] + rotated[1],
+          node.position[2] + rotated[2],
+        ])
+      }),
+    ])
+  ) as BodyNodeEditorGeometry['rings']
+  return { center, axes, rings }
+}
+
+export const translateBodyNodeAlongLocalAxis = (
+  node: BodyNode,
+  axis: 'x' | 'y' | 'z',
+  distance: number
+): BodyNode => {
+  const orientation = quaternionFromEuler(
+    radians(node.rotation[0]),
+    radians(node.rotation[1]),
+    radians(node.rotation[2])
+  )
+  const direction = rotateWithQuaternion(orientation, axisVector(axis))
+  return {
+    ...node,
+    position: [
+      node.position[0] + direction[0] * distance,
+      node.position[1] + direction[1] * distance,
+      node.position[2] + direction[2] * distance,
+    ],
+  }
+}
+
+export const rotateBodyNodeAroundLocalAxis = (
+  node: BodyNode,
+  axis: 'x' | 'y' | 'z',
+  deltaDegrees: number
+): BodyNode => {
+  const orientation = quaternionFromEuler(
+    radians(node.rotation[0]),
+    radians(node.rotation[1]),
+    radians(node.rotation[2])
+  )
+  const rotated = multiplyQuaternions(
+    orientation,
+    quaternionFromAxisAngle(axisVector(axis), radians(deltaDegrees))
+  )
+  const next = quaternionToEuler(rotated).map(value => (value * 180) / Math.PI) as [
+    number,
+    number,
+    number,
+  ]
+  return {
+    ...node,
+    rotation: next.map((value, index) => nearestEquivalentAngle(value, node.rotation[index])) as [
+      number,
+      number,
+      number,
+    ],
+  }
+}
 
 const path = (points: Point3[], close = true) => {
   if (!points.length) return ''

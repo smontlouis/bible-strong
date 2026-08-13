@@ -52,11 +52,14 @@ import {
   expressionFields,
   poseFromExpression,
   renderAvatar,
+  renderBodyNodeEditor,
   renderEyeEditor,
+  rotateBodyNodeAroundLocalAxis,
   rotateExpressionAroundAxis,
   rotateExpressionAroundCamera,
   rotateExpressionWithArcball,
   rotationRing,
+  translateBodyNodeAlongLocalAxis,
   type AvatarPose,
   type Expression,
   type Point3,
@@ -414,6 +417,196 @@ function RotationGizmo({
   )
 }
 
+type TransformAxis = 'x' | 'y' | 'z'
+
+function BodyNodeGizmo({
+  svgRef,
+  pose,
+  node,
+  onPreview,
+  onCommit,
+}: {
+  svgRef: React.RefObject<SVGSVGElement | null>
+  pose: AvatarPose
+  node: BodyNode
+  onPreview: (next: BodyNode) => void
+  onCommit: (next: BodyNode) => void
+}) {
+  const geometry = renderBodyNodeEditor(pose, node)
+  const [activeControl, setActiveControl] = useState<
+    { mode: 'translate' | 'rotate'; axis: TransformAxis } | undefined
+  >(undefined)
+  const drag = useRef<
+    | {
+        mode: 'translate' | 'rotate'
+        axis: TransformAxis
+        startPoint: readonly [number, number]
+        direction: readonly [number, number]
+        scale: number
+        node: BodyNode
+      }
+    | undefined
+  >(undefined)
+  const latestNode = useRef(node)
+  const previewFrame = useRef<number | undefined>(undefined)
+  const axes: TransformAxis[] = ['x', 'y', 'z']
+  const toSvg = (event: React.PointerEvent<SVGElement>): readonly [number, number] => {
+    const rectangle = svgRef.current!.getBoundingClientRect()
+    return [
+      ((event.clientX - rectangle.left) / rectangle.width) * 300 - 150,
+      ((event.clientY - rectangle.top) / rectangle.height) * 300 - 150,
+    ]
+  }
+  const directionBetween = (from: Point3, to: Point3): readonly [number, number] => {
+    const x = to[0] - from[0]
+    const y = to[1] - from[1]
+    const length = Math.hypot(x, y) || 1
+    return [x / length, y / length]
+  }
+  const ringPath = (points: Point3[]) =>
+    `M${points.map(point => `${point[0]} ${point[1]}`).join('L')}Z`
+  const startTranslate = (axis: TransformAxis, event: React.PointerEvent<SVGElement>) => {
+    event.stopPropagation()
+    const endpoint = geometry.axes[axis]
+    const length = Math.max(
+      Math.hypot(endpoint[0] - geometry.center[0], endpoint[1] - geometry.center[1]),
+      1
+    )
+    drag.current = {
+      mode: 'translate',
+      axis,
+      startPoint: toSvg(event),
+      direction: directionBetween(geometry.center, endpoint),
+      scale: 34 / length,
+      node,
+    }
+    setActiveControl({ mode: 'translate', axis })
+    latestNode.current = node
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  const startRotate = (axis: TransformAxis, event: React.PointerEvent<SVGElement>) => {
+    event.stopPropagation()
+    const point = toSvg(event)
+    const ring = geometry.rings[axis]
+    let closestIndex = 0
+    let closestDistance = Infinity
+    ring.slice(0, -1).forEach((ringPoint, index) => {
+      const distance = Math.hypot(ringPoint[0] - point[0], ringPoint[1] - point[1])
+      if (distance < closestDistance) {
+        closestIndex = index
+        closestDistance = distance
+      }
+    })
+    const previous = ring[(closestIndex - 1 + ring.length - 1) % (ring.length - 1)]
+    const next = ring[(closestIndex + 1) % (ring.length - 1)]
+    const radius = Math.max(
+      Math.hypot(
+        ring[closestIndex][0] - geometry.center[0],
+        ring[closestIndex][1] - geometry.center[1]
+      ),
+      8
+    )
+    drag.current = {
+      mode: 'rotate',
+      axis,
+      startPoint: point,
+      direction: directionBetween(previous, next),
+      scale: 180 / Math.PI / radius,
+      node,
+    }
+    setActiveControl({ mode: 'rotate', axis })
+    latestNode.current = node
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+  const move = (event: React.PointerEvent<SVGElement>) => {
+    if (!drag.current) return
+    const interaction = drag.current
+    const point = toSvg(event)
+    const deltaX = point[0] - interaction.startPoint[0]
+    const deltaY = point[1] - interaction.startPoint[1]
+    const delta =
+      (deltaX * interaction.direction[0] + deltaY * interaction.direction[1]) * interaction.scale
+    const next =
+      interaction.mode === 'translate'
+        ? translateBodyNodeAlongLocalAxis(interaction.node, interaction.axis, delta)
+        : rotateBodyNodeAroundLocalAxis(interaction.node, interaction.axis, delta)
+    latestNode.current = next
+    if (previewFrame.current !== undefined) return
+    previewFrame.current = requestAnimationFrame(() => {
+      previewFrame.current = undefined
+      onPreview(latestNode.current)
+    })
+  }
+  const stop = () => {
+    if (previewFrame.current !== undefined) cancelAnimationFrame(previewFrame.current)
+    previewFrame.current = undefined
+    onCommit(latestNode.current)
+    drag.current = undefined
+    setActiveControl(undefined)
+  }
+
+  useEffect(
+    () => () => {
+      if (previewFrame.current !== undefined) cancelAnimationFrame(previewFrame.current)
+    },
+    []
+  )
+
+  return (
+    <g className="body-node-gizmo" aria-label={`Transformer ${node.name}`}>
+      {axes.map(axis => (
+        <g key={`ring-${axis}`}>
+          <path
+            className="body-gizmo-hitbox body-gizmo-ring-hitbox"
+            d={ringPath(geometry.rings[axis])}
+            onPointerDown={event => startRotate(axis, event)}
+            onPointerMove={move}
+            onPointerUp={stop}
+            onPointerCancel={stop}
+          />
+          <path
+            className={`body-gizmo-ring gizmo-${axis}${activeControl?.mode === 'rotate' && activeControl.axis === axis ? ' is-active' : ''}`}
+            d={ringPath(geometry.rings[axis])}
+            pointerEvents="none"
+          />
+        </g>
+      ))}
+      {axes.map(axis => (
+        <g key={`axis-${axis}`}>
+          <path
+            className="body-gizmo-hitbox body-gizmo-axis-hitbox"
+            d={`M${geometry.center[0]} ${geometry.center[1]}L${geometry.axes[axis][0]} ${geometry.axes[axis][1]}`}
+            onPointerDown={event => startTranslate(axis, event)}
+            onPointerMove={move}
+            onPointerUp={stop}
+            onPointerCancel={stop}
+          />
+          <path
+            className={`body-gizmo-axis gizmo-${axis}${activeControl?.mode === 'translate' && activeControl.axis === axis ? ' is-active' : ''}`}
+            d={`M${geometry.center[0]} ${geometry.center[1]}L${geometry.axes[axis][0]} ${geometry.axes[axis][1]}`}
+            pointerEvents="none"
+          />
+          <circle
+            className={`body-gizmo-handle gizmo-${axis}`}
+            cx={geometry.axes[axis][0]}
+            cy={geometry.axes[axis][1]}
+            r="3.5"
+            pointerEvents="none"
+          />
+          <text
+            className={`body-gizmo-label body-gizmo-label-${axis}`}
+            x={geometry.axes[axis][0]}
+            y={geometry.axes[axis][1] - 5}
+          >
+            {axis.toUpperCase()}
+          </text>
+        </g>
+      ))}
+      <circle className="body-gizmo-origin" cx={geometry.center[0]} cy={geometry.center[1]} r="3" />
+    </g>
+  )
+}
+
 function AvatarCanvas({
   expression,
   avatarEyes,
@@ -425,6 +618,9 @@ function AvatarCanvas({
   backNodeIds,
   frontNodeIds,
   bodyEditing,
+  selectedBodyNodeId,
+  selectedBodyNode,
+  selectedSide,
   headPath,
   leftPath,
   rightPath,
@@ -434,6 +630,9 @@ function AvatarCanvas({
   highlight,
   onHighlightChange,
   onBodyNodeSelect,
+  onBodyNodePreview,
+  onBodyNodeChange,
+  onEyeSelect,
   onChange,
   onEyeChange,
 }: {
@@ -447,6 +646,9 @@ function AvatarCanvas({
   backNodeIds: { current: (string | null)[] }
   frontNodeIds: { current: (string | null)[] }
   bodyEditing: boolean
+  selectedBodyNodeId: 'primary' | string | null
+  selectedBodyNode: BodyNode | null
+  selectedSide: -1 | 1 | null
   headPath: MotionValue<string>
   leftPath: MotionValue<string>
   rightPath: MotionValue<string>
@@ -455,12 +657,14 @@ function AvatarCanvas({
   linked: { width: boolean; height: boolean; size: boolean }
   highlight: Highlight
   onHighlightChange: (highlight: Highlight) => void
-  onBodyNodeSelect: (id: 'primary' | string) => void
+  onBodyNodeSelect: (id: 'primary' | string | null) => void
+  onBodyNodePreview: (next: BodyNode) => void
+  onBodyNodeChange: (next: BodyNode) => void
+  onEyeSelect: (side: -1 | 1) => void
   onChange: (next: Expression) => void
   onEyeChange?: (next: Expression) => void
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
-  const [selectedSide, setSelectedSide] = useState<-1 | 1 | null>(null)
   const [activeDragType, setActiveDragType] = useState<
     'arcball' | 'width' | 'height' | 'size' | 'spacing' | 'rotate' | null
   >(null)
@@ -488,6 +692,15 @@ function AvatarCanvas({
     selectedSide === null
       ? null
       : renderEyeEditor(poseWithAvatarEyes(expression, avatarEyes), surface, selectedSide)
+  const selectedBodyPath = (() => {
+    if (!bodyEditing || !selectedBodyNodeId) return null
+    if (selectedBodyNodeId === 'primary') return headPath
+    const backIndex = backNodeIds.current.indexOf(selectedBodyNodeId)
+    if (backIndex >= 0) return backPaths[backIndex]
+    const frontIndex = frontNodeIds.current.indexOf(selectedBodyNodeId)
+    return frontIndex >= 0 ? frontPaths[frontIndex] : null
+  })()
+
   const toSvg = (event: React.PointerEvent<SVGElement>): readonly [number, number] => {
     const rectangle = svgRef.current!.getBoundingClientRect()
     return [
@@ -502,7 +715,7 @@ function AvatarCanvas({
     return [x / length, y / length]
   }
   const startDrag = (event: React.PointerEvent<SVGElement>) => {
-    setSelectedSide(null)
+    onBodyNodeSelect('primary')
     onHighlightChange('head')
     drag.current = {
       type: 'arcball',
@@ -521,12 +734,12 @@ function AvatarCanvas({
       return
     }
     event.stopPropagation()
-    setSelectedSide(null)
     onBodyNodeSelect(nodeId)
   }
   const selectEye = (side: -1 | 1, event: React.PointerEvent<SVGPathElement>) => {
     event.stopPropagation()
-    setSelectedSide(side)
+    onBodyNodeSelect(null)
+    onEyeSelect(side)
   }
   const startHandle = (
     type: 'width' | 'height' | 'size' | 'spacing' | 'rotate',
@@ -675,13 +888,13 @@ function AvatarCanvas({
               <motion.path className="wire" d={pathValue} key={index} />
             ))}
           <motion.path
-            className={`avatar-eye ${highlight === 'left' || highlight === 'both' ? 'cyan-outline' : ''}`}
+            className={`avatar-eye ${selectedSide === -1 || highlight === 'left' || highlight === 'both' ? 'cyan-outline' : ''}`}
             d={leftPath}
             opacity={leftOpacity}
             onPointerDown={event => selectEye(-1, event)}
           />
           <motion.path
-            className={`avatar-eye ${highlight === 'right' || highlight === 'both' ? 'cyan-outline' : ''}`}
+            className={`avatar-eye ${selectedSide === 1 || highlight === 'right' || highlight === 'both' ? 'cyan-outline' : ''}`}
             d={rightPath}
             opacity={rightOpacity}
             onPointerDown={event => selectEye(1, event)}
@@ -695,6 +908,18 @@ function AvatarCanvas({
             onPointerDown={event => selectBodyPath(event, frontNodeIds.current[index])}
           />
         ))}
+        {selectedBodyPath && (
+          <motion.path className="selection-outline body-selection-outline" d={selectedBodyPath} />
+        )}
+        {bodyEditing && selectedBodyNode && (
+          <BodyNodeGizmo
+            svgRef={svgRef}
+            pose={poseWithAvatarEyes(expression, avatarEyes)}
+            node={selectedBodyNode}
+            onPreview={onBodyNodePreview}
+            onCommit={onBodyNodeChange}
+          />
+        )}
         {editor?.visible && (
           <g className="eye-editor">
             {activeDragType !== null && activeDragType !== 'arcball' && (
@@ -1194,7 +1419,8 @@ export default function App() {
     initialLibrary.avatars[0]
   const [surface, setSurface] = useState(initialAvatar.body.primary)
   const [bodyNodes, setBodyNodes] = useState(initialAvatar.body.nodes)
-  const [selectedBodyNodeId, setSelectedBodyNodeId] = useState<'primary' | string>('primary')
+  const [selectedBodyNodeId, setSelectedBodyNodeId] = useState<'primary' | string | null>('primary')
+  const [selectedEyeSide, setSelectedEyeSide] = useState<-1 | 1 | null>(null)
   const [expressions, setExpressions] = useState(loadGlobalExpressions)
   const [bodyEditing, setBodyEditing] = useState(false)
   const [focusAvatarName, setFocusAvatarName] = useState(false)
@@ -1491,6 +1717,11 @@ export default function App() {
     persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
   }
 
+  const selectBodyNode = (id: 'primary' | string | null) => {
+    setSelectedBodyNodeId(id)
+    if (id) setSelectedEyeSide(null)
+  }
+
   const updateSurface = (next: SurfaceConfig) => {
     surfaceRef.current = next
     setSurface(next)
@@ -1538,7 +1769,7 @@ export default function App() {
     setActiveAvatarId(id)
     setSurface(avatar.body.primary)
     setBodyNodes(avatar.body.nodes)
-    setSelectedBodyNodeId('primary')
+    selectBodyNode('primary')
     setActiveExpression(null)
     setBodyEditing(editBody)
     if (!preserveMode || editBody) setMode('manual')
@@ -1579,7 +1810,7 @@ export default function App() {
     if (bodyNodesRef.current.length >= MAX_BODY_NODES) return
     const node = createBodyNode(type, bodyNodesRef.current.length)
     updateBodyNodes([...bodyNodesRef.current, node])
-    setSelectedBodyNodeId(node.id)
+    selectBodyNode(node.id)
   }
 
   const updateSelectedBodyNode = (update: (node: BodyNode) => BodyNode) => {
@@ -1589,10 +1820,21 @@ export default function App() {
     )
   }
 
+  const commitBodyNode = (nextNode: BodyNode) => {
+    updateBodyNodes(bodyNodesRef.current.map(node => (node.id === nextNode.id ? nextNode : node)))
+  }
+
+  const previewSelectedBodyNode = (nextNode: BodyNode) => {
+    const next = bodyNodesRef.current.map(node => (node.id === nextNode.id ? nextNode : node))
+    bodyNodesRef.current = next
+    setBodyNodes(next)
+    paintPose(displayedPose.current)
+  }
+
   const deleteSelectedBodyNode = () => {
     if (selectedBodyNodeId === 'primary') return
     updateBodyNodes(bodyNodesRef.current.filter(node => node.id !== selectedBodyNodeId))
-    setSelectedBodyNodeId('primary')
+    selectBodyNode('primary')
   }
 
   const duplicateSelectedBodyNode = () => {
@@ -1601,7 +1843,7 @@ export default function App() {
     if (!source) return
     const duplicate = duplicateBodyNode(source)
     updateBodyNodes([...bodyNodesRef.current, duplicate])
-    setSelectedBodyNodeId(duplicate.id)
+    selectBodyNode(duplicate.id)
   }
 
   const updateHighlight = (next: Highlight) => {
@@ -1795,6 +2037,9 @@ export default function App() {
           backNodeIds={backNodeIds}
           frontNodeIds={frontNodeIds}
           bodyEditing={bodyEditing}
+          selectedBodyNodeId={selectedBodyNodeId}
+          selectedBodyNode={selectedBodyNode}
+          selectedSide={selectedEyeSide}
           headPath={headPath}
           leftPath={leftPath}
           rightPath={rightPath}
@@ -1803,7 +2048,10 @@ export default function App() {
           linked={linked}
           highlight={highlight}
           onHighlightChange={updateHighlight}
-          onBodyNodeSelect={setSelectedBodyNodeId}
+          onBodyNodeSelect={selectBodyNode}
+          onBodyNodePreview={previewSelectedBodyNode}
+          onBodyNodeChange={commitBodyNode}
+          onEyeSelect={setSelectedEyeSide}
           onChange={updateImmediate}
           onEyeChange={bodyEditing ? persistEditedEyeExpression : undefined}
         />
@@ -1953,7 +2201,7 @@ export default function App() {
                         variant="outline"
                         type="button"
                         aria-pressed={selectedBodyNodeId === 'primary'}
-                        onClick={() => setSelectedBodyNodeId('primary')}
+                        onClick={() => selectBodyNode('primary')}
                       >
                         <span className="body-node-icon">●</span>
                         <span>
@@ -1967,7 +2215,7 @@ export default function App() {
                           type="button"
                           key={node.id}
                           aria-pressed={selectedBodyNodeId === node.id}
-                          onClick={() => setSelectedBodyNodeId(node.id)}
+                          onClick={() => selectBodyNode(node.id)}
                         >
                           <span className="body-node-icon">◇</span>
                           <span>
@@ -2020,6 +2268,10 @@ export default function App() {
                             </Button>
                           </div>
                         </div>
+                        <p className="body-gizmo-help">
+                          <Badge variant="outline">Gizmo local</Badge>
+                          Glisse un axe pour déplacer la forme, ou un anneau pour la faire tourner.
+                        </p>
                         <div className="surface-fields">
                           {(['width', 'height', 'depth'] as const).map(dimension => (
                             <NumericField
@@ -2156,7 +2408,7 @@ export default function App() {
                             key={type}
                             aria-pressed={surface.type === type}
                             onClick={() => {
-                              setSelectedBodyNodeId('primary')
+                              selectBodyNode('primary')
                               if (type !== surface.type) {
                                 updateSurface({ ...surfacePresets[type] })
                               }

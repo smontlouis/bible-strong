@@ -163,6 +163,79 @@ input {
   stroke-linejoin: round;
   pointer-events: none;
 }
+.body-selection-outline {
+  stroke-width: 3;
+  filter: drop-shadow(0 0 3px rgb(81 221 255 / 52%));
+}
+.body-node-gizmo {
+  isolation: isolate;
+}
+.body-gizmo-ring,
+.body-gizmo-axis {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  touch-action: none;
+  transition:
+    opacity 120ms ease,
+    stroke-width 120ms ease,
+    filter 120ms ease;
+}
+.body-gizmo-hitbox {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 14;
+  vector-effect: non-scaling-stroke;
+  cursor: grab;
+  touch-action: none;
+}
+.body-gizmo-ring {
+  stroke-width: 1.5;
+  opacity: 0.42;
+  cursor: grab;
+}
+.body-gizmo-axis {
+  stroke-width: 2.4;
+  cursor: move;
+}
+.body-gizmo-ring-hitbox:hover + .body-gizmo-ring,
+.body-gizmo-ring.is-active,
+.body-gizmo-axis-hitbox:hover + .body-gizmo-axis,
+.body-gizmo-axis.is-active {
+  stroke-width: 4;
+  opacity: 1;
+  filter: drop-shadow(0 0 2px currentColor);
+}
+.body-gizmo-handle {
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  cursor: move;
+  touch-action: none;
+}
+.body-gizmo-handle.gizmo-x {
+  fill: #46d477;
+}
+.body-gizmo-handle.gizmo-y {
+  fill: #ef5f5f;
+}
+.body-gizmo-handle.gizmo-z {
+  fill: #557bea;
+}
+.body-gizmo-origin {
+  fill: #f8fafc;
+  stroke: #11161d;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.body-gizmo-label {
+  fill: #f8fafc;
+  font-size: 7px;
+  font-weight: 900;
+  paint-order: stroke;
+  pointer-events: none;
+  stroke: #11161d;
+  stroke-width: 2px;
+  text-anchor: middle;
+}
 .editor-guide {
   fill: none;
   stroke: rgb(81 221 255 / 58%);
@@ -642,6 +715,15 @@ p {
 .body-node-actions > div {
   display: flex;
   gap: 6px;
+}
+.body-gizmo-help {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 0;
+  color: #747c89;
+  font-size: 9px;
+  line-height: 1.4;
 }
 .body-transform-grid {
   display: grid;
