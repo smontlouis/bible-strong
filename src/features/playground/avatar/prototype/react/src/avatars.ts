@@ -3,6 +3,16 @@ import { defaultExpression, initialExpressions } from './presets'
 import { surfacePresets } from './surfaces'
 import type { Expression } from './geometry'
 import { isBodyMotion, isEyeMotion } from './ambientMotion'
+import {
+  normalizeSequencesForExpressions,
+  parseSequences,
+  type AvatarSequence,
+} from './sequences'
+
+export type AvatarBehaviorLibrary = {
+  expressions: Expression[]
+  sequences: AvatarSequence[]
+}
 
 export type StudioAvatar = {
   id: string
@@ -10,6 +20,7 @@ export type StudioAvatar = {
   body: AvatarBody
   colors: AvatarColors
   eyes: AvatarEyeDefaults
+  behavior?: AvatarBehaviorLibrary
 }
 
 export type AvatarColors = { body: string; eyes: string }
@@ -123,6 +134,42 @@ export const parseExpressions = (value: unknown): Expression[] => {
   })
 }
 
+const cloneSequences = (sequences: AvatarSequence[]) =>
+  sequences.map(sequence => ({
+    ...sequence,
+    steps: sequence.steps.map(step => ({ ...step })),
+    blink: { ...sequence.blink },
+  }))
+
+export const cloneAvatarBehavior = (
+  behavior: AvatarBehaviorLibrary
+): AvatarBehaviorLibrary => ({
+  expressions: cloneExpressions(behavior.expressions),
+  sequences: cloneSequences(behavior.sequences),
+})
+
+export const resolveAvatarBehavior = (
+  avatar: StudioAvatar,
+  base: AvatarBehaviorLibrary
+): AvatarBehaviorLibrary => avatar.behavior ?? base
+
+const parseAvatarBehavior = (
+  value: unknown,
+  base: AvatarBehaviorLibrary
+): AvatarBehaviorLibrary | undefined => {
+  if (!value || typeof value !== 'object') return undefined
+  const candidate = value as Partial<AvatarBehaviorLibrary>
+  if (!Array.isArray(candidate.expressions) || !candidate.expressions.length) return undefined
+  const expressions = parseExpressions(candidate.expressions)
+  const sequences = normalizeSequencesForExpressions(
+    Array.isArray(candidate.sequences)
+      ? parseSequences(candidate.sequences)
+      : cloneSequences(base.sequences),
+    expressions
+  )
+  return { expressions, sequences }
+}
+
 export const createAvatar = (name: string): StudioAvatar => ({
   id: `avatar-${crypto.randomUUID()}`,
   name: name.trim() || 'Nouvel avatar',
@@ -131,7 +178,11 @@ export const createAvatar = (name: string): StudioAvatar => ({
   eyes: { ...defaultAvatarEyes },
 })
 
-export const parseAvatarLibrary = (value: unknown, fallback: AvatarLibrary): AvatarLibrary => {
+export const parseAvatarLibrary = (
+  value: unknown,
+  fallback: AvatarLibrary,
+  baseBehavior: AvatarBehaviorLibrary
+): AvatarLibrary => {
   try {
     const parsed = value as Partial<AvatarLibrary> | null
     if (!parsed || !Array.isArray(parsed.avatars) || !parsed.avatars.length) return fallback
@@ -144,13 +195,17 @@ export const parseAvatarLibrary = (value: unknown, fallback: AvatarLibrary): Ava
         seenIds.add(avatar.id)
         return true
       })
-      .map(avatar => ({
-        id: avatar.id,
-        name: avatar.name,
-        body: parseAvatarBody(avatar.body, surfacePresets.sphere),
-        colors: parseColors(avatar.colors),
-        eyes: parseAvatarEyeDefaults(avatar.eyes),
-      }))
+      .map(avatar => {
+        const behavior = parseAvatarBehavior(avatar.behavior, baseBehavior)
+        return {
+          id: avatar.id,
+          name: avatar.name,
+          body: parseAvatarBody(avatar.body, surfacePresets.sphere),
+          colors: parseColors(avatar.colors),
+          eyes: parseAvatarEyeDefaults(avatar.eyes),
+          ...(behavior ? { behavior } : {}),
+        }
+      })
     if (!avatars.length) return fallback
     const activeAvatarId = avatars.some(avatar => avatar.id === parsed.activeAvatarId)
       ? parsed.activeAvatarId!

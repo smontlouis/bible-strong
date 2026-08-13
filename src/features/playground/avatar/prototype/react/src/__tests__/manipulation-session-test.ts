@@ -1,4 +1,9 @@
-import { beginManipulation, finishManipulation, previewManipulation } from '../manipulationSession'
+import {
+  beginManipulation,
+  beginManipulationFromRenderedValue,
+  finishManipulation,
+  previewManipulation,
+} from '../manipulationSession'
 
 describe('pointer manipulation session', () => {
   it('previews many values and commits exactly once', () => {
@@ -28,5 +33,15 @@ describe('pointer manipulation session', () => {
     })
 
     expect(previews).toEqual([10])
+  })
+
+  it('starts from the live rendered value while an interpolation is running', () => {
+    const staleInspectorValue = { headX: 0, headY: 0 }
+    const renderedMidTransition = { headX: 18, headY: 27 }
+
+    const session = beginManipulationFromRenderedValue(() => renderedMidTransition)
+
+    expect(session.initial).toBe(renderedMidTransition)
+    expect(session.initial).not.toBe(staleInspectorValue)
   })
 })

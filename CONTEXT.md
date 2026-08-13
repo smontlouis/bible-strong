@@ -106,17 +106,30 @@ _Avoid_: Default pose
 **Pose**:
 The avatar's current temporary visual configuration. A Pose is not persisted directly.
 
+**Base behavior library**:
+The immutable bundled collection of Expressions and Animations inherited by an Avatar that has not customized its behavior.
+_Avoid_: Global library when implying that user edits affect every Avatar
+
+**Avatar behavior library**:
+The Avatar-owned collection of Expressions and Animations created atomically from the Base behavior library on that Avatar's first behavior mutation.
+
 **Expression**:
-A saved global visual preset whose eye values are relative to an Avatar's Neutral appearance. Optional color overrides are temporary and do not change the Avatar.
+A saved visual preset within either the Base behavior library or one Avatar behavior library. Its eye values are relative to the owning Avatar's Neutral appearance. Optional color overrides are temporary and do not change the Avatar.
 _Avoid_: Pose preset
 
 **Animation**:
-A saved animated sequence of Expressions, including its transitions and blink behavior.
+A saved animated sequence of Expressions from the same behavior library, including its transitions and blink behavior.
 _Avoid_: State in user-facing copy
 
 **Playback**:
 The active execution of one Animation. It exclusively controls the animated Pose until a direct user manipulation pauses it.
 _Avoid_: Animation when referring specifically to the running playback instance
+
+- An Avatar inherits the Base behavior library until its first Expression or Animation mutation.
+- The first behavior mutation creates the Avatar behavior library by copying Expressions and Animations together so Animation references remain coherent.
+- Subsequent Expression and Animation mutations affect only the owning Avatar.
+- Duplicating an Avatar also duplicates its Avatar behavior library when one exists.
+- Transferring an Animation between Avatars must also transfer the Expressions referenced by that Animation.
 
 ## Domain Relationships
 

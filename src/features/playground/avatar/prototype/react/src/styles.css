@@ -89,6 +89,81 @@ input {
   content: '';
   pointer-events: none;
 }
+.photo-flash {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  background: white;
+  pointer-events: none;
+}
+.photo-capture-bar {
+  position: absolute;
+  z-index: 8;
+  bottom: 58px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+.photo-capture-button {
+  min-width: 190px;
+  height: 44px;
+  padding-inline: 15px 10px;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 13px;
+  background: rgb(246 248 252 / 96%);
+  box-shadow:
+    0 12px 32px rgb(0 0 0 / 28%),
+    inset 0 1px 0 rgb(255 255 255 / 78%);
+  color: #17191d;
+  transition-property: transform, background-color, box-shadow;
+  transition-duration: 160ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+.photo-capture-button:hover {
+  background: white;
+  box-shadow:
+    0 15px 36px rgb(0 0 0 / 34%),
+    inset 0 1px 0 white;
+}
+.photo-capture-button:active {
+  transform: scale(0.96);
+}
+.photo-capture-button > svg {
+  width: 17px;
+  height: 17px;
+}
+.photo-format-badge {
+  margin-left: auto;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: #e9edfa;
+  color: #4168d5;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+}
+.photo-help-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgb(255 255 255 / 13%);
+  border-radius: 12px;
+  background: rgb(26 30 34 / 88%);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 24%);
+  color: #f6f7f8;
+  backdrop-filter: blur(12px);
+}
+.photo-help-button:hover {
+  background: rgb(40 45 51 / 96%);
+  color: white;
+}
+.photo-help-tooltip {
+  width: min(280px, calc(100vw - 32px));
+  padding: 9px 11px;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
 
 .brand {
   position: absolute;
@@ -156,6 +231,29 @@ input {
   z-index: 1;
   width: min(72vh, 72vw, 680px);
   aspect-ratio: 1;
+}
+.stage-playback-status {
+  position: absolute;
+  z-index: 6;
+  top: 3%;
+  left: 3%;
+  padding: 9px 11px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 12px;
+  background: rgb(26 30 34 / 86%);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
+  backdrop-filter: blur(12px);
+  pointer-events: none;
+}
+.stage-playback-status .playback-identity {
+  min-width: 104px;
+  padding: 0;
+}
+.stage-playback-status .playback-identity strong {
+  color: #f6f7f8;
+}
+.stage-playback-status .playback-identity small {
+  color: #8d96a2;
 }
 
 .avatar {
@@ -304,7 +402,7 @@ input {
   line-height: 1.45;
   white-space: normal;
 }
-.export-accordion-trigger[data-open] > svg {
+.export-accordion-trigger[aria-expanded='true'] > svg {
   transform: rotate(180deg);
 }
 .export-accordion-content {
@@ -386,7 +484,11 @@ input {
     linear-gradient(-45deg, #e7e9ee 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #e7e9ee 75%),
     linear-gradient(-45deg, transparent 75%, #e7e9ee 75%);
-  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+  background-position:
+    0 0,
+    0 6px,
+    6px -6px,
+    -6px 0;
   background-size: 12px 12px;
 }
 .snapshot-preview svg {
@@ -410,14 +512,8 @@ input {
   gap: 10px;
   margin-top: 14px;
 }
-.snapshot-download-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-.snapshot-download-actions > button {
-  min-height: 44px;
-  font-size: 11px;
+.snapshot-settings-separator {
+  margin-block: 14px;
 }
 .avatar-head,
 .preview-head {
@@ -837,30 +933,35 @@ p {
   background: white;
   box-shadow: 0 5px 18px rgb(24 28 35 / 5%);
 }
-.state-player > span {
+.playback-identity {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-width: 102px;
-  padding: 2px 7px;
   color: #33834b;
 }
-.state-player > span.is-paused {
+.state-player .playback-identity {
+  min-width: 102px;
+  padding: 2px 7px;
+}
+.playback-identity.is-paused {
   color: #8a6a24;
 }
-.state-player i {
+.playback-identity.is-stopped {
+  color: #7f8692;
+}
+.playback-identity i {
   width: 6px;
   height: 6px;
   flex: 0 0 auto;
   border-radius: 50%;
   background: currentColor;
-  box-shadow: 0 0 0 4px rgb(51 131 75 / 10%);
+  box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 10%, transparent);
 }
-.state-player > span > span {
+.playback-identity > span {
   display: grid;
   gap: 1px;
 }
-.state-player small {
+.playback-identity small {
   color: #9297a1;
   font-size: 8px;
   font-weight: 750;
@@ -868,7 +969,7 @@ p {
   line-height: 1;
   text-transform: uppercase;
 }
-.state-player strong {
+.playback-identity strong {
   max-width: 92px;
   overflow: hidden;
   color: #343943;
@@ -2033,6 +2134,12 @@ p {
   .stage-column {
     min-height: 420px;
     padding: 18px;
+  }
+  .photo-capture-bar {
+    bottom: 48px;
+  }
+  .photo-capture-button {
+    min-width: 168px;
   }
   .brand {
     top: 18px;

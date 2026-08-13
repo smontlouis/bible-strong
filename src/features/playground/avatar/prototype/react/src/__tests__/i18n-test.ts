@@ -27,6 +27,8 @@ describe('avatar studio translations', () => {
     expect(translateStudioText('Dégradé radial', 'zh-CN')).toBe('径向渐变')
     expect(translateStudioText('Définition du mode photo', 'zh-CN')).toBe('照片模式分辨率')
     expect(translateStudioText('Télécharger en PNG', 'zh-CN')).toBe('下载 PNG')
+    expect(translateStudioText('Prendre une photo', 'zh-CN')).toBe('拍照')
+    expect(translateStudioText('Format d’export', 'zh-CN')).toBe('导出格式')
   })
 
   it('covers every configured state description in English', () => {

@@ -107,11 +107,19 @@ export const chinese: Record<string, string> = {
   Arrivée: '结束颜色',
   Définition: '分辨率',
   'Dimensions inscrites dans le fichier SVG.': '写入 SVG 文件的尺寸。',
+  'Dimensions du fichier exporté.': '导出文件的尺寸。',
   'Définition du Snapshot': '快照分辨率',
   'Définition du mode photo': '照片模式分辨率',
   'Télécharger le Snapshot SVG': '下载 SVG 快照',
   'Télécharger en SVG': '下载 SVG',
   'Télécharger en PNG': '下载 PNG',
+  'Format d’export': '导出格式',
+  'Format d’export du mode photo': '照片模式导出格式',
+  'Choisis le type de fichier généré par le mode photo.': '选择照片模式生成的文件类型。',
+  'Prendre une photo': '拍照',
+  'Informations sur le mode photo': '照片模式信息',
+  'Tu peux modifier le format, le fond et la définition du mode photo dans Export.':
+    '你可以在“导出”中更改照片模式的格式、背景和分辨率。',
   'Projet du Studio': '工作室项目',
   'Transfère tous les avatars, expressions et animations vers un autre navigateur.':
     '将所有头像、表情和动画传输到另一个浏览器。',
@@ -238,8 +246,7 @@ export const chinese: Record<string, string> = {
   'Cette action supprimera définitivement cette animation.': '此操作将永久删除该动画。',
   'Cette animation enchaîne un pool de presets et des clignements.':
     '此动画依次播放一组预设并执行眨眼。',
-  'Cet état enchaîne un pool de presets et des clignements.':
-    '此动画依次播放一组预设并执行眨眼。',
+  'Cet état enchaîne un pool de presets et des clignements.': '此动画依次播放一组预设并执行眨眼。',
   'Expressions de l’animation': '动画表情',
   'Les presets sont joués dans cet ordre, puis la boucle recommence.':
     '预设按此顺序播放，然后重新开始循环。',
@@ -263,10 +270,13 @@ export const chinese: Record<string, string> = {
   Reprendre: '继续',
   Annuler: '取消',
   'Supprimer cette expression ?': '删除此表情？',
-  'Cette action retirera définitivement le preset de la bibliothèque globale.':
-    '此操作将从全局库中永久删除该预设。',
-  'Le corps et les couleurs de cet avatar seront définitivement supprimés. Les expressions globales seront conservées.':
-    '此头像的身体和颜色将被永久删除，全局表情将保留。',
+  'Cette action retirera définitivement le preset de la bibliothèque de cet avatar.':
+    '此操作将从该头像的库中永久删除该预设。',
+  'Cette expression sera aussi retirée des animations suivantes :': '此表情也会从以下动画中移除：',
+  'Si une animation ne contient que cette expression, l’expression de repli lui sera assignée pour qu’elle reste jouable.':
+    '如果动画只包含此表情，将为其分配备用表情以保持可播放。',
+  'Le corps, les expressions et les animations propres à cet avatar seront définitivement supprimés. La bibliothèque de base sera conservée.':
+    '此头像的身体、表情和动画将被永久删除，基础库将被保留。',
   'Glisse sur la surface pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.':
     '在表面上拖动以调整头部方向。控制器圆环分别控制 X、Y 和 Z。',
   Sphère: '球体',

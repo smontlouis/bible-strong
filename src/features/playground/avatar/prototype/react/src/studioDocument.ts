@@ -1,4 +1,9 @@
-import { parseAvatarLibrary, parseExpressions, type AvatarLibrary } from './avatars'
+import {
+  parseAvatarLibrary,
+  parseExpressions,
+  type AvatarBehaviorLibrary,
+  type AvatarLibrary,
+} from './avatars'
 import type { Expression } from './geometry'
 import { normalizeSequencesForExpressions, parseSequences, type AvatarSequence } from './sequences'
 import defaultStudioDocument from './defaultStudioDocument.json'
@@ -40,7 +45,8 @@ export const parseStudioDocument = (value: unknown, fallback: StudioDocument): S
   const sequences = Array.isArray(candidate.sequences)
     ? normalizeSequencesForExpressions(parseSequences(candidate.sequences), expressions)
     : fallback.sequences
-  const library = parseAvatarLibrary(candidate.library, fallback.library)
+  const baseBehavior: AvatarBehaviorLibrary = { expressions, sequences }
+  const library = parseAvatarLibrary(candidate.library, fallback.library, baseBehavior)
   return {
     version: 2,
     library,

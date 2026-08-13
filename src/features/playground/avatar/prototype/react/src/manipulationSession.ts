@@ -8,6 +8,10 @@ export const beginManipulation = <Value>(initial: Value): ManipulationSession<Va
   latest: initial,
 })
 
+export const beginManipulationFromRenderedValue = <Value>(
+  readRenderedValue: () => Value
+): ManipulationSession<Value> => beginManipulation(readRenderedValue())
+
 export const previewManipulation = <Value>(
   session: ManipulationSession<Value>,
   next: Value,

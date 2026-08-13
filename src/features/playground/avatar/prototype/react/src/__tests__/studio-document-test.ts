@@ -71,10 +71,43 @@ describe('Studio document', () => {
 
   it('round-trips a complete project document as portable JSON', () => {
     const document = documentFixture()
+    const expression = { ...initialExpressions[0], widthLeft: 42 }
+    const sequence = {
+      ...createInitialSequences()[0],
+      steps: createInitialSequences()[0].steps.map(step => ({
+        ...step,
+        expressionId: expression.id,
+      })),
+    }
+    document.library.avatars[0].behavior = {
+      expressions: [expression],
+      sequences: [sequence],
+    }
 
     const imported = parseImportedStudioDocument(serializeStudioDocument(document), document)
 
     expect(imported).toEqual(document)
+    expect(imported.library.avatars[0].behavior?.expressions[0].widthLeft).toBe(42)
+  })
+
+  it('keeps the base library unchanged when an avatar owns customized behavior', () => {
+    const document = documentFixture()
+    const avatar = document.library.avatars[0]
+    const customized = {
+      ...avatar,
+      behavior: {
+        expressions: [{ ...initialExpressions[0], widthLeft: 47 }],
+        sequences: createInitialSequences().slice(0, 1),
+      },
+    }
+    const store = createStudioDocumentStore(document, () => undefined)
+
+    const next = store.update({
+      library: { activeAvatarId: avatar.id, avatars: [customized] },
+    })
+
+    expect(next.expressions[0].widthLeft).toBe(initialExpressions[0].widthLeft)
+    expect(next.library.avatars[0].behavior?.expressions[0].widthLeft).toBe(47)
   })
 
   it('rejects files that are not versioned Studio projects', () => {

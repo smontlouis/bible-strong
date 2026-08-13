@@ -1180,19 +1180,48 @@ const accessoryPath = (pose: AvatarPose, node: BodyNode) => {
   return smoothClosedPath(densifyClosedPoints(hull))
 }
 
+const ACCESSORY_FRONT_CROSSING_RATIO = 0.1
+
+const accessoryCameraDepthRadius = (pose: AvatarPose, node: BodyNode) => {
+  const localOrientation = quaternionFromEuler(
+    radians(node.rotation[0]),
+    radians(node.rotation[1]),
+    radians(node.rotation[2])
+  )
+  const cameraDepthByAxis = ([
+    [1, 0, 0],
+    [0, 1, 0],
+    [0, 0, 1],
+  ] as Point3[]).map(axis =>
+    rotateWithQuaternion(
+      pose.orientation,
+      rotateWithQuaternion(localOrientation, axis)
+    )[2]
+  )
+  return Math.hypot(
+    cameraDepthByAxis[0] * (node.surface.width / 2),
+    cameraDepthByAxis[1] * (node.surface.height / 2),
+    cameraDepthByAxis[2] * (node.surface.depth / 2)
+  )
+}
+
 const accessoryLayers = (pose: AvatarPose, nodes: BodyNode[]) => {
   const layers = nodes
-    .map(node => ({
-      id: node.id,
-      path: accessoryPath(pose, node),
-      depth: rotateWithQuaternion(pose.orientation, node.position)[2],
-    }))
+    .map(node => {
+      const depth = rotateWithQuaternion(pose.orientation, node.position)[2]
+      return {
+        id: node.id,
+        path: accessoryPath(pose, node),
+        depth,
+        front: depth > accessoryCameraDepthRadius(pose, node) * ACCESSORY_FRONT_CROSSING_RATIO,
+      }
+    })
     .sort((left, right) => left.depth - right.depth)
   return {
-    backPaths: layers.filter(layer => layer.depth <= 0).map(layer => layer.path),
-    frontPaths: layers.filter(layer => layer.depth > 0).map(layer => layer.path),
-    backNodeIds: layers.filter(layer => layer.depth <= 0).map(layer => layer.id),
-    frontNodeIds: layers.filter(layer => layer.depth > 0).map(layer => layer.id),
+    backPaths: layers.filter(layer => !layer.front).map(layer => layer.path),
+    frontPaths: layers.filter(layer => layer.front).map(layer => layer.path),
+    backNodeIds: layers.filter(layer => !layer.front).map(layer => layer.id),
+    frontNodeIds: layers.filter(layer => layer.front).map(layer => layer.id),
   }
 }
 

@@ -16,12 +16,14 @@ import {
 } from 'react'
 import {
   ArrowLeft,
+  Camera,
   ChevronDown,
   ChevronUp,
   Copy,
   Download,
   FileCode2,
   GripVertical,
+  Info,
   Pause,
   Pencil,
   Play,
@@ -82,8 +84,11 @@ import {
 } from './body'
 import {
   applyAvatarEyeDefaults,
+  cloneAvatarBehavior,
   createAvatar,
   defaultAvatarEyes,
+  resolveAvatarBehavior,
+  type AvatarBehaviorLibrary,
   type StudioAvatar,
   type AvatarColors,
   type AvatarEyeDefaults,
@@ -148,9 +153,16 @@ import {
   type RenderedScene,
   type RenderedColors,
 } from './renderedScene'
+import {
+  createRenderedRotationGizmo,
+  paintRenderedRotationGizmo,
+  type RenderedRotationGizmo,
+} from './renderedRotationGizmo'
 import { scaleEye, updateEyeDimension, updateEyePosition } from './expressionEditing'
+import { resolveCanvasPreviewExpression, type CanvasPreviewTarget } from './canvasPreview'
 import {
   beginManipulation,
+  beginManipulationFromRenderedValue,
   finishManipulation,
   previewManipulation,
   type ManipulationSession,
@@ -169,6 +181,8 @@ import {
 
 type Mode = 'manual' | 'expressions' | 'states' | 'export'
 type ExportFormat = 'react' | 'javascript'
+type SnapshotFormat = 'svg' | 'png'
+type PlaybackStatus = 'playing' | 'paused' | 'stopped'
 
 const downloadBlob = (blob: Blob, fileName: string) => {
   const url = URL.createObjectURL(blob)
@@ -500,11 +514,13 @@ function LinkButton({
 
 function RotationGizmo({
   expression,
+  rendered,
   onChange,
   onActiveChange,
   onReset,
 }: {
   expression: Expression
+  rendered: RenderedRotationGizmo
   onChange: (next: Expression) => void
   onActiveChange: (active: boolean) => void
   onReset: () => void
@@ -534,11 +550,6 @@ function RotationGizmo({
       ((event.clientY - rectangle.top) / rectangle.height) * 86 - 43,
     ]
   }
-  const ringPath = (points: Point3[]) =>
-    `M${points[0][0]} ${points[0][1]}${points
-      .slice(1)
-      .map(point => `L${point[0]} ${point[1]}`)
-      .join('')}Z`
   const unitVector = (from: Point3, to: Point3): readonly [number, number] => {
     const x = to[0] - from[0]
     const y = to[1] - from[1]
@@ -618,25 +629,25 @@ function RotationGizmo({
           onPointerUp={stop}
           onPointerCancel={cancel}
         />
-        <path
+        <motion.path
           className="gizmo-orbit gizmo-y"
-          d={ringPath(rings.y)}
+          d={rendered.yPath}
           onPointerDown={event => startAxis('y', event)}
           onPointerMove={move}
           onPointerUp={stop}
           onPointerCancel={cancel}
         />
-        <path
+        <motion.path
           className="gizmo-orbit gizmo-x"
-          d={ringPath(rings.x)}
+          d={rendered.xPath}
           onPointerDown={event => startAxis('x', event)}
           onPointerMove={move}
           onPointerUp={stop}
           onPointerCancel={cancel}
         />
-        <path
+        <motion.path
           className="gizmo-orbit gizmo-z"
-          d={ringPath(rings.z)}
+          d={rendered.zPath}
           onPointerDown={event => startAxis('z', event)}
           onPointerMove={move}
           onPointerUp={stop}
@@ -930,6 +941,7 @@ function AvatarCanvas({
   avatarEyes,
   surface,
   scene,
+  rotationGizmo,
   showWire,
   bodyEditing,
   selectedBodyNodeId,
@@ -946,11 +958,14 @@ function AvatarCanvas({
   onChange,
   onReset,
   onEyeChange,
+  playback,
+  onManipulationStart,
 }: {
   expression: Expression
   avatarEyes: AvatarEyeDefaults
   surface: SurfaceConfig
   scene: RenderedScene
+  rotationGizmo: RenderedRotationGizmo
   showWire: boolean
   bodyEditing: boolean
   selectedBodyNodeId: 'primary' | string | null
@@ -963,10 +978,12 @@ function AvatarCanvas({
   onBodyNodePreview: (next: BodyNode) => void
   onBodyNodeChange: (next: BodyNode) => void
   onEyeSelect: (side: -1 | 1) => void
-  onPreview: (next: Expression) => void
+  onPreview: (next: Expression, target: CanvasPreviewTarget) => void
   onChange: (next: Expression) => void
   onReset: (next: Expression) => void
   onEyeChange?: (next: Expression) => void
+  playback: { name: string; status: Exclude<PlaybackStatus, 'stopped'> } | null
+  onManipulationStart: () => Expression
 }) {
   const { t } = useStudioLanguage()
   const {
@@ -1031,14 +1048,16 @@ function AvatarCanvas({
     return [x / length, y / length]
   }
   const startDrag = (event: React.PointerEvent<SVGElement>) => {
+    const session = beginManipulationFromRenderedValue(onManipulationStart)
+    const renderedExpression = session.initial
     onBodyNodeSelect('primary')
     onHighlightChange('head')
     drag.current = {
       type: 'arcball',
       startPoint: toSvg(event),
-      expression,
+      expression: renderedExpression,
     }
-    canvasManipulation.current = beginManipulation(expression)
+    canvasManipulation.current = session
     setActiveDragType('arcball')
     svgRef.current!.setPointerCapture(event.pointerId)
   }
@@ -1064,25 +1083,32 @@ function AvatarCanvas({
   ) => {
     event.stopPropagation()
     if (selectedSide === null || !editor) return
+    const session = beginManipulationFromRenderedValue(onManipulationStart)
+    const renderedExpression = session.initial
     onHighlightChange(selectedSide < 0 ? 'left' : 'right')
     const point = toSvg(event)
     const editableExpression = bodyEditing
-      ? applyAvatarEyeDefaults(expression, avatarEyes)
-      : expression
-    const leftEditor = renderEyeEditor(poseWithAvatarEyes(expression, avatarEyes), surface, -1)
-    const rightEditor = renderEyeEditor(poseWithAvatarEyes(expression, avatarEyes), surface, 1)
+      ? applyAvatarEyeDefaults(renderedExpression, avatarEyes)
+      : renderedExpression
+    const livePose = poseWithAvatarEyes(renderedExpression, avatarEyes)
+    const liveEditor = renderEyeEditor(livePose, surface, selectedSide)
+    const leftEditor = renderEyeEditor(livePose, surface, -1)
+    const rightEditor = renderEyeEditor(livePose, surface, 1)
     drag.current = {
       type,
       side: selectedSide,
       startPoint: point,
       expression: editableExpression,
-      center: editor.center,
-      widthAxis: unitVector(editor.center, editor.widthHandle),
-      heightAxis: unitVector(editor.center, editor.heightHandle),
+      center: liveEditor.center,
+      widthAxis: unitVector(liveEditor.center, liveEditor.widthHandle),
+      heightAxis: unitVector(liveEditor.center, liveEditor.heightHandle),
       spacingAxis: unitVector(leftEditor.center, rightEditor.center),
-      startPointerAngle: Math.atan2(point[1] - editor.center[1], point[0] - editor.center[0]),
+      startPointerAngle: Math.atan2(
+        point[1] - liveEditor.center[1],
+        point[0] - liveEditor.center[0]
+      ),
       startDistance: Math.max(
-        Math.hypot(point[0] - editor.center[0], point[1] - editor.center[1]),
+        Math.hypot(point[0] - liveEditor.center[0], point[1] - liveEditor.center[1]),
         1
       ),
     }
@@ -1100,7 +1126,7 @@ function AvatarCanvas({
         point
       )
       if (canvasManipulation.current) {
-        previewManipulation(canvasManipulation.current, next, onPreview)
+        previewManipulation(canvasManipulation.current, next, value => onPreview(value, 'head'))
       }
       return
     }
@@ -1155,7 +1181,7 @@ function AvatarCanvas({
         (deltaAngle * 180) / Math.PI
     }
     if (canvasManipulation.current) {
-      previewManipulation(canvasManipulation.current, next, onPreview)
+      previewManipulation(canvasManipulation.current, next, value => onPreview(value, 'eyes'))
     }
   }
   const commitDrag = () => {
@@ -1163,7 +1189,7 @@ function AvatarCanvas({
     const session = canvasManipulation.current
     if (interaction && session) {
       finishManipulation(session, 'commit', {
-        preview: onPreview,
+        preview: value => onPreview(value, interaction.type === 'arcball' ? 'head' : 'eyes'),
         commit: interaction.type === 'arcball' ? onChange : (onEyeChange ?? onChange),
       })
     }
@@ -1176,7 +1202,10 @@ function AvatarCanvas({
     const interaction = drag.current
     const session = canvasManipulation.current
     if (interaction && session) {
-      finishManipulation(session, 'cancel', { preview: onPreview, commit: onChange })
+      finishManipulation(session, 'cancel', {
+        preview: value => onPreview(value, interaction.type === 'arcball' ? 'head' : 'eyes'),
+        commit: onChange,
+      })
     }
     canvasManipulation.current = null
     drag.current = null
@@ -1186,6 +1215,16 @@ function AvatarCanvas({
   useEscapeToCancel(cancelDrag)
   return (
     <div className="avatar-wrap">
+      {playback && (
+        <motion.div
+          className="stage-playback-status"
+          initial={{ opacity: 0, scale: 0.96, y: -4 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: 'spring', duration: 0.3, bounce: 0 }}
+        >
+          <PlaybackIdentity name={playback.name} status={playback.status} />
+        </motion.div>
+      )}
       <svg
         ref={svgRef}
         className="avatar"
@@ -1291,6 +1330,7 @@ function AvatarCanvas({
       </svg>
       <RotationGizmo
         expression={expression}
+        rendered={rotationGizmo}
         onChange={onChange}
         onActiveChange={active => onHighlightChange(active ? 'head' : null)}
         onReset={() => onReset({ ...expression, headX: 0, headY: 0, headZ: 0 })}
@@ -2317,28 +2357,30 @@ function StudioApp() {
   const initialAvatar =
     initialLibrary.avatars.find(avatar => avatar.id === initialLibrary.activeAvatarId) ??
     initialLibrary.avatars[0]
+  const [baseBehavior] = useState<AvatarBehaviorLibrary>(() => ({
+    expressions: initialDocument.expressions,
+    sequences: initialDocument.sequences,
+  }))
+  const initialBehavior = resolveAvatarBehavior(initialAvatar, baseBehavior)
   const [surface, setSurface] = useState(initialAvatar.body.primary)
   const [bodyNodes, setBodyNodes] = useState(initialAvatar.body.nodes)
   const [selectedBodyNodeId, setSelectedBodyNodeId] = useState<'primary' | string | null>('primary')
   const [selectedEyeSide, setSelectedEyeSide] = useState<-1 | 1 | null>(null)
-  const [expressions, setExpressions] = useState(initialDocument.expressions)
-  const [sequences, setSequences] = useState(initialDocument.sequences)
+  const [expressions, setExpressions] = useState(initialBehavior.expressions)
+  const [sequences, setSequences] = useState(initialBehavior.sequences)
   const [exportFormat, setExportFormat] = useState<ExportFormat>('react')
   const [exportAnimationIds, setExportAnimationIds] = useState(() =>
-    initialDocument.sequences.map(animation => animation.id)
+    initialBehavior.sequences.map(animation => animation.id)
   )
-  const [snapshotBackground, setSnapshotBackground] =
-    useState<SnapshotBackground>('transparent')
+  const [snapshotBackground, setSnapshotBackground] = useState<SnapshotBackground>('transparent')
   const [snapshotColorFrom, setSnapshotColorFrom] = useState('#F5F7FC')
   const [snapshotColorTo, setSnapshotColorTo] = useState('#C9D5FF')
   const [snapshotSize, setSnapshotSize] = useState('1024')
+  const [snapshotFormat, setSnapshotFormat] = useState<SnapshotFormat>('png')
+  const [photoFlash, setPhotoFlash] = useState(0)
   const initialStatePlayback = initialDocument.playback
   const updateStudioLibrary = (library: typeof initialDocument.library) =>
     documentStore.update({ library })
-  const updateStudioExpressions = (nextExpressions: Expression[]) =>
-    documentStore.update({ expressions: nextExpressions })
-  const updateStudioSequences = (nextSequences: AvatarSequence[]) =>
-    documentStore.update({ sequences: nextSequences })
   const persistStatePlayback = (playback: StatePlaybackSelection) =>
     documentStore.update({ playback })
   const [bodyEditing, setBodyEditing] = useState(false)
@@ -2390,6 +2432,9 @@ function StudioApp() {
   )
   const [activeState, setActiveState] = useState<string | null>(null)
   const [statePlaying, setStatePlaying] = useState(false)
+  const [playbackStatus, setPlaybackStatus] = useState<PlaybackStatus>(() =>
+    initialStatePlayback.stateId === null ? 'stopped' : 'paused'
+  )
   const [playbackVisual, setPlaybackVisual] = useState({
     position: null as number | null,
     run: 0,
@@ -2414,6 +2459,8 @@ function StudioApp() {
   const reduceMotion = useReducedMotion()
 
   const avatarsRef = useRef(avatars)
+  const expressionsRef = useRef(expressions)
+  const sequencesRef = useRef(sequences)
   const draggedAvatarId = useRef<string | null>(null)
   const avatarDragOrigin = useRef<StudioAvatar[] | null>(null)
   const avatarDragPreview = useRef(avatars)
@@ -2431,6 +2478,29 @@ function StudioApp() {
   const bodyNodesRef = useRef(bodyNodes)
   const showWireRef = useRef(showWire)
   const highlightRef = useRef(highlight)
+  const persistActiveBehavior = (
+    nextExpressions: Expression[],
+    nextSequences: AvatarSequence[]
+  ) => {
+    const behavior = cloneAvatarBehavior({
+      expressions: nextExpressions,
+      sequences: nextSequences,
+    })
+    const nextAvatars = avatarsRef.current.map(avatar =>
+      avatar.id === activeAvatarIdRef.current ? { ...avatar, behavior } : avatar
+    )
+    avatarsRef.current = nextAvatars
+    setAvatars(nextAvatars)
+    updateStudioLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: nextAvatars })
+  }
+  const updateStudioExpressions = (nextExpressions: Expression[]) => {
+    expressionsRef.current = nextExpressions
+    persistActiveBehavior(nextExpressions, sequencesRef.current)
+  }
+  const updateStudioSequences = (nextSequences: AvatarSequence[]) => {
+    sequencesRef.current = nextSequences
+    persistActiveBehavior(expressionsRef.current, nextSequences)
+  }
   const [initialRender] = useState(() => {
     const pose = poseFromExpression(initialExpression)
     return {
@@ -2481,9 +2551,13 @@ function StudioApp() {
   const blinkAnimating = useRef(false)
   const blinkValue = useMotionValue(1)
   const [renderedScene] = useState(() => createRenderedScene(initialGeometry))
+  const [renderedRotationGizmo] = useState(() => createRenderedRotationGizmo(initialExpression))
+  const bodyColorAnimation = useRef<ReturnType<typeof animate> | null>(null)
+  const eyeColorAnimation = useRef<ReturnType<typeof animate> | null>(null)
 
   const paintPose = (pose: AvatarPose, blink?: number, frameTimeMs?: number) => {
     displayedPose.current = pose
+    paintRenderedRotationGizmo(renderedRotationGizmo, pose.expression)
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
     const signature = `${pose.expression.eyeMotion}:${pose.expression.bodyMotion}`
     if (signature !== ambientSignature.current) {
@@ -2539,6 +2613,8 @@ function StudioApp() {
     () => () => {
       if (transitionFrame.current !== null) cancelAnimationFrame(transitionFrame.current)
       blinkControls.current?.stop()
+      bodyColorAnimation.current?.stop()
+      eyeColorAnimation.current?.stop()
       if (stateTimer.current) clearTimeout(stateTimer.current)
       if (blinkTimer.current) clearTimeout(blinkTimer.current)
     },
@@ -2560,9 +2636,31 @@ function StudioApp() {
     }
   }
 
+  const stopColorTransitions = () => {
+    bodyColorAnimation.current?.stop()
+    eyeColorAnimation.current?.stop()
+    bodyColorAnimation.current = null
+    eyeColorAnimation.current = null
+  }
+
+  const freezeLivePreviewForManipulation = () => {
+    if (statePlaying) pauseState()
+    const renderedExpression = { ...displayedPose.current.expression }
+    stopTransition(true)
+    stopColorTransitions()
+    activeSequenceTransition.current = null
+    pausedSequenceTransition.current = null
+    transitionTarget.current = renderedExpression
+    canonicalTarget.current = renderedExpression
+    setExpression(renderedExpression)
+    setActiveExpression(null)
+    return renderedExpression
+  }
+
   const updateImmediate = (next: Expression, preservePlayback = false) => {
     if (!preservePlayback && statePlaying) pauseState()
     stopTransition(true)
+    stopColorTransitions()
     const pose = poseFromExpression(next)
     transitionTarget.current = next
     canonicalTarget.current = next
@@ -2609,6 +2707,7 @@ function StudioApp() {
 
     if (transitionSettings) {
       stopTransition(true)
+      stopColorTransitions()
       const durationMs = transitionSettings.transitionMs
       const from = { ...current }
       const fromColors = {
@@ -2673,8 +2772,14 @@ function StudioApp() {
 
     if (avatar) {
       const targetColors = resolveColors(next, avatar.colors)
-      animate(renderedColors.body, targetColors.body, { duration: 0.35, ease: 'easeInOut' })
-      animate(renderedColors.eyes, targetColors.eyes, { duration: 0.35, ease: 'easeInOut' })
+      bodyColorAnimation.current = animate(renderedColors.body, targetColors.body, {
+        duration: 0.35,
+        ease: 'easeInOut',
+      })
+      eyeColorAnimation.current = animate(renderedColors.eyes, targetColors.eyes, {
+        duration: 0.35,
+        ease: 'easeInOut',
+      })
     }
 
     if (transitionFrame.current !== null) {
@@ -2832,6 +2937,8 @@ function StudioApp() {
   const activateAvatar = (id: string, editBody = false, preserveMode = false) => {
     const avatar = avatarsRef.current.find(item => item.id === id)
     if (!avatar) return
+    const resumeActiveSequence = statePlaying
+    if (resumeActiveSequence) pauseState(false)
     if (editBody) suspendStateForEditor()
     if (editBody && !avatarEditSnapshot.current) {
       avatarEditSnapshot.current = {
@@ -2840,6 +2947,9 @@ function StudioApp() {
       }
     }
     const currentStateExpression = displayedPose.current.expression
+    const nextBehavior = resolveAvatarBehavior(avatar, baseBehavior)
+    const nextExpressions = nextBehavior.expressions
+    const nextSequences = nextBehavior.sequences
     stopTransition(true)
     activeAvatarIdRef.current = id
     surfaceRef.current = avatar.body.primary
@@ -2847,19 +2957,42 @@ function StudioApp() {
     setActiveAvatarId(id)
     setSurface(avatar.body.primary)
     setBodyNodes(avatar.body.nodes)
+    expressionsRef.current = nextExpressions
+    sequencesRef.current = nextSequences
+    expressionDragPreview.current = nextExpressions
+    stateDragPreview.current = nextSequences
+    setExpressions(nextExpressions)
+    setSequences(nextSequences)
+    setExportAnimationIds(nextSequences.map(animation => animation.id))
+    const nextActiveSequence = activeState
+      ? (nextSequences.find(sequence => sequence.id === activeState) ?? null)
+      : null
+    const nextSelectedState =
+      nextActiveSequence?.id ??
+      (nextSequences.some(sequence => sequence.id === 'idle')
+        ? 'idle'
+        : (nextSequences[0]?.id ?? ''))
+    activeSequenceRef.current = nextActiveSequence
+    setActiveState(nextActiveSequence?.id ?? null)
+    setSelectedState(nextSelectedState)
+    setPlaybackVisual(current => ({ ...current, position: null }))
     selectBodyNode('primary')
     setActiveExpression(null)
     setEditing(null)
     setBodyEditing(editBody)
     if (!preserveMode || editBody) setMode('manual')
-    const nextExpression = activeState
+    const nextExpression = nextActiveSequence
       ? currentStateExpression
-      : { ...(expressions[0] ?? defaultExpression) }
+      : { ...(nextExpressions[0] ?? defaultExpression) }
     setExpression(nextExpression)
     setDisplayColors(resolveColors(nextExpression, avatar.colors))
     canonicalTarget.current = nextExpression
     transitionTarget.current = nextExpression
     paintPose(poseFromExpression(nextExpression))
+    if (nextActiveSequence && resumeActiveSequence) {
+      pausedSequenceTransition.current = null
+      launchSequence(nextActiveSequence, true, false)
+    }
     if (!avatarEditSnapshot.current) {
       updateStudioLibrary({ activeAvatarId: id, avatars: avatarsRef.current })
     }
@@ -3041,6 +3174,7 @@ function StudioApp() {
     if (blinkAnimating.current) blinkControls.current?.pause()
     clearStateTimers()
     setStatePlaying(false)
+    setPlaybackStatus('paused')
     if (persist && activeState) persistStatePlayback({ stateId: activeState, playing: false })
   }
 
@@ -3055,8 +3189,9 @@ function StudioApp() {
     blinkValue.jump(1)
     paintPose(displayedPose.current, 1)
     setStatePlaying(false)
+    setPlaybackStatus('stopped')
     setPlaybackVisual(current => ({ ...current, position: null }))
-    if (persist) persistStatePlayback({ stateId: activeState ?? selectedState, playing: false })
+    if (persist) persistStatePlayback({ stateId: null, playing: false })
   }
 
   const launchSequence = (sequence: AvatarSequence, resume = false, persist = true) => {
@@ -3071,6 +3206,7 @@ function StudioApp() {
     setActiveState(id)
     activeSequenceRef.current = sequence
     setStatePlaying(true)
+    setPlaybackStatus('playing')
     if (persist) persistStatePlayback({ stateId: id, playing: true })
     const scheduleAdvance = (delay: number) => {
       playbackTimeline.current = schedulePlaybackStep(
@@ -3083,8 +3219,9 @@ function StudioApp() {
     const playCurrentStep = () => {
       playbackTimeline.current = { ...playbackTimeline.current, stepDueAt: null }
       const step = sequence.steps[playbackTimeline.current.position]
-      const expressionIndex = findExpressionIndex(expressions, step.expressionId)
-      const preset = expressions[expressionIndex]
+      const availableExpressions = expressionsRef.current
+      const expressionIndex = findExpressionIndex(availableExpressions, step.expressionId)
+      const preset = availableExpressions[expressionIndex]
       const durationMs = (reduceMotion ? 0 : step.transitionMs) + step.holdMs
       setPlaybackVisual(current => ({
         position: playbackTimeline.current.position,
@@ -3105,7 +3242,9 @@ function StudioApp() {
         blinkTimer.current = null
         playbackTimeline.current = { ...playbackTimeline.current, blinkDueAt: null }
         setStatePlaying(false)
+        setPlaybackStatus('stopped')
         setPlaybackVisual(current => ({ ...current, position: null }))
+        if (persist) persistStatePlayback({ stateId: null, playing: false })
         return
       }
       playCurrentStep()
@@ -3156,7 +3295,7 @@ function StudioApp() {
   const toggleStatePlayback = () => {
     if (!activeState || !activeSequenceRef.current) return
     if (statePlaying) pauseState()
-    else launchSequence(activeSequenceRef.current, true)
+    else launchSequence(activeSequenceRef.current, playbackStatus === 'paused')
   }
 
   const suspendStateForEditor = () => {
@@ -3199,6 +3338,7 @@ function StudioApp() {
       activeSequenceRef.current = sequence
       setActiveState(sequence.id)
       if (initialStatePlayback.playing) launchSequence(sequence, false, false)
+      else setPlaybackStatus('paused')
     }
     return () => {
       initialStatePlaybackApplied.current = false
@@ -3273,14 +3413,32 @@ function StudioApp() {
     paintPose(poseFromExpression(draft))
   }
 
-  const previewCanvasExpression = (next: Expression) => {
+  const previewCanvasExpression = (next: Expression, target: CanvasPreviewTarget) => {
+    const now = performance.now()
+    const updateInspector = now - lastInspectorFrame.current >= INSPECTOR_FRAME_MS
+    if (updateInspector) {
+      lastInspectorFrame.current = now
+      if (editing) {
+        setEditing(current => (current ? { ...current, draft: next } : current))
+      } else {
+        setExpression(next)
+      }
+    }
     if (bodyEditing) {
+      paintRenderedRotationGizmo(renderedRotationGizmo, next)
       paintRenderedScene(
         renderedScene,
-        renderAvatar(poseFromExpression(next), surfaceRef.current, blinkValue.get(), {
-          includeWire: showWireRef.current || highlightRef.current === 'head',
-          bodyNodes: bodyNodesRef.current,
-        })
+        renderAvatar(
+          poseFromExpression(
+            resolveCanvasPreviewExpression(next, activeAvatarEyes, bodyEditing, target)
+          ),
+          surfaceRef.current,
+          blinkValue.get(),
+          {
+            includeWire: showWireRef.current || highlightRef.current === 'head',
+            bodyNodes: bodyNodesRef.current,
+          }
+        )
       )
       return
     }
@@ -3516,10 +3674,10 @@ function StudioApp() {
   const currentStudioDocument = (): StudioDocument => ({
     version: 2,
     library: { activeAvatarId, avatars },
-    expressions,
-    sequences,
+    expressions: baseBehavior.expressions,
+    sequences: baseBehavior.sequences,
     playback: {
-      stateId: activeState ?? (selectedState || null),
+      stateId: playbackStatus === 'stopped' ? null : (activeState ?? (selectedState || null)),
       playing: statePlaying,
     },
   })
@@ -3569,6 +3727,13 @@ function StudioApp() {
     image.onerror = () => URL.revokeObjectURL(sourceUrl)
     image.src = sourceUrl
   }
+  const takePicture = () => {
+    setPhotoFlash(current => current + 1)
+    requestAnimationFrame(() => {
+      if (snapshotFormat === 'png') downloadSnapshotPng()
+      else downloadSnapshotSvg()
+    })
+  }
   const prepareStudioProjectImport = (file: File | undefined) => {
     if (!file) return
     setProjectImportError(null)
@@ -3605,6 +3770,15 @@ function StudioApp() {
   }
   const canvasExpression = editing?.draft ?? expression
   const editorPageOpen = bodyEditing || editing !== null || sequenceEditing !== null
+  const expressionPendingDeletionId =
+    editing?.index !== null && editing?.index !== undefined
+      ? (expressions[editing.index]?.id ?? editing.draft.id)
+      : null
+  const animationsAffectedByExpressionDeletion = expressionPendingDeletionId
+    ? sequences.filter(sequence =>
+        sequence.steps.some(step => step.expressionId === expressionPendingDeletionId)
+      )
+    : []
 
   useEffect(() => {
     if (!editorPageOpen || focusAvatarName) return
@@ -3706,6 +3880,7 @@ function StudioApp() {
           avatarEyes={activeAvatarEyes}
           surface={surface}
           scene={renderedScene}
+          rotationGizmo={renderedRotationGizmo}
           showWire={showWire}
           bodyEditing={bodyEditing}
           selectedBodyNodeId={selectedBodyNodeId}
@@ -3729,12 +3904,52 @@ function StudioApp() {
           onEyeChange={
             editing ? previewExpressionDraft : bodyEditing ? persistEditedEyeExpression : undefined
           }
+          playback={
+            activeSequenceLabel && playbackStatus !== 'stopped'
+              ? { name: activeSequenceLabel, status: playbackStatus }
+              : null
+          }
+          onManipulationStart={freezeLivePreviewForManipulation}
         />
-        <p className="stage-help">
-          {t(
-            'Glisse sur la surface pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.'
-          )}
-        </p>
+        {photoFlash > 0 && (
+          <motion.div
+            className="photo-flash"
+            key={photoFlash}
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.92, 0] }}
+            transition={{ duration: 0.38, times: [0, 0.16, 1], ease: 'easeOut' }}
+          />
+        )}
+        <TooltipProvider>
+          <div className="photo-capture-bar">
+            <Button className="photo-capture-button" type="button" onClick={takePicture}>
+              <Camera />
+              {t('Prendre une photo')}
+              <span className="photo-format-badge">{snapshotFormat.toUpperCase()}</span>
+            </Button>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    className="photo-help-button"
+                    variant="secondary"
+                    size="icon-sm"
+                    type="button"
+                    aria-label={t('Informations sur le mode photo')}
+                  />
+                }
+              >
+                <Info />
+              </TooltipTrigger>
+              <TooltipContent side="top" className="photo-help-tooltip">
+                {t(
+                  'Tu peux modifier le format, le fond et la définition du mode photo dans Export.'
+                )}
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        </TooltipProvider>
       </motion.section>
 
       <main
@@ -5248,7 +5463,9 @@ function StudioApp() {
                 <div>
                   <small>{t('Aperçu du mode photo')}</small>
                   <strong>{activeAvatar.name}</strong>
-                  <span>{snapshotSize} × {snapshotSize} px · SVG / PNG</span>
+                  <span>
+                    {snapshotSize} × {snapshotSize} px · {snapshotFormat.toUpperCase()}
+                  </span>
                 </div>
               </InspectorCard>
 
@@ -5267,7 +5484,9 @@ function StudioApp() {
                       { value: 'linear', label: t('Dégradé linéaire') },
                       { value: 'radial', label: t('Dégradé radial') },
                     ]}
-                    onValueChange={next => next && setSnapshotBackground(next as SnapshotBackground)}
+                    onValueChange={next =>
+                      next && setSnapshotBackground(next as SnapshotBackground)
+                    }
                   >
                     <SelectTrigger aria-label={t('Style d’arrière-plan')}>
                       <SelectValue />
@@ -5301,8 +5520,31 @@ function StudioApp() {
               <InspectorCard>
                 <Field className="snapshot-background-field" orientation="horizontal">
                   <div>
+                    <FieldTitle>{t('Format d’export')}</FieldTitle>
+                    <small>{t('Choisis le type de fichier généré par le mode photo.')}</small>
+                  </div>
+                  <Select
+                    value={snapshotFormat}
+                    items={[
+                      { value: 'png', label: 'PNG' },
+                      { value: 'svg', label: 'SVG' },
+                    ]}
+                    onValueChange={next => next && setSnapshotFormat(next as SnapshotFormat)}
+                  >
+                    <SelectTrigger aria-label={t('Format d’export du mode photo')}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="png">PNG</SelectItem>
+                      <SelectItem value="svg">SVG</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                <Separator className="snapshot-settings-separator" />
+                <Field className="snapshot-background-field" orientation="horizontal">
+                  <div>
                     <FieldTitle>{t('Définition')}</FieldTitle>
-                    <small>{t('Dimensions inscrites dans le fichier SVG.')}</small>
+                    <small>{t('Dimensions du fichier exporté.')}</small>
                   </div>
                   <Select
                     value={snapshotSize}
@@ -5320,17 +5562,6 @@ function StudioApp() {
                   </Select>
                 </Field>
               </InspectorCard>
-
-              <div className="snapshot-download-actions">
-                <Button variant="outline" type="button" onClick={downloadSnapshotSvg}>
-                  <Download />
-                  {t('Télécharger en SVG')}
-                </Button>
-                <Button type="button" onClick={downloadSnapshotPng}>
-                  <Download />
-                  {t('Télécharger en PNG')}
-                </Button>
-              </div>
             </ExportSection>
 
             <ExportSection
@@ -5490,7 +5721,7 @@ function StudioApp() {
               <div className="state-playback-controls">
                 <StatePlayer
                   name={activeSequenceLabel}
-                  playing={statePlaying}
+                  status={playbackStatus}
                   onToggle={toggleStatePlayback}
                   onStop={stopState}
                 />
@@ -5505,7 +5736,7 @@ function StudioApp() {
             <AlertDialogTitle>{t(`Supprimer ${activeAvatar.name} ?`)}</AlertDialogTitle>
             <AlertDialogDescription>
               {t(
-                'Le corps et les couleurs de cet avatar seront définitivement supprimés. Les expressions globales seront conservées.'
+                'Le corps, les expressions et les animations propres à cet avatar seront définitivement supprimés. La bibliothèque de base sera conservée.'
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -5520,8 +5751,29 @@ function StudioApp() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t('Supprimer cette expression ?')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('Cette action retirera définitivement le preset de la bibliothèque globale.')}
+              {t(
+                'Cette action retirera définitivement le preset de la bibliothèque de cet avatar.'
+              )}
             </AlertDialogDescription>
+            {animationsAffectedByExpressionDeletion.length > 0 && (
+              <div className="mt-2 grid gap-2 rounded-lg border border-destructive/20 bg-destructive/5 p-3 text-sm">
+                <p className="font-medium text-foreground">
+                  {t('Cette expression sera aussi retirée des animations suivantes :')}
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {animationsAffectedByExpressionDeletion.map(sequence => (
+                    <Badge key={sequence.id} variant="outline">
+                      {sequence.name}
+                    </Badge>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t(
+                    'Si une animation ne contient que cette expression, l’expression de repli lui sera assignée pour qu’elle reste jouable.'
+                  )}
+                </p>
+              </div>
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('Annuler')}</AlertDialogCancel>
@@ -5677,9 +5929,7 @@ function ExportSection({
         </span>
       </AccordionTrigger>
       <AccordionContent className="export-accordion-content">
-        <div className="export-accordion-inner">
-          {children}
-        </div>
+        <div className="export-accordion-inner">{children}</div>
       </AccordionContent>
     </AccordionItem>
   )
@@ -5691,38 +5941,49 @@ function InspectorCard({ className, ...props }: React.ComponentProps<typeof Card
 
 function StatePlayer({
   name,
-  playing,
+  status,
   onToggle,
   onStop,
 }: {
   name: string | null
-  playing: boolean
+  status: PlaybackStatus
   onToggle: () => void
   onStop: () => void
 }) {
   const { t } = useStudioLanguage()
   if (!name) return null
+  const statusLabel =
+    status === 'playing' ? 'En lecture' : status === 'paused' ? 'En pause' : 'Arrêté'
   return (
-    <div className="state-player" aria-label={t(`Animation en cours : ${name}`)}>
-      <span className={playing ? 'is-playing' : 'is-paused'}>
-        <i />
-        <span>
-          <small>{t(playing ? 'En lecture' : 'En pause')}</small>
-          <strong>{name}</strong>
-        </span>
-      </span>
+    <div className="state-player" aria-label={`${t(statusLabel)} : ${name}`}>
+      <PlaybackIdentity name={name} status={status} />
       <Button
         variant="secondary"
         size="icon-sm"
-        aria-label={t(playing ? `Mettre ${name} en pause` : `Reprendre ${name}`)}
+        aria-label={t(status === 'playing' ? `Mettre ${name} en pause` : `Reprendre ${name}`)}
         onClick={onToggle}
       >
-        {playing ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}
+        {status === 'playing' ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}
       </Button>
       <Button variant="ghost" size="icon-sm" aria-label={t(`Arrêter ${name}`)} onClick={onStop}>
         <Square fill="currentColor" />
       </Button>
     </div>
+  )
+}
+
+function PlaybackIdentity({ name, status }: { name: string; status: PlaybackStatus }) {
+  const { t } = useStudioLanguage()
+  const statusLabel =
+    status === 'playing' ? 'En lecture' : status === 'paused' ? 'En pause' : 'Arrêté'
+  return (
+    <span className={`playback-identity is-${status}`}>
+      <i />
+      <span>
+        <small>{t(statusLabel)}</small>
+        <strong>{name}</strong>
+      </span>
+    </span>
   )
 }
 

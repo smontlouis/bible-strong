@@ -1,5 +1,14 @@
 import { defaultExpression } from '../presets'
-import { applyAvatarEyeDefaults, defaultAvatarEyes, parseAvatarEyeDefaults } from '../avatars'
+import { createInitialSequences } from '../sequences'
+import {
+  applyAvatarEyeDefaults,
+  cloneAvatarBehavior,
+  createAvatar,
+  defaultAvatarEyes,
+  parseAvatarEyeDefaults,
+  resolveAvatarBehavior,
+} from '../avatars'
+import { initialExpressions } from '../presets'
 
 describe('avatar eye defaults', () => {
   it('keeps the historical rendering when using default values', () => {
@@ -23,5 +32,28 @@ describe('avatar eye defaults', () => {
     expect(result.widthLeft).toBe(42)
     expect(result.heightRight).toBe(defaultAvatarEyes.heightRight)
     expect(result.spacing).toBe(defaultAvatarEyes.spacing)
+  })
+})
+
+describe('avatar behavior library', () => {
+  const base = {
+    expressions: initialExpressions,
+    sequences: createInitialSequences(),
+  }
+
+  it('inherits the base library until the avatar owns a customization', () => {
+    const avatar = createAvatar('Strobi')
+
+    expect(resolveAvatarBehavior(avatar, base)).toBe(base)
+  })
+
+  it('clones expressions, animations and nested steps as one independent library', () => {
+    const behavior = cloneAvatarBehavior(base)
+
+    expect(behavior).not.toBe(base)
+    expect(behavior.expressions).not.toBe(base.expressions)
+    expect(behavior.sequences).not.toBe(base.sequences)
+    expect(behavior.sequences[0].steps).not.toBe(base.sequences[0].steps)
+    expect(behavior.sequences[0].blink).not.toBe(base.sequences[0].blink)
   })
 })
