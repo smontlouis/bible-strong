@@ -756,34 +756,6 @@ p {
   padding: 5px;
   backdrop-filter: blur(14px);
 }
-.playback-warning {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  margin: 0 0 14px;
-  padding: 12px 14px;
-  border: 1px solid #e9c868;
-  border-radius: 12px;
-  background: #fff9e8;
-  color: #594716;
-}
-.playback-warning > div {
-  display: grid;
-  gap: 3px;
-}
-.playback-warning strong {
-  font-size: 11px;
-}
-.playback-warning span {
-  color: #796329;
-  font-size: 10px;
-  line-height: 1.4;
-}
-.playback-warning svg {
-  width: 13px;
-  height: 13px;
-}
 .state-buttons button,
 .button-row button,
 .reset {
@@ -1353,17 +1325,17 @@ p {
   text-transform: uppercase;
 }
 .state-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
 }
-.state-buttons button {
-  min-height: 30px;
-  padding: 5px 9px;
-  border-radius: 999px;
-  font-size: 9px;
+.state-buttons .state-card > span {
+  max-width: calc(100% - 10px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.state-buttons button[aria-pressed='true'] {
+.state-buttons .state-card[aria-pressed='true'] {
   border-color: #aebff0;
   background: #edf1ff;
   color: #4f72d8;

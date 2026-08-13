@@ -1,7 +1,13 @@
 import { createBodyNode } from '../body'
 import { renderAvatar, poseFromExpression } from '../geometry'
 import { defaultExpression } from '../presets'
-import { createRenderedScene, findBodyNodePath, paintRenderedScene } from '../renderedScene'
+import {
+  createRenderedColors,
+  createRenderedScene,
+  findBodyNodePath,
+  paintRenderedColors,
+  paintRenderedScene,
+} from '../renderedScene'
 import { surfacePresets } from '../surfaces'
 
 describe('rendered avatar scene', () => {
@@ -23,5 +29,18 @@ describe('rendered avatar scene', () => {
     expect(findBodyNodePath(scene, 'primary')).toBe(scene.headPath)
     expect(findBodyNodePath(scene, node.id)).not.toBeNull()
     expect(scene.headPath.get()).toBe(rotated.headPath)
+  })
+
+  it('updates animated colors without replacing their motion values', () => {
+    const colors = createRenderedColors({ body: '#5b7fe5', eyes: '#111316' })
+    const body = colors.body
+    const eyes = colors.eyes
+
+    paintRenderedColors(colors, { body: '#c53b47', eyes: '#ffffff' })
+
+    expect(colors.body).toBe(body)
+    expect(colors.eyes).toBe(eyes)
+    expect(colors.body.get()).toBe('#c53b47')
+    expect(colors.eyes.get()).toBe('#ffffff')
   })
 })

@@ -123,8 +123,10 @@ import {
   stopPlaybackTimeline,
 } from './playback'
 import {
+  createRenderedColors,
   createRenderedScene,
   findBodyNodePath,
+  paintRenderedColors,
   paintRenderedScene,
   type RenderedScene,
 } from './renderedScene'
@@ -901,6 +903,7 @@ function AvatarCanvas({
   onEyeSelect,
   onPreview,
   onChange,
+  onReset,
   onEyeChange,
 }: {
   expression: Expression
@@ -921,6 +924,7 @@ function AvatarCanvas({
   onEyeSelect: (side: -1 | 1) => void
   onPreview: (next: Expression) => void
   onChange: (next: Expression) => void
+  onReset: (next: Expression) => void
   onEyeChange?: (next: Expression) => void
 }) {
   const { t } = useStudioLanguage()
@@ -1244,7 +1248,7 @@ function AvatarCanvas({
         expression={expression}
         onChange={onChange}
         onActiveChange={active => onHighlightChange(active ? 'head' : null)}
-        onReset={() => onChange({ ...expression, headX: 0, headY: 0, headZ: 0 })}
+        onReset={() => onReset({ ...expression, headX: 0, headY: 0, headZ: 0 })}
       />
       <div className="axis-key">
         <i className="x" />X <i className="y" />Y <i className="z" />Z
@@ -2245,6 +2249,10 @@ function StudioApp() {
   const persistStatePlayback = (playback: StatePlaybackSelection) =>
     documentStore.update({ playback })
   const [bodyEditing, setBodyEditing] = useState(false)
+  const modeRef = useRef(mode)
+  useEffect(() => {
+    modeRef.current = mode
+  }, [mode])
   const avatarEditSnapshot = useRef<{
     avatars: StudioAvatar[]
     activeAvatarId: string
@@ -2253,9 +2261,11 @@ function StudioApp() {
   const [focusAvatarName, setFocusAvatarName] = useState(false)
   const initialExpression = expressions[0] ?? defaultExpression
   const [expression, setExpression] = useState<Expression>({ ...initialExpression })
-  const [displayColors, setDisplayColors] = useState<AvatarColors>(() =>
-    resolveColors(initialExpression, initialAvatar.colors)
-  )
+  const initialDisplayColors = resolveColors(initialExpression, initialAvatar.colors)
+  const [renderedColors] = useState(() => createRenderedColors(initialDisplayColors))
+  const setDisplayColors = (next: AvatarColors) => {
+    paintRenderedColors(renderedColors, next)
+  }
   const [deleteAvatarOpen, setDeleteAvatarOpen] = useState(false)
   const [deleteExpressionOpen, setDeleteExpressionOpen] = useState(false)
   const [deleteSequenceOpen, setDeleteSequenceOpen] = useState(false)
@@ -2483,7 +2493,10 @@ function StudioApp() {
       stopTransition(true)
       const durationMs = transitionSettings.transitionMs
       const from = { ...current }
-      const fromColors = { ...displayColors }
+      const fromColors = {
+        body: renderedColors.body.get(),
+        eyes: renderedColors.eyes.get(),
+      }
       const targetColors = avatar ? resolveColors(next, avatar.colors) : fromColors
       let startedAt: number | null = null
       activeSequenceTransition.current = {
@@ -2517,7 +2530,7 @@ function StudioApp() {
           eyes: interpolateHexColor(fromColors.eyes, targetColors.eyes, bounded(eased, 0, 1)),
         })
         paintPose(poseFromExpression(animated), undefined, time)
-        if (time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS) {
+        if (modeRef.current === 'manual' && time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS) {
           lastInspectorFrame.current = time
           setExpression(animated)
         }
@@ -2602,7 +2615,7 @@ function StudioApp() {
       }
 
       paintPose(poseFromExpression(animated), undefined, time)
-      if (time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS) {
+      if (modeRef.current === 'manual' && time - lastInspectorFrame.current >= INSPECTOR_FRAME_MS) {
         lastInspectorFrame.current = time
         setExpression(animated)
       }
@@ -3273,7 +3286,7 @@ function StudioApp() {
       : activeSequence.name
     : null
   const canvasExpression = editing?.draft ?? expression
-  const canvasColors = editing ? resolveColors(editing.draft, activeAvatar.colors) : displayColors
+  const canvasColors = editing ? resolveColors(editing.draft, activeAvatar.colors) : null
   const editorPageOpen = bodyEditing || editing !== null || sequenceEditing !== null
 
   useEffect(() => {
@@ -3336,12 +3349,12 @@ function StudioApp() {
 
   return (
     <div className="studio" lang={language}>
-      <section
+      <motion.section
         className="stage-column"
         style={
           {
-            '--avatar-body-color': canvasColors.body,
-            '--avatar-eye-color': canvasColors.eyes,
+            '--avatar-body-color': canvasColors?.body ?? renderedColors.body,
+            '--avatar-eye-color': canvasColors?.eyes ?? renderedColors.eyes,
           } as CSSProperties
         }
       >
@@ -3387,6 +3400,12 @@ function StudioApp() {
           onEyeSelect={setSelectedEyeSide}
           onPreview={previewCanvasExpression}
           onChange={editing ? previewExpressionDraft : updateImmediate}
+          onReset={next => {
+            if (editing) {
+              setEditing(current => (current ? { ...current, draft: next } : current))
+            }
+            transitionToExpression(next)
+          }}
           onEyeChange={
             editing ? previewExpressionDraft : bodyEditing ? persistEditedEyeExpression : undefined
           }
@@ -3396,7 +3415,7 @@ function StudioApp() {
             'Glisse sur la surface pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.'
           )}
         </p>
-      </section>
+      </motion.section>
 
       <main
         className={`inspector ${editing ? 'expression-workspace-active' : sequenceEditing ? 'sequence-workspace-active' : bodyEditing ? 'body-workspace' : 'studio-workspace'}`}
@@ -3649,29 +3668,6 @@ function StudioApp() {
               </Tabs>
             </>
           ))}
-
-        {!sequenceEditing &&
-          !editing &&
-          !bodyEditing &&
-          statePlaying &&
-          (mode === 'manual' || mode === 'expressions') && (
-            <div className="playback-warning" role="alert">
-              <div>
-                <strong>{t('Un état est en cours de lecture')}</strong>
-                <span>
-                  {t(
-                    mode === 'manual'
-                      ? 'Mettez l’état en pause avant de manipuler les paramètres de pose.'
-                      : 'Mettez l’état en pause avant de choisir ou personnaliser une expression.'
-                  )}
-                </span>
-              </div>
-              <Button variant="outline" size="sm" type="button" onClick={() => pauseState()}>
-                <Pause />
-                {t('Pause')}
-              </Button>
-            </div>
-          )}
 
         {!editing && mode === 'manual' && (
           <div className="panel-stack">
@@ -4627,19 +4623,35 @@ function StudioApp() {
                         : group.name}
                     </strong>
                     <div className="state-buttons">
-                      {group.sequences.map(sequence => (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          type="button"
-                          key={sequence.id}
-                          aria-pressed={selectedState === sequence.id}
-                          onClick={() => setSelectedState(sequence.id)}
-                          onDoubleClick={() => openSequenceEditor(sequence)}
-                        >
-                          {sequence.builtIn ? t(sequence.name) : sequence.name}
-                        </Button>
-                      ))}
+                      {group.sequences.map(sequence => {
+                        const firstStep = sequence.steps[0]
+                        const firstExpression = firstStep
+                          ? expressions[
+                              findExpressionIndex(expressions, firstStep.expressionId)
+                            ]
+                          : undefined
+                        return (
+                          <Button
+                            className="expression-card state-card"
+                            variant="outline"
+                            type="button"
+                            key={sequence.id}
+                            aria-pressed={selectedState === sequence.id}
+                            onClick={() => setSelectedState(sequence.id)}
+                            onDoubleClick={() => openSequenceEditor(sequence)}
+                          >
+                            <ExpressionPreview
+                              expression={firstExpression ?? expressions[0] ?? defaultExpression}
+                              surface={surface}
+                              bodyNodes={bodyNodes}
+                              colors={activeAvatar.colors}
+                              avatarEyes={activeAvatarEyes}
+                              id={`state-card-${sequence.id}`}
+                            />
+                            <span>{sequence.builtIn ? t(sequence.name) : sequence.name}</span>
+                          </Button>
+                        )
+                      })}
                     </div>
                   </div>
                 ))}

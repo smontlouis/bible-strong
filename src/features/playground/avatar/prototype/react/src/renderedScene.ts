@@ -1,5 +1,6 @@
 import { motionValue, type MotionValue } from 'motion'
 
+import type { AvatarColors } from './avatars'
 import { MAX_BODY_NODES } from './body'
 import type { AvatarGeometry } from './geometry'
 
@@ -14,6 +15,11 @@ export type RenderedScene = {
   leftOpacity: MotionValue<number>
   rightOpacity: MotionValue<number>
   wirePaths: MotionValue<string>[]
+}
+
+export type RenderedColors = {
+  body: MotionValue<string>
+  eyes: MotionValue<string>
 }
 
 const bodyPathSlots = MAX_BODY_NODES + 2
@@ -34,6 +40,16 @@ export const createRenderedScene = (geometry: AvatarGeometry): RenderedScene => 
   rightOpacity: motionValue(geometry.rightVisible ? 1 : 0),
   wirePaths: geometry.wirePaths.map(path => motionValue(path)),
 })
+
+export const createRenderedColors = (colors: AvatarColors): RenderedColors => ({
+  body: motionValue(colors.body),
+  eyes: motionValue(colors.eyes),
+})
+
+export const paintRenderedColors = (rendered: RenderedColors, colors: AvatarColors) => {
+  rendered.body.set(colors.body)
+  rendered.eyes.set(colors.eyes)
+}
 
 export const paintRenderedScene = (scene: RenderedScene, geometry: AvatarGeometry) => {
   scene.headPath.set(geometry.headPath)
