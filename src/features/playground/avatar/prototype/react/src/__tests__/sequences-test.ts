@@ -5,14 +5,17 @@ import {
   normalizeSequencesForExpressions,
   parseSequences,
   remapSequencesAfterExpressionDelete,
-  remapSequencesAfterExpressionInsert,
 } from '../sequences'
+import { initialExpressions } from '../presets'
 
 describe('editable avatar sequences', () => {
   it('migrates the existing idle state into editable steps and blink settings', () => {
     const idle = createInitialSequences().find(sequence => sequence.id === 'idle')
 
-    expect(idle?.steps.map(step => step.expressionIndex)).toEqual([0, 8])
+    expect(idle?.steps.map(step => step.expressionId)).toEqual([
+      initialExpressions[0].id,
+      initialExpressions[8].id,
+    ])
     expect(idle?.steps[0].holdMs).toBe(5200)
     expect(idle?.blink.durationMs).toBe(280)
   })
@@ -33,21 +36,27 @@ describe('editable avatar sequences', () => {
     })
   })
 
-  it('keeps sequence references stable when expressions are inserted or deleted', () => {
+  it('keeps sequence references stable when expressions are reordered', () => {
     const sequence = createInitialSequences().find(item => item.id === 'idle')!
-    const inserted = remapSequencesAfterExpressionInsert([sequence], 0)[0]
-    const restored = remapSequencesAfterExpressionDelete([inserted], 0)[0]
+    const reordered = [...initialExpressions].reverse()
+    const [normalized] = normalizeSequencesForExpressions([sequence], reordered)
 
-    expect(inserted.steps.map(step => step.expressionIndex)).toEqual([1, 9])
-    expect(restored.steps.map(step => step.expressionIndex)).toEqual([0, 8])
+    expect(normalized.steps.map(step => step.expressionId)).toEqual(
+      sequence.steps.map(step => step.expressionId)
+    )
   })
 
   it('keeps a sequence playable when its only referenced expression is deleted', () => {
     const sequence = createInitialSequences().find(item => item.id === 'waking')!
-    const [remapped] = remapSequencesAfterExpressionDelete([sequence], 13)
+    const fallbackId = initialExpressions[12].id
+    const [remapped] = remapSequencesAfterExpressionDelete(
+      [sequence],
+      initialExpressions[13].id,
+      fallbackId
+    )
 
     expect(remapped.steps).toHaveLength(1)
-    expect(remapped.steps[0].expressionIndex).toBe(12)
+    expect(remapped.steps[0].expressionId).toBe(fallbackId)
   })
 
   it('sanitizes persisted timing values and invalid playback values', () => {
@@ -71,11 +80,11 @@ describe('editable avatar sequences', () => {
   it('repairs missing and out-of-range expression references on load', () => {
     const sequence = createInitialSequences().find(item => item.id === 'idle')!
     const [normalized] = normalizeSequencesForExpressions(
-      [{ ...sequence, steps: [{ ...sequence.steps[0], expressionIndex: 99 }] }],
-      4
+      [{ ...sequence, steps: [{ ...sequence.steps[0], expressionId: 'missing' }] }],
+      initialExpressions.slice(0, 4)
     )
 
-    expect(normalized.steps[0].expressionIndex).toBe(3)
+    expect(normalized.steps[0].expressionId).toBe(initialExpressions[0].id)
   })
 
   it('maps transition styles and durations to distinct spring dynamics', () => {

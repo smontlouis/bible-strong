@@ -106,15 +106,25 @@ const LEGACY_EXPRESSIONS_STORAGE_KEY = 'bible-strong-avatar-expressions-v1'
 const surfaceTypes = Object.keys(surfacePresets) as SurfaceType[]
 
 const cloneExpressions = (expressions: Expression[]) => expressions.map(item => ({ ...item }))
-const parseExpressions = (value: unknown): Expression[] => {
+export const parseExpressions = (value: unknown): Expression[] => {
   if (!Array.isArray(value) || !value.length) return cloneExpressions(initialExpressions)
-  return value.map(item => {
-    if (!item || typeof item !== 'object') return { ...defaultExpression }
+  return value.map((item, index) => {
+    if (!item || typeof item !== 'object') {
+      return { ...defaultExpression, id: `expression-${String(index).padStart(2, '0')}` }
+    }
     const candidate = item as Partial<Expression>
     const storedEyeMotion = (item as { eyeMotion?: unknown }).eyeMotion
     const storedBodyMotion = (item as { bodyMotion?: unknown }).bodyMotion
     const parsed = Object.fromEntries(
       Object.entries(defaultExpression).map(([field, fallback]) => {
+        if (field === 'id') {
+          return [
+            field,
+            typeof candidate.id === 'string' && candidate.id
+              ? candidate.id
+              : `expression-${String(index).padStart(2, '0')}`,
+          ]
+        }
         const stored = candidate[field as keyof Expression]
         return [field, typeof stored === 'number' && Number.isFinite(stored) ? stored : fallback]
       })

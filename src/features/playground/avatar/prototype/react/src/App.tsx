@@ -5,7 +5,6 @@ import {
   useMotionValueEvent,
   useReducedMotion,
 } from 'motion/react'
-import { motionValue, type MotionValue } from 'motion'
 import {
   useEffect,
   useEffectEvent,
@@ -73,10 +72,6 @@ import {
   applyAvatarEyeDefaults,
   createAvatar,
   defaultAvatarEyes,
-  loadAvatarLibrary,
-  loadGlobalExpressions,
-  persistAvatarLibrary,
-  persistGlobalExpressions,
   type StudioAvatar,
   type AvatarColors,
   type AvatarEyeDefaults,
@@ -100,23 +95,46 @@ import {
 } from './geometry'
 import { defaultExpression } from './presets'
 import {
-  advanceSequenceCursor,
   createSequence,
   createSequenceStep,
   duplicateSequence,
+  findExpressionIndex,
   getSequenceSpring,
   groupSequences,
-  loadSequences,
-  normalizeSequencesForExpressions,
-  persistSequences,
   readSequenceClock,
   remapSequencesAfterExpressionDelete,
-  remapSequencesAfterExpressionInsert,
   type AvatarSequence,
   type SequenceStep,
 } from './sequences'
 import { applyAmbientMotion, hasAmbientMotion } from './ambientMotion'
 import { surfaceLabels, surfacePresets, type SurfaceConfig } from './surfaces'
+import {
+  createStudioDocumentStore,
+  loadStudioDocument,
+  type StatePlaybackSelection,
+} from './studioDocument'
+import {
+  advancePlaybackTimeline,
+  beginPlayback,
+  createPlaybackTimeline,
+  pausePlaybackTimeline,
+  schedulePlaybackBlink,
+  schedulePlaybackStep,
+  stopPlaybackTimeline,
+} from './playback'
+import {
+  createRenderedScene,
+  findBodyNodePath,
+  paintRenderedScene,
+  type RenderedScene,
+} from './renderedScene'
+import { scaleEye, updateEyeDimension, updateEyePosition } from './expressionEditing'
+import {
+  beginManipulation,
+  finishManipulation,
+  previewManipulation,
+  type ManipulationSession,
+} from './manipulationSession'
 
 type Mode = 'manual' | 'expressions' | 'states'
 type Side = 'Left' | 'Right'
@@ -132,10 +150,10 @@ type NumericProps = {
 }
 type Highlight = 'head' | 'left' | 'right' | 'both' | null
 
-const BODY_RENDER_PATH_SLOTS = MAX_BODY_NODES + 2
 const RETARGET_BLEND_MS = 120
 const INSPECTOR_FRAME_MS = 1000 / 24
 const AMBIENT_FRAME_MS = 1000 / 30
+const createExpressionId = () => `expression-${crypto.randomUUID()}`
 const emptyBodyNodes: BodyNode[] = []
 const previewGeometryCache = new WeakMap<
   Expression,
@@ -178,6 +196,17 @@ const getPreviewGeometry = (
 const bounded = (value: number, min?: number, max?: number) =>
   Math.min(max ?? Infinity, Math.max(min ?? -Infinity, value))
 
+const useEscapeToCancel = (cancel: () => void) => {
+  const cancelEvent = useEffectEvent(cancel)
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') cancelEvent()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+}
+
 const scaleSurface = (
   surface: SurfaceConfig,
   size: number,
@@ -197,27 +226,6 @@ const formatSeconds = (milliseconds: number, language: StudioLanguage) =>
   `${new Intl.NumberFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
     maximumFractionDigits: 1,
   }).format(milliseconds / 1000)} s`
-
-const STATE_PLAYBACK_STORAGE_KEY = 'bible-strong-avatar-state-playback-v1'
-type StoredStatePlayback = { stateId: string | null; playing: boolean }
-const loadStatePlayback = (): StoredStatePlayback => {
-  try {
-    const stored = JSON.parse(window.localStorage.getItem(STATE_PLAYBACK_STORAGE_KEY) ?? 'null')
-    if (stored && (typeof stored.stateId === 'string' || stored.stateId === null)) {
-      return { stateId: stored.stateId, playing: stored.playing === true }
-    }
-  } catch {
-    // Le state idle reste le défaut si le stockage local est indisponible.
-  }
-  return { stateId: 'idle', playing: true }
-}
-const persistStatePlayback = (playback: StoredStatePlayback) => {
-  try {
-    window.localStorage.setItem(STATE_PLAYBACK_STORAGE_KEY, JSON.stringify(playback))
-  } catch {
-    // La lecture continue en mémoire si le stockage local est indisponible.
-  }
-}
 
 const parseHexColor = (color: string) => {
   const value = color.replace('#', '')
@@ -334,7 +342,7 @@ function NumericField({
   const dragRef = useRef<{ x: number; value: number } | null>(null)
   const editingRef = useRef(false)
   const [draftValue, setDraftValue] = useState(() =>
-    String(Number(value.toFixed(step < 0.1 ? 2 : 1))),
+    String(Number(value.toFixed(step < 0.1 ? 2 : 1)))
   )
 
   useEffect(() => {
@@ -345,9 +353,10 @@ function NumericField({
 
   const commitDraftValue = (rawValue: string) => {
     const parsedValue = Number(rawValue.replace(',', '.'))
-    const nextValue = Number.isFinite(parsedValue) && rawValue.trim() !== ''
-      ? bounded(parsedValue, min, max)
-      : value
+    const nextValue =
+      Number.isFinite(parsedValue) && rawValue.trim() !== ''
+        ? bounded(parsedValue, min, max)
+        : value
 
     setDraftValue(String(Number(nextValue.toFixed(step < 0.1 ? 2 : 1))))
     onChange(nextValue)
@@ -548,6 +557,11 @@ function RotationGizmo({
     drag.current = null
     onActiveChange(false)
   }
+  const cancel = () => {
+    if (drag.current) onChange(drag.current.expression)
+    stop()
+  }
+  useEscapeToCancel(cancel)
   return (
     <div className="gizmo-cluster">
       <svg className="gizmo" viewBox="-43 -43 86 86" aria-label={t('Gizmo de rotation')}>
@@ -559,7 +573,7 @@ function RotationGizmo({
           onPointerDown={startView}
           onPointerMove={move}
           onPointerUp={stop}
-          onPointerCancel={stop}
+          onPointerCancel={cancel}
         />
         <path
           className="gizmo-orbit gizmo-y"
@@ -567,7 +581,7 @@ function RotationGizmo({
           onPointerDown={event => startAxis('y', event)}
           onPointerMove={move}
           onPointerUp={stop}
-          onPointerCancel={stop}
+          onPointerCancel={cancel}
         />
         <path
           className="gizmo-orbit gizmo-x"
@@ -575,7 +589,7 @@ function RotationGizmo({
           onPointerDown={event => startAxis('x', event)}
           onPointerMove={move}
           onPointerUp={stop}
-          onPointerCancel={stop}
+          onPointerCancel={cancel}
         />
         <path
           className="gizmo-orbit gizmo-z"
@@ -583,7 +597,7 @@ function RotationGizmo({
           onPointerDown={event => startAxis('z', event)}
           onPointerMove={move}
           onPointerUp={stop}
-          onPointerCancel={stop}
+          onPointerCancel={cancel}
         />
       </svg>
       <Button
@@ -636,6 +650,7 @@ function BodyNodeGizmo({
     | undefined
   >(undefined)
   const latestNode = useRef(node)
+  const manipulation = useRef<ManipulationSession<BodyNode> | null>(null)
   const previewFrame = useRef<number | undefined>(undefined)
   const axes: TransformAxis[] = ['x', 'y', 'z']
   const toSvg = (event: React.PointerEvent<SVGElement>): readonly [number, number] => {
@@ -670,6 +685,7 @@ function BodyNodeGizmo({
     }
     setActiveControl({ mode: 'translate', axis })
     latestNode.current = node
+    manipulation.current = beginManipulation(node)
     event.currentTarget.setPointerCapture(event.pointerId)
   }
   const startRotate = (axis: TransformAxis, event: React.PointerEvent<SVGElement>) => {
@@ -704,6 +720,7 @@ function BodyNodeGizmo({
     }
     setActiveControl({ mode: 'rotate', axis })
     latestNode.current = node
+    manipulation.current = beginManipulation(node)
     event.currentTarget.setPointerCapture(event.pointerId)
   }
   const startPlaneTranslate = (event: React.PointerEvent<SVGElement>) => {
@@ -711,6 +728,7 @@ function BodyNodeGizmo({
     drag.current = { mode: 'plane', startPoint: toSvg(event), node }
     setActiveControl({ mode: 'plane' })
     latestNode.current = node
+    manipulation.current = beginManipulation(node)
     event.currentTarget.setPointerCapture(event.pointerId)
   }
   const move = (event: React.PointerEvent<SVGElement>) => {
@@ -730,6 +748,9 @@ function BodyNodeGizmo({
         : rotateBodyNodeAroundLocalAxis(interaction.node, interaction.axis, delta)
     })()
     latestNode.current = next
+    if (manipulation.current) {
+      previewManipulation(manipulation.current, next, () => undefined)
+    }
     if (previewFrame.current !== undefined) return
     previewFrame.current = requestAnimationFrame(() => {
       previewFrame.current = undefined
@@ -739,10 +760,24 @@ function BodyNodeGizmo({
   const stop = () => {
     if (previewFrame.current !== undefined) cancelAnimationFrame(previewFrame.current)
     previewFrame.current = undefined
-    onCommit(latestNode.current)
+    if (manipulation.current) {
+      finishManipulation(manipulation.current, 'commit', { preview: onPreview, commit: onCommit })
+    }
+    manipulation.current = null
     drag.current = undefined
     setActiveControl(undefined)
   }
+  const cancel = () => {
+    if (previewFrame.current !== undefined) cancelAnimationFrame(previewFrame.current)
+    previewFrame.current = undefined
+    if (manipulation.current) {
+      finishManipulation(manipulation.current, 'cancel', { preview: onPreview, commit: onCommit })
+    }
+    manipulation.current = null
+    drag.current = undefined
+    setActiveControl(undefined)
+  }
+  useEscapeToCancel(cancel)
   const resetTransform = (event: React.MouseEvent<SVGGElement>) => {
     event.stopPropagation()
     const resetNode: BodyNode = { ...node, position: [0, 0, 0], rotation: [0, 0, 0] }
@@ -767,7 +802,7 @@ function BodyNodeGizmo({
             onPointerDown={event => startRotate(axis, event)}
             onPointerMove={move}
             onPointerUp={stop}
-            onPointerCancel={stop}
+            onPointerCancel={cancel}
           />
           <path
             className={`body-gizmo-ring gizmo-${axis}${activeControl?.mode === 'rotate' && activeControl.axis === axis ? ' is-active' : ''}`}
@@ -784,7 +819,7 @@ function BodyNodeGizmo({
             onPointerDown={event => startTranslate(axis, event)}
             onPointerMove={move}
             onPointerUp={stop}
-            onPointerCancel={stop}
+            onPointerCancel={cancel}
           />
           <path
             className={`body-gizmo-axis gizmo-${axis}${activeControl?.mode === 'translate' && activeControl.axis === axis ? ' is-active' : ''}`}
@@ -816,7 +851,7 @@ function BodyNodeGizmo({
         onPointerDown={startPlaneTranslate}
         onPointerMove={move}
         onPointerUp={stop}
-        onPointerCancel={stop}
+        onPointerCancel={cancel}
       />
       <circle
         className={`body-gizmo-origin${activeControl?.mode === 'plane' ? ' is-active' : ''}`}
@@ -851,21 +886,12 @@ function AvatarCanvas({
   expression,
   avatarEyes,
   surface,
-  wirePaths,
+  scene,
   showWire,
-  backPaths,
-  frontPaths,
-  backNodeIds,
-  frontNodeIds,
   bodyEditing,
   selectedBodyNodeId,
   selectedBodyNode,
   selectedSide,
-  headPath,
-  leftPath,
-  rightPath,
-  leftOpacity,
-  rightOpacity,
   linked,
   highlight,
   onHighlightChange,
@@ -879,21 +905,12 @@ function AvatarCanvas({
   expression: Expression
   avatarEyes: AvatarEyeDefaults
   surface: SurfaceConfig
-  wirePaths: MotionValue<string>[]
+  scene: RenderedScene
   showWire: boolean
-  backPaths: MotionValue<string>[]
-  frontPaths: MotionValue<string>[]
-  backNodeIds: { current: (string | null)[] }
-  frontNodeIds: { current: (string | null)[] }
   bodyEditing: boolean
   selectedBodyNodeId: 'primary' | string | null
   selectedBodyNode: BodyNode | null
   selectedSide: -1 | 1 | null
-  headPath: MotionValue<string>
-  leftPath: MotionValue<string>
-  rightPath: MotionValue<string>
-  leftOpacity: MotionValue<number>
-  rightOpacity: MotionValue<number>
   linked: { width: boolean; height: boolean; size: boolean }
   highlight: Highlight
   onHighlightChange: (highlight: Highlight) => void
@@ -905,6 +922,18 @@ function AvatarCanvas({
   onEyeChange?: (next: Expression) => void
 }) {
   const { t } = useStudioLanguage()
+  const {
+    wirePaths,
+    backPaths,
+    frontPaths,
+    backNodeIds,
+    frontNodeIds,
+    headPath,
+    leftPath,
+    rightPath,
+    leftOpacity,
+    rightOpacity,
+  } = scene
   const svgRef = useRef<SVGSVGElement>(null)
   const [activeDragType, setActiveDragType] = useState<
     'arcball' | 'width' | 'height' | 'size' | 'spacing' | 'rotate' | null
@@ -935,11 +964,7 @@ function AvatarCanvas({
       : renderEyeEditor(poseWithAvatarEyes(expression, avatarEyes), surface, selectedSide)
   const selectedBodyPath = (() => {
     if (!bodyEditing || !selectedBodyNodeId) return null
-    if (selectedBodyNodeId === 'primary') return headPath
-    const backIndex = backNodeIds.current.indexOf(selectedBodyNodeId)
-    if (backIndex >= 0) return backPaths[backIndex]
-    const frontIndex = frontNodeIds.current.indexOf(selectedBodyNodeId)
-    return frontIndex >= 0 ? frontPaths[frontIndex] : null
+    return findBodyNodePath(scene, selectedBodyNodeId)
   })()
 
   const toSvg = (event: React.PointerEvent<SVGElement>): readonly [number, number] => {
@@ -1022,47 +1047,37 @@ function AvatarCanvas({
     }
     const interaction = drag.current
     const suffix = interaction.side < 0 ? 'Left' : 'Right'
-    const otherSuffix = interaction.side < 0 ? 'Right' : 'Left'
     const deltaX = point[0] - interaction.startPoint[0]
     const deltaY = point[1] - interaction.startPoint[1]
     const along = (axis: readonly [number, number]) => deltaX * axis[0] + deltaY * axis[1]
-    const next = { ...interaction.expression }
+    let next = { ...interaction.expression }
+    const side = interaction.side < 0 ? 'Left' : 'Right'
     if (interaction.type === 'width') {
       const value = bounded(
         interaction.expression[`width${suffix}`] + along(interaction.widthAxis) * 2,
         10,
         100
       )
-      next[`width${suffix}`] = value
-      if (linked.width) next[`width${otherSuffix}`] = value
+      next = updateEyeDimension(interaction.expression, side, 'width', value, linked.width)
     } else if (interaction.type === 'height') {
       const value = bounded(
         interaction.expression[`height${suffix}`] + along(interaction.heightAxis) * 2,
         10,
         100
       )
-      next[`height${suffix}`] = value
-      if (linked.height) next[`height${otherSuffix}`] = value
+      next = updateEyeDimension(interaction.expression, side, 'height', value, linked.height)
     } else if (interaction.type === 'size') {
       const distance = Math.hypot(
         point[0] - interaction.center[0],
         point[1] - interaction.center[1]
       )
       const factor = distance / interaction.startDistance
-      next[`width${suffix}`] = bounded(interaction.expression[`width${suffix}`] * factor, 10, 110)
-      next[`height${suffix}`] = bounded(interaction.expression[`height${suffix}`] * factor, 10, 110)
-      if (linked.size) {
-        next[`width${otherSuffix}`] = bounded(
-          interaction.expression[`width${otherSuffix}`] * factor,
-          10,
-          110
-        )
-        next[`height${otherSuffix}`] = bounded(
-          interaction.expression[`height${otherSuffix}`] * factor,
-          10,
-          110
-        )
-      }
+      const targetSize =
+        Math.max(
+          interaction.expression[`width${suffix}`],
+          interaction.expression[`height${suffix}`]
+        ) * factor
+      next = scaleEye(interaction.expression, side, targetSize, linked.size)
     } else if (interaction.type === 'spacing') {
       const startSpacing = interaction.expression.spacing
       const spacing = bounded(startSpacing + along(interaction.spacingAxis), 0, 150)
@@ -1082,6 +1097,17 @@ function AvatarCanvas({
     }
     ;(onEyeChange ?? onChange)(next)
   }
+  const cancelDrag = () => {
+    const interaction = drag.current
+    if (interaction) {
+      if (interaction.type === 'arcball') onChange(interaction.expression)
+      else (onEyeChange ?? onChange)(interaction.expression)
+    }
+    drag.current = null
+    setActiveDragType(null)
+    onHighlightChange(null)
+  }
+  useEscapeToCancel(cancelDrag)
   return (
     <div className="avatar-wrap">
       <svg
@@ -1096,11 +1122,7 @@ function AvatarCanvas({
           setActiveDragType(null)
           onHighlightChange(null)
         }}
-        onPointerCancel={() => {
-          drag.current = null
-          setActiveDragType(null)
-          onHighlightChange(null)
-        }}
+        onPointerCancel={cancelDrag}
       >
         <defs>
           <clipPath id="avatar-head-clip">
@@ -1435,26 +1457,10 @@ function ExpressionWorkspace({
   const [linked, setLinked] = useState({ width: true, height: true, size: true })
   const update = (changes: Partial<Expression>) => onChange({ ...editing.draft, ...changes })
   const updateDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
-    const key = `${dimension}${side}` as 'widthLeft' | 'widthRight' | 'heightLeft' | 'heightRight'
-    const other = `${dimension}${side === 'Left' ? 'Right' : 'Left'}` as typeof key
-    update({ [key]: value, ...(linked[dimension] ? { [other]: value } : {}) })
+    onChange(updateEyeDimension(editing.draft, side, dimension, value, linked[dimension]))
   }
   const updateSize = (side: Side, value: number) => {
-    const widthKey = `width${side}` as 'widthLeft' | 'widthRight'
-    const heightKey = `height${side}` as 'heightLeft' | 'heightRight'
-    const factor = value / (Math.max(editing.draft[widthKey], editing.draft[heightKey]) || 1)
-    const changes: Partial<Expression> = {
-      [widthKey]: bounded(editing.draft[widthKey] * factor, 10, 110),
-      [heightKey]: bounded(editing.draft[heightKey] * factor, 10, 110),
-    }
-    if (linked.size) {
-      const otherSide = side === 'Left' ? 'Right' : 'Left'
-      const otherWidth = `width${otherSide}` as 'widthLeft' | 'widthRight'
-      const otherHeight = `height${otherSide}` as 'heightLeft' | 'heightRight'
-      changes[otherWidth] = bounded(editing.draft[otherWidth] * factor, 10, 110)
-      changes[otherHeight] = bounded(editing.draft[otherHeight] * factor, 10, 110)
-    }
-    update(changes)
+    onChange(scaleEye(editing.draft, side, value, linked.size))
   }
 
   return (
@@ -1854,9 +1860,7 @@ function SequenceWorkspace({
                   { value: 'Réactions', label: t('Réactions') },
                   { value: 'Custom', label: t('Custom') },
                 ]}
-                onValueChange={value =>
-                  value && onChange({ ...editing.draft, group: value })
-                }
+                onValueChange={value => value && onChange({ ...editing.draft, group: value })}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -1916,7 +1920,8 @@ function SequenceWorkspace({
             {editing.draft.steps.length ? (
               <div className="sequence-timeline">
                 {editing.draft.steps.map((step, position) => {
-                  const preset = expressions[step.expressionIndex]
+                  const expressionIndex = findExpressionIndex(expressions, step.expressionId)
+                  const preset = expressions[expressionIndex]
                   if (!preset) return null
                   const card = (
                     <Button
@@ -1927,7 +1932,7 @@ function SequenceWorkspace({
                         onSelectedStepChange(step.id)
                         onPreviewStep(step)
                       }}
-                      onDoubleClick={() => onEditExpression(step.expressionIndex, preset)}
+                      onDoubleClick={() => onEditExpression(expressionIndex, preset)}
                     >
                       <GripVertical className="sequence-grip" />
                       <ExpressionPreview
@@ -1938,7 +1943,7 @@ function SequenceWorkspace({
                         avatarEyes={avatarEyes}
                         id={`sequence-${editing.draft.id}-${step.id}`}
                       />
-                      <span>{String(step.expressionIndex).padStart(2, '0')}</span>
+                      <span>{String(expressionIndex).padStart(2, '0')}</span>
                       <small>{position + 1}</small>
                     </Button>
                   )
@@ -1968,7 +1973,7 @@ function SequenceWorkspace({
                         <ContextMenuTrigger render={card} />
                         <ContextMenuContent>
                           <ContextMenuItem
-                            onClick={() => onEditExpression(step.expressionIndex, preset)}
+                            onClick={() => onEditExpression(expressionIndex, preset)}
                           >
                             <Pencil /> {t('Modifier')}
                           </ContextMenuItem>
@@ -2061,7 +2066,7 @@ function SequenceWorkspace({
                   type="button"
                   key={index}
                   onClick={() => {
-                    const step = createSequenceStep(index)
+                    const step = createSequenceStep(preset.id)
                     onChange({ ...editing.draft, steps: [...editing.draft.steps, step] })
                     onSelectedStepChange(step.id)
                     onPreviewStep(step)
@@ -2191,7 +2196,9 @@ function SequenceWorkspace({
 function StudioApp() {
   const { language, setLanguage, t } = useStudioLanguage()
   const [mode, setMode] = useState<Mode>('manual')
-  const [initialLibrary] = useState(loadAvatarLibrary)
+  const [initialDocument] = useState(loadStudioDocument)
+  const [documentStore] = useState(() => createStudioDocumentStore(initialDocument))
+  const initialLibrary = initialDocument.library
   const [avatars, setAvatars] = useState(initialLibrary.avatars)
   const [activeAvatarId, setActiveAvatarId] = useState(initialLibrary.activeAvatarId)
   const initialAvatar =
@@ -2201,11 +2208,17 @@ function StudioApp() {
   const [bodyNodes, setBodyNodes] = useState(initialAvatar.body.nodes)
   const [selectedBodyNodeId, setSelectedBodyNodeId] = useState<'primary' | string | null>('primary')
   const [selectedEyeSide, setSelectedEyeSide] = useState<-1 | 1 | null>(null)
-  const [expressions, setExpressions] = useState(loadGlobalExpressions)
-  const [sequences, setSequences] = useState(() =>
-    normalizeSequencesForExpressions(loadSequences(), expressions.length)
-  )
-  const [initialStatePlayback] = useState(loadStatePlayback)
+  const [expressions, setExpressions] = useState(initialDocument.expressions)
+  const [sequences, setSequences] = useState(initialDocument.sequences)
+  const initialStatePlayback = initialDocument.playback
+  const persistAvatarLibrary = (library: typeof initialDocument.library) =>
+    documentStore.update({ library })
+  const persistGlobalExpressions = (nextExpressions: Expression[]) =>
+    documentStore.update({ expressions: nextExpressions })
+  const persistSequences = (nextSequences: AvatarSequence[]) =>
+    documentStore.update({ sequences: nextSequences })
+  const persistStatePlayback = (playback: StatePlaybackSelection) =>
+    documentStore.update({ playback })
   const [bodyEditing, setBodyEditing] = useState(false)
   const avatarEditSnapshot = useRef<{
     avatars: StudioAvatar[]
@@ -2255,12 +2268,8 @@ function StudioApp() {
   } | null>(null)
   const initialStatePlaybackApplied = useRef(false)
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const statePosition = useRef(0)
-  const stateDirection = useRef<1 | -1>(1)
-  const stateNextDueAt = useRef<number | null>(null)
-  const stateRemainingDelay = useRef(0)
-  const blinkNextDueAt = useRef<number | null>(null)
-  const blinkRemainingDelay = useRef(0)
+  const [initialPlaybackTimeline] = useState(createPlaybackTimeline)
+  const playbackTimeline = useRef(initialPlaybackTimeline)
   const reduceMotion = useReducedMotion()
 
   const avatarsRef = useRef(avatars)
@@ -2322,26 +2331,7 @@ function StudioApp() {
   const blinkControls = useRef<ReturnType<typeof animate> | null>(null)
   const blinkAnimating = useRef(false)
   const blinkValue = useMotionValue(1)
-  const headPath = useMotionValue(initialGeometry.headPath)
-  const backNodeIds = useRef(initialGeometry.backNodeIds)
-  const frontNodeIds = useRef(initialGeometry.frontNodeIds)
-  const [backPaths] = useState(() =>
-    Array.from({ length: BODY_RENDER_PATH_SLOTS }, (_, index) =>
-      motionValue(initialGeometry.backPaths[index] ?? '')
-    )
-  )
-  const [frontPaths] = useState(() =>
-    Array.from({ length: BODY_RENDER_PATH_SLOTS }, (_, index) =>
-      motionValue(initialGeometry.frontPaths[index] ?? '')
-    )
-  )
-  const leftPath = useMotionValue(initialGeometry.leftPath)
-  const rightPath = useMotionValue(initialGeometry.rightPath)
-  const leftOpacity = useMotionValue(initialGeometry.leftVisible ? 1 : 0)
-  const rightOpacity = useMotionValue(initialGeometry.rightVisible ? 1 : 0)
-  const [wirePaths] = useState(() =>
-    initialGeometry.wirePaths.map(pathValue => motionValue(pathValue))
-  )
+  const [renderedScene] = useState(() => createRenderedScene(initialGeometry))
 
   const paintPose = (pose: AvatarPose, blink?: number, frameTimeMs?: number) => {
     displayedPose.current = pose
@@ -2367,16 +2357,7 @@ function StudioApp() {
       includeWire: showWireRef.current || highlightRef.current === 'head',
       bodyNodes: bodyNodesRef.current,
     })
-    headPath.set(geometry.headPath)
-    backNodeIds.current = geometry.backNodeIds
-    frontNodeIds.current = geometry.frontNodeIds
-    backPaths.forEach((pathValue, index) => pathValue.set(geometry.backPaths[index] ?? ''))
-    frontPaths.forEach((pathValue, index) => pathValue.set(geometry.frontPaths[index] ?? ''))
-    leftPath.set(geometry.leftPath)
-    rightPath.set(geometry.rightPath)
-    leftOpacity.set(geometry.leftVisible ? 1 : 0)
-    rightOpacity.set(geometry.rightVisible ? 1 : 0)
-    geometry.wirePaths.forEach((pathValue, index) => wirePaths[index].set(pathValue))
+    paintRenderedScene(renderedScene, geometry)
   }
 
   useMotionValueEvent(blinkValue, 'change', latest => paintPose(displayedPose.current, latest))
@@ -2426,7 +2407,8 @@ function StudioApp() {
     }
   }
 
-  const updateImmediate = (next: Expression) => {
+  const updateImmediate = (next: Expression, preservePlayback = false) => {
+    if (!preservePlayback && statePlaying) pauseState()
     stopTransition(true)
     const pose = poseFromExpression(next)
     transitionTarget.current = next
@@ -2443,6 +2425,7 @@ function StudioApp() {
     index: number | null = null,
     transitionSettings?: Pick<SequenceStep, 'transitionMs' | 'transition'>
   ) => {
+    if (!transitionSettings && statePlaying) pauseState()
     sequenceTransitionRef.current = transitionSettings ?? {
       transitionMs: 500,
       transition: 'smooth',
@@ -2450,7 +2433,7 @@ function StudioApp() {
     setActiveExpression(index)
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
     if (reduceMotion || transitionSettings?.transitionMs === 0) {
-      updateImmediate(next)
+      updateImmediate(next, Boolean(transitionSettings))
       setActiveExpression(index)
       return
     }
@@ -2620,33 +2603,11 @@ function StudioApp() {
   }
 
   const updateDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
-    const key = `${dimension}${side}` as 'widthLeft' | 'widthRight' | 'heightLeft' | 'heightRight'
-    const other = `${dimension}${side === 'Left' ? 'Right' : 'Left'}` as typeof key
-    updateImmediate({
-      ...expression,
-      [key]: value,
-      ...(linked[dimension] ? { [other]: value } : {}),
-    })
+    updateImmediate(updateEyeDimension(expression, side, dimension, value, linked[dimension]))
   }
 
   const updateSize = (side: Side, value: number) => {
-    const widthKey = `width${side}` as 'widthLeft' | 'widthRight'
-    const heightKey = `height${side}` as 'heightLeft' | 'heightRight'
-    const size = Math.max(expression[widthKey], expression[heightKey]) || 1
-    const factor = value / size
-    const next = {
-      ...expression,
-      [widthKey]: bounded(expression[widthKey] * factor, 10, 110),
-      [heightKey]: bounded(expression[heightKey] * factor, 10, 110),
-    }
-    if (linked.size) {
-      const otherSide = side === 'Left' ? 'Right' : 'Left'
-      const otherWidth = `width${otherSide}` as 'widthLeft' | 'widthRight'
-      const otherHeight = `height${otherSide}` as 'heightLeft' | 'heightRight'
-      next[otherWidth] = bounded(expression[otherWidth] * factor, 10, 110)
-      next[otherHeight] = bounded(expression[otherHeight] * factor, 10, 110)
-    }
-    updateImmediate(next)
+    updateImmediate(scaleEye(expression, side, value, linked.size))
   }
 
   const updateSpacing = (value: number) => {
@@ -2884,6 +2845,7 @@ function StudioApp() {
   }
 
   const updateHighlight = (next: Highlight) => {
+    if (next && statePlaying) pauseState()
     highlightRef.current = next
     setHighlight(next)
     if (next === 'head') paintPose(displayedPose.current)
@@ -2900,17 +2862,15 @@ function StudioApp() {
     if (blinkTimer.current) clearTimeout(blinkTimer.current)
     stateTimer.current = null
     blinkTimer.current = null
-    stateNextDueAt.current = null
-    blinkNextDueAt.current = null
+    playbackTimeline.current = {
+      ...playbackTimeline.current,
+      stepDueAt: null,
+      blinkDueAt: null,
+    }
   }
 
   const pauseState = (persist = true) => {
-    if (stateNextDueAt.current !== null) {
-      stateRemainingDelay.current = Math.max(stateNextDueAt.current - readSequenceClock(), 0)
-    }
-    if (blinkNextDueAt.current !== null) {
-      blinkRemainingDelay.current = Math.max(blinkNextDueAt.current - readSequenceClock(), 0)
-    }
+    playbackTimeline.current = pausePlaybackTimeline(playbackTimeline.current, readSequenceClock())
     if (transitionFrame.current !== null && activeSequenceTransition.current) {
       cancelAnimationFrame(transitionFrame.current)
       transitionFrame.current = null
@@ -2925,10 +2885,7 @@ function StudioApp() {
 
   const stopState = (persist = true) => {
     clearStateTimers()
-    statePosition.current = 0
-    stateDirection.current = 1
-    stateRemainingDelay.current = 0
-    blinkRemainingDelay.current = 0
+    playbackTimeline.current = stopPlaybackTimeline(playbackTimeline.current)
     activeSequenceTransition.current = null
     pausedSequenceTransition.current = null
     stopTransition(true)
@@ -2949,51 +2906,54 @@ function StudioApp() {
       return
     }
     const id = sequence.id
-    if (!resume) {
-      statePosition.current = 0
-      stateDirection.current = 1
-    }
+    playbackTimeline.current = beginPlayback(playbackTimeline.current, resume)
     setSelectedState(id)
     setActiveState(id)
     activeSequenceRef.current = sequence
     setStatePlaying(true)
     if (persist) persistStatePlayback({ stateId: id, playing: true })
     const scheduleAdvance = (delay: number) => {
-      stateRemainingDelay.current = delay
-      stateNextDueAt.current = readSequenceClock() + delay
+      playbackTimeline.current = schedulePlaybackStep(
+        playbackTimeline.current,
+        readSequenceClock(),
+        delay
+      )
       stateTimer.current = setTimeout(advance, delay)
     }
     const playCurrentStep = () => {
-      stateNextDueAt.current = null
-      const step = sequence.steps[statePosition.current]
-      const preset = expressions[step.expressionIndex]
+      playbackTimeline.current = { ...playbackTimeline.current, stepDueAt: null }
+      const step = sequence.steps[playbackTimeline.current.position]
+      const expressionIndex = findExpressionIndex(expressions, step.expressionId)
+      const preset = expressions[expressionIndex]
       if (preset) {
-        transitionToExpression(preset, step.expressionIndex, step)
+        transitionToExpression(preset, expressionIndex, step)
       }
       scheduleAdvance((reduceMotion ? 0 : step.transitionMs) + step.holdMs)
     }
     const advance = () => {
-      stateNextDueAt.current = null
-      const cursor = advanceSequenceCursor(sequence, statePosition.current, stateDirection.current)
+      const advanced = advancePlaybackTimeline(playbackTimeline.current, sequence)
+      playbackTimeline.current = advanced.timeline
+      const { cursor } = advanced
       if (cursor.complete) {
         if (blinkTimer.current) clearTimeout(blinkTimer.current)
         blinkTimer.current = null
-        blinkNextDueAt.current = null
+        playbackTimeline.current = { ...playbackTimeline.current, blinkDueAt: null }
         setStatePlaying(false)
         setActiveState(null)
         return
       }
-      statePosition.current = cursor.index
-      stateDirection.current = cursor.direction
       playCurrentStep()
     }
     const scheduleBlink = (delay: number) => {
-      blinkRemainingDelay.current = delay
-      blinkNextDueAt.current = readSequenceClock() + delay
+      playbackTimeline.current = schedulePlaybackBlink(
+        playbackTimeline.current,
+        readSequenceClock(),
+        delay
+      )
       blinkTimer.current = setTimeout(blinkLoop, delay)
     }
     const blinkLoop = () => {
-      blinkNextDueAt.current = null
+      playbackTimeline.current = { ...playbackTimeline.current, blinkDueAt: null }
       blink(sequence.blink.durationMs)
       const { minIntervalMs, maxIntervalMs } = sequence.blink
       scheduleBlink(
@@ -3010,9 +2970,9 @@ function StudioApp() {
         pausedSequenceTransition.current = null
       }
       if (blinkAnimating.current) blinkControls.current?.play()
-      const currentStep = sequence.steps[statePosition.current]
+      const currentStep = sequence.steps[playbackTimeline.current.position]
       scheduleAdvance(
-        stateRemainingDelay.current ||
+        playbackTimeline.current.stepRemainingMs ||
           (reduceMotion ? 0 : currentStep.transitionMs) + currentStep.holdMs
       )
     } else {
@@ -3021,7 +2981,7 @@ function StudioApp() {
     if (sequence.blink.enabled) {
       scheduleBlink(
         resume
-          ? blinkRemainingDelay.current || sequence.blink.initialDelayMs
+          ? playbackTimeline.current.blinkRemainingMs || sequence.blink.initialDelayMs
           : sequence.blink.initialDelayMs
       )
     }
@@ -3087,29 +3047,28 @@ function StudioApp() {
   const saveEditing = () => {
     if (!editing) return
     const index = editing.index ?? expressions.length
+    const savedDraft =
+      editing.index === null ? { ...editing.draft, id: createExpressionId() } : editing.draft
     const next =
       editing.index === null
-        ? [...expressions, { ...editing.draft }]
+        ? [...expressions, savedDraft]
         : expressions.map((item, itemIndex) =>
-            itemIndex === editing.index ? { ...editing.draft } : item
+            itemIndex === editing.index ? { ...savedDraft } : item
           )
     setExpressions(next)
     persistGlobalExpressions(next)
     setEditing(null)
-    transitionToExpression(editing.draft, index)
+    transitionToExpression(savedDraft, index)
     if (!sequenceEditing) restoreStateAfterEditor()
   }
 
   const duplicateExpression = (index: number | null, draft: Expression, editDuplicate = false) => {
     const insertionIndex = index === null ? expressions.length : index + 1
-    const duplicate = { ...draft }
+    const duplicate = { ...draft, id: createExpressionId() }
     const next = [...expressions]
     next.splice(insertionIndex, 0, duplicate)
-    const nextSequences = remapSequencesAfterExpressionInsert(sequences, insertionIndex)
     setExpressions(next)
-    setSequences(nextSequences)
     persistGlobalExpressions(next)
-    persistSequences(nextSequences)
     if (editDuplicate) openExpressionEditor(insertionIndex, duplicate)
     else transitionToExpression(duplicate, insertionIndex)
   }
@@ -3125,7 +3084,10 @@ function StudioApp() {
     suspendStateForEditor()
     setBodyEditing(false)
     setMode('expressions')
-    setEditing({ index, draft: { ...draft } })
+    setEditing({
+      index,
+      draft: { ...draft, id: index === null ? createExpressionId() : draft.id },
+    })
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
     if (avatar) setDisplayColors(resolveColors(draft, avatar.colors))
     paintPose(poseFromExpression(draft))
@@ -3146,16 +3108,20 @@ function StudioApp() {
         ? [{ ...defaultExpression }]
         : expressions.filter((_, index) => index !== editing.index)
     const fallback = next[Math.min(editing.index, next.length - 1)] ?? defaultExpression
-    const nextSequences =
-      expressions.length <= 1
-        ? normalizeSequencesForExpressions(sequences, 1)
-        : remapSequencesAfterExpressionDelete(sequences, editing.index)
+    const deletedExpressionId = expressions[editing.index]?.id ?? editing.draft.id
+    const fallbackExpressionId = fallback.id
+    const nextSequences = remapSequencesAfterExpressionDelete(
+      sequences,
+      deletedExpressionId,
+      fallbackExpressionId
+    )
     setExpressions(next)
     setSequences(nextSequences)
     if (sequenceEditing) {
       const draft = remapSequencesAfterExpressionDelete(
         [sequenceEditing.draft],
-        editing.index
+        deletedExpressionId,
+        fallbackExpressionId
       )[0]
       setSequenceEditing({ ...sequenceEditing, draft })
     }
@@ -3182,12 +3148,15 @@ function StudioApp() {
           steps: sequence.steps.map(step => ({ ...step })),
           blink: { ...sequence.blink },
         }
-      : createSequence(activeExpression ?? 0)
+      : createSequence(expressions[activeExpression ?? 0]?.id ?? expressions[0]?.id)
     setSequenceEditing({ sourceId: sequence?.id ?? null, draft })
     setSelectedSequenceStepId(draft.steps[0]?.id ?? null)
     const firstStep = draft.steps[0]
-    const preset = firstStep && expressions[firstStep.expressionIndex]
-    if (preset) transitionToExpression(preset, firstStep.expressionIndex, firstStep)
+    const expressionIndex = firstStep
+      ? findExpressionIndex(expressions, firstStep.expressionId)
+      : -1
+    const preset = expressions[expressionIndex]
+    if (preset) transitionToExpression(preset, expressionIndex, firstStep)
   }
 
   const cancelSequenceEditing = () => {
@@ -3274,31 +3243,39 @@ function StudioApp() {
 
   const selectedSequence = sequences.find(sequence => sequence.id === selectedState) ?? sequences[0]
   const updateAvatarEyeDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
-    const field = `${dimension}${side}` as keyof AvatarEyeDefaults
-    const other = `${dimension}${side === 'Left' ? 'Right' : 'Left'}` as keyof AvatarEyeDefaults
-    updateAvatarEyes({ [field]: value, ...(linked[dimension] ? { [other]: value } : {}) })
+    const next = updateEyeDimension(
+      { ...defaultExpression, ...activeAvatarEyes },
+      side,
+      dimension,
+      value,
+      linked[dimension]
+    )
+    updateAvatarEyes({
+      [`${dimension}Left`]: next[`${dimension}Left`],
+      [`${dimension}Right`]: next[`${dimension}Right`],
+    })
   }
   const updateAvatarEyeSize = (side: Side, value: number) => {
-    const widthField = `width${side}` as 'widthLeft' | 'widthRight'
-    const heightField = `height${side}` as 'heightLeft' | 'heightRight'
-    const factor = value / Math.max(activeAvatarEyes[widthField], activeAvatarEyes[heightField], 1)
-    const changes: Partial<AvatarEyeDefaults> = {
-      [widthField]: bounded(activeAvatarEyes[widthField] * factor, 10, 110),
-      [heightField]: bounded(activeAvatarEyes[heightField] * factor, 10, 110),
-    }
-    if (linked.size) {
-      const otherSide = side === 'Left' ? 'Right' : 'Left'
-      const otherWidth = `width${otherSide}` as 'widthLeft' | 'widthRight'
-      const otherHeight = `height${otherSide}` as 'heightLeft' | 'heightRight'
-      changes[otherWidth] = bounded(activeAvatarEyes[otherWidth] * factor, 10, 110)
-      changes[otherHeight] = bounded(activeAvatarEyes[otherHeight] * factor, 10, 110)
-    }
-    updateAvatarEyes(changes)
+    const next = scaleEye({ ...defaultExpression, ...activeAvatarEyes }, side, value, linked.size)
+    updateAvatarEyes({
+      widthLeft: next.widthLeft,
+      widthRight: next.widthRight,
+      heightLeft: next.heightLeft,
+      heightRight: next.heightRight,
+    })
   }
   const updateAvatarEyePosition = (side: Side, axis: 'X' | 'Y', value: number) => {
-    const field = `position${axis}${side}` as keyof AvatarEyeDefaults
-    const other = `position${axis}${side === 'Left' ? 'Right' : 'Left'}` as keyof AvatarEyeDefaults
-    updateAvatarEyes({ [field]: value, ...(linked.position ? { [other]: value } : {}) })
+    const next = updateEyePosition(
+      { ...defaultExpression, ...activeAvatarEyes },
+      side,
+      axis,
+      value,
+      linked.position
+    )
+    updateAvatarEyes({
+      [`position${axis}Left`]: next[`position${axis}Left`],
+      [`position${axis}Right`]: next[`position${axis}Right`],
+    })
   }
   const persistEditedEyeExpression = (next: Expression) => {
     updateAvatarEyes({
@@ -3354,21 +3331,12 @@ function StudioApp() {
           expression={canvasExpression}
           avatarEyes={activeAvatarEyes}
           surface={surface}
-          wirePaths={wirePaths}
+          scene={renderedScene}
           showWire={showWire}
-          backPaths={backPaths}
-          frontPaths={frontPaths}
-          backNodeIds={backNodeIds}
-          frontNodeIds={frontNodeIds}
           bodyEditing={bodyEditing}
           selectedBodyNodeId={selectedBodyNodeId}
           selectedBodyNode={selectedBodyNode}
           selectedSide={selectedEyeSide}
-          headPath={headPath}
-          leftPath={leftPath}
-          rightPath={rightPath}
-          leftOpacity={leftOpacity}
-          rightOpacity={rightOpacity}
           linked={linked}
           highlight={highlight}
           onHighlightChange={updateHighlight}
@@ -3414,8 +3382,9 @@ function StudioApp() {
                 setSequenceEditing(current => (current ? { ...current, draft } : current))
               }
               onPreviewStep={step => {
-                const preset = expressions[step.expressionIndex]
-                if (preset) transitionToExpression(preset, step.expressionIndex, step)
+                const expressionIndex = findExpressionIndex(expressions, step.expressionId)
+                const preset = expressions[expressionIndex]
+                if (preset) transitionToExpression(preset, expressionIndex, step)
               }}
               onEditExpression={openExpressionEditor}
               onPlay={() => launchSequence(sequenceEditing.draft, false, false)}
@@ -4669,23 +4638,22 @@ function StudioApp() {
                   </div>
                   <div className="expression-grid state-expression-grid">
                     {selectedSequence.steps.map((step, position) => {
-                      const preset = expressions[step.expressionIndex]
+                      const expressionIndex = findExpressionIndex(expressions, step.expressionId)
+                      const preset = expressions[expressionIndex]
                       if (!preset) return null
                       return (
                         <div className="state-step-preview" key={step.id}>
                           <ExpressionCard
                             expression={preset}
-                            index={step.expressionIndex}
-                            active={activeExpression === step.expressionIndex}
+                            index={expressionIndex}
+                            active={activeExpression === expressionIndex}
                             surface={surface}
                             bodyNodes={bodyNodes}
                             colors={activeAvatar.colors}
                             avatarEyes={activeAvatarEyes}
-                            previewId={`state-${selectedSequence.id}-${position}-${step.expressionIndex}`}
-                            onSelect={() =>
-                              transitionToExpression(preset, step.expressionIndex, step)
-                            }
-                            onEdit={() => openExpressionEditor(step.expressionIndex, preset)}
+                            previewId={`state-${selectedSequence.id}-${position}-${step.expressionId}`}
+                            onSelect={() => transitionToExpression(preset, expressionIndex, step)}
+                            onEdit={() => openExpressionEditor(expressionIndex, preset)}
                           />
                           <small>{formatSeconds(step.holdMs, language)}</small>
                         </div>

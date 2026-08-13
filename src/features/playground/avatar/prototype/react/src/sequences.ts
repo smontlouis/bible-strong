@@ -1,11 +1,18 @@
-import { getStatePlaybackConfig, stateGroups, stateNotes, statePools } from './presets'
+import {
+  getStatePlaybackConfig,
+  initialExpressions,
+  stateGroups,
+  stateNotes,
+  statePools,
+} from './presets'
+import type { Expression } from './geometry'
 
 export type SequencePlaybackMode = 'loop' | 'once' | 'pingPong'
 export type SequenceTransition = 'spring' | 'smooth' | 'snappy'
 
 export type SequenceStep = {
   id: string
-  expressionIndex: number
+  expressionId: string
   holdMs: number
   transitionMs: number
   transition: SequenceTransition
@@ -68,7 +75,7 @@ export const createInitialSequences = (): AvatarSequence[] =>
         playbackMode: 'loop',
         steps: (statePools[id] ?? [0]).map((expressionIndex, index) => ({
           id: `${id}-step-${index}`,
-          expressionIndex,
+          expressionId: initialExpressions[expressionIndex]?.id ?? initialExpressions[0].id,
           holdMs: playback.expressionIntervalMs,
           transitionMs: 500,
           transition: 'smooth',
@@ -79,12 +86,14 @@ export const createInitialSequences = (): AvatarSequence[] =>
   )
 
 const parseStep = (value: unknown, fallback: SequenceStep): SequenceStep => {
-  const candidate = value as Partial<SequenceStep> | null
+  const candidate = value as (Partial<SequenceStep> & { expressionIndex?: unknown }) | null
+  const legacyIndex = finite(candidate?.expressionIndex, 0, 0, 9999)
   return {
     id: typeof candidate?.id === 'string' ? candidate.id : createId('step'),
-    expressionIndex: Math.round(
-      finite(candidate?.expressionIndex, fallback.expressionIndex, 0, 9999)
-    ),
+    expressionId:
+      typeof candidate?.expressionId === 'string' && candidate.expressionId
+        ? candidate.expressionId
+        : (initialExpressions[Math.round(legacyIndex)]?.id ?? fallback.expressionId),
     holdMs: finite(candidate?.holdMs, fallback.holdMs, 100, 60000),
     transitionMs: finite(candidate?.transitionMs, fallback.transitionMs, 0, 5000),
     transition: transitions.includes(candidate?.transition as SequenceTransition)
@@ -97,7 +106,7 @@ const parseSequence = (value: unknown, fallback: AvatarSequence): AvatarSequence
   const candidate = value as Partial<AvatarSequence> | null
   const fallbackStep = fallback.steps[0] ?? {
     id: 'fallback-step',
-    expressionIndex: 0,
+    expressionId: initialExpressions[0].id,
     holdMs: 3000,
     transitionMs: 500,
     transition: 'smooth' as const,
@@ -172,17 +181,23 @@ export const persistSequences = (sequences: AvatarSequence[]) => {
 
 export const normalizeSequencesForExpressions = (
   sequences: AvatarSequence[],
-  expressionCount: number
+  expressions: Expression[]
 ) => {
-  const highestIndex = Math.max(expressionCount - 1, 0)
+  const availableIds = new Set(expressions.map(expression => expression.id))
+  const fallbackId = expressions[0]?.id ?? initialExpressions[0].id
   return sequences.map(sequence => ({
     ...sequence,
-    steps: (sequence.steps.length ? sequence.steps : [createSequenceStep(0)]).map(step => ({
-      ...step,
-      expressionIndex: Math.min(Math.max(step.expressionIndex, 0), highestIndex),
-    })),
+    steps: (sequence.steps.length ? sequence.steps : [createSequenceStep(fallbackId)]).map(
+      step => ({
+        ...step,
+        expressionId: availableIds.has(step.expressionId) ? step.expressionId : fallbackId,
+      })
+    ),
   }))
 }
+
+export const findExpressionIndex = (expressions: Expression[], expressionId: string) =>
+  expressions.findIndex(expression => expression.id === expressionId)
 
 export const readSequenceClock = () => performance.now()
 
@@ -201,7 +216,7 @@ export const groupSequences = (sequences: AvatarSequence[]) => {
   return groups
 }
 
-export const createSequence = (expressionIndex = 0): AvatarSequence => ({
+export const createSequence = (expressionId = initialExpressions[0].id): AvatarSequence => ({
   id: createId('sequence'),
   name: 'Untitled sequence',
   group: 'Custom',
@@ -211,7 +226,7 @@ export const createSequence = (expressionIndex = 0): AvatarSequence => ({
   steps: [
     {
       id: createId('step'),
-      expressionIndex,
+      expressionId,
       holdMs: 3000,
       transitionMs: 500,
       transition: 'smooth',
@@ -234,9 +249,9 @@ export const duplicateSequence = (source: AvatarSequence): AvatarSequence => ({
   steps: source.steps.map(step => ({ ...step, id: createId('step') })),
 })
 
-export const createSequenceStep = (expressionIndex: number): SequenceStep => ({
+export const createSequenceStep = (expressionId: string): SequenceStep => ({
   id: createId('step'),
-  expressionIndex,
+  expressionId,
   holdMs: 3000,
   transitionMs: 500,
   transition: 'smooth',
@@ -262,34 +277,16 @@ export const advanceSequenceCursor = (
   return { index: index >= lastIndex ? 0 : index + 1, direction: 1, complete: false }
 }
 
-export const remapSequencesAfterExpressionInsert = (
-  sequences: AvatarSequence[],
-  insertedIndex: number
-) =>
-  sequences.map(sequence => ({
-    ...sequence,
-    steps: sequence.steps.map(step => ({
-      ...step,
-      expressionIndex:
-        step.expressionIndex >= insertedIndex ? step.expressionIndex + 1 : step.expressionIndex,
-    })),
-  }))
-
 export const remapSequencesAfterExpressionDelete = (
   sequences: AvatarSequence[],
-  deletedIndex: number
+  deletedExpressionId: string,
+  fallbackExpressionId: string
 ) =>
   sequences.map(sequence => {
-    const steps = sequence.steps
-      .filter(step => step.expressionIndex !== deletedIndex)
-      .map(step => ({
-        ...step,
-        expressionIndex:
-          step.expressionIndex > deletedIndex ? step.expressionIndex - 1 : step.expressionIndex,
-      }))
+    const steps = sequence.steps.filter(step => step.expressionId !== deletedExpressionId)
     return {
       ...sequence,
-      steps: steps.length ? steps : [createSequenceStep(Math.max(deletedIndex - 1, 0))],
+      steps: steps.length ? steps : [createSequenceStep(fallbackExpressionId)],
     }
   })
 

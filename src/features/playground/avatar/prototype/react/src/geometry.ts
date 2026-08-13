@@ -13,6 +13,7 @@ export type EyeMotion = 'none' | 'microSaccades' | 'shake'
 export type BodyMotion = 'none' | 'slowDrift' | 'shake'
 
 export type Expression = {
+  id: string
   headX: number
   headY: number
   headZ: number
@@ -36,7 +37,7 @@ export type Expression = {
 
 export type ExpressionNumericField = Exclude<
   keyof Expression,
-  'bodyColor' | 'eyeColor' | 'eyeMotion' | 'bodyMotion'
+  'id' | 'bodyColor' | 'eyeColor' | 'eyeMotion' | 'bodyMotion'
 >
 
 export type AvatarPose = {

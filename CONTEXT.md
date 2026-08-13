@@ -94,6 +94,30 @@ Core user activities:
 | Account-eligible guest data | Guest data whose domain type already participates in account synchronization. Guest adoption does not turn previously device-owned state into account-owned state. | Authentication and synchronization |
 | Guest adoption | The one-time ownership transition that assigns account-eligible Guest data to a genuinely new account before normal account hydration begins. | Authentication and synchronization |
 
+## Avatar Studio Language
+
+**Avatar**:
+A reusable character whose body, colors, and neutral eyes define its persistent visual identity.
+
+**Neutral appearance**:
+The persistent visual base of an Avatar before any Expression is applied.
+_Avoid_: Default pose
+
+**Pose**:
+The avatar's current temporary visual configuration. A Pose is not persisted directly.
+
+**Expression**:
+A saved global visual preset whose eye values are relative to an Avatar's Neutral appearance. Optional color overrides are temporary and do not change the Avatar.
+_Avoid_: Pose preset
+
+**State**:
+An animated sequence of Expressions, including its transitions and blink behavior.
+_Avoid_: Animation, sequence
+
+**Playback**:
+The active execution of one State. It exclusively controls the animated Pose until a direct user manipulation pauses it.
+_Avoid_: State
+
 ## Domain Relationships
 
 - A **Reading plan** contains one or more **Plan slices**.

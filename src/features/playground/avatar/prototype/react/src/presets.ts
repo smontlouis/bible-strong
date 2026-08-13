@@ -29,19 +29,23 @@ const calibrated: number[][] = [
 ]
 
 export const initialExpressions: Expression[] = calibrated.map(
-  ([
-    headX,
-    headY,
-    headZ,
-    widthLeft,
-    widthRight,
-    heightLeft,
-    heightRight,
-    spacing,
-    latitude,
-    leftAngle,
-    rightAngle,
-  ]) => ({
+  (
+    [
+      headX,
+      headY,
+      headZ,
+      widthLeft,
+      widthRight,
+      heightLeft,
+      heightRight,
+      spacing,
+      latitude,
+      leftAngle,
+      rightAngle,
+    ],
+    index
+  ) => ({
+    id: `expression-${String(index).padStart(2, '0')}`,
     headX,
     headY,
     headZ,
@@ -63,6 +67,7 @@ export const initialExpressions: Expression[] = calibrated.map(
 )
 
 export const defaultExpression: Expression = {
+  id: 'expression-neutral',
   headX: 0,
   headY: 0,
   headZ: 0,
