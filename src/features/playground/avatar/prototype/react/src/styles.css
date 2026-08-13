@@ -261,6 +261,63 @@ input {
   min-height: 44px;
   box-shadow: 0 12px 30px rgb(23 25 29 / 18%);
 }
+.export-section {
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+.export-section-trigger {
+  justify-content: space-between;
+  width: 100%;
+  height: auto;
+  padding: 20px;
+  border-radius: 0;
+  text-align: left;
+}
+.export-section-trigger > span {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+}
+.export-section-trigger strong {
+  color: #343b49;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.export-section-trigger small {
+  color: #858c99;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.45;
+  white-space: normal;
+}
+.export-section-trigger > svg {
+  flex: none;
+  transition: transform 180ms ease;
+}
+.export-section-trigger[aria-expanded='true'] > svg {
+  transform: rotate(180deg);
+}
+.export-section-content {
+  display: grid;
+  gap: 10px;
+  padding: 0 20px 20px;
+}
+.export-section-content > [data-slot='separator'] {
+  margin-bottom: 4px;
+}
+.export-placeholder {
+  margin: 0;
+  padding: 12px;
+  color: var(--muted-foreground);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  background: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
 .project-transfer-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

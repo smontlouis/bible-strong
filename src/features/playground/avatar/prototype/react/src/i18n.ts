@@ -93,6 +93,9 @@ const english: Record<string, string> = {
   'Télécharger le composant TSX': 'Download TSX component',
   'Télécharger le package React': 'Download React package',
   'Télécharger le module': 'Download module',
+  Snapshot: 'Snapshot',
+  'Capture une image statique de l’avatar.': 'Capture a static image of the avatar.',
+  'Les options de capture seront configurées ici.': 'Snapshot options will be configured here.',
   'Projet du Studio': 'Studio project',
   'Transfère tous les avatars, expressions et animations vers un autre navigateur.':
     'Transfer every avatar, expression and animation to another browser.',

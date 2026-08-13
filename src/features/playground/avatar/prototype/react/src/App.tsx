@@ -2311,6 +2311,9 @@ function StudioApp() {
   const [expressions, setExpressions] = useState(initialDocument.expressions)
   const [sequences, setSequences] = useState(initialDocument.sequences)
   const [exportFormat, setExportFormat] = useState<ExportFormat>('react')
+  const [openExportSection, setOpenExportSection] = useState<
+    'avatar' | 'snapshot' | 'project' | null
+  >(null)
   const [exportAnimationIds, setExportAnimationIds] = useState(() =>
     initialDocument.sequences.map(animation => animation.id)
   )
@@ -5046,11 +5049,157 @@ function StudioApp() {
 
         {!sequenceEditing && !editing && !bodyEditing && mode === 'export' && (
           <div className="panel-stack export-panel">
-            <InspectorCard>
-              <PanelTitle
-                title="Projet du Studio"
-                subtitle="Transfère tous les avatars, expressions et animations vers un autre navigateur."
-              />
+            <ExportSection
+              title="Exporter l’avatar"
+              subtitle="Télécharge un composant autonome avec les animations de ton choix."
+              open={openExportSection === 'avatar'}
+              onToggle={() =>
+                setOpenExportSection(current => (current === 'avatar' ? null : 'avatar'))
+              }
+            >
+              <InspectorCard>
+                <div className="export-avatar-summary">
+                  <ExpressionPreview
+                    expression={expressions[0] ?? defaultExpression}
+                    surface={activeAvatar.body.primary}
+                    bodyNodes={activeAvatar.body.nodes}
+                    colors={activeAvatar.colors}
+                    avatarEyes={activeAvatarEyes}
+                    id={`export-avatar-${activeAvatar.id}`}
+                  />
+                  <div>
+                    <small>{t('Avatar sélectionné')}</small>
+                    <strong>{activeAvatar.name}</strong>
+                  </div>
+                </div>
+              </InspectorCard>
+
+              <InspectorCard>
+                <PanelTitle
+                  title="Format"
+                  subtitle="Choisis l’intégration correspondant à ton projet."
+                />
+                <div className="export-format-grid">
+                  <Button
+                    variant="outline"
+                    type="button"
+                    aria-pressed={exportFormat === 'react'}
+                    onClick={() => setExportFormat('react')}
+                  >
+                    <FileCode2 />
+                    <span>
+                      <strong>React / TypeScript</strong>
+                      <small>{t('Package React local (.zip)')}</small>
+                    </span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    aria-pressed={exportFormat === 'javascript'}
+                    onClick={() => setExportFormat('javascript')}
+                  >
+                    <FileCode2 />
+                    <span>
+                      <strong>{t('Module JavaScript')}</strong>
+                      <small>{t('Projet HTML + module JS (.zip)')}</small>
+                    </span>
+                  </Button>
+                </div>
+              </InspectorCard>
+
+              <InspectorCard>
+                <div className="preset-header export-animation-header">
+                  <div>
+                    <p className="eyebrow">
+                      {selectedExportAnimations.length}/{sequences.length} {t('sélectionnées')}
+                    </p>
+                    <h2>{t('Animations à exporter')}</h2>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    onClick={() =>
+                      setExportAnimationIds(
+                        selectedExportAnimations.length === sequences.length
+                          ? []
+                          : sequences.map(animation => animation.id)
+                      )
+                    }
+                  >
+                    {t(
+                      selectedExportAnimations.length === sequences.length
+                        ? 'Tout désélectionner'
+                        : 'Tout sélectionner'
+                    )}
+                  </Button>
+                </div>
+                <div className="state-buttons export-animation-grid">
+                  {sequences.map(animation => {
+                    const firstStep = animation.steps[0]
+                    const firstExpression = firstStep
+                      ? expressionById.get(firstStep.expressionId)
+                      : undefined
+                    return (
+                      <Button
+                        className="expression-card state-card"
+                        variant="outline"
+                        type="button"
+                        key={animation.id}
+                        aria-pressed={exportAnimationIdSet.has(animation.id)}
+                        onClick={() => toggleExportAnimation(animation.id)}
+                      >
+                        <ExpressionPreview
+                          expression={firstExpression ?? expressions[0] ?? defaultExpression}
+                          surface={surface}
+                          bodyNodes={bodyNodes}
+                          colors={activeAvatar.colors}
+                          avatarEyes={activeAvatarEyes}
+                          id={`export-animation-${animation.id}`}
+                        />
+                        <span>{animation.builtIn ? t(animation.name) : animation.name}</span>
+                      </Button>
+                    )
+                  })}
+                </div>
+              </InspectorCard>
+
+              <Button
+                className="export-download"
+                type="button"
+                disabled={!selectedExportAnimations.length}
+                onClick={downloadAvatarExport}
+              >
+                <Download />
+                {t(
+                  exportFormat === 'react'
+                    ? 'Télécharger le package React'
+                    : 'Télécharger le module'
+                )}
+              </Button>
+            </ExportSection>
+
+            <ExportSection
+              title="Snapshot"
+              subtitle="Capture une image statique de l’avatar."
+              open={openExportSection === 'snapshot'}
+              onToggle={() =>
+                setOpenExportSection(current => (current === 'snapshot' ? null : 'snapshot'))
+              }
+            >
+              <p className="export-placeholder">
+                {t('Les options de capture seront configurées ici.')}
+              </p>
+            </ExportSection>
+
+            <ExportSection
+              title="Projet du Studio"
+              subtitle="Transfère tous les avatars, expressions et animations vers un autre navigateur."
+              open={openExportSection === 'project'}
+              onToggle={() =>
+                setOpenExportSection(current => (current === 'project' ? null : 'project'))
+              }
+            >
               <div className="project-transfer-actions">
                 <Button variant="outline" type="button" onClick={downloadStudioProject}>
                   <Download />
@@ -5081,130 +5230,7 @@ function StudioApp() {
                   {projectImportError}
                 </p>
               )}
-            </InspectorCard>
-
-            <InspectorCard>
-              <PanelTitle
-                title="Exporter l’avatar"
-                subtitle="Télécharge un composant autonome avec les animations de ton choix."
-              />
-              <div className="export-avatar-summary">
-                <ExpressionPreview
-                  expression={expressions[0] ?? defaultExpression}
-                  surface={activeAvatar.body.primary}
-                  bodyNodes={activeAvatar.body.nodes}
-                  colors={activeAvatar.colors}
-                  avatarEyes={activeAvatarEyes}
-                  id={`export-avatar-${activeAvatar.id}`}
-                />
-                <div>
-                  <small>{t('Avatar sélectionné')}</small>
-                  <strong>{activeAvatar.name}</strong>
-                </div>
-              </div>
-            </InspectorCard>
-
-            <InspectorCard>
-              <PanelTitle
-                title="Format"
-                subtitle="Choisis l’intégration correspondant à ton projet."
-              />
-              <div className="export-format-grid">
-                <Button
-                  variant="outline"
-                  type="button"
-                  aria-pressed={exportFormat === 'react'}
-                  onClick={() => setExportFormat('react')}
-                >
-                  <FileCode2 />
-                  <span>
-                    <strong>React / TypeScript</strong>
-                    <small>{t('Package React local (.zip)')}</small>
-                  </span>
-                </Button>
-                <Button
-                  variant="outline"
-                  type="button"
-                  aria-pressed={exportFormat === 'javascript'}
-                  onClick={() => setExportFormat('javascript')}
-                >
-                  <FileCode2 />
-                  <span>
-                    <strong>{t('Module JavaScript')}</strong>
-                    <small>{t('Projet HTML + module JS (.zip)')}</small>
-                  </span>
-                </Button>
-              </div>
-            </InspectorCard>
-
-            <InspectorCard>
-              <div className="preset-header export-animation-header">
-                <div>
-                  <p className="eyebrow">
-                    {selectedExportAnimations.length}/{sequences.length} {t('sélectionnées')}
-                  </p>
-                  <h2>{t('Animations à exporter')}</h2>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  type="button"
-                  onClick={() =>
-                    setExportAnimationIds(
-                      selectedExportAnimations.length === sequences.length
-                        ? []
-                        : sequences.map(animation => animation.id)
-                    )
-                  }
-                >
-                  {t(
-                    selectedExportAnimations.length === sequences.length
-                      ? 'Tout désélectionner'
-                      : 'Tout sélectionner'
-                  )}
-                </Button>
-              </div>
-              <div className="state-buttons export-animation-grid">
-                {sequences.map(animation => {
-                  const firstStep = animation.steps[0]
-                  const firstExpression = firstStep
-                    ? expressionById.get(firstStep.expressionId)
-                    : undefined
-                  return (
-                    <Button
-                      className="expression-card state-card"
-                      variant="outline"
-                      type="button"
-                      key={animation.id}
-                      aria-pressed={exportAnimationIdSet.has(animation.id)}
-                      onClick={() => toggleExportAnimation(animation.id)}
-                    >
-                      <ExpressionPreview
-                        expression={firstExpression ?? expressions[0] ?? defaultExpression}
-                        surface={surface}
-                        bodyNodes={bodyNodes}
-                        colors={activeAvatar.colors}
-                        avatarEyes={activeAvatarEyes}
-                        id={`export-animation-${animation.id}`}
-                      />
-                      <span>{animation.builtIn ? t(animation.name) : animation.name}</span>
-                    </Button>
-                  )
-                })}
-              </div>
-            </InspectorCard>
-
-            <Button
-              className="export-download"
-              type="button"
-              disabled={!selectedExportAnimations.length}
-              onClick={downloadAvatarExport}
-            >
-              <Download />
-              {t(
-                exportFormat === 'react' ? 'Télécharger le package React' : 'Télécharger le module'
-              )}
-            </Button>
+            </ExportSection>
           </div>
         )}
         {activeSequence && !editorPageOpen && (
@@ -5427,6 +5453,49 @@ function ControlSection({
       </header>
       <Separator className="control-section-separator" />
       <div className="control-section-content">{children}</div>
+    </section>
+  )
+}
+
+function ExportSection({
+  title,
+  subtitle,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string
+  subtitle: string
+  open: boolean
+  onToggle: () => void
+  children: React.ReactNode
+}) {
+  const { t } = useStudioLanguage()
+  return (
+    <section className="control-section export-section">
+      <Button
+        className="export-section-trigger"
+        variant="ghost"
+        type="button"
+        aria-expanded={open}
+        onClick={onToggle}
+      >
+        <span>
+          <strong>{t(title)}</strong>
+          <small>{t(subtitle)}</small>
+        </span>
+        <ChevronDown aria-hidden="true" />
+      </Button>
+      {open && (
+        <motion.div
+          className="export-section-content"
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <Separator />
+          {children}
+        </motion.div>
+      )}
     </section>
   )
 }
