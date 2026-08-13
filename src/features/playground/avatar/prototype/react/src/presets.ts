@@ -158,6 +158,79 @@ export const statePools: Record<string, number[]> = {
   'powering-down': [13, 22],
 }
 
+export type StatePlaybackConfig = {
+  expressionIntervalMs: number
+  blink: {
+    initialDelayMs: number
+    minIntervalMs: number
+    maxIntervalMs: number
+    durationMs: number
+  }
+}
+
+const blinkProfiles = {
+  natural: {
+    initialDelayMs: 2600,
+    minIntervalMs: 3400,
+    maxIntervalMs: 6200,
+    durationMs: 280,
+  },
+  calm: {
+    initialDelayMs: 4800,
+    minIntervalMs: 6500,
+    maxIntervalMs: 9500,
+    durationMs: 420,
+  },
+  attentive: {
+    initialDelayMs: 3200,
+    minIntervalMs: 4800,
+    maxIntervalMs: 7200,
+    durationMs: 240,
+  },
+  active: {
+    initialDelayMs: 2100,
+    minIntervalMs: 2800,
+    maxIntervalMs: 5000,
+    durationMs: 260,
+  },
+  reactive: {
+    initialDelayMs: 1200,
+    minIntervalMs: 1800,
+    maxIntervalMs: 3600,
+    durationMs: 220,
+  },
+} as const
+
+const calmStates = new Set(['sleeping', 'drowsy', 'bored', 'sad', 'powering-down'])
+const attentiveStates = new Set(['listening', 'dictating', 'receiving', 'humming'])
+const reactiveStates = new Set([
+  'waking',
+  'excited',
+  'surprised',
+  'laughing',
+  'scared',
+  'celebrate',
+  'alerting',
+  'bouncing',
+])
+
+export const getStatePlaybackConfig = (name: string): StatePlaybackConfig => {
+  const blink =
+    name === 'idle'
+      ? blinkProfiles.natural
+      : calmStates.has(name)
+        ? blinkProfiles.calm
+        : attentiveStates.has(name)
+          ? blinkProfiles.attentive
+          : reactiveStates.has(name)
+            ? blinkProfiles.reactive
+            : blinkProfiles.active
+  return {
+    expressionIntervalMs: name === 'idle' ? 5200 : calmStates.has(name) ? 3600 : 2300,
+    blink: { ...blink },
+  }
+}
+
 export const stateNotes: Record<string, string> = {
   sleeping: 'Yeux presque fermés, respiration lente et expression de sommeil.',
   waking: 'Séquence courte de réveil avant retour vers une expression neutre.',

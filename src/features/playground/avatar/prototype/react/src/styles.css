@@ -1028,14 +1028,12 @@ button.primary {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
-.state-buttons,
-.pool {
+.state-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
-.state-buttons button,
-.pool button {
+.state-buttons button {
   min-height: 30px;
   padding: 5px 9px;
   border-radius: 999px;
@@ -1051,6 +1049,73 @@ button.primary {
   color: #7f848e;
   font-size: 11px;
   line-height: 1.5;
+}
+.state-expression-section,
+.state-blink-section {
+  padding-top: 16px;
+  border-top: 1px solid #eceef2;
+}
+.state-blink-section {
+  margin-top: 18px;
+}
+.state-section-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 11px;
+}
+.state-section-heading h3 {
+  margin: 0;
+  font-size: 12px;
+}
+.state-section-heading p {
+  margin: 4px 0 0;
+  font-size: 10px;
+}
+.state-section-heading > span {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #eef1f7;
+  color: #6f7785;
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.state-expression-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+.state-logic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.state-logic-grid > div {
+  display: grid;
+  gap: 3px;
+  padding: 11px;
+  border: 1px solid #e1e4ea;
+  border-radius: 11px;
+  background: #f7f8fa;
+}
+.state-logic-grid span,
+.state-logic-grid small {
+  color: #858b96;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.state-logic-grid strong {
+  color: #303640;
+  font-size: 13px;
+}
+.state-logic-grid small {
+  font-size: 7px;
+  font-weight: 650;
+  letter-spacing: 0;
+  text-transform: none;
 }
 
 .dialog-backdrop {

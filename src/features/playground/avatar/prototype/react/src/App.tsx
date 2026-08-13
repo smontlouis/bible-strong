@@ -56,7 +56,13 @@ import {
   type Expression,
   type Point3,
 } from './geometry'
-import { defaultExpression, stateGroups, stateNotes, statePools } from './presets'
+import {
+  defaultExpression,
+  getStatePlaybackConfig,
+  stateGroups,
+  stateNotes,
+  statePools,
+} from './presets'
 import { surfaceLabels, surfacePresets, type SurfaceConfig } from './surfaces'
 
 type Mode = 'manual' | 'expressions' | 'states'
@@ -117,6 +123,9 @@ const getPreviewGeometry = (
 
 const bounded = (value: number, min?: number, max?: number) =>
   Math.min(max ?? Infinity, Math.max(min ?? -Infinity, value))
+
+const secondsFormatter = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 })
+const formatSeconds = (milliseconds: number) => `${secondsFormatter.format(milliseconds / 1000)} s`
 
 const resolveColors = (expression: Expression, colors: AvatarColors): AvatarColors => ({
   body: expression.bodyColor ?? colors.body,
@@ -852,6 +861,50 @@ function ExpressionPreview({
   )
 }
 
+function ExpressionCard({
+  expression,
+  index,
+  active,
+  surface,
+  bodyNodes,
+  colors,
+  avatarEyes,
+  previewId,
+  onSelect,
+  onEdit,
+}: {
+  expression: Expression
+  index: number
+  active: boolean
+  surface: SurfaceConfig
+  bodyNodes: BodyNode[]
+  colors: AvatarColors
+  avatarEyes: AvatarEyeDefaults
+  previewId: string
+  onSelect: () => void
+  onEdit?: () => void
+}) {
+  return (
+    <button
+      className="expression-card"
+      aria-pressed={active}
+      type="button"
+      onClick={onSelect}
+      onDoubleClick={onEdit}
+    >
+      <ExpressionPreview
+        expression={expression}
+        surface={surface}
+        bodyNodes={bodyNodes}
+        colors={colors}
+        avatarEyes={avatarEyes}
+        id={previewId}
+      />
+      <span>{String(index).padStart(2, '0')}</span>
+    </button>
+  )
+}
+
 function ExpressionDialog({
   editing,
   surface,
@@ -1376,8 +1429,9 @@ export default function App() {
   const blink = () => {
     blinkControls.current?.stop()
     blinkValue.jump(1)
+    const blinkDuration = getStatePlaybackConfig(activeState ?? selectedState).blink.durationMs
     blinkControls.current = animate(blinkValue, [1, 0, 1], {
-      duration: reduceMotion ? 0 : 0.28,
+      duration: reduceMotion ? 0 : blinkDuration / 1000,
       times: [0, 0.42, 1],
       ease: ['easeIn', 'easeOut'],
     })
@@ -1588,7 +1642,8 @@ export default function App() {
     setSelectedState(name)
     setActiveState(name)
     setStatePlaying(true)
-    const cycleDelay = name === 'idle' ? 5200 : 2300
+    const playback = getStatePlaybackConfig(name)
+    const cycleDelay = playback.expressionIntervalMs
     const scheduleCycle = (delay: number) => {
       stateRemainingDelay.current = delay
       stateNextDueAt.current = performance.now() + delay
@@ -1603,11 +1658,15 @@ export default function App() {
     }
     const blinkLoop = () => {
       blink()
-      blinkTimer.current = setTimeout(blinkLoop, 3400 + Math.random() * 2800)
+      const { minIntervalMs, maxIntervalMs } = playback.blink
+      blinkTimer.current = setTimeout(
+        blinkLoop,
+        minIntervalMs + Math.random() * (maxIntervalMs - minIntervalMs)
+      )
     }
     if (resume) scheduleCycle(stateRemainingDelay.current || cycleDelay)
     else cycle()
-    blinkTimer.current = setTimeout(blinkLoop, 2600)
+    blinkTimer.current = setTimeout(blinkLoop, playback.blink.initialDelayMs)
   }
 
   const toggleStatePlayback = () => {
@@ -1655,6 +1714,7 @@ export default function App() {
   }
   const activeAvatar = avatars.find(avatar => avatar.id === activeAvatarId) ?? avatars[0]
   const activeAvatarEyes = activeAvatar.eyes ?? defaultAvatarEyes
+  const selectedStatePlayback = getStatePlaybackConfig(selectedState)
   const updateAvatarEyeDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
     const field = `${dimension}${side}` as keyof AvatarEyeDefaults
     const other = `${dimension}${side === 'Left' ? 'Right' : 'Left'}` as keyof AvatarEyeDefaults
@@ -2645,24 +2705,19 @@ export default function App() {
               </div>
               <div className="expression-grid">
                 {expressions.map((preset, index) => (
-                  <button
-                    className="expression-card"
-                    aria-pressed={activeExpression === index}
-                    type="button"
+                  <ExpressionCard
                     key={index}
-                    onClick={() => transitionToExpression(preset, index)}
-                    onDoubleClick={() => setEditing({ index, draft: { ...preset } })}
-                  >
-                    <ExpressionPreview
-                      expression={preset}
-                      surface={surface}
-                      bodyNodes={bodyNodes}
-                      colors={activeAvatar.colors}
-                      avatarEyes={activeAvatarEyes}
-                      id={String(index)}
-                    />
-                    <span>{String(index).padStart(2, '0')}</span>
-                  </button>
+                    expression={preset}
+                    index={index}
+                    active={activeExpression === index}
+                    surface={surface}
+                    bodyNodes={bodyNodes}
+                    colors={activeAvatar.colors}
+                    avatarEyes={activeAvatarEyes}
+                    previewId={String(index)}
+                    onSelect={() => transitionToExpression(preset, index)}
+                    onEdit={() => setEditing({ index, draft: { ...preset } })}
+                  />
                 ))}
                 <button
                   className="expression-add"
@@ -2741,16 +2796,67 @@ export default function App() {
                 {stateNotes[selectedState] ??
                   'Cet état enchaîne un pool de presets et des clignements.'}
               </p>
-              <div className="pool">
-                {statePools[selectedState].map(index => (
-                  <button
-                    type="button"
-                    key={index}
-                    onClick={() => transitionToExpression(expressions[index], index)}
-                  >
-                    {String(index).padStart(2, '0')}
-                  </button>
-                ))}
+              <div className="state-expression-section">
+                <div className="state-section-heading">
+                  <div>
+                    <h3>Expressions de la séquence</h3>
+                    <p>Les presets sont joués dans cet ordre, puis la boucle recommence.</p>
+                  </div>
+                  <span>{statePools[selectedState].length} expressions</span>
+                </div>
+                <div className="expression-grid state-expression-grid">
+                  {statePools[selectedState].map((index, position) => {
+                    const preset = expressions[index]
+                    if (!preset) return null
+                    return (
+                      <ExpressionCard
+                        key={`${selectedState}-${position}-${index}`}
+                        expression={preset}
+                        index={index}
+                        active={activeExpression === index}
+                        surface={surface}
+                        bodyNodes={bodyNodes}
+                        colors={activeAvatar.colors}
+                        avatarEyes={activeAvatarEyes}
+                        previewId={`state-${selectedState}-${position}-${index}`}
+                        onSelect={() => transitionToExpression(preset, index)}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+              <div className="state-blink-section">
+                <div className="state-section-heading">
+                  <div>
+                    <h3>Logique de clignement</h3>
+                    <p>Le rythme reste naturel grâce à un intervalle légèrement aléatoire.</p>
+                  </div>
+                </div>
+                <div className="state-logic-grid">
+                  <div>
+                    <span>Premier clignement</span>
+                    <strong>{formatSeconds(selectedStatePlayback.blink.initialDelayMs)}</strong>
+                    <small>après le lancement</small>
+                  </div>
+                  <div>
+                    <span>Intervalle</span>
+                    <strong>
+                      {formatSeconds(selectedStatePlayback.blink.minIntervalMs)}–
+                      {formatSeconds(selectedStatePlayback.blink.maxIntervalMs)}
+                    </strong>
+                    <small>tirage aléatoire</small>
+                  </div>
+                  <div>
+                    <span>Durée</span>
+                    <strong>{selectedStatePlayback.blink.durationMs} ms</strong>
+                    <small>fermeture et ouverture</small>
+                  </div>
+                  <div>
+                    <span>Changement d’expression</span>
+                    <strong>{formatSeconds(selectedStatePlayback.expressionIntervalMs)}</strong>
+                    <small>cadence de la séquence</small>
+                  </div>
+                </div>
               </div>
               <div className="button-row">
                 <button
