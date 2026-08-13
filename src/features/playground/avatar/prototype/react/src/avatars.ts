@@ -8,10 +8,13 @@ export type StudioAvatar = {
   name: string
   body: AvatarBody
   colors: AvatarColors
+  eyePosition: AvatarEyePosition
 }
 
 export type AvatarColors = { body: string; eyes: string }
+export type AvatarEyePosition = { x: number; y: number }
 export const defaultAvatarColors: AvatarColors = { body: '#5b7fe5', eyes: '#111316' }
+export const defaultAvatarEyePosition: AvatarEyePosition = { x: 0, y: 0 }
 const hexColor = /^#[0-9a-f]{6}$/i
 const parseColors = (value: unknown): AvatarColors => {
   const candidate = value as Partial<AvatarColors> | null
@@ -26,6 +29,25 @@ const parseColors = (value: unknown): AvatarColors => {
         : defaultAvatarColors.eyes,
   }
 }
+
+const parseEyePosition = (value: unknown): AvatarEyePosition => {
+  const candidate = value as Partial<AvatarEyePosition> | null
+  return {
+    x: typeof candidate?.x === 'number' && Number.isFinite(candidate.x) ? candidate.x : 0,
+    y: typeof candidate?.y === 'number' && Number.isFinite(candidate.y) ? candidate.y : 0,
+  }
+}
+
+export const applyAvatarEyePosition = (
+  expression: Expression,
+  eyePosition: AvatarEyePosition = defaultAvatarEyePosition
+): Expression => ({
+  ...expression,
+  positionXLeft: expression.positionXLeft + eyePosition.x,
+  positionXRight: expression.positionXRight + eyePosition.x,
+  positionYLeft: expression.positionYLeft + eyePosition.y,
+  positionYRight: expression.positionYRight + eyePosition.y,
+})
 
 export type AvatarLibrary = {
   activeAvatarId: string
@@ -99,7 +121,13 @@ const createStrobi = (): StudioAvatar => {
   } catch {
     // Les valeurs par défaut restent disponibles si la migration locale est invalide.
   }
-  return { id: 'strobi', name: 'Strobi', body, colors: { ...defaultAvatarColors } }
+  return {
+    id: 'strobi',
+    name: 'Strobi',
+    body,
+    colors: { ...defaultAvatarColors },
+    eyePosition: { ...defaultAvatarEyePosition },
+  }
 }
 
 export const createAvatar = (name: string): StudioAvatar => ({
@@ -107,6 +135,7 @@ export const createAvatar = (name: string): StudioAvatar => ({
   name: name.trim() || 'Nouvel avatar',
   body: { primary: { ...surfacePresets.sphere }, nodes: [] },
   colors: { ...defaultAvatarColors },
+  eyePosition: { ...defaultAvatarEyePosition },
 })
 
 export const loadAvatarLibrary = (): AvatarLibrary => {
@@ -129,6 +158,7 @@ export const loadAvatarLibrary = (): AvatarLibrary => {
         name: avatar.name,
         body: parseAvatarBody(avatar.body, surfacePresets.sphere),
         colors: parseColors(avatar.colors),
+        eyePosition: parseEyePosition(avatar.eyePosition),
       }))
     if (!avatars.length) throw new Error()
     const activeAvatarId = avatars.some(avatar => avatar.id === parsed.activeAvatarId)

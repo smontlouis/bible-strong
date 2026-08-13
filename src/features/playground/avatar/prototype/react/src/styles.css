@@ -494,6 +494,11 @@ p {
 .inherit-colors {
   margin-top: 12px;
 }
+.position-spacing {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #eceef2;
+}
 
 .panel-stack {
   display: grid;

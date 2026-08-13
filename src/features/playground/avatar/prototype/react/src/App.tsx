@@ -32,13 +32,16 @@ import {
   type BodyNode,
 } from './body'
 import {
+  applyAvatarEyePosition,
   createAvatar,
+  defaultAvatarEyePosition,
   loadAvatarLibrary,
   loadGlobalExpressions,
   persistAvatarLibrary,
   persistGlobalExpressions,
   type StudioAvatar,
   type AvatarColors,
+  type AvatarEyePosition,
 } from './avatars'
 import {
   expressionFields,
@@ -76,13 +79,20 @@ const INSPECTOR_FRAME_MS = 1000 / 24
 const emptyBodyNodes: BodyNode[] = []
 const previewGeometryCache = new WeakMap<
   Expression,
-  WeakMap<SurfaceConfig, WeakMap<BodyNode[], ReturnType<typeof renderAvatar>>>
+  WeakMap<
+    SurfaceConfig,
+    WeakMap<BodyNode[], { positionKey: string; geometry: ReturnType<typeof renderAvatar> }>
+  >
 >()
+
+const poseWithAvatarEyePosition = (expression: Expression, eyePosition: AvatarEyePosition) =>
+  poseFromExpression(applyAvatarEyePosition(expression, eyePosition))
 
 const getPreviewGeometry = (
   expression: Expression,
   surface: SurfaceConfig,
-  bodyNodes: BodyNode[]
+  bodyNodes: BodyNode[],
+  eyePosition: AvatarEyePosition = { x: 0, y: 0 }
 ) => {
   let surfaceCache = previewGeometryCache.get(expression)
   if (!surfaceCache) {
@@ -94,13 +104,14 @@ const getPreviewGeometry = (
     bodyCache = new WeakMap()
     surfaceCache.set(surface, bodyCache)
   }
+  const positionKey = `${eyePosition.x}:${eyePosition.y}`
   const cached = bodyCache.get(bodyNodes)
-  if (cached) return cached
-  const geometry = renderAvatar(poseFromExpression(expression), surface, 1, {
+  if (cached?.positionKey === positionKey) return cached.geometry
+  const geometry = renderAvatar(poseWithAvatarEyePosition(expression, eyePosition), surface, 1, {
     includeWire: false,
     bodyNodes,
   })
-  bodyCache.set(bodyNodes, geometry)
+  bodyCache.set(bodyNodes, { positionKey, geometry })
   return geometry
 }
 
@@ -386,6 +397,7 @@ function RotationGizmo({
 
 function AvatarCanvas({
   expression,
+  eyePosition,
   surface,
   wirePaths,
   showWire,
@@ -406,6 +418,7 @@ function AvatarCanvas({
   onChange,
 }: {
   expression: Expression
+  eyePosition: AvatarEyePosition
   surface: SurfaceConfig
   wirePaths: MotionValue<string>[]
   showWire: boolean
@@ -453,7 +466,7 @@ function AvatarCanvas({
   const editor =
     selectedSide === null
       ? null
-      : renderEyeEditor(poseFromExpression(expression), surface, selectedSide)
+      : renderEyeEditor(poseWithAvatarEyePosition(expression, eyePosition), surface, selectedSide)
   const toSvg = (event: React.PointerEvent<SVGElement>): readonly [number, number] => {
     const rectangle = svgRef.current!.getBoundingClientRect()
     return [
@@ -502,8 +515,16 @@ function AvatarCanvas({
     if (selectedSide === null || !editor) return
     onHighlightChange(selectedSide < 0 ? 'left' : 'right')
     const point = toSvg(event)
-    const leftEditor = renderEyeEditor(poseFromExpression(expression), surface, -1)
-    const rightEditor = renderEyeEditor(poseFromExpression(expression), surface, 1)
+    const leftEditor = renderEyeEditor(
+      poseWithAvatarEyePosition(expression, eyePosition),
+      surface,
+      -1
+    )
+    const rightEditor = renderEyeEditor(
+      poseWithAvatarEyePosition(expression, eyePosition),
+      surface,
+      1
+    )
     drag.current = {
       type,
       side: selectedSide,
@@ -779,15 +800,17 @@ function ExpressionPreview({
   surface,
   bodyNodes,
   colors,
+  eyePosition,
   id,
 }: {
   expression: Expression
   surface: SurfaceConfig
   bodyNodes: BodyNode[]
   colors: AvatarColors
+  eyePosition: AvatarEyePosition
   id: string
 }) {
-  const geometry = getPreviewGeometry(expression, surface, bodyNodes)
+  const geometry = getPreviewGeometry(expression, surface, bodyNodes, eyePosition)
   const resolvedColors = resolveColors(expression, colors)
   const clipId = `preview-${id}`
   return (
@@ -837,6 +860,7 @@ function ExpressionDialog({
   surface,
   bodyNodes,
   avatarColors,
+  avatarEyePosition,
   onChange,
   onCancel,
   onSave,
@@ -846,6 +870,7 @@ function ExpressionDialog({
   surface: SurfaceConfig
   bodyNodes: BodyNode[]
   avatarColors: AvatarColors
+  avatarEyePosition: AvatarEyePosition
   onChange: (draft: Expression) => void
   onCancel: () => void
   onSave: () => void
@@ -919,6 +944,7 @@ function ExpressionDialog({
               surface={surface}
               bodyNodes={bodyNodes}
               colors={avatarColors}
+              eyePosition={avatarEyePosition}
               id="dialog"
             />
             <strong>Aperçu en direct</strong>
@@ -1020,6 +1046,16 @@ function ExpressionDialog({
                   </div>
                 ))}
               </div>
+              <div className="position-spacing">
+                <NumericField
+                  label="Espacement"
+                  value={editing.draft.spacing}
+                  min={0}
+                  max={150}
+                  unit="u"
+                  onChange={value => update({ spacing: value })}
+                />
+              </div>
             </section>
             <section className="dialog-group">
               <h3>Rotation locale</h3>
@@ -1037,17 +1073,6 @@ function ExpressionDialog({
                   onChange={value => update({ rightAngle: value })}
                 />
               </div>
-            </section>
-            <section className="dialog-group">
-              <h3>Disposition générale</h3>
-              <NumericField
-                label="Espacement"
-                value={editing.draft.spacing}
-                min={0}
-                max={150}
-                unit="u"
-                onChange={value => update({ spacing: value })}
-              />
             </section>
             <section className="dialog-group">
               <h3>Projection</h3>
@@ -1122,7 +1147,12 @@ export default function App() {
     const pose = poseFromExpression(defaultExpression)
     return {
       pose,
-      geometry: renderAvatar(pose, surface, 1, { bodyNodes }),
+      geometry: renderAvatar(
+        poseWithAvatarEyePosition(defaultExpression, initialAvatar.eyePosition),
+        surface,
+        1,
+        { bodyNodes }
+      ),
     }
   })
   const { pose: initialPose, geometry: initialGeometry } = initialRender
@@ -1168,7 +1198,11 @@ export default function App() {
 
   const paintPose = (pose: AvatarPose, blink?: number) => {
     displayedPose.current = pose
-    const geometry = renderAvatar(pose, surfaceRef.current, blink ?? blinkValue.get(), {
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    const renderPose = avatar
+      ? poseWithAvatarEyePosition(pose.expression, avatar.eyePosition)
+      : pose
+    const geometry = renderAvatar(renderPose, surfaceRef.current, blink ?? blinkValue.get(), {
       includeWire: showWireRef.current || highlightRef.current === 'head',
       bodyNodes: bodyNodesRef.current,
     })
@@ -1396,6 +1430,14 @@ export default function App() {
     setDisplayColors(resolveColors(expression, colors))
   }
 
+  const updateAvatarEyePosition = (changes: Partial<AvatarEyePosition>) => {
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (!avatar) return
+    const eyePosition = { ...avatar.eyePosition, ...changes }
+    updateActiveAvatar(current => ({ ...current, eyePosition }))
+    paintPose(displayedPose.current)
+  }
+
   const activateAvatar = (id: string, editBody = false, preserveMode = false) => {
     const avatar = avatarsRef.current.find(item => item.id === id)
     if (!avatar) return
@@ -1551,6 +1593,7 @@ export default function App() {
     })
   }
   const activeAvatar = avatars.find(avatar => avatar.id === activeAvatarId) ?? avatars[0]
+  const activeEyePosition = activeAvatar.eyePosition ?? defaultAvatarEyePosition
 
   return (
     <div className="studio">
@@ -1569,6 +1612,7 @@ export default function App() {
         </div>
         <AvatarCanvas
           expression={expression}
+          eyePosition={activeEyePosition}
           surface={surface}
           wirePaths={wirePaths}
           showWire={showWire}
@@ -1661,6 +1705,7 @@ export default function App() {
                       surface={avatar.body.primary}
                       bodyNodes={avatar.body.nodes}
                       colors={avatar.colors}
+                      eyePosition={avatar.eyePosition}
                       id={`avatar-${avatar.id}`}
                     />
                     <span>{avatar.name}</span>
@@ -2005,6 +2050,28 @@ export default function App() {
                     )}
                   </div>
                 </section>
+                <section className="panel">
+                  <PanelTitle
+                    title="Position de base des yeux"
+                    subtitle="Déplace les deux yeux ensemble sur l’avatar, indépendamment des poses."
+                  />
+                  <div className="eye-columns">
+                    <NumericField
+                      label="Horizontale"
+                      value={activeEyePosition.x}
+                      unit="u"
+                      onActiveChange={active => updateHighlight(active ? 'both' : null)}
+                      onChange={x => updateAvatarEyePosition({ x })}
+                    />
+                    <NumericField
+                      label="Verticale"
+                      value={activeEyePosition.y}
+                      unit="u"
+                      onActiveChange={active => updateHighlight(active ? 'both' : null)}
+                      onChange={y => updateAvatarEyePosition({ y })}
+                    />
+                  </div>
+                </section>
                 <section className="panel color-panel">
                   <PanelTitle
                     title="Couleurs de l’avatar"
@@ -2190,6 +2257,17 @@ export default function App() {
                       />
                     </div>
                   </div>
+                  <div className="position-spacing">
+                    <NumericField
+                      label="Espacement"
+                      value={expression.spacing}
+                      min={0}
+                      max={150}
+                      unit="u"
+                      onActiveChange={active => updateHighlight(active ? 'both' : null)}
+                      onChange={updateSpacing}
+                    />
+                  </div>
                 </section>
                 <section className="panel">
                   <PanelTitle title="Rotation locale" subtitle="Inclinaison propre à chaque œil." />
@@ -2209,21 +2287,6 @@ export default function App() {
                       onChange={value => updateImmediate({ ...expression, rightAngle: value })}
                     />
                   </div>
-                </section>
-                <section className="panel">
-                  <PanelTitle
-                    title="Disposition générale"
-                    subtitle="Écarte ou rapproche les yeux autour de leur centre commun."
-                  />
-                  <NumericField
-                    label="Espacement"
-                    value={expression.spacing}
-                    min={0}
-                    max={150}
-                    unit="u"
-                    onActiveChange={active => updateHighlight(active ? 'both' : null)}
-                    onChange={updateSpacing}
-                  />
                 </section>
                 <section className="panel">
                   <PanelTitle title="Projection" subtitle="Perspective et repères de la tête." />
@@ -2280,6 +2343,7 @@ export default function App() {
                       surface={surface}
                       bodyNodes={bodyNodes}
                       colors={activeAvatar.colors}
+                      eyePosition={activeEyePosition}
                       id={String(index)}
                     />
                     <span>{String(index).padStart(2, '0')}</span>
@@ -2401,6 +2465,7 @@ export default function App() {
           surface={surface}
           bodyNodes={bodyNodes}
           avatarColors={activeAvatar.colors}
+          avatarEyePosition={activeEyePosition}
           onChange={draft => setEditing({ ...editing, draft })}
           onCancel={() => setEditing(null)}
           onSave={saveEditing}
