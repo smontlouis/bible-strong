@@ -4408,25 +4408,48 @@ function StudioApp() {
                     </div>
                   </InspectorCard>
                   <InspectorCard>
-                    <PanelTitle
-                      level={3}
-                      title="Rotation locale"
-                      subtitle="Inclinaison par défaut propre à chaque œil."
-                    />
+                    <div className="panel-inline-title">
+                      <PanelTitle
+                        level={3}
+                        title="Rotation locale"
+                        subtitle="Inclinaison par défaut propre à chaque œil."
+                      />
+                      <LinkButton
+                        linked={linked.rotation}
+                        label="Lier les rotations"
+                        onClick={() =>
+                          setLinked(current => ({ ...current, rotation: !current.rotation }))
+                        }
+                      />
+                    </div>
                     <div className="eye-columns">
                       <NumericField
                         label="Œil gauche"
                         value={activeAvatarEyes.leftAngle}
                         unit="°"
-                        onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                        onChange={leftAngle => updateAvatarEyes({ leftAngle })}
+                        onActiveChange={active =>
+                          updateHighlight(active ? (linked.rotation ? 'both' : 'left') : null)
+                        }
+                        onChange={leftAngle =>
+                          updateAvatarEyes({
+                            leftAngle,
+                            ...(linked.rotation ? { rightAngle: -leftAngle } : {}),
+                          })
+                        }
                       />
                       <NumericField
                         label="Œil droit"
                         value={activeAvatarEyes.rightAngle}
                         unit="°"
-                        onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                        onChange={rightAngle => updateAvatarEyes({ rightAngle })}
+                        onActiveChange={active =>
+                          updateHighlight(active ? (linked.rotation ? 'both' : 'right') : null)
+                        }
+                        onChange={rightAngle =>
+                          updateAvatarEyes({
+                            rightAngle,
+                            ...(linked.rotation ? { leftAngle: -rightAngle } : {}),
+                          })
+                        }
                       />
                     </div>
                   </InspectorCard>

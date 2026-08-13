@@ -3,6 +3,7 @@ import { createInitialSequences } from '../sequences'
 import { initialExpressions } from '../presets'
 import {
   createStudioDocumentStore,
+  loadStudioDocument,
   parseImportedStudioDocument,
   serializeStudioDocument,
   type StudioDocument,
@@ -23,6 +24,24 @@ const documentFixture = (): StudioDocument => {
 }
 
 describe('Studio document', () => {
+  const storage = (value: string | null = null) => ({ getItem: () => value })
+
+  it('loads the bundled Studio snapshot when no local project exists', () => {
+    const document = loadStudioDocument(storage())
+
+    expect(document.library.avatars).toHaveLength(10)
+    expect(document.library.activeAvatarId).toBe('avatar-4b9ea0c1-286f-4aa1-b053-61fcc416ba7e')
+    expect(document.expressions).toHaveLength(27)
+    expect(document.sequences).toHaveLength(23)
+    expect(document.playback).toEqual({ stateId: 'proud', playing: true })
+  })
+
+  it('keeps a locally saved project authoritative over the bundled snapshot', () => {
+    const localDocument = documentFixture()
+
+    expect(loadStudioDocument(storage(JSON.stringify(localDocument)))).toEqual(localDocument)
+  })
+
   it('persists one coherent document after a mutation', () => {
     const persisted: StudioDocument[] = []
     const store = createStudioDocumentStore(documentFixture(), value => persisted.push(value))

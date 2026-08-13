@@ -1,17 +1,7 @@
-import {
-  loadAvatarLibrary,
-  loadGlobalExpressions,
-  parseAvatarLibrary,
-  parseExpressions,
-  type AvatarLibrary,
-} from './avatars'
+import { parseAvatarLibrary, parseExpressions, type AvatarLibrary } from './avatars'
 import type { Expression } from './geometry'
-import {
-  loadSequences,
-  normalizeSequencesForExpressions,
-  parseSequences,
-  type AvatarSequence,
-} from './sequences'
+import { normalizeSequencesForExpressions, parseSequences, type AvatarSequence } from './sequences'
+import defaultStudioDocument from './defaultStudioDocument.json'
 
 export type StatePlaybackSelection = { stateId: string | null; playing: boolean }
 
@@ -26,7 +16,6 @@ export type StudioDocument = {
 export type StudioDocumentPatch = Partial<Omit<StudioDocument, 'version'>>
 
 const DOCUMENT_STORAGE_KEY = 'bible-strong-avatar-studio-v2'
-const LEGACY_PLAYBACK_STORAGE_KEY = 'bible-strong-avatar-state-playback-v1'
 
 const defaultPlayback: StatePlaybackSelection = { stateId: 'idle', playing: true }
 
@@ -94,28 +83,18 @@ export const parseImportedStudioDocument = (
   return parseStudioDocument(candidate, fallback)
 }
 
-const loadLegacyPlayback = (): StatePlaybackSelection => {
-  try {
-    return parsePlayback(
-      JSON.parse(window.localStorage.getItem(LEGACY_PLAYBACK_STORAGE_KEY) ?? 'null')
-    )
-  } catch {
-    return { ...defaultPlayback }
-  }
+const createBundledStudioDocument = () => {
+  const snapshot = JSON.parse(JSON.stringify(defaultStudioDocument)) as StudioDocument
+  return parseStudioDocument(snapshot, snapshot)
 }
 
-export const loadStudioDocument = (): StudioDocument => {
-  const expressions = loadGlobalExpressions()
-  const fallback: StudioDocument = {
-    version: 2,
-    library: loadAvatarLibrary(),
-    expressions,
-    sequences: normalizeSequencesForExpressions(loadSequences(expressions), expressions),
-    playback: loadLegacyPlayback(),
-  }
+export const loadStudioDocument = (
+  storage: Pick<Storage, 'getItem'> = window.localStorage
+): StudioDocument => {
+  const fallback = createBundledStudioDocument()
   try {
     return parseStudioDocument(
-      JSON.parse(window.localStorage.getItem(DOCUMENT_STORAGE_KEY) ?? 'null'),
+      JSON.parse(storage.getItem(DOCUMENT_STORAGE_KEY) ?? 'null'),
       fallback
     )
   } catch {
