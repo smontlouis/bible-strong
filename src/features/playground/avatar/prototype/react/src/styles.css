@@ -511,6 +511,46 @@ p {
   display: grid;
   gap: 14px;
 }
+.control-section {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d8dde8;
+  border-radius: 22px;
+  background: #eef1f6;
+}
+.control-section-header {
+  padding: 4px 5px 2px;
+}
+.control-section-header h2 {
+  margin: 0;
+  color: #343b49;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.control-section-header p {
+  margin: 5px 0 0;
+  color: #858c99;
+  font-size: 10px;
+  line-height: 1.45;
+}
+.control-section-content {
+  display: grid;
+  gap: 10px;
+}
+.control-section .panel {
+  border-color: #e0e3e9;
+  box-shadow: 0 4px 16px rgb(24 28 35 / 3%);
+}
+.control-section-compact {
+  padding: 10px;
+  border-radius: 17px;
+}
+.control-section-compact .control-section-header {
+  padding-inline: 3px;
+}
 .body-tree {
   display: grid;
   gap: 6px;
@@ -671,7 +711,9 @@ p {
   border-top: 0;
 }
 .panel-title h2,
+.panel-title h3,
 .panel-inline-title h2,
+.panel-inline-title h3,
 .preset-header h2,
 .state-detail h2 {
   margin: 0;

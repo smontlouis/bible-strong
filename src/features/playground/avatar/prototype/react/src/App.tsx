@@ -948,139 +948,157 @@ function ExpressionDialog({
             <span>Projection sur la forme active</span>
           </aside>
           <div className="dialog-fields">
-            <section className="dialog-group">
-              <h3>Couleurs</h3>
-              <div className="eye-columns">
+            <ControlSection
+              title="Corps"
+              subtitle="Apparence et orientation générale de l’avatar."
+              compact
+            >
+              <section className="dialog-group">
+                <h3>Couleur du corps</h3>
                 <ColorField
                   label="Corps"
                   value={editing.draft.bodyColor ?? avatarColors.body}
                   onChange={bodyColor => update({ bodyColor })}
                 />
+              </section>
+              <section className="dialog-group">
+                <h3>Rotation de la tête</h3>
+                {(['headX', 'headY', 'headZ'] as const).map(field => (
+                  <NumericField
+                    key={field}
+                    label={`Rotation ${field.at(-1)?.toUpperCase()}`}
+                    value={editing.draft[field]}
+                    unit="°"
+                    onChange={value => update({ [field]: value })}
+                  />
+                ))}
+              </section>
+            </ControlSection>
+            <ControlSection
+              title="Yeux"
+              subtitle="Forme, placement et orientation propres au regard."
+              compact
+            >
+              <section className="dialog-group">
+                <h3>Couleur des yeux</h3>
                 <ColorField
                   label="Yeux"
                   value={editing.draft.eyeColor ?? avatarColors.eyes}
                   onChange={eyeColor => update({ eyeColor })}
                 />
-              </div>
-            </section>
-            <section className="dialog-group">
-              <h3>Rotation de la tête</h3>
-              {(['headX', 'headY', 'headZ'] as const).map(field => (
-                <NumericField
-                  key={field}
-                  label={`Rotation ${field.at(-1)?.toUpperCase()}`}
-                  value={editing.draft[field]}
-                  unit="°"
-                  onChange={value => update({ [field]: value })}
-                />
-              ))}
-            </section>
-            {(['width', 'height', 'size'] as const).map(dimension => (
-              <section className="dialog-group" key={dimension}>
-                <div className="panel-inline-title">
-                  <h3>
-                    {
-                      { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
-                        dimension
-                      ]
-                    }
-                  </h3>
-                  <LinkButton
-                    linked={linked[dimension]}
-                    label={`Lier ${dimension}`}
-                    onClick={() =>
-                      setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
-                    }
-                  />
-                </div>
-                <div className="eye-columns">
-                  {(['Left', 'Right'] as Side[]).map(side => {
-                    const width = editing.draft[`width${side}`]
-                    const height = editing.draft[`height${side}`]
-                    const value =
-                      dimension === 'width'
-                        ? width
-                        : dimension === 'height'
-                          ? height
-                          : Math.max(width, height)
-                    return (
-                      <NumericField
-                        key={side}
-                        label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
-                        value={value}
-                        min={10}
-                        max={dimension === 'size' ? 110 : 100}
-                        unit="u"
-                        onChange={next =>
-                          dimension === 'size'
-                            ? updateSize(side, next)
-                            : updateDimension(side, dimension, next)
-                        }
-                      />
-                    )
-                  })}
-                </div>
               </section>
-            ))}
-            <section className="dialog-group">
-              <h3>Position des yeux</h3>
-              <div className="eye-columns">
-                {(['Left', 'Right'] as Side[]).map(side => (
-                  <div className="eye-column" key={side}>
-                    <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
-                    <NumericField
-                      label="Horizontale"
-                      value={editing.draft[`positionX${side}`]}
-                      unit="u"
-                      onChange={value => update({ [`positionX${side}`]: value })}
-                    />
-                    <NumericField
-                      label="Verticale"
-                      value={editing.draft[`positionY${side}`]}
-                      unit="u"
-                      onChange={value => update({ [`positionY${side}`]: value })}
+              {(['width', 'height', 'size'] as const).map(dimension => (
+                <section className="dialog-group" key={dimension}>
+                  <div className="panel-inline-title">
+                    <h3>
+                      {
+                        { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
+                          dimension
+                        ]
+                      }
+                    </h3>
+                    <LinkButton
+                      linked={linked[dimension]}
+                      label={`Lier ${dimension}`}
+                      onClick={() =>
+                        setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                      }
                     />
                   </div>
-                ))}
-              </div>
-              <div className="position-spacing">
+                  <div className="eye-columns">
+                    {(['Left', 'Right'] as Side[]).map(side => {
+                      const width = editing.draft[`width${side}`]
+                      const height = editing.draft[`height${side}`]
+                      const value =
+                        dimension === 'width'
+                          ? width
+                          : dimension === 'height'
+                            ? height
+                            : Math.max(width, height)
+                      return (
+                        <NumericField
+                          key={side}
+                          label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
+                          value={value}
+                          min={10}
+                          max={dimension === 'size' ? 110 : 100}
+                          unit="u"
+                          onChange={next =>
+                            dimension === 'size'
+                              ? updateSize(side, next)
+                              : updateDimension(side, dimension, next)
+                          }
+                        />
+                      )
+                    })}
+                  </div>
+                </section>
+              ))}
+              <section className="dialog-group">
+                <h3>Position et espacement</h3>
+                <div className="eye-columns">
+                  {(['Left', 'Right'] as Side[]).map(side => (
+                    <div className="eye-column" key={side}>
+                      <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
+                      <NumericField
+                        label="Horizontale"
+                        value={editing.draft[`positionX${side}`]}
+                        unit="u"
+                        onChange={value => update({ [`positionX${side}`]: value })}
+                      />
+                      <NumericField
+                        label="Verticale"
+                        value={editing.draft[`positionY${side}`]}
+                        unit="u"
+                        onChange={value => update({ [`positionY${side}`]: value })}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="position-spacing">
+                  <NumericField
+                    label="Espacement"
+                    value={editing.draft.spacing}
+                    min={0}
+                    max={150}
+                    unit="u"
+                    onChange={value => update({ spacing: value })}
+                  />
+                </div>
+              </section>
+              <section className="dialog-group">
+                <h3>Rotation locale</h3>
+                <div className="eye-columns">
+                  <NumericField
+                    label="Œil gauche"
+                    value={editing.draft.leftAngle}
+                    unit="°"
+                    onChange={value => update({ leftAngle: value })}
+                  />
+                  <NumericField
+                    label="Œil droit"
+                    value={editing.draft.rightAngle}
+                    unit="°"
+                    onChange={value => update({ rightAngle: value })}
+                  />
+                </div>
+              </section>
+            </ControlSection>
+            <ControlSection
+              title="Projection"
+              subtitle="Perspective appliquée à la surface active."
+              compact
+            >
+              <section className="dialog-group">
                 <NumericField
-                  label="Espacement"
-                  value={editing.draft.spacing}
-                  min={0}
-                  max={150}
-                  unit="u"
-                  onChange={value => update({ spacing: value })}
+                  label="Perspective"
+                  value={editing.draft.perspective}
+                  step={0.01}
+                  unit="×"
+                  onChange={value => update({ perspective: value })}
                 />
-              </div>
-            </section>
-            <section className="dialog-group">
-              <h3>Rotation locale</h3>
-              <div className="eye-columns">
-                <NumericField
-                  label="Œil gauche"
-                  value={editing.draft.leftAngle}
-                  unit="°"
-                  onChange={value => update({ leftAngle: value })}
-                />
-                <NumericField
-                  label="Œil droit"
-                  value={editing.draft.rightAngle}
-                  unit="°"
-                  onChange={value => update({ rightAngle: value })}
-                />
-              </div>
-            </section>
-            <section className="dialog-group">
-              <h3>Projection</h3>
-              <NumericField
-                label="Perspective"
-                value={editing.draft.perspective}
-                step={0.01}
-                unit="×"
-                onChange={value => update({ perspective: value })}
-              />
-            </section>
+              </section>
+            </ControlSection>
           </div>
         </div>
         <footer className="dialog-actions">
@@ -1802,345 +1820,420 @@ export default function App() {
           <div className="panel-stack">
             {bodyEditing && (
               <>
-                <section className="panel body-panel">
-                  <PanelTitle
-                    title="Construction du corps"
-                    subtitle="Une forme principale porte les yeux. Les autres primitives se placent autour d’elle."
-                  />
-                  <div className="body-tree">
-                    <button
-                      type="button"
-                      aria-pressed={selectedBodyNodeId === 'primary'}
-                      onClick={() => setSelectedBodyNodeId('primary')}
-                    >
-                      <span className="body-node-icon">●</span>
-                      <span>
-                        <strong>Forme principale</strong>
-                        <small>{surfaceLabels[surface.type]} · porte les yeux</small>
-                      </span>
-                    </button>
-                    {bodyNodes.map(node => (
+                <ControlSection
+                  title="Corps"
+                  subtitle="Construction, forme et couleur de la tête de l’avatar."
+                >
+                  <section className="panel body-panel">
+                    <PanelTitle
+                      level={3}
+                      title="Construction du corps"
+                      subtitle="Une forme principale porte les yeux. Les autres primitives se placent autour d’elle."
+                    />
+                    <div className="body-tree">
                       <button
                         type="button"
-                        key={node.id}
-                        aria-pressed={selectedBodyNodeId === node.id}
-                        onClick={() => setSelectedBodyNodeId(node.id)}
+                        aria-pressed={selectedBodyNodeId === 'primary'}
+                        onClick={() => setSelectedBodyNodeId('primary')}
                       >
-                        <span className="body-node-icon">◇</span>
+                        <span className="body-node-icon">●</span>
                         <span>
-                          <strong>{node.name}</strong>
-                          <small>{surfaceLabels[node.surface.type]}</small>
+                          <strong>Forme principale</strong>
+                          <small>{surfaceLabels[surface.type]} · porte les yeux</small>
                         </span>
                       </button>
-                    ))}
-                  </div>
-                  <div className="body-add">
-                    <span>
-                      Ajouter une forme · {bodyNodes.length}/{MAX_BODY_NODES}
-                    </span>
-                    <div>
-                      {bodyPrimitiveTypes.map(type => (
+                      {bodyNodes.map(node => (
                         <button
                           type="button"
-                          key={type}
-                          disabled={bodyNodes.length >= MAX_BODY_NODES}
-                          onClick={() => addBodyNode(type)}
+                          key={node.id}
+                          aria-pressed={selectedBodyNodeId === node.id}
+                          onClick={() => setSelectedBodyNodeId(node.id)}
                         >
-                          + {surfaceLabels[type]}
+                          <span className="body-node-icon">◇</span>
+                          <span>
+                            <strong>{node.name}</strong>
+                            <small>{surfaceLabels[node.surface.type]}</small>
+                          </span>
                         </button>
                       ))}
                     </div>
-                  </div>
-                  {selectedBodyNode && (
-                    <div className="body-node-editor">
-                      <div className="body-node-actions">
-                        <strong>{selectedBodyNode.name}</strong>
-                        <div>
+                    <div className="body-add">
+                      <span>
+                        Ajouter une forme · {bodyNodes.length}/{MAX_BODY_NODES}
+                      </span>
+                      <div>
+                        {bodyPrimitiveTypes.map(type => (
                           <button
                             type="button"
+                            key={type}
                             disabled={bodyNodes.length >= MAX_BODY_NODES}
-                            onClick={duplicateSelectedBodyNode}
+                            onClick={() => addBodyNode(type)}
                           >
-                            Dupliquer
+                            + {surfaceLabels[type]}
                           </button>
-                          <button className="danger" type="button" onClick={deleteSelectedBodyNode}>
-                            Supprimer
-                          </button>
-                        </div>
-                      </div>
-                      <div className="surface-fields">
-                        {(['width', 'height', 'depth'] as const).map(dimension => (
-                          <NumericField
-                            key={dimension}
-                            label={
-                              { width: 'Largeur', height: 'Hauteur', depth: 'Profondeur' }[
-                                dimension
-                              ]
-                            }
-                            value={selectedBodyNode.surface[dimension]}
-                            min={10}
-                            max={300}
-                            unit="u"
-                            onChange={value =>
-                              updateSelectedBodyNode(node => ({
-                                ...node,
-                                surface: { ...node.surface, [dimension]: value },
-                              }))
-                            }
-                          />
                         ))}
-                        {(selectedBodyNode.surface.type === 'cube' ||
-                          selectedBodyNode.surface.type === 'diamond' ||
-                          selectedBodyNode.surface.type === 'cylinder') && (
-                          <NumericField
-                            label="Rondeur"
-                            value={selectedBodyNode.surface.roundness}
-                            min={0}
-                            max={2}
-                            step={0.01}
-                            onChange={roundness =>
-                              updateSelectedBodyNode(node => ({
-                                ...node,
-                                surface: { ...node.surface, roundness },
-                              }))
-                            }
-                          />
-                        )}
-                        {(selectedBodyNode.surface.type === 'cylinder' ||
-                          selectedBodyNode.surface.type === 'cone') && (
-                          <NumericField
-                            label="Rondeur globale"
-                            value={selectedBodyNode.surface.morphRoundness ?? 0}
-                            min={0}
-                            max={2}
-                            step={0.01}
-                            onChange={morphRoundness =>
-                              updateSelectedBodyNode(node => ({
-                                ...node,
-                                surface: { ...node.surface, morphRoundness },
-                              }))
-                            }
-                          />
-                        )}
-                        {selectedBodyNode.surface.type === 'cone' && (
-                          <>
-                            <NumericField
-                              label="Rondeur pointe"
-                              value={selectedBodyNode.surface.tipRoundness ?? 0}
-                              min={0}
-                              max={2}
-                              step={0.01}
-                              onChange={tipRoundness =>
-                                updateSelectedBodyNode(node => ({
-                                  ...node,
-                                  surface: { ...node.surface, tipRoundness },
-                                }))
-                              }
-                            />
-                            <NumericField
-                              label="Rondeur base"
-                              value={selectedBodyNode.surface.baseRoundness ?? 0}
-                              min={0}
-                              max={2}
-                              step={0.01}
-                              onChange={baseRoundness =>
-                                updateSelectedBodyNode(node => ({
-                                  ...node,
-                                  surface: { ...node.surface, baseRoundness },
-                                }))
-                              }
-                            />
-                          </>
-                        )}
-                      </div>
-                      <div className="body-transform-grid">
-                        <div>
-                          <h3>Position locale</h3>
-                          {(['X', 'Y', 'Z'] as const).map((axis, index) => (
-                            <NumericField
-                              key={axis}
-                              label={axis}
-                              value={selectedBodyNode.position[index]}
-                              unit="u"
-                              onChange={value =>
-                                updateNodeVector('position', index as 0 | 1 | 2, value)
-                              }
-                            />
-                          ))}
-                        </div>
-                        <div>
-                          <h3>Rotation locale</h3>
-                          {(['X', 'Y', 'Z'] as const).map((axis, index) => (
-                            <NumericField
-                              key={axis}
-                              label={axis}
-                              value={selectedBodyNode.rotation[index]}
-                              unit="°"
-                              onChange={value =>
-                                updateNodeVector('rotation', index as 0 | 1 | 2, value)
-                              }
-                            />
-                          ))}
-                        </div>
                       </div>
                     </div>
-                  )}
-                </section>
-                <section className="panel surface-panel">
-                  <PanelTitle
-                    title="Forme principale"
-                    subtitle="Cette surface est la référence du visage et porte les yeux."
-                  />
-                  <div className="surface-grid">
-                    {bodyPrimitiveTypes.map(type => {
-                      const previewSurface = type === surface.type ? surface : surfacePresets[type]
-                      return (
-                        <button
-                          className="surface-card"
-                          type="button"
-                          key={type}
-                          aria-pressed={surface.type === type}
-                          onClick={() => {
-                            setSelectedBodyNodeId('primary')
-                            if (type !== surface.type) {
-                              updateSurface({ ...surfacePresets[type] })
-                            }
-                          }}
-                        >
-                          <SurfaceThumbnail surface={previewSurface} />
-                          <span>{surfaceLabels[type]}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                  <div className="surface-fields">
-                    <NumericField
-                      label="Largeur"
-                      value={surface.width}
-                      min={120}
-                      max={300}
-                      unit="u"
-                      onChange={width => updateSurface({ ...surface, width })}
-                    />
-                    <NumericField
-                      label="Hauteur"
-                      value={surface.height}
-                      min={120}
-                      max={300}
-                      unit="u"
-                      onChange={height => updateSurface({ ...surface, height })}
-                    />
-                    <NumericField
-                      label="Profondeur"
-                      value={surface.depth}
-                      min={100}
-                      max={300}
-                      unit="u"
-                      onChange={depth => updateSurface({ ...surface, depth })}
-                    />
-                    {(surface.type === 'cube' || surface.type === 'diamond') && (
-                      <NumericField
-                        label="Rondeur"
-                        value={surface.roundness}
-                        min={0}
-                        max={2}
-                        step={0.01}
-                        onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                        onChange={roundness => updateSurface({ ...surface, roundness })}
-                      />
+                    {selectedBodyNode && (
+                      <div className="body-node-editor">
+                        <div className="body-node-actions">
+                          <strong>{selectedBodyNode.name}</strong>
+                          <div>
+                            <button
+                              type="button"
+                              disabled={bodyNodes.length >= MAX_BODY_NODES}
+                              onClick={duplicateSelectedBodyNode}
+                            >
+                              Dupliquer
+                            </button>
+                            <button
+                              className="danger"
+                              type="button"
+                              onClick={deleteSelectedBodyNode}
+                            >
+                              Supprimer
+                            </button>
+                          </div>
+                        </div>
+                        <div className="surface-fields">
+                          {(['width', 'height', 'depth'] as const).map(dimension => (
+                            <NumericField
+                              key={dimension}
+                              label={
+                                { width: 'Largeur', height: 'Hauteur', depth: 'Profondeur' }[
+                                  dimension
+                                ]
+                              }
+                              value={selectedBodyNode.surface[dimension]}
+                              min={10}
+                              max={300}
+                              unit="u"
+                              onChange={value =>
+                                updateSelectedBodyNode(node => ({
+                                  ...node,
+                                  surface: { ...node.surface, [dimension]: value },
+                                }))
+                              }
+                            />
+                          ))}
+                          {(selectedBodyNode.surface.type === 'cube' ||
+                            selectedBodyNode.surface.type === 'diamond' ||
+                            selectedBodyNode.surface.type === 'cylinder') && (
+                            <NumericField
+                              label="Rondeur"
+                              value={selectedBodyNode.surface.roundness}
+                              min={0}
+                              max={2}
+                              step={0.01}
+                              onChange={roundness =>
+                                updateSelectedBodyNode(node => ({
+                                  ...node,
+                                  surface: { ...node.surface, roundness },
+                                }))
+                              }
+                            />
+                          )}
+                          {(selectedBodyNode.surface.type === 'cylinder' ||
+                            selectedBodyNode.surface.type === 'cone') && (
+                            <NumericField
+                              label="Rondeur globale"
+                              value={selectedBodyNode.surface.morphRoundness ?? 0}
+                              min={0}
+                              max={2}
+                              step={0.01}
+                              onChange={morphRoundness =>
+                                updateSelectedBodyNode(node => ({
+                                  ...node,
+                                  surface: { ...node.surface, morphRoundness },
+                                }))
+                              }
+                            />
+                          )}
+                          {selectedBodyNode.surface.type === 'cone' && (
+                            <>
+                              <NumericField
+                                label="Rondeur pointe"
+                                value={selectedBodyNode.surface.tipRoundness ?? 0}
+                                min={0}
+                                max={2}
+                                step={0.01}
+                                onChange={tipRoundness =>
+                                  updateSelectedBodyNode(node => ({
+                                    ...node,
+                                    surface: { ...node.surface, tipRoundness },
+                                  }))
+                                }
+                              />
+                              <NumericField
+                                label="Rondeur base"
+                                value={selectedBodyNode.surface.baseRoundness ?? 0}
+                                min={0}
+                                max={2}
+                                step={0.01}
+                                onChange={baseRoundness =>
+                                  updateSelectedBodyNode(node => ({
+                                    ...node,
+                                    surface: { ...node.surface, baseRoundness },
+                                  }))
+                                }
+                              />
+                            </>
+                          )}
+                        </div>
+                        <div className="body-transform-grid">
+                          <div>
+                            <h3>Position locale</h3>
+                            {(['X', 'Y', 'Z'] as const).map((axis, index) => (
+                              <NumericField
+                                key={axis}
+                                label={axis}
+                                value={selectedBodyNode.position[index]}
+                                unit="u"
+                                onChange={value =>
+                                  updateNodeVector('position', index as 0 | 1 | 2, value)
+                                }
+                              />
+                            ))}
+                          </div>
+                          <div>
+                            <h3>Rotation locale</h3>
+                            {(['X', 'Y', 'Z'] as const).map((axis, index) => (
+                              <NumericField
+                                key={axis}
+                                label={axis}
+                                value={selectedBodyNode.rotation[index]}
+                                unit="°"
+                                onChange={value =>
+                                  updateNodeVector('rotation', index as 0 | 1 | 2, value)
+                                }
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
                     )}
-                    {surface.type === 'cylinder' && (
+                  </section>
+                  <section className="panel surface-panel">
+                    <PanelTitle
+                      level={3}
+                      title="Forme principale"
+                      subtitle="Cette surface est la référence du visage et porte les yeux."
+                    />
+                    <div className="surface-grid">
+                      {bodyPrimitiveTypes.map(type => {
+                        const previewSurface =
+                          type === surface.type ? surface : surfacePresets[type]
+                        return (
+                          <button
+                            className="surface-card"
+                            type="button"
+                            key={type}
+                            aria-pressed={surface.type === type}
+                            onClick={() => {
+                              setSelectedBodyNodeId('primary')
+                              if (type !== surface.type) {
+                                updateSurface({ ...surfacePresets[type] })
+                              }
+                            }}
+                          >
+                            <SurfaceThumbnail surface={previewSurface} />
+                            <span>{surfaceLabels[type]}</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <div className="surface-fields">
                       <NumericField
-                        label="Rondeur des arêtes"
-                        value={surface.roundness}
-                        min={0}
-                        max={2}
-                        step={0.01}
-                        onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                        onChange={roundness => updateSurface({ ...surface, roundness })}
+                        label="Largeur"
+                        value={surface.width}
+                        min={120}
+                        max={300}
+                        unit="u"
+                        onChange={width => updateSurface({ ...surface, width })}
                       />
-                    )}
-                    {(surface.type === 'cylinder' || surface.type === 'cone') && (
                       <NumericField
-                        label="Rondeur globale"
-                        value={surface.morphRoundness ?? 0}
-                        min={0}
-                        max={2}
-                        step={0.01}
-                        onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                        onChange={morphRoundness => updateSurface({ ...surface, morphRoundness })}
+                        label="Hauteur"
+                        value={surface.height}
+                        min={120}
+                        max={300}
+                        unit="u"
+                        onChange={height => updateSurface({ ...surface, height })}
                       />
-                    )}
-                    {surface.type === 'cone' && (
-                      <>
+                      <NumericField
+                        label="Profondeur"
+                        value={surface.depth}
+                        min={100}
+                        max={300}
+                        unit="u"
+                        onChange={depth => updateSurface({ ...surface, depth })}
+                      />
+                      {(surface.type === 'cube' || surface.type === 'diamond') && (
                         <NumericField
-                          label="Rondeur pointe"
-                          value={surface.tipRoundness ?? 0}
+                          label="Rondeur"
+                          value={surface.roundness}
                           min={0}
                           max={2}
                           step={0.01}
                           onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                          onChange={tipRoundness => updateSurface({ ...surface, tipRoundness })}
+                          onChange={roundness => updateSurface({ ...surface, roundness })}
                         />
+                      )}
+                      {surface.type === 'cylinder' && (
                         <NumericField
-                          label="Rondeur base"
-                          value={surface.baseRoundness ?? 0}
+                          label="Rondeur des arêtes"
+                          value={surface.roundness}
                           min={0}
                           max={2}
                           step={0.01}
                           onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                          onChange={baseRoundness => updateSurface({ ...surface, baseRoundness })}
+                          onChange={roundness => updateSurface({ ...surface, roundness })}
                         />
-                      </>
-                    )}
-                  </div>
-                </section>
-                <section className="panel eye-defaults-intro">
-                  <PanelTitle
-                    title="Yeux par défaut"
-                    subtitle="Définis l’identité du regard de cet avatar. Les poses s’ajoutent ensuite à cette base."
-                  />
-                </section>
-                {(['width', 'height', 'size'] as const).map(dimension => (
-                  <section className="panel compact" key={`avatar-${dimension}`}>
+                      )}
+                      {(surface.type === 'cylinder' || surface.type === 'cone') && (
+                        <NumericField
+                          label="Rondeur globale"
+                          value={surface.morphRoundness ?? 0}
+                          min={0}
+                          max={2}
+                          step={0.01}
+                          onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                          onChange={morphRoundness => updateSurface({ ...surface, morphRoundness })}
+                        />
+                      )}
+                      {surface.type === 'cone' && (
+                        <>
+                          <NumericField
+                            label="Rondeur pointe"
+                            value={surface.tipRoundness ?? 0}
+                            min={0}
+                            max={2}
+                            step={0.01}
+                            onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                            onChange={tipRoundness => updateSurface({ ...surface, tipRoundness })}
+                          />
+                          <NumericField
+                            label="Rondeur base"
+                            value={surface.baseRoundness ?? 0}
+                            min={0}
+                            max={2}
+                            step={0.01}
+                            onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                            onChange={baseRoundness => updateSurface({ ...surface, baseRoundness })}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </section>
+                  <section className="panel color-panel">
+                    <PanelTitle
+                      level={3}
+                      title="Couleur du corps"
+                      subtitle="Couleur de base utilisée par les poses et les expressions."
+                    />
+                    <ColorField
+                      label="Corps"
+                      value={activeAvatar.colors.body}
+                      onChange={body => updateAvatarColors({ body })}
+                    />
+                  </section>
+                </ControlSection>
+                <ControlSection
+                  title="Yeux"
+                  subtitle="Forme, placement, orientation et couleur du regard par défaut."
+                >
+                  <section className="panel eye-defaults-intro">
+                    <PanelTitle
+                      level={3}
+                      title="Yeux par défaut"
+                      subtitle="Définis l’identité du regard de cet avatar. Les poses s’ajoutent ensuite à cette base."
+                    />
+                  </section>
+                  {(['width', 'height', 'size'] as const).map(dimension => (
+                    <section className="panel compact" key={`avatar-${dimension}`}>
+                      <div className="panel-inline-title">
+                        <h3>
+                          {
+                            { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
+                              dimension
+                            ]
+                          }
+                        </h3>
+                        <LinkButton
+                          linked={linked[dimension]}
+                          label={`Lier ${dimension}`}
+                          onClick={() =>
+                            setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                          }
+                        />
+                      </div>
+                      <div className="eye-columns">
+                        {(['Left', 'Right'] as Side[]).map(side => {
+                          const width = activeAvatarEyes[`width${side}`]
+                          const height = activeAvatarEyes[`height${side}`]
+                          const value =
+                            dimension === 'width'
+                              ? width
+                              : dimension === 'height'
+                                ? height
+                                : Math.max(width, height)
+                          return (
+                            <NumericField
+                              key={side}
+                              label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
+                              value={value}
+                              min={10}
+                              max={dimension === 'size' ? 110 : 100}
+                              unit="u"
+                              onActiveChange={active =>
+                                updateHighlight(
+                                  active
+                                    ? linked[dimension]
+                                      ? 'both'
+                                      : side === 'Left'
+                                        ? 'left'
+                                        : 'right'
+                                    : null
+                                )
+                              }
+                              onChange={next =>
+                                dimension === 'size'
+                                  ? updateAvatarEyeSize(side, next)
+                                  : updateAvatarEyeDimension(side, dimension, next)
+                              }
+                            />
+                          )
+                        })}
+                      </div>
+                    </section>
+                  ))}
+                  <section className="panel">
                     <div className="panel-inline-title">
-                      <h2>
-                        {
-                          { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
-                            dimension
-                          ]
-                        }
-                      </h2>
+                      <div>
+                        <h3>Position et espacement</h3>
+                        <p className="panel-inline-subtitle">
+                          Coordonnées propres à l’avatar, indépendantes des poses.
+                        </p>
+                      </div>
                       <LinkButton
-                        linked={linked[dimension]}
-                        label={`Lier ${dimension}`}
+                        linked={linked.position}
+                        label="Lier la position des yeux"
                         onClick={() =>
-                          setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                          setLinked(current => ({ ...current, position: !current.position }))
                         }
                       />
                     </div>
                     <div className="eye-columns">
-                      {(['Left', 'Right'] as Side[]).map(side => {
-                        const width = activeAvatarEyes[`width${side}`]
-                        const height = activeAvatarEyes[`height${side}`]
-                        const value =
-                          dimension === 'width'
-                            ? width
-                            : dimension === 'height'
-                              ? height
-                              : Math.max(width, height)
-                        return (
+                      {(['Left', 'Right'] as Side[]).map(side => (
+                        <div className="eye-column" key={side}>
+                          <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
                           <NumericField
-                            key={side}
-                            label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
-                            value={value}
-                            min={10}
-                            max={dimension === 'size' ? 110 : 100}
+                            label="Horizontale"
+                            value={activeAvatarEyes[`positionX${side}`]}
                             unit="u"
                             onActiveChange={active =>
                               updateHighlight(
                                 active
-                                  ? linked[dimension]
+                                  ? linked.position
                                     ? 'both'
                                     : side === 'Left'
                                       ? 'left'
@@ -2148,349 +2241,347 @@ export default function App() {
                                   : null
                               )
                             }
-                            onChange={next =>
-                              dimension === 'size'
-                                ? updateAvatarEyeSize(side, next)
-                                : updateAvatarEyeDimension(side, dimension, next)
-                            }
+                            onChange={value => updateAvatarEyePosition(side, 'X', value)}
                           />
-                        )
-                      })}
+                          <NumericField
+                            label="Verticale"
+                            value={activeAvatarEyes[`positionY${side}`]}
+                            unit="u"
+                            onActiveChange={active =>
+                              updateHighlight(
+                                active
+                                  ? linked.position
+                                    ? 'both'
+                                    : side === 'Left'
+                                      ? 'left'
+                                      : 'right'
+                                  : null
+                              )
+                            }
+                            onChange={value => updateAvatarEyePosition(side, 'Y', value)}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="position-spacing">
+                      <NumericField
+                        label="Espacement"
+                        value={activeAvatarEyes.spacing}
+                        min={0}
+                        max={150}
+                        unit="u"
+                        onActiveChange={active => updateHighlight(active ? 'both' : null)}
+                        onChange={spacing => updateAvatarEyes({ spacing })}
+                      />
                     </div>
                   </section>
-                ))}
-                <section className="panel">
-                  <div className="panel-inline-title">
-                    <div>
-                      <h2>Position des yeux</h2>
-                      <p className="panel-inline-subtitle">
-                        Coordonnées propres à l’avatar, indépendantes des poses.
-                      </p>
+                  <section className="panel">
+                    <PanelTitle
+                      level={3}
+                      title="Rotation locale"
+                      subtitle="Inclinaison par défaut propre à chaque œil."
+                    />
+                    <div className="eye-columns">
+                      <NumericField
+                        label="Œil gauche"
+                        value={activeAvatarEyes.leftAngle}
+                        unit="°"
+                        onActiveChange={active => updateHighlight(active ? 'left' : null)}
+                        onChange={leftAngle => updateAvatarEyes({ leftAngle })}
+                      />
+                      <NumericField
+                        label="Œil droit"
+                        value={activeAvatarEyes.rightAngle}
+                        unit="°"
+                        onActiveChange={active => updateHighlight(active ? 'right' : null)}
+                        onChange={rightAngle => updateAvatarEyes({ rightAngle })}
+                      />
                     </div>
-                    <LinkButton
-                      linked={linked.position}
-                      label="Lier la position des yeux"
-                      onClick={() =>
-                        setLinked(current => ({ ...current, position: !current.position }))
-                      }
-                    />
-                  </div>
-                  <div className="eye-columns">
-                    {(['Left', 'Right'] as Side[]).map(side => (
-                      <div className="eye-column" key={side}>
-                        <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
-                        <NumericField
-                          label="Horizontale"
-                          value={activeAvatarEyes[`positionX${side}`]}
-                          unit="u"
-                          onActiveChange={active =>
-                            updateHighlight(
-                              active
-                                ? linked.position
-                                  ? 'both'
-                                  : side === 'Left'
-                                    ? 'left'
-                                    : 'right'
-                                : null
-                            )
-                          }
-                          onChange={value => updateAvatarEyePosition(side, 'X', value)}
-                        />
-                        <NumericField
-                          label="Verticale"
-                          value={activeAvatarEyes[`positionY${side}`]}
-                          unit="u"
-                          onActiveChange={active =>
-                            updateHighlight(
-                              active
-                                ? linked.position
-                                  ? 'both'
-                                  : side === 'Left'
-                                    ? 'left'
-                                    : 'right'
-                                : null
-                            )
-                          }
-                          onChange={value => updateAvatarEyePosition(side, 'Y', value)}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="position-spacing">
-                    <NumericField
-                      label="Espacement"
-                      value={activeAvatarEyes.spacing}
-                      min={0}
-                      max={150}
-                      unit="u"
-                      onActiveChange={active => updateHighlight(active ? 'both' : null)}
-                      onChange={spacing => updateAvatarEyes({ spacing })}
-                    />
-                  </div>
-                </section>
-                <section className="panel">
-                  <PanelTitle
-                    title="Rotation locale"
-                    subtitle="Inclinaison par défaut propre à chaque œil."
-                  />
-                  <div className="eye-columns">
-                    <NumericField
-                      label="Œil gauche"
-                      value={activeAvatarEyes.leftAngle}
-                      unit="°"
-                      onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                      onChange={leftAngle => updateAvatarEyes({ leftAngle })}
-                    />
-                    <NumericField
-                      label="Œil droit"
-                      value={activeAvatarEyes.rightAngle}
-                      unit="°"
-                      onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                      onChange={rightAngle => updateAvatarEyes({ rightAngle })}
-                    />
-                  </div>
-                </section>
-                <section className="panel color-panel">
-                  <PanelTitle
-                    title="Couleurs de l’avatar"
-                    subtitle="Ces couleurs servent de base à toutes les poses et expressions."
-                  />
-                  <div className="eye-columns">
-                    <ColorField
-                      label="Corps"
-                      value={activeAvatar.colors.body}
-                      onChange={body => updateAvatarColors({ body })}
+                  </section>
+                  <section className="panel color-panel">
+                    <PanelTitle
+                      level={3}
+                      title="Couleur des yeux"
+                      subtitle="Couleur de base utilisée par les poses et les expressions."
                     />
                     <ColorField
                       label="Yeux"
                       value={activeAvatar.colors.eyes}
                       onChange={eyes => updateAvatarColors({ eyes })}
                     />
-                  </div>
-                </section>
+                  </section>
+                </ControlSection>
               </>
             )}
             {!bodyEditing && (
               <>
-                <section className="panel color-panel">
-                  <PanelTitle
-                    title="Couleurs de la pose"
-                    subtitle="Une pose peut remplacer temporairement les couleurs de l’avatar."
-                  />
-                  <div className="eye-columns">
+                <ControlSection
+                  title="Corps"
+                  subtitle="Orientation et apparence générale de la pose."
+                >
+                  <section className="panel color-panel">
+                    <PanelTitle
+                      level={3}
+                      title="Couleur du corps"
+                      subtitle="La pose peut remplacer temporairement la couleur de l’avatar."
+                    />
                     <ColorField
                       label="Corps"
                       value={expression.bodyColor ?? activeAvatar.colors.body}
                       onChange={bodyColor => updateImmediate({ ...expression, bodyColor })}
+                    />
+                    {expression.bodyColor && (
+                      <Button
+                        className="inherit-colors"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const next = { ...expression }
+                          delete next.bodyColor
+                          updateImmediate(next)
+                        }}
+                      >
+                        Reprendre la couleur de l’avatar
+                      </Button>
+                    )}
+                  </section>
+                  <section className="panel">
+                    <PanelTitle
+                      level={3}
+                      title="Rotation de la tête"
+                      subtitle="Les libellés ↔ sont scrubbables, comme dans Figma."
+                    />
+                    <NumericField
+                      label="Rotation X"
+                      value={expression.headX}
+                      unit="°"
+                      onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                      onChange={value => updateImmediate({ ...expression, headX: value })}
+                    />
+                    <NumericField
+                      label="Rotation Y"
+                      value={expression.headY}
+                      unit="°"
+                      onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                      onChange={value => updateImmediate({ ...expression, headY: value })}
+                    />
+                    <NumericField
+                      label="Rotation Z"
+                      value={expression.headZ}
+                      unit="°"
+                      onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                      onChange={value => updateImmediate({ ...expression, headZ: value })}
+                    />
+                  </section>
+                </ControlSection>
+                <ControlSection
+                  title="Yeux"
+                  subtitle="Forme, placement, orientation et couleur du regard."
+                >
+                  <section className="panel color-panel">
+                    <PanelTitle
+                      level={3}
+                      title="Couleur des yeux"
+                      subtitle="La pose peut remplacer temporairement la couleur de l’avatar."
                     />
                     <ColorField
                       label="Yeux"
                       value={expression.eyeColor ?? activeAvatar.colors.eyes}
                       onChange={eyeColor => updateImmediate({ ...expression, eyeColor })}
                     />
-                  </div>
-                  {(expression.bodyColor || expression.eyeColor) && (
-                    <Button
-                      className="inherit-colors"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        const next = { ...expression }
-                        delete next.bodyColor
-                        delete next.eyeColor
-                        updateImmediate(next)
-                      }}
-                    >
-                      Reprendre les couleurs de l’avatar
-                    </Button>
-                  )}
-                </section>
-                <section className="panel">
-                  <PanelTitle
-                    title="Rotation de la tête"
-                    subtitle="Les libellés ↔ sont scrubbables, comme dans Figma."
-                  />
-                  <NumericField
-                    label="Rotation X"
-                    value={expression.headX}
-                    unit="°"
-                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                    onChange={value => updateImmediate({ ...expression, headX: value })}
-                  />
-                  <NumericField
-                    label="Rotation Y"
-                    value={expression.headY}
-                    unit="°"
-                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                    onChange={value => updateImmediate({ ...expression, headY: value })}
-                  />
-                  <NumericField
-                    label="Rotation Z"
-                    value={expression.headZ}
-                    unit="°"
-                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                    onChange={value => updateImmediate({ ...expression, headZ: value })}
-                  />
-                </section>
-                {(['width', 'height', 'size'] as const).map(dimension => (
-                  <section className="panel compact" key={dimension}>
-                    <div className="panel-inline-title">
-                      <h2>
-                        {
-                          { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
-                            dimension
-                          ]
-                        }
-                      </h2>
-                      <LinkButton
-                        linked={linked[dimension]}
-                        label={`Lier ${dimension}`}
-                        onClick={() =>
-                          setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
-                        }
-                      />
-                    </div>
+                    {expression.eyeColor && (
+                      <Button
+                        className="inherit-colors"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const next = { ...expression }
+                          delete next.eyeColor
+                          updateImmediate(next)
+                        }}
+                      >
+                        Reprendre la couleur de l’avatar
+                      </Button>
+                    )}
+                  </section>
+                  {(['width', 'height', 'size'] as const).map(dimension => (
+                    <section className="panel compact" key={dimension}>
+                      <div className="panel-inline-title">
+                        <h3>
+                          {
+                            { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
+                              dimension
+                            ]
+                          }
+                        </h3>
+                        <LinkButton
+                          linked={linked[dimension]}
+                          label={`Lier ${dimension}`}
+                          onClick={() =>
+                            setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                          }
+                        />
+                      </div>
+                      <div className="eye-columns">
+                        {(['Left', 'Right'] as Side[]).map(side => {
+                          const width = expression[`width${side}`]
+                          const height = expression[`height${side}`]
+                          const value =
+                            dimension === 'width'
+                              ? width
+                              : dimension === 'height'
+                                ? height
+                                : Math.max(width, height)
+                          return (
+                            <NumericField
+                              key={side}
+                              label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
+                              value={value}
+                              min={10}
+                              max={dimension === 'size' ? 110 : 100}
+                              unit="u"
+                              onActiveChange={active =>
+                                updateHighlight(
+                                  active
+                                    ? linked[dimension]
+                                      ? 'both'
+                                      : side === 'Left'
+                                        ? 'left'
+                                        : 'right'
+                                    : null
+                                )
+                              }
+                              onChange={next =>
+                                dimension === 'size'
+                                  ? updateSize(side, next)
+                                  : updateDimension(side, dimension, next)
+                              }
+                            />
+                          )
+                        })}
+                      </div>
+                    </section>
+                  ))}
+                  <section className="panel">
+                    <PanelTitle
+                      level={3}
+                      title="Position et espacement"
+                      subtitle="Coordonnées communes projetées sur la forme choisie."
+                    />
                     <div className="eye-columns">
-                      {(['Left', 'Right'] as Side[]).map(side => {
-                        const width = expression[`width${side}`]
-                        const height = expression[`height${side}`]
-                        const value =
-                          dimension === 'width'
-                            ? width
-                            : dimension === 'height'
-                              ? height
-                              : Math.max(width, height)
-                        return (
-                          <NumericField
-                            key={side}
-                            label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
-                            value={value}
-                            min={10}
-                            max={dimension === 'size' ? 110 : 100}
-                            unit="u"
-                            onActiveChange={active =>
-                              updateHighlight(
-                                active
-                                  ? linked[dimension]
-                                    ? 'both'
-                                    : side === 'Left'
-                                      ? 'left'
-                                      : 'right'
-                                  : null
-                              )
-                            }
-                            onChange={next =>
-                              dimension === 'size'
-                                ? updateSize(side, next)
-                                : updateDimension(side, dimension, next)
-                            }
-                          />
-                        )
-                      })}
+                      <div className="eye-column">
+                        <h3>Œil gauche</h3>
+                        <NumericField
+                          label="Horizontale"
+                          value={expression.positionXLeft}
+                          unit="u"
+                          onActiveChange={active => updateHighlight(active ? 'left' : null)}
+                          onChange={value =>
+                            updateImmediate({ ...expression, positionXLeft: value })
+                          }
+                        />
+                        <NumericField
+                          label="Verticale"
+                          value={expression.positionYLeft}
+                          unit="u"
+                          onActiveChange={active => updateHighlight(active ? 'left' : null)}
+                          onChange={value =>
+                            updateImmediate({ ...expression, positionYLeft: value })
+                          }
+                        />
+                      </div>
+                      <div className="eye-column">
+                        <h3>Œil droit</h3>
+                        <NumericField
+                          label="Horizontale"
+                          value={expression.positionXRight}
+                          unit="u"
+                          onActiveChange={active => updateHighlight(active ? 'right' : null)}
+                          onChange={value =>
+                            updateImmediate({ ...expression, positionXRight: value })
+                          }
+                        />
+                        <NumericField
+                          label="Verticale"
+                          value={expression.positionYRight}
+                          unit="u"
+                          onActiveChange={active => updateHighlight(active ? 'right' : null)}
+                          onChange={value =>
+                            updateImmediate({ ...expression, positionYRight: value })
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="position-spacing">
+                      <NumericField
+                        label="Espacement"
+                        value={expression.spacing}
+                        min={0}
+                        max={150}
+                        unit="u"
+                        onActiveChange={active => updateHighlight(active ? 'both' : null)}
+                        onChange={updateSpacing}
+                      />
                     </div>
                   </section>
-                ))}
-                <section className="panel">
-                  <PanelTitle
-                    title="Position des yeux"
-                    subtitle="Coordonnées communes projetées sur la forme choisie."
-                  />
-                  <div className="eye-columns">
-                    <div className="eye-column">
-                      <h3>Œil gauche</h3>
+                  <section className="panel">
+                    <PanelTitle
+                      level={3}
+                      title="Rotation locale"
+                      subtitle="Inclinaison propre à chaque œil."
+                    />
+                    <div className="eye-columns">
                       <NumericField
-                        label="Horizontale"
-                        value={expression.positionXLeft}
-                        unit="u"
+                        label="Œil gauche"
+                        value={expression.leftAngle}
+                        unit="°"
                         onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                        onChange={value => updateImmediate({ ...expression, positionXLeft: value })}
+                        onChange={value => updateImmediate({ ...expression, leftAngle: value })}
                       />
                       <NumericField
-                        label="Verticale"
-                        value={expression.positionYLeft}
-                        unit="u"
-                        onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                        onChange={value => updateImmediate({ ...expression, positionYLeft: value })}
+                        label="Œil droit"
+                        value={expression.rightAngle}
+                        unit="°"
+                        onActiveChange={active => updateHighlight(active ? 'right' : null)}
+                        onChange={value => updateImmediate({ ...expression, rightAngle: value })}
                       />
                     </div>
-                    <div className="eye-column">
-                      <h3>Œil droit</h3>
-                      <NumericField
-                        label="Horizontale"
-                        value={expression.positionXRight}
-                        unit="u"
-                        onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                        onChange={value =>
-                          updateImmediate({ ...expression, positionXRight: value })
-                        }
+                  </section>
+                </ControlSection>
+                <ControlSection
+                  title="Projection"
+                  subtitle="Perspective et repères appliqués à la surface active."
+                >
+                  <section className="panel">
+                    <PanelTitle
+                      level={3}
+                      title="Perspective"
+                      subtitle="Profondeur simulée du visage."
+                    />
+                    <NumericField
+                      label="Perspective"
+                      value={expression.perspective}
+                      step={0.01}
+                      unit="×"
+                      onChange={value => updateImmediate({ ...expression, perspective: value })}
+                    />
+                    <label className="switch">
+                      <span>Afficher le maillage</span>
+                      <input
+                        type="checkbox"
+                        checked={showWire}
+                        onChange={event => updateWireVisibility(event.currentTarget.checked)}
                       />
-                      <NumericField
-                        label="Verticale"
-                        value={expression.positionYRight}
-                        unit="u"
-                        onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                        onChange={value =>
-                          updateImmediate({ ...expression, positionYRight: value })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="position-spacing">
-                    <NumericField
-                      label="Espacement"
-                      value={expression.spacing}
-                      min={0}
-                      max={150}
-                      unit="u"
-                      onActiveChange={active => updateHighlight(active ? 'both' : null)}
-                      onChange={updateSpacing}
-                    />
-                  </div>
-                </section>
-                <section className="panel">
-                  <PanelTitle title="Rotation locale" subtitle="Inclinaison propre à chaque œil." />
-                  <div className="eye-columns">
-                    <NumericField
-                      label="Œil gauche"
-                      value={expression.leftAngle}
-                      unit="°"
-                      onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                      onChange={value => updateImmediate({ ...expression, leftAngle: value })}
-                    />
-                    <NumericField
-                      label="Œil droit"
-                      value={expression.rightAngle}
-                      unit="°"
-                      onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                      onChange={value => updateImmediate({ ...expression, rightAngle: value })}
-                    />
-                  </div>
-                </section>
-                <section className="panel">
-                  <PanelTitle title="Projection" subtitle="Perspective et repères de la tête." />
-                  <NumericField
-                    label="Perspective"
-                    value={expression.perspective}
-                    step={0.01}
-                    unit="×"
-                    onChange={value => updateImmediate({ ...expression, perspective: value })}
-                  />
-                  <label className="switch">
-                    <span>Afficher le maillage</span>
-                    <input
-                      type="checkbox"
-                      checked={showWire}
-                      onChange={event => updateWireVisibility(event.currentTarget.checked)}
-                    />
-                  </label>
-                  <button
-                    className="reset"
-                    type="button"
-                    onClick={() => transitionToExpression({ ...defaultExpression })}
-                  >
-                    Réinitialiser
-                  </button>
-                </section>
+                    </label>
+                    <button
+                      className="reset"
+                      type="button"
+                      onClick={() => transitionToExpression({ ...defaultExpression })}
+                    >
+                      Réinitialiser
+                    </button>
+                  </section>
+                </ControlSection>
               </>
             )}
           </div>
@@ -2683,10 +2774,41 @@ export default function App() {
   )
 }
 
-function PanelTitle({ title, subtitle }: { title: string; subtitle: string }) {
+function ControlSection({
+  title,
+  subtitle,
+  compact = false,
+  children,
+}: {
+  title: string
+  subtitle: string
+  compact?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <section className={`control-section${compact ? ' control-section-compact' : ''}`}>
+      <header className="control-section-header">
+        <h2>{title}</h2>
+        <p>{subtitle}</p>
+      </header>
+      <div className="control-section-content">{children}</div>
+    </section>
+  )
+}
+
+function PanelTitle({
+  title,
+  subtitle,
+  level = 2,
+}: {
+  title: string
+  subtitle: string
+  level?: 2 | 3
+}) {
+  const Heading = level === 3 ? 'h3' : 'h2'
   return (
     <div className="panel-title">
-      <h2>{title}</h2>
+      <Heading>{title}</Heading>
       <p>{subtitle}</p>
     </div>
   )
