@@ -38,10 +38,7 @@ export const parseStudioDocument = (value: unknown, fallback: StudioDocument): S
       ? parseExpressions(candidate.expressions)
       : fallback.expressions
   const sequences = Array.isArray(candidate.sequences)
-    ? normalizeSequencesForExpressions(
-        parseSequences(candidate.sequences, expressions),
-        expressions
-      )
+    ? normalizeSequencesForExpressions(parseSequences(candidate.sequences), expressions)
     : fallback.sequences
   const library = parseAvatarLibrary(candidate.library, fallback.library)
   return {

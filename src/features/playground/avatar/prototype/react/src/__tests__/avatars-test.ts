@@ -17,15 +17,6 @@ describe('avatar eye defaults', () => {
     expect(expression.widthLeft).toBe(28)
   })
 
-  it('migrates the former shared eye position without changing its placement', () => {
-    const result = parseAvatarEyeDefaults(undefined, { x: 6, y: -4 })
-
-    expect(result.positionXLeft).toBe(6)
-    expect(result.positionXRight).toBe(6)
-    expect(result.positionYLeft).toBe(-11)
-    expect(result.positionYRight).toBe(-11)
-  })
-
   it('sanitizes partial persisted values', () => {
     const result = parseAvatarEyeDefaults({ widthLeft: 42, heightRight: Number.NaN })
 

@@ -30,7 +30,8 @@ describe('Studio document', () => {
     const document = loadStudioDocument(storage())
 
     expect(document.library.avatars).toHaveLength(10)
-    expect(document.library.activeAvatarId).toBe('avatar-4b9ea0c1-286f-4aa1-b053-61fcc416ba7e')
+    expect(document.library.activeAvatarId).toBe(document.library.avatars[0].id)
+    expect(document.library.avatars[0].name).toBe('Strobi')
     expect(document.expressions).toHaveLength(27)
     expect(document.sequences).toHaveLength(23)
     expect(document.playback).toEqual({ stateId: 'proud', playing: true })

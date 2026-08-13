@@ -9,7 +9,7 @@ import {
 import { initialExpressions } from '../presets'
 
 describe('editable avatar sequences', () => {
-  it('migrates the existing idle state into editable steps and blink settings', () => {
+  it('creates the idle animation with editable steps and blink settings', () => {
     const idle = createInitialSequences().find(sequence => sequence.id === 'idle')
 
     expect(idle?.steps.map(step => step.expressionId)).toEqual([
@@ -65,7 +65,7 @@ describe('editable avatar sequences', () => {
         id: 'custom',
         name: 'Custom',
         playbackMode: 'invalid',
-        steps: [{ expressionIndex: 2, holdMs: -5, transitionMs: 99999 }],
+        steps: [{ expressionId: initialExpressions[2].id, holdMs: -5, transitionMs: 99999 }],
         blink: { minIntervalMs: 9000, maxIntervalMs: 1000, durationMs: 2 },
       },
     ])
@@ -75,17 +75,6 @@ describe('editable avatar sequences', () => {
     expect(sequence.steps[0].transitionMs).toBe(5000)
     expect(sequence.blink.maxIntervalMs).toBe(sequence.blink.minIntervalMs)
     expect(sequence.blink.durationMs).toBe(40)
-  })
-
-  it('migrates a legacy index against the actual custom expression catalog', () => {
-    const custom = { ...initialExpressions[0], id: 'custom-expression' }
-    const expressions = [...initialExpressions, custom]
-    const [sequence] = parseSequences(
-      [{ id: 'custom', name: 'Custom', steps: [{ expressionIndex: expressions.length - 1 }] }],
-      expressions
-    )
-
-    expect(sequence.steps[0].expressionId).toBe(custom.id)
   })
 
   it('repairs missing and out-of-range expression references on load', () => {

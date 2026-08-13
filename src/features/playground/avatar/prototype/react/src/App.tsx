@@ -2315,11 +2315,11 @@ function StudioApp() {
     initialDocument.sequences.map(animation => animation.id)
   )
   const initialStatePlayback = initialDocument.playback
-  const persistAvatarLibrary = (library: typeof initialDocument.library) =>
+  const updateStudioLibrary = (library: typeof initialDocument.library) =>
     documentStore.update({ library })
-  const persistGlobalExpressions = (nextExpressions: Expression[]) =>
+  const updateStudioExpressions = (nextExpressions: Expression[]) =>
     documentStore.update({ expressions: nextExpressions })
-  const persistSequences = (nextSequences: AvatarSequence[]) =>
+  const updateStudioSequences = (nextSequences: AvatarSequence[]) =>
     documentStore.update({ sequences: nextSequences })
   const persistStatePlayback = (playback: StatePlaybackSelection) =>
     documentStore.update({ playback })
@@ -2766,7 +2766,7 @@ function StudioApp() {
     avatarsRef.current = next
     setAvatars(next)
     if (!avatarEditSnapshot.current) {
-      persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
+      updateStudioLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
     }
   }
 
@@ -2843,7 +2843,7 @@ function StudioApp() {
     transitionTarget.current = nextExpression
     paintPose(poseFromExpression(nextExpression))
     if (!avatarEditSnapshot.current) {
-      persistAvatarLibrary({ activeAvatarId: id, avatars: avatarsRef.current })
+      updateStudioLibrary({ activeAvatarId: id, avatars: avatarsRef.current })
     }
   }
 
@@ -2873,7 +2873,7 @@ function StudioApp() {
     avatarEditSnapshot.current = null
     avatarsRef.current = next
     setAvatars(next)
-    persistAvatarLibrary({ activeAvatarId: duplicate.id, avatars: next })
+    updateStudioLibrary({ activeAvatarId: duplicate.id, avatars: next })
     activateAvatar(duplicate.id, editDuplicate)
   }
 
@@ -2894,7 +2894,7 @@ function StudioApp() {
     previewAvatarMove(targetId)
     const next = avatarDragPreview.current
     avatarsRef.current = next
-    persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
+    updateStudioLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
     avatarDragOrigin.current = null
     draggedAvatarId.current = null
     setDraggingAvatarId(null)
@@ -2926,7 +2926,7 @@ function StudioApp() {
 
   const saveAvatarEditing = () => {
     avatarEditSnapshot.current = null
-    persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: avatarsRef.current })
+    updateStudioLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: avatarsRef.current })
     setBodyEditing(false)
     restoreStateAfterEditor()
   }
@@ -2941,7 +2941,7 @@ function StudioApp() {
     const remaining = avatarsRef.current.filter(avatar => avatar.id !== activeAvatarIdRef.current)
     avatarsRef.current = remaining
     setAvatars(remaining)
-    persistAvatarLibrary({ activeAvatarId: remaining[0].id, avatars: remaining })
+    updateStudioLibrary({ activeAvatarId: remaining[0].id, avatars: remaining })
     setDeleteAvatarOpen(false)
     activateAvatar(remaining[0].id)
     restoreStateAfterEditor()
@@ -3199,7 +3199,7 @@ function StudioApp() {
             itemIndex === editing.index ? { ...savedDraft } : item
           )
     setExpressions(next)
-    persistGlobalExpressions(next)
+    updateStudioExpressions(next)
     setEditing(null)
     transitionToExpression(savedDraft, index)
     if (!sequenceEditing) restoreStateAfterEditor()
@@ -3210,7 +3210,7 @@ function StudioApp() {
     const next = [...expressions, duplicate]
     const duplicateIndex = next.length - 1
     setExpressions(next)
-    persistGlobalExpressions(next)
+    updateStudioExpressions(next)
     if (editDuplicate) openExpressionEditor(duplicateIndex, duplicate)
     else transitionToExpression(duplicate, duplicateIndex)
   }
@@ -3232,7 +3232,7 @@ function StudioApp() {
 
   const commitExpressionMove = (targetId: string | null) => {
     previewExpressionMove(targetId)
-    persistGlobalExpressions(expressionDragPreview.current)
+    updateStudioExpressions(expressionDragPreview.current)
     expressionDragOrigin.current = null
     draggedExpressionId.current = null
     setDraggingExpressionId(null)
@@ -3316,8 +3316,8 @@ function StudioApp() {
       )[0]
       setSequenceEditing({ ...sequenceEditing, draft })
     }
-    persistGlobalExpressions(next)
-    persistSequences(nextSequences)
+    updateStudioExpressions(next)
+    updateStudioSequences(nextSequences)
     setActiveExpression(null)
     setEditing(null)
     setDeleteExpressionOpen(false)
@@ -3368,7 +3368,7 @@ function StudioApp() {
       ? sequences.map(sequence => (sequence.id === sequenceEditing.sourceId ? saved : sequence))
       : [...sequences, saved]
     setSequences(next)
-    persistSequences(next)
+    updateStudioSequences(next)
     setSelectedState(saved.id)
     if (activeState === saved.id) stopState(false)
     setSequenceEditing(null)
@@ -3382,7 +3382,7 @@ function StudioApp() {
     const duplicate = duplicateSequence(sequenceEditing.draft)
     const next = [...sequences, duplicate]
     setSequences(next)
-    persistSequences(next)
+    updateStudioSequences(next)
     setSelectedState(duplicate.id)
     setSequenceEditing({ sourceId: duplicate.id, draft: duplicate })
     setSelectedSequenceStepId(duplicate.steps[0]?.id ?? null)
@@ -3393,7 +3393,7 @@ function StudioApp() {
     const duplicate = duplicateSequence(sequence)
     const next = [...sequences, duplicate]
     setSequences(next)
-    persistSequences(next)
+    updateStudioSequences(next)
     setSelectedState(duplicate.id)
   }
 
@@ -3423,7 +3423,7 @@ function StudioApp() {
 
   const commitStateMove = (targetId: string | null, targetGroup: string) => {
     previewStateMove(targetId, targetGroup)
-    persistSequences(stateDragPreview.current)
+    updateStudioSequences(stateDragPreview.current)
     stateDragOrigin.current = null
     draggedStateId.current = null
     setDraggingStateId(null)
@@ -3444,7 +3444,7 @@ function StudioApp() {
     const next = sequences.filter(sequence => sequence.id !== sequenceEditing.sourceId)
     const fallback = next[0]
     setSequences(next)
-    persistSequences(next)
+    updateStudioSequences(next)
     if (activeState === sequenceEditing.sourceId) stopState(false)
     setSelectedState(fallback?.id ?? '')
     setSequenceEditing(null)

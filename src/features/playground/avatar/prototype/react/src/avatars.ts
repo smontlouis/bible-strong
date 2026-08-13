@@ -1,6 +1,6 @@
-import { parseAvatarBody, parseSurfaceConfig, type AvatarBody } from './body'
+import { parseAvatarBody, type AvatarBody } from './body'
 import { defaultExpression, initialExpressions } from './presets'
-import { surfacePresets, type SurfaceConfig, type SurfaceType } from './surfaces'
+import { surfacePresets } from './surfaces'
 import type { Expression } from './geometry'
 import { isBodyMotion, isEyeMotion } from './ambientMotion'
 
@@ -57,25 +57,13 @@ const parseColors = (value: unknown): AvatarColors => {
 }
 
 const eyeDefaultFields = Object.keys(defaultAvatarEyes) as (keyof AvatarEyeDefaults)[]
-export const parseAvatarEyeDefaults = (
-  value: unknown,
-  legacyPosition?: unknown
-): AvatarEyeDefaults => {
+export const parseAvatarEyeDefaults = (value: unknown): AvatarEyeDefaults => {
   const candidate = value as Partial<AvatarEyeDefaults> | null
   const parsed = { ...defaultAvatarEyes }
   eyeDefaultFields.forEach(field => {
     const stored = candidate?.[field]
     if (typeof stored === 'number' && Number.isFinite(stored)) parsed[field] = stored
   })
-  const legacy = legacyPosition as { x?: unknown; y?: unknown } | null
-  const legacyX = typeof legacy?.x === 'number' && Number.isFinite(legacy.x) ? legacy.x : 0
-  const legacyY = typeof legacy?.y === 'number' && Number.isFinite(legacy.y) ? legacy.y : 0
-  if (!candidate) {
-    parsed.positionXLeft += legacyX
-    parsed.positionXRight += legacyX
-    parsed.positionYLeft += legacyY
-    parsed.positionYRight += legacyY
-  }
   return parsed
 }
 
@@ -98,12 +86,6 @@ export type AvatarLibrary = {
   activeAvatarId: string
   avatars: StudioAvatar[]
 }
-
-const LIBRARY_STORAGE_KEY = 'bible-strong-avatar-library-v1'
-const LEGACY_BODY_STORAGE_KEY = 'bible-strong-avatar-body-v1'
-const LEGACY_SURFACE_STORAGE_KEY = 'bible-strong-avatar-surface-v1'
-const LEGACY_EXPRESSIONS_STORAGE_KEY = 'bible-strong-avatar-expressions-v1'
-const surfaceTypes = Object.keys(surfacePresets) as SurfaceType[]
 
 const cloneExpressions = (expressions: Expression[]) => expressions.map(item => ({ ...item }))
 export const parseExpressions = (value: unknown): Expression[] => {
@@ -133,68 +115,12 @@ export const parseExpressions = (value: unknown): Expression[] => {
       parsed.bodyColor = candidate.bodyColor
     if (typeof candidate.eyeColor === 'string' && hexColor.test(candidate.eyeColor))
       parsed.eyeColor = candidate.eyeColor
-    parsed.eyeMotion = isEyeMotion(storedEyeMotion)
-      ? storedEyeMotion
-      : storedEyeMotion === 'subtle'
-        ? 'microSaccades'
-        : defaultExpression.eyeMotion
+    parsed.eyeMotion = isEyeMotion(storedEyeMotion) ? storedEyeMotion : defaultExpression.eyeMotion
     parsed.bodyMotion = isBodyMotion(storedBodyMotion)
       ? storedBodyMotion
-      : storedBodyMotion === 'subtle'
-        ? 'slowDrift'
-        : defaultExpression.bodyMotion
+      : defaultExpression.bodyMotion
     return parsed
   })
-}
-
-export const loadGlobalExpressions = () => {
-  try {
-    return parseExpressions(
-      JSON.parse(window.localStorage.getItem(LEGACY_EXPRESSIONS_STORAGE_KEY) ?? 'null')
-    )
-  } catch {
-    return cloneExpressions(initialExpressions)
-  }
-}
-
-export const persistGlobalExpressions = (expressions: Expression[]) => {
-  try {
-    window.localStorage.setItem(LEGACY_EXPRESSIONS_STORAGE_KEY, JSON.stringify(expressions))
-  } catch {
-    // Les expressions restent disponibles en mémoire si le stockage est indisponible.
-  }
-}
-
-const loadLegacySurface = (): SurfaceConfig => {
-  try {
-    const parsed = JSON.parse(
-      window.localStorage.getItem(LEGACY_SURFACE_STORAGE_KEY) ?? 'null'
-    ) as Partial<SurfaceConfig> | null
-    const type = parsed?.type && surfaceTypes.includes(parsed.type) ? parsed.type : 'sphere'
-    return parseSurfaceConfig(parsed, surfacePresets[type])
-  } catch {
-    return { ...surfacePresets.sphere }
-  }
-}
-
-const createStrobi = (): StudioAvatar => {
-  const fallbackPrimary = loadLegacySurface()
-  let body: AvatarBody = { primary: fallbackPrimary, nodes: [] }
-  try {
-    body = parseAvatarBody(
-      JSON.parse(window.localStorage.getItem(LEGACY_BODY_STORAGE_KEY) ?? 'null'),
-      fallbackPrimary
-    )
-  } catch {
-    // Les valeurs par défaut restent disponibles si la migration locale est invalide.
-  }
-  return {
-    id: 'strobi',
-    name: 'Strobi',
-    body,
-    colors: { ...defaultAvatarColors },
-    eyes: { ...defaultAvatarEyes },
-  }
 }
 
 export const createAvatar = (name: string): StudioAvatar => ({
@@ -223,10 +149,7 @@ export const parseAvatarLibrary = (value: unknown, fallback: AvatarLibrary): Ava
         name: avatar.name,
         body: parseAvatarBody(avatar.body, surfacePresets.sphere),
         colors: parseColors(avatar.colors),
-        eyes: parseAvatarEyeDefaults(
-          avatar.eyes,
-          (avatar as StudioAvatar & { eyePosition?: unknown }).eyePosition
-        ),
+        eyes: parseAvatarEyeDefaults(avatar.eyes),
       }))
     if (!avatars.length) return fallback
     const activeAvatarId = avatars.some(avatar => avatar.id === parsed.activeAvatarId)
@@ -235,26 +158,5 @@ export const parseAvatarLibrary = (value: unknown, fallback: AvatarLibrary): Ava
     return { activeAvatarId, avatars }
   } catch {
     return fallback
-  }
-}
-
-export const loadAvatarLibrary = (): AvatarLibrary => {
-  const strobi = createStrobi()
-  const fallback = { activeAvatarId: strobi.id, avatars: [strobi] }
-  try {
-    return parseAvatarLibrary(
-      JSON.parse(window.localStorage.getItem(LIBRARY_STORAGE_KEY) ?? 'null'),
-      fallback
-    )
-  } catch {
-    return fallback
-  }
-}
-
-export const persistAvatarLibrary = (library: AvatarLibrary) => {
-  try {
-    window.localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(library))
-  } catch {
-    // Le studio continue de fonctionner en mémoire si le stockage est indisponible.
   }
 }
