@@ -1,6 +1,8 @@
 export const proceduralBrowserRuntime = `
-let avatarInstanceCount = 0;
 const SVG_NS = 'http://www.w3.org/2000/svg';
+const avatarInstanceId = () => typeof globalThis.crypto?.randomUUID === 'function'
+  ? globalThis.crypto.randomUUID()
+  : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
 const clamp01 = value => Math.max(0, Math.min(1, value));
 const easeProgress = (progress, transition) => transition === 'smooth'
   ? progress * progress * (3 - 2 * progress)
@@ -44,7 +46,7 @@ function mountAvatar(target, options = {}) {
   if (!host) throw new Error('Avatar target was not found.');
   const animationNames = Object.keys(DATA.animations);
   if (!animationNames.length) throw new Error('The avatar export contains no animations.');
-  const instanceId = ++avatarInstanceCount;
+  const instanceId = avatarInstanceId();
   const clipId = 'avatar-procedural-clip-' + instanceId;
   const svg = svgElement('svg');
   svg.setAttribute('viewBox', '-150 -150 300 300');

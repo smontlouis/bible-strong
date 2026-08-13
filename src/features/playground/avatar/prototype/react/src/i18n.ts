@@ -82,6 +82,7 @@ const english: Record<string, string> = {
   'Choisis l’intégration correspondant à ton projet.':
     'Choose the integration that matches your project.',
   'Composant TSX autonome': 'Standalone TSX component',
+  'Package React local (.zip)': 'Local React package (.zip)',
   'Module JavaScript': 'JavaScript module',
   'Module ES autonome': 'Standalone ES module',
   'Projet HTML + module JS (.zip)': 'HTML project + JS module (.zip)',
@@ -90,6 +91,7 @@ const english: Record<string, string> = {
   'Tout sélectionner': 'Select all',
   'Tout désélectionner': 'Deselect all',
   'Télécharger le composant TSX': 'Download TSX component',
+  'Télécharger le package React': 'Download React package',
   'Télécharger le module': 'Download module',
   'Construction, forme et couleur de la tête de l’avatar.':
     'Build, shape and color of the avatar head.',

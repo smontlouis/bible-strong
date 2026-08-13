@@ -6,6 +6,8 @@ import {
   generateJavaScriptAvatarModule,
   generateJavaScriptAvatarPackage,
   generateReactAvatarComponent,
+  generateReactAvatarPackage,
+  generateReactAvatarRuntime,
 } from '../exporter'
 import { initialExpressions } from '../presets'
 import { createInitialSequences } from '../sequences'
@@ -103,14 +105,16 @@ describe('avatar export', () => {
     expect(contents).toContain('avatar.js')
   })
 
-  it('generates a self-contained typed React component', () => {
+  it('generates a typed React component backed by the local runtime', () => {
     const source = generateReactAvatarComponent(payload)
 
     expect(source).toContain("from 'react'")
-    expect(source).toContain('export type AnimationName')
+    expect(source).toContain("from './avatar-runtime'")
+    expect(source).toContain("from './strobi.avatar'")
+    expect(source).toContain('export type { AnimationName }')
     expect(source).toContain('animation?: AnimationName')
     expect(source).toContain('forwardRef<AvatarHandle, AvatarProps>')
-    expect(source).toContain('AvatarProceduralEngine')
+    expect(source).not.toContain('AvatarProceduralEngine')
     expect(source).toContain('runtime.createAvatar(host.current')
     expect(source).not.toContain('@ts-nocheck')
     expect(source).not.toContain('avatarFrameIn')
@@ -118,5 +122,33 @@ describe('avatar export', () => {
     expect(() =>
       parse(source, { sourceType: 'module', plugins: ['typescript', 'jsx'] })
     ).not.toThrow()
+  })
+
+  it('packages the React runtime, avatar data and component separately', async () => {
+    const archive = new Uint8Array(await generateReactAvatarPackage(payload).arrayBuffer())
+    const contents = new TextDecoder().decode(archive)
+
+    expect(contents).toContain('avatar-runtime.ts')
+    expect(contents).toContain('strobi.avatar.ts')
+    expect(contents).toContain('Strobi.tsx')
+    expect(contents).toContain('strobi.index.ts')
+    expect(contents).toContain("from './avatar-runtime'")
+  })
+
+  it('generates one avatar-independent and versioned React runtime', () => {
+    const runtime = generateReactAvatarRuntime()
+
+    expect(runtime).toContain('AVATAR_RUNTIME_VERSION = 1')
+    expect(runtime).toContain('data.version !== AVATAR_RUNTIME_VERSION')
+    expect(runtime).not.toContain(payload.avatar.name)
+    expect(runtime).toContain('RuntimeAvatar<AnimationName>')
+    expect(() => parse(runtime, { sourceType: 'module', plugins: ['typescript'] })).not.toThrow()
+  })
+
+  it('uses globally unique SVG identifiers across avatar runtimes', () => {
+    const source = generateJavaScriptAvatarModule(payload)
+
+    expect(source).toContain('globalThis.crypto.randomUUID()')
+    expect(source).not.toContain('avatarInstanceCount')
   })
 })

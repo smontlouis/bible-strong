@@ -26,7 +26,8 @@ Puis ouvrir `http://127.0.0.1:5173/`.
 - Le cube, le cylindre et le cône proposent aussi un morphing global vers l’ellipsoïde.
 - Un repère facial commun conserve les expressions puis les projette sur la surface réelle.
 - `geometry.ts` reste indépendant du framework et projette expressions et maillages sur la surface active.
-- L’onglet Export génère soit un composant React/TypeScript autonome, soit un module JavaScript ES autonome.
+- L’onglet Export génère soit un package React/TypeScript avec `avatar-runtime.ts`, données et composant séparés, soit un module JavaScript ES autonome.
+- Plusieurs ZIP React peuvent être fusionnés dans le même dossier : seul `avatar-runtime.ts` est partagé et chaque avatar possède un point d’entrée unique (`strobi.index.ts`, `nova.index.ts`, etc.).
 - Le module JavaScript expose `createAvatar(target, options)`, puis `play(name)`, `pause()`, `stop()` et `destroy()`.
 - Le ZIP JavaScript contient aussi un `index.html` ouvrable directement : il sert de playground avec la liste des animations exportées et les commandes lecture, pause et arrêt.
 - Les exports n’embarquent que les animations sélectionnées et les expressions qu’elles utilisent.

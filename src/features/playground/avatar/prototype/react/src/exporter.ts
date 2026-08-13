@@ -352,20 +352,38 @@ export const generateJavaScriptAvatarPackage = (
   ])
 }
 
-export const generateReactAvatarComponent = (payload: AvatarExportPayload) => {
-  const animationNames = Object.keys(payload.animations)
-  const animationUnion = animationNames.map(name => JSON.stringify(name)).join(' | ') || 'never'
-  const runtimeSource = JSON.stringify(generateJavaScriptAvatarModule(payload))
-  return `
-import { forwardRef, useEffect, useImperativeHandle, useRef, type CSSProperties } from 'react'
+const avatarExportSlug = (name: string) =>
+  name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '') || 'avatar'
 
-type RuntimeAvatar = {
-  play: (animation?: AnimationName) => RuntimeAvatar
-  pause: () => RuntimeAvatar
-  stop: () => RuntimeAvatar
+const avatarComponentName = (name: string) => {
+  const identifier = avatarExportSlug(name)
+    .split('-')
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('')
+  return /^[A-Za-z_$]/.test(identifier) ? identifier : `Avatar${identifier}`
+}
+
+export const generateReactAvatarRuntime = () => `
+export type AvatarData<AnimationName extends string = string> = Readonly<{
+  version: number
+  avatar: Readonly<{ name: string } & Record<string, unknown>>
+  expressions: Readonly<Record<string, unknown>>
+  animations: Readonly<Record<AnimationName, unknown>>
+}>
+
+export type RuntimeAvatar<AnimationName extends string = string> = {
+  play: (animation?: AnimationName) => RuntimeAvatar<AnimationName>
+  pause: () => RuntimeAvatar<AnimationName>
+  stop: () => RuntimeAvatar<AnimationName>
   destroy: () => void
 }
-type AvatarRuntimeModule = {
+
+export type AvatarRuntimeModule<AnimationName extends string = string> = {
   createAvatar: (
     target: HTMLElement,
     options: {
@@ -375,22 +393,64 @@ type AvatarRuntimeModule = {
       size: string
       onAnimationEnd: (animation: AnimationName) => void
     }
-  ) => RuntimeAvatar
+  ) => RuntimeAvatar<AnimationName>
 }
 
-const RUNTIME_SOURCE = ${runtimeSource}
-let runtimePromise: Promise<AvatarRuntimeModule> | null = null
-const loadRuntime = () => {
-  if (runtimePromise) return runtimePromise
-  const url = URL.createObjectURL(new Blob([RUNTIME_SOURCE], { type: 'text/javascript' }))
-  runtimePromise = import(/* @vite-ignore */ url).then(module => {
+export const AVATAR_RUNTIME_VERSION = 1
+const ENGINE_SOURCE = ${JSON.stringify(standaloneEngineSource)}
+const BROWSER_RUNTIME_SOURCE = ${JSON.stringify(proceduralBrowserRuntime)}
+const runtimes = new WeakMap<object, Promise<unknown>>()
+
+const serializeData = (data: AvatarData) =>
+  JSON.stringify(data)
+    .replace(/</g, '\\\\u003c')
+    .replace(/\\u2028/g, '\\\\u2028')
+    .replace(/\\u2029/g, '\\\\u2029')
+
+export const loadAvatarRuntime = <AnimationName extends string>(
+  data: AvatarData<AnimationName>
+): Promise<AvatarRuntimeModule<AnimationName>> => {
+  if (data.version !== AVATAR_RUNTIME_VERSION) {
+    throw new Error(
+      'Avatar data version ' + data.version + ' requires a compatible avatar-runtime.ts'
+    )
+  }
+  const cached = runtimes.get(data)
+  if (cached) return cached as Promise<AvatarRuntimeModule<AnimationName>>
+  const source =
+    ENGINE_SOURCE +
+    '\\nconst DATA = ' +
+    serializeData(data) +
+    ';\\n' +
+    BROWSER_RUNTIME_SOURCE +
+    '\\nexport function createAvatar(target, options = {}) { return mountAvatar(target, options); }'
+  const url = URL.createObjectURL(new Blob([source], { type: 'text/javascript' }))
+  const runtime = import(/* @vite-ignore */ url).then(module => {
     URL.revokeObjectURL(url)
-    return module as AvatarRuntimeModule
+    return module as AvatarRuntimeModule<AnimationName>
   })
-  return runtimePromise
+  runtimes.set(data, runtime)
+  return runtime
 }
+`
 
-export type AnimationName = ${animationUnion}
+export const generateReactAvatarData = (payload: AvatarExportPayload) => `
+import type { AvatarData } from './avatar-runtime'
+
+export const avatarData = ${serializedPayload(payload)} as const satisfies AvatarData
+export type AnimationName = keyof typeof avatarData.animations
+`
+
+export const generateReactAvatarComponent = (payload: AvatarExportPayload) => {
+  const animationNames = Object.keys(payload.animations)
+  const slug = avatarExportSlug(payload.avatar.name)
+  const componentName = avatarComponentName(payload.avatar.name)
+  return `
+import { forwardRef, useEffect, useImperativeHandle, useRef, type CSSProperties } from 'react'
+import { loadAvatarRuntime, type RuntimeAvatar } from './avatar-runtime'
+import { avatarData, type AnimationName } from './${slug}.avatar'
+
+export type { AnimationName } from './${slug}.avatar'
 export type AvatarHandle = {
   play: (animation?: AnimationName) => void
   pause: () => void
@@ -406,7 +466,7 @@ export type AvatarProps = {
   onAnimationEnd?: (animation: AnimationName) => void
 }
 
-export const Avatar = forwardRef<AvatarHandle, AvatarProps>(function Avatar(
+export const ${componentName} = forwardRef<AvatarHandle, AvatarProps>(function ${componentName}(
   {
     animation = ${JSON.stringify(animationNames[0])},
     playing = true,
@@ -419,7 +479,7 @@ export const Avatar = forwardRef<AvatarHandle, AvatarProps>(function Avatar(
   ref
 ) {
   const host = useRef<HTMLSpanElement>(null)
-  const controller = useRef<RuntimeAvatar | null>(null)
+  const controller = useRef<RuntimeAvatar<AnimationName> | null>(null)
   const animationRef = useRef(animation)
   const playingRef = useRef(playing)
   const onAnimationEndRef = useRef(onAnimationEnd)
@@ -430,8 +490,8 @@ export const Avatar = forwardRef<AvatarHandle, AvatarProps>(function Avatar(
   useEffect(() => {
     if (!host.current) return
     let disposed = false
-    let avatar: RuntimeAvatar | null = null
-    void loadRuntime().then(runtime => {
+    let avatar: RuntimeAvatar<AnimationName> | null = null
+    void loadAvatarRuntime<AnimationName>(avatarData).then(runtime => {
       if (disposed || !host.current) return
       avatar = runtime.createAvatar(host.current, {
         animation: animationRef.current,
@@ -466,17 +526,22 @@ export const Avatar = forwardRef<AvatarHandle, AvatarProps>(function Avatar(
   return <span ref={host} className={className} style={{ display: 'inline-block', width: dimension, height: dimension, ...style }} />
 })
 
-export default Avatar
+export default ${componentName}
 `
 }
 
+export const generateReactAvatarPackage = (payload: AvatarExportPayload) => {
+  const slug = avatarExportSlug(payload.avatar.name)
+  const componentName = avatarComponentName(payload.avatar.name)
+  const avatarEntry = `export { default, ${componentName} } from './${componentName}'\nexport type { AnimationName, AvatarHandle, AvatarProps } from './${componentName}'\n`
+  return createStoredZip([
+    { name: 'avatar-runtime.ts', content: generateReactAvatarRuntime() },
+    { name: `${slug}.avatar.ts`, content: generateReactAvatarData(payload) },
+    { name: `${componentName}.tsx`, content: generateReactAvatarComponent(payload) },
+    { name: `${slug}.index.ts`, content: avatarEntry },
+  ])
+}
+
 export const avatarExportFileName = (name: string, extension: 'js' | 'tsx' | 'zip') => {
-  const base =
-    name
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-|-$/g, '') || 'avatar'
-  return `${base}-avatar.${extension}`
+  return `${avatarExportSlug(name)}-avatar.${extension}`
 }

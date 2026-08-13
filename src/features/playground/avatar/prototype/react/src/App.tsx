@@ -146,7 +146,7 @@ import {
   avatarExportFileName,
   createAvatarExportPayload,
   generateJavaScriptAvatarPackage,
-  generateReactAvatarComponent,
+  generateReactAvatarPackage,
 } from './exporter'
 
 type Mode = 'manual' | 'expressions' | 'states' | 'export'
@@ -3463,9 +3463,9 @@ function StudioApp() {
     if (!selectedExportAnimations.length) return
     const payload = createAvatarExportPayload(activeAvatar, expressions, selectedExportAnimations)
     const isReact = exportFormat === 'react'
-    const extension = isReact ? 'tsx' : 'zip'
+    const extension = 'zip'
     const blob = isReact
-      ? new Blob([generateReactAvatarComponent(payload)], { type: 'text/typescript' })
+      ? generateReactAvatarPackage(payload)
       : generateJavaScriptAvatarPackage(payload, language)
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
@@ -4990,7 +4990,7 @@ function StudioApp() {
                   <FileCode2 />
                   <span>
                     <strong>React / TypeScript</strong>
-                    <small>{t('Composant TSX autonome')}</small>
+                    <small>{t('Package React local (.zip)')}</small>
                   </span>
                 </Button>
                 <Button
@@ -5073,7 +5073,7 @@ function StudioApp() {
             >
               <Download />
               {t(
-                exportFormat === 'react' ? 'Télécharger le composant TSX' : 'Télécharger le module'
+                exportFormat === 'react' ? 'Télécharger le package React' : 'Télécharger le module'
               )}
             </Button>
           </div>
