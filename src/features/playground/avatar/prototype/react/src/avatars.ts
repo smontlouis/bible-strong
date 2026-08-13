@@ -1,0 +1,125 @@
+import { parseAvatarBody, parseSurfaceConfig, type AvatarBody } from './body'
+import { defaultExpression, initialExpressions } from './presets'
+import { surfacePresets, type SurfaceConfig, type SurfaceType } from './surfaces'
+import type { Expression } from './geometry'
+
+export type StudioAvatar = {
+  id: string
+  name: string
+  body: AvatarBody
+}
+
+export type AvatarLibrary = {
+  activeAvatarId: string
+  avatars: StudioAvatar[]
+}
+
+const LIBRARY_STORAGE_KEY = 'bible-strong-avatar-library-v1'
+const LEGACY_BODY_STORAGE_KEY = 'bible-strong-avatar-body-v1'
+const LEGACY_SURFACE_STORAGE_KEY = 'bible-strong-avatar-surface-v1'
+const LEGACY_EXPRESSIONS_STORAGE_KEY = 'bible-strong-avatar-expressions-v1'
+const surfaceTypes = Object.keys(surfacePresets) as SurfaceType[]
+
+const cloneExpressions = (expressions: Expression[]) => expressions.map(item => ({ ...item }))
+const parseExpressions = (value: unknown): Expression[] => {
+  if (!Array.isArray(value) || !value.length) return cloneExpressions(initialExpressions)
+  return value.map(item => {
+    if (!item || typeof item !== 'object') return { ...defaultExpression }
+    const candidate = item as Partial<Expression>
+    return Object.fromEntries(
+      Object.entries(defaultExpression).map(([field, fallback]) => {
+        const stored = candidate[field as keyof Expression]
+        return [field, typeof stored === 'number' && Number.isFinite(stored) ? stored : fallback]
+      })
+    ) as Expression
+  })
+}
+
+export const loadGlobalExpressions = () => {
+  try {
+    return parseExpressions(
+      JSON.parse(window.localStorage.getItem(LEGACY_EXPRESSIONS_STORAGE_KEY) ?? 'null')
+    )
+  } catch {
+    return cloneExpressions(initialExpressions)
+  }
+}
+
+export const persistGlobalExpressions = (expressions: Expression[]) => {
+  try {
+    window.localStorage.setItem(LEGACY_EXPRESSIONS_STORAGE_KEY, JSON.stringify(expressions))
+  } catch {
+    // Les expressions restent disponibles en mémoire si le stockage est indisponible.
+  }
+}
+
+const loadLegacySurface = (): SurfaceConfig => {
+  try {
+    const parsed = JSON.parse(
+      window.localStorage.getItem(LEGACY_SURFACE_STORAGE_KEY) ?? 'null'
+    ) as Partial<SurfaceConfig> | null
+    const type = parsed?.type && surfaceTypes.includes(parsed.type) ? parsed.type : 'sphere'
+    return parseSurfaceConfig(parsed, surfacePresets[type])
+  } catch {
+    return { ...surfacePresets.sphere }
+  }
+}
+
+const createStrobi = (): StudioAvatar => {
+  const fallbackPrimary = loadLegacySurface()
+  let body: AvatarBody = { primary: fallbackPrimary, nodes: [] }
+  try {
+    body = parseAvatarBody(
+      JSON.parse(window.localStorage.getItem(LEGACY_BODY_STORAGE_KEY) ?? 'null'),
+      fallbackPrimary
+    )
+  } catch {
+    // Les valeurs par défaut restent disponibles si la migration locale est invalide.
+  }
+  return { id: 'strobi', name: 'Strobi', body }
+}
+
+export const createAvatar = (name: string): StudioAvatar => ({
+  id: `avatar-${crypto.randomUUID()}`,
+  name: name.trim() || 'Nouvel avatar',
+  body: { primary: { ...surfacePresets.sphere }, nodes: [] },
+})
+
+export const loadAvatarLibrary = (): AvatarLibrary => {
+  try {
+    const parsed = JSON.parse(
+      window.localStorage.getItem(LIBRARY_STORAGE_KEY) ?? 'null'
+    ) as Partial<AvatarLibrary> | null
+    if (!parsed || !Array.isArray(parsed.avatars) || !parsed.avatars.length) throw new Error()
+    const seenIds = new Set<string>()
+    const avatars = parsed.avatars
+      .filter(avatar => {
+        if (!avatar || typeof avatar.id !== 'string' || typeof avatar.name !== 'string')
+          return false
+        if (seenIds.has(avatar.id)) return false
+        seenIds.add(avatar.id)
+        return true
+      })
+      .map(avatar => ({
+        id: avatar.id,
+        name: avatar.name,
+        body: parseAvatarBody(avatar.body, surfacePresets.sphere),
+      }))
+    if (!avatars.length) throw new Error()
+    const activeAvatarId = avatars.some(avatar => avatar.id === parsed.activeAvatarId)
+      ? parsed.activeAvatarId!
+      : avatars[0].id
+    return { activeAvatarId, avatars }
+  } catch {
+    const strobi = createStrobi()
+    return { activeAvatarId: strobi.id, avatars: [strobi] }
+  }
+}
+
+export const persistAvatarLibrary = (library: AvatarLibrary) => {
+  try {
+    window.localStorage.setItem(LIBRARY_STORAGE_KEY, JSON.stringify(library))
+  } catch {
+    // Le studio continue de fonctionner en mémoire si le stockage est indisponible.
+  }
+}

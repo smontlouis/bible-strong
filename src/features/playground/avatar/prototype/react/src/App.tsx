@@ -9,6 +9,21 @@ import { motionValue, type MotionValue } from 'motion'
 import { useEffect, useRef, useState } from 'react'
 
 import {
+  bodyPrimitiveTypes,
+  createBodyNode,
+  duplicateBodyNode,
+  MAX_BODY_NODES,
+  type BodyNode,
+} from './body'
+import {
+  createAvatar,
+  loadAvatarLibrary,
+  loadGlobalExpressions,
+  persistAvatarLibrary,
+  persistGlobalExpressions,
+  type StudioAvatar,
+} from './avatars'
+import {
   expressionFields,
   poseFromExpression,
   renderAvatar,
@@ -21,14 +36,8 @@ import {
   type Expression,
   type Point3,
 } from './geometry'
-import {
-  defaultExpression,
-  initialExpressions,
-  stateGroups,
-  stateNotes,
-  statePools,
-} from './presets'
-import { surfaceLabels, surfacePresets, type SurfaceConfig, type SurfaceType } from './surfaces'
+import { defaultExpression, stateGroups, stateNotes, statePools } from './presets'
+import { surfaceLabels, surfacePresets, type SurfaceConfig } from './surfaces'
 
 type Mode = 'manual' | 'expressions' | 'states'
 type Side = 'Left' | 'Right'
@@ -44,70 +53,38 @@ type NumericProps = {
 }
 type Highlight = 'head' | 'left' | 'right' | 'both' | null
 
-const EXPRESSIONS_STORAGE_KEY = 'bible-strong-avatar-expressions-v1'
-const SURFACE_STORAGE_KEY = 'bible-strong-avatar-surface-v1'
+const BODY_RENDER_PATH_SLOTS = MAX_BODY_NODES + 2
 const RETARGET_BLEND_MS = 120
 const INSPECTOR_FRAME_MS = 1000 / 24
-const surfaceTypes = Object.keys(surfacePresets) as SurfaceType[]
+const emptyBodyNodes: BodyNode[] = []
 const previewGeometryCache = new WeakMap<
   Expression,
-  WeakMap<SurfaceConfig, ReturnType<typeof renderAvatar>>
+  WeakMap<SurfaceConfig, WeakMap<BodyNode[], ReturnType<typeof renderAvatar>>>
 >()
 
-const getPreviewGeometry = (expression: Expression, surface: SurfaceConfig) => {
+const getPreviewGeometry = (
+  expression: Expression,
+  surface: SurfaceConfig,
+  bodyNodes: BodyNode[]
+) => {
   let surfaceCache = previewGeometryCache.get(expression)
   if (!surfaceCache) {
     surfaceCache = new WeakMap()
     previewGeometryCache.set(expression, surfaceCache)
   }
-  const cached = surfaceCache.get(surface)
+  let bodyCache = surfaceCache.get(surface)
+  if (!bodyCache) {
+    bodyCache = new WeakMap()
+    surfaceCache.set(surface, bodyCache)
+  }
+  const cached = bodyCache.get(bodyNodes)
   if (cached) return cached
   const geometry = renderAvatar(poseFromExpression(expression), surface, 1, {
     includeWire: false,
+    bodyNodes,
   })
-  surfaceCache.set(surface, geometry)
+  bodyCache.set(bodyNodes, geometry)
   return geometry
-}
-
-const loadExpressions = (): Expression[] => {
-  try {
-    const stored = window.localStorage.getItem(EXPRESSIONS_STORAGE_KEY)
-    if (!stored) return initialExpressions.map(item => ({ ...item }))
-    const parsed = JSON.parse(stored)
-    return Array.isArray(parsed) && parsed.length
-      ? parsed.map(item => ({ ...defaultExpression, ...item }))
-      : initialExpressions.map(item => ({ ...item }))
-  } catch {
-    return initialExpressions.map(item => ({ ...item }))
-  }
-}
-
-const persistExpressions = (expressions: Expression[]) => {
-  try {
-    window.localStorage.setItem(EXPRESSIONS_STORAGE_KEY, JSON.stringify(expressions))
-  } catch {
-    // Le prototype reste utilisable en mémoire si le stockage local est indisponible.
-  }
-}
-
-const loadSurface = (): SurfaceConfig => {
-  try {
-    const stored = window.localStorage.getItem(SURFACE_STORAGE_KEY)
-    if (!stored) return { ...surfacePresets.sphere }
-    const parsed = JSON.parse(stored) as Partial<SurfaceConfig>
-    const type = parsed.type && surfaceTypes.includes(parsed.type) ? parsed.type : 'sphere'
-    return { ...surfacePresets[type], ...parsed, type }
-  } catch {
-    return { ...surfacePresets.sphere }
-  }
-}
-
-const persistSurface = (surface: SurfaceConfig) => {
-  try {
-    window.localStorage.setItem(SURFACE_STORAGE_KEY, JSON.stringify(surface))
-  } catch {
-    // La forme reste modifiable en mémoire si le stockage local est indisponible.
-  }
 }
 
 const bounded = (value: number, min?: number, max?: number) =>
@@ -350,6 +327,10 @@ function AvatarCanvas({
   wirePaths,
   showWire,
   backPaths,
+  frontPaths,
+  backNodeIds,
+  frontNodeIds,
+  bodyEditing,
   headPath,
   leftPath,
   rightPath,
@@ -358,6 +339,7 @@ function AvatarCanvas({
   linked,
   highlight,
   onHighlightChange,
+  onBodyNodeSelect,
   onChange,
 }: {
   expression: Expression
@@ -365,6 +347,10 @@ function AvatarCanvas({
   wirePaths: MotionValue<string>[]
   showWire: boolean
   backPaths: MotionValue<string>[]
+  frontPaths: MotionValue<string>[]
+  backNodeIds: { current: Array<string | null> }
+  frontNodeIds: { current: Array<string | null> }
+  bodyEditing: boolean
   headPath: MotionValue<string>
   leftPath: MotionValue<string>
   rightPath: MotionValue<string>
@@ -373,6 +359,7 @@ function AvatarCanvas({
   linked: { width: boolean; height: boolean; size: boolean }
   highlight: Highlight
   onHighlightChange: (highlight: Highlight) => void
+  onBodyNodeSelect: (id: 'primary' | string) => void
   onChange: (next: Expression) => void
 }) {
   const svgRef = useRef<SVGSVGElement>(null)
@@ -417,7 +404,7 @@ function AvatarCanvas({
     const length = Math.hypot(x, y) || 1
     return [x / length, y / length]
   }
-  const startDrag = (event: React.PointerEvent<SVGCircleElement>) => {
+  const startDrag = (event: React.PointerEvent<SVGElement>) => {
     setSelectedSide(null)
     onHighlightChange('head')
     drag.current = {
@@ -427,6 +414,18 @@ function AvatarCanvas({
     }
     setActiveDragType('arcball')
     svgRef.current!.setPointerCapture(event.pointerId)
+  }
+  const selectBodyPath = (
+    event: React.PointerEvent<SVGPathElement>,
+    nodeId: string | null | undefined
+  ) => {
+    if (!nodeId || !bodyEditing) {
+      startDrag(event)
+      return
+    }
+    event.stopPropagation()
+    setSelectedSide(null)
+    onBodyNodeSelect(nodeId)
   }
   const selectEye = (side: -1 | 1, event: React.PointerEvent<SVGPathElement>) => {
     event.stopPropagation()
@@ -559,13 +558,16 @@ function AvatarCanvas({
             className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
             d={pathValue}
             key={index}
-            onPointerDown={startDrag}
+            onPointerDown={event => selectBodyPath(event, backNodeIds.current[index])}
           />
         ))}
         <motion.path
           className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
           d={headPath}
-          onPointerDown={startDrag}
+          onPointerDown={event => {
+            onBodyNodeSelect('primary')
+            startDrag(event)
+          }}
         />
         <g clipPath="url(#avatar-head-clip)">
           {(showWire || highlight === 'head') &&
@@ -585,6 +587,14 @@ function AvatarCanvas({
             onPointerDown={event => selectEye(1, event)}
           />
         </g>
+        {frontPaths.map((pathValue, index) => (
+          <motion.path
+            className={`avatar-head ${highlight === 'head' ? 'cyan-outline' : ''}`}
+            d={pathValue}
+            key={index}
+            onPointerDown={event => selectBodyPath(event, frontNodeIds.current[index])}
+          />
+        ))}
         {editor?.visible && (
           <g className="eye-editor">
             {activeDragType !== null && activeDragType !== 'arcball' && (
@@ -690,7 +700,7 @@ function EditorSquare({
 }
 
 function SurfaceThumbnail({ surface }: { surface: SurfaceConfig }) {
-  const geometry = getPreviewGeometry(defaultExpression, surface)
+  const geometry = getPreviewGeometry(defaultExpression, surface, emptyBodyNodes)
   return (
     <svg viewBox="-150 -150 300 300" aria-hidden="true">
       {geometry.backPaths.map((pathValue, index) => (
@@ -704,13 +714,15 @@ function SurfaceThumbnail({ surface }: { surface: SurfaceConfig }) {
 function ExpressionPreview({
   expression,
   surface,
+  bodyNodes,
   id,
 }: {
   expression: Expression
   surface: SurfaceConfig
+  bodyNodes: BodyNode[]
   id: string
 }) {
-  const geometry = getPreviewGeometry(expression, surface)
+  const geometry = getPreviewGeometry(expression, surface, bodyNodes)
   const clipId = `preview-${id}`
   return (
     <svg viewBox="-150 -150 300 300" aria-hidden="true">
@@ -735,6 +747,9 @@ function ExpressionPreview({
           opacity={geometry.rightVisible ? 1 : 0}
         />
       </g>
+      {geometry.frontPaths.map((pathValue, index) => (
+        <path className="preview-head" d={pathValue} key={`front-${index}`} />
+      ))}
     </svg>
   )
 }
@@ -742,6 +757,7 @@ function ExpressionPreview({
 function ExpressionDialog({
   editing,
   surface,
+  bodyNodes,
   onChange,
   onCancel,
   onSave,
@@ -749,6 +765,7 @@ function ExpressionDialog({
 }: {
   editing: { index: number | null; draft: Expression }
   surface: SurfaceConfig
+  bodyNodes: BodyNode[]
   onChange: (draft: Expression) => void
   onCancel: () => void
   onSave: () => void
@@ -811,7 +828,12 @@ function ExpressionDialog({
         </header>
         <div className="dialog-body">
           <aside className="dialog-preview">
-            <ExpressionPreview expression={editing.draft} surface={surface} id="dialog" />
+            <ExpressionPreview
+              expression={editing.draft}
+              surface={surface}
+              bodyNodes={bodyNodes}
+              id="dialog"
+            />
             <strong>Aperçu en direct</strong>
             <span>Projection sur la forme active</span>
           </aside>
@@ -959,8 +981,19 @@ function ExpressionDialog({
 
 export default function App() {
   const [mode, setMode] = useState<Mode>('manual')
-  const [surface, setSurface] = useState(loadSurface)
-  const [expressions, setExpressions] = useState(loadExpressions)
+  const [initialLibrary] = useState(loadAvatarLibrary)
+  const [avatars, setAvatars] = useState(initialLibrary.avatars)
+  const [activeAvatarId, setActiveAvatarId] = useState(initialLibrary.activeAvatarId)
+  const initialAvatar =
+    initialLibrary.avatars.find(avatar => avatar.id === initialLibrary.activeAvatarId) ??
+    initialLibrary.avatars[0]
+  const [surface, setSurface] = useState(initialAvatar.body.primary)
+  const [bodyNodes, setBodyNodes] = useState(initialAvatar.body.nodes)
+  const [selectedBodyNodeId, setSelectedBodyNodeId] = useState<'primary' | string>('primary')
+  const [expressions, setExpressions] = useState(loadGlobalExpressions)
+  const [bodyEditing, setBodyEditing] = useState(false)
+  const [creatingAvatar, setCreatingAvatar] = useState(false)
+  const [newAvatarName, setNewAvatarName] = useState('')
   const [expression, setExpression] = useState<Expression>({ ...defaultExpression })
   const [activeExpression, setActiveExpression] = useState<number | null>(null)
   const [editing, setEditing] = useState<{ index: number | null; draft: Expression } | null>(null)
@@ -974,12 +1007,18 @@ export default function App() {
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const reduceMotion = useReducedMotion()
 
+  const avatarsRef = useRef(avatars)
+  const activeAvatarIdRef = useRef(activeAvatarId)
   const surfaceRef = useRef(surface)
+  const bodyNodesRef = useRef(bodyNodes)
   const showWireRef = useRef(showWire)
   const highlightRef = useRef(highlight)
   const [initialRender] = useState(() => {
     const pose = poseFromExpression(defaultExpression)
-    return { pose, geometry: renderAvatar(pose, surface) }
+    return {
+      pose,
+      geometry: renderAvatar(pose, surface, 1, { bodyNodes }),
+    }
   })
   const { pose: initialPose, geometry: initialGeometry } = initialRender
   const displayedPose = useRef<AvatarPose>(initialPose)
@@ -1002,7 +1041,18 @@ export default function App() {
   const blinkControls = useRef<ReturnType<typeof animate> | null>(null)
   const blinkValue = useMotionValue(1)
   const headPath = useMotionValue(initialGeometry.headPath)
-  const [backPaths] = useState(() => [motionValue(''), motionValue('')])
+  const backNodeIds = useRef(initialGeometry.backNodeIds)
+  const frontNodeIds = useRef(initialGeometry.frontNodeIds)
+  const [backPaths] = useState(() =>
+    Array.from({ length: BODY_RENDER_PATH_SLOTS }, (_, index) =>
+      motionValue(initialGeometry.backPaths[index] ?? '')
+    )
+  )
+  const [frontPaths] = useState(() =>
+    Array.from({ length: BODY_RENDER_PATH_SLOTS }, (_, index) =>
+      motionValue(initialGeometry.frontPaths[index] ?? '')
+    )
+  )
   const leftPath = useMotionValue(initialGeometry.leftPath)
   const rightPath = useMotionValue(initialGeometry.rightPath)
   const leftOpacity = useMotionValue(initialGeometry.leftVisible ? 1 : 0)
@@ -1015,9 +1065,13 @@ export default function App() {
     displayedPose.current = pose
     const geometry = renderAvatar(pose, surfaceRef.current, blink ?? blinkValue.get(), {
       includeWire: showWireRef.current || highlightRef.current === 'head',
+      bodyNodes: bodyNodesRef.current,
     })
     headPath.set(geometry.headPath)
+    backNodeIds.current = geometry.backNodeIds
+    frontNodeIds.current = geometry.frontNodeIds
     backPaths.forEach((pathValue, index) => pathValue.set(geometry.backPaths[index] ?? ''))
+    frontPaths.forEach((pathValue, index) => pathValue.set(geometry.frontPaths[index] ?? ''))
     leftPath.set(geometry.leftPath)
     rightPath.set(geometry.rightPath)
     leftOpacity.set(geometry.leftVisible ? 1 : 0)
@@ -1196,11 +1250,97 @@ export default function App() {
     updateImmediate({ ...expression, spacing: value })
   }
 
+  const updateActiveAvatar = (update: (avatar: StudioAvatar) => StudioAvatar) => {
+    const next = avatarsRef.current.map(avatar =>
+      avatar.id === activeAvatarIdRef.current ? update(avatar) : avatar
+    )
+    avatarsRef.current = next
+    setAvatars(next)
+    persistAvatarLibrary({ activeAvatarId: activeAvatarIdRef.current, avatars: next })
+  }
+
   const updateSurface = (next: SurfaceConfig) => {
     surfaceRef.current = next
     setSurface(next)
-    persistSurface(next)
+    updateActiveAvatar(avatar => ({
+      ...avatar,
+      body: { primary: next, nodes: bodyNodesRef.current },
+    }))
     paintPose(displayedPose.current)
+  }
+
+  const updateBodyNodes = (next: BodyNode[]) => {
+    bodyNodesRef.current = next
+    setBodyNodes(next)
+    updateActiveAvatar(avatar => ({
+      ...avatar,
+      body: { primary: surfaceRef.current, nodes: next },
+    }))
+    paintPose(displayedPose.current)
+  }
+
+  const activateAvatar = (id: string, editBody = false) => {
+    const avatar = avatarsRef.current.find(item => item.id === id)
+    if (!avatar) return
+    stopTransition(true)
+    stopState()
+    activeAvatarIdRef.current = id
+    surfaceRef.current = avatar.body.primary
+    bodyNodesRef.current = avatar.body.nodes
+    setActiveAvatarId(id)
+    setSurface(avatar.body.primary)
+    setBodyNodes(avatar.body.nodes)
+    setSelectedBodyNodeId('primary')
+    setActiveExpression(null)
+    setBodyEditing(editBody)
+    setMode('manual')
+    const neutral = { ...defaultExpression }
+    setExpression(neutral)
+    canonicalTarget.current = neutral
+    transitionTarget.current = neutral
+    paintPose(poseFromExpression(neutral))
+    persistAvatarLibrary({ activeAvatarId: id, avatars: avatarsRef.current })
+  }
+
+  const submitNewAvatar = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const avatar = createAvatar(newAvatarName)
+    const next = [...avatarsRef.current, avatar]
+    avatarsRef.current = next
+    setAvatars(next)
+    setCreatingAvatar(false)
+    setNewAvatarName('')
+    persistAvatarLibrary({ activeAvatarId: avatar.id, avatars: next })
+    activateAvatar(avatar.id, true)
+  }
+
+  const addBodyNode = (type: (typeof bodyPrimitiveTypes)[number]) => {
+    if (bodyNodesRef.current.length >= MAX_BODY_NODES) return
+    const node = createBodyNode(type, bodyNodesRef.current.length)
+    updateBodyNodes([...bodyNodesRef.current, node])
+    setSelectedBodyNodeId(node.id)
+  }
+
+  const updateSelectedBodyNode = (update: (node: BodyNode) => BodyNode) => {
+    if (selectedBodyNodeId === 'primary') return
+    updateBodyNodes(
+      bodyNodesRef.current.map(node => (node.id === selectedBodyNodeId ? update(node) : node))
+    )
+  }
+
+  const deleteSelectedBodyNode = () => {
+    if (selectedBodyNodeId === 'primary') return
+    updateBodyNodes(bodyNodesRef.current.filter(node => node.id !== selectedBodyNodeId))
+    setSelectedBodyNodeId('primary')
+  }
+
+  const duplicateSelectedBodyNode = () => {
+    if (selectedBodyNodeId === 'primary' || bodyNodesRef.current.length >= MAX_BODY_NODES) return
+    const source = bodyNodesRef.current.find(node => node.id === selectedBodyNodeId)
+    if (!source) return
+    const duplicate = duplicateBodyNode(source)
+    updateBodyNodes([...bodyNodesRef.current, duplicate])
+    setSelectedBodyNodeId(duplicate.id)
   }
 
   const updateHighlight = (next: Highlight) => {
@@ -1227,6 +1367,7 @@ export default function App() {
     stopState()
     setActiveState(name)
     const pool = statePools[name]
+    if (!pool?.length) return
     let position = 0
     const cycle = () => {
       const index = pool[position % pool.length]
@@ -1252,7 +1393,7 @@ export default function App() {
             itemIndex === editing.index ? { ...editing.draft } : item
           )
     setExpressions(next)
-    persistExpressions(next)
+    persistGlobalExpressions(next)
     setEditing(null)
     transitionToExpression(editing.draft, index)
   }
@@ -1263,10 +1404,24 @@ export default function App() {
       return
     const next = expressions.filter((_, index) => index !== editing.index)
     setExpressions(next)
-    persistExpressions(next)
+    persistGlobalExpressions(next)
     setActiveExpression(null)
     setEditing(null)
   }
+
+  const selectedBodyNode =
+    selectedBodyNodeId === 'primary'
+      ? null
+      : (bodyNodes.find(node => node.id === selectedBodyNodeId) ?? null)
+
+  const updateNodeVector = (property: 'position' | 'rotation', index: 0 | 1 | 2, value: number) => {
+    updateSelectedBodyNode(node => {
+      const vector = [...node[property]] as [number, number, number]
+      vector[index] = value
+      return { ...node, [property]: vector }
+    })
+  }
+  const activeAvatar = avatars.find(avatar => avatar.id === activeAvatarId) ?? avatars[0]
 
   return (
     <div className="studio">
@@ -1281,6 +1436,10 @@ export default function App() {
           wirePaths={wirePaths}
           showWire={showWire}
           backPaths={backPaths}
+          frontPaths={frontPaths}
+          backNodeIds={backNodeIds}
+          frontNodeIds={frontNodeIds}
+          bodyEditing={bodyEditing}
           headPath={headPath}
           leftPath={leftPath}
           rightPath={rightPath}
@@ -1289,6 +1448,7 @@ export default function App() {
           linked={linked}
           highlight={highlight}
           onHighlightChange={updateHighlight}
+          onBodyNodeSelect={setSelectedBodyNodeId}
           onChange={updateImmediate}
         />
         <p className="stage-help">
@@ -1296,326 +1456,573 @@ export default function App() {
         </p>
       </section>
 
-      <main className="inspector">
-        <header className="inspector-header">
-          <div>
-            <p className="eyebrow">Prototype React + Motion</p>
-            <h1>Avatar Studio</h1>
-          </div>
-          <span className="motion-status">
-            <i />
-            Motion actif
-          </span>
-        </header>
-        <nav className="tabs" aria-label="Mode d’édition">
-          {(['manual', 'expressions', 'states'] as Mode[]).map(item => (
-            <button
-              key={item}
-              type="button"
-              aria-pressed={mode === item}
-              onClick={() => setMode(item)}
-            >
-              {{ manual: 'Manuel', expressions: 'Expressions', states: 'États' }[item]}
+      <main className={`inspector ${bodyEditing ? 'body-workspace' : ''}`}>
+        {bodyEditing ? (
+          <header className="body-workspace-header">
+            <div>
+              <p className="eyebrow">Construction du corps</p>
+              <h1>{activeAvatar.name}</h1>
+              <p>Choisis la forme principale puis assemble les primitives autour d’elle.</p>
+            </div>
+            <button type="button" onClick={() => setBodyEditing(false)}>
+              Terminer
             </button>
-          ))}
-        </nav>
+          </header>
+        ) : (
+          <>
+            <header className="inspector-header">
+              <div>
+                <p className="eyebrow">Prototype React + Motion</p>
+                <h1>Avatar Studio</h1>
+              </div>
+              <span className="motion-status">
+                <i />
+                Motion actif
+              </span>
+            </header>
+            <section className="avatar-switcher" aria-label="Avatar actif">
+              <div>
+                <span>Avatar</span>
+                <select
+                  aria-label="Choisir un avatar"
+                  value={activeAvatarId}
+                  onChange={event => activateAvatar(event.currentTarget.value)}
+                >
+                  {avatars.map(avatar => (
+                    <option key={avatar.id} value={avatar.id}>
+                      {avatar.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <button type="button" onClick={() => setCreatingAvatar(true)}>
+                + Nouvel avatar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode('manual')
+                  setBodyEditing(true)
+                }}
+              >
+                Modifier le corps
+              </button>
+            </section>
+            <p className="avatar-context">
+              Tu travailles actuellement sur <strong>{activeAvatar.name}</strong>.
+            </p>
+            <nav className="tabs" aria-label="Mode d’édition">
+              {(['manual', 'expressions', 'states'] as Mode[]).map(item => (
+                <button
+                  key={item}
+                  type="button"
+                  aria-pressed={mode === item}
+                  onClick={() => setMode(item)}
+                >
+                  {{ manual: 'Manuel', expressions: 'Expressions', states: 'États' }[item]}
+                </button>
+              ))}
+            </nav>
+          </>
+        )}
 
         {mode === 'manual' && (
           <div className="panel-stack">
-            <section className="panel surface-panel">
-              <PanelTitle
-                title="Forme de la tête"
-                subtitle="La surface change, les expressions et les états restent compatibles."
-              />
-              <div className="surface-grid">
-                {surfaceTypes.map(type => {
-                  const previewSurface = type === surface.type ? surface : surfacePresets[type]
-                  return (
+            {bodyEditing && (
+              <>
+                <section className="panel body-panel">
+                  <PanelTitle
+                    title="Construction du corps"
+                    subtitle="Une forme principale porte les yeux. Les autres primitives se placent autour d’elle."
+                  />
+                  <div className="body-tree">
                     <button
-                      className="surface-card"
                       type="button"
-                      key={type}
-                      aria-pressed={surface.type === type}
-                      onClick={() => updateSurface({ ...surfacePresets[type] })}
+                      aria-pressed={selectedBodyNodeId === 'primary'}
+                      onClick={() => setSelectedBodyNodeId('primary')}
                     >
-                      <SurfaceThumbnail surface={previewSurface} />
-                      <span>{surfaceLabels[type]}</span>
+                      <span className="body-node-icon">●</span>
+                      <span>
+                        <strong>Forme principale</strong>
+                        <small>{surfaceLabels[surface.type]} · porte les yeux</small>
+                      </span>
                     </button>
-                  )
-                })}
-              </div>
-              <div className="surface-fields">
-                <NumericField
-                  label="Largeur"
-                  value={surface.width}
-                  min={120}
-                  max={300}
-                  unit="u"
-                  onChange={width => updateSurface({ ...surface, width })}
-                />
-                <NumericField
-                  label="Hauteur"
-                  value={surface.height}
-                  min={120}
-                  max={300}
-                  unit="u"
-                  onChange={height => updateSurface({ ...surface, height })}
-                />
-                <NumericField
-                  label="Profondeur"
-                  value={surface.depth}
-                  min={100}
-                  max={300}
-                  unit="u"
-                  onChange={depth => updateSurface({ ...surface, depth })}
-                />
-                {(surface.type === 'cube' || surface.type === 'diamond') && (
-                  <NumericField
-                    label="Rondeur"
-                    value={surface.roundness}
-                    min={0}
-                    max={2}
-                    step={0.01}
-                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                    onChange={roundness => updateSurface({ ...surface, roundness })}
+                    {bodyNodes.map(node => (
+                      <button
+                        type="button"
+                        key={node.id}
+                        aria-pressed={selectedBodyNodeId === node.id}
+                        onClick={() => setSelectedBodyNodeId(node.id)}
+                      >
+                        <span className="body-node-icon">◇</span>
+                        <span>
+                          <strong>{node.name}</strong>
+                          <small>{surfaceLabels[node.surface.type]}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                  <div className="body-add">
+                    <span>
+                      Ajouter une forme · {bodyNodes.length}/{MAX_BODY_NODES}
+                    </span>
+                    <div>
+                      {bodyPrimitiveTypes.map(type => (
+                        <button
+                          type="button"
+                          key={type}
+                          disabled={bodyNodes.length >= MAX_BODY_NODES}
+                          onClick={() => addBodyNode(type)}
+                        >
+                          + {surfaceLabels[type]}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {selectedBodyNode && (
+                    <div className="body-node-editor">
+                      <div className="body-node-actions">
+                        <strong>{selectedBodyNode.name}</strong>
+                        <div>
+                          <button
+                            type="button"
+                            disabled={bodyNodes.length >= MAX_BODY_NODES}
+                            onClick={duplicateSelectedBodyNode}
+                          >
+                            Dupliquer
+                          </button>
+                          <button className="danger" type="button" onClick={deleteSelectedBodyNode}>
+                            Supprimer
+                          </button>
+                        </div>
+                      </div>
+                      <div className="surface-fields">
+                        {(['width', 'height', 'depth'] as const).map(dimension => (
+                          <NumericField
+                            key={dimension}
+                            label={
+                              { width: 'Largeur', height: 'Hauteur', depth: 'Profondeur' }[
+                                dimension
+                              ]
+                            }
+                            value={selectedBodyNode.surface[dimension]}
+                            min={10}
+                            max={300}
+                            unit="u"
+                            onChange={value =>
+                              updateSelectedBodyNode(node => ({
+                                ...node,
+                                surface: { ...node.surface, [dimension]: value },
+                              }))
+                            }
+                          />
+                        ))}
+                        {(selectedBodyNode.surface.type === 'cube' ||
+                          selectedBodyNode.surface.type === 'diamond' ||
+                          selectedBodyNode.surface.type === 'cylinder') && (
+                          <NumericField
+                            label="Rondeur"
+                            value={selectedBodyNode.surface.roundness}
+                            min={0}
+                            max={2}
+                            step={0.01}
+                            onChange={roundness =>
+                              updateSelectedBodyNode(node => ({
+                                ...node,
+                                surface: { ...node.surface, roundness },
+                              }))
+                            }
+                          />
+                        )}
+                        {(selectedBodyNode.surface.type === 'cylinder' ||
+                          selectedBodyNode.surface.type === 'cone') && (
+                          <NumericField
+                            label="Rondeur globale"
+                            value={selectedBodyNode.surface.morphRoundness ?? 0}
+                            min={0}
+                            max={2}
+                            step={0.01}
+                            onChange={morphRoundness =>
+                              updateSelectedBodyNode(node => ({
+                                ...node,
+                                surface: { ...node.surface, morphRoundness },
+                              }))
+                            }
+                          />
+                        )}
+                        {selectedBodyNode.surface.type === 'cone' && (
+                          <>
+                            <NumericField
+                              label="Rondeur pointe"
+                              value={selectedBodyNode.surface.tipRoundness ?? 0}
+                              min={0}
+                              max={2}
+                              step={0.01}
+                              onChange={tipRoundness =>
+                                updateSelectedBodyNode(node => ({
+                                  ...node,
+                                  surface: { ...node.surface, tipRoundness },
+                                }))
+                              }
+                            />
+                            <NumericField
+                              label="Rondeur base"
+                              value={selectedBodyNode.surface.baseRoundness ?? 0}
+                              min={0}
+                              max={2}
+                              step={0.01}
+                              onChange={baseRoundness =>
+                                updateSelectedBodyNode(node => ({
+                                  ...node,
+                                  surface: { ...node.surface, baseRoundness },
+                                }))
+                              }
+                            />
+                          </>
+                        )}
+                      </div>
+                      <div className="body-transform-grid">
+                        <div>
+                          <h3>Position locale</h3>
+                          {(['X', 'Y', 'Z'] as const).map((axis, index) => (
+                            <NumericField
+                              key={axis}
+                              label={axis}
+                              value={selectedBodyNode.position[index]}
+                              unit="u"
+                              onChange={value =>
+                                updateNodeVector('position', index as 0 | 1 | 2, value)
+                              }
+                            />
+                          ))}
+                        </div>
+                        <div>
+                          <h3>Rotation locale</h3>
+                          {(['X', 'Y', 'Z'] as const).map((axis, index) => (
+                            <NumericField
+                              key={axis}
+                              label={axis}
+                              value={selectedBodyNode.rotation[index]}
+                              unit="°"
+                              onChange={value =>
+                                updateNodeVector('rotation', index as 0 | 1 | 2, value)
+                              }
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </section>
+                <section className="panel surface-panel">
+                  <PanelTitle
+                    title="Forme principale"
+                    subtitle="Cette surface est la référence du visage et porte les yeux."
                   />
-                )}
-                {surface.type === 'cylinder' && (
-                  <NumericField
-                    label="Rondeur des arêtes"
-                    value={surface.roundness}
-                    min={0}
-                    max={2}
-                    step={0.01}
-                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                    onChange={roundness => updateSurface({ ...surface, roundness })}
-                  />
-                )}
-                {(surface.type === 'cylinder' || surface.type === 'cone') && (
-                  <NumericField
-                    label="Rondeur globale"
-                    value={surface.morphRoundness ?? 0}
-                    min={0}
-                    max={2}
-                    step={0.01}
-                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                    onChange={morphRoundness => updateSurface({ ...surface, morphRoundness })}
-                  />
-                )}
-                {surface.type === 'cone' && (
-                  <>
+                  <div className="surface-grid">
+                    {bodyPrimitiveTypes.map(type => {
+                      const previewSurface = type === surface.type ? surface : surfacePresets[type]
+                      return (
+                        <button
+                          className="surface-card"
+                          type="button"
+                          key={type}
+                          aria-pressed={surface.type === type}
+                          onClick={() => {
+                            setSelectedBodyNodeId('primary')
+                            if (type !== surface.type) {
+                              updateSurface({ ...surfacePresets[type] })
+                            }
+                          }}
+                        >
+                          <SurfaceThumbnail surface={previewSurface} />
+                          <span>{surfaceLabels[type]}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <div className="surface-fields">
                     <NumericField
-                      label="Rondeur pointe"
-                      value={surface.tipRoundness ?? 0}
-                      min={0}
-                      max={2}
-                      step={0.01}
-                      onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                      onChange={tipRoundness => updateSurface({ ...surface, tipRoundness })}
+                      label="Largeur"
+                      value={surface.width}
+                      min={120}
+                      max={300}
+                      unit="u"
+                      onChange={width => updateSurface({ ...surface, width })}
                     />
                     <NumericField
-                      label="Rondeur base"
-                      value={surface.baseRoundness ?? 0}
-                      min={0}
-                      max={2}
-                      step={0.01}
-                      onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                      onChange={baseRoundness => updateSurface({ ...surface, baseRoundness })}
+                      label="Hauteur"
+                      value={surface.height}
+                      min={120}
+                      max={300}
+                      unit="u"
+                      onChange={height => updateSurface({ ...surface, height })}
                     />
-                  </>
-                )}
-              </div>
-            </section>
-            <section className="panel">
-              <PanelTitle
-                title="Rotation de la tête"
-                subtitle="Les libellés ↔ sont scrubbables, comme dans Figma."
-              />
-              <NumericField
-                label="Rotation X"
-                value={expression.headX}
-                unit="°"
-                onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                onChange={value => updateImmediate({ ...expression, headX: value })}
-              />
-              <NumericField
-                label="Rotation Y"
-                value={expression.headY}
-                unit="°"
-                onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                onChange={value => updateImmediate({ ...expression, headY: value })}
-              />
-              <NumericField
-                label="Rotation Z"
-                value={expression.headZ}
-                unit="°"
-                onActiveChange={active => updateHighlight(active ? 'head' : null)}
-                onChange={value => updateImmediate({ ...expression, headZ: value })}
-              />
-            </section>
-            {(['width', 'height', 'size'] as const).map(dimension => (
-              <section className="panel compact" key={dimension}>
-                <div className="panel-inline-title">
-                  <h2>
-                    {
-                      { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
-                        dimension
-                      ]
-                    }
-                  </h2>
-                  <LinkButton
-                    linked={linked[dimension]}
-                    label={`Lier ${dimension}`}
-                    onClick={() =>
-                      setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
-                    }
-                  />
-                </div>
-                <div className="eye-columns">
-                  {(['Left', 'Right'] as Side[]).map(side => {
-                    const width = expression[`width${side}`]
-                    const height = expression[`height${side}`]
-                    const value =
-                      dimension === 'width'
-                        ? width
-                        : dimension === 'height'
-                          ? height
-                          : Math.max(width, height)
-                    return (
+                    <NumericField
+                      label="Profondeur"
+                      value={surface.depth}
+                      min={100}
+                      max={300}
+                      unit="u"
+                      onChange={depth => updateSurface({ ...surface, depth })}
+                    />
+                    {(surface.type === 'cube' || surface.type === 'diamond') && (
                       <NumericField
-                        key={side}
-                        label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
-                        value={value}
-                        min={10}
-                        max={dimension === 'size' ? 110 : 100}
-                        unit="u"
-                        onActiveChange={active =>
-                          updateHighlight(
-                            active
-                              ? linked[dimension]
-                                ? 'both'
-                                : side === 'Left'
-                                  ? 'left'
-                                  : 'right'
-                              : null
-                          )
+                        label="Rondeur"
+                        value={surface.roundness}
+                        min={0}
+                        max={2}
+                        step={0.01}
+                        onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                        onChange={roundness => updateSurface({ ...surface, roundness })}
+                      />
+                    )}
+                    {surface.type === 'cylinder' && (
+                      <NumericField
+                        label="Rondeur des arêtes"
+                        value={surface.roundness}
+                        min={0}
+                        max={2}
+                        step={0.01}
+                        onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                        onChange={roundness => updateSurface({ ...surface, roundness })}
+                      />
+                    )}
+                    {(surface.type === 'cylinder' || surface.type === 'cone') && (
+                      <NumericField
+                        label="Rondeur globale"
+                        value={surface.morphRoundness ?? 0}
+                        min={0}
+                        max={2}
+                        step={0.01}
+                        onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                        onChange={morphRoundness => updateSurface({ ...surface, morphRoundness })}
+                      />
+                    )}
+                    {surface.type === 'cone' && (
+                      <>
+                        <NumericField
+                          label="Rondeur pointe"
+                          value={surface.tipRoundness ?? 0}
+                          min={0}
+                          max={2}
+                          step={0.01}
+                          onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                          onChange={tipRoundness => updateSurface({ ...surface, tipRoundness })}
+                        />
+                        <NumericField
+                          label="Rondeur base"
+                          value={surface.baseRoundness ?? 0}
+                          min={0}
+                          max={2}
+                          step={0.01}
+                          onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                          onChange={baseRoundness => updateSurface({ ...surface, baseRoundness })}
+                        />
+                      </>
+                    )}
+                  </div>
+                </section>
+              </>
+            )}
+            {!bodyEditing && (
+              <>
+                <section className="panel">
+                  <PanelTitle
+                    title="Rotation de la tête"
+                    subtitle="Les libellés ↔ sont scrubbables, comme dans Figma."
+                  />
+                  <NumericField
+                    label="Rotation X"
+                    value={expression.headX}
+                    unit="°"
+                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                    onChange={value => updateImmediate({ ...expression, headX: value })}
+                  />
+                  <NumericField
+                    label="Rotation Y"
+                    value={expression.headY}
+                    unit="°"
+                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                    onChange={value => updateImmediate({ ...expression, headY: value })}
+                  />
+                  <NumericField
+                    label="Rotation Z"
+                    value={expression.headZ}
+                    unit="°"
+                    onActiveChange={active => updateHighlight(active ? 'head' : null)}
+                    onChange={value => updateImmediate({ ...expression, headZ: value })}
+                  />
+                </section>
+                {(['width', 'height', 'size'] as const).map(dimension => (
+                  <section className="panel compact" key={dimension}>
+                    <div className="panel-inline-title">
+                      <h2>
+                        {
+                          { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
+                            dimension
+                          ]
                         }
-                        onChange={next =>
-                          dimension === 'size'
-                            ? updateSize(side, next)
-                            : updateDimension(side, dimension, next)
+                      </h2>
+                      <LinkButton
+                        linked={linked[dimension]}
+                        label={`Lier ${dimension}`}
+                        onClick={() =>
+                          setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
                         }
                       />
-                    )
-                  })}
-                </div>
-              </section>
-            ))}
-            <section className="panel">
-              <PanelTitle
-                title="Position des yeux"
-                subtitle="Coordonnées communes projetées sur la forme choisie."
-              />
-              <div className="eye-columns">
-                <div className="eye-column">
-                  <h3>Œil gauche</h3>
-                  <NumericField
-                    label="Horizontale"
-                    value={expression.positionXLeft}
-                    unit="u"
-                    onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                    onChange={value => updateImmediate({ ...expression, positionXLeft: value })}
+                    </div>
+                    <div className="eye-columns">
+                      {(['Left', 'Right'] as Side[]).map(side => {
+                        const width = expression[`width${side}`]
+                        const height = expression[`height${side}`]
+                        const value =
+                          dimension === 'width'
+                            ? width
+                            : dimension === 'height'
+                              ? height
+                              : Math.max(width, height)
+                        return (
+                          <NumericField
+                            key={side}
+                            label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
+                            value={value}
+                            min={10}
+                            max={dimension === 'size' ? 110 : 100}
+                            unit="u"
+                            onActiveChange={active =>
+                              updateHighlight(
+                                active
+                                  ? linked[dimension]
+                                    ? 'both'
+                                    : side === 'Left'
+                                      ? 'left'
+                                      : 'right'
+                                  : null
+                              )
+                            }
+                            onChange={next =>
+                              dimension === 'size'
+                                ? updateSize(side, next)
+                                : updateDimension(side, dimension, next)
+                            }
+                          />
+                        )
+                      })}
+                    </div>
+                  </section>
+                ))}
+                <section className="panel">
+                  <PanelTitle
+                    title="Position des yeux"
+                    subtitle="Coordonnées communes projetées sur la forme choisie."
+                  />
+                  <div className="eye-columns">
+                    <div className="eye-column">
+                      <h3>Œil gauche</h3>
+                      <NumericField
+                        label="Horizontale"
+                        value={expression.positionXLeft}
+                        unit="u"
+                        onActiveChange={active => updateHighlight(active ? 'left' : null)}
+                        onChange={value => updateImmediate({ ...expression, positionXLeft: value })}
+                      />
+                      <NumericField
+                        label="Verticale"
+                        value={expression.positionYLeft}
+                        unit="u"
+                        onActiveChange={active => updateHighlight(active ? 'left' : null)}
+                        onChange={value => updateImmediate({ ...expression, positionYLeft: value })}
+                      />
+                    </div>
+                    <div className="eye-column">
+                      <h3>Œil droit</h3>
+                      <NumericField
+                        label="Horizontale"
+                        value={expression.positionXRight}
+                        unit="u"
+                        onActiveChange={active => updateHighlight(active ? 'right' : null)}
+                        onChange={value =>
+                          updateImmediate({ ...expression, positionXRight: value })
+                        }
+                      />
+                      <NumericField
+                        label="Verticale"
+                        value={expression.positionYRight}
+                        unit="u"
+                        onActiveChange={active => updateHighlight(active ? 'right' : null)}
+                        onChange={value =>
+                          updateImmediate({ ...expression, positionYRight: value })
+                        }
+                      />
+                    </div>
+                  </div>
+                </section>
+                <section className="panel">
+                  <PanelTitle title="Rotation locale" subtitle="Inclinaison propre à chaque œil." />
+                  <div className="eye-columns">
+                    <NumericField
+                      label="Œil gauche"
+                      value={expression.leftAngle}
+                      unit="°"
+                      onActiveChange={active => updateHighlight(active ? 'left' : null)}
+                      onChange={value => updateImmediate({ ...expression, leftAngle: value })}
+                    />
+                    <NumericField
+                      label="Œil droit"
+                      value={expression.rightAngle}
+                      unit="°"
+                      onActiveChange={active => updateHighlight(active ? 'right' : null)}
+                      onChange={value => updateImmediate({ ...expression, rightAngle: value })}
+                    />
+                  </div>
+                </section>
+                <section className="panel">
+                  <PanelTitle
+                    title="Disposition générale"
+                    subtitle="Écarte ou rapproche les yeux autour de leur centre commun."
                   />
                   <NumericField
-                    label="Verticale"
-                    value={expression.positionYLeft}
+                    label="Espacement"
+                    value={expression.spacing}
+                    min={0}
+                    max={150}
                     unit="u"
-                    onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                    onChange={value => updateImmediate({ ...expression, positionYLeft: value })}
+                    onActiveChange={active => updateHighlight(active ? 'both' : null)}
+                    onChange={updateSpacing}
                   />
-                </div>
-                <div className="eye-column">
-                  <h3>Œil droit</h3>
+                </section>
+                <section className="panel">
+                  <PanelTitle title="Projection" subtitle="Perspective et repères de la tête." />
                   <NumericField
-                    label="Horizontale"
-                    value={expression.positionXRight}
-                    unit="u"
-                    onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                    onChange={value => updateImmediate({ ...expression, positionXRight: value })}
+                    label="Perspective"
+                    value={expression.perspective}
+                    step={0.01}
+                    unit="×"
+                    onChange={value => updateImmediate({ ...expression, perspective: value })}
                   />
-                  <NumericField
-                    label="Verticale"
-                    value={expression.positionYRight}
-                    unit="u"
-                    onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                    onChange={value => updateImmediate({ ...expression, positionYRight: value })}
-                  />
-                </div>
-              </div>
-            </section>
-            <section className="panel">
-              <PanelTitle title="Rotation locale" subtitle="Inclinaison propre à chaque œil." />
-              <div className="eye-columns">
-                <NumericField
-                  label="Œil gauche"
-                  value={expression.leftAngle}
-                  unit="°"
-                  onActiveChange={active => updateHighlight(active ? 'left' : null)}
-                  onChange={value => updateImmediate({ ...expression, leftAngle: value })}
-                />
-                <NumericField
-                  label="Œil droit"
-                  value={expression.rightAngle}
-                  unit="°"
-                  onActiveChange={active => updateHighlight(active ? 'right' : null)}
-                  onChange={value => updateImmediate({ ...expression, rightAngle: value })}
-                />
-              </div>
-            </section>
-            <section className="panel">
-              <PanelTitle
-                title="Disposition générale"
-                subtitle="Écarte ou rapproche les yeux autour de leur centre commun."
-              />
-              <NumericField
-                label="Espacement"
-                value={expression.spacing}
-                min={0}
-                max={150}
-                unit="u"
-                onActiveChange={active => updateHighlight(active ? 'both' : null)}
-                onChange={updateSpacing}
-              />
-            </section>
-            <section className="panel">
-              <PanelTitle title="Projection" subtitle="Perspective et repères de la tête." />
-              <NumericField
-                label="Perspective"
-                value={expression.perspective}
-                step={0.01}
-                unit="×"
-                onChange={value => updateImmediate({ ...expression, perspective: value })}
-              />
-              <label className="switch">
-                <span>Afficher le maillage</span>
-                <input
-                  type="checkbox"
-                  checked={showWire}
-                  onChange={event => updateWireVisibility(event.currentTarget.checked)}
-                />
-              </label>
-              <button
-                className="reset"
-                type="button"
-                onClick={() => transitionToExpression({ ...defaultExpression })}
-              >
-                Réinitialiser
-              </button>
-            </section>
+                  <label className="switch">
+                    <span>Afficher le maillage</span>
+                    <input
+                      type="checkbox"
+                      checked={showWire}
+                      onChange={event => updateWireVisibility(event.currentTarget.checked)}
+                    />
+                  </label>
+                  <button
+                    className="reset"
+                    type="button"
+                    onClick={() => transitionToExpression({ ...defaultExpression })}
+                  >
+                    Réinitialiser
+                  </button>
+                </section>
+              </>
+            )}
           </div>
         )}
 
-        {mode === 'expressions' && (
+        {!bodyEditing && mode === 'expressions' && (
           <div className="panel-stack">
             <section className="panel">
               <div className="preset-header">
@@ -1635,7 +2042,12 @@ export default function App() {
                     onClick={() => transitionToExpression(preset, index)}
                     onDoubleClick={() => setEditing({ index, draft: { ...preset } })}
                   >
-                    <ExpressionPreview expression={preset} surface={surface} id={String(index)} />
+                    <ExpressionPreview
+                      expression={preset}
+                      surface={surface}
+                      bodyNodes={bodyNodes}
+                      id={String(index)}
+                    />
                     <span>{String(index).padStart(2, '0')}</span>
                   </button>
                 ))}
@@ -1681,7 +2093,7 @@ export default function App() {
           </div>
         )}
 
-        {mode === 'states' && (
+        {!bodyEditing && mode === 'states' && (
           <div className="panel-stack">
             <section className="panel">
               <div className="preset-header">
@@ -1749,10 +2161,41 @@ export default function App() {
           </div>
         )}
       </main>
+      {creatingAvatar && (
+        <div className="dialog-backdrop">
+          <form className="avatar-create-dialog" onSubmit={submitNewAvatar}>
+            <p className="eyebrow">Nouvel avatar</p>
+            <h2>Comment s’appelle-t-il&nbsp;?</h2>
+            <p>
+              Il utilisera les expressions et les états globaux du Studio, puis tu construiras son
+              corps.
+            </p>
+            <label>
+              Nom de l’avatar
+              <input
+                autoFocus
+                required
+                value={newAvatarName}
+                onChange={event => setNewAvatarName(event.currentTarget.value)}
+                placeholder="Mon avatar"
+              />
+            </label>
+            <div>
+              <button type="button" onClick={() => setCreatingAvatar(false)}>
+                Annuler
+              </button>
+              <button className="primary" type="submit">
+                Créer l’avatar
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
       {editing && (
         <ExpressionDialog
           editing={editing}
           surface={surface}
+          bodyNodes={bodyNodes}
           onChange={draft => setEditing({ ...editing, draft })}
           onCancel={() => setEditing(null)}
           onSave={saveEditing}

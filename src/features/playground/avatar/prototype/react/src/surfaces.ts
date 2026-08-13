@@ -298,6 +298,8 @@ export const cursorLayout = (config: SurfaceConfig) => {
     coneBaseY: -config.height / 2 + coneHeight,
     bodyHeight,
     bodyCenterY: config.height / 2 - bodyHeight / 2,
+    bodyWidth: config.width * 0.54,
+    bodyDepth: config.depth * 0.62,
   }
 }
 
@@ -325,12 +327,17 @@ export const surfacePointAt = (
     case 'cursor': {
       const layout = cursorLayout(config)
       const progress = (latitude + Math.PI / 2) / Math.PI
-      const bodyConfig = { ...config, height: layout.bodyHeight }
+      const bodyConfig = {
+        ...config,
+        width: layout.bodyWidth,
+        height: layout.bodyHeight,
+        depth: layout.bodyDepth,
+      }
       const profile = cylinderProfileAt(bodyConfig, progress)
       return [
-        (width / 2) * profile.radiusScale * Math.sin(longitude),
+        (layout.bodyWidth / 2) * profile.radiusScale * Math.sin(longitude),
         layout.bodyCenterY - layout.bodyHeight / 2 + layout.bodyHeight * profile.verticalProgress,
-        (depth / 2) * profile.radiusScale * Math.cos(longitude),
+        (layout.bodyDepth / 2) * profile.radiusScale * Math.cos(longitude),
       ]
     }
     case 'diamond':
@@ -546,7 +553,12 @@ export const surfaceFrontSampleAt = (
 
     case 'cursor': {
       const layout = cursorLayout(config)
-      const bodyConfig = { ...config, height: layout.bodyHeight }
+      const bodyConfig = {
+        ...config,
+        width: layout.bodyWidth,
+        height: layout.bodyHeight,
+        depth: layout.bodyDepth,
+      }
       const sample = radialProfileFrontSample(
         bodyConfig,
         x,
@@ -588,11 +600,7 @@ export const surfaceNormalAt = (
     ])
   }
 
-  if (
-    (config.type === 'cylinder' || config.type === 'cursor') &&
-    config.roundness <= 0 &&
-    (config.morphRoundness ?? 0) <= 0
-  ) {
+  if (config.type === 'cylinder' && config.roundness <= 0 && (config.morphRoundness ?? 0) <= 0) {
     return normalize([
       Math.sin(longitude) / (config.width / 2 || 1),
       0,
@@ -632,11 +640,7 @@ export const surfaceSampleAt = (
     }
   }
 
-  if (
-    (config.type === 'cylinder' || config.type === 'cursor') &&
-    config.roundness <= 0 &&
-    (config.morphRoundness ?? 0) <= 0
-  ) {
+  if (config.type === 'cylinder' && config.roundness <= 0 && (config.morphRoundness ?? 0) <= 0) {
     return {
       point,
       normal: normalize([

@@ -5,6 +5,7 @@ import {
   surfaceSampleAt,
   type SurfaceConfig,
 } from './surfaces'
+import type { BodyNode } from './body'
 
 export type Quaternion = readonly [number, number, number, number]
 export type Point3 = readonly [number, number, number]
@@ -34,6 +35,9 @@ export type AvatarPose = {
 
 export type AvatarGeometry = {
   backPaths: string[]
+  frontPaths: string[]
+  backNodeIds: Array<string | null>
+  frontNodeIds: Array<string | null>
   headPath: string
   leftPath: string
   rightPath: string
@@ -44,6 +48,7 @@ export type AvatarGeometry = {
 
 export type RenderAvatarOptions = {
   includeWire?: boolean
+  bodyNodes?: BodyNode[]
 }
 
 export type EyeEditorGeometry = {
@@ -339,6 +344,7 @@ const PRIMITIVE_RING_SAMPLES = 144
 const ROUNDED_PRIMITIVE_LATITUDE_SAMPLES = 33
 const ROUNDED_PRIMITIVE_LONGITUDE_SAMPLES = 73
 const headSamplesCache = new Map<string, Point3[]>()
+const accessorySamplesCache = new Map<string, Point3[]>()
 const wireSamplesCache = new Map<string, LocalSurfacePoint[][]>()
 
 const surfaceCacheKey = (surface: SurfaceConfig) =>
@@ -643,8 +649,8 @@ const projectedCursorBodyPath = (pose: AvatarPose, surface: SurfaceConfig) => {
   const layout = cursorLayout(surface)
   const halfHeight = layout.bodyHeight / 2
   const projected = [
-    ...ringPoints(surface.width, surface.depth, layout.bodyCenterY - halfHeight),
-    ...ringPoints(surface.width, surface.depth, layout.bodyCenterY + halfHeight),
+    ...ringPoints(layout.bodyWidth, layout.bodyDepth, layout.bodyCenterY - halfHeight),
+    ...ringPoints(layout.bodyWidth, layout.bodyDepth, layout.bodyCenterY + halfHeight),
   ].map(point => projectLocalPoint(pose, point))
   return smoothClosedPath(densifyClosedPoints(convexHull(projected)))
 }
@@ -974,6 +980,60 @@ const headPath = (pose: AvatarPose, surface: SurfaceConfig) => {
   return path(convexHull(projectedSamples))
 }
 
+const accessoryPath = (pose: AvatarPose, node: BodyNode) => {
+  const key = surfaceCacheKey(node.surface)
+  let localSamples = accessorySamplesCache.get(key)
+  if (!localSamples) {
+    localSamples = Array.from({ length: 17 }, (_, latitudeIndex) => {
+      const latitude = -Math.PI / 2 + (latitudeIndex / 16) * Math.PI
+      return Array.from({ length: 49 }, (_, longitudeIndex) => {
+        const longitude = -Math.PI + (longitudeIndex / 48) * Math.PI * 2
+        return surfacePointAt(node.surface, longitude, latitude)
+      })
+    }).flat()
+    cacheSurfaceValue(accessorySamplesCache, key, localSamples)
+  }
+
+  const localOrientation = quaternionFromEuler(
+    radians(node.rotation[0]),
+    radians(node.rotation[1]),
+    radians(node.rotation[2])
+  )
+  const projected = localSamples.map(point => {
+    const locallyRotated = rotateWithQuaternion(localOrientation, point)
+    const positioned: Point3 = [
+      locallyRotated[0] + node.position[0],
+      locallyRotated[1] + node.position[1],
+      locallyRotated[2] + node.position[2],
+    ]
+    return project(rotateWithQuaternion(pose.orientation, positioned), pose.expression.perspective)
+  })
+  const hull = convexHull(projected)
+  if (
+    (node.surface.type === 'cube' || node.surface.type === 'diamond') &&
+    node.surface.roundness <= 0
+  ) {
+    return path(hull)
+  }
+  return smoothClosedPath(densifyClosedPoints(hull))
+}
+
+const accessoryLayers = (pose: AvatarPose, nodes: BodyNode[]) => {
+  const layers = nodes
+    .map(node => ({
+      id: node.id,
+      path: accessoryPath(pose, node),
+      depth: rotateWithQuaternion(pose.orientation, node.position)[2],
+    }))
+    .sort((left, right) => left.depth - right.depth)
+  return {
+    backPaths: layers.filter(layer => layer.depth <= 0).map(layer => layer.path),
+    frontPaths: layers.filter(layer => layer.depth > 0).map(layer => layer.path),
+    backNodeIds: layers.filter(layer => layer.depth <= 0).map(layer => layer.id),
+    frontNodeIds: layers.filter(layer => layer.depth > 0).map(layer => layer.id),
+  }
+}
+
 export const renderAvatar = (
   pose: AvatarPose,
   surface: SurfaceConfig,
@@ -984,8 +1044,13 @@ export const renderAvatar = (
   const rightSamples = eyePoints(pose, surface, 1, blink)
   const left = leftSamples.map(sample => sample.point)
   const right = rightSamples.map(sample => sample.point)
+  const accessories = accessoryLayers(pose, options.bodyNodes ?? [])
+  const compositePaths = compositeBackPaths(pose, surface)
   return {
-    backPaths: compositeBackPaths(pose, surface),
+    backPaths: [...compositePaths, ...accessories.backPaths],
+    frontPaths: accessories.frontPaths,
+    backNodeIds: [...compositePaths.map(() => null), ...accessories.backNodeIds],
+    frontNodeIds: accessories.frontNodeIds,
     headPath: headPath(pose, surface),
     leftPath: path(left),
     rightPath: path(right),
