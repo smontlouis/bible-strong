@@ -77,6 +77,17 @@ describe('editable avatar sequences', () => {
     expect(sequence.blink.durationMs).toBe(40)
   })
 
+  it('migrates a legacy index against the actual custom expression catalog', () => {
+    const custom = { ...initialExpressions[0], id: 'custom-expression' }
+    const expressions = [...initialExpressions, custom]
+    const [sequence] = parseSequences(
+      [{ id: 'custom', name: 'Custom', steps: [{ expressionIndex: expressions.length - 1 }] }],
+      expressions
+    )
+
+    expect(sequence.steps[0].expressionId).toBe(custom.id)
+  })
+
   it('repairs missing and out-of-range expression references on load', () => {
     const sequence = createInitialSequences().find(item => item.id === 'idle')!
     const [normalized] = normalizeSequencesForExpressions(

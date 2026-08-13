@@ -11,10 +11,10 @@ export const beginManipulation = <Value>(initial: Value): ManipulationSession<Va
 export const previewManipulation = <Value>(
   session: ManipulationSession<Value>,
   next: Value,
-  preview: (value: Value) => void
+  preview?: (value: Value) => void
 ) => {
   session.latest = next
-  preview(next)
+  preview?.(next)
 }
 
 export const finishManipulation = <Value>(

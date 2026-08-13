@@ -85,7 +85,11 @@ export const createInitialSequences = (): AvatarSequence[] =>
     })
   )
 
-const parseStep = (value: unknown, fallback: SequenceStep): SequenceStep => {
+const parseStep = (
+  value: unknown,
+  fallback: SequenceStep,
+  expressions: Expression[]
+): SequenceStep => {
   const candidate = value as (Partial<SequenceStep> & { expressionIndex?: unknown }) | null
   const legacyIndex = finite(candidate?.expressionIndex, 0, 0, 9999)
   return {
@@ -93,7 +97,7 @@ const parseStep = (value: unknown, fallback: SequenceStep): SequenceStep => {
     expressionId:
       typeof candidate?.expressionId === 'string' && candidate.expressionId
         ? candidate.expressionId
-        : (initialExpressions[Math.round(legacyIndex)]?.id ?? fallback.expressionId),
+        : (expressions[Math.round(legacyIndex)]?.id ?? fallback.expressionId),
     holdMs: finite(candidate?.holdMs, fallback.holdMs, 100, 60000),
     transitionMs: finite(candidate?.transitionMs, fallback.transitionMs, 0, 5000),
     transition: transitions.includes(candidate?.transition as SequenceTransition)
@@ -102,7 +106,11 @@ const parseStep = (value: unknown, fallback: SequenceStep): SequenceStep => {
   }
 }
 
-const parseSequence = (value: unknown, fallback: AvatarSequence): AvatarSequence => {
+const parseSequence = (
+  value: unknown,
+  fallback: AvatarSequence,
+  expressions: Expression[]
+): AvatarSequence => {
   const candidate = value as Partial<AvatarSequence> | null
   const fallbackStep = fallback.steps[0] ?? {
     id: 'fallback-step',
@@ -112,7 +120,7 @@ const parseSequence = (value: unknown, fallback: AvatarSequence): AvatarSequence
     transition: 'smooth' as const,
   }
   const steps = Array.isArray(candidate?.steps)
-    ? candidate.steps.map(step => parseStep(step, fallbackStep))
+    ? candidate.steps.map(step => parseStep(step, fallbackStep, expressions))
     : fallback.steps.map(step => ({ ...step }))
   const storedBlink = candidate?.blink as Partial<BlinkSettings> | undefined
   const minIntervalMs = finite(storedBlink?.minIntervalMs, fallback.blink.minIntervalMs, 100, 60000)
@@ -148,14 +156,17 @@ const parseSequence = (value: unknown, fallback: AvatarSequence): AvatarSequence
   }
 }
 
-export const parseSequences = (value: unknown): AvatarSequence[] => {
+export const parseSequences = (
+  value: unknown,
+  expressions: Expression[] = initialExpressions
+): AvatarSequence[] => {
   const defaults = createInitialSequences()
   if (!Array.isArray(value)) return defaults
   if (!value.length) return []
   const fallback = defaults.find(sequence => sequence.id === 'idle') ?? defaults[0]
   const seen = new Set<string>()
   return value
-    .map(sequence => parseSequence(sequence, fallback))
+    .map(sequence => parseSequence(sequence, fallback, expressions))
     .filter(sequence => {
       if (seen.has(sequence.id)) return false
       seen.add(sequence.id)
@@ -163,9 +174,12 @@ export const parseSequences = (value: unknown): AvatarSequence[] => {
     })
 }
 
-export const loadSequences = (): AvatarSequence[] => {
+export const loadSequences = (expressions: Expression[] = initialExpressions): AvatarSequence[] => {
   try {
-    return parseSequences(JSON.parse(window.localStorage.getItem(SEQUENCES_STORAGE_KEY) ?? 'null'))
+    return parseSequences(
+      JSON.parse(window.localStorage.getItem(SEQUENCES_STORAGE_KEY) ?? 'null'),
+      expressions
+    )
   } catch {
     return createInitialSequences()
   }

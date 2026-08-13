@@ -112,7 +112,7 @@ _Avoid_: Pose preset
 
 **State**:
 An animated sequence of Expressions, including its transitions and blink behavior.
-_Avoid_: Animation, sequence
+_Avoid_: Animation
 
 **Playback**:
 The active execution of one State. It exclusively controls the animated Pose until a direct user manipulation pauses it.

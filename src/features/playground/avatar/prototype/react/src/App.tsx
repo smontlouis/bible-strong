@@ -749,7 +749,7 @@ function BodyNodeGizmo({
     })()
     latestNode.current = next
     if (manipulation.current) {
-      previewManipulation(manipulation.current, next, () => undefined)
+      previewManipulation(manipulation.current, next)
     }
     if (previewFrame.current !== undefined) return
     previewFrame.current = requestAnimationFrame(() => {
@@ -899,6 +899,7 @@ function AvatarCanvas({
   onBodyNodePreview,
   onBodyNodeChange,
   onEyeSelect,
+  onPreview,
   onChange,
   onEyeChange,
 }: {
@@ -918,6 +919,7 @@ function AvatarCanvas({
   onBodyNodePreview: (next: BodyNode) => void
   onBodyNodeChange: (next: BodyNode) => void
   onEyeSelect: (side: -1 | 1) => void
+  onPreview: (next: Expression) => void
   onChange: (next: Expression) => void
   onEyeChange?: (next: Expression) => void
 }) {
@@ -958,6 +960,7 @@ function AvatarCanvas({
       }
     | null
   >(null)
+  const canvasManipulation = useRef<ManipulationSession<Expression> | null>(null)
   const editor =
     selectedSide === null
       ? null
@@ -988,6 +991,7 @@ function AvatarCanvas({
       startPoint: toSvg(event),
       expression,
     }
+    canvasManipulation.current = beginManipulation(expression)
     setActiveDragType('arcball')
     svgRef.current!.setPointerCapture(event.pointerId)
   }
@@ -1035,6 +1039,7 @@ function AvatarCanvas({
         1
       ),
     }
+    canvasManipulation.current = beginManipulation(editableExpression)
     setActiveDragType(type)
     svgRef.current!.setPointerCapture(event.pointerId)
   }
@@ -1042,7 +1047,14 @@ function AvatarCanvas({
     if (!drag.current) return
     const point = toSvg(event)
     if (drag.current.type === 'arcball') {
-      onChange(rotateExpressionWithArcball(drag.current.expression, drag.current.startPoint, point))
+      const next = rotateExpressionWithArcball(
+        drag.current.expression,
+        drag.current.startPoint,
+        point
+      )
+      if (canvasManipulation.current) {
+        previewManipulation(canvasManipulation.current, next, onPreview)
+      }
       return
     }
     const interaction = drag.current
@@ -1095,14 +1107,31 @@ function AvatarCanvas({
         interaction.expression[interaction.side < 0 ? 'leftAngle' : 'rightAngle'] +
         (deltaAngle * 180) / Math.PI
     }
-    ;(onEyeChange ?? onChange)(next)
+    if (canvasManipulation.current) {
+      previewManipulation(canvasManipulation.current, next, onPreview)
+    }
+  }
+  const commitDrag = () => {
+    const interaction = drag.current
+    const session = canvasManipulation.current
+    if (interaction && session) {
+      finishManipulation(session, 'commit', {
+        preview: onPreview,
+        commit: interaction.type === 'arcball' ? onChange : (onEyeChange ?? onChange),
+      })
+    }
+    canvasManipulation.current = null
+    drag.current = null
+    setActiveDragType(null)
+    onHighlightChange(null)
   }
   const cancelDrag = () => {
     const interaction = drag.current
-    if (interaction) {
-      if (interaction.type === 'arcball') onChange(interaction.expression)
-      else (onEyeChange ?? onChange)(interaction.expression)
+    const session = canvasManipulation.current
+    if (interaction && session) {
+      finishManipulation(session, 'cancel', { preview: onPreview, commit: onChange })
     }
+    canvasManipulation.current = null
     drag.current = null
     setActiveDragType(null)
     onHighlightChange(null)
@@ -1117,11 +1146,7 @@ function AvatarCanvas({
         role="img"
         aria-label={t('Avatar procédural')}
         onPointerMove={move}
-        onPointerUp={() => {
-          drag.current = null
-          setActiveDragType(null)
-          onHighlightChange(null)
-        }}
+        onPointerUp={commitDrag}
         onPointerCancel={cancelDrag}
       >
         <defs>
@@ -3080,6 +3105,22 @@ function StudioApp() {
     paintPose(poseFromExpression(draft))
   }
 
+  const previewCanvasExpression = (next: Expression) => {
+    if (bodyEditing) {
+      paintRenderedScene(
+        renderedScene,
+        renderAvatar(poseFromExpression(next), surfaceRef.current, blinkValue.get(), {
+          includeWire: showWireRef.current || highlightRef.current === 'head',
+          bodyNodes: bodyNodesRef.current,
+        })
+      )
+      return
+    }
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (avatar) setDisplayColors(resolveColors(next, avatar.colors))
+    paintPose(poseFromExpression(next))
+  }
+
   const openExpressionEditor = (index: number | null, draft: Expression) => {
     suspendStateForEditor()
     setBodyEditing(false)
@@ -3344,6 +3385,7 @@ function StudioApp() {
           onBodyNodePreview={previewSelectedBodyNode}
           onBodyNodeChange={commitBodyNode}
           onEyeSelect={setSelectedEyeSide}
+          onPreview={previewCanvasExpression}
           onChange={editing ? previewExpressionDraft : updateImmediate}
           onEyeChange={
             editing ? previewExpressionDraft : bodyEditing ? persistEditedEyeExpression : undefined

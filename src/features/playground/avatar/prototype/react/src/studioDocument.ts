@@ -76,7 +76,7 @@ export const loadStudioDocument = (): StudioDocument => {
     version: 2,
     library: loadAvatarLibrary(),
     expressions,
-    sequences: normalizeSequencesForExpressions(loadSequences(), expressions),
+    sequences: normalizeSequencesForExpressions(loadSequences(expressions), expressions),
     playback: loadLegacyPlayback(),
   }
   try {
@@ -103,7 +103,6 @@ export const createStudioDocumentStore = (
 ) => {
   let current = initial
   return {
-    get: () => current,
     update: (patch: StudioDocumentPatch) => {
       const expressions = patch.expressions ?? current.expressions
       current = {
