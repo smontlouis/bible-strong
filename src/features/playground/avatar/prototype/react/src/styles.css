@@ -261,6 +261,23 @@ input {
   min-height: 44px;
   box-shadow: 0 12px 30px rgb(23 25 29 / 18%);
 }
+.project-transfer-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.project-transfer-actions > button {
+  min-height: 42px;
+}
+.project-import-input {
+  display: none;
+}
+.project-transfer-error {
+  margin: 10px 0 0;
+  color: var(--destructive);
+  font-size: 12px;
+  line-height: 1.45;
+}
 .avatar-head,
 .preview-head {
   fill: var(--avatar-body-color, #5b7fe5);

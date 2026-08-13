@@ -205,12 +205,10 @@ export const createAvatar = (name: string): StudioAvatar => ({
   eyes: { ...defaultAvatarEyes },
 })
 
-export const loadAvatarLibrary = (): AvatarLibrary => {
+export const parseAvatarLibrary = (value: unknown, fallback: AvatarLibrary): AvatarLibrary => {
   try {
-    const parsed = JSON.parse(
-      window.localStorage.getItem(LIBRARY_STORAGE_KEY) ?? 'null'
-    ) as Partial<AvatarLibrary> | null
-    if (!parsed || !Array.isArray(parsed.avatars) || !parsed.avatars.length) throw new Error()
+    const parsed = value as Partial<AvatarLibrary> | null
+    if (!parsed || !Array.isArray(parsed.avatars) || !parsed.avatars.length) return fallback
     const seenIds = new Set<string>()
     const avatars = parsed.avatars
       .filter(avatar => {
@@ -230,14 +228,26 @@ export const loadAvatarLibrary = (): AvatarLibrary => {
           (avatar as StudioAvatar & { eyePosition?: unknown }).eyePosition
         ),
       }))
-    if (!avatars.length) throw new Error()
+    if (!avatars.length) return fallback
     const activeAvatarId = avatars.some(avatar => avatar.id === parsed.activeAvatarId)
       ? parsed.activeAvatarId!
       : avatars[0].id
     return { activeAvatarId, avatars }
   } catch {
-    const strobi = createStrobi()
-    return { activeAvatarId: strobi.id, avatars: [strobi] }
+    return fallback
+  }
+}
+
+export const loadAvatarLibrary = (): AvatarLibrary => {
+  const strobi = createStrobi()
+  const fallback = { activeAvatarId: strobi.id, avatars: [strobi] }
+  try {
+    return parseAvatarLibrary(
+      JSON.parse(window.localStorage.getItem(LIBRARY_STORAGE_KEY) ?? 'null'),
+      fallback
+    )
+  } catch {
+    return fallback
   }
 }
 

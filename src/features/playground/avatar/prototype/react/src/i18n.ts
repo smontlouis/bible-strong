@@ -93,6 +93,19 @@ const english: Record<string, string> = {
   'Télécharger le composant TSX': 'Download TSX component',
   'Télécharger le package React': 'Download React package',
   'Télécharger le module': 'Download module',
+  'Projet du Studio': 'Studio project',
+  'Transfère tous les avatars, expressions et animations vers un autre navigateur.':
+    'Transfer every avatar, expression and animation to another browser.',
+  'Télécharger le projet JSON': 'Download JSON project',
+  'Importer un projet JSON': 'Import JSON project',
+  'Ce fichier ne contient pas un projet Avatar Studio valide et compatible.':
+    'This file does not contain a valid, compatible Avatar Studio project.',
+  'Importer ce projet ?': 'Import this project?',
+  'Le projet local actuel sera remplacé par les avatars, expressions, animations et état de lecture de ce fichier.':
+    'The current local project will be replaced with the avatars, expressions, animations and playback state from this file.',
+  'Le projet n’a pas pu être enregistré dans ce navigateur. Libère de l’espace puis réessaie.':
+    'The project could not be saved in this browser. Free up some space and try again.',
+  Importer: 'Import',
   'Construction, forme et couleur de la tête de l’avatar.':
     'Build, shape and color of the avatar head.',
   'Une forme principale porte les yeux. Les autres primitives se placent autour d’elle.':

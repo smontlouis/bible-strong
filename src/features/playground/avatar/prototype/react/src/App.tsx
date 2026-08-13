@@ -28,6 +28,7 @@ import {
   RotateCcw,
   Square,
   Trash2,
+  Upload,
 } from 'lucide-react'
 
 import { Button } from './components/ui/button'
@@ -115,6 +116,10 @@ import { surfaceLabels, surfacePresets, type SurfaceConfig } from './surfaces'
 import {
   createStudioDocumentStore,
   loadStudioDocument,
+  parseImportedStudioDocument,
+  persistStudioDocument,
+  serializeStudioDocument,
+  type StudioDocument,
   type StatePlaybackSelection,
 } from './studioDocument'
 import {
@@ -151,6 +156,17 @@ import {
 
 type Mode = 'manual' | 'expressions' | 'states' | 'export'
 type ExportFormat = 'react' | 'javascript'
+
+const downloadBlob = (blob: Blob, fileName: string) => {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  document.body.append(link)
+  link.click()
+  link.remove()
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
+}
 type Side = 'Left' | 'Right'
 type NumericProps = {
   label: string
@@ -2328,6 +2344,12 @@ function StudioApp() {
   const [deleteAvatarOpen, setDeleteAvatarOpen] = useState(false)
   const [deleteExpressionOpen, setDeleteExpressionOpen] = useState(false)
   const [deleteSequenceOpen, setDeleteSequenceOpen] = useState(false)
+  const [pendingProjectImport, setPendingProjectImport] = useState<{
+    document: StudioDocument
+    fileName: string
+  } | null>(null)
+  const [projectImportError, setProjectImportError] = useState<string | null>(null)
+  const projectImportRef = useRef<HTMLInputElement>(null)
   const [statePlayerExpanded, setStatePlayerExpanded] = useState(false)
   const [activeExpression, setActiveExpression] = useState<number | null>(null)
   const [editing, setEditing] = useState<{ index: number | null; draft: Expression } | null>(null)
@@ -3155,10 +3177,14 @@ function StudioApp() {
     if (initialStatePlaybackApplied.current) return
     initialStatePlaybackApplied.current = true
     const sequence = sequences.find(item => item.id === selectedState)
-    if (!sequence || initialStatePlayback.stateId === null) return
-    activeSequenceRef.current = sequence
-    setActiveState(sequence.id)
-    if (initialStatePlayback.playing) launchSequence(sequence, false, false)
+    if (sequence && initialStatePlayback.stateId !== null) {
+      activeSequenceRef.current = sequence
+      setActiveState(sequence.id)
+      if (initialStatePlayback.playing) launchSequence(sequence, false, false)
+    }
+    return () => {
+      initialStatePlaybackApplied.current = false
+    }
   }, [])
 
   const saveEditing = () => {
@@ -3467,14 +3493,57 @@ function StudioApp() {
     const blob = isReact
       ? generateReactAvatarPackage(payload)
       : generateJavaScriptAvatarPackage(payload, language)
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = avatarExportFileName(activeAvatar.name, extension)
-    document.body.append(link)
-    link.click()
-    link.remove()
-    window.setTimeout(() => URL.revokeObjectURL(url), 0)
+    downloadBlob(blob, avatarExportFileName(activeAvatar.name, extension))
+  }
+  const currentStudioDocument = (): StudioDocument => ({
+    version: 2,
+    library: { activeAvatarId, avatars },
+    expressions,
+    sequences,
+    playback: {
+      stateId: activeState ?? (selectedState || null),
+      playing: statePlaying,
+    },
+  })
+  const downloadStudioProject = () => {
+    const blob = new Blob([serializeStudioDocument(currentStudioDocument())], {
+      type: 'application/json',
+    })
+    downloadBlob(blob, 'avatar-studio-project.json')
+  }
+  const prepareStudioProjectImport = (file: File | undefined) => {
+    if (!file) return
+    setProjectImportError(null)
+    if (file.size > 10_000_000) {
+      setProjectImportError(
+        t('Ce fichier ne contient pas un projet Avatar Studio valide et compatible.')
+      )
+      return
+    }
+    file
+      .text()
+      .then(source => {
+        const imported = parseImportedStudioDocument(source, currentStudioDocument())
+        setPendingProjectImport({ document: imported, fileName: file.name })
+      })
+      .catch(() => {
+        setProjectImportError(
+          t('Ce fichier ne contient pas un projet Avatar Studio valide et compatible.')
+        )
+      })
+  }
+  const confirmStudioProjectImport = () => {
+    if (!pendingProjectImport) return
+    if (!persistStudioDocument(pendingProjectImport.document)) {
+      setProjectImportError(
+        t(
+          'Le projet n’a pas pu être enregistré dans ce navigateur. Libère de l’espace puis réessaie.'
+        )
+      )
+      setPendingProjectImport(null)
+      return
+    }
+    window.location.reload()
   }
   const canvasExpression = editing?.draft ?? expression
   const editorPageOpen = bodyEditing || editing !== null || sequenceEditing !== null
@@ -4956,6 +5025,43 @@ function StudioApp() {
           <div className="panel-stack export-panel">
             <InspectorCard>
               <PanelTitle
+                title="Projet du Studio"
+                subtitle="Transfère tous les avatars, expressions et animations vers un autre navigateur."
+              />
+              <div className="project-transfer-actions">
+                <Button variant="outline" type="button" onClick={downloadStudioProject}>
+                  <Download />
+                  {t('Télécharger le projet JSON')}
+                </Button>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onClick={() => projectImportRef.current?.click()}
+                >
+                  <Upload />
+                  {t('Importer un projet JSON')}
+                </Button>
+                <input
+                  ref={projectImportRef}
+                  className="project-import-input"
+                  type="file"
+                  accept="application/json,.json"
+                  aria-label={t('Importer un projet JSON')}
+                  onChange={event => {
+                    prepareStudioProjectImport(event.currentTarget.files?.[0])
+                    event.currentTarget.value = ''
+                  }}
+                />
+              </div>
+              {projectImportError && (
+                <p className="project-transfer-error" role="alert">
+                  {projectImportError}
+                </p>
+              )}
+            </InspectorCard>
+
+            <InspectorCard>
+              <PanelTitle
                 title="Exporter l’avatar"
                 subtitle="Télécharge un composant autonome avec les animations de ton choix."
               />
@@ -5247,6 +5353,30 @@ function StudioApp() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('Annuler')}</AlertDialogCancel>
             <AlertDialogAction onClick={deleteSequenceEditing}>{t('Supprimer')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog
+        open={pendingProjectImport !== null}
+        onOpenChange={open => {
+          if (!open) setPendingProjectImport(null)
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Importer ce projet ?')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                'Le projet local actuel sera remplacé par les avatars, expressions, animations et état de lecture de ce fichier.'
+              )}{' '}
+              {pendingProjectImport?.fileName}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('Annuler')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStudioProjectImport}>
+              {t('Importer')}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

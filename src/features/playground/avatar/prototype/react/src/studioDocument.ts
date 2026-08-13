@@ -1,11 +1,17 @@
 import {
   loadAvatarLibrary,
   loadGlobalExpressions,
+  parseAvatarLibrary,
   parseExpressions,
   type AvatarLibrary,
 } from './avatars'
 import type { Expression } from './geometry'
-import { loadSequences, normalizeSequencesForExpressions, type AvatarSequence } from './sequences'
+import {
+  loadSequences,
+  normalizeSequencesForExpressions,
+  parseSequences,
+  type AvatarSequence,
+} from './sequences'
 
 export type StatePlaybackSelection = { stateId: string | null; playing: boolean }
 
@@ -43,14 +49,12 @@ export const parseStudioDocument = (value: unknown, fallback: StudioDocument): S
       ? parseExpressions(candidate.expressions)
       : fallback.expressions
   const sequences = Array.isArray(candidate.sequences)
-    ? normalizeSequencesForExpressions(candidate.sequences, expressions)
+    ? normalizeSequencesForExpressions(
+        parseSequences(candidate.sequences, expressions),
+        expressions
+      )
     : fallback.sequences
-  const library =
-    candidate.library &&
-    Array.isArray(candidate.library.avatars) &&
-    candidate.library.avatars.length
-      ? candidate.library
-      : fallback.library
+  const library = parseAvatarLibrary(candidate.library, fallback.library)
   return {
     version: 2,
     library,
@@ -58,6 +62,36 @@ export const parseStudioDocument = (value: unknown, fallback: StudioDocument): S
     sequences,
     playback: parsePlayback(candidate.playback, fallback.playback),
   }
+}
+
+export const serializeStudioDocument = (document: StudioDocument) =>
+  JSON.stringify(document, null, 2)
+
+export const parseImportedStudioDocument = (
+  source: string,
+  fallback: StudioDocument
+): StudioDocument => {
+  let value: unknown
+  try {
+    value = JSON.parse(source)
+  } catch {
+    throw new Error('Invalid Avatar Studio project')
+  }
+  const candidate = value as Partial<StudioDocument> | null
+  if (!candidate || candidate.version !== 2) {
+    throw new Error('Unsupported Avatar Studio project')
+  }
+  if (
+    !candidate.library ||
+    !Array.isArray(candidate.library.avatars) ||
+    !candidate.library.avatars.length ||
+    !Array.isArray(candidate.expressions) ||
+    !candidate.expressions.length ||
+    !Array.isArray(candidate.sequences)
+  ) {
+    throw new Error('Invalid Avatar Studio project')
+  }
+  return parseStudioDocument(candidate, fallback)
 }
 
 const loadLegacyPlayback = (): StatePlaybackSelection => {
@@ -92,8 +126,10 @@ export const loadStudioDocument = (): StudioDocument => {
 export const persistStudioDocument = (document: StudioDocument) => {
   try {
     window.localStorage.setItem(DOCUMENT_STORAGE_KEY, JSON.stringify(document))
+    return true
   } catch {
     // The in-memory document remains authoritative when storage is unavailable.
+    return false
   }
 }
 
