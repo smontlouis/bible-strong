@@ -6,8 +6,8 @@ import {
   useReducedMotion,
 } from 'motion/react'
 import { motionValue, type MotionValue } from 'motion'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Pause, Pencil, Play, Plus, RotateCcw, Square, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
+import { ArrowLeft, Pause, Pencil, Play, Plus, RotateCcw, Square, Trash2 } from 'lucide-react'
 
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
@@ -1179,22 +1179,18 @@ function ExpressionCard({
   )
 }
 
-function ExpressionDialog({
+function ExpressionWorkspace({
   editing,
-  surface,
-  bodyNodes,
   avatarColors,
-  avatarEyes,
+  backButtonRef,
   onChange,
   onCancel,
   onSave,
   onDelete,
 }: {
   editing: { index: number | null; draft: Expression }
-  surface: SurfaceConfig
-  bodyNodes: BodyNode[]
   avatarColors: AvatarColors
-  avatarEyes: AvatarEyeDefaults
+  backButtonRef: RefObject<HTMLButtonElement | null>
   onChange: (draft: Expression) => void
   onCancel: () => void
   onSave: () => void
@@ -1226,224 +1222,194 @@ function ExpressionDialog({
   }
 
   return (
-    <div
-      className="dialog-backdrop"
-      role="presentation"
-      onMouseDown={event => {
-        if (event.target === event.currentTarget) onCancel()
-      }}
-    >
-      <motion.section
-        className="dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="dialog-title"
-        initial={{ opacity: 0, y: 18, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-      >
-        <header className="dialog-header">
-          <div>
-            <p className="eyebrow">Preset en mémoire</p>
-            <h2 id="dialog-title">
-              {editing.index === null
-                ? 'Nouvelle expression'
-                : `Modifier l’expression ${String(editing.index).padStart(2, '0')}`}
-            </h2>
-          </div>
-          <Button
-            className="icon-button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={onCancel}
-            aria-label="Fermer"
+    <>
+      <header className="workspace-header">
+        <Button
+          ref={backButtonRef}
+          variant="ghost"
+          size="icon"
+          onClick={onCancel}
+          aria-label="Retour aux expressions"
+        >
+          <ArrowLeft />
+        </Button>
+        <div className="workspace-heading">
+          <p className="eyebrow">Preset en mémoire</p>
+          <h1>
+            {editing.index === null
+              ? 'Nouvelle expression'
+              : `Modifier l’expression ${String(editing.index).padStart(2, '0')}`}
+          </h1>
+          <p>L’avatar à gauche affiche cette expression en direct.</p>
+        </div>
+      </header>
+      <div className="workspace-scroll">
+        <div className="dialog-fields">
+          <ControlSection
+            title="Corps"
+            subtitle="Apparence et orientation générale de l’avatar."
+            compact
           >
-            ×
-          </Button>
-        </header>
-        <div className="dialog-body">
-          <aside className="dialog-preview">
-            <ExpressionPreview
-              expression={editing.draft}
-              surface={surface}
-              bodyNodes={bodyNodes}
-              colors={avatarColors}
-              avatarEyes={avatarEyes}
-              id="dialog"
-            />
-            <strong>Aperçu en direct</strong>
-            <span>Projection sur la forme active</span>
-          </aside>
-          <div className="dialog-fields">
-            <ControlSection
-              title="Corps"
-              subtitle="Apparence et orientation générale de l’avatar."
-              compact
-            >
-              <Card className="dialog-group">
-                <h3>Couleur du corps</h3>
-                <ColorField
-                  label="Corps"
-                  value={editing.draft.bodyColor ?? avatarColors.body}
-                  onChange={bodyColor => update({ bodyColor })}
+            <Card className="dialog-group">
+              <h3>Couleur du corps</h3>
+              <ColorField
+                label="Corps"
+                value={editing.draft.bodyColor ?? avatarColors.body}
+                onChange={bodyColor => update({ bodyColor })}
+              />
+            </Card>
+            <Card className="dialog-group">
+              <h3>Rotation de la tête</h3>
+              {(['headX', 'headY', 'headZ'] as const).map(field => (
+                <NumericField
+                  key={field}
+                  label={`Rotation ${field.at(-1)?.toUpperCase()}`}
+                  value={editing.draft[field]}
+                  unit="°"
+                  onChange={value => update({ [field]: value })}
                 />
-              </Card>
-              <Card className="dialog-group">
-                <h3>Rotation de la tête</h3>
-                {(['headX', 'headY', 'headZ'] as const).map(field => (
-                  <NumericField
-                    key={field}
-                    label={`Rotation ${field.at(-1)?.toUpperCase()}`}
-                    value={editing.draft[field]}
-                    unit="°"
-                    onChange={value => update({ [field]: value })}
+              ))}
+            </Card>
+          </ControlSection>
+          <ControlSection
+            title="Yeux"
+            subtitle="Forme, placement et orientation propres au regard."
+            compact
+          >
+            <Card className="dialog-group">
+              <h3>Couleur des yeux</h3>
+              <ColorField
+                label="Yeux"
+                value={editing.draft.eyeColor ?? avatarColors.eyes}
+                onChange={eyeColor => update({ eyeColor })}
+              />
+            </Card>
+            {(['width', 'height', 'size'] as const).map(dimension => (
+              <Card className="dialog-group" key={dimension}>
+                <div className="panel-inline-title">
+                  <h3>
+                    {
+                      { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
+                        dimension
+                      ]
+                    }
+                  </h3>
+                  <LinkButton
+                    linked={linked[dimension]}
+                    label={`Lier ${dimension}`}
+                    onClick={() =>
+                      setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                    }
                   />
-                ))}
+                </div>
+                <div className="eye-columns">
+                  {(['Left', 'Right'] as Side[]).map(side => {
+                    const width = editing.draft[`width${side}`]
+                    const height = editing.draft[`height${side}`]
+                    const value =
+                      dimension === 'width'
+                        ? width
+                        : dimension === 'height'
+                          ? height
+                          : Math.max(width, height)
+                    return (
+                      <NumericField
+                        key={side}
+                        label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
+                        value={value}
+                        min={10}
+                        max={dimension === 'size' ? 110 : 100}
+                        unit="u"
+                        onChange={next =>
+                          dimension === 'size'
+                            ? updateSize(side, next)
+                            : updateDimension(side, dimension, next)
+                        }
+                      />
+                    )
+                  })}
+                </div>
               </Card>
-            </ControlSection>
-            <ControlSection
-              title="Yeux"
-              subtitle="Forme, placement et orientation propres au regard."
-              compact
-            >
-              <Card className="dialog-group">
-                <h3>Couleur des yeux</h3>
-                <ColorField
-                  label="Yeux"
-                  value={editing.draft.eyeColor ?? avatarColors.eyes}
-                  onChange={eyeColor => update({ eyeColor })}
-                />
-              </Card>
-              {(['width', 'height', 'size'] as const).map(dimension => (
-                <Card className="dialog-group" key={dimension}>
-                  <div className="panel-inline-title">
-                    <h3>
-                      {
-                        { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
-                          dimension
-                        ]
-                      }
-                    </h3>
-                    <LinkButton
-                      linked={linked[dimension]}
-                      label={`Lier ${dimension}`}
-                      onClick={() =>
-                        setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
-                      }
+            ))}
+            <Card className="dialog-group">
+              <h3>Position et espacement</h3>
+              <div className="eye-columns">
+                {(['Left', 'Right'] as Side[]).map(side => (
+                  <div className="eye-column" key={side}>
+                    <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
+                    <NumericField
+                      label="Horizontale"
+                      value={editing.draft[`positionX${side}`]}
+                      unit="u"
+                      onChange={value => update({ [`positionX${side}`]: value })}
+                    />
+                    <NumericField
+                      label="Verticale"
+                      value={editing.draft[`positionY${side}`]}
+                      unit="u"
+                      onChange={value => update({ [`positionY${side}`]: value })}
                     />
                   </div>
-                  <div className="eye-columns">
-                    {(['Left', 'Right'] as Side[]).map(side => {
-                      const width = editing.draft[`width${side}`]
-                      const height = editing.draft[`height${side}`]
-                      const value =
-                        dimension === 'width'
-                          ? width
-                          : dimension === 'height'
-                            ? height
-                            : Math.max(width, height)
-                      return (
-                        <NumericField
-                          key={side}
-                          label={side === 'Left' ? 'Œil gauche' : 'Œil droit'}
-                          value={value}
-                          min={10}
-                          max={dimension === 'size' ? 110 : 100}
-                          unit="u"
-                          onChange={next =>
-                            dimension === 'size'
-                              ? updateSize(side, next)
-                              : updateDimension(side, dimension, next)
-                          }
-                        />
-                      )
-                    })}
-                  </div>
-                </Card>
-              ))}
-              <Card className="dialog-group">
-                <h3>Position et espacement</h3>
-                <div className="eye-columns">
-                  {(['Left', 'Right'] as Side[]).map(side => (
-                    <div className="eye-column" key={side}>
-                      <h3>{side === 'Left' ? 'Œil gauche' : 'Œil droit'}</h3>
-                      <NumericField
-                        label="Horizontale"
-                        value={editing.draft[`positionX${side}`]}
-                        unit="u"
-                        onChange={value => update({ [`positionX${side}`]: value })}
-                      />
-                      <NumericField
-                        label="Verticale"
-                        value={editing.draft[`positionY${side}`]}
-                        unit="u"
-                        onChange={value => update({ [`positionY${side}`]: value })}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="position-spacing">
-                  <NumericField
-                    label="Espacement"
-                    value={editing.draft.spacing}
-                    min={0}
-                    max={150}
-                    unit="u"
-                    onChange={value => update({ spacing: value })}
-                  />
-                </div>
-              </Card>
-              <Card className="dialog-group">
-                <h3>Rotation locale</h3>
-                <div className="eye-columns">
-                  <NumericField
-                    label="Œil gauche"
-                    value={editing.draft.leftAngle}
-                    unit="°"
-                    onChange={value => update({ leftAngle: value })}
-                  />
-                  <NumericField
-                    label="Œil droit"
-                    value={editing.draft.rightAngle}
-                    unit="°"
-                    onChange={value => update({ rightAngle: value })}
-                  />
-                </div>
-              </Card>
-            </ControlSection>
-            <ControlSection
-              title="Projection"
-              subtitle="Perspective appliquée à la surface active."
-              compact
-            >
-              <Card className="dialog-group">
+                ))}
+              </div>
+              <div className="position-spacing">
                 <NumericField
-                  label="Perspective"
-                  value={editing.draft.perspective}
-                  step={0.01}
-                  unit="×"
-                  onChange={value => update({ perspective: value })}
+                  label="Espacement"
+                  value={editing.draft.spacing}
+                  min={0}
+                  max={150}
+                  unit="u"
+                  onChange={value => update({ spacing: value })}
                 />
-              </Card>
-            </ControlSection>
-          </div>
+              </div>
+            </Card>
+            <Card className="dialog-group">
+              <h3>Rotation locale</h3>
+              <div className="eye-columns">
+                <NumericField
+                  label="Œil gauche"
+                  value={editing.draft.leftAngle}
+                  unit="°"
+                  onChange={value => update({ leftAngle: value })}
+                />
+                <NumericField
+                  label="Œil droit"
+                  value={editing.draft.rightAngle}
+                  unit="°"
+                  onChange={value => update({ rightAngle: value })}
+                />
+              </div>
+            </Card>
+          </ControlSection>
+          <ControlSection
+            title="Projection"
+            subtitle="Perspective appliquée à la surface active."
+            compact
+          >
+            <Card className="dialog-group">
+              <NumericField
+                label="Perspective"
+                value={editing.draft.perspective}
+                step={0.01}
+                unit="×"
+                onChange={value => update({ perspective: value })}
+              />
+            </Card>
+          </ControlSection>
         </div>
-        <footer className="dialog-actions">
-          {editing.index !== null && (
-            <Button variant="destructive" onClick={onDelete}>
-              <Trash2 />
-              Supprimer
-            </Button>
-          )}
-          <div className="dialog-actions-main">
-            <Button variant="outline" onClick={onCancel}>
-              Annuler
-            </Button>
-            <Button onClick={onSave}>Enregistrer</Button>
-          </div>
-        </footer>
-      </motion.section>
-    </div>
+      </div>
+      <footer className="workspace-footer">
+        {editing.index !== null && (
+          <Button variant="destructive" onClick={onDelete}>
+            <Trash2 />
+            Supprimer
+          </Button>
+        )}
+        <div className="dialog-actions-main">
+          <Button onClick={onSave}>Enregistrer</Button>
+        </div>
+      </footer>
+    </>
   )
 }
 
@@ -1461,6 +1427,7 @@ export default function App() {
   const [selectedEyeSide, setSelectedEyeSide] = useState<-1 | 1 | null>(null)
   const [expressions, setExpressions] = useState(loadGlobalExpressions)
   const [bodyEditing, setBodyEditing] = useState(false)
+  const workspaceBackButtonRef = useRef<HTMLButtonElement>(null)
   const [focusAvatarName, setFocusAvatarName] = useState(false)
   const [expression, setExpression] = useState<Expression>({ ...defaultExpression })
   const [displayColors, setDisplayColors] = useState<AvatarColors>(() =>
@@ -1809,6 +1776,7 @@ export default function App() {
     setBodyNodes(avatar.body.nodes)
     selectBodyNode('primary')
     setActiveExpression(null)
+    setEditing(null)
     setBodyEditing(editBody)
     if (!preserveMode || editBody) setMode('manual')
     const nextExpression = activeState ? currentStateExpression : { ...defaultExpression }
@@ -1981,14 +1949,43 @@ export default function App() {
     transitionToExpression(editing.draft, index)
   }
 
+  const previewExpressionDraft = (draft: Expression) => {
+    setEditing(current => (current ? { ...current, draft } : current))
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (avatar) setDisplayColors(resolveColors(draft, avatar.colors))
+    paintPose(poseFromExpression(draft))
+  }
+
+  const openExpressionEditor = (index: number | null, draft: Expression) => {
+    stopState()
+    setBodyEditing(false)
+    setMode('expressions')
+    setEditing({ index, draft: { ...draft } })
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (avatar) setDisplayColors(resolveColors(draft, avatar.colors))
+    paintPose(poseFromExpression(draft))
+  }
+
+  const cancelExpressionEditing = () => {
+    setEditing(null)
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (avatar) setDisplayColors(resolveColors(expression, avatar.colors))
+    paintPose(poseFromExpression(expression))
+  }
+
   const deleteEditing = () => {
     if (editing?.index === null || editing?.index === undefined) return
     const next = expressions.filter((_, index) => index !== editing.index)
+    const fallback = next[Math.min(editing.index, next.length - 1)] ?? defaultExpression
     setExpressions(next)
     persistGlobalExpressions(next)
     setActiveExpression(null)
     setEditing(null)
     setDeleteExpressionOpen(false)
+    setExpression(fallback)
+    const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
+    if (avatar) setDisplayColors(resolveColors(fallback, avatar.colors))
+    paintPose(poseFromExpression(fallback))
   }
 
   const selectedBodyNode =
@@ -2005,6 +2002,15 @@ export default function App() {
   }
   const activeAvatar = avatars.find(avatar => avatar.id === activeAvatarId) ?? avatars[0]
   const activeAvatarEyes = activeAvatar.eyes ?? defaultAvatarEyes
+  const canvasExpression = editing?.draft ?? expression
+  const canvasColors = editing ? resolveColors(editing.draft, activeAvatar.colors) : displayColors
+  const editorPageOpen = bodyEditing || editing !== null
+
+  useEffect(() => {
+    if (!editorPageOpen || focusAvatarName) return
+    const frame = requestAnimationFrame(() => workspaceBackButtonRef.current?.focus())
+    return () => cancelAnimationFrame(frame)
+  }, [editorPageOpen, focusAvatarName])
   const selectedStatePlayback = getStatePlaybackConfig(selectedState)
   const updateAvatarEyeDimension = (side: Side, dimension: 'width' | 'height', value: number) => {
     const field = `${dimension}${side}` as keyof AvatarEyeDefaults
@@ -2055,8 +2061,8 @@ export default function App() {
         className="stage-column"
         style={
           {
-            '--avatar-body-color': displayColors.body,
-            '--avatar-eye-color': displayColors.eyes,
+            '--avatar-body-color': canvasColors.body,
+            '--avatar-eye-color': canvasColors.eyes,
           } as CSSProperties
         }
       >
@@ -2065,7 +2071,7 @@ export default function App() {
           Bible Strong <em>Avatar Lab</em>
         </div>
         <AvatarCanvas
-          expression={expression}
+          expression={canvasExpression}
           avatarEyes={activeAvatarEyes}
           surface={surface}
           wirePaths={wirePaths}
@@ -2090,137 +2096,161 @@ export default function App() {
           onBodyNodePreview={previewSelectedBodyNode}
           onBodyNodeChange={commitBodyNode}
           onEyeSelect={setSelectedEyeSide}
-          onChange={updateImmediate}
-          onEyeChange={bodyEditing ? persistEditedEyeExpression : undefined}
+          onChange={editing ? previewExpressionDraft : updateImmediate}
+          onEyeChange={
+            editing ? previewExpressionDraft : bodyEditing ? persistEditedEyeExpression : undefined
+          }
         />
         <p className="stage-help">
           Glisse sur la surface pour orienter la tête. Les anneaux du gizmo contrôlent X, Y et Z.
         </p>
       </section>
 
-      <main className={`inspector ${bodyEditing ? 'body-workspace' : ''}`}>
-        {bodyEditing ? (
-          <header className="body-workspace-header">
-            <div>
-              <p className="eyebrow">Construction du corps</p>
-              <Input
-                className="avatar-name-input"
-                aria-label="Nom de l’avatar"
-                autoFocus={focusAvatarName}
-                value={activeAvatar.name}
-                onChange={event => renameActiveAvatar(event.currentTarget.value)}
-                onFocus={event => {
-                  if (focusAvatarName) event.currentTarget.select()
-                }}
-                onBlur={event => {
-                  if (!event.currentTarget.value.trim()) renameActiveAvatar('Unknown')
-                  setFocusAvatarName(false)
-                }}
-              />
-              <p>Choisis la forme principale puis assemble les primitives autour d’elle.</p>
-            </div>
-            <div>
-              <StatePlayer
-                name={activeState}
-                playing={statePlaying}
-                onToggle={toggleStatePlayback}
-                onStop={stopState}
-              />
-              <Button
-                variant="destructive"
-                disabled={avatars.length <= 1}
-                onClick={() => setDeleteAvatarOpen(true)}
-              >
-                <Trash2 />
-                Supprimer
-              </Button>
-              <Button onClick={() => setBodyEditing(false)}>Terminer</Button>
-            </div>
-          </header>
-        ) : (
-          <>
-            <header className="inspector-header">
-              <h1>Avatar Studio</h1>
-              <StatePlayer
-                name={activeState}
-                playing={statePlaying}
-                onToggle={toggleStatePlayback}
-                onStop={stopState}
-              />
-            </header>
-            <section className="avatar-shelf" aria-label="Choisir un avatar">
-              <div className="avatar-shelf-heading">
-                <strong>Avatars</strong>
-                <span>Double-clic pour modifier</span>
-              </div>
-              <div className="avatar-grid">
-                {avatars.map(avatar => (
-                  <Button
-                    className="avatar-card"
-                    variant="outline"
-                    aria-pressed={activeAvatarId === avatar.id}
-                    type="button"
-                    key={avatar.id}
-                    onClick={() => activateAvatar(avatar.id, false, true)}
-                    onDoubleClick={() => {
-                      setFocusAvatarName(false)
-                      activateAvatar(avatar.id, true)
-                    }}
-                  >
-                    <ExpressionPreview
-                      expression={expressions[0] ?? defaultExpression}
-                      surface={avatar.body.primary}
-                      bodyNodes={avatar.body.nodes}
-                      colors={avatar.colors}
-                      avatarEyes={avatar.eyes ?? defaultAvatarEyes}
-                      id={`avatar-${avatar.id}`}
-                    />
-                    <span>{avatar.name}</span>
-                  </Button>
-                ))}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="avatar-add"
-                  onClick={createNewAvatar}
-                  aria-label="Nouvel avatar"
-                >
-                  <Plus />
-                </Button>
-              </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        className="avatar-edit"
-                        variant="secondary"
-                        size="icon"
-                        aria-label={`Modifier ${activeAvatar.name}`}
-                        onClick={() => {
-                          setFocusAvatarName(false)
-                          activateAvatar(activeAvatar.id, true)
-                        }}
-                      />
-                    }
-                  >
-                    <Pencil />
-                  </TooltipTrigger>
-                  <TooltipContent>Modifier {activeAvatar.name}</TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </section>
-            <Tabs value={mode} onValueChange={value => setMode(value as Mode)}>
-              <TabsList className="tabs" aria-label="Mode d’édition">
-                <TabsTrigger value="manual">Pose</TabsTrigger>
-                <TabsTrigger value="expressions">Expressions</TabsTrigger>
-                <TabsTrigger value="states">États</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </>
+      <main
+        className={`inspector ${editing ? 'expression-workspace-active' : bodyEditing ? 'body-workspace' : 'studio-workspace'}`}
+      >
+        {editing && (
+          <motion.div
+            key={`expression-${editing.index ?? 'new'}`}
+            className="workspace-page expression-workspace"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <ExpressionWorkspace
+              editing={editing}
+              avatarColors={activeAvatar.colors}
+              backButtonRef={workspaceBackButtonRef}
+              onChange={previewExpressionDraft}
+              onCancel={cancelExpressionEditing}
+              onSave={saveEditing}
+              onDelete={() => setDeleteExpressionOpen(true)}
+            />
+          </motion.div>
         )}
+        {!editing &&
+          (bodyEditing ? (
+            <header className="workspace-header body-workspace-header">
+              <Button
+                ref={workspaceBackButtonRef}
+                variant="ghost"
+                size="icon"
+                onClick={() => setBodyEditing(false)}
+                aria-label="Retour au studio"
+              >
+                <ArrowLeft />
+              </Button>
+              <div className="workspace-heading">
+                <p className="eyebrow">Construction du corps</p>
+                <Input
+                  className="avatar-name-input"
+                  aria-label="Nom de l’avatar"
+                  autoFocus={focusAvatarName}
+                  value={activeAvatar.name}
+                  onChange={event => renameActiveAvatar(event.currentTarget.value)}
+                  onFocus={event => {
+                    if (focusAvatarName) event.currentTarget.select()
+                  }}
+                  onBlur={event => {
+                    if (!event.currentTarget.value.trim()) renameActiveAvatar('Unknown')
+                    setFocusAvatarName(false)
+                  }}
+                />
+                <p>Choisis la forme principale puis assemble les primitives autour d’elle.</p>
+              </div>
+              <div className="workspace-header-actions">
+                <StatePlayer
+                  name={activeState}
+                  playing={statePlaying}
+                  onToggle={toggleStatePlayback}
+                  onStop={stopState}
+                />
+              </div>
+            </header>
+          ) : (
+            <>
+              <header className="inspector-header">
+                <h1>Avatar Studio</h1>
+                <StatePlayer
+                  name={activeState}
+                  playing={statePlaying}
+                  onToggle={toggleStatePlayback}
+                  onStop={stopState}
+                />
+              </header>
+              <section className="avatar-shelf" aria-label="Choisir un avatar">
+                <div className="avatar-shelf-heading">
+                  <strong>Avatars</strong>
+                  <span>Double-clic pour modifier</span>
+                </div>
+                <div className="avatar-grid">
+                  {avatars.map(avatar => (
+                    <Button
+                      className="avatar-card"
+                      variant="outline"
+                      aria-pressed={activeAvatarId === avatar.id}
+                      type="button"
+                      key={avatar.id}
+                      onClick={() => activateAvatar(avatar.id, false, true)}
+                      onDoubleClick={() => {
+                        setFocusAvatarName(false)
+                        activateAvatar(avatar.id, true)
+                      }}
+                    >
+                      <ExpressionPreview
+                        expression={expressions[0] ?? defaultExpression}
+                        surface={avatar.body.primary}
+                        bodyNodes={avatar.body.nodes}
+                        colors={avatar.colors}
+                        avatarEyes={avatar.eyes ?? defaultAvatarEyes}
+                        id={`avatar-${avatar.id}`}
+                      />
+                      <span>{avatar.name}</span>
+                    </Button>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="avatar-add"
+                    onClick={createNewAvatar}
+                    aria-label="Nouvel avatar"
+                  >
+                    <Plus />
+                  </Button>
+                </div>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          className="avatar-edit"
+                          variant="secondary"
+                          size="icon"
+                          aria-label={`Modifier ${activeAvatar.name}`}
+                          onClick={() => {
+                            setFocusAvatarName(false)
+                            activateAvatar(activeAvatar.id, true)
+                          }}
+                        />
+                      }
+                    >
+                      <Pencil />
+                    </TooltipTrigger>
+                    <TooltipContent>Modifier {activeAvatar.name}</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </section>
+              <Tabs value={mode} onValueChange={value => setMode(value as Mode)}>
+                <TabsList className="tabs" aria-label="Mode d’édition">
+                  <TabsTrigger value="manual">Pose</TabsTrigger>
+                  <TabsTrigger value="expressions">Expressions</TabsTrigger>
+                  <TabsTrigger value="states">États</TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </>
+          ))}
 
-        {mode === 'manual' && (
+        {!editing && mode === 'manual' && (
           <div className="panel-stack">
             {bodyEditing && (
               <>
@@ -2566,16 +2596,21 @@ export default function App() {
                       <div className="panel-inline-title">
                         <h3>
                           {
-                            { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
-                              dimension
-                            ]
+                            {
+                              width: 'Largeur',
+                              height: 'Hauteur',
+                              size: 'Taille proportionnelle',
+                            }[dimension]
                           }
                         </h3>
                         <LinkButton
                           linked={linked[dimension]}
                           label={`Lier ${dimension}`}
                           onClick={() =>
-                            setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                            setLinked(current => ({
+                              ...current,
+                              [dimension]: !current[dimension],
+                            }))
                           }
                         />
                       </div>
@@ -2822,16 +2857,21 @@ export default function App() {
                       <div className="panel-inline-title">
                         <h3>
                           {
-                            { width: 'Largeur', height: 'Hauteur', size: 'Taille proportionnelle' }[
-                              dimension
-                            ]
+                            {
+                              width: 'Largeur',
+                              height: 'Hauteur',
+                              size: 'Taille proportionnelle',
+                            }[dimension]
                           }
                         </h3>
                         <LinkButton
                           linked={linked[dimension]}
                           label={`Lier ${dimension}`}
                           onClick={() =>
-                            setLinked(current => ({ ...current, [dimension]: !current[dimension] }))
+                            setLinked(current => ({
+                              ...current,
+                              [dimension]: !current[dimension],
+                            }))
                           }
                         />
                       </div>
@@ -3001,7 +3041,21 @@ export default function App() {
           </div>
         )}
 
-        {!bodyEditing && mode === 'expressions' && (
+        {!editing && bodyEditing && (
+          <footer className="workspace-footer">
+            <Button
+              variant="destructive"
+              disabled={avatars.length <= 1}
+              onClick={() => setDeleteAvatarOpen(true)}
+            >
+              <Trash2 />
+              Supprimer
+            </Button>
+            <Button onClick={() => setBodyEditing(false)}>Enregistrer</Button>
+          </footer>
+        )}
+
+        {!editing && !bodyEditing && mode === 'expressions' && (
           <div className="panel-stack">
             <InspectorCard>
               <div className="preset-header">
@@ -3024,14 +3078,14 @@ export default function App() {
                     avatarEyes={activeAvatarEyes}
                     previewId={String(index)}
                     onSelect={() => transitionToExpression(preset, index)}
-                    onEdit={() => setEditing({ index, draft: { ...preset } })}
+                    onEdit={() => openExpressionEditor(index, preset)}
                   />
                 ))}
                 <Button
                   className="expression-add"
                   variant="outline"
                   type="button"
-                  onClick={() => setEditing({ index: null, draft: { ...expression } })}
+                  onClick={() => openExpressionEditor(null, expression)}
                   aria-label="Nouvelle expression"
                 >
                   +
@@ -3071,7 +3125,7 @@ export default function App() {
           </div>
         )}
 
-        {!bodyEditing && mode === 'states' && (
+        {!editing && !bodyEditing && mode === 'states' && (
           <div className="panel-stack">
             <InspectorCard>
               <div className="preset-header">
@@ -3184,19 +3238,6 @@ export default function App() {
           </div>
         )}
       </main>
-      {editing && (
-        <ExpressionDialog
-          editing={editing}
-          surface={surface}
-          bodyNodes={bodyNodes}
-          avatarColors={activeAvatar.colors}
-          avatarEyes={activeAvatarEyes}
-          onChange={draft => setEditing({ ...editing, draft })}
-          onCancel={() => setEditing(null)}
-          onSave={saveEditing}
-          onDelete={() => setDeleteExpressionOpen(true)}
-        />
-      )}
       <AlertDialog open={deleteAvatarOpen} onOpenChange={setDeleteAvatarOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

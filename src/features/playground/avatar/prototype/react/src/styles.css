@@ -387,9 +387,97 @@ input {
 
 .inspector {
   min-height: 100vh;
+  overflow: hidden;
   padding: 28px 26px 48px;
   border-left: 1px solid #d9dce3;
   background: #f5f6f8;
+}
+@keyframes studio-workspace-in {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+}
+@keyframes body-workspace-in {
+  from {
+    opacity: 0;
+    transform: translateX(18px);
+  }
+}
+.studio-workspace {
+  animation: studio-workspace-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.body-workspace {
+  animation: body-workspace-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-workspace,
+  .body-workspace {
+    animation: none;
+  }
+}
+.workspace-page {
+  display: flex;
+  min-height: calc(100vh - 76px);
+  flex-direction: column;
+  padding-bottom: 74px;
+}
+.workspace-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 3px 2px 16px;
+  border-bottom: 1px solid #d9dce3;
+}
+.workspace-header > [data-slot='button']:first-child {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  border: 1px solid #dfe2e8;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 4px 14px rgb(24 28 35 / 5%);
+}
+.workspace-heading {
+  min-width: 0;
+  flex: 1;
+}
+.workspace-heading h1 {
+  font-size: 25px;
+}
+.workspace-heading > p:last-child {
+  max-width: 360px;
+  margin: 6px 0 0;
+  color: #818792;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.workspace-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+.workspace-scroll {
+  display: grid;
+  gap: 12px;
+}
+.workspace-footer {
+  position: sticky;
+  z-index: 8;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: auto -2px -20px;
+  padding: 20px 2px 18px;
+  border-top: 1px solid #d9dce3;
+  background: linear-gradient(to bottom, rgb(245 246 248 / 86%), #f5f6f8 30%);
+  backdrop-filter: blur(10px);
+}
+.workspace-footer > [data-slot='button']:last-child,
+.workspace-footer .dialog-actions-main [data-slot='button'] {
+  min-width: 120px;
 }
 .inspector-header {
   display: flex;
@@ -1211,81 +1299,6 @@ p {
   text-transform: none;
 }
 
-.dialog-backdrop {
-  position: fixed;
-  z-index: 30;
-  inset: 0;
-  display: grid;
-  padding: 18px;
-  place-items: center;
-  background: rgb(13 15 18 / 58%);
-  backdrop-filter: blur(6px);
-}
-.dialog {
-  display: grid;
-  width: min(1040px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px);
-  overflow: hidden;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  border: 1px solid #d8dbe2;
-  border-radius: 22px;
-  background: #f5f6f8;
-  box-shadow: 0 35px 100px rgb(0 0 0 / 32%);
-}
-.dialog-header,
-.dialog-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 17px 20px;
-  background: white;
-}
-.dialog-header {
-  border-bottom: 1px solid #e0e2e7;
-}
-.dialog-header h2 {
-  margin: 0;
-  font-size: 18px;
-}
-.icon-button {
-  border-radius: 50%;
-  font-size: 18px;
-}
-.dialog-body {
-  display: grid;
-  overflow: auto;
-  padding: 16px;
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: 16px;
-}
-.dialog-preview {
-  position: sticky;
-  top: 0;
-  align-self: start;
-  padding: 14px;
-  border: 1px solid #e0e2e7;
-  border-radius: 16px;
-  background: white;
-  text-align: center;
-}
-.dialog-preview svg {
-  display: block;
-  width: 100%;
-  aspect-ratio: 1;
-}
-.dialog-preview strong,
-.dialog-preview span {
-  display: block;
-}
-.dialog-preview strong {
-  font-size: 11px;
-}
-.dialog-preview span {
-  margin-top: 4px;
-  color: #898e98;
-  font-size: 9px;
-}
 .dialog-fields {
   display: grid;
   gap: 12px;
@@ -1306,21 +1319,10 @@ p {
 .dialog-group .panel-inline-title h3 {
   margin: 0;
 }
-.dialog-actions {
-  justify-content: space-between;
-  border-top: 1px solid #e0e2e7;
-}
 .dialog-actions-main {
   display: flex;
+  margin-left: auto;
   gap: 8px;
-}
-.dialog-actions .danger {
-  border-color: #efc5c5;
-  background: #fff5f5;
-  color: #bc3030;
-}
-.dialog-actions button {
-  min-width: 115px;
 }
 
 @media (max-width: 980px) {
@@ -1376,13 +1378,7 @@ p {
   .surface-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .dialog-body {
-    grid-template-columns: 1fr;
-  }
-  .dialog-preview {
-    position: static;
-  }
-  .dialog-preview svg {
-    max-height: 170px;
+  .workspace-header-actions .state-player > span {
+    display: none;
   }
 }
