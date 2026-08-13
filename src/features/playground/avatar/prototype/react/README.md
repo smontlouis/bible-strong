@@ -11,6 +11,7 @@ Puis ouvrir `http://127.0.0.1:5173/`.
 
 - React gère une bibliothèque locale d’avatars. Le premier avatar s’appelle Strobi.
 - Chaque avatar conserve son propre corps ; les expressions et les états restent globaux au Studio.
+- La galerie Avatars affiche chaque corps avec l’expression 00 et ouvre sa construction au double-clic.
 - Le constructeur de corps s’ouvre à la création d’un avatar ou via « Modifier le corps ».
 - Motion gère les ressorts, les interruptions et les clignements.
 - `surfaces.ts` décrit les surfaces interchangeables (sphère, cube, capsule, etc.).

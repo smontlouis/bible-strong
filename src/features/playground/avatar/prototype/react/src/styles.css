@@ -284,31 +284,6 @@ p {
   background: currentColor;
   box-shadow: 0 0 0 4px rgb(51 131 75 / 10%);
 }
-.avatar-switcher {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 8px;
-  margin-bottom: 7px;
-  padding: 11px;
-  border: 1px solid #dcdfe6;
-  border-radius: 14px;
-  background: white;
-  box-shadow: 0 8px 24px rgb(24 28 35 / 5%);
-}
-.avatar-switcher > div {
-  display: grid;
-  min-width: 0;
-  gap: 3px;
-}
-.avatar-switcher span {
-  color: #888e99;
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-.avatar-switcher select,
-.avatar-switcher button,
 .body-workspace-header button,
 .avatar-create-dialog button {
   min-height: 36px;
@@ -319,32 +294,16 @@ p {
   font-size: 11px;
   font-weight: 780;
 }
-.avatar-switcher select {
-  min-width: 0;
-  border: 0;
-  outline: 0;
-  font-size: 15px;
-}
-.avatar-switcher button,
 .body-workspace-header button,
 .avatar-create-dialog button {
   align-self: center;
   padding: 0 12px;
   cursor: pointer;
 }
-.avatar-switcher button:first-of-type,
 .avatar-create-dialog .primary {
   border-color: #cad7ff;
   background: #edf2ff;
   color: #4f72d8;
-}
-.avatar-context {
-  margin: 0 3px 14px;
-  color: #8a909b;
-  font-size: 10px;
-}
-.avatar-context strong {
-  color: #3b3f47;
 }
 .body-workspace-header {
   display: flex;
@@ -368,6 +327,74 @@ p {
   border-color: #1c1e23;
   background: #1c1e23;
   color: white;
+}
+.body-workspace-header > div:last-child {
+  display: flex;
+  gap: 8px;
+}
+.body-workspace-header button.danger {
+  border-color: #efc5c5;
+  background: #fff5f5;
+  color: #bc3030;
+}
+.body-workspace-header button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+.avatar-shelf {
+  position: relative;
+  margin-bottom: 12px;
+  padding: 11px;
+  border: 1px solid #dcdfe6;
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 8px 24px rgb(24 28 35 / 5%);
+}
+.avatar-shelf-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.avatar-shelf-heading strong {
+  font-size: 11px;
+}
+.avatar-shelf-heading span {
+  color: #8d929c;
+  font-size: 8px;
+}
+.avatar-shelf .avatar-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  padding-right: 92px;
+}
+.avatar-shelf .avatar-card,
+.avatar-shelf .avatar-add {
+  min-height: 74px;
+  border-radius: 10px;
+}
+.avatar-shelf .avatar-card svg {
+  height: 54px;
+}
+.avatar-shelf .avatar-card > span {
+  padding: 2px 3px;
+  font-size: 8px;
+}
+.avatar-edit {
+  position: absolute;
+  right: 11px;
+  bottom: 11px;
+  width: 82px;
+  min-height: 74px;
+  padding: 8px;
+  border: 1px solid #cad7ff;
+  border-radius: 10px;
+  background: #edf2ff;
+  color: #4f72d8;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 800;
 }
 
 .tabs {
@@ -749,6 +776,48 @@ p {
   background: #f7f8fa;
   cursor: pointer;
 }
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.avatar-card,
+.avatar-add {
+  position: relative;
+  min-height: 132px;
+  overflow: hidden;
+  padding: 7px;
+  border: 1px solid #dfe1e7;
+  border-radius: 14px;
+  background: #f7f8fa;
+  cursor: pointer;
+}
+.avatar-card svg {
+  display: block;
+  width: 100%;
+  height: 105px;
+}
+.avatar-card > span {
+  display: block;
+  overflow: hidden;
+  padding: 5px 5px 3px;
+  font-size: 10px;
+  font-weight: 850;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.avatar-card[aria-pressed='true'] {
+  border-color: #5b7fe5;
+  box-shadow: 0 0 0 2px rgb(91 127 229 / 18%);
+}
+.avatar-add {
+  display: grid;
+  place-items: center;
+  border-style: dashed;
+  color: #5b7fe5;
+  font-size: 32px;
+}
 .expression-card svg {
   display: block;
   width: 100%;
@@ -1007,15 +1076,6 @@ button.primary {
 }
 
 @media (max-width: 600px) {
-  .avatar-switcher {
-    grid-template-columns: 1fr 1fr;
-  }
-  .avatar-switcher > div {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 600px) {
   .stage-column {
     min-height: 420px;
     padding: 18px;
@@ -1033,6 +1093,19 @@ button.primary {
   }
   .expression-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .avatar-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .avatar-shelf .avatar-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    padding-right: 0;
+  }
+  .avatar-edit {
+    position: static;
+    width: 100%;
+    min-height: 36px;
+    margin-top: 8px;
   }
   .surface-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

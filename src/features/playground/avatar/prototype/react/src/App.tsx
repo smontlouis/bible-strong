@@ -1279,7 +1279,7 @@ export default function App() {
     paintPose(displayedPose.current)
   }
 
-  const activateAvatar = (id: string, editBody = false) => {
+  const activateAvatar = (id: string, editBody = false, preserveMode = false) => {
     const avatar = avatarsRef.current.find(item => item.id === id)
     if (!avatar) return
     stopTransition(true)
@@ -1293,7 +1293,7 @@ export default function App() {
     setSelectedBodyNodeId('primary')
     setActiveExpression(null)
     setBodyEditing(editBody)
-    setMode('manual')
+    if (!preserveMode || editBody) setMode('manual')
     const neutral = { ...defaultExpression }
     setExpression(neutral)
     canonicalTarget.current = neutral
@@ -1312,6 +1312,16 @@ export default function App() {
     setNewAvatarName('')
     persistAvatarLibrary({ activeAvatarId: avatar.id, avatars: next })
     activateAvatar(avatar.id, true)
+  }
+
+  const deleteActiveAvatar = () => {
+    if (avatarsRef.current.length <= 1) return
+    if (!window.confirm(`Supprimer l’avatar ${activeAvatar.name} ?`)) return
+    const remaining = avatarsRef.current.filter(avatar => avatar.id !== activeAvatarIdRef.current)
+    avatarsRef.current = remaining
+    setAvatars(remaining)
+    persistAvatarLibrary({ activeAvatarId: remaining[0].id, avatars: remaining })
+    activateAvatar(remaining[0].id)
   }
 
   const addBodyNode = (type: (typeof bodyPrimitiveTypes)[number]) => {
@@ -1464,9 +1474,19 @@ export default function App() {
               <h1>{activeAvatar.name}</h1>
               <p>Choisis la forme principale puis assemble les primitives autour d’elle.</p>
             </div>
-            <button type="button" onClick={() => setBodyEditing(false)}>
-              Terminer
-            </button>
+            <div>
+              <button
+                className="danger"
+                type="button"
+                disabled={avatars.length <= 1}
+                onClick={deleteActiveAvatar}
+              >
+                Supprimer
+              </button>
+              <button type="button" onClick={() => setBodyEditing(false)}>
+                Terminer
+              </button>
+            </div>
           </header>
         ) : (
           <>
@@ -1480,37 +1500,50 @@ export default function App() {
                 Motion actif
               </span>
             </header>
-            <section className="avatar-switcher" aria-label="Avatar actif">
-              <div>
-                <span>Avatar</span>
-                <select
-                  aria-label="Choisir un avatar"
-                  value={activeAvatarId}
-                  onChange={event => activateAvatar(event.currentTarget.value)}
-                >
-                  {avatars.map(avatar => (
-                    <option key={avatar.id} value={avatar.id}>
-                      {avatar.name}
-                    </option>
-                  ))}
-                </select>
+            <section className="avatar-shelf" aria-label="Choisir un avatar">
+              <div className="avatar-shelf-heading">
+                <strong>Avatars</strong>
+                <span>Double-clic pour modifier</span>
               </div>
-              <button type="button" onClick={() => setCreatingAvatar(true)}>
-                + Nouvel avatar
-              </button>
+              <div className="avatar-grid">
+                {avatars.map(avatar => (
+                  <button
+                    className="avatar-card"
+                    aria-pressed={activeAvatarId === avatar.id}
+                    type="button"
+                    key={avatar.id}
+                    onClick={() => activateAvatar(avatar.id, false, true)}
+                    onDoubleClick={() => activateAvatar(avatar.id, true)}
+                  >
+                    <ExpressionPreview
+                      expression={expressions[0] ?? defaultExpression}
+                      surface={avatar.body.primary}
+                      bodyNodes={avatar.body.nodes}
+                      id={`avatar-${avatar.id}`}
+                    />
+                    <span>{avatar.name}</span>
+                  </button>
+                ))}
+                <button
+                  className="avatar-add"
+                  type="button"
+                  onClick={() => setCreatingAvatar(true)}
+                  aria-label="Nouvel avatar"
+                >
+                  +
+                </button>
+              </div>
               <button
+                className="avatar-edit"
                 type="button"
                 onClick={() => {
                   setMode('manual')
                   setBodyEditing(true)
                 }}
               >
-                Modifier le corps
+                Modifier {activeAvatar.name}
               </button>
             </section>
-            <p className="avatar-context">
-              Tu travailles actuellement sur <strong>{activeAvatar.name}</strong>.
-            </p>
             <nav className="tabs" aria-label="Mode d’édition">
               {(['manual', 'expressions', 'states'] as Mode[]).map(item => (
                 <button
@@ -1519,7 +1552,13 @@ export default function App() {
                   aria-pressed={mode === item}
                   onClick={() => setMode(item)}
                 >
-                  {{ manual: 'Manuel', expressions: 'Expressions', states: 'États' }[item]}
+                  {
+                    {
+                      manual: 'Manuel',
+                      expressions: 'Expressions',
+                      states: 'États',
+                    }[item]
+                  }
                 </button>
               ))}
             </nav>
