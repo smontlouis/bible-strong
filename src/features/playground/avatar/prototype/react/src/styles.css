@@ -257,9 +257,6 @@ input {
 }
 
 .export-download {
-  position: sticky;
-  z-index: 2;
-  bottom: 12px;
   width: 100%;
   min-height: 44px;
   box-shadow: 0 12px 30px rgb(23 25 29 / 18%);

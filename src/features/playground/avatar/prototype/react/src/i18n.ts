@@ -70,6 +70,7 @@ const english: Record<string, string> = {
   'Composant TSX autonome': 'Standalone TSX component',
   'Module JavaScript': 'JavaScript module',
   'Module ES autonome': 'Standalone ES module',
+  'Projet HTML + module JS (.zip)': 'HTML project + JS module (.zip)',
   sélectionnées: 'selected',
   'Animations à exporter': 'Animations to export',
   'Tout sélectionner': 'Select all',

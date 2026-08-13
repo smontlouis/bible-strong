@@ -145,7 +145,7 @@ import {
 import {
   avatarExportFileName,
   createAvatarExportPayload,
-  generateJavaScriptAvatarModule,
+  generateJavaScriptAvatarPackage,
   generateReactAvatarComponent,
 } from './exporter'
 
@@ -3383,7 +3383,12 @@ function StudioApp() {
       const targetIndex = next.findIndex(sequence => sequence.id === targetId)
       next.splice(targetIndex < 0 ? next.length : targetIndex, 0, moved)
     } else {
-      const lastGroupIndex = next.findLastIndex(sequence => sequence.group === targetGroup)
+      let lastGroupIndex = -1
+      for (let index = next.length - 1; index >= 0; index -= 1) {
+        if (next[index].group !== targetGroup) continue
+        lastGroupIndex = index
+        break
+      }
       next.splice(lastGroupIndex + 1, 0, moved)
     }
     stateDragPreview.current = next
@@ -3458,13 +3463,11 @@ function StudioApp() {
     if (!selectedExportAnimations.length) return
     const payload = createAvatarExportPayload(activeAvatar, expressions, selectedExportAnimations)
     const isReact = exportFormat === 'react'
-    const source = isReact
-      ? generateReactAvatarComponent(payload)
-      : generateJavaScriptAvatarModule(payload)
-    const extension = isReact ? 'tsx' : 'js'
-    const url = URL.createObjectURL(
-      new Blob([source], { type: isReact ? 'text/typescript' : 'text/javascript' })
-    )
+    const extension = isReact ? 'tsx' : 'zip'
+    const blob = isReact
+      ? new Blob([generateReactAvatarComponent(payload)], { type: 'text/typescript' })
+      : generateJavaScriptAvatarPackage(payload)
+    const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.download = avatarExportFileName(activeAvatar.name, extension)
@@ -4999,7 +5002,7 @@ function StudioApp() {
                   <FileCode2 />
                   <span>
                     <strong>{t('Module JavaScript')}</strong>
-                    <small>{t('Module ES autonome')}</small>
+                    <small>{t('Projet HTML + module JS (.zip)')}</small>
                   </span>
                 </Button>
               </div>
