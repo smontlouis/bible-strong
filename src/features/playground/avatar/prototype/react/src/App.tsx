@@ -32,6 +32,12 @@ import {
 } from 'lucide-react'
 
 import { Button } from './components/ui/button'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from './components/ui/accordion'
 import { Badge } from './components/ui/badge'
 import { Card, CardDescription, CardHeader, CardTitle } from './components/ui/card'
 import { Field, FieldTitle } from './components/ui/field'
@@ -2311,9 +2317,6 @@ function StudioApp() {
   const [expressions, setExpressions] = useState(initialDocument.expressions)
   const [sequences, setSequences] = useState(initialDocument.sequences)
   const [exportFormat, setExportFormat] = useState<ExportFormat>('react')
-  const [openExportSection, setOpenExportSection] = useState<
-    'avatar' | 'snapshot' | 'project' | null
-  >(null)
   const [exportAnimationIds, setExportAnimationIds] = useState(() =>
     initialDocument.sequences.map(animation => animation.id)
   )
@@ -5048,14 +5051,11 @@ function StudioApp() {
         )}
 
         {!sequenceEditing && !editing && !bodyEditing && mode === 'export' && (
-          <div className="panel-stack export-panel">
+          <Accordion className="export-panel">
             <ExportSection
+              value="avatar"
               title="Exporter l’avatar"
               subtitle="Télécharge un composant autonome avec les animations de ton choix."
-              open={openExportSection === 'avatar'}
-              onToggle={() =>
-                setOpenExportSection(current => (current === 'avatar' ? null : 'avatar'))
-              }
             >
               <InspectorCard>
                 <div className="export-avatar-summary">
@@ -5180,12 +5180,9 @@ function StudioApp() {
             </ExportSection>
 
             <ExportSection
+              value="snapshot"
               title="Snapshot"
               subtitle="Capture une image statique de l’avatar."
-              open={openExportSection === 'snapshot'}
-              onToggle={() =>
-                setOpenExportSection(current => (current === 'snapshot' ? null : 'snapshot'))
-              }
             >
               <p className="export-placeholder">
                 {t('Les options de capture seront configurées ici.')}
@@ -5193,12 +5190,9 @@ function StudioApp() {
             </ExportSection>
 
             <ExportSection
+              value="project"
               title="Projet du Studio"
               subtitle="Transfère tous les avatars, expressions et animations vers un autre navigateur."
-              open={openExportSection === 'project'}
-              onToggle={() =>
-                setOpenExportSection(current => (current === 'project' ? null : 'project'))
-              }
             >
               <div className="project-transfer-actions">
                 <Button variant="outline" type="button" onClick={downloadStudioProject}>
@@ -5231,7 +5225,7 @@ function StudioApp() {
                 </p>
               )}
             </ExportSection>
-          </div>
+          </Accordion>
         )}
         {activeSequence && !editorPageOpen && (
           <motion.footer
@@ -5458,45 +5452,32 @@ function ControlSection({
 }
 
 function ExportSection({
+  value,
   title,
   subtitle,
-  open,
-  onToggle,
   children,
 }: {
+  value: string
   title: string
   subtitle: string
-  open: boolean
-  onToggle: () => void
   children: React.ReactNode
 }) {
   const { t } = useStudioLanguage()
   return (
-    <section className="control-section export-section">
-      <Button
-        className="export-section-trigger"
-        variant="ghost"
-        type="button"
-        aria-expanded={open}
-        onClick={onToggle}
-      >
+    <AccordionItem value={value} className="export-accordion-item">
+      <AccordionTrigger className="export-accordion-trigger">
         <span>
           <strong>{t(title)}</strong>
           <small>{t(subtitle)}</small>
         </span>
-        <ChevronDown aria-hidden="true" />
-      </Button>
-      {open && (
-        <motion.div
-          className="export-section-content"
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+      </AccordionTrigger>
+      <AccordionContent className="export-accordion-content">
+        <div className="export-accordion-inner">
           <Separator />
           {children}
-        </motion.div>
-      )}
-    </section>
+        </div>
+      </AccordionContent>
+    </AccordionItem>
   )
 }
 

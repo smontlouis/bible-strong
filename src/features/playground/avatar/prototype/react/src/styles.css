@@ -213,12 +213,14 @@ input {
 
 .export-format-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .export-format-grid > button {
   justify-content: flex-start;
+  min-width: 0;
   height: auto;
   min-height: 68px;
   padding: 12px;
@@ -239,8 +241,14 @@ input {
 
 .export-format-grid > button > span {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 3px;
+}
+.export-format-grid strong,
+.export-format-grid small {
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .export-animation-header {
@@ -261,52 +269,52 @@ input {
   min-height: 44px;
   box-shadow: 0 12px 30px rgb(23 25 29 / 18%);
 }
-.export-section {
-  gap: 0;
-  padding: 0;
-  overflow: hidden;
-}
-.export-section-trigger {
-  justify-content: space-between;
+.export-panel {
   width: 100%;
-  height: auto;
-  padding: 20px;
-  border-radius: 0;
-  text-align: left;
+  min-width: 0;
 }
-.export-section-trigger > span {
+.export-accordion-item {
+  min-width: 0;
+  overflow: hidden;
+  border-color: #dcdfe6;
+  box-shadow: 0 4px 14px rgb(24 28 35 / 5%);
+}
+.export-accordion-trigger > span {
   display: grid;
   min-width: 0;
   gap: 5px;
 }
-.export-section-trigger strong {
+.export-accordion-trigger strong {
   color: #343b49;
   font-size: 12px;
   font-weight: 850;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.export-section-trigger small {
+.export-accordion-trigger small {
   color: #858c99;
   font-size: 10px;
   font-weight: 500;
   line-height: 1.45;
   white-space: normal;
 }
-.export-section-trigger > svg {
-  flex: none;
-  transition: transform 180ms ease;
-}
-.export-section-trigger[aria-expanded='true'] > svg {
+.export-accordion-trigger[data-open] > svg {
   transform: rotate(180deg);
 }
-.export-section-content {
-  display: grid;
-  gap: 10px;
-  padding: 0 20px 20px;
+.export-accordion-content {
+  min-width: 0;
+  transition: height 200ms ease;
 }
-.export-section-content > [data-slot='separator'] {
+.export-accordion-inner {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+}
+.export-accordion-inner > [data-slot='separator'] {
   margin-bottom: 4px;
+}
+.export-accordion-inner > * {
+  min-width: 0;
 }
 .export-placeholder {
   margin: 0;
@@ -320,7 +328,7 @@ input {
 }
 .project-transfer-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 .project-transfer-actions > button {
