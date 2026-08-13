@@ -1386,7 +1386,7 @@ function ExpressionCard({
       <span>{String(index).padStart(2, '0')}</span>
     </Button>
   )
-  if (!onEdit || !onDuplicate || !onDelete) return card
+  if (!onEdit) return card
   return (
     <ContextMenu>
       <ContextMenuTrigger render={card} />
@@ -1394,13 +1394,19 @@ function ExpressionCard({
         <ContextMenuItem onClick={onEdit}>
           <Pencil /> {t('Modifier')}
         </ContextMenuItem>
-        <ContextMenuItem onClick={onDuplicate}>
-          <Copy /> {t('Dupliquer')}
-        </ContextMenuItem>
-        <ContextMenuSeparator />
-        <ContextMenuItem variant="destructive" onClick={onDelete}>
-          <Trash2 /> {t('Supprimer')}
-        </ContextMenuItem>
+        {onDuplicate && (
+          <ContextMenuItem onClick={onDuplicate}>
+            <Copy /> {t('Dupliquer')}
+          </ContextMenuItem>
+        )}
+        {onDelete && (
+          <>
+            <ContextMenuSeparator />
+            <ContextMenuItem variant="destructive" onClick={onDelete}>
+              <Trash2 /> {t('Supprimer')}
+            </ContextMenuItem>
+          </>
+        )}
       </ContextMenuContent>
     </ContextMenu>
   )
@@ -1724,6 +1730,7 @@ function SequenceWorkspace({
   onSelectedStepChange,
   onChange,
   onPreviewStep,
+  onEditExpression,
   onPlay,
   onPause,
   onStop,
@@ -1746,6 +1753,7 @@ function SequenceWorkspace({
   onSelectedStepChange: (id: string | null) => void
   onChange: (draft: AvatarSequence) => void
   onPreviewStep: (step: SequenceStep) => void
+  onEditExpression: (index: number, expression: Expression) => void
   onPlay: () => void
   onPause: () => void
   onStop: () => void
@@ -1839,10 +1847,26 @@ function SequenceWorkspace({
             </Field>
             <Field>
               <FieldTitle>{t('Catégorie')}</FieldTitle>
-              <Input
+              <Select
                 value={editing.draft.group}
-                onChange={event => onChange({ ...editing.draft, group: event.currentTarget.value })}
-              />
+                items={[
+                  { value: 'Cycle de vie', label: t('Cycle de vie') },
+                  { value: 'Réactions', label: t('Réactions') },
+                  { value: 'Custom', label: t('Custom') },
+                ]}
+                onValueChange={value =>
+                  value && onChange({ ...editing.draft, group: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Cycle de vie">{t('Cycle de vie')}</SelectItem>
+                  <SelectItem value="Réactions">{t('Réactions')}</SelectItem>
+                  <SelectItem value="Custom">{t('Custom')}</SelectItem>
+                </SelectContent>
+              </Select>
             </Field>
             <Field>
               <FieldTitle>{t('Description')}</FieldTitle>
@@ -1894,6 +1918,30 @@ function SequenceWorkspace({
                 {editing.draft.steps.map((step, position) => {
                   const preset = expressions[step.expressionIndex]
                   if (!preset) return null
+                  const card = (
+                    <Button
+                      variant="outline"
+                      type="button"
+                      aria-pressed={selectedStep?.id === step.id}
+                      onClick={() => {
+                        onSelectedStepChange(step.id)
+                        onPreviewStep(step)
+                      }}
+                      onDoubleClick={() => onEditExpression(step.expressionIndex, preset)}
+                    >
+                      <GripVertical className="sequence-grip" />
+                      <ExpressionPreview
+                        expression={preset}
+                        surface={surface}
+                        bodyNodes={bodyNodes}
+                        colors={colors}
+                        avatarEyes={avatarEyes}
+                        id={`sequence-${editing.draft.id}-${step.id}`}
+                      />
+                      <span>{String(step.expressionIndex).padStart(2, '0')}</span>
+                      <small>{position + 1}</small>
+                    </Button>
+                  )
                   return (
                     <motion.div
                       className="sequence-step"
@@ -1916,27 +1964,16 @@ function SequenceWorkspace({
                         draggedStepId.current = null
                       }}
                     >
-                      <Button
-                        variant="outline"
-                        type="button"
-                        aria-pressed={selectedStep?.id === step.id}
-                        onClick={() => {
-                          onSelectedStepChange(step.id)
-                          onPreviewStep(step)
-                        }}
-                      >
-                        <GripVertical className="sequence-grip" />
-                        <ExpressionPreview
-                          expression={preset}
-                          surface={surface}
-                          bodyNodes={bodyNodes}
-                          colors={colors}
-                          avatarEyes={avatarEyes}
-                          id={`sequence-${editing.draft.id}-${step.id}`}
-                        />
-                        <span>{String(step.expressionIndex).padStart(2, '0')}</span>
-                        <small>{position + 1}</small>
-                      </Button>
+                      <ContextMenu>
+                        <ContextMenuTrigger render={card} />
+                        <ContextMenuContent>
+                          <ContextMenuItem
+                            onClick={() => onEditExpression(step.expressionIndex, preset)}
+                          >
+                            <Pencil /> {t('Modifier')}
+                          </ContextMenuItem>
+                        </ContextMenuContent>
+                      </ContextMenu>
                     </motion.div>
                   )
                 })}
@@ -3060,7 +3097,7 @@ function StudioApp() {
     persistGlobalExpressions(next)
     setEditing(null)
     transitionToExpression(editing.draft, index)
-    restoreStateAfterEditor()
+    if (!sequenceEditing) restoreStateAfterEditor()
   }
 
   const duplicateExpression = (index: number | null, draft: Expression, editDuplicate = false) => {
@@ -3099,7 +3136,7 @@ function StudioApp() {
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
     if (avatar) setDisplayColors(resolveColors(expression, avatar.colors))
     paintPose(poseFromExpression(expression))
-    restoreStateAfterEditor()
+    if (!sequenceEditing) restoreStateAfterEditor()
   }
 
   const deleteEditing = () => {
@@ -3115,6 +3152,13 @@ function StudioApp() {
         : remapSequencesAfterExpressionDelete(sequences, editing.index)
     setExpressions(next)
     setSequences(nextSequences)
+    if (sequenceEditing) {
+      const draft = remapSequencesAfterExpressionDelete(
+        [sequenceEditing.draft],
+        editing.index
+      )[0]
+      setSequenceEditing({ ...sequenceEditing, draft })
+    }
     persistGlobalExpressions(next)
     persistSequences(nextSequences)
     setActiveExpression(null)
@@ -3124,7 +3168,7 @@ function StudioApp() {
     const avatar = avatarsRef.current.find(item => item.id === activeAvatarIdRef.current)
     if (avatar) setDisplayColors(resolveColors(fallback, avatar.colors))
     paintPose(poseFromExpression(fallback))
-    restoreStateAfterEditor()
+    if (!sequenceEditing) restoreStateAfterEditor()
   }
 
   const openSequenceEditor = (sequence?: AvatarSequence) => {
@@ -3345,9 +3389,9 @@ function StudioApp() {
       </section>
 
       <main
-        className={`inspector ${sequenceEditing ? 'sequence-workspace-active' : editing ? 'expression-workspace-active' : bodyEditing ? 'body-workspace' : 'studio-workspace'}`}
+        className={`inspector ${editing ? 'expression-workspace-active' : sequenceEditing ? 'sequence-workspace-active' : bodyEditing ? 'body-workspace' : 'studio-workspace'}`}
       >
-        {sequenceEditing && (
+        {sequenceEditing && !editing && (
           <motion.div
             key={`sequence-${sequenceEditing.sourceId ?? 'new'}`}
             className="workspace-page sequence-workspace"
@@ -3373,6 +3417,7 @@ function StudioApp() {
                 const preset = expressions[step.expressionIndex]
                 if (preset) transitionToExpression(preset, step.expressionIndex, step)
               }}
+              onEditExpression={openExpressionEditor}
               onPlay={() => launchSequence(sequenceEditing.draft, false, false)}
               onPause={() => pauseState(false)}
               onStop={() => stopState(false)}
@@ -3385,7 +3430,7 @@ function StudioApp() {
             />
           </motion.div>
         )}
-        {!sequenceEditing && editing && (
+        {editing && (
           <motion.div
             key={`expression-${editing.index ?? 'new'}`}
             className="workspace-page expression-workspace"
@@ -4640,6 +4685,7 @@ function StudioApp() {
                             onSelect={() =>
                               transitionToExpression(preset, step.expressionIndex, step)
                             }
+                            onEdit={() => openExpressionEditor(step.expressionIndex, preset)}
                           />
                           <small>{formatSeconds(step.holdMs, language)}</small>
                         </div>

@@ -1,0 +1,213 @@
+- generic [ref=f2e3]:
+  - generic [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - text: Bible Strong
+      - emphasis [ref=f2e7]: Avatar Lab
+    - generic [ref=f2e8]:
+      - generic [ref=f2e9]: 🇬🇧
+      - combobox "Interface language" [ref=f2e10]:
+        - generic [ref=f2e11]: English
+        - img [ref=f2e12]: ▼
+      - textbox [ref=f2e14]: en
+    - generic [ref=f2e15]:
+      - img "Procedural avatar" [ref=f2e16]:
+        - generic [ref=f2e18]:
+          - generic [ref=f2e19] [cursor=pointer]
+          - generic [ref=f2e20] [cursor=pointer]
+      - generic [ref=f2e21]:
+        - img "Rotation gizmo" [ref=f2e22]
+        - button "Reset head rotation" [ref=f2e27]
+      - generic [ref=f2e28]: X Y Z
+    - paragraph [ref=f2e32]: Drag on the surface to orient the head. The gizmo rings control X, Y and Z.
+  - main [ref=f2e33]:
+    - generic [ref=f2e342]:
+      - generic [ref=f2e343]:
+        - button "Back to expressions" [active] [ref=f2e344]
+        - generic [ref=f2e345]:
+          - paragraph [ref=f2e346]: Saved preset
+          - heading "Edit expression 00" [level=1] [ref=f2e347]
+          - paragraph [ref=f2e348]: The avatar on the left previews this expression live.
+      - generic [ref=f2e350]:
+        - generic [ref=f2e351]:
+          - generic [ref=f2e352]:
+            - heading "Body" [level=2] [ref=f2e353]
+            - paragraph [ref=f2e354]: General avatar appearance and orientation.
+          - separator [ref=f2e355]
+          - generic [ref=f2e356]:
+            - generic [ref=f2e357]:
+              - heading "Body color" [level=3] [ref=f2e358]
+              - group [ref=f2e359]:
+                - generic [ref=f2e360]: Body
+                - generic [ref=f2e361]:
+                  - textbox "Body · picker" [ref=f2e362] [cursor=pointer]: "#5b7fe5"
+                  - textbox "Body · hex value" [ref=f2e363]: "#5B7FE5"
+            - generic [ref=f2e364]:
+              - heading "Perpetual motion" [level=3] [ref=f2e365]
+              - group [ref=f2e366]:
+                - generic [ref=f2e367]: Body
+                - combobox "Body" [ref=f2e368]:
+                  - generic [ref=f2e369]: No motion
+                  - img [ref=f2e370]: ▼
+                - textbox [ref=f2e372]: none
+              - paragraph [ref=f2e373]: Adds a subtle living presence or a continuous shake to the body.
+            - generic [ref=f2e374]:
+              - heading "Head rotation" [level=3] [ref=f2e375]
+              - group [ref=f2e376]:
+                - button "Rotation X" [ref=f2e377]:
+                  - generic [ref=f2e379]: ↔
+                - generic [ref=f2e380]:
+                  - spinbutton "Rotation X" [ref=f2e381]: "7.3"
+                  - generic [ref=f2e382]: °
+              - group [ref=f2e383]:
+                - button "Rotation Y" [ref=f2e384]:
+                  - generic [ref=f2e386]: ↔
+                - generic [ref=f2e387]:
+                  - spinbutton "Rotation Y" [ref=f2e388]: "27.8"
+                  - generic [ref=f2e389]: °
+              - group [ref=f2e390]:
+                - button "Rotation Z" [ref=f2e391]:
+                  - generic [ref=f2e393]: ↔
+                - generic [ref=f2e394]:
+                  - spinbutton "Rotation Z" [ref=f2e395]: "-16.1"
+                  - generic [ref=f2e396]: °
+        - generic [ref=f2e397]:
+          - generic [ref=f2e398]:
+            - heading "Eyes" [level=2] [ref=f2e399]
+            - paragraph [ref=f2e400]: Eye shape, placement and orientation.
+          - separator [ref=f2e401]
+          - generic [ref=f2e402]:
+            - generic [ref=f2e403]:
+              - heading "Eye color" [level=3] [ref=f2e404]
+              - group [ref=f2e405]:
+                - generic [ref=f2e406]: Eyes
+                - generic [ref=f2e407]:
+                  - textbox "Eyes · picker" [ref=f2e408] [cursor=pointer]: "#111316"
+                  - textbox "Eyes · hex value" [ref=f2e409]: "#111316"
+            - generic [ref=f2e410]:
+              - heading "Perpetual motion" [level=3] [ref=f2e411]
+              - group [ref=f2e412]:
+                - generic [ref=f2e413]: Eyes
+                - combobox "Eyes" [ref=f2e414]:
+                  - generic [ref=f2e415]: No motion
+                  - img [ref=f2e416]: ▼
+                - textbox [ref=f2e418]: none
+              - paragraph [ref=f2e419]: Animates the gaze with natural micro-saccades or a continuous shake.
+            - generic [ref=f2e420]:
+              - generic [ref=f2e421]:
+                - heading "Width" [level=3] [ref=f2e422]
+                - button "Link widths" [pressed] [ref=f2e423]
+              - generic [ref=f2e424]:
+                - group [ref=f2e425]:
+                  - button "Left eye" [ref=f2e426]:
+                    - generic [ref=f2e428]: ↔
+                  - generic [ref=f2e429]:
+                    - spinbutton "Left eye" [ref=f2e430]: "24.2"
+                    - generic [ref=f2e431]: u
+                - group [ref=f2e432]:
+                  - button "Right eye" [ref=f2e433]:
+                    - generic [ref=f2e435]: ↔
+                  - generic [ref=f2e436]:
+                    - spinbutton "Right eye" [ref=f2e437]: "27.6"
+                    - generic [ref=f2e438]: u
+            - generic [ref=f2e439]:
+              - generic [ref=f2e440]:
+                - heading "Height" [level=3] [ref=f2e441]
+                - button "Link heights" [pressed] [ref=f2e442]
+              - generic [ref=f2e443]:
+                - group [ref=f2e444]:
+                  - button "Left eye" [ref=f2e445]:
+                    - generic [ref=f2e447]: ↔
+                  - generic [ref=f2e448]:
+                    - spinbutton "Left eye" [ref=f2e449]: "38.9"
+                    - generic [ref=f2e450]: u
+                - group [ref=f2e451]:
+                  - button "Right eye" [ref=f2e452]:
+                    - generic [ref=f2e454]: ↔
+                  - generic [ref=f2e455]:
+                    - spinbutton "Right eye" [ref=f2e456]: "40.7"
+                    - generic [ref=f2e457]: u
+            - generic [ref=f2e458]:
+              - generic [ref=f2e459]:
+                - heading "Proportional size" [level=3] [ref=f2e460]
+                - button "Link sizes" [pressed] [ref=f2e461]
+              - generic [ref=f2e462]:
+                - group [ref=f2e463]:
+                  - button "Left eye" [ref=f2e464]:
+                    - generic [ref=f2e466]: ↔
+                  - generic [ref=f2e467]:
+                    - spinbutton "Left eye" [ref=f2e468]: "38.9"
+                    - generic [ref=f2e469]: u
+                - group [ref=f2e470]:
+                  - button "Right eye" [ref=f2e471]:
+                    - generic [ref=f2e473]: ↔
+                  - generic [ref=f2e474]:
+                    - spinbutton "Right eye" [ref=f2e475]: "40.7"
+                    - generic [ref=f2e476]: u
+            - generic [ref=f2e477]:
+              - heading "Position and spacing" [level=3] [ref=f2e478]
+              - generic [ref=f2e479]:
+                - generic [ref=f2e480]:
+                  - heading "Left eye" [level=3] [ref=f2e481]
+                  - group [ref=f2e482]:
+                    - button "Horizontal" [ref=f2e483]:
+                      - generic [ref=f2e485]: ↔
+                    - generic [ref=f2e486]:
+                      - spinbutton "Horizontal" [ref=f2e487]: "0"
+                      - generic [ref=f2e488]: u
+                  - group [ref=f2e489]:
+                    - button "Vertical" [ref=f2e490]:
+                      - generic [ref=f2e492]: ↔
+                    - generic [ref=f2e493]:
+                      - spinbutton "Vertical" [ref=f2e494]: "-20.5"
+                      - generic [ref=f2e495]: u
+                - generic [ref=f2e496]:
+                  - heading "Right eye" [level=3] [ref=f2e497]
+                  - group [ref=f2e498]:
+                    - button "Horizontal" [ref=f2e499]:
+                      - generic [ref=f2e501]: ↔
+                    - generic [ref=f2e502]:
+                      - spinbutton "Horizontal" [ref=f2e503]: "0"
+                      - generic [ref=f2e504]: u
+                  - group [ref=f2e505]:
+                    - button "Vertical" [ref=f2e506]:
+                      - generic [ref=f2e508]: ↔
+                    - generic [ref=f2e509]:
+                      - spinbutton "Vertical" [ref=f2e510]: "-20.5"
+                      - generic [ref=f2e511]: u
+              - group [ref=f2e513]:
+                - button "Spacing" [ref=f2e514]:
+                  - generic [ref=f2e516]: ↔
+                - generic [ref=f2e517]:
+                  - spinbutton "Spacing" [ref=f2e518]: "54.3"
+                  - generic [ref=f2e519]: u
+            - generic [ref=f2e520]:
+              - heading "Local rotation" [level=3] [ref=f2e521]
+              - generic [ref=f2e522]:
+                - group [ref=f2e523]:
+                  - button "Left eye" [ref=f2e524]:
+                    - generic [ref=f2e526]: ↔
+                  - generic [ref=f2e527]:
+                    - spinbutton "Left eye" [ref=f2e528]: "0"
+                    - generic [ref=f2e529]: °
+                - group [ref=f2e530]:
+                  - button "Right eye" [ref=f2e531]:
+                    - generic [ref=f2e533]: ↔
+                  - generic [ref=f2e534]:
+                    - spinbutton "Right eye" [ref=f2e535]: "0"
+                    - generic [ref=f2e536]: °
+        - generic [ref=f2e537]:
+          - generic [ref=f2e538]:
+            - heading "Projection" [level=2] [ref=f2e539]
+            - paragraph [ref=f2e540]: Perspective applied to the active surface.
+          - separator [ref=f2e541]
+          - group [ref=f2e544]:
+            - button "Perspective" [ref=f2e545]:
+              - generic [ref=f2e547]: ↔
+            - generic [ref=f2e548]:
+              - spinbutton "Perspective" [ref=f2e549]: "1"
+              - generic [ref=f2e550]: ×
+      - generic [ref=f2e551]:
+        - generic [ref=f2e552]:
+          - button "Delete" [ref=f2e553]
+          - button "Duplicate" [ref=f2e554]
+        - button "Save" [ref=f2e556]
