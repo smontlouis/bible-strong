@@ -7,7 +7,7 @@ import {
 } from 'motion/react'
 import { motionValue, type MotionValue } from 'motion'
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Pause, Pencil, Play, Plus, Square, Trash2 } from 'lucide-react'
 
 import { Button } from './components/ui/button'
 import { Input } from './components/ui/input'
@@ -1153,8 +1153,12 @@ export default function App() {
   const [highlight, setHighlight] = useState<Highlight>(null)
   const [selectedState, setSelectedState] = useState('idle')
   const [activeState, setActiveState] = useState<string | null>(null)
+  const [statePlaying, setStatePlaying] = useState(false)
   const stateTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const blinkTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const statePosition = useRef(0)
+  const stateNextDueAt = useRef<number | null>(null)
+  const stateRemainingDelay = useRef(0)
   const reduceMotion = useReducedMotion()
 
   const avatarsRef = useRef(avatars)
@@ -1461,8 +1465,8 @@ export default function App() {
   const activateAvatar = (id: string, editBody = false, preserveMode = false) => {
     const avatar = avatarsRef.current.find(item => item.id === id)
     if (!avatar) return
+    const currentStateExpression = displayedPose.current.expression
     stopTransition(true)
-    stopState()
     activeAvatarIdRef.current = id
     surfaceRef.current = avatar.body.primary
     bodyNodesRef.current = avatar.body.nodes
@@ -1473,12 +1477,12 @@ export default function App() {
     setActiveExpression(null)
     setBodyEditing(editBody)
     if (!preserveMode || editBody) setMode('manual')
-    const neutral = { ...defaultExpression }
-    setExpression(neutral)
-    setDisplayColors(resolveColors(neutral, avatar.colors))
-    canonicalTarget.current = neutral
-    transitionTarget.current = neutral
-    paintPose(poseFromExpression(neutral))
+    const nextExpression = activeState ? currentStateExpression : { ...defaultExpression }
+    setExpression(nextExpression)
+    setDisplayColors(resolveColors(nextExpression, avatar.colors))
+    canonicalTarget.current = nextExpression
+    transitionTarget.current = nextExpression
+    paintPose(poseFromExpression(nextExpression))
     persistAvatarLibrary({ activeAvatarId: id, avatars: avatarsRef.current })
   }
 
@@ -1547,32 +1551,69 @@ export default function App() {
     if (next) paintPose(displayedPose.current)
   }
 
-  const stopState = () => {
+  const clearStateTimers = () => {
     if (stateTimer.current) clearTimeout(stateTimer.current)
     if (blinkTimer.current) clearTimeout(blinkTimer.current)
     stateTimer.current = null
     blinkTimer.current = null
+    stateNextDueAt.current = null
+  }
+
+  const pauseState = () => {
+    if (stateNextDueAt.current !== null) {
+      stateRemainingDelay.current = Math.max(stateNextDueAt.current - performance.now(), 0)
+    }
+    clearStateTimers()
+    setStatePlaying(false)
+  }
+
+  const stopState = () => {
+    clearStateTimers()
+    statePosition.current = 0
+    stateRemainingDelay.current = 0
+    stopTransition(true)
+    blinkControls.current?.stop()
+    setStatePlaying(false)
     setActiveState(null)
   }
 
-  const launchState = (name: string) => {
-    stopState()
-    setActiveState(name)
+  const launchState = (name: string, resume = false) => {
+    clearStateTimers()
     const pool = statePools[name]
-    if (!pool?.length) return
-    let position = 0
+    if (!pool?.length) {
+      stopState()
+      return
+    }
+    if (!resume || activeState !== name) statePosition.current = 0
+    setSelectedState(name)
+    setActiveState(name)
+    setStatePlaying(true)
+    const cycleDelay = name === 'idle' ? 5200 : 2300
+    const scheduleCycle = (delay: number) => {
+      stateRemainingDelay.current = delay
+      stateNextDueAt.current = performance.now() + delay
+      stateTimer.current = setTimeout(cycle, delay)
+    }
     const cycle = () => {
-      const index = pool[position % pool.length]
+      stateNextDueAt.current = null
+      const index = pool[statePosition.current % pool.length]
       transitionToExpression(expressions[index], index)
-      position += 1
-      stateTimer.current = setTimeout(cycle, name === 'idle' ? 5200 : 2300)
+      statePosition.current += 1
+      scheduleCycle(cycleDelay)
     }
     const blinkLoop = () => {
       blink()
       blinkTimer.current = setTimeout(blinkLoop, 3400 + Math.random() * 2800)
     }
-    cycle()
+    if (resume) scheduleCycle(stateRemainingDelay.current || cycleDelay)
+    else cycle()
     blinkTimer.current = setTimeout(blinkLoop, 2600)
+  }
+
+  const toggleStatePlayback = () => {
+    if (!activeState) return
+    if (statePlaying) pauseState()
+    else launchState(activeState, true)
   }
 
   const saveEditing = () => {
@@ -1722,6 +1763,12 @@ export default function App() {
               <p>Choisis la forme principale puis assemble les primitives autour d’elle.</p>
             </div>
             <div>
+              <StatePlayer
+                name={activeState}
+                playing={statePlaying}
+                onToggle={toggleStatePlayback}
+                onStop={stopState}
+              />
               <Button
                 variant="destructive"
                 disabled={avatars.length <= 1}
@@ -1736,14 +1783,13 @@ export default function App() {
         ) : (
           <>
             <header className="inspector-header">
-              <div>
-                <p className="eyebrow">Prototype React + Motion</p>
-                <h1>Avatar Studio</h1>
-              </div>
-              <span className="motion-status">
-                <i />
-                Motion actif
-              </span>
+              <h1>Avatar Studio</h1>
+              <StatePlayer
+                name={activeState}
+                playing={statePlaying}
+                onToggle={toggleStatePlayback}
+                onStop={stopState}
+              />
             </header>
             <section className="avatar-shelf" aria-label="Choisir un avatar">
               <div className="avatar-shelf-heading">
@@ -2668,12 +2714,6 @@ export default function App() {
                   <p className="eyebrow">Séquences</p>
                   <h2>États animés</h2>
                 </div>
-                {activeState && (
-                  <span className="live-state">
-                    <i />
-                    {activeState}
-                  </span>
-                )}
               </div>
               <div className="state-groups">
                 {Object.entries(stateGroups).map(([group, states]) => (
@@ -2718,11 +2758,13 @@ export default function App() {
                   type="button"
                   onClick={() => launchState(selectedState)}
                 >
-                  Lancer
+                  {activeState === selectedState ? 'Relancer' : 'Lancer'}
                 </button>
-                <button type="button" onClick={stopState}>
-                  Pause
-                </button>
+                {activeState === selectedState && (
+                  <button type="button" onClick={toggleStatePlayback}>
+                    {statePlaying ? 'Pause' : 'Reprendre'}
+                  </button>
+                )}
               </div>
             </section>
           </div>
@@ -2793,6 +2835,42 @@ function ControlSection({
       </header>
       <div className="control-section-content">{children}</div>
     </section>
+  )
+}
+
+function StatePlayer({
+  name,
+  playing,
+  onToggle,
+  onStop,
+}: {
+  name: string | null
+  playing: boolean
+  onToggle: () => void
+  onStop: () => void
+}) {
+  if (!name) return null
+  return (
+    <div className="state-player" aria-label={`État en cours : ${name}`}>
+      <span className={playing ? 'is-playing' : 'is-paused'}>
+        <i />
+        <span>
+          <small>{playing ? 'En lecture' : 'En pause'}</small>
+          <strong>{name}</strong>
+        </span>
+      </span>
+      <Button
+        variant="secondary"
+        size="icon-sm"
+        aria-label={playing ? `Mettre ${name} en pause` : `Reprendre ${name}`}
+        onClick={onToggle}
+      >
+        {playing ? <Pause /> : <Play />}
+      </Button>
+      <Button variant="ghost" size="icon-sm" aria-label={`Arrêter ${name}`} onClick={onStop}>
+        <Square />
+      </Button>
+    </div>
   )
 }
 
