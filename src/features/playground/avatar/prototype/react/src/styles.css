@@ -465,34 +465,14 @@ p {
   gap: 5px;
   margin-bottom: 16px;
   padding: 5px;
-  border: 1px solid #dcdee5;
-  border-radius: 14px;
-  background: rgb(255 255 255 / 91%);
-  box-shadow: 0 10px 30px rgb(24 28 35 / 8%);
   backdrop-filter: blur(14px);
 }
-.tabs button,
 .state-buttons button,
-.pool button,
 .button-row button,
 .reset {
   min-height: 36px;
-  border: 1px solid #dcdfe6;
-  border-radius: 9px;
-  background: white;
-  cursor: pointer;
   font-size: 11px;
-  font-weight: 750;
 }
-.tabs button {
-  border: 0;
-  background: transparent;
-}
-.tabs button[data-active] {
-  background: #15171b;
-  color: white;
-}
-
 .color-field {
   display: grid;
   gap: 8px;
@@ -574,13 +554,15 @@ p {
   font-size: 10px;
   line-height: 1.45;
 }
+.control-section-separator {
+  opacity: 0.7;
+}
 .control-section-content {
   display: grid;
   gap: 10px;
 }
 .control-section .panel {
   border-color: #e0e3e9;
-  box-shadow: 0 4px 16px rgb(24 28 35 / 3%);
 }
 .control-section-compact {
   padding: 10px;
@@ -598,12 +580,11 @@ p {
   align-items: center;
   gap: 10px;
   width: 100%;
+  height: auto;
+  min-height: 46px;
   padding: 10px 12px;
-  border: 1px solid #e1e3e8;
-  border-radius: 11px;
-  background: #f7f8fa;
-  color: #31353d;
   text-align: left;
+  white-space: normal;
 }
 .body-tree > button[aria-pressed='true'] {
   border-color: #7796ec;
@@ -612,7 +593,12 @@ p {
 }
 .body-tree > button span:last-child {
   display: grid;
+  min-width: 0;
   gap: 2px;
+}
+.body-tree strong,
+.body-tree small {
+  line-height: 1.25;
 }
 .body-tree small {
   color: #858a95;
@@ -638,13 +624,7 @@ p {
 }
 .body-add button,
 .body-node-actions button {
-  padding: 7px 9px;
-  border: 1px solid #dfe3eb;
-  border-radius: 8px;
-  background: white;
-  color: #4f5663;
   font-size: 9px;
-  font-weight: 750;
 }
 .body-node-editor {
   margin-top: 14px;
@@ -663,10 +643,6 @@ p {
   display: flex;
   gap: 6px;
 }
-.body-node-actions .danger {
-  border-color: #efc5c5;
-  color: #bc3030;
-}
 .body-transform-grid {
   display: grid;
   margin-top: 12px;
@@ -684,11 +660,14 @@ p {
   grid-column: 1;
 }
 .panel {
+  gap: 0;
   padding: 20px;
-  border: 1px solid #dfe1e7;
-  border-radius: 18px;
-  background: white;
-  box-shadow: 0 8px 28px rgb(24 28 35 / 4%);
+}
+.section-description {
+  margin: -2px 3px 2px;
+  color: #747c89;
+  font-size: 10px;
+  line-height: 1.55;
 }
 .panel.compact {
   padding-top: 16px;
@@ -704,9 +683,6 @@ p {
   min-height: 82px;
   padding: 6px 4px 7px;
   place-items: center;
-  border: 1px solid #e1e3e8;
-  border-radius: 11px;
-  background: #f7f8fa;
   color: #767c87;
   cursor: pointer;
   font-size: 9px;
@@ -757,6 +733,18 @@ p {
   margin: 0;
   font-size: 15px;
   letter-spacing: -0.015em;
+}
+.panel-title {
+  gap: 5px;
+  margin-bottom: 17px;
+  padding: 0;
+}
+.panel-title [data-slot='card-title'] {
+  line-height: inherit;
+}
+.panel-title [data-slot='card-description'] {
+  font-size: 11px;
+  line-height: 1.45;
 }
 .panel-title p {
   margin: 5px 0 17px;
@@ -812,8 +800,6 @@ p {
   justify-content: space-between;
   gap: 5px;
   padding: 8px 4px;
-  border: 0;
-  background: transparent;
   cursor: ew-resize;
   touch-action: none;
   font-size: 11px;
@@ -877,10 +863,6 @@ p {
   height: 32px;
   padding: 7px;
   place-items: center;
-  border: 1px solid #dcdfe6;
-  border-radius: 9px;
-  background: white;
-  cursor: pointer;
 }
 .link-button svg {
   width: 16px;
@@ -923,9 +905,6 @@ p {
   min-height: 76px;
   overflow: hidden;
   padding: 3px;
-  border: 1px solid #dfe1e7;
-  border-radius: 11px;
-  background: #f7f8fa;
   cursor: pointer;
 }
 .avatar-grid {
@@ -939,9 +918,6 @@ p {
   min-height: 132px;
   overflow: hidden;
   padding: 7px;
-  border: 1px solid #dfe1e7;
-  border-radius: 14px;
-  background: #f7f8fa;
   cursor: pointer;
 }
 .avatar-card svg {
@@ -1010,12 +986,6 @@ p {
 .button-row button {
   flex: 1;
 }
-button.primary {
-  border-color: #17191d;
-  background: #17191d;
-  color: white;
-}
-
 .state-groups {
   display: grid;
   gap: 15px;

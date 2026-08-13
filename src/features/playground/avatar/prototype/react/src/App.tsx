@@ -10,7 +10,12 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Pause, Pencil, Play, Plus, Square, Trash2 } from 'lucide-react'
 
 import { Button } from './components/ui/button'
+import { Badge } from './components/ui/badge'
+import { Card, CardDescription, CardHeader, CardTitle } from './components/ui/card'
+import { Field, FieldTitle } from './components/ui/field'
 import { Input } from './components/ui/input'
+import { Separator } from './components/ui/separator'
+import { Switch } from './components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from './components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './components/ui/tooltip'
 import {
@@ -142,8 +147,8 @@ function ColorField({
   onChange: (value: string) => void
 }) {
   return (
-    <label className="color-field">
-      <span>{label}</span>
+    <Field className="color-field">
+      <FieldTitle>{label}</FieldTitle>
       <span className="color-control">
         <Input
           aria-label={`${label} · sélecteur`}
@@ -169,7 +174,7 @@ function ColorField({
           }}
         />
       </span>
-    </label>
+    </Field>
   )
 }
 
@@ -205,9 +210,11 @@ function NumericField({
   }
 
   return (
-    <div className="numeric-field">
-      <button
+    <Field className="numeric-field" orientation="horizontal">
+      <Button
         className="scrub-label"
+        variant="ghost"
+        size="sm"
         type="button"
         title="Glisser horizontalement pour modifier"
         onPointerDown={startScrub}
@@ -219,10 +226,11 @@ function NumericField({
         <span className="scrub-icon" aria-hidden="true">
           ↔
         </span>
-      </button>
+      </Button>
       <label className="number-shell">
         <Input
           type="number"
+          aria-label={label}
           min={min}
           max={max}
           step={step}
@@ -236,7 +244,7 @@ function NumericField({
         />
         <span>{unit}</span>
       </label>
-    </div>
+    </Field>
   )
 }
 
@@ -250,9 +258,11 @@ function LinkButton({
   label: string
 }) {
   return (
-    <button
+    <Button
       type="button"
       className="link-button"
+      variant="outline"
+      size="icon-sm"
       aria-pressed={linked}
       aria-label={label}
       onClick={onClick}
@@ -261,7 +271,7 @@ function LinkButton({
         <path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1.1 1.1" />
         <path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1.1-1.1" />
       </svg>
-    </button>
+    </Button>
   )
 }
 
@@ -885,8 +895,9 @@ function ExpressionCard({
   onEdit?: () => void
 }) {
   return (
-    <button
+    <Button
       className="expression-card"
+      variant="outline"
       aria-pressed={active}
       type="button"
       onClick={onSelect}
@@ -901,7 +912,7 @@ function ExpressionCard({
         id={previewId}
       />
       <span>{String(index).padStart(2, '0')}</span>
-    </button>
+    </Button>
   )
 }
 
@@ -1006,15 +1017,15 @@ function ExpressionDialog({
               subtitle="Apparence et orientation générale de l’avatar."
               compact
             >
-              <section className="dialog-group">
+              <Card className="dialog-group">
                 <h3>Couleur du corps</h3>
                 <ColorField
                   label="Corps"
                   value={editing.draft.bodyColor ?? avatarColors.body}
                   onChange={bodyColor => update({ bodyColor })}
                 />
-              </section>
-              <section className="dialog-group">
+              </Card>
+              <Card className="dialog-group">
                 <h3>Rotation de la tête</h3>
                 {(['headX', 'headY', 'headZ'] as const).map(field => (
                   <NumericField
@@ -1025,23 +1036,23 @@ function ExpressionDialog({
                     onChange={value => update({ [field]: value })}
                   />
                 ))}
-              </section>
+              </Card>
             </ControlSection>
             <ControlSection
               title="Yeux"
               subtitle="Forme, placement et orientation propres au regard."
               compact
             >
-              <section className="dialog-group">
+              <Card className="dialog-group">
                 <h3>Couleur des yeux</h3>
                 <ColorField
                   label="Yeux"
                   value={editing.draft.eyeColor ?? avatarColors.eyes}
                   onChange={eyeColor => update({ eyeColor })}
                 />
-              </section>
+              </Card>
               {(['width', 'height', 'size'] as const).map(dimension => (
-                <section className="dialog-group" key={dimension}>
+                <Card className="dialog-group" key={dimension}>
                   <div className="panel-inline-title">
                     <h3>
                       {
@@ -1085,9 +1096,9 @@ function ExpressionDialog({
                       )
                     })}
                   </div>
-                </section>
+                </Card>
               ))}
-              <section className="dialog-group">
+              <Card className="dialog-group">
                 <h3>Position et espacement</h3>
                 <div className="eye-columns">
                   {(['Left', 'Right'] as Side[]).map(side => (
@@ -1118,8 +1129,8 @@ function ExpressionDialog({
                     onChange={value => update({ spacing: value })}
                   />
                 </div>
-              </section>
-              <section className="dialog-group">
+              </Card>
+              <Card className="dialog-group">
                 <h3>Rotation locale</h3>
                 <div className="eye-columns">
                   <NumericField
@@ -1135,14 +1146,14 @@ function ExpressionDialog({
                     onChange={value => update({ rightAngle: value })}
                   />
                 </div>
-              </section>
+              </Card>
             </ControlSection>
             <ControlSection
               title="Projection"
               subtitle="Perspective appliquée à la surface active."
               compact
             >
-              <section className="dialog-group">
+              <Card className="dialog-group">
                 <NumericField
                   label="Perspective"
                   value={editing.draft.perspective}
@@ -1150,7 +1161,7 @@ function ExpressionDialog({
                   unit="×"
                   onChange={value => update({ perspective: value })}
                 />
-              </section>
+              </Card>
             </ControlSection>
           </div>
         </div>
@@ -1858,8 +1869,9 @@ export default function App() {
               </div>
               <div className="avatar-grid">
                 {avatars.map(avatar => (
-                  <button
+                  <Button
                     className="avatar-card"
+                    variant="outline"
                     aria-pressed={activeAvatarId === avatar.id}
                     type="button"
                     key={avatar.id}
@@ -1878,7 +1890,7 @@ export default function App() {
                       id={`avatar-${avatar.id}`}
                     />
                     <span>{avatar.name}</span>
-                  </button>
+                  </Button>
                 ))}
                 <Button
                   variant="outline"
@@ -1930,14 +1942,15 @@ export default function App() {
                   title="Corps"
                   subtitle="Construction, forme et couleur de la tête de l’avatar."
                 >
-                  <section className="panel body-panel">
+                  <InspectorCard className="body-panel">
                     <PanelTitle
                       level={3}
                       title="Construction du corps"
                       subtitle="Une forme principale porte les yeux. Les autres primitives se placent autour d’elle."
                     />
                     <div className="body-tree">
-                      <button
+                      <Button
+                        variant="outline"
                         type="button"
                         aria-pressed={selectedBodyNodeId === 'primary'}
                         onClick={() => setSelectedBodyNodeId('primary')}
@@ -1947,9 +1960,10 @@ export default function App() {
                           <strong>Forme principale</strong>
                           <small>{surfaceLabels[surface.type]} · porte les yeux</small>
                         </span>
-                      </button>
+                      </Button>
                       {bodyNodes.map(node => (
-                        <button
+                        <Button
+                          variant="outline"
                           type="button"
                           key={node.id}
                           aria-pressed={selectedBodyNodeId === node.id}
@@ -1960,7 +1974,7 @@ export default function App() {
                             <strong>{node.name}</strong>
                             <small>{surfaceLabels[node.surface.type]}</small>
                           </span>
-                        </button>
+                        </Button>
                       ))}
                     </div>
                     <div className="body-add">
@@ -1969,14 +1983,16 @@ export default function App() {
                       </span>
                       <div>
                         {bodyPrimitiveTypes.map(type => (
-                          <button
+                          <Button
+                            variant="outline"
+                            size="sm"
                             type="button"
                             key={type}
                             disabled={bodyNodes.length >= MAX_BODY_NODES}
                             onClick={() => addBodyNode(type)}
                           >
                             + {surfaceLabels[type]}
-                          </button>
+                          </Button>
                         ))}
                       </div>
                     </div>
@@ -1985,20 +2001,23 @@ export default function App() {
                         <div className="body-node-actions">
                           <strong>{selectedBodyNode.name}</strong>
                           <div>
-                            <button
+                            <Button
+                              variant="outline"
+                              size="sm"
                               type="button"
                               disabled={bodyNodes.length >= MAX_BODY_NODES}
                               onClick={duplicateSelectedBodyNode}
                             >
                               Dupliquer
-                            </button>
-                            <button
-                              className="danger"
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
                               type="button"
                               onClick={deleteSelectedBodyNode}
                             >
                               Supprimer
-                            </button>
+                            </Button>
                           </div>
                         </div>
                         <div className="surface-fields">
@@ -2118,8 +2137,8 @@ export default function App() {
                         </div>
                       </div>
                     )}
-                  </section>
-                  <section className="panel surface-panel">
+                  </InspectorCard>
+                  <InspectorCard className="surface-panel">
                     <PanelTitle
                       level={3}
                       title="Forme principale"
@@ -2130,8 +2149,9 @@ export default function App() {
                         const previewSurface =
                           type === surface.type ? surface : surfacePresets[type]
                         return (
-                          <button
+                          <Button
                             className="surface-card"
+                            variant="outline"
                             type="button"
                             key={type}
                             aria-pressed={surface.type === type}
@@ -2144,7 +2164,7 @@ export default function App() {
                           >
                             <SurfaceThumbnail surface={previewSurface} />
                             <span>{surfaceLabels[type]}</span>
-                          </button>
+                          </Button>
                         )
                       })}
                     </div>
@@ -2229,8 +2249,8 @@ export default function App() {
                         </>
                       )}
                     </div>
-                  </section>
-                  <section className="panel color-panel">
+                  </InspectorCard>
+                  <InspectorCard className="color-panel">
                     <PanelTitle
                       level={3}
                       title="Couleur du corps"
@@ -2241,21 +2261,18 @@ export default function App() {
                       value={activeAvatar.colors.body}
                       onChange={body => updateAvatarColors({ body })}
                     />
-                  </section>
+                  </InspectorCard>
                 </ControlSection>
                 <ControlSection
                   title="Yeux"
                   subtitle="Forme, placement, orientation et couleur du regard par défaut."
                 >
-                  <section className="panel eye-defaults-intro">
-                    <PanelTitle
-                      level={3}
-                      title="Yeux par défaut"
-                      subtitle="Définis l’identité du regard de cet avatar. Les poses s’ajoutent ensuite à cette base."
-                    />
-                  </section>
+                  <p className="section-description">
+                    Définis l’identité du regard de cet avatar. Les poses s’ajoutent ensuite à cette
+                    base.
+                  </p>
                   {(['width', 'height', 'size'] as const).map(dimension => (
-                    <section className="panel compact" key={`avatar-${dimension}`}>
+                    <InspectorCard className="compact" key={`avatar-${dimension}`}>
                       <div className="panel-inline-title">
                         <h3>
                           {
@@ -2310,9 +2327,9 @@ export default function App() {
                           )
                         })}
                       </div>
-                    </section>
+                    </InspectorCard>
                   ))}
-                  <section className="panel">
+                  <InspectorCard>
                     <div className="panel-inline-title">
                       <div>
                         <h3>Position et espacement</h3>
@@ -2380,8 +2397,8 @@ export default function App() {
                         onChange={spacing => updateAvatarEyes({ spacing })}
                       />
                     </div>
-                  </section>
-                  <section className="panel">
+                  </InspectorCard>
+                  <InspectorCard>
                     <PanelTitle
                       level={3}
                       title="Rotation locale"
@@ -2403,8 +2420,8 @@ export default function App() {
                         onChange={rightAngle => updateAvatarEyes({ rightAngle })}
                       />
                     </div>
-                  </section>
-                  <section className="panel color-panel">
+                  </InspectorCard>
+                  <InspectorCard className="color-panel">
                     <PanelTitle
                       level={3}
                       title="Couleur des yeux"
@@ -2415,7 +2432,7 @@ export default function App() {
                       value={activeAvatar.colors.eyes}
                       onChange={eyes => updateAvatarColors({ eyes })}
                     />
-                  </section>
+                  </InspectorCard>
                 </ControlSection>
               </>
             )}
@@ -2425,7 +2442,7 @@ export default function App() {
                   title="Corps"
                   subtitle="Orientation et apparence générale de la pose."
                 >
-                  <section className="panel color-panel">
+                  <InspectorCard className="color-panel">
                     <PanelTitle
                       level={3}
                       title="Couleur du corps"
@@ -2450,8 +2467,8 @@ export default function App() {
                         Reprendre la couleur de l’avatar
                       </Button>
                     )}
-                  </section>
-                  <section className="panel">
+                  </InspectorCard>
+                  <InspectorCard>
                     <PanelTitle
                       level={3}
                       title="Rotation de la tête"
@@ -2478,13 +2495,13 @@ export default function App() {
                       onActiveChange={active => updateHighlight(active ? 'head' : null)}
                       onChange={value => updateImmediate({ ...expression, headZ: value })}
                     />
-                  </section>
+                  </InspectorCard>
                 </ControlSection>
                 <ControlSection
                   title="Yeux"
                   subtitle="Forme, placement, orientation et couleur du regard."
                 >
-                  <section className="panel color-panel">
+                  <InspectorCard className="color-panel">
                     <PanelTitle
                       level={3}
                       title="Couleur des yeux"
@@ -2509,9 +2526,9 @@ export default function App() {
                         Reprendre la couleur de l’avatar
                       </Button>
                     )}
-                  </section>
+                  </InspectorCard>
                   {(['width', 'height', 'size'] as const).map(dimension => (
-                    <section className="panel compact" key={dimension}>
+                    <InspectorCard className="compact" key={dimension}>
                       <div className="panel-inline-title">
                         <h3>
                           {
@@ -2566,9 +2583,9 @@ export default function App() {
                           )
                         })}
                       </div>
-                    </section>
+                    </InspectorCard>
                   ))}
-                  <section className="panel">
+                  <InspectorCard>
                     <PanelTitle
                       level={3}
                       title="Position et espacement"
@@ -2629,8 +2646,8 @@ export default function App() {
                         onChange={updateSpacing}
                       />
                     </div>
-                  </section>
-                  <section className="panel">
+                  </InspectorCard>
+                  <InspectorCard>
                     <PanelTitle
                       level={3}
                       title="Rotation locale"
@@ -2652,13 +2669,13 @@ export default function App() {
                         onChange={value => updateImmediate({ ...expression, rightAngle: value })}
                       />
                     </div>
-                  </section>
+                  </InspectorCard>
                 </ControlSection>
                 <ControlSection
                   title="Projection"
                   subtitle="Perspective et repères appliqués à la surface active."
                 >
-                  <section className="panel">
+                  <InspectorCard>
                     <PanelTitle
                       level={3}
                       title="Perspective"
@@ -2671,22 +2688,23 @@ export default function App() {
                       unit="×"
                       onChange={value => updateImmediate({ ...expression, perspective: value })}
                     />
-                    <label className="switch">
+                    <div className="switch">
                       <span>Afficher le maillage</span>
-                      <input
-                        type="checkbox"
+                      <Switch
                         checked={showWire}
-                        onChange={event => updateWireVisibility(event.currentTarget.checked)}
+                        onCheckedChange={updateWireVisibility}
+                        aria-label="Afficher le maillage"
                       />
-                    </label>
-                    <button
+                    </div>
+                    <Button
                       className="reset"
+                      variant="outline"
                       type="button"
                       onClick={() => transitionToExpression({ ...defaultExpression })}
                     >
                       Réinitialiser
-                    </button>
-                  </section>
+                    </Button>
+                  </InspectorCard>
                 </ControlSection>
               </>
             )}
@@ -2695,7 +2713,7 @@ export default function App() {
 
         {!bodyEditing && mode === 'expressions' && (
           <div className="panel-stack">
-            <section className="panel">
+            <InspectorCard>
               <div className="preset-header">
                 <div>
                   <p className="eyebrow">{expressions.length} presets</p>
@@ -2719,17 +2737,18 @@ export default function App() {
                     onEdit={() => setEditing({ index, draft: { ...preset } })}
                   />
                 ))}
-                <button
+                <Button
                   className="expression-add"
+                  variant="outline"
                   type="button"
                   onClick={() => setEditing({ index: null, draft: { ...expression } })}
                   aria-label="Nouvelle expression"
                 >
                   +
-                </button>
+                </Button>
               </div>
-            </section>
-            <section className="panel">
+            </InspectorCard>
+            <InspectorCard>
               <PanelTitle
                 title="Mouvement"
                 subtitle="Motion interpole les valeurs et notre moteur effectue le slerp quaternion."
@@ -2744,10 +2763,11 @@ export default function App() {
                 }}
               />
               <div className="button-row">
-                <button type="button" onClick={blink}>
+                <Button variant="outline" type="button" onClick={blink}>
                   Cligner
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="outline"
                   type="button"
                   onClick={() => {
                     const index = Math.floor(Math.random() * expressions.length)
@@ -2755,15 +2775,15 @@ export default function App() {
                   }}
                 >
                   Expression aléatoire
-                </button>
+                </Button>
               </div>
-            </section>
+            </InspectorCard>
           </div>
         )}
 
         {!bodyEditing && mode === 'states' && (
           <div className="panel-stack">
-            <section className="panel">
+            <InspectorCard>
               <div className="preset-header">
                 <div>
                   <p className="eyebrow">Séquences</p>
@@ -2776,21 +2796,23 @@ export default function App() {
                     <strong>{group}</strong>
                     <div className="state-buttons">
                       {states.map(name => (
-                        <button
+                        <Button
+                          variant="outline"
+                          size="sm"
                           type="button"
                           key={name}
                           aria-pressed={selectedState === name}
                           onClick={() => setSelectedState(name)}
                         >
                           {name}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
-            </section>
-            <section className="panel state-detail">
+            </InspectorCard>
+            <InspectorCard className="state-detail">
               <h2>{selectedState}</h2>
               <p>
                 {stateNotes[selectedState] ??
@@ -2802,7 +2824,7 @@ export default function App() {
                     <h3>Expressions de la séquence</h3>
                     <p>Les presets sont joués dans cet ordre, puis la boucle recommence.</p>
                   </div>
-                  <span>{statePools[selectedState].length} expressions</span>
+                  <Badge variant="secondary">{statePools[selectedState].length} expressions</Badge>
                 </div>
                 <div className="expression-grid state-expression-grid">
                   {statePools[selectedState].map((index, position) => {
@@ -2859,20 +2881,16 @@ export default function App() {
                 </div>
               </div>
               <div className="button-row">
-                <button
-                  className="primary"
-                  type="button"
-                  onClick={() => launchState(selectedState)}
-                >
+                <Button type="button" onClick={() => launchState(selectedState)}>
                   {activeState === selectedState ? 'Relancer' : 'Lancer'}
-                </button>
+                </Button>
                 {activeState === selectedState && (
-                  <button type="button" onClick={toggleStatePlayback}>
+                  <Button variant="outline" type="button" onClick={toggleStatePlayback}>
                     {statePlaying ? 'Pause' : 'Reprendre'}
-                  </button>
+                  </Button>
                 )}
               </div>
-            </section>
+            </InspectorCard>
           </div>
         )}
       </main>
@@ -2939,9 +2957,14 @@ function ControlSection({
         <h2>{title}</h2>
         <p>{subtitle}</p>
       </header>
+      <Separator className="control-section-separator" />
       <div className="control-section-content">{children}</div>
     </section>
   )
+}
+
+function InspectorCard({ className, ...props }: React.ComponentProps<typeof Card>) {
+  return <Card className={`panel${className ? ` ${className}` : ''}`} {...props} />
 }
 
 function StatePlayer({
@@ -2991,9 +3014,9 @@ function PanelTitle({
 }) {
   const Heading = level === 3 ? 'h3' : 'h2'
   return (
-    <div className="panel-title">
-      <Heading>{title}</Heading>
-      <p>{subtitle}</p>
-    </div>
+    <CardHeader className="panel-title">
+      <CardTitle as={Heading}>{title}</CardTitle>
+      <CardDescription>{subtitle}</CardDescription>
+    </CardHeader>
   )
 }
