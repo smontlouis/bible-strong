@@ -8,6 +8,7 @@ import {
 import {
   useEffect,
   useEffectEvent,
+  useId,
   useRef,
   useState,
   type CSSProperties,
@@ -145,6 +146,7 @@ import {
   paintRenderedOffset,
   paintRenderedScene,
   type RenderedScene,
+  type RenderedColors,
 } from './renderedScene'
 import { scaleEye, updateEyeDimension, updateEyePosition } from './expressionEditing'
 import {
@@ -159,6 +161,11 @@ import {
   generateJavaScriptAvatarPackage,
   generateReactAvatarPackage,
 } from './exporter'
+import {
+  serializeAvatarSnapshot,
+  snapshotFileName,
+  type SnapshotBackground,
+} from './snapshotExporter'
 
 type Mode = 'manual' | 'expressions' | 'states' | 'export'
 type ExportFormat = 'react' | 'javascript'
@@ -259,7 +266,7 @@ const scaleSurface = (
 }
 
 const formatSeconds = (milliseconds: number, language: StudioLanguage) =>
-  `${new Intl.NumberFormat(language === 'fr' ? 'fr-FR' : 'en-US', {
+  `${new Intl.NumberFormat(language === 'fr' ? 'fr-FR' : language === 'zh-CN' ? 'zh-CN' : 'en-US', {
     maximumFractionDigits: 1,
   }).format(milliseconds / 1000)} s`
 
@@ -2320,6 +2327,11 @@ function StudioApp() {
   const [exportAnimationIds, setExportAnimationIds] = useState(() =>
     initialDocument.sequences.map(animation => animation.id)
   )
+  const [snapshotBackground, setSnapshotBackground] =
+    useState<SnapshotBackground>('transparent')
+  const [snapshotColorFrom, setSnapshotColorFrom] = useState('#F5F7FC')
+  const [snapshotColorTo, setSnapshotColorTo] = useState('#C9D5FF')
+  const [snapshotSize, setSnapshotSize] = useState('1024')
   const initialStatePlayback = initialDocument.playback
   const updateStudioLibrary = (library: typeof initialDocument.library) =>
     documentStore.update({ library })
@@ -3517,6 +3529,46 @@ function StudioApp() {
     })
     downloadBlob(blob, 'avatar-studio-project.json')
   }
+  const currentSnapshotSvg = () =>
+    serializeAvatarSnapshot(
+      activeAvatar.name,
+      renderedScene,
+      {
+        body: renderedColors.body.get(),
+        eyes: renderedColors.eyes.get(),
+      },
+      {
+        background: snapshotBackground,
+        colorFrom: snapshotColorFrom,
+        colorTo: snapshotColorTo,
+        size: Number(snapshotSize),
+      }
+    )
+
+  const downloadSnapshotSvg = () => {
+    downloadBlob(
+      new Blob([currentSnapshotSvg()], { type: 'image/svg+xml;charset=utf-8' }),
+      snapshotFileName(activeAvatar.name)
+    )
+  }
+  const downloadSnapshotPng = () => {
+    const size = Number(snapshotSize)
+    const source = new Blob([currentSnapshotSvg()], { type: 'image/svg+xml;charset=utf-8' })
+    const sourceUrl = URL.createObjectURL(source)
+    const image = new Image()
+    image.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
+      canvas.getContext('2d')?.drawImage(image, 0, 0, size, size)
+      URL.revokeObjectURL(sourceUrl)
+      canvas.toBlob(blob => {
+        if (blob) downloadBlob(blob, snapshotFileName(activeAvatar.name, 'png'))
+      }, 'image/png')
+    }
+    image.onerror = () => URL.revokeObjectURL(sourceUrl)
+    image.src = sourceUrl
+  }
   const prepareStudioProjectImport = (file: File | undefined) => {
     if (!file) return
     setProjectImportError(null)
@@ -3627,12 +3679,15 @@ function StudioApp() {
           Bible Strong <em>Avatar Lab</em>
         </div>
         <div className="language-picker">
-          <span aria-hidden="true">{language === 'en' ? '🇬🇧' : '🇫🇷'}</span>
+          <span aria-hidden="true">
+            {language === 'en' ? '🇬🇧' : language === 'fr' ? '🇫🇷' : '🇨🇳'}
+          </span>
           <Select
             value={language}
             items={[
               { value: 'en', label: 'English' },
               { value: 'fr', label: 'Français' },
+              { value: 'zh-CN', label: '中文' },
             ]}
             onValueChange={next => next && setLanguage(next as StudioLanguage)}
           >
@@ -3642,6 +3697,7 @@ function StudioApp() {
             <SelectContent>
               <SelectItem value="en">English</SelectItem>
               <SelectItem value="fr">Français</SelectItem>
+              <SelectItem value="zh-CN">中文</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -3780,9 +3836,6 @@ function StudioApp() {
             </header>
           ) : (
             <>
-              <header className="inspector-header">
-                <h1>Avatar Studio</h1>
-              </header>
               <section className="avatar-shelf" aria-label={t('Choisir un avatar')}>
                 <div className="avatar-shelf-heading">
                   <strong>Avatars</strong>
@@ -5181,12 +5234,103 @@ function StudioApp() {
 
             <ExportSection
               value="snapshot"
-              title="Snapshot"
+              title="Mode photo"
               subtitle="Capture une image statique de l’avatar."
             >
-              <p className="export-placeholder">
-                {t('Les options de capture seront configurées ici.')}
-              </p>
+              <InspectorCard className="snapshot-preview-card">
+                <SnapshotPreview
+                  scene={renderedScene}
+                  colors={renderedColors}
+                  background={snapshotBackground}
+                  colorFrom={snapshotColorFrom}
+                  colorTo={snapshotColorTo}
+                />
+                <div>
+                  <small>{t('Aperçu du mode photo')}</small>
+                  <strong>{activeAvatar.name}</strong>
+                  <span>{snapshotSize} × {snapshotSize} px · SVG / PNG</span>
+                </div>
+              </InspectorCard>
+
+              <InspectorCard>
+                <PanelTitle
+                  title="Arrière-plan"
+                  subtitle="Choisis un fond transparent, uni ou en dégradé."
+                />
+                <Field className="snapshot-background-field" orientation="horizontal">
+                  <FieldTitle>{t('Style')}</FieldTitle>
+                  <Select
+                    value={snapshotBackground}
+                    items={[
+                      { value: 'transparent', label: t('Transparent') },
+                      { value: 'solid', label: t('Uni') },
+                      { value: 'linear', label: t('Dégradé linéaire') },
+                      { value: 'radial', label: t('Dégradé radial') },
+                    ]}
+                    onValueChange={next => next && setSnapshotBackground(next as SnapshotBackground)}
+                  >
+                    <SelectTrigger aria-label={t('Style d’arrière-plan')}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="transparent">{t('Transparent')}</SelectItem>
+                      <SelectItem value="solid">{t('Uni')}</SelectItem>
+                      <SelectItem value="linear">{t('Dégradé linéaire')}</SelectItem>
+                      <SelectItem value="radial">{t('Dégradé radial')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+                {snapshotBackground !== 'transparent' && (
+                  <div className="snapshot-colors">
+                    <ColorField
+                      label={snapshotBackground === 'solid' ? 'Couleur' : 'Départ'}
+                      value={snapshotColorFrom}
+                      onChange={setSnapshotColorFrom}
+                    />
+                    {(snapshotBackground === 'linear' || snapshotBackground === 'radial') && (
+                      <ColorField
+                        label="Arrivée"
+                        value={snapshotColorTo}
+                        onChange={setSnapshotColorTo}
+                      />
+                    )}
+                  </div>
+                )}
+              </InspectorCard>
+
+              <InspectorCard>
+                <Field className="snapshot-background-field" orientation="horizontal">
+                  <div>
+                    <FieldTitle>{t('Définition')}</FieldTitle>
+                    <small>{t('Dimensions inscrites dans le fichier SVG.')}</small>
+                  </div>
+                  <Select
+                    value={snapshotSize}
+                    items={['512', '1024', '2048'].map(value => ({ value, label: `${value} px` }))}
+                    onValueChange={next => next && setSnapshotSize(next)}
+                  >
+                    <SelectTrigger aria-label={t('Définition du mode photo')}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="512">512 px</SelectItem>
+                      <SelectItem value="1024">1024 px</SelectItem>
+                      <SelectItem value="2048">2048 px</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </Field>
+              </InspectorCard>
+
+              <div className="snapshot-download-actions">
+                <Button variant="outline" type="button" onClick={downloadSnapshotSvg}>
+                  <Download />
+                  {t('Télécharger en SVG')}
+                </Button>
+                <Button type="button" onClick={downloadSnapshotPng}>
+                  <Download />
+                  {t('Télécharger en PNG')}
+                </Button>
+              </div>
             </ExportSection>
 
             <ExportSection
@@ -5451,6 +5595,67 @@ function ControlSection({
   )
 }
 
+function SnapshotPreview({
+  scene,
+  colors,
+  background,
+  colorFrom,
+  colorTo,
+}: {
+  scene: RenderedScene
+  colors: RenderedColors
+  background: SnapshotBackground
+  colorFrom: string
+  colorTo: string
+}) {
+  const id = useId().replace(/:/g, '')
+  const clipId = `${id}-clip`
+  const linearId = `${id}-linear`
+  const radialId = `${id}-radial`
+  const backgroundFill =
+    background === 'solid'
+      ? colorFrom
+      : background === 'linear'
+        ? `url(#${linearId})`
+        : `url(#${radialId})`
+
+  return (
+    <div className={`snapshot-preview ${background === 'transparent' ? 'is-transparent' : ''}`}>
+      <svg viewBox="-150 -150 300 300" aria-hidden="true">
+        <defs>
+          <clipPath id={clipId}>
+            <motion.path d={scene.headPath} />
+          </clipPath>
+          <linearGradient id={linearId} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor={colorFrom} />
+            <stop offset="1" stopColor={colorTo} />
+          </linearGradient>
+          <radialGradient id={radialId} cx="50%" cy="42%" r="70%">
+            <stop offset="0" stopColor={colorFrom} />
+            <stop offset="1" stopColor={colorTo} />
+          </radialGradient>
+        </defs>
+        {background !== 'transparent' && (
+          <rect x="-150" y="-150" width="300" height="300" fill={backgroundFill} />
+        )}
+        <motion.g style={{ x: scene.offsetX, y: scene.offsetY }}>
+          {scene.backPaths.map((pathValue, index) => (
+            <motion.path d={pathValue} fill={colors.body} key={`back-${index}`} />
+          ))}
+          <motion.path d={scene.headPath} fill={colors.body} />
+          <g clipPath={`url(#${clipId})`}>
+            <motion.path d={scene.leftPath} fill={colors.eyes} opacity={scene.leftOpacity} />
+            <motion.path d={scene.rightPath} fill={colors.eyes} opacity={scene.rightOpacity} />
+          </g>
+          {scene.frontPaths.map((pathValue, index) => (
+            <motion.path d={pathValue} fill={colors.body} key={`front-${index}`} />
+          ))}
+        </motion.g>
+      </svg>
+    </div>
+  )
+}
+
 function ExportSection({
   value,
   title,
@@ -5473,7 +5678,6 @@ function ExportSection({
       </AccordionTrigger>
       <AccordionContent className="export-accordion-content">
         <div className="export-accordion-inner">
-          <Separator />
           {children}
         </div>
       </AccordionContent>

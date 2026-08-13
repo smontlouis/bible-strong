@@ -20,7 +20,6 @@
 }
 
 :root {
-  scrollbar-gutter: stable;
   --background: #ffffff;
   --foreground: #17191d;
   --card: #ffffff;
@@ -223,7 +222,7 @@ input {
   min-width: 0;
   height: auto;
   min-height: 68px;
-  padding: 12px;
+  padding: 10px;
   text-align: left;
 }
 
@@ -235,8 +234,8 @@ input {
 }
 
 .export-format-grid > button > svg {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 .export-format-grid > button > span {
@@ -247,8 +246,15 @@ input {
 }
 .export-format-grid strong,
 .export-format-grid small {
-  overflow-wrap: anywhere;
-  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.export-format-grid strong {
+  font-size: 11px;
+}
+.export-format-grid small {
+  font-size: 9px;
 }
 
 .export-animation-header {
@@ -310,9 +316,6 @@ input {
   min-width: 0;
   gap: 10px;
 }
-.export-accordion-inner > [data-slot='separator'] {
-  margin-bottom: 4px;
-}
 .export-accordion-inner > * {
   min-width: 0;
 }
@@ -333,6 +336,7 @@ input {
 }
 .project-transfer-actions > button {
   min-height: 42px;
+  font-size: 11px;
 }
 .project-import-input {
   display: none;
@@ -342,6 +346,78 @@ input {
   color: var(--destructive);
   font-size: 12px;
   line-height: 1.45;
+}
+.snapshot-preview-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.snapshot-preview-card > div:last-child {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+.snapshot-preview-card small,
+.snapshot-preview-card span,
+.snapshot-background-field small {
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+.snapshot-preview-card strong {
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.snapshot-preview {
+  width: 112px;
+  height: 112px;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: white;
+}
+.snapshot-preview.is-transparent {
+  background-color: white;
+  background-image:
+    linear-gradient(45deg, #e7e9ee 25%, transparent 25%),
+    linear-gradient(-45deg, #e7e9ee 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e7e9ee 75%),
+    linear-gradient(-45deg, transparent 75%, #e7e9ee 75%);
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+  background-size: 12px 12px;
+}
+.snapshot-preview svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.snapshot-background-field {
+  align-items: center;
+}
+.snapshot-background-field > [data-slot='select-trigger'] {
+  width: 190px;
+}
+.snapshot-background-field > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+.snapshot-colors {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.snapshot-download-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.snapshot-download-actions > button {
+  min-height: 44px;
+  font-size: 11px;
 }
 .avatar-head,
 .preview-head {
@@ -613,6 +689,7 @@ input {
   height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   padding: 28px 26px 48px;
   border-left: 1px solid #d9dce3;
   background: #f5f6f8;
@@ -801,12 +878,12 @@ p {
   white-space: nowrap;
 }
 .state-player [data-slot='button'] {
-  width: 28px;
-  height: 28px;
+  width: 48px;
+  height: 48px;
 }
 .state-player svg {
-  width: 13px;
-  height: 13px;
+  width: 32px;
+  height: 32px;
 }
 .state-playback-footer {
   position: fixed;

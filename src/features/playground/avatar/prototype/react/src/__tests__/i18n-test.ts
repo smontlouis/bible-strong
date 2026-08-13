@@ -16,6 +16,19 @@ describe('avatar studio translations', () => {
     expect(translateStudioText('sleeping', 'fr')).toBe('sommeil')
   })
 
+  it('translates the studio interface and dynamic labels to Simplified Chinese', () => {
+    expect(translateStudioText('Couleur des yeux', 'zh-CN')).toBe('眼睛颜色')
+    expect(translateStudioText('Modifier l’expression 08', 'zh-CN')).toBe('编辑表情 08')
+    expect(translateStudioText('sleeping', 'zh-CN')).toBe('睡眠')
+  })
+
+  it('translates every Photo Mode control to Simplified Chinese', () => {
+    expect(translateStudioText('Mode photo', 'zh-CN')).toBe('照片模式')
+    expect(translateStudioText('Dégradé radial', 'zh-CN')).toBe('径向渐变')
+    expect(translateStudioText('Définition du mode photo', 'zh-CN')).toBe('照片模式分辨率')
+    expect(translateStudioText('Télécharger en PNG', 'zh-CN')).toBe('下载 PNG')
+  })
+
   it('covers every configured state description in English', () => {
     expect(translateStudioText('Rythme régulier et expressions concentrées.', 'en')).toBe(
       'Steady rhythm and focused expressions.'

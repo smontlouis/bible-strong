@@ -1,6 +1,22 @@
-import { createContext, createElement, useContext, useState, type ReactNode } from 'react'
+import { createContext, createElement, useContext, useEffect, useState, type ReactNode } from 'react'
+import { chinese, translateChineseDynamicText } from './i18n.zh'
 
-export type StudioLanguage = 'en' | 'fr'
+export type StudioLanguage = 'en' | 'fr' | 'zh-CN'
+
+const STUDIO_LANGUAGE_STORAGE_KEY = 'avatar-studio-language'
+
+const isStudioLanguage = (value: string | null): value is StudioLanguage =>
+  value === 'en' || value === 'fr' || value === 'zh-CN'
+
+const readStoredStudioLanguage = (): StudioLanguage => {
+  if (typeof window === 'undefined') return 'en'
+  try {
+    const storedLanguage = window.localStorage.getItem(STUDIO_LANGUAGE_STORAGE_KEY)
+    return isStudioLanguage(storedLanguage) ? storedLanguage : 'en'
+  } catch {
+    return 'en'
+  }
+}
 
 const english: Record<string, string> = {
   'Playground de l’avatar': 'Avatar playground',
@@ -94,8 +110,30 @@ const english: Record<string, string> = {
   'Télécharger le package React': 'Download React package',
   'Télécharger le module': 'Download module',
   Snapshot: 'Snapshot',
+  'Mode photo': 'Photo Mode',
   'Capture une image statique de l’avatar.': 'Capture a static image of the avatar.',
   'Les options de capture seront configurées ici.': 'Snapshot options will be configured here.',
+  'Aperçu du Snapshot': 'Snapshot preview',
+  'Aperçu du mode photo': 'Photo Mode preview',
+  'Arrière-plan': 'Background',
+  'Choisis un fond transparent, uni ou en dégradé.':
+    'Choose a transparent, solid or gradient background.',
+  Style: 'Style',
+  Transparent: 'Transparent',
+  Uni: 'Solid',
+  'Dégradé linéaire': 'Linear gradient',
+  'Dégradé radial': 'Radial gradient',
+  'Style d’arrière-plan': 'Background style',
+  Couleur: 'Color',
+  Départ: 'Start',
+  Arrivée: 'End',
+  Définition: 'Resolution',
+  'Dimensions inscrites dans le fichier SVG.': 'Dimensions embedded in the SVG file.',
+  'Définition du Snapshot': 'Snapshot resolution',
+  'Définition du mode photo': 'Photo Mode resolution',
+  'Télécharger le Snapshot SVG': 'Download SVG snapshot',
+  'Télécharger en SVG': 'Download SVG',
+  'Télécharger en PNG': 'Download PNG',
   'Projet du Studio': 'Studio project',
   'Transfère tous les avatars, expressions et animations vers un autre navigateur.':
     'Transfer every avatar, expression and animation to another browser.',
@@ -401,6 +439,15 @@ const dynamicTranslations: [RegExp, string][] = [
 
 export const translateStudioText = (text: string, language: StudioLanguage) => {
   if (language === 'fr') return frenchStates[text] ?? text
+  if (language === 'zh-CN') {
+    const exact = chinese[text]
+    if (exact) return exact
+    const dynamic = translateChineseDynamicText(text)
+    if (dynamic) return dynamic
+    return Object.entries(chinese)
+      .sort(([left], [right]) => right.length - left.length)
+      .reduce((translated, [source, replacement]) => translated.replaceAll(source, replacement), text)
+  }
   const exact = english[text]
   if (exact) return exact
   for (const [pattern, replacement] of dynamicTranslations) {
@@ -420,7 +467,16 @@ type StudioLanguageContextValue = {
 const StudioLanguageContext = createContext<StudioLanguageContextValue | null>(null)
 
 export function StudioLanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<StudioLanguage>('en')
+  const [language, setLanguage] = useState<StudioLanguage>(readStoredStudioLanguage)
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STUDIO_LANGUAGE_STORAGE_KEY, language)
+    } catch {
+      // The studio remains usable when browser storage is unavailable.
+    }
+  }, [language])
+
   return createElement(
     StudioLanguageContext.Provider,
     { value: { language, setLanguage, t: text => translateStudioText(text, language) } },
