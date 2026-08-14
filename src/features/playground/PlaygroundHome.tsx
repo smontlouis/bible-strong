@@ -57,7 +57,6 @@ type PlaygroundHomeProps = {
   selectedTheme: CurrentTheme
   onSelectTheme: (theme: CurrentTheme) => void
   onOpenAbelOnboarding: () => void
-  onOpenAvatar: () => void
   onOpenOfflineSetup: () => void
 }
 
@@ -65,7 +64,6 @@ const PlaygroundHome = ({
   selectedTheme,
   onSelectTheme,
   onOpenAbelOnboarding,
-  onOpenAvatar,
   onOpenOfflineSetup,
 }: PlaygroundHomeProps) => {
   const { t } = useTranslation()
@@ -115,13 +113,6 @@ const PlaygroundHome = ({
               description={t('playground.abelDescription')}
               icon="compass"
               onPress={onOpenAbelOnboarding}
-            />
-            <PlaygroundLink
-              eyebrow={t('playground.avatarEyebrow')}
-              title={t('playground.avatarTitle')}
-              description={t('playground.avatarDescription')}
-              icon="smile"
-              onPress={onOpenAvatar}
             />
             <PlaygroundLink
               eyebrow={t('playground.resourcesEyebrow')}
