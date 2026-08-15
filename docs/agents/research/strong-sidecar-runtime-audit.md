@@ -2,6 +2,11 @@
 
 _Audit en lecture seule réalisé le 24 juillet 2026._
 
+> **Statut historique (2026-08-15)** — Cet audit précède le lexique modulaire, la suppression des
+> identités runtime historiques et les corrections intégrées ensuite. Ses constats et chemins de
+> code sont des preuves datées, pas une liste de bugs encore ouverts. Pour l'état courant, utiliser
+> `CONTEXT.md`, les ADR 0013/0014/0017 et `src/features/resources/strongLexiconAccess.ts`.
+
 ## Conclusion
 
 Les chemins principaux de LSG, DBY et DBR ont bien migré vers les sidecars : lecture Strong,

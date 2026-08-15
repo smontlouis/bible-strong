@@ -75,14 +75,39 @@ Verse-level actions and word-level annotation actions are different concepts:
 
 ## Data And Resources
 
-Downloaded resources are managed through:
+Resource consumers go through domain access modules under `src/features/resources/` and TanStack
+Query options under `src/helpers/queryOptions.ts`. Screens should not infer whether a result came
+from the shared Bible database, a sidecar, or another local resource database.
 
-- `src/helpers/firebase.ts` for CDN URLs.
-- `src/helpers/databases.ts` for resource metadata and local paths.
-- `src/helpers/databaseTypes.ts` for database identifiers, language-specific/shared classification, and folder paths.
-- `src/helpers/downloadManager.ts` and `src/state/downloadQueue.ts` for downloads.
+The offline resource layer is split by responsibility:
 
-Resource IDs include `STRONG`, `DICTIONNAIRE`, `NAVE`, `TRESOR`, `MHY`, `INTERLINEAIRE`, `TIMELINE`, and `BIBLES`.
+- `src/assets/mobile-resource-catalog.json` is the bundled catalog of distributable ZIP artifacts.
+- `src/helpers/mobileResourceCatalog.ts` validates the bundled or remotely refreshed catalog and
+  never accepts a catalog that drops a bundled resource identity.
+- `src/helpers/downloadManager.ts` and `src/state/downloadQueue.ts` own queue execution and
+  dependency ordering.
+- `src/helpers/managedResourceInstallation.ts`, `resourceInstallationJournal.ts`, and
+  `atomicResourceFile.ts` make replacement recoverable and activate validated files atomically.
+- `src/helpers/offlineCopy.ts` and `offlineCopyId.ts` describe installed-copy identity independently
+  from its physical storage format.
+
+Not every offline copy is a `DatabaseId`:
+
+- Regular and canonical Bible texts are imported into the shared `bibles.sqlite` database.
+- A Strong-capable Bible has an optional, version-specific SQLite sidecar managed by
+  `strongBibleSidecar.ts`; the Bible text remains readable without it.
+- BHG is the canonical Hebrew/Aramaic and Greek Bible. Optional French and English interlinear
+  sidecars managed by `interlinearBibleSidecar.ts` add token alignment, glosses, morphology, and
+  lexical identities without duplicating BHG text.
+- The shared Strong lexicon is modular: required `core`, optional `resources` (the detailed Greek
+  dictionary), and optional `entities`. `strongLexiconModules.ts` owns their lifecycle.
+- `DICTIONNAIRE`, `NAVE`, `TRESOR`, `MHY`, `TIMELINE`, and `BIBLES` remain the general
+  `DatabaseId` values declared in `databaseTypes.ts`.
+
+Publication modules such as `strongBiblePublications.ts`, `interlinearBiblePublications.ts`, and
+`strongLexiconPublications.ts` define compatibility metadata. Readers require matching text
+revision and checksum before applying a sidecar, so offsets from one publication cannot be used
+against another Bible text.
 
 ## Sync And Cloud
 

@@ -3,9 +3,16 @@
 ## Status
 
 This is the architectural synthesis of the `grill-with-docs` design session for GitHub issue #245,
-**Online-first resources with optional offline access**. The session was documentation-only and no
-online-resource implementation has started. The consolidated PRD was published to issue #245 on
-2026-07-12 and is retained locally in `docs/online-resources-prd.md`.
+**Online-first resources with optional offline access**. The session itself was documentation-only.
+The consolidated PRD was published to issue #245 on 2026-07-12 and is retained locally in
+`docs/online-resources-prd.md`.
+
+Implementation note (2026-08-15): the app has since adopted TanStack Query and completed substantial
+local/offline prerequisites: domain access modules, canonical Bible text plus optional Strong and
+interlinear sidecars, the modular Strong lexicon, typed Offline-copy identities, a mobile artifact
+catalog, ZIP/checksum validation, dependency-aware installation, journaling, and atomic activation.
+The remote domain adapters, online LSG fallback, canonical Neon import, and public resource API in
+this document remain future work unless a newer implementation record says otherwise.
 
 ## Scope and boundaries
 
@@ -24,14 +31,14 @@ online-resource implementation has started. The consolidated PRD was published t
 - `src/features/resources/` already provides a registry and local interfaces for Bible content,
   Bible search, Bible reading extras, Strong, dictionary, and Nave. Many consuming screens already
   use these seams.
-- The current implementations are local-only wrappers around SQLite/JSON helpers. There is no
-  local/remote orchestrator, remote adapter, uniform error model, publication catalog integration,
-  or persistent partial cache.
-- Some availability, coverage, lifecycle, timeline, interlinear, and sidecar paths still depend
-  directly on local helpers and require gradual migration.
-- The application uses the internal `react-query-lite`, not `@tanstack/react-query`.
-- The existing seams are therefore a useful starting point for one complete domain path; they are
-  not yet a finished online/offline module system.
+- Current implementations remain local-only. There is no general local/remote orchestrator, remote
+  editorial adapter, or persistent partial query cache.
+- Availability, publication metadata, installation lifecycle, Strong, and interlinear paths now
+  have dedicated modules. Other resources still require gradual migration behind the same seams.
+- The application uses `@tanstack/react-query`; local-capable resource queries use an always-running
+  network mode so SQLite work is not paused merely because the device is offline.
+- These seams and the Offline-copy layer are a stronger starting point for a complete domain path,
+  but they are not yet a finished online/offline source-selection system.
 
 ## Incremental migration order
 
@@ -51,12 +58,11 @@ schedule.
 
 ### First future implementation slice
 
-The first implementation milestone is one complete LSG chapter-loading path. It imports and
-publishes the current LSG resource to canonical Neon data and a compatible offline artifact, exposes
-the versioned REST chapter endpoint behind App Check and Cloudflare cache, replaces
-`react-query-lite` with TanStack Query on this path, prefers an installed SQLite LSG copy, falls back
-to HTTP when local content is absent or recoverably broken, and renders the structured unavailable
-state when neither source works.
+The first remote implementation milestone is one complete LSG chapter-loading path. It imports and
+publishes the current LSG resource to canonical Neon data, exposes the versioned REST chapter
+endpoint behind App Check and Cloudflare cache, reuses the existing TanStack Query integration,
+prefers an installed SQLite LSG copy, falls back to HTTP when local content is absent or recoverably
+broken, and renders the structured unavailable state when neither source works.
 
 This first slice excludes Bible search, Strong, interlinear, dictionary, Nave, commentaries,
 cross-references, timeline, and persistent partial caching. It is a future implementation milestone,
@@ -84,8 +90,8 @@ not work started during this design session.
   types and HTTP payload types do not escape their adapters.
 - Shared machine-readable contracts provide runtime validation, TypeScript types, and OpenAPI
   documentation. The concrete schema library is not yet selected.
-- The project currently uses `react-query-lite`; adopting actual TanStack Query is future
-  implementation work.
+- TanStack Query is already adopted for resource query lifecycle. Remote adapters and their retry,
+  caching, and invalidation policies remain future implementation work.
 - `BibleViewer` depends on one chapter-loading facade. That facade internally routes regular Bible,
   Strong Bible, and interlinear chapter requests to specialized providers. Strong lexical lookup,
   search, and concordance remain a separate `StrongAccess` domain rather than part of generic

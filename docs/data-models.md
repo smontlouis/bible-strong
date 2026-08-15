@@ -9,7 +9,9 @@ This document describes the durable data shapes that matter most for app behavio
 | Bible version code | `LSG`, `KJV`, `BHS`, etc. | Defined in `src/helpers/bibleVersions.ts`. |
 | Verse key | `book-chapter-verse` | Common user-data key, for example `1-27-2`. |
 | Verse range key | Often slash-joined verse keys | Used by links/notes/actions that can span selections. |
-| Database id | `STRONG`, `DICTIONNAIRE`, `NAVE`, etc. | Defined in `src/helpers/databaseTypes.ts`. |
+| Database id | `DICTIONNAIRE`, `NAVE`, `TRESOR`, `MHY`, `TIMELINE`, or `BIBLES` | General database identifier defined in `src/helpers/databaseTypes.ts`; Strong and interlinear copies use separate typed identities. |
+| Offline copy id | `bible:LSG`, `bible-strong:LSG`, `strong-lexicon:core`, etc. | Canonical identity for one independently managed local resource, built by `src/helpers/offlineCopyId.ts`. |
+| Resource revision | Publication-specific string | Identifies the installed edition recorded by the installation journal/catalog layer. |
 | Tab id | string | Generated in `src/state/tabs.ts`. |
 | Tag id | string | Stored in `user.bible.tags` and referenced by entities. |
 
@@ -176,23 +178,42 @@ Settings affect both native UI and Bible DOM rendering.
 
 Tab groups are persisted and form the app switcher workspace.
 
-## Resource Databases
+## Offline Resource Storage
 
-`src/helpers/databaseTypes.ts` defines:
+`src/helpers/databaseTypes.ts` describes only the general resource databases:
 
-- Language-specific databases: `STRONG`, `DICTIONNAIRE`, `NAVE`, `MHY`, `INTERLINEAIRE`, `TIMELINE`
+- Language-specific databases: `DICTIONNAIRE`, `NAVE`, `MHY`, `TIMELINE`
 - Shared databases: `TRESOR`, `BIBLES`
-- User-selectable resource language databases: `STRONG`, `DICTIONNAIRE`, `NAVE`, `MHY`, `INTERLINEAIRE`, `TIMELINE`
+- User-selectable resource language databases: `DICTIONNAIRE`, `NAVE`, `MHY`, `TIMELINE`
 - French-only databases: `MHY`
+
+Strong and interlinear resources deliberately do not use `DatabaseId`:
+
+- Canonical Bible texts live as version rows in shared `bibles.sqlite`.
+- `bible-strong:<versionId>` identifies a text-free, version-specific Strong sidecar. Its metadata
+  must match the canonical Bible's text revision and checksum.
+- `bible-interlinear:BHG:<language>` identifies a localized BHG interlinear sidecar. BHG remains
+  the independently installed canonical original-language Bible.
+- `strong-lexicon:core`, `strong-lexicon:resources`, and `strong-lexicon:entities` identify the
+  modular Strong lexicon files. Optional modules depend on `core`.
+
+`src/helpers/offlineCopy.ts` defines this typed identity model. The persisted installation journal
+records publication identity and lifecycle state; the mobile resource catalog supplies artifact
+URLs, archive/content checksums, sizes, entries, and installation strategies.
 
 Local paths:
 
 - SQLite base: `documentDirectory/SQLite`
 - Language-specific SQLite: `documentDirectory/SQLite/{lang}`
 - Shared SQLite: `documentDirectory/SQLite/shared`
+- Strong lexicon modules: `documentDirectory/SQLite/shared/strong-lexicon`
+- Strong Bible sidecars: `documentDirectory/SQLite/shared/strong-bibles`
+- BHG interlinear sidecars: `documentDirectory/SQLite/shared/interlinear-bibles`
 - Language-specific JSON: `documentDirectory/{lang}`
 
-Remote URLs are defined in `src/helpers/firebase.ts` and use `https://assets.bible-strong.app/`.
+The bundled resource catalog is `src/assets/mobile-resource-catalog.json`. Its runtime loader may
+accept a newer compatible catalog, while `src/helpers/firebase.ts` retains the CDN base and fallback
+URL helpers.
 
 ## Firestore Sync
 

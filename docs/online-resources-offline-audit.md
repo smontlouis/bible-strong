@@ -2,6 +2,28 @@
 
 Date: 2026-06-13
 
+## Historical status
+
+This document preserves the June 2026 discovery snapshot and target architecture. Its sections
+named **Current State**, estimates, risks, and recommended plan must not be read as the current
+implementation inventory.
+
+Since this audit, the local resource architecture has materially changed:
+
+- legacy `LSGS`, `KJVS`, `INT`, and `INT_EN` identities are migration inputs rather than current
+  reader resources;
+- canonical Bible text is separated from optional version-specific Strong sidecars;
+- BHG replaces the legacy interlinear Bible identities and uses optional localized indexes;
+- the Strong lexicon is split into required `core` plus optional detailed-Greek and entity modules;
+- installation uses typed Offline-copy identities, one mobile resource catalog, ZIP artifacts,
+  checksums, dependency-aware queueing, installation journaling, and atomic activation;
+- initial offline setup now guarantees the language-specific startup Bible and organizes optional
+  resources into thematic folders.
+
+For the current model, start with `CONTEXT.md`, `docs/architecture.md`, `docs/data-models.md`, and
+ADRs 0013, 0014, 0015, 0017, and 0021. The online-first backend described below remains a design
+trajectory unless a newer implementation document says otherwise.
+
 ## Summary
 
 Product goal: Bible Strong should be usable immediately online, while still allowing users to make any resource available offline. Offline downloads become a user choice, not an entry requirement.

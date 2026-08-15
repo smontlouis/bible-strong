@@ -30,13 +30,15 @@
 
 Routes in `app/` use Expo Router. Examples:
 
-- `app/bible-view.tsx`
+- `app/(explore)/bible-view.tsx`
 - `app/search.tsx`
 - `app/downloads.tsx`
-- `app/strong.tsx`
-- `app/dictionnaire.tsx`
-- `app/studies.tsx`
-- `app/timeline-home.tsx`
+- `app/strong/index.tsx`
+- `app/strong/concordance.tsx`
+- `app/strong/entity.tsx`
+- `app/(library)/dictionnaire.tsx`
+- `app/(library)/studies.tsx`
+- `app/(library)/timeline-home.tsx`
 
 Legacy screen names are mapped in `src/navigation/routeMapping.ts` and typed in `src/navigation/type.ts`.
 
@@ -61,6 +63,8 @@ Legacy screen names are mapped in `src/navigation/routeMapping.ts` and typed in 
 | `bible` | Main reading surface, Bible DOM, selectors, verse actions, annotations, audio footer, Strong, compare, resources. |
 | `bookmarks` | Bookmark list and bookmark editing modal. |
 | `search` | Bible search and search result navigation. |
+| `resources` | Storage-independent Bible, Strong, dictionary, and Nave access contracts. |
+| `lexique` | Strong lexicon list/detail surfaces and resource cards. Standalone secondary pages are routed under `app/strong/`. |
 | `studies` | Study list/editor and study DOM support. |
 | `notes` | Notes list/details. |
 | `plans` | Reading plans, plan slices, progress. |
@@ -85,6 +89,10 @@ Legacy screen names are mapped in `src/navigation/routeMapping.ts` and typed in 
 | `src/state/tabs.ts` | Tab groups, active tab, cached tabs, Bible tab actions. |
 | `src/redux/modules/user.ts` | Main persisted user Bible state. |
 | `src/redux/firestoreMiddleware.ts` | Cloud sync side effects. |
-| `src/helpers/databases.ts` | Resource metadata, local paths, download/update checks. |
-| `src/helpers/firebase.ts` | Firebase instances and CDN/resource URLs. |
-
+| `src/features/resources/strongLexiconAccess.ts` | Storage-independent access to modular Strong entries, morphology, relations, resources, and entities. |
+| `src/helpers/mobileResourceCatalog.ts` | Validates and resolves the current mobile artifact catalog. |
+| `src/helpers/strongBibleSidecar.ts` | Version-specific Strong index lifecycle and queries. |
+| `src/helpers/interlinearBibleSidecar.ts` | Localized BHG interlinear index lifecycle and queries. |
+| `src/helpers/strongLexiconModules.ts` | Core and optional Strong lexicon module lifecycle. |
+| `src/helpers/databases.ts` | General database metadata and local paths; Strong/interlinear modules use dedicated helpers. |
+| `src/helpers/downloadManager.ts` | Executes resource download/install items and their lifecycle callbacks. |

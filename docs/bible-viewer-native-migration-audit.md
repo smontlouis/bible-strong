@@ -3,6 +3,12 @@
 Date: 2026-05-21  
 Périmètre: synthèse des audits iOS SwiftUI et Android Jetpack Compose pour remplacer progressivement le rendu `BibleDOM` par un composant Bible natif.
 
+> **Note de statut (2026-08-15)** — Les contraintes de rendu et la stratégie de migration restent
+> utiles, mais l'inventaire Strong/interlinéaire de mai 2026 est historique. `LSGS`, `KJVS`, `INT`
+> et `INT_EN` ont été remplacés par des Bibles canoniques, des sidecars Strong par version et BHG
+> avec index interlinéaires localisés. Toute implémentation doit repartir des ADR 0013 et 0014 et
+> des contrats actuels sous `src/features/resources/`.
+
 ## Conclusion
 
 La migration vers un lecteur Bible natif est possible, mais elle ne doit pas être lancée comme une réécriture directe de `BibleDOM` avec les composants Expo UI déclaratifs. Le lecteur actuel est un moteur de lecture annotable: rendu riche, versions parallèles, interlinéaire, Strong, commentaires, notes, liens, tags, signets, relations d'étude, sélection multi-versets, annotations mot-à-mot, scroll contrôlé, gestes et bridge d'événements.

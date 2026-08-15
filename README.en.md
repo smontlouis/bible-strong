@@ -65,11 +65,18 @@ Whether you are a theology student, pastor, or simply curious to deepen your und
 
 Strong's concordance allows you to study each word of the Bible in its original language:
 
-- **Interlinear Bible**: display Hebrew/Greek text with word-by-word translation
-- **Strong's numbers**: each word is linked to its Strong's number for in-depth study
-- **Complete definitions**: etymology, meanings, uses in the Bible
-- **Search by number**: find all verses using a specific word
-- **Complete lexicon**: browse all Hebrew and Greek words
+- **Separate text and indexes**: a Bible remains readable without Strong data; its lexical index can be installed or updated independently
+- **Many compatible Bibles**: LSG, Darby, KJV, NASB, BSB, and other publications have their own concordance
+- **Modular lexicon**: the Hebrew/Greek core can be extended with a detailed Greek dictionary and biblical entity profiles
+- **Precise lexical identities**: support for classic Strong's numbers and enriched STEPBible identities
+- **Contextual concordance**: browse occurrences, original forms, transliteration, and available morphology
+- **Enriched navigation**: explore related words, entities, lexical resources, and study relations
+
+### Original Languages and Interlinear
+
+- **BHG Hebrew-Greek Bible**: canonical original-language text covering the Old and New Testaments
+- **French and English interlinear indexes**: glosses, transliteration, morphology, and lexical alignment without duplicating the Bible text
+- **Configurable display**: original text, interlinear translation, Strong's numbers, and transliteration can be adapted to the reading context
 
 ### Study Tools
 
@@ -114,7 +121,8 @@ Strong's concordance allows you to study each word of the Bible in its original 
 - **User account**: sign in with Google or Apple
 - **Cloud sync**: access your data on all your devices
 - **Automatic backup**: never lose your notes and highlights
-- **Offline mode**: works without internet connection
+- **Offline library**: choose which Bibles, lexicons, Strong indexes, and resources remain on the device
+- **Guided installation**: the startup Bible is guaranteed while additional resources are organized by purpose
 
 ## Screenshots
 
@@ -267,7 +275,7 @@ Contributions are welcome! Bible Strong is an open-source community project.
 
 - **TypeScript**: strict typing enabled, avoid `any`
 - **ESLint**: Expo + Prettier configuration
-- **Styling**: use Emotion (styled components)
+- **Styling**: prefer `Box`, `HStack`, and `VStack`; Emotion remains available for shared primitives
 - **State**: Redux for persistent data, Jotai for local UI
 - **Commits**: Conventional Commits format
   - `feat:` new feature
@@ -298,13 +306,16 @@ To add a new language:
 
 ```
 bible-strong/
+├── app/                    # Expo Router routes
+│   └── strong/             # Strong entry, concordance, entities, and dictionary
 ├── src/
 │   ├── features/           # Feature modules
 │   │   ├── bible/          # Bible reading and navigation
+│   │   ├── resources/      # Resource access contracts
 │   │   ├── studies/        # Study editor
 │   │   ├── plans/          # Reading plans
-│   │   ├── search/         # Search (Algolia + Lunr)
-│   │   ├── lexique/        # Strong's concordance
+│   │   ├── search/         # Bible and global search
+│   │   ├── lexique/        # Strong lexicon list and details
 │   │   ├── nave/           # Nave's Bible
 │   │   ├── dictionnary/    # Bible dictionary
 │   │   ├── commentaries/   # Commentaries
@@ -317,7 +328,7 @@ bible-strong/
 │   ├── redux/              # Redux store and slices
 │   ├── state/              # Jotai atoms
 │   ├── helpers/            # Utilities and hooks
-│   ├── navigation/         # React Navigation
+│   ├── navigation/         # Navigation compatibility and types
 │   ├── themes/             # Themes and colors
 │   └── assets/             # Static resources
 ├── i18n/                   # Translations
@@ -325,7 +336,12 @@ bible-strong/
 └── ...
 ```
 
-For more technical details, see [CLAUDE.md](./CLAUDE.md).
+Downloadable resources use a versioned mobile catalog. Canonical Bibles, their Strong indexes,
+interlinear indexes, and lexicon modules are independent offline copies that are verified and
+activated atomically.
+
+For more technical details, see the [documentation index](./docs/index.md),
+[architecture guide](./docs/architecture.md), and [domain context](./CONTEXT.md).
 
 ---
 
@@ -337,7 +353,7 @@ For more technical details, see [CLAUDE.md](./CLAUDE.md).
 | Language | TypeScript 5.9 |
 | State | Redux Toolkit, Jotai, Redux Persist |
 | Styling | Emotion |
-| Navigation | React Navigation 6 |
+| Navigation | Expo Router, React Navigation |
 | Database | SQLite (expo-sqlite), Firestore |
 | Auth | Firebase Auth (email, Google, Apple) |
 | Audio | react-native-track-player |

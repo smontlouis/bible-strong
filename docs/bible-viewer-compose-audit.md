@@ -3,6 +3,11 @@
 Date: 2026-05-21  
 Perimetre: Android uniquement. Un audit iOS SwiftUI est traite separement.
 
+> **Note de statut (2026-08-15)** — Les contraintes Compose restent utiles, mais les références à
+> `LSGS`, `KJVS`, `INT`, `INT_EN`, `loadStrongChapter` et `loadInterlineaireChapter` décrivent
+> l'ancien modèle. Le lecteur courant utilise des Bibles canoniques, des sidecars Strong par version
+> et BHG avec index interlinéaires localisés. Voir les ADR 0013 et 0014 avant tout prototype.
+
 ## Diagnostic court
 
 La migration Android vers un lecteur biblique natif est faisable, mais pas comme un simple remplacement de `BibleDOM` par les composants declaratifs de `@expo/ui/jetpack-compose`. Le rendu basique d'un chapitre, des titres de pericope, des highlights de versets, des notes/liens/tags et d'un mode parallele simple peut etre porte vers Compose. En revanche, les fonctions riches du lecteur actuel reposent fortement sur le DOM: selection mot-a-mot, calcul de rectangles de texte, surlignage multi-ligne, gestes tactiles fins, commentaires HTML et synchronisation de scroll horizontal.

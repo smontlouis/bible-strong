@@ -3,6 +3,11 @@
 Date: 2026-05-21  
 Périmètre: iOS uniquement. L'audit Android Compose est traité séparément.
 
+> **Note de statut (2026-08-15)** — Les contraintes SwiftUI/TextKit restent utiles, mais
+> l'inventaire Strong/interlinéaire de mai 2026 est historique. `LSGS`, `KJVS`, `INT` et `INT_EN`
+> ont été remplacés par des Bibles canoniques, des sidecars Strong par version et BHG avec index
+> interlinéaires localisés. Voir les ADR 0013 et 0014 et les contrats actuels de ressources.
+
 ## Synthèse
 
 La migration iOS est faisable, mais elle ne doit pas être abordée comme une simple conversion de `BibleDOM` vers `@expo/ui/swift-ui`. Le lecteur actuel est un moteur de rendu DOM complet, avec mesure de texte, hit-testing mot par mot, scroll contrôlé, annotations, affichage Strong/interlinéaire, indicateurs de notes/liens/tags/signets, versions parallèles et un bridge d'événements très large. Pour obtenir un composant Bible natif robuste, la voie pragmatique est un module Expo natif custom côté iOS, exposant une vue SwiftUI ou UIKit via SwiftUI, et non une composition pure de composants `@expo/ui/swift-ui` écrite depuis JSX.

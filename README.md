@@ -65,11 +65,18 @@ Que vous soyez etudiant en theologie, pasteur, ou simplement curieux d'approfond
 
 La concordance Strong permet d'etudier chaque mot de la Bible dans sa langue originale :
 
-- **Bible interlineaire** : affichez le texte hebreu/grec avec la traduction mot a mot
-- **Numeros Strong** : chaque mot est lie a son numero Strong pour une etude approfondie
-- **Definitions completes** : etymologie, significations, usages dans la Bible
-- **Recherche par numero** : trouvez tous les versets utilisant un mot specifique
-- **Lexique complet** : parcourez l'ensemble des mots hebreux et grecs
+- **Textes et index separes** : une Bible reste lisible sans donnees Strong ; son index lexical peut etre installe ou mis a jour independamment
+- **Nombreuses Bibles compatibles** : LSG, Darby, KJV, NASB, BSB et d'autres publications disposent de leur propre concordance
+- **Lexique modulaire** : le coeur hebreu/grec peut etre complete par un dictionnaire grec detaille et des fiches d'entites bibliques
+- **Identites lexicales precises** : prise en charge des numeros Strong classiques et des identites enrichies de STEPBible
+- **Concordance contextuelle** : retrouvez les occurrences, la forme originale, la translitteration et la morphologie disponible
+- **Navigation enrichie** : parcourez les mots lies, les entites, les ressources lexicales et les relations d'etude
+
+### Langues originales et interlineaire
+
+- **Bible hebreu-grec BHG** : texte canonique original couvrant l'Ancien et le Nouveau Testament
+- **Index interlineaires francais et anglais** : glosses, translitteration, morphologie et alignement lexical sans dupliquer le texte biblique
+- **Affichage configurable** : texte original, traduction interlineaire, numeros Strong et translitteration peuvent etre adaptes au contexte de lecture
 
 ### Outils d'etude
 
@@ -114,7 +121,8 @@ La concordance Strong permet d'etudier chaque mot de la Bible dans sa langue ori
 - **Compte utilisateur** : connectez-vous avec Google ou Apple
 - **Synchronisation cloud** : retrouvez vos donnees sur tous vos appareils
 - **Sauvegarde automatique** : ne perdez jamais vos notes et surlignages
-- **Mode hors-ligne** : fonctionne sans connexion internet
+- **Bibliotheque hors ligne** : choisissez les Bibles, lexiques, index Strong et ressources a conserver sur l'appareil
+- **Installation guidee** : la Bible de demarrage est garantie et les ressources supplementaires sont organisees par usage
 
 ## Captures d'ecran
 
@@ -267,7 +275,7 @@ Les contributions sont les bienvenues ! Bible Strong est un projet open-source e
 
 - **TypeScript** : typage strict active, evitez les `any`
 - **ESLint** : configuration Expo + Prettier
-- **Styling** : utilisation d'Emotion (styled components)
+- **Styling** : privilegiez `Box`, `HStack` et `VStack` ; Emotion reste disponible pour les primitives partagees
 - **Etat** : Redux pour les donnees persistantes, Jotai pour l'UI locale
 - **Commits** : format Conventional Commits
   - `feat:` nouvelle fonctionnalite
@@ -298,13 +306,16 @@ Pour ajouter une nouvelle langue :
 
 ```
 bible-strong/
+├── app/                    # Routes Expo Router
+│   └── strong/             # Entree Strong, concordance, entites et dictionnaire
 ├── src/
 │   ├── features/           # Modules fonctionnels
 │   │   ├── bible/          # Lecture et navigation biblique
+│   │   ├── resources/      # Contrats d'acces aux ressources
 │   │   ├── studies/        # Editeur d'etudes
 │   │   ├── plans/          # Plans de lecture
-│   │   ├── search/         # Recherche (Algolia + Lunr)
-│   │   ├── lexique/        # Concordance Strong
+│   │   ├── search/         # Recherche biblique et globale
+│   │   ├── lexique/        # Liste et details du lexique Strong
 │   │   ├── nave/           # Bible Nave
 │   │   ├── dictionnary/    # Dictionnaire biblique
 │   │   ├── commentaries/   # Commentaires
@@ -317,7 +328,7 @@ bible-strong/
 │   ├── redux/              # Store Redux et slices
 │   ├── state/              # Atoms Jotai
 │   ├── helpers/            # Utilitaires et hooks
-│   ├── navigation/         # React Navigation
+│   ├── navigation/         # Compatibilite et types de navigation
 │   ├── themes/             # Themes et couleurs
 │   └── assets/             # Ressources statiques
 ├── i18n/                   # Traductions
@@ -325,7 +336,12 @@ bible-strong/
 └── ...
 ```
 
-Pour plus de details techniques, consultez [CLAUDE.md](./CLAUDE.md).
+Les ressources telechargeables utilisent un catalogue mobile versionne. Les Bibles canoniques,
+leurs index Strong, les index interlineaires et les modules du lexique sont des copies hors ligne
+independantes, verifiees puis activees de maniere atomique.
+
+Pour plus de details techniques, consultez [l'index de la documentation](./docs/index.md),
+[l'architecture](./docs/architecture.md) et le [contexte du domaine](./CONTEXT.md).
 
 ---
 
@@ -337,7 +353,7 @@ Pour plus de details techniques, consultez [CLAUDE.md](./CLAUDE.md).
 | Langage | TypeScript 5.9 |
 | Etat | Redux Toolkit, Jotai, Redux Persist |
 | Styling | Emotion |
-| Navigation | React Navigation 6 |
+| Navigation | Expo Router, React Navigation |
 | Base de donnees | SQLite (expo-sqlite), Firestore |
 | Auth | Firebase Auth (email, Google, Apple) |
 | Audio | react-native-track-player |

@@ -2,6 +2,11 @@
 
 _Audit en lecture seule réalisé le 24 juillet 2026._
 
+> **Statut historique (2026-08-15)** — Ce document explique le chemin de mise à niveau observé le
+> 24 juillet. La migration de publication et le catalogue mobile ont ensuite évolué. Ne pas utiliser
+> ses chemins de fichiers, déclencheurs ou limites de retry comme description du runtime courant ;
+> consulter les ADR 0013, 0015 et 0021 ainsi que `src/migrations/legacyResourceMigration.ts`.
+
 ## Réponse courte
 
 Une ancienne LSG, DBY ou DBR correctement importée n’est pas supprimée ni déclarée absente lors de
