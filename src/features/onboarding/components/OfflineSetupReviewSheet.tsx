@@ -505,7 +505,7 @@ const OfflineSetupReviewSheet = ({
               skipEntering={false}
               skipExiting={false}
               height={layout.summaryHeight}
-              overflow='visible'
+              overflow="visible"
             >
               <OfflineSetupReviewHeader
                 downloadBytes={displayedDownloadBytes}

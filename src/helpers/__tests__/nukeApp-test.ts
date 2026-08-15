@@ -1,6 +1,6 @@
 /* eslint-disable import/first */
 
-global.__DEV__ = true
+Object.assign(globalThis, { __DEV__: true })
 
 jest.mock('@react-native-async-storage/async-storage', () => ({
   clear: jest.fn(),

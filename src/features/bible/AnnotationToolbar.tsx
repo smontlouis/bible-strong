@@ -141,6 +141,22 @@ type AnnotationColorPaletteProps = {
   onSelectColor: (colorKey: string, type: AnnotationType) => void
 }
 
+type AnnotationTargetLabelProps = {
+  label: string
+  reference: string
+}
+
+const AnnotationTargetLabel = ({ label, reference }: AnnotationTargetLabelProps) => (
+  <HStack maxWidth={220} center>
+    <FadingText fontSize={15} color="grey" numberOfLines={1}>
+      {`${label} `}
+    </FadingText>
+    <FadingText fontSize={15} color="grey" numberOfLines={1} bold>
+      {reference}
+    </FadingText>
+  </HStack>
+)
+
 const AnnotationColorPalette = ({
   disabled,
   type,
@@ -340,12 +356,10 @@ const AnnotationToolbar = ({
                 mt={6}
               >
                 <AnimatedBox layout={LinearTransition}>
-                  <FadingText fontSize={15} color="grey" numberOfLines={1} maxWidth={220}>
-                    {t('Appliquer à')}{' '}
-                    <Text fontSize={15} bold>
-                      {verseToReference([selectedAnnotation.verseKey])}
-                    </Text>
-                  </FadingText>
+                  <AnnotationTargetLabel
+                    label={t('Appliquer à')}
+                    reference={verseToReference([selectedAnnotation.verseKey])}
+                  />
                 </AnimatedBox>
               </AnimatedBox>
             ) : hasSelection && selection?.start && selection?.end ? (
@@ -356,12 +370,10 @@ const AnnotationToolbar = ({
                 mt={8}
               >
                 <AnimatedBox layout={LinearTransition}>
-                  <FadingText fontSize={15} color="grey" numberOfLines={1} maxWidth={220}>
-                    {t('Appliquer à')}{' '}
-                    <Text fontSize={15} bold>
-                      {formatSelectionRange(selection)}
-                    </Text>
-                  </FadingText>
+                  <AnnotationTargetLabel
+                    label={t('Appliquer à')}
+                    reference={formatSelectionRange(selection)}
+                  />
                 </AnimatedBox>
               </AnimatedBox>
             ) : (
