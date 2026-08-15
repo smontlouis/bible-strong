@@ -5,8 +5,9 @@ import {
   fetchAndActivate,
 } from '@react-native-firebase/remote-config'
 
-export const useRemoteConfig = () => {
+export const useRemoteConfig = (enabled = true) => {
   useEffect(() => {
+    if (!enabled) return
     ;(async () => {
       const rc = getRemoteConfig()
       await setDefaults(rc, {
@@ -22,5 +23,5 @@ export const useRemoteConfig = () => {
         )
       }
     })()
-  }, [])
+  }, [enabled])
 }

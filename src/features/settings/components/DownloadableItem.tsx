@@ -28,8 +28,7 @@ interface DownloadableItemProps {
   isDownloaded?: boolean
   isDefault?: boolean
   needsUpdate?: boolean
-  resourceUrl: string
-  relatedResources?: { resourceId: string; url: string }[]
+  relatedResources?: { resourceId: string }[]
   variant?: 'standard' | 'dependency'
 }
 
@@ -57,7 +56,6 @@ const DownloadableItem = ({
   isDownloaded,
   isDefault,
   needsUpdate,
-  resourceUrl,
   relatedResources,
   variant = 'standard',
 }: DownloadableItemProps) => {
@@ -66,7 +64,6 @@ const DownloadableItem = ({
   const queueState = useDownloadItemStatus(itemId)
   const publication = useResourcePublicationStatus({
     resourceId: itemId,
-    url: resourceUrl,
     isInstalled: Boolean(isDownloaded),
     relatedResources,
   })

@@ -3,12 +3,23 @@ import {
   createDownloadItemFromOnboardingSelection,
   getDefaultOnboardingResourceSelection,
   getOnboardingDatabaseResourceOptions,
+  getOnboardingResourceDisplayName,
   getOnboardingResourceSelectionId,
   toggleOnboardingResourceSelection,
 } from '../onboardingResources'
 
 jest.mock('~helpers/languageUtils', () => ({
   getDefaultBibleVersion: jest.fn((lang: string) => (lang === 'en' ? 'KJV' : 'LSG')),
+}))
+
+jest.mock('~helpers/bibleVersions', () => ({
+  versions: {
+    BHG: {
+      id: 'BHG',
+      name: 'Bible hébraïque et grecque',
+      name_en: 'Hebrew & Greek Bible',
+    },
+  },
 }))
 
 jest.mock('~helpers/downloadItemFactory', () => ({
@@ -38,6 +49,24 @@ jest.mock('~helpers/downloadItemFactory', () => ({
         type: 'bible-strong-sidecar',
         name: `${versionId} Strong`,
         versionId,
+      }) as DownloadItem
+  ),
+  createInterlinearSidecarDownloadItem: jest.fn(
+    (lang: string): DownloadItem =>
+      ({
+        id: `bible-interlinear:BHG:${lang}`,
+        type: 'bible-interlinear-sidecar',
+        name: `BHG ${lang}`,
+        lang,
+      }) as DownloadItem
+  ),
+  createStrongLexiconModuleDownloadItem: jest.fn(
+    (moduleId: string): DownloadItem =>
+      ({
+        id: `strong-lexicon:${moduleId}`,
+        type: 'strong-lexicon-module',
+        name: moduleId,
+        strongLexiconModuleId: moduleId,
       }) as DownloadItem
   ),
 }))
@@ -115,8 +144,55 @@ describe('onboardingResources', () => {
       expect.objectContaining({
         id: 'bible-strong:DBR',
         versionId: 'DBR',
+        dependsOnId: 'bible:DBR',
       })
     )
+  })
+
+  it('encodes onboarding download dependencies in the queue items', () => {
+    expect(
+      createDownloadItemFromOnboardingSelection({
+        kind: 'strong-lexicon',
+        moduleId: 'entities',
+      })
+    ).toEqual(expect.objectContaining({ dependsOnId: 'strong-lexicon:core' }))
+    expect(
+      createDownloadItemFromOnboardingSelection({ kind: 'bible-interlinear', lang: 'fr' })
+    ).toEqual(expect.objectContaining({ dependsOnId: 'bible:BHG' }))
+  })
+
+  it('localizes technical resource names for the English review', () => {
+    const labels: Record<string, string> = {
+      'offlineSetup.resources.strongLexicon': 'Strong lexicon',
+      'offlineSetup.resources.entities': 'Biblical entities',
+      'offlineSetup.resources.greekDictionary': 'Detailed Greek dictionary',
+    }
+    const translate = (key: string) => labels[key] ?? key
+
+    expect(
+      getOnboardingResourceDisplayName(
+        { kind: 'strong-lexicon', moduleId: 'core' },
+        'en',
+        translate
+      )
+    ).toBe('Strong lexicon')
+    expect(
+      getOnboardingResourceDisplayName(
+        { kind: 'strong-lexicon', moduleId: 'entities' },
+        'en',
+        translate
+      )
+    ).toBe('Biblical entities')
+    expect(
+      getOnboardingResourceDisplayName(
+        { kind: 'strong-lexicon', moduleId: 'resources' },
+        'en',
+        translate
+      )
+    ).toBe('Detailed Greek dictionary')
+    expect(
+      getOnboardingResourceDisplayName({ kind: 'bible', versionId: 'BHG' }, 'en', translate)
+    ).toBe('Hebrew & Greek Bible')
   })
 
   it('selecting Strong also selects its base Bible and deselecting the base removes Strong', () => {

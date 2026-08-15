@@ -13,7 +13,7 @@ import {
   Tag,
   TagsObj,
 } from '~common/types'
-import { FireAuthProfile } from '~helpers/FireAuth'
+import type { FireAuthProfile } from '~helpers/FireAuth'
 import { firebaseDb } from '~helpers/firebase'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'

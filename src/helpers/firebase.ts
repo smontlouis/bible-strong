@@ -13,10 +13,15 @@ import {
   writeBatch,
   query,
   where,
+  waitForPendingWrites,
 } from '@react-native-firebase/firestore'
 import { getStorage, ref } from '@react-native-firebase/storage'
 import { getLanguage } from '~i18n'
 import { ResourceLanguage, DatabaseId, isSharedDB } from '~helpers/databaseTypes'
+import {
+  BUNDLED_MOBILE_RESOURCE_CATALOG,
+  getMobileResourceCatalogEntry,
+} from '~helpers/mobileResourceCatalog'
 
 // Firebase instances (modular API)
 export const firebaseDb = getFirestore()
@@ -38,6 +43,7 @@ export {
   where,
   firestoreDeleteField as deleteField,
   firestoreIncrement,
+  waitForPendingWrites,
 }
 
 export const CDN_URL = 'https://assets.bible-strong.app/'
@@ -48,46 +54,29 @@ export const getCdnFallbackUrl = (url: string) =>
 
 // French database URLs
 export const databasesRef = {
-  MHY: cdnUrl('databases/commentaires-mhy.sqlite'),
-  TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'),
-  DICTIONNAIRE: cdnUrl('databases/dictionnaire.sqlite'),
-  NAVE: cdnUrl('databases/nave-fr.sqlite'),
-  TIMELINE: cdnUrl('databases/bible-timeline-events.json'),
+  MHY: getMobileResourceCatalogEntry('database:MHY:fr').url,
+  TRESOR: getMobileResourceCatalogEntry('database:TRESOR:fr').url,
+  DICTIONNAIRE: getMobileResourceCatalogEntry('database:DICTIONNAIRE:fr').url,
+  NAVE: getMobileResourceCatalogEntry('database:NAVE:fr').url,
+  TIMELINE: getMobileResourceCatalogEntry('database:TIMELINE:fr').url,
 }
 
 // English database URLs
-export const databasesEnRef = {
-  MHY: cdnUrl('databases/en/commentaires-mhy.sqlite'),
-  TRESOR: cdnUrl('databases/commentaires-tresor.sqlite'), // Shared across languages
-  DICTIONNAIRE: cdnUrl('databases/en/dictionnaire.sqlite'),
-  NAVE: cdnUrl('databases/en/nave.sqlite'),
-  TIMELINE: cdnUrl('databases/en/bible-timeline-events.json'),
-}
-
-interface DatabasesRef {
-  [DATABASEID: string]: string
-  MHY: string
-  TRESOR: string
-  DICTIONNAIRE: string
-  NAVE: string
-  TIMELINE: string
+export const databasesEnRef: Partial<Record<RemoteDatabaseId, string>> = {
+  TRESOR: getMobileResourceCatalogEntry('database:TRESOR:fr').url,
+  DICTIONNAIRE: getMobileResourceCatalogEntry('database:DICTIONNAIRE:en').url,
+  NAVE: getMobileResourceCatalogEntry('database:NAVE:en').url,
+  TIMELINE: getMobileResourceCatalogEntry('database:TIMELINE:en').url,
 }
 
 // Database IDs that have remote URLs (excludes BIBLES which is local-only)
 type RemoteDatabaseId = Exclude<DatabaseId, 'BIBLES'>
+type DatabasesRef = Partial<Record<RemoteDatabaseId, string>>
 
 // Get database URL for a specific database and language
 export const getDatabaseUrl = (dbId: RemoteDatabaseId, lang: ResourceLanguage): string => {
-  // Shared databases always use the same URL
-  if (isSharedDB(dbId)) {
-    return databasesRef[dbId]
-  }
-
-  if (lang === 'fr') {
-    return databasesRef[dbId]
-  }
-
-  return databasesEnRef[dbId]
+  const resourceLang = isSharedDB(dbId) ? 'fr' : lang
+  return getMobileResourceCatalogEntry(`database:${dbId}:${resourceLang}`).url
 }
 
 // Legacy function for backward compatibility
@@ -110,52 +99,8 @@ export const getDatabasesRefForLang = (lang: ResourceLanguage): DatabasesRef => 
 
 export const biblesRef: {
   [version: string]: string
-} = {
-  LSG: cdnUrl('bibles/bible-lsg.json'),
-  DBY: cdnUrl('bibles/bible-dby.json'),
-  DBR: cdnUrl('bibles/bible-dbr.json'),
-  OST: cdnUrl('bibles/bible-ost.json'),
-  BDS: cdnUrl('bibles/bible-bds.json'),
-  CHU: cdnUrl('bibles/bible-chu.json'),
-  FMAR: cdnUrl('bibles/bible-fmar.json'),
-  LAU: cdnUrl('bibles/bible-lau.json'),
-  FRC97: cdnUrl('bibles/bible-frc97.json'),
-  NBS: cdnUrl('bibles/bible-nbs.json'),
-  NEG79: cdnUrl('bibles/bible-neg79.json'),
-  NVS78P: cdnUrl('bibles/bible-nvs78p.json'),
-  S21: cdnUrl('bibles/bible-s21.json'),
-  KJF: cdnUrl('bibles/bible-kjf.json'),
-  KJV: cdnUrl('bibles/bible-kjv.json'),
-  BSB: cdnUrl('bibles/bible-bsb.json'),
-  ASV: cdnUrl('bibles/bible-asv.json'),
-  DARBY: cdnUrl('bibles/bible-darby.json'),
-  RLT: cdnUrl('bibles/bible-rlt.json'),
-  RWEBSTER: cdnUrl('bibles/bible-rwebster.json'),
-  RV1895: cdnUrl('bibles/bible-rv1895.json'),
-  NKJV: cdnUrl('bibles/bible-nkjv.json'),
-  ESV: cdnUrl('bibles/bible-esv.json'),
-  NIV: cdnUrl('bibles/bible-niv.json'),
-  POV: cdnUrl('bibles/bible-pov.json'),
-  BHS: cdnUrl('bibles/bible-hebrew.json'),
-  SBLGNT: cdnUrl('bibles/bible-greek.json'),
-  NFC: cdnUrl('bibles/bible-nfc.json'),
-  PDV2017: cdnUrl('bibles/bible-pdv2017.json'),
-  BFC: cdnUrl('bibles/bible-bfc.json'),
-  BCC1923: cdnUrl('bibles/bible-bcc1923.json'),
-  LXX_FR: cdnUrl('bibles/bible-lxx-french.json'),
-  // JER: cdnUrl('bibles/bible-jer.json'),
-  LXX: cdnUrl('bibles/bible-lxx.json'),
-  VUL: cdnUrl('bibles/bible-vul.json'),
-  TR1624: cdnUrl('bibles/bible-TR1624.json'),
-  TR1894: cdnUrl('bibles/bible-TR1894.json'),
-  AMP: cdnUrl('bibles/bible-amp.json'),
-  DEL: cdnUrl('bibles/bible-del.json'),
-  NASB1995: cdnUrl('bibles/bible-nasb1995.json'),
-  NASB2020: cdnUrl('bibles/bible-nasb2020.json'),
-  EASY: cdnUrl('bibles/bible-easy.json'),
-  TLV: cdnUrl('bibles/bible-tlv.json'),
-  NET: cdnUrl('bibles/bible-net.json'),
-  GW: cdnUrl('bibles/bible-gw.json'),
-  CSB: cdnUrl('bibles/bible-csb.json'),
-  NLT: cdnUrl('bibles/bible-nlt.json'),
-}
+} = Object.fromEntries(
+  Object.entries(BUNDLED_MOBILE_RESOURCE_CATALOG.resources).flatMap(([id, resource]) =>
+    id.startsWith('bible:') ? [[id.slice('bible:'.length), resource.url]] : []
+  )
+)

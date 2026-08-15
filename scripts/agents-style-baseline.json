@@ -51,7 +51,6 @@
   "src/features/lexique/LexiqueItem.tsx": 3,
   "src/features/nave/NaveItem.tsx": 2,
   "src/features/nave/NaveModalItem.tsx": 2,
-  "src/features/onboarding/OnBoarding.tsx": 2,
   "src/features/plans/PlanScreen/EntitySlice.tsx": 4,
   "src/features/plans/PlanScreen/ReadingSlice.tsx": 3,
   "src/features/plans/PlanScreen/SectionHeader.tsx": 2,

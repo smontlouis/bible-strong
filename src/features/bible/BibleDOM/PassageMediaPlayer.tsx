@@ -8,9 +8,10 @@ type Props = {
   item: ResolvedPassageMedia
   layoutId: string
   layoutTransition: Transition
+  borderColor: string
 }
 
-const PassageMediaPlayer = ({ item, layoutId, layoutTransition }: Props) => {
+const PassageMediaPlayer = ({ item, layoutId, layoutTransition, borderColor }: Props) => {
   const shouldReduceMotion = useReducedMotion()
   const [isReady, setIsReady] = useState(false)
   const readyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -51,7 +52,7 @@ const PassageMediaPlayer = ({ item, layoutId, layoutTransition }: Props) => {
           aspectRatio: '16 / 9',
           boxSizing: 'border-box',
           overflow: 'hidden',
-          border: '2px solid #fff',
+          border: `2px solid ${borderColor}`,
           borderRadius: 11,
           boxShadow: '0 7px 22px rgba(0, 0, 0, 0.25)',
           background: 'transparent',

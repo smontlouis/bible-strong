@@ -36,6 +36,7 @@ import {
 import { createOfflineCopyId, parseOfflineCopyId } from '~helpers/offlineCopy'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
 import { installedVersionsSignalAtom } from '~state/app'
+import { mobileResourceCatalogAtom } from '~helpers/mobileResourceCatalog'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultStore } from 'jotai/vanilla'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
@@ -66,11 +67,7 @@ import {
   type StrongLexiconModuleAvailability,
 } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
-import {
-  compareResourcePublications,
-  fetchResourcePublication,
-  resourcePublicationStore,
-} from '~helpers/resourcePublication'
+import { resolveResourceCatalogStatus } from '~helpers/resourcePublication'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -486,6 +483,7 @@ const DownloadsScreen = () => {
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
+  const catalog = useAtomValue(mobileResourceCatalogAtom)
   const defaultVersion = getDefaultBibleVersion(lang)
   const defaultBibleOfflineCopyId = createOfflineCopyId({
     kind: 'bible',
@@ -518,37 +516,33 @@ const DownloadsScreen = () => {
       if (!downloadedSet.has(item.id)) return []
       const identity = parseOfflineCopyId(item.id)
       if (!identity) return []
-      const downloadItem = createOfflineCopyDownloadItem(identity)
       const relatedResources =
         identity.kind === 'bible'
           ? (getBibleRelatedPublicationResources(identity.versionId) ?? [])
           : []
 
       return [
-        { itemId: item.id, resourceId: item.id, url: downloadItem.url },
+        { itemId: item.id, resourceId: item.id },
         ...relatedResources.map(resource => ({ itemId: item.id, ...resource })),
       ]
     })
   )
   const publicationQueries = useQueries({
     queries: publicationResources.map(resource => ({
-      queryKey: ['resource-publication', resource.resourceId, resource.url],
-      queryFn: () => fetchResourcePublication(resource.url),
+      queryKey: [
+        'resource-publication',
+        resource.resourceId,
+        catalog.resources[resource.resourceId]?.archiveSha256,
+      ],
+      queryFn: () => resolveResourceCatalogStatus(resource.resourceId, { catalog }),
       staleTime: 6 * 60 * 60 * 1000,
       refetchOnMount: 'always' as const,
-      retry: 1,
+      retry: false,
     })),
   })
   const publicationUpdateIds = new Set(
     publicationResources.flatMap((resource, index) => {
-      const remotePublication = publicationQueries[index]?.data
-      return remotePublication &&
-        compareResourcePublications(
-          resourcePublicationStore.read(resource.resourceId),
-          remotePublication
-        ) === 'update-available'
-        ? [resource.itemId]
-        : []
+      return publicationQueries[index]?.data === 'update-available' ? [resource.itemId] : []
     })
   )
 
@@ -973,8 +967,6 @@ const DownloadsScreen = () => {
           const isDownloaded = downloadedSet.has(item.id)
           const identity = parseOfflineCopyId(item.id)
           if (!identity) return null
-          const resourceDownloadItem = createOfflineCopyDownloadItem(identity)
-
           const isDefault =
             (identity.kind === 'bible' && identity.versionId === defaultVersion) ||
             (identity.kind === 'strong-lexicon-module' && identity.moduleId === 'core')
@@ -987,7 +979,6 @@ const DownloadsScreen = () => {
           return (
             <DownloadableItem
               itemId={item.id}
-              resourceUrl={resourceDownloadItem.url}
               relatedResources={relatedResources}
               name={item.name}
               subtitle={item.subtitle}

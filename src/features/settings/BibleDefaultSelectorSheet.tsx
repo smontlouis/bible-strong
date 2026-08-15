@@ -9,11 +9,14 @@ import {
   VersionCatalogHeader,
   VersionCatalogList,
 } from '~features/bible/VersionCatalogView'
+import {
+  getBibleDefaultCatalog,
+  type BibleDefaultSelectionKind,
+} from '~features/bible/bibleDefaultCatalog'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
 import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import type { VersionCode } from '~state/tabs'
-import { getBibleDefaultCatalog, type BibleDefaultSelectionKind } from './bibleDefaultCatalog'
 
 type Props = {
   kind: BibleDefaultSelectionKind

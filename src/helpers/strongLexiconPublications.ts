@@ -8,6 +8,7 @@ export type StrongLexiconPublicationArtifact = {
   url: string
   entry: string
   archiveBytes: number
+  archiveSha256?: string
   schemaVersion: number
 }
 

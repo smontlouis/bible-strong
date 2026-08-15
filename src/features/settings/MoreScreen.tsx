@@ -62,6 +62,7 @@ type MoreProps = {
 }
 
 export const More = ({ closeMenu }: MoreProps) => {
+  const router = useRouter()
   const { isLogged, user, logout } = useLogin()
   const theme = useTheme()
   const deleteAccountModalRef = useRef<SheetRef>(null)
@@ -415,6 +416,19 @@ export const More = ({ closeMenu }: MoreProps) => {
                 Dev
               </Text>
             </SectionCardHeader>
+            <CardLinkItem
+              onPress={() =>
+                router.push({ pathname: '/playground', params: { playground: 'avatar' } })
+              }
+            >
+              <IconCircle bg="rgba(89, 131, 240, 0.12)">
+                <FeatherIcon name="smile" size={20} color="primary" />
+              </IconCircle>
+              <Text flex color="primary" fontSize={15}>
+                Playground · Avatar
+              </Text>
+              <FeatherIcon name="chevron-right" size={20} color="grey" />
+            </CardLinkItem>
             <CardLinkItem onPress={promptNuke} isLast>
               <IconCircle bg="rgba(239, 68, 68, 0.1)">
                 <FeatherIcon name="trash-2" size={20} color="quart" />

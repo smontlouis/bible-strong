@@ -4,22 +4,33 @@ import {
   type StrongLexiconModuleId,
 } from './strongLexiconPublications'
 import { createOfflineCopyId } from './offlineCopyId'
+import { getMobileResourceCatalogEntry } from './mobileResourceCatalog'
 
 export function createStrongLexiconModuleDownloadItem(
   moduleId: StrongLexiconModuleId
 ): DownloadItem {
-  const artifact = getStrongLexiconPublication(moduleId)
+  const publicationArtifact = getStrongLexiconPublication(moduleId)
+  const id = createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId })
+  const catalogArtifact = getMobileResourceCatalogEntry(id)
+  const artifact = {
+    ...publicationArtifact,
+    url: catalogArtifact.url,
+    entry: catalogArtifact.entry,
+    archiveBytes: catalogArtifact.archiveBytes,
+    archiveSha256: catalogArtifact.archiveSha256,
+  }
   const names: Record<StrongLexiconModuleId, string> = {
     core: 'Lexique Strong',
     resources: 'Dictionnaire grec détaillé',
     entities: 'Entités bibliques',
   }
   return {
-    id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId }),
+    id,
     type: 'strong-lexicon-module',
     name: names[moduleId],
     url: artifact.url,
     estimatedSize: artifact.archiveBytes,
+    expectedArchiveSha256: artifact.archiveSha256,
     strongLexiconModuleId: moduleId,
     strongLexiconArtifact: artifact,
     addedAt: Date.now(),

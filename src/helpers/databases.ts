@@ -1,7 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import { to } from 'await-to-js'
 
-import { getDatabasesRef } from '~helpers/firebase'
 import i18n, { getLanguage } from '~i18n'
 import {
   ResourceLanguage,
@@ -12,6 +11,8 @@ import {
   isSharedDB,
   BASE_SQLITE_DIR,
 } from '~helpers/databaseTypes'
+import { resolveResourceCatalogStatus } from '~helpers/resourcePublication'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
 
 export const databaseDictionnaireName = 'dictionnaire.sqlite'
 export const databaseTresorName = 'commentaires-tresor.sqlite'
@@ -88,6 +89,8 @@ const sqliteDirPath = `${FileSystem.documentDirectory}SQLite`
 
 export const getIfDatabaseNeedsUpdate = async (dbId: IdDatabase) => {
   const { path } = databases()[dbId]
+  const lang = getLanguage()
+  if (dbId === 'MHY' && lang !== 'fr') return false
 
   const [errF, file] = await to(FileSystem.getInfoAsync(path))
 
@@ -95,15 +98,18 @@ export const getIfDatabaseNeedsUpdate = async (dbId: IdDatabase) => {
     return false
   }
 
-  const [errRF, response] = await to(fetch(getDatabasesRef()[dbId], { method: 'HEAD' }))
-
-  if (errF || errRF) {
-    console.log(`Error for${dbId}`, errF, errRF)
+  const resourceLang = isSharedDB(dbId) ? 'fr' : lang
+  const resourceId = createOfflineCopyId({
+    kind: 'database',
+    databaseId: dbId,
+    language: resourceLang,
+  })
+  const [statusError, status] = await to(resolveResourceCatalogStatus(resourceId))
+  if (errF || statusError || !status) {
+    console.log(`Error for${dbId}`, errF, statusError)
     return false
   }
-
-  const remoteSize = Number(response?.headers.get('content-length'))
-  return Number.isFinite(remoteSize) && file.size !== remoteSize
+  return status === 'update-available'
 }
 
 export const getIfDatabaseNeedsDownload = async (dbId: IdDatabase) => {

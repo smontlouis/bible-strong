@@ -94,7 +94,7 @@
     "@react-native-firebase/remote-config": "23.7.0",
     "@react-native-firebase/storage": "23.7.0",
     "@react-native-google-signin/google-signin": "^16.0.0",
-    "@react-native-masked-view/masked-view": "0.3.2",
+    "@react-native-masked-view/masked-view": "patch:@react-native-masked-view/masked-view@npm%3A0.3.2#~/.yarn/patches/@react-native-masked-view-masked-view-npm-0.3.2-7e49df0087.patch",
     "@reduxjs/toolkit": "^1.3.4",
     "@sentry/react-native": "~7.11.0",
     "@shopify/flash-list": "2.0.2",
@@ -195,6 +195,7 @@
     "@babel/core": "^7.29.0",
     "@babel/runtime": "^7.28.4",
     "@dagrejs/dagre": "^3.0.0",
+    "@types/babel__core": "^7.20.5",
     "@types/babel__preset-env": "^7",
     "@types/debounce": "^1.2.4",
     "@types/jest": "^29.5.12",
@@ -204,6 +205,7 @@
     "@vitejs/plugin-react": "^6.0.2",
     "@xyflow/react": "^12.10.2",
     "babel-plugin-module-resolver": "^3.2.0",
+    "babel-plugin-react-compiler": "^1.0.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-preset-expo": "~56.0.0",
     "dotenv-cli": "^11.0.0",
@@ -240,7 +242,8 @@
     "react-native-svg": "15.15.4",
     "react-native-screens@npm:^4.25.2": "patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch",
     "rn-fetch-blob@npm:^0.12.0": "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch",
-    "@expo/cli@npm:^56.1.16": "patch:@expo/cli@npm%3A56.1.16#~/.yarn/patches/@expo-cli-npm-56.1.16-7d7dd3fde0.patch"
+    "@expo/cli@npm:^56.1.16": "patch:@expo/cli@npm%3A56.1.16#~/.yarn/patches/@expo-cli-npm-56.1.16-7d7dd3fde0.patch",
+    "@react-native-masked-view/masked-view@npm:^0.3.2": "patch:@react-native-masked-view/masked-view@npm%3A0.3.2#~/.yarn/patches/@react-native-masked-view-masked-view-npm-0.3.2-7e49df0087.patch"
   },
   "expo": {
     "install": {

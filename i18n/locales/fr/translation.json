@@ -470,6 +470,7 @@
   "Cliquez sur une couleur pour annoter": "Cliquez sur une couleur pour annoter",
   "Sélectionnez du texte dans la Bible": "Sélectionnez du texte dans la Bible",
   "Mode libre": "Mode libre",
+  "Appliquer à": "Appliquer à",
   "Choisissez un type de surlignage": "Choisissez un type de surlignage",
   "mot(s) sélectionné(s)": "mot(s) sélectionné(s)",
   "Changer le type": "Changer le type",
@@ -1355,5 +1356,231 @@
   "strongDetail.entity.relation.sibling.female": "Sœur",
   "strongDetail.entity.relation.offspring": "descendant",
   "strongDetail.entity.relation.founder_or_origin": "fondateur ou origine",
-  "strongDetail.entity.relation.resident": "résident"
+  "strongDetail.entity.relation.resident": "résident",
+  "accountEntry.adoptionPending": "Vos données locales restent en sécurité sur cet appareil. Leur synchronisation reprendra automatiquement lorsque votre compte sera de nouveau disponible.",
+  "playground.badge": "Bible Strong · Playground",
+  "playground.title": "Playground",
+  "playground.description": "Un espace isolé pour découvrir et tester les expériences en cours de construction dans Bible Strong.",
+  "playground.experiences": "Parcours disponibles",
+  "playground.abelEyebrow": "Onboarding",
+  "playground.abelTitle": "Parcours onboarding Abel",
+  "playground.abelDescription": "Parcourez une étude biblique interactive, du verset de Genèse 4.2 jusqu’aux mots Strong, aux notes et aux relations.",
+  "onboarding.abel.skip": "Passer",
+  "onboarding.abel.skipConfirmTitle": "Passer la découverte ?",
+  "onboarding.abel.skipConfirmMessage": "Vous passerez directement au choix de vos ressources.",
+  "onboarding.abel.keepDiscovering": "Continuer la découverte",
+  "onboarding.abel.progress": "Étape {{current}} sur {{total}}",
+  "onboarding.abel.back": "Revenir à la scène précédente",
+  "onboarding.abel.continue": "Continuer",
+  "onboarding.abel.complete": "Votre espace est prêt.",
+  "onboarding.abel.sceneOne.chapter": "Genèse 4.2",
+  "onboarding.abel.sceneOne.lineOne": "Elle enfanta encore son frère",
+  "onboarding.abel.sceneOne.highlightWord": "Abel",
+  "onboarding.abel.sceneOne.lineTwo": ". Abel fut berger,",
+  "onboarding.abel.sceneOne.lineThree": "et Caïn fut laboureur.",
+  "onboarding.abel.sceneOne.translation": "LOUIS SEGOND 1910",
+  "onboarding.abel.sceneOne.phrase": "Lisez. Surlignez. Découvrez.",
+  "onboarding.abel.sceneOne.openLexique": "Ouvrir le lexique du verset",
+  "onboarding.abel.sceneOne.colorPrompt.color2": "Une couleur, un fil à retrouver.",
+  "onboarding.abel.sceneOne.colorPrompt.color3": "Gardez en lumière ce qui compte.",
+  "onboarding.abel.sceneOne.colorPrompt.color4": "Classez vos intuitions par couleur.",
+  "onboarding.abel.sceneOne.colorPrompt.color5": "Gardez une trace de vos découvertes.",
+  "onboarding.abel.sceneOne.togglePalette.show": "Afficher les couleurs de surlignage",
+  "onboarding.abel.sceneOne.togglePalette.hide": "Masquer les couleurs de surlignage",
+  "onboarding.abel.sceneOne.color1": "Turquoise",
+  "onboarding.abel.sceneOne.color2": "Corail",
+  "onboarding.abel.sceneOne.color3": "Jaune doré",
+  "onboarding.abel.sceneOne.color4": "Bleu ciel",
+  "onboarding.abel.sceneOne.color5": "Ardoise",
+  "onboarding.abel.sceneTwo.phrase": "Chaque verset peut devenir un point de départ.",
+  "onboarding.abel.sceneTwo.dictionary": "Dictionnaire",
+  "onboarding.abel.sceneTwo.references": "Références",
+  "onboarding.abel.sceneTwo.lexique": "Lexique",
+  "onboarding.abel.sceneTwo.comments": "Commentaires",
+  "onboarding.abel.sceneTwo.themes": "Thèmes",
+  "onboarding.abel.sceneTwo.comparisons": "Comparaisons"
+  ,"onboarding.abel.sceneThree.properPhrase": "Retrouvez le mot derrière la traduction."
+  ,"onboarding.abel.sceneThree.commonPhrase": "Un mot peut en révéler un autre."
+  ,"onboarding.abel.sceneThree.strongLabel": "STRONG"
+  ,"onboarding.abel.sceneThree.listen": "Écouter la prononciation"
+  ,"onboarding.abel.sceneThree.openStrong": "Ouvrir Strong H1892"
+  ,"onboarding.abel.sceneThree.properTransliteration": "Hevel"
+  ,"onboarding.abel.sceneThree.properTitle": "Abel"
+  ,"onboarding.abel.sceneThree.properDefinition": "Fils d’Adam et Ève"
+  ,"onboarding.abel.sceneThree.properType": "NOM PROPRE"
+  ,"onboarding.abel.sceneThree.commonTransliteration": "hevel"
+  ,"onboarding.abel.sceneThree.commonTitle": "hevel"
+  ,"onboarding.abel.sceneThree.commonDefinition": "souffle, vapeur, vanité"
+  ,"onboarding.abel.sceneThree.commonType": "NOM COMMUN"
+  ,"onboarding.abel.sceneFour.phrase": "Un même mot traverse toute la Bible."
+  ,"onboarding.abel.sceneFour.addNote": "Ajouter une note"
+  ,"onboarding.abel.sceneFour.hebrew": "HÉBREU"
+  ,"onboarding.abel.sceneFour.lemmaDetails": "H1892  ·  vapeur · souffle · vanité"
+  ,"onboarding.abel.sceneFour.occurrenceCount": "64"
+  ,"onboarding.abel.sceneFour.usageCount": "emplois dans la LSG"
+  ,"onboarding.abel.sceneFour.filterAll": "Tous · 64"
+  ,"onboarding.abel.sceneFour.filterVanity": "vanité [n] · 51"
+  ,"onboarding.abel.sceneFour.filterIdol": "idole [n] · 7"
+  ,"onboarding.abel.sceneFour.filterBreath": "souffle [n] · 6"
+  ,"onboarding.abel.sceneFour.proverbsReference": "PROVERBES 31.30"
+  ,"onboarding.abel.sceneFour.proverbsBefore": "La grâce est trompeuse, et la beauté est "
+  ,"onboarding.abel.sceneFour.proverbsHighlight": "vaine…"
+  ,"onboarding.abel.sceneFour.jobReference": "JOB 7.16"
+  ,"onboarding.abel.sceneFour.jobBefore": "Laisse-moi, car mes jours ne sont que "
+  ,"onboarding.abel.sceneFour.jobHighlight": "vanité"
+  ,"onboarding.abel.sceneFour.jobAfter": "."
+  ,"onboarding.abel.sceneFour.ecclesiastesReference": "ECCLÉSIASTE 1.2"
+  ,"onboarding.abel.sceneFour.ecclesiastesHighlightOne": "Vanité"
+  ,"onboarding.abel.sceneFour.ecclesiastesMiddle": " des vanités, dit l’Ecclésiaste, vanité des vanités, tout est "
+  ,"onboarding.abel.sceneFour.ecclesiastesHighlightTwo": "vanité"
+  ,"onboarding.abel.sceneFour.ecclesiastesAfter": "."
+  ,"onboarding.abel.sceneFour.idolDeuteronomyReference": "DEUTÉRONOME 32.21"
+  ,"onboarding.abel.sceneFour.idolDeuteronomyBefore": "Ils m’ont irrité par leurs vaines "
+  ,"onboarding.abel.sceneFour.idolDeuteronomyHighlight": "idoles"
+  ,"onboarding.abel.sceneFour.idolDeuteronomyAfter": "."
+  ,"onboarding.abel.sceneFour.idolKingsReference": "1 ROIS 16.13"
+  ,"onboarding.abel.sceneFour.idolKingsBefore": "Ils avaient irrité par leurs "
+  ,"onboarding.abel.sceneFour.idolKingsHighlight": "idoles"
+  ,"onboarding.abel.sceneFour.idolKingsAfter": " l’Éternel, le Dieu d’Israël."
+  ,"onboarding.abel.sceneFour.idolPsalmsReference": "PSAUMES 31.6"
+  ,"onboarding.abel.sceneFour.idolPsalmsBefore": "Je hais ceux qui s’attachent à de vaines "
+  ,"onboarding.abel.sceneFour.idolPsalmsHighlight": "idoles"
+  ,"onboarding.abel.sceneFour.idolPsalmsAfter": ", et je me confie en l’Éternel."
+  ,"onboarding.abel.sceneFour.breathJobReference": "JOB 7.16"
+  ,"onboarding.abel.sceneFour.breathJobBefore": "Laisse-moi, car ma vie n’est qu’un "
+  ,"onboarding.abel.sceneFour.breathJobHighlight": "souffle"
+  ,"onboarding.abel.sceneFour.breathJobAfter": "."
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineReference": "PSAUMES 39.5"
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineBefore": "Oui, tout homme debout n’est qu’un "
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineHighlight": "souffle"
+  ,"onboarding.abel.sceneFour.breathPsalmThirtyNineAfter": "."
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourReference": "PSAUMES 144.4"
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourBefore": "L’homme est semblable à un "
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourHighlight": "souffle"
+  ,"onboarding.abel.sceneFour.breathPsalmOneFortyFourAfter": ", ses jours sont comme l’ombre qui passe."
+  ,"onboarding.abel.sceneFive.phrase": "Notez ce que vous découvrez."
+  ,"onboarding.abel.sceneFive.addTag": "Ajouter le tag Abel"
+  ,"onboarding.abel.sceneFive.genesisLabel": "GENÈSE 4.2"
+  ,"onboarding.abel.sceneFive.genesisTitle": "Elle enfanta Abel"
+  ,"onboarding.abel.sceneFive.abelLabel": "H1893"
+  ,"onboarding.abel.sceneFive.abelMeta": "nom propre · hébreu"
+  ,"onboarding.abel.sceneFive.hevelLabel": "H1892"
+  ,"onboarding.abel.sceneFive.hevelMeta": "souffle · vapeur · vanité"
+  ,"onboarding.abel.sceneFive.noteLabel": "NOTE"
+  ,"onboarding.abel.sceneFive.noteQuestion": "Abel s’écrit comme hevel, souffle ou vapeur. Pourquoi ce nom ?"
+  ,"onboarding.abel.sceneFive.relations": "Relations"
+  ,"onboarding.abel.sceneFive.genesisChip": "Genèse 4.2"
+  ,"onboarding.abel.sceneSix.phrase": "Classez, reliez, approfondissez."
+  ,"onboarding.abel.sceneSix.closeRelations": "Refermer les relations"
+  ,"onboarding.abel.sceneSix.genesisTitle": "Genèse 4.2"
+  ,"onboarding.abel.sceneSix.genesisDetail": "occurrence"
+  ,"onboarding.abel.sceneSix.abelDetail": "nom"
+  ,"onboarding.abel.sceneSix.hevelDetail": "souffle"
+  ,"onboarding.abel.sceneSix.ecclesiastesTitle": "Ecclésiaste 1.2"
+  ,"onboarding.abel.sceneSix.ecclesiastesDetail": "vanité  ·  occurrence"
+  ,"onboarding.abel.sceneSix.noteTitle": "Note"
+  ,"onboarding.abel.sceneSix.studyTitle": "Étude"
+  ,"onboarding.abel.sceneSix.studyDetail": "Personnages & sens"
+  ,"onboarding.abel.sceneSix.explains": "explique"
+  ,"onboarding.abel.sceneSix.references": "référence"
+  ,"onboarding.abel.sceneSix.mentions": "mentionne"
+  ,"onboarding.abel.sceneSix.linkedTo": "lié à"
+  ,"onboarding.abel.start": "Commencer"
+  ,"onboarding.abel.sceneSeven.phrase": "Lisez simplement.\nExplorez aussi loin que vous le souhaitez."
+  ,"onboarding.abel.sceneSeven.note": "Note"
+  ,"onboarding.abel.sceneSeven.study": "Étude"
+  ,"onboarding.abel.sceneSeven.ecclesiastes": "Ecclésiaste 1.2"
+  ,"offlineSetup.title": "Préparez votre bibliothèque"
+  ,"offlineSetup.subtitle": "Choisissez les traductions et les outils d’étude que vous souhaitez garder sur cet appareil."
+  ,"offlineSetup.toDownload": "À télécharger"
+  ,"offlineSetup.onDevice": "Espace utilisé"
+  ,"offlineSetup.continue": "Continuer"
+  ,"offlineSetup.download": "Télécharger"
+  ,"offlineSetup.review": "Vérifier"
+  ,"offlineSetup.done": "Terminer"
+  ,"offlineSetup.folderReviewSummary": "{{count}} sélection · {{size}}"
+  ,"offlineSetup.folderReviewSummary_plural": "{{count}} sélections · {{size}}"
+  ,"offlineSetup.reviewSubtitle": "{{count}} ressource sera ajoutée à votre bibliothèque."
+  ,"offlineSetup.reviewSubtitle_plural": "{{count}} ressources seront ajoutées à votre bibliothèque."
+  ,"offlineSetup.reviewItemSize": "{{download}} téléchargés · {{installed}} installés"
+  ,"offlineSetup.openReview": "Ouvrir le récapitulatif"
+  ,"offlineSetup.closeReview": "Fermer le récapitulatif"
+  ,"offlineSetup.downloadReady": "Vous êtes prêt"
+  ,"offlineSetup.downloadWelcomePrefix": "Bienvenue sur"
+  ,"offlineSetup.downloadError": "Le téléchargement a échoué"
+  ,"offlineSetup.didYouKnow": "Le saviez-vous ?"
+  ,"offlineSetup.bibleFacts.jehovah": "« Jéhovah » combine les consonnes YHWH avec des voyelles indiquant qu’il fallait lire Adonaï : ce n’est probablement pas la prononciation antique."
+  ,"offlineSetup.bibleFacts.johnLove": "Dans Jean 21, quand Pierre discute avec Jésus, Jésus passe d’agapaō à phileō à sa troisième question."
+  ,"offlineSetup.bibleFacts.lucifer": "Dans Ésaïe 14, « Lucifer » est le latin pour « astre du matin », dans une satire du roi de Babylone."
+  ,"offlineSetup.bibleFacts.christTitle": "« Christ » n’est pas le nom de famille de Jésus : christos est un titre grec signifiant « oint », équivalent de « Messie »."
+  ,"offlineSetup.bibleFacts.jesusJoshua": "Jésus et Josué portent le même nom en grec, Iēsous. Dans Hébreux 4:8, seul le contexte permet de savoir qu’il s’agit de Josué."
+  ,"offlineSetup.bibleFacts.hosanna": "« Hosanna » signifiait initialement « sauve, je t’en prie », avant de devenir également une acclamation de louange."
+  ,"offlineSetup.bibleFacts.sheol": "Le Shéol est le séjour des morts dans la Bible hébraïque. Le traduire systématiquement par « enfer » lui ajoute des notions qui ne se sont développées que bien plus tard."
+  ,"offlineSetup.bibleFacts.gehenna": "« Géhenne » vient du nom d’une vallée près de Jérusalem, devenue ensuite une image du jugement."
+  ,"offlineSetup.bibleFacts.adamAdamah": "En Genèse 2, adam et adamah forment un jeu de mots : l’humain est tiré de l’humus, ou du sol."
+  ,"offlineSetup.bibleFacts.adamSide": "La « côte » d’Adam traduit tsela, un mot qui désigne généralement un « côté ». « Côte » reste possible, mais ce n’est pas son seul sens."
+  ,"offlineSetup.bibleFacts.shalom": "Shalom ne signifie pas seulement « paix » : sa famille de mots évoque ce qui est entier, achevé ou restauré. En Néhémie 6:15, le mur est « achevé » avec un verbe de la même racine."
+  ,"offlineSetup.bibleFacts.strongNumbers": "Les numéros Strong portent le nom de James Strong, qui publia sa concordance en 1890. Jack Cochrane et Germain Chouinard en ont créé une adaptation francophone pour la Bible Segond."
+  ,"offlineSetup.bibleFacts.psalm119": "Les 176 versets du Psaume 119 forment 22 strophes : huit versets pour chaque lettre hébraïque."
+  ,"offlineSetup.back": "Retour aux dossiers"
+  ,"offlineSetup.included": "Ce dossier contient"
+  ,"offlineSetup.add": "Ajouter à ma bibliothèque"
+  ,"offlineSetup.remove": "Retirer de ma sélection"
+  ,"offlineSetup.required": "Inclus pour lire la Bible"
+  ,"offlineSetup.resourceCount": "{{count}} ressources"
+  ,"offlineSetup.presets.read-bible.title": "Lire la Bible"
+  ,"offlineSetup.presets.read-bible.subtitle": "1 traduction"
+  ,"offlineSetup.presets.read-bible.description": "Choisissez parmi plusieurs versions de la Bible et gardez celles que vous aimez lire à portée de main."
+  ,"offlineSetup.presets.understand-words.title": "Comprendre les mots"
+  ,"offlineSetup.presets.understand-words.subtitle": "4 ressources"
+  ,"offlineSetup.presets.understand-words.description": "Découvrez les mots derrière le texte avec plusieurs Bibles enrichies des codes Strong. Choisissez les Bibles d’étude qui vous conviennent."
+  ,"offlineSetup.presets.explore-bible.title": "Explorer la Bible"
+  ,"offlineSetup.presets.explore-bible.subtitle": "6 ressources"
+  ,"offlineSetup.presets.explore-bible.description": "Partez à la rencontre des personnages et des lieux, suivez les grands thèmes, reliez les passages entre eux et éclairez votre lecture grâce aux outils d’étude."
+  ,"offlineSetup.presets.original-languages.title": "Langues originales"
+  ,"offlineSetup.presets.original-languages.subtitle": "4 ressources"
+  ,"offlineSetup.presets.original-languages.description": "Étudiez les textes hébreux et grecs avec l’interlinéaire et le dictionnaire grec détaillé."
+  ,"offlineSetup.resources.bible": "Bible principale"
+  ,"offlineSetup.resources.strongIndex": "Index Strong de la Bible"
+  ,"offlineSetup.resources.strongLexicon": "Lexique Strong"
+  ,"offlineSetup.resources.dictionary": "Dictionnaire biblique"
+  ,"offlineSetup.resources.nave": "Bible thématique Nave"
+  ,"offlineSetup.resources.crossReferences": "Références croisées"
+  ,"offlineSetup.resources.commentaries": "Commentaires bibliques"
+  ,"offlineSetup.resources.timeline": "Chronologie de la Bible"
+  ,"offlineSetup.resources.entities": "Entités bibliques"
+  ,"offlineSetup.resources.strongFoundation": "Données Strong partagées"
+  ,"offlineSetup.resources.originalBible": "Bible hébraïque et grecque"
+  ,"offlineSetup.resources.interlinear": "Interlinéaire en français"
+  ,"offlineSetup.resources.greekDictionary": "Dictionnaire grec détaillé"
+  ,"offlineSetup.closePreview": "Fermer l’aperçu"
+  ,"playground.resourcesEyebrow": "Onboarding"
+  ,"playground.resourcesTitle": "Écran des ressources"
+  ,"playground.resourcesDescription": "Prévisualisez les dossiers proposés à la fin de l’onboarding et ouvrez leur détail."
+  ,"playground.previewSettings": "Réglages de l’aperçu"
+  ,"playground.previewSettingsDescription": "Appliqués aux deux parcours du playground."
+  ,"offlineSetup.chooseResources": "Choisissez vos ressources"
+  ,"offlineSetup.selectedCount": "{{count}} sélection"
+  ,"offlineSetup.selectedCount_plural": "{{count}} sélections"
+  ,"offlineSetup.translationCount": "{{count}} traduction"
+  ,"offlineSetup.translationCount_plural": "{{count}} traductions"
+  ,"offlineSetup.requiredBadge": "REQUIS"
+  ,"offlineSetup.includedBadge": "INCLUS"
+  ,"offlineSetup.section.primaryLanguage": "Dans votre langue"
+  ,"offlineSetup.section.otherLanguages": "Autres langues"
+  ,"offlineSetup.section.sharedResources": "Ressources partagées"
+  ,"offlineSetup.section.sharedTools": "Outils partagés"
+  ,"offlineSetup.section.strongBiblesPrimary": "Bibles Strong dans votre langue"
+  ,"offlineSetup.section.strongBiblesOther": "Bibles Strong dans d’autres langues"
+  ,"offlineSetup.section.originalText": "Texte original"
+  ,"offlineSetup.section.interlinearLanguages": "Langues de l’interlinéaire"
+  ,"offlineSetup.option.strongBible": "{{name}} · Strong"
+  ,"offlineSetup.option.localizedResource": "{{name}} · {{language}}"
+  ,"offlineSetup.option.strongLexiconDescription": "Définitions françaises et anglaises, morphologie et mots liés."
+  ,"offlineSetup.option.entitiesDescription": "Personnes, lieux, groupes et autres entités reliés aux mots bibliques."
+  ,"offlineSetup.option.greekDictionaryDescription": "Notices détaillées de grec classique pour les entrées Strong grecques."
+  ,"offlineSetup.option.interlinear.fr": "Interlinéaire français"
+  ,"offlineSetup.option.interlinear.en": "Interlinéaire anglais"
+  ,"offlineSetup.language.fr": "Français"
+  ,"offlineSetup.language.en": "Anglais"
 }

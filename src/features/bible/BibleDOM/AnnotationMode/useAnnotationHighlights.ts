@@ -13,6 +13,7 @@ import {
   collectAnnotationTextNodes,
   createAnnotationTextRanges,
 } from './annotationDomText'
+import { subscribeToBibleLayoutChanges } from '../annotationLayoutLifecycle'
 
 /**
  * Merges all DOMRects on the same line into single rectangles.
@@ -357,10 +358,10 @@ export function useAnnotationHighlights({
     }
 
     window.addEventListener('resize', handleResize)
-    window.addEventListener('layoutChanged', handleLayoutChanged)
+    const unsubscribeFromLayoutChanges = subscribeToBibleLayoutChanges(handleLayoutChanged)
     return () => {
       window.removeEventListener('resize', handleResize)
-      window.removeEventListener('layoutChanged', handleLayoutChanged)
+      unsubscribeFromLayoutChanges()
     }
   }, [
     version,

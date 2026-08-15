@@ -1,12 +1,11 @@
 import type { DownloadItem } from '~state/downloadQueue'
-import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
+import { isSharedDB, type DatabaseId, type ResourceLanguage } from '~helpers/databaseTypes'
 import { versions, type Version } from '~helpers/bibleVersions'
-import { biblesRef, getDatabaseUrl } from '~helpers/firebase'
 import { databases, getDbPath } from '~helpers/databases'
+import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
 import {
   getStrongBiblePublication,
   isStrongCapableBibleVersion,
-  usesCanonicalBibleExtras,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
 import type { StrongBibleSidecarAvailability } from './strongBibleSidecar'
@@ -25,8 +24,6 @@ export {
   createStrongLexiconModuleDownloadPlan,
 } from './strongLexiconDownloadItems'
 
-const BIBLE_ESTIMATED_SIZE = 2_500_000
-
 /**
  * Create a DownloadItem for a Bible version.
  */
@@ -40,26 +37,30 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
   const interlinearPublication = isInterlinearCapableBibleVersion(versionId)
     ? BHG_INTERLINEAR_PUBLICATION
     : undefined
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    createOfflineCopyId({ kind: 'bible', versionId })
+  )
 
-  const url = interlinearPublication
-    ? interlinearPublication.canonical.url
-    : publication
-      ? publication.canonical.url
-      : biblesRef[versionId]
-
-  const estimatedSize =
-    interlinearPublication?.canonical.archiveBytes ??
-    publication?.canonical.archiveBytes ??
-    BIBLE_ESTIMATED_SIZE
+  const url = catalogArtifact.url
+  const estimatedSize = catalogArtifact.archiveBytes
 
   const common = {
     id: createOfflineCopyId({ kind: 'bible', versionId }),
     name: version.name,
     versionId,
     url,
+    archiveEntry: catalogArtifact.entry,
+    archiveEntries: {
+      canonical: catalogArtifact.entries.canonical?.entry ?? catalogArtifact.entry,
+      ...(catalogArtifact.entries.pericope
+        ? { pericope: catalogArtifact.entries.pericope.entry }
+        : {}),
+      ...(catalogArtifact.entries.redWords
+        ? { redWords: catalogArtifact.entries.redWords.entry }
+        : {}),
+    },
     estimatedSize,
-    hasRedWords: usesCanonicalBibleExtras(versionId) ? false : Boolean(version.hasRedWords),
-    hasPericope: usesCanonicalBibleExtras(versionId) ? false : Boolean(version.hasPericope),
+    expectedArchiveSha256: catalogArtifact.archiveSha256,
     addedAt: Date.now(),
     retryCount: 0,
   }
@@ -73,7 +74,19 @@ export function createBibleDownloadItem(versionId: string): DownloadItem {
 }
 
 export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): DownloadItem {
-  const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[lang]
+  const publicationArtifact = BHG_INTERLINEAR_PUBLICATION.indexes[lang]
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: lang })
+  )
+  const artifact = {
+    ...publicationArtifact,
+    url: catalogArtifact.url,
+    entry: catalogArtifact.entry,
+    archiveSha256: catalogArtifact.archiveSha256,
+    archiveBytes: catalogArtifact.archiveBytes,
+    contentSha256: catalogArtifact.contentSha256,
+    contentBytes: catalogArtifact.contentBytes,
+  }
   return {
     id: createOfflineCopyId({
       kind: 'interlinear-index',
@@ -86,6 +99,7 @@ export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): Do
     lang,
     url: artifact.url,
     estimatedSize: artifact.archiveBytes,
+    expectedArchiveSha256: artifact.archiveSha256,
     interlinearArtifact: artifact,
     interlinearDatasetId: BHG_INTERLINEAR_PUBLICATION.datasetId,
     addedAt: Date.now(),
@@ -108,14 +122,27 @@ export const createInterlinearSidecarDownloadPlan = (
 export function createStrongSidecarDownloadItem(versionId: StrongBibleVersionId): DownloadItem {
   const version = versions[versionId]
   const publication = getStrongBiblePublication(versionId)
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    createOfflineCopyId({ kind: 'strong-bible-index', versionId })
+  )
+  const strongArtifact = {
+    ...publication.strong,
+    url: catalogArtifact.url,
+    entry: catalogArtifact.entry,
+    archiveSha256: catalogArtifact.archiveSha256,
+    archiveBytes: catalogArtifact.archiveBytes,
+    contentSha256: catalogArtifact.contentSha256,
+    contentBytes: catalogArtifact.contentBytes,
+  }
   return {
     id: createOfflineCopyId({ kind: 'strong-bible-index', versionId }),
     type: 'bible-strong-sidecar',
     name: `${version.name} — Strong`,
     versionId,
-    url: publication.strong.url,
-    estimatedSize: publication.strong.archiveBytes,
-    strongArtifact: publication.strong,
+    url: strongArtifact.url,
+    estimatedSize: strongArtifact.archiveBytes,
+    expectedArchiveSha256: strongArtifact.archiveSha256,
+    strongArtifact,
     strongDatasetId: publication.datasetId,
     addedAt: Date.now(),
     retryCount: 0,
@@ -203,22 +230,28 @@ export function createDatabaseDownloadItem(
   databaseId: Exclude<DatabaseId, 'BIBLES'>,
   lang: ResourceLanguage
 ): DownloadItem {
-  const allDbs = databases(lang)
+  const resourceLang = isSharedDB(databaseId) ? 'fr' : lang
+  const allDbs = databases(resourceLang)
   const db = allDbs[databaseId as keyof typeof allDbs]
   if (!db) throw new Error(`Unknown database: ${databaseId}`)
 
-  const url = getDatabaseUrl(databaseId as Exclude<DatabaseId, 'BIBLES'>, lang)
-  const destinationPath = getDbPath(databaseId, lang)
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    createOfflineCopyId({ kind: 'database', databaseId, language: resourceLang })
+  )
+  const url = catalogArtifact.url
+  const destinationPath = getDbPath(databaseId, resourceLang)
 
   return {
-    id: createOfflineCopyId({ kind: 'database', databaseId, language: lang }),
+    id: createOfflineCopyId({ kind: 'database', databaseId, language: resourceLang }),
     type: 'database',
     name: db.name,
     databaseId,
-    lang,
+    lang: resourceLang,
     url,
     destinationPath,
-    estimatedSize: db.fileSize,
+    archiveEntry: catalogArtifact.entry,
+    estimatedSize: catalogArtifact.archiveBytes,
+    expectedArchiveSha256: catalogArtifact.archiveSha256,
     addedAt: Date.now(),
     retryCount: 0,
   }

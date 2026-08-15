@@ -1,3 +1,40 @@
+diff --git a/build/src/export/exportDomComponents.js b/build/src/export/exportDomComponents.js
+index cee1be17099f215f9a5e8c3010dc5dae14d79999..7495823ed5036eeb2c4c03d01913997ccd65d037 100644
+--- a/build/src/export/exportDomComponents.js
++++ b/build/src/export/exportDomComponents.js
+@@ -75,6 +75,20 @@ function _interop_require_default(obj) {
+     };
+ }
+ const debug = require('debug')('expo:export:exportDomComponents');
++function transformDomArtifactsForMd5Filename(artifacts) {
++    const renamedArtifacts = new Map();
++    for (const artifact of artifacts){
++        const originalFilename = artifact.filename;
++        const md5 = _crypto().default.createHash('md5').update(artifact.source).digest('hex');
++        artifact.filename = `${md5}.${artifact.type}`;
++        renamedArtifacts.set(originalFilename, artifact.filename);
++    }
++    for (const artifact of artifacts){
++        if (artifact.metadata.requires) {
++            artifact.metadata.requires = artifact.metadata.requires.map((filename)=>renamedArtifacts.get(filename) ?? filename);
++        }
++    }
++}
+ async function exportDomComponentAsync({ filePath, projectRoot, dev, devServer, isHermes, includeSourceMaps, exp, files, useMd5Filename = false }) {
+     var _exp_experiments;
+     const virtualEntry = (0, _resolvefrom().default)(projectRoot, 'expo/dom/entry.js');
+@@ -103,10 +120,7 @@ async function exportDomComponentAsync({ filePath, projectRoot, dev, devServer,
+         minify: true
+     });
+     if (useMd5Filename) {
+-        for (const artifact of bundle.artifacts){
+-            const md5 = _crypto().default.createHash('md5').update(artifact.source).digest('hex');
+-            artifact.filename = `${md5}.${artifact.type}`;
+-        }
++        transformDomArtifactsForMd5Filename(bundle.artifacts);
+     }
+     const html = await (0, _serializeHtml.serializeHtmlWithAssets)({
+         isExporting: true,
 diff --git a/build/src/start/server/middleware/DomComponentsMiddleware.js b/build/src/start/server/middleware/DomComponentsMiddleware.js
 index 9354bedfc84d53efd54e089ad3e9e23c4d026123..55d8eb166ff1cfa17aa2a34623b01ca9e97dd583 100644
 --- a/build/src/start/server/middleware/DomComponentsMiddleware.js

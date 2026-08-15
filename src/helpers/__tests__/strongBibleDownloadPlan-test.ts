@@ -6,9 +6,15 @@ jest.mock('~helpers/firebase', () => ({
   getDatabaseUrl: jest.fn(),
 }))
 
+jest.mock('~helpers/databaseTypes', () => ({
+  isSharedDB: (databaseId: string) => databaseId === 'TRESOR',
+}))
+
 jest.mock('~helpers/bibleVersions', () => ({
   versions: {
     DBY: { id: 'DBY', name: 'Bible Darby' },
+    OST: { id: 'OST', name: 'Bible Ostervald' },
+    NBS: { id: 'NBS', name: 'Nouvelle Bible Segond', hasRedWords: true, hasPericope: true },
     KJV: {
       id: 'KJV',
       name: 'King James Version',
@@ -20,8 +26,14 @@ jest.mock('~helpers/bibleVersions', () => ({
 }))
 
 jest.mock('~helpers/databases', () => ({
-  databases: () => ({}),
-  getDbPath: jest.fn(),
+  databases: () => ({
+    NAVE: { name: 'Nave', fileSize: 1 },
+    TRESOR: { name: 'Trésor', fileSize: 1 },
+  }),
+  getDbPath: (databaseId: string, lang: string) =>
+    databaseId === 'TRESOR'
+      ? '/documents/SQLite/shared/commentaires-tresor.sqlite'
+      : `/documents/SQLite/${lang}/${databaseId.toLowerCase()}.sqlite`,
 }))
 
 jest.mock('~helpers/requireBiblePath', () => ({
@@ -31,6 +43,7 @@ jest.mock('~helpers/requireBiblePath', () => ({
 import {
   createInterlinearSidecarDownloadPlan,
   createBibleDownloadItem,
+  createDatabaseDownloadItem,
   createOfflineCopyDownloadItem,
   createOfflineCopyDownloadPlan,
   createStrongSidecarDownloadPlan,
@@ -66,8 +79,30 @@ describe('Strong Bible download planning', () => {
   it('does not queue legacy red-word or pericope files for a canonical V4 publication', () => {
     expect(createBibleDownloadItem('KJV')).toEqual(
       expect.objectContaining({
-        hasRedWords: false,
-        hasPericope: false,
+        archiveEntries: { canonical: 'bible-kjv.json' },
+      })
+    )
+  })
+
+  it('uses the global ZIP catalog for a historical Bible', () => {
+    expect(createBibleDownloadItem('OST')).toEqual(
+      expect.objectContaining({
+        url: 'https://assets.bible-strong.app/bibles/bible-ost.json.zip',
+        archiveEntry: 'bible-ost.json',
+        expectedArchiveSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
+      })
+    )
+  })
+
+  it('installs legacy display metadata from the same Bible archive', () => {
+    expect(createBibleDownloadItem('NBS')).toEqual(
+      expect.objectContaining({
+        id: 'bible:NBS',
+        archiveEntries: {
+          canonical: 'bible-nbs.json',
+          pericope: 'bible-nbs-pericope.json',
+          redWords: 'red-words-nbs.json',
+        },
       })
     )
   })
@@ -97,6 +132,29 @@ describe('Strong Bible download planning', () => {
       'bible:DBY',
       'bible-strong:DBY',
     ])
+  })
+})
+
+describe('historical resource database download planning', () => {
+  it('uses the global ZIP catalog and declared archive entry', () => {
+    expect(createDatabaseDownloadItem('NAVE', 'fr')).toEqual(
+      expect.objectContaining({
+        url: 'https://assets.bible-strong.app/databases/nave-fr.sqlite.zip',
+        archiveEntry: 'nave-fr.sqlite',
+        destinationPath: '/documents/SQLite/fr/nave.sqlite',
+        expectedArchiveSha256: expect.stringMatching(/^[a-f0-9]{64}$/),
+      })
+    )
+  })
+
+  it('canonicalizes a shared database to its language-independent catalog identity', () => {
+    expect(createDatabaseDownloadItem('TRESOR', 'en')).toEqual(
+      expect.objectContaining({
+        id: 'database:TRESOR:fr',
+        lang: 'fr',
+        url: 'https://assets.bible-strong.app/databases/commentaires-tresor.sqlite.zip',
+      })
+    )
   })
 })
 

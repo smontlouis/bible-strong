@@ -5,11 +5,12 @@ import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atom
 import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { getSharedSqliteDirPath } from './databaseTypes'
 import { downloadWithCdnFallback } from './downloadWithCdnFallback'
-import { toNativeFilePath } from './fileIntegrity'
+import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
 import {
   getStrongLexiconPublication,
   type StrongLexiconModuleId,
+  type StrongLexiconPublicationArtifact,
 } from './strongLexiconPublications'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
@@ -251,9 +252,9 @@ const activateStrongLexiconModule = async (
 
 export const installStrongLexiconModule = async (
   moduleId: StrongLexiconModuleId,
+  publication: StrongLexiconPublicationArtifact,
   callbacks: StrongLexiconInstallCallbacks = {}
 ) => {
-  const publication = getStrongLexiconPublication(moduleId)
   const archivePath = `${FileSystem.cacheDirectory}strong-lexicon-${moduleId}.zip`
   const extractionDirectory = `${FileSystem.cacheDirectory}strong-lexicon-${moduleId}/`
   const extractedPath = `${extractionDirectory}${publication.entry}`
@@ -268,6 +269,13 @@ export const installStrongLexiconModule = async (
       logTag: `StrongLexicon:${moduleId}`,
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
+    if (publication.archiveSha256) {
+      await verifyFileSha256(
+        archivePath,
+        publication.archiveSha256,
+        `STRONG_LEXICON_ARCHIVE_CHECKSUM_MISMATCH:${moduleId}`
+      )
+    }
     await callbacks.installationLifecycle?.prepare(result)
 
     callbacks.onStatusInserting?.()

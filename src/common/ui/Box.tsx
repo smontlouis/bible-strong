@@ -510,6 +510,7 @@ export const FadingText = ({ children, direction = 'left', ...props }: FadingTex
 
 type FadingViewProps = Omit<BoxProps, 'direction'> & {
   keyProp: string
+  animateLayout?: boolean
   direction?: 'left' | 'right' | 'top' | 'bottom'
   entering?: EntryExitAnimationFunction | ComplexAnimationBuilder
   exiting?: EntryExitAnimationFunction | ComplexAnimationBuilder
@@ -520,6 +521,7 @@ type FadingViewProps = Omit<BoxProps, 'direction'> & {
 export const FadingBox = ({
   children,
   keyProp,
+  animateLayout = true,
   direction = 'left',
   entering,
   exiting,
@@ -544,7 +546,7 @@ export const FadingBox = ({
         key={keyProp ?? children?.toString() ?? ''}
         entering={enteringAnimation}
         exiting={exitingAnimation}
-        layout={LinearTransition}
+        layout={animateLayout ? LinearTransition : undefined}
         {...props}
       >
         {children}

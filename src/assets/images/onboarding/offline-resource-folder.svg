@@ -1,0 +1,37 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="170"
+  height="154"
+  viewBox="0 0 170 154"
+  fill="none"
+>
+  <defs>
+    <linearGradient
+      id="offline-resource-folder-front"
+      x1="133.754"
+      y1="44.851"
+      x2="36.246"
+      y2="143.149"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#76A0FA" />
+      <stop offset="1" stop-color="#5983F0" />
+    </linearGradient>
+  </defs>
+
+  <path
+    id="folder-back"
+    d="M20 0H150C161 0 170 9 170 20V134C170 145 161 154 150 154H20C9 154 0 145 0 134V20C0 9 9 0 20 0Z"
+    fill="#C9DAFF"
+  />
+  <path
+    id="folder-paper"
+    d="M42 12H142C153 12 162 21 162 32V112C162 123 153 132 142 132H30C20 132 12 123 12 112V32C12 21 20 12 30 12H42Z"
+    fill="#FFFDF8"
+  />
+  <path
+    id="folder-front"
+    d="M0 54C0 43 9 34 20 34H75C90 34 95.5 34 104 50C108 57 114 60 122 60H150C161 60 170 69 170 80V134C170 145 161 154 150 154H20C9 154 0 145 0 134V54Z"
+    fill="url(#offline-resource-folder-front)"
+  />
+</svg>

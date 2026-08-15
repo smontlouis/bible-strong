@@ -106,8 +106,10 @@ export const formatPassageMediaDuration = (durationSeconds: number): string => {
   return `${minutes}:${String(seconds).padStart(2, '0')}`
 }
 
+const PASSAGE_MEDIA_PLAYER_URL = 'https://bible-strong.app/embed/youtube.html'
+
 export const getPassageMediaEmbedUrl = (providerId: string): string =>
-  `https://www.youtube.com/embed/${encodeURIComponent(providerId)}?autoplay=1&playsinline=1&rel=0&modestbranding=1`
+  `${PASSAGE_MEDIA_PLAYER_URL}?v=${encodeURIComponent(providerId)}`
 
 type ResolvePassageMediaChapterInput = {
   book: number

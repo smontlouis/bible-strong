@@ -15,6 +15,7 @@ import { storage } from '~helpers/storage'
 import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
 import { reconcileResourceInstallationJournal } from '~helpers/resourceInstallationJournal'
 import { installManagedResource } from '~helpers/managedResourceInstallation'
+import { refreshPersistedDownloadItem } from '~helpers/persistedDownloadItem'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -110,6 +111,7 @@ class DownloadManager {
     this.cancelledIds.delete(itemId)
     states.set(itemId, {
       ...state,
+      item: refreshPersistedDownloadItem(state.item),
       status: 'queued',
       downloadProgress: 0,
       insertProgress: 0,
@@ -130,6 +132,7 @@ class DownloadManager {
         this.cancelledIds.delete(id)
         states.set(id, {
           ...state,
+          item: refreshPersistedDownloadItem(state.item),
           status: 'queued',
           downloadProgress: 0,
           insertProgress: 0,
@@ -165,6 +168,7 @@ class DownloadManager {
         ) {
           states.set(itemState.item.id, {
             ...itemState,
+            item: refreshPersistedDownloadItem(itemState.item),
             status:
               itemState.status === 'downloading' || itemState.status === 'inserting'
                 ? 'queued'

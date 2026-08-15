@@ -66,6 +66,7 @@ import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
 import ChapterEntities from './ChapterEntities'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
 import { getPassageMediaGalleryItems, getPassageMediaGallerySections } from './passageMediaGallery'
+import { createVersePositionLayoutProps } from './annotationLayoutLifecycle'
 
 declare global {
   interface Window {
@@ -619,6 +620,11 @@ const LoadedBibleContent = ({
     selection: annotationMode ? selection : undefined,
     getTokens: annotationMode ? getTokens : undefined,
   })
+  const [isVerseLayoutAnimating, setIsVerseLayoutAnimating] = useState(false)
+  const versePositionLayoutProps = createVersePositionLayoutProps({
+    onAnimationStart: () => setIsVerseLayoutAnimating(true),
+    onAnimationSettled: () => setIsVerseLayoutAnimating(false),
+  })
 
   // Gesture handlers for unified touch selection
   const hasReverseInterlinear = verses.some(verse => Boolean(verse.ReverseInterlinearSpans?.length))
@@ -1154,34 +1160,36 @@ const LoadedBibleContent = ({
           headerHeight={headerHeight}
         >
           {/* Highlight layer for word annotations and selection (disabled in parallel mode) */}
-          {!isParallelVerse && (highlightRects.length > 0 || (annotationMode && selection)) && (
-            <HighlightLayer $dimmed={!annotationMode && Object.keys(selectedVerses).length > 0}>
-              {highlightRects.map(rect => (
-                <HighlightRectDiv
-                  key={rect.id}
-                  $top={rect.top}
-                  $left={rect.left}
-                  $width={rect.width}
-                  $height={rect.height}
-                  $color={rect.color}
-                  $annotationType={rect.annotationType}
-                  $isSelected={rect.annotationId === selectedAnnotationId}
-                  $isDimmed={rect.isDimmed}
-                  $primaryColor={settings.colors[settings.theme].primary}
-                  $backgroundColor={settings.colors[settings.theme].reverse}
-                  $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}
-                />
-              ))}
-              {/* Selection handles - only in annotation mode */}
-              {annotationMode && (
-                <SelectionHandles
-                  hasSelection={selection !== null}
-                  startPosition={selectionHandlePositions.start}
-                  endPosition={selectionHandlePositions.end}
-                />
-              )}
-            </HighlightLayer>
-          )}
+          {!isVerseLayoutAnimating &&
+            !isParallelVerse &&
+            (highlightRects.length > 0 || (annotationMode && selection)) && (
+              <HighlightLayer $dimmed={!annotationMode && Object.keys(selectedVerses).length > 0}>
+                {highlightRects.map(rect => (
+                  <HighlightRectDiv
+                    key={rect.id}
+                    $top={rect.top}
+                    $left={rect.left}
+                    $width={rect.width}
+                    $height={rect.height}
+                    $color={rect.color}
+                    $annotationType={rect.annotationType}
+                    $isSelected={rect.annotationId === selectedAnnotationId}
+                    $isDimmed={rect.isDimmed}
+                    $primaryColor={settings.colors[settings.theme].primary}
+                    $backgroundColor={settings.colors[settings.theme].reverse}
+                    $animationDelay={rect.type === 'annotation' ? getAnimationDelay(rect.id) : 0}
+                  />
+                ))}
+                {/* Selection handles - only in annotation mode */}
+                {annotationMode && (
+                  <SelectionHandles
+                    hasSelection={selection !== null}
+                    startPosition={selectionHandlePositions.start}
+                    endPosition={selectionHandlePositions.end}
+                  />
+                )}
+              </HighlightLayer>
+            )}
           {isParallelVerse && parallelDisplayMode === 'horizontal' && (
             <HeaderScrollWrapper ref={headerScrollRef} columnCount={parallelVersionTitles.length}>
               <VersionsContainer
@@ -1233,7 +1241,7 @@ const LoadedBibleContent = ({
                 isCompact={!passageMedia.isIntroductionStartChapter}
               />
             )}
-            <m.div layout="position">
+            <m.div {...versePositionLayoutProps}>
               {/* Unified verse rendering for all modes */}
               <UnifiedVersesRenderer
                 verses={verses}

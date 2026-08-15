@@ -1,164 +1,246 @@
-import { useAtom } from 'jotai/react'
-import React, { useEffect } from 'react'
+import { Feather } from '@expo/vector-icons'
+import { useTheme } from '@emotion/react'
+import { useSetAtom } from 'jotai/react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SectionList } from 'react-native'
-import Border from '~common/ui/Border'
-import Box from '~common/ui/Box'
-import Button from '~common/ui/Button'
-import Container from '~common/ui/Container'
-import Paragraph from '~common/ui/Paragraph'
+import { Pressable, useWindowDimensions } from 'react-native'
+import { FadeIn, FadeInUp, useReducedMotion } from 'react-native-reanimated'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import { getVersionsBySections } from '~helpers/bibleVersions'
 import useLanguage from '~helpers/useLanguage'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import {
-  getStrongBiblePublication,
-  isStrongCapableBibleVersion,
-  type StrongBibleVersionId,
-} from '~helpers/strongBiblePublications'
+import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { selectedResourcesAtom } from './atom'
-import {
-  getDefaultOnboardingResourceSelection,
-  getOnboardingDatabaseResourceOptions,
-  getOnboardingResourceSelectionId,
-  toggleOnboardingResourceSelection,
-  type OnboardingResourceSelection,
-} from './onboardingResources'
-import ResourceItem from './ResourceItem'
-import { getStrongLexiconPublication } from '~helpers/strongLexiconPublications'
+import DownloadResources from './DownloadResources'
+import OfflineResourceFolderHero from './components/OfflineResourceFolderHero'
+import OfflineSetupFolderDetail from './components/OfflineSetupFolderDetail'
+import OfflineSetupOverview from './components/OfflineSetupOverview'
+import OfflineSetupReviewSheet from './components/OfflineSetupReviewSheet'
+import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
+import { getOfflineSetupFolderPalette, getOfflineSetupOverviewPalette } from './offlineSetupPalette'
+import { getOfflineSetupFolderSections } from './offlineSetupPresets'
+import type { OfflineSetupReviewFolderContext } from './offlineSetupReview'
+import { OFFLINE_SETUP_FOLDER_PRESENTATIONS } from './offlineSetupPresentation'
+import useOfflineSetupScene from './useOfflineSetupScene'
+import useOfflineSetupSelection from './useOfflineSetupSelection'
 
-const DownloadFiles = ({ setStep }: { setStep: React.Dispatch<React.SetStateAction<number>> }) => {
+type SelectResourcesProps =
+  | { mode?: 'onboarding'; onComplete: () => void }
+  | { mode: 'preview'; onClose: () => void }
+
+const SelectResources = (props: SelectResourcesProps) => {
   const { t } = useTranslation()
+  const theme = useTheme()
+  const { colorScheme } = useCurrentThemeSelector()
   const lang = useLanguage()
-  const databases = getOnboardingDatabaseResourceOptions(lang)
-  const [selectedResources, setSelectedResources] = useAtom(selectedResourcesAtom)
+  const insets = useSafeAreaInsets()
+  const viewport = useWindowDimensions()
+  const reduceMotion = useReducedMotion()
+  const setSelectedResources = useSetAtom(selectedResourcesAtom)
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const selection = useOfflineSetupSelection(lang)
+  const scene = useOfflineSetupScene({ reduceMotion, viewport })
+  const contentWidth = Math.min(350, viewport.width - 40)
+  const folderWidth = (contentWidth - 50) / 2
+  const bottomInset = Math.max(insets.bottom, 16)
+  const { state } = scene
+  const activeFolder = state.activeFolder
+  const activeVisual = OFFLINE_SETUP_FOLDER_PRESENTATIONS.find(item => item.id === activeFolder)
+  const heroVisual = OFFLINE_SETUP_FOLDER_PRESENTATIONS.find(
+    item => item.id === state.hero?.folderId
+  )
+  const heroCount = state.hero ? selection.folderOptionIds[state.hero.folderId].length : 0
+  const isClosingFolder = state.hero?.direction === 'closing'
+  const downloading = state.downloadSceneActive && !state.downloadSceneSettled
+  const activeFolderSummary = activeFolder
+    ? selection.folderReviewSummaries[activeFolder]
+    : undefined
+  const overviewPalette = getOfflineSetupOverviewPalette(theme, colorScheme)
+  const activePalette = activeVisual
+    ? getOfflineSetupFolderPalette(activeVisual, theme, colorScheme)
+    : undefined
+  const sceneBackground = activePalette?.canvas ?? theme.colors.lightGrey
+  let folderContext: OfflineSetupReviewFolderContext | undefined
 
-  // Set default version
-  useEffect(() => {
-    setSelectedResources([getDefaultOnboardingResourceSelection(lang)])
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const onPressItem = (resource: OnboardingResourceSelection) => {
-    setSelectedResources(res => toggleOnboardingResourceSelection(res, resource))
+  if (activeFolder && activeVisual && activeFolderSummary && activePalette) {
+    folderContext = {
+      folderId: activeFolder,
+      heroOverlayActive:
+        state.hero?.folderId === activeFolder && state.hero.direction !== 'settled',
+      selectedCount: selection.folderOptionIds[activeFolder].length,
+      palette: activePalette,
+      summary: activeFolderSummary,
+      title: t(`offlineSetup.presets.${activeFolder}.title`),
+      visual: activeVisual,
+      onClose: scene.closeFolder,
+      onHeroTargetLayout: scene.handleHeroTargetLayout,
+    }
   }
 
-  const isSelected = (resource: OnboardingResourceSelection) => {
-    const resourceId = getOnboardingResourceSelectionId(resource)
-    return selectedResources.some(r => getOnboardingResourceSelectionId(r) === resourceId)
+  const startDownload = () => {
+    if (!selection.availabilityReady) return
+    setReviewOpen(false)
+    setSelectedResources(selection.missingSelections)
+    scene.startDownload()
   }
 
   return (
-    <Container>
-      <SectionList
-        ListHeaderComponent={
-          <>
-            <Box paddingTop={100} paddingBottom={30}>
-              <Box>
-                <Text padding={20} title fontSize={40}>
-                  {t('Vous êtes presque prêt !')}
-                </Text>
-              </Box>
-              <Box>
-                <Paragraph fontFamily="text" px={20} mt={40}>
-                  {t(
-                    'Choisissez les bases de données et les bibles que vous souhaitez télécharger.'
-                  )}
-                </Paragraph>
-              </Box>
-            </Box>
-            <Text padding={20} title fontSize={25}>
-              {t('Bases de données')}
-            </Text>
-            <ResourceItem
-              name={t('Lexique Strong')}
-              subTitle={t('Définitions françaises et anglaises, morphologie et mots liés')}
-              fileSize={getStrongLexiconPublication('core').archiveBytes}
-              isSelected={isSelected({ kind: 'strong-lexicon' })}
-              onPress={() => onPressItem({ kind: 'strong-lexicon' })}
+    <AnimatedBox
+      flex
+      style={{
+        backgroundColor: sceneBackground,
+        transitionProperty: 'backgroundColor',
+        transitionDuration: reduceMotion
+          ? 0
+          : OFFLINE_SETUP_MOTION.overview.backgroundColorDuration,
+        transitionTimingFunction: 'ease-out',
+      }}
+    >
+      {state.downloadSceneActive ? (
+        <AnimatedBox absoluteFill zIndex={state.downloadSceneSettled ? 30 : 15}>
+          {props.mode === 'preview' ? (
+            <DownloadResources
+              canvasVisible={state.downloadSceneSettled}
+              mode="preview"
+              transitioning={!state.downloadContentVisible}
             />
-            {Object.values(databases).map(db => (
-              <ResourceItem
-                key={db.id}
-                name={db.name}
-                subTitle={db.desc}
-                fileSize={db.fileSize}
-                isSelected={isSelected({
-                  kind: 'database',
-                  databaseId: db.id,
-                  lang,
-                })}
-                onPress={() =>
-                  onPressItem({
-                    kind: 'database',
-                    databaseId: db.id,
-                    lang,
-                  })
-                }
-              />
-            ))}
+          ) : (
+            <DownloadResources
+              canvasVisible={state.downloadSceneSettled}
+              mode="onboarding"
+              onComplete={props.onComplete}
+              transitioning={!state.downloadContentVisible}
+            />
+          )}
+        </AnimatedBox>
+      ) : null}
 
-            <Text padding={20} paddingBottom={0} title fontSize={25}>
-              {t('Bibles')}
-            </Text>
-          </>
-        }
-        stickySectionHeadersEnabled={false}
-        sections={getVersionsBySections()}
-        keyExtractor={item => item.id}
-        renderSectionHeader={({ section: { title } }) => (
-          <Box paddingHorizontal={20} marginTop={20}>
-            <Text fontSize={16} color="tertiary">
-              {title}
-            </Text>
-            <Border marginTop={10} />
-          </Box>
-        )}
-        renderItem={({ item: version }) => (
-          <>
-            <ResourceItem
-              name={version.name}
-              isSelected={isSelected({ kind: 'bible', versionId: version.id })}
-              isDisabled={version.id === getDefaultBibleVersion(lang)}
-              onPress={() => {
-                onPressItem({
-                  kind: 'bible',
-                  versionId: version.id,
-                })
-              }}
-            />
-            {isStrongCapableBibleVersion(version.id) && (
-              <Box pl={20}>
-                <ResourceItem
-                  name={t('Mode Strong')}
-                  subTitle={t(
-                    'Ajoute les numéros Strong à cette Bible. Le texte biblique reste utilisable sans ce téléchargement.'
-                  )}
-                  fileSize={
-                    getStrongBiblePublication(version.id as StrongBibleVersionId).strong
-                      .archiveBytes
-                  }
-                  isSelected={isSelected({
-                    kind: 'bible-strong',
-                    versionId: version.id as StrongBibleVersionId,
-                  })}
-                  onPress={() =>
-                    onPressItem({
-                      kind: 'bible-strong',
-                      versionId: version.id as StrongBibleVersionId,
-                    })
-                  }
-                />
-              </Box>
+      {!state.downloadSceneSettled && activeFolder && activeVisual && activePalette ? (
+        <OfflineSetupFolderDetail
+          contentVisible={state.detailContentVisible}
+          folderId={activeFolder}
+          lang={lang}
+          lockedOptionIds={selection.lockedOptionIds}
+          sizeManifest={selection.sizeManifest}
+          sections={getOfflineSetupFolderSections(activeFolder, lang)}
+          selectedOptionIds={selection.folderOptionIds[activeFolder]}
+          palette={activePalette}
+          onToggleOption={option => selection.toggleOption(activeFolder, option)}
+        />
+      ) : null}
+
+      {!state.downloadSceneSettled && (!activeFolder || state.openingFolder || isClosingFolder) ? (
+        <AnimatedBox
+          absoluteFill
+          zIndex={10}
+          entering={reduceMotion || !isClosingFolder ? undefined : FadeIn.duration(100)}
+        >
+          <OfflineSetupOverview
+            bottomInset={bottomInset}
+            contentWidth={contentWidth}
+            downloading={downloading}
+            folderOptionIds={selection.folderOptionIds}
+            folderWidth={folderWidth}
+            hero={state.hero}
+            mergeOffsets={state.folderMergeOffsets}
+            openingFolder={state.openingFolder}
+            reduceMotion={reduceMotion}
+            returningFolder={state.returningFolder}
+            safeAreaTop={insets.top}
+            onFolderPress={scene.openFolder}
+            registerFolder={scene.registerFolder}
+          />
+        </AnimatedBox>
+      ) : null}
+
+      {!state.downloadSceneSettled ? (
+        <AnimatedBox
+          absoluteFill
+          zIndex={20}
+          pointerEvents={downloading ? 'none' : 'box-none'}
+          entering={reduceMotion ? undefined : FadeInUp.duration(400).delay(450)}
+          style={{
+            opacity: downloading ? 0 : 1,
+            transform: [{ translateY: downloading ? 10 : 0 }],
+            transitionProperty: ['opacity', 'transform'],
+            transitionDuration: OFFLINE_SETUP_MOTION.overview.downloadFadeDuration,
+            transitionTimingFunction: 'ease-out',
+          }}
+        >
+          <OfflineSetupReviewSheet
+            availabilityReady={selection.availabilityReady}
+            bottomInset={bottomInset}
+            downloading={downloading}
+            folderContext={folderContext}
+            lang={lang}
+            overviewPalette={overviewPalette}
+            reduceMotion={reduceMotion}
+            safeAreaTop={insets.top}
+            summary={selection.reviewSummary}
+            onDownload={startDownload}
+            onOpenChange={setReviewOpen}
+          />
+        </AnimatedBox>
+      ) : null}
+
+      {!state.downloadSceneSettled && state.hero && heroVisual ? (
+        <OfflineResourceFolderHero
+          direction={state.hero.direction}
+          origin={state.hero.origin}
+          target={state.hero.target}
+          title={t(`offlineSetup.presets.${state.hero.folderId}.title`)}
+          subtitle={t('offlineSetup.selectedCount', { count: heroCount })}
+          itemCount={heroCount}
+          visual={heroVisual}
+          selected={heroCount > 0}
+          onTransitionEnd={scene.handleHeroTransitionEnd}
+        />
+      ) : null}
+
+      {props.mode === 'preview' ? (
+        <AnimatedBox
+          position="absolute"
+          top={insets.top + 10}
+          right={16}
+          zIndex={100}
+          pointerEvents={reviewOpen ? 'none' : 'auto'}
+          style={{
+            opacity: reviewOpen ? 0 : 1,
+            transitionProperty: 'opacity',
+            transitionDuration: 160,
+          }}
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('offlineSetup.closePreview')}
+            onPress={props.onClose}
+            hitSlop={8}
+          >
+            {({ pressed }) => (
+              <HStack
+                px={11}
+                height={32}
+                borderRadius={16}
+                bg="rgba(255,255,255,0.92)"
+                alignItems="center"
+                gap={6}
+                style={{
+                  opacity: pressed ? 0.72 : 1,
+                  boxShadow: '0 4px 14px rgba(28,51,88,0.10)',
+                }}
+              >
+                <Text color="#68758C" fontSize={10} bold>
+                  {t('offlineSetup.closePreview')}
+                </Text>
+                <Feather name="x" size={14} color="#68758C" />
+              </HStack>
             )}
-          </>
-        )}
-      />
-      <Box padding={20}>
-        <Button onPress={() => setStep(2)}>{t('Continuer')}</Button>
-      </Box>
-    </Container>
+          </Pressable>
+        </AnimatedBox>
+      ) : null}
+    </AnimatedBox>
   )
 }
 
-export default DownloadFiles
+export default SelectResources

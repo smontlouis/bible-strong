@@ -1,0 +1,87 @@
+- generic [ref=f2e3]:
+  - generic [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - text: Bible Strong
+      - emphasis [ref=f2e7]: Avatar Lab
+    - generic [ref=f2e8]:
+      - generic [ref=f2e9]: 🇬🇧
+      - combobox "Interface language" [ref=f2e10]:
+        - generic [ref=f2e11]: English
+        - img [ref=f2e12]: ▼
+      - textbox [ref=f2e14]: en
+    - generic [ref=f2e15]:
+      - img "Procedural avatar" [ref=f2e16]:
+        - generic [ref=f2e18]:
+          - generic [ref=f2e19] [cursor=pointer]
+          - generic [ref=f2e20] [cursor=pointer]
+      - generic [ref=f2e21]:
+        - img "Rotation gizmo" [ref=f2e22]
+        - button "Reset head rotation" [ref=f2e27]
+      - generic [ref=f2e28]: X Y Z
+    - paragraph [ref=f2e32]: Drag on the surface to orient the head. The gizmo rings control X, Y and Z.
+  - main [ref=f2e33]:
+    - generic [ref=f2e557]:
+      - heading "Avatar Studio" [level=1] [ref=f2e558]
+      - 'generic "Active state: idle" [ref=f2e559]':
+        - generic [ref=f2e562]:
+          - generic [ref=f2e563]: Paused
+          - strong [ref=f2e564]: idle
+        - button "Resume idle" [ref=f2e565]
+        - button "Stop idle" [ref=f2e566]
+    - region "Choose an avatar" [ref=f2e567]:
+      - generic [ref=f2e568]:
+        - strong [ref=f2e569]: Avatars
+        - generic [ref=f2e570]: Double-click to edit
+      - generic [ref=f2e571]:
+        - button "Strobi" [pressed] [ref=f2e573]
+        - button "New avatar" [ref=f2e575] [cursor=pointer]
+      - button "Edit Strobi" [ref=f2e576]
+    - tablist "Editing mode" [ref=f2e578]:
+      - tab "Pose" [ref=f2e579]
+      - tab "Expressions" [selected] [ref=f2e580]
+      - tab "States" [ref=f2e581]
+    - generic [ref=f2e582]:
+      - generic [ref=f2e583]:
+        - generic [ref=f2e584]:
+          - generic [ref=f2e585]:
+            - paragraph [ref=f2e586]: 25 presets
+            - heading "Expressions" [level=2] [ref=f2e587]
+          - generic [ref=f2e588]: Double-click to edit
+        - generic [ref=f2e589]:
+          - button "00" [ref=f2e590] [cursor=pointer]
+          - button "01" [ref=f2e592] [cursor=pointer]
+          - button "02" [ref=f2e594] [cursor=pointer]
+          - button "03" [ref=f2e596] [cursor=pointer]
+          - button "04" [ref=f2e598] [cursor=pointer]
+          - button "05" [ref=f2e600] [cursor=pointer]
+          - button "06" [ref=f2e602] [cursor=pointer]
+          - button "07" [ref=f2e604] [cursor=pointer]
+          - button "08" [ref=f2e606] [cursor=pointer]
+          - button "09" [ref=f2e608] [cursor=pointer]
+          - button "10" [ref=f2e610] [cursor=pointer]
+          - button "11" [ref=f2e612] [cursor=pointer]
+          - button "12" [ref=f2e614] [cursor=pointer]
+          - button "13" [ref=f2e616] [cursor=pointer]
+          - button "14" [ref=f2e618] [cursor=pointer]
+          - button "15" [ref=f2e620] [cursor=pointer]
+          - button "16" [ref=f2e622] [cursor=pointer]
+          - button "17" [ref=f2e624] [cursor=pointer]
+          - button "18" [ref=f2e626] [cursor=pointer]
+          - button "19" [ref=f2e628] [cursor=pointer]
+          - button "20" [ref=f2e630] [cursor=pointer]
+          - button "21" [ref=f2e632] [cursor=pointer]
+          - button "22" [ref=f2e634] [cursor=pointer]
+          - button "23" [ref=f2e636] [cursor=pointer]
+          - button "24" [ref=f2e638] [cursor=pointer]
+          - button "New expression" [ref=f2e640] [cursor=pointer]: +
+      - generic [ref=f2e641]:
+        - generic [ref=f2e642]:
+          - heading "Motion" [level=2] [ref=f2e643]
+          - generic [ref=f2e644]: Motion interpolates values while the engine performs quaternion slerp.
+        - group [ref=f2e645]:
+          - button "Spring speed" [ref=f2e646]:
+            - generic [ref=f2e648]: ↔
+          - spinbutton "Spring speed" [ref=f2e650]: "7"
+        - generic [ref=f2e651]:
+          - button "Blink" [ref=f2e652]
+          - button "Random expression" [ref=f2e653]

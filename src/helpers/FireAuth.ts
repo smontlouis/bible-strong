@@ -25,6 +25,16 @@ import { tokenManager } from '~helpers/TokenManager'
 import { runAllCleanups } from '~helpers/cleanupRegistry'
 import i18n from '~i18n'
 import type { AppDispatch } from '~redux/store'
+import { appLogger } from './agentObservability'
+import {
+  AccountEntryAttemptCoordinator,
+  classifyAccountEntry,
+  createUnresolvedAccountEntryRepository,
+  preserveUnresolvedAccountEntryClassification,
+  type AccountEntryClassification,
+  type AccountEntryOperation,
+} from './accountEntry'
+import { storage } from './storage'
 
 export type FireAuthProfile = {
   id: string
@@ -36,10 +46,18 @@ export type FireAuthProfile = {
   createdAt: string | null
 }
 
-type OnLoginCallback = (payload: { profile: FireAuthProfile }) => void
+type OnLoginCallback = (payload: {
+  profile: FireAuthProfile
+  accountEntryClassification: AccountEntryClassification
+}) => void
 type OnUserChangeCallback = (profile: FireAuthProfile) => void
 type VoidCallback = () => void
 type AuthErrorCallback = (error: unknown) => void
+type AccountEntryProvider = 'apple.com' | 'google.com' | 'password' | 'custom-token'
+type ClassifiedAuthAttempt = {
+  complete(result: { userId: string; credentialIsNewUser?: boolean }): void
+  fail(): void
+}
 
 const getErrorCode = (error: unknown): string | undefined => {
   if (error && typeof error === 'object' && 'code' in error) {
@@ -66,6 +84,50 @@ const FireAuth = class {
   onError: AuthErrorCallback | null = null
 
   previousEmailVerified = false
+
+  accountEntryAttempts = new AccountEntryAttemptCoordinator()
+
+  unresolvedAccountEntries = createUnresolvedAccountEntryRepository(storage)
+
+  private beginAccountEntryAttempt(
+    operation: AccountEntryOperation,
+    provider: AccountEntryProvider
+  ): ClassifiedAuthAttempt {
+    const startedAt = Date.now()
+    const attempt = this.accountEntryAttempts.begin(operation)
+    appLogger.info('sync', 'account_entry.authentication_started', {
+      lifecycleState: 'authenticating',
+      operation,
+      provider,
+    })
+
+    return {
+      complete: (result: { userId: string; credentialIsNewUser?: boolean }) => {
+        const classification = classifyAccountEntry({
+          operation,
+          credentialIsNewUser: result.credentialIsNewUser,
+        })
+        attempt.complete(result)
+        appLogger.info('sync', 'account_entry.authentication_completed', {
+          lifecycleState: 'classified',
+          operation,
+          provider,
+          classification,
+          durationMs: Date.now() - startedAt,
+        })
+      },
+      fail: () => {
+        attempt.fail()
+        appLogger.warn('sync', 'account_entry.authentication_failed', {
+          lifecycleState: 'recoverable-error',
+          operation,
+          provider,
+          failureStage: 'authentication',
+          durationMs: Date.now() - startedAt,
+        })
+      },
+    }
+  }
 
   async init(
     onLogin: OnLoginCallback,
@@ -95,6 +157,17 @@ const FireAuth = class {
 
       if (user) {
         console.log('[Auth] User exists')
+
+        const accountEntryClassification = preserveUnresolvedAccountEntryClassification({
+          classification: await this.accountEntryAttempts.classifyAuthenticatedUser(user.uid),
+          userId: user.uid,
+          repository: this.unresolvedAccountEntries,
+        })
+        appLogger.info('sync', 'account_entry.classified', {
+          lifecycleState: 'classifying-account-transition',
+          classification: accountEntryClassification,
+          provider: user.providerData[0]?.providerId || 'unknown',
+        })
 
         // Determine if user needs to verify email
         const emailVerified =
@@ -139,7 +212,7 @@ const FireAuth = class {
             /**
              * 1.c. We call the onLogin callback dispatching onUserLoginSuccess
              */
-            this.onLogin({ profile })
+            this.onLogin({ profile, accountEntryClassification })
           }
 
           this.user = user // Store user
@@ -169,6 +242,7 @@ const FireAuth = class {
 
   appleLogin = (): Promise<boolean> =>
     new Promise(async resolve => {
+      const accountEntryAttempt = this.beginAccountEntryAttempt('provider-sign-in', 'apple.com')
       try {
         const appleAuthRequestResponse = await appleAuth.performRequest({
           requestedOperation: appleAuth.Operation.LOGIN,
@@ -182,13 +256,19 @@ const FireAuth = class {
           // 3). create a Firebase `AppleAuthProvider` credential
           const appleCredential = AppleAuthProvider.credential(identityToken, nonce)
           const userCredential = await signInWithCredential(getAuth(), appleCredential)
+          accountEntryAttempt.complete({
+            userId: userCredential.user.uid,
+            credentialIsNewUser: userCredential.additionalUserInfo?.isNewUser,
+          })
 
           console.log(`[Auth] Firebase authenticated via Apple, UID: ${userCredential.user.uid}`)
           resolve(false)
         } else {
+          accountEntryAttempt.fail()
           resolve(false)
         }
       } catch (e) {
+        accountEntryAttempt.fail()
         if (getErrorCode(e) === 'ERR_CANCELED') {
           console.log('[Auth] ERR_CANCELED')
         } else {
@@ -225,6 +305,7 @@ const FireAuth = class {
 
   googleLogin = (): Promise<boolean> =>
     new Promise(async resolve => {
+      const accountEntryAttempt = this.beginAccountEntryAttempt('provider-sign-in', 'google.com')
       try {
         await GoogleSignin.hasPlayServices()
         const signInResult = await GoogleSignin.signIn()
@@ -235,8 +316,9 @@ const FireAuth = class {
         }
 
         const googleCredential = GoogleAuthProvider.credential(idToken)
-        return this.onCredentialSuccess(googleCredential, resolve)
+        return this.onCredentialSuccess(googleCredential, resolve, accountEntryAttempt)
       } catch (e) {
+        accountEntryAttempt.fail()
         toast.error(i18n.t('Une erreur est survenue'))
         console.log('[Auth] Google login error:', e)
         return resolve(false)
@@ -245,15 +327,21 @@ const FireAuth = class {
 
   onCredentialSuccess = async (
     credential: FirebaseAuthTypes.AuthCredential,
-    resolve: (value: boolean) => void
+    resolve: (value: boolean) => void,
+    accountEntryAttempt: ClassifiedAuthAttempt
   ) => {
     try {
       const user = await signInWithCredential(getAuth(), credential)
+      accountEntryAttempt.complete({
+        userId: user.user.uid,
+        credentialIsNewUser: user.additionalUserInfo?.isNewUser,
+      })
 
       console.log('[Auth] User signed in', user)
       toast.success(i18n.t('Connexion réussie'))
       return resolve(true)
     } catch (e) {
+      accountEntryAttempt.fail()
       const code = getErrorCode(e)
       console.log('[Auth] Error code:', code)
       if (code === 'auth/account-exists-with-different-credential') {
@@ -265,18 +353,25 @@ const FireAuth = class {
 
   login = (email: string, password: string): Promise<boolean> =>
     new Promise(resolve => {
+      const accountEntryAttempt = this.beginAccountEntryAttempt('email-login', 'password')
       try {
         signInWithEmailAndPassword(getAuth(), email.trim(), password.trim())
-          .then(() => {
+          .then(userCredential => {
+            accountEntryAttempt.complete({
+              userId: userCredential.user.uid,
+              credentialIsNewUser: userCredential.additionalUserInfo?.isNewUser,
+            })
             resolve(true)
           })
           .catch(err => {
+            accountEntryAttempt.fail()
             if (this.onError) {
               this.onError(err)
             }
             resolve(false)
           })
       } catch (e) {
+        accountEntryAttempt.fail()
         if (this.onError) {
           this.onError(e)
         }
@@ -322,21 +417,29 @@ const FireAuth = class {
 
   register = (username: string, email: string, password: string): Promise<boolean> =>
     new Promise(resolve => {
+      const accountEntryAttempt = this.beginAccountEntryAttempt('email-registration', 'password')
       try {
         createUserWithEmailAndPassword(getAuth(), email, password)
-          .then(({ user }) => {
+          .then(userCredential => {
+            const { user } = userCredential
+            accountEntryAttempt.complete({
+              userId: user.uid,
+              credentialIsNewUser: userCredential.additionalUserInfo?.isNewUser,
+            })
             setDoc(doc(firebaseDb, 'users', user.uid), { displayName: username }, { merge: true })
 
             user.sendEmailVerification()
             return resolve(true)
           })
           .catch(err => {
+            accountEntryAttempt.fail()
             if (this.onError) {
               this.onError(err)
             }
             return resolve(false)
           })
       } catch (e) {
+        accountEntryAttempt.fail()
         if (this.onError) {
           this.onError(e)
         }
@@ -419,11 +522,14 @@ const FireAuth = class {
         resolve(false)
         return
       }
+      const accountEntryAttempt = this.beginAccountEntryAttempt('email-login', 'custom-token')
       try {
-        await signInWithCustomToken(getAuth(), token)
+        const { user } = await signInWithCustomToken(getAuth(), token)
+        accountEntryAttempt.complete({ userId: user.uid })
         toast.success(i18n.t('Connexion réussie'))
         resolve(true)
       } catch (e) {
+        accountEntryAttempt.fail()
         console.log('[Auth] Custom token error:', e)
         toast.error(i18n.t('Token invalide'))
         resolve(false)

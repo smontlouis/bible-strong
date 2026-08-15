@@ -6,10 +6,7 @@ import { isAtomicResourceFileRollbackError } from './atomicResourceFile'
 import { getInterlinearSidecarPath } from './interlinearBibleSidecar'
 import { getDownloadItemIdentity } from './offlineCopy'
 import { invalidateOfflineCopyQueries } from './offlineCopyQueries'
-import {
-  installResourceDatabaseItem,
-  synchronizeOptionalBibleResources,
-} from './resourceDatabaseInstallation'
+import { installResourceDatabaseItem } from './resourceDatabaseInstallation'
 import {
   beginResourceInstallation,
   commitResourceInstallation,
@@ -60,11 +57,12 @@ export const installManagedResource = async (
     await installResourceDatabaseItem(item, {
       ...callbacks,
       installationLifecycle: {
-        prepare: installed => {
+        prepare: (installed, recoveryTarget) => {
           installationJournal = beginResourceInstallation(
             item.id,
             installed,
-            getResourceInstallationRecoveryTarget(item)
+            recoveryTarget ?? getResourceInstallationRecoveryTarget(item),
+            item.expectedArchiveSha256
           )
         },
         commit: () => {
@@ -81,9 +79,6 @@ export const installManagedResource = async (
     }
     installationCompleted = true
     completeResourceInstallation(installationJournal)
-    if (item.type === 'bible') {
-      await synchronizeOptionalBibleResources(item, item.versionId)
-    }
   } catch (error) {
     if (
       installationJournal &&

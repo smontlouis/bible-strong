@@ -14,6 +14,14 @@ import {
 } from './overlayStagger'
 import { NAVIGATE_TO_STRONG } from './dispatch'
 import { useDispatch } from './DispatchProvider'
+import { withColorAlpha } from './themeOverlayColor'
+
+type OverlayColors = {
+  default: string
+  lightGrey: string
+  primary: string
+  reverse: string
+}
 
 type Props = {
   items: ResolvedPassageMedia[]
@@ -25,6 +33,7 @@ type Props = {
   onClose: () => void
   onSelect: (item: ResolvedPassageMedia) => void
   placement: 'inline' | 'introduction' | 'chapter-resources'
+  colors: OverlayColors
 }
 
 type GalleryItemProps = {
@@ -39,6 +48,7 @@ type GalleryItemProps = {
   layoutTransition: Transition
   onSelect: (item: ResolvedPassageMedia) => void
   onOpenStrong: (strongCode: string) => void
+  colors: OverlayColors
 }
 
 const PassageMediaGalleryCard = ({
@@ -53,6 +63,7 @@ const PassageMediaGalleryCard = ({
   layoutTransition,
   onSelect,
   onOpenStrong,
+  colors,
 }: GalleryItemProps) => {
   const delayedLayoutTransition = { ...layoutTransition, delay: sourceDelay }
 
@@ -73,7 +84,7 @@ const PassageMediaGalleryCard = ({
         minWidth: 0,
         alignSelf: 'start',
         overflow: 'visible',
-        color: '#171717',
+        color: colors.default,
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
         textAlign: 'left',
         background: 'transparent',
@@ -107,7 +118,7 @@ const PassageMediaGalleryCard = ({
             width: '100%',
             aspectRatio: '16 / 9',
             boxSizing: 'border-box',
-            border: '2px solid #fff',
+            border: `2px solid ${colors.reverse}`,
             borderRadius: 11,
             boxShadow: '0 7px 22px rgba(0, 0, 0, 0.25)',
           }}
@@ -170,8 +181,8 @@ const PassageMediaGalleryCard = ({
                     padding: '4px 8px',
                     border: 0,
                     borderRadius: 999,
-                    background: 'rgba(93, 135, 237, 0.14)',
-                    color: '#416bc9',
+                    background: colors.lightGrey,
+                    color: colors.default,
                     fontSize: 10,
                     fontWeight: 700,
                     lineHeight: 1.2,
@@ -212,6 +223,7 @@ const PassageMediaOverlay = ({
   selectedItem,
   onClose,
   onSelect,
+  colors,
 }: Props) => {
   const translations = useTranslations()
   const dispatch = useDispatch()
@@ -286,6 +298,7 @@ const PassageMediaOverlay = ({
         shouldReduceMotion={shouldReduceMotion}
         layoutTransition={spring}
         onSelect={onSelect}
+        colors={colors}
         onOpenStrong={strongCode => {
           void dispatch({ type: NAVIGATE_TO_STRONG, payload: strongCode })
         }}
@@ -304,7 +317,7 @@ const PassageMediaOverlay = ({
       data-ignore-verse-touch
       initial={false}
       animate={{
-        backgroundColor: mode !== 'closed' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0)',
+        backgroundColor: withColorAlpha(colors.reverse, mode !== 'closed' ? 0.5 : 0),
         backdropFilter: mode !== 'closed' ? 'blur(8px)' : 'blur(0px)',
       }}
       transition={{
@@ -392,7 +405,7 @@ const PassageMediaOverlay = ({
                     transition={{ duration: 0.22, delay: 0.08 + sectionIndex * 0.06 }}
                     style={{
                       margin: '0 0 14px 2px',
-                      color: '#5d87ed',
+                      color: colors.primary,
                       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
                       fontSize: 12,
                       lineHeight: 1.2,
@@ -435,6 +448,7 @@ const PassageMediaOverlay = ({
             items.findIndex(item => item.editionId === selectedItem.editionId)
           )}
           layoutTransition={spring}
+          borderColor={colors.reverse}
         />
       )}
     </m.div>,

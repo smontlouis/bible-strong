@@ -18,6 +18,11 @@ import reducer, {
   appFetchData,
   appFetchDataFail,
 } from '../user'
+import {
+  canStartRemoteHydration,
+  createAccountEntryState,
+  reduceAccountEntry,
+} from '~helpers/accountEntry'
 
 jest.mock('react-native', () => ({
   Appearance: {
@@ -245,6 +250,49 @@ describe('User Reducer', () => {
       }
       const newState = reducer(state, onUserLoginSuccess({ profile }))
       expect(newState.displayName).toBe('Existing Name')
+    })
+
+    it('reproduces empty snapshot loss and keeps the new-account hydration gate closed', () => {
+      const guestState = createState({
+        bible: {
+          ...initialState.bible,
+          bookmarks: {
+            'guest-bookmark': {
+              id: 'guest-bookmark',
+              name: 'Guest bookmark',
+              color: '#123456',
+              book: 1,
+              chapter: 1,
+              verse: 1,
+              version: 'LSG',
+              date: 1,
+            },
+          },
+        },
+      })
+      const emptyRemoteSnapshot = receiveSubcollectionUpdates({
+        collection: 'bookmarks',
+        data: {},
+        changes: { added: {}, modified: {}, removed: [] },
+        isInitialLoad: true,
+      })
+
+      let accountEntry = createAccountEntryState()
+      accountEntry = reduceAccountEntry(accountEntry, { type: 'authentication-started' })
+      accountEntry = reduceAccountEntry(accountEntry, {
+        type: 'account-classified',
+        classification: 'new-account',
+        userId: 'new-user',
+      })
+      accountEntry = reduceAccountEntry(accountEntry, { type: 'backup-finished' })
+
+      const stateWithoutGate = reducer(guestState, emptyRemoteSnapshot)
+      const hydrationEnabled = canStartRemoteHydration(accountEntry)
+      const stateWithGate = hydrationEnabled ? reducer(guestState, emptyRemoteSnapshot) : guestState
+
+      expect(stateWithoutGate.bible.bookmarks).toEqual({})
+      expect(hydrationEnabled).toBe(false)
+      expect(stateWithGate.bible.bookmarks).toHaveProperty('guest-bookmark')
     })
   })
 

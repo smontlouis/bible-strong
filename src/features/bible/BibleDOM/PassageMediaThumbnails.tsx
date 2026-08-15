@@ -227,6 +227,7 @@ const PassageMediaThumbnails = ({
         })}
       </m.button>
       <PassageMediaOverlay
+        colors={colors}
         placement={placement}
         items={items}
         sections={gallerySections}

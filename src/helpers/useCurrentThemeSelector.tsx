@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Appearance } from 'react-native'
 import { useSelector } from 'react-redux'
+import { useThemeSelectionOverride } from '~common/ThemeSelectionOverrideContext'
 import { RootState } from '~redux/modules/reducer'
 
 const useCurrentThemeSelector = () => {
+  const themeSelectionOverride = useThemeSelectionOverride()
   const preferredColorScheme = useSelector(
     (state: RootState) => state.user.bible.settings.preferredColorScheme || 'auto'
   )
@@ -42,12 +44,14 @@ const useCurrentThemeSelector = () => {
     return preferredLightTheme
   })()
 
-  return {
-    theme: computedTheme,
-    colorScheme: (['default', 'sepia', 'nature', 'sunset'].includes(computedTheme)
-      ? 'light'
-      : 'dark') as 'light' | 'dark',
-  }
+  return (
+    themeSelectionOverride ?? {
+      theme: computedTheme,
+      colorScheme: (['default', 'sepia', 'nature', 'sunset'].includes(computedTheme)
+        ? 'light'
+        : 'dark') as 'light' | 'dark',
+    }
+  )
 }
 
 export default useCurrentThemeSelector

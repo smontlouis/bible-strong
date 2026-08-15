@@ -4,6 +4,7 @@ import 'react-native-url-polyfill/auto'
 
 import type { ActiveLanguage } from '~helpers/languageUtils'
 import { DEFAULT_LANGUAGE, isActiveLanguage } from '~helpers/languageUtils'
+import { isPlaygroundEnabled } from '~helpers/runtimeConfig'
 import { storage } from '~helpers/storage'
 
 const enTranslation = require('./locales/en/translation.json')
@@ -42,6 +43,8 @@ const languageDetector = {
     }
   },
   cacheUserLanguage: (language: string) => {
+    if (isPlaygroundEnabled) return
+
     try {
       storage.set('lang', language)
     } catch (error) {

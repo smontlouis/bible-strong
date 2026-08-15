@@ -116,6 +116,22 @@ Complete files remain useful for offline installation, but they should no longer
 - If internet is unavailable and no local resource is installed, the app shows a clear offline state with actions: retry, choose an installed resource, download later.
 - Onboarding becomes explanatory and dismissible, or is replaced by a "Make available offline" card.
 
+### Initial Offline Setup
+
+Onboarding may offer cumulative, need-based selections to prepare the user's first Offline copies:
+
+- `Lire la Bible`: the selected primary Bible;
+- `Comprendre les mots`: a selected Strong-compatible Bible, its Strong index, the core Strong
+  lexicon, and the general dictionary;
+- `Explorer la Bible`: Nave, cross references, commentaries, timeline, and biblical entities;
+- `Étudier les langues originales`: BHG, the interlinear index in the application language, the
+  core Strong lexicon, and the detailed Greek dictionary;
+- `Tout préparer`: a convenience action selecting every preceding need, not an additional preset.
+
+Technical dependencies are added automatically and shared resources are deduplicated. The user may
+skip the setup and rely on Online access. Once the resulting Offline copies enter the download
+queue, these selections cease to exist as product objects.
+
 ### Bible Reading
 
 - The main chapter loads first.
@@ -128,7 +144,9 @@ Complete files remain useful for offline installation, but they should no longer
 
 - The Resources screen shows three states: `Online`, `Available offline`, `Update available`.
 - Primary actions become: open, make available offline, remove offline copy, update.
-- Packs can group downloads: basic reading, Strong study, local search, complete FR resources, complete EN resources.
+- During onboarding, ephemeral need-based presets can bootstrap a user's initial Offline copies.
+  Once those copies enter the download queue, the preset disappears: the Downloads screen manages
+  individual resources only and does not expose installed packs.
 
 ### Search
 

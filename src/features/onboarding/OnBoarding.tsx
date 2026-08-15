@@ -1,31 +1,35 @@
-import styled from '@emotion/native'
-import { useAtom } from 'jotai/react'
-import React, { useEffect, useState } from 'react'
+import { useAtom, useSetAtom } from 'jotai/react'
+import { useEffect, useRef, useState } from 'react'
 import { Modal } from 'react-native'
 import { useDispatch } from 'react-redux'
+
+import Box from '~common/ui/Box'
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import { isOnboardingForced } from '~helpers/runtimeConfig'
 import { deleteAllDatabases } from '~helpers/sqlite'
 import useLanguage from '~helpers/useLanguage'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
-
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { setDefaultBibleVersion } from '~redux/modules/user'
 import { isOnboardingCompletedAtom } from './atom'
-import DownloadResources from './DownloadResources'
-import OnBoardingSlides from './OnBoardingSlides'
+import AbelOnboarding from './AbelOnboarding'
 import SelectResources from './SelectResources'
-
-const ModalContainer = styled.View(({ theme }) => ({
-  flex: 1,
-  backgroundColor: theme.colors.reverse,
-}))
 
 const useCheckMandatoryVersions = () => {
   const lang = useLanguage()
   const dispatch = useDispatch()
   const [isOnboardingCompleted, setIsOnboardingCompleted] = useAtom(isOnboardingCompletedAtom)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const forcedOnboardingDismissed = useRef(false)
 
   useEffect(() => {
+    if (isOnboardingForced) {
+      if (!forcedOnboardingDismissed.current) {
+        console.log('[Onboarding] Force onboarding.')
+        setShowOnboarding(true)
+      }
+      return
+    }
+
     // Skip file check if onboarding was already completed (fast path via MMKV)
     if (isOnboardingCompleted) {
       console.log('[Onboarding] Already completed, skipping file check.')
@@ -59,20 +63,41 @@ const useCheckMandatoryVersions = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang, dispatch, isOnboardingCompleted])
 
-  return showOnboarding
+  const hideOnboarding = () => {
+    forcedOnboardingDismissed.current = true
+    setShowOnboarding(false)
+  }
+
+  return { hideOnboarding, showOnboarding }
 }
 
 const OnBoarding = () => {
-  const [step, setStep] = React.useState<number>(0)
-  const showOnboarding = useCheckMandatoryVersions()
+  const [step, setStep] = useState<'abel' | 'resources'>('abel')
+  const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
+  const { hideOnboarding, showOnboarding } = useCheckMandatoryVersions()
+
+  const completeOnboarding = () => {
+    if (isOnboardingForced) {
+      hideOnboarding()
+      return
+    }
+    setIsOnboardingCompleted(true)
+  }
 
   return (
-    <Modal visible={showOnboarding} animationType="slide" presentationStyle="fullScreen">
-      <ModalContainer>
-        {step === 0 && <OnBoardingSlides setStep={setStep} />}
-        {step === 1 && <SelectResources setStep={setStep} />}
-        {step === 2 && <DownloadResources />}
-      </ModalContainer>
+    <Modal
+      visible={showOnboarding}
+      animationType="fade"
+      presentationStyle="fullScreen"
+      onRequestClose={() => undefined}
+    >
+      <Box flex bg="reverse">
+        {step === 'abel' ? (
+          <AbelOnboarding onComplete={() => setStep('resources')} />
+        ) : (
+          <SelectResources onComplete={completeOnboarding} />
+        )}
+      </Box>
     </Modal>
   )
 }

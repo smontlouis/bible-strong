@@ -1,0 +1,175 @@
+import { Feather } from '@expo/vector-icons'
+import { Pressable } from 'react-native'
+import { FadeIn, FadeOut } from 'react-native-reanimated'
+import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg'
+
+import Box, { FadingBox } from '~common/ui/Box'
+import Text from '~common/ui/Text'
+import type { OfflineSetupFolderVisual } from '../offlineSetupPresentation'
+import OfflineResourceFolderBounce from './OfflineResourceFolderBounce'
+import OfflineResourceFolderItems from './OfflineResourceFolderItems'
+
+type OfflineResourceFolderProps = {
+  title: string
+  subtitle: string
+  width: number
+  icon: React.ComponentProps<typeof Feather>['name']
+  itemCount: number
+  selected: boolean
+  showChevron?: boolean
+  colors: OfflineSetupFolderVisual['colors']
+  onPress?: () => void
+}
+
+const OfflineResourceFolder = ({
+  title,
+  subtitle,
+  width,
+  icon,
+  itemCount,
+  selected,
+  showChevron = true,
+  colors,
+  onPress,
+}: OfflineResourceFolderProps) => {
+  const scale = width / 170
+  const scaled = (value: number) => value * scale
+
+  return (
+    <Pressable
+      accessible={Boolean(onPress)}
+      accessibilityRole={onPress ? 'button' : undefined}
+      accessibilityState={onPress ? { selected } : undefined}
+      accessibilityLabel={`${title}, ${subtitle}`}
+      disabled={!onPress}
+      onPress={onPress}
+      style={({ pressed }) => ({
+        width,
+        aspectRatio: 170 / 154,
+        overflow: 'visible',
+        opacity: pressed && onPress ? 0.88 : 1,
+        transform: [{ scale: pressed && onPress ? 0.98 : 1 }],
+      })}
+    >
+      <OfflineResourceFolderBounce itemCount={itemCount} width={width}>
+        <Svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 170 154"
+          fill="none"
+          style={{ position: 'absolute', zIndex: 0 }}
+        >
+          <Path
+            d="M20 0H150C161 0 170 9 170 20V134C170 145 161 154 150 154H20C9 154 0 145 0 134V20C0 9 9 0 20 0Z"
+            fill={colors.back}
+          />
+          <Path
+            d="M42 12H142C153 12 162 21 162 32V112C162 123 153 132 142 132H30C20 132 12 123 12 112V32C12 21 20 12 30 12H42Z"
+            fill="#FFFDF8"
+          />
+        </Svg>
+
+        <OfflineResourceFolderItems colors={colors} itemCount={itemCount} width={width} />
+
+        <Svg
+          width="100%"
+          height="100%"
+          viewBox="0 0 170 154"
+          fill="none"
+          style={{ position: 'absolute', zIndex: 10 }}
+        >
+          <Defs>
+            <LinearGradient
+              id={`folder-front-${icon}`}
+              x1="133.754"
+              y1="44.851"
+              x2="36.246"
+              y2="143.149"
+              gradientUnits="userSpaceOnUse"
+            >
+              <Stop stopColor={colors.frontStart} />
+              <Stop offset="1" stopColor={colors.frontEnd} />
+            </LinearGradient>
+          </Defs>
+          <Path
+            d="M0 54C0 43 9 34 20 34H75C90 34 95.5 34 104 50C108 57 114 60 122 60H150C161 60 170 69 170 80V134C170 145 161 154 150 154H20C9 154 0 145 0 134V54Z"
+            fill={`url(#folder-front-${icon})`}
+          />
+        </Svg>
+
+        <Box
+          position="absolute"
+          top={scaled(46)}
+          left={scaled(14)}
+          size={scaled(34)}
+          borderRadius={scaled(11)}
+          zIndex={20}
+          center
+          bg="rgba(255,255,255,0.82)"
+        >
+          <Feather name={icon} size={scaled(20)} color={colors.icon} />
+        </Box>
+
+        <FadingBox
+          keyProp={selected ? 'selected' : 'unselected'}
+          entering={FadeIn.duration(140)}
+          exiting={FadeOut.duration(140)}
+          skipEntering={false}
+          skipExiting={false}
+          position="absolute"
+          top={scaled(70)}
+          right={scaled(12)}
+          size={scaled(20)}
+          borderRadius={scaled(10)}
+          borderWidth={scaled(1.5)}
+          borderColor="rgba(255,255,255,0.9)"
+          bg={selected ? '#FFFFFF' : 'rgba(255,255,255,0.18)'}
+          zIndex={20}
+          center
+        >
+          {selected ? <Feather name="check" size={scaled(13)} color={colors.icon} /> : null}
+        </FadingBox>
+
+        <Box
+          position="absolute"
+          left={scaled(14)}
+          right={scaled(14)}
+          bottom={scaled(8)}
+          zIndex={20}
+        >
+          <Box pr={scaled(30)}>
+            <Text
+              color="#FFFFFF"
+              title
+              fontSize={scaled(15)}
+              lineHeight={scaled(18)}
+              numberOfLines={2}
+            >
+              {title}
+            </Text>
+          </Box>
+          <Box row alignItems="center" justifyContent="space-between" mt={scaled(1)}>
+            <FadingBox
+              keyProp={subtitle}
+              entering={FadeIn.duration(140)}
+              exiting={FadeOut.duration(140)}
+              skipEntering={false}
+              skipExiting={false}
+            >
+              <Text color="#FFFFFF" fontSize={scaled(12)} lineHeight={scaled(16)}>
+                {subtitle}
+              </Text>
+            </FadingBox>
+            <Box size={scaled(20)} center>
+              {showChevron ? (
+                <Feather name="chevron-right" size={scaled(20)} color="#FFFFFF" />
+              ) : null}
+            </Box>
+          </Box>
+        </Box>
+      </OfflineResourceFolderBounce>
+    </Pressable>
+  )
+}
+
+export default OfflineResourceFolder
