@@ -361,9 +361,15 @@ describe('resolvePassageMediaLibrary', () => {
 })
 
 describe('getPassageMediaEmbedUrl', () => {
-  it('creates an inline autoplay YouTube embed URL', () => {
+  it('creates an inline HTTPS wrapper URL', () => {
+    expect(getPassageMediaEmbedUrl('abcDEF_1234')).toBe(
+      'https://bible-strong.app/embed/youtube.html?v=abcDEF_1234'
+    )
+  })
+
+  it('URL-encodes the provider ID', () => {
     expect(getPassageMediaEmbedUrl('video/id')).toBe(
-      'https://www.youtube.com/embed/video%2Fid?autoplay=1&playsinline=1&rel=0&modestbranding=1'
+      'https://bible-strong.app/embed/youtube.html?v=video%2Fid'
     )
   })
 })
