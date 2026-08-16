@@ -679,7 +679,7 @@ function decodeCanonical(value: unknown): CanonicalStrongBiblePublication {
     isRecord(item) &&
     positive(item.book) &&
     positive(item.chapter) &&
-    positive(item.verse);
+    nonNegative(item.verse);
   const verseKeys = new Set<string>();
   for (const verse of candidate.verses) {
     if (!location(verse))
