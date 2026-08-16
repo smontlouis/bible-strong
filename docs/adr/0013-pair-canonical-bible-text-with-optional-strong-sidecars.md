@@ -64,12 +64,12 @@ Strong Bible, then the remaining installed sidecars in that same priority order.
 global Strong database for shared lexical definitions; its French or English language setting
 changes definitions, not the Bible source used for Strong word placement.
 
-Removing a canonical Bible explicitly also removes its version-specific Strong sidecar. Replacing
-or re-downloading the Bible required by the active application language preserves that sidecar so
-it can be reused after the compatible canonical text has been installed again. The required Bible
-is LSG in French and KJV in English; the other language's Bible remains removable. Switching the
-application language must ensure the target language's required Bible is downloaded. Removing a
-sidecar never removes its Bible or the shared global Strong database.
+Removing a canonical Bible Offline copy explicitly also removes its version-specific Strong
+sidecar Offline copy. LSG in French and KJV in English remain the default reader choices, but
+neither is required locally and both may be removed from device storage without removing their
+catalog entry or Online access. Switching the application language changes the default choice; it
+does not force a download. Removing a sidecar never removes its Bible Offline copy or the shared
+global Strong database.
 
 In download management, identify each sidecar as an index belonging to its canonical Bible and
 display the required Strong-number attribution from Concordances et Traductions de la Bible for the

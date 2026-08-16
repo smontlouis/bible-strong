@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import { AppState, AppStateStatus } from 'react-native'
+import { onlineManager } from '@tanstack/react-query'
 import { getDefaultStore } from 'jotai/vanilla'
 
 import {
@@ -35,6 +36,9 @@ class DownloadManager {
   constructor() {
     // Persist immediately when app goes to background
     AppState.addEventListener('change', this.handleAppStateChange)
+    onlineManager.subscribe(isOnline => {
+      if (isOnline) void this.processQueue()
+    })
   }
 
   // -----------------------------------------------------------------------
@@ -214,7 +218,7 @@ class DownloadManager {
     try {
       while (true) {
         const states = this.jotaiStore.get(downloadItemStatesAtom)
-        const { next, blocked } = getDownloadQueueDecision(states)
+        const { next, blocked } = getDownloadQueueDecision(states, onlineManager.isOnline())
         if (blocked) {
           this.updateItemStatus(
             blocked.item.id,

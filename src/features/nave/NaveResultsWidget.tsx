@@ -28,7 +28,7 @@ const LexiqueResultsWidget = ({ searchValue }: LexiqueResultsWidgetProps) => {
 
   const { results, error } = useResultsByLetterOrSearch({
     queryKey: ['nave'],
-    query: resources.nave.search,
+    query: value => resources.nave.search(value, resourceLanguage),
     value: searchValue,
     resourceLanguage,
   })

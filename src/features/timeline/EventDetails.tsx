@@ -4,12 +4,11 @@ import { getLegacyLocalizedField } from '~helpers/languageUtils'
 
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
-import waitForTimeline from '~common/waitForTimeline'
-import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { calculateLabel } from './constants'
 import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
 import { Image } from 'expo-image'
 import Media from './EventDetailsMedia'
+import TimelineResourceBoundary, { useTimelineDetails } from './TimelineResourceBoundary'
 
 export type EventDetailsProps = Pick<
   TimelineEventProps,
@@ -45,7 +44,8 @@ export const EventDetailsContent = ({
 }) => {
   const lang = useLanguage()
   const date = calculateLabel(start, end)
-  const event = (bibleMemoize.timeline as TimelineEventDetail[]).find(e => e.slug === slug)
+  const timeline = useTimelineDetails()
+  const event = timeline.find(e => e.slug === slug)
 
   if (!event) {
     return null
@@ -77,8 +77,10 @@ export const EventDetailsContent = ({
   )
 }
 
-const EventDetails = waitForTimeline((props: EventDetailsProps) => {
-  return <EventDetailsContent {...props} />
-})
+const EventDetails = (props: EventDetailsProps) => (
+  <TimelineResourceBoundary>
+    <EventDetailsContent {...props} />
+  </TimelineResourceBoundary>
+)
 
 export default EventDetails

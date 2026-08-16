@@ -15,7 +15,12 @@ jest.mock('~helpers/databases', () => ({
 }))
 
 jest.mock('~helpers/sqlite', () => ({
+  dbManager: { getDB: jest.fn() },
   initSQLiteDir: jest.fn(),
+}))
+
+jest.mock('~helpers/atomicResourceFile', () => ({
+  restoreOrphanedResourceBackup: jest.fn(async () => undefined),
 }))
 
 jest.mock('~helpers/strongBibleSidecar', () => ({
@@ -42,6 +47,16 @@ import {
 import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
+import * as FileSystem from 'expo-file-system/legacy'
+import { getDbPath, initLanguageDirs } from '~helpers/databases'
+import { dbManager } from '~helpers/sqlite'
+
+const mockGetInfoAsync = FileSystem.getInfoAsync as jest.MockedFunction<
+  typeof FileSystem.getInfoAsync
+>
+const mockGetDbPath = getDbPath as jest.MockedFunction<typeof getDbPath>
+const mockInitLanguageDirs = initLanguageDirs as jest.MockedFunction<typeof initLanguageDirs>
+const mockGetManagedDatabase = dbManager.getDB as jest.MockedFunction<typeof dbManager.getDB>
 
 const createDependencies = ({
   files = new Set<string>(),
@@ -76,9 +91,12 @@ const createDependencies = ({
       moduleId,
     })
   ),
+  validateDatabaseResource: jest.fn(async () => true),
 })
 
 describe('resourceAvailability', () => {
+  beforeEach(() => jest.clearAllMocks())
+
   it('reports a regular Bible version available from bibles.sqlite', async () => {
     const dependencies = createDependencies({
       installedVersions: new Set(['LSG']),
@@ -131,6 +149,54 @@ describe('resourceAvailability', () => {
         expectedPath: 'file:///docs/SQLite/fr/nave.sqlite',
       })
     )
+  })
+
+  it('preserves a failed health check as a corrupt database copy', async () => {
+    const path = 'file:///docs/SQLite/fr/nave.sqlite'
+    const dependencies = createDependencies({ files: new Set([path]) })
+    dependencies.validateDatabaseResource.mockResolvedValue(false)
+
+    await expect(
+      getLocalResourceAvailability(
+        { kind: 'database', databaseId: 'NAVE', language: 'fr' },
+        dependencies
+      )
+    ).resolves.toEqual({
+      status: 'corrupt',
+      resource: { kind: 'database', databaseId: 'NAVE', language: 'fr' },
+      reason: 'integrity-check-failed',
+    })
+  })
+
+  it('reports a Nave copy without its VERSES table as corrupt', async () => {
+    const path = 'file:///docs/SQLite/fr/nave.sqlite'
+    const getFirstAsync = jest
+      .fn()
+      .mockResolvedValueOnce({ quick_check: 'ok' })
+      .mockResolvedValueOnce({ name: 'TOPICS' })
+      .mockResolvedValueOnce(null)
+
+    mockInitLanguageDirs.mockResolvedValue(undefined)
+    mockGetDbPath.mockReturnValue(path)
+    mockGetInfoAsync.mockResolvedValue({
+      exists: true,
+      uri: path,
+      isDirectory: false,
+      size: 1,
+      modificationTime: 0,
+    })
+    mockGetManagedDatabase.mockReturnValue({
+      init: jest.fn(async () => undefined),
+      get: jest.fn(() => ({ getFirstAsync })),
+    } as unknown as ReturnType<typeof dbManager.getDB>)
+
+    await expect(
+      getLocalResourceAvailability({ kind: 'database', databaseId: 'NAVE', language: 'fr' })
+    ).resolves.toEqual({
+      status: 'corrupt',
+      resource: { kind: 'database', databaseId: 'NAVE', language: 'fr' },
+      reason: 'integrity-check-failed',
+    })
   })
 
   it('uses canonical child identities for pericope and red-word availability', async () => {

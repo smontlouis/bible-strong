@@ -1,0 +1,56 @@
+import { Schema } from 'effect'
+
+const ProblemFields = {
+  type: Schema.NonEmptyString,
+  title: Schema.NonEmptyString,
+  detail: Schema.NonEmptyString,
+  requestId: Schema.NonEmptyString,
+}
+
+export class InvalidResourceRequestProblem extends Schema.TaggedError<InvalidResourceRequestProblem>()(
+  'InvalidResourceRequestProblem',
+  {
+    ...ProblemFields,
+    status: Schema.Literal(400),
+    code: Schema.Literal('INVALID_RESOURCE_REQUEST'),
+  }
+) {}
+
+export class ResourceNotFoundProblem extends Schema.TaggedError<ResourceNotFoundProblem>()(
+  'ResourceNotFoundProblem',
+  {
+    ...ProblemFields,
+    status: Schema.Literal(404),
+    code: Schema.Literal(
+      'BIBLE_UNSUPPORTED',
+      'BIBLE_CHAPTER_NOT_FOUND',
+      'NAVE_UNSUPPORTED',
+      'NAVE_TOPIC_NOT_FOUND',
+      'STRONG_BIBLE_UNSUPPORTED',
+      'STRONG_BIBLE_CHAPTER_NOT_FOUND'
+    ),
+  }
+) {}
+
+export class ResourceUnavailableProblem extends Schema.TaggedError<ResourceUnavailableProblem>()(
+  'ResourceUnavailableProblem',
+  {
+    ...ProblemFields,
+    status: Schema.Literal(503),
+    code: Schema.Literal(
+      'BIBLE_PUBLICATION_INACTIVE',
+      'NAVE_PUBLICATION_INACTIVE',
+      'STRONG_BIBLE_PUBLICATION_INACTIVE'
+    ),
+    retryAfterSeconds: Schema.Int.pipe(Schema.positive()),
+  }
+) {}
+
+export class ResourceInternalProblem extends Schema.TaggedError<ResourceInternalProblem>()(
+  'ResourceInternalProblem',
+  {
+    ...ProblemFields,
+    status: Schema.Literal(500),
+    code: Schema.Literal('RESOURCE_INTERNAL_FAILURE'),
+  }
+) {}

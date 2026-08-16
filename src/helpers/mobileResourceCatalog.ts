@@ -1,4 +1,5 @@
 import catalogJson from '~assets/mobile-resource-catalog.json'
+import { ORDINARY_BIBLE_VERSION_IDS } from './ordinaryBibleVersions'
 import { atom, getDefaultStore } from 'jotai/vanilla'
 
 export type MobileResourceInstallationStrategy = 'sqlite-import' | 'archive-extract'
@@ -199,5 +200,47 @@ export const loadMobileResourceCatalog = (
 export const getMobileResourceCatalogEntry = (resourceId: string): MobileResourceCatalogEntry => {
   const entry = MOBILE_RESOURCE_CATALOG.resources[resourceId]
   if (!entry) throw new Error(`MOBILE_RESOURCE_CATALOG_ENTRY_MISSING:${resourceId}`)
-  return entry
+  return {
+    ...entry,
+    url: resolveMobileResourceArtifactUrl(entry),
+  }
+}
+
+export const getMobileBibleVersionIds = (
+  catalog: MobileResourceCatalog = MOBILE_RESOURCE_CATALOG
+): string[] =>
+  catalog === BUNDLED_MOBILE_RESOURCE_CATALOG
+    ? [...ORDINARY_BIBLE_VERSION_IDS]
+    : Object.keys(catalog.resources)
+        .filter(resourceId => resourceId.startsWith('bible:'))
+        .map(resourceId => resourceId.slice('bible:'.length))
+        .sort()
+
+export const getMobileStrongBibleVersionIds = (
+  catalog: MobileResourceCatalog = MOBILE_RESOURCE_CATALOG
+): string[] =>
+  Object.keys(catalog.resources)
+    .filter(resourceId => resourceId.startsWith('bible-strong:'))
+    .map(resourceId => resourceId.slice('bible-strong:'.length))
+    .sort()
+
+let developmentResourceArtifactBaseUrl: string | undefined
+
+export const configureDevelopmentResourceArtifactBaseUrl = (value: string | undefined): void => {
+  developmentResourceArtifactBaseUrl = __DEV__ ? value : undefined
+}
+
+export const resolveMobileResourceArtifactUrl = (
+  entry: Pick<MobileResourceCatalogEntry, 'file' | 'url'>,
+  configuredBaseUrl = developmentResourceArtifactBaseUrl
+): string => {
+  if (!configuredBaseUrl) return entry.url
+  try {
+    const baseUrl = new URL(configuredBaseUrl)
+    if (baseUrl.protocol !== 'http:' && baseUrl.protocol !== 'https:') return entry.url
+    if (!baseUrl.pathname.endsWith('/')) baseUrl.pathname += '/'
+    return new URL(entry.file, baseUrl).toString()
+  } catch {
+    return entry.url
+  }
 }

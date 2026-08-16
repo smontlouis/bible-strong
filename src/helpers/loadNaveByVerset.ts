@@ -1,6 +1,8 @@
-import { SQLNaveTransaction } from '~helpers/getSQLTransaction'
+import { getSQLTransactionForLang } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError.new'
 import * as Sentry from '@sentry/react-native'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { getResourceLanguage } from '~state/resourcesLanguage'
 
 type NaveRefQuery = {
   ref: string
@@ -11,11 +13,13 @@ type NaveTopicsQuery = {
   name_lower: string
 }[]
 
-const fetchData = async (item: string) => {
-  const [itemResult]: NaveRefQuery = await SQLNaveTransaction(
+const fetchData = async (item: string, language: ResourceLanguage) => {
+  const transaction = getSQLTransactionForLang('NAVE', language)
+  const [itemResult]: NaveRefQuery = await transaction(
     `SELECT ref
           FROM VERSES
-          WHERE id = '${item}'`
+          WHERE id = ?`,
+    [item]
   )
 
   if (!itemResult) {
@@ -24,29 +28,28 @@ const fetchData = async (item: string) => {
 
   const refArray: string[] = JSON.parse(itemResult.ref)
 
-  const verseSqlReq = refArray.reduce((sqlString, name_lower, index) => {
-    sqlString += `name_lower LIKE '${name_lower}' `
-    if (refArray.length - 1 !== index) {
-      sqlString += 'OR '
-    }
-    return sqlString
-  }, 'SELECT name_lower, name FROM TOPICS WHERE ')
+  const verseSqlReq = `SELECT name_lower, name FROM TOPICS WHERE ${refArray
+    .map(() => 'name_lower = ?')
+    .join(' OR ')}`
 
-  const result: Promise<NaveTopicsQuery> = SQLNaveTransaction(verseSqlReq)
+  const result: Promise<NaveTopicsQuery> = transaction(verseSqlReq, refArray)
 
   return result
 }
 
-const loadNaveByVerset = (verse: string) =>
+const loadNaveByVerset = (
+  verse: string,
+  language: ResourceLanguage = getResourceLanguage('NAVE')
+) =>
   catchDatabaseError(
     async () => {
       // Fetch for verse
-      const naveReferenceResultForVerse = await fetchData(verse)
+      const naveReferenceResultForVerse = await fetchData(verse, language)
 
       // Fetch for chapter
       const chapter = verse.split('-').slice(0, -1).join('-') // 1-1-1 => 1-1
 
-      const naveReferenceResultForChapter = await fetchData(chapter)
+      const naveReferenceResultForChapter = await fetchData(chapter, language)
 
       return [naveReferenceResultForVerse, naveReferenceResultForChapter] as [
         NaveTopicsQuery | undefined,

@@ -219,7 +219,7 @@ export const createOfflineCopyDownloadPlan = (
       return [createDatabaseDownloadItem(identity.databaseId, identity.language)]
     case 'bible-pericope':
     case 'bible-red-words':
-      throw new Error(`BIBLE_CHILD_RESOURCE_REQUIRES_PARENT:${createOfflineCopyId(identity)}`)
+      return [createBibleDownloadItem(identity.versionId)]
   }
 }
 

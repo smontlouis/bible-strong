@@ -45,6 +45,12 @@ import {
 } from './targetSearch'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import ResourceUnavailableView, {
+  type ResourceUnavailableReason,
+} from '~features/resources/ResourceUnavailableView'
+import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
+import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 
 type BrowseMode = 'note' | 'link' | 'study' | 'strong' | 'nave' | 'dictionary'
 type NaveRow = NaveTopicSummary
@@ -59,6 +65,12 @@ type RelationTargetSectionId =
   | 'dictionary'
   | 'nave'
 type RelationTargetSection = SearchResultSection<RelationTargetSectionId>
+type RelationResourceFailure = {
+  identity: OfflineCopyIdentity
+  title: string
+  error: unknown
+  retry: () => Promise<unknown>
+}
 
 type Props = {
   ref?: Ref<SheetRef | null>
@@ -182,6 +194,15 @@ const getSourceEndpointSubtitle = (
 
 const isDatabaseError = (value: unknown): value is { error: string } =>
   typeof value === 'object' && value !== null && 'error' in value
+
+const getUnavailableReason = (error: unknown): ResourceUnavailableReason =>
+  error instanceof ResourceAccessError
+    ? error.code === 'INVALID_OFFLINE_COPY'
+      ? 'invalid-offline-copy'
+      : error.recoveries.includes('acquire-offline-copy')
+        ? 'offline-copy-required'
+        : 'temporary-unavailable'
+    : 'temporary-unavailable'
 
 const searchWithMatches = (
   targets: RelationTargetResult[],
@@ -351,10 +372,20 @@ const CreateEntityRelationModal = ({
       deferredStrongSearchValue,
       strongLetter,
     ],
-    queryFn: () =>
-      deferredStrongSearchValue.trim()
+    queryFn: async () => {
+      const availability = await resources.strongLexicon.getModuleAvailability('core')
+      if (availability.status !== 'available') {
+        throw new ResourceAccessError(
+          availability.status === 'corrupt' ? 'INVALID_OFFLINE_COPY' : 'UNKNOWN',
+          (await resources.strongLexicon.getModuleRecoveryActions?.('core')) ?? [
+            'acquire-offline-copy',
+          ]
+        )
+      }
+      return deferredStrongSearchValue.trim()
         ? resources.strongLexicon.search(deferredStrongSearchValue, resourcesLanguage.STRONG, 200)
-        : resources.strongLexicon.browseByGlossPrefix(strongLetter, resourcesLanguage.STRONG, 500),
+        : resources.strongLexicon.browseByGlossPrefix(strongLetter, resourcesLanguage.STRONG, 500)
+    },
     enabled: shouldLoadStrongTargets,
   })
   const strongError =
@@ -376,10 +407,18 @@ const CreateEntityRelationModal = ({
       deferredResourceSearchValue,
       naveLetter,
     ],
-    queryFn: () =>
-      deferredResourceSearchValue.trim()
-        ? resources.nave.search(deferredResourceSearchValue)
-        : resources.nave.listByLetter(naveLetter),
+    queryFn: async () => {
+      const availability = await resources.nave.getAvailability?.(resourcesLanguage.NAVE)
+      if (availability?.status === 'unavailable') {
+        throw new ResourceAccessError(
+          availability.reason === 'invalid-offline-copy' ? 'INVALID_OFFLINE_COPY' : 'UNKNOWN',
+          availability.recoveries
+        )
+      }
+      return deferredResourceSearchValue.trim()
+        ? resources.nave.search(deferredResourceSearchValue, resourcesLanguage.NAVE)
+        : resources.nave.listByLetter(naveLetter, resourcesLanguage.NAVE)
+    },
     enabled: shouldLoadNaveTargets,
   })
   const naveError = naveQuery.data && isDatabaseError(naveQuery.data) ? naveQuery.data.error : null
@@ -394,10 +433,20 @@ const CreateEntityRelationModal = ({
       deferredResourceSearchValue,
       dictionaryLetter,
     ],
-    queryFn: () =>
-      deferredResourceSearchValue.trim()
+    queryFn: async () => {
+      const availability = await resources.dictionary.getAvailability?.(
+        resourcesLanguage.DICTIONNAIRE
+      )
+      if (availability?.status === 'unavailable') {
+        throw new ResourceAccessError(
+          availability.reason === 'invalid-offline-copy' ? 'INVALID_OFFLINE_COPY' : 'UNKNOWN',
+          availability.recoveries
+        )
+      }
+      return deferredResourceSearchValue.trim()
         ? resources.dictionary.search(deferredResourceSearchValue)
-        : resources.dictionary.listByLetter(dictionaryLetter),
+        : resources.dictionary.listByLetter(dictionaryLetter)
+    },
     enabled: shouldLoadDictionaryTargets,
   })
   const dictionaryError =
@@ -538,6 +587,44 @@ const CreateEntityRelationModal = ({
     (shouldLoadNaveTargets && naveQuery.isFetching) ||
     (shouldLoadDictionaryTargets && dictionaryQuery.isFetching)
 
+  const resourceFailures: (RelationResourceFailure | undefined)[] = [
+    shouldLoadStrongTargets && (strongQuery.isError || strongError)
+      ? {
+          identity: { kind: 'strong-lexicon-module', moduleId: 'core' } as const,
+          title: t('resource.strong.temporarilyUnavailable'),
+          error: strongQuery.error ?? strongError,
+          retry: strongQuery.refetch,
+        }
+      : undefined,
+    shouldLoadNaveTargets && (naveQuery.isError || naveError)
+      ? {
+          identity: {
+            kind: 'database',
+            databaseId: 'NAVE',
+            language: resourcesLanguage.NAVE,
+          } as const,
+          title: t('resource.nave.temporarilyUnavailable'),
+          error: naveQuery.error ?? naveError,
+          retry: naveQuery.refetch,
+        }
+      : undefined,
+    shouldLoadDictionaryTargets && (dictionaryQuery.isError || dictionaryError)
+      ? {
+          identity: {
+            kind: 'database',
+            databaseId: 'DICTIONNAIRE',
+            language: resourcesLanguage.DICTIONNAIRE,
+          } as const,
+          title: t('resource.dictionary.temporarilyUnavailable'),
+          error: dictionaryQuery.error ?? dictionaryError,
+          retry: dictionaryQuery.refetch,
+        }
+      : undefined,
+  ]
+  const resourceFailure = resourceFailures.find(
+    (failure): failure is RelationResourceFailure => failure !== undefined
+  )
+
   const placeholder = browseMode
     ? {
         note: t('Rechercher dans les notes'),
@@ -630,18 +717,19 @@ const CreateEntityRelationModal = ({
       }
     >
       <VStack flex={1}>
-        {strongError && browseMode === 'strong' ? (
-          <Box px={20} py={24}>
-            <Text color="grey">{t('Impossible de charger le lexique Strong.')}</Text>
-          </Box>
-        ) : naveError && browseMode === 'nave' ? (
-          <Box px={20} py={24}>
-            <Text color="grey">{t('Impossible de charger la nave...')}</Text>
-          </Box>
-        ) : dictionaryError && browseMode === 'dictionary' ? (
-          <Box px={20} py={24}>
-            <Text color="grey">{t('Impossible de charger le dictionnaire...')}</Text>
-          </Box>
+        {resourceFailure ? (
+          <ResourceUnavailableView
+            identity={resourceFailure.identity}
+            title={resourceFailure.title}
+            fileSize={Math.max(
+              1,
+              Math.round(
+                createOfflineCopyDownloadItem(resourceFailure.identity).estimatedSize / 1_000_000
+              )
+            )}
+            reason={getUnavailableReason(resourceFailure.error)}
+            onRetry={() => void resourceFailure.retry()}
+          />
         ) : (
           <SheetFlashList
             data={searchSections}

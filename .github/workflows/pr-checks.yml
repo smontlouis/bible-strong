@@ -16,6 +16,24 @@ jobs:
     name: Typecheck, lint, test, format
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      RESOURCE_DATABASE_URL: postgresql://bible_strong:bible_strong@127.0.0.1:54329/bible_strong
+      RESOURCE_EXTERNAL_POSTGRES: '1'
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: bible_strong
+          POSTGRES_USER: bible_strong
+          POSTGRES_PASSWORD: bible_strong
+        ports:
+          - 54329:5432
+        options: >-
+          --health-cmd "pg_isready -U bible_strong -d bible_strong"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
 
     steps:
       - name: Checkout
@@ -34,6 +52,18 @@ jobs:
 
       - name: Typecheck
         run: yarn typecheck
+
+      - name: Resource architecture
+        run: yarn resources:architecture:check
+
+      - name: Resource migrations
+        run: yarn resources:migrate
+
+      - name: Resource service tests
+        run: yarn resources:test
+
+      - name: Resource PostgreSQL integration tests
+        run: yarn resources:test:integration
 
       - name: Lint
         run: yarn lint

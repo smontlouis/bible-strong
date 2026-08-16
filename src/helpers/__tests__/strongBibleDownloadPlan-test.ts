@@ -106,6 +106,15 @@ describe('Strong Bible download planning', () => {
       })
     )
   })
+
+  it.each(['bible-pericope', 'bible-red-words'] as const)(
+    'acquires %s by downloading its parent Bible archive',
+    kind => {
+      expect(
+        createOfflineCopyDownloadPlan({ kind, versionId: 'NBS' }).map(item => item.id)
+      ).toEqual(['bible:NBS'])
+    }
+  )
   it.each(['base-missing', 'base-incompatible'] as const)(
     'queues the canonical Bible before its sidecar when status is %s',
     status => {

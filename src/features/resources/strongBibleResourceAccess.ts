@@ -1,4 +1,5 @@
 import type { Verse } from '~common/types'
+import { Schema } from 'effect'
 import { getMultipleVerses, getVerseText } from '~helpers/biblesDb'
 import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
 import {
@@ -22,6 +23,16 @@ import {
   type StrongBibleDatasetId,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
+import {
+  StrongBibleChapterDto,
+  StrongBibleCountsDto,
+  StrongBibleCoverageDto,
+  StrongBibleLemmaStatsDto,
+  StrongBibleOccurrencesDto,
+} from './strongBibleContract'
+import type { BibleChapterAdapter } from './bibleChapterSource'
+import { loadVerseTextsFromChapterAdapter } from './bibleChapterSource'
+import { mapLocalResourceError, ResourceAccessError } from './resourceAccessError'
 
 export type { StrongBibleLemmaStat, StrongBibleVerseCountByBook } from '~helpers/strongBibleSidecar'
 
@@ -90,6 +101,22 @@ export type StrongBibleChapterCodesResult =
       codes: string[]
     }
 
+export type StrongBibleChapterSpansResult =
+  | StrongBibleUnavailable
+  | {
+      status: 'available'
+      provenance: StrongBibleProvenance
+      spansByVerse: Record<number, StrongBibleSpan[]>
+      textRevision?: string
+      textSha256?: string
+    }
+
+export type StrongBibleChapterSpansPayload = {
+  spansByVerse: Record<number, StrongBibleSpan[]>
+  textRevision?: string
+  textSha256?: string
+}
+
 export type StrongBibleCountsResult =
   | StrongBibleUnavailable
   | {
@@ -127,7 +154,7 @@ export interface StrongBibleResourceAdapter {
   loadChapterSpans: (
     versionId: StrongBibleVersionId,
     request: Pick<StrongBibleChapterRequest, 'book' | 'chapter'>
-  ) => Promise<Record<number, StrongBibleSpan[]>>
+  ) => Promise<StrongBibleChapterSpansPayload>
   loadCountsByBook: (
     versionId: StrongBibleVersionId,
     request: StrongBibleAdapterConcordanceRequest
@@ -172,8 +199,10 @@ const toAdapterRequest = (
 }
 
 export interface StrongBibleResourceAccess {
+  getAvailability: (versionId: string) => Promise<StrongBibleSidecarAvailability>
   loadVerse: (request: StrongBibleVerseRequest) => Promise<StrongBibleVerseResult>
   loadChapterCodes: (request: StrongBibleChapterRequest) => Promise<StrongBibleChapterCodesResult>
+  loadChapterSpans: (request: StrongBibleChapterRequest) => Promise<StrongBibleChapterSpansResult>
   loadCountsByBook: (request: StrongBibleConcordanceRequest) => Promise<StrongBibleCountsResult>
   loadFoundVersesByBook: (
     request: StrongBibleConcordanceRequest
@@ -183,8 +212,20 @@ export interface StrongBibleResourceAccess {
 
 export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
   getAvailability: getStrongBibleSidecarAvailability,
-  loadChapterSpans(versionId, request) {
-    return loadStrongBibleChapterSpans(versionId, request.book, request.chapter)
+  async loadChapterSpans(versionId, request) {
+    const [spansByVerse, availability] = await Promise.all([
+      loadStrongBibleChapterSpans(versionId, request.book, request.chapter),
+      getStrongBibleSidecarAvailability(versionId),
+    ])
+    return {
+      spansByVerse,
+      ...(availability.status === 'available'
+        ? {
+            textRevision: availability.textRevision,
+            ...(availability.textSha256 ? { textSha256: availability.textSha256 } : {}),
+          }
+        : {}),
+    }
   },
   async loadVerse(versionId, request) {
     const [text, spans] = await Promise.all([
@@ -243,6 +284,390 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
   },
 }
 
+type HttpStrongBibleResourceAdapterOptions = {
+  baseUrl: string
+  fetcher?: typeof fetch
+  isOnline: () => Promise<boolean>
+  bibleChapterAdapter: BibleChapterAdapter
+  timeoutMs?: number
+}
+
+const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, '')
+
+const problemCode = (payload: unknown) =>
+  payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
+
+const mapHttpFailure = async (
+  response: Response,
+  payload: unknown
+): Promise<ResourceAccessError> => {
+  const code = problemCode(payload)
+  if (response.status === 404 && code === 'STRONG_BIBLE_CHAPTER_NOT_FOUND') {
+    return new ResourceAccessError('NOT_FOUND')
+  }
+  if (response.status === 404 && code === 'STRONG_BIBLE_UNSUPPORTED') {
+    return new ResourceAccessError('RESOURCE_UNSUPPORTED')
+  }
+  return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+}
+
+const toStrongBibleSpan = (
+  span: StrongBibleChapterDto['verses'][number]['spans'][number]
+): StrongBibleSpan => ({
+  ordinal: span.ordinal,
+  startOffset: span.startOffset,
+  length: span.length,
+  ...(span.stepTokenIds ? { stepTokenIds: [...span.stepTokenIds] } : {}),
+  identities: span.identities.map(identity => ({ kind: identity.kind, code: identity.code })),
+  ...(span.morphologies
+    ? {
+        morphologies: span.morphologies.map(morphology => ({
+          identity: {
+            kind: morphology.identity.kind,
+            code: morphology.identity.code,
+          },
+          codes: [...morphology.codes],
+        })),
+      }
+    : {}),
+})
+
+const assertBibleChapterRevision = (
+  chapter: Awaited<ReturnType<BibleChapterAdapter['loadChapter']>>,
+  expectedTextRevision: string,
+  expectedTextSha256: string
+) => {
+  if (
+    chapter.status !== 'available' ||
+    chapter.textRevision !== expectedTextRevision ||
+    chapter.textSha256 !== expectedTextSha256 ||
+    chapter.verses.some(verse => verse.TextRevision !== expectedTextRevision)
+  ) {
+    throw new ResourceAccessError('INTEGRITY_FAILURE')
+  }
+}
+
+const bibleChapterUnavailableError = (
+  chapter: Extract<
+    Awaited<ReturnType<BibleChapterAdapter['loadChapter']>>,
+    { status: 'unavailable' }
+  >
+) => {
+  switch (chapter.reason) {
+    case 'chapter-not-available':
+      return new ResourceAccessError('NOT_FOUND')
+    case 'publication-not-available':
+      return new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    case 'offline-copy-invalid':
+      return new ResourceAccessError('INVALID_OFFLINE_COPY', [
+        'acquire-offline-copy',
+        'manage-offline-copies',
+      ])
+    case 'resource-unsupported':
+      return new ResourceAccessError('RESOURCE_UNSUPPORTED')
+    case 'network-offline':
+      return new ResourceAccessError('NETWORK_OFFLINE')
+    case 'integrity-failure':
+      return new ResourceAccessError('INTEGRITY_FAILURE')
+    case 'temporary-unavailable':
+      return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+  }
+}
+
+export const createHttpStrongBibleResourceAdapter = ({
+  baseUrl,
+  fetcher = fetch,
+  isOnline,
+  bibleChapterAdapter,
+  timeoutMs = 10_000,
+}: HttpStrongBibleResourceAdapterOptions): StrongBibleResourceAdapter => {
+  const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
+  const get = async <A>(path: string, schema: Schema.Schema<A>): Promise<A> => {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await fetcher(`${normalizedBaseUrl}${path}`, {
+        headers: { accept: 'application/json' },
+        signal: controller.signal,
+      })
+      const payload: unknown = await response.json().catch(() => undefined)
+      if (!response.ok) throw await mapHttpFailure(response, payload)
+      try {
+        return Schema.decodeUnknownSync(schema)(payload)
+      } catch {
+        throw new ResourceAccessError('INTEGRITY_FAILURE')
+      }
+    } catch (error) {
+      if (error instanceof ResourceAccessError) throw error
+      throw new ResourceAccessError(
+        (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+      )
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+
+  const loadChapter = (versionId: StrongBibleVersionId, book: number, chapter: number) =>
+    get(
+      `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${book}/chapters/${chapter}`,
+      StrongBibleChapterDto
+    )
+
+  return {
+    async getAvailability(versionId) {
+      if (!isStrongCapableBibleVersion(versionId)) return { status: 'unsupported' }
+      try {
+        const coverage = await get(
+          `/v1/strong-bibles/${encodeURIComponent(versionId)}/coverage`,
+          StrongBibleCoverageDto
+        )
+        const bibleCoverage = await bibleChapterAdapter.loadCoverage(versionId)
+        if (bibleCoverage.status !== 'available') {
+          throw bibleChapterUnavailableError(bibleCoverage)
+        }
+        if (
+          bibleCoverage.textRevision !== coverage.resource.textRevision ||
+          bibleCoverage.textSha256 !== coverage.resource.textSha256
+        ) {
+          return {
+            status: 'base-incompatible',
+            baseTextRevision: bibleCoverage.textRevision,
+            requiredTextRevision: coverage.resource.textRevision,
+          }
+        }
+        return {
+          status: 'available',
+          versionId,
+          datasetId: coverage.resource.datasetId,
+          textRevision: coverage.resource.textRevision,
+          textSha256: coverage.resource.textSha256,
+          strongRevision: coverage.resource.strongRevision,
+        }
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'RESOURCE_UNSUPPORTED') {
+          return { status: 'unsupported' }
+        }
+        throw error
+      }
+    },
+    async loadChapterSpans(versionId, request) {
+      try {
+        const chapter = await loadChapter(versionId, request.book, request.chapter)
+        return {
+          spansByVerse: Object.fromEntries(
+            chapter.verses.map(verse => [verse.number, verse.spans.map(toStrongBibleSpan)])
+          ),
+          textRevision: chapter.resource.textRevision,
+          textSha256: chapter.resource.textSha256,
+        }
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'NOT_FOUND') {
+          return { spansByVerse: {} }
+        }
+        throw error
+      }
+    },
+    async loadVerse(versionId, request) {
+      try {
+        const [chapter, bibleChapter] = await Promise.all([
+          loadChapter(versionId, request.book, request.chapter),
+          bibleChapterAdapter.loadChapter(versionId, request.book, request.chapter),
+        ])
+        if (bibleChapter.status !== 'available') throw bibleChapterUnavailableError(bibleChapter)
+        assertBibleChapterRevision(
+          bibleChapter,
+          chapter.resource.textRevision,
+          chapter.resource.textSha256
+        )
+        const text = bibleChapter.verses.find(
+          verse => Number(verse.Verset) === request.verse
+        )?.Texte
+        if (text == null) return undefined
+        return {
+          text,
+          spans:
+            chapter.verses
+              .find(verse => verse.number === request.verse)
+              ?.spans.map(toStrongBibleSpan) ?? [],
+        }
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'NOT_FOUND') return undefined
+        throw error
+      }
+    },
+    async loadCountsByBook(versionId, request) {
+      const response = await get(
+        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/counts`,
+        StrongBibleCountsDto
+      )
+      return {
+        counts: response.counts.map(count => ({
+          Livre: count.book,
+          versesCountByBook: count.verseCount,
+        })),
+        ...(response.identity
+          ? { identity: response.identity as ResolvedStrongBibleIdentity }
+          : {}),
+      }
+    },
+    async loadFoundVersesByBook(versionId, request) {
+      const query = new URLSearchParams()
+      if (request.limit !== undefined) query.set('limit', String(request.limit))
+      if (request.offset !== undefined) query.set('offset', String(request.offset))
+      if (request.allBooks !== undefined) query.set('allBooks', String(request.allBooks))
+      if (request.lexemeId !== undefined) query.set('lexemeId', String(request.lexemeId))
+      const response = await get(
+        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/occurrences${query.size ? `?${query}` : ''}`,
+        StrongBibleOccurrencesDto
+      )
+      const verseKeys = response.verses.map(
+        verse => `${verse.book}-${verse.chapter}-${verse.verse}`
+      )
+      const texts = await loadVerseTextsFromChapterAdapter(
+        bibleChapterAdapter,
+        versionId,
+        verseKeys,
+        undefined,
+        response.resource.textRevision,
+        response.resource.textSha256
+      )
+      return {
+        verses: response.verses.flatMap(verse => {
+          const key = `${verse.book}-${verse.chapter}-${verse.verse}`
+          const text = texts[key]
+          return text == null
+            ? []
+            : [
+                {
+                  Livre: verse.book,
+                  Chapitre: verse.chapter,
+                  Verset: verse.verse,
+                  Texte: text,
+                  StrongSpans: verse.spans.map(toStrongBibleSpan),
+                },
+              ]
+        }),
+        ...(response.identity
+          ? { identity: response.identity as ResolvedStrongBibleIdentity }
+          : {}),
+        ...(response.nextOffset === undefined ? {} : { nextOffset: response.nextOffset }),
+      }
+    },
+    async loadLemmaStats(versionId, request) {
+      const response = await get(
+        `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/lemmas`,
+        StrongBibleLemmaStatsDto
+      )
+      return {
+        lemmas: response.lemmas.map(lemma => ({ ...lemma })),
+        ...(response.identity
+          ? { identity: response.identity as ResolvedStrongBibleIdentity }
+          : {}),
+      }
+    },
+  }
+}
+
+export const createHybridStrongBibleResourceAdapter = ({
+  offline,
+  online,
+  remotelyReadableVersions,
+  isOnline,
+}: {
+  offline: StrongBibleResourceAdapter
+  online: StrongBibleResourceAdapter
+  remotelyReadableVersions: ReadonlySet<string>
+  isOnline: () => Promise<boolean>
+}): StrongBibleResourceAdapter => {
+  const isInvalidLocalAvailability = (availability: StrongBibleSidecarAvailability) =>
+    availability.status === 'corrupt' ||
+    availability.status === 'incompatible' ||
+    availability.status === 'base-incompatible'
+  const invalidOfflineCopy = () =>
+    new ResourceAccessError('INVALID_OFFLINE_COPY', [
+      'acquire-offline-copy',
+      'manage-offline-copies',
+    ])
+  const select = async <Result>(
+    versionId: StrongBibleVersionId,
+    localOperation: () => Promise<Result>,
+    remoteOperation: () => Promise<Result>
+  ): Promise<Result> => {
+    const local = await offline.getAvailability(versionId)
+    if (local.status === 'available') {
+      try {
+        return await localOperation()
+      } catch (error) {
+        const mapped = mapLocalResourceError(error)
+        if (!remotelyReadableVersions.has(versionId) || !(await isOnline())) throw mapped
+      }
+    }
+    if (local.status === 'incompatible' || local.status === 'base-incompatible') {
+      throw invalidOfflineCopy()
+    }
+    if (!remotelyReadableVersions.has(versionId)) {
+      if (isInvalidLocalAvailability(local)) throw invalidOfflineCopy()
+      throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    }
+    if (!(await isOnline())) {
+      if (isInvalidLocalAvailability(local)) throw invalidOfflineCopy()
+      throw new ResourceAccessError('NETWORK_OFFLINE')
+    }
+    try {
+      return await remoteOperation()
+    } catch (error) {
+      if (isInvalidLocalAvailability(local)) throw invalidOfflineCopy()
+      throw error
+    }
+  }
+
+  return {
+    async getAvailability(versionId) {
+      const local = await offline.getAvailability(versionId)
+      if (local.status === 'available') return local
+      if (local.status === 'incompatible' || local.status === 'base-incompatible') return local
+      if (
+        !isStrongCapableBibleVersion(versionId) ||
+        !remotelyReadableVersions.has(versionId) ||
+        !(await isOnline())
+      ) {
+        return local
+      }
+      return online.getAvailability(versionId)
+    },
+    loadChapterSpans: (versionId, request) =>
+      select(
+        versionId,
+        () => offline.loadChapterSpans(versionId, request),
+        () => online.loadChapterSpans(versionId, request)
+      ),
+    loadVerse: (versionId, request) =>
+      select(
+        versionId,
+        () => offline.loadVerse(versionId, request),
+        () => online.loadVerse(versionId, request)
+      ),
+    loadCountsByBook: (versionId, request) =>
+      select(
+        versionId,
+        () => offline.loadCountsByBook(versionId, request),
+        () => online.loadCountsByBook(versionId, request)
+      ),
+    loadFoundVersesByBook: (versionId, request) =>
+      select(
+        versionId,
+        () => offline.loadFoundVersesByBook(versionId, request),
+        () => online.loadFoundVersesByBook(versionId, request)
+      ),
+    loadLemmaStats: (versionId, request) =>
+      select(
+        versionId,
+        () => offline.loadLemmaStats(versionId, request),
+        () => online.loadLemmaStats(versionId, request)
+      ),
+  }
+}
+
 export const createStrongBibleResourceAccess = (
   adapter: StrongBibleResourceAdapter = localStrongBibleResourceAdapter
 ): StrongBibleResourceAccess => {
@@ -267,13 +692,20 @@ export const createStrongBibleResourceAccess = (
       ]),
     ].filter((candidate): candidate is string => Boolean(candidate))
     const attempts: StrongBibleAttempt[] = []
+    let firstAvailabilityError: unknown
 
     for (const candidate of candidates) {
       if (!isStrongCapableBibleVersion(candidate)) {
         attempts.push({ versionId: candidate, status: 'unsupported' })
         continue
       }
-      const availability = await adapter.getAvailability(candidate)
+      let availability: StrongBibleSidecarAvailability
+      try {
+        availability = await adapter.getAvailability(candidate)
+      } catch (error) {
+        firstAvailabilityError ??= error
+        continue
+      }
       if (availability.status === 'available') {
         return {
           status: 'available',
@@ -287,10 +719,12 @@ export const createStrongBibleResourceAccess = (
       attempts.push({ versionId: candidate, status: availability.status })
     }
 
+    if (firstAvailabilityError !== undefined) throw firstAvailabilityError
     return { status: 'unavailable', attempts }
   }
 
   return {
+    getAvailability: adapter.getAvailability,
     async loadChapterCodes(request) {
       const resolution = await resolve(request)
       if (resolution.status !== 'available') return resolution
@@ -303,11 +737,27 @@ export const createStrongBibleResourceAccess = (
         provenance: resolution.provenance,
         codes: [
           ...new Set(
-            Object.values(spansByVerse).flatMap(spans =>
+            Object.values(spansByVerse.spansByVerse).flatMap(spans =>
               spans.flatMap(span => span.identities.map(identity => identity.code))
             )
           ),
         ],
+      }
+    },
+
+    async loadChapterSpans(request) {
+      const resolution = await resolve(request)
+      if (resolution.status !== 'available') return resolution
+      const loaded = await adapter.loadChapterSpans(resolution.provenance.versionId, {
+        book: request.book,
+        chapter: request.chapter,
+      })
+      return {
+        status: 'available',
+        provenance: resolution.provenance,
+        spansByVerse: loaded.spansByVerse,
+        ...(loaded.textRevision ? { textRevision: loaded.textRevision } : {}),
+        ...(loaded.textSha256 ? { textSha256: loaded.textSha256 } : {}),
       }
     },
 

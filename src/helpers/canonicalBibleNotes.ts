@@ -16,7 +16,7 @@ export type CanonicalBibleNoteMarkupNode =
 export type CanonicalBibleNote = {
   offset: number
   order: number
-  kind: 'note'
+  kind: 'note' | 'reference'
   markup: string
 }
 

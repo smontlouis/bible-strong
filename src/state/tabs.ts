@@ -18,6 +18,7 @@ import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import {
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
+  resolveBibleCoverageCanonId,
 } from '~helpers/bibleCoverage'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
 import { type StrongBibleVersionId, type StrongMode } from '~helpers/strongBiblePublications'
@@ -1024,7 +1025,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
           currentBook,
           draft.data.selectedChapter,
           coverage,
-          getBibleVersionCanonId(draft.data.selectedVersion)
+          resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(draft.data.selectedVersion))
         )
         if (!target) return
 
@@ -1051,7 +1052,7 @@ export const useBibleTabActions = (tabAtom: PrimitiveAtom<BibleTab>) => {
           currentBook,
           draft.data.selectedChapter,
           coverage,
-          getBibleVersionCanonId(draft.data.selectedVersion)
+          resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(draft.data.selectedVersion))
         )
         if (!target) return
 

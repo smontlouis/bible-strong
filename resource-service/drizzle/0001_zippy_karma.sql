@@ -1,0 +1,1 @@
+ALTER TABLE "bible_verses" ALTER COLUMN "presentation" SET DEFAULT '{"startTags":[],"layout":[],"notes":[],"headings":[]}'::jsonb;

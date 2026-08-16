@@ -19,6 +19,7 @@ jest.mock('~helpers/interlinearBibleSidecar', () => ({
 }))
 
 jest.mock('~helpers/bibleVersions', () => ({
+  getBibleVersionCanonId: jest.fn(() => 'protestant-66'),
   getIfVersionNeedsDownload: jest.fn(),
 }))
 
@@ -33,49 +34,54 @@ jest.mock('../strongLexiconAccess', () => ({
 }))
 
 import { BibleLoadingError } from '~helpers/bibleErrors'
+import { getChapterVerses } from '~helpers/biblesDb'
+import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import type { StrongLexiconPreview } from '../strongLexiconAccess'
-import { loadBibleContentChapter } from '../bibleContentAccess'
+import { loadBibleContentChapter, localBibleChapterAdapter } from '../bibleContentAccess'
+import type { BibleChapterAdapter } from '../bibleChapterSource'
 
 const createDependencies = () => ({
   ...(() => {
     const getChapterVerses = jest.fn()
     const getIfVersionNeedsDownload = jest.fn(async (_version: string) => false)
+    const chapterAdapter: jest.Mocked<BibleChapterAdapter> = {
+      loadCoverage: jest.fn(),
+      loadChapter: jest.fn(async (version: string, book: number, chapter: number) => {
+        try {
+          const verses = await getChapterVerses(version, book, chapter)
+          if (verses.length > 0) return { status: 'available' as const, verses }
+          if (await getIfVersionNeedsDownload(version)) {
+            return {
+              status: 'unavailable' as const,
+              reason: 'publication-not-available' as const,
+              recoveries: ['acquire-offline-copy' as const],
+            }
+          }
+          return { status: 'unavailable' as const, reason: 'chapter-not-available' as const }
+        } catch (error) {
+          if (error instanceof BibleLoadingError && error.type === 'BIBLE_NOT_FOUND') {
+            return {
+              status: 'unavailable' as const,
+              reason: 'publication-not-available' as const,
+              recoveries: ['acquire-offline-copy' as const],
+            }
+          }
+          const message = String(error)
+          if (message.includes('no such table') || message.includes('corrupted')) {
+            return {
+              status: 'unavailable' as const,
+              reason: 'offline-copy-invalid' as const,
+              recoveries: ['manage-offline-copies' as const, 'reset-offline-store' as const],
+            }
+          }
+          throw error
+        }
+      }),
+    }
     return {
       getChapterVerses,
       getIfVersionNeedsDownload,
-      chapterAdapter: {
-        loadChapter: jest.fn(async (version: string, book: number, chapter: number) => {
-          try {
-            const verses = await getChapterVerses(version, book, chapter)
-            if (verses.length > 0) return { status: 'available' as const, verses }
-            if (await getIfVersionNeedsDownload(version)) {
-              return {
-                status: 'unavailable' as const,
-                reason: 'publication-not-available' as const,
-                recoveries: ['acquire-offline-copy' as const],
-              }
-            }
-            return { status: 'unavailable' as const, reason: 'chapter-not-available' as const }
-          } catch (error) {
-            if (error instanceof BibleLoadingError && error.type === 'BIBLE_NOT_FOUND') {
-              return {
-                status: 'unavailable' as const,
-                reason: 'publication-not-available' as const,
-                recoveries: ['acquire-offline-copy' as const],
-              }
-            }
-            const message = String(error)
-            if (message.includes('no such table') || message.includes('corrupted')) {
-              return {
-                status: 'unavailable' as const,
-                reason: 'offline-copy-invalid' as const,
-                recoveries: ['manage-offline-copies' as const, 'reset-offline-store' as const],
-              }
-            }
-            throw error
-          }
-        }),
-      },
+      chapterAdapter,
     }
   })(),
   strongLexicon: {
@@ -86,6 +92,59 @@ const createDependencies = () => ({
 })
 
 describe('BibleContentAccess', () => {
+  it('does not overlay Strong spans onto a Bible chapter with a different revision or hash', async () => {
+    const dependencies = createDependencies()
+    dependencies.chapterAdapter.loadChapter.mockResolvedValue({
+      status: 'available',
+      textRevision: 'stale-local-revision',
+      textSha256: '0'.repeat(64),
+      verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'Texte local ancien' }],
+    } as Awaited<ReturnType<BibleChapterAdapter['loadChapter']>>)
+    const loadStrongBibleChapterSpans = jest.fn().mockResolvedValue({
+      spansByVerse: { 1: [] },
+      textRevision: 'lsg-text-v1',
+      textSha256: '1'.repeat(64),
+    })
+
+    const result = await loadBibleContentChapter(
+      { book: 1, chapter: 1, version: 'LSG', strongMode: 'visible' },
+      { ...dependencies, loadStrongBibleChapterSpans }
+    )
+
+    expect(result).toEqual(
+      expect.objectContaining({ success: true, data: expect.objectContaining({ kind: 'plain' }) })
+    )
+    expect(dependencies.logError).toHaveBeenCalledWith(
+      '[BibleContentAccess] Strong sidecar unavailable:',
+      expect.objectContaining({ code: 'INTEGRITY_FAILURE' })
+    )
+  })
+
+  it('classifies a missing canonical chapter in an installed Bible as an invalid copy', async () => {
+    ;(getChapterVerses as jest.MockedFunction<typeof getChapterVerses>).mockResolvedValue([])
+    ;(
+      getIfVersionNeedsDownload as jest.MockedFunction<typeof getIfVersionNeedsDownload>
+    ).mockResolvedValue(false)
+
+    await expect(localBibleChapterAdapter.loadChapter('LSG', 1, 1)).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'offline-copy-invalid',
+      recoveries: ['manage-offline-copies', 'reset-offline-store'],
+    })
+  })
+
+  it('keeps a chapter outside the declared canon as a genuine domain absence', async () => {
+    ;(getChapterVerses as jest.MockedFunction<typeof getChapterVerses>).mockResolvedValue([])
+    ;(
+      getIfVersionNeedsDownload as jest.MockedFunction<typeof getIfVersionNeedsDownload>
+    ).mockResolvedValue(false)
+
+    await expect(localBibleChapterAdapter.loadChapter('LSG', 1, 999)).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'chapter-not-available',
+    })
+  })
+
   it('loads regular Bible chapters from regular chapter verses', async () => {
     const dependencies = createDependencies()
     dependencies.getChapterVerses.mockResolvedValue([
@@ -99,6 +158,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'plain',
+          presentation: 'canonical',
           verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'In the beginning' }],
         },
       })
@@ -124,6 +184,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'plain',
+          presentation: 'legacy-sidecars',
           verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' }],
         },
       })
@@ -162,6 +223,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'interlinear',
+          presentation: 'legacy-sidecars',
           verses: [
             expect.objectContaining({
               Texte: 'בְּרֵאשִׁית',
@@ -191,7 +253,12 @@ describe('BibleContentAccess', () => {
         },
         { ...dependencies, loadInterlinearChapterTokens }
       )
-    ).resolves.toEqual(expect.objectContaining({ success: true, data: { kind: 'plain', verses } }))
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: { kind: 'plain', presentation: 'legacy-sidecars', verses },
+      })
+    )
     expect(dependencies.logError).toHaveBeenCalled()
     expect(loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
   })
@@ -224,6 +291,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'interlinear',
+          presentation: 'legacy-sidecars',
           verses: [expect.objectContaining({ InterlinearTokens: tokens })],
         },
       })
@@ -330,6 +398,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'strong',
+          presentation: 'canonical',
           verses: [
             expect.objectContaining({
               StrongSpans: [
@@ -433,6 +502,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'reverse-interlinear',
+          presentation: 'canonical',
           verses: [
             expect.objectContaining({
               Texte: 'Au commencement',
@@ -506,6 +576,29 @@ describe('BibleContentAccess', () => {
         error: expect.objectContaining({
           type: 'OFFLINE_COPY_INVALID',
           recoveries: ['manage-offline-copies', 'reset-offline-store'],
+        }),
+      })
+    )
+  })
+
+  it('maps a temporary source failure to retry instead of a download action', async () => {
+    const dependencies = createDependencies()
+    const loadChapter = dependencies.chapterAdapter.loadChapter as jest.MockedFunction<
+      BibleChapterAdapter['loadChapter']
+    >
+    loadChapter.mockResolvedValue({
+      status: 'unavailable',
+      reason: 'temporary-unavailable',
+    })
+
+    await expect(
+      loadBibleContentChapter({ book: 1, chapter: 1, version: 'LSG' }, dependencies)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: false,
+        error: expect.objectContaining({
+          type: 'RESOURCE_TEMPORARY_UNAVAILABLE',
+          recoveries: ['retry'],
         }),
       })
     )

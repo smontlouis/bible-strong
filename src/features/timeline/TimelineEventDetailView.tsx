@@ -8,12 +8,12 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import ScrollView from '~common/ui/ScrollView'
-import waitForTimeline from '~common/waitForTimeline'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
 import { TimelineEvent } from './types'
+import TimelineResourceBoundary from './TimelineResourceBoundary'
 
 interface Props {
   event?: TimelineEvent | (EventDetailsProps & { sectionIndex?: number })
@@ -37,56 +37,67 @@ const getMenuItemImage = (icon: string): MenuAction['image'] => {
   }
 }
 
-const TimelineEventDetailView = waitForTimeline(
-  ({ event, onOpenEvent, canGoBack, onBack, isFormSheet = false, menuItems }: Props) => {
-    const { t } = useTranslation()
-    const lang = useLanguage()
-    const canGoBackInStack = useCanGoBackInStack()
-    const hasBackButton = isFormSheet ? canGoBackInStack : canGoBack
+const TimelineEventDetailContent = ({
+  event,
+  onOpenEvent,
+  canGoBack,
+  onBack,
+  isFormSheet = false,
+  menuItems,
+}: Props) => {
+  const { t } = useTranslation()
+  const lang = useLanguage()
+  const canGoBackInStack = useCanGoBackInStack()
+  const hasBackButton = isFormSheet ? canGoBackInStack : canGoBack
 
-    if (!event) {
-      return (
-        <FormSheetScreen isFormSheet={isFormSheet}>
-          <Header title={t('Chronologie de la Bible')} hasBackButton={hasBackButton} />
-          <Empty
-            icon={require('~assets/images/empty-state-icons/search.svg')}
-            message={t("Cet événement n'est plus disponible.")}
-          />
-        </FormSheetScreen>
-      )
-    }
-
+  if (!event) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        <Header
-          title={getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn })}
-          hasBackButton={hasBackButton}
-          onCustomBackPress={onBack}
-          rightComponent={
-            menuItems?.length ? (
-              <MenuView
-                actions={menuItems.map(item => ({
-                  id: item.label,
-                  title: item.label,
-                  image: getMenuItemImage(item.icon),
-                }))}
-                onPressAction={({ nativeEvent }) => {
-                  menuItems.find(item => item.label === nativeEvent.event)?.onSelect()
-                }}
-              >
-                <Box row center height={60} width={60}>
-                  <FeatherIcon name="more-vertical" size={18} />
-                </Box>
-              </MenuView>
-            ) : undefined
-          }
+        <Header title={t('Chronologie de la Bible')} hasBackButton={hasBackButton} />
+        <Empty
+          icon={require('~assets/images/empty-state-icons/search.svg')}
+          message={t("Cet événement n'est plus disponible.")}
         />
-        <ScrollView>
-          <EventDetailsContent {...event} onOpenEvent={onOpenEvent} />
-        </ScrollView>
       </FormSheetScreen>
     )
   }
+
+  return (
+    <FormSheetScreen isFormSheet={isFormSheet}>
+      <Header
+        title={getLegacyLocalizedField(lang, { fr: event.title, en: event.titleEn })}
+        hasBackButton={hasBackButton}
+        onCustomBackPress={onBack}
+        rightComponent={
+          menuItems?.length ? (
+            <MenuView
+              actions={menuItems.map(item => ({
+                id: item.label,
+                title: item.label,
+                image: getMenuItemImage(item.icon),
+              }))}
+              onPressAction={({ nativeEvent }) => {
+                menuItems.find(item => item.label === nativeEvent.event)?.onSelect()
+              }}
+            >
+              <Box row center height={60} width={60}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
+          ) : undefined
+        }
+      />
+      <ScrollView>
+        <EventDetailsContent {...event} onOpenEvent={onOpenEvent} />
+      </ScrollView>
+    </FormSheetScreen>
+  )
+}
+
+const TimelineEventDetailView = (props: Props) => (
+  <TimelineResourceBoundary>
+    <TimelineEventDetailContent {...props} />
+  </TimelineResourceBoundary>
 )
 
 export default TimelineEventDetailView

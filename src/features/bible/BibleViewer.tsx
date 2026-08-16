@@ -24,9 +24,12 @@ import VerseFormatSheet from '~features/studies/VerseFormatSheet'
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import type { BibleReadingAvailability } from '~features/resources/bibleReadingResourceAccess'
 import { bibleChapterQueryOptions, loadBibleVerseTexts } from '~features/resources/resourceQueries'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import { osisToBibleReferenceTarget } from '~helpers/bcvParser'
 import { getBook } from '~helpers/bibleBookCatalog'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
@@ -39,6 +42,7 @@ import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
 import { toast } from '~helpers/toast'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { databases } from '~helpers/databases'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
@@ -67,6 +71,7 @@ import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { selectIsLogged } from '~redux/selectors/user'
 import type { AppDispatch } from '~redux/store'
 import { historyAtom } from '../../state/app'
+import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import {
   activeBibleTabIdAtom,
   bibleDOMHostLayoutsAtom,
@@ -92,7 +97,6 @@ import {
   loadBibleReadingRedWords,
 } from './bibleReadingChapter'
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
-import { usesCanonicalBibleExtras } from '~helpers/strongBiblePublications'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
 import { useAnnotationMode } from './hooks'
@@ -167,6 +171,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
   const resources = useResourceAccess()
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
 
   const setUnifiedTagsModal = useUnifiedTagsModal()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
@@ -280,16 +285,18 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     placeholderData: keepPreviousData,
   })
   const mainResult = mainReadingQuery.data
-  const verses = mainResult?.success && mainResult.data ? mainResult.data.verses : EMPTY_VERSES
+  const mainChapterData = mainResult?.success ? mainResult.data : undefined
+  const verses = mainChapterData?.verses ?? EMPTY_VERSES
+  const usesCanonicalPresentation = mainChapterData?.presentation === 'canonical'
   const legacyPericopeQuery = useQuery({
     queryKey: resourceQueryKeys.biblePericope(version),
     queryFn: () => resources.bibleReading.loadPericope(version),
-    enabled: Boolean(mainResult?.success && mainResult.data && !usesCanonicalBibleExtras(version)),
+    enabled: Boolean(mainResult?.success && mainResult.data && !usesCanonicalPresentation),
     staleTime: Infinity,
     ...localQueryOptions,
   })
   const pericope =
-    mainResult?.success && mainResult.data && usesCanonicalBibleExtras(version)
+    mainResult?.success && mainResult.data && usesCanonicalPresentation
       ? getCanonicalChapterPericope(mainResult.data.verses)
       : (legacyPericopeQuery.data ?? null)
   const isLoading = mainReadingQuery.isFetching
@@ -326,6 +333,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     interlinearLocaleAutomatic: !interlinearLocale,
     parallelVersions,
     commentsDisplay: settings.commentsDisplay,
+    presentation: mainChapterData?.presentation,
   }
   const extrasEnabled =
     Boolean(mainResult?.success && mainResult.data) && !mainReadingQuery.isPlaceholderData
@@ -346,21 +354,68 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     staleTime: Infinity,
     ...localQueryOptions,
   })
+  const commentsAvailabilityQuery = useQuery({
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('MHY', 'fr'),
+      downloadCompletionSignal,
+    ],
+    queryFn: () =>
+      resources.bibleReading.getMhyAvailability?.(lang) ??
+      Promise.resolve({ status: 'available' as const }),
+    enabled: extrasEnabled && settings.commentsDisplay && lang === 'fr',
+    networkMode: 'always',
+  })
   const commentsQuery = useQuery({
     queryKey: resourceQueryKeys.bibleComments({ book: book.Numero, chapter, language: lang }),
     queryFn: () => loadBibleReadingComments(extrasRequest, resources),
-    enabled: extrasEnabled && settings.commentsDisplay,
+    enabled:
+      extrasEnabled &&
+      settings.commentsDisplay &&
+      commentsAvailabilityQuery.data?.status === 'available',
     staleTime: Infinity,
     ...localQueryOptions,
   })
   const comments = settings.commentsDisplay ? (commentsQuery.data ?? null) : null
-  const { data: redWords = null } = useQuery({
+  const commentsUnavailable =
+    commentsAvailabilityQuery.data?.status === 'unavailable'
+      ? (commentsAvailabilityQuery.data as Extract<
+          BibleReadingAvailability,
+          { status: 'unavailable' }
+        >)
+      : undefined
+  const commentsFailureIsTemporary = commentsAvailabilityQuery.isError || commentsQuery.isError
+  const redWordsAvailabilityQuery = useQuery({
+    queryKey: [
+      ...resourceQueryKeys.bibleRedWords(version),
+      'availability',
+      downloadCompletionSignal,
+    ],
+    queryFn: () =>
+      resources.bibleReading.getRedWordsAvailability?.(version) ??
+      Promise.resolve({ status: 'available' as const }),
+    enabled: extrasEnabled && settings.redWordsDisplay && !usesCanonicalPresentation,
+    networkMode: 'always',
+  })
+  const redWordsQuery = useQuery({
     queryKey: resourceQueryKeys.bibleRedWords(version),
     queryFn: () => loadBibleReadingRedWords(extrasRequest, resources),
-    enabled: extrasEnabled,
+    enabled:
+      extrasEnabled &&
+      settings.redWordsDisplay &&
+      !usesCanonicalPresentation &&
+      redWordsAvailabilityQuery.data?.status === 'available',
     staleTime: Infinity,
     ...localQueryOptions,
   })
+  const redWords = redWordsQuery.data ?? null
+  const redWordsUnavailable =
+    redWordsAvailabilityQuery.data?.status === 'unavailable'
+      ? (redWordsAvailabilityQuery.data as Extract<
+          BibleReadingAvailability,
+          { status: 'unavailable' }
+        >)
+      : undefined
+  const redWordsFailureIsTemporary = redWordsAvailabilityQuery.isError || redWordsQuery.isError
   const displayedChapterEntityStrongCodes = [
     ...new Set(
       verses.flatMap(verse =>
@@ -1174,6 +1229,70 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         hidePersonalBibleData={hidePersonalBibleData}
         onEditFocusTags={editFocusTags}
       />
+      {settings.commentsDisplay && lang === 'fr' && commentsFailureIsTemporary && (
+        <Box bg="reverse" borderBottomWidth={1} borderColor="border">
+          <ResourceUnavailableView
+            identity={{ kind: 'database', databaseId: 'MHY', language: 'fr' }}
+            title={t('resource.commentary.temporarilyUnavailable')}
+            fileSize={Math.round(databases('fr').MHY.fileSize / 1_000_000)}
+            reason="temporary-unavailable"
+            size="small"
+            onRetry={() => {
+              void commentsAvailabilityQuery.refetch()
+              void commentsQuery.refetch()
+            }}
+          />
+        </Box>
+      )}
+      {settings.commentsDisplay && lang === 'fr' && commentsUnavailable && (
+        <Box bg="reverse" borderBottomWidth={1} borderColor="border">
+          <ResourceUnavailableView
+            identity={commentsUnavailable.recoveryIdentity}
+            title={t('resource.commentary.offlineCopyNeeded')}
+            fileSize={Math.round(databases('fr').MHY.fileSize / 1_000_000)}
+            reason={commentsUnavailable.reason}
+            size="small"
+          />
+        </Box>
+      )}
+      {settings.redWordsDisplay && redWordsFailureIsTemporary && (
+        <Box bg="reverse" borderBottomWidth={1} borderColor="border">
+          <ResourceUnavailableView
+            identity={{ kind: 'bible', versionId: version }}
+            title={t('resource.redWords.temporarilyUnavailable')}
+            fileSize={Math.max(
+              1,
+              Math.round(
+                createOfflineCopyDownloadItem({ kind: 'bible', versionId: version }).estimatedSize /
+                  1_000_000
+              )
+            )}
+            reason="temporary-unavailable"
+            size="small"
+            onRetry={() => {
+              void redWordsAvailabilityQuery.refetch()
+              void redWordsQuery.refetch()
+            }}
+          />
+        </Box>
+      )}
+      {settings.redWordsDisplay && redWordsUnavailable && (
+        <Box bg="reverse" borderBottomWidth={1} borderColor="border">
+          <ResourceUnavailableView
+            identity={redWordsUnavailable.recoveryIdentity}
+            title={t('resource.redWords.offlineCopyNeeded')}
+            fileSize={Math.max(
+              1,
+              Math.round(
+                createOfflineCopyDownloadItem(redWordsUnavailable.recoveryIdentity).estimatedSize /
+                  1_000_000
+              )
+            )}
+            reason={redWordsUnavailable.reason}
+            size="small"
+          />
+        </Box>
+      )}
       <Box flex={1} zIndex={domLayerZIndex}>
         {useSharedDOM ? (
           // Keep every host mounted so Android only retargets between

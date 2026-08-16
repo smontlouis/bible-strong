@@ -27,14 +27,8 @@ import {
   FRENCH_STRONG_BIBLE_PRIORITY,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import {
-  getInterlinearSidecarAvailability,
-  type InterlinearSidecarAvailability,
-} from '~helpers/interlinearBibleSidecar'
-import {
-  getStrongBibleSidecarAvailability,
-  type StrongBibleSidecarAvailability,
-} from '~helpers/strongBibleSidecar'
+import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
+import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus, useDownloadQueue } from '~helpers/useDownloadQueue'
 import {
   downloadCompletionSignalAtom,
@@ -44,6 +38,9 @@ import {
 import type { BibleTab } from '~state/tabs'
 import { getLanguage } from '~i18n'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import useConnection from '~helpers/useConnection'
+import { toast } from '~helpers/toast'
 
 type SharedProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -161,6 +158,8 @@ const StrongSourceRow = ({
   onDownload,
   activeDownload,
   failedDownload,
+  availabilityError,
+  downloadDisabled,
 }: {
   sourceId: string
   name: string
@@ -171,6 +170,8 @@ const StrongSourceRow = ({
   onDownload: () => void
   activeDownload?: DownloadItemState
   failedDownload?: DownloadItemState
+  availabilityError?: boolean
+  downloadDisabled?: boolean
 }) => {
   const { t } = useTranslation()
   const progress = activeDownload ? getDownloadItemProgress(activeDownload) : 0
@@ -240,7 +241,17 @@ const StrongSourceRow = ({
       ) : !isAvailable ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={failedDownload ? t('downloads.retry') : t('downloads.download')}
+          accessibilityLabel={
+            availabilityError
+              ? t('resource.action.temporarilyUnavailable')
+              : downloadDisabled
+                ? t('resource.action.connectionRequired')
+                : failedDownload
+                  ? t('downloads.retry')
+                  : t('downloads.download')
+          }
+          accessibilityState={{ disabled: downloadDisabled }}
+          disabled={downloadDisabled}
           onPress={onDownload}
           style={({ pressed }) => ({
             marginLeft: 12,
@@ -251,7 +262,16 @@ const StrongSourceRow = ({
             opacity: pressed ? 0.7 : 1,
           })}
         >
-          <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
+          <FeatherIcon
+            name={
+              availabilityError || failedDownload
+                ? 'rotate-cw'
+                : downloadDisabled
+                  ? 'wifi-off'
+                  : 'download-cloud'
+            }
+            size={16}
+          />
         </Pressable>
       ) : null}
     </Box>
@@ -265,6 +285,8 @@ const StrongBibleSourceRow = ({
   selected,
   onSelect,
   onDownload,
+  availabilityError,
+  downloadDisabled,
 }: {
   versionId: StrongBibleVersionId
   availability?: StrongBibleSidecarAvailability
@@ -272,6 +294,8 @@ const StrongBibleSourceRow = ({
   selected: boolean
   onSelect: () => void
   onDownload: () => void
+  availabilityError?: boolean
+  downloadDisabled?: boolean
 }) => {
   const bibleDownload = useDownloadItemStatus(createOfflineCopyId({ kind: 'bible', versionId }))
   const strongDownload = useDownloadItemStatus(
@@ -290,6 +314,8 @@ const StrongBibleSourceRow = ({
       onDownload={onDownload}
       activeDownload={downloads.find(state => isActiveDownload(state?.status))}
       failedDownload={downloads.find(state => state?.status === 'failed')}
+      availabilityError={availabilityError}
+      downloadDisabled={downloadDisabled}
     />
   )
 }
@@ -299,11 +325,17 @@ const BhgStrongSourceRow = ({
   selected,
   onSelect,
   onDownload,
+  availabilityError,
+  downloadDisabled,
+  isChecking,
 }: {
   availability?: BhgLexiconAvailability
   selected: boolean
   onSelect: () => void
   onDownload: () => void
+  availabilityError?: boolean
+  downloadDisabled?: boolean
+  isChecking: boolean
 }) => {
   const bibleDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'bible', versionId: 'BHG' })
@@ -321,12 +353,14 @@ const BhgStrongSourceRow = ({
       sourceId="BHG"
       name={versions.BHG.name}
       isAvailable={availability?.status === 'available'}
-      isChecking={!availability}
+      isChecking={isChecking}
       selected={selected}
       onSelect={onSelect}
       onDownload={onDownload}
       activeDownload={downloads.find(state => isActiveDownload(state?.status))}
       failedDownload={downloads.find(state => state?.status === 'failed')}
+      availabilityError={availabilityError}
+      downloadDisabled={downloadDisabled}
     />
   )
 }
@@ -338,6 +372,8 @@ export const StrongBibleSourceSheet = ({
   resolvedProvenance,
 }: SheetProps) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
+  const isConnected = useConnection()
   const insets = useSafeAreaInsets()
   const bible = useAtomValue(bibleAtom)
   const setBible = useSetAtom(bibleAtom)
@@ -397,12 +433,15 @@ export const StrongBibleSourceSheet = ({
           sourceGroups.flatMap(group =>
             group.versionIds.map(async versionId => ({
               versionId,
-              availability: await getStrongBibleSidecarAvailability(versionId),
+              availability: await resources.strongBible.getAvailability(versionId),
             }))
           )
         ),
         isBhgBible
-          ? getBhgLexiconAvailability(preferredInterlinearLocale)
+          ? getBhgLexiconAvailability(
+              preferredInterlinearLocale,
+              resources.lexiconBible.getInterlinearAvailability
+            )
           : Promise.resolve(undefined),
       ])
       return {
@@ -414,14 +453,9 @@ export const StrongBibleSourceSheet = ({
     },
     enabled: isResourceModalOpen || isSheetOpen,
   })
-  const availabilityByVersion =
-    availabilityQuery.data?.availabilityByVersion ??
-    (availabilityQuery.isError
-      ? new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
-      : null)
+  const availabilityByVersion = availabilityQuery.data?.availabilityByVersion ?? null
   const bhgAvailability: BhgLexiconAvailability | undefined =
-    availabilityQuery.data?.bhgAvailability ??
-    (availabilityQuery.isError && isBhgBible ? { status: 'unavailable', attempts: [] } : undefined)
+    availabilityQuery.data?.bhgAvailability
 
   useEffect(() => {
     const nextAvailability = availabilityQuery.data?.availabilityByVersion
@@ -451,22 +485,32 @@ export const StrongBibleSourceSheet = ({
   }
 
   const downloadSource = async (versionId: StrongBibleVersionId) => {
-    const availability =
-      availabilityByVersion?.get(versionId) ?? (await getStrongBibleSidecarAvailability(versionId))
-    setPendingSelectionVersionId(versionId)
-    enqueue(createStrongSidecarDownloadPlan(versionId, availability.status))
+    if (!isConnected) return
+    try {
+      const availability =
+        availabilityByVersion?.get(versionId) ??
+        (await resources.strongBible.getAvailability(versionId))
+      setPendingSelectionVersionId(versionId)
+      enqueue(createStrongSidecarDownloadPlan(versionId, availability.status))
+    } catch {
+      toast.error(t('resource.action.temporarilyUnavailable'))
+    }
   }
 
   const downloadBhgSource = async () => {
-    const availability: InterlinearSidecarAvailability = await getInterlinearSidecarAvailability(
-      preferredInterlinearLocale
-    )
-    if (availability.status === 'available') {
-      selectSource()
-      return
+    if (!isConnected) return
+    try {
+      const availability: InterlinearSidecarAvailability =
+        await resources.lexiconBible.getInterlinearAvailability(preferredInterlinearLocale)
+      if (availability.status === 'available') {
+        selectSource()
+        return
+      }
+      setStrongBibleSourceVersion()
+      enqueue(createInterlinearSidecarDownloadPlan(preferredInterlinearLocale, availability.status))
+    } catch {
+      toast.error(t('resource.action.temporarilyUnavailable'))
     }
-    setStrongBibleSourceVersion()
-    enqueue(createInterlinearSidecarDownloadPlan(preferredInterlinearLocale, availability.status))
   }
 
   const automaticDescription = strongBibleSourceVersionId
@@ -573,18 +617,31 @@ export const StrongBibleSourceSheet = ({
           ) : item.type === 'bhg-source' ? (
             <BhgStrongSourceRow
               availability={bhgAvailability}
+              availabilityError={availabilityQuery.isError}
+              downloadDisabled={!isConnected && !availabilityQuery.isError}
+              isChecking={availabilityQuery.isPending || availabilityQuery.isFetching}
               selected={!strongBibleSourceVersionId && resolvedProvenance?.versionId === 'BHG'}
               onSelect={() => selectSource()}
-              onDownload={() => void downloadBhgSource()}
+              onDownload={() =>
+                availabilityQuery.isError
+                  ? void availabilityQuery.refetch()
+                  : void downloadBhgSource()
+              }
             />
           ) : (
             <StrongBibleSourceRow
               versionId={item.versionId}
               availability={availabilityByVersion?.get(item.versionId)}
-              isChecking={!availabilityByVersion}
+              isChecking={availabilityQuery.isPending || availabilityQuery.isFetching}
+              availabilityError={availabilityQuery.isError}
+              downloadDisabled={!isConnected && !availabilityQuery.isError}
               selected={strongBibleSourceVersionId === item.versionId}
               onSelect={() => selectSource(item.versionId)}
-              onDownload={() => void downloadSource(item.versionId)}
+              onDownload={() =>
+                availabilityQuery.isError
+                  ? void availabilityQuery.refetch()
+                  : void downloadSource(item.versionId)
+              }
             />
           )
         }

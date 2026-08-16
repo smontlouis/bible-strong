@@ -38,6 +38,16 @@ This is a UI-driven mobile app. Level 1 Ready requires app launch plus represent
 - Confirm available Bible/resource rows render.
 - Do not delete existing downloaded resources unless the test data was created during this run.
 
+### 6. Zero-Copy Local Resource Service
+
+- Start Postgres and the local resource HTTP service with the complete LSG publication.
+- Reinstall the app so its sandbox contains no downloaded resource databases.
+- Complete or skip discovery, then choose **Continue/Skip without downloading**.
+- Confirm the reader opens LSG from the local HTTP service.
+- Open Downloads and confirm LSG is online while its offline copy is not installed.
+- Download LSG, confirm the installed state, remove that test copy, and confirm online reading remains available.
+- Repeat the zero-copy read and Downloads state check on both iOS and Android.
+
 ## Optional Follow-Up
 
 - Strong concordance lookup from a verse.
@@ -80,3 +90,20 @@ Evidence screenshots were captured under `/private/tmp/` during the run:
 - `/private/tmp/bible-strong-smoke-downloads-2.png`
 - `/private/tmp/bible-strong-highlight-created.png`
 - `/private/tmp/bible-strong-highlight-removed.png`
+
+### Local resource-service execution — 2026-08-16
+
+Executed against local Postgres 17 and the complete LSG publication revision `lsg-a1edb9406bd74711735b`.
+
+- iOS Simulator, iPhone 17 Pro: fresh reinstall, discovery completed, **Continuer sans télécharger**, Genèse 1 rendered through `http://127.0.0.1:8787`, Downloads reported `0/23` French Bibles and LSG as `Disponible en ligne · Aucune copie hors ligne`.
+- iOS lifecycle: downloaded the test LSG copy, observed `Copie hors ligne installée`, removed it through the confirmation dialog, and observed online availability with no offline copy again.
+- Android Emulator, Pixel 6 Pro API 36: fresh reinstall, discovery skipped, **Skip downloads**, KJV correctly reported that it was not available online yet, then selecting LSG rendered Genèse 1 through `http://10.0.2.2:8787`.
+- Android Downloads reported `92 KB used` and `0/23` French Bibles, confirming the zero-copy state.
+- The live coverage endpoint returned the active revision, 66 ordered books, 1,189 chapters, and 31 verses for Genèse 1; the mobile HTTP adapter also verifies this complete coverage in the exhaustive LSG suite.
+- Android download/install/remove lifecycle: served the exact validated bundle through the local development artifact server, downloaded LSG to 100%, observed `Offline copy installed`, removed it through the native confirmation dialog, observed `No Offline copy`, and returned to a still-readable Genèse 1 through the local API.
+- The local artifact origin was `http://10.0.2.2:8788`; the mobile catalog path, archive SHA-256, content SHA-256, and atomic installation code were unchanged. This proves the lifecycle without relying on production infrastructure or the emulator's external DNS.
+- The real-PostgreSQL complete-LSG integration suite now drives the mobile hybrid adapter through installed-local/no-network priority, removal and HTTP fallback, recoverable local corruption, local not-found without source hopping, genuine remote 404, network-offline, and temporary inactive-publication outcomes.
+- Automated source-orchestration tests additionally cover unsupported publication, malformed remote content, and remote coverage fallback.
+- No hosted database, remote publication upload, Worker deployment, or Cloudflare infrastructure was used.
+
+The exhaustive surface and identity inventory is recorded in [resource-coverage-matrix.md](resource-coverage-matrix.md).

@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import { useAtom } from 'jotai'
-import { Alert, TouchableOpacity } from 'react-native'
+import { Pressable } from 'react-native'
 import Animated, { type AnimatedStyle } from 'react-native-reanimated'
 import { useTheme } from '@emotion/react'
 
@@ -21,9 +21,6 @@ import {
 } from 'src/state/resourcesLanguage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
-import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
-import { useDownloadQueue } from '~helpers/useDownloadQueue'
 
 // Icons mapping using SVG files
 const icons = {
@@ -142,22 +139,20 @@ const SegmentedLanguageToggle = ({
       <Animated.View style={indicatorStyle} />
 
       {/* FR Button */}
-      <TouchableOpacity
+      <Pressable
         onPress={() => onChange('fr')}
-        activeOpacity={0.8}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
       >
         <Animated.Text style={frenchTextStyle}>{isLarge ? 'Français' : 'FR'}</Animated.Text>
-      </TouchableOpacity>
+      </Pressable>
 
       {/* EN Button */}
-      <TouchableOpacity
+      <Pressable
         onPress={() => onChange('en')}
-        activeOpacity={0.8}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
       >
         <Animated.Text style={englishTextStyle}>{isLarge ? 'English' : 'EN'}</Animated.Text>
-      </TouchableOpacity>
+      </Pressable>
     </Box>
   )
 }
@@ -261,7 +256,6 @@ const ResourceRow = ({
 const ResourceLanguageScreen = () => {
   const { t, i18n } = useTranslation()
   const dispatch = useDispatch()
-  const { enqueue } = useDownloadQueue()
 
   const [resourcesLanguages, setResourcesLanguages] = useAtom(resourcesLanguageAtom)
   const currentAppLang = i18n.language as ResourceLanguage
@@ -283,31 +277,9 @@ const ResourceLanguageScreen = () => {
     dispatch(resetCompareVersion(defaultVersion))
   }
 
-  const handleAppLanguageChange = async (lang: ResourceLanguage) => {
+  const handleAppLanguageChange = (lang: ResourceLanguage) => {
     if (lang === currentAppLang) return
-
-    const requiredVersion = getDefaultBibleVersion(lang)
-    const needsDownload = await getIfVersionNeedsDownload(requiredVersion)
-
-    if (!needsDownload) {
-      applyAppLanguageChange(lang)
-      return
-    }
-
-    Alert.alert(
-      t('resourceLanguage.requiredBibleTitle', { version: requiredVersion }),
-      t('resourceLanguage.requiredBibleMessage', { version: requiredVersion }),
-      [
-        { text: t('Annuler'), style: 'cancel' },
-        {
-          text: t('resourceLanguage.downloadAndSwitch'),
-          onPress: () => {
-            enqueue([createBibleDownloadItem(requiredVersion)])
-            applyAppLanguageChange(lang)
-          },
-        },
-      ]
-    )
+    applyAppLanguageChange(lang)
   }
 
   return (

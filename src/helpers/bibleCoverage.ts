@@ -1,6 +1,17 @@
 import { Book } from '~assets/bible_versions/books-desc'
-import { type BibleCanonId, getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
+import {
+  type BibleCanonId,
+  getBook,
+  getBooksForCanon,
+  isBibleCanonId,
+} from '~helpers/bibleBookCatalog'
 import { getChapterVerseCount, type BibleVersionCoverage } from '~helpers/biblesDb'
+
+export const resolveBibleCoverageCanonId = (
+  coverage: BibleVersionCoverage | undefined,
+  fallback: BibleCanonId
+): BibleCanonId =>
+  coverage?.canon?.id && isBibleCanonId(coverage.canon.id) ? coverage.canon.id : fallback
 
 export const getCanonicalChapters = (book: Book) =>
   Array.from({ length: book.Chapitres }, (_, i) => i + 1)

@@ -4,6 +4,7 @@ import {
   resolveBibleVerses,
   shouldShowBibleReferenceUnavailable,
 } from '../bibleVerseResolver'
+import { BibleLoadingError } from '../bibleErrors'
 
 jest.mock('../biblesDb', () => ({
   getMultipleVerses: jest.fn(),
@@ -104,6 +105,60 @@ describe('resolveBibleVerses', () => {
       version: 'VUL',
       texts: { '67-1-1': 'One verse' },
       missingVerseKeys: ['67-1-2'],
+    })
+  })
+
+  it('does not turn a genuine missing verse into an Offline-copy acquisition', async () => {
+    await expect(
+      resolveBibleVerses(
+        { verseKeys: ['1-200-1'], defaultVersion: 'LSG' },
+        {
+          loadVerseTexts: async () => {
+            throw new BibleLoadingError('CHAPTER_NOT_FOUND', 'LSG', 1, 200)
+          },
+          getAvailability: async () => ({
+            status: 'unavailable',
+            recoveries: ['acquire-offline-copy'],
+          }),
+        }
+      )
+    ).resolves.toEqual({
+      status: 'reference-only',
+      version: 'LSG',
+      texts: {},
+      missingVerseKeys: ['1-200-1'],
+    })
+  })
+
+  it('preserves the recovery attached to a structured source failure', async () => {
+    await expect(
+      resolveBibleVerses(
+        { verseKeys: ['1-1-1'], defaultVersion: 'LSG' },
+        {
+          loadVerseTexts: async () => {
+            throw new BibleLoadingError('RESOURCE_OFFLINE', 'LSG', 1, 1)
+          },
+        }
+      )
+    ).resolves.toMatchObject({
+      status: 'reference-only',
+      recoveries: ['acquire-offline-copy'],
+    })
+  })
+
+  it('keeps a temporary remote failure as retryable instead of suggesting a download', async () => {
+    await expect(
+      resolveBibleVerses(
+        { verseKeys: ['1-1-1'], defaultVersion: 'LSG' },
+        {
+          loadVerseTexts: async () => {
+            throw new BibleLoadingError('RESOURCE_TEMPORARY_UNAVAILABLE', 'LSG', 1, 1)
+          },
+        }
+      )
+    ).resolves.toMatchObject({
+      status: 'reference-only',
+      recoveries: ['retry'],
     })
   })
 })

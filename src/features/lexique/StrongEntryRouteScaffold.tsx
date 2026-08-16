@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { Alert } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 
@@ -130,19 +129,7 @@ const StrongEntryRouteScaffold = ({
 
   if (requireEntry && entryState.coreAvailability.data?.status !== 'available') {
     const requestCoreDownload = () => {
-      Alert.alert(
-        t('Télécharger le lexique Strong ?'),
-        t(
-          'Le lexique principal est nécessaire pour afficher les définitions, la morphologie et les mots liés.'
-        ),
-        [
-          { text: t('Annuler'), style: 'cancel' },
-          {
-            text: t('Télécharger'),
-            onPress: () => downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')]),
-          },
-        ]
-      )
+      downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')])
     }
 
     return (
@@ -151,7 +138,7 @@ const StrongEntryRouteScaffold = ({
         <VStack flex px={20} center gap={16}>
           <FeatherIcon name="book-open" size={34} color="default" />
           <Text bold fontSize={20} textAlign="center">
-            {t('Le nouveau lexique Strong est requis')}
+            {t('resource.strong.coreUnavailable')}
           </Text>
           <Text color="tertiary" textAlign="center">
             {t(

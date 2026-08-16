@@ -1,7 +1,6 @@
 import { type SheetRef } from '~common/sheet'
 import React from 'react'
 import { useSharedValue } from 'react-native-reanimated'
-import bibleMemoize from '~helpers/bibleStupidMemoize'
 import Box from '~common/ui/Box'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
@@ -19,11 +18,8 @@ import SectionDetailsModal from './SectionDetailsModal'
 import TimelineEvent from './TimelineEvent'
 import TimelineHeader from './TimelineHeader'
 import { useTimeline } from './timeline.hooks'
-import {
-  ShallowTimelineSection,
-  TimelineEventDetail,
-  TimelineSection as TimelineSectionProps,
-} from './types'
+import { ShallowTimelineSection, TimelineSection as TimelineSectionProps } from './types'
+import { useTimelineDetails } from './TimelineResourceBoundary'
 interface Props extends TimelineSectionProps {
   onPrev: () => void
   onNext: () => void
@@ -74,8 +70,8 @@ const Timeline = ({
   const openInNewTab = useOpenInNewTab()
   const lang = useLanguage()
 
-  const timeline = bibleMemoize.timeline as TimelineEventDetail[] | undefined
-  const eventDetailSlugs = timeline ? new Set(timeline.map(e => e.slug)) : undefined
+  const timeline = useTimelineDetails()
+  const eventDetailSlugs = new Set(timeline.map(e => e.slug))
 
   const onTimelineDetailsOpen = () => {
     modalRef.current?.present()

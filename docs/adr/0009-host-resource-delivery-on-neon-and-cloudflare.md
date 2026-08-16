@@ -21,9 +21,11 @@ reads, and R2 stores published SQLite/JSON offline artifacts. Neon stores publis
 and serves dynamic operations such as search behind the Worker API. Firebase remains responsible
 for authentication and user-owned data and is not placed in the resource-read path.
 
-Workers initially connect to Neon over HTTP with the Neon serverless driver. Do not introduce
-Cloudflare Hyperdrive before measured latency or connection pressure justifies its extra pooling and
-query-cache layer.
+Workers initially connect to Neon over HTTP through Kysely's Neon dialect and the Neon serverless
+driver. Local development uses the same Kysely repositories through `PostgresDialect` and
+`node-postgres`; switching dialects must not change domain queries or Resource contracts. Do not
+introduce Cloudflare Hyperdrive before measured latency or connection pressure justifies its extra
+pooling and query-cache layer.
 
 Place the initial Neon project in AWS Europe Frankfurt (`eu-central-1`) for proximity to Bible
 Strong's primarily French and European audience. Cloudflare remains the global delivery and cache

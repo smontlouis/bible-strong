@@ -14,13 +14,12 @@ import {
   getStrongBibleAttributionKey,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import {
-  getStrongBibleSidecarAvailability,
-  type StrongBibleSidecarAvailability,
-} from '~helpers/strongBibleSidecar'
+import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import useConnection from '~helpers/useConnection'
 
 interface Props {
   versionId: StrongBibleVersionId
@@ -33,6 +32,8 @@ const isActiveDownload = (status?: string) =>
 
 const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: Props) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
+  const isConnected = useConnection()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus(createOfflineCopyId({ kind: 'bible', versionId }))
   const strongDownload = useDownloadItemStatus(
@@ -40,10 +41,11 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
   )
   const availabilityQuery = useQuery({
     queryKey: ['strong-index-availability', versionId, downloadCompletionSignal],
-    queryFn: () => getStrongBibleSidecarAvailability(versionId),
+    queryFn: () => resources.strongBible.getAvailability(versionId),
   })
   const availability = availabilityQuery.data
   const isChecking = availabilityQuery.isPending || availabilityQuery.isFetching
+  const availabilityFailed = availabilityQuery.isError
 
   React.useEffect(() => {
     onAvailabilityChange(availability?.status === 'available')
@@ -57,9 +59,17 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
   const handlePress = async () => {
     if (isChecking || isAvailable || strongActiveDownload) return
 
+    if (availabilityFailed) {
+      await availabilityQuery.refetch()
+      return
+    }
+
+    if (!isConnected) return
+
     let resolvedAvailability: StrongBibleSidecarAvailability | undefined = availability
     if (!resolvedAvailability) {
       const result = await availabilityQuery.refetch()
+      if (result.isError) return
       resolvedAvailability = result.data
     }
 
@@ -110,10 +120,21 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
         ) : (
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel={t('downloads.strongIndexName', { bible: versionId })}
-            accessibilityState={{ disabled: isChecking || Boolean(strongActiveDownload) }}
+            accessibilityLabel={
+              availabilityFailed
+                ? t('resource.action.temporarilyUnavailable')
+                : t('downloads.strongIndexName', { bible: versionId })
+            }
+            accessibilityState={{
+              disabled:
+                (!availabilityFailed && !isConnected) ||
+                isChecking ||
+                Boolean(strongActiveDownload),
+            }}
             activeOpacity={strongActiveDownload ? 1 : 0.7}
-            disabled={isChecking || Boolean(strongActiveDownload)}
+            disabled={
+              (!availabilityFailed && !isConnected) || isChecking || Boolean(strongActiveDownload)
+            }
             onPress={handlePress}
           >
             <Box width={48} minHeight={40} center>
@@ -124,7 +145,16 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
               ) : strongActiveDownload ? (
                 <Progress progress={Math.max(progress, 0.04)} size={22} thickness={2.5} />
               ) : (
-                <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
+                <FeatherIcon
+                  name={
+                    availabilityFailed || failedDownload
+                      ? 'rotate-cw'
+                      : !isConnected
+                        ? 'wifi-off'
+                        : 'download-cloud'
+                  }
+                  size={16}
+                />
               )}
             </Box>
           </TouchableOpacity>

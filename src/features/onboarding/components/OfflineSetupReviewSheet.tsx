@@ -136,11 +136,14 @@ const getButtonOpacity = (disabled: boolean, pressed: boolean) => {
 const getButtonTranslationKey = ({
   folderContext,
   reviewOpen,
+  canReview,
 }: {
   folderContext: boolean
   reviewOpen: boolean
+  canReview: boolean
 }) => {
   if (folderContext) return 'offlineSetup.done'
+  if (!canReview) return 'offlineSetup.continue'
   if (reviewOpen) return 'offlineSetup.download'
   return 'offlineSetup.review'
 }
@@ -190,12 +193,11 @@ const OfflineSetupReviewSheet = ({
   const canReview = displayedItems.length > 0
   const gestureEnabled = canReview || Boolean(folderContext)
   const gestureLocked = !canReview
-  const disabled = folderContext
-    ? false
-    : downloading || displayedItems.length === 0 || !availabilityReady
+  const disabled = folderContext ? false : downloading || !availabilityReady
   const buttonTranslationKey = getButtonTranslationKey({
     folderContext: Boolean(folderContext),
     reviewOpen,
+    canReview,
   })
   const buttonLabel = t(buttonTranslationKey)
   const closedButtonLabel = t('offlineSetup.review')
@@ -396,7 +398,7 @@ const OfflineSetupReviewSheet = ({
         skipEntering={false}
         skipExiting={false}
       >
-        {folderContext ? (
+        {folderContext || !canReview ? (
           <Text color={palette.onAccent} title fontSize={16}>
             {buttonLabel}
           </Text>
@@ -422,6 +424,10 @@ const OfflineSetupReviewSheet = ({
     if (disabled) return
     if (folderContext) {
       closeFolder()
+      return
+    }
+    if (!canReview) {
+      onDownload()
       return
     }
     if (!reviewOpen) {

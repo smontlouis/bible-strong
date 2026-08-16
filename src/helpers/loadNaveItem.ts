@@ -1,5 +1,7 @@
-import { SQLNaveTransaction } from '~helpers/getSQLTransaction'
+import { getSQLTransactionForLang } from '~helpers/getSQLTransaction'
 import catchDatabaseError, { DatabaseError } from '~helpers/catchDatabaseError'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { getResourceLanguage } from '~state/resourcesLanguage'
 
 export interface NaveItemRow {
   name_lower: string
@@ -8,9 +10,12 @@ export interface NaveItemRow {
   description: string
 }
 
-const loadNaveItem = (name_lower: string): Promise<NaveItemRow | DatabaseError | undefined> =>
+const loadNaveItem = (
+  name_lower: string,
+  language: ResourceLanguage = getResourceLanguage('NAVE')
+): Promise<NaveItemRow | DatabaseError | undefined> =>
   catchDatabaseError(async () => {
-    const result = await SQLNaveTransaction<NaveItemRow>(
+    const result = await getSQLTransactionForLang('NAVE', language)<NaveItemRow>(
       `SELECT name_lower, name, letter, description
     FROM TOPICS
     WHERE name_lower LIKE (?)

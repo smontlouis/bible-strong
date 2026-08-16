@@ -19,6 +19,22 @@ search and filtering may query PostgreSQL.
 The publication pipeline assigns immutable resource revisions and produces or registers the matching
 downloadable offline artifacts.
 
+The initial Bible chapter route is
+`GET /v1/bibles/{version}/books/{book}/chapters/{chapter}`. Its response is a canonical DTO rather
+than the mobile application's historical `Verse` type or a PostgreSQL row shape. It declares the
+active Resource revision in the response and HTTP validator. `/v1` versions the API contract, while
+content replacement changes the Resource revision without changing the route version. The API serves
+only the active revision and does not expose historical-revision reads.
+
+Define the server application with Effect HttpApi and define request, response, and error boundaries
+with Effect Schema. These definitions are the single source for runtime validation, TypeScript types,
+JSON Schema, and OpenAPI. The Node development entry point and the future Cloudflare Worker entry
+point provide runtime bindings to the same HTTP application rather than owning separate route logic.
+
+Boundary failures use stable structured problem responses with an HTTP status, domain code, safe
+message, request identifier, and retry information where relevant. Database errors and other
+implementation details never cross the Resource domain API boundary.
+
 Remote editorial reads must work without an authenticated user account so first-time users can read
 online immediately. Operational protections such as rate limits, quotas, app attestation, and
 resource-specific licensing controls may protect the API without making account authentication a
@@ -58,7 +74,8 @@ simple without introducing GraphQL or gRPC clients.
 Define REST requests and responses once in a shared machine-readable contract package. The same
 definitions provide runtime boundary validation, inferred or generated TypeScript types, and OpenAPI
 documentation. Plain handwritten TypeScript interfaces on the mobile and Worker sides are not
-independent sources of truth. The concrete schema library remains an implementation choice.
+independent sources of truth. Effect Schema is the concrete contract library and Effect HttpApi is
+the server application boundary.
 
 Keep each API route version backward-compatible for its lifetime. Additive optional fields are
 allowed, but removing, renaming, or reinterpreting existing fields requires a new route version.

@@ -141,6 +141,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['react-native-edge-to-edge'],
   ],
   extra: {
+    resourceApiUrl: process.env.EXPO_PUBLIC_RESOURCE_API_URL,
+    resourceArtifactBaseUrl: process.env.EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL,
     eas: {
       projectId: 'fdf72b90-346b-11e9-ad9a-255491359311',
     },

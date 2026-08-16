@@ -5,6 +5,7 @@ import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
 import { downloadWithCdnFallback } from '~helpers/downloadWithCdnFallback'
 import { dbManager, openSQLiteDatabase } from '~helpers/sqlite'
 import type { DatabaseId } from '~helpers/databaseTypes'
+import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
 import type { DownloadItem } from '~state/downloadQueue'
 import type {
   BibleDownloadItem,
@@ -134,14 +135,10 @@ const installDatabase = async (
           `SELECT name FROM sqlite_schema WHERE type='table'`
         )
         const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
-        const requiredTables: Partial<Record<DatabaseId, string[]>> = {
-          DICTIONNAIRE: ['dictionnaire'],
-          NAVE: ['topics', 'verses'],
-          TRESOR: ['commentaires'],
-          MHY: ['commentaires'],
-        }
         if (
-          requiredTables[dbId as DatabaseId]?.some(table => !tableNames.has(table.toLowerCase()))
+          resourceDatabaseRequiredTables[dbId as DatabaseId]?.some(
+            table => !tableNames.has(table.toLowerCase())
+          )
         ) {
           throw new Error(`RESOURCE_DATABASE_SCHEMA_MISMATCH:${dbId}:${lang}`)
         }

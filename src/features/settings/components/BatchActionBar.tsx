@@ -13,6 +13,7 @@ interface BatchActionBarProps {
   hasDeletable: boolean
   onDownload: () => void
   onDelete: () => void
+  downloadsDisabled?: boolean
 }
 
 const BatchActionBar = ({
@@ -21,6 +22,7 @@ const BatchActionBar = ({
   hasDeletable,
   onDownload,
   onDelete,
+  downloadsDisabled = false,
 }: BatchActionBarProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -49,16 +51,20 @@ const BatchActionBar = ({
 
         {hasDownloadable && (
           <TouchableOpacity
+            accessibilityState={{ disabled: downloadsDisabled }}
+            disabled={downloadsDisabled}
             onPress={onDownload}
             style={{
-              backgroundColor: theme.colors.primary,
+              backgroundColor: downloadsDisabled ? theme.colors.tertiary : theme.colors.primary,
               paddingHorizontal: 16,
               paddingVertical: 10,
               borderRadius: 8,
             }}
           >
             <Text fontSize={14} bold style={{ color: '#fff' }}>
-              {t('downloads.download')}
+              {downloadsDisabled
+                ? t('resource.action.connectionRequired')
+                : t('downloads.download')}
             </Text>
           </TouchableOpacity>
         )}

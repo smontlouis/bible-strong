@@ -54,7 +54,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     return (
       <ResourceDownloadWidget
         identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
-        title={t('Dictionnaire requis')}
+        title={t('resource.dictionary.offlineCopyNeeded')}
         fileSize={22}
       />
     )

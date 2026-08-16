@@ -198,7 +198,7 @@ const SelectResources = (props: SelectResourcesProps) => {
         />
       ) : null}
 
-      {props.mode === 'preview' ? (
+      {props.mode === 'preview' || props.mode === undefined ? (
         <AnimatedBox
           position="absolute"
           top={insets.top + 10}
@@ -213,8 +213,12 @@ const SelectResources = (props: SelectResourcesProps) => {
         >
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('offlineSetup.closePreview')}
-            onPress={props.onClose}
+            accessibilityLabel={t(
+              props.mode === 'preview'
+                ? 'offlineSetup.closePreview'
+                : 'offlineSetup.continueWithoutDownloads'
+            )}
+            onPress={props.mode === 'preview' ? props.onClose : props.onComplete}
             hitSlop={8}
           >
             {({ pressed }) => (
@@ -231,9 +235,17 @@ const SelectResources = (props: SelectResourcesProps) => {
                 }}
               >
                 <Text color="#68758C" fontSize={10} bold>
-                  {t('offlineSetup.closePreview')}
+                  {t(
+                    props.mode === 'preview'
+                      ? 'offlineSetup.closePreview'
+                      : 'offlineSetup.continueWithoutDownloads'
+                  )}
                 </Text>
-                <Feather name="x" size={14} color="#68758C" />
+                <Feather
+                  name={props.mode === 'preview' ? 'x' : 'arrow-right'}
+                  size={14}
+                  color="#68758C"
+                />
               </HStack>
             )}
           </Pressable>

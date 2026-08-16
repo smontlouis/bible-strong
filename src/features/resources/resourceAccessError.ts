@@ -1,7 +1,15 @@
 import type { DatabaseError } from '~helpers/catchDatabaseError'
 import { isDatabaseError } from '~helpers/queryResult'
 
-export type ResourceAccessErrorCode = 'INVALID_OFFLINE_COPY' | 'TEMPORARY_UNAVAILABLE' | 'UNKNOWN'
+export type ResourceAccessErrorCode =
+  | 'OFFLINE_COPY_REQUIRED'
+  | 'INVALID_OFFLINE_COPY'
+  | 'NETWORK_OFFLINE'
+  | 'RESOURCE_UNSUPPORTED'
+  | 'NOT_FOUND'
+  | 'INTEGRITY_FAILURE'
+  | 'TEMPORARY_UNAVAILABLE'
+  | 'UNKNOWN'
 
 export type ResourceRecoveryAction = 'acquire-offline-copy' | 'manage-offline-copies'
 

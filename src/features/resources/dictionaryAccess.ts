@@ -6,10 +6,7 @@ import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
 import { mapLocalResourceError, unwrapLocalResourceResult } from './resourceAccessError'
 import { getLocalResourceAvailability } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-
-export type ResourceAvailability =
-  | { status: 'available' }
-  | { status: 'unavailable'; recoveries: 'acquire-offline-copy'[] }
+import type { ResourceAvailability } from './resourceModel'
 
 export type DictionarySummary = {
   id: number
@@ -34,16 +31,26 @@ export type DictionaryAccess = {
 }
 
 export const localDictionaryAccess: DictionaryAccess = {
-  getAvailability: async language =>
-    (
-      await getLocalResourceAvailability({
-        kind: 'database',
-        databaseId: 'DICTIONNAIRE',
-        language,
-      })
-    ).status === 'available'
+  getAvailability: async language => {
+    const availability = await getLocalResourceAvailability({
+      kind: 'database',
+      databaseId: 'DICTIONNAIRE',
+      language,
+    })
+    return availability.status === 'available'
       ? { status: 'available' }
-      : { status: 'unavailable', recoveries: ['acquire-offline-copy'] },
+      : availability.status === 'corrupt'
+        ? {
+            status: 'unavailable',
+            reason: 'invalid-offline-copy',
+            recoveries: ['acquire-offline-copy', 'manage-offline-copies'],
+          }
+        : {
+            status: 'unavailable',
+            reason: 'offline-copy-required',
+            recoveries: ['acquire-offline-copy'],
+          }
+  },
   listByLetter: async letter =>
     unwrapLocalResourceResult(await loadDictionnaireByLetter(letter)).map(item => ({
       id: item.rowid,

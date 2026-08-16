@@ -47,7 +47,6 @@ interface Resource {
   type: 'bible' | 'database'
   fileSize: number
   url: string
-  required?: boolean
 }
 ```
 
@@ -69,13 +68,8 @@ OnBoarding (orchestrateur)
 
 ```typescript
 // Dans App.tsx ou navigation root
-const checkOnboarding = async () => {
-  const hasDefaultBible = await checkDefaultBibleInstalled()
-  
-  if (!hasDefaultBible) {
-    setShowOnboarding(true)
-  }
-}
+// L'onboarding est un guide facultatif. Il ne dépend d'aucune copie locale.
+const checkOnboarding = () => setShowOnboarding(!hasCompletedOnboarding())
 ```
 
 ### Intégration dans l'app
@@ -126,7 +120,7 @@ const slides = [
 ```typescript
 // Bibles disponibles
 const bibles = [
-  { id: 'LSG', name: 'Louis Segond', required: true },
+  { id: 'LSG', name: 'Louis Segond', suggested: true },
   { id: 'S21', name: 'Segond 21' },
   { id: 'MARTIN', name: 'Martin' },
   // ...
@@ -142,8 +136,9 @@ const databases = [
 ```
 
 ### Validation
-- Au moins une Bible doit être sélectionnée
-- LSG (FR) ou KJV (EN) obligatoire selon la langue
+
+- Aucune ressource ne doit être sélectionnée pour continuer
+- LSG (FR) ou KJV (EN) est suggérée selon la langue, sans téléchargement obligatoire
 - Estimation de l'espace disque nécessaire
 
 ## Téléchargement
