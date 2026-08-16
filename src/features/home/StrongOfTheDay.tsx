@@ -19,6 +19,7 @@ import { useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import ResourceDownloadWidget from './ResourceDownloadWidget'
 
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
@@ -56,12 +57,18 @@ const StrongOfTheDay = ({
   })
   const strongReference = strongQuery.data
   if (
-    (availabilityQuery.data?.availability.status !== 'available' &&
+    (availabilityQuery.data?.availability?.status !== 'available' &&
       availabilityQuery.data?.recoveries?.includes('acquire-offline-copy')) ||
     (strongQuery.error instanceof ResourceAccessError &&
       strongQuery.error.recoveries.includes('acquire-offline-copy'))
   ) {
-    return null
+    return (
+      <ResourceDownloadWidget
+        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        title={t('resource.strong.offlineCopyNeeded')}
+        fileSize={35}
+      />
+    )
   }
   const error = strongQuery.isError
     ? true

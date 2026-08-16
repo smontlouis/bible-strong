@@ -1,13 +1,8 @@
-import * as FileSystem from 'expo-file-system/legacy'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 
-import { isVersionInstalled } from '~helpers/biblesDb'
 import { downloadManager } from '~helpers/downloadManager'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
-import { requireBiblePath } from '~helpers/requireBiblePath'
-import useLanguage from '~helpers/useLanguage'
 import { bibleDomRemountSignalAtom } from '~state/app'
 import { downloadItemStatesAtom } from '~state/downloadQueue'
 import { selectedResourcesAtom } from './atom'
@@ -58,7 +53,6 @@ const useOfflineSetupDownload = ({
   const selectedResources = useAtomValue(selectedResourcesAtom)
   const bumpBibleDomRemountSignal = useSetAtom(bibleDomRemountSignalAtom)
   const downloadItemStates = useAtomValue(downloadItemStatesAtom)
-  const lang = useLanguage()
   const [phase, setPhase] = useState<OfflineSetupDownloadPhase>('downloading')
   const [error, setError] = useState<Error | null>(null)
   const [previewProgress, setPreviewProgress] = useState(0)
@@ -134,17 +128,6 @@ const useOfflineSetupDownload = ({
     verificationStarted.current = true
 
     try {
-      const defaultVersion = getDefaultBibleVersion(lang)
-      const installed = await isVersionInstalled(defaultVersion)
-      if (!installed) {
-        const fileInfo = await FileSystem.getInfoAsync(requireBiblePath(defaultVersion))
-        if (!fileInfo.exists) {
-          verificationStarted.current = false
-          fail(new Error(`Download verification failed: Bible ${defaultVersion} not found`))
-          return
-        }
-      }
-
       downloadManager.clearCompleted()
       if (Platform.OS === 'android') {
         bumpBibleDomRemountSignal(signal => signal + 1)

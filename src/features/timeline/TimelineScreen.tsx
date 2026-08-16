@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { getEvents } from './events'
 import Box from '~common/ui/Box'
+import TimelineResourceBoundary from './TimelineResourceBoundary'
 
 const omitEvents = ({ events, ...rest }: TimelineSectionProps): ShallowTimelineSection => rest
 
@@ -63,32 +64,34 @@ const Timeline = ({
   }, [events?.length])
 
   return (
-    <Box flex bg="reverse">
-      <View style={{ flex: 1, position: 'relative' }}>
-        {events?.map((ev, i) => {
-          const prevEvent = events[i - 1] && omitEvents(events[i - 1])
-          const nextEvent = events[i + 1] && omitEvents(events[i + 1])
-          return (
-            <TimelineSection
-              {...ev}
-              key={`${i}-${current === i}`}
-              entrance={entrance}
-              isCurrent={current === i}
-              isFirst={i === 0}
-              isLast={i === events.length - 1}
-              onPrev={onPrev}
-              onNext={onNext}
-              onBackPress={onBackPress}
-              hasBackButton={hasBackButton}
-              isFormSheet={isFormSheet}
-              prevEvent={prevEvent}
-              nextEvent={nextEvent}
-              sectionIndex={i}
-            />
-          )
-        })}
-      </View>
-    </Box>
+    <TimelineResourceBoundary>
+      <Box flex bg="reverse">
+        <View style={{ flex: 1, position: 'relative' }}>
+          {events?.map((ev, i) => {
+            const prevEvent = events[i - 1] && omitEvents(events[i - 1])
+            const nextEvent = events[i + 1] && omitEvents(events[i + 1])
+            return (
+              <TimelineSection
+                {...ev}
+                key={`${i}-${current === i}`}
+                entrance={entrance}
+                isCurrent={current === i}
+                isFirst={i === 0}
+                isLast={i === events.length - 1}
+                onPrev={onPrev}
+                onNext={onNext}
+                onBackPress={onBackPress}
+                hasBackButton={hasBackButton}
+                isFormSheet={isFormSheet}
+                prevEvent={prevEvent}
+                nextEvent={nextEvent}
+                sectionIndex={i}
+              />
+            )
+          })}
+        </View>
+      </Box>
+    </TimelineResourceBoundary>
   )
 }
 export default Timeline

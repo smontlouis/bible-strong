@@ -14,13 +14,11 @@ import {
   getStrongBibleAttributionKey,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import {
-  getStrongBibleSidecarAvailability,
-  type StrongBibleSidecarAvailability,
-} from '~helpers/strongBibleSidecar'
+import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 interface Props {
   versionId: StrongBibleVersionId
@@ -33,6 +31,7 @@ const isActiveDownload = (status?: string) =>
 
 const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: Props) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus(createOfflineCopyId({ kind: 'bible', versionId }))
   const strongDownload = useDownloadItemStatus(
@@ -40,7 +39,7 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
   )
   const availabilityQuery = useQuery({
     queryKey: ['strong-index-availability', versionId, downloadCompletionSignal],
-    queryFn: () => getStrongBibleSidecarAvailability(versionId),
+    queryFn: () => resources.strongBible.getAvailability(versionId),
   })
   const availability = availabilityQuery.data
   const isChecking = availabilityQuery.isPending || availabilityQuery.isFetching

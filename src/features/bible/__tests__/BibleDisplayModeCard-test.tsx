@@ -63,16 +63,16 @@ type CardPressableProps = {
   onPress?: () => void
 }
 
-const getCardPressable = (
+const getCardPressables = (
   card: React.ReactElement<{ children: React.ReactNode }>
-): React.ReactElement<CardPressableProps> =>
-  React.Children.only(card.props.children) as React.ReactElement<CardPressableProps>
+): React.ReactElement<CardPressableProps>[] =>
+  React.Children.toArray(card.props.children) as React.ReactElement<CardPressableProps>[]
 
 describe('BibleDisplayModeCard', () => {
-  it('uses the whole unavailable card to request its download', () => {
+  it('keeps selection and Offline acquisition as separate actions', () => {
     const onPress = jest.fn()
     const onDownloadPress = jest.fn()
-    const pressable = getCardPressable(
+    const [selectionPressable, downloadPressable] = getCardPressables(
       BibleDisplayModeCard({
         label: 'Strong',
         description: 'Texte + numéros',
@@ -85,19 +85,23 @@ describe('BibleDisplayModeCard', () => {
       })
     )
 
-    expect(pressable.props.accessibilityLabel).toBe('Télécharger les ressources pour Strong')
-    expect(pressable.props.disabled).toBe(false)
+    expect(selectionPressable!.props.accessibilityLabel).toBe('Strong. Texte + numéros')
+    expect(downloadPressable!.props.accessibilityLabel).toBe(
+      'Télécharger les ressources pour Strong'
+    )
+    expect(selectionPressable!.props.disabled).toBe(false)
 
-    pressable.props.onPress?.()
+    selectionPressable!.props.onPress?.()
+    downloadPressable!.props.onPress?.()
 
     expect(onDownloadPress).toHaveBeenCalledTimes(1)
-    expect(onPress).not.toHaveBeenCalled()
+    expect(onPress).toHaveBeenCalledTimes(1)
   })
 
   it('selects an installed mode when its card is pressed', () => {
     const onPress = jest.fn()
     const onDownloadPress = jest.fn()
-    const pressable = getCardPressable(
+    const [pressable] = getCardPressables(
       BibleDisplayModeCard({
         label: 'Strong',
         description: 'Texte + numéros',
@@ -108,7 +112,7 @@ describe('BibleDisplayModeCard', () => {
       })
     )
 
-    pressable.props.onPress?.()
+    pressable!.props.onPress?.()
 
     expect(onPress).toHaveBeenCalledTimes(1)
     expect(onDownloadPress).not.toHaveBeenCalled()
@@ -126,13 +130,14 @@ describe('BibleDisplayModeCard', () => {
       onDownloadPress: jest.fn(),
       children: <span>Aperçu</span>,
     })
-    const pressable = getCardPressable(card)
-    const content = pressable.props.children as React.ReactElement<{ children: React.ReactNode }>
+    const [pressable, downloadPressable] = getCardPressables(card)
+    const content = pressable!.props.children as React.ReactElement<{ children: React.ReactNode }>
     const downloadIndicator = React.Children.toArray(content.props.children).at(
       -1
     ) as React.ReactElement<{ children: React.ReactElement<{ progress: number }> }>
 
-    expect(pressable.props.disabled).toBe(true)
+    expect(pressable!.props.disabled).toBe(true)
+    expect(downloadPressable!.props.disabled).toBe(true)
     expect(downloadIndicator.props.children.props.progress).toBe(0.42)
   })
 
@@ -149,8 +154,8 @@ describe('BibleDisplayModeCard', () => {
       onDownloadPress: jest.fn(),
       children: <span>Aperçu</span>,
     })
-    const pressable = getCardPressable(card)
-    const content = pressable.props.children as React.ReactElement<{ children: React.ReactNode }>
+    const [pressable] = getCardPressables(card)
+    const content = pressable!.props.children as React.ReactElement<{ children: React.ReactNode }>
     const downloadIndicator = React.Children.toArray(content.props.children).at(
       0
     ) as React.ReactElement<{ children: React.ReactElement<{ progress?: number }> }>

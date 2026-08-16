@@ -27,14 +27,8 @@ import {
   FRENCH_STRONG_BIBLE_PRIORITY,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import {
-  getInterlinearSidecarAvailability,
-  type InterlinearSidecarAvailability,
-} from '~helpers/interlinearBibleSidecar'
-import {
-  getStrongBibleSidecarAvailability,
-  type StrongBibleSidecarAvailability,
-} from '~helpers/strongBibleSidecar'
+import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
+import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus, useDownloadQueue } from '~helpers/useDownloadQueue'
 import {
   downloadCompletionSignalAtom,
@@ -44,6 +38,7 @@ import {
 import type { BibleTab } from '~state/tabs'
 import { getLanguage } from '~i18n'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 type SharedProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -338,6 +333,7 @@ export const StrongBibleSourceSheet = ({
   resolvedProvenance,
 }: SheetProps) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const insets = useSafeAreaInsets()
   const bible = useAtomValue(bibleAtom)
   const setBible = useSetAtom(bibleAtom)
@@ -397,12 +393,15 @@ export const StrongBibleSourceSheet = ({
           sourceGroups.flatMap(group =>
             group.versionIds.map(async versionId => ({
               versionId,
-              availability: await getStrongBibleSidecarAvailability(versionId),
+              availability: await resources.strongBible.getAvailability(versionId),
             }))
           )
         ),
         isBhgBible
-          ? getBhgLexiconAvailability(preferredInterlinearLocale)
+          ? getBhgLexiconAvailability(
+              preferredInterlinearLocale,
+              resources.lexiconBible.getInterlinearAvailability
+            )
           : Promise.resolve(undefined),
       ])
       return {
@@ -452,15 +451,15 @@ export const StrongBibleSourceSheet = ({
 
   const downloadSource = async (versionId: StrongBibleVersionId) => {
     const availability =
-      availabilityByVersion?.get(versionId) ?? (await getStrongBibleSidecarAvailability(versionId))
+      availabilityByVersion?.get(versionId) ??
+      (await resources.strongBible.getAvailability(versionId))
     setPendingSelectionVersionId(versionId)
     enqueue(createStrongSidecarDownloadPlan(versionId, availability.status))
   }
 
   const downloadBhgSource = async () => {
-    const availability: InterlinearSidecarAvailability = await getInterlinearSidecarAvailability(
-      preferredInterlinearLocale
-    )
+    const availability: InterlinearSidecarAvailability =
+      await resources.lexiconBible.getInterlinearAvailability(preferredInterlinearLocale)
     if (availability.status === 'available') {
       selectSource()
       return

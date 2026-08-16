@@ -10,6 +10,12 @@ import { downloadManager } from '~helpers/downloadManager'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { itemHeight, itemWidth } from './widget'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import {
+  getResourceActions,
+  resourceIdentityFromOfflineCopy,
+  type OfflineCopyState,
+} from '~features/resources/resourceModel'
 
 type Props = {
   identity: OfflineCopyIdentity
@@ -19,6 +25,7 @@ type Props = {
 
 const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const [isPressed, setIsPressed] = useState(false)
   const offlineCopyId = createOfflineCopyId(identity)
   const queue = useDownloadItemStatus(offlineCopyId)
@@ -26,8 +33,25 @@ const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
     queue?.status === 'queued' || queue?.status === 'downloading' || queue?.status === 'inserting'
   const progress =
     queue?.status === 'inserting' ? queue.insertProgress : (queue?.downloadProgress ?? 0)
+  const resourceIdentity = resourceIdentityFromOfflineCopy(identity)
+  const offlineCopy: OfflineCopyState = isActive
+    ? { status: 'downloading', progress }
+    : queue?.status === 'failed'
+      ? { status: 'invalid', recoverable: true }
+      : { status: 'not-installed', supported: true }
+  const actions = resourceIdentity
+    ? getResourceActions({
+        identity: resourceIdentity,
+        operations: ['read'],
+        onlineAccess: resources.capabilities.getOnlineAccess(resourceIdentity),
+        offlineCopy,
+        content: { status: 'offline-unavailable' },
+      })
+    : []
+  const canAcquire = actions.includes('make-available-offline') || actions.includes('retry')
 
   const startDownload = () => {
+    if (!canAcquire) return
     if (queue?.status === 'failed') {
       downloadManager.retry(offlineCopyId)
     } else {

@@ -39,7 +39,6 @@ import { installedVersionsSignalAtom } from '~state/app'
 import { mobileResourceCatalogAtom } from '~helpers/mobileResourceCatalog'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultStore } from 'jotai/vanilla'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import {
   getStrongBibleAttributionKey,
   getStrongBiblePublication,
@@ -68,6 +67,8 @@ import {
 } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import { resolveResourceCatalogStatus } from '~helpers/resourcePublication'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceIdentityFromOfflineCopy } from '~features/resources/resourceModel'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -96,11 +97,7 @@ interface UnifiedSection {
 function buildDatabaseItems(lang: ResourceLanguage): UnifiedItem[] {
   const allDbs = databases(lang)
   return LANGUAGE_SPECIFIC_DBS.flatMap(dbId => {
-    if (
-      dbId === 'BIBLES' ||
-      dbId === 'TIMELINE' ||
-      (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))
-    ) {
+    if (dbId === 'BIBLES' || (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))) {
       return []
     }
     const db = allDbs[dbId as keyof typeof allDbs]
@@ -397,9 +394,7 @@ function useDownloadedItems() {
       const databaseEntries = await Promise.all(
         (['fr', 'en'] as ResourceLanguage[]).flatMap(lang =>
           LANGUAGE_SPECIFIC_DBS.flatMap(dbId =>
-            dbId !== 'BIBLES' &&
-            dbId !== 'TIMELINE' &&
-            (lang !== 'en' || !FRENCH_ONLY_DBS.includes(dbId))
+            dbId !== 'BIBLES' && (lang !== 'en' || !FRENCH_ONLY_DBS.includes(dbId))
               ? [
                   isLocalResourceAvailable({
                     kind: 'database',
@@ -484,15 +479,7 @@ const DownloadsScreen = () => {
   const theme = useTheme()
   const lang = useLanguage()
   const catalog = useAtomValue(mobileResourceCatalogAtom)
-  const defaultVersion = getDefaultBibleVersion(lang)
-  const defaultBibleOfflineCopyId = createOfflineCopyId({
-    kind: 'bible',
-    versionId: defaultVersion,
-  })
-  const strongLexiconCoreOfflineCopyId = createOfflineCopyId({
-    kind: 'strong-lexicon-module',
-    moduleId: 'core',
-  })
+  const resources = useResourceAccess()
   const { enqueue, clearCompleted } = useDownloadQueue()
 
   // Local state
@@ -692,13 +679,8 @@ const DownloadsScreen = () => {
   }
 
   const handleBatchDelete = () => {
-    // Exclude default versions from batch delete
     const deletionPlans = Array.from(selectedItems).flatMap(id =>
-      downloadedSet.has(id) &&
-      id !== defaultBibleOfflineCopyId &&
-      id !== strongLexiconCoreOfflineCopyId
-        ? [createDownloadedItemDeletionPlan(id)]
-        : []
+      downloadedSet.has(id) ? [createDownloadedItemDeletionPlan(id)] : []
     )
     if (deletionPlans.length === 0) return
 
@@ -756,10 +738,7 @@ const DownloadsScreen = () => {
   }
 
   const handleUpdateItem = (item: UnifiedItem) => {
-    const isRequiredBible = item.id === defaultBibleOfflineCopyId
-    const deletionPlan = createDownloadedItemDeletionPlan(item.id, {
-      bibleMode: isRequiredBible ? 'replace' : 'remove',
-    })
+    const deletionPlan = createDownloadedItemDeletionPlan(item.id, { bibleMode: 'replace' })
     const deletesStrongSidecar =
       deletionPlan.kind === 'bible' &&
       deletionPlan.strongSidecar !== undefined &&
@@ -852,12 +831,7 @@ const DownloadsScreen = () => {
 
   // Count downloadable/deletable in selection
   const selectedDownloadable = Array.from(selectedItems).filter(id => !downloadedSet.has(id)).length
-  const selectedDeletable = Array.from(selectedItems).filter(
-    id =>
-      downloadedSet.has(id) &&
-      id !== defaultBibleOfflineCopyId &&
-      id !== strongLexiconCoreOfflineCopyId
-  ).length
+  const selectedDeletable = Array.from(selectedItems).filter(id => downloadedSet.has(id)).length
 
   return (
     <Container>
@@ -967,11 +941,9 @@ const DownloadsScreen = () => {
           const isDownloaded = downloadedSet.has(item.id)
           const identity = parseOfflineCopyId(item.id)
           if (!identity) return null
-          const isDefault =
-            (identity.kind === 'bible' && identity.versionId === defaultVersion) ||
-            (identity.kind === 'strong-lexicon-module' && identity.moduleId === 'core')
           const isNestedDependency = item.parentItemId !== undefined
           const bibleVersionId = identity.kind === 'bible' ? identity.versionId : undefined
+          const resourceIdentity = resourceIdentityFromOfflineCopy(identity)
           const relatedResources = bibleVersionId
             ? getBibleRelatedPublicationResources(bibleVersionId)
             : undefined
@@ -987,13 +959,18 @@ const DownloadsScreen = () => {
               isSelected={selectedItems.has(item.id)}
               onToggleSelect={() => toggleSelect(item.id)}
               onDownload={() => handleDownloadItem(item)}
-              onDelete={isDefault ? undefined : () => handleDeleteItem(item)}
-              onRedownload={isDefault ? () => handleRedownloadItem(item) : undefined}
+              onDelete={() => handleDeleteItem(item)}
+              onRedownload={() => handleRedownloadItem(item)}
               onUpdate={() => handleUpdateItem(item)}
               isDownloaded={isDownloaded}
-              isDefault={isDefault}
+              isDefault={false}
               needsUpdate={itemNeedsUpdate(item)}
               variant={isNestedDependency ? 'dependency' : 'standard'}
+              onlineAccessStatus={
+                resourceIdentity
+                  ? resources.capabilities.getOnlineAccess(resourceIdentity).status
+                  : 'unsupported'
+              }
             />
           )
         }}

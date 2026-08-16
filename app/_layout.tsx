@@ -21,7 +21,6 @@ import ErrorBoundary from '~common/ErrorBoundary'
 import { CurrentTheme } from '~common/types'
 import { ResourceAccessProvider } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
-import { DBStateProvider } from '~helpers/databaseState'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { configureQueryManagers, queryClient } from '~helpers/queryClient'
@@ -218,11 +217,9 @@ function InnerApp() {
     <ThemeProvider theme={theme}>
       <QueryClientProvider client={queryClient}>
         <PersistGate loading={<StartupLoading />} persistor={persistor}>
-          <DBStateProvider>
-            <ErrorBoundary>
-              <ResourceAccessProvider>{appContent}</ResourceAccessProvider>
-            </ErrorBoundary>
-          </DBStateProvider>
+          <ErrorBoundary>
+            <ResourceAccessProvider>{appContent}</ResourceAccessProvider>
+          </ErrorBoundary>
         </PersistGate>
       </QueryClientProvider>
     </ThemeProvider>

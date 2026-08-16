@@ -105,6 +105,8 @@ describe('OnBoarding', () => {
       })
 
       expect(renderer!.root.findByProps({ testID: 'onboarding-modal' }).props.visible).toBe(true)
+      expect(mockGetIfVersionNeedsDownload).not.toHaveBeenCalled()
+      expect(mockDeleteAllDatabases).not.toHaveBeenCalled()
       expect(renderer!.root.findByProps({ testID: 'gesture-root' }).props.style).toEqual({
         flex: 1,
       })
@@ -123,6 +125,24 @@ describe('OnBoarding', () => {
       act(() => renderer?.unmount())
       consoleError.mockRestore()
       consoleLog.mockRestore()
+    }
+  })
+
+  it.each(['fr', 'en'])('does not reopen after completion in %s', async language => {
+    mockLanguage = language
+    getDefaultStore().set(isOnboardingCompletedAtom, true)
+    let renderer: ReactTestRenderer | undefined
+
+    try {
+      await act(async () => {
+        renderer = create(<OnBoarding />)
+      })
+
+      expect(renderer!.root.findByProps({ testID: 'onboarding-modal' }).props.visible).toBe(false)
+      expect(mockGetIfVersionNeedsDownload).not.toHaveBeenCalled()
+      expect(mockDeleteAllDatabases).not.toHaveBeenCalled()
+    } finally {
+      act(() => renderer?.unmount())
     }
   })
 

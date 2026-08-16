@@ -7,6 +7,7 @@ import { useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { Alert, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
@@ -101,6 +102,7 @@ import {
   OPEN_DOWNLOADS,
   REMOVE_PARALLEL_VERSION,
   RESET_BIBLE_DATABASE,
+  RETRY_BIBLE_RESOURCE,
   SET_BIBLE_OVERLAY_OPEN,
   SELECTION_CHANGED,
   SHOW_TOAST,
@@ -136,6 +138,7 @@ import { resetBiblesDb } from '~helpers/biblesDb'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strongSelection'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -406,6 +409,7 @@ export const BibleDOMWrapper = ({
   const insets = useSafeAreaInsets()
   const { t } = useTranslation()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const pushRouteOnce = usePushRouteOnce()
   const [isResettingDatabase, setIsResettingDatabase] = useState(false)
   const errorDownloadItemId = createOfflineCopyId({
@@ -457,12 +461,17 @@ export const BibleDOMWrapper = ({
     versionNotFound: t('bible.error.versionNotFound'),
     chapterNotFound: t('bible.error.chapterNotFound'),
     databaseCorrupted: t('bible.error.databaseCorrupted'),
+    onlineUnsupported: t('bible.error.onlineUnsupported'),
+    offlineUnavailable: t('bible.error.offlineUnavailable'),
+    temporaryUnavailable: t('bible.error.temporaryUnavailable'),
+    integrityFailure: t('bible.error.integrityFailure'),
     unknownError: t('bible.error.unknown'),
     goToDownloads: t('bible.error.goToDownloads'),
     downloadVersion: t('bible.error.downloadVersion'),
     downloading: t('bible.error.downloading'),
     inserting: t('bible.error.inserting'),
     resetDatabase: t('bible.error.resetDatabase'),
+    retry: t('bible.error.retry'),
     openCanonicalBibleNote: t('Afficher la note'),
     pericopeIndex: t('Péricopes'),
     passageMediaTitle: t('bible.passageMedia.title'),
@@ -558,22 +567,11 @@ export const BibleDOMWrapper = ({
       }
       case DOWNLOAD_CHAPTER_ENTITIES: {
         if (!chapterEntityModuleStatus || chapterEntityModuleStatus === 'available') break
-        Alert.alert(
-          t('Télécharger {{name}} ?', { name: t('strongLexicon.biblicalEntities') }),
-          t('strongLexicon.biblicalEntitiesDescription'),
-          [
-            { text: t('Annuler'), style: 'cancel' },
-            {
-              text: t('Télécharger'),
-              onPress: () =>
-                downloadManager.enqueue(
-                  createStrongLexiconModuleDownloadPlan(
-                    'entities',
-                    chapterEntityModuleStatus !== 'core-missing'
-                  )
-                ),
-            },
-          ]
+        downloadManager.enqueue(
+          createStrongLexiconModuleDownloadPlan(
+            'entities',
+            chapterEntityModuleStatus !== 'core-missing'
+          )
         )
         break
       }
@@ -887,6 +885,11 @@ export const BibleDOMWrapper = ({
         } finally {
           setIsResettingDatabase(false)
         }
+        break
+      }
+
+      case RETRY_BIBLE_RESOURCE: {
+        await queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
         break
       }
 

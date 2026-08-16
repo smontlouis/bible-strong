@@ -1,5 +1,10 @@
 import type { ResourceAccessRegistry } from '../resourceAccess'
-import { bibleChapterQueryOptions, loadBibleVerseTexts } from '../resourceQueries'
+import {
+  bibleChapterQueryOptions,
+  loadBibleVerseTexts,
+  retryResourceQuery,
+} from '../resourceQueries'
+import { BibleLoadingError } from '~helpers/bibleErrors'
 
 describe('resourceQueries', () => {
   it('loads a Bible chapter through the supplied Resource access registry', async () => {
@@ -19,6 +24,7 @@ describe('resourceQueries', () => {
     expect(options.queryKey).toEqual(['resource', 'bible-content', 'chapter', request])
     expect(loadChapter).toHaveBeenCalledWith(request)
     expect(options.networkMode).toBe('always')
+    expect(options.retry).toBe(retryResourceQuery)
   })
 
   it('loads selected verse texts through Resource access', async () => {
@@ -36,5 +42,16 @@ describe('resourceQueries', () => {
       verseKeys: ['1-1-2', '1-2-1'],
       shouldCancel: undefined,
     })
+  })
+
+  it('retries only typed temporary Resource failures', async () => {
+    expect(
+      retryResourceQuery(0, new BibleLoadingError('RESOURCE_TEMPORARY_UNAVAILABLE', 'LSG', 1, 1))
+    ).toBe(true)
+    expect(
+      retryResourceQuery(2, new BibleLoadingError('RESOURCE_TEMPORARY_UNAVAILABLE', 'LSG'))
+    ).toBe(false)
+    expect(retryResourceQuery(0, new BibleLoadingError('RESOURCE_OFFLINE', 'LSG'))).toBe(false)
+    expect(retryResourceQuery(0, new Error('network'))).toBe(false)
   })
 })

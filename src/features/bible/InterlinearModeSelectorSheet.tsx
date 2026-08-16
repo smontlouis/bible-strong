@@ -18,10 +18,7 @@ import {
   normalizeInterlinearMode,
   type InterlinearDisplayMode,
 } from '~helpers/interlinearBiblePublications'
-import {
-  getInterlinearSidecarAvailability,
-  type InterlinearSidecarAvailability,
-} from '~helpers/interlinearBibleSidecar'
+import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import useLanguage from '~helpers/useLanguage'
 import {
@@ -32,8 +29,8 @@ import {
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
 import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 import BibleDisplayModeCard from './BibleDisplayModeCard'
-import { confirmBibleModeAcquisition } from './confirmBibleModeAcquisition'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -51,6 +48,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const appLanguage = useLanguage()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
+  const resources = useResourceAccess()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const downloadStates = useAtomValue(downloadItemStatesAtom)
   const frenchDownload = useDownloadItemStatus(
@@ -80,8 +78,8 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     ],
     queryFn: async () => {
       const [fr, en] = await Promise.all([
-        getInterlinearSidecarAvailability('fr'),
-        getInterlinearSidecarAvailability('en'),
+        resources.lexiconBible.getInterlinearAvailability('fr'),
+        resources.lexiconBible.getInterlinearAvailability('en'),
       ])
       return { fr, en }
     },
@@ -102,14 +100,14 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
 
   const requestDownload = async (
     locale: ResourceLanguage,
-    modeLabel: string,
+    _modeLabel: string,
     modeAfterDownload?: InterlinearDisplayMode,
     knownAvailability?: InterlinearSidecarAvailability
   ) => {
     const resolvedAvailability =
       knownAvailability ??
       availability[locale] ??
-      (await getInterlinearSidecarAvailability(locale).catch(() => undefined))
+      (await resources.lexiconBible.getInterlinearAvailability(locale).catch(() => undefined))
     if (!resolvedAvailability) return
     if (resolvedAvailability.status === 'available') {
       if (modeAfterDownload) {
@@ -120,22 +118,15 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     }
 
     const plan = createInterlinearSidecarDownloadPlan(locale, resolvedAvailability.status)
-    confirmBibleModeAcquisition({
-      plan,
-      modeLabel,
-      translate: t,
-      onConfirm: () => {
-        if (modeAfterDownload) {
-          actions.startBibleModeAcquisition({
-            kind: 'interlinear',
-            mode: modeAfterDownload,
-            locale,
-            planIds: plan.map(item => item.id),
-          })
-        }
-        downloadManager.enqueue(plan)
-      },
-    })
+    if (modeAfterDownload) {
+      actions.startBibleModeAcquisition({
+        kind: 'interlinear',
+        mode: modeAfterDownload,
+        locale,
+        planIds: plan.map(item => item.id),
+      })
+    }
+    downloadManager.enqueue(plan)
   }
 
   const selectMode = async (mode: DisplayMode) => {

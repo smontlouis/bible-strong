@@ -203,15 +203,15 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
   const [verseText] = verseResolution.verses
   const { versesInCurrentChapter } = useVerseInCurrentChapter(verseText?.Livre, verseText?.Chapitre)
   const { enqueue } = useDownloadQueue()
-  const requiredBibleVersion =
+  const unavailableBibleVersion =
     verse &&
     !verseResolution.isLoading &&
     verseResolution.recoveries?.includes('acquire-offline-copy')
       ? defaultVersion
       : null
-  const requiredBibleDownloadStatus = useDownloadItemStatus(
-    requiredBibleVersion
-      ? createOfflineCopyId({ kind: 'bible', versionId: requiredBibleVersion })
+  const unavailableBibleDownloadStatus = useDownloadItemStatus(
+    unavailableBibleVersion
+      ? createOfflineCopyId({ kind: 'bible', versionId: unavailableBibleVersion })
       : undefined
   )
 
@@ -280,24 +280,24 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
                 <NumberText>{verseText?.Verset}</NumberText>
               </VersetWrapper>
               <Box flex>
-                {requiredBibleVersion ? (
+                {unavailableBibleVersion ? (
                   <Box>
                     <Text fontSize={13} color="grey" mb={10}>
-                      {t('resourceLanguage.requiredBibleMissing', {
-                        version: requiredBibleVersion,
+                      {t('resource.bible.referenceUnavailable', {
+                        version: unavailableBibleVersion,
                       })}
                     </Text>
                     <Button
                       small
-                      onPress={() => enqueue([createBibleDownloadItem(requiredBibleVersion)])}
+                      onPress={() => enqueue([createBibleDownloadItem(unavailableBibleVersion)])}
                       isLoading={
-                        requiredBibleDownloadStatus?.status === 'queued' ||
-                        requiredBibleDownloadStatus?.status === 'downloading' ||
-                        requiredBibleDownloadStatus?.status === 'inserting'
+                        unavailableBibleDownloadStatus?.status === 'queued' ||
+                        unavailableBibleDownloadStatus?.status === 'downloading' ||
+                        unavailableBibleDownloadStatus?.status === 'inserting'
                       }
                     >
-                      {t('resourceLanguage.downloadRequiredBible', {
-                        version: requiredBibleVersion,
+                      {t('resource.bible.makeAvailableOffline', {
+                        version: unavailableBibleVersion,
                       })}
                     </Button>
                   </Box>

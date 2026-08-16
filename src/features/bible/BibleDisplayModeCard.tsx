@@ -40,17 +40,15 @@ const BibleDisplayModeCard = ({
   return (
     <Box flex={isList ? undefined : 1} height={isList ? 92 : 148} position="relative">
       <Pressable
-        accessibilityRole={isList && !showDownloadControl ? 'radio' : 'button'}
+        accessibilityRole={isList ? 'radio' : 'button'}
         accessibilityState={
           isList && !showDownloadControl
             ? { checked: selected, disabled: downloading }
             : { selected, disabled: downloading }
         }
-        accessibilityLabel={
-          showDownloadControl ? downloadAccessibilityLabel : `${label}. ${description}`
-        }
+        accessibilityLabel={`${label}. ${description}`}
         disabled={downloading}
-        onPress={downloadRequired ? onDownloadPress : onPress}
+        onPress={onPress}
         style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
       >
         <Box
@@ -128,6 +126,23 @@ const BibleDisplayModeCard = ({
           )}
         </Box>
       </Pressable>
+      {showDownloadControl && onDownloadPress && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={downloadAccessibilityLabel}
+          accessibilityState={{ disabled: downloading }}
+          disabled={downloading}
+          onPress={onDownloadPress}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: isList ? 0 : undefined,
+            bottom: isList ? 0 : 0,
+            width: isList ? 54 : 44,
+            height: isList ? 92 : 44,
+          }}
+        />
+      )}
     </Box>
   )
 }

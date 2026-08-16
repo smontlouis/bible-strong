@@ -11,13 +11,11 @@ import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { downloadManager } from '~helpers/downloadManager'
 import { createInterlinearSidecarDownloadPlan } from '~helpers/downloadItemFactory'
-import {
-  getInterlinearSidecarAvailability,
-  type InterlinearSidecarAvailability,
-} from '~helpers/interlinearBibleSidecar'
+import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 interface Props {
   locale: ResourceLanguage
@@ -30,6 +28,7 @@ const isActiveDownload = (status?: string) =>
 
 const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }: Props) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'bible', versionId: 'BHG' })
@@ -39,7 +38,7 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
   )
   const availabilityQuery = useQuery({
     queryKey: ['interlinear-index-availability', locale, downloadCompletionSignal],
-    queryFn: () => getInterlinearSidecarAvailability(locale),
+    queryFn: () => resources.lexiconBible.getInterlinearAvailability(locale),
   })
   const availability = availabilityQuery.data
   const isChecking = availabilityQuery.isPending || availabilityQuery.isFetching

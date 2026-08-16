@@ -356,7 +356,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     return (
       <OfflineResourceRecovery
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-        title={t('La base de données strong est requise pour accéder à cette page.')}
+        title={t('resource.strong.offlineCopyNeeded')}
         fileSize={35}
         size="small"
       />

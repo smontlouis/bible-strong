@@ -64,7 +64,6 @@ const OfflineSetupResourceOption = ({
   let description = option.description
   if (option.descriptionKey) description = t(option.descriptionKey)
 
-  const badgeKey = option.required ? 'offlineSetup.requiredBadge' : 'offlineSetup.includedBadge'
   const selectedBorderColor = selected ? palette.accent : palette.itemBorder
   const checkboxBorderColor = selected ? palette.accent : palette.description
   const checkboxBackground = selected ? palette.accent : palette.itemSurface
@@ -73,7 +72,7 @@ const OfflineSetupResourceOption = ({
   return (
     <Pressable
       accessibilityRole="checkbox"
-      accessibilityState={{ checked: selected, disabled: option.required }}
+      accessibilityState={{ checked: selected }}
       accessibilityLabel={label}
       onPress={onPress}
       style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1 })}
@@ -113,7 +112,7 @@ const OfflineSetupResourceOption = ({
                 </Text>
                 {locked ? (
                   <FadingBox
-                    keyProp={option.required ? 'required' : 'included'}
+                    keyProp="included"
                     entering={FadeIn.duration(140)}
                     exiting={FadeOut.duration(140)}
                     skipEntering={false}
@@ -121,7 +120,7 @@ const OfflineSetupResourceOption = ({
                   >
                     <Box px={7} py={3} borderRadius={9} bg={palette.itemAccentSoft}>
                       <Text color={palette.itemAccentText} fontSize={9} bold>
-                        {t(badgeKey)}
+                        {t('offlineSetup.includedBadge')}
                       </Text>
                     </Box>
                   </FadingBox>

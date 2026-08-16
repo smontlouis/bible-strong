@@ -1,8 +1,19 @@
 import { createContext, useContext, type ReactNode } from 'react'
+import Constants from 'expo-constants'
+import { onlineManager } from '@tanstack/react-query'
+import { Platform } from 'react-native'
 import {
-  localBibleContentAccess,
+  createBibleContentAccess,
+  localBibleChapterAdapter,
   type BibleContentAccess,
 } from '~features/resources/bibleContentAccess'
+import {
+  createHttpBibleChapterAdapter,
+  createHybridBibleChapterAdapter,
+  getConfiguredResourceApiBaseUrl,
+  getDevelopmentResourceApiBaseUrl,
+  unavailableHttpBibleChapterAdapter,
+} from '~features/resources/bibleChapterSource'
 import {
   localBibleReadingResourceAccess,
   type BibleReadingResourceAccess,
@@ -25,6 +36,17 @@ import {
   localLexiconBibleResourceAccess,
   type LexiconBibleResourceAccess,
 } from '~features/resources/lexiconBibleResourceAccess'
+import { localTimelineAccess, type TimelineAccess } from '~features/resources/timelineAccess'
+import {
+  isLocalResourceAvailable,
+  type LocalResourceRef,
+} from '~features/resources/resourceAvailability'
+import {
+  getResourceOnlineAccess,
+  type OnlineAccessState,
+  type ResourceIdentity,
+} from '~features/resources/resourceModel'
+import { configureDevelopmentResourceArtifactBaseUrl } from '~helpers/mobileResourceCatalog'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
@@ -35,10 +57,37 @@ export type ResourceAccessRegistry = {
   nave: NaveAccess
   strongLexicon: StrongLexiconAccess
   strongBible: StrongBibleResourceAccess
+  timeline: TimelineAccess
+  offlineCopies: {
+    isAvailable: (identity: LocalResourceRef) => Promise<boolean>
+  }
+  capabilities: {
+    getOnlineAccess: (identity: ResourceIdentity) => OnlineAccessState
+  }
 }
 
+const resourceApiBaseUrl =
+  getConfiguredResourceApiBaseUrl(
+    Constants.expoConfig?.extra?.resourceApiUrl as string | undefined
+  ) ??
+  (__DEV__ ? getDevelopmentResourceApiBaseUrl(Platform.OS as 'ios' | 'android' | 'web') : undefined)
+configureDevelopmentResourceArtifactBaseUrl(
+  Constants.expoConfig?.extra?.resourceArtifactBaseUrl as string | undefined
+)
+const onlineBibleChapterAdapter = resourceApiBaseUrl
+  ? createHttpBibleChapterAdapter({
+      baseUrl: resourceApiBaseUrl,
+      isOnline: async () => onlineManager.isOnline(),
+    })
+  : unavailableHttpBibleChapterAdapter
+
 export const defaultResourceAccess: ResourceAccessRegistry = {
-  bibleContent: localBibleContentAccess,
+  bibleContent: createBibleContentAccess(
+    createHybridBibleChapterAdapter({
+      offline: localBibleChapterAdapter,
+      online: onlineBibleChapterAdapter,
+    })
+  ),
   bibleReading: localBibleReadingResourceAccess,
   bibleSearch: localBibleSearchAccess,
   dictionary: localDictionaryAccess,
@@ -46,6 +95,12 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   nave: localNaveAccess,
   strongLexicon: localStrongLexiconAccess,
   strongBible: localStrongBibleResourceAccess,
+  timeline: localTimelineAccess,
+  offlineCopies: { isAvailable: isLocalResourceAvailable },
+  capabilities: {
+    getOnlineAccess: identity =>
+      getResourceOnlineAccess(identity, resourceApiBaseUrl ? new Set(['LSG']) : new Set()),
+  },
 }
 
 const ResourceAccessContext = createContext<ResourceAccessRegistry>(defaultResourceAccess)

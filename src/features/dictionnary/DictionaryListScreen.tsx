@@ -124,7 +124,7 @@ const DictionaryListScreen = ({
           databaseId: 'DICTIONNAIRE',
           language: dictionaryResourceLanguage,
         }}
-        title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
+        title={t('resource.dictionary.offlineCopyNeeded')}
         fileSize={22}
         hasBackButton={showBackButton}
         hasHeader

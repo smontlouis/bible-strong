@@ -18,7 +18,6 @@ import {
   resolveStrongNavigationVersionId,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { getLanguage } from '~i18n'
 import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setDefaultStrongBibleVersion } from '~redux/modules/user'
@@ -26,6 +25,7 @@ import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import type { VersionCode } from '~state/tabs'
 import BibleDefaultSelectorSheet from './BibleDefaultSelectorSheet'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 type DefaultVersionCardProps = {
   title: string
@@ -91,6 +91,7 @@ const DefaultVersionCard = ({
 
 const BibleDefaultsScreen = () => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const dispatch = useDispatch()
   const language = getLanguage()
   const readingSheetRef = React.useRef<SheetRef>(null)
@@ -119,7 +120,7 @@ const BibleDefaultsScreen = () => {
       downloadCompletionSignal,
     ],
     queryFn: async () =>
-      (await getStrongBibleSidecarAvailability(defaultStrongVersion)).status === 'available',
+      (await resources.strongBible.getAvailability(defaultStrongVersion)).status === 'available',
     ...localQueryOptions,
   })
 

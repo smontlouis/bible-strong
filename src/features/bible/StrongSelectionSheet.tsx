@@ -5,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useAtomValue } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 import {
-  Alert,
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
@@ -159,19 +158,7 @@ const StrongSelectionSheet = ({
   }, [selectionKey])
 
   const requestCoreDownload = () => {
-    Alert.alert(
-      t('Télécharger le lexique Strong ?'),
-      t(
-        'Le lexique principal est nécessaire pour afficher les définitions, la morphologie et les mots liés.'
-      ),
-      [
-        { text: t('Annuler'), style: 'cancel' },
-        {
-          text: t('Télécharger'),
-          onPress: () => downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')]),
-        },
-      ]
-    )
+    downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')])
   }
 
   const openEntry = (stepCode: string, language: 'greek' | 'hebrew', morphologyCodes: string[]) => {

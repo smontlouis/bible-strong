@@ -46,7 +46,7 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     return (
       <ResourceDownloadWidget
         identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLanguage }}
-        title={t('Thématique nave requise')}
+        title={t('resource.nave.offlineCopyNeeded')}
         fileSize={7}
       />
     )

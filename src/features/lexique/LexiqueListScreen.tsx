@@ -137,7 +137,7 @@ const LexiqueListScreen = ({
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
         hasBackButton={showBackButton}
         hasHeader
-        title={t('La base de données strong est requise pour accéder à cette page.')}
+        title={t('resource.strong.offlineCopyNeeded')}
         fileSize={35}
       />
     )

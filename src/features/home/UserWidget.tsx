@@ -8,7 +8,6 @@ import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
 import useLogin from '~helpers/useLogin'
 import OfflineNotice from './OfflineNotice'
-import PreloadBible from './PreloadBible'
 import VerseOfTheDay, { VERSE_CARD_HEIGHT } from './VerseOfTheDay'
 
 const vodNb = [...Array(5).keys()]
@@ -26,49 +25,45 @@ const UserWidget = () => {
   return (
     <Container>
       <OfflineNotice />
-      <PreloadBible>
-        <Box
-          alignItems="center"
-          justifyContent="center"
-          overflow="visible"
-          width="100%"
-          onLayout={({ nativeEvent }) => {
-            const nextWidth = Math.round(nativeEvent.layout.width)
-            setCarouselWidth(currentWidth =>
-              currentWidth === nextWidth ? currentWidth : nextWidth
-            )
-          }}
-        >
-          {carouselWidth > 0 && (
-            <Carousel
-              mode="vertical-stack"
-              data={vodNb}
-              loop={false}
-              style={{
-                width: carouselWidth,
-                height: VERSE_CARD_HEIGHT,
-                overflow: 'visible',
-              }}
-              contentContainerStyle={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'visible',
-              }}
-              itemWidth={Math.max(carouselWidth - 65, 0)}
-              itemHeight={VERSE_CARD_HEIGHT}
-              modeConfig={{
-                snapDirection: 'right',
-                stackInterval: -10,
-                scaleInterval: 0.04,
-                rotateZDeg: 0,
-                opacityInterval: 0.4,
-              }}
-              renderItem={({ item: i }) => <VerseOfTheDay addDay={-(vodNb.length - 1 - i)} />}
-              defaultIndex={vodNb.length - 1}
-            />
-          )}
-        </Box>
-      </PreloadBible>
+      <Box
+        alignItems="center"
+        justifyContent="center"
+        overflow="visible"
+        width="100%"
+        onLayout={({ nativeEvent }) => {
+          const nextWidth = Math.round(nativeEvent.layout.width)
+          setCarouselWidth(currentWidth => (currentWidth === nextWidth ? currentWidth : nextWidth))
+        }}
+      >
+        {carouselWidth > 0 && (
+          <Carousel
+            mode="vertical-stack"
+            data={vodNb}
+            loop={false}
+            style={{
+              width: carouselWidth,
+              height: VERSE_CARD_HEIGHT,
+              overflow: 'visible',
+            }}
+            contentContainerStyle={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'visible',
+            }}
+            itemWidth={Math.max(carouselWidth - 65, 0)}
+            itemHeight={VERSE_CARD_HEIGHT}
+            modeConfig={{
+              snapDirection: 'right',
+              stackInterval: -10,
+              scaleInterval: 0.04,
+              rotateZDeg: 0,
+              opacityInterval: 0.4,
+            }}
+            renderItem={({ item: i }) => <VerseOfTheDay addDay={-(vodNb.length - 1 - i)} />}
+            defaultIndex={vodNb.length - 1}
+          />
+        )}
+      </Box>
     </Container>
   )
 }

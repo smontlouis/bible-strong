@@ -1,4 +1,4 @@
-import { getIfVersionNeedsDownload, versions } from '~helpers/bibleVersions'
+import { versions } from '~helpers/bibleVersions'
 
 let cachedAvailability:
   | {
@@ -7,11 +7,13 @@ let cachedAvailability:
     }
   | undefined
 
-const loadDownloadedBibleVersionIds = async () => {
+const loadDownloadedBibleVersionIds = async (
+  isAvailable: (versionId: string) => Promise<boolean>
+) => {
   const downloadedIds = await Promise.all(
     Object.values(versions).map(async version => {
       try {
-        return (await getIfVersionNeedsDownload(version.id)) ? null : version.id
+        return (await isAvailable(version.id)) ? version.id : null
       } catch {
         return null
       }
@@ -21,12 +23,15 @@ const loadDownloadedBibleVersionIds = async () => {
   return new Set(downloadedIds.filter((id): id is string => Boolean(id)))
 }
 
-export const getDownloadedBibleVersionIds = (installedVersionsSignal: number) => {
+export const getDownloadedBibleVersionIds = (
+  installedVersionsSignal: number,
+  isAvailable: (versionId: string) => Promise<boolean>
+) => {
   if (cachedAvailability?.signal === installedVersionsSignal) {
     return cachedAvailability.promise
   }
 
-  const promise = loadDownloadedBibleVersionIds()
+  const promise = loadDownloadedBibleVersionIds(isAvailable)
   cachedAvailability = { signal: installedVersionsSignal, promise }
   return promise
 }

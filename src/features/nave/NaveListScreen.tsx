@@ -115,9 +115,7 @@ const NaveListScreen = ({
     return (
       <OfflineResourceRecovery
         identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
-        title={t(
-          'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
-        )}
+        title={t('resource.nave.offlineCopyNeeded')}
         fileSize={7}
         hasBackButton={showBackButton}
         hasHeader

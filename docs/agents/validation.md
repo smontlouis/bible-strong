@@ -23,6 +23,10 @@ Copy `.env.example` to the appropriate local environment file and fill required 
 | Primitive styling guard | `yarn agents:styles:check` | UI or component changes; rejects new feature-level `styled` usage |
 | Agent domain quality | `yarn agents:quality:check` | Feature/domain changes, PR readiness, or harness changes |
 | i18n extraction | `yarn i18n` | User-facing string additions or translation key changes |
+| Resource architecture | `yarn resources:architecture:check` | Resource domain, service, runtime, or UI access changes |
+| Resource unit tests | `yarn resources:test` | Bundle, importer, API, repository, or runtime changes |
+| Resource Postgres integration | `yarn resources:test:integration` | Schema, migrations, importer, or persistence changes |
+| Complete LSG parity | `yarn resources:test:lsg` | Publication, API response, or Bible presentation changes |
 
 `yarn agents:architecture:check` regenerates `docs/agents/architecture-lint.md` and `.scratch/architecture/architecture.json`, then fails on high-risk boundary errors. Warnings are intentionally non-blocking for the current brownfield baseline.
 
@@ -54,6 +58,16 @@ yarn start
 ```
 
 This starts Expo with a custom development client. The app is not expected to run in Expo Go.
+
+For the local production-shaped resource stack:
+
+```bash
+yarn resources:db:up
+yarn resources:migrate
+RESOURCE_PUBLICATION_BUNDLE=resource-service/.local/publications/lsg yarn resources:dev
+```
+
+The development client defaults to `http://127.0.0.1:8787` on iOS and `http://10.0.2.2:8787` on Android when `EXPO_PUBLIC_RESOURCE_API_URL` is not configured. These defaults are development-only.
 
 In this environment, `yarn start` under Node 22 failed before Metro bound a port with:
 

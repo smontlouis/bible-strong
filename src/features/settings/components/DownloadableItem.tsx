@@ -30,6 +30,7 @@ interface DownloadableItemProps {
   needsUpdate?: boolean
   relatedResources?: { resourceId: string }[]
   variant?: 'standard' | 'dependency'
+  onlineAccessStatus?: 'remotely-readable' | 'temporarily-unavailable' | 'unsupported'
 }
 
 const formatSize = (
@@ -58,6 +59,7 @@ const DownloadableItem = ({
   needsUpdate,
   relatedResources,
   variant = 'standard',
+  onlineAccessStatus = 'unsupported',
 }: DownloadableItemProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -172,6 +174,23 @@ const DownloadableItem = ({
             {subtitle && visualState !== 'queued' && visualState !== 'failed' && (
               <Text fontSize={12} color="tertiary" mt={2} numberOfLines={isDependency ? 3 : 2}>
                 {subtitle}
+              </Text>
+            )}
+            {visualState !== 'queued' && visualState !== 'failed' && (
+              <Text fontSize={11} color="tertiary" mt={3}>
+                {t(
+                  onlineAccessStatus === 'remotely-readable'
+                    ? 'resource.status.onlineAvailable'
+                    : onlineAccessStatus === 'temporarily-unavailable'
+                      ? 'resource.status.onlineTemporary'
+                      : 'resource.status.onlineUnsupported'
+                )}
+                {' · '}
+                {t(
+                  isDownloaded
+                    ? 'resource.status.offlineInstalled'
+                    : 'resource.status.offlineNotInstalled'
+                )}
               </Text>
             )}
 

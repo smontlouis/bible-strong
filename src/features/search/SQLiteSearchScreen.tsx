@@ -608,7 +608,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       return (
         <OfflineResourceRecovery
           identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-          title={t('La base de données strong est requise pour accéder à cette page.')}
+          title={t('resource.strong.offlineCopyNeeded')}
           fileSize={35}
           size="small"
         />
@@ -627,7 +627,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             databaseId: 'DICTIONNAIRE',
             language: resourcesLanguage.DICTIONNAIRE,
           }}
-          title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
+          title={t('resource.dictionary.offlineCopyNeeded')}
           fileSize={22}
           size="small"
         />
@@ -642,9 +642,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       return (
         <OfflineResourceRecovery
           identity={{ kind: 'database', databaseId: 'NAVE', language: resourcesLanguage.NAVE }}
-          title={t(
-            'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
-          )}
+          title={t('resource.nave.offlineCopyNeeded')}
           fileSize={7}
           size="small"
         />

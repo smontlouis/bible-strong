@@ -172,6 +172,7 @@ const toAdapterRequest = (
 }
 
 export interface StrongBibleResourceAccess {
+  getAvailability: (versionId: string) => Promise<StrongBibleSidecarAvailability>
   loadVerse: (request: StrongBibleVerseRequest) => Promise<StrongBibleVerseResult>
   loadChapterCodes: (request: StrongBibleChapterRequest) => Promise<StrongBibleChapterCodesResult>
   loadCountsByBook: (request: StrongBibleConcordanceRequest) => Promise<StrongBibleCountsResult>
@@ -291,6 +292,7 @@ export const createStrongBibleResourceAccess = (
   }
 
   return {
+    getAvailability: adapter.getAvailability,
     async loadChapterCodes(request) {
       const resolution = await resolve(request)
       if (resolution.status !== 'available') return resolution

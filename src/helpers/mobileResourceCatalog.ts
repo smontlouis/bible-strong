@@ -199,5 +199,29 @@ export const loadMobileResourceCatalog = (
 export const getMobileResourceCatalogEntry = (resourceId: string): MobileResourceCatalogEntry => {
   const entry = MOBILE_RESOURCE_CATALOG.resources[resourceId]
   if (!entry) throw new Error(`MOBILE_RESOURCE_CATALOG_ENTRY_MISSING:${resourceId}`)
-  return entry
+  return {
+    ...entry,
+    url: resolveMobileResourceArtifactUrl(entry),
+  }
+}
+
+let developmentResourceArtifactBaseUrl: string | undefined
+
+export const configureDevelopmentResourceArtifactBaseUrl = (value: string | undefined): void => {
+  developmentResourceArtifactBaseUrl = __DEV__ ? value : undefined
+}
+
+export const resolveMobileResourceArtifactUrl = (
+  entry: Pick<MobileResourceCatalogEntry, 'file' | 'url'>,
+  configuredBaseUrl = developmentResourceArtifactBaseUrl
+): string => {
+  if (!configuredBaseUrl) return entry.url
+  try {
+    const baseUrl = new URL(configuredBaseUrl)
+    if (baseUrl.protocol !== 'http:' && baseUrl.protocol !== 'https:') return entry.url
+    if (!baseUrl.pathname.endsWith('/')) baseUrl.pathname += '/'
+    return new URL(entry.file, baseUrl).toString()
+  } catch {
+    return entry.url
+  }
 }

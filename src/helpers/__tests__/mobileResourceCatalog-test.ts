@@ -5,6 +5,7 @@ import {
   loadMobileResourceCatalog,
   MOBILE_RESOURCE_CATALOG,
   MOBILE_RESOURCE_CATALOG_URL,
+  resolveMobileResourceArtifactUrl,
   resolveMobileResourceCatalog,
 } from '../mobileResourceCatalog'
 
@@ -130,6 +131,15 @@ describe('mobile resource catalog', () => {
         strategy: 'archive-extract',
       })
     )
+  })
+
+  it('can route immutable artifacts through a local development server', () => {
+    const entry = BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:LSG']
+    expect(resolveMobileResourceArtifactUrl(entry, 'http://10.0.2.2:8788')).toBe(
+      'http://10.0.2.2:8788/bibles/bible-lsg.json.zip'
+    )
+    expect(resolveMobileResourceArtifactUrl(entry, 'file:///tmp/resources')).toBe(entry.url)
+    expect(resolveMobileResourceArtifactUrl(entry, 'not-a-url')).toBe(entry.url)
   })
 
   it('fails closed for an undeclared resource', () => {

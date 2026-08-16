@@ -10,10 +10,10 @@ import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import bibleMemoize from '~helpers/bibleStupidMemoize'
 import { TimelineEventDetail } from './types'
 import { getTimelineImageUri } from './timelineImage'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { useTimelineDetails } from './TimelineResourceBoundary'
 
 interface Props {
   modalRef: React.RefObject<SheetRef | null>
@@ -41,14 +41,9 @@ const getSearchScore = (event: TimelineEventDetail, query: string) => {
   return Number.POSITIVE_INFINITY
 }
 
-const searchTimeline = (query: string) => {
+const searchTimeline = (timeline: TimelineEventDetail[], query: string) => {
   if (!query.trim()) {
     return { results: [], hasSearched: false }
-  }
-
-  const timeline = bibleMemoize.timeline as TimelineEventDetail[] | undefined
-  if (!timeline) {
-    return { results: [], hasSearched: true }
   }
 
   const lowerQuery = normalizeSearchText(query.trim())
@@ -105,16 +100,17 @@ const SearchInTimelineModal = ({ modalRef }: Props) => {
   const [searchValue, setSearchValue] = useState('')
   const [results, setResults] = useState<TimelineEventDetail[]>([])
   const [hasSearched, setHasSearched] = useState(false)
+  const timeline = useTimelineDetails()
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const search = searchTimeline(searchValue)
+      const search = searchTimeline(timeline, searchValue)
       setResults(search.results)
       setHasSearched(search.hasSearched)
     }, 250)
 
     return () => clearTimeout(timeout)
-  }, [searchValue])
+  }, [searchValue, timeline])
 
   const onClear = () => {
     setSearchValue('')

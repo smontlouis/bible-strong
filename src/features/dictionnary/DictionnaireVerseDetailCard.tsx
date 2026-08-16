@@ -160,14 +160,14 @@ const useFormattedText = ({
     },
   }
   const verseText = bible[Livre]?.[Chapitre]?.[Verset]
-  const requiredBibleVersion =
+  const unavailableBibleVersion =
     chapterResult &&
     !chapterResult.success &&
     chapterResult.error.recoveries?.includes('acquire-offline-copy')
       ? defaultVersion
       : null
   const chapterDomainError =
-    (chapterResult && !chapterResult.success && !requiredBibleVersion) ||
+    (chapterResult && !chapterResult.success && !unavailableBibleVersion) ||
     (chapterResult?.success && !verseText)
 
   return {
@@ -180,7 +180,7 @@ const useFormattedText = ({
     currentWord,
     setCurrentWord: setSelectedWord,
     versesInCurrentChapter: chapterVerses.length,
-    requiredBibleVersion,
+    unavailableBibleVersion,
   }
 }
 
@@ -228,11 +228,11 @@ const DictionnaireVerseDetailScreen = ({
     currentWord,
     setCurrentWord,
     versesInCurrentChapter,
-    requiredBibleVersion,
+    unavailableBibleVersion,
   } = useFormattedText({ verse, wordsInVerse, resourceLang })
-  const requiredBibleDownloadStatus = useDownloadItemStatus(
-    requiredBibleVersion
-      ? createOfflineCopyId({ kind: 'bible', versionId: requiredBibleVersion })
+  const unavailableBibleDownloadStatus = useDownloadItemStatus(
+    unavailableBibleVersion
+      ? createOfflineCopyId({ kind: 'bible', versionId: unavailableBibleVersion })
       : undefined
   )
 
@@ -252,7 +252,7 @@ const DictionnaireVerseDetailScreen = ({
     return (
       <OfflineResourceRecovery
         identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
-        title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
+        title={t('resource.dictionary.offlineCopyNeeded')}
         fileSize={22}
         size="small"
       />
@@ -286,26 +286,26 @@ const DictionnaireVerseDetailScreen = ({
     )
   }
 
-  if (requiredBibleVersion) {
+  if (unavailableBibleVersion) {
     const isDownloading =
-      requiredBibleDownloadStatus?.status === 'queued' ||
-      requiredBibleDownloadStatus?.status === 'downloading' ||
-      requiredBibleDownloadStatus?.status === 'inserting'
+      unavailableBibleDownloadStatus?.status === 'queued' ||
+      unavailableBibleDownloadStatus?.status === 'downloading' ||
+      unavailableBibleDownloadStatus?.status === 'inserting'
 
     return (
       <Container>
         <Box flex center px={30}>
           <Empty
             source={require('~assets/images/empty.json')}
-            message={t('resourceLanguage.requiredBibleMissing', {
-              version: requiredBibleVersion,
+            message={t('resource.bible.referenceUnavailable', {
+              version: unavailableBibleVersion,
             })}
           />
           <Button
-            onPress={() => enqueue([createBibleDownloadItem(requiredBibleVersion)])}
+            onPress={() => enqueue([createBibleDownloadItem(unavailableBibleVersion)])}
             isLoading={isDownloading}
           >
-            {t('resourceLanguage.downloadRequiredBible', { version: requiredBibleVersion })}
+            {t('resource.bible.makeAvailableOffline', { version: unavailableBibleVersion })}
           </Button>
         </Box>
       </Container>

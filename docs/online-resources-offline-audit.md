@@ -14,11 +14,11 @@ Since this audit, the local resource architecture has materially changed:
   reader resources;
 - canonical Bible text is separated from optional version-specific Strong sidecars;
 - BHG replaces the legacy interlinear Bible identities and uses optional localized indexes;
-- the Strong lexicon is split into required `core` plus optional detailed-Greek and entity modules;
+- the Strong lexicon is split into a `core` dependency plus optional detailed-Greek and entity modules;
 - installation uses typed Offline-copy identities, one mobile resource catalog, ZIP artifacts,
   checksums, dependency-aware queueing, installation journaling, and atomic activation;
-- initial offline setup now guarantees the language-specific startup Bible and organizes optional
-  resources into thematic folders.
+- the implemented offline setup historically guaranteed a language-specific startup Bible, but the
+  accepted Online-first target removes that prerequisite and makes every Offline copy optional.
 
 For the current model, start with `CONTEXT.md`, `docs/architecture.md`, `docs/data-models.md`, and
 ADRs 0013, 0014, 0015, 0017, and 0021. The online-first backend described below remains a design

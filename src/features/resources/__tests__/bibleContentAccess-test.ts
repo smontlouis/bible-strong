@@ -44,6 +44,7 @@ const createDependencies = () => ({
       getChapterVerses,
       getIfVersionNeedsDownload,
       chapterAdapter: {
+        loadCoverage: jest.fn(),
         loadChapter: jest.fn(async (version: string, book: number, chapter: number) => {
           try {
             const verses = await getChapterVerses(version, book, chapter)

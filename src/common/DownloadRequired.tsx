@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 interface Props {
   title: string
   fileSize: number
-  setStartDownload: (value: boolean) => void
+  onDownload: () => void
   hasBackButton?: boolean
   iconSize?: number
   size?: 'small' | 'large'
@@ -21,7 +21,7 @@ interface Props {
 const DownloadRequired = ({
   title,
   fileSize,
-  setStartDownload,
+  onDownload,
   hasBackButton,
   iconSize = 100,
   size = 'large',
@@ -32,7 +32,9 @@ const DownloadRequired = ({
   const { t } = useTranslation()
   return (
     <Container isSafe={size === 'large'}>
-      {hasHeader && <Header title={t('Téléchargement nécessaire')} hasBackButton={hasBackButton} />}
+      {hasHeader && (
+        <Header title={t('resource.offlineCopy.title')} hasBackButton={hasBackButton} />
+      )}
       <Box flex center padding={padding}>
         <Box center maxWidth={300}>
           <Icon.Feather
@@ -43,7 +45,7 @@ const DownloadRequired = ({
           <Text textAlign="center" marginBottom={padding} marginTop={padding}>
             {title}
           </Text>
-          <Text bold color="primary" onPress={() => setStartDownload(true)}>
+          <Text bold color="primary" onPress={onDownload}>
             {`${t('Télécharger')} (${fileSize}Mo)`}
           </Text>
         </Box>

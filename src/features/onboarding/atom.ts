@@ -4,7 +4,7 @@ import type { OnboardingResourceSelection } from './onboardingResources'
 
 export const selectedResourcesAtom = atom<OnboardingResourceSelection[]>([])
 
-// Tracks onboarding completion state: true = completed (Bible downloaded), false = not completed
+// Tracks whether the optional introduction was completed or dismissed.
 // Persisted in MMKV for instant access on app restart
 export const isOnboardingCompletedAtom = atomWithAsyncStorage<boolean>(
   'isOnboardingCompleted',
