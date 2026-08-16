@@ -35,9 +35,20 @@ to Bible Strong without making the Resource service inspect this working tree:
 RESOURCE_PUBLICATION_BUNDLE=/absolute/path/to/lsg-<revision> yarn resources:dev
 ```
 
+Validate a received or archived handoff independently with:
+
+```sh
+npm run resources:publication:bible -- validate \
+  --bundle /absolute/path/to/lsg-<revision>
+```
+
 The command refuses to replace an existing output directory. Rebuild into a
 new directory for every immutable revision. Production upload or activation is
-not performed by this command.
+not performed by this command. This per-Resource bundle is the canonical
+handoff into PostgreSQL; it does not replace the global mobile release catalog.
+Before any public Offline-copy activation, feed the bundle's exact archive into
+the source override for `resources:release:mobile`, rebuild the exhaustive
+catalog, and publish that catalog last as described below.
 
 ### Complete mobile resource release
 

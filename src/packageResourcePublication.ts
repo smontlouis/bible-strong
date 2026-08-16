@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
 import { createReadStream, existsSync } from "node:fs";
 import {
   copyFile,
@@ -11,12 +12,18 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { promisify } from "node:util";
 
 import {
   buildMobileResourceCatalog,
   type MobileResourceCatalog
 } from "./packageMobileResourceCatalog.js";
-import type { CanonicalBiblePublication } from "./strongBibleMobilePublication.js";
+import {
+  verifyCanonicalBiblePublication,
+  type CanonicalBiblePublication
+} from "./strongBibleMobilePublication.js";
+
+const execFileAsync = promisify(execFile);
 
 export interface BibleResourcePublicationMetadata {
   identity: { versionId: string; language: string };
@@ -110,7 +117,7 @@ export async function buildBibleResourcePublication(
   const canonical = JSON.parse(
     await readFile(sourceCanonicalPath, "utf8")
   ) as CanonicalBiblePublication;
-  const derived = validateCanonicalBible(canonical, options);
+  const derived = deriveCanonicalBibleManifestData(canonical, options);
   const normalizedVersion = options.identity.versionId.toLocaleLowerCase();
   const canonicalEntry = `bible-${normalizedVersion}.json`;
   const archiveFile = `${canonicalEntry}.zip`;
@@ -208,6 +215,7 @@ export async function buildBibleResourcePublication(
       `${JSON.stringify(manifest, null, 2)}\n`,
       "utf8"
     );
+    await validateBibleResourcePublication(temporaryDir);
     await mkdir(path.dirname(outputDir), { recursive: true });
     await rename(temporaryDir, outputDir);
     return {
@@ -223,6 +231,76 @@ export async function buildBibleResourcePublication(
   } finally {
     await rm(mobileReleaseDir, { recursive: true, force: true });
   }
+}
+
+export async function validateBibleResourcePublication(
+  bundleDir: string
+): Promise<BibleResourcePublicationManifest> {
+  const resolvedBundleDir = path.resolve(bundleDir);
+  const manifestValue: unknown = JSON.parse(
+    await readFile(path.join(resolvedBundleDir, "manifest.json"), "utf8")
+  );
+  const manifest = decodeManifest(manifestValue);
+  const canonicalPath = resolveBundlePath(
+    resolvedBundleDir,
+    manifest.canonical.path
+  );
+  const offlineArtifactPath = resolveBundlePath(
+    resolvedBundleDir,
+    manifest.offlineArtifact.path
+  );
+  const [canonicalStats, offlineStats] = await Promise.all([
+    stat(canonicalPath),
+    stat(offlineArtifactPath)
+  ]);
+  if (
+    canonicalStats.size !== manifest.canonical.bytes ||
+    (await sha256File(canonicalPath)) !== manifest.canonical.sha256
+  ) {
+    throw new Error("resource-publication-canonical-integrity-mismatch");
+  }
+  if (
+    offlineStats.size !== manifest.offlineArtifact.bytes ||
+    (await sha256File(offlineArtifactPath)) !== manifest.offlineArtifact.sha256
+  ) {
+    throw new Error("resource-publication-offline-integrity-mismatch");
+  }
+
+  const canonical = JSON.parse(
+    await readFile(canonicalPath, "utf8")
+  ) as CanonicalBiblePublication;
+  const canonicalVerification = verifyCanonicalBiblePublication(canonical);
+  if (
+    manifest.canonical.schemaVersion !== canonical.schemaVersion ||
+    manifest.identity.versionId !== canonical.applicationVersionId ||
+    manifest.revision !== canonicalVerification.textRevision ||
+    manifest.provenance.sourceVersion !== canonical.sourceVersion ||
+    manifest.provenance.sourceSha256 !== canonical.sourceSha256
+  ) {
+    throw new Error("resource-publication-canonical-metadata-mismatch");
+  }
+  const derived = deriveCanonicalBibleManifestData(canonical, manifest);
+  if (
+    JSON.stringify(manifest.coverage) !== JSON.stringify(derived.coverage) ||
+    JSON.stringify(manifest.counts) !== JSON.stringify(derived.counts)
+  ) {
+    throw new Error("resource-publication-canonical-declaration-mismatch");
+  }
+
+  const archived = await execFileAsync(
+    "unzip",
+    ["-p", offlineArtifactPath, manifest.offlineArtifact.entry],
+    { maxBuffer: 128 * 1024 * 1024 }
+  );
+  const archivedCanonical = Buffer.from(archived.stdout, "utf8");
+  if (
+    sha256Buffer(archivedCanonical) !==
+      manifest.offlineArtifact.contentSha256 ||
+    manifest.offlineArtifact.contentSha256 !== manifest.canonical.sha256
+  ) {
+    throw new Error("resource-publication-offline-content-mismatch");
+  }
+  return manifest;
 }
 
 function validateMetadata(metadata: BibleResourcePublicationMetadata): void {
@@ -243,34 +321,21 @@ function validateMetadata(metadata: BibleResourcePublicationMetadata): void {
   ) {
     throw new Error("resource-publication-rights-mismatch");
   }
-  if (
-    !metadata.deliveryCapabilities.onlineAccess &&
-    !metadata.deliveryCapabilities.offlineDownload
-  ) {
-    throw new Error("resource-publication-delivery-unavailable");
-  }
   if (metadata.canon.orderedBooks.length === 0) {
     throw new Error("resource-publication-canon-empty");
   }
 }
 
-function validateCanonicalBible(
+function deriveCanonicalBibleManifestData(
   canonical: CanonicalBiblePublication,
   metadata: BibleResourcePublicationMetadata
 ): {
   coverage: BibleResourcePublicationManifest["coverage"];
   counts: BibleResourcePublicationManifest["counts"];
 } {
-  if (
-    canonical.format !== "bible-strong-canonical-bible" ||
-    canonical.schemaVersion !== 4 ||
-    canonical.applicationVersionId !== metadata.identity.versionId ||
-    !canonical.textRevision ||
-    !/^[a-f0-9]{64}$/.test(canonical.sourceSha256) ||
-    !canonical.verses ||
-    typeof canonical.verses !== "object"
-  ) {
-    throw new Error("resource-publication-canonical-invalid");
+  const verification = verifyCanonicalBiblePublication(canonical);
+  if (canonical.applicationVersionId !== metadata.identity.versionId) {
+    throw new Error("resource-publication-canonical-identity-mismatch");
   }
 
   const orderedBooks = Object.keys(canonical.verses)
@@ -286,8 +351,6 @@ function validateCanonicalBible(
   const verseCountByBookChapter: Record<string, number> = {};
   let chapters = 0;
   let verses = 0;
-  let notes = 0;
-  let headings = 0;
   for (const book of orderedBooks) {
     const chapterRecord = canonical.verses[String(book)]!;
     const chapterNumbers = Object.keys(chapterRecord)
@@ -309,26 +372,9 @@ function validateCanonicalBible(
       }
       verseCountByBookChapter[`${book}-${chapter}`] = chapterVerses.length;
       verses += chapterVerses.length;
-      for (const verse of chapterVerses) {
-        if (
-          typeof verse.text !== "string" ||
-          !Array.isArray(verse.startTags) ||
-          !Array.isArray(verse.layout) ||
-          !Array.isArray(verse.notes) ||
-          !Array.isArray(verse.headings)
-        ) {
-          throw new Error("resource-publication-verse-invalid");
-        }
-        notes += verse.notes.length;
-        headings += verse.headings.length;
-      }
     }
   }
-  if (
-    verses !== canonical.verseCount ||
-    notes !== canonical.noteCount ||
-    headings !== canonical.headingCount
-  ) {
+  if (verses !== verification.verseCount) {
     throw new Error("resource-publication-count-mismatch");
   }
   return {
@@ -337,10 +383,80 @@ function validateCanonicalBible(
       books: orderedBooks.length,
       chapters,
       verses,
-      notes,
-      headings
+      notes: verification.noteCount,
+      headings: verification.headingCount
     }
   };
+}
+
+function decodeManifest(value: unknown): BibleResourcePublicationManifest {
+  if (!value || typeof value !== "object") {
+    throw new Error("resource-publication-manifest-invalid");
+  }
+  const manifest = value as Partial<BibleResourcePublicationManifest>;
+  if (manifest.format !== "bible-strong-resource-publication") {
+    throw new Error("resource-publication-manifest-format-invalid");
+  }
+  if (manifest.schemaVersion !== 1) {
+    throw new Error(
+      `resource-publication-manifest-version-unsupported:${String(manifest.schemaVersion)}`
+    );
+  }
+  if (
+    manifest.identity?.kind !== "bible-text" ||
+    !manifest.identity.versionId ||
+    !manifest.identity.language ||
+    !manifest.revision ||
+    manifest.canonical?.mediaType !== "application/json" ||
+    !manifest.canonical.path ||
+    !isSha256(manifest.canonical.sha256) ||
+    !Number.isSafeInteger(manifest.canonical.bytes) ||
+    manifest.offlineArtifact?.mediaType !== "application/zip" ||
+    !manifest.offlineArtifact.path ||
+    !manifest.offlineArtifact.entry ||
+    !isSha256(manifest.offlineArtifact.sha256) ||
+    !isSha256(manifest.offlineArtifact.contentSha256) ||
+    !Number.isSafeInteger(manifest.offlineArtifact.bytes) ||
+    manifest.provenance?.generator !== "bible-lexicon-maker" ||
+    !manifest.provenance.sourceVersion ||
+    !isSha256(manifest.provenance.sourceSha256) ||
+    !manifest.provenance.generatedAt ||
+    !manifest.rights ||
+    !manifest.deliveryCapabilities ||
+    !manifest.canon ||
+    !manifest.versification ||
+    !manifest.coverage ||
+    !manifest.counts
+  ) {
+    throw new Error("resource-publication-manifest-invalid");
+  }
+  validateMetadata(manifest as BibleResourcePublicationManifest);
+  return manifest as BibleResourcePublicationManifest;
+}
+
+function resolveBundlePath(bundleDir: string, relativePath: string): string {
+  if (
+    path.isAbsolute(relativePath) ||
+    relativePath.includes("\\") ||
+    relativePath
+      .split("/")
+      .some((segment) => !segment || segment === "." || segment === "..")
+  ) {
+    throw new Error("resource-publication-path-invalid");
+  }
+  const resolved = path.resolve(bundleDir, relativePath);
+  if (!resolved.startsWith(`${bundleDir}${path.sep}`)) {
+    throw new Error("resource-publication-path-invalid");
+  }
+  return resolved;
+}
+
+function isSha256(value: unknown): value is string {
+  return typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+}
+
+function sha256Buffer(value: Buffer): string {
+  return createHash("sha256").update(value).digest("hex");
 }
 
 async function sha256File(filePath: string): Promise<string> {
@@ -349,8 +465,10 @@ async function sha256File(filePath: string): Promise<string> {
   return hash.digest("hex");
 }
 
-function parseCliArgs(args: readonly string[]): Record<string, string> {
-  const allowed = new Set(["--canonical", "--metadata", "--output-dir"]);
+function parseCliArgs(
+  args: readonly string[],
+  allowed: ReadonlySet<string>
+): Record<string, string> {
   const result: Record<string, string> = {};
   for (let index = 0; index < args.length; index += 2) {
     const key = args[index];
@@ -369,7 +487,20 @@ function parseCliArgs(args: readonly string[]): Record<string, string> {
 }
 
 async function main(): Promise<void> {
-  const args = parseCliArgs(process.argv.slice(2));
+  const [command = "build", ...rawArgs] = process.argv.slice(2);
+  if (command === "validate") {
+    const args = parseCliArgs(rawArgs, new Set(["--bundle"]));
+    const bundle = args["--bundle"];
+    if (!bundle) throw new Error("resource-publication-cli-bundle-missing");
+    const manifest = await validateBibleResourcePublication(bundle);
+    console.log(JSON.stringify(manifest, null, 2));
+    return;
+  }
+  const buildArgs = command === "build" ? rawArgs : [command, ...rawArgs];
+  const args = parseCliArgs(
+    buildArgs,
+    new Set(["--canonical", "--metadata", "--output-dir"])
+  );
   const canonicalPath = args["--canonical"];
   const metadataPath = args["--metadata"];
   const outputDir = args["--output-dir"];
