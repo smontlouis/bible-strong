@@ -1,4 +1,4 @@
-import type { Pericope } from '~common/types'
+import type { Pericope, Verse } from '~common/types'
 import getBiblePericope from '~helpers/getBiblePericope'
 import loadMhyComments from '~helpers/loadMhyComments'
 import { loadRedWords } from '~helpers/loadRedWords'
@@ -12,6 +12,9 @@ import { usesCanonicalBibleExtras } from '~helpers/strongBiblePublications'
 import { versionHasPericope } from '~helpers/pericopes'
 import { versionHasRedWords } from '~helpers/redWords'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
+import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
+import { Schema } from 'effect'
+import { BiblePericopeIndexDto } from './bibleChapterContract'
 
 export type BibleChapterComments = { serializedComments: string }
 
@@ -128,3 +131,72 @@ export const localBibleReadingResourceAccess: BibleReadingResourceAccess = {
     }
   },
 }
+
+type HttpBibleReadingOptions = {
+  baseUrl: string
+  fetcher?: typeof fetch
+  isOnline: () => Promise<boolean>
+  timeoutMs?: number
+}
+
+export const createHttpBibleReadingResourceAccess = ({
+  baseUrl,
+  fetcher = fetch,
+  isOnline,
+  timeoutMs = 8_000,
+}: HttpBibleReadingOptions): Pick<
+  BibleReadingResourceAccess,
+  'getPericopeAvailability' | 'loadPericope'
+> => ({
+  getPericopeAvailability: async () =>
+    (await isOnline()) ? { status: 'available' } : { status: 'unsupported' },
+  loadPericope: async version => {
+    if (!(await isOnline())) throw new Error('BIBLE_PERICOPE_HTTP_OFFLINE')
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await fetcher(
+        `${baseUrl.replace(/\/$/, '')}/v1/bibles/${encodeURIComponent(version)}/pericopes`,
+        { headers: { accept: 'application/json' }, signal: controller.signal }
+      )
+      if (!response.ok) throw new Error(`BIBLE_PERICOPE_HTTP_${response.status}`)
+      const payload = Schema.decodeUnknownSync(BiblePericopeIndexDto)(await response.json())
+      return getCanonicalChapterPericope(
+        payload.verses.map(item => ({
+          Livre: item.book,
+          Chapitre: item.chapter,
+          Verset: item.verse,
+          Texte: '',
+          Headings: [...item.headings] as NonNullable<Verse['Headings']>,
+        })) as Verse[]
+      )
+    } finally {
+      clearTimeout(timeout)
+    }
+  },
+})
+
+export const createHybridBibleReadingResourceAccess = (options: {
+  local: BibleReadingResourceAccess
+  online: Pick<BibleReadingResourceAccess, 'getPericopeAvailability' | 'loadPericope'>
+  remotelyReadableVersions: ReadonlySet<string>
+  isOnline: () => Promise<boolean>
+}): BibleReadingResourceAccess => ({
+  ...options.local,
+  getPericopeAvailability: async version => {
+    const local = await options.local.getPericopeAvailability?.(version)
+    if (local?.status === 'available') return local
+    if (options.remotelyReadableVersions.has(version) && (await options.isOnline())) {
+      return { status: 'available' }
+    }
+    return local ?? { status: 'unsupported' }
+  },
+  loadPericope: async version => {
+    const local = await options.local.getPericopeAvailability?.(version)
+    if (local?.status === 'available') return options.local.loadPericope(version)
+    if (options.remotelyReadableVersions.has(version) && (await options.isOnline())) {
+      return options.online.loadPericope(version)
+    }
+    return options.local.loadPericope(version)
+  },
+})

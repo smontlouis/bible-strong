@@ -1,4 +1,5 @@
 import catalogJson from '~assets/mobile-resource-catalog.json'
+import { ORDINARY_BIBLE_VERSION_IDS } from './ordinaryBibleVersions'
 import { atom, getDefaultStore } from 'jotai/vanilla'
 
 export type MobileResourceInstallationStrategy = 'sqlite-import' | 'archive-extract'
@@ -204,6 +205,16 @@ export const getMobileResourceCatalogEntry = (resourceId: string): MobileResourc
     url: resolveMobileResourceArtifactUrl(entry),
   }
 }
+
+export const getMobileBibleVersionIds = (
+  catalog: MobileResourceCatalog = MOBILE_RESOURCE_CATALOG
+): string[] =>
+  catalog === BUNDLED_MOBILE_RESOURCE_CATALOG
+    ? [...ORDINARY_BIBLE_VERSION_IDS]
+    : Object.keys(catalog.resources)
+        .filter(resourceId => resourceId.startsWith('bible:'))
+        .map(resourceId => resourceId.slice('bible:'.length))
+        .sort()
 
 let developmentResourceArtifactBaseUrl: string | undefined
 

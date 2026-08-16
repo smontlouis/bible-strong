@@ -15,6 +15,8 @@ import {
   unavailableHttpBibleChapterAdapter,
 } from '~features/resources/bibleChapterSource'
 import {
+  createHttpBibleReadingResourceAccess,
+  createHybridBibleReadingResourceAccess,
   localBibleReadingResourceAccess,
   type BibleReadingResourceAccess,
 } from '~features/resources/bibleReadingResourceAccess'
@@ -56,7 +58,11 @@ import {
   type OnlineAccessState,
   type ResourceIdentity,
 } from '~features/resources/resourceModel'
-import { configureDevelopmentResourceArtifactBaseUrl } from '~helpers/mobileResourceCatalog'
+import {
+  configureDevelopmentResourceArtifactBaseUrl,
+  getMobileBibleVersionIds,
+} from '~helpers/mobileResourceCatalog'
+import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
@@ -97,6 +103,20 @@ const onlineNaveAccess = resourceApiBaseUrl
       isOnline: async () => onlineManager.isOnline(),
     })
   : unavailableHttpNaveAccess
+const remotelyReadableBibleVersions = new Set(
+  resourceApiBaseUrl ? (__DEV__ ? getMobileBibleVersionIds() : PUBLIC_ONLINE_BIBLE_VERSION_IDS) : []
+)
+const onlineBibleReadingAccess = resourceApiBaseUrl
+  ? createHttpBibleReadingResourceAccess({
+      baseUrl: resourceApiBaseUrl,
+      isOnline: async () => onlineManager.isOnline(),
+    })
+  : {
+      getPericopeAvailability: async () => ({ status: 'unsupported' as const }),
+      loadPericope: async () => {
+        throw new Error('BIBLE_PERICOPE_HTTP_UNCONFIGURED')
+      },
+    }
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleContent: createBibleContentAccess(
@@ -105,7 +125,12 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
       online: onlineBibleChapterAdapter,
     })
   ),
-  bibleReading: localBibleReadingResourceAccess,
+  bibleReading: createHybridBibleReadingResourceAccess({
+    local: localBibleReadingResourceAccess,
+    online: onlineBibleReadingAccess,
+    remotelyReadableVersions: remotelyReadableBibleVersions,
+    isOnline: async () => onlineManager.isOnline(),
+  }),
   bibleSearch: localBibleSearchAccess,
   dictionary: localDictionaryAccess,
   lexiconBible: localLexiconBibleResourceAccess,
@@ -124,7 +149,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     getOnlineAccess: identity =>
       getResourceOnlineAccess(
         identity,
-        resourceApiBaseUrl ? new Set(['LSG']) : new Set(),
+        remotelyReadableBibleVersions,
         resourceApiBaseUrl ? new Set(['fr']) : new Set()
       ),
   },

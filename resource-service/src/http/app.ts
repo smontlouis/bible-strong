@@ -7,6 +7,7 @@ import {
   BibleChapterRepository,
   BibleChapterRepositoryFailure,
   readBibleChapter,
+  readBiblePericopes,
   readBibleCoverage,
   UnsupportedBibleVersion,
   type BibleChapterRepositoryService,
@@ -164,6 +165,18 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
         Effect.mapError(cause => toHttpProblem(cause, requestId))
       )
     })
+    .handle('getBiblePericopes', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return readBiblePericopes(path.version).pipe(
+        Effect.tap(response =>
+          addResponseHeaders({
+            'x-request-id': requestId,
+            'x-resource-revision': response.resource.revision,
+          })
+        ),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
 )
 
 const serveNaveResponse = <A extends { resource: { revision: string } }, E, R>(
@@ -242,6 +255,8 @@ const unavailableRepository: BibleChapterRepositoryService = {
   findActiveChapter: input =>
     Effect.fail(new ActiveBiblePublicationUnavailable({ versionId: input.versionId })),
   findActiveCoverage: versionId =>
+    Effect.fail(new ActiveBiblePublicationUnavailable({ versionId })),
+  findActivePericopes: versionId =>
     Effect.fail(new ActiveBiblePublicationUnavailable({ versionId })),
 }
 

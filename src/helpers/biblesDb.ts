@@ -99,6 +99,8 @@ export interface SearchOptions {
 }
 
 export interface BibleVersionCoverage {
+  canon?: { id: string; orderedBooks: number[] }
+  versification?: string
   books: number[]
   chaptersByBook: Record<number, number[]>
   verseCountByBookChapter: Record<string, number>

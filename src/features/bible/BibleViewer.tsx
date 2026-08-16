@@ -97,7 +97,6 @@ import {
   loadBibleReadingRedWords,
 } from './bibleReadingChapter'
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
-import { usesCanonicalBibleExtras } from '~helpers/strongBiblePublications'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
 import { useAnnotationMode } from './hooks'
@@ -286,16 +285,18 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     placeholderData: keepPreviousData,
   })
   const mainResult = mainReadingQuery.data
-  const verses = mainResult?.success && mainResult.data ? mainResult.data.verses : EMPTY_VERSES
+  const mainChapterData = mainResult?.success ? mainResult.data : undefined
+  const verses = mainChapterData?.verses ?? EMPTY_VERSES
+  const usesCanonicalPresentation = mainChapterData?.presentation === 'canonical'
   const legacyPericopeQuery = useQuery({
     queryKey: resourceQueryKeys.biblePericope(version),
     queryFn: () => resources.bibleReading.loadPericope(version),
-    enabled: Boolean(mainResult?.success && mainResult.data && !usesCanonicalBibleExtras(version)),
+    enabled: Boolean(mainResult?.success && mainResult.data && !usesCanonicalPresentation),
     staleTime: Infinity,
     ...localQueryOptions,
   })
   const pericope =
-    mainResult?.success && mainResult.data && usesCanonicalBibleExtras(version)
+    mainResult?.success && mainResult.data && usesCanonicalPresentation
       ? getCanonicalChapterPericope(mainResult.data.verses)
       : (legacyPericopeQuery.data ?? null)
   const isLoading = mainReadingQuery.isFetching
@@ -332,6 +333,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     interlinearLocaleAutomatic: !interlinearLocale,
     parallelVersions,
     commentsDisplay: settings.commentsDisplay,
+    presentation: mainChapterData?.presentation,
   }
   const extrasEnabled =
     Boolean(mainResult?.success && mainResult.data) && !mainReadingQuery.isPlaceholderData
@@ -391,7 +393,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     queryFn: () =>
       resources.bibleReading.getRedWordsAvailability?.(version) ??
       Promise.resolve({ status: 'available' as const }),
-    enabled: extrasEnabled && settings.redWordsDisplay && !usesCanonicalBibleExtras(version),
+    enabled: extrasEnabled && settings.redWordsDisplay && !usesCanonicalPresentation,
     networkMode: 'always',
   })
   const redWordsQuery = useQuery({
@@ -400,7 +402,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     enabled:
       extrasEnabled &&
       settings.redWordsDisplay &&
-      !usesCanonicalBibleExtras(version) &&
+      !usesCanonicalPresentation &&
       redWordsAvailabilityQuery.data?.status === 'available',
     staleTime: Infinity,
     ...localQueryOptions,

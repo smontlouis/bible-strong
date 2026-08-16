@@ -1,5 +1,5 @@
 import { Effect } from 'effect'
-import type { Kysely } from 'kysely'
+import { sql, type Kysely } from 'kysely'
 
 import type { ActiveBibleChapter, BibleChapterRepositoryService } from '../domain/bibleChapter'
 import {
@@ -10,6 +10,16 @@ import {
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import { tryDatabasePromise } from '../database/databaseEffect'
 import type { ResourceDatabase } from '../database/types'
+
+type BiblePublicationMetadata = {
+  canon: { id: string; orderedBooks: number[] }
+  versification: string
+  resource_revision?: string
+  text_revision?: string
+}
+
+const bibleMetadata = (value: Record<string, unknown>): BiblePublicationMetadata =>
+  value as BiblePublicationMetadata
 
 export const makeKyselyBibleChapterRepository = (
   database: Kysely<ResourceDatabase>
@@ -27,6 +37,7 @@ export const makeKyselyBibleChapterRepository = (
           )
           .select([
             'resource_publications.revision',
+            'resource_publications.metadata',
             'bible_verses.verse',
             'bible_verses.text',
             'bible_verses.presentation',
@@ -44,7 +55,14 @@ export const makeKyselyBibleChapterRepository = (
 
       return {
         ...input,
-        revision: rows[0]!.revision,
+        revision:
+          bibleMetadata(rows[0]!.metadata).resource_revision ??
+          bibleMetadata(rows[0]!.metadata).text_revision ??
+          rows[0]!.revision,
+        textRevision:
+          bibleMetadata(rows[0]!.metadata).text_revision ??
+          bibleMetadata(rows[0]!.metadata).resource_revision ??
+          rows[0]!.revision,
         verses: rows.map(row => ({
           number: row.verse!,
           text: row.text!,
@@ -54,42 +72,98 @@ export const makeKyselyBibleChapterRepository = (
     }),
   findActiveCoverage: versionId =>
     Effect.gen(function* () {
-      const rows = yield* tryDatabasePromise('bible.coverage.read-active', () =>
+      const publication = yield* tryDatabasePromise('bible.coverage.read-publication', () =>
         database
           .selectFrom('resource_publications')
-          .leftJoin('bible_verses', 'bible_verses.publication_id', 'resource_publications.id')
-          .select(['resource_publications.revision', 'bible_verses.book', 'bible_verses.chapter'])
+          .select(['id', 'revision', 'metadata'])
+          .where('resource_identity', '=', `bible-text:${versionId}`)
+          .where('status', '=', 'active')
+          .executeTakeFirst()
+      ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
+
+      if (!publication) return yield* new ActiveBiblePublicationUnavailable({ versionId })
+      const rows = yield* tryDatabasePromise('bible.coverage.read-active', () =>
+        database
+          .selectFrom('bible_verses')
+          .select(['book', 'chapter'])
           .select(expression => expression.fn.count('bible_verses.verse').as('verse_count'))
-          .where('resource_publications.resource_identity', '=', `bible-text:${versionId}`)
-          .where('resource_publications.status', '=', 'active')
-          .groupBy(['resource_publications.revision', 'bible_verses.book', 'bible_verses.chapter'])
-          .orderBy('bible_verses.book')
-          .orderBy('bible_verses.chapter')
+          .where('publication_id', '=', publication.id)
+          .groupBy(['book', 'chapter'])
+          .orderBy('book')
+          .orderBy('chapter')
           .execute()
       ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
 
-      if (rows.length === 0 || rows[0]?.book === null) {
+      if (rows.length === 0) {
         return yield* new ActiveBiblePublicationUnavailable({ versionId })
       }
-      const books: number[] = []
       const chaptersByBook: Record<string, number[]> = {}
       const verseCountByBookChapter: Record<string, number> = {}
       for (const row of rows) {
         const book = row.book!
         const chapter = row.chapter!
         if (!chaptersByBook[book]) {
-          books.push(book)
           chaptersByBook[book] = []
         }
         chaptersByBook[book]!.push(chapter)
         verseCountByBookChapter[`${book}-${chapter}`] = Number(row.verse_count)
       }
+      const metadata = bibleMetadata(publication.metadata)
+      const books = metadata.canon.orderedBooks.filter(book => chaptersByBook[book] !== undefined)
       return {
         versionId,
-        revision: rows[0]!.revision,
+        revision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
+        textRevision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
+        canon: metadata.canon,
+        versification: metadata.versification,
         books,
         chaptersByBook,
         verseCountByBookChapter,
+      }
+    }),
+  findActivePericopes: versionId =>
+    Effect.gen(function* () {
+      const publication = yield* tryDatabasePromise('bible.pericopes.read-publication', () =>
+        database
+          .selectFrom('resource_publications')
+          .select(['id', 'revision', 'metadata'])
+          .where('resource_identity', '=', `bible-text:${versionId}`)
+          .where('status', '=', 'active')
+          .executeTakeFirst()
+      ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
+
+      if (!publication) return yield* new ActiveBiblePublicationUnavailable({ versionId })
+      const rows = yield* tryDatabasePromise('bible.pericopes.read-active', () =>
+        database
+          .selectFrom('bible_verses')
+          .select(['book', 'chapter', 'verse', 'presentation'])
+          .where('publication_id', '=', publication.id)
+          .where(
+            sql<boolean>`jsonb_array_length(${sql.ref('bible_verses.presentation')} -> 'headings') > 0`
+          )
+          .orderBy('bible_verses.book')
+          .orderBy('bible_verses.chapter')
+          .orderBy('bible_verses.verse')
+          .execute()
+      ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
+
+      const metadata = bibleMetadata(publication.metadata)
+      return {
+        versionId,
+        revision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
+        textRevision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
+        verses: rows.flatMap(row =>
+          row.presentation!.headings.length > 0
+            ? [
+                {
+                  book: row.book!,
+                  chapter: row.chapter!,
+                  verse: row.verse!,
+                  headings: row.presentation!.headings,
+                },
+              ]
+            : []
+        ),
       }
     }),
 })

@@ -5,6 +5,7 @@ import path from 'node:path'
 import { Schema } from 'effect'
 import { unzipSync } from 'fflate'
 import initSqlJs, { type Database } from 'sql.js'
+import { buildCanonicalBibleFromLegacy, hashCanonicalVerses } from './legacyBiblePublication'
 
 import {
   BibleVersePresentationDto,
@@ -19,11 +20,17 @@ const Artifact = Schema.Struct({
   sha256: Sha256,
   bytes: Schema.NonNegativeInt,
 })
+const OfflineEntry = Schema.Struct({
+  entry: Schema.NonEmptyString,
+  sha256: Sha256,
+  bytes: Schema.NonNegativeInt,
+})
 
 const PublicationBundleCommonFields = {
   format: Schema.Literal('bible-strong-resource-publication'),
   schemaVersion: Schema.Literal(1),
   revision: Schema.NonEmptyString,
+  publicationRevision: Schema.optional(Schema.NonEmptyString),
   canonical: Schema.Struct({
     ...Artifact.fields,
     mediaType: Schema.Literal('application/json'),
@@ -34,23 +41,41 @@ const PublicationBundleCommonFields = {
     mediaType: Schema.Literal('application/zip'),
     entry: Schema.NonEmptyString,
     contentSha256: Sha256,
+    entries: Schema.optional(
+      Schema.Struct({
+        canonical: OfflineEntry,
+        pericope: Schema.optional(OfflineEntry),
+        redWords: Schema.optional(OfflineEntry),
+      })
+    ),
   }),
   provenance: Schema.Struct({
     generator: Schema.Literal('bible-lexicon-maker'),
     sourceVersion: Schema.NonEmptyString,
     sourceSha256: Sha256,
     generatedAt: Schema.NonEmptyString,
+    sources: Schema.optional(
+      Schema.Array(
+        Schema.Struct({
+          role: Schema.Literal('canonical', 'pericope', 'redWords'),
+          sourceUrl: Schema.NonEmptyString,
+          sha256: Sha256,
+        })
+      )
+    ),
   }),
   rights: Schema.Struct({
     holder: Schema.NonEmptyString,
     termsReference: Schema.NonEmptyString,
     attribution: Schema.NonEmptyString,
+    reviewedAt: Schema.optional(Schema.NonEmptyString),
     online: Schema.Boolean,
     offline: Schema.Boolean,
   }),
   deliveryCapabilities: Schema.Struct({
     onlineAccess: Schema.Boolean,
     offlineDownload: Schema.Boolean,
+    localDevelopmentAccess: Schema.optional(Schema.Boolean),
   }),
 }
 
@@ -172,6 +197,37 @@ export type CanonicalNavePublication = {
 
 export type CanonicalPublication = CanonicalBiblePublication | CanonicalNavePublication
 
+const normalizeJson = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(normalizeJson)
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+        .map(([key, nested]) => [key, normalizeJson(nested)])
+    )
+  }
+  return value
+}
+
+export const derivePublicationRevision = (manifest: PublicationBundleManifest): string => {
+  const { publicationRevision, ...envelope } = manifest
+  const resourceId =
+    manifest.identity.kind === 'bible-text'
+      ? manifest.identity.versionId.toLowerCase()
+      : manifest.identity.resourceId.toLowerCase()
+  const digest = createHash('sha256')
+    .update(JSON.stringify(normalizeJson(envelope)))
+    .digest('hex')
+  return `${resourceId}-${digest.slice(0, 20)}`
+}
+
+const validatePublicationRevision = (manifest: PublicationBundleManifest) => {
+  if (!manifest.publicationRevision) return
+  if (manifest.publicationRevision !== derivePublicationRevision(manifest)) {
+    throw new Error('PUBLICATION_BUNDLE_REVISION_INVALID')
+  }
+}
+
 const isSafeBundlePath = (value: string): boolean =>
   !path.isAbsolute(value) &&
   !value.includes('\\') &&
@@ -185,10 +241,20 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID', { cause })
   }
 
+  validatePublicationRevision(manifest)
+
   if (
     !isSafeBundlePath(manifest.canonical.path) ||
     !isSafeBundlePath(manifest.offlineArtifact.path) ||
     !isSafeBundlePath(manifest.offlineArtifact.entry)
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_PATH_INVALID')
+  }
+  if (
+    manifest.offlineArtifact.entries &&
+    Object.values(manifest.offlineArtifact.entries).some(
+      entry => entry && !isSafeBundlePath(entry.entry)
+    )
   ) {
     throw new Error('PUBLICATION_BUNDLE_PATH_INVALID')
   }
@@ -329,7 +395,7 @@ export const countCanonicalContent = (publication: CanonicalBiblePublication) =>
         throw new Error('CANONICAL_VERSE_INVALID')
       }
       for (const [verseNumber, verse] of Object.entries(chapter)) {
-        if (!/^[1-9]\d*$/.test(verseNumber) || !verse || typeof verse.text !== 'string') {
+        if (!/^(?:0|[1-9]\d*)$/.test(verseNumber) || !verse || typeof verse.text !== 'string') {
           throw new Error('CANONICAL_VERSE_INVALID')
         }
         try {
@@ -498,13 +564,6 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     assertArtifact(offlineArtifactPath, manifest.offlineArtifact, 'OFFLINE_ARTIFACT'),
   ])
 
-  if (
-    isBiblePublicationBundleManifest(manifest) &&
-    manifest.offlineArtifact.contentSha256 !== manifest.canonical.sha256
-  ) {
-    throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
-  }
-
   let offlineEntries: ReturnType<typeof unzipSync>
   try {
     offlineEntries = unzipSync(await readFile(offlineArtifactPath))
@@ -532,8 +591,12 @@ export const validatePublicationBundle = async (bundlePath: string) => {
   let canonical: CanonicalPublication
   if (isBiblePublicationBundleManifest(manifest)) {
     canonical = decodeCanonicalBible(canonicalValue)
+    const textSha256 = hashCanonicalVerses(canonical.verses)
     if (
       canonical.applicationVersionId !== manifest.identity.versionId ||
+      canonical.textSha256 !== textSha256 ||
+      canonical.textRevision !==
+        `${canonical.applicationVersionId.toLowerCase()}-${textSha256.slice(0, 20)}` ||
       canonical.textRevision !== manifest.revision ||
       canonical.sourceVersion !== manifest.provenance.sourceVersion ||
       canonical.sourceSha256 !== manifest.provenance.sourceSha256
@@ -552,7 +615,7 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     }
     const coverage = getCanonicalCoverage(canonical)
     if (
-      JSON.stringify(manifest.canon.orderedBooks) !== JSON.stringify(coverage.orderedBooks) ||
+      coverage.orderedBooks.some(book => !manifest.canon.orderedBooks.includes(book)) ||
       JSON.stringify(manifest.coverage) !==
         JSON.stringify({
           chaptersByBook: coverage.chaptersByBook,
@@ -560,6 +623,45 @@ export const validatePublicationBundle = async (bundlePath: string) => {
         })
     ) {
       throw new Error('PUBLICATION_BUNDLE_COVERAGE_MISMATCH')
+    }
+    const declaredEntries = manifest.offlineArtifact.entries ?? {
+      canonical: {
+        entry: manifest.offlineArtifact.entry,
+        sha256: manifest.offlineArtifact.contentSha256,
+        bytes: offlineContent.byteLength,
+      },
+    }
+    const decodedEntries: Partial<Record<'canonical' | 'pericope' | 'redWords', unknown>> = {}
+    for (const [role, declaration] of Object.entries(declaredEntries)) {
+      if (!declaration) continue
+      const content = offlineEntries[declaration.entry]
+      if (!content) throw new Error('OFFLINE_ARTIFACT_ENTRY_MISSING')
+      if (
+        content.byteLength !== declaration.bytes ||
+        createHash('sha256').update(content).digest('hex') !== declaration.sha256
+      ) {
+        throw new Error('OFFLINE_ARTIFACT_ENTRY_CHECKSUM_MISMATCH')
+      }
+      decodedEntries[role as keyof typeof decodedEntries] = JSON.parse(
+        Buffer.from(content).toString()
+      )
+    }
+    const archivedValue = decodedEntries.canonical
+    if (!archivedValue) throw new Error('OFFLINE_ARTIFACT_ENTRY_MISSING')
+    const archivedCanonical =
+      (archivedValue as Partial<CanonicalBiblePublication>).format ===
+      'bible-strong-canonical-bible'
+        ? decodeCanonicalBible(archivedValue)
+        : buildCanonicalBibleFromLegacy({
+            versionId: manifest.identity.versionId,
+            sourceVersion: manifest.provenance.sourceVersion,
+            sourceSha256: manifest.provenance.sourceSha256,
+            bible: archivedValue,
+            pericope: decodedEntries.pericope,
+            redWords: decodedEntries.redWords,
+          })
+    if (JSON.stringify(archivedCanonical.verses) !== JSON.stringify(canonical.verses)) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }
   } else {
     canonical = decodeCanonicalNave(canonicalValue)

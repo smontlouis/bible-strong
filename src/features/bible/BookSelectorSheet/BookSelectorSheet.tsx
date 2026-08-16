@@ -21,7 +21,7 @@ import VerseSheet, { tempSelectedBookAtom, tempSelectedChapterAtom } from './Ver
 import { useQuery } from '@tanstack/react-query'
 import { useTheme } from '@emotion/react'
 import { applyBookChapterSelection } from './bookSelectorSelection'
-import { getBooksForCanon } from '~helpers/bibleBookCatalog'
+import { getBooksForCanon, isBibleCanonId } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
@@ -55,7 +55,6 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const openInNewTab = useOpenInNewTab()
   const verseSheetRef = useRef<SheetRef>(null)
   const selectedVersion = bookSelectorData?.selectedVersion
-  const canonId = getBibleVersionCanonId(selectedVersion || '')
   const theme = useTheme()
   const resources = useResourceAccess()
 
@@ -64,6 +63,11 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     queryFn: () => resources.bibleContent.loadCoverage(selectedVersion || 'LSG'),
     enabled: !!selectedVersion,
   })
+  const publishedCanonId = coverageData?.canon?.id
+  const canonId =
+    publishedCanonId && isBibleCanonId(publishedCanonId)
+      ? publishedCanonId
+      : getBibleVersionCanonId(selectedVersion || '')
 
   // On écoute les événements de sélection
   useEffect(() => {

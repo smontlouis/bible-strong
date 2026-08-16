@@ -10,7 +10,10 @@ import { type StrongMode, usesCanonicalBibleExtras } from '~helpers/strongBibleP
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import type { BibleChapterData } from '~features/resources/bibleContentAccess'
+import type {
+  BibleChapterData,
+  BibleChapterPresentationSource,
+} from '~features/resources/bibleContentAccess'
 import type { ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 
 export type CommentsByVerse = Record<string, string>
@@ -29,6 +32,7 @@ export interface BibleReadingChapterRequest {
 export interface BibleReadingExtrasRequest extends BibleReadingChapterRequest {
   parallelVersions: VersionCode[]
   commentsDisplay: boolean
+  presentation?: BibleChapterPresentationSource
 }
 
 export interface BibleReadingMainResult {
@@ -48,26 +52,6 @@ export const loadBibleReadingMain = async (
   }: BibleReadingChapterRequest,
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<BibleReadingMainResult> => {
-  const canonicalExtras = usesCanonicalBibleExtras(version)
-  if (!canonicalExtras) {
-    const [pericope, mainResult] = await Promise.all([
-      resourceAccess.bibleReading.loadPericope(version),
-      resourceAccess.bibleContent.loadChapter({
-        book,
-        chapter,
-        version,
-        strongMode,
-        interlinearMode,
-        interlinearLocale,
-        interlinearLocaleAutomatic,
-      }),
-    ])
-    return {
-      pericope,
-      mainResult,
-    }
-  }
-
   const mainResult = await resourceAccess.bibleContent.loadChapter({
     book,
     chapter,
@@ -77,6 +61,13 @@ export const loadBibleReadingMain = async (
     interlinearLocale,
     interlinearLocaleAutomatic,
   })
+  if (!mainResult.success || !mainResult.data) return { pericope: {}, mainResult }
+  if (mainResult.data.presentation === 'legacy-sidecars') {
+    return {
+      pericope: await resourceAccess.bibleReading.loadPericope(version),
+      mainResult,
+    }
+  }
   const pericope =
     mainResult.success && mainResult.data ? getCanonicalChapterPericope(mainResult.data.verses) : {}
 
@@ -142,10 +133,15 @@ export const loadBibleReadingComments = async (
 }
 
 export const loadBibleReadingRedWords = async (
-  { version }: BibleReadingChapterRequest,
+  {
+    version,
+    presentation,
+  }: BibleReadingChapterRequest & { presentation?: BibleChapterPresentationSource },
   resourceAccess: ResourceAccessRegistry = defaultResourceAccess
 ): Promise<RedWordsByVerse | null> => {
-  if (usesCanonicalBibleExtras(version)) return null
+  if (presentation === 'canonical' || (!presentation && usesCanonicalBibleExtras(version))) {
+    return null
+  }
   try {
     return await resourceAccess.bibleReading.loadRedWords(version)
   } catch {

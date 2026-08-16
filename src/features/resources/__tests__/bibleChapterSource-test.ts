@@ -44,6 +44,17 @@ describe('hybrid Bible chapter source', () => {
     expect(source.loadChapter).toHaveBeenCalledTimes(2)
   })
 
+  it('preserves verse zero when resolving BHG Psalm superscriptions', async () => {
+    const source = adapter({
+      status: 'available',
+      verses: [{ Livre: 19, Chapitre: 3, Verset: 0, Texte: 'A Psalm of David' }],
+    })
+
+    await expect(loadVerseTextsFromChapterAdapter(source, 'BHG', ['19-3-0'])).resolves.toEqual({
+      '19-3-0': 'A Psalm of David',
+    })
+  })
+
   it('preserves a structured source failure when no requested verse can be resolved', async () => {
     const source = adapter({ status: 'unavailable', reason: 'network-offline' })
 
@@ -172,6 +183,7 @@ describe('HTTP Bible chapter adapter', () => {
 
     await expect(http.loadChapter('LSG', 1, 1)).resolves.toEqual({
       status: 'available',
+      presentation: 'canonical',
       verses: [
         {
           Livre: 1,
@@ -197,6 +209,8 @@ describe('HTTP Bible chapter adapter', () => {
       new Response(
         JSON.stringify({
           resource: { kind: 'bible-text', versionId: 'LSG', revision: 'lsg-r1' },
+          canon: { id: 'protestant-66', orderedBooks: [1] },
+          versification: 'bible-strong-default',
           books: [1],
           chaptersByBook: { 1: [1, 2] },
           verseCountByBookChapter: { '1-1': 31, '1-2': 25 },
@@ -213,6 +227,8 @@ describe('HTTP Bible chapter adapter', () => {
     await expect(http.loadCoverage('LSG')).resolves.toEqual({
       status: 'available',
       coverage: {
+        canon: { id: 'protestant-66', orderedBooks: [1] },
+        versification: 'bible-strong-default',
         books: [1],
         chaptersByBook: { 1: [1, 2] },
         verseCountByBookChapter: { '1-1': 31, '1-2': 25 },

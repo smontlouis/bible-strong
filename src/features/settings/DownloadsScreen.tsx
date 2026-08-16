@@ -615,6 +615,9 @@ const DownloadsScreen = () => {
         catalog.resources[resource.resourceId]?.archiveSha256,
       ],
       queryFn: () => resolveResourceCatalogStatus(resource.resourceId, { catalog }),
+      // Canonical Bible bundles can register bundled presentation copies (pericopes/red words)
+      // that intentionally have no standalone catalog publication.
+      enabled: Boolean(catalog.resources[resource.resourceId]),
       staleTime: 6 * 60 * 60 * 1000,
       refetchOnMount: 'always' as const,
       retry: false,

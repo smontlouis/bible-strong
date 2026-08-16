@@ -7,7 +7,7 @@ import { Book } from '~assets/bible_versions/books-desc'
 import { BibleTab, useBibleTabActions } from '../../state/tabs'
 import BookSelectorItem from './BookSelectorItem'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
-import { getBooksForCanon } from '~helpers/bibleBookCatalog'
+import { getBooksForCanon, isBibleCanonId } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 
 interface BookSelectorScreenProps {
@@ -23,7 +23,12 @@ const BookSelector = ({ bibleAtom, onNavigate, coverage }: BookSelectorScreenPro
   const {
     data: { selectedBook, selectedVersion },
   } = bible
-  const books = getBooksForCanon(getBibleVersionCanonId(selectedVersion), coverage?.books)
+  const publishedCanonId = coverage?.canon?.id
+  const canonId =
+    publishedCanonId && isBibleCanonId(publishedCanonId)
+      ? publishedCanonId
+      : getBibleVersionCanonId(selectedVersion)
+  const books = getBooksForCanon(canonId, coverage?.books)
 
   const onBookChange = (book: Book) => {
     onNavigate(1)
