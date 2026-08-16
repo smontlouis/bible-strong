@@ -16,7 +16,8 @@ import { promisify } from "node:util";
 
 import {
   buildMobileResourceCatalog,
-  type MobileResourceCatalog
+  type MobileResourceCatalog,
+  type MobileResourceCatalogEntry
 } from "./packageMobileResourceCatalog.js";
 import {
   verifyCanonicalBiblePublication,
@@ -26,6 +27,7 @@ import {
   decodeResourcePublicationEnvelope,
   resolveResourcePublicationPath
 } from "./resourcePublicationEnvelope.js";
+import { buildCanonicalBibleFromLegacy } from "./legacyBiblePublication.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -35,12 +37,14 @@ export interface BibleResourcePublicationMetadata {
     holder: string;
     termsReference: string;
     attribution: string;
+    reviewedAt?: string;
     online: boolean;
     offline: boolean;
   };
   deliveryCapabilities: {
     onlineAccess: boolean;
     offlineDownload: boolean;
+    localDevelopmentAccess?: boolean;
   };
   canon: { id: string; orderedBooks: number[] };
   versification: string;
@@ -55,6 +59,7 @@ export interface BibleResourcePublicationManifest {
     language: string;
   };
   revision: string;
+  publicationRevision: string;
   canonical: {
     path: string;
     mediaType: "application/json";
@@ -69,12 +74,18 @@ export interface BibleResourcePublicationManifest {
     sha256: string;
     bytes: number;
     contentSha256: string;
+    entries?: MobileResourceCatalogEntry["entries"];
   };
   provenance: {
     generator: "bible-lexicon-maker";
     sourceVersion: string;
     sourceSha256: string;
     generatedAt: string;
+    sources?: {
+      role: "canonical" | "pericope" | "redWords";
+      sourceUrl: string;
+      sha256: string;
+    }[];
   };
   rights: BibleResourcePublicationMetadata["rights"];
   deliveryCapabilities: BibleResourcePublicationMetadata["deliveryCapabilities"];
@@ -97,7 +108,14 @@ export async function buildBibleResourcePublication(
   options: BibleResourcePublicationMetadata & {
     canonicalPath: string;
     outputDir: string;
-    generatedAt?: string;
+    generatedAt: string;
+    provenanceSources?: NonNullable<
+      BibleResourcePublicationManifest["provenance"]["sources"]
+    >;
+    offlineArtifact?: {
+      path: string;
+      catalogEntry: MobileResourceCatalogEntry;
+    };
   }
 ): Promise<{
   outputDir: string;
@@ -122,38 +140,45 @@ export async function buildBibleResourcePublication(
     await readFile(sourceCanonicalPath, "utf8")
   ) as CanonicalBiblePublication;
   const derived = deriveCanonicalBibleManifestData(canonical, options);
-  const normalizedVersion = options.identity.versionId.toLocaleLowerCase();
+  const normalizedVersion = options.identity.versionId.toLowerCase();
   const canonicalEntry = `bible-${normalizedVersion}.json`;
-  const archiveFile = `${canonicalEntry}.zip`;
+  const archiveFile = options.offlineArtifact
+    ? path.basename(options.offlineArtifact.path)
+    : `${canonicalEntry}.zip`;
   const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const mobileReleaseDir = `${temporaryDir}-mobile`;
 
   try {
-    const mobileResult = await buildMobileResourceCatalog({
-      outputDir: mobileReleaseDir,
-      generatedAt: options.generatedAt,
-      inventory: [
-        {
-          id: `bible:${options.identity.versionId}`,
-          artifactUrl: `https://local.invalid/offline/${archiveFile}`,
-          sources: [
+    const mobileResult = options.offlineArtifact
+      ? undefined
+      : await buildMobileResourceCatalog({
+          outputDir: mobileReleaseDir,
+          generatedAt: options.generatedAt,
+          inventory: [
             {
-              role: "canonical",
-              sourceUrl: `https://local.invalid/canonical/${canonicalEntry}`,
-              sourcePath: sourceCanonicalPath,
-              entry: canonicalEntry
+              id: `bible:${options.identity.versionId}`,
+              artifactUrl: `https://local.invalid/offline/${archiveFile}`,
+              sources: [
+                {
+                  role: "canonical",
+                  sourceUrl: `https://local.invalid/canonical/${canonicalEntry}`,
+                  sourcePath: sourceCanonicalPath,
+                  entry: canonicalEntry
+                }
+              ],
+              strategy: "sqlite-import"
             }
           ],
-          strategy: "sqlite-import"
-        }
-      ],
-      requiredIds: [`bible:${options.identity.versionId}`]
-    });
-    const mobileCatalog = JSON.parse(
-      await readFile(mobileResult.catalogPath, "utf8")
-    ) as MobileResourceCatalog;
+          requiredIds: [`bible:${options.identity.versionId}`]
+        });
+    const mobileCatalog = mobileResult
+      ? (JSON.parse(
+          await readFile(mobileResult.catalogPath, "utf8")
+        ) as MobileResourceCatalog)
+      : undefined;
     const mobileArtifact =
-      mobileCatalog.resources[`bible:${options.identity.versionId}`];
+      options.offlineArtifact?.catalogEntry ??
+      mobileCatalog?.resources[`bible:${options.identity.versionId}`];
     if (!mobileArtifact)
       throw new Error("resource-publication-offline-artifact-missing");
 
@@ -168,7 +193,8 @@ export async function buildBibleResourcePublication(
     await Promise.all([
       copyFile(sourceCanonicalPath, bundleCanonicalPath),
       copyFile(
-        path.join(mobileReleaseDir, mobileArtifact.file),
+        options.offlineArtifact?.path ??
+          path.join(mobileReleaseDir, mobileArtifact.file),
         offlineArtifactPath
       )
     ]);
@@ -176,11 +202,17 @@ export async function buildBibleResourcePublication(
     const canonicalStats = await stat(bundleCanonicalPath);
     const offlineStats = await stat(offlineArtifactPath);
     const canonicalSha256 = await sha256File(bundleCanonicalPath);
-    if (mobileArtifact.entries.canonical?.sha256 !== canonicalSha256) {
+    if (
+      !options.offlineArtifact &&
+      mobileArtifact.entries.canonical?.sha256 !== canonicalSha256
+    ) {
       throw new Error("resource-publication-offline-content-mismatch");
     }
 
-    const manifest: BibleResourcePublicationManifest = {
+    const manifestWithoutPublicationRevision: Omit<
+      BibleResourcePublicationManifest,
+      "publicationRevision"
+    > = {
       format: "bible-strong-resource-publication",
       schemaVersion: 1,
       identity: { kind: "bible-text", ...options.identity },
@@ -195,16 +227,20 @@ export async function buildBibleResourcePublication(
       offlineArtifact: {
         path: offlineRelativePath,
         mediaType: "application/zip",
-        entry: canonicalEntry,
+        entry: mobileArtifact.entry,
         sha256: await sha256File(offlineArtifactPath),
         bytes: offlineStats.size,
-        contentSha256: canonicalSha256
+        contentSha256: mobileArtifact.entries.canonical!.sha256,
+        entries: mobileArtifact.entries
       },
       provenance: {
         generator: "bible-lexicon-maker",
         sourceVersion: canonical.sourceVersion,
         sourceSha256: canonical.sourceSha256,
-        generatedAt: options.generatedAt ?? new Date().toISOString()
+        generatedAt: options.generatedAt,
+        ...(options.provenanceSources
+          ? { sources: options.provenanceSources }
+          : {})
       },
       rights: options.rights,
       deliveryCapabilities: options.deliveryCapabilities,
@@ -212,6 +248,12 @@ export async function buildBibleResourcePublication(
       versification: options.versification,
       coverage: derived.coverage,
       counts: derived.counts
+    };
+    const manifest: BibleResourcePublicationManifest = {
+      ...manifestWithoutPublicationRevision,
+      publicationRevision: buildBibleResourcePublicationRevision(
+        manifestWithoutPublicationRevision
+      )
     };
     const manifestPath = path.join(temporaryDir, "manifest.json");
     await writeFile(
@@ -278,6 +320,10 @@ export async function validateBibleResourcePublication(
     manifest.canonical.schemaVersion !== canonical.schemaVersion ||
     manifest.identity.versionId !== canonical.applicationVersionId ||
     manifest.revision !== canonicalVerification.textRevision ||
+    manifest.publicationRevision !==
+      buildBibleResourcePublicationRevision(
+        omitPublicationRevision(manifest)
+      ) ||
     manifest.provenance.sourceVersion !== canonical.sourceVersion ||
     manifest.provenance.sourceSha256 !== canonical.sourceSha256
   ) {
@@ -291,18 +337,62 @@ export async function validateBibleResourcePublication(
     throw new Error("resource-publication-canonical-declaration-mismatch");
   }
 
-  const archived = await execFileAsync(
-    "unzip",
-    ["-p", offlineArtifactPath, manifest.offlineArtifact.entry],
-    { maxBuffer: 128 * 1024 * 1024 }
-  );
-  const archivedCanonical = Buffer.from(archived.stdout, "utf8");
+  const archiveEntries = manifest.offlineArtifact.entries ?? {
+    canonical: {
+      entry: manifest.offlineArtifact.entry,
+      sha256: manifest.offlineArtifact.contentSha256,
+      bytes: 0
+    }
+  };
+  const archivedValues: Partial<
+    Record<"canonical" | "pericope" | "redWords", string>
+  > = {};
+  for (const [role, entry] of Object.entries(archiveEntries)) {
+    if (!entry) continue;
+    const archived = await execFileAsync(
+      "unzip",
+      ["-p", offlineArtifactPath, entry.entry],
+      { maxBuffer: 128 * 1024 * 1024 }
+    );
+    const content = Buffer.from(archived.stdout, "utf8");
+    if (
+      sha256Buffer(content) !== entry.sha256 ||
+      (entry.bytes > 0 && content.byteLength !== entry.bytes)
+    ) {
+      throw new Error("resource-publication-offline-entry-mismatch");
+    }
+    archivedValues[role as keyof typeof archivedValues] = archived.stdout;
+  }
+  const archivedCanonical = archivedValues.canonical;
   if (
-    sha256Buffer(archivedCanonical) !==
-      manifest.offlineArtifact.contentSha256 ||
-    manifest.offlineArtifact.contentSha256 !== manifest.canonical.sha256
+    !archivedCanonical ||
+    sha256Buffer(Buffer.from(archivedCanonical, "utf8")) !==
+      manifest.offlineArtifact.contentSha256
   ) {
-    throw new Error("resource-publication-offline-content-mismatch");
+    throw new Error("resource-publication-offline-primary-content-mismatch");
+  }
+  const archivedValue: unknown = JSON.parse(archivedCanonical);
+  const archivedPublication =
+    (archivedValue as Partial<CanonicalBiblePublication>).format ===
+    "bible-strong-canonical-bible"
+      ? (archivedValue as CanonicalBiblePublication)
+      : buildCanonicalBibleFromLegacy({
+          versionId: manifest.identity.versionId,
+          sourceVersion: manifest.provenance.sourceVersion,
+          sourceSha256: manifest.provenance.sourceSha256,
+          bible: archivedValue,
+          ...(archivedValues.pericope
+            ? { pericope: JSON.parse(archivedValues.pericope) }
+            : {}),
+          ...(archivedValues.redWords
+            ? { redWords: JSON.parse(archivedValues.redWords) }
+            : {})
+        });
+  if (
+    JSON.stringify(archivedPublication.verses) !==
+    JSON.stringify(canonical.verses)
+  ) {
+    throw new Error("resource-publication-offline-presentation-mismatch");
   }
   return manifest;
 }
@@ -346,7 +436,7 @@ function deriveCanonicalBibleManifestData(
     .map(Number)
     .sort((left, right) => left - right);
   if (
-    JSON.stringify(orderedBooks) !== JSON.stringify(metadata.canon.orderedBooks)
+    orderedBooks.some((book) => !metadata.canon.orderedBooks.includes(book))
   ) {
     throw new Error("resource-publication-canon-mismatch");
   }
@@ -428,6 +518,36 @@ function sha256Buffer(value: Buffer): string {
   return createHash("sha256").update(value).digest("hex");
 }
 
+export function buildBibleResourcePublicationRevision(
+  manifest: Omit<BibleResourcePublicationManifest, "publicationRevision">
+): string {
+  const digest = createHash("sha256")
+    .update(JSON.stringify(sortJsonValue(manifest)))
+    .digest("hex");
+  return `${manifest.identity.versionId.toLowerCase()}-${digest.slice(0, 20)}`;
+}
+
+function omitPublicationRevision(
+  manifest: BibleResourcePublicationManifest
+): Omit<BibleResourcePublicationManifest, "publicationRevision"> {
+  const {
+    publicationRevision: _publicationRevision,
+    ...withoutPublicationRevision
+  } = manifest;
+  void _publicationRevision;
+  return withoutPublicationRevision;
+}
+
+function sortJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortJsonValue);
+  if (value === null || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, item]) => [key, sortJsonValue(item)])
+  );
+}
+
 async function sha256File(filePath: string): Promise<string> {
   const hash = createHash("sha256");
   for await (const chunk of createReadStream(filePath)) hash.update(chunk);
@@ -468,12 +588,13 @@ async function main(): Promise<void> {
   const buildArgs = command === "build" ? rawArgs : [command, ...rawArgs];
   const args = parseCliArgs(
     buildArgs,
-    new Set(["--canonical", "--metadata", "--output-dir"])
+    new Set(["--canonical", "--metadata", "--output-dir", "--generated-at"])
   );
   const canonicalPath = args["--canonical"];
   const metadataPath = args["--metadata"];
   const outputDir = args["--output-dir"];
-  if (!canonicalPath || !metadataPath || !outputDir) {
+  const generatedAt = args["--generated-at"];
+  if (!canonicalPath || !metadataPath || !outputDir || !generatedAt) {
     throw new Error("resource-publication-cli-required-options-missing");
   }
   const metadata = JSON.parse(
@@ -482,7 +603,8 @@ async function main(): Promise<void> {
   const result = await buildBibleResourcePublication({
     ...metadata,
     canonicalPath,
-    outputDir
+    outputDir,
+    generatedAt
   });
   console.log(
     JSON.stringify(

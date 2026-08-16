@@ -22,6 +22,16 @@ export interface ResourcePublicationEnvelope {
     sha256: string;
     bytes: number;
     contentSha256: string;
+    entries?: Partial<
+      Record<
+        "canonical" | "pericope" | "redWords",
+        {
+          entry: string;
+          sha256: string;
+          bytes: number;
+        }
+      >
+    >;
   };
   provenance: {
     generator: "bible-lexicon-maker";
@@ -33,12 +43,14 @@ export interface ResourcePublicationEnvelope {
     holder: string;
     termsReference: string;
     attribution: string;
+    reviewedAt?: string;
     online: boolean;
     offline: boolean;
   };
   deliveryCapabilities: {
     onlineAccess: boolean;
     offlineDownload: boolean;
+    localDevelopmentAccess?: boolean;
   };
 }
 
@@ -86,11 +98,18 @@ export function decodeResourcePublicationEnvelope(
     !isNonEmptyString(rights.holder) ||
     !isNonEmptyString(rights.termsReference) ||
     !isNonEmptyString(rights.attribution) ||
+    (rights.reviewedAt !== undefined && !isNonEmptyString(rights.reviewedAt)) ||
     typeof rights.online !== "boolean" ||
     typeof rights.offline !== "boolean" ||
     !isRecord(delivery) ||
     typeof delivery.onlineAccess !== "boolean" ||
-    typeof delivery.offlineDownload !== "boolean"
+    typeof delivery.offlineDownload !== "boolean" ||
+    (delivery.localDevelopmentAccess !== undefined &&
+      typeof delivery.localDevelopmentAccess !== "boolean") ||
+    (offline.entries !== undefined &&
+      (!isOfflineEntries(offline.entries) ||
+        !isRecord(offline.entries) ||
+        !isRecord(offline.entries.canonical)))
   ) {
     throw new Error("resource-publication-manifest-invalid");
   }
@@ -101,6 +120,19 @@ export function decodeResourcePublicationEnvelope(
     throw new Error("resource-publication-rights-mismatch");
   }
   return value as unknown as ResourcePublicationEnvelope;
+}
+
+function isOfflineEntries(value: unknown): boolean {
+  if (!isRecord(value)) return false;
+  const allowed = new Set(["canonical", "pericope", "redWords"]);
+  return Object.entries(value).every(
+    ([role, entry]) =>
+      allowed.has(role) &&
+      isRecord(entry) &&
+      isBundlePath(entry.entry) &&
+      isSha256(entry.sha256) &&
+      isNonNegativeInteger(entry.bytes)
+  );
 }
 
 export function resolveResourcePublicationPath(

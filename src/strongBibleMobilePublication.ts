@@ -334,7 +334,7 @@ export async function compileStrongBibleMobilePublication(options: {
       }
       sourceSha256 = await stream.sourceSha256;
       const textSha256 = textHash.digest("hex");
-      const textRevision = buildTextRevision(
+      const textRevision = buildCanonicalBibleTextRevision(
         options.applicationVersionId,
         textSha256
       );
@@ -477,13 +477,13 @@ export function verifyCanonicalBiblePublication(
     throw new Error("strong-bible-mobile-invalid-canonical-publication");
   }
   assertCanonicalVerseIdentities(publication.verses);
-  const expectedTextSha256 = hashCanonicalVerses(publication.verses);
+  const expectedTextSha256 = hashCanonicalBibleVerses(publication.verses);
   if (publication.textSha256 !== expectedTextSha256) {
     throw new Error(
       `strong-bible-mobile-text-checksum-mismatch:${publication.textSha256}:${expectedTextSha256}`
     );
   }
-  const expectedTextRevision = buildTextRevision(
+  const expectedTextRevision = buildCanonicalBibleTextRevision(
     publication.applicationVersionId,
     expectedTextSha256
   );
@@ -590,7 +590,7 @@ function assertCanonicalVerseIdentities(
         );
       }
       for (const [verseKey, verse] of Object.entries(chapter)) {
-        if (!isPositiveIntegerKey(verseKey) || !isRecord(verse)) {
+        if (!isNonNegativeIntegerKey(verseKey) || !isRecord(verse)) {
           throw new Error(
             `strong-bible-mobile-invalid-verse-identity:${bookKey}:${chapterKey}:${verseKey}`
           );
@@ -602,6 +602,10 @@ function assertCanonicalVerseIdentities(
 
 function isPositiveIntegerKey(value: string): boolean {
   return /^(?:[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value));
+}
+
+function isNonNegativeIntegerKey(value: string): boolean {
+  return /^(?:0|[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value));
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -777,14 +781,14 @@ export async function verifyStrongBibleMobilePublication(options: {
   }
 }
 
-function buildTextRevision(
+export function buildCanonicalBibleTextRevision(
   applicationVersionId: string,
   textSha256: string
 ): string {
   return `${applicationVersionId.toLowerCase()}-${textSha256.slice(0, 20)}`;
 }
 
-function hashCanonicalVerses(
+export function hashCanonicalBibleVerses(
   verses: CanonicalBiblePublication["verses"]
 ): string {
   const hash = createHash("sha256");

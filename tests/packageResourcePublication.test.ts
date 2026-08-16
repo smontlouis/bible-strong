@@ -99,6 +99,8 @@ test("publishes one canonical Bible and its matching Offline-copy bundle", async
   assert.equal(manifest.format, "bible-strong-resource-publication");
   assert.equal(manifest.identity.versionId, "TEST");
   assert.equal(manifest.revision, textRevision);
+  assert.match(manifest.publicationRevision, /^test-[a-f0-9]{20}$/u);
+  assert.notEqual(manifest.publicationRevision, textRevision);
   assert.deepEqual(manifest.deliveryCapabilities, {
     onlineAccess: false,
     offlineDownload: true
@@ -127,6 +129,19 @@ test("publishes one canonical Bible and its matching Offline-copy bundle", async
   );
 
   await assert.doesNotReject(validateBibleResourcePublication(outputDir));
+  const originalRevision = manifest.revision;
+  manifest.rights.attribution = "Changed attribution";
+  await writeFile(
+    result.manifestPath,
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    "utf8"
+  );
+  await assert.rejects(
+    validateBibleResourcePublication(outputDir),
+    /resource-publication-canonical-metadata-mismatch/
+  );
+  manifest.rights.attribution = "Test Bible";
+  manifest.revision = originalRevision;
   manifest.schemaVersion = 2;
   await writeFile(
     result.manifestPath,
@@ -151,7 +166,7 @@ test("publishes one canonical Bible and its matching Offline-copy bundle", async
   );
 });
 
-test("rejects malformed canonical verse identities", async (t) => {
+test("rejects malformed canonical book identities", async (t) => {
   const directory = await mkdtemp(
     path.join(tmpdir(), "bible-resource-publication-identity-")
   );
@@ -165,7 +180,7 @@ test("rejects malformed canonical verse identities", async (t) => {
     headings: []
   };
   const textSha256 = createHash("sha256")
-    .update(`${JSON.stringify([1, 1, 0, verse])}\n`)
+    .update(`${JSON.stringify([0, 1, 1, verse])}\n`)
     .digest("hex");
   await writeFile(
     canonicalPath,
@@ -181,7 +196,7 @@ test("rejects malformed canonical verse identities", async (t) => {
       verseCount: 1,
       noteCount: 0,
       headingCount: 0,
-      verses: { "1": { "1": { "0": verse } } }
+      verses: { "0": { "1": { "1": verse } } }
     })}\n`,
     "utf8"
   );
@@ -189,6 +204,7 @@ test("rejects malformed canonical verse identities", async (t) => {
     buildBibleResourcePublication({
       canonicalPath,
       outputDir: path.join(directory, "publication"),
+      generatedAt: "2026-08-16T00:00:00.000Z",
       identity: { versionId: "TEST", language: "fr" },
       rights: {
         holder: "Test holder",
@@ -201,7 +217,7 @@ test("rejects malformed canonical verse identities", async (t) => {
       canon: { id: "test-canon", orderedBooks: [1] },
       versification: "test"
     }),
-    /strong-bible-mobile-invalid-verse-identity:1:1:0/
+    /strong-bible-mobile-invalid-book-identity:0/
   );
 });
 
@@ -243,6 +259,7 @@ test("rejects a canonical Bible whose declared revision is not content-derived",
     buildBibleResourcePublication({
       canonicalPath,
       outputDir: path.join(directory, "publication"),
+      generatedAt: "2026-08-16T00:00:00.000Z",
       identity: { versionId: "TEST", language: "fr" },
       rights: {
         holder: "Test holder",

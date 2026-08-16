@@ -19,6 +19,19 @@ canonical import JSON and the exact matching ZIP Offline copy under one
 immutable, content-derived revision. Rights and Online/Offline delivery
 capabilities remain independent and are validated before a bundle is written.
 
+Build the exhaustive ordinary-Bible handoff directly from the current mobile inventory:
+
+```sh
+npm run resources:publication:bibles -- \
+  --output outputs/releases/ordinary-bible-publications-current \
+  --generated-at 2026-08-16T00:00:00.000Z
+```
+
+This produces exactly 47 version directories. Each contains canonical import JSON plus the current
+mobile ZIP byte-for-byte; legacy pericope and red-word entries are projected into canonical
+presentation and verified for complete parity. Restricted publications declare local-development
+access without enabling public Online delivery.
+
 After generating a canonical Bible JSON, build the LSG bundle with:
 
 ```sh
