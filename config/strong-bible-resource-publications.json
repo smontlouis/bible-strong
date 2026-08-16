@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "rightsReviewedAt": "2026-08-16",
+  "resources": [
+    {
+      "versionId": "ASV",
+      "datasetId": "ASV",
+      "language": "en",
+      "attribution": "1901 — Public Domain"
+    },
+    {
+      "versionId": "BSB",
+      "datasetId": "BSB",
+      "language": "en",
+      "attribution": "© Berean Bible — CC0 / Public Domain"
+    },
+    {
+      "versionId": "DARBY",
+      "datasetId": "DARBY_EN",
+      "language": "en",
+      "attribution": "1889 — Public Domain"
+    },
+    {
+      "versionId": "DBR",
+      "datasetId": "DBYR",
+      "language": "fr",
+      "attribution": "© Bibles et Publications Chrétiennes — CC BY-NC-ND"
+    },
+    {
+      "versionId": "DBY",
+      "datasetId": "DBY",
+      "language": "fr",
+      "attribution": "1890 — Public Domain"
+    },
+    {
+      "versionId": "KJV",
+      "datasetId": "KJV",
+      "language": "en",
+      "attribution": "Public Domain except in the United Kingdom (Crown rights)"
+    },
+    {
+      "versionId": "LSG",
+      "datasetId": "LSG",
+      "language": "fr",
+      "attribution": "1910 — Public Domain"
+    },
+    {
+      "versionId": "NASB1995",
+      "datasetId": "NASB1995",
+      "language": "en",
+      "attribution": "© 1960–1995 The Lockman Foundation"
+    },
+    {
+      "versionId": "NASB2020",
+      "datasetId": "NASB2020",
+      "language": "en",
+      "attribution": "© 1960–2020 The Lockman Foundation"
+    },
+    {
+      "versionId": "RLT",
+      "datasetId": "RLT",
+      "language": "en",
+      "attribution": "© 2018 Michael W. Jones, Sr. — GPL"
+    },
+    {
+      "versionId": "RV1895",
+      "datasetId": "RV1895",
+      "language": "en",
+      "attribution": "1895 — Public Domain"
+    },
+    {
+      "versionId": "RWEBSTER",
+      "datasetId": "RWEBSTER",
+      "language": "en",
+      "attribution": "1833 — Public Domain"
+    }
+  ]
+}

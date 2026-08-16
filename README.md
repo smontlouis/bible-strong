@@ -72,6 +72,27 @@ The Nave producer derives the immutable revision from the ordered topics and
 verse anchors, embeds matching provenance in the Offline SQLite copy, and
 validates canonical-to-SQLite parity before completing the handoff.
 
+Publish all 12 cataloged Strong Bible indexes from the current authoritative
+SQLite archives and pair each one with the exact ordinary-Bible revision:
+
+```sh
+npm run resources:publication:strong-bibles -- \
+  --bible-bundles-dir outputs/releases/ordinary-bible-publications-current \
+  --output-dir outputs/releases/strong-bible-publications-current \
+  --generated-at 2026-08-17T00:00:00.000Z
+
+npm run resources:publication:strong-bibles -- validate \
+  --bundle /absolute/path/to/strong-bible-publications-current/lsg
+```
+
+The producer downloads the exact sources declared by the mobile inventory,
+proves the builder/source/text revision chain, derives a canonical Strong index
+from every SQLite, and validates exact JSON/SQLite parity. Each manifest
+declares its required Bible text revision and SHA-256 plus the Strong lexicon
+module needed for lexical details. It refuses partial catalogs, unknown dataset
+identities, stale Bible dependencies, corrupt SQLite files, and malformed or
+multi-entry ZIP archives.
+
 The command refuses to replace an existing output directory. Rebuild into a
 new directory for every immutable revision. Production upload or activation is
 not performed by this command. This per-Resource bundle is the canonical
