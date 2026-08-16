@@ -127,12 +127,6 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     throw new Error('PUBLICATION_BUNDLE_RIGHTS_MISMATCH')
   }
   if (
-    !manifest.deliveryCapabilities.onlineAccess &&
-    !manifest.deliveryCapabilities.offlineDownload
-  ) {
-    throw new Error('PUBLICATION_BUNDLE_DELIVERY_UNAVAILABLE')
-  }
-  if (
     manifest.canon.orderedBooks.length === 0 ||
     Object.values(manifest.coverage.chaptersByBook).some(chapters => chapters.length === 0)
   ) {

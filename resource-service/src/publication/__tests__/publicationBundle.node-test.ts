@@ -216,6 +216,14 @@ describe('Resource publication bundle', () => {
     assert.deepEqual(decodePublicationBundleManifest(downloadOnly), downloadOnly)
   })
 
+  it('allows a validated publication to remain inactive for both delivery modes', () => {
+    const inactive = makeManifest({
+      rights: { ...makeManifest().rights, online: false, offline: false },
+      deliveryCapabilities: { onlineAccess: false, offlineDownload: false },
+    })
+    assert.deepEqual(decodePublicationBundleManifest(inactive), inactive)
+  })
+
   it('rejects declared canon coverage that differs from canonical content', async () => {
     const root = await mkdtemp(path.join(tmpdir(), 'resource-publication-'))
     const canonical = `${JSON.stringify({
