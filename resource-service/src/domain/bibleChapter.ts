@@ -21,6 +21,7 @@ export type BibleChapterLocation = {
 export type ActiveBibleChapter = BibleChapterLocation & {
   revision: string
   textRevision: string
+  textSha256?: string
   verses: readonly {
     number: number
     text: string
@@ -32,6 +33,7 @@ export type ActiveBibleCoverage = {
   versionId: string
   revision: string
   textRevision: string
+  textSha256?: string
   canon: { id: string; orderedBooks: readonly number[] }
   versification: string
   books: readonly number[]
@@ -43,6 +45,7 @@ export type ActiveBiblePericopeIndex = {
   versionId: string
   revision: string
   textRevision: string
+  textSha256?: string
   verses: readonly {
     book: number
     chapter: number
@@ -113,6 +116,7 @@ export const readBibleChapter = (
         versionId: chapter.versionId,
         revision: chapter.revision,
         textRevision: chapter.textRevision,
+        ...(chapter.textSha256 ? { textSha256: chapter.textSha256 } : {}),
       }),
       book: chapter.book,
       chapter: chapter.chapter,
@@ -146,6 +150,7 @@ export const readBibleCoverage = (
         versionId,
         revision: coverage.revision,
         textRevision: coverage.textRevision,
+        ...(coverage.textSha256 ? { textSha256: coverage.textSha256 } : {}),
       }),
       books: [...coverage.books],
       canon: { id: coverage.canon.id, orderedBooks: [...coverage.canon.orderedBooks] },
@@ -176,6 +181,7 @@ export const readBiblePericopes = (
         versionId,
         revision: index.revision,
         textRevision: index.textRevision,
+        ...(index.textSha256 ? { textSha256: index.textSha256 } : {}),
       }),
       verses: index.verses.map(verse => new BiblePericopeVerseDto(verse)),
     })

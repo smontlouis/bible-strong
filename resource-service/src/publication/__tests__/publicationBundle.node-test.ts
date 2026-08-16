@@ -207,7 +207,7 @@ describe('Resource publication bundle', () => {
       })
       await writeFile(path.join(root, 'manifest.json'), `${JSON.stringify(manifest)}\n`)
 
-      await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_ENTRY_MISSING/)
+      await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_INVALID/)
     } finally {
       await rm(root, { recursive: true, force: true })
     }

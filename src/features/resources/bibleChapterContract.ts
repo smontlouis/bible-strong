@@ -66,6 +66,7 @@ export class BibleTextRevisionDto extends Schema.Class<BibleTextRevisionDto>(
   versionId: Schema.NonEmptyString,
   revision: Schema.NonEmptyString,
   textRevision: Schema.optional(Schema.NonEmptyString),
+  textSha256: Schema.optional(Schema.String.pipe(Schema.pattern(/^[a-f0-9]{64}$/))),
 }) {}
 
 export class BibleChapterDto extends Schema.Class<BibleChapterDto>('BibleChapterDto')({

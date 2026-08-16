@@ -30,16 +30,22 @@ not generate its manifest, editorial metadata, or Offline-copy artifact:
 yarn resources:bundle:validate --bundle /absolute/path/to/bible-lexicon-maker/lsg-bundle
 ```
 
-The accepted schema-v1 bundle represents exactly one `bible-text` or `nave` identity and immutable
-revision.
+The accepted schema-v1 bundle represents exactly one `bible-text`, `strong-bible-index`, or `nave`
+identity and immutable revision.
 It contains:
 
 - `manifest.json`, with identity, language, revision, provenance, independent delivery capabilities,
   rights, domain coverage, counts, format versions, sizes, and SHA-256 checksums;
 - `canonical/*.json`, used by the PostgreSQL importer;
 - `offline/*.zip`, the matching Offline-copy artifact delivered to the app. Bible bundles contain
-  the canonical JSON; Nave bundles contain the generated SQLite database used by existing mobile
-  surfaces.
+  the canonical JSON; Strong Bible and Nave bundles contain the generated SQLite database used by
+  existing mobile surfaces.
+
+A Strong Bible manifest declares its matching `bible-text:<version>` revision and text SHA-256 as
+required in both Online and Offline-copy modes. It also declares the Strong lexicon modules required
+for lexical details. Validation compares every identity, span offset, alignment flag, morphology
+token link, lexeme assignment, and aggregate count between canonical JSON and the archived SQLite
+sidecar.
 
 The NAVE_FR archive entry is `nave-fr.sqlite`. In addition to the existing `TOPICS` and `VERSES`
 tables, publication copies contain one `RESOURCE_METADATA` row with `resource_id`, `revision`,
@@ -63,6 +69,7 @@ yarn resources:migrate
 yarn resources:import --bundle resource-service/.local/publications/lsg
 yarn resources:import --bundle resource-service/.local/publications/nave-fr
 yarn resources:import-all --root /path/to/ordinary-bible-publications-current
+yarn resources:import-all --root /path/to/strong-bible-publications-current
 ```
 
 `import-all` is the explicit local-development path: it activates publications whose manifest sets
@@ -73,11 +80,17 @@ Reimporting the same revision and checksums returns `unchanged`. Reusing a revis
 content fails. Validation failures or Effect interruption roll back staging and preserve the prior
 active publication.
 
-The local Effect HttpApi exposes Bible reading plus the Nave operations consumed by the app:
+The local Effect HttpApi exposes Bible reading, Strong Bible indexes, and the Nave operations
+consumed by the app:
 
 - `GET /v1/bibles/:version/books/:book/chapters/:chapter`
 - `GET /v1/bibles/:version/coverage`
 - `GET /v1/bibles/:version/pericopes`
+- `GET /v1/strong-bibles/:version/coverage`
+- `GET /v1/strong-bibles/:version/books/:book/chapters/:chapter`
+- `GET /v1/strong-bibles/:version/books/:book/identities/:reference/counts`
+- `GET /v1/strong-bibles/:version/books/:book/identities/:reference/occurrences`
+- `GET /v1/strong-bibles/:version/books/:book/identities/:reference/lemmas`
 - `GET /v1/naves/:language/topics/:normalizedName`
 - `GET /v1/naves/:language/topics?initial=:initial`
 - `GET /v1/naves/:language/topics?search=:search`
@@ -85,7 +98,10 @@ The local Effect HttpApi exposes Bible reading plus the Nave operations consumed
 - `GET /v1/naves/:language/random`
 
 Only `nave:fr` (`NAVE_FR`) is remotely readable in this tracer. English Nave remains available
-through its existing optional Offline copy.
+through its existing optional Offline copy. All 12 cataloged Strong Bible versions are remotely
+readable when their validated index publication and the exact declared Bible text revision and
+SHA-256 are active. An active index with a missing or mismatched Bible publication is deliberately
+unavailable.
 
 ## Verification
 
@@ -93,11 +109,16 @@ through its existing optional Offline copy.
 yarn resources:test
 yarn resources:test:integration
 yarn resources:test:lsg
+yarn resources:test:strong
 yarn resources:architecture:check
 ```
 
 `resources:test:lsg` compares all 66 books, 1,189 chapters, 31,171 verses, and every presentation
 value in the complete local LSG bundle with the active PostgreSQL publication.
+
+`resources:test:strong` reads `RESOURCE_STRONG_BIBLE_BUNDLES_ROOT`, requires exactly the 12 mobile
+catalog identities, validates canonical/archive parity, imports each domain atomically, and queries
+chapter coverage and spans. The suite is skipped when the external Maker handoff path is absent.
 
 ## Mobile development URL
 

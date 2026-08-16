@@ -58,6 +58,12 @@ import {
   loadVerseTextsFromChapterAdapter,
   BibleVerseTextSourceError,
 } from './bibleChapterSource'
+import {
+  localStrongBibleResourceAccess,
+  type StrongBibleChapterSpansPayload,
+  type StrongBibleResourceAccess,
+} from './strongBibleResourceAccess'
+import { ResourceAccessError } from './resourceAccessError'
 
 export type { BibleChapterAdapter, BibleChapterSourceResult } from './bibleChapterSource'
 
@@ -122,7 +128,14 @@ type BibleContentAccessDependencies = {
   getStrongResourceLanguage: () => ResourceLanguage
   chapterAdapter: BibleChapterAdapter
   logError: (message: string, error: unknown) => void
-  loadStrongBibleChapterSpans?: typeof loadStrongBibleChapterSpans
+  loadStrongBibleChapterSpans?: (
+    versionId: StrongBibleVersionId,
+    book: number,
+    chapter: number
+  ) => Promise<
+    | Record<number, import('~helpers/canonicalStrongVerse').StrongBibleSpan[]>
+    | StrongBibleChapterSpansPayload
+  >
   loadReverseInterlinearChapterSpans?: typeof loadReverseInterlinearChapterSpans
   loadInterlinearChapterTokens?: typeof loadInterlinearChapterTokens
 }
@@ -137,6 +150,8 @@ export const localBibleChapterAdapter: BibleChapterAdapter = {
           status: 'available',
           verses,
           presentation: metadata?.schemaVersion === 4 ? 'canonical' : 'legacy-sidecars',
+          ...(metadata?.textRevision ? { textRevision: metadata.textRevision } : {}),
+          ...(metadata?.textSha256 ? { textSha256: metadata.textSha256 } : {}),
         }
       }
 
@@ -192,7 +207,16 @@ export const localBibleChapterAdapter: BibleChapterAdapter = {
   },
   async loadCoverage(version) {
     try {
-      return { status: 'available', coverage: await loadLocalBibleCoverage(version) }
+      const [coverage, metadata] = await Promise.all([
+        loadLocalBibleCoverage(version),
+        getBibleVersionMetadata(version),
+      ])
+      return {
+        status: 'available',
+        coverage,
+        ...(metadata?.textRevision ? { textRevision: metadata.textRevision } : {}),
+        ...(metadata?.textSha256 ? { textSha256: metadata.textSha256 } : {}),
+      }
     } catch {
       return { status: 'unavailable', reason: 'offline-copy-invalid' }
     }
@@ -402,11 +426,21 @@ const loadRegularBibleChapter = async (
   }
 
   try {
-    const spansByVerse = await dependencies.loadStrongBibleChapterSpans(
+    const strongChapter = await dependencies.loadStrongBibleChapterSpans(
       request.version as StrongBibleVersionId,
       request.book,
       request.chapter
     )
+    const spansByVerse =
+      'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
+    if (
+      'spansByVerse' in strongChapter &&
+      ((strongChapter.textRevision !== undefined &&
+        chapter.textRevision !== strongChapter.textRevision) ||
+        (strongChapter.textSha256 !== undefined && chapter.textSha256 !== strongChapter.textSha256))
+    ) {
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    }
     let alignedTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
     if (dependencies.loadInterlinearChapterTokens) {
       for (const locale of getInterlinearLocalePriority(request.interlinearLocale ?? 'fr')) {
@@ -495,11 +529,34 @@ export const localBibleContentAccess: BibleContentAccess = {
 }
 
 export const createBibleContentAccess = (
-  chapterAdapter: BibleChapterAdapter
+  chapterAdapter: BibleChapterAdapter,
+  strongBibleAccess: {
+    loadChapterSpans: NonNullable<StrongBibleResourceAccess['loadChapterSpans']>
+  } = localStrongBibleResourceAccess
 ): BibleContentAccess => ({
   ...localBibleContentAccess,
   loadChapter: request =>
-    loadBibleContentChapter(request, { ...defaultDependencies, chapterAdapter }),
+    loadBibleContentChapter(request, {
+      ...defaultDependencies,
+      chapterAdapter,
+      loadStrongBibleChapterSpans: async (versionId, book, chapter) => {
+        const result = await strongBibleAccess.loadChapterSpans({
+          currentVersionId: versionId,
+          defaultVersionId: versionId,
+          fallbackVersionIds: [],
+          book,
+          chapter,
+        })
+        if (result.status !== 'available') {
+          throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+        }
+        return {
+          spansByVerse: result.spansByVerse,
+          ...(result.textRevision ? { textRevision: result.textRevision } : {}),
+          ...(result.textSha256 ? { textSha256: result.textSha256 } : {}),
+        }
+      },
+    }),
   loadVerseTexts: async ({ version, verseKeys, shouldCancel }) => {
     try {
       return await loadVerseTextsFromChapterAdapter(

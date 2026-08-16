@@ -3,51 +3,22 @@ import {
   REVERSE_INTERLINEAR_STEP_CONTRACT,
   STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES,
 } from './strongBibleReverseInterlinearCandidate'
+import {
+  ENGLISH_STRONG_BIBLE_PRIORITY,
+  FRENCH_STRONG_BIBLE_PRIORITY,
+  type StrongBibleDatasetId,
+  type StrongBibleVersionId,
+} from './strongBibleCatalog'
+
+export {
+  ENGLISH_STRONG_BIBLE_PRIORITY,
+  FRENCH_STRONG_BIBLE_PRIORITY,
+  STRONG_BIBLE_FALLBACK_PRIORITY,
+  type StrongBibleDatasetId,
+  type StrongBibleVersionId,
+} from './strongBibleCatalog'
 
 export type StrongMode = 'visible' | 'hidden' | 'reverse-interlinear'
-export type StrongBibleVersionId =
-  | 'LSG'
-  | 'DBY'
-  | 'DBR'
-  | 'KJV'
-  | 'NASB2020'
-  | 'NASB1995'
-  | 'BSB'
-  | 'ASV'
-  | 'DARBY'
-  | 'RLT'
-  | 'RWEBSTER'
-  | 'RV1895'
-export type StrongBibleDatasetId =
-  | 'LSG'
-  | 'DBY'
-  | 'DBYR'
-  | 'KJV'
-  | 'NASB2020'
-  | 'NASB1995'
-  | 'BSB'
-  | 'ASV'
-  | 'DARBY_EN'
-  | 'RLT'
-  | 'RWEBSTER'
-  | 'RV1895'
-
-export const FRENCH_STRONG_BIBLE_PRIORITY = ['LSG', 'DBY', 'DBR'] as const
-export const ENGLISH_STRONG_BIBLE_PRIORITY = [
-  'KJV',
-  'NASB2020',
-  'NASB1995',
-  'BSB',
-  'ASV',
-  'DARBY',
-  'RLT',
-  'RWEBSTER',
-  'RV1895',
-] as const
-export const STRONG_BIBLE_FALLBACK_PRIORITY = [
-  ...FRENCH_STRONG_BIBLE_PRIORITY,
-  ...ENGLISH_STRONG_BIBLE_PRIORITY,
-] as const satisfies readonly StrongBibleVersionId[]
 
 type PublicationArtifact = {
   url: string

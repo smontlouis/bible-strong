@@ -19,6 +19,8 @@ export type BibleChapterSourceResult =
       status: 'available'
       verses: Verse[]
       presentation?: 'canonical' | 'legacy-sidecars'
+      textRevision?: string
+      textSha256?: string
     }
   | {
       status: 'unavailable'
@@ -32,7 +34,12 @@ export type BibleChapterAdapter = {
 }
 
 export type BibleCoverageSourceResult =
-  | { status: 'available'; coverage: BibleVersionCoverage }
+  | {
+      status: 'available'
+      coverage: BibleVersionCoverage
+      textRevision?: string
+      textSha256?: string
+    }
   | { status: 'unavailable'; reason: BibleChapterUnavailableReason }
 
 export class BibleVerseTextSourceError extends Error {
@@ -49,7 +56,9 @@ export const loadVerseTextsFromChapterAdapter = async (
   adapter: BibleChapterAdapter,
   version: string,
   verseKeys: string[],
-  shouldCancel?: () => boolean
+  shouldCancel?: () => boolean,
+  expectedTextRevision?: string,
+  expectedTextSha256?: string
 ): Promise<Record<string, string>> => {
   const chapters = new Map<string, { book: number; chapter: number; verseKeys: string[] }>()
 
@@ -81,6 +90,12 @@ export const loadVerseTextsFromChapterAdapter = async (
     if (chapterResult.status !== 'available') {
       firstUnavailable ??= chapterResult
       continue
+    }
+    if (
+      (expectedTextRevision !== undefined && chapterResult.textRevision !== expectedTextRevision) ||
+      (expectedTextSha256 !== undefined && chapterResult.textSha256 !== expectedTextSha256)
+    ) {
+      throw new BibleVerseTextSourceError('integrity-failure')
     }
 
     const requestedKeys = new Set(group.verseKeys)
@@ -221,6 +236,8 @@ export const createHttpBibleChapterAdapter = ({
           return {
             status: 'available',
             presentation: 'canonical',
+            textRevision: decoded.resource.textRevision ?? decoded.resource.revision,
+            ...(decoded.resource.textSha256 ? { textSha256: decoded.resource.textSha256 } : {}),
             verses: decoded.verses.map(verse =>
               toVerse(
                 decoded.book,
@@ -260,6 +277,8 @@ export const createHttpBibleChapterAdapter = ({
           const decoded = Schema.decodeUnknownSync(BibleVersionCoverageDto)(payload)
           return {
             status: 'available',
+            textRevision: decoded.resource.textRevision ?? decoded.resource.revision,
+            ...(decoded.resource.textSha256 ? { textSha256: decoded.resource.textSha256 } : {}),
             coverage: {
               canon: {
                 id: decoded.canon.id,

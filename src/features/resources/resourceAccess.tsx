@@ -37,7 +37,10 @@ import {
   type StrongLexiconAccess,
 } from '~features/resources/strongLexiconAccess'
 import {
-  localStrongBibleResourceAccess,
+  createHttpStrongBibleResourceAdapter,
+  createHybridStrongBibleResourceAdapter,
+  createStrongBibleResourceAccess,
+  localStrongBibleResourceAdapter,
   type StrongBibleResourceAccess,
 } from '~features/resources/strongBibleResourceAccess'
 import {
@@ -63,6 +66,7 @@ import {
   getMobileBibleVersionIds,
 } from '~helpers/mobileResourceCatalog'
 import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
+import { STRONG_BIBLE_FALLBACK_PRIORITY } from '~helpers/strongBiblePublications'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
@@ -97,12 +101,34 @@ const onlineBibleChapterAdapter = resourceApiBaseUrl
       isOnline: async () => onlineManager.isOnline(),
     })
   : unavailableHttpBibleChapterAdapter
+const bibleChapterAdapter = createHybridBibleChapterAdapter({
+  offline: localBibleChapterAdapter,
+  online: onlineBibleChapterAdapter,
+})
 const onlineNaveAccess = resourceApiBaseUrl
   ? createHttpNaveAccess({
       baseUrl: resourceApiBaseUrl,
       isOnline: async () => onlineManager.isOnline(),
     })
   : unavailableHttpNaveAccess
+const remotelyReadableStrongBibleVersions = new Set(
+  resourceApiBaseUrl ? STRONG_BIBLE_FALLBACK_PRIORITY : []
+)
+const onlineStrongBibleAdapter = resourceApiBaseUrl
+  ? createHttpStrongBibleResourceAdapter({
+      baseUrl: resourceApiBaseUrl,
+      isOnline: async () => onlineManager.isOnline(),
+      bibleChapterAdapter,
+    })
+  : localStrongBibleResourceAdapter
+const strongBibleAccess = createStrongBibleResourceAccess(
+  createHybridStrongBibleResourceAdapter({
+    offline: localStrongBibleResourceAdapter,
+    online: onlineStrongBibleAdapter,
+    remotelyReadableVersions: remotelyReadableStrongBibleVersions,
+    isOnline: async () => onlineManager.isOnline(),
+  })
+)
 const remotelyReadableBibleVersions = new Set(
   resourceApiBaseUrl ? (__DEV__ ? getMobileBibleVersionIds() : PUBLIC_ONLINE_BIBLE_VERSION_IDS) : []
 )
@@ -119,12 +145,7 @@ const onlineBibleReadingAccess = resourceApiBaseUrl
     }
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
-  bibleContent: createBibleContentAccess(
-    createHybridBibleChapterAdapter({
-      offline: localBibleChapterAdapter,
-      online: onlineBibleChapterAdapter,
-    })
-  ),
+  bibleContent: createBibleContentAccess(bibleChapterAdapter, strongBibleAccess),
   bibleReading: createHybridBibleReadingResourceAccess({
     local: localBibleReadingResourceAccess,
     online: onlineBibleReadingAccess,
@@ -141,7 +162,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     isOnline: async () => onlineManager.isOnline(),
   }),
   strongLexicon: localStrongLexiconAccess,
-  strongBible: localStrongBibleResourceAccess,
+  strongBible: strongBibleAccess,
   timeline: localTimelineAccess,
   commentary: defaultCommentaryAccess,
   offlineCopies: { isAvailable: isLocalResourceAvailable },
@@ -150,7 +171,8 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
       getResourceOnlineAccess(
         identity,
         remotelyReadableBibleVersions,
-        resourceApiBaseUrl ? new Set(['fr']) : new Set()
+        resourceApiBaseUrl ? new Set(['fr']) : new Set(),
+        remotelyReadableStrongBibleVersions
       ),
   },
 }

@@ -28,7 +28,7 @@ This report is a directional agent-readability score, not a product quality verd
 | `plans` | 9/10 | 30 | 2 | yes | no | 2 eslint-disable markers |
 | `playground` | 8/10 | 3 | 1 | no | no | no mapped smoke path; no feature README |
 | `profile` | 5/10 | 9 | 0 | no | yes | no colocated feature tests; no mapped smoke path; no feature README; sensitive user/account surface |
-| `resources` | 8/10 | 21 | 15 | no | no | no mapped smoke path; no feature README |
+| `resources` | 8/10 | 22 | 16 | no | no | no mapped smoke path; no feature README |
 | `search` | 9/10 | 15 | 2 | yes | no | 2 eslint-disable markers |
 | `settings` | 8/10 | 37 | 4 | yes | yes | 1 eslint-disable markers; sensitive user/account surface |
 | `studies` | 7/10 | 37 | 3 | no | no | no mapped smoke path; 18 console calls; 2 eslint-disable markers |

@@ -43,17 +43,19 @@ describe('strongBibleResourceAccess', () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBY'))
     dependencies.loadChapterSpans.mockResolvedValue({
-      1: [
-        {
-          ordinal: 0,
-          startOffset: 0,
-          length: 4,
-          identities: [
-            { kind: 'strong', code: 'H3068G' },
-            { kind: 'strong', code: 'H3068G' },
-          ],
-        },
-      ],
+      spansByVerse: {
+        1: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 4,
+            identities: [
+              { kind: 'strong', code: 'H3068G' },
+              { kind: 'strong', code: 'H3068G' },
+            ],
+          },
+        ],
+      },
     })
     const access = createStrongBibleResourceAccess(dependencies)
 

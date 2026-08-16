@@ -109,7 +109,7 @@ const writeBundle = async ({
     publicationRevision,
   }
   await writeFile(path.join(root, 'manifest.json'), `${JSON.stringify(manifest)}\n`)
-  return { publicationRevision, textRevision }
+  return { publicationRevision, textRevision, textSha256 }
 }
 
 describe('Atomic publication import', { skip: !runIntegration }, () => {
@@ -151,6 +151,28 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
       )
       const unchanged = await Effect.runPromise(importPublicationBundle(firstBundle, database))
       assert.equal(unchanged.status, 'unchanged')
+      const preHashMetadata = await database
+        .selectFrom('resource_publications')
+        .select('metadata')
+        .where('resource_identity', '=', identity)
+        .where('revision', '=', firstPublication.publicationRevision)
+        .executeTakeFirstOrThrow()
+      const { text_sha256: _removedTextSha256, ...legacyMetadata } = preHashMetadata.metadata
+      await database
+        .updateTable('resource_publications')
+        .set({ metadata: legacyMetadata })
+        .where('resource_identity', '=', identity)
+        .where('revision', '=', firstPublication.publicationRevision)
+        .executeTakeFirstOrThrow()
+      const backfilled = await Effect.runPromise(importPublicationBundle(firstBundle, database))
+      assert.equal(backfilled.status, 'unchanged')
+      const backfilledPublication = await database
+        .selectFrom('resource_publications')
+        .select('metadata')
+        .where('resource_identity', '=', identity)
+        .where('revision', '=', firstPublication.publicationRevision)
+        .executeTakeFirstOrThrow()
+      assert.equal(backfilledPublication.metadata.text_sha256, firstPublication.textSha256)
       await writeBundle({
         root: firstBundle,
         versionId,

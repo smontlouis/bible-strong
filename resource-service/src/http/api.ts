@@ -18,6 +18,17 @@ import {
   NaveVerseTopicsResponseDto,
 } from '../../../src/features/resources/naveContract'
 import {
+  StrongBibleChapterDto,
+  StrongBibleChapterPath,
+  StrongBibleCountsDto,
+  StrongBibleCoverageDto,
+  StrongBibleIdentityPath,
+  StrongBibleLemmaStatsDto,
+  StrongBibleOccurrencesDto,
+  StrongBibleOccurrencesQuery,
+  StrongBibleVersionPath,
+} from '../../../src/features/resources/strongBibleContract'
+import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
   ResourceNotFoundProblem,
@@ -100,7 +111,68 @@ const NaveApi = HttpApiGroup.make('naves')
       .addError(ResourceInternalProblem, { status: 500 })
   )
 
+const StrongBibleApi = HttpApiGroup.make('strongBibles')
+  .add(
+    HttpApiEndpoint.get('getStrongBibleCoverage', '/v1/strong-bibles/:version/coverage')
+      .setPath(StrongBibleVersionPath)
+      .addSuccess(StrongBibleCoverageDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getStrongBibleChapter',
+      '/v1/strong-bibles/:version/books/:book/chapters/:chapter'
+    )
+      .setPath(StrongBibleChapterPath)
+      .addSuccess(StrongBibleChapterDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getStrongBibleCounts',
+      '/v1/strong-bibles/:version/books/:book/identities/:reference/counts'
+    )
+      .setPath(StrongBibleIdentityPath)
+      .addSuccess(StrongBibleCountsDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getStrongBibleOccurrences',
+      '/v1/strong-bibles/:version/books/:book/identities/:reference/occurrences'
+    )
+      .setPath(StrongBibleIdentityPath)
+      .setUrlParams(StrongBibleOccurrencesQuery)
+      .addSuccess(StrongBibleOccurrencesDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getStrongBibleLemmaStats',
+      '/v1/strong-bibles/:version/books/:book/identities/:reference/lemmas'
+    )
+      .setPath(StrongBibleIdentityPath)
+      .addSuccess(StrongBibleLemmaStatsDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+
 export class ResourceApi extends HttpApi.make('resource-api')
   .add(SystemApi)
   .add(BibleApi)
-  .add(NaveApi) {}
+  .add(NaveApi)
+  .add(StrongBibleApi) {}

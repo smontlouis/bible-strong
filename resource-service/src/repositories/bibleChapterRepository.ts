@@ -16,6 +16,7 @@ type BiblePublicationMetadata = {
   versification: string
   resource_revision?: string
   text_revision?: string
+  text_sha256?: string
 }
 
 const bibleMetadata = (value: Record<string, unknown>): BiblePublicationMetadata =>
@@ -63,6 +64,9 @@ export const makeKyselyBibleChapterRepository = (
           bibleMetadata(rows[0]!.metadata).text_revision ??
           bibleMetadata(rows[0]!.metadata).resource_revision ??
           rows[0]!.revision,
+        ...(bibleMetadata(rows[0]!.metadata).text_sha256
+          ? { textSha256: bibleMetadata(rows[0]!.metadata).text_sha256 }
+          : {}),
         verses: rows.map(row => ({
           number: row.verse!,
           text: row.text!,
@@ -114,6 +118,7 @@ export const makeKyselyBibleChapterRepository = (
         versionId,
         revision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
         textRevision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
+        ...(metadata.text_sha256 ? { textSha256: metadata.text_sha256 } : {}),
         canon: metadata.canon,
         versification: metadata.versification,
         books,
@@ -152,6 +157,7 @@ export const makeKyselyBibleChapterRepository = (
         versionId,
         revision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
         textRevision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
+        ...(metadata.text_sha256 ? { textSha256: metadata.text_sha256 } : {}),
         verses: rows.flatMap(row =>
           row.presentation!.headings.length > 0
             ? [

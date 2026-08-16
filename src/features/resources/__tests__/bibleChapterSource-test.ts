@@ -184,6 +184,7 @@ describe('HTTP Bible chapter adapter', () => {
     await expect(http.loadChapter('LSG', 1, 1)).resolves.toEqual({
       status: 'available',
       presentation: 'canonical',
+      textRevision: 'lsg-r1',
       verses: [
         {
           Livre: 1,
@@ -226,6 +227,7 @@ describe('HTTP Bible chapter adapter', () => {
 
     await expect(http.loadCoverage('LSG')).resolves.toEqual({
       status: 'available',
+      textRevision: 'lsg-r1',
       coverage: {
         canon: { id: 'protestant-66', orderedBooks: [1] },
         versification: 'bible-strong-default',

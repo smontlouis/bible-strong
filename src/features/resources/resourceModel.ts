@@ -74,9 +74,12 @@ export type ResourceAction =
 export const getResourceOnlineAccess = (
   identity: ResourceIdentity,
   remotelyReadableBibleVersions: ReadonlySet<string>,
-  remotelyReadableNaveLanguages: ReadonlySet<ResourceLanguage> = new Set()
+  remotelyReadableNaveLanguages: ReadonlySet<ResourceLanguage> = new Set(),
+  remotelyReadableStrongBibleVersions: ReadonlySet<string> = new Set()
 ): OnlineAccessState =>
   (identity.kind === 'bible-text' && remotelyReadableBibleVersions.has(identity.versionId)) ||
+  (identity.kind === 'strong-bible-index' &&
+    remotelyReadableStrongBibleVersions.has(identity.versionId)) ||
   (identity.kind === 'nave' && remotelyReadableNaveLanguages.has(identity.language)) ||
   (identity.kind === 'commentary' && identity.collection === 'FIRESTORE')
     ? { status: 'remotely-readable' }
