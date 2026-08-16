@@ -11,7 +11,8 @@ import { strToU8, zipSync } from 'fflate'
 import { makeLocalDatabase } from '../../database/localDatabase'
 import { makeKyselyBibleChapterRepository } from '../../repositories/bibleChapterRepository'
 import { importPublicationBundle } from '../../repositories/publicationImporter'
-import type { PublicationBundleManifest } from '../publicationBundle'
+import { hashCanonicalVerses } from '../legacyBiblePublication'
+import { derivePublicationRevision, type PublicationBundleManifest } from '../publicationBundle'
 
 const runIntegration = process.env.RESOURCE_INTEGRATION === '1'
 const connectionString =
@@ -22,37 +23,40 @@ const sha256 = (value: string | Buffer) => createHash('sha256').update(value).di
 const writeBundle = async ({
   root,
   versionId,
-  revision,
   text,
   countOverride,
   rightsHolder = 'integration-test',
   onlineAccess = true,
   localDevelopmentAccess = false,
+  publicationRevisionOverride,
 }: {
   root: string
   versionId: string
-  revision: string
   text: string
   countOverride?: number
   rightsHolder?: string
   onlineAccess?: boolean
   localDevelopmentAccess?: boolean
+  publicationRevisionOverride?: string
 }) => {
   const sourceSha256 = '2'.repeat(64)
+  const verses = {
+    1: { 1: { 1: { text, startTags: [], layout: [], notes: [], headings: [] } } },
+  }
+  const textSha256 = hashCanonicalVerses(verses)
+  const textRevision = `${versionId.toLowerCase()}-${textSha256.slice(0, 20)}`
   const canonical = `${JSON.stringify({
     format: 'bible-strong-canonical-bible',
     schemaVersion: 4,
     applicationVersionId: versionId,
-    textRevision: revision,
-    textSha256: sha256(text),
+    textRevision,
+    textSha256,
     sourceVersion: 'integration-source',
     sourceSha256,
     verseCount: 1,
     noteCount: 0,
     headingCount: 0,
-    verses: {
-      1: { 1: { 1: { text, startTags: [], layout: [], notes: [], headings: [] } } },
-    },
+    verses,
   })}\n`
   const offline = Buffer.from(zipSync({ 'bible.json': strToU8(canonical) }))
   await mkdir(path.join(root, 'canonical'), { recursive: true })
@@ -60,11 +64,11 @@ const writeBundle = async ({
   await writeFile(path.join(root, 'canonical/bible.json'), canonical)
   await writeFile(path.join(root, 'offline/bible.zip'), offline)
 
-  const manifest: PublicationBundleManifest = {
+  const manifestBase: PublicationBundleManifest = {
     format: 'bible-strong-resource-publication',
     schemaVersion: 1,
     identity: { kind: 'bible-text', versionId, language: 'fr' },
-    revision,
+    revision: textRevision,
     canonical: {
       path: 'canonical/bible.json',
       mediaType: 'application/json',
@@ -99,7 +103,13 @@ const writeBundle = async ({
     coverage: { chaptersByBook: { 1: [1] }, verseCountByBookChapter: { '1-1': 1 } },
     counts: { books: 1, chapters: 1, verses: countOverride ?? 1, notes: 0, headings: 0 },
   }
+  const publicationRevision = publicationRevisionOverride ?? derivePublicationRevision(manifestBase)
+  const manifest: PublicationBundleManifest = {
+    ...manifestBase,
+    publicationRevision,
+  }
   await writeFile(path.join(root, 'manifest.json'), `${JSON.stringify(manifest)}\n`)
+  return { publicationRevision, textRevision }
 }
 
 describe('Atomic publication import', { skip: !runIntegration }, () => {
@@ -114,26 +124,24 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
     const database = makeLocalDatabase({ connectionString, maxConnections: 1 })
 
     try {
-      await writeBundle({ root: firstBundle, versionId, revision: 'revision-1', text: 'First' })
-      await writeBundle({ root: secondBundle, versionId, revision: 'revision-2', text: 'Second' })
+      const firstPublication = await writeBundle({ root: firstBundle, versionId, text: 'First' })
+      const secondPublication = await writeBundle({ root: secondBundle, versionId, text: 'Second' })
       await writeBundle({
         root: invalidBundle,
         versionId,
-        revision: 'revision-3',
         text: 'Invalid',
         countOverride: 2,
       })
       await writeBundle({
         root: interruptedBundle,
         versionId,
-        revision: 'revision-interrupted',
         text: 'Must never activate',
       })
       await writeBundle({
         root: collisionBundle,
         versionId,
-        revision: 'revision-2',
         text: 'Revision collision',
+        publicationRevisionOverride: secondPublication.publicationRevision,
       })
 
       await assert.doesNotReject(
@@ -146,19 +154,19 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
       await writeBundle({
         root: firstBundle,
         versionId,
-        revision: 'revision-1',
         text: 'First',
         rightsHolder: 'attempted-mutation',
+        publicationRevisionOverride: firstPublication.publicationRevision,
       })
       await assert.rejects(
         Effect.runPromise(importPublicationBundle(firstBundle, database)),
-        /PUBLICATION_REVISION_COLLISION/
+        /PUBLICATION_BUNDLE_REVISION_INVALID/
       )
       const unchangedPublication = await database
         .selectFrom('resource_publications')
         .select('rights')
         .where('resource_identity', '=', identity)
-        .where('revision', '=', 'revision-1')
+        .where('revision', '=', firstPublication.publicationRevision)
         .executeTakeFirstOrThrow()
       assert.equal(unchangedPublication.rights.holder, 'integration-test')
 
@@ -170,7 +178,7 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
       )
       await assert.rejects(
         Effect.runPromise(importPublicationBundle(collisionBundle, database)),
-        /PUBLICATION_REVISION_COLLISION/
+        /PUBLICATION_BUNDLE_REVISION_INVALID/
       )
 
       let reachedActivation!: () => void
@@ -204,7 +212,13 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
         .where('resource_publications.resource_identity', '=', identity)
         .execute()
 
-      assert.deepEqual(active, [{ revision: 'revision-2', status: 'active', text: 'Second' }])
+      assert.deepEqual(active, [
+        {
+          revision: secondPublication.publicationRevision,
+          status: 'active',
+          text: 'Second',
+        },
+      ])
     } finally {
       await database
         .deleteFrom('resource_publications')
@@ -229,7 +243,6 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
       await writeBundle({
         root: bundle,
         versionId,
-        revision: 'offline-revision-1',
         text: 'Offline only',
         onlineAccess: false,
       })
@@ -262,7 +275,6 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
       await writeBundle({
         root: bundle,
         versionId,
-        revision: 'local-revision-1',
         text: 'Local development only',
         onlineAccess: false,
         localDevelopmentAccess: true,

@@ -209,8 +209,7 @@ const normalizeJson = (value: unknown): unknown => {
   return value
 }
 
-const validatePublicationRevision = (manifest: PublicationBundleManifest) => {
-  if (!manifest.publicationRevision) return
+export const derivePublicationRevision = (manifest: PublicationBundleManifest): string => {
   const { publicationRevision, ...envelope } = manifest
   const resourceId =
     manifest.identity.kind === 'bible-text'
@@ -219,7 +218,12 @@ const validatePublicationRevision = (manifest: PublicationBundleManifest) => {
   const digest = createHash('sha256')
     .update(JSON.stringify(normalizeJson(envelope)))
     .digest('hex')
-  if (publicationRevision !== `${resourceId}-${digest.slice(0, 20)}`) {
+  return `${resourceId}-${digest.slice(0, 20)}`
+}
+
+const validatePublicationRevision = (manifest: PublicationBundleManifest) => {
+  if (!manifest.publicationRevision) return
+  if (manifest.publicationRevision !== derivePublicationRevision(manifest)) {
     throw new Error('PUBLICATION_BUNDLE_REVISION_INVALID')
   }
 }
