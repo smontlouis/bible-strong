@@ -114,7 +114,9 @@ describe('Strong Bible publication import', { skip: !runIntegration }, () => {
         .set({ metadata: { text_revision: 'lsg-text-v1', text_sha256: '1'.repeat(64) } })
         .where('resource_identity', '=', 'bible-text:LSG')
         .executeTakeFirstOrThrow()
-      await writeStrongPublicationFixture(bundle, { strongRevision: '6'.repeat(64) })
+      const replacementFixture = await writeStrongPublicationFixture(bundle, {
+        strongRevision: '6'.repeat(64),
+      })
       const replacement = await Effect.runPromise(
         importPublicationBundle(bundle, isolated.database)
       )
@@ -125,8 +127,11 @@ describe('Strong Bible publication import', { skip: !runIntegration }, () => {
         .execute()
 
       assert.equal(replacement.status, 'activated')
-      assert.deepEqual(activePublications, [{ revision: '6'.repeat(64), status: 'active' }])
-      await Effect.runPromise(repository.findActiveCoverage('LSG'))
+      assert.deepEqual(activePublications, [
+        { revision: replacementFixture.manifest.revision, status: 'active' },
+      ])
+      const replacementCoverage = await Effect.runPromise(repository.findActiveCoverage('LSG'))
+      assert.equal(replacementCoverage.strongRevision, '6'.repeat(64))
     } finally {
       await isolated.dispose()
       await rm(bundle, { recursive: true, force: true })
