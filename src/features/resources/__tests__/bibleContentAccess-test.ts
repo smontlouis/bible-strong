@@ -129,6 +129,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'plain',
+          presentation: 'canonical',
           verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'In the beginning' }],
         },
       })
@@ -154,6 +155,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'plain',
+          presentation: 'legacy-sidecars',
           verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'בְּרֵאשִׁית' }],
         },
       })
@@ -192,6 +194,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'interlinear',
+          presentation: 'legacy-sidecars',
           verses: [
             expect.objectContaining({
               Texte: 'בְּרֵאשִׁית',
@@ -221,7 +224,12 @@ describe('BibleContentAccess', () => {
         },
         { ...dependencies, loadInterlinearChapterTokens }
       )
-    ).resolves.toEqual(expect.objectContaining({ success: true, data: { kind: 'plain', verses } }))
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: { kind: 'plain', presentation: 'legacy-sidecars', verses },
+      })
+    )
     expect(dependencies.logError).toHaveBeenCalled()
     expect(loadInterlinearChapterTokens).toHaveBeenCalledTimes(1)
   })
@@ -254,6 +262,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'interlinear',
+          presentation: 'legacy-sidecars',
           verses: [expect.objectContaining({ InterlinearTokens: tokens })],
         },
       })
@@ -360,6 +369,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'strong',
+          presentation: 'canonical',
           verses: [
             expect.objectContaining({
               StrongSpans: [
@@ -463,6 +473,7 @@ describe('BibleContentAccess', () => {
         success: true,
         data: {
           kind: 'reverse-interlinear',
+          presentation: 'canonical',
           verses: [
             expect.objectContaining({
               Texte: 'Au commencement',

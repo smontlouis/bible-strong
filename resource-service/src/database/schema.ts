@@ -29,6 +29,7 @@ export type ResourceRights = {
   terms_reference?: string
   online: boolean
   offline: boolean
+  reviewed_at?: string
 }
 
 export const publicationStatus = pgEnum('resource_publication_status', ['staged', 'active'])

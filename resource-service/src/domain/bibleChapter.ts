@@ -2,12 +2,15 @@ import { Context, Data, Effect } from 'effect'
 
 import {
   BibleChapterDto,
+  BiblePericopeIndexDto,
+  BiblePericopeVerseDto,
   BibleChapterVerseDto,
   BibleTextRevisionDto,
   BibleVersionCoverageDto,
   BibleVersePresentationDto,
   type BibleVersePresentation,
 } from '../../../src/features/resources/bibleChapterContract'
+import { isOrdinaryBibleVersionId } from '../../../src/helpers/ordinaryBibleVersions'
 
 export type BibleChapterLocation = {
   versionId: string
@@ -17,6 +20,7 @@ export type BibleChapterLocation = {
 
 export type ActiveBibleChapter = BibleChapterLocation & {
   revision: string
+  textRevision: string
   verses: readonly {
     number: number
     text: string
@@ -27,9 +31,24 @@ export type ActiveBibleChapter = BibleChapterLocation & {
 export type ActiveBibleCoverage = {
   versionId: string
   revision: string
+  textRevision: string
+  canon: { id: string; orderedBooks: readonly number[] }
+  versification: string
   books: readonly number[]
   chaptersByBook: Record<string, readonly number[]>
   verseCountByBookChapter: Record<string, number>
+}
+
+export type ActiveBiblePericopeIndex = {
+  versionId: string
+  revision: string
+  textRevision: string
+  verses: readonly {
+    book: number
+    chapter: number
+    verse: number
+    headings: BibleVersePresentation['headings']
+  }[]
 }
 
 export class UnsupportedBibleVersion extends Data.TaggedError('UnsupportedBibleVersion')<{
@@ -64,14 +83,15 @@ export type BibleChapterRepositoryService = {
   findActiveCoverage: (
     versionId: string
   ) => Effect.Effect<ActiveBibleCoverage, BibleChapterRepositoryError>
+  findActivePericopes: (
+    versionId: string
+  ) => Effect.Effect<ActiveBiblePericopeIndex, BibleChapterRepositoryError>
 }
 
 export class BibleChapterRepository extends Context.Tag('BibleChapterRepository')<
   BibleChapterRepository,
   BibleChapterRepositoryService
 >() {}
-
-const supportedVersions = new Set(['LSG'])
 
 export const readBibleChapter = (
   input: BibleChapterLocation
@@ -81,7 +101,7 @@ export const readBibleChapter = (
   BibleChapterRepository
 > =>
   Effect.gen(function* () {
-    if (!supportedVersions.has(input.versionId)) {
+    if (!isOrdinaryBibleVersionId(input.versionId)) {
       return yield* new UnsupportedBibleVersion({ versionId: input.versionId })
     }
     const repository = yield* BibleChapterRepository
@@ -92,6 +112,7 @@ export const readBibleChapter = (
         kind: 'bible-text',
         versionId: chapter.versionId,
         revision: chapter.revision,
+        textRevision: chapter.textRevision,
       }),
       book: chapter.book,
       chapter: chapter.chapter,
@@ -114,7 +135,7 @@ export const readBibleCoverage = (
   BibleChapterRepository
 > =>
   Effect.gen(function* () {
-    if (!supportedVersions.has(versionId)) {
+    if (!isOrdinaryBibleVersionId(versionId)) {
       return yield* new UnsupportedBibleVersion({ versionId })
     }
     const repository = yield* BibleChapterRepository
@@ -124,11 +145,38 @@ export const readBibleCoverage = (
         kind: 'bible-text',
         versionId,
         revision: coverage.revision,
+        textRevision: coverage.textRevision,
       }),
       books: [...coverage.books],
+      canon: { id: coverage.canon.id, orderedBooks: [...coverage.canon.orderedBooks] },
+      versification: coverage.versification,
       chaptersByBook: Object.fromEntries(
         Object.entries(coverage.chaptersByBook).map(([book, chapters]) => [book, [...chapters]])
       ),
       verseCountByBookChapter: coverage.verseCountByBookChapter,
+    })
+  })
+
+export const readBiblePericopes = (
+  versionId: string
+): Effect.Effect<
+  BiblePericopeIndexDto,
+  UnsupportedBibleVersion | BibleChapterRepositoryError,
+  BibleChapterRepository
+> =>
+  Effect.gen(function* () {
+    if (!isOrdinaryBibleVersionId(versionId)) {
+      return yield* new UnsupportedBibleVersion({ versionId })
+    }
+    const repository = yield* BibleChapterRepository
+    const index = yield* repository.findActivePericopes(versionId)
+    return new BiblePericopeIndexDto({
+      resource: new BibleTextRevisionDto({
+        kind: 'bible-text',
+        versionId,
+        revision: index.revision,
+        textRevision: index.textRevision,
+      }),
+      verses: index.verses.map(verse => new BiblePericopeVerseDto(verse)),
     })
   })

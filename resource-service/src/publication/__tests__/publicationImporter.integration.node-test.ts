@@ -27,6 +27,7 @@ const writeBundle = async ({
   countOverride,
   rightsHolder = 'integration-test',
   onlineAccess = true,
+  localDevelopmentAccess = false,
 }: {
   root: string
   versionId: string
@@ -35,6 +36,7 @@ const writeBundle = async ({
   countOverride?: number
   rightsHolder?: string
   onlineAccess?: boolean
+  localDevelopmentAccess?: boolean
 }) => {
   const sourceSha256 = '2'.repeat(64)
   const canonical = `${JSON.stringify({
@@ -91,7 +93,7 @@ const writeBundle = async ({
       online: onlineAccess,
       offline: true,
     },
-    deliveryCapabilities: { onlineAccess, offlineDownload: true },
+    deliveryCapabilities: { onlineAccess, offlineDownload: true, localDevelopmentAccess },
     canon: { id: 'integration', orderedBooks: [1] },
     versification: 'integration',
     coverage: { chaptersByBook: { 1: [1] }, verseCountByBookChapter: { '1-1': 1 } },
@@ -240,6 +242,45 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
         Effect.runPromise(repository.findActiveChapter({ versionId, book: 1, chapter: 1 })),
         /ActiveBiblePublicationUnavailable/
       )
+    } finally {
+      await database
+        .deleteFrom('resource_publications')
+        .where('resource_identity', '=', identity)
+        .execute()
+      await database.destroy()
+      await rm(bundle, { recursive: true, force: true })
+    }
+  })
+
+  it('activates a rights-restricted publication only for explicit local development', async () => {
+    const versionId = `LOCAL-${randomUUID()}`
+    const identity = `bible-text:${versionId}`
+    const bundle = await mkdtemp(path.join(tmpdir(), 'publication-local-development-'))
+    const database = makeLocalDatabase({ connectionString, maxConnections: 1 })
+
+    try {
+      await writeBundle({
+        root: bundle,
+        versionId,
+        revision: 'local-revision-1',
+        text: 'Local development only',
+        onlineAccess: false,
+        localDevelopmentAccess: true,
+      })
+
+      const staged = await Effect.runPromise(importPublicationBundle(bundle, database))
+      assert.equal(staged.status, 'staged')
+
+      const activated = await Effect.runPromise(
+        importPublicationBundle(bundle, database, { activateForLocalDevelopment: true })
+      )
+      assert.equal(activated.status, 'activated')
+
+      const repository = makeKyselyBibleChapterRepository(database)
+      const chapter = await Effect.runPromise(
+        repository.findActiveChapter({ versionId, book: 1, chapter: 1 })
+      )
+      assert.equal(chapter.verses[0]?.text, 'Local development only')
     } finally {
       await database
         .deleteFrom('resource_publications')

@@ -26,6 +26,9 @@ for (const command of RESOURCE_DEVELOPMENT_COMMANDS) run(command)
 if (process.env.RESOURCE_PUBLICATION_BUNDLE) {
   run(['yarn', 'resources:import', '--bundle', process.env.RESOURCE_PUBLICATION_BUNDLE])
 }
+if (process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT) {
+  run(['yarn', 'resources:import-all', '--root', process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT])
+}
 
 const port = Number(process.env.RESOURCE_API_PORT ?? 8787)
 const endpoints = getDevelopmentEndpoints({ port, lanAddress: getLanAddress() })

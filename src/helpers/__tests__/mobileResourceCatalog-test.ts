@@ -1,5 +1,6 @@
 import {
   BUNDLED_MOBILE_RESOURCE_CATALOG,
+  getMobileBibleVersionIds,
   getMobileResourceCatalogEntry,
   isMobileResourceCatalog,
   loadMobileResourceCatalog,
@@ -8,8 +9,31 @@ import {
   resolveMobileResourceArtifactUrl,
   resolveMobileResourceCatalog,
 } from '../mobileResourceCatalog'
+import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '../ordinaryBibleVersions'
 
 describe('mobile resource catalog', () => {
+  it('declares every ordinary Bible identity exactly once', () => {
+    expect(getMobileBibleVersionIds()).toHaveLength(47)
+    expect(new Set(getMobileBibleVersionIds()).size).toBe(47)
+  })
+
+  it('keeps public Online delivery limited to documented ordinary Bible identities', () => {
+    expect(PUBLIC_ONLINE_BIBLE_VERSION_IDS).toEqual([
+      'ASV',
+      'BHG',
+      'BSB',
+      'DARBY',
+      'DBY',
+      'FMAR',
+      'LAU',
+      'LSG',
+      'OST',
+      'RV1895',
+      'RWEBSTER',
+      'VUL',
+    ])
+  })
+
   it('contains every downloadable resource as a ZIP', () => {
     expect(isMobileResourceCatalog(BUNDLED_MOBILE_RESOURCE_CATALOG)).toBe(true)
     expect(MOBILE_RESOURCE_CATALOG.resourceCount).toBe(72)

@@ -14,6 +14,7 @@ import { makeResourceWebHandler } from '../app'
 const chapter = {
   versionId: 'LSG',
   revision: 'lsg-test-revision',
+  textRevision: 'lsg-text-revision',
   book: 1,
   chapter: 1,
   verses: [
@@ -47,9 +48,35 @@ const repository: BibleChapterRepositoryService = {
     Effect.succeed({
       versionId,
       revision: chapter.revision,
+      textRevision: chapter.textRevision,
+      canon: { id: 'protestant-66', orderedBooks: [1] },
+      versification: 'bible-strong-default',
       books: [1],
       chaptersByBook: { 1: [1, 2, 3, 4] },
       verseCountByBookChapter: { '1-1': 2 },
+    }),
+  findActivePericopes: versionId =>
+    Effect.succeed({
+      versionId,
+      revision: chapter.revision,
+      textRevision: chapter.textRevision,
+      verses: [
+        {
+          book: 1,
+          chapter: 1,
+          verse: 1,
+          headings: [
+            {
+              offset: 0,
+              order: 0,
+              kind: 'pericope',
+              type: 'section',
+              text: 'La création',
+              markup: '<h3>La création</h3>',
+            },
+          ],
+        },
+      ],
     }),
 }
 
@@ -69,7 +96,12 @@ describe('v1 Bible chapter API', () => {
       assert.equal(response.headers.get('x-request-id'), 'request-test-123')
       assert.match(response.headers.get('etag') ?? '', /^"[a-f0-9]{64}"$/)
       assert.deepEqual(await response.json(), {
-        resource: { kind: 'bible-text', versionId: 'LSG', revision: 'lsg-test-revision' },
+        resource: {
+          kind: 'bible-text',
+          versionId: 'LSG',
+          revision: 'lsg-test-revision',
+          textRevision: 'lsg-text-revision',
+        },
         book: 1,
         chapter: 1,
         verses: chapter.verses,
@@ -102,7 +134,14 @@ describe('v1 Bible chapter API', () => {
       const response = await web.handler(request('/v1/bibles/LSG/coverage'))
       assert.equal(response.status, 200)
       assert.deepEqual(await response.json(), {
-        resource: { kind: 'bible-text', versionId: 'LSG', revision: chapter.revision },
+        resource: {
+          kind: 'bible-text',
+          versionId: 'LSG',
+          revision: chapter.revision,
+          textRevision: chapter.textRevision,
+        },
+        canon: { id: 'protestant-66', orderedBooks: [1] },
+        versification: 'bible-strong-default',
         books: [1],
         chaptersByBook: { 1: [1, 2, 3, 4] },
         verseCountByBookChapter: { '1-1': 2 },
@@ -112,11 +151,24 @@ describe('v1 Bible chapter API', () => {
     }
   })
 
+  it('returns publication-owned pericopes for zero-copy browsing', async () => {
+    const web = makeResourceWebHandler(repository)
+    try {
+      const response = await web.handler(request('/v1/bibles/LSG/pericopes'))
+      assert.equal(response.status, 200)
+      const payload = (await response.json()) as { verses: unknown[] }
+      assert.equal(payload.verses.length, 1)
+      assert.equal(response.headers.get('x-resource-revision'), chapter.revision)
+    } finally {
+      await web.dispose()
+    }
+  })
+
   it('maps unsupported, invalid, absent, inactive, and internal outcomes to safe problems', async () => {
     const web = makeResourceWebHandler(repository)
     try {
       const cases = [
-        ['/v1/bibles/KJV/books/1/chapters/1', 404, 'BIBLE_UNSUPPORTED'],
+        ['/v1/bibles/UNKNOWN/books/1/chapters/1', 404, 'BIBLE_UNSUPPORTED'],
         ['/v1/bibles/LSG/books/0/chapters/1', 400, 'INVALID_RESOURCE_REQUEST'],
         ['/v1/bibles/LSG/books/1/chapters/2', 404, 'BIBLE_CHAPTER_NOT_FOUND'],
         ['/v1/bibles/LSG/books/1/chapters/3', 503, 'BIBLE_PUBLICATION_INACTIVE'],

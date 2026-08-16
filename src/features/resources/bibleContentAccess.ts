@@ -10,11 +10,16 @@ import {
 import type { BibleRecoveryAction } from '~helpers/bibleErrors'
 import {
   getBibleVersionCoverage,
+  getBibleVersionMetadata,
   getChapterVerses,
   getMultipleVerses,
   type BibleVersionCoverage,
 } from '~helpers/biblesDb'
-import { getBibleVersionCanonId, getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import {
+  getBibleVersionCanonId,
+  getBibleVersionVersificationId,
+  getIfVersionNeedsDownload,
+} from '~helpers/bibleVersions'
 import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { localStrongLexiconAccess, type StrongLexiconAccess } from './strongLexiconAccess'
 import {
@@ -22,6 +27,7 @@ import {
   resolveStrongBibleVersion,
   type StrongBibleVersionId,
   type StrongMode,
+  usesCanonicalBibleExtras,
 } from '~helpers/strongBiblePublications'
 import {
   loadReverseInterlinearChapterSpans,
@@ -65,11 +71,17 @@ const isCanonicalChapterForVersion = (version: string, book: number, chapter: nu
   )
 }
 
+export type BibleChapterPresentationSource = 'canonical' | 'legacy-sidecars'
+
 export type BibleChapterData =
-  | { kind: 'plain'; verses: Verse[] }
-  | { kind: 'strong'; verses: Verse[] }
-  | { kind: 'interlinear'; verses: Verse[] }
-  | { kind: 'reverse-interlinear'; verses: Verse[] }
+  | { kind: 'plain'; verses: Verse[]; presentation: BibleChapterPresentationSource }
+  | { kind: 'strong'; verses: Verse[]; presentation: BibleChapterPresentationSource }
+  | { kind: 'interlinear'; verses: Verse[]; presentation: BibleChapterPresentationSource }
+  | {
+      kind: 'reverse-interlinear'
+      verses: Verse[]
+      presentation: BibleChapterPresentationSource
+    }
 
 export type BibleChapterRequest = {
   book: number
@@ -95,6 +107,16 @@ export type BibleContentAccess = {
   }>
 }
 
+const loadLocalBibleCoverage = async (version: string): Promise<BibleVersionCoverage> => {
+  const coverage = await getBibleVersionCoverage(version)
+  const canonId = getBibleVersionCanonId(version)
+  return {
+    ...coverage,
+    canon: { id: canonId, orderedBooks: getBooksForCanon(canonId).map(book => book.Numero) },
+    versification: getBibleVersionVersificationId(version),
+  }
+}
+
 type BibleContentAccessDependencies = {
   strongLexicon: Pick<StrongLexiconAccess, 'loadPreview'>
   getStrongResourceLanguage: () => ResourceLanguage
@@ -109,7 +131,14 @@ export const localBibleChapterAdapter: BibleChapterAdapter = {
   async loadChapter(version, book, chapter) {
     try {
       const verses = await getChapterVerses(version, book, chapter)
-      if (verses.length > 0) return { status: 'available', verses }
+      if (verses.length > 0) {
+        const metadata = await getBibleVersionMetadata(version)
+        return {
+          status: 'available',
+          verses,
+          presentation: metadata?.schemaVersion === 4 ? 'canonical' : 'legacy-sidecars',
+        }
+      }
 
       try {
         if (await getIfVersionNeedsDownload(version)) {
@@ -163,7 +192,7 @@ export const localBibleChapterAdapter: BibleChapterAdapter = {
   },
   async loadCoverage(version) {
     try {
-      return { status: 'available', coverage: await getBibleVersionCoverage(version) }
+      return { status: 'available', coverage: await loadLocalBibleCoverage(version) }
     } catch {
       return { status: 'unavailable', reason: 'offline-copy-invalid' }
     }
@@ -222,6 +251,9 @@ const loadRegularBibleChapter = async (
     )
   }
   const { verses } = chapter
+  const presentation =
+    chapter.presentation ??
+    (usesCanonicalBibleExtras(request.version) ? 'canonical' : 'legacy-sidecars')
 
   if (
     request.version === 'BHG' &&
@@ -245,6 +277,7 @@ const loadRegularBibleChapter = async (
         )
         return successResult({
           kind: 'interlinear',
+          presentation,
           verses: verses.map(verse => ({
             ...verse,
             InterlinearTokens: tokensByVerse[Number(verse.Verset)] ?? [],
@@ -257,7 +290,7 @@ const loadRegularBibleChapter = async (
         )
       }
     }
-    return successResult({ kind: 'plain', verses })
+    return successResult({ kind: 'plain', verses, presentation })
   }
 
   if (
@@ -348,6 +381,7 @@ const loadRegularBibleChapter = async (
 
       return successResult({
         kind: 'reverse-interlinear',
+        presentation,
         verses: verses.map(verse => ({
           ...verse,
           ReverseInterlinearSpans: reverseSpansByVerse[Number(verse.Verset)] ?? [],
@@ -355,7 +389,7 @@ const loadRegularBibleChapter = async (
       })
     } catch (error) {
       dependencies.logError('[BibleContentAccess] Reverse interlinear unavailable:', error)
-      return successResult({ kind: 'plain', verses })
+      return successResult({ kind: 'plain', verses, presentation })
     }
   }
 
@@ -364,7 +398,7 @@ const loadRegularBibleChapter = async (
     !isStrongCapableBibleVersion(request.version) ||
     !dependencies.loadStrongBibleChapterSpans
   ) {
-    return successResult({ kind: 'plain', verses })
+    return successResult({ kind: 'plain', verses, presentation })
   }
 
   try {
@@ -391,6 +425,7 @@ const loadRegularBibleChapter = async (
     }
     return successResult({
       kind: 'strong',
+      presentation,
       verses: verses.map(verse => {
         const verseNumber = Number(verse.Verset)
         const alignedTokens = alignedTokensByVerse[verseNumber] ?? []
@@ -419,7 +454,7 @@ const loadRegularBibleChapter = async (
     })
   } catch (error) {
     dependencies.logError('[BibleContentAccess] Strong sidecar unavailable:', error)
-    return successResult({ kind: 'plain', verses })
+    return successResult({ kind: 'plain', verses, presentation })
   }
 }
 
@@ -452,7 +487,7 @@ export const localBibleContentAccess: BibleContentAccess = {
   loadChapter: loadBibleContentChapter,
   loadVerseTexts: ({ version, verseKeys, shouldCancel }) =>
     getMultipleVerses(version, verseKeys, shouldCancel),
-  loadCoverage: getBibleVersionCoverage,
+  loadCoverage: loadLocalBibleCoverage,
   getAvailability: async version =>
     (await getIfVersionNeedsDownload(version))
       ? { status: 'unavailable', recoveries: ['acquire-offline-copy'] }

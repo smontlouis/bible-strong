@@ -28,6 +28,7 @@ type PublicationImportResult =
 
 export type PublicationImportOptions = {
   beforeActivation?: (signal: AbortSignal) => Promise<void>
+  activateForLocalDevelopment?: boolean
 }
 
 const assertNotInterrupted = (signal: AbortSignal) => {
@@ -70,7 +71,13 @@ export const importPublicationBundle = (
       const resourceIdentity = isBiblePublicationBundleManifest(manifest)
         ? `bible-text:${manifest.identity.versionId}`
         : `nave:${manifest.identity.language}`
-      const publicationStatus = manifest.deliveryCapabilities.onlineAccess ? 'active' : 'staged'
+      const publicationStatus =
+        manifest.deliveryCapabilities.onlineAccess ||
+        (options.activateForLocalDevelopment &&
+          manifest.deliveryCapabilities.localDevelopmentAccess === true)
+          ? 'active'
+          : 'staged'
+      const publicationRevision = manifest.publicationRevision ?? manifest.revision
       const manifestSha256 = createHash('sha256').update(JSON.stringify(manifest)).digest('hex')
       const provenance = {
         source: manifest.provenance.sourceVersion,
@@ -81,6 +88,7 @@ export const importPublicationBundle = (
         terms_reference: manifest.rights.termsReference,
         online: manifest.rights.online,
         offline: manifest.rights.offline,
+        ...(manifest.rights.reviewedAt ? { reviewed_at: manifest.rights.reviewedAt } : {}),
       }
       const metadata = isBiblePublicationBundleManifest(manifest)
         ? {
@@ -90,6 +98,8 @@ export const importPublicationBundle = (
             delivery_capabilities: manifest.deliveryCapabilities,
             counts: manifest.counts,
             canonical_schema_version: manifest.canonical.schemaVersion,
+            resource_revision: manifest.revision,
+            text_revision: manifest.revision,
             offline_entry: manifest.offlineArtifact.entry,
           }
         : {
@@ -133,7 +143,7 @@ export const importPublicationBundle = (
                 'metadata',
               ])
               .where('resource_identity', '=', resourceIdentity)
-              .where('revision', '=', manifest.revision)
+              .where('revision', '=', publicationRevision)
               .executeTakeFirst()
 
             if (existing) {
@@ -173,7 +183,7 @@ export const importPublicationBundle = (
               .values({
                 resource_identity: resourceIdentity,
                 resource_kind: manifest.identity.kind,
-                revision: manifest.revision,
+                revision: publicationRevision,
                 language: manifest.identity.language,
                 canonical_sha256: manifest.canonical.sha256,
                 offline_artifact_sha256: manifest.offlineArtifact.sha256,

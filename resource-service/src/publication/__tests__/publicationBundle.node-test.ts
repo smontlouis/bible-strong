@@ -16,13 +16,22 @@ import {
 } from '../publicationBundle'
 
 const sha256 = (value: string | Buffer) => createHash('sha256').update(value).digest('hex')
+const canonicalVerse = {
+  text: 'Au commencement',
+  startTags: [],
+  layout: [],
+  notes: [],
+  headings: [],
+}
+const canonicalTextSha256 = sha256(`${JSON.stringify([1, 1, 1, canonicalVerse])}\n`)
+const canonicalTextRevision = `lsg-${canonicalTextSha256.slice(0, 20)}`
 
 const makeManifest = (overrides: Partial<BiblePublicationBundleManifest> = {}) =>
   ({
     format: 'bible-strong-resource-publication',
     schemaVersion: 1,
     identity: { kind: 'bible-text', versionId: 'LSG', language: 'fr' },
-    revision: 'lsg-test-revision',
+    revision: canonicalTextRevision,
     canonical: {
       path: 'canonical/bible-lsg.json',
       mediaType: 'application/json',
@@ -65,8 +74,8 @@ describe('Resource publication bundle', () => {
       format: 'bible-strong-canonical-bible',
       schemaVersion: 4,
       applicationVersionId: 'LSG',
-      textRevision: 'lsg-test-revision',
-      textSha256: 'canonical-text-hash',
+      textRevision: canonicalTextRevision,
+      textSha256: canonicalTextSha256,
       sourceVersion: 'SG1910',
       sourceSha256: '2'.repeat(64),
       verseCount: 1,
@@ -94,6 +103,14 @@ describe('Resource publication bundle', () => {
     const manifest = makeManifest()
 
     assert.deepEqual(decodePublicationBundleManifest(manifest), manifest)
+    assert.throws(
+      () =>
+        decodePublicationBundleManifest({
+          ...manifest,
+          publicationRevision: 'lsg-arbitrary-publication',
+        }),
+      /PUBLICATION_BUNDLE_REVISION_INVALID/
+    )
   })
 
   it('rejects unknown bundle schema versions and unsafe artifact paths', () => {
@@ -117,8 +134,8 @@ describe('Resource publication bundle', () => {
       format: 'bible-strong-canonical-bible',
       schemaVersion: 4,
       applicationVersionId: 'LSG',
-      textRevision: 'lsg-test-revision',
-      textSha256: 'canonical-text-hash',
+      textRevision: canonicalTextRevision,
+      textSha256: canonicalTextSha256,
       sourceVersion: 'SG1910',
       sourceSha256: '2'.repeat(64),
       verseCount: 1,
@@ -154,7 +171,7 @@ describe('Resource publication bundle', () => {
 
       const validated = await validatePublicationBundle(root)
 
-      assert.equal(validated.manifest.revision, 'lsg-test-revision')
+      assert.equal(validated.manifest.revision, canonicalTextRevision)
       assert.equal(validated.canonical.format, 'bible-strong-canonical-bible')
       if (validated.canonical.format !== 'bible-strong-canonical-bible') {
         assert.fail('Expected a Bible canonical publication')
@@ -234,8 +251,8 @@ describe('Resource publication bundle', () => {
       format: 'bible-strong-canonical-bible',
       schemaVersion: 4,
       applicationVersionId: 'LSG',
-      textRevision: 'lsg-test-revision',
-      textSha256: 'canonical-text-hash',
+      textRevision: canonicalTextRevision,
+      textSha256: canonicalTextSha256,
       sourceVersion: 'SG1910',
       sourceSha256: '2'.repeat(64),
       verseCount: 1,

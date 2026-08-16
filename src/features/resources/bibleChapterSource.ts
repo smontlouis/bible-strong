@@ -15,7 +15,11 @@ export type BibleChapterUnavailableReason =
   | 'integrity-failure'
 
 export type BibleChapterSourceResult =
-  | { status: 'available'; verses: Verse[] }
+  | {
+      status: 'available'
+      verses: Verse[]
+      presentation?: 'canonical' | 'legacy-sidecars'
+    }
   | {
       status: 'unavailable'
       reason: BibleChapterUnavailableReason
@@ -59,7 +63,7 @@ export const loadVerseTextsFromChapterAdapter = async (
       !Number.isInteger(verse) ||
       book < 1 ||
       chapter < 1 ||
-      verse < 1
+      verse < 0
     ) {
       continue
     }
@@ -216,8 +220,14 @@ export const createHttpBibleChapterAdapter = ({
           const decoded = Schema.decodeUnknownSync(BibleChapterDto)(payload)
           return {
             status: 'available',
+            presentation: 'canonical',
             verses: decoded.verses.map(verse =>
-              toVerse(decoded.book, decoded.chapter, decoded.resource.revision, verse)
+              toVerse(
+                decoded.book,
+                decoded.chapter,
+                decoded.resource.textRevision ?? decoded.resource.revision,
+                verse
+              )
             ),
           }
         } catch {
@@ -251,6 +261,11 @@ export const createHttpBibleChapterAdapter = ({
           return {
             status: 'available',
             coverage: {
+              canon: {
+                id: decoded.canon.id,
+                orderedBooks: [...decoded.canon.orderedBooks],
+              },
+              versification: decoded.versification,
               books: [...decoded.books],
               chaptersByBook: Object.fromEntries(
                 Object.entries(decoded.chaptersByBook).map(([book, chapters]) => [

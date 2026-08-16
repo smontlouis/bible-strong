@@ -3,7 +3,7 @@ import { describe, it } from 'node:test'
 
 import { Effect } from 'effect'
 
-import { makeLocalDatabase } from '../../database/localDatabase'
+import { createIsolatedPostgres } from '../../testing/isolatedPostgres'
 import {
   isBiblePublicationBundleManifest,
   validatePublicationBundle,
@@ -24,7 +24,8 @@ const connectionString =
 
 describe('Complete LSG API', { skip: !bundlePath }, () => {
   it('serves every published chapter through the v1 contract', async () => {
-    const database = makeLocalDatabase({ connectionString, maxConnections: 4 })
+    const isolated = await createIsolatedPostgres(connectionString, 'lsg_api_chapters')
+    const { database } = isolated
     const web = makeResourceWebHandler(makeKyselyBibleChapterRepository(database))
 
     try {
@@ -104,12 +105,13 @@ describe('Complete LSG API', { skip: !bundlePath }, () => {
       }
     } finally {
       await web.dispose()
-      await database.destroy()
+      await isolated.dispose()
     }
   })
 
   it('exercises the complete mobile source-selection journey against the real API', async () => {
-    const database = makeLocalDatabase({ connectionString, maxConnections: 4 })
+    const isolated = await createIsolatedPostgres(connectionString, 'lsg_api_source_selection')
+    const { database } = isolated
     const web = makeResourceWebHandler(makeKyselyBibleChapterRepository(database))
     let activePublicationId: number | undefined
 
@@ -233,7 +235,7 @@ describe('Complete LSG API', { skip: !bundlePath }, () => {
           .catch(() => undefined)
       }
       await web.dispose()
-      await database.destroy()
+      await isolated.dispose()
     }
   })
 })

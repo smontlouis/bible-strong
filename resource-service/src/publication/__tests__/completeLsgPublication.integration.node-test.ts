@@ -3,7 +3,7 @@ import { describe, it } from 'node:test'
 
 import { Effect } from 'effect'
 
-import { makeLocalDatabase } from '../../database/localDatabase'
+import { createIsolatedPostgres } from '../../testing/isolatedPostgres'
 import { isBiblePublicationBundleManifest, validatePublicationBundle } from '../publicationBundle'
 import { importPublicationBundle } from '../../repositories/publicationImporter'
 
@@ -14,7 +14,8 @@ const connectionString =
 
 describe('Complete LSG publication', { skip: !bundlePath }, () => {
   it('preserves every declared book, chapter, verse, and presentation value', async () => {
-    const database = makeLocalDatabase({ connectionString, maxConnections: 1 })
+    const isolated = await createIsolatedPostgres(connectionString, 'lsg_publication')
+    const { database } = isolated
 
     try {
       const validated = await validatePublicationBundle(bundlePath!)
@@ -35,7 +36,10 @@ describe('Complete LSG publication', { skip: !bundlePath }, () => {
         .where('resource_identity', '=', 'bible-text:LSG')
         .where('status', '=', 'active')
         .executeTakeFirstOrThrow()
-      assert.equal(publication.revision, validated.manifest.revision)
+      assert.equal(
+        publication.revision,
+        validated.manifest.publicationRevision ?? validated.manifest.revision
+      )
       assert.equal(publication.language, 'fr')
       const { manifest_sha256: manifestSha256, ...publicationMetadata } = publication.metadata
       assert.match(String(manifestSha256), /^[a-f0-9]{64}$/)
@@ -46,6 +50,8 @@ describe('Complete LSG publication', { skip: !bundlePath }, () => {
         delivery_capabilities: validated.manifest.deliveryCapabilities,
         counts: validated.manifest.counts,
         canonical_schema_version: 4,
+        resource_revision: validated.manifest.revision,
+        text_revision: validated.manifest.revision,
         offline_entry: validated.manifest.offlineArtifact.entry,
       })
 
@@ -77,7 +83,7 @@ describe('Complete LSG publication', { skip: !bundlePath }, () => {
       assert.equal(rows.length, 31_171)
       assert.deepEqual(rows, expected)
     } finally {
-      await database.destroy()
+      await isolated.dispose()
     }
   })
 })

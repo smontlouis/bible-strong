@@ -62,7 +62,12 @@ yarn resources:db:up
 yarn resources:migrate
 yarn resources:import --bundle resource-service/.local/publications/lsg
 yarn resources:import --bundle resource-service/.local/publications/nave-fr
+yarn resources:import-all --root /path/to/ordinary-bible-publications-current
 ```
+
+`import-all` is the explicit local-development path: it activates publications whose manifest sets
+`localDevelopmentAccess`, while the ordinary `import` command continues to stage any publication
+whose rights do not permit public Online delivery.
 
 Reimporting the same revision and checksums returns `unchanged`. Reusing a revision with different
 content fails. Validation failures or Effect interruption roll back staging and preserve the prior
@@ -72,6 +77,7 @@ The local Effect HttpApi exposes Bible reading plus the Nave operations consumed
 
 - `GET /v1/bibles/:version/books/:book/chapters/:chapter`
 - `GET /v1/bibles/:version/coverage`
+- `GET /v1/bibles/:version/pericopes`
 - `GET /v1/naves/:language/topics/:normalizedName`
 - `GET /v1/naves/:language/topics?initial=:initial`
 - `GET /v1/naves/:language/topics?search=:search`
