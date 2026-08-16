@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { readFile, stat } from 'node:fs/promises'
+import { lstat, readFile, realpath } from 'node:fs/promises'
 import path from 'node:path'
 
 import { Schema } from 'effect'
@@ -15,6 +15,7 @@ import {
   getStrongBibleCatalogIdentity,
   isStrongBibleVersionId,
 } from '../../../src/helpers/strongBibleCatalog'
+import { STRONG_IDENTITY_KINDS } from '../../../src/helpers/strongIdentities'
 
 const Sha256 = Schema.String.pipe(Schema.pattern(/^[a-f0-9]{64}$/))
 const Language = Schema.String.pipe(Schema.pattern(/^[a-z]{2,3}(?:-[A-Za-z0-9]+)*$/))
@@ -390,9 +391,17 @@ const fileSha256 = async (filePath: string): Promise<string> =>
 const assertArtifact = async (
   filePath: string,
   artifact: { sha256: string; bytes: number },
-  label: string
+  label: string,
+  bundleRoot: string
 ) => {
-  const fileStat = await stat(filePath)
+  const [fileStat, resolvedFile, resolvedRoot] = await Promise.all([
+    lstat(filePath),
+    realpath(filePath),
+    realpath(bundleRoot),
+  ])
+  if (!fileStat.isFile() || !resolvedFile.startsWith(`${resolvedRoot}${path.sep}`)) {
+    throw new Error(`${label}_PATH_INVALID`)
+  }
   if (fileStat.size !== artifact.bytes) throw new Error(`${label}_SIZE_MISMATCH`)
   if ((await fileSha256(filePath)) !== artifact.sha256) {
     throw new Error(`${label}_CHECKSUM_MISMATCH`)
@@ -516,7 +525,7 @@ export const decodeCanonicalStrongBible = (value: unknown): CanonicalStrongBible
       !verse ||
       !isPositiveInteger(verse.book) ||
       !isPositiveInteger(verse.chapter) ||
-      !isNonNegativeInteger(verse.verse)
+      !isPositiveInteger(verse.verse)
     ) {
       throw new Error('CANONICAL_STRONG_BIBLE_VERSE_INVALID')
     }
@@ -676,6 +685,15 @@ export const countCanonicalStrongBibleContent = (publication: CanonicalStrongBib
   lexemes: publication.lexemes.length,
 })
 
+export const deriveStrongBibleResourceRevision = (
+  publication: CanonicalStrongBiblePublication
+): string => {
+  const digest = createHash('sha256')
+    .update(JSON.stringify(normalizeJson(publication)))
+    .digest('hex')
+  return `${publication.applicationVersionId.toLowerCase()}-strong-${digest.slice(0, 20)}`
+}
+
 export const getCanonicalNaveAlphabeticalBrowse = (publication: CanonicalNavePublication) => {
   const topicCountByInitial: Record<string, number> = {}
   for (const topic of publication.topics) {
@@ -785,8 +803,6 @@ const validateNaveOfflineParity = async (
     database?.close()
   }
 }
-
-const STRONG_IDENTITY_KINDS = ['strong', 'estrong', 'dstrong', 'ustrong'] as const
 
 const requireSqliteInteger = (value: unknown) => {
   if (!Number.isSafeInteger(value)) throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
@@ -949,19 +965,44 @@ const validateStrongBibleOfflineParity = async (
 
 export const validatePublicationBundle = async (bundlePath: string) => {
   const root = path.resolve(bundlePath)
-  const manifestRaw = await readFile(path.join(root, 'manifest.json'), 'utf8')
+  const manifestPath = path.join(root, 'manifest.json')
+  const [manifestStat, resolvedManifest, resolvedRoot] = await Promise.all([
+    lstat(manifestPath),
+    realpath(manifestPath),
+    realpath(root),
+  ])
+  if (!manifestStat.isFile() || !resolvedManifest.startsWith(`${resolvedRoot}${path.sep}`)) {
+    throw new Error('PUBLICATION_BUNDLE_MANIFEST_PATH_INVALID')
+  }
+  const manifestRaw = await readFile(manifestPath, 'utf8')
   const manifest = decodePublicationBundleManifest(JSON.parse(manifestRaw))
   const canonicalPath = path.resolve(root, manifest.canonical.path)
   const offlineArtifactPath = path.resolve(root, manifest.offlineArtifact.path)
 
   await Promise.all([
-    assertArtifact(canonicalPath, manifest.canonical, 'CANONICAL_ARTIFACT'),
-    assertArtifact(offlineArtifactPath, manifest.offlineArtifact, 'OFFLINE_ARTIFACT'),
+    assertArtifact(canonicalPath, manifest.canonical, 'CANONICAL_ARTIFACT', root),
+    assertArtifact(offlineArtifactPath, manifest.offlineArtifact, 'OFFLINE_ARTIFACT', root),
   ])
 
   let offlineEntries: ReturnType<typeof unzipSync>
   try {
-    offlineEntries = unzipSync(await readFile(offlineArtifactPath))
+    const archive = await readFile(offlineArtifactPath)
+    if (archive.byteLength > 512 * 1024 * 1024) throw new Error('archive-too-large')
+    const seenEntries: string[] = []
+    offlineEntries = unzipSync(archive, {
+      filter: entry => {
+        seenEntries.push(entry.name)
+        if (
+          entry.name !== manifest.offlineArtifact.entry ||
+          entry.originalSize > 512 * 1024 * 1024 ||
+          entry.originalSize > Math.max(entry.size * 250, 1024 * 1024)
+        ) {
+          throw new Error('archive-entry-invalid')
+        }
+        return true
+      },
+    })
+    if (seenEntries.length !== 1) throw new Error('archive-entries-invalid')
   } catch (cause) {
     throw new Error('OFFLINE_ARTIFACT_INVALID', { cause })
   }
@@ -1084,7 +1125,7 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     if (
       canonical.applicationVersionId !== manifest.identity.versionId ||
       canonical.datasetId !== manifest.identity.datasetId ||
-      canonical.strongRevision !== manifest.revision ||
+      deriveStrongBibleResourceRevision(canonical) !== manifest.revision ||
       canonical.textRevision !== manifest.dependencies.bible.revision ||
       canonical.textSha256 !== manifest.dependencies.bible.textSha256
     ) {

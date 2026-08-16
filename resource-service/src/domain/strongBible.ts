@@ -15,21 +15,7 @@ import {
   StrongBibleSpanDto,
 } from '../../../src/features/resources/strongBibleContract'
 import type { StrongBibleSpan } from '../../../src/helpers/canonicalStrongVerse'
-
-const SUPPORTED_STRONG_BIBLE_VERSIONS = new Set([
-  'LSG',
-  'DBY',
-  'DBR',
-  'KJV',
-  'NASB2020',
-  'NASB1995',
-  'BSB',
-  'ASV',
-  'DARBY',
-  'RLT',
-  'RWEBSTER',
-  'RV1895',
-])
+import { isStrongBibleVersionId } from '../../../src/helpers/strongBibleCatalog'
 
 export type StrongBibleResourceRevision = {
   versionId: string
@@ -124,7 +110,7 @@ export class StrongBibleRepository extends Context.Tag('StrongBibleRepository')<
 >() {}
 
 const assertSupported = (versionId: string) =>
-  SUPPORTED_STRONG_BIBLE_VERSIONS.has(versionId)
+  isStrongBibleVersionId(versionId)
     ? Effect.void
     : Effect.fail(new UnsupportedStrongBibleVersion({ versionId }))
 

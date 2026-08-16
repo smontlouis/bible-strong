@@ -5,9 +5,10 @@ import path from 'node:path'
 import { zipSync } from 'fflate'
 import initSqlJs from 'sql.js'
 
-import type {
-  CanonicalStrongBiblePublication,
-  StrongBiblePublicationBundleManifest,
+import {
+  deriveStrongBibleResourceRevision,
+  type CanonicalStrongBiblePublication,
+  type StrongBiblePublicationBundleManifest,
 } from '../publicationBundle'
 
 const sha256 = (value: string | Uint8Array) => createHash('sha256').update(value).digest('hex')
@@ -86,7 +87,12 @@ const makeOfflineSqlite = async (canonical: CanonicalStrongBiblePublication) => 
   })) {
     database.run('INSERT INTO ResourceMetadata(key, value) VALUES (?, ?)', [key, String(value)])
   }
-  database.run('INSERT INTO Verses VALUES (1, 1, 1, 1)')
+  const firstVerse = canonical.verses[0]!
+  database.run('INSERT INTO Verses VALUES (1, ?, ?, ?)', [
+    firstVerse.book,
+    firstVerse.chapter,
+    firstVerse.verse,
+  ])
   database.run("INSERT INTO FrenchLexemes VALUES (1, 'Dieu', 'N')")
   database.run('INSERT INTO WordSpans VALUES (1, 0, 0, 4, 1, 0, 1, 1, 7)')
   database.run("INSERT INTO StrongCodes VALUES (1, 0, 'H0430')")
@@ -106,6 +112,8 @@ export const writeStrongPublicationFixture = async (
     textRevision?: string
     textSha256?: string
     duplicateIdentityCode?: boolean
+    extraOfflineEntry?: boolean
+    zeroVerse?: boolean
   } = {}
 ) => {
   const canonical: CanonicalStrongBiblePublication = {
@@ -119,10 +127,23 @@ export const writeStrongPublicationFixture = async (
           { id: 2, kind: 'strong', code: canonicalStrongFixture.identities[0]!.code },
         ]
       : canonicalStrongFixture.identities,
+    ...(options.zeroVerse
+      ? {
+          verses: canonicalStrongFixture.verses.map(verse => ({ ...verse, verse: 0 })),
+          spans: canonicalStrongFixture.spans.map(span => ({ ...span, verse: 0 })),
+          spanIdentities: canonicalStrongFixture.spanIdentities.map(identity => ({
+            ...identity,
+            verse: 0,
+          })),
+        }
+      : {}),
   }
   const canonicalJson = `${JSON.stringify(canonical)}\n`
   const sqlite = await makeOfflineSqlite(canonical)
-  const offline = zipSync({ 'bible-lsg-strong.sqlite': sqlite })
+  const offline = zipSync({
+    'bible-lsg-strong.sqlite': sqlite,
+    ...(options.extraOfflineEntry ? { 'unexpected.txt': new TextEncoder().encode('bad') } : {}),
+  })
   const onlineAccess = options.onlineAccess ?? true
   const manifest: StrongBiblePublicationBundleManifest = {
     format: 'bible-strong-resource-publication',
@@ -133,7 +154,7 @@ export const writeStrongPublicationFixture = async (
       datasetId: canonical.datasetId,
       language: 'fr',
     },
-    revision: canonical.strongRevision,
+    revision: deriveStrongBibleResourceRevision(canonical),
     canonical: {
       path: 'canonical/bible-lsg-strong.json',
       mediaType: 'application/json',

@@ -3,6 +3,7 @@ import { sql, type Kysely } from 'kysely'
 
 import { getStrongBibleConcordanceCandidates } from '../../../src/helpers/strongBibleConcordance'
 import type { StrongBibleSpan } from '../../../src/helpers/canonicalStrongVerse'
+import { STRONG_IDENTITY_KINDS } from '../../../src/helpers/strongIdentities'
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import type { ResourceDatabase } from '../database/types'
@@ -204,9 +205,8 @@ export const makeKyselyStrongBibleRepository = (
 
   const resolveIdentity = (publicationId: number, book: number, reference: string | number) =>
     Effect.gen(function* () {
-      const kindNames = ['strong', 'estrong', 'dstrong', 'ustrong'] as const
       for (const candidate of getStrongBibleConcordanceCandidates(book, reference)) {
-        const kind = kindNames[candidate.kind]
+        const kind = STRONG_IDENTITY_KINDS[candidate.kind]
         if (!kind) continue
         const identity = yield* tryDatabasePromise('strong-bible.identity.resolve', () =>
           database
@@ -220,7 +220,7 @@ export const makeKyselyStrongBibleRepository = (
         if (identity) {
           return {
             id: identity.identity_id,
-            kind: identity.kind as (typeof kindNames)[number],
+            kind: identity.kind as (typeof STRONG_IDENTITY_KINDS)[number],
             code: identity.code,
           }
         }

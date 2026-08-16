@@ -128,7 +128,10 @@ export const importPublicationBundle = (
               resource_revision: manifest.revision,
               text_revision: manifest.dependencies.bible.revision,
               text_sha256: manifest.dependencies.bible.textSha256,
-              strong_revision: manifest.revision,
+              strong_revision:
+                canonical.format === 'bible-strong-canonical-strong-index'
+                  ? canonical.strongRevision
+                  : undefined,
               offline_entry: manifest.offlineArtifact.entry,
             }
       const publicationMetadata = { ...metadata, manifest_sha256: manifestSha256 }
