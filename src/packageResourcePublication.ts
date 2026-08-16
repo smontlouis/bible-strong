@@ -22,6 +22,10 @@ import {
   verifyCanonicalBiblePublication,
   type CanonicalBiblePublication
 } from "./strongBibleMobilePublication.js";
+import {
+  decodeResourcePublicationEnvelope,
+  resolveResourcePublicationPath
+} from "./resourcePublicationEnvelope.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -241,11 +245,11 @@ export async function validateBibleResourcePublication(
     await readFile(path.join(resolvedBundleDir, "manifest.json"), "utf8")
   );
   const manifest = decodeManifest(manifestValue);
-  const canonicalPath = resolveBundlePath(
+  const canonicalPath = resolveResourcePublicationPath(
     resolvedBundleDir,
     manifest.canonical.path
   );
-  const offlineArtifactPath = resolveBundlePath(
+  const offlineArtifactPath = resolveResourcePublicationPath(
     resolvedBundleDir,
     manifest.offlineArtifact.path
   );
@@ -390,49 +394,13 @@ function deriveCanonicalBibleManifestData(
 }
 
 function decodeManifest(value: unknown): BibleResourcePublicationManifest {
-  if (!value || typeof value !== "object") {
-    throw new Error("resource-publication-manifest-invalid");
-  }
+  const envelope = decodeResourcePublicationEnvelope(value);
   const manifest = value as Partial<BibleResourcePublicationManifest>;
-  if (manifest.format !== "bible-strong-resource-publication") {
-    throw new Error("resource-publication-manifest-format-invalid");
-  }
-  if (manifest.schemaVersion !== 1) {
-    throw new Error(
-      `resource-publication-manifest-version-unsupported:${String(manifest.schemaVersion)}`
-    );
-  }
   if (
     manifest.identity?.kind !== "bible-text" ||
     !manifest.identity.versionId ||
     !manifest.identity.language ||
-    !manifest.revision ||
-    manifest.canonical?.mediaType !== "application/json" ||
-    !manifest.canonical.path ||
-    !isSha256(manifest.canonical.sha256) ||
-    !Number.isSafeInteger(manifest.canonical.bytes) ||
-    manifest.offlineArtifact?.mediaType !== "application/zip" ||
-    !manifest.offlineArtifact.path ||
-    !manifest.offlineArtifact.entry ||
-    !isSha256(manifest.offlineArtifact.sha256) ||
-    !isSha256(manifest.offlineArtifact.contentSha256) ||
-    !Number.isSafeInteger(manifest.offlineArtifact.bytes) ||
-    manifest.provenance?.generator !== "bible-lexicon-maker" ||
-    !manifest.provenance.sourceVersion ||
-    !isSha256(manifest.provenance.sourceSha256) ||
-    !manifest.provenance.generatedAt ||
-    !manifest.rights ||
-    typeof manifest.rights.holder !== "string" ||
-    manifest.rights.holder.length === 0 ||
-    typeof manifest.rights.termsReference !== "string" ||
-    manifest.rights.termsReference.length === 0 ||
-    typeof manifest.rights.attribution !== "string" ||
-    manifest.rights.attribution.length === 0 ||
-    typeof manifest.rights.online !== "boolean" ||
-    typeof manifest.rights.offline !== "boolean" ||
-    !manifest.deliveryCapabilities ||
-    typeof manifest.deliveryCapabilities.onlineAccess !== "boolean" ||
-    typeof manifest.deliveryCapabilities.offlineDownload !== "boolean" ||
+    envelope.canonical.schemaVersion < 1 ||
     !manifest.canon ||
     typeof manifest.canon.id !== "string" ||
     manifest.canon.id.length === 0 ||
@@ -454,27 +422,6 @@ function decodeManifest(value: unknown): BibleResourcePublicationManifest {
   }
   validateMetadata(manifest as BibleResourcePublicationManifest);
   return manifest as BibleResourcePublicationManifest;
-}
-
-function resolveBundlePath(bundleDir: string, relativePath: string): string {
-  if (
-    path.isAbsolute(relativePath) ||
-    relativePath.includes("\\") ||
-    relativePath
-      .split("/")
-      .some((segment) => !segment || segment === "." || segment === "..")
-  ) {
-    throw new Error("resource-publication-path-invalid");
-  }
-  const resolved = path.resolve(bundleDir, relativePath);
-  if (!resolved.startsWith(`${bundleDir}${path.sep}`)) {
-    throw new Error("resource-publication-path-invalid");
-  }
-  return resolved;
-}
-
-function isSha256(value: unknown): value is string {
-  return typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
 }
 
 function sha256Buffer(value: Buffer): string {

@@ -42,6 +42,23 @@ npm run resources:publication:bible -- validate \
   --bundle /absolute/path/to/lsg-<revision>
 ```
 
+Publish the French Nave topical resource from its authoritative SQLite source
+with the same handoff contract:
+
+```sh
+npm run resources:publication:nave -- \
+  --sqlite /absolute/path/to/nave-fr.sqlite \
+  --metadata config/resource-publications/nave-fr.json \
+  --output-dir outputs/publications/nave-fr-<revision>
+
+npm run resources:publication:nave -- validate \
+  --bundle /absolute/path/to/nave-fr-<revision>
+```
+
+The Nave producer derives the immutable revision from the ordered topics and
+verse anchors, embeds matching provenance in the Offline SQLite copy, and
+validates canonical-to-SQLite parity before completing the handoff.
+
 The command refuses to replace an existing output directory. Rebuild into a
 new directory for every immutable revision. Production upload or activation is
 not performed by this command. This per-Resource bundle is the canonical

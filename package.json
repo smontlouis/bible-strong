@@ -49,6 +49,7 @@
     "strong:release:mobile": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageMobileStrongBibles.ts",
     "resources:release:mobile": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageMobileResourceCatalog.ts",
     "resources:publication:bible": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageResourcePublication.ts",
+    "resources:publication:nave": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageNaveResourcePublication.ts",
     "strong:release:step-interlinear": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/stepInterlinearPublication.ts",
     "strong:release:step-interlinear:ledger": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/stepInterlinearPublication.ts",
     "strong:release:step-interlinear:runtime": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/stepInterlinearRuntimePublication.ts",
