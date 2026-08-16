@@ -11,13 +11,13 @@ import {
   countCanonicalContent,
   decodePublicationBundleManifest,
   validatePublicationBundle,
+  type BiblePublicationBundleManifest,
   type CanonicalBiblePublication,
-  type PublicationBundleManifest,
 } from '../publicationBundle'
 
 const sha256 = (value: string | Buffer) => createHash('sha256').update(value).digest('hex')
 
-const makeManifest = (overrides: Partial<PublicationBundleManifest> = {}) =>
+const makeManifest = (overrides: Partial<BiblePublicationBundleManifest> = {}) =>
   ({
     format: 'bible-strong-resource-publication',
     schemaVersion: 1,
@@ -57,7 +57,7 @@ const makeManifest = (overrides: Partial<PublicationBundleManifest> = {}) =>
     coverage: { chaptersByBook: { 1: [1] }, verseCountByBookChapter: { '1-1': 1 } },
     counts: { books: 1, chapters: 1, verses: 1, notes: 0, headings: 0 },
     ...overrides,
-  }) satisfies PublicationBundleManifest
+  }) satisfies BiblePublicationBundleManifest
 
 describe('Resource publication bundle', () => {
   it('rejects malformed editorial presentation before import', () => {
@@ -155,6 +155,10 @@ describe('Resource publication bundle', () => {
       const validated = await validatePublicationBundle(root)
 
       assert.equal(validated.manifest.revision, 'lsg-test-revision')
+      assert.equal(validated.canonical.format, 'bible-strong-canonical-bible')
+      if (validated.canonical.format !== 'bible-strong-canonical-bible') {
+        assert.fail('Expected a Bible canonical publication')
+      }
       assert.equal(validated.canonical.verses['1']?.['1']?.['1']?.text, 'Au commencement')
     } finally {
       await rm(root, { recursive: true, force: true })

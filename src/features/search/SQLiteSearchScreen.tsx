@@ -508,8 +508,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       try {
         const result =
           browseItemType === 'nave' && !trimmedSearchValue
-            ? await resources.nave.listByLetter(naveLetter)
-            : await resources.nave.search(trimmedSearchValue)
+            ? await resources.nave.listByLetter(naveLetter, resourcesLanguage.NAVE)
+            : await resources.nave.search(trimmedSearchValue, resourcesLanguage.NAVE)
         return result
       } catch (error) {
         appLogger.error('database', 'search.nave.failed', { error })

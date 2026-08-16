@@ -52,12 +52,18 @@ describe('Resource model', () => {
     expect(getResourceActions(state)).toEqual(['open', 'make-available-offline'])
   })
 
-  it('declares only explicitly served Bible publications remotely readable', () => {
+  it('declares only explicitly served Bible and Nave publications remotely readable', () => {
     expect(
       getResourceOnlineAccess({ kind: 'bible-text', versionId: 'LSG' }, new Set(['LSG']))
     ).toEqual({ status: 'remotely-readable' })
     expect(
       getResourceOnlineAccess({ kind: 'dictionary', language: 'fr' }, new Set(['LSG']))
+    ).toEqual({ status: 'unsupported' })
+    expect(
+      getResourceOnlineAccess({ kind: 'nave', language: 'fr' }, new Set(['LSG']), new Set(['fr']))
+    ).toEqual({ status: 'remotely-readable' })
+    expect(
+      getResourceOnlineAccess({ kind: 'nave', language: 'en' }, new Set(['LSG']), new Set(['fr']))
     ).toEqual({ status: 'unsupported' })
   })
 

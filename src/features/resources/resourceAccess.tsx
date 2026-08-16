@@ -23,7 +23,13 @@ import {
   type BibleSearchAccess,
 } from '~features/resources/bibleSearchAccess'
 import { localDictionaryAccess, type DictionaryAccess } from '~features/resources/dictionaryAccess'
-import { localNaveAccess, type NaveAccess } from '~features/resources/naveAccess'
+import {
+  createHttpNaveAccess,
+  createHybridNaveAccess,
+  localNaveAccess,
+  unavailableHttpNaveAccess,
+  type NaveAccess,
+} from '~features/resources/naveAccess'
 import {
   localStrongLexiconAccess,
   type StrongLexiconAccess,
@@ -85,6 +91,12 @@ const onlineBibleChapterAdapter = resourceApiBaseUrl
       isOnline: async () => onlineManager.isOnline(),
     })
   : unavailableHttpBibleChapterAdapter
+const onlineNaveAccess = resourceApiBaseUrl
+  ? createHttpNaveAccess({
+      baseUrl: resourceApiBaseUrl,
+      isOnline: async () => onlineManager.isOnline(),
+    })
+  : unavailableHttpNaveAccess
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleContent: createBibleContentAccess(
@@ -97,7 +109,12 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleSearch: localBibleSearchAccess,
   dictionary: localDictionaryAccess,
   lexiconBible: localLexiconBibleResourceAccess,
-  nave: localNaveAccess,
+  nave: createHybridNaveAccess({
+    offline: localNaveAccess,
+    online: onlineNaveAccess,
+    remotelyReadableLanguages: resourceApiBaseUrl ? new Set(['fr']) : new Set(),
+    isOnline: async () => onlineManager.isOnline(),
+  }),
   strongLexicon: localStrongLexiconAccess,
   strongBible: localStrongBibleResourceAccess,
   timeline: localTimelineAccess,
@@ -105,7 +122,11 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   offlineCopies: { isAvailable: isLocalResourceAvailable },
   capabilities: {
     getOnlineAccess: identity =>
-      getResourceOnlineAccess(identity, resourceApiBaseUrl ? new Set(['LSG']) : new Set()),
+      getResourceOnlineAccess(
+        identity,
+        resourceApiBaseUrl ? new Set(['LSG']) : new Set(),
+        resourceApiBaseUrl ? new Set(['fr']) : new Set()
+      ),
   },
 }
 

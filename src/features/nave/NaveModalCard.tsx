@@ -37,7 +37,7 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
 
   const naveQuery = useQuery({
     queryKey: ['nave', selectedVerse, resourceLang],
-    queryFn: () => resources.nave.loadByVerse(selectedVerse),
+    queryFn: () => resources.nave.loadByVerse(selectedVerse, resourceLang),
   })
   const { isLoading, error, data } = naveQuery
 

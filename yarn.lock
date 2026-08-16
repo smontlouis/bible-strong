@@ -6410,6 +6410,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/emscripten@npm:*":
+  version: 1.41.5
+  resolution: "@types/emscripten@npm:1.41.5"
+  checksum: 10c0/ae816da716f896434e59df7a71b67c71ae7e85ca067a32aef1616572fc4757459515d42ade6f5b8fd8d69733a9dbd0cf23010fec5b2f41ce52c09501aa350e45
+  languageName: node
+  linkType: hard
+
 "@types/estree@npm:^1.0.6":
   version: 1.0.8
   resolution: "@types/estree@npm:1.0.8"
@@ -6626,6 +6633,16 @@ __metadata:
   dependencies:
     csstype: "npm:^3.2.2"
   checksum: 10c0/b554eab715bb14e581f0ae60e5cefe91e1a5e06c31022b543a9806cf224aa056f21e4fb46208e46eb934d86ca0b247ebc82377192a0dead303cb28b8764c6e67
+  languageName: node
+  linkType: hard
+
+"@types/sql.js@npm:^1.4.11":
+  version: 1.4.11
+  resolution: "@types/sql.js@npm:1.4.11"
+  dependencies:
+    "@types/emscripten": "npm:*"
+    "@types/node": "npm:*"
+  checksum: 10c0/eefb0408235cb645879103414b8ef0f13c2e7f2eac69c2a6c2838b72ec0be49985d6c6711b95bc8d79c208c7c5db95a51576a6ce7bfb49dd9edcc17721ffb40f
   languageName: node
   linkType: hard
 
@@ -7971,6 +7988,7 @@ __metadata:
     "@types/react-dom": "npm:^19.2.3"
     "@types/react-redux": "npm:^7.1.33"
     "@types/react-test-renderer": "npm:^19.1.0"
+    "@types/sql.js": "npm:^1.4.11"
     "@vitejs/plugin-react": "npm:^6.0.2"
     "@xyflow/react": "npm:^12.10.2"
     await-to-js: "npm:^2.1.1"
@@ -8085,6 +8103,7 @@ __metadata:
     rn-fetch-blob: "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch"
     slugify: "npm:^1.4.0"
     sonner-native: "npm:^0.22.2"
+    sql.js: "npm:^1.14.2"
     trunc-html: "npm:^1.1.2"
     tsx: "npm:4.20.6"
     typescript: "npm:~6.0.3"
@@ -18169,6 +18188,13 @@ __metadata:
   version: 1.0.3
   resolution: "sprintf-js@npm:1.0.3"
   checksum: 10c0/ecadcfe4c771890140da5023d43e190b7566d9cf8b2d238600f31bec0fc653f328da4450eb04bd59a431771a8e9cc0e118f0aa3974b683a4981b4e07abc2a5bb
+  languageName: node
+  linkType: hard
+
+"sql.js@npm:^1.14.2":
+  version: 1.14.2
+  resolution: "sql.js@npm:1.14.2"
+  checksum: 10c0/4c217404d85b7396a2c7b6037a9dc96dd05f10c94847bb8c5df70d387ff37702f51551afc97d338ff2c0d504414bb1d3631d48f2a3f33eaa45e862747135d5d5
   languageName: node
   linkType: hard
 

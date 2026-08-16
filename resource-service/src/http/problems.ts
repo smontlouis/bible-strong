@@ -21,7 +21,12 @@ export class ResourceNotFoundProblem extends Schema.TaggedError<ResourceNotFound
   {
     ...ProblemFields,
     status: Schema.Literal(404),
-    code: Schema.Literal('BIBLE_UNSUPPORTED', 'BIBLE_CHAPTER_NOT_FOUND'),
+    code: Schema.Literal(
+      'BIBLE_UNSUPPORTED',
+      'BIBLE_CHAPTER_NOT_FOUND',
+      'NAVE_UNSUPPORTED',
+      'NAVE_TOPIC_NOT_FOUND'
+    ),
   }
 ) {}
 
@@ -30,7 +35,7 @@ export class ResourceUnavailableProblem extends Schema.TaggedError<ResourceUnava
   {
     ...ProblemFields,
     status: Schema.Literal(503),
-    code: Schema.Literal('BIBLE_PUBLICATION_INACTIVE'),
+    code: Schema.Literal('BIBLE_PUBLICATION_INACTIVE', 'NAVE_PUBLICATION_INACTIVE'),
     retryAfterSeconds: Schema.Int.pipe(Schema.positive()),
   }
 ) {}

@@ -15,6 +15,17 @@ const manifest = {
   deliveryCapabilities: { offlineDownload: true },
 } as PublicationBundleManifest
 
+const naveManifest = {
+  identity: { kind: 'nave', resourceId: 'NAVE_FR', language: 'fr' },
+  revision: 'nave-fr-r1',
+  offlineArtifact: {
+    path: 'offline/nave-fr.sqlite.zip',
+    mediaType: 'application/zip',
+    sha256: 'b'.repeat(64),
+  },
+  deliveryCapabilities: { offlineDownload: true },
+} as PublicationBundleManifest
+
 describe('development artifact server', () => {
   it('serves the bundle bytes at the mobile catalog path with integrity headers', async () => {
     const bytes = Buffer.from('immutable LSG bundle')
@@ -50,6 +61,19 @@ describe('development artifact server', () => {
         artifact
       ).status,
       405
+    )
+  })
+
+  it('serves NAVE_FR at the existing mobile database catalog route', () => {
+    const artifact = createDevelopmentArtifact(naveManifest, Buffer.from('nave bundle'))
+
+    assert.equal(artifact.route, '/databases/nave-fr.sqlite.zip')
+    assert.equal(
+      respondWithDevelopmentArtifact(
+        new Request('http://127.0.0.1:8788/databases/nave-fr.sqlite.zip'),
+        artifact
+      ).status,
+      200
     )
   })
 })

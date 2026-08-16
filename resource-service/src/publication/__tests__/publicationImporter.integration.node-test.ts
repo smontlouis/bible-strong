@@ -139,6 +139,8 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
           assert.equal(result.status, 'activated')
         })
       )
+      const unchanged = await Effect.runPromise(importPublicationBundle(firstBundle, database))
+      assert.equal(unchanged.status, 'unchanged')
       await writeBundle({
         root: firstBundle,
         versionId,
@@ -146,8 +148,10 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
         text: 'First',
         rightsHolder: 'attempted-mutation',
       })
-      const unchanged = await Effect.runPromise(importPublicationBundle(firstBundle, database))
-      assert.equal(unchanged.status, 'unchanged')
+      await assert.rejects(
+        Effect.runPromise(importPublicationBundle(firstBundle, database)),
+        /PUBLICATION_REVISION_COLLISION/
+      )
       const unchangedPublication = await database
         .selectFrom('resource_publications')
         .select('rights')
