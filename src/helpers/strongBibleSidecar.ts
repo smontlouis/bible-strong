@@ -68,6 +68,7 @@ export type StrongBibleSidecarAvailability =
       versionId: StrongBibleVersionId
       datasetId: string
       textRevision: string
+      textSha256?: string
       strongRevision: string
     }
 
@@ -133,6 +134,7 @@ export const getStrongBibleSidecarAvailability = async (
         versionId,
         datasetId: metadata.datasetId,
         textRevision: metadata.textRevision,
+        textSha256: metadata.textSha256,
         strongRevision: metadata.strongRevision,
       }
     })

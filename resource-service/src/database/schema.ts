@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm'
 import {
+  boolean,
   index,
   foreignKey,
   integer,
@@ -133,5 +134,169 @@ export const naveVerseLinks = pgTable(
     }).onDelete('cascade'),
     index('nave_verse_links_verse_lookup').on(table.publication_id, table.verse_key),
     index('nave_verse_links_topic_lookup').on(table.publication_id, table.normalized_name),
+  ]
+)
+
+export const strongBibleVerses = pgTable(
+  'strong_bible_verses',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    book: integer('book').notNull(),
+    chapter: integer('chapter').notNull(),
+    verse: integer('verse').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_bible_verses_publication_location_primary',
+      columns: [table.publication_id, table.book, table.chapter, table.verse],
+    }),
+    index('strong_bible_verses_chapter_lookup').on(
+      table.publication_id,
+      table.book,
+      table.chapter,
+      table.verse
+    ),
+  ]
+)
+
+export const strongBibleLexemes = pgTable(
+  'strong_bible_lexemes',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    lexeme_id: integer('lexeme_id').notNull(),
+    lemma: text('lemma').notNull(),
+    part_of_speech: text('part_of_speech').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_bible_lexemes_publication_id_primary',
+      columns: [table.publication_id, table.lexeme_id],
+    }),
+    index('strong_bible_lexemes_label_lookup').on(
+      table.publication_id,
+      table.lemma,
+      table.part_of_speech
+    ),
+  ]
+)
+
+export const strongBibleIdentities = pgTable(
+  'strong_bible_identities',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    identity_id: integer('identity_id').notNull(),
+    kind: text('kind').notNull(),
+    code: text('code').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_bible_identities_publication_id_primary',
+      columns: [table.publication_id, table.identity_id],
+    }),
+    uniqueIndex('strong_bible_identities_code_unique').on(
+      table.publication_id,
+      table.kind,
+      table.code
+    ),
+  ]
+)
+
+export const strongBibleSpans = pgTable(
+  'strong_bible_spans',
+  {
+    publication_id: integer('publication_id').notNull(),
+    book: integer('book').notNull(),
+    chapter: integer('chapter').notNull(),
+    verse: integer('verse').notNull(),
+    ordinal: integer('ordinal').notNull(),
+    start_offset: integer('start_offset').notNull(),
+    length: integer('length').notNull(),
+    is_aligned: boolean('is_aligned').notNull(),
+    lexeme_id: integer('lexeme_id'),
+    step_token_ids: jsonb('step_token_ids').$type<number[]>().notNull().default([]),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_bible_spans_publication_location_primary',
+      columns: [table.publication_id, table.book, table.chapter, table.verse, table.ordinal],
+    }),
+    foreignKey({
+      name: 'strong_bible_spans_verse_fk',
+      columns: [table.publication_id, table.book, table.chapter, table.verse],
+      foreignColumns: [
+        strongBibleVerses.publication_id,
+        strongBibleVerses.book,
+        strongBibleVerses.chapter,
+        strongBibleVerses.verse,
+      ],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'strong_bible_spans_lexeme_fk',
+      columns: [table.publication_id, table.lexeme_id],
+      foreignColumns: [strongBibleLexemes.publication_id, strongBibleLexemes.lexeme_id],
+    }).onDelete('cascade'),
+    index('strong_bible_spans_chapter_lookup').on(
+      table.publication_id,
+      table.book,
+      table.chapter,
+      table.verse,
+      table.ordinal
+    ),
+    index('strong_bible_spans_lexeme_lookup').on(table.publication_id, table.lexeme_id),
+  ]
+)
+
+export const strongBibleSpanIdentities = pgTable(
+  'strong_bible_span_identities',
+  {
+    publication_id: integer('publication_id').notNull(),
+    book: integer('book').notNull(),
+    chapter: integer('chapter').notNull(),
+    verse: integer('verse').notNull(),
+    ordinal: integer('ordinal').notNull(),
+    identity_order: integer('identity_order').notNull(),
+    identity_id: integer('identity_id').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_bible_span_identities_publication_location_primary',
+      columns: [
+        table.publication_id,
+        table.book,
+        table.chapter,
+        table.verse,
+        table.ordinal,
+        table.identity_order,
+      ],
+    }),
+    foreignKey({
+      name: 'strong_bible_span_identities_span_fk',
+      columns: [table.publication_id, table.book, table.chapter, table.verse, table.ordinal],
+      foreignColumns: [
+        strongBibleSpans.publication_id,
+        strongBibleSpans.book,
+        strongBibleSpans.chapter,
+        strongBibleSpans.verse,
+        strongBibleSpans.ordinal,
+      ],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'strong_bible_span_identities_identity_fk',
+      columns: [table.publication_id, table.identity_id],
+      foreignColumns: [strongBibleIdentities.publication_id, strongBibleIdentities.identity_id],
+    }).onDelete('cascade'),
+    index('strong_bible_span_identities_lookup').on(
+      table.publication_id,
+      table.identity_id,
+      table.book,
+      table.chapter,
+      table.verse
+    ),
   ]
 )

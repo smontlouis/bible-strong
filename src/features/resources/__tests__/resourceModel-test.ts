@@ -52,7 +52,7 @@ describe('Resource model', () => {
     expect(getResourceActions(state)).toEqual(['open', 'make-available-offline'])
   })
 
-  it('declares only explicitly served Bible and Nave publications remotely readable', () => {
+  it('declares only explicitly served Bible, Strong Bible, and Nave publications remotely readable', () => {
     expect(
       getResourceOnlineAccess({ kind: 'bible-text', versionId: 'LSG' }, new Set(['LSG']))
     ).toEqual({ status: 'remotely-readable' })
@@ -61,6 +61,14 @@ describe('Resource model', () => {
     ).toEqual({ status: 'unsupported' })
     expect(
       getResourceOnlineAccess({ kind: 'nave', language: 'fr' }, new Set(['LSG']), new Set(['fr']))
+    ).toEqual({ status: 'remotely-readable' })
+    expect(
+      getResourceOnlineAccess(
+        { kind: 'strong-bible-index', versionId: 'LSG' },
+        new Set(['LSG']),
+        new Set(['fr']),
+        new Set(['LSG'])
+      )
     ).toEqual({ status: 'remotely-readable' })
     expect(
       getResourceOnlineAccess({ kind: 'nave', language: 'en' }, new Set(['LSG']), new Set(['fr']))

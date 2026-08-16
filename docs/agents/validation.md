@@ -27,6 +27,7 @@ Copy `.env.example` to the appropriate local environment file and fill required 
 | Resource unit tests | `yarn resources:test` | Bundle, importer, API, repository, or runtime changes |
 | Resource Postgres integration | `yarn resources:test:integration` | Schema, migrations, importer, or persistence changes |
 | Complete LSG parity | `yarn resources:test:lsg` | Publication, API response, or Bible presentation changes |
+| Complete Strong Bible parity | `RESOURCE_STRONG_BIBLE_BUNDLES_ROOT=/absolute/path yarn resources:test:strong` | Strong publication, importer, API, or sidecar changes |
 
 `yarn agents:architecture:check` regenerates `docs/agents/architecture-lint.md` and `.scratch/architecture/architecture.json`, then fails on high-risk boundary errors. Warnings are intentionally non-blocking for the current brownfield baseline.
 

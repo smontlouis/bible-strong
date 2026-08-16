@@ -24,6 +24,19 @@ import {
   UnsupportedNaveLanguage,
   type NaveRepositoryService,
 } from '../domain/nave'
+import {
+  ActiveStrongBiblePublicationUnavailable,
+  readStrongBibleChapter,
+  readStrongBibleCounts,
+  readStrongBibleCoverage,
+  readStrongBibleLemmaStats,
+  readStrongBibleOccurrences,
+  StrongBibleChapterNotFound,
+  StrongBibleRepository,
+  StrongBibleRepositoryFailure,
+  UnsupportedStrongBibleVersion,
+  type StrongBibleRepositoryService,
+} from '../domain/strongBible'
 import { HealthResponse, ResourceApi } from './api'
 import {
   InvalidResourceRequestProblem,
@@ -55,7 +68,11 @@ const toHttpProblem = (
     | UnsupportedNaveLanguage
     | ActiveNavePublicationUnavailable
     | NaveTopicNotFound
-    | NaveRepositoryFailure,
+    | NaveRepositoryFailure
+    | UnsupportedStrongBibleVersion
+    | ActiveStrongBiblePublicationUnavailable
+    | StrongBibleChapterNotFound
+    | StrongBibleRepositoryFailure,
   requestId: string
 ) => {
   switch (cause._tag) {
@@ -80,6 +97,7 @@ const toHttpProblem = (
       })
     case 'BibleChapterRepositoryFailure':
     case 'NaveRepositoryFailure':
+    case 'StrongBibleRepositoryFailure':
       return new ResourceInternalProblem({
         ...problemFields(requestId, 'The Resource service could not complete the request.'),
         status: 500,
@@ -102,6 +120,25 @@ const toHttpProblem = (
         ...problemFields(requestId, 'The Nave publication is temporarily unavailable.'),
         status: 503,
         code: 'NAVE_PUBLICATION_INACTIVE',
+        retryAfterSeconds: 30,
+      })
+    case 'UnsupportedStrongBibleVersion':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This Strong Bible index is not available from this service.'),
+        status: 404,
+        code: 'STRONG_BIBLE_UNSUPPORTED',
+      })
+    case 'StrongBibleChapterNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This Strong Bible chapter does not exist.'),
+        status: 404,
+        code: 'STRONG_BIBLE_CHAPTER_NOT_FOUND',
+      })
+    case 'ActiveStrongBiblePublicationUnavailable':
+      return new ResourceUnavailableProblem({
+        ...problemFields(requestId, 'The Strong Bible publication is temporarily unavailable.'),
+        status: 503,
+        code: 'STRONG_BIBLE_PUBLICATION_INACTIVE',
         retryAfterSeconds: 30,
       })
   }
@@ -179,7 +216,7 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
     })
 )
 
-const serveNaveResponse = <A extends { resource: { revision: string } }, E, R>(
+const serveRevisionedResponse = <A extends { resource: { revision: string } }, E, R>(
   effect: Effect.Effect<A, E, R>,
   requestId: string,
   ifNoneMatch: string | undefined,
@@ -206,7 +243,7 @@ const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
   handlers
     .handle('getNaveTopic', ({ path, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
-      return serveNaveResponse(
+      return serveRevisionedResponse(
         readNaveTopic(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],
@@ -215,7 +252,7 @@ const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
     })
     .handle('listNaveTopics', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
-      return serveNaveResponse(
+      return serveRevisionedResponse(
         browseNaveTopics({ ...path, initial: urlParams.initial, search: urlParams.search }).pipe(
           Effect.mapError(cause => toHttpProblem(cause, requestId))
         ),
@@ -226,7 +263,7 @@ const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
     })
     .handle('getNaveVerseTopics', ({ path, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
-      return serveNaveResponse(
+      return serveRevisionedResponse(
         readNaveVerseTopics(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],
@@ -235,7 +272,7 @@ const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
     })
     .handle('getRandomNaveTopic', ({ path, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
-      return serveNaveResponse(
+      return serveRevisionedResponse(
         readRandomNaveTopic(path.language).pipe(
           Effect.mapError(cause => toHttpProblem(cause, requestId))
         ),
@@ -245,10 +282,81 @@ const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
     })
 )
 
+const StrongBibleApiLive = HttpApiBuilder.group(ResourceApi, 'strongBibles', handlers =>
+  handlers
+    .handle('getStrongBibleCoverage', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongBibleCoverage(path.version).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-bible', path.version, 'coverage']
+      )
+    })
+    .handle('getStrongBibleChapter', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongBibleChapter({
+          versionId: path.version,
+          book: path.book,
+          chapter: path.chapter,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-bible', path.version, path.book, path.chapter]
+      )
+    })
+    .handle('getStrongBibleCounts', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongBibleCounts({
+          versionId: path.version,
+          book: path.book,
+          reference: path.reference,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-bible', path.version, path.book, path.reference, 'counts']
+      )
+    })
+    .handle('getStrongBibleOccurrences', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongBibleOccurrences({
+          versionId: path.version,
+          book: path.book,
+          reference: path.reference,
+          limit: urlParams.limit,
+          offset: urlParams.offset,
+          allBooks: urlParams.allBooks === 'true',
+          lexemeId: urlParams.lexemeId,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match']
+      )
+    })
+    .handle('getStrongBibleLemmaStats', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongBibleLemmaStats({
+          versionId: path.version,
+          book: path.book,
+          reference: path.reference,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-bible', path.version, path.book, path.reference, 'lemmas']
+      )
+    })
+)
+
 export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
   Layer.provide(BibleApiLive),
-  Layer.provide(NaveApiLive)
+  Layer.provide(NaveApiLive),
+  Layer.provide(StrongBibleApiLive)
 )
 
 const unavailableRepository: BibleChapterRepositoryService = {
@@ -270,25 +378,48 @@ const unavailableNaveRepository: NaveRepositoryService = {
   findRandomTopic: language => Effect.fail(new ActiveNavePublicationUnavailable({ language })),
 }
 
+const unavailableStrongBibleRepository: StrongBibleRepositoryService = {
+  findActiveCoverage: versionId =>
+    Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId })),
+  findActiveChapter: input =>
+    Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
+  findCountsByBook: input =>
+    Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
+  findOccurrences: input =>
+    Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
+  findLemmaStats: input =>
+    Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
+}
+
 export const provideResourceRepositories = (
   repository: BibleChapterRepositoryService,
-  naveRepository: NaveRepositoryService
+  naveRepository: NaveRepositoryService,
+  strongBibleRepository: StrongBibleRepositoryService = unavailableStrongBibleRepository
 ) =>
   ResourceApiLive.pipe(
     Layer.provide(
-      Layer.merge(
+      Layer.mergeAll(
         Layer.succeed(BibleChapterRepository, repository),
-        Layer.succeed(NaveRepository, naveRepository)
+        Layer.succeed(NaveRepository, naveRepository),
+        Layer.succeed(StrongBibleRepository, strongBibleRepository)
       )
     )
   )
 
 export const makeResourceWebHandler = (
   repository: BibleChapterRepositoryService = unavailableRepository,
-  naveRepository: NaveRepositoryService = unavailableNaveRepository
+  naveRepository: NaveRepositoryService = unavailableNaveRepository,
+  overrides: ResourceRepositoryOverrides = {}
 ) => {
   const web = HttpApiBuilder.toWebHandler(
-    Layer.mergeAll(provideResourceRepositories(repository, naveRepository), HttpServer.layerContext)
+    Layer.mergeAll(
+      provideResourceRepositories(
+        repository,
+        naveRepository,
+        overrides.strongBible ?? unavailableStrongBibleRepository
+      ),
+      HttpServer.layerContext
+    )
   )
   return {
     ...web,
@@ -317,4 +448,8 @@ export const makeResourceWebHandler = (
       return new Response(response.body, { status: response.status, headers })
     },
   }
+}
+
+export type ResourceRepositoryOverrides = {
+  strongBible?: StrongBibleRepositoryService
 }

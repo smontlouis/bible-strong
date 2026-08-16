@@ -93,7 +93,10 @@ export interface InterlinearLexiconAdapter {
 }
 
 export interface LexiconBibleResourceDependencies {
-  strongBible: StrongBibleResourceAccess
+  strongBible: Pick<
+    StrongBibleResourceAccess,
+    'loadVerse' | 'loadCountsByBook' | 'loadFoundVersesByBook' | 'loadLemmaStats'
+  >
   interlinear: InterlinearLexiconAdapter
 }
 

@@ -7,9 +7,11 @@ import { createServer } from 'node:http'
 import { makeLocalDatabase } from '../database/localDatabase'
 import { BibleChapterRepository } from '../domain/bibleChapter'
 import { NaveRepository } from '../domain/nave'
+import { StrongBibleRepository } from '../domain/strongBible'
 import { ResourceApiLive } from '../http/app'
 import { makeKyselyBibleChapterRepository } from '../repositories/bibleChapterRepository'
 import { makeKyselyNaveRepository } from '../repositories/naveRepository'
+import { makeKyselyStrongBibleRepository } from '../repositories/strongBibleRepository'
 
 const port = Number(process.env.RESOURCE_API_PORT ?? 8787)
 const database = makeLocalDatabase({
@@ -18,14 +20,15 @@ const database = makeLocalDatabase({
     'postgresql://bible_strong:bible_strong@127.0.0.1:54329/bible_strong',
 })
 
-const RepositoryLive = Layer.merge(
+const RepositoryLive = Layer.mergeAll(
   Layer.scoped(
     BibleChapterRepository,
     Effect.acquireRelease(Effect.succeed(makeKyselyBibleChapterRepository(database)), () =>
       Effect.promise(() => database.destroy())
     )
   ),
-  Layer.succeed(NaveRepository, makeKyselyNaveRepository(database))
+  Layer.succeed(NaveRepository, makeKyselyNaveRepository(database)),
+  Layer.succeed(StrongBibleRepository, makeKyselyStrongBibleRepository(database))
 )
 const ApiLive = ResourceApiLive.pipe(Layer.provide(RepositoryLive))
 

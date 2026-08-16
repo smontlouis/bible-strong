@@ -216,6 +216,14 @@ export const getMobileBibleVersionIds = (
         .map(resourceId => resourceId.slice('bible:'.length))
         .sort()
 
+export const getMobileStrongBibleVersionIds = (
+  catalog: MobileResourceCatalog = MOBILE_RESOURCE_CATALOG
+): string[] =>
+  Object.keys(catalog.resources)
+    .filter(resourceId => resourceId.startsWith('bible-strong:'))
+    .map(resourceId => resourceId.slice('bible-strong:'.length))
+    .sort()
+
 let developmentResourceArtifactBaseUrl: string | undefined
 
 export const configureDevelopmentResourceArtifactBaseUrl = (value: string | undefined): void => {

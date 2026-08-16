@@ -15,7 +15,7 @@ search ranking or routing.
 | `bible-text:<version>` | `bibleContent`, `bibleReading`, `bibleSearch` | `LSG`: remotely readable through `/v1/bibles/...` including ordered coverage; remote full-text search is not part of this first slice; other versions are unsupported for now | Bible SQLite archive, removable even when selected/default | Reader, book/chapter navigation, version selector, comparison, search, export, audio helpers | Resource model, hybrid source/coverage, queries, complete LSG API/presentation parity, version catalogue |
 | `bible-presentation:<version>:pericope` | `bibleReading` | Unsupported for now | Pericope sidecar, independent from canonical Bible text | Pericope reader, passage navigation | Identity/offline-copy mapping and Bible reading tests |
 | `bible-presentation:<version>:red-words` | `bibleReading` | Unsupported for now | Red-word sidecar, independent from canonical Bible text | Bible reader and export | Identity/offline-copy mapping and Bible reading tests |
-| `strong-bible-index:<version>` | `strongBible`, `lexiconBible` | Unsupported for now | Strong index sidecar, independently downloadable/removable | Strong mode selector, concordance, verse detail, lexicon source selector | Strong Bible and lexicon Bible adapter suites |
+| `strong-bible-index:<version>` | `strongBible`, `lexiconBible` | All 12 cataloged versions: remotely readable through `/v1/strong-bibles/...` when the index and its exact Bible revision and text SHA-256 are active | Strong index sidecar, independently downloadable/removable; installed copy wins | Strong mode selector, concordance, verse detail, lexicon source selector | Publication/archive parity, atomic PostgreSQL import, typed API, hybrid HTTP/SQLite source selection, failure/recovery/removal, and existing managed download/update suites |
 | `interlinear-index:BHG:<language>` | `strongBible`, `lexiconBible` | Unsupported for now | BHG interlinear sidecar for FR/EN | Interlinear selector and Strong verse display | Resource model plus Strong/lexicon adapter suites |
 | `strong-lexicon:<module>` | `strongLexicon` | Unsupported for now | Core, resources, and entity modules remain independent | Lexicon list/detail, Strong entry routes, relation graph | Strong lexicon adapter and route tests |
 | `dictionary:<language>` | `dictionary` | Unsupported for now | FR/EN dictionary database | Dictionary list/detail and verse cards | Dictionary adapter/query tests and architecture guard |
@@ -41,7 +41,7 @@ search ranking or routing.
 | Valid Offline copy, with or without network | Read the installed copy. Online content never silently replaces the installed revision. |
 | Search while connected, once remote search exists | Query the remote search service first, even when a local index is installed; fall back locally on a temporary remote failure. |
 | Search while disconnected | Query the installed local index first; if none exists, show the shared unavailable state without offering an impossible transfer. |
-| No Offline copy, online operation supported and connected | Read Online content. LSG chapter text/coverage and NAVE_FR topic operations are implemented. |
+| No Offline copy, online operation supported and connected | Read Online content. LSG chapter text/coverage, all cataloged Strong Bible index operations, and NAVE_FR topic operations are implemented. |
 | No Offline copy, Online operation not implemented, connected | Keep the feature open and explain that an Offline copy is needed for now; offer **Make available offline**. |
 | No Offline copy and disconnected | Keep the feature open, explain that reconnection is required, and disable the transfer action. |
 | Download queued while connectivity disappears | Keep the item queued without consuming retries; resume processing after reconnection. |
@@ -65,6 +65,9 @@ never become a download button merely because the check returned no data.
   provenance, rights, independent canonical/SQLite checksums, and delivery capabilities.
 - NAVE_FR import and repository integration tests exercise atomic activation, lookup,
   alphabetical browse, temporary domain search, verse-linked topics, and random topic selection.
+- Strong Bible publication tests preserve token identity, alignment, morphology token links, lexical
+  references, dependency revisions, and canonical/SQLite counts. The complete-set gate requires all
+  12 Maker handoffs before import/API parity can pass.
 - Mobile adapter tests cover installed-copy priority, zero-copy HTTP, local not-found without source
   hopping, invalid local copy recovery, network-offline, inactive service, malformed content, and
   unsupported English remote access. Existing managed installation/removal suites cover the shared
