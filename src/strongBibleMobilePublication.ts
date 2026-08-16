@@ -476,6 +476,7 @@ export function verifyCanonicalBiblePublication(
   ) {
     throw new Error("strong-bible-mobile-invalid-canonical-publication");
   }
+  assertCanonicalVerseIdentities(publication.verses);
   const expectedTextSha256 = hashCanonicalVerses(publication.verses);
   if (publication.textSha256 !== expectedTextSha256) {
     throw new Error(
@@ -573,6 +574,38 @@ export function verifyCanonicalBiblePublication(
     headingCount,
     invalidNoteRangeCount
   };
+}
+
+function assertCanonicalVerseIdentities(
+  verses: CanonicalBiblePublication["verses"]
+): void {
+  for (const [bookKey, chapters] of Object.entries(verses)) {
+    if (!isPositiveIntegerKey(bookKey) || !isRecord(chapters)) {
+      throw new Error(`strong-bible-mobile-invalid-book-identity:${bookKey}`);
+    }
+    for (const [chapterKey, chapter] of Object.entries(chapters)) {
+      if (!isPositiveIntegerKey(chapterKey) || !isRecord(chapter)) {
+        throw new Error(
+          `strong-bible-mobile-invalid-chapter-identity:${bookKey}:${chapterKey}`
+        );
+      }
+      for (const [verseKey, verse] of Object.entries(chapter)) {
+        if (!isPositiveIntegerKey(verseKey) || !isRecord(verse)) {
+          throw new Error(
+            `strong-bible-mobile-invalid-verse-identity:${bookKey}:${chapterKey}:${verseKey}`
+          );
+        }
+      }
+    }
+  }
+}
+
+function isPositiveIntegerKey(value: string): boolean {
+  return /^(?:[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
 }
 
 export async function verifyStrongBibleMobilePublication(options: {

@@ -137,6 +137,72 @@ test("publishes one canonical Bible and its matching Offline-copy bundle", async
     validateBibleResourcePublication(outputDir),
     /resource-publication-manifest-version-unsupported:2/
   );
+
+  manifest.schemaVersion = 1;
+  delete manifest.deliveryCapabilities.onlineAccess;
+  await writeFile(
+    result.manifestPath,
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    "utf8"
+  );
+  await assert.rejects(
+    validateBibleResourcePublication(outputDir),
+    /resource-publication-manifest-invalid/
+  );
+});
+
+test("rejects malformed canonical verse identities", async (t) => {
+  const directory = await mkdtemp(
+    path.join(tmpdir(), "bible-resource-publication-identity-")
+  );
+  t.after(async () => rm(directory, { recursive: true, force: true }));
+  const canonicalPath = path.join(directory, "bible-test.json");
+  const verse = {
+    text: "Texte",
+    startTags: [],
+    layout: [],
+    notes: [],
+    headings: []
+  };
+  const textSha256 = createHash("sha256")
+    .update(`${JSON.stringify([1, 1, 0, verse])}\n`)
+    .digest("hex");
+  await writeFile(
+    canonicalPath,
+    `${JSON.stringify({
+      format: "bible-strong-canonical-bible",
+      schemaVersion: 4,
+      applicationVersionId: "TEST",
+      datasetId: "test-source",
+      sourceVersion: "TEST-SOURCE",
+      textRevision: `test-${textSha256.slice(0, 20)}`,
+      textSha256,
+      sourceSha256: "b".repeat(64),
+      verseCount: 1,
+      noteCount: 0,
+      headingCount: 0,
+      verses: { "1": { "1": { "0": verse } } }
+    })}\n`,
+    "utf8"
+  );
+  await assert.rejects(
+    buildBibleResourcePublication({
+      canonicalPath,
+      outputDir: path.join(directory, "publication"),
+      identity: { versionId: "TEST", language: "fr" },
+      rights: {
+        holder: "Test holder",
+        termsReference: "terms",
+        attribution: "Test Bible",
+        online: true,
+        offline: true
+      },
+      deliveryCapabilities: { onlineAccess: true, offlineDownload: true },
+      canon: { id: "test-canon", orderedBooks: [1] },
+      versification: "test"
+    }),
+    /strong-bible-mobile-invalid-verse-identity:1:1:0/
+  );
 });
 
 test("rejects a canonical Bible whose declared revision is not content-derived", async (t) => {

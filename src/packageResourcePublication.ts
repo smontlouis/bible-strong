@@ -422,11 +422,33 @@ function decodeManifest(value: unknown): BibleResourcePublicationManifest {
     !isSha256(manifest.provenance.sourceSha256) ||
     !manifest.provenance.generatedAt ||
     !manifest.rights ||
+    typeof manifest.rights.holder !== "string" ||
+    manifest.rights.holder.length === 0 ||
+    typeof manifest.rights.termsReference !== "string" ||
+    manifest.rights.termsReference.length === 0 ||
+    typeof manifest.rights.attribution !== "string" ||
+    manifest.rights.attribution.length === 0 ||
+    typeof manifest.rights.online !== "boolean" ||
+    typeof manifest.rights.offline !== "boolean" ||
     !manifest.deliveryCapabilities ||
+    typeof manifest.deliveryCapabilities.onlineAccess !== "boolean" ||
+    typeof manifest.deliveryCapabilities.offlineDownload !== "boolean" ||
     !manifest.canon ||
+    typeof manifest.canon.id !== "string" ||
+    manifest.canon.id.length === 0 ||
+    !Array.isArray(manifest.canon.orderedBooks) ||
+    manifest.canon.orderedBooks.length === 0 ||
+    manifest.canon.orderedBooks.some(
+      (book) => !Number.isSafeInteger(book) || book < 1
+    ) ||
     !manifest.versification ||
     !manifest.coverage ||
-    !manifest.counts
+    !manifest.coverage.chaptersByBook ||
+    !manifest.coverage.verseCountByBookChapter ||
+    !manifest.counts ||
+    Object.values(manifest.counts).some(
+      (count) => !Number.isSafeInteger(count) || count < 0
+    )
   ) {
     throw new Error("resource-publication-manifest-invalid");
   }
