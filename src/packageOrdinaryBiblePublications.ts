@@ -283,7 +283,8 @@ export async function buildOrdinaryBiblePublications(options: {
       });
       publications.push({
         id: metadata.id,
-        revision: result.manifest.publicationRevision,
+        revision: result.manifest.revision,
+        publicationRevision: result.manifest.publicationRevision,
         textRevision: result.manifest.revision,
         onlineAccess: result.manifest.deliveryCapabilities.onlineAccess
       });
