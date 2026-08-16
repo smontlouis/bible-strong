@@ -30,7 +30,6 @@ export type OfflineSetupOption = {
   description?: string
   descriptionKey?: string
   language?: string
-  required?: boolean
   requires?: string[]
   selections: OnboardingResourceSelection[]
 }
@@ -52,14 +51,12 @@ const getBibleLabel = (versionId: string, lang: ResourceLanguage): string => {
 const createBibleOption = (
   versionId: string,
   lang: ResourceLanguage,
-  required = false,
   label = getBibleLabel(versionId, lang)
 ): OfflineSetupOption => ({
   id: `bible:${versionId}`,
   label,
   description: versions[versionId].c,
   language: versions[versionId].language,
-  required,
   selections: [{ kind: 'bible', versionId }],
 })
 
@@ -143,12 +140,12 @@ const getBibleFolderCatalogSections = (kind: BibleDefaultSelectionKind, lang: Re
 }
 
 const getReadableBibleSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
-  const requiredVersionId = getDefaultBibleVersion(lang)
+  const suggestedVersionId = getDefaultBibleVersion(lang)
   const catalogSections = getBibleFolderCatalogSections('reading', lang).reduce(
     (result, section) => {
       const options = section.data.reduce<OfflineSetupOption[]>((sectionOptions, version) => {
-        if (version.id !== requiredVersionId) {
-          sectionOptions.push(createBibleOption(version.id, lang, false, version.displayName))
+        if (version.id !== suggestedVersionId) {
+          sectionOptions.push(createBibleOption(version.id, lang, version.displayName))
         }
         return sectionOptions
       }, [])
@@ -167,8 +164,8 @@ const getReadableBibleSections = (lang: ResourceLanguage): OfflineSetupSection[]
 
   return [
     {
-      id: 'required-bible',
-      options: [createBibleOption(requiredVersionId, lang, true)],
+      id: 'suggested-bible',
+      options: [createBibleOption(suggestedVersionId, lang)],
     },
     ...catalogSections,
   ]
@@ -349,7 +346,7 @@ const getFolderOptions = (
   return Object.fromEntries(entries) as Record<OfflineSetupFolderId, OfflineSetupOption[]>
 }
 
-const collectRequiredOptionIds = (
+const collectDependencyOptionIds = (
   option: OfflineSetupOption,
   folderOptions: Record<OfflineSetupFolderId, OfflineSetupOption[]>
 ): Set<string> => {
@@ -428,13 +425,11 @@ export const toggleOfflineSetupFolderOption = (
   option: OfflineSetupOption,
   lang: ResourceLanguage
 ): OfflineSetupFolderOptionIds => {
-  if (option.required) return { ...selectedIdsByFolder }
-
   const folderOptions = getFolderOptions(lang)
   const isSelected = selectedIdsByFolder[sourceFolderId].includes(option.id)
   if (!isSelected) {
-    const requiredOptionIds = collectRequiredOptionIds(option, folderOptions)
-    return addOptionIdsToFolders(selectedIdsByFolder, requiredOptionIds, folderOptions)
+    const dependencyOptionIds = collectDependencyOptionIds(option, folderOptions)
+    return addOptionIdsToFolders(selectedIdsByFolder, dependencyOptionIds, folderOptions)
   }
 
   const removedOptionIds = collectDependentOptionIds(option.id, selectedIdsByFolder, folderOptions)
@@ -451,12 +446,11 @@ export const getOfflineSetupLockedOptionIds = (
   for (const folderId of OFFLINE_SETUP_FOLDER_IDS) {
     const selectedIds = new Set(selectedIdsByFolder[folderId])
     for (const option of folderOptions[folderId]) {
-      if (option.required) lockedIds.add(option.id)
       if (!selectedIds.has(option.id)) continue
 
-      const requiredIds = collectRequiredOptionIds(option, folderOptions)
-      requiredIds.delete(option.id)
-      requiredIds.forEach(requiredId => lockedIds.add(requiredId))
+      const dependencyIds = collectDependencyOptionIds(option, folderOptions)
+      dependencyIds.delete(option.id)
+      dependencyIds.forEach(dependencyId => lockedIds.add(dependencyId))
     }
   }
 
@@ -488,13 +482,9 @@ export const resolveOfflineSetupFolderOptionIds = (
   optionIdsByFolder: OfflineSetupFolderOptionIds,
   lang: ResourceLanguage
 ): OnboardingResourceSelection[] => {
-  const requiredBible: OnboardingResourceSelection = {
-    kind: 'bible',
-    versionId: getDefaultBibleVersion(lang),
-  }
   const selections = OFFLINE_SETUP_FOLDER_IDS.flatMap(folderId =>
     resolveOfflineSetupFolderSelections(folderId, optionIdsByFolder[folderId], lang)
   )
 
-  return getUniqueResourceSelections([requiredBible, ...selections])
+  return getUniqueResourceSelections(selections)
 }

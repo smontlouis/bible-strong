@@ -41,6 +41,7 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
@@ -77,17 +78,14 @@ const DictionnaryDetailScreen = ({
     networkMode: 'always',
     staleTime: Infinity,
   })
-  const {
-    data: dictionnaireItem = null,
-    isPending: isDictionaryPending,
-    isError: isDictionaryError,
-  } = useQuery({
+  const dictionaryQuery = useQuery({
     queryKey: ['dictionary-detail', dictionaryResourceLanguage, word],
     queryFn: async () => (word ? ((await resources.dictionary.loadItem(word)) ?? null) : null),
     enabled: !!word,
     staleTime: Infinity,
     ...localQueryOptions,
   })
+  const dictionnaireItem = dictionaryQuery.data ?? null
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
@@ -200,7 +198,7 @@ const DictionnaryDetailScreen = ({
           databaseId: 'DICTIONNAIRE',
           language: dictionaryResourceLanguage,
         }}
-        title={t('La base de données dictionnaire est requise pour accéder à cette page.')}
+        title={t('resource.dictionary.offlineCopyNeeded')}
         fileSize={22}
         hasBackButton={hasBackButton}
         hasHeader
@@ -208,7 +206,7 @@ const DictionnaryDetailScreen = ({
     )
   }
 
-  if (isDictionaryPending) {
+  if (dictionaryQuery.isPending) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header
@@ -221,7 +219,33 @@ const DictionnaryDetailScreen = ({
     )
   }
 
-  if (isDictionaryError || !dictionnaireItem) {
+  if (dictionaryAvailabilityQuery.isError || dictionaryQuery.isError) {
+    return (
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header
+          hasBackButton={hasBackButton}
+          onCustomBackPress={goBack}
+          title={t('Dictionnaire')}
+        />
+        <ResourceUnavailableView
+          identity={{
+            kind: 'database',
+            databaseId: 'DICTIONNAIRE',
+            language: dictionaryResourceLanguage,
+          }}
+          title={t('resource.dictionary.temporarilyUnavailable')}
+          fileSize={22}
+          reason="temporary-unavailable"
+          onRetry={() => {
+            void dictionaryAvailabilityQuery.refetch()
+            void dictionaryQuery.refetch()
+          }}
+        />
+      </FormSheetScreen>
+    )
+  }
+
+  if (!dictionnaireItem) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header

@@ -1,0 +1,19 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: bible_strong
+      POSTGRES_USER: bible_strong
+      POSTGRES_PASSWORD: bible_strong
+    ports:
+      - '${RESOURCE_POSTGRES_PORT:-54329}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U bible_strong -d bible_strong']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - resource-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  resource-postgres-data:

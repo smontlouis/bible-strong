@@ -84,25 +84,40 @@ jest.mock('~helpers/strongBiblePublications', () => ({
 }))
 
 describe('offline setup folders', () => {
-  it('locks the language-specific startup Bible as the only default selection', () => {
+  it('suggests the language-specific default Bible but allows an empty selection', () => {
     expect(getDefaultOfflineSetupFolderOptionIds('fr')).toEqual({
       'read-bible': ['bible:LSG'],
       'understand-words': [],
       'explore-bible': [],
       'original-languages': [],
     })
-    const required = getOfflineSetupFolderSections('read-bible', 'fr')
+    const suggested = getOfflineSetupFolderSections('read-bible', 'fr')
       .flatMap(section => section.options)
       .find(option => option.id === 'bible:LSG')
-    expect(required?.required).toBe(true)
     expect(
       toggleOfflineSetupFolderOption(
         getDefaultOfflineSetupFolderOptionIds('fr'),
         'read-bible',
-        required!,
+        suggested!,
         'fr'
       )
-    ).toEqual(getDefaultOfflineSetupFolderOptionIds('fr'))
+    ).toEqual({
+      'read-bible': [],
+      'understand-words': [],
+      'explore-bible': [],
+      'original-languages': [],
+    })
+    expect(
+      resolveOfflineSetupFolderOptionIds(
+        {
+          'read-bible': [],
+          'understand-words': [],
+          'explore-bible': [],
+          'original-languages': [],
+        },
+        'fr'
+      )
+    ).toEqual([])
   })
 
   it('lists only French and English Bibles in the reading folder', () => {
@@ -121,7 +136,6 @@ describe('offline setup folders', () => {
       'bible:DBY',
       'bible:DBR',
     ])
-    expect(sections[0]?.options[0]?.required).toBe(true)
     expect(sections[1]?.options.map(option => option.id)).toEqual(
       expect.arrayContaining(['bible:ASV', 'bible:KJV', 'bible:RLT'])
     )
@@ -138,7 +152,6 @@ describe('offline setup folders', () => {
 
     expect(sections[0]?.titleKey).toBeUndefined()
     expect(sections[0]?.options[0]?.id).toBe('bible:KJV')
-    expect(sections[0]?.options[0]?.required).toBe(true)
     expect(options.filter(option => option.id === 'bible:KJV')).toHaveLength(1)
   })
 

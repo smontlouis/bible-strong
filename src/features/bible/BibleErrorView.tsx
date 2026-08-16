@@ -7,38 +7,30 @@ import Box from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import Progress from '~common/ui/Progress'
 import Text from '~common/ui/Text'
-import { BibleError } from '~helpers/bibleErrors'
+import { BibleError, getBibleErrorPresentation } from '~helpers/bibleErrors'
 import { resetBiblesDb } from '~helpers/biblesDb'
 import { toast } from '~helpers/toast'
 import { downloadManager } from '~helpers/downloadManager'
 import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
-
-/**
- * Get localized error message based on error type
- */
-const getErrorMessage = (error: BibleError, t: (key: string) => string): string => {
-  switch (error.type) {
-    case 'BIBLE_NOT_FOUND':
-      return t('bible.error.versionNotFound')
-    case 'CHAPTER_NOT_FOUND':
-      return t('bible.error.chapterNotFound')
-    case 'OFFLINE_COPY_INVALID':
-      return t('bible.error.databaseCorrupted')
-    default:
-      return t('bible.error.unknown')
-  }
-}
+import { useQueryClient } from '@tanstack/react-query'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import useConnection from '~helpers/useConnection'
 
 const BibleErrorView = ({ error }: { error: BibleError }) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const queryClient = useQueryClient()
+  const isConnected = useConnection()
   const [isResetting, setIsResetting] = useState(false)
   const canAcquire = error.recoveries?.includes('acquire-offline-copy')
   const canManage = error.recoveries?.includes('manage-offline-copies')
   const canReset = error.recoveries?.includes('reset-offline-store')
-  const showActions = canAcquire || canManage || canReset
+  const presentation = getBibleErrorPresentation(error.type)
+  const canRetry = presentation.retryable
+  const connectionRequired = canAcquire && !isConnected
+  const showActions = canAcquire || canManage || canReset || canRetry
 
   // Subscribe to download queue state for this version (only relevant when missing)
   const downloadItemId = createOfflineCopyId({ kind: 'bible', versionId: error.version })
@@ -73,11 +65,18 @@ const BibleErrorView = ({ error }: { error: BibleError }) => {
     }
   }
 
+  const handleRetry = () =>
+    queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
+
   return (
     <Box flex={1}>
-      <Empty source={require('~assets/images/empty.json')} message={getErrorMessage(error, t)}>
+      <Empty
+        source={require('~assets/images/empty.json')}
+        message={t(`bible.error.${presentation.messageKey}`)}
+      >
         {showActions && (
           <Box mt={20} gap={10} alignItems="center">
+            {canRetry && <Button onPress={handleRetry}>{t('bible.error.retry')}</Button>}
             {canAcquire &&
               (downloadInProgress ? (
                 <Box alignItems="center" gap={12}>
@@ -87,7 +86,11 @@ const BibleErrorView = ({ error }: { error: BibleError }) => {
                   </Text>
                 </Box>
               ) : (
-                <Button onPress={handleDownload}>{t('bible.error.downloadVersion')}</Button>
+                <Button disabled={connectionRequired} onPress={handleDownload}>
+                  {connectionRequired
+                    ? t('resource.action.connectionRequired')
+                    : t('bible.error.downloadVersion')}
+                </Button>
               ))}
             {(canManage || canReset) && (
               <>

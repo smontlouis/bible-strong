@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { useAtomValue } from 'jotai/react'
 
 import Header from '~common/Header'
+import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
@@ -27,7 +28,10 @@ import {
   type DatabaseId,
   type ResourceLanguage,
 } from '~helpers/databaseTypes'
-import { isLocalResourceAvailable } from '~features/resources/resourceAvailability'
+import {
+  getLocalResourceAvailability,
+  isLocalResourceAvailable,
+} from '~features/resources/resourceAvailability'
 import {
   createOfflineCopyDownloadItem,
   createOfflineCopyDownloadPlan,
@@ -39,7 +43,6 @@ import { installedVersionsSignalAtom } from '~state/app'
 import { mobileResourceCatalogAtom } from '~helpers/mobileResourceCatalog'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultStore } from 'jotai/vanilla'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import {
   getStrongBibleAttributionKey,
   getStrongBiblePublication,
@@ -68,6 +71,12 @@ import {
 } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import { resolveResourceCatalogStatus } from '~helpers/resourcePublication'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceIdentityFromOfflineCopy } from '~features/resources/resourceModel'
+import useConnection from '~helpers/useConnection'
+import { versionHasPericope } from '~helpers/pericopes'
+import { versionHasRedWords } from '~helpers/redWords'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -96,11 +105,7 @@ interface UnifiedSection {
 function buildDatabaseItems(lang: ResourceLanguage): UnifiedItem[] {
   const allDbs = databases(lang)
   return LANGUAGE_SPECIFIC_DBS.flatMap(dbId => {
-    if (
-      dbId === 'BIBLES' ||
-      dbId === 'TIMELINE' ||
-      (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))
-    ) {
+    if (dbId === 'BIBLES' || (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))) {
       return []
     }
     const db = allDbs[dbId as keyof typeof allDbs]
@@ -194,9 +199,38 @@ function buildBibleItems(
       lang: (v.type === 'en' ? 'en' : v.type === 'other' ? 'other' : 'fr') as 'fr' | 'en' | 'other',
       searchText: `${v.id} ${v.name} ${v.name_en || ''} ${v.c || ''}`.toLowerCase(),
     }
+    const presentationItems: UnifiedItem[] = [
+      ...(versionHasPericope(v.id)
+        ? [
+            {
+              id: createOfflineCopyId({ kind: 'bible-pericope', versionId: v.id }),
+              name: t('downloads.pericopeData'),
+              subtitle: t('downloads.includedInBibleArchive'),
+              parentItemId: base.id,
+              estimatedSize: 0,
+              lang: base.lang,
+              searchText: `${v.id} pericope headings`.toLowerCase(),
+            },
+          ]
+        : []),
+      ...(versionHasRedWords(v.id)
+        ? [
+            {
+              id: createOfflineCopyId({ kind: 'bible-red-words', versionId: v.id }),
+              name: t('downloads.redWordsData'),
+              subtitle: t('downloads.includedInBibleArchive'),
+              parentItemId: base.id,
+              estimatedSize: 0,
+              lang: base.lang,
+              searchText: `${v.id} red words jesus`.toLowerCase(),
+            },
+          ]
+        : []),
+    ]
     if (v.id === 'BHG') {
       return [
         base,
+        ...presentationItems,
         ...(['fr', 'en'] as ResourceLanguage[]).map(locale => {
           const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[locale]
           return {
@@ -217,11 +251,12 @@ function buildBibleItems(
         }),
       ]
     }
-    if (!isStrongCapableBibleVersion(v.id)) return [base]
+    if (!isStrongCapableBibleVersion(v.id)) return [base, ...presentationItems]
     const publication = getStrongBiblePublication(v.id)
     const strongIndexBibleName = getStrongIndexBibleName(displayName)
     return [
       base,
+      ...presentationItems,
       {
         id: createOfflineCopyId({ kind: 'strong-bible-index', versionId: v.id }),
         name: t('downloads.strongIndexName', { bible: strongIndexBibleName }),
@@ -309,6 +344,7 @@ function useDownloadedItems() {
     networkMode: 'always',
     queryFn: async () => {
       const set = new Set<string>()
+      const invalidSet = new Set<string>()
 
       const lexiconAvailabilityMap = new Map<
         StrongLexiconModuleId,
@@ -335,6 +371,9 @@ function useDownloadedItems() {
             })
           )
         }
+        if (availability.status === 'corrupt') {
+          invalidSet.add(createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId }))
+        }
       }
 
       // Check all Bible versions
@@ -349,6 +388,33 @@ function useDownloadedItems() {
       )
       for (const [vId, available] of bibleEntries) {
         if (available) set.add(createOfflineCopyId({ kind: 'bible', versionId: vId }))
+      }
+
+      const biblePresentationEntries = await Promise.all(
+        Object.keys(versions).flatMap(versionId => [
+          ...(versionHasPericope(versionId)
+            ? [
+                isLocalResourceAvailable({ kind: 'bible-pericope', versionId }).then(
+                  available =>
+                    [createOfflineCopyId({ kind: 'bible-pericope', versionId }), available] as const
+                ),
+              ]
+            : []),
+          ...(versionHasRedWords(versionId)
+            ? [
+                isLocalResourceAvailable({ kind: 'bible-red-words', versionId }).then(
+                  available =>
+                    [
+                      createOfflineCopyId({ kind: 'bible-red-words', versionId }),
+                      available,
+                    ] as const
+                ),
+              ]
+            : []),
+        ])
+      )
+      for (const [itemId, available] of biblePresentationEntries) {
+        if (available) set.add(itemId)
       }
 
       const availabilityMap = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
@@ -366,6 +432,9 @@ function useDownloadedItems() {
           availability.status === 'corrupt'
         ) {
           set.add(createOfflineCopyId({ kind: 'strong-bible-index', versionId }))
+        }
+        if (availability.status === 'corrupt') {
+          invalidSet.add(createOfflineCopyId({ kind: 'strong-bible-index', versionId }))
         }
       }
 
@@ -391,35 +460,44 @@ function useDownloadedItems() {
             })
           )
         }
+        if (availability.status === 'corrupt') {
+          invalidSet.add(
+            createOfflineCopyId({
+              kind: 'interlinear-index',
+              versionId: 'BHG',
+              language: locale,
+            })
+          )
+        }
       }
 
       // Check databases for both languages
       const databaseEntries = await Promise.all(
         (['fr', 'en'] as ResourceLanguage[]).flatMap(lang =>
           LANGUAGE_SPECIFIC_DBS.flatMap(dbId =>
-            dbId !== 'BIBLES' &&
-            dbId !== 'TIMELINE' &&
-            (lang !== 'en' || !FRENCH_ONLY_DBS.includes(dbId))
+            dbId !== 'BIBLES' && (lang !== 'en' || !FRENCH_ONLY_DBS.includes(dbId))
               ? [
-                  isLocalResourceAvailable({
+                  getLocalResourceAvailability({
                     kind: 'database',
                     databaseId: dbId,
                     language: lang,
-                  }).then(available => [dbId, lang, available] as const),
+                  }).then(availability => [dbId, lang, availability] as const),
                 ]
               : []
           )
         )
       )
-      for (const [dbId, lang, available] of databaseEntries) {
-        if (available) {
-          set.add(
-            createOfflineCopyId({
-              kind: 'database',
-              databaseId: dbId,
-              language: lang,
-            })
-          )
+      for (const [dbId, lang, availability] of databaseEntries) {
+        const itemId = createOfflineCopyId({
+          kind: 'database',
+          databaseId: dbId,
+          language: lang,
+        })
+        if (availability.status === 'available' || availability.status === 'corrupt') {
+          set.add(itemId)
+        }
+        if (availability.status === 'corrupt') {
+          invalidSet.add(itemId)
         }
       }
 
@@ -429,28 +507,31 @@ function useDownloadedItems() {
           dbId === 'BIBLES'
             ? []
             : [
-                isLocalResourceAvailable({
+                getLocalResourceAvailability({
                   kind: 'database',
                   databaseId: dbId,
                   language: 'fr',
-                }).then(available => [dbId, available] as const),
+                }).then(availability => [dbId, availability] as const),
               ]
         )
       )
-      for (const [dbId, available] of sharedEntries) {
-        if (available) {
-          set.add(
-            createOfflineCopyId({
-              kind: 'database',
-              databaseId: dbId,
-              language: 'fr',
-            })
-          )
+      for (const [dbId, availability] of sharedEntries) {
+        const itemId = createOfflineCopyId({
+          kind: 'database',
+          databaseId: dbId,
+          language: 'fr',
+        })
+        if (availability.status === 'available' || availability.status === 'corrupt') {
+          set.add(itemId)
+        }
+        if (availability.status === 'corrupt') {
+          invalidSet.add(itemId)
         }
       }
 
       return {
         downloadedSet: set,
+        invalidSet,
         strongAvailability: availabilityMap,
         interlinearAvailability: interlinearAvailabilityMap,
         strongLexiconAvailability: lexiconAvailabilityMap,
@@ -460,6 +541,7 @@ function useDownloadedItems() {
 
   return {
     downloadedSet: availabilityQuery.data?.downloadedSet ?? new Set<string>(),
+    invalidSet: availabilityQuery.data?.invalidSet ?? new Set<string>(),
     strongAvailability:
       availabilityQuery.data?.strongAvailability ??
       new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>(),
@@ -469,6 +551,8 @@ function useDownloadedItems() {
     strongLexiconAvailability:
       availabilityQuery.data?.strongLexiconAvailability ??
       new Map<StrongLexiconModuleId, StrongLexiconModuleAvailability>(),
+    isAvailabilityPending: availabilityQuery.isPending,
+    isAvailabilityError: availabilityQuery.isError,
     refreshDownloadedItems: async () => {
       await availabilityQuery.refetch()
     },
@@ -484,15 +568,8 @@ const DownloadsScreen = () => {
   const theme = useTheme()
   const lang = useLanguage()
   const catalog = useAtomValue(mobileResourceCatalogAtom)
-  const defaultVersion = getDefaultBibleVersion(lang)
-  const defaultBibleOfflineCopyId = createOfflineCopyId({
-    kind: 'bible',
-    versionId: defaultVersion,
-  })
-  const strongLexiconCoreOfflineCopyId = createOfflineCopyId({
-    kind: 'strong-lexicon-module',
-    moduleId: 'core',
-  })
+  const resources = useResourceAccess()
+  const isConnected = useConnection()
   const { enqueue, clearCompleted } = useDownloadQueue()
 
   // Local state
@@ -505,9 +582,12 @@ const DownloadsScreen = () => {
 
   const {
     downloadedSet,
+    invalidSet,
     strongAvailability,
     interlinearAvailability,
     strongLexiconAvailability,
+    isAvailabilityPending,
+    isAvailabilityError,
     refreshDownloadedItems,
   } = useDownloadedItems()
   const allSections = buildAllSections(lang, t)
@@ -552,17 +632,15 @@ const DownloadsScreen = () => {
     if (!identity) return false
 
     if (identity.kind === 'strong-bible-index') {
-      return ['incompatible', 'corrupt'].includes(
-        strongAvailability.get(identity.versionId)?.status ?? ''
-      )
+      return ['incompatible'].includes(strongAvailability.get(identity.versionId)?.status ?? '')
     }
     if (identity.kind === 'strong-lexicon-module') {
-      return ['incompatible', 'corrupt', 'core-missing'].includes(
+      return ['incompatible', 'core-missing'].includes(
         strongLexiconAvailability.get(identity.moduleId)?.status ?? ''
       )
     }
     if (identity.kind === 'interlinear-index') {
-      return ['base-incompatible', 'corrupt'].includes(
+      return ['base-incompatible'].includes(
         interlinearAvailability.get(identity.language)?.status ?? ''
       )
     }
@@ -673,11 +751,12 @@ const DownloadsScreen = () => {
         return createOfflineCopyDownloadPlan(identity)
       case 'bible-pericope':
       case 'bible-red-words':
-        throw new Error(`BIBLE_CHILD_RESOURCE_REQUIRES_PARENT:${itemId}`)
+        return createOfflineCopyDownloadPlan(identity)
     }
   }
 
   const handleBatchDownload = () => {
+    if (!isConnected) return
     const items = dedupeDownloadItems(
       Array.from(selectedItems).flatMap(id =>
         downloadedSet.has(id) ? [] : createDownloadPlanForId(id)
@@ -692,13 +771,8 @@ const DownloadsScreen = () => {
   }
 
   const handleBatchDelete = () => {
-    // Exclude default versions from batch delete
     const deletionPlans = Array.from(selectedItems).flatMap(id =>
-      downloadedSet.has(id) &&
-      id !== defaultBibleOfflineCopyId &&
-      id !== strongLexiconCoreOfflineCopyId
-        ? [createDownloadedItemDeletionPlan(id)]
-        : []
+      downloadedSet.has(id) ? [createDownloadedItemDeletionPlan(id)] : []
     )
     if (deletionPlans.length === 0) return
 
@@ -737,10 +811,12 @@ const DownloadsScreen = () => {
   }
 
   const handleDownloadItem = (item: UnifiedItem) => {
+    if (!isConnected) return
     enqueue(createDownloadPlanForId(item.id))
   }
 
   const handleRedownloadItem = (item: UnifiedItem) => {
+    if (!isConnected) return
     const deletionPlan = createDownloadedItemDeletionPlan(item.id, { bibleMode: 'replace' })
     Alert.alert(t('Attention'), t('downloads.redownloadConfirm'), [
       { text: t('Non'), style: 'cancel' },
@@ -756,10 +832,8 @@ const DownloadsScreen = () => {
   }
 
   const handleUpdateItem = (item: UnifiedItem) => {
-    const isRequiredBible = item.id === defaultBibleOfflineCopyId
-    const deletionPlan = createDownloadedItemDeletionPlan(item.id, {
-      bibleMode: isRequiredBible ? 'replace' : 'remove',
-    })
+    if (!isConnected) return
+    const deletionPlan = createDownloadedItemDeletionPlan(item.id, { bibleMode: 'replace' })
     const deletesStrongSidecar =
       deletionPlan.kind === 'bible' &&
       deletionPlan.strongSidecar !== undefined &&
@@ -783,6 +857,7 @@ const DownloadsScreen = () => {
   }
 
   const handleUpdateAll = () => {
+    if (!isConnected) return
     Alert.alert(
       t('downloads.updateAvailable'),
       t(
@@ -852,12 +927,7 @@ const DownloadsScreen = () => {
 
   // Count downloadable/deletable in selection
   const selectedDownloadable = Array.from(selectedItems).filter(id => !downloadedSet.has(id)).length
-  const selectedDeletable = Array.from(selectedItems).filter(
-    id =>
-      downloadedSet.has(id) &&
-      id !== defaultBibleOfflineCopyId &&
-      id !== strongLexiconCoreOfflineCopyId
-  ).length
+  const selectedDeletable = Array.from(selectedItems).filter(id => downloadedSet.has(id)).length
 
   return (
     <Container>
@@ -868,11 +938,17 @@ const DownloadsScreen = () => {
           <Box row alignItems="center">
             {itemsToUpdate.length > 0 && !isSelectMode && (
               <TouchableOpacity
+                accessibilityState={{ disabled: !isConnected }}
+                disabled={!isConnected}
                 onPress={handleUpdateAll}
                 accessibilityLabel={t('downloads.update')}
                 style={{ padding: 8 }}
               >
-                <FeatherIcon name="refresh-cw" size={20} color="success" />
+                <FeatherIcon
+                  name={isConnected ? 'refresh-cw' : 'wifi-off'}
+                  size={20}
+                  color={isConnected ? 'success' : 'tertiary'}
+                />
               </TouchableOpacity>
             )}
             <TouchableOpacity
@@ -892,125 +968,147 @@ const DownloadsScreen = () => {
         }
       />
 
-      <SectionList<UnifiedItem, UnifiedSection>
-        sections={displaySections}
-        keyExtractor={(item: UnifiedItem) => item.id}
-        stickySectionHeadersEnabled={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-        ListHeaderComponent={
-          <>
-            {/* Search */}
-            <Box
-              mx={16}
-              mt={12}
-              row
-              alignItems="center"
-              bg="border"
-              borderRadius={10}
-              px={12}
-              height={40}
-            >
-              <FeatherIcon name="search" size={16} color="tertiary" />
-              <TextInput
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder={t('downloads.search')}
-                placeholderTextColor={theme.colors.tertiary}
-                style={{
-                  flex: 1,
-                  marginLeft: 8,
-                  fontSize: 14,
-                  color: theme.colors.default,
-                  padding: 0,
-                }}
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <FeatherIcon name="x" size={16} color="tertiary" />
-                </TouchableOpacity>
-              )}
-            </Box>
-
-            {/* Filters */}
-            <FilterChipRow
-              statusFilter={statusFilter}
-              langFilter={langFilter}
-              onStatusToggle={handleStatusToggle}
-              onLangToggle={handleLangToggle}
-            />
-
-            <StorageSummaryCard />
-          </>
-        }
-        renderSectionHeader={({ section }) => {
-          // Use the full (non-collapsed) data from filteredSections for counts
-          const fullSection = filteredSections.find(s => s.key === section.key)
-          const sectionItems = fullSection?.data || []
-          const downloadedCount = sectionItems.filter(i => downloadedSet.has(i.id)).length
-          const totalCount = sectionItems.length
-          const isCollapsed = !hasActiveFilters && collapsedSections.has(section.key)
-
-          return (
-            <DownloadSectionHeader
-              title={section.title}
-              isCollapsed={isCollapsed}
-              onToggleCollapse={() => toggleCollapse(section.key)}
-              downloadedCount={downloadedCount}
-              totalCount={totalCount}
-              isSelectMode={isSelectMode}
-              allSelected={sectionItems.every((i: UnifiedItem) => selectedItems.has(i.id))}
-              onToggleSelectAll={() => toggleSelectAll(sectionItems)}
-            />
-          )
-        }}
-        renderItem={({ item }) => {
-          const isDownloaded = downloadedSet.has(item.id)
-          const identity = parseOfflineCopyId(item.id)
-          if (!identity) return null
-          const isDefault =
-            (identity.kind === 'bible' && identity.versionId === defaultVersion) ||
-            (identity.kind === 'strong-lexicon-module' && identity.moduleId === 'core')
-          const isNestedDependency = item.parentItemId !== undefined
-          const bibleVersionId = identity.kind === 'bible' ? identity.versionId : undefined
-          const relatedResources = bibleVersionId
-            ? getBibleRelatedPublicationResources(bibleVersionId)
-            : undefined
-
-          return (
-            <DownloadableItem
-              itemId={item.id}
-              relatedResources={relatedResources}
-              name={item.name}
-              subtitle={item.subtitle}
-              estimatedSize={item.estimatedSize}
-              isSelectMode={isSelectMode}
-              isSelected={selectedItems.has(item.id)}
-              onToggleSelect={() => toggleSelect(item.id)}
-              onDownload={() => handleDownloadItem(item)}
-              onDelete={isDefault ? undefined : () => handleDeleteItem(item)}
-              onRedownload={isDefault ? () => handleRedownloadItem(item) : undefined}
-              onUpdate={() => handleUpdateItem(item)}
-              isDownloaded={isDownloaded}
-              isDefault={isDefault}
-              needsUpdate={itemNeedsUpdate(item)}
-              variant={isNestedDependency ? 'dependency' : 'standard'}
-            />
-          )
-        }}
-      />
-
-      {/* Bottom bars */}
-      {isSelectMode ? (
-        <BatchActionBar
-          selectedCount={selectedItems.size}
-          hasDownloadable={selectedDownloadable > 0}
-          hasDeletable={selectedDeletable > 0}
-          onDownload={handleBatchDownload}
-          onDelete={handleBatchDelete}
+      {isAvailabilityPending ? (
+        <Box flex center>
+          <Loading />
+        </Box>
+      ) : isAvailabilityError ? (
+        <ResourceUnavailableView
+          identity={{ kind: 'bible', versionId: 'LSG' }}
+          title={t('downloads.availabilityUnavailable')}
+          fileSize={1}
+          reason="temporary-unavailable"
+          onRetry={() => void refreshDownloadedItems()}
         />
       ) : (
-        <GlobalDownloadBar />
+        <SectionList<UnifiedItem, UnifiedSection>
+          sections={displaySections}
+          keyExtractor={(item: UnifiedItem) => item.id}
+          stickySectionHeadersEnabled={false}
+          contentContainerStyle={{ paddingBottom: 100 }}
+          ListHeaderComponent={
+            <>
+              {/* Search */}
+              <Box
+                mx={16}
+                mt={12}
+                row
+                alignItems="center"
+                bg="border"
+                borderRadius={10}
+                px={12}
+                height={40}
+              >
+                <FeatherIcon name="search" size={16} color="tertiary" />
+                <TextInput
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  placeholder={t('downloads.search')}
+                  placeholderTextColor={theme.colors.tertiary}
+                  style={{
+                    flex: 1,
+                    marginLeft: 8,
+                    fontSize: 14,
+                    color: theme.colors.default,
+                    padding: 0,
+                  }}
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity onPress={() => setSearchQuery('')}>
+                    <FeatherIcon name="x" size={16} color="tertiary" />
+                  </TouchableOpacity>
+                )}
+              </Box>
+
+              {/* Filters */}
+              <FilterChipRow
+                statusFilter={statusFilter}
+                langFilter={langFilter}
+                onStatusToggle={handleStatusToggle}
+                onLangToggle={handleLangToggle}
+              />
+
+              <StorageSummaryCard />
+            </>
+          }
+          renderSectionHeader={({ section }) => {
+            // Use the full (non-collapsed) data from filteredSections for counts
+            const fullSection = filteredSections.find(s => s.key === section.key)
+            const sectionItems = fullSection?.data || []
+            const downloadedCount = sectionItems.filter(i => downloadedSet.has(i.id)).length
+            const totalCount = sectionItems.length
+            const isCollapsed = !hasActiveFilters && collapsedSections.has(section.key)
+
+            return (
+              <DownloadSectionHeader
+                title={section.title}
+                isCollapsed={isCollapsed}
+                onToggleCollapse={() => toggleCollapse(section.key)}
+                downloadedCount={downloadedCount}
+                totalCount={totalCount}
+                isSelectMode={isSelectMode}
+                allSelected={sectionItems.every((i: UnifiedItem) => selectedItems.has(i.id))}
+                onToggleSelectAll={() => toggleSelectAll(sectionItems)}
+              />
+            )
+          }}
+          renderItem={({ item }) => {
+            const isDownloaded = downloadedSet.has(item.id)
+            const identity = parseOfflineCopyId(item.id)
+            if (!identity) return null
+            const isNestedDependency = item.parentItemId !== undefined
+            const bibleVersionId = identity.kind === 'bible' ? identity.versionId : undefined
+            const resourceIdentity = resourceIdentityFromOfflineCopy(identity)
+            const relatedResources = bibleVersionId
+              ? getBibleRelatedPublicationResources(bibleVersionId)
+              : undefined
+
+            return (
+              <DownloadableItem
+                itemId={item.id}
+                relatedResources={relatedResources}
+                name={item.name}
+                subtitle={item.subtitle}
+                estimatedSize={item.estimatedSize}
+                isSelectMode={isSelectMode}
+                isSelected={selectedItems.has(item.id)}
+                onToggleSelect={() => toggleSelect(item.id)}
+                onDownload={() => handleDownloadItem(item)}
+                onDelete={() => handleDeleteItem(item)}
+                onRedownload={() => handleRedownloadItem(item)}
+                onUpdate={() => handleUpdateItem(item)}
+                isDownloaded={isDownloaded}
+                isDefault={false}
+                needsUpdate={itemNeedsUpdate(item)}
+                isInvalid={invalidSet.has(item.id)}
+                variant={isNestedDependency ? 'dependency' : 'standard'}
+                onlineAccessStatus={
+                  resourceIdentity
+                    ? resources.capabilities.getOnlineAccess(resourceIdentity).status
+                    : 'unsupported'
+                }
+                downloadsDisabled={!isConnected}
+              />
+            )
+          }}
+        />
       )}
+
+      {/* Bottom bars */}
+      {!isAvailabilityPending &&
+        !isAvailabilityError &&
+        (isSelectMode ? (
+          <BatchActionBar
+            selectedCount={selectedItems.size}
+            hasDownloadable={selectedDownloadable > 0}
+            hasDeletable={selectedDeletable > 0}
+            onDownload={handleBatchDownload}
+            onDelete={handleBatchDelete}
+            downloadsDisabled={!isConnected}
+          />
+        ) : (
+          <GlobalDownloadBar />
+        ))}
     </Container>
   )
 }

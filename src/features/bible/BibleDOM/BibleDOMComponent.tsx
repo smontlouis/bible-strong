@@ -16,6 +16,7 @@ import {
   VerseRelationItem,
   WebViewProps,
 } from './BibleDOMWrapper'
+import { BibleError, getBibleErrorPresentation } from '~helpers/bibleErrors'
 import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
@@ -32,10 +33,10 @@ import {
   TOGGLE_SELECTED_VERSE,
   OPEN_DOWNLOADS,
   RESET_BIBLE_DATABASE,
+  RETRY_BIBLE_RESOURCE,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
 } from './dispatch'
-import { BibleError } from '~helpers/bibleErrors'
 import { DispatchProvider } from './DispatchProvider'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
 import { scaleFontSize } from './scaleFontSize'
@@ -1357,19 +1358,6 @@ const LoadedBibleContent = ({
 // MAIN VERSES RENDERER (lightweight shell)
 // ============================================================================
 
-const getErrorMessage = (error: BibleError, translations: BibleDOMTranslations) => {
-  switch (error.type) {
-    case 'BIBLE_NOT_FOUND':
-      return translations.versionNotFound
-    case 'CHAPTER_NOT_FOUND':
-      return translations.chapterNotFound
-    case 'OFFLINE_COPY_INVALID':
-      return translations.databaseCorrupted
-    default:
-      return translations.unknownError
-  }
-}
-
 const BibleDOMErrorContent = ({
   settings,
   dispatch,
@@ -1392,6 +1380,11 @@ const BibleDOMErrorContent = ({
   const canAcquire = error.recoveries?.includes('acquire-offline-copy')
   const canManage = error.recoveries?.includes('manage-offline-copies')
   const canReset = error.recoveries?.includes('reset-offline-store')
+  const presentation = getBibleErrorPresentation(error.type)
+  const canRetry = presentation.retryable
+  const connectionRequired = canAcquire && error.type === 'RESOURCE_OFFLINE'
+  const messageKey =
+    presentation.messageKey === 'unknown' ? 'unknownError' : presentation.messageKey
 
   return (
     <TranslationsProvider translations={translations}>
@@ -1406,7 +1399,7 @@ const BibleDOMErrorContent = ({
                 color={settings.colors[settings.theme].primary}
               />
             </ErrorIcon>
-            <ErrorMessage settings={settings}>{getErrorMessage(error, translations)}</ErrorMessage>
+            <ErrorMessage settings={settings}>{translations[messageKey]}</ErrorMessage>
             {canAcquire &&
               (isDownloading ? (
                 <>
@@ -1422,15 +1415,29 @@ const BibleDOMErrorContent = ({
                 <ErrorButton
                   settings={settings}
                   type="button"
+                  disabled={connectionRequired}
                   onClick={() =>
-                    dispatch({ type: DOWNLOAD_BIBLE_VERSION, payload: error.version }).catch(
-                      console.error
-                    )
+                    connectionRequired
+                      ? undefined
+                      : dispatch({ type: DOWNLOAD_BIBLE_VERSION, payload: error.version }).catch(
+                          console.error
+                        )
                   }
                 >
-                  {translations.downloadVersion}
+                  {connectionRequired
+                    ? translations.connectionRequired
+                    : translations.downloadVersion}
                 </ErrorButton>
               ))}
+            {canRetry && (
+              <ErrorButton
+                settings={settings}
+                type="button"
+                onClick={() => dispatch({ type: RETRY_BIBLE_RESOURCE }).catch(console.error)}
+              >
+                {translations.retry}
+              </ErrorButton>
+            )}
             {(canManage || canReset) && (
               <>
                 {canManage && (

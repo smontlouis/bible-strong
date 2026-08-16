@@ -28,8 +28,11 @@ interface DownloadableItemProps {
   isDownloaded?: boolean
   isDefault?: boolean
   needsUpdate?: boolean
+  isInvalid?: boolean
   relatedResources?: { resourceId: string }[]
   variant?: 'standard' | 'dependency'
+  onlineAccessStatus?: 'remotely-readable' | 'temporarily-unavailable' | 'unsupported'
+  downloadsDisabled?: boolean
 }
 
 const formatSize = (
@@ -56,8 +59,11 @@ const DownloadableItem = ({
   isDownloaded,
   isDefault,
   needsUpdate,
+  isInvalid,
   relatedResources,
   variant = 'standard',
+  onlineAccessStatus = 'unsupported',
+  downloadsDisabled = false,
 }: DownloadableItemProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -76,6 +82,7 @@ const DownloadableItem = ({
     isSelectMode,
     isSelected,
     isDownloaded,
+    isInvalid,
     needsUpdate: effectiveNeedsUpdate,
   })
 
@@ -87,15 +94,22 @@ const DownloadableItem = ({
 
     switch (visualState) {
       case 'not-downloaded':
+        if (downloadsDisabled) break
         onDownload?.()
         break
       case 'downloaded':
         // No action on press for downloaded items
         break
       case 'needs-update':
+        if (downloadsDisabled) break
         onUpdate?.()
         break
+      case 'invalid':
+        if (downloadsDisabled) break
+        onRedownload?.()
+        break
       case 'failed':
+        if (downloadsDisabled) break
         downloadManager.retry(itemId)
         break
     }
@@ -109,7 +123,15 @@ const DownloadableItem = ({
     visualState === 'downloading' || visualState === 'inserting' || visualState === 'queued'
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={isActive ? 1 : 0.7}>
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={isActive ? 1 : 0.7}
+      accessibilityState={{
+        disabled:
+          downloadsDisabled &&
+          ['not-downloaded', 'needs-update', 'invalid', 'failed'].includes(visualState),
+      }}
+    >
       <Animated.View
         style={{
           paddingRight: 20,
@@ -117,8 +139,13 @@ const DownloadableItem = ({
           paddingVertical: isDependency ? 10 : 12,
           opacity: visualState === 'not-downloaded' ? 0.5 : 1,
           backgroundColor: visualState === 'selected' ? theme.colors.lightPrimary : 'transparent',
-          borderLeftWidth: visualState === 'needs-update' ? 4 : 0,
-          borderLeftColor: visualState === 'needs-update' ? theme.colors.success : 'transparent',
+          borderLeftWidth: ['needs-update', 'invalid'].includes(visualState) ? 4 : 0,
+          borderLeftColor:
+            visualState === 'needs-update'
+              ? theme.colors.success
+              : visualState === 'invalid'
+                ? theme.colors.quart
+                : 'transparent',
           overflow: 'visible',
           transitionProperty: ['opacity', 'backgroundColor'],
           transitionDuration: 200,
@@ -169,9 +196,31 @@ const DownloadableItem = ({
                 {queueState.error}
               </Text>
             )}
+            {visualState === 'invalid' && (
+              <Text fontSize={12} color="quart" mt={2}>
+                {t('downloads.invalidCopy')}
+              </Text>
+            )}
             {subtitle && visualState !== 'queued' && visualState !== 'failed' && (
               <Text fontSize={12} color="tertiary" mt={2} numberOfLines={isDependency ? 3 : 2}>
                 {subtitle}
+              </Text>
+            )}
+            {visualState !== 'queued' && visualState !== 'failed' && visualState !== 'invalid' && (
+              <Text fontSize={11} color="tertiary" mt={3}>
+                {t(
+                  onlineAccessStatus === 'remotely-readable'
+                    ? 'resource.status.onlineAvailable'
+                    : onlineAccessStatus === 'temporarily-unavailable'
+                      ? 'resource.status.onlineTemporary'
+                      : 'resource.status.onlineUnsupported'
+                )}
+                {' · '}
+                {t(
+                  isDownloaded
+                    ? 'resource.status.offlineInstalled'
+                    : 'resource.status.offlineNotInstalled'
+                )}
               </Text>
             )}
 
@@ -201,7 +250,11 @@ const DownloadableItem = ({
           <Box ml={12} alignItems="flex-end" justifyContent="center">
             {visualState === 'not-downloaded' && !isSelectMode && (
               <Box alignItems="flex-end" mr={5}>
-                <FeatherIcon name="download-cloud" size={16} color="primary" />
+                <FeatherIcon
+                  name={downloadsDisabled ? 'wifi-off' : 'download-cloud'}
+                  size={16}
+                  color={downloadsDisabled ? 'tertiary' : 'primary'}
+                />
                 {estimatedSize != null && estimatedSize > 0 && (
                   <Text fontSize={10} color="tertiary" mt={2}>
                     {formatSize(estimatedSize, t)}
@@ -240,11 +293,17 @@ const DownloadableItem = ({
 
             {visualState === 'downloaded' && !isSelectMode && isDefault && (
               <TouchableOpacity
+                accessibilityState={{ disabled: downloadsDisabled }}
+                disabled={downloadsDisabled}
                 onPress={onRedownload}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 style={{ padding: 4 }}
               >
-                <FeatherIcon name="refresh-cw" size={16} color="tertiary" />
+                <FeatherIcon
+                  name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
+                  size={16}
+                  color="tertiary"
+                />
               </TouchableOpacity>
             )}
 
@@ -260,22 +319,48 @@ const DownloadableItem = ({
 
             {visualState === 'needs-update' && !isSelectMode && (
               <TouchableOpacity
+                accessibilityState={{ disabled: downloadsDisabled }}
+                disabled={downloadsDisabled}
                 onPress={onUpdate}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 style={{ padding: 4 }}
               >
-                <FeatherIcon name="refresh-cw" size={18} color="success" />
+                <FeatherIcon
+                  name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
+                  size={18}
+                  color={downloadsDisabled ? 'tertiary' : 'success'}
+                />
+              </TouchableOpacity>
+            )}
+
+            {visualState === 'invalid' && !isSelectMode && (
+              <TouchableOpacity
+                accessibilityState={{ disabled: downloadsDisabled }}
+                disabled={downloadsDisabled}
+                onPress={onRedownload}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                style={{ padding: 4 }}
+              >
+                <FeatherIcon
+                  name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
+                  size={18}
+                  color={downloadsDisabled ? 'tertiary' : 'quart'}
+                />
               </TouchableOpacity>
             )}
 
             {visualState === 'failed' && !isSelectMode && (
               <Box row gap={8} alignItems="center">
                 <TouchableOpacity
+                  accessibilityState={{ disabled: downloadsDisabled }}
+                  disabled={downloadsDisabled}
                   onPress={() => downloadManager.retry(itemId)}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
-                  <Text fontSize={12} color="primary" bold>
-                    {t('downloads.retry')}
+                  <Text fontSize={12} color={downloadsDisabled ? 'tertiary' : 'primary'} bold>
+                    {downloadsDisabled
+                      ? t('resource.action.connectionRequired')
+                      : t('downloads.retry')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -301,6 +386,7 @@ type VisualState =
   | 'inserting'
   | 'downloaded'
   | 'needs-update'
+  | 'invalid'
   | 'failed'
 
 function getVisualState({
@@ -309,12 +395,14 @@ function getVisualState({
   isSelected,
   isDownloaded,
   needsUpdate,
+  isInvalid,
 }: {
   queueState?: DownloadItemState
   isSelectMode?: boolean
   isSelected?: boolean
   isDownloaded?: boolean
   needsUpdate?: boolean
+  isInvalid?: boolean
 }): VisualState {
   // Queue states take priority
   if (queueState) {
@@ -337,6 +425,7 @@ function getVisualState({
   }
 
   if (isSelectMode && isSelected) return 'selected'
+  if (isInvalid) return 'invalid'
   if (needsUpdate) return 'needs-update'
   if (isDownloaded || queueState?.status === 'completed') return 'downloaded'
   return 'not-downloaded'

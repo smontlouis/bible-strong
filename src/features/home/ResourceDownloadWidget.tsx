@@ -9,7 +9,14 @@ import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import useConnection from '~helpers/useConnection'
 import { itemHeight, itemWidth } from './widget'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import {
+  getResourceActions,
+  resourceIdentityFromOfflineCopy,
+  type OfflineCopyState,
+} from '~features/resources/resourceModel'
 
 type Props = {
   identity: OfflineCopyIdentity
@@ -19,6 +26,8 @@ type Props = {
 
 const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
+  const isConnected = useConnection()
   const [isPressed, setIsPressed] = useState(false)
   const offlineCopyId = createOfflineCopyId(identity)
   const queue = useDownloadItemStatus(offlineCopyId)
@@ -26,8 +35,27 @@ const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
     queue?.status === 'queued' || queue?.status === 'downloading' || queue?.status === 'inserting'
   const progress =
     queue?.status === 'inserting' ? queue.insertProgress : (queue?.downloadProgress ?? 0)
+  const resourceIdentity = resourceIdentityFromOfflineCopy(identity)
+  const offlineCopy: OfflineCopyState = isActive
+    ? { status: 'downloading', progress }
+    : queue?.status === 'failed'
+      ? { status: 'invalid', recoverable: true }
+      : { status: 'not-installed', supported: true }
+  const actions = resourceIdentity
+    ? getResourceActions({
+        identity: resourceIdentity,
+        operations: ['read'],
+        onlineAccess: resources.capabilities.getOnlineAccess(resourceIdentity),
+        offlineCopy,
+        content: { status: 'offline-unavailable' },
+        connectivity: isConnected ? 'online' : 'offline',
+      })
+    : []
+  const canAcquire = actions.includes('make-available-offline') || actions.includes('retry')
+  const connectionRequired = actions.includes('connection-required')
 
   const startDownload = () => {
+    if (!canAcquire) return
     if (queue?.status === 'failed') {
       downloadManager.retry(offlineCopyId)
     } else {
@@ -41,9 +69,9 @@ const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
       accessibilityLabel={
         isActive ? `${title}. ${t('Téléchargement en cours')}` : `${title}. ${fileSize} Mo`
       }
-      accessibilityState={{ disabled: isActive }}
+      accessibilityState={{ disabled: isActive || connectionRequired }}
       activeOpacity={1}
-      disabled={isActive}
+      disabled={isActive || connectionRequired}
       onPress={startDownload}
       onPressIn={() => setIsPressed(true)}
       onPressOut={() => setIsPressed(false)}
@@ -69,6 +97,16 @@ const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
           <Progress progress={progress} size={30} thickness={2} />
           <Text color="tertiary" marginTop={12} fontSize={12} textAlign="center">
             {t('Téléchargement en cours')}
+          </Text>
+        </>
+      ) : connectionRequired ? (
+        <>
+          <FeatherIcon name="wifi-off" size={24} color="tertiary" />
+          <Text color="tertiary" bold marginTop={10} textAlign="center" fontSize={12}>
+            {title}
+          </Text>
+          <Text color="tertiary" fontSize={11} marginTop={4} textAlign="center">
+            {t('resource.action.connectionRequired')}
           </Text>
         </>
       ) : (

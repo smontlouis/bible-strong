@@ -115,14 +115,14 @@ LSG chapter loading before expanding to search and other resources.
 ## Implementation Decisions
 
 - The project covers editorial resources and search. User-owned data, authentication semantics, and Firestore synchronization remain independent and unchanged.
-- The product is online-first with optional offline access. Online-first removes mandatory initial downloads; it does not mean remote-first source priority.
+- The product is online-first with optional offline access. Online-first removes mandatory initial downloads; it does not generally mean remote-first source priority. Search is the explicit exception: once its remote endpoint exists, it is remote-first while connected and local-index-first while disconnected.
 - Resource consumers use one TanStack Query operation per domain request. TanStack owns request lifecycle, deduplication, and the initial memory-only query cache.
 - Persistent partial query caching is deferred. Downloaded complete resources are offline copies, not query-cache entries.
 - Hybrid SQLite/HTTP queries use a network mode that executes while offline. Purely remote metadata operations may pause while offline. React Native network state feeds TanStack's online manager.
 - Retry behavior is based on structured error category rather than applied uniformly.
 - Query keys represent domain content rather than local or remote source. Installing, removing, or updating an offline copy invalidates affected queries so source selection runs again.
 - Each deep resource-access module owns source selection, local and remote adapters, domain contracts, structured errors, and resource-specific behavior.
-- The local adapter is preferred whenever an offline copy is installed, including when a newer revision is advertised. Updates remain explicit.
+- The local adapter is preferred for resource reading whenever an offline copy is installed, including when a newer revision is advertised. Updates remain explicit. Search instead prefers its remote adapter while connected, falls back locally after a temporary remote failure, and prefers the local index while disconnected.
 - Recoverable local corruption or incomplete content falls back to the remote adapter when online delivery is supported. Genuine not-found, missing installation, unsupported resource, offline, corruption, and remote failure remain distinct.
 - SQLite rows and HTTP payloads are private adapter details. Both sources produce the same storage-independent domain result.
 - REST request and response contracts have one shared machine-readable definition supporting runtime validation, TypeScript types, and OpenAPI. The concrete schema library is deferred.

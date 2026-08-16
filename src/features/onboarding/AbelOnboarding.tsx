@@ -402,6 +402,7 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
       >
         <AnimatedBox
           key={isFinishing && completionMode === 'confirmation' ? 'confirmation' : 'scenes'}
+          collapsable={false}
           flex={1}
           overflow="visible"
           entering={reduceMotion ? undefined : FadeIn.springify()}
@@ -541,6 +542,7 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
           ) : (
             <AnimatedBox
               key={promptKey}
+              collapsable={false}
               entering={
                 reduceMotion ? undefined : isFinalScene ? finalPromptEntering : promptEntering
               }

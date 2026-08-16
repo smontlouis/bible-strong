@@ -27,6 +27,7 @@ import type { StrongLexiconSearchResult } from '~features/resources/strongLexico
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 interface LexiqueSection {
   title: string
@@ -91,7 +92,7 @@ const LexiqueListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error } = useResultsByLetterOrSearch(
+  const { results, isLoading, error, retry } = useResultsByLetterOrSearch(
     {
       queryKey: ['strong-lexicon'],
       query: value => resources.strongLexicon.search(value, strongResourceLanguage, 200),
@@ -137,27 +138,26 @@ const LexiqueListScreen = ({
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
         hasBackButton={showBackButton}
         hasHeader
-        title={t('La base de données strong est requise pour accéder à cette page.')}
+        title={t('resource.strong.offlineCopyNeeded')}
         fileSize={35}
       />
     )
   }
 
-  if (error) {
+  if (coreAvailabilityQuery.isError || error) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Box flex bg="reverse">
           <Header hasBackButton={showBackButton} title={t('Désolé...')} />
-          <Empty
-            icon={require('~assets/images/empty-state-icons/inbox.svg')}
-            message={`${t('Impossible de charger la strong pour ce verset...')}
-            ${
-              error === 'INVALID_OFFLINE_COPY'
-                ? t(
-                    '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                  )
-                : ''
-            }`}
+          <ResourceUnavailableView
+            identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+            title={t('resource.strong.temporarilyUnavailable')}
+            fileSize={35}
+            reason="temporary-unavailable"
+            onRetry={() => {
+              void coreAvailabilityQuery.refetch()
+              retry()
+            }}
           />
         </Box>
       </FormSheetScreen>

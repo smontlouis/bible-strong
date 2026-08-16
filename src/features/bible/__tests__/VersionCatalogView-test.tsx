@@ -73,6 +73,11 @@ jest.mock('../versionCatalogState', () => ({
 jest.mock('../versionAvailability', () => ({
   getDownloadedBibleVersionIds: async () => new Set(),
 }))
+jest.mock('~features/resources/resourceAccess', () => ({
+  useResourceAccess: () => ({
+    offlineCopies: { isAvailable: async () => false },
+  }),
+}))
 
 const sections: VersionCatalogSection[] = Array.from({ length: 5 }, (_, sectionIndex) => ({
   key: `section-${sectionIndex}`,

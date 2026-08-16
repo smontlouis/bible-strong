@@ -32,7 +32,7 @@ interface Props {
 }
 
 // Hook for automatic translation based on selected language
-const useCommentTranslation = (id: string, content: string) => {
+const useCommentTranslation = (id: string, content: string, enabled = true) => {
   const { t } = useTranslation()
 
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
@@ -69,13 +69,13 @@ const useCommentTranslation = (id: string, content: string) => {
         .set({ content: translatedContent })
       return translatedContent as string
     },
-    enabled: commentLang !== 'en',
+    enabled: enabled && commentLang !== 'en',
     ...remoteQueryOptions,
     staleTime: Infinity,
     retry: false,
   })
   const status: Status =
-    commentLang === 'en'
+    !enabled || commentLang === 'en'
       ? 'Idle'
       : query.fetchStatus === 'paused'
         ? 'Rejected'
@@ -85,7 +85,10 @@ const useCommentTranslation = (id: string, content: string) => {
             ? 'Rejected'
             : 'Resolved'
 
-  return { status, translatedContent: commentLang === 'en' ? '' : (query.data ?? '') }
+  return {
+    status,
+    translatedContent: !enabled || commentLang === 'en' ? '' : (query.data ?? ''),
+  }
 }
 
 const fastImageStyle = { width: 40, height: 40 }
@@ -102,7 +105,7 @@ const Comment = ({ comment }: Props) => {
     [cacheImage]
   )
   const { t } = useTranslation()
-  const { status, translatedContent } = useCommentTranslation(id, content)
+  const { status, translatedContent } = useCommentTranslation(id, content, resource.code !== 'MHY')
 
   const openLink = (href: string, innerHTML: string, type: string) => {
     if (type.includes('egwlink_bible')) {

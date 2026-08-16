@@ -42,7 +42,7 @@ export const useResultsByLetterOrSearch = <T,>(
   const active = search.value && search.query ? search : letter
   const mode = active === search ? 'search' : 'letter'
   const enabled = Boolean(active.value && active.query)
-  const { data, error, isPending, isFetching } = useQuery({
+  const query = useQuery({
     queryKey: [
       'resource-results',
       ...(active.queryKey ?? []),
@@ -57,9 +57,10 @@ export const useResultsByLetterOrSearch = <T,>(
   })
 
   return {
-    results: data ?? [],
-    isLoading: enabled && (isPending || isFetching),
-    error: getResourceAccessErrorCode(error),
-    recoveries: error instanceof ResourceAccessError ? error.recoveries : [],
+    results: query.data ?? [],
+    isLoading: enabled && (query.isPending || query.isFetching),
+    error: getResourceAccessErrorCode(query.error),
+    recoveries: query.error instanceof ResourceAccessError ? query.error.recoveries : [],
+    retry: () => void query.refetch(),
   }
 }

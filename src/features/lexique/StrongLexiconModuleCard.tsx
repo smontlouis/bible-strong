@@ -53,16 +53,9 @@ const StrongLexiconModuleCard = ({
     : 0
 
   const requestDownload = () => {
-    Alert.alert(t('Télécharger {{name}} ?', { name: title }), description, [
-      { text: t('Annuler'), style: 'cancel' },
-      {
-        text: t('Télécharger'),
-        onPress: () =>
-          downloadManager.enqueue(
-            createStrongLexiconModuleDownloadPlan(moduleId, availability.status !== 'core-missing')
-          ),
-      },
-    ])
+    downloadManager.enqueue(
+      createStrongLexiconModuleDownloadPlan(moduleId, availability.status !== 'core-missing')
+    )
   }
 
   const requestDismiss = () => {

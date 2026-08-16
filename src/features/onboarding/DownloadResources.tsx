@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons'
 import { useTheme } from '@emotion/react'
 import { useEffect, useState } from 'react'
 import { Pressable } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Animated, {
   FadeIn,
   FadeOut,
@@ -422,10 +423,12 @@ const DownloadPhaseContent = ({
 }
 
 const DownloadResources = (props: DownloadResourcesProps) => {
+  const { t } = useTranslation()
   const theme = useTheme()
   const { colorScheme } = useCurrentThemeSelector()
   const palette = getOfflineSetupOverviewPalette(theme, colorScheme)
   const reduceMotion = useReducedMotion()
+  const insets = useSafeAreaInsets()
   const { closing, displayProgress, error, phase, retry, successMessage } = useOfflineSetupDownload(
     {
       mode: props.mode ?? 'onboarding',
@@ -495,6 +498,29 @@ const DownloadResources = (props: DownloadResourcesProps) => {
           transitioning={transitioning}
         />
       </FadingBox>
+      {props.mode !== 'preview' && phase !== 'success' && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('offlineSetup.continueInApp')}
+          onPress={props.onComplete}
+          style={{ position: 'absolute', top: Math.max(insets.top, 16) + 8, right: 18 }}
+        >
+          {({ pressed }) => (
+            <Box
+              px={13}
+              height={36}
+              borderRadius={18}
+              bg="reverse"
+              center
+              opacity={pressed ? 0.7 : 0.92}
+            >
+              <Text color="tertiary" bold fontSize={12}>
+                {t('offlineSetup.continueInApp')}
+              </Text>
+            </Box>
+          )}
+        </Pressable>
+      )}
     </AnimatedBox>
   )
 }

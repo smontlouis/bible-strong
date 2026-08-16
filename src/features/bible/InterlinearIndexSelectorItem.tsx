@@ -11,13 +11,12 @@ import Text from '~common/ui/Text'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { downloadManager } from '~helpers/downloadManager'
 import { createInterlinearSidecarDownloadPlan } from '~helpers/downloadItemFactory'
-import {
-  getInterlinearSidecarAvailability,
-  type InterlinearSidecarAvailability,
-} from '~helpers/interlinearBibleSidecar'
+import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import useConnection from '~helpers/useConnection'
 
 interface Props {
   locale: ResourceLanguage
@@ -30,6 +29,8 @@ const isActiveDownload = (status?: string) =>
 
 const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }: Props) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
+  const isConnected = useConnection()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'bible', versionId: 'BHG' })
@@ -39,10 +40,11 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
   )
   const availabilityQuery = useQuery({
     queryKey: ['interlinear-index-availability', locale, downloadCompletionSignal],
-    queryFn: () => getInterlinearSidecarAvailability(locale),
+    queryFn: () => resources.lexiconBible.getInterlinearAvailability(locale),
   })
   const availability = availabilityQuery.data
   const isChecking = availabilityQuery.isPending || availabilityQuery.isFetching
+  const availabilityFailed = availabilityQuery.isError
 
   React.useEffect(() => {
     onAvailabilityChange(availability?.status === 'available')
@@ -56,9 +58,17 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
   const handlePress = async () => {
     if (isChecking || isAvailable || activeDownload) return
 
+    if (availabilityFailed) {
+      await availabilityQuery.refetch()
+      return
+    }
+
+    if (!isConnected) return
+
     let resolvedAvailability: InterlinearSidecarAvailability | undefined = availability
     if (!resolvedAvailability) {
       const result = await availabilityQuery.refetch()
+      if (result.isError) return
       resolvedAvailability = result.data
     }
 
@@ -108,10 +118,19 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
         ) : (
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel={t('downloads.interlinearIndexName')}
-            accessibilityState={{ disabled: isChecking || Boolean(activeDownload) }}
+            accessibilityLabel={
+              availabilityFailed
+                ? t('resource.action.temporarilyUnavailable')
+                : t('downloads.interlinearIndexName')
+            }
+            accessibilityState={{
+              disabled:
+                (!availabilityFailed && !isConnected) || isChecking || Boolean(activeDownload),
+            }}
             activeOpacity={activeDownload ? 1 : 0.7}
-            disabled={isChecking || Boolean(activeDownload)}
+            disabled={
+              (!availabilityFailed && !isConnected) || isChecking || Boolean(activeDownload)
+            }
             onPress={handlePress}
           >
             <Box width={48} minHeight={40} center>
@@ -122,7 +141,16 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
               ) : activeDownload ? (
                 <Progress progress={Math.max(progress, 0.04)} size={22} thickness={2.5} />
               ) : (
-                <FeatherIcon name={failedDownload ? 'rotate-cw' : 'download-cloud'} size={16} />
+                <FeatherIcon
+                  name={
+                    availabilityFailed || failedDownload
+                      ? 'rotate-cw'
+                      : !isConnected
+                        ? 'wifi-off'
+                        : 'download-cloud'
+                  }
+                  size={16}
+                />
               )}
             </Box>
           </TouchableOpacity>

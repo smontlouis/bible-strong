@@ -7,9 +7,8 @@ import {
   verifyBibleModeAcquisition,
   type PendingBibleModeAcquisition,
 } from '~helpers/bibleModeAcquisition'
-import { getInterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
-import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { downloadItemStatesAtom } from '~state/downloadQueue'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 export const useBibleModeAcquisitionCompletion = ({
   acquisition,
@@ -21,8 +20,13 @@ export const useBibleModeAcquisitionCompletion = ({
   onSucceeded: (acquisition: PendingBibleModeAcquisition) => void
 }) => {
   const downloadStates = useAtomValue(downloadItemStatesAtom)
+  const resources = useResourceAccess()
   const finishAcquisition = useEffectEvent(finish)
   const handleSucceeded = useEffectEvent(onSucceeded)
+  const getStrongAvailability = useEffectEvent(resources.strongBible.getAvailability)
+  const getInterlinearAvailability = useEffectEvent(
+    resources.lexiconBible.getInterlinearAvailability
+  )
 
   useEffect(() => {
     if (!acquisition) return
@@ -35,8 +39,8 @@ export const useBibleModeAcquisitionCompletion = ({
 
     let cancelled = false
     verifyBibleModeAcquisition(acquisition, {
-      getStrongAvailability: getStrongBibleSidecarAvailability,
-      getInterlinearAvailability: getInterlinearSidecarAvailability,
+      getStrongAvailability,
+      getInterlinearAvailability,
     })
       .then(ready => {
         if (cancelled) return

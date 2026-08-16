@@ -41,9 +41,7 @@ import BookmarkModal from '~features/bookmarks/BookmarkModal'
 import { createVerseEndpoint } from '~features/studyRelations/domain'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { getIfDatabaseNeedsDownload } from '~helpers/databases'
 import generateUUID from '~helpers/generateUUID'
-import { toast } from '~helpers/toast'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
 import useLanguage from '~helpers/useLanguage'
@@ -232,15 +230,7 @@ const Header = ({
     transitionDuration: 300,
   } as const
 
-  const onOpenCommentaire = async () => {
-    const needsDownload = await getIfDatabaseNeedsDownload('MHY')
-
-    if (needsDownload) {
-      toast(t('Téléchargez la base de commentaires Matthew Henry'))
-      router.push('/downloads')
-      return
-    }
-
+  const onOpenCommentaire = () => {
     dispatch(setSettingsCommentaires(true))
   }
 

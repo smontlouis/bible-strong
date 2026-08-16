@@ -98,6 +98,7 @@ export interface LexiconBibleResourceDependencies {
 }
 
 export interface LexiconBibleResourceAccess {
+  getInterlinearAvailability: (locale: ResourceLanguage) => Promise<InterlinearSidecarAvailability>
   loadVerse: (request: LexiconBibleVerseRequest) => Promise<LexiconBibleVerseResult>
   loadCountsByBook: (request: LexiconBibleConcordanceRequest) => Promise<LexiconBibleCountsResult>
   loadFoundVersesByBook: (
@@ -212,9 +213,9 @@ const resolveBhgAvailability = async (
 }
 
 export const getBhgLexiconAvailability = (
-  preferredLocale: ResourceLanguage
-): Promise<BhgLexiconAvailability> =>
-  resolveBhgAvailability(preferredLocale, localInterlinearLexiconAdapter.getInterlinearAvailability)
+  preferredLocale: ResourceLanguage,
+  getAvailability: InterlinearLexiconAdapter['getInterlinearAvailability'] = localInterlinearLexiconAdapter.getInterlinearAvailability
+): Promise<BhgLexiconAvailability> => resolveBhgAvailability(preferredLocale, getAvailability)
 
 export const createBhgStrongSpans = (tokens: InterlinearToken[]): StrongBibleSpan[] =>
   tokens.flatMap(token => {
@@ -287,6 +288,7 @@ export const createLexiconBibleResourceAccess = (
   })
 
   return {
+    getInterlinearAvailability: dependencies.interlinear.getInterlinearAvailability,
     async loadVerse(request) {
       if (request.currentVersionId === 'BHG' && !request.preferredVersionId) {
         try {

@@ -10,12 +10,18 @@ export interface BibleDOMTranslations {
   versionNotFound: string
   chapterNotFound: string
   databaseCorrupted: string
+  onlineUnsupported: string
+  offlineUnavailable: string
+  temporaryUnavailable: string
+  integrityFailure: string
   unknownError: string
   goToDownloads: string
   downloadVersion: string
+  connectionRequired: string
   downloading: string
   inserting: string
   resetDatabase: string
+  retry: string
   openCanonicalBibleNote: string
   pericopeIndex: string
   passageMediaTitle: string

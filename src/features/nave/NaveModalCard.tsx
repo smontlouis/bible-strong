@@ -3,7 +3,6 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import { useAtomValue } from 'jotai'
-import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useQuery } from '@tanstack/react-query'
@@ -13,6 +12,7 @@ import { SheetScrollView } from '~common/sheet'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 type Props = {
   selectedVerse: string
@@ -35,10 +35,11 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
     staleTime: Infinity,
   })
 
-  const { isLoading, error, data } = useQuery({
+  const naveQuery = useQuery({
     queryKey: ['nave', selectedVerse, resourceLang],
     queryFn: () => resources.nave.loadByVerse(selectedVerse),
   })
+  const { isLoading, error, data } = naveQuery
 
   if (
     (availabilityQuery.data?.status === 'unavailable' &&
@@ -48,20 +49,25 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
     return (
       <OfflineResourceRecovery
         identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLang }}
-        title={t(
-          'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
-        )}
+        title={t('resource.nave.offlineCopyNeeded')}
         fileSize={7}
         size="small"
       />
     )
   }
 
-  if (error) {
+  if (availabilityQuery.isError || error) {
     return (
-      <Empty
-        source={require('~assets/images/empty.json')}
-        message={t('Une erreur est survenue...')}
+      <ResourceUnavailableView
+        identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLang }}
+        title={t('resource.nave.temporarilyUnavailable')}
+        fileSize={7}
+        reason="temporary-unavailable"
+        size="small"
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          void naveQuery.refetch()
+        }}
       />
     )
   }

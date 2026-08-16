@@ -4,6 +4,7 @@ import {
   BibleChapterResult,
   createBibleError,
   errorResult,
+  getBibleRecoveryActions,
   successResult,
 } from '~helpers/bibleErrors'
 import type { BibleRecoveryAction } from '~helpers/bibleErrors'
@@ -13,7 +14,8 @@ import {
   getMultipleVerses,
   type BibleVersionCoverage,
 } from '~helpers/biblesDb'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { getBibleVersionCanonId, getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { localStrongLexiconAccess, type StrongLexiconAccess } from './strongLexiconAccess'
 import {
   isStrongCapableBibleVersion,
@@ -44,6 +46,24 @@ import {
 } from '~helpers/strongIdentities'
 import { collectStrongSelectionMorphologies } from '~helpers/strongSelection'
 import { getResourceLanguage } from '~state/resourcesLanguage'
+import {
+  type BibleChapterAdapter,
+  type BibleChapterUnavailableReason,
+  loadVerseTextsFromChapterAdapter,
+  BibleVerseTextSourceError,
+} from './bibleChapterSource'
+
+export type { BibleChapterAdapter, BibleChapterSourceResult } from './bibleChapterSource'
+
+const isCanonicalChapterForVersion = (version: string, book: number, chapter: number) => {
+  const canonicalBook = getBook(book)
+  return (
+    Boolean(canonicalBook) &&
+    chapter >= 1 &&
+    chapter <= (canonicalBook?.Chapitres ?? 0) &&
+    getBooksForCanon(getBibleVersionCanonId(version)).some(item => item.Numero === book)
+  )
+}
 
 export type BibleChapterData =
   | { kind: 'plain'; verses: Verse[] }
@@ -75,18 +95,6 @@ export type BibleContentAccess = {
   }>
 }
 
-export type BibleChapterSourceResult =
-  | { status: 'available'; verses: Verse[] }
-  | {
-      status: 'unavailable'
-      reason: 'publication-not-available' | 'chapter-not-available' | 'offline-copy-invalid'
-      recoveries?: BibleRecoveryAction[]
-    }
-
-export type BibleChapterAdapter = {
-  loadChapter: (version: string, book: number, chapter: number) => Promise<BibleChapterSourceResult>
-}
-
 type BibleContentAccessDependencies = {
   strongLexicon: Pick<StrongLexiconAccess, 'loadPreview'>
   getStrongResourceLanguage: () => ResourceLanguage
@@ -114,7 +122,13 @@ export const localBibleChapterAdapter: BibleChapterAdapter = {
       } catch {
         // An inconclusive availability check still means the requested chapter is unavailable.
       }
-      return { status: 'unavailable', reason: 'chapter-not-available' }
+      return isCanonicalChapterForVersion(version, book, chapter)
+        ? {
+            status: 'unavailable',
+            reason: 'offline-copy-invalid',
+            recoveries: ['manage-offline-copies', 'reset-offline-store'],
+          }
+        : { status: 'unavailable', reason: 'chapter-not-available' }
     } catch (error) {
       if (error instanceof BibleLoadingError) {
         if (error.type === 'BIBLE_NOT_FOUND') {
@@ -147,6 +161,34 @@ export const localBibleChapterAdapter: BibleChapterAdapter = {
       throw error
     }
   },
+  async loadCoverage(version) {
+    try {
+      return { status: 'available', coverage: await getBibleVersionCoverage(version) }
+    } catch {
+      return { status: 'unavailable', reason: 'offline-copy-invalid' }
+    }
+  },
+}
+
+const unavailableReasonToErrorType = (
+  reason: BibleChapterUnavailableReason
+): import('~helpers/bibleErrors').BibleErrorType => {
+  switch (reason) {
+    case 'publication-not-available':
+      return 'BIBLE_NOT_FOUND'
+    case 'chapter-not-available':
+      return 'CHAPTER_NOT_FOUND'
+    case 'offline-copy-invalid':
+      return 'OFFLINE_COPY_INVALID'
+    case 'resource-unsupported':
+      return 'RESOURCE_UNSUPPORTED'
+    case 'network-offline':
+      return 'RESOURCE_OFFLINE'
+    case 'temporary-unavailable':
+      return 'RESOURCE_TEMPORARY_UNAVAILABLE'
+    case 'integrity-failure':
+      return 'RESOURCE_INTEGRITY_ERROR'
+  }
 }
 
 const defaultDependencies: BibleContentAccessDependencies = {
@@ -169,19 +211,13 @@ const loadRegularBibleChapter = async (
     request.chapter
   )
   if (chapter.status === 'unavailable') {
-    const errorType =
-      chapter.reason === 'publication-not-available'
-        ? 'BIBLE_NOT_FOUND'
-        : chapter.reason === 'chapter-not-available'
-          ? 'CHAPTER_NOT_FOUND'
-          : 'OFFLINE_COPY_INVALID'
     return errorResult(
       createBibleError(
-        errorType,
+        unavailableReasonToErrorType(chapter.reason),
         request.version,
         request.book,
         request.chapter,
-        chapter.recoveries
+        chapter.recoveries ?? getBibleRecoveryActions(unavailableReasonToErrorType(chapter.reason))
       )
     )
   }
@@ -422,3 +458,31 @@ export const localBibleContentAccess: BibleContentAccess = {
       ? { status: 'unavailable', recoveries: ['acquire-offline-copy'] }
       : { status: 'available' },
 }
+
+export const createBibleContentAccess = (
+  chapterAdapter: BibleChapterAdapter
+): BibleContentAccess => ({
+  ...localBibleContentAccess,
+  loadChapter: request =>
+    loadBibleContentChapter(request, { ...defaultDependencies, chapterAdapter }),
+  loadVerseTexts: async ({ version, verseKeys, shouldCancel }) => {
+    try {
+      return await loadVerseTextsFromChapterAdapter(
+        chapterAdapter,
+        version,
+        verseKeys,
+        shouldCancel
+      )
+    } catch (error) {
+      if (error instanceof BibleVerseTextSourceError) {
+        throw new BibleLoadingError(unavailableReasonToErrorType(error.reason), version)
+      }
+      throw error
+    }
+  },
+  loadCoverage: async version => {
+    const result = await chapterAdapter.loadCoverage(version)
+    if (result.status === 'available') return result.coverage
+    throw new BibleLoadingError(unavailableReasonToErrorType(result.reason), version)
+  },
+})

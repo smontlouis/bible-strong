@@ -39,6 +39,7 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
@@ -83,11 +84,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     networkMode: 'always',
     staleTime: Infinity,
   })
-  const {
-    data: naveItem = null,
-    isPending: isNavePending,
-    isError: isNaveError,
-  } = useQuery({
+  const naveQuery = useQuery({
     queryKey: ['nave-detail', naveResourceLanguage, name_lower],
     queryFn: async () =>
       name_lower ? ((await resources.nave.loadItem(name_lower)) ?? null) : null,
@@ -95,6 +92,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     staleTime: Infinity,
     ...localQueryOptions,
   })
+  const naveItem = naveQuery.data ?? null
   const { t } = useTranslation()
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const selectNaveTags = makeNaveTagsSelector()
@@ -197,9 +195,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     return (
       <OfflineResourceRecovery
         identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
-        title={t(
-          'La base de données "Bible thématique Nave" est requise pour accéder à ce module.'
-        )}
+        title={t('resource.nave.offlineCopyNeeded')}
         fileSize={7}
         hasBackButton={hasBackButton}
         hasHeader
@@ -207,7 +203,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     )
   }
 
-  if (isNavePending) {
+  if (naveQuery.isPending) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title="Thèmes Nave" />
@@ -216,7 +212,25 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     )
   }
 
-  if (isNaveError || !naveItem) {
+  if (naveAvailabilityQuery.isError || naveQuery.isError) {
+    return (
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title="Thèmes Nave" />
+        <ResourceUnavailableView
+          identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
+          title={t('resource.nave.temporarilyUnavailable')}
+          fileSize={7}
+          reason="temporary-unavailable"
+          onRetry={() => {
+            void naveAvailabilityQuery.refetch()
+            void naveQuery.refetch()
+          }}
+        />
+      </FormSheetScreen>
+    )
+  }
+
+  if (!naveItem) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header hasBackButton={hasBackButton} onCustomBackPress={goBack} title="Thèmes Nave" />

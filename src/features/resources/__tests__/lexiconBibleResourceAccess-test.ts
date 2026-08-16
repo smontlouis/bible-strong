@@ -25,6 +25,7 @@ jest.mock('~features/resources/strongBibleResourceAccess', () => ({
 
 const createDependencies = () => ({
   strongBible: {
+    getAvailability: jest.fn(),
     loadChapterCodes: jest.fn(),
     loadVerse: jest.fn(),
     loadCountsByBook: jest.fn(),

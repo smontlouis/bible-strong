@@ -20,6 +20,8 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import useLanguage from '~helpers/useLanguage'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import { useTranslation } from 'react-i18next'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 const ReferenceItem = ({ reference, version }: { reference: string; version: VersionCode }) => {
   const resources = useResourceAccess()
@@ -73,6 +75,7 @@ export const ReferenceCard = ({
   version: VersionCode
 }) => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const resources = useResourceAccess()
   const resourceLanguage = useLanguage()
   const availabilityQuery = useQuery({
@@ -84,10 +87,11 @@ export const ReferenceCard = ({
     staleTime: Infinity,
   })
 
-  const { isLoading, error, data } = useQuery({
+  const referencesQuery = useQuery({
     queryKey: resourceQueryKeys.bibleReferences(selectedVerse),
     queryFn: async () => (await resources.bibleReading.loadTresorReferences(selectedVerse)) ?? null,
   })
+  const { isLoading, error, data } = referencesQuery
 
   if (
     availabilityQuery.data?.status === 'unavailable' &&
@@ -96,7 +100,7 @@ export const ReferenceCard = ({
     return (
       <OfflineResourceRecovery
         identity={{ kind: 'database', databaseId: 'TRESOR', language: resourceLanguage }}
-        title="La base Trésor de la connaissance biblique est requise."
+        title={t('resource.crossReferences.offlineCopyNeeded')}
         fileSize={10}
         size="small"
       />
@@ -107,16 +111,26 @@ export const ReferenceCard = ({
     return (
       <OfflineResourceRecovery
         identity={{ kind: 'database', databaseId: 'TRESOR', language: resourceLanguage }}
-        title="La base Trésor doit être retéléchargée."
+        title={t('resource.crossReferences.offlineCopyInvalid')}
         fileSize={10}
         size="small"
       />
     )
   }
 
-  if (error) {
+  if (availabilityQuery.isError || error) {
     return (
-      <Empty source={require('~assets/images/empty.json')} message="Une erreur est survenue..." />
+      <ResourceUnavailableView
+        identity={{ kind: 'database', databaseId: 'TRESOR', language: resourceLanguage }}
+        title={t('resource.crossReferences.temporarilyUnavailable')}
+        fileSize={10}
+        reason="temporary-unavailable"
+        size="small"
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          void referencesQuery.refetch()
+        }}
+      />
     )
   }
 

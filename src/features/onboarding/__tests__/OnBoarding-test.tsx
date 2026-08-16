@@ -19,6 +19,17 @@ jest.mock('react-native', () => {
   }
 })
 
+jest.mock('react-native-gesture-handler', () => {
+  const React = jest.requireActual<typeof import('react')>('react')
+  return {
+    GestureHandlerRootView: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement('GestureHandlerRootView', { ...props, testID: 'gesture-root' }, children),
+  }
+})
+
 jest.mock('jotai/react', () => jest.requireActual('jotai/react'))
 
 jest.mock('../atom', () => {
@@ -68,6 +79,12 @@ jest.mock('../SelectResources', () => {
     React.createElement('SelectResources', { ...props, testID: 'select-resources' })
 })
 
+jest.mock('../ResourceSetupChoice', () => {
+  const React = jest.requireActual<typeof import('react')>('react')
+  return (props: Record<string, unknown>) =>
+    React.createElement('ResourceSetupChoice', { ...props, testID: 'resource-setup-choice' })
+})
+
 describe('OnBoarding', () => {
   beforeAll(() => {
     ;(
@@ -83,7 +100,7 @@ describe('OnBoarding', () => {
     getDefaultStore().set(isOnboardingCompletedAtom, false)
   })
 
-  it('hands Abel off to real resource selection and only closes after setup completion', async () => {
+  it('lets the user choose Offline preparation after discovery', async () => {
     let renderer: ReactTestRenderer | undefined
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined)
     const consoleLog = jest.spyOn(console, 'log').mockImplementation(() => undefined)
@@ -94,13 +111,22 @@ describe('OnBoarding', () => {
       })
 
       expect(renderer!.root.findByProps({ testID: 'onboarding-modal' }).props.visible).toBe(true)
+      expect(mockGetIfVersionNeedsDownload).not.toHaveBeenCalled()
+      expect(mockDeleteAllDatabases).not.toHaveBeenCalled()
+      expect(renderer!.root.findByProps({ testID: 'gesture-root' }).props.style).toEqual({
+        flex: 1,
+      })
       const abel = renderer!.root.findByProps({ testID: 'abel-onboarding' })
 
       act(() => abel.props.onComplete())
 
       expect(renderer!.root.findAllByProps({ testID: 'abel-onboarding' })).toHaveLength(0)
-      const resources = renderer!.root.findByProps({ testID: 'select-resources' })
+      const choice = renderer!.root.findByProps({ testID: 'resource-setup-choice' })
       expect(renderer!.root.findByProps({ testID: 'onboarding-modal' }).props.visible).toBe(true)
+
+      act(() => choice.props.onPrepareOffline())
+
+      const resources = renderer!.root.findByProps({ testID: 'select-resources' })
 
       await act(async () => resources.props.onComplete())
 
@@ -109,6 +135,45 @@ describe('OnBoarding', () => {
       act(() => renderer?.unmount())
       consoleError.mockRestore()
       consoleLog.mockRestore()
+    }
+  })
+
+  it('enters the app directly when the user chooses Online access', async () => {
+    let renderer: ReactTestRenderer | undefined
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    try {
+      await act(async () => {
+        renderer = create(<OnBoarding />)
+      })
+
+      act(() => renderer!.root.findByProps({ testID: 'abel-onboarding' }).props.onComplete())
+      const choice = renderer!.root.findByProps({ testID: 'resource-setup-choice' })
+      act(() => choice.props.onContinueOnline())
+
+      expect(renderer!.root.findByProps({ testID: 'onboarding-modal' }).props.visible).toBe(false)
+      expect(getDefaultStore().get(isOnboardingCompletedAtom)).toBe(true)
+    } finally {
+      act(() => renderer?.unmount())
+      consoleError.mockRestore()
+    }
+  })
+
+  it.each(['fr', 'en'])('does not reopen after completion in %s', async language => {
+    mockLanguage = language
+    getDefaultStore().set(isOnboardingCompletedAtom, true)
+    let renderer: ReactTestRenderer | undefined
+
+    try {
+      await act(async () => {
+        renderer = create(<OnBoarding />)
+      })
+
+      expect(renderer!.root.findByProps({ testID: 'onboarding-modal' }).props.visible).toBe(false)
+      expect(mockGetIfVersionNeedsDownload).not.toHaveBeenCalled()
+      expect(mockDeleteAllDatabases).not.toHaveBeenCalled()
+    } finally {
+      act(() => renderer?.unmount())
     }
   })
 
@@ -124,6 +189,9 @@ describe('OnBoarding', () => {
       })
 
       act(() => renderer!.root.findByProps({ testID: 'abel-onboarding' }).props.onComplete())
+      act(() =>
+        renderer!.root.findByProps({ testID: 'resource-setup-choice' }).props.onPrepareOffline()
+      )
       const resources = renderer!.root.findByProps({ testID: 'select-resources' })
       await act(async () => resources.props.onComplete())
       expect(renderer!.root.findByProps({ testID: 'onboarding-modal' }).props.visible).toBe(false)

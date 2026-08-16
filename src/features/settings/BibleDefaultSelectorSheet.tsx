@@ -14,9 +14,9 @@ import {
   type BibleDefaultSelectionKind,
 } from '~features/bible/bibleDefaultCatalog'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
-import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import type { VersionCode } from '~state/tabs'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 type Props = {
   kind: BibleDefaultSelectionKind
@@ -34,6 +34,7 @@ const BibleDefaultSelectorSheet = ({
   onSelect,
 }: Props) => {
   const insets = useSafeAreaInsets()
+  const resources = useResourceAccess()
   const versionCatalog = useVersionCatalog(getBibleDefaultCatalog(kind))
   const [revealKey, setRevealKey] = React.useState(0)
   const [pendingStrongVersionId, setPendingStrongVersionId] = React.useState<VersionCode>()
@@ -50,7 +51,8 @@ const BibleDefaultSelectorSheet = ({
     if (kind !== 'strong' || !pendingStrongVersionId) return
 
     let cancelled = false
-    getStrongBibleSidecarAvailability(pendingStrongVersionId)
+    resources.strongBible
+      .getAvailability(pendingStrongVersionId)
       .then(availability => {
         if (cancelled || availability.status !== 'available') return
 
@@ -63,7 +65,7 @@ const BibleDefaultSelectorSheet = ({
     return () => {
       cancelled = true
     }
-  }, [downloadCompletionSignal, kind, onSelect, pendingStrongVersionId, sheetRef])
+  }, [downloadCompletionSignal, kind, onSelect, pendingStrongVersionId, resources, sheetRef])
 
   const headerProps =
     kind === 'strong'

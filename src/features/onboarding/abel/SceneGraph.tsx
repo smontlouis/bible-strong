@@ -777,6 +777,7 @@ const NodeRenderer = ({
     >
       <AnimatedBox
         key={descriptor.contentIdentity}
+        collapsable={false}
         style={{ position: 'absolute', inset: 0 }}
         pointerEvents={descriptor.pointerEvents}
         overflow="visible"
@@ -804,6 +805,7 @@ const NodeRenderer = ({
 
   return (
     <AnimatedBox
+      collapsable={false}
       position="absolute"
       left={initialFrame.x * metrics.scale}
       top={initialFrame.y * metrics.scale}
@@ -925,6 +927,7 @@ const ConnectionRenderer = ({
 
   return (
     <AnimatedBox
+      collapsable={false}
       position="absolute"
       left={0}
       top={0}
@@ -998,10 +1001,11 @@ export const SceneGraph = ({
   }, [activeSceneId, orbitDuration, orbitProgress, orbitStartDelay, reduceMotion])
 
   return (
-    <Box flex={1} overflow="visible">
+    <Box flex={1} overflow="visible" collapsable={false}>
       {activeScene.layers.map(layer => (
         <AnimatedBox
           key={`${activeScene.id}:${layer.key}`}
+          collapsable={false}
           position="absolute"
           left={0}
           top={0}

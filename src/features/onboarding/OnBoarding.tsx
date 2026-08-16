@@ -1,23 +1,23 @@
-import { useAtom, useSetAtom } from 'jotai/react'
+import { useAtomValue, useSetAtom } from 'jotai/react'
 import { useEffect, useRef, useState } from 'react'
 import { Modal } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useDispatch } from 'react-redux'
 
 import Box from '~common/ui/Box'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { isOnboardingForced } from '~helpers/runtimeConfig'
-import { deleteAllDatabases } from '~helpers/sqlite'
 import useLanguage from '~helpers/useLanguage'
 import { setDefaultBibleVersion } from '~redux/modules/user'
 import { isOnboardingCompletedAtom } from './atom'
 import AbelOnboarding from './AbelOnboarding'
 import SelectResources from './SelectResources'
+import ResourceSetupChoice from './ResourceSetupChoice'
 
-const useCheckMandatoryVersions = () => {
+const useOptionalOnboarding = () => {
   const lang = useLanguage()
   const dispatch = useDispatch()
-  const [isOnboardingCompleted, setIsOnboardingCompleted] = useAtom(isOnboardingCompletedAtom)
+  const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const forcedOnboardingDismissed = useRef(false)
 
@@ -30,37 +30,14 @@ const useCheckMandatoryVersions = () => {
       return
     }
 
-    // Skip file check if onboarding was already completed (fast path via MMKV)
     if (isOnboardingCompleted) {
-      console.log('[Onboarding] Already completed, skipping file check.')
       setShowOnboarding(false)
       return
     }
 
     const defaultVersion = getDefaultBibleVersion(lang)
-
-    ;(async () => {
-      try {
-        const needsDownload = await getIfVersionNeedsDownload(defaultVersion)
-
-        if (needsDownload) {
-          console.log('[Onboarding] Needs download, open onboarding.')
-          setShowOnboarding(true)
-          dispatch(setDefaultBibleVersion(defaultVersion))
-          deleteAllDatabases()
-        } else {
-          // Bible exists, mark onboarding as completed for future fast starts
-          console.log('[Onboarding] Bible exists, marking as completed.')
-          setIsOnboardingCompleted(true)
-        }
-      } catch (error) {
-        console.error('[Onboarding] Error checking version:', error)
-        // On error, assume onboarding is required to be safe
-        setShowOnboarding(true)
-        dispatch(setDefaultBibleVersion(defaultVersion))
-      }
-    })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    dispatch(setDefaultBibleVersion(defaultVersion))
+    setShowOnboarding(true)
   }, [lang, dispatch, isOnboardingCompleted])
 
   const hideOnboarding = () => {
@@ -72,9 +49,9 @@ const useCheckMandatoryVersions = () => {
 }
 
 const OnBoarding = () => {
-  const [step, setStep] = useState<'abel' | 'resources'>('abel')
+  const [step, setStep] = useState<'abel' | 'choice' | 'resources'>('abel')
   const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
-  const { hideOnboarding, showOnboarding } = useCheckMandatoryVersions()
+  const { hideOnboarding, showOnboarding } = useOptionalOnboarding()
 
   const completeOnboarding = () => {
     if (isOnboardingForced) {
@@ -89,15 +66,22 @@ const OnBoarding = () => {
       visible={showOnboarding}
       animationType="fade"
       presentationStyle="fullScreen"
-      onRequestClose={() => undefined}
+      onRequestClose={completeOnboarding}
     >
-      <Box flex bg="reverse">
-        {step === 'abel' ? (
-          <AbelOnboarding onComplete={() => setStep('resources')} />
-        ) : (
-          <SelectResources onComplete={completeOnboarding} />
-        )}
-      </Box>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Box flex bg="reverse">
+          {step === 'abel' ? (
+            <AbelOnboarding onComplete={() => setStep('choice')} />
+          ) : step === 'choice' ? (
+            <ResourceSetupChoice
+              onContinueOnline={completeOnboarding}
+              onPrepareOffline={() => setStep('resources')}
+            />
+          ) : (
+            <SelectResources onComplete={completeOnboarding} />
+          )}
+        </Box>
+      </GestureHandlerRootView>
     </Modal>
   )
 }

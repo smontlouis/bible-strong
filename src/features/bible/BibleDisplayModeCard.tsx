@@ -15,6 +15,7 @@ type Props = {
   onPress: () => void
   downloadRequired?: boolean
   downloading?: boolean
+  downloadDisabled?: boolean
   downloadProgress?: number
   downloadAccessibilityLabel?: string
   onDownloadPress?: () => void
@@ -29,6 +30,7 @@ const BibleDisplayModeCard = ({
   onPress,
   downloadRequired = false,
   downloading = false,
+  downloadDisabled = false,
   downloadProgress = 0,
   downloadAccessibilityLabel,
   onDownloadPress,
@@ -40,17 +42,15 @@ const BibleDisplayModeCard = ({
   return (
     <Box flex={isList ? undefined : 1} height={isList ? 92 : 148} position="relative">
       <Pressable
-        accessibilityRole={isList && !showDownloadControl ? 'radio' : 'button'}
+        accessibilityRole={isList ? 'radio' : 'button'}
         accessibilityState={
           isList && !showDownloadControl
-            ? { checked: selected, disabled: downloading }
-            : { selected, disabled: downloading }
+            ? { checked: selected, disabled: downloading || downloadRequired }
+            : { selected, disabled: downloading || downloadRequired }
         }
-        accessibilityLabel={
-          showDownloadControl ? downloadAccessibilityLabel : `${label}. ${description}`
-        }
-        disabled={downloading}
-        onPress={downloadRequired ? onDownloadPress : onPress}
+        accessibilityLabel={`${label}. ${description}`}
+        disabled={downloading || downloadRequired}
+        onPress={onPress}
         style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
       >
         <Box
@@ -72,7 +72,11 @@ const BibleDisplayModeCard = ({
                 {downloading ? (
                   <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
                 ) : (
-                  <FeatherIcon name="download-cloud" size={19} color="default" />
+                  <FeatherIcon
+                    name={downloadDisabled ? 'wifi-off' : 'download-cloud'}
+                    size={19}
+                    color="default"
+                  />
                 )}
               </Box>
             ) : (
@@ -122,12 +126,33 @@ const BibleDisplayModeCard = ({
               {downloading ? (
                 <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
               ) : (
-                <FeatherIcon name="download-cloud" size={17} color="default" />
+                <FeatherIcon
+                  name={downloadDisabled ? 'wifi-off' : 'download-cloud'}
+                  size={17}
+                  color="default"
+                />
               )}
             </Box>
           )}
         </Box>
       </Pressable>
+      {showDownloadControl && onDownloadPress && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={downloadAccessibilityLabel}
+          accessibilityState={{ disabled: downloading || downloadDisabled }}
+          disabled={downloading || downloadDisabled}
+          onPress={onDownloadPress}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: isList ? 0 : undefined,
+            bottom: isList ? 0 : 0,
+            width: isList ? 54 : 44,
+            height: isList ? 92 : 44,
+          }}
+        />
+      )}
     </Box>
   )
 }

@@ -14,6 +14,7 @@ const lexiconBible = [...root, 'lexicon-bible'] as const
 const strongBible = [...root, 'strong-bible'] as const
 const strongLexicon = [...root, 'strong-lexicon'] as const
 const offlineDatabase = [...root, 'offline-database'] as const
+const timeline = [...root, 'timeline'] as const
 
 type LexiconBibleQueryRequest = {
   currentVersionId: string
@@ -81,4 +82,5 @@ export const resourceQueryKeys = {
     [...strongLexicon, 'availability', moduleId] as const,
   offlineDatabaseAvailability: (databaseId: string, language: string) =>
     [...offlineDatabase, 'availability', databaseId, language] as const,
+  timeline: (language: string) => [...timeline, language] as const,
 }

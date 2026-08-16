@@ -28,6 +28,7 @@ import {
   type VersionCatalogSection,
 } from './versionCatalog'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 
 const STYLE_INFO_KEYS: Record<TranslationReadingProfile, string> = {
   'word-for-word': 'versionCatalog.style.wordForWord.description',
@@ -44,6 +45,7 @@ export const useVersionCatalog = (
   { resetSearchOnFocus = false }: { resetSearchOnFocus?: boolean } = {}
 ) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const navigation = useNavigation()
   const uiLanguage = useLanguage()
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
@@ -52,7 +54,10 @@ export const useVersionCatalog = (
   const [availability, setAvailability] = React.useState<BibleVersionAvailability>('all')
   const { data: downloadedVersionIds = null } = useQuery({
     queryKey: ['downloaded-bible-version-ids', installedVersionsSignal],
-    queryFn: () => getDownloadedBibleVersionIds(installedVersionsSignal),
+    queryFn: () =>
+      getDownloadedBibleVersionIds(installedVersionsSignal, versionId =>
+        resources.offlineCopies.isAvailable({ kind: 'bible', versionId })
+      ),
     ...localQueryOptions,
   })
   const [activeStyleInfo, setActiveStyleInfo] = React.useState<TranslationReadingProfile | null>(

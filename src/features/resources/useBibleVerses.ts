@@ -26,6 +26,7 @@ type ResolvedBibleVerses = {
   isLoading: boolean
   error: Error | null
   recoveries?: BibleRecoveryAction[]
+  retry: () => void
 }
 
 export const useResolvedBibleVerses = (
@@ -42,7 +43,7 @@ export const useResolvedBibleVerses = (
     defaultVersion,
   })
 
-  const { data, error, isPending } = useQuery({
+  const query = useQuery({
     queryKey: [...resourceQueryKeys.bibleVerseSelection(version, verseKeys), requestKey],
     queryFn: async () => {
       if (!verseKeys.length) {
@@ -82,13 +83,14 @@ export const useResolvedBibleVerses = (
   })
 
   return {
-    verses: data?.verses ?? [],
-    version: data?.version,
-    status: data?.status ?? 'reference-only',
-    missingVerseKeys: data?.missingVerseKeys ?? verseKeys,
-    isLoading: isPending,
-    error,
-    recoveries: data?.recoveries,
+    verses: query.data?.verses ?? [],
+    version: query.data?.version,
+    status: query.data?.status ?? 'reference-only',
+    missingVerseKeys: query.data?.missingVerseKeys ?? verseKeys,
+    isLoading: query.isPending,
+    error: query.error,
+    recoveries: query.data?.recoveries,
+    retry: () => void query.refetch(),
   }
 }
 

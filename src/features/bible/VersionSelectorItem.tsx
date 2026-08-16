@@ -1,7 +1,6 @@
 import React from 'react'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Alert, Linking, TouchableOpacity } from 'react-native'
-import { useDispatch } from 'react-redux'
 
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
@@ -12,9 +11,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import { getIfVersionNeedsDownload, Version } from '~helpers/bibleVersions'
-import useLanguage from '~helpers/useLanguage'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
+import { Version } from '~helpers/bibleVersions'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
 import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
 import { downloadManager } from '~helpers/downloadManager'
@@ -23,17 +20,13 @@ import {
   createBibleDownloadItem,
   createStrongSidecarDownloadPlan,
 } from '~helpers/downloadItemFactory'
-import { setDefaultBibleVersion } from '~redux/modules/user'
-import { VersionCode, tabsAtom, BibleTab } from 'src/state/tabs'
-import { store } from '~redux/store'
+import { VersionCode } from 'src/state/tabs'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import {
   getStrongBibleAttributionKey,
   isStrongCapableBibleVersion,
 } from '~helpers/strongBiblePublications'
-import {
-  getStrongBibleSidecarAvailability,
-  type StrongBibleSidecarAvailability,
-} from '~helpers/strongBibleSidecar'
+import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import StrongIndexSelectorItem from './StrongIndexSelectorItem'
 import StrongMark from './StrongMark'
 import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
@@ -47,6 +40,7 @@ import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
+import useConnection from '~helpers/useConnection'
 
 const getVersionDownloadQueryKey = (
   versionId: string,
@@ -94,8 +88,20 @@ const ActionColumn = ({ children, opacity }: React.PropsWithChildren<{ opacity?:
   </Box>
 )
 
-const ActionButton = ({ children, onPress }: React.PropsWithChildren<{ onPress: () => void }>) => (
-  <TouchableOpacity onPress={onPress}>
+const ActionButton = ({
+  children,
+  onPress,
+  disabled = false,
+}: React.PropsWithChildren<{ onPress: () => void; disabled?: boolean }>) => (
+  <TouchableOpacity
+    accessibilityRole="button"
+    accessibilityState={{ disabled }}
+    disabled={disabled}
+    onPress={event => {
+      event.stopPropagation()
+      onPress()
+    }}
+  >
     <ActionColumn>{children}</ActionColumn>
   </TouchableOpacity>
 )
@@ -275,7 +281,7 @@ const VersionSelectorItem = ({
   selectionRequirement = 'bible',
 }: Props) => {
   const { t } = useTranslation()
-  const lang = useLanguage()
+  const resources = useResourceAccess()
   const [isStrongIndexAvailable, setStrongIndexAvailable] = React.useState<boolean>()
   const [isStrongIndexExpanded, setStrongIndexExpanded] = React.useState(false)
   const [isFrenchInterlinearIndexAvailable, setFrenchInterlinearIndexAvailable] =
@@ -284,7 +290,7 @@ const VersionSelectorItem = ({
     React.useState<boolean>()
   const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
   const queryClient = useQueryClient()
-  const dispatch = useDispatch()
+  const isConnected = useConnection()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
@@ -295,15 +301,17 @@ const VersionSelectorItem = ({
   const previousBibleDownloadStatusRef = React.useRef(queueState?.status)
   const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
   const requiresStrong = selectionRequirement === 'strong' && Boolean(strongVersionId)
-  const { data: versionNeedsDownload } = useQuery({
+  const versionAvailabilityQuery = useQuery({
     queryKey: getVersionDownloadQueryKey(
       version.id,
       isOnboardingCompleted,
       installedVersionsSignal
     ),
-    queryFn: () => getIfVersionNeedsDownload(version.id),
+    queryFn: async () =>
+      !(await resources.offlineCopies.isAvailable({ kind: 'bible', versionId: version.id })),
     placeholderData: keepPreviousData,
   })
+  const versionNeedsDownload = versionAvailabilityQuery.data
   const bibleDownloadItem = createBibleDownloadItem(version.id)
   const publicationStatus = useResourcePublicationStatus({
     resourceId: bibleDownloadItem.id,
@@ -318,12 +326,12 @@ const VersionSelectorItem = ({
       installedVersionsSignal,
       downloadCompletionSignal,
     ],
-    queryFn: () => getStrongBibleSidecarAvailability(strongVersionId!),
+    queryFn: () => resources.strongBible.getAvailability(strongVersionId!),
     enabled: requiresStrong,
     placeholderData: keepPreviousData,
   })
   const strongSelectionAvailability: StrongBibleSidecarAvailability | undefined =
-    strongSelectionQuery.data ?? (strongSelectionQuery.isError ? { status: 'missing' } : undefined)
+    strongSelectionQuery.data
   const strongQueueState = useDownloadItemStatus(
     isStrongCapableBibleVersion(version.id)
       ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version.id })
@@ -367,9 +375,15 @@ const VersionSelectorItem = ({
     : undefined
 
   const startDownload = async () => {
+    if (!isConnected) return
+    if (versionAvailabilityQuery.isError || strongSelectionQuery.isError) {
+      await Promise.all([versionAvailabilityQuery.refetch(), strongSelectionQuery.refetch()])
+      return
+    }
     if (requiresStrong && strongVersionId) {
       const availability =
-        strongSelectionAvailability ?? (await getStrongBibleSidecarAvailability(strongVersionId))
+        strongSelectionAvailability ??
+        (await resources.strongBible.getAvailability(strongVersionId))
       onDownloadStart?.(version.id)
       downloadManager.enqueue(createStrongSidecarDownloadPlan(strongVersionId, availability.status))
       return
@@ -430,54 +444,7 @@ const VersionSelectorItem = ({
   }
 
   const deleteVersion = async () => {
-    // Check if we're deleting the default Bible version
-    const state = store.getState()
-    const defaultVersion = state.user.bible.settings.defaultBibleVersion
-    const fallback: VersionCode = getDefaultBibleVersion(lang)
-
-    if (version.id === defaultVersion) {
-      dispatch(setDefaultBibleVersion(fallback))
-    }
-
-    // Update all tabs that use this version
     const jotaiStore = getDefaultStore()
-    const tabs = jotaiStore.get(tabsAtom)
-    const updatedTabs = tabs.map(tab => {
-      if (tab.type !== 'bible') return tab
-
-      const bibleTab = tab as BibleTab
-      let tabNeedsUpdate = false
-      let newSelectedVersion = bibleTab.data.selectedVersion
-      let newParallelVersions = bibleTab.data.parallelVersions
-
-      if (bibleTab.data.selectedVersion === version.id) {
-        newSelectedVersion = fallback
-        tabNeedsUpdate = true
-      }
-
-      if (bibleTab.data.parallelVersions.includes(version.id)) {
-        newParallelVersions = bibleTab.data.parallelVersions.filter(v => v !== version.id)
-        tabNeedsUpdate = true
-      }
-
-      if (tabNeedsUpdate) {
-        return {
-          ...bibleTab,
-          data: {
-            ...bibleTab.data,
-            selectedVersion: newSelectedVersion,
-            parallelVersions: newParallelVersions,
-          },
-        }
-      }
-
-      return tab
-    })
-
-    if (JSON.stringify(tabs) !== JSON.stringify(updatedTabs)) {
-      jotaiStore.set(tabsAtom, updatedTabs)
-    }
-
     const bibleOfflineCopyId = createOfflineCopyId({
       kind: 'bible',
       versionId: version.id,
@@ -548,21 +515,18 @@ const VersionSelectorItem = ({
       : undefined
     : versionNeedsDownload
 
-  if (typeof selectionNeedsDownload === 'undefined') {
-    return null
-  }
-
-  if (selectionNeedsDownload) {
+  if (selectionNeedsDownload !== false) {
     return (
       <Box>
         <VersionItemContainer
+          onPress={() => onChange?.(version.id)}
           hasDependency={
             (showStrongCapability && isStrongIndexExpanded) ||
             (showInterlinearCapability && isInterlinearIndexExpanded)
           }
         >
           <Box flex row alignItems="center">
-            <Box disabled flex>
+            <Box flex>
               <VersionIdentity
                 version={version}
                 color="default"
@@ -592,12 +556,34 @@ const VersionSelectorItem = ({
                 interlinearAttribution={t('versionSelector.interlinearAttribution')}
               />
             </Box>
-            {!isLoading && !isQueued && (
-              <ActionButton onPress={() => void startDownload()}>
-                <FeatherIcon name="download-cloud" size={16} />
+            {selectionNeedsDownload === true && !isLoading && !isQueued && (
+              <ActionButton
+                disabled={!isConnected}
+                onPress={() => {
+                  void startDownload()
+                }}
+              >
+                <FeatherIcon name={isConnected ? 'download-cloud' : 'wifi-off'} size={16} />
               </ActionButton>
             )}
-            {renderSelectionCheckbox(true)}
+            {(versionAvailabilityQuery.isError || strongSelectionQuery.isError) && (
+              <ActionButton
+                onPress={() => {
+                  void versionAvailabilityQuery.refetch()
+                  void strongSelectionQuery.refetch()
+                }}
+              >
+                <FeatherIcon name="rotate-cw" size={16} />
+              </ActionButton>
+            )}
+            {renderSelectionCheckbox()}
+            {typeof selectionNeedsDownload === 'undefined' &&
+              !versionAvailabilityQuery.isError &&
+              !strongSelectionQuery.isError && (
+                <ActionColumn>
+                  <FeatherIcon name="clock" size={18} color="tertiary" />
+                </ActionColumn>
+              )}
             {isQueued && (
               <ActionColumn>
                 <FeatherIcon name="clock" size={18} color="tertiary" />
@@ -628,14 +614,24 @@ const VersionSelectorItem = ({
         <Box flex row center>
           <VersionIdentity version={version} color="default" />
           {needsUpdate ? (
-            <TouchableOpacity onPress={updateVersion} style={{ padding: 10 }}>
-              <FeatherIcon name="download" size={18} color="success" />
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !isConnected }}
+              disabled={!isConnected}
+              onPress={updateVersion}
+              style={{ padding: 10 }}
+            >
+              <FeatherIcon
+                name={isConnected ? 'download' : 'wifi-off'}
+                size={18}
+                color={isConnected ? 'success' : 'tertiary'}
+              />
             </TouchableOpacity>
-          ) : version.id !== getDefaultBibleVersion(lang) ? (
+          ) : (
             <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
               <FeatherIcon name="trash-2" size={18} color="quart" />
             </TouchableOpacity>
-          ) : null}
+          )}
         </Box>
       </VersionItemContainer>
     )
