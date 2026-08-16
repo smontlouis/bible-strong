@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile, rm, symlink, writeFile } from 'node:fs/promises'
+import { mkdtemp, readFile, rm, symlink, truncate, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import path from 'node:path'
 import { describe, it } from 'node:test'
@@ -53,15 +53,17 @@ describe('Strong Bible publication bundle', () => {
     }
   })
 
-  it('rejects zero verse identities and additional Offline entries', async () => {
+  it('preserves verse-zero superscriptions and rejects additional Offline entries', async () => {
     const zeroRoot = await mkdtemp(path.join(tmpdir(), 'strong-publication-zero-'))
     const zipRoot = await mkdtemp(path.join(tmpdir(), 'strong-publication-zip-'))
     try {
       await writeStrongPublicationFixture(zeroRoot, { zeroVerse: true })
-      await assert.rejects(
-        validatePublicationBundle(zeroRoot),
-        /CANONICAL_STRONG_BIBLE_VERSE_INVALID/
-      )
+      const validated = await validatePublicationBundle(zeroRoot)
+      assert.equal(validated.canonical.format, 'bible-strong-canonical-strong-index')
+      if (validated.canonical.format !== 'bible-strong-canonical-strong-index') {
+        assert.fail('Expected a Strong Bible publication')
+      }
+      assert.equal(validated.canonical.verses[0]?.verse, 0)
       await writeStrongPublicationFixture(zipRoot, { extraOfflineEntry: true })
       await assert.rejects(validatePublicationBundle(zipRoot), /OFFLINE_ARTIFACT_INVALID/)
     } finally {
@@ -83,6 +85,18 @@ describe('Strong Bible publication bundle', () => {
       await symlink(external, canonicalPath)
       await assert.rejects(validatePublicationBundle(root), /CANONICAL_ARTIFACT_PATH_INVALID/)
       await rm(external, { force: true })
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects an oversized sparse archive before hashing or decompression', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'strong-publication-oversized-'))
+    try {
+      const result = await writeStrongPublicationFixture(root)
+      const archivePath = path.join(root, result.manifest.offlineArtifact.path)
+      await truncate(archivePath, 512 * 1024 * 1024 + 1)
+      await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_SIZE_LIMIT_EXCEEDED/)
     } finally {
       await rm(root, { recursive: true, force: true })
     }

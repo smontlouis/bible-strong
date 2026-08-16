@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import { createReadStream } from 'node:fs'
 import { lstat, readFile, realpath } from 'node:fs/promises'
 import path from 'node:path'
 
@@ -384,9 +385,13 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
 }
 
 const fileSha256 = async (filePath: string): Promise<string> =>
-  createHash('sha256')
-    .update(await readFile(filePath))
-    .digest('hex')
+  new Promise((resolve, reject) => {
+    const hash = createHash('sha256')
+    const stream = createReadStream(filePath)
+    stream.on('data', chunk => hash.update(chunk))
+    stream.on('error', reject)
+    stream.on('end', () => resolve(hash.digest('hex')))
+  })
 
 const assertArtifact = async (
   filePath: string,
@@ -402,6 +407,7 @@ const assertArtifact = async (
   if (!fileStat.isFile() || !resolvedFile.startsWith(`${resolvedRoot}${path.sep}`)) {
     throw new Error(`${label}_PATH_INVALID`)
   }
+  if (fileStat.size > 512 * 1024 * 1024) throw new Error(`${label}_SIZE_LIMIT_EXCEEDED`)
   if (fileStat.size !== artifact.bytes) throw new Error(`${label}_SIZE_MISMATCH`)
   if ((await fileSha256(filePath)) !== artifact.sha256) {
     throw new Error(`${label}_CHECKSUM_MISMATCH`)
@@ -525,7 +531,7 @@ export const decodeCanonicalStrongBible = (value: unknown): CanonicalStrongBible
       !verse ||
       !isPositiveInteger(verse.book) ||
       !isPositiveInteger(verse.chapter) ||
-      !isPositiveInteger(verse.verse)
+      !isNonNegativeInteger(verse.verse)
     ) {
       throw new Error('CANONICAL_STRONG_BIBLE_VERSE_INVALID')
     }
@@ -550,7 +556,7 @@ export const decodeCanonicalStrongBible = (value: unknown): CanonicalStrongBible
 
   const identityIds = new Set<number>()
   const identityCodes = new Set<string>()
-  const identityKinds = new Set(['strong', 'estrong', 'dstrong', 'ustrong'])
+  const identityKinds = new Set<string>(STRONG_IDENTITY_KINDS)
   for (const identity of candidate.identities) {
     if (
       !identity ||
@@ -971,7 +977,11 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     realpath(manifestPath),
     realpath(root),
   ])
-  if (!manifestStat.isFile() || !resolvedManifest.startsWith(`${resolvedRoot}${path.sep}`)) {
+  if (
+    !manifestStat.isFile() ||
+    manifestStat.size > 1024 * 1024 ||
+    !resolvedManifest.startsWith(`${resolvedRoot}${path.sep}`)
+  ) {
     throw new Error('PUBLICATION_BUNDLE_MANIFEST_PATH_INVALID')
   }
   const manifestRaw = await readFile(manifestPath, 'utf8')
