@@ -1,6 +1,7 @@
 import { useAtom, useSetAtom } from 'jotai/react'
 import { useEffect, useRef, useState } from 'react'
 import { Modal } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useDispatch } from 'react-redux'
 
 import Box from '~common/ui/Box'
@@ -91,13 +92,15 @@ const OnBoarding = () => {
       presentationStyle="fullScreen"
       onRequestClose={() => undefined}
     >
-      <Box flex bg="reverse">
-        {step === 'abel' ? (
-          <AbelOnboarding onComplete={() => setStep('resources')} />
-        ) : (
-          <SelectResources onComplete={completeOnboarding} />
-        )}
-      </Box>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Box flex bg="reverse">
+          {step === 'abel' ? (
+            <AbelOnboarding onComplete={() => setStep('resources')} />
+          ) : (
+            <SelectResources onComplete={completeOnboarding} />
+          )}
+        </Box>
+      </GestureHandlerRootView>
     </Modal>
   )
 }

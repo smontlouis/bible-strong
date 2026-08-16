@@ -19,6 +19,17 @@ jest.mock('react-native', () => {
   }
 })
 
+jest.mock('react-native-gesture-handler', () => {
+  const React = jest.requireActual<typeof import('react')>('react')
+  return {
+    GestureHandlerRootView: ({
+      children,
+      ...props
+    }: React.PropsWithChildren<Record<string, unknown>>) =>
+      React.createElement('GestureHandlerRootView', { ...props, testID: 'gesture-root' }, children),
+  }
+})
+
 jest.mock('jotai/react', () => jest.requireActual('jotai/react'))
 
 jest.mock('../atom', () => {
@@ -94,6 +105,9 @@ describe('OnBoarding', () => {
       })
 
       expect(renderer!.root.findByProps({ testID: 'onboarding-modal' }).props.visible).toBe(true)
+      expect(renderer!.root.findByProps({ testID: 'gesture-root' }).props.style).toEqual({
+        flex: 1,
+      })
       const abel = renderer!.root.findByProps({ testID: 'abel-onboarding' })
 
       act(() => abel.props.onComplete())

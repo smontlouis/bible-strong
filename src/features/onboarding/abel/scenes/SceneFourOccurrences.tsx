@@ -209,7 +209,9 @@ const OccurrenceFilter = ({
       center
       style={{
         transitionProperty: 'backgroundColor',
+        transitionDuration: 280,
         transitionDelay: 800,
+        transitionTimingFunction: 'ease-in-out',
       }}
     >
       <Text color={active ? 'primary' : 'tertiary'} bold fontSize={metrics.s(8.5)}>
