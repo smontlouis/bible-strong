@@ -6,6 +6,8 @@ import NaveOfTheDay from '../NaveOfTheDay'
 import StrongOfTheDay from '../StrongOfTheDay'
 import WordOfTheDay from '../WordOfTheDay'
 
+let mockIsConnected = true
+
 jest.mock('expo-linear-gradient', () => ({ LinearGradient: () => null }))
 
 jest.mock('react-i18next', () => ({
@@ -107,11 +109,16 @@ jest.mock('~state/resourcesLanguage', () => ({
 }))
 
 jest.mock('~helpers/useLanguage', () => ({ __esModule: true, default: () => 'fr' }))
+jest.mock('~helpers/useConnection', () => ({
+  __esModule: true,
+  default: () => mockIsConnected,
+}))
 
 describe('Home resource download widgets', () => {
   let renderer: ReactTestRenderer
 
   beforeEach(() => {
+    mockIsConnected = true
     jest.mocked(downloadManager.enqueue).mockClear()
     jest.mocked(downloadManager.retry).mockClear()
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -197,5 +204,20 @@ describe('Home resource download widgets', () => {
         identity: { kind: 'strong-lexicon-module', moduleId: 'core' },
       },
     ])
+  })
+
+  it('keeps a missing resource visible without attempting an impossible Offline download', () => {
+    mockIsConnected = false
+    act(() => {
+      renderer = create(<NaveOfTheDay />)
+    })
+
+    const recovery = renderer.root.find(node => String(node.type) === 'AnimatedTouchableBox')
+    expect(recovery.props.accessibilityState).toEqual({ disabled: true })
+    expect(JSON.stringify(renderer.toJSON())).toContain('resource.action.connectionRequired')
+
+    act(() => recovery.props.onPress?.())
+
+    expect(downloadManager.enqueue).not.toHaveBeenCalled()
   })
 })

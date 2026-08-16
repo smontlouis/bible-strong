@@ -69,27 +69,6 @@ export const importPublicationBundle = (
                 })
               }
               if (existing.status === 'active') {
-                await transaction
-                  .updateTable('resource_publications')
-                  .set({
-                    rights: {
-                      holder: manifest.rights.holder,
-                      terms_reference: manifest.rights.termsReference,
-                      online: manifest.rights.online,
-                      offline: manifest.rights.offline,
-                    },
-                    metadata: {
-                      canon: manifest.canon,
-                      versification: manifest.versification,
-                      coverage: manifest.coverage,
-                      delivery_capabilities: manifest.deliveryCapabilities,
-                      counts: manifest.counts,
-                      canonical_schema_version: manifest.canonical.schemaVersion,
-                      offline_entry: manifest.offlineArtifact.entry,
-                    },
-                  })
-                  .where('id', '=', existing.id)
-                  .executeTakeFirstOrThrow()
                 return {
                   status: 'unchanged' as const,
                   resourceIdentity,

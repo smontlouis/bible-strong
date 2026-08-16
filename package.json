@@ -26,7 +26,6 @@
     "resources:db:reset": "docker compose -f resource-service/compose.yaml down --volumes",
     "resources:generate": "drizzle-kit generate --config resource-service/drizzle.config.ts",
     "resources:migrate": "drizzle-kit migrate --config resource-service/drizzle.config.ts",
-    "resources:bundle": "tsx resource-service/src/publication/publicationCli.ts assemble",
     "resources:bundle:validate": "tsx resource-service/src/publication/publicationCli.ts validate",
     "resources:import": "tsx resource-service/src/publication/publicationCli.ts import",
     "resources:serve": "tsx resource-service/src/runtime/node.ts",

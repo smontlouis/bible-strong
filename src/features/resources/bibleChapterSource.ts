@@ -2,6 +2,7 @@ import { Schema } from 'effect'
 
 import type { Verse } from '~common/types'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
+import type { BibleRecoveryAction } from '~helpers/bibleErrors'
 import { BibleChapterDto, BibleVersionCoverageDto } from './bibleChapterContract'
 
 export type BibleChapterUnavailableReason =
@@ -18,7 +19,7 @@ export type BibleChapterSourceResult =
   | {
       status: 'unavailable'
       reason: BibleChapterUnavailableReason
-      recoveries?: ('acquire-offline-copy' | 'manage-offline-copies' | 'reset-offline-store')[]
+      recoveries?: BibleRecoveryAction[]
     }
 
 export type BibleChapterAdapter = {
@@ -29,6 +30,16 @@ export type BibleChapterAdapter = {
 export type BibleCoverageSourceResult =
   | { status: 'available'; coverage: BibleVersionCoverage }
   | { status: 'unavailable'; reason: BibleChapterUnavailableReason }
+
+export class BibleVerseTextSourceError extends Error {
+  constructor(
+    public readonly reason: BibleChapterUnavailableReason,
+    public readonly recoveries?: BibleRecoveryAction[]
+  ) {
+    super(reason)
+    this.name = 'BibleVerseTextSourceError'
+  }
+}
 
 export const loadVerseTextsFromChapterAdapter = async (
   adapter: BibleChapterAdapter,
@@ -59,16 +70,24 @@ export const loadVerseTextsFromChapterAdapter = async (
   }
 
   const result: Record<string, string> = {}
+  let firstUnavailable: Extract<BibleChapterSourceResult, { status: 'unavailable' }> | undefined
   for (const group of chapters.values()) {
     if (shouldCancel?.()) return result
     const chapterResult = await adapter.loadChapter(version, group.book, group.chapter)
-    if (chapterResult.status !== 'available') continue
+    if (chapterResult.status !== 'available') {
+      firstUnavailable ??= chapterResult
+      continue
+    }
 
     const requestedKeys = new Set(group.verseKeys)
     for (const verse of chapterResult.verses) {
       const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
       if (requestedKeys.has(verseKey)) result[verseKey] = verse.Texte
     }
+  }
+
+  if (Object.keys(result).length === 0 && firstUnavailable) {
+    throw new BibleVerseTextSourceError(firstUnavailable.reason, firstUnavailable.recoveries)
   }
 
   return result

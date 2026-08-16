@@ -2,8 +2,8 @@ import * as FileSystem from 'expo-file-system/legacy'
 
 import { isVersionInstalled } from '~helpers/biblesDb'
 import { getDbPath, initLanguageDirs } from '~helpers/databases'
-import { initSQLiteDir } from '~helpers/sqlite'
-import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { dbManager, initSQLiteDir } from '~helpers/sqlite'
+import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
 import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import {
@@ -35,6 +35,11 @@ export type LocalResourceAvailability =
       resource: LocalResourceRef
       expectedPath?: string
     }
+  | {
+      status: 'corrupt'
+      resource: LocalResourceRef
+      reason: 'integrity-check-failed'
+    }
   | (Exclude<StrongBibleSidecarAvailability, { status: 'available' | 'missing' }> & {
       resource: LocalResourceRef
     })
@@ -62,6 +67,46 @@ type ResourceAvailabilityDependencies = {
   getStrongLexiconAvailability?: (
     moduleId: Extract<OfflineCopyIdentity, { kind: 'strong-lexicon-module' }>['moduleId']
   ) => Promise<StrongLexiconModuleAvailability>
+  validateDatabaseResource: (
+    databaseId: Exclude<DatabaseId, 'BIBLES'>,
+    language: ResourceLanguage,
+    path: string
+  ) => Promise<boolean>
+}
+
+const requiredTableByDatabase: Record<Exclude<DatabaseId, 'BIBLES' | 'TIMELINE'>, string> = {
+  DICTIONNAIRE: 'dictionnaire',
+  NAVE: 'TOPICS',
+  TRESOR: 'COMMENTAIRES',
+  MHY: 'COMMENTAIRES',
+}
+
+const validateDatabaseResource = async (
+  databaseId: Exclude<DatabaseId, 'BIBLES'>,
+  language: ResourceLanguage,
+  path: string
+): Promise<boolean> => {
+  try {
+    if (databaseId === 'TIMELINE') {
+      const decoded: unknown = JSON.parse(await FileSystem.readAsStringAsync(path))
+      return decoded !== null && typeof decoded === 'object'
+    }
+
+    const managedDatabase = dbManager.getDB(databaseId, language)
+    await managedDatabase.init()
+    const database = managedDatabase.get()
+    if (!database) return false
+    const integrity = await database.getFirstAsync<Record<string, string>>('PRAGMA quick_check')
+    if (!integrity || !Object.values(integrity).includes('ok')) return false
+    const table = await database.getFirstAsync<{ name: string }>(
+      `SELECT name FROM sqlite_master
+       WHERE type = 'table' AND lower(name) = lower(?)`,
+      [requiredTableByDatabase[databaseId]]
+    )
+    return Boolean(table)
+  } catch {
+    return false
+  }
 }
 
 const defaultDependencies: ResourceAvailabilityDependencies = {
@@ -74,6 +119,7 @@ const defaultDependencies: ResourceAvailabilityDependencies = {
   getStrongBibleAvailability: getStrongBibleSidecarAvailability,
   getInterlinearAvailability: getInterlinearSidecarAvailability,
   getStrongLexiconAvailability: getStrongLexiconModuleAvailability,
+  validateDatabaseResource,
 }
 
 export const getLocalResourceKey = (resource: LocalResourceRef): string =>
@@ -131,6 +177,9 @@ export const getLocalResourceAvailability = async (
     const file = await dependencies.getFileInfo(expectedPath)
 
     if (file.exists) {
+      if (!(await dependencies.validateDatabaseResource(resource.databaseId, lang, expectedPath))) {
+        return { status: 'corrupt', resource, reason: 'integrity-check-failed' }
+      }
       return {
         status: 'available',
         resource,

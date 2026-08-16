@@ -4,6 +4,7 @@ import {
   BibleChapterResult,
   createBibleError,
   errorResult,
+  getBibleRecoveryActions,
   successResult,
 } from '~helpers/bibleErrors'
 import type { BibleRecoveryAction } from '~helpers/bibleErrors'
@@ -13,7 +14,8 @@ import {
   getMultipleVerses,
   type BibleVersionCoverage,
 } from '~helpers/biblesDb'
-import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { getBibleVersionCanonId, getIfVersionNeedsDownload } from '~helpers/bibleVersions'
+import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { localStrongLexiconAccess, type StrongLexiconAccess } from './strongLexiconAccess'
 import {
   isStrongCapableBibleVersion,
@@ -48,9 +50,20 @@ import {
   type BibleChapterAdapter,
   type BibleChapterUnavailableReason,
   loadVerseTextsFromChapterAdapter,
+  BibleVerseTextSourceError,
 } from './bibleChapterSource'
 
 export type { BibleChapterAdapter, BibleChapterSourceResult } from './bibleChapterSource'
+
+const isCanonicalChapterForVersion = (version: string, book: number, chapter: number) => {
+  const canonicalBook = getBook(book)
+  return (
+    Boolean(canonicalBook) &&
+    chapter >= 1 &&
+    chapter <= (canonicalBook?.Chapitres ?? 0) &&
+    getBooksForCanon(getBibleVersionCanonId(version)).some(item => item.Numero === book)
+  )
+}
 
 export type BibleChapterData =
   | { kind: 'plain'; verses: Verse[] }
@@ -109,7 +122,13 @@ export const localBibleChapterAdapter: BibleChapterAdapter = {
       } catch {
         // An inconclusive availability check still means the requested chapter is unavailable.
       }
-      return { status: 'unavailable', reason: 'chapter-not-available' }
+      return isCanonicalChapterForVersion(version, book, chapter)
+        ? {
+            status: 'unavailable',
+            reason: 'offline-copy-invalid',
+            recoveries: ['manage-offline-copies', 'reset-offline-store'],
+          }
+        : { status: 'unavailable', reason: 'chapter-not-available' }
     } catch (error) {
       if (error instanceof BibleLoadingError) {
         if (error.type === 'BIBLE_NOT_FOUND') {
@@ -172,24 +191,6 @@ const unavailableReasonToErrorType = (
   }
 }
 
-const unavailableReasonToRecoveries = (
-  reason: BibleChapterUnavailableReason
-): BibleRecoveryAction[] | undefined => {
-  switch (reason) {
-    case 'publication-not-available':
-    case 'resource-unsupported':
-    case 'network-offline':
-    case 'temporary-unavailable':
-      return ['acquire-offline-copy']
-    case 'offline-copy-invalid':
-      return ['manage-offline-copies', 'reset-offline-store']
-    case 'integrity-failure':
-      return ['acquire-offline-copy', 'manage-offline-copies']
-    case 'chapter-not-available':
-      return undefined
-  }
-}
-
 const defaultDependencies: BibleContentAccessDependencies = {
   strongLexicon: localStrongLexiconAccess,
   getStrongResourceLanguage: () => getResourceLanguage('STRONG'),
@@ -216,7 +217,7 @@ const loadRegularBibleChapter = async (
         request.version,
         request.book,
         request.chapter,
-        chapter.recoveries ?? unavailableReasonToRecoveries(chapter.reason)
+        chapter.recoveries ?? getBibleRecoveryActions(unavailableReasonToErrorType(chapter.reason))
       )
     )
   }
@@ -464,8 +465,21 @@ export const createBibleContentAccess = (
   ...localBibleContentAccess,
   loadChapter: request =>
     loadBibleContentChapter(request, { ...defaultDependencies, chapterAdapter }),
-  loadVerseTexts: ({ version, verseKeys, shouldCancel }) =>
-    loadVerseTextsFromChapterAdapter(chapterAdapter, version, verseKeys, shouldCancel),
+  loadVerseTexts: async ({ version, verseKeys, shouldCancel }) => {
+    try {
+      return await loadVerseTextsFromChapterAdapter(
+        chapterAdapter,
+        version,
+        verseKeys,
+        shouldCancel
+      )
+    } catch (error) {
+      if (error instanceof BibleVerseTextSourceError) {
+        throw new BibleLoadingError(unavailableReasonToErrorType(error.reason), version)
+      }
+      throw error
+    }
+  },
   loadCoverage: async version => {
     const result = await chapterAdapter.loadCoverage(version)
     if (result.status === 'available') return result.coverage

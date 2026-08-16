@@ -3,6 +3,7 @@ import {
   createHybridBibleChapterAdapter,
   getDevelopmentResourceApiBaseUrl,
   loadVerseTextsFromChapterAdapter,
+  BibleVerseTextSourceError,
   type BibleChapterAdapter,
 } from '../bibleChapterSource'
 
@@ -41,6 +42,15 @@ describe('hybrid Bible chapter source', () => {
       loadVerseTextsFromChapterAdapter(source, 'LSG', ['1-1-2', '1-2-1', 'invalid'])
     ).resolves.toEqual({ '1-1-2': 'Second' })
     expect(source.loadChapter).toHaveBeenCalledTimes(2)
+  })
+
+  it('preserves a structured source failure when no requested verse can be resolved', async () => {
+    const source = adapter({ status: 'unavailable', reason: 'network-offline' })
+
+    await expect(loadVerseTextsFromChapterAdapter(source, 'LSG', ['1-1-1'])).rejects.toMatchObject({
+      name: 'BibleVerseTextSourceError',
+      reason: 'network-offline',
+    } satisfies Partial<BibleVerseTextSourceError>)
   })
 
   it('loads remote coverage when no Offline Bible copy is installed', async () => {
@@ -92,7 +102,7 @@ describe('hybrid Bible chapter source', () => {
     }
   )
 
-  it('does not source-hop after a genuine domain not-found result', async () => {
+  it('does not source-hop after a genuine local domain not-found', async () => {
     const offline = adapter({ status: 'unavailable', reason: 'chapter-not-available' })
     const online = adapter({ status: 'available', verses })
 

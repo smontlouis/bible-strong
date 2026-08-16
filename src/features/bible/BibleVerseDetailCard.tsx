@@ -15,7 +15,6 @@ import StrongCard from './StrongCard'
 
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -44,6 +43,7 @@ import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
 import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
 import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -137,7 +137,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
 }) => {
   const theme = useTheme()
   const { t } = useTranslation()
-  const router = useRouter()
   const defaultStrongVersion = useSelector(
     (rootState: RootState) => rootState.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
@@ -382,23 +381,17 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     }
 
     return (
-      <Container>
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message={`Impossible de charger la strong pour ce verset...${
-            error === 'CORRUPTED_DATABASE'
-              ? t(
-                  '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                )
-              : ''
-          }`}
-        />
-        <Box px={30} pb={30}>
-          <Button onPress={() => router.push('/downloads')}>
-            {t('Gérer les téléchargements Strong')}
-          </Button>
-        </Box>
-      </Container>
+      <ResourceUnavailableView
+        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        title={t('resource.strong.temporarilyUnavailable')}
+        fileSize={35}
+        reason="temporary-unavailable"
+        size="small"
+        onRetry={() => {
+          void coreAvailabilityQuery.refetch()
+          void strongVerseQuery.refetch()
+        }}
+      />
     )
   }
 

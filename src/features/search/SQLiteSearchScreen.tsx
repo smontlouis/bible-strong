@@ -65,7 +65,9 @@ import {
 } from './searchResultsModel'
 import { localQueryOptions } from '~helpers/queryOptions'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 
 type Props = {
   searchValue: string
@@ -94,6 +96,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
   const openStudyObject = useOpenStudyObject()
   const resources = useResourceAccess()
+  const defaultBibleVersion = useDefaultBibleVersion()
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const notes = useSelector((state: RootState) => state.user.bible.notes)
@@ -547,23 +550,37 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   })
 
   function renderPassageError(): ReactNode {
-    if (searchError) {
+    const recoveryIdentity = { kind: 'bible', versionId: defaultBibleVersion } as const
+    const recoveryFileSize = Math.max(
+      1,
+      Math.round(createOfflineCopyDownloadItem(recoveryIdentity).estimatedSize / 1_000_000)
+    )
+
+    if (searchError || installedVersionsQuery.isError) {
       return (
-        <Box py={10}>
-          <Text title fontSize={14} color="quart">
-            {searchError}
-          </Text>
-        </Box>
+        <ResourceUnavailableView
+          identity={recoveryIdentity}
+          title={t('resource.search.temporarilyUnavailable')}
+          fileSize={recoveryFileSize}
+          reason="temporary-unavailable"
+          size="small"
+          onRetry={() => {
+            void installedVersionsQuery.refetch()
+            void passageQuery.refetch()
+          }}
+        />
       )
     }
 
     if (!hasInstalledVersions) {
       return (
-        <Box py={10}>
-          <Text title fontSize={14} color="grey">
-            {t('Téléchargez une Bible pour activer la recherche hors-ligne.')}
-          </Text>
-        </Box>
+        <ResourceUnavailableView
+          identity={recoveryIdentity}
+          title={t('resource.search.offlineCopyNeeded')}
+          fileSize={recoveryFileSize}
+          reason="offline-copy-required"
+          size="small"
+        />
       )
     }
 
@@ -600,6 +617,61 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const listBottomInset = alphabetFooterInset + keyboardFooterBottom
 
   const renderBrowseDatabaseState = () => {
+    if (browseItemType === 'strong' && (strongAvailabilityQuery.isError || strongQuery.isError)) {
+      return (
+        <ResourceUnavailableView
+          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          title={t('resource.strong.temporarilyUnavailable')}
+          fileSize={35}
+          reason="temporary-unavailable"
+          size="small"
+          onRetry={() => {
+            void strongAvailabilityQuery.refetch()
+            void strongQuery.refetch()
+          }}
+        />
+      )
+    }
+
+    if (
+      browseItemType === 'dictionary' &&
+      (dictionaryAvailabilityQuery.isError || dictionaryQuery.isError)
+    ) {
+      return (
+        <ResourceUnavailableView
+          identity={{
+            kind: 'database',
+            databaseId: 'DICTIONNAIRE',
+            language: resourcesLanguage.DICTIONNAIRE,
+          }}
+          title={t('resource.dictionary.temporarilyUnavailable')}
+          fileSize={22}
+          reason="temporary-unavailable"
+          size="small"
+          onRetry={() => {
+            void dictionaryAvailabilityQuery.refetch()
+            void dictionaryQuery.refetch()
+          }}
+        />
+      )
+    }
+
+    if (browseItemType === 'nave' && (naveAvailabilityQuery.isError || naveQuery.isError)) {
+      return (
+        <ResourceUnavailableView
+          identity={{ kind: 'database', databaseId: 'NAVE', language: resourcesLanguage.NAVE }}
+          title={t('resource.nave.temporarilyUnavailable')}
+          fileSize={7}
+          reason="temporary-unavailable"
+          size="small"
+          onRetry={() => {
+            void naveAvailabilityQuery.refetch()
+            void naveQuery.refetch()
+          }}
+        />
+      )
+    }
+
     if (
       browseItemType === 'strong' &&
       strongAvailabilityQuery.data?.availability.status !== 'available' &&

@@ -17,6 +17,7 @@ export interface BibleDOMTranslations {
   unknownError: string
   goToDownloads: string
   downloadVersion: string
+  connectionRequired: string
   downloading: string
   inserting: string
   resetDatabase: string

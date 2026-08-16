@@ -30,6 +30,7 @@ describe('Resource model', () => {
     [{ kind: 'nave', language: 'en' }, 'nave:en'],
     [{ kind: 'cross-references' }, 'cross-references'],
     [{ kind: 'commentary', collection: 'MHY', language: 'fr' }, 'commentary:MHY:fr'],
+    [{ kind: 'commentary', collection: 'FIRESTORE', language: 'en' }, 'commentary:FIRESTORE:en'],
     [{ kind: 'timeline', language: 'fr' }, 'timeline:fr'],
     [{ kind: 'timeline', language: 'en' }, 'timeline:en'],
   ]
@@ -45,6 +46,7 @@ describe('Resource model', () => {
       onlineAccess: { status: 'remotely-readable' },
       offlineCopy: { status: 'not-installed', supported: true },
       content: { status: 'idle' },
+      connectivity: 'online',
     }
 
     expect(getResourceActions(state)).toEqual(['open', 'make-available-offline'])
@@ -56,6 +58,18 @@ describe('Resource model', () => {
     ).toEqual({ status: 'remotely-readable' })
     expect(
       getResourceOnlineAccess({ kind: 'dictionary', language: 'fr' }, new Set(['LSG']))
+    ).toEqual({ status: 'unsupported' })
+  })
+
+  it('represents Firestore commentaries as remote-only without changing MHY delivery', () => {
+    expect(
+      getResourceOnlineAccess(
+        { kind: 'commentary', collection: 'FIRESTORE', language: 'en' },
+        new Set()
+      )
+    ).toEqual({ status: 'remotely-readable' })
+    expect(
+      getResourceOnlineAccess({ kind: 'commentary', collection: 'MHY', language: 'fr' }, new Set())
     ).toEqual({ status: 'unsupported' })
   })
 
@@ -115,6 +129,7 @@ describe('Resource model', () => {
       onlineAccess: { status: 'temporarily-unavailable' },
       offlineCopy: { status: 'installed', revision: 'nave-en-1' },
       content: { status: 'available', source: 'offline' },
+      connectivity: 'offline',
     }
 
     expect(getResourceActions(state)).toEqual(['open', 'remove-offline-copy', 'manage-storage'])
@@ -128,6 +143,7 @@ describe('Resource model', () => {
         onlineAccess: { status: 'remotely-readable' },
         offlineCopy: { status: 'update-available', revision: 'dictionary-fr-1' },
         content: { status: 'available', source: 'offline' },
+        connectivity: 'online',
       },
       ['open', 'update', 'remove-offline-copy', 'manage-storage'],
     ],
@@ -138,6 +154,7 @@ describe('Resource model', () => {
         onlineAccess: { status: 'unsupported' },
         offlineCopy: { status: 'downloading', progress: 0.4 },
         content: { status: 'loading' },
+        connectivity: 'online',
       },
       ['manage-storage'],
     ],
@@ -148,6 +165,7 @@ describe('Resource model', () => {
         onlineAccess: { status: 'unsupported' },
         offlineCopy: { status: 'invalid', recoverable: true },
         content: { status: 'offline-unavailable' },
+        connectivity: 'online',
       },
       ['retry', 'make-available-offline', 'manage-storage'],
     ],
@@ -158,6 +176,7 @@ describe('Resource model', () => {
         onlineAccess: { status: 'temporarily-unavailable' },
         offlineCopy: { status: 'not-installed', supported: true },
         content: { status: 'temporarily-unavailable', retryable: true },
+        connectivity: 'online',
       },
       ['retry', 'make-available-offline'],
     ],
@@ -168,10 +187,42 @@ describe('Resource model', () => {
         onlineAccess: { status: 'unsupported' },
         offlineCopy: { status: 'unsupported' },
         content: { status: 'not-found' },
+        connectivity: 'online',
       },
       [],
     ],
   ])('derives storage-agnostic actions from capability state', (state, expectedActions) => {
     expect(getResourceActions(state)).toEqual(expectedActions)
+  })
+
+  it('asks for a connection instead of offering an impossible Offline-copy download', () => {
+    const state: ResourceState = {
+      identity: { kind: 'strong-lexicon', moduleId: 'core' },
+      operations: ['read', 'browse', 'search'],
+      onlineAccess: { status: 'unsupported' },
+      offlineCopy: { status: 'not-installed', supported: true },
+      content: { status: 'offline-unavailable' },
+      connectivity: 'offline',
+    }
+
+    expect(getResourceActions(state)).toEqual(['connection-required'])
+  })
+
+  it('does not offer an Offline-copy update until connectivity returns', () => {
+    const state: ResourceState = {
+      identity: { kind: 'bible-text', versionId: 'LSG' },
+      operations: ['read'],
+      onlineAccess: { status: 'remotely-readable' },
+      offlineCopy: { status: 'update-available', revision: 'old' },
+      content: { status: 'available', source: 'offline' },
+      connectivity: 'offline',
+    }
+
+    expect(getResourceActions(state)).toEqual([
+      'open',
+      'connection-required',
+      'remove-offline-copy',
+      'manage-storage',
+    ])
   })
 })

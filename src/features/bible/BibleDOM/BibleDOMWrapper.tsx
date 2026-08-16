@@ -468,6 +468,7 @@ export const BibleDOMWrapper = ({
     unknownError: t('bible.error.unknown'),
     goToDownloads: t('bible.error.goToDownloads'),
     downloadVersion: t('bible.error.downloadVersion'),
+    connectionRequired: t('resource.action.connectionRequired'),
     downloading: t('bible.error.downloading'),
     inserting: t('bible.error.inserting'),
     resetDatabase: t('bible.error.resetDatabase'),

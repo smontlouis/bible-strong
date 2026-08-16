@@ -23,6 +23,10 @@ export const useBibleModeAcquisitionCompletion = ({
   const resources = useResourceAccess()
   const finishAcquisition = useEffectEvent(finish)
   const handleSucceeded = useEffectEvent(onSucceeded)
+  const getStrongAvailability = useEffectEvent(resources.strongBible.getAvailability)
+  const getInterlinearAvailability = useEffectEvent(
+    resources.lexiconBible.getInterlinearAvailability
+  )
 
   useEffect(() => {
     if (!acquisition) return
@@ -35,8 +39,8 @@ export const useBibleModeAcquisitionCompletion = ({
 
     let cancelled = false
     verifyBibleModeAcquisition(acquisition, {
-      getStrongAvailability: resources.strongBible.getAvailability,
-      getInterlinearAvailability: resources.lexiconBible.getInterlinearAvailability,
+      getStrongAvailability,
+      getInterlinearAvailability,
     })
       .then(ready => {
         if (cancelled) return

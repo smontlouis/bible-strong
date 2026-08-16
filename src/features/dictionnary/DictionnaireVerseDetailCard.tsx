@@ -5,7 +5,6 @@ import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 
 import Empty from '~common/Empty'
 import Loading from '~common/Loading'
-import Button from '~common/ui/Button'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import Paragraph from '~common/ui/Paragraph'
@@ -21,19 +20,18 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import captureError from '~helpers/captureError'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { DictionaryEntry } from '~features/resources/dictionaryAccess'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
-import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
-import { useDownloadQueue, useDownloadItemStatus } from '~helpers/useDownloadQueue'
+import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -193,6 +191,7 @@ const DictionnaireVerseDetailScreen = ({
 }) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const queryClient = useQueryClient()
   const carousel = useRef<ICarouselInstance>(null)
   const { Livre, Chapitre, Verset } = verse
   const [boxHeight, setBoxHeight] = useState(0)
@@ -205,7 +204,6 @@ const DictionnaireVerseDetailScreen = ({
   // Get resource language from Jotai for cache key invalidation
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.DICTIONNAIRE
-  const { enqueue } = useDownloadQueue()
   const dictionaryAvailabilityQuery = useQuery({
     queryKey: resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', resourceLang),
     queryFn: () =>
@@ -230,11 +228,6 @@ const DictionnaireVerseDetailScreen = ({
     versesInCurrentChapter,
     unavailableBibleVersion,
   } = useFormattedText({ verse, wordsInVerse, resourceLang })
-  const unavailableBibleDownloadStatus = useDownloadItemStatus(
-    unavailableBibleVersion
-      ? createOfflineCopyId({ kind: 'bible', versionId: unavailableBibleVersion })
-      : undefined
-  )
 
   const goToWord = (word: string) => {
     if (!wordsInVerse) return
@@ -277,37 +270,39 @@ const DictionnaireVerseDetailScreen = ({
 
   if (dictionaryWordsError || wordsError) {
     return (
-      <Container>
-        <Empty
-          source={require('~assets/images/empty.json')}
-          message={t('Impossible de charger le dictionnaire pour ce verset...')}
-        />
-      </Container>
+      <ResourceUnavailableView
+        identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
+        title={t('resource.dictionary.temporarilyUnavailable')}
+        fileSize={22}
+        reason="temporary-unavailable"
+        size="small"
+        onRetry={() => {
+          void dictionaryAvailabilityQuery.refetch()
+          void queryClient.invalidateQueries({ queryKey: ['dictionaryWords'] })
+          void queryClient.invalidateQueries({ queryKey: ['words'] })
+          void queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
+        }}
+      />
     )
   }
 
   if (unavailableBibleVersion) {
-    const isDownloading =
-      unavailableBibleDownloadStatus?.status === 'queued' ||
-      unavailableBibleDownloadStatus?.status === 'downloading' ||
-      unavailableBibleDownloadStatus?.status === 'inserting'
-
     return (
       <Container>
-        <Box flex center px={30}>
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t('resource.bible.referenceUnavailable', {
-              version: unavailableBibleVersion,
-            })}
-          />
-          <Button
-            onPress={() => enqueue([createBibleDownloadItem(unavailableBibleVersion)])}
-            isLoading={isDownloading}
-          >
-            {t('resource.bible.makeAvailableOffline', { version: unavailableBibleVersion })}
-          </Button>
-        </Box>
+        <ResourceUnavailableView
+          identity={{ kind: 'bible', versionId: unavailableBibleVersion }}
+          title={t('resource.bible.referenceUnavailable', { version: unavailableBibleVersion })}
+          fileSize={Math.max(
+            1,
+            Math.round(
+              createOfflineCopyDownloadItem({
+                kind: 'bible',
+                versionId: unavailableBibleVersion,
+              }).estimatedSize / 1_000_000
+            )
+          )}
+          reason="offline-copy-required"
+        />
       </Container>
     )
   }

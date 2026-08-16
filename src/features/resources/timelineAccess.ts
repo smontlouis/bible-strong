@@ -52,10 +52,19 @@ export const createLocalTimelineAccess = (
       }
     }
 
+    let serialized: string
     try {
-      const value: unknown = JSON.parse(
-        await dependencies.readText(dependencies.getPath('TIMELINE', language))
-      )
+      serialized = await dependencies.readText(dependencies.getPath('TIMELINE', language))
+    } catch {
+      return {
+        status: 'unavailable',
+        reason: 'temporary-unavailable',
+        recoveries: [],
+      }
+    }
+
+    try {
+      const value: unknown = JSON.parse(serialized)
       if (!isTimelineEventDetailList(value)) throw new Error('TIMELINE_CONTENT_INVALID')
       return { status: 'available', details: value }
     } catch {

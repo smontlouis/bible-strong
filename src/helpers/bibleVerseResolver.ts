@@ -1,4 +1,4 @@
-import type { BibleRecoveryAction } from './bibleErrors'
+import { BibleLoadingError, getBibleRecoveryActions, type BibleRecoveryAction } from './bibleErrors'
 
 export type BibleVerseResolutionStatus = 'resolved' | 'partial' | 'reference-only'
 
@@ -66,7 +66,20 @@ export const resolveBibleVerses = async (
   }
 
   const version = preferredVersion || defaultVersion
-  const texts = await dependencies.loadVerseTexts(version, requestedVerseKeys)
+  let texts: Record<string, string>
+  try {
+    texts = await dependencies.loadVerseTexts(version, requestedVerseKeys)
+  } catch (error) {
+    if (!(error instanceof BibleLoadingError)) throw error
+    const recoveries = getBibleRecoveryActions(error.type)
+    return {
+      status: 'reference-only',
+      version,
+      texts: {},
+      missingVerseKeys: requestedVerseKeys,
+      ...(recoveries ? { recoveries } : {}),
+    }
+  }
   const missingVerseKeys = requestedVerseKeys.filter(key => !texts[key])
   if (missingVerseKeys.length === 0) {
     return { status: 'resolved', version, texts, missingVerseKeys: [] }

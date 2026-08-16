@@ -76,6 +76,7 @@ const createDependencies = ({
       moduleId,
     })
   ),
+  validateDatabaseResource: jest.fn(async () => true),
 })
 
 describe('resourceAvailability', () => {
@@ -131,6 +132,23 @@ describe('resourceAvailability', () => {
         expectedPath: 'file:///docs/SQLite/fr/nave.sqlite',
       })
     )
+  })
+
+  it('preserves a failed health check as a corrupt database copy', async () => {
+    const path = 'file:///docs/SQLite/fr/nave.sqlite'
+    const dependencies = createDependencies({ files: new Set([path]) })
+    dependencies.validateDatabaseResource.mockResolvedValue(false)
+
+    await expect(
+      getLocalResourceAvailability(
+        { kind: 'database', databaseId: 'NAVE', language: 'fr' },
+        dependencies
+      )
+    ).resolves.toEqual({
+      status: 'corrupt',
+      resource: { kind: 'database', databaseId: 'NAVE', language: 'fr' },
+      reason: 'integrity-check-failed',
+    })
   })
 
   it('uses canonical child identities for pericope and red-word availability', async () => {

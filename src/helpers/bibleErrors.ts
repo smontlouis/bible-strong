@@ -22,6 +22,27 @@ export type BibleRecoveryAction =
   | 'acquire-offline-copy'
   | 'manage-offline-copies'
   | 'reset-offline-store'
+  | 'retry'
+
+export const getBibleRecoveryActions = (
+  type: BibleErrorType
+): BibleRecoveryAction[] | undefined => {
+  switch (type) {
+    case 'BIBLE_NOT_FOUND':
+    case 'RESOURCE_UNSUPPORTED':
+    case 'RESOURCE_OFFLINE':
+      return ['acquire-offline-copy']
+    case 'RESOURCE_TEMPORARY_UNAVAILABLE':
+      return ['retry']
+    case 'OFFLINE_COPY_INVALID':
+      return ['manage-offline-copies', 'reset-offline-store']
+    case 'RESOURCE_INTEGRITY_ERROR':
+      return ['acquire-offline-copy', 'manage-offline-copies']
+    case 'CHAPTER_NOT_FOUND':
+    case 'UNKNOWN_ERROR':
+      return undefined
+  }
+}
 
 export interface BibleError {
   type: BibleErrorType

@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useQuery } from '@tanstack/react-query'
-import { type RefObject } from 'react'
+import { type RefObject, useEffect } from 'react'
 import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
@@ -9,14 +9,8 @@ import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { SheetView } from '~common/sheet-expo-ui'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { downloadManager } from '~helpers/downloadManager'
-import { getInterlinearLocalePriority } from '~helpers/interlinearDisplayMode'
-import {
-  createStrongModeDownloadPlan,
-  type InterlinearAvailabilityCandidate,
-} from '~helpers/strongModeDownloadPlan'
-import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
+import { createStrongModeDownloadPlan } from '~helpers/strongModeDownloadPlan'
 import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
@@ -30,15 +24,15 @@ import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisiti
 import BibleDisplayModeCard from './BibleDisplayModeCard'
 import { toast } from '~helpers/toast'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import useConnection from '~helpers/useConnection'
+import {
+  loadStrongModeAvailability,
+  type StrongModeAvailabilityState,
+} from './loadStrongModeAvailability'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
   sheetRef: RefObject<SheetRef | null>
-}
-
-type AvailabilityState = {
-  strong?: StrongBibleSidecarAvailability
-  interlinear: InterlinearAvailabilityCandidate[]
 }
 
 const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
@@ -47,6 +41,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
   const resources = useResourceAccess()
+  const isConnected = useConnection()
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const downloadStates = useAtomValue(downloadItemStatesAtom)
   const selectedMode = bible.data.strongMode ?? 'hidden'
@@ -64,41 +59,39 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const strongPreview = isHebrew ? 'H0430' : 'G2316'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
 
-  const { data: availability = { interlinear: [] } } = useQuery<AvailabilityState>({
+  const availabilityQuery = useQuery<StrongModeAvailabilityState>({
     queryKey: ['strong-mode-availability', version, appLanguage, downloadCompletionSignal],
-    queryFn: async () => {
-      const readStrongAvailability = async () => {
-        if (!isStrongCapableBibleVersion(version)) return
-        return resources.strongBible.getAvailability(version)
-      }
-      const readInterlinearAvailabilities = async () => {
-        if (!isStrongCapableBibleVersion(version)) return []
-        const results = await Promise.allSettled(
-          getInterlinearLocalePriority(appLanguage).map(locale =>
-            resources.lexiconBible.getInterlinearAvailability(locale).then(availability => ({
-              locale,
-              availability,
-            }))
-          )
-        )
-        return results.flatMap(result => (result.status === 'fulfilled' ? [result.value] : []))
-      }
-      const [strongResult, interlinearResult] = await Promise.allSettled([
-        readStrongAvailability(),
-        readInterlinearAvailabilities(),
-      ])
-      return {
-        strong: strongResult.status === 'fulfilled' ? strongResult.value : undefined,
-        interlinear: interlinearResult.status === 'fulfilled' ? interlinearResult.value : [],
-      }
-    },
+    queryFn: () =>
+      loadStrongModeAvailability({
+        appLanguage,
+        getInterlinearAvailability: resources.lexiconBible.getInterlinearAvailability,
+        getStrongAvailability: resources.strongBible.getAvailability,
+        version,
+      }),
   })
+  const availability = availabilityQuery.data ?? { interlinear: [] }
+  const availabilityFailed = availabilityQuery.isError
 
   const strongAvailable = availability.strong?.status === 'available'
   const installedInterlinear = availability.interlinear.find(
     ({ availability: sidecarAvailability }) => sidecarAvailability.status === 'available'
   )
   const reverseInterlinearAvailable = strongAvailable && Boolean(installedInterlinear)
+
+  useEffect(() => {
+    if (!availabilityQuery.isSuccess || !availability.strong || selectedMode === 'hidden') return
+    const selectedModeAvailable =
+      selectedMode === 'visible' ? strongAvailable : reverseInterlinearAvailable
+    if (selectedModeAvailable) return
+    actions.setStrongMode('hidden')
+  }, [
+    actions,
+    availability.strong,
+    availabilityQuery.isSuccess,
+    reverseInterlinearAvailable,
+    selectedMode,
+    strongAvailable,
+  ])
   const getModeDownloadPresentation = (mode: Exclude<StrongMode, 'hidden'>) => {
     return getBibleModeAcquisitionPresentation(
       pendingAcquisition?.mode === mode ? pendingAcquisition : undefined,
@@ -124,6 +117,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   }
 
   const requestDownload = (mode: Exclude<StrongMode, 'hidden'>) => {
+    if (!isConnected || availabilityFailed) return
     if (!isStrongCapableBibleVersion(version)) return
     try {
       const strong = availability.strong
@@ -160,7 +154,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     }
   }
 
-  const hasLoadedAvailability = Boolean(availability.strong)
+  const hasLoadedAvailability = availabilityQuery.isSuccess && Boolean(availability.strong)
   const strongDownloadRequired = hasLoadedAvailability && !strongAvailable
   const reverseInterlinearDownloadRequired = hasLoadedAvailability && !reverseInterlinearAvailable
   const strongDownloading =
@@ -169,11 +163,24 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     pendingAcquisition?.mode === 'reverse-interlinear' &&
     reverseInterlinearDownloadPresentation.status !== 'failed'
 
-  const downloadLabel = (mode: string) => t('Télécharger les ressources pour {{mode}}', { mode })
+  const downloadLabel = (mode: string) =>
+    isConnected
+      ? t('Télécharger les ressources pour {{mode}}', { mode })
+      : t('resource.action.connectionRequired')
 
   return (
     <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
       <SheetView p={16} gap={10}>
+        {availabilityFailed && (
+          <Box center py={8}>
+            <Text color="tertiary" textAlign="center">
+              {t('resource.action.temporarilyUnavailable')}
+            </Text>
+            <Text bold color="primary" mt={8} onPress={() => void availabilityQuery.refetch()}>
+              {t('bible.error.retry')}
+            </Text>
+          </Box>
+        )}
         <BibleDisplayModeCard
           layout="list"
           label={t('Texte')}
@@ -192,6 +199,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           selected={selectedMode === 'visible'}
           onPress={() => selectMode('visible')}
           downloadRequired={strongDownloadRequired}
+          downloadDisabled={!isConnected || availabilityFailed}
           downloading={strongDownloading}
           downloadProgress={strongDownloadPresentation.progress}
           downloadAccessibilityLabel={downloadLabel(t('Strong'))}
@@ -211,6 +219,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           selected={selectedMode === 'reverse-interlinear'}
           onPress={() => selectMode('reverse-interlinear')}
           downloadRequired={reverseInterlinearDownloadRequired}
+          downloadDisabled={!isConnected || availabilityFailed}
           downloading={reverseInterlinearDownloading}
           downloadProgress={reverseInterlinearDownloadPresentation.progress}
           downloadAccessibilityLabel={downloadLabel(t('Interlinéaire inversé'))}

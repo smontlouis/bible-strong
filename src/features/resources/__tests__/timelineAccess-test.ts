@@ -53,4 +53,20 @@ describe('Timeline Resource access', () => {
       })
     }
   )
+
+  it('keeps a temporary file read failure distinct from an invalid Offline copy', async () => {
+    const access = createLocalTimelineAccess({
+      getAvailability: async identity => ({ status: 'available', resource: identity }),
+      getPath: () => '/timeline.json',
+      readText: async () => {
+        throw new Error('DISK_IO')
+      },
+    })
+
+    await expect(access.loadDetails('fr')).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'temporary-unavailable',
+      recoveries: [],
+    })
+  })
 })

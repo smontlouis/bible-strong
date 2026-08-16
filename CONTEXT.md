@@ -152,12 +152,14 @@ Core user activities:
 - Initial offline setup is optional and dismissible. Every suggested Offline copy can be deselected, and the user may finish onboarding with no resource installed.
 - Offline setup folders exist only to compose the Initial offline selection. After enqueueing, the application manages individual Offline copies and does not expose folder installation, folder progress, folder updates, or folder removal.
 - Resource consumers use one query interface regardless of source. Resource access chooses between an installed Offline copy and remote access; the Query cache does not replace either source.
+- Reading and search intentionally use different source priorities. Reading prefers a valid installed Offline copy. Search prefers the remote search service while connected and the installed local index while disconnected; a temporary remote-search failure may fall back to the local index.
 - Local and remote adapters return the same Resource domain contract; SQLite rows and HTTP payload shapes do not escape their adapters.
 - Resource domain contracts have a shared machine-readable definition that supports runtime validation, inferred or generated TypeScript types, and OpenAPI documentation for the REST boundary.
 - Resource domain API versions describe backward-compatible HTTP contracts; Resource revisions describe content and do not create new API versions.
 - The Resource domain API serves only the active Resource revision, identifies it in responses and validators such as `ETag`, and does not provide historical-revision reads.
 - Resource domain API payloads use canonical DTOs rather than mobile `Verse` or PostgreSQL row types. Boundary failures use stable structured problem responses and never expose database errors.
 - Online and offline search preserve Search parity without promising identical ranking between their different search engines.
+- Until remote search endpoints exist for a resource, its search remains explicitly local-only; local-only search must not pretend that remote priority has already been implemented.
 - Remote editorial resources and their downloadable Offline copies are derived from the same Resource revision.
 - Bible Lexicon Maker owns generation and validation of a Resource publication bundle; the Resource service owns importing that bundle into its canonical database and serving it through the Resource domain API.
 - Each Resource publication bundle is independently importable. Its format version is owned by Bible Lexicon Maker, and the Resource service accepts only explicitly supported versions.

@@ -6,7 +6,7 @@ import loadNaveItem from '~helpers/loadNaveItem'
 import { mapLocalResourceError, unwrapLocalResourceResult } from './resourceAccessError'
 import { getLocalResourceAvailability } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import type { ResourceAvailability } from './dictionaryAccess'
+import type { ResourceAvailability } from './resourceModel'
 
 export type NaveTopicSummary = {
   normalizedName: string
@@ -33,16 +33,26 @@ export type NaveAccess = {
 }
 
 export const localNaveAccess: NaveAccess = {
-  getAvailability: async language =>
-    (
-      await getLocalResourceAvailability({
-        kind: 'database',
-        databaseId: 'NAVE',
-        language,
-      })
-    ).status === 'available'
+  getAvailability: async language => {
+    const availability = await getLocalResourceAvailability({
+      kind: 'database',
+      databaseId: 'NAVE',
+      language,
+    })
+    return availability.status === 'available'
       ? { status: 'available' }
-      : { status: 'unavailable', recoveries: ['acquire-offline-copy'] },
+      : availability.status === 'corrupt'
+        ? {
+            status: 'unavailable',
+            reason: 'invalid-offline-copy',
+            recoveries: ['acquire-offline-copy', 'manage-offline-copies'],
+          }
+        : {
+            status: 'unavailable',
+            reason: 'offline-copy-required',
+            recoveries: ['acquire-offline-copy'],
+          }
+  },
   listByLetter: async letter =>
     unwrapLocalResourceResult(await loadNaveByLetter(letter)).map(mapLocalNaveTopic),
   search: async searchValue =>

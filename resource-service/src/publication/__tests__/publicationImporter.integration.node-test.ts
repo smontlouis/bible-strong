@@ -24,12 +24,14 @@ const writeBundle = async ({
   revision,
   text,
   countOverride,
+  rightsHolder = 'integration-test',
 }: {
   root: string
   versionId: string
   revision: string
   text: string
   countOverride?: number
+  rightsHolder?: string
 }) => {
   const sourceSha256 = '2'.repeat(64)
   const canonical = `${JSON.stringify({
@@ -80,7 +82,7 @@ const writeBundle = async ({
       generatedAt: new Date(0).toISOString(),
     },
     rights: {
-      holder: 'integration-test',
+      holder: rightsHolder,
       termsReference: 'integration-test',
       attribution: 'integration-test',
       online: true,
@@ -134,8 +136,22 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
           assert.equal(result.status, 'activated')
         })
       )
+      await writeBundle({
+        root: firstBundle,
+        versionId,
+        revision: 'revision-1',
+        text: 'First',
+        rightsHolder: 'attempted-mutation',
+      })
       const unchanged = await Effect.runPromise(importPublicationBundle(firstBundle, database))
       assert.equal(unchanged.status, 'unchanged')
+      const unchangedPublication = await database
+        .selectFrom('resource_publications')
+        .select('rights')
+        .where('resource_identity', '=', identity)
+        .where('revision', '=', 'revision-1')
+        .executeTakeFirstOrThrow()
+      assert.equal(unchangedPublication.rights.holder, 'integration-test')
 
       const replaced = await Effect.runPromise(importPublicationBundle(secondBundle, database))
       assert.equal(replaced.status, 'activated')

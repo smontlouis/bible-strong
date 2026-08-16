@@ -12,7 +12,10 @@ import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import Link from '~common/Link'
 import Empty from '~common/Empty'
+import Loading from '~common/Loading'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import type { BibleReadingAvailability } from '~features/resources/bibleReadingResourceAccess'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
@@ -22,6 +25,10 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import type { VersionCode } from '~state/tabs'
 import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { useAtomValue } from 'jotai/react'
+import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 
 type PericopeVerse = {
   h1?: string
@@ -68,6 +75,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   const canGoBackInStack = useCanGoBackInStack()
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const defaultVersion = useDefaultBibleVersion()
   const params = useLocalSearchParams<{ book?: string; version?: string }>()
   const version = (params.version || defaultVersion) as VersionCode
@@ -76,10 +84,24 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   const initialBookNumber = params.book ? Number(params.book) : 1
   const [book, setBook] = useState<Book>(getBook(initialBookNumber) || getBook(1)!)
 
-  const { data: pericope } = useQuery({
-    queryKey: ['bible-pericope', version],
-    queryFn: () => resources.bibleReading.loadPericope(version),
+  const availabilityQuery = useQuery({
+    queryKey: [
+      ...resourceQueryKeys.biblePericope(version),
+      'availability',
+      downloadCompletionSignal,
+    ],
+    queryFn: () =>
+      resources.bibleReading.getPericopeAvailability?.(version) ??
+      Promise.resolve({ status: 'available' as const }),
+    networkMode: 'always',
   })
+  const pericopeQuery = useQuery({
+    queryKey: resourceQueryKeys.biblePericope(version),
+    queryFn: () => resources.bibleReading.loadPericope(version),
+    enabled: availabilityQuery.data?.status === 'available',
+    networkMode: 'always',
+  })
+  const pericope = pericopeQuery.data
   const pericopeBook: PericopeBook = pericope
     ? clearEmpties((pericope[String(book.Numero)] || {}) as PericopeBook)
     : {}
@@ -90,59 +112,93 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
     currentBookIndex >= 0 && currentBookIndex < canonBooks.length - 1
       ? canonBooks[currentBookIndex + 1]
       : undefined
+  const unavailable =
+    availabilityQuery.data?.status === 'unavailable'
+      ? (availabilityQuery.data as Extract<BibleReadingAvailability, { status: 'unavailable' }>)
+      : undefined
+  const fallbackRecoveryIdentity = { kind: 'bible', versionId: version } as const
+  const recoveryIdentity = unavailable?.recoveryIdentity ?? fallbackRecoveryIdentity
+  const recoveryFileSize = Math.max(
+    1,
+    Math.round(createOfflineCopyDownloadItem(recoveryIdentity).estimatedSize / 1_000_000)
+  )
 
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
         <PericopeHeader hasBackButton={hasBackButton} title={`${t('Péricopes')} ${version}`} />
-        <ScrollView>
-          <Box padding={20}>
-            <Text fontSize={30} fontWeight="bold" marginBottom={40}>
-              {t(book.Nom)}
-            </Text>
-            {!Object.keys(pericopeBook).length ? (
-              <Empty
-                source={require('~assets/images/empty.json')}
-                message={t('Aucun péricope pour ce Livre, essayez avec une autre version.')}
-              />
-            ) : (
-              Object.entries(pericopeBook).map(([chapterKey, chapterObject]) => (
-                <Fragment key={chapterKey}>
-                  {!!Object.keys(chapterObject).length && (
-                    <Text color="tertiary" fontSize={12} marginBottom={10}>
-                      {t('CHAPITRE')} {chapterKey}
-                    </Text>
-                  )}
-                  {Object.entries(chapterObject).map(([verseKey, verseObject]) => {
-                    const { h1, h2, h3, h4 } = verseObject
-                    return (
-                      <TouchableOpacity
-                        key={verseKey}
-                        onPress={() =>
-                          pushRouteOnce({
-                            pathname: '/bible-view',
-                            params: {
-                              contextDisplayMode: 'focused',
-                              book: JSON.stringify(book),
-                              chapter: String(chapterKey),
-                              version,
-                              verse: '1',
-                            },
-                          })
-                        }
-                      >
-                        {h1 && <PericopeHeading size={24}>{h1}</PericopeHeading>}
-                        {h2 && <PericopeHeading size={20}>{h2}</PericopeHeading>}
-                        {h3 && <PericopeHeading size={18}>{h3}</PericopeHeading>}
-                        {h4 && <PericopeHeading size={16}>{h4}</PericopeHeading>}
-                      </TouchableOpacity>
-                    )
-                  })}
-                </Fragment>
-              ))
-            )}
+        {availabilityQuery.isPending ? (
+          <Box flex center>
+            <Loading message={t('Chargement...')} />
           </Box>
-        </ScrollView>
+        ) : availabilityQuery.isError || pericopeQuery.isError ? (
+          <ResourceUnavailableView
+            identity={recoveryIdentity}
+            title={t('resource.pericope.temporarilyUnavailable')}
+            fileSize={recoveryFileSize}
+            reason="temporary-unavailable"
+            onRetry={() => {
+              void availabilityQuery.refetch()
+              void pericopeQuery.refetch()
+            }}
+          />
+        ) : unavailable ? (
+          <ResourceUnavailableView
+            identity={recoveryIdentity}
+            title={t('resource.pericope.offlineCopyNeeded')}
+            fileSize={recoveryFileSize}
+            reason={unavailable.reason}
+          />
+        ) : (
+          <ScrollView>
+            <Box padding={20}>
+              <Text fontSize={30} fontWeight="bold" marginBottom={40}>
+                {t(book.Nom)}
+              </Text>
+              {!Object.keys(pericopeBook).length ? (
+                <Empty
+                  source={require('~assets/images/empty.json')}
+                  message={t('Aucun péricope pour ce Livre, essayez avec une autre version.')}
+                />
+              ) : (
+                Object.entries(pericopeBook).map(([chapterKey, chapterObject]) => (
+                  <Fragment key={chapterKey}>
+                    {!!Object.keys(chapterObject).length && (
+                      <Text color="tertiary" fontSize={12} marginBottom={10}>
+                        {t('CHAPITRE')} {chapterKey}
+                      </Text>
+                    )}
+                    {Object.entries(chapterObject).map(([verseKey, verseObject]) => {
+                      const { h1, h2, h3, h4 } = verseObject
+                      return (
+                        <TouchableOpacity
+                          key={verseKey}
+                          onPress={() =>
+                            pushRouteOnce({
+                              pathname: '/bible-view',
+                              params: {
+                                contextDisplayMode: 'focused',
+                                book: JSON.stringify(book),
+                                chapter: String(chapterKey),
+                                version,
+                                verse: '1',
+                              },
+                            })
+                          }
+                        >
+                          {h1 && <PericopeHeading size={24}>{h1}</PericopeHeading>}
+                          {h2 && <PericopeHeading size={20}>{h2}</PericopeHeading>}
+                          {h3 && <PericopeHeading size={18}>{h3}</PericopeHeading>}
+                          {h4 && <PericopeHeading size={16}>{h4}</PericopeHeading>}
+                        </TouchableOpacity>
+                      )
+                    })}
+                  </Fragment>
+                ))
+              )}
+            </Box>
+          </ScrollView>
+        )}
         <Box
           bg="reverse"
           row

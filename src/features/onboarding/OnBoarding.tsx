@@ -12,6 +12,7 @@ import { setDefaultBibleVersion } from '~redux/modules/user'
 import { isOnboardingCompletedAtom } from './atom'
 import AbelOnboarding from './AbelOnboarding'
 import SelectResources from './SelectResources'
+import ResourceSetupChoice from './ResourceSetupChoice'
 
 const useOptionalOnboarding = () => {
   const lang = useLanguage()
@@ -48,7 +49,7 @@ const useOptionalOnboarding = () => {
 }
 
 const OnBoarding = () => {
-  const [step, setStep] = useState<'abel' | 'resources'>('abel')
+  const [step, setStep] = useState<'abel' | 'choice' | 'resources'>('abel')
   const setIsOnboardingCompleted = useSetAtom(isOnboardingCompletedAtom)
   const { hideOnboarding, showOnboarding } = useOptionalOnboarding()
 
@@ -70,7 +71,12 @@ const OnBoarding = () => {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <Box flex bg="reverse">
           {step === 'abel' ? (
-            <AbelOnboarding onComplete={() => setStep('resources')} />
+            <AbelOnboarding onComplete={() => setStep('choice')} />
+          ) : step === 'choice' ? (
+            <ResourceSetupChoice
+              onContinueOnline={completeOnboarding}
+              onPrepareOffline={() => setStep('resources')}
+            />
           ) : (
             <SelectResources onComplete={completeOnboarding} />
           )}

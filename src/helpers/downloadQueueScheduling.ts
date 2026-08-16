@@ -6,7 +6,8 @@ export type DownloadQueueDecision = {
 }
 
 export const getDownloadQueueDecision = (
-  states: Map<string, DownloadItemState>
+  states: Map<string, DownloadItemState>,
+  isOnline = true
 ): DownloadQueueDecision => {
   const queued = Array.from(states.values()).filter(state => state.status === 'queued')
   const blocked = queued.find(state => {
@@ -15,6 +16,7 @@ export const getDownloadQueueDecision = (
     return dependency?.status === 'failed' || dependency?.status === 'cancelled'
   })
   if (blocked) return { blocked }
+  if (!isOnline) return {}
 
   const next = queued.find(state => {
     const { dependsOnId } = state.item

@@ -20,6 +20,7 @@ import Box, { FadingBox, HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
 import { createStrongIdentity, type StrongIdentity } from '~helpers/strongIdentities'
@@ -29,6 +30,7 @@ import {
 } from '~helpers/strongSelection'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import useConnection from '~helpers/useConnection'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { createStrongSelectionPreviewCard } from './strongSelectionPreviewCard'
@@ -90,6 +92,7 @@ const StrongSelectionSheet = ({
   const { width: windowWidth } = useWindowDimensions()
   const pushRouteOnce = usePushRouteOnce()
   const resources = useResourceAccess()
+  const isConnected = useConnection()
   const previewPagerRef = useRef<ScrollView>(null)
   const programmaticPreviewScrollRef = useRef(false)
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState(0)
@@ -158,6 +161,7 @@ const StrongSelectionSheet = ({
   }, [selectionKey])
 
   const requestCoreDownload = () => {
+    if (!isConnected) return
     downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')])
   }
 
@@ -223,15 +227,26 @@ const StrongSelectionSheet = ({
       onDismiss={onClose}
     >
       <SheetView pt={12} pb={24} gap={14}>
-        {!coreAvailable && !downloading && !availabilityQuery.isPending && (
+        {!coreAvailable && !downloading && availabilityQuery.isSuccess && (
           <Box px={carouselHorizontalPadding}>
-            <TouchableOpacity onPress={requestCoreDownload} activeOpacity={0.7}>
+            <TouchableOpacity
+              accessibilityState={{ disabled: !isConnected }}
+              disabled={!isConnected}
+              onPress={requestCoreDownload}
+              activeOpacity={0.7}
+            >
               <StrongDownloadPromptCard>
                 <HStack gap={12} alignItems="center">
-                  <FeatherIcon name="download-cloud" size={19} color="default" />
+                  <FeatherIcon
+                    name={isConnected ? 'download-cloud' : 'wifi-off'}
+                    size={19}
+                    color="default"
+                  />
                   <VStack flex gap={2}>
                     <Text bold fontSize={14}>
-                      {t('Télécharger le lexique Strong')}
+                      {isConnected
+                        ? t('Télécharger le lexique Strong')
+                        : t('resource.action.connectionRequired')}
                     </Text>
                     <Text color="default" fontSize={12}>
                       {t('Définitions françaises et anglaises, morphologie et mots liés')}
@@ -241,6 +256,20 @@ const StrongSelectionSheet = ({
               </StrongDownloadPromptCard>
             </TouchableOpacity>
           </Box>
+        )}
+
+        {(availabilityQuery.isError || previewQuery.isError) && (
+          <ResourceUnavailableView
+            identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+            title={t('resource.strong.temporarilyUnavailable')}
+            fileSize={35}
+            reason="temporary-unavailable"
+            size="small"
+            onRetry={() => {
+              void availabilityQuery.refetch()
+              void previewQuery.refetch()
+            }}
+          />
         )}
 
         {downloading && (

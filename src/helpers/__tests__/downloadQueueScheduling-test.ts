@@ -52,4 +52,11 @@ describe('download queue scheduling', () => {
       expect(getDownloadQueueDecision(states)).toEqual({ blocked: states.get('sidecar') })
     }
   )
+
+  it('keeps downloads queued until the device reconnects', () => {
+    const states = new Map([['bible', createState('bible', 'queued')]])
+
+    expect(getDownloadQueueDecision(states, false)).toEqual({})
+    expect(states.get('bible')?.status).toBe('queued')
+  })
 })

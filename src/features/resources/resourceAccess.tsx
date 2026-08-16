@@ -38,6 +38,10 @@ import {
 } from '~features/resources/lexiconBibleResourceAccess'
 import { localTimelineAccess, type TimelineAccess } from '~features/resources/timelineAccess'
 import {
+  defaultCommentaryAccess,
+  type CommentaryAccess,
+} from '~features/resources/commentaryAccess'
+import {
   isLocalResourceAvailable,
   type LocalResourceRef,
 } from '~features/resources/resourceAvailability'
@@ -58,6 +62,7 @@ export type ResourceAccessRegistry = {
   strongLexicon: StrongLexiconAccess
   strongBible: StrongBibleResourceAccess
   timeline: TimelineAccess
+  commentary: CommentaryAccess
   offlineCopies: {
     isAvailable: (identity: LocalResourceRef) => Promise<boolean>
   }
@@ -96,6 +101,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   strongLexicon: localStrongLexiconAccess,
   strongBible: localStrongBibleResourceAccess,
   timeline: localTimelineAccess,
+  commentary: defaultCommentaryAccess,
   offlineCopies: { isAvailable: isLocalResourceAvailable },
   capabilities: {
     getOnlineAccess: identity =>

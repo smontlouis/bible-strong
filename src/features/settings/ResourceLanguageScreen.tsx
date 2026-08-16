@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch } from 'react-redux'
 import { useAtom } from 'jotai'
-import { TouchableOpacity } from 'react-native'
+import { Pressable } from 'react-native'
 import Animated, { type AnimatedStyle } from 'react-native-reanimated'
 import { useTheme } from '@emotion/react'
 
@@ -139,22 +139,20 @@ const SegmentedLanguageToggle = ({
       <Animated.View style={indicatorStyle} />
 
       {/* FR Button */}
-      <TouchableOpacity
+      <Pressable
         onPress={() => onChange('fr')}
-        activeOpacity={0.8}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
       >
         <Animated.Text style={frenchTextStyle}>{isLarge ? 'Français' : 'FR'}</Animated.Text>
-      </TouchableOpacity>
+      </Pressable>
 
       {/* EN Button */}
-      <TouchableOpacity
+      <Pressable
         onPress={() => onChange('en')}
-        activeOpacity={0.8}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
       >
         <Animated.Text style={englishTextStyle}>{isLarge ? 'English' : 'EN'}</Animated.Text>
-      </TouchableOpacity>
+      </Pressable>
     </Box>
   )
 }

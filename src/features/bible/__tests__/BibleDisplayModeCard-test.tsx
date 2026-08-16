@@ -89,13 +89,13 @@ describe('BibleDisplayModeCard', () => {
     expect(downloadPressable!.props.accessibilityLabel).toBe(
       'Télécharger les ressources pour Strong'
     )
-    expect(selectionPressable!.props.disabled).toBe(false)
+    expect(selectionPressable!.props.disabled).toBe(true)
 
-    selectionPressable!.props.onPress?.()
+    if (!selectionPressable!.props.disabled) selectionPressable!.props.onPress?.()
     downloadPressable!.props.onPress?.()
 
     expect(onDownloadPress).toHaveBeenCalledTimes(1)
-    expect(onPress).toHaveBeenCalledTimes(1)
+    expect(onPress).not.toHaveBeenCalled()
   })
 
   it('selects an installed mode when its card is pressed', () => {
@@ -139,6 +139,25 @@ describe('BibleDisplayModeCard', () => {
     expect(pressable!.props.disabled).toBe(true)
     expect(downloadPressable!.props.disabled).toBe(true)
     expect(downloadIndicator.props.children.props.progress).toBe(0.42)
+  })
+
+  it('disables Offline acquisition while keeping its intent visible', () => {
+    const [selectionPressable, downloadPressable] = getCardPressables(
+      BibleDisplayModeCard({
+        label: 'Strong',
+        description: 'Texte + numéros',
+        selected: false,
+        onPress: jest.fn(),
+        downloadRequired: true,
+        downloadDisabled: true,
+        downloadAccessibilityLabel: 'Reconnectez-vous pour télécharger Strong',
+        onDownloadPress: jest.fn(),
+        children: <span>Aperçu</span>,
+      })
+    )
+
+    expect(selectionPressable!.props.disabled).toBe(true)
+    expect(downloadPressable!.props.disabled).toBe(true)
   })
 
   it('keeps progress in place of the list radio while a confirmed download is active', () => {

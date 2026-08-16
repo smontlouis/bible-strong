@@ -34,6 +34,11 @@ An installed offline copy remains preferred even when the catalog advertises a n
 The user continues reading the installed revision until explicitly updating it; the app does not
 silently alternate between local and remote revisions according to connectivity.
 
+Search is the deliberate exception to this read policy. Once a remote search capability exists,
+connected searches prefer it even when a local index is installed; disconnected searches prefer
+the installed local index. A temporary remote-search failure may fall back to that local index.
+Until remote search endpoints are implemented, existing searches remain explicitly local-only.
+
 If an installed local adapter fails with a recoverable storage error such as corruption or
 incomplete content, the resource access module automatically attempts the remote adapter when that
 delivery capability is available. Domain absence, local corruption, missing installation, offline
@@ -81,7 +86,8 @@ instead of disappearing according to current network or installation state.
 
 Online and offline search expose equivalent query meaning, filters, pagination, and result
 contracts. PostgreSQL and SQLite FTS5 are not required to produce identical relevance scores or
-strictly identical result ordering.
+strictly identical result ordering. Source selection follows connectivity: remote first while
+connected, local first while disconnected, with a local fallback for temporary remote failures.
 
 Screens and hooks have one query key for the domain result rather than separate local and remote
 query keys. Installing, removing, or updating an offline copy must invalidate affected queries so

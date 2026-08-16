@@ -5,6 +5,14 @@ import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 export type BiblePresentationResource = 'pericope' | 'red-words'
 export type ResourceOperation = 'read' | 'browse' | 'search'
 
+export type ResourceAvailability =
+  | { status: 'available' }
+  | {
+      status: 'unavailable'
+      reason: 'offline-copy-required' | 'invalid-offline-copy'
+      recoveries: ('acquire-offline-copy' | 'manage-offline-copies')[]
+    }
+
 export type ResourceIdentity =
   | { kind: 'bible-text'; versionId: string }
   | {
@@ -19,6 +27,7 @@ export type ResourceIdentity =
   | { kind: 'nave'; language: ResourceLanguage }
   | { kind: 'cross-references' }
   | { kind: 'commentary'; collection: 'MHY'; language: 'fr' }
+  | { kind: 'commentary'; collection: 'FIRESTORE'; language: 'en' }
   | { kind: 'timeline'; language: ResourceLanguage }
 
 export type OnlineAccessState =
@@ -42,12 +51,15 @@ export type ResourceContentState =
   | { status: 'temporarily-unavailable'; retryable: boolean }
   | { status: 'offline-unavailable' }
 
+export type ResourceConnectivity = 'online' | 'offline'
+
 export type ResourceState = {
   identity: ResourceIdentity
   operations: readonly ResourceOperation[]
   onlineAccess: OnlineAccessState
   offlineCopy: OfflineCopyState
   content: ResourceContentState
+  connectivity: ResourceConnectivity
 }
 
 export type ResourceAction =
@@ -57,12 +69,14 @@ export type ResourceAction =
   | 'update'
   | 'remove-offline-copy'
   | 'manage-storage'
+  | 'connection-required'
 
 export const getResourceOnlineAccess = (
   identity: ResourceIdentity,
   remotelyReadableBibleVersions: ReadonlySet<string>
 ): OnlineAccessState =>
-  identity.kind === 'bible-text' && remotelyReadableBibleVersions.has(identity.versionId)
+  (identity.kind === 'bible-text' && remotelyReadableBibleVersions.has(identity.versionId)) ||
+  (identity.kind === 'commentary' && identity.collection === 'FIRESTORE')
     ? { status: 'remotely-readable' }
     : { status: 'unsupported' }
 
@@ -135,7 +149,7 @@ export const resourceIdentityFromOfflineCopy = (
 
 export const getResourceActions = (state: ResourceState): ResourceAction[] => {
   const actions: ResourceAction[] = []
-  const { content, offlineCopy, onlineAccess } = state
+  const { connectivity, content, offlineCopy, onlineAccess } = state
 
   if (
     content.status === 'available' ||
@@ -148,21 +162,23 @@ export const getResourceActions = (state: ResourceState): ResourceAction[] => {
   }
 
   if (
-    (content.status === 'temporarily-unavailable' && content.retryable) ||
-    (offlineCopy.status === 'invalid' && offlineCopy.recoverable)
+    connectivity === 'online' &&
+    ((content.status === 'temporarily-unavailable' && content.retryable) ||
+      (offlineCopy.status === 'invalid' && offlineCopy.recoverable))
   ) {
     actions.push('retry')
   }
 
-  if (
+  const needsNetworkAcquisition =
     offlineCopy.status === 'not-installed' ||
     (offlineCopy.status === 'invalid' && offlineCopy.recoverable)
-  ) {
-    actions.push('make-available-offline')
+
+  if (needsNetworkAcquisition) {
+    actions.push(connectivity === 'online' ? 'make-available-offline' : 'connection-required')
   }
 
   if (offlineCopy.status === 'update-available') {
-    actions.push('update')
+    actions.push(connectivity === 'online' ? 'update' : 'connection-required')
   }
 
   if (offlineCopy.status === 'installed' || offlineCopy.status === 'update-available') {

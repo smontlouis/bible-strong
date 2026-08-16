@@ -29,12 +29,23 @@ const screenLevelAvailabilityCalls = [
   'isVersionInstalled',
   'getStrongBibleSidecarAvailability',
   'getInterlinearSidecarAvailability',
+  'getStrongLexiconModuleAvailability',
+  'hasPericopeFile',
+  'hasRedWordsFile',
+  'isLocalResourceAvailable',
 ]
 const allowedLocalLifecyclePrefixes = [
   'src/features/resources/',
   'src/features/onboarding/',
   'src/features/settings/DownloadsScreen.tsx',
   'src/features/settings/components/',
+]
+const sourceBoundaryRules = [
+  {
+    file: 'src/features/commentaries/CommentariesTabScreen.tsx',
+    forbidden: ['~helpers/firebase', 'firebaseDb'],
+    message: 'commentary content must be loaded through ResourceAccess',
+  },
 ]
 
 const violations = []
@@ -54,6 +65,14 @@ for (const file of (await Promise.all(sourceRoots.map(collectFiles))).flat()) {
         violations.push(
           `${relative}: ${call} must stay behind Resource access or Offline-copy lifecycle modules`
         )
+      }
+    }
+  }
+
+  for (const rule of sourceBoundaryRules.filter(rule => rule.file === relative)) {
+    for (const forbidden of rule.forbidden) {
+      if (source.includes(forbidden)) {
+        violations.push(`${relative}: ${rule.message} (${forbidden})`)
       }
     }
   }

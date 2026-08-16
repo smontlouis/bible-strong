@@ -30,6 +30,7 @@ import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResol
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 type NaveRow = NaveTopicSummary
 type NaveSection = {
@@ -91,7 +92,7 @@ const NaveListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error, recoveries } = useResultsByLetterOrSearch(
+  const { results, isLoading, error, recoveries, retry } = useResultsByLetterOrSearch(
     {
       queryKey: ['nave'],
       query: resources.nave.search,
@@ -159,20 +160,20 @@ const NaveListScreen = ({
     toast(t('menu.languageChanged', { language: nextLanguage === 'fr' ? 'Français' : 'English' }))
   }
 
-  if (error) {
+  if (availabilityQuery.isError || error) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Box flex bg="reverse">
           <Header hasBackButton={showBackButton} title={t('Désolé...')} />
-          <Empty
-            icon={require('~assets/images/empty-state-icons/inbox.svg')}
-            message={`${t('Impossible de charger la nave...')}${
-              error === 'INVALID_OFFLINE_COPY'
-                ? t(
-                    '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                  )
-                : ''
-            }`}
+          <ResourceUnavailableView
+            identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
+            title={t('resource.nave.temporarilyUnavailable')}
+            fileSize={7}
+            reason="temporary-unavailable"
+            onRetry={() => {
+              void availabilityQuery.refetch()
+              retry()
+            }}
           />
         </Box>
       </FormSheetScreen>

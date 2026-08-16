@@ -9,7 +9,6 @@ import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
-import Button from '~common/ui/Button'
 import Paragraph from '~common/ui/Paragraph'
 import RoundedCorner from '~common/ui/RoundedCorner'
 import Text from '~common/ui/Text'
@@ -17,7 +16,6 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import { useResolvedBibleVerses, verseStringToObject } from '~features/resources/useBibleVerses'
 import BibleVerseDetailFooter from '../bible/BibleVerseDetailFooter'
 import Comment from './Comment'
-import { Comment as CommentType, Comments } from './types'
 
 import { useTheme } from '@emotion/react'
 import { produce } from 'immer'
@@ -30,8 +28,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import { firebaseDb } from '~helpers/firebase'
-import { localQueryOptions, remoteQueryOptions } from '~helpers/queryOptions'
+import { localQueryOptions } from '~helpers/queryOptions'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -39,9 +36,11 @@ import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
-import { createBibleDownloadItem } from '~helpers/downloadItemFactory'
-import { useDownloadItemStatus, useDownloadQueue } from '~helpers/useDownloadQueue'
-import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
+import { databases } from '~helpers/databases'
+import { CommentaryAccessError } from '~features/resources/commentaryAccess'
+import { ResourceAccessError } from '~features/resources/resourceAccessError'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -64,56 +63,13 @@ const StyledVerse = styled.View({
   flexDirection: 'row',
 })
 
-const fetchComments = async (verse: string) => {
-  const verseCommentRef = await firebaseDb.collection('verse-commentaries').doc(verse).get()
-
-  if (!verseCommentRef.exists) {
-    throw new Error('NOT_FOUND')
-  }
-
-  const verseComment = verseCommentRef.data()
-
-  const snapshot = await firebaseDb
-    .collection('verse-commentaries')
-    .doc(verse)
-    .collection('commentaries')
-    .orderBy('order')
-    .where('isSDA', '==', false)
-    .limit(3)
-    .get()
-
-  const comments = snapshot.docs.map(x => x.data())
-
-  return { ...verseComment, comments } as Comments
-}
-
-const fetchMoreComments = async (verse: string, order: number) => {
-  const snapshot = await firebaseDb
-    .collection('verse-commentaries')
-    .doc(verse)
-    .collection('commentaries')
-    .orderBy('order')
-    .startAfter(order)
-    .limit(8)
-    .get()
-
-  const comments = snapshot.docs.map(x => x.data()) as CommentType[]
-
-  return comments
-}
-
 const useComments = (verse: string) => {
+  const resources = useResourceAccess()
   const query = useInfiniteQuery({
     queryKey: ['commentaries', verse],
     initialPageParam: null as number | null,
     queryFn: async ({ pageParam }) => {
-      if (!pageParam) return fetchComments(verse)
-
-      return {
-        id: verse,
-        count: 0,
-        comments: await fetchMoreComments(verse, pageParam),
-      } satisfies Comments
+      return resources.commentary.loadVersePage(verse, pageParam ?? undefined)
     },
     getNextPageParam: (lastPage, pages) => {
       const loadedCommentCount = pages.reduce((count, page) => count + page.comments.length, 0)
@@ -121,7 +77,7 @@ const useComments = (verse: string) => {
         ? lastPage.comments.at(-1)?.order
         : undefined
     },
-    ...remoteQueryOptions,
+    ...localQueryOptions,
   })
   const data = query.data
     ? {
@@ -136,8 +92,9 @@ const useComments = (verse: string) => {
     loadMore: query.fetchNextPage,
     canLoad: query.hasNextPage,
     isPending: query.isPending && query.fetchStatus === 'fetching',
-    isError: query.isError || query.fetchStatus === 'paused',
+    isError: !data && (query.isError || query.fetchStatus === 'paused'),
     isFetchingMore: query.isFetchingNextPage,
+    retry: query.refetch,
   }
 }
 
@@ -191,7 +148,8 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
       })
     )
 
-  const { data, error, loadMore, canLoad, isPending, isError, isFetchingMore } = useComments(verse)
+  const { data, error, loadMore, canLoad, isPending, isError, isFetchingMore, retry } =
+    useComments(verse)
   const verseFormatted = useMemo(() => verseStringToObject([verse]), [verse])
 
   const { title: headerTitle } = verseFormatted
@@ -202,18 +160,13 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
   const verseResolution = useResolvedBibleVerses(verseFormatted)
   const [verseText] = verseResolution.verses
   const { versesInCurrentChapter } = useVerseInCurrentChapter(verseText?.Livre, verseText?.Chapitre)
-  const { enqueue } = useDownloadQueue()
   const unavailableBibleVersion =
     verse &&
     !verseResolution.isLoading &&
     verseResolution.recoveries?.includes('acquire-offline-copy')
       ? defaultVersion
       : null
-  const unavailableBibleDownloadStatus = useDownloadItemStatus(
-    unavailableBibleVersion
-      ? createOfflineCopyId({ kind: 'bible', versionId: unavailableBibleVersion })
-      : undefined
-  )
+  const bibleTemporarilyUnavailable = verseResolution.recoveries?.includes('retry')
 
   const updateVerse = (value: -1 | 1) => {
     const [b, c, v] = verse.split('-').map(Number)
@@ -281,26 +234,32 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
               </VersetWrapper>
               <Box flex>
                 {unavailableBibleVersion ? (
-                  <Box>
-                    <Text fontSize={13} color="grey" mb={10}>
-                      {t('resource.bible.referenceUnavailable', {
-                        version: unavailableBibleVersion,
-                      })}
-                    </Text>
-                    <Button
-                      small
-                      onPress={() => enqueue([createBibleDownloadItem(unavailableBibleVersion)])}
-                      isLoading={
-                        unavailableBibleDownloadStatus?.status === 'queued' ||
-                        unavailableBibleDownloadStatus?.status === 'downloading' ||
-                        unavailableBibleDownloadStatus?.status === 'inserting'
-                      }
-                    >
-                      {t('resource.bible.makeAvailableOffline', {
-                        version: unavailableBibleVersion,
-                      })}
-                    </Button>
-                  </Box>
+                  <ResourceUnavailableView
+                    identity={{ kind: 'bible', versionId: unavailableBibleVersion }}
+                    title={t('resource.bible.referenceUnavailable', {
+                      version: unavailableBibleVersion,
+                    })}
+                    fileSize={Math.max(
+                      1,
+                      Math.round(
+                        createOfflineCopyDownloadItem({
+                          kind: 'bible',
+                          versionId: unavailableBibleVersion,
+                        }).estimatedSize / 1_000_000
+                      )
+                    )}
+                    reason="offline-copy-required"
+                    size="small"
+                  />
+                ) : bibleTemporarilyUnavailable ? (
+                  <ResourceUnavailableView
+                    identity={{ kind: 'bible', versionId: defaultVersion }}
+                    title={t('resource.bible.referenceUnavailable', { version: defaultVersion })}
+                    fileSize={1}
+                    reason="temporary-unavailable"
+                    size="small"
+                    onRetry={verseResolution.retry}
+                  />
                 ) : (
                   <Paragraph>{verseText?.Texte.replace(/\n/gi, '')}</Paragraph>
                 )}
@@ -320,14 +279,25 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
             <Box height={100} center>
               <Loading />
             </Box>
+          ) : isError && !(error instanceof CommentaryAccessError) ? (
+            <ResourceUnavailableView
+              identity={{ kind: 'database', databaseId: 'MHY', language: 'fr' }}
+              title={t('resource.commentaries.temporarilyUnavailable')}
+              fileSize={Math.max(1, Math.round(databases('fr').MHY.fileSize / 1_000_000))}
+              reason={
+                error instanceof ResourceAccessError && error.code === 'INVALID_OFFLINE_COPY'
+                  ? 'invalid-offline-copy'
+                  : error instanceof ResourceAccessError &&
+                      error.recoveries.includes('acquire-offline-copy')
+                    ? 'offline-copy-required'
+                    : 'temporary-unavailable'
+              }
+              onRetry={() => void retry()}
+            />
           ) : isError ? (
             <Empty
               icon={require('~assets/images/empty-state-icons/comment.svg')}
-              message={
-                error?.message === 'NOT_FOUND'
-                  ? t('Aucun commentaire disponible pour ce verset.')
-                  : t("Une erreur est survenue. Assurez-vous d'être connecté à Internet.")
-              }
+              message={t('Aucun commentaire disponible pour ce verset.')}
             />
           ) : (
             <>

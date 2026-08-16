@@ -40,6 +40,7 @@ import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
+import useConnection from '~helpers/useConnection'
 
 const getVersionDownloadQueryKey = (
   versionId: string,
@@ -87,8 +88,15 @@ const ActionColumn = ({ children, opacity }: React.PropsWithChildren<{ opacity?:
   </Box>
 )
 
-const ActionButton = ({ children, onPress }: React.PropsWithChildren<{ onPress: () => void }>) => (
+const ActionButton = ({
+  children,
+  onPress,
+  disabled = false,
+}: React.PropsWithChildren<{ onPress: () => void; disabled?: boolean }>) => (
   <TouchableOpacity
+    accessibilityRole="button"
+    accessibilityState={{ disabled }}
+    disabled={disabled}
     onPress={event => {
       event.stopPropagation()
       onPress()
@@ -282,6 +290,7 @@ const VersionSelectorItem = ({
     React.useState<boolean>()
   const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
   const queryClient = useQueryClient()
+  const isConnected = useConnection()
   const isOnboardingCompleted = useAtomValue(isOnboardingCompletedAtom)
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
@@ -292,7 +301,7 @@ const VersionSelectorItem = ({
   const previousBibleDownloadStatusRef = React.useRef(queueState?.status)
   const strongVersionId = isStrongCapableBibleVersion(version.id) ? version.id : undefined
   const requiresStrong = selectionRequirement === 'strong' && Boolean(strongVersionId)
-  const { data: versionNeedsDownload } = useQuery({
+  const versionAvailabilityQuery = useQuery({
     queryKey: getVersionDownloadQueryKey(
       version.id,
       isOnboardingCompleted,
@@ -302,6 +311,7 @@ const VersionSelectorItem = ({
       !(await resources.offlineCopies.isAvailable({ kind: 'bible', versionId: version.id })),
     placeholderData: keepPreviousData,
   })
+  const versionNeedsDownload = versionAvailabilityQuery.data
   const bibleDownloadItem = createBibleDownloadItem(version.id)
   const publicationStatus = useResourcePublicationStatus({
     resourceId: bibleDownloadItem.id,
@@ -321,7 +331,7 @@ const VersionSelectorItem = ({
     placeholderData: keepPreviousData,
   })
   const strongSelectionAvailability: StrongBibleSidecarAvailability | undefined =
-    strongSelectionQuery.data ?? (strongSelectionQuery.isError ? { status: 'missing' } : undefined)
+    strongSelectionQuery.data
   const strongQueueState = useDownloadItemStatus(
     isStrongCapableBibleVersion(version.id)
       ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version.id })
@@ -365,6 +375,11 @@ const VersionSelectorItem = ({
     : undefined
 
   const startDownload = async () => {
+    if (!isConnected) return
+    if (versionAvailabilityQuery.isError || strongSelectionQuery.isError) {
+      await Promise.all([versionAvailabilityQuery.refetch(), strongSelectionQuery.refetch()])
+      return
+    }
     if (requiresStrong && strongVersionId) {
       const availability =
         strongSelectionAvailability ??
@@ -543,19 +558,32 @@ const VersionSelectorItem = ({
             </Box>
             {selectionNeedsDownload === true && !isLoading && !isQueued && (
               <ActionButton
+                disabled={!isConnected}
                 onPress={() => {
                   void startDownload()
                 }}
               >
-                <FeatherIcon name="download-cloud" size={16} />
+                <FeatherIcon name={isConnected ? 'download-cloud' : 'wifi-off'} size={16} />
+              </ActionButton>
+            )}
+            {(versionAvailabilityQuery.isError || strongSelectionQuery.isError) && (
+              <ActionButton
+                onPress={() => {
+                  void versionAvailabilityQuery.refetch()
+                  void strongSelectionQuery.refetch()
+                }}
+              >
+                <FeatherIcon name="rotate-cw" size={16} />
               </ActionButton>
             )}
             {renderSelectionCheckbox()}
-            {typeof selectionNeedsDownload === 'undefined' && (
-              <ActionColumn>
-                <FeatherIcon name="clock" size={18} color="tertiary" />
-              </ActionColumn>
-            )}
+            {typeof selectionNeedsDownload === 'undefined' &&
+              !versionAvailabilityQuery.isError &&
+              !strongSelectionQuery.isError && (
+                <ActionColumn>
+                  <FeatherIcon name="clock" size={18} color="tertiary" />
+                </ActionColumn>
+              )}
             {isQueued && (
               <ActionColumn>
                 <FeatherIcon name="clock" size={18} color="tertiary" />
@@ -586,8 +614,18 @@ const VersionSelectorItem = ({
         <Box flex row center>
           <VersionIdentity version={version} color="default" />
           {needsUpdate ? (
-            <TouchableOpacity onPress={updateVersion} style={{ padding: 10 }}>
-              <FeatherIcon name="download" size={18} color="success" />
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !isConnected }}
+              disabled={!isConnected}
+              onPress={updateVersion}
+              style={{ padding: 10 }}
+            >
+              <FeatherIcon
+                name={isConnected ? 'download' : 'wifi-off'}
+                size={18}
+                color={isConnected ? 'success' : 'tertiary'}
+              />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>

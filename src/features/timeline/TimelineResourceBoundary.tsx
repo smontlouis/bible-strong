@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { databases } from '~helpers/databases'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
@@ -36,13 +36,21 @@ const TimelineResourceBoundary = ({ children }: { children: ReactNode }) => {
     )
   }
 
-  if (!query.data || query.data.status === 'unavailable') {
+  if (query.isError || !query.data || query.data.status === 'unavailable') {
+    const reason =
+      query.data?.status === 'unavailable' ? query.data.reason : 'temporary-unavailable'
     return (
       <Box flex center>
-        <OfflineResourceRecovery
+        <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'TIMELINE', language }}
-          title={t('resource.timeline.offlineCopyNeeded')}
+          title={
+            reason === 'temporary-unavailable'
+              ? t('resource.timeline.temporarilyUnavailable')
+              : t('resource.timeline.offlineCopyNeeded')
+          }
           fileSize={Math.round(databases(language).TIMELINE.fileSize / 1_000_000)}
+          reason={reason}
+          onRetry={() => void query.refetch()}
         />
       </Box>
     )

@@ -26,6 +26,7 @@ import { useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 
 type DictionaryRow = DictionarySummary
 
@@ -95,7 +96,7 @@ const DictionaryListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error, recoveries } = useResultsByLetterOrSearch(
+  const { results, isLoading, error, recoveries, retry } = useResultsByLetterOrSearch(
     {
       queryKey: ['dictionary'],
       query: resources.dictionary.search,
@@ -163,20 +164,24 @@ const DictionaryListScreen = ({
     onWordSelect?.(word)
   }
 
-  if (error) {
+  if (availabilityQuery.isError || error) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Box flex bg="reverse">
           <Header hasBackButton={showBackButton} title={t('Désolé...')} />
-          <Empty
-            icon={require('~assets/images/empty-state-icons/inbox.svg')}
-            message={`${t('Impossible de charger le dictionnaire...')}${
-              error === 'INVALID_OFFLINE_COPY'
-                ? t(
-                    '\n\nVotre base de données semble être corrompue. Rendez-vous dans la gestion de téléchargements pour retélécharger la base de données.'
-                  )
-                : ''
-            }`}
+          <ResourceUnavailableView
+            identity={{
+              kind: 'database',
+              databaseId: 'DICTIONNAIRE',
+              language: dictionaryResourceLanguage,
+            }}
+            title={t('resource.dictionary.temporarilyUnavailable')}
+            fileSize={22}
+            reason="temporary-unavailable"
+            onRetry={() => {
+              void availabilityQuery.refetch()
+              retry()
+            }}
           />
         </Box>
       </FormSheetScreen>

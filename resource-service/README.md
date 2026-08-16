@@ -22,27 +22,15 @@ RESOURCE_PUBLICATION_BUNDLE=/absolute/path/to/bundle yarn resources:dev
 ## Bible Lexicon Maker handoff
 
 Bible Strong never scans or reads a neighboring Bible Lexicon Maker checkout. The handoff input is
-an explicit immutable ZIP artifact produced by Bible Lexicon Maker. Assemble it with the distribution
-rights and canonical metadata that apply to that publication:
+an explicit immutable publication bundle produced and validated by Bible Lexicon Maker. Copy or
+mount that bundle at a path selected explicitly for local validation or import; Bible Strong does
+not generate its manifest, editorial metadata, or Offline-copy artifact:
 
 ```bash
-yarn resources:bundle \
-  --artifact /absolute/path/to/bible-lsg.json.zip \
-  --entry bible-lsg.json \
-  --output resource-service/.local/publications/lsg \
-  --language fr \
-  --canon protestant-66 \
-  --versification kjv \
-  --rights-holder "Public domain" \
-  --rights-terms "Louis Segond 1910 public-domain text" \
-  --attribution "Louis Segond 1910" \
-  --rights-online true \
-  --rights-offline true \
-  --online-access true \
-  --offline-download true
+yarn resources:bundle:validate --bundle /absolute/path/to/bible-lexicon-maker/lsg-bundle
 ```
 
-The resulting schema-v1 bundle represents exactly one `bible-text` identity and immutable revision.
+The accepted schema-v1 bundle represents exactly one `bible-text` identity and immutable revision.
 It contains:
 
 - `manifest.json`, with identity, language, revision, provenance, independent delivery capabilities,
@@ -51,8 +39,8 @@ It contains:
 - `canonical/*.json`, used by the PostgreSQL importer;
 - `offline/*.zip`, the byte-identical Offline-copy artifact delivered to the app.
 
-Validation checks the manifest version, safe paths, both files, archive entry, hashes, identity,
-source revision, counts, and delivery rights:
+The Resource service independently validates the supported handoff contract: manifest version, safe
+paths, both files, archive entry, hashes, identity, source revision, counts, and delivery rights:
 
 ```bash
 yarn resources:bundle:validate --bundle resource-service/.local/publications/lsg

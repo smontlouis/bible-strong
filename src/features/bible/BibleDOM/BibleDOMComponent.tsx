@@ -1382,6 +1382,7 @@ const BibleDOMErrorContent = ({
   const canReset = error.recoveries?.includes('reset-offline-store')
   const presentation = getBibleErrorPresentation(error.type)
   const canRetry = presentation.retryable
+  const connectionRequired = canAcquire && error.type === 'RESOURCE_OFFLINE'
   const messageKey =
     presentation.messageKey === 'unknown' ? 'unknownError' : presentation.messageKey
 
@@ -1414,13 +1415,18 @@ const BibleDOMErrorContent = ({
                 <ErrorButton
                   settings={settings}
                   type="button"
+                  disabled={connectionRequired}
                   onClick={() =>
-                    dispatch({ type: DOWNLOAD_BIBLE_VERSION, payload: error.version }).catch(
-                      console.error
-                    )
+                    connectionRequired
+                      ? undefined
+                      : dispatch({ type: DOWNLOAD_BIBLE_VERSION, payload: error.version }).catch(
+                          console.error
+                        )
                   }
                 >
-                  {translations.downloadVersion}
+                  {connectionRequired
+                    ? translations.connectionRequired
+                    : translations.downloadVersion}
                 </ErrorButton>
               ))}
             {canRetry && (
