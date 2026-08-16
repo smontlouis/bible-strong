@@ -9,6 +9,7 @@ import { Effect, Fiber } from 'effect'
 import { strToU8, zipSync } from 'fflate'
 
 import { makeLocalDatabase } from '../../database/localDatabase'
+import { makeKyselyBibleChapterRepository } from '../../repositories/bibleChapterRepository'
 import { importPublicationBundle } from '../../repositories/publicationImporter'
 import type { PublicationBundleManifest } from '../publicationBundle'
 
@@ -25,6 +26,7 @@ const writeBundle = async ({
   text,
   countOverride,
   rightsHolder = 'integration-test',
+  onlineAccess = true,
 }: {
   root: string
   versionId: string
@@ -32,6 +34,7 @@ const writeBundle = async ({
   text: string
   countOverride?: number
   rightsHolder?: string
+  onlineAccess?: boolean
 }) => {
   const sourceSha256 = '2'.repeat(64)
   const canonical = `${JSON.stringify({
@@ -85,10 +88,10 @@ const writeBundle = async ({
       holder: rightsHolder,
       termsReference: 'integration-test',
       attribution: 'integration-test',
-      online: true,
+      online: onlineAccess,
       offline: true,
     },
-    deliveryCapabilities: { onlineAccess: true, offlineDownload: true },
+    deliveryCapabilities: { onlineAccess, offlineDownload: true },
     canon: { id: 'integration', orderedBooks: [1] },
     versification: 'integration',
     coverage: { chaptersByBook: { 1: [1] }, verseCountByBookChapter: { '1-1': 1 } },
@@ -207,6 +210,39 @@ describe('Atomic publication import', { skip: !runIntegration }, () => {
           directory => rm(directory, { recursive: true, force: true })
         )
       )
+    }
+  })
+
+  it('keeps an Offline-only publication unavailable to Online chapter reads', async () => {
+    const versionId = `OFFLINE-${randomUUID()}`
+    const identity = `bible-text:${versionId}`
+    const bundle = await mkdtemp(path.join(tmpdir(), 'publication-offline-only-'))
+    const database = makeLocalDatabase({ connectionString, maxConnections: 1 })
+
+    try {
+      await writeBundle({
+        root: bundle,
+        versionId,
+        revision: 'offline-revision-1',
+        text: 'Offline only',
+        onlineAccess: false,
+      })
+
+      const imported = await Effect.runPromise(importPublicationBundle(bundle, database))
+      assert.equal(imported.status, 'staged')
+
+      const repository = makeKyselyBibleChapterRepository(database)
+      await assert.rejects(
+        Effect.runPromise(repository.findActiveChapter({ versionId, book: 1, chapter: 1 })),
+        /ActiveBiblePublicationUnavailable/
+      )
+    } finally {
+      await database
+        .deleteFrom('resource_publications')
+        .where('resource_identity', '=', identity)
+        .execute()
+      await database.destroy()
+      await rm(bundle, { recursive: true, force: true })
     }
   })
 })

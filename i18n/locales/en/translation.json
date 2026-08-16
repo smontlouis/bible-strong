@@ -1674,7 +1674,7 @@
   "offlineSetup.choice.title": "How would you like to start?",
   "offlineSetup.choice.subtitle": "You can use Bible Strong right away and add Offline copies whenever you want.",
   "offlineSetup.choice.startNow": "Start now",
-  "offlineSetup.choice.startNowDescription": "Read KJV online without using storage. Downloads remain available later.",
+  "offlineSetup.choice.startNowDescription": "Use Bible Strong without downloading. KJV and other resources can be added later.",
   "offlineSetup.choice.prepareOffline": "Prepare Offline use",
   "offlineSetup.choice.prepareOfflineDescription": "Choose the Bibles and study tools to keep on this device.",
   "offlineSetup.choice.offlineNotice": "You are offline. Downloads will resume after reconnection.",

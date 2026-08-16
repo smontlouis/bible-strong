@@ -12,7 +12,7 @@ export class PublicationImportFailure extends Data.TaggedError('PublicationImpor
 }> {}
 
 type PublicationImportResult = {
-  status: 'activated' | 'unchanged'
+  status: 'activated' | 'staged' | 'unchanged'
   resourceIdentity: string
   revision: string
   verseCount: number
@@ -45,6 +45,7 @@ export const importPublicationBundle = (
     Effect.flatMap(validated => {
       const { canonical, manifest } = validated
       const resourceIdentity = `bible-text:${manifest.identity.versionId}`
+      const publicationStatus = manifest.deliveryCapabilities.onlineAccess ? 'active' : 'staged'
 
       return tryDatabasePromise(
         'publication.import',
@@ -68,7 +69,7 @@ export const importPublicationBundle = (
                   message: 'PUBLICATION_REVISION_COLLISION',
                 })
               }
-              if (existing.status === 'active') {
+              if (existing.status === publicationStatus) {
                 return {
                   status: 'unchanged' as const,
                   resourceIdentity,
@@ -141,7 +142,9 @@ export const importPublicationBundle = (
                 .execute()
             }
 
-            if (options.beforeActivation) await options.beforeActivation(signal)
+            if (publicationStatus === 'active' && options.beforeActivation) {
+              await options.beforeActivation(signal)
+            }
             assertNotInterrupted(signal)
 
             await transaction
@@ -150,14 +153,16 @@ export const importPublicationBundle = (
               .where('id', '!=', publication.id)
               .execute()
             assertNotInterrupted(signal)
-            await transaction
-              .updateTable('resource_publications')
-              .set({ status: 'active', activated_at: new Date() })
-              .where('id', '=', publication.id)
-              .executeTakeFirstOrThrow()
+            if (publicationStatus === 'active') {
+              await transaction
+                .updateTable('resource_publications')
+                .set({ status: 'active', activated_at: new Date() })
+                .where('id', '=', publication.id)
+                .executeTakeFirstOrThrow()
+            }
 
             return {
-              status: 'activated' as const,
+              status: publicationStatus === 'active' ? ('activated' as const) : ('staged' as const),
               resourceIdentity,
               revision: manifest.revision,
               verseCount: rows.length,

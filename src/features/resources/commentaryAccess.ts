@@ -1,6 +1,7 @@
 import { onlineManager } from '@tanstack/react-query'
 
 import type { Comment, Comments } from '~features/commentaries/types'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { firebaseDb } from '~helpers/firebase'
 import loadMhyComments from '~helpers/loadMhyComments'
 import { getLocalResourceAvailability } from './resourceAvailability'
@@ -18,7 +19,11 @@ export class CommentaryAccessError extends Error {
 }
 
 export type CommentaryAccess = {
-  loadVersePage: (verse: string, afterOrder?: number) => Promise<Comments>
+  loadVersePage: (
+    verse: string,
+    afterOrder?: number,
+    language?: ResourceLanguage
+  ) => Promise<Comments>
 }
 
 const mhyIdentity = { kind: 'database', databaseId: 'MHY', language: 'fr' } as const
@@ -145,17 +150,22 @@ export const createCommentaryAccess = ({
   local?: CommentaryAccess
   remote?: CommentaryAccess
 } = {}): CommentaryAccess => ({
-  async loadVersePage(verse, afterOrder) {
+  async loadVersePage(verse, afterOrder, language = 'fr') {
+    if (language !== 'fr') {
+      if (!(await isOnline())) throw new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+      return remote.loadVersePage(verse, afterOrder, language)
+    }
+
     if (afterOrder != null) {
       if (!(await isOnline())) throw new ResourceAccessError('TEMPORARY_UNAVAILABLE')
-      return remote.loadVersePage(verse, afterOrder)
+      return remote.loadVersePage(verse, afterOrder, language)
     }
 
     const connected = await isOnline()
     const [localResult, remoteResult] = await Promise.allSettled([
       local.loadVersePage(verse),
       connected
-        ? remote.loadVersePage(verse)
+        ? remote.loadVersePage(verse, undefined, language)
         : Promise.reject(new ResourceAccessError('TEMPORARY_UNAVAILABLE')),
     ])
 

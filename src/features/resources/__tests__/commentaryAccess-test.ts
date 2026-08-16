@@ -74,6 +74,18 @@ describe('commentary access', () => {
     })
   })
 
+  it('does not merge the French MHY copy into English commentary results', async () => {
+    const local: CommentaryAccess = { loadVersePage: jest.fn(async () => comments('MHY', 0)) }
+    const remote: CommentaryAccess = { loadVersePage: jest.fn(async () => comments('REMOTE')) }
+    const access = createCommentaryAccess({ isOnline: async () => true, local, remote })
+
+    await expect(access.loadVersePage('1-1-1', undefined, 'en')).resolves.toMatchObject({
+      count: 1,
+      comments: [{ id: 'REMOTE' }],
+    })
+    expect(local.loadVersePage).not.toHaveBeenCalled()
+  })
+
   it('uses the installed local commentary when disconnected', async () => {
     const local: CommentaryAccess = { loadVersePage: jest.fn(async () => comments('MHY', 0)) }
     const remote: CommentaryAccess = { loadVersePage: jest.fn() }

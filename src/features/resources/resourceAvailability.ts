@@ -4,6 +4,7 @@ import { isVersionInstalled } from '~helpers/biblesDb'
 import { getDbPath, initLanguageDirs } from '~helpers/databases'
 import { dbManager, initSQLiteDir } from '~helpers/sqlite'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
+import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
 import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import {
@@ -74,13 +75,6 @@ type ResourceAvailabilityDependencies = {
   ) => Promise<boolean>
 }
 
-const requiredTableByDatabase: Record<Exclude<DatabaseId, 'BIBLES' | 'TIMELINE'>, string> = {
-  DICTIONNAIRE: 'dictionnaire',
-  NAVE: 'TOPICS',
-  TRESOR: 'COMMENTAIRES',
-  MHY: 'COMMENTAIRES',
-}
-
 const validateDatabaseResource = async (
   databaseId: Exclude<DatabaseId, 'BIBLES'>,
   language: ResourceLanguage,
@@ -98,12 +92,15 @@ const validateDatabaseResource = async (
     if (!database) return false
     const integrity = await database.getFirstAsync<Record<string, string>>('PRAGMA quick_check')
     if (!integrity || !Object.values(integrity).includes('ok')) return false
-    const table = await database.getFirstAsync<{ name: string }>(
-      `SELECT name FROM sqlite_master
-       WHERE type = 'table' AND lower(name) = lower(?)`,
-      [requiredTableByDatabase[databaseId]]
-    )
-    return Boolean(table)
+    for (const requiredTable of resourceDatabaseRequiredTables[databaseId] ?? []) {
+      const table = await database.getFirstAsync<{ name: string }>(
+        `SELECT name FROM sqlite_master
+         WHERE type = 'table' AND lower(name) = lower(?)`,
+        [requiredTable]
+      )
+      if (!table) return false
+    }
+    return true
   } catch {
     return false
   }

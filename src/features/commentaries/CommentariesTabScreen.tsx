@@ -19,7 +19,7 @@ import Comment from './Comment'
 
 import { useTheme } from '@emotion/react'
 import { produce } from 'immer'
-import { useAtom } from 'jotai/react'
+import { useAtom, useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
@@ -41,6 +41,7 @@ import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import { databases } from '~helpers/databases'
 import { CommentaryAccessError } from '~features/resources/commentaryAccess'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -65,11 +66,12 @@ const StyledVerse = styled.View({
 
 const useComments = (verse: string) => {
   const resources = useResourceAccess()
+  const commentariesLanguage = useAtomValue(resourcesLanguageAtom).COMMENTARIES
   const query = useInfiniteQuery({
-    queryKey: ['commentaries', verse],
+    queryKey: ['commentaries', commentariesLanguage, verse],
     initialPageParam: null as number | null,
     queryFn: async ({ pageParam }) => {
-      return resources.commentary.loadVersePage(verse, pageParam ?? undefined)
+      return resources.commentary.loadVersePage(verse, pageParam ?? undefined, commentariesLanguage)
     },
     getNextPageParam: (lastPage, pages) => {
       const loadedCommentCount = pages.reduce((count, page) => count + page.comments.length, 0)
