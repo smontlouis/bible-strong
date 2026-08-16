@@ -202,7 +202,7 @@ const normalizeJson = (value: unknown): unknown => {
   if (value && typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value)
-        .sort(([left], [right]) => left.localeCompare(right))
+        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
         .map(([key, nested]) => [key, normalizeJson(nested)])
     )
   }
@@ -214,8 +214,8 @@ const validatePublicationRevision = (manifest: PublicationBundleManifest) => {
   const { publicationRevision, ...envelope } = manifest
   const resourceId =
     manifest.identity.kind === 'bible-text'
-      ? manifest.identity.versionId.toLocaleLowerCase()
-      : manifest.identity.resourceId.toLocaleLowerCase()
+      ? manifest.identity.versionId.toLowerCase()
+      : manifest.identity.resourceId.toLowerCase()
   const digest = createHash('sha256')
     .update(JSON.stringify(normalizeJson(envelope)))
     .digest('hex')

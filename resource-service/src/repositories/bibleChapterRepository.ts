@@ -55,10 +55,13 @@ export const makeKyselyBibleChapterRepository = (
 
       return {
         ...input,
-        revision: rows[0]!.revision,
-        textRevision:
+        revision:
           bibleMetadata(rows[0]!.metadata).resource_revision ??
           bibleMetadata(rows[0]!.metadata).text_revision ??
+          rows[0]!.revision,
+        textRevision:
+          bibleMetadata(rows[0]!.metadata).text_revision ??
+          bibleMetadata(rows[0]!.metadata).resource_revision ??
           rows[0]!.revision,
         verses: rows.map(row => ({
           number: row.verse!,
@@ -109,7 +112,7 @@ export const makeKyselyBibleChapterRepository = (
       const books = metadata.canon.orderedBooks.filter(book => chaptersByBook[book] !== undefined)
       return {
         versionId,
-        revision: publication.revision,
+        revision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
         textRevision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
         canon: metadata.canon,
         versification: metadata.versification,
@@ -147,7 +150,7 @@ export const makeKyselyBibleChapterRepository = (
       const metadata = bibleMetadata(publication.metadata)
       return {
         versionId,
-        revision: publication.revision,
+        revision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
         textRevision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
         verses: rows.flatMap(row =>
           row.presentation!.headings.length > 0

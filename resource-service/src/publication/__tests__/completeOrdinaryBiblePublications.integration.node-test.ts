@@ -128,7 +128,7 @@ describe('Complete ordinary Bible publications', { skip: !runIntegration }, () =
           assert.deepEqual(coverage.chaptersByBook, publication.manifest.coverage.chaptersByBook)
           assert.deepEqual(coverage.canon, publication.manifest.canon)
           assert.equal(coverage.versification, publication.manifest.versification)
-          assert.equal(coverage.revision, publication.manifest.publicationRevision)
+          assert.equal(coverage.revision, publication.manifest.revision)
           assert.equal(coverage.textRevision, publication.manifest.revision)
           assert.deepEqual(
             coverage.books,

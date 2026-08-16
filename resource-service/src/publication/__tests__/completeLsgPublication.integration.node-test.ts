@@ -3,7 +3,7 @@ import { describe, it } from 'node:test'
 
 import { Effect } from 'effect'
 
-import { createIsolatedPostgres } from '../../testing/isolatedPostgres'
+import { createIsolatedPostgres } from '../../database/__tests__/isolatedPostgresTestSupport'
 import { isBiblePublicationBundleManifest, validatePublicationBundle } from '../publicationBundle'
 import { importPublicationBundle } from '../../repositories/publicationImporter'
 

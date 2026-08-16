@@ -21,6 +21,7 @@ import {
   getAvailableChapters,
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
+  resolveBibleCoverageCanonId,
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { BibleTab, VersionCode } from '../../../state/tabs'
@@ -296,7 +297,7 @@ const AudioUrlFooter = ({
   bibleAtom,
   coverage,
 }: AudioUrlFooterProps) => {
-  const canonId = getBibleVersionCanonId(version)
+  const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(version))
   const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
   const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
 

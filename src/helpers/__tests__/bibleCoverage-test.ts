@@ -3,6 +3,7 @@ import { getBook } from '../bibleBookCatalog'
 import {
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
+  resolveBibleCoverageCanonId,
 } from '../bibleCoverage'
 
 jest.mock('../biblesDb', () => ({
@@ -34,5 +35,15 @@ describe('bibleCoverage canonical navigation', () => {
     const target = getPreviousAvailableChapterLocation(esther, 1, coverage, 'clementine-vulgate')
 
     expect(target).toEqual({ book: getBook(68), chapter: 1 })
+  })
+
+  it('prefers a publication-owned canon and falls back for legacy coverage', () => {
+    expect(
+      resolveBibleCoverageCanonId(
+        { ...coverage, canon: { id: 'catholic-73', orderedBooks: coverage.books } },
+        'protestant-66'
+      )
+    ).toBe('catholic-73')
+    expect(resolveBibleCoverageCanonId(coverage, 'clementine-vulgate')).toBe('clementine-vulgate')
   })
 })

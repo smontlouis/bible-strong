@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url'
 
 import { Pool } from 'pg'
 
-import { makeLocalDatabase } from '../database/localDatabase'
+import { makeLocalDatabase } from '../localDatabase'
 
-const migrationDirectory = fileURLToPath(new URL('../../drizzle', import.meta.url))
+const migrationDirectory = fileURLToPath(new URL('../../../drizzle', import.meta.url))
 
 export const createIsolatedPostgres = async (connectionString: string, label: string) => {
   const databaseName = `bible_strong_${label}_${randomUUID().replaceAll('-', '')}`

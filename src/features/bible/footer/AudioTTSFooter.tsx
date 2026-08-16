@@ -16,6 +16,7 @@ import { Version, getBibleVersionCanonId, getVersions } from '~helpers/bibleVers
 import {
   getNextAvailableChapterLocation,
   getPreviousAvailableChapterLocation,
+  resolveBibleCoverageCanonId,
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -320,7 +321,7 @@ const AudioTTSFooter = ({
   bibleAtom,
   coverage,
 }: AudioTTSFooterProps) => {
-  const canonId = getBibleVersionCanonId(version)
+  const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(version))
   const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
   const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
 

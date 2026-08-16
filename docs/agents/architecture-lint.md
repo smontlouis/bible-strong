@@ -137,12 +137,12 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` src/features/bible/StrongAudioProvider.tsx:100 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/bible/StrongAudioProvider.tsx:140 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/features/bible/__tests__/VersionCatalogView-test.tsx:109 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/bible/footer/AudioUrlFooter.tsx:26 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:115 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` src/features/bible/footer/AudioUrlFooter.tsx:27 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:191 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:226 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:254 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:117 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:192 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:227 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:255 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `deep-relative-import` src/features/bible/footer/BackToAudioFooter.tsx:12 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `deep-relative-import` src/features/bible/passageMedia.ts:4 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `deep-relative-import` src/features/bible/resources/ResourceModal.tsx:30 - Prefer path aliases or a small public module boundary over deep relative imports.
@@ -474,8 +474,8 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` src/state/tabGroups.ts:134 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/state/tabGroups.ts:166 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/state/tabGroups.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabs.ts:451 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabs.ts:467 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/state/tabs.ts:452 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` src/state/tabs.ts:468 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/state/useTabGroupsSync.ts:48 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/state/useTabGroupsSync.ts:51 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` src/state/useTabGroupsSync.ts:101 - Prefer appLogger for app-owned diagnostic events that agents should query.
