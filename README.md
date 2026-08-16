@@ -11,6 +11,34 @@ npm install
 
 ## Recommended Workflow
 
+### Versioned Resource publication bundles
+
+Bible Lexicon Maker is the official producer of the handoff consumed by the
+Bible Strong Resource service. A Bible publication bundle contains the
+canonical import JSON and the exact matching ZIP Offline copy under one
+immutable, content-derived revision. Rights and Online/Offline delivery
+capabilities remain independent and are validated before a bundle is written.
+
+After generating a canonical Bible JSON, build the LSG bundle with:
+
+```sh
+npm run resources:publication:bible -- \
+  --canonical outputs/releases/<release>/bibles/bible-lsg.json \
+  --metadata config/resource-publications/lsg.json \
+  --output-dir outputs/publications/lsg-<revision>
+```
+
+The output directory is an explicit repository-to-repository handoff. Pass it
+to Bible Strong without making the Resource service inspect this working tree:
+
+```sh
+RESOURCE_PUBLICATION_BUNDLE=/absolute/path/to/lsg-<revision> yarn resources:dev
+```
+
+The command refuses to replace an existing output directory. Rebuild into a
+new directory for every immutable revision. Production upload or activation is
+not performed by this command.
+
 ### Complete mobile resource release
 
 The mobile release inventory is owned by
