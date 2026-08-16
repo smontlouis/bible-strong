@@ -15,6 +15,13 @@
       "when": 1786881182619,
       "tag": "0001_zippy_karma",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786906757064,
+      "tag": "0002_amazing_katie_power",
+      "breakpoints": true
     }
   ]
 }

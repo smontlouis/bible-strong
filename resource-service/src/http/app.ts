@@ -11,6 +11,18 @@ import {
   UnsupportedBibleVersion,
   type BibleChapterRepositoryService,
 } from '../domain/bibleChapter'
+import {
+  ActiveNavePublicationUnavailable,
+  browseNaveTopics,
+  NaveRepository,
+  NaveRepositoryFailure,
+  NaveTopicNotFound,
+  readNaveTopic,
+  readNaveVerseTopics,
+  readRandomNaveTopic,
+  UnsupportedNaveLanguage,
+  type NaveRepositoryService,
+} from '../domain/nave'
 import { HealthResponse, ResourceApi } from './api'
 import {
   InvalidResourceRequestProblem,
@@ -38,7 +50,11 @@ const toHttpProblem = (
     | UnsupportedBibleVersion
     | ActiveBiblePublicationUnavailable
     | BibleChapterNotFound
-    | BibleChapterRepositoryFailure,
+    | BibleChapterRepositoryFailure
+    | UnsupportedNaveLanguage
+    | ActiveNavePublicationUnavailable
+    | NaveTopicNotFound
+    | NaveRepositoryFailure,
   requestId: string
 ) => {
   switch (cause._tag) {
@@ -62,19 +78,39 @@ const toHttpProblem = (
         retryAfterSeconds: 30,
       })
     case 'BibleChapterRepositoryFailure':
+    case 'NaveRepositoryFailure':
       return new ResourceInternalProblem({
         ...problemFields(requestId, 'The Resource service could not complete the request.'),
         status: 500,
         code: 'RESOURCE_INTERNAL_FAILURE',
       })
+    case 'UnsupportedNaveLanguage':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This Nave language is not available from this service.'),
+        status: 404,
+        code: 'NAVE_UNSUPPORTED',
+      })
+    case 'NaveTopicNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This Nave topic does not exist in the active publication.'),
+        status: 404,
+        code: 'NAVE_TOPIC_NOT_FOUND',
+      })
+    case 'ActiveNavePublicationUnavailable':
+      return new ResourceUnavailableProblem({
+        ...problemFields(requestId, 'The Nave publication is temporarily unavailable.'),
+        status: 503,
+        code: 'NAVE_PUBLICATION_INACTIVE',
+        retryAfterSeconds: 30,
+      })
   }
 }
 
-const representationEtag = (versionId: string, revision: string, book: number, chapter: number) =>
+const representationEtag = (...identity: readonly (string | number)[]) =>
   Effect.promise(async () => {
     const digest = await crypto.subtle.digest(
       'SHA-256',
-      new TextEncoder().encode(`${versionId}:${revision}:${book}:${chapter}`)
+      new TextEncoder().encode(identity.join(':'))
     )
     return `"${Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join(
       ''
@@ -130,9 +166,76 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
     })
 )
 
+const serveNaveResponse = <A extends { resource: { revision: string } }, E, R>(
+  effect: Effect.Effect<A, E, R>,
+  requestId: string,
+  ifNoneMatch: string | undefined,
+  cacheIdentity?: readonly (string | number)[]
+) =>
+  Effect.gen(function* () {
+    yield* addResponseHeaders({ 'x-request-id': requestId })
+    const response = yield* effect
+    const headers: Record<string, string> = {
+      'x-resource-revision': response.resource.revision,
+    }
+    if (cacheIdentity) {
+      const etag = yield* representationEtag(...cacheIdentity, response.resource.revision)
+      headers.etag = etag
+      if (etagMatches(ifNoneMatch, etag)) {
+        return HttpServerResponse.empty({ status: 304, headers })
+      }
+    }
+    yield* addResponseHeaders(headers)
+    return response
+  })
+
+const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
+  handlers
+    .handle('getNaveTopic', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveNaveResponse(
+        readNaveTopic(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['nave', path.language, 'topic', path.normalizedName]
+      )
+    })
+    .handle('listNaveTopics', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveNaveResponse(
+        browseNaveTopics({ ...path, initial: urlParams.initial, search: urlParams.search }).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        urlParams.search ? undefined : ['nave', path.language, 'browse', urlParams.initial ?? '*']
+      )
+    })
+    .handle('getNaveVerseTopics', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveNaveResponse(
+        readNaveVerseTopics(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['nave', path.language, 'verse-topics', path.verseKey]
+      )
+    })
+    .handle('getRandomNaveTopic', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveNaveResponse(
+        readRandomNaveTopic(path.language).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match']
+      )
+    })
+)
+
 export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
-  Layer.provide(BibleApiLive)
+  Layer.provide(BibleApiLive),
+  Layer.provide(NaveApiLive)
 )
 
 const unavailableRepository: BibleChapterRepositoryService = {
@@ -142,14 +245,35 @@ const unavailableRepository: BibleChapterRepositoryService = {
     Effect.fail(new ActiveBiblePublicationUnavailable({ versionId })),
 }
 
-export const provideBibleChapterRepository = (repository: BibleChapterRepositoryService) =>
-  ResourceApiLive.pipe(Layer.provide(Layer.succeed(BibleChapterRepository, repository)))
+const unavailableNaveRepository: NaveRepositoryService = {
+  findTopic: input =>
+    Effect.fail(new ActiveNavePublicationUnavailable({ language: input.language })),
+  listTopics: input =>
+    Effect.fail(new ActiveNavePublicationUnavailable({ language: input.language })),
+  findVerseTopics: input =>
+    Effect.fail(new ActiveNavePublicationUnavailable({ language: input.language })),
+  findRandomTopic: language => Effect.fail(new ActiveNavePublicationUnavailable({ language })),
+}
+
+export const provideResourceRepositories = (
+  repository: BibleChapterRepositoryService,
+  naveRepository: NaveRepositoryService
+) =>
+  ResourceApiLive.pipe(
+    Layer.provide(
+      Layer.merge(
+        Layer.succeed(BibleChapterRepository, repository),
+        Layer.succeed(NaveRepository, naveRepository)
+      )
+    )
+  )
 
 export const makeResourceWebHandler = (
-  repository: BibleChapterRepositoryService = unavailableRepository
+  repository: BibleChapterRepositoryService = unavailableRepository,
+  naveRepository: NaveRepositoryService = unavailableNaveRepository
 ) => {
   const web = HttpApiBuilder.toWebHandler(
-    Layer.mergeAll(provideBibleChapterRepository(repository), HttpServer.layerContext)
+    Layer.mergeAll(provideResourceRepositories(repository, naveRepository), HttpServer.layerContext)
   )
   return {
     ...web,

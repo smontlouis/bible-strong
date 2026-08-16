@@ -4,6 +4,7 @@ import path from 'node:path'
 
 import { Schema } from 'effect'
 import { unzipSync } from 'fflate'
+import initSqlJs, { type Database } from 'sql.js'
 
 import {
   BibleVersePresentationDto,
@@ -19,14 +20,9 @@ const Artifact = Schema.Struct({
   bytes: Schema.NonNegativeInt,
 })
 
-const PublicationBundleManifestSchema = Schema.Struct({
+const PublicationBundleCommonFields = {
   format: Schema.Literal('bible-strong-resource-publication'),
   schemaVersion: Schema.Literal(1),
-  identity: Schema.Struct({
-    kind: Schema.Literal('bible-text'),
-    versionId: Schema.NonEmptyString,
-    language: Language,
-  }),
   revision: Schema.NonEmptyString,
   canonical: Schema.Struct({
     ...Artifact.fields,
@@ -56,6 +52,15 @@ const PublicationBundleManifestSchema = Schema.Struct({
     onlineAccess: Schema.Boolean,
     offlineDownload: Schema.Boolean,
   }),
+}
+
+const BiblePublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  identity: Schema.Struct({
+    kind: Schema.Literal('bible-text'),
+    versionId: Schema.NonEmptyString,
+    language: Language,
+  }),
   canon: Schema.Struct({
     id: Schema.NonEmptyString,
     orderedBooks: Schema.Array(Schema.Int.pipe(Schema.positive())),
@@ -80,7 +85,49 @@ const PublicationBundleManifestSchema = Schema.Struct({
   }),
 })
 
-export type PublicationBundleManifest = typeof PublicationBundleManifestSchema.Type
+const NavePublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  offlineArtifact: Schema.Struct({
+    ...PublicationBundleCommonFields.offlineArtifact.fields,
+    entry: Schema.Literal('nave-fr.sqlite'),
+  }),
+  identity: Schema.Struct({
+    kind: Schema.Literal('nave'),
+    resourceId: Schema.Literal('NAVE_FR'),
+    language: Schema.Literal('fr'),
+  }),
+  alphabeticalBrowse: Schema.Struct({
+    initials: Schema.Array(Schema.NonEmptyString),
+    topicCountByInitial: Schema.Record({
+      key: Schema.String,
+      value: Schema.NonNegativeInt,
+    }),
+  }),
+  counts: Schema.Struct({
+    topics: Schema.NonNegativeInt,
+    verseAnchors: Schema.NonNegativeInt,
+    topicReferences: Schema.NonNegativeInt,
+  }),
+})
+
+const PublicationBundleManifestSchema = Schema.Union(
+  BiblePublicationBundleManifestSchema,
+  NavePublicationBundleManifestSchema
+)
+
+export type BiblePublicationBundleManifest = typeof BiblePublicationBundleManifestSchema.Type
+export type NavePublicationBundleManifest = typeof NavePublicationBundleManifestSchema.Type
+export type PublicationBundleManifest =
+  | BiblePublicationBundleManifest
+  | NavePublicationBundleManifest
+
+export const isBiblePublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is BiblePublicationBundleManifest => manifest.identity.kind === 'bible-text'
+
+export const isNavePublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is NavePublicationBundleManifest => manifest.identity.kind === 'nave'
 
 export type CanonicalBibleVerse = BibleVersePresentation & {
   text: string
@@ -99,6 +146,31 @@ export type CanonicalBiblePublication = {
   headingCount: number
   verses: Record<string, Record<string, Record<string, CanonicalBibleVerse>>>
 }
+
+export type CanonicalNaveTopic = {
+  normalizedName: string
+  name: string
+  initial: string
+  description: string
+}
+
+export type CanonicalNaveVerseAnchor = {
+  verseKey: string
+  topicNormalizedNames: string[]
+}
+
+export type CanonicalNavePublication = {
+  format: 'bible-strong-canonical-nave'
+  schemaVersion: 1
+  resourceId: 'NAVE_FR'
+  revision: string
+  sourceVersion: string
+  sourceSha256: string
+  topics: CanonicalNaveTopic[]
+  verseAnchors: CanonicalNaveVerseAnchor[]
+}
+
+export type CanonicalPublication = CanonicalBiblePublication | CanonicalNavePublication
 
 const isSafeBundlePath = (value: string): boolean =>
   !path.isAbsolute(value) &&
@@ -127,10 +199,18 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     throw new Error('PUBLICATION_BUNDLE_RIGHTS_MISMATCH')
   }
   if (
-    manifest.canon.orderedBooks.length === 0 ||
-    Object.values(manifest.coverage.chaptersByBook).some(chapters => chapters.length === 0)
+    isBiblePublicationBundleManifest(manifest) &&
+    (manifest.canon.orderedBooks.length === 0 ||
+      Object.values(manifest.coverage.chaptersByBook).some(chapters => chapters.length === 0))
   ) {
     throw new Error('PUBLICATION_BUNDLE_COVERAGE_INVALID')
+  }
+  if (
+    isNavePublicationBundleManifest(manifest) &&
+    (manifest.alphabeticalBrowse.initials.length === 0 ||
+      Object.values(manifest.alphabeticalBrowse.topicCountByInitial).some(count => count === 0))
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_ALPHABETICAL_BROWSE_INVALID')
   }
 
   return manifest
@@ -173,6 +253,65 @@ export const decodeCanonicalBible = (value: unknown): CanonicalBiblePublication 
     throw new Error('CANONICAL_BIBLE_INVALID')
   }
   return candidate as CanonicalBiblePublication
+}
+
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === 'string' && value.length > 0
+
+export const decodeCanonicalNave = (value: unknown): CanonicalNavePublication => {
+  if (!value || typeof value !== 'object') throw new Error('CANONICAL_NAVE_INVALID')
+  const candidate = value as Partial<CanonicalNavePublication>
+  if (
+    candidate.format !== 'bible-strong-canonical-nave' ||
+    candidate.schemaVersion !== 1 ||
+    candidate.resourceId !== 'NAVE_FR' ||
+    !isNonEmptyString(candidate.revision) ||
+    !isNonEmptyString(candidate.sourceVersion) ||
+    !isNonEmptyString(candidate.sourceSha256) ||
+    !/^[a-f0-9]{64}$/.test(candidate.sourceSha256) ||
+    !Array.isArray(candidate.topics) ||
+    !Array.isArray(candidate.verseAnchors)
+  ) {
+    throw new Error('CANONICAL_NAVE_INVALID')
+  }
+
+  const topicNames = new Set<string>()
+  for (const topic of candidate.topics) {
+    if (
+      !topic ||
+      !isNonEmptyString(topic.normalizedName) ||
+      !isNonEmptyString(topic.name) ||
+      !isNonEmptyString(topic.initial) ||
+      typeof topic.description !== 'string'
+    ) {
+      throw new Error('CANONICAL_NAVE_TOPIC_INVALID')
+    }
+    if (topicNames.has(topic.normalizedName)) throw new Error('CANONICAL_NAVE_TOPIC_DUPLICATE')
+    topicNames.add(topic.normalizedName)
+  }
+
+  const verseKeys = new Set<string>()
+  for (const anchor of candidate.verseAnchors) {
+    if (
+      !anchor ||
+      !isNonEmptyString(anchor.verseKey) ||
+      !/^[1-9]\d*-[1-9]\d*(?:-[1-9]\d*)?$/.test(anchor.verseKey) ||
+      !Array.isArray(anchor.topicNormalizedNames) ||
+      anchor.topicNormalizedNames.length === 0 ||
+      anchor.topicNormalizedNames.some(
+        topicName => !isNonEmptyString(topicName) || !topicNames.has(topicName)
+      )
+    ) {
+      throw new Error('CANONICAL_NAVE_LINK_INVALID')
+    }
+    if (verseKeys.has(anchor.verseKey)) throw new Error('CANONICAL_NAVE_ANCHOR_DUPLICATE')
+    if (new Set(anchor.topicNormalizedNames).size !== anchor.topicNormalizedNames.length) {
+      throw new Error('CANONICAL_NAVE_LINK_DUPLICATE')
+    }
+    verseKeys.add(anchor.verseKey)
+  }
+
+  return candidate as CanonicalNavePublication
 }
 
 export const countCanonicalContent = (publication: CanonicalBiblePublication) => {
@@ -228,6 +367,125 @@ export const getCanonicalCoverage = (publication: CanonicalBiblePublication) => 
   return { orderedBooks, chaptersByBook, verseCountByBookChapter }
 }
 
+export const countCanonicalNaveContent = (publication: CanonicalNavePublication) => ({
+  topics: publication.topics.length,
+  verseAnchors: publication.verseAnchors.length,
+  topicReferences: publication.verseAnchors.reduce(
+    (count, anchor) => count + anchor.topicNormalizedNames.length,
+    0
+  ),
+})
+
+export const getCanonicalNaveAlphabeticalBrowse = (publication: CanonicalNavePublication) => {
+  const topicCountByInitial: Record<string, number> = {}
+  for (const topic of publication.topics) {
+    topicCountByInitial[topic.initial] = (topicCountByInitial[topic.initial] ?? 0) + 1
+  }
+  return {
+    initials: Object.keys(topicCountByInitial).sort(),
+    topicCountByInitial: Object.fromEntries(
+      Object.entries(topicCountByInitial).sort(([left], [right]) => left.localeCompare(right))
+    ),
+  }
+}
+
+const readSqliteRows = (database: Database, query: string) => {
+  const statement = database.prepare(query)
+  const rows: Record<string, unknown>[] = []
+  try {
+    while (statement.step()) rows.push(statement.getAsObject())
+    return rows
+  } finally {
+    statement.free()
+  }
+}
+
+const requireSqliteString = (value: unknown) => {
+  if (typeof value !== 'string') throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+  return value
+}
+
+const compareIdentity = (left: { normalizedName: string }, right: { normalizedName: string }) =>
+  left.normalizedName.localeCompare(right.normalizedName)
+
+const compareVerseKey = (left: { verseKey: string }, right: { verseKey: string }) =>
+  left.verseKey.localeCompare(right.verseKey)
+
+const validateNaveOfflineParity = async (
+  offlineContent: Uint8Array,
+  canonical: CanonicalNavePublication
+) => {
+  const SQL = await initSqlJs()
+  let database: Database | undefined
+  try {
+    database = new SQL.Database(offlineContent)
+    const metadataRows = readSqliteRows(
+      database,
+      'SELECT resource_id, revision, source_version, source_sha256 FROM RESOURCE_METADATA'
+    )
+    if (metadataRows.length !== 1) throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+    const metadata = metadataRows[0]
+    if (
+      requireSqliteString(metadata?.resource_id) !== canonical.resourceId ||
+      requireSqliteString(metadata?.revision) !== canonical.revision ||
+      requireSqliteString(metadata?.source_version) !== canonical.sourceVersion ||
+      requireSqliteString(metadata?.source_sha256) !== canonical.sourceSha256
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+
+    const topics = readSqliteRows(
+      database,
+      'SELECT name_lower, name, letter, description FROM TOPICS'
+    )
+      .map(row => ({
+        normalizedName: requireSqliteString(row.name_lower),
+        name: requireSqliteString(row.name),
+        initial: requireSqliteString(row.letter),
+        description: requireSqliteString(row.description),
+      }))
+      .sort(compareIdentity)
+    const verseAnchors = readSqliteRows(database, 'SELECT id, ref FROM VERSES')
+      .map(row => {
+        const verseKey = requireSqliteString(row.id)
+        const encodedReferences = requireSqliteString(row.ref)
+        let topicNormalizedNames: unknown
+        try {
+          topicNormalizedNames = JSON.parse(encodedReferences)
+        } catch (cause) {
+          throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+        }
+        if (
+          !Array.isArray(topicNormalizedNames) ||
+          topicNormalizedNames.some(reference => typeof reference !== 'string')
+        ) {
+          throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+        }
+        return { verseKey, topicNormalizedNames: [...topicNormalizedNames].sort() }
+      })
+      .sort(compareVerseKey)
+    const expectedTopics = [...canonical.topics].sort(compareIdentity)
+    const expectedVerseAnchors = canonical.verseAnchors
+      .map(anchor => ({
+        verseKey: anchor.verseKey,
+        topicNormalizedNames: [...anchor.topicNormalizedNames].sort(),
+      }))
+      .sort(compareVerseKey)
+
+    if (
+      JSON.stringify(topics) !== JSON.stringify(expectedTopics) ||
+      JSON.stringify(verseAnchors) !== JSON.stringify(expectedVerseAnchors)
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.startsWith('OFFLINE_ARTIFACT_')) throw cause
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+  } finally {
+    database?.close()
+  }
+}
+
 export const validatePublicationBundle = async (bundlePath: string) => {
   const root = path.resolve(bundlePath)
   const manifestRaw = await readFile(path.join(root, 'manifest.json'), 'utf8')
@@ -240,7 +498,10 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     assertArtifact(offlineArtifactPath, manifest.offlineArtifact, 'OFFLINE_ARTIFACT'),
   ])
 
-  if (manifest.offlineArtifact.contentSha256 !== manifest.canonical.sha256) {
+  if (
+    isBiblePublicationBundleManifest(manifest) &&
+    manifest.offlineArtifact.contentSha256 !== manifest.canonical.sha256
+  ) {
     throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
   }
 
@@ -252,39 +513,74 @@ export const validatePublicationBundle = async (bundlePath: string) => {
   }
   const offlineContent = offlineEntries[manifest.offlineArtifact.entry]
   if (!offlineContent) throw new Error('OFFLINE_ARTIFACT_ENTRY_MISSING')
-  if (createHash('sha256').update(offlineContent).digest('hex') !== manifest.canonical.sha256) {
+  if (
+    createHash('sha256').update(offlineContent).digest('hex') !==
+    manifest.offlineArtifact.contentSha256
+  ) {
     throw new Error('OFFLINE_ARTIFACT_ENTRY_CHECKSUM_MISMATCH')
   }
-
-  const canonical = decodeCanonicalBible(JSON.parse(await readFile(canonicalPath, 'utf8')))
   if (
-    canonical.applicationVersionId !== manifest.identity.versionId ||
-    canonical.textRevision !== manifest.revision ||
-    canonical.sourceVersion !== manifest.provenance.sourceVersion ||
-    canonical.sourceSha256 !== manifest.provenance.sourceSha256
+    isNavePublicationBundleManifest(manifest) &&
+    !Buffer.from(offlineContent)
+      .subarray(0, 16)
+      .equals(Buffer.from('SQLite format 3\u0000', 'utf8'))
   ) {
-    throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    throw new Error('OFFLINE_ARTIFACT_FORMAT_INVALID')
   }
 
-  const counts = countCanonicalContent(canonical)
-  if (
-    JSON.stringify(counts) !== JSON.stringify(manifest.counts) ||
-    canonical.verseCount !== counts.verses ||
-    canonical.noteCount !== counts.notes ||
-    canonical.headingCount !== counts.headings
-  ) {
-    throw new Error('PUBLICATION_BUNDLE_COUNT_MISMATCH')
-  }
-  const coverage = getCanonicalCoverage(canonical)
-  if (
-    JSON.stringify(manifest.canon.orderedBooks) !== JSON.stringify(coverage.orderedBooks) ||
-    JSON.stringify(manifest.coverage) !==
-      JSON.stringify({
-        chaptersByBook: coverage.chaptersByBook,
-        verseCountByBookChapter: coverage.verseCountByBookChapter,
-      })
-  ) {
-    throw new Error('PUBLICATION_BUNDLE_COVERAGE_MISMATCH')
+  const canonicalValue: unknown = JSON.parse(await readFile(canonicalPath, 'utf8'))
+  let canonical: CanonicalPublication
+  if (isBiblePublicationBundleManifest(manifest)) {
+    canonical = decodeCanonicalBible(canonicalValue)
+    if (
+      canonical.applicationVersionId !== manifest.identity.versionId ||
+      canonical.textRevision !== manifest.revision ||
+      canonical.sourceVersion !== manifest.provenance.sourceVersion ||
+      canonical.sourceSha256 !== manifest.provenance.sourceSha256
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+
+    const counts = countCanonicalContent(canonical)
+    if (
+      JSON.stringify(counts) !== JSON.stringify(manifest.counts) ||
+      canonical.verseCount !== counts.verses ||
+      canonical.noteCount !== counts.notes ||
+      canonical.headingCount !== counts.headings
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_COUNT_MISMATCH')
+    }
+    const coverage = getCanonicalCoverage(canonical)
+    if (
+      JSON.stringify(manifest.canon.orderedBooks) !== JSON.stringify(coverage.orderedBooks) ||
+      JSON.stringify(manifest.coverage) !==
+        JSON.stringify({
+          chaptersByBook: coverage.chaptersByBook,
+          verseCountByBookChapter: coverage.verseCountByBookChapter,
+        })
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_COVERAGE_MISMATCH')
+    }
+  } else {
+    canonical = decodeCanonicalNave(canonicalValue)
+    if (
+      canonical.resourceId !== manifest.identity.resourceId ||
+      canonical.revision !== manifest.revision ||
+      canonical.sourceVersion !== manifest.provenance.sourceVersion ||
+      canonical.sourceSha256 !== manifest.provenance.sourceSha256
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+    if (JSON.stringify(countCanonicalNaveContent(canonical)) !== JSON.stringify(manifest.counts)) {
+      throw new Error('PUBLICATION_BUNDLE_COUNT_MISMATCH')
+    }
+    if (
+      JSON.stringify(getCanonicalNaveAlphabeticalBrowse(canonical)) !==
+      JSON.stringify(manifest.alphabeticalBrowse)
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_ALPHABETICAL_BROWSE_MISMATCH')
+    }
+    await validateNaveOfflineParity(offlineContent, canonical)
   }
 
   return { manifest, canonical, canonicalPath, offlineArtifactPath }

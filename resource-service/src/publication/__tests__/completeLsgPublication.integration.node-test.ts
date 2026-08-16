@@ -4,7 +4,7 @@ import { describe, it } from 'node:test'
 import { Effect } from 'effect'
 
 import { makeLocalDatabase } from '../../database/localDatabase'
-import { validatePublicationBundle } from '../publicationBundle'
+import { isBiblePublicationBundleManifest, validatePublicationBundle } from '../publicationBundle'
 import { importPublicationBundle } from '../../repositories/publicationImporter'
 
 const bundlePath = process.env.RESOURCE_LSG_BUNDLE
@@ -18,6 +18,14 @@ describe('Complete LSG publication', { skip: !bundlePath }, () => {
 
     try {
       const validated = await validatePublicationBundle(bundlePath!)
+      assert.equal(validated.manifest.identity.kind, 'bible-text')
+      assert.equal(validated.canonical.format, 'bible-strong-canonical-bible')
+      if (
+        !isBiblePublicationBundleManifest(validated.manifest) ||
+        validated.canonical.format !== 'bible-strong-canonical-bible'
+      ) {
+        assert.fail('Expected the LSG Bible publication')
+      }
       const imported = await Effect.runPromise(importPublicationBundle(bundlePath!, database))
       assert.match(imported.status, /activated|unchanged/)
 
@@ -29,7 +37,9 @@ describe('Complete LSG publication', { skip: !bundlePath }, () => {
         .executeTakeFirstOrThrow()
       assert.equal(publication.revision, validated.manifest.revision)
       assert.equal(publication.language, 'fr')
-      assert.deepEqual(publication.metadata, {
+      const { manifest_sha256: manifestSha256, ...publicationMetadata } = publication.metadata
+      assert.match(String(manifestSha256), /^[a-f0-9]{64}$/)
+      assert.deepEqual(publicationMetadata, {
         canon: validated.manifest.canon,
         versification: validated.manifest.versification,
         coverage: validated.manifest.coverage,

@@ -226,6 +226,7 @@
     "@types/react": "~19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-test-renderer": "^19.1.0",
+    "@types/sql.js": "^1.4.11",
     "@vitejs/plugin-react": "^6.0.2",
     "@xyflow/react": "^12.10.2",
     "babel-plugin-module-resolver": "^3.2.0",
@@ -246,6 +247,7 @@
     "jest-expo": "~56.0.5",
     "prettier": "^3.8.1",
     "react-test-renderer": "19.2.3",
+    "sql.js": "^1.14.2",
     "tsx": "4.20.6",
     "typescript": "~6.0.3",
     "vite": "^8.0.13"

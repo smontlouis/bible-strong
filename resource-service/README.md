@@ -30,20 +30,29 @@ not generate its manifest, editorial metadata, or Offline-copy artifact:
 yarn resources:bundle:validate --bundle /absolute/path/to/bible-lexicon-maker/lsg-bundle
 ```
 
-The accepted schema-v1 bundle represents exactly one `bible-text` identity and immutable revision.
+The accepted schema-v1 bundle represents exactly one `bible-text` or `nave` identity and immutable
+revision.
 It contains:
 
 - `manifest.json`, with identity, language, revision, provenance, independent delivery capabilities,
-  rights, ordered canon, declared chapter/verse coverage, versification, counts, format versions,
-  sizes, and SHA-256 checksums;
+  rights, domain coverage, counts, format versions, sizes, and SHA-256 checksums;
 - `canonical/*.json`, used by the PostgreSQL importer;
-- `offline/*.zip`, the byte-identical Offline-copy artifact delivered to the app.
+- `offline/*.zip`, the matching Offline-copy artifact delivered to the app. Bible bundles contain
+  the canonical JSON; Nave bundles contain the generated SQLite database used by existing mobile
+  surfaces.
+
+The NAVE_FR archive entry is `nave-fr.sqlite`. In addition to the existing `TOPICS` and `VERSES`
+tables, publication copies contain one `RESOURCE_METADATA` row with `resource_id`, `revision`,
+`source_version`, and `source_sha256`. Validation opens the database and compares every topic,
+description, verse/chapter anchor, durable identity, and metadata value with canonical JSON before
+activation.
 
 The Resource service independently validates the supported handoff contract: manifest version, safe
 paths, both files, archive entry, hashes, identity, source revision, counts, and delivery rights:
 
 ```bash
 yarn resources:bundle:validate --bundle resource-service/.local/publications/lsg
+yarn resources:bundle:validate --bundle resource-service/.local/publications/nave-fr
 ```
 
 Import and activation are one Kysely transaction wrapped at the Effect repository boundary:
@@ -52,16 +61,25 @@ Import and activation are one Kysely transaction wrapped at the Effect repositor
 yarn resources:db:up
 yarn resources:migrate
 yarn resources:import --bundle resource-service/.local/publications/lsg
+yarn resources:import --bundle resource-service/.local/publications/nave-fr
 ```
 
 Reimporting the same revision and checksums returns `unchanged`. Reusing a revision with different
 content fails. Validation failures or Effect interruption roll back staging and preserve the prior
 active publication.
 
-The local Effect HttpApi exposes both chapter content and source-independent navigation coverage:
+The local Effect HttpApi exposes Bible reading plus the Nave operations consumed by the app:
 
 - `GET /v1/bibles/:version/books/:book/chapters/:chapter`
 - `GET /v1/bibles/:version/coverage`
+- `GET /v1/naves/:language/topics/:normalizedName`
+- `GET /v1/naves/:language/topics?initial=:initial`
+- `GET /v1/naves/:language/topics?search=:search`
+- `GET /v1/naves/:language/verses/:verseKey/topics`
+- `GET /v1/naves/:language/random`
+
+Only `nave:fr` (`NAVE_FR`) is remotely readable in this tracer. English Nave remains available
+through its existing optional Offline copy.
 
 ## Verification
 
@@ -113,3 +131,5 @@ unchanged; only the origin is replaced.
 
 Production builds ignore this override. The local server validates the explicit bundle before it
 starts and returns generation plus checksum headers used by the normal atomic installation flow.
+Bible artifacts are served below `/bibles/`; NAVE_FR is served at the existing mobile catalog path
+`/databases/nave-fr.sqlite.zip`.

@@ -4,7 +4,10 @@ import { describe, it } from 'node:test'
 import { Effect } from 'effect'
 
 import { makeLocalDatabase } from '../../database/localDatabase'
-import { validatePublicationBundle } from '../../publication/publicationBundle'
+import {
+  isBiblePublicationBundleManifest,
+  validatePublicationBundle,
+} from '../../publication/publicationBundle'
 import { makeKyselyBibleChapterRepository } from '../../repositories/bibleChapterRepository'
 import { importPublicationBundle } from '../../repositories/publicationImporter'
 import { makeResourceWebHandler } from '../app'
@@ -26,6 +29,14 @@ describe('Complete LSG API', { skip: !bundlePath }, () => {
 
     try {
       const validated = await validatePublicationBundle(bundlePath!)
+      assert.equal(validated.manifest.identity.kind, 'bible-text')
+      assert.equal(validated.canonical.format, 'bible-strong-canonical-bible')
+      if (
+        !isBiblePublicationBundleManifest(validated.manifest) ||
+        validated.canonical.format !== 'bible-strong-canonical-bible'
+      ) {
+        assert.fail('Expected the LSG Bible publication')
+      }
       await Effect.runPromise(importPublicationBundle(bundlePath!, database))
 
       let chapterCount = 0

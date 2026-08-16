@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   index,
+  foreignKey,
   integer,
   jsonb,
   pgEnum,
@@ -14,7 +15,11 @@ import {
 import type { BibleVersePresentation } from '../../../src/features/resources/bibleChapterContract'
 
 export type ResourceProvenance = {
+  generator?: string
   source: string
+  source_version?: string
+  source_sha256?: string
+  generated_at?: string
   attribution?: string
   imported_at: string
 }
@@ -82,5 +87,50 @@ export const bibleVerses = pgTable(
       table.chapter,
       table.verse
     ),
+  ]
+)
+
+export const naveTopics = pgTable(
+  'nave_topics',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    normalized_name: text('normalized_name').notNull(),
+    name: text('name').notNull(),
+    initial: text('initial').notNull(),
+    description: text('description').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'nave_topics_publication_name_primary',
+      columns: [table.publication_id, table.normalized_name],
+    }),
+    index('nave_topics_browse').on(table.publication_id, table.initial, table.name),
+    index('nave_topics_search').on(table.publication_id, table.name),
+  ]
+)
+
+export const naveVerseLinks = pgTable(
+  'nave_verse_links',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    verse_key: text('verse_key').notNull(),
+    normalized_name: text('normalized_name').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'nave_verse_links_publication_verse_topic_primary',
+      columns: [table.publication_id, table.verse_key, table.normalized_name],
+    }),
+    foreignKey({
+      name: 'nave_verse_links_topic_fk',
+      columns: [table.publication_id, table.normalized_name],
+      foreignColumns: [naveTopics.publication_id, naveTopics.normalized_name],
+    }).onDelete('cascade'),
+    index('nave_verse_links_verse_lookup').on(table.publication_id, table.verse_key),
+    index('nave_verse_links_topic_lookup').on(table.publication_id, table.normalized_name),
   ]
 )

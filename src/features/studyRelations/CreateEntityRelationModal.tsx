@@ -416,8 +416,8 @@ const CreateEntityRelationModal = ({
         )
       }
       return deferredResourceSearchValue.trim()
-        ? resources.nave.search(deferredResourceSearchValue)
-        : resources.nave.listByLetter(naveLetter)
+        ? resources.nave.search(deferredResourceSearchValue, resourcesLanguage.NAVE)
+        : resources.nave.listByLetter(naveLetter, resourcesLanguage.NAVE)
     },
     enabled: shouldLoadNaveTargets,
   })

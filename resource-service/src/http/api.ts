@@ -8,6 +8,15 @@ import {
   BibleVersionPath,
 } from '../../../src/features/resources/bibleChapterContract'
 import {
+  NaveLanguagePath,
+  NaveTopicListResponseDto,
+  NaveTopicPath,
+  NaveTopicResponseDto,
+  NaveTopicsQuery,
+  NaveVersePath,
+  NaveVerseTopicsResponseDto,
+} from '../../../src/features/resources/naveContract'
+import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
   ResourceNotFoundProblem,
@@ -42,4 +51,46 @@ const BibleApi = HttpApiGroup.make('bibles')
       .addError(ResourceInternalProblem, { status: 500 })
   )
 
-export class ResourceApi extends HttpApi.make('resource-api').add(SystemApi).add(BibleApi) {}
+const NaveApi = HttpApiGroup.make('naves')
+  .add(
+    HttpApiEndpoint.get('getNaveTopic', '/v1/naves/:language/topics/:normalizedName')
+      .setPath(NaveTopicPath)
+      .addSuccess(NaveTopicResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('listNaveTopics', '/v1/naves/:language/topics')
+      .setPath(NaveLanguagePath)
+      .setUrlParams(NaveTopicsQuery)
+      .addSuccess(NaveTopicListResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getNaveVerseTopics', '/v1/naves/:language/verses/:verseKey/topics')
+      .setPath(NaveVersePath)
+      .addSuccess(NaveVerseTopicsResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getRandomNaveTopic', '/v1/naves/:language/random')
+      .setPath(NaveLanguagePath)
+      .addSuccess(NaveTopicResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+
+export class ResourceApi extends HttpApi.make('resource-api')
+  .add(SystemApi)
+  .add(BibleApi)
+  .add(NaveApi) {}

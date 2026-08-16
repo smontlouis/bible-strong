@@ -87,7 +87,9 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   const naveQuery = useQuery({
     queryKey: ['nave-detail', naveResourceLanguage, name_lower],
     queryFn: async () =>
-      name_lower ? ((await resources.nave.loadItem(name_lower)) ?? null) : null,
+      name_lower
+        ? ((await resources.nave.loadItem(name_lower, naveResourceLanguage)) ?? null)
+        : null,
     enabled: !!name_lower,
     staleTime: Infinity,
     ...localQueryOptions,

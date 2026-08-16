@@ -32,8 +32,8 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     staleTime: Infinity,
   })
   const naveQuery = useQuery({
-    queryKey: ['home-nave-random', randomSeed],
-    queryFn: async () => (await resources.nave.loadRandom()) ?? null,
+    queryKey: ['home-nave-random', resourceLanguage, randomSeed],
+    queryFn: async () => (await resources.nave.loadRandom(resourceLanguage)) ?? null,
     ...localQueryOptions,
   })
   const naveReference = naveQuery.data

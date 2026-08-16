@@ -1,13 +1,17 @@
 import { makeResourceWebHandler } from '../http/app'
 import type { BibleChapterRepositoryService } from '../domain/bibleChapter'
+import type { NaveRepositoryService } from '../domain/nave'
 import { makeNeonBibleChapterRepository } from '../repositories/bibleChapterRepository'
+import { makeNeonNaveRepository } from '../repositories/naveRepository'
 
 export type ResourceWorkerBindings = {
   RESOURCE_DATABASE_URL: string
 }
 
-export const makeResourceWorkerHandler = (repository: BibleChapterRepositoryService) =>
-  makeResourceWebHandler(repository)
+export const makeResourceWorkerHandler = (
+  repository: BibleChapterRepositoryService,
+  naveRepository?: NaveRepositoryService
+) => makeResourceWebHandler(repository, naveRepository)
 
 let cached:
   | {
@@ -19,7 +23,8 @@ let cached:
 const getWorkerHandler = (connectionString: string) => {
   if (cached?.connectionString === connectionString) return cached.web
   const { repository } = makeNeonBibleChapterRepository({ connectionString })
-  const web = makeResourceWorkerHandler(repository)
+  const { repository: naveRepository } = makeNeonNaveRepository({ connectionString })
+  const web = makeResourceWorkerHandler(repository, naveRepository)
   cached = { connectionString, web }
   return web
 }

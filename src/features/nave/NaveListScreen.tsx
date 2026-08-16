@@ -95,13 +95,13 @@ const NaveListScreen = ({
   const { results, isLoading, error, recoveries, retry } = useResultsByLetterOrSearch(
     {
       queryKey: ['nave'],
-      query: resources.nave.search,
+      query: value => resources.nave.search(value, naveResourceLanguage),
       value: debouncedSearchValue,
       resourceLanguage: naveResourceLanguage,
     },
     {
       queryKey: ['nave'],
-      query: resources.nave.listByLetter,
+      query: value => resources.nave.listByLetter(value, naveResourceLanguage),
       value: letter,
       resourceLanguage: naveResourceLanguage,
     }
