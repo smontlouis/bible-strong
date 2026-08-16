@@ -29,6 +29,7 @@ import {
   sha256ResourcePublicationFile,
   type ResourcePublicationEnvelope
 } from "./resourcePublicationEnvelope.js";
+import { validateBibleResourcePublication } from "./packageResourcePublication.js";
 
 const execFileAsync = promisify(execFile);
 const STRONG_KINDS = ["strong", "estrong", "dstrong", "ustrong"] as const;
@@ -192,7 +193,7 @@ export async function buildStrongBibleResourcePublication(options: {
         datasetId: options.datasetId,
         language: options.language
       },
-      revision: canonical.strongRevision,
+      revision: deriveStrongBibleResourceRevision(canonical),
       canonical: {
         path: canonicalRelative,
         mediaType: "application/json",
@@ -220,12 +221,12 @@ export async function buildStrongBibleResourcePublication(options: {
         termsReference: `config/strong-bible-resource-publications.json#${options.versionId}`,
         attribution: options.attribution,
         reviewedAt: options.rightsReviewedAt,
-        online: true,
-        offline: true
+        online: bibleManifest.onlineAccess,
+        offline: bibleManifest.offlineDownload
       },
       deliveryCapabilities: {
-        onlineAccess: true,
-        offlineDownload: true,
+        onlineAccess: bibleManifest.onlineAccess,
+        offlineDownload: bibleManifest.offlineDownload,
         localDevelopmentAccess: true
       },
       dependencies: {
@@ -375,7 +376,7 @@ export async function validateStrongBibleResourcePublication(
   if (
     canonical.applicationVersionId !== manifest.identity.versionId ||
     canonical.datasetId !== manifest.identity.datasetId ||
-    canonical.strongRevision !== manifest.revision ||
+    deriveStrongBibleResourceRevision(canonical) !== manifest.revision ||
     canonical.textRevision !== manifest.dependencies.bible.revision ||
     canonical.textSha256 !== manifest.dependencies.bible.textSha256 ||
     manifest.dependencies.bible.resourceIdentity !==
@@ -633,6 +634,25 @@ function countCanonical(canonical: CanonicalStrongBiblePublication) {
   };
 }
 
+export function deriveStrongBibleResourceRevision(
+  canonical: CanonicalStrongBiblePublication
+): string {
+  const digest = sha256(JSON.stringify(normalizeJson(canonical)));
+  return `${canonical.applicationVersionId.toLowerCase()}-strong-${digest.slice(0, 20)}`;
+}
+
+function normalizeJson(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(normalizeJson);
+  if (isRecord(value)) {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, nested]) => [key, normalizeJson(nested)])
+    );
+  }
+  return value;
+}
+
 function decodeCanonical(value: unknown): CanonicalStrongBiblePublication {
   if (!isRecord(value)) throw new Error("strong-publication-canonical-invalid");
   const candidate = value as Partial<CanonicalStrongBiblePublication>;
@@ -782,21 +802,10 @@ async function readBibleDependency(bundleDir: string): Promise<{
   identity: { versionId: string };
   revision: string;
   textSha256: string;
+  onlineAccess: boolean;
+  offlineDownload: boolean;
 }> {
-  const value: unknown = JSON.parse(
-    await readFile(path.join(bundleDir, "manifest.json"), "utf8")
-  );
-  if (
-    !isRecord(value) ||
-    !isRecord(value.identity) ||
-    value.identity.kind !== "bible-text" ||
-    !isNonEmptyString(value.identity.versionId) ||
-    !isNonEmptyString(value.revision) ||
-    !isRecord(value.canonical) ||
-    !isNonEmptyString(value.canonical.path)
-  ) {
-    throw new Error("strong-publication-bible-manifest-invalid");
-  }
+  const value = await validateBibleResourcePublication(bundleDir);
   const canonicalValue: unknown = JSON.parse(
     await readFile(
       resolveResourcePublicationPath(bundleDir, value.canonical.path),
@@ -809,7 +818,9 @@ async function readBibleDependency(bundleDir: string): Promise<{
   return {
     identity: { versionId: value.identity.versionId },
     revision: value.revision,
-    textSha256: canonicalValue.textSha256
+    textSha256: canonicalValue.textSha256,
+    onlineAccess: value.deliveryCapabilities.onlineAccess,
+    offlineDownload: value.deliveryCapabilities.offlineDownload
   };
 }
 
@@ -878,11 +889,22 @@ async function main(): Promise<void> {
     return;
   }
   const args = new Map<string, string>();
+  const allowed = new Set([
+    "--output-dir",
+    "--bible-bundles-dir",
+    "--generated-at"
+  ]);
   for (let index = 0; index < rawArgs.length; index += 2) {
     const key = rawArgs[index];
     const value = rawArgs[index + 1];
-    if (!key || !value || !key.startsWith("--"))
+    if (!key || !allowed.has(key)) {
+      throw new Error(`strong-publication-cli-option-unknown:${key ?? ""}`);
+    }
+    if (!value || value.startsWith("--"))
       throw new Error("strong-publication-cli-invalid");
+    if (args.has(key)) {
+      throw new Error(`strong-publication-cli-option-duplicate:${key}`);
+    }
     args.set(key, value);
   }
   const result = await buildAllStrongBibleResourcePublications({

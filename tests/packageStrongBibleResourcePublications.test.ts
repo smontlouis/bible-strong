@@ -11,9 +11,19 @@ import {
   buildStrongBibleResourcePublication,
   validateStrongBibleResourcePublication
 } from "../src/packageStrongBibleResourcePublications.js";
+import { buildBibleResourcePublication } from "../src/packageResourcePublication.js";
 
 const execFileAsync = promisify(execFile);
-const textSha256 = "1".repeat(64);
+const bibleVerse = {
+  text: "Dieu",
+  startTags: [],
+  layout: [],
+  notes: [],
+  headings: []
+};
+const textSha256 = createHash("sha256")
+  .update(`${JSON.stringify([1, 1, 1, bibleVerse])}\n`)
+  .digest("hex");
 const sourceSha256 = "2".repeat(64);
 const textRevision = `lsg-${textSha256.slice(0, 20)}`;
 const strongRevision = createHash("sha256")
@@ -67,22 +77,41 @@ async function makeFixture(root: string, revision = strongRevision) {
   `
   ]);
   await execFileAsync("zip", ["-q", "-j", archivePath, sqlitePath]);
-  const bibleDir = path.join(root, "bible");
-  await mkdir(path.join(bibleDir, "canonical"), { recursive: true });
+  const bibleSource = path.join(root, "bible-source.json");
   await writeFile(
-    path.join(bibleDir, "canonical/bible-lsg.json"),
-    `${JSON.stringify({ textSha256 })}\n`
-  );
-  await writeFile(
-    path.join(bibleDir, "manifest.json"),
+    bibleSource,
     `${JSON.stringify({
-      format: "bible-strong-resource-publication",
-      schemaVersion: 1,
-      identity: { kind: "bible-text", versionId: "LSG", language: "fr" },
-      revision: textRevision,
-      canonical: { path: "canonical/bible-lsg.json" }
+      format: "bible-strong-canonical-bible",
+      schemaVersion: 4,
+      applicationVersionId: "LSG",
+      datasetId: "LSG",
+      sourceVersion: "SG1910",
+      textRevision,
+      textSha256,
+      sourceSha256,
+      verseCount: 1,
+      noteCount: 0,
+      headingCount: 0,
+      verses: { "1": { "1": { "1": bibleVerse } } }
     })}\n`
   );
+  const bibleDir = path.join(root, "bible");
+  await buildBibleResourcePublication({
+    canonicalPath: bibleSource,
+    outputDir: bibleDir,
+    identity: { versionId: "LSG", language: "fr" },
+    rights: {
+      holder: "Public domain",
+      termsReference: "fixture",
+      attribution: "LSG fixture",
+      online: true,
+      offline: true
+    },
+    deliveryCapabilities: { onlineAccess: true, offlineDownload: true },
+    canon: { id: "protestant-66", orderedBooks: [1] },
+    versification: "fixture",
+    generatedAt: "2026-08-16T00:00:00.000Z"
+  });
   return { archivePath, bibleDir };
 }
 
@@ -106,7 +135,7 @@ test("publishes and validates a Strong Bible canonical plus matching SQLite arch
     generatedAt: "2026-08-16T00:00:00.000Z"
   });
 
-  assert.equal(result.manifest.revision, strongRevision);
+  assert.match(result.manifest.revision, /^lsg-strong-[a-f0-9]{20}$/u);
   assert.deepEqual(result.manifest.counts, {
     verses: 1,
     occurrences: 1,
@@ -156,14 +185,16 @@ test("rejects an ordinary Bible dependency with a different text identity", asyn
   );
   t.after(async () => rm(root, { recursive: true, force: true }));
   const fixture = await makeFixture(root);
+  const bibleManifest = JSON.parse(
+    await readFile(path.join(fixture.bibleDir, "manifest.json"), "utf8")
+  );
   const bibleCanonical = path.join(
     fixture.bibleDir,
-    "canonical/bible-lsg.json"
+    bibleManifest.canonical.path
   );
-  await writeFile(
-    bibleCanonical,
-    `${JSON.stringify({ textSha256: "9".repeat(64) })}\n`
-  );
+  const canonical = JSON.parse(await readFile(bibleCanonical, "utf8"));
+  canonical.textSha256 = "9".repeat(64);
+  await writeFile(bibleCanonical, `${JSON.stringify(canonical)}\n`);
   await assert.rejects(
     buildStrongBibleResourcePublication({
       sourceArchivePath: fixture.archivePath,
@@ -178,6 +209,6 @@ test("rejects an ordinary Bible dependency with a different text identity", asyn
       rightsReviewedAt: "2026-08-16",
       generatedAt: "2026-08-16T00:00:00.000Z"
     }),
-    /strong-publication-bible-dependency-mismatch:LSG/
+    /resource-publication-canonical-integrity-mismatch/
   );
 });
