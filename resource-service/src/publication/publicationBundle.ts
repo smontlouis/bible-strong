@@ -989,11 +989,18 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     const archive = await readFile(offlineArtifactPath)
     if (archive.byteLength > 512 * 1024 * 1024) throw new Error('archive-too-large')
     const seenEntries: string[] = []
+    const expectedEntries = new Set(
+      manifest.offlineArtifact.entries
+        ? Object.values(manifest.offlineArtifact.entries)
+            .filter(entry => entry !== undefined)
+            .map(entry => entry.entry)
+        : [manifest.offlineArtifact.entry]
+    )
     offlineEntries = unzipSync(archive, {
       filter: entry => {
         seenEntries.push(entry.name)
         if (
-          entry.name !== manifest.offlineArtifact.entry ||
+          !expectedEntries.has(entry.name) ||
           entry.originalSize > 512 * 1024 * 1024 ||
           entry.originalSize > Math.max(entry.size * 250, 1024 * 1024)
         ) {
@@ -1002,7 +1009,12 @@ export const validatePublicationBundle = async (bundlePath: string) => {
         return true
       },
     })
-    if (seenEntries.length !== 1) throw new Error('archive-entries-invalid')
+    if (
+      seenEntries.length !== expectedEntries.size ||
+      seenEntries.some(entry => !expectedEntries.has(entry))
+    ) {
+      throw new Error('archive-entries-invalid')
+    }
   } catch (cause) {
     throw new Error('OFFLINE_ARTIFACT_INVALID', { cause })
   }
