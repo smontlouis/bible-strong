@@ -503,9 +503,9 @@ export const derivePublicationRevision = (manifest: PublicationBundleManifest): 
       ? manifest.identity.resourceId.toLowerCase()
       : manifest.identity.kind === 'dictionary'
         ? `dictionary-${manifest.identity.language}`
-      : manifest.identity.kind === 'strong-lexicon-module'
-        ? manifest.identity.resourceId
-        : manifest.identity.versionId.toLowerCase()
+        : manifest.identity.kind === 'strong-lexicon-module'
+          ? manifest.identity.resourceId
+          : manifest.identity.versionId.toLowerCase()
   const digest = createHash('sha256')
     .update(JSON.stringify(normalizeJson(envelope)))
     .digest('hex')
@@ -1120,7 +1120,10 @@ export const deriveDictionaryResourceRevision = (
 export const countCanonicalDictionaryContent = (publication: CanonicalDictionaryPublication) => ({
   entries: publication.entries.length,
   verseAnchors: publication.verseAnchors.length,
-  wordReferences: publication.verseAnchors.reduce((count, anchor) => count + anchor.words.length, 0),
+  wordReferences: publication.verseAnchors.reduce(
+    (count, anchor) => count + anchor.words.length,
+    0
+  ),
 })
 
 export const getCanonicalDictionaryAlphabeticalBrowse = (
@@ -1131,9 +1134,7 @@ export const getCanonicalDictionaryAlphabeticalBrowse = (
     const initial = [...entry.normalizedWord][0] ?? '#'
     entryCountByInitial[initial] = (entryCountByInitial[initial] ?? 0) + 1
   }
-  const initials = Object.keys(entryCountByInitial).sort((left, right) =>
-    left.localeCompare(right)
-  )
+  const initials = Object.keys(entryCountByInitial).sort((left, right) => left.localeCompare(right))
   return {
     initials,
     entryCountByInitial: Object.fromEntries(
@@ -1312,7 +1313,9 @@ const validateDictionaryOfflineParity = async (
       database,
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
     ).map(row => requireSqliteString(row.name))
-    if (JSON.stringify(tables) !== JSON.stringify(['RESOURCE_METADATA', 'dictionnaire', 'verses'])) {
+    if (
+      JSON.stringify(tables) !== JSON.stringify(['RESOURCE_METADATA', 'dictionnaire', 'verses'])
+    ) {
       throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
     }
     const metadataRows = readSqliteRows(
@@ -1341,20 +1344,22 @@ const validateDictionaryOfflineParity = async (
       if (id <= 0 || !normalizedWord || !word) throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
       return { id, word, normalizedWord, definition }
     })
-    const verseAnchors = readSqliteRows(database, 'SELECT id, ref FROM verses ORDER BY id').map(row => {
-      const verseKey = requireSqliteString(row.id)
-      if (!isDictionaryVerseKey(verseKey)) throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
-      let words: unknown
-      try {
-        words = JSON.parse(requireSqliteString(row.ref))
-      } catch (cause) {
-        throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+    const verseAnchors = readSqliteRows(database, 'SELECT id, ref FROM verses ORDER BY id').map(
+      row => {
+        const verseKey = requireSqliteString(row.id)
+        if (!isDictionaryVerseKey(verseKey)) throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+        let words: unknown
+        try {
+          words = JSON.parse(requireSqliteString(row.ref))
+        } catch (cause) {
+          throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+        }
+        if (!Array.isArray(words) || words.some(word => typeof word !== 'string' || !word.trim())) {
+          throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+        }
+        return { verseKey, words: [...new Set(words.map(word => word.trim().toLocaleLowerCase()))] }
       }
-      if (!Array.isArray(words) || words.some(word => typeof word !== 'string' || !word.trim())) {
-        throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
-      }
-      return { verseKey, words: [...new Set(words.map(word => word.trim().toLocaleLowerCase()))] }
-    })
+    )
     if (
       JSON.stringify(entries) !== JSON.stringify(canonical.entries) ||
       JSON.stringify(verseAnchors) !== JSON.stringify(canonical.verseAnchors)
@@ -2531,8 +2536,7 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
     }
     if (
-      JSON.stringify(countCanonicalDictionaryContent(canonical)) !==
-      JSON.stringify(manifest.counts)
+      JSON.stringify(countCanonicalDictionaryContent(canonical)) !== JSON.stringify(manifest.counts)
     ) {
       throw new Error('PUBLICATION_BUNDLE_COUNT_MISMATCH')
     }

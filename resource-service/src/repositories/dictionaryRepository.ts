@@ -13,7 +13,11 @@ import {
 } from '../domain/dictionary'
 import type { ResourceDatabase } from '../database/types'
 
-const mapEntry = (row: { entry_id: number; word: string; definition: string }): DictionaryEntry => ({
+const mapEntry = (row: {
+  entry_id: number
+  word: string
+  definition: string
+}): DictionaryEntry => ({
   id: row.entry_id,
   word: row.word,
   definition: row.definition,
@@ -52,7 +56,11 @@ export const makeKyselyDictionaryRepository = (
           .select(['entry_id', 'word', 'normalized_word'])
           .where('publication_id', '=', publication.id)
         if (input.initial?.trim()) {
-          query = query.where('normalized_word', 'ilike', `${input.initial.trim().toLocaleLowerCase()}%`)
+          query = query.where(
+            'normalized_word',
+            'ilike',
+            `${input.initial.trim().toLocaleLowerCase()}%`
+          )
         }
         if (input.search?.trim()) {
           const search = `%${input.search.trim()}%`
@@ -61,7 +69,12 @@ export const makeKyselyDictionaryRepository = (
           )
         }
         const rows = yield* tryDatabasePromise('dictionary.entries.browse', () =>
-          query.orderBy('normalized_word').orderBy('entry_id').limit(limit + 1).offset(offset).execute()
+          query
+            .orderBy('normalized_word')
+            .orderBy('entry_id')
+            .limit(limit + 1)
+            .offset(offset)
+            .execute()
         ).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause })))
         const hasNext = rows.length > limit
         return {
@@ -86,7 +99,9 @@ export const makeKyselyDictionaryRepository = (
             .selectFrom('dictionary_entries')
             .select(['entry_id', 'word', 'definition'])
             .where('publication_id', '=', publication.id)
-            .where(eb => eb.or([eb('normalized_word', '=', normalized), eb('word', '=', input.word)]))
+            .where(eb =>
+              eb.or([eb('normalized_word', '=', normalized), eb('word', '=', input.word)])
+            )
             .orderBy('entry_id')
             .executeTakeFirst()
         ).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause })))

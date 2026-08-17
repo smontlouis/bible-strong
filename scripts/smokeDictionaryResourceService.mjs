@@ -51,10 +51,16 @@ const main = async () => {
   assert(Array.isArray(verse.body?.words) && verse.body.words.length > 0, 'verse-empty')
 
   const missing = await request('/v1/dictionaries/fr/entries/__smoke_missing__')
-  assert(missing.response.status === 404 && missing.body?.code === 'DICTIONARY_ENTRY_NOT_FOUND', 'missing-not-404')
+  assert(
+    missing.response.status === 404 && missing.body?.code === 'DICTIONARY_ENTRY_NOT_FOUND',
+    'missing-not-404'
+  )
 
   const invalidLanguage = await request('/v1/dictionaries/de/entries')
-  assert(invalidLanguage.response.status === 400, `invalid-language-status:${invalidLanguage.response.status}`)
+  assert(
+    invalidLanguage.response.status === 400,
+    `invalid-language-status:${invalidLanguage.response.status}`
+  )
 
   console.log(
     JSON.stringify(
@@ -67,12 +73,14 @@ const main = async () => {
         verseWordsChecked: verse.body.words.length,
       },
       null,
-      2,
-    ),
+      2
+    )
   )
 }
 
-main().catch((error) => {
-  console.error(`dictionary-resource-smoke-failed: ${error instanceof Error ? error.message : String(error)}`)
+main().catch(error => {
+  console.error(
+    `dictionary-resource-smoke-failed: ${error instanceof Error ? error.message : String(error)}`
+  )
   process.exitCode = 1
 })

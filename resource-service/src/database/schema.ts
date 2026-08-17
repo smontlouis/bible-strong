@@ -179,11 +179,7 @@ export const dictionaryVerseLinks = pgTable(
       name: 'dictionary_verse_links_publication_verse_ordinal_primary',
       columns: [table.publication_id, table.verse_key, table.ordinal],
     }),
-    index('dictionary_verse_links_lookup').on(
-      table.publication_id,
-      table.verse_key,
-      table.ordinal
-    ),
+    index('dictionary_verse_links_lookup').on(table.publication_id, table.verse_key, table.ordinal),
   ]
 )
 

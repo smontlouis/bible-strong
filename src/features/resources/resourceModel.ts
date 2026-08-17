@@ -87,8 +87,7 @@ export const getResourceOnlineAccess = (
     remotelyReadableInterlinearLanguages.has(identity.language)) ||
   (identity.kind === 'strong-lexicon' &&
     remotelyReadableStrongLexiconModules.has(identity.moduleId)) ||
-  (identity.kind === 'dictionary' &&
-    remotelyReadableDictionaryLanguages.has(identity.language)) ||
+  (identity.kind === 'dictionary' && remotelyReadableDictionaryLanguages.has(identity.language)) ||
   (identity.kind === 'nave' && remotelyReadableNaveLanguages.has(identity.language)) ||
   (identity.kind === 'commentary' && identity.collection === 'FIRESTORE')
     ? { status: 'remotely-readable' }

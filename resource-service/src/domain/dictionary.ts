@@ -72,8 +72,12 @@ export type DictionaryRepositoryError =
   | DictionaryRepositoryFailure
 
 export type DictionaryRepositoryService = {
-  listEntries: (input: DictionaryListInput) => Effect.Effect<ActiveDictionaryList, DictionaryRepositoryError>
-  findEntry: (input: DictionaryEntryLookup) => Effect.Effect<ActiveDictionaryEntry, DictionaryRepositoryError>
+  listEntries: (
+    input: DictionaryListInput
+  ) => Effect.Effect<ActiveDictionaryList, DictionaryRepositoryError>
+  findEntry: (
+    input: DictionaryEntryLookup
+  ) => Effect.Effect<ActiveDictionaryEntry, DictionaryRepositoryError>
   findEntryById: (
     input: DictionaryEntryIdLookup
   ) => Effect.Effect<ActiveDictionaryEntry, DictionaryRepositoryError>

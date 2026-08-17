@@ -137,7 +137,9 @@ export const createHttpDictionaryAccess = ({
       return payload
     } catch (error) {
       if (error instanceof ResourceAccessError) throw error
-      throw new ResourceAccessError((await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE')
+      throw new ResourceAccessError(
+        (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+      )
     } finally {
       clearTimeout(timeout)
     }
@@ -325,11 +327,23 @@ export const createHybridDictionaryAccess = ({
         : state.local
     },
     listByLetter: (letter, language = 'fr') =>
-      runSearch(language, () => offline.listByLetter(letter, language), () => online.listByLetter(letter, language)),
+      runSearch(
+        language,
+        () => offline.listByLetter(letter, language),
+        () => online.listByLetter(letter, language)
+      ),
     search: (value, language = 'fr') =>
-      runSearch(language, () => offline.search(value, language), () => online.search(value, language)),
+      runSearch(
+        language,
+        () => offline.search(value, language),
+        () => online.search(value, language)
+      ),
     loadItem: (word, language = 'fr') =>
-      runRead(language, () => offline.loadItem(word, language), () => online.loadItem(word, language)),
+      runRead(
+        language,
+        () => offline.loadItem(word, language),
+        () => online.loadItem(word, language)
+      ),
     loadItemByRowId: (id, language = 'fr') =>
       runRead(
         language,

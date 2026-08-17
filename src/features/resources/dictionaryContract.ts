@@ -44,7 +44,9 @@ export class DictionaryRevisionDto extends Schema.Class<DictionaryRevisionDto>(
   revision: Schema.NonEmptyString,
 }) {}
 
-export class DictionarySummaryDto extends Schema.Class<DictionarySummaryDto>('DictionarySummaryDto')({
+export class DictionarySummaryDto extends Schema.Class<DictionarySummaryDto>(
+  'DictionarySummaryDto'
+)({
   id: Schema.Int.pipe(Schema.positive()),
   word: Schema.NonEmptyString,
   normalizedWord: Schema.NonEmptyString,
