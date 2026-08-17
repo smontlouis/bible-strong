@@ -51,6 +51,8 @@
     "resources:publication:bible": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageResourcePublication.ts",
     "resources:publication:bibles": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageOrdinaryBiblePublications.ts",
     "resources:publication:nave": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageNaveResourcePublication.ts",
+    "resources:smoke:supplementary": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx scripts/smokeSupplementaryResourcePublications.ts",
+    "resources:publication:supplementary": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageSupplementaryResourcePublications.ts",
     "resources:publication:dictionary": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageDictionaryResourcePublications.ts",
     "resources:publication:strong-bibles": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning --max-old-space-size=8192 $NODE_OPTIONS\" tsx src/packageStrongBibleResourcePublications.ts",
     "resources:publication:interlinear-bibles": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning --max-old-space-size=8192 $NODE_OPTIONS\" tsx src/packageInterlinearBibleResourcePublications.ts",
