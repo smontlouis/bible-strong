@@ -24,17 +24,12 @@ const getLanAddress = (): string | undefined => {
 }
 
 for (const command of RESOURCE_DEVELOPMENT_COMMANDS) run(command)
-const publicationRoots = process.env.RESOURCE_PUBLICATION_ROOTS
-  ?.split(path.delimiter)
+const publicationRoots = process.env.RESOURCE_PUBLICATION_ROOTS?.split(path.delimiter)
   .map(root => root.trim())
   .filter(Boolean)
 
 if (publicationRoots?.length) {
-  run([
-    'yarn',
-    'resources:import-catalog',
-    ...publicationRoots.flatMap(root => ['--root', root]),
-  ])
+  run(['yarn', 'resources:import-catalog', ...publicationRoots.flatMap(root => ['--root', root])])
 } else if (process.env.RESOURCE_PUBLICATION_BUNDLE) {
   run(['yarn', 'resources:import', '--bundle', process.env.RESOURCE_PUBLICATION_BUNDLE])
 } else if (process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT) {
