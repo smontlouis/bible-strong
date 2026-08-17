@@ -110,7 +110,7 @@ describe('v1 Nave API', () => {
     try {
       const cases = [
         ['/v1/naves/fr/topics/absent', 404, 'NAVE_TOPIC_NOT_FOUND'],
-        ['/v1/naves/en/random', 404, 'NAVE_UNSUPPORTED'],
+        ['/v1/naves/en/random', 503, 'NAVE_PUBLICATION_INACTIVE'],
         ['/v1/naves/fr/random', 503, 'NAVE_PUBLICATION_INACTIVE'],
         ['/v1/naves/french/random', 400, 'INVALID_RESOURCE_REQUEST'],
         ['/v1/naves/fr/verses/0-0-0/topics', 400, 'INVALID_RESOURCE_REQUEST'],

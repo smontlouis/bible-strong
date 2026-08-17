@@ -1517,15 +1517,15 @@
       "entries": {
         "canonical": {
           "entry": "nave.sqlite",
-          "sha256": "e66721dc7e2db41d71e0a5a3e2a7afb6c0676367bcc339b64ac821ea77cb5726",
-          "bytes": 7401472
+          "sha256": "85ebea651a48023c8c31b2a805c3805d9189f479b3848e9053c270845ee687a0",
+          "bytes": 7402496
         }
       },
-      "archiveSha256": "dbc579c0bd262d2a06a2a8913d9245bfee12de359eb18f234f5e99c2ff0f8f57",
-      "archiveBytes": 2010635,
-      "contentSha256": "e66721dc7e2db41d71e0a5a3e2a7afb6c0676367bcc339b64ac821ea77cb5726",
-      "contentBytes": 7401472,
-      "installedBytes": 7401472,
+      "archiveSha256": "0e94c41d69e852c0cfb1ca72431110e3f7e22a1ff31a78304258894296230ee1",
+      "archiveBytes": 2010815,
+      "contentSha256": "85ebea651a48023c8c31b2a805c3805d9189f479b3848e9053c270845ee687a0",
+      "contentBytes": 7402496,
+      "installedBytes": 7402496,
       "peakInstallationBytes": 10823924,
       "strategy": "archive-extract"
     },
@@ -1537,15 +1537,15 @@
       "entries": {
         "canonical": {
           "entry": "nave-fr.sqlite",
-          "sha256": "42e6c1e43fd8a082cef5591f8d11bfa962c57f1bc541031c67426890829fdf85",
-          "bytes": 7790592
+          "sha256": "8a5769b3b526cb8fdf119936758864773ff74908af949a4354d7d38b58a9ef6b",
+          "bytes": 7791616
         }
       },
-      "archiveSha256": "78ad5378c02ae8ae5243f2294057eee445188dd417f4ddd811d08dba7c9f108d",
-      "archiveBytes": 2068625,
-      "contentSha256": "42e6c1e43fd8a082cef5591f8d11bfa962c57f1bc541031c67426890829fdf85",
-      "contentBytes": 7790592,
-      "installedBytes": 7790592,
+      "archiveSha256": "75df3e31501ef968b7d9343244e45fcbe8563f893e0c8fce82064ca2436c9dd3",
+      "archiveBytes": 2068972,
+      "contentSha256": "8a5769b3b526cb8fdf119936758864773ff74908af949a4354d7d38b58a9ef6b",
+      "contentBytes": 7791616,
+      "installedBytes": 7791616,
       "peakInstallationBytes": 11338100,
       "strategy": "archive-extract"
     },

@@ -79,7 +79,9 @@ export class NaveRepository extends Context.Tag('NaveRepository')<
 >() {}
 
 const assertSupported = (language: NaveLanguage) =>
-  language === 'fr' ? Effect.void : Effect.fail(new UnsupportedNaveLanguage({ language }))
+  language === 'fr' || language === 'en'
+    ? Effect.void
+    : Effect.fail(new UnsupportedNaveLanguage({ language }))
 
 const revisionDto = (language: NaveLanguage, revision: string) =>
   new NaveRevisionDto({ kind: 'nave', language, revision })
