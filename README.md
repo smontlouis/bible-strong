@@ -93,6 +93,25 @@ module needed for lexical details. It refuses partial catalogs, unknown dataset
 identities, stale Bible dependencies, corrupt SQLite files, and malformed or
 multi-entry ZIP archives.
 
+Publish the two localized BHG/STEP interlinear indexes from the V5 runtime and
+bind them to the exact canonical BHG bundle:
+
+```sh
+npm run resources:publication:interlinear-bibles -- \
+  --fr-sqlite outputs/releases/bible-step-interlinear-runtime-v5/bible-step-interlinear-fr.sqlite \
+  --en-sqlite outputs/releases/bible-step-interlinear-runtime-v5/bible-step-interlinear-en.sqlite \
+  --bible-bundle outputs/releases/ordinary-bible-publications-current/bhg \
+  --output-dir outputs/releases/interlinear-bible-publications-current \
+  --generated-at 2026-08-17T00:00:00.000Z
+```
+
+The producer rewrites only the dependency metadata in a copied SQLite, never
+the source runtime. It derives one content-addressed Resource revision per
+locale, emits the complete normalized token/segment/identity JSON, creates the
+matching single-entry SQLite ZIP, and validates exact JSON/SQLite parity. Both
+manifests require the same ordinary BHG text revision and SHA-256, so an index
+cannot be activated against a different base text.
+
 The command refuses to replace an existing output directory. Rebuild into a
 new directory for every immutable revision. Production upload or activation is
 not performed by this command. This per-Resource bundle is the canonical
