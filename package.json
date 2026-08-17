@@ -53,6 +53,8 @@
     "resources:publication:nave": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/packageNaveResourcePublication.ts",
     "resources:publication:strong-bibles": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning --max-old-space-size=8192 $NODE_OPTIONS\" tsx src/packageStrongBibleResourcePublications.ts",
     "resources:publication:interlinear-bibles": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning --max-old-space-size=8192 $NODE_OPTIONS\" tsx src/packageInterlinearBibleResourcePublications.ts",
+    "resources:publication:strong-lexicon": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning --max-old-space-size=8192 $NODE_OPTIONS\" tsx src/packageStrongLexiconResourcePublications.ts",
+    "resources:smoke:strong-lexicon": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx scripts/smokeStrongLexiconResourcePublications.ts",
     "strong:release:step-interlinear": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/stepInterlinearPublication.ts",
     "strong:release:step-interlinear:ledger": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/stepInterlinearPublication.ts",
     "strong:release:step-interlinear:runtime": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/stepInterlinearRuntimePublication.ts",

@@ -112,6 +112,30 @@ matching single-entry SQLite ZIP, and validates exact JSON/SQLite parity. Both
 manifests require the same ordinary BHG text revision and SHA-256, so an index
 cannot be activated against a different base text.
 
+Publish the complete Strong lexicon as three independently versioned modules:
+
+```sh
+npm run resources:publication:strong-lexicon -- \
+  --source data/dictionaries/strong_lexicon.en-fr.full.production.sqlite \
+  --entities data/entities/bible_entities.production.sqlite \
+  --config config/strong-lexicon-resource-publications.json \
+  --output outputs/publications/strong-lexicon-issue-305 \
+  --generated-at 2026-08-17T00:00:00.000Z
+
+npm run resources:publication:strong-lexicon -- validate \
+  --bundle /absolute/path/to/strong-lexicon-issue-305/core
+```
+
+The command emits exactly `core`, `resources`, and `entities`. Each directory
+contains normalized canonical JSON, one matching SQLite ZIP, and a strict
+rights-aware manifest under its own content-derived Resource revision. The
+resources and entities modules declare the exact core revision they extend,
+but remain independently downloadable and replaceable. Generation validates
+SQLite integrity, foreign keys, complete table/count parity, dependency
+metadata, checksums, paths, and the single regular bounded ZIP entry before
+atomically publishing the three-directory handoff. The same validator can be
+run independently against every received module.
+
 The command refuses to replace an existing output directory. Rebuild into a
 new directory for every immutable revision. Production upload or activation is
 not performed by this command. This per-Resource bundle is the canonical
