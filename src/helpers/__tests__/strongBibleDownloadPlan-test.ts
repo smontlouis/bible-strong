@@ -50,6 +50,10 @@ import {
   dedupeDownloadItems,
 } from '../downloadItemFactory'
 import { createStrongModeDownloadPlan } from '../strongModeDownloadPlan'
+import {
+  BUNDLED_MOBILE_RESOURCE_CATALOG,
+  loadMobileResourceCatalog,
+} from '../mobileResourceCatalog'
 
 describe('Strong Bible download planning', () => {
   it('plans a Strong Offline copy from its canonical identity', () => {
@@ -185,6 +189,57 @@ describe('Interlinear Bible download planning', () => {
       ])
     }
   )
+
+  it('binds the BHG and localized index downloads to the same canonical text identity', () => {
+    const [bible, index] = createInterlinearSidecarDownloadPlan('fr', 'base-missing')
+
+    expect(bible?.type).toBe('bible')
+    expect(index?.type).toBe('bible-interlinear-sidecar')
+    if (bible?.type !== 'bible' || index?.type !== 'bible-interlinear-sidecar') {
+      throw new Error('Expected the BHG Bible followed by its French interlinear index')
+    }
+
+    expect(bible.archiveArtifact).toMatchObject({
+      textRevision: 'bhg-803c482ed06005693547',
+      textSha256: '803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f',
+    })
+    expect(index.interlinearArtifact).toMatchObject({
+      textRevision: bible.archiveArtifact?.textRevision,
+      textSha256: bible.archiveArtifact?.textSha256,
+      archiveSha256: '01c757b213c0b467a6ae0d405f7e911ea516eed4159485b591f5b3196e9905ec',
+    })
+  })
+
+  it('takes physical index integrity from a newer active mobile catalog', async () => {
+    const catalog = structuredClone(BUNDLED_MOBILE_RESOURCE_CATALOG)
+    catalog.generatedAt = '2099-01-01T00:00:00.000Z'
+    const physical = catalog.resources['bible-interlinear:BHG:fr']!
+    physical.archiveSha256 = 'a'.repeat(64)
+    physical.archiveBytes = 123456
+    physical.contentSha256 = 'b'.repeat(64)
+    physical.contentBytes = 654321
+    physical.entry = 'bible-step-interlinear-fr-v2.sqlite'
+    physical.entries.canonical = {
+      entry: physical.entry,
+      sha256: physical.contentSha256,
+      bytes: physical.contentBytes,
+    }
+
+    await loadMobileResourceCatalog(
+      jest.fn(async () => new Response(JSON.stringify(catalog), { status: 200 })) as typeof fetch
+    )
+    const [index] = createInterlinearSidecarDownloadPlan('fr', 'missing')
+    expect(index?.type).toBe('bible-interlinear-sidecar')
+    if (index?.type !== 'bible-interlinear-sidecar') throw new Error('Expected interlinear index')
+    expect(index.interlinearArtifact).toMatchObject({
+      entry: physical.entry,
+      archiveSha256: physical.archiveSha256,
+      archiveBytes: physical.archiveBytes,
+      contentSha256: physical.contentSha256,
+      contentBytes: physical.contentBytes,
+      textRevision: 'bhg-803c482ed06005693547',
+    })
+  })
 })
 
 describe('Strong display mode download planning', () => {

@@ -2,6 +2,10 @@ import type { Kyselify } from 'drizzle-orm/kysely'
 
 import type {
   bibleVerses,
+  interlinearBibleSegmentIdentities,
+  interlinearBibleSegments,
+  interlinearBibleTokens,
+  interlinearBibleVerses,
   naveTopics,
   naveVerseLinks,
   resourcePublications,
@@ -21,6 +25,10 @@ export type StrongBibleLexemeRow = Kyselify<typeof strongBibleLexemes>
 export type StrongBibleIdentityRow = Kyselify<typeof strongBibleIdentities>
 export type StrongBibleSpanRow = Kyselify<typeof strongBibleSpans>
 export type StrongBibleSpanIdentityRow = Kyselify<typeof strongBibleSpanIdentities>
+export type InterlinearBibleVerseRow = Kyselify<typeof interlinearBibleVerses>
+export type InterlinearBibleTokenRow = Kyselify<typeof interlinearBibleTokens>
+export type InterlinearBibleSegmentRow = Kyselify<typeof interlinearBibleSegments>
+export type InterlinearBibleSegmentIdentityRow = Kyselify<typeof interlinearBibleSegmentIdentities>
 
 export type ResourceDatabase = {
   resource_publications: ResourcePublicationRow
@@ -32,4 +40,8 @@ export type ResourceDatabase = {
   strong_bible_identities: StrongBibleIdentityRow
   strong_bible_spans: StrongBibleSpanRow
   strong_bible_span_identities: StrongBibleSpanIdentityRow
+  interlinear_bible_verses: InterlinearBibleVerseRow
+  interlinear_bible_tokens: InterlinearBibleTokenRow
+  interlinear_bible_segments: InterlinearBibleSegmentRow
+  interlinear_bible_segment_identities: InterlinearBibleSegmentIdentityRow
 }

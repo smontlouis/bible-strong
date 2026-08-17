@@ -37,6 +37,16 @@ import {
   UnsupportedStrongBibleVersion,
   type StrongBibleRepositoryService,
 } from '../domain/strongBible'
+import {
+  ActiveInterlinearBiblePublicationUnavailable,
+  InterlinearBibleChapterNotFound,
+  InterlinearBibleRepository,
+  InterlinearBibleRepositoryFailure,
+  readInterlinearBibleChapter,
+  readInterlinearBibleCoverage,
+  UnsupportedInterlinearBible,
+  type InterlinearBibleRepositoryService,
+} from '../domain/interlinearBible'
 import { HealthResponse, ResourceApi } from './api'
 import {
   InvalidResourceRequestProblem,
@@ -72,7 +82,11 @@ const toHttpProblem = (
     | UnsupportedStrongBibleVersion
     | ActiveStrongBiblePublicationUnavailable
     | StrongBibleChapterNotFound
-    | StrongBibleRepositoryFailure,
+    | StrongBibleRepositoryFailure
+    | UnsupportedInterlinearBible
+    | ActiveInterlinearBiblePublicationUnavailable
+    | InterlinearBibleChapterNotFound
+    | InterlinearBibleRepositoryFailure,
   requestId: string
 ) => {
   switch (cause._tag) {
@@ -98,6 +112,7 @@ const toHttpProblem = (
     case 'BibleChapterRepositoryFailure':
     case 'NaveRepositoryFailure':
     case 'StrongBibleRepositoryFailure':
+    case 'InterlinearBibleRepositoryFailure':
       return new ResourceInternalProblem({
         ...problemFields(requestId, 'The Resource service could not complete the request.'),
         status: 500,
@@ -139,6 +154,25 @@ const toHttpProblem = (
         ...problemFields(requestId, 'The Strong Bible publication is temporarily unavailable.'),
         status: 503,
         code: 'STRONG_BIBLE_PUBLICATION_INACTIVE',
+        retryAfterSeconds: 30,
+      })
+    case 'UnsupportedInterlinearBible':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This interlinear index is not available from this service.'),
+        status: 404,
+        code: 'INTERLINEAR_UNSUPPORTED',
+      })
+    case 'InterlinearBibleChapterNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This interlinear chapter does not exist.'),
+        status: 404,
+        code: 'INTERLINEAR_CHAPTER_NOT_FOUND',
+      })
+    case 'ActiveInterlinearBiblePublicationUnavailable':
+      return new ResourceUnavailableProblem({
+        ...problemFields(requestId, 'The interlinear publication is temporarily unavailable.'),
+        status: 503,
+        code: 'INTERLINEAR_PUBLICATION_INACTIVE',
         retryAfterSeconds: 30,
       })
   }
@@ -352,11 +386,42 @@ const StrongBibleApiLive = HttpApiBuilder.group(ResourceApi, 'strongBibles', han
     })
 )
 
+const InterlinearBibleApiLive = HttpApiBuilder.group(ResourceApi, 'interlinearBibles', handlers =>
+  handlers
+    .handle('getInterlinearBibleCoverage', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readInterlinearBibleCoverage({
+          versionId: path.version,
+          language: path.language,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['interlinear-bible', path.version, path.language, 'coverage']
+      )
+    })
+    .handle('getInterlinearBibleChapter', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readInterlinearBibleChapter({
+          versionId: path.version,
+          language: path.language,
+          book: path.book,
+          chapter: path.chapter,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['interlinear-bible', path.version, path.language, path.book, path.chapter]
+      )
+    })
+)
+
 export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
   Layer.provide(BibleApiLive),
   Layer.provide(NaveApiLive),
-  Layer.provide(StrongBibleApiLive)
+  Layer.provide(StrongBibleApiLive),
+  Layer.provide(InterlinearBibleApiLive)
 )
 
 const unavailableRepository: BibleChapterRepositoryService = {
@@ -391,17 +456,30 @@ const unavailableStrongBibleRepository: StrongBibleRepositoryService = {
     Effect.fail(new ActiveStrongBiblePublicationUnavailable({ versionId: input.versionId })),
 }
 
+const unavailableInterlinearBibleRepository: InterlinearBibleRepositoryService = {
+  findActiveCoverage: input => Effect.fail(new ActiveInterlinearBiblePublicationUnavailable(input)),
+  findActiveChapter: input =>
+    Effect.fail(
+      new ActiveInterlinearBiblePublicationUnavailable({
+        versionId: input.versionId,
+        language: input.language,
+      })
+    ),
+}
+
 export const provideResourceRepositories = (
   repository: BibleChapterRepositoryService,
   naveRepository: NaveRepositoryService,
-  strongBibleRepository: StrongBibleRepositoryService = unavailableStrongBibleRepository
+  strongBibleRepository: StrongBibleRepositoryService = unavailableStrongBibleRepository,
+  interlinearBibleRepository: InterlinearBibleRepositoryService = unavailableInterlinearBibleRepository
 ) =>
   ResourceApiLive.pipe(
     Layer.provide(
       Layer.mergeAll(
         Layer.succeed(BibleChapterRepository, repository),
         Layer.succeed(NaveRepository, naveRepository),
-        Layer.succeed(StrongBibleRepository, strongBibleRepository)
+        Layer.succeed(StrongBibleRepository, strongBibleRepository),
+        Layer.succeed(InterlinearBibleRepository, interlinearBibleRepository)
       )
     )
   )
@@ -416,7 +494,8 @@ export const makeResourceWebHandler = (
       provideResourceRepositories(
         repository,
         naveRepository,
-        overrides.strongBible ?? unavailableStrongBibleRepository
+        overrides.strongBible ?? unavailableStrongBibleRepository,
+        overrides.interlinearBible ?? unavailableInterlinearBibleRepository
       ),
       HttpServer.layerContext
     )
@@ -452,4 +531,5 @@ export const makeResourceWebHandler = (
 
 export type ResourceRepositoryOverrides = {
   strongBible?: StrongBibleRepositoryService
+  interlinearBible?: InterlinearBibleRepositoryService
 }

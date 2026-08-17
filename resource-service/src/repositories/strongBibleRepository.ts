@@ -84,7 +84,7 @@ const groupSpans = (rows: readonly SpanRow[]) => {
     if (
       row.kind &&
       row.code &&
-      ['strong', 'estrong', 'dstrong', 'ustrong'].includes(row.kind) &&
+      STRONG_IDENTITY_KINDS.includes(row.kind as (typeof STRONG_IDENTITY_KINDS)[number]) &&
       !span.identities.some(identity => identity.kind === row.kind && identity.code === row.code)
     ) {
       span.identities.push({

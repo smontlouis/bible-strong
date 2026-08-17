@@ -2,9 +2,9 @@
 
 This matrix records the local-first resource boundary introduced by issues #286–#299. It distinguishes the domain identity, the current remote capability, the optional offline copy, and the application surfaces that consume it.
 
-The hosted publication step is intentionally out of scope. `LSG` and French Nave are the two
-end-to-end local publication tracers; every other resource keeps its existing offline acquisition
-path until a publication is added later.
+The hosted publication step is intentionally out of scope. `LSG`, French Nave, all 12 Strong Bible
+indexes, and both BHG interlinear gloss languages have an end-to-end local publication path; every
+other resource keeps its existing offline acquisition path until a publication is added later.
 
 Unified remote search remains a later slice. NAVE_FR temporarily exposes domain search through its
 topic-list endpoint so the existing Nave surfaces work with zero copy; this does not change unified
@@ -16,7 +16,7 @@ search ranking or routing.
 | `bible-presentation:<version>:pericope` | `bibleReading` | Unsupported for now | Pericope sidecar, independent from canonical Bible text | Pericope reader, passage navigation | Identity/offline-copy mapping and Bible reading tests |
 | `bible-presentation:<version>:red-words` | `bibleReading` | Unsupported for now | Red-word sidecar, independent from canonical Bible text | Bible reader and export | Identity/offline-copy mapping and Bible reading tests |
 | `strong-bible-index:<version>` | `strongBible`, `lexiconBible` | All 12 cataloged versions: remotely readable through `/v1/strong-bibles/...` when the index and its exact Bible revision and text SHA-256 are active | Strong index sidecar, independently downloadable/removable; installed copy wins | Strong mode selector, concordance, verse detail, lexicon source selector | Publication/archive parity, atomic PostgreSQL import, typed API, hybrid HTTP/SQLite source selection, failure/recovery/removal, and existing managed download/update suites |
-| `interlinear-index:BHG:<language>` | `strongBible`, `lexiconBible` | Unsupported for now | BHG interlinear sidecar for FR/EN | Interlinear selector and Strong verse display | Resource model plus Strong/lexicon adapter suites |
+| `interlinear-index:BHG:<language>` | `bibleContent`, `lexiconBible` | French and English are remotely readable through `/v1/interlinear-bibles/BHG/languages/...` when the index and exact BHG text revision and SHA-256 are active | BHG interlinear V5 sidecar for FR/EN, independently downloadable/removable; valid installed copy wins | Interlinear selector, BHG reader, Strong verse display, lexicon source selector | Complete publication/archive parity gate, atomic PostgreSQL import, typed API, hybrid HTTP/SQLite source selection, dependency and failure/recovery/removal suites |
 | `strong-lexicon:<module>` | `strongLexicon` | Unsupported for now | Core, resources, and entity modules remain independent | Lexicon list/detail, Strong entry routes, relation graph | Strong lexicon adapter and route tests |
 | `dictionary:<language>` | `dictionary` | Unsupported for now | FR/EN dictionary database | Dictionary list/detail and verse cards | Dictionary adapter/query tests and architecture guard |
 | `nave:<language>` | `nave` | `nave:fr`: remotely readable through `/v1/naves/...` lookup, browse/search, verse-topic, and random operations; `nave:en` unsupported remotely | FR/EN Nave SQLite database; installed copy always wins | Nave list/detail, home widget, verse modal, relation target picker, local/unified search consumers | Publication validation/import, PostgreSQL repository, Effect API, hybrid HTTP/local adapter, lifecycle/recovery tests, architecture guard |
@@ -41,7 +41,7 @@ search ranking or routing.
 | Valid Offline copy, with or without network | Read the installed copy. Online content never silently replaces the installed revision. |
 | Search while connected, once remote search exists | Query the remote search service first, even when a local index is installed; fall back locally on a temporary remote failure. |
 | Search while disconnected | Query the installed local index first; if none exists, show the shared unavailable state without offering an impossible transfer. |
-| No Offline copy, online operation supported and connected | Read Online content. LSG chapter text/coverage, all cataloged Strong Bible index operations, and NAVE_FR topic operations are implemented. |
+| No Offline copy, online operation supported and connected | Read Online content. LSG chapter text/coverage, all cataloged Strong Bible index operations, both BHG interlinear languages, and NAVE_FR topic operations are implemented. |
 | No Offline copy, Online operation not implemented, connected | Keep the feature open and explain that an Offline copy is needed for now; offer **Make available offline**. |
 | No Offline copy and disconnected | Keep the feature open, explain that reconnection is required, and disable the transfer action. |
 | Download queued while connectivity disappears | Keep the item queued without consuming retries; resume processing after reconnection. |
@@ -68,10 +68,14 @@ never become a download button merely because the check returned no data.
 - Strong Bible publication tests preserve token identity, alignment, morphology token links, lexical
   references, dependency revisions, and canonical/SQLite counts. The complete-set gate requires all
   12 Maker handoffs before import/API parity can pass.
+- BHG interlinear publication tests preserve both gloss languages, token/segment alignment offsets,
+  morphology, lexical references, dependency revisions, delivery rights/capabilities, checksums,
+  and canonical/V5 SQLite counts. The complete-set gate requires both Maker handoffs before
+  import/API parity can pass.
 - Mobile adapter tests cover installed-copy priority, zero-copy HTTP, local not-found without source
   hopping, invalid local copy recovery, network-offline, inactive service, malformed content, and
-  unsupported English remote access. Existing managed installation/removal suites cover the shared
-  database Offline-copy lifecycle used by Nave.
+  both BHG gloss languages. Existing managed installation/removal suites cover the shared database
+  Offline-copy lifecycle used by Nave and the BHG sidecars.
 - Fresh iOS and Android installs entered the workspace with no Bible SQLite copy and read LSG through the local HTTP service.
 - iOS additionally exercised download, installed-state detection, removal, and continued online readability after removal.
 - Android additionally exercised the acquisition/failure/cancellation presentation; a simulator DNS failure prevented the remote ZIP from resolving, and is recorded in the smoke log rather than misreported as a successful lifecycle.

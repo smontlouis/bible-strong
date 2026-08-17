@@ -29,6 +29,13 @@
       "when": 1786918964631,
       "tag": "0003_massive_fenris",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786924445534,
+      "tag": "0004_light_captain_midlands",
+      "breakpoints": true
     }
   ]
 }

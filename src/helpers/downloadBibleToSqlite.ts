@@ -134,9 +134,11 @@ export async function downloadAndInsertBible(
     const downloadedTextRevision = `${revisionPrefix}-${downloadedTextChecksum.slice(0, 20)}`
     const targetTextRevision = isCanonicalBibleJsonData(jsonData)
       ? jsonData.textRevision
-      : archiveArtifact
-        ? downloadedTextRevision
-        : undefined
+      : opts.archiveArtifact
+        ? opts.archiveArtifact.textRevision
+        : archiveArtifact
+          ? downloadedTextRevision
+          : undefined
     const realignmentPlan = await buildRealignmentPlan(versionId, jsonData, targetTextRevision)
     if (realignmentPlan && Object.keys(realignmentPlan.updates).length > 0) {
       persistAnnotationMigrationJournal({
@@ -168,8 +170,8 @@ export async function downloadAndInsertBible(
           : opts.archiveArtifact
             ? {
                 publicationMetadata: {
-                  textRevision: downloadedTextRevision,
-                  textSha256: downloadedTextChecksum,
+                  textRevision: opts.archiveArtifact.textRevision,
+                  textSha256: opts.archiveArtifact.textSha256,
                   sourceSha256: downloadedTextChecksum,
                   schemaVersion: opts.archiveArtifact.schemaVersion,
                   verseCount: importableVerseCount,

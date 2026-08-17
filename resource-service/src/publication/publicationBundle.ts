@@ -175,20 +175,56 @@ const StrongBiblePublicationBundleManifestSchema = Schema.Struct({
   }),
 })
 
+const InterlinearBiblePublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  identity: Schema.Struct({
+    kind: Schema.Literal('interlinear-index'),
+    versionId: Schema.Literal('BHG'),
+    datasetId: Schema.Literal('STEP'),
+    language: Schema.Literal('fr', 'en'),
+  }),
+  dependencies: Schema.Struct({
+    bible: Schema.Struct({
+      resourceIdentity: Schema.Literal('bible-text:BHG'),
+      revision: Schema.NonEmptyString,
+      textSha256: Sha256,
+      online: Schema.Literal('required'),
+      offline: Schema.Literal('required'),
+    }),
+    strongLexiconModules: Schema.Array(
+      Schema.Struct({
+        resourceIdentity: Schema.NonEmptyString,
+        online: Schema.Literal('required-for-lexical-details'),
+        offline: Schema.Literal('required-for-lexical-details'),
+      })
+    ),
+  }),
+  counts: Schema.Struct({
+    verses: Schema.NonNegativeInt,
+    tokens: Schema.NonNegativeInt,
+    segments: Schema.NonNegativeInt,
+    identities: Schema.NonNegativeInt,
+  }),
+})
+
 const PublicationBundleManifestSchema = Schema.Union(
   BiblePublicationBundleManifestSchema,
   NavePublicationBundleManifestSchema,
-  StrongBiblePublicationBundleManifestSchema
+  StrongBiblePublicationBundleManifestSchema,
+  InterlinearBiblePublicationBundleManifestSchema
 )
 
 export type BiblePublicationBundleManifest = typeof BiblePublicationBundleManifestSchema.Type
 export type NavePublicationBundleManifest = typeof NavePublicationBundleManifestSchema.Type
 export type StrongBiblePublicationBundleManifest =
   typeof StrongBiblePublicationBundleManifestSchema.Type
+export type InterlinearBiblePublicationBundleManifest =
+  typeof InterlinearBiblePublicationBundleManifestSchema.Type
 export type PublicationBundleManifest =
   | BiblePublicationBundleManifest
   | NavePublicationBundleManifest
   | StrongBiblePublicationBundleManifest
+  | InterlinearBiblePublicationBundleManifest
 
 export const isBiblePublicationBundleManifest = (
   manifest: PublicationBundleManifest
@@ -202,6 +238,11 @@ export const isStrongBiblePublicationBundleManifest = (
   manifest: PublicationBundleManifest
 ): manifest is StrongBiblePublicationBundleManifest =>
   manifest.identity.kind === 'strong-bible-index'
+
+export const isInterlinearBiblePublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is InterlinearBiblePublicationBundleManifest =>
+  manifest.identity.kind === 'interlinear-index'
 
 export type CanonicalBibleVerse = BibleVersePresentation & {
   text: string
@@ -279,10 +320,56 @@ export type CanonicalStrongBiblePublication = {
   spanIdentities: CanonicalStrongBibleSpanIdentity[]
 }
 
+export type CanonicalInterlinearBibleVerse = {
+  id: number
+  book: number
+  chapter: number
+  verse: number
+}
+export type CanonicalInterlinearBibleToken = {
+  id: number
+  verseId: number
+  ordinal: number
+  startOffset: number
+  length: number
+}
+export type CanonicalInterlinearBibleSegment = {
+  id: number
+  tokenId: number
+  ordinal: number
+  startOffset: number
+  length: number
+  transliteration: string
+  lemma: string
+  morphology: string
+  gloss: string
+}
+export type CanonicalInterlinearBibleSegmentIdentity = {
+  segmentId: number
+  identityOrder: number
+  kind: 'strong' | 'estrong' | 'dstrong' | 'ustrong'
+  code: string
+}
+export type CanonicalInterlinearBiblePublication = {
+  format: 'bible-strong-canonical-interlinear-index'
+  schemaVersion: 1
+  applicationVersionId: 'BHG'
+  datasetId: 'STEP'
+  language: 'fr' | 'en'
+  indexRevision: string
+  textRevision: string
+  textSha256: string
+  verses: CanonicalInterlinearBibleVerse[]
+  tokens: CanonicalInterlinearBibleToken[]
+  segments: CanonicalInterlinearBibleSegment[]
+  segmentIdentities: CanonicalInterlinearBibleSegmentIdentity[]
+}
+
 export type CanonicalPublication =
   | CanonicalBiblePublication
   | CanonicalNavePublication
   | CanonicalStrongBiblePublication
+  | CanonicalInterlinearBiblePublication
 
 const normalizeJson = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(normalizeJson)
@@ -374,6 +461,17 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
         getStrongBibleCatalogIdentity(manifest.identity.versionId).language ||
       manifest.dependencies.bible.resourceIdentity !==
         `bible-text:${manifest.identity.versionId}` ||
+      !manifest.dependencies.strongLexiconModules.some(
+        dependency => dependency.resourceIdentity === 'strong-lexicon:core'
+      ))
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_DEPENDENCY_INVALID')
+  }
+  if (
+    isInterlinearBiblePublicationBundleManifest(manifest) &&
+    (manifest.offlineArtifact.entry !==
+      `bible-step-interlinear-${manifest.identity.language}.sqlite` ||
+      manifest.canonical.schemaVersion !== 1 ||
       !manifest.dependencies.strongLexiconModules.some(
         dependency => dependency.resourceIdentity === 'strong-lexicon:core'
       ))
@@ -620,6 +718,124 @@ export const decodeCanonicalStrongBible = (value: unknown): CanonicalStrongBible
   return candidate as CanonicalStrongBiblePublication
 }
 
+export const decodeCanonicalInterlinearBible = (
+  value: unknown
+): CanonicalInterlinearBiblePublication => {
+  if (!value || typeof value !== 'object') throw new Error('CANONICAL_INTERLINEAR_INVALID')
+  const candidate = value as Partial<CanonicalInterlinearBiblePublication>
+  if (
+    candidate.format !== 'bible-strong-canonical-interlinear-index' ||
+    candidate.schemaVersion !== 1 ||
+    candidate.applicationVersionId !== 'BHG' ||
+    candidate.datasetId !== 'STEP' ||
+    (candidate.language !== 'fr' && candidate.language !== 'en') ||
+    !isNonEmptyString(candidate.indexRevision) ||
+    !isNonEmptyString(candidate.textRevision) ||
+    !isNonEmptyString(candidate.textSha256) ||
+    !/^[a-f0-9]{64}$/.test(candidate.textSha256) ||
+    !Array.isArray(candidate.verses) ||
+    !Array.isArray(candidate.tokens) ||
+    !Array.isArray(candidate.segments) ||
+    !Array.isArray(candidate.segmentIdentities) ||
+    candidate.verses.length === 0 ||
+    candidate.tokens.length === 0 ||
+    candidate.segments.length === 0 ||
+    candidate.segmentIdentities.length === 0
+  ) {
+    throw new Error('CANONICAL_INTERLINEAR_INVALID')
+  }
+
+  const verseIds = new Set<number>()
+  const verseLocations = new Set<string>()
+  for (const verse of candidate.verses) {
+    if (
+      !verse ||
+      !isPositiveInteger(verse.id) ||
+      !isPositiveInteger(verse.book) ||
+      !isPositiveInteger(verse.chapter) ||
+      !isNonNegativeInteger(verse.verse)
+    ) {
+      throw new Error('CANONICAL_INTERLINEAR_VERSE_INVALID')
+    }
+    const location = `${verse.book}-${verse.chapter}-${verse.verse}`
+    if (verseIds.has(verse.id) || verseLocations.has(location)) {
+      throw new Error('CANONICAL_INTERLINEAR_VERSE_DUPLICATE')
+    }
+    verseIds.add(verse.id)
+    verseLocations.add(location)
+  }
+
+  const tokenIds = new Set<number>()
+  const tokenOrdinals = new Set<string>()
+  const tokenById = new Map<number, CanonicalInterlinearBiblePublication['tokens'][number]>()
+  for (const token of candidate.tokens) {
+    if (
+      !token ||
+      !isPositiveInteger(token.id) ||
+      !verseIds.has(token.verseId) ||
+      !isNonNegativeInteger(token.ordinal) ||
+      !isNonNegativeInteger(token.startOffset) ||
+      !isNonNegativeInteger(token.length)
+    ) {
+      throw new Error('CANONICAL_INTERLINEAR_TOKEN_INVALID')
+    }
+    const ordinalKey = `${token.verseId}-${token.ordinal}`
+    if (tokenIds.has(token.id) || tokenOrdinals.has(ordinalKey)) {
+      throw new Error('CANONICAL_INTERLINEAR_TOKEN_DUPLICATE')
+    }
+    tokenIds.add(token.id)
+    tokenOrdinals.add(ordinalKey)
+    tokenById.set(token.id, token)
+  }
+
+  const segmentIds = new Set<number>()
+  const segmentOrdinals = new Set<string>()
+  for (const segment of candidate.segments) {
+    const token = tokenById.get(segment.tokenId)
+    if (
+      !segment ||
+      !isPositiveInteger(segment.id) ||
+      !token ||
+      !isNonNegativeInteger(segment.ordinal) ||
+      !isNonNegativeInteger(segment.startOffset) ||
+      !isNonNegativeInteger(segment.length) ||
+      segment.startOffset + segment.length > token.length ||
+      typeof segment.transliteration !== 'string' ||
+      typeof segment.lemma !== 'string' ||
+      typeof segment.morphology !== 'string' ||
+      typeof segment.gloss !== 'string'
+    ) {
+      throw new Error('CANONICAL_INTERLINEAR_SEGMENT_INVALID')
+    }
+    const ordinalKey = `${segment.tokenId}-${segment.ordinal}`
+    if (segmentIds.has(segment.id) || segmentOrdinals.has(ordinalKey)) {
+      throw new Error('CANONICAL_INTERLINEAR_SEGMENT_DUPLICATE')
+    }
+    segmentIds.add(segment.id)
+    segmentOrdinals.add(ordinalKey)
+  }
+
+  const identityKinds = new Set<string>(STRONG_IDENTITY_KINDS)
+  const identityKeys = new Set<string>()
+  for (const identity of candidate.segmentIdentities) {
+    if (
+      !identity ||
+      !segmentIds.has(identity.segmentId) ||
+      !isNonNegativeInteger(identity.identityOrder) ||
+      !identityKinds.has(identity.kind) ||
+      STRONG_IDENTITY_KINDS[identity.identityOrder] !== identity.kind ||
+      !isNonEmptyString(identity.code)
+    ) {
+      throw new Error('CANONICAL_INTERLINEAR_IDENTITY_INVALID')
+    }
+    const key = `${identity.segmentId}-${identity.identityOrder}`
+    if (identityKeys.has(key)) throw new Error('CANONICAL_INTERLINEAR_IDENTITY_DUPLICATE')
+    identityKeys.add(key)
+  }
+
+  return candidate as CanonicalInterlinearBiblePublication
+}
+
 export const countCanonicalContent = (publication: CanonicalBiblePublication) => {
   let chapters = 0
   let verses = 0
@@ -691,6 +907,15 @@ export const countCanonicalStrongBibleContent = (publication: CanonicalStrongBib
   lexemes: publication.lexemes.length,
 })
 
+export const countCanonicalInterlinearBibleContent = (
+  publication: CanonicalInterlinearBiblePublication
+) => ({
+  verses: publication.verses.length,
+  tokens: publication.tokens.length,
+  segments: publication.segments.length,
+  identities: publication.segmentIdentities.length,
+})
+
 export const deriveStrongBibleResourceRevision = (
   publication: CanonicalStrongBiblePublication
 ): string => {
@@ -698,6 +923,19 @@ export const deriveStrongBibleResourceRevision = (
     .update(JSON.stringify(normalizeJson(publication)))
     .digest('hex')
   return `${publication.applicationVersionId.toLowerCase()}-strong-${digest.slice(0, 20)}`
+}
+
+export const deriveInterlinearBibleResourceRevision = (
+  publication:
+    | CanonicalInterlinearBiblePublication
+    | Omit<CanonicalInterlinearBiblePublication, 'indexRevision'>
+): string => {
+  const { indexRevision: _indexRevision, ...content } =
+    publication as CanonicalInterlinearBiblePublication
+  const digest = createHash('sha256')
+    .update(JSON.stringify(normalizeJson(content)))
+    .digest('hex')
+  return `bhg-interlinear-${publication.language}-${digest.slice(0, 20)}`
 }
 
 export const getCanonicalNaveAlphabeticalBrowse = (publication: CanonicalNavePublication) => {
@@ -743,6 +981,10 @@ const validateNaveOfflineParity = async (
   let database: Database | undefined
   try {
     database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    if (integrity.length !== 1 || Object.values(integrity[0] ?? {}).some(value => value !== 'ok')) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
     const metadataRows = readSqliteRows(
       database,
       'SELECT resource_id, revision, source_version, source_sha256 FROM RESOURCE_METADATA'
@@ -833,6 +1075,15 @@ const validateStrongBibleOfflineParity = async (
   let database: Database | undefined
   try {
     database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    const foreignKeyFailures = readSqliteRows(database, 'PRAGMA foreign_key_check')
+    if (
+      integrity.length !== 1 ||
+      Object.values(integrity[0] ?? {}).some(value => value !== 'ok') ||
+      foreignKeyFailures.length !== 0
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
     const metadata = Object.fromEntries(
       readSqliteRows(database, 'SELECT key, value FROM ResourceMetadata').map(row => [
         requireSqliteString(row.key),
@@ -969,6 +1220,191 @@ const validateStrongBibleOfflineParity = async (
   }
 }
 
+const validateInterlinearBibleOfflineParity = async (
+  offlineContent: Uint8Array,
+  canonical: CanonicalInterlinearBiblePublication
+) => {
+  const SQL = await initSqlJs()
+  let database: Database | undefined
+  try {
+    database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    const foreignKeyFailures = readSqliteRows(database, 'PRAGMA foreign_key_check')
+    if (
+      integrity.length !== 1 ||
+      Object.values(integrity[0] ?? {}).some(value => value !== 'ok') ||
+      foreignKeyFailures.length !== 0
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
+    const metadata = Object.fromEntries(
+      readSqliteRows(database, 'SELECT key, value FROM ResourceMetadata').map(row => [
+        requireSqliteString(row.key),
+        requireSqliteString(row.value),
+      ])
+    )
+    if (
+      metadata.schemaVersion !== '5' ||
+      metadata.applicationVersionId !== canonical.applicationVersionId ||
+      metadata.datasetId !== canonical.datasetId ||
+      metadata.locale !== canonical.language ||
+      metadata.textRevision !== canonical.textRevision ||
+      metadata.textSha256 !== canonical.textSha256 ||
+      metadata.indexRevision !== canonical.indexRevision
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+
+    const verses = readSqliteRows(
+      database,
+      'SELECT id, bookOrder AS book, chapter, verse FROM Verses ORDER BY id'
+    ).map(row => ({
+      id: requireSqliteInteger(row.id),
+      book: requireSqliteInteger(row.book),
+      chapter: requireSqliteInteger(row.chapter),
+      verse: requireSqliteInteger(row.verse),
+    }))
+    const tokens = readSqliteRows(
+      database,
+      `SELECT id, verseId, readingOrdinal AS ordinal, startOffset, length
+         FROM Tokens ORDER BY id`
+    ).map(row => ({
+      id: requireSqliteInteger(row.id),
+      verseId: requireSqliteInteger(row.verseId),
+      ordinal: requireSqliteInteger(row.ordinal),
+      startOffset: requireSqliteInteger(row.startOffset),
+      length: requireSqliteInteger(row.length),
+    }))
+    const segments = readSqliteRows(
+      database,
+      `SELECT s.id, s.tokenId, s.ordinal, s.startOffset, s.length,
+              tr.value AS transliteration, l.value AS lemma,
+              m.code AS morphology, g.text AS gloss
+         FROM Segments s
+         JOIN Transliterations tr ON tr.id=s.transliterationId
+         JOIN Lemmas l ON l.id=s.lemmaId
+         JOIN Morphologies m ON m.id=s.morphologyId
+         JOIN Glosses g ON g.id=s.glossId
+        ORDER BY s.id`
+    ).map(row => ({
+      id: requireSqliteInteger(row.id),
+      tokenId: requireSqliteInteger(row.tokenId),
+      ordinal: requireSqliteInteger(row.ordinal),
+      startOffset: requireSqliteInteger(row.startOffset),
+      length: requireSqliteInteger(row.length),
+      transliteration: requireSqliteString(row.transliteration),
+      lemma: requireSqliteString(row.lemma),
+      morphology: requireSqliteString(row.morphology),
+      gloss: requireSqliteString(row.gloss),
+    }))
+    const segmentIdentities = readSqliteRows(
+      database,
+      `SELECT s.id AS segmentId,
+              c0.code AS strong, c1.code AS estrong,
+              c2.code AS dstrong, c3.code AS ustrong
+         FROM Segments s
+         LEFT JOIN StrongCodes c0 ON c0.id=s.strongCodeId
+         LEFT JOIN StrongCodes c1 ON c1.id=s.eStrongCodeId
+         LEFT JOIN StrongCodes c2 ON c2.id=s.dStrongCodeId
+         LEFT JOIN StrongCodes c3 ON c3.id=s.uStrongCodeId
+        ORDER BY s.id`
+    ).flatMap(row =>
+      STRONG_IDENTITY_KINDS.flatMap((kind, identityOrder) => {
+        const code = row[kind]
+        return code == null
+          ? []
+          : [
+              {
+                segmentId: requireSqliteInteger(row.segmentId),
+                identityOrder,
+                kind,
+                code: requireSqliteString(code),
+              },
+            ]
+      })
+    )
+
+    const rawCounts = {
+      verses: requireSqliteInteger(
+        readSqliteRows(database, 'SELECT COUNT(*) AS count FROM Verses')[0]?.count
+      ),
+      tokens: requireSqliteInteger(
+        readSqliteRows(database, 'SELECT COUNT(*) AS count FROM Tokens')[0]?.count
+      ),
+      segments: requireSqliteInteger(
+        readSqliteRows(database, 'SELECT COUNT(*) AS count FROM Segments')[0]?.count
+      ),
+      identities: segmentIdentities.length,
+    }
+    if (
+      rawCounts.verses !== canonical.verses.length ||
+      rawCounts.tokens !== canonical.tokens.length ||
+      rawCounts.segments !== canonical.segments.length ||
+      rawCounts.identities !== canonical.segmentIdentities.length ||
+      verses.length !== rawCounts.verses ||
+      tokens.length !== rawCounts.tokens ||
+      segments.length !== rawCounts.segments
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+
+    const verseByToken = new Map(canonical.tokens.map(token => [token.id, token.verseId]))
+    const tokenBySegment = new Map(canonical.segments.map(segment => [segment.id, segment.tokenId]))
+    const expectedStrongVerseIndex = new Map<string, number>()
+    for (const identity of canonical.segmentIdentities) {
+      const verseId = verseByToken.get(tokenBySegment.get(identity.segmentId) ?? -1)
+      if (verseId === undefined) throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+      const key = `${verseId}:${identity.code}`
+      expectedStrongVerseIndex.set(
+        key,
+        (expectedStrongVerseIndex.get(key) ?? 0) | (1 << identity.identityOrder)
+      )
+    }
+    const strongVerseRows = readSqliteRows(
+      database,
+      `SELECT svi.verseId AS verseId, sc.code AS code, svi.kindMask AS kindMask
+         FROM StrongVerseIndex svi
+         JOIN StrongCodes sc ON sc.id=svi.codeId
+        ORDER BY svi.verseId, sc.code`
+    )
+    const actualStrongVerseIndex = new Map(
+      strongVerseRows.map(row => [
+        `${requireSqliteInteger(row.verseId)}:${requireSqliteString(row.code)}`,
+        requireSqliteInteger(row.kindMask),
+      ])
+    )
+    if (
+      actualStrongVerseIndex.size !== strongVerseRows.length ||
+      actualStrongVerseIndex.size !== expectedStrongVerseIndex.size ||
+      [...expectedStrongVerseIndex].some(
+        ([key, kindMask]) => actualStrongVerseIndex.get(key) !== kindMask
+      )
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+
+    const expected = {
+      verses: [...canonical.verses].sort((left, right) => left.id - right.id),
+      tokens: [...canonical.tokens].sort((left, right) => left.id - right.id),
+      segments: [...canonical.segments].sort((left, right) => left.id - right.id),
+      segmentIdentities: [...canonical.segmentIdentities].sort(
+        (left, right) =>
+          left.segmentId - right.segmentId || left.identityOrder - right.identityOrder
+      ),
+    }
+    if (
+      JSON.stringify({ verses, tokens, segments, segmentIdentities }) !== JSON.stringify(expected)
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.startsWith('OFFLINE_ARTIFACT_')) throw cause
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+  } finally {
+    database?.close()
+  }
+}
+
 export const validatePublicationBundle = async (bundlePath: string) => {
   const root = path.resolve(bundlePath)
   const manifestPath = path.join(root, 'manifest.json')
@@ -1038,7 +1474,8 @@ export const validatePublicationBundle = async (bundlePath: string) => {
   }
   if (
     (isNavePublicationBundleManifest(manifest) ||
-      isStrongBiblePublicationBundleManifest(manifest)) &&
+      isStrongBiblePublicationBundleManifest(manifest) ||
+      isInterlinearBiblePublicationBundleManifest(manifest)) &&
     !Buffer.from(offlineContent)
       .subarray(0, 16)
       .equals(Buffer.from('SQLite format 3\u0000', 'utf8'))
@@ -1142,7 +1579,7 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_ALPHABETICAL_BROWSE_MISMATCH')
     }
     await validateNaveOfflineParity(offlineContent, canonical)
-  } else {
+  } else if (isStrongBiblePublicationBundleManifest(manifest)) {
     canonical = decodeCanonicalStrongBible(canonicalValue)
     if (
       canonical.applicationVersionId !== manifest.identity.versionId ||
@@ -1160,6 +1597,26 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_COUNT_MISMATCH')
     }
     await validateStrongBibleOfflineParity(offlineContent, canonical)
+  } else {
+    canonical = decodeCanonicalInterlinearBible(canonicalValue)
+    if (
+      canonical.applicationVersionId !== manifest.identity.versionId ||
+      canonical.datasetId !== manifest.identity.datasetId ||
+      canonical.language !== manifest.identity.language ||
+      canonical.indexRevision !== manifest.revision ||
+      deriveInterlinearBibleResourceRevision(canonical) !== manifest.revision ||
+      canonical.textRevision !== manifest.dependencies.bible.revision ||
+      canonical.textSha256 !== manifest.dependencies.bible.textSha256
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+    if (
+      JSON.stringify(countCanonicalInterlinearBibleContent(canonical)) !==
+      JSON.stringify(manifest.counts)
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_COUNT_MISMATCH')
+    }
+    await validateInterlinearBibleOfflineParity(offlineContent, canonical)
   }
 
   return { manifest, canonical, canonicalPath, offlineArtifactPath }

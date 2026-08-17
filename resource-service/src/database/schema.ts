@@ -300,3 +300,134 @@ export const strongBibleSpanIdentities = pgTable(
     ),
   ]
 )
+
+export const interlinearBibleVerses = pgTable(
+  'interlinear_bible_verses',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    verse_id: integer('verse_id').notNull(),
+    book: integer('book').notNull(),
+    chapter: integer('chapter').notNull(),
+    verse: integer('verse').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'interlinear_bible_verses_publication_id_primary',
+      columns: [table.publication_id, table.verse_id],
+    }),
+    uniqueIndex('interlinear_bible_verses_location_unique').on(
+      table.publication_id,
+      table.book,
+      table.chapter,
+      table.verse
+    ),
+    index('interlinear_bible_verses_chapter_lookup').on(
+      table.publication_id,
+      table.book,
+      table.chapter,
+      table.verse
+    ),
+  ]
+)
+
+export const interlinearBibleTokens = pgTable(
+  'interlinear_bible_tokens',
+  {
+    publication_id: integer('publication_id').notNull(),
+    token_id: integer('token_id').notNull(),
+    verse_id: integer('verse_id').notNull(),
+    ordinal: integer('ordinal').notNull(),
+    start_offset: integer('start_offset').notNull(),
+    length: integer('length').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'interlinear_bible_tokens_publication_id_primary',
+      columns: [table.publication_id, table.token_id],
+    }),
+    foreignKey({
+      name: 'interlinear_bible_tokens_verse_fk',
+      columns: [table.publication_id, table.verse_id],
+      foreignColumns: [interlinearBibleVerses.publication_id, interlinearBibleVerses.verse_id],
+    }).onDelete('cascade'),
+    uniqueIndex('interlinear_bible_tokens_verse_ordinal_unique').on(
+      table.publication_id,
+      table.verse_id,
+      table.ordinal
+    ),
+    index('interlinear_bible_tokens_verse_lookup').on(
+      table.publication_id,
+      table.verse_id,
+      table.ordinal
+    ),
+  ]
+)
+
+export const interlinearBibleSegments = pgTable(
+  'interlinear_bible_segments',
+  {
+    publication_id: integer('publication_id').notNull(),
+    segment_id: integer('segment_id').notNull(),
+    token_id: integer('token_id').notNull(),
+    ordinal: integer('ordinal').notNull(),
+    start_offset: integer('start_offset').notNull(),
+    length: integer('length').notNull(),
+    transliteration: text('transliteration').notNull(),
+    lemma: text('lemma').notNull(),
+    morphology: text('morphology').notNull(),
+    gloss: text('gloss').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'interlinear_bible_segments_publication_id_primary',
+      columns: [table.publication_id, table.segment_id],
+    }),
+    foreignKey({
+      name: 'interlinear_bible_segments_token_fk',
+      columns: [table.publication_id, table.token_id],
+      foreignColumns: [interlinearBibleTokens.publication_id, interlinearBibleTokens.token_id],
+    }).onDelete('cascade'),
+    uniqueIndex('interlinear_bible_segments_token_ordinal_unique').on(
+      table.publication_id,
+      table.token_id,
+      table.ordinal
+    ),
+    index('interlinear_bible_segments_token_lookup').on(
+      table.publication_id,
+      table.token_id,
+      table.ordinal
+    ),
+  ]
+)
+
+export const interlinearBibleSegmentIdentities = pgTable(
+  'interlinear_bible_segment_identities',
+  {
+    publication_id: integer('publication_id').notNull(),
+    segment_id: integer('segment_id').notNull(),
+    identity_order: integer('identity_order').notNull(),
+    kind: text('kind').notNull(),
+    code: text('code').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'interlinear_bible_segment_identities_primary',
+      columns: [table.publication_id, table.segment_id, table.identity_order],
+    }),
+    foreignKey({
+      name: 'interlinear_bible_segment_identities_segment_fk',
+      columns: [table.publication_id, table.segment_id],
+      foreignColumns: [
+        interlinearBibleSegments.publication_id,
+        interlinearBibleSegments.segment_id,
+      ],
+    }).onDelete('cascade'),
+    index('interlinear_bible_segment_identities_code_lookup').on(
+      table.publication_id,
+      table.kind,
+      table.code
+    ),
+  ]
+)

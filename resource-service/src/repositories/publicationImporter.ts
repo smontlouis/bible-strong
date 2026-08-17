@@ -7,6 +7,7 @@ import { tryDatabasePromise, type DatabaseFailure } from '../database/databaseEf
 import type { ResourceDatabase } from '../database/types'
 import {
   isBiblePublicationBundleManifest,
+  isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
   validatePublicationBundle,
 } from '../publication/publicationBundle'
@@ -73,7 +74,9 @@ export const importPublicationBundle = (
         ? `bible-text:${manifest.identity.versionId}`
         : isNavePublicationBundleManifest(manifest)
           ? `nave:${manifest.identity.language}`
-          : `strong-bible-index:${manifest.identity.versionId}`
+          : isInterlinearBiblePublicationBundleManifest(manifest)
+            ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
+            : `strong-bible-index:${manifest.identity.versionId}`
       const publicationStatus =
         manifest.deliveryCapabilities.onlineAccess ||
         (options.activateForLocalDevelopment &&
@@ -118,22 +121,36 @@ export const importPublicationBundle = (
               canonical_schema_version: manifest.canonical.schemaVersion,
               offline_entry: manifest.offlineArtifact.entry,
             }
-          : {
-              version_id: manifest.identity.versionId,
-              dataset_id: manifest.identity.datasetId,
-              delivery_capabilities: manifest.deliveryCapabilities,
-              dependencies: manifest.dependencies,
-              counts: manifest.counts,
-              canonical_schema_version: manifest.canonical.schemaVersion,
-              resource_revision: manifest.revision,
-              text_revision: manifest.dependencies.bible.revision,
-              text_sha256: manifest.dependencies.bible.textSha256,
-              strong_revision:
-                canonical.format === 'bible-strong-canonical-strong-index'
-                  ? canonical.strongRevision
-                  : undefined,
-              offline_entry: manifest.offlineArtifact.entry,
-            }
+          : isInterlinearBiblePublicationBundleManifest(manifest)
+            ? {
+                version_id: manifest.identity.versionId,
+                dataset_id: manifest.identity.datasetId,
+                language: manifest.identity.language,
+                delivery_capabilities: manifest.deliveryCapabilities,
+                dependencies: manifest.dependencies,
+                counts: manifest.counts,
+                canonical_schema_version: manifest.canonical.schemaVersion,
+                resource_revision: manifest.revision,
+                text_revision: manifest.dependencies.bible.revision,
+                text_sha256: manifest.dependencies.bible.textSha256,
+                offline_entry: manifest.offlineArtifact.entry,
+              }
+            : {
+                version_id: manifest.identity.versionId,
+                dataset_id: manifest.identity.datasetId,
+                delivery_capabilities: manifest.deliveryCapabilities,
+                dependencies: manifest.dependencies,
+                counts: manifest.counts,
+                canonical_schema_version: manifest.canonical.schemaVersion,
+                resource_revision: manifest.revision,
+                text_revision: manifest.dependencies.bible.revision,
+                text_sha256: manifest.dependencies.bible.textSha256,
+                strong_revision:
+                  canonical.format === 'bible-strong-canonical-strong-index'
+                    ? canonical.strongRevision
+                    : undefined,
+                offline_entry: manifest.offlineArtifact.entry,
+              }
       const publicationMetadata = { ...metadata, manifest_sha256: manifestSha256 }
       const makeResult = (status: PublicationImportResult['status']): PublicationImportResult =>
         isBiblePublicationBundleManifest(manifest)
@@ -150,12 +167,19 @@ export const importPublicationBundle = (
                 revision: manifest.revision,
                 itemCount: manifest.counts.topics,
               }
-            : {
-                status,
-                resourceIdentity,
-                revision: manifest.revision,
-                itemCount: manifest.counts.occurrences,
-              }
+            : isInterlinearBiblePublicationBundleManifest(manifest)
+              ? {
+                  status,
+                  resourceIdentity,
+                  revision: manifest.revision,
+                  itemCount: manifest.counts.segments,
+                }
+              : {
+                  status,
+                  resourceIdentity,
+                  revision: manifest.revision,
+                  itemCount: manifest.counts.occurrences,
+                }
 
       return tryDatabasePromise(
         'publication.import',
@@ -293,7 +317,7 @@ export const importPublicationBundle = (
                   .values(links.slice(offset, offset + 1_000))
                   .execute()
               }
-            } else {
+            } else if (canonical.format === 'bible-strong-canonical-strong-index') {
               for (let offset = 0; offset < canonical.verses.length; offset += 1_000) {
                 assertNotInterrupted(signal)
                 await transaction
@@ -371,6 +395,73 @@ export const importPublicationBundle = (
                       ordinal: spanIdentity.ordinal,
                       identity_order: spanIdentity.identityOrder,
                       identity_id: spanIdentity.identityId,
+                    }))
+                  )
+                  .execute()
+              }
+            } else {
+              for (let offset = 0; offset < canonical.verses.length; offset += 1_000) {
+                assertNotInterrupted(signal)
+                await transaction
+                  .insertInto('interlinear_bible_verses')
+                  .values(
+                    canonical.verses.slice(offset, offset + 1_000).map(verse => ({
+                      publication_id: publication.id,
+                      verse_id: verse.id,
+                      book: verse.book,
+                      chapter: verse.chapter,
+                      verse: verse.verse,
+                    }))
+                  )
+                  .execute()
+              }
+              for (let offset = 0; offset < canonical.tokens.length; offset += 1_000) {
+                assertNotInterrupted(signal)
+                await transaction
+                  .insertInto('interlinear_bible_tokens')
+                  .values(
+                    canonical.tokens.slice(offset, offset + 1_000).map(token => ({
+                      publication_id: publication.id,
+                      token_id: token.id,
+                      verse_id: token.verseId,
+                      ordinal: token.ordinal,
+                      start_offset: token.startOffset,
+                      length: token.length,
+                    }))
+                  )
+                  .execute()
+              }
+              for (let offset = 0; offset < canonical.segments.length; offset += 1_000) {
+                assertNotInterrupted(signal)
+                await transaction
+                  .insertInto('interlinear_bible_segments')
+                  .values(
+                    canonical.segments.slice(offset, offset + 1_000).map(segment => ({
+                      publication_id: publication.id,
+                      segment_id: segment.id,
+                      token_id: segment.tokenId,
+                      ordinal: segment.ordinal,
+                      start_offset: segment.startOffset,
+                      length: segment.length,
+                      transliteration: segment.transliteration,
+                      lemma: segment.lemma,
+                      morphology: segment.morphology,
+                      gloss: segment.gloss,
+                    }))
+                  )
+                  .execute()
+              }
+              for (let offset = 0; offset < canonical.segmentIdentities.length; offset += 1_000) {
+                assertNotInterrupted(signal)
+                await transaction
+                  .insertInto('interlinear_bible_segment_identities')
+                  .values(
+                    canonical.segmentIdentities.slice(offset, offset + 1_000).map(identity => ({
+                      publication_id: publication.id,
+                      segment_id: identity.segmentId,
+                      identity_order: identity.identityOrder,
+                      kind: identity.kind,
+                      code: identity.code,
                     }))
                   )
                   .execute()

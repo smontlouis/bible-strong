@@ -28,6 +28,8 @@ import {
   type StrongBibleVerseRequest,
   type StrongBibleVerseResult,
 } from './strongBibleResourceAccess'
+import type { BibleChapterAdapter } from './bibleChapterSource'
+import type { InterlinearBibleResourceAccess } from './interlinearBibleResourceAccess'
 
 export type BhgLexiconProvenance = {
   sourceKind: 'interlinear'
@@ -176,6 +178,24 @@ export const localInterlinearLexiconAdapter: InterlinearLexiconAdapter = {
     return { verses, ...(page.nextCursor ? { nextCursor: page.nextCursor } : {}) }
   },
 }
+
+export const createHybridInterlinearLexiconAdapter = (
+  interlinearBible: Pick<InterlinearBibleResourceAccess, 'getAvailability' | 'loadChapterTokens'>,
+  bibleChapterAdapter: BibleChapterAdapter
+): InterlinearLexiconAdapter => ({
+  ...localInterlinearLexiconAdapter,
+  getInterlinearAvailability: interlinearBible.getAvailability,
+  async loadVerse(locale, request) {
+    const [chapter, interlinear] = await Promise.all([
+      bibleChapterAdapter.loadChapter('BHG', request.book, request.chapter),
+      interlinearBible.loadChapterTokens(locale, request),
+    ])
+    if (chapter.status !== 'available') return undefined
+    const text = chapter.verses.find(verse => Number(verse.Verset) === request.verse)?.Texte
+    if (text == null) return undefined
+    return { text, tokens: interlinear.tokensByVerse[request.verse] ?? [] }
+  },
+})
 
 const defaultDependencies: LexiconBibleResourceDependencies = {
   strongBible: localStrongBibleResourceAccess,

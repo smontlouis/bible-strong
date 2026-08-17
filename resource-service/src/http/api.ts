@@ -29,6 +29,12 @@ import {
   StrongBibleVersionPath,
 } from '../../../src/features/resources/strongBibleContract'
 import {
+  InterlinearBibleChapterDto,
+  InterlinearBibleChapterPath,
+  InterlinearBibleCoverageDto,
+  InterlinearBibleCoveragePath,
+} from '../../../src/features/resources/interlinearBibleContract'
+import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
   ResourceNotFoundProblem,
@@ -171,8 +177,35 @@ const StrongBibleApi = HttpApiGroup.make('strongBibles')
       .addError(ResourceInternalProblem, { status: 500 })
   )
 
+const InterlinearBibleApi = HttpApiGroup.make('interlinearBibles')
+  .add(
+    HttpApiEndpoint.get(
+      'getInterlinearBibleCoverage',
+      '/v1/interlinear-bibles/:version/languages/:language/coverage'
+    )
+      .setPath(InterlinearBibleCoveragePath)
+      .addSuccess(InterlinearBibleCoverageDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getInterlinearBibleChapter',
+      '/v1/interlinear-bibles/:version/languages/:language/books/:book/chapters/:chapter'
+    )
+      .setPath(InterlinearBibleChapterPath)
+      .addSuccess(InterlinearBibleChapterDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+
 export class ResourceApi extends HttpApi.make('resource-api')
   .add(SystemApi)
   .add(BibleApi)
   .add(NaveApi)
-  .add(StrongBibleApi) {}
+  .add(StrongBibleApi)
+  .add(InterlinearBibleApi) {}
