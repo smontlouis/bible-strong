@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "sourceVersion": "strong-lexicon-en-fr-production",
+  "rightsReviewedAt": "2026-08-17",
+  "modules": {
+    "core": {
+      "holder": "STEP Bible / Bible Strong contributors",
+      "termsReference": "README.md#strong-lexicon-publications",
+      "attribution": "STEP Bible lexical data and Bible Strong French enrichment",
+      "online": true,
+      "offline": true
+    },
+    "resources": {
+      "holder": "STEP Bible / Bible Strong contributors",
+      "termsReference": "README.md#strong-lexicon-publications",
+      "attribution": "STEP Bible, TFLSJ and Bible Strong French enrichment",
+      "online": true,
+      "offline": true
+    },
+    "entities": {
+      "holder": "STEP Bible / Bible Strong contributors",
+      "termsReference": "README.md#strong-lexicon-publications",
+      "attribution": "STEP Bible entity data and Bible Strong French enrichment",
+      "online": true,
+      "offline": true
+    }
+  }
+}

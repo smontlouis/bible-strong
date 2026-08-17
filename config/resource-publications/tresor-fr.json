@@ -1,0 +1,15 @@
+{
+  "resourceId": "TRESOR",
+  "sourceVersion": "tresor-fr-mobile-source-v1",
+  "rights": {
+    "holder": "Public domain",
+    "termsReference": "Trésor des Saintes Écritures",
+    "attribution": "Trésor des Saintes Écritures; French editorial source",
+    "online": true,
+    "offline": true
+  },
+  "deliveryCapabilities": {
+    "onlineAccess": true,
+    "offlineDownload": true
+  }
+}

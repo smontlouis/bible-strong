@@ -334,7 +334,7 @@ export async function compileStrongBibleMobilePublication(options: {
       }
       sourceSha256 = await stream.sourceSha256;
       const textSha256 = textHash.digest("hex");
-      const textRevision = buildTextRevision(
+      const textRevision = buildCanonicalBibleTextRevision(
         options.applicationVersionId,
         textSha256
       );
@@ -447,6 +447,171 @@ export async function compileStrongBibleMobilePublication(options: {
   };
 }
 
+export function verifyCanonicalBiblePublication(
+  publication: CanonicalBiblePublication
+): {
+  textRevision: string;
+  textSha256: string;
+  verseCount: number;
+  noteCount: number;
+  headingCount: number;
+  invalidNoteRangeCount: number;
+} {
+  if (
+    publication.format !== "bible-strong-canonical-bible" ||
+    publication.schemaVersion !== CANONICAL_BIBLE_SCHEMA_VERSION ||
+    typeof publication.applicationVersionId !== "string" ||
+    publication.applicationVersionId.length === 0 ||
+    typeof publication.sourceVersion !== "string" ||
+    publication.sourceVersion.length === 0 ||
+    !/^[a-f0-9]{64}$/.test(publication.sourceSha256) ||
+    !publication.verses ||
+    typeof publication.verses !== "object" ||
+    !Number.isSafeInteger(publication.verseCount) ||
+    publication.verseCount <= 0 ||
+    !Number.isSafeInteger(publication.noteCount) ||
+    publication.noteCount < 0 ||
+    !Number.isSafeInteger(publication.headingCount) ||
+    publication.headingCount < 0
+  ) {
+    throw new Error("strong-bible-mobile-invalid-canonical-publication");
+  }
+  assertCanonicalVerseIdentities(publication.verses);
+  const expectedTextSha256 = hashCanonicalBibleVerses(publication.verses);
+  if (publication.textSha256 !== expectedTextSha256) {
+    throw new Error(
+      `strong-bible-mobile-text-checksum-mismatch:${publication.textSha256}:${expectedTextSha256}`
+    );
+  }
+  const expectedTextRevision = buildCanonicalBibleTextRevision(
+    publication.applicationVersionId,
+    expectedTextSha256
+  );
+  if (publication.textRevision !== expectedTextRevision) {
+    throw new Error(
+      `strong-bible-mobile-text-revision-mismatch:${publication.textRevision}:${expectedTextRevision}`
+    );
+  }
+
+  let verseCount = 0;
+  let noteCount = 0;
+  let headingCount = 0;
+  let invalidNoteRangeCount = 0;
+  let invalidHeadingCount = 0;
+  for (const chapters of Object.values(publication.verses)) {
+    for (const chapter of Object.values(chapters)) {
+      for (const verse of Object.values(chapter)) {
+        verseCount += 1;
+        if (
+          typeof verse.text !== "string" ||
+          !Array.isArray(verse.startTags) ||
+          !Array.isArray(verse.layout) ||
+          !Array.isArray(verse.notes) ||
+          !Array.isArray(verse.headings)
+        ) {
+          throw new Error("strong-bible-mobile-canonical-verse-invalid");
+        }
+        for (const heading of verse.headings) {
+          headingCount += 1;
+          if (
+            !Number.isSafeInteger(heading.offset) ||
+            heading.offset < 0 ||
+            heading.offset > verse.text.length ||
+            !Number.isSafeInteger(heading.order) ||
+            heading.order < 0 ||
+            !["pericope", "heading", "parallel"].includes(heading.kind) ||
+            typeof heading.type !== "string" ||
+            typeof heading.text !== "string" ||
+            typeof heading.markup !== "string" ||
+            heading.markup.length === 0 ||
+            /<w\b|(?:^|\s)(?:strong|estrong|dstrong|ustrong|lemma|morph)=/iu.test(
+              heading.markup
+            )
+          ) {
+            invalidHeadingCount += 1;
+          }
+        }
+        for (const note of verse.notes) {
+          noteCount += 1;
+          if (
+            !Number.isSafeInteger(note.offset) ||
+            note.offset < 0 ||
+            note.offset > verse.text.length ||
+            !Number.isSafeInteger(note.order) ||
+            note.order < 0 ||
+            (note.kind !== "note" && note.kind !== "reference") ||
+            typeof note.markup !== "string" ||
+            note.markup.length === 0 ||
+            /<w\b|(?:^|\s)(?:strong|estrong|dstrong|ustrong|lemma|morph)=/iu.test(
+              note.markup
+            )
+          ) {
+            invalidNoteRangeCount += 1;
+          }
+        }
+      }
+    }
+  }
+  if (
+    verseCount !== publication.verseCount ||
+    noteCount !== publication.noteCount ||
+    invalidNoteRangeCount > 0
+  ) {
+    throw new Error(
+      `strong-bible-mobile-invalid-canonical-counts:${verseCount}:${publication.verseCount}:${noteCount}:${publication.noteCount}:${invalidNoteRangeCount}`
+    );
+  }
+  if (headingCount !== publication.headingCount || invalidHeadingCount > 0) {
+    throw new Error(
+      `strong-bible-mobile-invalid-canonical-headings:${headingCount}:${publication.headingCount}:${invalidHeadingCount}`
+    );
+  }
+  return {
+    textRevision: publication.textRevision,
+    textSha256: publication.textSha256,
+    verseCount,
+    noteCount,
+    headingCount,
+    invalidNoteRangeCount
+  };
+}
+
+function assertCanonicalVerseIdentities(
+  verses: CanonicalBiblePublication["verses"]
+): void {
+  for (const [bookKey, chapters] of Object.entries(verses)) {
+    if (!isPositiveIntegerKey(bookKey) || !isRecord(chapters)) {
+      throw new Error(`strong-bible-mobile-invalid-book-identity:${bookKey}`);
+    }
+    for (const [chapterKey, chapter] of Object.entries(chapters)) {
+      if (!isPositiveIntegerKey(chapterKey) || !isRecord(chapter)) {
+        throw new Error(
+          `strong-bible-mobile-invalid-chapter-identity:${bookKey}:${chapterKey}`
+        );
+      }
+      for (const [verseKey, verse] of Object.entries(chapter)) {
+        if (!isNonNegativeIntegerKey(verseKey) || !isRecord(verse)) {
+          throw new Error(
+            `strong-bible-mobile-invalid-verse-identity:${bookKey}:${chapterKey}:${verseKey}`
+          );
+        }
+      }
+    }
+  }
+}
+
+function isPositiveIntegerKey(value: string): boolean {
+  return /^(?:[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value));
+}
+
+function isNonNegativeIntegerKey(value: string): boolean {
+  return /^(?:0|[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
 export async function verifyStrongBibleMobilePublication(options: {
   canonicalJsonPath: string;
   strongSqlitePath: string;
@@ -469,22 +634,7 @@ export async function verifyStrongBibleMobilePublication(options: {
   const publication = JSON.parse(
     await readFile(options.canonicalJsonPath, "utf8")
   ) as CanonicalBiblePublication;
-  if (
-    publication.format !== "bible-strong-canonical-bible" ||
-    publication.schemaVersion !== CANONICAL_BIBLE_SCHEMA_VERSION ||
-    !Number.isSafeInteger(publication.noteCount) ||
-    publication.noteCount < 0 ||
-    !Number.isSafeInteger(publication.headingCount) ||
-    publication.headingCount < 0
-  ) {
-    throw new Error("strong-bible-mobile-invalid-canonical-publication");
-  }
-  const expectedTextSha256 = hashCanonicalVerses(publication.verses);
-  if (publication.textSha256 !== expectedTextSha256) {
-    throw new Error(
-      `strong-bible-mobile-text-checksum-mismatch:${publication.textSha256}:${expectedTextSha256}`
-    );
-  }
+  const canonicalVerification = verifyCanonicalBiblePublication(publication);
 
   const database = new DatabaseSync(options.strongSqlitePath, {
     readOnly: true
@@ -586,71 +736,6 @@ export async function verifyStrongBibleMobilePublication(options: {
         `strong-bible-mobile-invalid-ranges:${invalidRangeCount}`
       );
     }
-    let noteCount = 0;
-    let headingCount = 0;
-    let invalidNoteRangeCount = 0;
-    let invalidHeadingCount = 0;
-    for (const chapters of Object.values(publication.verses)) {
-      for (const chapter of Object.values(chapters)) {
-        for (const verse of Object.values(chapter)) {
-          if (!Array.isArray(verse.notes)) {
-            throw new Error("strong-bible-mobile-canonical-notes-missing");
-          }
-          if (!Array.isArray(verse.headings)) {
-            throw new Error("strong-bible-mobile-canonical-headings-missing");
-          }
-          for (const heading of verse.headings) {
-            headingCount += 1;
-            if (
-              !Number.isSafeInteger(heading.offset) ||
-              heading.offset < 0 ||
-              heading.offset > verse.text.length ||
-              !Number.isSafeInteger(heading.order) ||
-              heading.order < 0 ||
-              !["pericope", "heading", "parallel"].includes(heading.kind) ||
-              typeof heading.type !== "string" ||
-              typeof heading.text !== "string" ||
-              typeof heading.markup !== "string" ||
-              heading.markup.length === 0 ||
-              /<w\b|(?:^|\s)(?:strong|estrong|dstrong|ustrong|lemma|morph)=/iu.test(
-                heading.markup
-              )
-            ) {
-              invalidHeadingCount += 1;
-            }
-          }
-          for (const note of verse.notes) {
-            noteCount += 1;
-            if (
-              !Number.isSafeInteger(note.offset) ||
-              note.offset < 0 ||
-              note.offset > verse.text.length ||
-              !Number.isSafeInteger(note.order) ||
-              note.order < 0 ||
-              (note.kind !== "note" && note.kind !== "reference") ||
-              typeof note.markup !== "string" ||
-              note.markup.length === 0 ||
-              /<w\b|(?:^|\s)(?:strong|estrong|dstrong|ustrong|lemma|morph)=/iu.test(
-                note.markup
-              )
-            ) {
-              invalidNoteRangeCount += 1;
-            }
-          }
-        }
-      }
-    }
-    if (noteCount !== publication.noteCount || invalidNoteRangeCount > 0) {
-      throw new Error(
-        `strong-bible-mobile-invalid-canonical-notes:${noteCount}:${publication.noteCount}:${invalidNoteRangeCount}`
-      );
-    }
-    if (headingCount !== publication.headingCount || invalidHeadingCount > 0) {
-      throw new Error(
-        `strong-bible-mobile-invalid-canonical-headings:${headingCount}:${publication.headingCount}:${invalidHeadingCount}`
-      );
-    }
-
     const counts = database
       .prepare(
         `
@@ -685,10 +770,10 @@ export async function verifyStrongBibleMobilePublication(options: {
       identityCount: Number(counts.identityCount),
       lexemeAssignmentCount: Number(counts.lexemeAssignmentCount),
       lexemeCount: Number(counts.lexemeCount),
-      noteCount,
-      headingCount,
+      noteCount: canonicalVerification.noteCount,
+      headingCount: canonicalVerification.headingCount,
       invalidRangeCount,
-      invalidNoteRangeCount,
+      invalidNoteRangeCount: canonicalVerification.invalidNoteRangeCount,
       integrityCheck: "ok"
     };
   } finally {
@@ -696,14 +781,14 @@ export async function verifyStrongBibleMobilePublication(options: {
   }
 }
 
-function buildTextRevision(
+export function buildCanonicalBibleTextRevision(
   applicationVersionId: string,
   textSha256: string
 ): string {
   return `${applicationVersionId.toLowerCase()}-${textSha256.slice(0, 20)}`;
 }
 
-function hashCanonicalVerses(
+export function hashCanonicalBibleVerses(
   verses: CanonicalBiblePublication["verses"]
 ): string {
   const hash = createHash("sha256");

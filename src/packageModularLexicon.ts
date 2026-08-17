@@ -704,9 +704,8 @@ function compareFingerprints(options: {
 
 function queryFingerprint(database: DatabaseSync, sql: string): string {
   const hash = createHash("sha256");
-  for (const row of database.prepare(sql).iterate() as Iterable<
-    Record<string, unknown>
-  >) {
+  const statement = database.prepare(sql);
+  for (const row of statement.all() as Record<string, unknown>[]) {
     hash.update(JSON.stringify(row));
     hash.update("\n");
   }

@@ -11,6 +11,139 @@ npm install
 
 ## Recommended Workflow
 
+### Versioned Resource publication bundles
+
+Bible Lexicon Maker is the official producer of the handoff consumed by the
+Bible Strong Resource service. A Bible publication bundle contains the
+canonical import JSON and the exact matching ZIP Offline copy under one
+immutable, content-derived revision. Rights and Online/Offline delivery
+capabilities remain independent and are validated before a bundle is written.
+
+Build the exhaustive ordinary-Bible handoff directly from the current mobile inventory:
+
+```sh
+npm run resources:publication:bibles -- \
+  --output outputs/releases/ordinary-bible-publications-current \
+  --generated-at 2026-08-16T00:00:00.000Z
+```
+
+This produces exactly 47 version directories. Each contains canonical import JSON plus the current
+mobile ZIP byte-for-byte; legacy pericope and red-word entries are projected into canonical
+presentation and verified for complete parity. Restricted publications declare local-development
+access without enabling public Online delivery.
+
+After generating a canonical Bible JSON, build the LSG bundle with:
+
+```sh
+npm run resources:publication:bible -- \
+  --canonical outputs/releases/<release>/bibles/bible-lsg.json \
+  --metadata config/resource-publications/lsg.json \
+  --output-dir outputs/publications/lsg-<revision>
+```
+
+The output directory is an explicit repository-to-repository handoff. Pass it
+to Bible Strong without making the Resource service inspect this working tree:
+
+```sh
+RESOURCE_PUBLICATION_BUNDLE=/absolute/path/to/lsg-<revision> yarn resources:dev
+```
+
+Validate a received or archived handoff independently with:
+
+```sh
+npm run resources:publication:bible -- validate \
+  --bundle /absolute/path/to/lsg-<revision>
+```
+
+Publish the French Nave topical resource from its authoritative SQLite source
+with the same handoff contract:
+
+```sh
+npm run resources:publication:nave -- \
+  --sqlite /absolute/path/to/nave-fr.sqlite \
+  --metadata config/resource-publications/nave-fr.json \
+  --output-dir outputs/publications/nave-fr-<revision>
+
+npm run resources:publication:nave -- validate \
+  --bundle /absolute/path/to/nave-fr-<revision>
+```
+
+The Nave producer derives the immutable revision from the ordered topics and
+verse anchors, embeds matching provenance in the Offline SQLite copy, and
+validates canonical-to-SQLite parity before completing the handoff.
+
+Publish all 12 cataloged Strong Bible indexes from the current authoritative
+SQLite archives and pair each one with the exact ordinary-Bible revision:
+
+```sh
+npm run resources:publication:strong-bibles -- \
+  --bible-bundles-dir outputs/releases/ordinary-bible-publications-current \
+  --output-dir outputs/releases/strong-bible-publications-current \
+  --generated-at 2026-08-17T00:00:00.000Z
+
+npm run resources:publication:strong-bibles -- validate \
+  --bundle /absolute/path/to/strong-bible-publications-current/lsg
+```
+
+The producer downloads the exact sources declared by the mobile inventory,
+proves the builder/source/text revision chain, derives a canonical Strong index
+from every SQLite, and validates exact JSON/SQLite parity. Each manifest
+declares its required Bible text revision and SHA-256 plus the Strong lexicon
+module needed for lexical details. It refuses partial catalogs, unknown dataset
+identities, stale Bible dependencies, corrupt SQLite files, and malformed or
+multi-entry ZIP archives.
+
+Publish the two localized BHG/STEP interlinear indexes from the V5 runtime and
+bind them to the exact canonical BHG bundle:
+
+```sh
+npm run resources:publication:interlinear-bibles -- \
+  --fr-sqlite outputs/releases/bible-step-interlinear-runtime-v5/bible-step-interlinear-fr.sqlite \
+  --en-sqlite outputs/releases/bible-step-interlinear-runtime-v5/bible-step-interlinear-en.sqlite \
+  --bible-bundle outputs/releases/ordinary-bible-publications-current/bhg \
+  --output-dir outputs/releases/interlinear-bible-publications-current \
+  --generated-at 2026-08-17T00:00:00.000Z
+```
+
+The producer rewrites only the dependency metadata in a copied SQLite, never
+the source runtime. It derives one content-addressed Resource revision per
+locale, emits the complete normalized token/segment/identity JSON, creates the
+matching single-entry SQLite ZIP, and validates exact JSON/SQLite parity. Both
+manifests require the same ordinary BHG text revision and SHA-256, so an index
+cannot be activated against a different base text.
+
+Publish the complete Strong lexicon as three independently versioned modules:
+
+```sh
+npm run resources:publication:strong-lexicon -- \
+  --source data/dictionaries/strong_lexicon.en-fr.full.production.sqlite \
+  --entities data/entities/bible_entities.production.sqlite \
+  --config config/strong-lexicon-resource-publications.json \
+  --output outputs/publications/strong-lexicon-issue-305 \
+  --generated-at 2026-08-17T00:00:00.000Z
+
+npm run resources:publication:strong-lexicon -- validate \
+  --bundle /absolute/path/to/strong-lexicon-issue-305/core
+```
+
+The command emits exactly `core`, `resources`, and `entities`. Each directory
+contains normalized canonical JSON, one matching SQLite ZIP, and a strict
+rights-aware manifest under its own content-derived Resource revision. The
+resources and entities modules declare the exact core revision they extend,
+but remain independently downloadable and replaceable. Generation validates
+SQLite integrity, foreign keys, complete table/count parity, dependency
+metadata, checksums, paths, and the single regular bounded ZIP entry before
+atomically publishing the three-directory handoff. The same validator can be
+run independently against every received module.
+
+The command refuses to replace an existing output directory. Rebuild into a
+new directory for every immutable revision. Production upload or activation is
+not performed by this command. This per-Resource bundle is the canonical
+handoff into PostgreSQL; it does not replace the global mobile release catalog.
+Before any public Offline-copy activation, feed the bundle's exact archive into
+the source override for `resources:release:mobile`, rebuild the exhaustive
+catalog, and publish that catalog last as described below.
+
 ### Complete mobile resource release
 
 The mobile release inventory is owned by
