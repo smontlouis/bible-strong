@@ -81,6 +81,19 @@ yarn resources:import-all --root /path/to/strong-bible-publications-current
 yarn resources:import-all --root /path/to/interlinear-publications-current
 ```
 
+For a complete local editorial bootstrap, pass every Maker release root to the catalog importer.
+It discovers nested `manifest.json` bundles, imports them in dependency order, and activates them
+for local development without resetting PostgreSQL:
+
+```bash
+RESOURCE_PUBLICATION_ROOTS="/path/to/ordinary:/path/to/strong:/path/to/interlinear:/path/to/lexicon:/path/to/editorial" \
+  yarn resources:import-catalog
+```
+
+The command is repeatable: unchanged revisions are reported as `unchanged`, while a changed
+revision is staged and activated by the normal importer. It is intentionally local-only; it does
+not contact or modify a hosted database.
+
 `import-all` is the explicit local-development path: it activates publications whose manifest sets
 `localDevelopmentAccess`, while the ordinary `import` command continues to stage any publication
 whose rights do not permit public Online delivery.

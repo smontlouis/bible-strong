@@ -42,6 +42,7 @@
     "resources:bundle:validate": "tsx resource-service/src/publication/publicationCli.ts validate",
     "resources:import": "tsx resource-service/src/publication/publicationCli.ts import",
     "resources:import-all": "tsx resource-service/src/publication/publicationCli.ts import-all",
+    "resources:import-catalog": "tsx resource-service/src/publication/publicationCli.ts import-catalog",
     "resources:serve": "tsx resource-service/src/runtime/node.ts",
     "resources:serve:artifacts": "tsx resource-service/src/runtime/artifactNode.ts",
     "resources:dev": "tsx resource-service/src/runtime/dev.ts",
