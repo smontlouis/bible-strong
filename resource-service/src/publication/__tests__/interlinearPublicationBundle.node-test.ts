@@ -50,3 +50,17 @@ test('rejects an Offline copy whose schema is not the required V5 contract', asy
 
   await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_CONTENT_MISMATCH/)
 })
+
+test('rejects an Offline copy without its exact Resource revision', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'interlinear-revision-'))
+  await writeInterlinearPublicationFixture(root, { omitOfflineIndexRevision: true })
+
+  await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_CONTENT_MISMATCH/)
+})
+
+test('rejects an Offline Strong verse index that is not derived from canonical identities', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'interlinear-strong-index-'))
+  await writeInterlinearPublicationFixture(root, { mismatchedStrongVerseIndex: true })
+
+  await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_CONTENT_MISMATCH/)
+})

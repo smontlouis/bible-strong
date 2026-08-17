@@ -762,6 +762,7 @@ export const decodeCanonicalInterlinearBible = (
 
   const tokenIds = new Set<number>()
   const tokenOrdinals = new Set<string>()
+  const tokenById = new Map<number, CanonicalInterlinearBiblePublication['tokens'][number]>()
   for (const token of candidate.tokens) {
     if (
       !token ||
@@ -779,18 +780,21 @@ export const decodeCanonicalInterlinearBible = (
     }
     tokenIds.add(token.id)
     tokenOrdinals.add(ordinalKey)
+    tokenById.set(token.id, token)
   }
 
   const segmentIds = new Set<number>()
   const segmentOrdinals = new Set<string>()
   for (const segment of candidate.segments) {
+    const token = tokenById.get(segment.tokenId)
     if (
       !segment ||
       !isPositiveInteger(segment.id) ||
-      !tokenIds.has(segment.tokenId) ||
+      !token ||
       !isNonNegativeInteger(segment.ordinal) ||
       !isNonNegativeInteger(segment.startOffset) ||
       !isNonNegativeInteger(segment.length) ||
+      segment.startOffset + segment.length > token.length ||
       typeof segment.transliteration !== 'string' ||
       typeof segment.lemma !== 'string' ||
       typeof segment.morphology !== 'string' ||
@@ -814,6 +818,7 @@ export const decodeCanonicalInterlinearBible = (
       !segmentIds.has(identity.segmentId) ||
       !isNonNegativeInteger(identity.identityOrder) ||
       !identityKinds.has(identity.kind) ||
+      STRONG_IDENTITY_KINDS[identity.identityOrder] !== identity.kind ||
       !isNonEmptyString(identity.code)
     ) {
       throw new Error('CANONICAL_INTERLINEAR_IDENTITY_INVALID')
@@ -971,6 +976,10 @@ const validateNaveOfflineParity = async (
   let database: Database | undefined
   try {
     database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    if (integrity.length !== 1 || Object.values(integrity[0] ?? {}).some(value => value !== 'ok')) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
     const metadataRows = readSqliteRows(
       database,
       'SELECT resource_id, revision, source_version, source_sha256 FROM RESOURCE_METADATA'
@@ -1061,6 +1070,15 @@ const validateStrongBibleOfflineParity = async (
   let database: Database | undefined
   try {
     database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    const foreignKeyFailures = readSqliteRows(database, 'PRAGMA foreign_key_check')
+    if (
+      integrity.length !== 1 ||
+      Object.values(integrity[0] ?? {}).some(value => value !== 'ok') ||
+      foreignKeyFailures.length !== 0
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
     const metadata = Object.fromEntries(
       readSqliteRows(database, 'SELECT key, value FROM ResourceMetadata').map(row => [
         requireSqliteString(row.key),
@@ -1218,7 +1236,7 @@ const validateInterlinearBibleOfflineParity = async (
       metadata.locale !== canonical.language ||
       metadata.textRevision !== canonical.textRevision ||
       metadata.textSha256 !== canonical.textSha256 ||
-      (metadata.indexRevision !== undefined && metadata.indexRevision !== canonical.indexRevision)
+      metadata.indexRevision !== canonical.indexRevision
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }
@@ -1277,7 +1295,7 @@ const validateInterlinearBibleOfflineParity = async (
          LEFT JOIN StrongCodes c3 ON c3.id=s.uStrongCodeId
         ORDER BY s.id`
     ).flatMap(row =>
-      (['strong', 'estrong', 'dstrong', 'ustrong'] as const).flatMap((kind, identityOrder) => {
+      STRONG_IDENTITY_KINDS.flatMap((kind, identityOrder) => {
         const code = row[kind]
         return code == null
           ? []
@@ -1291,6 +1309,59 @@ const validateInterlinearBibleOfflineParity = async (
             ]
       })
     )
+
+    const rawCounts = {
+      verses: requireSqliteInteger(
+        readSqliteRows(database, 'SELECT COUNT(*) AS count FROM Verses')[0]?.count
+      ),
+      tokens: requireSqliteInteger(
+        readSqliteRows(database, 'SELECT COUNT(*) AS count FROM Tokens')[0]?.count
+      ),
+      segments: requireSqliteInteger(
+        readSqliteRows(database, 'SELECT COUNT(*) AS count FROM Segments')[0]?.count
+      ),
+      identities: segmentIdentities.length,
+    }
+    if (
+      rawCounts.verses !== canonical.verses.length ||
+      rawCounts.tokens !== canonical.tokens.length ||
+      rawCounts.segments !== canonical.segments.length ||
+      rawCounts.identities !== canonical.segmentIdentities.length ||
+      verses.length !== rawCounts.verses ||
+      tokens.length !== rawCounts.tokens ||
+      segments.length !== rawCounts.segments
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+
+    const verseByToken = new Map(canonical.tokens.map(token => [token.id, token.verseId]))
+    const tokenBySegment = new Map(canonical.segments.map(segment => [segment.id, segment.tokenId]))
+    const expectedStrongVerseIndex = new Set(
+      canonical.segmentIdentities.map(identity => {
+        const verseId = verseByToken.get(tokenBySegment.get(identity.segmentId) ?? -1)
+        if (verseId === undefined) throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+        return `${verseId}:${identity.code}`
+      })
+    )
+    const strongVerseRows = readSqliteRows(
+      database,
+      `SELECT svi.verseId AS verseId, sc.code AS code
+         FROM StrongVerseIndex svi
+         JOIN StrongCodes sc ON sc.id=svi.codeId
+        ORDER BY svi.verseId, sc.code`
+    )
+    const actualStrongVerseIndex = new Set(
+      strongVerseRows.map(
+        row => `${requireSqliteInteger(row.verseId)}:${requireSqliteString(row.code)}`
+      )
+    )
+    if (
+      actualStrongVerseIndex.size !== strongVerseRows.length ||
+      actualStrongVerseIndex.size !== expectedStrongVerseIndex.size ||
+      [...expectedStrongVerseIndex].some(key => !actualStrongVerseIndex.has(key))
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
 
     const expected = {
       verses: [...canonical.verses].sort((left, right) => left.id - right.id),

@@ -205,6 +205,33 @@ describe('interlinear Bible HTTP resource access', () => {
     )
   })
 
+  it('recovers from an incompatible index through HTTP while keeping its BHG dependency', async () => {
+    const offline = unavailableAdapter()
+    offline.getAvailability.mockResolvedValue({ status: 'incompatible' })
+    const online = unavailableAdapter()
+    online.getAvailability.mockResolvedValue({
+      status: 'available',
+      locale: 'fr',
+      textRevision: resource.textRevision,
+    })
+    online.loadChapterTokens.mockResolvedValue({
+      tokensByVerse: { 1: [token] },
+      textRevision: resource.textRevision,
+      textSha256: resource.textSha256,
+    })
+    const hybrid = createHybridInterlinearBibleResourceAdapter({
+      offline,
+      online,
+      remotelyReadableLocales: new Set(['fr', 'en']),
+      isOnline: async () => true,
+    })
+
+    await expect(hybrid.getAvailability('fr')).resolves.toMatchObject({ status: 'available' })
+    await expect(hybrid.loadChapterTokens('fr', { book: 1, chapter: 1 })).resolves.toMatchObject({
+      tokensByVerse: { 1: [token] },
+    })
+  })
+
   it('keeps an incompatible installed BHG dependency instead of mixing revisions', async () => {
     const offline = unavailableAdapter()
     offline.getAvailability.mockResolvedValue({ status: 'base-incompatible' })

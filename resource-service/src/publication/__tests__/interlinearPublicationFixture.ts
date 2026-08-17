@@ -46,7 +46,11 @@ export const canonicalInterlinearFixture: CanonicalInterlinearBiblePublication =
 
 const makeOfflineSqlite = async (
   canonical: CanonicalInterlinearBiblePublication,
-  schemaVersion = 5
+  options: {
+    schemaVersion?: number
+    omitIndexRevision?: boolean
+    mismatchedStrongVerseIndex?: boolean
+  } = {}
 ) => {
   const SQL = await initSqlJs()
   const database = new SQL.Database()
@@ -74,19 +78,20 @@ const makeOfflineSqlite = async (
     );
     CREATE TABLE StrongVerseIndex(codeId INTEGER, verseId INTEGER, kindMask INTEGER);
   `)
-  for (const [key, value] of Object.entries({
+  const metadata = {
     applicationVersionId: canonical.applicationVersionId,
     datasetId: canonical.datasetId,
     locale: canonical.language,
     textRevision: canonical.textRevision,
     textSha256: canonical.textSha256,
-    indexRevision: canonical.indexRevision,
-    schemaVersion,
+    ...(!options.omitIndexRevision ? { indexRevision: canonical.indexRevision } : {}),
+    schemaVersion: options.schemaVersion ?? 5,
     verseCount: canonical.verses.length,
     tokenCount: canonical.tokens.length,
     segmentCount: canonical.segments.length,
     identityCount: canonical.segmentIdentities.length,
-  })) {
+  }
+  for (const [key, value] of Object.entries(metadata)) {
     database.run('INSERT INTO ResourceMetadata(key, value) VALUES (?, ?)', [key, String(value)])
   }
   database.run("INSERT INTO Verses VALUES (1, 1, 'Gen', 1, 1, 'Gen.1.1')")
@@ -97,7 +102,9 @@ const makeOfflineSqlite = async (
   database.run('INSERT INTO Glosses VALUES (1, ?)', [canonical.segments[0]!.gloss])
   database.run("INSERT INTO StrongCodes VALUES (1, 'H07225')")
   database.run('INSERT INTO Segments VALUES (11, 7, 0, 0, 8, 1, 1, 1, 1, 1, NULL, NULL, NULL)')
-  database.run('INSERT INTO StrongVerseIndex VALUES (1, 1, 1)')
+  database.run('INSERT INTO StrongVerseIndex VALUES (1, ?, 1)', [
+    options.mismatchedStrongVerseIndex ? 2 : 1,
+  ])
   const bytes = database.export()
   database.close()
   return bytes
@@ -112,6 +119,8 @@ export const writeInterlinearPublicationFixture = async (
     canonicalLanguage?: 'fr' | 'en'
     extraOfflineEntry?: boolean
     offlineSchemaVersion?: number
+    omitOfflineIndexRevision?: boolean
+    mismatchedStrongVerseIndex?: boolean
   } = {}
 ) => {
   const language = options.language ?? 'fr'
@@ -128,7 +137,11 @@ export const writeInterlinearPublicationFixture = async (
     indexRevision: deriveInterlinearBibleResourceRevision(canonicalBase),
   }
   const canonicalJson = `${JSON.stringify(canonical)}\n`
-  const sqlite = await makeOfflineSqlite(canonical, options.offlineSchemaVersion)
+  const sqlite = await makeOfflineSqlite(canonical, {
+    schemaVersion: options.offlineSchemaVersion,
+    omitIndexRevision: options.omitOfflineIndexRevision,
+    mismatchedStrongVerseIndex: options.mismatchedStrongVerseIndex,
+  })
   const entry = `bible-step-interlinear-${language}.sqlite`
   const offline = zipSync({
     [entry]: sqlite,

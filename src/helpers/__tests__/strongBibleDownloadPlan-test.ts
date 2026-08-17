@@ -185,6 +185,26 @@ describe('Interlinear Bible download planning', () => {
       ])
     }
   )
+
+  it('binds the BHG and localized index downloads to the same canonical text identity', () => {
+    const [bible, index] = createInterlinearSidecarDownloadPlan('fr', 'base-missing')
+
+    expect(bible?.type).toBe('bible')
+    expect(index?.type).toBe('bible-interlinear-sidecar')
+    if (bible?.type !== 'bible' || index?.type !== 'bible-interlinear-sidecar') {
+      throw new Error('Expected the BHG Bible followed by its French interlinear index')
+    }
+
+    expect(bible.archiveArtifact).toMatchObject({
+      textRevision: 'bhg-803c482ed06005693547',
+      textSha256: '803c482ed06005693547f9ea04a2dcbec4718c1d97ab0c531d60600e4c3a9d8f',
+    })
+    expect(index.interlinearArtifact).toMatchObject({
+      textRevision: bible.archiveArtifact?.textRevision,
+      textSha256: bible.archiveArtifact?.textSha256,
+      archiveSha256: '01c757b213c0b467a6ae0d405f7e911ea516eed4159485b591f5b3196e9905ec',
+    })
+  })
 })
 
 describe('Strong display mode download planning', () => {

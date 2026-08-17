@@ -239,7 +239,7 @@ export const createHybridInterlinearBibleResourceAdapter = ({
           if (!remotelyReadableLocales.has(locale) || !(await isOnline())) throw mapped
         }
       }
-      if (local.status === 'base-incompatible' || local.status === 'incompatible') {
+      if (local.status === 'base-incompatible') {
         throw invalidOfflineCopy()
       }
       if (!remotelyReadableLocales.has(locale)) {

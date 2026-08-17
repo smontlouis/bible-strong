@@ -6,6 +6,7 @@ import type {
   InterlinearIdentityKind,
   InterlinearToken,
 } from '../../../src/helpers/interlinearBibleSidecar'
+import { STRONG_IDENTITY_KINDS } from '../../../src/helpers/strongIdentities'
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import type { ResourceDatabase } from '../database/types'
@@ -102,7 +103,7 @@ const groupRows = (rows: readonly InterlinearRow[]) => {
       segments.set(row.segment_id, segment)
       token.segments.push(segment)
     }
-    if (row.kind && row.code && ['strong', 'estrong', 'dstrong', 'ustrong'].includes(row.kind)) {
+    if (row.kind && row.code && STRONG_IDENTITY_KINDS.some(kind => kind === row.kind)) {
       segment.identities.push({ kind: row.kind as InterlinearIdentityKind, code: row.code })
     }
   }
