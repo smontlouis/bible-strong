@@ -213,6 +213,28 @@ const CrossReferencePublicationBundleManifestSchema = Schema.Struct({
   }),
 })
 
+const TimelinePublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  canonical: Schema.Struct({
+    ...PublicationBundleCommonFields.canonical.fields,
+    schemaVersion: Schema.Literal(1),
+  }),
+  offlineArtifact: Schema.Struct({
+    ...PublicationBundleCommonFields.offlineArtifact.fields,
+    entry: Schema.Literal('bible-timeline-events.json'),
+  }),
+  identity: Schema.Struct({
+    kind: Schema.Literal('timeline'),
+    resourceId: Schema.Literal('TIMELINE'),
+    language: Schema.Literal('fr', 'en'),
+  }),
+  counts: Schema.Struct({
+    events: Schema.NonNegativeInt,
+    relations: Schema.NonNegativeInt,
+    scriptures: Schema.NonNegativeInt,
+  }),
+})
+
 const StrongBiblePublicationBundleManifestSchema = Schema.Struct({
   ...PublicationBundleCommonFields,
   identity: Schema.Struct({
@@ -316,6 +338,7 @@ const PublicationBundleManifestSchema = Schema.Union(
   DictionaryPublicationBundleManifestSchema,
   CommentaryPublicationBundleManifestSchema,
   CrossReferencePublicationBundleManifestSchema,
+  TimelinePublicationBundleManifestSchema,
   StrongBiblePublicationBundleManifestSchema,
   InterlinearBiblePublicationBundleManifestSchema,
   StrongLexiconPublicationBundleManifestSchema
@@ -329,6 +352,7 @@ export type CommentaryPublicationBundleManifest =
   typeof CommentaryPublicationBundleManifestSchema.Type
 export type CrossReferencePublicationBundleManifest =
   typeof CrossReferencePublicationBundleManifestSchema.Type
+export type TimelinePublicationBundleManifest = typeof TimelinePublicationBundleManifestSchema.Type
 export type StrongBiblePublicationBundleManifest =
   typeof StrongBiblePublicationBundleManifestSchema.Type
 export type InterlinearBiblePublicationBundleManifest =
@@ -341,6 +365,7 @@ export type PublicationBundleManifest =
   | DictionaryPublicationBundleManifest
   | CommentaryPublicationBundleManifest
   | CrossReferencePublicationBundleManifest
+  | TimelinePublicationBundleManifest
   | StrongBiblePublicationBundleManifest
   | InterlinearBiblePublicationBundleManifest
   | StrongLexiconPublicationBundleManifest
@@ -365,6 +390,10 @@ export const isCrossReferencePublicationBundleManifest = (
   manifest: PublicationBundleManifest
 ): manifest is CrossReferencePublicationBundleManifest =>
   manifest.identity.kind === 'cross-references'
+
+export const isTimelinePublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is TimelinePublicationBundleManifest => manifest.identity.kind === 'timeline'
 
 export const isStrongBiblePublicationBundleManifest = (
   manifest: PublicationBundleManifest
@@ -468,6 +497,31 @@ export type CanonicalCrossReferencePublication = {
   verseAnchors: Array<{ verseKey: string; references: string[] }>
 }
 
+export type CanonicalTimelineEvent = {
+  id: string
+  slug: string
+  title: string
+  description: string
+  article: string
+  period: string
+  dates: string
+  related: Array<{ slug: string; title: string }>
+  images: Array<{ caption: string; file: string }>
+  videos: Array<{ title: string; caption: string; filename: string }>
+  scriptures: string[]
+}
+
+export type CanonicalTimelinePublication = {
+  format: 'bible-strong-canonical-timeline'
+  schemaVersion: 1
+  resourceId: 'TIMELINE'
+  language: 'fr' | 'en'
+  revision: string
+  sourceVersion: string
+  sourceSha256: string
+  events: CanonicalTimelineEvent[]
+}
+
 export type CanonicalStrongBibleVerse = { book: number; chapter: number; verse: number }
 export type CanonicalStrongBibleLexeme = { id: number; lemma: string; partOfSpeech: string }
 export type CanonicalStrongBibleIdentity = {
@@ -554,6 +608,7 @@ export type CanonicalPublication =
   | CanonicalDictionaryPublication
   | CanonicalCommentaryPublication
   | CanonicalCrossReferencePublication
+  | CanonicalTimelinePublication
   | CanonicalStrongBiblePublication
   | CanonicalInterlinearBiblePublication
   | CanonicalStrongLexiconModulePublication
@@ -591,9 +646,11 @@ export const derivePublicationRevision = (manifest: PublicationBundleManifest): 
           ? `commentary-${manifest.identity.resourceId.toLowerCase()}-${manifest.identity.language}`
           : manifest.identity.kind === 'cross-references'
             ? `cross-references-${manifest.identity.language}`
-            : manifest.identity.kind === 'strong-lexicon-module'
-              ? manifest.identity.resourceId
-              : manifest.identity.versionId.toLowerCase()
+            : manifest.identity.kind === 'timeline'
+              ? `timeline-${manifest.identity.language}`
+              : manifest.identity.kind === 'strong-lexicon-module'
+                ? manifest.identity.resourceId
+                : manifest.identity.versionId.toLowerCase()
   const digest = createHash('sha256')
     .update(JSON.stringify(normalizeJson(envelope)))
     .digest('hex')
@@ -679,6 +736,13 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     (manifest.identity.resourceId !== 'TRESOR' ||
       manifest.offlineArtifact.entry !== 'commentaires-tresor.sqlite' ||
       manifest.counts.verseAnchors === 0)
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
+  }
+  if (
+    isTimelinePublicationBundleManifest(manifest) &&
+    (manifest.offlineArtifact.entry !== 'bible-timeline-events.json' ||
+      manifest.counts.events === 0)
   ) {
     throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
   }
@@ -969,6 +1033,72 @@ export const decodeCanonicalCrossReferences = (
     keys.add(anchor.verseKey)
   }
   return candidate as CanonicalCrossReferencePublication
+}
+
+export const decodeCanonicalTimeline = (value: unknown): CanonicalTimelinePublication => {
+  if (!value || typeof value !== 'object') throw new Error('CANONICAL_TIMELINE_INVALID')
+  const candidate = value as Partial<CanonicalTimelinePublication>
+  if (
+    candidate.format !== 'bible-strong-canonical-timeline' ||
+    candidate.schemaVersion !== 1 ||
+    candidate.resourceId !== 'TIMELINE' ||
+    (candidate.language !== 'fr' && candidate.language !== 'en') ||
+    !isNonEmptyString(candidate.revision) ||
+    !isNonEmptyString(candidate.sourceVersion) ||
+    !/^[a-f0-9]{64}$/u.test(candidate.sourceSha256 ?? '') ||
+    !Array.isArray(candidate.events) ||
+    candidate.events.length === 0
+  ) {
+    throw new Error('CANONICAL_TIMELINE_INVALID')
+  }
+  const slugs = new Set<string>()
+  const ids = new Set<string>()
+  for (const event of candidate.events) {
+    if (
+      !event ||
+      !isNonEmptyString(event.id) ||
+      !isNonEmptyString(event.slug) ||
+      !isNonEmptyString(event.title) ||
+      typeof event.description !== 'string' ||
+      typeof event.article !== 'string' ||
+      typeof event.period !== 'string' ||
+      typeof event.dates !== 'string' ||
+      !Array.isArray(event.related) ||
+      !Array.isArray(event.images) ||
+      !Array.isArray(event.videos) ||
+      !Array.isArray(event.scriptures) ||
+      slugs.has(event.slug) ||
+      ids.has(event.id)
+    ) {
+      throw new Error('CANONICAL_TIMELINE_EVENT_INVALID')
+    }
+    for (const related of event.related) {
+      if (!related || !isNonEmptyString(related.slug) || !isNonEmptyString(related.title)) {
+        throw new Error('CANONICAL_TIMELINE_RELATED_INVALID')
+      }
+    }
+    for (const image of event.images) {
+      if (!image || typeof image.caption !== 'string' || !isNonEmptyString(image.file)) {
+        throw new Error('CANONICAL_TIMELINE_IMAGE_INVALID')
+      }
+    }
+    for (const video of event.videos) {
+      if (
+        !video ||
+        typeof video.title !== 'string' ||
+        typeof video.caption !== 'string' ||
+        !isNonEmptyString(video.filename)
+      ) {
+        throw new Error('CANONICAL_TIMELINE_VIDEO_INVALID')
+      }
+    }
+    if (event.scriptures.some(scripture => typeof scripture !== 'string')) {
+      throw new Error('CANONICAL_TIMELINE_SCRIPTURE_INVALID')
+    }
+    slugs.add(event.slug)
+    ids.add(event.id)
+  }
+  return candidate as CanonicalTimelinePublication
 }
 
 const isPositiveInteger = (value: unknown): value is number =>
@@ -1365,6 +1495,21 @@ export const deriveInterlinearBibleResourceRevision = (
     .digest('hex')
   return `bhg-interlinear-${publication.language}-${digest.slice(0, 20)}`
 }
+
+export const deriveTimelineResourceRevision = (
+  publication: Pick<CanonicalTimelinePublication, 'language' | 'events'>
+): string => {
+  const digest = createHash('sha256')
+    .update(JSON.stringify(normalizeJson(publication.events)))
+    .digest('hex')
+  return `timeline-${publication.language}-${digest.slice(0, 20)}`
+}
+
+export const countCanonicalTimelineContent = (publication: CanonicalTimelinePublication) => ({
+  events: publication.events.length,
+  relations: publication.events.reduce((total, event) => total + event.related.length, 0),
+  scriptures: publication.events.reduce((total, event) => total + event.scriptures.length, 0),
+})
 
 export const getCanonicalNaveAlphabeticalBrowse = (publication: CanonicalNavePublication) => {
   const topicCountByInitial: Record<string, number> = {}
@@ -2876,6 +3021,31 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
     }
     await validateCrossReferenceOfflineParity(offlineContent, canonical)
+  } else if (isTimelinePublicationBundleManifest(manifest)) {
+    canonical = decodeCanonicalTimeline(canonicalValue)
+    if (
+      canonical.resourceId !== manifest.identity.resourceId ||
+      canonical.language !== manifest.identity.language ||
+      canonical.revision !== manifest.revision ||
+      deriveTimelineResourceRevision(canonical) !== manifest.revision ||
+      canonical.sourceVersion !== manifest.provenance.sourceVersion ||
+      canonical.sourceSha256 !== manifest.provenance.sourceSha256 ||
+      JSON.stringify(countCanonicalTimelineContent(canonical)) !== JSON.stringify(manifest.counts)
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+    let archivedEvents: unknown
+    try {
+      archivedEvents = JSON.parse(Buffer.from(offlineContent).toString('utf8'))
+    } catch (cause) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_INVALID', { cause })
+    }
+    if (
+      !Array.isArray(archivedEvents) ||
+      JSON.stringify(archivedEvents) !== JSON.stringify(canonical.events)
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
   } else if (isStrongBiblePublicationBundleManifest(manifest)) {
     canonical = decodeCanonicalStrongBible(canonicalValue)
     if (

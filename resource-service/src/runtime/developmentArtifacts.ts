@@ -15,7 +15,8 @@ export const createDevelopmentArtifact = (
 ): DevelopmentArtifact => {
   const filename = path.basename(manifest.offlineArtifact.path)
   const databasePrefix =
-    manifest.identity.kind === 'nave' && manifest.identity.language === 'en'
+    (manifest.identity.kind === 'nave' || manifest.identity.kind === 'timeline') &&
+    manifest.identity.language === 'en'
       ? '/databases/en'
       : '/databases'
   const databaseKinds = new Set([
@@ -24,6 +25,7 @@ export const createDevelopmentArtifact = (
     'commentary',
     'cross-references',
     'strong-lexicon-module',
+    'timeline',
   ])
   return {
     route: `${databaseKinds.has(manifest.identity.kind) ? databasePrefix : '/bibles'}/${filename}`,

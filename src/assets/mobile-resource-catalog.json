@@ -1557,16 +1557,16 @@
       "entries": {
         "canonical": {
           "entry": "bible-timeline-events.json",
-          "sha256": "786e785cbcb70e6fd800e7c508ef7ddd366e76007d95240caccdb6abf1e3da3d",
-          "bytes": 1822033
+          "sha256": "7cf9ff871b30f9d9cb235c9742d16d278e73da2e2c708235f2337bba18b5efc1",
+          "bytes": 1397921
         }
       },
-      "archiveSha256": "383ee138c4dfdd3d96333161a39f7e696a3aa0c6a2abe8f7e92f9fcd6f448d70",
-      "archiveBytes": 574945,
-      "contentSha256": "786e785cbcb70e6fd800e7c508ef7ddd366e76007d95240caccdb6abf1e3da3d",
-      "contentBytes": 1822033,
-      "installedBytes": 1822033,
-      "peakInstallationBytes": 2756525,
+      "archiveSha256": "7f6e4eb89eab97a3010e3664285b4fbe11abb6c9d9b991d5e23a12275cdce6a3",
+      "archiveBytes": 488026,
+      "contentSha256": "7cf9ff871b30f9d9cb235c9742d16d278e73da2e2c708235f2337bba18b5efc1",
+      "contentBytes": 1397921,
+      "installedBytes": 1397921,
+      "peakInstallationBytes": 1885947,
       "strategy": "archive-extract"
     },
     "database:TIMELINE:fr": {
@@ -1577,16 +1577,16 @@
       "entries": {
         "canonical": {
           "entry": "bible-timeline-events.json",
-          "sha256": "ee866711e30631cc525c156bbf971654990dec0605988f8b37bff072894dd1af",
-          "bytes": 1512391
+          "sha256": "fe4d7e06145f65683f2380e61f55b0d6cd53a8386bb1964da2de9971099da818",
+          "bytes": 1520517
         }
       },
-      "archiveSha256": "7cf06690f92a2430927e9414df21bc72ecac03911740be741f630d3b82254423",
-      "archiveBytes": 542735,
-      "contentSha256": "ee866711e30631cc525c156bbf971654990dec0605988f8b37bff072894dd1af",
-      "contentBytes": 1512391,
-      "installedBytes": 1512391,
-      "peakInstallationBytes": 2363395,
+      "archiveSha256": "d24b4c08e2f8f25e51256ecc01e98cb3fa7befbaff96da39eef0f5f75b709d84",
+      "archiveBytes": 532641,
+      "contentSha256": "fe4d7e06145f65683f2380e61f55b0d6cd53a8386bb1964da2de9971099da818",
+      "contentBytes": 1520517,
+      "installedBytes": 1520517,
+      "peakInstallationBytes": 2055793,
       "strategy": "archive-extract"
     },
     "database:TRESOR:fr": {

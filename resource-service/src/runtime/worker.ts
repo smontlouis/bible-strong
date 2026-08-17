@@ -6,6 +6,7 @@ import type { StrongBibleRepositoryService } from '../domain/strongBible'
 import type { InterlinearBibleRepositoryService } from '../domain/interlinearBible'
 import type { StrongLexiconRepositoryService } from '../domain/strongLexicon'
 import type { SupplementaryRepositoryService } from '../domain/supplementary'
+import type { TimelineRepositoryService } from '../domain/timeline'
 import { makeNeonBibleChapterRepository } from '../repositories/bibleChapterRepository'
 import { makeNeonNaveRepository } from '../repositories/naveRepository'
 import { makeNeonDictionaryRepository } from '../repositories/dictionaryRepository'
@@ -13,6 +14,7 @@ import { makeNeonStrongBibleRepository } from '../repositories/strongBibleReposi
 import { makeNeonInterlinearBibleRepository } from '../repositories/interlinearBibleRepository'
 import { makeNeonStrongLexiconRepository } from '../repositories/strongLexiconRepository'
 import { makeNeonSupplementaryRepository } from '../repositories/supplementaryRepository'
+import { makeNeonTimelineRepository } from '../repositories/timelineRepository'
 
 export type ResourceWorkerBindings = {
   RESOURCE_DATABASE_URL: string
@@ -25,7 +27,8 @@ export const makeResourceWorkerHandler = (
   strongBibleRepository?: StrongBibleRepositoryService,
   interlinearBibleRepository?: InterlinearBibleRepositoryService,
   strongLexiconRepository?: StrongLexiconRepositoryService,
-  supplementaryRepository?: SupplementaryRepositoryService
+  supplementaryRepository?: SupplementaryRepositoryService,
+  timelineRepository?: TimelineRepositoryService
 ) =>
   makeResourceWebHandler(repository, naveRepository, {
     dictionary: dictionaryRepository,
@@ -33,6 +36,7 @@ export const makeResourceWorkerHandler = (
     interlinearBible: interlinearBibleRepository,
     strongLexicon: strongLexiconRepository,
     supplementary: supplementaryRepository,
+    timeline: timelineRepository,
   })
 
 let cached:
@@ -57,6 +61,7 @@ const getWorkerHandler = (connectionString: string) => {
   const { repository: supplementaryRepository } = makeNeonSupplementaryRepository({
     connectionString,
   })
+  const { repository: timelineRepository } = makeNeonTimelineRepository({ connectionString })
   const web = makeResourceWorkerHandler(
     repository,
     naveRepository,
@@ -64,7 +69,8 @@ const getWorkerHandler = (connectionString: string) => {
     strongBibleRepository,
     interlinearBibleRepository,
     strongLexiconRepository,
-    supplementaryRepository
+    supplementaryRepository,
+    timelineRepository
   )
   cached = { connectionString, web }
   return web

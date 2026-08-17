@@ -83,6 +83,15 @@ import {
   SupplementaryRepositoryFailure,
   type SupplementaryRepositoryService,
 } from '../domain/supplementary'
+import {
+  ActiveTimelinePublicationUnavailable,
+  TimelineEventNotFound,
+  TimelineRepository,
+  TimelineRepositoryFailure,
+  readTimelineEvent,
+  readTimelineEvents,
+  type TimelineRepositoryService,
+} from '../domain/timeline'
 import { HealthResponse, ResourceApi } from './api'
 import {
   InvalidResourceRequestProblem,
@@ -132,7 +141,10 @@ const toHttpProblem = (
     | StrongLexiconRepositoryFailure
     | ActiveSupplementaryPublicationUnavailable
     | SupplementaryContentNotFound
-    | SupplementaryRepositoryFailure,
+    | SupplementaryRepositoryFailure
+    | ActiveTimelinePublicationUnavailable
+    | TimelineEventNotFound
+    | TimelineRepositoryFailure,
   requestId: string
 ) => {
   switch (cause._tag) {
@@ -166,6 +178,25 @@ const toHttpProblem = (
         ...problemFields(requestId, 'The Resource service could not complete the request.'),
         status: 500,
         code: 'RESOURCE_INTERNAL_FAILURE',
+      })
+    case 'TimelineRepositoryFailure':
+      return new ResourceInternalProblem({
+        ...problemFields(requestId, 'The Resource service could not complete the request.'),
+        status: 500,
+        code: 'RESOURCE_INTERNAL_FAILURE',
+      })
+    case 'TimelineEventNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This timeline event does not exist.'),
+        status: 404,
+        code: 'TIMELINE_EVENT_NOT_FOUND',
+      })
+    case 'ActiveTimelinePublicationUnavailable':
+      return new ResourceUnavailableProblem({
+        ...problemFields(requestId, 'The timeline publication is temporarily unavailable.'),
+        status: 503,
+        code: 'TIMELINE_PUBLICATION_INACTIVE',
+        retryAfterSeconds: 30,
       })
     case 'SupplementaryContentNotFound':
       return new ResourceNotFoundProblem({
@@ -685,6 +716,30 @@ const SupplementaryApiLive = HttpApiBuilder.group(ResourceApi, 'supplementary', 
     })
 )
 
+const TimelineApiLive = HttpApiBuilder.group(ResourceApi, 'timelines', handlers =>
+  handlers
+    .handle('listTimelineEvents', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readTimelineEvents(path.language).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['timeline', path.language, 'events']
+      )
+    })
+    .handle('getTimelineEvent', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readTimelineEvent(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['timeline', path.language, 'event', path.slug]
+      )
+    })
+)
+
 export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
   Layer.provide(BibleApiLive),
@@ -693,7 +748,8 @@ export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(StrongBibleApiLive),
   Layer.provide(InterlinearBibleApiLive),
   Layer.provide(StrongLexiconApiLive),
-  Layer.provide(SupplementaryApiLive)
+  Layer.provide(SupplementaryApiLive),
+  Layer.provide(TimelineApiLive)
 )
 
 const unavailableRepository: BibleChapterRepositoryService = {
@@ -780,6 +836,12 @@ const unavailableSupplementaryRepository: SupplementaryRepositoryService = {
     ),
 }
 
+const unavailableTimelineRepository: TimelineRepositoryService = {
+  listEvents: language => Effect.fail(new ActiveTimelinePublicationUnavailable({ language })),
+  findEvent: input =>
+    Effect.fail(new ActiveTimelinePublicationUnavailable({ language: input.language })),
+}
+
 export const provideResourceRepositories = (
   repository: BibleChapterRepositoryService,
   naveRepository: NaveRepositoryService,
@@ -787,7 +849,8 @@ export const provideResourceRepositories = (
   strongBibleRepository: StrongBibleRepositoryService = unavailableStrongBibleRepository,
   interlinearBibleRepository: InterlinearBibleRepositoryService = unavailableInterlinearBibleRepository,
   strongLexiconRepository: StrongLexiconRepositoryService = unavailableStrongLexiconRepository,
-  supplementaryRepository: SupplementaryRepositoryService = unavailableSupplementaryRepository
+  supplementaryRepository: SupplementaryRepositoryService = unavailableSupplementaryRepository,
+  timelineRepository: TimelineRepositoryService = unavailableTimelineRepository
 ) =>
   ResourceApiLive.pipe(
     Layer.provide(
@@ -798,7 +861,8 @@ export const provideResourceRepositories = (
         Layer.succeed(StrongBibleRepository, strongBibleRepository),
         Layer.succeed(InterlinearBibleRepository, interlinearBibleRepository),
         Layer.succeed(StrongLexiconRepository, strongLexiconRepository),
-        Layer.succeed(SupplementaryRepository, supplementaryRepository)
+        Layer.succeed(SupplementaryRepository, supplementaryRepository),
+        Layer.succeed(TimelineRepository, timelineRepository)
       )
     )
   )
@@ -817,7 +881,8 @@ export const makeResourceWebHandler = (
         overrides.strongBible ?? unavailableStrongBibleRepository,
         overrides.interlinearBible ?? unavailableInterlinearBibleRepository,
         overrides.strongLexicon ?? unavailableStrongLexiconRepository,
-        overrides.supplementary ?? unavailableSupplementaryRepository
+        overrides.supplementary ?? unavailableSupplementaryRepository,
+        overrides.timeline ?? unavailableTimelineRepository
       ),
       HttpServer.layerContext
     )
@@ -857,4 +922,5 @@ export type ResourceRepositoryOverrides = {
   interlinearBible?: InterlinearBibleRepositoryService
   strongLexicon?: StrongLexiconRepositoryService
   supplementary?: SupplementaryRepositoryService
+  timeline?: TimelineRepositoryService
 }

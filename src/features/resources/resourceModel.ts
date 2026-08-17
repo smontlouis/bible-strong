@@ -80,7 +80,8 @@ export const getResourceOnlineAccess = (
   remotelyReadableStrongLexiconModules: ReadonlySet<string> = new Set(),
   remotelyReadableDictionaryLanguages: ReadonlySet<ResourceLanguage> = new Set(),
   remotelyReadableCommentaryCollections: ReadonlySet<string> = new Set(),
-  remotelyReadableCrossReferences = false
+  remotelyReadableCrossReferences = false,
+  remotelyReadableTimelineLanguages: ReadonlySet<ResourceLanguage> = new Set()
 ): OnlineAccessState =>
   (identity.kind === 'bible-text' && remotelyReadableBibleVersions.has(identity.versionId)) ||
   (identity.kind === 'strong-bible-index' &&
@@ -94,7 +95,8 @@ export const getResourceOnlineAccess = (
   (identity.kind === 'commentary' &&
     (identity.collection === 'FIRESTORE' ||
       remotelyReadableCommentaryCollections.has(identity.collection))) ||
-  (identity.kind === 'cross-references' && remotelyReadableCrossReferences)
+  (identity.kind === 'cross-references' && remotelyReadableCrossReferences) ||
+  (identity.kind === 'timeline' && remotelyReadableTimelineLanguages.has(identity.language))
     ? { status: 'remotely-readable' }
     : { status: 'unsupported' }
 

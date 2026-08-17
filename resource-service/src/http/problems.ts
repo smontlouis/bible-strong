@@ -34,7 +34,8 @@ export class ResourceNotFoundProblem extends Schema.TaggedError<ResourceNotFound
       'INTERLINEAR_CHAPTER_NOT_FOUND',
       'STRONG_LEXICON_ENTRY_NOT_FOUND',
       'STRONG_LEXICON_ENTITY_NOT_FOUND',
-      'SUPPLEMENTARY_CONTENT_NOT_FOUND'
+      'SUPPLEMENTARY_CONTENT_NOT_FOUND',
+      'TIMELINE_EVENT_NOT_FOUND'
     ),
   }
 ) {}
@@ -51,7 +52,8 @@ export class ResourceUnavailableProblem extends Schema.TaggedError<ResourceUnava
       'STRONG_BIBLE_PUBLICATION_INACTIVE',
       'INTERLINEAR_PUBLICATION_INACTIVE',
       'STRONG_LEXICON_PUBLICATION_INACTIVE',
-      'SUPPLEMENTARY_PUBLICATION_INACTIVE'
+      'SUPPLEMENTARY_PUBLICATION_INACTIVE',
+      'TIMELINE_PUBLICATION_INACTIVE'
     ),
     retryAfterSeconds: Schema.Int.pipe(Schema.positive()),
   }
