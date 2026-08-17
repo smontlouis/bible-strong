@@ -2,6 +2,7 @@ import {
   BUNDLED_MOBILE_RESOURCE_CATALOG,
   getMobileBibleVersionIds,
   getMobileResourceCatalogEntry,
+  getDevelopmentResourceArtifactBaseUrl,
   isMobileResourceCatalog,
   loadMobileResourceCatalog,
   MOBILE_RESOURCE_CATALOG,
@@ -164,6 +165,12 @@ describe('mobile resource catalog', () => {
     )
     expect(resolveMobileResourceArtifactUrl(entry, 'file:///tmp/resources')).toBe(entry.url)
     expect(resolveMobileResourceArtifactUrl(entry, 'not-a-url')).toBe(entry.url)
+  })
+
+  it('uses the local artifact-server defaults for native development', () => {
+    expect(getDevelopmentResourceArtifactBaseUrl('ios')).toBe('http://127.0.0.1:8788')
+    expect(getDevelopmentResourceArtifactBaseUrl('android')).toBe('http://10.0.2.2:8788')
+    expect(getDevelopmentResourceArtifactBaseUrl('web')).toBeUndefined()
   })
 
   it('fails closed for an undeclared resource', () => {

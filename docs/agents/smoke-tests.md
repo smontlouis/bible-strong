@@ -58,6 +58,37 @@ This is a UI-driven mobile app. Level 1 Ready requires app launch plus represent
 - Theme switch and return to previous theme.
 - Import/export backup flow using a throwaway file only.
 
+## Automated Resource Smoke (No UI)
+
+For resource-platform changes, run the deterministic local checks before any device work:
+
+```bash
+yarn test src/helpers/__tests__/mobileResourceCatalog-test.ts \
+  src/features/resources/__tests__/resourceModel-test.ts \
+  src/features/resources/__tests__/strongLexiconAccess-test.ts \
+  src/helpers/__tests__/strongLexiconModules-test.ts \
+  src/helpers/__tests__/strongLexiconPublications-test.ts \
+  --runInBand --watchman=false
+
+RESOURCE_STRONG_LEXICON_BUNDLES_ROOT=/absolute/path/to/strong-lexicon-publications \
+  yarn resources:test:lexicon
+```
+
+These checks cover the local HTTP contracts, PostgreSQL import/parity, installed-first and
+online-first access decisions, and archive integrity. Mobile UI/E2E validation is intentionally
+deferred to the product-level smoke owner.
+
+For issue #305, validation is intentionally limited to local function calls, archive checks,
+the local PostgreSQL/API stack, and HTTP/artifact smoke scripts. No Argent session or mobile E2E
+run is required from the implementation agent; device validation remains with the product-level
+smoke owner.
+
+With the local resource API and artifact server running, the repeatable Strong lexicon smoke is:
+
+```bash
+yarn resources:smoke:lexicon
+```
+
 ## Blocked Or Requires Human Context
 
 - Account login, registration, Google Sign-In, Apple Sign-In, and email verification require human-owned credentials.

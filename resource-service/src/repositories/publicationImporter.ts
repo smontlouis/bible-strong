@@ -9,7 +9,9 @@ import {
   isBiblePublicationBundleManifest,
   isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
+  isStrongLexiconPublicationBundleManifest,
   validatePublicationBundle,
+  type CanonicalStrongLexiconModulePublication,
 } from '../publication/publicationBundle'
 
 export class PublicationImportFailure extends Data.TaggedError('PublicationImportFailure')<{
@@ -59,6 +61,251 @@ const normalizeJson = (value: unknown): unknown => {
 const jsonEquals = (left: unknown, right: unknown) =>
   JSON.stringify(normalizeJson(left)) === JSON.stringify(normalizeJson(right))
 
+type StrongRow = Record<string, string | number | null>
+
+const rowNumber = (row: StrongRow, key: string): number | null =>
+  typeof row[key] === 'number' && Number.isInteger(row[key]) ? row[key] : null
+const rowString = (row: StrongRow, key: string): string =>
+  typeof row[key] === 'string' ? row[key] : ''
+
+const insertChunks = async <Table extends keyof ResourceDatabase>(
+  transaction: Kysely<ResourceDatabase>,
+  table: Table,
+  values: Array<unknown>
+) => {
+  for (let offset = 0; offset < values.length; offset += 1_000) {
+    await transaction
+      .insertInto(table)
+      .values(values.slice(offset, offset + 1_000) as never)
+      .execute()
+  }
+}
+
+const importStrongLexiconDomainProjection = async (
+  transaction: Kysely<ResourceDatabase>,
+  publicationId: number,
+  canonical: CanonicalStrongLexiconModulePublication,
+  signal: AbortSignal
+) => {
+  const rows = canonical.tables
+  if (canonical.moduleId === 'core') {
+    await insertChunks(
+      transaction,
+      'strong_lexicon_entries',
+      (rows.StepEntries ?? []).map(row => ({
+        publication_id: publicationId,
+        entry_id: rowNumber(row, 'id')!,
+        language: rowString(row, 'language'),
+        e_strong: rowString(row, 'eStrong'),
+        d_strong: rowString(row, 'dStrong'),
+        u_strong: rowString(row, 'uStrong'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_entry_identities',
+      (rows.StepEntryIdentities ?? []).map(row => ({
+        publication_id: publicationId,
+        step_entry_id: rowNumber(row, 'stepEntryId')!,
+        step_code: rowString(row, 'stepCode'),
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_translations',
+      (rows.LexiconTranslations ?? []).map(row => ({
+        publication_id: publicationId,
+        step_entry_id: rowNumber(row, 'stepEntryId')!,
+        language: rowString(row, 'language'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_relation_kinds',
+      (rows.RelationKinds ?? []).map(row => ({
+        publication_id: publicationId,
+        relation_kind_id: rowNumber(row, 'id')!,
+        kind: rowString(row, 'kind'),
+        label_en: rowString(row, 'labelEn'),
+        label_fr: rowString(row, 'labelFr'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_relations',
+      (rows.LexiconRelations ?? []).map(row => ({
+        publication_id: publicationId,
+        relation_id: rowNumber(row, 'id')!,
+        from_entry_id: rowNumber(row, 'fromStepEntryId')!,
+        to_entry_id: rowNumber(row, 'toStepEntryId'),
+        relation_kind_id: rowNumber(row, 'relationKindId'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_morphology_codes',
+      (rows.MorphologyCodes ?? []).map(row => ({
+        publication_id: publicationId,
+        morphology_code_id: rowNumber(row, 'id')!,
+        code: rowString(row, 'code'),
+        normalized_code: rowString(row, 'normalizedCode'),
+        language: rowString(row, 'language'),
+        scope: rowString(row, 'scope'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_morphology_code_translations',
+      (rows.MorphologyCodeTranslations ?? []).map(row => ({
+        publication_id: publicationId,
+        morphology_code_id: rowNumber(row, 'morphologyCodeId')!,
+        language: rowString(row, 'language'),
+        payload: row,
+      }))
+    )
+  }
+  if (canonical.moduleId === 'resources') {
+    await insertChunks(
+      transaction,
+      'strong_lexicon_resources',
+      (rows.LexiconResources ?? []).map(row => ({
+        publication_id: publicationId,
+        resource_id: rowNumber(row, 'id')!,
+        step_entry_id: rowNumber(row, 'stepEntryId')!,
+        source: rowString(row, 'source'),
+        kind: rowString(row, 'kind'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_resource_translations',
+      (rows.LexiconResourceTranslations ?? []).map(row => ({
+        publication_id: publicationId,
+        resource_id: rowNumber(row, 'resourceId')!,
+        language: rowString(row, 'language'),
+        payload: row,
+      }))
+    )
+  }
+  if (canonical.moduleId === 'entities') {
+    await insertChunks(
+      transaction,
+      'strong_lexicon_entities',
+      (rows.Entities ?? []).map(row => ({
+        publication_id: publicationId,
+        entity_id: rowNumber(row, 'id')!,
+        unique_name: rowString(row, 'uniqueName'),
+        u_strong: rowString(row, 'uStrong'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_entity_translations',
+      (rows.EntityTranslations ?? []).map(row => ({
+        publication_id: publicationId,
+        translation_id: rowNumber(row, 'id')!,
+        entity_id: rowNumber(row, 'entityId')!,
+        language: rowString(row, 'language'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_entity_refs',
+      (rows.EntityRefs ?? []).map(row => ({
+        publication_id: publicationId,
+        entity_id: rowNumber(row, 'entityId')!,
+        book: rowString(row, 'book'),
+        chapter: rowNumber(row, 'chapter')!,
+        verse: rowNumber(row, 'verse')!,
+        suffix: rowString(row, 'suffix'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_entity_relations',
+      (rows.EntityRelations ?? []).map((row, index) => ({
+        publication_id: publicationId,
+        relation_id: index + 1,
+        from_entity_id: rowNumber(row, 'fromEntityId')!,
+        to_entity_id: rowNumber(row, 'toEntityId'),
+        relation: rowString(row, 'relation'),
+        payload: row,
+      }))
+    )
+    await insertChunks(
+      transaction,
+      'strong_lexicon_entity_places',
+      (rows.EntityPlaces ?? []).map(row => ({
+        publication_id: publicationId,
+        entity_id: rowNumber(row, 'entityId')!,
+        payload: row,
+      }))
+    )
+  }
+  assertNotInterrupted(signal)
+}
+
+const assertStrongLexiconCrossModuleReferences = async (
+  transaction: Kysely<ResourceDatabase>,
+  canonical: CanonicalStrongLexiconModulePublication,
+  corePublicationId: number
+) => {
+  const coreEntries = await transaction
+    .selectFrom('strong_lexicon_entries')
+    .select(['entry_id', 'e_strong', 'd_strong', 'u_strong'])
+    .where('publication_id', '=', corePublicationId)
+    .execute()
+  if (coreEntries.length === 0) {
+    throw new PublicationImportFailure({
+      code: 'VALIDATION_FAILED',
+      message: 'STRONG_LEXICON_CORE_PROJECTION_MISSING',
+    })
+  }
+  const coreEntryIds = new Set(coreEntries.map(row => row.entry_id))
+  const coreCodes = new Set(
+    coreEntries.flatMap(row =>
+      [row.e_strong, row.d_strong, row.u_strong].map(value => value.trim().toUpperCase())
+    )
+  )
+  const coreBaseCodes = new Set(
+    [...coreCodes]
+      .map(code => code.match(/^([HG]\d+)/u)?.[1])
+      .filter((code): code is string => Boolean(code))
+  )
+  if (canonical.moduleId === 'resources') {
+    for (const row of canonical.tables.LexiconResources ?? []) {
+      const stepEntryId = rowNumber(row, 'stepEntryId')
+      if (stepEntryId === null || !coreEntryIds.has(stepEntryId)) {
+        throw new PublicationImportFailure({
+          code: 'VALIDATION_FAILED',
+          message: 'STRONG_LEXICON_RESOURCE_ENTRY_REFERENCE_INVALID',
+        })
+      }
+    }
+  }
+  if (canonical.moduleId === 'entities') {
+    for (const row of canonical.tables.Entities ?? []) {
+      const uStrong = rowString(row, 'uStrong').trim().toUpperCase()
+      const baseCode = uStrong.match(/^([HG]\d+)/u)?.[1]
+      if (!uStrong || (!coreCodes.has(uStrong) && (!baseCode || !coreBaseCodes.has(baseCode)))) {
+        throw new PublicationImportFailure({
+          code: 'VALIDATION_FAILED',
+          message: 'STRONG_LEXICON_ENTITY_CORE_IDENTITY_INVALID',
+        })
+      }
+    }
+  }
+}
+
 export const importPublicationBundle = (
   bundlePath: string,
   database: Kysely<ResourceDatabase>,
@@ -76,7 +323,9 @@ export const importPublicationBundle = (
           ? `nave:${manifest.identity.language}`
           : isInterlinearBiblePublicationBundleManifest(manifest)
             ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
-            : `strong-bible-index:${manifest.identity.versionId}`
+            : isStrongLexiconPublicationBundleManifest(manifest)
+              ? manifest.identity.resourceId
+              : `strong-bible-index:${manifest.identity.versionId}`
       const publicationStatus =
         manifest.deliveryCapabilities.onlineAccess ||
         (options.activateForLocalDevelopment &&
@@ -135,22 +384,32 @@ export const importPublicationBundle = (
                 text_sha256: manifest.dependencies.bible.textSha256,
                 offline_entry: manifest.offlineArtifact.entry,
               }
-            : {
-                version_id: manifest.identity.versionId,
-                dataset_id: manifest.identity.datasetId,
-                delivery_capabilities: manifest.deliveryCapabilities,
-                dependencies: manifest.dependencies,
-                counts: manifest.counts,
-                canonical_schema_version: manifest.canonical.schemaVersion,
-                resource_revision: manifest.revision,
-                text_revision: manifest.dependencies.bible.revision,
-                text_sha256: manifest.dependencies.bible.textSha256,
-                strong_revision:
-                  canonical.format === 'bible-strong-canonical-strong-index'
-                    ? canonical.strongRevision
-                    : undefined,
-                offline_entry: manifest.offlineArtifact.entry,
-              }
+            : isStrongLexiconPublicationBundleManifest(manifest)
+              ? {
+                  module_id: manifest.identity.moduleId,
+                  delivery_capabilities: manifest.deliveryCapabilities,
+                  dependencies: manifest.dependencies,
+                  counts: manifest.counts,
+                  canonical_schema_version: manifest.canonical.schemaVersion,
+                  resource_revision: manifest.revision,
+                  offline_entry: manifest.offlineArtifact.entry,
+                }
+              : {
+                  version_id: manifest.identity.versionId,
+                  dataset_id: manifest.identity.datasetId,
+                  delivery_capabilities: manifest.deliveryCapabilities,
+                  dependencies: manifest.dependencies,
+                  counts: manifest.counts,
+                  canonical_schema_version: manifest.canonical.schemaVersion,
+                  resource_revision: manifest.revision,
+                  text_revision: manifest.dependencies.bible.revision,
+                  text_sha256: manifest.dependencies.bible.textSha256,
+                  strong_revision:
+                    canonical.format === 'bible-strong-canonical-strong-index'
+                      ? canonical.strongRevision
+                      : undefined,
+                  offline_entry: manifest.offlineArtifact.entry,
+                }
       const publicationMetadata = { ...metadata, manifest_sha256: manifestSha256 }
       const makeResult = (status: PublicationImportResult['status']): PublicationImportResult =>
         isBiblePublicationBundleManifest(manifest)
@@ -174,18 +433,58 @@ export const importPublicationBundle = (
                   revision: manifest.revision,
                   itemCount: manifest.counts.segments,
                 }
-              : {
-                  status,
-                  resourceIdentity,
-                  revision: manifest.revision,
-                  itemCount: manifest.counts.occurrences,
-                }
+              : isStrongLexiconPublicationBundleManifest(manifest)
+                ? {
+                    status,
+                    resourceIdentity,
+                    revision: manifest.revision,
+                    itemCount: Object.values(manifest.counts).reduce(
+                      (total, count) => total + count,
+                      0
+                    ),
+                  }
+                : {
+                    status,
+                    resourceIdentity,
+                    revision: manifest.revision,
+                    itemCount: manifest.counts.occurrences,
+                  }
 
       return tryDatabasePromise(
         'publication.import',
         signal =>
           database.transaction().execute(async transaction => {
             assertNotInterrupted(signal)
+            let activeStrongCoreId: number | undefined
+            if (
+              isStrongLexiconPublicationBundleManifest(manifest) &&
+              manifest.identity.moduleId !== 'core'
+            ) {
+              const dependency = manifest.dependencies[0]
+              const activeCore = await transaction
+                .selectFrom('resource_publications')
+                .select(['id', 'revision'])
+                .where('resource_identity', '=', 'strong-lexicon:core')
+                .where('status', '=', 'active')
+                .executeTakeFirst()
+              if (!dependency || activeCore?.revision !== dependency.revision) {
+                throw new PublicationImportFailure({
+                  code: 'VALIDATION_FAILED',
+                  message: 'STRONG_LEXICON_CORE_DEPENDENCY_UNAVAILABLE',
+                })
+              }
+              activeStrongCoreId = activeCore?.id
+              if (
+                activeStrongCoreId !== undefined &&
+                canonical.format === 'bible-strong-canonical-strong-lexicon-module'
+              ) {
+                await assertStrongLexiconCrossModuleReferences(
+                  transaction,
+                  canonical,
+                  activeStrongCoreId
+                )
+              }
+            }
             const existing = await transaction
               .selectFrom('resource_publications')
               .select([
@@ -399,7 +698,7 @@ export const importPublicationBundle = (
                   )
                   .execute()
               }
-            } else {
+            } else if (canonical.format === 'bible-strong-canonical-interlinear-index') {
               for (let offset = 0; offset < canonical.verses.length; offset += 1_000) {
                 assertNotInterrupted(signal)
                 await transaction
@@ -466,6 +765,61 @@ export const importPublicationBundle = (
                   )
                   .execute()
               }
+            } else if (!isStrongLexiconPublicationBundleManifest(manifest)) {
+              for (const [tableName, tableRows] of Object.entries(canonical.tables)) {
+                const rows = tableRows.map((payload, index) => {
+                  const entryIdValue =
+                    payload.stepEntryId ??
+                    payload.fromStepEntryId ??
+                    payload.resourceId ??
+                    payload.morphologyCodeId ??
+                    payload.entityId ??
+                    payload.fromEntityId ??
+                    (tableName === 'StepEntries' ||
+                    tableName === 'RelationKinds' ||
+                    tableName === 'MorphologyCodes' ||
+                    tableName === 'Entities'
+                      ? payload.id
+                      : null)
+                  const codeValue =
+                    payload.stepCode ?? payload.eStrong ?? payload.uStrong ?? payload.code ?? null
+                  const uniqueNameValue = payload.uniqueName ?? payload.toUniqueName ?? null
+                  return {
+                    publication_id: publication.id,
+                    table_name: tableName,
+                    record_key: `${index}:${createHash('sha256')
+                      .update(JSON.stringify(normalizeJson(payload)))
+                      .digest('hex')}`,
+                    entry_id:
+                      typeof entryIdValue === 'number' && Number.isInteger(entryIdValue)
+                        ? entryIdValue
+                        : null,
+                    language: typeof payload.language === 'string' ? payload.language : null,
+                    code: typeof codeValue === 'string' ? codeValue : null,
+                    unique_name: typeof uniqueNameValue === 'string' ? uniqueNameValue : null,
+                    payload,
+                  }
+                })
+                for (let offset = 0; offset < rows.length; offset += 1_000) {
+                  assertNotInterrupted(signal)
+                  await transaction
+                    .insertInto('strong_lexicon_records')
+                    .values(rows.slice(offset, offset + 1_000))
+                    .execute()
+                }
+              }
+            }
+
+            if (
+              isStrongLexiconPublicationBundleManifest(manifest) &&
+              canonical.format === 'bible-strong-canonical-strong-lexicon-module'
+            ) {
+              await importStrongLexiconDomainProjection(
+                transaction,
+                publication.id,
+                canonical,
+                signal
+              )
             }
 
             if (publicationStatus === 'active' && options.beforeActivation) {

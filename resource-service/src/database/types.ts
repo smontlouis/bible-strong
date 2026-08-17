@@ -14,6 +14,21 @@ import type {
   strongBibleSpanIdentities,
   strongBibleSpans,
   strongBibleVerses,
+  strongLexiconRecords,
+  strongLexiconEntries,
+  strongLexiconRelationKinds,
+  strongLexiconMorphologyCodes,
+  strongLexiconMorphologyCodeTranslations,
+  strongLexiconEntryIdentities,
+  strongLexiconTranslations,
+  strongLexiconRelations,
+  strongLexiconResources,
+  strongLexiconResourceTranslations,
+  strongLexiconEntities,
+  strongLexiconEntityTranslations,
+  strongLexiconEntityRefs,
+  strongLexiconEntityPlaces,
+  strongLexiconEntityRelations,
 } from './schema'
 
 export type ResourcePublicationRow = Kyselify<typeof resourcePublications>
@@ -29,6 +44,23 @@ export type InterlinearBibleVerseRow = Kyselify<typeof interlinearBibleVerses>
 export type InterlinearBibleTokenRow = Kyselify<typeof interlinearBibleTokens>
 export type InterlinearBibleSegmentRow = Kyselify<typeof interlinearBibleSegments>
 export type InterlinearBibleSegmentIdentityRow = Kyselify<typeof interlinearBibleSegmentIdentities>
+export type StrongLexiconRecordRow = Kyselify<typeof strongLexiconRecords>
+export type StrongLexiconEntryRow = Kyselify<typeof strongLexiconEntries>
+export type StrongLexiconRelationKindRow = Kyselify<typeof strongLexiconRelationKinds>
+export type StrongLexiconMorphologyCodeRow = Kyselify<typeof strongLexiconMorphologyCodes>
+export type StrongLexiconMorphologyCodeTranslationRow = Kyselify<
+  typeof strongLexiconMorphologyCodeTranslations
+>
+export type StrongLexiconEntryIdentityRow = Kyselify<typeof strongLexiconEntryIdentities>
+export type StrongLexiconTranslationRow = Kyselify<typeof strongLexiconTranslations>
+export type StrongLexiconRelationRow = Kyselify<typeof strongLexiconRelations>
+export type StrongLexiconResourceRow = Kyselify<typeof strongLexiconResources>
+export type StrongLexiconResourceTranslationRow = Kyselify<typeof strongLexiconResourceTranslations>
+export type StrongLexiconEntityRow = Kyselify<typeof strongLexiconEntities>
+export type StrongLexiconEntityTranslationRow = Kyselify<typeof strongLexiconEntityTranslations>
+export type StrongLexiconEntityRefRow = Kyselify<typeof strongLexiconEntityRefs>
+export type StrongLexiconEntityPlaceRow = Kyselify<typeof strongLexiconEntityPlaces>
+export type StrongLexiconEntityRelationRow = Kyselify<typeof strongLexiconEntityRelations>
 
 export type ResourceDatabase = {
   resource_publications: ResourcePublicationRow
@@ -44,4 +76,19 @@ export type ResourceDatabase = {
   interlinear_bible_tokens: InterlinearBibleTokenRow
   interlinear_bible_segments: InterlinearBibleSegmentRow
   interlinear_bible_segment_identities: InterlinearBibleSegmentIdentityRow
+  strong_lexicon_records: StrongLexiconRecordRow
+  strong_lexicon_entries: StrongLexiconEntryRow
+  strong_lexicon_relation_kinds: StrongLexiconRelationKindRow
+  strong_lexicon_morphology_codes: StrongLexiconMorphologyCodeRow
+  strong_lexicon_morphology_code_translations: StrongLexiconMorphologyCodeTranslationRow
+  strong_lexicon_entry_identities: StrongLexiconEntryIdentityRow
+  strong_lexicon_translations: StrongLexiconTranslationRow
+  strong_lexicon_relations: StrongLexiconRelationRow
+  strong_lexicon_resources: StrongLexiconResourceRow
+  strong_lexicon_resource_translations: StrongLexiconResourceTranslationRow
+  strong_lexicon_entities: StrongLexiconEntityRow
+  strong_lexicon_entity_translations: StrongLexiconEntityTranslationRow
+  strong_lexicon_entity_refs: StrongLexiconEntityRefRow
+  strong_lexicon_entity_places: StrongLexiconEntityPlaceRow
+  strong_lexicon_entity_relations: StrongLexiconEntityRelationRow
 }

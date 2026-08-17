@@ -130,8 +130,8 @@ function buildStrongLexiconItems(
   return [
     {
       id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' }),
-      name: t('Lexique Strong'),
-      subtitle: t('Définitions françaises et anglaises, morphologie et mots liés'),
+      name: t('offlineSetup.resources.strongLexicon'),
+      subtitle: t('offlineSetup.option.strongLexiconDescription'),
       estimatedSize: createOfflineCopyDownloadItem({
         kind: 'strong-lexicon-module',
         moduleId: 'core',
@@ -141,8 +141,8 @@ function buildStrongLexiconItems(
     },
     {
       id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'resources' }),
-      name: t('Dictionnaire grec détaillé'),
-      subtitle: t('Notices LSJ/TFLSJ et traductions françaises'),
+      name: t('offlineSetup.resources.greekDictionary'),
+      subtitle: t('offlineSetup.option.greekDictionaryDescription'),
       parentItemId: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' }),
       estimatedSize: createOfflineCopyDownloadItem({
         kind: 'strong-lexicon-module',
@@ -153,8 +153,8 @@ function buildStrongLexiconItems(
     },
     {
       id: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'entities' }),
-      name: t('Entités bibliques'),
-      subtitle: t('Personnes, lieux, groupes, relations et références'),
+      name: t('offlineSetup.resources.entities'),
+      subtitle: t('offlineSetup.option.entitiesDescription'),
       parentItemId: createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' }),
       estimatedSize: createOfflineCopyDownloadItem({
         kind: 'strong-lexicon-module',
@@ -286,7 +286,7 @@ function buildAllSections(
     return [
       {
         key: 'strong-lexicon',
-        title: t('Lexique Strong'),
+        title: t('downloads.section.strongLexicon'),
         data: buildStrongLexiconItems(t),
       },
       {
@@ -311,7 +311,7 @@ function buildAllSections(
   return [
     {
       key: 'strong-lexicon',
-      title: t('Lexique Strong'),
+      title: t('downloads.section.strongLexicon'),
       data: buildStrongLexiconItems(t),
     },
     {

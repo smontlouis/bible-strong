@@ -12,12 +12,22 @@ export function createStrongLexiconModuleDownloadItem(
   const publicationArtifact = getStrongLexiconPublication(moduleId)
   const id = createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId })
   const catalogArtifact = getMobileResourceCatalogEntry(id)
+  const canonicalEntry = catalogArtifact.entries.canonical
+  if (!canonicalEntry || canonicalEntry.entry !== publicationArtifact.entry) {
+    throw new Error(`STRONG_LEXICON_CATALOG_ENTRY_MISMATCH:${moduleId}`)
+  }
   const artifact = {
     ...publicationArtifact,
     url: catalogArtifact.url,
     entry: catalogArtifact.entry,
     archiveBytes: catalogArtifact.archiveBytes,
     archiveSha256: catalogArtifact.archiveSha256,
+    contentBytes: canonicalEntry.bytes,
+    contentSha256: canonicalEntry.sha256,
+    resourceRevision: catalogArtifact.resourceRevision ?? publicationArtifact.resourceRevision,
+    ...(catalogArtifact.coreRevision || publicationArtifact.coreRevision
+      ? { coreRevision: catalogArtifact.coreRevision ?? publicationArtifact.coreRevision }
+      : {}),
   }
   const names: Record<StrongLexiconModuleId, string> = {
     core: 'Lexique Strong',

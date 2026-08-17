@@ -52,7 +52,7 @@ describe('Resource model', () => {
     expect(getResourceActions(state)).toEqual(['open', 'make-available-offline'])
   })
 
-  it('declares only explicitly served Bible, Strong Bible, and Nave publications remotely readable', () => {
+  it('declares only explicitly served publications remotely readable', () => {
     expect(
       getResourceOnlineAccess({ kind: 'bible-text', versionId: 'LSG' }, new Set(['LSG']))
     ).toEqual({ status: 'remotely-readable' })
@@ -73,6 +73,16 @@ describe('Resource model', () => {
     expect(
       getResourceOnlineAccess({ kind: 'nave', language: 'en' }, new Set(['LSG']), new Set(['fr']))
     ).toEqual({ status: 'unsupported' })
+    expect(
+      getResourceOnlineAccess(
+        { kind: 'strong-lexicon', moduleId: 'resources' },
+        new Set(['LSG']),
+        new Set(['fr']),
+        new Set(['LSG']),
+        new Set(['fr', 'en']),
+        new Set(['core', 'resources', 'entities'])
+      )
+    ).toEqual({ status: 'remotely-readable' })
   })
 
   it('represents Firestore commentaries as remote-only without changing MHY delivery', () => {

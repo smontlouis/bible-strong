@@ -47,6 +47,21 @@ import {
   UnsupportedInterlinearBible,
   type InterlinearBibleRepositoryService,
 } from '../domain/interlinearBible'
+import {
+  ActiveStrongLexiconPublicationUnavailable,
+  browseStrongLexicon,
+  readRandomStrongLexiconEntry,
+  readStrongLexiconChapterEntities,
+  readStrongLexiconEntry,
+  readStrongLexiconEntity,
+  readStrongLexiconModuleState,
+  readStrongLexiconMorphologies,
+  StrongLexiconEntityNotFound,
+  StrongLexiconEntryNotFound,
+  StrongLexiconRepository,
+  StrongLexiconRepositoryFailure,
+  type StrongLexiconRepositoryService,
+} from '../domain/strongLexicon'
 import { HealthResponse, ResourceApi } from './api'
 import {
   InvalidResourceRequestProblem,
@@ -86,7 +101,11 @@ const toHttpProblem = (
     | UnsupportedInterlinearBible
     | ActiveInterlinearBiblePublicationUnavailable
     | InterlinearBibleChapterNotFound
-    | InterlinearBibleRepositoryFailure,
+    | InterlinearBibleRepositoryFailure
+    | ActiveStrongLexiconPublicationUnavailable
+    | StrongLexiconEntryNotFound
+    | StrongLexiconEntityNotFound
+    | StrongLexiconRepositoryFailure,
   requestId: string
 ) => {
   switch (cause._tag) {
@@ -113,6 +132,7 @@ const toHttpProblem = (
     case 'NaveRepositoryFailure':
     case 'StrongBibleRepositoryFailure':
     case 'InterlinearBibleRepositoryFailure':
+    case 'StrongLexiconRepositoryFailure':
       return new ResourceInternalProblem({
         ...problemFields(requestId, 'The Resource service could not complete the request.'),
         status: 500,
@@ -173,6 +193,25 @@ const toHttpProblem = (
         ...problemFields(requestId, 'The interlinear publication is temporarily unavailable.'),
         status: 503,
         code: 'INTERLINEAR_PUBLICATION_INACTIVE',
+        retryAfterSeconds: 30,
+      })
+    case 'StrongLexiconEntryNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This Strong lexicon entry does not exist.'),
+        status: 404,
+        code: 'STRONG_LEXICON_ENTRY_NOT_FOUND',
+      })
+    case 'StrongLexiconEntityNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This Strong lexicon entity does not exist.'),
+        status: 404,
+        code: 'STRONG_LEXICON_ENTITY_NOT_FOUND',
+      })
+    case 'ActiveStrongLexiconPublicationUnavailable':
+      return new ResourceUnavailableProblem({
+        ...problemFields(requestId, 'The Strong lexicon module is temporarily unavailable.'),
+        status: 503,
+        code: 'STRONG_LEXICON_PUBLICATION_INACTIVE',
         retryAfterSeconds: 30,
       })
   }
@@ -416,12 +455,99 @@ const InterlinearBibleApiLive = HttpApiBuilder.group(ResourceApi, 'interlinearBi
     })
 )
 
+const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', handlers =>
+  handlers
+    .handle('getStrongLexiconModule', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return readStrongLexiconModuleState(path.moduleId).pipe(
+        Effect.tap(() => addResponseHeaders({ 'x-request-id': requestId })),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
+    .handle('getStrongLexiconEntry', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongLexiconEntry({
+          reference: path.reference,
+          language: urlParams.language,
+          ...(urlParams.kind ? { kind: urlParams.kind } : {}),
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-lexicon', path.reference, urlParams.language, urlParams.kind ?? 'strong']
+      )
+    })
+    .handle('browseStrongLexicon', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        browseStrongLexicon({
+          language: urlParams.language,
+          lexicalLanguage: urlParams.lexicalLanguage,
+          search: urlParams.search,
+          prefix: urlParams.prefix,
+          limit: urlParams.limit ?? 100,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match']
+      )
+    })
+    .handle('getRandomStrongLexiconEntry', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readRandomStrongLexiconEntry(urlParams).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match']
+      )
+    })
+    .handle('getStrongLexiconMorphologies', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongLexiconMorphologies({
+          language: urlParams.language,
+          codes: urlParams.codes
+            .split(',')
+            .map(code => code.trim())
+            .filter(Boolean),
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match']
+      )
+    })
+    .handle('getStrongLexiconEntity', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongLexiconEntity({ uniqueName: path.uniqueName, language: urlParams.language }).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['strong-lexicon', 'entity', path.uniqueName, urlParams.language]
+      )
+    })
+    .handle('getStrongLexiconChapterEntities', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readStrongLexiconChapterEntities({
+          bookCode: path.bookCode,
+          chapter: path.chapter,
+          language: urlParams.language,
+          strongCodes: (urlParams.strongCodes ?? '').split(',').filter(Boolean),
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match']
+      )
+    })
+)
+
 export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
   Layer.provide(BibleApiLive),
   Layer.provide(NaveApiLive),
   Layer.provide(StrongBibleApiLive),
-  Layer.provide(InterlinearBibleApiLive)
+  Layer.provide(InterlinearBibleApiLive),
+  Layer.provide(StrongLexiconApiLive)
 )
 
 const unavailableRepository: BibleChapterRepositoryService = {
@@ -467,11 +593,27 @@ const unavailableInterlinearBibleRepository: InterlinearBibleRepositoryService =
     ),
 }
 
+const unavailableStrongLexiconRepository: StrongLexiconRepositoryService = {
+  getModuleState: moduleId => Effect.succeed({ moduleId, status: 'unavailable' }),
+  findEntry: () => Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })),
+  listEntries: () =>
+    Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })),
+  findRandom: () =>
+    Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })),
+  findMorphologies: () =>
+    Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'core' })),
+  findEntity: () =>
+    Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })),
+  findChapterEntities: () =>
+    Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })),
+}
+
 export const provideResourceRepositories = (
   repository: BibleChapterRepositoryService,
   naveRepository: NaveRepositoryService,
   strongBibleRepository: StrongBibleRepositoryService = unavailableStrongBibleRepository,
-  interlinearBibleRepository: InterlinearBibleRepositoryService = unavailableInterlinearBibleRepository
+  interlinearBibleRepository: InterlinearBibleRepositoryService = unavailableInterlinearBibleRepository,
+  strongLexiconRepository: StrongLexiconRepositoryService = unavailableStrongLexiconRepository
 ) =>
   ResourceApiLive.pipe(
     Layer.provide(
@@ -479,7 +621,8 @@ export const provideResourceRepositories = (
         Layer.succeed(BibleChapterRepository, repository),
         Layer.succeed(NaveRepository, naveRepository),
         Layer.succeed(StrongBibleRepository, strongBibleRepository),
-        Layer.succeed(InterlinearBibleRepository, interlinearBibleRepository)
+        Layer.succeed(InterlinearBibleRepository, interlinearBibleRepository),
+        Layer.succeed(StrongLexiconRepository, strongLexiconRepository)
       )
     )
   )
@@ -495,7 +638,8 @@ export const makeResourceWebHandler = (
         repository,
         naveRepository,
         overrides.strongBible ?? unavailableStrongBibleRepository,
-        overrides.interlinearBible ?? unavailableInterlinearBibleRepository
+        overrides.interlinearBible ?? unavailableInterlinearBibleRepository,
+        overrides.strongLexicon ?? unavailableStrongLexiconRepository
       ),
       HttpServer.layerContext
     )
@@ -532,4 +676,5 @@ export const makeResourceWebHandler = (
 export type ResourceRepositoryOverrides = {
   strongBible?: StrongBibleRepositoryService
   interlinearBible?: InterlinearBibleRepositoryService
+  strongLexicon?: StrongLexiconRepositoryService
 }

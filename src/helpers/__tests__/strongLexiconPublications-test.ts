@@ -10,7 +10,7 @@ describe('Strong lexicon modular publications', () => {
     expect(getStrongLexiconPublication('core')).toMatchObject({
       required: true,
       entry: 'strong_lexicon.core.sqlite',
-      archiveBytes: 5_621_474,
+      archiveBytes: 6_543_526,
       schemaVersion: 2,
     })
     expect(
@@ -26,9 +26,14 @@ describe('Strong lexicon modular publications', () => {
       entry: 'bible_entities.production.sqlite',
     })
     expect(
-      getStrongLexiconPublication('entities').url.endsWith('databases/bible_entities.sqlite.zip')
+      getStrongLexiconPublication('entities').url.endsWith(
+        'databases/bible_entities.production.sqlite.zip'
+      )
     ).toBe(true)
-    expect(getStrongLexiconPublication('core')).not.toHaveProperty('contentSha256')
+    expect(getStrongLexiconPublication('core')).toMatchObject({
+      contentBytes: 30_371_840,
+      contentSha256: '4697c3a496a7e647922114771a0332530a21c86752fb67d1d98cf7bfd00fd3e1',
+    })
   })
 
   it('makes an optional module depend on core when core is absent', () => {

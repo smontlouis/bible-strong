@@ -210,7 +210,9 @@ export const strongBibleIdentities = pgTable(
 export const strongBibleSpans = pgTable(
   'strong_bible_spans',
   {
-    publication_id: integer('publication_id').notNull(),
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
     book: integer('book').notNull(),
     chapter: integer('chapter').notNull(),
     verse: integer('verse').notNull(),
@@ -255,7 +257,9 @@ export const strongBibleSpans = pgTable(
 export const strongBibleSpanIdentities = pgTable(
   'strong_bible_span_identities',
   {
-    publication_id: integer('publication_id').notNull(),
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
     book: integer('book').notNull(),
     chapter: integer('chapter').notNull(),
     verse: integer('verse').notNull(),
@@ -429,5 +433,386 @@ export const interlinearBibleSegmentIdentities = pgTable(
       table.kind,
       table.code
     ),
+  ]
+)
+
+export const strongLexiconRecords = pgTable(
+  'strong_lexicon_records',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    table_name: text('table_name').notNull(),
+    record_key: text('record_key').notNull(),
+    entry_id: integer('entry_id'),
+    language: text('language'),
+    code: text('code'),
+    unique_name: text('unique_name'),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_records_primary',
+      columns: [table.publication_id, table.table_name, table.record_key],
+    }),
+    index('strong_lexicon_records_entry_lookup').on(
+      table.publication_id,
+      table.table_name,
+      table.entry_id
+    ),
+    index('strong_lexicon_records_code_lookup').on(
+      table.publication_id,
+      table.table_name,
+      table.code
+    ),
+    index('strong_lexicon_records_unique_name_lookup').on(
+      table.publication_id,
+      table.table_name,
+      table.unique_name
+    ),
+  ]
+)
+
+// Strong lexicon domain projections keep stable identities and graph edges in
+// typed PostgreSQL columns. The generic record table above remains as an
+// immutable audit/read-model copy of every canonical row.
+export const strongLexiconEntries = pgTable(
+  'strong_lexicon_entries',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    entry_id: integer('entry_id').notNull(),
+    language: text('language').notNull(),
+    e_strong: text('e_strong').notNull(),
+    d_strong: text('d_strong').notNull(),
+    u_strong: text('u_strong').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_entries_primary',
+      columns: [table.publication_id, table.entry_id],
+    }),
+    index('strong_lexicon_entries_code_lookup').on(
+      table.publication_id,
+      table.e_strong,
+      table.d_strong,
+      table.u_strong
+    ),
+  ]
+)
+
+export const strongLexiconRelationKinds = pgTable(
+  'strong_lexicon_relation_kinds',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    relation_kind_id: integer('relation_kind_id').notNull(),
+    kind: text('kind').notNull(),
+    label_en: text('label_en').notNull(),
+    label_fr: text('label_fr').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_relation_kinds_primary',
+      columns: [table.publication_id, table.relation_kind_id],
+    }),
+  ]
+)
+
+export const strongLexiconMorphologyCodes = pgTable(
+  'strong_lexicon_morphology_codes',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    morphology_code_id: integer('morphology_code_id').notNull(),
+    code: text('code').notNull(),
+    normalized_code: text('normalized_code').notNull(),
+    language: text('language').notNull(),
+    scope: text('scope').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_morphology_codes_primary',
+      columns: [table.publication_id, table.morphology_code_id],
+    }),
+  ]
+)
+
+export const strongLexiconMorphologyCodeTranslations = pgTable(
+  'strong_lexicon_morphology_code_translations',
+  {
+    publication_id: integer('publication_id').notNull(),
+    morphology_code_id: integer('morphology_code_id').notNull(),
+    language: text('language').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_morphology_code_translations_primary',
+      columns: [table.publication_id, table.morphology_code_id, table.language],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_morphology_code_translations_code_fk',
+      columns: [table.publication_id, table.morphology_code_id],
+      foreignColumns: [
+        strongLexiconMorphologyCodes.publication_id,
+        strongLexiconMorphologyCodes.morphology_code_id,
+      ],
+    }).onDelete('cascade'),
+  ]
+)
+
+export const strongLexiconEntryIdentities = pgTable(
+  'strong_lexicon_entry_identities',
+  {
+    publication_id: integer('publication_id').notNull(),
+    step_entry_id: integer('step_entry_id').notNull(),
+    step_code: text('step_code').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_entry_identities_primary',
+      columns: [table.publication_id, table.step_entry_id],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_entry_identities_entry_fk',
+      columns: [table.publication_id, table.step_entry_id],
+      foreignColumns: [strongLexiconEntries.publication_id, strongLexiconEntries.entry_id],
+    }).onDelete('cascade'),
+    uniqueIndex('strong_lexicon_entry_identities_code_unique').on(
+      table.publication_id,
+      table.step_code
+    ),
+  ]
+)
+
+export const strongLexiconTranslations = pgTable(
+  'strong_lexicon_translations',
+  {
+    publication_id: integer('publication_id').notNull(),
+    step_entry_id: integer('step_entry_id').notNull(),
+    language: text('language').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_translations_primary',
+      columns: [table.publication_id, table.step_entry_id, table.language],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_translations_entry_fk',
+      columns: [table.publication_id, table.step_entry_id],
+      foreignColumns: [strongLexiconEntries.publication_id, strongLexiconEntries.entry_id],
+    }).onDelete('cascade'),
+  ]
+)
+
+export const strongLexiconRelations = pgTable(
+  'strong_lexicon_relations',
+  {
+    publication_id: integer('publication_id').notNull(),
+    relation_id: integer('relation_id').notNull(),
+    from_entry_id: integer('from_entry_id').notNull(),
+    to_entry_id: integer('to_entry_id'),
+    relation_kind_id: integer('relation_kind_id'),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_relations_primary',
+      columns: [table.publication_id, table.relation_id],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_relations_from_entry_fk',
+      columns: [table.publication_id, table.from_entry_id],
+      foreignColumns: [strongLexiconEntries.publication_id, strongLexiconEntries.entry_id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'strong_lexicon_relations_to_entry_fk',
+      columns: [table.publication_id, table.to_entry_id],
+      foreignColumns: [strongLexiconEntries.publication_id, strongLexiconEntries.entry_id],
+    }).onDelete('set null'),
+    foreignKey({
+      name: 'strong_lexicon_relations_kind_fk',
+      columns: [table.publication_id, table.relation_kind_id],
+      foreignColumns: [
+        strongLexiconRelationKinds.publication_id,
+        strongLexiconRelationKinds.relation_kind_id,
+      ],
+    }).onDelete('restrict'),
+  ]
+)
+
+export const strongLexiconResources = pgTable(
+  'strong_lexicon_resources',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    resource_id: integer('resource_id').notNull(),
+    step_entry_id: integer('step_entry_id').notNull(),
+    source: text('source').notNull(),
+    kind: text('kind').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_resources_primary',
+      columns: [table.publication_id, table.resource_id],
+    }),
+  ]
+)
+
+export const strongLexiconResourceTranslations = pgTable(
+  'strong_lexicon_resource_translations',
+  {
+    publication_id: integer('publication_id').notNull(),
+    resource_id: integer('resource_id').notNull(),
+    language: text('language').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_resource_translations_primary',
+      columns: [table.publication_id, table.resource_id, table.language],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_resource_translations_resource_fk',
+      columns: [table.publication_id, table.resource_id],
+      foreignColumns: [strongLexiconResources.publication_id, strongLexiconResources.resource_id],
+    }).onDelete('cascade'),
+  ]
+)
+
+export const strongLexiconEntities = pgTable(
+  'strong_lexicon_entities',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    entity_id: integer('entity_id').notNull(),
+    unique_name: text('unique_name').notNull(),
+    u_strong: text('u_strong').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_entities_primary',
+      columns: [table.publication_id, table.entity_id],
+    }),
+    uniqueIndex('strong_lexicon_entities_unique_name').on(table.publication_id, table.unique_name),
+    index('strong_lexicon_entities_ustrong_lookup').on(table.publication_id, table.u_strong),
+  ]
+)
+
+export const strongLexiconEntityTranslations = pgTable(
+  'strong_lexicon_entity_translations',
+  {
+    publication_id: integer('publication_id').notNull(),
+    translation_id: integer('translation_id').notNull(),
+    entity_id: integer('entity_id').notNull(),
+    language: text('language').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_entity_translations_primary',
+      columns: [table.publication_id, table.translation_id],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_entity_translations_entity_fk',
+      columns: [table.publication_id, table.entity_id],
+      foreignColumns: [strongLexiconEntities.publication_id, strongLexiconEntities.entity_id],
+    }).onDelete('cascade'),
+  ]
+)
+
+export const strongLexiconEntityPlaces = pgTable(
+  'strong_lexicon_entity_places',
+  {
+    publication_id: integer('publication_id').notNull(),
+    entity_id: integer('entity_id').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_entity_places_primary',
+      columns: [table.publication_id, table.entity_id],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_entity_places_entity_fk',
+      columns: [table.publication_id, table.entity_id],
+      foreignColumns: [strongLexiconEntities.publication_id, strongLexiconEntities.entity_id],
+    }).onDelete('cascade'),
+  ]
+)
+
+export const strongLexiconEntityRefs = pgTable(
+  'strong_lexicon_entity_refs',
+  {
+    publication_id: integer('publication_id').notNull(),
+    entity_id: integer('entity_id').notNull(),
+    book: text('book').notNull(),
+    chapter: integer('chapter').notNull(),
+    verse: integer('verse').notNull(),
+    suffix: text('suffix').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_entity_refs_primary',
+      columns: [
+        table.publication_id,
+        table.entity_id,
+        table.book,
+        table.chapter,
+        table.verse,
+        table.suffix,
+      ],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_entity_refs_entity_fk',
+      columns: [table.publication_id, table.entity_id],
+      foreignColumns: [strongLexiconEntities.publication_id, strongLexiconEntities.entity_id],
+    }).onDelete('cascade'),
+    index('strong_lexicon_entity_refs_chapter_lookup').on(
+      table.publication_id,
+      table.book,
+      table.chapter
+    ),
+  ]
+)
+
+export const strongLexiconEntityRelations = pgTable(
+  'strong_lexicon_entity_relations',
+  {
+    publication_id: integer('publication_id').notNull(),
+    relation_id: integer('relation_id').notNull(),
+    from_entity_id: integer('from_entity_id').notNull(),
+    to_entity_id: integer('to_entity_id'),
+    relation: text('relation').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'strong_lexicon_entity_relations_primary',
+      columns: [table.publication_id, table.relation_id],
+    }),
+    foreignKey({
+      name: 'strong_lexicon_entity_relations_from_fk',
+      columns: [table.publication_id, table.from_entity_id],
+      foreignColumns: [strongLexiconEntities.publication_id, strongLexiconEntities.entity_id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'strong_lexicon_entity_relations_to_fk',
+      columns: [table.publication_id, table.to_entity_id],
+      foreignColumns: [strongLexiconEntities.publication_id, strongLexiconEntities.entity_id],
+    }).onDelete('set null'),
   ]
 )

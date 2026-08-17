@@ -29,6 +29,7 @@ Copy `.env.example` to the appropriate local environment file and fill required 
 | Complete LSG parity | `yarn resources:test:lsg` | Publication, API response, or Bible presentation changes |
 | Complete Strong Bible parity | `RESOURCE_STRONG_BIBLE_BUNDLES_ROOT=/absolute/path yarn resources:test:strong` | Strong publication, importer, API, or sidecar changes |
 | Complete BHG interlinear parity | `RESOURCE_BHG_BUNDLE_ROOT=/absolute/path/to/bhg RESOURCE_INTERLINEAR_BUNDLES_ROOT=/absolute/path yarn resources:test:interlinear` | Interlinear publication, importer, API, or sidecar changes |
+| Complete Strong lexicon parity | `RESOURCE_STRONG_LEXICON_BUNDLES_ROOT=/absolute/path yarn resources:test:lexicon` | Strong lexicon publication, importer, API, module, or Offline-copy changes |
 
 `yarn agents:architecture:check` regenerates `docs/agents/architecture-lint.md` and `.scratch/architecture/architecture.json`, then fails on high-risk boundary errors. Warnings are intentionally non-blocking for the current brownfield baseline.
 
@@ -66,10 +67,26 @@ For the local production-shaped resource stack:
 ```bash
 yarn resources:db:up
 yarn resources:migrate
-RESOURCE_PUBLICATION_BUNDLE=resource-service/.local/publications/lsg yarn resources:dev
+RESOURCE_PUBLICATION_BUNDLES_ROOT=/absolute/path/to/publications yarn resources:dev
+RESOURCE_PUBLICATION_BUNDLES_ROOT=/absolute/path/to/publications yarn resources:serve:artifacts
 ```
 
 The development client defaults to `http://127.0.0.1:8787` on iOS and `http://10.0.2.2:8787` on Android when `EXPO_PUBLIC_RESOURCE_API_URL` is not configured. These defaults are development-only.
+
+When the API uses those local defaults, the development client also resolves Offline-copy
+archives to `http://127.0.0.1:8788` (iOS) or `http://10.0.2.2:8788` (Android). Set
+`EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL` to override this explicitly. The artifact server
+validates and serves every immediate child bundle in `RESOURCE_PUBLICATION_BUNDLES_ROOT`.
+
+For a non-UI Strong lexicon smoke against a complete local stack:
+
+```bash
+RESOURCE_STRONG_LEXICON_BUNDLES_ROOT=/absolute/path/to/strong-lexicon-publications yarn resources:test:lexicon
+```
+
+This exercises bundle validation, atomic PostgreSQL activation, typed repository/API reads,
+module dependency states, and the generated Offline-copy archives. Mobile UI/E2E execution is
+left to the product-level smoke owner.
 
 In this environment, `yarn start` under Node 22 failed before Metro bound a port with:
 
