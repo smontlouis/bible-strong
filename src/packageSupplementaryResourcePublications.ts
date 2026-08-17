@@ -75,6 +75,22 @@ export type SupplementaryCanonicalPublication =
   | CanonicalCommentaryPublication
   | CanonicalCrossReferencePublication;
 
+type SupplementaryCanonicalContent =
+  | Omit<CanonicalCommentaryPublication, "revision" | "sourceVersion" | "sourceSha256">
+  | Omit<CanonicalCrossReferencePublication, "revision" | "sourceVersion" | "sourceSha256">;
+
+type PartialSupplementaryCanonicalPublication = {
+  format?: CanonicalCommentaryPublication["format"] | CanonicalCrossReferencePublication["format"];
+  schemaVersion?: number;
+  resourceId?: SupplementaryResourceId;
+  language?: string;
+  revision?: string;
+  sourceVersion?: string;
+  sourceSha256?: string;
+  verses?: CanonicalCommentaryPublication["verses"];
+  verseAnchors?: CanonicalCrossReferencePublication["verseAnchors"];
+};
+
 export type SupplementaryResourcePublicationManifest = {
   format: "bible-strong-resource-publication";
   schemaVersion: 1;
@@ -161,7 +177,7 @@ const readSqlite = async (
   sqlitePath: string,
   resourceId: SupplementaryResourceId
 ): Promise<{
-  canonical: Omit<SupplementaryCanonicalPublication, "revision" | "sourceVersion" | "sourceSha256">;
+  canonical: SupplementaryCanonicalContent;
   counts: SupplementaryResourcePublicationManifest["counts"];
 }> => {
   const integrity = await queryJson<{ integrity_check: string }>(
@@ -441,7 +457,7 @@ const decodeCanonical = (value: unknown): SupplementaryCanonicalPublication => {
   if (!isRecord(value) || (value.format !== "bible-strong-canonical-commentary" && value.format !== "bible-strong-canonical-cross-references")) {
     throw new Error("supplementary-publication-canonical-invalid");
   }
-  const candidate = value as Partial<SupplementaryCanonicalPublication>;
+  const candidate = value as PartialSupplementaryCanonicalPublication;
   if (
     candidate.schemaVersion !== 1 ||
     (candidate.resourceId !== "MHY" && candidate.resourceId !== "TRESOR") ||
