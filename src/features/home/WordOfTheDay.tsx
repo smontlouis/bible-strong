@@ -17,6 +17,7 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
+import useConnection from '~helpers/useConnection'
 
 function randomIntFromInterval(min: number, max: number) {
   // min and max included
@@ -27,9 +28,10 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const lang = useLanguage()
+  const isConnected = useConnection()
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', lang),
+    queryKey: [...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', lang), isConnected],
     queryFn: () =>
       resources.dictionary.getAvailability?.(lang) ??
       Promise.resolve({ status: 'available' as const }),
@@ -37,7 +39,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     staleTime: Infinity,
   })
   const strongQuery = useQuery({
-    queryKey: ['home-dictionary-random', lang, randomSeed],
+    queryKey: ['home-dictionary-random', lang, randomSeed, isConnected],
     queryFn: async () =>
       (await resources.dictionary.loadItemByRowId(
         lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620),

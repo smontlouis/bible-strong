@@ -17,14 +17,19 @@ import { useResourceLanguage } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
+import useConnection from '~helpers/useConnection'
 
 const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)' }) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const [resourceLanguage] = useResourceLanguage('NAVE')
+  const isConnected = useConnection()
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability('NAVE', resourceLanguage),
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('NAVE', resourceLanguage),
+      isConnected,
+    ],
     queryFn: () =>
       resources.nave.getAvailability?.(resourceLanguage) ??
       Promise.resolve({ status: 'available' as const }),
@@ -32,7 +37,7 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     staleTime: Infinity,
   })
   const naveQuery = useQuery({
-    queryKey: ['home-nave-random', resourceLanguage, randomSeed],
+    queryKey: ['home-nave-random', resourceLanguage, randomSeed, isConnected],
     queryFn: async () => (await resources.nave.loadRandom(resourceLanguage)) ?? null,
     ...localQueryOptions,
   })
