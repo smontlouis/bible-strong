@@ -62,7 +62,12 @@ import {
   localInterlinearBibleResourceAdapter,
   type InterlinearBibleResourceAccess,
 } from '~features/resources/interlinearBibleResourceAccess'
-import { localTimelineAccess, type TimelineAccess } from '~features/resources/timelineAccess'
+import {
+  createHttpTimelineAccess,
+  createHybridTimelineAccess,
+  localTimelineAccess,
+  type TimelineAccess,
+} from '~features/resources/timelineAccess'
 import {
   createHttpCommentaryAccess,
   createCommentaryAccess,
@@ -154,6 +159,9 @@ const remotelyReadableNaveLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
 const remotelyReadableCommentaryCollections = new Set<string>(resourceApiBaseUrl ? ['MHY'] : [])
+const remotelyReadableTimelineLanguages = new Set<ResourceLanguage>(
+  resourceApiBaseUrl ? ['fr', 'en'] : []
+)
 const onlineDictionaryAccess = resourceApiBaseUrl
   ? createHttpDictionaryAccess({
       baseUrl: resourceApiBaseUrl,
@@ -241,6 +249,12 @@ const onlineBibleReadingAccess = resourceApiBaseUrl
 const commentaryAccess = onlineCommentaryAccess
   ? createCommentaryAccess({ remote: onlineCommentaryAccess, combineResults: false })
   : defaultCommentaryAccess
+const onlineTimelineAccess = resourceApiBaseUrl
+  ? createHttpTimelineAccess({
+      baseUrl: resourceApiBaseUrl,
+      isOnline: async () => onlineManager.isOnline(),
+    })
+  : localTimelineAccess
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleContent: createBibleContentAccess(
@@ -272,7 +286,12 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   strongLexicon: strongLexiconAccess,
   strongBible: strongBibleAccess,
   interlinearBible: interlinearBibleAccess,
-  timeline: localTimelineAccess,
+  timeline: createHybridTimelineAccess({
+    offline: localTimelineAccess,
+    online: onlineTimelineAccess,
+    remotelyReadableLanguages: remotelyReadableTimelineLanguages,
+    isOnline: async () => onlineManager.isOnline(),
+  }),
   commentary: commentaryAccess,
   offlineCopies: { isAvailable: isLocalResourceAvailable },
   capabilities: {
@@ -286,7 +305,8 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
         remotelyReadableStrongLexiconModules,
         remotelyReadableDictionaryLanguages,
         remotelyReadableCommentaryCollections,
-        Boolean(resourceApiBaseUrl)
+        Boolean(resourceApiBaseUrl),
+        remotelyReadableTimelineLanguages
       ),
   },
 }

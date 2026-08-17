@@ -71,6 +71,12 @@ import {
   CrossReferenceResponseDto,
 } from '../../../src/features/resources/supplementaryContract'
 import {
+  TimelineEventPath,
+  TimelineEventResponseDto,
+  TimelineEventsResponseDto,
+  TimelineLanguagePath,
+} from '../../../src/features/resources/timelineContract'
+import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
   ResourceNotFoundProblem,
@@ -379,6 +385,26 @@ const SupplementaryApi = HttpApiGroup.make('supplementary')
       .addError(ResourceInternalProblem, { status: 500 })
   )
 
+const TimelineApi = HttpApiGroup.make('timelines')
+  .add(
+    HttpApiEndpoint.get('listTimelineEvents', '/v1/timelines/:language/events')
+      .setPath(TimelineLanguagePath)
+      .addSuccess(TimelineEventsResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getTimelineEvent', '/v1/timelines/:language/events/:slug')
+      .setPath(TimelineEventPath)
+      .addSuccess(TimelineEventResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+
 export class ResourceApi extends HttpApi.make('resource-api')
   .add(SystemApi)
   .add(BibleApi)
@@ -387,4 +413,5 @@ export class ResourceApi extends HttpApi.make('resource-api')
   .add(StrongBibleApi)
   .add(InterlinearBibleApi)
   .add(StrongLexiconApi)
-  .add(SupplementaryApi) {}
+  .add(SupplementaryApi)
+  .add(TimelineApi) {}

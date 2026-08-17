@@ -174,6 +174,37 @@ export const crossReferenceLinks = pgTable(
   ]
 )
 
+export const timelineEvents = pgTable(
+  'timeline_events',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    event_id: text('event_id').notNull(),
+    ordinal: integer('ordinal').notNull(),
+    slug: text('slug').notNull(),
+    title: text('title').notNull(),
+    description: text('description').notNull(),
+    article: text('article').notNull(),
+    period: text('period').notNull(),
+    dates: text('dates').notNull(),
+    related: jsonb('related').$type<Array<{ slug: string; title: string }>>().notNull(),
+    images: jsonb('images').$type<Array<{ caption: string; file: string }>>().notNull(),
+    videos: jsonb('videos')
+      .$type<Array<{ title: string; caption: string; filename: string }>>()
+      .notNull(),
+    scriptures: jsonb('scriptures').$type<string[]>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'timeline_events_publication_event_primary',
+      columns: [table.publication_id, table.event_id],
+    }),
+    uniqueIndex('timeline_events_publication_slug_unique').on(table.publication_id, table.slug),
+    index('timeline_events_browse').on(table.publication_id, table.ordinal),
+  ]
+)
+
 export const dictionaryEntries = pgTable(
   'dictionary_entries',
   {

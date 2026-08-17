@@ -10,6 +10,7 @@ import {
   isDictionaryPublicationBundleManifest,
   isCommentaryPublicationBundleManifest,
   isCrossReferencePublicationBundleManifest,
+  isTimelinePublicationBundleManifest,
   isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
   isStrongLexiconPublicationBundleManifest,
@@ -18,6 +19,7 @@ import {
   type CanonicalDictionaryPublication,
   type CanonicalCommentaryPublication,
   type CanonicalCrossReferencePublication,
+  type CanonicalTimelinePublication,
 } from '../publication/publicationBundle'
 
 export class PublicationImportFailure extends Data.TaggedError('PublicationImportFailure')<{
@@ -333,11 +335,13 @@ export const importPublicationBundle = (
               ? `commentary:${manifest.identity.resourceId}:${manifest.identity.language}`
               : isCrossReferencePublicationBundleManifest(manifest)
                 ? `cross-references:${manifest.identity.language}`
-                : isInterlinearBiblePublicationBundleManifest(manifest)
-                  ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
-                  : isStrongLexiconPublicationBundleManifest(manifest)
-                    ? manifest.identity.resourceId
-                    : `strong-bible-index:${manifest.identity.versionId}`
+                : isTimelinePublicationBundleManifest(manifest)
+                  ? `timeline:${manifest.identity.language}`
+                  : isInterlinearBiblePublicationBundleManifest(manifest)
+                    ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
+                    : isStrongLexiconPublicationBundleManifest(manifest)
+                      ? manifest.identity.resourceId
+                      : `strong-bible-index:${manifest.identity.versionId}`
       const publicationStatus =
         manifest.deliveryCapabilities.onlineAccess ||
         (options.activateForLocalDevelopment &&
@@ -413,33 +417,21 @@ export const importPublicationBundle = (
                     resource_revision: manifest.revision,
                     offline_entry: manifest.offlineArtifact.entry,
                   }
-                : isInterlinearBiblePublicationBundleManifest(manifest)
+                : isTimelinePublicationBundleManifest(manifest)
                   ? {
-                      version_id: manifest.identity.versionId,
-                      dataset_id: manifest.identity.datasetId,
+                      resource_id: manifest.identity.resourceId,
                       language: manifest.identity.language,
                       delivery_capabilities: manifest.deliveryCapabilities,
-                      dependencies: manifest.dependencies,
                       counts: manifest.counts,
                       canonical_schema_version: manifest.canonical.schemaVersion,
                       resource_revision: manifest.revision,
-                      text_revision: manifest.dependencies.bible.revision,
-                      text_sha256: manifest.dependencies.bible.textSha256,
                       offline_entry: manifest.offlineArtifact.entry,
                     }
-                  : isStrongLexiconPublicationBundleManifest(manifest)
+                  : isInterlinearBiblePublicationBundleManifest(manifest)
                     ? {
-                        module_id: manifest.identity.moduleId,
-                        delivery_capabilities: manifest.deliveryCapabilities,
-                        dependencies: manifest.dependencies,
-                        counts: manifest.counts,
-                        canonical_schema_version: manifest.canonical.schemaVersion,
-                        resource_revision: manifest.revision,
-                        offline_entry: manifest.offlineArtifact.entry,
-                      }
-                    : {
                         version_id: manifest.identity.versionId,
                         dataset_id: manifest.identity.datasetId,
+                        language: manifest.identity.language,
                         delivery_capabilities: manifest.deliveryCapabilities,
                         dependencies: manifest.dependencies,
                         counts: manifest.counts,
@@ -447,12 +439,34 @@ export const importPublicationBundle = (
                         resource_revision: manifest.revision,
                         text_revision: manifest.dependencies.bible.revision,
                         text_sha256: manifest.dependencies.bible.textSha256,
-                        strong_revision:
-                          canonical.format === 'bible-strong-canonical-strong-index'
-                            ? canonical.strongRevision
-                            : undefined,
                         offline_entry: manifest.offlineArtifact.entry,
                       }
+                    : isStrongLexiconPublicationBundleManifest(manifest)
+                      ? {
+                          module_id: manifest.identity.moduleId,
+                          delivery_capabilities: manifest.deliveryCapabilities,
+                          dependencies: manifest.dependencies,
+                          counts: manifest.counts,
+                          canonical_schema_version: manifest.canonical.schemaVersion,
+                          resource_revision: manifest.revision,
+                          offline_entry: manifest.offlineArtifact.entry,
+                        }
+                      : {
+                          version_id: manifest.identity.versionId,
+                          dataset_id: manifest.identity.datasetId,
+                          delivery_capabilities: manifest.deliveryCapabilities,
+                          dependencies: manifest.dependencies,
+                          counts: manifest.counts,
+                          canonical_schema_version: manifest.canonical.schemaVersion,
+                          resource_revision: manifest.revision,
+                          text_revision: manifest.dependencies.bible.revision,
+                          text_sha256: manifest.dependencies.bible.textSha256,
+                          strong_revision:
+                            canonical.format === 'bible-strong-canonical-strong-index'
+                              ? canonical.strongRevision
+                              : undefined,
+                          offline_entry: manifest.offlineArtifact.entry,
+                        }
       const publicationMetadata = { ...metadata, manifest_sha256: manifestSha256 }
       const makeResult = (status: PublicationImportResult['status']): PublicationImportResult =>
         isBiblePublicationBundleManifest(manifest)
@@ -490,29 +504,36 @@ export const importPublicationBundle = (
                       revision: manifest.revision,
                       itemCount: manifest.counts.references,
                     }
-                  : isInterlinearBiblePublicationBundleManifest(manifest)
+                  : isTimelinePublicationBundleManifest(manifest)
                     ? {
                         status,
                         resourceIdentity,
                         revision: manifest.revision,
-                        itemCount: manifest.counts.segments,
+                        itemCount: manifest.counts.events,
                       }
-                    : isStrongLexiconPublicationBundleManifest(manifest)
+                    : isInterlinearBiblePublicationBundleManifest(manifest)
                       ? {
                           status,
                           resourceIdentity,
                           revision: manifest.revision,
-                          itemCount: Object.values(manifest.counts).reduce(
-                            (total, count) => total + count,
-                            0
-                          ),
+                          itemCount: manifest.counts.segments,
                         }
-                      : {
-                          status,
-                          resourceIdentity,
-                          revision: manifest.revision,
-                          itemCount: manifest.counts.occurrences,
-                        }
+                      : isStrongLexiconPublicationBundleManifest(manifest)
+                        ? {
+                            status,
+                            resourceIdentity,
+                            revision: manifest.revision,
+                            itemCount: Object.values(manifest.counts).reduce(
+                              (total, count) => total + count,
+                              0
+                            ),
+                          }
+                        : {
+                            status,
+                            resourceIdentity,
+                            revision: manifest.revision,
+                            itemCount: manifest.counts.occurrences,
+                          }
 
       return tryDatabasePromise(
         'publication.import',
@@ -733,6 +754,27 @@ export const importPublicationBundle = (
                     reference,
                   }))
                 )
+              )
+            } else if (canonical.format === 'bible-strong-canonical-timeline') {
+              const timelineCanonical = canonical as CanonicalTimelinePublication
+              await insertChunks(
+                transaction,
+                'timeline_events',
+                timelineCanonical.events.map((event, ordinal) => ({
+                  publication_id: publication.id,
+                  event_id: event.id,
+                  ordinal,
+                  slug: event.slug,
+                  title: event.title,
+                  description: event.description,
+                  article: event.article,
+                  period: event.period,
+                  dates: event.dates,
+                  related: sql`${JSON.stringify(event.related)}::jsonb`,
+                  images: sql`${JSON.stringify(event.images)}::jsonb`,
+                  videos: sql`${JSON.stringify(event.videos)}::jsonb`,
+                  scriptures: sql`${JSON.stringify(event.scriptures)}::jsonb`,
+                }))
               )
             } else if (canonical.format === 'bible-strong-canonical-strong-index') {
               for (let offset = 0; offset < canonical.verses.length; offset += 1_000) {

@@ -4,6 +4,7 @@ import type {
   bibleVerses,
   commentaryVerses,
   crossReferenceLinks,
+  timelineEvents,
   interlinearBibleSegmentIdentities,
   interlinearBibleSegments,
   interlinearBibleTokens,
@@ -39,6 +40,7 @@ export type ResourcePublicationRow = Kyselify<typeof resourcePublications>
 export type BibleVerseRow = Kyselify<typeof bibleVerses>
 export type CommentaryVerseRow = Kyselify<typeof commentaryVerses>
 export type CrossReferenceLinkRow = Kyselify<typeof crossReferenceLinks>
+export type TimelineEventRow = Kyselify<typeof timelineEvents>
 export type NaveTopicRow = Kyselify<typeof naveTopics>
 export type NaveVerseLinkRow = Kyselify<typeof naveVerseLinks>
 export type DictionaryEntryRow = Kyselify<typeof dictionaryEntries>
@@ -75,6 +77,7 @@ export type ResourceDatabase = {
   bible_verses: BibleVerseRow
   commentary_verses: CommentaryVerseRow
   cross_reference_links: CrossReferenceLinkRow
+  timeline_events: TimelineEventRow
   nave_topics: NaveTopicRow
   nave_verse_links: NaveVerseLinkRow
   dictionary_entries: DictionaryEntryRow
