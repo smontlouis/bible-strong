@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { getDevelopmentEndpoints, RESOURCE_DEVELOPMENT_COMMANDS } from '../development'
+import {
+  getDevelopmentEndpoints,
+  RESOURCE_DEVELOPMENT_COMMANDS,
+  shouldImportResourcePublications,
+} from '../development'
 
 describe('Resource development bootstrap', () => {
   it('starts and migrates persistent PostgreSQL without a reset operation', () => {
@@ -21,5 +25,19 @@ describe('Resource development bootstrap', () => {
       androidEmulator: 'http://10.0.2.2:8787',
       physicalDevice: 'http://192.168.1.42:8787',
     })
+  })
+
+  it('can explicitly skip imports even when publication paths are inherited', () => {
+    assert.equal(
+      shouldImportResourcePublications({
+        RESOURCE_SKIP_IMPORT: '1',
+        RESOURCE_PUBLICATION_ROOTS: '/existing/catalog',
+      }),
+      false
+    )
+    assert.equal(
+      shouldImportResourcePublications({ RESOURCE_PUBLICATION_ROOTS: '/existing/catalog' }),
+      true
+    )
   })
 })

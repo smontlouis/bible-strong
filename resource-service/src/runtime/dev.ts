@@ -2,7 +2,11 @@ import { spawnSync } from 'node:child_process'
 import { networkInterfaces } from 'node:os'
 import path from 'node:path'
 
-import { getDevelopmentEndpoints, RESOURCE_DEVELOPMENT_COMMANDS } from './development'
+import {
+  getDevelopmentEndpoints,
+  RESOURCE_DEVELOPMENT_COMMANDS,
+  shouldImportResourcePublications,
+} from './development'
 
 const run = ([command, ...args]: readonly string[]) => {
   const result = spawnSync(command, args, {
@@ -28,12 +32,14 @@ const publicationRoots = process.env.RESOURCE_PUBLICATION_ROOTS?.split(path.deli
   .map(root => root.trim())
   .filter(Boolean)
 
-if (publicationRoots?.length) {
-  run(['yarn', 'resources:import-catalog', ...publicationRoots.flatMap(root => ['--root', root])])
-} else if (process.env.RESOURCE_PUBLICATION_BUNDLE) {
-  run(['yarn', 'resources:import', '--bundle', process.env.RESOURCE_PUBLICATION_BUNDLE])
-} else if (process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT) {
-  run(['yarn', 'resources:import-all', '--root', process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT])
+if (shouldImportResourcePublications(process.env)) {
+  if (publicationRoots?.length) {
+    run(['yarn', 'resources:import-catalog', ...publicationRoots.flatMap(root => ['--root', root])])
+  } else if (process.env.RESOURCE_PUBLICATION_BUNDLE) {
+    run(['yarn', 'resources:import', '--bundle', process.env.RESOURCE_PUBLICATION_BUNDLE])
+  } else if (process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT) {
+    run(['yarn', 'resources:import-all', '--root', process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT])
+  }
 }
 
 const port = Number(process.env.RESOURCE_API_PORT ?? 8787)
