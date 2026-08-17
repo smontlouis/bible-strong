@@ -81,6 +81,11 @@ export function createInterlinearSidecarDownloadItem(lang: ResourceLanguage): Do
   const artifact = {
     ...publicationArtifact,
     url: catalogArtifact.url,
+    entry: catalogArtifact.entry,
+    archiveSha256: catalogArtifact.archiveSha256,
+    archiveBytes: catalogArtifact.archiveBytes,
+    contentSha256: catalogArtifact.contentSha256,
+    contentBytes: catalogArtifact.contentBytes,
   }
   return {
     id: createOfflineCopyId({

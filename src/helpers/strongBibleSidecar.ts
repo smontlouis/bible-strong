@@ -22,6 +22,7 @@ import {
   type StrongBibleVersionId,
 } from './strongBiblePublications'
 import type { StrongBibleIdentityKind, StrongBibleSpan } from './canonicalStrongVerse'
+import { STRONG_IDENTITY_KINDS } from './strongIdentities'
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import { getStrongBibleConcordanceCandidates } from './strongBibleConcordance'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
@@ -46,7 +47,7 @@ const strongBibleConnections = new AsyncConnectionRegistry<StrongBibleVersionId,
   database => database.closeAsync()
 )
 const validatedSidecars = new Map<StrongBibleVersionId, StrongBibleSidecarMetadata>()
-const IDENTITY_KINDS = ['strong', 'estrong', 'dstrong', 'ustrong'] as const
+const IDENTITY_KINDS = STRONG_IDENTITY_KINDS
 
 export type StrongBibleSidecarAvailability =
   | { status: 'unsupported' }

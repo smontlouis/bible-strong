@@ -471,6 +471,7 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     isInterlinearBiblePublicationBundleManifest(manifest) &&
     (manifest.offlineArtifact.entry !==
       `bible-step-interlinear-${manifest.identity.language}.sqlite` ||
+      manifest.canonical.schemaVersion !== 1 ||
       !manifest.dependencies.strongLexiconModules.some(
         dependency => dependency.resourceIdentity === 'strong-lexicon:core'
       ))
@@ -735,7 +736,11 @@ export const decodeCanonicalInterlinearBible = (
     !Array.isArray(candidate.verses) ||
     !Array.isArray(candidate.tokens) ||
     !Array.isArray(candidate.segments) ||
-    !Array.isArray(candidate.segmentIdentities)
+    !Array.isArray(candidate.segmentIdentities) ||
+    candidate.verses.length === 0 ||
+    candidate.tokens.length === 0 ||
+    candidate.segments.length === 0 ||
+    candidate.segmentIdentities.length === 0
   ) {
     throw new Error('CANONICAL_INTERLINEAR_INVALID')
   }
@@ -1223,6 +1228,15 @@ const validateInterlinearBibleOfflineParity = async (
   let database: Database | undefined
   try {
     database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    const foreignKeyFailures = readSqliteRows(database, 'PRAGMA foreign_key_check')
+    if (
+      integrity.length !== 1 ||
+      Object.values(integrity[0] ?? {}).some(value => value !== 'ok') ||
+      foreignKeyFailures.length !== 0
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
     const metadata = Object.fromEntries(
       readSqliteRows(database, 'SELECT key, value FROM ResourceMetadata').map(row => [
         requireSqliteString(row.key),
@@ -1336,29 +1350,35 @@ const validateInterlinearBibleOfflineParity = async (
 
     const verseByToken = new Map(canonical.tokens.map(token => [token.id, token.verseId]))
     const tokenBySegment = new Map(canonical.segments.map(segment => [segment.id, segment.tokenId]))
-    const expectedStrongVerseIndex = new Set(
-      canonical.segmentIdentities.map(identity => {
-        const verseId = verseByToken.get(tokenBySegment.get(identity.segmentId) ?? -1)
-        if (verseId === undefined) throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
-        return `${verseId}:${identity.code}`
-      })
-    )
+    const expectedStrongVerseIndex = new Map<string, number>()
+    for (const identity of canonical.segmentIdentities) {
+      const verseId = verseByToken.get(tokenBySegment.get(identity.segmentId) ?? -1)
+      if (verseId === undefined) throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+      const key = `${verseId}:${identity.code}`
+      expectedStrongVerseIndex.set(
+        key,
+        (expectedStrongVerseIndex.get(key) ?? 0) | (1 << identity.identityOrder)
+      )
+    }
     const strongVerseRows = readSqliteRows(
       database,
-      `SELECT svi.verseId AS verseId, sc.code AS code
+      `SELECT svi.verseId AS verseId, sc.code AS code, svi.kindMask AS kindMask
          FROM StrongVerseIndex svi
          JOIN StrongCodes sc ON sc.id=svi.codeId
         ORDER BY svi.verseId, sc.code`
     )
-    const actualStrongVerseIndex = new Set(
-      strongVerseRows.map(
-        row => `${requireSqliteInteger(row.verseId)}:${requireSqliteString(row.code)}`
-      )
+    const actualStrongVerseIndex = new Map(
+      strongVerseRows.map(row => [
+        `${requireSqliteInteger(row.verseId)}:${requireSqliteString(row.code)}`,
+        requireSqliteInteger(row.kindMask),
+      ])
     )
     if (
       actualStrongVerseIndex.size !== strongVerseRows.length ||
       actualStrongVerseIndex.size !== expectedStrongVerseIndex.size ||
-      [...expectedStrongVerseIndex].some(key => !actualStrongVerseIndex.has(key))
+      [...expectedStrongVerseIndex].some(
+        ([key, kindMask]) => actualStrongVerseIndex.get(key) !== kindMask
+      )
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }

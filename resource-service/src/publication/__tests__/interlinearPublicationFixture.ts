@@ -50,6 +50,8 @@ const makeOfflineSqlite = async (
     schemaVersion?: number
     omitIndexRevision?: boolean
     mismatchedStrongVerseIndex?: boolean
+    mismatchedStrongKindMask?: boolean
+    corruptIntegrity?: boolean
   } = {}
 ) => {
   const SQL = await initSqlJs()
@@ -102,9 +104,20 @@ const makeOfflineSqlite = async (
   database.run('INSERT INTO Glosses VALUES (1, ?)', [canonical.segments[0]!.gloss])
   database.run("INSERT INTO StrongCodes VALUES (1, 'H07225')")
   database.run('INSERT INTO Segments VALUES (11, 7, 0, 0, 8, 1, 1, 1, 1, 1, NULL, NULL, NULL)')
-  database.run('INSERT INTO StrongVerseIndex VALUES (1, ?, 1)', [
+  database.run('INSERT INTO StrongVerseIndex VALUES (1, ?, ?)', [
     options.mismatchedStrongVerseIndex ? 2 : 1,
+    options.mismatchedStrongKindMask ? 8 : 1,
   ])
+  if (options.corruptIntegrity) {
+    database.run('CREATE TABLE CorruptInterlinearPage(value TEXT)')
+    database.run('PRAGMA writable_schema=ON')
+    database.run(`
+      UPDATE sqlite_master
+         SET rootpage=(SELECT rootpage FROM sqlite_master WHERE name='ResourceMetadata')
+       WHERE name='CorruptInterlinearPage'
+    `)
+    database.run('PRAGMA writable_schema=OFF')
+  }
   const bytes = database.export()
   database.close()
   return bytes
@@ -121,6 +134,8 @@ export const writeInterlinearPublicationFixture = async (
     offlineSchemaVersion?: number
     omitOfflineIndexRevision?: boolean
     mismatchedStrongVerseIndex?: boolean
+    mismatchedStrongKindMask?: boolean
+    corruptOfflineIntegrity?: boolean
   } = {}
 ) => {
   const language = options.language ?? 'fr'
@@ -141,6 +156,8 @@ export const writeInterlinearPublicationFixture = async (
     schemaVersion: options.offlineSchemaVersion,
     omitIndexRevision: options.omitOfflineIndexRevision,
     mismatchedStrongVerseIndex: options.mismatchedStrongVerseIndex,
+    mismatchedStrongKindMask: options.mismatchedStrongKindMask,
+    corruptIntegrity: options.corruptOfflineIntegrity,
   })
   const entry = `bible-step-interlinear-${language}.sqlite`
   const offline = zipSync({
