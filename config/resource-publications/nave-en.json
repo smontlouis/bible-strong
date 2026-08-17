@@ -1,0 +1,14 @@
+{
+  "sourceVersion": "nave-en-mobile-source-v1",
+  "rights": {
+    "holder": "Public domain",
+    "termsReference": "Nave's Topical Bible",
+    "attribution": "Orville J. Nave; English source",
+    "online": true,
+    "offline": true
+  },
+  "deliveryCapabilities": {
+    "onlineAccess": true,
+    "offlineDownload": true
+  }
+}

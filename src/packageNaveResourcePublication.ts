@@ -49,10 +49,35 @@ export interface NaveResourcePublicationMetadata {
   };
 }
 
+export type NaveLanguage = "fr" | "en";
+export type NaveResourceId = "NAVE_FR" | "NAVE_EN";
+
+const configFor = (language: NaveLanguage) =>
+  language === "fr"
+    ? {
+        resourceId: "NAVE_FR" as const,
+        entry: "nave-fr.sqlite" as const,
+        stem: "nave-fr"
+      }
+    : {
+        resourceId: "NAVE_EN" as const,
+        entry: "nave.sqlite" as const,
+        stem: "nave-en"
+      };
+
+const isNaveResourceId = (value: unknown): value is NaveResourceId =>
+  value === "NAVE_FR" || value === "NAVE_EN";
+
+const isNaveLanguage = (value: unknown): value is NaveLanguage =>
+  value === "fr" || value === "en";
+
+const languageForResourceId = (resourceId: NaveResourceId): NaveLanguage =>
+  resourceId === "NAVE_EN" ? "en" : "fr";
+
 export interface CanonicalNavePublication {
   format: "bible-strong-canonical-nave";
   schemaVersion: 1;
-  resourceId: "NAVE_FR";
+  resourceId: NaveResourceId;
   revision: string;
   sourceVersion: string;
   sourceSha256: string;
@@ -71,7 +96,11 @@ export interface CanonicalNavePublication {
 export interface NaveResourcePublicationManifest {
   format: "bible-strong-resource-publication";
   schemaVersion: 1;
-  identity: { kind: "nave"; resourceId: "NAVE_FR"; language: "fr" };
+  identity: {
+    kind: "nave";
+    resourceId: NaveResourceId;
+    language: NaveLanguage;
+  };
   revision: string;
   canonical: {
     path: string;
@@ -83,7 +112,7 @@ export interface NaveResourcePublicationManifest {
   offlineArtifact: {
     path: string;
     mediaType: "application/zip";
-    entry: "nave-fr.sqlite";
+    entry: "nave-fr.sqlite" | "nave.sqlite";
     sha256: string;
     bytes: number;
     contentSha256: string;
@@ -116,6 +145,7 @@ export async function buildNaveResourcePublication(
   options: NaveResourcePublicationMetadata & {
     sqlitePath: string;
     outputDir: string;
+    language?: NaveLanguage;
     generatedAt?: string;
   }
 ): Promise<{
@@ -127,6 +157,8 @@ export async function buildNaveResourcePublication(
 }> {
   const sourceSqlitePath = path.resolve(options.sqlitePath);
   const outputDir = path.resolve(options.outputDir);
+  const language = options.language ?? "fr";
+  const resource = configFor(language);
   if (!existsSync(sourceSqlitePath)) {
     throw new Error(`nave-publication-source-missing:${sourceSqlitePath}`);
   }
@@ -137,11 +169,14 @@ export async function buildNaveResourcePublication(
 
   const sourceSha256 = await sha256File(sourceSqlitePath);
   const source = await readNaveSqlite(sourceSqlitePath);
-  const revision = deriveNaveRevision(source);
+  const revision = deriveNaveRevision({
+    ...source,
+    resourceId: resource.resourceId
+  });
   const canonical: CanonicalNavePublication = {
     format: "bible-strong-canonical-nave",
     schemaVersion: 1,
-    resourceId: "NAVE_FR",
+    resourceId: resource.resourceId,
     revision,
     sourceVersion: options.sourceVersion,
     sourceSha256,
@@ -151,10 +186,13 @@ export async function buildNaveResourcePublication(
 
   const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const mobileReleaseDir = `${temporaryDir}-mobile`;
-  const canonicalRelativePath = "canonical/nave-fr.json";
-  const offlineRelativePath = "offline/nave-fr.sqlite.zip";
+  const canonicalRelativePath = `canonical/${resource.stem}.json`;
+  const offlineRelativePath = `offline/${resource.entry}.zip`;
   const canonicalPath = path.join(temporaryDir, canonicalRelativePath);
-  const normalizedSqlitePath = path.join(temporaryDir, "work/nave-fr.sqlite");
+  const normalizedSqlitePath = path.join(
+    temporaryDir,
+    `work/${resource.entry}`
+  );
 
   try {
     await Promise.all([
@@ -170,25 +208,25 @@ export async function buildNaveResourcePublication(
       generatedAt: options.generatedAt,
       inventory: [
         {
-          id: "database:NAVE:fr",
-          artifactUrl: "https://local.invalid/databases/nave-fr.sqlite.zip",
+          id: `database:NAVE:${language}`,
+          artifactUrl: `https://local.invalid/databases/${resource.entry}.zip`,
           sources: [
             {
               role: "canonical",
-              sourceUrl: "https://local.invalid/databases/nave-fr.sqlite",
+              sourceUrl: `https://local.invalid/databases/${resource.entry}`,
               sourcePath: normalizedSqlitePath,
-              entry: "nave-fr.sqlite"
+              entry: resource.entry
             }
           ],
           strategy: "archive-extract"
         }
       ],
-      requiredIds: ["database:NAVE:fr"]
+      requiredIds: [`database:NAVE:${language}`]
     });
     const catalog = JSON.parse(
       await readFile(mobileResult.catalogPath, "utf8")
     ) as MobileResourceCatalog;
-    const mobileArtifact = catalog.resources["database:NAVE:fr"];
+    const mobileArtifact = catalog.resources[`database:NAVE:${language}`];
     if (!mobileArtifact) throw new Error("nave-publication-offline-missing");
 
     const offlineArtifactPath = path.join(temporaryDir, offlineRelativePath);
@@ -208,7 +246,7 @@ export async function buildNaveResourcePublication(
     const manifest: NaveResourcePublicationManifest = {
       format: "bible-strong-resource-publication",
       schemaVersion: 1,
-      identity: { kind: "nave", resourceId: "NAVE_FR", language: "fr" },
+      identity: { kind: "nave", resourceId: resource.resourceId, language },
       revision,
       canonical: {
         path: canonicalRelativePath,
@@ -220,7 +258,7 @@ export async function buildNaveResourcePublication(
       offlineArtifact: {
         path: offlineRelativePath,
         mediaType: "application/zip",
-        entry: "nave-fr.sqlite",
+        entry: resource.entry,
         sha256: await sha256File(offlineArtifactPath),
         bytes: offlineStats.size,
         contentSha256
@@ -494,7 +532,8 @@ function countCanonical(canonical: CanonicalNavePublication) {
 }
 
 export function deriveNaveRevision(
-  canonical: Pick<CanonicalNavePublication, "topics" | "verseAnchors">
+  canonical: Pick<CanonicalNavePublication, "topics" | "verseAnchors"> &
+    Partial<Pick<CanonicalNavePublication, "resourceId">>
 ): string {
   const semanticSha256 = sha256Buffer(
     Buffer.from(
@@ -505,7 +544,7 @@ export function deriveNaveRevision(
       "utf8"
     )
   );
-  return `nave-fr-${semanticSha256.slice(0, 20)}`;
+  return `${canonical.resourceId === "NAVE_EN" ? "nave-en" : "nave-fr"}-${semanticSha256.slice(0, 20)}`;
 }
 
 function deriveAlphabeticalBrowse(canonical: CanonicalNavePublication) {
@@ -548,7 +587,7 @@ function decodeCanonical(value: unknown): CanonicalNavePublication {
   if (
     canonical.format !== "bible-strong-canonical-nave" ||
     canonical.schemaVersion !== 1 ||
-    canonical.resourceId !== "NAVE_FR" ||
+    !isNaveResourceId(canonical.resourceId) ||
     !isNonEmptyString(canonical.revision) ||
     !isNonEmptyString(canonical.sourceVersion) ||
     !isSha256(canonical.sourceSha256) ||
@@ -582,12 +621,15 @@ function decodeCanonical(value: unknown): CanonicalNavePublication {
 function decodeManifest(value: unknown): NaveResourcePublicationManifest {
   const envelope = decodeResourcePublicationEnvelope(value);
   const manifest = value as Partial<NaveResourcePublicationManifest>;
+  const identity = manifest.identity;
   if (
-    manifest.identity?.kind !== "nave" ||
-    manifest.identity.resourceId !== "NAVE_FR" ||
-    manifest.identity.language !== "fr" ||
+    !identity ||
+    identity.kind !== "nave" ||
+    !isNaveResourceId(identity.resourceId) ||
+    !isNaveLanguage(identity.language) ||
+    identity.language !== languageForResourceId(identity.resourceId) ||
     envelope.canonical.schemaVersion !== 1 ||
-    envelope.offlineArtifact.entry !== "nave-fr.sqlite" ||
+    envelope.offlineArtifact.entry !== configFor(identity.language).entry ||
     !manifest.alphabeticalBrowse ||
     !Array.isArray(manifest.alphabeticalBrowse.initials) ||
     manifest.alphabeticalBrowse.initials.some(
@@ -677,11 +719,15 @@ async function main(): Promise<void> {
   const buildArgs = command === "build" ? rawArgs : [command, ...rawArgs];
   const args = parseCliArgs(
     buildArgs,
-    new Set(["--sqlite", "--metadata", "--output-dir"])
+    new Set(["--sqlite", "--metadata", "--output-dir", "--language"])
   );
   const sqlitePath = args["--sqlite"];
   const metadataPath = args["--metadata"];
   const outputDir = args["--output-dir"];
+  const language = args["--language"] ?? "fr";
+  if (!isNaveLanguage(language)) {
+    throw new Error("nave-publication-language-invalid");
+  }
   if (!sqlitePath || !metadataPath || !outputDir) {
     throw new Error("nave-publication-cli-required-options-missing");
   }
@@ -691,7 +737,8 @@ async function main(): Promise<void> {
   const result = await buildNaveResourcePublication({
     ...metadata,
     sqlitePath,
-    outputDir
+    outputDir,
+    language
   });
   console.log(
     JSON.stringify(
