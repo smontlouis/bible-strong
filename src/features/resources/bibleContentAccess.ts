@@ -64,6 +64,10 @@ import {
   type StrongBibleResourceAccess,
 } from './strongBibleResourceAccess'
 import { ResourceAccessError } from './resourceAccessError'
+import {
+  localInterlinearBibleResourceAccess,
+  type InterlinearBibleResourceAccess,
+} from './interlinearBibleResourceAccess'
 
 export type { BibleChapterAdapter, BibleChapterSourceResult } from './bibleChapterSource'
 
@@ -532,7 +536,11 @@ export const createBibleContentAccess = (
   chapterAdapter: BibleChapterAdapter,
   strongBibleAccess: {
     loadChapterSpans: NonNullable<StrongBibleResourceAccess['loadChapterSpans']>
-  } = localStrongBibleResourceAccess
+  } = localStrongBibleResourceAccess,
+  interlinearBibleAccess: Pick<
+    InterlinearBibleResourceAccess,
+    'loadChapterTokens'
+  > = localInterlinearBibleResourceAccess
 ): BibleContentAccess => ({
   ...localBibleContentAccess,
   loadChapter: request =>
@@ -556,6 +564,13 @@ export const createBibleContentAccess = (
           ...(result.textSha256 ? { textSha256: result.textSha256 } : {}),
         }
       },
+      loadInterlinearChapterTokens: async (_versionId, locale, book, chapter) =>
+        (
+          await interlinearBibleAccess.loadChapterTokens(locale, {
+            book,
+            chapter,
+          })
+        ).tokensByVerse,
     }),
   loadVerseTexts: async ({ version, verseKeys, shouldCancel }) => {
     try {

@@ -30,22 +30,28 @@ not generate its manifest, editorial metadata, or Offline-copy artifact:
 yarn resources:bundle:validate --bundle /absolute/path/to/bible-lexicon-maker/lsg-bundle
 ```
 
-The accepted schema-v1 bundle represents exactly one `bible-text`, `strong-bible-index`, or `nave`
-identity and immutable revision.
+The accepted schema-v1 bundle represents exactly one `bible-text`, `strong-bible-index`,
+`interlinear-index`, or `nave` identity and immutable revision.
 It contains:
 
 - `manifest.json`, with identity, language, revision, provenance, independent delivery capabilities,
   rights, domain coverage, counts, format versions, sizes, and SHA-256 checksums;
 - `canonical/*.json`, used by the PostgreSQL importer;
 - `offline/*.zip`, the matching Offline-copy artifact delivered to the app. Bible bundles contain
-  the canonical JSON; Strong Bible and Nave bundles contain the generated SQLite database used by
-  existing mobile surfaces.
+  the canonical JSON; Strong Bible, interlinear, and Nave bundles contain the generated SQLite
+  database used by existing mobile surfaces.
 
 A Strong Bible manifest declares its matching `bible-text:<version>` revision and text SHA-256 as
 required in both Online and Offline-copy modes. It also declares the Strong lexicon modules required
 for lexical details. Validation compares every identity, span offset, alignment flag, morphology
 token link, lexeme assignment, and aggregate count between canonical JSON and the archived SQLite
 sidecar.
+
+A BHG interlinear manifest identifies one `STEP` gloss language (`fr` or `en`), declares the exact
+`bible-text:BHG` revision and text SHA-256 required in both delivery modes, and declares the Strong
+lexicon modules needed for lexical details. Validation compares every verse, token, alignment
+offset, segment, localized gloss, morphology value, and ordered lexical identity between canonical
+JSON and the archived V5 SQLite sidecar.
 
 The NAVE_FR archive entry is `nave-fr.sqlite`. In addition to the existing `TOPICS` and `VERSES`
 tables, publication copies contain one `RESOURCE_METADATA` row with `resource_id`, `revision`,
@@ -70,6 +76,7 @@ yarn resources:import --bundle resource-service/.local/publications/lsg
 yarn resources:import --bundle resource-service/.local/publications/nave-fr
 yarn resources:import-all --root /path/to/ordinary-bible-publications-current
 yarn resources:import-all --root /path/to/strong-bible-publications-current
+yarn resources:import-all --root /path/to/interlinear-publications-current
 ```
 
 `import-all` is the explicit local-development path: it activates publications whose manifest sets
@@ -80,8 +87,8 @@ Reimporting the same revision and checksums returns `unchanged`. Reusing a revis
 content fails. Validation failures or Effect interruption roll back staging and preserve the prior
 active publication.
 
-The local Effect HttpApi exposes Bible reading, Strong Bible indexes, and the Nave operations
-consumed by the app:
+The local Effect HttpApi exposes Bible reading, Strong Bible indexes, BHG interlinear indexes, and
+the Nave operations consumed by the app:
 
 - `GET /v1/bibles/:version/books/:book/chapters/:chapter`
 - `GET /v1/bibles/:version/coverage`
@@ -91,6 +98,8 @@ consumed by the app:
 - `GET /v1/strong-bibles/:version/books/:book/identities/:reference/counts`
 - `GET /v1/strong-bibles/:version/books/:book/identities/:reference/occurrences`
 - `GET /v1/strong-bibles/:version/books/:book/identities/:reference/lemmas`
+- `GET /v1/interlinear-bibles/BHG/languages/:language/coverage`
+- `GET /v1/interlinear-bibles/BHG/languages/:language/books/:book/chapters/:chapter`
 - `GET /v1/naves/:language/topics/:normalizedName`
 - `GET /v1/naves/:language/topics?initial=:initial`
 - `GET /v1/naves/:language/topics?search=:search`
@@ -101,7 +110,8 @@ Only `nave:fr` (`NAVE_FR`) is remotely readable in this tracer. English Nave rem
 through its existing optional Offline copy. All 12 cataloged Strong Bible versions are remotely
 readable when their validated index publication and the exact declared Bible text revision and
 SHA-256 are active. An active index with a missing or mismatched Bible publication is deliberately
-unavailable.
+unavailable. Both cataloged BHG interlinear languages are remotely readable under the same exact
+base-text dependency rule; a valid installed V5 sidecar remains preferred.
 
 ## Verification
 
@@ -110,6 +120,9 @@ yarn resources:test
 yarn resources:test:integration
 yarn resources:test:lsg
 yarn resources:test:strong
+RESOURCE_BHG_BUNDLE_ROOT=/absolute/path/to/bhg \
+RESOURCE_INTERLINEAR_BUNDLES_ROOT=/absolute/path \
+yarn resources:test:interlinear
 yarn resources:architecture:check
 ```
 
@@ -119,6 +132,12 @@ value in the complete local LSG bundle with the active PostgreSQL publication.
 `resources:test:strong` reads `RESOURCE_STRONG_BIBLE_BUNDLES_ROOT`, requires exactly the 12 mobile
 catalog identities, validates canonical/archive parity, imports each domain atomically, and queries
 chapter coverage and spans. The suite is skipped when the external Maker handoff path is absent.
+
+`resources:test:interlinear` reads the prerequisite BHG publication from
+`RESOURCE_BHG_BUNDLE_ROOT` and its two index bundles from `RESOURCE_INTERLINEAR_BUNDLES_ROOT`, requires exactly the French
+and English catalog identities, checks their declared catalog metadata and complete
+canonical/archive parity, imports both, and queries chapter coverage and aligned token content. The
+suite is skipped when the external Maker handoff path is absent.
 
 ## Mobile development URL
 
@@ -158,5 +177,5 @@ unchanged; only the origin is replaced.
 
 Production builds ignore this override. The local server validates the explicit bundle before it
 starts and returns generation plus checksum headers used by the normal atomic installation flow.
-Bible artifacts are served below `/bibles/`; NAVE_FR is served at the existing mobile catalog path
-`/databases/nave-fr.sqlite.zip`.
+Bible and interlinear artifacts are served below `/bibles/`; NAVE_FR is served at the existing
+mobile catalog path `/databases/nave-fr.sqlite.zip`.

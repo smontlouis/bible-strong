@@ -26,6 +26,17 @@ const naveManifest = {
   deliveryCapabilities: { offlineDownload: true },
 } as PublicationBundleManifest
 
+const interlinearManifest = {
+  identity: { kind: 'interlinear-index', versionId: 'BHG', datasetId: 'STEP', language: 'fr' },
+  revision: 'bhg-interlinear-fr-r1',
+  offlineArtifact: {
+    path: 'offline/bible-step-interlinear-fr.sqlite.zip',
+    mediaType: 'application/zip',
+    sha256: 'c'.repeat(64),
+  },
+  deliveryCapabilities: { offlineDownload: true },
+} as PublicationBundleManifest
+
 describe('development artifact server', () => {
   it('serves the bundle bytes at the mobile catalog path with integrity headers', async () => {
     const bytes = Buffer.from('immutable LSG bundle')
@@ -71,6 +82,22 @@ describe('development artifact server', () => {
     assert.equal(
       respondWithDevelopmentArtifact(
         new Request('http://127.0.0.1:8788/databases/nave-fr.sqlite.zip'),
+        artifact
+      ).status,
+      200
+    )
+  })
+
+  it('serves a BHG interlinear Offline copy at its mobile catalog route', () => {
+    const artifact = createDevelopmentArtifact(
+      interlinearManifest,
+      Buffer.from('interlinear bundle')
+    )
+
+    assert.equal(artifact.route, '/bibles/bible-step-interlinear-fr.sqlite.zip')
+    assert.equal(
+      respondWithDevelopmentArtifact(
+        new Request('http://127.0.0.1:8788/bibles/bible-step-interlinear-fr.sqlite.zip'),
         artifact
       ).status,
       200

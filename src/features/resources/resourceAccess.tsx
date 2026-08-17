@@ -44,9 +44,16 @@ import {
   type StrongBibleResourceAccess,
 } from '~features/resources/strongBibleResourceAccess'
 import {
-  localLexiconBibleResourceAccess,
+  createHybridInterlinearLexiconAdapter,
+  createLexiconBibleResourceAccess,
   type LexiconBibleResourceAccess,
 } from '~features/resources/lexiconBibleResourceAccess'
+import {
+  createHttpInterlinearBibleResourceAdapter,
+  createHybridInterlinearBibleResourceAdapter,
+  localInterlinearBibleResourceAdapter,
+  type InterlinearBibleResourceAccess,
+} from '~features/resources/interlinearBibleResourceAccess'
 import { localTimelineAccess, type TimelineAccess } from '~features/resources/timelineAccess'
 import {
   defaultCommentaryAccess,
@@ -67,6 +74,7 @@ import {
 } from '~helpers/mobileResourceCatalog'
 import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
 import { STRONG_BIBLE_FALLBACK_PRIORITY } from '~helpers/strongBiblePublications'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
@@ -77,6 +85,7 @@ export type ResourceAccessRegistry = {
   nave: NaveAccess
   strongLexicon: StrongLexiconAccess
   strongBible: StrongBibleResourceAccess
+  interlinearBible: InterlinearBibleResourceAccess
   timeline: TimelineAccess
   commentary: CommentaryAccess
   offlineCopies: {
@@ -129,6 +138,26 @@ const strongBibleAccess = createStrongBibleResourceAccess(
     isOnline: async () => onlineManager.isOnline(),
   })
 )
+const remotelyReadableInterlinearLocales = new Set<ResourceLanguage>(
+  resourceApiBaseUrl ? ['fr', 'en'] : []
+)
+const onlineInterlinearBibleAdapter = resourceApiBaseUrl
+  ? createHttpInterlinearBibleResourceAdapter({
+      baseUrl: resourceApiBaseUrl,
+      isOnline: async () => onlineManager.isOnline(),
+      bibleChapterAdapter,
+    })
+  : localInterlinearBibleResourceAdapter
+const interlinearBibleAccess = createHybridInterlinearBibleResourceAdapter({
+  offline: localInterlinearBibleResourceAdapter,
+  online: onlineInterlinearBibleAdapter,
+  remotelyReadableLocales: remotelyReadableInterlinearLocales,
+  isOnline: async () => onlineManager.isOnline(),
+})
+const lexiconBibleAccess = createLexiconBibleResourceAccess({
+  strongBible: strongBibleAccess,
+  interlinear: createHybridInterlinearLexiconAdapter(interlinearBibleAccess, bibleChapterAdapter),
+})
 const remotelyReadableBibleVersions = new Set(
   resourceApiBaseUrl ? (__DEV__ ? getMobileBibleVersionIds() : PUBLIC_ONLINE_BIBLE_VERSION_IDS) : []
 )
@@ -145,7 +174,11 @@ const onlineBibleReadingAccess = resourceApiBaseUrl
     }
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
-  bibleContent: createBibleContentAccess(bibleChapterAdapter, strongBibleAccess),
+  bibleContent: createBibleContentAccess(
+    bibleChapterAdapter,
+    strongBibleAccess,
+    interlinearBibleAccess
+  ),
   bibleReading: createHybridBibleReadingResourceAccess({
     local: localBibleReadingResourceAccess,
     online: onlineBibleReadingAccess,
@@ -154,7 +187,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   }),
   bibleSearch: localBibleSearchAccess,
   dictionary: localDictionaryAccess,
-  lexiconBible: localLexiconBibleResourceAccess,
+  lexiconBible: lexiconBibleAccess,
   nave: createHybridNaveAccess({
     offline: localNaveAccess,
     online: onlineNaveAccess,
@@ -163,6 +196,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   }),
   strongLexicon: localStrongLexiconAccess,
   strongBible: strongBibleAccess,
+  interlinearBible: interlinearBibleAccess,
   timeline: localTimelineAccess,
   commentary: defaultCommentaryAccess,
   offlineCopies: { isAvailable: isLocalResourceAvailable },
@@ -172,7 +206,8 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
         identity,
         remotelyReadableBibleVersions,
         resourceApiBaseUrl ? new Set(['fr']) : new Set(),
-        remotelyReadableStrongBibleVersions
+        remotelyReadableStrongBibleVersions,
+        remotelyReadableInterlinearLocales
       ),
   },
 }

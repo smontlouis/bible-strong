@@ -22,6 +22,7 @@
     "resources:test:lsg": "RESOURCE_LSG_BUNDLE=resource-service/.local/publications/lsg tsx --test --test-concurrency=1 resource-service/src/*/__tests__/*completeLsg*.integration.node-test.ts",
     "resources:test:bibles": "RESOURCE_INTEGRATION=1 tsx --test --test-concurrency=1 resource-service/src/publication/__tests__/completeOrdinaryBiblePublications.integration.node-test.ts",
     "resources:test:strong": "RESOURCE_INTEGRATION=1 tsx --test --test-concurrency=1 resource-service/src/publication/__tests__/completeStrongBiblePublications.integration.node-test.ts",
+    "resources:test:interlinear": "RESOURCE_INTEGRATION=1 tsx --test --test-concurrency=1 resource-service/src/publication/__tests__/completeInterlinearBiblePublications.integration.node-test.ts",
     "resources:architecture:check": "node scripts/check-resource-service-architecture.mjs && node scripts/check-resource-ui-architecture.mjs",
     "resources:db:up": "docker compose -f resource-service/compose.yaml up -d --wait",
     "resources:db:down": "docker compose -f resource-service/compose.yaml down",
