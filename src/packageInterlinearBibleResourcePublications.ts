@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import {
   copyFile,
+  lstat,
   mkdir,
   mkdtemp,
   readFile,
@@ -29,10 +30,11 @@ import {
   resolveResourcePublicationPath,
   sha256ResourcePublicationFile
 } from "./resourcePublicationEnvelope.js";
+import { STRONG_IDENTITY_KINDS as IDENTITY_KINDS } from "./strongIdentityKinds.js";
 
 const execFileAsync = promisify(execFile);
 const ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
-const IDENTITY_KINDS = ["strong", "estrong", "dstrong", "ustrong"] as const;
+const MAX_SQLITE_BYTES = 128 * 1024 * 1024;
 type Locale = "fr" | "en";
 
 export interface CanonicalInterlinearBiblePublication {
@@ -189,7 +191,7 @@ export async function buildInterlinearBibleResourcePublication(
   }
 
   const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
-  const workDir = path.join(temporaryDir, "work");
+  const workDir = await mkdtemp(path.join(tmpdir(), "interlinear-build-"));
   const entry = `bible-step-interlinear-${options.language}.sqlite`;
   const normalizedSqlite = path.join(workDir, entry);
   const canonicalRelative = `canonical/bible-bhg-interlinear-${options.language}.json`;
@@ -227,6 +229,7 @@ export async function buildInterlinearBibleResourcePublication(
       ...withoutRevision,
       indexRevision: revision
     };
+    bindIndexRevision(normalizedSqlite, revision);
     await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
     await utimes(normalizedSqlite, ZIP_TIME, ZIP_TIME);
     await execFileAsync("zip", [
@@ -316,11 +319,15 @@ export async function buildInterlinearBibleResourcePublication(
       "utf8"
     );
     await validateInterlinearBibleResourcePublication(temporaryDir);
+    await rm(workDir, { recursive: true, force: true });
     await mkdir(path.dirname(outputDir), { recursive: true });
     await rename(temporaryDir, outputDir);
     return { outputDir, manifest };
   } catch (error) {
-    await rm(temporaryDir, { recursive: true, force: true });
+    await Promise.all([
+      rm(temporaryDir, { recursive: true, force: true }),
+      rm(workDir, { recursive: true, force: true })
+    ]);
     throw error;
   }
 }
@@ -375,28 +382,33 @@ export async function validateInterlinearBibleResourcePublication(
   ) {
     throw new Error("interlinear-publication-declaration-mismatch");
   }
-  const entries = (await execFileAsync("unzip", ["-Z1", offlinePath])).stdout
-    .trim()
-    .split(/\r?\n/u)
-    .filter(Boolean);
-  if (entries.length !== 1 || entries[0] !== manifest.offlineArtifact.entry) {
-    throw new Error("interlinear-publication-offline-entry-mismatch");
-  }
+  await assertSingleBoundedZipEntry(
+    offlinePath,
+    manifest.offlineArtifact.entry
+  );
   const extractedDir = await mkdtemp(
     path.join(tmpdir(), "interlinear-publication-")
   );
   try {
-    await execFileAsync("unzip", ["-q", offlinePath, "-d", extractedDir]);
+    await execFileAsync("unzip", [
+      "-qq",
+      offlinePath,
+      manifest.offlineArtifact.entry,
+      "-d",
+      extractedDir
+    ]);
     const extracted = path.join(extractedDir, manifest.offlineArtifact.entry);
     if (
+      !(await lstat(extracted)).isFile() ||
       (await sha256ResourcePublicationFile(extracted)) !==
-      manifest.offlineArtifact.contentSha256
+        manifest.offlineArtifact.contentSha256
     ) {
       throw new Error("interlinear-publication-offline-content-mismatch");
     }
     const offlineCanonical = readCanonicalContent(
       extracted,
-      canonical.language
+      canonical.language,
+      canonical.indexRevision
     );
     if (
       JSON.stringify(offlineCanonical) !==
@@ -415,13 +427,42 @@ export async function validateInterlinearBibleResourcePublication(
   return manifest;
 }
 
+async function assertSingleBoundedZipEntry(
+  archivePath: string,
+  expectedEntry: string
+): Promise<void> {
+  const { stdout: names } = await execFileAsync("unzip", ["-Z1", archivePath]);
+  if (names.split(/\r?\n/u).filter(Boolean).join("\n") !== expectedEntry) {
+    throw new Error("interlinear-publication-offline-entry-mismatch");
+  }
+  const { stdout } = await execFileAsync("zipinfo", [
+    "-l",
+    archivePath,
+    expectedEntry
+  ]);
+  const line = stdout
+    .split(/\r?\n/u)
+    .find((item) => item.trimEnd().endsWith(` ${expectedEntry}`));
+  const bytes = line?.trim().split(/\s+/u)[3];
+  if (
+    !line?.trimStart().startsWith("-") ||
+    !bytes ||
+    !Number.isSafeInteger(Number(bytes)) ||
+    Number(bytes) <= 0 ||
+    Number(bytes) > MAX_SQLITE_BYTES
+  ) {
+    throw new Error("interlinear-publication-offline-size-invalid");
+  }
+}
+
 export function deriveInterlinearBibleResourceRevision(
   canonical:
     | Omit<CanonicalInterlinearBiblePublication, "indexRevision">
     | CanonicalInterlinearBiblePublication
 ): string {
-  const { indexRevision: _ignored, ...content } =
-    canonical as CanonicalInterlinearBiblePublication;
+  const content = Object.fromEntries(
+    Object.entries(canonical).filter(([key]) => key !== "indexRevision")
+  );
   const digest = createHash("sha256")
     .update(JSON.stringify(normalizeJson(content)))
     .digest("hex");
@@ -447,7 +488,9 @@ function bindBibleDependency(
       metadata.datasetId !== "STEP" ||
       metadata.locale !== language ||
       !isNonEmptyString(metadata.sourceVersion) ||
-      database.prepare("PRAGMA integrity_check").get()?.integrity_check !== "ok"
+      database.prepare("PRAGMA integrity_check").get()?.integrity_check !==
+        "ok" ||
+      database.prepare("PRAGMA foreign_key_check").all().length !== 0
     ) {
       throw new Error("interlinear-source-invalid");
     }
@@ -466,7 +509,25 @@ function bindBibleDependency(
   }
 }
 
-function readCanonicalContent(sqlitePath: string, language: Locale) {
+function bindIndexRevision(sqlitePath: string, indexRevision: string): void {
+  const database = new DatabaseSync(sqlitePath);
+  try {
+    database
+      .prepare(
+        "INSERT INTO ResourceMetadata(key, value) VALUES ('indexRevision', ?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+      )
+      .run(indexRevision);
+    database.exec("VACUUM");
+  } finally {
+    database.close();
+  }
+}
+
+function readCanonicalContent(
+  sqlitePath: string,
+  language: Locale,
+  expectedIndexRevision?: string
+) {
   const database = new DatabaseSync(sqlitePath, { readOnly: true });
   try {
     const metadata = Object.fromEntries(
@@ -475,8 +536,20 @@ function readCanonicalContent(sqlitePath: string, language: Locale) {
         .all()
         .map((row) => [row.key, row.value])
     ) as Record<string, string>;
-    if (metadata.locale !== language || metadata.schemaVersion !== "5") {
+    if (
+      metadata.locale !== language ||
+      metadata.schemaVersion !== "5" ||
+      (expectedIndexRevision !== undefined &&
+        metadata.indexRevision !== expectedIndexRevision)
+    ) {
       throw new Error("interlinear-source-metadata-invalid");
+    }
+    if (
+      database.prepare("PRAGMA integrity_check").get()?.integrity_check !==
+        "ok" ||
+      database.prepare("PRAGMA foreign_key_check").all().length !== 0
+    ) {
+      throw new Error("interlinear-source-integrity-invalid");
     }
     const verses = database
       .prepare(
@@ -528,9 +601,207 @@ function readCanonicalContent(sqlitePath: string, language: Locale) {
           : []
       )
     );
+    const rawCounts = {
+      verses: Number(
+        (
+          database.prepare("SELECT COUNT(*) AS count FROM Verses").get() as {
+            count: number;
+          }
+        ).count
+      ),
+      tokens: Number(
+        (
+          database.prepare("SELECT COUNT(*) AS count FROM Tokens").get() as {
+            count: number;
+          }
+        ).count
+      ),
+      segments: Number(
+        (
+          database.prepare("SELECT COUNT(*) AS count FROM Segments").get() as {
+            count: number;
+          }
+        ).count
+      ),
+      identities: segmentIdentities.length
+    };
+    const declaredCounts = {
+      verses: Number(metadata.verseCount),
+      tokens: Number(metadata.tokenCount),
+      segments: Number(metadata.segmentCount),
+      identities: Number(metadata.identityCount)
+    };
+    if (
+      JSON.stringify(rawCounts) !== JSON.stringify(declaredCounts) ||
+      verses.length !== rawCounts.verses ||
+      tokens.length !== rawCounts.tokens ||
+      segments.length !== rawCounts.segments
+    ) {
+      throw new Error("interlinear-source-count-mismatch");
+    }
+    validateCanonicalGraph({ verses, tokens, segments, segmentIdentities });
+    validateStrongVerseIndex(
+      database,
+      verses,
+      tokens,
+      segments,
+      segmentIdentities
+    );
     return { verses, tokens, segments, segmentIdentities };
   } finally {
     database.close();
+  }
+}
+
+type CanonicalInterlinearContent = Pick<
+  CanonicalInterlinearBiblePublication,
+  "verses" | "tokens" | "segments" | "segmentIdentities"
+>;
+
+const isPositiveInteger = (value: unknown): value is number =>
+  Number.isInteger(value) && Number(value) > 0;
+
+function validateCanonicalGraph(content: CanonicalInterlinearContent): void {
+  if (
+    content.verses.length === 0 ||
+    content.tokens.length === 0 ||
+    content.segments.length === 0 ||
+    content.segmentIdentities.length === 0
+  ) {
+    throw new Error("interlinear-canonical-empty");
+  }
+  const verseIds = new Set<number>();
+  const verseLocations = new Set<string>();
+  for (const verse of content.verses) {
+    if (
+      !isPositiveInteger(verse.id) ||
+      !isPositiveInteger(verse.book) ||
+      !isPositiveInteger(verse.chapter) ||
+      !isNonNegativeInteger(verse.verse) ||
+      verseIds.has(verse.id)
+    ) {
+      throw new Error("interlinear-canonical-verse-invalid");
+    }
+    const location = `${verse.book}:${verse.chapter}:${verse.verse}`;
+    if (verseLocations.has(location))
+      throw new Error("interlinear-canonical-verse-duplicate");
+    verseIds.add(verse.id);
+    verseLocations.add(location);
+  }
+
+  const tokenIds = new Set<number>();
+  const tokenOrdinals = new Set<string>();
+  const tokenById = new Map<
+    number,
+    CanonicalInterlinearBiblePublication["tokens"][number]
+  >();
+  for (const token of content.tokens) {
+    if (
+      !isPositiveInteger(token.id) ||
+      !verseIds.has(token.verseId) ||
+      !isNonNegativeInteger(token.ordinal) ||
+      !isNonNegativeInteger(token.startOffset) ||
+      !isNonNegativeInteger(token.length) ||
+      tokenIds.has(token.id)
+    ) {
+      throw new Error("interlinear-canonical-token-invalid");
+    }
+    const ordinal = `${token.verseId}:${token.ordinal}`;
+    if (tokenOrdinals.has(ordinal))
+      throw new Error("interlinear-canonical-token-duplicate");
+    tokenIds.add(token.id);
+    tokenOrdinals.add(ordinal);
+    tokenById.set(token.id, token);
+  }
+
+  const segmentIds = new Set<number>();
+  const segmentOrdinals = new Set<string>();
+  const segmentById = new Map<
+    number,
+    CanonicalInterlinearBiblePublication["segments"][number]
+  >();
+  for (const segment of content.segments) {
+    const token = tokenById.get(segment.tokenId);
+    if (
+      !isPositiveInteger(segment.id) ||
+      !token ||
+      !isNonNegativeInteger(segment.ordinal) ||
+      !isNonNegativeInteger(segment.startOffset) ||
+      !isNonNegativeInteger(segment.length) ||
+      segment.startOffset + segment.length > token.length ||
+      !isNonEmptyString(segment.transliteration) ||
+      typeof segment.lemma !== "string" ||
+      typeof segment.morphology !== "string" ||
+      typeof segment.gloss !== "string" ||
+      segmentIds.has(segment.id)
+    ) {
+      throw new Error("interlinear-canonical-segment-invalid");
+    }
+    const ordinal = `${segment.tokenId}:${segment.ordinal}`;
+    if (segmentOrdinals.has(ordinal))
+      throw new Error("interlinear-canonical-segment-duplicate");
+    segmentIds.add(segment.id);
+    segmentOrdinals.add(ordinal);
+    segmentById.set(segment.id, segment);
+  }
+
+  const identities = new Set<string>();
+  for (const identity of content.segmentIdentities) {
+    if (
+      !segmentById.has(identity.segmentId) ||
+      !isNonNegativeInteger(identity.identityOrder) ||
+      IDENTITY_KINDS[identity.identityOrder] !== identity.kind ||
+      !IDENTITY_KINDS.includes(identity.kind) ||
+      !isNonEmptyString(identity.code)
+    ) {
+      throw new Error("interlinear-canonical-identity-invalid");
+    }
+    const key = `${identity.segmentId}:${identity.kind}`;
+    if (identities.has(key))
+      throw new Error("interlinear-canonical-identity-duplicate");
+    identities.add(key);
+  }
+}
+
+function validateStrongVerseIndex(
+  database: DatabaseSync,
+  verses: CanonicalInterlinearBiblePublication["verses"],
+  tokens: CanonicalInterlinearBiblePublication["tokens"],
+  segments: CanonicalInterlinearBiblePublication["segments"],
+  identities: CanonicalInterlinearBiblePublication["segmentIdentities"]
+): void {
+  const verseByToken = new Map(
+    tokens.map((token) => [token.id, token.verseId])
+  );
+  const tokenBySegment = new Map(
+    segments.map((segment) => [segment.id, segment.tokenId])
+  );
+  const verseIds = new Set(verses.map((verse) => verse.id));
+  const expected = new Set(
+    identities.map((identity) => {
+      const verseId = verseByToken.get(
+        tokenBySegment.get(identity.segmentId) ?? -1
+      );
+      if (!verseId || !verseIds.has(verseId))
+        throw new Error("interlinear-strong-index-reference-invalid");
+      return `${verseId}:${identity.code}`;
+    })
+  );
+  const actualRows = database
+    .prepare(
+      `SELECT svi.verseId AS verseId, sc.code AS code
+         FROM StrongVerseIndex svi
+         JOIN StrongCodes sc ON sc.id=svi.codeId
+        ORDER BY svi.verseId, sc.code`
+    )
+    .all() as Array<{ verseId: number; code: string }>;
+  const actual = new Set(actualRows.map((row) => `${row.verseId}:${row.code}`));
+  if (
+    actualRows.length !== actual.size ||
+    actual.size !== expected.size ||
+    [...expected].some((key) => !actual.has(key))
+  ) {
+    throw new Error("interlinear-strong-index-parity-mismatch");
   }
 }
 
@@ -552,7 +823,9 @@ function decodeCanonical(value: unknown): CanonicalInterlinearBiblePublication {
   ) {
     throw new Error("interlinear-canonical-invalid");
   }
-  return value as unknown as CanonicalInterlinearBiblePublication;
+  const canonical = value as unknown as CanonicalInterlinearBiblePublication;
+  validateCanonicalGraph(canonical);
+  return canonical;
 }
 
 function decodeManifest(value: unknown): InterlinearBiblePublicationManifest {
@@ -574,6 +847,16 @@ function decodeManifest(value: unknown): InterlinearBiblePublicationManifest {
     dependencies.bible.online !== "required" ||
     dependencies.bible.offline !== "required" ||
     !Array.isArray(dependencies.strongLexiconModules) ||
+    dependencies.strongLexiconModules.length !== 1 ||
+    !isRecord(dependencies.strongLexiconModules[0]) ||
+    dependencies.strongLexiconModules[0].resourceIdentity !==
+      "strong-lexicon:core" ||
+    dependencies.strongLexiconModules[0].online !==
+      "required-for-lexical-details" ||
+    dependencies.strongLexiconModules[0].offline !==
+      "required-for-lexical-details" ||
+    !isRecord(value.canonical) ||
+    value.canonical.schemaVersion !== 1 ||
     !isRecord(counts) ||
     !isNonNegativeInteger(counts.verses) ||
     !isNonNegativeInteger(counts.tokens) ||
@@ -617,8 +900,12 @@ async function buildAllFromCli() {
   ]);
   for (const key of args.keys())
     if (!allowed.has(key)) throw new Error(`interlinear-cli-unknown:${key}`);
-  const root =
-    args.get("output-dir") ?? "outputs/releases/interlinear-bible-publications";
+  const root = path.resolve(
+    args.get("output-dir") ?? "outputs/releases/interlinear-bible-publications"
+  );
+  if (existsSync(root))
+    throw new Error(`interlinear-output-already-exists:${root}`);
+  const stagingRoot = `${root}.tmp-${process.pid}-${randomUUID()}`;
   const bibleBundle =
     args.get("bible-bundle") ??
     "outputs/releases/ordinary-bible-publications-issue-302-v5/bhg";
@@ -629,15 +916,69 @@ async function buildAllFromCli() {
     rightsReviewedAt: "2026-08-16",
     generatedAt: args.get("generated-at")
   };
-  for (const language of ["fr", "en"] as const) {
-    await buildInterlinearBibleResourcePublication({
-      ...common,
-      language,
-      sqlitePath:
-        args.get(`${language}-sqlite`) ??
-        `outputs/releases/bible-step-interlinear-runtime-v5/bible-step-interlinear-${language}.sqlite`,
-      outputDir: path.join(root, language)
-    });
+  try {
+    const publications = [];
+    for (const language of ["fr", "en"] as const) {
+      publications.push(
+        await buildInterlinearBibleResourcePublication({
+          ...common,
+          language,
+          sqlitePath:
+            args.get(`${language}-sqlite`) ??
+            `outputs/releases/bible-step-interlinear-runtime-v5/bible-step-interlinear-${language}.sqlite`,
+          outputDir: path.join(stagingRoot, language)
+        })
+      );
+    }
+    const [french, english] = await Promise.all(
+      publications.map(async (publication) =>
+        decodeCanonical(
+          JSON.parse(
+            await readFile(
+              path.join(
+                publication.outputDir,
+                publication.manifest.canonical.path
+              ),
+              "utf8"
+            )
+          )
+        )
+      )
+    );
+    assertSharedInterlinearStructure(french!, english!);
+    await mkdir(path.dirname(root), { recursive: true });
+    await rename(stagingRoot, root);
+  } catch (error) {
+    await rm(stagingRoot, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+export function assertSharedInterlinearStructure(
+  french: CanonicalInterlinearBiblePublication,
+  english: CanonicalInterlinearBiblePublication
+): void {
+  const shared = (canonical: CanonicalInterlinearBiblePublication) => ({
+    applicationVersionId: canonical.applicationVersionId,
+    datasetId: canonical.datasetId,
+    textRevision: canonical.textRevision,
+    textSha256: canonical.textSha256,
+    verses: canonical.verses,
+    tokens: canonical.tokens,
+    segments: canonical.segments.map((segment) => ({
+      id: segment.id,
+      tokenId: segment.tokenId,
+      ordinal: segment.ordinal,
+      startOffset: segment.startOffset,
+      length: segment.length,
+      transliteration: segment.transliteration,
+      lemma: segment.lemma,
+      morphology: segment.morphology
+    })),
+    segmentIdentities: canonical.segmentIdentities
+  });
+  if (JSON.stringify(shared(french)) !== JSON.stringify(shared(english))) {
+    throw new Error("interlinear-publication-locale-structure-mismatch");
   }
 }
 

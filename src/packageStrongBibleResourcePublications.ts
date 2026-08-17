@@ -30,9 +30,9 @@ import {
   type ResourcePublicationEnvelope
 } from "./resourcePublicationEnvelope.js";
 import { validateBibleResourcePublication } from "./packageResourcePublication.js";
+import { STRONG_IDENTITY_KINDS as STRONG_KINDS } from "./strongIdentityKinds.js";
 
 const execFileAsync = promisify(execFile);
-const STRONG_KINDS = ["strong", "estrong", "dstrong", "ustrong"] as const;
 const BASE_BUILDER_VERSION = "strong-bible-mobile-publication@2";
 const REVERSE_BUILDER_VERSIONS = new Set([
   "reverse-interlinear-mobile-compact@2",
@@ -178,10 +178,9 @@ export async function buildStrongBibleResourcePublication(options: {
     ]);
     await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
     await copyFile(archivePath, offlinePath);
-    const [canonicalStat, offlineStat, sqliteStat] = await Promise.all([
+    const [canonicalStat, offlineStat] = await Promise.all([
       stat(canonicalPath),
-      stat(offlinePath),
-      stat(sqlitePath)
+      stat(offlinePath)
     ]);
     const metadata = await readMetadata(sqlitePath);
     const manifest: StrongBibleManifest = {
