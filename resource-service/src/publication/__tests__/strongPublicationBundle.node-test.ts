@@ -39,6 +39,16 @@ describe('Strong Bible publication bundle', () => {
     }
   })
 
+  it('rejects an Offline copy without the concordance query indexes', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'strong-publication-indexes-'))
+    try {
+      await writeStrongPublicationFixture(root, { omitQueryIndexes: true })
+      await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_INDEX_MISSING/)
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
   it('rejects a non-content-derived Resource revision', async () => {
     const root = await mkdtemp(path.join(tmpdir(), 'strong-publication-revision-'))
     try {

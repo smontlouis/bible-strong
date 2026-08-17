@@ -1535,6 +1535,29 @@ const readSqliteRows = (database: Database, query: string) => {
   }
 }
 
+const assertSqliteQueryIndexes = (
+  database: Database,
+  requirements: Record<string, readonly string[]>
+) => {
+  for (const [tableName, requiredColumns] of Object.entries(requirements)) {
+    const indexes = readSqliteRows(
+      database,
+      `PRAGMA index_list("${tableName.replaceAll('"', '""')}")`
+    )
+    const hasPrefix = indexes.some(index => {
+      const indexName = requireSqliteString(index.name)
+      const columns = readSqliteRows(
+        database,
+        `PRAGMA index_info("${indexName.replaceAll('"', '""')}")`
+      ).map(column => requireSqliteString(column.name))
+      return requiredColumns.every((column, position) => columns[position] === column)
+    })
+    if (!hasPrefix) {
+      throw new Error(`OFFLINE_ARTIFACT_INDEX_MISSING:${tableName}(${requiredColumns.join(',')})`)
+    }
+  }
+}
+
 const requireSqliteString = (value: unknown) => {
   if (typeof value !== 'string') throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
   return value
@@ -1848,6 +1871,11 @@ const validateStrongBibleOfflineParity = async (
     ) {
       throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
     }
+    assertSqliteQueryIndexes(database, {
+      Verses: ['bookOrder', 'chapter', 'verse'],
+      StrongCodes: ['kind', 'code'],
+      WordStrongCodes: ['codeId', 'verseId', 'ordinal'],
+    })
     const metadata = Object.fromEntries(
       readSqliteRows(database, 'SELECT key, value FROM ResourceMetadata').map(row => [
         requireSqliteString(row.key),
@@ -2001,6 +2029,11 @@ const validateInterlinearBibleOfflineParity = async (
     ) {
       throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
     }
+    assertSqliteQueryIndexes(database, {
+      Verses: ['bookOrder', 'chapter', 'verse'],
+      StrongCodes: ['code'],
+      StrongVerseIndex: ['codeId', 'verseId'],
+    })
     const metadata = Object.fromEntries(
       readSqliteRows(database, 'SELECT key, value FROM ResourceMetadata').map(row => [
         requireSqliteString(row.key),

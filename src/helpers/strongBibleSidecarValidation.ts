@@ -25,6 +25,7 @@ export interface StrongBibleSidecarSnapshot {
   metadata: StrongBibleSidecarMetadata
   counts: StrongBibleSidecarCounts
   tableColumns: Record<string, string[]>
+  indexes: Record<string, string[][]>
 }
 
 export type ExpectedStrongBibleSidecar = StrongBibleSidecarMetadata & StrongBibleSidecarCounts
@@ -40,6 +41,12 @@ const REQUIRED_TABLE_COLUMNS = {
 const REQUIRED_REVERSE_INTERLINEAR_TABLE_COLUMNS = {
   WordSpans: ['stepTokenId'],
   WordStepTokenExtras: ['verseId', 'targetOrdinal', 'sourceOrder', 'stepTokenId'],
+} as const
+
+const REQUIRED_QUERY_INDEXES = {
+  Verses: ['bookOrder', 'chapter', 'verse'],
+  StrongCodes: ['kind', 'code'],
+  WordStrongCodes: ['codeId', 'verseId', 'ordinal'],
 } as const
 
 export const classifyStrongBibleSidecarMetadata = (
@@ -97,6 +104,7 @@ export const validateStrongBibleSidecarSnapshot = (
   }
 
   validateRequiredTableColumns(snapshot.tableColumns, REQUIRED_TABLE_COLUMNS)
+  validateRequiredIndexes(snapshot.indexes, REQUIRED_QUERY_INDEXES)
   if (expected.reverseInterlinearSchemaVersion != null) {
     validateRequiredTableColumns(snapshot.tableColumns, REQUIRED_REVERSE_INTERLINEAR_TABLE_COLUMNS)
   }
@@ -117,6 +125,20 @@ export const validateStrongBibleSidecarSnapshot = (
   const verseColumns = snapshot.tableColumns.Verses ?? []
   if (verseColumns.includes('canonicalText') || verseColumns.includes('markupJson')) {
     throw new Error('STRONG_BIBLE_DUPLICATED_TEXT')
+  }
+}
+
+const validateRequiredIndexes = (
+  indexes: Record<string, string[][]>,
+  requiredIndexes: Record<string, readonly string[]>
+): void => {
+  for (const [tableName, requiredColumns] of Object.entries(requiredIndexes)) {
+    const hasPrefix = (indexes[tableName] ?? []).some(columns =>
+      requiredColumns.every((column, index) => columns[index] === column)
+    )
+    if (!hasPrefix) {
+      throw new Error(`STRONG_BIBLE_INDEX_MISSING:${tableName}(${requiredColumns.join(',')})`)
+    }
   }
 }
 

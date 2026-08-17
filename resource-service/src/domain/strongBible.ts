@@ -34,7 +34,7 @@ export type StrongBibleIdentityLookup = {
 }
 export type StrongBibleOccurrencesLookup = StrongBibleIdentityLookup & {
   limit?: number
-  offset?: number
+  cursor?: string
   allBooks?: boolean
   lexemeId?: number
 }
@@ -61,7 +61,7 @@ export type ActiveStrongBibleOccurrences = StrongBibleResourceRevision & {
     verse: number
     spans: readonly StrongBibleSpan[]
   }[]
-  nextOffset?: number
+  nextCursor?: string
 }
 export type ActiveStrongBibleLemmaStats = StrongBibleResourceRevision & {
   identity?: { id: number; kind: StrongBibleIdentityDto['kind']; code: string }
@@ -194,7 +194,7 @@ export const readStrongBibleOccurrences = (input: StrongBibleOccurrencesLookup) 
             spans: verse.spans.map(spanDto),
           })
       ),
-      nextOffset: active.nextOffset,
+      nextCursor: active.nextCursor,
     })
   })
 

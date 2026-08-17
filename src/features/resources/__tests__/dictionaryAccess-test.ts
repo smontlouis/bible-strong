@@ -1,0 +1,69 @@
+import { createHttpDictionaryAccess } from '../dictionaryAccess'
+
+jest.mock('~helpers/loadDictionnaireByLetter', () => jest.fn())
+jest.mock('~helpers/loadDictionnaireBySearch', () => jest.fn())
+jest.mock('~helpers/loadDictionnaireItem', () => jest.fn())
+jest.mock('~helpers/loadDictionnaireItems', () => jest.fn())
+jest.mock('~helpers/loadDictionnaireItemByRowId', () => jest.fn())
+jest.mock('~helpers/loadDictionnaireWords', () => jest.fn())
+jest.mock('../resourceAvailability', () => ({ getLocalResourceAvailability: jest.fn() }))
+
+const response = (body: unknown) =>
+  Promise.resolve(
+    new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    })
+  )
+
+describe('HTTP dictionary access', () => {
+  it('continues browse with the server cursor without offset pagination', async () => {
+    const cursor = encodeURIComponent(JSON.stringify(['amour', 42]))
+    const fetcher = jest.fn(() =>
+      response({
+        resource: { kind: 'dictionary', language: 'fr', revision: 'r1' },
+        entries: [{ id: 43, word: 'Ange', normalizedWord: 'ange' }],
+        limit: 1,
+        nextCursor: cursor,
+      })
+    )
+    const access = createHttpDictionaryAccess({
+      baseUrl: 'http://resource.test',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(access.listByLetterPage('a', { limit: 1, cursor }, 'fr')).resolves.toEqual({
+      entries: [{ id: 43, word: 'Ange', normalizedWord: 'ange' }],
+      nextCursor: cursor,
+    })
+    expect(fetcher).toHaveBeenCalledWith(
+      `http://resource.test/v1/dictionaries/fr/entries?initial=a&limit=1&cursor=${encodeURIComponent(cursor)}`,
+      expect.any(Object)
+    )
+  })
+
+  it('loads verse definitions through one batch request', async () => {
+    const fetcher = jest.fn(() =>
+      response({
+        resource: { kind: 'dictionary', language: 'fr', revision: 'r1' },
+        entries: [
+          { id: 1, word: 'Amour', definition: 'Définition 1' },
+          { id: 2, word: 'Ange', definition: 'Définition 2' },
+        ],
+      })
+    )
+    const access = createHttpDictionaryAccess({
+      baseUrl: 'http://resource.test',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(access.loadItems(['amour', 'ange'], 'fr')).resolves.toHaveLength(2)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://resource.test/v1/dictionaries/fr/entries/batch?words=amour%2Cange',
+      expect.any(Object)
+    )
+  })
+})

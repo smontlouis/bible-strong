@@ -1,4 +1,11 @@
 import { Schema } from 'effect'
+import { decodeNavePageCursor, encodeNavePageCursor } from '~helpers/resourcePageCursor'
+
+export { decodeNavePageCursor, encodeNavePageCursor }
+
+const NaveCursor = Schema.NonEmptyString.pipe(
+  Schema.filter(value => decodeNavePageCursor(value) !== undefined)
+)
 
 export class NaveLanguagePath extends Schema.Class<NaveLanguagePath>('NaveLanguagePath')({
   language: Schema.Literal('fr', 'en'),
@@ -17,6 +24,8 @@ export class NaveVersePath extends Schema.Class<NaveVersePath>('NaveVersePath')(
 export class NaveTopicsQuery extends Schema.Class<NaveTopicsQuery>('NaveTopicsQuery')({
   initial: Schema.optional(Schema.NonEmptyString),
   search: Schema.optional(Schema.NonEmptyString),
+  limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
+  cursor: Schema.optional(NaveCursor),
 }) {}
 
 export class NaveRevisionDto extends Schema.Class<NaveRevisionDto>('NaveRevisionDto')({
@@ -55,6 +64,8 @@ export class NaveTopicListResponseDto extends Schema.Class<NaveTopicListResponse
 )({
   resource: NaveRevisionDto,
   topics: Schema.Array(NaveTopicSummaryDto),
+  limit: Schema.Int.pipe(Schema.positive()),
+  nextCursor: Schema.optional(Schema.NonEmptyString),
 }) {}
 
 export class NaveVerseTopicsResponseDto extends Schema.Class<NaveVerseTopicsResponseDto>(

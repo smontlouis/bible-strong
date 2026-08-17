@@ -12,6 +12,10 @@ import {
   type DictionaryRepositoryService,
 } from '../domain/dictionary'
 import type { ResourceDatabase } from '../database/types'
+import {
+  decodeDictionaryPageCursor,
+  encodeDictionaryPageCursor,
+} from '../../../src/features/resources/dictionaryContract'
 
 const mapEntry = (row: {
   entry_id: number
@@ -50,7 +54,7 @@ export const makeKyselyDictionaryRepository = (
       Effect.gen(function* () {
         const publication = yield* requirePublication(input.language)
         const limit = input.limit ?? 500
-        const offset = input.offset ?? 0
+        const cursor = decodeDictionaryPageCursor(input.cursor)
         let query = database
           .selectFrom('dictionary_entries')
           .select(['entry_id', 'word', 'normalized_word'])
@@ -68,12 +72,19 @@ export const makeKyselyDictionaryRepository = (
             eb.or([eb('word', 'ilike', search), eb('normalized_word', 'ilike', search)])
           )
         }
+        if (cursor) {
+          query = query.where(eb =>
+            eb.or([
+              eb('normalized_word', '>', cursor[0]),
+              eb.and([eb('normalized_word', '=', cursor[0]), eb('entry_id', '>', cursor[1])]),
+            ])
+          )
+        }
         const rows = yield* tryDatabasePromise('dictionary.entries.browse', () =>
           query
             .orderBy('normalized_word')
             .orderBy('entry_id')
             .limit(limit + 1)
-            .offset(offset)
             .execute()
         ).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause })))
         const hasNext = rows.length > limit
@@ -85,9 +96,15 @@ export const makeKyselyDictionaryRepository = (
             word: row.word,
             normalizedWord: row.normalized_word,
           })),
-          offset,
           limit,
-          ...(hasNext ? { nextOffset: offset + limit } : {}),
+          ...(hasNext && rows[limit - 1]
+            ? {
+                nextCursor: encodeDictionaryPageCursor([
+                  rows[limit - 1].normalized_word,
+                  rows[limit - 1].entry_id,
+                ]),
+              }
+            : {}),
         }
       }),
     findEntry: input =>
@@ -121,6 +138,32 @@ export const makeKyselyDictionaryRepository = (
         ).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause })))
         if (!row) return yield* new DictionaryEntryNotFound(input)
         return { language: input.language, revision: publication.revision, entry: mapEntry(row) }
+      }),
+    findEntries: input =>
+      Effect.gen(function* () {
+        const publication = yield* requirePublication(input.language)
+        const words = [...new Set(input.words.map(word => word.trim().toLocaleLowerCase()))]
+        if (words.length === 0) {
+          return { language: input.language, revision: publication.revision, entries: [] }
+        }
+        const rows = yield* tryDatabasePromise('dictionary.entries.read-batch', () =>
+          database
+            .selectFrom('dictionary_entries')
+            .select(['entry_id', 'word', 'definition', 'normalized_word'])
+            .where('publication_id', '=', publication.id)
+            .where('normalized_word', 'in', words)
+            .orderBy('entry_id')
+            .execute()
+        ).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause })))
+        const firstByWord = new Map(rows.map(row => [row.normalized_word, row]))
+        return {
+          language: input.language,
+          revision: publication.revision,
+          entries: words.flatMap(word => {
+            const row = firstByWord.get(word)
+            return row ? [mapEntry(row)] : []
+          }),
+        }
       }),
     findVerseWords: input =>
       Effect.gen(function* () {

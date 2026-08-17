@@ -4,6 +4,35 @@ const VersionId = Schema.String.pipe(Schema.pattern(/^[A-Z0-9][A-Z0-9_-]{1,31}$/
 const Book = Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 77))
 const Chapter = Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 200))
 const Reference = Schema.String.pipe(Schema.pattern(/^(?:[HG])?\d+[A-Z]*$/i))
+const OccurrenceCursor = Schema.String.pipe(Schema.pattern(/^strong:v1:\d+:\d+:\d+$/))
+
+export type StrongBibleOccurrenceCursorLocation = {
+  book: number
+  chapter: number
+  verse: number
+}
+
+export const encodeStrongBibleOccurrenceCursor = ({
+  book,
+  chapter,
+  verse,
+}: StrongBibleOccurrenceCursorLocation): string => `strong:v1:${book}:${chapter}:${verse}`
+
+export const decodeStrongBibleOccurrenceCursor = (
+  cursor?: string
+): StrongBibleOccurrenceCursorLocation | undefined => {
+  if (!cursor) return undefined
+  const match = /^strong:v1:(\d+):(\d+):(\d+)$/.exec(cursor)
+  const values = match?.slice(1).map(Number)
+  if (!values || values.some(value => !Number.isSafeInteger(value) || value < 0)) {
+    throw new Error('STRONG_BIBLE_INVALID_CONCORDANCE_CURSOR')
+  }
+  const [book, chapter, verse] = values
+  if (book === undefined || chapter === undefined || verse === undefined) {
+    throw new Error('STRONG_BIBLE_INVALID_CONCORDANCE_CURSOR')
+  }
+  return { book, chapter, verse }
+}
 
 export class StrongBibleVersionPath extends Schema.Class<StrongBibleVersionPath>(
   'StrongBibleVersionPath'
@@ -31,7 +60,7 @@ export class StrongBibleOccurrencesQuery extends Schema.Class<StrongBibleOccurre
   'StrongBibleOccurrencesQuery'
 )({
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
-  offset: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.nonNegative())),
+  cursor: Schema.optional(OccurrenceCursor),
   allBooks: Schema.optional(Schema.Literal('true', 'false')),
   lexemeId: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.positive())),
 }) {}
@@ -133,7 +162,7 @@ export class StrongBibleOccurrencesDto extends Schema.Class<StrongBibleOccurrenc
   resource: StrongBibleRevisionDto,
   identity: Schema.optional(StrongBibleIdentityDto),
   verses: Schema.Array(StrongBibleOccurrenceVerseDto),
-  nextOffset: Schema.optional(Schema.Int.pipe(Schema.nonNegative())),
+  nextCursor: Schema.optional(OccurrenceCursor),
 }) {}
 
 export class StrongBibleLemmaStatDto extends Schema.Class<StrongBibleLemmaStatDto>(

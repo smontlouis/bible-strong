@@ -15,7 +15,7 @@ import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 
-import { useResultsByLetterOrSearch, useSearchValue } from './useUtilities'
+import { useInfiniteResultsByLetterOrSearch, useSearchValue } from './useUtilities'
 
 import { useTranslation } from 'react-i18next'
 import LexiqueItem from './LexiqueItem'
@@ -92,21 +92,32 @@ const LexiqueListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error, retry } = useResultsByLetterOrSearch(
-    {
-      queryKey: ['strong-lexicon'],
-      query: value => resources.strongLexicon.search(value, strongResourceLanguage, 200),
-      value: debouncedSearchValue,
-      resourceLanguage: strongResourceLanguage,
-    },
-    {
-      queryKey: ['strong-lexicon'],
-      query: value =>
-        resources.strongLexicon.browseByGlossPrefix(value, strongResourceLanguage, 500),
-      value: letter,
-      resourceLanguage: strongResourceLanguage,
-    }
-  )
+  const { results, isLoading, error, retry, fetchNextPage, hasNextPage } =
+    useInfiniteResultsByLetterOrSearch(
+      {
+        queryKey: ['strong-lexicon'],
+        query: (value, options) =>
+          resources.strongLexicon.listEntries({
+            language: strongResourceLanguage,
+            search: value,
+            ...options,
+          }),
+        value: debouncedSearchValue,
+        resourceLanguage: strongResourceLanguage,
+      },
+      {
+        queryKey: ['strong-lexicon'],
+        query: (value, options) =>
+          resources.strongLexicon.listEntries({
+            language: strongResourceLanguage,
+            prefix: value,
+            ...options,
+          }),
+        value: letter,
+        resourceLanguage: strongResourceLanguage,
+      },
+      50
+    )
 
   const lexiqueResults = Array.isArray(results) ? results : []
   const sectionResults = useSectionResults(lexiqueResults)
@@ -203,9 +214,8 @@ const LexiqueListScreen = ({
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
             <SectionList<StrongLexiconSearchResult, LexiqueSection>
-              renderItem={({ item, index }) => (
+              renderItem={({ item }) => (
                 <LexiqueItem
-                  key={index}
                   {...item}
                   onSelect={isNewTabSelection || onStrongSelect ? selectStrong : undefined}
                 />
@@ -225,6 +235,10 @@ const LexiqueListScreen = ({
               stickySectionHeadersEnabled
               sections={sectionResults}
               keyExtractor={item => `${item.id}:${item.stepCode}`}
+              onEndReached={() => {
+                if (hasNextPage) fetchNextPage()
+              }}
+              onEndReachedThreshold={0.5}
             />
           ) : (
             <Empty

@@ -24,7 +24,12 @@ const repository: NaveRepositoryService = {
       ? Effect.fail(new NaveTopicNotFound(input))
       : Effect.succeed({ language: input.language, revision: 'nave-fr-r1', topic: amour }),
   listTopics: input =>
-    Effect.succeed({ language: input.language, revision: 'nave-fr-r1', topics: [amour] }),
+    Effect.succeed({
+      language: input.language,
+      revision: 'nave-fr-r1',
+      topics: [amour],
+      limit: input.limit ?? 50,
+    }),
   findVerseTopics: input =>
     Effect.succeed({
       language: input.language,
@@ -61,6 +66,7 @@ describe('v1 Nave API', () => {
           {
             resource: { kind: 'nave', language: 'fr', revision: 'nave-fr-r1' },
             topics: [{ normalizedName: 'amour', name: 'Amour', initial: 'a' }],
+            limit: 50,
           },
         ],
         [
@@ -68,6 +74,7 @@ describe('v1 Nave API', () => {
           {
             resource: { kind: 'nave', language: 'fr', revision: 'nave-fr-r1' },
             topics: [{ normalizedName: 'amour', name: 'Amour', initial: 'a' }],
+            limit: 50,
           },
         ],
         [
@@ -114,6 +121,7 @@ describe('v1 Nave API', () => {
         ['/v1/naves/fr/random', 503, 'NAVE_PUBLICATION_INACTIVE'],
         ['/v1/naves/french/random', 400, 'INVALID_RESOURCE_REQUEST'],
         ['/v1/naves/fr/verses/0-0-0/topics', 400, 'INVALID_RESOURCE_REQUEST'],
+        ['/v1/naves/fr/topics?cursor=not-a-cursor', 400, 'INVALID_RESOURCE_REQUEST'],
         ['/v1/naves/fr/topics?initial=a', 500, 'RESOURCE_INTERNAL_FAILURE'],
       ] as const
 

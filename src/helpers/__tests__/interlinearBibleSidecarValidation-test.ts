@@ -33,11 +33,18 @@ const tableColumns = {
   StrongVerseIndex: ['codeId', 'verseId', 'kindMask'],
 }
 
+const indexes = {
+  Verses: [['bookOrder', 'chapter', 'verse']],
+  StrongCodes: [['code']],
+  StrongVerseIndex: [['codeId', 'verseId']],
+}
+
 const classify = (schemaVersion: string, columns: Record<string, string[]> = tableColumns) =>
   classifyInterlinearBibleSidecarSnapshot(
     {
       metadata: { ...expected, schemaVersion },
       tableColumns: columns,
+      indexes,
     },
     expected,
     {
@@ -49,6 +56,20 @@ const classify = (schemaVersion: string, columns: Record<string, string[]> = tab
 describe('classifyInterlinearBibleSidecarSnapshot', () => {
   it('accepts the concordance-capable sidecar schema', () => {
     expect(classify('5')).toBe('compatible')
+  })
+
+  it('rejects a sidecar without the Strong occurrence cursor index', () => {
+    expect(
+      classifyInterlinearBibleSidecarSnapshot(
+        {
+          metadata: { ...expected, schemaVersion: '5' },
+          tableColumns,
+          indexes: { ...indexes, StrongVerseIndex: [] },
+        },
+        expected,
+        { textRevision: expected.textRevision, textSha256: expected.textSha256 }
+      )
+    ).toBe('incompatible')
   })
 
   it.each(['4', '3', '1.5', 'not-a-version'])(

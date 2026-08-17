@@ -21,6 +21,7 @@ import type {
   StrongLexiconEntity,
   StrongLexiconMorphology,
   StrongLexiconSearchResult,
+  StrongLexiconPage,
 } from '../../../src/features/resources/strongLexiconAccess'
 import type { StrongIdentityKind } from '../../../src/helpers/strongIdentities'
 
@@ -70,10 +71,8 @@ export type StrongLexiconRepositoryService = {
     search?: string
     prefix?: string
     limit: number
-  }) => Effect.Effect<
-    ActiveStrongLexiconValue<StrongLexiconSearchResult[]>,
-    StrongLexiconRepositoryError
-  >
+    cursor?: string
+  }) => Effect.Effect<ActiveStrongLexiconValue<StrongLexiconPage>, StrongLexiconRepositoryError>
   findRandom: (input: {
     language: StrongLexiconLanguage
     lexicalLanguage: StrongLexicalLanguage
@@ -163,12 +162,14 @@ export const browseStrongLexicon = (input: {
   search?: string
   prefix?: string
   limit: number
+  cursor?: string
 }) =>
   Effect.gen(function* () {
     const active = yield* (yield* StrongLexiconRepository).listEntries(input)
     return new StrongLexiconSearchResponseDto({
       resource: { revision: active.revision },
-      entries: active.value.map(entry => new StrongLexiconSearchResultDto(entry)),
+      entries: active.value.entries.map(entry => new StrongLexiconSearchResultDto(entry)),
+      ...(active.value.nextCursor ? { nextCursor: active.value.nextCursor } : {}),
     })
   })
 

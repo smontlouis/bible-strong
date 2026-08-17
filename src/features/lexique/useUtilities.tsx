@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { type QueryKey, useQuery } from '@tanstack/react-query'
+import { type QueryKey, useInfiniteQuery } from '@tanstack/react-query'
 import useDebounce from '~helpers/useDebounce'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { localQueryOptions } from '~helpers/queryOptions'
@@ -11,15 +11,6 @@ import useConnection from '~helpers/useConnection'
 
 interface UseSearchValueOptions {
   onDebouncedValue?: () => void
-}
-
-type QueryFunction<T> = (value: string, resourceLanguage?: ResourceLanguage) => Promise<T[]>
-
-interface QueryConfig<T> {
-  queryKey?: QueryKey
-  query?: QueryFunction<T>
-  value?: string
-  resourceLanguage?: ResourceLanguage
 }
 
 export const useSearchValue = ({ onDebouncedValue }: UseSearchValueOptions = {}) => {
@@ -36,32 +27,59 @@ export const useSearchValue = ({ onDebouncedValue }: UseSearchValueOptions = {})
   return { searchValue, debouncedSearchValue, setSearchValue }
 }
 
-export const useResultsByLetterOrSearch = <T,>(
-  search: QueryConfig<T> = {},
-  letter: QueryConfig<T> = {}
+type Page<T> = { entries: T[]; nextCursor?: string } | { topics: T[]; nextCursor?: string }
+type PageQuery<T> = (
+  value: string,
+  options: { limit: number; cursor?: string },
+  resourceLanguage?: ResourceLanguage
+) => Promise<Page<T>>
+
+export const useInfiniteResultsByLetterOrSearch = <T,>(
+  search: {
+    queryKey: QueryKey
+    query: PageQuery<T>
+    value: string
+    resourceLanguage?: ResourceLanguage
+  },
+  letter: {
+    queryKey: QueryKey
+    query: PageQuery<T>
+    value: string
+    resourceLanguage?: ResourceLanguage
+  },
+  limit = 50
 ) => {
   const isConnected = useConnection()
-  const active = search.value && search.query ? search : letter
+  const active = search.value ? search : letter
   const mode = active === search ? 'search' : 'letter'
-  const enabled = Boolean(active.value && active.query)
-  const query = useQuery({
+  const query = useInfiniteQuery({
     queryKey: [
-      'resource-results',
-      ...(active.queryKey ?? []),
+      'resource-infinite-results',
+      ...active.queryKey,
       active.resourceLanguage,
       mode,
-      active.value ?? '',
+      active.value,
       isConnected,
     ],
-    queryFn: () => active.query!(active.value!, active.resourceLanguage),
-    enabled,
+    queryFn: ({ pageParam }) =>
+      active.query(
+        active.value,
+        { limit, ...(pageParam ? { cursor: pageParam } : {}) },
+        active.resourceLanguage
+      ),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.nextCursor,
     staleTime: Infinity,
     ...localQueryOptions,
   })
-
   return {
-    results: query.data ?? [],
-    isLoading: enabled && (query.isPending || query.isFetching),
+    results: (query.data?.pages ?? []).flatMap(page =>
+      'entries' in page ? page.entries : page.topics
+    ),
+    isLoading: query.isPending,
+    isFetchingNextPage: query.isFetchingNextPage,
+    fetchNextPage: () => void query.fetchNextPage(),
+    hasNextPage: query.hasNextPage,
     error: getResourceAccessErrorCode(query.error),
     recoveries: query.error instanceof ResourceAccessError ? query.error.recoveries : [],
     retry: () => void query.refetch(),

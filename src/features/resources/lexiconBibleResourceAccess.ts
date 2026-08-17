@@ -202,16 +202,15 @@ const defaultDependencies: LexiconBibleResourceDependencies = {
   interlinear: localInterlinearLexiconAdapter,
 }
 
-type LexiconPage = { kind: 'strong'; offset: number } | { kind: 'interlinear'; cursor: string }
+type LexiconPage = { kind: 'strong'; cursor: string } | { kind: 'interlinear'; cursor: string }
 
 const encodePageToken = (page: LexiconPage): string =>
-  page.kind === 'strong' ? `strong:${page.offset}` : `interlinear:${page.cursor}`
+  page.kind === 'strong' ? page.cursor : `interlinear:${page.cursor}`
 
 const decodePageToken = (token?: string): LexiconPage | undefined => {
   if (!token) return undefined
   if (token.startsWith('strong:')) {
-    const offset = Number(token.slice('strong:'.length))
-    return Number.isFinite(offset) && offset >= 0 ? { kind: 'strong', offset } : undefined
+    return { kind: 'strong', cursor: token }
   }
   if (token.startsWith('interlinear:')) {
     const cursor = token.slice('interlinear:'.length)
@@ -386,10 +385,7 @@ export const createLexiconBibleResourceAccess = (
       const loadStrongPage = async (): Promise<LexiconBibleFoundVersesResult> => {
         const strongResult = await dependencies.strongBible.loadFoundVersesByBook({
           ...request,
-          pageToken:
-            page?.kind === 'strong'
-              ? encodePageToken({ kind: 'strong', offset: page.offset })
-              : undefined,
+          pageToken: page?.kind === 'strong' ? page.cursor : undefined,
         })
         if (strongResult.status !== 'available') return strongResult
         return {

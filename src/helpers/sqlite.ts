@@ -84,6 +84,28 @@ class LanguageAwareDB {
     this.path = getDbPath(dbId, lang)
   }
 
+  private ensureResourceQueryIndexes = async () => {
+    if (!this.db) return
+    if (this.dbId === 'DICTIONNAIRE') {
+      await this.db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_dictionnaire_browse
+          ON dictionnaire(sanitized_word, id);
+        CREATE INDEX IF NOT EXISTS idx_dictionnaire_verse
+          ON verses(id);
+      `)
+    }
+    if (this.dbId === 'NAVE') {
+      await this.db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_nave_browse
+          ON TOPICS(letter, name, name_lower);
+        CREATE INDEX IF NOT EXISTS idx_nave_name
+          ON TOPICS(name, name_lower);
+        CREATE INDEX IF NOT EXISTS idx_nave_verse
+          ON VERSES(id);
+      `)
+    }
+  }
+
   init = async (): Promise<void> => {
     if (this.db) return
     if (this.initPromise) return this.initPromise
@@ -125,6 +147,7 @@ class LanguageAwareDB {
           language: this.lang,
         }
       )
+      await this.ensureResourceQueryIndexes()
       console.log(`[DBManager] ${this.dbId} (${this.lang}) loaded from ${this.path}`)
     })()
 

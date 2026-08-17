@@ -1,9 +1,13 @@
 import { Effect } from 'effect'
-import { sql, type Kysely } from 'kysely'
+import { type Kysely } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import type { ResourceDatabase } from '../database/types'
+import {
+  decodeNavePageCursor,
+  encodeNavePageCursor,
+} from '../../../src/features/resources/naveContract'
 import {
   ActiveNavePublicationUnavailable,
   NaveRepositoryFailure,
@@ -57,6 +61,8 @@ export const makeKyselyNaveRepository = (
       }),
     listTopics: input =>
       Effect.gen(function* () {
+        const limit = input.limit ?? 50
+        const cursor = decodeNavePageCursor(input.cursor)
         const publication = yield* findActivePublication(input.language)
         if (!publication) {
           return yield* new ActiveNavePublicationUnavailable({ language: input.language })
@@ -67,13 +73,34 @@ export const makeKyselyNaveRepository = (
           .where('publication_id', '=', publication.id)
         if (input.initial) query = query.where('initial', '=', input.initial)
         if (input.search) query = query.where('name', 'ilike', `%${input.search.trim()}%`)
+        if (cursor) {
+          query = query.where(eb =>
+            eb.or([
+              eb('name', '>', cursor[0]),
+              eb.and([eb('name', '=', cursor[0]), eb('normalized_name', '>', cursor[1])]),
+            ])
+          )
+        }
         const rows = yield* tryDatabasePromise('nave.topics.browse', () =>
-          query.orderBy('name').execute()
+          query
+            .orderBy('name')
+            .orderBy('normalized_name')
+            .limit(limit + 1)
+            .execute()
         ).pipe(Effect.mapError(cause => new NaveRepositoryFailure({ cause })))
         return {
           language: input.language,
           revision: publication.revision,
-          topics: rows.map(mapTopic),
+          topics: rows.slice(0, limit).map(mapTopic),
+          limit,
+          ...(rows.length > limit && rows[limit - 1]
+            ? {
+                nextCursor: encodeNavePageCursor([
+                  rows[limit - 1].name,
+                  rows[limit - 1].normalized_name,
+                ]),
+              }
+            : {}),
         }
       }),
     findVerseTopics: input =>
@@ -115,15 +142,28 @@ export const makeKyselyNaveRepository = (
       Effect.gen(function* () {
         const publication = yield* findActivePublication(language)
         if (!publication) return yield* new ActiveNavePublicationUnavailable({ language })
-        const row = yield* tryDatabasePromise('nave.topic.random', () =>
+        const threshold = Math.random()
+        let row = yield* tryDatabasePromise('nave.topic.random', () =>
           database
             .selectFrom('nave_topics')
             .select(['normalized_name', 'name', 'initial', 'description'])
             .where('publication_id', '=', publication.id)
-            .orderBy(sql`random()`)
+            .where('random_key', '>=', threshold)
+            .orderBy('random_key')
             .limit(1)
             .executeTakeFirst()
         ).pipe(Effect.mapError(cause => new NaveRepositoryFailure({ cause })))
+        if (!row) {
+          row = yield* tryDatabasePromise('nave.topic.random-wrap', () =>
+            database
+              .selectFrom('nave_topics')
+              .select(['normalized_name', 'name', 'initial', 'description'])
+              .where('publication_id', '=', publication.id)
+              .orderBy('random_key')
+              .limit(1)
+              .executeTakeFirst()
+          ).pipe(Effect.mapError(cause => new NaveRepositoryFailure({ cause })))
+        }
         if (!row) return yield* new ActiveNavePublicationUnavailable({ language })
         return { language, revision: publication.revision, topic: mapTopic(row) }
       }),

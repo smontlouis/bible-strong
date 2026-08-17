@@ -23,6 +23,10 @@ import type {
   StrongLexiconSearchResult,
 } from '../../../src/features/resources/strongLexiconAccess'
 import {
+  decodeStrongLexiconPageCursor,
+  encodeStrongLexiconPageCursor,
+} from '../../../src/features/resources/strongLexiconContract'
+import {
   createStrongIdentity,
   getDisplayedStrongIdentities,
   type StrongIdentityKind,
@@ -61,6 +65,7 @@ const normalizeText = (value: string): string =>
     .replace(/\s+/gu, ' ')
     .trim()
     .toLowerCase()
+
 const classicStrong = (row: Payload) =>
   `${text(row, 'language') === 'greek' ? 'G' : 'H'}${String(number(row, 'baseCode')).padStart(4, '0')}`
 
@@ -271,7 +276,7 @@ export const makeKyselyStrongLexiconRepository = (
     language: StrongLexiconLanguage
   ): Promise<StrongLexiconEntity> => {
     const entityId = number(entity, 'id')
-    const [translation, place, relationRows, coreEntries, coreIdentities] = await Promise.all([
+    const [translation, place, relationRows] = await Promise.all([
       translationFor(entityPublication.id, 'EntityTranslations', entityId, language),
       records(entityPublication.id, 'EntityPlaces', query =>
         query.where('entry_id', '=', entityId)
@@ -279,9 +284,59 @@ export const makeKyselyStrongLexiconRepository = (
       records(entityPublication.id, 'EntityRelations', query =>
         query.where('entry_id', '=', entityId)
       ),
-      records(core.id, 'StepEntries'),
-      records(core.id, 'StepEntryIdentities'),
     ])
+    const targetIds = [
+      ...new Set(relationRows.map(relation => number(relation, 'toEntityId')).filter(id => id > 0)),
+    ]
+    const targetNames = [
+      ...new Set(
+        relationRows
+          .map(relation => text(relation, 'toUniqueName').split('|').at(-1) ?? '')
+          .filter(Boolean)
+      ),
+    ]
+    const targetRows =
+      targetIds.length || targetNames.length
+        ? await records(entityPublication.id, 'Entities', query => {
+            const idFilter = targetIds.length
+              ? sql<boolean>`entry_id IN (${sql.join(targetIds.map(id => sql`${id}`))})`
+              : sql<boolean>`false`
+            const nameFilter = targetNames.length
+              ? sql<boolean>`unique_name IN (${sql.join(targetNames.map(name => sql`${name}`))})`
+              : sql<boolean>`false`
+            return query.where(sql<boolean>`(${idFilter} OR ${nameFilter})`)
+          })
+        : []
+    const targetTranslations = targetRows.length
+      ? await records(entityPublication.id, 'EntityTranslations', query =>
+          query
+            .where(
+              'entry_id',
+              'in',
+              targetRows.map(row => number(row, 'id'))
+            )
+            .where('language', '=', language)
+        )
+      : []
+    const relevantUStrongs = [
+      ...new Set([entity, ...targetRows].map(row => text(row, 'uStrong')).filter(Boolean)),
+    ]
+    const coreEntries = relevantUStrongs.length
+      ? await records(core.id, 'StepEntries', query =>
+          query.where(
+            sql<boolean>`payload->>'uStrong' IN (${sql.join(relevantUStrongs.map(code => sql`${code}`))})`
+          )
+        )
+      : []
+    const coreIdentities = coreEntries.length
+      ? await records(core.id, 'StepEntryIdentities', query =>
+          query.where(
+            'entry_id',
+            'in',
+            coreEntries.map(row => number(row, 'id'))
+          )
+        )
+      : []
     const codesForUStrong = (uStrong: string) =>
       getDisplayedStrongIdentities(
         coreEntries
@@ -302,32 +357,20 @@ export const makeKyselyStrongLexiconRepository = (
       relation: Payload
       target?: Payload
       targetTranslation?: Payload
-    }[] = []
-    for (const relation of relationRows) {
+    }[] = relationRows.map(relation => {
       const targetUniqueName = text(relation, 'toUniqueName').split('|').at(-1) ?? ''
       const targetId = number(relation, 'toEntityId')
       const target =
         targetId > 0
-          ? (
-              await records(entityPublication.id, 'Entities', query =>
-                query.where('entry_id', '=', targetId)
-              )
-            )[0]
-          : (
-              await records(entityPublication.id, 'Entities', query =>
-                query.where('unique_name', '=', targetUniqueName)
-              )
-            )[0]
+          ? targetRows.find(row => number(row, 'id') === targetId)
+          : targetRows.find(row => text(row, 'uniqueName') === targetUniqueName)
       const targetTranslation = target
-        ? await translationFor(
-            entityPublication.id,
-            'EntityTranslations',
-            number(target, 'id'),
-            language
+        ? targetTranslations.find(
+            translated => number(translated, 'entityId') === number(target, 'id')
           )
         : undefined
-      resolvedRelations.push({ relation, target, targetTranslation })
-    }
+      return { relation, target, targetTranslation }
+    })
     const relations: StrongLexiconEntityRelation[] = resolvedRelations
       .sort((left, right) => {
         const relationOrder = text(left.relation, 'relation').localeCompare(
@@ -446,11 +489,17 @@ export const makeKyselyStrongLexiconRepository = (
         const targetEntries = targetIds.length
           ? await records(core.id, 'StepEntries', query => query.where('entry_id', 'in', targetIds))
           : []
-        const relationTranslations = await Promise.all(
-          targetEntries.map(row =>
-            translationFor(core.id, 'LexiconTranslations', number(row, 'id'), input.language)
-          )
-        )
+        const relationTranslations = targetEntries.length
+          ? await records(core.id, 'LexiconTranslations', query =>
+              query
+                .where(
+                  'entry_id',
+                  'in',
+                  targetEntries.map(row => number(row, 'id'))
+                )
+                .where('language', '=', input.language)
+            )
+          : []
         const morphologyRow = morphologyRows.find(
           row =>
             text(row, 'scope') === 'lexical_brief' &&
@@ -491,18 +540,18 @@ export const makeKyselyStrongLexiconRepository = (
               )
             ).sort((left, right) => number(left, 'id') - number(right, 'id'))
           : []
-        const resourceTranslations = resourcePublication
-          ? await Promise.all(
-              resourceRows.map(row =>
-                translationFor(
-                  resourcePublication.id,
-                  'LexiconResourceTranslations',
-                  number(row, 'id'),
-                  input.language
-                )
+        const resourceTranslations =
+          resourcePublication && resourceRows.length
+            ? await records(resourcePublication.id, 'LexiconResourceTranslations', query =>
+                query
+                  .where(
+                    'entry_id',
+                    'in',
+                    resourceRows.map(row => number(row, 'id'))
+                  )
+                  .where('language', '=', input.language)
               )
-            )
-          : []
+            : []
         let entity: StrongLexiconEntity | undefined
         if (entitiesState.status === 'available') {
           const entityPublication = await activePublication('entities')
@@ -517,7 +566,13 @@ export const makeKyselyStrongLexiconRepository = (
             const prefix = text(entry, 'language') === 'greek' ? 'G' : 'H'
             const baseCode = number(entry, 'baseCode')
             const gloss = normalizeText(text(entry, 'gloss'))
-            entityCandidates = (await records(entityPublication.id, 'Entities')).filter(row => {
+            entityCandidates = (
+              await records(entityPublication.id, 'Entities', query =>
+                query.where(
+                  sql<boolean>`upper(payload->>'uStrong') ~ ${`^${prefix}0*${baseCode}(?:[^0-9]|$)`}`
+                )
+              )
+            ).filter(row => {
               const match = text(row, 'uStrong').match(/^([HG])0*(\d+)/u)
               return Boolean(
                 match &&
@@ -566,10 +621,13 @@ export const makeKyselyStrongLexiconRepository = (
           })
           .slice(0, 72)
         let lsjAbsent = false
-        const resources = resourceRows.slice(0, 5).flatMap((row, index) => {
+        const resources = resourceRows.slice(0, 5).flatMap(row => {
+          const translatedResource = resourceTranslations.find(
+            translated => number(translated, 'resourceId') === number(row, 'id')
+          )
           const contentHtml = localized(
             input.language,
-            text(resourceTranslations[index] ?? {}, 'contentHtml'),
+            text(translatedResource ?? {}, 'contentHtml'),
             text(row, 'contentHtml')
           )
           if (
@@ -627,7 +685,9 @@ export const makeKyselyStrongLexiconRepository = (
               row => number(row, 'id') === number(relation, 'toStepEntryId')
             )
             const targetTranslation = target
-              ? relationTranslations[targetEntries.indexOf(target)]
+              ? relationTranslations.find(
+                  translated => number(translated, 'stepEntryId') === number(target, 'id')
+                )
               : undefined
             const kind = relationKinds.find(
               row => number(row, 'id') === number(relation, 'relationKindId')
@@ -668,152 +728,180 @@ export const makeKyselyStrongLexiconRepository = (
     listEntries: input =>
       tryDatabasePromise('strong-lexicon.entries', async () => {
         const core = await requiredCore()
-        const pattern = input.search?.trim() ? `%${input.search.trim()}%` : undefined
-        const translatedMatches = pattern
-          ? await records(core.id, 'LexiconTranslations', query =>
-              query
-                .where('language', '=', input.language)
-                .where(sql<boolean>`payload->>'gloss' ILIKE ${pattern}`)
-            )
-          : []
-        const identityMatches = pattern
-          ? await records(core.id, 'StepEntryIdentities', query =>
-              query.where(sql<boolean>`payload->>'stepCode' ILIKE ${pattern}`)
-            )
-          : []
-        const translatedIds = [
-          ...new Set([
-            ...translatedMatches.map(row => number(row, 'stepEntryId')),
-            ...identityMatches.map(row => number(row, 'stepEntryId')),
-          ]),
-        ]
-        let entryRows = await records(core.id, 'StepEntries', query => {
-          let filtered = query
-          if (input.lexicalLanguage)
-            filtered = filtered.where('language', '=', input.lexicalLanguage)
-          if (pattern) {
-            const translatedFilter = translatedIds.length
-              ? sql` OR entry_id IN (${sql.join(translatedIds.map(id => sql`${id}`))})`
-              : sql``
-            filtered = filtered.where(
-              sql<boolean>`(payload->>'original' ILIKE ${pattern} OR payload->>'transliteration' ILIKE ${pattern} OR payload->>'gloss' ILIKE ${pattern} OR payload->>'eStrong' ILIKE ${pattern} OR payload->>'dStrong' ILIKE ${pattern} OR payload->>'uStrong' ILIKE ${pattern}${translatedFilter})`
-            )
-          }
-          return filtered
-        })
-        const identities = await records(core.id, 'StepEntryIdentities')
-        const translations = await records(core.id, 'LexiconTranslations', query =>
-          query.where('language', '=', input.language)
-        )
-        if (input.prefix?.trim()) {
-          const prefix = input.prefix.trim().toLocaleLowerCase()
-          entryRows = entryRows.filter(entry => {
-            const translation = translations.find(
-              row => number(row, 'stepEntryId') === number(entry, 'id')
-            )
-            return localized(input.language, text(translation ?? {}, 'gloss'), text(entry, 'gloss'))
-              .toLocaleLowerCase()
-              .startsWith(prefix)
-          })
+        const search = input.search?.trim()
+        const prefix = input.prefix?.trim()
+        const cursor = decodeStrongLexiconPageCursor(input.cursor)
+        const filters = [sql<boolean>`representative_rank = 1`]
+        const candidateFilters = [sql<boolean>`e.publication_id=${core.id}`]
+        if (input.lexicalLanguage) {
+          candidateFilters.push(sql<boolean>`e.language = ${input.lexicalLanguage}`)
         }
-        const candidates = entryRows
-          .map(entry => {
-            const identity = identities.find(
-              row => number(row, 'stepEntryId') === number(entry, 'id')
-            )
-            if (!identity) return undefined
-            return {
-              entry,
-              result: searchResult(
-                entry,
-                identity,
-                translations.find(row => number(row, 'stepEntryId') === number(entry, 'id')),
-                input.language
-              ),
-            }
-          })
-          .filter(
-            (
-              entry
-            ): entry is {
-              entry: Payload
-              result: StrongLexiconSearchResult
-            } => Boolean(entry)
+        if (search) {
+          const pattern = `%${search.toLocaleLowerCase()}%`
+          candidateFilters.push(
+            sql<boolean>`(
+              lower(coalesce(e.payload->>'original', '') || ' ' || coalesce(e.payload->>'transliteration', '') || ' ' || coalesce(e.payload->>'gloss', '') || ' ' || e.e_strong || ' ' || e.d_strong || ' ' || e.u_strong) LIKE ${pattern}
+              OR lower(i.step_code) LIKE ${pattern}
+              OR lower(coalesce(tr.payload->>'gloss', '')) LIKE ${pattern}
+            )`
           )
-          .sort(
-            (left, right) =>
-              left.result.gloss.localeCompare(right.result.gloss) ||
-              number(left.entry, 'baseCode') - number(right.entry, 'baseCode') ||
-              number(left.entry, 'id') - number(right.entry, 'id')
-          )
-        const representatives = new Map<string, (typeof candidates)[number]>()
-        for (const candidate of candidates) {
-          const uStrong = normalizeCode(text(candidate.entry, 'uStrong'))
-          const key = `${text(candidate.entry, 'language')}:${uStrong || number(candidate.entry, 'id')}`
-          const previous = representatives.get(key)
-          const rank =
-            text(candidate.result, 'stepCode') === text(candidate.entry, 'uStrong') ? 0 : 1
-          const previousRank = previous
-            ? text(previous.result, 'stepCode') === text(previous.entry, 'uStrong')
-              ? 0
-              : 1
-            : Number.POSITIVE_INFINITY
-          if (
-            !previous ||
-            rank < previousRank ||
-            (rank === previousRank && number(candidate.entry, 'id') < number(previous.entry, 'id'))
-          ) {
-            representatives.set(key, candidate)
-          }
         }
-        const selectedCandidates = input.prefix?.trim()
-          ? candidates
-          : [...representatives.values()].sort(
-              (left, right) =>
-                left.result.gloss.localeCompare(right.result.gloss) ||
-                number(left.entry, 'baseCode') - number(right.entry, 'baseCode') ||
-                number(left.entry, 'id') - number(right.entry, 'id')
-            )
-        const value = selectedCandidates.slice(0, input.limit).map(candidate => candidate.result)
-        return { revision: core.revision, value }
+        if (prefix) {
+          const pattern = `${prefix.toLocaleLowerCase()}%`
+          candidateFilters.push(
+            input.language === 'fr'
+              ? sql<boolean>`lower(coalesce(nullif(tr.payload->>'gloss', ''), e.payload->>'gloss', '')) LIKE ${pattern}`
+              : sql<boolean>`lower(coalesce(e.payload->>'gloss', '')) LIKE ${pattern}`
+          )
+        }
+        if (cursor) {
+          filters.push(
+            sql<boolean>`(sort_gloss, base_code, entry_id) > (${cursor.gloss}, ${cursor.baseCode}, ${cursor.id})`
+          )
+        }
+        type ListRow = {
+          entry_id: number
+          language: string
+          base_code: number
+          step_code: string
+          original: string
+          transliteration: string
+          gloss: string
+          sort_gloss: string
+        }
+        const result = await sql<ListRow>`
+          WITH candidates AS (
+            SELECT e.entry_id,
+                   e.language,
+                   (e.payload->>'baseCode')::integer AS base_code,
+                   e.e_strong,
+                   e.d_strong,
+                   e.u_strong,
+                   i.step_code,
+                   e.payload->>'original' AS original,
+                   COALESCE(NULLIF(e.payload->>'classicTransliteration', ''), e.payload->>'transliteration', '') AS transliteration,
+                   CASE WHEN ${input.language} = 'fr'
+                     THEN COALESCE(NULLIF(tr.payload->>'gloss', ''), e.payload->>'gloss', '')
+                     ELSE COALESCE(e.payload->>'gloss', '')
+                   END AS gloss,
+                   lower(CASE WHEN ${input.language} = 'fr'
+                     THEN COALESCE(NULLIF(tr.payload->>'gloss', ''), e.payload->>'gloss', '')
+                     ELSE COALESCE(e.payload->>'gloss', '')
+                   END) AS sort_gloss,
+                   row_number() OVER (
+                     PARTITION BY e.language, COALESCE(NULLIF(e.u_strong, ''), e.entry_id::text)
+                     ORDER BY CASE WHEN i.step_code=e.u_strong THEN 0 ELSE 1 END, e.entry_id
+                   ) AS representative_rank
+              FROM strong_lexicon_entries e
+              JOIN strong_lexicon_entry_identities i
+                ON i.publication_id=e.publication_id AND i.step_entry_id=e.entry_id
+              LEFT JOIN strong_lexicon_translations tr
+                ON tr.publication_id=e.publication_id
+               AND tr.step_entry_id=e.entry_id
+               AND tr.language=${input.language}
+             WHERE ${sql.join(candidateFilters, sql` AND `)}
+          )
+          SELECT entry_id, language, base_code, step_code, original, transliteration, gloss, sort_gloss
+            FROM candidates
+           WHERE ${sql.join(filters, sql` AND `)}
+           ORDER BY sort_gloss, base_code, entry_id
+           LIMIT ${input.limit + 1}
+        `.execute(database)
+        const rows = result.rows
+        const hasNextPage = rows.length > input.limit
+        const selected = rows.slice(0, input.limit)
+        const last = selected.at(-1)
+        return {
+          revision: core.revision,
+          value: {
+            entries: selected.map(row => ({
+              id: row.entry_id,
+              stepCode: row.step_code,
+              classicStrong: `${row.language === 'greek' ? 'G' : 'H'}${String(row.base_code).padStart(4, '0')}`,
+              language: (row.language === 'greek' ? 'greek' : 'hebrew') as 'greek' | 'hebrew',
+              original: row.original,
+              transliteration: row.transliteration,
+              gloss: row.gloss,
+            })),
+            ...(hasNextPage && last
+              ? {
+                  nextCursor: encodeStrongLexiconPageCursor({
+                    gloss: last.sort_gloss,
+                    baseCode: last.base_code,
+                    id: last.entry_id,
+                  }),
+                }
+              : {}),
+          },
+        }
       }).pipe(Effect.mapError(mapRepositoryCause)),
 
     findRandom: input =>
       tryDatabasePromise('strong-lexicon.random', async () => {
         const core = await requiredCore()
-        const candidates = await records(core.id, 'StepEntries', query =>
-          query
-            .where('language', '=', input.lexicalLanguage)
-            .where(sql<boolean>`payload->>'gloss' <> ''`)
-        )
-        const entry = candidates.length
-          ? candidates[Math.floor(Math.random() * candidates.length)]
-          : undefined
-        if (!entry) return { revision: core.revision, value: [] }
-        const identity = (
-          await records(core.id, 'StepEntryIdentities', query =>
-            query.where('entry_id', '=', number(entry, 'id'))
+        type RandomRow = { payload: Payload; step_code: string; translation: Payload | null }
+        const randomResult = await sql<RandomRow>`
+          WITH bounds AS (
+            SELECT min(entry_id) AS minimum, max(entry_id) AS maximum
+              FROM strong_lexicon_entries
+             WHERE publication_id=${core.id} AND language=${input.lexicalLanguage}
+               AND payload->>'gloss' <> ''
           )
-        )[0]
-        const translation = await translationFor(
-          core.id,
-          'LexiconTranslations',
-          number(entry, 'id'),
-          input.language
-        )
+          SELECT e.payload, i.step_code, tr.payload AS translation
+            FROM bounds
+            JOIN LATERAL (
+              SELECT * FROM strong_lexicon_entries
+               WHERE publication_id=${core.id} AND language=${input.lexicalLanguage}
+                 AND payload->>'gloss' <> ''
+                 AND entry_id >= floor(random() * (bounds.maximum - bounds.minimum + 1) + bounds.minimum)
+               ORDER BY entry_id
+               LIMIT 1
+            ) e ON true
+            JOIN strong_lexicon_entry_identities i
+              ON i.publication_id=e.publication_id AND i.step_entry_id=e.entry_id
+            LEFT JOIN strong_lexicon_translations tr
+              ON tr.publication_id=e.publication_id AND tr.step_entry_id=e.entry_id
+             AND tr.language=${input.language}
+        `.execute(database)
+        const randomRow = randomResult.rows[0]
+        if (!randomRow) return { revision: core.revision, value: [] }
         return {
           revision: core.revision,
-          value: identity ? [searchResult(entry, identity, translation, input.language)] : [],
+          value: [
+            searchResult(
+              randomRow.payload,
+              { stepCode: randomRow.step_code },
+              randomRow.translation ?? undefined,
+              input.language
+            ),
+          ],
         }
       }).pipe(Effect.mapError(mapRepositoryCause)),
 
     findMorphologies: input =>
       tryDatabasePromise('strong-lexicon.morphologies', async () => {
         const core = await requiredCore()
-        const all = await records(core.id, 'MorphologyCodes')
-        const translations = await records(core.id, 'MorphologyCodeTranslations', query =>
-          query.where('language', '=', input.language)
-        )
+        const normalizedCodes = [
+          ...new Set(input.codes.map(code => code.trim().toLocaleLowerCase()).filter(Boolean)),
+        ]
+        const all = normalizedCodes.length
+          ? await records(core.id, 'MorphologyCodes', query =>
+              query.where(
+                sql<boolean>`(lower(payload->>'code') IN (${sql.join(normalizedCodes.map(code => sql`${code}`))}) OR lower(payload->>'normalizedCode') IN (${sql.join(normalizedCodes.map(code => sql`${code}`))}))`
+              )
+            )
+          : []
+        const translations = all.length
+          ? await records(core.id, 'MorphologyCodeTranslations', query =>
+              query
+                .where(
+                  'entry_id',
+                  'in',
+                  all.map(row => number(row, 'id'))
+                )
+                .where('language', '=', input.language)
+            )
+          : []
         const value = input.codes.map(code => {
           const normalizedCode = code.trim().toLocaleLowerCase()
           const row = all.find(candidate =>
@@ -897,27 +985,38 @@ export const makeKyselyStrongLexiconRepository = (
           ...new Set(input.strongCodes.map(code => normalizeCode(code)).filter(Boolean)),
         ]
         const referencedIds = [...new Set(refs.map(row => number(row, 'entityId')))]
-        const allEntities = normalizedStrongCodes.length
-          ? await records(entityPublication.id, 'Entities')
+        type UniqueEntityRow = { payload: Payload }
+        const codeEntities = normalizedStrongCodes.length
+          ? (
+              await sql<UniqueEntityRow>`
+                SELECT payload
+                  FROM (
+                    SELECT payload, count(*) OVER (PARTITION BY upper(u_strong)) AS matches
+                      FROM strong_lexicon_entities
+                     WHERE publication_id=${entityPublication.id}
+                       AND upper(u_strong) IN (${sql.join(normalizedStrongCodes.map(code => sql`${code}`))})
+                  ) matching
+                 WHERE matches=1
+              `.execute(database)
+            ).rows.map(row => row.payload)
           : []
-        const uStrongCounts = new Map<string, number>()
-        for (const entity of allEntities) {
-          const uStrong = normalizeCode(text(entity, 'uStrong'))
-          uStrongCounts.set(uStrong, (uStrongCounts.get(uStrong) ?? 0) + 1)
-        }
-        const codeEntities = allEntities.filter(entity => {
-          const uStrong = normalizeCode(text(entity, 'uStrong'))
-          return normalizedStrongCodes.includes(uStrong) && uStrongCounts.get(uStrong) === 1
-        })
         const ids = [...new Set([...referencedIds, ...codeEntities.map(row => number(row, 'id'))])]
         const entities = ids.length
           ? await records(entityPublication.id, 'Entities', query =>
               query.where('entry_id', 'in', ids)
             )
           : []
-        const translations = await records(entityPublication.id, 'EntityTranslations', query =>
-          query.where('language', '=', input.language)
-        )
+        const translations = entities.length
+          ? await records(entityPublication.id, 'EntityTranslations', query =>
+              query
+                .where(
+                  'entry_id',
+                  'in',
+                  entities.map(row => number(row, 'id'))
+                )
+                .where('language', '=', input.language)
+            )
+          : []
         const value: StrongLexiconChapterEntity[] = entities
           .map((entity): StrongLexiconChapterEntity => {
             const id = number(entity, 'id')

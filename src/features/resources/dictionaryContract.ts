@@ -1,4 +1,11 @@
 import { Schema } from 'effect'
+import { decodeDictionaryPageCursor, encodeDictionaryPageCursor } from '~helpers/resourcePageCursor'
+
+export { decodeDictionaryPageCursor, encodeDictionaryPageCursor }
+
+const DictionaryPageCursor = Schema.NonEmptyString.pipe(
+  Schema.filter(value => decodeDictionaryPageCursor(value) !== undefined)
+)
 
 const DictionaryVerseKey = Schema.String.pipe(
   Schema.pattern(/^[^\\/\u0000-\u001f\s]+-[^\\/\u0000-\u001f\s]+-[^\\/\u0000-\u001f\s]+$/u)
@@ -33,7 +40,13 @@ export class DictionaryEntriesQuery extends Schema.Class<DictionaryEntriesQuery>
   initial: Schema.optional(Schema.NonEmptyString),
   search: Schema.optional(Schema.NonEmptyString),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
-  offset: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.nonNegative())),
+  cursor: Schema.optional(DictionaryPageCursor),
+}) {}
+
+export class DictionaryEntriesBatchQuery extends Schema.Class<DictionaryEntriesBatchQuery>(
+  'DictionaryEntriesBatchQuery'
+)({
+  words: Schema.NonEmptyString,
 }) {}
 
 export class DictionaryRevisionDto extends Schema.Class<DictionaryRevisionDto>(
@@ -63,9 +76,8 @@ export class DictionaryEntriesResponseDto extends Schema.Class<DictionaryEntries
 )({
   resource: DictionaryRevisionDto,
   entries: Schema.Array(DictionarySummaryDto),
-  offset: Schema.NonNegativeInt,
   limit: Schema.Int.pipe(Schema.positive()),
-  nextOffset: Schema.optional(Schema.NonNegativeInt),
+  nextCursor: Schema.optional(Schema.NonEmptyString),
 }) {}
 
 export class DictionaryEntryResponseDto extends Schema.Class<DictionaryEntryResponseDto>(
@@ -73,6 +85,13 @@ export class DictionaryEntryResponseDto extends Schema.Class<DictionaryEntryResp
 )({
   resource: DictionaryRevisionDto,
   entry: DictionaryEntryDto,
+}) {}
+
+export class DictionaryEntriesBatchResponseDto extends Schema.Class<DictionaryEntriesBatchResponseDto>(
+  'DictionaryEntriesBatchResponseDto'
+)({
+  resource: DictionaryRevisionDto,
+  entries: Schema.Array(DictionaryEntryDto),
 }) {}
 
 export class DictionaryVerseWordsResponseDto extends Schema.Class<DictionaryVerseWordsResponseDto>(

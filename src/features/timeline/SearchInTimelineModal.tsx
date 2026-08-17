@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
+import { useAtomValue } from 'jotai/react'
 
 import { SheetFlatList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { Image } from 'expo-image'
@@ -10,61 +12,24 @@ import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import { TimelineEventDetail } from './types'
+import type { TimelineEventSummary } from '~features/resources/timelineAccess'
 import { getTimelineImageUri } from './timelineImage'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { useTimelineDetails } from './TimelineResourceBoundary'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import useDebounce from '~helpers/useDebounce'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 interface Props {
   modalRef: React.RefObject<SheetRef | null>
-}
-
-const normalizeSearchText = (value?: string) =>
-  (value ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-
-const getSearchScore = (event: TimelineEventDetail, query: string) => {
-  const title = normalizeSearchText(event.title)
-  const description = normalizeSearchText(event.description)
-  const article = normalizeSearchText(event.article)
-
-  if (title === query) return 0
-  if (title.startsWith(query)) return 1
-  if (title.split(/\W+/).includes(query)) return 2
-  if (title.includes(query)) return 3
-  if (description.startsWith(query)) return 4
-  if (description.includes(query)) return 5
-  if (article.includes(query)) return 6
-
-  return Number.POSITIVE_INFINITY
-}
-
-const searchTimeline = (timeline: TimelineEventDetail[], query: string) => {
-  if (!query.trim()) {
-    return { results: [], hasSearched: false }
-  }
-
-  const lowerQuery = normalizeSearchText(query.trim())
-  const results = timeline
-    .map(event => ({ event, score: getSearchScore(event, lowerQuery) }))
-    .filter(({ score }) => Number.isFinite(score))
-    .sort((a, b) => {
-      if (a.score !== b.score) return a.score - b.score
-      return a.event.title.localeCompare(b.event.title)
-    })
-    .map(({ event }) => event)
-
-  return { results, hasSearched: true }
 }
 
 const TimelineSearchResultItem = ({
   item,
   onPress,
 }: {
-  item: TimelineEventDetail
-  onPress: (event: TimelineEventDetail) => void
+  item: TimelineEventSummary
+  onPress: (event: TimelineEventSummary) => void
 }) => {
   const imageUri = getTimelineImageUri(item.images?.[0]?.file)
 
@@ -97,28 +62,24 @@ const TimelineSearchResultItem = ({
 const SearchInTimelineModal = ({ modalRef }: Props) => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
+  const resources = useResourceAccess()
+  const language = useAtomValue(resourcesLanguageAtom).TIMELINE
   const [searchValue, setSearchValue] = useState('')
-  const [results, setResults] = useState<TimelineEventDetail[]>([])
-  const [hasSearched, setHasSearched] = useState(false)
-  const timeline = useTimelineDetails()
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      const search = searchTimeline(timeline, searchValue)
-      setResults(search.results)
-      setHasSearched(search.hasSearched)
-    }, 250)
-
-    return () => clearTimeout(timeout)
-  }, [searchValue, timeline])
+  const debouncedSearchValue = useDebounce(searchValue, 250)
+  const hasSearched = Boolean(debouncedSearchValue.trim())
+  const searchQuery = useQuery({
+    queryKey: [...resourceQueryKeys.timeline(language), 'search', debouncedSearchValue.trim()],
+    queryFn: () => resources.timeline.searchIndex(debouncedSearchValue.trim(), language),
+    enabled: hasSearched,
+    networkMode: 'always',
+  })
+  const results = searchQuery.data?.status === 'available' ? searchQuery.data.details : []
 
   const onClear = () => {
     setSearchValue('')
-    setResults([])
-    setHasSearched(false)
   }
 
-  const onOpenEvent = (event: TimelineEventDetail) => {
+  const onOpenEvent = (event: TimelineEventSummary) => {
     modalRef.current?.dismiss()
     pushRouteOnce({
       pathname: '/event',
@@ -147,7 +108,7 @@ const SearchInTimelineModal = ({ modalRef }: Props) => {
       <SheetFlatList
         ItemSeparatorComponent={() => <Border />}
         data={results}
-        keyExtractor={(item: TimelineEventDetail) => item.slug}
+        keyExtractor={(item: TimelineEventSummary) => item.slug}
         ListHeaderComponent={
           !hasSearched ? (
             <Empty
@@ -166,7 +127,7 @@ const SearchInTimelineModal = ({ modalRef }: Props) => {
             </Box>
           )
         }
-        renderItem={({ item }: { item: TimelineEventDetail }) => (
+        renderItem={({ item }: { item: TimelineEventSummary }) => (
           <TimelineSearchResultItem item={item} onPress={onOpenEvent} />
         )}
       />

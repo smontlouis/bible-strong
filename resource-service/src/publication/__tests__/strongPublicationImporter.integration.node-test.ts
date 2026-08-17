@@ -77,6 +77,7 @@ describe('Strong Bible publication import', { skip: !runIntegration }, () => {
         occurrences.verses.map(verse => [verse.book, verse.chapter, verse.verse]),
         [[1, 1, 1]]
       )
+      assert.equal(occurrences.nextCursor, undefined)
       assert.deepEqual(lemmas.lemmas, [
         { id: 1, lemma: 'Dieu', partOfSpeech: 'N', occurrenceCount: 1 },
       ])

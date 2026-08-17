@@ -1,5 +1,5 @@
 import { Effect } from 'effect'
-import { type Kysely } from 'kysely'
+import { sql, type Kysely } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
@@ -9,6 +9,7 @@ import {
   TimelineEventNotFound,
   TimelineRepositoryFailure,
   type TimelineEvent,
+  type TimelineEventSummary,
   type TimelineRepositoryService,
 } from '../domain/timeline'
 
@@ -20,9 +21,9 @@ const mapEvent = (row: {
   article: string
   period: string
   dates: string
-  related: Array<{ slug: string; title: string }>
-  images: Array<{ caption: string; file: string }>
-  videos: Array<{ title: string; caption: string; filename: string }>
+  related: { slug: string; title: string }[]
+  images: { caption: string; file: string }[]
+  videos: { title: string; caption: string; filename: string }[]
   scriptures: string[]
 }): TimelineEvent => ({
   id: row.event_id,
@@ -36,6 +37,24 @@ const mapEvent = (row: {
   images: row.images,
   videos: row.videos,
   scriptures: row.scriptures,
+})
+
+const mapEventSummary = (row: {
+  event_id: string
+  slug: string
+  title: string
+  description: string
+  period: string
+  dates: string
+  images: { caption: string; file: string }[]
+}): TimelineEventSummary => ({
+  id: row.event_id,
+  slug: row.slug,
+  title: row.title,
+  description: row.description,
+  period: row.period,
+  dates: row.dates,
+  images: row.images,
 })
 
 export const makeKyselyTimelineRepository = (
@@ -52,19 +71,27 @@ export const makeKyselyTimelineRepository = (
     ).pipe(Effect.mapError(cause => new TimelineRepositoryFailure({ cause })))
 
   return {
-    listEvents: language =>
+    listEvents: (language, options = {}) =>
       Effect.gen(function* () {
         const publication = yield* findActivePublication(language)
         if (!publication) return yield* new ActiveTimelinePublicationUnavailable({ language })
-        const rows = yield* tryDatabasePromise('timeline.events.list', () =>
-          database
+        const rows = yield* tryDatabasePromise('timeline.events.list', () => {
+          let query = database
             .selectFrom('timeline_events')
-            .selectAll()
+            .select(['event_id', 'slug', 'title', 'description', 'period', 'dates', 'images'])
             .where('publication_id', '=', publication.id)
+          const search = options.search?.trim()
+          if (search) {
+            query = query.where(
+              sql<boolean>`unaccent(lower(title || ' ' || description || ' ' || article)) LIKE unaccent(lower(${`%${search}%`}))`
+            )
+          }
+          return query
             .orderBy('ordinal')
+            .limit(Math.min(options.limit ?? (search ? 50 : 5_000), 5_000))
             .execute()
-        ).pipe(Effect.mapError(cause => new TimelineRepositoryFailure({ cause })))
-        return { language, revision: publication.revision, events: rows.map(mapEvent) }
+        }).pipe(Effect.mapError(cause => new TimelineRepositoryFailure({ cause })))
+        return { language, revision: publication.revision, events: rows.map(mapEventSummary) }
       }),
     findEvent: input =>
       Effect.gen(function* () {

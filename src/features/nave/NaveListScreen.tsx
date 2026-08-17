@@ -20,7 +20,7 @@ import SectionTitle from '~common/SectionTitle'
 import useLanguage from '~helpers/useLanguage'
 
 import NaveItem from './NaveItem'
-import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
+import { useSearchValue, useInfiniteResultsByLetterOrSearch } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
 import { NaveTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -92,20 +92,22 @@ const NaveListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error, recoveries, retry } = useResultsByLetterOrSearch(
-    {
-      queryKey: ['nave'],
-      query: value => resources.nave.search(value, naveResourceLanguage),
-      value: debouncedSearchValue,
-      resourceLanguage: naveResourceLanguage,
-    },
-    {
-      queryKey: ['nave'],
-      query: value => resources.nave.listByLetter(value, naveResourceLanguage),
-      value: letter,
-      resourceLanguage: naveResourceLanguage,
-    }
-  )
+  const { results, isLoading, error, recoveries, retry, fetchNextPage, hasNextPage } =
+    useInfiniteResultsByLetterOrSearch(
+      {
+        queryKey: ['nave'],
+        query: (value, options) => resources.nave.searchPage(value, options, naveResourceLanguage),
+        value: debouncedSearchValue,
+        resourceLanguage: naveResourceLanguage,
+      },
+      {
+        queryKey: ['nave'],
+        query: (value, options) =>
+          resources.nave.listByLetterPage(value, options, naveResourceLanguage),
+        value: letter,
+        resourceLanguage: naveResourceLanguage,
+      }
+    )
   const naveResults = Array.isArray(results) ? (results as NaveRow[]) : []
   const sectionResults = useSectionResults(naveResults)
 
@@ -230,7 +232,6 @@ const NaveListScreen = ({
             <SectionList<NaveRow, NaveSection>
               renderItem={({ item: { normalizedName, name } }) => (
                 <NaveItem
-                  key={normalizedName}
                   name_lower={normalizedName}
                   name={name}
                   onSelect={isNewTabSelection || onNaveSelect ? selectNave : undefined}
@@ -251,6 +252,10 @@ const NaveListScreen = ({
               stickySectionHeadersEnabled
               sections={sectionResults}
               keyExtractor={(item: NaveRow) => item.normalizedName}
+              onEndReached={() => {
+                if (hasNextPage) fetchNextPage()
+              }}
+              onEndReachedThreshold={0.5}
             />
           ) : (
             <Empty

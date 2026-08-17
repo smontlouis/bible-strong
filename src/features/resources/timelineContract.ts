@@ -8,6 +8,11 @@ export class TimelineLanguagePath extends Schema.Class<TimelineLanguagePath>(
   language: Language,
 }) {}
 
+export class TimelineEventsQuery extends Schema.Class<TimelineEventsQuery>('TimelineEventsQuery')({
+  search: Schema.optional(Schema.String),
+  limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))),
+}) {}
+
 export class TimelineEventPath extends Schema.Class<TimelineEventPath>('TimelineEventPath')({
   ...TimelineLanguagePath.fields,
   slug: Schema.NonEmptyString,
@@ -49,11 +54,23 @@ export class TimelineEventDto extends Schema.Class<TimelineEventDto>('TimelineEv
   scriptures: Schema.Array(Schema.String),
 }) {}
 
+export class TimelineEventSummaryDto extends Schema.Class<TimelineEventSummaryDto>(
+  'TimelineEventSummaryDto'
+)({
+  id: Schema.NonEmptyString,
+  slug: Schema.NonEmptyString,
+  title: Schema.NonEmptyString,
+  description: Schema.String,
+  period: Schema.String,
+  dates: Schema.String,
+  images: Schema.Array(TimelineImageDto),
+}) {}
+
 export class TimelineEventsResponseDto extends Schema.Class<TimelineEventsResponseDto>(
   'TimelineEventsResponseDto'
 )({
   resource: TimelineRevisionDto,
-  events: Schema.Array(TimelineEventDto),
+  events: Schema.Array(TimelineEventSummaryDto),
 }) {}
 
 export class TimelineEventResponseDto extends Schema.Class<TimelineEventResponseDto>(

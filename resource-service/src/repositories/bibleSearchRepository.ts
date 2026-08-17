@@ -1,5 +1,5 @@
 import { Effect } from 'effect'
-import { type Kysely } from 'kysely'
+import { sql, type Kysely } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
@@ -7,7 +7,6 @@ import type { ResourceDatabase } from '../database/types'
 import {
   ActiveBibleSearchPublicationUnavailable,
   BibleSearchRepositoryFailure,
-  type BibleSearchInput,
   type BibleSearchRepositoryService,
 } from '../domain/bibleSearch'
 
@@ -58,26 +57,24 @@ export const makeKyselyBibleSearchRepository = (
       if (input.section === 'ot') filtered = filtered.where('book', '<=', 39)
       if (input.section === 'nt') filtered = filtered.where('book', '>=', 40)
 
-      const countRow = yield* tryDatabasePromise('bible.search.count', () =>
-        filtered
-          .clearSelect()
-          .select(expression => expression.fn.count('verse').as('count'))
-          .executeTakeFirst()
-      ).pipe(Effect.mapError(cause => new BibleSearchRepositoryFailure({ cause })))
-      const count = Number(countRow?.count ?? 0)
       const sortOrder = input.sortOrder ?? 'relevance'
       const rows = yield* tryDatabasePromise('bible.search.read-results', () => {
-        let ordered = filtered
+        let ordered = filtered.select(sql<number>`count(*) over ()`.as('total_count'))
         if (sortOrder === 'book') {
           ordered = ordered.orderBy('book').orderBy('chapter').orderBy('verse')
         } else {
-          ordered = ordered.orderBy('book').orderBy('chapter').orderBy('verse')
+          ordered = ordered
+            .orderBy(sql`similarity(text, ${query})`, 'desc')
+            .orderBy('book')
+            .orderBy('chapter')
+            .orderBy('verse')
         }
         return ordered
           .limit(input.limit ?? 100)
           .offset(input.offset ?? 0)
           .execute()
       }).pipe(Effect.mapError(cause => new BibleSearchRepositoryFailure({ cause })))
+      const count = Number(rows[0]?.total_count ?? 0)
       const bibleMetadata = metadata(publication.metadata)
       return {
         versionId: input.versionId,

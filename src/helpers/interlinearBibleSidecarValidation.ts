@@ -17,6 +17,7 @@ export interface ExpectedInterlinearBibleSidecarMetadata {
 export interface InterlinearBibleSidecarSnapshot {
   metadata: InterlinearBibleSidecarMetadata
   tableColumns: Record<string, string[]>
+  indexes: Record<string, string[][]>
 }
 
 export const INTERLINEAR_BIBLE_SIDECAR_REQUIRED_TABLE_COLUMNS = {
@@ -42,6 +43,12 @@ export const INTERLINEAR_BIBLE_SIDECAR_REQUIRED_TABLE_COLUMNS = {
   Glosses: ['id', 'text'],
   StrongCodes: ['id', 'code'],
   StrongVerseIndex: ['codeId', 'verseId', 'kindMask'],
+} as const
+
+const INTERLINEAR_BIBLE_REQUIRED_QUERY_INDEXES = {
+  Verses: ['bookOrder', 'chapter', 'verse'],
+  StrongCodes: ['code'],
+  StrongVerseIndex: ['codeId', 'verseId'],
 } as const
 
 export const classifyInterlinearBibleSidecarSnapshot = (
@@ -71,6 +78,15 @@ export const classifyInterlinearBibleSidecarSnapshot = (
     if (requiredColumns.some(columnName => !availableColumns.includes(columnName))) {
       return 'incompatible'
     }
+  }
+
+  for (const [tableName, requiredColumns] of Object.entries(
+    INTERLINEAR_BIBLE_REQUIRED_QUERY_INDEXES
+  )) {
+    const hasPrefix = (snapshot.indexes[tableName] ?? []).some(columns =>
+      requiredColumns.every((columnName, index) => columns[index] === columnName)
+    )
+    if (!hasPrefix) return 'incompatible'
   }
 
   return 'compatible'

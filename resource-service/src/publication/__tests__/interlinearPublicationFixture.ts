@@ -52,6 +52,7 @@ const makeOfflineSqlite = async (
     mismatchedStrongVerseIndex?: boolean
     mismatchedStrongKindMask?: boolean
     corruptIntegrity?: boolean
+    omitQueryIndexes?: boolean
   } = {}
 ) => {
   const SQL = await initSqlJs()
@@ -80,6 +81,13 @@ const makeOfflineSqlite = async (
     );
     CREATE TABLE StrongVerseIndex(codeId INTEGER, verseId INTEGER, kindMask INTEGER);
   `)
+  if (!options.omitQueryIndexes) {
+    database.run(`
+      CREATE INDEX Verses_location_idx ON Verses(bookOrder, chapter, verse);
+      CREATE UNIQUE INDEX StrongCodes_code_idx ON StrongCodes(code);
+      CREATE INDEX StrongVerseIndex_code_verse_idx ON StrongVerseIndex(codeId, verseId);
+    `)
+  }
   const metadata = {
     applicationVersionId: canonical.applicationVersionId,
     datasetId: canonical.datasetId,
@@ -136,6 +144,7 @@ export const writeInterlinearPublicationFixture = async (
     mismatchedStrongVerseIndex?: boolean
     mismatchedStrongKindMask?: boolean
     corruptOfflineIntegrity?: boolean
+    omitQueryIndexes?: boolean
   } = {}
 ) => {
   const language = options.language ?? 'fr'
@@ -158,6 +167,7 @@ export const writeInterlinearPublicationFixture = async (
     mismatchedStrongVerseIndex: options.mismatchedStrongVerseIndex,
     mismatchedStrongKindMask: options.mismatchedStrongKindMask,
     corruptIntegrity: options.corruptOfflineIntegrity,
+    omitQueryIndexes: options.omitQueryIndexes,
   })
   const entry = `bible-step-interlinear-${language}.sqlite`
   const offline = zipSync({

@@ -18,7 +18,7 @@ import { getFirstLetterFrom } from '~helpers/alphabet'
 import type { DictionarySummary } from '~features/resources/dictionaryAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { DictionaryTab } from '../../state/tabs'
-import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
+import { useInfiniteResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
@@ -96,20 +96,21 @@ const DictionaryListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error, recoveries, retry } = useResultsByLetterOrSearch(
-    {
-      queryKey: ['dictionary'],
-      query: resources.dictionary.search,
-      value: debouncedSearchValue,
-      resourceLanguage: dictionaryResourceLanguage,
-    },
-    {
-      queryKey: ['dictionary'],
-      query: resources.dictionary.listByLetter,
-      value: letter,
-      resourceLanguage: dictionaryResourceLanguage,
-    }
-  )
+  const { results, isLoading, error, recoveries, retry, fetchNextPage, hasNextPage } =
+    useInfiniteResultsByLetterOrSearch(
+      {
+        queryKey: ['dictionary'],
+        query: resources.dictionary.searchPage,
+        value: debouncedSearchValue,
+        resourceLanguage: dictionaryResourceLanguage,
+      },
+      {
+        queryKey: ['dictionary'],
+        query: resources.dictionary.listByLetterPage,
+        value: letter,
+        resourceLanguage: dictionaryResourceLanguage,
+      }
+    )
 
   const dictionaryResults = Array.isArray(results) ? results : []
   const sectionResults = useSectionResults(dictionaryResults)
@@ -229,6 +230,10 @@ const DictionaryListScreen = ({
               keyExtractor={(item, index) =>
                 item.id ? String(item.id) : `${item.normalizedWord}-${item.word}-${index}`
               }
+              onEndReached={() => {
+                if (hasNextPage) fetchNextPage()
+              }}
+              onEndReachedThreshold={0.5}
             />
           ) : (
             <Empty

@@ -26,6 +26,10 @@ import { STRONG_IDENTITY_KINDS } from './strongIdentities'
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import { getStrongBibleConcordanceCandidates } from './strongBibleConcordance'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
+import {
+  decodeStrongBibleOccurrenceCursor,
+  encodeStrongBibleOccurrenceCursor,
+} from '~features/resources/strongBibleContract'
 
 class StrongBibleSidecarMissingError extends Error {}
 
@@ -374,8 +378,27 @@ export const loadStrongBibleVerseSpans = async (
   chapter: number,
   verse: number
 ): Promise<StrongBibleSpan[]> => {
-  const spans = await loadStrongBibleChapterSpans(versionId, book, chapter)
-  return spans[verse] ?? []
+  await assertStrongBibleSidecarAvailable(versionId)
+  const rows = await withStrongBibleSidecar(versionId, database =>
+    database.getAllAsync<StrongBibleSpanRow>(
+      `SELECT v.verse, o.ordinal, o.startOffset, o.length,
+            w.identityOrder, c.kind, c.code,
+            o.stepTokenId AS primaryStepTokenId,
+            e.sourceOrder, e.stepTokenId AS extraStepTokenId
+       FROM Verses v
+       JOIN WordSpans o ON o.verseId=v.id
+       LEFT JOIN WordStrongCodes w
+         ON w.verseId=o.verseId AND w.ordinal=o.ordinal
+       LEFT JOIN StrongCodes c ON c.id=w.codeId
+       LEFT JOIN WordStepTokenExtras e
+         ON e.verseId=o.verseId AND e.targetOrdinal=o.ordinal
+      WHERE v.bookOrder=? AND v.chapter=? AND v.verse=?
+        AND (o.isAligned=1 OR o.length=0)
+      ORDER BY o.ordinal, w.identityOrder, e.sourceOrder`,
+      [book, chapter, verse]
+    )
+  )
+  return groupStrongBibleSpanRows(rows, row => row.verse).get(verse) ?? []
 }
 
 export interface StrongBibleVerseCountByBook {
@@ -437,9 +460,15 @@ export const loadStrongBibleVersesSpans = async (
 
 export interface StrongBibleOccurrencePage {
   limit?: number
-  offset?: number
+  cursor?: string
   allBooks?: boolean
   lexemeId?: number
+}
+
+export interface StrongBibleOccurrenceLocationPage {
+  locations: StrongBibleOccurrenceLocation[]
+  identity?: ResolvedStrongBibleIdentity
+  nextCursor?: string
 }
 
 export interface StrongBibleLemmaStat {
@@ -454,20 +483,31 @@ export const loadStrongBibleVerseCountsByBook = async (
   referenceBook: number,
   reference: string | number
 ): Promise<StrongBibleVerseCountByBook[]> => {
+  return (await loadStrongBibleVerseCountsByBookResult(versionId, referenceBook, reference)).counts
+}
+
+export const loadStrongBibleVerseCountsByBookResult = async (
+  versionId: StrongBibleVersionId,
+  referenceBook: number,
+  reference: string | number
+): Promise<{
+  counts: StrongBibleVerseCountByBook[]
+  identity?: ResolvedStrongBibleIdentity
+}> => {
   await assertStrongBibleSidecarAvailable(versionId)
   return withStrongBibleSidecar(versionId, async database => {
     const identity = await resolveStrongBibleConcordanceIdentity(database, referenceBook, reference)
-    if (!identity) return []
-    return database.getAllAsync<StrongBibleVerseCountByBook>(
+    if (!identity) return { counts: [] }
+    const counts = await database.getAllAsync<StrongBibleVerseCountByBook>(
       `SELECT v.bookOrder AS Livre, COUNT(DISTINCT v.id) AS versesCountByBook
-     FROM StrongCodes c
-     JOIN WordStrongCodes w ON w.codeId=c.id
+     FROM WordStrongCodes w
      JOIN Verses v ON v.id=w.verseId
-     WHERE c.id=?
+     WHERE w.codeId=?
      GROUP BY v.bookOrder
      ORDER BY v.bookOrder`,
       [identity.id]
     )
+    return { counts, identity }
   })
 }
 
@@ -476,35 +516,71 @@ export const loadStrongBibleOccurrenceLocations = async (
   book: number,
   reference: string | number,
   page: StrongBibleOccurrencePage = {}
-): Promise<StrongBibleOccurrenceLocation[]> => {
+): Promise<StrongBibleOccurrenceLocationPage> => {
   await assertStrongBibleSidecarAvailable(versionId)
   return withStrongBibleSidecar(versionId, async database => {
     const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
-    if (!identity) return []
-    const filters = ['c.id=?']
+    if (!identity) return { locations: [] }
+    const occurrenceMatch =
+      page.lexemeId == null
+        ? `EXISTS (
+           SELECT 1 FROM WordStrongCodes w
+            WHERE w.codeId=? AND w.verseId=v.id
+         )`
+        : `EXISTS (
+           SELECT 1
+             FROM WordStrongCodes w
+             JOIN WordSpans s ON s.verseId=w.verseId AND s.ordinal=w.ordinal
+            WHERE w.codeId=? AND w.verseId=v.id AND s.lexemeId=?
+         )`
+    const filters = [occurrenceMatch]
     const parameters: number[] = [identity.id]
+    if (page.lexemeId != null) parameters.push(page.lexemeId)
     if (!page.allBooks) {
       filters.push('v.bookOrder=?')
       parameters.push(book)
     }
-    if (page.lexemeId != null) {
-      filters.push('s.lexemeId=?')
-      parameters.push(page.lexemeId)
+    const cursor = decodeStrongBibleOccurrenceCursor(page.cursor)
+    if (cursor) {
+      filters.push(
+        '(v.bookOrder>? OR (v.bookOrder=? AND v.chapter>?) OR (v.bookOrder=? AND v.chapter=? AND v.verse>?))'
+      )
+      parameters.push(
+        cursor.book,
+        cursor.book,
+        cursor.chapter,
+        cursor.book,
+        cursor.chapter,
+        cursor.verse
+      )
     }
-    return database.getAllAsync<StrongBibleOccurrenceLocation>(
-      `SELECT DISTINCT
+    const limit = Math.max(1, page.limit ?? 100)
+    const rows = await database.getAllAsync<StrongBibleOccurrenceLocation>(
+      `SELECT
        v.bookOrder AS Livre,
        v.chapter AS Chapitre,
        v.verse AS Verset
-     FROM StrongCodes c
-     JOIN WordStrongCodes w ON w.codeId=c.id
-     JOIN WordSpans s ON s.verseId=w.verseId AND s.ordinal=w.ordinal
-     JOIN Verses v ON v.id=w.verseId
+     FROM Verses v
      WHERE ${filters.join(' AND ')}
      ORDER BY v.bookOrder, v.chapter, v.verse
-     LIMIT ? OFFSET ?`,
-      [...parameters, page.limit ?? -1, Math.max(0, page.offset ?? 0)]
+     LIMIT ?`,
+      [...parameters, limit + 1]
     )
+    const locations = rows.slice(0, limit)
+    const lastLocation = locations.at(-1)
+    return {
+      locations,
+      identity,
+      ...(rows.length > limit && lastLocation
+        ? {
+            nextCursor: encodeStrongBibleOccurrenceCursor({
+              book: lastLocation.Livre,
+              chapter: lastLocation.Chapitre,
+              verse: lastLocation.Verset,
+            }),
+          }
+        : {}),
+    }
   })
 }
 
@@ -513,11 +589,22 @@ export const loadStrongBibleLemmaStats = async (
   book: number,
   reference: string | number
 ): Promise<StrongBibleLemmaStat[]> => {
+  return (await loadStrongBibleLemmaStatsResult(versionId, book, reference)).lemmas
+}
+
+export const loadStrongBibleLemmaStatsResult = async (
+  versionId: StrongBibleVersionId,
+  book: number,
+  reference: string | number
+): Promise<{
+  lemmas: StrongBibleLemmaStat[]
+  identity?: ResolvedStrongBibleIdentity
+}> => {
   await assertStrongBibleSidecarAvailable(versionId)
   return withStrongBibleSidecar(versionId, async database => {
     const identity = await resolveStrongBibleConcordanceIdentity(database, book, reference)
-    if (!identity) return []
-    return database.getAllAsync<StrongBibleLemmaStat>(
+    if (!identity) return { lemmas: [] }
+    const lemmas = await database.getAllAsync<StrongBibleLemmaStat>(
       `SELECT l.id, l.lemma, l.partOfSpeech, COUNT(DISTINCT s.verseId) AS occurrenceCount
        FROM WordStrongCodes w
        JOIN WordSpans s ON s.verseId=w.verseId AND s.ordinal=w.ordinal
@@ -527,6 +614,7 @@ export const loadStrongBibleLemmaStats = async (
       ORDER BY occurrenceCount DESC, l.lemma`,
       [identity.id]
     )
+    return { lemmas, identity }
   })
 }
 
@@ -661,12 +749,31 @@ const readStrongBibleSidecarSnapshot = async (
       })
     )
   )
+  const indexes = Object.fromEntries(
+    await Promise.all(
+      ['Verses', 'StrongCodes', 'WordStrongCodes'].map(async tableName => {
+        const indexRows = await database.getAllAsync<{ name: string }>(
+          `PRAGMA index_list("${tableName}")`
+        )
+        const indexColumns = await Promise.all(
+          indexRows.map(async ({ name }) => {
+            const columns = await database.getAllAsync<{ name: string }>(
+              `PRAGMA index_info("${name.replaceAll('"', '""')}")`
+            )
+            return columns.map(column => column.name)
+          })
+        )
+        return [tableName, indexColumns] as const
+      })
+    )
+  )
   if (!counts) throw new Error('STRONG_BIBLE_COUNT_MISSING')
   return {
     integrity: integrity?.integrity_check ?? '',
     metadata,
     counts,
     tableColumns,
+    indexes,
   }
 }
 

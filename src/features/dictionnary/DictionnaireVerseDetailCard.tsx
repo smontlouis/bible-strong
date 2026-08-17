@@ -137,16 +137,10 @@ const useFormattedText = ({
     enabled: !!wordsInVerse,
   })
 
-  const { error: wordsError, data: words } = useQuery<(DictionaryEntry | undefined)[]>({
+  const { error: wordsError, data: words } = useQuery<DictionaryEntry[]>({
     enabled: Boolean(wordsInVerse),
     queryKey: ['words', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
-    queryFn: () =>
-      Promise.all(
-        (wordsInVerse ?? []).map(async w => {
-          const word = await resources.dictionary.loadItem(w, resourceLang)
-          return word
-        })
-      ),
+    queryFn: () => resources.dictionary.loadItems(wordsInVerse ?? [], resourceLang),
     ...localQueryOptions,
   })
   const currentWord =

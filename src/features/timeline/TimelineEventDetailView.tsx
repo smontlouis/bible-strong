@@ -13,7 +13,6 @@ import { getLegacyLocalizedField } from '~helpers/languageUtils'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { EventDetailsContent, EventDetailsProps } from './EventDetails'
 import { TimelineEvent } from './types'
-import TimelineResourceBoundary from './TimelineResourceBoundary'
 
 interface Props {
   event?: TimelineEvent | (EventDetailsProps & { sectionIndex?: number })
@@ -94,10 +93,6 @@ const TimelineEventDetailContent = ({
   )
 }
 
-const TimelineEventDetailView = (props: Props) => (
-  <TimelineResourceBoundary>
-    <TimelineEventDetailContent {...props} />
-  </TimelineResourceBoundary>
-)
+const TimelineEventDetailView = (props: Props) => <TimelineEventDetailContent {...props} />
 
 export default TimelineEventDetailView

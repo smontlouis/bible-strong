@@ -17,9 +17,10 @@ const loadNaveByRandom = async (
     const result = await getSQLTransactionForLang(
       'NAVE',
       language
-    )<NaveRandomRow>(
-      'SELECT * FROM TOPICS WHERE name_lower IN (SELECT name_lower FROM TOPICS ORDER BY RANDOM() LIMIT 1)'
-    )
+    )<NaveRandomRow>(`SELECT * FROM TOPICS
+      WHERE rowid >= (ABS(RANDOM()) % (SELECT COALESCE(MAX(rowid), 0) + 1 FROM TOPICS))
+      ORDER BY rowid
+      LIMIT 1`)
     return result[0]
   })
 

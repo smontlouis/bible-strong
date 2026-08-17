@@ -458,7 +458,7 @@ describe('lexiconBibleResourceAccess', () => {
       status: 'available',
       provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: false },
       verses,
-      nextPageToken: 'strong:2',
+      nextPageToken: 'strong:v1:1:2:3',
     })
     const access = createLexiconBibleResourceAccess(dependencies)
     const request = {
@@ -472,14 +472,14 @@ describe('lexiconBibleResourceAccess', () => {
     }
 
     const firstPage = await access.loadFoundVersesByBook(request)
-    expect(firstPage).toEqual(expect.objectContaining({ nextPageToken: 'strong:2' }))
+    expect(firstPage).toEqual(expect.objectContaining({ nextPageToken: 'strong:v1:1:2:3' }))
 
     await access.loadFoundVersesByBook({
       ...request,
       pageToken: firstPage.status === 'available' ? firstPage.nextPageToken : undefined,
     })
     expect(dependencies.strongBible.loadFoundVersesByBook).toHaveBeenLastCalledWith(
-      expect.objectContaining({ pageToken: 'strong:2' })
+      expect.objectContaining({ pageToken: 'strong:v1:1:2:3' })
     )
   })
 

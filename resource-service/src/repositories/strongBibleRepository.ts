@@ -2,6 +2,10 @@ import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
 
 import { getStrongBibleConcordanceCandidates } from '../../../src/helpers/strongBibleConcordance'
+import {
+  decodeStrongBibleOccurrenceCursor,
+  encodeStrongBibleOccurrenceCursor,
+} from '../../../src/features/resources/strongBibleContract'
 import type { StrongBibleSpan } from '../../../src/helpers/canonicalStrongVerse'
 import { STRONG_IDENTITY_KINDS } from '../../../src/helpers/strongIdentities'
 import { tryDatabasePromise } from '../database/databaseEffect'
@@ -356,18 +360,36 @@ export const makeKyselyStrongBibleRepository = (
         if (input.lexemeId !== undefined) {
           query = query.where('strong_bible_spans.lexeme_id', '=', input.lexemeId)
         }
+        const cursor = decodeStrongBibleOccurrenceCursor(input.cursor)
+        if (cursor) {
+          query = query.where(expression =>
+            expression.or([
+              expression('strong_bible_span_identities.book', '>', cursor.book),
+              expression.and([
+                expression('strong_bible_span_identities.book', '=', cursor.book),
+                expression('strong_bible_span_identities.chapter', '>', cursor.chapter),
+              ]),
+              expression.and([
+                expression('strong_bible_span_identities.book', '=', cursor.book),
+                expression('strong_bible_span_identities.chapter', '=', cursor.chapter),
+                expression('strong_bible_span_identities.verse', '>', cursor.verse),
+              ]),
+            ])
+          )
+        }
         const limit = input.limit ?? 100
-        const locations = yield* tryDatabasePromise('strong-bible.occurrences.read', () =>
+        const locationRows = yield* tryDatabasePromise('strong-bible.occurrences.read', () =>
           query
             .orderBy('strong_bible_span_identities.book')
             .orderBy('strong_bible_span_identities.chapter')
             .orderBy('strong_bible_span_identities.verse')
-            .limit(limit)
-            .offset(input.offset ?? 0)
+            .limit(limit + 1)
             .execute()
         ).pipe(Effect.mapError(cause => new StrongBibleRepositoryFailure({ cause })))
+        const locations = locationRows.slice(0, limit)
         const spanRows = locations.length ? yield* loadSpanRows(publication.id, locations) : []
         const spansByVerse = groupSpans(spanRows)
+        const lastLocation = locations.at(-1)
         return {
           ...revisionFrom(publication),
           identity,
@@ -375,8 +397,8 @@ export const makeKyselyStrongBibleRepository = (
             ...location,
             spans: spansByVerse.get(`${location.book}-${location.chapter}-${location.verse}`) ?? [],
           })),
-          ...(locations.length >= limit
-            ? { nextOffset: (input.offset ?? 0) + locations.length }
+          ...(locationRows.length > limit && lastLocation
+            ? { nextCursor: encodeStrongBibleOccurrenceCursor(lastLocation) }
             : {}),
         }
       }),

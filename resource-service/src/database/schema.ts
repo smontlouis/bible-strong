@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   boolean,
+  doublePrecision,
   index,
   foreignKey,
   integer,
@@ -89,6 +90,7 @@ export const bibleVerses = pgTable(
       table.chapter,
       table.verse
     ),
+    index('bible_verses_text_trigram').using('gin', sql`${table.text} gin_trgm_ops`),
   ]
 )
 
@@ -102,6 +104,9 @@ export const naveTopics = pgTable(
     name: text('name').notNull(),
     initial: text('initial').notNull(),
     description: text('description').notNull(),
+    random_key: doublePrecision('random_key')
+      .notNull()
+      .default(sql`random()`),
   },
   table => [
     primaryKey({
@@ -110,6 +115,8 @@ export const naveTopics = pgTable(
     }),
     index('nave_topics_browse').on(table.publication_id, table.initial, table.name),
     index('nave_topics_search').on(table.publication_id, table.name),
+    index('nave_topics_name_trgm').using('gin', sql`${table.name} gin_trgm_ops`),
+    index('nave_topics_random').on(table.publication_id, table.random_key),
   ]
 )
 
@@ -228,6 +235,11 @@ export const dictionaryEntries = pgTable(
       table.entry_id
     ),
     index('dictionary_entries_search').on(table.publication_id, table.word),
+    index('dictionary_entries_word_trgm').using('gin', sql`${table.word} gin_trgm_ops`),
+    index('dictionary_entries_normalized_word_trgm').using(
+      'gin',
+      sql`${table.normalized_word} gin_trgm_ops`
+    ),
   ]
 )
 
@@ -365,6 +377,14 @@ export const strongBibleSpans = pgTable(
       table.ordinal
     ),
     index('strong_bible_spans_lexeme_lookup').on(table.publication_id, table.lexeme_id),
+    index('strong_bible_spans_lexeme_location_lookup').on(
+      table.publication_id,
+      table.lexeme_id,
+      table.book,
+      table.chapter,
+      table.verse,
+      table.ordinal
+    ),
   ]
 )
 
@@ -415,6 +435,14 @@ export const strongBibleSpanIdentities = pgTable(
       table.book,
       table.chapter,
       table.verse
+    ),
+    index('strong_bible_span_identities_concordance_cursor').on(
+      table.publication_id,
+      table.identity_id,
+      table.book,
+      table.chapter,
+      table.verse,
+      table.ordinal
     ),
   ]
 )
@@ -614,6 +642,19 @@ export const strongLexiconEntries = pgTable(
       table.d_strong,
       table.u_strong
     ),
+    index('strong_lexicon_entries_browse').on(
+      table.publication_id,
+      sql`lower(coalesce(${table.payload}->>'gloss', ''))`,
+      sql`((${table.payload}->>'baseCode')::integer)`,
+      table.entry_id
+    ),
+    index('strong_lexicon_entries_random')
+      .on(table.publication_id, table.language, table.entry_id)
+      .where(sql`${table.payload}->>'gloss' <> ''`),
+    index('strong_lexicon_entries_search').using(
+      'gin',
+      sql`lower(coalesce(${table.payload}->>'original', '') || ' ' || coalesce(${table.payload}->>'transliteration', '') || ' ' || coalesce(${table.payload}->>'gloss', '') || ' ' || ${table.e_strong} || ' ' || ${table.d_strong} || ' ' || ${table.u_strong}) gin_trgm_ops`
+    ),
   ]
 )
 
@@ -655,6 +696,11 @@ export const strongLexiconMorphologyCodes = pgTable(
       name: 'strong_lexicon_morphology_codes_primary',
       columns: [table.publication_id, table.morphology_code_id],
     }),
+    index('strong_lexicon_morphology_code_lookup').on(
+      table.publication_id,
+      sql`lower(${table.normalized_code})`,
+      sql`lower(${table.code})`
+    ),
   ]
 )
 
@@ -703,6 +749,10 @@ export const strongLexiconEntryIdentities = pgTable(
       table.publication_id,
       table.step_code
     ),
+    index('strong_lexicon_entry_identities_code_search').using(
+      'gin',
+      sql`lower(${table.step_code}) gin_trgm_ops`
+    ),
   ]
 )
 
@@ -724,6 +774,10 @@ export const strongLexiconTranslations = pgTable(
       columns: [table.publication_id, table.step_entry_id],
       foreignColumns: [strongLexiconEntries.publication_id, strongLexiconEntries.entry_id],
     }).onDelete('cascade'),
+    index('strong_lexicon_translations_gloss_search').using(
+      'gin',
+      sql`lower(coalesce(${table.payload}->>'gloss', '')) gin_trgm_ops`
+    ),
   ]
 )
 
@@ -760,6 +814,8 @@ export const strongLexiconRelations = pgTable(
         strongLexiconRelationKinds.relation_kind_id,
       ],
     }).onDelete('restrict'),
+    index('strong_lexicon_relations_from_lookup').on(table.publication_id, table.from_entry_id),
+    index('strong_lexicon_relations_to_lookup').on(table.publication_id, table.to_entry_id),
   ]
 )
 
@@ -780,6 +836,7 @@ export const strongLexiconResources = pgTable(
       name: 'strong_lexicon_resources_primary',
       columns: [table.publication_id, table.resource_id],
     }),
+    index('strong_lexicon_resources_entry_lookup').on(table.publication_id, table.step_entry_id),
   ]
 )
 
@@ -844,6 +901,11 @@ export const strongLexiconEntityTranslations = pgTable(
       columns: [table.publication_id, table.entity_id],
       foreignColumns: [strongLexiconEntities.publication_id, strongLexiconEntities.entity_id],
     }).onDelete('cascade'),
+    index('strong_lexicon_entity_translations_lookup').on(
+      table.publication_id,
+      table.entity_id,
+      table.language
+    ),
   ]
 )
 
@@ -928,5 +990,10 @@ export const strongLexiconEntityRelations = pgTable(
       columns: [table.publication_id, table.to_entity_id],
       foreignColumns: [strongLexiconEntities.publication_id, strongLexiconEntities.entity_id],
     }).onDelete('set null'),
+    index('strong_lexicon_entity_relations_from_lookup').on(
+      table.publication_id,
+      table.from_entity_id
+    ),
+    index('strong_lexicon_entity_relations_to_lookup').on(table.publication_id, table.to_entity_id),
   ]
 )

@@ -11,9 +11,9 @@ import { databases } from '~helpers/databases'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import type { TimelineEventDetail } from './types'
+import type { TimelineEventSummary } from '~features/resources/timelineAccess'
 
-const TimelineDetailsContext = createContext<TimelineEventDetail[]>([])
+const TimelineDetailsContext = createContext<TimelineEventSummary[]>([])
 
 export const useTimelineDetails = () => useContext(TimelineDetailsContext)
 
@@ -24,7 +24,7 @@ const TimelineResourceBoundary = ({ children }: { children: ReactNode }) => {
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const query = useQuery({
     queryKey: [...resourceQueryKeys.timeline(language), downloadCompletionSignal],
-    queryFn: () => resources.timeline.loadDetails(language),
+    queryFn: () => resources.timeline.loadIndex(language),
     networkMode: 'always',
   })
 

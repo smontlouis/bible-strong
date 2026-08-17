@@ -13,6 +13,7 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { ResourceAvailability } from './resourceModel'
 import { Schema } from 'effect'
 import {
+  encodeNavePageCursor,
   NaveTopicListResponseDto,
   NaveTopicResponseDto,
   NaveVerseTopicsResponseDto,
@@ -32,11 +33,23 @@ export type NaveTopicReference = {
 }
 
 export type NaveVerseTopics = [NaveTopicReference[] | undefined, NaveTopicReference[] | undefined]
+export type NavePageOptions = { limit?: number; cursor?: string }
+export type NavePage = { topics: NaveTopicSummary[]; nextCursor?: string }
 
 export type NaveAccess = {
   getAvailability?: (language: ResourceLanguage) => Promise<ResourceAvailability>
   listByLetter: (letter: string, language?: ResourceLanguage) => Promise<NaveTopicSummary[]>
   search: (searchValue: string, language?: ResourceLanguage) => Promise<NaveTopicSummary[]>
+  listByLetterPage: (
+    letter: string,
+    options?: NavePageOptions,
+    language?: ResourceLanguage
+  ) => Promise<NavePage>
+  searchPage: (
+    searchValue: string,
+    options?: NavePageOptions,
+    language?: ResourceLanguage
+  ) => Promise<NavePage>
   loadItem: (nameLower: string, language?: ResourceLanguage) => Promise<NaveTopic | undefined>
   loadByVerse: (verse: string, language?: ResourceLanguage) => Promise<NaveVerseTopics>
   loadRandom: (language?: ResourceLanguage) => Promise<NaveTopic | undefined>
@@ -64,9 +77,39 @@ export const localNaveAccess: NaveAccess = {
           }
   },
   listByLetter: async (letter, language) =>
-    unwrapLocalResourceResult(await loadNaveByLetter(letter, language)).map(mapLocalNaveTopic),
+    (await localNaveAccess.listByLetterPage(letter, { limit: 50 }, language)).topics,
   search: async (searchValue, language) =>
-    unwrapLocalResourceResult(await loadNaveBySearch(searchValue, language)).map(mapLocalNaveTopic),
+    (await localNaveAccess.searchPage(searchValue, { limit: 50 }, language)).topics,
+  listByLetterPage: async (letter, options = {}, language) => {
+    const limit = options.limit ?? 50
+    const rows = unwrapLocalResourceResult(
+      await loadNaveByLetter(letter, language, { ...options, limit })
+    )
+    const pageRows = rows.slice(0, limit)
+    return {
+      topics: pageRows.map(mapLocalNaveTopic),
+      ...(rows.length > limit && pageRows.length
+        ? {
+            nextCursor: encodeNavePageCursor([pageRows.at(-1)!.name, pageRows.at(-1)!.name_lower]),
+          }
+        : {}),
+    }
+  },
+  searchPage: async (searchValue, options = {}, language) => {
+    const limit = options.limit ?? 50
+    const rows = unwrapLocalResourceResult(
+      await loadNaveBySearch(searchValue, language, { ...options, limit })
+    )
+    const pageRows = rows.slice(0, limit)
+    return {
+      topics: pageRows.map(mapLocalNaveTopic),
+      ...(rows.length > limit && pageRows.length
+        ? {
+            nextCursor: encodeNavePageCursor([pageRows.at(-1)!.name, pageRows.at(-1)!.name_lower]),
+          }
+        : {}),
+    }
+  },
   loadItem: async (nameLower, language) => {
     const item = unwrapLocalResourceResult(await loadNaveItem(nameLower, language))
     return item ? { ...mapLocalNaveTopic(item), description: item.description } : undefined
@@ -166,26 +209,14 @@ export const createHttpNaveAccess = ({
             recoveries: ['acquire-offline-copy'],
           },
     listByLetter: async (letter, language) => {
-      const lang = languageOrFrench(language)
-      const payload = await request(
-        `/v1/naves/${encodeURIComponent(lang)}/topics?initial=${encodeURIComponent(letter)}`
-      )
-      const decoded = decode(NaveTopicListResponseDto, payload)
-      assertResponseLanguage(decoded.resource.language, lang)
-      if (decoded.topics.some(topic => topic.initial !== letter)) {
-        throw new ResourceAccessError('INTEGRITY_FAILURE')
-      }
-      return [...decoded.topics]
+      return (await createPageRequest({ initial: letter, language })).topics
     },
     search: async (searchValue, language) => {
-      const lang = languageOrFrench(language)
-      const payload = await request(
-        `/v1/naves/${encodeURIComponent(lang)}/topics?search=${encodeURIComponent(searchValue)}`
-      )
-      const decoded = decode(NaveTopicListResponseDto, payload)
-      assertResponseLanguage(decoded.resource.language, lang)
-      return [...decoded.topics]
+      return (await createPageRequest({ search: searchValue, language })).topics
     },
+    listByLetterPage: (letter, options, language) =>
+      createPageRequest({ initial: letter, language, ...options }),
+    searchPage: (search, options, language) => createPageRequest({ search, language, ...options }),
     loadItem: async (nameLower, language) => {
       const lang = languageOrFrench(language)
       try {
@@ -221,6 +252,39 @@ export const createHttpNaveAccess = ({
       return decoded.topic
     },
   }
+
+  async function createPageRequest({
+    initial,
+    search,
+    language,
+    limit = 50,
+    cursor,
+  }: {
+    initial?: string
+    search?: string
+    language?: ResourceLanguage
+    limit?: number
+    cursor?: string
+  }): Promise<NavePage> {
+    const lang = languageOrFrench(language)
+    const params = new URLSearchParams({
+      ...(initial ? { initial } : {}),
+      ...(search ? { search } : {}),
+      limit: String(limit),
+      ...(cursor ? { cursor } : {}),
+    })
+    const decoded = decode(
+      NaveTopicListResponseDto,
+      await request(`/v1/naves/${encodeURIComponent(lang)}/topics?${params}`)
+    )
+    assertResponseLanguage(decoded.resource.language, lang)
+    if (initial && decoded.topics.some(topic => topic.initial !== initial))
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    return {
+      topics: [...decoded.topics],
+      ...(decoded.nextCursor ? { nextCursor: decoded.nextCursor } : {}),
+    }
+  }
 }
 
 export const unavailableHttpNaveAccess: NaveAccess = {
@@ -233,6 +297,12 @@ export const unavailableHttpNaveAccess: NaveAccess = {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
   search: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+  },
+  listByLetterPage: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+  },
+  searchPage: async () => {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
   loadItem: async () => {
@@ -327,6 +397,41 @@ export const createHybridNaveAccess = ({
     }
   }
 
+  const runSearchPage = async (
+    searchValue: string,
+    options: NavePageOptions | undefined,
+    language: ResourceLanguage
+  ) => {
+    const state = await availability(language)
+    if (!state.remotelyReadable || !(await isOnline())) {
+      if (state.local.status === 'available') {
+        return offline.searchPage(searchValue, options, language)
+      }
+      if (state.local.reason === 'invalid-offline-copy') {
+        throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
+          'acquire-offline-copy',
+          'manage-offline-copies',
+        ])
+      }
+      if (!state.remotelyReadable) {
+        throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+      }
+      throw new ResourceAccessError('NETWORK_OFFLINE')
+    }
+    try {
+      return await online.searchPage(searchValue, options, language)
+    } catch (error) {
+      if (
+        state.local.status === 'available' &&
+        error instanceof ResourceAccessError &&
+        (error.code === 'TEMPORARY_UNAVAILABLE' || error.code === 'NETWORK_OFFLINE')
+      ) {
+        return offline.searchPage(searchValue, options, language)
+      }
+      throw error
+    }
+  }
+
   return {
     getAvailability: async language => {
       const state = await availability(language)
@@ -345,6 +450,18 @@ export const createHybridNaveAccess = ({
     search: (searchValue, language) => {
       const lang = languageOrFrench(language)
       return runSearch(searchValue, lang)
+    },
+    listByLetterPage: (letter, options, language) => {
+      const lang = languageOrFrench(language)
+      return run(
+        lang,
+        () => offline.listByLetterPage(letter, options, lang),
+        () => online.listByLetterPage(letter, options, lang)
+      )
+    },
+    searchPage: (value, options, language) => {
+      const lang = languageOrFrench(language)
+      return runSearchPage(value, options, lang)
     },
     loadItem: (nameLower, language) => {
       const lang = languageOrFrench(language)

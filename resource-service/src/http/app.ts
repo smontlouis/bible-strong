@@ -39,6 +39,7 @@ import {
   DictionaryRepositoryFailure,
   readDictionaryEntry,
   readDictionaryEntryById,
+  readDictionaryEntries,
   readDictionaryVerseWords,
   type DictionaryRepositoryService,
 } from '../domain/dictionary'
@@ -461,12 +462,18 @@ const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
     .handle('listNaveTopics', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
-        browseNaveTopics({ ...path, initial: urlParams.initial, search: urlParams.search }).pipe(
-          Effect.mapError(cause => toHttpProblem(cause, requestId))
-        ),
+        browseNaveTopics({
+          ...path,
+          initial: urlParams.initial,
+          search: urlParams.search,
+          limit: urlParams.limit,
+          cursor: urlParams.cursor,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],
-        urlParams.search ? undefined : ['nave', path.language, 'browse', urlParams.initial ?? '*']
+        urlParams.search
+          ? undefined
+          : ['nave', path.language, 'browse', urlParams.initial ?? '*', urlParams.cursor ?? 'first']
       )
     })
     .handle('getNaveVerseTopics', ({ path, request }) => {
@@ -500,13 +507,34 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
           initial: urlParams.initial,
           search: urlParams.search,
           limit: urlParams.limit,
-          offset: urlParams.offset,
+          cursor: urlParams.cursor,
         }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],
         urlParams.search
           ? undefined
-          : ['dictionary', path.language, 'browse', urlParams.initial ?? '*', urlParams.offset ?? 0]
+          : [
+              'dictionary',
+              path.language,
+              'browse',
+              urlParams.initial ?? '*',
+              urlParams.cursor ?? 'first',
+            ]
+      )
+    })
+    .handle('getDictionaryEntriesBatch', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      const words = urlParams.words
+        .split(',')
+        .map(word => word.trim())
+        .filter(Boolean)
+        .slice(0, 100)
+      return serveRevisionedResponse(
+        readDictionaryEntries({ language: path.language, words }).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match']
       )
     })
     .handle('getDictionaryEntry', ({ path, request }) => {
@@ -589,7 +617,7 @@ const StrongBibleApiLive = HttpApiBuilder.group(ResourceApi, 'strongBibles', han
           book: path.book,
           reference: path.reference,
           limit: urlParams.limit,
-          offset: urlParams.offset,
+          cursor: urlParams.cursor,
           allBooks: urlParams.allBooks === 'true',
           lexemeId: urlParams.lexemeId,
         }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
@@ -673,6 +701,7 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
           search: urlParams.search,
           prefix: urlParams.prefix,
           limit: urlParams.limit ?? 100,
+          cursor: urlParams.cursor,
         }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match']
@@ -761,15 +790,16 @@ const SupplementaryApiLive = HttpApiBuilder.group(ResourceApi, 'supplementary', 
 
 const TimelineApiLive = HttpApiBuilder.group(ResourceApi, 'timelines', handlers =>
   handlers
-    .handle('listTimelineEvents', ({ path, request }) => {
+    .handle('listTimelineEvents', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
-        readTimelineEvents(path.language).pipe(
-          Effect.mapError(cause => toHttpProblem(cause, requestId))
-        ),
+        readTimelineEvents(path.language, {
+          search: urlParams.search,
+          limit: urlParams.limit,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],
-        ['timeline', path.language, 'events']
+        urlParams.search ? undefined : ['timeline', path.language, 'events']
       )
     })
     .handle('getTimelineEvent', ({ path, request }) => {
@@ -825,6 +855,8 @@ const unavailableDictionaryRepository: DictionaryRepositoryService = {
   findEntry: input =>
     Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
   findEntryById: input =>
+    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+  findEntries: input =>
     Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
   findVerseWords: input =>
     Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),

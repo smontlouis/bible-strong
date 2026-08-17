@@ -3,6 +3,8 @@ import { describe, it } from 'node:test'
 
 import { Effect } from 'effect'
 
+import { encodeStrongLexiconPageCursor } from '../../../../src/helpers/resourcePageCursor'
+
 import {
   ActiveStrongLexiconPublicationUnavailable,
   StrongLexiconEntityNotFound,
@@ -35,6 +37,7 @@ const entity = {
   articleHtml: '<p>Adam</p>',
   relations: [],
 }
+let lastListInput: Parameters<StrongLexiconRepositoryService['listEntries']>[0] | undefined
 
 const repository: StrongLexiconRepositoryService = {
   getModuleState: moduleId =>
@@ -73,7 +76,13 @@ const repository: StrongLexiconRepositoryService = {
             },
           },
         }),
-  listEntries: () => Effect.succeed({ revision, value: [searchEntry] }),
+  listEntries: input => {
+    lastListInput = input
+    return Effect.succeed({
+      revision,
+      value: { entries: [searchEntry], nextCursor: 'next-page' },
+    })
+  },
   findRandom: () => Effect.succeed({ revision, value: [searchEntry] }),
   findMorphologies: input =>
     Effect.succeed({ revision, value: input.codes.map(code => ({ code, meaning: 'nom grec' })) }),
@@ -103,12 +112,14 @@ const request = (path: string) =>
 
 describe('v1 Strong lexicon API', () => {
   it('serves module, entry, browse, random, morphology, entity, and chapter contracts', async () => {
+    lastListInput = undefined
     const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: repository })
     try {
+      const cursor = encodeStrongLexiconPageCursor({ gloss: 'parole', baseCode: 3056, id: 3056 })
       const paths = [
         '/v1/strong-lexicon/modules/core',
         '/v1/strong-lexicon/entries/G3056?language=fr',
-        '/v1/strong-lexicon/entries?language=fr&search=parole&limit=10',
+        `/v1/strong-lexicon/entries?language=fr&search=parole&limit=10&cursor=${cursor}`,
         '/v1/strong-lexicon/random?language=fr&lexicalLanguage=greek',
         '/v1/strong-lexicon/morphologies?language=fr&codes=G%3AN-M',
         '/v1/strong-lexicon/entities/Adam%40Gen.2.19-Jud?language=fr',
@@ -119,6 +130,26 @@ describe('v1 Strong lexicon API', () => {
         assert.equal(response.status, 200, `${path}: ${await response.clone().text()}`)
         assert.equal(response.headers.get('x-request-id'), 'strong-lexicon-request-123')
       }
+      assert.equal(
+        (lastListInput as { cursor?: string } | undefined)?.cursor,
+        JSON.stringify({ gloss: 'parole', baseCode: 3056, id: 3056 })
+      )
+      const page = await web.handler(
+        request('/v1/strong-lexicon/entries?language=fr&prefix=p&limit=10')
+      )
+      assert.equal(((await page.json()) as { nextCursor?: string }).nextCursor, 'next-page')
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('rejects malformed page cursors before reaching the repository', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: repository })
+    try {
+      const response = await web.handler(
+        request('/v1/strong-lexicon/entries?language=fr&cursor=not-a-cursor')
+      )
+      assert.equal(response.status, 400)
     } finally {
       await web.dispose()
     }
