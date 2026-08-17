@@ -46,11 +46,19 @@ est simplement rapportée `unchanged`.
 
 ## 3. Smoke API
 
-Le smoke doit être exécuté avec l’API locale déjà démarrée :
+Avec l’API locale et le serveur d’artefacts déjà démarrés, un seul smoke couvre les six domaines
+exposés par l’API :
 
 ```bash
-RESOURCE_API_BASE_URL=http://127.0.0.1:8787 yarn resources:smoke:bible-search
+RESOURCE_API_BASE_URL=http://127.0.0.1:8794 \
+RESOURCE_ARTIFACT_BASE_URL=http://127.0.0.1:8795 \
+  yarn resources:smoke:local
 ```
+
+Les scripts individuels (`resources:smoke:bible-search`, `resources:smoke:dictionary`, etc.) restent
+disponibles pour diagnostiquer un domaine précis. Ces smokes vérifient les appels HTTP, les contrats,
+les révisions et les réponses de récupération ; ils ne remplacent pas les vérifications manuelles
+iOS/Android.
 
 Les vérifications iOS/Android et les parcours E2E restent séparés de cette procédure et sont à
 exécuter manuellement.
