@@ -170,6 +170,49 @@ const DictionaryPublicationBundleManifestSchema = Schema.Struct({
   }),
 })
 
+const CommentaryPublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  canonical: Schema.Struct({
+    ...PublicationBundleCommonFields.canonical.fields,
+    schemaVersion: Schema.Literal(1),
+  }),
+  offlineArtifact: Schema.Struct({
+    ...PublicationBundleCommonFields.offlineArtifact.fields,
+    entry: Schema.Literal('commentaires-mhy.sqlite'),
+  }),
+  identity: Schema.Struct({
+    kind: Schema.Literal('commentary'),
+    resourceId: Schema.Literal('MHY'),
+    language: Schema.Literal('fr'),
+  }),
+  counts: Schema.Struct({
+    chapters: Schema.NonNegativeInt,
+    verses: Schema.NonNegativeInt,
+    characters: Schema.NonNegativeInt,
+  }),
+})
+
+const CrossReferencePublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  canonical: Schema.Struct({
+    ...PublicationBundleCommonFields.canonical.fields,
+    schemaVersion: Schema.Literal(1),
+  }),
+  offlineArtifact: Schema.Struct({
+    ...PublicationBundleCommonFields.offlineArtifact.fields,
+    entry: Schema.Literal('commentaires-tresor.sqlite'),
+  }),
+  identity: Schema.Struct({
+    kind: Schema.Literal('cross-references'),
+    resourceId: Schema.Literal('TRESOR'),
+    language: Schema.Literal('fr'),
+  }),
+  counts: Schema.Struct({
+    verseAnchors: Schema.NonNegativeInt,
+    references: Schema.NonNegativeInt,
+  }),
+})
+
 const StrongBiblePublicationBundleManifestSchema = Schema.Struct({
   ...PublicationBundleCommonFields,
   identity: Schema.Struct({
@@ -271,6 +314,8 @@ const PublicationBundleManifestSchema = Schema.Union(
   BiblePublicationBundleManifestSchema,
   NavePublicationBundleManifestSchema,
   DictionaryPublicationBundleManifestSchema,
+  CommentaryPublicationBundleManifestSchema,
+  CrossReferencePublicationBundleManifestSchema,
   StrongBiblePublicationBundleManifestSchema,
   InterlinearBiblePublicationBundleManifestSchema,
   StrongLexiconPublicationBundleManifestSchema
@@ -280,6 +325,10 @@ export type BiblePublicationBundleManifest = typeof BiblePublicationBundleManife
 export type NavePublicationBundleManifest = typeof NavePublicationBundleManifestSchema.Type
 export type DictionaryPublicationBundleManifest =
   typeof DictionaryPublicationBundleManifestSchema.Type
+export type CommentaryPublicationBundleManifest =
+  typeof CommentaryPublicationBundleManifestSchema.Type
+export type CrossReferencePublicationBundleManifest =
+  typeof CrossReferencePublicationBundleManifestSchema.Type
 export type StrongBiblePublicationBundleManifest =
   typeof StrongBiblePublicationBundleManifestSchema.Type
 export type InterlinearBiblePublicationBundleManifest =
@@ -290,6 +339,8 @@ export type PublicationBundleManifest =
   | BiblePublicationBundleManifest
   | NavePublicationBundleManifest
   | DictionaryPublicationBundleManifest
+  | CommentaryPublicationBundleManifest
+  | CrossReferencePublicationBundleManifest
   | StrongBiblePublicationBundleManifest
   | InterlinearBiblePublicationBundleManifest
   | StrongLexiconPublicationBundleManifest
@@ -305,6 +356,15 @@ export const isNavePublicationBundleManifest = (
 export const isDictionaryPublicationBundleManifest = (
   manifest: PublicationBundleManifest
 ): manifest is DictionaryPublicationBundleManifest => manifest.identity.kind === 'dictionary'
+
+export const isCommentaryPublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is CommentaryPublicationBundleManifest => manifest.identity.kind === 'commentary'
+
+export const isCrossReferencePublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is CrossReferencePublicationBundleManifest =>
+  manifest.identity.kind === 'cross-references'
 
 export const isStrongBiblePublicationBundleManifest = (
   manifest: PublicationBundleManifest
@@ -384,6 +444,28 @@ export type CanonicalDictionaryPublication = {
   sourceSha256: string
   entries: CanonicalDictionaryEntry[]
   verseAnchors: CanonicalDictionaryVerseAnchor[]
+}
+
+export type CanonicalCommentaryPublication = {
+  format: 'bible-strong-canonical-commentary'
+  schemaVersion: 1
+  resourceId: 'MHY'
+  language: 'fr'
+  revision: string
+  sourceVersion: string
+  sourceSha256: string
+  verses: Array<{ verseKey: string; content: string }>
+}
+
+export type CanonicalCrossReferencePublication = {
+  format: 'bible-strong-canonical-cross-references'
+  schemaVersion: 1
+  resourceId: 'TRESOR'
+  language: 'fr'
+  revision: string
+  sourceVersion: string
+  sourceSha256: string
+  verseAnchors: Array<{ verseKey: string; references: string[] }>
 }
 
 export type CanonicalStrongBibleVerse = { book: number; chapter: number; verse: number }
@@ -470,6 +552,8 @@ export type CanonicalPublication =
   | CanonicalBiblePublication
   | CanonicalNavePublication
   | CanonicalDictionaryPublication
+  | CanonicalCommentaryPublication
+  | CanonicalCrossReferencePublication
   | CanonicalStrongBiblePublication
   | CanonicalInterlinearBiblePublication
   | CanonicalStrongLexiconModulePublication
@@ -503,6 +587,10 @@ export const derivePublicationRevision = (manifest: PublicationBundleManifest): 
       ? manifest.identity.resourceId.toLowerCase()
       : manifest.identity.kind === 'dictionary'
         ? `dictionary-${manifest.identity.language}`
+        : manifest.identity.kind === 'commentary'
+          ? `commentary-${manifest.identity.resourceId.toLowerCase()}-${manifest.identity.language}`
+          : manifest.identity.kind === 'cross-references'
+            ? `cross-references-${manifest.identity.language}`
         : manifest.identity.kind === 'strong-lexicon-module'
           ? manifest.identity.resourceId
           : manifest.identity.versionId.toLowerCase()
@@ -577,6 +665,22 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
       Object.values(manifest.alphabeticalBrowse.topicCountByInitial).some(count => count === 0))
   ) {
     throw new Error('PUBLICATION_BUNDLE_ALPHABETICAL_BROWSE_INVALID')
+  }
+  if (
+    isCommentaryPublicationBundleManifest(manifest) &&
+    (manifest.identity.resourceId !== 'MHY' ||
+      manifest.offlineArtifact.entry !== 'commentaires-mhy.sqlite' ||
+      manifest.counts.verses === 0)
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
+  }
+  if (
+    isCrossReferencePublicationBundleManifest(manifest) &&
+    (manifest.identity.resourceId !== 'TRESOR' ||
+      manifest.offlineArtifact.entry !== 'commentaires-tresor.sqlite' ||
+      manifest.counts.verseAnchors === 0)
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
   }
   if (
     isDictionaryPublicationBundleManifest(manifest) &&
@@ -795,6 +899,76 @@ export const decodeCanonicalDictionary = (value: unknown): CanonicalDictionaryPu
     verseKeys.add(anchor.verseKey)
   }
   return candidate as CanonicalDictionaryPublication
+}
+
+const isSupplementaryVerseKey = (value: unknown): value is string =>
+  typeof value === 'string' && /^[1-9]\d*-[1-9]\d*-(?:0|[1-9]\d*)$/u.test(value)
+
+export const decodeCanonicalCommentary = (value: unknown): CanonicalCommentaryPublication => {
+  if (!value || typeof value !== 'object') throw new Error('CANONICAL_COMMENTARY_INVALID')
+  const candidate = value as Partial<CanonicalCommentaryPublication>
+  if (
+    candidate.format !== 'bible-strong-canonical-commentary' ||
+    candidate.schemaVersion !== 1 ||
+    candidate.resourceId !== 'MHY' ||
+    candidate.language !== 'fr' ||
+    !isNonEmptyString(candidate.revision) ||
+    !isNonEmptyString(candidate.sourceVersion) ||
+    !/^[a-f0-9]{64}$/u.test(candidate.sourceSha256 ?? '') ||
+    !Array.isArray(candidate.verses) ||
+    candidate.verses.length === 0
+  ) {
+    throw new Error('CANONICAL_COMMENTARY_INVALID')
+  }
+  const keys = new Set<string>()
+  for (const verse of candidate.verses) {
+    if (
+      !verse ||
+      !isSupplementaryVerseKey(verse.verseKey) ||
+      typeof verse.content !== 'string' ||
+      !verse.content.trim() ||
+      keys.has(verse.verseKey)
+    ) {
+      throw new Error('CANONICAL_COMMENTARY_VERSE_INVALID')
+    }
+    keys.add(verse.verseKey)
+  }
+  return candidate as CanonicalCommentaryPublication
+}
+
+export const decodeCanonicalCrossReferences = (
+  value: unknown
+): CanonicalCrossReferencePublication => {
+  if (!value || typeof value !== 'object') throw new Error('CANONICAL_CROSS_REFERENCES_INVALID')
+  const candidate = value as Partial<CanonicalCrossReferencePublication>
+  if (
+    candidate.format !== 'bible-strong-canonical-cross-references' ||
+    candidate.schemaVersion !== 1 ||
+    candidate.resourceId !== 'TRESOR' ||
+    candidate.language !== 'fr' ||
+    !isNonEmptyString(candidate.revision) ||
+    !isNonEmptyString(candidate.sourceVersion) ||
+    !/^[a-f0-9]{64}$/u.test(candidate.sourceSha256 ?? '') ||
+    !Array.isArray(candidate.verseAnchors) ||
+    candidate.verseAnchors.length === 0
+  ) {
+    throw new Error('CANONICAL_CROSS_REFERENCES_INVALID')
+  }
+  const keys = new Set<string>()
+  for (const anchor of candidate.verseAnchors) {
+    if (
+      !anchor ||
+      !isSupplementaryVerseKey(anchor.verseKey) ||
+      !Array.isArray(anchor.references) ||
+      anchor.references.length === 0 ||
+      anchor.references.some(reference => typeof reference !== 'string' || !reference.trim()) ||
+      keys.has(anchor.verseKey)
+    ) {
+      throw new Error('CANONICAL_CROSS_REFERENCES_ANCHOR_INVALID')
+    }
+    keys.add(anchor.verseKey)
+  }
+  return candidate as CanonicalCrossReferencePublication
 }
 
 const isPositiveInteger = (value: unknown): value is number =>
@@ -1372,6 +1546,121 @@ const validateDictionaryOfflineParity = async (
     if (
       JSON.stringify(entries) !== JSON.stringify(canonical.entries) ||
       JSON.stringify(verseAnchors) !== JSON.stringify(canonical.verseAnchors)
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.startsWith('OFFLINE_ARTIFACT_')) throw cause
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+  } finally {
+    database?.close()
+  }
+}
+
+const validateCommentaryOfflineParity = async (
+  offlineContent: Uint8Array,
+  canonical: CanonicalCommentaryPublication
+) => {
+  const SQL = await initSqlJs()
+  let database: Database | undefined
+  try {
+    database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    if (integrity.length !== 1 || Object.values(integrity[0] ?? {}).some(value => value !== 'ok')) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
+    const metadataRows = readSqliteRows(
+      database,
+      'SELECT resource_id, language, revision, source_version, source_sha256 FROM RESOURCE_METADATA'
+    )
+    const metadata = metadataRows[0]
+    if (
+      metadataRows.length !== 1 ||
+      requireSqliteString(metadata?.resource_id) !== canonical.resourceId ||
+      requireSqliteString(metadata?.language) !== canonical.language ||
+      requireSqliteString(metadata?.revision) !== canonical.revision ||
+      requireSqliteString(metadata?.source_version) !== canonical.sourceVersion ||
+      requireSqliteString(metadata?.source_sha256) !== canonical.sourceSha256
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+    const verses = readSqliteRows(database, 'SELECT id, commentaires FROM COMMENTAIRES')
+      .flatMap(row => {
+        const chapterKey = requireSqliteString(row.id)
+        let content: unknown
+        try {
+          content = JSON.parse(requireSqliteString(row.commentaires))
+        } catch (cause) {
+          throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+        }
+        if (!content || typeof content !== 'object' || Array.isArray(content)) {
+          throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+        }
+        return Object.entries(content).flatMap(([verse, value]) =>
+          typeof value === 'string' && value.trim()
+            ? [{ verseKey: `${chapterKey}-${verse}`, content: value }]
+            : []
+        )
+      })
+      .sort(compareVerseKey)
+    if (JSON.stringify(verses) !== JSON.stringify([...canonical.verses].sort(compareVerseKey))) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.startsWith('OFFLINE_ARTIFACT_')) throw cause
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+  } finally {
+    database?.close()
+  }
+}
+
+const validateCrossReferenceOfflineParity = async (
+  offlineContent: Uint8Array,
+  canonical: CanonicalCrossReferencePublication
+) => {
+  const SQL = await initSqlJs()
+  let database: Database | undefined
+  try {
+    database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    if (integrity.length !== 1 || Object.values(integrity[0] ?? {}).some(value => value !== 'ok')) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
+    const metadataRows = readSqliteRows(
+      database,
+      'SELECT resource_id, language, revision, source_version, source_sha256 FROM RESOURCE_METADATA'
+    )
+    const metadata = metadataRows[0]
+    if (
+      metadataRows.length !== 1 ||
+      requireSqliteString(metadata?.resource_id) !== canonical.resourceId ||
+      requireSqliteString(metadata?.language) !== canonical.language ||
+      requireSqliteString(metadata?.revision) !== canonical.revision ||
+      requireSqliteString(metadata?.source_version) !== canonical.sourceVersion ||
+      requireSqliteString(metadata?.source_sha256) !== canonical.sourceSha256
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+    const anchors = readSqliteRows(database, 'SELECT id, commentaires FROM COMMENTAIRES')
+      .flatMap(row => {
+        const verseKey = requireSqliteString(row.id)
+        let references: unknown
+        try {
+          references = JSON.parse(requireSqliteString(row.commentaires))
+        } catch (cause) {
+          throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+        }
+        if (!Array.isArray(references)) throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+        const values = references
+          .filter((reference): reference is string => typeof reference === 'string')
+          .map(reference => reference.trim())
+          .filter(Boolean)
+        return values.length > 0 ? [{ verseKey, references: values }] : []
+      })
+      .sort(compareVerseKey)
+    if (
+      JSON.stringify(anchors) !==
+      JSON.stringify([...canonical.verseAnchors].sort(compareVerseKey))
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }
@@ -2426,6 +2715,8 @@ export const validatePublicationBundle = async (bundlePath: string) => {
   if (
     (isNavePublicationBundleManifest(manifest) ||
       isDictionaryPublicationBundleManifest(manifest) ||
+      isCommentaryPublicationBundleManifest(manifest) ||
+      isCrossReferencePublicationBundleManifest(manifest) ||
       isStrongBiblePublicationBundleManifest(manifest) ||
       isInterlinearBiblePublicationBundleManifest(manifest) ||
       isStrongLexiconPublicationBundleManifest(manifest)) &&
@@ -2556,6 +2847,34 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_ALPHABETICAL_BROWSE_MISMATCH')
     }
     await validateDictionaryOfflineParity(offlineContent, canonical)
+  } else if (isCommentaryPublicationBundleManifest(manifest)) {
+    canonical = decodeCanonicalCommentary(canonicalValue)
+    if (
+      canonical.resourceId !== manifest.identity.resourceId ||
+      canonical.language !== manifest.identity.language ||
+      canonical.revision !== manifest.revision ||
+      canonical.sourceVersion !== manifest.provenance.sourceVersion ||
+      canonical.sourceSha256 !== manifest.provenance.sourceSha256 ||
+      manifest.counts.verses !== canonical.verses.length ||
+      manifest.counts.characters !== canonical.verses.reduce((total, verse) => total + verse.content.length, 0)
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+    await validateCommentaryOfflineParity(offlineContent, canonical)
+  } else if (isCrossReferencePublicationBundleManifest(manifest)) {
+    canonical = decodeCanonicalCrossReferences(canonicalValue)
+    if (
+      canonical.resourceId !== manifest.identity.resourceId ||
+      canonical.language !== manifest.identity.language ||
+      canonical.revision !== manifest.revision ||
+      canonical.sourceVersion !== manifest.provenance.sourceVersion ||
+      canonical.sourceSha256 !== manifest.provenance.sourceSha256 ||
+      manifest.counts.verseAnchors !== canonical.verseAnchors.length ||
+      manifest.counts.references !== canonical.verseAnchors.reduce((total, anchor) => total + anchor.references.length, 0)
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+    await validateCrossReferenceOfflineParity(offlineContent, canonical)
   } else if (isStrongBiblePublicationBundleManifest(manifest)) {
     canonical = decodeCanonicalStrongBible(canonicalValue)
     if (

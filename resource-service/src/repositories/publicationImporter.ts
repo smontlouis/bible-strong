@@ -8,12 +8,16 @@ import type { ResourceDatabase } from '../database/types'
 import {
   isBiblePublicationBundleManifest,
   isDictionaryPublicationBundleManifest,
+  isCommentaryPublicationBundleManifest,
+  isCrossReferencePublicationBundleManifest,
   isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
   isStrongLexiconPublicationBundleManifest,
   validatePublicationBundle,
   type CanonicalStrongLexiconModulePublication,
   type CanonicalDictionaryPublication,
+  type CanonicalCommentaryPublication,
+  type CanonicalCrossReferencePublication,
 } from '../publication/publicationBundle'
 
 export class PublicationImportFailure extends Data.TaggedError('PublicationImportFailure')<{
@@ -325,6 +329,10 @@ export const importPublicationBundle = (
           ? `nave:${manifest.identity.language}`
           : isDictionaryPublicationBundleManifest(manifest)
             ? `dictionary:${manifest.identity.language}`
+            : isCommentaryPublicationBundleManifest(manifest)
+              ? `commentary:${manifest.identity.resourceId}:${manifest.identity.language}`
+              : isCrossReferencePublicationBundleManifest(manifest)
+                ? `cross-references:${manifest.identity.language}`
             : isInterlinearBiblePublicationBundleManifest(manifest)
               ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
               : isStrongLexiconPublicationBundleManifest(manifest)
@@ -385,6 +393,26 @@ export const importPublicationBundle = (
                 resource_revision: manifest.revision,
                 offline_entry: manifest.offlineArtifact.entry,
               }
+            : isCommentaryPublicationBundleManifest(manifest)
+              ? {
+                  resource_id: manifest.identity.resourceId,
+                  language: manifest.identity.language,
+                  delivery_capabilities: manifest.deliveryCapabilities,
+                  counts: manifest.counts,
+                  canonical_schema_version: manifest.canonical.schemaVersion,
+                  resource_revision: manifest.revision,
+                  offline_entry: manifest.offlineArtifact.entry,
+                }
+              : isCrossReferencePublicationBundleManifest(manifest)
+                ? {
+                    resource_id: manifest.identity.resourceId,
+                    language: manifest.identity.language,
+                    delivery_capabilities: manifest.deliveryCapabilities,
+                    counts: manifest.counts,
+                    canonical_schema_version: manifest.canonical.schemaVersion,
+                    resource_revision: manifest.revision,
+                    offline_entry: manifest.offlineArtifact.entry,
+                  }
             : isInterlinearBiblePublicationBundleManifest(manifest)
               ? {
                   version_id: manifest.identity.versionId,
@@ -448,7 +476,21 @@ export const importPublicationBundle = (
                   revision: manifest.revision,
                   itemCount: manifest.counts.entries,
                 }
-              : isInterlinearBiblePublicationBundleManifest(manifest)
+            : isCommentaryPublicationBundleManifest(manifest)
+              ? {
+                  status,
+                  resourceIdentity,
+                  revision: manifest.revision,
+                  itemCount: manifest.counts.verses,
+                }
+              : isCrossReferencePublicationBundleManifest(manifest)
+                ? {
+                    status,
+                    resourceIdentity,
+                    revision: manifest.revision,
+                    itemCount: manifest.counts.references,
+                  }
+            : isInterlinearBiblePublicationBundleManifest(manifest)
                 ? {
                     status,
                     resourceIdentity,
@@ -667,6 +709,31 @@ export const importPublicationBundle = (
                 }))
               )
               await insertChunks(transaction, 'dictionary_verse_links', links)
+            } else if (canonical.format === 'bible-strong-canonical-commentary') {
+              const commentaryCanonical = canonical as CanonicalCommentaryPublication
+              await insertChunks(
+                transaction,
+                'commentary_verses',
+                commentaryCanonical.verses.map(verse => ({
+                  publication_id: publication.id,
+                  verse_key: verse.verseKey,
+                  content: verse.content,
+                }))
+              )
+            } else if (canonical.format === 'bible-strong-canonical-cross-references') {
+              const crossReferenceCanonical = canonical as CanonicalCrossReferencePublication
+              await insertChunks(
+                transaction,
+                'cross_reference_links',
+                crossReferenceCanonical.verseAnchors.flatMap(anchor =>
+                  anchor.references.map((reference, ordinal) => ({
+                    publication_id: publication.id,
+                    verse_key: anchor.verseKey,
+                    ordinal,
+                    reference,
+                  }))
+                )
+              )
             } else if (canonical.format === 'bible-strong-canonical-strong-index') {
               for (let offset = 0; offset < canonical.verses.length; offset += 1_000) {
                 assertNotInterrupted(signal)

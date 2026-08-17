@@ -73,6 +73,16 @@ import {
   StrongLexiconRepositoryFailure,
   type StrongLexiconRepositoryService,
 } from '../domain/strongLexicon'
+import {
+  ActiveSupplementaryPublicationUnavailable,
+  readCommentaryChapter,
+  readCommentaryVerse,
+  readCrossReferences,
+  SupplementaryContentNotFound,
+  SupplementaryRepository,
+  SupplementaryRepositoryFailure,
+  type SupplementaryRepositoryService,
+} from '../domain/supplementary'
 import { HealthResponse, ResourceApi } from './api'
 import {
   InvalidResourceRequestProblem,
@@ -119,7 +129,10 @@ const toHttpProblem = (
     | ActiveStrongLexiconPublicationUnavailable
     | StrongLexiconEntryNotFound
     | StrongLexiconEntityNotFound
-    | StrongLexiconRepositoryFailure,
+    | StrongLexiconRepositoryFailure
+    | ActiveSupplementaryPublicationUnavailable
+    | SupplementaryContentNotFound
+    | SupplementaryRepositoryFailure,
   requestId: string
 ) => {
   switch (cause._tag) {
@@ -148,10 +161,24 @@ const toHttpProblem = (
     case 'StrongBibleRepositoryFailure':
     case 'InterlinearBibleRepositoryFailure':
     case 'StrongLexiconRepositoryFailure':
+    case 'SupplementaryRepositoryFailure':
       return new ResourceInternalProblem({
         ...problemFields(requestId, 'The Resource service could not complete the request.'),
         status: 500,
         code: 'RESOURCE_INTERNAL_FAILURE',
+      })
+    case 'SupplementaryContentNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This supplementary resource content does not exist.'),
+        status: 404,
+        code: 'SUPPLEMENTARY_CONTENT_NOT_FOUND',
+      })
+    case 'ActiveSupplementaryPublicationUnavailable':
+      return new ResourceUnavailableProblem({
+        ...problemFields(requestId, 'The supplementary publication is temporarily unavailable.'),
+        status: 503,
+        code: 'SUPPLEMENTARY_PUBLICATION_INACTIVE',
+        retryAfterSeconds: 30,
       })
     case 'UnsupportedNaveLanguage':
       return new ResourceNotFoundProblem({
@@ -627,6 +654,39 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
     })
 )
 
+const SupplementaryApiLive = HttpApiBuilder.group(ResourceApi, 'supplementary', handlers =>
+  handlers
+    .handle('getCommentaryVerse', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readCommentaryVerse(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['commentary', path.collection, path.language, path.verseKey]
+      )
+    })
+    .handle('getCommentaryChapter', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readCommentaryChapter(path).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['commentary', path.collection, path.language, path.book, path.chapter]
+      )
+    })
+    .handle('getCrossReferences', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readCrossReferences(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['cross-references', path.language, path.verseKey]
+      )
+    })
+)
+
 export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
   Layer.provide(BibleApiLive),
@@ -634,7 +694,8 @@ export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(DictionaryApiLive),
   Layer.provide(StrongBibleApiLive),
   Layer.provide(InterlinearBibleApiLive),
-  Layer.provide(StrongLexiconApiLive)
+  Layer.provide(StrongLexiconApiLive),
+  Layer.provide(SupplementaryApiLive)
 )
 
 const unavailableRepository: BibleChapterRepositoryService = {
@@ -706,13 +767,29 @@ const unavailableStrongLexiconRepository: StrongLexiconRepositoryService = {
     Effect.fail(new ActiveStrongLexiconPublicationUnavailable({ moduleId: 'entities' })),
 }
 
+const unavailableSupplementaryRepository: SupplementaryRepositoryService = {
+  findCommentaryVerse: () =>
+    Effect.fail(
+      new ActiveSupplementaryPublicationUnavailable({ resourceIdentity: 'commentary:MHY:fr' })
+    ),
+  findCommentaryChapter: () =>
+    Effect.fail(
+      new ActiveSupplementaryPublicationUnavailable({ resourceIdentity: 'commentary:MHY:fr' })
+    ),
+  findCrossReferences: () =>
+    Effect.fail(
+      new ActiveSupplementaryPublicationUnavailable({ resourceIdentity: 'cross-references:fr' })
+    ),
+}
+
 export const provideResourceRepositories = (
   repository: BibleChapterRepositoryService,
   naveRepository: NaveRepositoryService,
   dictionaryRepository: DictionaryRepositoryService = unavailableDictionaryRepository,
   strongBibleRepository: StrongBibleRepositoryService = unavailableStrongBibleRepository,
   interlinearBibleRepository: InterlinearBibleRepositoryService = unavailableInterlinearBibleRepository,
-  strongLexiconRepository: StrongLexiconRepositoryService = unavailableStrongLexiconRepository
+  strongLexiconRepository: StrongLexiconRepositoryService = unavailableStrongLexiconRepository,
+  supplementaryRepository: SupplementaryRepositoryService = unavailableSupplementaryRepository
 ) =>
   ResourceApiLive.pipe(
     Layer.provide(
@@ -722,7 +799,8 @@ export const provideResourceRepositories = (
         Layer.succeed(DictionaryRepository, dictionaryRepository),
         Layer.succeed(StrongBibleRepository, strongBibleRepository),
         Layer.succeed(InterlinearBibleRepository, interlinearBibleRepository),
-        Layer.succeed(StrongLexiconRepository, strongLexiconRepository)
+        Layer.succeed(StrongLexiconRepository, strongLexiconRepository),
+        Layer.succeed(SupplementaryRepository, supplementaryRepository)
       )
     )
   )
@@ -740,7 +818,8 @@ export const makeResourceWebHandler = (
         overrides.dictionary ?? unavailableDictionaryRepository,
         overrides.strongBible ?? unavailableStrongBibleRepository,
         overrides.interlinearBible ?? unavailableInterlinearBibleRepository,
-        overrides.strongLexicon ?? unavailableStrongLexiconRepository
+        overrides.strongLexicon ?? unavailableStrongLexiconRepository,
+        overrides.supplementary ?? unavailableSupplementaryRepository
       ),
       HttpServer.layerContext
     )
@@ -779,4 +858,5 @@ export type ResourceRepositoryOverrides = {
   strongBible?: StrongBibleRepositoryService
   interlinearBible?: InterlinearBibleRepositoryService
   strongLexicon?: StrongLexiconRepositoryService
+  supplementary?: SupplementaryRepositoryService
 }

@@ -63,6 +63,14 @@ import {
   StrongLexiconSearchResponseDto,
 } from '../../../src/features/resources/strongLexiconContract'
 import {
+  CommentaryChapterPath,
+  CommentaryChapterResponseDto,
+  CommentaryPath,
+  CommentaryVerseResponseDto,
+  CrossReferencePath,
+  CrossReferenceResponseDto,
+} from '../../../src/features/resources/supplementaryContract'
+import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
   ResourceNotFoundProblem,
@@ -337,6 +345,40 @@ const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
       .addError(ResourceInternalProblem, { status: 500 })
   )
 
+const SupplementaryApi = HttpApiGroup.make('supplementary')
+  .add(
+    HttpApiEndpoint.get(
+      'getCommentaryVerse',
+      '/v1/commentaries/:collection/:language/verses/:verseKey'
+    )
+      .setPath(CommentaryPath)
+      .addSuccess(CommentaryVerseResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getCommentaryChapter',
+      '/v1/commentaries/:collection/:language/chapters/:book/:chapter'
+    )
+      .setPath(CommentaryChapterPath)
+      .addSuccess(CommentaryChapterResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getCrossReferences', '/v1/cross-references/:language/verses/:verseKey')
+      .setPath(CrossReferencePath)
+      .addSuccess(CrossReferenceResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+
 export class ResourceApi extends HttpApi.make('resource-api')
   .add(SystemApi)
   .add(BibleApi)
@@ -344,4 +386,5 @@ export class ResourceApi extends HttpApi.make('resource-api')
   .add(DictionaryApi)
   .add(StrongBibleApi)
   .add(InterlinearBibleApi)
-  .add(StrongLexiconApi) {}
+  .add(StrongLexiconApi)
+  .add(SupplementaryApi) {}

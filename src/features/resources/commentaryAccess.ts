@@ -5,6 +5,8 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { firebaseDb } from '~helpers/firebase'
 import loadMhyComments from '~helpers/loadMhyComments'
 import { getLocalResourceAvailability } from './resourceAvailability'
+import { Schema } from 'effect'
+import { CommentaryVerseResponseDto } from './supplementaryContract'
 import {
   mapLocalResourceError,
   ResourceAccessError,
@@ -141,14 +143,92 @@ export const firestoreCommentaryAccess: CommentaryAccess = {
   },
 }
 
+type HttpCommentaryAccessOptions = {
+  baseUrl: string
+  fetcher?: typeof fetch
+  isOnline: () => Promise<boolean>
+  timeoutMs?: number
+}
+
+export const createHttpCommentaryAccess = ({
+  baseUrl,
+  fetcher = fetch,
+  isOnline,
+  timeoutMs = 8_000,
+}: HttpCommentaryAccessOptions): CommentaryAccess => {
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, '')
+  const loadVersePage = async (verse: string, afterOrder?: number): Promise<Comments> => {
+    if (afterOrder != null) return { id: verse, count: 1, comments: [] }
+    if (!(await isOnline())) throw new ResourceAccessError('NETWORK_OFFLINE')
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await fetcher(
+        `${normalizedBaseUrl}/v1/commentaries/MHY/fr/verses/${encodeURIComponent(verse)}`,
+        { headers: { accept: 'application/json' }, signal: controller.signal }
+      )
+      const payload: unknown = await response.json().catch(() => undefined)
+      if (!response.ok) {
+        const code =
+          payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
+        if (response.status === 404 && code === 'SUPPLEMENTARY_CONTENT_NOT_FOUND') {
+          throw new CommentaryAccessError('NOT_FOUND')
+        }
+        throw new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+      }
+      let decoded: Schema.Schema.Type<typeof CommentaryVerseResponseDto>
+      try {
+        decoded = Schema.decodeUnknownSync(CommentaryVerseResponseDto)(payload)
+      } catch {
+        throw new ResourceAccessError('INTEGRITY_FAILURE')
+      }
+      if (decoded.verseKey !== verse || decoded.resource.resourceId !== 'MHY') {
+        throw new ResourceAccessError('INTEGRITY_FAILURE')
+      }
+      return {
+        id: verse,
+        count: 1,
+        comments: [
+          {
+            id: `MHY-${verse}`,
+            verseId: verse,
+            content: decoded.content,
+            resource: {
+              name: 'Commentaire concis de la Bible',
+              code: 'MHY',
+              logo: '',
+              author: 'Matthew Henry',
+            },
+            order: 0,
+            type: 'comment',
+            isSDA: false,
+          },
+        ],
+      }
+    } catch (error) {
+      if (error instanceof CommentaryAccessError || error instanceof ResourceAccessError) {
+        throw error
+      }
+      throw new ResourceAccessError(
+        (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+      )
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+  return { loadVersePage }
+}
+
 export const createCommentaryAccess = ({
   isOnline = async () => onlineManager.isOnline(),
   local = localMhyCommentaryAccess,
   remote = firestoreCommentaryAccess,
+  combineResults = true,
 }: {
   isOnline?: () => Promise<boolean>
   local?: CommentaryAccess
   remote?: CommentaryAccess
+  combineResults?: boolean
 } = {}): CommentaryAccess => ({
   async loadVersePage(verse, afterOrder, language = 'fr') {
     if (language !== 'fr') {
@@ -169,6 +249,7 @@ export const createCommentaryAccess = ({
         : Promise.reject(new ResourceAccessError('TEMPORARY_UNAVAILABLE')),
     ])
 
+    if (localResult.status === 'fulfilled' && !combineResults) return localResult.value
     if (localResult.status === 'fulfilled' && remoteResult.status === 'fulfilled') {
       return {
         id: verse,
