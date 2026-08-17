@@ -19,6 +19,15 @@ To import one already validated publication before the API starts, select it exp
 RESOURCE_PUBLICATION_BUNDLE=/absolute/path/to/bundle yarn resources:dev
 ```
 
+To start the same local API with the complete nested Maker catalog, pass its roots once. The
+command starts PostgreSQL, migrates it, imports the roots in dependency order, and then serves the
+API; it never resets the database:
+
+```bash
+RESOURCE_PUBLICATION_ROOTS="/path/to/ordinary:/path/to/strong:/path/to/interlinear:/path/to/lexicon:/path/to/editorial" \
+  RESOURCE_API_PORT=8787 yarn resources:dev
+```
+
 ## Bible Lexicon Maker handoff
 
 Bible Strong never scans or reads a neighboring Bible Lexicon Maker checkout. The handoff input is
@@ -80,6 +89,19 @@ yarn resources:import-all --root /path/to/ordinary-bible-publications-current
 yarn resources:import-all --root /path/to/strong-bible-publications-current
 yarn resources:import-all --root /path/to/interlinear-publications-current
 ```
+
+For a complete local editorial bootstrap, pass every Maker release root to the catalog importer.
+It discovers nested `manifest.json` bundles, imports them in dependency order, and activates them
+for local development without resetting PostgreSQL:
+
+```bash
+RESOURCE_PUBLICATION_ROOTS="/path/to/ordinary:/path/to/strong:/path/to/interlinear:/path/to/lexicon:/path/to/editorial" \
+  yarn resources:import-catalog
+```
+
+The command is repeatable: unchanged revisions are reported as `unchanged`, while a changed
+revision is staged and activated by the normal importer. It is intentionally local-only; it does
+not contact or modify a hosted database.
 
 `import-all` is the explicit local-development path: it activates publications whose manifest sets
 `localDevelopmentAccess`, while the ordinary `import` command continues to stage any publication

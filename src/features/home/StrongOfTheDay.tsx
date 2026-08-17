@@ -20,6 +20,7 @@ import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
+import useConnection from '~helpers/useConnection'
 
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
@@ -35,10 +36,11 @@ const StrongOfTheDay = ({
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
+  const isConnected = useConnection()
 
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryKey: [...resourceQueryKeys.strongLexiconAvailability('core'), isConnected],
     queryFn: async () => ({
       availability: await resources.strongLexicon.getModuleAvailability('core'),
       recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
@@ -47,7 +49,7 @@ const StrongOfTheDay = ({
     staleTime: Infinity,
   })
   const strongQuery = useQuery({
-    queryKey: ['home-strong-random', type, resourceLanguage, randomSeed],
+    queryKey: ['home-strong-random', type, resourceLanguage, randomSeed, isConnected],
     queryFn: async (): Promise<StrongLexiconSearchResult | null> =>
       (await resources.strongLexicon.random(
         type === 'grec' ? 'greek' : 'hebrew',

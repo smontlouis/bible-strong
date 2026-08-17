@@ -7,6 +7,7 @@ import {
   getResourceAccessErrorCode,
   ResourceAccessError,
 } from '~features/resources/resourceAccessError'
+import useConnection from '~helpers/useConnection'
 
 interface UseSearchValueOptions {
   onDebouncedValue?: () => void
@@ -39,6 +40,7 @@ export const useResultsByLetterOrSearch = <T,>(
   search: QueryConfig<T> = {},
   letter: QueryConfig<T> = {}
 ) => {
+  const isConnected = useConnection()
   const active = search.value && search.query ? search : letter
   const mode = active === search ? 'search' : 'letter'
   const enabled = Boolean(active.value && active.query)
@@ -49,6 +51,7 @@ export const useResultsByLetterOrSearch = <T,>(
       active.resourceLanguage,
       mode,
       active.value ?? '',
+      isConnected,
     ],
     queryFn: () => active.query!(active.value!, active.resourceLanguage),
     enabled,
