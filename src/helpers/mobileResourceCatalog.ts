@@ -21,6 +21,8 @@ export type MobileResourceCatalogEntry = {
   archiveBytes: number
   contentSha256: string
   contentBytes: number
+  resourceRevision?: string
+  coreRevision?: string
   installedBytes: number
   peakInstallationBytes: number
   strategy: MobileResourceInstallationStrategy
@@ -75,6 +77,7 @@ const isCatalogEntry = (value: unknown): value is MobileResourceCatalogEntry => 
   const entries = entry.entries
   if (!entries || typeof entries !== 'object') return false
   const archiveEntries = Object.entries(entries)
+  const isStrongLexicon = typeof entry.id === 'string' && entry.id.startsWith('strong-lexicon:')
   return (
     typeof entry.id === 'string' &&
     entry.id.length > 0 &&
@@ -93,6 +96,11 @@ const isCatalogEntry = (value: unknown): value is MobileResourceCatalogEntry => 
     isPositiveByteCount(entry.archiveBytes) &&
     isSha256(entry.contentSha256) &&
     isPositiveByteCount(entry.contentBytes) &&
+    (!isStrongLexicon ||
+      (typeof entry.resourceRevision === 'string' &&
+        entry.resourceRevision.length > 0 &&
+        (entry.id === 'strong-lexicon:core' ||
+          (typeof entry.coreRevision === 'string' && entry.coreRevision.length > 0)))) &&
     isPositiveByteCount(entry.installedBytes) &&
     isPositiveByteCount(entry.peakInstallationBytes) &&
     (entry.strategy === 'sqlite-import' || entry.strategy === 'archive-extract')
@@ -225,6 +233,14 @@ export const getMobileStrongBibleVersionIds = (
     .sort()
 
 let developmentResourceArtifactBaseUrl: string | undefined
+
+export const getDevelopmentResourceArtifactBaseUrl = (
+  platform: 'ios' | 'android' | 'web'
+): string | undefined => {
+  if (platform === 'ios') return 'http://127.0.0.1:8788'
+  if (platform === 'android') return 'http://10.0.2.2:8788'
+  return undefined
+}
 
 export const configureDevelopmentResourceArtifactBaseUrl = (value: string | undefined): void => {
   developmentResourceArtifactBaseUrl = __DEV__ ? value : undefined

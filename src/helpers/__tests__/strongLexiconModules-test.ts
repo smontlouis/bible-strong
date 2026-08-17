@@ -14,11 +14,13 @@ jest.mock('../sqlite', () => ({ openSQLiteDatabase: jest.fn() }))
 
 import type { SQLiteDatabase } from '../sqlite'
 import { validateStrongLexiconModuleDatabase } from '../strongLexiconModules'
+import { getStrongLexiconPublication } from '../strongLexiconPublications'
 
-const createResourcesDatabase = (revision: string) =>
+const createResourcesDatabase = () =>
   ({
     getFirstAsync: jest.fn(async () => ({ integrity_check: 'ok' })),
     getAllAsync: jest.fn(async (sql: string) => {
+      if (sql.includes('foreign_key_check')) return []
       if (sql.includes('sqlite_schema')) {
         return [
           { name: 'DictionaryMeta' },
@@ -27,10 +29,30 @@ const createResourcesDatabase = (revision: string) =>
         ]
       }
 
+      if (sql.includes('table_info')) {
+        const table = sql.match(/table_info\("([^"]+)"\)/u)?.[1]
+        const columns: Record<string, string[]> = {
+          DictionaryMeta: ['key', 'value'],
+          LexiconResources: ['id', 'stepEntryId', 'source', 'kind', 'contentHtml'],
+          LexiconResourceTranslations: ['resourceId', 'language', 'contentHtml'],
+        }
+        return (columns[table ?? ''] ?? []).map(name => ({
+          name,
+          type: ['id', 'stepEntryId', 'resourceId'].includes(name) ? 'INTEGER' : 'TEXT',
+          notnull: 1,
+          pk: name === 'id' || name === 'key' ? 1 : 0,
+        }))
+      }
+
       return [
         { key: 'moduleKind', value: 'resources' },
         { key: 'moduleSchemaVersion', value: '2' },
-        { key: 'lexiconRevision', value: revision },
+        { key: 'resourceIdentity', value: 'strong-lexicon:resources' },
+        {
+          key: 'resourceRevision',
+          value: getStrongLexiconPublication('resources').resourceRevision,
+        },
+        { key: 'coreRevision', value: getStrongLexiconPublication('resources').coreRevision },
       ]
     }),
   }) as unknown as SQLiteDatabase
@@ -38,31 +60,26 @@ const createResourcesDatabase = (revision: string) =>
 describe('Strong lexicon module validation', () => {
   it('accepts an independently published resources revision with an available core', async () => {
     await expect(
-      validateStrongLexiconModuleDatabase(
-        'resources',
-        createResourcesDatabase('resources-revision-2'),
-        async () => ({
-          status: 'available',
-          moduleId: 'core',
-          revision: 'core-revision-1',
-          schemaVersion: 2,
-        })
-      )
+      validateStrongLexiconModuleDatabase('resources', createResourcesDatabase(), async () => ({
+        status: 'available',
+        moduleId: 'core',
+        revision: getStrongLexiconPublication('core').resourceRevision,
+        schemaVersion: 2,
+      }))
     ).resolves.toEqual({
       status: 'available',
       moduleId: 'resources',
-      revision: 'resources-revision-2',
+      revision: getStrongLexiconPublication('resources').resourceRevision,
       schemaVersion: 2,
     })
   })
 
   it('still requires the core module before activating resources', async () => {
     await expect(
-      validateStrongLexiconModuleDatabase(
-        'resources',
-        createResourcesDatabase('resources-revision-2'),
-        async () => ({ status: 'missing', moduleId: 'core' })
-      )
+      validateStrongLexiconModuleDatabase('resources', createResourcesDatabase(), async () => ({
+        status: 'missing',
+        moduleId: 'core',
+      }))
     ).resolves.toEqual({ status: 'core-missing', moduleId: 'resources' })
   })
 })

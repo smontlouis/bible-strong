@@ -3,10 +3,12 @@ import type { BibleChapterRepositoryService } from '../domain/bibleChapter'
 import type { NaveRepositoryService } from '../domain/nave'
 import type { StrongBibleRepositoryService } from '../domain/strongBible'
 import type { InterlinearBibleRepositoryService } from '../domain/interlinearBible'
+import type { StrongLexiconRepositoryService } from '../domain/strongLexicon'
 import { makeNeonBibleChapterRepository } from '../repositories/bibleChapterRepository'
 import { makeNeonNaveRepository } from '../repositories/naveRepository'
 import { makeNeonStrongBibleRepository } from '../repositories/strongBibleRepository'
 import { makeNeonInterlinearBibleRepository } from '../repositories/interlinearBibleRepository'
+import { makeNeonStrongLexiconRepository } from '../repositories/strongLexiconRepository'
 
 export type ResourceWorkerBindings = {
   RESOURCE_DATABASE_URL: string
@@ -16,11 +18,13 @@ export const makeResourceWorkerHandler = (
   repository: BibleChapterRepositoryService,
   naveRepository?: NaveRepositoryService,
   strongBibleRepository?: StrongBibleRepositoryService,
-  interlinearBibleRepository?: InterlinearBibleRepositoryService
+  interlinearBibleRepository?: InterlinearBibleRepositoryService,
+  strongLexiconRepository?: StrongLexiconRepositoryService
 ) =>
   makeResourceWebHandler(repository, naveRepository, {
     strongBible: strongBibleRepository,
     interlinearBible: interlinearBibleRepository,
+    strongLexicon: strongLexiconRepository,
   })
 
 let cached:
@@ -38,11 +42,15 @@ const getWorkerHandler = (connectionString: string) => {
   const { repository: interlinearBibleRepository } = makeNeonInterlinearBibleRepository({
     connectionString,
   })
+  const { repository: strongLexiconRepository } = makeNeonStrongLexiconRepository({
+    connectionString,
+  })
   const web = makeResourceWorkerHandler(
     repository,
     naveRepository,
     strongBibleRepository,
-    interlinearBibleRepository
+    interlinearBibleRepository,
+    strongLexiconRepository
   )
   cached = { connectionString, web }
   return web

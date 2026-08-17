@@ -1,0 +1,2 @@
+ALTER TABLE "strong_lexicon_entities" ADD CONSTRAINT "strong_lexicon_entities_publication_id_resource_publications_id_fk" FOREIGN KEY ("publication_id") REFERENCES "public"."resource_publications"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "strong_lexicon_resources" ADD CONSTRAINT "strong_lexicon_resources_publication_id_resource_publications_id_fk" FOREIGN KEY ("publication_id") REFERENCES "public"."resource_publications"("id") ON DELETE cascade ON UPDATE no action;

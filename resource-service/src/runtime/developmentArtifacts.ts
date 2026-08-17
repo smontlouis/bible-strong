@@ -15,7 +15,7 @@ export const createDevelopmentArtifact = (
 ): DevelopmentArtifact => {
   const filename = path.basename(manifest.offlineArtifact.path)
   return {
-    route: `/${manifest.identity.kind === 'nave' ? 'databases' : 'bibles'}/${filename}`,
+    route: `/${manifest.identity.kind === 'nave' || manifest.identity.kind === 'strong-lexicon-module' ? 'databases' : 'bibles'}/${filename}`,
     bytes,
     headers: {
       'content-type': manifest.offlineArtifact.mediaType,

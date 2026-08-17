@@ -76,13 +76,16 @@ export const getResourceOnlineAccess = (
   remotelyReadableBibleVersions: ReadonlySet<string>,
   remotelyReadableNaveLanguages: ReadonlySet<ResourceLanguage> = new Set(),
   remotelyReadableStrongBibleVersions: ReadonlySet<string> = new Set(),
-  remotelyReadableInterlinearLanguages: ReadonlySet<ResourceLanguage> = new Set()
+  remotelyReadableInterlinearLanguages: ReadonlySet<ResourceLanguage> = new Set(),
+  remotelyReadableStrongLexiconModules: ReadonlySet<string> = new Set()
 ): OnlineAccessState =>
   (identity.kind === 'bible-text' && remotelyReadableBibleVersions.has(identity.versionId)) ||
   (identity.kind === 'strong-bible-index' &&
     remotelyReadableStrongBibleVersions.has(identity.versionId)) ||
   (identity.kind === 'interlinear-index' &&
     remotelyReadableInterlinearLanguages.has(identity.language)) ||
+  (identity.kind === 'strong-lexicon' &&
+    remotelyReadableStrongLexiconModules.has(identity.moduleId)) ||
   (identity.kind === 'nave' && remotelyReadableNaveLanguages.has(identity.language)) ||
   (identity.kind === 'commentary' && identity.collection === 'FIRESTORE')
     ? { status: 'remotely-readable' }

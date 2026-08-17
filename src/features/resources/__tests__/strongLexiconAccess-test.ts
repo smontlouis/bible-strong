@@ -14,9 +14,11 @@ import {
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import type { SQLiteDatabase } from '~helpers/sqlite'
 import {
+  createHybridStrongLexiconAccess,
   formatStrongEntityDisplayName,
   getTipnrBookCode,
   localStrongLexiconAccess,
+  type StrongLexiconAccess,
 } from '../strongLexiconAccess'
 
 const mockGetStrongLexiconModuleAvailability = jest.mocked(getStrongLexiconModuleAvailability)
@@ -779,5 +781,78 @@ describe('strongLexiconAccess', () => {
     await expect(localStrongLexiconAccess.loadChapterEntities(1, 1, 'fr')).resolves.toEqual([])
     await expect(localStrongLexiconAccess.loadChapterEntities(67, 1, 'fr')).resolves.toEqual([])
     expect(mockWithOptionalStrongLexiconDatabase).not.toHaveBeenCalled()
+  })
+})
+
+const createHybridStub = (
+  availability: 'available' | 'missing',
+  label: string
+): StrongLexiconAccess => ({
+  getModuleAvailability: jest.fn(async moduleId =>
+    availability === 'available'
+      ? { status: 'available' as const, moduleId, revision: label, schemaVersion: 2 }
+      : { status: 'missing' as const, moduleId }
+  ),
+  loadPreview: jest.fn(async () => []),
+  loadEntry: jest.fn(async identity => ({ label, selectedIdentity: identity }) as never),
+  loadEntries: jest.fn(async () => []),
+  loadMorphologies: jest.fn(async () => []),
+  loadEntity: jest.fn(async () => undefined),
+  loadChapterEntities: jest.fn(async () => []),
+  search: jest.fn(async () => [{ gloss: label }] as never),
+  browseByGlossPrefix: jest.fn(async () => [{ gloss: label }] as never),
+  random: jest.fn(async () => undefined),
+})
+
+describe('hybrid Strong lexicon routing', () => {
+  it('prefers an installed entry over HTTP', async () => {
+    const offline = createHybridStub('available', 'offline')
+    const online = createHybridStub('available', 'online')
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => true,
+    })
+
+    await expect(access.loadEntry({ kind: 'strong', code: 'G3056' }, 'fr')).resolves.toMatchObject({
+      label: 'offline',
+    })
+    expect(online.loadEntry).not.toHaveBeenCalled()
+  })
+
+  it('uses HTTP when the local core is absent', async () => {
+    const offline = createHybridStub('missing', 'offline')
+    const online = createHybridStub('available', 'online')
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => true,
+    })
+
+    await expect(access.loadEntry({ kind: 'strong', code: 'G3056' }, 'fr')).resolves.toMatchObject({
+      label: 'online',
+    })
+  })
+
+  it('searches online first, then uses the installed index while offline', async () => {
+    const offline = createHybridStub('available', 'offline')
+    const online = createHybridStub('available', 'online')
+    let connected = true
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => connected,
+    })
+
+    await expect(access.search('parole', 'fr')).resolves.toEqual([
+      expect.objectContaining({ gloss: 'online' }),
+    ])
+    connected = false
+    await expect(access.search('parole', 'fr')).resolves.toEqual([
+      expect.objectContaining({ gloss: 'offline' }),
+    ])
   })
 })

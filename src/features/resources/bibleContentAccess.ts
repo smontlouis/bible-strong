@@ -540,13 +540,15 @@ export const createBibleContentAccess = (
   interlinearBibleAccess: Pick<
     InterlinearBibleResourceAccess,
     'loadChapterTokens'
-  > = localInterlinearBibleResourceAccess
+  > = localInterlinearBibleResourceAccess,
+  strongLexiconAccess: Pick<StrongLexiconAccess, 'loadPreview'> = localStrongLexiconAccess
 ): BibleContentAccess => ({
   ...localBibleContentAccess,
   loadChapter: request =>
     loadBibleContentChapter(request, {
       ...defaultDependencies,
       chapterAdapter,
+      strongLexicon: strongLexiconAccess,
       loadStrongBibleChapterSpans: async (versionId, book, chapter) => {
         const result = await strongBibleAccess.loadChapterSpans({
           currentVersionId: versionId,

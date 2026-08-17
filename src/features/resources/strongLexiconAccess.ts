@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from '~helpers/sqlite'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { Schema } from 'effect'
 import {
   createStrongIdentity,
   getDisplayedStrongIdentities,
@@ -13,6 +14,17 @@ import {
   withStrongLexiconDatabase,
   type StrongLexiconModuleAvailability,
 } from '~helpers/strongLexiconModules'
+import {
+  StrongLexiconChapterEntitiesResponseDto,
+  StrongLexiconEntryDto,
+  StrongLexiconEntityResponseDto,
+  StrongLexiconModuleStateDto,
+  StrongLexiconMorphologyResponseDto,
+  StrongLexiconSearchResponseDto,
+} from './strongLexiconContract'
+import { ResourceAccessError } from './resourceAccessError'
+
+const STRONG_LEXICON_MODULE_SCHEMA_VERSION = 2
 
 export type StrongLexiconMorphology = {
   code: string
@@ -1054,4 +1066,299 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
       return row ? toSearchResult(row, language) : undefined
     })
   },
+}
+
+type HttpStrongLexiconAccessOptions = {
+  baseUrl: string
+  fetcher?: typeof fetch
+  isOnline: () => Promise<boolean>
+  timeoutMs?: number
+}
+
+const mapHttpStrongLexiconFailure = (status: number, code: unknown) => {
+  if (
+    status === 404 &&
+    (code === 'STRONG_LEXICON_ENTRY_NOT_FOUND' || code === 'STRONG_LEXICON_ENTITY_NOT_FOUND')
+  ) {
+    return new ResourceAccessError('NOT_FOUND')
+  }
+  if (status === 503 && code === 'STRONG_LEXICON_PUBLICATION_INACTIVE') {
+    return new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+  }
+  return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+}
+
+export const createHttpStrongLexiconAccess = ({
+  baseUrl,
+  fetcher = fetch,
+  isOnline,
+  timeoutMs = 10_000,
+}: HttpStrongLexiconAccessOptions): StrongLexiconAccess => {
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, '')
+  const get = async <A>(path: string, schema: Schema.Schema<A>): Promise<A> => {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await fetcher(`${normalizedBaseUrl}${path}`, {
+        headers: { accept: 'application/json' },
+        signal: controller.signal,
+      })
+      const payload: unknown = await response.json().catch(() => undefined)
+      if (!response.ok) {
+        const code =
+          payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
+        throw mapHttpStrongLexiconFailure(response.status, code)
+      }
+      try {
+        return Schema.decodeUnknownSync(schema)(payload)
+      } catch {
+        throw new ResourceAccessError('INTEGRITY_FAILURE')
+      }
+    } catch (error) {
+      if (error instanceof ResourceAccessError) throw error
+      throw new ResourceAccessError(
+        (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
+      )
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+  const languageQuery = (language: ResourceLanguage, kind?: StrongIdentityKind) =>
+    `language=${encodeURIComponent(language)}${kind ? `&kind=${encodeURIComponent(kind)}` : ''}`
+  const loadSearch = async (query: URLSearchParams) => {
+    const response = await get(
+      `/v1/strong-lexicon/entries?${query}`,
+      StrongLexiconSearchResponseDto
+    )
+    return [...response.entries]
+  }
+  return {
+    async getModuleAvailability(moduleId) {
+      const state = await get(`/v1/strong-lexicon/modules/${moduleId}`, StrongLexiconModuleStateDto)
+      if (state.status === 'available') {
+        return {
+          status: 'available',
+          moduleId,
+          revision: state.revision,
+          schemaVersion: STRONG_LEXICON_MODULE_SCHEMA_VERSION,
+        }
+      }
+      if (state.status === 'incompatible') {
+        return { status: 'incompatible', moduleId, installedRevision: state.revision }
+      }
+      return { status: 'missing', moduleId }
+    },
+    getModuleRecoveryActions: async () => [],
+    async loadEntry(identity, language) {
+      try {
+        const response = await get(
+          `/v1/strong-lexicon/entries/${encodeURIComponent(identity.code)}?${languageQuery(language, identity.kind)}`,
+          StrongLexiconEntryDto
+        )
+        const { resource: _resource, ...entry } = response
+        const toAvailability = (
+          moduleId: 'resources' | 'entities',
+          state: typeof entry.modules.resources
+        ): StrongLexiconModuleAvailability =>
+          state.status === 'available'
+            ? {
+                status: 'available',
+                moduleId,
+                revision: state.revision,
+                schemaVersion: STRONG_LEXICON_MODULE_SCHEMA_VERSION,
+              }
+            : state.status === 'incompatible'
+              ? { status: 'incompatible', moduleId, installedRevision: state.revision }
+              : { status: 'missing', moduleId }
+        return {
+          ...entry,
+          modules: {
+            resources: toAvailability('resources', entry.modules.resources),
+            entities: toAvailability('entities', entry.modules.entities),
+          },
+        } as StrongLexiconEntry
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'NOT_FOUND') return undefined
+        throw error
+      }
+    },
+    async loadEntries(identities, language) {
+      const entries = await Promise.all(
+        identities.map(identity => this.loadEntry(identity, language))
+      )
+      return entries.filter((entry): entry is StrongLexiconEntry => Boolean(entry))
+    },
+    async loadPreview(identities, language) {
+      const entries = await this.loadEntries(identities, language)
+      return entries.map(entry => ({
+        id: entry.id,
+        selectedIdentity: entry.selectedIdentity,
+        stepCode: entry.stepCode,
+        classicStrong: entry.classicStrong,
+        language: entry.language,
+        original: entry.original,
+        transliteration: entry.transliteration,
+        gloss: entry.gloss,
+        definitionHtml: entry.definitionHtml,
+      }))
+    },
+    async loadMorphologies(codes, language) {
+      if (!codes.length) return []
+      const response = await get(
+        `/v1/strong-lexicon/morphologies?${languageQuery(language)}&codes=${encodeURIComponent(codes.join(','))}`,
+        StrongLexiconMorphologyResponseDto
+      )
+      return [...response.morphologies]
+    },
+    async loadEntity(uniqueName, language) {
+      try {
+        const response = await get(
+          `/v1/strong-lexicon/entities/${encodeURIComponent(uniqueName)}?${languageQuery(language)}`,
+          StrongLexiconEntityResponseDto
+        )
+        return response.entity as StrongLexiconEntity
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'NOT_FOUND') return undefined
+        throw error
+      }
+    },
+    async loadChapterEntities(book, chapter, language, strongCodes = []) {
+      const bookCode = getTipnrBookCode(book)
+      if (!bookCode) return []
+      const query = new URLSearchParams({ language })
+      if (strongCodes.length) query.set('strongCodes', strongCodes.join(','))
+      const response = await get(
+        `/v1/strong-lexicon/entities/chapters/${bookCode}/${chapter}?${query}`,
+        StrongLexiconChapterEntitiesResponseDto
+      )
+      return response.entities.map(entity => ({ ...entity, verses: [...entity.verses] }))
+    },
+    search(query, language, limit = 100) {
+      return loadSearch(new URLSearchParams({ language, search: query, limit: String(limit) }))
+    },
+    browseByGlossPrefix(prefix, language, limit = 500) {
+      return loadSearch(new URLSearchParams({ language, prefix, limit: String(limit) }))
+    },
+    async random(lexicalLanguage, language) {
+      const response = await get(
+        `/v1/strong-lexicon/random?${new URLSearchParams({ language, lexicalLanguage })}`,
+        StrongLexiconSearchResponseDto
+      )
+      return response.entries[0]
+    },
+  }
+}
+
+export const createHybridStrongLexiconAccess = ({
+  offline,
+  online,
+  remotelyReadable,
+  isOnline,
+}: {
+  offline: StrongLexiconAccess
+  online: StrongLexiconAccess
+  remotelyReadable: boolean
+  isOnline: () => Promise<boolean>
+}): StrongLexiconAccess => {
+  const localAvailable = async (moduleId: StrongLexiconModuleId) =>
+    (await offline.getModuleAvailability(moduleId)).status === 'available'
+  const select = async <T>(
+    moduleId: StrongLexiconModuleId,
+    localOperation: () => Promise<T>,
+    remoteOperation: () => Promise<T>
+  ) => {
+    if (await localAvailable(moduleId)) return localOperation()
+    if (!remotelyReadable) {
+      throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    }
+    return remoteOperation()
+  }
+  const searchFirstOnline = async <T>(
+    localOperation: () => Promise<T>,
+    remoteOperation: () => Promise<T>
+  ) => {
+    if (remotelyReadable && (await isOnline())) {
+      try {
+        return await remoteOperation()
+      } catch (error) {
+        if (
+          (await localAvailable('core')) &&
+          error instanceof ResourceAccessError &&
+          (error.code === 'TEMPORARY_UNAVAILABLE' || error.code === 'NETWORK_OFFLINE')
+        ) {
+          return localOperation()
+        }
+        throw error
+      }
+    }
+    if (await localAvailable('core')) return localOperation()
+    throw new ResourceAccessError(remotelyReadable ? 'NETWORK_OFFLINE' : 'OFFLINE_COPY_REQUIRED')
+  }
+  return {
+    async getModuleAvailability(moduleId) {
+      const local = await offline.getModuleAvailability(moduleId)
+      if (local.status === 'available' || !remotelyReadable) return local
+      try {
+        return await online.getModuleAvailability(moduleId)
+      } catch {
+        return local
+      }
+    },
+    async getModuleRecoveryActions(moduleId) {
+      const local = await offline.getModuleAvailability(moduleId)
+      return local.status === 'available' || remotelyReadable ? [] : ['acquire-offline-copy']
+    },
+    loadPreview: (identities, language) =>
+      select(
+        'core',
+        () => offline.loadPreview(identities, language),
+        () => online.loadPreview(identities, language)
+      ),
+    loadEntry: (identity, language) =>
+      select(
+        'core',
+        () => offline.loadEntry(identity, language),
+        () => online.loadEntry(identity, language)
+      ),
+    loadEntries: (identities, language) =>
+      select(
+        'core',
+        () => offline.loadEntries(identities, language),
+        () => online.loadEntries(identities, language)
+      ),
+    loadMorphologies: (codes, language) =>
+      select(
+        'core',
+        () => offline.loadMorphologies(codes, language),
+        () => online.loadMorphologies(codes, language)
+      ),
+    loadEntity: (uniqueName, language) =>
+      select(
+        'entities',
+        () => offline.loadEntity(uniqueName, language),
+        () => online.loadEntity(uniqueName, language)
+      ),
+    loadChapterEntities: (book, chapter, language, strongCodes) =>
+      select(
+        'entities',
+        () => offline.loadChapterEntities(book, chapter, language, strongCodes),
+        () => online.loadChapterEntities(book, chapter, language, strongCodes)
+      ),
+    search: (query, language, limit) =>
+      searchFirstOnline(
+        () => offline.search(query, language, limit),
+        () => online.search(query, language, limit)
+      ),
+    browseByGlossPrefix: (prefix, language, limit) =>
+      searchFirstOnline(
+        () => offline.browseByGlossPrefix(prefix, language, limit),
+        () => online.browseByGlossPrefix(prefix, language, limit)
+      ),
+    random: (lexicalLanguage, language) =>
+      select(
+        'core',
+        () => offline.random(lexicalLanguage, language),
+        () => online.random(lexicalLanguage, language)
+      ),
+  }
 }

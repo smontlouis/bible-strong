@@ -207,11 +207,43 @@ const InterlinearBiblePublicationBundleManifestSchema = Schema.Struct({
   }),
 })
 
+const StrongLexiconModuleId = Schema.Literal('core', 'resources', 'entities')
+const STRONG_LEXICON_MODULE_ENTRIES = {
+  core: 'strong_lexicon.core.sqlite',
+  resources: 'strong_lexicon.resources.sqlite',
+  entities: 'bible_entities.production.sqlite',
+} as const
+const StrongLexiconPublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  canonical: Schema.Struct({
+    ...PublicationBundleCommonFields.canonical.fields,
+    schemaVersion: Schema.Literal(1),
+  }),
+  identity: Schema.Struct({
+    kind: Schema.Literal('strong-lexicon-module'),
+    moduleId: StrongLexiconModuleId,
+    resourceId: Schema.Literal(
+      'strong-lexicon:core',
+      'strong-lexicon:resources',
+      'strong-lexicon:entities'
+    ),
+    language: Schema.Literal('mul'),
+  }),
+  dependencies: Schema.Array(
+    Schema.Struct({
+      resourceIdentity: Schema.Literal('strong-lexicon:core'),
+      revision: Schema.NonEmptyString,
+    })
+  ),
+  counts: Schema.Record({ key: Schema.String, value: Schema.NonNegativeInt }),
+})
+
 const PublicationBundleManifestSchema = Schema.Union(
   BiblePublicationBundleManifestSchema,
   NavePublicationBundleManifestSchema,
   StrongBiblePublicationBundleManifestSchema,
-  InterlinearBiblePublicationBundleManifestSchema
+  InterlinearBiblePublicationBundleManifestSchema,
+  StrongLexiconPublicationBundleManifestSchema
 )
 
 export type BiblePublicationBundleManifest = typeof BiblePublicationBundleManifestSchema.Type
@@ -220,11 +252,14 @@ export type StrongBiblePublicationBundleManifest =
   typeof StrongBiblePublicationBundleManifestSchema.Type
 export type InterlinearBiblePublicationBundleManifest =
   typeof InterlinearBiblePublicationBundleManifestSchema.Type
+export type StrongLexiconPublicationBundleManifest =
+  typeof StrongLexiconPublicationBundleManifestSchema.Type
 export type PublicationBundleManifest =
   | BiblePublicationBundleManifest
   | NavePublicationBundleManifest
   | StrongBiblePublicationBundleManifest
   | InterlinearBiblePublicationBundleManifest
+  | StrongLexiconPublicationBundleManifest
 
 export const isBiblePublicationBundleManifest = (
   manifest: PublicationBundleManifest
@@ -243,6 +278,11 @@ export const isInterlinearBiblePublicationBundleManifest = (
   manifest: PublicationBundleManifest
 ): manifest is InterlinearBiblePublicationBundleManifest =>
   manifest.identity.kind === 'interlinear-index'
+
+export const isStrongLexiconPublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is StrongLexiconPublicationBundleManifest =>
+  manifest.identity.kind === 'strong-lexicon-module'
 
 export type CanonicalBibleVerse = BibleVersePresentation & {
   text: string
@@ -370,6 +410,17 @@ export type CanonicalPublication =
   | CanonicalNavePublication
   | CanonicalStrongBiblePublication
   | CanonicalInterlinearBiblePublication
+  | CanonicalStrongLexiconModulePublication
+
+export type CanonicalStrongLexiconModulePublication = {
+  format: 'bible-strong-canonical-strong-lexicon-module'
+  schemaVersion: 1
+  moduleId: 'core' | 'resources' | 'entities'
+  revision: string
+  dependencies: { resourceIdentity: 'strong-lexicon:core'; revision: string }[]
+  tables: Record<string, Record<string, string | number | null>[]>
+  counts: Record<string, number>
+}
 
 const normalizeJson = (value: unknown): unknown => {
   if (Array.isArray(value)) return value.map(normalizeJson)
@@ -388,7 +439,9 @@ export const derivePublicationRevision = (manifest: PublicationBundleManifest): 
   const resourceId =
     manifest.identity.kind === 'nave'
       ? manifest.identity.resourceId.toLowerCase()
-      : manifest.identity.versionId.toLowerCase()
+      : manifest.identity.kind === 'strong-lexicon-module'
+        ? manifest.identity.resourceId
+        : manifest.identity.versionId.toLowerCase()
   const digest = createHash('sha256')
     .update(JSON.stringify(normalizeJson(envelope)))
     .digest('hex')
@@ -477,6 +530,24 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
       ))
   ) {
     throw new Error('PUBLICATION_BUNDLE_DEPENDENCY_INVALID')
+  }
+  if (isStrongLexiconPublicationBundleManifest(manifest)) {
+    const expectedResourceId = `strong-lexicon:${manifest.identity.moduleId}`
+    if (
+      manifest.offlineArtifact.entry !== STRONG_LEXICON_MODULE_ENTRIES[manifest.identity.moduleId]
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_OFFLINE_ENTRY_INVALID')
+    }
+    const dependency = manifest.dependencies[0]
+    if (
+      manifest.identity.resourceId !== expectedResourceId ||
+      (manifest.identity.moduleId === 'core'
+        ? manifest.dependencies.length !== 0
+        : manifest.dependencies.length !== 1 ||
+          dependency?.resourceIdentity !== 'strong-lexicon:core')
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_DEPENDENCY_INVALID')
+    }
   }
 
   return manifest
@@ -1405,6 +1476,626 @@ const validateInterlinearBibleOfflineParity = async (
   }
 }
 
+const STRONG_LEXICON_TABLES = {
+  core: [
+    'StepEntries',
+    'StepEntryIdentities',
+    'LexiconTranslations',
+    'RelationKinds',
+    'LexiconRelations',
+    'MorphologyCodes',
+    'MorphologyCodeTranslations',
+  ],
+  resources: ['LexiconResources', 'LexiconResourceTranslations'],
+  entities: ['Entities', 'EntityTranslations', 'EntityRefs', 'EntityRelations', 'EntityPlaces'],
+} as const
+
+const STRONG_LEXICON_TABLE_COLUMNS: Record<
+  keyof typeof STRONG_LEXICON_TABLES,
+  Record<string, readonly string[]>
+> = {
+  core: {
+    StepEntries: [
+      'id',
+      'language',
+      'baseCode',
+      'eStrong',
+      'dStrong',
+      'uStrong',
+      'original',
+      'transliteration',
+      'morph',
+      'gloss',
+      'meaning',
+      'classicTransliteration',
+      'pronunciation',
+    ],
+    StepEntryIdentities: ['stepEntryId', 'stepCode'],
+    LexiconTranslations: ['stepEntryId', 'language', 'gloss', 'meaning', 'meaningHtml'],
+    RelationKinds: ['id', 'kind', 'labelEn', 'labelFr'],
+    LexiconRelations: [
+      'id',
+      'fromStepEntryId',
+      'toStepEntryId',
+      'toStepCode',
+      'groupKind',
+      'relationKindId',
+      'sortOrder',
+    ],
+    MorphologyCodes: [
+      'id',
+      'code',
+      'normalizedCode',
+      'language',
+      'scope',
+      'meaning',
+      'description',
+    ],
+    MorphologyCodeTranslations: ['morphologyCodeId', 'language', 'meaning', 'description'],
+  },
+  resources: {
+    LexiconResources: ['id', 'stepEntryId', 'source', 'kind', 'contentHtml'],
+    LexiconResourceTranslations: ['resourceId', 'language', 'contentHtml'],
+  },
+  entities: {
+    Entities: [
+      'id',
+      'uniqueName',
+      'uStrong',
+      'displayName',
+      'category',
+      'type',
+      'description',
+      'summaryHtml',
+      'briefest',
+      'brief',
+      'shortDescription',
+      'articleHtml',
+    ],
+    EntityTranslations: [
+      'id',
+      'entityId',
+      'language',
+      'displayName',
+      'description',
+      'summaryHtml',
+      'briefest',
+      'brief',
+      'shortDescription',
+      'articleHtml',
+    ],
+    EntityRefs: ['entityId', 'book', 'chapter', 'verse', 'suffix', 'refText'],
+    EntityRelations: ['fromEntityId', 'relation', 'toUniqueName', 'toEntityId', 'certainty'],
+    EntityPlaces: [
+      'entityId',
+      'openBibleName',
+      'googleMapUrl',
+      'palopenmapsUrl',
+      'latitude',
+      'longitude',
+      'area',
+    ],
+  },
+}
+
+const STRONG_LEXICON_TABLE_PRIMARY_KEYS: Record<
+  keyof typeof STRONG_LEXICON_TABLES,
+  Record<string, readonly string[]>
+> = {
+  core: {
+    StepEntries: ['id'],
+    StepEntryIdentities: ['stepEntryId'],
+    LexiconTranslations: ['stepEntryId', 'language'],
+    RelationKinds: ['id'],
+    LexiconRelations: ['id'],
+    MorphologyCodes: ['id'],
+    MorphologyCodeTranslations: ['morphologyCodeId', 'language'],
+  },
+  resources: {
+    LexiconResources: ['id'],
+    LexiconResourceTranslations: ['resourceId', 'language'],
+  },
+  entities: {
+    Entities: ['id'],
+    EntityTranslations: ['id'],
+    EntityRefs: ['entityId', 'book', 'chapter', 'verse', 'suffix'],
+    EntityRelations: [],
+    EntityPlaces: ['entityId'],
+  },
+}
+
+const STRONG_LEXICON_TABLE_UNIQUE_KEYS: Record<
+  keyof typeof STRONG_LEXICON_TABLES,
+  Record<string, readonly string[]>
+> = {
+  core: {
+    StepEntryIdentities: ['stepCode'],
+    RelationKinds: ['kind'],
+  },
+  resources: {},
+  entities: {
+    Entities: ['uniqueName'],
+    EntityRelations: ['fromEntityId', 'relation', 'toUniqueName', 'toEntityId'],
+  },
+}
+
+const STRONG_LEXICON_REQUIRED_COLUMNS: Record<
+  keyof typeof STRONG_LEXICON_TABLES,
+  Record<string, readonly string[]>
+> = {
+  core: {
+    StepEntries: ['language', 'eStrong', 'dStrong', 'uStrong', 'gloss'],
+    StepEntryIdentities: ['stepCode'],
+    LexiconTranslations: ['language'],
+    RelationKinds: ['kind'],
+    LexiconRelations: ['toStepCode', 'groupKind'],
+    MorphologyCodes: ['code', 'normalizedCode', 'language', 'scope'],
+    MorphologyCodeTranslations: ['language'],
+  },
+  resources: {
+    LexiconResources: ['source', 'kind'],
+    LexiconResourceTranslations: ['language'],
+  },
+  entities: {
+    Entities: ['uniqueName', 'uStrong', 'displayName', 'category', 'type'],
+    EntityTranslations: ['language'],
+    EntityRefs: ['book', 'refText'],
+    EntityRelations: ['relation', 'toUniqueName', 'certainty'],
+    EntityPlaces: [],
+  },
+}
+
+const STRONG_LEXICON_POSITIVE_INTEGER_COLUMNS = new Set([
+  'id',
+  'baseCode',
+  'stepEntryId',
+  'resourceId',
+  'morphologyCodeId',
+  'entityId',
+  'fromStepEntryId',
+  'toStepEntryId',
+  'fromEntityId',
+  'toEntityId',
+  'relationKindId',
+  'sortOrder',
+  'chapter',
+  'verse',
+])
+
+const STRONG_LEXICON_REQUIRED_INTEGER_COLUMNS: Record<
+  keyof typeof STRONG_LEXICON_TABLES,
+  Record<string, readonly string[]>
+> = {
+  core: {
+    StepEntries: ['id', 'baseCode'],
+    StepEntryIdentities: ['stepEntryId'],
+    LexiconTranslations: ['stepEntryId'],
+    RelationKinds: ['id'],
+    LexiconRelations: ['id', 'fromStepEntryId', 'relationKindId'],
+    MorphologyCodes: ['id'],
+    MorphologyCodeTranslations: ['morphologyCodeId'],
+  },
+  resources: {
+    LexiconResources: ['id', 'stepEntryId'],
+    LexiconResourceTranslations: ['resourceId'],
+  },
+  entities: {
+    Entities: ['id'],
+    EntityTranslations: ['id', 'entityId'],
+    EntityRefs: ['entityId', 'chapter', 'verse'],
+    EntityRelations: ['fromEntityId'],
+    EntityPlaces: ['entityId'],
+  },
+}
+
+const STRONG_LEXICON_SQLITE_INTEGER_COLUMNS = new Set([
+  'id',
+  'baseCode',
+  'stepEntryId',
+  'resourceId',
+  'morphologyCodeId',
+  'entityId',
+  'fromStepEntryId',
+  'toStepEntryId',
+  'fromEntityId',
+  'toEntityId',
+  'relationKindId',
+  'sortOrder',
+  'chapter',
+  'verse',
+])
+const STRONG_LEXICON_SQLITE_REAL_COLUMNS = new Set(['latitude', 'longitude'])
+const STRONG_LEXICON_SQLITE_OPTIONAL_COLUMNS = new Set([
+  'toStepEntryId',
+  'toEntityId',
+  'latitude',
+  'longitude',
+])
+const STRONG_LEXICON_SQLITE_UNIQUE_COLUMNS: Record<
+  keyof typeof STRONG_LEXICON_TABLES,
+  Record<string, readonly string[]>
+> = {
+  core: {
+    StepEntryIdentities: ['stepCode'],
+    RelationKinds: ['kind'],
+  },
+  resources: {},
+  entities: { Entities: ['uniqueName'] },
+}
+
+export const deriveStrongLexiconModuleRevision = (
+  moduleId: CanonicalStrongLexiconModulePublication['moduleId'],
+  tables: CanonicalStrongLexiconModulePublication['tables'],
+  dependencies: CanonicalStrongLexiconModulePublication['dependencies'] = []
+): string =>
+  `strong-lexicon-${moduleId}-${createHash('sha256')
+    .update(
+      JSON.stringify(
+        (function normalizeLexicon(value: unknown): unknown {
+          if (Array.isArray(value)) return value.map(normalizeLexicon)
+          if (value && typeof value === 'object') {
+            return Object.fromEntries(
+              Object.entries(value)
+                .sort(([left], [right]) => left.localeCompare(right))
+                .map(([key, nested]) => [key, normalizeLexicon(nested)])
+            )
+          }
+          return value
+        })({ moduleId, dependencies, tables })
+      )
+    )
+    .digest('hex')
+    .slice(0, 24)}`
+
+const validateStrongLexiconRows = (
+  moduleId: CanonicalStrongLexiconModulePublication['moduleId'],
+  tables: CanonicalStrongLexiconModulePublication['tables']
+) => {
+  const ids = new Map<string, Set<number>>()
+  for (const table of STRONG_LEXICON_TABLES[moduleId]) {
+    const expectedColumns = STRONG_LEXICON_TABLE_COLUMNS[moduleId][table]
+    const rows = tables[table] ?? []
+    const required = new Set(STRONG_LEXICON_REQUIRED_COLUMNS[moduleId][table] ?? [])
+    const primary = STRONG_LEXICON_TABLE_PRIMARY_KEYS[moduleId][table] ?? []
+    const uniqueKey = STRONG_LEXICON_TABLE_UNIQUE_KEYS[moduleId][table] ?? []
+    const seen = new Set<string>()
+    const seenUnique = new Set<string>()
+    if (rows.length === 0) throw new Error('CANONICAL_STRONG_LEXICON_TABLE_EMPTY')
+    for (const row of rows) {
+      const keys = Object.keys(row).sort()
+      if (keys.join('|') !== [...expectedColumns].sort().join('|')) {
+        throw new Error('CANONICAL_STRONG_LEXICON_ROW_COLUMNS_INVALID')
+      }
+      for (const [key, value] of Object.entries(row)) {
+        if (value !== null && typeof value !== 'string' && typeof value !== 'number') {
+          throw new Error('CANONICAL_STRONG_LEXICON_ROW_VALUE_INVALID')
+        }
+        if (STRONG_LEXICON_POSITIVE_INTEGER_COLUMNS.has(key) && value !== null) {
+          if (!isPositiveInteger(value)) {
+            throw new Error('CANONICAL_STRONG_LEXICON_ROW_IDENTITY_INVALID')
+          }
+        }
+        if (
+          STRONG_LEXICON_REQUIRED_INTEGER_COLUMNS[moduleId][table]?.includes(key) &&
+          !isPositiveInteger(value)
+        ) {
+          throw new Error('CANONICAL_STRONG_LEXICON_ROW_REQUIRED_IDENTITY_INVALID')
+        }
+        if (required.has(key) && (typeof value !== 'string' || !value.trim())) {
+          throw new Error('CANONICAL_STRONG_LEXICON_ROW_REQUIRED_INVALID')
+        }
+      }
+      const keyColumns = primary.length ? primary : uniqueKey
+      const primaryKey = keyColumns.map(column => String(row[column] ?? '')).join('\u001f')
+      if (keyColumns.length && seen.has(primaryKey)) {
+        throw new Error('CANONICAL_STRONG_LEXICON_ROW_DUPLICATE')
+      }
+      if (keyColumns.length) seen.add(primaryKey)
+      if (uniqueKey.length) {
+        const uniqueValue = uniqueKey.map(column => String(row[column] ?? '')).join('\u001f')
+        if (seenUnique.has(uniqueValue)) {
+          throw new Error('CANONICAL_STRONG_LEXICON_ROW_UNIQUE_DUPLICATE')
+        }
+        seenUnique.add(uniqueValue)
+      }
+    }
+    const idColumn =
+      table === 'StepEntries' ||
+      table === 'RelationKinds' ||
+      table === 'MorphologyCodes' ||
+      table === 'LexiconResources' ||
+      table === 'Entities'
+        ? 'id'
+        : undefined
+    if (idColumn) ids.set(table, new Set(rows.map(row => Number(row[idColumn]))))
+  }
+  const references = (table: string, column: string, target: string) => {
+    const targetIds = ids.get(target)
+    if (!targetIds) return
+    for (const row of tables[table] ?? []) {
+      const value = row[column]
+      if (value !== null && !targetIds.has(Number(value))) {
+        throw new Error('CANONICAL_STRONG_LEXICON_REFERENCE_INVALID')
+      }
+    }
+  }
+  if (moduleId === 'core') {
+    const entryById = new Map((tables.StepEntries ?? []).map(row => [Number(row.id), row]))
+    for (const row of tables.StepEntryIdentities ?? []) {
+      const entry = entryById.get(Number(row.stepEntryId))
+      const identity = String(row.stepCode)
+      const dStrongIdentity = String(entry?.dStrong ?? '').split(/\s+/u)[0]
+      if (!entry || ![entry.eStrong, entry.uStrong, dStrongIdentity].includes(identity)) {
+        throw new Error('CANONICAL_STRONG_LEXICON_IDENTITY_MISMATCH')
+      }
+    }
+    if (
+      (tables.StepEntries ?? []).some(row => !['greek', 'hebrew'].includes(String(row.language)))
+    ) {
+      throw new Error('CANONICAL_STRONG_LEXICON_LANGUAGE_INVALID')
+    }
+    if (
+      (tables.LexiconRelations ?? []).some(
+        row => !['subentry', 'identity', 'family'].includes(String(row.groupKind))
+      )
+    ) {
+      throw new Error('CANONICAL_STRONG_LEXICON_RELATION_GROUP_INVALID')
+    }
+    references('StepEntryIdentities', 'stepEntryId', 'StepEntries')
+    references('LexiconTranslations', 'stepEntryId', 'StepEntries')
+    references('LexiconRelations', 'fromStepEntryId', 'StepEntries')
+    references('LexiconRelations', 'toStepEntryId', 'StepEntries')
+    references('LexiconRelations', 'relationKindId', 'RelationKinds')
+    references('MorphologyCodeTranslations', 'morphologyCodeId', 'MorphologyCodes')
+    const identityCodes = new Map(
+      (tables.StepEntryIdentities ?? []).map(row => [Number(row.stepEntryId), String(row.stepCode)])
+    )
+    for (const row of tables.LexiconRelations ?? []) {
+      if (
+        row.toStepEntryId !== null &&
+        identityCodes.get(Number(row.toStepEntryId)) !== String(row.toStepCode)
+      ) {
+        throw new Error('CANONICAL_STRONG_LEXICON_RELATION_TARGET_MISMATCH')
+      }
+    }
+  } else if (moduleId === 'resources') {
+    references('LexiconResourceTranslations', 'resourceId', 'LexiconResources')
+  } else {
+    references('EntityTranslations', 'entityId', 'Entities')
+    references('EntityRefs', 'entityId', 'Entities')
+    references('EntityRelations', 'fromEntityId', 'Entities')
+    references('EntityRelations', 'toEntityId', 'Entities')
+    references('EntityPlaces', 'entityId', 'Entities')
+    const entityNames = new Map(
+      (tables.Entities ?? []).map(row => [Number(row.id), String(row.uniqueName)])
+    )
+    for (const row of tables.EntityRelations ?? []) {
+      if (
+        row.toEntityId !== null &&
+        entityNames.get(Number(row.toEntityId)) !== String(row.toUniqueName).split('|').at(-1)
+      ) {
+        throw new Error('CANONICAL_STRONG_LEXICON_ENTITY_TARGET_MISMATCH')
+      }
+    }
+  }
+}
+
+const validateStrongLexiconSqliteTableSchema = (
+  database: Database,
+  moduleId: CanonicalStrongLexiconModulePublication['moduleId'],
+  table: string
+) => {
+  const columns = rowsFromSqlJs(database, `PRAGMA table_info("${table}")`)
+  const expected = STRONG_LEXICON_TABLE_COLUMNS[moduleId][table]
+  if (
+    columns
+      .map(column => String(column.name))
+      .sort()
+      .join('|') !== [...expected].sort().join('|')
+  ) {
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+  }
+  for (const column of columns) {
+    const expectedType = STRONG_LEXICON_SQLITE_REAL_COLUMNS.has(String(column.name))
+      ? 'REAL'
+      : STRONG_LEXICON_SQLITE_INTEGER_COLUMNS.has(String(column.name))
+        ? 'INTEGER'
+        : 'TEXT'
+    if (String(column.type).toUpperCase() !== expectedType) {
+      throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+    }
+    const primaryIntegerColumn = Number(column.pk) === 1 && expectedType === 'INTEGER'
+    if (
+      !STRONG_LEXICON_SQLITE_OPTIONAL_COLUMNS.has(String(column.name)) &&
+      Number(column.notnull) !== 1 &&
+      !primaryIntegerColumn
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+    }
+  }
+  const primary = columns
+    .filter(column => Number(column.pk) > 0)
+    .sort((left, right) => Number(left.pk) - Number(right.pk))
+    .map(column => String(column.name))
+  if (primary.join('|') !== (STRONG_LEXICON_TABLE_PRIMARY_KEYS[moduleId][table] ?? []).join('|')) {
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+  }
+  const uniqueColumns = STRONG_LEXICON_SQLITE_UNIQUE_COLUMNS[moduleId][table] ?? []
+  if (uniqueColumns.length) {
+    const quoted = uniqueColumns.map(column => `"${column}"`).join(',')
+    const duplicate = rowsFromSqlJs(
+      database,
+      `SELECT ${quoted}, COUNT(*) AS count FROM "${table}" GROUP BY ${quoted} HAVING COUNT(*) > 1 LIMIT 1`
+    )
+    if (duplicate.length) throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+  }
+}
+
+export const decodeCanonicalStrongLexiconModule = (
+  value: unknown
+): CanonicalStrongLexiconModulePublication => {
+  if (!value || typeof value !== 'object') throw new Error('CANONICAL_STRONG_LEXICON_INVALID')
+  const candidate = value as Partial<CanonicalStrongLexiconModulePublication>
+  if (
+    candidate.format !== 'bible-strong-canonical-strong-lexicon-module' ||
+    candidate.schemaVersion !== 1 ||
+    !candidate.moduleId ||
+    !Object.hasOwn(STRONG_LEXICON_TABLES, candidate.moduleId) ||
+    typeof candidate.revision !== 'string' ||
+    !candidate.revision ||
+    !Array.isArray(candidate.dependencies) ||
+    !candidate.tables ||
+    typeof candidate.tables !== 'object' ||
+    !candidate.counts ||
+    typeof candidate.counts !== 'object'
+  ) {
+    throw new Error('CANONICAL_STRONG_LEXICON_INVALID')
+  }
+  const expectedTables = STRONG_LEXICON_TABLES[candidate.moduleId]
+  if (
+    Object.keys(candidate.tables).sort().join('|') !== [...expectedTables].sort().join('|') ||
+    Object.keys(candidate.counts ?? {})
+      .sort()
+      .join('|') !== [...expectedTables].sort().join('|') ||
+    expectedTables.some(table => {
+      const rows = candidate.tables?.[table]
+      return (
+        !Array.isArray(rows) ||
+        rows.some(
+          row =>
+            !row ||
+            typeof row !== 'object' ||
+            Array.isArray(row) ||
+            Object.values(row).some(
+              field => field !== null && typeof field !== 'string' && typeof field !== 'number'
+            )
+        ) ||
+        candidate.counts?.[table] !== rows.length
+      )
+    }) ||
+    deriveStrongLexiconModuleRevision(
+      candidate.moduleId,
+      candidate.tables,
+      candidate.dependencies
+    ) !== candidate.revision
+  ) {
+    throw new Error('CANONICAL_STRONG_LEXICON_INVALID')
+  }
+  if (
+    (candidate.moduleId === 'core' && candidate.dependencies.length !== 0) ||
+    (candidate.moduleId !== 'core' &&
+      (candidate.dependencies.length !== 1 ||
+        candidate.dependencies[0]?.resourceIdentity !== 'strong-lexicon:core' ||
+        !candidate.dependencies[0]?.revision))
+  ) {
+    throw new Error('CANONICAL_STRONG_LEXICON_DEPENDENCY_INVALID')
+  }
+  validateStrongLexiconRows(candidate.moduleId, candidate.tables)
+  return candidate as CanonicalStrongLexiconModulePublication
+}
+
+const rowsFromSqlJs = (
+  database: Database,
+  sqlText: string
+): Record<string, string | number | null>[] => {
+  const result = database.exec(sqlText)[0]
+  if (!result) return []
+  return result.values.map(values =>
+    Object.fromEntries(result.columns.map((column, index) => [column, values[index] ?? null]))
+  ) as Record<string, string | number | null>[]
+}
+
+const validateStrongLexiconOfflineParity = async (
+  bytes: Uint8Array,
+  canonical: CanonicalStrongLexiconModulePublication
+) => {
+  const SQL = await initSqlJs()
+  let database: Database | undefined
+  try {
+    database = new SQL.Database(bytes)
+    const integrity = rowsFromSqlJs(database, 'PRAGMA integrity_check')
+    const integrityValue = Object.values(integrity[0] ?? {})[0]
+    if (integrity.length !== 1 || integrityValue !== 'ok') {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
+    if (rowsFromSqlJs(database, 'PRAGMA foreign_key_check').length > 0) {
+      throw new Error('OFFLINE_ARTIFACT_FOREIGN_KEY_INVALID')
+    }
+    const metadataTable = canonical.moduleId === 'entities' ? 'EntityMeta' : 'DictionaryMeta'
+    const actualTables = rowsFromSqlJs(
+      database,
+      "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+    ).map(row => String(row.name))
+    const allowedTables = new Set([
+      ...STRONG_LEXICON_TABLES[canonical.moduleId],
+      metadataTable,
+      ...(canonical.moduleId === 'entities' ? ['EntityNames', 'EntityTranslationProvenance'] : []),
+    ])
+    if (actualTables.some(table => !allowedTables.has(table))) {
+      throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+    }
+    const metadataColumns = rowsFromSqlJs(database, `PRAGMA table_info("${metadataTable}")`)
+    if (
+      metadataColumns.length !== 2 ||
+      metadataColumns.map(column => String(column.name)).join('|') !== 'key|value' ||
+      metadataColumns.some(
+        column =>
+          String(column.type).toUpperCase() !== 'TEXT' ||
+          Number(column.notnull) !== 1 ||
+          (String(column.name) === 'key' && Number(column.pk) !== 1) ||
+          (String(column.name) === 'value' && Number(column.pk) !== 0)
+      )
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_METADATA_SCHEMA_INVALID')
+    }
+    const actualContent = Object.fromEntries(
+      STRONG_LEXICON_TABLES[canonical.moduleId].map(table => {
+        const columns = rowsFromSqlJs(database!, `PRAGMA table_info("${table}")`)
+        validateStrongLexiconSqliteTableSchema(database!, canonical.moduleId, table)
+        const primary = columns
+          .filter(column => Number(column.pk) > 0)
+          .sort((left, right) => Number(left.pk) - Number(right.pk))
+          .map(column => `"${String(column.name)}"`)
+        const fallback = columns.map(column => `"${String(column.name)}"`)
+        return [
+          table,
+          rowsFromSqlJs(
+            database!,
+            `SELECT * FROM "${table}" ORDER BY ${(primary.length ? primary : fallback).join(',')}`
+          ),
+        ]
+      })
+    )
+    if (
+      JSON.stringify(normalizeJson(actualContent)) !==
+      JSON.stringify(normalizeJson(canonical.tables))
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+    const metadata = Object.fromEntries(
+      rowsFromSqlJs(database, `SELECT key,value FROM ${metadataTable}`).map(row => [
+        String(row.key),
+        String(row.value),
+      ])
+    )
+    if (
+      metadata.resourceIdentity !== `strong-lexicon:${canonical.moduleId}` ||
+      metadata.resourceRevision !== canonical.revision ||
+      metadata.moduleKind !== canonical.moduleId ||
+      metadata.moduleSchemaVersion !== '2' ||
+      (canonical.moduleId !== 'core' &&
+        metadata.coreRevision !== canonical.dependencies[0]?.revision)
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_METADATA_MISMATCH')
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.startsWith('OFFLINE_ARTIFACT_')) throw cause
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+  } finally {
+    database?.close()
+  }
+}
+
 export const validatePublicationBundle = async (bundlePath: string) => {
   const root = path.resolve(bundlePath)
   const manifestPath = path.join(root, 'manifest.json')
@@ -1475,7 +2166,8 @@ export const validatePublicationBundle = async (bundlePath: string) => {
   if (
     (isNavePublicationBundleManifest(manifest) ||
       isStrongBiblePublicationBundleManifest(manifest) ||
-      isInterlinearBiblePublicationBundleManifest(manifest)) &&
+      isInterlinearBiblePublicationBundleManifest(manifest) ||
+      isStrongLexiconPublicationBundleManifest(manifest)) &&
     !Buffer.from(offlineContent)
       .subarray(0, 16)
       .equals(Buffer.from('SQLite format 3\u0000', 'utf8'))
@@ -1597,7 +2289,7 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_COUNT_MISMATCH')
     }
     await validateStrongBibleOfflineParity(offlineContent, canonical)
-  } else {
+  } else if (isInterlinearBiblePublicationBundleManifest(manifest)) {
     canonical = decodeCanonicalInterlinearBible(canonicalValue)
     if (
       canonical.applicationVersionId !== manifest.identity.versionId ||
@@ -1617,6 +2309,19 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_COUNT_MISMATCH')
     }
     await validateInterlinearBibleOfflineParity(offlineContent, canonical)
+  } else {
+    canonical = decodeCanonicalStrongLexiconModule(canonicalValue)
+    if (
+      canonical.moduleId !== manifest.identity.moduleId ||
+      canonical.revision !== manifest.revision ||
+      JSON.stringify(normalizeJson(canonical.dependencies)) !==
+        JSON.stringify(normalizeJson(manifest.dependencies)) ||
+      JSON.stringify(normalizeJson(canonical.counts)) !==
+        JSON.stringify(normalizeJson(manifest.counts))
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+    await validateStrongLexiconOfflineParity(offlineContent, canonical)
   }
 
   return { manifest, canonical, canonicalPath, offlineArtifactPath }

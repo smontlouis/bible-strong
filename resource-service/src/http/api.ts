@@ -35,6 +35,24 @@ import {
   InterlinearBibleCoveragePath,
 } from '../../../src/features/resources/interlinearBibleContract'
 import {
+  StrongLexiconBrowseQuery,
+  StrongLexiconChapterEntitiesPath,
+  StrongLexiconChapterEntitiesQuery,
+  StrongLexiconChapterEntitiesResponseDto,
+  StrongLexiconEntryQuery,
+  StrongLexiconEntryDto,
+  StrongLexiconEntryPath,
+  StrongLexiconEntityPath,
+  StrongLexiconEntityResponseDto,
+  StrongLexiconLanguageQuery,
+  StrongLexiconModulePath,
+  StrongLexiconModuleStateDto,
+  StrongLexiconMorphologyQuery,
+  StrongLexiconMorphologyResponseDto,
+  StrongLexiconRandomQuery,
+  StrongLexiconSearchResponseDto,
+} from '../../../src/features/resources/strongLexiconContract'
+import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
   ResourceNotFoundProblem,
@@ -203,9 +221,74 @@ const InterlinearBibleApi = HttpApiGroup.make('interlinearBibles')
       .addError(ResourceInternalProblem, { status: 500 })
   )
 
+const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
+  .add(
+    HttpApiEndpoint.get('getStrongLexiconModule', '/v1/strong-lexicon/modules/:moduleId')
+      .setPath(StrongLexiconModulePath)
+      .addSuccess(StrongLexiconModuleStateDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getStrongLexiconEntry', '/v1/strong-lexicon/entries/:reference')
+      .setPath(StrongLexiconEntryPath)
+      .setUrlParams(StrongLexiconEntryQuery)
+      .addSuccess(StrongLexiconEntryDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('browseStrongLexicon', '/v1/strong-lexicon/entries')
+      .setUrlParams(StrongLexiconBrowseQuery)
+      .addSuccess(StrongLexiconSearchResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getRandomStrongLexiconEntry', '/v1/strong-lexicon/random')
+      .setUrlParams(StrongLexiconRandomQuery)
+      .addSuccess(StrongLexiconSearchResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getStrongLexiconMorphologies', '/v1/strong-lexicon/morphologies')
+      .setUrlParams(StrongLexiconMorphologyQuery)
+      .addSuccess(StrongLexiconMorphologyResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getStrongLexiconEntity', '/v1/strong-lexicon/entities/:uniqueName')
+      .setPath(StrongLexiconEntityPath)
+      .setUrlParams(StrongLexiconLanguageQuery)
+      .addSuccess(StrongLexiconEntityResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getStrongLexiconChapterEntities',
+      '/v1/strong-lexicon/entities/chapters/:bookCode/:chapter'
+    )
+      .setPath(StrongLexiconChapterEntitiesPath)
+      .setUrlParams(StrongLexiconChapterEntitiesQuery)
+      .addSuccess(StrongLexiconChapterEntitiesResponseDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+
 export class ResourceApi extends HttpApi.make('resource-api')
   .add(SystemApi)
   .add(BibleApi)
   .add(NaveApi)
   .add(StrongBibleApi)
-  .add(InterlinearBibleApi) {}
+  .add(InterlinearBibleApi)
+  .add(StrongLexiconApi) {}

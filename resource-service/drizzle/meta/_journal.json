@@ -36,6 +36,48 @@
       "when": 1786924445534,
       "tag": "0004_light_captain_midlands",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786930200937,
+      "tag": "0005_nosy_overlord",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786944989640,
+      "tag": "0006_strong_lexicon_domain",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1786945066887,
+      "tag": "0007_strong_lexicon_domain_fk_cleanup",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786945476390,
+      "tag": "0008_chief_shinko_yamashiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1786945564066,
+      "tag": "0009_fearless_thundra",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1786945688701,
+      "tag": "0010_sudden_rachel_grey",
+      "breakpoints": true
     }
   ]
 }
