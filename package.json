@@ -59,6 +59,7 @@
     "resources:publication:strong-bibles": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning --max-old-space-size=8192 $NODE_OPTIONS\" tsx src/packageStrongBibleResourcePublications.ts",
     "resources:publication:interlinear-bibles": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning --max-old-space-size=8192 $NODE_OPTIONS\" tsx src/packageInterlinearBibleResourcePublications.ts",
     "resources:publication:strong-lexicon": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning --max-old-space-size=8192 $NODE_OPTIONS\" tsx src/packageStrongLexiconResourcePublications.ts",
+    "resources:publication:reconcile": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/reconcileResourcePublicationSet.ts",
     "resources:smoke:strong-lexicon": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx scripts/smokeStrongLexiconResourcePublications.ts",
     "resources:smoke:dictionary": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx scripts/smokeDictionaryResourcePublications.ts",
     "strong:release:step-interlinear": "NODE_OPTIONS=\"--disable-warning=ExperimentalWarning $NODE_OPTIONS\" tsx src/stepInterlinearPublication.ts",
