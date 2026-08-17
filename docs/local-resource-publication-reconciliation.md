@@ -1,11 +1,16 @@
 # Local resource publication reconciliation
 
-`resources:publication:reconcile` is the handoff smoke for a local release. Pass one or more
-publication roots (the command walks nested language/module directories):
+The canonical local publication store is `outputs/resource-publications`. Every producer writes
+its final bundle under that directory; worktree-local `outputs/` directories are only temporary
+build locations.
+
+`resources:publication:reconcile` inventories the local release (the command walks nested
+language/module directories):
 
 ```bash
-RESOURCE_PUBLICATION_ROOTS="outputs/releases/ordinary:outputs/releases/strong:outputs/releases/interlinear:outputs/releases/lexicon:outputs/releases/editorial" \
-  npm run resources:publication:reconcile
+npm run resources:publication:reconcile -- \
+  --root outputs/resource-publications \
+  --report outputs/resource-publications/reconciliation.json
 ```
 
 The command reads `config/mobile-resource-required-ids.json`, maps each publication manifest to its
