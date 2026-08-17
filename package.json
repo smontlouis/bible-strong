@@ -32,6 +32,7 @@
     "resources:smoke:supplementary:artifacts": "node scripts/smokeSupplementaryResourceArtifacts.mjs",
     "resources:smoke:timeline": "node scripts/smokeTimelineResourceService.mjs",
     "resources:smoke:timeline:artifacts": "node scripts/smokeTimelineResourceArtifacts.mjs",
+    "resources:smoke:bible-search": "node scripts/smokeBibleSearchResourceService.mjs",
     "resources:architecture:check": "node scripts/check-resource-service-architecture.mjs && node scripts/check-resource-ui-architecture.mjs",
     "resources:db:up": "docker compose -f resource-service/compose.yaml up -d --wait",
     "resources:db:down": "docker compose -f resource-service/compose.yaml down",

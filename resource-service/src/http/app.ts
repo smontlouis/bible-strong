@@ -13,6 +13,13 @@ import {
   type BibleChapterRepositoryService,
 } from '../domain/bibleChapter'
 import {
+  ActiveBibleSearchPublicationUnavailable,
+  BibleSearchRepository,
+  BibleSearchRepositoryFailure,
+  readBibleSearch,
+  type BibleSearchRepositoryService,
+} from '../domain/bibleSearch'
+import {
   ActiveNavePublicationUnavailable,
   browseNaveTopics,
   NaveRepository,
@@ -120,6 +127,8 @@ const toHttpProblem = (
     | ActiveBiblePublicationUnavailable
     | BibleChapterNotFound
     | BibleChapterRepositoryFailure
+    | ActiveBibleSearchPublicationUnavailable
+    | BibleSearchRepositoryFailure
     | UnsupportedNaveLanguage
     | ActiveNavePublicationUnavailable
     | NaveTopicNotFound
@@ -168,6 +177,7 @@ const toHttpProblem = (
         retryAfterSeconds: 30,
       })
     case 'BibleChapterRepositoryFailure':
+    case 'BibleSearchRepositoryFailure':
     case 'NaveRepositoryFailure':
     case 'DictionaryRepositoryFailure':
     case 'StrongBibleRepositoryFailure':
@@ -178,6 +188,13 @@ const toHttpProblem = (
         ...problemFields(requestId, 'The Resource service could not complete the request.'),
         status: 500,
         code: 'RESOURCE_INTERNAL_FAILURE',
+      })
+    case 'ActiveBibleSearchPublicationUnavailable':
+      return new ResourceUnavailableProblem({
+        ...problemFields(requestId, 'The Bible publication is temporarily unavailable.'),
+        status: 503,
+        code: 'BIBLE_PUBLICATION_INACTIVE',
+        retryAfterSeconds: 30,
       })
     case 'TimelineRepositoryFailure':
       return new ResourceInternalProblem({
@@ -333,6 +350,32 @@ const addResponseHeaders = (headers: Record<string, string>) =>
 
 const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
   handlers
+    .handle('searchBible', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readBibleSearch({
+          versionId: path.version,
+          query: urlParams.q,
+          book: urlParams.book,
+          section: urlParams.section,
+          sortOrder: urlParams.sortOrder,
+          limit: urlParams.limit,
+          offset: urlParams.offset,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        [
+          'bible-search',
+          path.version,
+          urlParams.q,
+          urlParams.book ?? '*',
+          urlParams.section ?? '*',
+          urlParams.sortOrder ?? 'relevance',
+          urlParams.limit ?? 100,
+          urlParams.offset ?? 0,
+        ]
+      )
+    })
     .handle('getBibleChapter', ({ path, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
 
@@ -761,6 +804,11 @@ const unavailableRepository: BibleChapterRepositoryService = {
     Effect.fail(new ActiveBiblePublicationUnavailable({ versionId })),
 }
 
+const unavailableBibleSearchRepository: BibleSearchRepositoryService = {
+  search: input =>
+    Effect.fail(new ActiveBibleSearchPublicationUnavailable({ versionId: input.versionId })),
+}
+
 const unavailableNaveRepository: NaveRepositoryService = {
   findTopic: input =>
     Effect.fail(new ActiveNavePublicationUnavailable({ language: input.language })),
@@ -850,12 +898,14 @@ export const provideResourceRepositories = (
   interlinearBibleRepository: InterlinearBibleRepositoryService = unavailableInterlinearBibleRepository,
   strongLexiconRepository: StrongLexiconRepositoryService = unavailableStrongLexiconRepository,
   supplementaryRepository: SupplementaryRepositoryService = unavailableSupplementaryRepository,
-  timelineRepository: TimelineRepositoryService = unavailableTimelineRepository
+  timelineRepository: TimelineRepositoryService = unavailableTimelineRepository,
+  bibleSearchRepository: BibleSearchRepositoryService = unavailableBibleSearchRepository
 ) =>
   ResourceApiLive.pipe(
     Layer.provide(
       Layer.mergeAll(
         Layer.succeed(BibleChapterRepository, repository),
+        Layer.succeed(BibleSearchRepository, bibleSearchRepository),
         Layer.succeed(NaveRepository, naveRepository),
         Layer.succeed(DictionaryRepository, dictionaryRepository),
         Layer.succeed(StrongBibleRepository, strongBibleRepository),
@@ -882,7 +932,8 @@ export const makeResourceWebHandler = (
         overrides.interlinearBible ?? unavailableInterlinearBibleRepository,
         overrides.strongLexicon ?? unavailableStrongLexiconRepository,
         overrides.supplementary ?? unavailableSupplementaryRepository,
-        overrides.timeline ?? unavailableTimelineRepository
+        overrides.timeline ?? unavailableTimelineRepository,
+        overrides.bibleSearch ?? unavailableBibleSearchRepository
       ),
       HttpServer.layerContext
     )
@@ -917,6 +968,7 @@ export const makeResourceWebHandler = (
 }
 
 export type ResourceRepositoryOverrides = {
+  bibleSearch?: BibleSearchRepositoryService
   dictionary?: DictionaryRepositoryService
   strongBible?: StrongBibleRepositoryService
   interlinearBible?: InterlinearBibleRepositoryService
