@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process'
 import { networkInterfaces } from 'node:os'
+import path from 'node:path'
 
 import { getDevelopmentEndpoints, RESOURCE_DEVELOPMENT_COMMANDS } from './development'
 
@@ -23,10 +24,20 @@ const getLanAddress = (): string | undefined => {
 }
 
 for (const command of RESOURCE_DEVELOPMENT_COMMANDS) run(command)
-if (process.env.RESOURCE_PUBLICATION_BUNDLE) {
+const publicationRoots = process.env.RESOURCE_PUBLICATION_ROOTS
+  ?.split(path.delimiter)
+  .map(root => root.trim())
+  .filter(Boolean)
+
+if (publicationRoots?.length) {
+  run([
+    'yarn',
+    'resources:import-catalog',
+    ...publicationRoots.flatMap(root => ['--root', root]),
+  ])
+} else if (process.env.RESOURCE_PUBLICATION_BUNDLE) {
   run(['yarn', 'resources:import', '--bundle', process.env.RESOURCE_PUBLICATION_BUNDLE])
-}
-if (process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT) {
+} else if (process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT) {
   run(['yarn', 'resources:import-all', '--root', process.env.RESOURCE_PUBLICATION_BUNDLES_ROOT])
 }
 

@@ -19,6 +19,15 @@ To import one already validated publication before the API starts, select it exp
 RESOURCE_PUBLICATION_BUNDLE=/absolute/path/to/bundle yarn resources:dev
 ```
 
+To start the same local API with the complete nested Maker catalog, pass its roots once. The
+command starts PostgreSQL, migrates it, imports the roots in dependency order, and then serves the
+API; it never resets the database:
+
+```bash
+RESOURCE_PUBLICATION_ROOTS="/path/to/ordinary:/path/to/strong:/path/to/interlinear:/path/to/lexicon:/path/to/editorial" \
+  RESOURCE_API_PORT=8787 yarn resources:dev
+```
+
 ## Bible Lexicon Maker handoff
 
 Bible Strong never scans or reads a neighboring Bible Lexicon Maker checkout. The handoff input is

@@ -32,17 +32,15 @@ RESOURCE_PUBLICATION_ROOTS="<ordinary-root>:<strong-root>:<interlinear-root>:<le
 ## 2. Importer dans PostgreSQL local
 
 ```bash
-yarn resources:db:up
-yarn resources:migrate
 RESOURCE_PUBLICATION_ROOTS="<ordinary-root>:<strong-root>:<interlinear-root>:<lexicon-root>:<dictionary-root>:<nave-root>:<editorial-root>:<timeline-root>" \
-  yarn resources:import-catalog
-yarn resources:serve
+  RESOURCE_API_PORT=8787 yarn resources:dev
 ```
 
-`resources:import-catalog` découvre les manifests imbriqués, importe les dépendances dans l’ordre
+`resources:dev` démarre PostgreSQL, applique les migrations, puis `resources:import-catalog` découvre
+les manifests imbriqués et importe les dépendances dans l’ordre
 (`bible-text`, lexique Strong, index Strong/interlinéaire, puis les autres domaines) et active les
 révisions pour le développement local. Relancer la commande est sans reset : une révision inchangée
-est simplement rapportée `unchanged`.
+est simplement rapportée `unchanged`, puis l’API démarre sur le port demandé.
 
 ## 3. Smoke API
 
