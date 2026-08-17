@@ -6,12 +6,13 @@ import { createInterface } from "node:readline";
 import { DatabaseSync } from "node:sqlite";
 
 import { BOOK_IDS } from "./books.js";
+import { STRONG_IDENTITY_KINDS } from "./strongIdentityKinds.js";
 
 export const STRONG_BIBLE_SQLITE_SCHEMA_VERSION = 3;
 export const STRONG_BIBLE_SQLITE_BUILDER_VERSION =
   "strong-bible-jsonl-sqlite@3";
 
-export type StrongIdentityKind = "strong" | "estrong" | "dstrong" | "ustrong";
+export type StrongIdentityKind = (typeof STRONG_IDENTITY_KINDS)[number];
 
 export interface StrongBibleJsonlVerse {
   ref: string;
@@ -120,24 +121,11 @@ const RUN_TAGS = new Set([
   "q",
   "span"
 ]);
-const IDENTITY_KINDS: StrongIdentityKind[] = [
-  "strong",
-  "estrong",
-  "dstrong",
-  "ustrong"
-];
-const IDENTITY_KIND_CODES: Record<StrongIdentityKind, number> = {
-  strong: 0,
-  estrong: 1,
-  dstrong: 2,
-  ustrong: 3
-};
-const IDENTITY_CODE_KINDS = [
-  "strong",
-  "estrong",
-  "dstrong",
-  "ustrong"
-] as const satisfies readonly StrongIdentityKind[];
+const IDENTITY_KINDS = STRONG_IDENTITY_KINDS;
+const IDENTITY_KIND_CODES = Object.fromEntries(
+  STRONG_IDENTITY_KINDS.map((kind, index) => [kind, index])
+) as Record<StrongIdentityKind, number>;
+const IDENTITY_CODE_KINDS = STRONG_IDENTITY_KINDS;
 const MARKUP_TAGS = [
   "p",
   "l",

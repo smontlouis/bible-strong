@@ -36,6 +36,7 @@ const execFileAsync = promisify(execFile);
 const ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
 const MAX_SQLITE_BYTES = 128 * 1024 * 1024;
 type Locale = "fr" | "en";
+type BibleTextByLocation = Map<string, string>;
 
 export interface CanonicalInterlinearBiblePublication {
   format: "bible-strong-canonical-interlinear-index";
@@ -174,7 +175,7 @@ export async function buildInterlinearBibleResourcePublication(
   if (bibleManifest.identity.versionId !== "BHG") {
     throw new Error("interlinear-bible-dependency-invalid");
   }
-  const bibleCanonical = JSON.parse(
+  const bibleCanonicalValue: unknown = JSON.parse(
     await readFile(
       path.join(
         path.resolve(options.bibleBundleDir),
@@ -182,13 +183,20 @@ export async function buildInterlinearBibleResourcePublication(
       ),
       "utf8"
     )
-  ) as { textRevision?: unknown; textSha256?: unknown };
+  );
   if (
-    !isNonEmptyString(bibleCanonical.textRevision) ||
-    !isSha256(bibleCanonical.textSha256)
+    !isRecord(bibleCanonicalValue) ||
+    !isRecord(bibleCanonicalValue.verses) ||
+    !isNonEmptyString(bibleCanonicalValue.textRevision) ||
+    !isSha256(bibleCanonicalValue.textSha256)
   ) {
     throw new Error("interlinear-bible-dependency-invalid");
   }
+  const bibleCanonical = {
+    textRevision: bibleCanonicalValue.textRevision,
+    textSha256: bibleCanonicalValue.textSha256,
+    texts: decodeBibleTexts(bibleCanonicalValue.verses)
+  };
 
   const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const workDir = await mkdtemp(path.join(tmpdir(), "interlinear-build-"));
@@ -213,7 +221,12 @@ export async function buildInterlinearBibleResourcePublication(
       bibleCanonical.textRevision,
       bibleCanonical.textSha256
     );
-    const content = readCanonicalContent(normalizedSqlite, options.language);
+    const content = readCanonicalContent(normalizedSqlite, {
+      language: options.language,
+      textRevision: bibleCanonical.textRevision,
+      textSha256: bibleCanonical.textSha256,
+      bibleTexts: bibleCanonical.texts
+    });
     const withoutRevision = {
       format: "bible-strong-canonical-interlinear-index" as const,
       schemaVersion: 1 as const,
@@ -405,11 +418,12 @@ export async function validateInterlinearBibleResourcePublication(
     ) {
       throw new Error("interlinear-publication-offline-content-mismatch");
     }
-    const offlineCanonical = readCanonicalContent(
-      extracted,
-      canonical.language,
-      canonical.indexRevision
-    );
+    const offlineCanonical = readCanonicalContent(extracted, {
+      language: canonical.language,
+      indexRevision: canonical.indexRevision,
+      textRevision: canonical.textRevision,
+      textSha256: canonical.textSha256
+    });
     if (
       JSON.stringify(offlineCanonical) !==
       JSON.stringify({
@@ -525,8 +539,13 @@ function bindIndexRevision(sqlitePath: string, indexRevision: string): void {
 
 function readCanonicalContent(
   sqlitePath: string,
-  language: Locale,
-  expectedIndexRevision?: string
+  expected: {
+    language: Locale;
+    indexRevision?: string;
+    textRevision: string;
+    textSha256: string;
+    bibleTexts?: BibleTextByLocation;
+  }
 ) {
   const database = new DatabaseSync(sqlitePath, { readOnly: true });
   try {
@@ -537,10 +556,14 @@ function readCanonicalContent(
         .map((row) => [row.key, row.value])
     ) as Record<string, string>;
     if (
-      metadata.locale !== language ||
+      metadata.applicationVersionId !== "BHG" ||
+      metadata.datasetId !== "STEP" ||
+      metadata.locale !== expected.language ||
       metadata.schemaVersion !== "5" ||
-      (expectedIndexRevision !== undefined &&
-        metadata.indexRevision !== expectedIndexRevision)
+      metadata.textRevision !== expected.textRevision ||
+      metadata.textSha256 !== expected.textSha256 ||
+      (expected.indexRevision !== undefined &&
+        metadata.indexRevision !== expected.indexRevision)
     ) {
       throw new Error("interlinear-source-metadata-invalid");
     }
@@ -639,7 +662,10 @@ function readCanonicalContent(
     ) {
       throw new Error("interlinear-source-count-mismatch");
     }
-    validateCanonicalGraph({ verses, tokens, segments, segmentIdentities });
+    validateCanonicalGraph(
+      { verses, tokens, segments, segmentIdentities },
+      expected.bibleTexts
+    );
     validateStrongVerseIndex(
       database,
       verses,
@@ -661,7 +687,10 @@ type CanonicalInterlinearContent = Pick<
 const isPositiveInteger = (value: unknown): value is number =>
   Number.isInteger(value) && Number(value) > 0;
 
-function validateCanonicalGraph(content: CanonicalInterlinearContent): void {
+function validateCanonicalGraph(
+  content: CanonicalInterlinearContent,
+  bibleTexts?: BibleTextByLocation
+): void {
   if (
     content.verses.length === 0 ||
     content.tokens.length === 0 ||
@@ -672,6 +701,7 @@ function validateCanonicalGraph(content: CanonicalInterlinearContent): void {
   }
   const verseIds = new Set<number>();
   const verseLocations = new Set<string>();
+  const verseTextById = new Map<number, string>();
   for (const verse of content.verses) {
     if (
       !isPositiveInteger(verse.id) ||
@@ -687,7 +717,15 @@ function validateCanonicalGraph(content: CanonicalInterlinearContent): void {
       throw new Error("interlinear-canonical-verse-duplicate");
     verseIds.add(verse.id);
     verseLocations.add(location);
+    if (bibleTexts) {
+      const text = bibleTexts.get(location);
+      if (text === undefined)
+        throw new Error("interlinear-bible-coverage-mismatch");
+      verseTextById.set(verse.id, text);
+    }
   }
+  if (bibleTexts && bibleTexts.size !== verseLocations.size)
+    throw new Error("interlinear-bible-coverage-mismatch");
 
   const tokenIds = new Set<number>();
   const tokenOrdinals = new Set<string>();
@@ -702,6 +740,9 @@ function validateCanonicalGraph(content: CanonicalInterlinearContent): void {
       !isNonNegativeInteger(token.ordinal) ||
       !isNonNegativeInteger(token.startOffset) ||
       !isNonNegativeInteger(token.length) ||
+      (bibleTexts &&
+        token.startOffset + token.length >
+          (verseTextById.get(token.verseId)?.length ?? -1)) ||
       tokenIds.has(token.id)
     ) {
       throw new Error("interlinear-canonical-token-invalid");
@@ -763,6 +804,30 @@ function validateCanonicalGraph(content: CanonicalInterlinearContent): void {
   }
 }
 
+function decodeBibleTexts(value: Record<string, unknown>): BibleTextByLocation {
+  const texts = new Map<string, string>();
+  for (const [bookKey, chaptersValue] of Object.entries(value)) {
+    if (!/^[1-9]\d*$/u.test(bookKey) || !isRecord(chaptersValue))
+      throw new Error("interlinear-bible-dependency-invalid");
+    for (const [chapterKey, versesValue] of Object.entries(chaptersValue)) {
+      if (!/^[1-9]\d*$/u.test(chapterKey) || !isRecord(versesValue))
+        throw new Error("interlinear-bible-dependency-invalid");
+      for (const [verseKey, verseValue] of Object.entries(versesValue)) {
+        if (
+          !/^(?:0|[1-9]\d*)$/u.test(verseKey) ||
+          !isRecord(verseValue) ||
+          typeof verseValue.text !== "string"
+        ) {
+          throw new Error("interlinear-bible-dependency-invalid");
+        }
+        texts.set(`${bookKey}:${chapterKey}:${verseKey}`, verseValue.text);
+      }
+    }
+  }
+  if (texts.size === 0) throw new Error("interlinear-bible-dependency-invalid");
+  return texts;
+}
+
 function validateStrongVerseIndex(
   database: DatabaseSync,
   verses: CanonicalInterlinearBiblePublication["verses"],
@@ -777,29 +842,31 @@ function validateStrongVerseIndex(
     segments.map((segment) => [segment.id, segment.tokenId])
   );
   const verseIds = new Set(verses.map((verse) => verse.id));
-  const expected = new Set(
-    identities.map((identity) => {
-      const verseId = verseByToken.get(
-        tokenBySegment.get(identity.segmentId) ?? -1
-      );
-      if (!verseId || !verseIds.has(verseId))
-        throw new Error("interlinear-strong-index-reference-invalid");
-      return `${verseId}:${identity.code}`;
-    })
-  );
+  const expected = new Map<string, number>();
+  for (const identity of identities) {
+    const verseId = verseByToken.get(
+      tokenBySegment.get(identity.segmentId) ?? -1
+    );
+    if (!verseId || !verseIds.has(verseId))
+      throw new Error("interlinear-strong-index-reference-invalid");
+    const key = `${verseId}:${identity.code}`;
+    expected.set(key, (expected.get(key) ?? 0) | (1 << identity.identityOrder));
+  }
   const actualRows = database
     .prepare(
-      `SELECT svi.verseId AS verseId, sc.code AS code
+      `SELECT svi.verseId AS verseId, sc.code AS code, svi.kindMask AS kindMask
          FROM StrongVerseIndex svi
          JOIN StrongCodes sc ON sc.id=svi.codeId
         ORDER BY svi.verseId, sc.code`
     )
-    .all() as Array<{ verseId: number; code: string }>;
-  const actual = new Set(actualRows.map((row) => `${row.verseId}:${row.code}`));
+    .all() as Array<{ verseId: number; code: string; kindMask: number }>;
+  const actual = new Map(
+    actualRows.map((row) => [`${row.verseId}:${row.code}`, row.kindMask])
+  );
   if (
     actualRows.length !== actual.size ||
     actual.size !== expected.size ||
-    [...expected].some((key) => !actual.has(key))
+    [...expected].some(([key, kindMask]) => actual.get(key) !== kindMask)
   ) {
     throw new Error("interlinear-strong-index-parity-mismatch");
   }

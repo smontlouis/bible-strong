@@ -186,6 +186,52 @@ test("rejects source rows that disappear from the canonical joins", async (t) =>
   );
 });
 
+test("rejects token offsets outside the exact canonical BHG verse text", async (t) => {
+  const root = await mkdtemp(
+    path.join(tmpdir(), "interlinear-resource-offset-")
+  );
+  t.after(async () => rm(root, { recursive: true, force: true }));
+  const fixture = await makeFixture(root);
+  const database = new DatabaseSync(fixture.sqlitePath);
+  database.exec("UPDATE Tokens SET startOffset=2 WHERE id=1");
+  database.close();
+
+  await assert.rejects(
+    buildInterlinearBibleResourcePublication({
+      sqlitePath: fixture.sqlitePath,
+      bibleBundleDir: fixture.bibleBundle,
+      outputDir: path.join(root, "publication"),
+      language: "fr",
+      attribution: "STEP fixture",
+      rightsReviewedAt: "2026-08-16",
+      generatedAt: "2026-08-17T00:00:00.000Z"
+    }),
+    /interlinear-canonical-token-invalid/u
+  );
+});
+
+test("rejects a Strong verse index with the wrong identity-kind mask", async (t) => {
+  const root = await mkdtemp(path.join(tmpdir(), "interlinear-resource-mask-"));
+  t.after(async () => rm(root, { recursive: true, force: true }));
+  const fixture = await makeFixture(root);
+  const database = new DatabaseSync(fixture.sqlitePath);
+  database.exec("UPDATE StrongVerseIndex SET kindMask=8");
+  database.close();
+
+  await assert.rejects(
+    buildInterlinearBibleResourcePublication({
+      sqlitePath: fixture.sqlitePath,
+      bibleBundleDir: fixture.bibleBundle,
+      outputDir: path.join(root, "publication"),
+      language: "fr",
+      attribution: "STEP fixture",
+      rightsReviewedAt: "2026-08-16",
+      generatedAt: "2026-08-17T00:00:00.000Z"
+    }),
+    /interlinear-strong-index-parity-mismatch/u
+  );
+});
+
 test("requires French and English publications to share the same source structure", () => {
   const canonical = {
     format: "bible-strong-canonical-interlinear-index" as const,
