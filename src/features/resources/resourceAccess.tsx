@@ -142,6 +142,9 @@ const onlineNaveAccess = resourceApiBaseUrl
 const remotelyReadableDictionaryLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
+const remotelyReadableNaveLanguages = new Set<ResourceLanguage>(
+  resourceApiBaseUrl ? ['fr', 'en'] : []
+)
 const onlineDictionaryAccess = resourceApiBaseUrl
   ? createHttpDictionaryAccess({
       baseUrl: resourceApiBaseUrl,
@@ -239,7 +242,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   nave: createHybridNaveAccess({
     offline: localNaveAccess,
     online: onlineNaveAccess,
-    remotelyReadableLanguages: resourceApiBaseUrl ? new Set(['fr']) : new Set(),
+    remotelyReadableLanguages: remotelyReadableNaveLanguages,
     isOnline: async () => onlineManager.isOnline(),
   }),
   strongLexicon: strongLexiconAccess,
@@ -253,7 +256,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
       getResourceOnlineAccess(
         identity,
         remotelyReadableBibleVersions,
-        resourceApiBaseUrl ? new Set(['fr']) : new Set(),
+        remotelyReadableNaveLanguages,
         remotelyReadableStrongBibleVersions,
         remotelyReadableInterlinearLocales,
         remotelyReadableStrongLexiconModules,

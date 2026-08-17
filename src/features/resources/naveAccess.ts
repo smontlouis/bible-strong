@@ -158,7 +158,7 @@ export const createHttpNaveAccess = ({
 
   return {
     getAvailability: async language =>
-      language === 'fr'
+      language === 'fr' || language === 'en'
         ? { status: 'available' }
         : {
             status: 'unavailable',

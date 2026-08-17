@@ -120,12 +120,12 @@ const NavePublicationBundleManifestSchema = Schema.Struct({
   ...PublicationBundleCommonFields,
   offlineArtifact: Schema.Struct({
     ...PublicationBundleCommonFields.offlineArtifact.fields,
-    entry: Schema.Literal('nave-fr.sqlite'),
+    entry: Schema.Literal('nave-fr.sqlite', 'nave.sqlite'),
   }),
   identity: Schema.Struct({
     kind: Schema.Literal('nave'),
-    resourceId: Schema.Literal('NAVE_FR'),
-    language: Schema.Literal('fr'),
+    resourceId: Schema.Literal('NAVE_FR', 'NAVE_EN'),
+    language: Schema.Literal('fr', 'en'),
   }),
   alphabeticalBrowse: Schema.Struct({
     initials: Schema.Array(Schema.NonEmptyString),
@@ -354,7 +354,7 @@ export type CanonicalNaveVerseAnchor = {
 export type CanonicalNavePublication = {
   format: 'bible-strong-canonical-nave'
   schemaVersion: 1
-  resourceId: 'NAVE_FR'
+  resourceId: 'NAVE_FR' | 'NAVE_EN'
   revision: string
   sourceVersion: string
   sourceSha256: string
@@ -556,6 +556,15 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     throw new Error('PUBLICATION_BUNDLE_RIGHTS_MISMATCH')
   }
   if (
+    isNavePublicationBundleManifest(manifest) &&
+    (manifest.identity.resourceId !==
+      (manifest.identity.language === 'fr' ? 'NAVE_FR' : 'NAVE_EN') ||
+      manifest.offlineArtifact.entry !==
+        (manifest.identity.language === 'fr' ? 'nave-fr.sqlite' : 'nave.sqlite'))
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
+  }
+  if (
     isBiblePublicationBundleManifest(manifest) &&
     (manifest.canon.orderedBooks.length === 0 ||
       Object.values(manifest.coverage.chaptersByBook).some(chapters => chapters.length === 0))
@@ -687,7 +696,7 @@ export const decodeCanonicalNave = (value: unknown): CanonicalNavePublication =>
   if (
     candidate.format !== 'bible-strong-canonical-nave' ||
     candidate.schemaVersion !== 1 ||
-    candidate.resourceId !== 'NAVE_FR' ||
+    (candidate.resourceId !== 'NAVE_FR' && candidate.resourceId !== 'NAVE_EN') ||
     !isNonEmptyString(candidate.revision) ||
     !isNonEmptyString(candidate.sourceVersion) ||
     !isNonEmptyString(candidate.sourceSha256) ||
