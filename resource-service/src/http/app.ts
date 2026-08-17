@@ -25,6 +25,17 @@ import {
   type NaveRepositoryService,
 } from '../domain/nave'
 import {
+  ActiveDictionaryPublicationUnavailable,
+  browseDictionaryEntries,
+  DictionaryEntryNotFound,
+  DictionaryRepository,
+  DictionaryRepositoryFailure,
+  readDictionaryEntry,
+  readDictionaryEntryById,
+  readDictionaryVerseWords,
+  type DictionaryRepositoryService,
+} from '../domain/dictionary'
+import {
   ActiveStrongBiblePublicationUnavailable,
   readStrongBibleChapter,
   readStrongBibleCounts,
@@ -94,6 +105,9 @@ const toHttpProblem = (
     | ActiveNavePublicationUnavailable
     | NaveTopicNotFound
     | NaveRepositoryFailure
+    | ActiveDictionaryPublicationUnavailable
+    | DictionaryEntryNotFound
+    | DictionaryRepositoryFailure
     | UnsupportedStrongBibleVersion
     | ActiveStrongBiblePublicationUnavailable
     | StrongBibleChapterNotFound
@@ -130,6 +144,7 @@ const toHttpProblem = (
       })
     case 'BibleChapterRepositoryFailure':
     case 'NaveRepositoryFailure':
+    case 'DictionaryRepositoryFailure':
     case 'StrongBibleRepositoryFailure':
     case 'InterlinearBibleRepositoryFailure':
     case 'StrongLexiconRepositoryFailure':
@@ -155,6 +170,19 @@ const toHttpProblem = (
         ...problemFields(requestId, 'The Nave publication is temporarily unavailable.'),
         status: 503,
         code: 'NAVE_PUBLICATION_INACTIVE',
+        retryAfterSeconds: 30,
+      })
+    case 'DictionaryEntryNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(requestId, 'This dictionary entry does not exist.'),
+        status: 404,
+        code: 'DICTIONARY_ENTRY_NOT_FOUND',
+      })
+    case 'ActiveDictionaryPublicationUnavailable':
+      return new ResourceUnavailableProblem({
+        ...problemFields(requestId, 'The dictionary publication is temporarily unavailable.'),
+        status: 503,
+        code: 'DICTIONARY_PUBLICATION_INACTIVE',
         retryAfterSeconds: 30,
       })
     case 'UnsupportedStrongBibleVersion':
@@ -213,6 +241,12 @@ const toHttpProblem = (
         status: 503,
         code: 'STRONG_LEXICON_PUBLICATION_INACTIVE',
         retryAfterSeconds: 30,
+      })
+    default:
+      return new ResourceInternalProblem({
+        ...problemFields(requestId, 'The Resource service could not complete the request.'),
+        status: 500,
+        code: 'RESOURCE_INTERNAL_FAILURE',
       })
   }
 }
@@ -351,6 +385,58 @@ const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
         ),
         requestId,
         request.headers['if-none-match']
+      )
+    })
+)
+
+const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', handlers =>
+  handlers
+    .handle('listDictionaryEntries', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        browseDictionaryEntries({
+          language: path.language,
+          initial: urlParams.initial,
+          search: urlParams.search,
+          limit: urlParams.limit,
+          offset: urlParams.offset,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        urlParams.search
+          ? undefined
+          : ['dictionary', path.language, 'browse', urlParams.initial ?? '*', urlParams.offset ?? 0]
+      )
+    })
+    .handle('getDictionaryEntry', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readDictionaryEntry(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
+        requestId,
+        request.headers['if-none-match'],
+        ['dictionary', path.language, 'entry', path.word]
+      )
+    })
+    .handle('getDictionaryEntryById', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readDictionaryEntryById(path).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['dictionary', path.language, 'entry-id', path.id]
+      )
+    })
+    .handle('getDictionaryVerseWords', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readDictionaryVerseWords(path).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['dictionary', path.language, 'verse', path.verseKey]
       )
     })
 )
@@ -545,6 +631,7 @@ export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
   Layer.provide(BibleApiLive),
   Layer.provide(NaveApiLive),
+  Layer.provide(DictionaryApiLive),
   Layer.provide(StrongBibleApiLive),
   Layer.provide(InterlinearBibleApiLive),
   Layer.provide(StrongLexiconApiLive)
@@ -567,6 +654,17 @@ const unavailableNaveRepository: NaveRepositoryService = {
   findVerseTopics: input =>
     Effect.fail(new ActiveNavePublicationUnavailable({ language: input.language })),
   findRandomTopic: language => Effect.fail(new ActiveNavePublicationUnavailable({ language })),
+}
+
+const unavailableDictionaryRepository: DictionaryRepositoryService = {
+  listEntries: input =>
+    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+  findEntry: input =>
+    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+  findEntryById: input =>
+    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+  findVerseWords: input =>
+    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
 }
 
 const unavailableStrongBibleRepository: StrongBibleRepositoryService = {
@@ -611,6 +709,7 @@ const unavailableStrongLexiconRepository: StrongLexiconRepositoryService = {
 export const provideResourceRepositories = (
   repository: BibleChapterRepositoryService,
   naveRepository: NaveRepositoryService,
+  dictionaryRepository: DictionaryRepositoryService = unavailableDictionaryRepository,
   strongBibleRepository: StrongBibleRepositoryService = unavailableStrongBibleRepository,
   interlinearBibleRepository: InterlinearBibleRepositoryService = unavailableInterlinearBibleRepository,
   strongLexiconRepository: StrongLexiconRepositoryService = unavailableStrongLexiconRepository
@@ -620,6 +719,7 @@ export const provideResourceRepositories = (
       Layer.mergeAll(
         Layer.succeed(BibleChapterRepository, repository),
         Layer.succeed(NaveRepository, naveRepository),
+        Layer.succeed(DictionaryRepository, dictionaryRepository),
         Layer.succeed(StrongBibleRepository, strongBibleRepository),
         Layer.succeed(InterlinearBibleRepository, interlinearBibleRepository),
         Layer.succeed(StrongLexiconRepository, strongLexiconRepository)
@@ -637,6 +737,7 @@ export const makeResourceWebHandler = (
       provideResourceRepositories(
         repository,
         naveRepository,
+        overrides.dictionary ?? unavailableDictionaryRepository,
         overrides.strongBible ?? unavailableStrongBibleRepository,
         overrides.interlinearBible ?? unavailableInterlinearBibleRepository,
         overrides.strongLexicon ?? unavailableStrongLexiconRepository
@@ -674,6 +775,7 @@ export const makeResourceWebHandler = (
 }
 
 export type ResourceRepositoryOverrides = {
+  dictionary?: DictionaryRepositoryService
   strongBible?: StrongBibleRepositoryService
   interlinearBible?: InterlinearBibleRepositoryService
   strongLexicon?: StrongLexiconRepositoryService

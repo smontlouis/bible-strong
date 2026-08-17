@@ -12,7 +12,7 @@ interface UseSearchValueOptions {
   onDebouncedValue?: () => void
 }
 
-type QueryFunction<T> = (value: string) => Promise<T[]>
+type QueryFunction<T> = (value: string, resourceLanguage?: ResourceLanguage) => Promise<T[]>
 
 interface QueryConfig<T> {
   queryKey?: QueryKey
@@ -50,7 +50,7 @@ export const useResultsByLetterOrSearch = <T,>(
       mode,
       active.value ?? '',
     ],
-    queryFn: () => active.query!(active.value!),
+    queryFn: () => active.query!(active.value!, active.resourceLanguage),
     enabled,
     staleTime: Infinity,
     ...localQueryOptions,

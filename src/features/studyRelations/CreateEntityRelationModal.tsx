@@ -444,8 +444,8 @@ const CreateEntityRelationModal = ({
         )
       }
       return deferredResourceSearchValue.trim()
-        ? resources.dictionary.search(deferredResourceSearchValue)
-        : resources.dictionary.listByLetter(dictionaryLetter)
+        ? resources.dictionary.search(deferredResourceSearchValue, resourcesLanguage.DICTIONNAIRE)
+        : resources.dictionary.listByLetter(dictionaryLetter, resourcesLanguage.DICTIONNAIRE)
     },
     enabled: shouldLoadDictionaryTargets,
   })

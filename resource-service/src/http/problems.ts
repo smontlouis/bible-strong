@@ -26,6 +26,8 @@ export class ResourceNotFoundProblem extends Schema.TaggedError<ResourceNotFound
       'BIBLE_CHAPTER_NOT_FOUND',
       'NAVE_UNSUPPORTED',
       'NAVE_TOPIC_NOT_FOUND',
+      'DICTIONARY_UNSUPPORTED',
+      'DICTIONARY_ENTRY_NOT_FOUND',
       'STRONG_BIBLE_UNSUPPORTED',
       'STRONG_BIBLE_CHAPTER_NOT_FOUND',
       'INTERLINEAR_UNSUPPORTED',
@@ -44,6 +46,7 @@ export class ResourceUnavailableProblem extends Schema.TaggedError<ResourceUnava
     code: Schema.Literal(
       'BIBLE_PUBLICATION_INACTIVE',
       'NAVE_PUBLICATION_INACTIVE',
+      'DICTIONARY_PUBLICATION_INACTIVE',
       'STRONG_BIBLE_PUBLICATION_INACTIVE',
       'INTERLINEAR_PUBLICATION_INACTIVE',
       'STRONG_LEXICON_PUBLICATION_INACTIVE'

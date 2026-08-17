@@ -18,6 +18,16 @@ import {
   NaveVerseTopicsResponseDto,
 } from '../../../src/features/resources/naveContract'
 import {
+  DictionaryEntriesQuery,
+  DictionaryEntriesResponseDto,
+  DictionaryEntryIdPath,
+  DictionaryEntryPath,
+  DictionaryEntryResponseDto,
+  DictionaryLanguagePath,
+  DictionaryVersePath,
+  DictionaryVerseWordsResponseDto,
+} from '../../../src/features/resources/dictionaryContract'
+import {
   StrongBibleChapterDto,
   StrongBibleChapterPath,
   StrongBibleCountsDto,
@@ -129,6 +139,48 @@ const NaveApi = HttpApiGroup.make('naves')
     HttpApiEndpoint.get('getRandomNaveTopic', '/v1/naves/:language/random')
       .setPath(NaveLanguagePath)
       .addSuccess(NaveTopicResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+
+const DictionaryApi = HttpApiGroup.make('dictionaries')
+  .add(
+    HttpApiEndpoint.get('listDictionaryEntries', '/v1/dictionaries/:language/entries')
+      .setPath(DictionaryLanguagePath)
+      .setUrlParams(DictionaryEntriesQuery)
+      .addSuccess(DictionaryEntriesResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getDictionaryEntry', '/v1/dictionaries/:language/entries/:word')
+      .setPath(DictionaryEntryPath)
+      .addSuccess(DictionaryEntryResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getDictionaryEntryById', '/v1/dictionaries/:language/entries/by-id/:id')
+      .setPath(DictionaryEntryIdPath)
+      .addSuccess(DictionaryEntryResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getDictionaryVerseWords',
+      '/v1/dictionaries/:language/verses/:verseKey/words'
+    )
+      .setPath(DictionaryVersePath)
+      .addSuccess(DictionaryVerseWordsResponseDto)
       .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })
@@ -289,6 +341,7 @@ export class ResourceApi extends HttpApi.make('resource-api')
   .add(SystemApi)
   .add(BibleApi)
   .add(NaveApi)
+  .add(DictionaryApi)
   .add(StrongBibleApi)
   .add(InterlinearBibleApi)
   .add(StrongLexiconApi) {}

@@ -7,11 +7,13 @@ import { tryDatabasePromise, type DatabaseFailure } from '../database/databaseEf
 import type { ResourceDatabase } from '../database/types'
 import {
   isBiblePublicationBundleManifest,
+  isDictionaryPublicationBundleManifest,
   isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
   isStrongLexiconPublicationBundleManifest,
   validatePublicationBundle,
   type CanonicalStrongLexiconModulePublication,
+  type CanonicalDictionaryPublication,
 } from '../publication/publicationBundle'
 
 export class PublicationImportFailure extends Data.TaggedError('PublicationImportFailure')<{
@@ -321,6 +323,8 @@ export const importPublicationBundle = (
         ? `bible-text:${manifest.identity.versionId}`
         : isNavePublicationBundleManifest(manifest)
           ? `nave:${manifest.identity.language}`
+          : isDictionaryPublicationBundleManifest(manifest)
+            ? `dictionary:${manifest.identity.language}`
           : isInterlinearBiblePublicationBundleManifest(manifest)
             ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
             : isStrongLexiconPublicationBundleManifest(manifest)
@@ -370,6 +374,17 @@ export const importPublicationBundle = (
               canonical_schema_version: manifest.canonical.schemaVersion,
               offline_entry: manifest.offlineArtifact.entry,
             }
+          : isDictionaryPublicationBundleManifest(manifest)
+            ? {
+                resource_id: manifest.identity.resourceId,
+                language: manifest.identity.language,
+                alphabetical_browse: manifest.alphabeticalBrowse,
+                delivery_capabilities: manifest.deliveryCapabilities,
+                counts: manifest.counts,
+                canonical_schema_version: manifest.canonical.schemaVersion,
+                resource_revision: manifest.revision,
+                offline_entry: manifest.offlineArtifact.entry,
+              }
           : isInterlinearBiblePublicationBundleManifest(manifest)
             ? {
                 version_id: manifest.identity.versionId,
@@ -426,6 +441,13 @@ export const importPublicationBundle = (
                 revision: manifest.revision,
                 itemCount: manifest.counts.topics,
               }
+            : isDictionaryPublicationBundleManifest(manifest)
+              ? {
+                  status,
+                  resourceIdentity,
+                  revision: manifest.revision,
+                  itemCount: manifest.counts.entries,
+                }
             : isInterlinearBiblePublicationBundleManifest(manifest)
               ? {
                   status,
@@ -616,6 +638,35 @@ export const importPublicationBundle = (
                   .values(links.slice(offset, offset + 1_000))
                   .execute()
               }
+            } else if (canonical.format === 'bible-strong-canonical-dictionary') {
+              const dictionaryCanonical = canonical as CanonicalDictionaryPublication
+              await insertChunks(
+                transaction,
+                'dictionary_entries',
+                dictionaryCanonical.entries.map(entry => ({
+                  publication_id: publication.id,
+                  entry_id: entry.id,
+                  word: entry.word,
+                  normalized_word: entry.normalizedWord,
+                  definition: entry.definition,
+                  payload: {
+                    id: entry.id,
+                    word: entry.word,
+                    sanitized_word: entry.normalizedWord,
+                    definition: entry.definition,
+                  },
+                }))
+              )
+              const links = dictionaryCanonical.verseAnchors.flatMap(anchor =>
+                anchor.words.map((word, ordinal) => ({
+                  publication_id: publication.id,
+                  verse_key: anchor.verseKey,
+                  ordinal,
+                  word,
+                  normalized_word: word.trim().toLocaleLowerCase(),
+                }))
+              )
+              await insertChunks(transaction, 'dictionary_verse_links', links)
             } else if (canonical.format === 'bible-strong-canonical-strong-index') {
               for (let offset = 0; offset < canonical.verses.length; offset += 1_000) {
                 assertNotInterrupted(signal)

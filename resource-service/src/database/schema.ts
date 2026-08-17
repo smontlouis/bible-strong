@@ -137,6 +137,56 @@ export const naveVerseLinks = pgTable(
   ]
 )
 
+export const dictionaryEntries = pgTable(
+  'dictionary_entries',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    entry_id: integer('entry_id').notNull(),
+    word: text('word').notNull(),
+    normalized_word: text('normalized_word').notNull(),
+    definition: text('definition').notNull(),
+    payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'dictionary_entries_publication_entry_primary',
+      columns: [table.publication_id, table.entry_id],
+    }),
+    index('dictionary_entries_browse').on(
+      table.publication_id,
+      table.normalized_word,
+      table.entry_id
+    ),
+    index('dictionary_entries_search').on(table.publication_id, table.word),
+  ]
+)
+
+export const dictionaryVerseLinks = pgTable(
+  'dictionary_verse_links',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    verse_key: text('verse_key').notNull(),
+    ordinal: integer('ordinal').notNull(),
+    word: text('word').notNull(),
+    normalized_word: text('normalized_word').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'dictionary_verse_links_publication_verse_ordinal_primary',
+      columns: [table.publication_id, table.verse_key, table.ordinal],
+    }),
+    index('dictionary_verse_links_lookup').on(
+      table.publication_id,
+      table.verse_key,
+      table.ordinal
+    ),
+  ]
+)
+
 export const strongBibleVerses = pgTable(
   'strong_bible_verses',
   {
