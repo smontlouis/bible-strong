@@ -54,3 +54,6 @@ RESOURCE_API_BASE_URL=http://127.0.0.1:8787 yarn resources:smoke:bible-search
 
 Les vérifications iOS/Android et les parcours E2E restent séparés de cette procédure et sont à
 exécuter manuellement.
+
+La matrice des surfaces et des identités est disponible dans
+[`docs/resource-evidence-matrix.md`](./resource-evidence-matrix.md).
