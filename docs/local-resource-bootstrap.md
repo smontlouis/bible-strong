@@ -31,6 +31,15 @@ RESOURCE_PUBLICATION_ROOTS="<ordinary-root>:<strong-root>:<interlinear-root>:<le
 
 ## 2. Importer dans PostgreSQL local
 
+Avec l'organisation locale standard (`bible-strong-app` et `bible-lexicon-maker` côte à côte), une
+seule commande démarre PostgreSQL, importe le catalogue canonique et lance l'API sur le port 8787 :
+
+```bash
+yarn resources:dev:local
+```
+
+La forme configurable reste disponible pour un autre emplacement :
+
 ```bash
 RESOURCE_PUBLICATION_ROOTS="<ordinary-root>:<strong-root>:<interlinear-root>:<lexicon-root>:<dictionary-root>:<nave-root>:<editorial-root>:<timeline-root>" \
   RESOURCE_API_PORT=8787 yarn resources:dev

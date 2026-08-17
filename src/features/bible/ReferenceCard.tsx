@@ -142,8 +142,17 @@ export const ReferenceCard = ({
     )
   }
 
-  if (!selectedVerse || !data) {
+  if (!selectedVerse) {
     return null
+  }
+
+  if (!data) {
+    return (
+      <Empty
+        source={require('~assets/images/empty.json')}
+        message={t('resource.crossReferences.noneForVerse')}
+      />
+    )
   }
 
   return (

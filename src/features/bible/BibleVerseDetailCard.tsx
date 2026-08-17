@@ -100,6 +100,7 @@ type StrongVerseQueryErrorCode =
   | 'DISK_IO'
   | 'UNKNOWN_ERROR'
   | 'STRONG_BIBLE_UNAVAILABLE'
+  | 'STRONG_VERSE_NOT_INDEXED'
 
 class StrongVerseQueryError extends Error {
   code: StrongVerseQueryErrorCode
@@ -193,7 +194,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       })
       if (result.status !== 'available') {
         throw new StrongVerseQueryError(
-          result.status === 'unavailable' ? 'STRONG_BIBLE_UNAVAILABLE' : 'UNKNOWN_ERROR'
+          result.status === 'unavailable'
+            ? 'STRONG_BIBLE_UNAVAILABLE'
+            : result.status === 'missing-location'
+              ? 'STRONG_VERSE_NOT_INDEXED'
+              : 'UNKNOWN_ERROR'
         )
       }
 
@@ -363,6 +368,17 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   }
 
   if (error) {
+    if (error === 'STRONG_VERSE_NOT_INDEXED') {
+      return (
+        <Container>
+          <Empty
+            iconElement={<FeatherIcon name="book-open" size={36} color="tertiary" />}
+            message={t('resource.strong.noLexiconForVerse')}
+          />
+        </Container>
+      )
+    }
+
     if (error === 'STRONG_BIBLE_UNAVAILABLE') {
       return (
         <Container>

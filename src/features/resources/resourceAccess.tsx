@@ -71,9 +71,7 @@ import {
   type TimelineAccess,
 } from '~features/resources/timelineAccess'
 import {
-  createHttpCommentaryAccess,
-  createCommentaryAccess,
-  defaultCommentaryAccess,
+  firestoreCommentaryAccess,
   type CommentaryAccess,
 } from '~features/resources/commentaryAccess'
 import {
@@ -148,12 +146,6 @@ const onlineNaveAccess = resourceApiBaseUrl
       isOnline: async () => onlineManager.isOnline(),
     })
   : unavailableHttpNaveAccess
-const onlineCommentaryAccess = resourceApiBaseUrl
-  ? createHttpCommentaryAccess({
-      baseUrl: resourceApiBaseUrl,
-      isOnline: async () => onlineManager.isOnline(),
-    })
-  : undefined
 const remotelyReadableDictionaryLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
@@ -255,9 +247,6 @@ const onlineBibleReadingAccess = resourceApiBaseUrl
         throw new Error('CROSS_REFERENCES_HTTP_UNCONFIGURED')
       },
     }
-const commentaryAccess = onlineCommentaryAccess
-  ? createCommentaryAccess({ remote: onlineCommentaryAccess, combineResults: false })
-  : defaultCommentaryAccess
 const onlineTimelineAccess = resourceApiBaseUrl
   ? createHttpTimelineAccess({
       baseUrl: resourceApiBaseUrl,
@@ -306,7 +295,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     remotelyReadableLanguages: remotelyReadableTimelineLanguages,
     isOnline: async () => onlineManager.isOnline(),
   }),
-  commentary: commentaryAccess,
+  commentary: firestoreCommentaryAccess,
   offlineCopies: { isAvailable: isLocalResourceAvailable },
   capabilities: {
     getOnlineAccess: identity =>

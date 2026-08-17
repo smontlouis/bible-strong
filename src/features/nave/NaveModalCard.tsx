@@ -13,6 +13,7 @@ import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import Empty from '~common/Empty'
 
 type Props = {
   selectedVerse: string
@@ -85,15 +86,21 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
   }
 
   const [naveItemsForVerse, naveItemsForChapter] = data || []
+  const hasTopics = Boolean(naveItemsForVerse?.length || naveItemsForChapter?.length)
 
   return (
     <SheetScrollView>
       <Box padding={20}>
-        {(!!naveItemsForChapter || !!naveItemsForVerse) && (
+        {hasTopics ? (
           <>
             <NaveForVerse items={naveItemsForVerse} label={t('Concernant le verset')} />
             <NaveForVerse items={naveItemsForChapter} label={t('Concernant le chapitre entier')} />
           </>
+        ) : (
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message={t('resource.nave.noTopicsForVerse')}
+          />
         )}
       </Box>
     </SheetScrollView>

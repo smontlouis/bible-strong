@@ -11,6 +11,8 @@ import { bookSelectorDataAtom } from '../BookSelectorSheet/BookSelectorSheet'
 import { useTheme } from '@emotion/react'
 import { useVersionCatalog, VersionCatalogHeader, VersionCatalogList } from '../VersionCatalogView'
 import { versionSelectorDataAtom } from './state'
+import type { Version } from '~helpers/bibleVersions'
+import BibleOfflineDetailsSheet from './BibleOfflineDetailsSheet'
 
 interface VersionSelectorSheetProps {
   sheetRef: React.RefObject<SheetRef | null>
@@ -24,6 +26,10 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
     Object.values(versions).filter(version => !version.hidden)
   )
   const [revealKey, setRevealKey] = React.useState(0)
+  const offlineDetailsRef = React.useRef<SheetRef>(null)
+  const [offlineDetailsVersion, setOfflineDetailsVersion] = React.useState<
+    (Version & { displayName?: string }) | undefined
+  >()
 
   const { actions, data, parallelVersionIndex } = useAtomValue(versionSelectorDataAtom)
   const setBookSelectorData = useSetAtom(bookSelectorDataAtom)
@@ -81,11 +87,16 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
               isSelected={item.id === selectedVersion}
               showStrongIndex
               strongCollapseKey={revealKey}
+              onOpenOfflineDetails={version => {
+                setOfflineDetailsVersion(version)
+                requestAnimationFrame(() => offlineDetailsRef.current?.present())
+              }}
             />
           )}
         />
       </Sheet>
       {versionCatalog.modals}
+      <BibleOfflineDetailsSheet sheetRef={offlineDetailsRef} version={offlineDetailsVersion} />
     </>
   )
 }

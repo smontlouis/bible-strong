@@ -92,9 +92,15 @@ const ActionButton = ({
   children,
   onPress,
   disabled = false,
-}: React.PropsWithChildren<{ onPress: () => void; disabled?: boolean }>) => (
+  accessibilityLabel,
+}: React.PropsWithChildren<{
+  onPress: () => void
+  disabled?: boolean
+  accessibilityLabel?: string
+}>) => (
   <TouchableOpacity
     accessibilityRole="button"
+    accessibilityLabel={accessibilityLabel}
     accessibilityState={{ disabled }}
     disabled={disabled}
     onPress={event => {
@@ -127,6 +133,7 @@ const VersionIdentity = ({
   onToggleInterlinearIndex,
   interlinearToggleLabel,
   interlinearAttribution,
+  passiveCapabilities = false,
 }: {
   version: Version & { displayName?: string }
   color: string
@@ -148,6 +155,7 @@ const VersionIdentity = ({
   onToggleInterlinearIndex?: () => void
   interlinearToggleLabel?: string
   interlinearAttribution?: string
+  passiveCapabilities?: boolean
 }) => (
   <Box flex>
     <Text color={color} fontSize={12} opacity={0.5} bold>
@@ -189,7 +197,7 @@ const VersionIdentity = ({
           </TouchableOpacity>
         ) : (
           <Box ml={5}>
-            <StrongMark highlighted={isStrongIndexAvailable} />
+            <StrongMark highlighted={isStrongIndexAvailable} passive={passiveCapabilities} />
           </Box>
         ))}
       {showCapabilities &&
@@ -219,7 +227,10 @@ const VersionIdentity = ({
           </TouchableOpacity>
         ) : (
           <Box ml={5}>
-            <InterlinearMark highlighted={isInterlinearIndexAvailable} />
+            <InterlinearMark
+              highlighted={isInterlinearIndexAvailable}
+              passive={passiveCapabilities}
+            />
           </Box>
         ))}
     </HStack>
@@ -265,6 +276,7 @@ interface Props {
   showStrongIndex?: boolean
   strongCollapseKey?: number
   selectionRequirement?: 'bible' | 'strong'
+  onOpenOfflineDetails?: (version: Version & { displayName?: string }) => void
 }
 
 const VersionSelectorItem = ({
@@ -279,6 +291,7 @@ const VersionSelectorItem = ({
   showStrongIndex,
   strongCollapseKey,
   selectionRequirement = 'bible',
+  onOpenOfflineDetails,
 }: Props) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
@@ -514,6 +527,48 @@ const VersionSelectorItem = ({
       ? strongSelectionAvailability.status !== 'available'
       : undefined
     : versionNeedsDownload
+
+  if (onOpenOfflineDetails) {
+    return (
+      <VersionItemContainer needsUpdate={needsUpdate} onPress={() => onChange?.(version.id)}>
+        <Box flex row alignItems="center">
+          <VersionIdentity
+            version={version}
+            color={versionColor}
+            showPublicationDetails
+            showCapabilities
+            passiveCapabilities
+            copyrightColor={copyrightColor}
+            copyrightOpacity={copyrightOpacity}
+            copyrightStyle={copyrightStyle}
+            onCopyrightPress={version.sourceUrl ? openSourceUrl : undefined}
+            showStrongCapability={showStrongCapability}
+            showInterlinearCapability={showInterlinearCapability}
+          />
+          {isLoading ? (
+            <Box width={30} center>
+              <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
+            </Box>
+          ) : versionNeedsDownload === false ? (
+            <Box width={30} center>
+              <FeatherIcon name="cloud" size={18} color="primary" />
+            </Box>
+          ) : null}
+          {isSelected && (
+            <Box width={26} center>
+              <FeatherIcon name="check" size={16} color="primary" />
+            </Box>
+          )}
+          <ActionButton
+            accessibilityLabel={t('bibleOfflineDetails.manage', { bible: version.id })}
+            onPress={() => onOpenOfflineDetails(version)}
+          >
+            <FeatherIcon name="more-horizontal" size={20} color="default" />
+          </ActionButton>
+        </Box>
+      </VersionItemContainer>
+    )
+  }
 
   if (selectionNeedsDownload !== false) {
     return (
