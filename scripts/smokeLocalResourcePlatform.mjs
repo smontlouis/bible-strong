@@ -14,6 +14,7 @@ const artifactBaseUrl = (process.env.RESOURCE_ARTIFACT_BASE_URL ?? 'http://127.0
 )
 
 const smokeScripts = [
+  'smokeResourceCatalogApi.mjs',
   'smokeBibleSearchResourceService.mjs',
   'smokeDictionaryResourceService.mjs',
   'smokeNaveResourceService.mjs',
