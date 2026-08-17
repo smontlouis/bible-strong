@@ -1457,16 +1457,16 @@
       "entries": {
         "canonical": {
           "entry": "dictionnaire.sqlite",
-          "sha256": "33120ac7e89aa5390836f55ac6a36366cd60824488408cdd9472ee30ba9f9f38",
+          "sha256": "20bba5cccf99d4fc2dffccce861cac596e814bd9178d93ecbf4ef488078e50d6",
           "bytes": 22532096
         }
       },
-      "archiveSha256": "bb041f16f4cc8d0f8c35e28752683f41dc52d747fcabd79cd1e4534760a09b9c",
-      "archiveBytes": 6819016,
-      "contentSha256": "33120ac7e89aa5390836f55ac6a36366cd60824488408cdd9472ee30ba9f9f38",
+      "archiveSha256": "7da622e2b6d11d0d41766a1f5aba9b091f157eed8161aa45be2ebc3981cb0621",
+      "archiveBytes": 6819899,
+      "contentSha256": "20bba5cccf99d4fc2dffccce861cac596e814bd9178d93ecbf4ef488078e50d6",
       "contentBytes": 22532096,
       "installedBytes": 22532096,
-      "peakInstallationBytes": 33753779,
+      "peakInstallationBytes": 33754795,
       "strategy": "archive-extract"
     },
     "database:DICTIONNAIRE:fr": {
@@ -1477,16 +1477,16 @@
       "entries": {
         "canonical": {
           "entry": "dictionnaire.sqlite",
-          "sha256": "167b6b2f8764de0093879f0f440b25baf8c50c513400d8c035ecb011835a1a08",
-          "bytes": 24455168
+          "sha256": "de510c259915c889c7dc154f25418c9753355e774d1938afaa876ce661e9697c",
+          "bytes": 24456192
         }
       },
-      "archiveSha256": "47216086d400f0e9c8739bd9baa0b868cf26969548305f519e00a17fc4a71a51",
-      "archiveBytes": 6602308,
-      "contentSha256": "167b6b2f8764de0093879f0f440b25baf8c50c513400d8c035ecb011835a1a08",
-      "contentBytes": 24455168,
-      "installedBytes": 24455168,
-      "peakInstallationBytes": 35716098,
+      "archiveSha256": "b124243c601ba224b9907f7bd8c8cca104ae56acad1f2140164080e0e46ba09b",
+      "archiveBytes": 6602491,
+      "contentSha256": "de510c259915c889c7dc154f25418c9753355e774d1938afaa876ce661e9697c",
+      "contentBytes": 24456192,
+      "installedBytes": 24456192,
+      "peakInstallationBytes": 35717486,
       "strategy": "archive-extract"
     },
     "database:MHY:fr": {

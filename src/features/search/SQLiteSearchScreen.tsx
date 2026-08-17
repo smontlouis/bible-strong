@@ -473,8 +473,11 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       try {
         const result =
           browseItemType === 'dictionary' && !trimmedSearchValue
-            ? await resources.dictionary.listByLetter(dictionaryLetter)
-            : await resources.dictionary.search(trimmedSearchValue)
+            ? await resources.dictionary.listByLetter(
+                dictionaryLetter,
+                resourcesLanguage.DICTIONNAIRE
+              )
+            : await resources.dictionary.search(trimmedSearchValue, resourcesLanguage.DICTIONNAIRE)
         return result
       } catch (error) {
         appLogger.error('database', 'search.dictionary.failed', { error })

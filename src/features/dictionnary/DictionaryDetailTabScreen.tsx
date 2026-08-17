@@ -80,7 +80,10 @@ const DictionnaryDetailScreen = ({
   })
   const dictionaryQuery = useQuery({
     queryKey: ['dictionary-detail', dictionaryResourceLanguage, word],
-    queryFn: async () => (word ? ((await resources.dictionary.loadItem(word)) ?? null) : null),
+    queryFn: async () =>
+      word
+        ? ((await resources.dictionary.loadItem(word, dictionaryResourceLanguage)) ?? null)
+        : null,
     enabled: !!word,
     staleTime: Infinity,
     ...localQueryOptions,

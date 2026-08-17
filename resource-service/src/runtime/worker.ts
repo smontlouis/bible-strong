@@ -1,11 +1,13 @@
 import { makeResourceWebHandler } from '../http/app'
 import type { BibleChapterRepositoryService } from '../domain/bibleChapter'
 import type { NaveRepositoryService } from '../domain/nave'
+import type { DictionaryRepositoryService } from '../domain/dictionary'
 import type { StrongBibleRepositoryService } from '../domain/strongBible'
 import type { InterlinearBibleRepositoryService } from '../domain/interlinearBible'
 import type { StrongLexiconRepositoryService } from '../domain/strongLexicon'
 import { makeNeonBibleChapterRepository } from '../repositories/bibleChapterRepository'
 import { makeNeonNaveRepository } from '../repositories/naveRepository'
+import { makeNeonDictionaryRepository } from '../repositories/dictionaryRepository'
 import { makeNeonStrongBibleRepository } from '../repositories/strongBibleRepository'
 import { makeNeonInterlinearBibleRepository } from '../repositories/interlinearBibleRepository'
 import { makeNeonStrongLexiconRepository } from '../repositories/strongLexiconRepository'
@@ -17,11 +19,13 @@ export type ResourceWorkerBindings = {
 export const makeResourceWorkerHandler = (
   repository: BibleChapterRepositoryService,
   naveRepository?: NaveRepositoryService,
+  dictionaryRepository?: DictionaryRepositoryService,
   strongBibleRepository?: StrongBibleRepositoryService,
   interlinearBibleRepository?: InterlinearBibleRepositoryService,
   strongLexiconRepository?: StrongLexiconRepositoryService
 ) =>
   makeResourceWebHandler(repository, naveRepository, {
+    dictionary: dictionaryRepository,
     strongBible: strongBibleRepository,
     interlinearBible: interlinearBibleRepository,
     strongLexicon: strongLexiconRepository,
@@ -38,6 +42,7 @@ const getWorkerHandler = (connectionString: string) => {
   if (cached?.connectionString === connectionString) return cached.web
   const { repository } = makeNeonBibleChapterRepository({ connectionString })
   const { repository: naveRepository } = makeNeonNaveRepository({ connectionString })
+  const { repository: dictionaryRepository } = makeNeonDictionaryRepository({ connectionString })
   const { repository: strongBibleRepository } = makeNeonStrongBibleRepository({ connectionString })
   const { repository: interlinearBibleRepository } = makeNeonInterlinearBibleRepository({
     connectionString,
@@ -48,6 +53,7 @@ const getWorkerHandler = (connectionString: string) => {
   const web = makeResourceWorkerHandler(
     repository,
     naveRepository,
+    dictionaryRepository,
     strongBibleRepository,
     interlinearBibleRepository,
     strongLexiconRepository

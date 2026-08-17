@@ -40,7 +40,8 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     queryKey: ['home-dictionary-random', lang, randomSeed],
     queryFn: async () =>
       (await resources.dictionary.loadItemByRowId(
-        lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620)
+        lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620),
+        lang
       )) ?? null,
     ...localQueryOptions,
   })

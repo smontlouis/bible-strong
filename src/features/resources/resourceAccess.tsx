@@ -24,7 +24,13 @@ import {
   localBibleSearchAccess,
   type BibleSearchAccess,
 } from '~features/resources/bibleSearchAccess'
-import { localDictionaryAccess, type DictionaryAccess } from '~features/resources/dictionaryAccess'
+import {
+  createHttpDictionaryAccess,
+  createHybridDictionaryAccess,
+  localDictionaryAccess,
+  unavailableHttpDictionaryAccess,
+  type DictionaryAccess,
+} from '~features/resources/dictionaryAccess'
 import {
   createHttpNaveAccess,
   createHybridNaveAccess,
@@ -133,6 +139,15 @@ const onlineNaveAccess = resourceApiBaseUrl
       isOnline: async () => onlineManager.isOnline(),
     })
   : unavailableHttpNaveAccess
+const remotelyReadableDictionaryLanguages = new Set<ResourceLanguage>(
+  resourceApiBaseUrl ? ['fr', 'en'] : []
+)
+const onlineDictionaryAccess = resourceApiBaseUrl
+  ? createHttpDictionaryAccess({
+      baseUrl: resourceApiBaseUrl,
+      isOnline: async () => onlineManager.isOnline(),
+    })
+  : unavailableHttpDictionaryAccess
 const remotelyReadableStrongBibleVersions = new Set(
   resourceApiBaseUrl ? STRONG_BIBLE_FALLBACK_PRIORITY : []
 )
@@ -214,7 +229,12 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     isOnline: async () => onlineManager.isOnline(),
   }),
   bibleSearch: localBibleSearchAccess,
-  dictionary: localDictionaryAccess,
+  dictionary: createHybridDictionaryAccess({
+    offline: localDictionaryAccess,
+    online: onlineDictionaryAccess,
+    remotelyReadableLanguages: remotelyReadableDictionaryLanguages,
+    isOnline: async () => onlineManager.isOnline(),
+  }),
   lexiconBible: lexiconBibleAccess,
   nave: createHybridNaveAccess({
     offline: localNaveAccess,
@@ -236,7 +256,8 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
         resourceApiBaseUrl ? new Set(['fr']) : new Set(),
         remotelyReadableStrongBibleVersions,
         remotelyReadableInterlinearLocales,
-        remotelyReadableStrongLexiconModules
+        remotelyReadableStrongLexiconModules,
+        remotelyReadableDictionaryLanguages
       ),
   },
 }

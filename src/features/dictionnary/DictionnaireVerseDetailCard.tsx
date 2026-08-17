@@ -20,6 +20,7 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import captureError from '~helpers/captureError'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { DictionaryEntry } from '~features/resources/dictionaryAccess'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLayoutSize } from '~helpers/useLayoutSize'
 import { wp } from '~helpers/utils'
@@ -119,7 +120,7 @@ const useFormattedText = ({
 }: {
   verse: Verse
   wordsInVerse?: string[]
-  resourceLang: string
+  resourceLang: ResourceLanguage
 }) => {
   const resources = useResourceAccess()
   const [selectedWord, setSelectedWord] = useState<string>()
@@ -142,7 +143,7 @@ const useFormattedText = ({
     queryFn: () =>
       Promise.all(
         (wordsInVerse ?? []).map(async w => {
-          const word = await resources.dictionary.loadItem(w)
+          const word = await resources.dictionary.loadItem(w, resourceLang)
           return word
         })
       ),
@@ -215,7 +216,8 @@ const DictionnaireVerseDetailScreen = ({
 
   const { error: dictionaryWordsError, data: wordsInVerse } = useQuery<string[]>({
     queryKey: ['dictionaryWords', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
-    queryFn: () => resources.dictionary.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`),
+    queryFn: () =>
+      resources.dictionary.loadWordsForVerse(`${Livre}-${Chapitre}-${Verset}`, resourceLang),
     ...localQueryOptions,
   })
 

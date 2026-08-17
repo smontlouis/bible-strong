@@ -8,6 +8,8 @@ import type {
   interlinearBibleVerses,
   naveTopics,
   naveVerseLinks,
+  dictionaryEntries,
+  dictionaryVerseLinks,
   resourcePublications,
   strongBibleIdentities,
   strongBibleLexemes,
@@ -35,6 +37,8 @@ export type ResourcePublicationRow = Kyselify<typeof resourcePublications>
 export type BibleVerseRow = Kyselify<typeof bibleVerses>
 export type NaveTopicRow = Kyselify<typeof naveTopics>
 export type NaveVerseLinkRow = Kyselify<typeof naveVerseLinks>
+export type DictionaryEntryRow = Kyselify<typeof dictionaryEntries>
+export type DictionaryVerseLinkRow = Kyselify<typeof dictionaryVerseLinks>
 export type StrongBibleVerseRow = Kyselify<typeof strongBibleVerses>
 export type StrongBibleLexemeRow = Kyselify<typeof strongBibleLexemes>
 export type StrongBibleIdentityRow = Kyselify<typeof strongBibleIdentities>
@@ -67,6 +71,8 @@ export type ResourceDatabase = {
   bible_verses: BibleVerseRow
   nave_topics: NaveTopicRow
   nave_verse_links: NaveVerseLinkRow
+  dictionary_entries: DictionaryEntryRow
+  dictionary_verse_links: DictionaryVerseLinkRow
   strong_bible_verses: StrongBibleVerseRow
   strong_bible_lexemes: StrongBibleLexemeRow
   strong_bible_identities: StrongBibleIdentityRow

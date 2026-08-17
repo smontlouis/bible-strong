@@ -7,12 +7,14 @@ import { createServer } from 'node:http'
 import { makeLocalDatabase } from '../database/localDatabase'
 import { BibleChapterRepository } from '../domain/bibleChapter'
 import { NaveRepository } from '../domain/nave'
+import { DictionaryRepository } from '../domain/dictionary'
 import { StrongBibleRepository } from '../domain/strongBible'
 import { InterlinearBibleRepository } from '../domain/interlinearBible'
 import { StrongLexiconRepository } from '../domain/strongLexicon'
 import { ResourceApiLive } from '../http/app'
 import { makeKyselyBibleChapterRepository } from '../repositories/bibleChapterRepository'
 import { makeKyselyNaveRepository } from '../repositories/naveRepository'
+import { makeKyselyDictionaryRepository } from '../repositories/dictionaryRepository'
 import { makeKyselyStrongBibleRepository } from '../repositories/strongBibleRepository'
 import { makeKyselyInterlinearBibleRepository } from '../repositories/interlinearBibleRepository'
 import { makeKyselyStrongLexiconRepository } from '../repositories/strongLexiconRepository'
@@ -32,6 +34,7 @@ const RepositoryLive = Layer.mergeAll(
     )
   ),
   Layer.succeed(NaveRepository, makeKyselyNaveRepository(database)),
+  Layer.succeed(DictionaryRepository, makeKyselyDictionaryRepository(database)),
   Layer.succeed(StrongBibleRepository, makeKyselyStrongBibleRepository(database)),
   Layer.succeed(InterlinearBibleRepository, makeKyselyInterlinearBibleRepository(database)),
   Layer.succeed(StrongLexiconRepository, makeKyselyStrongLexiconRepository(database))
