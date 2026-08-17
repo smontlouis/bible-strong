@@ -92,7 +92,8 @@ export const getResourceOnlineAccess = (
   (identity.kind === 'dictionary' && remotelyReadableDictionaryLanguages.has(identity.language)) ||
   (identity.kind === 'nave' && remotelyReadableNaveLanguages.has(identity.language)) ||
   (identity.kind === 'commentary' &&
-    remotelyReadableCommentaryCollections.has(identity.collection)) ||
+    (identity.collection === 'FIRESTORE' ||
+      remotelyReadableCommentaryCollections.has(identity.collection))) ||
   (identity.kind === 'cross-references' && remotelyReadableCrossReferences)
     ? { status: 'remotely-readable' }
     : { status: 'unsupported' }
