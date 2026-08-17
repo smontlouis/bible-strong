@@ -8,12 +8,16 @@ import type { ResourceDatabase } from '../database/types'
 import {
   isBiblePublicationBundleManifest,
   isDictionaryPublicationBundleManifest,
+  isCommentaryPublicationBundleManifest,
+  isCrossReferencePublicationBundleManifest,
   isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
   isStrongLexiconPublicationBundleManifest,
   validatePublicationBundle,
   type CanonicalStrongLexiconModulePublication,
   type CanonicalDictionaryPublication,
+  type CanonicalCommentaryPublication,
+  type CanonicalCrossReferencePublication,
 } from '../publication/publicationBundle'
 
 export class PublicationImportFailure extends Data.TaggedError('PublicationImportFailure')<{
@@ -325,11 +329,15 @@ export const importPublicationBundle = (
           ? `nave:${manifest.identity.language}`
           : isDictionaryPublicationBundleManifest(manifest)
             ? `dictionary:${manifest.identity.language}`
-            : isInterlinearBiblePublicationBundleManifest(manifest)
-              ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
-              : isStrongLexiconPublicationBundleManifest(manifest)
-                ? manifest.identity.resourceId
-                : `strong-bible-index:${manifest.identity.versionId}`
+            : isCommentaryPublicationBundleManifest(manifest)
+              ? `commentary:${manifest.identity.resourceId}:${manifest.identity.language}`
+              : isCrossReferencePublicationBundleManifest(manifest)
+                ? `cross-references:${manifest.identity.language}`
+                : isInterlinearBiblePublicationBundleManifest(manifest)
+                  ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
+                  : isStrongLexiconPublicationBundleManifest(manifest)
+                    ? manifest.identity.resourceId
+                    : `strong-bible-index:${manifest.identity.versionId}`
       const publicationStatus =
         manifest.deliveryCapabilities.onlineAccess ||
         (options.activateForLocalDevelopment &&
@@ -385,46 +393,66 @@ export const importPublicationBundle = (
                 resource_revision: manifest.revision,
                 offline_entry: manifest.offlineArtifact.entry,
               }
-            : isInterlinearBiblePublicationBundleManifest(manifest)
+            : isCommentaryPublicationBundleManifest(manifest)
               ? {
-                  version_id: manifest.identity.versionId,
-                  dataset_id: manifest.identity.datasetId,
+                  resource_id: manifest.identity.resourceId,
                   language: manifest.identity.language,
                   delivery_capabilities: manifest.deliveryCapabilities,
-                  dependencies: manifest.dependencies,
                   counts: manifest.counts,
                   canonical_schema_version: manifest.canonical.schemaVersion,
                   resource_revision: manifest.revision,
-                  text_revision: manifest.dependencies.bible.revision,
-                  text_sha256: manifest.dependencies.bible.textSha256,
                   offline_entry: manifest.offlineArtifact.entry,
                 }
-              : isStrongLexiconPublicationBundleManifest(manifest)
+              : isCrossReferencePublicationBundleManifest(manifest)
                 ? {
-                    module_id: manifest.identity.moduleId,
+                    resource_id: manifest.identity.resourceId,
+                    language: manifest.identity.language,
                     delivery_capabilities: manifest.deliveryCapabilities,
-                    dependencies: manifest.dependencies,
                     counts: manifest.counts,
                     canonical_schema_version: manifest.canonical.schemaVersion,
                     resource_revision: manifest.revision,
                     offline_entry: manifest.offlineArtifact.entry,
                   }
-                : {
-                    version_id: manifest.identity.versionId,
-                    dataset_id: manifest.identity.datasetId,
-                    delivery_capabilities: manifest.deliveryCapabilities,
-                    dependencies: manifest.dependencies,
-                    counts: manifest.counts,
-                    canonical_schema_version: manifest.canonical.schemaVersion,
-                    resource_revision: manifest.revision,
-                    text_revision: manifest.dependencies.bible.revision,
-                    text_sha256: manifest.dependencies.bible.textSha256,
-                    strong_revision:
-                      canonical.format === 'bible-strong-canonical-strong-index'
-                        ? canonical.strongRevision
-                        : undefined,
-                    offline_entry: manifest.offlineArtifact.entry,
-                  }
+                : isInterlinearBiblePublicationBundleManifest(manifest)
+                  ? {
+                      version_id: manifest.identity.versionId,
+                      dataset_id: manifest.identity.datasetId,
+                      language: manifest.identity.language,
+                      delivery_capabilities: manifest.deliveryCapabilities,
+                      dependencies: manifest.dependencies,
+                      counts: manifest.counts,
+                      canonical_schema_version: manifest.canonical.schemaVersion,
+                      resource_revision: manifest.revision,
+                      text_revision: manifest.dependencies.bible.revision,
+                      text_sha256: manifest.dependencies.bible.textSha256,
+                      offline_entry: manifest.offlineArtifact.entry,
+                    }
+                  : isStrongLexiconPublicationBundleManifest(manifest)
+                    ? {
+                        module_id: manifest.identity.moduleId,
+                        delivery_capabilities: manifest.deliveryCapabilities,
+                        dependencies: manifest.dependencies,
+                        counts: manifest.counts,
+                        canonical_schema_version: manifest.canonical.schemaVersion,
+                        resource_revision: manifest.revision,
+                        offline_entry: manifest.offlineArtifact.entry,
+                      }
+                    : {
+                        version_id: manifest.identity.versionId,
+                        dataset_id: manifest.identity.datasetId,
+                        delivery_capabilities: manifest.deliveryCapabilities,
+                        dependencies: manifest.dependencies,
+                        counts: manifest.counts,
+                        canonical_schema_version: manifest.canonical.schemaVersion,
+                        resource_revision: manifest.revision,
+                        text_revision: manifest.dependencies.bible.revision,
+                        text_sha256: manifest.dependencies.bible.textSha256,
+                        strong_revision:
+                          canonical.format === 'bible-strong-canonical-strong-index'
+                            ? canonical.strongRevision
+                            : undefined,
+                        offline_entry: manifest.offlineArtifact.entry,
+                      }
       const publicationMetadata = { ...metadata, manifest_sha256: manifestSha256 }
       const makeResult = (status: PublicationImportResult['status']): PublicationImportResult =>
         isBiblePublicationBundleManifest(manifest)
@@ -448,29 +476,43 @@ export const importPublicationBundle = (
                   revision: manifest.revision,
                   itemCount: manifest.counts.entries,
                 }
-              : isInterlinearBiblePublicationBundleManifest(manifest)
+              : isCommentaryPublicationBundleManifest(manifest)
                 ? {
                     status,
                     resourceIdentity,
                     revision: manifest.revision,
-                    itemCount: manifest.counts.segments,
+                    itemCount: manifest.counts.verses,
                   }
-                : isStrongLexiconPublicationBundleManifest(manifest)
+                : isCrossReferencePublicationBundleManifest(manifest)
                   ? {
                       status,
                       resourceIdentity,
                       revision: manifest.revision,
-                      itemCount: Object.values(manifest.counts).reduce(
-                        (total, count) => total + count,
-                        0
-                      ),
+                      itemCount: manifest.counts.references,
                     }
-                  : {
-                      status,
-                      resourceIdentity,
-                      revision: manifest.revision,
-                      itemCount: manifest.counts.occurrences,
-                    }
+                  : isInterlinearBiblePublicationBundleManifest(manifest)
+                    ? {
+                        status,
+                        resourceIdentity,
+                        revision: manifest.revision,
+                        itemCount: manifest.counts.segments,
+                      }
+                    : isStrongLexiconPublicationBundleManifest(manifest)
+                      ? {
+                          status,
+                          resourceIdentity,
+                          revision: manifest.revision,
+                          itemCount: Object.values(manifest.counts).reduce(
+                            (total, count) => total + count,
+                            0
+                          ),
+                        }
+                      : {
+                          status,
+                          resourceIdentity,
+                          revision: manifest.revision,
+                          itemCount: manifest.counts.occurrences,
+                        }
 
       return tryDatabasePromise(
         'publication.import',
@@ -667,6 +709,31 @@ export const importPublicationBundle = (
                 }))
               )
               await insertChunks(transaction, 'dictionary_verse_links', links)
+            } else if (canonical.format === 'bible-strong-canonical-commentary') {
+              const commentaryCanonical = canonical as CanonicalCommentaryPublication
+              await insertChunks(
+                transaction,
+                'commentary_verses',
+                commentaryCanonical.verses.map(verse => ({
+                  publication_id: publication.id,
+                  verse_key: verse.verseKey,
+                  content: verse.content,
+                }))
+              )
+            } else if (canonical.format === 'bible-strong-canonical-cross-references') {
+              const crossReferenceCanonical = canonical as CanonicalCrossReferencePublication
+              await insertChunks(
+                transaction,
+                'cross_reference_links',
+                crossReferenceCanonical.verseAnchors.flatMap(anchor =>
+                  anchor.references.map((reference, ordinal) => ({
+                    publication_id: publication.id,
+                    verse_key: anchor.verseKey,
+                    ordinal,
+                    reference,
+                  }))
+                )
+              )
             } else if (canonical.format === 'bible-strong-canonical-strong-index') {
               for (let offset = 0; offset < canonical.verses.length; offset += 1_000) {
                 assertNotInterrupted(signal)

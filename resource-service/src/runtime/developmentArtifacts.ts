@@ -18,8 +18,15 @@ export const createDevelopmentArtifact = (
     manifest.identity.kind === 'nave' && manifest.identity.language === 'en'
       ? '/databases/en'
       : '/databases'
+  const databaseKinds = new Set([
+    'nave',
+    'dictionary',
+    'commentary',
+    'cross-references',
+    'strong-lexicon-module',
+  ])
   return {
-    route: `${manifest.identity.kind === 'nave' || manifest.identity.kind === 'strong-lexicon-module' ? databasePrefix : '/bibles'}/${filename}`,
+    route: `${databaseKinds.has(manifest.identity.kind) ? databasePrefix : '/bibles'}/${filename}`,
     bytes,
     headers: {
       'content-type': manifest.offlineArtifact.mediaType,

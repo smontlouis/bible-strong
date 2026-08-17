@@ -137,6 +137,43 @@ export const naveVerseLinks = pgTable(
   ]
 )
 
+export const commentaryVerses = pgTable(
+  'commentary_verses',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    verse_key: text('verse_key').notNull(),
+    content: text('content').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'commentary_verses_publication_verse_primary',
+      columns: [table.publication_id, table.verse_key],
+    }),
+    index('commentary_verses_lookup').on(table.publication_id, table.verse_key),
+  ]
+)
+
+export const crossReferenceLinks = pgTable(
+  'cross_reference_links',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    verse_key: text('verse_key').notNull(),
+    ordinal: integer('ordinal').notNull(),
+    reference: text('reference').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'cross_reference_links_publication_verse_ordinal_primary',
+      columns: [table.publication_id, table.verse_key, table.ordinal],
+    }),
+    index('cross_reference_links_lookup').on(table.publication_id, table.verse_key, table.ordinal),
+  ]
+)
+
 export const dictionaryEntries = pgTable(
   'dictionary_entries',
   {

@@ -1497,15 +1497,15 @@
       "entries": {
         "canonical": {
           "entry": "commentaires-mhy.sqlite",
-          "sha256": "163c2e15d40394b6f141f8e1b0c748697f0c7c509be3a85205d70f6b42728fc5",
-          "bytes": 6574080
+          "sha256": "5f5d6e28f561957be09c8eaa1bee51afd52b073c4a572ae0b6474b90fe7ce111",
+          "bytes": 6575104
         }
       },
-      "archiveSha256": "1e6bf8466591fc846e1c4ec239c4821e7e1efb2a545e1b907f2716160c9b8aaa",
-      "archiveBytes": 1916604,
-      "contentSha256": "163c2e15d40394b6f141f8e1b0c748697f0c7c509be3a85205d70f6b42728fc5",
-      "contentBytes": 6574080,
-      "installedBytes": 6574080,
+      "archiveSha256": "12cb45899b302190c362b39158bc399bc7e5d2d035ae9c25e49d396b1ff63031",
+      "archiveBytes": 1943754,
+      "contentSha256": "5f5d6e28f561957be09c8eaa1bee51afd52b073c4a572ae0b6474b90fe7ce111",
+      "contentBytes": 6575104,
+      "installedBytes": 6575104,
       "peakInstallationBytes": 9764287,
       "strategy": "archive-extract"
     },
@@ -1597,15 +1597,15 @@
       "entries": {
         "canonical": {
           "entry": "commentaires-tresor.sqlite",
-          "sha256": "94d4dc0303f081ebc617ffb935437d8e4a44114c68e3d84d8e7d98701f7afebd",
-          "bytes": 5434368
+          "sha256": "cc5575bdf73ff43c2e44d1f5fe2de2a480f9d12e57e2152b7b437ff6c1771032",
+          "bytes": 5435392
         }
       },
-      "archiveSha256": "130696759f14fa1eeb30ea5edc9fd51a954168ffd55467a674133c0eaf3bda1a",
-      "archiveBytes": 1851318,
-      "contentSha256": "94d4dc0303f081ebc617ffb935437d8e4a44114c68e3d84d8e7d98701f7afebd",
-      "contentBytes": 5434368,
-      "installedBytes": 5434368,
+      "archiveSha256": "77a06354a28689085dec7c5c3e1593bdbf7944db22d075c42b67a24b32789f9c",
+      "archiveBytes": 1887092,
+      "contentSha256": "cc5575bdf73ff43c2e44d1f5fe2de2a480f9d12e57e2152b7b437ff6c1771032",
+      "contentBytes": 5435392,
+      "installedBytes": 5435392,
       "peakInstallationBytes": 8378539,
       "strategy": "archive-extract"
     },

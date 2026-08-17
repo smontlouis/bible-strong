@@ -64,6 +64,8 @@ import {
 } from '~features/resources/interlinearBibleResourceAccess'
 import { localTimelineAccess, type TimelineAccess } from '~features/resources/timelineAccess'
 import {
+  createHttpCommentaryAccess,
+  createCommentaryAccess,
   defaultCommentaryAccess,
   type CommentaryAccess,
 } from '~features/resources/commentaryAccess'
@@ -139,12 +141,19 @@ const onlineNaveAccess = resourceApiBaseUrl
       isOnline: async () => onlineManager.isOnline(),
     })
   : unavailableHttpNaveAccess
+const onlineCommentaryAccess = resourceApiBaseUrl
+  ? createHttpCommentaryAccess({
+      baseUrl: resourceApiBaseUrl,
+      isOnline: async () => onlineManager.isOnline(),
+    })
+  : undefined
 const remotelyReadableDictionaryLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
 const remotelyReadableNaveLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
+const remotelyReadableCommentaryCollections = new Set<string>(resourceApiBaseUrl ? ['MHY'] : [])
 const onlineDictionaryAccess = resourceApiBaseUrl
   ? createHttpDictionaryAccess({
       baseUrl: resourceApiBaseUrl,
@@ -216,7 +225,22 @@ const onlineBibleReadingAccess = resourceApiBaseUrl
       loadPericope: async () => {
         throw new Error('BIBLE_PERICOPE_HTTP_UNCONFIGURED')
       },
+      getMhyAvailability: async () => ({ status: 'unsupported' as const }),
+      loadMhyComments: async () => {
+        throw new Error('COMMENTARY_HTTP_UNCONFIGURED')
+      },
+      getTresorAvailability: async () => ({
+        status: 'unavailable' as const,
+        reason: 'offline-copy-required' as const,
+        recoveries: ['acquire-offline-copy' as const],
+      }),
+      loadTresorReferences: async () => {
+        throw new Error('CROSS_REFERENCES_HTTP_UNCONFIGURED')
+      },
     }
+const commentaryAccess = onlineCommentaryAccess
+  ? createCommentaryAccess({ remote: onlineCommentaryAccess, combineResults: false })
+  : defaultCommentaryAccess
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleContent: createBibleContentAccess(
@@ -249,7 +273,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   strongBible: strongBibleAccess,
   interlinearBible: interlinearBibleAccess,
   timeline: localTimelineAccess,
-  commentary: defaultCommentaryAccess,
+  commentary: commentaryAccess,
   offlineCopies: { isAvailable: isLocalResourceAvailable },
   capabilities: {
     getOnlineAccess: identity =>
@@ -260,7 +284,9 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
         remotelyReadableStrongBibleVersions,
         remotelyReadableInterlinearLocales,
         remotelyReadableStrongLexiconModules,
-        remotelyReadableDictionaryLanguages
+        remotelyReadableDictionaryLanguages,
+        remotelyReadableCommentaryCollections,
+        Boolean(resourceApiBaseUrl)
       ),
   },
 }
