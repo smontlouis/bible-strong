@@ -68,6 +68,7 @@ import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
+import useConnection from '~helpers/useConnection'
 
 type Props = {
   searchValue: string
@@ -96,6 +97,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const keyboardFooterBottom = useKeyboardFooterBottom(SEARCH_ALPHABET_FOOTER_HEIGHT)
   const openStudyObject = useOpenStudyObject()
   const resources = useResourceAccess()
+  const isConnected = useConnection()
   const defaultBibleVersion = useDefaultBibleVersion()
   const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
@@ -120,7 +122,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [naveLetter, setNaveLetter] = useState('a')
 
   const strongAvailabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
+    queryKey: [...resourceQueryKeys.strongLexiconAvailability('core'), isConnected],
     queryFn: async () => ({
       availability: await resources.strongLexicon.getModuleAvailability('core'),
       recoveries: await resources.strongLexicon.getModuleRecoveryActions?.('core'),
@@ -129,10 +131,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     staleTime: Infinity,
   })
   const dictionaryAvailabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability(
-      'DICTIONNAIRE',
-      resourcesLanguage.DICTIONNAIRE
-    ),
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability(
+        'DICTIONNAIRE',
+        resourcesLanguage.DICTIONNAIRE
+      ),
+      isConnected,
+    ],
     queryFn: () =>
       resources.dictionary.getAvailability?.(resourcesLanguage.DICTIONNAIRE) ??
       Promise.resolve({ status: 'available' as const }),
@@ -140,7 +145,10 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     staleTime: Infinity,
   })
   const naveAvailabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability('NAVE', resourcesLanguage.NAVE),
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('NAVE', resourcesLanguage.NAVE),
+      isConnected,
+    ],
     queryFn: () =>
       resources.nave.getAvailability?.(resourcesLanguage.NAVE) ??
       Promise.resolve({ status: 'available' as const }),
@@ -361,6 +369,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       book,
       selectedVersion,
       sortOrder,
+      isConnected,
     ],
     queryFn: async () => {
       try {
@@ -425,6 +434,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       browseItemType,
       trimmedSearchValue,
       strongLetter,
+      isConnected,
     ],
     queryFn: async () => {
       try {
@@ -468,6 +478,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       browseItemType,
       trimmedSearchValue,
       dictionaryLetter,
+      isConnected,
     ],
     queryFn: async () => {
       try {
@@ -506,6 +517,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       browseItemType,
       trimmedSearchValue,
       naveLetter,
+      isConnected,
     ],
     queryFn: async () => {
       try {
