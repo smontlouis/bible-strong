@@ -88,6 +88,31 @@ canonical ledger:
 npm run strong:report:references -- --bible nbs
 ```
 
+For the nine English SWORD Bibles, the contextual lemma/POS values are refined
+in a separate additive release after STEP reverse-interlinear enrichment:
+
+```sh
+npm run strong:english:lexemes:refine
+```
+
+This command never overwrites its parent release and never publishes an
+indeterminate POS. The complete evidence order, fingerprints, canaries,
+current candidate and regeneration contract are documented in
+[`docs/english-lemma-pos-refinement.md`](docs/english-lemma-pos-refinement.md).
+
+Audit a deterministic 100-Strong sample across KJV and ASV, including changed
+and unchanged occurrences:
+
+```sh
+npm run strong:english:lexemes:audit
+```
+
+The current v18 candidate passes the mechanical and semantic gates on the
+same reproducible 100-Strong KJV/ASV sample. The rejected v10–v17 lineage,
+current metrics, remaining review queue, and reproduction commands are
+documented in
+[`docs/english-lemma-pos-sample-audit.md`](docs/english-lemma-pos-sample-audit.md).
+
 For semantic gaps that remain in the ledger, build a constrained review packet
 before using any LLM. For production-scale review, inspect a stable plan before
 running the transactional batch:

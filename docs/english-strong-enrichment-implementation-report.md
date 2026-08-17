@@ -76,17 +76,17 @@ profil massif de sur-balisage observé dans ASV et Darby EN.
 
 Les cellules `kind` donnent `codes distincts / liens`.
 
-| Bible | kind 0 | kind 1 | kind 2 | kind 3 | Couverture STEP |
-|---|---:|---:|---:|---:|---:|
-| KJV | 14 079 / 373 413 | 1 113 / 37 247 | 4 403 / 123 584 | 1 431 / 43 272 | 92,19 % |
-| NASB2020 | 13 547 / 375 260 | 1 761 / 56 001 | 4 161 / 126 086 | 1 311 / 40 705 | 80,11 % |
-| NASB1995 | 13 555 / 358 103 | 1 768 / 54 132 | 4 186 / 128 633 | 1 314 / 41 524 | 85,88 % |
-| BSB | 13 867 / 435 307 | 1 123 / 57 951 | 4 405 / 147 569 | 1 456 / 46 808 | 97,28 % |
-| ASV | 6 291 / 217 997 | 427 / 17 357 | 3 107 / 64 744 | 703 / 20 369 | 22,67 % |
-| Darby EN | 6 228 / 216 810 | 412 / 17 287 | 2 968 / 64 191 | 673 / 20 134 | 22,44 % |
-| RLT | 14 077 / 373 406 | 1 113 / 37 246 | 4 405 / 123 586 | 1 431 / 43 278 | 92,19 % |
-| RWebster | 14 178 / 350 877 | 1 113 / 37 251 | 4 409 / 123 811 | 1 455 / 43 598 | 92,25 % |
-| RV1895 | 10 511 / 401 886 | 563 / 33 612 | 3 582 / 105 264 | 1 112 / 33 473 | 65,84 % |
+| Bible    |           kind 0 |         kind 1 |          kind 2 |         kind 3 | Couverture STEP |
+| -------- | ---------------: | -------------: | --------------: | -------------: | --------------: |
+| KJV      | 14 079 / 373 413 | 1 113 / 37 247 | 4 403 / 123 584 | 1 431 / 43 272 |         92,19 % |
+| NASB2020 | 13 547 / 375 260 | 1 761 / 56 001 | 4 161 / 126 086 | 1 311 / 40 705 |         80,11 % |
+| NASB1995 | 13 555 / 358 103 | 1 768 / 54 132 | 4 186 / 128 633 | 1 314 / 41 524 |         85,88 % |
+| BSB      | 13 867 / 435 307 | 1 123 / 57 951 | 4 405 / 147 569 | 1 456 / 46 808 |         97,28 % |
+| ASV      |  6 291 / 217 997 |   427 / 17 357 |  3 107 / 64 744 |   703 / 20 369 |         22,67 % |
+| Darby EN |  6 228 / 216 810 |   412 / 17 287 |  2 968 / 64 191 |   673 / 20 134 |         22,44 % |
+| RLT      | 14 077 / 373 406 | 1 113 / 37 246 | 4 405 / 123 586 | 1 431 / 43 278 |         92,19 % |
+| RWebster | 14 178 / 350 877 | 1 113 / 37 251 | 4 409 / 123 811 | 1 455 / 43 598 |         92,25 % |
+| RV1895   | 10 511 / 401 886 |   563 / 33 612 | 3 582 / 105 264 | 1 112 / 33 473 |         65,84 % |
 
 La couverture plus faible d'ASV et Darby EN est volontaire. Une égalité de
 cardinalité, ou la simple présence d'un Strong sur un mot fonctionnel, ne
@@ -94,10 +94,10 @@ suffit pas à émettre une identité enrichie.
 
 ## Assainissement ASV et Darby EN
 
-| Bible | Strong classiques source | Conservés par STEP | Conservés lexicalement | Supprimés | Dont mots fonctionnels | Dont incompatibilités lexicales |
-|---|---:|---:|---:|---:|---:|---:|
-| ASV | 681 149 | 154 415 | 63 582 | 463 152 | 353 030 | 110 122 |
-| Darby EN | 679 619 | 152 531 | 64 279 | 462 809 | 357 950 | 104 859 |
+| Bible    | Strong classiques source | Conservés par STEP | Conservés lexicalement | Supprimés | Dont mots fonctionnels | Dont incompatibilités lexicales |
+| -------- | -----------------------: | -----------------: | ---------------------: | --------: | ---------------------: | ------------------------------: |
+| ASV      |                  681 149 |            154 415 |                 63 582 |   463 152 |                353 030 |                         110 122 |
+| Darby EN |                  679 619 |            152 531 |                 64 279 |   462 809 |                357 950 |                         104 859 |
 
 Les égalités suivantes sont vérifiées à la publication :
 
@@ -198,6 +198,32 @@ Les alternatives rejetées :
 Une amélioration future du rappel devra fournir une preuve plus forte, par
 exemple un alignement original anglais explicitement adressé. Elle ne devra pas
 réactiver le fallback `H3117G → H3117`.
+
+### Lemmatisation et POS anglais
+
+L'audit du 2026-07-30 a montré que le POS contextuel provisoire contient des
+erreurs systématiques dans les neuf Bibles anglaises : noms divins, personnes
+et lieux peuvent notamment être classés `verb`. Ce défaut est indépendant de
+l'assainissement Strong ASV/Darby.
+
+Le contrat de correction, les canaris initiaux, l'ordre des preuves,
+l'interdiction de publier un POS indéterminé et la stratégie de génération
+additive sont définis dans
+[`docs/english-lemma-pos-refinement.md`](english-lemma-pos-refinement.md).
+Toute nouvelle release anglaise postérieure au candidat v9 doit appliquer ce
+contrat ou déclarer explicitement qu'elle reste une baseline non raffinée.
+
+Au 2026-07-30, l'implémentation courante est
+`english-lexeme-refinement@9` / `english-wordnet-context-pos@8`, dans
+`outputs/releases/bible-strong-reverse-interlinear-v18-wordnet-context-candidate`.
+Elle combine WordNet, lemmatiseur, contexte de phrase, règles anglaises
+bibliques versionnées, morphologie STEP comme diagnostic et consensus
+multi-Bibles. Le candidat contient 27 591 décisions et 86 835 corrections.
+Les neuf Bibles ont zéro canari bloquant et l'audit figé de 100 Strong
+KJV/ASV passe avec zéro POS indéterminé et zéro `name` sans forme propre
+reconnue. La lignée v10–v17 reste conservée mais rejetée; ses causes sont
+consignées dans
+[`docs/english-lemma-pos-sample-audit.md`](english-lemma-pos-sample-audit.md).
 
 ## Plan de promotion
 
