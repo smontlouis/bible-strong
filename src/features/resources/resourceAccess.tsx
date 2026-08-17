@@ -21,6 +21,8 @@ import {
   type BibleReadingResourceAccess,
 } from '~features/resources/bibleReadingResourceAccess'
 import {
+  createHttpBibleSearchAccess,
+  createHybridBibleSearchAccess,
   localBibleSearchAccess,
   type BibleSearchAccess,
 } from '~features/resources/bibleSearchAccess'
@@ -223,6 +225,13 @@ const remotelyReadableStrongLexiconModules = new Set(
 const remotelyReadableBibleVersions = new Set(
   resourceApiBaseUrl ? (__DEV__ ? getMobileBibleVersionIds() : PUBLIC_ONLINE_BIBLE_VERSION_IDS) : []
 )
+const onlineBibleSearchAccess = resourceApiBaseUrl
+  ? createHttpBibleSearchAccess({
+      baseUrl: resourceApiBaseUrl,
+      versions: [...remotelyReadableBibleVersions],
+      isOnline: async () => onlineManager.isOnline(),
+    })
+  : localBibleSearchAccess
 const onlineBibleReadingAccess = resourceApiBaseUrl
   ? createHttpBibleReadingResourceAccess({
       baseUrl: resourceApiBaseUrl,
@@ -269,7 +278,12 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     remotelyReadableVersions: remotelyReadableBibleVersions,
     isOnline: async () => onlineManager.isOnline(),
   }),
-  bibleSearch: localBibleSearchAccess,
+  bibleSearch: createHybridBibleSearchAccess({
+    offline: localBibleSearchAccess,
+    online: onlineBibleSearchAccess,
+    remotelyReadableVersions: remotelyReadableBibleVersions,
+    isOnline: async () => onlineManager.isOnline(),
+  }),
   dictionary: createHybridDictionaryAccess({
     offline: localDictionaryAccess,
     online: onlineDictionaryAccess,

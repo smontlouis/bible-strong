@@ -10,6 +10,26 @@ export class BibleVersionPath extends Schema.Class<BibleVersionPath>('BibleVersi
   version: BibleChapterRequest.fields.version,
 }) {}
 
+export class BibleSearchQuery extends Schema.Class<BibleSearchQuery>('BibleSearchQuery')({
+  q: Schema.NonEmptyString,
+  book: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 77))),
+  section: Schema.optional(Schema.Literal('ot', 'nt')),
+  sortOrder: Schema.optional(Schema.Literal('relevance', 'book')),
+  limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))),
+  offset: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.nonNegative())),
+}) {}
+
+export class BibleSearchResultDto extends Schema.Class<BibleSearchResultDto>(
+  'BibleSearchResultDto'
+)({
+  version: Schema.NonEmptyString,
+  book: Schema.Int.pipe(Schema.positive()),
+  chapter: Schema.Int.pipe(Schema.positive()),
+  verse: Schema.Int.pipe(Schema.nonNegative()),
+  text: Schema.String,
+  highlighted: Schema.String,
+}) {}
+
 export class BibleVersePresentationDto extends Schema.Class<BibleVersePresentationDto>(
   'BibleVersePresentationDto'
 )({
@@ -67,6 +87,14 @@ export class BibleTextRevisionDto extends Schema.Class<BibleTextRevisionDto>(
   revision: Schema.NonEmptyString,
   textRevision: Schema.optional(Schema.NonEmptyString),
   textSha256: Schema.optional(Schema.String.pipe(Schema.pattern(/^[a-f0-9]{64}$/))),
+}) {}
+
+export class BibleSearchResponseDto extends Schema.Class<BibleSearchResponseDto>(
+  'BibleSearchResponseDto'
+)({
+  resource: BibleTextRevisionDto,
+  results: Schema.Array(BibleSearchResultDto),
+  count: Schema.NonNegativeInt,
 }) {}
 
 export class BibleChapterDto extends Schema.Class<BibleChapterDto>('BibleChapterDto')({

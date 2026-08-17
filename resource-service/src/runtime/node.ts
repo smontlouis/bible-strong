@@ -6,6 +6,7 @@ import { createServer } from 'node:http'
 
 import { makeLocalDatabase } from '../database/localDatabase'
 import { BibleChapterRepository } from '../domain/bibleChapter'
+import { BibleSearchRepository } from '../domain/bibleSearch'
 import { NaveRepository } from '../domain/nave'
 import { DictionaryRepository } from '../domain/dictionary'
 import { StrongBibleRepository } from '../domain/strongBible'
@@ -15,6 +16,7 @@ import { SupplementaryRepository } from '../domain/supplementary'
 import { TimelineRepository } from '../domain/timeline'
 import { ResourceApiLive } from '../http/app'
 import { makeKyselyBibleChapterRepository } from '../repositories/bibleChapterRepository'
+import { makeKyselyBibleSearchRepository } from '../repositories/bibleSearchRepository'
 import { makeKyselyNaveRepository } from '../repositories/naveRepository'
 import { makeKyselyDictionaryRepository } from '../repositories/dictionaryRepository'
 import { makeKyselyStrongBibleRepository } from '../repositories/strongBibleRepository'
@@ -37,6 +39,7 @@ const RepositoryLive = Layer.mergeAll(
       Effect.promise(() => database.destroy())
     )
   ),
+  Layer.succeed(BibleSearchRepository, makeKyselyBibleSearchRepository(database)),
   Layer.succeed(NaveRepository, makeKyselyNaveRepository(database)),
   Layer.succeed(DictionaryRepository, makeKyselyDictionaryRepository(database)),
   Layer.succeed(StrongBibleRepository, makeKyselyStrongBibleRepository(database)),
