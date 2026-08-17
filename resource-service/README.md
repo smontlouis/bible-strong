@@ -53,7 +53,7 @@ lexicon modules needed for lexical details. Validation compares every verse, tok
 offset, segment, localized gloss, morphology value, and ordered lexical identity between canonical
 JSON and the archived V5 SQLite sidecar.
 
-The NAVE_FR archive entry is `nave-fr.sqlite`. In addition to the existing `TOPICS` and `VERSES`
+Nave archive entries are `nave-fr.sqlite` (French) and `nave.sqlite` (English). In addition to the existing `TOPICS` and `VERSES`
 tables, publication copies contain one `RESOURCE_METADATA` row with `resource_id`, `revision`,
 `source_version`, and `source_sha256`. Validation opens the database and compares every topic,
 description, verse/chapter anchor, durable identity, and metadata value with canonical JSON before
@@ -65,6 +65,7 @@ paths, both files, archive entry, hashes, identity, source revision, counts, and
 ```bash
 yarn resources:bundle:validate --bundle resource-service/.local/publications/lsg
 yarn resources:bundle:validate --bundle resource-service/.local/publications/nave-fr
+yarn resources:bundle:validate --bundle resource-service/.local/publications/nave-en
 ```
 
 Import and activation are one Kysely transaction wrapped at the Effect repository boundary:
@@ -74,6 +75,7 @@ yarn resources:db:up
 yarn resources:migrate
 yarn resources:import --bundle resource-service/.local/publications/lsg
 yarn resources:import --bundle resource-service/.local/publications/nave-fr
+yarn resources:import --bundle resource-service/.local/publications/nave-en
 yarn resources:import-all --root /path/to/ordinary-bible-publications-current
 yarn resources:import-all --root /path/to/strong-bible-publications-current
 yarn resources:import-all --root /path/to/interlinear-publications-current
@@ -106,8 +108,7 @@ the Nave operations consumed by the app:
 - `GET /v1/naves/:language/verses/:verseKey/topics`
 - `GET /v1/naves/:language/random`
 
-Only `nave:fr` (`NAVE_FR`) is remotely readable in this tracer. English Nave remains available
-through its existing optional Offline copy. All 12 cataloged Strong Bible versions are remotely
+Both `nave:fr` (`NAVE_FR`) and `nave:en` (`NAVE_EN`) are remotely readable in this tracer. All 12 cataloged Strong Bible versions are remotely
 readable when their validated index publication and the exact declared Bible text revision and
 SHA-256 are active. An active index with a missing or mismatched Bible publication is deliberately
 unavailable. Both cataloged BHG interlinear languages are remotely readable under the same exact
@@ -177,5 +178,5 @@ unchanged; only the origin is replaced.
 
 Production builds ignore this override. The local server validates the explicit bundle before it
 starts and returns generation plus checksum headers used by the normal atomic installation flow.
-Bible and interlinear artifacts are served below `/bibles/`; NAVE_FR is served at the existing
-mobile catalog path `/databases/nave-fr.sqlite.zip`.
+Bible and interlinear artifacts are served below `/bibles/`; Nave is served at the existing mobile
+catalog paths `/databases/nave-fr.sqlite.zip` and `/databases/en/nave.sqlite.zip`.
