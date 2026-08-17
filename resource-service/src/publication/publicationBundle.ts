@@ -591,9 +591,9 @@ export const derivePublicationRevision = (manifest: PublicationBundleManifest): 
           ? `commentary-${manifest.identity.resourceId.toLowerCase()}-${manifest.identity.language}`
           : manifest.identity.kind === 'cross-references'
             ? `cross-references-${manifest.identity.language}`
-        : manifest.identity.kind === 'strong-lexicon-module'
-          ? manifest.identity.resourceId
-          : manifest.identity.versionId.toLowerCase()
+            : manifest.identity.kind === 'strong-lexicon-module'
+              ? manifest.identity.resourceId
+              : manifest.identity.versionId.toLowerCase()
   const digest = createHash('sha256')
     .update(JSON.stringify(normalizeJson(envelope)))
     .digest('hex')
@@ -1659,8 +1659,7 @@ const validateCrossReferenceOfflineParity = async (
       })
       .sort(compareVerseKey)
     if (
-      JSON.stringify(anchors) !==
-      JSON.stringify([...canonical.verseAnchors].sort(compareVerseKey))
+      JSON.stringify(anchors) !== JSON.stringify([...canonical.verseAnchors].sort(compareVerseKey))
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }
@@ -2856,7 +2855,8 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       canonical.sourceVersion !== manifest.provenance.sourceVersion ||
       canonical.sourceSha256 !== manifest.provenance.sourceSha256 ||
       manifest.counts.verses !== canonical.verses.length ||
-      manifest.counts.characters !== canonical.verses.reduce((total, verse) => total + verse.content.length, 0)
+      manifest.counts.characters !==
+        canonical.verses.reduce((total, verse) => total + verse.content.length, 0)
     ) {
       throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
     }
@@ -2870,7 +2870,8 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       canonical.sourceVersion !== manifest.provenance.sourceVersion ||
       canonical.sourceSha256 !== manifest.provenance.sourceSha256 ||
       manifest.counts.verseAnchors !== canonical.verseAnchors.length ||
-      manifest.counts.references !== canonical.verseAnchors.reduce((total, anchor) => total + anchor.references.length, 0)
+      manifest.counts.references !==
+        canonical.verseAnchors.reduce((total, anchor) => total + anchor.references.length, 0)
     ) {
       throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
     }

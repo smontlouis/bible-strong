@@ -668,9 +668,7 @@ const SupplementaryApiLive = HttpApiBuilder.group(ResourceApi, 'supplementary', 
     .handle('getCommentaryChapter', ({ path, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
-        readCommentaryChapter(path).pipe(
-          Effect.mapError(cause => toHttpProblem(cause, requestId))
-        ),
+        readCommentaryChapter(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],
         ['commentary', path.collection, path.language, path.book, path.chapter]

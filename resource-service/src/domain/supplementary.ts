@@ -33,7 +33,9 @@ export class SupplementaryContentNotFound extends Data.TaggedError('Supplementar
   readonly verseKey?: string
 }> {}
 
-export class SupplementaryRepositoryFailure extends Data.TaggedError('SupplementaryRepositoryFailure')<{
+export class SupplementaryRepositoryFailure extends Data.TaggedError(
+  'SupplementaryRepositoryFailure'
+)<{
   readonly cause: unknown
 }> {}
 

@@ -7,7 +7,8 @@ const artifacts = [
 for (const [path, bundle] of artifacts) {
   const manifest = JSON.parse(await readFile(`${bundle}/manifest.json`, 'utf8'))
   const response = await fetch(`${baseUrl}${path}`, { method: 'HEAD' })
-  if (response.status !== 200) throw new Error(`supplementary-artifact-http:${path}:${response.status}`)
+  if (response.status !== 200)
+    throw new Error(`supplementary-artifact-http:${path}:${response.status}`)
   if (Number(response.headers.get('content-length')) !== manifest.offlineArtifact.bytes) {
     throw new Error(`supplementary-artifact-size:${path}`)
   }

@@ -170,11 +170,7 @@ export const crossReferenceLinks = pgTable(
       name: 'cross_reference_links_publication_verse_ordinal_primary',
       columns: [table.publication_id, table.verse_key, table.ordinal],
     }),
-    index('cross_reference_links_lookup').on(
-      table.publication_id,
-      table.verse_key,
-      table.ordinal
-    ),
+    index('cross_reference_links_lookup').on(table.publication_id, table.verse_key, table.ordinal),
   ]
 )
 
