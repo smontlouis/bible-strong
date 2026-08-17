@@ -27,6 +27,7 @@
     "resources:smoke:lexicon": "node scripts/smokeStrongLexiconResourceService.mjs",
     "resources:smoke:dictionary": "node scripts/smokeDictionaryResourceService.mjs",
     "resources:smoke:nave": "node scripts/smokeNaveResourceService.mjs",
+    "resources:smoke:nave:artifacts": "node scripts/smokeNaveResourceArtifacts.mjs",
     "resources:architecture:check": "node scripts/check-resource-service-architecture.mjs && node scripts/check-resource-ui-architecture.mjs",
     "resources:db:up": "docker compose -f resource-service/compose.yaml up -d --wait",
     "resources:db:down": "docker compose -f resource-service/compose.yaml down",
