@@ -977,10 +977,8 @@ const DownloadsScreen = () => {
         </Box>
       ) : isAvailabilityError ? (
         <ResourceUnavailableView
-          identity={{ kind: 'bible', versionId: 'LSG' }}
           title={t('downloads.availabilityUnavailable')}
-          fileSize={1}
-          reason="temporary-unavailable"
+          failure={{ cause: 'temporary-unavailable', recoveries: ['retry'] }}
           onRetry={() => void refreshDownloadedItems()}
         />
       ) : (

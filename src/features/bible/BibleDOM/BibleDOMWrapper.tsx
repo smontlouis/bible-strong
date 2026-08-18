@@ -139,6 +139,7 @@ import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strongSelection'
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import useConnection from '~helpers/useConnection'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -398,6 +399,7 @@ export const BibleDOMWrapper = ({
   personalBibleDataEnabled = true,
   error,
 }: WebViewProps) => {
+  const isConnected = useConnection()
   const { openVersionSelector } = useBookAndVersionSelector()
   const openRelationEndpoint = useOpenRelationEndpoint()
   const isContextFocused = contextDisplayMode === 'focused'
@@ -458,16 +460,19 @@ export const BibleDOMWrapper = ({
     parallelChapterNotFound: t('bible.error.parallelChapterNotFound'),
     parallelLoadError: t('bible.error.parallelLoadError'),
     exitFocus: t('tab.exitFocus'),
-    versionNotFound: t('bible.error.versionNotFound'),
-    chapterNotFound: t('bible.error.chapterNotFound'),
-    databaseCorrupted: t('bible.error.databaseCorrupted'),
-    onlineUnsupported: t('bible.error.onlineUnsupported'),
-    offlineUnavailable: t('bible.error.offlineUnavailable'),
-    temporaryUnavailable: t('bible.error.temporaryUnavailable'),
-    integrityFailure: t('bible.error.integrityFailure'),
-    unknownError: t('bible.error.unknown'),
+    resourceFailureDetails: {
+      'Référence introuvable': t('Référence introuvable'),
+      'app.youAreOffline': t('app.youAreOffline'),
+      'resource.status.offlineNotInstalled': t('resource.status.offlineNotInstalled'),
+      'resource.status.onlineUnsupported': t('resource.status.onlineUnsupported'),
+      'bible.error.databaseCorrupted': t('bible.error.databaseCorrupted'),
+      'resource.action.temporarilyUnavailable': t('resource.action.temporarilyUnavailable'),
+      'bible.error.integrityFailure': t('bible.error.integrityFailure'),
+      'bible.error.unknown': t('bible.error.unknown'),
+    },
     goToDownloads: t('bible.error.goToDownloads'),
     downloadVersion: t('bible.error.downloadVersion'),
+    repairOfflineCopy: t('resource.action.repairOfflineCopy'),
     connectionRequired: t('resource.action.connectionRequired'),
     downloading: t('bible.error.downloading'),
     inserting: t('bible.error.inserting'),
@@ -1010,6 +1015,7 @@ export const BibleDOMWrapper = ({
         relationItemsCount={relationMetadata.counts}
         relationItemsText={relationMetadata.items}
         isFormSheet={isFormSheet}
+        isConnected={isConnected}
       />
       {Platform.OS === 'android' && Number(Platform.Version) < 30 && (
         <AndroidWebViewWarningModal top={headerHeight + TOP_INSET} />

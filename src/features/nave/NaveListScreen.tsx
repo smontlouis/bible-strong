@@ -28,9 +28,13 @@ import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessCode,
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 
 type NaveRow = NaveTopicSummary
 type NaveSection = {
@@ -111,29 +115,13 @@ const NaveListScreen = ({
   const naveResults = Array.isArray(results) ? (results as NaveRow[]) : []
   const sectionResults = useSectionResults(naveResults)
 
-  if (
-    availabilityQuery.data?.status === 'unavailable' &&
-    availabilityQuery.data.recoveries.includes('acquire-offline-copy')
-  ) {
+  if (availabilityQuery.data?.status === 'unavailable') {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
         title={t('resource.nave.offlineCopyNeeded')}
         fileSize={7}
-        hasBackButton={showBackButton}
-        hasHeader
-      />
-    )
-  }
-
-  if (error === 'INVALID_OFFLINE_COPY' && recoveries.includes('acquire-offline-copy')) {
-    return (
-      <OfflineResourceRecovery
-        identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
-        title={t('La base Nave doit être retéléchargée.')}
-        fileSize={7}
-        hasBackButton={showBackButton}
-        hasHeader
+        failure={resourceFailureFromAvailability(availabilityQuery.data)}
       />
     )
   }
@@ -171,7 +159,11 @@ const NaveListScreen = ({
             identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
             title={t('resource.nave.temporarilyUnavailable')}
             fileSize={7}
-            reason="temporary-unavailable"
+            failure={
+              error
+                ? resourceFailureFromAccessCode(error, recoveries)
+                : resourceFailureFromAccessError(availabilityQuery.error)
+            }
             onRetry={() => {
               void availabilityQuery.refetch()
               retry()

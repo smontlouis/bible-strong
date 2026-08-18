@@ -26,8 +26,12 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessCode,
+  resourceFailureFromAccessError,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
 
 interface LexiqueSection {
   title: string
@@ -92,7 +96,7 @@ const LexiqueListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error, retry, fetchNextPage, hasNextPage } =
+  const { results, isLoading, error, recoveries, retry, fetchNextPage, hasNextPage } =
     useInfiniteResultsByLetterOrSearch(
       {
         queryKey: ['strong-lexicon'],
@@ -141,16 +145,18 @@ const LexiqueListScreen = ({
   }
 
   if (
-    coreAvailabilityQuery.data?.availability.status !== 'available' &&
-    coreAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+    coreAvailabilityQuery.data &&
+    coreAvailabilityQuery.data.availability.status !== 'available'
   ) {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-        hasBackButton={showBackButton}
-        hasHeader
         title={t('resource.strong.offlineCopyNeeded')}
         fileSize={35}
+        failure={resourceFailureFromStrongModuleAvailability(
+          coreAvailabilityQuery.data.availability,
+          coreAvailabilityQuery.data.recoveries
+        )}
       />
     )
   }
@@ -164,7 +170,11 @@ const LexiqueListScreen = ({
             identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
             title={t('resource.strong.temporarilyUnavailable')}
             fileSize={35}
-            reason="temporary-unavailable"
+            failure={
+              error
+                ? resourceFailureFromAccessCode(error, recoveries)
+                : resourceFailureFromAccessError(coreAvailabilityQuery.error)
+            }
             onRetry={() => {
               void coreAvailabilityQuery.refetch()
               retry()

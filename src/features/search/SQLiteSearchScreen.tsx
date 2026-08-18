@@ -64,11 +64,15 @@ import {
   type SearchSectionId,
 } from './searchResultsModel'
 import { localQueryOptions } from '~helpers/queryOptions'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import useConnection from '~helpers/useConnection'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
 
 type Props = {
   searchValue: string
@@ -592,7 +596,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           identity={recoveryIdentity}
           title={t('resource.search.temporarilyUnavailable')}
           fileSize={recoveryFileSize}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(
+            passageQuery.error ?? installedVersionsQuery.error
+          )}
           size="small"
           onRetry={() => {
             void installedVersionsQuery.refetch()
@@ -608,7 +614,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           identity={recoveryIdentity}
           title={t('resource.search.offlineCopyNeeded')}
           fileSize={recoveryFileSize}
-          reason="offline-copy-required"
+          failure={{ cause: 'offline-copy-required', recoveries: ['acquire-offline-copy'] }}
           size="small"
         />
       )
@@ -653,7 +659,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
           title={t('resource.strong.temporarilyUnavailable')}
           fileSize={35}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(
+            strongQuery.error ?? strongAvailabilityQuery.error
+          )}
           size="small"
           onRetry={() => {
             void strongAvailabilityQuery.refetch()
@@ -676,7 +684,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           }}
           title={t('resource.dictionary.temporarilyUnavailable')}
           fileSize={22}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(
+            dictionaryQuery.error ?? dictionaryAvailabilityQuery.error
+          )}
           size="small"
           onRetry={() => {
             void dictionaryAvailabilityQuery.refetch()
@@ -692,7 +702,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           identity={{ kind: 'database', databaseId: 'NAVE', language: resourcesLanguage.NAVE }}
           title={t('resource.nave.temporarilyUnavailable')}
           fileSize={7}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(naveQuery.error ?? naveAvailabilityQuery.error)}
           size="small"
           onRetry={() => {
             void naveAvailabilityQuery.refetch()
@@ -704,26 +714,29 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
     if (
       browseItemType === 'strong' &&
-      strongAvailabilityQuery.data?.availability.status !== 'available' &&
-      strongAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+      strongAvailabilityQuery.data &&
+      strongAvailabilityQuery.data.availability.status !== 'available'
     ) {
       return (
-        <OfflineResourceRecovery
+        <ResourceUnavailableView
           identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
           title={t('resource.strong.offlineCopyNeeded')}
           fileSize={35}
           size="small"
+          failure={resourceFailureFromStrongModuleAvailability(
+            strongAvailabilityQuery.data.availability,
+            strongAvailabilityQuery.data.recoveries
+          )}
         />
       )
     }
 
     if (
       browseItemType === 'dictionary' &&
-      dictionaryAvailabilityQuery.data?.status === 'unavailable' &&
-      dictionaryAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
+      dictionaryAvailabilityQuery.data?.status === 'unavailable'
     ) {
       return (
-        <OfflineResourceRecovery
+        <ResourceUnavailableView
           identity={{
             kind: 'database',
             databaseId: 'DICTIONNAIRE',
@@ -732,21 +745,19 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           title={t('resource.dictionary.offlineCopyNeeded')}
           fileSize={22}
           size="small"
+          failure={resourceFailureFromAvailability(dictionaryAvailabilityQuery.data)}
         />
       )
     }
 
-    if (
-      browseItemType === 'nave' &&
-      naveAvailabilityQuery.data?.status === 'unavailable' &&
-      naveAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
-    ) {
+    if (browseItemType === 'nave' && naveAvailabilityQuery.data?.status === 'unavailable') {
       return (
-        <OfflineResourceRecovery
+        <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'NAVE', language: resourcesLanguage.NAVE }}
           title={t('resource.nave.offlineCopyNeeded')}
           fileSize={7}
           size="small"
+          failure={resourceFailureFromAvailability(naveAvailabilityQuery.data)}
         />
       )
     }

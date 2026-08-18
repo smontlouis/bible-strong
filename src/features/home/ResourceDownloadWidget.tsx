@@ -17,6 +17,7 @@ import {
   resourceIdentityFromOfflineCopy,
   type OfflineCopyState,
 } from '~features/resources/resourceModel'
+import { getResourceFailurePresentation } from '~features/resources/resourceFailure'
 
 type Props = {
   identity: OfflineCopyIdentity
@@ -53,6 +54,10 @@ const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
     : []
   const canAcquire = actions.includes('make-available-offline') || actions.includes('retry')
   const connectionRequired = actions.includes('connection-required')
+  const failurePresentation = getResourceFailurePresentation(
+    { cause: 'offline-copy-required', recoveries: ['acquire-offline-copy'] },
+    { isOnline: isConnected }
+  )
 
   const startDownload = () => {
     if (!canAcquire) return
@@ -101,7 +106,7 @@ const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
         </>
       ) : connectionRequired ? (
         <>
-          <FeatherIcon name="wifi-off" size={24} color="tertiary" />
+          <FeatherIcon name={failurePresentation.icon} size={24} color="tertiary" />
           <Text color="tertiary" bold marginTop={10} textAlign="center" fontSize={12}>
             {title}
           </Text>
@@ -111,7 +116,7 @@ const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
         </>
       ) : (
         <>
-          <FeatherIcon name="download-cloud" size={24} color="tertiary" />
+          <FeatherIcon name={failurePresentation.icon} size={24} color="tertiary" />
           <Text color="tertiary" bold marginTop={10} textAlign="center" fontSize={12}>
             {title}
           </Text>

@@ -45,10 +45,9 @@ import {
 } from './targetSearch'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import ResourceUnavailableView, {
-  type ResourceUnavailableReason,
-} from '~features/resources/ResourceUnavailableView'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 
@@ -191,15 +190,6 @@ const getSourceEndpointSubtitle = (
       return endpoint.labelFallback || getEndpointFallbackLabel(endpoint)
   }
 }
-
-const getUnavailableReason = (error: unknown): ResourceUnavailableReason =>
-  error instanceof ResourceAccessError
-    ? error.code === 'INVALID_OFFLINE_COPY'
-      ? 'invalid-offline-copy'
-      : error.recoveries.includes('acquire-offline-copy')
-        ? 'offline-copy-required'
-        : 'temporary-unavailable'
-    : 'temporary-unavailable'
 
 const searchWithMatches = (
   targets: RelationTargetResult[],
@@ -743,7 +733,7 @@ const CreateEntityRelationModal = ({
                 createOfflineCopyDownloadItem(resourceFailure.identity).estimatedSize / 1_000_000
               )
             )}
-            reason={getUnavailableReason(resourceFailure.error)}
+            failure={resourceFailureFromAccessError(resourceFailure.error)}
             onRetry={() => void resourceFailure.retry()}
           />
         ) : (

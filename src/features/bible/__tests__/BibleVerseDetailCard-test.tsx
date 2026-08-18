@@ -107,6 +107,11 @@ jest.mock('~features/resources/OfflineResourceRecovery', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return () => ReactModule.createElement('OfflineResourceRecovery')
 })
+jest.mock('~features/resources/ResourceUnavailableView', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return (props: Record<string, unknown>) =>
+    ReactModule.createElement('ResourceUnavailableView', props)
+})
 
 jest.mock('~state/resourcesLanguage', () => ({
   useResourcesLanguageValue: () => ({ STRONG: 'fr' }),

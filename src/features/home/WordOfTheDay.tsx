@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import DictionnaireIcon from '~common/DictionnaryIcon'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -15,9 +14,13 @@ import RandomButton from './RandomButton'
 import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { ResourceAccessError } from '~features/resources/resourceAccessError'
-import ResourceDownloadWidget from './ResourceDownloadWidget'
 import useConnection from '~helpers/useConnection'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
+import ResourceDownloadWidget from './ResourceDownloadWidget'
 
 function randomIntFromInterval(min: number, max: number) {
   // min and max included
@@ -50,9 +53,8 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const strongReference = strongQuery.data
 
   if (
-    availabilityQuery.data?.status === 'unavailable' ||
-    (strongQuery.error instanceof ResourceAccessError &&
-      strongQuery.error.recoveries.includes('acquire-offline-copy'))
+    availabilityQuery.data?.status === 'unavailable' &&
+    availabilityQuery.data.reason === 'offline-copy-required'
   ) {
     return (
       <ResourceDownloadWidget
@@ -63,11 +65,45 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     )
   }
 
-  if (strongQuery.isError || (strongQuery.isSuccess && !strongReference)) {
+  if (
+    availabilityQuery.data?.status === 'unavailable' &&
+    availabilityQuery.data.reason === 'invalid-offline-copy'
+  ) {
     return (
       <WidgetContainer>
-        <FeatherIcon name="x" size={30} color="quart" />
-        <Text marginTop={5}>{t('Une erreur est survenue.')}</Text>
+        <ResourceUnavailableView
+          identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
+          title={t('resource.dictionary.temporarilyUnavailable')}
+          fileSize={22}
+          failure={resourceFailureFromAvailability(availabilityQuery.data)}
+          size="small"
+        />
+      </WidgetContainer>
+    )
+  }
+
+  if (
+    availabilityQuery.isError ||
+    strongQuery.isError ||
+    (strongQuery.isSuccess && !strongReference)
+  ) {
+    return (
+      <WidgetContainer>
+        <ResourceUnavailableView
+          identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
+          title={t('Une erreur est survenue.')}
+          fileSize={22}
+          failure={
+            availabilityQuery.isError || strongQuery.isError
+              ? resourceFailureFromAccessError(strongQuery.error ?? availabilityQuery.error)
+              : { cause: 'not-found', recoveries: [] }
+          }
+          size="small"
+          onRetry={() => {
+            void availabilityQuery.refetch()
+            void strongQuery.refetch()
+          }}
+        />
       </WidgetContainer>
     )
   }

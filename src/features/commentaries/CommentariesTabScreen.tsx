@@ -40,7 +40,7 @@ import ResourceUnavailableView from '~features/resources/ResourceUnavailableView
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import { databases } from '~helpers/databases'
 import { CommentaryAccessError } from '~features/resources/commentaryAccess'
-import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 const VersetWrapper = styled.View(() => ({
@@ -250,15 +250,16 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
                         }).estimatedSize / 1_000_000
                       )
                     )}
-                    reason="offline-copy-required"
+                    failure={{
+                      cause: 'offline-copy-required',
+                      recoveries: ['acquire-offline-copy'],
+                    }}
                     size="small"
                   />
                 ) : bibleTemporarilyUnavailable ? (
                   <ResourceUnavailableView
-                    identity={{ kind: 'bible', versionId: defaultVersion }}
                     title={t('resource.bible.referenceUnavailable', { version: defaultVersion })}
-                    fileSize={1}
-                    reason="temporary-unavailable"
+                    failure={{ cause: 'temporary-unavailable', recoveries: ['retry'] }}
                     size="small"
                     onRetry={verseResolution.retry}
                   />
@@ -286,14 +287,7 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
               identity={{ kind: 'database', databaseId: 'MHY', language: 'fr' }}
               title={t('resource.commentaries.temporarilyUnavailable')}
               fileSize={Math.max(1, Math.round(databases('fr').MHY.fileSize / 1_000_000))}
-              reason={
-                error instanceof ResourceAccessError && error.code === 'INVALID_OFFLINE_COPY'
-                  ? 'invalid-offline-copy'
-                  : error instanceof ResourceAccessError &&
-                      error.recoveries.includes('acquire-offline-copy')
-                    ? 'offline-copy-required'
-                    : 'temporary-unavailable'
-              }
+              failure={resourceFailureFromAccessError(error)}
               onRetry={() => void retry()}
             />
           ) : isError ? (

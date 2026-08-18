@@ -9,6 +9,7 @@ import { useResourceAccess } from './resourceAccess'
 import { getResourceActions, resourceIdentityFromOfflineCopy } from './resourceModel'
 import useConnection from '~helpers/useConnection'
 import { useTranslation } from 'react-i18next'
+import type { ResourceFailureIcon } from './resourceFailure'
 
 type Props = {
   identity: OfflineCopyIdentity
@@ -18,6 +19,8 @@ type Props = {
   hasBackButton?: boolean
   hasHeader?: boolean
   size?: 'small' | 'large'
+  icon?: ResourceFailureIcon
+  secondaryActions?: { label: string; onPress: () => void }[]
 }
 
 const OfflineResourceRecovery = ({

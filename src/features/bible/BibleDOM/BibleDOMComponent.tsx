@@ -16,7 +16,8 @@ import {
   VerseRelationItem,
   WebViewProps,
 } from './BibleDOMWrapper'
-import { BibleError, getBibleErrorPresentation } from '~helpers/bibleErrors'
+import { BibleError } from '~helpers/bibleErrors'
+import { getBibleDOMErrorPresentation } from './bibleDOMErrorPresentation'
 import ChevronDownIcon from './ChevronDownIcon'
 import Comment from './Comment'
 import {
@@ -204,6 +205,7 @@ type Props = Pick<
   error?: BibleError | null
   errorDownloadState?: BibleDOMDownloadState
   isResettingDatabase?: boolean
+  isConnected: boolean
 }
 
 const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVersion: string) => {
@@ -1366,10 +1368,12 @@ const BibleDOMErrorContent = ({
   errorDownloadState,
   isResettingDatabase,
   headerHeight,
+  isConnected,
 }: Pick<Props, 'settings' | 'dispatch' | 'translations' | 'error' | 'errorDownloadState'> & {
   error: BibleError
   isResettingDatabase?: boolean
   headerHeight: number
+  isConnected: boolean
 }) => {
   const isDownloading =
     errorDownloadState?.status === 'queued' ||
@@ -1377,14 +1381,13 @@ const BibleDOMErrorContent = ({
     errorDownloadState?.status === 'inserting'
   const progressLabel =
     errorDownloadState?.status === 'inserting' ? translations.inserting : translations.downloading
-  const canAcquire = error.recoveries?.includes('acquire-offline-copy')
-  const canManage = error.recoveries?.includes('manage-offline-copies')
-  const canReset = error.recoveries?.includes('reset-offline-store')
-  const presentation = getBibleErrorPresentation(error.type)
-  const canRetry = presentation.retryable
-  const connectionRequired = canAcquire && error.type === 'RESOURCE_OFFLINE'
-  const messageKey =
-    presentation.messageKey === 'unknown' ? 'unknownError' : presentation.messageKey
+  const failurePresentation = getBibleDOMErrorPresentation(error, isConnected)
+  const canAcquire = failurePresentation.actions.includes('download')
+  const canRepair = failurePresentation.actions.includes('repair')
+  const canManage = failurePresentation.actions.includes('manage')
+  const canReset = failurePresentation.actions.includes('reset')
+  const canRetry = failurePresentation.actions.includes('retry')
+  const connectionRequired = failurePresentation.connectionRequired
 
   return (
     <TranslationsProvider translations={translations}>
@@ -1394,13 +1397,15 @@ const BibleDOMErrorContent = ({
           <ErrorContent>
             <ErrorIcon settings={settings}>
               <Feather
-                name="download-cloud"
+                name={failurePresentation.icon}
                 size={26}
                 color={settings.colors[settings.theme].primary}
               />
             </ErrorIcon>
-            <ErrorMessage settings={settings}>{translations[messageKey]}</ErrorMessage>
-            {canAcquire &&
+            <ErrorMessage settings={settings}>
+              {translations.resourceFailureDetails[failurePresentation.detailKey]}
+            </ErrorMessage>
+            {(canAcquire || canRepair) &&
               (isDownloading ? (
                 <>
                   <ProgressTrack settings={settings}>
@@ -1426,7 +1431,9 @@ const BibleDOMErrorContent = ({
                 >
                   {connectionRequired
                     ? translations.connectionRequired
-                    : translations.downloadVersion}
+                    : canRepair
+                      ? translations.repairOfflineCopy
+                      : translations.downloadVersion}
                 </ErrorButton>
               ))}
             {canRetry && (
@@ -1509,6 +1516,7 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
         errorDownloadState={rest.errorDownloadState}
         isResettingDatabase={rest.isResettingDatabase}
         headerHeight={headerHeight}
+        isConnected={rest.isConnected}
       />
     )
   }

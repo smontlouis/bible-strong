@@ -7,6 +7,12 @@ import StrongOfTheDay from '../StrongOfTheDay'
 import WordOfTheDay from '../WordOfTheDay'
 
 let mockIsConnected = true
+let mockAvailabilityReason: 'offline-copy-required' | 'invalid-offline-copy' =
+  'offline-copy-required'
+let mockStrongAvailabilityStatus: 'missing' | 'incompatible' | 'corrupt' = 'missing'
+let mockAvailabilityError = false
+const mockAvailabilityRefetch = jest.fn()
+const mockContentRefetch = jest.fn()
 
 jest.mock('expo-linear-gradient', () => ({ LinearGradient: () => null }))
 
@@ -35,6 +41,11 @@ jest.mock('~common/ui/Box', () => {
   return { __esModule: true, default: () => null, AnimatedTouchableBox }
 })
 jest.mock('~common/ui/Progress', () => () => null)
+jest.mock('~features/resources/ResourceUnavailableView', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return (props: Record<string, unknown>) =>
+    ReactModule.createElement('ResourceUnavailableView', props)
+})
 jest.mock('../RandomButton', () => () => null)
 jest.mock('../widget', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
@@ -69,22 +80,41 @@ jest.mock('@tanstack/react-query', () => ({
     if (serializedKey.includes('strong-lexicon:availability')) {
       return {
         data: {
-          availability: { status: 'unavailable' },
+          availability:
+            mockStrongAvailabilityStatus === 'corrupt'
+              ? { status: 'corrupt', moduleId: 'core', reason: 'checksum mismatch' }
+              : { status: mockStrongAvailabilityStatus, moduleId: 'core' },
           recoveries: ['acquire-offline-copy'],
         },
         isPending: false,
         isError: false,
         isSuccess: true,
+        refetch: mockAvailabilityRefetch,
       }
     }
     return serializedKey.includes('availability')
       ? {
-          data: { status: 'unavailable', recoveries: ['acquire-offline-copy'] },
+          data: mockAvailabilityError
+            ? undefined
+            : {
+                status: 'unavailable',
+                reason: mockAvailabilityReason,
+                recoveries: ['acquire-offline-copy'],
+              },
+          error: mockAvailabilityError ? new Error('availability failed') : undefined,
           isPending: false,
-          isError: false,
-          isSuccess: true,
+          isError: mockAvailabilityError,
+          isSuccess: !mockAvailabilityError,
+          refetch: mockAvailabilityRefetch,
         }
-      : { data: undefined, error: undefined, isPending: true, isError: false, isSuccess: false }
+      : {
+          data: undefined,
+          error: undefined,
+          isPending: true,
+          isError: false,
+          isSuccess: false,
+          refetch: mockContentRefetch,
+        }
   },
 }))
 
@@ -119,6 +149,11 @@ describe('Home resource download widgets', () => {
 
   beforeEach(() => {
     mockIsConnected = true
+    mockAvailabilityReason = 'offline-copy-required'
+    mockStrongAvailabilityStatus = 'missing'
+    mockAvailabilityError = false
+    mockAvailabilityRefetch.mockClear()
+    mockContentRefetch.mockClear()
     jest.mocked(downloadManager.enqueue).mockClear()
     jest.mocked(downloadManager.retry).mockClear()
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -219,5 +254,52 @@ describe('Home resource download widgets', () => {
     act(() => recovery.props.onPress?.())
 
     expect(downloadManager.enqueue).not.toHaveBeenCalled()
+  })
+
+  it('presents an invalid Nave copy as repair instead of a normal download', () => {
+    mockAvailabilityReason = 'invalid-offline-copy'
+    act(() => {
+      renderer = create(<NaveOfTheDay />)
+    })
+
+    expect(
+      renderer.root.find(node => String(node.type) === 'ResourceUnavailableView').props.failure
+    ).toEqual({
+      cause: 'invalid-offline-copy',
+      recoveries: ['repair-offline-copy', 'manage-offline-copies'],
+    })
+  })
+
+  it('presents a corrupt Strong core as an integrity failure instead of a download', () => {
+    mockStrongAvailabilityStatus = 'corrupt'
+    act(() => {
+      renderer = create(<StrongOfTheDay type="grec" />)
+    })
+
+    expect(
+      renderer.root.find(node => String(node.type) === 'ResourceUnavailableView').props.failure
+    ).toEqual({
+      cause: 'integrity-failure',
+      recoveries: ['retry', 'repair-offline-copy', 'manage-offline-copies'],
+    })
+    expect(
+      renderer.root.findAll(node => String(node.type) === 'AnimatedTouchableBox')
+    ).toHaveLength(0)
+  })
+
+  it.each([
+    ['Nave', <NaveOfTheDay />],
+    ['Dictionary', <WordOfTheDay />],
+  ])('retries both %s availability and content queries', (_label, widget) => {
+    mockAvailabilityError = true
+    act(() => {
+      renderer = create(widget)
+    })
+
+    const unavailable = renderer.root.find(node => String(node.type) === 'ResourceUnavailableView')
+    act(() => unavailable.props.onRetry())
+
+    expect(mockAvailabilityRefetch).toHaveBeenCalledTimes(1)
+    expect(mockContentRefetch).toHaveBeenCalledTimes(1)
   })
 })

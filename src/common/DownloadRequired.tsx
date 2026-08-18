@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type ComponentProps } from 'react'
 
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
@@ -18,6 +18,8 @@ interface Props {
   hasBackground?: boolean
   disabled?: boolean
   actionLabel?: string
+  icon?: ComponentProps<typeof FeatherIcon>['name']
+  secondaryActions?: { label: string; onPress: () => void }[]
 }
 
 const DownloadRequired = ({
@@ -31,6 +33,8 @@ const DownloadRequired = ({
   hasBackground,
   disabled = false,
   actionLabel,
+  icon,
+  secondaryActions = [],
 }: Props) => {
   const padding = size === 'small' ? 10 : 30
   const { t } = useTranslation()
@@ -42,7 +46,7 @@ const DownloadRequired = ({
       <Box flex center padding={padding}>
         <Box center maxWidth={300}>
           <FeatherIcon
-            name={disabled ? 'wifi-off' : 'download-cloud'}
+            name={icon ?? (disabled ? 'wifi-off' : 'download-cloud')}
             size={size === 'small' ? 20 : iconSize}
             color="tertiary"
           />
@@ -57,6 +61,11 @@ const DownloadRequired = ({
           >
             {actionLabel ?? `${t('Télécharger')} (${fileSize}Mo)`}
           </Text>
+          {secondaryActions.map(action => (
+            <Text key={action.label} bold color="primary" marginTop={12} onPress={action.onPress}>
+              {action.label}
+            </Text>
+          ))}
         </Box>
       </Box>
     </Container>

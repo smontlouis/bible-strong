@@ -42,8 +42,11 @@ import { scaleFontSize } from './BibleDOM/scaleFontSize'
 import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
 import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
 import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -354,15 +357,19 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         : false
 
   if (
-    coreAvailabilityQuery.data?.availability.status !== 'available' &&
-    coreAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+    coreAvailabilityQuery.data &&
+    coreAvailabilityQuery.data.availability.status !== 'available'
   ) {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
         title={t('resource.strong.offlineCopyNeeded')}
         fileSize={35}
         size="small"
+        failure={resourceFailureFromStrongModuleAvailability(
+          coreAvailabilityQuery.data.availability,
+          coreAvailabilityQuery.data.recoveries
+        )}
       />
     )
   }
@@ -401,7 +408,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
         title={t('resource.strong.temporarilyUnavailable')}
         fileSize={35}
-        reason="temporary-unavailable"
+        failure={resourceFailureFromAccessError(
+          strongVerseQuery.error ?? coreAvailabilityQuery.error
+        )}
         size="small"
         onRetry={() => {
           void coreAvailabilityQuery.refetch()
