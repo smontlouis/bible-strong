@@ -607,7 +607,7 @@ const getInitialState = (): UserState => ({
   isLoading: true,
   sync: getInitialUserDataSyncState(),
   notifications: {
-    verseOfTheDay: '07:00',
+    verseOfTheDay: '',
     notificationId: '',
   },
   changelog: {

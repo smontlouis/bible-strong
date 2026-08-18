@@ -95,7 +95,7 @@ const getInitialState = (): UserState =>
     createdAt: null,
     isLoading: true,
     notifications: {
-      verseOfTheDay: '07:00',
+      verseOfTheDay: '',
       notificationId: '',
     },
     changelog: {
@@ -168,6 +168,12 @@ describe('User Reducer', () => {
 
   beforeEach(() => {
     initialState = getInitialState()
+  })
+
+  it('starts a fresh installation with verse-of-the-day notifications disabled', () => {
+    const freshState = reducer(undefined, { type: '@@INIT' })
+
+    expect(freshState.notifications.verseOfTheDay).toBe('')
   })
 
   describe('verifyEmail', () => {
