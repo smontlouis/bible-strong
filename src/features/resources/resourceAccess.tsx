@@ -85,7 +85,6 @@ import {
 } from '~features/resources/resourceModel'
 import {
   configureDevelopmentResourceArtifactBaseUrl,
-  getDevelopmentResourceArtifactBaseUrl,
   getMobileBibleVersionIds,
 } from '~helpers/mobileResourceCatalog'
 import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
@@ -121,15 +120,7 @@ const resourceApiBaseUrl =
 const configuredResourceArtifactBaseUrl = Constants.expoConfig?.extra?.resourceArtifactBaseUrl as
   | string
   | undefined
-const localDevelopmentApiBaseUrl = getDevelopmentResourceApiBaseUrl(
-  Platform.OS as 'ios' | 'android' | 'web'
-)
-configureDevelopmentResourceArtifactBaseUrl(
-  configuredResourceArtifactBaseUrl ??
-    (__DEV__ && resourceApiBaseUrl === localDevelopmentApiBaseUrl
-      ? getDevelopmentResourceArtifactBaseUrl(Platform.OS as 'ios' | 'android' | 'web')
-      : undefined)
-)
+configureDevelopmentResourceArtifactBaseUrl(configuredResourceArtifactBaseUrl)
 const onlineBibleChapterAdapter = resourceApiBaseUrl
   ? createHttpBibleChapterAdapter({
       baseUrl: resourceApiBaseUrl,

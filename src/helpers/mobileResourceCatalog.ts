@@ -234,14 +234,6 @@ export const getMobileStrongBibleVersionIds = (
 
 let developmentResourceArtifactBaseUrl: string | undefined
 
-export const getDevelopmentResourceArtifactBaseUrl = (
-  platform: 'ios' | 'android' | 'web'
-): string | undefined => {
-  if (platform === 'ios') return 'http://127.0.0.1:8788'
-  if (platform === 'android') return 'http://10.0.2.2:8788'
-  return undefined
-}
-
 export const configureDevelopmentResourceArtifactBaseUrl = (value: string | undefined): void => {
   developmentResourceArtifactBaseUrl = __DEV__ ? value : undefined
 }

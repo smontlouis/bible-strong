@@ -68,13 +68,18 @@ yarn resources:dev:local
 Elle force `RESOURCE_SKIP_IMPORT=1` : même une ancienne variable `RESOURCE_PUBLICATION_ROOTS`
 exportée dans le terminal ne peut donc pas relancer l'import. PostgreSQL et ses données persistent
 entre deux lancements ; le processus HTTP de l'API doit rester ouvert pour la consultation en ligne.
-Les téléchargements hors ligne utilisent en plus le serveur d'artefacts. Pour tester le
-téléchargement d'une publication précise, le bundle doit être indiqué explicitement :
+Les téléchargements hors ligne restent sur `assets.bible-strong.app`, indépendamment de l'API
+locale. Pour tester volontairement une publication locale, démarrez le serveur d'artefacts avec le
+bundle explicite :
 
 ```bash
 RESOURCE_PUBLICATION_BUNDLE="<bundle-directory>" \
   RESOURCE_ARTIFACT_PORT=8788 yarn resources:serve:artifacts
 ```
+
+Puis démarrez Expo avec `EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL=http://127.0.0.1:8788` pour le
+simulateur iOS, `http://10.0.2.2:8788` pour l'émulateur Android, ou l'adresse LAN du Mac pour un
+appareil physique.
 
 ## 4. Smoke API
 

@@ -189,8 +189,9 @@ RESOURCE_PUBLICATION_BUNDLE=resource-service/.local/publications/lsg \
   yarn resources:serve:artifacts
 ```
 
-Start Expo with the matching development-only base URL. The catalog path and declared checksums stay
-unchanged; only the origin is replaced.
+Start Expo with the matching development-only base URL. This override is explicit: using the local
+API alone keeps Offline-copy downloads on the catalog CDN. The catalog path and declared checksums
+stay unchanged; only the origin is replaced.
 
 | Target | `EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL` |
 | --- | --- |

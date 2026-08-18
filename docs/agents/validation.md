@@ -73,10 +73,10 @@ RESOURCE_PUBLICATION_BUNDLES_ROOT=/absolute/path/to/publications yarn resources:
 
 The development client defaults to `http://127.0.0.1:8787` on iOS and `http://10.0.2.2:8787` on Android when `EXPO_PUBLIC_RESOURCE_API_URL` is not configured. These defaults are development-only.
 
-When the API uses those local defaults, the development client also resolves Offline-copy
-archives to `http://127.0.0.1:8788` (iOS) or `http://10.0.2.2:8788` (Android). Set
-`EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL` to override this explicitly. The artifact server
-validates and serves every immediate child bundle in `RESOURCE_PUBLICATION_BUNDLES_ROOT`.
+Offline-copy archives continue to use the catalog CDN independently of the API origin. Set
+`EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL` explicitly only when testing a local artifact server. The
+artifact server validates and serves every immediate child bundle in
+`RESOURCE_PUBLICATION_BUNDLES_ROOT`.
 
 For a non-UI Strong lexicon smoke against a complete local stack:
 
