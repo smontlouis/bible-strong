@@ -5,7 +5,6 @@ import React from 'react'
 import type { SheetRef } from '~common/sheet'
 import type { Version } from '~helpers/bibleVersions'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
-import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { installedVersionsSignalAtom } from '~state/app'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
@@ -45,7 +44,7 @@ export const useBibleOfflineDetails = () => {
             installedSignal,
             completionSignal
           ),
-          queryFn: () => getStrongBibleSidecarAvailability(nextVersion.id),
+          queryFn: () => resources.strongBible.getAvailability(nextVersion.id),
         })
       )
     }

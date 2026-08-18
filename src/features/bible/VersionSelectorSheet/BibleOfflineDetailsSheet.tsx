@@ -25,7 +25,6 @@ import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import { getStrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
@@ -93,7 +92,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       completionSignal
     ),
     enabled: Boolean(strongVersionId),
-    queryFn: () => getStrongBibleSidecarAvailability(strongVersionId!),
+    queryFn: () => resources.strongBible.getAvailability(strongVersionId!),
   })
 
   if (!version || !versionId || !bibleId) return null
