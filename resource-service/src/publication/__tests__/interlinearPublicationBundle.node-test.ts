@@ -76,6 +76,13 @@ test('rejects an Offline Strong verse index with the wrong identity-kind mask', 
   await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_CONTENT_MISMATCH/)
 })
 
+test('rejects an Offline copy without the Strong occurrence cursor index', async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), 'interlinear-query-index-'))
+  await writeInterlinearPublicationFixture(root, { omitQueryIndexes: true })
+
+  await assert.rejects(validatePublicationBundle(root), /OFFLINE_ARTIFACT_INDEX_MISSING/)
+})
+
 test('rejects an Offline SQLite whose page graph fails integrity_check', async () => {
   const root = await mkdtemp(path.join(os.tmpdir(), 'interlinear-integrity-'))
   await writeInterlinearPublicationFixture(root, { corruptOfflineIntegrity: true })

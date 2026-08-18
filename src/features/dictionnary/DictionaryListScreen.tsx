@@ -18,15 +18,19 @@ import { getFirstLetterFrom } from '~helpers/alphabet'
 import type { DictionarySummary } from '~features/resources/dictionaryAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { DictionaryTab } from '../../state/tabs'
-import { useResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
+import { useInfiniteResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessCode,
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 
 type DictionaryRow = DictionarySummary
 
@@ -96,30 +100,28 @@ const DictionaryListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error, recoveries, retry } = useResultsByLetterOrSearch(
-    {
-      queryKey: ['dictionary'],
-      query: resources.dictionary.search,
-      value: debouncedSearchValue,
-      resourceLanguage: dictionaryResourceLanguage,
-    },
-    {
-      queryKey: ['dictionary'],
-      query: resources.dictionary.listByLetter,
-      value: letter,
-      resourceLanguage: dictionaryResourceLanguage,
-    }
-  )
+  const { results, isLoading, error, recoveries, retry, fetchNextPage, hasNextPage } =
+    useInfiniteResultsByLetterOrSearch(
+      {
+        queryKey: ['dictionary'],
+        query: resources.dictionary.searchPage,
+        value: debouncedSearchValue,
+        resourceLanguage: dictionaryResourceLanguage,
+      },
+      {
+        queryKey: ['dictionary'],
+        query: resources.dictionary.listByLetterPage,
+        value: letter,
+        resourceLanguage: dictionaryResourceLanguage,
+      }
+    )
 
   const dictionaryResults = Array.isArray(results) ? results : []
   const sectionResults = useSectionResults(dictionaryResults)
 
-  if (
-    availabilityQuery.data?.status === 'unavailable' &&
-    availabilityQuery.data.recoveries.includes('acquire-offline-copy')
-  ) {
+  if (availabilityQuery.data?.status === 'unavailable') {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{
           kind: 'database',
           databaseId: 'DICTIONNAIRE',
@@ -127,24 +129,7 @@ const DictionaryListScreen = ({
         }}
         title={t('resource.dictionary.offlineCopyNeeded')}
         fileSize={22}
-        hasBackButton={showBackButton}
-        hasHeader
-      />
-    )
-  }
-
-  if (error === 'INVALID_OFFLINE_COPY' && recoveries.includes('acquire-offline-copy')) {
-    return (
-      <OfflineResourceRecovery
-        identity={{
-          kind: 'database',
-          databaseId: 'DICTIONNAIRE',
-          language: dictionaryResourceLanguage,
-        }}
-        title={t('Votre dictionnaire doit être retéléchargé.')}
-        fileSize={22}
-        hasBackButton={showBackButton}
-        hasHeader
+        failure={resourceFailureFromAvailability(availabilityQuery.data)}
       />
     )
   }
@@ -177,7 +162,11 @@ const DictionaryListScreen = ({
             }}
             title={t('resource.dictionary.temporarilyUnavailable')}
             fileSize={22}
-            reason="temporary-unavailable"
+            failure={
+              error
+                ? resourceFailureFromAccessCode(error, recoveries)
+                : resourceFailureFromAccessError(availabilityQuery.error)
+            }
             onRetry={() => {
               void availabilityQuery.refetch()
               retry()
@@ -229,6 +218,10 @@ const DictionaryListScreen = ({
               keyExtractor={(item, index) =>
                 item.id ? String(item.id) : `${item.normalizedWord}-${item.word}-${index}`
               }
+              onEndReached={() => {
+                if (hasNextPage) fetchNextPage()
+              }}
+              onEndReachedThreshold={0.5}
             />
           ) : (
             <Empty

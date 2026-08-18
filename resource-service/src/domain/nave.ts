@@ -20,7 +20,13 @@ export type NaveTopic = {
 }
 
 export type NaveTopicLookup = { language: NaveLanguage; normalizedName: string }
-export type NaveTopicList = { language: NaveLanguage; initial?: string; search?: string }
+export type NaveTopicList = {
+  language: NaveLanguage
+  initial?: string
+  search?: string
+  limit?: number
+  cursor?: string
+}
 export type NaveVerseLookup = { language: NaveLanguage; verseKey: string }
 
 type ActiveNaveTopic = {
@@ -33,6 +39,8 @@ type ActiveNaveTopicList = {
   language: NaveLanguage
   revision: string
   topics: readonly NaveTopic[]
+  limit: number
+  nextCursor?: string
 }
 
 type ActiveNaveVerseTopics = {
@@ -115,6 +123,8 @@ export const browseNaveTopics = (input: NaveTopicList) =>
     return new NaveTopicListResponseDto({
       resource: revisionDto(active.language, active.revision),
       topics: active.topics.map(summaryDto),
+      limit: active.limit,
+      ...(active.nextCursor === undefined ? {} : { nextCursor: active.nextCursor }),
     })
   })
 

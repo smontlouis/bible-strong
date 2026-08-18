@@ -49,7 +49,10 @@ export const canonicalStrongFixture: CanonicalStrongBiblePublication = {
   ],
 }
 
-const makeOfflineSqlite = async (canonical: CanonicalStrongBiblePublication) => {
+const makeOfflineSqlite = async (
+  canonical: CanonicalStrongBiblePublication,
+  options: { omitQueryIndexes?: boolean } = {}
+) => {
   const SQL = await initSqlJs()
   const database = new SQL.Database()
   database.run(`
@@ -71,6 +74,14 @@ const makeOfflineSqlite = async (canonical: CanonicalStrongBiblePublication) => 
       PRIMARY KEY(verseId, targetOrdinal, sourceOrder)
     );
   `)
+  if (!options.omitQueryIndexes) {
+    database.run(`
+      CREATE INDEX Verses_location_idx ON Verses(bookOrder, chapter, verse);
+      CREATE UNIQUE INDEX StrongCodes_kind_code_idx ON StrongCodes(kind, code);
+      CREATE INDEX WordStrongCodes_code_verse_idx
+        ON WordStrongCodes(codeId, verseId, ordinal);
+    `)
+  }
   for (const [key, value] of Object.entries({
     applicationVersionId: canonical.applicationVersionId,
     datasetId: canonical.datasetId,
@@ -114,6 +125,7 @@ export const writeStrongPublicationFixture = async (
     duplicateIdentityCode?: boolean
     extraOfflineEntry?: boolean
     zeroVerse?: boolean
+    omitQueryIndexes?: boolean
   } = {}
 ) => {
   const canonical: CanonicalStrongBiblePublication = {
@@ -139,7 +151,7 @@ export const writeStrongPublicationFixture = async (
       : {}),
   }
   const canonicalJson = `${JSON.stringify(canonical)}\n`
-  const sqlite = await makeOfflineSqlite(canonical)
+  const sqlite = await makeOfflineSqlite(canonical, options)
   const offline = zipSync({
     'bible-lsg-strong.sqlite': sqlite,
     ...(options.extraOfflineEntry ? { 'unexpected.txt': new TextEncoder().encode('bad') } : {}),

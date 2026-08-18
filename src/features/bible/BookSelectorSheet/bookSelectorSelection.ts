@@ -43,6 +43,6 @@ export const applyBookChapterSelection = (
   actions.setTempSelectedBook(book)
   actions.setTempSelectedChapter(chapter)
   actions.setTempSelectedVerse(1)
-  actions.validateTempSelected()
   dismissBookSelector()
+  actions.validateTempSelected()
 }

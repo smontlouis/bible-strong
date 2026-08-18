@@ -8,6 +8,9 @@ import {
   BibleTextRevisionDto,
   BibleVersionCoverageDto,
   BibleVersePresentationDto,
+  BibleVerseTextDto,
+  BibleVerseTextsDto,
+  type BibleVerseLocation,
   type BibleVersePresentation,
 } from '../../../src/features/resources/bibleChapterContract'
 import { isOrdinaryBibleVersionId } from '../../../src/helpers/ordinaryBibleVersions'
@@ -27,6 +30,19 @@ export type ActiveBibleChapter = BibleChapterLocation & {
     text: string
     presentation: BibleVersePresentation
   }[]
+}
+
+export type BibleVerseTextSelection = {
+  versionId: string
+  locations: readonly BibleVerseLocation[]
+}
+
+export type ActiveBibleVerseTexts = {
+  versionId: string
+  revision: string
+  textRevision: string
+  textSha256?: string
+  verses: readonly (BibleVerseLocation & { text: string })[]
 }
 
 export type ActiveBibleCoverage = {
@@ -68,6 +84,10 @@ export class BibleChapterNotFound extends Data.TaggedError(
   'BibleChapterNotFound'
 )<BibleChapterLocation> {}
 
+export class BibleVerseSelectionNotFound extends Data.TaggedError(
+  'BibleVerseSelectionNotFound'
+)<BibleVerseTextSelection> {}
+
 export class BibleChapterRepositoryFailure extends Data.TaggedError(
   'BibleChapterRepositoryFailure'
 )<{
@@ -77,6 +97,7 @@ export class BibleChapterRepositoryFailure extends Data.TaggedError(
 export type BibleChapterRepositoryError =
   | ActiveBiblePublicationUnavailable
   | BibleChapterNotFound
+  | BibleVerseSelectionNotFound
   | BibleChapterRepositoryFailure
 
 export type BibleChapterRepositoryService = {
@@ -89,6 +110,9 @@ export type BibleChapterRepositoryService = {
   findActivePericopes: (
     versionId: string
   ) => Effect.Effect<ActiveBiblePericopeIndex, BibleChapterRepositoryError>
+  findActiveVerseTexts: (
+    input: BibleVerseTextSelection
+  ) => Effect.Effect<ActiveBibleVerseTexts, BibleChapterRepositoryError>
 }
 
 export class BibleChapterRepository extends Context.Tag('BibleChapterRepository')<
@@ -126,6 +150,40 @@ export const readBibleChapter = (
             number: verse.number,
             text: verse.text,
             presentation: new BibleVersePresentationDto(verse.presentation),
+          })
+      ),
+    })
+  })
+
+export const readBibleVerseTexts = (
+  input: BibleVerseTextSelection
+): Effect.Effect<
+  BibleVerseTextsDto,
+  UnsupportedBibleVersion | BibleChapterRepositoryError,
+  BibleChapterRepository
+> =>
+  Effect.gen(function* () {
+    if (!isOrdinaryBibleVersionId(input.versionId)) {
+      return yield* new UnsupportedBibleVersion({ versionId: input.versionId })
+    }
+    const repository = yield* BibleChapterRepository
+    const selection = yield* repository.findActiveVerseTexts(input)
+
+    return new BibleVerseTextsDto({
+      resource: new BibleTextRevisionDto({
+        kind: 'bible-text',
+        versionId: selection.versionId,
+        revision: selection.revision,
+        textRevision: selection.textRevision,
+        ...(selection.textSha256 ? { textSha256: selection.textSha256 } : {}),
+      }),
+      verses: selection.verses.map(
+        verse =>
+          new BibleVerseTextDto({
+            book: verse.book,
+            chapter: verse.chapter,
+            number: verse.verse,
+            text: verse.text,
           })
       ),
     })

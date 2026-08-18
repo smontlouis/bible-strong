@@ -4,11 +4,10 @@ import { getMultipleVerses, getVerseText } from '~helpers/biblesDb'
 import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
 import {
   getStrongBibleSidecarAvailability,
-  getResolvedStrongBibleConcordanceIdentity,
-  loadStrongBibleLemmaStats,
+  loadStrongBibleLemmaStatsResult,
   loadStrongBibleChapterSpans,
   loadStrongBibleOccurrenceLocations,
-  loadStrongBibleVerseCountsByBook,
+  loadStrongBibleVerseCountsByBookResult,
   loadStrongBibleVerseSpans,
   loadStrongBibleVersesSpans,
   type StrongBibleLemmaStat,
@@ -168,7 +167,7 @@ export interface StrongBibleResourceAdapter {
   ) => Promise<{
     verses: Verse[]
     identity?: ResolvedStrongBibleIdentity
-    nextOffset?: number
+    nextCursor?: string
   }>
   loadLemmaStats: (
     versionId: StrongBibleVersionId,
@@ -180,22 +179,14 @@ export interface StrongBibleResourceAdapter {
 }
 
 type StrongBibleAdapterConcordanceRequest = Omit<StrongBibleConcordanceRequest, 'pageToken'> & {
-  offset?: number
-}
-
-const encodePageToken = (offset: number) => `strong:${offset}`
-
-const decodePageToken = (pageToken?: string) => {
-  if (!pageToken?.startsWith('strong:')) return 0
-  const offset = Number(pageToken.slice('strong:'.length))
-  return Number.isFinite(offset) && offset >= 0 ? offset : 0
+  cursor?: string
 }
 
 const toAdapterRequest = (
   request: StrongBibleConcordanceRequest
 ): StrongBibleAdapterConcordanceRequest => {
   const { pageToken, ...adapterRequest } = request
-  return { ...adapterRequest, offset: decodePageToken(pageToken) }
+  return { ...adapterRequest, ...(pageToken ? { cursor: pageToken } : {}) }
 }
 
 export interface StrongBibleResourceAccess {
@@ -235,22 +226,21 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
     return text == null ? undefined : { text, spans }
   },
   async loadCountsByBook(versionId, request) {
-    const [counts, identity] = await Promise.all([
-      loadStrongBibleVerseCountsByBook(versionId, request.book, request.reference),
-      getResolvedStrongBibleConcordanceIdentity(versionId, request.book, request.reference),
-    ])
-    return { counts, ...(identity ? { identity } : {}) }
+    return loadStrongBibleVerseCountsByBookResult(versionId, request.book, request.reference)
   },
   async loadFoundVersesByBook(versionId, request) {
-    const [locations, identity] = await Promise.all([
-      loadStrongBibleOccurrenceLocations(versionId, request.book, request.reference, {
+    const page = await loadStrongBibleOccurrenceLocations(
+      versionId,
+      request.book,
+      request.reference,
+      {
         limit: request.limit,
-        offset: request.offset,
+        cursor: request.cursor,
         allBooks: request.allBooks,
         lexemeId: request.lexemeId,
-      }),
-      getResolvedStrongBibleConcordanceIdentity(versionId, request.book, request.reference),
-    ])
+      }
+    )
+    const { locations, identity } = page
     const keys = locations.map(
       location => `${location.Livre}-${location.Chapitre}-${location.Verset}`
     )
@@ -265,22 +255,14 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
         ? []
         : [{ ...location, Texte: text, StrongSpans: spansByVerse[key] ?? [] }]
     })
-    const nextOffset =
-      request.limit && locations.length >= request.limit
-        ? (request.offset ?? 0) + locations.length
-        : undefined
     return {
       verses,
       ...(identity ? { identity } : {}),
-      ...(nextOffset == null ? {} : { nextOffset }),
+      ...(page.nextCursor ? { nextCursor: page.nextCursor } : {}),
     }
   },
   async loadLemmaStats(versionId, request) {
-    const [lemmas, identity] = await Promise.all([
-      loadStrongBibleLemmaStats(versionId, request.book, request.reference),
-      getResolvedStrongBibleConcordanceIdentity(versionId, request.book, request.reference),
-    ])
-    return { lemmas, ...(identity ? { identity } : {}) }
+    return loadStrongBibleLemmaStatsResult(versionId, request.book, request.reference)
   },
 }
 
@@ -513,7 +495,7 @@ export const createHttpStrongBibleResourceAdapter = ({
     async loadFoundVersesByBook(versionId, request) {
       const query = new URLSearchParams()
       if (request.limit !== undefined) query.set('limit', String(request.limit))
-      if (request.offset !== undefined) query.set('offset', String(request.offset))
+      if (request.cursor !== undefined) query.set('cursor', request.cursor)
       if (request.allBooks !== undefined) query.set('allBooks', String(request.allBooks))
       if (request.lexemeId !== undefined) query.set('lexemeId', String(request.lexemeId))
       const response = await get(
@@ -550,7 +532,7 @@ export const createHttpStrongBibleResourceAdapter = ({
         ...(response.identity
           ? { identity: response.identity as ResolvedStrongBibleIdentity }
           : {}),
-        ...(response.nextOffset === undefined ? {} : { nextOffset: response.nextOffset }),
+        ...(response.nextCursor === undefined ? {} : { nextCursor: response.nextCursor }),
       }
     },
     async loadLemmaStats(versionId, request) {
@@ -807,7 +789,7 @@ export const createStrongBibleResourceAccess = (
         provenance: resolution.provenance,
         verses: loaded.verses,
         ...(loaded.identity ? { identity: loaded.identity } : {}),
-        ...(loaded.nextOffset == null ? {} : { nextPageToken: encodePageToken(loaded.nextOffset) }),
+        ...(loaded.nextCursor == null ? {} : { nextPageToken: loaded.nextCursor }),
       }
     },
 

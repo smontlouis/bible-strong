@@ -14,6 +14,7 @@ import {
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import type { SQLiteDatabase } from '~helpers/sqlite'
 import {
+  createHttpStrongLexiconAccess,
   createHybridStrongLexiconAccess,
   formatStrongEntityDisplayName,
   getTipnrBookCode,
@@ -92,6 +93,46 @@ describe('strongLexiconAccess', () => {
         status: 'missing',
         moduleId,
       })
+    )
+  })
+
+  it('loads bounded Strong lexicon pages and carries the keyset cursor', async () => {
+    const fetcher = jest.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            resource: { revision: 'core-r1' },
+            entries: [
+              {
+                id: 15149,
+                stepCode: 'H3068G',
+                classicStrong: 'H3068',
+                language: 'hebrew',
+                original: 'יְהֹוָה',
+                transliteration: 'yehovah',
+                gloss: 'SEIGNEUR',
+              },
+            ],
+            nextCursor: 'seigneur|3068|15149',
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )
+    )
+    const access = createHttpStrongLexiconAccess({
+      baseUrl: 'https://resources.test',
+      fetcher: fetcher as typeof fetch,
+      isOnline: async () => true,
+    })
+
+    await expect(
+      access.listEntries({ language: 'fr', prefix: 's', limit: 25, cursor: 'older cursor' })
+    ).resolves.toEqual({
+      entries: [expect.objectContaining({ stepCode: 'H3068G', gloss: 'SEIGNEUR' })],
+      nextCursor: 'seigneur|3068|15149',
+    })
+    expect(fetcher).toHaveBeenCalledWith(
+      'https://resources.test/v1/strong-lexicon/entries?language=fr&limit=25&prefix=s&cursor=older+cursor',
+      expect.any(Object)
     )
   })
 
@@ -181,9 +222,75 @@ describe('strongLexiconAccess', () => {
       }),
     ])
     expect(database.getAllAsync).toHaveBeenCalledWith(
-      expect.stringContaining("COALESCE(NULLIF(tr.gloss, ''), e.gloss) LIKE ?"),
-      ['fr', 'S%', 25]
+      expect.stringContaining("lower(COALESCE(NULLIF(tr.gloss, ''), e.gloss)) LIKE ?"),
+      ['fr', 'S%', 26]
     )
+  })
+
+  it('continues local browse pages after the last key instead of using OFFSET', async () => {
+    const pageRows = Array.from({ length: 3 }, (_, index) => ({
+      ...rows.H3068G,
+      id: 100 + index,
+      baseCode: 3000 + index,
+      stepCode: `H${3000 + index}`,
+      sortGloss: `seigneur-${index}`,
+    }))
+    const database = createDatabase()
+    database.getAllAsync.mockResolvedValue(pageRows)
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    const first = await localStrongLexiconAccess.listEntries({
+      language: 'fr',
+      prefix: 's',
+      limit: 2,
+    })
+    expect(first.entries).toHaveLength(2)
+    expect(first.nextCursor).toBeDefined()
+
+    database.getAllAsync.mockResolvedValue([])
+    await localStrongLexiconAccess.listEntries({
+      language: 'fr',
+      prefix: 's',
+      limit: 2,
+      cursor: first.nextCursor,
+    })
+    const [statement, parameters] = database.getAllAsync.mock.calls.at(-1)!
+    expect(String(statement)).toContain('sortGloss > ?')
+    expect(parameters).toEqual([
+      'fr',
+      's%',
+      'seigneur-1',
+      'seigneur-1',
+      3001,
+      'seigneur-1',
+      3001,
+      101,
+      3,
+    ])
+  })
+
+  it('selects a random entry from an indexed id threshold without sorting the corpus', async () => {
+    const database = {
+      getFirstAsync: jest
+        .fn()
+        .mockResolvedValueOnce({ minimum: 100, maximum: 200 })
+        .mockResolvedValueOnce(rows.H3068G),
+    }
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+    const random = jest.spyOn(Math, 'random').mockReturnValueOnce(0.5)
+
+    await expect(localStrongLexiconAccess.random('hebrew', 'fr')).resolves.toEqual(
+      expect.objectContaining({ stepCode: 'H3068G' })
+    )
+    const statements = database.getFirstAsync.mock.calls.map(([statement]) => String(statement))
+    expect(statements.join('\n')).not.toContain('ORDER BY RANDOM()')
+    expect(statements[1]).toContain('e.id >= ?')
+    expect(database.getFirstAsync.mock.calls[1]?.[1]).toEqual(['fr', 'hebrew', 150])
+    random.mockRestore()
   })
 
   it('returns the matched STEP Strong code for a disambiguated dictionary identity', async () => {
@@ -211,7 +318,7 @@ describe('strongLexiconAccess', () => {
         classicStrong: 'H3651',
       }),
     ])
-    expect(database.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('e.dStrong LIKE ?'), [
+    expect(database.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('dStrong LIKE ?'), [
       'fr',
       '%H3651C%',
       '%H3651C%',
@@ -220,7 +327,7 @@ describe('strongLexiconAccess', () => {
       '%H3651C%',
       '%H3651C%',
       '%H3651C%',
-      25,
+      26,
     ])
   })
 
@@ -799,6 +906,7 @@ const createHybridStub = (
   loadMorphologies: jest.fn(async () => []),
   loadEntity: jest.fn(async () => undefined),
   loadChapterEntities: jest.fn(async () => []),
+  listEntries: jest.fn(async () => ({ entries: [{ gloss: label }] as never })),
   search: jest.fn(async () => [{ gloss: label }] as never),
   browseByGlossPrefix: jest.fn(async () => [{ gloss: label }] as never),
   random: jest.fn(async () => undefined),

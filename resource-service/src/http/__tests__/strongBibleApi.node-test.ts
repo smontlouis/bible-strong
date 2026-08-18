@@ -44,13 +44,15 @@ const repositories: ResourceRepositoryOverrides = {
         identity: { id: 1, kind: 'strong' as const, code: 'H0430' },
         counts: [{ book: 1, verseCount: 1 }],
       }),
-    findOccurrences: () =>
-      Effect.succeed({
+    findOccurrences: input => {
+      assert.equal(input.cursor, 'strong:v1:1:1:0')
+      return Effect.succeed({
         ...resource,
         identity: { id: 1, kind: 'strong' as const, code: 'H0430' },
         verses: [{ book: 1, chapter: 1, verse: 1, spans: [span] }],
-        nextOffset: 1,
-      }),
+        nextCursor: 'strong:v1:1:1:1',
+      })
+    },
     findLemmaStats: () =>
       Effect.succeed({
         ...resource,
@@ -88,7 +90,7 @@ describe('Strong Bible API', () => {
     try {
       const response = await web.handler(
         new Request(
-          'http://localhost/v1/strong-bibles/LSG/books/1/identities/H0430/occurrences?limit=1&offset=0&allBooks=true'
+          'http://localhost/v1/strong-bibles/LSG/books/1/identities/H0430/occurrences?limit=1&cursor=strong%3Av1%3A1%3A1%3A0&allBooks=true'
         )
       )
 
@@ -100,7 +102,7 @@ describe('Strong Bible API', () => {
         },
         identity: { id: 1, kind: 'strong', code: 'H0430' },
         verses: [{ book: 1, chapter: 1, verse: 1, spans: [span] }],
-        nextOffset: 1,
+        nextCursor: 'strong:v1:1:1:1',
       })
     } finally {
       await web.dispose()

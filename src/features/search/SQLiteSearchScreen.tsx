@@ -5,7 +5,7 @@ import { FlatList, ScrollView, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@emotion/react'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import booksDesc from '~assets/bible_versions/books-desc'
@@ -64,11 +64,15 @@ import {
   type SearchSectionId,
 } from './searchResultsModel'
 import { localQueryOptions } from '~helpers/queryOptions'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import useConnection from '~helpers/useConnection'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
 
 type Props = {
   searchValue: string
@@ -78,6 +82,7 @@ type Props = {
 const MIN_SEARCH_LENGTH = SEARCH_MIN_QUERY_LENGTH
 const STRONG_CODE_REGEX = /^[HG]\d+$/i
 const SEARCH_ALPHABET_FOOTER_HEIGHT = 70
+const PASSAGE_SEARCH_PAGE_SIZE = 20
 
 type DictionaryRow = DictionarySearchRow
 type NaveRow = NaveSearchItemRow
@@ -120,6 +125,21 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [strongLetter, setStrongLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
+  const [section, _setSection] = useState<SearchSection>(globalFilters.section)
+  const [book, _setBook] = useState(globalFilters.book)
+  const [selectedVersion, _setSelectedVersion] = useState(globalFilters.selectedVersion)
+  const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(globalFilters.sortOrder)
+  const [itemFilters, _setItemFilters] = useState(globalFilters.itemFilters)
+  const activeItemFilterTypes = searchItemFilterOrder.filter(itemType => itemFilters[itemType])
+  const singleActiveItemType =
+    activeItemFilterTypes.length === 1 ? activeItemFilterTypes[0] : undefined
+  const browseItemType = singleActiveItemType !== 'passages' ? singleActiveItemType : undefined
+  const isSoloPaginatedSection = (sectionId: SearchSectionId) =>
+    singleActiveItemType === sectionId &&
+    (sectionId === 'passages' ||
+      sectionId === 'strong' ||
+      sectionId === 'dictionary' ||
+      sectionId === 'nave')
 
   const strongAvailabilityQuery = useQuery({
     queryKey: [...resourceQueryKeys.strongLexiconAvailability('core'), isConnected],
@@ -129,6 +149,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }),
     networkMode: 'always',
     staleTime: Infinity,
+    enabled: itemFilters.strong,
   })
   const dictionaryAvailabilityQuery = useQuery({
     queryKey: [
@@ -143,6 +164,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       Promise.resolve({ status: 'available' as const }),
     networkMode: 'always',
     staleTime: Infinity,
+    enabled: itemFilters.dictionary,
   })
   const naveAvailabilityQuery = useQuery({
     queryKey: [
@@ -154,17 +176,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       Promise.resolve({ status: 'available' as const }),
     networkMode: 'always',
     staleTime: Infinity,
+    enabled: itemFilters.nave,
   })
-
-  const [section, _setSection] = useState<SearchSection>(globalFilters.section)
-  const [book, _setBook] = useState(globalFilters.book)
-  const [selectedVersion, _setSelectedVersion] = useState(globalFilters.selectedVersion)
-  const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(globalFilters.sortOrder)
-  const [itemFilters, _setItemFilters] = useState(globalFilters.itemFilters)
-  const activeItemFilterTypes = searchItemFilterOrder.filter(itemType => itemFilters[itemType])
-  const singleActiveItemType =
-    activeItemFilterTypes.length === 1 ? activeItemFilterTypes[0] : undefined
-  const browseItemType = singleActiveItemType !== 'passages' ? singleActiveItemType : undefined
 
   const setSection = (v: SearchSection) => {
     _setSection(v)
@@ -361,7 +374,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     searchValue.trim().length >= MIN_SEARCH_LENGTH &&
     trimmedSearchValue.length >= MIN_SEARCH_LENGTH &&
     !STRONG_CODE_REGEX.test(trimmedSearchValue)
-  const passageQuery = useQuery({
+  const passageQuery = useInfiniteQuery({
     queryKey: [
       'sqlite-passage-search',
       trimmedSearchValue,
@@ -371,25 +384,22 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       sortOrder,
       isConnected,
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       try {
         const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
         const options: SearchOptions = {
-          limit: 200,
+          limit: PASSAGE_SEARCH_PAGE_SIZE,
+          offset: pageParam,
           sortOrder,
           ...(selectedVersion && { version: selectedVersion }),
           ...(book && { book }),
           ...(sectionMap[section] && { section: sectionMap[section] }),
         }
 
-        const [searchResults, count] = await appLogger.measure(
+        return await appLogger.measure(
           'database',
           'search.sqlite',
-          () =>
-            Promise.all([
-              resources.bibleSearch.searchVerses(debouncedSearchValue, options),
-              resources.bibleSearch.searchVersesCount(debouncedSearchValue, options),
-            ]),
+          () => resources.bibleSearch.searchPage(debouncedSearchValue, options),
           {
             queryLength: debouncedSearchValue.length,
             version: selectedVersion,
@@ -398,16 +408,19 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             sortOrder,
           }
         )
-
-        return { results: searchResults, count }
       } catch (e) {
         appLogger.error('database', 'search.sqlite.failed', { error: e })
         console.error('[Search] FTS5 error:', e)
         throw e
       }
     },
+    initialPageParam: 0,
+    getNextPageParam: (_lastPage, pages) => {
+      const loaded = pages.reduce((total, page) => total + page.results.length, 0)
+      const count = pages[0]?.count ?? 0
+      return loaded < count ? loaded : undefined
+    },
     enabled: shouldSearchPassages,
-    placeholderData: keepPreviousData,
     ...localQueryOptions,
   })
   const results: SearchResult[] | null = !itemFilters.passages
@@ -415,9 +428,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     : STRONG_CODE_REGEX.test(trimmedSearchValue)
       ? []
       : shouldSearchPassages
-        ? (passageQuery.data?.results ?? null)
+        ? (passageQuery.data?.pages.flatMap(page => page.results) ?? null)
         : null
-  const totalCount = passageQuery.data?.count ?? 0
+  const totalCount = passageQuery.data?.pages[0]?.count ?? 0
   const isSearching = shouldSearchPassages && passageQuery.isFetching
   const searchError = passageQuery.isError ? t('search.error.searchFailed') : null
 
@@ -427,41 +440,36 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       (browseItemType !== 'strong' &&
         searchValue.trim().length >= MIN_SEARCH_LENGTH &&
         trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
-  const strongQuery = useQuery({
+  const strongQuery = useInfiniteQuery({
     queryKey: [
       'sqlite-strong-search',
       resourcesLanguage.STRONG,
       browseItemType,
       trimmedSearchValue,
       strongLetter,
-      isConnected,
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       try {
-        const result =
-          browseItemType === 'strong' && !trimmedSearchValue
-            ? await resources.strongLexicon.browseByGlossPrefix(
-                strongLetter,
-                resourcesLanguage.STRONG,
-                500
-              )
-            : await resources.strongLexicon.search(
-                trimmedSearchValue,
-                resourcesLanguage.STRONG,
-                200
-              )
-        return result
+        return await resources.strongLexicon.listEntries({
+          language: resourcesLanguage.STRONG,
+          limit: 20,
+          ...(pageParam ? { cursor: pageParam } : {}),
+          ...(browseItemType === 'strong' && !trimmedSearchValue
+            ? { prefix: strongLetter }
+            : { search: trimmedSearchValue }),
+        })
       } catch (error) {
         appLogger.error('database', 'search.strong.failed', { error })
         throw error
       }
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchStrong,
-    placeholderData: keepPreviousData,
     ...localQueryOptions,
   })
   const strongResults: StrongLexiconSearchResult[] = shouldSearchStrong
-    ? (strongQuery.data ?? [])
+    ? (strongQuery.data?.pages.flatMap(page => page.entries) ?? [])
     : []
   const isStrongSearching = shouldSearchStrong && strongQuery.isFetching
 
@@ -471,36 +479,39 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       (browseItemType !== 'dictionary' &&
         searchValue.trim().length >= MIN_SEARCH_LENGTH &&
         trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
-  const dictionaryQuery = useQuery({
+  const dictionaryQuery = useInfiniteQuery({
     queryKey: [
       'sqlite-dictionary-search',
       resourcesLanguage.DICTIONNAIRE,
       browseItemType,
       trimmedSearchValue,
       dictionaryLetter,
-      isConnected,
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       try {
-        const result =
-          browseItemType === 'dictionary' && !trimmedSearchValue
-            ? await resources.dictionary.listByLetter(
-                dictionaryLetter,
-                resourcesLanguage.DICTIONNAIRE
-              )
-            : await resources.dictionary.search(trimmedSearchValue, resourcesLanguage.DICTIONNAIRE)
-        return result
+        return browseItemType === 'dictionary' && !trimmedSearchValue
+          ? await resources.dictionary.listByLetterPage(
+              dictionaryLetter,
+              { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+              resourcesLanguage.DICTIONNAIRE
+            )
+          : await resources.dictionary.searchPage(
+              trimmedSearchValue,
+              { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+              resourcesLanguage.DICTIONNAIRE
+            )
       } catch (error) {
         appLogger.error('database', 'search.dictionary.failed', { error })
         throw error
       }
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchDictionary,
-    placeholderData: keepPreviousData,
     ...localQueryOptions,
   })
   const dictionaryResults: DictionaryRow[] = shouldSearchDictionary
-    ? (dictionaryQuery.data ?? [])
+    ? (dictionaryQuery.data?.pages.flatMap(page => page.entries) ?? [])
     : []
   const isDictionarySearching = shouldSearchDictionary && dictionaryQuery.isFetching
 
@@ -510,32 +521,40 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       (browseItemType !== 'nave' &&
         searchValue.trim().length >= MIN_SEARCH_LENGTH &&
         trimmedSearchValue.length >= MIN_SEARCH_LENGTH))
-  const naveQuery = useQuery({
+  const naveQuery = useInfiniteQuery({
     queryKey: [
       'sqlite-nave-search',
       resourcesLanguage.NAVE,
       browseItemType,
       trimmedSearchValue,
       naveLetter,
-      isConnected,
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       try {
-        const result =
-          browseItemType === 'nave' && !trimmedSearchValue
-            ? await resources.nave.listByLetter(naveLetter, resourcesLanguage.NAVE)
-            : await resources.nave.search(trimmedSearchValue, resourcesLanguage.NAVE)
-        return result
+        return browseItemType === 'nave' && !trimmedSearchValue
+          ? await resources.nave.listByLetterPage(
+              naveLetter,
+              { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+              resourcesLanguage.NAVE
+            )
+          : await resources.nave.searchPage(
+              trimmedSearchValue,
+              { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+              resourcesLanguage.NAVE
+            )
       } catch (error) {
         appLogger.error('database', 'search.nave.failed', { error })
         throw error
       }
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchNave,
-    placeholderData: keepPreviousData,
     ...localQueryOptions,
   })
-  const naveResults: NaveRow[] = shouldSearchNave ? (naveQuery.data ?? []) : []
+  const naveResults: NaveRow[] = shouldSearchNave
+    ? (naveQuery.data?.pages.flatMap(page => page.topics) ?? [])
+    : []
   const isNaveSearching = shouldSearchNave && naveQuery.isFetching
 
   const searchModel = getSearchResultsModel({
@@ -577,7 +596,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           identity={recoveryIdentity}
           title={t('resource.search.temporarilyUnavailable')}
           fileSize={recoveryFileSize}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(
+            passageQuery.error ?? installedVersionsQuery.error
+          )}
           size="small"
           onRetry={() => {
             void installedVersionsQuery.refetch()
@@ -593,7 +614,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           identity={recoveryIdentity}
           title={t('resource.search.offlineCopyNeeded')}
           fileSize={recoveryFileSize}
-          reason="offline-copy-required"
+          failure={{ cause: 'offline-copy-required', recoveries: ['acquire-offline-copy'] }}
           size="small"
         />
       )
@@ -638,7 +659,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
           title={t('resource.strong.temporarilyUnavailable')}
           fileSize={35}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(
+            strongQuery.error ?? strongAvailabilityQuery.error
+          )}
           size="small"
           onRetry={() => {
             void strongAvailabilityQuery.refetch()
@@ -661,7 +684,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           }}
           title={t('resource.dictionary.temporarilyUnavailable')}
           fileSize={22}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(
+            dictionaryQuery.error ?? dictionaryAvailabilityQuery.error
+          )}
           size="small"
           onRetry={() => {
             void dictionaryAvailabilityQuery.refetch()
@@ -677,7 +702,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           identity={{ kind: 'database', databaseId: 'NAVE', language: resourcesLanguage.NAVE }}
           title={t('resource.nave.temporarilyUnavailable')}
           fileSize={7}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(naveQuery.error ?? naveAvailabilityQuery.error)}
           size="small"
           onRetry={() => {
             void naveAvailabilityQuery.refetch()
@@ -689,26 +714,29 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
     if (
       browseItemType === 'strong' &&
-      strongAvailabilityQuery.data?.availability.status !== 'available' &&
-      strongAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+      strongAvailabilityQuery.data &&
+      strongAvailabilityQuery.data.availability.status !== 'available'
     ) {
       return (
-        <OfflineResourceRecovery
+        <ResourceUnavailableView
           identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
           title={t('resource.strong.offlineCopyNeeded')}
           fileSize={35}
           size="small"
+          failure={resourceFailureFromStrongModuleAvailability(
+            strongAvailabilityQuery.data.availability,
+            strongAvailabilityQuery.data.recoveries
+          )}
         />
       )
     }
 
     if (
       browseItemType === 'dictionary' &&
-      dictionaryAvailabilityQuery.data?.status === 'unavailable' &&
-      dictionaryAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
+      dictionaryAvailabilityQuery.data?.status === 'unavailable'
     ) {
       return (
-        <OfflineResourceRecovery
+        <ResourceUnavailableView
           identity={{
             kind: 'database',
             databaseId: 'DICTIONNAIRE',
@@ -717,21 +745,19 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           title={t('resource.dictionary.offlineCopyNeeded')}
           fileSize={22}
           size="small"
+          failure={resourceFailureFromAvailability(dictionaryAvailabilityQuery.data)}
         />
       )
     }
 
-    if (
-      browseItemType === 'nave' &&
-      naveAvailabilityQuery.data?.status === 'unavailable' &&
-      naveAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
-    ) {
+    if (browseItemType === 'nave' && naveAvailabilityQuery.data?.status === 'unavailable') {
       return (
-        <OfflineResourceRecovery
+        <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'NAVE', language: resourcesLanguage.NAVE }}
           title={t('resource.nave.offlineCopyNeeded')}
           fileSize={7}
           size="small"
+          failure={resourceFailureFromAvailability(naveAvailabilityQuery.data)}
         />
       )
     }
@@ -818,6 +844,37 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           }}
           removeClippedSubviews
           data={searchModel.sections}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => {
+            if (
+              singleActiveItemType === 'passages' &&
+              passageQuery.hasNextPage &&
+              !passageQuery.isFetchingNextPage
+            ) {
+              void passageQuery.fetchNextPage()
+            }
+            if (
+              browseItemType === 'strong' &&
+              strongQuery.hasNextPage &&
+              !strongQuery.isFetchingNextPage
+            ) {
+              void strongQuery.fetchNextPage()
+            }
+            if (
+              browseItemType === 'dictionary' &&
+              dictionaryQuery.hasNextPage &&
+              !dictionaryQuery.isFetchingNextPage
+            ) {
+              void dictionaryQuery.fetchNextPage()
+            }
+            if (
+              browseItemType === 'nave' &&
+              naveQuery.hasNextPage &&
+              !naveQuery.isFetchingNextPage
+            ) {
+              void naveQuery.fetchNextPage()
+            }
+          }}
           keyExtractor={(section: SQLiteSearchResultSection) => section.id}
           ListEmptyComponent={
             searchModel.isBrowseLoading ? (
@@ -837,8 +894,47 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           renderItem={({ item: section }: { item: SQLiteSearchResultSection }) => (
             <SearchSectionBlock
               section={section}
-              visibleCount={visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT}
-              onLoadMore={() => increaseVisibleCount(section.id)}
+              visibleCount={
+                isSoloPaginatedSection(section.id)
+                  ? section.items.length
+                  : visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT
+              }
+              onLoadMore={() => {
+                const currentVisible = visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT
+                increaseVisibleCount(section.id)
+                if (
+                  section.id === 'passages' &&
+                  currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                  passageQuery.hasNextPage &&
+                  !passageQuery.isFetchingNextPage
+                ) {
+                  void passageQuery.fetchNextPage()
+                }
+                if (
+                  section.id === 'strong' &&
+                  currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                  strongQuery.hasNextPage &&
+                  !strongQuery.isFetchingNextPage
+                ) {
+                  void strongQuery.fetchNextPage()
+                }
+                if (
+                  section.id === 'dictionary' &&
+                  currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                  dictionaryQuery.hasNextPage &&
+                  !dictionaryQuery.isFetchingNextPage
+                ) {
+                  void dictionaryQuery.fetchNextPage()
+                }
+                if (
+                  section.id === 'nave' &&
+                  currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                  naveQuery.hasNextPage &&
+                  !naveQuery.isFetchingNextPage
+                ) {
+                  void naveQuery.fetchNextPage()
+                }
+              }}
               onPressItem={openSearchItem}
               renderItem={item =>
                 item.referenceSegment ? (
@@ -859,6 +955,13 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 (section.id === 'dictionary' && isDictionarySearching) ||
                 (section.id === 'nave' && isNaveSearching)
               }
+              hasMore={
+                (section.id === 'passages' && passageQuery.hasNextPage) ||
+                (section.id === 'strong' && strongQuery.hasNextPage) ||
+                (section.id === 'dictionary' && dictionaryQuery.hasNextPage) ||
+                (section.id === 'nave' && naveQuery.hasNextPage)
+              }
+              showLoadMoreButton={!isSoloPaginatedSection(section.id)}
             />
           )}
         />

@@ -134,6 +134,7 @@ const getFooterMarginStyle = (footerHeight: number) =>
   footerHeight ? { marginBottom: footerHeight } : undefined
 
 type SheetCommand = 'present' | 'presentAt' | 'resizeTo' | 'dismiss' | 'close' | 'forceClose'
+type SheetLifecycleState = 'dismissed' | 'presenting' | 'presented' | 'dismissing'
 
 const isExpectedNativeSheetLifecycleError = (error: unknown) => {
   if (!(error instanceof Error)) return false
@@ -145,12 +146,20 @@ const isExpectedNativeSheetLifecycleError = (error: unknown) => {
   )
 }
 
-const runSheetCommand = (command: SheetCommand, action: () => Promise<void> | undefined) => {
+const runSheetCommand = (
+  command: SheetCommand,
+  action: () => Promise<void> | undefined,
+  onFailure?: () => void
+) => {
   try {
     const result = action()
-    if (!result) return
+    if (!result) {
+      onFailure?.()
+      return
+    }
 
     void result.catch(error => {
+      onFailure?.()
       if (isExpectedNativeSheetLifecycleError(error)) return
 
       Sentry.captureException(error, {
@@ -161,6 +170,7 @@ const runSheetCommand = (command: SheetCommand, action: () => Promise<void> | un
       })
     })
   } catch (error) {
+    onFailure?.()
     if (isExpectedNativeSheetLifecycleError(error)) return
 
     Sentry.captureException(error, {
@@ -218,6 +228,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   } = props
   const { height } = useWindowDimensions()
   const sheetRef = React.useRef<TrueSheet>(null)
+  const lifecycleStateRef = React.useRef<SheetLifecycleState>('dismissed')
   const detents = getDetents(snapPoints)
   const initialDetentIndex = initialSnapPoint ? findSnapPointIndex(detents, initialSnapPoint) : 0
   const scrollable = !detents.includes('auto')
@@ -235,25 +246,48 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
     }
   }, [hasFooter])
 
-  React.useImperativeHandle(
-    ref,
-    () => ({
-      present: () =>
-        runSheetCommand('present', () => sheetRef.current?.present(initialDetentIndex)),
-      presentAt: snapPoint =>
-        runSheetCommand('presentAt', () =>
-          sheetRef.current?.present(findSnapPointIndex(detents, snapPoint))
-        ),
+  React.useImperativeHandle(ref, () => {
+    const present = (command: 'present' | 'presentAt', index: number) => {
+      if (lifecycleStateRef.current !== 'dismissed') {
+        return
+      }
+      const previousState = lifecycleStateRef.current
+      lifecycleStateRef.current = 'presenting'
+      runSheetCommand(
+        command,
+        () => sheetRef.current?.present(index),
+        () => {
+          lifecycleStateRef.current = previousState
+        }
+      )
+    }
+    const dismiss = (command: 'dismiss' | 'close' | 'forceClose') => {
+      if (lifecycleStateRef.current === 'dismissed' || lifecycleStateRef.current === 'dismissing') {
+        return
+      }
+      const previousState = lifecycleStateRef.current
+      lifecycleStateRef.current = 'dismissing'
+      runSheetCommand(
+        command,
+        () => sheetRef.current?.dismiss(),
+        () => {
+          lifecycleStateRef.current = previousState
+        }
+      )
+    }
+
+    return {
+      present: () => present('present', initialDetentIndex),
+      presentAt: snapPoint => present('presentAt', findSnapPointIndex(detents, snapPoint)),
       resizeTo: snapPoint =>
         runSheetCommand('resizeTo', () =>
           sheetRef.current?.resize(findSnapPointIndex(detents, snapPoint))
         ),
-      dismiss: () => runSheetCommand('dismiss', () => sheetRef.current?.dismiss()),
-      close: () => runSheetCommand('close', () => sheetRef.current?.dismiss()),
-      forceClose: () => runSheetCommand('forceClose', () => sheetRef.current?.dismiss()),
-    }),
-    [detents, initialDetentIndex]
-  )
+      dismiss: () => dismiss('dismiss'),
+      close: () => dismiss('close'),
+      forceClose: () => dismiss('forceClose'),
+    }
+  }, [detents, initialDetentIndex])
 
   return (
     <SheetContext.Provider value={{ footerHeight, hasFooter, setFooterHeight }}>
@@ -289,11 +323,16 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
         detached={detached}
         detachedOffset={detachedOffset}
         onDidPresent={() => {
+          lifecycleStateRef.current = 'presented'
           onOpenChange?.(true)
           onPresent?.()
         }}
-        onWillDismiss={onDismissStart}
+        onWillDismiss={() => {
+          lifecycleStateRef.current = 'dismissing'
+          onDismissStart?.()
+        }}
         onDidDismiss={() => {
+          lifecycleStateRef.current = 'dismissed'
           onOpenChange?.(false)
           onClose?.()
           onDismiss?.()

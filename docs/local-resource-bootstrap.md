@@ -29,20 +29,59 @@ RESOURCE_PUBLICATION_ROOTS="<ordinary-root>:<strong-root>:<interlinear-root>:<le
   npm run resources:publication:reconcile
 ```
 
-## 2. Importer dans PostgreSQL local
+## 2. Synchroniser PostgreSQL local
+
+Avec l'organisation locale standard (`bible-strong-app` et `bible-lexicon-maker` côte à côte), cette
+commande démarre PostgreSQL, applique les migrations et importe le catalogue canonique :
 
 ```bash
-RESOURCE_PUBLICATION_ROOTS="<ordinary-root>:<strong-root>:<interlinear-root>:<lexicon-root>:<dictionary-root>:<nave-root>:<editorial-root>:<timeline-root>" \
-  RESOURCE_API_PORT=8787 yarn resources:dev
+yarn resources:sync:local
 ```
 
-`resources:dev` démarre PostgreSQL, applique les migrations, puis `resources:import-catalog` découvre
-les manifests imbriqués et importe les dépendances dans l’ordre
-(`bible-text`, lexique Strong, index Strong/interlinéaire, puis les autres domaines) et active les
-révisions pour le développement local. Relancer la commande est sans reset : une révision inchangée
-est simplement rapportée `unchanged`, puis l’API démarre sur le port demandé.
+Elle est à lancer au premier démarrage, puis uniquement lorsque les publications de Bible Lexicon
+Maker ont changé. La base reste dans le volume Docker `resource-postgres-data` : cette commande ne
+la détruit pas et les révisions déjà importées sont rapportées `unchanged`.
 
-## 3. Smoke API
+Pour synchroniser un autre emplacement :
+
+```bash
+yarn resources:db:up && \
+  yarn resources:migrate && \
+  RESOURCE_PUBLICATION_ROOTS="<ordinary-root>:<strong-root>:<interlinear-root>:<lexicon-root>:<dictionary-root>:<nave-root>:<editorial-root>:<timeline-root>" \
+    yarn resources:import-catalog
+```
+
+`resources:import-catalog` découvre les manifests imbriqués et importe les dépendances dans l’ordre
+(`bible-text`, lexique Strong, index Strong/interlinéaire, puis les autres domaines) et active les
+révisions pour le développement local.
+
+## 3. Démarrer l'API locale
+
+Une fois la synchronisation initiale terminée, cette commande démarre PostgreSQL si nécessaire,
+applique seulement les éventuelles nouvelles migrations, puis lance immédiatement l'API sur le port
+8787 :
+
+```bash
+yarn resources:dev:local
+```
+
+Elle force `RESOURCE_SKIP_IMPORT=1` : même une ancienne variable `RESOURCE_PUBLICATION_ROOTS`
+exportée dans le terminal ne peut donc pas relancer l'import. PostgreSQL et ses données persistent
+entre deux lancements ; le processus HTTP de l'API doit rester ouvert pour la consultation en ligne.
+Les téléchargements hors ligne restent sur `assets.bible-strong.app`, indépendamment de l'API
+locale. Pour tester volontairement une publication locale, démarrez le serveur d'artefacts avec le
+bundle explicite :
+
+```bash
+RESOURCE_PUBLICATION_BUNDLE="<bundle-directory>" \
+  RESOURCE_ARTIFACT_PORT=8788 yarn resources:serve:artifacts
+```
+
+Puis démarrez Expo avec `EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL=http://127.0.0.1:8788` pour le
+simulateur iOS, `http://10.0.2.2:8788` pour l'émulateur Android, ou l'adresse LAN du Mac pour un
+appareil physique.
+
+## 4. Smoke API
 
 Avec l’API locale et le serveur d’artefacts déjà démarrés, un seul smoke couvre les six domaines
 exposés par l’API :

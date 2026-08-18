@@ -86,9 +86,24 @@ describe('CompareVersesTabScreen', () => {
 
     const scrollView = renderer.root.find(node => String(node.type) === 'ScrollView')
     expect(scrollView.props.contentContainerStyle).toEqual(
-      expect.objectContaining({ paddingBottom: expect.any(Number) })
+      expect.objectContaining({ paddingBottom: expect.any(Number), flexGrow: 1 })
     )
     expect(scrollView.findAll(node => String(node.type) === 'CompareCard')).toHaveLength(1)
+  })
+
+  it('lets the empty comparison CTA open the version selector', () => {
+    act(() => {
+      renderer = create(<CompareVersesTabScreen compareAtom={{} as never} />)
+    })
+
+    const present = jest.fn()
+    const selector = renderer.root.find(node => String(node.type) === 'CompareVersionSelectorSheet')
+    selector.props.sheetRef.current = { present }
+    const compareCard = renderer.root.find(node => String(node.type) === 'CompareCard')
+
+    act(() => compareCard.props.onChooseVersions())
+
+    expect(present).toHaveBeenCalledTimes(1)
   })
 
   it('exposes a Strong mode toggle that updates the comparison tab', () => {

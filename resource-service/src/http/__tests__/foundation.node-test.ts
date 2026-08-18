@@ -26,5 +26,6 @@ describe('Resource service foundation', () => {
     assert.equal(specification.openapi, '3.1.0')
     assert.ok(specification.paths['/health']?.get)
     assert.ok(specification.paths['/v1/bibles/{version}/books/{book}/chapters/{chapter}']?.get)
+    assert.ok(specification.paths['/v1/bibles/{version}/verses']?.get)
   })
 })

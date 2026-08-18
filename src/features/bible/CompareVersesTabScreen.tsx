@@ -115,11 +115,12 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
           </MenuView>
         }
       />
-      <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}>
         <CompareCard
           selectedVerses={selectedVerses}
           strongMode={strongMode}
           onChangeVerse={verse => setSelectedVerses({ [verse]: true })}
+          onChooseVersions={() => compareVersionSelectorRef.current?.present()}
         />
       </ScrollView>
       <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />

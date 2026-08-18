@@ -16,6 +16,8 @@ jest.mock('~helpers/strongBibleSidecar', () => ({
   getStrongBibleSidecarAvailability: jest.fn(),
   loadStrongBibleOccurrenceLocations: jest.fn(),
   loadStrongBibleChapterSpans: jest.fn(),
+  loadStrongBibleLemmaStatsResult: jest.fn(),
+  loadStrongBibleVerseCountsByBookResult: jest.fn(),
   loadStrongBibleVerseCountsByBook: jest.fn(),
   loadStrongBibleVerseSpans: jest.fn(),
   loadStrongBibleVersesSpans: jest.fn(),
@@ -381,7 +383,7 @@ describe('strongBibleResourceAccess', () => {
         { Livre: 1, Chapitre: 2, Verset: 1, Texte: 'Ainsi furent achevés', StrongSpans: [] },
       ],
       identity: { id: 42, kind: 'dstrong', code: 'H7225A' },
-      nextOffset: 36,
+      nextCursor: 'strong:v1:1:2:1',
     })
     const access = createStrongBibleResourceAccess(dependencies)
 
@@ -391,19 +393,23 @@ describe('strongBibleResourceAccess', () => {
       book: 1,
       reference: '7225',
       limit: 15,
-      pageToken: 'strong:30',
+      pageToken: 'strong:v1:1:1:30',
     })
 
     expect(result.status).toBe('available')
     expect(result).toEqual(
       expect.objectContaining({
         identity: { id: 42, kind: 'dstrong', code: 'H7225A' },
-        nextPageToken: 'strong:36',
+        nextPageToken: 'strong:v1:1:2:1',
       })
     )
     expect(dependencies.loadFoundVersesByBook).toHaveBeenCalledWith(
       'DBY',
-      expect.objectContaining({ reference: '7225', limit: 15, offset: 30 })
+      expect.objectContaining({
+        reference: '7225',
+        limit: 15,
+        cursor: 'strong:v1:1:1:30',
+      })
     )
   })
 

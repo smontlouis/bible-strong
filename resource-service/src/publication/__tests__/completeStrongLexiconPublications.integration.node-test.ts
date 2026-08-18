@@ -55,7 +55,7 @@ describe('Complete Strong lexicon publications', { skip: !runIntegration }, () =
       const search = await Effect.runPromise(
         repository.listEntries({ language: 'fr', search: 'parole', limit: 10 })
       )
-      assert.ok(search.value.length > 0)
+      assert.ok(search.value.entries.length > 0)
     } finally {
       await isolated.dispose()
     }

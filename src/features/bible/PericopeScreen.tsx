@@ -29,6 +29,10 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useAtomValue } from 'jotai/react'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 
 type PericopeVerse = {
   h1?: string
@@ -136,7 +140,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
             identity={recoveryIdentity}
             title={t('resource.pericope.temporarilyUnavailable')}
             fileSize={recoveryFileSize}
-            reason="temporary-unavailable"
+            failure={resourceFailureFromAccessError(pericopeQuery.error ?? availabilityQuery.error)}
             onRetry={() => {
               void availabilityQuery.refetch()
               void pericopeQuery.refetch()
@@ -147,7 +151,13 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
             identity={recoveryIdentity}
             title={t('resource.pericope.offlineCopyNeeded')}
             fileSize={recoveryFileSize}
-            reason={unavailable.reason}
+            failure={resourceFailureFromAvailability({
+              reason: unavailable.reason,
+              recoveries:
+                unavailable.reason === 'invalid-offline-copy'
+                  ? ['acquire-offline-copy', 'manage-offline-copies']
+                  : ['acquire-offline-copy'],
+            })}
           />
         ) : (
           <ScrollView>

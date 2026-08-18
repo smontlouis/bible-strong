@@ -30,6 +30,7 @@ import nightColors from '~themes/nightColors'
 import sepiaColors from '~themes/sepiaColors'
 import sunsetColors from '~themes/sunsetColors'
 import type { RootState } from '../store'
+import { COMPARE_SELECTION_VERSION, normalizeCompareSelection } from '../compareSelectionMigration'
 
 // Import action creators from sub-modules
 import { addBookmarkAction, moveBookmark, removeBookmark, updateBookmark } from './user/bookmarks'
@@ -576,6 +577,7 @@ export interface UserState {
       compare: {
         [x: string]: boolean
       }
+      compareSelectionVersion?: typeof COMPARE_SELECTION_VERSION
       customHighlightColors: CustomColor[]
       defaultColorNames?: {
         color1?: string
@@ -607,7 +609,7 @@ const getInitialState = (): UserState => ({
   isLoading: true,
   sync: getInitialUserDataSyncState(),
   notifications: {
-    verseOfTheDay: '07:00',
+    verseOfTheDay: '',
     notificationId: '',
   },
   changelog: {
@@ -669,9 +671,8 @@ const getInitialState = (): UserState => ({
         mauve: mauveColors,
         night: nightColors,
       },
-      compare: {
-        [getDefaultBibleVersion(getLanguage())]: true,
-      },
+      compare: {},
+      compareSelectionVersion: COMPARE_SELECTION_VERSION,
       customHighlightColors: [],
     },
   },
@@ -762,6 +763,7 @@ const userSlice = createSlice({
       // Clean corrupted data before merging (removes {_type: 'delete'} objects)
       const cleanedBible = cleanCorruptedFirestoreData(bible || {})
       state.bible = deepmerge(getInitialState().bible, cleanedBible)
+      Object.assign(state.bible.settings, normalizeCompareSelection(bible?.settings))
 
       // Restore subcollection data
       state.bible.bookmarks = currentBookmarks
@@ -952,6 +954,7 @@ const userSlice = createSlice({
       const cleanedBible = cleanCorruptedFirestoreData(bible || {})
       const importedBible = cleanedBible as Partial<UserState['bible']>
       state.bible = deepmerge(getInitialState().bible, cleanedBible)
+      Object.assign(state.bible.settings, normalizeCompareSelection(importedBible.settings))
       state.bible.relations = normalizeImportedRelations(importedBible, state.bible.relations)
       state.bible.relationIndex = rebuildRelationIndexes(state.bible.relations)
       state.bible.relationPairs = rebuildRelationPairs(state.bible.relations)
@@ -979,11 +982,11 @@ const userSlice = createSlice({
       } else {
         state.bible.settings.compare[action.payload] = true
       }
+      state.bible.settings.compareSelectionVersion = COMPARE_SELECTION_VERSION
     },
-    resetCompareVersion(state, action: PayloadAction<'LSG' | 'KJV'>) {
-      state.bible.settings.compare = {
-        [action.payload]: true,
-      }
+    resetCompareVersion(state) {
+      state.bible.settings.compare = {}
+      state.bible.settings.compareSelectionVersion = COMPARE_SELECTION_VERSION
     },
     addChangelog(state, action: PayloadAction<ChangelogItem[]>) {
       state.changelog.isLoading = false

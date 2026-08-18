@@ -1,4 +1,10 @@
 import { Schema } from 'effect'
+import {
+  decodeStrongLexiconPageCursor,
+  encodeStrongLexiconPageCursor,
+} from '~helpers/resourcePageCursor'
+
+export { decodeStrongLexiconPageCursor, encodeStrongLexiconPageCursor }
 
 export const StrongLexiconLanguage = Schema.Literal('fr', 'en')
 export const StrongLexicalLanguage = Schema.Literal('greek', 'hebrew')
@@ -43,6 +49,11 @@ export class StrongLexiconBrowseQuery extends Schema.Class<StrongLexiconBrowseQu
   search: Schema.optional(Schema.String),
   prefix: Schema.optional(Schema.String),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
+  cursor: Schema.optional(
+    Schema.NonEmptyString.pipe(
+      Schema.filter(value => decodeStrongLexiconPageCursor(value) !== undefined)
+    )
+  ),
 }) {}
 
 export class StrongLexiconRandomQuery extends Schema.Class<StrongLexiconRandomQuery>(
@@ -183,6 +194,7 @@ export class StrongLexiconSearchResponseDto extends Schema.Class<StrongLexiconSe
 )({
   resource: Schema.Struct({ revision: Schema.String }),
   entries: Schema.Array(StrongLexiconSearchResultDto),
+  nextCursor: Schema.optional(Schema.String),
 }) {}
 
 export class StrongLexiconMorphologyResponseDto extends Schema.Class<StrongLexiconMorphologyResponseDto>(

@@ -1,4 +1,5 @@
 import { createContext, useContext, ReactNode } from 'react'
+import type { ResourceFailurePresentation } from '~features/resources/resourceFailure'
 
 export interface BibleDOMTranslations {
   // Error messages for parallel versions
@@ -7,16 +8,10 @@ export interface BibleDOMTranslations {
   parallelLoadError: string
   exitFocus: string
   // Error/download state
-  versionNotFound: string
-  chapterNotFound: string
-  databaseCorrupted: string
-  onlineUnsupported: string
-  offlineUnavailable: string
-  temporaryUnavailable: string
-  integrityFailure: string
-  unknownError: string
+  resourceFailureDetails: Record<ResourceFailurePresentation['detailKey'], string>
   goToDownloads: string
   downloadVersion: string
+  repairOfflineCopy: string
   connectionRequired: string
   downloading: string
   inserting: string

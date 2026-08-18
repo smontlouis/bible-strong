@@ -147,4 +147,16 @@ describe('redux migrations', () => {
     )
     expect(migrated.user.bible.relationIndex['verse:1-1-2']).toBeDefined()
   })
+
+  it('clears comparison versions that predate explicit comparison selection', () => {
+    const state = createLegacyState() as any
+    state.user.bible.settings = {
+      compare: { LSG: true, KJV: true, NASB2020: true },
+    }
+
+    const migrated = migrations[37](state)
+
+    expect(migrated.user.bible.settings.compare).toEqual({})
+    expect(migrated.user.bible.settings.compareSelectionVersion).toBe(2)
+  })
 })

@@ -6,6 +6,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import CurrentSectionImage from './CurrentSectionImage'
 import CurrentYear from './CurrentYear'
 import Datebar from './Datebar'
@@ -13,7 +14,6 @@ import Line from './Line'
 import NextSectionImage from './NextSectionImage'
 import PrevSectionImage from './PrevSectionImage'
 import ScrollView from './ScrollView'
-import SearchInTimelineModal from './SearchInTimelineModal'
 import SectionDetailsModal from './SectionDetailsModal'
 import TimelineEvent from './TimelineEvent'
 import TimelineHeader from './TimelineHeader'
@@ -66,8 +66,8 @@ const Timeline = ({
 }: Props) => {
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<SheetRef>(null)
-  const searchModalRef = React.useRef<SheetRef>(null)
   const openInNewTab = useOpenInNewTab()
+  const pushRouteOnce = usePushRouteOnce()
   const lang = useLanguage()
 
   const timeline = useTimelineDetails()
@@ -109,7 +109,7 @@ const Timeline = ({
         onPress={onTimelineDetailsOpen}
         onBackPress={onBackPress}
         onOpenInNewTab={openSectionInNewTab}
-        searchModalRef={searchModalRef}
+        onSearchPress={() => pushRouteOnce({ pathname: '/timeline-search' })}
       />
 
       {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}
@@ -200,7 +200,6 @@ const Timeline = ({
           interval,
         }}
       />
-      <SearchInTimelineModal modalRef={searchModalRef} />
     </Box>
   )
 }

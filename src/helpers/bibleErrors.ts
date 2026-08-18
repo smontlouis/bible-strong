@@ -20,6 +20,7 @@ export type BibleErrorType =
 
 export type BibleRecoveryAction =
   | 'acquire-offline-copy'
+  | 'repair-offline-copy'
   | 'manage-offline-copies'
   | 'reset-offline-store'
   | 'retry'
@@ -35,9 +36,9 @@ export const getBibleRecoveryActions = (
     case 'RESOURCE_TEMPORARY_UNAVAILABLE':
       return ['retry']
     case 'OFFLINE_COPY_INVALID':
-      return ['manage-offline-copies', 'reset-offline-store']
+      return ['repair-offline-copy', 'manage-offline-copies', 'reset-offline-store']
     case 'RESOURCE_INTEGRITY_ERROR':
-      return ['acquire-offline-copy', 'manage-offline-copies']
+      return ['retry', 'repair-offline-copy', 'manage-offline-copies']
     case 'CHAPTER_NOT_FOUND':
     case 'UNKNOWN_ERROR':
       return undefined
@@ -51,43 +52,6 @@ export interface BibleError {
   chapter?: number
   message: string
   recoveries?: BibleRecoveryAction[]
-}
-
-export type BibleErrorMessageKey =
-  | 'versionNotFound'
-  | 'chapterNotFound'
-  | 'databaseCorrupted'
-  | 'onlineUnsupported'
-  | 'offlineUnavailable'
-  | 'temporaryUnavailable'
-  | 'integrityFailure'
-  | 'unknown'
-
-export const getBibleErrorPresentation = (type: BibleErrorType) => {
-  const messageKey: BibleErrorMessageKey = (() => {
-    switch (type) {
-      case 'BIBLE_NOT_FOUND':
-        return 'versionNotFound'
-      case 'CHAPTER_NOT_FOUND':
-        return 'chapterNotFound'
-      case 'OFFLINE_COPY_INVALID':
-        return 'databaseCorrupted'
-      case 'RESOURCE_UNSUPPORTED':
-        return 'onlineUnsupported'
-      case 'RESOURCE_OFFLINE':
-        return 'offlineUnavailable'
-      case 'RESOURCE_TEMPORARY_UNAVAILABLE':
-        return 'temporaryUnavailable'
-      case 'RESOURCE_INTEGRITY_ERROR':
-        return 'integrityFailure'
-      default:
-        return 'unknown'
-    }
-  })()
-  return {
-    messageKey,
-    retryable: type === 'RESOURCE_TEMPORARY_UNAVAILABLE' || type === 'RESOURCE_INTEGRITY_ERROR',
-  }
 }
 
 export class BibleLoadingError extends Error {

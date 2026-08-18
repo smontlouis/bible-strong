@@ -11,12 +11,29 @@ export type ResourceAccessErrorCode =
   | 'TEMPORARY_UNAVAILABLE'
   | 'UNKNOWN'
 
-export type ResourceRecoveryAction = 'acquire-offline-copy' | 'manage-offline-copies'
+export type ResourceRecoveryAction =
+  | 'retry'
+  | 'acquire-offline-copy'
+  | 'repair-offline-copy'
+  | 'manage-offline-copies'
+
+const getDefaultRecoveries = (code: ResourceAccessErrorCode): ResourceRecoveryAction[] => {
+  switch (code) {
+    case 'NETWORK_OFFLINE':
+    case 'TEMPORARY_UNAVAILABLE':
+    case 'UNKNOWN':
+      return ['retry']
+    case 'INTEGRITY_FAILURE':
+      return ['retry', 'repair-offline-copy', 'manage-offline-copies']
+    default:
+      return []
+  }
+}
 
 export class ResourceAccessError extends Error {
   constructor(
     public readonly code: ResourceAccessErrorCode,
-    public readonly recoveries: ResourceRecoveryAction[] = []
+    public readonly recoveries: ResourceRecoveryAction[] = getDefaultRecoveries(code)
   ) {
     super(code)
     this.name = 'ResourceAccessError'

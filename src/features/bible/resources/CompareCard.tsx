@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import Empty from '~common/Empty'
 import Box from '~common/ui/Box'
+import Button from '~common/ui/Button'
+import { FeatherIcon } from '~common/ui/Icon'
 import { VerseIds } from '~common/types'
 import BibleCompareVerseItem from '~features/bible/BibleCompareVerseItem'
 import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
@@ -21,9 +23,15 @@ interface CompareCardProps {
   selectedVerses: VerseIds
   onChangeVerse: (verse: string) => void
   strongMode?: boolean
+  onChooseVersions?: () => void
 }
 
-const CompareCard = ({ selectedVerses, onChangeVerse, strongMode = false }: CompareCardProps) => {
+const CompareCard = ({
+  selectedVerses,
+  onChangeVerse,
+  strongMode = false,
+  onChooseVersions,
+}: CompareCardProps) => {
   const { t } = useTranslation()
   const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
   const strongSelectionSheet = useSheet()
@@ -39,7 +47,7 @@ const CompareCard = ({ selectedVerses, onChangeVerse, strongMode = false }: Comp
         countLsgChapters[`${livre}-${chapitre}`]
       return { verseNumber: verse, versesInCurrentChapter }
     },
-    enabled: selectedVerseKeys.length === 1,
+    enabled: selectedVerseKeys.length === 1 && versionsToCompare.length > 0,
     ...localQueryOptions,
   })
 
@@ -60,9 +68,29 @@ const CompareCard = ({ selectedVerses, onChangeVerse, strongMode = false }: Comp
   if (!filteredVersions.length) {
     return (
       <Empty
-        source={require('~assets/images/empty.json')}
+        iconElement={
+          <Box size={64} borderRadius={32} bg="lightGrey" center>
+            <FeatherIcon name="columns" size={28} color="primary" />
+          </Box>
+        }
         message={t('Aucune version à comparer...')}
-      />
+      >
+        {onChooseVersions && (
+          <Box mt={20} minWidth={260}>
+            <Button
+              onPress={onChooseVersions}
+              testID="compare-empty-choose-versions"
+              rightIcon={
+                <Box ml={10}>
+                  <FeatherIcon name="arrow-right" size={18} color="reverse" />
+                </Box>
+              }
+            >
+              {t('common.chooseCompareVersions')}
+            </Button>
+          </Box>
+        )}
+      </Empty>
     )
   }
 

@@ -62,6 +62,7 @@ const initPromise = i18n
   .init({
     resources,
     fallbackLng: 'fr',
+    returnEmptyString: false,
     keySeparator: false,
     interpolation: {
       escapeValue: false,

@@ -11,9 +11,13 @@ import { databases } from '~helpers/databases'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import type { TimelineEventDetail } from './types'
+import type { TimelineEventSummary } from '~features/resources/timelineAccess'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 
-const TimelineDetailsContext = createContext<TimelineEventDetail[]>([])
+const TimelineDetailsContext = createContext<TimelineEventSummary[]>([])
 
 export const useTimelineDetails = () => useContext(TimelineDetailsContext)
 
@@ -24,7 +28,7 @@ const TimelineResourceBoundary = ({ children }: { children: ReactNode }) => {
   const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const query = useQuery({
     queryKey: [...resourceQueryKeys.timeline(language), downloadCompletionSignal],
-    queryFn: () => resources.timeline.loadDetails(language),
+    queryFn: () => resources.timeline.loadIndex(language),
     networkMode: 'always',
   })
 
@@ -49,7 +53,11 @@ const TimelineResourceBoundary = ({ children }: { children: ReactNode }) => {
               : t('resource.timeline.offlineCopyNeeded')
           }
           fileSize={Math.round(databases(language).TIMELINE.fileSize / 1_000_000)}
-          reason={reason}
+          failure={
+            query.data?.status === 'unavailable'
+              ? resourceFailureFromAvailability(query.data)
+              : resourceFailureFromAccessError(query.error)
+          }
           onRetry={() => void query.refetch()}
         />
       </Box>

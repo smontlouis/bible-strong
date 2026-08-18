@@ -48,6 +48,45 @@ export interface StrongLexiconInstallCallbacks {
 
 class StrongLexiconModuleMissingError extends Error {}
 
+const ensureStrongLexiconQueryIndexes = async (
+  moduleId: StrongLexiconModuleId,
+  database: SQLiteDatabase
+): Promise<void> => {
+  if (moduleId === 'core') {
+    await database.execAsync(`
+      CREATE INDEX IF NOT EXISTS StepEntries_browse_idx
+        ON StepEntries(language, gloss COLLATE NOCASE, baseCode, id);
+      CREATE INDEX IF NOT EXISTS StepEntries_random_idx
+        ON StepEntries(language, id) WHERE gloss <> '';
+      CREATE INDEX IF NOT EXISTS StepEntryIdentities_entry_idx
+        ON StepEntryIdentities(stepEntryId, stepCode);
+      CREATE INDEX IF NOT EXISTS LexiconTranslations_browse_idx
+        ON LexiconTranslations(language, gloss COLLATE NOCASE, stepEntryId);
+      CREATE INDEX IF NOT EXISTS LexiconRelations_from_idx
+        ON LexiconRelations(fromStepEntryId, sortOrder);
+      CREATE INDEX IF NOT EXISTS MorphologyCodes_lookup_idx
+        ON MorphologyCodes(normalizedCode COLLATE NOCASE, code COLLATE NOCASE);
+    `)
+  } else if (moduleId === 'resources') {
+    await database.execAsync(`
+      CREATE INDEX IF NOT EXISTS LexiconResources_entry_idx
+        ON LexiconResources(stepEntryId, id);
+      CREATE INDEX IF NOT EXISTS LexiconResourceTranslations_lookup_idx
+        ON LexiconResourceTranslations(resourceId, language);
+    `)
+  } else {
+    await database.execAsync(`
+      CREATE INDEX IF NOT EXISTS Entities_ustrong_idx ON Entities(uStrong, id);
+      CREATE INDEX IF NOT EXISTS EntityTranslations_lookup_idx
+        ON EntityTranslations(entityId, language);
+      CREATE INDEX IF NOT EXISTS EntityRefs_chapter_idx
+        ON EntityRefs(book, chapter, entityId, verse);
+      CREATE INDEX IF NOT EXISTS EntityRelations_from_idx
+        ON EntityRelations(fromEntityId, relation, toEntityId);
+    `)
+  }
+}
+
 const moduleConnections = new AsyncConnectionRegistry<StrongLexiconModuleId, SQLiteDatabase>(
   async moduleId => {
     const path = getStrongLexiconModulePath(moduleId)
@@ -58,11 +97,13 @@ const moduleConnections = new AsyncConnectionRegistry<StrongLexiconModuleId, SQL
     }
 
     const publication = getStrongLexiconPublication(moduleId)
-    return openSQLiteDatabase(
+    const database = await openSQLiteDatabase(
       publication.entry,
       { useNewConnection: true },
       getStrongLexiconDirectory()
     )
+    await ensureStrongLexiconQueryIndexes(moduleId, database)
+    return database
   },
   database => database.closeAsync()
 )

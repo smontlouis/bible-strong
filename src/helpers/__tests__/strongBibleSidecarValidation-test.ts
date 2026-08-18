@@ -28,6 +28,11 @@ const validSnapshot = {
     WordStrongCodes: ['verseId', 'ordinal', 'identityOrder', 'codeId'],
     FrenchLexemes: ['id', 'lemma', 'partOfSpeech'],
   },
+  indexes: {
+    Verses: [['bookOrder', 'chapter', 'verse']],
+    StrongCodes: [['kind', 'code']],
+    WordStrongCodes: [['codeId', 'verseId', 'ordinal']],
+  },
 }
 
 const expected = {
@@ -48,6 +53,15 @@ const expected = {
 describe('Strong Bible sidecar validation', () => {
   it('accepts a complete matching snapshot', () => {
     expect(() => validateStrongBibleSidecarSnapshot(validSnapshot, expected)).not.toThrow()
+  })
+
+  it('rejects a sidecar without the concordance keyset indexes', () => {
+    expect(() =>
+      validateStrongBibleSidecarSnapshot(
+        { ...validSnapshot, indexes: { ...validSnapshot.indexes, WordStrongCodes: [] } },
+        expected
+      )
+    ).toThrow('STRONG_BIBLE_INDEX_MISSING:WordStrongCodes(codeId,verseId,ordinal)')
   })
 
   it.each([

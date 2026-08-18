@@ -19,9 +19,11 @@ jest.mock('~helpers/strongBibleSidecar', () => ({
   getStrongBibleSidecarAvailability: jest.fn(),
   getResolvedStrongBibleConcordanceIdentity: jest.fn(),
   loadStrongBibleLemmaStats: jest.fn(),
+  loadStrongBibleLemmaStatsResult: jest.fn(),
   loadStrongBibleChapterSpans: jest.fn(),
   loadStrongBibleOccurrenceLocations: jest.fn(),
   loadStrongBibleVerseCountsByBook: jest.fn(),
+  loadStrongBibleVerseCountsByBookResult: jest.fn(),
   loadStrongBibleVerseSpans: jest.fn(),
   loadStrongBibleVersesSpans: jest.fn(),
 }))

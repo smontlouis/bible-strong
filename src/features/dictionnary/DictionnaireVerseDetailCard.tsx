@@ -29,10 +29,12 @@ import DictionnaireCard from './DictionnaireCard'
 import DictionnaireVerseReference from './DictionnaireVerseReference'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { ResourceAccessError } from '~features/resources/resourceAccessError'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -137,16 +139,10 @@ const useFormattedText = ({
     enabled: !!wordsInVerse,
   })
 
-  const { error: wordsError, data: words } = useQuery<(DictionaryEntry | undefined)[]>({
+  const { error: wordsError, data: words } = useQuery<DictionaryEntry[]>({
     enabled: Boolean(wordsInVerse),
     queryKey: ['words', `${Livre}-${Chapitre}-${Verset}`, resourceLang],
-    queryFn: () =>
-      Promise.all(
-        (wordsInVerse ?? []).map(async w => {
-          const word = await resources.dictionary.loadItem(w, resourceLang)
-          return word
-        })
-      ),
+    queryFn: () => resources.dictionary.loadItems(wordsInVerse ?? [], resourceLang),
     ...localQueryOptions,
   })
   const currentWord =
@@ -240,32 +236,14 @@ const DictionnaireVerseDetailScreen = ({
     setCurrentWord(word)
   }
 
-  if (
-    dictionaryAvailabilityQuery.data?.status === 'unavailable' &&
-    dictionaryAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
-  ) {
+  if (dictionaryAvailabilityQuery.data?.status === 'unavailable') {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
         title={t('resource.dictionary.offlineCopyNeeded')}
         fileSize={22}
         size="small"
-      />
-    )
-  }
-
-  if (
-    [dictionaryWordsError, wordsError].some(
-      error =>
-        error instanceof ResourceAccessError && error.recoveries.includes('acquire-offline-copy')
-    )
-  ) {
-    return (
-      <OfflineResourceRecovery
-        identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
-        title={t('Votre dictionnaire doit être retéléchargé.')}
-        fileSize={22}
-        size="small"
+        failure={resourceFailureFromAvailability(dictionaryAvailabilityQuery.data)}
       />
     )
   }
@@ -276,7 +254,7 @@ const DictionnaireVerseDetailScreen = ({
         identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
         title={t('resource.dictionary.temporarilyUnavailable')}
         fileSize={22}
-        reason="temporary-unavailable"
+        failure={resourceFailureFromAccessError(dictionaryWordsError ?? wordsError)}
         size="small"
         onRetry={() => {
           void dictionaryAvailabilityQuery.refetch()
@@ -303,7 +281,7 @@ const DictionnaireVerseDetailScreen = ({
               }).estimatedSize / 1_000_000
             )
           )}
-          reason="offline-copy-required"
+          failure={{ cause: 'offline-copy-required', recoveries: ['acquire-offline-copy'] }}
         />
       </Container>
     )

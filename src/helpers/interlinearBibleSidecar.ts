@@ -122,14 +122,15 @@ export const getInterlinearSidecarAvailability = async (
 
   try {
     return await withInterlinearSidecar(locale, async database => {
-      const [metadata, tableColumns] = await Promise.all([
+      const [metadata, tableColumns, indexes] = await Promise.all([
         readMetadata(database),
         readTableColumns(database),
+        readRequiredIndexes(database),
       ])
       const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[locale]
       if (
         classifyInterlinearBibleSidecarSnapshot(
-          { metadata, tableColumns },
+          { metadata, tableColumns, indexes },
           {
             schemaVersion: artifact.schemaVersion,
             datasetId: BHG_INTERLINEAR_PUBLICATION.datasetId,
@@ -210,15 +211,16 @@ export const installInterlinearSidecar = async (
       extractionDirectory
     )
     try {
-      const [metadata, tableColumns, integrity] = await Promise.all([
+      const [metadata, tableColumns, indexes, integrity] = await Promise.all([
         readMetadata(candidate),
         readTableColumns(candidate),
+        readRequiredIndexes(candidate),
         candidate.getFirstAsync<{ integrity_check: string }>('PRAGMA integrity_check'),
       ])
       if (
         integrity?.integrity_check !== 'ok' ||
         classifyInterlinearBibleSidecarSnapshot(
-          { metadata, tableColumns },
+          { metadata, tableColumns, indexes },
           {
             schemaVersion: artifact.schemaVersion,
             datasetId,
@@ -497,6 +499,26 @@ const readTableColumns = async (database: SQLiteDatabase) =>
           `PRAGMA table_info("${tableName}")`
         )
         return [tableName, columns.map(({ name }) => name)]
+      })
+    )
+  )
+
+const readRequiredIndexes = async (database: SQLiteDatabase) =>
+  Object.fromEntries(
+    await Promise.all(
+      ['Verses', 'StrongCodes', 'StrongVerseIndex'].map(async tableName => {
+        const indexRows = await database.getAllAsync<{ name: string }>(
+          `PRAGMA index_list("${tableName}")`
+        )
+        const indexColumns = await Promise.all(
+          indexRows.map(async ({ name }) => {
+            const columns = await database.getAllAsync<{ name: string }>(
+              `PRAGMA index_info("${name.replaceAll('"', '""')}")`
+            )
+            return columns.map(column => column.name)
+          })
+        )
+        return [tableName, indexColumns] as const
       })
     )
   )

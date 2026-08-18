@@ -37,9 +37,12 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 
 interface NaveDetailScreenProps {
   naveAtom: PrimitiveAtom<NaveTab>
@@ -190,17 +193,13 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     return null
   }
 
-  if (
-    naveAvailabilityQuery.data?.status === 'unavailable' &&
-    naveAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
-  ) {
+  if (naveAvailabilityQuery.data?.status === 'unavailable') {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
         title={t('resource.nave.offlineCopyNeeded')}
         fileSize={7}
-        hasBackButton={hasBackButton}
-        hasHeader
+        failure={resourceFailureFromAvailability(naveAvailabilityQuery.data)}
       />
     )
   }
@@ -222,7 +221,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
           identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
           title={t('resource.nave.temporarilyUnavailable')}
           fileSize={7}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(naveQuery.error ?? naveAvailabilityQuery.error)}
           onRetry={() => {
             void naveAvailabilityQuery.refetch()
             void naveQuery.refetch()

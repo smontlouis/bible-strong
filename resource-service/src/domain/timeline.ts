@@ -5,6 +5,7 @@ import {
   TimelineRelatedDto,
   TimelineVideoDto,
   TimelineEventDto,
+  TimelineEventSummaryDto,
   TimelineEventsResponseDto,
   TimelineEventResponseDto,
   TimelineRevisionDto,
@@ -19,11 +20,15 @@ export type TimelineEvent = {
   article: string
   period: string
   dates: string
-  related: Array<{ slug: string; title: string }>
-  images: Array<{ caption: string; file: string }>
-  videos: Array<{ title: string; caption: string; filename: string }>
+  related: { slug: string; title: string }[]
+  images: { caption: string; file: string }[]
+  videos: { title: string; caption: string; filename: string }[]
   scriptures: string[]
 }
+export type TimelineEventSummary = Pick<
+  TimelineEvent,
+  'id' | 'slug' | 'title' | 'description' | 'period' | 'dates' | 'images'
+>
 
 export class ActiveTimelinePublicationUnavailable extends Data.TaggedError(
   'ActiveTimelinePublicationUnavailable'
@@ -41,9 +46,10 @@ export type TimelineRepositoryError =
   | TimelineRepositoryFailure
 export type TimelineRepositoryService = {
   listEvents: (
-    language: TimelineLanguage
+    language: TimelineLanguage,
+    options?: { search?: string; limit?: number }
   ) => Effect.Effect<
-    { language: TimelineLanguage; revision: string; events: TimelineEvent[] },
+    { language: TimelineLanguage; revision: string; events: TimelineEventSummary[] },
     TimelineRepositoryError
   >
   findEvent: (input: {
@@ -68,13 +74,21 @@ const eventDto = (event: TimelineEvent) =>
     images: event.images.map(image => new TimelineImageDto(image)),
     videos: event.videos.map(video => new TimelineVideoDto(video)),
   })
+const eventSummaryDto = (event: TimelineEventSummary) =>
+  new TimelineEventSummaryDto({
+    ...event,
+    images: event.images.map(image => new TimelineImageDto(image)),
+  })
 
-export const readTimelineEvents = (language: TimelineLanguage) =>
+export const readTimelineEvents = (
+  language: TimelineLanguage,
+  options?: { search?: string; limit?: number }
+) =>
   Effect.gen(function* () {
-    const active = yield* (yield* TimelineRepository).listEvents(language)
+    const active = yield* (yield* TimelineRepository).listEvents(language, options)
     return new TimelineEventsResponseDto({
       resource: revisionDto(active.language, active.revision),
-      events: active.events.map(eventDto),
+      events: active.events.map(eventSummaryDto),
     })
   })
 

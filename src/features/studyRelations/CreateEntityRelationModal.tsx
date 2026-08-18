@@ -1,6 +1,6 @@
 import { SheetFlashList, Sheet, SheetHeader, type SheetRef } from '~common/sheet'
 import { useTheme } from '@emotion/react'
-import { useQuery } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import { Ref, useDeferredValue, useEffect, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
@@ -45,10 +45,9 @@ import {
 } from './targetSearch'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import ResourceUnavailableView, {
-  type ResourceUnavailableReason,
-} from '~features/resources/ResourceUnavailableView'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { ResourceAccessError } from '~features/resources/resourceAccessError'
+import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 
@@ -191,18 +190,6 @@ const getSourceEndpointSubtitle = (
       return endpoint.labelFallback || getEndpointFallbackLabel(endpoint)
   }
 }
-
-const isDatabaseError = (value: unknown): value is { error: string } =>
-  typeof value === 'object' && value !== null && 'error' in value
-
-const getUnavailableReason = (error: unknown): ResourceUnavailableReason =>
-  error instanceof ResourceAccessError
-    ? error.code === 'INVALID_OFFLINE_COPY'
-      ? 'invalid-offline-copy'
-      : error.recoveries.includes('acquire-offline-copy')
-        ? 'offline-copy-required'
-        : 'temporary-unavailable'
-    : 'temporary-unavailable'
 
 const searchWithMatches = (
   targets: RelationTargetResult[],
@@ -365,14 +352,14 @@ const CreateEntityRelationModal = ({
     isAllowed('strong') &&
     (deferredBrowseMode === 'strong' || (!deferredBrowseMode && deferredSearchHasValue))
 
-  const strongQuery = useQuery({
+  const strongQuery = useInfiniteQuery({
     queryKey: [
       'relation-strong-targets',
       resourcesLanguage.STRONG,
       deferredStrongSearchValue,
       strongLetter,
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       const availability = await resources.strongLexicon.getModuleAvailability('core')
       if (availability.status !== 'available') {
         throw new ResourceAccessError(
@@ -382,16 +369,22 @@ const CreateEntityRelationModal = ({
           ]
         )
       }
-      return deferredStrongSearchValue.trim()
-        ? resources.strongLexicon.search(deferredStrongSearchValue, resourcesLanguage.STRONG, 200)
-        : resources.strongLexicon.browseByGlossPrefix(strongLetter, resourcesLanguage.STRONG, 500)
+      return resources.strongLexicon.listEntries({
+        language: resourcesLanguage.STRONG,
+        limit: 20,
+        ...(pageParam ? { cursor: pageParam } : {}),
+        ...(deferredStrongSearchValue.trim()
+          ? { search: deferredStrongSearchValue }
+          : { prefix: strongLetter }),
+      })
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.nextCursor,
     enabled: shouldLoadStrongTargets,
   })
-  const strongError =
-    strongQuery.data && isDatabaseError(strongQuery.data) ? strongQuery.data.error : null
-  const strongResults: StrongLexiconSearchResult[] =
-    shouldLoadStrongTargets && strongQuery.data ? strongQuery.data : []
+  const strongResults: StrongLexiconSearchResult[] = shouldLoadStrongTargets
+    ? (strongQuery.data?.pages.flatMap(page => page.entries) ?? [])
+    : []
 
   const shouldLoadNaveTargets =
     isAllowed('nave') &&
@@ -400,14 +393,14 @@ const CreateEntityRelationModal = ({
     isAllowed('dictionary') &&
     (deferredBrowseMode === 'dictionary' || (!deferredBrowseMode && deferredSearchHasValue))
 
-  const naveQuery = useQuery({
+  const naveQuery = useInfiniteQuery({
     queryKey: [
       'relation-nave-targets',
       resourcesLanguage.NAVE,
       deferredResourceSearchValue,
       naveLetter,
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       const availability = await resources.nave.getAvailability?.(resourcesLanguage.NAVE)
       if (availability?.status === 'unavailable') {
         throw new ResourceAccessError(
@@ -416,24 +409,31 @@ const CreateEntityRelationModal = ({
         )
       }
       return deferredResourceSearchValue.trim()
-        ? resources.nave.search(deferredResourceSearchValue, resourcesLanguage.NAVE)
-        : resources.nave.listByLetter(naveLetter, resourcesLanguage.NAVE)
+        ? resources.nave.searchPage(
+            deferredResourceSearchValue,
+            { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+            resourcesLanguage.NAVE
+          )
+        : resources.nave.listByLetterPage(
+            naveLetter,
+            { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+            resourcesLanguage.NAVE
+          )
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.nextCursor,
     enabled: shouldLoadNaveTargets,
   })
-  const naveError = naveQuery.data && isDatabaseError(naveQuery.data) ? naveQuery.data.error : null
   const naveResults: NaveRow[] =
-    shouldLoadNaveTargets && naveQuery.data && !isDatabaseError(naveQuery.data)
-      ? naveQuery.data
-      : []
-  const dictionaryQuery = useQuery({
+    shouldLoadNaveTargets && naveQuery.data ? naveQuery.data.pages.flatMap(page => page.topics) : []
+  const dictionaryQuery = useInfiniteQuery({
     queryKey: [
       'relation-dictionary-targets',
       resourcesLanguage.DICTIONNAIRE,
       deferredResourceSearchValue,
       dictionaryLetter,
     ],
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       const availability = await resources.dictionary.getAvailability?.(
         resourcesLanguage.DICTIONNAIRE
       )
@@ -444,18 +444,24 @@ const CreateEntityRelationModal = ({
         )
       }
       return deferredResourceSearchValue.trim()
-        ? resources.dictionary.search(deferredResourceSearchValue, resourcesLanguage.DICTIONNAIRE)
-        : resources.dictionary.listByLetter(dictionaryLetter, resourcesLanguage.DICTIONNAIRE)
+        ? resources.dictionary.searchPage(
+            deferredResourceSearchValue,
+            { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+            resourcesLanguage.DICTIONNAIRE
+          )
+        : resources.dictionary.listByLetterPage(
+            dictionaryLetter,
+            { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+            resourcesLanguage.DICTIONNAIRE
+          )
     },
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: page => page.nextCursor,
     enabled: shouldLoadDictionaryTargets,
   })
-  const dictionaryError =
-    dictionaryQuery.data && isDatabaseError(dictionaryQuery.data)
-      ? dictionaryQuery.data.error
-      : null
   const dictionaryResults: DictionaryRow[] =
-    shouldLoadDictionaryTargets && dictionaryQuery.data && !isDatabaseError(dictionaryQuery.data)
-      ? dictionaryQuery.data
+    shouldLoadDictionaryTargets && dictionaryQuery.data
+      ? dictionaryQuery.data.pages.flatMap(page => page.entries)
       : []
 
   const handleSearch = (value: string) => {
@@ -588,15 +594,15 @@ const CreateEntityRelationModal = ({
     (shouldLoadDictionaryTargets && dictionaryQuery.isFetching)
 
   const resourceFailures: (RelationResourceFailure | undefined)[] = [
-    shouldLoadStrongTargets && (strongQuery.isError || strongError)
+    shouldLoadStrongTargets && strongQuery.isError
       ? {
           identity: { kind: 'strong-lexicon-module', moduleId: 'core' } as const,
           title: t('resource.strong.temporarilyUnavailable'),
-          error: strongQuery.error ?? strongError,
+          error: strongQuery.error,
           retry: strongQuery.refetch,
         }
       : undefined,
-    shouldLoadNaveTargets && (naveQuery.isError || naveError)
+    shouldLoadNaveTargets && naveQuery.isError
       ? {
           identity: {
             kind: 'database',
@@ -604,11 +610,11 @@ const CreateEntityRelationModal = ({
             language: resourcesLanguage.NAVE,
           } as const,
           title: t('resource.nave.temporarilyUnavailable'),
-          error: naveQuery.error ?? naveError,
+          error: naveQuery.error,
           retry: naveQuery.refetch,
         }
       : undefined,
-    shouldLoadDictionaryTargets && (dictionaryQuery.isError || dictionaryError)
+    shouldLoadDictionaryTargets && dictionaryQuery.isError
       ? {
           identity: {
             kind: 'database',
@@ -616,7 +622,7 @@ const CreateEntityRelationModal = ({
             language: resourcesLanguage.DICTIONNAIRE,
           } as const,
           title: t('resource.dictionary.temporarilyUnavailable'),
-          error: dictionaryQuery.error ?? dictionaryError,
+          error: dictionaryQuery.error,
           retry: dictionaryQuery.refetch,
         }
       : undefined,
@@ -727,17 +733,69 @@ const CreateEntityRelationModal = ({
                 createOfflineCopyDownloadItem(resourceFailure.identity).estimatedSize / 1_000_000
               )
             )}
-            reason={getUnavailableReason(resourceFailure.error)}
+            failure={resourceFailureFromAccessError(resourceFailure.error)}
             onRetry={() => void resourceFailure.retry()}
           />
         ) : (
           <SheetFlashList
             data={searchSections}
+            onEndReachedThreshold={0.4}
+            onEndReached={() => {
+              if (
+                browseMode === 'strong' &&
+                strongQuery.hasNextPage &&
+                !strongQuery.isFetchingNextPage
+              ) {
+                void strongQuery.fetchNextPage()
+              }
+              if (
+                browseMode === 'dictionary' &&
+                dictionaryQuery.hasNextPage &&
+                !dictionaryQuery.isFetchingNextPage
+              ) {
+                void dictionaryQuery.fetchNextPage()
+              }
+              if (browseMode === 'nave' && naveQuery.hasNextPage && !naveQuery.isFetchingNextPage) {
+                void naveQuery.fetchNextPage()
+              }
+            }}
             renderItem={({ item: section }: { item: RelationTargetSection }) => (
               <SearchSectionBlock
                 section={section}
-                visibleCount={visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT}
-                onLoadMore={() => increaseVisibleCount(section.id)}
+                visibleCount={
+                  browseMode === section.id &&
+                  (section.id === 'strong' || section.id === 'dictionary' || section.id === 'nave')
+                    ? section.items.length
+                    : visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT
+                }
+                onLoadMore={() => {
+                  const currentVisible = visibleCounts[section.id] || SEARCH_SECTION_PREVIEW_LIMIT
+                  increaseVisibleCount(section.id)
+                  if (
+                    section.id === 'strong' &&
+                    currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                    strongQuery.hasNextPage &&
+                    !strongQuery.isFetchingNextPage
+                  ) {
+                    void strongQuery.fetchNextPage()
+                  }
+                  if (
+                    section.id === 'dictionary' &&
+                    currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                    dictionaryQuery.hasNextPage &&
+                    !dictionaryQuery.isFetchingNextPage
+                  ) {
+                    void dictionaryQuery.fetchNextPage()
+                  }
+                  if (
+                    section.id === 'nave' &&
+                    currentVisible + SEARCH_SECTION_LOAD_MORE_COUNT >= section.items.length &&
+                    naveQuery.hasNextPage &&
+                    !naveQuery.isFetchingNextPage
+                  ) {
+                    void naveQuery.fetchNextPage()
+                  }
+                }}
                 onPressItem={() => undefined}
                 renderItem={renderTargetSearchItem}
                 isLoading={
@@ -745,6 +803,19 @@ const CreateEntityRelationModal = ({
                   (section.id === 'dictionary' &&
                     (dictionaryQuery.isFetching || isDictionaryPending)) ||
                   (section.id === 'nave' && (naveQuery.isFetching || isNavePending))
+                }
+                hasMore={
+                  (section.id === 'strong' && strongQuery.hasNextPage) ||
+                  (section.id === 'dictionary' && dictionaryQuery.hasNextPage) ||
+                  (section.id === 'nave' && naveQuery.hasNextPage)
+                }
+                showLoadMoreButton={
+                  !(
+                    browseMode === section.id &&
+                    (section.id === 'strong' ||
+                      section.id === 'dictionary' ||
+                      section.id === 'nave')
+                  )
                 }
               />
             )}

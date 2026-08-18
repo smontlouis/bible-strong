@@ -21,8 +21,10 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
-import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
-import { downloadManager } from '~helpers/downloadManager'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
 import { createStrongIdentity, type StrongIdentity } from '~helpers/strongIdentities'
 import {
   getStrongSelectionMorphologyCodes,
@@ -30,7 +32,6 @@ import {
 } from '~helpers/strongSelection'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import useConnection from '~helpers/useConnection'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { createStrongSelectionPreviewCard } from './strongSelectionPreviewCard'
@@ -92,7 +93,6 @@ const StrongSelectionSheet = ({
   const { width: windowWidth } = useWindowDimensions()
   const pushRouteOnce = usePushRouteOnce()
   const resources = useResourceAccess()
-  const isConnected = useConnection()
   const previewPagerRef = useRef<ScrollView>(null)
   const programmaticPreviewScrollRef = useRef(false)
   const [selectedPreviewIndex, setSelectedPreviewIndex] = useState(0)
@@ -160,11 +160,6 @@ const StrongSelectionSheet = ({
     previewPagerRef.current?.scrollTo({ x: 0, animated: false })
   }, [selectionKey])
 
-  const requestCoreDownload = () => {
-    if (!isConnected) return
-    downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')])
-  }
-
   const openEntry = (stepCode: string, language: 'greek' | 'hebrew', morphologyCodes: string[]) => {
     const identity = createStrongIdentity(stepCode, language)
     pushRouteOnce({
@@ -229,32 +224,14 @@ const StrongSelectionSheet = ({
       <SheetView pt={12} pb={24} gap={14}>
         {!coreAvailable && !downloading && availabilityQuery.isSuccess && (
           <Box px={carouselHorizontalPadding}>
-            <TouchableOpacity
-              accessibilityState={{ disabled: !isConnected }}
-              disabled={!isConnected}
-              onPress={requestCoreDownload}
-              activeOpacity={0.7}
-            >
-              <StrongDownloadPromptCard>
-                <HStack gap={12} alignItems="center">
-                  <FeatherIcon
-                    name={isConnected ? 'download-cloud' : 'wifi-off'}
-                    size={19}
-                    color="default"
-                  />
-                  <VStack flex gap={2}>
-                    <Text bold fontSize={14}>
-                      {isConnected
-                        ? t('Télécharger le lexique Strong')
-                        : t('resource.action.connectionRequired')}
-                    </Text>
-                    <Text color="default" fontSize={12}>
-                      {t('Définitions françaises et anglaises, morphologie et mots liés')}
-                    </Text>
-                  </VStack>
-                </HStack>
-              </StrongDownloadPromptCard>
-            </TouchableOpacity>
+            <ResourceUnavailableView
+              identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+              title={t('resource.strong.offlineCopyNeeded')}
+              fileSize={35}
+              failure={resourceFailureFromStrongModuleAvailability(availabilityQuery.data)}
+              size="small"
+              onRetry={() => void availabilityQuery.refetch()}
+            />
           </Box>
         )}
 
@@ -263,7 +240,7 @@ const StrongSelectionSheet = ({
             identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
             title={t('resource.strong.temporarilyUnavailable')}
             fileSize={35}
-            reason="temporary-unavailable"
+            failure={resourceFailureFromAccessError(previewQuery.error ?? availabilityQuery.error)}
             size="small"
             onRetry={() => {
               void availabilityQuery.refetch()

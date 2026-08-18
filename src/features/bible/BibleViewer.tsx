@@ -25,6 +25,10 @@ import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRela
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 import type { BibleReadingAvailability } from '~features/resources/bibleReadingResourceAccess'
 import { bibleChapterQueryOptions, loadBibleVerseTexts } from '~features/resources/resourceQueries'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
@@ -1235,7 +1239,9 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
             identity={{ kind: 'database', databaseId: 'MHY', language: 'fr' }}
             title={t('resource.commentary.temporarilyUnavailable')}
             fileSize={Math.round(databases('fr').MHY.fileSize / 1_000_000)}
-            reason="temporary-unavailable"
+            failure={resourceFailureFromAccessError(
+              commentsQuery.error ?? commentsAvailabilityQuery.error
+            )}
             size="small"
             onRetry={() => {
               void commentsAvailabilityQuery.refetch()
@@ -1250,7 +1256,13 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
             identity={commentsUnavailable.recoveryIdentity}
             title={t('resource.commentary.offlineCopyNeeded')}
             fileSize={Math.round(databases('fr').MHY.fileSize / 1_000_000)}
-            reason={commentsUnavailable.reason}
+            failure={resourceFailureFromAvailability({
+              reason: commentsUnavailable.reason,
+              recoveries:
+                commentsUnavailable.reason === 'invalid-offline-copy'
+                  ? ['acquire-offline-copy', 'manage-offline-copies']
+                  : ['acquire-offline-copy'],
+            })}
             size="small"
           />
         </Box>
@@ -1267,7 +1279,9 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
                   1_000_000
               )
             )}
-            reason="temporary-unavailable"
+            failure={resourceFailureFromAccessError(
+              redWordsQuery.error ?? redWordsAvailabilityQuery.error
+            )}
             size="small"
             onRetry={() => {
               void redWordsAvailabilityQuery.refetch()
@@ -1288,7 +1302,13 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
                   1_000_000
               )
             )}
-            reason={redWordsUnavailable.reason}
+            failure={resourceFailureFromAvailability({
+              reason: redWordsUnavailable.reason,
+              recoveries:
+                redWordsUnavailable.reason === 'invalid-offline-copy'
+                  ? ['acquire-offline-copy', 'manage-offline-copies']
+                  : ['acquire-offline-copy'],
+            })}
             size="small"
           />
         </Box>

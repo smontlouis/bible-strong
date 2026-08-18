@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import NaveIcon from '~common/NaveIcon'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -15,9 +14,13 @@ import { WidgetContainer, WidgetLoading, itemHeight } from './widget'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { useResourceLanguage } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { ResourceAccessError } from '~features/resources/resourceAccessError'
-import ResourceDownloadWidget from './ResourceDownloadWidget'
 import useConnection from '~helpers/useConnection'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
+import ResourceDownloadWidget from './ResourceDownloadWidget'
 
 const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)' }) => {
   const { t } = useTranslation()
@@ -44,9 +47,8 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
   const naveReference = naveQuery.data
 
   if (
-    availabilityQuery.data?.status === 'unavailable' ||
-    (naveQuery.error instanceof ResourceAccessError &&
-      naveQuery.error.recoveries.includes('acquire-offline-copy'))
+    availabilityQuery.data?.status === 'unavailable' &&
+    availabilityQuery.data.reason === 'offline-copy-required'
   ) {
     return (
       <ResourceDownloadWidget
@@ -57,11 +59,41 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     )
   }
 
-  if (naveQuery.isError || (naveQuery.isSuccess && !naveReference)) {
+  if (
+    availabilityQuery.data?.status === 'unavailable' &&
+    availabilityQuery.data.reason === 'invalid-offline-copy'
+  ) {
     return (
       <WidgetContainer>
-        <FeatherIcon name="x" size={30} color="quart" />
-        <Text marginTop={5}>{t('Une erreur est survenue.')}</Text>
+        <ResourceUnavailableView
+          identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLanguage }}
+          title={t('resource.nave.temporarilyUnavailable')}
+          fileSize={7}
+          failure={resourceFailureFromAvailability(availabilityQuery.data)}
+          size="small"
+        />
+      </WidgetContainer>
+    )
+  }
+
+  if (availabilityQuery.isError || naveQuery.isError || (naveQuery.isSuccess && !naveReference)) {
+    return (
+      <WidgetContainer>
+        <ResourceUnavailableView
+          identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLanguage }}
+          title={t('Une erreur est survenue.')}
+          fileSize={7}
+          failure={
+            availabilityQuery.isError || naveQuery.isError
+              ? resourceFailureFromAccessError(naveQuery.error ?? availabilityQuery.error)
+              : { cause: 'not-found', recoveries: [] }
+          }
+          size="small"
+          onRetry={() => {
+            void availabilityQuery.refetch()
+            void naveQuery.refetch()
+          }}
+        />
       </WidgetContainer>
     )
   }

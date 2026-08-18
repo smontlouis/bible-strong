@@ -39,9 +39,12 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
@@ -190,12 +193,9 @@ const DictionnaryDetailScreen = ({
     return null
   }
 
-  if (
-    dictionaryAvailabilityQuery.data?.status === 'unavailable' &&
-    dictionaryAvailabilityQuery.data.recoveries.includes('acquire-offline-copy')
-  ) {
+  if (dictionaryAvailabilityQuery.data?.status === 'unavailable') {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{
           kind: 'database',
           databaseId: 'DICTIONNAIRE',
@@ -203,8 +203,7 @@ const DictionnaryDetailScreen = ({
         }}
         title={t('resource.dictionary.offlineCopyNeeded')}
         fileSize={22}
-        hasBackButton={hasBackButton}
-        hasHeader
+        failure={resourceFailureFromAvailability(dictionaryAvailabilityQuery.data)}
       />
     )
   }
@@ -238,7 +237,9 @@ const DictionnaryDetailScreen = ({
           }}
           title={t('resource.dictionary.temporarilyUnavailable')}
           fileSize={22}
-          reason="temporary-unavailable"
+          failure={resourceFailureFromAccessError(
+            dictionaryQuery.error ?? dictionaryAvailabilityQuery.error
+          )}
           onRetry={() => {
             void dictionaryAvailabilityQuery.refetch()
             void dictionaryQuery.refetch()

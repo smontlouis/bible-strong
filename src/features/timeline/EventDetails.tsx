@@ -1,4 +1,6 @@
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useAtomValue } from 'jotai/react'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
 
@@ -8,7 +10,11 @@ import { calculateLabel } from './constants'
 import { TimelineEventDetail, TimelineEvent as TimelineEventProps } from './types'
 import { Image } from 'expo-image'
 import Media from './EventDetailsMedia'
-import TimelineResourceBoundary, { useTimelineDetails } from './TimelineResourceBoundary'
+import Loading from '~common/Loading'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 
 export type EventDetailsProps = Pick<
   TimelineEventProps,
@@ -44,8 +50,28 @@ export const EventDetailsContent = ({
 }) => {
   const lang = useLanguage()
   const date = calculateLabel(start, end)
-  const timeline = useTimelineDetails()
-  const event = timeline.find(e => e.slug === slug)
+  const resources = useResourceAccess()
+  const resourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
+  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const eventQuery = useQuery({
+    queryKey: [
+      ...resourceQueryKeys.timeline(resourceLanguage),
+      'event',
+      slug,
+      downloadCompletionSignal,
+    ],
+    queryFn: () => resources.timeline.loadEvent(resourceLanguage, slug),
+    networkMode: 'always',
+  })
+  const event = eventQuery.data?.status === 'available' ? eventQuery.data.detail : undefined
+
+  if (eventQuery.isPending) {
+    return (
+      <Box py={40} center>
+        <Loading />
+      </Box>
+    )
+  }
 
   if (!event) {
     return null
@@ -77,10 +103,6 @@ export const EventDetailsContent = ({
   )
 }
 
-const EventDetails = (props: EventDetailsProps) => (
-  <TimelineResourceBoundary>
-    <EventDetailsContent {...props} />
-  </TimelineResourceBoundary>
-)
+const EventDetails = (props: EventDetailsProps) => <EventDetailsContent {...props} />
 
 export default EventDetails

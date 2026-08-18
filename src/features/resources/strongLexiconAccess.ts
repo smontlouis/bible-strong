@@ -15,6 +15,8 @@ import {
   type StrongLexiconModuleAvailability,
 } from '~helpers/strongLexiconModules'
 import {
+  decodeStrongLexiconPageCursor,
+  encodeStrongLexiconPageCursor,
   StrongLexiconChapterEntitiesResponseDto,
   StrongLexiconEntryDto,
   StrongLexiconEntityResponseDto,
@@ -140,6 +142,20 @@ export type StrongLexiconSearchResult = {
   original: string
   transliteration: string
   gloss: string
+}
+
+export type StrongLexiconPage = {
+  entries: StrongLexiconSearchResult[]
+  nextCursor?: string
+}
+
+export type StrongLexiconListRequest = {
+  language: ResourceLanguage
+  lexicalLanguage?: 'greek' | 'hebrew'
+  search?: string
+  prefix?: string
+  limit?: number
+  cursor?: string
 }
 
 type CoreEntryRow = {
@@ -642,8 +658,7 @@ const hydrateEntity = async (
          )
          LEFT JOIN EntityTranslations tr ON tr.entityId=target.id AND tr.language=?
         WHERE r.fromEntityId=?
-        ORDER BY r.relation, target.displayName
-        LIMIT 60`,
+        ORDER BY r.relation, target.displayName`,
       [language, entity.id]
     ),
   ])
@@ -828,6 +843,7 @@ export type StrongLexiconAccess = {
     language: ResourceLanguage,
     strongCodes?: string[]
   ) => Promise<StrongLexiconChapterEntity[]>
+  listEntries: (request: StrongLexiconListRequest) => Promise<StrongLexiconPage>
   search: (
     query: string,
     language: ResourceLanguage,
@@ -989,68 +1005,107 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
     return withStrongLexiconDatabase('core', core => loadMorphologies(core, codes, language))
   },
 
-  async search(query, language, limit = 100) {
-    const normalized = query.trim()
-    const like = `%${normalized}%`
+  async listEntries({
+    language,
+    lexicalLanguage,
+    search,
+    prefix,
+    limit = 100,
+    cursor: encodedCursor,
+  }) {
+    const normalizedSearch = search?.trim()
+    const normalizedPrefix = prefix?.trim()
+    if (!normalizedSearch && !normalizedPrefix) return { entries: [] }
+    const cursor = decodeStrongLexiconPageCursor(encodedCursor)
+    const pattern = normalizedSearch ? `%${normalizedSearch}%` : `${normalizedPrefix}%`
     return withStrongLexiconDatabase('core', async core => {
-      const rows = await core.getAllAsync<CoreEntryRow>(
-        `WITH rankedMatches AS (
+      const candidateFilters: string[] = []
+      const filters = ['unifiedRank=1']
+      const parameters: (string | number)[] = [language]
+      if (lexicalLanguage) {
+        candidateFilters.push('e.language=?')
+        parameters.push(lexicalLanguage)
+      }
+      candidateFilters.push(
+        normalizedSearch
+          ? `(i.stepCode LIKE ? OR e.eStrong LIKE ? OR e.dStrong LIKE ? OR e.original LIKE ? OR e.transliteration LIKE ? OR e.gloss LIKE ? OR tr.gloss LIKE ?)`
+          : `lower(COALESCE(NULLIF(tr.gloss, ''), e.gloss)) LIKE ?`
+      )
+      parameters.push(...Array(normalizedSearch ? 7 : 1).fill(pattern))
+      if (cursor) {
+        filters.push(
+          `(sortGloss > ? OR (sortGloss = ? AND baseCode > ?) OR (sortGloss = ? AND baseCode = ? AND id > ?))`
+        )
+        parameters.push(
+          cursor.gloss,
+          cursor.gloss,
+          cursor.baseCode,
+          cursor.gloss,
+          cursor.baseCode,
+          cursor.id
+        )
+      }
+      parameters.push(limit + 1)
+      const rows = await core.getAllAsync<CoreEntryRow & { sortGloss: string }>(
+        `WITH rankedEntries AS (
            SELECT e.*, i.stepCode,
                   tr.gloss AS localizedGloss,
                   tr.meaning AS localizedMeaning,
                   tr.meaningHtml AS localizedMeaningHtml,
+                  lower(COALESCE(NULLIF(tr.gloss, ''), e.gloss)) AS sortGloss,
                   ROW_NUMBER() OVER (
-                    PARTITION BY e.language, COALESCE(
-                      NULLIF(e.uStrong, ''),
-                      CAST(e.id AS TEXT) || ':' || i.stepCode
-                    )
+                    PARTITION BY e.language, COALESCE(NULLIF(e.uStrong, ''), CAST(e.id AS TEXT))
                     ORDER BY CASE WHEN i.stepCode=e.uStrong THEN 0 ELSE 1 END, e.id
                   ) AS unifiedRank
              FROM StepEntries e
              JOIN StepEntryIdentities i ON i.stepEntryId=e.id
-             LEFT JOIN LexiconTranslations tr
-               ON tr.stepEntryId=e.id AND tr.language=?
-            WHERE i.stepCode LIKE ? OR e.eStrong LIKE ? OR e.dStrong LIKE ?
-               OR e.original LIKE ? OR e.transliteration LIKE ?
-               OR e.gloss LIKE ? OR tr.gloss LIKE ?
+             LEFT JOIN LexiconTranslations tr ON tr.stepEntryId=e.id AND tr.language=?
+            WHERE ${candidateFilters.join(' AND ')}
          )
-         SELECT *
-           FROM rankedMatches
-          WHERE unifiedRank=1
-          ORDER BY COALESCE(NULLIF(localizedGloss, ''), gloss), baseCode
-        LIMIT ?`,
-        [language, like, like, like, like, like, like, like, limit]
+         SELECT * FROM rankedEntries
+          WHERE ${filters.join(' AND ')}
+          ORDER BY sortGloss, baseCode, id
+          LIMIT ?`,
+        parameters
       )
-      return rows.map(row => toSearchResult(row, language))
+      const hasNextPage = rows.length > limit
+      const selected = rows.slice(0, limit)
+      const last = selected.at(-1)
+      return {
+        entries: selected.map(row => toSearchResult(row, language)),
+        ...(hasNextPage && last
+          ? {
+              nextCursor: encodeStrongLexiconPageCursor({
+                gloss: last.sortGloss,
+                baseCode: last.baseCode,
+                id: last.id,
+              }),
+            }
+          : {}),
+      }
     })
   },
 
-  async browseByGlossPrefix(prefix, language, limit = 500) {
-    const normalizedPrefix = prefix.trim()
-    if (!normalizedPrefix) return []
-    return withStrongLexiconDatabase('core', async core => {
-      const rows = await core.getAllAsync<CoreEntryRow>(
-        `SELECT e.*, i.stepCode,
-              tr.gloss AS localizedGloss,
-              tr.meaning AS localizedMeaning,
-              tr.meaningHtml AS localizedMeaningHtml
-         FROM StepEntries e
-         JOIN StepEntryIdentities i ON i.stepEntryId=e.id
-         LEFT JOIN LexiconTranslations tr
-           ON tr.stepEntryId=e.id AND tr.language=?
-        WHERE COALESCE(NULLIF(tr.gloss, ''), e.gloss) LIKE ?
-        ORDER BY COALESCE(NULLIF(tr.gloss, ''), e.gloss), e.baseCode
-        LIMIT ?`,
-        [language, `${normalizedPrefix}%`, limit]
-      )
-      return rows.map(row => toSearchResult(row, language))
-    })
+  async search(query, language, limit = 100) {
+    return (await this.listEntries({ language, search: query, limit })).entries
+  },
+
+  async browseByGlossPrefix(prefix, language, limit = 50) {
+    return (await this.listEntries({ language, prefix, limit })).entries
   },
 
   async random(lexicalLanguage, language) {
     return withStrongLexiconDatabase('core', async core => {
-      const row = await core.getFirstAsync<CoreEntryRow>(
-        `SELECT e.*, i.stepCode,
+      const bounds = await core.getFirstAsync<{ minimum: number | null; maximum: number | null }>(
+        `SELECT MIN(id) AS minimum, MAX(id) AS maximum
+           FROM StepEntries
+          WHERE language=? AND gloss <> ''`,
+        [lexicalLanguage]
+      )
+      if (bounds?.minimum == null || bounds.maximum == null) return undefined
+      const threshold =
+        bounds.minimum + Math.floor(Math.random() * (bounds.maximum - bounds.minimum + 1))
+      const select = `SELECT e.*, i.stepCode,
               tr.gloss AS localizedGloss,
               tr.meaning AS localizedMeaning,
               tr.meaningHtml AS localizedMeaningHtml
@@ -1058,11 +1113,17 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
          JOIN StepEntryIdentities i ON i.stepEntryId=e.id
          LEFT JOIN LexiconTranslations tr
            ON tr.stepEntryId=e.id AND tr.language=?
-        WHERE e.language=? AND e.gloss <> ''
-        ORDER BY RANDOM()
-        LIMIT 1`,
-        [language, lexicalLanguage]
-      )
+        WHERE e.language=? AND e.gloss <> ''`
+      const row =
+        (await core.getFirstAsync<CoreEntryRow>(`${select} AND e.id >= ? ORDER BY e.id LIMIT 1`, [
+          language,
+          lexicalLanguage,
+          threshold,
+        ])) ??
+        (await core.getFirstAsync<CoreEntryRow>(
+          `${select} AND e.id < ? ORDER BY e.id DESC LIMIT 1`,
+          [language, lexicalLanguage, threshold]
+        ))
       return row ? toSearchResult(row, language) : undefined
     })
   },
@@ -1130,7 +1191,10 @@ export const createHttpStrongLexiconAccess = ({
       `/v1/strong-lexicon/entries?${query}`,
       StrongLexiconSearchResponseDto
     )
-    return [...response.entries]
+    return {
+      entries: [...response.entries],
+      ...(response.nextCursor ? { nextCursor: response.nextCursor } : {}),
+    }
   }
   return {
     async getModuleAvailability(moduleId) {
@@ -1233,11 +1297,19 @@ export const createHttpStrongLexiconAccess = ({
       )
       return response.entities.map(entity => ({ ...entity, verses: [...entity.verses] }))
     },
-    search(query, language, limit = 100) {
-      return loadSearch(new URLSearchParams({ language, search: query, limit: String(limit) }))
+    listEntries({ language, lexicalLanguage, search, prefix, limit = 100, cursor }) {
+      const query = new URLSearchParams({ language, limit: String(limit) })
+      if (lexicalLanguage) query.set('lexicalLanguage', lexicalLanguage)
+      if (search) query.set('search', search)
+      if (prefix) query.set('prefix', prefix)
+      if (cursor) query.set('cursor', cursor)
+      return loadSearch(query)
     },
-    browseByGlossPrefix(prefix, language, limit = 500) {
-      return loadSearch(new URLSearchParams({ language, prefix, limit: String(limit) }))
+    search(query, language, limit = 100) {
+      return this.listEntries({ language, search: query, limit }).then(page => page.entries)
+    },
+    browseByGlossPrefix(prefix, language, limit = 50) {
+      return this.listEntries({ language, prefix, limit }).then(page => page.entries)
     },
     async random(lexicalLanguage, language) {
       const response = await get(
@@ -1343,6 +1415,11 @@ export const createHybridStrongLexiconAccess = ({
         'entities',
         () => offline.loadChapterEntities(book, chapter, language, strongCodes),
         () => online.loadChapterEntities(book, chapter, language, strongCodes)
+      ),
+    listEntries: request =>
+      searchFirstOnline(
+        () => offline.listEntries(request),
+        () => online.listEntries(request)
       ),
     search: (query, language, limit) =>
       searchFirstOnline(

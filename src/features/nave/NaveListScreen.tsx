@@ -20,7 +20,7 @@ import SectionTitle from '~common/SectionTitle'
 import useLanguage from '~helpers/useLanguage'
 
 import NaveItem from './NaveItem'
-import { useSearchValue, useResultsByLetterOrSearch } from '../lexique/useUtilities'
+import { useSearchValue, useInfiniteResultsByLetterOrSearch } from '../lexique/useUtilities'
 import { useTranslation } from 'react-i18next'
 import { NaveTab } from '../../state/tabs'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -28,9 +28,13 @@ import { toast } from '~helpers/toast'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessCode,
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
 
 type NaveRow = NaveTopicSummary
 type NaveSection = {
@@ -92,46 +96,32 @@ const NaveListScreen = ({
     staleTime: Infinity,
   })
 
-  const { results, isLoading, error, recoveries, retry } = useResultsByLetterOrSearch(
-    {
-      queryKey: ['nave'],
-      query: value => resources.nave.search(value, naveResourceLanguage),
-      value: debouncedSearchValue,
-      resourceLanguage: naveResourceLanguage,
-    },
-    {
-      queryKey: ['nave'],
-      query: value => resources.nave.listByLetter(value, naveResourceLanguage),
-      value: letter,
-      resourceLanguage: naveResourceLanguage,
-    }
-  )
+  const { results, isLoading, error, recoveries, retry, fetchNextPage, hasNextPage } =
+    useInfiniteResultsByLetterOrSearch(
+      {
+        queryKey: ['nave'],
+        query: (value, options) => resources.nave.searchPage(value, options, naveResourceLanguage),
+        value: debouncedSearchValue,
+        resourceLanguage: naveResourceLanguage,
+      },
+      {
+        queryKey: ['nave'],
+        query: (value, options) =>
+          resources.nave.listByLetterPage(value, options, naveResourceLanguage),
+        value: letter,
+        resourceLanguage: naveResourceLanguage,
+      }
+    )
   const naveResults = Array.isArray(results) ? (results as NaveRow[]) : []
   const sectionResults = useSectionResults(naveResults)
 
-  if (
-    availabilityQuery.data?.status === 'unavailable' &&
-    availabilityQuery.data.recoveries.includes('acquire-offline-copy')
-  ) {
+  if (availabilityQuery.data?.status === 'unavailable') {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
         title={t('resource.nave.offlineCopyNeeded')}
         fileSize={7}
-        hasBackButton={showBackButton}
-        hasHeader
-      />
-    )
-  }
-
-  if (error === 'INVALID_OFFLINE_COPY' && recoveries.includes('acquire-offline-copy')) {
-    return (
-      <OfflineResourceRecovery
-        identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
-        title={t('La base Nave doit être retéléchargée.')}
-        fileSize={7}
-        hasBackButton={showBackButton}
-        hasHeader
+        failure={resourceFailureFromAvailability(availabilityQuery.data)}
       />
     )
   }
@@ -169,7 +159,11 @@ const NaveListScreen = ({
             identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
             title={t('resource.nave.temporarilyUnavailable')}
             fileSize={7}
-            reason="temporary-unavailable"
+            failure={
+              error
+                ? resourceFailureFromAccessCode(error, recoveries)
+                : resourceFailureFromAccessError(availabilityQuery.error)
+            }
             onRetry={() => {
               void availabilityQuery.refetch()
               retry()
@@ -230,7 +224,6 @@ const NaveListScreen = ({
             <SectionList<NaveRow, NaveSection>
               renderItem={({ item: { normalizedName, name } }) => (
                 <NaveItem
-                  key={normalizedName}
                   name_lower={normalizedName}
                   name={name}
                   onSelect={isNewTabSelection || onNaveSelect ? selectNave : undefined}
@@ -251,6 +244,10 @@ const NaveListScreen = ({
               stickySectionHeadersEnabled
               sections={sectionResults}
               keyExtractor={(item: NaveRow) => item.normalizedName}
+              onEndReached={() => {
+                if (hasNextPage) fetchNextPage()
+              }}
+              onEndReachedThreshold={0.5}
             />
           ) : (
             <Empty

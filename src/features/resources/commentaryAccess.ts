@@ -38,7 +38,7 @@ export const localMhyCommentaryAccess: CommentaryAccess = {
       const availability = await getLocalResourceAvailability(mhyIdentity)
       if (availability.status !== 'available') {
         if (availability.status === 'missing') {
-          throw new ResourceAccessError('UNKNOWN', ['acquire-offline-copy'])
+          throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
         }
         throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
           'acquire-offline-copy',
@@ -232,21 +232,42 @@ export const createCommentaryAccess = ({
 } = {}): CommentaryAccess => ({
   async loadVersePage(verse, afterOrder, language = 'fr') {
     if (language !== 'fr') {
-      if (!(await isOnline())) throw new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+      if (!(await isOnline())) throw new ResourceAccessError('NETWORK_OFFLINE')
       return remote.loadVersePage(verse, afterOrder, language)
     }
 
     if (afterOrder != null) {
-      if (!(await isOnline())) throw new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+      if (!(await isOnline())) throw new ResourceAccessError('NETWORK_OFFLINE')
       return remote.loadVersePage(verse, afterOrder, language)
     }
 
     const connected = await isOnline()
+    if (!combineResults) {
+      try {
+        return await local.loadVersePage(verse, undefined, language)
+      } catch (localError) {
+        if (!connected) {
+          if (
+            localError instanceof ResourceAccessError &&
+            ['INVALID_OFFLINE_COPY', 'INTEGRITY_FAILURE'].includes(localError.code)
+          ) {
+            throw localError
+          }
+          throw new ResourceAccessError('NETWORK_OFFLINE', ['retry', 'acquire-offline-copy'])
+        }
+        try {
+          return await remote.loadVersePage(verse, undefined, language)
+        } catch (remoteError) {
+          if (remoteError instanceof CommentaryAccessError) throw remoteError
+          throw remoteError
+        }
+      }
+    }
     const [localResult, remoteResult] = await Promise.allSettled([
       local.loadVersePage(verse),
       connected
         ? remote.loadVersePage(verse, undefined, language)
-        : Promise.reject(new ResourceAccessError('TEMPORARY_UNAVAILABLE')),
+        : Promise.reject(new ResourceAccessError('NETWORK_OFFLINE')),
     ])
 
     if (localResult.status === 'fulfilled' && !combineResults) return localResult.value
@@ -260,7 +281,15 @@ export const createCommentaryAccess = ({
     if (localResult.status === 'fulfilled') return localResult.value
     if (remoteResult.status === 'fulfilled') return remoteResult.value
 
-    if (!connected) throw localResult.reason
+    if (!connected) {
+      if (
+        localResult.reason instanceof ResourceAccessError &&
+        ['INVALID_OFFLINE_COPY', 'INTEGRITY_FAILURE'].includes(localResult.reason.code)
+      ) {
+        throw localResult.reason
+      }
+      throw new ResourceAccessError('NETWORK_OFFLINE', ['retry', 'acquire-offline-copy'])
+    }
     if (remoteResult.reason instanceof CommentaryAccessError) {
       if (localResult.reason instanceof CommentaryAccessError) throw remoteResult.reason
       throw localResult.reason

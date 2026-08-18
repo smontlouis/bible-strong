@@ -13,6 +13,7 @@ import {
   getOverlaySourceDelay,
   OVERLAY_ADDITIONAL_STAGGER_SECONDS,
 } from './overlayStagger'
+import { withColorAlpha } from './themeOverlayColor'
 
 type Props = {
   entities: StrongLexiconChapterEntity[]
@@ -61,7 +62,7 @@ const ChapterEntitiesOverlay = ({
       data-ignore-verse-touch
       initial={false}
       animate={{
-        backgroundColor: isOpen ? 'rgba(255, 255, 255, 0.5)' : 'rgba(255, 255, 255, 0)',
+        backgroundColor: withColorAlpha(colors.reverse, isOpen ? 0.5 : 0),
         backdropFilter: isOpen ? 'blur(8px)' : 'blur(0px)',
       }}
       transition={{

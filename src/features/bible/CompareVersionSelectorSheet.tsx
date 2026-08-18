@@ -7,10 +7,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import { versions } from '~helpers/bibleVersions'
 import { toggleCompareVersion } from '~redux/modules/user'
-import type { RootState } from '~redux/modules/reducer'
+import { selectCompareVersions } from '~redux/selectors/user'
 import type { AppDispatch } from '~redux/store'
 import type { VersionCode } from 'src/state/tabs'
 import { useVersionCatalog, VersionCatalogHeader, VersionCatalogList } from './VersionCatalogView'
+import BibleOfflineDetailsSheet from './VersionSelectorSheet/BibleOfflineDetailsSheet'
+import { useBibleOfflineDetails } from './VersionSelectorSheet/useBibleOfflineDetails'
 
 type CompareVersionSelectorSheetProps = {
   sheetRef: React.RefObject<SheetRef | null>
@@ -24,19 +26,11 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
     Object.values(versions).filter(version => !version.hidden)
   )
   const [scrollToTopKey, setScrollToTopKey] = React.useState(0)
-  const versionsToCompare = useSelector(
-    (state: RootState) => Object.keys(state.user.bible.settings.compare),
-    shallowEqual
-  )
+  const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
+  const offlineDetails = useBibleOfflineDetails()
 
   const toggleVersion = (versionId: VersionCode) => {
     dispatch(toggleCompareVersion(versionId))
-  }
-
-  const addCompletedDownload = (versionId: VersionCode) => {
-    if (!versionsToCompare.includes(versionId)) {
-      dispatch(toggleCompareVersion(versionId))
-    }
   }
 
   return (
@@ -68,13 +62,20 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
               version={item}
               isSelected={versionsToCompare.includes(item.id)}
               onChange={toggleVersion}
-              onDownloadComplete={addCompletedDownload}
               showSelectionCheckbox
+              showStrongIndex
+              onOpenOfflineDetails={version => {
+                void offlineDetails.open(version)
+              }}
             />
           )}
         />
       </Sheet>
       {versionCatalog.modals}
+      <BibleOfflineDetailsSheet
+        sheetRef={offlineDetails.sheetRef}
+        version={offlineDetails.version}
+      />
     </>
   )
 }

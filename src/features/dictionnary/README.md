@@ -43,7 +43,6 @@ dictionnary/
 ├── Cards/
 │   ├── DictionnaireCard      # Carte de contenu
 │   └── DictionnaireVerseDetailCard # Carte pour versets
-└── DictionnaryResultsWidget   # Widget résultats de recherche
 ```
 
 ### Structure de la base de données

@@ -1,6 +1,7 @@
 import { Context, Data, Effect } from 'effect'
 
 import {
+  DictionaryEntriesBatchResponseDto,
   DictionaryEntriesResponseDto,
   DictionaryEntryDto,
   DictionaryEntryResponseDto,
@@ -28,19 +29,19 @@ export type DictionaryListInput = {
   initial?: string
   search?: string
   limit?: number
-  offset?: number
+  cursor?: string
 }
 
 export type DictionaryEntryLookup = { language: DictionaryLanguage; word: string }
 export type DictionaryEntryIdLookup = { language: DictionaryLanguage; id: number }
+export type DictionaryEntriesLookup = { language: DictionaryLanguage; words: readonly string[] }
 export type DictionaryVerseLookup = { language: DictionaryLanguage; verseKey: string }
 
 type ActiveDictionaryBase = { language: DictionaryLanguage; revision: string }
 export type ActiveDictionaryList = ActiveDictionaryBase & {
   entries: readonly DictionarySummary[]
-  offset: number
   limit: number
-  nextOffset?: number
+  nextCursor?: string
 }
 export type ActiveDictionaryEntry = ActiveDictionaryBase & { entry: DictionaryEntry }
 export type ActiveDictionaryVerseWords = ActiveDictionaryBase & {
@@ -81,6 +82,12 @@ export type DictionaryRepositoryService = {
   findEntryById: (
     input: DictionaryEntryIdLookup
   ) => Effect.Effect<ActiveDictionaryEntry, DictionaryRepositoryError>
+  findEntries: (
+    input: DictionaryEntriesLookup
+  ) => Effect.Effect<
+    ActiveDictionaryBase & { entries: readonly DictionaryEntry[] },
+    DictionaryRepositoryError
+  >
   findVerseWords: (
     input: DictionaryVerseLookup
   ) => Effect.Effect<ActiveDictionaryVerseWords, DictionaryRepositoryError>
@@ -101,9 +108,8 @@ export const browseDictionaryEntries = (input: DictionaryListInput) =>
     return new DictionaryEntriesResponseDto({
       resource: revisionDto(active.language, active.revision),
       entries: active.entries.map(entry => new DictionarySummaryDto(entry)),
-      offset: active.offset,
       limit: active.limit,
-      ...(active.nextOffset === undefined ? {} : { nextOffset: active.nextOffset }),
+      ...(active.nextCursor === undefined ? {} : { nextCursor: active.nextCursor }),
     })
   })
 
@@ -124,6 +130,16 @@ export const readDictionaryEntryById = (input: DictionaryEntryIdLookup) =>
     return new DictionaryEntryResponseDto({
       resource: revisionDto(active.language, active.revision),
       entry: new DictionaryEntryDto(active.entry),
+    })
+  })
+
+export const readDictionaryEntries = (input: DictionaryEntriesLookup) =>
+  Effect.gen(function* () {
+    const repository = yield* DictionaryRepository
+    const active = yield* repository.findEntries(input)
+    return new DictionaryEntriesBatchResponseDto({
+      resource: revisionDto(active.language, active.revision),
+      entries: active.entries.map(entry => new DictionaryEntryDto(entry)),
     })
   })
 

@@ -9,10 +9,13 @@ import { useQuery } from '@tanstack/react-query'
 import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
 import NaveForVerse from './NaveModalForVerse'
 import { SheetScrollView } from '~common/sheet'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { ResourceAccessError } from '~features/resources/resourceAccessError'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromAvailability,
+} from '~features/resources/resourceFailure'
+import Empty from '~common/Empty'
 
 type Props = {
   selectedVerse: string
@@ -41,17 +44,14 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
   })
   const { isLoading, error, data } = naveQuery
 
-  if (
-    (availabilityQuery.data?.status === 'unavailable' &&
-      availabilityQuery.data.recoveries.includes('acquire-offline-copy')) ||
-    (error instanceof ResourceAccessError && error.recoveries.includes('acquire-offline-copy'))
-  ) {
+  if (availabilityQuery.data?.status === 'unavailable') {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLang }}
         title={t('resource.nave.offlineCopyNeeded')}
         fileSize={7}
         size="small"
+        failure={resourceFailureFromAvailability(availabilityQuery.data)}
       />
     )
   }
@@ -62,7 +62,7 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
         identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLang }}
         title={t('resource.nave.temporarilyUnavailable')}
         fileSize={7}
-        reason="temporary-unavailable"
+        failure={resourceFailureFromAccessError(error ?? availabilityQuery.error)}
         size="small"
         onRetry={() => {
           void availabilityQuery.refetch()
@@ -85,15 +85,21 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
   }
 
   const [naveItemsForVerse, naveItemsForChapter] = data || []
+  const hasTopics = Boolean(naveItemsForVerse?.length || naveItemsForChapter?.length)
 
   return (
     <SheetScrollView>
       <Box padding={20}>
-        {(!!naveItemsForChapter || !!naveItemsForVerse) && (
+        {hasTopics ? (
           <>
             <NaveForVerse items={naveItemsForVerse} label={t('Concernant le verset')} />
             <NaveForVerse items={naveItemsForChapter} label={t('Concernant le chapitre entier')} />
           </>
+        ) : (
+          <Empty
+            source={require('~assets/images/empty.json')}
+            message={t('resource.nave.noTopicsForVerse')}
+          />
         )}
       </Box>
     </SheetScrollView>

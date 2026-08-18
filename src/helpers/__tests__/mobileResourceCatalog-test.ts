@@ -1,8 +1,8 @@
 import {
   BUNDLED_MOBILE_RESOURCE_CATALOG,
+  configureDevelopmentResourceArtifactBaseUrl,
   getMobileBibleVersionIds,
   getMobileResourceCatalogEntry,
-  getDevelopmentResourceArtifactBaseUrl,
   isMobileResourceCatalog,
   loadMobileResourceCatalog,
   MOBILE_RESOURCE_CATALOG,
@@ -167,10 +167,25 @@ describe('mobile resource catalog', () => {
     expect(resolveMobileResourceArtifactUrl(entry, 'not-a-url')).toBe(entry.url)
   })
 
-  it('uses the local artifact-server defaults for native development', () => {
-    expect(getDevelopmentResourceArtifactBaseUrl('ios')).toBe('http://127.0.0.1:8788')
-    expect(getDevelopmentResourceArtifactBaseUrl('android')).toBe('http://10.0.2.2:8788')
-    expect(getDevelopmentResourceArtifactBaseUrl('web')).toBeUndefined()
+  it('keeps the catalog CDN when no local artifact server is explicitly configured', () => {
+    const entry = BUNDLED_MOBILE_RESOURCE_CATALOG.resources['bible:LSG']
+    const runtime = globalThis as typeof globalThis & { __DEV__?: boolean }
+    const previousDevelopmentMode = runtime.__DEV__
+    runtime.__DEV__ = true
+
+    try {
+      configureDevelopmentResourceArtifactBaseUrl('http://127.0.0.1:8788')
+      expect(resolveMobileResourceArtifactUrl(entry)).toBe(
+        'http://127.0.0.1:8788/bibles/bible-lsg.json.zip'
+      )
+
+      configureDevelopmentResourceArtifactBaseUrl(undefined)
+      expect(resolveMobileResourceArtifactUrl(entry)).toBe(entry.url)
+    } finally {
+      configureDevelopmentResourceArtifactBaseUrl(undefined)
+      if (previousDevelopmentMode === undefined) delete runtime.__DEV__
+      else runtime.__DEV__ = previousDevelopmentMode
+    }
   })
 
   it('fails closed for an undeclared resource', () => {

@@ -107,6 +107,11 @@ jest.mock('~features/resources/OfflineResourceRecovery', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
   return () => ReactModule.createElement('OfflineResourceRecovery')
 })
+jest.mock('~features/resources/ResourceUnavailableView', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return (props: Record<string, unknown>) =>
+    ReactModule.createElement('ResourceUnavailableView', props)
+})
 
 jest.mock('~state/resourcesLanguage', () => ({
   useResourcesLanguageValue: () => ({ STRONG: 'fr' }),
@@ -583,6 +588,28 @@ describe('BibleVerseDetailCard', () => {
       renderer.root.findByProps({ onPress: openStrongBibleSourceSheet }).props.onPress()
     })
     expect(openStrongBibleSourceSheet).toHaveBeenCalledTimes(1)
+  })
+
+  it('shows an empty lexicon state when the verse is outside the Strong index', async () => {
+    const openStrongBibleSourceSheet = jest.fn()
+    mockLoadVerse.mockResolvedValueOnce({
+      status: 'missing-location',
+      provenance: { versionId: 'LSG', datasetId: 'strong-lsg', isFallback: false },
+    })
+
+    await act(async () => {
+      renderer = create(renderCard(6, openStrongBibleSourceSheet))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(6, openStrongBibleSourceSheet))
+      await flushQueryUpdates()
+    })
+
+    expect(
+      renderer.root.findByProps({ message: 'resource.strong.noLexiconForVerse' })
+    ).toBeDefined()
+    expect(openStrongBibleSourceSheet).not.toHaveBeenCalled()
   })
 
   it('keeps the displayed Strong verse when the next verse cannot be loaded', async () => {

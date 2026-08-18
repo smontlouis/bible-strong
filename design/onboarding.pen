@@ -8633,1366 +8633,6 @@
     },
     {
       "type": "frame",
-      "id": "kKCXM",
-      "x": 1120,
-      "y": 2548,
-      "name": "Téléchargements — Proposition Bibliothèque",
-      "clip": true,
-      "width": 390,
-      "height": 844,
-      "fill": "#F4F7FF",
-      "layout": "vertical",
-      "children": [
-        {
-          "type": "frame",
-          "id": "Y6kCD",
-          "name": "Status Bar",
-          "width": "fill_container",
-          "height": 62,
-          "padding": [
-            0,
-            20
-          ],
-          "justifyContent": "space_between",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "text",
-              "id": "w9nOAH",
-              "name": "Status Time",
-              "fill": "$bs-ink",
-              "content": "10:49",
-              "fontFamily": "Inter",
-              "fontSize": 15,
-              "fontWeight": "700"
-            },
-            {
-              "type": "frame",
-              "id": "n2MkT",
-              "name": "Status Island",
-              "width": 122,
-              "height": 34,
-              "fill": "#000000",
-              "cornerRadius": 22
-            },
-            {
-              "type": "frame",
-              "id": "yxIxP",
-              "name": "Status Indicators",
-              "gap": 8,
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "L7gZz",
-                  "name": "Signal",
-                  "fill": "$bs-slate",
-                  "content": "•••",
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "B1D4l",
-                  "name": "Wifi",
-                  "fill": "$bs-ink",
-                  "content": "◔",
-                  "fontFamily": "Inter",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "rectangle",
-                  "cornerRadius": 4,
-                  "id": "cZBHk",
-                  "name": "Battery",
-                  "fill": "#FFFFFF",
-                  "width": 26,
-                  "height": 12,
-                  "stroke": "$bs-ink",
-                  "strokeWidth": 1
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "hAe4M",
-          "name": "Contenu de configuration",
-          "width": "fill_container",
-          "height": "fill_container",
-          "layout": "vertical",
-          "gap": 14,
-          "padding": [
-            0,
-            20,
-            20,
-            20
-          ],
-          "children": [
-            {
-              "type": "frame",
-              "id": "Pr0j4",
-              "name": "Introduction",
-              "width": "fill_container",
-              "layout": "vertical",
-              "gap": 7,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "n8zUT",
-                  "name": "Titre",
-                  "fill": "#111827",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "Gérez vos ressources hors ligne",
-                  "lineHeight": 1.03,
-                  "fontFamily": "Inter",
-                  "fontSize": 30,
-                  "fontWeight": "700",
-                  "letterSpacing": -0.6
-                },
-                {
-                  "type": "text",
-                  "id": "TqlNw",
-                  "name": "Sous-titre",
-                  "fill": "#667085",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "Voyez ce qui est installé, ce qu’un téléchargement consomme et l’espace qui restera sur votre téléphone.",
-                  "lineHeight": 1.35,
-                  "fontFamily": "Funnel Sans",
-                  "fontSize": 13,
-                  "fontWeight": "450"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "TuKXm",
-              "name": "Dossiers de besoins",
-              "width": "fill_container",
-              "height": 393,
-              "layout": "vertical",
-              "gap": 12,
-              "justifyContent": "space_around",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "Z9l98",
-                  "name": "Première rangée",
-                  "width": "fill_container",
-                  "height": 154,
-                  "gap": 10,
-                  "children": [
-                    {
-                      "id": "w0sFaB",
-                      "type": "ref",
-                      "ref": "Cw3IB",
-                      "fill": "#557BEF",
-                      "name": "Dossier — Lire la Bible",
-                      "width": "fill_container",
-                      "height": 154,
-                      "descendants": {
-                        "cZpDT": {
-                          "fill": "#C9DAFF"
-                        },
-                        "c1htZ": {
-                          "width": 150,
-                          "height": 120
-                        },
-                        "G6Byav": {
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 145,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#76A0FA",
-                                "position": 0
-                              },
-                              {
-                                "color": "#5983F0",
-                                "position": 1
-                              }
-                            ]
-                          }
-                        },
-                        "Y0vjz": {
-                          "width": "fill_container(170)",
-                          "layout": "none",
-                          "fill": "#00000000"
-                        },
-                        "vna9v": {
-                          "icon": "book-open"
-                        },
-                        "lpTbf": {
-                          "enabled": true
-                        },
-                        "JPc5y": {
-                          "width": 146,
-                          "flipX": false,
-                          "flipY": false,
-                          "height": "fit_content",
-                          "x": 14,
-                          "y": 75
-                        },
-                        "gftLj": {
-                          "content": "Dictionnaire grec"
-                        },
-                        "eVSFX": {
-                          "content": "↓ 13,4 Mo · 60,2 Mo disque"
-                        }
-                      }
-                    },
-                    {
-                      "id": "dktRp",
-                      "type": "ref",
-                      "ref": "Cw3IB",
-                      "fill": "#7B61D1",
-                      "name": "Dossier — Comprendre les mots",
-                      "width": 170,
-                      "height": 154,
-                      "descendants": {
-                        "cZpDT": {
-                          "fill": "#DEC9F7"
-                        },
-                        "G6Byav": {
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 145,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#B67BEF",
-                                "position": 0
-                              },
-                              {
-                                "color": "#8756D2",
-                                "position": 1
-                              }
-                            ]
-                          }
-                        },
-                        "Y0vjz": {
-                          "fill": "#00000000"
-                        },
-                        "vna9v": {
-                          "icon": "whole-word",
-                          "fill": "#8756D2"
-                        },
-                        "lpTbf": {
-                          "enabled": true,
-                          "fill": "#FFFFFF66",
-                          "stroke": "#FFFFFFB8",
-                          "strokeWidth": 1
-                        },
-                        "NY7Sw": {
-                          "enabled": false
-                        },
-                        "JPc5y": {
-                          "flipX": false,
-                          "flipY": false,
-                          "width": 146,
-                          "height": "fit_content",
-                          "x": 10,
-                          "y": 77
-                        },
-                        "gftLj": {
-                          "content": "Entités bibliques"
-                        },
-                        "eVSFX": {
-                          "content": "Installé · 19,9 Mo"
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "KX55p",
-                  "name": "Deuxième rangée",
-                  "width": "fill_container",
-                  "height": 154,
-                  "gap": 10,
-                  "children": [
-                    {
-                      "id": "VSi4J",
-                      "type": "ref",
-                      "ref": "Cw3IB",
-                      "fill": "#E69A42",
-                      "name": "Dossier — Explorer la Bible",
-                      "width": 170,
-                      "height": 154,
-                      "descendants": {
-                        "cZpDT": {
-                          "fill": "#F7D7AD"
-                        },
-                        "G6Byav": {
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 145,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#F2B46C",
-                                "position": 0
-                              },
-                              {
-                                "color": "#E69643",
-                                "position": 1
-                              }
-                            ]
-                          }
-                        },
-                        "Y0vjz": {
-                          "fill": "#00000000"
-                        },
-                        "vna9v": {
-                          "icon": "network",
-                          "fill": "#D8842E"
-                        },
-                        "lpTbf": {
-                          "enabled": true,
-                          "fill": "#FFFFFF66",
-                          "stroke": "#FFFFFFB8",
-                          "strokeWidth": 1
-                        },
-                        "NY7Sw": {
-                          "enabled": false
-                        },
-                        "JPc5y": {
-                          "flipX": false,
-                          "flipY": false,
-                          "width": 146,
-                          "height": "fit_content",
-                          "x": 10,
-                          "y": 77
-                        },
-                        "gftLj": {
-                          "content": "Dictionnaire Westphal"
-                        },
-                        "eVSFX": {
-                          "content": "↓ 23 Mo · 61 Mo disque"
-                        }
-                      }
-                    },
-                    {
-                      "id": "cGAfR",
-                      "type": "ref",
-                      "ref": "Cw3IB",
-                      "fill": "#D95D78",
-                      "name": "Dossier — Langues originales",
-                      "width": 170,
-                      "height": 154,
-                      "descendants": {
-                        "cZpDT": {
-                          "fill": "#F6C6D0"
-                        },
-                        "G6Byav": {
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 145,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#EB8390",
-                                "position": 0
-                              },
-                              {
-                                "color": "#D85D74",
-                                "position": 1
-                              }
-                            ]
-                          }
-                        },
-                        "Y0vjz": {
-                          "fill": "#00000000"
-                        },
-                        "vna9v": {
-                          "icon": "languages",
-                          "fill": "#CC526A"
-                        },
-                        "lpTbf": {
-                          "enabled": true,
-                          "fill": "#FFFFFF66",
-                          "stroke": "#FFFFFFB8",
-                          "strokeWidth": 1
-                        },
-                        "NY7Sw": {
-                          "enabled": false
-                        },
-                        "JPc5y": {
-                          "flipX": false,
-                          "flipY": false,
-                          "width": 146,
-                          "height": "fit_content",
-                          "x": 10,
-                          "y": 77
-                        },
-                        "gftLj": {
-                          "content": "Commentaires"
-                        },
-                        "eVSFX": {
-                          "content": "↓ 7 Mo · 16 Mo disque"
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "gxYbA",
-                  "name": "Personnaliser",
-                  "height": 19,
-                  "cornerRadius": 22,
-                  "gap": 7,
-                  "padding": [
-                    0,
-                    14
-                  ],
-                  "justifyContent": "center",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "Ho8yI",
-                      "name": "Personnaliser — Icône",
-                      "width": 15,
-                      "height": 15,
-                      "icon": "sliders-horizontal",
-                      "library": "lucide",
-                      "fill": "#5983F0"
-                    },
-                    {
-                      "type": "text",
-                      "id": "vftvf",
-                      "name": "Personnaliser — Libellé",
-                      "fill": "#3159B2",
-                      "content": "Catalogue  ·  Installés  ·  En cours",
-                      "fontFamily": "Funnel Sans",
-                      "fontSize": 11,
-                      "fontWeight": "700"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "XBP11",
-              "name": "Actions dossiers",
-              "width": "fill_container",
-              "layout": "vertical",
-              "gap": 10,
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "tGGyz",
-                  "name": "Actions de sélection",
-                  "width": "fill_container",
-                  "height": 44,
-                  "gap": 8,
-                  "justifyContent": "center",
-                  "alignItems": "center"
-                },
-                {
-                  "type": "frame",
-                  "id": "Cfw8x",
-                  "name": "Résumé de stockage",
-                  "width": "fill_container",
-                  "fill": "#18243A",
-                  "cornerRadius": 38,
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#18243A26",
-                    "offset": {
-                      "x": 0,
-                      "y": 5
-                    },
-                    "blur": 12
-                  },
-                  "layout": "vertical",
-                  "gap": 12,
-                  "padding": [
-                    12,
-                    14
-                  ],
-                  "justifyContent": "center",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "N81yc",
-                      "name": "Manifest de stockage V2",
-                      "width": "fill_container",
-                      "fill": "#18243A",
-                      "cornerRadius": 20,
-                      "effect": {
-                        "type": "shadow",
-                        "shadowType": "outer",
-                        "color": "#18243A26",
-                        "offset": {
-                          "x": 0,
-                          "y": 5
-                        },
-                        "blur": 12
-                      },
-                      "gap": 12,
-                      "padding": [
-                        12,
-                        14
-                      ],
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "p0kBU0",
-                          "name": "Stockage V2 — Icône",
-                          "width": 32,
-                          "height": 32,
-                          "fill": "#5983F0",
-                          "cornerRadius": 16,
-                          "justifyContent": "center",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "h8nXAT",
-                              "name": "Stockage V2 — Package",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "archive-restore",
-                              "library": "lucide",
-                              "fill": "#FFFFFF"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "vEVty",
-                          "name": "Stockage V2 — Téléchargement",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 2,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "gkkLh",
-                              "name": "Stockage V2 — Téléchargement label",
-                              "fill": "#B8C4D7",
-                              "content": "Ressources hors ligne",
-                              "fontFamily": "Funnel Sans",
-                              "fontSize": 9,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "TzRbz",
-                              "name": "Stockage V2 — Téléchargement valeur",
-                              "fill": "#FFFFFF",
-                              "content": "120 Mo",
-                              "fontFamily": "Geist Mono",
-                              "fontSize": 17,
-                              "fontWeight": "700"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "VQYXQ",
-                          "name": "Stockage V2 — Séparateur",
-                          "width": 1,
-                          "height": 34,
-                          "fill": "#FFFFFF33"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "ExKOV",
-                          "name": "Stockage V2 — Téléphone",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 2,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "c0MPf",
-                              "name": "Stockage V2 — Téléphone label",
-                              "fill": "#B8C4D7",
-                              "content": "Espace libre",
-                              "fontFamily": "Funnel Sans",
-                              "fontSize": 9,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "nLGEN",
-                              "name": "Stockage V2 — Téléphone valeur",
-                              "fill": "#FFFFFF",
-                              "content": "38,6 Go",
-                              "fontFamily": "Geist Mono",
-                              "fontSize": 17,
-                              "fontWeight": "700"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "BEPOL",
-                      "name": "Bouton Continuer dossiers",
-                      "width": "fill_container",
-                      "height": 56,
-                      "fill": "#5983F0",
-                      "cornerRadius": 28,
-                      "effect": {
-                        "type": "shadow",
-                        "shadowType": "outer",
-                        "color": "#3159B22E",
-                        "offset": {
-                          "x": 0,
-                          "y": 8
-                        },
-                        "blur": 18
-                      },
-                      "gap": 9,
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "bBBXj",
-                          "name": "Continuer dossiers — Libellé",
-                          "fill": "#FFFFFF",
-                          "content": "Voir toutes les ressources",
-                          "fontFamily": "Funnel Sans",
-                          "fontSize": 14,
-                          "fontWeight": "700"
-                        },
-                        {
-                          "type": "icon",
-                          "id": "WTTUR",
-                          "name": "Continuer dossiers — Flèche",
-                          "width": 17,
-                          "height": 17,
-                          "icon": "arrow-right",
-                          "library": "lucide",
-                          "fill": "#FFFFFF"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
-      "id": "BctTY",
-      "x": 1630,
-      "y": 2548,
-      "name": "Téléchargements — Proposition Sélection",
-      "clip": true,
-      "width": 390,
-      "height": 844,
-      "fill": "#F4F7FF",
-      "layout": "vertical",
-      "children": [
-        {
-          "type": "frame",
-          "id": "beODr",
-          "name": "Status Bar",
-          "width": "fill_container",
-          "height": 62,
-          "padding": [
-            0,
-            20
-          ],
-          "justifyContent": "space_between",
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "text",
-              "id": "vXkfs",
-              "name": "Status Time",
-              "fill": "$bs-ink",
-              "content": "10:49",
-              "fontFamily": "Inter",
-              "fontSize": 15,
-              "fontWeight": "700"
-            },
-            {
-              "type": "frame",
-              "id": "RR4JG",
-              "name": "Status Island",
-              "width": 122,
-              "height": 34,
-              "fill": "#000000",
-              "cornerRadius": 22
-            },
-            {
-              "type": "frame",
-              "id": "Ex19d",
-              "name": "Status Indicators",
-              "gap": 8,
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "m4Ujgj",
-                  "name": "Signal",
-                  "fill": "$bs-slate",
-                  "content": "•••",
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "FsevX",
-                  "name": "Wifi",
-                  "fill": "$bs-ink",
-                  "content": "◔",
-                  "fontFamily": "Inter",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "rectangle",
-                  "cornerRadius": 4,
-                  "id": "R7hZj",
-                  "name": "Battery",
-                  "fill": "#FFFFFF",
-                  "width": 26,
-                  "height": 12,
-                  "stroke": "$bs-ink",
-                  "strokeWidth": 1
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "IGofF",
-          "name": "Contenu de configuration",
-          "width": "fill_container",
-          "height": "fill_container",
-          "layout": "vertical",
-          "gap": 14,
-          "padding": [
-            0,
-            20,
-            20,
-            20
-          ],
-          "children": [
-            {
-              "type": "frame",
-              "id": "t3EkRn",
-              "name": "Introduction",
-              "width": "fill_container",
-              "layout": "vertical",
-              "gap": 7,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "ermYb",
-                  "name": "Titre",
-                  "fill": "#111827",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "3 ressources sélectionnées",
-                  "lineHeight": 1.03,
-                  "fontFamily": "Inter",
-                  "fontSize": 30,
-                  "fontWeight": "700",
-                  "letterSpacing": -0.6
-                },
-                {
-                  "type": "text",
-                  "id": "wp95F",
-                  "name": "Sous-titre",
-                  "fill": "#667085",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "Vérifiez le transfert réseau et l’espace réellement ajouté avant de confirmer.",
-                  "lineHeight": 1.35,
-                  "fontFamily": "Funnel Sans",
-                  "fontSize": 13,
-                  "fontWeight": "450"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "NUjwE",
-              "name": "Dossiers de besoins",
-              "width": "fill_container",
-              "height": 393,
-              "layout": "vertical",
-              "gap": 12,
-              "justifyContent": "space_around",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "VhM2v",
-                  "name": "Première rangée",
-                  "width": "fill_container",
-                  "height": 154,
-                  "gap": 10,
-                  "children": [
-                    {
-                      "id": "bLhUR",
-                      "type": "ref",
-                      "ref": "Cw3IB",
-                      "fill": "#557BEF",
-                      "name": "Dossier — Lire la Bible",
-                      "width": "fill_container",
-                      "height": 154,
-                      "descendants": {
-                        "cZpDT": {
-                          "fill": "#C9DAFF"
-                        },
-                        "c1htZ": {
-                          "width": 150,
-                          "height": 120
-                        },
-                        "G6Byav": {
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 145,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#76A0FA",
-                                "position": 0
-                              },
-                              {
-                                "color": "#5983F0",
-                                "position": 1
-                              }
-                            ]
-                          }
-                        },
-                        "Y0vjz": {
-                          "width": "fill_container(170)",
-                          "layout": "none",
-                          "fill": "#00000000"
-                        },
-                        "vna9v": {
-                          "icon": "book-open"
-                        },
-                        "lpTbf": {
-                          "enabled": true
-                        },
-                        "JPc5y": {
-                          "width": 146,
-                          "flipX": false,
-                          "flipY": false,
-                          "height": "fit_content",
-                          "x": 14,
-                          "y": 75
-                        },
-                        "gftLj": {
-                          "content": "Dictionnaire grec"
-                        },
-                        "eVSFX": {
-                          "content": "↓ 13,4 Mo · 60,2 Mo disque"
-                        }
-                      }
-                    },
-                    {
-                      "id": "nbsgV",
-                      "type": "ref",
-                      "ref": "Cw3IB",
-                      "fill": "#7B61D1",
-                      "name": "Dossier — Comprendre les mots",
-                      "width": 170,
-                      "height": 154,
-                      "descendants": {
-                        "cZpDT": {
-                          "fill": "#DEC9F7"
-                        },
-                        "G6Byav": {
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 145,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#B67BEF",
-                                "position": 0
-                              },
-                              {
-                                "color": "#8756D2",
-                                "position": 1
-                              }
-                            ]
-                          }
-                        },
-                        "Y0vjz": {
-                          "fill": "#00000000"
-                        },
-                        "vna9v": {
-                          "icon": "whole-word",
-                          "fill": "#8756D2"
-                        },
-                        "lpTbf": {
-                          "enabled": true,
-                          "fill": "#FFFFFF66",
-                          "stroke": "#FFFFFFB8",
-                          "strokeWidth": 1
-                        },
-                        "NY7Sw": {
-                          "enabled": false
-                        },
-                        "JPc5y": {
-                          "flipX": false,
-                          "flipY": false,
-                          "width": 146,
-                          "height": "fit_content",
-                          "x": 10,
-                          "y": 64
-                        },
-                        "gftLj": {
-                          "content": "Entités bibliques"
-                        },
-                        "eVSFX": {
-                          "content": "Dépendance · 5,3 Mo / 19,9 Mo"
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "C4AyLd",
-                  "name": "Deuxième rangée",
-                  "width": "fill_container",
-                  "height": 154,
-                  "gap": 10,
-                  "children": [
-                    {
-                      "id": "wMRWH",
-                      "type": "ref",
-                      "ref": "Cw3IB",
-                      "fill": "#E69A42",
-                      "name": "Dossier — Explorer la Bible",
-                      "width": 170,
-                      "height": 154,
-                      "descendants": {
-                        "cZpDT": {
-                          "fill": "#F7D7AD"
-                        },
-                        "G6Byav": {
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 145,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#F2B46C",
-                                "position": 0
-                              },
-                              {
-                                "color": "#E69643",
-                                "position": 1
-                              }
-                            ]
-                          }
-                        },
-                        "Y0vjz": {
-                          "fill": "#00000000"
-                        },
-                        "vna9v": {
-                          "icon": "network",
-                          "fill": "#D8842E"
-                        },
-                        "lpTbf": {
-                          "enabled": true,
-                          "fill": "#FFFFFF66",
-                          "stroke": "#FFFFFFB8",
-                          "strokeWidth": 1
-                        },
-                        "NY7Sw": {
-                          "enabled": false
-                        },
-                        "JPc5y": {
-                          "flipX": false,
-                          "flipY": false,
-                          "width": 146,
-                          "height": "fit_content",
-                          "x": 10,
-                          "y": 77
-                        },
-                        "gftLj": {
-                          "content": "Dictionnaire Westphal"
-                        },
-                        "eVSFX": {
-                          "content": "↓ 23 Mo · 61 Mo disque"
-                        }
-                      }
-                    },
-                    {
-                      "id": "X8dfat",
-                      "type": "ref",
-                      "ref": "Cw3IB",
-                      "fill": "#D95D78",
-                      "name": "Dossier — Langues originales",
-                      "width": 170,
-                      "height": 154,
-                      "descendants": {
-                        "cZpDT": {
-                          "fill": "#F6C6D0"
-                        },
-                        "G6Byav": {
-                          "fill": {
-                            "type": "gradient",
-                            "gradientType": "linear",
-                            "enabled": true,
-                            "rotation": 145,
-                            "size": {
-                              "height": 1
-                            },
-                            "colors": [
-                              {
-                                "color": "#EB8390",
-                                "position": 0
-                              },
-                              {
-                                "color": "#D85D74",
-                                "position": 1
-                              }
-                            ]
-                          }
-                        },
-                        "Y0vjz": {
-                          "fill": "#00000000"
-                        },
-                        "vna9v": {
-                          "icon": "languages",
-                          "fill": "#CC526A"
-                        },
-                        "lpTbf": {
-                          "enabled": true,
-                          "fill": "#FFFFFF66",
-                          "stroke": "#FFFFFFB8",
-                          "strokeWidth": 1
-                        },
-                        "NY7Sw": {
-                          "enabled": false
-                        },
-                        "JPc5y": {
-                          "flipX": false,
-                          "flipY": false,
-                          "width": 146,
-                          "height": "fit_content",
-                          "x": 10,
-                          "y": 77
-                        },
-                        "gftLj": {
-                          "content": "Commentaires"
-                        },
-                        "eVSFX": {
-                          "content": "↓ 7 Mo · 16 Mo disque"
-                        }
-                      }
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "UfDCL",
-                  "name": "Personnaliser",
-                  "height": 19,
-                  "cornerRadius": 22,
-                  "gap": 7,
-                  "padding": [
-                    0,
-                    14
-                  ],
-                  "justifyContent": "center",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "k3ao8z",
-                      "name": "Personnaliser — Icône",
-                      "width": 15,
-                      "height": 15,
-                      "icon": "sliders-horizontal",
-                      "library": "lucide",
-                      "fill": "#5983F0"
-                    },
-                    {
-                      "type": "text",
-                      "id": "CCQSH",
-                      "name": "Personnaliser — Libellé",
-                      "fill": "#3159B2",
-                      "content": "Modifier la sélection",
-                      "fontFamily": "Funnel Sans",
-                      "fontSize": 11,
-                      "fontWeight": "700"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "Dtwg0",
-              "name": "Actions dossiers",
-              "width": "fill_container",
-              "layout": "vertical",
-              "gap": 10,
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "r3L5RK",
-                  "name": "Actions de sélection",
-                  "width": "fill_container",
-                  "height": 44,
-                  "gap": 8,
-                  "justifyContent": "center",
-                  "alignItems": "center"
-                },
-                {
-                  "type": "frame",
-                  "id": "OrwYx",
-                  "name": "Résumé de stockage",
-                  "width": "fill_container",
-                  "fill": "#18243A",
-                  "cornerRadius": 38,
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#18243A26",
-                    "offset": {
-                      "x": 0,
-                      "y": 5
-                    },
-                    "blur": 12
-                  },
-                  "layout": "vertical",
-                  "gap": 12,
-                  "padding": [
-                    12,
-                    14
-                  ],
-                  "justifyContent": "center",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "cd1GP",
-                      "name": "Manifest de stockage V2",
-                      "width": "fill_container",
-                      "fill": "#18243A",
-                      "cornerRadius": 20,
-                      "effect": {
-                        "type": "shadow",
-                        "shadowType": "outer",
-                        "color": "#18243A26",
-                        "offset": {
-                          "x": 0,
-                          "y": 5
-                        },
-                        "blur": 12
-                      },
-                      "gap": 12,
-                      "padding": [
-                        12,
-                        14
-                      ],
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "Y0LTq",
-                          "name": "Stockage V2 — Icône",
-                          "width": 32,
-                          "height": 32,
-                          "fill": "#5983F0",
-                          "cornerRadius": 16,
-                          "justifyContent": "center",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "H3Flh",
-                              "name": "Stockage V2 — Package",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "archive-restore",
-                              "library": "lucide",
-                              "fill": "#FFFFFF"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "zN05D",
-                          "name": "Stockage V2 — Téléchargement",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 2,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "SBG1M",
-                              "name": "Stockage V2 — Téléchargement label",
-                              "fill": "#B8C4D7",
-                              "content": "À télécharger",
-                              "fontFamily": "Funnel Sans",
-                              "fontSize": 9,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "jMLrc",
-                              "name": "Stockage V2 — Téléchargement valeur",
-                              "fill": "#FFFFFF",
-                              "content": "43 Mo",
-                              "fontFamily": "Geist Mono",
-                              "fontSize": 17,
-                              "fontWeight": "700"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "fRQPJ",
-                          "name": "Stockage V2 — Séparateur",
-                          "width": 1,
-                          "height": 34,
-                          "fill": "#FFFFFF33"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "RVxyl",
-                          "name": "Stockage V2 — Téléphone",
-                          "width": "fill_container",
-                          "layout": "vertical",
-                          "gap": 2,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "SleFa",
-                              "name": "Stockage V2 — Téléphone label",
-                              "fill": "#B8C4D7",
-                              "content": "Ajout sur le téléphone",
-                              "fontFamily": "Funnel Sans",
-                              "fontSize": 9,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "jgEkI",
-                              "name": "Stockage V2 — Téléphone valeur",
-                              "fill": "#FFFFFF",
-                              "content": "+137 Mo",
-                              "fontFamily": "Geist Mono",
-                              "fontSize": 17,
-                              "fontWeight": "700"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "qAwdL",
-                      "name": "Bouton Continuer dossiers",
-                      "width": "fill_container",
-                      "height": 56,
-                      "fill": "#5983F0",
-                      "cornerRadius": 28,
-                      "effect": {
-                        "type": "shadow",
-                        "shadowType": "outer",
-                        "color": "#3159B22E",
-                        "offset": {
-                          "x": 0,
-                          "y": 8
-                        },
-                        "blur": 18
-                      },
-                      "gap": 9,
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "o5yLUq",
-                          "name": "Continuer dossiers — Libellé",
-                          "fill": "#FFFFFF",
-                          "content": "Télécharger · 38,5 Go resteront libres",
-                          "fontFamily": "Funnel Sans",
-                          "fontSize": 14,
-                          "fontWeight": "700"
-                        },
-                        {
-                          "type": "icon",
-                          "id": "yn8vT",
-                          "name": "Continuer dossiers — Flèche",
-                          "width": 17,
-                          "height": 17,
-                          "icon": "arrow-right",
-                          "library": "lucide",
-                          "fill": "#FFFFFF"
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "frame",
       "id": "XnDN5",
       "x": 1120,
       "y": 3512,
@@ -13408,6 +12048,4026 @@
                   ]
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "rectangle",
+      "id": "MPCW2",
+      "x": 6499,
+      "y": -1143,
+      "name": "bible-offline-sheet-reference.png (1206×2622)",
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "screenshot-site.png",
+        "mode": "fill"
+      },
+      "width": 358,
+      "height": 780
+    },
+    {
+      "type": "frame",
+      "id": "FKWn9",
+      "x": 6957,
+      "y": 4800,
+      "name": "Bible hors ligne — Proposition 1 Fiche éditoriale",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#F4F6FA",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "gap": 14,
+      "padding": 18,
+      "children": [
+        {
+          "type": "text",
+          "id": "xjGNM",
+          "name": "P1 Eyebrow",
+          "fill": "#5B82ED",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "BIBLE DARBY · DBY",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "xzSiY",
+          "name": "P1 Titre",
+          "fill": "#111827",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Bible Darby",
+          "fontFamily": "Inter",
+          "fontSize": 30,
+          "fontWeight": "bold"
+        },
+        {
+          "type": "text",
+          "id": "RE0cI",
+          "name": "P1 Licence",
+          "fill": "#66717F",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "1890 · Libre de droit",
+          "fontFamily": "Inter",
+          "fontSize": 14,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "ZmELm",
+          "name": "P1 Résumé stockage",
+          "width": "fill_container",
+          "fill": "#151C2B",
+          "cornerRadius": 22,
+          "gap": 18,
+          "padding": 18,
+          "children": [
+            {
+              "type": "frame",
+              "id": "gM7bt",
+              "name": "P1 Téléchargement",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 5,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "v90UE",
+                  "name": "P1 Taille zip label",
+                  "fill": "#AEB8CA",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Téléchargement",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "T27CG",
+                  "name": "P1 Taille zip",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "1,9 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "bold"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ClZUA",
+              "name": "P1 Installation",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 5,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "sAJha",
+                  "name": "P1 Taille installée label",
+                  "fill": "#AEB8CA",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Une fois installée",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "YHyUN",
+                  "name": "P1 Taille installée",
+                  "fill": "#FFFFFF",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "12,4 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 24,
+                  "fontWeight": "bold"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kSXXf",
+          "name": "P1 États",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "cornerRadius": 22,
+          "layout": "vertical",
+          "gap": 16,
+          "padding": 18,
+          "children": [
+            {
+              "type": "frame",
+              "id": "rIs1e",
+              "name": "P1 Bible",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xRAvw",
+                  "name": "P1 Bible libellé",
+                  "fill": "#17202B",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Bible",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "bold"
+                },
+                {
+                  "type": "text",
+                  "id": "p0U6ts",
+                  "name": "P1 Bible état",
+                  "fill": "#647181",
+                  "content": "Non téléchargée",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "F5O3g",
+              "name": "P1 Strong",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "KQRFt",
+                  "name": "P1 Strong libellé",
+                  "fill": "#17202B",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Index Strong",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "bold"
+                },
+                {
+                  "type": "text",
+                  "id": "M4bJ0",
+                  "name": "P1 Strong état",
+                  "fill": "#647181",
+                  "content": "Non téléchargé",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "D56pRp",
+          "name": "P1 En ligne",
+          "width": "fill_container",
+          "gap": 10,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "CEFge",
+              "name": "P1 Point en ligne",
+              "fill": "#28C77B",
+              "width": 10,
+              "height": 10
+            },
+            {
+              "type": "text",
+              "id": "I4A22G",
+              "name": "P1 En ligne texte",
+              "fill": "#4B5968",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Disponible en ligne",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "bold"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "P3nfWA",
+          "name": "P1 Détail Strong",
+          "fill": "#66717F",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Index Strong : 13,1 Mo à télécharger · 30,1 Mo installé",
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "RTKxj",
+          "name": "P1 Espace flexible",
+          "width": "fill_container",
+          "height": 80
+        },
+        {
+          "type": "frame",
+          "id": "W6i7rd",
+          "name": "P1 Primaire",
+          "width": "fill_container",
+          "height": 54,
+          "fill": "#5B82ED",
+          "cornerRadius": 18,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "tH4e7",
+              "name": "P1 Primaire libellé",
+              "fill": "#FFFFFF",
+              "content": "Télécharger la Bible",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "bold"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "AyMwL",
+          "name": "P1 Secondaire",
+          "width": "fill_container",
+          "height": 54,
+          "fill": "#FFFFFF",
+          "cornerRadius": 18,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "DkkDU",
+              "name": "P1 Secondaire libellé",
+              "fill": "#17202B",
+              "content": "Télécharger Bible + Strong",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "bold"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "GogTt",
+      "x": 6957,
+      "y": 4800,
+      "name": "Bible hors ligne — A Intro éditoriale centrée",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#FFFFFF",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "gSwEz",
+          "name": "A Grabber zone",
+          "width": "fill_container",
+          "height": 22,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "rBTXz",
+              "name": "A Grabber",
+              "fill": "#D3D7DE",
+              "width": 36,
+              "height": 5
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "x3ZKu",
+          "name": "A Introduction",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 20,
+          "padding": [
+            20,
+            26,
+            0,
+            26
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "sJJ9F",
+              "name": "A Couverture",
+              "width": 96,
+              "height": 96,
+              "fill": "#F1F3F9",
+              "cornerRadius": 28,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "cgJRE",
+                  "name": "A Sigle",
+                  "fill": "#111827",
+                  "content": "DBY",
+                  "fontFamily": "Inter",
+                  "fontSize": 29,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.5
+                },
+                {
+                  "type": "frame",
+                  "id": "yoK0i",
+                  "layoutPosition": "absolute",
+                  "x": 64,
+                  "y": -8,
+                  "name": "A Badge Strong",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 999,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0F172A24",
+                    "offset": {
+                      "x": 0,
+                      "y": 2
+                    },
+                    "blur": 10
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Y14GW",
+                      "name": "A Badge lettre",
+                      "fill": "#111827",
+                      "content": "S",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fEFE0",
+              "name": "A Titres",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Ca85P",
+                  "name": "A Titre",
+                  "fill": "#111827",
+                  "content": "Bible Darby",
+                  "fontFamily": "Inter",
+                  "fontSize": 29,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.6
+                },
+                {
+                  "type": "text",
+                  "id": "QbWeY",
+                  "name": "A Traducteur",
+                  "fill": "#66717F",
+                  "content": "Traduite par John Nelson Darby",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "Bq5XI",
+              "name": "A Description",
+              "fill": "#4A5563",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Une traduction française reconnue pour sa fidélité littérale aux textes hébreu et grec, achevée en 1890.",
+              "lineHeight": 1.55,
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 14.5,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "fX8JK",
+              "name": "A Détails",
+              "width": "fill_container",
+              "fill": "#F5F6F8",
+              "cornerRadius": 20,
+              "padding": [
+                16,
+                6
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "SYoGn",
+                  "name": "A Détail LANGUE",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 5,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "B4z4P",
+                      "name": "A Détail étiquette",
+                      "fill": "#8A93A0",
+                      "content": "LANGUE",
+                      "fontFamily": "Inter",
+                      "fontSize": 10.5,
+                      "fontWeight": "bold",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "TBp52",
+                      "name": "A Détail valeur",
+                      "fill": "#17202B",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Français",
+                      "lineHeight": 1.25,
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "D4rbl6",
+                  "name": "A Séparateur",
+                  "fill": "#E1E4EA",
+                  "width": 1,
+                  "height": 30
+                },
+                {
+                  "type": "frame",
+                  "id": "f96fi",
+                  "name": "A Détail PUBLICATION",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 5,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Zw767",
+                      "name": "A Détail étiquette",
+                      "fill": "#8A93A0",
+                      "content": "PUBLICATION",
+                      "fontFamily": "Inter",
+                      "fontSize": 10.5,
+                      "fontWeight": "bold",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "hoyTw",
+                      "name": "A Détail valeur",
+                      "fill": "#17202B",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "1890",
+                      "lineHeight": 1.25,
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "WAoep",
+                  "name": "A Séparateur",
+                  "fill": "#E1E4EA",
+                  "width": 1,
+                  "height": 30
+                },
+                {
+                  "type": "frame",
+                  "id": "f0dR5",
+                  "name": "A Détail LICENCE",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 5,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vsbub",
+                      "name": "A Détail étiquette",
+                      "fill": "#8A93A0",
+                      "content": "LICENCE",
+                      "fontFamily": "Inter",
+                      "fontSize": 10.5,
+                      "fontWeight": "bold",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "Ep4hX",
+                      "name": "A Détail valeur",
+                      "fill": "#17202B",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Libre de droit",
+                      "lineHeight": 1.25,
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "UTajc",
+              "name": "A Copyright",
+              "fill": "#8A93A0",
+              "content": "Domaine public · Texte librement reproductible",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qKgka",
+          "name": "A Espace flexible",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "PET5N",
+          "name": "A Panneau téléchargement",
+          "width": "fill_container",
+          "fill": "#F5F6F8",
+          "cornerRadius": [
+            30,
+            30,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            22,
+            22,
+            30,
+            22
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "lIS2j",
+              "name": "A Panneau titre",
+              "fill": "#8A93A0",
+              "content": "TÉLÉCHARGER POUR LIRE HORS LIGNE",
+              "fontFamily": "Inter",
+              "fontSize": 10.5,
+              "fontWeight": "bold",
+              "letterSpacing": 1.2
+            },
+            {
+              "type": "frame",
+              "id": "shmlm",
+              "name": "A Option Bible + Index Strong",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "soX3k",
+                  "name": "A Bouton Bible + Index Strong",
+                  "width": "fill_container",
+                  "height": 56,
+                  "fill": "#5B82ED",
+                  "cornerRadius": 18,
+                  "stroke": "#00000000",
+                  "padding": [
+                    0,
+                    20
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "f7vyaQ",
+                      "name": "A Bouton libellé",
+                      "fill": "#FFFFFF",
+                      "content": "Bible + Index Strong",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "bold"
+                    },
+                    {
+                      "type": "text",
+                      "id": "WtexV",
+                      "name": "A Bouton taille",
+                      "fill": "#FFFFFFCC",
+                      "content": "15 Mo",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "tGkz4",
+                  "name": "A Option détail",
+                  "fill": "#66717F",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "42,5 Mo sur l'appareil · définitions hébreu et grec incluses",
+                  "lineHeight": 1.35,
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 12.5,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "y4EXl",
+              "name": "A Option Bible uniquement",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "f25YD",
+                  "name": "A Bouton Bible uniquement",
+                  "width": "fill_container",
+                  "height": 56,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 18,
+                  "stroke": "#DFE3E9",
+                  "strokeWidth": 1.5,
+                  "padding": [
+                    0,
+                    20
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "n1uJC",
+                      "name": "A Bouton libellé",
+                      "fill": "#111827",
+                      "content": "Bible uniquement",
+                      "fontFamily": "Inter",
+                      "fontSize": 16,
+                      "fontWeight": "bold"
+                    },
+                    {
+                      "type": "text",
+                      "id": "llpML",
+                      "name": "A Bouton taille",
+                      "fill": "#66717F",
+                      "content": "1,9 Mo",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "otBaQ",
+                  "name": "A Option détail",
+                  "fill": "#66717F",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "12,4 Mo sur l'appareil · texte biblique seul",
+                  "lineHeight": 1.35,
+                  "textAlign": "center",
+                  "fontFamily": "Inter",
+                  "fontSize": 12.5,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "a8TR6U",
+      "x": 7447,
+      "y": 4800,
+      "name": "Bible hors ligne — B Fiche détaillée",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#F5F6F8",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "FrHTw",
+          "name": "B Grabber zone",
+          "width": "fill_container",
+          "height": 22,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "i3FwO",
+              "name": "B Grabber",
+              "fill": "#D3D7DE",
+              "width": 36,
+              "height": 5
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RVH0b",
+          "name": "B Introduction",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 18,
+          "padding": [
+            18,
+            24,
+            0,
+            24
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Fe8pD",
+              "name": "B En-tête",
+              "width": "fill_container",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "npja5",
+                  "name": "B Couverture",
+                  "width": 76,
+                  "height": 76,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 22,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "L5ouJ",
+                      "name": "B Sigle",
+                      "fill": "#111827",
+                      "content": "DBY",
+                      "fontFamily": "Inter",
+                      "fontSize": 22,
+                      "fontWeight": "bold",
+                      "letterSpacing": -0.3
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "FUcNj",
+                  "name": "B Titres",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 5,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kkkwH",
+                      "name": "B Titre",
+                      "fill": "#111827",
+                      "content": "Bible Darby",
+                      "fontFamily": "Inter",
+                      "fontSize": 27,
+                      "fontWeight": "bold",
+                      "letterSpacing": -0.6
+                    },
+                    {
+                      "type": "text",
+                      "id": "kl3su",
+                      "name": "B Sous-titre",
+                      "fill": "#66717F",
+                      "content": "Français · Édition de 1890",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "KGvYa",
+              "name": "B Description",
+              "fill": "#4A5563",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Traduction littérale de John Nelson Darby, saluée pour sa précision et sa proximité avec les textes hébreu et grec.",
+              "lineHeight": 1.55,
+              "fontFamily": "Inter",
+              "fontSize": 14.5,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "S0wlyi",
+              "name": "B Fiche",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 22,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "NGr65",
+                  "name": "B Ligne Traducteur",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    14,
+                    18
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "db7wu",
+                      "name": "B Étiquette",
+                      "fill": "#66717F",
+                      "content": "Traducteur",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "KBNhz",
+                      "name": "B Valeur",
+                      "fill": "#17202B",
+                      "content": "John Nelson Darby",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "nunfn",
+                  "name": "B Séparateur",
+                  "width": "fill_container",
+                  "height": 1,
+                  "padding": [
+                    0,
+                    0,
+                    0,
+                    18
+                  ],
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "kIwYM",
+                      "name": "B Trait",
+                      "fill": "#ECEEF2",
+                      "width": "fill_container",
+                      "height": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kSIbU",
+                  "name": "B Ligne Publication",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    14,
+                    18
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "O7gLn",
+                      "name": "B Étiquette",
+                      "fill": "#66717F",
+                      "content": "Publication",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "tgrI0",
+                      "name": "B Valeur",
+                      "fill": "#17202B",
+                      "content": "1890",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qnqNb",
+                  "name": "B Séparateur",
+                  "width": "fill_container",
+                  "height": 1,
+                  "padding": [
+                    0,
+                    0,
+                    0,
+                    18
+                  ],
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "V7Cgk2",
+                      "name": "B Trait",
+                      "fill": "#ECEEF2",
+                      "width": "fill_container",
+                      "height": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "f3A9U",
+                  "name": "B Ligne Licence",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    14,
+                    18
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "BgbjI",
+                      "name": "B Étiquette",
+                      "fill": "#66717F",
+                      "content": "Licence",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "pUyag",
+                      "name": "B Valeur",
+                      "fill": "#17202B",
+                      "content": "Domaine public",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "lSX4B",
+                  "name": "B Séparateur",
+                  "width": "fill_container",
+                  "height": 1,
+                  "padding": [
+                    0,
+                    0,
+                    0,
+                    18
+                  ],
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "FiSrC",
+                      "name": "B Trait",
+                      "fill": "#ECEEF2",
+                      "width": "fill_container",
+                      "height": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "c1Sjb",
+                  "name": "B Ligne Livres",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    14,
+                    18
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "YE50t",
+                      "name": "B Étiquette",
+                      "fill": "#66717F",
+                      "content": "Livres",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "vKx9v",
+                      "name": "B Valeur",
+                      "fill": "#17202B",
+                      "content": "66 livres · 31 102 versets",
+                      "fontFamily": "Inter",
+                      "fontSize": 13.5,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "i34LiX",
+              "name": "B Copyright",
+              "fill": "#8A93A0",
+              "content": "Libre de droit — reproduction et diffusion autorisées.",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FgroY",
+          "name": "B Espace flexible",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "KtgWf",
+          "name": "B Panneau téléchargement",
+          "width": "fill_container",
+          "fill": "#FFFFFF",
+          "cornerRadius": [
+            30,
+            30,
+            0,
+            0
+          ],
+          "effect": {
+            "type": "shadow",
+            "shadowType": "outer",
+            "color": "#0F172A12",
+            "offset": {
+              "x": 0,
+              "y": -8
+            },
+            "blur": 28
+          },
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            20,
+            22,
+            30,
+            22
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "oZ2Fd",
+              "name": "B Panneau titre",
+              "fill": "#111827",
+              "content": "Lire hors connexion",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "bold",
+              "letterSpacing": -0.3
+            },
+            {
+              "type": "frame",
+              "id": "wqnhi",
+              "name": "B Options",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Fg8vK",
+                  "name": "B Option Bible + Index Strong",
+                  "width": "fill_container",
+                  "fill": "#EAF0FF",
+                  "cornerRadius": 18,
+                  "stroke": "#5B82ED",
+                  "strokeWidth": 1.5,
+                  "gap": 13,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ruxLQ",
+                      "name": "B Radio",
+                      "width": 21,
+                      "height": 21,
+                      "fill": "#5B82ED",
+                      "cornerRadius": 999,
+                      "stroke": "#00000000",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "ellipse",
+                          "id": "DEs7h",
+                          "name": "B Point",
+                          "fill": "#FFFFFF",
+                          "width": 8,
+                          "height": 8
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WLCgQ",
+                      "name": "B Texte",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ZM6zU",
+                          "name": "B Option titre",
+                          "fill": "#17202B",
+                          "content": "Bible + Index Strong",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "bold"
+                        },
+                        {
+                          "type": "text",
+                          "id": "A6ILm",
+                          "name": "B Option sous-titre",
+                          "fill": "#66717F",
+                          "content": "42,5 Mo sur l'appareil",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "bbxgN",
+                      "name": "B Option taille",
+                      "fill": "#4E73DA",
+                      "content": "15 Mo",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "eRM3H",
+                  "name": "B Option Bible uniquement",
+                  "width": "fill_container",
+                  "fill": "#F5F6F8",
+                  "cornerRadius": 18,
+                  "stroke": "#00000000",
+                  "gap": 13,
+                  "padding": [
+                    14,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "cmvWb",
+                      "name": "B Radio",
+                      "width": 21,
+                      "height": 21,
+                      "fill": "#00000000",
+                      "cornerRadius": 999,
+                      "stroke": "#CBD1D9",
+                      "strokeWidth": 1.5,
+                      "justifyContent": "center",
+                      "alignItems": "center"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "E3Q5WO",
+                      "name": "B Texte",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "zKXr7",
+                          "name": "B Option titre",
+                          "fill": "#17202B",
+                          "content": "Bible uniquement",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "bold"
+                        },
+                        {
+                          "type": "text",
+                          "id": "o6Rf5f",
+                          "name": "B Option sous-titre",
+                          "fill": "#66717F",
+                          "content": "12,4 Mo sur l'appareil",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "pY6mA",
+                      "name": "B Option taille",
+                      "fill": "#66717F",
+                      "content": "1,9 Mo",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ecxxc",
+              "name": "B CTA",
+              "width": "fill_container",
+              "height": 56,
+              "fill": "#5B82ED",
+              "cornerRadius": 18,
+              "gap": 9,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "hNXRr",
+                  "name": "B CTA icône",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "arrow-down-to-line",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                },
+                {
+                  "type": "text",
+                  "id": "fcfps",
+                  "name": "B CTA libellé",
+                  "fill": "#FFFFFF",
+                  "content": "Télécharger 15 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "bold"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "lcziP",
+      "x": 7937,
+      "y": 4800,
+      "name": "Bible hors ligne — C Bandeau couverture",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#FFFFFF",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "GdPmC",
+          "name": "C Grabber zone",
+          "width": "fill_container",
+          "height": 22,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "NmK6C",
+              "name": "C Grabber",
+              "fill": "#D3D7DE",
+              "width": 36,
+              "height": 5
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "h9eB4",
+          "name": "C Bandeau",
+          "width": "fill_container",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#EAF0FF",
+                "position": 0
+              },
+              {
+                "color": "#F6F8FD",
+                "position": 1
+              }
+            ]
+          },
+          "gap": 20,
+          "padding": [
+            24,
+            26,
+            28,
+            26
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "L2yLj2",
+              "name": "C Couverture",
+              "width": 86,
+              "height": 114,
+              "fill": "#FFFFFF",
+              "cornerRadius": [
+                6,
+                16,
+                16,
+                6
+              ],
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#3D4C7A2E",
+                "offset": {
+                  "x": 0,
+                  "y": 10
+                },
+                "blur": 24
+              },
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    6,
+                    0,
+                    0,
+                    6
+                  ],
+                  "id": "EjJP2",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "C Tranche",
+                  "fill": "#5B82ED",
+                  "width": 7,
+                  "height": 114
+                },
+                {
+                  "type": "text",
+                  "id": "pIhi6",
+                  "name": "C Sigle",
+                  "fill": "#111827",
+                  "content": "DBY",
+                  "fontFamily": "Inter",
+                  "fontSize": 22,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.4
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "m7apN5",
+              "name": "C Titres",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 9,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "rCAnM",
+                  "name": "C Titre",
+                  "fill": "#111827",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Bible Darby",
+                  "lineHeight": 1.15,
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.7
+                },
+                {
+                  "type": "text",
+                  "id": "dKlCU",
+                  "name": "C Auteur",
+                  "fill": "#5A6473",
+                  "content": "John Nelson Darby · 1890",
+                  "fontFamily": "Inter",
+                  "fontSize": 13.5,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "pObTR",
+                  "name": "C Chips",
+                  "width": "fill_container",
+                  "gap": 7,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "jhTbF",
+                      "name": "C Chip Français",
+                      "fill": "#FFFFFFB8",
+                      "cornerRadius": 999,
+                      "gap": 6,
+                      "padding": [
+                        6,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "HK2fI",
+                          "name": "C Chip icône",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "globe",
+                          "library": "lucide",
+                          "fill": "#5A6473"
+                        },
+                        {
+                          "type": "text",
+                          "id": "f7V9yp",
+                          "name": "C Chip texte",
+                          "fill": "#48525F",
+                          "content": "Français",
+                          "fontFamily": "Inter",
+                          "fontSize": 11.5,
+                          "fontWeight": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cPAyg",
+                      "name": "C Chip Libre de droit",
+                      "fill": "#FFFFFFB8",
+                      "cornerRadius": 999,
+                      "gap": 6,
+                      "padding": [
+                        6,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "pw76A",
+                          "name": "C Chip icône",
+                          "width": 13,
+                          "height": 13,
+                          "icon": "scale",
+                          "library": "lucide",
+                          "fill": "#5A6473"
+                        },
+                        {
+                          "type": "text",
+                          "id": "lKfVh",
+                          "name": "C Chip texte",
+                          "fill": "#48525F",
+                          "content": "Libre de droit",
+                          "fontFamily": "Inter",
+                          "fontSize": 11.5,
+                          "fontWeight": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "zIHgs",
+          "name": "C Description zone",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            22,
+            26,
+            0,
+            26
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "MjNOk",
+              "name": "C Description",
+              "fill": "#4A5563",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Traduction littérale reconnue pour sa fidélité aux textes hébreu et grec. Le texte appartient au domaine public : il peut être lu, copié et partagé librement.",
+              "lineHeight": 1.55,
+              "fontFamily": "Inter",
+              "fontSize": 14.5,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "GxZma",
+          "name": "C Espace flexible",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "OE7On",
+          "name": "C Panneau téléchargement",
+          "width": "fill_container",
+          "fill": "#F5F6F8",
+          "cornerRadius": [
+            30,
+            30,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            20,
+            22,
+            30,
+            22
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "wBZuk",
+              "name": "C Panneau entête",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "b9oxn2",
+                  "name": "C Panneau titre",
+                  "fill": "#111827",
+                  "content": "Contenu à télécharger",
+                  "fontFamily": "Inter",
+                  "fontSize": 17,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.3
+                },
+                {
+                  "type": "text",
+                  "id": "gInr2",
+                  "name": "C Panneau total",
+                  "fill": "#4E73DA",
+                  "content": "15 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "bold"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "I930vu",
+              "name": "C Liste",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 20,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "y1M5K",
+                  "name": "C Ligne Texte de la Bible",
+                  "width": "fill_container",
+                  "gap": 13,
+                  "padding": [
+                    15,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "s33CD",
+                      "name": "C Case",
+                      "width": 23,
+                      "height": 23,
+                      "fill": "#C4CBD4",
+                      "cornerRadius": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "Y7umS",
+                          "name": "C Coche",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VC76a",
+                      "name": "C Texte",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "BWir6",
+                          "name": "C Ligne titre",
+                          "width": "fill_container",
+                          "gap": 7,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "y1wwP",
+                              "name": "C Titre ligne",
+                              "fill": "#17202B",
+                              "content": "Texte de la Bible",
+                              "fontFamily": "Inter",
+                              "fontSize": 15,
+                              "fontWeight": "bold"
+                            },
+                            {
+                              "type": "text",
+                              "id": "cSLvQ",
+                              "name": "C Mention requise",
+                              "fill": "#8A93A0",
+                              "content": "Requis",
+                              "fontFamily": "Inter",
+                              "fontSize": 11,
+                              "fontWeight": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "Tqy0a",
+                          "name": "C Sous-titre ligne",
+                          "fill": "#66717F",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "66 livres · 31 102 versets",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "n0FBp",
+                      "name": "C Taille",
+                      "fill": "#17202B",
+                      "content": "1,9 Mo",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "eQZB6",
+                  "name": "C Séparateur",
+                  "width": "fill_container",
+                  "height": 1,
+                  "padding": [
+                    0,
+                    0,
+                    0,
+                    52
+                  ],
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "tEsI7",
+                      "name": "C Trait",
+                      "fill": "#ECEEF2",
+                      "width": "fill_container",
+                      "height": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "sCd2k",
+                  "name": "C Ligne Index Strong",
+                  "width": "fill_container",
+                  "gap": 13,
+                  "padding": [
+                    15,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "cRyt2",
+                      "name": "C Case",
+                      "width": 23,
+                      "height": 23,
+                      "fill": "#5B82ED",
+                      "cornerRadius": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "XPptq",
+                          "name": "C Coche",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "check",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "hgT64",
+                      "name": "C Texte",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "w5QacZ",
+                          "name": "C Ligne titre",
+                          "width": "fill_container",
+                          "gap": 7,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "irdhJ",
+                              "name": "C Titre ligne",
+                              "fill": "#17202B",
+                              "content": "Index Strong",
+                              "fontFamily": "Inter",
+                              "fontSize": 15,
+                              "fontWeight": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "NLm8L",
+                          "name": "C Sous-titre ligne",
+                          "fill": "#66717F",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Définitions hébreu et grec",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "ZUhRI",
+                      "name": "C Taille",
+                      "fill": "#17202B",
+                      "content": "13,1 Mo",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "EDbZO",
+              "name": "C CTA",
+              "width": "fill_container",
+              "height": 56,
+              "fill": "#5B82ED",
+              "cornerRadius": 18,
+              "gap": 9,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "VXvXP",
+                  "name": "C CTA icône",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "arrow-down-to-line",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                },
+                {
+                  "type": "text",
+                  "id": "n3K0a",
+                  "name": "C CTA libellé",
+                  "fill": "#FFFFFF",
+                  "content": "Télécharger 15 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "bold"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "xIYvh",
+              "name": "C Note",
+              "fill": "#8A93A0",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "42,5 Mo occupés sur l'appareil une fois installé.",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rUa6R",
+      "x": 8427,
+      "y": 4800,
+      "name": "Bible hors ligne — D Spécimen et stockage",
+      "clip": true,
+      "width": 390,
+      "height": 414,
+      "fill": "#FFFFFF",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "AjvUS",
+          "name": "D Grabber zone",
+          "width": "fill_container",
+          "height": 22,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "PSOwY",
+              "name": "D Grabber",
+              "fill": "#D3D7DE",
+              "width": 36,
+              "height": 5
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "H4JDN",
+          "name": "D Héros",
+          "width": "fill_container",
+          "gap": 16,
+          "padding": [
+            18,
+            26,
+            0,
+            26
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "hJCLz",
+              "name": "D Couverture",
+              "width": 74,
+              "height": 96,
+              "fill": "#F1F3F9",
+              "cornerRadius": [
+                5,
+                14,
+                14,
+                5
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    5,
+                    0,
+                    0,
+                    5
+                  ],
+                  "id": "qDhhz",
+                  "layoutPosition": "absolute",
+                  "x": 0,
+                  "y": 0,
+                  "name": "D Tranche",
+                  "fill": "#5B82ED",
+                  "width": 6,
+                  "height": 96
+                },
+                {
+                  "type": "text",
+                  "id": "V2wDpV",
+                  "name": "D Sigle",
+                  "fill": "#111827",
+                  "content": "DBY",
+                  "fontFamily": "Inter",
+                  "fontSize": 19,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.3
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Sm9v5",
+              "name": "D Titres",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 5,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "AmsjK",
+                  "name": "D Titre",
+                  "fill": "#111827",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Bible Darby",
+                  "lineHeight": 1.15,
+                  "fontFamily": "Inter",
+                  "fontSize": 27,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.7
+                },
+                {
+                  "type": "text",
+                  "id": "AUgGZ",
+                  "name": "D Traducteur",
+                  "fill": "#66717F",
+                  "content": "1890 libre de droit",
+                  "fontFamily": "Inter",
+                  "fontSize": 13.5,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "joI0W",
+          "name": "D Zone apparat",
+          "width": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            22,
+            26,
+            0,
+            26
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "nRM3f",
+              "name": "D Apparat",
+              "width": "fill_container",
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "K56rJ",
+                  "name": "D Filet haut",
+                  "fill": "#ECEEF2",
+                  "width": "fill_container",
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "wPml7",
+                  "name": "D Bandeau méta",
+                  "width": "fill_container",
+                  "padding": [
+                    14,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "vc2pX",
+                      "name": "D Méta LANGUE",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 5,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "PHR8Y",
+                          "name": "D Méta étiquette",
+                          "fill": "#8A93A0",
+                          "content": "LANGUE",
+                          "fontFamily": "Inter",
+                          "fontSize": 9.5,
+                          "fontWeight": "bold",
+                          "letterSpacing": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "gEewi",
+                          "name": "D Méta valeur",
+                          "fill": "#17202B",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Français",
+                          "lineHeight": 1.2,
+                          "textAlign": "center",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "rmPgc",
+                      "name": "D Filet vertical",
+                      "fill": "#ECEEF2",
+                      "width": 1,
+                      "height": 28
+                    },
+                    {
+                      "type": "frame",
+                      "id": "vfgrs",
+                      "name": "D Méta VERSETS",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 5,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Mq7ef",
+                          "name": "D Méta étiquette",
+                          "fill": "#8A93A0",
+                          "content": "LIVRES",
+                          "fontFamily": "Inter",
+                          "fontSize": 9.5,
+                          "fontWeight": "bold",
+                          "letterSpacing": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "cpapz",
+                          "name": "D Méta valeur",
+                          "fill": "#17202B",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "66",
+                          "lineHeight": 1.2,
+                          "textAlign": "center",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "rectangle",
+                      "id": "AKJjx",
+                      "name": "D Filet vertical",
+                      "fill": "#ECEEF2",
+                      "width": 1,
+                      "height": 28
+                    },
+                    {
+                      "type": "frame",
+                      "id": "HA9tw",
+                      "name": "D Méta LICENCE",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 5,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "M3Yrh4",
+                          "name": "D Méta étiquette",
+                          "fill": "#8A93A0",
+                          "content": "Une fois installée",
+                          "fontFamily": "Inter",
+                          "fontSize": 9.5,
+                          "fontWeight": "bold",
+                          "letterSpacing": 1
+                        },
+                        {
+                          "type": "text",
+                          "id": "L5g1gU",
+                          "name": "D Méta valeur",
+                          "fill": "#17202B",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "13Mo",
+                          "lineHeight": 1.2,
+                          "textAlign": "center",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "rectangle",
+                  "id": "dSIf9",
+                  "name": "D Filet bas",
+                  "fill": "#ECEEF2",
+                  "width": "fill_container",
+                  "height": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "KmCgX",
+          "name": "D Panneau téléchargement",
+          "width": "fill_container",
+          "fill": "#F5F6F8",
+          "cornerRadius": [
+            30,
+            30,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            20,
+            22,
+            30,
+            22
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "S9eAR",
+              "name": "D Ligne interrupteur",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 20,
+              "gap": 13,
+              "padding": [
+                14,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "k4NPx",
+                  "name": "D Icône boîte",
+                  "width": 38,
+                  "height": 38,
+                  "fill": "#EAF0FF",
+                  "cornerRadius": 13,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "aKofu",
+                      "name": "D Icône",
+                      "width": 19,
+                      "height": 19,
+                      "icon": "languages",
+                      "library": "lucide",
+                      "fill": "#4E73DA"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kZj1C",
+                  "name": "D Interrupteur texte",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 2,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "x9CmY",
+                      "name": "D Interrupteur titre",
+                      "fill": "#17202B",
+                      "content": "Inclure l'index Strong",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "bold"
+                    },
+                    {
+                      "type": "text",
+                      "id": "zbfhz",
+                      "name": "D Interrupteur sous-titre",
+                      "fill": "#66717F",
+                      "content": "Hébreu et grec · +13,1 Mo",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "EnVHY",
+                  "name": "D Interrupteur",
+                  "width": 51,
+                  "height": 31,
+                  "fill": "#5B82ED",
+                  "cornerRadius": 999,
+                  "padding": [
+                    0,
+                    3
+                  ],
+                  "justifyContent": "end",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "w5dUae",
+                      "name": "D Bouton interrupteur",
+                      "fill": "#FFFFFF",
+                      "width": 25,
+                      "height": 25,
+                      "effect": {
+                        "type": "shadow",
+                        "shadowType": "outer",
+                        "color": "#0F172A33",
+                        "offset": {
+                          "x": 0,
+                          "y": 1
+                        },
+                        "blur": 3
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MJvcB",
+              "name": "D CTA",
+              "width": "fill_container",
+              "height": 56,
+              "fill": "#5B82ED",
+              "cornerRadius": 18,
+              "gap": 9,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "wpwOC",
+                  "name": "D CTA icône",
+                  "width": 18,
+                  "height": 18,
+                  "icon": "arrow-down-to-line",
+                  "library": "lucide",
+                  "fill": "#FFFFFF"
+                },
+                {
+                  "type": "text",
+                  "id": "dJ1At",
+                  "name": "D CTA libellé",
+                  "fill": "#FFFFFF",
+                  "content": "Télécharger 15 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "bold"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "lax3V",
+      "x": 8917,
+      "y": 4800,
+      "name": "Bible hors ligne — E Rayon et formats",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#FFFFFF",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "C5kSel",
+          "name": "E Grabber zone",
+          "width": "fill_container",
+          "height": 22,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "j8y3fT",
+              "name": "E Grabber",
+              "fill": "#D3D7DE",
+              "width": 36,
+              "height": 5
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "xPndg",
+          "name": "E Rayon",
+          "width": "fill_container",
+          "fill": "#F5F6F8",
+          "layout": "vertical",
+          "padding": [
+            26,
+            26,
+            0,
+            26
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "sbk5W",
+              "name": "E Étagère",
+              "width": "fill_container",
+              "gap": 6,
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "S0Kjy7",
+                  "name": "E Tranche voisine",
+                  "fill": "#CBD1DB",
+                  "width": 13,
+                  "height": 74
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "dZ7J6",
+                  "name": "E Tranche voisine",
+                  "fill": "#B9C6E4",
+                  "width": 16,
+                  "height": 86
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "iYjdt",
+                  "name": "E Tranche voisine",
+                  "fill": "#D7DBE2",
+                  "width": 11,
+                  "height": 66
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "iINeM",
+                  "name": "E Tranche voisine",
+                  "fill": "#C3CAD6",
+                  "width": 15,
+                  "height": 80
+                },
+                {
+                  "type": "frame",
+                  "id": "Wzv4T",
+                  "name": "E Écart",
+                  "width": 12,
+                  "height": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "w3wzSB",
+                  "name": "E Couverture",
+                  "width": 70,
+                  "height": 102,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": [
+                    5,
+                    14,
+                    14,
+                    5
+                  ],
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#2A3A6B26",
+                    "offset": {
+                      "x": 0,
+                      "y": 8
+                    },
+                    "blur": 20
+                  },
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": [
+                        5,
+                        0,
+                        0,
+                        5
+                      ],
+                      "id": "VeNjh",
+                      "layoutPosition": "absolute",
+                      "x": 0,
+                      "y": 0,
+                      "name": "E Tranche",
+                      "fill": "#5B82ED",
+                      "width": 6,
+                      "height": 102
+                    },
+                    {
+                      "type": "text",
+                      "id": "y7hpz",
+                      "name": "E Sigle",
+                      "fill": "#111827",
+                      "content": "DBY",
+                      "fontFamily": "Inter",
+                      "fontSize": 18,
+                      "fontWeight": "bold",
+                      "letterSpacing": -0.3
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "KqRes",
+                  "name": "E Écart droite",
+                  "width": 12,
+                  "height": 1
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "UguN8",
+                  "name": "E Tranche voisine",
+                  "fill": "#CBD1DB",
+                  "width": 14,
+                  "height": 78
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "vjAXX",
+                  "name": "E Tranche voisine",
+                  "fill": "#D7DBE2",
+                  "width": 11,
+                  "height": 64
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "vEntU",
+                  "name": "E Tranche voisine",
+                  "fill": "#C3CAD6",
+                  "width": 17,
+                  "height": 88
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "kM3oF",
+                  "name": "E Tranche voisine",
+                  "fill": "#CBD1DB",
+                  "width": 12,
+                  "height": 70
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": [
+                    3,
+                    2,
+                    2,
+                    3
+                  ],
+                  "id": "X8QUWJ",
+                  "name": "E Tranche voisine",
+                  "fill": "#D7DBE2",
+                  "width": 15,
+                  "height": 76
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "cornerRadius": 2,
+              "id": "csNdP",
+              "name": "E Tablette",
+              "fill": "#DCE0E7",
+              "width": "fill_container",
+              "height": 3
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "SnlKp",
+          "name": "E Légende rayon",
+          "width": "fill_container",
+          "padding": [
+            12,
+            26,
+            0,
+            26
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "YmnC2",
+              "name": "E Légende gauche",
+              "fill": "#8A93A0",
+              "content": "4 versions déjà hors ligne",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "pxUZB",
+              "name": "E Légende droite",
+              "fill": "#8A93A0",
+              "content": "47,2 Mo utilisés",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "bold"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "vt7Gp",
+          "name": "E Titre bloc",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            22,
+            26,
+            0,
+            26
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "NNvbb",
+              "name": "E Titre",
+              "fill": "#111827",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Bible Darby",
+              "lineHeight": 1.12,
+              "fontFamily": "Inter",
+              "fontSize": 28,
+              "fontWeight": "bold",
+              "letterSpacing": -0.7
+            },
+            {
+              "type": "text",
+              "id": "Q9U1K",
+              "name": "E Sous-titre",
+              "fill": "#66717F",
+              "content": "John Nelson Darby · 1890 · Français",
+              "fontFamily": "Inter",
+              "fontSize": 13.5,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "wXG1l",
+              "name": "E Description",
+              "fill": "#4A5563",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Traduction littérale saluée pour sa fidélité aux textes hébreu et grec.",
+              "lineHeight": 1.5,
+              "fontFamily": "Inter",
+              "fontSize": 14.5,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "DzmmC",
+              "name": "E Étiquettes",
+              "width": "fill_container",
+              "gap": 7,
+              "padding": [
+                4,
+                0,
+                0,
+                0
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Ha5Vk",
+                  "name": "E Étiquette Littérale",
+                  "fill": "#F1F3F9",
+                  "cornerRadius": 999,
+                  "padding": [
+                    6,
+                    11
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "hNXPc",
+                      "name": "E Étiquette texte",
+                      "fill": "#48525F",
+                      "content": "Littérale",
+                      "fontFamily": "Inter",
+                      "fontSize": 11.5,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "OBzrk",
+                  "name": "E Étiquette Ancien et Nouveau Testament",
+                  "fill": "#F1F3F9",
+                  "cornerRadius": 999,
+                  "padding": [
+                    6,
+                    11
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "c0guhN",
+                      "name": "E Étiquette texte",
+                      "fill": "#48525F",
+                      "content": "Ancien + Nouveau Testament",
+                      "fontFamily": "Inter",
+                      "fontSize": 11.5,
+                      "fontWeight": "500"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "TQPWq",
+          "name": "E Mentions",
+          "width": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            20,
+            26,
+            0,
+            26
+          ],
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "Minnh",
+              "name": "E Filet mentions",
+              "fill": "#ECEEF2",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "RXvkW",
+              "name": "E Mentions liste",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 9,
+              "padding": [
+                14,
+                0,
+                0,
+                0
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "jC4el",
+                  "name": "E Mention TEXTE",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "T00NC",
+                      "name": "E Mention étiquette",
+                      "fill": "#8A93A0",
+                      "textGrowth": "fixed-width",
+                      "width": 96,
+                      "content": "TEXTE",
+                      "lineHeight": 1.6,
+                      "fontFamily": "Inter",
+                      "fontSize": 9.5,
+                      "fontWeight": "bold",
+                      "letterSpacing": 0.9
+                    },
+                    {
+                      "type": "text",
+                      "id": "l4Da5m",
+                      "name": "E Mention valeur",
+                      "fill": "#4A5563",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Domaine public — reproduction et diffusion libres",
+                      "lineHeight": 1.35,
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QDNkP",
+                  "name": "E Mention NUMÉROTATION",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Lz3eu",
+                      "name": "E Mention étiquette",
+                      "fill": "#8A93A0",
+                      "textGrowth": "fixed-width",
+                      "width": 96,
+                      "content": "NUMÉROTATION",
+                      "lineHeight": 1.6,
+                      "fontFamily": "Inter",
+                      "fontSize": 9.5,
+                      "fontWeight": "bold",
+                      "letterSpacing": 0.9
+                    },
+                    {
+                      "type": "text",
+                      "id": "TBbpg",
+                      "name": "E Mention valeur",
+                      "fill": "#4A5563",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Concordance de James Strong, 1890",
+                      "lineHeight": 1.35,
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kTsKP",
+                  "name": "E Mention ÉDITION",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qKMlx",
+                      "name": "E Mention étiquette",
+                      "fill": "#8A93A0",
+                      "textGrowth": "fixed-width",
+                      "width": 96,
+                      "content": "ÉDITION",
+                      "lineHeight": 1.6,
+                      "fontFamily": "Inter",
+                      "fontSize": 9.5,
+                      "fontWeight": "bold",
+                      "letterSpacing": 0.9
+                    },
+                    {
+                      "type": "text",
+                      "id": "YTFRm",
+                      "name": "E Mention valeur",
+                      "fill": "#4A5563",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Numérisation Bible Strong · révision 2024",
+                      "lineHeight": 1.35,
+                      "fontFamily": "Inter",
+                      "fontSize": 12.5,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CCvB8",
+          "name": "E Espace flexible",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "p3mia",
+          "name": "E Panneau formats",
+          "width": "fill_container",
+          "fill": "#F5F6F8",
+          "cornerRadius": [
+            30,
+            30,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 12,
+          "padding": [
+            20,
+            22,
+            30,
+            22
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "F6fJte",
+              "name": "E Panneau entête",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "St6Kx",
+                  "name": "E Panneau titre",
+                  "fill": "#111827",
+                  "content": "Formats disponibles",
+                  "fontFamily": "Inter",
+                  "fontSize": 17,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.3
+                },
+                {
+                  "type": "text",
+                  "id": "Jno4Q",
+                  "name": "E Panneau note",
+                  "fill": "#8A93A0",
+                  "content": "Modifiable ensuite",
+                  "fontFamily": "Inter",
+                  "fontSize": 11.5,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hDO8Y",
+              "name": "E Liste formats",
+              "clip": true,
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 20,
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "KW2jN",
+                  "name": "E Format Bible + index Strong",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    15,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZCkxC",
+                      "name": "E Format texte",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 3,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "sGo0V",
+                          "name": "E Format mention",
+                          "fill": "#4E73DA",
+                          "content": "RECOMMANDÉ",
+                          "fontFamily": "Inter",
+                          "fontSize": 9,
+                          "fontWeight": "bold",
+                          "letterSpacing": 0.8
+                        },
+                        {
+                          "type": "frame",
+                          "id": "m7cerd",
+                          "name": "E Format ligne titre",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "w4q27A",
+                              "name": "E Format titre",
+                              "fill": "#17202B",
+                              "content": "Bible + index Strong",
+                              "fontFamily": "Inter",
+                              "fontSize": 15,
+                              "fontWeight": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "fjhzh",
+                          "name": "E Format sous-titre",
+                          "fill": "#66717F",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "15 Mo · 42,5 Mo une fois installé",
+                          "lineHeight": 1.3,
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Sl6sL",
+                      "name": "E Format bouton",
+                      "fill": "#5B82ED",
+                      "cornerRadius": 999,
+                      "stroke": "#00000000",
+                      "padding": [
+                        10,
+                        18
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "pzuKk",
+                          "name": "E Format bouton libellé",
+                          "fill": "#FFFFFF",
+                          "content": "Installer",
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "pUzBl",
+                  "name": "E Séparateur",
+                  "width": "fill_container",
+                  "height": 1,
+                  "padding": [
+                    0,
+                    0,
+                    0,
+                    16
+                  ],
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "id": "WpRk2",
+                      "name": "E Trait",
+                      "fill": "#ECEEF2",
+                      "width": "fill_container",
+                      "height": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "p2e1s",
+                  "name": "E Format Bible seule",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    15,
+                    16
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "q9QUe",
+                      "name": "E Format texte",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 3,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "uAk3p",
+                          "name": "E Format ligne titre",
+                          "width": "fill_container",
+                          "gap": 8,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ay14d",
+                              "name": "E Format titre",
+                              "fill": "#17202B",
+                              "content": "Bible seule",
+                              "fontFamily": "Inter",
+                              "fontSize": 15,
+                              "fontWeight": "bold"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "SyYhq",
+                          "name": "E Format sous-titre",
+                          "fill": "#66717F",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "1,9 Mo · 12,4 Mo une fois installé",
+                          "lineHeight": 1.3,
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "D3IdT",
+                      "name": "E Format bouton",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 999,
+                      "stroke": "#DFE3E9",
+                      "strokeWidth": 1.5,
+                      "padding": [
+                        10,
+                        18
+                      ],
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "h9raf",
+                          "name": "E Format bouton libellé",
+                          "fill": "#111827",
+                          "content": "Installer",
+                          "fontFamily": "Inter",
+                          "fontSize": 13.5,
+                          "fontWeight": "bold"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "s8U6LZ",
+              "name": "E Bas de page",
+              "fill": "#8A93A0",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Mise à jour automatique · Suppression possible à tout moment",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 11.5,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "yeMsY",
+      "x": 9407,
+      "y": 4800,
+      "name": "Bible hors ligne — F Marge et étiquette",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#FFFFFF",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "P29jlE",
+          "name": "F Grabber zone",
+          "width": "fill_container",
+          "height": 22,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "cornerRadius": 3,
+              "id": "b3VZGm",
+              "name": "F Grabber",
+              "fill": "#D3D7DE",
+              "width": 36,
+              "height": 5
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "A1Bgtx",
+          "name": "F Colonnes",
+          "width": "fill_container",
+          "padding": [
+            20,
+            26,
+            0,
+            26
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "tSieH",
+              "name": "F Marge",
+              "width": 78,
+              "layout": "vertical",
+              "gap": 14,
+              "padding": [
+                2,
+                16,
+                0,
+                0
+              ],
+              "alignItems": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "o7tCi",
+                  "name": "F Couverture",
+                  "width": 48,
+                  "height": 64,
+                  "fill": "#F1F3F9",
+                  "cornerRadius": [
+                    4,
+                    10,
+                    10,
+                    4
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "rectangle",
+                      "cornerRadius": [
+                        4,
+                        0,
+                        0,
+                        4
+                      ],
+                      "id": "ruPCM",
+                      "layoutPosition": "absolute",
+                      "x": 0,
+                      "y": 0,
+                      "name": "F Tranche",
+                      "fill": "#5B82ED",
+                      "width": 4,
+                      "height": 64
+                    },
+                    {
+                      "type": "text",
+                      "id": "xgJoP",
+                      "name": "F Sigle",
+                      "fill": "#111827",
+                      "content": "DBY",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "f0qJTE",
+                  "name": "F Glose 1890",
+                  "fill": "#8A93A0",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "1890",
+                  "lineHeight": 1.45,
+                  "textAlign": "right",
+                  "fontFamily": "Inter",
+                  "fontSize": 9.5,
+                  "fontWeight": "bold",
+                  "letterSpacing": 0.9
+                },
+                {
+                  "type": "text",
+                  "id": "jMXGi",
+                  "name": "F Glose FRANÇAIS",
+                  "fill": "#8A93A0",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "FRANÇAIS",
+                  "lineHeight": 1.45,
+                  "textAlign": "right",
+                  "fontFamily": "Inter",
+                  "fontSize": 9.5,
+                  "fontWeight": "bold",
+                  "letterSpacing": 0.9
+                },
+                {
+                  "type": "text",
+                  "id": "C1HxNa",
+                  "name": "F Glose DOMAINE PUBLIC",
+                  "fill": "#8A93A0",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "DOMAINE\nPUBLIC",
+                  "lineHeight": 1.45,
+                  "textAlign": "right",
+                  "fontFamily": "Inter",
+                  "fontSize": 9.5,
+                  "fontWeight": "bold",
+                  "letterSpacing": 0.9
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "M8uWY",
+              "name": "F Filet vertical",
+              "fill": "#ECEEF2",
+              "width": 1,
+              "height": 181
+            },
+            {
+              "type": "frame",
+              "id": "WL45N",
+              "name": "F Colonne texte",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                0,
+                0,
+                0,
+                18
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ZZ19p",
+                  "name": "F Titre",
+                  "fill": "#111827",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Bible Darby",
+                  "lineHeight": 1.1,
+                  "fontFamily": "Inter",
+                  "fontSize": 28,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.7
+                },
+                {
+                  "type": "text",
+                  "id": "Z9jJ4",
+                  "name": "F Traducteur",
+                  "fill": "#66717F",
+                  "content": "John Nelson Darby",
+                  "fontFamily": "Inter",
+                  "fontSize": 13.5,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "K1fBY1",
+                  "name": "F Description",
+                  "fill": "#4A5563",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Traduction littérale, tenue pour l'une des plus fidèles aux textes hébreu et grec. Chaque mot peut être relié à son entrée dans la concordance de Strong.",
+                  "lineHeight": 1.55,
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "PnGIK",
+          "name": "F Étiquette",
+          "width": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            26,
+            26,
+            0,
+            26
+          ],
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "iLys5",
+              "name": "F Filet fort haut",
+              "fill": "#111827",
+              "width": "fill_container",
+              "height": 3
+            },
+            {
+              "type": "frame",
+              "id": "rgbGv",
+              "name": "F Étiquette entête",
+              "width": "fill_container",
+              "padding": [
+                11,
+                0,
+                9,
+                0
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kZgtO",
+                  "name": "F Étiquette titre",
+                  "fill": "#111827",
+                  "content": "CONTENU DU TÉLÉCHARGEMENT",
+                  "fontFamily": "Inter",
+                  "fontSize": 10.5,
+                  "fontWeight": "bold",
+                  "letterSpacing": 1.3
+                },
+                {
+                  "type": "text",
+                  "id": "c854kZ",
+                  "name": "F Étiquette unité",
+                  "fill": "#8A93A0",
+                  "content": "2 ÉLÉMENTS",
+                  "fontFamily": "Inter",
+                  "fontSize": 9.5,
+                  "fontWeight": "bold",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "q6egeq",
+              "name": "F Filet moyen",
+              "fill": "#D3D7DE",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "odri7",
+              "name": "F Élément Texte biblique",
+              "width": "fill_container",
+              "gap": 12,
+              "padding": [
+                13,
+                0
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "duLi2",
+                  "name": "F Élément texte",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 3,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "VXKHT",
+                      "name": "F Élément titre",
+                      "fill": "#17202B",
+                      "content": "Texte biblique",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "bold"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dYyjN",
+                      "name": "F Élément détail",
+                      "fill": "#66717F",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "66 livres · 31 102 versets",
+                      "lineHeight": 1.3,
+                      "fontFamily": "Inter",
+                      "fontSize": 11.5,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "R9bJ0E",
+                  "name": "F Élément valeur",
+                  "fill": "#111827",
+                  "content": "1,9 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "bold"
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "e4HL5",
+              "name": "F Filet fin",
+              "fill": "#ECEEF2",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "EQAEF",
+              "name": "F Élément Index Strong",
+              "width": "fill_container",
+              "gap": 12,
+              "padding": [
+                13,
+                0
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "kUtVb",
+                  "name": "F Élément texte",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 3,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "hBIUc",
+                      "name": "F Élément titre",
+                      "fill": "#17202B",
+                      "content": "Index Strong",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "bold"
+                    },
+                    {
+                      "type": "text",
+                      "id": "xu7t4",
+                      "name": "F Élément détail",
+                      "fill": "#66717F",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "8 674 entrées hébreu et grec",
+                      "lineHeight": 1.3,
+                      "fontFamily": "Inter",
+                      "fontSize": 11.5,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "GpHcn",
+                  "name": "F Élément valeur",
+                  "fill": "#111827",
+                  "content": "13,1 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 15,
+                  "fontWeight": "bold"
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "T6iCM",
+              "name": "F Filet fort total",
+              "fill": "#111827",
+              "width": "fill_container",
+              "height": 2
+            },
+            {
+              "type": "frame",
+              "id": "E86dC8",
+              "name": "F Total",
+              "width": "fill_container",
+              "padding": [
+                12,
+                0
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "yH78v",
+                  "name": "F Total libellé",
+                  "fill": "#111827",
+                  "content": "Total à télécharger",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "bold"
+                },
+                {
+                  "type": "text",
+                  "id": "BjwRC",
+                  "name": "F Total valeur",
+                  "fill": "#111827",
+                  "content": "15 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 18,
+                  "fontWeight": "bold",
+                  "letterSpacing": -0.3
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "t6eOHa",
+              "name": "F Filet moyen bas",
+              "fill": "#D3D7DE",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "frame",
+              "id": "EPvhB",
+              "name": "F Occupation",
+              "width": "fill_container",
+              "padding": [
+                10,
+                0
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Mhr1p",
+                  "name": "F Occupation libellé",
+                  "fill": "#66717F",
+                  "content": "Espace occupé une fois installé",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "ddNV6",
+                  "name": "F Occupation valeur",
+                  "fill": "#66717F",
+                  "content": "42,5 Mo",
+                  "fontFamily": "Inter",
+                  "fontSize": 12.5,
+                  "fontWeight": "bold"
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "d76Rp",
+              "name": "F Filet fort bas",
+              "fill": "#111827",
+              "width": "fill_container",
+              "height": 3
+            },
+            {
+              "type": "frame",
+              "id": "Y7w38",
+              "name": "F Espace mentions",
+              "width": "fill_container",
+              "height": 11
+            },
+            {
+              "type": "text",
+              "id": "MG33k",
+              "name": "F Mentions",
+              "fill": "#8A93A0",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Texte du domaine public · numérotation de la concordance de James Strong (1890)",
+              "lineHeight": 1.4,
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "q4AIY7",
+          "name": "F Équivalence zone",
+          "width": "fill_container",
+          "padding": [
+            18,
+            26,
+            0,
+            26
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "d5fZ1g",
+              "name": "F Équivalence",
+              "width": "fill_container",
+              "fill": "#F5F6F8",
+              "cornerRadius": 16,
+              "gap": 11,
+              "padding": [
+                13,
+                15
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "V5sCxh",
+                  "name": "F Équivalence icône",
+                  "width": 17,
+                  "height": 17,
+                  "icon": "image",
+                  "library": "lucide",
+                  "fill": "#4E73DA"
+                },
+                {
+                  "type": "text",
+                  "id": "S7dNz",
+                  "name": "F Équivalence texte",
+                  "fill": "#4A5563",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "15 Mo, soit l'équivalent de 4 photos de votre galerie.",
+                  "lineHeight": 1.35,
+                  "fontFamily": "Inter",
+                  "fontSize": 12.5,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "wxriv",
+          "name": "F Espace flexible",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "ymvKK",
+          "name": "F Barre d'action",
+          "width": "fill_container",
+          "fill": "#F5F6F8",
+          "cornerRadius": [
+            30,
+            30,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 14,
+          "padding": [
+            18,
+            22,
+            28,
+            22
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "wHRe3",
+              "name": "F Barre",
+              "width": "fill_container",
+              "gap": 14,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "cSUdP",
+                  "name": "F Barre texte",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 3,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "z9GaVs",
+                      "name": "F Barre total",
+                      "fill": "#111827",
+                      "content": "15 Mo à télécharger",
+                      "fontFamily": "Inter",
+                      "fontSize": 15.5,
+                      "fontWeight": "bold"
+                    },
+                    {
+                      "type": "text",
+                      "id": "HOxdF",
+                      "name": "F Barre détail",
+                      "fill": "#66717F",
+                      "content": "42,5 Mo sur l'appareil",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "b6hVV",
+                  "name": "F Bouton",
+                  "fill": "#5B82ED",
+                  "cornerRadius": 999,
+                  "gap": 8,
+                  "padding": [
+                    15,
+                    26
+                  ],
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "c0WWWO",
+                      "name": "F Bouton icône",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "arrow-down-to-line",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    },
+                    {
+                      "type": "text",
+                      "id": "G0GDy",
+                      "name": "F Bouton libellé",
+                      "fill": "#FFFFFF",
+                      "content": "Télécharger",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "bold"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "rectangle",
+              "id": "v7JNxp",
+              "name": "F Filet barre",
+              "fill": "#E1E4EA",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "text",
+              "id": "c1dZx",
+              "name": "F Lien secondaire",
+              "fill": "#4E73DA",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Télécharger le texte seul · 1,9 Mo",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 13.5,
+              "fontWeight": "bold"
             }
           ]
         }

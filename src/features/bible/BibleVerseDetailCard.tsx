@@ -42,8 +42,11 @@ import { scaleFontSize } from './BibleDOM/scaleFontSize'
 import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
 import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
 import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
-import OfflineResourceRecovery from '~features/resources/OfflineResourceRecovery'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
 
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
@@ -100,6 +103,7 @@ type StrongVerseQueryErrorCode =
   | 'DISK_IO'
   | 'UNKNOWN_ERROR'
   | 'STRONG_BIBLE_UNAVAILABLE'
+  | 'STRONG_VERSE_NOT_INDEXED'
 
 class StrongVerseQueryError extends Error {
   code: StrongVerseQueryErrorCode
@@ -193,7 +197,11 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       })
       if (result.status !== 'available') {
         throw new StrongVerseQueryError(
-          result.status === 'unavailable' ? 'STRONG_BIBLE_UNAVAILABLE' : 'UNKNOWN_ERROR'
+          result.status === 'unavailable'
+            ? 'STRONG_BIBLE_UNAVAILABLE'
+            : result.status === 'missing-location'
+              ? 'STRONG_VERSE_NOT_INDEXED'
+              : 'UNKNOWN_ERROR'
         )
       }
 
@@ -349,20 +357,35 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         : false
 
   if (
-    coreAvailabilityQuery.data?.availability.status !== 'available' &&
-    coreAvailabilityQuery.data?.recoveries?.includes('acquire-offline-copy')
+    coreAvailabilityQuery.data &&
+    coreAvailabilityQuery.data.availability.status !== 'available'
   ) {
     return (
-      <OfflineResourceRecovery
+      <ResourceUnavailableView
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
         title={t('resource.strong.offlineCopyNeeded')}
         fileSize={35}
         size="small"
+        failure={resourceFailureFromStrongModuleAvailability(
+          coreAvailabilityQuery.data.availability,
+          coreAvailabilityQuery.data.recoveries
+        )}
       />
     )
   }
 
   if (error) {
+    if (error === 'STRONG_VERSE_NOT_INDEXED') {
+      return (
+        <Container>
+          <Empty
+            iconElement={<FeatherIcon name="book-open" size={36} color="tertiary" />}
+            message={t('resource.strong.noLexiconForVerse')}
+          />
+        </Container>
+      )
+    }
+
     if (error === 'STRONG_BIBLE_UNAVAILABLE') {
       return (
         <Container>
@@ -385,7 +408,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
         title={t('resource.strong.temporarilyUnavailable')}
         fileSize={35}
-        reason="temporary-unavailable"
+        failure={resourceFailureFromAccessError(
+          strongVerseQuery.error ?? coreAvailabilityQuery.error
+        )}
         size="small"
         onRetry={() => {
           void coreAvailabilityQuery.refetch()

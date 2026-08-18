@@ -3,17 +3,23 @@ import loadDictionnaireBySearch from '~helpers/loadDictionnaireBySearch'
 import loadDictionnaireItem from '~helpers/loadDictionnaireItem'
 import loadDictionnaireItemByRowId from '~helpers/loadDictionnaireItemByRowId'
 import loadDictionnaireWords from '~helpers/loadDictionnaireWords'
-import { mapLocalResourceError, unwrapLocalResourceResult } from './resourceAccessError'
+import loadDictionnaireItems from '~helpers/loadDictionnaireItems'
+import {
+  mapLocalResourceError,
+  ResourceAccessError,
+  unwrapLocalResourceResult,
+} from './resourceAccessError'
 import { getLocalResourceAvailability } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { ResourceAvailability } from './resourceModel'
 import { Schema } from 'effect'
 import {
+  encodeDictionaryPageCursor,
+  DictionaryEntriesBatchResponseDto,
   DictionaryEntriesResponseDto,
   DictionaryEntryResponseDto,
   DictionaryVerseWordsResponseDto,
 } from './dictionaryContract'
-import { ResourceAccessError } from './resourceAccessError'
 
 export type DictionarySummary = {
   id: number
@@ -28,12 +34,25 @@ export type DictionaryEntry = {
 }
 
 export type DictionaryWordReference = { word: string }
+export type DictionaryPageOptions = { limit?: number; cursor?: string }
+export type DictionaryPage = { entries: DictionarySummary[]; nextCursor?: string }
 
 export type DictionaryAccess = {
   getAvailability?: (language: ResourceLanguage) => Promise<ResourceAvailability>
   listByLetter: (letter: string, language?: ResourceLanguage) => Promise<DictionarySummary[]>
   search: (searchValue: string, language?: ResourceLanguage) => Promise<DictionarySummary[]>
+  listByLetterPage: (
+    letter: string,
+    options?: DictionaryPageOptions,
+    language?: ResourceLanguage
+  ) => Promise<DictionaryPage>
+  searchPage: (
+    searchValue: string,
+    options?: DictionaryPageOptions,
+    language?: ResourceLanguage
+  ) => Promise<DictionaryPage>
   loadItem: (word: string, language?: ResourceLanguage) => Promise<DictionaryEntry | undefined>
+  loadItems: (words: readonly string[], language?: ResourceLanguage) => Promise<DictionaryEntry[]>
   loadItemByRowId: (
     id: number | string,
     language?: ResourceLanguage
@@ -63,17 +82,53 @@ export const localDictionaryAccess: DictionaryAccess = {
           }
   },
   listByLetter: async letter =>
-    unwrapLocalResourceResult(await loadDictionnaireByLetter(letter)).map(item => ({
-      id: item.rowid,
-      word: item.word,
-      normalizedWord: item.sanitized_word,
-    })),
+    (await localDictionaryAccess.listByLetterPage(letter, { limit: 50 })).entries,
   search: async searchValue =>
-    unwrapLocalResourceResult(await loadDictionnaireBySearch(searchValue)).map(item => ({
-      id: item.rowid,
-      word: item.word,
-      normalizedWord: item.sanitized_word,
-    })),
+    (await localDictionaryAccess.searchPage(searchValue, { limit: 50 })).entries,
+  listByLetterPage: async (letter, options = {}) => {
+    const limit = options.limit ?? 50
+    const rows = unwrapLocalResourceResult(
+      await loadDictionnaireByLetter(letter, { ...options, limit })
+    )
+    const pageRows = rows.slice(0, limit)
+    return {
+      entries: pageRows.map(item => ({
+        id: item.rowid,
+        word: item.word,
+        normalizedWord: item.sanitized_word,
+      })),
+      ...(rows.length > limit && pageRows.length
+        ? {
+            nextCursor: encodeDictionaryPageCursor([
+              pageRows.at(-1)!.sanitized_word,
+              pageRows.at(-1)!.rowid,
+            ]),
+          }
+        : {}),
+    }
+  },
+  searchPage: async (searchValue, options = {}) => {
+    const limit = options.limit ?? 50
+    const rows = unwrapLocalResourceResult(
+      await loadDictionnaireBySearch(searchValue, { ...options, limit })
+    )
+    const pageRows = rows.slice(0, limit)
+    return {
+      entries: pageRows.map(item => ({
+        id: item.rowid,
+        word: item.word,
+        normalizedWord: item.sanitized_word,
+      })),
+      ...(rows.length > limit && pageRows.length
+        ? {
+            nextCursor: encodeDictionaryPageCursor([
+              pageRows.at(-1)!.sanitized_word,
+              pageRows.at(-1)!.rowid,
+            ]),
+          }
+        : {}),
+    }
+  },
   loadItem: async word => {
     try {
       return await loadDictionnaireItem(word)
@@ -81,6 +136,8 @@ export const localDictionaryAccess: DictionaryAccess = {
       throw mapLocalResourceError(error)
     }
   },
+  loadItems: async words =>
+    (await loadDictionnaireItems(words)).map(({ word, definition }) => ({ word, definition })),
   loadItemByRowId: async id => unwrapLocalResourceResult(await loadDictionnaireItemByRowId(id)),
   loadWordsForVerse: async verseId => {
     try {
@@ -166,23 +223,14 @@ export const createHttpDictionaryAccess = ({
             recoveries: ['acquire-offline-copy'],
           },
     listByLetter: async (letter, language) => {
-      const lang = languageOrFrench(language)
-      const payload = await request(
-        `/v1/dictionaries/${encodeURIComponent(lang)}/entries?initial=${encodeURIComponent(letter)}`
-      )
-      const decoded = decode(DictionaryEntriesResponseDto, payload)
-      assertLanguage(decoded.resource.language, lang)
-      return [...decoded.entries]
+      return (await createPageRequest({ initial: letter, language })).entries
     },
     search: async (searchValue, language) => {
-      const lang = languageOrFrench(language)
-      const payload = await request(
-        `/v1/dictionaries/${encodeURIComponent(lang)}/entries?search=${encodeURIComponent(searchValue)}`
-      )
-      const decoded = decode(DictionaryEntriesResponseDto, payload)
-      assertLanguage(decoded.resource.language, lang)
-      return [...decoded.entries]
+      return (await createPageRequest({ search: searchValue, language })).entries
     },
+    listByLetterPage: (letter, options, language) =>
+      createPageRequest({ initial: letter, language, ...options }),
+    searchPage: (search, options, language) => createPageRequest({ search, language, ...options }),
     loadItem: async (word, language) => {
       const lang = languageOrFrench(language)
       try {
@@ -197,6 +245,18 @@ export const createHttpDictionaryAccess = ({
         if (error instanceof ResourceAccessError && error.code === 'NOT_FOUND') return undefined
         throw error
       }
+    },
+    loadItems: async (words, language) => {
+      if (words.length === 0) return []
+      const lang = languageOrFrench(language)
+      const normalized = [...new Set(words.map(word => word.trim().toLocaleLowerCase()))]
+      const params = new URLSearchParams({ words: normalized.join(',') })
+      const decoded = decode(
+        DictionaryEntriesBatchResponseDto,
+        await request(`/v1/dictionaries/${encodeURIComponent(lang)}/entries/batch?${params}`)
+      )
+      assertLanguage(decoded.resource.language, lang)
+      return [...decoded.entries]
     },
     loadItemByRowId: async (id, language) => {
       const lang = languageOrFrench(language)
@@ -223,6 +283,37 @@ export const createHttpDictionaryAccess = ({
       return [...decoded.words]
     },
   }
+
+  async function createPageRequest({
+    initial,
+    search,
+    language,
+    limit = 50,
+    cursor,
+  }: {
+    initial?: string
+    search?: string
+    language?: ResourceLanguage
+    limit?: number
+    cursor?: string
+  }): Promise<DictionaryPage> {
+    const lang = languageOrFrench(language)
+    const params = new URLSearchParams({
+      ...(initial ? { initial } : {}),
+      ...(search ? { search } : {}),
+      limit: String(limit),
+      ...(cursor ? { cursor } : {}),
+    })
+    const decoded = decode(
+      DictionaryEntriesResponseDto,
+      await request(`/v1/dictionaries/${encodeURIComponent(lang)}/entries?${params}`)
+    )
+    assertLanguage(decoded.resource.language, lang)
+    return {
+      entries: [...decoded.entries],
+      ...(decoded.nextCursor ? { nextCursor: decoded.nextCursor } : {}),
+    }
+  }
 }
 
 export const unavailableHttpDictionaryAccess: DictionaryAccess = {
@@ -237,7 +328,16 @@ export const unavailableHttpDictionaryAccess: DictionaryAccess = {
   search: async () => {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
+  listByLetterPage: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+  },
+  searchPage: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+  },
   loadItem: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+  },
+  loadItems: async () => {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
   loadItemByRowId: async () => {
@@ -338,11 +438,29 @@ export const createHybridDictionaryAccess = ({
         () => offline.search(value, language),
         () => online.search(value, language)
       ),
+    listByLetterPage: (letter, options, language = 'fr') =>
+      runSearch(
+        language,
+        () => offline.listByLetterPage(letter, options, language),
+        () => online.listByLetterPage(letter, options, language)
+      ),
+    searchPage: (value, options, language = 'fr') =>
+      runSearch(
+        language,
+        () => offline.searchPage(value, options, language),
+        () => online.searchPage(value, options, language)
+      ),
     loadItem: (word, language = 'fr') =>
       runRead(
         language,
         () => offline.loadItem(word, language),
         () => online.loadItem(word, language)
+      ),
+    loadItems: (words, language = 'fr') =>
+      runRead(
+        language,
+        () => offline.loadItems(words, language),
+        () => online.loadItems(words, language)
       ),
     loadItemByRowId: (id, language = 'fr') =>
       runRead(

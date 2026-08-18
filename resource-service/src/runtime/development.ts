@@ -3,6 +3,10 @@ export const RESOURCE_DEVELOPMENT_COMMANDS = [
   ['yarn', 'resources:migrate'],
 ] as const
 
+export const shouldImportResourcePublications = (
+  environment: Readonly<Record<string, string | undefined>>
+): boolean => environment.RESOURCE_SKIP_IMPORT !== '1'
+
 export const getDevelopmentEndpoints = ({
   port,
   lanAddress,

@@ -97,6 +97,44 @@ describe('commentary access', () => {
     expect(remote.loadVersePage).not.toHaveBeenCalled()
   })
 
+  it('prefers the installed MHY publication without duplicating the same HTTP corpus', async () => {
+    const local: CommentaryAccess = { loadVersePage: jest.fn(async () => comments('MHY', 0)) }
+    const remote: CommentaryAccess = { loadVersePage: jest.fn(async () => comments('MHY', 0)) }
+    const access = createCommentaryAccess({
+      isOnline: async () => true,
+      local,
+      remote,
+      combineResults: false,
+    })
+
+    await expect(access.loadVersePage('1-1-1')).resolves.toMatchObject({
+      count: 1,
+      comments: [{ id: 'MHY' }],
+    })
+    expect(remote.loadVersePage).not.toHaveBeenCalled()
+  })
+
+  it('keeps a same-corpus HTTP miss as not-found after the local copy is absent', async () => {
+    const local: CommentaryAccess = {
+      loadVersePage: jest.fn(async () => {
+        throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+      }),
+    }
+    const remote: CommentaryAccess = {
+      loadVersePage: jest.fn(async () => {
+        throw new CommentaryAccessError('NOT_FOUND')
+      }),
+    }
+    const access = createCommentaryAccess({
+      isOnline: async () => true,
+      local,
+      remote,
+      combineResults: false,
+    })
+
+    await expect(access.loadVersePage('1-1-1')).rejects.toMatchObject({ code: 'NOT_FOUND' })
+  })
+
   it('keeps a missing local corpus recoverable when the independent remote corpus has no result', async () => {
     const local: CommentaryAccess = {
       loadVersePage: jest.fn(async () => {
@@ -126,5 +164,30 @@ describe('commentary access', () => {
     })
 
     await expect(access.loadVersePage('1-1-1')).rejects.toBeInstanceOf(CommentaryAccessError)
+  })
+
+  it('reports offline connectivity instead of temporary failure when no local commentary can answer', async () => {
+    const access = createCommentaryAccess({
+      isOnline: async () => false,
+      local: {
+        loadVersePage: async () => {
+          throw new CommentaryAccessError('NOT_FOUND')
+        },
+      },
+      remote: { loadVersePage: jest.fn() },
+    })
+
+    await expect(access.loadVersePage('1-1-1')).rejects.toMatchObject({
+      code: 'NETWORK_OFFLINE',
+      recoveries: ['retry', 'acquire-offline-copy'],
+    })
+  })
+
+  it('reports offline connectivity for non-French remote commentary', async () => {
+    const access = createCommentaryAccess({ isOnline: async () => false })
+
+    await expect(access.loadVersePage('1-1-1', undefined, 'en')).rejects.toMatchObject({
+      code: 'NETWORK_OFFLINE',
+    })
   })
 })

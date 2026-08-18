@@ -30,6 +30,8 @@ const makeAccess = (overrides: Partial<NaveAccess> = {}): NaveAccess => ({
   })),
   listByLetter: jest.fn(async () => [topic]),
   search: jest.fn(async () => [topic]),
+  listByLetterPage: jest.fn(async () => ({ topics: [topic] })),
+  searchPage: jest.fn(async () => ({ topics: [topic] })),
   loadItem: jest.fn(async () => topic),
   loadByVerse: jest.fn(async (): Promise<NaveVerseTopics> => [[topic], undefined]),
   loadRandom: jest.fn(async () => topic),
@@ -183,6 +185,7 @@ describe('HTTP Nave access', () => {
         response({
           resource: { kind: 'nave', language: 'fr', revision: 'r1' },
           topics: [{ normalizedName: 'amour', name: 'Amour', initial: 'a' }],
+          limit: 50,
         })
       )
       .mockImplementationOnce(() =>
@@ -221,11 +224,37 @@ describe('HTTP Nave access', () => {
     ])
     await expect(access.loadRandom('fr')).resolves.toEqual(topic)
     expect(fetcher.mock.calls.map(([url]) => url)).toEqual([
-      'http://resource.test/v1/naves/fr/topics?initial=a',
+      'http://resource.test/v1/naves/fr/topics?initial=a&limit=50',
       'http://resource.test/v1/naves/fr/topics/amour',
       'http://resource.test/v1/naves/fr/verses/43-3-16/topics',
       'http://resource.test/v1/naves/fr/random',
     ])
+  })
+
+  it('forwards an opaque cursor and exposes the next page token', async () => {
+    const cursor = encodeURIComponent(JSON.stringify(['Amour', 'amour']))
+    const fetcher = jest.fn(() =>
+      response({
+        resource: { kind: 'nave', language: 'fr', revision: 'r1' },
+        topics: [{ normalizedName: 'ange', name: 'Ange', initial: 'a' }],
+        limit: 1,
+        nextCursor: cursor,
+      })
+    )
+    const access = createHttpNaveAccess({
+      baseUrl: 'http://resource.test',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(access.listByLetterPage('a', { limit: 1, cursor }, 'fr')).resolves.toEqual({
+      topics: [{ normalizedName: 'ange', name: 'Ange', initial: 'a' }],
+      nextCursor: cursor,
+    })
+    expect(fetcher).toHaveBeenCalledWith(
+      `http://resource.test/v1/naves/fr/topics?initial=a&limit=1&cursor=${encodeURIComponent(cursor)}`,
+      expect.any(Object)
+    )
   })
 
   it('distinguishes not-found, offline, temporary failure, and malformed content', async () => {

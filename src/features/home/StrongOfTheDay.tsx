@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next'
 import LexiqueIcon from '~common/LexiqueIcon'
 import Link from '~common/Link'
 import Box from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import truncate from '~helpers/truncate'
@@ -18,9 +17,13 @@ import { localQueryOptions } from '~helpers/queryOptions'
 import { useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { ResourceAccessError } from '~features/resources/resourceAccessError'
-import ResourceDownloadWidget from './ResourceDownloadWidget'
 import useConnection from '~helpers/useConnection'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
+import ResourceDownloadWidget from './ResourceDownloadWidget'
 
 type StrongOfTheDayProps = {
   type: 'grec' | 'hebreu'
@@ -58,11 +61,21 @@ const StrongOfTheDay = ({
     ...localQueryOptions,
   })
   const strongReference = strongQuery.data
+  if (availabilityQuery.isError) {
+    return (
+      <WidgetContainer>
+        <ResourceUnavailableView
+          title={t('resource.strong.temporarilyUnavailable')}
+          failure={resourceFailureFromAccessError(availabilityQuery.error)}
+          size="small"
+          onRetry={() => void availabilityQuery.refetch()}
+        />
+      </WidgetContainer>
+    )
+  }
   if (
-    (availabilityQuery.data?.availability?.status !== 'available' &&
-      availabilityQuery.data?.recoveries?.includes('acquire-offline-copy')) ||
-    (strongQuery.error instanceof ResourceAccessError &&
-      strongQuery.error.recoveries.includes('acquire-offline-copy'))
+    availabilityQuery.data &&
+    ['missing', 'core-missing'].includes(availabilityQuery.data.availability.status)
   ) {
     return (
       <ResourceDownloadWidget
@@ -70,6 +83,22 @@ const StrongOfTheDay = ({
         title={t('resource.strong.offlineCopyNeeded')}
         fileSize={35}
       />
+    )
+  }
+  if (availabilityQuery.data && availabilityQuery.data.availability.status !== 'available') {
+    return (
+      <WidgetContainer>
+        <ResourceUnavailableView
+          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          title={t('resource.strong.temporarilyUnavailable')}
+          fileSize={35}
+          failure={resourceFailureFromStrongModuleAvailability(
+            availabilityQuery.data.availability,
+            availabilityQuery.data.recoveries
+          )}
+          size="small"
+        />
+      </WidgetContainer>
     )
   }
   const error = strongQuery.isError
@@ -81,17 +110,20 @@ const StrongOfTheDay = ({
   if (error) {
     return (
       <WidgetContainer>
-        {error === 'NOT_FOUND' ? (
-          <>
-            <FeatherIcon name="slash" size={30} color="quart" />
-            <Text marginTop={5}>{t('Pas de strong pour ce Code.')}</Text>
-          </>
-        ) : (
-          <>
-            <FeatherIcon name="x" size={30} color="quart" />
-            <Text marginTop={5}>{t('Une erreur est survenue.')}</Text>
-          </>
-        )}
+        <ResourceUnavailableView
+          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          title={
+            error === 'NOT_FOUND' ? t('Pas de strong pour ce Code.') : t('Une erreur est survenue.')
+          }
+          fileSize={35}
+          failure={
+            error === 'NOT_FOUND'
+              ? { cause: 'not-found', recoveries: [] }
+              : resourceFailureFromAccessError(strongQuery.error)
+          }
+          size="small"
+          onRetry={() => void strongQuery.refetch()}
+        />
       </WidgetContainer>
     )
   }

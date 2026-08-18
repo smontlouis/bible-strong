@@ -38,8 +38,7 @@ nave/
 │   └── NaveWarningScreen       # Avertissement (version FR)
 ├── Components/
 │   ├── NaveItem                # Élément de liste
-│   ├── NaveResultItem          # Résultat de recherche
-│   └── NaveResultsWidget       # Widget de résultats
+│   └── NaveResultItem          # Résultat de recherche
 └── Modals/
     ├── NaveModalForVerse       # Modal contextuel pour verset
     ├── NaveModalItem           # Élément dans le modal

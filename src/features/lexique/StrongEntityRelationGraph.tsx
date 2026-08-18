@@ -1461,23 +1461,6 @@ export const StrongEntityRelationGraph = ({
   }, [isResetting, motions.length, navigation.history.length])
 
   const activeScene = buildGraphScene(navigation)
-  const visibleTargetNames = activeScene.page.relations
-    .map(relation => relation.targetUniqueName)
-    .filter((uniqueName): uniqueName is string => Boolean(uniqueName))
-  const visibleTargetsKey = JSON.stringify(visibleTargetNames)
-
-  useEffect(() => {
-    const targets = JSON.parse(visibleTargetsKey) as string[]
-    targets.forEach(uniqueName => {
-      void queryClient.prefetchQuery({
-        queryKey: ['strong-lexicon', 'entity', language, uniqueName],
-        queryFn: () => resources.strongLexicon.loadEntity(uniqueName, language),
-        networkMode: 'always',
-        staleTime: Infinity,
-      })
-    })
-  }, [language, queryClient, resources, visibleTargetsKey])
-
   const finishMotion = (motionId: number) => {
     setMotions(current => current.filter(motion => motion.id !== motionId))
     setSceneLayers(current =>

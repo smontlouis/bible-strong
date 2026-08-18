@@ -1,11 +1,16 @@
 import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
 
-import type { ActiveBibleChapter, BibleChapterRepositoryService } from '../domain/bibleChapter'
+import type {
+  ActiveBibleChapter,
+  ActiveBibleVerseTexts,
+  BibleChapterRepositoryService,
+} from '../domain/bibleChapter'
 import {
   ActiveBiblePublicationUnavailable,
   BibleChapterNotFound,
   BibleChapterRepositoryFailure,
+  BibleVerseSelectionNotFound,
 } from '../domain/bibleChapter'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import { tryDatabasePromise } from '../database/databaseEffect'
@@ -25,6 +30,61 @@ const bibleMetadata = (value: Record<string, unknown>): BiblePublicationMetadata
 export const makeKyselyBibleChapterRepository = (
   database: Kysely<ResourceDatabase>
 ): BibleChapterRepositoryService => ({
+  findActiveVerseTexts: input =>
+    Effect.gen(function* () {
+      const publication = yield* tryDatabasePromise('bible.verse-texts.read-publication', () =>
+        database
+          .selectFrom('resource_publications')
+          .select(['id', 'revision', 'metadata'])
+          .where('resource_publications.resource_identity', '=', `bible-text:${input.versionId}`)
+          .where('resource_publications.status', '=', 'active')
+          .executeTakeFirst()
+      ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
+
+      if (!publication) {
+        return yield* new ActiveBiblePublicationUnavailable({ versionId: input.versionId })
+      }
+
+      const rows = yield* tryDatabasePromise('bible.verse-texts.read-active', () =>
+        database
+          .selectFrom('bible_verses')
+          .select(['book', 'chapter', 'verse', 'text'])
+          .where('publication_id', '=', publication.id)
+          .where(expression =>
+            expression.or(
+              input.locations.map(location =>
+                expression.and([
+                  expression('book', '=', location.book),
+                  expression('chapter', '=', location.chapter),
+                  expression('verse', '=', location.verse),
+                ])
+              )
+            )
+          )
+          .orderBy('book')
+          .orderBy('chapter')
+          .orderBy('verse')
+          .execute()
+      ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
+
+      if (rows.length === 0) {
+        return yield* new BibleVerseSelectionNotFound(input)
+      }
+
+      const metadata = bibleMetadata(publication.metadata)
+      return {
+        versionId: input.versionId,
+        revision: metadata.resource_revision ?? metadata.text_revision ?? publication.revision,
+        textRevision: metadata.text_revision ?? metadata.resource_revision ?? publication.revision,
+        ...(metadata.text_sha256 ? { textSha256: metadata.text_sha256 } : {}),
+        verses: rows.map(row => ({
+          book: row.book,
+          chapter: row.chapter,
+          verse: row.verse,
+          text: row.text,
+        })),
+      } satisfies ActiveBibleVerseTexts
+    }),
   findActiveChapter: input =>
     Effect.gen(function* () {
       const rows = yield* tryDatabasePromise('bible.chapter.read-active', () =>

@@ -9,6 +9,8 @@ import {
   BibleVersionPath,
   BibleSearchQuery,
   BibleSearchResponseDto,
+  BibleVerseTextsDto,
+  BibleVerseTextsQuery,
 } from '../../../src/features/resources/bibleChapterContract'
 import {
   NaveLanguagePath,
@@ -20,6 +22,8 @@ import {
   NaveVerseTopicsResponseDto,
 } from '../../../src/features/resources/naveContract'
 import {
+  DictionaryEntriesBatchQuery,
+  DictionaryEntriesBatchResponseDto,
   DictionaryEntriesQuery,
   DictionaryEntriesResponseDto,
   DictionaryEntryIdPath,
@@ -75,6 +79,7 @@ import {
 import {
   TimelineEventPath,
   TimelineEventResponseDto,
+  TimelineEventsQuery,
   TimelineEventsResponseDto,
   TimelineLanguagePath,
 } from '../../../src/features/resources/timelineContract'
@@ -108,6 +113,16 @@ const BibleApi = HttpApiGroup.make('bibles')
     HttpApiEndpoint.get('getBibleChapter', '/v1/bibles/:version/books/:book/chapters/:chapter')
       .setPath(BibleChapterRequest)
       .addSuccess(BibleChapterDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getBibleVerseTexts', '/v1/bibles/:version/verses')
+      .setPath(BibleVersionPath)
+      .setUrlParams(BibleVerseTextsQuery)
+      .addSuccess(BibleVerseTextsDto)
       .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })
@@ -177,6 +192,16 @@ const DictionaryApi = HttpApiGroup.make('dictionaries')
       .setPath(DictionaryLanguagePath)
       .setUrlParams(DictionaryEntriesQuery)
       .addSuccess(DictionaryEntriesResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getDictionaryEntriesBatch', '/v1/dictionaries/:language/entries/batch')
+      .setPath(DictionaryLanguagePath)
+      .setUrlParams(DictionaryEntriesBatchQuery)
+      .addSuccess(DictionaryEntriesBatchResponseDto)
       .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })
@@ -401,6 +426,7 @@ const TimelineApi = HttpApiGroup.make('timelines')
   .add(
     HttpApiEndpoint.get('listTimelineEvents', '/v1/timelines/:language/events')
       .setPath(TimelineLanguagePath)
+      .setUrlParams(TimelineEventsQuery)
       .addSuccess(TimelineEventsResponseDto)
       .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })

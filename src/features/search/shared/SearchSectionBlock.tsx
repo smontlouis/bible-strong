@@ -24,6 +24,8 @@ type Props<SectionId extends string = string> = {
   renderItem?: (item: SearchEntityResult) => ReactNode
   statusMessage?: ReactNode
   isLoading?: boolean
+  hasMore?: boolean
+  showLoadMoreButton?: boolean
 }
 
 const SearchSectionBlock = <SectionId extends string = string>({
@@ -34,6 +36,8 @@ const SearchSectionBlock = <SectionId extends string = string>({
   renderItem,
   statusMessage,
   isLoading,
+  hasMore = false,
+  showLoadMoreButton = true,
 }: Props<SectionId>) => {
   const visibleItems = section.items.slice(0, visibleCount)
   const remaining = Math.max(0, section.items.length - visibleCount)
@@ -63,7 +67,7 @@ const SearchSectionBlock = <SectionId extends string = string>({
           />
         )
       )}
-      {remaining > 0 ? (
+      {showLoadMoreButton && (remaining > 0 || hasMore) ? (
         <TouchableBox onPress={onLoadMore} py={10} px={20} alignItems="flex-start">
           <Box px={10} py={6} bg="lightGrey" borderRadius={6}>
             <Text color="primary" fontSize={13} bold>

@@ -6,24 +6,22 @@ import Empty from '~common/Empty'
 import EntityChipList from '~common/EntityChipList'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
-import Box, { VStack } from '~common/ui/Box'
-import Button from '~common/ui/Button'
+import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
 import { createStrongEndpoint } from '~features/studyRelations/endpoints'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
-import { createStrongLexiconModuleDownloadItem } from '~helpers/downloadItemFactory'
-import { downloadManager } from '~helpers/downloadManager'
-import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import type { RootState } from '~redux/modules/reducer'
 import { makeStrongTagsSelector } from '~redux/selectors/bible'
 import StrongEntryMenu from './StrongEntryMenu'
 import type { StrongDetailRouteContext } from './strongDetailRoutes'
 import { useStrongEntryRoute } from './useStrongEntryRoute'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import {
+  resourceFailureFromAccessError,
+  resourceFailureFromStrongModuleAvailability,
+} from '~features/resources/resourceFailure'
 
 type StrongEntryLoadState = Pick<
   ReturnType<typeof useStrongEntryRoute>,
@@ -73,13 +71,6 @@ const StrongEntryRouteScaffold = ({
     : null
   const relationCount = useRelationCount(strongEndpoint)
   const openEntityRelations = useOpenEntityRelations()
-  const coreDownload = useDownloadItemStatus(
-    createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'core' })
-  )
-  const coreDownloading =
-    coreDownload?.status === 'queued' ||
-    coreDownload?.status === 'downloading' ||
-    coreDownload?.status === 'inserting'
   const header = (
     <Header
       hasBackButton={onBack ? true : isFormSheet ? canGoBackInStack : true}
@@ -127,28 +118,47 @@ const StrongEntryRouteScaffold = ({
     )
   }
 
-  if (requireEntry && entryState.coreAvailability.data?.status !== 'available') {
-    const requestCoreDownload = () => {
-      downloadManager.enqueue([createStrongLexiconModuleDownloadItem('core')])
-    }
-
+  if (requireEntry && entryState.coreAvailability.isError) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         {header}
-        <VStack flex px={20} center gap={16}>
-          <FeatherIcon name="book-open" size={34} color="default" />
-          <Text bold fontSize={20} textAlign="center">
-            {t('resource.strong.coreUnavailable')}
-          </Text>
-          <Text color="tertiary" textAlign="center">
-            {t(
-              'Téléchargez le module principal pour accéder aux définitions, à la morphologie et aux relations lexicales.'
-            )}
-          </Text>
-          <Button onPress={requestCoreDownload} disabled={coreDownloading}>
-            {coreDownloading ? t('Téléchargement...') : t('Télécharger')}
-          </Button>
-        </VStack>
+        <ResourceUnavailableView
+          title={t('resource.strong.temporarilyUnavailable')}
+          failure={resourceFailureFromAccessError(entryState.coreAvailability.error)}
+          onRetry={() => void entryState.coreAvailability.refetch()}
+        />
+      </FormSheetScreen>
+    )
+  }
+
+  if (
+    requireEntry &&
+    entryState.coreAvailability.data &&
+    entryState.coreAvailability.data.status !== 'available'
+  ) {
+    return (
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        {header}
+        <ResourceUnavailableView
+          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          title={t('resource.strong.coreUnavailable')}
+          fileSize={35}
+          failure={resourceFailureFromStrongModuleAvailability(entryState.coreAvailability.data)}
+          onRetry={() => void entryState.coreAvailability.refetch()}
+        />
+      </FormSheetScreen>
+    )
+  }
+
+  if (requireEntry && entryState.entryQuery.isError) {
+    return (
+      <FormSheetScreen isFormSheet={isFormSheet}>
+        {header}
+        <ResourceUnavailableView
+          title={t("Cette entrée Strong n'a pas pu être chargée.")}
+          failure={resourceFailureFromAccessError(entryState.entryQuery.error)}
+          onRetry={() => void entryState.entryQuery.refetch()}
+        />
       </FormSheetScreen>
     )
   }

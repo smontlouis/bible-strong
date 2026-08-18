@@ -28,6 +28,7 @@ const DATABASE_DOMAIN_QUERY_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, QueryKey
   DICTIONNAIRE: [
     ['dictionary'],
     ['resource-results', 'dictionary'],
+    ['resource-infinite-results', 'dictionary'],
     ['dictionary-detail'],
     ['dictionaryWords'],
     ['words'],
@@ -38,6 +39,7 @@ const DATABASE_DOMAIN_QUERY_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, QueryKey
   NAVE: [
     ['nave'],
     ['resource-results', 'nave'],
+    ['resource-infinite-results', 'nave'],
     ['nave-detail'],
     ['home-nave-random'],
     ['sqlite-nave-search'],

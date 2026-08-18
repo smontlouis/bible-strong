@@ -11,14 +11,27 @@ import { ResourceAccessError } from './resourceAccessError'
 
 export type { SearchOptions, SearchResult, SearchSortOrder } from '~helpers/biblesDb'
 
+export type BibleSearchPage = {
+  results: SearchResult[]
+  count: number
+}
+
 export type BibleSearchAccess = {
   getInstalledVersions: () => Promise<string[]>
+  searchPage: (query: string, options?: SearchOptions) => Promise<BibleSearchPage>
   searchVerses: (query: string, options?: SearchOptions) => Promise<SearchResult[]>
   searchVersesCount: (query: string, options?: SearchOptions) => Promise<number>
 }
 
 export const localBibleSearchAccess: BibleSearchAccess = {
   getInstalledVersions,
+  searchPage: async (query, options) => {
+    const [results, count] = await Promise.all([
+      searchVerses(query, options),
+      searchVersesCount(query, options),
+    ])
+    return { results, count }
+  },
   searchVerses,
   searchVersesCount,
 }
@@ -106,6 +119,7 @@ export const createHttpBibleSearchAccess = ({
 
   return {
     getInstalledVersions: async () => [...versions],
+    searchPage: run,
     searchVerses: async (query, options) => {
       const result = await run(query, options)
       return result.results
@@ -148,6 +162,11 @@ export const createHybridBibleSearchAccess = ({
       const local = await offline.getInstalledVersions()
       return Array.from(new Set([...local, ...remotelyReadableVersions]))
     },
+    searchPage: (query, options) =>
+      run(
+        access => access.searchPage(query, options),
+        () => offline.searchPage(query, options)
+      ),
     searchVerses: (query, options) =>
       run(
         access => access.searchVerses(query, options),
