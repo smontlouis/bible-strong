@@ -544,6 +544,7 @@ const VersionSelectorItem = ({
             }
           >
             <Box flex row alignItems="center">
+              {renderSelectionCheckbox()}
               <VersionIdentity
                 version={version}
                 color={versionColor}
@@ -564,7 +565,6 @@ const VersionSelectorItem = ({
                   <FeatherIcon name="cloud" size={18} color="primary" />
                 </Box>
               ) : null}
-              {renderSelectionCheckbox()}
             </Box>
           </TouchableOpacity>
           <ActionButton
