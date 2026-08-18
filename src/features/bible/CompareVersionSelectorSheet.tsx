@@ -3,6 +3,7 @@ import React from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTheme } from '@emotion/react'
 
 import VersionSelectorItem from '~features/bible/VersionSelectorItem'
 import { versions } from '~helpers/bibleVersions'
@@ -20,6 +21,7 @@ type CompareVersionSelectorSheetProps = {
 
 const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetProps) => {
   const insets = useSafeAreaInsets()
+  const theme = useTheme()
   const { t } = useTranslation()
   const dispatch = useDispatch<AppDispatch>()
   const versionCatalog = useVersionCatalog(
@@ -38,6 +40,7 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
       <Sheet
         ref={sheetRef}
         snapPoints={[1]}
+        backgroundColor={theme.colors.reverse}
         scrollableOptions={{ scrollingExpandsSheet: false }}
         onPresent={() => {
           versionCatalog.resetSearch()

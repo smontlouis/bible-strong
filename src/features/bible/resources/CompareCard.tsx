@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
+import { useWindowDimensions } from 'react-native'
 import { shallowEqual, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 
@@ -33,6 +34,7 @@ const CompareCard = ({
   onChooseVersions,
 }: CompareCardProps) => {
   const { t } = useTranslation()
+  const { height: viewportHeight } = useWindowDimensions()
   const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
   const strongSelectionSheet = useSheet()
   const [strongSelection, setStrongSelection] = React.useState<StrongSelection | null>(null)
@@ -82,7 +84,7 @@ const CompareCard = ({
               testID="compare-empty-choose-versions"
               rightIcon={
                 <Box ml={10}>
-                  <FeatherIcon name="arrow-right" size={18} color="reverse" />
+                  <FeatherIcon name="arrow-right" size={18} color="white" />
                 </Box>
               }
             >
@@ -117,6 +119,7 @@ const CompareCard = ({
             versesInCurrentChapter={prevNextItems.versesInCurrentChapter}
           />
         )}
+        <Box height={viewportHeight * 0.55} />
       </Box>
       <StrongSelectionSheet
         sheetRef={strongSelectionSheet.getRef()}

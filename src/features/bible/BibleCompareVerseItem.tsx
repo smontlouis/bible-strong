@@ -15,6 +15,7 @@ import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import type { StrongSelection } from '~helpers/strongSelection'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import { localQueryOptions } from '~helpers/queryOptions'
@@ -92,6 +93,8 @@ const PlainCompareVerseItem = ({
   )
 }
 
+type LexiconCompareVersionId = StrongBibleVersionId | 'BHG'
+
 const StrongCompareVerseItem = ({
   versionId,
   name,
@@ -99,14 +102,15 @@ const StrongCompareVerseItem = ({
   position,
   selectedStrongReference,
   onStrongSelect,
-}: CompareVerseItemProps & { versionId: StrongBibleVersionId }) => {
+}: CompareVerseItemProps & { versionId: LexiconCompareVersionId }) => {
   const resources = useResourceAccess()
   const strongLanguage = useResourcesLanguageValue().STRONG
   const selectedVerseKeys = Object.keys(selectedVerses)
   const { data: strongVerses } = useQuery({
     queryKey: resourceQueryKeys.lexiconBibleVerseSelection({
       currentVersionId: versionId,
-      defaultVersionId: versionId,
+      defaultVersionId: versionId === 'BHG' ? 'LSG' : versionId,
+      preferredVersionId: versionId === 'BHG' ? undefined : versionId,
       preferredInterlinearLocale: strongLanguage,
       verseKeys: selectedVerseKeys,
     }),
@@ -116,8 +120,8 @@ const StrongCompareVerseItem = ({
           const [book, chapter, verse] = verseKey.split('-').map(Number)
           return resources.lexiconBible.loadVerse({
             currentVersionId: versionId,
-            defaultVersionId: versionId,
-            preferredVersionId: versionId,
+            defaultVersionId: versionId === 'BHG' ? 'LSG' : versionId,
+            preferredVersionId: versionId === 'BHG' ? undefined : versionId,
             preferredInterlinearLocale: strongLanguage,
             fallbackVersionIds: [],
             book,
@@ -164,7 +168,11 @@ const StrongCompareVerseItem = ({
 }
 
 const BibleCompareVerseItem = (props: CompareVerseItemProps) => {
-  if (props.strongMode && isStrongCapableBibleVersion(props.versionId)) {
+  if (
+    props.strongMode &&
+    (isStrongCapableBibleVersion(props.versionId) ||
+      isInterlinearCapableBibleVersion(props.versionId))
+  ) {
     return <StrongCompareVerseItem {...props} versionId={props.versionId} />
   }
 

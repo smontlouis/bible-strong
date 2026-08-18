@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next'
-import { Pressable } from 'react-native'
+import { Image, Pressable, useWindowDimensions } from 'react-native'
+import type { ImageSourcePropType } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import Box, { VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useConnection from '~helpers/useConnection'
+import { OFFLINE_SETUP_HEADER_TOP_OFFSET } from './offlineSetupPresentation'
 
 type Props = {
   onContinueOnline: () => void
@@ -14,12 +16,12 @@ type Props = {
 
 const SetupChoice = ({
   description,
-  icon,
+  illustration,
   onPress,
   title,
 }: {
   description: string
-  icon: 'cloud' | 'download-cloud'
+  illustration: ImageSourcePropType
   onPress: () => void
   title: string
 }) => (
@@ -30,29 +32,22 @@ const SetupChoice = ({
   >
     {({ pressed }) => (
       <Box
-        row
-        alignItems="center"
-        gap={16}
-        minHeight={108}
-        p={18}
-        borderRadius={22}
-        borderWidth={1}
-        borderColor="border"
-        bg="reverse"
-        opacity={pressed ? 0.76 : 1}
+        gap={4}
+        minHeight={142}
+        py={16}
+        opacity={pressed ? 0.76 : 1} alignItems="center"
       >
-        <Box size={48} borderRadius={24} bg="lightPrimary" center>
-          <FeatherIcon name={icon} size={22} color="tertiary" />
-        </Box>
-        <Box flex gap={5}>
-          <Text bold fontSize={16}>
+        <Image source={illustration} style={{ width: 140, height: 140 }} resizeMode="contain" />
+        <Box row alignItems="center" gap={10}>
+        <Box gap={4} alignitems="center" justifyContent="center">
+          <Text fontSize={22} lineHeight={28} textAlign="center" style={{ fontFamily: 'Literata Book' }}>
             {title}
           </Text>
-          <Text color="tertiary" fontSize={13} lineHeight={18}>
+          <Text color="tertiary" textAlign="center" fontSize={14} lineHeight={20}>
             {description}
           </Text>
         </Box>
-        <FeatherIcon name="arrow-right" size={19} color="tertiary" />
+        </Box>
       </Box>
     )}
   </Pressable>
@@ -61,35 +56,37 @@ const SetupChoice = ({
 const ResourceSetupChoice = ({ onContinueOnline, onPrepareOffline }: Props) => {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
+  const viewport = useWindowDimensions()
   const isConnected = useConnection()
+  const contentWidth = Math.min(350, viewport.width - 40)
 
   return (
     <VStack
       flex
       bg="lightGrey"
-      px={22}
-      paddingTop={Math.max(insets.top, 24) + 28}
       paddingBottom={Math.max(insets.bottom, 18)}
     >
-      <Box flex justifyContent="center" maxWidth={520} width="100%" alignSelf="center">
-        <Text title fontSize={30} lineHeight={37} textAlign="center">
+      <Box
+        flex
+        width={contentWidth}
+        alignSelf="center"
+        paddingTop={insets.top + OFFLINE_SETUP_HEADER_TOP_OFFSET}
+      >
+        <Text title fontSize={40} lineHeight={42}>
           {t('offlineSetup.choice.title')}
         </Text>
-        <Text color="tertiary" fontSize={15} lineHeight={22} textAlign="center" mt={12} mb={34}>
-          {t('offlineSetup.choice.subtitle')}
-        </Text>
 
-        <VStack gap={14}>
+        <VStack mt={72}>
           <SetupChoice
-            icon="cloud"
             title={t('offlineSetup.choice.startNow')}
             description={t('offlineSetup.choice.startNowDescription')}
+            illustration={require('../../assets/images/onboarding/online-choice.png')}
             onPress={onContinueOnline}
           />
           <SetupChoice
-            icon="download-cloud"
             title={t('offlineSetup.choice.prepareOffline')}
             description={t('offlineSetup.choice.prepareOfflineDescription')}
+            illustration={require('../../assets/images/onboarding/offline-choice.png')}
             onPress={onPrepareOffline}
           />
         </VStack>

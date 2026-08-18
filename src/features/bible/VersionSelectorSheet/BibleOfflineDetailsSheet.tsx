@@ -16,6 +16,7 @@ import { getBooksForCanon } from '~helpers/bibleBookCatalog'
 import type { Version } from '~helpers/bibleVersions'
 import {
   createBibleDownloadItem,
+  createInterlinearSidecarDownloadPlan,
   createStrongSidecarDownloadPlan,
 } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
@@ -25,6 +26,7 @@ import {
   isStrongCapableBibleVersion,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
@@ -34,8 +36,10 @@ import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/do
 import { bibleDataRefreshSignalAtom, installedVersionsSignalAtom } from '~state/app'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import useConnection from '~helpers/useConnection'
+import { getLanguage } from '~i18n'
 import {
   getBibleOfflineDetailsQueryKey,
+  getInterlinearOfflineDetailsQueryKey,
   getStrongOfflineDetailsQueryKey,
 } from './bibleOfflineDetailsQueryKeys'
 
@@ -71,14 +75,28 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   const strongId = strongVersionId
     ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: strongVersionId })
     : undefined
+  const interlinearLocale = getLanguage()
+  const hasInterlinearIndex = Boolean(
+    versionId && isInterlinearCapableBibleVersion(versionId)
+  )
+  const interlinearId = hasInterlinearIndex
+    ? createOfflineCopyId({
+        kind: 'interlinear-index',
+        versionId: 'BHG',
+        language: interlinearLocale,
+      })
+    : undefined
   const bibleQueue = useDownloadItemStatus(bibleId)
   const strongQueue = useDownloadItemStatus(strongId)
-  const [strongChoice, setStrongChoice] = React.useState({
+  const interlinearQueue = useDownloadItemStatus(interlinearId)
+  const [indexChoice, setIndexChoice] = React.useState({
     versionId,
-    enabled: Boolean(strongVersionId),
+    enabled: Boolean(strongVersionId || hasInterlinearIndex),
   })
-  const includeStrong =
-    strongChoice.versionId === versionId ? strongChoice.enabled : Boolean(strongVersionId)
+  const includeIndex =
+    indexChoice.versionId === versionId
+      ? indexChoice.enabled
+      : Boolean(strongVersionId || hasInterlinearIndex)
 
   const bibleAvailability = useQuery({
     queryKey: getBibleOfflineDetailsQueryKey(versionId!, installedSignal, completionSignal),
@@ -94,6 +112,20 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
     enabled: Boolean(strongVersionId),
     queryFn: () => resources.strongBible.getAvailability(strongVersionId!),
   })
+  const interlinearAvailability = useQuery({
+    queryKey: getInterlinearOfflineDetailsQueryKey(
+      interlinearLocale,
+      installedSignal,
+      completionSignal
+    ),
+    enabled: hasInterlinearIndex,
+    queryFn: () =>
+      resources.offlineCopies.isAvailable({
+        kind: 'interlinear-index',
+        versionId: 'BHG',
+        language: interlinearLocale,
+      }),
+  })
 
   if (!version || !versionId || !bibleId) return null
 
@@ -106,16 +138,27 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       strongAvailability.data?.status === 'incompatible' ||
       strongAvailability.data?.status === 'corrupt'
     : false
+  const interlinearInstalled = hasInterlinearIndex ? interlinearAvailability.data : undefined
+  const indexInstalled = strongVersionId ? strongInstalled : interlinearInstalled
+  const indexPresent = strongVersionId ? strongPresent : interlinearInstalled === true
   const bibleArtifact = getMobileResourceCatalogEntry(bibleId)
   const strongArtifact = strongId ? getMobileResourceCatalogEntry(strongId) : undefined
-  const activeQueue = [bibleQueue, strongQueue].find(state =>
+  const interlinearArtifact = interlinearId
+    ? getMobileResourceCatalogEntry(interlinearId)
+    : undefined
+  const indexArtifact = strongArtifact ?? interlinearArtifact
+  const indexId = strongId ?? interlinearId
+  const activeQueue = [bibleQueue, strongQueue, interlinearQueue].find(state =>
     state ? ['queued', 'downloading', 'inserting'].includes(state.status) : false
   )
-  const failedQueue = [bibleQueue, strongQueue].find(state => state?.status === 'failed')
+  const failedQueue = [bibleQueue, strongQueue, interlinearQueue].find(
+    state => state?.status === 'failed'
+  )
   const progress = activeQueue ? getDownloadItemProgress(activeQueue) : 0
   const availabilityReady =
     bibleAvailability.data !== undefined &&
-    (!strongVersionId || strongAvailability.data !== undefined)
+    (!strongVersionId || strongAvailability.data !== undefined) &&
+    (!hasInterlinearIndex || interlinearAvailability.data !== undefined)
   const languageKey = version.language === 'he-grc' ? 'heGrc' : version.language
   const languageLabel = t(`versionCatalog.language.${languageKey}`)
   const bookCount = getBooksForCanon(version.canonId ?? 'protestant-66').length
@@ -124,9 +167,13 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       value: formatMegabyteValue(bytes, i18n.language),
     })
   const selectedArchiveBytes =
-    bibleArtifact.archiveBytes + (includeStrong && strongArtifact ? strongArtifact.archiveBytes : 0)
-  const shouldDownloadStrong =
-    bibleInstalled === true && Boolean(strongVersionId) && !strongInstalled && includeStrong
+    bibleArtifact.archiveBytes + (includeIndex && indexArtifact ? indexArtifact.archiveBytes : 0)
+  const shouldDownloadIndex =
+    bibleInstalled === true &&
+    Boolean(strongVersionId || hasInterlinearIndex) &&
+    !indexInstalled &&
+    includeIndex
+  const indexMark = strongVersionId ? 'S' : hasInterlinearIndex ? 'I' : undefined
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
 
   const refreshInstalledState = () => {
@@ -140,24 +187,37 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
     downloadManager.enqueue([createBibleDownloadItem(versionId)])
   }
 
-  const downloadBibleAndStrong = () => {
-    if (!isConnected || !strongVersionId) return
-    downloadManager.enqueue(
-      createStrongSidecarDownloadPlan(
-        strongVersionId,
-        bibleInstalled === false
-          ? 'base-missing'
-          : (strongAvailability.data?.status ?? 'base-missing')
+  const downloadBibleAndIndex = () => {
+    if (!isConnected) return
+    if (strongVersionId) {
+      downloadManager.enqueue(
+        createStrongSidecarDownloadPlan(
+          strongVersionId,
+          bibleInstalled === false
+            ? 'base-missing'
+            : (strongAvailability.data?.status ?? 'base-missing')
+        )
       )
-    )
+      return
+    }
+    if (hasInterlinearIndex) {
+      downloadManager.enqueue(
+        createInterlinearSidecarDownloadPlan(
+          interlinearLocale,
+          bibleInstalled === false ? 'base-missing' : 'missing'
+        )
+      )
+    }
   }
 
   const removeBible = () => {
     Alert.alert(
       t('Attention'),
       t(
-        strongPresent
-          ? 'bibleOfflineDetails.removeBibleWithStrongConfirm'
+        indexPresent
+          ? strongVersionId
+            ? 'bibleOfflineDetails.removeBibleWithStrongConfirm'
+            : 'bibleOfflineDetails.removeBibleWithInterlinearConfirm'
           : 'downloads.deleteConfirm'
       ),
       [
@@ -179,11 +239,13 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       downloadManager.cancel(bibleId)
     }
     if (
-      strongId &&
-      strongQueue &&
-      ['queued', 'downloading', 'inserting'].includes(strongQueue.status)
+      indexId &&
+      (strongQueue || interlinearQueue) &&
+      ['queued', 'downloading', 'inserting'].includes(
+        (strongQueue ?? interlinearQueue)!.status
+      )
     ) {
-      downloadManager.cancel(strongId)
+      downloadManager.cancel(indexId)
     }
   }
 
@@ -213,9 +275,9 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
               <Text flex fontSize={22} bold numberOfLines={2}>
                 {version.displayName || version.name}
               </Text>
-              {strongVersionId && (
+              {indexMark && (
                 <Text ml={8} fontSize={22} bold style={{ fontFamily: serifFontFamily }}>
-                  S
+                  {indexMark}
                 </Text>
               )}
             </Box>
@@ -282,8 +344,8 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
             </Text>
             <TouchableBox
               onPress={() => {
-                if (failedQueue.item.id === strongId && bibleInstalled === false) {
-                  downloadBibleAndStrong()
+                if (failedQueue.item.id === indexId && bibleInstalled === false) {
+                  downloadBibleAndIndex()
                   return
                 }
                 downloadManager.retry(failedQueue.item.id)
@@ -297,11 +359,14 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
           </Box>
         )}
 
-        {(bibleAvailability.isError || (strongVersionId && strongAvailability.isError)) && (
+        {(bibleAvailability.isError ||
+          (strongVersionId && strongAvailability.isError) ||
+          (hasInterlinearIndex && interlinearAvailability.isError)) && (
           <TouchableBox
             onPress={() => {
               void bibleAvailability.refetch()
               if (strongVersionId) void strongAvailability.refetch()
+              if (hasInterlinearIndex) void interlinearAvailability.refetch()
             }}
             mt={14}
             py={8}
@@ -316,6 +381,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
           !failedQueue &&
           !bibleAvailability.isError &&
           !strongAvailability.isError &&
+          !interlinearAvailability.isError &&
           !availabilityReady && (
             <Box row alignItems="center" justifyContent="center" py={32}>
               <FeatherIcon name="clock" size={17} color="tertiary" />
@@ -327,26 +393,30 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
 
         {!activeQueue && !failedQueue && availabilityReady && (
           <Box mt={22} p={16} bg="lightGrey" borderRadius={22} gap={14}>
-            {strongVersionId && strongArtifact && !strongInstalled && (
+            {indexMark && indexArtifact && !indexInstalled && (
               <Box row alignItems="center" p={14} bg="reverse" borderRadius={17}>
                 <Box size={42} center bg="lightGrey" borderRadius={13}>
                   <Text fontSize={20} bold style={{ fontFamily: serifFontFamily }}>
-                    S
+                    {indexMark}
                   </Text>
                 </Box>
                 <Box ml={12} flex gap={3}>
                   <Text fontSize={14} bold>
-                    {t('bibleOfflineDetails.includeStrong')}
+                    {t(
+                      strongVersionId
+                        ? 'bibleOfflineDetails.includeStrong'
+                        : 'bibleOfflineDetails.includeInterlinear'
+                    )}
                   </Text>
                   <Text color="tertiary" fontSize={11}>
-                    {t('bibleOfflineDetails.strongOptionSubtitle', {
-                      size: formatSize(strongArtifact.installedBytes),
+                    {t('bibleOfflineDetails.indexOptionSubtitle', {
+                      size: formatSize(indexArtifact.installedBytes),
                     })}
                   </Text>
                 </Box>
                 <Switch
-                  value={includeStrong}
-                  onValueChange={enabled => setStrongChoice({ versionId, enabled })}
+                  value={includeIndex}
+                  onValueChange={enabled => setIndexChoice({ versionId, enabled })}
                   trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
                 />
               </Box>
@@ -357,22 +427,22 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
                 <Button
                   onPress={
                     bibleInstalled
-                      ? downloadBibleAndStrong
-                      : includeStrong && strongVersionId
-                        ? downloadBibleAndStrong
+                      ? downloadBibleAndIndex
+                      : includeIndex && (strongVersionId || hasInterlinearIndex)
+                        ? downloadBibleAndIndex
                         : downloadBible
                   }
-                  disabled={!isConnected || (bibleInstalled === true && !shouldDownloadStrong)}
+                  disabled={!isConnected || (bibleInstalled === true && !shouldDownloadIndex)}
                   leftIcon={
                     bibleInstalled === false ? (
                       <Box mr={9}>
-                        <FeatherIcon name="download" size={18} color="reverse" />
+                        <FeatherIcon name="download" size={18} color="white" />
                       </Box>
                     ) : undefined
                   }
                 >
                   {bibleInstalled
-                    ? shouldDownloadStrong
+                    ? shouldDownloadIndex
                       ? t('bibleOfflineDetails.download')
                       : t('bibleOfflineDetails.bibleDownloaded')
                     : t('bibleOfflineDetails.downloadSize', {

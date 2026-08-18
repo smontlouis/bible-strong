@@ -30,6 +30,7 @@ import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleRes
 import { BibleTab, useBibleTabActions, VersionCode } from '../../../state/tabs'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 import CompareVersionSelectorSheet from '../CompareVersionSelectorSheet'
+import CompareStrongModeButton from '../CompareStrongModeButton'
 import { ReferenceCard } from '../ReferenceCard'
 import CompareCard from './CompareCard'
 import ResourcesModalFooter from './ResourcesModalFooter'
@@ -171,12 +172,6 @@ const ResourcesModal = ({
       case 'compare':
         return [
           {
-            id: 'toggle-strong',
-            title: t('Mode Strong'),
-            image: 'number',
-            state: compareStrongMode ? 'on' : 'off',
-          },
-          {
             id: 'choose-versions',
             title: t('common.chooseCompareVersions'),
             image: 'checkmark.square',
@@ -206,9 +201,6 @@ const ResourcesModal = ({
         break
       case 'choose-versions':
         compareVersionSelectorRef.current?.present()
-        break
-      case 'toggle-strong':
-        setCompareStrongMode(value => !value)
         break
       case 'open-tab':
         if (resourceType === 'commentary') {
@@ -253,6 +245,12 @@ const ResourcesModal = ({
 
     return (
       <Box row alignItems="center">
+        {resourceType === 'compare' ? (
+          <CompareStrongModeButton
+            enabled={compareStrongMode}
+            onPress={() => setCompareStrongMode(value => !value)}
+          />
+        ) : null}
         {resourceType === 'strong' ? (
           <StrongBibleSourceButton
             bibleAtom={bibleAtom}

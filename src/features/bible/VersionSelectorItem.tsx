@@ -41,8 +41,10 @@ import {
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
 import useConnection from '~helpers/useConnection'
+import { getLanguage } from '~i18n'
 import {
   getBibleOfflineDetailsQueryKey,
+  getInterlinearOfflineDetailsQueryKey,
   getStrongOfflineDetailsQueryKey,
 } from './VersionSelectorSheet/bibleOfflineDetailsQueryKeys'
 
@@ -402,6 +404,14 @@ const VersionSelectorItem = ({
         ? strongSelectionAvailability
         : await resources.strongBible.getAvailability(strongVersionId)
       : undefined
+    const interlinearLocale = getLanguage()
+    const interlinearInstalled = isInterlinearCapableBibleVersion(version.id)
+      ? await resources.offlineCopies.isAvailable({
+          kind: 'interlinear-index',
+          versionId: 'BHG',
+          language: interlinearLocale,
+        })
+      : undefined
 
     queryClient.setQueryData(
       getBibleOfflineDetailsQueryKey(version.id, installedVersionsSignal, downloadCompletionSignal),
@@ -415,6 +425,16 @@ const VersionSelectorItem = ({
           downloadCompletionSignal
         ),
         strongAvailability
+      )
+    }
+    if (interlinearInstalled !== undefined) {
+      queryClient.setQueryData(
+        getInterlinearOfflineDetailsQueryKey(
+          interlinearLocale,
+          installedVersionsSignal,
+          downloadCompletionSignal
+        ),
+        interlinearInstalled
       )
     }
 

@@ -5,11 +5,14 @@ import React from 'react'
 import type { SheetRef } from '~common/sheet'
 import type { Version } from '~helpers/bibleVersions'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import { getLanguage } from '~i18n'
 import { installedVersionsSignalAtom } from '~state/app'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import {
   getBibleOfflineDetailsQueryKey,
+  getInterlinearOfflineDetailsQueryKey,
   getStrongOfflineDetailsQueryKey,
 } from './bibleOfflineDetailsQueryKeys'
 
@@ -45,6 +48,25 @@ export const useBibleOfflineDetails = () => {
             completionSignal
           ),
           queryFn: () => resources.strongBible.getAvailability(nextVersion.id),
+        })
+      )
+    }
+
+    if (isInterlinearCapableBibleVersion(nextVersion.id)) {
+      const language = getLanguage()
+      preloadTasks.push(
+        queryClient.ensureQueryData({
+          queryKey: getInterlinearOfflineDetailsQueryKey(
+            language,
+            installedSignal,
+            completionSignal
+          ),
+          queryFn: () =>
+            resources.offlineCopies.isAvailable({
+              kind: 'interlinear-index',
+              versionId: 'BHG',
+              language,
+            }),
         })
       )
     }

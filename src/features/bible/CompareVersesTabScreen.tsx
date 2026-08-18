@@ -19,6 +19,7 @@ import { CompareTab, SelectedVerses } from '../../state/tabs'
 import CompareVersionSelectorSheet from './CompareVersionSelectorSheet'
 import type { SheetRef } from '~common/sheet'
 import CompareCard from './resources/CompareCard'
+import CompareStrongModeButton from './CompareStrongModeButton'
 
 interface CompareVersesTabScreenProps {
   compareAtom: PrimitiveAtom<CompareTab>
@@ -67,52 +68,50 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
         fontSize={16}
         title={title}
         rightComponent={
-          <MenuView
-            actions={[
-              {
-                id: 'toggle-strong',
-                title: t('Mode Strong'),
-                image: 'number',
-                state: strongMode ? 'on' : 'off',
-              },
-              {
-                id: 'choose-versions',
-                title: t('common.chooseCompareVersions'),
-                image: 'checkmark.square',
-              },
-              {
-                id: 'open-tab',
-                title: t('tab.openInNewTab'),
-                image: 'arrow.up.forward.square',
-              },
-            ]}
-            onPressAction={({ nativeEvent }) => {
-              switch (nativeEvent.event) {
-                case 'toggle-strong':
-                  toggleStrongMode()
-                  break
-                case 'choose-versions':
-                  compareVersionSelectorRef.current?.present()
-                  break
-                case 'open-tab':
-                  openInNewTab({
-                    id: `compare-${generateUUID()}`,
-                    title: t('tabs.new'),
-                    isRemovable: true,
-                    type: 'compare',
-                    data: {
-                      selectedVerses,
-                      strongMode,
-                    },
-                  })
-                  break
-              }
-            }}
-          >
-            <Box row center height={60} width={60}>
-              <FeatherIcon name="more-vertical" size={18} />
-            </Box>
-          </MenuView>
+          <Box row alignItems="center">
+            <CompareStrongModeButton
+              enabled={strongMode}
+              onPress={toggleStrongMode}
+              height={60}
+            />
+            <MenuView
+              actions={[
+                {
+                  id: 'choose-versions',
+                  title: t('common.chooseCompareVersions'),
+                  image: 'checkmark.square',
+                },
+                {
+                  id: 'open-tab',
+                  title: t('tab.openInNewTab'),
+                  image: 'arrow.up.forward.square',
+                },
+              ]}
+              onPressAction={({ nativeEvent }) => {
+                switch (nativeEvent.event) {
+                  case 'choose-versions':
+                    compareVersionSelectorRef.current?.present()
+                    break
+                  case 'open-tab':
+                    openInNewTab({
+                      id: `compare-${generateUUID()}`,
+                      title: t('tabs.new'),
+                      isRemovable: true,
+                      type: 'compare',
+                      data: {
+                        selectedVerses,
+                        strongMode,
+                      },
+                    })
+                    break
+                }
+              }}
+            >
+              <Box row center height={60} width={60}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
+          </Box>
         }
       />
       <ScrollView contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}>

@@ -16072,6 +16072,2916 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "tC6xa",
+      "x": 9937,
+      "y": -1143,
+      "name": "1. Choix éditorial — Comment commencer",
+      "context": "Écran de choix : commencer en ligne ou préparer le hors ligne.",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bs-bg",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "kKtYj",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "vS5jF",
+              "name": "Status Time",
+              "fill": "$bs-ink",
+              "content": "10:49",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "w6Nlwq",
+              "name": "Status Island",
+              "width": 122,
+              "height": 34,
+              "fill": "#000000",
+              "cornerRadius": 22
+            },
+            {
+              "type": "frame",
+              "id": "dwSjJ",
+              "name": "Status Indicators",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "depvL",
+                  "name": "Signal",
+                  "fill": "$bs-slate",
+                  "content": "•••",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "dFwBB",
+                  "name": "Wifi",
+                  "fill": "$bs-ink",
+                  "content": "◔",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "d86gkO",
+                  "name": "Battery",
+                  "fill": "#FFFFFF",
+                  "width": 26,
+                  "height": 12,
+                  "stroke": "$bs-ink",
+                  "strokeWidth": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "N1FM5S",
+          "name": "En-tête",
+          "width": "fill_container",
+          "padding": [
+            4,
+            20,
+            0,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "id": "jnfvA",
+              "type": "ref",
+              "ref": "pCYCC",
+              "name": "Onboarding Header — Choix",
+              "width": "fill_container"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "fqDgK",
+          "name": "Contenu",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            26,
+            20,
+            28,
+            20
+          ],
+          "children": [
+            {
+              "type": "ellipse",
+              "id": "G0ULy",
+              "layoutPosition": "absolute",
+              "x": 30,
+              "y": 190,
+              "name": "Champ d'ambiance",
+              "fill": "#E3EEFCD9",
+              "width": 300,
+              "height": 300
+            },
+            {
+              "type": "text",
+              "id": "OkYNQ",
+              "name": "Sur-titre",
+              "fill": "$bs-slate",
+              "content": "AVANT DE COMMENCER",
+              "fontFamily": "$bs-caption",
+              "fontSize": 11,
+              "fontWeight": "normal",
+              "letterSpacing": 1.4
+            },
+            {
+              "type": "frame",
+              "id": "xAnMd",
+              "name": "Écart 1",
+              "width": "fill_container",
+              "height": 14
+            },
+            {
+              "type": "text",
+              "id": "kPiGs",
+              "name": "Titre",
+              "fill": "$bs-ink",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Comment souhaitez-vous commencer ?",
+              "lineHeight": 1.18,
+              "fontFamily": "$bs-heading",
+              "fontSize": 32,
+              "fontWeight": "600",
+              "letterSpacing": -0.6
+            },
+            {
+              "type": "frame",
+              "id": "UGH0p",
+              "name": "Écart 2",
+              "width": "fill_container",
+              "height": 12
+            },
+            {
+              "type": "text",
+              "id": "jPLBx",
+              "name": "Sous-titre",
+              "fill": "$bs-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "Bible Strong s'utilise en ligne dès maintenant. Les copies hors ligne s'ajoutent quand vous le souhaitez.",
+              "lineHeight": 1.5,
+              "fontFamily": "$bs-body",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "RKyeg",
+              "name": "Écart 3",
+              "width": "fill_container",
+              "height": 30
+            },
+            {
+              "type": "frame",
+              "id": "D3A4s",
+              "name": "Choix",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "w6C3Jb",
+                  "name": "Carte Commencer maintenant",
+                  "width": "fill_container",
+                  "fill": "$bs-card",
+                  "cornerRadius": "$bs-radius-card",
+                  "stroke": "$bs-blue",
+                  "strokeWidth": 2,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#3159B230",
+                    "offset": {
+                      "x": 0,
+                      "y": 5
+                    },
+                    "blur": 14
+                  },
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "z67Od2",
+                      "name": "Ligne principale",
+                      "width": "fill_container",
+                      "gap": 14,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "DMPcL",
+                          "name": "Pastille",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "$bs-blue-light",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "I9agb",
+                              "name": "Icône",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "cloud",
+                              "library": "lucide",
+                              "fill": "$bs-blue"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "v19DO",
+                          "name": "Texte",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "OOljN",
+                              "name": "Titre carte",
+                              "fill": "$bs-ink",
+                              "content": "Commencer maintenant",
+                              "fontFamily": "$bs-body",
+                              "fontSize": 17,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "f8FSdS",
+                              "name": "Détail carte",
+                              "fill": "$bs-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Lire la LSG en ligne, sans occuper d'espace.",
+                              "lineHeight": 1.4,
+                              "fontFamily": "$bs-body",
+                              "fontSize": 13.5,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "wlHEr",
+                          "name": "Sélecteur",
+                          "width": 24,
+                          "height": 24,
+                          "fill": "$bs-blue",
+                          "cornerRadius": 999,
+                          "stroke": "#00000000",
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "RD58F",
+                              "name": "Coche",
+                              "width": 14,
+                              "height": 14,
+                              "icon": "check",
+                              "library": "lucide",
+                              "fill": "#FFFFFF"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oNLLu",
+                      "name": "Puces",
+                      "width": "fill_container",
+                      "gap": 7,
+                      "padding": [
+                        0,
+                        0,
+                        0,
+                        62
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "Z7W2H",
+                          "name": "Puce EN LIGNE",
+                          "fill": "$bs-bg",
+                          "cornerRadius": 9,
+                          "padding": [
+                            5,
+                            9
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "xld3r",
+                              "name": "Puce texte",
+                              "fill": "$bs-muted",
+                              "content": "EN LIGNE",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 10.5,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.4
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "TQQxC",
+                          "name": "Puce 0 MO",
+                          "fill": "$bs-bg",
+                          "cornerRadius": 9,
+                          "padding": [
+                            5,
+                            9
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "F7sBq1",
+                              "name": "Puce texte",
+                              "fill": "$bs-muted",
+                              "content": "0 MO",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 10.5,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.4
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "KbJQ1",
+                  "name": "Carte Préparer le mode hors ligne",
+                  "width": "fill_container",
+                  "fill": "$bs-card",
+                  "cornerRadius": "$bs-radius-card",
+                  "stroke": "#E1E8F5",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#3159B214",
+                    "offset": {
+                      "x": 0,
+                      "y": 3
+                    },
+                    "blur": 10
+                  },
+                  "layout": "vertical",
+                  "gap": 12,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "IKP1O",
+                      "name": "Ligne principale",
+                      "width": "fill_container",
+                      "gap": 14,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "q6q4w",
+                          "name": "Pastille",
+                          "width": 48,
+                          "height": 48,
+                          "fill": "#EAF7F0",
+                          "cornerRadius": 999,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "NdfA1",
+                              "name": "Icône",
+                              "width": 22,
+                              "height": 22,
+                              "icon": "arrow-down-to-line",
+                              "library": "lucide",
+                              "fill": "$bs-ink"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZQZoU",
+                          "name": "Texte",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "F722i",
+                              "name": "Titre carte",
+                              "fill": "$bs-ink",
+                              "content": "Préparer le mode hors ligne",
+                              "fontFamily": "$bs-body",
+                              "fontSize": 17,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Rw8Em",
+                              "name": "Détail carte",
+                              "fill": "$bs-muted",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Choisir les Bibles et outils à conserver ici.",
+                              "lineHeight": 1.4,
+                              "fontFamily": "$bs-body",
+                              "fontSize": 13.5,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "POAJ8",
+                          "name": "Sélecteur",
+                          "width": 24,
+                          "height": 24,
+                          "fill": "#00000000",
+                          "cornerRadius": 999,
+                          "stroke": "#CBD6E8",
+                          "strokeWidth": 1.5,
+                          "justifyContent": "center",
+                          "alignItems": "center"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DLk2A",
+                      "name": "Puces",
+                      "width": "fill_container",
+                      "gap": 7,
+                      "padding": [
+                        0,
+                        0,
+                        0,
+                        62
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "iLJ8J",
+                          "name": "Puce 3 RESSOURCES SUGGÉRÉES",
+                          "fill": "$bs-bg",
+                          "cornerRadius": 9,
+                          "padding": [
+                            5,
+                            9
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "b1awRJ",
+                              "name": "Puce texte",
+                              "fill": "$bs-muted",
+                              "content": "3 RESSOURCES SUGGÉRÉES",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 10.5,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.4
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "etRZD",
+                          "name": "Puce 15 MO",
+                          "fill": "$bs-bg",
+                          "cornerRadius": 9,
+                          "padding": [
+                            5,
+                            9
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "pjUwX",
+                              "name": "Puce texte",
+                              "fill": "$bs-muted",
+                              "content": "15 MO",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 10.5,
+                              "fontWeight": "normal",
+                              "letterSpacing": 0.4
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ta0ki",
+              "name": "Espace flexible",
+              "width": "fill_container",
+              "height": "fill_container"
+            },
+            {
+              "type": "frame",
+              "id": "qNoXy",
+              "name": "Épigraphe",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "padding": [
+                0,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "rectangle",
+                  "id": "c4HB4N",
+                  "name": "Filet",
+                  "fill": "#D7E0F2",
+                  "width": 44,
+                  "height": 1
+                },
+                {
+                  "type": "text",
+                  "id": "dp5OY",
+                  "name": "Phrase",
+                  "fill": "$bs-ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Vous pouvez lire dès maintenant.",
+                  "lineHeight": 1.25,
+                  "textAlign": "center",
+                  "fontFamily": "$bs-heading",
+                  "fontSize": 21,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.2
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "hzEJi",
+              "name": "Espace flexible 2",
+              "width": "fill_container",
+              "height": "fill_container"
+            },
+            {
+              "type": "frame",
+              "id": "t9YLng",
+              "name": "Pied",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "KDr8I",
+                  "name": "Note",
+                  "fill": "$bs-slate",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Modifiable à tout moment dans Téléchargements",
+                  "lineHeight": 1.4,
+                  "textAlign": "center",
+                  "fontFamily": "$bs-caption",
+                  "fontSize": 10.5,
+                  "fontWeight": "normal",
+                  "letterSpacing": 0.2
+                },
+                {
+                  "type": "frame",
+                  "id": "TGwW7",
+                  "name": "Bouton Continuer",
+                  "width": "fill_container",
+                  "height": 58,
+                  "fill": "$bs-blue",
+                  "cornerRadius": 62,
+                  "effect": [
+                    {
+                      "type": "shadow",
+                      "shadowType": "outer",
+                      "color": "#3159B226",
+                      "offset": {
+                        "x": 0,
+                        "y": 2
+                      },
+                      "blur": 4
+                    },
+                    {
+                      "type": "shadow",
+                      "shadowType": "outer",
+                      "color": "#3159B21F",
+                      "offset": {
+                        "x": 0,
+                        "y": 8
+                      },
+                      "blur": 18
+                    }
+                  ],
+                  "gap": 10,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "x7MRIl",
+                      "name": "Libellé",
+                      "fill": "#FFFFFF",
+                      "content": "Continuer",
+                      "fontFamily": "$bs-body",
+                      "fontSize": 17,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "R6JsJO",
+                      "name": "Flèche",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "arrow-right",
+                      "library": "lucide",
+                      "fill": "#FFFFFF"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "w6mLi",
+      "x": 10407,
+      "y": -1143,
+      "name": "2. Variante — Le seuil (choix éditorial)",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#F4F7FF",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "ellipse",
+          "id": "q79kVd",
+          "layoutPosition": "absolute",
+          "x": 110,
+          "y": -150,
+          "name": "Halo décoratif",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#5983F026",
+                "position": 0
+              },
+              {
+                "color": "#F4F7FF00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 360,
+          "height": 360
+        },
+        {
+          "type": "ellipse",
+          "id": "yedHQ",
+          "layoutPosition": "absolute",
+          "x": -160,
+          "y": 560,
+          "name": "Halo décoratif bas",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "radial",
+            "enabled": true,
+            "rotation": 0,
+            "size": {
+              "width": 1,
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#8756D21F",
+                "position": 0
+              },
+              {
+                "color": "#F4F7FF00",
+                "position": 1
+              }
+            ]
+          },
+          "width": 360,
+          "height": 360
+        },
+        {
+          "type": "frame",
+          "id": "Y8lEV",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Jg8sm",
+              "name": "Status Time",
+              "fill": "$bs-ink",
+              "content": "10:49",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "wvkMn",
+              "name": "Status Island",
+              "width": 122,
+              "height": 34,
+              "fill": "#000000",
+              "cornerRadius": 22
+            },
+            {
+              "type": "frame",
+              "id": "dC0vz",
+              "name": "Status Indicators",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "AUCCY",
+                  "name": "Signal",
+                  "fill": "$bs-slate",
+                  "content": "•••",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "qN2YV",
+                  "name": "Wifi",
+                  "fill": "$bs-ink",
+                  "content": "◔",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "XJdcg",
+                  "name": "Battery",
+                  "fill": "#FFFFFF",
+                  "width": 26,
+                  "height": 12,
+                  "stroke": "$bs-ink",
+                  "strokeWidth": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "IaOTn",
+          "name": "Contenu",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 18,
+          "padding": [
+            6,
+            20,
+            18,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "z7LCbk",
+              "name": "En-tête éditorial",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "HYR2W",
+                  "name": "Fil d'étape",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "cM0KX",
+                      "name": "Puce active",
+                      "width": 16,
+                      "height": 4,
+                      "fill": "#5983F0",
+                      "cornerRadius": 2
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ngcQE",
+                      "name": "Puce suivante",
+                      "width": 6,
+                      "height": 4,
+                      "fill": "#C6D3EE",
+                      "cornerRadius": 2
+                    },
+                    {
+                      "type": "text",
+                      "id": "Vf3nj",
+                      "name": "Libellé étape",
+                      "fill": "#8095B8",
+                      "content": "PREMIER DÉMARRAGE",
+                      "fontFamily": "Geist Mono",
+                      "fontSize": 10,
+                      "fontWeight": "600",
+                      "letterSpacing": 1.2
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "D5u0u",
+                  "name": "Titre",
+                  "fill": "#111827",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Par où voulez-vous commencer ?",
+                  "lineHeight": 1.05,
+                  "fontFamily": "Inter",
+                  "fontSize": 30,
+                  "fontWeight": "700",
+                  "letterSpacing": -0.7
+                },
+                {
+                  "type": "text",
+                  "id": "tLBkw",
+                  "name": "Sous-titre",
+                  "fill": "#667085",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Deux chemins, aucun définitif. Vous pourrez basculer de l'un à l'autre quand vous voudrez.",
+                  "lineHeight": 1.38,
+                  "fontFamily": "Funnel Sans",
+                  "fontSize": 13,
+                  "fontWeight": "450"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "p0Vqg",
+              "name": "Choix A — Lire maintenant",
+              "width": "fill_container",
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 150,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#1E2E49",
+                    "position": 0
+                  },
+                  {
+                    "color": "#16223A",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 26,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#18243A33",
+                "offset": {
+                  "x": 0,
+                  "y": 10
+                },
+                "blur": 24
+              },
+              "layout": "vertical",
+              "gap": 14,
+              "padding": 18,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "lbdaQ",
+                  "name": "A — Bandeau",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "TKR7N",
+                      "name": "A — Badge",
+                      "height": 22,
+                      "fill": "#5983F0",
+                      "cornerRadius": 11,
+                      "gap": 5,
+                      "padding": [
+                        0,
+                        10
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "FA784",
+                          "name": "A — Badge icône",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "zap",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        },
+                        {
+                          "type": "text",
+                          "id": "OJ9D2",
+                          "name": "A — Badge libellé",
+                          "fill": "#FFFFFF",
+                          "content": "Conseillé",
+                          "fontFamily": "Funnel Sans",
+                          "fontSize": 10,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "v68yHR",
+                      "name": "A — Poids",
+                      "fill": "#8FA8CC",
+                      "content": "0 Mo",
+                      "fontFamily": "Geist Mono",
+                      "fontSize": 11,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "TS44P",
+                  "name": "A — Texte",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "UvOzp",
+                      "name": "A — Titre",
+                      "fill": "#FFFFFF",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Lire tout de suite",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "700",
+                      "letterSpacing": -0.3
+                    },
+                    {
+                      "type": "text",
+                      "id": "UCJYT",
+                      "name": "A — Description",
+                      "fill": "#AEC0DA",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "La Segond 1910 s'ouvre en ligne, sans rien occuper sur l'appareil.",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Funnel Sans",
+                      "fontSize": 12.5,
+                      "fontWeight": "450"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ZuwSR",
+                  "name": "A — Aperçu verset",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF14",
+                  "cornerRadius": 16,
+                  "stroke": "#FFFFFF1F",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 7,
+                  "padding": [
+                    13,
+                    14
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "n1vGFN",
+                      "name": "A — Référence",
+                      "width": "fill_container",
+                      "gap": 7,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "P3WwB3",
+                          "name": "A — Réf",
+                          "fill": "#7FB2FF",
+                          "content": "GENÈSE 4.2",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9.5,
+                          "fontWeight": "700",
+                          "letterSpacing": 1
+                        },
+                        {
+                          "type": "frame",
+                          "id": "sHnlA",
+                          "name": "A — Filet",
+                          "width": "fill_container",
+                          "height": 1,
+                          "fill": "#FFFFFF1A"
+                        },
+                        {
+                          "type": "text",
+                          "id": "fnRK1",
+                          "name": "A — Version",
+                          "fill": "#7E93B2",
+                          "content": "LSG",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 9.5,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "Rb2fg",
+                      "name": "A — Verset",
+                      "fill": "#E6EDF8",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Elle enfanta encore son frère Abel. Abel fut berger, et Caïn fut laboureur.",
+                      "lineHeight": 1.42,
+                      "fontFamily": "Newsreader",
+                      "fontSize": 15
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "wWbvr",
+                  "name": "A — Action",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 24,
+                  "gap": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "uMllL",
+                      "name": "A — Action libellé",
+                      "fill": "#16223A",
+                      "content": "Ouvrir la Bible",
+                      "fontFamily": "Funnel Sans",
+                      "fontSize": 14,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "icon",
+                      "id": "auGC8",
+                      "name": "A — Action flèche",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "arrow-right",
+                      "library": "lucide",
+                      "fill": "#16223A"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "F5AC3U",
+              "name": "Choix B — Préparer hors ligne",
+              "width": "fill_container",
+              "fill": "#FFFFFF",
+              "cornerRadius": 26,
+              "stroke": "#E3EAF7",
+              "strokeWidth": 1,
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#16223A0F",
+                "offset": {
+                  "x": 0,
+                  "y": 6
+                },
+                "blur": 16
+              },
+              "layout": "vertical",
+              "gap": 13,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "r4tDFj",
+                  "name": "B — En-tête",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "liL5o",
+                      "name": "B — Tuile",
+                      "width": 42,
+                      "height": 42,
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 145,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#76A0FA",
+                            "position": 0
+                          },
+                          {
+                            "color": "#5983F0",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "cornerRadius": 15,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "pzNPo",
+                          "name": "B — Icône",
+                          "width": 20,
+                          "height": 20,
+                          "icon": "cloud-download",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "a77iI",
+                      "name": "B — Texte",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 3,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Guqpx",
+                          "name": "B — Titre",
+                          "fill": "#111827",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Préparer le hors ligne",
+                          "fontFamily": "Inter",
+                          "fontSize": 17,
+                          "fontWeight": "700",
+                          "letterSpacing": -0.2
+                        },
+                        {
+                          "type": "text",
+                          "id": "r5IlPu",
+                          "name": "B — Description",
+                          "fill": "#667085",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Choisir ce qui reste disponible sans réseau.",
+                          "lineHeight": 1.35,
+                          "fontFamily": "Funnel Sans",
+                          "fontSize": 12,
+                          "fontWeight": "450"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "ADTcn",
+                      "name": "B — Chevron",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "chevron-right",
+                      "library": "lucide",
+                      "fill": "#A5B4CC"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "dC9Bz",
+                  "name": "B — Ressources",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "DFeZm",
+                      "name": "B — Chip Bibles",
+                      "height": 26,
+                      "fill": "#EAF0FF",
+                      "cornerRadius": 13,
+                      "gap": 5,
+                      "padding": [
+                        0,
+                        9
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "MMCaU",
+                          "name": "B — Chip icône Bibles",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "book-open",
+                          "library": "lucide",
+                          "fill": "#3159B2"
+                        },
+                        {
+                          "type": "text",
+                          "id": "WQdAx",
+                          "name": "B — Chip libellé Bibles",
+                          "fill": "#3159B2",
+                          "content": "Bibles",
+                          "fontFamily": "Funnel Sans",
+                          "fontSize": 10.5,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "p5Au5",
+                      "name": "B — Chip Strong",
+                      "height": 26,
+                      "fill": "#F3EAFC",
+                      "cornerRadius": 13,
+                      "gap": 5,
+                      "padding": [
+                        0,
+                        9
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "C48SAz",
+                          "name": "B — Chip icône Strong",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "whole-word",
+                          "library": "lucide",
+                          "fill": "#7743BE"
+                        },
+                        {
+                          "type": "text",
+                          "id": "PBveC",
+                          "name": "B — Chip libellé Strong",
+                          "fill": "#7743BE",
+                          "content": "Strong",
+                          "fontFamily": "Funnel Sans",
+                          "fontSize": 10.5,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "KXSZg",
+                      "name": "B — Chip Dictionnaires",
+                      "height": 26,
+                      "fill": "#FDF0E3",
+                      "cornerRadius": 13,
+                      "gap": 5,
+                      "padding": [
+                        0,
+                        9
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "Cbiwj",
+                          "name": "B — Chip icône Dictionnaires",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "library",
+                          "library": "lucide",
+                          "fill": "#B96F22"
+                        },
+                        {
+                          "type": "text",
+                          "id": "JkxKK",
+                          "name": "B — Chip libellé Dictionnaires",
+                          "fill": "#B96F22",
+                          "content": "Dictionnaires",
+                          "fontFamily": "Funnel Sans",
+                          "fontSize": 10.5,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RWBoY",
+                  "name": "B — Estimation",
+                  "width": "fill_container",
+                  "stroke": "#EDF1F9",
+                  "strokeWidth": {
+                    "top": 1
+                  },
+                  "gap": 8,
+                  "padding": [
+                    10,
+                    0,
+                    0,
+                    0
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "T563xA",
+                      "name": "B — Taille",
+                      "fill": "#111827",
+                      "content": "≈ 120 Mo",
+                      "fontFamily": "Geist Mono",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DBIMI",
+                      "name": "B — Point",
+                      "width": 3,
+                      "height": 3,
+                      "fill": "#C3CEE2",
+                      "cornerRadius": 2
+                    },
+                    {
+                      "type": "text",
+                      "id": "M59Dt",
+                      "name": "B — Durée",
+                      "fill": "#8095B8",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "4 min en Wi-Fi · modifiable",
+                      "fontFamily": "Funnel Sans",
+                      "fontSize": 11,
+                      "fontWeight": "450"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "zcSdR",
+              "name": "Espace flexible",
+              "width": "fill_container",
+              "height": "fill_container"
+            },
+            {
+              "type": "frame",
+              "id": "dwF8z",
+              "name": "Note de bas",
+              "width": "fill_container",
+              "gap": 7,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Q8sFey",
+                  "name": "Note — Icône",
+                  "width": 13,
+                  "height": 13,
+                  "icon": "settings-2",
+                  "library": "lucide",
+                  "fill": "#A5B4CC"
+                },
+                {
+                  "type": "text",
+                  "id": "v1rbVO",
+                  "name": "Note — Texte",
+                  "fill": "#8095B8",
+                  "content": "Réglages ▸ Téléchargements, à tout moment",
+                  "fontFamily": "Funnel Sans",
+                  "fontSize": 11,
+                  "fontWeight": "450"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "r6LVqE",
+      "x": 10877,
+      "y": -1143,
+      "name": "3. Variante",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bs-bg",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Q8Mahg",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "TbbZs",
+              "name": "Status Time",
+              "fill": "$bs-ink",
+              "content": "10:49",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "VCu1L",
+              "name": "Status Island",
+              "width": 122,
+              "height": 34,
+              "fill": "#000000",
+              "cornerRadius": 22
+            },
+            {
+              "type": "frame",
+              "id": "xoxvg",
+              "name": "Status Indicators",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "QqyWI",
+                  "name": "Signal",
+                  "fill": "$bs-slate",
+                  "content": "•••",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "GC40R",
+                  "name": "Wifi",
+                  "fill": "$bs-ink",
+                  "content": "◔",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "vtUcx",
+                  "name": "Battery",
+                  "fill": "#FFFFFF",
+                  "width": 26,
+                  "height": 12,
+                  "stroke": "$bs-ink",
+                  "strokeWidth": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CfEbV",
+          "name": "Contenu",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "padding": [
+            10,
+            22,
+            24,
+            22
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "KMePi",
+              "name": "En-tête éditorial",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "y7dGb",
+                  "name": "Surtitre",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ZuLkX",
+                      "name": "Trait",
+                      "width": 18,
+                      "height": 2,
+                      "fill": "$bs-blue",
+                      "cornerRadius": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "fHFVl",
+                      "name": "Surtitre libellé",
+                      "fill": "$bs-blue",
+                      "content": "AVANT DE COMMENCER",
+                      "fontFamily": "$bs-caption",
+                      "fontSize": 10,
+                      "fontWeight": "700",
+                      "letterSpacing": 1.3
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "kxDgD",
+                  "name": "Titre",
+                  "fill": "$bs-ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Comment souhaitez-vous commencer ?",
+                  "lineHeight": 1.08,
+                  "fontFamily": "$bs-heading",
+                  "fontSize": 34,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.8
+                },
+                {
+                  "type": "text",
+                  "id": "WuPGs",
+                  "name": "Chapeau",
+                  "fill": "$bs-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Bible Strong s'ouvre en ligne dès maintenant. Le mode hors ligne se prépare quand vous le souhaitez.",
+                  "lineHeight": 1.45,
+                  "fontFamily": "$bs-body",
+                  "fontSize": 13.5,
+                  "fontWeight": "450"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NbYPv",
+              "name": "Épigraphe",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 12,
+              "padding": [
+                0,
+                14
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "U7CdOp",
+                  "name": "Épigraphe — Verset",
+                  "fill": "#33415C",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "« Au commencement, Dieu créa les cieux et la terre. »",
+                  "lineHeight": 1.5,
+                  "textAlign": "center",
+                  "fontFamily": "$bs-heading",
+                  "fontSize": 19,
+                  "fontStyle": "italic"
+                },
+                {
+                  "type": "frame",
+                  "id": "C4x9Fo",
+                  "name": "Épigraphe — Référence",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "eJZni",
+                      "name": "Trait gauche",
+                      "width": 14,
+                      "height": 1,
+                      "fill": "#C3CEE4"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dDSnd",
+                      "name": "Référence libellé",
+                      "fill": "#94A1BA",
+                      "content": "GENÈSE 1.1 · LOUIS SEGOND",
+                      "lineHeight": 1.5,
+                      "fontFamily": "$bs-caption",
+                      "fontSize": 9.5,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "frame",
+                      "id": "NjhMT",
+                      "name": "Trait droit",
+                      "width": 14,
+                      "height": 1,
+                      "fill": "#C3CEE4"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "l6tpx",
+              "name": "Choix",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "EYVZd",
+                  "name": "Option principale — Commencer maintenant",
+                  "clip": true,
+                  "width": "fill_container",
+                  "fill": "#18243A",
+                  "cornerRadius": 30,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#18243A33",
+                    "offset": {
+                      "x": 0,
+                      "y": 10
+                    },
+                    "blur": 24
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 20,
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "fXiX0",
+                      "layoutPosition": "absolute",
+                      "x": 190,
+                      "y": -70,
+                      "name": "Halo bleu",
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "radial",
+                        "enabled": true,
+                        "rotation": 0,
+                        "size": {
+                          "width": 1,
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#5983F066",
+                            "position": 0
+                          },
+                          {
+                            "color": "#18243A00",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "width": 260,
+                      "height": 260
+                    },
+                    {
+                      "type": "frame",
+                      "id": "w2unDf",
+                      "name": "Ligne badge",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "IgpwU",
+                          "name": "Badge recommandé",
+                          "height": 22,
+                          "fill": "$bs-blue",
+                          "cornerRadius": 11,
+                          "padding": [
+                            0,
+                            10
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "tZ7YB",
+                              "name": "Badge libellé",
+                              "fill": "#FFFFFF",
+                              "content": "RECOMMANDÉ",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 9,
+                              "fontWeight": "700",
+                              "letterSpacing": 0.9
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ghr9T",
+                          "name": "Chip stockage",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "hEIMI",
+                              "name": "Chip icône",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "hard-drive",
+                              "library": "lucide",
+                              "fill": "#8FA6C4"
+                            },
+                            {
+                              "type": "text",
+                              "id": "RQfyR",
+                              "name": "Chip valeur",
+                              "fill": "#B8C4D7",
+                              "content": "0 Mo",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 11,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Mh80B",
+                      "name": "Textes principale",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 8,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Admhs",
+                          "name": "Titre principale",
+                          "fill": "#FFFFFF",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Commencer maintenant",
+                          "lineHeight": 1.15,
+                          "fontFamily": "$bs-heading",
+                          "fontSize": 24,
+                          "fontWeight": "600",
+                          "letterSpacing": -0.4
+                        },
+                        {
+                          "type": "text",
+                          "id": "jPJWQ",
+                          "name": "Description principale",
+                          "fill": "#A9B8CD",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Lire la Louis Segond en ligne, sans occuper d'espace sur l'appareil. Les téléchargements restent disponibles à tout moment.",
+                          "lineHeight": 1.45,
+                          "fontFamily": "$bs-body",
+                          "fontSize": 12.5,
+                          "fontWeight": "450"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "b5L7lm",
+                      "name": "Bouton Ouvrir la Bible",
+                      "width": "fill_container",
+                      "height": 52,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 26,
+                      "gap": 9,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "OwVn5",
+                          "name": "Bouton libellé",
+                          "fill": "#18243A",
+                          "content": "Ouvrir la Bible",
+                          "fontFamily": "$bs-body",
+                          "fontSize": 14.5,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "i7sQk",
+                          "name": "Bouton flèche",
+                          "width": 17,
+                          "height": 17,
+                          "icon": "arrow-right",
+                          "library": "lucide",
+                          "fill": "#18243A"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "e8JS6",
+                  "name": "Option secondaire — Hors ligne",
+                  "width": "fill_container",
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 24,
+                  "stroke": "#DCE4F7",
+                  "strokeWidth": 1,
+                  "gap": 14,
+                  "padding": [
+                    16,
+                    18
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "WbrZD",
+                      "name": "Icône hors ligne",
+                      "width": 42,
+                      "height": 42,
+                      "fill": "$bs-blue-light",
+                      "cornerRadius": 15,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "tWAcp",
+                          "name": "Icône téléchargement",
+                          "width": 19,
+                          "height": 19,
+                          "icon": "arrow-down-to-line",
+                          "library": "lucide",
+                          "fill": "$bs-blue"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "UNl3K",
+                      "name": "Textes secondaire",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "ugfMC",
+                          "name": "Titre secondaire",
+                          "fill": "$bs-ink",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Préparer le mode hors ligne",
+                          "fontFamily": "$bs-body",
+                          "fontSize": 14.5,
+                          "fontWeight": "700"
+                        },
+                        {
+                          "type": "text",
+                          "id": "tbuQs",
+                          "name": "Description secondaire",
+                          "fill": "$bs-muted",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Choisir les Bibles et outils à conserver sur cet appareil.",
+                          "lineHeight": 1.35,
+                          "fontFamily": "$bs-body",
+                          "fontSize": 12,
+                          "fontWeight": "450"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "icon",
+                      "id": "u7bYO",
+                      "name": "Chevron secondaire",
+                      "width": 20,
+                      "height": 20,
+                      "icon": "chevron-right",
+                      "library": "lucide",
+                      "fill": "#9AA6BC"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "lQus2",
+              "name": "Pied de page",
+              "width": "fill_container",
+              "gap": 7,
+              "padding": [
+                14,
+                0,
+                0,
+                0
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "oJKtI",
+                  "name": "Pied icône",
+                  "width": 12,
+                  "height": 12,
+                  "icon": "refresh-cw",
+                  "library": "lucide",
+                  "fill": "#9AA6BC"
+                },
+                {
+                  "type": "text",
+                  "id": "p4c1Qf",
+                  "name": "Pied libellé",
+                  "fill": "#8B98AE",
+                  "content": "Vous pourrez changer d'avis dans les réglages",
+                  "lineHeight": 1.4,
+                  "fontFamily": "$bs-body",
+                  "fontSize": 11.5,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "dGxCu",
+      "x": 11347,
+      "y": -1143,
+      "name": "4. Variante — Deux portes",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bs-bg",
+      "cornerRadius": 38,
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "lfj7v",
+          "name": "Status Bar",
+          "width": "fill_container",
+          "height": 62,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "mnPiH",
+              "name": "Status Time",
+              "fill": "$bs-ink",
+              "content": "9:41",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "UbK1u",
+              "name": "Status Island",
+              "width": 122,
+              "height": 34,
+              "fill": "#000000",
+              "cornerRadius": 22
+            },
+            {
+              "type": "frame",
+              "id": "HrP1P",
+              "name": "Status Indicators",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "E2AbAA",
+                  "name": "Signal",
+                  "fill": "$bs-slate",
+                  "content": "•••",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "O4Z8jW",
+                  "name": "Wifi",
+                  "fill": "$bs-ink",
+                  "content": "◔",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 4,
+                  "id": "kie5f",
+                  "name": "Battery",
+                  "fill": "#FFFFFF",
+                  "width": 26,
+                  "height": 12,
+                  "stroke": "$bs-ink",
+                  "strokeWidth": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "bEF7f",
+          "name": "Contenu",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 22,
+          "padding": [
+            10,
+            20,
+            18,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "OXcxd",
+              "name": "En-tête",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 9,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "wzb1k",
+                  "name": "Eyebrow",
+                  "fill": "$bs-blue",
+                  "content": "PREMIER DÉMARRAGE",
+                  "fontFamily": "$bs-caption",
+                  "fontSize": 10,
+                  "fontWeight": "600",
+                  "letterSpacing": 1.4
+                },
+                {
+                  "type": "text",
+                  "id": "E2cAzs",
+                  "name": "Titre",
+                  "fill": "$bs-ink",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Comment souhaitez-vous commencer ?",
+                  "lineHeight": 1.06,
+                  "fontFamily": "$bs-heading",
+                  "fontSize": 31,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.5
+                },
+                {
+                  "type": "text",
+                  "id": "i6hssW",
+                  "name": "Sous-titre",
+                  "fill": "$bs-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Tout fonctionne en ligne dès maintenant. Le hors ligne s'ajoute quand vous le décidez.",
+                  "lineHeight": 1.4,
+                  "fontFamily": "$bs-body",
+                  "fontSize": 13,
+                  "fontWeight": "450"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "BhqOA",
+              "name": "Choix",
+              "width": "fill_container",
+              "height": "fill_container",
+              "layout": "vertical",
+              "gap": 14,
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "J9IoE",
+                  "name": "Carte — Commencer maintenant",
+                  "clip": true,
+                  "width": "fill_container",
+                  "fill": "$bs-card",
+                  "cornerRadius": 24,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#18243A14",
+                    "offset": {
+                      "x": 0,
+                      "y": 10
+                    },
+                    "blur": 24
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "tb8fI",
+                      "name": "Bandeau — Commencer maintenant",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": 132,
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 145,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#76A0FA",
+                            "position": 0
+                          },
+                          {
+                            "color": "#5983F0",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "D6QbT",
+                          "x": 230,
+                          "y": 32,
+                          "name": "Filigrane",
+                          "width": 184,
+                          "height": 184,
+                          "icon": "wifi",
+                          "library": "lucide",
+                          "fill": "#FFFFFF2B"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "G5OKX",
+                          "x": 16,
+                          "y": 16,
+                          "name": "Chip état",
+                          "height": 26,
+                          "fill": "#FFFFFF2E",
+                          "cornerRadius": 13,
+                          "stroke": "#FFFFFF5C",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            11
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "l01Jb",
+                              "name": "Chip icône",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "wifi",
+                              "library": "lucide",
+                              "fill": "#FFFFFF"
+                            },
+                            {
+                              "type": "text",
+                              "id": "SfcfF",
+                              "name": "Chip libellé",
+                              "fill": "#FFFFFF",
+                              "content": "EN LIGNE",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 9,
+                              "fontWeight": "700",
+                              "letterSpacing": 1
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "lWkLL",
+                          "x": 243,
+                          "y": 16,
+                          "name": "Badge recommandé",
+                          "height": 26,
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 13,
+                          "gap": 5,
+                          "padding": [
+                            0,
+                            11
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "GHIXy",
+                              "name": "Badge icône",
+                              "width": 12,
+                              "height": 12,
+                              "icon": "sparkles",
+                              "library": "lucide",
+                              "fill": "#3159B2"
+                            },
+                            {
+                              "type": "text",
+                              "id": "op1Cs",
+                              "name": "Badge libellé",
+                              "fill": "#3159B2",
+                              "content": "Recommandé",
+                              "fontFamily": "$bs-body",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "IN5OZ",
+                          "x": 16,
+                          "y": 54,
+                          "name": "Aperçu verset",
+                          "width": 214,
+                          "fill": "#FFFFFFE8",
+                          "cornerRadius": 14,
+                          "effect": {
+                            "type": "shadow",
+                            "shadowType": "outer",
+                            "color": "#1E3A8A2E",
+                            "offset": {
+                              "x": 0,
+                              "y": 6
+                            },
+                            "blur": 14
+                          },
+                          "layout": "vertical",
+                          "gap": 5,
+                          "padding": [
+                            11,
+                            13
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "M7NGSA",
+                              "name": "Aperçu référence",
+                              "fill": "$bs-ink",
+                              "content": "Genèse 4.2",
+                              "fontFamily": "$bs-heading",
+                              "fontSize": 12,
+                              "fontWeight": "700"
+                            },
+                            {
+                              "type": "text",
+                              "id": "oKazO",
+                              "name": "Aperçu texte",
+                              "fill": "#4B5563",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "Elle enfanta encore son frère Abel.",
+                              "lineHeight": 1.3,
+                              "fontFamily": "$bs-body",
+                              "fontSize": 10.5,
+                              "fontWeight": "450"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "L7QtKU",
+                      "name": "Corps — Commencer maintenant",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "padding": [
+                        15,
+                        16
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "SYtEa",
+                          "name": "Ligne titre",
+                          "width": "fill_container",
+                          "gap": 12,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "U79hkQ",
+                              "name": "Texte",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 5,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "C54M9",
+                                  "name": "Titre carte",
+                                  "fill": "$bs-ink",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Commencer maintenant",
+                                  "lineHeight": 1.15,
+                                  "fontFamily": "$bs-body",
+                                  "fontSize": 17,
+                                  "fontWeight": "700",
+                                  "letterSpacing": -0.2
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "JPT5r",
+                                  "name": "Description",
+                                  "fill": "$bs-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Lire la LSG en streaming, sans occuper d'espace sur l'appareil.",
+                                  "lineHeight": 1.35,
+                                  "fontFamily": "$bs-body",
+                                  "fontSize": 12.5,
+                                  "fontWeight": "450"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "MOLw5",
+                              "name": "Flèche",
+                              "width": 38,
+                              "height": 38,
+                              "fill": "#EEF3FF",
+                              "cornerRadius": 19,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "Aqxn6",
+                                  "name": "Flèche icône",
+                                  "width": 17,
+                                  "height": 17,
+                                  "icon": "arrow-right",
+                                  "library": "lucide",
+                                  "fill": "#5983F0"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "x9hf6",
+                          "name": "Filet",
+                          "width": "fill_container",
+                          "height": 1,
+                          "fill": "#EDF0F6"
+                        },
+                        {
+                          "type": "text",
+                          "id": "J31gka",
+                          "name": "Méta",
+                          "fill": "#8B96A8",
+                          "content": "0 Mo utilisé · Téléchargements possibles plus tard",
+                          "fontFamily": "$bs-caption",
+                          "fontSize": 10,
+                          "fontWeight": "500",
+                          "letterSpacing": 0.1
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "HUkyy",
+                  "name": "Carte — Préparer le mode hors ligne",
+                  "clip": true,
+                  "width": "fill_container",
+                  "fill": "$bs-card",
+                  "cornerRadius": 24,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#18243A14",
+                    "offset": {
+                      "x": 0,
+                      "y": 10
+                    },
+                    "blur": 24
+                  },
+                  "layout": "vertical",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "QIDyV",
+                      "name": "Bandeau — Préparer le mode hors ligne",
+                      "clip": true,
+                      "width": "fill_container",
+                      "height": 132,
+                      "fill": {
+                        "type": "gradient",
+                        "gradientType": "linear",
+                        "enabled": true,
+                        "rotation": 145,
+                        "size": {
+                          "height": 1
+                        },
+                        "colors": [
+                          {
+                            "color": "#B67BEF",
+                            "position": 0
+                          },
+                          {
+                            "color": "#8756D2",
+                            "position": 1
+                          }
+                        ]
+                      },
+                      "layout": "none",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "esRyq",
+                          "x": 224,
+                          "y": -30,
+                          "name": "Filigrane",
+                          "width": 186,
+                          "height": 186,
+                          "icon": "hard-drive-download",
+                          "library": "lucide",
+                          "fill": "#FFFFFF2B"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "b1XM1",
+                          "x": 16,
+                          "y": 16,
+                          "name": "Chip état",
+                          "height": 26,
+                          "fill": "#FFFFFF2E",
+                          "cornerRadius": 13,
+                          "stroke": "#FFFFFF5C",
+                          "strokeWidth": 1,
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            11
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "icon",
+                              "id": "HJTDa",
+                              "name": "Chip icône",
+                              "width": 13,
+                              "height": 13,
+                              "icon": "package",
+                              "library": "lucide",
+                              "fill": "#FFFFFF"
+                            },
+                            {
+                              "type": "text",
+                              "id": "U3c2rC",
+                              "name": "Chip libellé",
+                              "fill": "#FFFFFF",
+                              "content": "HORS LIGNE",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 9,
+                              "fontWeight": "700",
+                              "letterSpacing": 1
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Xa4Eu",
+                          "x": 16,
+                          "y": 56,
+                          "name": "Ressources à choisir",
+                          "gap": 9,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "J7W3Zx",
+                              "name": "Ressource — Bibles",
+                              "width": 66,
+                              "height": 62,
+                              "fill": "#FFFFFF2E",
+                              "cornerRadius": 14,
+                              "stroke": "#FFFFFF57",
+                              "strokeWidth": 1,
+                              "layout": "vertical",
+                              "gap": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "hk7SL",
+                                  "name": "Ressource icône",
+                                  "width": 17,
+                                  "height": 17,
+                                  "icon": "book-open",
+                                  "library": "lucide",
+                                  "fill": "#FFFFFF"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "rpW13",
+                                  "name": "Ressource libellé",
+                                  "fill": "#FFFFFFE0",
+                                  "content": "Bibles",
+                                  "fontFamily": "$bs-body",
+                                  "fontSize": 9.5,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "KcvrM",
+                              "name": "Ressource — Lexiques",
+                              "width": 66,
+                              "height": 62,
+                              "fill": "#FFFFFF2E",
+                              "cornerRadius": 14,
+                              "stroke": "#FFFFFF57",
+                              "strokeWidth": 1,
+                              "layout": "vertical",
+                              "gap": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "uhF7p",
+                                  "name": "Ressource icône",
+                                  "width": 17,
+                                  "height": 17,
+                                  "icon": "whole-word",
+                                  "library": "lucide",
+                                  "fill": "#FFFFFF"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "J1EECu",
+                                  "name": "Ressource libellé",
+                                  "fill": "#FFFFFFE0",
+                                  "content": "Lexiques",
+                                  "fontFamily": "$bs-body",
+                                  "fontSize": 9.5,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "S2GtqO",
+                              "name": "Ressource — Thèmes",
+                              "width": 66,
+                              "height": 62,
+                              "fill": "#FFFFFF2E",
+                              "cornerRadius": 14,
+                              "stroke": "#FFFFFF57",
+                              "strokeWidth": 1,
+                              "layout": "vertical",
+                              "gap": 6,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "Q3Bxb",
+                                  "name": "Ressource icône",
+                                  "width": 17,
+                                  "height": 17,
+                                  "icon": "network",
+                                  "library": "lucide",
+                                  "fill": "#FFFFFF"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "kfYmn",
+                                  "name": "Ressource libellé",
+                                  "fill": "#FFFFFFE0",
+                                  "content": "Thèmes",
+                                  "fontFamily": "$bs-body",
+                                  "fontSize": 9.5,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "LuiRk",
+                          "x": 241,
+                          "y": 56,
+                          "name": "Sélecteur suivant",
+                          "width": 66,
+                          "height": 62,
+                          "fill": "#FFFFFF14",
+                          "cornerRadius": 14,
+                          "stroke": "#FFFFFF33",
+                          "strokeWidth": 1,
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "aMrw6",
+                              "name": "Sélecteur libellé",
+                              "fill": "#FFFFFFB8",
+                              "content": "+ 8",
+                              "fontFamily": "$bs-caption",
+                              "fontSize": 12,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ok1IF",
+                      "name": "Corps — Préparer le mode hors ligne",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "padding": [
+                        15,
+                        16
+                      ],
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "z9i0p",
+                          "name": "Ligne titre",
+                          "width": "fill_container",
+                          "gap": 12,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "r7fdP",
+                              "name": "Texte",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 5,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "G1tAM",
+                                  "name": "Titre carte",
+                                  "fill": "$bs-ink",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Préparer le mode hors ligne",
+                                  "lineHeight": 1.15,
+                                  "fontFamily": "$bs-body",
+                                  "fontSize": 17,
+                                  "fontWeight": "700",
+                                  "letterSpacing": -0.2
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "RJr3o",
+                                  "name": "Description",
+                                  "fill": "$bs-muted",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "Choisir les Bibles et les outils à conserver sur cet appareil.",
+                                  "lineHeight": 1.35,
+                                  "fontFamily": "$bs-body",
+                                  "fontSize": 12.5,
+                                  "fontWeight": "450"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "r54DJ",
+                              "name": "Flèche",
+                              "width": 38,
+                              "height": 38,
+                              "fill": "#F4ECFD",
+                              "cornerRadius": 19,
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "IoZiB",
+                                  "name": "Flèche icône",
+                                  "width": 17,
+                                  "height": 17,
+                                  "icon": "arrow-right",
+                                  "library": "lucide",
+                                  "fill": "#8756D2"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "isUzf",
+                          "name": "Filet",
+                          "width": "fill_container",
+                          "height": 1,
+                          "fill": "#EDF0F6"
+                        },
+                        {
+                          "type": "text",
+                          "id": "A5OaVH",
+                          "name": "Méta",
+                          "fill": "#8B96A8",
+                          "content": "≈ 120 Mo · environ 2 min en Wi-Fi",
+                          "fontFamily": "$bs-caption",
+                          "fontSize": 10,
+                          "fontWeight": "500",
+                          "letterSpacing": 0.1
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "BAOSQ",
+              "name": "Note",
+              "width": "fill_container",
+              "gap": 7,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "b5WGh",
+                  "name": "Note icône",
+                  "width": 13,
+                  "height": 13,
+                  "icon": "settings-2",
+                  "library": "lucide",
+                  "fill": "#98A2B3"
+                },
+                {
+                  "type": "text",
+                  "id": "c5Vyz",
+                  "name": "Note libellé",
+                  "fill": "#98A2B3",
+                  "content": "Modifiable à tout moment dans les réglages",
+                  "fontFamily": "$bs-body",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "themes": {

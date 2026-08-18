@@ -3,13 +3,12 @@ import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import sectionListGetItemLayout from 'react-native-section-list-get-item-layout'
 
-import * as Icon from '@expo/vector-icons'
 import SectionList from '~common/ui/SectionList'
 import Box from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Text from '~common/ui/Text'
 import Header from '~common/Header'
-import Link from '~common/Link'
 import SearchInput from '~common/SearchInput'
 import Loading from '~common/Loading'
 import type { NaveTopicSummary } from '~features/resources/naveAccess'
@@ -17,7 +16,6 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
 import SectionTitle from '~common/SectionTitle'
-import useLanguage from '~helpers/useLanguage'
 
 import NaveItem from './NaveItem'
 import { useSearchValue, useInfiniteResultsByLetterOrSearch } from '../lexique/useUtilities'
@@ -83,7 +81,6 @@ const NaveListScreen = ({
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
-  const lang = useLanguage()
   const [naveResourceLanguage, setNaveResourceLanguage] = useResourceLanguage('NAVE')
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
@@ -182,11 +179,6 @@ const NaveListScreen = ({
           title={t('Thématique Nave')}
           rightComponent={
             <Box row alignItems="center">
-              {lang === 'fr' && (
-                <Link route="NaveWarning" padding>
-                  <Icon.Feather size={20} name="alert-triangle" color="rgb(255,188,0)" />
-                </Link>
-              )}
               <MenuView
                 actions={[
                   {
@@ -200,9 +192,9 @@ const NaveListScreen = ({
                 onPressAction={({ nativeEvent }) => {
                   if (nativeEvent.event === 'language') toggleNaveLanguage()
                 }}
-              >
+                >
                 <Box row center height={60} width={60}>
-                  <Icon.Feather name="more-vertical" size={18} />
+                  <FeatherIcon name="more-vertical" size={18} />
                 </Box>
               </MenuView>
             </Box>

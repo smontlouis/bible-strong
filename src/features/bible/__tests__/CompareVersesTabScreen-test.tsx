@@ -51,6 +51,10 @@ jest.mock('../CompareVersionSelectorSheet', () => ({
   __esModule: true,
   default: mockHostComponent('CompareVersionSelectorSheet'),
 }))
+jest.mock('../CompareStrongModeButton', () => ({
+  __esModule: true,
+  default: mockHostComponent('CompareStrongModeButton'),
+}))
 jest.mock(
   '~common/ui/MenuView',
   () => {
@@ -106,18 +110,20 @@ describe('CompareVersesTabScreen', () => {
     expect(present).toHaveBeenCalledTimes(1)
   })
 
-  it('exposes a Strong mode toggle that updates the comparison tab', () => {
+  it('exposes a Strong mode toggle directly in the header', () => {
     act(() => {
       renderer = create(<CompareVersesTabScreen compareAtom={{} as never} />)
     })
 
     const header = renderer.root.find(node => String(node.type) === 'Header')
-    const menu = header.props.rightComponent
-    expect(menu.props.actions).toEqual(
-      expect.arrayContaining([expect.objectContaining({ id: 'toggle-strong', state: 'off' })])
+    const strongButton = header.props.rightComponent.props.children[0]
+    const menu = header.props.rightComponent.props.children[1]
+    expect(strongButton.props.enabled).toBe(false)
+    expect(menu.props.actions).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: 'toggle-strong' })])
     )
 
-    act(() => menu.props.onPressAction({ nativeEvent: { event: 'toggle-strong' } }))
+    act(() => strongButton.props.onPress())
 
     const update = mockSetCompareTab.mock.calls.at(-1)?.[0]
     expect(
