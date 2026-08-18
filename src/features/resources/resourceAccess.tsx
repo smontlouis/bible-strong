@@ -71,7 +71,10 @@ import {
   type TimelineAccess,
 } from '~features/resources/timelineAccess'
 import {
+  createCommentaryAccess,
+  createHttpCommentaryAccess,
   firestoreCommentaryAccess,
+  localMhyCommentaryAccess,
   type CommentaryAccess,
 } from '~features/resources/commentaryAccess'
 import {
@@ -90,6 +93,7 @@ import {
 import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
 import { STRONG_BIBLE_FALLBACK_PRIORITY } from '~helpers/strongBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { withResourceSourceLogging } from '~features/resources/resourceSourceLogger'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
@@ -121,21 +125,34 @@ const configuredResourceArtifactBaseUrl = Constants.expoConfig?.extra?.resourceA
   | string
   | undefined
 configureDevelopmentResourceArtifactBaseUrl(configuredResourceArtifactBaseUrl)
+
+const offlineSource = <Adapter extends object>(resource: string, adapter: Adapter) =>
+  withResourceSourceLogging(adapter, { resource, source: 'offline' })
+const onlineSource = <Adapter extends object>(resource: string, adapter: Adapter) =>
+  withResourceSourceLogging(adapter, { resource, source: 'online' })
+
+const localBibleChapterSource = offlineSource('Bible', localBibleChapterAdapter)
 const onlineBibleChapterAdapter = resourceApiBaseUrl
-  ? createHttpBibleChapterAdapter({
-      baseUrl: resourceApiBaseUrl,
-      isOnline: async () => onlineManager.isOnline(),
-    })
+  ? onlineSource(
+      'Bible',
+      createHttpBibleChapterAdapter({
+        baseUrl: resourceApiBaseUrl,
+        isOnline: async () => onlineManager.isOnline(),
+      })
+    )
   : unavailableHttpBibleChapterAdapter
 const bibleChapterAdapter = createHybridBibleChapterAdapter({
-  offline: localBibleChapterAdapter,
+  offline: localBibleChapterSource,
   online: onlineBibleChapterAdapter,
 })
 const onlineNaveAccess = resourceApiBaseUrl
-  ? createHttpNaveAccess({
-      baseUrl: resourceApiBaseUrl,
-      isOnline: async () => onlineManager.isOnline(),
-    })
+  ? onlineSource(
+      'Nave',
+      createHttpNaveAccess({
+        baseUrl: resourceApiBaseUrl,
+        isOnline: async () => onlineManager.isOnline(),
+      })
+    )
   : unavailableHttpNaveAccess
 const remotelyReadableDictionaryLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
@@ -148,24 +165,30 @@ const remotelyReadableTimelineLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
 const onlineDictionaryAccess = resourceApiBaseUrl
-  ? createHttpDictionaryAccess({
-      baseUrl: resourceApiBaseUrl,
-      isOnline: async () => onlineManager.isOnline(),
-    })
+  ? onlineSource(
+      'Dictionary',
+      createHttpDictionaryAccess({
+        baseUrl: resourceApiBaseUrl,
+        isOnline: async () => onlineManager.isOnline(),
+      })
+    )
   : unavailableHttpDictionaryAccess
 const remotelyReadableStrongBibleVersions = new Set(
   resourceApiBaseUrl ? STRONG_BIBLE_FALLBACK_PRIORITY : []
 )
 const onlineStrongBibleAdapter = resourceApiBaseUrl
-  ? createHttpStrongBibleResourceAdapter({
-      baseUrl: resourceApiBaseUrl,
-      isOnline: async () => onlineManager.isOnline(),
-      bibleChapterAdapter,
-    })
+  ? onlineSource(
+      'Strong Bible index',
+      createHttpStrongBibleResourceAdapter({
+        baseUrl: resourceApiBaseUrl,
+        isOnline: async () => onlineManager.isOnline(),
+        bibleChapterAdapter,
+      })
+    )
   : localStrongBibleResourceAdapter
 const strongBibleAccess = createStrongBibleResourceAccess(
   createHybridStrongBibleResourceAdapter({
-    offline: localStrongBibleResourceAdapter,
+    offline: offlineSource('Strong Bible index', localStrongBibleResourceAdapter),
     online: onlineStrongBibleAdapter,
     remotelyReadableVersions: remotelyReadableStrongBibleVersions,
     isOnline: async () => onlineManager.isOnline(),
@@ -175,14 +198,17 @@ const remotelyReadableInterlinearLocales = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
 const onlineInterlinearBibleAdapter = resourceApiBaseUrl
-  ? createHttpInterlinearBibleResourceAdapter({
-      baseUrl: resourceApiBaseUrl,
-      isOnline: async () => onlineManager.isOnline(),
-      bibleChapterAdapter,
-    })
+  ? onlineSource(
+      'Interlinear Bible',
+      createHttpInterlinearBibleResourceAdapter({
+        baseUrl: resourceApiBaseUrl,
+        isOnline: async () => onlineManager.isOnline(),
+        bibleChapterAdapter,
+      })
+    )
   : localInterlinearBibleResourceAdapter
 const interlinearBibleAccess = createHybridInterlinearBibleResourceAdapter({
-  offline: localInterlinearBibleResourceAdapter,
+  offline: offlineSource('Interlinear Bible', localInterlinearBibleResourceAdapter),
   online: onlineInterlinearBibleAdapter,
   remotelyReadableLocales: remotelyReadableInterlinearLocales,
   isOnline: async () => onlineManager.isOnline(),
@@ -192,12 +218,15 @@ const lexiconBibleAccess = createLexiconBibleResourceAccess({
   interlinear: createHybridInterlinearLexiconAdapter(interlinearBibleAccess, bibleChapterAdapter),
 })
 const strongLexiconAccess = createHybridStrongLexiconAccess({
-  offline: localStrongLexiconAccess,
+  offline: offlineSource('Strong lexicon', localStrongLexiconAccess),
   online: resourceApiBaseUrl
-    ? createHttpStrongLexiconAccess({
-        baseUrl: resourceApiBaseUrl,
-        isOnline: async () => onlineManager.isOnline(),
-      })
+    ? onlineSource(
+        'Strong lexicon',
+        createHttpStrongLexiconAccess({
+          baseUrl: resourceApiBaseUrl,
+          isOnline: async () => onlineManager.isOnline(),
+        })
+      )
     : localStrongLexiconAccess,
   remotelyReadable: Boolean(resourceApiBaseUrl),
   isOnline: async () => onlineManager.isOnline(),
@@ -209,17 +238,23 @@ const remotelyReadableBibleVersions = new Set(
   resourceApiBaseUrl ? (__DEV__ ? getMobileBibleVersionIds() : PUBLIC_ONLINE_BIBLE_VERSION_IDS) : []
 )
 const onlineBibleSearchAccess = resourceApiBaseUrl
-  ? createHttpBibleSearchAccess({
-      baseUrl: resourceApiBaseUrl,
-      versions: [...remotelyReadableBibleVersions],
-      isOnline: async () => onlineManager.isOnline(),
-    })
+  ? onlineSource(
+      'Bible search',
+      createHttpBibleSearchAccess({
+        baseUrl: resourceApiBaseUrl,
+        versions: [...remotelyReadableBibleVersions],
+        isOnline: async () => onlineManager.isOnline(),
+      })
+    )
   : localBibleSearchAccess
 const onlineBibleReadingAccess = resourceApiBaseUrl
-  ? createHttpBibleReadingResourceAccess({
-      baseUrl: resourceApiBaseUrl,
-      isOnline: async () => onlineManager.isOnline(),
-    })
+  ? onlineSource(
+      'Bible reading resources',
+      createHttpBibleReadingResourceAccess({
+        baseUrl: resourceApiBaseUrl,
+        isOnline: async () => onlineManager.isOnline(),
+      })
+    )
   : {
       getPericopeAvailability: async () => ({ status: 'unsupported' as const }),
       loadPericope: async () => {
@@ -239,11 +274,28 @@ const onlineBibleReadingAccess = resourceApiBaseUrl
       },
     }
 const onlineTimelineAccess = resourceApiBaseUrl
-  ? createHttpTimelineAccess({
-      baseUrl: resourceApiBaseUrl,
-      isOnline: async () => onlineManager.isOnline(),
-    })
+  ? onlineSource(
+      'Timeline',
+      createHttpTimelineAccess({
+        baseUrl: resourceApiBaseUrl,
+        isOnline: async () => onlineManager.isOnline(),
+      })
+    )
   : localTimelineAccess
+const commentaryAccess = createCommentaryAccess({
+  local: offlineSource('Commentary', localMhyCommentaryAccess),
+  remote: resourceApiBaseUrl
+    ? onlineSource(
+        'Commentary',
+        createHttpCommentaryAccess({
+          baseUrl: resourceApiBaseUrl,
+          isOnline: async () => onlineManager.isOnline(),
+        })
+      )
+    : onlineSource('Commentary', firestoreCommentaryAccess),
+  isOnline: async () => onlineManager.isOnline(),
+  combineResults: !resourceApiBaseUrl,
+})
 
 export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleContent: createBibleContentAccess(
@@ -253,26 +305,26 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     strongLexiconAccess
   ),
   bibleReading: createHybridBibleReadingResourceAccess({
-    local: localBibleReadingResourceAccess,
+    local: offlineSource('Bible reading resources', localBibleReadingResourceAccess),
     online: onlineBibleReadingAccess,
     remotelyReadableVersions: remotelyReadableBibleVersions,
     isOnline: async () => onlineManager.isOnline(),
   }),
   bibleSearch: createHybridBibleSearchAccess({
-    offline: localBibleSearchAccess,
+    offline: offlineSource('Bible search', localBibleSearchAccess),
     online: onlineBibleSearchAccess,
     remotelyReadableVersions: remotelyReadableBibleVersions,
     isOnline: async () => onlineManager.isOnline(),
   }),
   dictionary: createHybridDictionaryAccess({
-    offline: localDictionaryAccess,
+    offline: offlineSource('Dictionary', localDictionaryAccess),
     online: onlineDictionaryAccess,
     remotelyReadableLanguages: remotelyReadableDictionaryLanguages,
     isOnline: async () => onlineManager.isOnline(),
   }),
   lexiconBible: lexiconBibleAccess,
   nave: createHybridNaveAccess({
-    offline: localNaveAccess,
+    offline: offlineSource('Nave', localNaveAccess),
     online: onlineNaveAccess,
     remotelyReadableLanguages: remotelyReadableNaveLanguages,
     isOnline: async () => onlineManager.isOnline(),
@@ -281,12 +333,12 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   strongBible: strongBibleAccess,
   interlinearBible: interlinearBibleAccess,
   timeline: createHybridTimelineAccess({
-    offline: localTimelineAccess,
+    offline: offlineSource('Timeline', localTimelineAccess),
     online: onlineTimelineAccess,
     remotelyReadableLanguages: remotelyReadableTimelineLanguages,
     isOnline: async () => onlineManager.isOnline(),
   }),
-  commentary: firestoreCommentaryAccess,
+  commentary: commentaryAccess,
   offlineCopies: { isAvailable: isLocalResourceAvailable },
   capabilities: {
     getOnlineAccess: identity =>
