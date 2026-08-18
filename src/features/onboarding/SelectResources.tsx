@@ -221,33 +221,33 @@ const SelectResources = (props: SelectResourcesProps) => {
             onPress={props.mode === 'preview' ? props.onClose : props.onComplete}
             hitSlop={8}
           >
-            {({ pressed }) => (
-              <HStack
-                px={11}
-                height={32}
-                borderRadius={16}
-                bg="rgba(255,255,255,0.92)"
-                alignItems="center"
-                gap={6}
-                style={{
-                  opacity: pressed ? 0.72 : 1,
-                  boxShadow: '0 4px 14px rgba(28,51,88,0.10)',
-                }}
-              >
-                <Text color="#68758C" fontSize={10} bold>
-                  {t(
-                    props.mode === 'preview'
-                      ? 'offlineSetup.closePreview'
-                      : 'offlineSetup.continueWithoutDownloads'
-                  )}
-                </Text>
-                <Feather
-                  name={props.mode === 'preview' ? 'x' : 'arrow-right'}
-                  size={14}
-                  color="#68758C"
-                />
-              </HStack>
-            )}
+            {({ pressed }) =>
+              props.mode === 'preview' ? (
+                <HStack
+                  px={11}
+                  height={32}
+                  borderRadius={16}
+                  bg="rgba(255,255,255,0.92)"
+                  alignItems="center"
+                  gap={6}
+                  style={{
+                    opacity: pressed ? 0.72 : 1,
+                    boxShadow: '0 4px 14px rgba(28,51,88,0.10)',
+                  }}
+                >
+                  <Text color="#68758C" fontSize={10} bold>
+                    {t('offlineSetup.closePreview')}
+                  </Text>
+                  <Feather name="x" size={14} color="#68758C" />
+                </HStack>
+              ) : (
+                <HStack px={8} minHeight={40} center style={{ opacity: pressed ? 0.6 : 1 }}>
+                  <Text fontSize={12}>
+                    {t('offlineSetup.continueWithoutDownloads').toUpperCase()}
+                  </Text>
+                </HStack>
+              )
+            }
           </Pressable>
         </AnimatedBox>
       ) : null}
