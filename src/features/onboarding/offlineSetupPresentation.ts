@@ -26,6 +26,8 @@ export type OfflineSetupFolderPresentation = OfflineSetupFolderVisual & {
 export type OfflineSetupFolderMergeOffset = { x: number; y: number }
 export type OfflineSetupHeroDirection = 'opening' | 'closing' | 'settled'
 
+export const OFFLINE_SETUP_HEADER_TOP_OFFSET = 66
+
 export const OFFLINE_SETUP_FOLDER_PRESENTATIONS: OfflineSetupFolderPresentation[] = [
   {
     id: 'read-bible',

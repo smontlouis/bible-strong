@@ -15,6 +15,7 @@ import type {
 } from '../offlineSetupPresets'
 import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
 import type { OfflineSetupPalette } from '../offlineSetupPalette'
+import { OFFLINE_SETUP_HEADER_TOP_OFFSET } from '../offlineSetupPresentation'
 import OfflineSetupResourceOption from './OfflineSetupResourceOption'
 
 type OfflineSetupFolderDetailProps = {
@@ -105,7 +106,7 @@ const OfflineSetupFolderDetail = ({
       <ScrollView
         contentContainerStyle={{
           paddingHorizontal: 20,
-          paddingTop: insets.top + 26,
+          paddingTop: insets.top + OFFLINE_SETUP_HEADER_TOP_OFFSET,
           paddingBottom: DETAIL_SHEET_HEIGHT + footerBottomInset + 24,
         }}
         showsVerticalScrollIndicator={false}

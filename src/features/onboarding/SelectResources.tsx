@@ -241,9 +241,9 @@ const SelectResources = (props: SelectResourcesProps) => {
                   <Feather name="x" size={14} color="#68758C" />
                 </HStack>
               ) : (
-                <HStack px={8} minHeight={40} center style={{ opacity: pressed ? 0.6 : 1 }}>
-                  <Text fontSize={12}>
-                    {t('offlineSetup.continueWithoutDownloads').toUpperCase()}
+                <HStack px={8} minHeight={40} center style={{ opacity: pressed ? 0.62 : 1 }}>
+                  <Text color="tertiary" fontSize={13}>
+                    {t('offlineSetup.continueWithoutDownloads')}
                   </Text>
                 </HStack>
               )

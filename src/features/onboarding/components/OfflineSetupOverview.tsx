@@ -8,6 +8,7 @@ import type { OfflineSetupFolderId, OfflineSetupFolderOptionIds } from '../offli
 import { OFFLINE_SETUP_MOTION } from '../offlineSetupMotion'
 import {
   OFFLINE_SETUP_FOLDER_PRESENTATIONS,
+  OFFLINE_SETUP_HEADER_TOP_OFFSET,
   type OfflineSetupFolderMergeOffset,
 } from '../offlineSetupPresentation'
 import type { OfflineSetupHeroTransition } from '../offlineSetupScene'
@@ -121,7 +122,7 @@ const OfflineSetupOverview = ({
         contentContainerStyle={{
           width: contentWidth,
           alignSelf: 'center',
-          paddingTop: safeAreaTop + 26,
+          paddingTop: safeAreaTop + OFFLINE_SETUP_HEADER_TOP_OFFSET,
           paddingBottom: OVERVIEW_FOOTER_HEIGHT + bottomInset + 28,
           overflow: 'visible',
         }}
