@@ -1,13 +1,12 @@
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { MenuView } from '~common/ui/MenuView'
-import { type SheetRef } from '~common/sheet'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Back from '~common/Back'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
@@ -37,7 +36,7 @@ interface Props {
   onPress: () => void
   onBackPress?: () => void
   onOpenInNewTab: () => void
-  searchModalRef: React.RefObject<SheetRef | null>
+  onSearchPress: () => void
 }
 
 const TimelineHeader = ({
@@ -49,16 +48,12 @@ const TimelineHeader = ({
   onPress,
   onBackPress,
   onOpenInNewTab,
-  searchModalRef,
+  onSearchPress,
 }: Props) => {
   const lang = useLanguage()
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const topInset = isFormSheet ? 0 : insets.top
-
-  const openSearch = () => {
-    searchModalRef.current?.present()
-  }
 
   return (
     <HeaderBox row topInset={topInset}>
@@ -75,9 +70,18 @@ const TimelineHeader = ({
         </Text>
       </Box>
       <Box center row>
+        <TouchableBox
+          center
+          height={60}
+          width={44}
+          onPress={onSearchPress}
+          accessibilityRole="button"
+          accessibilityLabel={t('Recherche')}
+        >
+          <FeatherIcon name="search" size={19} />
+        </TouchableBox>
         <MenuView
           actions={[
-            { id: 'search', title: t('Recherche'), image: 'magnifyingglass' },
             { id: 'details', title: t('Détails'), image: 'info.circle' },
             {
               id: 'open-tab',
@@ -87,9 +91,6 @@ const TimelineHeader = ({
           ]}
           onPressAction={({ nativeEvent }) => {
             switch (nativeEvent.event) {
-              case 'search':
-                openSearch()
-                break
               case 'details':
                 onPress()
                 break
@@ -99,7 +100,7 @@ const TimelineHeader = ({
             }
           }}
         >
-          <Box row center height={60} width={60}>
+          <Box row center height={60} width={44}>
             <Icon.Feather name="more-vertical" size={18} />
           </Box>
         </MenuView>

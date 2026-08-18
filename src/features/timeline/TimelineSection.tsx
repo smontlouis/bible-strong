@@ -13,10 +13,10 @@ import Line from './Line'
 import NextSectionImage from './NextSectionImage'
 import PrevSectionImage from './PrevSectionImage'
 import ScrollView from './ScrollView'
-import SearchInTimelineModal from './SearchInTimelineModal'
 import SectionDetailsModal from './SectionDetailsModal'
 import TimelineEvent from './TimelineEvent'
 import TimelineHeader from './TimelineHeader'
+import TimelineSearchOverlay from './TimelineSearchOverlay'
 import { useTimeline } from './timeline.hooks'
 import { ShallowTimelineSection, TimelineSection as TimelineSectionProps } from './types'
 import { useTimelineDetails } from './TimelineResourceBoundary'
@@ -66,7 +66,7 @@ const Timeline = ({
 }: Props) => {
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<SheetRef>(null)
-  const searchModalRef = React.useRef<SheetRef>(null)
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false)
   const openInNewTab = useOpenInNewTab()
   const lang = useLanguage()
 
@@ -109,7 +109,7 @@ const Timeline = ({
         onPress={onTimelineDetailsOpen}
         onBackPress={onBackPress}
         onOpenInNewTab={openSectionInNewTab}
-        searchModalRef={searchModalRef}
+        onSearchPress={() => setIsSearchOpen(true)}
       />
 
       {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}
@@ -200,7 +200,9 @@ const Timeline = ({
           interval,
         }}
       />
-      <SearchInTimelineModal modalRef={searchModalRef} />
+      {isSearchOpen && (
+        <TimelineSearchOverlay isFormSheet={isFormSheet} onClose={() => setIsSearchOpen(false)} />
+      )}
     </Box>
   )
 }
