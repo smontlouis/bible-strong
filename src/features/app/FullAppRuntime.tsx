@@ -134,6 +134,14 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                     <Stack screenOptions={{ headerShown: false }}>
                       <Stack.Screen name="index" />
                       <Stack.Screen
+                        name="(timeline-search)"
+                        options={createFormSheetOptions(theme, {
+                          contentStyle: { bottom: 0 },
+                          sheetAllowedDetents: [1],
+                          sheetExpandsWhenScrolledToEdge: true,
+                        })}
+                      />
+                      <Stack.Screen
                         name="(explore)"
                         options={createFormSheetOptions(theme, {
                           contentStyle: { bottom: 0 },

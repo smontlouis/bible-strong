@@ -4,29 +4,25 @@ import { useAtomValue } from 'jotai/react'
 import React, { useState } from 'react'
 import { ActivityIndicator, FlatList, Keyboard } from 'react-native'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTranslation } from 'react-i18next'
 
 import Empty from '~common/Empty'
+import Header from '~common/Header'
 import { LinkBox } from '~common/Link'
 import SearchInput from '~common/SearchInput'
 import Border from '~common/ui/Border'
-import Box, { TouchableBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
+import Box from '~common/ui/Box'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { TimelineEventSummary } from '~features/resources/timelineAccess'
+import { IS_FORM_SHEET } from '~helpers/constants'
 import useDebounce from '~helpers/useDebounce'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { getTimelineImageUri } from './timelineImage'
-
-interface Props {
-  isFormSheet?: boolean
-  onClose: () => void
-}
 
 const TimelineSearchResultItem = ({
   item,
@@ -63,10 +59,9 @@ const TimelineSearchResultItem = ({
   )
 }
 
-const TimelineSearchOverlay = ({ isFormSheet = false, onClose }: Props) => {
+const TimelineSearchScreen = () => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
-  const insets = useSafeAreaInsets()
   const resources = useResourceAccess()
   const language = useAtomValue(resourcesLanguageAtom).TIMELINE
   const [searchValue, setSearchValue] = useState('')
@@ -80,11 +75,6 @@ const TimelineSearchOverlay = ({ isFormSheet = false, onClose }: Props) => {
     networkMode: 'always',
   })
   const results = searchQuery.data?.status === 'available' ? searchQuery.data.details : []
-
-  const close = () => {
-    Keyboard.dismiss()
-    onClose()
-  }
 
   const onOpenEvent = (event: TimelineEventSummary) => {
     Keyboard.dismiss()
@@ -116,48 +106,32 @@ const TimelineSearchOverlay = ({ isFormSheet = false, onClose }: Props) => {
   }
 
   return (
-    <Box absoluteFill zIndex={100} bg="reverse">
-      <KeyboardAvoidingView automaticOffset behavior="padding" style={{ flex: 1 }}>
-        <Box
-          row
-          alignItems="center"
-          gap={8}
-          px={16}
-          paddingTop={(isFormSheet ? 12 : insets.top) + 12}
-          pb={12}
-          borderBottomWidth={1}
-          borderColor="border"
-        >
-          <Box flex>
-            <SearchInput
-              autoFocus
-              value={searchValue}
-              onChangeText={setSearchValue}
-              placeholder={t('Rechercher un événement dans la Bible')}
-              onDelete={() => setSearchValue('')}
-              returnKeyType="search"
-            />
-          </Box>
-          <TouchableBox
-            center
-            size={44}
-            onPress={close}
-            accessibilityRole="button"
-            accessibilityLabel={t('Fermer')}
-          >
-            <FeatherIcon name="x" size={24} />
-          </TouchableBox>
+    <FormSheetScreen isFormSheet={IS_FORM_SHEET} flex={1} bg="reverse">
+      <Header title={t('Recherche')} hasBackButton isModal={IS_FORM_SHEET} background>
+        <Box px={16} pb={12}>
+          <SearchInput
+            autoFocus
+            value={searchValue}
+            onChangeText={setSearchValue}
+            placeholder={t('Rechercher un événement dans la Bible')}
+            onDelete={() => setSearchValue('')}
+            returnKeyType="search"
+          />
         </Box>
+      </Header>
 
+      <KeyboardAvoidingView
+        automaticOffset
+        behavior={IS_FORM_SHEET ? undefined : 'padding'}
+        style={{ flex: 1 }}
+      >
         <FlatList
           data={results}
           keyExtractor={item => item.slug}
-          keyboardDismissMode="interactive"
+          keyboardDismissMode={IS_FORM_SHEET ? 'interactive' : 'on-drag'}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: insets.bottom + 16,
-          }}
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={{ flexGrow: 1 }}
           ItemSeparatorComponent={() => <Border />}
           ListHeaderComponent={
             results.length > 0 ? (
@@ -174,8 +148,8 @@ const TimelineSearchOverlay = ({ isFormSheet = false, onClose }: Props) => {
           renderItem={({ item }) => <TimelineSearchResultItem item={item} onPress={onOpenEvent} />}
         />
       </KeyboardAvoidingView>
-    </Box>
+    </FormSheetScreen>
   )
 }
 
-export default TimelineSearchOverlay
+export default TimelineSearchScreen

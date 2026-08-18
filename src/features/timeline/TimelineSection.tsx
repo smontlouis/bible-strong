@@ -6,6 +6,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import useLanguage from '~helpers/useLanguage'
 import { getLegacyLocalizedField } from '~helpers/languageUtils'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import CurrentSectionImage from './CurrentSectionImage'
 import CurrentYear from './CurrentYear'
 import Datebar from './Datebar'
@@ -16,7 +17,6 @@ import ScrollView from './ScrollView'
 import SectionDetailsModal from './SectionDetailsModal'
 import TimelineEvent from './TimelineEvent'
 import TimelineHeader from './TimelineHeader'
-import TimelineSearchOverlay from './TimelineSearchOverlay'
 import { useTimeline } from './timeline.hooks'
 import { ShallowTimelineSection, TimelineSection as TimelineSectionProps } from './types'
 import { useTimelineDetails } from './TimelineResourceBoundary'
@@ -66,8 +66,8 @@ const Timeline = ({
 }: Props) => {
   const isReady = useSharedValue(0)
   const modalRef = React.useRef<SheetRef>(null)
-  const [isSearchOpen, setIsSearchOpen] = React.useState(false)
   const openInNewTab = useOpenInNewTab()
+  const pushRouteOnce = usePushRouteOnce()
   const lang = useLanguage()
 
   const timeline = useTimelineDetails()
@@ -109,7 +109,7 @@ const Timeline = ({
         onPress={onTimelineDetailsOpen}
         onBackPress={onBackPress}
         onOpenInNewTab={openSectionInNewTab}
-        onSearchPress={() => setIsSearchOpen(true)}
+        onSearchPress={() => pushRouteOnce({ pathname: '/timeline-search' })}
       />
 
       {!isFirst && <PrevSectionImage x={x} prevEvent={prevEvent} />}
@@ -200,9 +200,6 @@ const Timeline = ({
           interval,
         }}
       />
-      {isSearchOpen && (
-        <TimelineSearchOverlay isFormSheet={isFormSheet} onClose={() => setIsSearchOpen(false)} />
-      )}
     </Box>
   )
 }
