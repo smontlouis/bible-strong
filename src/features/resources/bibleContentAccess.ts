@@ -145,6 +145,41 @@ type BibleContentAccessDependencies = {
 }
 
 export const localBibleChapterAdapter: BibleChapterAdapter = {
+  async loadVerseTexts(version, verseKeys, shouldCancel) {
+    try {
+      const texts = await getMultipleVerses(version, verseKeys, shouldCancel)
+      if (Object.keys(texts).length > 0) {
+        const metadata = await getBibleVersionMetadata(version)
+        return {
+          status: 'available',
+          texts,
+          ...(metadata?.textRevision ? { textRevision: metadata.textRevision } : {}),
+          ...(metadata?.textSha256 ? { textSha256: metadata.textSha256 } : {}),
+        }
+      }
+      if (await getIfVersionNeedsDownload(version)) {
+        return {
+          status: 'unavailable',
+          reason: 'publication-not-available',
+          recoveries: ['acquire-offline-copy'],
+        }
+      }
+      return { status: 'unavailable', reason: 'verses-not-available' }
+    } catch (error) {
+      if (error instanceof BibleLoadingError && error.type === 'BIBLE_NOT_FOUND') {
+        return {
+          status: 'unavailable',
+          reason: 'publication-not-available',
+          recoveries: ['acquire-offline-copy'],
+        }
+      }
+      return {
+        status: 'unavailable',
+        reason: 'offline-copy-invalid',
+        recoveries: ['manage-offline-copies', 'reset-offline-store'],
+      }
+    }
+  },
   async loadChapter(version, book, chapter) {
     try {
       const verses = await getChapterVerses(version, book, chapter)
@@ -234,6 +269,7 @@ const unavailableReasonToErrorType = (
     case 'publication-not-available':
       return 'BIBLE_NOT_FOUND'
     case 'chapter-not-available':
+    case 'verses-not-available':
       return 'CHAPTER_NOT_FOUND'
     case 'offline-copy-invalid':
       return 'OFFLINE_COPY_INVALID'

@@ -9,6 +9,8 @@ import {
   BibleVersionPath,
   BibleSearchQuery,
   BibleSearchResponseDto,
+  BibleVerseTextsDto,
+  BibleVerseTextsQuery,
 } from '../../../src/features/resources/bibleChapterContract'
 import {
   NaveLanguagePath,
@@ -111,6 +113,16 @@ const BibleApi = HttpApiGroup.make('bibles')
     HttpApiEndpoint.get('getBibleChapter', '/v1/bibles/:version/books/:book/chapters/:chapter')
       .setPath(BibleChapterRequest)
       .addSuccess(BibleChapterDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getBibleVerseTexts', '/v1/bibles/:version/verses')
+      .setPath(BibleVersionPath)
+      .setUrlParams(BibleVerseTextsQuery)
+      .addSuccess(BibleVerseTextsDto)
       .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })

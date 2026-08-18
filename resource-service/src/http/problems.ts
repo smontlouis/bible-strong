@@ -24,6 +24,7 @@ export class ResourceNotFoundProblem extends Schema.TaggedError<ResourceNotFound
     code: Schema.Literal(
       'BIBLE_UNSUPPORTED',
       'BIBLE_CHAPTER_NOT_FOUND',
+      'BIBLE_VERSES_NOT_FOUND',
       'NAVE_UNSUPPORTED',
       'NAVE_TOPIC_NOT_FOUND',
       'DICTIONARY_UNSUPPORTED',

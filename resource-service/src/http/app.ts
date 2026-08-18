@@ -4,9 +4,11 @@ import { Effect, Layer } from 'effect'
 import {
   ActiveBiblePublicationUnavailable,
   BibleChapterNotFound,
+  BibleVerseSelectionNotFound,
   BibleChapterRepository,
   BibleChapterRepositoryFailure,
   readBibleChapter,
+  readBibleVerseTexts,
   readBiblePericopes,
   readBibleCoverage,
   UnsupportedBibleVersion,
@@ -101,6 +103,7 @@ import {
   type TimelineRepositoryService,
 } from '../domain/timeline'
 import { HealthResponse, ResourceApi } from './api'
+import { parseBibleVerseKey } from '../../../src/features/resources/bibleChapterContract'
 import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
@@ -127,6 +130,7 @@ const toHttpProblem = (
     | UnsupportedBibleVersion
     | ActiveBiblePublicationUnavailable
     | BibleChapterNotFound
+    | BibleVerseSelectionNotFound
     | BibleChapterRepositoryFailure
     | ActiveBibleSearchPublicationUnavailable
     | BibleSearchRepositoryFailure
@@ -169,6 +173,15 @@ const toHttpProblem = (
         ...problemFields(requestId, 'This chapter does not exist in the active publication.'),
         status: 404,
         code: 'BIBLE_CHAPTER_NOT_FOUND',
+      })
+    case 'BibleVerseSelectionNotFound':
+      return new ResourceNotFoundProblem({
+        ...problemFields(
+          requestId,
+          'None of the requested verses exist in the active publication.'
+        ),
+        status: 404,
+        code: 'BIBLE_VERSES_NOT_FOUND',
       })
     case 'ActiveBiblePublicationUnavailable':
       return new ResourceUnavailableProblem({
@@ -397,6 +410,30 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
           etag,
           'x-resource-revision': response.resource.revision,
         }
+        if (etagMatches(request.headers['if-none-match'], etag)) {
+          return HttpServerResponse.empty({ status: 304, headers })
+        }
+        yield* addResponseHeaders(headers)
+        return response
+      })
+    })
+    .handle('getBibleVerseTexts', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      const references = [...new Set(urlParams.references.split(','))]
+      const locations = references.map(reference => parseBibleVerseKey(reference)!)
+
+      return Effect.gen(function* () {
+        yield* addResponseHeaders({ 'x-request-id': requestId })
+        const response = yield* readBibleVerseTexts({
+          versionId: path.version,
+          locations,
+        }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId)))
+        const etag = yield* representationEtag(
+          response.resource.versionId,
+          response.resource.revision,
+          references.join(',')
+        )
+        const headers = { etag, 'x-resource-revision': response.resource.revision }
         if (etagMatches(request.headers['if-none-match'], etag)) {
           return HttpServerResponse.empty({ status: 304, headers })
         }
@@ -826,6 +863,8 @@ export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
 )
 
 const unavailableRepository: BibleChapterRepositoryService = {
+  findActiveVerseTexts: input =>
+    Effect.fail(new ActiveBiblePublicationUnavailable({ versionId: input.versionId })),
   findActiveChapter: input =>
     Effect.fail(new ActiveBiblePublicationUnavailable({ versionId: input.versionId })),
   findActiveCoverage: versionId =>

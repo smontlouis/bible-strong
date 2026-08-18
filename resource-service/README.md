@@ -115,6 +115,7 @@ The local Effect HttpApi exposes Bible reading, Strong Bible indexes, BHG interl
 the Nave operations consumed by the app:
 
 - `GET /v1/bibles/:version/books/:book/chapters/:chapter`
+- `GET /v1/bibles/:version/verses?references=1-1-1,1-1-2,19-10-3`
 - `GET /v1/bibles/:version/coverage`
 - `GET /v1/bibles/:version/pericopes`
 - `GET /v1/strong-bibles/:version/coverage`

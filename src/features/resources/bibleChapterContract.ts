@@ -10,6 +10,43 @@ export class BibleVersionPath extends Schema.Class<BibleVersionPath>('BibleVersi
   version: BibleChapterRequest.fields.version,
 }) {}
 
+export type BibleVerseLocation = { book: number; chapter: number; verse: number }
+
+export const parseBibleVerseKey = (value: string): BibleVerseLocation | undefined => {
+  const match = /^(\d+)-(\d+)-(\d+)$/.exec(value)
+  if (!match) return undefined
+  const [, bookValue, chapterValue, verseValue] = match
+  const book = Number(bookValue)
+  const chapter = Number(chapterValue)
+  const verse = Number(verseValue)
+  return Number.isInteger(book) &&
+    Number.isInteger(chapter) &&
+    Number.isInteger(verse) &&
+    book >= 1 &&
+    book <= 77 &&
+    chapter >= 1 &&
+    chapter <= 200 &&
+    verse >= 0 &&
+    verse <= 200
+    ? { book, chapter, verse }
+    : undefined
+}
+
+export class BibleVerseTextsQuery extends Schema.Class<BibleVerseTextsQuery>(
+  'BibleVerseTextsQuery'
+)({
+  references: Schema.String.pipe(
+    Schema.filter(value => {
+      const references = value.split(',')
+      return references.length >= 1 &&
+        references.length <= 200 &&
+        references.every(reference => parseBibleVerseKey(reference) !== undefined)
+        ? undefined
+        : 'Expected 1 to 200 comma-separated Bible verse keys'
+    })
+  ),
+}) {}
+
 export class BibleSearchQuery extends Schema.Class<BibleSearchQuery>('BibleSearchQuery')({
   q: Schema.NonEmptyString,
   book: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 77))),
@@ -102,6 +139,18 @@ export class BibleChapterDto extends Schema.Class<BibleChapterDto>('BibleChapter
   book: Schema.Int.pipe(Schema.positive()),
   chapter: Schema.Int.pipe(Schema.positive()),
   verses: Schema.Array(BibleChapterVerseDto),
+}) {}
+
+export class BibleVerseTextDto extends Schema.Class<BibleVerseTextDto>('BibleVerseTextDto')({
+  book: Schema.Int.pipe(Schema.between(1, 77)),
+  chapter: Schema.Int.pipe(Schema.between(1, 200)),
+  number: Schema.Int.pipe(Schema.nonNegative()),
+  text: Schema.String,
+}) {}
+
+export class BibleVerseTextsDto extends Schema.Class<BibleVerseTextsDto>('BibleVerseTextsDto')({
+  resource: BibleTextRevisionDto,
+  verses: Schema.Array(BibleVerseTextDto),
 }) {}
 
 export class BibleVersionCoverageDto extends Schema.Class<BibleVersionCoverageDto>(

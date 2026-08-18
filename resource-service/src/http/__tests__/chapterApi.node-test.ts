@@ -7,6 +7,7 @@ import {
   ActiveBiblePublicationUnavailable,
   BibleChapterNotFound,
   BibleChapterRepositoryFailure,
+  BibleVerseSelectionNotFound,
   type BibleChapterRepositoryService,
 } from '../../domain/bibleChapter'
 import { makeResourceWebHandler } from '../app'
@@ -32,6 +33,26 @@ const chapter = {
 } as const
 
 const repository: BibleChapterRepositoryService = {
+  findActiveVerseTexts: input =>
+    input.locations.every(location => location.book !== chapter.book)
+      ? Effect.fail(new BibleVerseSelectionNotFound(input))
+      : Effect.succeed({
+          versionId: input.versionId,
+          revision: chapter.revision,
+          textRevision: chapter.textRevision,
+          verses: [...input.locations]
+            .sort(
+              (left, right) =>
+                left.book - right.book || left.chapter - right.chapter || left.verse - right.verse
+            )
+            .flatMap(location =>
+              location.book === chapter.book && location.chapter === chapter.chapter
+                ? chapter.verses
+                    .filter(verse => verse.number === location.verse)
+                    .map(({ number, text }) => ({ ...location, verse: number, text }))
+                : []
+            ),
+        }),
   findActiveChapter: input => {
     if (input.chapter === 2) {
       return Effect.fail(new BibleChapterNotFound(input))
@@ -123,6 +144,58 @@ describe('v1 Bible chapter API', () => {
       assert.equal(conditional.status, 304)
       assert.equal(conditional.headers.get('etag'), etag)
       assert.equal(await conditional.text(), '')
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('returns only the requested verse texts in canonical order', async () => {
+    const web = makeResourceWebHandler(repository)
+    try {
+      const response = await web.handler(
+        request('/v1/bibles/LSG/verses?references=1-1-2,1-1-1,1-1-2')
+      )
+
+      assert.equal(response.status, 200)
+      assert.equal(response.headers.get('x-resource-revision'), chapter.revision)
+      assert.deepEqual(await response.json(), {
+        resource: {
+          kind: 'bible-text',
+          versionId: 'LSG',
+          revision: chapter.revision,
+          textRevision: chapter.textRevision,
+        },
+        verses: [
+          { book: 1, chapter: 1, number: 1, text: 'Au commencement' },
+          { book: 1, chapter: 1, number: 2, text: 'La terre était informe' },
+        ],
+      })
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('rejects malformed verse selections at the HTTP boundary', async () => {
+    const web = makeResourceWebHandler(repository)
+    try {
+      const response = await web.handler(request('/v1/bibles/LSG/verses?references=1-1-1,1-1--2'))
+      const body = (await response.json()) as Record<string, unknown>
+
+      assert.equal(response.status, 400)
+      assert.equal(body.code, 'INVALID_RESOURCE_REQUEST')
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('reports a missing cross-chapter verse selection without calling it a missing chapter', async () => {
+    const web = makeResourceWebHandler(repository)
+    try {
+      const response = await web.handler(request('/v1/bibles/LSG/verses?references=2-1-1,3-1-1'))
+      const body = (await response.json()) as Record<string, unknown>
+
+      assert.equal(response.status, 404)
+      assert.equal(body.code, 'BIBLE_VERSES_NOT_FOUND')
     } finally {
       await web.dispose()
     }

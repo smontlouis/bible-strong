@@ -90,6 +90,15 @@ describe('Complete LSG API', { skip: !bundlePath }, () => {
         )
         assert.equal(mobileChapter.verses[0]?.TextRevision, validated.manifest.revision)
       }
+      const selectedTexts = await mobileHttp.loadVerseTexts?.('LSG', ['1-1-1', '19-10-1'])
+      assert.equal(selectedTexts?.status, 'available')
+      if (selectedTexts?.status === 'available') {
+        assert.deepEqual(selectedTexts.texts, {
+          '1-1-1': validated.canonical.verses['1']?.['1']?.['1']?.text,
+          '19-10-1': validated.canonical.verses['19']?.['10']?.['1']?.text,
+        })
+        assert.equal(selectedTexts.textRevision, validated.manifest.revision)
+      }
       const mobileCoverage = await mobileHttp.loadCoverage('LSG')
       assert.equal(mobileCoverage.status, 'available')
       if (mobileCoverage.status === 'available') {

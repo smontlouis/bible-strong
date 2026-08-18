@@ -205,6 +205,87 @@ describe('HTTP Bible chapter adapter', () => {
     )
   })
 
+  it('loads only requested verse texts from the lightweight HTTP route', async () => {
+    const fetcher = jest.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          resource: { kind: 'bible-text', versionId: 'LSG', revision: 'lsg-r1' },
+          verses: [
+            { book: 1, chapter: 1, number: 2, text: 'La terre était informe' },
+            { book: 2, chapter: 1, number: 1, text: 'Voici les noms' },
+          ],
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } }
+      )
+    )
+    const http = createHttpBibleChapterAdapter({
+      baseUrl: 'http://127.0.0.1:8787',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(
+      loadVerseTextsFromChapterAdapter(http, 'LSG', ['1-1-2', '2-1-1', '1-1-2'])
+    ).resolves.toEqual({
+      '1-1-2': 'La terre était informe',
+      '2-1-1': 'Voici les noms',
+    })
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://127.0.0.1:8787/v1/bibles/LSG/verses?references=1-1-2,2-1-1',
+      expect.objectContaining({ headers: { accept: 'application/json' } })
+    )
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejects the complete selection when a later 200-reference batch fails', async () => {
+    const references = Array.from({ length: 201 }, (_, index) => `1-1-${index % 200}`)
+    references[200] = '2-1-1'
+    const fetcher = jest
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            resource: { kind: 'bible-text', versionId: 'LSG', revision: 'lsg-r1' },
+            verses: [{ book: 1, chapter: 1, number: 1, text: 'Premier lot' }],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ code: 'RESOURCE_INTERNAL_FAILURE' }), {
+          status: 500,
+          headers: { 'content-type': 'application/json' },
+        })
+      )
+    const http = createHttpBibleChapterAdapter({
+      baseUrl: 'http://127.0.0.1:8787',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(http.loadVerseTexts?.('LSG', references)).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'temporary-unavailable',
+    })
+    expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+
+  it('prefers an exact installed verse selection before the remote route', async () => {
+    const offline = adapter({ status: 'available', verses })
+    offline.loadVerseTexts = jest.fn().mockResolvedValue({
+      status: 'available',
+      texts: { '1-1-1': 'Au commencement' },
+    })
+    const online = adapter({ status: 'available', verses })
+    online.loadVerseTexts = jest.fn()
+    const hybrid = createHybridBibleChapterAdapter({ offline, online })
+
+    await expect(loadVerseTextsFromChapterAdapter(hybrid, 'LSG', ['1-1-1'])).resolves.toEqual({
+      '1-1-1': 'Au commencement',
+    })
+    expect(online.loadVerseTexts).not.toHaveBeenCalled()
+  })
+
   it('decodes remote canon coverage for zero-copy navigation', async () => {
     const fetcher = jest.fn().mockResolvedValue(
       new Response(
