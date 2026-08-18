@@ -113,10 +113,10 @@ export const getVersionCatalogSections = ({
       return groupedVersions
     }, new Map<BibleVersionLanguage, VersionCatalogItem[]>())
     const languages = [...versionsByLanguage.keys()].sort((left, right) => {
-      if (left === uiLanguage) return -1
-      if (right === uiLanguage) return 1
       if (left === 'he-grc') return -1
       if (right === 'he-grc') return 1
+      if (left === uiLanguage) return -1
+      if (right === uiLanguage) return 1
       return labels.languages[left].localeCompare(labels.languages[right], uiLanguage, {
         sensitivity: 'base',
       })

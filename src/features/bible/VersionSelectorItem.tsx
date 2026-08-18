@@ -1,6 +1,6 @@
 import React from 'react'
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Alert, Linking, TouchableOpacity } from 'react-native'
+import { Alert, Linking, Platform, TouchableOpacity } from 'react-native'
 
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
@@ -41,6 +41,10 @@ import {
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
 import useConnection from '~helpers/useConnection'
+import {
+  getBibleOfflineDetailsQueryKey,
+  getStrongOfflineDetailsQueryKey,
+} from './VersionSelectorSheet/bibleOfflineDetailsQueryKeys'
 
 const getVersionDownloadQueryKey = (
   versionId: string,
@@ -342,11 +346,15 @@ const VersionSelectorItem = ({
       downloadCompletionSignal,
     ],
     queryFn: () => resources.strongBible.getAvailability(strongVersionId!),
-    enabled: requiresStrong,
+    enabled: requiresStrong || Boolean(onOpenOfflineDetails && strongVersionId),
     placeholderData: keepPreviousData,
   })
   const strongSelectionAvailability: StrongBibleSidecarAvailability | undefined =
     strongSelectionQuery.data
+  const strongPresent =
+    strongSelectionAvailability?.status === 'available' ||
+    strongSelectionAvailability?.status === 'incompatible' ||
+    strongSelectionAvailability?.status === 'corrupt'
   const strongQueueState = useDownloadItemStatus(
     isStrongCapableBibleVersion(version.id)
       ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version.id })
@@ -380,6 +388,37 @@ const VersionSelectorItem = ({
     if (version.sourceUrl) {
       Linking.openURL(version.sourceUrl)
     }
+  }
+
+  const openOfflineDetails = async () => {
+    if (!onOpenOfflineDetails) return
+
+    const bibleInstalled =
+      versionNeedsDownload === undefined || versionAvailabilityQuery.isPlaceholderData
+        ? await resources.offlineCopies.isAvailable({ kind: 'bible', versionId: version.id })
+        : !versionNeedsDownload
+    const strongAvailability = strongVersionId
+      ? strongSelectionAvailability && !strongSelectionQuery.isPlaceholderData
+        ? strongSelectionAvailability
+        : await resources.strongBible.getAvailability(strongVersionId)
+      : undefined
+
+    queryClient.setQueryData(
+      getBibleOfflineDetailsQueryKey(version.id, installedVersionsSignal, downloadCompletionSignal),
+      bibleInstalled
+    )
+    if (strongVersionId && strongAvailability) {
+      queryClient.setQueryData(
+        getStrongOfflineDetailsQueryKey(
+          strongVersionId,
+          installedVersionsSignal,
+          downloadCompletionSignal
+        ),
+        strongAvailability
+      )
+    }
+
+    onOpenOfflineDetails(version)
   }
 
   const versionColor = isSelected ? 'primary' : 'default'
@@ -561,15 +600,37 @@ const VersionSelectorItem = ({
                   <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
                 </Box>
               ) : versionNeedsDownload === false ? (
-                <Box width={30} center>
+                <Box width={30} height={28} center position="relative" overflow="visible">
                   <FeatherIcon name="cloud" size={18} color="primary" />
+                  {strongPresent && (
+                    <Box
+                      position="absolute"
+                      right={-1}
+                      bottom={-2}
+                      size={14}
+                      borderRadius={7}
+                      bg="primary"
+                      center
+                    >
+                      <Text
+                        color="reverse"
+                        fontSize={9}
+                        bold
+                        style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}
+                      >
+                        S
+                      </Text>
+                    </Box>
+                  )}
                 </Box>
               ) : null}
             </Box>
           </TouchableOpacity>
           <ActionButton
             accessibilityLabel={t('bibleOfflineDetails.manage', { bible: version.id })}
-            onPress={() => onOpenOfflineDetails(version)}
+            onPress={() => {
+              void openOfflineDetails()
+            }}
           >
             <FeatherIcon name="more-horizontal" size={20} color="default" />
           </ActionButton>

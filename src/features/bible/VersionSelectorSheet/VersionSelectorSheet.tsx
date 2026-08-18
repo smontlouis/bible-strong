@@ -36,6 +36,7 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
 
   const handleVersionSelect = (vers: VersionCode) => {
     if (!actions) return
+    sheetRef.current?.dismiss()
 
     if (parallelVersionIndex === undefined) {
       actions.setSelectedVersion(vers)
@@ -51,7 +52,6 @@ const VersionSelectorSheet = ({ sheetRef }: VersionSelectorSheetProps) => {
     } else {
       actions.setParallelVersion(vers, parallelVersionIndex)
     }
-    sheetRef.current?.dismiss()
   }
 
   const selectedVersion =

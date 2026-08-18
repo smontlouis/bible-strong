@@ -3,15 +3,16 @@ import { useTheme } from '@emotion/react'
 import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import React from 'react'
-import { Alert } from 'react-native'
+import { Alert, Platform, Switch } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
-import { Sheet, SheetHeader, SheetScrollView, type SheetRef } from '~common/sheet'
+import { Sheet, SheetScrollView, type SheetRef } from '~common/sheet'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
 import Text from '~common/ui/Text'
+import { getBooksForCanon } from '~helpers/bibleBookCatalog'
 import type { Version } from '~helpers/bibleVersions'
 import {
   createBibleDownloadItem,
@@ -39,58 +40,15 @@ import {
   getStrongOfflineDetailsQueryKey,
 } from './bibleOfflineDetailsQueryKeys'
 
-const Detail = ({ label, value }: { label: string; value: string }) => (
-  <Box flex>
-    <Text fontSize={11} color="tertiary">
-      {label}
-    </Text>
-    <Text fontSize={14} mt={2}>
-      {value}
-    </Text>
-  </Box>
-)
+const megabyteFormatters = new Map<string, Intl.NumberFormat>()
 
-const StatusRow = ({
-  label,
-  status,
-}: {
-  label: string
-  status: 'installed' | 'not-installed' | 'checking' | 'problem'
-}) => {
-  const { t } = useTranslation()
-  const installed = status === 'installed'
-  const problem = status === 'problem'
-
-  return (
-    <Box row alignItems="center" py={8}>
-      <FeatherIcon
-        name={
-          installed
-            ? 'check-circle'
-            : problem
-              ? 'alert-circle'
-              : status === 'checking'
-                ? 'clock'
-                : 'circle'
-        }
-        size={17}
-        color={installed ? 'success' : problem ? 'quart' : 'tertiary'}
-      />
-      <Text ml={10} fontSize={14}>
-        {label}
-      </Text>
-      <Box flex />
-      <Text fontSize={12} color="tertiary">
-        {status === 'checking'
-          ? t('bibleOfflineDetails.checking')
-          : problem
-            ? t('bibleOfflineDetails.needsRepair')
-            : installed
-              ? t('bibleOfflineDetails.installed')
-              : t('bibleOfflineDetails.notDownloaded')}
-      </Text>
-    </Box>
-  )
+const formatMegabyteValue = (bytes: number, language: string) => {
+  let formatter = megabyteFormatters.get(language)
+  if (!formatter) {
+    formatter = new Intl.NumberFormat(language, { maximumFractionDigits: 1 })
+    megabyteFormatters.set(language, formatter)
+  }
+  return formatter.format(bytes / 1_000_000)
 }
 
 type Props = {
@@ -116,6 +74,12 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
     : undefined
   const bibleQueue = useDownloadItemStatus(bibleId)
   const strongQueue = useDownloadItemStatus(strongId)
+  const [strongChoice, setStrongChoice] = React.useState({
+    versionId,
+    enabled: Boolean(strongVersionId),
+  })
+  const includeStrong =
+    strongChoice.versionId === versionId ? strongChoice.enabled : Boolean(strongVersionId)
 
   const bibleAvailability = useQuery({
     queryKey: getBibleOfflineDetailsQueryKey(versionId!, installedSignal, completionSignal),
@@ -143,27 +107,28 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       strongAvailability.data?.status === 'incompatible' ||
       strongAvailability.data?.status === 'corrupt'
     : false
-  const strongProblem = strongVersionId
-    ? strongAvailability.data?.status === 'incompatible' ||
-      strongAvailability.data?.status === 'corrupt'
-    : false
   const bibleArtifact = getMobileResourceCatalogEntry(bibleId)
   const strongArtifact = strongId ? getMobileResourceCatalogEntry(strongId) : undefined
-  const onlineStatus = resources.capabilities.getOnlineAccess({
-    kind: 'bible-text',
-    versionId,
-  }).status
   const activeQueue = [bibleQueue, strongQueue].find(state =>
     state ? ['queued', 'downloading', 'inserting'].includes(state.status) : false
   )
   const failedQueue = [bibleQueue, strongQueue].find(state => state?.status === 'failed')
   const progress = activeQueue ? getDownloadItemProgress(activeQueue) : 0
+  const availabilityReady =
+    bibleAvailability.data !== undefined &&
+    (!strongVersionId || strongAvailability.data !== undefined)
+  const languageKey = version.language === 'he-grc' ? 'heGrc' : version.language
+  const languageLabel = t(`versionCatalog.language.${languageKey}`)
+  const bookCount = getBooksForCanon(version.canonId ?? 'protestant-66').length
   const formatSize = (bytes: number) =>
     t('downloads.size.mb', {
-      value: new Intl.NumberFormat(i18n.language, { maximumFractionDigits: 1 }).format(
-        bytes / 1_000_000
-      ),
+      value: formatMegabyteValue(bytes, i18n.language),
     })
+  const selectedArchiveBytes =
+    bibleArtifact.archiveBytes + (includeStrong && strongArtifact ? strongArtifact.archiveBytes : 0)
+  const shouldDownloadStrong =
+    bibleInstalled === true && Boolean(strongVersionId) && !strongInstalled && includeStrong
+  const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
 
   const refreshInstalledState = () => {
     const store = getDefaultStore()
@@ -181,24 +146,11 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
     downloadManager.enqueue(
       createStrongSidecarDownloadPlan(
         strongVersionId,
-        strongAvailability.data?.status ?? 'base-missing'
+        bibleInstalled === false
+          ? 'base-missing'
+          : (strongAvailability.data?.status ?? 'base-missing')
       )
     )
-  }
-
-  const removeStrong = () => {
-    if (!strongId) return
-    Alert.alert(t('Attention'), t('bibleOfflineDetails.removeStrongConfirm'), [
-      { text: t('Non'), style: 'cancel' },
-      {
-        text: t('Oui'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteDownloadedItem(createDownloadedItemDeletionPlan(strongId))
-          refreshInstalledState()
-        },
-      },
-    ])
   }
 
   const removeBible = () => {
@@ -237,86 +189,73 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   }
 
   return (
-    <Sheet
-      ref={sheetRef}
-      backgroundColor={theme.colors.reverse}
-      header={<SheetHeader title={version.displayName || version.name} subTitle={version.id} />}
-    >
-      <SheetScrollView contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 28 }}>
-        <Text color="tertiary" fontSize={13} lineHeight={19}>
-          {version.c}
-        </Text>
-
-        <Box mt={18} p={16} bg="lightGrey" borderRadius={16}>
-          <Box row gap={16}>
-            <Detail
-              label={t('bibleOfflineDetails.archiveSize')}
-              value={formatSize(bibleArtifact.archiveBytes)}
-            />
-            <Detail
-              label={t('bibleOfflineDetails.installedSize')}
-              value={formatSize(bibleArtifact.installedBytes)}
-            />
+    <Sheet ref={sheetRef} backgroundColor={theme.colors.reverse}>
+      <SheetScrollView
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 32 }}
+      >
+        <Box row alignItems="center" gap={16}>
+          <Box width={78} height={94} center bg="lightGrey" borderRadius={14}>
+            <Box position="absolute" left={0} top={0} bottom={0} width={6} bg="primary" />
+            <Text
+              width={66}
+              pl={6}
+              fontSize={22}
+              bold
+              textAlign="center"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.55}
+            >
+              {version.id}
+            </Text>
           </Box>
-          <Box mt={14} pt={12} borderTopWidth={1} borderColor="border">
-            <StatusRow
-              label={t('bibleOfflineDetails.bible')}
-              status={
-                bibleAvailability.isError
-                  ? 'problem'
-                  : bibleInstalled === undefined
-                    ? 'checking'
-                    : bibleInstalled
-                      ? 'installed'
-                      : 'not-installed'
-              }
-            />
-            {strongVersionId && (
-              <StatusRow
-                label={t('versionSelector.strongIndex')}
-                status={
-                  strongAvailability.isError
-                    ? 'problem'
-                    : !strongAvailability.data
-                      ? 'checking'
-                      : strongProblem
-                        ? 'problem'
-                        : strongInstalled
-                          ? 'installed'
-                          : 'not-installed'
-                }
-              />
+          <Box flex gap={6}>
+            <Box row alignItems="center">
+              <Text flex fontSize={22} bold numberOfLines={2}>
+                {version.displayName || version.name}
+              </Text>
+              {strongVersionId && (
+                <Text ml={8} fontSize={22} bold style={{ fontFamily: serifFontFamily }}>
+                  S
+                </Text>
+              )}
+            </Box>
+            {!!version.c && (
+              <Text color="tertiary" fontSize={13} numberOfLines={2}>
+                {version.c}
+              </Text>
             )}
           </Box>
         </Box>
 
-        <Box row alignItems="center" mt={14}>
-          <FeatherIcon
-            name={isConnected && onlineStatus === 'remotely-readable' ? 'wifi' : 'wifi-off'}
-            size={16}
-            color={isConnected && onlineStatus === 'remotely-readable' ? 'success' : 'tertiary'}
-          />
-          <Text ml={8} fontSize={13} color="tertiary">
-            {t(
-              !isConnected
-                ? 'bibleOfflineDetails.offlineNow'
-                : onlineStatus === 'remotely-readable'
-                  ? 'resource.status.onlineAvailable'
-                  : onlineStatus === 'temporarily-unavailable'
-                    ? 'resource.status.onlineTemporary'
-                    : 'resource.status.onlineUnsupported'
-            )}
-          </Text>
+        <Box row mt={22} py={14} borderTopWidth={1} borderBottomWidth={1} borderColor="border">
+          <Box flex alignItems="center" gap={4}>
+            <Text color="tertiary" fontSize={9} bold>
+              {t('bibleOfflineDetails.language').toUpperCase()}
+            </Text>
+            <Text fontSize={13} bold>
+              {languageLabel}
+            </Text>
+          </Box>
+          <Box width={1} bg="border" />
+          <Box flex alignItems="center" gap={4}>
+            <Text color="tertiary" fontSize={9} bold>
+              {t('bibleOfflineDetails.books').toUpperCase()}
+            </Text>
+            <Text fontSize={13} bold>
+              {bookCount}
+            </Text>
+          </Box>
+          <Box width={1} bg="border" />
+          <Box flex alignItems="center" gap={4}>
+            <Text color="tertiary" fontSize={9} bold>
+              {t('bibleOfflineDetails.installedSize').toUpperCase()}
+            </Text>
+            <Text fontSize={13} bold>
+              {formatSize(bibleArtifact.installedBytes)}
+            </Text>
+          </Box>
         </Box>
-
-        {strongArtifact && (
-          <Text mt={8} fontSize={12} color="tertiary">
-            {t('bibleOfflineDetails.strongSize', {
-              archive: formatSize(strongArtifact.archiveBytes),
-              installed: formatSize(strongArtifact.installedBytes),
-            })}
-          </Text>
-        )}
 
         {activeQueue && (
           <Box mt={20} p={14} borderWidth={1} borderColor="border" borderRadius={14}>
@@ -342,7 +281,16 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
             <Text color="quart" bold>
               {t('bibleOfflineDetails.downloadFailed')}
             </Text>
-            <TouchableBox onPress={() => downloadManager.retry(failedQueue.item.id)} pt={10}>
+            <TouchableBox
+              onPress={() => {
+                if (failedQueue.item.id === strongId && bibleInstalled === false) {
+                  downloadBibleAndStrong()
+                  return
+                }
+                downloadManager.retry(failedQueue.item.id)
+              }}
+              pt={10}
+            >
               <Text color="primary" bold>
                 {t('Réessayer')}
               </Text>
@@ -350,7 +298,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
           </Box>
         )}
 
-        {(bibleAvailability.isError || strongAvailability.isError) && (
+        {(bibleAvailability.isError || (strongVersionId && strongAvailability.isError)) && (
           <TouchableBox
             onPress={() => {
               void bibleAvailability.refetch()
@@ -365,40 +313,90 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
           </TouchableBox>
         )}
 
-        {!activeQueue && !failedQueue && !bibleAvailability.isError && (
-          <Box mt={22} gap={10}>
-            {bibleInstalled === false && (
-              <Button onPress={downloadBible} disabled={!isConnected}>
-                {t('bibleOfflineDetails.downloadBible')}
-              </Button>
+        {!activeQueue &&
+          !failedQueue &&
+          !bibleAvailability.isError &&
+          !strongAvailability.isError &&
+          !availabilityReady && (
+            <Box row alignItems="center" justifyContent="center" py={32}>
+              <FeatherIcon name="clock" size={17} color="tertiary" />
+              <Text ml={9} color="tertiary">
+                {t('bibleOfflineDetails.checking')}
+              </Text>
+            </Box>
+          )}
+
+        {!activeQueue && !failedQueue && availabilityReady && (
+          <Box mt={22} p={16} bg="lightGrey" borderRadius={22} gap={14}>
+            {strongVersionId && strongArtifact && !strongInstalled && (
+              <Box row alignItems="center" p={14} bg="reverse" borderRadius={17}>
+                <Box size={42} center bg="lightGrey" borderRadius={13}>
+                  <Text fontSize={20} bold style={{ fontFamily: serifFontFamily }}>
+                    S
+                  </Text>
+                </Box>
+                <Box ml={12} flex gap={3}>
+                  <Text fontSize={14} bold>
+                    {t('bibleOfflineDetails.includeStrong')}
+                  </Text>
+                  <Text color="tertiary" fontSize={11}>
+                    {t('bibleOfflineDetails.strongOptionSubtitle', {
+                      size: formatSize(strongArtifact.installedBytes),
+                    })}
+                  </Text>
+                </Box>
+                <Switch
+                  value={includeStrong}
+                  onValueChange={enabled => setStrongChoice({ versionId, enabled })}
+                  trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                />
+              </Box>
             )}
-            {bibleInstalled === false && strongVersionId && (
-              <Button onPress={downloadBibleAndStrong} disabled={!isConnected} reverse>
-                {t('bibleOfflineDetails.downloadBibleAndStrong')}
-              </Button>
-            )}
-            {bibleInstalled === true &&
-              strongVersionId &&
-              strongAvailability.data &&
-              !strongInstalled && (
-                <Button onPress={downloadBibleAndStrong} disabled={!isConnected}>
-                  {t('bibleOfflineDetails.downloadStrong')}
+
+            <Box row alignItems="center" gap={10}>
+              <Box flex>
+                <Button
+                  onPress={
+                    bibleInstalled
+                      ? downloadBibleAndStrong
+                      : includeStrong && strongVersionId
+                        ? downloadBibleAndStrong
+                        : downloadBible
+                  }
+                  disabled={!isConnected || (bibleInstalled === true && !shouldDownloadStrong)}
+                  leftIcon={
+                    bibleInstalled === false ? (
+                      <Box mr={9}>
+                        <FeatherIcon name="download" size={18} color="reverse" />
+                      </Box>
+                    ) : undefined
+                  }
+                >
+                  {bibleInstalled
+                    ? shouldDownloadStrong
+                      ? t('bibleOfflineDetails.download')
+                      : t('bibleOfflineDetails.bibleDownloaded')
+                    : t('bibleOfflineDetails.downloadSize', {
+                        size: formatSize(selectedArchiveBytes),
+                      })}
                 </Button>
+              </Box>
+              {bibleInstalled && (
+                <TouchableBox
+                  accessibilityRole="button"
+                  accessibilityLabel={t('bibleOfflineDetails.removeBible')}
+                  onPress={removeBible}
+                  size={48}
+                  center
+                  bg="reverse"
+                  borderRadius={24}
+                  borderWidth={1}
+                  borderColor="border"
+                >
+                  <FeatherIcon name="trash-2" size={20} color="quart" />
+                </TouchableBox>
               )}
-            {strongPresent && (
-              <Button onPress={removeStrong} reverse>
-                {t('bibleOfflineDetails.removeStrong')}
-              </Button>
-            )}
-            {bibleInstalled === true && (
-              <Button onPress={removeBible} color={theme.colors.quart}>
-                {t(
-                  strongPresent
-                    ? 'bibleOfflineDetails.removeBibleAndStrong'
-                    : 'bibleOfflineDetails.removeBible'
-                )}
-              </Button>
-            )}
+            </Box>
           </Box>
         )}
       </SheetScrollView>

@@ -12,7 +12,6 @@ const useConnection = () => {
 
     unsubscribeRef.current = NetInfo.addEventListener(
       ({ isConnected: userIsConnected }: NetInfoState) => {
-        console.log('[Connection] Is connected:', userIsConnected)
         setIsConnected(userIsConnected ?? true)
       }
     )
