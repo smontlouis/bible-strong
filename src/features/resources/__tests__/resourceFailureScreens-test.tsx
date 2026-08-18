@@ -87,8 +87,8 @@ describe('resource failure list screens', () => {
   afterEach(() => act(() => renderer.unmount()))
 
   it.each([
-    ['Dictionary', <DictionaryListScreen dictionaryAtom={{} as never} />],
-    ['Nave', <NaveListScreen naveAtom={{} as never} />],
+    ['Dictionary', <DictionaryListScreen key="dictionary" dictionaryAtom={{} as never} />],
+    ['Nave', <NaveListScreen key="nave" naveAtom={{} as never} />],
   ])('keeps %s network errors classified as offline', (_name, screen) => {
     act(() => {
       renderer = create(screen)

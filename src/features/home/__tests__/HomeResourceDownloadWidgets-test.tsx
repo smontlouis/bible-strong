@@ -288,8 +288,8 @@ describe('Home resource download widgets', () => {
   })
 
   it.each([
-    ['Nave', <NaveOfTheDay />],
-    ['Dictionary', <WordOfTheDay />],
+    ['Nave', <NaveOfTheDay key="nave" />],
+    ['Dictionary', <WordOfTheDay key="dictionary" />],
   ])('retries both %s availability and content queries', (_label, widget) => {
     mockAvailabilityError = true
     act(() => {
