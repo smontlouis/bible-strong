@@ -92,7 +92,6 @@ const TimelineSearchOverlay = ({ isFormSheet = false, onClose }: Props) => {
       pathname: '/event',
       params: { slug: event.slug },
     })
-    onClose()
   }
 
   const renderEmptyState = () => {
