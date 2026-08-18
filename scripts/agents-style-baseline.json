@@ -35,7 +35,6 @@
   "src/features/bible/SelectorItem.tsx": 3,
   "src/features/bible/StrongCard.tsx": 4,
   "src/features/bible/SvgIcon.tsx": 2,
-  "src/features/bible/ToggleCompareVersesScreen.tsx": 3,
   "src/features/bible/TouchableChip.tsx": 3,
   "src/features/bible/TouchableCircle.tsx": 3,
   "src/features/bible/TouchableIcon.tsx": 3,

@@ -9,7 +9,7 @@ const StrongMark = ({
   passive?: boolean
 }) => (
   <Text
-    color={passive ? 'default' : highlighted ? 'primary' : 'tertiary'}
+    color={passive ? (highlighted ? 'primary' : 'default') : highlighted ? 'primary' : 'tertiary'}
     fontSize={17}
     bold
     style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}

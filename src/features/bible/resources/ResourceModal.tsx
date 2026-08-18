@@ -319,6 +319,7 @@ const ResourcesModal = ({
               selectedVerses={selectedVerses}
               compareStrongMode={compareStrongMode}
               onChangeVerse={onChangeVerse}
+              onChooseCompareVersions={() => compareVersionSelectorRef.current?.present()}
             />
           </View>
         )}
@@ -348,6 +349,7 @@ const Resource = ({
   selectedVerses,
   compareStrongMode,
   onChangeVerse,
+  onChooseCompareVersions,
 }: {
   bibleAtom: PrimitiveAtom<BibleTab>
   resourceType: BibleResource | null
@@ -360,6 +362,7 @@ const Resource = ({
   selectedVerses: VerseIds
   compareStrongMode: boolean
   onChangeVerse?: (verseKey: string) => void
+  onChooseCompareVersions: () => void
 }) => {
   const actions = useBibleTabActions(bibleAtom)
   const selectedVerse = Object.keys(selectedVerses)[0]
@@ -430,11 +433,12 @@ const Resource = ({
         />
       </Slide>
       <Slide key="compare">
-        <SheetScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+        <SheetScrollView contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}>
           <CompareCard
             selectedVerses={selectedVerses}
             strongMode={compareStrongMode}
             onChangeVerse={onChangeVerse ?? actions.selectSelectedVerse}
+            onChooseVersions={onChooseCompareVersions}
           />
         </SheetScrollView>
       </Slide>

@@ -58,10 +58,12 @@ const VersionItemContainer = ({
   children,
   needsUpdate,
   hasDependency,
+  selected,
   onPress,
 }: React.PropsWithChildren<{
   needsUpdate?: boolean
   hasDependency?: boolean
+  selected?: boolean
   onPress?: () => void
 }>) => {
   const content = (
@@ -72,8 +74,8 @@ const VersionItemContainer = ({
       py={12}
       borderBottomWidth={hasDependency ? 0 : 1}
       borderColor="border"
-      borderLeftWidth={needsUpdate ? 5 : 0}
-      borderLeftColor={needsUpdate ? 'success' : undefined}
+      borderLeftWidth={selected ? 3 : needsUpdate ? 5 : 0}
+      borderLeftColor={selected ? 'primary' : needsUpdate ? 'success' : undefined}
     >
       {children}
     </Box>
@@ -530,35 +532,41 @@ const VersionSelectorItem = ({
 
   if (onOpenOfflineDetails) {
     return (
-      <VersionItemContainer needsUpdate={needsUpdate} onPress={() => onChange?.(version.id)}>
+      <VersionItemContainer needsUpdate={needsUpdate} selected={isSelected}>
         <Box flex row alignItems="center">
-          <VersionIdentity
-            version={version}
-            color={versionColor}
-            showPublicationDetails
-            showCapabilities
-            passiveCapabilities
-            copyrightColor={copyrightColor}
-            copyrightOpacity={copyrightOpacity}
-            copyrightStyle={copyrightStyle}
-            onCopyrightPress={version.sourceUrl ? openSourceUrl : undefined}
-            showStrongCapability={showStrongCapability}
-            showInterlinearCapability={showInterlinearCapability}
-          />
-          {isLoading ? (
-            <Box width={30} center>
-              <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={() => onChange?.(version.id)}
+            accessibilityRole={showSelectionCheckbox ? 'checkbox' : 'button'}
+            accessibilityLabel={`${t('Sélectionner les versions')}: ${version.displayName || version.name}`}
+            accessibilityState={
+              showSelectionCheckbox ? { checked: Boolean(isSelected) } : undefined
+            }
+          >
+            <Box flex row alignItems="center">
+              <VersionIdentity
+                version={version}
+                color={versionColor}
+                showPublicationDetails
+                showCapabilities
+                passiveCapabilities
+                copyrightOpacity={copyrightOpacity}
+                showStrongCapability={showStrongCapability}
+                isStrongIndexAvailable={isSelected}
+                showInterlinearCapability={showInterlinearCapability}
+              />
+              {isLoading ? (
+                <Box width={30} center>
+                  <Progress progress={Math.max(downloadProgress, 0.04)} size={22} thickness={2.5} />
+                </Box>
+              ) : versionNeedsDownload === false ? (
+                <Box width={30} center>
+                  <FeatherIcon name="cloud" size={18} color="primary" />
+                </Box>
+              ) : null}
+              {renderSelectionCheckbox()}
             </Box>
-          ) : versionNeedsDownload === false ? (
-            <Box width={30} center>
-              <FeatherIcon name="cloud" size={18} color="primary" />
-            </Box>
-          ) : null}
-          {isSelected && (
-            <Box width={26} center>
-              <FeatherIcon name="check" size={16} color="primary" />
-            </Box>
-          )}
+          </TouchableOpacity>
           <ActionButton
             accessibilityLabel={t('bibleOfflineDetails.manage', { bible: version.id })}
             onPress={() => onOpenOfflineDetails(version)}

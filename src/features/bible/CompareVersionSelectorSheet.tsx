@@ -11,6 +11,8 @@ import { selectCompareVersions } from '~redux/selectors/user'
 import type { AppDispatch } from '~redux/store'
 import type { VersionCode } from 'src/state/tabs'
 import { useVersionCatalog, VersionCatalogHeader, VersionCatalogList } from './VersionCatalogView'
+import BibleOfflineDetailsSheet from './VersionSelectorSheet/BibleOfflineDetailsSheet'
+import { useBibleOfflineDetails } from './VersionSelectorSheet/useBibleOfflineDetails'
 
 type CompareVersionSelectorSheetProps = {
   sheetRef: React.RefObject<SheetRef | null>
@@ -25,6 +27,7 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
   )
   const [scrollToTopKey, setScrollToTopKey] = React.useState(0)
   const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
+  const offlineDetails = useBibleOfflineDetails()
 
   const toggleVersion = (versionId: VersionCode) => {
     dispatch(toggleCompareVersion(versionId))
@@ -60,11 +63,19 @@ const CompareVersionSelectorSheet = ({ sheetRef }: CompareVersionSelectorSheetPr
               isSelected={versionsToCompare.includes(item.id)}
               onChange={toggleVersion}
               showSelectionCheckbox
+              showStrongIndex
+              onOpenOfflineDetails={version => {
+                void offlineDetails.open(version)
+              }}
             />
           )}
         />
       </Sheet>
       {versionCatalog.modals}
+      <BibleOfflineDetailsSheet
+        sheetRef={offlineDetails.sheetRef}
+        version={offlineDetails.version}
+      />
     </>
   )
 }

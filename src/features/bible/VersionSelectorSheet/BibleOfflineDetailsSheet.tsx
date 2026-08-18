@@ -34,6 +34,10 @@ import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/do
 import { bibleDataRefreshSignalAtom, installedVersionsSignalAtom } from '~state/app'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import useConnection from '~helpers/useConnection'
+import {
+  getBibleOfflineDetailsQueryKey,
+  getStrongOfflineDetailsQueryKey,
+} from './bibleOfflineDetailsQueryKeys'
 
 const Detail = ({ label, value }: { label: string; value: string }) => (
   <Box flex>
@@ -114,18 +118,16 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   const strongQueue = useDownloadItemStatus(strongId)
 
   const bibleAvailability = useQuery({
-    queryKey: ['bible-offline-details', 'bible', versionId, installedSignal, completionSignal],
+    queryKey: getBibleOfflineDetailsQueryKey(versionId!, installedSignal, completionSignal),
     enabled: Boolean(versionId),
     queryFn: () => resources.offlineCopies.isAvailable({ kind: 'bible', versionId: versionId! }),
   })
   const strongAvailability = useQuery({
-    queryKey: [
-      'bible-offline-details',
-      'strong',
-      strongVersionId,
+    queryKey: getStrongOfflineDetailsQueryKey(
+      strongVersionId ?? versionId ?? '',
       installedSignal,
-      completionSignal,
-    ],
+      completionSignal
+    ),
     enabled: Boolean(strongVersionId),
     queryFn: () => getStrongBibleSidecarAvailability(strongVersionId!),
   })
