@@ -4,6 +4,7 @@ type ResourceSourceLoggerOptions = {
   resource: string
   source: ResourceLoadSource
   enabled?: boolean
+  isResolvedResult?: (operation: string, result: unknown) => boolean
 }
 
 const TRACEABLE_OPERATION = /^(?:browse|find|list|load|random|search)/u
@@ -55,6 +56,14 @@ const logResourceSource = (
   )
 }
 
+const shouldLogResult = (
+  options: ResourceSourceLoggerOptions,
+  operation: string,
+  result: unknown
+) =>
+  didLoadResource(result) &&
+  (options.isResolvedResult === undefined || options.isResolvedResult(operation, result))
+
 export const withResourceSourceLogging = <Adapter extends object>(
   adapter: Adapter,
   options: ResourceSourceLoggerOptions
@@ -77,12 +86,16 @@ export const withResourceSourceLogging = <Adapter extends object>(
         const result = Reflect.apply(member, target, args)
         if (result instanceof Promise) {
           return result.then(value => {
-            if (didLoadResource(value)) logResourceSource(options, property, args)
+            if (shouldLogResult(options, property, value)) {
+              logResourceSource(options, property, args)
+            }
             return value
           })
         }
 
-        if (didLoadResource(result)) logResourceSource(options, property, args)
+        if (shouldLogResult(options, property, result)) {
+          logResourceSource(options, property, args)
+        }
         return result
       }
     },

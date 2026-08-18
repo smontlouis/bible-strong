@@ -1,5 +1,10 @@
 import { withResourceSourceLogging } from '../resourceSourceLogger'
-import { createHybridBibleChapterAdapter, type BibleChapterAdapter } from '../bibleChapterSource'
+import {
+  createHybridBibleChapterAdapter,
+  isUsableBibleCoverage,
+  type BibleChapterAdapter,
+  type BibleCoverageSourceResult,
+} from '../bibleChapterSource'
 
 describe('resource source development logger', () => {
   const consoleLog = jest.spyOn(console, 'log').mockImplementation()
@@ -90,5 +95,42 @@ describe('resource source development logger', () => {
     expect(consoleLog).toHaveBeenCalledWith(
       '[ResourceSource] Bible · ONLINE · loadChapter · DBY · 1 · 2'
     )
+  })
+
+  it('does not log an empty local coverage rejected by the hybrid adapter', async () => {
+    const coverage = (books: number[]) => ({
+      status: 'available' as const,
+      coverage: {
+        books,
+        chaptersByBook: {},
+        verseCountByBookChapter: {},
+      },
+    })
+    const offline = withResourceSourceLogging<BibleChapterAdapter>(
+      {
+        loadChapter: async () => ({ status: 'available', verses: [] }),
+        loadCoverage: async () => coverage([]),
+      },
+      {
+        resource: 'Bible',
+        source: 'offline',
+        enabled: true,
+        isResolvedResult: (operation, result) =>
+          operation !== 'loadCoverage' ||
+          isUsableBibleCoverage(result as BibleCoverageSourceResult),
+      }
+    )
+    const online = withResourceSourceLogging<BibleChapterAdapter>(
+      {
+        loadChapter: async () => ({ status: 'available', verses: [] }),
+        loadCoverage: async () => coverage([1]),
+      },
+      { resource: 'Bible', source: 'online', enabled: true }
+    )
+
+    await createHybridBibleChapterAdapter({ offline, online }).loadCoverage('LSG')
+
+    expect(consoleLog).toHaveBeenCalledTimes(1)
+    expect(consoleLog).toHaveBeenCalledWith('[ResourceSource] Bible · ONLINE · loadCoverage · LSG')
   })
 })

@@ -42,6 +42,9 @@ export type BibleCoverageSourceResult =
     }
   | { status: 'unavailable'; reason: BibleChapterUnavailableReason }
 
+export const isUsableBibleCoverage = (result: BibleCoverageSourceResult) =>
+  result.status === 'available' && result.coverage.books.length > 0
+
 export class BibleVerseTextSourceError extends Error {
   constructor(
     public readonly reason: BibleChapterUnavailableReason,
@@ -138,7 +141,7 @@ export const createHybridBibleChapterAdapter = ({
   },
   async loadCoverage(version) {
     const local = await offline.loadCoverage(version)
-    if (local.status === 'available' && local.coverage.books.length > 0) return local
+    if (isUsableBibleCoverage(local)) return local
     const remote = await online.loadCoverage(version)
     if (remote.status === 'available') return remote
     return local.status === 'unavailable' && local.reason === 'offline-copy-invalid'

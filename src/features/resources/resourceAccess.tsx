@@ -12,6 +12,7 @@ import {
   createHybridBibleChapterAdapter,
   getConfiguredResourceApiBaseUrl,
   getDevelopmentResourceApiBaseUrl,
+  isUsableBibleCoverage,
   unavailableHttpBibleChapterAdapter,
 } from '~features/resources/bibleChapterSource'
 import {
@@ -131,7 +132,16 @@ const offlineSource = <Adapter extends object>(resource: string, adapter: Adapte
 const onlineSource = <Adapter extends object>(resource: string, adapter: Adapter) =>
   withResourceSourceLogging(adapter, { resource, source: 'online' })
 
-const localBibleChapterSource = offlineSource('Bible', localBibleChapterAdapter)
+const localBibleChapterSource = withResourceSourceLogging(localBibleChapterAdapter, {
+  resource: 'Bible',
+  source: 'offline',
+  isResolvedResult: (operation, result) => {
+    if (operation !== 'loadCoverage' || !result || typeof result !== 'object') return true
+    return isUsableBibleCoverage(
+      result as Awaited<ReturnType<typeof localBibleChapterAdapter.loadCoverage>>
+    )
+  },
+})
 const onlineBibleChapterAdapter = resourceApiBaseUrl
   ? onlineSource(
       'Bible',
