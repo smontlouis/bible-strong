@@ -8,8 +8,8 @@ import { toggleCompareVersion } from '~redux/modules/user'
 import { versions } from '~helpers/bibleVersions'
 import { useTranslation } from 'react-i18next'
 import Switch from '~common/ui/Switch'
-import type { RootState } from '~redux/modules/reducer'
 import type { AppDispatch } from '~redux/store'
+import { selectCompareVersions } from '~redux/selectors/user'
 import type { Theme } from '~themes'
 import { useVersionCatalog, VersionCatalogHeader, VersionCatalogList } from './VersionCatalogView'
 import type { VersionCatalogItem } from './versionCatalog'
@@ -56,10 +56,7 @@ const SwitchVersion = withTheme(({ version, isSelected, onChange }: SwitchVersio
 })
 
 const ToggleCompareVersesScreen = () => {
-  const versionsToCompare = useSelector(
-    (state: RootState) => Object.keys(state.user.bible.settings.compare),
-    shallowEqual
-  )
+  const versionsToCompare = useSelector(selectCompareVersions, shallowEqual)
   const dispatch = useDispatch<AppDispatch>()
   const { t } = useTranslation()
   const versionCatalog = useVersionCatalog(

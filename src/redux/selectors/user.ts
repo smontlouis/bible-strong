@@ -55,5 +55,8 @@ export const selectHighlightsObj = (state: RootState) => state.user.bible.highli
 // Selector for compare versions (used in CompareVersesTabScreen)
 export const selectCompareVersions = createSelector(
   [(state: RootState) => state.user.bible.settings.compare],
-  compare => Object.keys(compare)
+  compare =>
+    Object.entries(compare)
+      .filter(([, enabled]) => enabled)
+      .map(([versionId]) => versionId)
 )

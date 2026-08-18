@@ -33,7 +33,7 @@ function configureStore() {
     keyPrefix: '',
     storage: mmkvStorage,
     stateReconciler: autoMergeLevel2,
-    version: 36,
+    version: 37,
     // debug: true,
     blacklist: ['plan'],
     migrate: createMigrate(migrations as unknown as Parameters<typeof createMigrate>[0], {

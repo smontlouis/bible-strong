@@ -13,6 +13,8 @@ import reducer, {
   setNotificationId,
   toggleCompareVersion,
   resetCompareVersion,
+  receiveLiveUpdates,
+  importData,
   addChangelog,
   getChangelogFail,
   appFetchData,
@@ -148,9 +150,8 @@ const getInitialState = (): UserState =>
           mauve: { primary: '#666' },
           night: { primary: '#777' },
         },
-        compare: {
-          LSG: true,
-        },
+        compare: {},
+        compareSelectionVersion: 2,
         customHighlightColors: [],
       },
     },
@@ -174,6 +175,13 @@ describe('User Reducer', () => {
     const freshState = reducer(undefined, { type: '@@INIT' })
 
     expect(freshState.notifications.verseOfTheDay).toBe('')
+  })
+
+  it('starts a fresh installation without an implicit comparison version', () => {
+    const freshState = reducer(undefined, { type: '@@INIT' })
+
+    expect(freshState.bible.settings.compare).toEqual({})
+    expect(freshState.bible.settings.compareSelectionVersion).toBe(2)
   })
 
   describe('verifyEmail', () => {
@@ -389,7 +397,7 @@ describe('User Reducer', () => {
   })
 
   describe('resetCompareVersion', () => {
-    it('should reset compare to single version', () => {
+    it('clears every comparison version', () => {
       const state = {
         ...initialState,
         bible: {
@@ -400,9 +408,71 @@ describe('User Reducer', () => {
           },
         },
       } as UserState
-      const newState = reducer(state, resetCompareVersion('KJV'))
-      expect(newState.bible.settings.compare).toEqual({ KJV: true })
+      const newState = reducer(state, resetCompareVersion())
+      expect(newState.bible.settings.compare).toEqual({})
+      expect(newState.bible.settings.compareSelectionVersion).toBe(2)
     })
+  })
+
+  it('drops legacy automatic comparisons received from Firestore', () => {
+    const remoteUserData = {
+      id: 'user-123',
+      email: 'test@example.com',
+      displayName: '',
+      photoURL: '',
+      provider: 'email',
+      subscription: undefined,
+      bible: {
+        settings: {
+          ...initialState.bible.settings,
+          compare: { LSG: true, KJV: true },
+          compareSelectionVersion: undefined,
+        },
+      },
+    }
+
+    const newState = reducer(initialState, receiveLiveUpdates({ remoteUserData } as never))
+
+    expect(newState.bible.settings.compare).toEqual({})
+    expect(newState.bible.settings.compareSelectionVersion).toBe(2)
+  })
+
+  it('drops legacy automatic comparisons restored from a backup', () => {
+    const newState = reducer(
+      initialState,
+      importData({
+        bible: {
+          settings: {
+            ...initialState.bible.settings,
+            compare: { LSG: true, KJV: true },
+            compareSelectionVersion: undefined,
+          },
+        },
+        studies: {},
+      })
+    )
+
+    expect(newState.bible.settings.compare).toEqual({})
+    expect(newState.bible.settings.compareSelectionVersion).toBe(2)
+  })
+
+  it('preserves explicit comparison versions from current backups', () => {
+    const newState = reducer(
+      initialState,
+      importData({
+        bible: {
+          settings: {
+            ...initialState.bible.settings,
+            compare: { DBY: true, KJV: false },
+            compareSelectionVersion: 2,
+          },
+        },
+        studies: {},
+      })
+    )
+
+    expect(newState.bible.settings.compare).toEqual({ DBY: true })
+    expect(newState.bible.settings.compareSelectionVersion).toBe(2)
   })
 
   describe('addChangelog', () => {

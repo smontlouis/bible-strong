@@ -274,7 +274,7 @@ const ResourceLanguageScreen = () => {
     resetAllResourcesLanguage(lang)
 
     dispatch(setDefaultBibleVersion(defaultVersion))
-    dispatch(resetCompareVersion(defaultVersion))
+    dispatch(resetCompareVersion())
   }
 
   const handleAppLanguageChange = (lang: ResourceLanguage) => {

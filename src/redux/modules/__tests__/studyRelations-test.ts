@@ -360,7 +360,7 @@ describe('study relation reducer', () => {
       settings: {
         defaultBibleVersion: 'KJV',
         defaultStrongBibleVersionId: 'LSG',
-        compare: { BHG: true },
+        compare: {},
       },
       notes: {
         note: { description: 'LSGS in user text', version: 'BHG' },

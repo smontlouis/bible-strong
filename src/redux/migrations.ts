@@ -17,6 +17,7 @@ import {
   type RelationsObj,
 } from '~features/studyRelations/domain'
 import { migrateLegacyBibleVersionId } from '../migrations/legacyBibleVersionMigration'
+import { normalizeCompareSelection } from './compareSelectionMigration'
 
 type LegacyRootState = RootState & {
   bible?: Record<string, unknown>
@@ -635,4 +636,17 @@ export default {
       },
     }
   },
+  37: (state: RootState) => ({
+    ...state,
+    user: {
+      ...state.user,
+      bible: {
+        ...state.user.bible,
+        settings: {
+          ...state.user.bible.settings,
+          ...normalizeCompareSelection(state.user.bible.settings),
+        },
+      },
+    },
+  }),
 }

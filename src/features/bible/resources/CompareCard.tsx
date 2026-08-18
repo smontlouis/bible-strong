@@ -39,7 +39,7 @@ const CompareCard = ({ selectedVerses, onChangeVerse, strongMode = false }: Comp
         countLsgChapters[`${livre}-${chapitre}`]
       return { verseNumber: verse, versesInCurrentChapter }
     },
-    enabled: selectedVerseKeys.length === 1,
+    enabled: selectedVerseKeys.length === 1 && versionsToCompare.length > 0,
     ...localQueryOptions,
   })
 
