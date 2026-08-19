@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises'
 import { readMobileResourceCatalog, type MobileResourceCatalogEntry } from './mobileResourceCatalog'
 import {
   isStrongLexiconPublicationBundleManifest,
+  type PublicationBundleManifest,
   validatePublicationBundle,
 } from './publicationBundle'
 import { getPublicationIdentityProjection } from './publicationIdentity'
@@ -33,17 +34,17 @@ export type R2ArtifactPublicationResult = {
 type ValidatedPublicationBundle = Awaited<ReturnType<typeof validatePublicationBundle>>
 
 const catalogMatchesOfflineArtifact = (
-  validated: ValidatedPublicationBundle,
+  manifest: PublicationBundleManifest,
   catalogEntry: MobileResourceCatalogEntry
 ): boolean => {
-  const artifact = validated.manifest.offlineArtifact
-  if (isStrongLexiconPublicationBundleManifest(validated.manifest)) {
-    const coreDependency = validated.manifest.dependencies.find(
+  const artifact = manifest.offlineArtifact
+  if (isStrongLexiconPublicationBundleManifest(manifest)) {
+    const coreDependency = manifest.dependencies.find(
       dependency => dependency.resourceIdentity === 'strong-lexicon:core'
     )
     if (
-      catalogEntry.resourceRevision !== validated.manifest.revision ||
-      (validated.manifest.identity.moduleId === 'core'
+      catalogEntry.resourceRevision !== manifest.revision ||
+      (manifest.identity.moduleId === 'core'
         ? catalogEntry.coreRevision !== undefined
         : catalogEntry.coreRevision !== coreDependency?.revision)
     ) {
@@ -79,6 +80,16 @@ const catalogMatchesOfflineArtifact = (
           catalogArtifactEntry.bytes === manifestEntry.bytes
       : catalogArtifactEntry === undefined
   })
+}
+
+export const assertCatalogMatchesOfflineArtifact = (
+  manifest: PublicationBundleManifest,
+  catalogEntry: MobileResourceCatalogEntry,
+  catalogId: string
+) => {
+  if (!catalogMatchesOfflineArtifact(manifest, catalogEntry)) {
+    throw new Error(`R2_PUBLICATION_CATALOG_INTEGRITY_MISMATCH:${catalogId}`)
+  }
 }
 
 const publishValidatedR2PublicationBundle = async (
@@ -196,9 +207,7 @@ export const publishR2PublicationCatalog = async (
     ) {
       throw new Error(`R2_PUBLICATION_CATALOG_OFFLINE_NOT_AUTHORIZED:${catalogId}`)
     }
-    if (!catalogMatchesOfflineArtifact(validated, catalogEntry)) {
-      throw new Error(`R2_PUBLICATION_CATALOG_INTEGRITY_MISMATCH:${catalogId}`)
-    }
+    assertCatalogMatchesOfflineArtifact(validated.manifest, catalogEntry, catalogId)
     return { validated, catalogId, stableKey: catalogEntry.file }
   })
   const seenIds = new Set<string>()

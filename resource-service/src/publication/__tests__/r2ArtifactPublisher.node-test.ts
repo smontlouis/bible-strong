@@ -6,10 +6,13 @@ import path from 'node:path'
 import { describe, it } from 'node:test'
 
 import {
+  assertCatalogMatchesOfflineArtifact,
   publishR2PublicationCatalog,
   publishR2PublicationBundle,
   type R2ArtifactStore,
 } from '../r2ArtifactPublisher'
+import type { MobileResourceCatalogEntry } from '../mobileResourceCatalog'
+import type { StrongLexiconPublicationBundleManifest } from '../publicationBundle'
 import { writeStrongPublicationFixture } from './strongPublicationFixture'
 
 const writeMobileCatalog = async (
@@ -70,7 +73,122 @@ class MemoryR2ArtifactStore implements R2ArtifactStore {
   }
 }
 
+const strongLexiconManifest = (
+  moduleId: 'core' | 'entities',
+  revision: string,
+  coreRevision?: string
+): StrongLexiconPublicationBundleManifest => ({
+  format: 'bible-strong-resource-publication',
+  schemaVersion: 1,
+  identity: {
+    kind: 'strong-lexicon-module',
+    moduleId,
+    resourceId: `strong-lexicon:${moduleId}`,
+    language: 'mul',
+  },
+  revision,
+  canonical: {
+    path: `canonical/${moduleId}.json`,
+    mediaType: 'application/json',
+    schemaVersion: 1,
+    sha256: '1'.repeat(64),
+    bytes: 1,
+  },
+  offlineArtifact: {
+    path: `offline/${moduleId}.sqlite.zip`,
+    mediaType: 'application/zip',
+    entry: moduleId === 'core' ? 'strong_lexicon.core.sqlite' : 'bible_entities.production.sqlite',
+    sha256: '2'.repeat(64),
+    bytes: 2,
+    contentSha256: '3'.repeat(64),
+  },
+  provenance: {
+    generator: 'bible-lexicon-maker',
+    sourceVersion: 'fixture',
+    sourceSha256: '4'.repeat(64),
+    generatedAt: '2026-08-19T00:00:00.000Z',
+  },
+  rights: {
+    holder: 'fixture',
+    termsReference: 'fixture',
+    attribution: 'fixture',
+    online: true,
+    offline: true,
+  },
+  deliveryCapabilities: {
+    onlineAccess: true,
+    offlineDownload: true,
+    localDevelopmentAccess: true,
+  },
+  dependencies:
+    moduleId === 'core'
+      ? []
+      : [
+          {
+            resourceIdentity: 'strong-lexicon:core',
+            revision: coreRevision ?? 'missing-core-revision',
+          },
+        ],
+  counts: {},
+})
+
+const strongLexiconCatalogEntry = (
+  manifest: StrongLexiconPublicationBundleManifest,
+  resourceRevision = manifest.revision,
+  coreRevision?: string
+): MobileResourceCatalogEntry => {
+  const entry = manifest.offlineArtifact.entry
+  return {
+    id: manifest.identity.resourceId,
+    file: 'databases/module.sqlite.zip',
+    entry,
+    entries: {
+      canonical: {
+        entry,
+        sha256: '3'.repeat(64),
+        bytes: 1,
+      },
+    },
+    archiveSha256: '2'.repeat(64),
+    archiveBytes: 2,
+    contentSha256: '3'.repeat(64),
+    resourceRevision,
+    coreRevision,
+  }
+}
+
 describe('R2 artifact publisher', () => {
+  it('rejects Strong lexicon resource and core revision drift', () => {
+    const coreManifest = strongLexiconManifest('core', 'core-r1')
+    assert.doesNotThrow(() =>
+      assertCatalogMatchesOfflineArtifact(
+        coreManifest,
+        strongLexiconCatalogEntry(coreManifest),
+        'strong-lexicon:core'
+      )
+    )
+    assert.throws(
+      () =>
+        assertCatalogMatchesOfflineArtifact(
+          coreManifest,
+          strongLexiconCatalogEntry(coreManifest, 'core-r2'),
+          'strong-lexicon:core'
+        ),
+      /R2_PUBLICATION_CATALOG_INTEGRITY_MISMATCH:strong-lexicon:core/
+    )
+
+    const entitiesManifest = strongLexiconManifest('entities', 'entities-r1', 'core-r1')
+    assert.throws(
+      () =>
+        assertCatalogMatchesOfflineArtifact(
+          entitiesManifest,
+          strongLexiconCatalogEntry(entitiesManifest, 'entities-r1', 'core-r2'),
+          'strong-lexicon:entities'
+        ),
+      /R2_PUBLICATION_CATALOG_INTEGRITY_MISMATCH:strong-lexicon:entities/
+    )
+  })
+
   it('publishes a validated Offline-copy artifact and its integrity metadata', async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-publication-'))
     const store = new MemoryR2ArtifactStore()
