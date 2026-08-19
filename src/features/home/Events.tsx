@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { firebaseDb } from '~helpers/firebase'
+import { collection, firebaseDb, getDocs, query, where } from '~helpers/firebase'
 import { useQuery } from '@tanstack/react-query'
 import { remoteQueryOptions } from '~helpers/queryOptions'
 import { getLanguage } from '~i18n'
@@ -34,12 +34,14 @@ type Event = {
 }
 
 const getEvents = async (language: string) => {
-  const events = await firebaseDb
-    .collection('events')
-    .where('status', '==', 'published')
-    .where('lang', '==', language)
-    .get()
-  return events.docs.map(x => x.data() as Event)
+  const events = await getDocs(
+    query(
+      collection(firebaseDb, 'events'),
+      where('status', '==', 'published'),
+      where('lang', '==', language)
+    )
+  )
+  return events.docs.map((x: { data: () => unknown }) => x.data() as Event)
 }
 
 const EventPeriod = ({ event }: { event: Event }) => {

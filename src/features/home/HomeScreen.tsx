@@ -1,7 +1,7 @@
 import Color from 'color'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import React from 'react'
-import { Linking, ScrollView as RNScrollView } from 'react-native'
+import { Linking, Platform, ScrollView as RNScrollView } from 'react-native'
 import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -35,7 +35,8 @@ export const Home = ({ closeHome }: HomeProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
-  const appleIsReviewing = getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
+  const appleIsReviewing =
+    Platform.OS === 'web' ? false : getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
 
   return (
     <Box bg="lightGrey" flex={1}>

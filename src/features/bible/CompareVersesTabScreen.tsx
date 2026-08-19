@@ -69,11 +69,7 @@ const CompareVersesTabScreen = ({ compareAtom }: CompareVersesTabScreenProps) =>
         title={title}
         rightComponent={
           <Box row alignItems="center">
-            <CompareStrongModeButton
-              enabled={strongMode}
-              onPress={toggleStrongMode}
-              height={60}
-            />
+            <CompareStrongModeButton enabled={strongMode} onPress={toggleStrongMode} height={60} />
             <MenuView
               actions={[
                 {

@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, PermissionsAndroid, Platform, Share } from 'react-native'
 import { useDispatch } from 'react-redux'
-import RNFetchBlob from 'rn-fetch-blob'
 import slugify from 'slugify'
 import { LinkBox } from '~common/Link'
 import { toast } from '~helpers/toast'
@@ -71,6 +70,8 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
 
   const exportPDF = async () => {
     try {
+      if (Platform.OS === 'web') return
+      const { default: RNFetchBlob } = await import('rn-fetch-blob')
       setPDFStatus('Pending')
       const file_name = slugify(study.title)
       const dirPath = Platform.select({
@@ -218,7 +219,7 @@ const PublishStudyMenuItem = ({ study, onClosed }: Props) => {
               <FeatherIcon name="share-2" size={20} />
               <Text ml={20}>{t('Partager')}</Text>
             </LinkBox>
-            {(pdfStatus === 'Idle' || pdfStatus === 'Rejected') && (
+            {Platform.OS !== 'web' && (pdfStatus === 'Idle' || pdfStatus === 'Rejected') && (
               <LinkBox row alignItems="center" py={10} onPress={() => exportPDF()}>
                 <MaterialIcon name="picture-as-pdf" size={20} />
                 {pdfStatus === 'Idle' ? (

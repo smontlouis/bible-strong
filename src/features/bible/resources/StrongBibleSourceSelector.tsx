@@ -4,7 +4,7 @@ import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, Pressable } from 'react-native'
+import { ActivityIndicator, Platform, Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Sheet, SheetFlatList, SheetHeader, type SheetRef } from '~common/sheet'
@@ -175,6 +175,8 @@ const StrongSourceRow = ({
 }) => {
   const { t } = useTranslation()
   const progress = activeDownload ? getDownloadItemProgress(activeDownload) : 0
+
+  if (Platform.OS === 'web' && !isAvailable) return null
 
   return (
     <Box
@@ -485,6 +487,7 @@ export const StrongBibleSourceSheet = ({
   }
 
   const downloadSource = async (versionId: StrongBibleVersionId) => {
+    if (Platform.OS === 'web') return
     if (!isConnected) return
     try {
       const availability =
@@ -498,6 +501,7 @@ export const StrongBibleSourceSheet = ({
   }
 
   const downloadBhgSource = async () => {
+    if (Platform.OS === 'web') return
     if (!isConnected) return
     try {
       const availability: InterlinearSidecarAvailability =

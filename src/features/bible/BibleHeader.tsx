@@ -6,6 +6,7 @@ import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
+import { Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import { isFullScreenBibleAtom } from 'src/state/app'
@@ -222,7 +223,7 @@ const Header = ({
     transitionProperty: 'opacity',
     transitionDuration: 300,
   } as const
-  const nativeHeaderZIndex = undefined
+  const nativeHeaderZIndex = Platform.OS === 'web' ? 1 : undefined
 
   const translateYTransitionStyle = {
     transform: [{ translateY: fullScreenTranslateY }],

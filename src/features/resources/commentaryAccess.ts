@@ -2,7 +2,18 @@ import { onlineManager } from '@tanstack/react-query'
 
 import type { Comment, Comments } from '~features/commentaries/types'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { firebaseDb } from '~helpers/firebase'
+import {
+  collection,
+  doc,
+  firebaseDb,
+  getDoc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  startAfter,
+  where,
+} from '~helpers/firebase'
 import loadMhyComments from '~helpers/loadMhyComments'
 import { getLocalResourceAvailability } from './resourceAvailability'
 import { Schema } from 'effect'
@@ -105,36 +116,40 @@ export const firestoreCommentaryAccess: CommentaryAccess = {
   async loadVersePage(verse, afterOrder) {
     try {
       if (afterOrder == null) {
-        const verseCommentRef = await firebaseDb.collection('verse-commentaries').doc(verse).get()
-        if (!verseCommentRef.exists) throw new CommentaryAccessError('NOT_FOUND')
+        const verseCommentRef = await getDoc(doc(firebaseDb, 'verse-commentaries', verse))
+        if (!verseCommentRef.exists()) throw new CommentaryAccessError('NOT_FOUND')
 
-        const snapshot = await firebaseDb
-          .collection('verse-commentaries')
-          .doc(verse)
-          .collection('commentaries')
-          .orderBy('order')
-          .where('isSDA', '==', false)
-          .limit(3)
-          .get()
+        const snapshot = await getDocs(
+          query(
+            collection(firebaseDb, 'verse-commentaries', verse, 'commentaries'),
+            orderBy('order'),
+            where('isSDA', '==', false),
+            limit(3)
+          )
+        )
 
         return {
           ...(verseCommentRef.data() as Omit<Comments, 'comments'>),
-          comments: snapshot.docs.map(document => document.data() as Comment),
+          comments: snapshot.docs.map(
+            (document: { data: () => unknown }) => document.data() as Comment
+          ),
         }
       }
 
-      const snapshot = await firebaseDb
-        .collection('verse-commentaries')
-        .doc(verse)
-        .collection('commentaries')
-        .orderBy('order')
-        .startAfter(afterOrder)
-        .limit(8)
-        .get()
+      const snapshot = await getDocs(
+        query(
+          collection(firebaseDb, 'verse-commentaries', verse, 'commentaries'),
+          orderBy('order'),
+          startAfter(afterOrder),
+          limit(8)
+        )
+      )
       return {
         id: verse,
         count: 0,
-        comments: snapshot.docs.map(document => document.data() as Comment),
+        comments: snapshot.docs.map(
+          (document: { data: () => unknown }) => document.data() as Comment
+        ),
       }
     } catch (error) {
       if (error instanceof CommentaryAccessError) throw error

@@ -100,7 +100,8 @@ export const More = ({ closeMenu }: MoreProps) => {
     }
   }
 
-  const appleIsReviewing = getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
+  const appleIsReviewing =
+    Platform.OS === 'web' ? false : getValue(getRemoteConfig(), 'apple_reviewing').asBoolean()
 
   const promptNuke = () => {
     Alert.alert(
@@ -246,29 +247,33 @@ export const More = ({ closeMenu }: MoreProps) => {
             </Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>
-          <CardLinkItem route="Downloads">
-            <IconCircle bg="rgba(107, 114, 128, 0.1)">
-              <Box>
-                <FeatherIcon name="download" size={20} color="grey" />
-              </Box>
-            </IconCircle>
-            <Text flex fontSize={15}>
-              {t('Gestion des téléchargements')}
-            </Text>
-            <FeatherIcon name="chevron-right" size={20} color="grey" />
-          </CardLinkItem>
-          <CardLinkItem onPress={checkForUpdate} isLast>
-            <IconCircle bg="rgba(107, 114, 128, 0.1)">
-              {isCheckingUpdate ? (
-                <ActivityIndicator size="small" color={theme.colors.grey} />
-              ) : (
-                <FeatherIcon name="refresh-cw" size={20} color="grey" />
-              )}
-            </IconCircle>
-            <Text flex fontSize={15}>
-              {t('app.checkForUpdates')}
-            </Text>
-          </CardLinkItem>
+          {Platform.OS !== 'web' && (
+            <>
+              <CardLinkItem route="Downloads">
+                <IconCircle bg="rgba(107, 114, 128, 0.1)">
+                  <Box>
+                    <FeatherIcon name="download" size={20} color="grey" />
+                  </Box>
+                </IconCircle>
+                <Text flex fontSize={15}>
+                  {t('Gestion des téléchargements')}
+                </Text>
+                <FeatherIcon name="chevron-right" size={20} color="grey" />
+              </CardLinkItem>
+              <CardLinkItem onPress={checkForUpdate} isLast>
+                <IconCircle bg="rgba(107, 114, 128, 0.1)">
+                  {isCheckingUpdate ? (
+                    <ActivityIndicator size="small" color={theme.colors.grey} />
+                  ) : (
+                    <FeatherIcon name="refresh-cw" size={20} color="grey" />
+                  )}
+                </IconCircle>
+                <Text flex fontSize={15}>
+                  {t('app.checkForUpdates')}
+                </Text>
+              </CardLinkItem>
+            </>
+          )}
         </SectionCard>
 
         <SectionCard>
@@ -408,7 +413,7 @@ export const More = ({ closeMenu }: MoreProps) => {
           )}
         </Box>
 
-        {__DEV__ && (
+        {__DEV__ && Platform.OS !== 'web' && (
           <SectionCard>
             <SectionCardHeader>
               <FeatherIcon name="alert-triangle" size={16} color="quart" />

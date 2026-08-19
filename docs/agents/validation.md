@@ -25,6 +25,7 @@ Copy `.env.example` to the appropriate local environment file and fill required 
 | i18n extraction | `yarn i18n` | User-facing string additions or translation key changes |
 | Resource architecture | `yarn resources:architecture:check` | Resource domain, service, runtime, or UI access changes |
 | Resource unit tests | `yarn resources:test` | Bundle, importer, API, repository, or runtime changes |
+| Expo Web export | `yarn web:export` | Web runtime, routing, platform adapters, or browser dependencies |
 | Resource Postgres integration | `yarn resources:test:integration` | Schema, migrations, importer, or persistence changes |
 | Complete LSG parity | `yarn resources:test:lsg` | Publication, API response, or Bible presentation changes |
 | Complete Strong Bible parity | `RESOURCE_STRONG_BIBLE_BUNDLES_ROOT=/absolute/path yarn resources:test:strong` | Strong publication, importer, API, or sidecar changes |
@@ -72,6 +73,16 @@ RESOURCE_PUBLICATION_BUNDLES_ROOT=/absolute/path/to/publications yarn resources:
 ```
 
 The development client defaults to `http://127.0.0.1:8787` on iOS and `http://10.0.2.2:8787` on Android when `EXPO_PUBLIC_RESOURCE_API_URL` is not configured. These defaults are development-only.
+
+For the online-only Web runtime, set `EXPO_PUBLIC_RESOURCE_API_URL` explicitly and start Expo with:
+
+```bash
+yarn web
+```
+
+The resource service must allow the browser origin through `RESOURCE_WEB_ORIGINS`. Validate a
+production-shaped SPA bundle with `yarn web:export`; the deployment host must fall back to
+`index.html` for Expo Router paths.
 
 Offline-copy archives continue to use the catalog CDN independently of the API origin. Set
 `EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL` explicitly only when testing a local artifact server. The

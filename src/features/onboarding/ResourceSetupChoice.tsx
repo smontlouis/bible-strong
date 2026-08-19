@@ -31,22 +31,22 @@ const SetupChoice = ({
     onPress={onPress}
   >
     {({ pressed }) => (
-      <Box
-        gap={4}
-        minHeight={142}
-        py={16}
-        opacity={pressed ? 0.76 : 1} alignItems="center"
-      >
+      <Box gap={4} minHeight={142} py={16} opacity={pressed ? 0.76 : 1} alignItems="center">
         <Image source={illustration} style={{ width: 140, height: 140 }} resizeMode="contain" />
         <Box row alignItems="center" gap={10}>
-        <Box gap={4} alignitems="center" justifyContent="center">
-          <Text fontSize={22} lineHeight={28} textAlign="center" style={{ fontFamily: 'Literata Book' }}>
-            {title}
-          </Text>
-          <Text color="tertiary" textAlign="center" fontSize={14} lineHeight={20}>
-            {description}
-          </Text>
-        </Box>
+          <Box gap={4} alignItems="center" justifyContent="center">
+            <Text
+              fontSize={22}
+              lineHeight={28}
+              textAlign="center"
+              style={{ fontFamily: 'Literata Book' }}
+            >
+              {title}
+            </Text>
+            <Text color="tertiary" textAlign="center" fontSize={14} lineHeight={20}>
+              {description}
+            </Text>
+          </Box>
         </Box>
       </Box>
     )}
@@ -61,11 +61,7 @@ const ResourceSetupChoice = ({ onContinueOnline, onPrepareOffline }: Props) => {
   const contentWidth = Math.min(350, viewport.width - 40)
 
   return (
-    <VStack
-      flex
-      bg="lightGrey"
-      paddingBottom={Math.max(insets.bottom, 18)}
-    >
+    <VStack flex bg="lightGrey" paddingBottom={Math.max(insets.bottom, 18)}>
       <Box
         flex
         width={contentWidth}

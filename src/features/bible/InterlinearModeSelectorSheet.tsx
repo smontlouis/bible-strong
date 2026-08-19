@@ -5,8 +5,7 @@ import { type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform, Pressable } from 'react-native'
 
-import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
-import { SheetView } from '~common/sheet-expo-ui'
+import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
@@ -107,6 +106,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     modeAfterDownload?: InterlinearDisplayMode,
     knownAvailability?: InterlinearSidecarAvailability
   ) => {
+    if (Platform.OS === 'web') return
     if (!isConnected || availabilityFailed) return
     const resolvedAvailability =
       knownAvailability ??
@@ -171,6 +171,8 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     const localeDownload = getDownload(locale)
     const downloading = isActiveDownload(localeDownload?.status)
 
+    if (Platform.OS === 'web' && !available) return null
+
     return (
       <Pressable
         accessibilityRole={available ? 'button' : undefined}
@@ -231,9 +233,10 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const preferredAvailable = isAvailable(selectedLocale)
   const fallbackLocale: ResourceLanguage = selectedLocale === 'fr' ? 'en' : 'fr'
   const fallbackAvailable = isAvailable(fallbackLocale)
-  const interlinearDownloadRequired = hasLoadedAvailability && !preferredAvailable
+  const interlinearDownloadRequired =
+    Platform.OS !== 'web' && hasLoadedAvailability && !preferredAvailable
   const fallbackCapableDownloadRequired =
-    hasLoadedAvailability && !preferredAvailable && !fallbackAvailable
+    Platform.OS !== 'web' && hasLoadedAvailability && !preferredAvailable && !fallbackAvailable
   const getModeDownloadState = (mode: InterlinearDisplayMode) => {
     const acquisition = pendingAcquisition?.mode === mode ? pendingAcquisition : undefined
     const presentation = getBibleModeAcquisitionPresentation(acquisition, downloadStates)
@@ -283,6 +286,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             label={t('Interlinéaire')}
             description={t('Mot par mot')}
             selected={selectedMode === 'interlinear'}
+            disabled={Platform.OS === 'web' && !preferredAvailable}
             onPress={() => selectMode('interlinear')}
             downloadRequired={interlinearDownloadRequired}
             downloadDisabled={!isConnected || availabilityFailed}
@@ -317,6 +321,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             label={t('Strong')}
             description={t('Texte + numéros')}
             selected={selectedMode === 'strong'}
+            disabled={Platform.OS === 'web' && !preferredAvailable && !fallbackAvailable}
             onPress={() => selectMode('strong')}
             downloadRequired={fallbackCapableDownloadRequired}
             downloadDisabled={!isConnected || availabilityFailed}
@@ -340,6 +345,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
             label={t('Translittération')}
             description={t('Caractères latins')}
             selected={selectedMode === 'transliteration'}
+            disabled={Platform.OS === 'web' && !preferredAvailable && !fallbackAvailable}
             onPress={() => selectMode('transliteration')}
             downloadRequired={fallbackCapableDownloadRequired}
             downloadDisabled={!isConnected || availabilityFailed}

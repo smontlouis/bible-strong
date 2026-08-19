@@ -272,7 +272,7 @@ const VersionIdentity = ({
   </Box>
 )
 
-interface Props {
+export interface Props {
   version: Version & { displayName?: string }
   isSelected?: boolean
   onChange?: (id: VersionCode) => void

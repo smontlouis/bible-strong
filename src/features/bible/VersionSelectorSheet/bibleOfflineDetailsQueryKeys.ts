@@ -15,4 +15,11 @@ export const getInterlinearOfflineDetailsQueryKey = (
   installedSignal: number,
   completionSignal: number
 ) =>
-  ['bible-offline-details', 'interlinear', 'BHG', language, installedSignal, completionSignal] as const
+  [
+    'bible-offline-details',
+    'interlinear',
+    'BHG',
+    language,
+    installedSignal,
+    completionSignal,
+  ] as const

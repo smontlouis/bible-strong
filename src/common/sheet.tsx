@@ -82,6 +82,8 @@ export type SheetItemProps = TextProps & {
 
 export type SheetProps = {
   children?: React.ReactNode
+  accessibilityLabel?: string
+  accessibilityDescription?: string
   snapPoints?: SheetSnapPoint[]
   initialSnapPoint?: SheetSnapPoint
   detached?: boolean

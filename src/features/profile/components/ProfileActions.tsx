@@ -1,6 +1,6 @@
 import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { type SheetRef } from '~common/sheet'
 
 import Box from '~common/ui/Box'
@@ -50,15 +50,17 @@ const ProfileActions = () => {
           </CardLinkItem>
         )}
 
-        <CardLinkItem route="Backup">
-          <IconCircle bg="rgba(107, 114, 128, 0.1)">
-            <FeatherIcon name="database" size={20} color="grey" />
-          </IconCircle>
-          <Text flex fontSize={15}>
-            {t('backup.title')}
-          </Text>
-          <FeatherIcon name="chevron-right" size={20} color="grey" />
-        </CardLinkItem>
+        {Platform.OS !== 'web' && (
+          <CardLinkItem route="Backup">
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              <FeatherIcon name="database" size={20} color="grey" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('backup.title')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+        )}
 
         <CardLinkItem onPress={promptLogout}>
           <IconCircle bg="rgba(239, 68, 68, 0.1)">
