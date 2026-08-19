@@ -140,7 +140,14 @@ type BibleContentAccessDependencies = {
     | Record<number, import('~helpers/canonicalStrongVerse').StrongBibleSpan[]>
     | StrongBibleChapterSpansPayload
   >
-  loadReverseInterlinearChapterSpans?: typeof loadReverseInterlinearChapterSpans
+  loadReverseInterlinearChapterSpans?: (
+    versionId: StrongBibleVersionId,
+    book: number,
+    chapter: number
+  ) => Promise<
+    | Record<number, import('~helpers/canonicalStrongVerse').StrongBibleSpan[]>
+    | StrongBibleChapterSpansPayload
+  >
   loadInterlinearChapterTokens?: typeof loadInterlinearChapterTokens
 }
 
@@ -364,7 +371,7 @@ const loadRegularBibleChapter = async (
     dependencies.loadInterlinearChapterTokens
   ) {
     try {
-      const [targetSpansByVerse, originalVerses] = await Promise.all([
+      const [strongChapter, originalVerses] = await Promise.all([
         dependencies.loadReverseInterlinearChapterSpans(
           request.version as StrongBibleVersionId,
           request.book,
@@ -372,6 +379,17 @@ const loadRegularBibleChapter = async (
         ),
         dependencies.chapterAdapter.loadChapter('BHG', request.book, request.chapter),
       ])
+      const targetSpansByVerse =
+        'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
+      if (
+        'spansByVerse' in strongChapter &&
+        ((strongChapter.textRevision !== undefined &&
+          chapter.textRevision !== strongChapter.textRevision) ||
+          (strongChapter.textSha256 !== undefined &&
+            chapter.textSha256 !== strongChapter.textSha256))
+      ) {
+        throw new ResourceAccessError('INTEGRITY_FAILURE')
+      }
       const preferredLocale = request.interlinearLocale ?? 'fr'
       let sourceTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
       for (const locale of getInterlinearLocalePriority(preferredLocale)) {
@@ -578,56 +596,68 @@ export const createBibleContentAccess = (
     'loadChapterTokens'
   > = localInterlinearBibleResourceAccess,
   strongLexiconAccess: Pick<StrongLexiconAccess, 'loadPreview'> = localStrongLexiconAccess
-): BibleContentAccess => ({
-  ...localBibleContentAccess,
-  loadChapter: request =>
-    loadBibleContentChapter(request, {
-      ...defaultDependencies,
-      chapterAdapter,
-      strongLexicon: strongLexiconAccess,
-      loadStrongBibleChapterSpans: async (versionId, book, chapter) => {
-        const result = await strongBibleAccess.loadChapterSpans({
-          currentVersionId: versionId,
-          defaultVersionId: versionId,
-          fallbackVersionIds: [],
-          book,
-          chapter,
-        })
-        if (result.status !== 'available') {
-          throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
-        }
-        return {
-          spansByVerse: result.spansByVerse,
-          ...(result.textRevision ? { textRevision: result.textRevision } : {}),
-          ...(result.textSha256 ? { textSha256: result.textSha256 } : {}),
-        }
-      },
-      loadInterlinearChapterTokens: async (_versionId, locale, book, chapter) =>
-        (
-          await interlinearBibleAccess.loadChapterTokens(locale, {
-            book,
-            chapter,
-          })
-        ).tokensByVerse,
-    }),
-  loadVerseTexts: async ({ version, verseKeys, shouldCancel }) => {
-    try {
-      return await loadVerseTextsFromChapterAdapter(
-        chapterAdapter,
-        version,
-        verseKeys,
-        shouldCancel
-      )
-    } catch (error) {
-      if (error instanceof BibleVerseTextSourceError) {
-        throw new BibleLoadingError(unavailableReasonToErrorType(error.reason), version)
-      }
-      throw error
+): BibleContentAccess => {
+  const loadConfiguredStrongBibleChapterSpans = async (
+    versionId: StrongBibleVersionId,
+    book: number,
+    chapter: number
+  ) => {
+    const result = await strongBibleAccess.loadChapterSpans({
+      currentVersionId: versionId,
+      defaultVersionId: versionId,
+      fallbackVersionIds: [],
+      book,
+      chapter,
+    })
+    if (result.status !== 'available') {
+      throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
     }
-  },
-  loadCoverage: async version => {
-    const result = await chapterAdapter.loadCoverage(version)
-    if (result.status === 'available') return result.coverage
-    throw new BibleLoadingError(unavailableReasonToErrorType(result.reason), version)
-  },
-})
+    return result
+  }
+
+  return {
+    ...localBibleContentAccess,
+    loadChapter: request =>
+      loadBibleContentChapter(request, {
+        ...defaultDependencies,
+        chapterAdapter,
+        strongLexicon: strongLexiconAccess,
+        loadStrongBibleChapterSpans: async (versionId, book, chapter) => {
+          const result = await loadConfiguredStrongBibleChapterSpans(versionId, book, chapter)
+          return {
+            spansByVerse: result.spansByVerse,
+            ...(result.textRevision ? { textRevision: result.textRevision } : {}),
+            ...(result.textSha256 ? { textSha256: result.textSha256 } : {}),
+          }
+        },
+        loadReverseInterlinearChapterSpans: loadConfiguredStrongBibleChapterSpans,
+        loadInterlinearChapterTokens: async (_versionId, locale, book, chapter) =>
+          (
+            await interlinearBibleAccess.loadChapterTokens(locale, {
+              book,
+              chapter,
+            })
+          ).tokensByVerse,
+      }),
+    loadVerseTexts: async ({ version, verseKeys, shouldCancel }) => {
+      try {
+        return await loadVerseTextsFromChapterAdapter(
+          chapterAdapter,
+          version,
+          verseKeys,
+          shouldCancel
+        )
+      } catch (error) {
+        if (error instanceof BibleVerseTextSourceError) {
+          throw new BibleLoadingError(unavailableReasonToErrorType(error.reason), version)
+        }
+        throw error
+      }
+    },
+    loadCoverage: async version => {
+      const result = await chapterAdapter.loadCoverage(version)
+      if (result.status === 'available') return result.coverage
+      throw new BibleLoadingError(unavailableReasonToErrorType(result.reason), version)
+    },
+  }
+}

@@ -37,7 +37,11 @@ import { BibleLoadingError } from '~helpers/bibleErrors'
 import { getChapterVerses } from '~helpers/biblesDb'
 import { getIfVersionNeedsDownload } from '~helpers/bibleVersions'
 import type { StrongLexiconPreview } from '../strongLexiconAccess'
-import { loadBibleContentChapter, localBibleChapterAdapter } from '../bibleContentAccess'
+import {
+  createBibleContentAccess,
+  loadBibleContentChapter,
+  localBibleChapterAdapter,
+} from '../bibleContentAccess'
 import type { BibleChapterAdapter } from '../bibleChapterSource'
 
 const createDependencies = () => ({
@@ -529,6 +533,140 @@ describe('BibleContentAccess', () => {
     expect(dependencies.strongLexicon.loadPreview).toHaveBeenCalledWith(
       [{ kind: 'strong', code: 'H1254' }],
       'fr'
+    )
+  })
+
+  it('uses the configured Strong access for an online reverse interlinear chapter', async () => {
+    const chapterAdapter: BibleChapterAdapter = {
+      loadChapter: jest.fn(async version => ({
+        status: 'available' as const,
+        presentation: 'canonical' as const,
+        verses: [
+          {
+            Livre: 1,
+            Chapitre: 1,
+            Verset: 1,
+            Texte: version === 'BHG' ? 'בְּרֵאשִׁית' : 'Au commencement',
+          },
+        ],
+      })),
+      loadCoverage: jest.fn(),
+    }
+    const loadChapterSpans = jest.fn().mockResolvedValue({
+      status: 'available',
+      provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: false },
+      spansByVerse: {
+        1: [
+          {
+            ordinal: 0,
+            startOffset: 3,
+            length: 12,
+            identities: [{ kind: 'strong', code: 'H7225' }],
+            stepTokenIds: [1],
+          },
+        ],
+      },
+    })
+    const loadChapterTokens = jest.fn().mockResolvedValue({
+      tokensByVerse: {
+        1: [
+          {
+            id: 1,
+            ordinal: 0,
+            startOffset: 0,
+            length: 11,
+            segments: [
+              {
+                ordinal: 0,
+                startOffset: 0,
+                length: 11,
+                transliteration: 'be.re.Shit',
+                lemma: 'רֵאשִׁית',
+                morphology: 'HNcfsa',
+                gloss: 'commencement',
+                identities: [{ kind: 'strong', code: 'H7225' }],
+              },
+            ],
+          },
+        ],
+      },
+    })
+    const access = createBibleContentAccess(
+      chapterAdapter,
+      { loadChapterSpans },
+      { loadChapterTokens },
+      { loadPreview: jest.fn(async () => []) }
+    )
+
+    await expect(
+      access.loadChapter({
+        book: 1,
+        chapter: 1,
+        version: 'LSG',
+        strongMode: 'reverse-interlinear',
+        interlinearLocale: 'fr',
+      })
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({ kind: 'reverse-interlinear' }),
+      })
+    )
+    expect(loadChapterSpans).toHaveBeenCalledWith({
+      currentVersionId: 'LSG',
+      defaultVersionId: 'LSG',
+      fallbackVersionIds: [],
+      book: 1,
+      chapter: 1,
+    })
+  })
+
+  it('does not apply online reverse interlinear spans from another text revision', async () => {
+    const chapterAdapter: BibleChapterAdapter = {
+      loadChapter: jest.fn(async version => ({
+        status: 'available' as const,
+        presentation: 'canonical' as const,
+        textRevision: version === 'LSG' ? 'lsg-current' : 'bhg-current',
+        textSha256: version === 'LSG' ? '1'.repeat(64) : '2'.repeat(64),
+        verses: [
+          {
+            Livre: 1,
+            Chapitre: 1,
+            Verset: 1,
+            Texte: version === 'BHG' ? 'בְּרֵאשִׁית' : 'Au commencement',
+          },
+        ],
+      })),
+      loadCoverage: jest.fn(),
+    }
+    const access = createBibleContentAccess(
+      chapterAdapter,
+      {
+        loadChapterSpans: jest.fn().mockResolvedValue({
+          status: 'available',
+          provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: false },
+          textRevision: 'lsg-stale',
+          textSha256: '0'.repeat(64),
+          spansByVerse: { 1: [] },
+        }),
+      },
+      { loadChapterTokens: jest.fn().mockResolvedValue({ tokensByVerse: {} }) },
+      { loadPreview: jest.fn(async () => []) }
+    )
+
+    await expect(
+      access.loadChapter({
+        book: 1,
+        chapter: 1,
+        version: 'LSG',
+        strongMode: 'reverse-interlinear',
+        interlinearLocale: 'fr',
+      })
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({ kind: 'plain' }),
+      })
     )
   })
 
