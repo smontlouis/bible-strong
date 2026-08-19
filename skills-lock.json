@@ -115,6 +115,18 @@
       "skillPath": "skills/misc/migrate-to-shoehorn/SKILL.md",
       "computedHash": "8f1a623a019abca0ab5e22e8deaae375829368cc1344016010201cf650331d33"
     },
+    "neon": {
+      "source": "neondatabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/neon/SKILL.md",
+      "computedHash": "4a11ddb79d07e83a542af0f8dbae232824a3c5260e226580fea9807a02b5ebee"
+    },
+    "neon-postgres": {
+      "source": "neondatabase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/neon-postgres/SKILL.md",
+      "computedHash": "9386efb7f97bd96f01d0c84f467e8e6e41be54f73cc1ece9c92f4f1dbd76f10f"
+    },
     "obsidian-vault": {
       "source": "mattpocock/skills",
       "sourceType": "github",
