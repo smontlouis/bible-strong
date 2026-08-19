@@ -11,6 +11,8 @@ export type MobileResourceCatalogEntry = {
   archiveSha256: string
   archiveBytes: number
   contentSha256: string
+  resourceRevision?: string
+  coreRevision?: string
 }
 
 export type MobileResourceCatalog = {
@@ -61,6 +63,9 @@ const decodeEntry = (id: string, value: unknown): MobileResourceCatalogEntry => 
     archiveSha256: candidate.archiveSha256!,
     archiveBytes: candidate.archiveBytes!,
     contentSha256: candidate.contentSha256!,
+    resourceRevision:
+      typeof candidate.resourceRevision === 'string' ? candidate.resourceRevision : undefined,
+    coreRevision: typeof candidate.coreRevision === 'string' ? candidate.coreRevision : undefined,
   }
 }
 

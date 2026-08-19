@@ -29,21 +29,51 @@ const isMissingObjectFailure = (cause: unknown) =>
   cause instanceof Error &&
   /specified key does not exist|NoSuchKey|object not found/i.test(cause.message)
 
+const isTransientWranglerFailure = (cause: unknown) =>
+  cause instanceof Error &&
+  /\b401\b.*Unauthorized|\b429\b|\b5\d{2}\b|Gateway Timeout|Upstream service unavailable/i.test(
+    cause.message
+  )
+
+const wait = (milliseconds: number) =>
+  new Promise<void>(resolve => {
+    setTimeout(resolve, milliseconds)
+  })
+
 export class WranglerR2ArtifactStore implements R2ArtifactStore {
   private readonly bucket: string
   private readonly runWrangler: RunWrangler
+  private readonly retryDelaysMs: readonly number[]
 
-  constructor(options: { bucket: string; runWrangler?: RunWrangler }) {
+  constructor(options: {
+    bucket: string
+    runWrangler?: RunWrangler
+    retryDelaysMs?: readonly number[]
+  }) {
     if (!options.bucket.trim()) throw new Error('RESOURCE_R2_BUCKET_REQUIRED')
     this.bucket = options.bucket
     this.runWrangler = options.runWrangler ?? defaultRunWrangler
+    this.retryDelaysMs = options.retryDelaysMs ?? [500, 1_000, 2_000]
+  }
+
+  private async runWranglerWithRetry(args: string[]) {
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        await this.runWrangler(args)
+        return
+      } catch (cause) {
+        const retryDelay = this.retryDelaysMs[attempt]
+        if (retryDelay === undefined || !isTransientWranglerFailure(cause)) throw cause
+        await wait(retryDelay)
+      }
+    }
   }
 
   async get(key: string) {
     const temporaryDirectory = await mkdtemp(path.join(os.tmpdir(), 'bible-strong-r2-get-'))
     const destination = path.join(temporaryDirectory, 'object')
     try {
-      await this.runWrangler([
+      await this.runWranglerWithRetry([
         'r2',
         'object',
         'get',
@@ -63,7 +93,7 @@ export class WranglerR2ArtifactStore implements R2ArtifactStore {
 
   async putFile(key: string, filePath: string, mediaType: string) {
     try {
-      await this.runWrangler([
+      await this.runWranglerWithRetry([
         'r2',
         'object',
         'put',

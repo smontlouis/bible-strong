@@ -51,4 +51,27 @@ describe('Wrangler R2 artifact store', () => {
 
     assert.equal(await store.get('missing.zip'), undefined)
   })
+
+  it('retries transient Cloudflare failures before failing the publication', async () => {
+    let attempts = 0
+    const store = new WranglerR2ArtifactStore({
+      bucket: 'private-bucket',
+      retryDelaysMs: [0, 0],
+      runWrangler: async args => {
+        attempts += 1
+        if (attempts < 3) {
+          throw new Error(
+            attempts === 1
+              ? '401: Unauthorized; Authentication error'
+              : '504: Gateway Timeout; Upstream service unavailable'
+          )
+        }
+        const fileIndex = args.indexOf('--file')
+        await writeFile(args[fileIndex + 1]!, 'remote-after-retry')
+      },
+    })
+
+    assert.equal((await store.get('bibles/retry.zip'))?.toString(), 'remote-after-retry')
+    assert.equal(attempts, 3)
+  })
 })

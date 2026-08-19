@@ -2,7 +2,10 @@ import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 
 import { readMobileResourceCatalog, type MobileResourceCatalogEntry } from './mobileResourceCatalog'
-import { validatePublicationBundle } from './publicationBundle'
+import {
+  isStrongLexiconPublicationBundleManifest,
+  validatePublicationBundle,
+} from './publicationBundle'
 import { getPublicationIdentityProjection } from './publicationIdentity'
 
 export type R2ArtifactStore = {
@@ -34,6 +37,19 @@ const catalogMatchesOfflineArtifact = (
   catalogEntry: MobileResourceCatalogEntry
 ): boolean => {
   const artifact = validated.manifest.offlineArtifact
+  if (isStrongLexiconPublicationBundleManifest(validated.manifest)) {
+    const coreDependency = validated.manifest.dependencies.find(
+      dependency => dependency.resourceIdentity === 'strong-lexicon:core'
+    )
+    if (
+      catalogEntry.resourceRevision !== validated.manifest.revision ||
+      (validated.manifest.identity.moduleId === 'core'
+        ? catalogEntry.coreRevision !== undefined
+        : catalogEntry.coreRevision !== coreDependency?.revision)
+    ) {
+      return false
+    }
+  }
   if (
     catalogEntry.archiveSha256 !== artifact.sha256 ||
     catalogEntry.archiveBytes !== artifact.bytes ||
