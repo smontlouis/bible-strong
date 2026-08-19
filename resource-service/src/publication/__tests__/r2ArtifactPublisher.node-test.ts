@@ -146,6 +146,33 @@ describe('R2 artifact publisher', () => {
     }
   })
 
+  it('rejects an Offline-copy-unauthorized exhaustive catalog before writing', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-catalog-rights-'))
+    const store = new MemoryR2ArtifactStore()
+
+    try {
+      const bundle = path.join(root, 'bundle')
+      const { manifest } = await writeStrongPublicationFixture(bundle, { offlineAccess: false })
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/bible-lsg-strong.sqlite.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+      })
+
+      await assert.rejects(
+        publishR2PublicationCatalog([bundle], catalogPath, store),
+        /R2_PUBLICATION_CATALOG_OFFLINE_NOT_AUTHORIZED:bible-strong:LSG/
+      )
+      assert.deepEqual(store.puts, [])
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
   it('leaves an identical verified R2 publication unchanged', async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-idempotency-'))
     const store = new MemoryR2ArtifactStore()

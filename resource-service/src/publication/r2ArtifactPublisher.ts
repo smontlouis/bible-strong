@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises'
 
 import { readMobileResourceCatalog } from './mobileResourceCatalog'
 import { validatePublicationBundle } from './publicationBundle'
-import { getMobileResourceCatalogId, getPublicationResourceIdentity } from './publicationIdentity'
+import { getPublicationIdentityProjection } from './publicationIdentity'
 
 export type R2ArtifactStore = {
   get(key: string): Promise<Buffer | undefined>
@@ -35,7 +35,7 @@ const publishValidatedR2PublicationBundle = async (
   stableKey: string
 ): Promise<R2ArtifactPublicationResult> => {
   const { manifest, offlineArtifactPath } = validated
-  const resourceIdentity = getPublicationResourceIdentity(manifest)
+  const { resourceIdentity } = getPublicationIdentityProjection(manifest)
   if (!manifest.rights.offline || !manifest.deliveryCapabilities.offlineDownload) {
     return {
       status: 'skipped',
@@ -135,9 +135,15 @@ export const publishR2PublicationCatalog = async (
     )
   }
   const candidates = validatedBundles.map(validated => {
-    const catalogId = getMobileResourceCatalogId(validated.manifest)
+    const { mobileCatalogId: catalogId } = getPublicationIdentityProjection(validated.manifest)
     const catalogEntry = mobileCatalog.resources.get(catalogId)
     if (!catalogEntry) throw new Error(`R2_PUBLICATION_CATALOG_RESOURCE_MISSING:${catalogId}`)
+    if (
+      !validated.manifest.rights.offline ||
+      !validated.manifest.deliveryCapabilities.offlineDownload
+    ) {
+      throw new Error(`R2_PUBLICATION_CATALOG_OFFLINE_NOT_AUTHORIZED:${catalogId}`)
+    }
     return { validated, catalogId, stableKey: catalogEntry.file }
   })
   const seenIds = new Set<string>()

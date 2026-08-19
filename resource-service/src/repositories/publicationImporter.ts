@@ -21,7 +21,7 @@ import {
   type CanonicalCrossReferencePublication,
   type CanonicalTimelinePublication,
 } from '../publication/publicationBundle'
-import { getPublicationResourceIdentity } from '../publication/publicationIdentity'
+import { getPublicationIdentityProjection } from '../publication/publicationIdentity'
 
 export class PublicationImportFailure extends Data.TaggedError('PublicationImportFailure')<{
   readonly code: 'VALIDATION_FAILED' | 'REVISION_COLLISION'
@@ -326,7 +326,7 @@ export const importPublicationBundle = (
   }).pipe(
     Effect.flatMap(validated => {
       const { canonical, manifest } = validated
-      const resourceIdentity = getPublicationResourceIdentity(manifest)
+      const { resourceIdentity } = getPublicationIdentityProjection(manifest)
       const publicationStatus =
         manifest.deliveryCapabilities.onlineAccess ||
         (options.activateForLocalDevelopment &&
