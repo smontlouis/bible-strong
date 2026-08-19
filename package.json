@@ -45,6 +45,7 @@
     "resources:import-all": "tsx resource-service/src/publication/publicationCli.ts import-all",
     "resources:import-catalog": "tsx resource-service/src/publication/publicationCli.ts import-catalog",
     "resources:import-catalog:hosted": "tsx resource-service/src/publication/publicationCli.ts import-catalog-hosted",
+    "resources:r2:publish-catalog": "tsx resource-service/src/publication/r2PublicationCli.ts",
     "resources:serve": "tsx resource-service/src/runtime/node.ts",
     "resources:serve:artifacts": "tsx resource-service/src/runtime/artifactNode.ts",
     "resources:worker:types": "wrangler types --config resource-service/wrangler.jsonc resource-service/worker-configuration.d.ts",

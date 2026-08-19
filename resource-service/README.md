@@ -124,10 +124,28 @@ Reimporting the same revision and checksums returns `unchanged`. Reusing a revis
 content fails. Validation failures or Effect interruption roll back staging and preserve the prior
 active publication.
 
+## Publish Offline-copy artifacts to private R2
+
+The resource publisher uploads only bundles whose manifest independently authorizes Offline-copy
+delivery. It validates the complete catalog before the first write, publishes each archive at its
+stable mobile path, writes an integrity metadata sidecar, and reads both objects back for size and
+checksum verification. Re-running an identical verified catalog reports `unchanged` without
+overwriting it:
+
+```bash
+RESOURCE_R2_BUCKET=bible-strong-resource-artifacts-prod \
+RESOURCE_PUBLICATION_ROOTS=/absolute/path/to/resource-publications \
+  yarn resources:r2:publish-catalog
+```
+
+The bucket remains private. The `RESOURCE_ARTIFACTS` Worker binding is reserved for the later
+App Check-protected download route; publishing does not expose an R2 custom domain, change the
+mobile artifact origin, or remove the current Firebase Storage copies.
+
 ## Deploy the production Worker
 
-The production Worker reaches Neon only through the `HYPERDRIVE` binding declared in
-`wrangler.jsonc`. Hyperdrive uses the dedicated `resource_api` PostgreSQL login, which has `CONNECT`,
+The production Worker reaches Neon only through the `HYPERDRIVE` binding and has private access to
+R2 through the `RESOURCE_ARTIFACTS` binding declared in `wrangler.jsonc`. Hyperdrive uses the dedicated `resource_api` PostgreSQL login, which has `CONNECT`,
 schema `USAGE`, and table `SELECT` privileges but no table writes or role/database administration.
 Its password is held by Hyperdrive and must never be added to a Worker secret, environment file, or
 the repository. Hyperdrive SQL caching is disabled until publication-aware invalidation exists.

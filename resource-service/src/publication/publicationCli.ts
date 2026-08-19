@@ -5,6 +5,10 @@ import path from 'node:path'
 import { makeLocalDatabase } from '../database/localDatabase'
 import { validatePublicationBundle } from './publicationBundle'
 import { formatPublicationCliFailure, resolveCatalogImportPolicy } from './publicationCliPolicy'
+import {
+  findPublicationBundlesRecursively,
+  parsePublicationCatalogRoots,
+} from './publicationCatalog'
 import { importPublicationBundle } from '../repositories/publicationImporter'
 
 const parseOptions = (values: string[]) => {
@@ -34,39 +38,6 @@ export const findPublicationBundles = async (rootPath: string) => {
     .filter(entry => entry.isDirectory())
     .map(entry => path.join(root, entry.name))
     .sort((left, right) => left.localeCompare(right))
-}
-
-const findPublicationBundlesRecursively = async (roots: readonly string[]) => {
-  const manifests: string[] = []
-  const visit = async (directory: string): Promise<void> => {
-    const entries = await readdir(directory, { withFileTypes: true })
-    for (const entry of entries) {
-      const candidate = path.join(directory, entry.name)
-      if (entry.isDirectory()) {
-        await visit(candidate)
-      } else if (entry.isFile() && entry.name === 'manifest.json') {
-        manifests.push(path.dirname(candidate))
-      }
-    }
-  }
-  for (const root of roots) await visit(path.resolve(root))
-  return [...new Set(manifests)].sort((left, right) => left.localeCompare(right))
-}
-
-const parseCatalogRoots = (values: readonly string[]) => {
-  const roots: string[] = []
-  for (let index = 0; index < values.length; index += 1) {
-    if (values[index] !== '--root' || !values[index + 1]) {
-      throw new Error(`PUBLICATION_CLI_ARGUMENT_INVALID:${values[index] ?? '<missing>'}`)
-    }
-    roots.push(values[index + 1]!)
-    index += 1
-  }
-  if (roots.length === 0 && process.env.RESOURCE_PUBLICATION_ROOTS) {
-    roots.push(...process.env.RESOURCE_PUBLICATION_ROOTS.split(path.delimiter).filter(Boolean))
-  }
-  if (roots.length === 0) throw new Error('PUBLICATION_CLI_ARGUMENT_REQUIRED:--root')
-  return roots
 }
 
 const publicationPriority = async (bundle: string) => {
@@ -139,7 +110,9 @@ const run = async () => {
       maxConnections: 1,
     })
     try {
-      const bundles = await findPublicationBundlesRecursively(parseCatalogRoots(rawOptions))
+      const bundles = await findPublicationBundlesRecursively(
+        parsePublicationCatalogRoots(rawOptions)
+      )
       const orderedBundles = (
         await Promise.all(
           bundles.map(async bundle => ({ bundle, priority: await publicationPriority(bundle) }))

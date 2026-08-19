@@ -8,8 +8,8 @@
   "routes": [
     {
       "pattern": "api.bible-strong.app",
-      "custom_domain": true
-    }
+      "custom_domain": true,
+    },
   ],
   "observability": {
     "enabled": true,
@@ -24,6 +24,12 @@
     {
       "binding": "HYPERDRIVE",
       "id": "8d808a268c90412aa69ec2f59e40725f",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RESOURCE_ARTIFACTS",
+      "bucket_name": "bible-strong-resource-artifacts-prod",
     },
   ],
 }

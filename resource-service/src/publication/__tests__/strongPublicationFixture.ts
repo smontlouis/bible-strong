@@ -118,6 +118,7 @@ export const writeStrongPublicationFixture = async (
   root: string,
   options: {
     localDevelopmentAccess?: boolean
+    offlineAccess?: boolean
     onlineAccess?: boolean
     strongRevision?: string
     textRevision?: string
@@ -157,6 +158,7 @@ export const writeStrongPublicationFixture = async (
     ...(options.extraOfflineEntry ? { 'unexpected.txt': new TextEncoder().encode('bad') } : {}),
   })
   const onlineAccess = options.onlineAccess ?? true
+  const offlineAccess = options.offlineAccess ?? true
   const manifest: StrongBiblePublicationBundleManifest = {
     format: 'bible-strong-resource-publication',
     schemaVersion: 1,
@@ -193,11 +195,11 @@ export const writeStrongPublicationFixture = async (
       termsReference: 'Segond 1910',
       attribution: 'Louis Segond',
       online: onlineAccess,
-      offline: true,
+      offline: offlineAccess,
     },
     deliveryCapabilities: {
       onlineAccess,
-      offlineDownload: true,
+      offlineDownload: offlineAccess,
       localDevelopmentAccess: options.localDevelopmentAccess,
     },
     dependencies: {
