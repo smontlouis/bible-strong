@@ -458,6 +458,9 @@ async function packageResource(options: {
         );
 
   const archiveBytes = (await stat(artifactPath)).size;
+  const archiveSha256 = await sha256File(artifactPath);
+  const artifactUrl = new URL(artifactFile, MOBILE_RESOURCE_ARTIFACT_BASE_URL);
+  artifactUrl.searchParams.set("sha256", archiveSha256);
   const installedBytes =
     resource.strategy === "sqlite-import"
       ? Math.ceil(contentBytes * 1.25)
@@ -469,11 +472,11 @@ async function packageResource(options: {
   );
   return {
     id: resource.id,
-    url: new URL(artifactFile, MOBILE_RESOURCE_ARTIFACT_BASE_URL).toString(),
+    url: artifactUrl.toString(),
     file: artifactFile,
     entry: canonicalEntry.entry,
     entries: catalogEntries,
-    archiveSha256: await sha256File(artifactPath),
+    archiveSha256,
     archiveBytes,
     contentSha256,
     contentBytes,
@@ -763,7 +766,8 @@ export function parseMobileResourceCliArgs(
     "--required-ids",
     "--output-dir",
     "--app-root",
-    "--source-overrides"
+    "--source-overrides",
+    "--generated-at"
   ]);
   const parsed: Record<string, string> = {};
   for (let index = 0; index < args.length; index += 2) {
@@ -790,7 +794,8 @@ async function main(): Promise<void> {
     requiredIdsPath: args["--required-ids"],
     outputDir: args["--output-dir"],
     appRoot: args["--app-root"],
-    sourceOverridesPath: args["--source-overrides"]
+    sourceOverridesPath: args["--source-overrides"],
+    generatedAt: args["--generated-at"]
   });
   console.log(
     JSON.stringify(

@@ -25,6 +25,15 @@ describe("mobile resource catalog", () => {
       /mobile-resource-cli-option-value-missing/
     );
   });
+  test("accepts a deterministic catalog generation date", () => {
+    assert.deepEqual(
+      parseMobileResourceCliArgs([
+        "--generated-at",
+        "2026-08-19T21:00:00.000Z"
+      ]),
+      { "--generated-at": "2026-08-19T21:00:00.000Z" }
+    );
+  });
   test("the checked-in inventory covers the complete mobile catalog", async () => {
     const inventory = JSON.parse(
       await readFile(
@@ -240,7 +249,7 @@ describe("mobile resource catalog", () => {
     assert.equal(catalog.resourceCount, 1);
     assert.equal(
       artifact.url,
-      "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-test.json.zip"
+      `https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-test.json.zip?sha256=${artifact.archiveSha256}`
     );
     assert.equal(artifact.entry, "bible-test.json");
     assert.deepEqual(Object.keys(artifact.entries).sort(), [

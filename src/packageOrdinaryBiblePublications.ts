@@ -125,6 +125,8 @@ export async function buildOrdinaryBiblePublications(options: {
   root?: string;
   outputDir?: string;
   generatedAt: string;
+  sourceOverridesPath?: string;
+  versionIds?: readonly string[];
 }) {
   const root = path.resolve(options.root ?? process.cwd());
   const outputDir = path.resolve(
@@ -141,19 +143,34 @@ export async function buildOrdinaryBiblePublications(options: {
       "utf8"
     )
   ) as PublicationConfig;
+  if (config.bibles.length !== 47) {
+    throw new Error("ordinary-bible-publications-config-invalid");
+  }
+  const requestedVersionIds = options.versionIds?.map((id) => id.toUpperCase());
+  const selectedBibles = requestedVersionIds
+    ? config.bibles.filter((bible) => requestedVersionIds.includes(bible.id))
+    : config.bibles;
+  if (
+    selectedBibles.length === 0 ||
+    (requestedVersionIds &&
+      (new Set(requestedVersionIds).size !== requestedVersionIds.length ||
+        selectedBibles.length !== requestedVersionIds.length))
+  ) {
+    throw new Error("ordinary-bible-publications-version-invalid");
+  }
   const inventory = JSON.parse(
     await readFile(
       path.join(root, "config/mobile-resource-inventory.json"),
       "utf8"
     )
   ) as MobileResourceInventoryEntry[];
-  const ids = config.bibles.map((bible) => `bible:${bible.id}`);
+  const ids = selectedBibles.map((bible) => `bible:${bible.id}`);
   const ordinaryInventory = inventory.filter((resource) =>
     ids.includes(resource.id)
   );
   if (
-    ordinaryInventory.length !== config.bibles.length ||
-    new Set(ids).size !== 47
+    ordinaryInventory.length !== selectedBibles.length ||
+    new Set(ids).size !== selectedBibles.length
   ) {
     throw new Error("ordinary-bible-publications-catalog-mismatch");
   }
@@ -177,7 +194,8 @@ export async function buildOrdinaryBiblePublications(options: {
       inventory: ordinaryInventory,
       requiredIds: ids,
       requiredBundleRoles,
-      generatedAt: options.generatedAt
+      generatedAt: options.generatedAt,
+      sourceOverridesPath: options.sourceOverridesPath
     });
     const mobileCatalog = JSON.parse(
       await readFile(mobileResult.catalogPath, "utf8")
@@ -185,7 +203,7 @@ export async function buildOrdinaryBiblePublications(options: {
     await mkdir(canonicalDir, { recursive: true });
     const publications = [];
 
-    for (const metadata of config.bibles) {
+    for (const metadata of selectedBibles) {
       const resourceId = `bible:${metadata.id}`;
       const artifact = mobileCatalog.resources[resourceId];
       const inventoryEntry = ordinaryInventory.find(
@@ -307,16 +325,54 @@ export async function buildOrdinaryBiblePublications(options: {
   }
 }
 
-const parseArgs = (args: string[]) => {
+const parseArgs = (args: readonly string[]) => {
   const values = new Map<string, string>();
+  const allowed = new Set([
+    "--generated-at",
+    "--output",
+    "--source-overrides",
+    "--version"
+  ]);
   for (let index = 0; index < args.length; index += 2) {
     const key = args[index];
     const value = args[index + 1];
-    if (!key?.startsWith("--") || !value)
+    if (!key || !allowed.has(key))
+      throw new Error(
+        `ordinary-bible-publications-cli-option-unknown:${key ?? ""}`
+      );
+    if (!value || value.startsWith("--"))
       throw new Error("ordinary-bible-publications-cli-invalid");
+    if (values.has(key))
+      throw new Error(
+        `ordinary-bible-publications-cli-option-duplicate:${key}`
+      );
     values.set(key, value);
   }
   return values;
+};
+
+export const parseOrdinaryBiblePublicationArgs = (
+  raw: readonly string[]
+): {
+  generatedAt: string;
+  outputDir?: string;
+  sourceOverridesPath?: string;
+  versionIds?: string[];
+} => {
+  const args = parseArgs(raw);
+  const generatedAt = args.get("--generated-at");
+  if (!generatedAt)
+    throw new Error("ordinary-bible-publications-generated-at-required");
+  return {
+    generatedAt,
+    ...(args.get("--output") ? { outputDir: args.get("--output") } : {}),
+    ...(args.get("--source-overrides")
+      ? { sourceOverridesPath: args.get("--source-overrides") }
+      : {}),
+    ...(args.get("--version")
+      ? { versionIds: [args.get("--version")!.toUpperCase()] }
+      : {})
+  };
 };
 
 const isMain = process.argv.some((argument) =>
@@ -327,16 +383,10 @@ if (isMain) {
   const firstOption = process.argv.findIndex((argument) =>
     argument.startsWith("--")
   );
-  const args = parseArgs(
+  const options = parseOrdinaryBiblePublicationArgs(
     firstOption === -1 ? [] : process.argv.slice(firstOption)
   );
-  const generatedAt = args.get("--generated-at");
-  if (!generatedAt)
-    throw new Error("ordinary-bible-publications-generated-at-required");
-  buildOrdinaryBiblePublications({
-    generatedAt,
-    ...(args.get("--output") ? { outputDir: args.get("--output") } : {})
-  })
+  buildOrdinaryBiblePublications(options)
     .then((result) => console.log(JSON.stringify(result, null, 2)))
     .catch((error) => {
       console.error(error instanceof Error ? error.message : error);

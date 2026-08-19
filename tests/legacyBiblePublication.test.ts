@@ -3,7 +3,10 @@ import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import { buildCanonicalBibleFromLegacy } from "../src/legacyBiblePublication.js";
-import { getOrdinaryBibleCanon } from "../src/packageOrdinaryBiblePublications.js";
+import {
+  getOrdinaryBibleCanon,
+  parseOrdinaryBiblePublicationArgs
+} from "../src/packageOrdinaryBiblePublications.js";
 import { verifyCanonicalBiblePublication } from "../src/strongBibleMobilePublication.js";
 
 describe("ordinary Bible publication", () => {
@@ -74,6 +77,37 @@ describe("ordinary Bible publication", () => {
     assert.ok(config.bibles.every((bible) => bible.attribution.length > 0));
     assert.ok(
       config.bibles.every((bible) => typeof bible.publicOnline === "boolean")
+    );
+  });
+
+  it("accepts one version and local source overrides for an incremental publication", () => {
+    assert.deepEqual(
+      parseOrdinaryBiblePublicationArgs([
+        "--generated-at",
+        "2026-08-19T21:00:00.000Z",
+        "--version",
+        "lsg",
+        "--source-overrides",
+        "/candidate/source-overrides.json",
+        "--output",
+        "/candidate/ordinary"
+      ]),
+      {
+        generatedAt: "2026-08-19T21:00:00.000Z",
+        outputDir: "/candidate/ordinary",
+        sourceOverridesPath: "/candidate/source-overrides.json",
+        versionIds: ["LSG"]
+      }
+    );
+    assert.throws(
+      () =>
+        parseOrdinaryBiblePublicationArgs([
+          "--generated-at",
+          "2026-08-19T21:00:00.000Z",
+          "--versoin",
+          "LSG"
+        ]),
+      /ordinary-bible-publications-cli-option-unknown/u
     );
   });
 
