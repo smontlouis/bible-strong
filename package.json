@@ -44,7 +44,7 @@
     "resources:import": "tsx resource-service/src/publication/publicationCli.ts import",
     "resources:import-all": "tsx resource-service/src/publication/publicationCli.ts import-all",
     "resources:import-catalog": "tsx resource-service/src/publication/publicationCli.ts import-catalog",
-    "resources:import-catalog:production": "tsx resource-service/src/publication/publicationCli.ts import-catalog-hosted",
+    "resources:import-catalog:hosted": "tsx resource-service/src/publication/publicationCli.ts import-catalog-hosted",
     "resources:serve": "tsx resource-service/src/runtime/node.ts",
     "resources:serve:artifacts": "tsx resource-service/src/runtime/artifactNode.ts",
     "resources:dev": "tsx resource-service/src/runtime/dev.ts",

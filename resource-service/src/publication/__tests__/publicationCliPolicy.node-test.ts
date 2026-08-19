@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
-import { resolveCatalogImportPolicy } from '../publicationCliPolicy'
+import { formatPublicationCliFailure, resolveCatalogImportPolicy } from '../publicationCliPolicy'
 
 describe('publication CLI policy', () => {
   it('keeps the local catalog bootstrap permissive for local-development publications', () => {
@@ -35,5 +35,20 @@ describe('publication CLI policy', () => {
       connectionString,
       activateForLocalDevelopment: false,
     })
+  })
+
+  it('reports nested failures without exposing a database URL', () => {
+    const databaseFailure = new Error(
+      'connect ECONNRESET postgresql://owner:secret@ep-example.aws.neon.tech/neondb'
+    )
+    const bundleFailure = new Error('PUBLICATION_CATALOG_IMPORT_FAILED:/publications/bhg-en', {
+      cause: databaseFailure,
+    })
+
+    assert.equal(
+      formatPublicationCliFailure(bundleFailure),
+      'PUBLICATION_CATALOG_IMPORT_FAILED:/publications/bhg-en\n' +
+        'Caused by: connect ECONNRESET [REDACTED_DATABASE_URL]'
+    )
   })
 })

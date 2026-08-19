@@ -4,7 +4,7 @@ import path from 'node:path'
 
 import { makeLocalDatabase } from '../database/localDatabase'
 import { validatePublicationBundle } from './publicationBundle'
-import { resolveCatalogImportPolicy } from './publicationCliPolicy'
+import { formatPublicationCliFailure, resolveCatalogImportPolicy } from './publicationCliPolicy'
 import { importPublicationBundle } from '../repositories/publicationImporter'
 
 const parseOptions = (values: string[]) => {
@@ -174,6 +174,6 @@ const run = async () => {
 }
 
 run().catch(cause => {
-  console.error(cause instanceof Error ? cause.message : cause)
+  console.error(formatPublicationCliFailure(cause))
   process.exitCode = 1
 })

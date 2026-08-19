@@ -113,7 +113,7 @@ activates a publication solely because it declares `localDevelopmentAccess`:
 ```bash
 RESOURCE_DATABASE_URL="postgresql://..." \
 RESOURCE_PUBLICATION_ROOTS="/path/to/resource-publications" \
-  yarn resources:import-catalog:production
+  yarn resources:import-catalog:hosted
 ```
 
 The hosted command refuses a missing URL and Neon pooler hostnames. Keep the connection string out
