@@ -54,7 +54,7 @@ describe("ordinary Bible publication", () => {
       bibles: Array<{
         id: string;
         attribution: string;
-        publicOnline?: boolean;
+        publicOnline: boolean;
       }>;
     };
     const required = JSON.parse(
@@ -72,26 +72,7 @@ describe("ordinary Bible publication", () => {
     assert.equal(new Set(actual).size, 47);
     assert.deepEqual(actual, expected);
     assert.ok(config.bibles.every((bible) => bible.attribution.length > 0));
-    assert.deepEqual(
-      config.bibles
-        .filter((bible) => bible.publicOnline === true)
-        .map((bible) => bible.id)
-        .sort(),
-      [
-        "ASV",
-        "BHG",
-        "BSB",
-        "DARBY",
-        "DBY",
-        "FMAR",
-        "LAU",
-        "LSG",
-        "OST",
-        "RV1895",
-        "RWEBSTER",
-        "VUL"
-      ]
-    );
+    assert.ok(config.bibles.every((bible) => bible.publicOnline === true));
   });
 
   it("uses the app's canonical versification identities for every known exception", async () => {

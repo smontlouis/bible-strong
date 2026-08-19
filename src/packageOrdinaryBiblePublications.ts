@@ -64,7 +64,7 @@ type PublicationConfig = {
     id: string;
     language: string;
     attribution: string;
-    publicOnline?: boolean;
+    publicOnline: true;
   }>;
 };
 

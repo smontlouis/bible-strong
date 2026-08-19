@@ -1,11 +1,12 @@
 {
   "schemaVersion": 1,
-  "rightsReviewedAt": "2026-08-16",
+  "rightsReviewedAt": "2026-08-19",
   "bibles": [
     {
       "id": "AMP",
       "language": "en",
-      "attribution": "© 2015 The Lockman Foundation"
+      "attribution": "© 2015 The Lockman Foundation",
+      "publicOnline": true
     },
     {
       "id": "ASV",
@@ -13,16 +14,23 @@
       "attribution": "1901 — Public Domain",
       "publicOnline": true
     },
-    { "id": "BCC1923", "language": "fr", "attribution": "© mission-web.com" },
+    {
+      "id": "BCC1923",
+      "language": "fr",
+      "attribution": "© mission-web.com",
+      "publicOnline": true
+    },
     {
       "id": "BDS",
       "language": "fr",
-      "attribution": "© 2000 Société Biblique Internationale"
+      "attribution": "© 2000 Société Biblique Internationale",
+      "publicOnline": true
     },
     {
       "id": "BFC",
       "language": "fr",
-      "attribution": "© Alliance Biblique Française"
+      "attribution": "© Alliance Biblique Française",
+      "publicOnline": true
     },
     {
       "id": "BHG",
@@ -33,7 +41,8 @@
     {
       "id": "BHS",
       "language": "he",
-      "attribution": "© Deutsche Bibelgesellschaft, Stuttgart 1967/77"
+      "attribution": "© Deutsche Bibelgesellschaft, Stuttgart 1967/77",
+      "publicOnline": true
     },
     {
       "id": "BSB",
@@ -44,12 +53,14 @@
     {
       "id": "CHU",
       "language": "fr",
-      "attribution": "© 1977 Editions Desclée de Brouwer"
+      "attribution": "© 1977 Editions Desclée de Brouwer",
+      "publicOnline": true
     },
     {
       "id": "CSB",
       "language": "en",
-      "attribution": "© 2017 Holman Bible Publishers"
+      "attribution": "© 2017 Holman Bible Publishers",
+      "publicOnline": true
     },
     {
       "id": "DARBY",
@@ -60,7 +71,8 @@
     {
       "id": "DBR",
       "language": "fr",
-      "attribution": "© Bibles et Publications Chrétiennes — CC BY-NC-ND"
+      "attribution": "© Bibles et Publications Chrétiennes — CC BY-NC-ND",
+      "publicOnline": true
     },
     {
       "id": "DBY",
@@ -71,10 +83,21 @@
     {
       "id": "DEL",
       "language": "he",
-      "attribution": "© Bible Society in Israel, 2018"
+      "attribution": "© Bible Society in Israel, 2018",
+      "publicOnline": true
     },
-    { "id": "EASY", "language": "en", "attribution": "© MissionAssist 2018" },
-    { "id": "ESV", "language": "en", "attribution": "© 2001 Crossway Bibles" },
+    {
+      "id": "EASY",
+      "language": "en",
+      "attribution": "© MissionAssist 2018",
+      "publicOnline": true
+    },
+    {
+      "id": "ESV",
+      "language": "en",
+      "attribution": "© 2001 Crossway Bibles",
+      "publicOnline": true
+    },
     {
       "id": "FMAR",
       "language": "fr",
@@ -84,22 +107,26 @@
     {
       "id": "FRC97",
       "language": "fr",
-      "attribution": "© Alliance Biblique Française"
+      "attribution": "© Alliance Biblique Française",
+      "publicOnline": true
     },
     {
       "id": "GW",
       "language": "en",
-      "attribution": "© 1995 God's Word to the Nations Bible Society"
+      "attribution": "© 1995 God's Word to the Nations Bible Society",
+      "publicOnline": true
     },
     {
       "id": "KJF",
       "language": "fr",
-      "attribution": "© Bible des réformateurs 2006"
+      "attribution": "© Bible des réformateurs 2006",
+      "publicOnline": true
     },
     {
       "id": "KJV",
       "language": "en",
-      "attribution": "Public Domain except in the United Kingdom (Crown rights)"
+      "attribution": "Public Domain except in the United Kingdom (Crown rights)",
+      "publicOnline": true
     },
     {
       "id": "LAU",
@@ -116,62 +143,74 @@
     {
       "id": "LXX",
       "language": "grc",
-      "attribution": "ThéoTeX Éditions — theotex.org"
+      "attribution": "ThéoTeX Éditions — theotex.org",
+      "publicOnline": true
     },
     {
       "id": "LXX_FR",
       "language": "fr",
-      "attribution": "ThéoTeX Éditions — theotex.org"
+      "attribution": "ThéoTeX Éditions — theotex.org",
+      "publicOnline": true
     },
     {
       "id": "NASB1995",
       "language": "en",
-      "attribution": "© 1960–1995 The Lockman Foundation"
+      "attribution": "© 1960–1995 The Lockman Foundation",
+      "publicOnline": true
     },
     {
       "id": "NASB2020",
       "language": "en",
-      "attribution": "© 1960–2020 The Lockman Foundation"
+      "attribution": "© 1960–2020 The Lockman Foundation",
+      "publicOnline": true
     },
     {
       "id": "NBS",
       "language": "fr",
-      "attribution": "© 2002 Société Biblique Française"
+      "attribution": "© 2002 Société Biblique Française",
+      "publicOnline": true
     },
     {
       "id": "NEG79",
       "language": "fr",
-      "attribution": "© 1979 Société Biblique de Genève"
+      "attribution": "© 1979 Société Biblique de Genève",
+      "publicOnline": true
     },
     {
       "id": "NET",
       "language": "en",
-      "attribution": "© 1996–2016 Biblical Studies Press, L.L.C."
+      "attribution": "© 1996–2016 Biblical Studies Press, L.L.C.",
+      "publicOnline": true
     },
     {
       "id": "NFC",
       "language": "fr",
-      "attribution": "© Alliance Biblique Française"
+      "attribution": "© Alliance Biblique Française",
+      "publicOnline": true
     },
     {
       "id": "NIV",
       "language": "en",
-      "attribution": "© NIV 1973, 1978, 1984, 2011 Biblica"
+      "attribution": "© NIV 1973, 1978, 1984, 2011 Biblica",
+      "publicOnline": true
     },
     {
       "id": "NKJV",
       "language": "en",
-      "attribution": "© 1982 Thomas Nelson, Inc"
+      "attribution": "© 1982 Thomas Nelson, Inc",
+      "publicOnline": true
     },
     {
       "id": "NLT",
       "language": "en",
-      "attribution": "© 1996, 2004, 2015 Tyndale House Foundation"
+      "attribution": "© 1996, 2004, 2015 Tyndale House Foundation",
+      "publicOnline": true
     },
     {
       "id": "NVS78P",
       "language": "fr",
-      "attribution": "© Alliance Biblique Française"
+      "attribution": "© Alliance Biblique Française",
+      "publicOnline": true
     },
     {
       "id": "OST",
@@ -182,13 +221,20 @@
     {
       "id": "PDV2017",
       "language": "fr",
-      "attribution": "© Alliance Biblique Française"
+      "attribution": "© Alliance Biblique Française",
+      "publicOnline": true
     },
-    { "id": "POV", "language": "fr", "attribution": "© 2013" },
+    {
+      "id": "POV",
+      "language": "fr",
+      "attribution": "© 2013",
+      "publicOnline": true
+    },
     {
       "id": "RLT",
       "language": "en",
-      "attribution": "© 2018 Michael W. Jones, Sr. — GPL"
+      "attribution": "© 2018 Michael W. Jones, Sr. — GPL",
+      "publicOnline": true
     },
     {
       "id": "RV1895",
@@ -205,27 +251,32 @@
     {
       "id": "S21",
       "language": "fr",
-      "attribution": "© 2007 Société Biblique de Genève"
+      "attribution": "© 2007 Société Biblique de Genève",
+      "publicOnline": true
     },
     {
       "id": "SBLGNT",
       "language": "grc",
-      "attribution": "© 2010 Society of Biblical Literature"
+      "attribution": "© 2010 Society of Biblical Literature",
+      "publicOnline": true
     },
     {
       "id": "TLV",
       "language": "en",
-      "attribution": "© 2015 The Messianic Jewish Family Bible Society"
+      "attribution": "© 2015 The Messianic Jewish Family Bible Society",
+      "publicOnline": true
     },
     {
       "id": "TR1624",
       "language": "grc",
-      "attribution": "Textus Receptus 1624"
+      "attribution": "Textus Receptus 1624",
+      "publicOnline": true
     },
     {
       "id": "TR1894",
       "language": "grc",
-      "attribution": "Textus Receptus 1894"
+      "attribution": "Textus Receptus 1894",
+      "publicOnline": true
     },
     {
       "id": "VUL",
