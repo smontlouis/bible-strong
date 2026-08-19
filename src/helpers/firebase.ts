@@ -13,6 +13,9 @@ import {
   writeBatch,
   query,
   where,
+  orderBy,
+  limit,
+  startAfter,
   waitForPendingWrites,
 } from '@react-native-firebase/firestore'
 import { getStorage, ref } from '@react-native-firebase/storage'
@@ -41,6 +44,9 @@ export {
   writeBatch,
   query,
   where,
+  orderBy,
+  limit,
+  startAfter,
   firestoreDeleteField as deleteField,
   firestoreIncrement,
   waitForPendingWrites,

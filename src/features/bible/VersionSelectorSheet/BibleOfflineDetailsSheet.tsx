@@ -76,9 +76,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
     ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: strongVersionId })
     : undefined
   const interlinearLocale = getLanguage()
-  const hasInterlinearIndex = Boolean(
-    versionId && isInterlinearCapableBibleVersion(versionId)
-  )
+  const hasInterlinearIndex = Boolean(versionId && isInterlinearCapableBibleVersion(versionId))
   const interlinearId = hasInterlinearIndex
     ? createOfflineCopyId({
         kind: 'interlinear-index',
@@ -241,9 +239,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
     if (
       indexId &&
       (strongQueue || interlinearQueue) &&
-      ['queued', 'downloading', 'inserting'].includes(
-        (strongQueue ?? interlinearQueue)!.status
-      )
+      ['queued', 'downloading', 'inserting'].includes((strongQueue ?? interlinearQueue)!.status)
     ) {
       downloadManager.cancel(indexId)
     }

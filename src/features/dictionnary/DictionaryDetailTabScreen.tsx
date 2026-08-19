@@ -5,15 +5,15 @@ import { Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
-import { WebView } from 'react-native-webview'
 import books from '~assets/bible_versions/books-desc'
+import HTMLViewContent from '~common/HTMLViewContent'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
-import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
+import { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
@@ -168,8 +168,6 @@ const DictionnaryDetailScreen = ({
       })
     }
   }
-
-  const { webviewProps } = useHTMLView({ onLinkClicked: openLink, autoHeight: true })
 
   const shareDefinition = async () => {
     if (!dictionnaireItem) return
@@ -335,7 +333,10 @@ const DictionnaryDetailScreen = ({
           </Box>
         )}
         {dictionnaireItem?.definition && (
-          <WebView {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))} />
+          <HTMLViewContent
+            html={dictionnaireItem.definition.replace(/\n/gi, '')}
+            onLinkClicked={openLink}
+          />
         )}
       </AppScrollView>
     </FormSheetScreen>

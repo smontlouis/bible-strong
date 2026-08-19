@@ -192,7 +192,7 @@ const NaveListScreen = ({
                 onPressAction={({ nativeEvent }) => {
                   if (nativeEvent.event === 'language') toggleNaveLanguage()
                 }}
-                >
+              >
                 <Box row center height={60} width={60}>
                   <FeatherIcon name="more-vertical" size={18} />
                 </Box>

@@ -1,11 +1,10 @@
-'use dom'
-
 import { useEffect, useRef, RefObject } from 'react'
 import { Verse as TVerse } from '~common/types'
 import { WordToken, getWordIndexFromCharOffset } from '~helpers/wordTokenizer'
 import { SelectionRange, WordPosition } from './selectionUtils'
 import { HighlightRect } from './HighlightComponents'
 import { getCaretInfoFromPoint, findVerseContainer, isIgnoredVerseTouchTarget } from './domUtils'
+import { getDOMScrollTarget, scrollDOMBy } from '../domScroll'
 
 // Drag selection constants
 const DRAG_THRESHOLD = 10 // pixels to detect horizontal drag vs scroll
@@ -218,7 +217,7 @@ export function useTouchSelection({
     if (autoScrollRef.current) return
 
     const scroll = () => {
-      window.scrollBy(0, direction)
+      scrollDOMBy(getDOMScrollTarget(containerRef.current), { top: direction })
 
       // Update selection during auto-scroll if we have current touch position
       if (currentTouchPosRef.current && touchStateRef.current.isDragging) {
@@ -286,6 +285,9 @@ export function useTouchSelection({
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
+    let lastTouchEndAt = 0
+    let mouseIsDown = false
+    let suppressMouseClickUntil = 0
 
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length > 1) return
@@ -444,6 +446,7 @@ export function useTouchSelection({
     }
 
     const handleTouchEnd = (e: TouchEvent) => {
+      lastTouchEndAt = Date.now()
       const touchState = touchStateRef.current
       const cbs = callbacksRef.current
       const now = Date.now()
@@ -531,17 +534,204 @@ export function useTouchSelection({
       currentTouchPosRef.current = null
     }
 
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0 || Date.now() - lastTouchEndAt < 700) return
+      if (isIgnoredVerseTouchTarget(e.target)) return
+
+      const touchState = touchStateRef.current
+      const cbs = callbacksRef.current
+      const now = Date.now()
+
+      clearTimers()
+      mouseIsDown = true
+      touchState.startPos = { x: e.clientX, y: e.clientY }
+      touchState.isDragging = false
+      touchState.isSwipe = false
+      touchState.hasMoved = false
+      touchState.dragHandle = null
+      touchState.longPressFired = false
+      touchState.startTime = now
+      touchState.velocitySamples = []
+      currentTouchPosRef.current = { x: e.clientX, y: e.clientY }
+
+      const wordPos = getWordAtPoint(e.clientX, e.clientY)
+      touchState.startWord = wordPos
+      touchState.startVerseKey = wordPos?.verseKey || getVerseKeyAtPoint(e.clientX, e.clientY)
+
+      if (!touchState.startVerseKey) return
+      cbs.onTouchedVerseChange?.(touchState.startVerseKey)
+
+      if (selectionRef.current && annotationModeRef.current) {
+        const handlePositions = getSelectionHandlePositionsRef.current()
+        if (isNearHandle(e.clientX, e.clientY, handlePositions.start)) {
+          touchState.dragHandle = 'start'
+          touchState.isDragging = true
+          e.preventDefault()
+          return
+        }
+        if (isNearHandle(e.clientX, e.clientY, handlePositions.end)) {
+          touchState.dragHandle = 'end'
+          touchState.isDragging = true
+          e.preventDefault()
+          return
+        }
+      }
+
+      touchState.longPressTimer = setTimeout(() => {
+        if (!mouseIsDown || touchState.hasMoved || touchState.isDragging) return
+        if (!touchState.startVerseKey) return
+
+        touchState.longPressFired = true
+        suppressMouseClickUntil = Date.now() + 700
+        callbacksRef.current.onTouchedVerseChange?.(null)
+        callbacksRef.current.onLongPressVerse?.(touchState.startVerseKey)
+      }, LONG_PRESS_DELAY)
+    }
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!mouseIsDown) return
+
+      const touchState = touchStateRef.current
+      currentTouchPosRef.current = { x: e.clientX, y: e.clientY }
+
+      if (touchState.isDragging) {
+        e.preventDefault()
+        const wordPos = getWordAtPoint(e.clientX, e.clientY)
+        if (wordPos) updateSelectionDuringDrag(wordPos)
+        if (e.clientY < AUTO_SCROLL_ZONE_TOP) {
+          startAutoScroll(-AUTO_SCROLL_SPEED)
+        } else if (e.clientY > window.innerHeight - AUTO_SCROLL_ZONE_BOTTOM) {
+          startAutoScroll(AUTO_SCROLL_SPEED)
+        } else {
+          stopAutoScroll()
+        }
+        return
+      }
+
+      const deltaX = Math.abs(e.clientX - touchState.startPos.x)
+      const deltaY = Math.abs(e.clientY - touchState.startPos.y)
+      if (Math.max(deltaX, deltaY) <= DRAG_THRESHOLD) return
+
+      if (touchState.longPressTimer) {
+        clearTimeout(touchState.longPressTimer)
+        touchState.longPressTimer = null
+      }
+      callbacksRef.current.onTouchedVerseChange?.(null)
+
+      if (annotationModeRef.current && touchState.startWord) {
+        touchState.isDragging = true
+        suppressMouseClickUntil = Date.now() + 700
+        e.preventDefault()
+        callbacksRef.current.onDragStart?.()
+        const currentWord = getWordAtPoint(e.clientX, e.clientY) ?? touchState.startWord
+        setSelectionRef.current(() => ({
+          start: touchState.startWord!,
+          end: currentWord,
+        }))
+        return
+      }
+
+      touchState.hasMoved = true
+    }
+
+    const handleMouseUp = (e: MouseEvent) => {
+      if (!mouseIsDown) return
+      mouseIsDown = false
+      stopAutoScroll()
+
+      const touchState = touchStateRef.current
+      if (touchState.longPressTimer) {
+        clearTimeout(touchState.longPressTimer)
+        touchState.longPressTimer = null
+      }
+      callbacksRef.current.onTouchedVerseChange?.(null)
+      currentTouchPosRef.current = null
+
+      if (touchState.isDragging) {
+        e.preventDefault()
+        lastDragEndRef.current = Date.now()
+        suppressMouseClickUntil = Date.now() + 700
+      } else if (touchState.hasMoved || touchState.longPressFired) {
+        suppressMouseClickUntil = Date.now() + 700
+      }
+
+      resetTouchState(touchState)
+    }
+
+    const handleContextMenu = (e: MouseEvent) => {
+      const verseContainer = e.target instanceof Element ? findVerseContainer(e.target) : null
+      if (verseContainer) e.preventDefault()
+    }
+
+    // Desktop browsers don't emit TouchEvents for mouse clicks. Expo DOM
+    // renders inline on web, so mirror the tap/double-tap behavior with mouse
+    // events while ignoring the synthetic click generated after a real touch.
+    const handleClick = (e: MouseEvent) => {
+      if (
+        Date.now() - lastTouchEndAt < 700 ||
+        Date.now() < suppressMouseClickUntil ||
+        isIgnoredVerseTouchTarget(e.target)
+      )
+        return
+
+      const verseContainer = e.target instanceof Element ? findVerseContainer(e.target) : null
+      const verseKey = verseContainer?.getAttribute('data-verse-key')
+      if (!verseKey) {
+        callbacksRef.current.onTapEmpty?.()
+        return
+      }
+
+      const tapPosition = { x: e.clientX, y: e.clientY }
+      if (singleTapTimerRef.current) clearTimeout(singleTapTimerRef.current)
+      singleTapTimerRef.current = setTimeout(() => {
+        callbacksRef.current.onTapVerse?.(verseKey, tapPosition)
+        singleTapTimerRef.current = null
+      }, DOUBLE_TAP_DELAY)
+    }
+
+    const handleDoubleClick = (e: MouseEvent) => {
+      if (
+        Date.now() - lastTouchEndAt < 700 ||
+        Date.now() < suppressMouseClickUntil ||
+        isIgnoredVerseTouchTarget(e.target)
+      )
+        return
+
+      const verseContainer = e.target instanceof Element ? findVerseContainer(e.target) : null
+      const verseKey = verseContainer?.getAttribute('data-verse-key')
+      if (!verseKey) return
+
+      if (singleTapTimerRef.current) {
+        clearTimeout(singleTapTimerRef.current)
+        singleTapTimerRef.current = null
+      }
+      callbacksRef.current.onDoubleTapVerse?.(verseKey, { x: e.clientX, y: e.clientY })
+    }
+
     // { passive: false } allows preventDefault() to work
     container.addEventListener('touchstart', handleTouchStart, { passive: false })
     container.addEventListener('touchmove', handleTouchMove, { passive: false })
     container.addEventListener('touchend', handleTouchEnd)
     container.addEventListener('touchcancel', handleTouchCancel)
+    container.addEventListener('click', handleClick)
+    container.addEventListener('dblclick', handleDoubleClick)
+    container.addEventListener('mousedown', handleMouseDown)
+    container.addEventListener('contextmenu', handleContextMenu)
+    window.addEventListener('mousemove', handleMouseMove, { passive: false })
+    window.addEventListener('mouseup', handleMouseUp)
 
     return () => {
       container.removeEventListener('touchstart', handleTouchStart)
       container.removeEventListener('touchmove', handleTouchMove)
       container.removeEventListener('touchend', handleTouchEnd)
       container.removeEventListener('touchcancel', handleTouchCancel)
+      container.removeEventListener('click', handleClick)
+      container.removeEventListener('dblclick', handleDoubleClick)
+      container.removeEventListener('mousedown', handleMouseDown)
+      container.removeEventListener('contextmenu', handleContextMenu)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+      stopAutoScroll()
       clearTimers()
     }
   }, [])

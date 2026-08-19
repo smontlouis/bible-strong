@@ -1,4 +1,5 @@
 import { makeResourceWebHandler } from '../http/app'
+import { parseResourceCorsOrigins } from '../http/cors'
 import type { BibleChapterRepositoryService } from '../domain/bibleChapter'
 import type { BibleSearchRepositoryService } from '../domain/bibleSearch'
 import type { NaveRepositoryService } from '../domain/nave'
@@ -20,6 +21,7 @@ import { makeNeonTimelineRepository } from '../repositories/timelineRepository'
 
 export type ResourceWorkerBindings = {
   RESOURCE_DATABASE_URL: string
+  RESOURCE_WEB_ORIGINS?: string
 }
 
 export const makeResourceWorkerHandler = (
@@ -31,27 +33,36 @@ export const makeResourceWorkerHandler = (
   strongLexiconRepository?: StrongLexiconRepositoryService,
   supplementaryRepository?: SupplementaryRepositoryService,
   timelineRepository?: TimelineRepositoryService,
-  bibleSearchRepository?: BibleSearchRepositoryService
+  bibleSearchRepository?: BibleSearchRepositoryService,
+  corsAllowedOrigins: readonly string[] = []
 ) =>
-  makeResourceWebHandler(repository, naveRepository, {
-    bibleSearch: bibleSearchRepository,
-    dictionary: dictionaryRepository,
-    strongBible: strongBibleRepository,
-    interlinearBible: interlinearBibleRepository,
-    strongLexicon: strongLexiconRepository,
-    supplementary: supplementaryRepository,
-    timeline: timelineRepository,
-  })
+  makeResourceWebHandler(
+    repository,
+    naveRepository,
+    {
+      bibleSearch: bibleSearchRepository,
+      dictionary: dictionaryRepository,
+      strongBible: strongBibleRepository,
+      interlinearBible: interlinearBibleRepository,
+      strongLexicon: strongLexiconRepository,
+      supplementary: supplementaryRepository,
+      timeline: timelineRepository,
+    },
+    { corsAllowedOrigins }
+  )
 
 let cached:
   | {
       connectionString: string
+      corsOrigins: string
       web: ReturnType<typeof makeResourceWebHandler>
     }
   | undefined
 
-const getWorkerHandler = (connectionString: string) => {
-  if (cached?.connectionString === connectionString) return cached.web
+const getWorkerHandler = (connectionString: string, corsOrigins: string) => {
+  if (cached?.connectionString === connectionString && cached.corsOrigins === corsOrigins) {
+    return cached.web
+  }
   const { repository } = makeNeonBibleChapterRepository({ connectionString })
   const { repository: bibleSearchRepository } = makeNeonBibleSearchRepository({ connectionString })
   const { repository: naveRepository } = makeNeonNaveRepository({ connectionString })
@@ -76,14 +87,18 @@ const getWorkerHandler = (connectionString: string) => {
     strongLexiconRepository,
     supplementaryRepository,
     timelineRepository,
-    bibleSearchRepository
+    bibleSearchRepository,
+    parseResourceCorsOrigins(corsOrigins)
   )
-  cached = { connectionString, web }
+  cached = { connectionString, corsOrigins, web }
   return web
 }
 
 export default {
   fetch(request: Request, bindings: ResourceWorkerBindings): Promise<Response> {
-    return getWorkerHandler(bindings.RESOURCE_DATABASE_URL).handler(request)
+    return getWorkerHandler(
+      bindings.RESOURCE_DATABASE_URL,
+      bindings.RESOURCE_WEB_ORIGINS ?? ''
+    ).handler(request)
   },
 }

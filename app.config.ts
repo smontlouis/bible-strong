@@ -8,7 +8,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'biblestrong',
   primaryColor: '#ffffff',
   githubUrl: 'https://github.com/bulby97/bible-strong',
-  platforms: ['ios', 'android'],
+  platforms: ['ios', 'android', 'web'],
   version: '27.0.1',
   orientation: 'default',
   icon: './assets/images/icon-2.png',
@@ -67,6 +67,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     },
     // Deep linking: iOS Universal Links
     associatedDomains: ['applinks:bible.strong.app'],
+  },
+  web: {
+    bundler: 'metro',
+    output: 'single',
+    favicon: './assets/images/icon-2.png',
   },
   plugins: [
     'expo-sharing',

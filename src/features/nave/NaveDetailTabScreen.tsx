@@ -2,7 +2,6 @@ import React, { useCallback, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
-import { WebView } from 'react-native-webview'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
@@ -14,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Empty from '~common/Empty'
+import HTMLViewContent from '~common/HTMLViewContent'
 import { toast } from '~helpers/toast'
 import EntityChipList from '~common/EntityChipList'
 import Box from '~common/ui/Box'
@@ -23,7 +23,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import useHTMLView, { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
+import { type HTMLViewLinkPayload } from '~helpers/useHTMLView'
 import { RootState } from '~redux/modules/reducer'
 import { makeNaveTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
@@ -168,8 +168,6 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       })
     }
   }
-
-  const { webviewProps } = useHTMLView({ onLinkClicked: openLink, autoHeight: true })
 
   const shareDefinition = async () => {
     if (!naveItem) return
@@ -316,7 +314,9 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
             />
           </Box>
         )}
-        {naveItem?.description && <WebView {...webviewProps(naveItem.description)} />}
+        {naveItem?.description && (
+          <HTMLViewContent html={naveItem.description} onLinkClicked={openLink} />
+        )}
       </ScrollView>
     </FormSheetScreen>
   )

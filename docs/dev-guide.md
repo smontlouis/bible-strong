@@ -19,9 +19,36 @@ cp .env.example .env.development
 yarn start
 yarn ios
 yarn android
+yarn web
 ```
 
 The app uses a custom Expo development client. It is not expected to run in Expo Go.
+
+## Expo Web
+
+The Web runtime is intentionally online-only. Bible content, search, concordance, dictionaries,
+timeline, commentaries, and interlinear data are read through the resource HTTP API. It does not
+run onboarding, SQLite migrations, local resource downloads, backup/import-export flows, or native
+context menus. Browser storage is limited to app preferences and user state.
+
+Configure the resource API and Firebase Web app before starting Expo:
+
+```bash
+EXPO_PUBLIC_RESOURCE_API_URL="http://127.0.0.1:8787" yarn web
+```
+
+The Firebase Web variables are listed in `.env.example`. The resource service must also allow the
+Web origin through `RESOURCE_WEB_ORIGINS`, a comma-separated exact allowlist. `*` is suitable only
+for local development.
+
+Create the production SPA bundle with:
+
+```bash
+yarn web:export
+```
+
+The Web export uses Expo Router's single-page output. Configure the host to send unknown routes to
+`index.html` so direct links such as `/login` and `/downloads` resolve correctly.
 
 ## Playground mode
 

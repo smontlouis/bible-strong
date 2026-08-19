@@ -1,5 +1,5 @@
 import React from 'react'
-import { SectionList, TouchableOpacity, type SectionListRenderItem } from 'react-native'
+import { Platform, SectionList, TouchableOpacity, type SectionListRenderItem } from 'react-native'
 import { useNavigation } from 'expo-router'
 import { useAtom, useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
@@ -58,6 +58,7 @@ export const useVersionCatalog = (
       getDownloadedBibleVersionIds(installedVersionsSignal, versionId =>
         resources.offlineCopies.isAvailable({ kind: 'bible', versionId })
       ),
+    enabled: Platform.OS !== 'web',
     ...localQueryOptions,
   })
   const [activeStyleInfo, setActiveStyleInfo] = React.useState<TranslationReadingProfile | null>(
@@ -95,9 +96,19 @@ export const useVersionCatalog = (
     all: t('versionCatalog.availability.all'),
     downloaded: t('versionCatalog.availability.downloaded'),
   }
+  const onlineCatalog =
+    Platform.OS === 'web'
+      ? catalog.filter(
+          version =>
+            resources.capabilities.getOnlineAccess({
+              kind: 'bible-text',
+              versionId: version.id,
+            }).status === 'remotely-readable'
+        )
+      : catalog
   const visibleCatalog = filterVersionCatalogByAvailability(
-    catalog,
-    availability,
+    onlineCatalog,
+    Platform.OS === 'web' ? 'all' : availability,
     downloadedVersionIds ?? EMPTY_DOWNLOADED_VERSION_IDS
   )
   const sections = getVersionCatalogSections({
@@ -152,14 +163,18 @@ export const useVersionCatalog = (
         active: grouping !== 'language',
         onPress: () => groupingRef.current?.present(),
       },
-      {
-        key: 'availability',
-        icon: 'download' as const,
-        label: t('versionCatalog.availability.label'),
-        value: availabilityLabels[availability],
-        active: availability !== 'all',
-        onPress: () => availabilityRef.current?.present(),
-      },
+      ...(Platform.OS === 'web'
+        ? []
+        : [
+            {
+              key: 'availability',
+              icon: 'download' as const,
+              label: t('versionCatalog.availability.label'),
+              value: availabilityLabels[availability],
+              active: availability !== 'all',
+              onPress: () => availabilityRef.current?.present(),
+            },
+          ]),
     ],
   }
 
@@ -185,19 +200,21 @@ export const useVersionCatalog = (
           groupingRef.current?.dismiss()
         }}
       />
-      <ChoiceFilterModal
-        ref={availabilityRef}
-        title={t('versionCatalog.availability.label')}
-        selectedValue={availability}
-        options={(['all', 'downloaded'] as const).map(value => ({
-          value,
-          label: availabilityLabels[value],
-        }))}
-        onSelect={value => {
-          setAvailability(value)
-          availabilityRef.current?.dismiss()
-        }}
-      />
+      {Platform.OS !== 'web' && (
+        <ChoiceFilterModal
+          ref={availabilityRef}
+          title={t('versionCatalog.availability.label')}
+          selectedValue={availability}
+          options={(['all', 'downloaded'] as const).map(value => ({
+            value,
+            label: availabilityLabels[value],
+          }))}
+          onSelect={value => {
+            setAvailability(value)
+            availabilityRef.current?.dismiss()
+          }}
+        />
+      )}
       <Sheet
         ref={styleInfoRef}
         header={

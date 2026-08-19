@@ -8,7 +8,7 @@ import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Alert, Platform } from 'react-native'
+import { Alert, Platform, type ViewStyle } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
@@ -419,16 +419,17 @@ export const BibleDOMWrapper = ({
     versionId: error?.version ?? version,
   })
   const queueState = useDownloadItemStatus(errorDownloadItemId)
-  const errorDownloadState: BibleDOMDownloadState | undefined = error
-    ? {
-        status: queueState?.status,
-        progress:
-          queueState?.status === 'inserting'
-            ? (queueState.insertProgress ?? 0)
-            : (queueState?.downloadProgress ?? 0),
-        error: queueState?.error,
-      }
-    : undefined
+  const errorDownloadState: BibleDOMDownloadState | undefined =
+    error && Platform.OS !== 'web'
+      ? {
+          status: queueState?.status,
+          progress:
+            queueState?.status === 'inserting'
+              ? (queueState.insertProgress ?? 0)
+              : (queueState?.downloadProgress ?? 0),
+          error: queueState?.error,
+        }
+      : undefined
 
   const stableVerses = useStabilizedVerses(verses, isLoading)
 
@@ -572,6 +573,7 @@ export const BibleDOMWrapper = ({
         break
       }
       case DOWNLOAD_CHAPTER_ENTITIES: {
+        if (Platform.OS === 'web') break
         if (!chapterEntityModuleStatus || chapterEntityModuleStatus === 'available') break
         downloadManager.enqueue(
           createStrongLexiconModuleDownloadPlan(
@@ -865,6 +867,10 @@ export const BibleDOMWrapper = ({
       }
 
       case DOWNLOAD_BIBLE_VERSION: {
+        if (Platform.OS === 'web') {
+          await queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
+          break
+        }
         const requestedVersion = getStringPayload(action.payload)
         if (!requestedVersion) break
         try {
@@ -877,11 +883,15 @@ export const BibleDOMWrapper = ({
       }
 
       case OPEN_DOWNLOADS: {
-        router.push('/downloads')
+        if (Platform.OS !== 'web') router.push('/downloads')
         break
       }
 
       case RESET_BIBLE_DATABASE: {
+        if (Platform.OS === 'web') {
+          await queryClient.invalidateQueries({ queryKey: resourceQueryKeys.bibleContent() })
+          break
+        }
         setIsResettingDatabase(true)
         try {
           await resetBiblesDb()
@@ -937,7 +947,19 @@ export const BibleDOMWrapper = ({
   )
   const TOP_INSET = isFormSheet ? 0 : insets.top
   const headerHeight = isFormSheet ? BIBLE_FORM_SHEET_HEADER_HEIGHT : HEADER_HEIGHT
-  const nativeLayerZIndex = -1
+  const nativeLayerZIndex = Platform.OS === 'web' ? 0 : -1
+  const webInlineScrollStyle =
+    Platform.OS === 'web'
+      ? ({
+          overflowY: 'auto',
+          overscrollBehaviorY: 'contain',
+          WebkitOverflowScrolling: 'touch',
+        } satisfies ViewStyle & {
+          overflowY: 'auto'
+          overscrollBehaviorY: 'contain'
+          WebkitOverflowScrolling: 'touch'
+        })
+      : undefined
 
   return (
     <Box
@@ -945,6 +967,7 @@ export const BibleDOMWrapper = ({
         backgroundColor: theme.colors.reverse,
         zIndex: nativeLayerZIndex,
         flex: 1,
+        ...webInlineScrollStyle,
       }}
     >
       <BibleDOMComponent
@@ -1016,6 +1039,7 @@ export const BibleDOMWrapper = ({
         relationItemsText={relationMetadata.items}
         isFormSheet={isFormSheet}
         isConnected={isConnected}
+        onlineOnly={Platform.OS === 'web'}
       />
       {Platform.OS === 'android' && Number(Platform.Version) < 30 && (
         <AndroidWebViewWarningModal top={headerHeight + TOP_INSET} />

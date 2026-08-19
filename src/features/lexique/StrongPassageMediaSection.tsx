@@ -1,5 +1,5 @@
 import { useWindowDimensions, type LayoutChangeEvent } from 'react-native'
-import YoutubePlayer from 'react-native-youtube-iframe'
+import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 
 import Box, { VStack } from '~common/ui/Box'
 import { type ResolvedPassageMedia } from '~features/bible/passageMedia'

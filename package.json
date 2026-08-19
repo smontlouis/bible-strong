@@ -94,7 +94,9 @@
     "bible-project:anchors:prepare": "yarn bible-project:transcripts && yarn bible-project:derive:anchor-dossiers && yarn bible-project:prepare:anchor-agents",
     "bible-project:anchors:finalize": "yarn bible-project:aggregate:anchor-proposals && yarn bible-project:derive:associated-resources && yarn bible-project:derive:presentation",
     "android": "expo run:android",
-    "ios": "expo run:ios"
+    "ios": "expo run:ios",
+    "web": "expo start --web",
+    "web:export": "expo export --platform web"
   },
   "dependencies": {
     "@alloc/moti": "^54.0.0-beta.8",
@@ -109,12 +111,13 @@
     "@emotion/react": "^11.10.5",
     "@expo/material-symbols": "^0.1.1",
     "@expo/metro-runtime": "~56.0.15",
-    "@expo/ui": "~56.0.18",
+    "@expo/ui": "patch:@expo/ui@npm%3A56.0.18#~/.yarn/patches/@expo-ui-npm-56.0.18-1c9708e21e.patch",
     "@expo/vector-icons": "^15.0.3",
     "@fastify/deepmerge": "^1.3.0",
     "@invertase/react-native-apple-authentication": "^2.3.0",
     "@legendapp/list": "^2.0.19",
     "@lodev09/react-native-true-sheet": "^3.10.1",
+    "@lottiefiles/dotlottie-react": "^0.13.5",
     "@native-html/render": "^1.0.3",
     "@neondatabase/serverless": "1.0.2",
     "@notifee/react-native": "^7.8.2",
@@ -170,6 +173,7 @@
     "expo-system-ui": "~56.0.5",
     "expo-updates": "~56.0.19",
     "fflate": "0.8.2",
+    "firebase": "12.6.0",
     "firestore-size": "^2.0.7",
     "fuse.js": "^7.3.0",
     "global": "^4.4.0",
@@ -228,6 +232,7 @@
     "redux-persist-filesystem-storage": "^2.1.0",
     "redux-thunk": "^2.3.0",
     "rn-fetch-blob": "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch",
+    "shaka-player": "^4.7.9",
     "slugify": "^1.4.0",
     "sonner-native": "^0.22.2",
     "trunc-html": "^1.1.2"
@@ -292,7 +297,8 @@
     "react-native-screens@npm:^4.25.2": "patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch",
     "rn-fetch-blob@npm:^0.12.0": "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch",
     "@expo/cli@npm:^56.1.16": "patch:@expo/cli@npm%3A56.1.16#~/.yarn/patches/@expo-cli-npm-56.1.16-7d7dd3fde0.patch",
-    "@react-native-masked-view/masked-view@npm:^0.3.2": "patch:@react-native-masked-view/masked-view@npm%3A0.3.2#~/.yarn/patches/@react-native-masked-view-masked-view-npm-0.3.2-7e49df0087.patch"
+    "@react-native-masked-view/masked-view@npm:^0.3.2": "patch:@react-native-masked-view/masked-view@npm%3A0.3.2#~/.yarn/patches/@react-native-masked-view-masked-view-npm-0.3.2-7e49df0087.patch",
+    "@expo/ui@npm:^56.0.18": "patch:@expo/ui@npm%3A56.0.18#~/.yarn/patches/@expo-ui-npm-56.0.18-1c9708e21e.patch"
   },
   "expo": {
     "install": {

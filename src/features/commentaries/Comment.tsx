@@ -16,7 +16,7 @@ import Box, { AnimatedBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { useFireStorage } from '~features/plans/plan.hooks'
-import { firebaseDb } from '~helpers/firebase'
+import { doc, firebaseDb, getDoc, setDoc } from '~helpers/firebase'
 import { Comment as CommentProps, EGWComment } from './types'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { remoteQueryOptions } from '~helpers/queryOptions'
@@ -40,7 +40,8 @@ const useCommentTranslation = (id: string, content: string, enabled = true) => {
   const query = useQuery({
     queryKey: ['comment-translation', commentLang, id, content],
     queryFn: async () => {
-      const commentRef = await firebaseDb.collection('commentaries-FR').doc(id.toString()).get()
+      const commentDocument = doc(firebaseDb, 'commentaries-FR', id.toString())
+      const commentRef = await getDoc(commentDocument)
       if (commentRef.exists()) return commentRef.data()!.content as string
 
       const data = `auth_key=${process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY}&text=${encodeURIComponent(
@@ -63,10 +64,7 @@ const useCommentTranslation = (id: string, content: string, enabled = true) => {
       const translatedContent = result.translations?.[0]?.text
       if (!translatedContent) throw new Error('Translation response is empty')
 
-      await firebaseDb
-        .collection('commentaries-FR')
-        .doc(id.toString())
-        .set({ content: translatedContent })
+      await setDoc(commentDocument, { content: translatedContent })
       return translatedContent as string
     },
     enabled: enabled && commentLang !== 'en',

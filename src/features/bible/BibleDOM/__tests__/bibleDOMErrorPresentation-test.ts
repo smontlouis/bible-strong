@@ -17,4 +17,20 @@ describe('Bible DOM resource failure presentation', () => {
       getBibleDOMErrorPresentation(new BibleLoadingError('BIBLE_NOT_FOUND', 'LSG'), false)
     ).toMatchObject({ icon: 'wifi-off', actions: [], connectionRequired: true })
   })
+
+  it('removes offline recovery actions from an online-only presentation', () => {
+    expect(
+      getBibleDOMErrorPresentation(new BibleLoadingError('BIBLE_NOT_FOUND', 'LSG'), true, {
+        onlineOnly: true,
+      })
+    ).toMatchObject({ actions: [] })
+
+    expect(
+      getBibleDOMErrorPresentation(
+        new BibleLoadingError('RESOURCE_TEMPORARY_UNAVAILABLE', 'LSG'),
+        true,
+        { onlineOnly: true }
+      )
+    ).toMatchObject({ actions: ['retry'] })
+  })
 })

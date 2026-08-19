@@ -1,6 +1,8 @@
 import { HttpApiBuilder, HttpApp, HttpServer, HttpServerResponse } from '@effect/platform'
 import { Effect, Layer } from 'effect'
 
+import { addResourceCorsHeaders, makeResourcePreflightResponse } from './cors'
+
 import {
   ActiveBiblePublicationUnavailable,
   BibleChapterNotFound,
@@ -991,7 +993,8 @@ export const provideResourceRepositories = (
 export const makeResourceWebHandler = (
   repository: BibleChapterRepositoryService = unavailableRepository,
   naveRepository: NaveRepositoryService = unavailableNaveRepository,
-  overrides: ResourceRepositoryOverrides = {}
+  overrides: ResourceRepositoryOverrides = {},
+  options: ResourceWebHandlerOptions = {}
 ) => {
   const web = HttpApiBuilder.toWebHandler(
     Layer.mergeAll(
@@ -1012,9 +1015,12 @@ export const makeResourceWebHandler = (
   return {
     ...web,
     handler: async (request: Request) => {
+      const preflight = makeResourcePreflightResponse(request, options.corsAllowedOrigins ?? [])
+      if (preflight) return preflight
       const requestId = requestIdFrom(request.headers.get('x-request-id') ?? undefined)
       const response = await web.handler(request)
       const headers = new Headers(response.headers)
+      addResourceCorsHeaders(request, headers, options.corsAllowedOrigins ?? [])
       if (!headers.has('x-request-id')) headers.set('x-request-id', requestId)
       if (response.status === 503 && !headers.has('retry-after')) headers.set('retry-after', '30')
       if (response.status === 400) {
@@ -1046,4 +1052,8 @@ export type ResourceRepositoryOverrides = {
   strongLexicon?: StrongLexiconRepositoryService
   supplementary?: SupplementaryRepositoryService
   timeline?: TimelineRepositoryService
+}
+
+export type ResourceWebHandlerOptions = {
+  corsAllowedOrigins?: readonly string[]
 }
