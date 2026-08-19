@@ -6017,6 +6017,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-firebase/app-check@npm:23.7.0":
+  version: 23.7.0
+  resolution: "@react-native-firebase/app-check@npm:23.7.0"
+  peerDependencies:
+    "@react-native-firebase/app": 23.7.0
+    expo: ">=47.0.0"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10c0/d3b4274a6f105609e71b6bb2b8af7a552819281c0d3d8c5afaee5c475f5093d34dd3ab7b168fb31012f6e3f3503b1dc4f999aeb4c2f870e3e4c16c908cb07f2b
+  languageName: node
+  linkType: hard
+
 "@react-native-firebase/app@npm:23.7.0":
   version: 23.7.0
   resolution: "@react-native-firebase/app@npm:23.7.0"
@@ -8527,6 +8540,7 @@ __metadata:
     "@react-native-community/netinfo": "npm:12.0.1"
     "@react-native-firebase/analytics": "npm:23.7.0"
     "@react-native-firebase/app": "npm:23.7.0"
+    "@react-native-firebase/app-check": "npm:23.7.0"
     "@react-native-firebase/auth": "npm:23.7.0"
     "@react-native-firebase/firestore": "npm:23.7.0"
     "@react-native-firebase/remote-config": "npm:23.7.0"
@@ -8609,6 +8623,7 @@ __metadata:
     intl: "npm:^1.2.5"
     jest: "npm:^29.2.1"
     jest-expo: "npm:~56.0.5"
+    jose: "npm:6.2.9"
     jotai: "npm:^2.16.0"
     jotai-devtools: "npm:^0.13.0"
     kysely: "npm:0.29.5"
@@ -14457,6 +14472,13 @@ __metadata:
     "@sideway/formula": "npm:^3.0.1"
     "@sideway/pinpoint": "npm:^2.0.0"
   checksum: 10c0/9262aef1da3f1bec5b03caf50c46368899fe03b8ff26cbe3d53af4584dd1049079fc97230bbf1500b6149db7cc765b9ee45f0deb24bb6fc3fa06229d7148c17f
+  languageName: node
+  linkType: hard
+
+"jose@npm:6.2.9":
+  version: 6.2.9
+  resolution: "jose@npm:6.2.9"
+  checksum: 10c0/fc6d79b11fdd5cc1393bccd644533b3e2445fd8eb2468066eb23c01ed7f6b41deca710e8aabe9379a382cca7920740900c7f610bdf0be4ff5e7ee44412730d4c
   languageName: node
   linkType: hard
 

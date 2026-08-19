@@ -37,6 +37,7 @@ const writeMobileCatalog = async (
           {
             id,
             ...entry,
+            entry: entry.entry ?? 'bible-lsg-strong.sqlite',
             entries: {
               canonical: {
                 entry: entry.entry ?? 'bible-lsg-strong.sqlite',
@@ -254,6 +255,33 @@ describe('R2 artifact publisher', () => {
         'canonical/bible-lsg-strong.sqlite.zip'
       )
       assert.ok(store.objects.has('canonical/bible-lsg-strong.sqlite.zip'))
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects a catalog whose artifact integrity differs from its publication bundle', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-catalog-integrity-'))
+    const store = new MemoryR2ArtifactStore()
+
+    try {
+      const bundle = path.join(root, 'bundle')
+      const { manifest } = await writeStrongPublicationFixture(bundle)
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/bible-lsg-strong.sqlite.zip',
+          archiveSha256: '0'.repeat(64),
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+      })
+
+      await assert.rejects(
+        publishR2PublicationCatalog([bundle], catalogPath, store),
+        /R2_PUBLICATION_CATALOG_INTEGRITY_MISMATCH:bible-strong:LSG/
+      )
+      assert.deepEqual(store.puts, [])
     } finally {
       await rm(root, { recursive: true, force: true })
     }

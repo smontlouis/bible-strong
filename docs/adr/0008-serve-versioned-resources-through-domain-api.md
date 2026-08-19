@@ -57,10 +57,12 @@ at Cloudflare and purge affected entries during publication. Do not CDN-cache dy
 initial design. Verify App Check before protected cache access, while keeping attestation tokens out
 of shared content cache keys so verified application instances reuse the same cached response.
 
-Keep offline artifacts in private R2 buckets. After App Check verification, the Worker issues a
-short-lived presigned URL scoped to one artifact so the mobile client downloads directly from R2 and
-then verifies the catalog checksum. Treat the URL as a temporary bearer credential and allow the app
-to request a replacement when resuming after expiry.
+Keep offline artifacts in private R2 buckets. After App Check verification, the Worker reads the
+requested catalog artifact through its R2 binding and streams it to the mobile client with byte-range
+support. The Worker accepts only stable object keys declared by the exhaustive mobile catalog and
+never exposes publication metadata sidecars or recovery objects. The mobile client then verifies the
+catalog checksum. This keeps permanent R2 credentials and public bucket domains out of the delivery
+path and allows interrupted downloads to resume without expiring bearer URLs.
 
 ## Consequences
 

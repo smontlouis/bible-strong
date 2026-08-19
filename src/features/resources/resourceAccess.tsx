@@ -95,6 +95,7 @@ import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
 import { STRONG_BIBLE_FALLBACK_PRIORITY } from '~helpers/strongBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { withResourceSourceLogging } from '~features/resources/resourceSourceLogger'
+import { resourceApiFetch } from '~helpers/resourceAppCheck'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
@@ -147,6 +148,7 @@ const onlineBibleChapterAdapter = resourceApiBaseUrl
       'Bible',
       createHttpBibleChapterAdapter({
         baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
       })
     )
@@ -160,6 +162,7 @@ const onlineNaveAccess = resourceApiBaseUrl
       'Nave',
       createHttpNaveAccess({
         baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
       })
     )
@@ -179,6 +182,7 @@ const onlineDictionaryAccess = resourceApiBaseUrl
       'Dictionary',
       createHttpDictionaryAccess({
         baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
       })
     )
@@ -191,6 +195,7 @@ const onlineStrongBibleAdapter = resourceApiBaseUrl
       'Strong Bible index',
       createHttpStrongBibleResourceAdapter({
         baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
         bibleChapterAdapter,
       })
@@ -212,6 +217,7 @@ const onlineInterlinearBibleAdapter = resourceApiBaseUrl
       'Interlinear Bible',
       createHttpInterlinearBibleResourceAdapter({
         baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
         bibleChapterAdapter,
       })
@@ -234,6 +240,7 @@ const strongLexiconAccess = createHybridStrongLexiconAccess({
         'Strong lexicon',
         createHttpStrongLexiconAccess({
           baseUrl: resourceApiBaseUrl,
+          fetcher: resourceApiFetch,
           isOnline: async () => onlineManager.isOnline(),
         })
       )
@@ -252,6 +259,7 @@ const onlineBibleSearchAccess = resourceApiBaseUrl
       'Bible search',
       createHttpBibleSearchAccess({
         baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
         versions: [...remotelyReadableBibleVersions],
         isOnline: async () => onlineManager.isOnline(),
       })
@@ -262,6 +270,7 @@ const onlineBibleReadingAccess = resourceApiBaseUrl
       'Bible reading resources',
       createHttpBibleReadingResourceAccess({
         baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
       })
     )
@@ -288,6 +297,7 @@ const onlineTimelineAccess = resourceApiBaseUrl
       'Timeline',
       createHttpTimelineAccess({
         baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
         isOnline: async () => onlineManager.isOnline(),
       })
     )
@@ -299,6 +309,7 @@ const commentaryAccess = createCommentaryAccess({
         'Commentary',
         createHttpCommentaryAccess({
           baseUrl: resourceApiBaseUrl,
+          fetcher: resourceApiFetch,
           isOnline: async () => onlineManager.isOnline(),
         })
       )

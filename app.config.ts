@@ -64,6 +64,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
     entitlements: {
       'com.apple.developer.applesignin': ['Default'],
+      'com.apple.developer.devicecheck.appattest-environment': 'production',
     },
     // Deep linking: iOS Universal Links
     associatedDomains: ['applinks:bible.strong.app'],
@@ -76,6 +77,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-sqlite',
     'expo-audio',
     '@react-native-firebase/app',
+    './plugins/withFirebaseAppCheckSwiftBridge.js',
+    '@react-native-firebase/app-check',
     '@react-native-firebase/auth',
     [
       'expo-build-properties',
@@ -83,10 +86,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         ios: {
           deploymentTarget: '16.4',
           useFrameworks: 'static',
-          forceStaticLinking: ['RNFBApp', 'RNFBAuth', 'RNFBFirestore', 'RNFBConfig', 'RNFBStorage'],
+          forceStaticLinking: [
+            'RNFBApp',
+            'RNFBAppCheck',
+            'RNFBAuth',
+            'RNFBFirestore',
+            'RNFBConfig',
+            'RNFBStorage',
+          ],
         },
         android: {
-          targetSdkVersion: 35,
+          targetSdkVersion: 36,
           usesCleartextTraffic: true,
           extraMavenRepos: ['../../node_modules/@notifee/react-native/android/libs'],
         },

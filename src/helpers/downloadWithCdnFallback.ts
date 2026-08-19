@@ -6,6 +6,7 @@ import {
   publicationFromHeaders,
   type ResourcePublication,
 } from './resourcePublication'
+import { getResourceDownloadHeaders } from './resourceAppCheck'
 
 type DownloadWithCdnFallbackOptions = {
   url: string
@@ -37,10 +38,15 @@ export const downloadWithCdnFallback = async ({
   let lastError: unknown
 
   for (const downloadUrl of urls) {
+    const appCheckHeaders = await getResourceDownloadHeaders(downloadUrl)
     const resumable = FileSystem.createDownloadResumable(
       downloadUrl,
       destinationPath,
-      { ...downloadOptions, md5: true },
+      {
+        ...downloadOptions,
+        headers: { ...downloadOptions?.headers, ...appCheckHeaders },
+        md5: true,
+      },
       onDownloadProgress
     )
 

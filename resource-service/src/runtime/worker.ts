@@ -18,6 +18,8 @@ import { makeKyselyInterlinearBibleRepository } from '../repositories/interlinea
 import { makeKyselyStrongLexiconRepository } from '../repositories/strongLexiconRepository'
 import { makeKyselySupplementaryRepository } from '../repositories/supplementaryRepository'
 import { makeKyselyTimelineRepository } from '../repositories/timelineRepository'
+import { routeR2ArtifactRequest } from './r2ArtifactDelivery'
+import { createFirebaseAppCheckConfig, verifyFirebaseAppCheckRequest } from './firebaseAppCheck'
 
 export const makeResourceWorkerHandler = (
   repository: BibleChapterRepositoryService,
@@ -42,6 +44,17 @@ export const makeResourceWorkerHandler = (
 
 export default {
   async fetch(request: Request, bindings: Env): Promise<Response> {
+    const appCheckConfig = createFirebaseAppCheckConfig({
+      projectNumber: bindings.FIREBASE_APP_CHECK_PROJECT_NUMBER,
+      allowedAppIds: bindings.FIREBASE_APP_CHECK_ALLOWED_APP_IDS,
+    })
+    const artifactResponse = await routeR2ArtifactRequest({
+      request,
+      bucket: bindings.RESOURCE_ARTIFACTS,
+      authorize: candidate => verifyFirebaseAppCheckRequest(candidate, appCheckConfig),
+    })
+    if (artifactResponse) return artifactResponse
+
     const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString)
     const web = makeResourceWorkerHandler(
       makeKyselyBibleChapterRepository(database),

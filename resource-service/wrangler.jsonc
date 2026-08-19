@@ -11,6 +11,10 @@
       "custom_domain": true,
     },
   ],
+  "vars": {
+    "FIREBASE_APP_CHECK_PROJECT_NUMBER": "204116128917",
+    "FIREBASE_APP_CHECK_ALLOWED_APP_IDS": "1:204116128917:android:3ae4e716f079e5a002579c,1:204116128917:android:48985d9ab5229d3b02579c,1:204116128917:android:3fdbe48f9c6db8e702579c,1:204116128917:ios:116748d319a72c8c02579c,1:204116128917:ios:253ce7fa4e328e2702579c,1:204116128917:ios:db04ad99d1581a9e02579c",
+  },
   "observability": {
     "enabled": true,
     "head_sampling_rate": 0.1,

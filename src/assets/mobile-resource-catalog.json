@@ -1,7 +1,7 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-08-11T10:52:29.011Z",
+  "generatedAt": "2026-08-19T17:36:40.007Z",
   "resourceCount": 72,
   "resources": {
     "bible-interlinear:BHG:en": {
@@ -21,7 +21,7 @@
       "contentSha256": "be13b954bda6cef2525d46d2421c7ea64f80adf0f0c34e7b767d40eb96526a34",
       "contentBytes": 55119872,
       "installedBytes": 55119872,
-      "peakInstallationBytes": 89532253,
+      "peakInstallationBytes": 89775344,
       "strategy": "archive-extract"
     },
     "bible-interlinear:BHG:fr": {
@@ -41,7 +41,7 @@
       "contentSha256": "e5581a22d74be411e762936a5094e1ad4873c6fe7b98cbb49adc25fbd8ea2294",
       "contentBytes": 54296576,
       "installedBytes": 54296576,
-      "peakInstallationBytes": 88133223,
+      "peakInstallationBytes": 88358116,
       "strategy": "archive-extract"
     },
     "bible-strong:ASV": {
@@ -1501,12 +1501,12 @@
           "bytes": 6575104
         }
       },
-      "archiveSha256": "12cb45899b302190c362b39158bc399bc7e5d2d035ae9c25e49d396b1ff63031",
+      "archiveSha256": "d15eff34186b93ddbe89a3d20d74ec0829d3becba6611516b58600868054cec4",
       "archiveBytes": 1943754,
       "contentSha256": "5f5d6e28f561957be09c8eaa1bee51afd52b073c4a572ae0b6474b90fe7ce111",
       "contentBytes": 6575104,
       "installedBytes": 6575104,
-      "peakInstallationBytes": 9764287,
+      "peakInstallationBytes": 9796687,
       "strategy": "archive-extract"
     },
     "database:NAVE:en": {
@@ -1526,7 +1526,7 @@
       "contentSha256": "85ebea651a48023c8c31b2a805c3805d9189f479b3848e9053c270845ee687a0",
       "contentBytes": 7402496,
       "installedBytes": 7402496,
-      "peakInstallationBytes": 10823924,
+      "peakInstallationBytes": 10825308,
       "strategy": "archive-extract"
     },
     "database:NAVE:fr": {
@@ -1546,7 +1546,7 @@
       "contentSha256": "8a5769b3b526cb8fdf119936758864773ff74908af949a4354d7d38b58a9ef6b",
       "contentBytes": 7791616,
       "installedBytes": 7791616,
-      "peakInstallationBytes": 11338100,
+      "peakInstallationBytes": 11339677,
       "strategy": "archive-extract"
     },
     "database:TIMELINE:en": {
@@ -1561,12 +1561,12 @@
           "bytes": 1397921
         }
       },
-      "archiveSha256": "7f6e4eb89eab97a3010e3664285b4fbe11abb6c9d9b991d5e23a12275cdce6a3",
+      "archiveSha256": "3b8795a95a473924dd6674bcace464954cefea5252d2b02ded3624845ffa83ef",
       "archiveBytes": 488026,
       "contentSha256": "7cf9ff871b30f9d9cb235c9742d16d278e73da2e2c708235f2337bba18b5efc1",
       "contentBytes": 1397921,
       "installedBytes": 1397921,
-      "peakInstallationBytes": 1885947,
+      "peakInstallationBytes": 2168840,
       "strategy": "archive-extract"
     },
     "database:TIMELINE:fr": {
@@ -1581,12 +1581,12 @@
           "bytes": 1520517
         }
       },
-      "archiveSha256": "d24b4c08e2f8f25e51256ecc01e98cb3fa7befbaff96da39eef0f5f75b709d84",
+      "archiveSha256": "e563a61d5d8ab2b336713193fc23be68e60318367aeda6201f1ce2cc3c657ed2",
       "archiveBytes": 532641,
       "contentSha256": "fe4d7e06145f65683f2380e61f55b0d6cd53a8386bb1964da2de9971099da818",
       "contentBytes": 1520517,
       "installedBytes": 1520517,
-      "peakInstallationBytes": 2055793,
+      "peakInstallationBytes": 2361132,
       "strategy": "archive-extract"
     },
     "database:TRESOR:fr": {
@@ -1601,12 +1601,12 @@
           "bytes": 5435392
         }
       },
-      "archiveSha256": "77a06354a28689085dec7c5c3e1593bdbf7944db22d075c42b67a24b32789f9c",
+      "archiveSha256": "87c3195546ffbe6b5b4a2fde771732cbecf8bf33d5601d120ebd15a47302fd97",
       "archiveBytes": 1887092,
       "contentSha256": "cc5575bdf73ff43c2e44d1f5fe2de2a480f9d12e57e2152b7b437ff6c1771032",
       "contentBytes": 5435392,
       "installedBytes": 5435392,
-      "peakInstallationBytes": 8378539,
+      "peakInstallationBytes": 8420857,
       "strategy": "archive-extract"
     },
     "strong-lexicon:core": {
@@ -1617,40 +1617,40 @@
       "entries": {
         "canonical": {
           "entry": "strong_lexicon.core.sqlite",
-          "sha256": "4697c3a496a7e647922114771a0332530a21c86752fb67d1d98cf7bfd00fd3e1",
+          "sha256": "7a3b4638109483b00b80644536be39f290f24709eebe06b81af9677da92d485b",
           "bytes": 30371840
         }
       },
-      "archiveSha256": "063629b535055ecc5938f44a40fa442fd333652ed2440459e7c91784340baa5d",
-      "archiveBytes": 6543526,
-      "contentSha256": "4697c3a496a7e647922114771a0332530a21c86752fb67d1d98cf7bfd00fd3e1",
+      "archiveSha256": "7f2357e954b14c322f86b50f299634ed3e7e9db3f30ac721ba24d1195a89505a",
+      "archiveBytes": 6543530,
+      "contentSha256": "7a3b4638109483b00b80644536be39f290f24709eebe06b81af9677da92d485b",
       "contentBytes": 30371840,
-      "resourceRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699",
       "installedBytes": 30371840,
-      "peakInstallationBytes": 43458892,
-      "strategy": "archive-extract"
+      "peakInstallationBytes": 42452676,
+      "strategy": "archive-extract",
+      "resourceRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699"
     },
     "strong-lexicon:entities": {
       "id": "strong-lexicon:entities",
-      "url": "https://assets.bible-strong.app/databases/bible_entities.production.sqlite.zip",
-      "file": "databases/bible_entities.production.sqlite.zip",
+      "url": "https://assets.bible-strong.app/databases/bible_entities.sqlite.zip",
+      "file": "databases/bible_entities.sqlite.zip",
       "entry": "bible_entities.production.sqlite",
       "entries": {
         "canonical": {
           "entry": "bible_entities.production.sqlite",
-          "sha256": "21816c1d9d3190a16ffcfbf3b53cc47a17e860fe93ab4d81f2fad877c63b07e1",
+          "sha256": "89849a14e352604c6cd0d3bd886b56637708d8fff93760aee086a956102c6611",
           "bytes": 19873792
         }
       },
-      "archiveSha256": "16ec0b12497180dc39042a4a818972c599ab9d5f79c6880a765b2ab8aaed0e09",
+      "archiveSha256": "82a4023c4d13b7ee9c9a445ad3612b59f28eea828746872ffb1325f172f5b08e",
       "archiveBytes": 5369907,
-      "contentSha256": "21816c1d9d3190a16ffcfbf3b53cc47a17e860fe93ab4d81f2fad877c63b07e1",
+      "contentSha256": "89849a14e352604c6cd0d3bd886b56637708d8fff93760aee086a956102c6611",
       "contentBytes": 19873792,
-      "resourceRevision": "strong-lexicon-entities-8235604fb1a30e9714b32a69",
-      "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699",
       "installedBytes": 19873792,
-      "peakInstallationBytes": 30613590,
-      "strategy": "archive-extract"
+      "peakInstallationBytes": 29030254,
+      "strategy": "archive-extract",
+      "resourceRevision": "strong-lexicon-entities-8235604fb1a30e9714b32a69",
+      "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699"
     },
     "strong-lexicon:resources": {
       "id": "strong-lexicon:resources",
@@ -1660,19 +1660,19 @@
       "entries": {
         "canonical": {
           "entry": "strong_lexicon.resources.sqlite",
-          "sha256": "84c2d3b684242b54473093fc21f9d4dc549b0d359461dc9eade12831f62d0826",
+          "sha256": "c0a891f171c6679a16ca9f8f05839c4e546cb36982da36ae6f08a509c4892e00",
           "bytes": 52072448
         }
       },
-      "archiveSha256": "956950545e6a1014b8b05b020c84a8accf21eb958e670964976d0dc52c34888e",
-      "archiveBytes": 11492177,
-      "contentSha256": "84c2d3b684242b54473093fc21f9d4dc549b0d359461dc9eade12831f62d0826",
+      "archiveSha256": "e81155bbf7c2583e65f55c13e5c4586b477a7014f74e2f78221e0b446f62b199",
+      "archiveBytes": 11492264,
+      "contentSha256": "c0a891f171c6679a16ca9f8f05839c4e546cb36982da36ae6f08a509c4892e00",
       "contentBytes": 52072448,
-      "resourceRevision": "strong-lexicon-resources-c8cb209a32d429e67fb5f06b",
-      "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699",
       "installedBytes": 52072448,
-      "peakInstallationBytes": 75056962,
-      "strategy": "archive-extract"
+      "peakInstallationBytes": 73099419,
+      "strategy": "archive-extract",
+      "resourceRevision": "strong-lexicon-resources-c8cb209a32d429e67fb5f06b",
+      "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699"
     }
   }
 }

@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 
-import { readMobileResourceCatalog } from './mobileResourceCatalog'
+import { readMobileResourceCatalog, type MobileResourceCatalogEntry } from './mobileResourceCatalog'
 import { validatePublicationBundle } from './publicationBundle'
 import { getPublicationIdentityProjection } from './publicationIdentity'
 
@@ -28,6 +28,42 @@ export type R2ArtifactPublicationResult = {
 )
 
 type ValidatedPublicationBundle = Awaited<ReturnType<typeof validatePublicationBundle>>
+
+const catalogMatchesOfflineArtifact = (
+  validated: ValidatedPublicationBundle,
+  catalogEntry: MobileResourceCatalogEntry
+): boolean => {
+  const artifact = validated.manifest.offlineArtifact
+  if (
+    catalogEntry.archiveSha256 !== artifact.sha256 ||
+    catalogEntry.archiveBytes !== artifact.bytes ||
+    catalogEntry.entry !== artifact.entry
+  ) {
+    return false
+  }
+
+  const declarations = artifact.entries
+  if (!declarations) {
+    return (
+      Object.keys(catalogEntry.entries).length === 1 &&
+      catalogEntry.contentSha256 === artifact.contentSha256 &&
+      catalogEntry.entries.canonical?.entry === artifact.entry &&
+      catalogEntry.entries.canonical.sha256 === artifact.contentSha256
+    )
+  }
+
+  const roles = ['canonical', 'pericope', 'redWords'] as const
+  return roles.every(role => {
+    const manifestEntry = declarations[role]
+    const catalogArtifactEntry = catalogEntry.entries[role]
+    return manifestEntry
+      ? !!catalogArtifactEntry &&
+          catalogArtifactEntry.entry === manifestEntry.entry &&
+          catalogArtifactEntry.sha256 === manifestEntry.sha256 &&
+          catalogArtifactEntry.bytes === manifestEntry.bytes
+      : catalogArtifactEntry === undefined
+  })
+}
 
 const publishValidatedR2PublicationBundle = async (
   validated: ValidatedPublicationBundle,
@@ -143,6 +179,9 @@ export const publishR2PublicationCatalog = async (
       !validated.manifest.deliveryCapabilities.offlineDownload
     ) {
       throw new Error(`R2_PUBLICATION_CATALOG_OFFLINE_NOT_AUTHORIZED:${catalogId}`)
+    }
+    if (!catalogMatchesOfflineArtifact(validated, catalogEntry)) {
+      throw new Error(`R2_PUBLICATION_CATALOG_INTEGRITY_MISMATCH:${catalogId}`)
     }
     return { validated, catalogId, stableKey: catalogEntry.file }
   })

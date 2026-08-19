@@ -151,12 +151,23 @@ publication manifest independently authorizes and validates the newly generated 
 entries, byte size, and SHA-256. Production publishing requires the checked-in exhaustive 72-entry
 inventory; it cannot be replaced by an environment override.
 
-The bucket remains private. The `RESOURCE_ARTIFACTS` Worker binding is reserved for the later
-App Check-protected download route; publishing does not expose an R2 custom domain, change the
-mobile artifact origin, or remove the current Firebase Storage copies. This initial operator-run
-upload is only a private bootstrap mirror, not production activation. Before the Worker exposes R2
-downloads or the mobile catalog points to it, move subsequent publication credentials and recovery
-retention into the manually triggered protected CI environment required by ADR-0010.
+The bucket remains private. The `RESOURCE_ARTIFACTS` Worker binding supplies the App
+Check-protected download route. The route accepts only `GET` and `HEAD` for the exact stable
+paths in the checked-in mobile catalog, verifies the Firebase JWT signature, project, expiration,
+audience, and allow-listed native App ID, then streams bodies and byte ranges through the binding.
+It returns `401` before reading R2 when attestation is missing or invalid. Publishing does not expose
+an R2 custom domain, change the mobile artifact origin, or remove the current Firebase Storage
+copies. This initial operator-run upload is only a private bootstrap mirror, not production
+activation. Before the mobile catalog points to R2, move subsequent publication credentials and
+recovery retention into the manually triggered protected CI environment required by ADR-0010.
+
+The Worker configuration contains only the non-secret Firebase project number and the six native
+App IDs already declared by the development, staging, and production Firebase application files.
+It fetches Firebase's rotating public App Check JWKS and keeps tokens out of logs and cache keys.
+The Expo application uses the App Check config plugin, Play Integrity on release Android builds,
+App Attest with DeviceCheck fallback on release Apple builds, and Firebase's debug provider in
+development. Register each release provider and each local debug token in Firebase Console before
+testing a protected artifact download. Do not put debug tokens in committed `.env` files.
 
 ## Deploy the production Worker
 

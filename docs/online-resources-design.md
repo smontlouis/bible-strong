@@ -123,10 +123,10 @@ not work started during this design session.
   `node-postgres`. One bounded pool is shared by all repositories for a request and then closed.
   Hyperdrive SQL caching starts disabled until publication-aware invalidation exists.
 - Cloudflare R2 stores downloadable SQLite/JSON offline artifacts.
-- R2 artifact buckets remain private. After App Check verification, the Worker grants temporary
-  direct access to one artifact with a short-lived presigned URL; the mobile app verifies the
-  catalog checksum after download. Presigned URLs are bearer credentials and may be renewed for a
-  resumed download, but they do not expose permanent R2 credentials.
+- R2 artifact buckets remain private. After App Check verification, the Worker streams one
+  catalog-declared artifact through its R2 binding with byte-range support; the mobile app verifies
+  the catalog checksum after download. R2 credentials, integrity sidecars, and recovery objects are
+  never exposed, and interrupted downloads can resume without expiring bearer URLs.
 - The mobile application never connects directly to PostgreSQL and no generic remote SQL interface
   is exposed.
 - Deterministic reads such as chapters and lexical entries are eligible for Cloudflare caching;
