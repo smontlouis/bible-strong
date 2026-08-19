@@ -27,6 +27,8 @@ export const DEFAULT_MOBILE_RESOURCE_REQUIRED_IDS =
 export const DEFAULT_MOBILE_RESOURCE_RELEASE =
   "outputs/releases/mobile-resources-current";
 export const MOBILE_RESOURCE_CATALOG_FILE = "mobile-resource-catalog.json";
+export const MOBILE_RESOURCE_ARTIFACT_BASE_URL =
+  "https://api.bible-strong.app/v1/offline-artifacts/";
 
 export type MobileResourceInstallationStrategy =
   | "sqlite-import"
@@ -467,7 +469,7 @@ async function packageResource(options: {
   );
   return {
     id: resource.id,
-    url: resource.artifactUrl,
+    url: new URL(artifactFile, MOBILE_RESOURCE_ARTIFACT_BASE_URL).toString(),
     file: artifactFile,
     entry: canonicalEntry.entry,
     entries: catalogEntries,

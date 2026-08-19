@@ -240,7 +240,7 @@ describe("mobile resource catalog", () => {
     assert.equal(catalog.resourceCount, 1);
     assert.equal(
       artifact.url,
-      "https://assets.test/bibles/bible-test.json.zip"
+      "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-test.json.zip"
     );
     assert.equal(artifact.entry, "bible-test.json");
     assert.deepEqual(Object.keys(artifact.entries).sort(), [
