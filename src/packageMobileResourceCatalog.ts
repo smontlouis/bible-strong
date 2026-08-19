@@ -46,6 +46,8 @@ export interface MobileResourceInventoryEntry {
   artifactUrl: string;
   sources: MobileResourceInventorySource[];
   strategy: MobileResourceInstallationStrategy;
+  resourceRevision?: string;
+  coreRevision?: string;
 }
 
 export interface MobileResourceCatalogFileEntry {
@@ -69,6 +71,8 @@ export interface MobileResourceCatalogEntry {
   installedBytes: number;
   peakInstallationBytes: number;
   strategy: MobileResourceInstallationStrategy;
+  resourceRevision?: string;
+  coreRevision?: string;
 }
 
 export interface MobileResourceCatalog {
@@ -103,6 +107,19 @@ export function validateMobileResourceInventory(
       throw new Error(`mobile-resource-id-duplicate:${resource.id}`);
     }
     ids.add(resource.id);
+    if (
+      resource.id.startsWith("strong-lexicon:") &&
+      !resource.resourceRevision?.trim()
+    ) {
+      throw new Error(`mobile-resource-revision-missing:${resource.id}`);
+    }
+    if (
+      resource.id.startsWith("strong-lexicon:") &&
+      resource.id !== "strong-lexicon:core" &&
+      !resource.coreRevision?.trim()
+    ) {
+      throw new Error(`mobile-resource-core-revision-missing:${resource.id}`);
+    }
     if (
       !(["sqlite-import", "archive-extract"] as const).includes(
         resource.strategy
@@ -460,7 +477,9 @@ async function packageResource(options: {
     contentBytes,
     installedBytes,
     peakInstallationBytes,
-    strategy: resource.strategy
+    strategy: resource.strategy,
+    resourceRevision: resource.resourceRevision,
+    coreRevision: resource.coreRevision
   };
 }
 

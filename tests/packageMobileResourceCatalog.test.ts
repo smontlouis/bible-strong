@@ -73,6 +73,20 @@ describe("mobile resource catalog", () => {
         item.artifactUrl.endsWith(".zip")
       )
     );
+    const strongCore = inventory.find(
+      (item: { id: string }) => item.id === "strong-lexicon:core"
+    );
+    assert.match(strongCore.resourceRevision, /^strong-lexicon-core-/);
+    for (const moduleId of ["entities", "resources"]) {
+      const module = inventory.find(
+        (item: { id: string }) => item.id === `strong-lexicon:${moduleId}`
+      );
+      assert.match(
+        module.resourceRevision,
+        new RegExp(`^strong-lexicon-${moduleId}-`)
+      );
+      assert.equal(module.coreRevision, strongCore.resourceRevision);
+    }
   });
 
   test("requires one unique ZIP artifact for every resource", () => {
