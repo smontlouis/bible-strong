@@ -3,7 +3,7 @@ import { unzip } from 'react-native-zip-archive'
 
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath, type ResourceLanguage } from './databaseTypes'
-import { downloadWithCdnFallback } from './downloadWithCdnFallback'
+import { downloadResourceArtifact } from './downloadResourceArtifact'
 import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
 import {
   BHG_INTERLINEAR_PUBLICATION,
@@ -183,14 +183,14 @@ export const installInterlinearSidecar = async (
   const extractionDirectory = `${FileSystem.cacheDirectory}bhg-interlinear-${locale}/`
   const extractedPath = `${extractionDirectory}${artifact.entry}`
   try {
-    const downloadResult = await downloadWithCdnFallback({
+    const downloadResult = await downloadResourceArtifact({
       url: artifact.url,
+      archiveSha256: artifact.archiveSha256,
       destinationPath: archivePath,
       downloadOptions: { cache: false },
       onDownloadProgress: callbacks.onDownloadProgress,
       onResumable: callbacks.onResumable,
       isCancelled: callbacks.isCancelled,
-      logTag: 'InterlinearBibleSidecar',
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
     await verifyFileSha256(

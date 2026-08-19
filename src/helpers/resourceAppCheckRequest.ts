@@ -1,6 +1,7 @@
 export const FIREBASE_APP_CHECK_HEADER = 'X-Firebase-AppCheck'
 const RESOURCE_API_HOSTNAME = 'api.bible-strong.app'
-const RESOURCE_ARTIFACT_PATH_PREFIX = '/v1/offline-artifacts/'
+const RESOURCE_API_PATH_PREFIX = '/v1/'
+const PUBLIC_RESOURCE_CATALOG_PATH = '/v1/offline-catalog'
 
 export type ResourceAppCheckTokenProvider = (forceRefresh?: boolean) => Promise<string>
 
@@ -11,7 +12,8 @@ export const isResourceAppCheckProtectedUrl = (input: RequestInfo | URL): boolea
     return (
       url.protocol === 'https:' &&
       url.hostname === RESOURCE_API_HOSTNAME &&
-      url.pathname.startsWith(RESOURCE_ARTIFACT_PATH_PREFIX)
+      url.pathname.startsWith(RESOURCE_API_PATH_PREFIX) &&
+      url.pathname !== PUBLIC_RESOURCE_CATALOG_PATH
     )
   } catch {
     return false

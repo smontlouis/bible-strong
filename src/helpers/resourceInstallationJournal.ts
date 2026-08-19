@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
 import { getBibleVersionMetadata } from './biblesDb'
-import type { DownloadWithCdnFallbackResult } from './downloadWithCdnFallback'
+import type { DownloadResourceArtifactResult } from './downloadResourceArtifact'
 import { resourcePublicationStore, type InstalledResourcePublication } from './resourcePublication'
 import { storage } from './storage'
 
@@ -51,7 +51,7 @@ const restorePublication = (journal: ResourceInstallationJournal) => {
 
 export const beginResourceInstallation = (
   resourceId: string,
-  result: DownloadWithCdnFallbackResult,
+  result: DownloadResourceArtifactResult,
   recoveryTarget: ResourceInstallationRecoveryTarget,
   archiveSha256?: string
 ): ResourceInstallationJournal => {
@@ -112,7 +112,7 @@ const reconcileFileInstallation = async (journal: ResourceInstallationJournal) =
 const reconcileBibleInstallation = async (journal: ResourceInstallationJournal) => {
   if (journal.recoveryTarget.kind !== 'bible-sqlite') return
   const metadata = await getBibleVersionMetadata(journal.recoveryTarget.versionId)
-  if (metadata?.resourceGeneration === journal.nextPublication.generation) {
+  if (metadata?.resourceGeneration === journal.nextPublication.revision) {
     resourcePublicationStore.write(journal.resourceId, journal.nextPublication)
     await Promise.all(
       (journal.recoveryTarget.bundleFiles ?? []).map(file =>

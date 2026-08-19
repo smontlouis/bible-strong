@@ -1,6 +1,6 @@
 import {
   BUNDLED_MOBILE_RESOURCE_CATALOG,
-  configureDevelopmentResourceArtifactBaseUrl,
+  configureResourceArtifactBaseUrl,
   getMobileBibleVersionIds,
   getMobileResourceCatalogEntry,
   isMobileResourceCatalog,
@@ -46,7 +46,7 @@ describe('mobile resource catalog', () => {
     ).toBe(true)
   })
 
-  it('uses the single CDN catalog with the bundled catalog as network fallback', async () => {
+  it('uses the Resource API catalog with the bundled catalog as network fallback', async () => {
     const fetcher = jest.fn(async () => new Response(null, { status: 503 }))
 
     await expect(loadMobileResourceCatalog(fetcher)).resolves.toBe(BUNDLED_MOBILE_RESOURCE_CATALOG)
@@ -127,7 +127,7 @@ describe('mobile resource catalog', () => {
   it('bundles optional pericope and red-word JSON files with legacy Bibles', () => {
     expect(getMobileResourceCatalogEntry('bible:NBS')).toEqual(
       expect.objectContaining({
-        url: 'https://assets.bible-strong.app/bibles/bible-nbs.json.zip',
+        url: 'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nbs.json.zip',
         entry: 'bible-nbs.json',
         entries: expect.objectContaining({
           canonical: expect.objectContaining({ entry: 'bible-nbs.json' }),
@@ -144,14 +144,14 @@ describe('mobile resource catalog', () => {
   it('describes historical Bible and database archive entries', () => {
     expect(getMobileResourceCatalogEntry('bible:OST')).toEqual(
       expect.objectContaining({
-        url: 'https://assets.bible-strong.app/bibles/bible-ost.json.zip',
+        url: 'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-ost.json.zip',
         entry: 'bible-ost.json',
         strategy: 'sqlite-import',
       })
     )
     expect(getMobileResourceCatalogEntry('database:NAVE:fr')).toEqual(
       expect.objectContaining({
-        url: 'https://assets.bible-strong.app/databases/nave-fr.sqlite.zip',
+        url: 'https://api.bible-strong.app/v1/offline-artifacts/databases/nave-fr.sqlite.zip',
         entry: 'nave-fr.sqlite',
         strategy: 'archive-extract',
       })
@@ -174,15 +174,15 @@ describe('mobile resource catalog', () => {
     runtime.__DEV__ = true
 
     try {
-      configureDevelopmentResourceArtifactBaseUrl('http://127.0.0.1:8788')
+      configureResourceArtifactBaseUrl('http://127.0.0.1:8788')
       expect(resolveMobileResourceArtifactUrl(entry)).toBe(
         'http://127.0.0.1:8788/bibles/bible-lsg.json.zip'
       )
 
-      configureDevelopmentResourceArtifactBaseUrl(undefined)
+      configureResourceArtifactBaseUrl(undefined)
       expect(resolveMobileResourceArtifactUrl(entry)).toBe(entry.url)
     } finally {
-      configureDevelopmentResourceArtifactBaseUrl(undefined)
+      configureResourceArtifactBaseUrl(undefined)
       if (previousDevelopmentMode === undefined) delete runtime.__DEV__
       else runtime.__DEV__ = previousDevelopmentMode
     }

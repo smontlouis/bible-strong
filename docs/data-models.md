@@ -212,8 +212,9 @@ Local paths:
 - Language-specific JSON: `documentDirectory/{lang}`
 
 The bundled resource catalog is `src/assets/mobile-resource-catalog.json`. Its runtime loader may
-accept a newer compatible catalog, while `src/helpers/firebase.ts` retains the CDN base and fallback
-URL helpers.
+accept a newer compatible catalog from `/v1/offline-catalog`. Every downloadable resource URL is
+derived from the Resource API artifact base and served from private R2 after App Check verification;
+there is no Firebase Storage fallback in the resource installation path.
 
 ## Firestore Sync
 

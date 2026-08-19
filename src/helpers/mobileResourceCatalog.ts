@@ -36,8 +36,11 @@ export type MobileResourceCatalog = {
   resources: Record<string, MobileResourceCatalogEntry>
 }
 
-export const MOBILE_RESOURCE_CATALOG_URL =
-  'https://assets.bible-strong.app/manifests/mobile-resource-catalog.json'
+export const MOBILE_RESOURCE_CATALOG_URL = 'https://api.bible-strong.app/v1/offline-catalog'
+export const MOBILE_RESOURCE_ARTIFACT_BASE_URL =
+  'https://api.bible-strong.app/v1/offline-artifacts/'
+export const resourceArtifactUrl = (path: string): string =>
+  new URL(path, MOBILE_RESOURCE_ARTIFACT_BASE_URL).toString()
 const MOBILE_RESOURCE_CATALOG_TIMEOUT_MS = 3_000
 const CATALOG_ENTRY_ROLES = new Set<MobileResourceEntryRole>(['canonical', 'pericope', 'redWords'])
 
@@ -232,15 +235,15 @@ export const getMobileStrongBibleVersionIds = (
     .map(resourceId => resourceId.slice('bible-strong:'.length))
     .sort()
 
-let developmentResourceArtifactBaseUrl: string | undefined
+let configuredResourceArtifactBaseUrl: string | undefined
 
-export const configureDevelopmentResourceArtifactBaseUrl = (value: string | undefined): void => {
-  developmentResourceArtifactBaseUrl = __DEV__ ? value : undefined
+export const configureResourceArtifactBaseUrl = (value: string | undefined): void => {
+  configuredResourceArtifactBaseUrl = value
 }
 
 export const resolveMobileResourceArtifactUrl = (
   entry: Pick<MobileResourceCatalogEntry, 'file' | 'url'>,
-  configuredBaseUrl = developmentResourceArtifactBaseUrl
+  configuredBaseUrl = configuredResourceArtifactBaseUrl ?? MOBILE_RESOURCE_ARTIFACT_BASE_URL
 ): string => {
   if (!configuredBaseUrl) return entry.url
   try {

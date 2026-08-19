@@ -1,4 +1,4 @@
-import { cdnUrl } from './firebase'
+import { resourceArtifactUrl } from './mobileResourceCatalog'
 import type { ResourceLanguage } from './databaseTypes'
 import { BHG_INTERLINEAR_PUBLICATION_CATALOG } from './interlinearBiblePublicationCatalog'
 
@@ -55,16 +55,16 @@ export const BHG_INTERLINEAR_PUBLICATION: InterlinearBiblePublication = {
   identityCount: catalog.identityCount,
   canonical: {
     ...catalog.canonical,
-    url: cdnUrl(catalog.canonical.path),
+    url: resourceArtifactUrl(catalog.canonical.path),
   },
   indexes: {
     fr: {
       ...catalog.indexes.fr,
-      url: cdnUrl(catalog.indexes.fr.path),
+      url: resourceArtifactUrl(catalog.indexes.fr.path),
     },
     en: {
       ...catalog.indexes.en,
-      url: cdnUrl(catalog.indexes.en.path),
+      url: resourceArtifactUrl(catalog.indexes.en.path),
     },
   },
 }

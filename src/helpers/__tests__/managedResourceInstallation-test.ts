@@ -85,7 +85,7 @@ const callbacks = {
 
 const installedResource = {
   result: { uri: '/resource.sqlite.download', status: 200, headers: {} },
-  publication: { generation: '2', size: 10 },
+  publication: { revision: '2', size: 10 },
   sourceUrl: 'https://example.com/nave.sqlite',
 }
 

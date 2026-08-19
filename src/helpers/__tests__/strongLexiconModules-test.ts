@@ -7,7 +7,7 @@ jest.mock('../atomicResourceFile', () => ({
   restoreOrphanedResourceBackup: jest.fn(),
 }))
 jest.mock('../databaseTypes', () => ({ getSharedSqliteDirPath: () => '/sqlite' }))
-jest.mock('../downloadWithCdnFallback', () => ({ downloadWithCdnFallback: jest.fn() }))
+jest.mock('../downloadResourceArtifact', () => ({ downloadResourceArtifact: jest.fn() }))
 jest.mock('../fileIntegrity', () => ({ toNativeFilePath: (path: string) => path }))
 jest.mock('../firebase', () => ({ cdnUrl: (path: string) => `https://assets.test/${path}` }))
 jest.mock('../sqlite', () => ({ openSQLiteDatabase: jest.fn() }))

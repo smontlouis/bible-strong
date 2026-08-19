@@ -42,7 +42,8 @@ prerequisite.
 
 Require Firebase App Check tokens on the custom resource API as the target application-attestation
 mechanism, using App Attest with DeviceCheck fallback on Apple platforms and Play Integrity on
-Android. The Cloudflare Worker verifies attestation before protected cache or origin access. A
+Android. Every production `/v1` database read and R2 artifact request requires attestation before
+cache or origin access. Only `/health` and the non-sensitive `/v1/offline-catalog` remain public. A
 static client identifier may support telemetry or routing but is not treated as a secret or an
 authorization mechanism. Rate limiting remains necessary because mobile attestation reduces abuse
 but cannot guarantee that a compromised device will never produce valid requests.

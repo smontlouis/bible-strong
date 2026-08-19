@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import {
+  MOBILE_RESOURCE_CATALOG_ROUTE,
   R2_ARTIFACT_ROUTE_PREFIX,
   routeR2ArtifactRequest,
   type ArtifactRange,
@@ -45,6 +46,23 @@ const artifactRequest = (path = artifactKey, init?: RequestInit) =>
   new Request(`https://api.bible-strong.app${R2_ARTIFACT_ROUTE_PREFIX}${path}`, init)
 
 describe('R2 artifact delivery', () => {
+  it('serves the provider-neutral mobile catalog without touching R2', async () => {
+    const { bucket, reads } = makeBucket()
+
+    const response = await routeR2ArtifactRequest({
+      request: new Request(`https://api.bible-strong.app${MOBILE_RESOURCE_CATALOG_ROUTE}`),
+      bucket,
+      authorize: async () => false,
+    })
+
+    assert.equal(response?.status, 200)
+    assert.equal(response?.headers.get('content-type'), 'application/json; charset=utf-8')
+    const catalog = (await response?.json()) as { resourceCount?: number; resources?: object }
+    assert.equal(catalog.resourceCount, 72)
+    assert.equal(Object.keys(catalog.resources ?? {}).length, 72)
+    assert.deepEqual(reads, [])
+  })
+
   it('does not handle unrelated Resource API routes', async () => {
     const { bucket, reads } = makeBucket()
 

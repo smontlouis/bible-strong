@@ -33,7 +33,8 @@ This directory is the repo-level reference set for agents and humans working on 
 | `online-resources-offline-audit.md` | Historical June 2026 audit, retained for context and explicitly marked as a snapshot. |
 | `adr/0013-pair-canonical-bible-text-with-optional-strong-sidecars.md` | Canonical Bible text and optional version-specific Strong indexes. |
 | `adr/0014-pair-original-language-text-with-localized-interlinear-indexes.md` | BHG canonical text and localized interlinear indexes. |
-| `adr/0015-use-storage-generation-for-offline-copy-updates.md` | Installed-copy revision and update detection. |
+| `adr/0015-use-storage-generation-for-offline-copy-updates.md` | Superseded Cloud Storage generation strategy. |
+| `adr/0025-use-catalog-sha-for-r2-offline-copy-updates.md` | R2 artifact delivery and catalog SHA-256 update detection. |
 | `adr/0017-own-strong-routes-under-strong.md` | Ownership and navigation of standalone Strong pages. |
 | `adr/0021-package-all-offline-resources-as-zip.md` | ZIP packaging, mobile catalog, validation, and installation strategy. |
 | `agents/research/legacy-bible-strong-upgrade-workflow.md` | Historical migration analysis for legacy Strong Bible installations. |

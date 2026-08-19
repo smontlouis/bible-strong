@@ -21,6 +21,16 @@ import { makeKyselyTimelineRepository } from '../repositories/timelineRepository
 import { routeR2ArtifactRequest } from './r2ArtifactDelivery'
 import { createFirebaseAppCheckConfig, verifyFirebaseAppCheckRequest } from './firebaseAppCheck'
 
+export const RESOURCE_API_PATH_PREFIX = '/v1/'
+
+export const enforceResourceApiAppCheck = async (
+  request: Request,
+  authorize: (request: Request) => Promise<boolean>
+): Promise<Response | undefined> => {
+  if (!new URL(request.url).pathname.startsWith(RESOURCE_API_PATH_PREFIX)) return undefined
+  return (await authorize(request)) ? undefined : new Response(null, { status: 401 })
+}
+
 export const makeResourceWorkerHandler = (
   repository: BibleChapterRepositoryService,
   naveRepository?: NaveRepositoryService,
@@ -54,6 +64,11 @@ export default {
       authorize: candidate => verifyFirebaseAppCheckRequest(candidate, appCheckConfig),
     })
     if (artifactResponse) return artifactResponse
+
+    const appCheckFailure = await enforceResourceApiAppCheck(request, candidate =>
+      verifyFirebaseAppCheckRequest(candidate, appCheckConfig)
+    )
+    if (appCheckFailure) return appCheckFailure
 
     const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString)
     const web = makeResourceWorkerHandler(

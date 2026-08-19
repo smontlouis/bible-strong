@@ -1,12 +1,12 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-08-19T17:41:24.520Z",
+  "generatedAt": "2026-08-19T20:30:09.143Z",
   "resourceCount": 72,
   "resources": {
     "bible-interlinear:BHG:en": {
       "id": "bible-interlinear:BHG:en",
-      "url": "https://assets.bible-strong.app/bibles/bible-step-interlinear-en.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-step-interlinear-en.sqlite.zip",
       "file": "bibles/bible-step-interlinear-en.sqlite.zip",
       "entry": "bible-step-interlinear-en.sqlite",
       "entries": {
@@ -26,7 +26,7 @@
     },
     "bible-interlinear:BHG:fr": {
       "id": "bible-interlinear:BHG:fr",
-      "url": "https://assets.bible-strong.app/bibles/bible-step-interlinear-fr.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-step-interlinear-fr.sqlite.zip",
       "file": "bibles/bible-step-interlinear-fr.sqlite.zip",
       "entry": "bible-step-interlinear-fr.sqlite",
       "entries": {
@@ -46,7 +46,7 @@
     },
     "bible-strong:ASV": {
       "id": "bible-strong:ASV",
-      "url": "https://assets.bible-strong.app/bibles/bible-asv-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-asv-strong.sqlite.zip",
       "file": "bibles/bible-asv-strong.sqlite.zip",
       "entry": "bible-asv-strong.sqlite",
       "entries": {
@@ -66,7 +66,7 @@
     },
     "bible-strong:BSB": {
       "id": "bible-strong:BSB",
-      "url": "https://assets.bible-strong.app/bibles/bible-bsb-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-bsb-strong.sqlite.zip",
       "file": "bibles/bible-bsb-strong.sqlite.zip",
       "entry": "bible-bsb-strong.sqlite",
       "entries": {
@@ -86,7 +86,7 @@
     },
     "bible-strong:DARBY": {
       "id": "bible-strong:DARBY",
-      "url": "https://assets.bible-strong.app/bibles/bible-darby-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-darby-strong.sqlite.zip",
       "file": "bibles/bible-darby-strong.sqlite.zip",
       "entry": "bible-darby-strong.sqlite",
       "entries": {
@@ -106,7 +106,7 @@
     },
     "bible-strong:DBR": {
       "id": "bible-strong:DBR",
-      "url": "https://assets.bible-strong.app/bibles/bible-dbr-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-dbr-strong.sqlite.zip",
       "file": "bibles/bible-dbr-strong.sqlite.zip",
       "entry": "bible-dbr-strong.sqlite",
       "entries": {
@@ -126,7 +126,7 @@
     },
     "bible-strong:DBY": {
       "id": "bible-strong:DBY",
-      "url": "https://assets.bible-strong.app/bibles/bible-dby-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-dby-strong.sqlite.zip",
       "file": "bibles/bible-dby-strong.sqlite.zip",
       "entry": "bible-dby-strong.sqlite",
       "entries": {
@@ -146,7 +146,7 @@
     },
     "bible-strong:KJV": {
       "id": "bible-strong:KJV",
-      "url": "https://assets.bible-strong.app/bibles/bible-kjv-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-kjv-strong.sqlite.zip",
       "file": "bibles/bible-kjv-strong.sqlite.zip",
       "entry": "bible-kjv-strong.sqlite",
       "entries": {
@@ -166,7 +166,7 @@
     },
     "bible-strong:LSG": {
       "id": "bible-strong:LSG",
-      "url": "https://assets.bible-strong.app/bibles/bible-lsg-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg-strong.sqlite.zip",
       "file": "bibles/bible-lsg-strong.sqlite.zip",
       "entry": "bible-lsg-strong.sqlite",
       "entries": {
@@ -186,7 +186,7 @@
     },
     "bible-strong:NASB1995": {
       "id": "bible-strong:NASB1995",
-      "url": "https://assets.bible-strong.app/bibles/bible-nasb1995-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nasb1995-strong.sqlite.zip",
       "file": "bibles/bible-nasb1995-strong.sqlite.zip",
       "entry": "bible-nasb1995-strong.sqlite",
       "entries": {
@@ -206,7 +206,7 @@
     },
     "bible-strong:NASB2020": {
       "id": "bible-strong:NASB2020",
-      "url": "https://assets.bible-strong.app/bibles/bible-nasb2020-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nasb2020-strong.sqlite.zip",
       "file": "bibles/bible-nasb2020-strong.sqlite.zip",
       "entry": "bible-nasb2020-strong.sqlite",
       "entries": {
@@ -226,7 +226,7 @@
     },
     "bible-strong:RLT": {
       "id": "bible-strong:RLT",
-      "url": "https://assets.bible-strong.app/bibles/bible-rlt-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-rlt-strong.sqlite.zip",
       "file": "bibles/bible-rlt-strong.sqlite.zip",
       "entry": "bible-rlt-strong.sqlite",
       "entries": {
@@ -246,7 +246,7 @@
     },
     "bible-strong:RV1895": {
       "id": "bible-strong:RV1895",
-      "url": "https://assets.bible-strong.app/bibles/bible-rv1895-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-rv1895-strong.sqlite.zip",
       "file": "bibles/bible-rv1895-strong.sqlite.zip",
       "entry": "bible-rv1895-strong.sqlite",
       "entries": {
@@ -266,7 +266,7 @@
     },
     "bible-strong:RWEBSTER": {
       "id": "bible-strong:RWEBSTER",
-      "url": "https://assets.bible-strong.app/bibles/bible-rwebster-strong.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-rwebster-strong.sqlite.zip",
       "file": "bibles/bible-rwebster-strong.sqlite.zip",
       "entry": "bible-rwebster-strong.sqlite",
       "entries": {
@@ -286,7 +286,7 @@
     },
     "bible:AMP": {
       "id": "bible:AMP",
-      "url": "https://assets.bible-strong.app/bibles/bible-amp.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-amp.json.zip",
       "file": "bibles/bible-amp.json.zip",
       "entry": "bible-amp.json",
       "entries": {
@@ -316,7 +316,7 @@
     },
     "bible:ASV": {
       "id": "bible:ASV",
-      "url": "https://assets.bible-strong.app/bibles/bible-asv.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-asv.json.zip",
       "file": "bibles/bible-asv.json.zip",
       "entry": "bible-asv.json",
       "entries": {
@@ -336,7 +336,7 @@
     },
     "bible:BCC1923": {
       "id": "bible:BCC1923",
-      "url": "https://assets.bible-strong.app/bibles/bible-bcc1923.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-bcc1923.json.zip",
       "file": "bibles/bible-bcc1923.json.zip",
       "entry": "bible-bcc1923.json",
       "entries": {
@@ -366,7 +366,7 @@
     },
     "bible:BDS": {
       "id": "bible:BDS",
-      "url": "https://assets.bible-strong.app/bibles/bible-bds.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-bds.json.zip",
       "file": "bibles/bible-bds.json.zip",
       "entry": "bible-bds.json",
       "entries": {
@@ -396,7 +396,7 @@
     },
     "bible:BFC": {
       "id": "bible:BFC",
-      "url": "https://assets.bible-strong.app/bibles/bible-bfc.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-bfc.json.zip",
       "file": "bibles/bible-bfc.json.zip",
       "entry": "bible-bfc.json",
       "entries": {
@@ -426,7 +426,7 @@
     },
     "bible:BHG": {
       "id": "bible:BHG",
-      "url": "https://assets.bible-strong.app/bibles/bible-step.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-step.json.zip",
       "file": "bibles/bible-step.json.zip",
       "entry": "bible-step.json",
       "entries": {
@@ -446,7 +446,7 @@
     },
     "bible:BHS": {
       "id": "bible:BHS",
-      "url": "https://assets.bible-strong.app/bibles/bible-hebrew.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-hebrew.json.zip",
       "file": "bibles/bible-hebrew.json.zip",
       "entry": "bible-hebrew.json",
       "entries": {
@@ -466,7 +466,7 @@
     },
     "bible:BSB": {
       "id": "bible:BSB",
-      "url": "https://assets.bible-strong.app/bibles/bible-bsb.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-bsb.json.zip",
       "file": "bibles/bible-bsb.json.zip",
       "entry": "bible-bsb.json",
       "entries": {
@@ -486,7 +486,7 @@
     },
     "bible:CHU": {
       "id": "bible:CHU",
-      "url": "https://assets.bible-strong.app/bibles/bible-chu.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-chu.json.zip",
       "file": "bibles/bible-chu.json.zip",
       "entry": "bible-chu.json",
       "entries": {
@@ -511,7 +511,7 @@
     },
     "bible:CSB": {
       "id": "bible:CSB",
-      "url": "https://assets.bible-strong.app/bibles/bible-csb.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-csb.json.zip",
       "file": "bibles/bible-csb.json.zip",
       "entry": "bible-csb.json",
       "entries": {
@@ -541,7 +541,7 @@
     },
     "bible:DARBY": {
       "id": "bible:DARBY",
-      "url": "https://assets.bible-strong.app/bibles/bible-darby.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-darby.json.zip",
       "file": "bibles/bible-darby.json.zip",
       "entry": "bible-darby.json",
       "entries": {
@@ -561,7 +561,7 @@
     },
     "bible:DBR": {
       "id": "bible:DBR",
-      "url": "https://assets.bible-strong.app/bibles/bible-dbr.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-dbr.json.zip",
       "file": "bibles/bible-dbr.json.zip",
       "entry": "bible-dbr.json",
       "entries": {
@@ -581,7 +581,7 @@
     },
     "bible:DBY": {
       "id": "bible:DBY",
-      "url": "https://assets.bible-strong.app/bibles/bible-dby.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-dby.json.zip",
       "file": "bibles/bible-dby.json.zip",
       "entry": "bible-dby.json",
       "entries": {
@@ -601,7 +601,7 @@
     },
     "bible:DEL": {
       "id": "bible:DEL",
-      "url": "https://assets.bible-strong.app/bibles/bible-del.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-del.json.zip",
       "file": "bibles/bible-del.json.zip",
       "entry": "bible-del.json",
       "entries": {
@@ -621,7 +621,7 @@
     },
     "bible:EASY": {
       "id": "bible:EASY",
-      "url": "https://assets.bible-strong.app/bibles/bible-easy.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-easy.json.zip",
       "file": "bibles/bible-easy.json.zip",
       "entry": "bible-easy.json",
       "entries": {
@@ -651,7 +651,7 @@
     },
     "bible:ESV": {
       "id": "bible:ESV",
-      "url": "https://assets.bible-strong.app/bibles/bible-esv.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-esv.json.zip",
       "file": "bibles/bible-esv.json.zip",
       "entry": "bible-esv.json",
       "entries": {
@@ -681,7 +681,7 @@
     },
     "bible:FMAR": {
       "id": "bible:FMAR",
-      "url": "https://assets.bible-strong.app/bibles/bible-fmar.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-fmar.json.zip",
       "file": "bibles/bible-fmar.json.zip",
       "entry": "bible-fmar.json",
       "entries": {
@@ -711,7 +711,7 @@
     },
     "bible:FRC97": {
       "id": "bible:FRC97",
-      "url": "https://assets.bible-strong.app/bibles/bible-frc97.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-frc97.json.zip",
       "file": "bibles/bible-frc97.json.zip",
       "entry": "bible-frc97.json",
       "entries": {
@@ -741,7 +741,7 @@
     },
     "bible:GW": {
       "id": "bible:GW",
-      "url": "https://assets.bible-strong.app/bibles/bible-gw.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-gw.json.zip",
       "file": "bibles/bible-gw.json.zip",
       "entry": "bible-gw.json",
       "entries": {
@@ -771,7 +771,7 @@
     },
     "bible:KJF": {
       "id": "bible:KJF",
-      "url": "https://assets.bible-strong.app/bibles/bible-kjf.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-kjf.json.zip",
       "file": "bibles/bible-kjf.json.zip",
       "entry": "bible-kjf.json",
       "entries": {
@@ -796,7 +796,7 @@
     },
     "bible:KJV": {
       "id": "bible:KJV",
-      "url": "https://assets.bible-strong.app/bibles/bible-kjv.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-kjv.json.zip",
       "file": "bibles/bible-kjv.json.zip",
       "entry": "bible-kjv.json",
       "entries": {
@@ -816,7 +816,7 @@
     },
     "bible:LAU": {
       "id": "bible:LAU",
-      "url": "https://assets.bible-strong.app/bibles/bible-lau.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lau.json.zip",
       "file": "bibles/bible-lau.json.zip",
       "entry": "bible-lau.json",
       "entries": {
@@ -836,7 +836,7 @@
     },
     "bible:LSG": {
       "id": "bible:LSG",
-      "url": "https://assets.bible-strong.app/bibles/bible-lsg.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg.json.zip",
       "file": "bibles/bible-lsg.json.zip",
       "entry": "bible-lsg.json",
       "entries": {
@@ -856,7 +856,7 @@
     },
     "bible:LXX": {
       "id": "bible:LXX",
-      "url": "https://assets.bible-strong.app/bibles/bible-lxx.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lxx.json.zip",
       "file": "bibles/bible-lxx.json.zip",
       "entry": "bible-lxx.json",
       "entries": {
@@ -876,7 +876,7 @@
     },
     "bible:LXX_FR": {
       "id": "bible:LXX_FR",
-      "url": "https://assets.bible-strong.app/bibles/bible-lxx-french.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lxx-french.json.zip",
       "file": "bibles/bible-lxx-french.json.zip",
       "entry": "bible-lxx-french.json",
       "entries": {
@@ -896,7 +896,7 @@
     },
     "bible:NASB1995": {
       "id": "bible:NASB1995",
-      "url": "https://assets.bible-strong.app/bibles/bible-nasb1995.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nasb1995.json.zip",
       "file": "bibles/bible-nasb1995.json.zip",
       "entry": "bible-nasb1995.json",
       "entries": {
@@ -916,7 +916,7 @@
     },
     "bible:NASB2020": {
       "id": "bible:NASB2020",
-      "url": "https://assets.bible-strong.app/bibles/bible-nasb2020.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nasb2020.json.zip",
       "file": "bibles/bible-nasb2020.json.zip",
       "entry": "bible-nasb2020.json",
       "entries": {
@@ -936,7 +936,7 @@
     },
     "bible:NBS": {
       "id": "bible:NBS",
-      "url": "https://assets.bible-strong.app/bibles/bible-nbs.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nbs.json.zip",
       "file": "bibles/bible-nbs.json.zip",
       "entry": "bible-nbs.json",
       "entries": {
@@ -966,7 +966,7 @@
     },
     "bible:NEG79": {
       "id": "bible:NEG79",
-      "url": "https://assets.bible-strong.app/bibles/bible-neg79.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-neg79.json.zip",
       "file": "bibles/bible-neg79.json.zip",
       "entry": "bible-neg79.json",
       "entries": {
@@ -996,7 +996,7 @@
     },
     "bible:NET": {
       "id": "bible:NET",
-      "url": "https://assets.bible-strong.app/bibles/bible-net.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-net.json.zip",
       "file": "bibles/bible-net.json.zip",
       "entry": "bible-net.json",
       "entries": {
@@ -1026,7 +1026,7 @@
     },
     "bible:NFC": {
       "id": "bible:NFC",
-      "url": "https://assets.bible-strong.app/bibles/bible-nfc.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nfc.json.zip",
       "file": "bibles/bible-nfc.json.zip",
       "entry": "bible-nfc.json",
       "entries": {
@@ -1056,7 +1056,7 @@
     },
     "bible:NIV": {
       "id": "bible:NIV",
-      "url": "https://assets.bible-strong.app/bibles/bible-niv.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-niv.json.zip",
       "file": "bibles/bible-niv.json.zip",
       "entry": "bible-niv.json",
       "entries": {
@@ -1086,7 +1086,7 @@
     },
     "bible:NKJV": {
       "id": "bible:NKJV",
-      "url": "https://assets.bible-strong.app/bibles/bible-nkjv.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nkjv.json.zip",
       "file": "bibles/bible-nkjv.json.zip",
       "entry": "bible-nkjv.json",
       "entries": {
@@ -1116,7 +1116,7 @@
     },
     "bible:NLT": {
       "id": "bible:NLT",
-      "url": "https://assets.bible-strong.app/bibles/bible-nlt.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nlt.json.zip",
       "file": "bibles/bible-nlt.json.zip",
       "entry": "bible-nlt.json",
       "entries": {
@@ -1146,7 +1146,7 @@
     },
     "bible:NVS78P": {
       "id": "bible:NVS78P",
-      "url": "https://assets.bible-strong.app/bibles/bible-nvs78p.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nvs78p.json.zip",
       "file": "bibles/bible-nvs78p.json.zip",
       "entry": "bible-nvs78p.json",
       "entries": {
@@ -1176,7 +1176,7 @@
     },
     "bible:OST": {
       "id": "bible:OST",
-      "url": "https://assets.bible-strong.app/bibles/bible-ost.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-ost.json.zip",
       "file": "bibles/bible-ost.json.zip",
       "entry": "bible-ost.json",
       "entries": {
@@ -1201,7 +1201,7 @@
     },
     "bible:PDV2017": {
       "id": "bible:PDV2017",
-      "url": "https://assets.bible-strong.app/bibles/bible-pdv2017.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-pdv2017.json.zip",
       "file": "bibles/bible-pdv2017.json.zip",
       "entry": "bible-pdv2017.json",
       "entries": {
@@ -1231,7 +1231,7 @@
     },
     "bible:POV": {
       "id": "bible:POV",
-      "url": "https://assets.bible-strong.app/bibles/bible-pov.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-pov.json.zip",
       "file": "bibles/bible-pov.json.zip",
       "entry": "bible-pov.json",
       "entries": {
@@ -1256,7 +1256,7 @@
     },
     "bible:RLT": {
       "id": "bible:RLT",
-      "url": "https://assets.bible-strong.app/bibles/bible-rlt.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-rlt.json.zip",
       "file": "bibles/bible-rlt.json.zip",
       "entry": "bible-rlt.json",
       "entries": {
@@ -1276,7 +1276,7 @@
     },
     "bible:RV1895": {
       "id": "bible:RV1895",
-      "url": "https://assets.bible-strong.app/bibles/bible-rv1895.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-rv1895.json.zip",
       "file": "bibles/bible-rv1895.json.zip",
       "entry": "bible-rv1895.json",
       "entries": {
@@ -1296,7 +1296,7 @@
     },
     "bible:RWEBSTER": {
       "id": "bible:RWEBSTER",
-      "url": "https://assets.bible-strong.app/bibles/bible-rwebster.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-rwebster.json.zip",
       "file": "bibles/bible-rwebster.json.zip",
       "entry": "bible-rwebster.json",
       "entries": {
@@ -1316,7 +1316,7 @@
     },
     "bible:S21": {
       "id": "bible:S21",
-      "url": "https://assets.bible-strong.app/bibles/bible-s21.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-s21.json.zip",
       "file": "bibles/bible-s21.json.zip",
       "entry": "bible-s21.json",
       "entries": {
@@ -1346,7 +1346,7 @@
     },
     "bible:SBLGNT": {
       "id": "bible:SBLGNT",
-      "url": "https://assets.bible-strong.app/bibles/bible-greek.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-greek.json.zip",
       "file": "bibles/bible-greek.json.zip",
       "entry": "bible-greek.json",
       "entries": {
@@ -1366,7 +1366,7 @@
     },
     "bible:TLV": {
       "id": "bible:TLV",
-      "url": "https://assets.bible-strong.app/bibles/bible-tlv.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-tlv.json.zip",
       "file": "bibles/bible-tlv.json.zip",
       "entry": "bible-tlv.json",
       "entries": {
@@ -1391,7 +1391,7 @@
     },
     "bible:TR1624": {
       "id": "bible:TR1624",
-      "url": "https://assets.bible-strong.app/bibles/bible-TR1624.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-TR1624.json.zip",
       "file": "bibles/bible-TR1624.json.zip",
       "entry": "bible-TR1624.json",
       "entries": {
@@ -1411,7 +1411,7 @@
     },
     "bible:TR1894": {
       "id": "bible:TR1894",
-      "url": "https://assets.bible-strong.app/bibles/bible-TR1894.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-TR1894.json.zip",
       "file": "bibles/bible-TR1894.json.zip",
       "entry": "bible-TR1894.json",
       "entries": {
@@ -1431,7 +1431,7 @@
     },
     "bible:VUL": {
       "id": "bible:VUL",
-      "url": "https://assets.bible-strong.app/bibles/bible-vul.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-vul.json.zip",
       "file": "bibles/bible-vul.json.zip",
       "entry": "bible-vul.json",
       "entries": {
@@ -1451,7 +1451,7 @@
     },
     "database:DICTIONNAIRE:en": {
       "id": "database:DICTIONNAIRE:en",
-      "url": "https://assets.bible-strong.app/databases/en/dictionnaire.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/en/dictionnaire.sqlite.zip",
       "file": "databases/en/dictionnaire.sqlite.zip",
       "entry": "dictionnaire.sqlite",
       "entries": {
@@ -1471,7 +1471,7 @@
     },
     "database:DICTIONNAIRE:fr": {
       "id": "database:DICTIONNAIRE:fr",
-      "url": "https://assets.bible-strong.app/databases/dictionnaire.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/dictionnaire.sqlite.zip",
       "file": "databases/dictionnaire.sqlite.zip",
       "entry": "dictionnaire.sqlite",
       "entries": {
@@ -1491,7 +1491,7 @@
     },
     "database:MHY:fr": {
       "id": "database:MHY:fr",
-      "url": "https://assets.bible-strong.app/databases/commentaires-mhy.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/commentaires-mhy.sqlite.zip",
       "file": "databases/commentaires-mhy.sqlite.zip",
       "entry": "commentaires-mhy.sqlite",
       "entries": {
@@ -1511,7 +1511,7 @@
     },
     "database:NAVE:en": {
       "id": "database:NAVE:en",
-      "url": "https://assets.bible-strong.app/databases/en/nave.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/en/nave.sqlite.zip",
       "file": "databases/en/nave.sqlite.zip",
       "entry": "nave.sqlite",
       "entries": {
@@ -1531,7 +1531,7 @@
     },
     "database:NAVE:fr": {
       "id": "database:NAVE:fr",
-      "url": "https://assets.bible-strong.app/databases/nave-fr.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/nave-fr.sqlite.zip",
       "file": "databases/nave-fr.sqlite.zip",
       "entry": "nave-fr.sqlite",
       "entries": {
@@ -1551,7 +1551,7 @@
     },
     "database:TIMELINE:en": {
       "id": "database:TIMELINE:en",
-      "url": "https://assets.bible-strong.app/databases/en/bible-timeline-events.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/en/bible-timeline-events.json.zip",
       "file": "databases/en/bible-timeline-events.json.zip",
       "entry": "bible-timeline-events.json",
       "entries": {
@@ -1571,7 +1571,7 @@
     },
     "database:TIMELINE:fr": {
       "id": "database:TIMELINE:fr",
-      "url": "https://assets.bible-strong.app/databases/bible-timeline-events.json.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/bible-timeline-events.json.zip",
       "file": "databases/bible-timeline-events.json.zip",
       "entry": "bible-timeline-events.json",
       "entries": {
@@ -1591,7 +1591,7 @@
     },
     "database:TRESOR:fr": {
       "id": "database:TRESOR:fr",
-      "url": "https://assets.bible-strong.app/databases/commentaires-tresor.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/commentaires-tresor.sqlite.zip",
       "file": "databases/commentaires-tresor.sqlite.zip",
       "entry": "commentaires-tresor.sqlite",
       "entries": {
@@ -1611,7 +1611,7 @@
     },
     "strong-lexicon:core": {
       "id": "strong-lexicon:core",
-      "url": "https://assets.bible-strong.app/databases/strong_lexicon.core.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.core.sqlite.zip",
       "file": "databases/strong_lexicon.core.sqlite.zip",
       "entry": "strong_lexicon.core.sqlite",
       "entries": {
@@ -1632,7 +1632,7 @@
     },
     "strong-lexicon:entities": {
       "id": "strong-lexicon:entities",
-      "url": "https://assets.bible-strong.app/databases/bible_entities.production.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/bible_entities.production.sqlite.zip",
       "file": "databases/bible_entities.production.sqlite.zip",
       "entry": "bible_entities.production.sqlite",
       "entries": {
@@ -1654,7 +1654,7 @@
     },
     "strong-lexicon:resources": {
       "id": "strong-lexicon:resources",
-      "url": "https://assets.bible-strong.app/databases/strong_lexicon.resources.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.resources.sqlite.zip",
       "file": "databases/strong_lexicon.resources.sqlite.zip",
       "entry": "strong_lexicon.resources.sqlite",
       "entries": {

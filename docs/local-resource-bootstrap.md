@@ -68,7 +68,7 @@ yarn resources:dev:local
 Elle force `RESOURCE_SKIP_IMPORT=1` : même une ancienne variable `RESOURCE_PUBLICATION_ROOTS`
 exportée dans le terminal ne peut donc pas relancer l'import. PostgreSQL et ses données persistent
 entre deux lancements ; le processus HTTP de l'API doit rester ouvert pour la consultation en ligne.
-Les téléchargements hors ligne restent sur `assets.bible-strong.app`, indépendamment de l'API
+Les téléchargements hors ligne passent par le Worker et son bucket R2 privé, indépendamment de l'API
 locale. Pour tester volontairement une publication locale, démarrez le serveur d'artefacts avec le
 bundle explicite :
 

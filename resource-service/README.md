@@ -151,15 +151,16 @@ publication manifest independently authorizes and validates the newly generated 
 entries, byte size, and SHA-256. Production publishing requires the checked-in exhaustive 72-entry
 inventory; it cannot be replaced by an environment override.
 
-The bucket remains private. The `RESOURCE_ARTIFACTS` Worker binding supplies the App
-Check-protected download route. The route accepts only `GET` and `HEAD` for the exact stable
-paths in the checked-in mobile catalog, verifies the Firebase JWT signature, project, expiration,
-audience, and allow-listed native App ID, then streams bodies and byte ranges through the binding.
-It returns `401` before reading R2 when attestation is missing or invalid. Publishing does not expose
-an R2 custom domain, change the mobile artifact origin, or remove the current Firebase Storage
-copies. This initial operator-run upload is only a private bootstrap mirror, not production
-activation. Before the mobile catalog points to R2, move subsequent publication credentials and
-recovery retention into the manually triggered protected CI environment required by ADR-0010.
+The bucket remains private. Every production `/v1` resource request is protected by Firebase App
+Check. The Worker verifies the Firebase JWT signature, project, expiration, audience, and
+allow-listed native App ID before opening Hyperdrive or reading R2. The artifact route accepts only
+`GET` and `HEAD` for exact stable paths in the checked-in mobile catalog, then streams bodies and
+byte ranges through the binding. Missing or invalid attestation returns `401`. `/health` and the
+non-sensitive `/v1/offline-catalog` remain public. Publishing does not expose
+an R2 custom domain. The mobile catalog and all resource artifact URLs use the Worker route
+`/v1/offline-artifacts/`; the application has no Firebase Storage fallback for resources. Move
+subsequent publication credentials and recovery retention into the manually triggered protected CI
+environment required by ADR-0010.
 
 The Worker configuration contains only the non-secret Firebase project number and the six native
 App IDs already declared by the development, staging, and production Firebase application files.
@@ -167,7 +168,8 @@ It fetches Firebase's rotating public App Check JWKS and keeps tokens out of log
 The Expo application uses the App Check config plugin, Play Integrity on release Android builds,
 App Attest with DeviceCheck fallback on release Apple builds, and Firebase's debug provider in
 development. Register each release provider and each local debug token in Firebase Console before
-testing a protected artifact download. Do not put debug tokens in committed `.env` files.
+testing protected API reads or artifact downloads. Do not put debug tokens in committed `.env`
+files.
 
 ## Deploy the production Worker
 
@@ -274,9 +276,8 @@ RESOURCE_PUBLICATION_BUNDLE=resource-service/.local/publications/lsg \
   yarn resources:serve:artifacts
 ```
 
-Start Expo with the matching development-only base URL. This override is explicit: using the local
-API alone keeps Offline-copy downloads on the catalog CDN. The catalog path and declared checksums
-stay unchanged; only the origin is replaced.
+Start Expo with the matching development artifact base URL. The catalog path and declared checksums
+stay unchanged; only the R2 delivery origin is replaced by the validated local artifact server.
 
 | Target | `EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL` |
 | --- | --- |
@@ -284,7 +285,8 @@ stay unchanged; only the origin is replaced.
 | Android Emulator | `http://10.0.2.2:8788` |
 | Physical device | `http://<development-machine-LAN-IP>:8788` |
 
-Production builds ignore this override. The local server validates the explicit bundle before it
-starts and returns generation plus checksum headers used by the normal atomic installation flow.
+Production uses the Worker base URL declared in its environment. The local server validates the
+explicit bundle before it starts and returns standard HTTP metadata; the app verifies the catalog
+SHA-256 through the normal atomic installation flow.
 Bible and interlinear artifacts are served below `/bibles/`; Nave is served at the existing mobile
 catalog paths `/databases/nave-fr.sqlite.zip` and `/databases/en/nave.sqlite.zip`.

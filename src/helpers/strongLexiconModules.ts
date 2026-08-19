@@ -4,7 +4,7 @@ import { unzip } from 'react-native-zip-archive'
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { getSharedSqliteDirPath } from './databaseTypes'
-import { downloadWithCdnFallback } from './downloadWithCdnFallback'
+import { downloadResourceArtifact } from './downloadResourceArtifact'
 import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
 import { createOfflineCopyId } from './offlineCopyId'
 import { getMobileResourceCatalogEntry } from './mobileResourceCatalog'
@@ -526,14 +526,14 @@ export const installStrongLexiconModule = async (
     ) {
       throw new Error(`STRONG_LEXICON_PUBLICATION_IDENTITY_MISMATCH:${moduleId}`)
     }
-    const result = await downloadWithCdnFallback({
+    const result = await downloadResourceArtifact({
       url: publication.url,
+      archiveSha256: publication.archiveSha256,
       destinationPath: archivePath,
       downloadOptions: { cache: false },
       onDownloadProgress: callbacks.onDownloadProgress,
       onResumable: callbacks.onResumable,
       isCancelled: callbacks.isCancelled,
-      logTag: `StrongLexicon:${moduleId}`,
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
     await readBoundedArchive(archivePath, {

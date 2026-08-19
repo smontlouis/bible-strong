@@ -179,7 +179,7 @@ type DownloadItemCommon = {
   name: string
   url: string
   estimatedSize: number
-  expectedArchiveSha256?: string
+  expectedArchiveSha256: string
   dependsOnId?: OfflineCopyId
   addedAt: number
   retryCount: number

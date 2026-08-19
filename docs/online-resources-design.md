@@ -7,12 +7,10 @@ This is the architectural synthesis of the `grill-with-docs` design session for 
 The consolidated PRD was published to issue #245 on 2026-07-12 and is retained locally in
 `docs/online-resources-prd.md`.
 
-Implementation note (2026-08-15): the app has since adopted TanStack Query and completed substantial
-local/offline prerequisites: domain access modules, canonical Bible text plus optional Strong and
-interlinear sidecars, the modular Strong lexicon, typed Offline-copy identities, a mobile artifact
-catalog, ZIP/checksum validation, dependency-aware installation, journaling, and atomic activation.
-The remote domain adapters, online LSG fallback, canonical Neon import, and public resource API in
-this document remain future work unless a newer implementation record says otherwise.
+Implementation note (2026-08-19): the app now has domain adapters, canonical Neon publications,
+online reads, a Cloudflare Worker API, private R2 Offline copies, catalog SHA-256 validation, and
+Firebase App Check across every production `/v1` database and artifact request. `/health` and the
+non-sensitive offline catalog remain public operational endpoints.
 
 ## Scope and boundaries
 
@@ -158,9 +156,10 @@ not work started during this design session.
 
 - A static token embedded in React Native is not considered a secret because it can be extracted
   and replayed.
-- Firebase App Check is the target protection for the custom Cloudflare API: App Attest with
+- Firebase App Check protects the custom Cloudflare API: App Attest with
   DeviceCheck fallback on Apple platforms and Play Integrity on Android.
-- The Worker verifies App Check before protected cache or origin access.
+- The Worker verifies App Check before every `/v1` database origin or R2 access. Only `/health` and
+  `/v1/offline-catalog` are public.
 - Verified official clients share deterministic cached responses; the App Check token is not part
   of the content cache key.
 - Rate limits still apply, with stricter controls for dynamic search than deterministic cached

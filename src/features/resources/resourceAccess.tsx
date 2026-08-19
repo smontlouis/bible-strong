@@ -88,7 +88,7 @@ import {
   type ResourceIdentity,
 } from '~features/resources/resourceModel'
 import {
-  configureDevelopmentResourceArtifactBaseUrl,
+  configureResourceArtifactBaseUrl,
   getMobileBibleVersionIds,
 } from '~helpers/mobileResourceCatalog'
 import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
@@ -126,7 +126,7 @@ const resourceApiBaseUrl =
 const configuredResourceArtifactBaseUrl = Constants.expoConfig?.extra?.resourceArtifactBaseUrl as
   | string
   | undefined
-configureDevelopmentResourceArtifactBaseUrl(configuredResourceArtifactBaseUrl)
+configureResourceArtifactBaseUrl(configuredResourceArtifactBaseUrl)
 
 const offlineSource = <Adapter extends object>(resource: string, adapter: Adapter) =>
   withResourceSourceLogging(adapter, { resource, source: 'offline' })

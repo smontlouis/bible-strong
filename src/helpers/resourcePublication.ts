@@ -2,9 +2,7 @@ import { storage } from './storage'
 import { MOBILE_RESOURCE_CATALOG, type MobileResourceCatalog } from './mobileResourceCatalog'
 
 export interface ResourcePublication {
-  generation: string
-  md5Hash?: string
-  crc32c?: string
+  revision: string
   size: number
   etag?: string
 }
@@ -13,7 +11,6 @@ export interface InstalledResourcePublication extends ResourcePublication {
   sourceUrl: string
   installedAt: number
   archiveSha256?: string
-  legacyCatalogUpdateDetected?: boolean
 }
 
 export type ResourcePublicationStatus = 'current' | 'update-available'
@@ -24,92 +21,22 @@ export interface ResourcePublicationStorage {
   remove(key: string): void
 }
 
-type FetchResponse = {
-  ok: boolean
-  status?: number
-  headers: { get(name: string): string | null }
-}
-
 const STORAGE_PREFIX = 'resource-publication:'
 
-const withMetadataCacheBust = (url: string) =>
-  `${url}${url.includes('?') ? '&' : '?'}resource_metadata=${Date.now()}`
-
-const parseGoogHash = (value: string | null) => {
-  const hashes = Object.fromEntries(
-    (value ?? '')
-      .split(',')
-      .map(part => {
-        const normalized = part.trim()
-        const separator = normalized.indexOf('=')
-        return [normalized.slice(0, separator), normalized.slice(separator + 1)]
-      })
-      .filter(([key, hash]) => key && hash)
-  )
-  return { md5Hash: hashes.md5, crc32c: hashes.crc32c }
-}
-
-export const publicationFromHeaders = (headers: FetchResponse['headers']): ResourcePublication => {
-  const generation = headers.get('x-goog-generation')
-  if (!generation) throw new Error('RESOURCE_GENERATION_MISSING')
+export const publicationFromArtifactResponse = (
+  headers: { get(name: string): string | null },
+  archiveSha256: string
+): ResourcePublication => {
+  if (!/^[a-f0-9]{64}$/.test(archiveSha256)) {
+    throw new Error('RESOURCE_ARCHIVE_SHA256_INVALID')
+  }
   const size = Number(headers.get('content-length') ?? 0)
-  const hashes = parseGoogHash(headers.get('x-goog-hash'))
   return {
-    generation,
-    ...hashes,
+    revision: archiveSha256,
     size: Number.isFinite(size) ? size : 0,
     etag: headers.get('etag') ?? undefined,
   }
 }
-
-export const base64ChecksumToHex = (checksum: string): string => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
-  let bits = 0
-  let bitCount = 0
-  const bytes: number[] = []
-  for (const character of checksum.replace(/=+$/, '')) {
-    const value = alphabet.indexOf(character)
-    if (value < 0) throw new Error('RESOURCE_CHECKSUM_INVALID')
-    bits = (bits << 6) | value
-    bitCount += 6
-    if (bitCount >= 8) {
-      bitCount -= 8
-      bytes.push((bits >> bitCount) & 0xff)
-    }
-  }
-  return bytes.map(byte => byte.toString(16).padStart(2, '0')).join('')
-}
-
-export const assertResourceChecksum = (
-  publication: ResourcePublication,
-  downloadedMd5?: string
-): void => {
-  if (!publication.md5Hash || !downloadedMd5) {
-    throw new Error('RESOURCE_DOWNLOAD_CHECKSUM_MISSING')
-  }
-  if (base64ChecksumToHex(publication.md5Hash) !== downloadedMd5.toLowerCase()) {
-    throw new Error('RESOURCE_DOWNLOAD_CHECKSUM_MISMATCH')
-  }
-}
-
-export const fetchResourcePublication = async (
-  url: string,
-  { fetcher = fetch }: { fetcher?: (url: string, init: RequestInit) => Promise<FetchResponse> } = {}
-): Promise<ResourcePublication> => {
-  const response = await fetcher(withMetadataCacheBust(url), {
-    method: 'HEAD',
-    cache: 'no-store',
-    headers: { 'Cache-Control': 'no-cache' },
-  })
-  if (!response.ok) throw new Error(`RESOURCE_METADATA_HTTP_${response.status ?? 'ERROR'}`)
-  return publicationFromHeaders(response.headers)
-}
-
-export const compareResourcePublications = (
-  installed: InstalledResourcePublication | undefined,
-  remote: ResourcePublication
-): ResourcePublicationStatus =>
-  installed?.generation === remote.generation ? 'current' : 'update-available'
 
 type ResourcePublicationReaderWriter = Pick<
   ReturnType<typeof createResourcePublicationStore>,
@@ -121,11 +48,9 @@ export const resolveResourceCatalogStatus = async (
   {
     catalog = MOBILE_RESOURCE_CATALOG,
     store = resourcePublicationStore,
-    fetcher = fetch,
   }: {
     catalog?: MobileResourceCatalog
     store?: ResourcePublicationReaderWriter
-    fetcher?: (url: string, init: RequestInit) => Promise<FetchResponse>
   } = {}
 ): Promise<ResourcePublicationStatus | undefined> => {
   const catalogEntry = catalog.resources[resourceId]
@@ -133,27 +58,7 @@ export const resolveResourceCatalogStatus = async (
   if (!catalogEntry) return undefined
   if (!installed) return 'update-available'
 
-  if (installed.legacyCatalogUpdateDetected) return 'update-available'
-
-  if (installed.archiveSha256) {
-    return installed.archiveSha256 === catalogEntry.archiveSha256 ? 'current' : 'update-available'
-  }
-
-  const remote = await fetchResourcePublication(catalogEntry.url, { fetcher })
-  const legacyStatus = compareResourcePublications(installed, remote)
-  if (legacyStatus === 'current') {
-    store.write(resourceId, {
-      ...installed,
-      archiveSha256: catalogEntry.archiveSha256,
-      sourceUrl: catalogEntry.url,
-    })
-  } else {
-    store.write(resourceId, {
-      ...installed,
-      legacyCatalogUpdateDetected: true,
-    })
-  }
-  return legacyStatus
+  return installed.archiveSha256 === catalogEntry.archiveSha256 ? 'current' : 'update-available'
 }
 
 export const createResourcePublicationStore = (backend: ResourcePublicationStorage) => ({

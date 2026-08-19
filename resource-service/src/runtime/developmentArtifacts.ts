@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto'
 import path from 'node:path'
 
 import type { PublicationBundleManifest } from '../publication/publicationBundle'
@@ -33,8 +32,6 @@ export const createDevelopmentArtifact = (
     headers: {
       'content-type': manifest.offlineArtifact.mediaType,
       'content-length': String(bytes.byteLength),
-      'x-goog-generation': manifest.revision,
-      'x-goog-hash': `md5=${createHash('md5').update(bytes).digest('base64')}`,
       etag: manifest.offlineArtifact.sha256,
     },
   }

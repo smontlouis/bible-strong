@@ -30,19 +30,18 @@ archive entries and roles, SHA-256 checksums, byte sizes, installation strategy,
 estimate. The build fails on an omitted/duplicate identity contract, a non-ZIP target, a missing
 canonical entry, duplicate roles, or an unexpected archive entry.
 
-The exact same catalog is uploaded to `/manifests/mobile-resource-catalog.json` and bundled in the
-app as its offline fallback. The app loads the CDN copy at startup and derives download URLs, archive
-entries, and size metadata from it; a network or validation failure keeps the bundled copy active.
-There is no separate size manifest. The installer persists each installed archive SHA-256, and update
-checks compare it locally with the active catalog instead of issuing one metadata request per ZIP.
-Installations created before catalog SHA tracking perform at most one legacy HEAD reconciliation; a
-matching object generation is then permanently associated with the catalog SHA. All Bible bundle
+The exact same catalog is served by the Resource API at `/v1/offline-catalog` and bundled in the app
+as its offline fallback. The app derives download URLs under the App Check-protected
+`/v1/offline-artifacts/` route, plus archive entries and size metadata, from it; a network or
+validation failure keeps the bundled copy active. There is no separate size manifest and no Firebase
+Storage resource fallback. The installer persists each installed archive SHA-256, and update checks
+compare it locally with the active catalog instead of issuing one metadata request per ZIP.
+Installations created before catalog SHA tracking are marked update-available. All Bible bundle
 entries are extracted and validated from one download. The text is imported
 into `bibles.sqlite`, while legacy pericope and red-word files keep their historical on-device paths.
 They no longer have independent download or publication identities. SQLite and timeline resources
 are extracted before their existing schema/integrity validation and atomic file swap. Publication
-update detection continues to use the parent Bible object generation and archive checksum as defined
-by ADR-0015.
+update detection uses the parent Bible archive SHA-256 as defined by ADR-0025.
 
 Activation is ordered: upload and verify every catalog artifact at its stable object path first,
 then replace the global catalog, and only then release an app build that consumes that catalog.
@@ -58,5 +57,5 @@ synchronized.
 
 Installation temporarily needs space for both the archive and extracted content; the catalog exposes
 that peak estimate. Publishing a ZIP with the wrong internal filename is rejected before activation.
-Older app versions that still request direct objects require those legacy objects to remain available
-for their supported lifetime; deleting them is a separate compatibility decision.
+This new mobile delivery contract does not address historical app releases. The current application
+contains no legacy resource URL or Cloud Storage fallback.

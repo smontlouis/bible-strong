@@ -1,6 +1,7 @@
 import mobileResourceCatalog from '../../../src/assets/mobile-resource-catalog.json'
 
 export const R2_ARTIFACT_ROUTE_PREFIX = '/v1/offline-artifacts/'
+export const MOBILE_RESOURCE_CATALOG_ROUTE = '/v1/offline-catalog'
 
 export type ArtifactRange =
   | { offset: number; length?: number }
@@ -82,6 +83,19 @@ export const routeR2ArtifactRequest = async ({
   authorize: ArtifactRequestAuthorizer
 }): Promise<Response | undefined> => {
   const pathname = new URL(request.url).pathname
+  if (pathname === MOBILE_RESOURCE_CATALOG_ROUTE) {
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return new Response(null, { status: 405, headers: { allow: 'GET, HEAD' } })
+    }
+    const body = JSON.stringify(mobileResourceCatalog)
+    return new Response(request.method === 'HEAD' ? null : body, {
+      status: 200,
+      headers: {
+        'cache-control': 'public, max-age=300',
+        'content-type': 'application/json; charset=utf-8',
+      },
+    })
+  }
   if (!pathname.startsWith(R2_ARTIFACT_ROUTE_PREFIX)) return undefined
 
   const key = pathname.slice(R2_ARTIFACT_ROUTE_PREFIX.length)

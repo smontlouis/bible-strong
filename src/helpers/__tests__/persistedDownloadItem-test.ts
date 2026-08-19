@@ -16,7 +16,7 @@ jest.mock('../downloadItemFactory', () => ({
     type: 'bible',
     name: 'Nouvelle Bible Segond',
     versionId: 'NBS',
-    url: 'https://assets.bible-strong.app/bibles/bible-nbs.json.zip',
+    url: 'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nbs.json.zip',
     archiveEntry: 'bible-nbs.json',
     archiveEntries: {
       canonical: 'bible-nbs.json',
@@ -44,7 +44,7 @@ describe('persisted download item migration', () => {
       type: 'bible',
       name: 'NBS',
       versionId: 'NBS',
-      url: 'https://assets.bible-strong.app/bibles/bible-nbs.json',
+      url: 'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nbs.json',
       estimatedSize: 1,
       addedAt: 42,
       retryCount: 1,
@@ -52,7 +52,7 @@ describe('persisted download item migration', () => {
 
     expect(refreshPersistedDownloadItem(legacyItem)).toEqual(
       expect.objectContaining({
-        url: 'https://assets.bible-strong.app/bibles/bible-nbs.json.zip',
+        url: 'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-nbs.json.zip',
         archiveEntries: {
           canonical: 'bible-nbs.json',
           pericope: 'bible-nbs-pericope.json',

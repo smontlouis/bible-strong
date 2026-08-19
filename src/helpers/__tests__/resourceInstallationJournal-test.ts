@@ -32,7 +32,7 @@ import {
 } from '../resourceInstallationJournal'
 
 const previousPublication = {
-  generation: '1',
+  revision: '1',
   size: 10,
   sourceUrl: 'https://example.com/old',
   installedAt: 1,
@@ -44,7 +44,7 @@ const downloadResult = {
     headers: {},
     mimeType: 'application/octet-stream',
   },
-  publication: { generation: '2', size: 20 },
+  publication: { revision: '2', size: 20 },
   sourceUrl: 'https://example.com/new',
 }
 
@@ -90,14 +90,14 @@ describe('resource installation journal', () => {
     expect(mockDeleteAsync).toHaveBeenCalledWith('/resource.sqlite.backup', {
       idempotent: true,
     })
-    expect(resourcePublicationStore.read('database:NAVE:fr')?.generation).toBe('2')
+    expect(resourcePublicationStore.read('database:NAVE:fr')?.revision).toBe('2')
     expect(resourcePublicationStore.read('database:NAVE:fr')?.archiveSha256).toBe(archiveSha256)
   })
 
-  it('restores an interrupted same-generation reinstall instead of inferring a commit', async () => {
+  it('restores an interrupted same-revision reinstall instead of inferring a commit', async () => {
     resourcePublicationStore.write('database:NAVE:fr', {
       ...previousPublication,
-      generation: '2',
+      revision: '2',
     })
     beginResourceInstallation('database:NAVE:fr', downloadResult, {
       kind: 'file',
@@ -130,7 +130,7 @@ describe('resource installation journal', () => {
     expect(mockValues.has('resource-installation-journal')).toBe(true)
   })
 
-  it('uses the SQLite generation committed with Bible content as the recovery authority', async () => {
+  it('uses the SQLite revision committed with Bible content as the recovery authority', async () => {
     const journal = beginResourceInstallation('bible:DBY', downloadResult, {
       kind: 'bible-sqlite',
       versionId: 'DBY',
@@ -140,7 +140,7 @@ describe('resource installation journal', () => {
 
     await reconcileResourceInstallationJournal()
 
-    expect(resourcePublicationStore.read('bible:DBY')?.generation).toBe('2')
+    expect(resourcePublicationStore.read('bible:DBY')?.revision).toBe('2')
   })
 
   it('keeps committed Bible bundle files and removes their recovery backups', async () => {

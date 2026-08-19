@@ -11,9 +11,9 @@ import {
   type LegacyBibleJsonData,
 } from '~helpers/biblesDb'
 import {
-  downloadWithCdnFallback,
-  type DownloadWithCdnFallbackResult,
-} from '~helpers/downloadWithCdnFallback'
+  downloadResourceArtifact,
+  type DownloadResourceArtifactResult,
+} from '~helpers/downloadResourceArtifact'
 import type { StrongBiblePublication } from '~helpers/strongBiblePublications'
 import type { InterlinearPublicationArtifact } from '~helpers/interlinearBiblePublications'
 import { planWordAnnotationRealignment } from '~helpers/wordAnnotationRealignment'
@@ -43,7 +43,7 @@ export interface DownloadAndInsertOptions extends InsertBibleOptions {
   archiveArtifact?: InterlinearPublicationArtifact
   archiveEntry?: string
   archiveEntries?: BibleArchiveEntries
-  expectedArchiveSha256?: string
+  expectedArchiveSha256: string
   installationLifecycle?: ResourceInstallationLifecycle
 }
 
@@ -59,14 +59,8 @@ export interface DownloadAndInsertOptions extends InsertBibleOptions {
 export async function downloadAndInsertBible(
   versionId: string,
   downloadUrl: string,
-  onProgressOrOptions?: FileSystem.DownloadProgressCallback | DownloadAndInsertOptions
-): Promise<DownloadWithCdnFallbackResult> {
-  // Normalize arguments: support both legacy callback and new options object
-  const opts: DownloadAndInsertOptions =
-    typeof onProgressOrOptions === 'function'
-      ? { onDownloadProgress: onProgressOrOptions }
-      : (onProgressOrOptions ?? {})
-
+  opts: DownloadAndInsertOptions
+): Promise<DownloadResourceArtifactResult> {
   // Ensure DB is open
   await openBiblesDb()
 
@@ -81,14 +75,14 @@ export async function downloadAndInsertBible(
   try {
     // 1. Download to temp file
     console.log(`[DownloadBible] Downloading ${versionId} from ${downloadUrl}`)
-    const downloadResult = await downloadWithCdnFallback({
+    const downloadResult = await downloadResourceArtifact({
       url: downloadUrl,
+      archiveSha256: opts.expectedArchiveSha256,
       destinationPath: tempPath,
       downloadOptions: { cache: false },
       onDownloadProgress: opts.onDownloadProgress,
       onResumable: opts.onResumable,
       isCancelled: opts.isCancelled,
-      logTag: 'DownloadBible',
     })
 
     // Check cancellation after download
@@ -164,7 +158,7 @@ export async function downloadAndInsertBible(
                 sourceSha256: jsonData.sourceSha256,
                 schemaVersion: jsonData.schemaVersion,
                 verseCount: jsonData.verseCount,
-                resourceGeneration: downloadResult.publication.generation,
+                resourceGeneration: downloadResult.publication.revision,
               },
             }
           : opts.archiveArtifact
@@ -175,7 +169,7 @@ export async function downloadAndInsertBible(
                   sourceSha256: downloadedTextChecksum,
                   schemaVersion: opts.archiveArtifact.schemaVersion,
                   verseCount: importableVerseCount,
-                  resourceGeneration: downloadResult.publication.generation,
+                  resourceGeneration: downloadResult.publication.revision,
                 },
               }
             : {
@@ -185,7 +179,7 @@ export async function downloadAndInsertBible(
                   sourceSha256: downloadedTextChecksum,
                   schemaVersion: 0,
                   verseCount: importableVerseCount,
-                  resourceGeneration: downloadResult.publication.generation,
+                  resourceGeneration: downloadResult.publication.revision,
                 },
               }),
       })

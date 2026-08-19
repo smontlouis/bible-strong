@@ -3,7 +3,7 @@ import { unzip } from 'react-native-zip-archive'
 
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath } from './databaseTypes'
-import { downloadWithCdnFallback } from './downloadWithCdnFallback'
+import { downloadResourceArtifact } from './downloadResourceArtifact'
 import { toNativeFilePath, verifyFileSha256 } from './fileIntegrity'
 import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
 import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
@@ -163,14 +163,14 @@ export const installStrongBibleSidecar = async (
   const extractionDirectory = `${FileSystem.cacheDirectory}bible-${versionId}-strong-extract/`
   const extractedPath = `${extractionDirectory}${artifact.entry}`
   try {
-    const downloadResult = await downloadWithCdnFallback({
+    const downloadResult = await downloadResourceArtifact({
       url: artifact.url,
+      archiveSha256: artifact.archiveSha256,
       destinationPath: archivePath,
       downloadOptions: { cache: false },
       onDownloadProgress: callbacks.onDownloadProgress,
       onResumable: callbacks.onResumable,
       isCancelled: callbacks.isCancelled,
-      logTag: 'StrongBibleSidecar',
     })
     if (callbacks.isCancelled?.()) throw new Error('CANCELLED')
     await verifyFileSha256(

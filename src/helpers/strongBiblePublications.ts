@@ -1,4 +1,4 @@
-import { cdnUrl } from './firebase'
+import { resourceArtifactUrl } from './mobileResourceCatalog'
 import {
   REVERSE_INTERLINEAR_STEP_CONTRACT,
   STRONG_BIBLE_REVERSE_INTERLINEAR_CANDIDATES,
@@ -126,7 +126,7 @@ const makeEnglishPublication = ({
     sourceVersion,
     sourceSha256,
     canonical: {
-      url: cdnUrl(`bibles/bible-${fileId}.json.zip`),
+      url: resourceArtifactUrl(`bibles/bible-${fileId}.json.zip`),
       entry: `bible-${fileId}.json`,
       archiveSha256: canonicalArchiveSha256,
       archiveBytes: canonicalArchiveBytes,
@@ -140,7 +140,7 @@ const makeEnglishPublication = ({
       headingCount,
     },
     strong: {
-      url: cdnUrl(`bibles/bible-${fileId}-strong.sqlite.zip`),
+      url: resourceArtifactUrl(`bibles/bible-${fileId}-strong.sqlite.zip`),
       entry: `bible-${fileId}-strong.sqlite`,
       archiveSha256: strongArchiveSha256,
       archiveBytes: strongArchiveBytes,
@@ -167,7 +167,7 @@ const BASE_STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBiblePu
     sourceVersion: 'SG1910',
     sourceSha256: 'ca3899a49bee30400082f24505cb67a0f4e5e77949c9116cc914243d5ffad43b',
     canonical: {
-      url: cdnUrl('bibles/bible-lsg.json.zip'),
+      url: resourceArtifactUrl('bibles/bible-lsg.json.zip'),
       entry: 'bible-lsg.json',
       archiveSha256: '95a26a36a07b025f400d876caa6d40536dac0327845962b6f82f93207d0b6698',
       archiveBytes: 1455775,
@@ -180,7 +180,7 @@ const BASE_STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBiblePu
       noteCount: 0,
     },
     strong: {
-      url: cdnUrl('bibles/bible-lsg-strong.sqlite.zip'),
+      url: resourceArtifactUrl('bibles/bible-lsg-strong.sqlite.zip'),
       entry: 'bible-lsg-strong.sqlite',
       archiveSha256: '867a87ec31bb816ec4ac22ca89fcdb878959d6da60ef3bfe916a03df4a207177',
       archiveBytes: 11892615,
@@ -204,7 +204,7 @@ const BASE_STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBiblePu
     sourceVersion: 'DARBY',
     sourceSha256: 'f26d738b114cb9a251697f56c74996cf10de39d295cab27df2644fa788d081d8',
     canonical: {
-      url: cdnUrl('bibles/bible-dby.json.zip'),
+      url: resourceArtifactUrl('bibles/bible-dby.json.zip'),
       entry: 'bible-dby.json',
       archiveSha256: '6deb3af582949a7831ba5fdb0c6995edf1ecd588b3de8f869c7e34e0a337b17a',
       archiveBytes: 1896638,
@@ -217,7 +217,7 @@ const BASE_STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBiblePu
       noteCount: 6340,
     },
     strong: {
-      url: cdnUrl('bibles/bible-dby-strong.sqlite.zip'),
+      url: resourceArtifactUrl('bibles/bible-dby-strong.sqlite.zip'),
       entry: 'bible-dby-strong.sqlite',
       archiveSha256: 'd0055f1df460ce0149f5f898a6e5ba2337cf25929cf2c8512cd8de063ab0d305',
       archiveBytes: 11942570,
@@ -241,7 +241,7 @@ const BASE_STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBiblePu
     sourceVersion: 'DARBYR',
     sourceSha256: '650695dc198504179c5b2488f873c436bc63a44d5144d87d1abcab43d9adeafe',
     canonical: {
-      url: cdnUrl('bibles/bible-dbr.json.zip'),
+      url: resourceArtifactUrl('bibles/bible-dbr.json.zip'),
       entry: 'bible-dbr.json',
       archiveSha256: '8242dcdab0f648530a9482dbc527d39db4ba95761d8f74e4f31f5380a36d48f1',
       archiveBytes: 2009114,
@@ -254,7 +254,7 @@ const BASE_STRONG_BIBLE_PUBLICATIONS: Record<StrongBibleVersionId, StrongBiblePu
       noteCount: 8845,
     },
     strong: {
-      url: cdnUrl('bibles/bible-dbr-strong.sqlite.zip'),
+      url: resourceArtifactUrl('bibles/bible-dbr-strong.sqlite.zip'),
       entry: 'bible-dbr-strong.sqlite',
       archiveSha256: '026bec64d2fc192b1cfd25acb41c6e8bad9ffdc716673d2ff93828485bd69bd5',
       archiveBytes: 11950148,
@@ -550,7 +550,7 @@ export const STRONG_BIBLE_PUBLICATIONS = Object.fromEntries(
         ...publication,
         canonical: {
           ...publication.canonical,
-          url: cdnUrl(`bibles/bible-${fileId}.json.zip`),
+          url: resourceArtifactUrl(`bibles/bible-${fileId}.json.zip`),
           archiveSha256: canonical[0],
           archiveBytes: canonical[1],
           contentSha256: canonical[2],
@@ -564,7 +564,7 @@ export const STRONG_BIBLE_PUBLICATIONS = Object.fromEntries(
         },
         strong: {
           ...publication.strong,
-          url: cdnUrl(`bibles/bible-${fileId}-strong.sqlite.zip`),
+          url: resourceArtifactUrl(`bibles/bible-${fileId}-strong.sqlite.zip`),
           archiveSha256: strong[0],
           archiveBytes: strong[1],
           contentSha256: strong[2],

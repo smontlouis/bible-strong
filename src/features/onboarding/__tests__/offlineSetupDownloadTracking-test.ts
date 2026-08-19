@@ -11,6 +11,7 @@ const createState = (
     name: id,
     url: `https://example.com/${id}`,
     estimatedSize: 1,
+    expectedArchiveSha256: 'a'.repeat(64),
     addedAt: 0,
     retryCount: 0,
     type: 'database',

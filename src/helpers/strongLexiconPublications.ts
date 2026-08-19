@@ -1,4 +1,4 @@
-import { cdnUrl } from './firebase'
+import { resourceArtifactUrl } from './mobileResourceCatalog'
 
 export type StrongLexiconModuleId = 'core' | 'resources' | 'entities'
 
@@ -8,7 +8,7 @@ export type StrongLexiconPublicationArtifact = {
   url: string
   entry: string
   archiveBytes: number
-  archiveSha256?: string
+  archiveSha256: string
   contentBytes: number
   contentSha256: string
   schemaVersion: number
@@ -23,7 +23,7 @@ export const STRONG_LEXICON_PUBLICATIONS: Record<
   core: {
     id: 'core',
     required: true,
-    url: cdnUrl('databases/strong_lexicon.core.sqlite.zip'),
+    url: resourceArtifactUrl('databases/strong_lexicon.core.sqlite.zip'),
     entry: 'strong_lexicon.core.sqlite',
     archiveBytes: 6_543_526,
     archiveSha256: '063629b535055ecc5938f44a40fa442fd333652ed2440459e7c91784340baa5d',
@@ -35,7 +35,7 @@ export const STRONG_LEXICON_PUBLICATIONS: Record<
   resources: {
     id: 'resources',
     required: false,
-    url: cdnUrl('databases/strong_lexicon.resources.sqlite.zip'),
+    url: resourceArtifactUrl('databases/strong_lexicon.resources.sqlite.zip'),
     entry: 'strong_lexicon.resources.sqlite',
     archiveBytes: 11_492_177,
     archiveSha256: '956950545e6a1014b8b05b020c84a8accf21eb958e670964976d0dc52c34888e',
@@ -48,7 +48,7 @@ export const STRONG_LEXICON_PUBLICATIONS: Record<
   entities: {
     id: 'entities',
     required: false,
-    url: cdnUrl('databases/bible_entities.production.sqlite.zip'),
+    url: resourceArtifactUrl('databases/bible_entities.production.sqlite.zip'),
     entry: 'bible_entities.production.sqlite',
     archiveBytes: 5_369_907,
     archiveSha256: '16ec0b12497180dc39042a4a818972c599ab9d5f79c6880a765b2ab8aaed0e09',

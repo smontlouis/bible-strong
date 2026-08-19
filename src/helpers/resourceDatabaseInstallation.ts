@@ -2,7 +2,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { unzip } from 'react-native-zip-archive'
 
 import { downloadAndInsertBible } from '~helpers/downloadBibleToSqlite'
-import { downloadWithCdnFallback } from '~helpers/downloadWithCdnFallback'
+import { downloadResourceArtifact } from '~helpers/downloadResourceArtifact'
 import { dbManager, openSQLiteDatabase } from '~helpers/sqlite'
 import type { DatabaseId } from '~helpers/databaseTypes'
 import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
@@ -17,7 +17,7 @@ import type {
 import { installStrongBibleSidecar } from './strongBibleSidecar'
 import type { StrongBibleVersionId } from './strongBiblePublications'
 import { installInterlinearSidecar } from './interlinearBibleSidecar'
-import type { DownloadWithCdnFallbackResult } from './downloadWithCdnFallback'
+import type { DownloadResourceArtifactResult } from './downloadResourceArtifact'
 import { installAtomicResourceFile } from './atomicResourceFile'
 import { installStrongLexiconModule } from './strongLexiconModules'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
@@ -37,15 +37,15 @@ const downloadFile = async (
   callbacks: ResourceInstallationCallbacks,
   destinationPath = item.destinationPath!
 ) => {
-  const result = await downloadWithCdnFallback({
+  const result = await downloadResourceArtifact({
     url: item.url,
+    archiveSha256: item.expectedArchiveSha256,
     destinationPath,
     onDownloadProgress: ({ totalBytesWritten }) => {
       callbacks.onDownloadProgress(Math.min(totalBytesWritten / item.estimatedSize, 1))
     },
     onResumable: callbacks.onResumable,
     isCancelled: callbacks.isCancelled,
-    logTag: 'ResourceInstallation',
   })
 
   if (callbacks.isCancelled()) throw new Error('CANCELLED')
@@ -223,7 +223,7 @@ const installLexiconModule = async (
 export const installResourceDatabaseItem = async (
   item: DownloadItem,
   callbacks: ResourceInstallationCallbacks
-): Promise<DownloadWithCdnFallbackResult> => {
+): Promise<DownloadResourceArtifactResult> => {
   switch (item.type) {
     case 'bible':
       return installBible(item, callbacks)

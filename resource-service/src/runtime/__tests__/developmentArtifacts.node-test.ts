@@ -48,8 +48,7 @@ describe('development artifact server', () => {
 
     assert.equal(artifact.route, '/bibles/bible-lsg.json.zip')
     assert.equal(response.status, 200)
-    assert.equal(response.headers.get('x-goog-generation'), 'lsg-r1')
-    assert.match(response.headers.get('x-goog-hash') ?? '', /^md5=/)
+    assert.equal(response.headers.get('etag'), manifest.offlineArtifact.sha256)
     assert.equal(response.headers.get('etag'), 'a'.repeat(64))
     assert.deepEqual(Buffer.from(await response.arrayBuffer()), bytes)
   })

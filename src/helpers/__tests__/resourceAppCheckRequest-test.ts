@@ -5,7 +5,7 @@ import {
 } from '../resourceAppCheckRequest'
 
 describe('Resource App Check requests', () => {
-  it('attaches an App Check token only to production artifact downloads', async () => {
+  it('attaches an App Check token to every protected production Resource API request', async () => {
     const fetcher = jest.fn<Promise<Response>, [RequestInfo | URL, RequestInit?]>(() =>
       Promise.resolve(new Response('{}', { status: 200 }))
     )
@@ -21,17 +21,22 @@ describe('Resource App Check requests', () => {
     await guardedFetch('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1', {
       headers: { accept: 'application/json' },
     })
+    await guardedFetch('https://api.bible-strong.app/v1/offline-catalog')
     await guardedFetch('http://127.0.0.1:8787/health')
 
     const guardedHeaders = fetcher.mock.calls[0]?.[1]?.headers
     expect(new Headers(guardedHeaders).get(FIREBASE_APP_CHECK_HEADER)).toBe('attestation-token')
     expect(new Headers(guardedHeaders).get('accept')).toBe('application/zip')
-    expect(fetcher.mock.calls[1]).toEqual([
-      'https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1',
-      { headers: { accept: 'application/json' } },
+    expect(new Headers(fetcher.mock.calls[1]?.[1]?.headers).get(FIREBASE_APP_CHECK_HEADER)).toBe(
+      'attestation-token'
+    )
+    expect(new Headers(fetcher.mock.calls[1]?.[1]?.headers).get('accept')).toBe('application/json')
+    expect(fetcher.mock.calls[2]).toEqual([
+      'https://api.bible-strong.app/v1/offline-catalog',
+      undefined,
     ])
-    expect(fetcher.mock.calls[2]).toEqual(['http://127.0.0.1:8787/health', undefined])
-    expect(getToken).toHaveBeenCalledTimes(1)
+    expect(fetcher.mock.calls[3]).toEqual(['http://127.0.0.1:8787/health', undefined])
+    expect(getToken).toHaveBeenCalledTimes(2)
   })
 
   it('refreshes the token once after an authenticated GET is rejected', async () => {
@@ -55,7 +60,7 @@ describe('Resource App Check requests', () => {
     )
   })
 
-  it('provides download headers only for the protected artifact origin', async () => {
+  it('provides App Check headers for protected API and artifact URLs only', async () => {
     const getToken = jest.fn(async () => 'download-token')
 
     await expect(
@@ -66,9 +71,12 @@ describe('Resource App Check requests', () => {
     ).resolves.toEqual({ [FIREBASE_APP_CHECK_HEADER]: 'download-token' })
     await expect(
       getResourceAppCheckHeaders(
-        'https://assets.bible-strong.app/bibles/bible-lsg.json.zip',
+        'https://api.bible-strong.app/v1/bibles/LSG/chapters/1/1',
         getToken
       )
+    ).resolves.toEqual({ [FIREBASE_APP_CHECK_HEADER]: 'download-token' })
+    await expect(
+      getResourceAppCheckHeaders('https://api.bible-strong.app/v1/offline-catalog', getToken)
     ).resolves.toEqual({})
   })
 })
