@@ -1069,11 +1069,11 @@
     "id": "strong-lexicon:entities",
     "resourceRevision": "strong-lexicon-entities-8235604fb1a30e9714b32a69",
     "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699",
-    "artifactUrl": "https://assets.bible-strong.app/databases/bible_entities.sqlite.zip",
+    "artifactUrl": "https://assets.bible-strong.app/databases/bible_entities.production.sqlite.zip",
     "sources": [
       {
         "role": "canonical",
-        "sourceUrl": "https://assets.bible-strong.app/databases/bible_entities.sqlite.zip",
+        "sourceUrl": "https://assets.bible-strong.app/databases/bible_entities.production.sqlite.zip",
         "entry": "bible_entities.production.sqlite"
       }
     ],
