@@ -8,19 +8,16 @@ import type { InterlinearBibleRepositoryService } from '../domain/interlinearBib
 import type { StrongLexiconRepositoryService } from '../domain/strongLexicon'
 import type { SupplementaryRepositoryService } from '../domain/supplementary'
 import type { TimelineRepositoryService } from '../domain/timeline'
-import { makeNeonBibleChapterRepository } from '../repositories/bibleChapterRepository'
-import { makeNeonBibleSearchRepository } from '../repositories/bibleSearchRepository'
-import { makeNeonNaveRepository } from '../repositories/naveRepository'
-import { makeNeonDictionaryRepository } from '../repositories/dictionaryRepository'
-import { makeNeonStrongBibleRepository } from '../repositories/strongBibleRepository'
-import { makeNeonInterlinearBibleRepository } from '../repositories/interlinearBibleRepository'
-import { makeNeonStrongLexiconRepository } from '../repositories/strongLexiconRepository'
-import { makeNeonSupplementaryRepository } from '../repositories/supplementaryRepository'
-import { makeNeonTimelineRepository } from '../repositories/timelineRepository'
-
-export type ResourceWorkerBindings = {
-  RESOURCE_DATABASE_URL: string
-}
+import { makeHyperdriveDatabase } from '../database/hyperdriveDatabase'
+import { makeKyselyBibleChapterRepository } from '../repositories/bibleChapterRepository'
+import { makeKyselyBibleSearchRepository } from '../repositories/bibleSearchRepository'
+import { makeKyselyNaveRepository } from '../repositories/naveRepository'
+import { makeKyselyDictionaryRepository } from '../repositories/dictionaryRepository'
+import { makeKyselyStrongBibleRepository } from '../repositories/strongBibleRepository'
+import { makeKyselyInterlinearBibleRepository } from '../repositories/interlinearBibleRepository'
+import { makeKyselyStrongLexiconRepository } from '../repositories/strongLexiconRepository'
+import { makeKyselySupplementaryRepository } from '../repositories/supplementaryRepository'
+import { makeKyselyTimelineRepository } from '../repositories/timelineRepository'
 
 export const makeResourceWorkerHandler = (
   repository: BibleChapterRepositoryService,
@@ -43,47 +40,25 @@ export const makeResourceWorkerHandler = (
     timeline: timelineRepository,
   })
 
-let cached:
-  | {
-      connectionString: string
-      web: ReturnType<typeof makeResourceWebHandler>
-    }
-  | undefined
-
-const getWorkerHandler = (connectionString: string) => {
-  if (cached?.connectionString === connectionString) return cached.web
-  const { repository } = makeNeonBibleChapterRepository({ connectionString })
-  const { repository: bibleSearchRepository } = makeNeonBibleSearchRepository({ connectionString })
-  const { repository: naveRepository } = makeNeonNaveRepository({ connectionString })
-  const { repository: dictionaryRepository } = makeNeonDictionaryRepository({ connectionString })
-  const { repository: strongBibleRepository } = makeNeonStrongBibleRepository({ connectionString })
-  const { repository: interlinearBibleRepository } = makeNeonInterlinearBibleRepository({
-    connectionString,
-  })
-  const { repository: strongLexiconRepository } = makeNeonStrongLexiconRepository({
-    connectionString,
-  })
-  const { repository: supplementaryRepository } = makeNeonSupplementaryRepository({
-    connectionString,
-  })
-  const { repository: timelineRepository } = makeNeonTimelineRepository({ connectionString })
-  const web = makeResourceWorkerHandler(
-    repository,
-    naveRepository,
-    dictionaryRepository,
-    strongBibleRepository,
-    interlinearBibleRepository,
-    strongLexiconRepository,
-    supplementaryRepository,
-    timelineRepository,
-    bibleSearchRepository
-  )
-  cached = { connectionString, web }
-  return web
-}
-
 export default {
-  fetch(request: Request, bindings: ResourceWorkerBindings): Promise<Response> {
-    return getWorkerHandler(bindings.RESOURCE_DATABASE_URL).handler(request)
+  async fetch(request: Request, bindings: Env): Promise<Response> {
+    const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString)
+    const web = makeResourceWorkerHandler(
+      makeKyselyBibleChapterRepository(database),
+      makeKyselyNaveRepository(database),
+      makeKyselyDictionaryRepository(database),
+      makeKyselyStrongBibleRepository(database),
+      makeKyselyInterlinearBibleRepository(database),
+      makeKyselyStrongLexiconRepository(database),
+      makeKyselySupplementaryRepository(database),
+      makeKyselyTimelineRepository(database),
+      makeKyselyBibleSearchRepository(database)
+    )
+
+    try {
+      return await web.handler(request)
+    } finally {
+      await database.destroy()
+    }
   },
-}
+} satisfies ExportedHandler<Env>

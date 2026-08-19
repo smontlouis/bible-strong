@@ -38,6 +38,7 @@ for (const file of await collectTypeScriptFiles(sourceRoot)) {
   if (/from ['"](?:kysely|kysely-neon|pg|@neondatabase\/serverless)['"]/.test(source)) {
     const allowed = new Set([
       'resource-service/src/database/localDatabase.ts',
+      'resource-service/src/database/hyperdriveDatabase.ts',
       'resource-service/src/database/neonDatabase.ts',
       'resource-service/src/database/types.ts',
     ])

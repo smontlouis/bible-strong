@@ -151,7 +151,7 @@ LSG chapter loading before expanding to search and other resources.
 - The Worker verifies App Check before protected cache or origin access. Attestation tokens do not enter shared content cache keys.
 - Static mobile tokens are not secrets or sufficient authorization. They may be used only as client identifiers. Rate limiting remains required, with stricter policy for dynamic search than cached deterministic reads.
 - Private R2 buckets store offline artifacts. After App Check verification, the Worker returns a short-lived presigned URL scoped to one artifact; the app verifies the catalog checksum after download and can request a replacement URL for resume.
-- Workers initially query Neon over HTTP with the Neon serverless driver. Hyperdrive is deferred until observed latency or connection pressure justifies another pooling/cache layer.
+- Workers query Neon through Cloudflare Hyperdrive with one bounded `node-postgres` pool shared by the repositories for each request. Hyperdrive SQL caching starts disabled until publication-aware invalidation is designed.
 - API, shared contracts, Worker code, and publication tooling begin in the existing repository. The Expo tree is not moved immediately; formal Yarn workspaces may be introduced later.
 - REST routes are versioned. An API version permits additive optional fields but no removal, rename, or reinterpretation. Breaking changes use a new route version and overlap until observed client usage allows retirement.
 - PostgreSQL migrations are versioned in the repository, deployed separately from content publications, and use expand/migrate/contract changes to preserve active API versions.
@@ -199,7 +199,7 @@ LSG chapter loading before expanding to search and other resources.
 - Building a generic remote SQL endpoint.
 - Adding GraphQL or gRPC.
 - Adding Algolia, Elasticsearch, Meilisearch, or another hosted search engine before PostgreSQL limitations are measured.
-- Adding Cloudflare Hyperdrive before measured latency or connection pressure justifies it.
+- Enabling Hyperdrive SQL response caching before publication-aware invalidation exists.
 - Keeping historical revisions in live Neon or live R2.
 - Building a resource administration UI before the CLI/CI publication workflow proves a need.
 - Implementing automatic mappings between Bible versifications or expanding the app's supported canon as part of this project.

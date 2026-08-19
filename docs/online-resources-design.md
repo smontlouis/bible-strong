@@ -119,9 +119,9 @@ not work started during this design session.
   provide the initial resilience. Additional replication requires measured availability need.
 - Cloudflare Workers provides the versioned REST/JSON domain API, cache handling, rate limiting, and
   abuse controls.
-- Workers initially query Neon directly over HTTP with `@neondatabase/serverless`, which suits
-  one-shot edge queries. Hyperdrive is deferred until measured global latency or connection pressure
-  justifies an additional pooling/query-cache layer.
+- Workers query Neon through Cloudflare Hyperdrive with Kysely, `PostgresDialect`, and
+  `node-postgres`. One bounded pool is shared by all repositories for a request and then closed.
+  Hyperdrive SQL caching starts disabled until publication-aware invalidation exists.
 - Cloudflare R2 stores downloadable SQLite/JSON offline artifacts.
 - R2 artifact buckets remain private. After App Check verification, the Worker grants temporary
   direct access to one artifact with a short-lived presigned URL; the mobile app verifies the

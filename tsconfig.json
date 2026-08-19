@@ -24,6 +24,9 @@
   "include": ["**/*.ts", "**/*.tsx", "App.tsx.ol"],
   "exclude": [
     "node_modules",
+    "resource-service/src/runtime/worker.ts",
+    "resource-service/src/runtime/__tests__/worker.node-test.ts",
+    "resource-service/worker-configuration.d.ts",
     "src/features/timeline/events.old.ts",
     "src/features/bible/bibleWebView",
     "src/features/studies/studiesWebView"

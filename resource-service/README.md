@@ -1,7 +1,8 @@
-# Resource service (local phase)
+# Resource service
 
-This directory contains the production-shaped Resource API while it is developed locally. It does
-not provision Neon, Cloudflare, R2, or any other hosted infrastructure.
+This directory contains the Resource API, its local PostgreSQL runtime, and its Cloudflare Worker
+deployment configuration. Neon and Cloudflare infrastructure is administered separately from the
+application source.
 
 ## Start the local database and API
 
@@ -122,6 +123,32 @@ of shell history and committed environment files.
 Reimporting the same revision and checksums returns `unchanged`. Reusing a revision with different
 content fails. Validation failures or Effect interruption roll back staging and preserve the prior
 active publication.
+
+## Deploy the production Worker
+
+The production Worker reaches Neon only through the `HYPERDRIVE` binding declared in
+`wrangler.jsonc`. Hyperdrive uses the dedicated `resource_api` PostgreSQL login, which has `CONNECT`,
+schema `USAGE`, and table `SELECT` privileges but no table writes or role/database administration.
+Its password is held by Hyperdrive and must never be added to a Worker secret, environment file, or
+the repository. Hyperdrive SQL caching is disabled until publication-aware invalidation exists.
+
+Authenticate Wrangler, regenerate and verify generated binding types, then deploy:
+
+```bash
+yarn wrangler login
+yarn resources:worker:types
+yarn resources:worker:check
+yarn resources:worker:deploy
+```
+
+The production deployment uses the Custom Domain `api.bible-strong.app`; `workers.dev` is disabled.
+The `bible-strong.app` zone must therefore be active in Cloudflare before deployment. After
+deployment, verify both the Worker itself and an actual read through Hyperdrive:
+
+```bash
+curl --fail https://api.bible-strong.app/health
+curl --fail https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1
+```
 
 The local Effect HttpApi exposes Bible reading, Strong Bible indexes, BHG interlinear indexes, and
 the Nave operations consumed by the app:

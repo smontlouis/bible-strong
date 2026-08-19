@@ -47,6 +47,10 @@
     "resources:import-catalog:hosted": "tsx resource-service/src/publication/publicationCli.ts import-catalog-hosted",
     "resources:serve": "tsx resource-service/src/runtime/node.ts",
     "resources:serve:artifacts": "tsx resource-service/src/runtime/artifactNode.ts",
+    "resources:worker:types": "wrangler types --config resource-service/wrangler.jsonc resource-service/worker-configuration.d.ts",
+    "resources:worker:types:check": "wrangler types --check --config resource-service/wrangler.jsonc resource-service/worker-configuration.d.ts",
+    "resources:worker:check": "yarn resources:worker:types:check && tsc --project resource-service/tsconfig.worker.json",
+    "resources:worker:deploy": "wrangler deploy --config resource-service/wrangler.jsonc",
     "resources:dev": "tsx resource-service/src/runtime/dev.ts",
     "resources:dev:local": "RESOURCE_SKIP_IMPORT=1 RESOURCE_API_PORT=8787 yarn resources:dev",
     "resources:sync:local": "yarn resources:db:up && yarn resources:migrate && RESOURCE_PUBLICATION_ROOTS=../bible-lexicon-maker/outputs/resource-publications yarn resources:import-catalog",
@@ -236,6 +240,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/runtime": "^7.28.4",
+    "@cloudflare/workers-types": "^5.20260819.1",
     "@dagrejs/dagre": "^3.0.0",
     "@types/babel__core": "^7.20.5",
     "@types/babel__preset-env": "^7",
@@ -269,7 +274,8 @@
     "sql.js": "^1.14.2",
     "tsx": "4.20.6",
     "typescript": "~6.0.3",
-    "vite": "^8.0.13"
+    "vite": "^8.0.13",
+    "wrangler": "^4.124.0"
   },
   "private": true,
   "packageManager": "yarn@4.12.0",
