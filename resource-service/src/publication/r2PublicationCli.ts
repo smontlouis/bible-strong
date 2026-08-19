@@ -13,9 +13,7 @@ const run = async () => {
   if (!bucket) throw new Error('RESOURCE_R2_BUCKET_REQUIRED')
 
   const roots = parsePublicationCatalogRoots(process.argv.slice(2))
-  const mobileCatalogPath =
-    process.env.RESOURCE_MOBILE_RESOURCE_CATALOG ??
-    path.resolve(process.cwd(), 'src/assets/mobile-resource-catalog.json')
+  const mobileCatalogPath = path.resolve(process.cwd(), 'src/assets/mobile-resource-catalog.json')
   const bundles = await findPublicationBundlesRecursively(roots)
   if (bundles.length === 0) throw new Error('RESOURCE_PUBLICATION_CATALOG_EMPTY')
 
@@ -24,6 +22,7 @@ const run = async () => {
     mobileCatalogPath,
     new WranglerR2ArtifactStore({ bucket }),
     {
+      expectedCatalogResourceCount: 72,
       onResult: (result, index, total) => {
         const detail = result.status === 'skipped' ? result.reason : result.key
         console.error(

@@ -1,7 +1,6 @@
 import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 
-import { createDevelopmentArtifact } from '../runtime/developmentArtifacts'
 import { readMobileResourceCatalog } from './mobileResourceCatalog'
 import { validatePublicationBundle } from './publicationBundle'
 import { getMobileResourceCatalogId, getPublicationResourceIdentity } from './publicationIdentity'
@@ -33,7 +32,7 @@ type ValidatedPublicationBundle = Awaited<ReturnType<typeof validatePublicationB
 const publishValidatedR2PublicationBundle = async (
   validated: ValidatedPublicationBundle,
   store: R2ArtifactStore,
-  stableKey?: string
+  stableKey: string
 ): Promise<R2ArtifactPublicationResult> => {
   const { manifest, offlineArtifactPath } = validated
   const resourceIdentity = getPublicationResourceIdentity(manifest)
@@ -46,8 +45,7 @@ const publishValidatedR2PublicationBundle = async (
     }
   }
   const bytes = await readFile(offlineArtifactPath)
-  const artifact = createDevelopmentArtifact(manifest, bytes)
-  const key = stableKey ?? artifact.route.slice(1)
+  const key = stableKey
   const metadata = {
     format: 'bible-strong-r2-artifact-metadata',
     schemaVersion: 1,
@@ -110,9 +108,10 @@ const publishValidatedR2PublicationBundle = async (
 
 export const publishR2PublicationBundle = async (
   bundlePath: string,
+  stableKey: string,
   store: R2ArtifactStore
 ): Promise<R2ArtifactPublicationResult> =>
-  publishValidatedR2PublicationBundle(await validatePublicationBundle(bundlePath), store)
+  publishValidatedR2PublicationBundle(await validatePublicationBundle(bundlePath), store, stableKey)
 
 export const publishR2PublicationCatalog = async (
   bundlePaths: readonly string[],
@@ -120,12 +119,21 @@ export const publishR2PublicationCatalog = async (
   store: R2ArtifactStore,
   options: {
     onResult?: (result: R2ArtifactPublicationResult, index: number, total: number) => void
+    expectedCatalogResourceCount?: number
   } = {}
 ): Promise<R2ArtifactPublicationResult[]> => {
   const [validatedBundles, mobileCatalog] = await Promise.all([
     Promise.all(bundlePaths.map(validatePublicationBundle)),
     readMobileResourceCatalog(mobileCatalogPath),
   ])
+  if (
+    options.expectedCatalogResourceCount !== undefined &&
+    mobileCatalog.resources.size !== options.expectedCatalogResourceCount
+  ) {
+    throw new Error(
+      `R2_PUBLICATION_CATALOG_EXPECTED_COUNT_MISMATCH:${mobileCatalog.resources.size}:${options.expectedCatalogResourceCount}`
+    )
+  }
   const candidates = validatedBundles.map(validated => {
     const catalogId = getMobileResourceCatalogId(validated.manifest)
     const catalogEntry = mobileCatalog.resources.get(catalogId)

@@ -76,7 +76,11 @@ describe('R2 artifact publisher', () => {
 
     try {
       const { manifest } = await writeStrongPublicationFixture(root)
-      const result = await publishR2PublicationBundle(root, store)
+      const result = await publishR2PublicationBundle(
+        root,
+        'bibles/bible-lsg-strong.sqlite.zip',
+        store
+      )
 
       assert.deepEqual(result, {
         status: 'uploaded',
@@ -126,12 +130,15 @@ describe('R2 artifact publisher', () => {
       const { manifest } = await writeStrongPublicationFixture(root, { offlineAccess: false })
 
       await assert.doesNotReject(async () => {
-        assert.deepEqual(await publishR2PublicationBundle(root, store), {
-          status: 'skipped',
-          resourceIdentity: 'strong-bible-index:LSG',
-          revision: manifest.revision,
-          reason: 'offline-download-not-authorized',
-        })
+        assert.deepEqual(
+          await publishR2PublicationBundle(root, 'bibles/bible-lsg-strong.sqlite.zip', store),
+          {
+            status: 'skipped',
+            resourceIdentity: 'strong-bible-index:LSG',
+            revision: manifest.revision,
+            reason: 'offline-download-not-authorized',
+          }
+        )
       })
       assert.deepEqual(store.puts, [])
     } finally {
@@ -145,17 +152,20 @@ describe('R2 artifact publisher', () => {
 
     try {
       const { manifest } = await writeStrongPublicationFixture(root)
-      await publishR2PublicationBundle(root, store)
+      await publishR2PublicationBundle(root, 'bibles/bible-lsg-strong.sqlite.zip', store)
       const putCount = store.puts.length
 
-      assert.deepEqual(await publishR2PublicationBundle(root, store), {
-        status: 'unchanged',
-        resourceIdentity: 'strong-bible-index:LSG',
-        revision: manifest.revision,
-        key: 'bibles/bible-lsg-strong.sqlite.zip',
-        bytes: manifest.offlineArtifact.bytes,
-        sha256: manifest.offlineArtifact.sha256,
-      })
+      assert.deepEqual(
+        await publishR2PublicationBundle(root, 'bibles/bible-lsg-strong.sqlite.zip', store),
+        {
+          status: 'unchanged',
+          resourceIdentity: 'strong-bible-index:LSG',
+          revision: manifest.revision,
+          key: 'bibles/bible-lsg-strong.sqlite.zip',
+          bytes: manifest.offlineArtifact.bytes,
+          sha256: manifest.offlineArtifact.sha256,
+        }
+      )
       assert.equal(store.puts.length, putCount)
     } finally {
       await rm(root, { recursive: true, force: true })
@@ -244,6 +254,14 @@ describe('R2 artifact publisher', () => {
       await assert.rejects(
         publishR2PublicationCatalog([firstBundle, secondBundle], catalogPath, store),
         /R2_PUBLICATION_CATALOG_DUPLICATE_RESOURCE:bible-strong:LSG/
+      )
+      assert.deepEqual(store.puts, [])
+
+      await assert.rejects(
+        publishR2PublicationCatalog([firstBundle], catalogPath, store, {
+          expectedCatalogResourceCount: 72,
+        }),
+        /R2_PUBLICATION_CATALOG_EXPECTED_COUNT_MISMATCH:1:72/
       )
       assert.deepEqual(store.puts, [])
 
