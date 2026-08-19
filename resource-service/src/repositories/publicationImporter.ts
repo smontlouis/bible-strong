@@ -1003,7 +1003,7 @@ export const importPublicationBundle = (
 
             return makeResult(publicationStatus === 'active' ? 'activated' : 'staged')
           }),
-        { timeout: '2 minutes' }
+        { timeout: '10 minutes' }
       ).pipe(
         Effect.mapError(failure =>
           failure.cause instanceof PublicationImportFailure ? failure.cause : failure
