@@ -1,11 +1,9 @@
 import { useTheme } from '@emotion/react'
 import { Asset } from 'expo-asset'
-import * as FileSystem from 'expo-file-system/legacy'
 import { Image } from 'expo-image'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet } from 'react-native'
-import { AnimatedProgressCircle } from '@convective/react-native-reanimated-progress'
+import { Platform, StyleSheet } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import Link from '~common/Link'
 import PlanIcon from '~common/PlanIcon'
@@ -20,6 +18,7 @@ import useLanguage from '~helpers/useLanguage'
 import { addPlan } from '~redux/modules/plan'
 import { RootState } from '~redux/modules/reducer'
 import { Theme } from '~themes'
+import PlanProgressCircle from './PlanProgressCircle'
 
 const LinkBox = Box.withComponent(Link)
 
@@ -29,16 +28,23 @@ const useGetFirstPlans = () => {
   const dispatch = useDispatch()
 
   const getBibleProjectPlan = async () => {
-    const [{ localUri }] = await Asset.loadAsync(
+    const [asset] = await Asset.loadAsync(
       lang === 'fr'
         ? // eslint-disable-next-line @typescript-eslint/no-require-imports
           require('~assets/plans/bible-project-plan.txt')
         : // eslint-disable-next-line @typescript-eslint/no-require-imports
           require('~assets/plans/bible-project-plan-en.txt')
     )
-    if (!localUri) return
     try {
-      const plan: Plan = JSON.parse(await FileSystem.readAsStringAsync(localUri))
+      let serialized: string | undefined
+      if (Platform.OS === 'web') {
+        serialized = await fetch(asset.uri).then(response => response.text())
+      } else if (asset.localUri) {
+        const FileSystem = await import('expo-file-system/legacy')
+        serialized = await FileSystem.readAsStringAsync(asset.localUri)
+      }
+      if (!serialized) return
+      const plan: Plan = JSON.parse(serialized)
       dispatch(addPlan(plan))
     } catch (error) {
       console.log('[Home] Error loading plan:', error)
@@ -100,13 +106,12 @@ const PlanHome = () => {
             params={{ planId: id!, plan: currentPlan! }}
             px={20}
           >
-            <AnimatedProgressCircle
+            <PlanProgressCircle
               size={40}
               progress={progress}
               color={status === 'Completed' ? theme.colors.success : theme.colors.primary}
               unfilledColor={theme.colors.lightGrey}
               thickness={2}
-              animationDuration={300}
             >
               <Box style={StyleSheet.absoluteFill} center>
                 <CircleImage size={35} center>
@@ -120,7 +125,7 @@ const PlanHome = () => {
                   )}
                 </CircleImage>
               </Box>
-            </AnimatedProgressCircle>
+            </PlanProgressCircle>
             <Box flex justifyContent="center" ml={15}>
               <Paragraph fontFamily="title" scale={-2} scaleLineHeight={-2}>
                 {title}

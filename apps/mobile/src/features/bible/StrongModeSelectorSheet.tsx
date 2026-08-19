@@ -5,8 +5,7 @@ import { type RefObject, useEffect } from 'react'
 import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
-import { Sheet, SheetHeader, type SheetRef } from '~common/sheet'
-import { SheetView } from '~common/sheet-expo-ui'
+import { Sheet, SheetHeader, SheetView, type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { downloadManager } from '~helpers/downloadManager'
@@ -119,6 +118,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   }
 
   const requestDownload = (mode: Exclude<StrongMode, 'hidden'>) => {
+    if (Platform.OS === 'web') return
     if (!isConnected || availabilityFailed) return
     if (!isStrongCapableBibleVersion(version)) return
     try {
@@ -157,8 +157,9 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   }
 
   const hasLoadedAvailability = availabilityQuery.isSuccess && Boolean(availability.strong)
-  const strongDownloadRequired = hasLoadedAvailability && !strongAvailable
-  const reverseInterlinearDownloadRequired = hasLoadedAvailability && !reverseInterlinearAvailable
+  const strongDownloadRequired = Platform.OS !== 'web' && hasLoadedAvailability && !strongAvailable
+  const reverseInterlinearDownloadRequired =
+    Platform.OS !== 'web' && hasLoadedAvailability && !reverseInterlinearAvailable
   const strongDownloading =
     pendingAcquisition?.mode === 'visible' && strongDownloadPresentation.status !== 'failed'
   const reverseInterlinearDownloading =
@@ -189,6 +190,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           label={t('Strong')}
           description={t('Texte + numéros')}
           selected={selectedMode === 'visible'}
+          disabled={Platform.OS === 'web' && !strongAvailable}
           onPress={() => selectMode('visible')}
           downloadRequired={strongDownloadRequired}
           downloadDisabled={!isConnected || availabilityFailed}
@@ -209,6 +211,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
           label={t('Interlinéaire inversé')}
           description={t('Traduction puis original')}
           selected={selectedMode === 'reverse-interlinear'}
+          disabled={Platform.OS === 'web' && !reverseInterlinearAvailable}
           onPress={() => selectMode('reverse-interlinear')}
           downloadRequired={reverseInterlinearDownloadRequired}
           downloadDisabled={!isConnected || availabilityFailed}

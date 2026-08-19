@@ -1,6 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "tanstack-start",
+  "installCommand": "corepack yarn install --immutable",
   "headers": [
     {
       "source": "/embed/youtube.html",

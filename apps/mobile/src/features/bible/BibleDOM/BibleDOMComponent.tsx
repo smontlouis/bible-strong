@@ -70,6 +70,14 @@ import ChapterEntities from './ChapterEntities'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
 import { getPassageMediaGalleryItems, getPassageMediaGallerySections } from './passageMediaGallery'
 import { createVersePositionLayoutProps } from './annotationLayoutLifecycle'
+import {
+  addDOMScrollListener,
+  getDOMScrollHeight,
+  getDOMScrollTarget,
+  getDOMScrollTop,
+  getDOMViewportHeight,
+  scrollDOMTo,
+} from './domScroll'
 
 declare global {
   interface Window {
@@ -207,6 +215,7 @@ type Props = Pick<
   errorDownloadState?: BibleDOMDownloadState
   isResettingDatabase?: boolean
   isConnected: boolean
+  onlineOnly?: boolean
 }
 
 const extractParallelVersionTitles = (parallelVerses: ParallelVerse[], currentVersion: string) => {
@@ -971,7 +980,9 @@ const LoadedBibleContent = ({
   useEffect(() => {
     if (isFormSheet) return
 
-    let lastScrollTop = 0
+    const scrollTarget = getDOMScrollTarget(containerRef.current)
+
+    let lastScrollTop = getDOMScrollTop(scrollTarget)
     let lastScrollTime = Date.now()
     const VELOCITY_THRESHOLD = 400
     let canSwipeDown = true
@@ -979,7 +990,7 @@ const LoadedBibleContent = ({
     let reachedBoundaries = false
 
     const handleScroll = () => {
-      const currentScrollTop = window.scrollY
+      const currentScrollTop = getDOMScrollTop(scrollTarget)
       const currentTime = Date.now()
       const timeDiff = currentTime - lastScrollTime
       const scrollDiff = currentScrollTop - lastScrollTop
@@ -988,7 +999,7 @@ const LoadedBibleContent = ({
       const velocity = Math.abs(scrollDiff / timeDiff)
 
       // Get total scrollable height
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight
+      const totalHeight = getDOMScrollHeight(scrollTarget) - getDOMViewportHeight(scrollTarget)
 
       // Don't dispatch if scroll is beyond boundaries (iOS momentum scrolling)
       if (currentScrollTop < 0 || currentScrollTop > totalHeight) {
@@ -1028,8 +1039,7 @@ const LoadedBibleContent = ({
       lastScrollTime = currentTime
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    return addDOMScrollListener(scrollTarget, handleScroll)
   }, [dispatch, isFormSheet])
 
   const hasVerses = verses.length > 0
@@ -1061,7 +1071,9 @@ const LoadedBibleContent = ({
     if (!element) return null
 
     const rect = element.getBoundingClientRect()
-    const viewportBottom = window.innerHeight - RETURN_TO_SELECTED_VERSE_BOTTOM_OFFSET
+    const scrollTarget = getDOMScrollTarget(containerRef.current)
+    const viewportBottom =
+      getDOMViewportHeight(scrollTarget) - RETURN_TO_SELECTED_VERSE_BOTTOM_OFFSET
 
     if (rect.bottom < headerHeight) return 'top'
     if (rect.top > viewportBottom) return 'bottom'
@@ -1073,9 +1085,14 @@ const LoadedBibleContent = ({
     if (!element) return
 
     const rect = element.getBoundingClientRect()
+    const scrollTarget = getDOMScrollTarget(containerRef.current)
     window.disableSwipeDownEvent = true
-    window.scrollTo({
-      top: window.scrollY + rect.top - window.innerHeight / 2 + rect.height / 2,
+    scrollDOMTo(scrollTarget, {
+      top:
+        getDOMScrollTop(scrollTarget) +
+        rect.top -
+        getDOMViewportHeight(scrollTarget) / 2 +
+        rect.height / 2,
       behavior,
     })
     setReturnToSelectedVersePosition(null)
@@ -1088,7 +1105,7 @@ const LoadedBibleContent = ({
   useEffect(() => {
     if (!hasVerses) return
     if (scrollTargetVerse === 1) {
-      window.scrollTo(0, 0)
+      scrollDOMTo(getDOMScrollTarget(containerRef.current), { top: 0 })
     }
   }, [chapter, scrollTargetVerse, hasVerses])
 
@@ -1100,10 +1117,11 @@ const LoadedBibleContent = ({
     requestAnimationFrame(() => {
       const element = document.querySelector(`#verset-${scrollTargetVerse}`)
       if (element) {
+        const scrollTarget = getDOMScrollTarget(containerRef.current)
         window.disableSwipeDownEvent = true
         const elementPosition = element.getBoundingClientRect().top
-        window.scrollTo({
-          top: window.scrollY + elementPosition - 100,
+        scrollDOMTo(scrollTarget, {
+          top: getDOMScrollTop(scrollTarget) + elementPosition - 100,
         })
         setTimeout(() => {
           window.disableSwipeDownEvent = false
@@ -1125,6 +1143,7 @@ const LoadedBibleContent = ({
   useEffect(() => {
     if (!selectedVerseElementId) return
 
+    const scrollTarget = getDOMScrollTarget(containerRef.current)
     let rafId: number | null = null
     const updateVisibility = () => {
       if (rafId) cancelAnimationFrame(rafId)
@@ -1134,11 +1153,11 @@ const LoadedBibleContent = ({
     }
 
     updateVisibility()
-    window.addEventListener('scroll', updateVisibility, { passive: true })
+    const removeScrollListener = addDOMScrollListener(scrollTarget, updateVisibility)
     window.addEventListener('resize', updateVisibility)
 
     return () => {
-      window.removeEventListener('scroll', updateVisibility)
+      removeScrollListener()
       window.removeEventListener('resize', updateVisibility)
       if (rafId) cancelAnimationFrame(rafId)
     }
@@ -1392,11 +1411,13 @@ const BibleDOMErrorContent = ({
   isResettingDatabase,
   headerHeight,
   isConnected,
+  onlineOnly,
 }: Pick<Props, 'settings' | 'dispatch' | 'translations' | 'error' | 'errorDownloadState'> & {
   error: BibleError
   isResettingDatabase?: boolean
   headerHeight: number
   isConnected: boolean
+  onlineOnly?: boolean
 }) => {
   const isDownloading =
     errorDownloadState?.status === 'queued' ||
@@ -1404,7 +1425,7 @@ const BibleDOMErrorContent = ({
     errorDownloadState?.status === 'inserting'
   const progressLabel =
     errorDownloadState?.status === 'inserting' ? translations.inserting : translations.downloading
-  const failurePresentation = getBibleDOMErrorPresentation(error, isConnected)
+  const failurePresentation = getBibleDOMErrorPresentation(error, isConnected, { onlineOnly })
   const canAcquire = failurePresentation.actions.includes('download')
   const canRepair = failurePresentation.actions.includes('repair')
   const canManage = failurePresentation.actions.includes('manage')
@@ -1540,6 +1561,7 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
         isResettingDatabase={rest.isResettingDatabase}
         headerHeight={headerHeight}
         isConnected={rest.isConnected}
+        onlineOnly={rest.onlineOnly}
       />
     )
   }

@@ -11,9 +11,9 @@ import {
   type SheetRef,
   SheetView,
 } from '~common/sheet'
-import { getAuth, deleteUser } from '@react-native-firebase/auth'
+import { deleteCurrentAuthUser, getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 
-import Box, { VStack, HStack } from '~common/ui/Box'
+import Box, { VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import Button from '~common/ui/Button'
 import FireAuth from '~helpers/FireAuth'
@@ -45,12 +45,12 @@ const DeleteAccountModal = ({ modalRef }: DeleteAccountModalProps) => {
   const handleDelete = async () => {
     if (!isValid) return
 
-    const authUser = getAuth().currentUser
+    const authUser = getCurrentAuthUser()
     if (!authUser) return
 
     setIsLoading(true)
     try {
-      await deleteUser(authUser)
+      await deleteCurrentAuthUser()
       handleClose()
       FireAuth.logout()
     } catch (error: unknown) {

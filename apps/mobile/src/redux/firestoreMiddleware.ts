@@ -1,7 +1,7 @@
-import { getAuth } from '@react-native-firebase/auth'
 import { isAnyOf, Middleware } from '@reduxjs/toolkit'
-import { autoBackupManager } from '~helpers/AutoBackupManager'
+import { Platform } from 'react-native'
 import { appLogger } from '~helpers/agentObservability'
+import { getCurrentAuthUser } from '~helpers/firebaseAuthRuntime'
 import { tokenManager } from '~helpers/TokenManager'
 import {
   firestoreSyncOutbox,
@@ -442,12 +442,16 @@ async function handleSyncWithRetry(
       })
 
       // SAFETY: Créer un backup immédiat en cas d'erreur de sync
-      autoBackupManager.createBackupNow(state, 'sync_error').catch(backupError => {
-        console.error('[AutoBackup] Failed to create error backup:', backupError)
-        appLogger.captureError('sync', 'sync_error.backup_failed', backupError, {
-          action: actionName,
-        })
-      })
+      if (Platform.OS !== 'web') {
+        void import('~helpers/AutoBackupManager').then(({ autoBackupManager }) =>
+          autoBackupManager.createBackupNow(state, 'sync_error').catch(backupError => {
+            console.error('[AutoBackup] Failed to create error backup:', backupError)
+            appLogger.captureError('sync', 'sync_error.backup_failed', backupError, {
+              action: actionName,
+            })
+          })
+        )
+      }
 
       onFinalFailure?.()
       toast.error(i18n.t('app.syncError'))
@@ -537,7 +541,7 @@ const firestoreMiddleware: Middleware = store => next => async action => {
     return result
   }
 
-  const currentUser = getAuth().currentUser
+  const currentUser = getCurrentAuthUser()
   if (!currentUser) {
     return result
   }
@@ -577,7 +581,11 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   }
 
   // Schedule un backup automatique après chaque changement (debounced 30s)
-  autoBackupManager.scheduleBackup(state)
+  if (Platform.OS !== 'web') {
+    void import('~helpers/AutoBackupManager').then(({ autoBackupManager }) =>
+      autoBackupManager.scheduleBackup(state)
+    )
+  }
 
   // ========== PLAN SYNC ==========
   if (isPlanAction(action)) {

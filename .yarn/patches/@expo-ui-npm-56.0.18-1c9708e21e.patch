@@ -1,0 +1,109 @@
+diff --git a/build/community/bottom-sheet/types.d.ts b/build/community/bottom-sheet/types.d.ts
+index 72fc6becbc414c318799e28103d15484ed86f703..1e3301e1818f9c23e22ec966b3614bbb30c84ea4 100644
+--- a/build/community/bottom-sheet/types.d.ts
++++ b/build/community/bottom-sheet/types.d.ts
+@@ -112,6 +112,10 @@ export interface BottomSheetFooterProps {
+  * a modal sheet overlay on iOS and Android. On web, it renders inline.
+  */
+ export interface BottomSheetProps {
++    /** Accessible name used by the web dialog implementation. */
++    accessibilityLabel?: string;
++    /** Accessible description used by the web dialog implementation. */
++    accessibilityDescription?: string;
+     /**
+      * Ref to the bottom sheet component. Exposes imperative methods (`snapToIndex`,
+      * `expand`, `collapse`, `close`, `present`, `dismiss`, etc.).
+@@ -250,7 +254,7 @@ export interface BottomSheetProps {
+      * iOS uses a system-provided backdrop. Android provides scrim color control via `backgroundStyle`.
+      * On web, the default scrim is always rendered.
+      */
+-    backdropComponent?: ComponentType<BottomSheetBackdropProps>;
++    backdropComponent?: ComponentType<BottomSheetBackdropProps> | null;
+     /**
+      * Custom background component.
+      *
+diff --git a/src/community/bottom-sheet/BottomSheet.tsx b/src/community/bottom-sheet/BottomSheet.tsx
+index 50b5738f22a2ebaac85d42a5435a8bb148ae8e00..75ec5c5e38e71ef53aa296cd0a865dba87d22e88 100644
+--- a/src/community/bottom-sheet/BottomSheet.tsx
++++ b/src/community/bottom-sheet/BottomSheet.tsx
+@@ -42,11 +42,25 @@ const defaultContentStyle: React.CSSProperties = {
+   zIndex: 1000,
+ };
+ 
++const visuallyHiddenStyle: React.CSSProperties = {
++  position: 'absolute',
++  width: 1,
++  height: 1,
++  padding: 0,
++  margin: -1,
++  overflow: 'hidden',
++  clip: 'rect(0, 0, 0, 0)',
++  whiteSpace: 'nowrap',
++  borderWidth: 0,
++};
++
+ /**
+  * Web implementation of `BottomSheet` using vaul.
+  */
+ export function BottomSheet(props: BottomSheetProps) {
+   const {
++    accessibilityDescription = 'Bottom sheet',
++    accessibilityLabel = 'Bottom sheet',
+     ref,
+     snapPoints: snapPointsProp,
+     index: indexProp = 0,
+@@ -55,9 +69,11 @@ export function BottomSheet(props: BottomSheetProps) {
+     onDismiss,
+     enablePanDownToClose = false,
+     handleComponent,
++    backdropComponent,
+     backgroundStyle,
+     children,
+   } = props;
++  const allowsBackgroundInteraction = backdropComponent === null;
+ 
+   const { height: windowHeight } = useWindowDimensions();
+ 
+@@ -184,10 +200,15 @@ export function BottomSheet(props: BottomSheetProps) {
+         <Drawer.Root
+           open={isOpen}
+           onOpenChange={handleOpenChange}
++          modal={!allowsBackgroundInteraction}
+           dismissible={enablePanDownToClose}>
+-          <Drawer.Overlay style={overlayStyle} />
++          {!allowsBackgroundInteraction && <Drawer.Overlay style={overlayStyle} />}
+           <Drawer.Portal>
+             <Drawer.Content style={mergedContentStyle}>
++              <Drawer.Title style={visuallyHiddenStyle}>{accessibilityLabel}</Drawer.Title>
++              <Drawer.Description style={visuallyHiddenStyle}>
++                {accessibilityDescription}
++              </Drawer.Description>
+               {handleComponent !== null && <Drawer.Handle />}
+               <div style={innerStyle}>{children}</div>
+             </Drawer.Content>
+diff --git a/src/community/bottom-sheet/types.ts b/src/community/bottom-sheet/types.ts
+index d7372fcb72e3717329ee8df4e27e2f537f17decb..516a5723bde9a059808841c04a2f7d1cba852cdf 100644
+--- a/src/community/bottom-sheet/types.ts
++++ b/src/community/bottom-sheet/types.ts
+@@ -121,6 +121,12 @@ export interface BottomSheetFooterProps {
+  * a modal sheet overlay on iOS and Android. On web, it renders inline.
+  */
+ export interface BottomSheetProps {
++  /** Accessible name used by the web dialog implementation. */
++  accessibilityLabel?: string;
++
++  /** Accessible description used by the web dialog implementation. */
++  accessibilityDescription?: string;
++
+   /**
+    * Ref to the bottom sheet component. Exposes imperative methods (`snapToIndex`,
+    * `expand`, `collapse`, `close`, `present`, `dismiss`, etc.).
+@@ -285,7 +291,7 @@ export interface BottomSheetProps {
+    * iOS uses a system-provided backdrop. Android provides scrim color control via `backgroundStyle`.
+    * On web, the default scrim is always rendered.
+    */
+-  backdropComponent?: ComponentType<BottomSheetBackdropProps>;
++  backdropComponent?: ComponentType<BottomSheetBackdropProps> | null;
+ 
+   /**
+    * Custom background component.

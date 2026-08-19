@@ -1,9 +1,7 @@
 import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { Image } from 'expo-image'
-import * as FileSystem from 'expo-file-system/legacy'
-import * as Sharing from 'expo-sharing'
 import React, { useState } from 'react'
-import { ActivityIndicator } from 'react-native'
+import { ActivityIndicator, Platform } from 'react-native'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
 import Loading from '~common/Loading'
@@ -40,6 +38,17 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
 
     setShareIsLoading(true)
     try {
+      if (Platform.OS === 'web') {
+        if (typeof navigator !== 'undefined' && navigator.share) {
+          await navigator.share({ url: imageUrls.large })
+        }
+        setShareIsLoading(false)
+        return
+      }
+      const [FileSystem, Sharing] = await Promise.all([
+        import('expo-file-system/legacy'),
+        import('expo-sharing'),
+      ])
       const path = `${FileSystem.documentDirectory}${verseOfTheDay.v}.jpeg`
       const imageFile = await FileSystem.getInfoAsync(path)
 

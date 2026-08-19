@@ -1,6 +1,5 @@
 import React from 'react'
-// import YoutubePlayer from '~helpers/react-native-youtube-iframe'
-import YoutubePlayer from 'react-native-youtube-iframe'
+import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 
 import Box from '~common/ui/Box'
 import { wp } from '~helpers/utils'
@@ -30,7 +29,7 @@ const VideoSlice = ({ title, description, url, planLanguage }: Props) => {
         videoId={videoId}
         // onChangeState={event => console.log(event)}
         onReady={() => console.log('[Plans] Video ready')}
-        onError={(e: string) => console.log('[Plans] Video error:', e)}
+        onError={e => console.log('[Plans] Video error:', e)}
         // onPlaybackQualityChange={q => console.log(q)}
       />
     </Box>

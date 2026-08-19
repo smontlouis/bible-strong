@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react'
+import { Platform } from 'react-native'
 import { Sheet, SheetScrollView, type SheetRef, SheetHeader } from '~common/sheet'
 import distanceInWords from 'date-fns/formatDistance'
 
@@ -76,7 +77,8 @@ const Changelog = () => {
   const changelogIsLoading = useSelector((state: RootState) => state.user.changelog.isLoading)
 
   const hasAutomaticLogs = !changelogIsLoading && hasNewLogs(seenLogs, changelog)
-  const showModal = isOnboardingCompleted && (hasAutomaticLogs || manualOpen)
+  const showModal =
+    (Platform.OS === 'web' || isOnboardingCompleted) && (hasAutomaticLogs || manualOpen)
   const newLogs = hasAutomaticLogs ? findNewLogs(seenLogs, changelog) : []
   const visibleLogs = hasAutomaticLogs
     ? newLogs

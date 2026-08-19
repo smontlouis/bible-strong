@@ -1,20 +1,12 @@
 import type { Verse } from '~common/types'
 import { Schema } from 'effect'
-import { getMultipleVerses, getVerseText } from '~helpers/biblesDb'
 import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
-import {
-  loadStrongBibleLemmaStatsResult,
-  loadStrongBibleChapterSpans,
-  loadStrongBibleOccurrenceLocations,
-  loadStrongBibleVerseCountsByBookResult,
-  loadStrongBibleVerseSpans,
-  loadStrongBibleVersesSpans,
-  type StrongBibleLemmaStat,
-  type ResolvedStrongBibleIdentity,
-  type StrongBibleSidecarAvailability,
-  type StrongBibleVerseCountByBook,
+import type {
+  StrongBibleLemmaStat,
+  ResolvedStrongBibleIdentity,
+  StrongBibleSidecarAvailability,
+  StrongBibleVerseCountByBook,
 } from '~helpers/strongBibleSidecar'
-import { getRegisteredStrongBibleAvailability } from './resourceAvailability'
 import {
   getStrongDatasetId,
   getStrongBibleFallbackPriority,
@@ -213,11 +205,16 @@ export interface StrongBibleResourceAccess {
 }
 
 export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
-  getAvailability: getRegisteredStrongBibleAvailability,
+  async getAvailability(versionId) {
+    const { getStrongBibleSidecarAvailability } = await import('~helpers/strongBibleSidecar')
+    return getStrongBibleSidecarAvailability(versionId)
+  },
   async loadChapterSpans(versionId, request) {
+    const { getStrongBibleSidecarAvailability, loadStrongBibleChapterSpans } =
+      await import('~helpers/strongBibleSidecar')
     const [spansByVerse, availability] = await Promise.all([
       loadStrongBibleChapterSpans(versionId, request.book, request.chapter),
-      getRegisteredStrongBibleAvailability(versionId),
+      getStrongBibleSidecarAvailability(versionId),
     ])
     return {
       spansByVerse,
@@ -230,6 +227,10 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
     }
   },
   async loadVerse(versionId, request) {
+    const [{ getVerseText }, { loadStrongBibleVerseSpans }] = await Promise.all([
+      import('~helpers/biblesDb'),
+      import('~helpers/strongBibleSidecar'),
+    ])
     const [text, spans] = await Promise.all([
       getVerseText(versionId, request.book, request.chapter, request.verse),
       loadStrongBibleVerseSpans(versionId, request.book, request.chapter, request.verse),
@@ -237,9 +238,13 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
     return text == null ? undefined : { text, spans }
   },
   async loadCountsByBook(versionId, request) {
+    const { loadStrongBibleVerseCountsByBookResult } = await import('~helpers/strongBibleSidecar')
     return loadStrongBibleVerseCountsByBookResult(versionId, request.book, request.reference)
   },
   async loadFoundVersesByBook(versionId, request) {
+    const { loadStrongBibleOccurrenceLocations, loadStrongBibleVersesSpans } =
+      await import('~helpers/strongBibleSidecar')
+    const { getMultipleVerses } = await import('~helpers/biblesDb')
     const page = await loadStrongBibleOccurrenceLocations(
       versionId,
       request.book,
@@ -286,6 +291,7 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
     }
   },
   async loadLemmaStats(versionId, request) {
+    const { loadStrongBibleLemmaStatsResult } = await import('~helpers/strongBibleSidecar')
     return loadStrongBibleLemmaStatsResult(versionId, request.book, request.reference)
   },
 }

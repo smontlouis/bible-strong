@@ -33,6 +33,29 @@ yarn workspace @bible-strong/resource-studio commentaries:validate
 
 The mobile app uses a custom Expo development client and is not expected to run in Expo Go.
 
+## Expo Web runtime in the mobile workspace
+
+The Expo Web runtime is intentionally online-only. Bible content, search, concordance,
+dictionaries, timeline, commentaries, and interlinear data are read through the Resource HTTP API.
+It does not run onboarding, SQLite migrations, local resource downloads, backup/import-export
+flows, or native context menus. Browser storage is limited to app preferences and user state.
+
+Configure the Resource API and Firebase Web app from `apps/mobile/.env.example`, then start Expo:
+
+```bash
+EXPO_PUBLIC_RESOURCE_API_URL="http://127.0.0.1:8787" yarn workspace @bible-strong/mobile web
+```
+
+The Resource service must allow the browser origin through `RESOURCE_WEB_ORIGINS`, a
+comma-separated exact allowlist. Create the production SPA bundle with:
+
+```bash
+yarn workspace @bible-strong/mobile web:export
+```
+
+The deployment host must send unknown Expo Router routes to `index.html`. This runtime is distinct
+from the dedicated TanStack Start application under `apps/web`.
+
 ## Validation
 
 Root commands run the applicable validation scripts across the relevant workspaces:

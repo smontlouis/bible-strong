@@ -1,13 +1,8 @@
 import type { Verse } from '~common/types'
-import { getMultipleVerses, getVerseText } from '~helpers/biblesDb'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import {
-  getInterlinearSidecarAvailability,
-  loadInterlinearStrongOccurrencePage,
-  loadInterlinearStrongVerseCountsByBook,
-  loadInterlinearVerseTokens,
-  type InterlinearSidecarAvailability,
-  type InterlinearToken,
+import type {
+  InterlinearSidecarAvailability,
+  InterlinearToken,
 } from '~helpers/interlinearBibleSidecar'
 import {
   getDisplayedStrongIdentities,
@@ -97,7 +92,7 @@ export interface InterlinearLexiconAdapter {
   loadCountsByBook: (
     locale: ResourceLanguage,
     request: InterlinearLexiconConcordanceRequest
-  ) => Promise<Awaited<ReturnType<typeof loadInterlinearStrongVerseCountsByBook>>>
+  ) => Promise<StrongBibleVerseCountByBook[]>
   loadFoundVersesByBook: (
     locale: ResourceLanguage,
     request: InterlinearLexiconConcordanceRequest
@@ -165,8 +160,15 @@ export type LexiconBibleLemmaStatsResult =
     }
 
 export const localInterlinearLexiconAdapter: InterlinearLexiconAdapter = {
-  getInterlinearAvailability: getInterlinearSidecarAvailability,
+  async getInterlinearAvailability(locale) {
+    const { getInterlinearSidecarAvailability } = await import('~helpers/interlinearBibleSidecar')
+    return getInterlinearSidecarAvailability(locale)
+  },
   async loadVerse(locale, request) {
+    const [{ getVerseText }, { loadInterlinearVerseTokens }] = await Promise.all([
+      import('~helpers/biblesDb'),
+      import('~helpers/interlinearBibleSidecar'),
+    ])
     const [text, tokens] = await Promise.all([
       getVerseText('BHG', request.book, request.chapter, request.verse),
       loadInterlinearVerseTokens('BHG', locale, request.book, request.chapter, request.verse),
@@ -174,9 +176,16 @@ export const localInterlinearLexiconAdapter: InterlinearLexiconAdapter = {
     return text == null ? undefined : { text, tokens }
   },
   loadCountsByBook(locale, request) {
-    return loadInterlinearStrongVerseCountsByBook(locale, request.reference)
+    return import('~helpers/interlinearBibleSidecar').then(
+      ({ loadInterlinearStrongVerseCountsByBook }) =>
+        loadInterlinearStrongVerseCountsByBook(locale, request.reference)
+    )
   },
   async loadFoundVersesByBook(locale, request) {
+    const [{ getMultipleVerses }, { loadInterlinearStrongOccurrencePage }] = await Promise.all([
+      import('~helpers/biblesDb'),
+      import('~helpers/interlinearBibleSidecar'),
+    ])
     const page = await loadInterlinearStrongOccurrencePage(locale, request.reference, {
       book: request.allBooks ? undefined : request.book,
       limit: request.limit,

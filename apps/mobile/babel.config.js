@@ -25,6 +25,9 @@ module.exports = function (api) {
       'jotai/babel/plugin-debug-label',
     ],
     env: {
+      test: {
+        plugins: ['dynamic-import-node'],
+      },
       production: {
         plugins: ['transform-remove-console'],
       },

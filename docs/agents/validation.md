@@ -13,23 +13,24 @@ Copy `apps/mobile/.env.example` to the appropriate app-local environment file an
 
 ## Canonical Local Checks
 
-| Task | Command | When to run |
-|---|---|---|
-| Unit tests | `yarn test` | Reducers, helpers, business logic, or shared state changes |
-| Lint | `yarn lint` | Most code changes |
-| Typecheck | `yarn typecheck` | TypeScript, navigation params, Redux, Jotai, or helper changes |
-| Format check | `yarn format:check` | Before finishing docs/code formatting-sensitive changes |
-| Agent architecture | `yarn agents:architecture:check` | Feature boundary, helper, SQLite, Firebase, logging, or shared architecture changes |
-| Primitive styling guard | `yarn agents:styles:check` | UI or component changes; rejects new feature-level `styled` usage |
-| Agent domain quality | `yarn agents:quality:check` | Feature/domain changes, PR readiness, or harness changes |
-| i18n extraction | `yarn workspace @bible-strong/mobile i18n` | Mobile user-facing string additions or translation key changes |
-| Resource architecture | `yarn resources:architecture:check` | Resource domain, service, runtime, or UI access changes |
-| Resource unit tests | `yarn resources:test` | Bundle, importer, API, repository, or runtime changes |
-| Resource Postgres integration | `yarn resources:test:integration` | Schema, migrations, importer, or persistence changes |
-| Complete LSG parity | Run the relevant Resource service integration test with its local bundle root | Publication, API response, or Bible presentation changes |
-| Complete Strong Bible parity | Run the relevant Resource service integration test with `RESOURCE_STRONG_BIBLE_BUNDLES_ROOT` | Strong publication, importer, API, or sidecar changes |
-| Complete BHG interlinear parity | Run the relevant Resource service integration test with `RESOURCE_BHG_BUNDLE_ROOT` and `RESOURCE_INTERLINEAR_BUNDLES_ROOT` | Interlinear publication, importer, API, or sidecar changes |
-| Complete Strong lexicon parity | Run the relevant Resource service integration test with `RESOURCE_STRONG_LEXICON_BUNDLES_ROOT` | Strong lexicon publication, importer, API, module, or Offline-copy changes |
+| Task                            | Command                                                                                                                    | When to run                                                                         |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Unit tests                      | `yarn test`                                                                                                                | Reducers, helpers, business logic, or shared state changes                          |
+| Lint                            | `yarn lint`                                                                                                                | Most code changes                                                                   |
+| Typecheck                       | `yarn typecheck`                                                                                                           | TypeScript, navigation params, Redux, Jotai, or helper changes                      |
+| Format check                    | `yarn format:check`                                                                                                        | Before finishing docs/code formatting-sensitive changes                             |
+| Agent architecture              | `yarn agents:architecture:check`                                                                                           | Feature boundary, helper, SQLite, Firebase, logging, or shared architecture changes |
+| Primitive styling guard         | `yarn agents:styles:check`                                                                                                 | UI or component changes; rejects new feature-level `styled` usage                   |
+| Agent domain quality            | `yarn agents:quality:check`                                                                                                | Feature/domain changes, PR readiness, or harness changes                            |
+| i18n extraction                 | `yarn workspace @bible-strong/mobile i18n`                                                                                 | Mobile user-facing string additions or translation key changes                      |
+| Resource architecture           | `yarn resources:architecture:check`                                                                                        | Resource domain, service, runtime, or UI access changes                             |
+| Resource unit tests             | `yarn resources:test`                                                                                                      | Bundle, importer, API, repository, or runtime changes                               |
+| Expo Web export                 | `yarn workspace @bible-strong/mobile web:export`                                                                           | Mobile Web runtime, routing, platform adapters, or browser dependencies             |
+| Resource Postgres integration   | `yarn resources:test:integration`                                                                                          | Schema, migrations, importer, or persistence changes                                |
+| Complete LSG parity             | Run the relevant Resource service integration test with its local bundle root                                              | Publication, API response, or Bible presentation changes                            |
+| Complete Strong Bible parity    | Run the relevant Resource service integration test with `RESOURCE_STRONG_BIBLE_BUNDLES_ROOT`                               | Strong publication, importer, API, or sidecar changes                               |
+| Complete BHG interlinear parity | Run the relevant Resource service integration test with `RESOURCE_BHG_BUNDLE_ROOT` and `RESOURCE_INTERLINEAR_BUNDLES_ROOT` | Interlinear publication, importer, API, or sidecar changes                          |
+| Complete Strong lexicon parity  | Run the relevant Resource service integration test with `RESOURCE_STRONG_LEXICON_BUNDLES_ROOT`                             | Strong lexicon publication, importer, API, module, or Offline-copy changes          |
 
 `yarn agents:architecture:check` regenerates `docs/agents/architecture-lint.md` and `.scratch/architecture/architecture.json`, then fails on high-risk boundary errors. Warnings are intentionally non-blocking for the current brownfield baseline.
 
@@ -72,6 +73,16 @@ RESOURCE_PUBLICATION_BUNDLES_ROOT=/absolute/path/to/publications yarn workspace 
 ```
 
 The development client defaults to `http://127.0.0.1:8787` on iOS and `http://10.0.2.2:8787` on Android when `EXPO_PUBLIC_RESOURCE_API_URL` is not configured. These defaults are development-only.
+
+For the online-only Expo Web runtime, set `EXPO_PUBLIC_RESOURCE_API_URL` explicitly and start it with:
+
+```bash
+yarn workspace @bible-strong/mobile web
+```
+
+The Resource service must allow the browser origin through `RESOURCE_WEB_ORIGINS`. Validate a
+production-shaped SPA bundle with `yarn workspace @bible-strong/mobile web:export`; the deployment
+host must fall back to `index.html` for Expo Router paths.
 
 Offline-copy archives use the App Check-protected Resource API route backed by private R2. Set
 `EXPO_PUBLIC_RESOURCE_ARTIFACT_BASE_URL` to the local artifact server only for local publication

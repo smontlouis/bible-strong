@@ -2189,12 +2189,13 @@ __metadata:
     "@emotion/react": "npm:^11.10.5"
     "@expo/material-symbols": "npm:^0.1.1"
     "@expo/metro-runtime": "npm:~56.0.15"
-    "@expo/ui": "npm:~56.0.18"
+    "@expo/ui": "patch:@expo/ui@npm%3A56.0.18#~/.yarn/patches/@expo-ui-npm-56.0.18-1c9708e21e.patch"
     "@expo/vector-icons": "npm:^15.0.3"
     "@fastify/deepmerge": "npm:^1.3.0"
     "@invertase/react-native-apple-authentication": "npm:^2.3.0"
     "@legendapp/list": "npm:^2.0.19"
     "@lodev09/react-native-true-sheet": "npm:^3.10.1"
+    "@lottiefiles/dotlottie-react": "npm:^0.13.5"
     "@native-html/render": "npm:^1.0.3"
     "@notifee/react-native": "npm:^7.8.2"
     "@react-native-async-storage/async-storage": "npm:2.2.0"
@@ -2226,6 +2227,7 @@ __metadata:
     "@vitejs/plugin-react": "npm:^6.0.2"
     "@xyflow/react": "npm:^12.10.2"
     await-to-js: "npm:^2.1.1"
+    babel-plugin-dynamic-import-node: "npm:^2.3.3"
     babel-plugin-module-resolver: "npm:^3.2.0"
     babel-plugin-react-compiler: "npm:^1.0.0"
     babel-plugin-transform-remove-console: "npm:^6.9.4"
@@ -2267,6 +2269,7 @@ __metadata:
     expo-store-review: "npm:~56.0.3"
     expo-system-ui: "npm:~56.0.5"
     expo-updates: "npm:~56.0.19"
+    firebase: "npm:12.6.0"
     firestore-size: "npm:^2.0.7"
     fuse.js: "npm:^7.3.0"
     global: "npm:^4.4.0"
@@ -2329,6 +2332,7 @@ __metadata:
     redux-persist-filesystem-storage: "npm:^2.1.0"
     redux-thunk: "npm:^2.3.0"
     rn-fetch-blob: "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch"
+    shaka-player: "npm:^4.7.9"
     slugify: "npm:^1.4.0"
     sonner-native: "npm:^0.22.2"
     trunc-html: "npm:^1.1.2"
@@ -4414,7 +4418,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/ui@npm:^56.0.18, @expo/ui@npm:~56.0.18":
+"@expo/ui@npm:56.0.18":
   version: 56.0.18
   resolution: "@expo/ui@npm:56.0.18"
   dependencies:
@@ -4438,6 +4442,33 @@ __metadata:
     react-native-worklets:
       optional: true
   checksum: 10c0/150d08ff09e00fdd03b44f39474b5ee60a1b45c1696268f492ed4173fe875b87323f71234ed09be686de7df3555e336ea2fe71c5377aa837ed8ff66dd0fc5554
+  languageName: node
+  linkType: hard
+
+"@expo/ui@patch:@expo/ui@npm%3A56.0.18#~/.yarn/patches/@expo-ui-npm-56.0.18-1c9708e21e.patch":
+  version: 56.0.18
+  resolution: "@expo/ui@patch:@expo/ui@npm%3A56.0.18#~/.yarn/patches/@expo-ui-npm-56.0.18-1c9708e21e.patch::version=56.0.18&hash=a711e6"
+  dependencies:
+    sf-symbols-typescript: "npm:^2.1.0"
+    vaul: "npm:^1.1.2"
+  peerDependencies:
+    "@babel/core": "*"
+    expo: "*"
+    react: "*"
+    react-dom: "*"
+    react-native: "*"
+    react-native-reanimated: "*"
+    react-native-worklets: "*"
+  peerDependenciesMeta:
+    "@babel/core":
+      optional: true
+    react-dom:
+      optional: true
+    react-native-reanimated:
+      optional: true
+    react-native-worklets:
+      optional: true
+  checksum: 10c0/b617ee4eca64d453fa6faa0789b86dd7fc5fad86781ec16db96d7e759df49f5203fd156871256bff7bcab1563fa0bbd8e88d31397e9c6dc11af24734964c7396
   languageName: node
   linkType: hard
 
@@ -6433,6 +6464,24 @@ __metadata:
     react-native-worklets:
       optional: true
   checksum: 10c0/73716d01b0b7a703f30ef2aaf751dc7fa703cf918026e814c24f85e03ea09e6fdf9eafd57f5373a322772dbb3517194eebf058ff1f8f82a5506f3d048ed4520c
+  languageName: node
+  linkType: hard
+
+"@lottiefiles/dotlottie-react@npm:^0.13.5":
+  version: 0.13.5
+  resolution: "@lottiefiles/dotlottie-react@npm:0.13.5"
+  dependencies:
+    "@lottiefiles/dotlottie-web": "npm:0.44.0"
+  peerDependencies:
+    react: ^17 || ^18 || ^19
+  checksum: 10c0/fd6f47a7308eb6b584e06e50e36a80258efe542019118a7b0d4f66b1016837ed4cba92ba6183a44ac7f951ae270baa4662ce725181ccf2edcc93081b85d148bc
+  languageName: node
+  linkType: hard
+
+"@lottiefiles/dotlottie-web@npm:0.44.0":
+  version: 0.44.0
+  resolution: "@lottiefiles/dotlottie-web@npm:0.44.0"
+  checksum: 10c0/b6454236b3310ca46bc9751041dbab29742a6fd45f6e1f3452bca2217f668b91c4d0ebd55bb99ef98a79a8e4bb52db51721f352b8a1c010447152241d0ac974e
   languageName: node
   linkType: hard
 
@@ -12943,6 +12992,15 @@ __metadata:
   peerDependencies:
     "@babel/core": ^7.8.0
   checksum: 10c0/2eda9c1391e51936ca573dd1aedfee07b14c59b33dbe16ef347873ddd777bcf6e2fc739681e9e9661ab54ef84a3109a03725be2ac32cd2124c07ea4401cbe8c1
+  languageName: node
+  linkType: hard
+
+"babel-plugin-dynamic-import-node@npm:^2.3.3":
+  version: 2.3.3
+  resolution: "babel-plugin-dynamic-import-node@npm:2.3.3"
+  dependencies:
+    object.assign: "npm:^4.1.0"
+  checksum: 10c0/1bd80df981e1fc1aff0cd4e390cf27aaa34f95f7620cd14dff07ba3bad56d168c098233a7d2deb2c9b1dc13643e596a6b94fc608a3412ee3c56e74a25cd2167e
   languageName: node
   linkType: hard
 
@@ -23786,7 +23844,7 @@ multer@emadalam/multer:
   languageName: node
   linkType: hard
 
-"object.assign@npm:^4.1.4, object.assign@npm:^4.1.7":
+"object.assign@npm:^4.1.0, object.assign@npm:^4.1.4, object.assign@npm:^4.1.7":
   version: 4.1.7
   resolution: "object.assign@npm:4.1.7"
   dependencies:
@@ -27289,6 +27347,13 @@ multer@emadalam/multer:
   version: 2.2.0
   resolution: "sf-symbols-typescript@npm:2.2.0"
   checksum: 10c0/3f3bbf33aaad19e619d6f169899b39e9fe9c5fd21f0d6d511100e36887606ad349109ddc6ff82933f2b8cbf437dd7105c2ae6b0059b291dc47f143b30c2074cc
+  languageName: node
+  linkType: hard
+
+"shaka-player@npm:^4.7.9":
+  version: 4.16.47
+  resolution: "shaka-player@npm:4.16.47"
+  checksum: 10c0/35e8f36d5fef3b142ac51a0017b2dd90983fff8273846a38fee7047e23085ec900de5f43c9d9f021c631bb66256f30299ee5164d50c5127034abf6e8411b570b
   languageName: node
   linkType: hard
 

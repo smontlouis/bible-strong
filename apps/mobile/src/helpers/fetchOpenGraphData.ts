@@ -1,5 +1,5 @@
-import { getAuth } from '@react-native-firebase/auth'
 import { Link, LinkType, OpenGraphData } from '~redux/modules/user'
+import { getCurrentAuthUser } from './firebaseAuthRuntime'
 
 const FUNCTION_URL = 'https://us-central1-bible-strong-app.cloudfunctions.net/fetchOpenGraph'
 
@@ -79,7 +79,7 @@ export async function fetchOpenGraphData(url: string): Promise<OpenGraphData | n
   }
 
   try {
-    const user = getAuth().currentUser
+    const user = getCurrentAuthUser()
     if (!user) return null
 
     const token = await user.getIdToken()
