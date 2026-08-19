@@ -107,6 +107,18 @@ not contact or modify a hosted database.
 `localDevelopmentAccess`, while the ordinary `import` command continues to stage any publication
 whose rights do not permit public Online delivery.
 
+For a hosted Neon branch, use an explicit direct (non-pooled) connection string. This command never
+activates a publication solely because it declares `localDevelopmentAccess`:
+
+```bash
+RESOURCE_DATABASE_URL="postgresql://..." \
+RESOURCE_PUBLICATION_ROOTS="/path/to/resource-publications" \
+  yarn resources:import-catalog:production
+```
+
+The hosted command refuses a missing URL and Neon pooler hostnames. Keep the connection string out
+of shell history and committed environment files.
+
 Reimporting the same revision and checksums returns `unchanged`. Reusing a revision with different
 content fails. Validation failures or Effect interruption roll back staging and preserve the prior
 active publication.

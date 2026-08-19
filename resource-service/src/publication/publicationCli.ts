@@ -4,6 +4,7 @@ import path from 'node:path'
 
 import { makeLocalDatabase } from '../database/localDatabase'
 import { validatePublicationBundle } from './publicationBundle'
+import { resolveCatalogImportPolicy } from './publicationCliPolicy'
 import { importPublicationBundle } from '../repositories/publicationImporter'
 
 const parseOptions = (values: string[]) => {
@@ -85,7 +86,9 @@ const publicationPriority = async (bundle: string) => {
 const run = async () => {
   const [command, ...rawOptions] = process.argv.slice(2)
   const options =
-    command === 'import-catalog' ? new Map<string, string>() : parseOptions(rawOptions)
+    command === 'import-catalog' || command === 'import-catalog-hosted'
+      ? new Map<string, string>()
+      : parseOptions(rawOptions)
 
   if (command === 'validate') {
     const result = await validatePublicationBundle(required(options, '--bundle'))
@@ -126,11 +129,13 @@ const run = async () => {
     return
   }
 
-  if (command === 'import-catalog') {
+  if (command === 'import-catalog' || command === 'import-catalog-hosted') {
+    const policy = resolveCatalogImportPolicy({
+      mode: command === 'import-catalog-hosted' ? 'hosted' : 'local',
+      connectionString: process.env.RESOURCE_DATABASE_URL,
+    })
     const database = makeLocalDatabase({
-      connectionString:
-        process.env.RESOURCE_DATABASE_URL ??
-        'postgresql://bible_strong:bible_strong@127.0.0.1:54329/bible_strong',
+      connectionString: policy.connectionString,
       maxConnections: 1,
     })
     try {
@@ -146,13 +151,17 @@ const run = async () => {
         .map(item => item.bundle)
       const results = []
       for (const bundle of orderedBundles) {
-        results.push(
-          await Effect.runPromise(
-            importPublicationBundle(bundle, database, {
-              activateForLocalDevelopment: true,
-            })
+        try {
+          results.push(
+            await Effect.runPromise(
+              importPublicationBundle(bundle, database, {
+                activateForLocalDevelopment: policy.activateForLocalDevelopment,
+              })
+            )
           )
-        )
+        } catch (cause) {
+          throw new Error(`PUBLICATION_CATALOG_IMPORT_FAILED:${bundle}`, { cause })
+        }
       }
       console.log(JSON.stringify({ bundleCount: orderedBundles.length, results }, null, 2))
     } finally {
