@@ -21,6 +21,7 @@ import {
   type CanonicalCrossReferencePublication,
   type CanonicalTimelinePublication,
 } from '../publication/publicationBundle'
+import { getPublicationResourceIdentity } from '../publication/publicationIdentity'
 
 export class PublicationImportFailure extends Data.TaggedError('PublicationImportFailure')<{
   readonly code: 'VALIDATION_FAILED' | 'REVISION_COLLISION'
@@ -325,23 +326,7 @@ export const importPublicationBundle = (
   }).pipe(
     Effect.flatMap(validated => {
       const { canonical, manifest } = validated
-      const resourceIdentity = isBiblePublicationBundleManifest(manifest)
-        ? `bible-text:${manifest.identity.versionId}`
-        : isNavePublicationBundleManifest(manifest)
-          ? `nave:${manifest.identity.language}`
-          : isDictionaryPublicationBundleManifest(manifest)
-            ? `dictionary:${manifest.identity.language}`
-            : isCommentaryPublicationBundleManifest(manifest)
-              ? `commentary:${manifest.identity.resourceId}:${manifest.identity.language}`
-              : isCrossReferencePublicationBundleManifest(manifest)
-                ? `cross-references:${manifest.identity.language}`
-                : isTimelinePublicationBundleManifest(manifest)
-                  ? `timeline:${manifest.identity.language}`
-                  : isInterlinearBiblePublicationBundleManifest(manifest)
-                    ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
-                    : isStrongLexiconPublicationBundleManifest(manifest)
-                      ? manifest.identity.resourceId
-                      : `strong-bible-index:${manifest.identity.versionId}`
+      const resourceIdentity = getPublicationResourceIdentity(manifest)
       const publicationStatus =
         manifest.deliveryCapabilities.onlineAccess ||
         (options.activateForLocalDevelopment &&

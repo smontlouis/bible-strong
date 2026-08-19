@@ -12,6 +12,44 @@ import {
 } from '../r2ArtifactPublisher'
 import { writeStrongPublicationFixture } from './strongPublicationFixture'
 
+const writeMobileCatalog = async (
+  catalogPath: string,
+  entries: Record<
+    string,
+    {
+      file: string
+      archiveSha256: string
+      archiveBytes: number
+      contentSha256: string
+      entry?: string
+    }
+  >
+) =>
+  writeFile(
+    catalogPath,
+    `${JSON.stringify({
+      format: 'bible-strong-mobile-resource-catalog',
+      schemaVersion: 1,
+      resourceCount: Object.keys(entries).length,
+      resources: Object.fromEntries(
+        Object.entries(entries).map(([id, entry]) => [
+          id,
+          {
+            id,
+            ...entry,
+            entries: {
+              canonical: {
+                entry: entry.entry ?? 'bible-lsg-strong.sqlite',
+                sha256: entry.contentSha256,
+                bytes: 1,
+              },
+            },
+          },
+        ])
+      ),
+    })}\n`
+  )
+
 class MemoryR2ArtifactStore implements R2ArtifactStore {
   readonly objects = new Map<string, Buffer>()
   readonly puts: string[] = []
@@ -131,13 +169,101 @@ describe('R2 artifact publisher', () => {
     try {
       const validBundle = path.join(root, 'valid')
       const invalidBundle = path.join(root, 'invalid')
-      await writeStrongPublicationFixture(validBundle)
+      const { manifest } = await writeStrongPublicationFixture(validBundle)
       await writeStrongPublicationFixture(invalidBundle)
       await writeFile(path.join(invalidBundle, 'offline/bible-lsg-strong.sqlite.zip'), 'corrupt')
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/bible-lsg-strong.sqlite.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+      })
 
       await assert.rejects(
-        publishR2PublicationCatalog([validBundle, invalidBundle], store),
+        publishR2PublicationCatalog([validBundle, invalidBundle], catalogPath, store),
         /OFFLINE_ARTIFACT_(SIZE|SHA256)_MISMATCH/
+      )
+      assert.deepEqual(store.puts, [])
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('publishes to the stable path declared by the exhaustive mobile catalog', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-stable-path-'))
+    const store = new MemoryR2ArtifactStore()
+
+    try {
+      const bundle = path.join(root, 'bundle')
+      const { manifest } = await writeStrongPublicationFixture(bundle)
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'canonical/bible-lsg-strong.sqlite.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+      })
+
+      const [result] = await publishR2PublicationCatalog([bundle], catalogPath, store)
+
+      assert.equal(result?.status, 'uploaded')
+      assert.equal(
+        result?.status === 'uploaded' ? result.key : undefined,
+        'canonical/bible-lsg-strong.sqlite.zip'
+      )
+      assert.ok(store.objects.has('canonical/bible-lsg-strong.sqlite.zip'))
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects duplicate identities and an incomplete mobile catalog before writing', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-exhaustive-'))
+    const store = new MemoryR2ArtifactStore()
+
+    try {
+      const firstBundle = path.join(root, 'first')
+      const secondBundle = path.join(root, 'second')
+      const { manifest } = await writeStrongPublicationFixture(firstBundle)
+      await writeStrongPublicationFixture(secondBundle)
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/bible-lsg-strong.sqlite.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+      })
+
+      await assert.rejects(
+        publishR2PublicationCatalog([firstBundle, secondBundle], catalogPath, store),
+        /R2_PUBLICATION_CATALOG_DUPLICATE_RESOURCE:bible-strong:LSG/
+      )
+      assert.deepEqual(store.puts, [])
+
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/bible-lsg-strong.sqlite.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+        'bible:EXTRA': {
+          file: 'bibles/extra.zip',
+          archiveSha256: '0'.repeat(64),
+          archiveBytes: 1,
+          contentSha256: '1'.repeat(64),
+        },
+      })
+      await assert.rejects(
+        publishR2PublicationCatalog([firstBundle], catalogPath, store),
+        /R2_PUBLICATION_CATALOG_INCOMPLETE:bible:EXTRA/
       )
       assert.deepEqual(store.puts, [])
     } finally {

@@ -2,18 +2,9 @@ import { createHash } from 'node:crypto'
 import { readFile } from 'node:fs/promises'
 
 import { createDevelopmentArtifact } from '../runtime/developmentArtifacts'
-import {
-  isBiblePublicationBundleManifest,
-  isCommentaryPublicationBundleManifest,
-  isCrossReferencePublicationBundleManifest,
-  isDictionaryPublicationBundleManifest,
-  isInterlinearBiblePublicationBundleManifest,
-  isNavePublicationBundleManifest,
-  isStrongLexiconPublicationBundleManifest,
-  isTimelinePublicationBundleManifest,
-  validatePublicationBundle,
-  type PublicationBundleManifest,
-} from './publicationBundle'
+import { readMobileResourceCatalog } from './mobileResourceCatalog'
+import { validatePublicationBundle } from './publicationBundle'
+import { getMobileResourceCatalogId, getPublicationResourceIdentity } from './publicationIdentity'
 
 export type R2ArtifactStore = {
   get(key: string): Promise<Buffer | undefined>
@@ -39,28 +30,10 @@ export type R2ArtifactPublicationResult = {
 
 type ValidatedPublicationBundle = Awaited<ReturnType<typeof validatePublicationBundle>>
 
-export const getPublicationResourceIdentity = (manifest: PublicationBundleManifest): string =>
-  isBiblePublicationBundleManifest(manifest)
-    ? `bible-text:${manifest.identity.versionId}`
-    : isNavePublicationBundleManifest(manifest)
-      ? `nave:${manifest.identity.language}`
-      : isDictionaryPublicationBundleManifest(manifest)
-        ? `dictionary:${manifest.identity.language}`
-        : isCommentaryPublicationBundleManifest(manifest)
-          ? `commentary:${manifest.identity.resourceId}:${manifest.identity.language}`
-          : isCrossReferencePublicationBundleManifest(manifest)
-            ? `cross-references:${manifest.identity.language}`
-            : isTimelinePublicationBundleManifest(manifest)
-              ? `timeline:${manifest.identity.language}`
-              : isInterlinearBiblePublicationBundleManifest(manifest)
-                ? `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`
-                : isStrongLexiconPublicationBundleManifest(manifest)
-                  ? manifest.identity.resourceId
-                  : `strong-bible-index:${manifest.identity.versionId}`
-
 const publishValidatedR2PublicationBundle = async (
   validated: ValidatedPublicationBundle,
-  store: R2ArtifactStore
+  store: R2ArtifactStore,
+  stableKey?: string
 ): Promise<R2ArtifactPublicationResult> => {
   const { manifest, offlineArtifactPath } = validated
   const resourceIdentity = getPublicationResourceIdentity(manifest)
@@ -74,7 +47,7 @@ const publishValidatedR2PublicationBundle = async (
   }
   const bytes = await readFile(offlineArtifactPath)
   const artifact = createDevelopmentArtifact(manifest, bytes)
-  const key = artifact.route.slice(1)
+  const key = stableKey ?? artifact.route.slice(1)
   const metadata = {
     format: 'bible-strong-r2-artifact-metadata',
     schemaVersion: 1,
@@ -143,17 +116,47 @@ export const publishR2PublicationBundle = async (
 
 export const publishR2PublicationCatalog = async (
   bundlePaths: readonly string[],
+  mobileCatalogPath: string,
   store: R2ArtifactStore,
   options: {
     onResult?: (result: R2ArtifactPublicationResult, index: number, total: number) => void
   } = {}
 ): Promise<R2ArtifactPublicationResult[]> => {
-  const validatedBundles = await Promise.all(bundlePaths.map(validatePublicationBundle))
+  const [validatedBundles, mobileCatalog] = await Promise.all([
+    Promise.all(bundlePaths.map(validatePublicationBundle)),
+    readMobileResourceCatalog(mobileCatalogPath),
+  ])
+  const candidates = validatedBundles.map(validated => {
+    const catalogId = getMobileResourceCatalogId(validated.manifest)
+    const catalogEntry = mobileCatalog.resources.get(catalogId)
+    if (!catalogEntry) throw new Error(`R2_PUBLICATION_CATALOG_RESOURCE_MISSING:${catalogId}`)
+    return { validated, catalogId, stableKey: catalogEntry.file }
+  })
+  const seenIds = new Set<string>()
+  const seenKeys = new Set<string>()
+  for (const candidate of candidates) {
+    if (seenIds.has(candidate.catalogId)) {
+      throw new Error(`R2_PUBLICATION_CATALOG_DUPLICATE_RESOURCE:${candidate.catalogId}`)
+    }
+    if (seenKeys.has(candidate.stableKey)) {
+      throw new Error(`R2_PUBLICATION_CATALOG_DUPLICATE_KEY:${candidate.stableKey}`)
+    }
+    seenIds.add(candidate.catalogId)
+    seenKeys.add(candidate.stableKey)
+  }
+  const missingIds = [...mobileCatalog.resources.keys()].filter(id => !seenIds.has(id))
+  if (missingIds.length > 0) {
+    throw new Error(`R2_PUBLICATION_CATALOG_INCOMPLETE:${missingIds.join(',')}`)
+  }
   const results: R2ArtifactPublicationResult[] = []
-  for (const validated of validatedBundles) {
-    const result = await publishValidatedR2PublicationBundle(validated, store)
+  for (const candidate of candidates) {
+    const result = await publishValidatedR2PublicationBundle(
+      candidate.validated,
+      store,
+      candidate.stableKey
+    )
     results.push(result)
-    options.onResult?.(result, results.length, validatedBundles.length)
+    options.onResult?.(result, results.length, candidates.length)
   }
   return results
 }

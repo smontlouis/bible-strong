@@ -1,3 +1,5 @@
+import path from 'node:path'
+
 import {
   findPublicationBundlesRecursively,
   parsePublicationCatalogRoots,
@@ -11,11 +13,15 @@ const run = async () => {
   if (!bucket) throw new Error('RESOURCE_R2_BUCKET_REQUIRED')
 
   const roots = parsePublicationCatalogRoots(process.argv.slice(2))
+  const mobileCatalogPath =
+    process.env.RESOURCE_MOBILE_RESOURCE_CATALOG ??
+    path.resolve(process.cwd(), 'src/assets/mobile-resource-catalog.json')
   const bundles = await findPublicationBundlesRecursively(roots)
   if (bundles.length === 0) throw new Error('RESOURCE_PUBLICATION_CATALOG_EMPTY')
 
   const results = await publishR2PublicationCatalog(
     bundles,
+    mobileCatalogPath,
     new WranglerR2ArtifactStore({ bucket }),
     {
       onResult: (result, index, total) => {

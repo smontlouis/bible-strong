@@ -138,9 +138,18 @@ RESOURCE_PUBLICATION_ROOTS=/absolute/path/to/resource-publications \
   yarn resources:r2:publish-catalog
 ```
 
+The publisher checks the discovered bundles against the exhaustive catalog at
+`src/assets/mobile-resource-catalog.json`, including every identity and stable object key. The
+publication manifest independently authorizes and validates the newly generated revision, archive
+entries, byte size, and SHA-256. Set `RESOURCE_MOBILE_RESOURCE_CATALOG` only when publishing a
+separately generated catalog candidate.
+
 The bucket remains private. The `RESOURCE_ARTIFACTS` Worker binding is reserved for the later
 App Check-protected download route; publishing does not expose an R2 custom domain, change the
-mobile artifact origin, or remove the current Firebase Storage copies.
+mobile artifact origin, or remove the current Firebase Storage copies. This initial operator-run
+upload is only a private bootstrap mirror, not production activation. Before the Worker exposes R2
+downloads or the mobile catalog points to it, move subsequent publication credentials and recovery
+retention into the manually triggered protected CI environment required by ADR-0010.
 
 ## Deploy the production Worker
 
