@@ -6,6 +6,7 @@ import NaveListScreen from '~features/nave/NaveListScreen'
 
 jest.mock('react-native-section-list-get-item-layout', () => () => jest.fn())
 jest.mock('@expo/vector-icons', () => ({ Feather: () => null }))
+jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
 jest.mock('@tanstack/react-query', () => ({
   useQuery: () => ({
     data: { status: 'available' },
