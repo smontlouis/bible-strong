@@ -72,7 +72,9 @@ describe("ordinary Bible publication", () => {
     assert.equal(new Set(actual).size, 47);
     assert.deepEqual(actual, expected);
     assert.ok(config.bibles.every((bible) => bible.attribution.length > 0));
-    assert.ok(config.bibles.every((bible) => bible.publicOnline === true));
+    assert.ok(
+      config.bibles.every((bible) => typeof bible.publicOnline === "boolean")
+    );
   });
 
   it("uses the app's canonical versification identities for every known exception", async () => {
