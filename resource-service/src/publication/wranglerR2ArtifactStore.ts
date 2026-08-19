@@ -7,23 +7,25 @@ import type { R2ArtifactStore } from './r2ArtifactPublisher'
 
 type RunWrangler = (args: string[]) => Promise<void>
 
-const defaultRunWrangler: RunWrangler = args =>
-  new Promise((resolve, reject) => {
-    execFile(
-      path.resolve(process.cwd(), 'node_modules/.bin/wrangler'),
-      args,
-      { maxBuffer: 16 * 1024 * 1024 },
-      (error, stdout, stderr) => {
-        if (!error) {
-          resolve()
-          return
+const defaultRunWrangler =
+  (env: NodeJS.ProcessEnv): RunWrangler =>
+  args =>
+    new Promise((resolve, reject) => {
+      execFile(
+        path.resolve(process.cwd(), 'node_modules/.bin/wrangler'),
+        args,
+        { env, maxBuffer: 16 * 1024 * 1024 },
+        (error, stdout, stderr) => {
+          if (!error) {
+            resolve()
+            return
+          }
+          reject(
+            new Error([error.message, stdout, stderr].filter(Boolean).join('\n'), { cause: error })
+          )
         }
-        reject(
-          new Error([error.message, stdout, stderr].filter(Boolean).join('\n'), { cause: error })
-        )
-      }
-    )
-  })
+      )
+    })
 
 const isMissingObjectFailure = (cause: unknown) =>
   cause instanceof Error &&
@@ -48,11 +50,12 @@ export class WranglerR2ArtifactStore implements R2ArtifactStore {
   constructor(options: {
     bucket: string
     runWrangler?: RunWrangler
+    env?: NodeJS.ProcessEnv
     retryDelaysMs?: readonly number[]
   }) {
     if (!options.bucket.trim()) throw new Error('RESOURCE_R2_BUCKET_REQUIRED')
     this.bucket = options.bucket
-    this.runWrangler = options.runWrangler ?? defaultRunWrangler
+    this.runWrangler = options.runWrangler ?? defaultRunWrangler(options.env ?? process.env)
     this.retryDelaysMs = options.retryDelaysMs ?? [500, 1_000, 2_000]
   }
 

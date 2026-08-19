@@ -33,6 +33,15 @@ export type R2ArtifactPublicationResult = {
 
 type ValidatedPublicationBundle = Awaited<ReturnType<typeof validatePublicationBundle>>
 
+export type ValidatedR2PublicationCandidate = {
+  validated: ValidatedPublicationBundle
+  catalogId: string
+  stableKey: string
+}
+
+export const immutableR2ArtifactKey = (stableKey: string, archiveSha256: string) =>
+  `revisions/${archiveSha256}/${stableKey}`
+
 const catalogMatchesOfflineArtifact = (
   manifest: PublicationBundleManifest,
   catalogEntry: MobileResourceCatalogEntry
@@ -176,15 +185,13 @@ export const publishR2PublicationBundle = async (
 ): Promise<R2ArtifactPublicationResult> =>
   publishValidatedR2PublicationBundle(await validatePublicationBundle(bundlePath), store, stableKey)
 
-export const publishR2PublicationCatalog = async (
+export const validateR2PublicationCatalog = async (
   bundlePaths: readonly string[],
   mobileCatalogPath: string,
-  store: R2ArtifactStore,
   options: {
-    onResult?: (result: R2ArtifactPublicationResult, index: number, total: number) => void
     expectedCatalogResourceCount?: number
   } = {}
-): Promise<R2ArtifactPublicationResult[]> => {
+): Promise<ValidatedR2PublicationCandidate[]> => {
   const [validatedBundles, mobileCatalog] = await Promise.all([
     Promise.all(bundlePaths.map(validatePublicationBundle)),
     readMobileResourceCatalog(mobileCatalogPath),
@@ -226,12 +233,28 @@ export const publishR2PublicationCatalog = async (
   if (missingIds.length > 0) {
     throw new Error(`R2_PUBLICATION_CATALOG_INCOMPLETE:${missingIds.join(',')}`)
   }
+  return candidates
+}
+
+export const publishR2PublicationCatalog = async (
+  bundlePaths: readonly string[],
+  mobileCatalogPath: string,
+  store: R2ArtifactStore,
+  options: {
+    onResult?: (result: R2ArtifactPublicationResult, index: number, total: number) => void
+    expectedCatalogResourceCount?: number
+  } = {}
+): Promise<R2ArtifactPublicationResult[]> => {
+  const candidates = await validateR2PublicationCatalog(bundlePaths, mobileCatalogPath, options)
   const results: R2ArtifactPublicationResult[] = []
   for (const candidate of candidates) {
     const result = await publishValidatedR2PublicationBundle(
       candidate.validated,
       store,
-      candidate.stableKey
+      immutableR2ArtifactKey(
+        candidate.stableKey,
+        candidate.validated.manifest.offlineArtifact.sha256
+      )
     )
     results.push(result)
     options.onResult?.(result, results.length, candidates.length)

@@ -29,9 +29,21 @@ export type R2ArtifactBucket = {
 
 export type ArtifactRequestAuthorizer = (request: Request) => Promise<boolean>
 
-const mobileArtifactKeys = new Set(
-  Object.values(mobileResourceCatalog.resources).map(resource => resource.file)
+const mobileArtifacts = new Map(
+  Object.values(mobileResourceCatalog.resources).map(resource => [
+    resource.file,
+    resource.archiveSha256,
+  ])
 )
+
+const r2KeyForRequest = (url: URL): string | undefined => {
+  const stableKey = url.pathname.slice(R2_ARTIFACT_ROUTE_PREFIX.length)
+  if (!mobileArtifacts.has(stableKey)) return undefined
+  const requestedSha256 = url.searchParams.get('sha256')
+  if (!requestedSha256) return stableKey
+  if (!/^[a-f0-9]{64}$/.test(requestedSha256)) return undefined
+  return `revisions/${requestedSha256}/${stableKey}`
+}
 
 const contentRangeFrom = (range: ArtifactRange, totalSize: number): string | undefined => {
   if ('suffix' in range) {
@@ -82,7 +94,8 @@ export const routeR2ArtifactRequest = async ({
   bucket: R2ArtifactBucket
   authorize: ArtifactRequestAuthorizer
 }): Promise<Response | undefined> => {
-  const pathname = new URL(request.url).pathname
+  const url = new URL(request.url)
+  const pathname = url.pathname
   if (pathname === MOBILE_RESOURCE_CATALOG_ROUTE) {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return new Response(null, { status: 405, headers: { allow: 'GET, HEAD' } })
@@ -98,8 +111,8 @@ export const routeR2ArtifactRequest = async ({
   }
   if (!pathname.startsWith(R2_ARTIFACT_ROUTE_PREFIX)) return undefined
 
-  const key = pathname.slice(R2_ARTIFACT_ROUTE_PREFIX.length)
-  if (!mobileArtifactKeys.has(key)) return new Response(null, { status: 404 })
+  const key = r2KeyForRequest(url)
+  if (!key) return new Response(null, { status: 404 })
   if (request.method !== 'GET' && request.method !== 'HEAD') {
     return new Response(null, { status: 405, headers: { allow: 'GET, HEAD' } })
   }

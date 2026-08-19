@@ -1,0 +1,91 @@
+name: Publish Bible resources
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Bible version identifier (for example LSG)
+        required: true
+        type: string
+      source_path:
+        description: Absolute canonical Bible JSON path on the protected runner
+        required: true
+        type: string
+      maker_root:
+        description: Absolute bible-lexicon-maker checkout path on the protected runner
+        required: true
+        type: string
+      publication_root:
+        description: Absolute verified 72-bundle baseline path on the protected runner
+        required: true
+        type: string
+      dependent_bundle_roots:
+        description: Optional newline-separated rebuilt Strong/interlinear bundle roots
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-bible-publication
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Validate and activate production publication
+    if: github.ref == 'refs/heads/master'
+    environment: production
+    runs-on: [self-hosted, bible-publication]
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+
+      - run: corepack enable && yarn install --immutable
+
+      - name: Publish the Bible and its rebuilt dependents
+        env:
+          RESOURCE_DATABASE_URL: ${{ secrets.RESOURCE_DATABASE_URL }}
+          RESOURCE_R2_BUCKET: ${{ vars.RESOURCE_R2_BUCKET }}
+          RESOURCE_APP_CHECK_DEBUG_TOKEN: ${{ secrets.RESOURCE_APP_CHECK_DEBUG_TOKEN }}
+          RESOURCE_FIREBASE_PROJECT_ID: ${{ vars.RESOURCE_FIREBASE_PROJECT_ID }}
+          RESOURCE_FIREBASE_APP_ID: ${{ vars.RESOURCE_FIREBASE_APP_ID }}
+          RESOURCE_FIREBASE_API_KEY: ${{ vars.RESOURCE_FIREBASE_API_KEY }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RESOURCE_PUBLICATION_ENVIRONMENT: production
+          VERSION_ID: ${{ inputs.version }}
+          SOURCE_PATH: ${{ inputs.source_path }}
+          MAKER_ROOT: ${{ inputs.maker_root }}
+          PUBLICATION_ROOT: ${{ inputs.publication_root }}
+          DEPENDENT_BUNDLE_ROOTS: ${{ inputs.dependent_bundle_roots }}
+          PUBLICATION_WORKSPACE: ${{ runner.temp }}/bible-publication-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          args=(
+            --version "$VERSION_ID"
+            --source "$SOURCE_PATH"
+            --maker-root "$MAKER_ROOT"
+            --publication-root "$PUBLICATION_ROOT"
+            --workspace "$PUBLICATION_WORKSPACE"
+            --activate-production
+          )
+          while IFS= read -r bundle_root; do
+            if [[ -n "$bundle_root" ]]; then
+              args+=(--dependent-bundle "$bundle_root")
+            fi
+          done <<< "$DEPENDENT_BUNDLE_ROOTS"
+          yarn resources:publish:bible "${args[@]}"
+
+      - name: Archive the verified publication baseline and recovery workspace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bible-publication-${{ inputs.version }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/bible-publication-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 30

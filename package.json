@@ -47,6 +47,7 @@
     "resources:import-catalog:hosted": "tsx resource-service/src/publication/publicationCli.ts import-catalog-hosted",
     "resources:r2:publish-catalog": "tsx resource-service/src/publication/r2PublicationCli.ts",
     "resources:r2:publish-catalog:prod": "RESOURCE_R2_BUCKET=bible-strong-resource-artifacts-prod yarn resources:r2:publish-catalog --root ../bible-lexicon-maker/outputs/resource-publications",
+    "resources:publish:bible": "tsx resource-service/src/publication/biblePublicationWorkflowCli.ts",
     "resources:serve": "tsx resource-service/src/runtime/node.ts",
     "resources:serve:artifacts": "tsx resource-service/src/runtime/artifactNode.ts",
     "resources:worker:types": "wrangler types --config resource-service/wrangler.jsonc resource-service/worker-configuration.d.ts",

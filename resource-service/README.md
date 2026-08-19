@@ -127,8 +127,8 @@ active publication.
 ## Publish Offline-copy artifacts to private R2
 
 The resource publisher uploads only bundles whose manifest independently authorizes Offline-copy
-delivery. It validates the complete catalog before the first write, publishes each archive at its
-stable mobile path, writes an integrity metadata sidecar, and reads both objects back for size and
+delivery. It validates the complete catalog before the first write, derives an immutable R2 key
+from each stable mobile path plus its archive SHA-256, writes an integrity metadata sidecar, and reads both objects back for size and
 checksum verification. Re-running an identical verified catalog reports `unchanged` without
 overwriting it:
 
@@ -170,6 +170,55 @@ App Attest with DeviceCheck fallback on release Apple builds, and Firebase's deb
 development. Register each release provider and each local debug token in Firebase Console before
 testing protected API reads or artifact downloads. Do not put debug tokens in committed `.env`
 files.
+
+## Publish one edited Bible end to end
+
+Use the unified workflow after editing a legacy or canonical Bible JSON. Without the production
+flag, it creates and validates a candidate only: it packages the Bible, verifies any existing
+Strong or interlinear sidecars that depend on its text, rebuilds the exhaustive 72-resource mobile
+catalog, validates every publication bundle, and proves R2/catalog parity without contacting R2 or
+Neon:
+
+```bash
+yarn resources:publish:bible \
+  --version LSG \
+  --source /absolute/path/to/bible-lsg.json
+```
+
+The result prints the retained workspace, candidate revision, and changed catalog identities. If
+the text revision changed for a Bible with a Strong/interlinear sidecar, first rebuild that producer
+data with its dedicated Maker workflow, then supply the resulting publication one or more times as
+`--dependent-bundle /absolute/path/to/bundle-or-root`. The preflight rejects an omitted, stale, or
+partially rebuilt dependency before any production write.
+
+After reviewing the candidate, run the **Publish Bible resources** GitHub Actions workflow. It is a
+manual `workflow_dispatch` job bound to the protected `production` environment and to the dedicated
+`bible-publication` self-hosted runner. Enter the version, canonical source path, Maker checkout,
+verified 72-bundle baseline, and any rebuilt dependent bundle roots in the workflow form. Production
+activation cannot be enabled by setting local environment variables.
+
+On success the job commits the deployed mobile catalog back to `master` and stores the full
+workspace as a private 30-day Actions artifact. Its `verified-publication-baseline` directory is the
+exhaustive 72-bundle baseline for the following publication; retain/extract it on the protected
+runner and pass that directory as `publication_root`. The artifact also contains the previous
+catalog and candidates needed to audit or recover the release.
+
+Production mode runs every preflight gate before its first production write, then publishes the
+validated Offline copies to immutable, content-addressed private R2 keys, imports and activates only the changed publications in
+Neon, atomically replaces the checked-in Worker catalog, deploys the Worker, and checks health,
+catalog parity, App Check rejection for an unattested artifact request, and an authenticated
+immutable-artifact checksum plus revision reads through Worker/Hyperdrive. The preflight first
+proves that the checked-out catalog, live Worker catalog, baseline bundles, live Neon revisions, and
+the configured production R2 bucket describe the same release. The Neon URL must be a direct
+non-pooler connection. The protected environment stores a registered Firebase App Check debug
+credential, and the workflow exchanges it for a fresh short-lived JWT separately for preflight and
+smoke reads. Database, App Check, and Cloudflare credentials are scoped to the protected environment
+and only passed to the subprocess that needs each credential; they are never written into the
+workspace.
+
+The generated date can be pinned with `--generated-at`; sibling checkout locations can be changed
+with `--maker-root` and `--publication-root`. Every workspace is intentionally retained as the
+audit/retry artifact and an existing workspace is never overwritten.
 
 ## Deploy the production Worker
 

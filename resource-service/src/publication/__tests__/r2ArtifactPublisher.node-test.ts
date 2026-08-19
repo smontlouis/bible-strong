@@ -7,8 +7,10 @@ import { describe, it } from 'node:test'
 
 import {
   assertCatalogMatchesOfflineArtifact,
+  immutableR2ArtifactKey,
   publishR2PublicationCatalog,
   publishR2PublicationBundle,
+  validateR2PublicationCatalog,
   type R2ArtifactStore,
 } from '../r2ArtifactPublisher'
 import type { MobileResourceCatalogEntry } from '../mobileResourceCatalog'
@@ -348,7 +350,7 @@ describe('R2 artifact publisher', () => {
     }
   })
 
-  it('publishes to the stable path declared by the exhaustive mobile catalog', async () => {
+  it('publishes to an immutable revision key derived from the stable catalog path', async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-stable-path-'))
     const store = new MemoryR2ArtifactStore()
 
@@ -366,13 +368,51 @@ describe('R2 artifact publisher', () => {
       })
 
       const [result] = await publishR2PublicationCatalog([bundle], catalogPath, store)
+      const immutableKey = immutableR2ArtifactKey(
+        'canonical/bible-lsg-strong.sqlite.zip',
+        manifest.offlineArtifact.sha256
+      )
 
       assert.equal(result?.status, 'uploaded')
-      assert.equal(
-        result?.status === 'uploaded' ? result.key : undefined,
-        'canonical/bible-lsg-strong.sqlite.zip'
+      assert.equal(result?.status === 'uploaded' ? result.key : undefined, immutableKey)
+      assert.ok(store.objects.has(immutableKey))
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('preflights an exhaustive catalog without requiring or writing an R2 store', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-preflight-'))
+
+    try {
+      const bundle = path.join(root, 'bundle')
+      const { manifest } = await writeStrongPublicationFixture(bundle)
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/bible-lsg-strong.sqlite.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+      })
+
+      const candidates = await validateR2PublicationCatalog([bundle], catalogPath, {
+        expectedCatalogResourceCount: 1,
+      })
+
+      assert.deepEqual(
+        candidates.map(candidate => ({
+          catalogId: candidate.catalogId,
+          stableKey: candidate.stableKey,
+        })),
+        [
+          {
+            catalogId: 'bible-strong:LSG',
+            stableKey: 'bibles/bible-lsg-strong.sqlite.zip',
+          },
+        ]
       )
-      assert.ok(store.objects.has('canonical/bible-lsg-strong.sqlite.zip'))
     } finally {
       await rm(root, { recursive: true, force: true })
     }

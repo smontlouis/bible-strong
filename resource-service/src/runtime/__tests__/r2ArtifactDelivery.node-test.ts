@@ -8,8 +8,10 @@ import {
   type ArtifactRange,
   type R2ArtifactBucket,
 } from '../r2ArtifactDelivery'
+import mobileResourceCatalog from '../../../../src/assets/mobile-resource-catalog.json'
 
 const artifactKey = 'bibles/bible-lsg.json.zip'
+const artifactSha256 = mobileResourceCatalog.resources['bible:LSG'].archiveSha256
 
 const makeObject = ({
   body = 'archive',
@@ -119,6 +121,37 @@ describe('R2 artifact delivery', () => {
     assert.equal(response?.headers.get('cache-control'), 'private, no-store')
     assert.equal(await response?.text(), 'archive')
     assert.deepEqual(reads, [{ operation: 'get', key: artifactKey }])
+  })
+
+  it('routes a catalog SHA URL to an immutable R2 revision while preserving legacy stable URLs', async () => {
+    const { bucket, reads } = makeBucket()
+
+    const response = await routeR2ArtifactRequest({
+      request: artifactRequest(`${artifactKey}?sha256=${artifactSha256}`),
+      bucket,
+      authorize: async () => true,
+    })
+
+    assert.equal(response?.status, 200)
+    assert.deepEqual(reads, [
+      { operation: 'get', key: `revisions/${artifactSha256}/${artifactKey}` },
+    ])
+  })
+
+  it('keeps retained immutable revisions addressable for older cached catalogs', async () => {
+    const { bucket, reads } = makeBucket()
+    const previousSha256 = 'b'.repeat(64)
+
+    const response = await routeR2ArtifactRequest({
+      request: artifactRequest(`${artifactKey}?sha256=${previousSha256}`),
+      bucket,
+      authorize: async () => true,
+    })
+
+    assert.equal(response?.status, 200)
+    assert.deepEqual(reads, [
+      { operation: 'get', key: `revisions/${previousSha256}/${artifactKey}` },
+    ])
   })
 
   it('supports resumable range downloads without buffering the archive', async () => {

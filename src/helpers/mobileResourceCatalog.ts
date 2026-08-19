@@ -79,13 +79,13 @@ const isCatalogEntry = (value: unknown): value is MobileResourceCatalogEntry => 
   const entry = value as Partial<MobileResourceCatalogEntry>
   const entries = entry.entries
   if (!entries || typeof entries !== 'object') return false
+  const artifactUrl = isHttpsUrl(entry.url) ? new URL(entry.url) : undefined
   const archiveEntries = Object.entries(entries)
   const isStrongLexicon = typeof entry.id === 'string' && entry.id.startsWith('strong-lexicon:')
   return (
     typeof entry.id === 'string' &&
     entry.id.length > 0 &&
-    isHttpsUrl(entry.url) &&
-    entry.url.endsWith('.zip') &&
+    artifactUrl?.pathname.endsWith('.zip') === true &&
     isSafeRelativePath(entry.file) &&
     entry.file.endsWith('.zip') &&
     isSafeRelativePath(entry.entry) &&
@@ -96,6 +96,8 @@ const isCatalogEntry = (value: unknown): value is MobileResourceCatalogEntry => 
         CATALOG_ENTRY_ROLES.has(role as MobileResourceEntryRole) && isCatalogFileEntry(fileEntry)
     ) &&
     isSha256(entry.archiveSha256) &&
+    (artifactUrl.searchParams.get('sha256') === null ||
+      artifactUrl.searchParams.get('sha256') === entry.archiveSha256) &&
     isPositiveByteCount(entry.archiveBytes) &&
     isSha256(entry.contentSha256) &&
     isPositiveByteCount(entry.contentBytes) &&
@@ -250,7 +252,9 @@ export const resolveMobileResourceArtifactUrl = (
     const baseUrl = new URL(configuredBaseUrl)
     if (baseUrl.protocol !== 'http:' && baseUrl.protocol !== 'https:') return entry.url
     if (!baseUrl.pathname.endsWith('/')) baseUrl.pathname += '/'
-    return new URL(entry.file, baseUrl).toString()
+    const resolved = new URL(entry.file, baseUrl)
+    resolved.search = new URL(entry.url).search
+    return resolved.toString()
   } catch {
     return entry.url
   }
