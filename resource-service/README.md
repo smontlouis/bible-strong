@@ -138,6 +138,13 @@ RESOURCE_PUBLICATION_ROOTS=/absolute/path/to/resource-publications \
   yarn resources:r2:publish-catalog
 ```
 
+In the standard sibling-checkout workspace, the production shortcut supplies both non-secret
+values automatically:
+
+```bash
+yarn resources:r2:publish-catalog:prod
+```
+
 The publisher checks the discovered bundles against the exhaustive catalog at
 `src/assets/mobile-resource-catalog.json`, including every identity and stable object key. The
 publication manifest independently authorizes and validates the newly generated revision, archive
