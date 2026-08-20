@@ -52,7 +52,9 @@ describe('hybrid Nave access', () => {
       isOnline: async () => true,
     })
 
-    await expect(access.listByLetter('a', 'fr')).resolves.toEqual([topic])
+    await expect(access.listByLetter('a', 'fr')).resolves.toMatchObject([
+      { normalizedName: 'amour', name: 'Amour', initial: 'a' },
+    ])
     await expect(access.loadItem('absent', 'fr')).resolves.toBeUndefined()
     expect(remote.listByLetter).not.toHaveBeenCalled()
     expect(remote.loadItem).not.toHaveBeenCalled()
@@ -170,6 +172,33 @@ describe('hybrid Nave access', () => {
 })
 
 describe('HTTP Nave access', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('keeps matching topics when one item has an inconsistent initial', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const access = createHttpNaveAccess({
+      baseUrl: 'http://resource.test',
+      fetcher: jest.fn(() =>
+        response({
+          resource: { kind: 'nave', language: 'fr', revision: 'r1' },
+          topics: [topic, { normalizedName: 'bonté', name: 'Bonté', initial: 'b' }],
+          limit: 50,
+        })
+      ),
+      isOnline: async () => true,
+    })
+
+    await expect(access.listByLetter('a', 'fr')).resolves.toMatchObject([
+      { normalizedName: 'amour', name: 'Amour', initial: 'a' },
+    ])
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: nave-topic-initial-mismatch',
+      { language: 'fr', requestedInitial: 'a', omittedCount: 1 }
+    )
+  })
+
   const response = (body: unknown, status = 200) =>
     Promise.resolve(
       new Response(JSON.stringify(body), {

@@ -86,6 +86,10 @@ const bibleChapterAdapter = {
 }
 
 describe('interlinear Bible HTTP resource access', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('loads an interlinear chapter over HTTP with zero Offline copy', async () => {
     const fetcher = jest.fn((url: string) =>
       url.endsWith('/coverage')
@@ -124,6 +128,68 @@ describe('interlinear Bible HTTP resource access', () => {
       textRevision: resource.textRevision,
       textSha256: resource.textSha256,
     })
+  })
+
+  it('keeps decoded interlinear data available when its BHG revision metadata differs', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const staleBibleChapterAdapter = {
+      loadChapter: async () => ({
+        status: 'available' as const,
+        textRevision: 'stale-bhg-text',
+        textSha256: '0'.repeat(64),
+        verses: [
+          {
+            Livre: 1,
+            Chapitre: 1,
+            Verset: 1,
+            Texte: 'בְּרֵאשִׁית',
+            TextRevision: 'stale-bhg-text',
+          },
+        ],
+      }),
+      loadCoverage: async () => ({
+        status: 'available' as const,
+        coverage: {
+          canon: { id: 'protestant-66', orderedBooks: [1] },
+          versification: 'protestant-66',
+          books: [1],
+          chaptersByBook: { 1: [1] },
+          verseCountByBookChapter: { '1-1': 1 },
+        },
+        textRevision: 'stale-bhg-text',
+        textSha256: '0'.repeat(64),
+      }),
+    }
+    const fetcher = jest.fn((url: string) =>
+      url.endsWith('/coverage')
+        ? jsonResponse({
+            resource,
+            books: [1],
+            chaptersByBook: { 1: [1] },
+            verseCountByBookChapter: { '1-1': 1 },
+          })
+        : jsonResponse({
+            resource,
+            book: 1,
+            chapter: 1,
+            verses: [{ number: 1, tokens: [token] }],
+          })
+    ) as jest.MockedFunction<typeof fetch>
+    const online = createHttpInterlinearBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher,
+      isOnline: async () => true,
+      bibleChapterAdapter: staleBibleChapterAdapter,
+    })
+
+    await expect(online.getAvailability('fr')).resolves.toMatchObject({ status: 'available' })
+    await expect(online.loadChapterTokens('fr', { book: 1, chapter: 1 })).resolves.toMatchObject({
+      tokensByVerse: { 1: [token] },
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: interlinear-bible-text-revision-mismatch',
+      expect.objectContaining({ locale: 'fr', book: 1, chapter: 1 })
+    )
   })
 
   it('prefers installed SQLite and returns to HTTP after removal', async () => {

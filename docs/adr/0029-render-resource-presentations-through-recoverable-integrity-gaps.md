@@ -32,6 +32,11 @@ best-effort rule when rendering can continue safely. Invalid fragments are omitt
 remain visible. These warnings do not authorize changing the requested locale, Bible version,
 presentation kind, or logical resource.
 
+The same rule applies to aggregate pages: one incomplete occurrence or misclassified list item does
+not hide the other valid results. A response that cannot be decoded, belongs to another requested
+identity, or fails to load remains a Resource error; best effort never displays content from the
+wrong language, verse, topic, or Resource identity.
+
 A failure to load a required logical resource remains a resource error. Publication validation and
 CI may still reject inconsistent artifacts; this decision concerns the user-facing runtime only.
 

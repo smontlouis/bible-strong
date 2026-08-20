@@ -1,7 +1,10 @@
 import {
   createBhgStrongSpans,
   createLexiconBibleResourceAccess,
+  localInterlinearLexiconAdapter,
 } from '../lexiconBibleResourceAccess'
+import { getMultipleVerses } from '~helpers/biblesDb'
+import { loadInterlinearStrongOccurrencePage } from '~helpers/interlinearBibleSidecar'
 
 jest.mock('~helpers/firebase', () => ({
   cdnUrl: (path: string) => `https://assets.example/${path}`,
@@ -41,6 +44,67 @@ const createDependencies = () => ({
 })
 
 describe('lexiconBibleResourceAccess', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('keeps displayable BHG occurrences when another occurrence is incomplete', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    jest.mocked(loadInterlinearStrongOccurrencePage).mockResolvedValue({
+      occurrences: [
+        {
+          Livre: 1,
+          Chapitre: 1,
+          Verset: 1,
+          tokens: [
+            {
+              ordinal: 0,
+              startOffset: 0,
+              length: 2,
+              segments: [
+                {
+                  ordinal: 0,
+                  startOffset: 0,
+                  length: 2,
+                  transliteration: 'be',
+                  lemma: 'ב',
+                  morphology: 'HR',
+                  gloss: 'dans',
+                  identities: [{ kind: 'strong', code: 'H07225' }],
+                },
+              ],
+            },
+          ],
+        },
+        { Livre: 1, Chapitre: 1, Verset: 2, tokens: [] },
+        { Livre: 1, Chapitre: 1, Verset: 3, tokens: [] },
+      ],
+    })
+    jest.mocked(getMultipleVerses).mockResolvedValue({
+      '1-1-1': 'בְּרֵאשִׁית',
+      '1-1-2': 'וְהָאָרֶץ',
+    })
+
+    await expect(
+      localInterlinearLexiconAdapter.loadFoundVersesByBook('fr', {
+        currentVersionId: 'BHG',
+        defaultVersionId: 'LSG',
+        preferredInterlinearLocale: 'fr',
+        book: 1,
+        reference: 'H07225',
+      })
+    ).resolves.toMatchObject({
+      verses: [
+        expect.objectContaining({ Verset: 1 }),
+        expect.objectContaining({ Verset: 2, StrongSpans: [] }),
+      ],
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: bhg-occurrences-incomplete',
+      expect.objectContaining({ locale: 'fr', missingTextCount: 1, missingSpansCount: 1 })
+    )
+  })
+
   it('uses the installed BHG interlinear index before regular Strong Bibles', async () => {
     const dependencies = createDependencies()
     dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
@@ -326,7 +390,8 @@ describe('lexiconBibleResourceAccess', () => {
     expect(dependencies.strongBible.loadVerse).not.toHaveBeenCalled()
   })
 
-  it('treats an existing BHG verse without lexical spans as an integrity failure', async () => {
+  it('keeps an existing BHG verse visible without lexical spans', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     const dependencies = createDependencies()
     dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
@@ -348,7 +413,14 @@ describe('lexiconBibleResourceAccess', () => {
         chapter: 1,
         verse: 1,
       })
-    ).rejects.toMatchObject({ code: 'INTEGRITY_FAILURE' })
+    ).resolves.toMatchObject({
+      status: 'available',
+      verse: { Texte: 'בְּרֵאשִׁית', StrongSpans: [] },
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: bhg-lexicon-verse-without-spans',
+      expect.objectContaining({ locale: 'fr', book: 1, chapter: 1, verse: 1 })
+    )
   })
 
   it('loads a BHG concordance page with an opaque domain page token', async () => {

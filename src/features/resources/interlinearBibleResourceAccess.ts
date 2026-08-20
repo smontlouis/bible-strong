@@ -16,6 +16,7 @@ import {
   resourceAccessErrorFromBibleChapterUnavailable,
   resourceAccessErrorFromHttpResponse,
 } from './resourceAccessError'
+import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 
 export type InterlinearChapterTokensPayload = {
   tokensByVerse: InterlinearChapterTokens
@@ -140,7 +141,11 @@ export const createHttpInterlinearBibleResourceAdapter = ({
           bibleCoverage.textRevision !== coverage.resource.textRevision ||
           bibleCoverage.textSha256 !== coverage.resource.textSha256
         ) {
-          return { status: 'base-incompatible' }
+          warnAboutRecoverableResourceIntegrity('interlinear-bible-coverage-revision-mismatch', {
+            locale,
+            bibleTextRevision: bibleCoverage.textRevision,
+            interlinearTextRevision: coverage.resource.textRevision,
+          })
         }
         return {
           status: 'available',
@@ -176,7 +181,13 @@ export const createHttpInterlinearBibleResourceAdapter = ({
           verse => verse.TextRevision && verse.TextRevision !== chapter.resource.textRevision
         )
       ) {
-        throw new ResourceAccessError('INTEGRITY_FAILURE')
+        warnAboutRecoverableResourceIntegrity('interlinear-bible-text-revision-mismatch', {
+          locale,
+          book: request.book,
+          chapter: request.chapter,
+          bibleTextRevision: bibleChapter.textRevision,
+          interlinearTextRevision: chapter.resource.textRevision,
+        })
       }
       return {
         tokensByVerse: Object.fromEntries(

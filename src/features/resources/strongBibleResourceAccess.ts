@@ -37,6 +37,7 @@ import {
   resourceAccessErrorFromBibleChapterUnavailable,
   resourceAccessErrorFromHttpResponse,
 } from './resourceAccessError'
+import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 
 export type { StrongBibleLemmaStat, StrongBibleVerseCountByBook } from '~helpers/strongBibleSidecar'
 
@@ -253,8 +254,18 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
       getMultipleVerses(versionId, keys),
       loadStrongBibleVersesSpans(versionId, locations),
     ])
-    if (keys.some(key => texts[key] === undefined || (spansByVerse[key]?.length ?? 0) === 0)) {
-      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    const missingTextCount = keys.filter(key => texts[key] === undefined).length
+    const missingSpansCount = keys.filter(
+      key => texts[key] !== undefined && (spansByVerse[key]?.length ?? 0) === 0
+    ).length
+    if (missingTextCount || missingSpansCount) {
+      warnAboutRecoverableResourceIntegrity('strong-occurrences-incomplete', {
+        versionId,
+        book: request.book,
+        reference: String(request.reference),
+        missingTextCount,
+        missingSpansCount,
+      })
     }
     const verses = locations.flatMap(location => {
       const key = `${location.Livre}-${location.Chapitre}-${location.Verset}`
@@ -322,20 +333,17 @@ const toStrongBibleSpan = (
     : {}),
 })
 
-const assertBibleChapterRevision = (
-  chapter: Awaited<ReturnType<BibleChapterAdapter['loadChapter']>>,
+const hasBibleChapterRevisionMismatch = (
+  chapter: Extract<
+    Awaited<ReturnType<BibleChapterAdapter['loadChapter']>>,
+    { status: 'available' }
+  >,
   expectedTextRevision: string,
   expectedTextSha256: string
-) => {
-  if (
-    chapter.status !== 'available' ||
-    chapter.textRevision !== expectedTextRevision ||
-    chapter.textSha256 !== expectedTextSha256 ||
-    chapter.verses.some(verse => verse.TextRevision !== expectedTextRevision)
-  ) {
-    throw new ResourceAccessError('INTEGRITY_FAILURE')
-  }
-}
+) =>
+  chapter.textRevision !== expectedTextRevision ||
+  chapter.textSha256 !== expectedTextSha256 ||
+  chapter.verses.some(verse => verse.TextRevision !== expectedTextRevision)
 
 const bibleChapterUnavailableError = (
   chapter: Extract<
@@ -404,11 +412,11 @@ export const createHttpStrongBibleResourceAdapter = ({
           bibleCoverage.textRevision !== coverage.resource.textRevision ||
           bibleCoverage.textSha256 !== coverage.resource.textSha256
         ) {
-          return {
-            status: 'base-incompatible',
-            baseTextRevision: bibleCoverage.textRevision,
-            requiredTextRevision: coverage.resource.textRevision,
-          }
+          warnAboutRecoverableResourceIntegrity('strong-bible-coverage-revision-mismatch', {
+            versionId,
+            bibleTextRevision: bibleCoverage.textRevision,
+            strongTextRevision: coverage.resource.textRevision,
+          })
         }
         return {
           status: 'available',
@@ -449,11 +457,21 @@ export const createHttpStrongBibleResourceAdapter = ({
           bibleChapterAdapter.loadChapter(versionId, request.book, request.chapter),
         ])
         if (bibleChapter.status !== 'available') throw bibleChapterUnavailableError(bibleChapter)
-        assertBibleChapterRevision(
-          bibleChapter,
-          chapter.resource.textRevision,
-          chapter.resource.textSha256
-        )
+        if (
+          hasBibleChapterRevisionMismatch(
+            bibleChapter,
+            chapter.resource.textRevision,
+            chapter.resource.textSha256
+          )
+        ) {
+          warnAboutRecoverableResourceIntegrity('strong-bible-text-revision-mismatch', {
+            versionId,
+            book: request.book,
+            chapter: request.chapter,
+            bibleTextRevision: bibleChapter.textRevision,
+            strongTextRevision: chapter.resource.textRevision,
+          })
+        }
         const text = bibleChapter.verses.find(
           verse => Number(verse.Verset) === request.verse
         )?.Texte

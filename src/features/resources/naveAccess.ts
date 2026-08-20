@@ -8,6 +8,7 @@ import {
   ResourceAccessError,
   unwrapLocalResourceResult,
 } from './resourceAccessError'
+import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 import { getLocalResourceAvailability } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { ResourceAvailability } from './resourceModel'
@@ -278,10 +279,19 @@ export const createHttpNaveAccess = ({
       await request(`/v1/naves/${encodeURIComponent(lang)}/topics?${params}`)
     )
     assertResponseLanguage(decoded.resource.language, lang)
-    if (initial && decoded.topics.some(topic => topic.initial !== initial))
-      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    const topics = initial
+      ? decoded.topics.filter(topic => topic.initial === initial)
+      : decoded.topics
+    const omittedCount = decoded.topics.length - topics.length
+    if (initial && omittedCount) {
+      warnAboutRecoverableResourceIntegrity('nave-topic-initial-mismatch', {
+        language: lang,
+        requestedInitial: initial,
+        omittedCount,
+      })
+    }
     return {
-      topics: [...decoded.topics],
+      topics: [...topics],
       ...(decoded.nextCursor ? { nextCursor: decoded.nextCursor } : {}),
     }
   }

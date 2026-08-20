@@ -29,10 +29,8 @@ import {
 } from './strongBibleResourceAccess'
 import type { BibleChapterAdapter } from './bibleChapterSource'
 import type { InterlinearBibleResourceAccess } from './interlinearBibleResourceAccess'
-import {
-  ResourceAccessError,
-  resourceAccessErrorFromBibleChapterUnavailable,
-} from './resourceAccessError'
+import { resourceAccessErrorFromBibleChapterUnavailable } from './resourceAccessError'
+import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 
 export type BhgLexiconProvenance = {
   sourceKind: 'interlinear'
@@ -189,18 +187,28 @@ export const localInterlinearLexiconAdapter: InterlinearLexiconAdapter = {
         createBhgStrongSpans(tokens),
       ])
     )
-    if (
-      page.occurrences.some(({ Livre, Chapitre, Verset }) => {
-        const key = `${Livre}-${Chapitre}-${Verset}`
-        return !texts[key] || (spansByVerse.get(key)?.length ?? 0) === 0
+    const missingTextCount = page.occurrences.filter(
+      ({ Livre, Chapitre, Verset }) => !texts[`${Livre}-${Chapitre}-${Verset}`]
+    ).length
+    const missingSpansCount = page.occurrences.filter(({ Livre, Chapitre, Verset }) => {
+      const key = `${Livre}-${Chapitre}-${Verset}`
+      return Boolean(texts[key]) && (spansByVerse.get(key)?.length ?? 0) === 0
+    }).length
+    if (missingTextCount || missingSpansCount) {
+      warnAboutRecoverableResourceIntegrity('bhg-occurrences-incomplete', {
+        locale,
+        book: request.book,
+        reference: String(request.reference),
+        missingTextCount,
+        missingSpansCount,
       })
-    ) {
-      throw new ResourceAccessError('INTEGRITY_FAILURE')
     }
     const verses = page.occurrences.flatMap(({ tokens, ...location }) => {
       const key = `${location.Livre}-${location.Chapitre}-${location.Verset}`
       const text = texts[key]
-      return text == null ? [] : [{ ...location, Texte: text, StrongSpans: spansByVerse.get(key)! }]
+      return text == null
+        ? []
+        : [{ ...location, Texte: text, StrongSpans: spansByVerse.get(key) ?? [] }]
     })
     return { verses, ...(page.nextCursor ? { nextCursor: page.nextCursor } : {}) }
   },
@@ -348,7 +356,14 @@ export const createLexiconBibleResourceAccess = (
         if (!loaded) {
           return { status: 'missing-location', provenance }
         }
-        if (!spans.length) throw new ResourceAccessError('INTEGRITY_FAILURE')
+        if (!spans.length) {
+          warnAboutRecoverableResourceIntegrity('bhg-lexicon-verse-without-spans', {
+            locale: availability.locale,
+            book: request.book,
+            chapter: request.chapter,
+            verse: request.verse,
+          })
+        }
         return {
           status: 'available',
           provenance,

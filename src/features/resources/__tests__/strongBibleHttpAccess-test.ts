@@ -63,6 +63,10 @@ const unavailableAdapter = (): jest.Mocked<StrongBibleResourceAdapter> => ({
 })
 
 describe('Strong Bible HTTP resource access', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('renders Strong from HTTP when no Offline copy exists', async () => {
     const fetcher = jest.fn((url: string) => {
       if (url.endsWith('/coverage')) {
@@ -228,7 +232,8 @@ describe('Strong Bible HTTP resource access', () => {
     })
   })
 
-  it('reports a stale installed Bible as base-incompatible before Strong activation', async () => {
+  it('keeps remote Strong available when Bible revision metadata differs', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     const fetcher: typeof fetch = () =>
       jsonResponse({
         resource,
@@ -257,11 +262,98 @@ describe('Strong Bible HTTP resource access', () => {
       },
     })
 
-    await expect(online.getAvailability('LSG')).resolves.toEqual({
-      status: 'base-incompatible',
-      baseTextRevision: 'stale-local-revision',
-      requiredTextRevision: resource.textRevision,
+    await expect(online.getAvailability('LSG')).resolves.toMatchObject({
+      status: 'available',
+      versionId: 'LSG',
     })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: strong-bible-coverage-revision-mismatch',
+      expect.objectContaining({ versionId: 'LSG' })
+    )
+  })
+
+  it('keeps a decoded Strong verse when its Bible revision metadata differs', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const fetcher: typeof fetch = () =>
+      jsonResponse({
+        resource,
+        book: 1,
+        chapter: 1,
+        verses: [{ number: 1, spans: [span] }],
+      })
+    const online = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher,
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({
+          status: 'available',
+          textRevision: 'stale-local-revision',
+          textSha256: '0'.repeat(64),
+          verses: [
+            {
+              Livre: 1,
+              Chapitre: 1,
+              Verset: 1,
+              Texte: 'Dieu créa',
+              TextRevision: 'stale-local-revision',
+            },
+          ],
+        }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+      },
+    })
+
+    await expect(online.loadVerse('LSG', { book: 1, chapter: 1, verse: 1 })).resolves.toEqual({
+      text: 'Dieu créa',
+      spans: [span],
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: strong-bible-text-revision-mismatch',
+      expect.objectContaining({ versionId: 'LSG', book: 1, chapter: 1 })
+    )
+  })
+
+  it('keeps displayable HTTP Strong occurrences when another verse text is missing', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const fetcher: typeof fetch = () =>
+      jsonResponse({
+        resource,
+        verses: [
+          { book: 1, chapter: 1, verse: 1, spans: [span] },
+          { book: 1, chapter: 1, verse: 2, spans: [span] },
+        ],
+      })
+    const online = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher,
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'chapter-not-available' }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+        loadVerseTexts: async () => ({
+          status: 'available',
+          texts: { '1-1-1': 'Au commencement' },
+          textRevision: 'stale-local-revision',
+          textSha256: '0'.repeat(64),
+        }),
+      },
+    })
+
+    await expect(
+      online.loadFoundVersesByBook('LSG', {
+        currentVersionId: 'LSG',
+        defaultVersionId: 'LSG',
+        book: 1,
+        reference: 'H0430',
+      })
+    ).resolves.toMatchObject({
+      verses: [expect.objectContaining({ Verset: 1, Texte: 'Au commencement' })],
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: bible-verse-text-selection-incomplete',
+      expect.objectContaining({ version: 'LSG', missingVerseKeys: ['1-1-2'] })
+    )
   })
 
   it('returns the exact Bible dependency from the same HTTP Strong chapter response', async () => {

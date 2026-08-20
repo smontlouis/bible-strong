@@ -20,6 +20,43 @@ const adapter = (
 })
 
 describe('hybrid Bible chapter source', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('keeps available verse texts when revision metadata or individual references differ', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const source: BibleChapterAdapter = {
+      loadChapter: jest.fn(),
+      loadCoverage: jest.fn(),
+      loadVerseTexts: jest.fn().mockResolvedValue({
+        status: 'available',
+        texts: { '1-1-1': 'Au commencement' },
+        textRevision: 'stale-revision',
+        textSha256: '0'.repeat(64),
+      }),
+    }
+
+    await expect(
+      loadVerseTextsFromChapterAdapter(
+        source,
+        'LSG',
+        ['1-1-1', '1-1-2'],
+        undefined,
+        'expected-revision',
+        '1'.repeat(64)
+      )
+    ).resolves.toEqual({ '1-1-1': 'Au commencement' })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: bible-verse-text-selection-incomplete',
+      expect.objectContaining({
+        version: 'LSG',
+        revisionMismatch: true,
+        missingVerseKeys: ['1-1-2'],
+      })
+    )
+  })
+
   it('rejects comparison verses when any requested chapter is unavailable', async () => {
     const source: BibleChapterAdapter = {
       loadChapter: jest
@@ -269,6 +306,46 @@ describe('HTTP Bible chapter adapter', () => {
       diagnostics: { httpStatus: 500, serverCode: 'RESOURCE_INTERNAL_FAILURE' },
     })
     expect(fetcher).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps decoded batches when their revision metadata differs', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const references = [...Array.from({ length: 200 }, (_, index) => `1-1-${index}`), '1-2-0']
+    const fetcher = jest
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            resource: { kind: 'bible-text', versionId: 'LSG', revision: 'lsg-r1' },
+            verses: [{ book: 1, chapter: 1, number: 1, text: 'Premier lot' }],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            resource: { kind: 'bible-text', versionId: 'LSG', revision: 'lsg-r2' },
+            verses: [{ book: 1, chapter: 2, number: 0, text: 'Deuxième lot' }],
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )
+      )
+    const http = createHttpBibleChapterAdapter({
+      baseUrl: 'http://127.0.0.1:8787',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(http.loadVerseTexts?.('LSG', references)).resolves.toMatchObject({
+      status: 'available',
+      texts: { '1-1-1': 'Premier lot', '1-2-0': 'Deuxième lot' },
+      textRevision: 'lsg-r1',
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: bible-verse-text-batch-revision-mismatch',
+      expect.objectContaining({ version: 'LSG', batchOffset: 200 })
+    )
   })
 
   it('prefers an exact installed verse selection before the remote route', async () => {

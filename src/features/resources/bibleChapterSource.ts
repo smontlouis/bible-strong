@@ -5,6 +5,7 @@ import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import type { BibleRecoveryAction } from '~helpers/bibleErrors'
 import type { ResourceAccessErrorDiagnostics } from './resourceAccessError'
 import { resourceAccessErrorFromHttpResponse } from './resourceAccessError'
+import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 import {
   BibleChapterDto,
   BibleVerseTextsDto,
@@ -105,15 +106,19 @@ export const loadVerseTextsFromChapterAdapter = async (
         selection.diagnostics
       )
     }
-    if (
+    const revisionMismatch =
       (expectedTextRevision !== undefined && selection.textRevision !== expectedTextRevision) ||
       (expectedTextSha256 !== undefined && selection.textSha256 !== expectedTextSha256)
-    ) {
-      throw new BibleVerseTextSourceError('integrity-failure')
-    }
     const requestedVerseKeys = verseKeys.filter(verseKey => parseBibleVerseKey(verseKey))
-    if (requestedVerseKeys.some(verseKey => selection.texts[verseKey] === undefined)) {
-      throw new BibleVerseTextSourceError('verses-not-available')
+    const missingVerseKeys = requestedVerseKeys.filter(
+      verseKey => selection.texts[verseKey] === undefined
+    )
+    if (revisionMismatch || missingVerseKeys.length) {
+      warnAboutRecoverableResourceIntegrity('bible-verse-text-selection-incomplete', {
+        version,
+        revisionMismatch,
+        missingVerseKeys,
+      })
     }
     return selection.texts
   }
@@ -131,6 +136,7 @@ export const loadVerseTextsFromChapterAdapter = async (
   }
 
   const result: Record<string, string> = {}
+  let revisionMismatch = false
   for (const group of chapters.values()) {
     if (shouldCancel?.()) return result
     const chapterResult = await adapter.loadChapter(version, group.book, group.chapter)
@@ -145,7 +151,7 @@ export const loadVerseTextsFromChapterAdapter = async (
       (expectedTextRevision !== undefined && chapterResult.textRevision !== expectedTextRevision) ||
       (expectedTextSha256 !== undefined && chapterResult.textSha256 !== expectedTextSha256)
     ) {
-      throw new BibleVerseTextSourceError('integrity-failure')
+      revisionMismatch = true
     }
 
     const requestedKeys = new Set(group.verseKeys)
@@ -156,8 +162,13 @@ export const loadVerseTextsFromChapterAdapter = async (
   }
 
   const requestedVerseKeys = [...chapters.values()].flatMap(group => group.verseKeys)
-  if (requestedVerseKeys.some(verseKey => result[verseKey] === undefined)) {
-    throw new BibleVerseTextSourceError('verses-not-available')
+  const missingVerseKeys = requestedVerseKeys.filter(verseKey => result[verseKey] === undefined)
+  if (revisionMismatch || missingVerseKeys.length) {
+    warnAboutRecoverableResourceIntegrity('bible-verse-text-selection-incomplete', {
+      version,
+      revisionMismatch,
+      missingVerseKeys,
+    })
   }
 
   return result
@@ -366,10 +377,15 @@ export const createHttpBibleChapterAdapter = ({
           (textRevision !== undefined && revision !== textRevision) ||
           (textSha256 !== undefined && decoded.resource.textSha256 !== textSha256)
         ) {
-          return { status: 'unavailable', reason: 'integrity-failure' }
+          warnAboutRecoverableResourceIntegrity('bible-verse-text-batch-revision-mismatch', {
+            version,
+            batchOffset: offset,
+            previousTextRevision: textRevision,
+            receivedTextRevision: revision,
+          })
         }
-        textRevision = revision
-        textSha256 = decoded.resource.textSha256
+        textRevision ??= revision
+        textSha256 ??= decoded.resource.textSha256
         for (const verse of decoded.verses) {
           texts[`${verse.book}-${verse.chapter}-${verse.number}`] = verse.text
         }

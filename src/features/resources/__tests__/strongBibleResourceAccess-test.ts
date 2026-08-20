@@ -1,8 +1,14 @@
 import {
   createStrongBibleResourceAccess,
+  localStrongBibleResourceAdapter,
   type StrongBibleResourceAdapter,
 } from '../strongBibleResourceAccess'
 import { ResourceAccessError } from '../resourceAccessError'
+import { getMultipleVerses } from '~helpers/biblesDb'
+import {
+  loadStrongBibleOccurrenceLocations,
+  loadStrongBibleVersesSpans,
+} from '~helpers/strongBibleSidecar'
 
 jest.mock('~helpers/biblesDb', () => ({
   getMultipleVerses: jest.fn(),
@@ -42,6 +48,54 @@ const createDependencies = (): jest.Mocked<StrongBibleResourceAdapter> => ({
 })
 
 describe('strongBibleResourceAccess', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('keeps displayable Strong occurrences when another occurrence is incomplete', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    jest.mocked(loadStrongBibleOccurrenceLocations).mockResolvedValue({
+      locations: [
+        { Livre: 1, Chapitre: 1, Verset: 1 },
+        { Livre: 1, Chapitre: 1, Verset: 2 },
+        { Livre: 1, Chapitre: 1, Verset: 3 },
+      ],
+    })
+    jest.mocked(getMultipleVerses).mockResolvedValue({
+      '1-1-1': 'Au commencement',
+      '1-1-2': 'La terre',
+    })
+    jest.mocked(loadStrongBibleVersesSpans).mockResolvedValue({
+      '1-1-1': [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 2,
+          identities: [{ kind: 'strong', code: 'H07225' }],
+        },
+      ],
+      '1-1-2': [],
+    })
+
+    await expect(
+      localStrongBibleResourceAdapter.loadFoundVersesByBook('LSG', {
+        currentVersionId: 'LSG',
+        defaultVersionId: 'LSG',
+        book: 1,
+        reference: 'H07225',
+      })
+    ).resolves.toMatchObject({
+      verses: [
+        expect.objectContaining({ Verset: 1, Texte: 'Au commencement' }),
+        expect.objectContaining({ Verset: 2, Texte: 'La terre', StrongSpans: [] }),
+      ],
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: strong-occurrences-incomplete',
+      expect.objectContaining({ versionId: 'LSG', missingTextCount: 1, missingSpansCount: 1 })
+    )
+  })
+
   it('loads unique Strong codes for a chapter independently of the display mode', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability.mockResolvedValue(available('DBY'))
