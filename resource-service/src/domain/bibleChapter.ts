@@ -2,6 +2,7 @@ import { Context, Data, Effect } from 'effect'
 
 import {
   BibleChapterDto,
+  BibleChaptersDto,
   BiblePericopeIndexDto,
   BiblePericopeVerseDto,
   BibleChapterVerseDto,
@@ -104,6 +105,11 @@ export type BibleChapterRepositoryService = {
   findActiveChapter: (
     input: BibleChapterLocation
   ) => Effect.Effect<ActiveBibleChapter, BibleChapterRepositoryError>
+  findActiveChapters?: (input: {
+    versionIds: string[]
+    book: number
+    chapter: number
+  }) => Effect.Effect<ActiveBibleChapter[], BibleChapterRepositoryError>
   findActiveCoverage: (
     versionId: string
   ) => Effect.Effect<ActiveBibleCoverage, BibleChapterRepositoryError>
@@ -153,6 +159,44 @@ export const readBibleChapter = (
           })
       ),
     })
+  })
+
+const chapterDto = (chapter: ActiveBibleChapter) =>
+  new BibleChapterDto({
+    resource: new BibleTextRevisionDto({
+      kind: 'bible-text',
+      versionId: chapter.versionId,
+      revision: chapter.revision,
+      textRevision: chapter.textRevision,
+      ...(chapter.textSha256 ? { textSha256: chapter.textSha256 } : {}),
+    }),
+    book: chapter.book,
+    chapter: chapter.chapter,
+    verses: chapter.verses.map(
+      verse =>
+        new BibleChapterVerseDto({
+          number: verse.number,
+          text: verse.text,
+          presentation: new BibleVersePresentationDto(verse.presentation),
+        })
+    ),
+  })
+
+export const readBibleChapters = (input: { versionIds: string[]; book: number; chapter: number }) =>
+  Effect.gen(function* () {
+    for (const versionId of input.versionIds) {
+      if (!isOrdinaryBibleVersionId(versionId))
+        return yield* new UnsupportedBibleVersion({ versionId })
+    }
+    const repository = yield* BibleChapterRepository
+    const chapters = repository.findActiveChapters
+      ? yield* repository.findActiveChapters(input)
+      : yield* Effect.all(
+          input.versionIds.map(versionId =>
+            repository.findActiveChapter({ versionId, book: input.book, chapter: input.chapter })
+          )
+        )
+    return new BibleChaptersDto({ chapters: chapters.map(chapterDto) })
   })
 
 export const readBibleVerseTexts = (

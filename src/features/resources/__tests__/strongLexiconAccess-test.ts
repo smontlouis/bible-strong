@@ -903,6 +903,7 @@ const createHybridStub = (
   loadPreview: jest.fn(async () => []),
   loadEntry: jest.fn(async identity => ({ label, selectedIdentity: identity }) as never),
   loadEntries: jest.fn(async () => []),
+  loadEntryCards: jest.fn(async () => []),
   loadMorphologies: jest.fn(async () => []),
   loadEntity: jest.fn(async () => undefined),
   loadChapterEntities: jest.fn(async () => []),

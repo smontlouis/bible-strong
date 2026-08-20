@@ -99,6 +99,9 @@ export type BibleChapterRequest = {
 
 export type BibleContentAccess = {
   loadChapter: (request: BibleChapterRequest) => Promise<BibleChapterResult<BibleChapterData>>
+  loadChapters?: (
+    requests: BibleChapterRequest[]
+  ) => Promise<BibleChapterResult<BibleChapterData>[]>
   loadVerseTexts: (request: {
     version: string
     verseKeys: string[]
@@ -746,30 +749,65 @@ export const createBibleContentAccess = (
     return result
   }
 
+  const contentDependencies: BibleContentAccessDependencies = {
+    ...defaultDependencies,
+    chapterAdapter,
+    loadStrongBibleChapterSpans: async (versionId, book, chapter) => {
+      const result = await loadConfiguredStrongBibleChapterSpans(versionId, book, chapter)
+      return {
+        spansByVerse: result.spansByVerse,
+        ...(result.textRevision ? { textRevision: result.textRevision } : {}),
+        ...(result.textSha256 ? { textSha256: result.textSha256 } : {}),
+      }
+    },
+    loadReverseInterlinearChapterSpans: loadConfiguredStrongBibleChapterSpans,
+    loadInterlinearChapterTokens: async (_versionId, locale, book, chapter) =>
+      (
+        await interlinearBibleAccess.loadChapterTokens(locale, {
+          book,
+          chapter,
+        })
+      ).tokensByVerse,
+    getInterlinearAvailability: interlinearBibleAccess.getAvailability,
+  }
+  const loadChapter = (request: BibleChapterRequest) =>
+    loadBibleContentChapter(request, contentDependencies)
+
   return {
     ...localBibleContentAccess,
-    loadChapter: request =>
-      loadBibleContentChapter(request, {
-        ...defaultDependencies,
-        chapterAdapter,
-        loadStrongBibleChapterSpans: async (versionId, book, chapter) => {
-          const result = await loadConfiguredStrongBibleChapterSpans(versionId, book, chapter)
-          return {
-            spansByVerse: result.spansByVerse,
-            ...(result.textRevision ? { textRevision: result.textRevision } : {}),
-            ...(result.textSha256 ? { textSha256: result.textSha256 } : {}),
-          }
-        },
-        loadReverseInterlinearChapterSpans: loadConfiguredStrongBibleChapterSpans,
-        loadInterlinearChapterTokens: async (_versionId, locale, book, chapter) =>
-          (
-            await interlinearBibleAccess.loadChapterTokens(locale, {
-              book,
-              chapter,
-            })
-          ).tokensByVerse,
-        getInterlinearAvailability: interlinearBibleAccess.getAvailability,
-      }),
+    loadChapter,
+    loadChapters: async requests => {
+      const canBatch =
+        Boolean(chapterAdapter.loadChapters) &&
+        requests.length > 1 &&
+        requests.every(
+          request =>
+            request.book === requests[0]?.book &&
+            request.chapter === requests[0]?.chapter &&
+            request.strongMode !== 'visible' &&
+            request.strongMode !== 'reverse-interlinear' &&
+            !isInterlinearModeEnabled(request.interlinearMode)
+        )
+      if (!canBatch || !chapterAdapter.loadChapters) {
+        return Promise.all(requests.map(loadChapter))
+      }
+      const sources = await chapterAdapter.loadChapters(
+        requests.map(request => request.version),
+        requests[0]!.book,
+        requests[0]!.chapter
+      )
+      return Promise.all(
+        requests.map((request, index) =>
+          loadBibleContentChapter(request, {
+            ...contentDependencies,
+            chapterAdapter: {
+              ...chapterAdapter,
+              loadChapter: async () => sources[index]!,
+            },
+          })
+        )
+      )
+    },
     loadVerseTexts: async ({ version, verseKeys, shouldCancel }) => {
       try {
         return await loadVerseTextsFromChapterAdapter(

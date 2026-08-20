@@ -10,6 +10,21 @@ export class BibleVersionPath extends Schema.Class<BibleVersionPath>('BibleVersi
   version: BibleChapterRequest.fields.version,
 }) {}
 
+export class BibleChaptersQuery extends Schema.Class<BibleChaptersQuery>('BibleChaptersQuery')({
+  versions: Schema.String.pipe(
+    Schema.filter(value => {
+      const versions = value.split(',')
+      return (
+        versions.length >= 1 &&
+        versions.length <= 20 &&
+        versions.every(version => /^[A-Z0-9][A-Z0-9_-]{1,31}$/.test(version))
+      )
+    })
+  ),
+  book: BibleChapterRequest.fields.book,
+  chapter: BibleChapterRequest.fields.chapter,
+}) {}
+
 export type BibleVerseLocation = { book: number; chapter: number; verse: number }
 
 export const parseBibleVerseKey = (value: string): BibleVerseLocation | undefined => {
@@ -54,6 +69,22 @@ export class BibleSearchQuery extends Schema.Class<BibleSearchQuery>('BibleSearc
   sortOrder: Schema.optional(Schema.Literal('relevance', 'book')),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))),
   offset: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.nonNegative())),
+}) {}
+
+export class BibleMultiSearchQuery extends Schema.Class<BibleMultiSearchQuery>(
+  'BibleMultiSearchQuery'
+)({
+  ...BibleSearchQuery.fields,
+  versions: Schema.String.pipe(
+    Schema.filter(value => {
+      const versions = value.split(',')
+      return versions.length >= 1 &&
+        versions.length <= 50 &&
+        versions.every(version => /^[A-Z0-9][A-Z0-9_-]{1,31}$/.test(version))
+        ? undefined
+        : 'Expected 1 to 50 comma-separated Bible version identifiers'
+    })
+  ),
 }) {}
 
 export class BibleSearchResultDto extends Schema.Class<BibleSearchResultDto>(
@@ -134,11 +165,23 @@ export class BibleSearchResponseDto extends Schema.Class<BibleSearchResponseDto>
   count: Schema.NonNegativeInt,
 }) {}
 
+export class BibleMultiSearchResponseDto extends Schema.Class<BibleMultiSearchResponseDto>(
+  'BibleMultiSearchResponseDto'
+)({
+  resources: Schema.Array(BibleTextRevisionDto),
+  results: Schema.Array(BibleSearchResultDto),
+  count: Schema.NonNegativeInt,
+}) {}
+
 export class BibleChapterDto extends Schema.Class<BibleChapterDto>('BibleChapterDto')({
   resource: BibleTextRevisionDto,
   book: Schema.Int.pipe(Schema.positive()),
   chapter: Schema.Int.pipe(Schema.positive()),
   verses: Schema.Array(BibleChapterVerseDto),
+}) {}
+
+export class BibleChaptersDto extends Schema.Class<BibleChaptersDto>('BibleChaptersDto')({
+  chapters: Schema.Array(BibleChapterDto),
 }) {}
 
 export class BibleVerseTextDto extends Schema.Class<BibleVerseTextDto>('BibleVerseTextDto')({

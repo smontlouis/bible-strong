@@ -3,8 +3,12 @@ import { Schema } from 'effect'
 
 import {
   BibleChapterDto,
+  BibleChaptersDto,
+  BibleChaptersQuery,
   BiblePericopeIndexDto,
   BibleChapterRequest,
+  BibleMultiSearchQuery,
+  BibleMultiSearchResponseDto,
   BibleVersionCoverageDto,
   BibleVersionPath,
   BibleSearchQuery,
@@ -57,6 +61,8 @@ import {
   StrongLexiconChapterEntitiesResponseDto,
   StrongLexiconEntryQuery,
   StrongLexiconEntryDto,
+  StrongLexiconEntryCardsDto,
+  StrongLexiconEntriesQuery,
   StrongLexiconEntryPath,
   StrongLexiconEntityPath,
   StrongLexiconEntityResponseDto,
@@ -100,6 +106,24 @@ const SystemApi = HttpApiGroup.make('system').add(
 )
 
 const BibleApi = HttpApiGroup.make('bibles')
+  .add(
+    HttpApiEndpoint.get('getBibleChapters', '/v1/bibles/chapters')
+      .setUrlParams(BibleChaptersQuery)
+      .addSuccess(BibleChaptersDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('searchBibles', '/v1/bibles/search')
+      .setUrlParams(BibleMultiSearchQuery)
+      .addSuccess(BibleMultiSearchResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
   .add(
     HttpApiEndpoint.get('searchBible', '/v1/bibles/:version/search')
       .setPath(BibleVersionPath)
@@ -335,6 +359,15 @@ const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
     HttpApiEndpoint.get('getStrongLexiconModule', '/v1/strong-lexicon/modules/:moduleId')
       .setPath(StrongLexiconModulePath)
       .addSuccess(StrongLexiconModuleStateDto)
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('getStrongLexiconEntries', '/v1/strong-lexicon/entries/batch')
+      .setUrlParams(StrongLexiconEntriesQuery)
+      .addSuccess(StrongLexiconEntryCardsDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })

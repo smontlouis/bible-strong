@@ -22,10 +22,11 @@ import { routeR2ArtifactRequest } from './r2ArtifactDelivery'
 import { createFirebaseAppCheckConfig, verifyFirebaseAppCheckRequest } from './firebaseAppCheck'
 import {
   enforceResourceApiAppCheck,
-  RESOURCE_API_CACHE_EPOCH,
+  RESOURCE_API_CACHE_REVISION,
   routeResourceApiRequest,
 } from './resourceApiCache'
 import { protectResourceRequest } from './resourceRequestProtection'
+import { resourceRequestClassFrom } from './resourceRoutePolicy'
 
 export const RESOURCE_API_PATH_PREFIX = '/v1/'
 export { enforceResourceApiAppCheck, routeResourceApiRequest }
@@ -111,11 +112,13 @@ export default {
     })
     if (artifactResponse) return artifactResponse
 
-    return routeResourceApiRequest({
+    const startedAt = Date.now()
+    let sqlStatements = 0
+    const response = await routeResourceApiRequest({
       request,
       authorize: async () => true,
       cache: edgeCache,
-      cacheEpoch: await RESOURCE_API_CACHE_EPOCH,
+      cacheEpoch: await RESOURCE_API_CACHE_REVISION(request),
       waitUntil: promise => ctx.waitUntil(promise),
       reportCacheFailure: (operation, cause) => {
         console.error(
@@ -128,7 +131,15 @@ export default {
         )
       },
       load: async () => {
-        const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString)
+        const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString).withPlugin({
+          transformQuery(args) {
+            sqlStatements += 1
+            return args.node
+          },
+          async transformResult(args) {
+            return args.result
+          },
+        })
         const web = makeResourceWorkerHandler(
           makeKyselyBibleChapterRepository(database),
           makeKyselyNaveRepository(database),
@@ -148,5 +159,20 @@ export default {
         }
       },
     })
+    console.log(
+      JSON.stringify({
+        message: 'resource API request',
+        requestClass: resourceRequestClassFrom(request),
+        method: request.method,
+        path: new URL(request.url).pathname,
+        status: response.status,
+        cache: response.headers.get('x-resource-cache') ?? 'BYPASS',
+        originRead: response.headers.get('x-resource-cache') !== 'HIT',
+        sqlStatements,
+        durationMs: Date.now() - startedAt,
+        requestId: response.headers.get('x-request-id'),
+      })
+    )
+    return response
   },
 } satisfies ExportedHandler<Env>

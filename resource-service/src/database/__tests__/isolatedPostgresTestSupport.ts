@@ -9,7 +9,11 @@ import { makeLocalDatabase } from '../localDatabase'
 
 const migrationDirectory = fileURLToPath(new URL('../../../drizzle', import.meta.url))
 
-export const createIsolatedPostgres = async (connectionString: string, label: string) => {
+export const createIsolatedPostgres = async (
+  connectionString: string,
+  label: string,
+  maxConnections = 4
+) => {
   const databaseName = `bible_strong_${label}_${randomUUID().replaceAll('-', '')}`
   const databaseUrl = new URL(connectionString)
   databaseUrl.pathname = `/${databaseName}`
@@ -39,7 +43,7 @@ export const createIsolatedPostgres = async (connectionString: string, label: st
 
   const database = makeLocalDatabase({
     connectionString: databaseUrl.toString(),
-    maxConnections: 4,
+    maxConnections,
   })
   return {
     database,

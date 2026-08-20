@@ -90,18 +90,17 @@ export const loadBibleReadingParallelVerses = async (
 ): Promise<ParallelVerse[]> => {
   if (!parallelVersions.length) return []
 
-  const parallelResults = await Promise.all(
-    parallelVersions.map(parallelVersion =>
-      resourceAccess.bibleContent.loadChapter({
-        book,
-        chapter,
-        version: parallelVersion,
-        strongMode,
-        interlinearLocale,
-        interlinearLocaleAutomatic,
-      })
-    )
-  )
+  const requests = parallelVersions.map(parallelVersion => ({
+    book,
+    chapter,
+    version: parallelVersion,
+    strongMode,
+    interlinearLocale,
+    interlinearLocaleAutomatic,
+  }))
+  const parallelResults = resourceAccess.bibleContent.loadChapters
+    ? await resourceAccess.bibleContent.loadChapters(requests)
+    : await Promise.all(requests.map(request => resourceAccess.bibleContent.loadChapter(request)))
 
   return parallelResults.map((result, index) => {
     const id = parallelVersions[index]

@@ -1,6 +1,7 @@
 import { Context, Data, Effect } from 'effect'
 
 import {
+  BibleMultiSearchResponseDto,
   BibleSearchResponseDto,
   BibleSearchResultDto,
   BibleTextRevisionDto,
@@ -18,20 +19,35 @@ export type BibleSearchInput = {
   offset?: number
 }
 
+export type BibleMultiSearchInput = Omit<BibleSearchInput, 'versionId'> & {
+  versionIds: string[]
+}
+
 export type ActiveBibleSearch = {
   versionId: string
   revision: string
   textRevision: string
   textSha256?: string
   count: number
-  results: Array<{
+  results: {
     version: string
     book: number
     chapter: number
     verse: number
     text: string
     highlighted: string
-  }>
+  }[]
+}
+
+export type ActiveBibleMultiSearch = {
+  resources: {
+    versionId: string
+    revision: string
+    textRevision: string
+    textSha256?: string
+  }[]
+  count: number
+  results: ActiveBibleSearch['results']
 }
 
 export class BibleSearchRepositoryFailure extends Data.TaggedError('BibleSearchRepositoryFailure')<{
@@ -48,6 +64,9 @@ export type BibleSearchRepositoryError =
 
 export type BibleSearchRepositoryService = {
   search: (input: BibleSearchInput) => Effect.Effect<ActiveBibleSearch, BibleSearchRepositoryError>
+  searchMany: (
+    input: BibleMultiSearchInput
+  ) => Effect.Effect<ActiveBibleMultiSearch, BibleSearchRepositoryError>
 }
 
 export class BibleSearchRepository extends Context.Tag('BibleSearchRepository')<
@@ -75,6 +94,35 @@ export const readBibleSearch = (
         textRevision: active.textRevision,
         ...(active.textSha256 ? { textSha256: active.textSha256 } : {}),
       }),
+      count: active.count,
+      results: active.results.map(result => new BibleSearchResultDto(result)),
+    })
+  })
+
+export const readBibleSearchMany = (
+  input: BibleMultiSearchInput
+): Effect.Effect<
+  BibleMultiSearchResponseDto,
+  BibleSearchRepositoryError | UnsupportedBibleVersion,
+  BibleSearchRepository
+> =>
+  Effect.gen(function* () {
+    const versionIds = [...new Set(input.versionIds)]
+    const unsupported = versionIds.find(versionId => !isOrdinaryBibleVersionId(versionId))
+    if (unsupported) return yield* new UnsupportedBibleVersion({ versionId: unsupported })
+
+    const active = yield* (yield* BibleSearchRepository).searchMany({ ...input, versionIds })
+    return new BibleMultiSearchResponseDto({
+      resources: active.resources.map(
+        resource =>
+          new BibleTextRevisionDto({
+            kind: 'bible-text',
+            versionId: resource.versionId,
+            revision: resource.revision,
+            textRevision: resource.textRevision,
+            ...(resource.textSha256 ? { textSha256: resource.textSha256 } : {}),
+          })
+      ),
       count: active.count,
       results: active.results.map(result => new BibleSearchResultDto(result)),
     })

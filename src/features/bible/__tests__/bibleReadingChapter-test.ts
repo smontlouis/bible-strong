@@ -114,4 +114,26 @@ describe('canonical V4 Bible chapter extras', () => {
       interlinearLocaleAutomatic: true,
     })
   })
+
+  it('groups plain parallel versions through the batch chapter access', async () => {
+    const resources = createResources()
+    resources.bibleContent.loadChapters = jest.fn().mockResolvedValue([
+      { success: true, data: { kind: 'plain', verses: [] } },
+      { success: true, data: { kind: 'plain', verses: [] } },
+    ])
+
+    await loadBibleReadingParallelVerses(
+      {
+        book: 1,
+        chapter: 1,
+        version: 'LSG',
+        parallelVersions: ['KJV', 'BSB'],
+        commentsDisplay: false,
+      },
+      resources
+    )
+
+    expect(resources.bibleContent.loadChapters).toHaveBeenCalledTimes(1)
+    expect(resources.bibleContent.loadChapter).not.toHaveBeenCalled()
+  })
 })

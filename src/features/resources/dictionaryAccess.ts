@@ -34,7 +34,7 @@ export type DictionaryEntry = {
 }
 
 export type DictionaryWordReference = { word: string }
-export type DictionaryPageOptions = { limit?: number; cursor?: string }
+export type DictionaryPageOptions = { limit?: number; cursor?: string; signal?: AbortSignal }
 export type DictionaryPage = { entries: DictionarySummary[]; nextCursor?: string }
 
 export type DictionaryAccess = {
@@ -177,8 +177,11 @@ export const createHttpDictionaryAccess = ({
   timeoutMs = 10_000,
 }: HttpDictionaryAccessOptions): DictionaryAccess => {
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
-  const request = async (path: string): Promise<unknown> => {
+  const request = async (path: string, signal?: AbortSignal): Promise<unknown> => {
     const controller = new AbortController()
+    const abort = () => controller.abort()
+    signal?.addEventListener('abort', abort, { once: true })
+    if (signal?.aborted) controller.abort()
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
     try {
       const response = await fetcher(`${normalizedBaseUrl}${path}`, {
@@ -193,12 +196,14 @@ export const createHttpDictionaryAccess = ({
       }
       return payload
     } catch (error) {
+      if (signal?.aborted) throw error
       if (error instanceof ResourceAccessError) throw error
       throw new ResourceAccessError(
         (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
       )
     } finally {
       clearTimeout(timeout)
+      signal?.removeEventListener('abort', abort)
     }
   }
   const decode = <A>(schema: Schema.Schema<A>, payload: unknown): A => {
@@ -290,12 +295,14 @@ export const createHttpDictionaryAccess = ({
     language,
     limit = 50,
     cursor,
+    signal,
   }: {
     initial?: string
     search?: string
     language?: ResourceLanguage
     limit?: number
     cursor?: string
+    signal?: AbortSignal
   }): Promise<DictionaryPage> {
     const lang = languageOrFrench(language)
     const params = new URLSearchParams({
@@ -306,7 +313,7 @@ export const createHttpDictionaryAccess = ({
     })
     const decoded = decode(
       DictionaryEntriesResponseDto,
-      await request(`/v1/dictionaries/${encodeURIComponent(lang)}/entries?${params}`)
+      await request(`/v1/dictionaries/${encodeURIComponent(lang)}/entries?${params}`, signal)
     )
     assertLanguage(decoded.resource.language, lang)
     return {

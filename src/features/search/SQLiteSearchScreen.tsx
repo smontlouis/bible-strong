@@ -114,7 +114,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const globalFilters = useAtomValue(searchFiltersAtom)
   const setGlobalFilters = useSetAtom(searchFiltersAtom)
 
-  const debouncedSearchValue = useDebounce(searchValue, 300)
+  const debouncedSearchValue = useDebounce(searchValue, 600)
   const [noteResults, setNoteResults] = useState<SearchEntityResult[]>([])
   const [linkResults, setLinkResults] = useState<SearchEntityResult[]>([])
   const [studyResults, setStudyResults] = useState<SearchEntityResult[]>([])
@@ -384,10 +384,11 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       sortOrder,
       isConnected,
     ],
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam, signal }) => {
       try {
         const sectionMap: Record<string, 'ot' | 'nt'> = { at: 'ot', nt: 'nt' }
         const options: SearchOptions = {
+          signal,
           limit: PASSAGE_SEARCH_PAGE_SIZE,
           offset: pageParam,
           sortOrder,
@@ -421,6 +422,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       return loaded < count ? loaded : undefined
     },
     enabled: shouldSearchPassages,
+    retry: false,
     ...localQueryOptions,
   })
   const results: SearchResult[] | null = !itemFilters.passages
@@ -448,9 +450,10 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       trimmedSearchValue,
       strongLetter,
     ],
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam, signal }) => {
       try {
         return await resources.strongLexicon.listEntries({
+          signal,
           language: resourcesLanguage.STRONG,
           limit: 20,
           ...(pageParam ? { cursor: pageParam } : {}),
@@ -466,6 +469,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchStrong,
+    retry: false,
     ...localQueryOptions,
   })
   const strongResults: StrongLexiconSearchResult[] = shouldSearchStrong
@@ -487,17 +491,17 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       trimmedSearchValue,
       dictionaryLetter,
     ],
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam, signal }) => {
       try {
         return browseItemType === 'dictionary' && !trimmedSearchValue
           ? await resources.dictionary.listByLetterPage(
               dictionaryLetter,
-              { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+              { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
               resourcesLanguage.DICTIONNAIRE
             )
           : await resources.dictionary.searchPage(
               trimmedSearchValue,
-              { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+              { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
               resourcesLanguage.DICTIONNAIRE
             )
       } catch (error) {
@@ -508,6 +512,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchDictionary,
+    retry: false,
     ...localQueryOptions,
   })
   const dictionaryResults: DictionaryRow[] = shouldSearchDictionary
@@ -529,17 +534,17 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       trimmedSearchValue,
       naveLetter,
     ],
-    queryFn: async ({ pageParam }) => {
+    queryFn: async ({ pageParam, signal }) => {
       try {
         return browseItemType === 'nave' && !trimmedSearchValue
           ? await resources.nave.listByLetterPage(
               naveLetter,
-              { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+              { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
               resourcesLanguage.NAVE
             )
           : await resources.nave.searchPage(
               trimmedSearchValue,
-              { limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
+              { signal, limit: 20, ...(pageParam ? { cursor: pageParam } : {}) },
               resourcesLanguage.NAVE
             )
       } catch (error) {
@@ -550,6 +555,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchNave,
+    retry: false,
     ...localQueryOptions,
   })
   const naveResults: NaveRow[] = shouldSearchNave

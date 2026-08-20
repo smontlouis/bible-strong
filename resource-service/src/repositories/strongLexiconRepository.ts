@@ -9,6 +9,7 @@ import {
   StrongLexiconEntityNotFound,
   StrongLexiconEntryNotFound,
   StrongLexiconRepositoryFailure,
+  type ActiveStrongLexiconValue,
   type StrongLexiconLanguage,
   type StrongLexiconModuleId,
   type StrongLexiconModuleState,
@@ -19,6 +20,7 @@ import type {
   StrongLexiconEntity,
   StrongLexiconEntityRelation,
   StrongLexiconEntry,
+  StrongLexiconEntryCard,
   StrongLexiconMorphology,
   StrongLexiconSearchResult,
 } from '../../../src/features/resources/strongLexiconAccess'
@@ -269,6 +271,139 @@ export const makeKyselyStrongLexiconRepository = (
     return resolvedIdentity ? { entry, identity: resolvedIdentity } : undefined
   }
 
+  const findEntryCardsBatch = async (input: {
+    identities: { reference: string; kind: StrongIdentityKind }[]
+    language: StrongLexiconLanguage
+  }): Promise<ActiveStrongLexiconValue<StrongLexiconEntryCard>[]> => {
+    if (!input.identities.length) return []
+    const core = await requiredCore()
+    const references = [
+      ...new Set(input.identities.map(identity => normalizeCode(identity.reference))),
+    ]
+    const requestedIdentityRows = await records(core.id, 'StepEntryIdentities', query =>
+      query.where('code', 'in', references)
+    )
+    const requestedEntryIds = requestedIdentityRows.map(row => number(row, 'stepEntryId'))
+    const referenceSql = sql.join(references.map(reference => sql`${reference}`))
+    const baseFilters = input.identities.map(identity => {
+      const reference = normalizeCode(identity.reference)
+      const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
+      return sql<boolean>`(
+        (payload->>'baseCode')::integer = ${Number.isFinite(base) ? base : -1}
+        AND payload->>'language' = ${reference.startsWith('G') ? 'greek' : 'hebrew'}
+      )`
+    })
+    const entryIdFilter = requestedEntryIds.length
+      ? sql<boolean>`entry_id IN (${sql.join(requestedEntryIds.map(id => sql`${id}`))})`
+      : sql<boolean>`false`
+    const entries = await records(core.id, 'StepEntries', query =>
+      query.where(sql<boolean>`(
+        ${entryIdFilter}
+        OR upper(payload->>'eStrong') IN (${referenceSql})
+        OR upper(payload->>'dStrong') IN (${referenceSql})
+        OR upper(payload->>'uStrong') IN (${referenceSql})
+        OR ${sql.join(baseFilters, sql` OR `)}
+      )`)
+    )
+    if (!entries.length) return []
+    const entryIds = entries.map(entry => number(entry, 'id'))
+    const [identities, translations, morphologyRows] = await Promise.all([
+      records(core.id, 'StepEntryIdentities', query => query.where('entry_id', 'in', entryIds)),
+      records(core.id, 'LexiconTranslations', query =>
+        query.where('entry_id', 'in', entryIds).where('language', '=', input.language)
+      ),
+      records(core.id, 'MorphologyCodes'),
+    ])
+    const morphologyIds = morphologyRows.map(row => number(row, 'id'))
+    const morphologyTranslations = morphologyIds.length
+      ? await records(core.id, 'MorphologyCodeTranslations', query =>
+          query.where('entry_id', 'in', morphologyIds).where('language', '=', input.language)
+        )
+      : []
+    return input.identities.flatMap(requested => {
+      const reference = normalizeCode(requested.reference)
+      const requestedIdentity = requestedIdentityRows.find(
+        identity => text(identity, 'stepCode') === reference
+      )
+      const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
+      const entry = entries.find(candidate => {
+        if (
+          requestedIdentity &&
+          number(candidate, 'id') === number(requestedIdentity, 'stepEntryId')
+        ) {
+          return true
+        }
+        if (requested.kind === 'dstrong') return text(candidate, 'dStrong').startsWith(reference)
+        if (requested.kind === 'estrong') return text(candidate, 'eStrong') === reference
+        if (requested.kind === 'ustrong') return text(candidate, 'uStrong') === reference
+        return (
+          [
+            text(candidate, 'eStrong'),
+            text(candidate, 'dStrong'),
+            text(candidate, 'uStrong'),
+          ].includes(reference) ||
+          (number(candidate, 'baseCode') === base &&
+            text(candidate, 'language') === (reference.startsWith('G') ? 'greek' : 'hebrew'))
+        )
+      })
+      if (!entry) return []
+      const entryId = number(entry, 'id')
+      const identity = identities.find(candidate => number(candidate, 'stepEntryId') === entryId)
+      if (!identity) return []
+      const translation =
+        translations.find(candidate => number(candidate, 'stepEntryId') === entryId) ?? {}
+      const morphologyRow = morphologyRows.find(
+        row =>
+          text(row, 'scope') === 'lexical_brief' &&
+          [text(row, 'code'), text(row, 'normalizedCode')].includes(text(entry, 'morph'))
+      )
+      const morphologyTranslation = morphologyRow
+        ? (morphologyTranslations.find(
+            row => number(row, 'morphologyCodeId') === number(morphologyRow, 'id')
+          ) ?? {})
+        : {}
+      const meaning = morphologyRow
+        ? localized(
+            input.language,
+            text(morphologyTranslation, 'meaning'),
+            text(morphologyRow, 'meaning')
+          )
+        : ''
+      const definition = localized(
+        input.language,
+        text(translation, 'meaningHtml') || text(translation, 'meaning'),
+        text(entry, 'meaning')
+      )
+      return [
+        {
+          revision: `core:${core.revision}`,
+          value: {
+            id: entryId,
+            selectedIdentity: {
+              kind: requested.kind,
+              code: text(identity, 'stepCode'),
+            },
+            stepCode: text(identity, 'stepCode'),
+            classicStrong: classicStrong(entry),
+            eStrong: text(entry, 'eStrong'),
+            dStrong: text(entry, 'dStrong'),
+            language: text(entry, 'language') === 'greek' ? 'greek' : 'hebrew',
+            baseCode: number(entry, 'baseCode'),
+            original: text(entry, 'original'),
+            transliteration:
+              text(entry, 'classicTransliteration') || text(entry, 'transliteration'),
+            ...(text(entry, 'pronunciation')
+              ? { pronunciation: text(entry, 'pronunciation') }
+              : {}),
+            gloss: localized(input.language, text(translation, 'gloss'), text(entry, 'gloss')),
+            ...(definition ? { definitionHtml: definition } : {}),
+            ...(morphologyRow ? { morphology: { code: text(entry, 'morph'), meaning } } : {}),
+          },
+        },
+      ]
+    })
+  }
+
   const hydrateEntity = async (
     core: Publication,
     entityPublication: Publication,
@@ -455,6 +590,10 @@ export const makeKyselyStrongLexiconRepository = (
   }
 
   return {
+    findEntryCards: input =>
+      tryDatabasePromise('strong-lexicon.entries-batch', () => findEntryCardsBatch(input)).pipe(
+        Effect.mapError(mapRepositoryCause)
+      ),
     getModuleState: moduleId =>
       tryDatabasePromise('strong-lexicon.module-state', () => getState(moduleId)).pipe(
         Effect.mapError(cause => new StrongLexiconRepositoryFailure({ cause }))

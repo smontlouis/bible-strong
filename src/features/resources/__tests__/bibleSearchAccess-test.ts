@@ -59,6 +59,92 @@ describe('HTTP Bible search access', () => {
     )
   })
 
+  it('searches multiple Online Bible versions through one aggregate request', async () => {
+    const fetcher = jest.fn(async () =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            resources: [
+              {
+                kind: 'bible-text',
+                versionId: 'LSG',
+                revision: 'lsg-r1',
+                textRevision: 'lsg-r1',
+              },
+              {
+                kind: 'bible-text',
+                versionId: 'DBY',
+                revision: 'dby-r1',
+                textRevision: 'dby-r1',
+              },
+            ],
+            results: [
+              {
+                version: 'LSG',
+                book: 43,
+                chapter: 3,
+                verse: 16,
+                text: 'Car Dieu a tant aimé le monde',
+                highlighted: 'Car {{Dieu}} a tant aimé le monde',
+              },
+              {
+                version: 'DBY',
+                book: 43,
+                chapter: 3,
+                verse: 16,
+                text: 'Car Dieu a tant aimé le monde',
+                highlighted: 'Car {{Dieu}} a tant aimé le monde',
+              },
+            ],
+            count: 2,
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )
+      )
+    )
+    const access = createHttpBibleSearchAccess({
+      baseUrl: 'http://resource.test/',
+      versions: ['LSG', 'DBY'],
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(access.searchPage('Dieu', { limit: 20 })).resolves.toMatchObject({
+      count: 2,
+      results: [{ version: 'LSG' }, { version: 'DBY' }],
+    })
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://resource.test/v1/bibles/search?q=Dieu&versions=LSG%2CDBY&limit=20',
+      expect.any(Object)
+    )
+  })
+
+  it('forwards cancellation to the active HTTP search', async () => {
+    let receivedSignal: AbortSignal | undefined
+    const fetcher = jest.fn((_url: string | URL | Request, init?: RequestInit) => {
+      receivedSignal = init?.signal ?? undefined
+      return new Promise<Response>((_resolve, reject) => {
+        receivedSignal?.addEventListener('abort', () =>
+          reject(new DOMException('Aborted', 'AbortError'))
+        )
+      })
+    })
+    const access = createHttpBibleSearchAccess({
+      baseUrl: 'http://resource.test',
+      versions: ['LSG', 'DBY'],
+      fetcher,
+      isOnline: async () => true,
+    })
+    const controller = new AbortController()
+
+    const request = access.searchPage('Dieu', { signal: controller.signal })
+    controller.abort()
+
+    await expect(request).rejects.toMatchObject({ name: 'AbortError' })
+    expect(receivedSignal?.aborted).toBe(true)
+  })
+
   it('rejects a multi-version search when any requested version fails', async () => {
     const fetcher = jest.fn(async (url: string | URL | Request) => {
       const value = String(url)

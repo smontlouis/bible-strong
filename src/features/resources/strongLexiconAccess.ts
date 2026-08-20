@@ -19,6 +19,7 @@ import {
   encodeStrongLexiconPageCursor,
   StrongLexiconChapterEntitiesResponseDto,
   StrongLexiconEntryDto,
+  StrongLexiconEntryCardsDto,
   StrongLexiconEntityResponseDto,
   StrongLexiconModuleStateDto,
   StrongLexiconMorphologyResponseDto,
@@ -134,6 +135,24 @@ export type StrongLexiconPreview = Pick<
   | 'definitionHtml'
 >
 
+export type StrongLexiconEntryCard = Pick<
+  StrongLexiconEntry,
+  | 'id'
+  | 'selectedIdentity'
+  | 'stepCode'
+  | 'classicStrong'
+  | 'eStrong'
+  | 'dStrong'
+  | 'language'
+  | 'baseCode'
+  | 'original'
+  | 'transliteration'
+  | 'pronunciation'
+  | 'gloss'
+  | 'definitionHtml'
+  | 'morphology'
+>
+
 export type StrongLexiconSearchResult = {
   id: number
   stepCode: string
@@ -150,6 +169,7 @@ export type StrongLexiconPage = {
 }
 
 export type StrongLexiconListRequest = {
+  signal?: AbortSignal
   language: ResourceLanguage
   lexicalLanguage?: 'greek' | 'hebrew'
   search?: string
@@ -829,6 +849,10 @@ export type StrongLexiconAccess = {
     identities: StrongIdentity[],
     language: ResourceLanguage
   ) => Promise<StrongLexiconEntry[]>
+  loadEntryCards: (
+    identities: StrongIdentity[],
+    language: ResourceLanguage
+  ) => Promise<StrongLexiconEntryCard[]>
   loadMorphologies: (
     codes: string[],
     language: ResourceLanguage
@@ -1001,6 +1025,10 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
     return entries.filter((entry): entry is StrongLexiconEntry => Boolean(entry))
   },
 
+  async loadEntryCards(identities, language) {
+    return localStrongLexiconAccess.loadEntries(identities, language)
+  },
+
   async loadMorphologies(codes, language) {
     return withStrongLexiconDatabase('core', core => loadMorphologies(core, codes, language))
   },
@@ -1158,8 +1186,15 @@ export const createHttpStrongLexiconAccess = ({
   timeoutMs = 10_000,
 }: HttpStrongLexiconAccessOptions): StrongLexiconAccess => {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, '')
-  const get = async <A>(path: string, schema: Schema.Schema<A>): Promise<A> => {
+  const get = async <A>(
+    path: string,
+    schema: Schema.Schema<A>,
+    signal?: AbortSignal
+  ): Promise<A> => {
     const controller = new AbortController()
+    const abort = () => controller.abort()
+    signal?.addEventListener('abort', abort, { once: true })
+    if (signal?.aborted) controller.abort()
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
     try {
       const response = await fetcher(`${normalizedBaseUrl}${path}`, {
@@ -1178,25 +1213,54 @@ export const createHttpStrongLexiconAccess = ({
         throw new ResourceAccessError('INTEGRITY_FAILURE')
       }
     } catch (error) {
+      if (signal?.aborted) throw error
       if (error instanceof ResourceAccessError) throw error
       throw new ResourceAccessError(
         (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
       )
     } finally {
       clearTimeout(timeout)
+      signal?.removeEventListener('abort', abort)
     }
   }
   const languageQuery = (language: ResourceLanguage, kind?: StrongIdentityKind) =>
     `language=${encodeURIComponent(language)}${kind ? `&kind=${encodeURIComponent(kind)}` : ''}`
-  const loadSearch = async (query: URLSearchParams) => {
+  const loadSearch = async (query: URLSearchParams, signal?: AbortSignal) => {
     const response = await get(
       `/v1/strong-lexicon/entries?${query}`,
-      StrongLexiconSearchResponseDto
+      StrongLexiconSearchResponseDto,
+      signal
     )
     return {
       entries: [...response.entries],
       ...(response.nextCursor ? { nextCursor: response.nextCursor } : {}),
     }
+  }
+  const toEntry = (
+    response: Schema.Schema.Type<typeof StrongLexiconEntryDto>
+  ): StrongLexiconEntry => {
+    const { resource: _resource, ...entry } = response
+    const toAvailability = (
+      moduleId: 'resources' | 'entities',
+      state: typeof entry.modules.resources
+    ): StrongLexiconModuleAvailability =>
+      state.status === 'available'
+        ? {
+            status: 'available',
+            moduleId,
+            revision: state.revision,
+            schemaVersion: STRONG_LEXICON_MODULE_SCHEMA_VERSION,
+          }
+        : state.status === 'incompatible'
+          ? { status: 'incompatible', moduleId, installedRevision: state.revision }
+          : { status: 'missing', moduleId }
+    return {
+      ...entry,
+      modules: {
+        resources: toAvailability('resources', entry.modules.resources),
+        entities: toAvailability('entities', entry.modules.entities),
+      },
+    } as StrongLexiconEntry
   }
   return {
     async getModuleAvailability(moduleId) {
@@ -1221,28 +1285,7 @@ export const createHttpStrongLexiconAccess = ({
           `/v1/strong-lexicon/entries/${encodeURIComponent(identity.code)}?${languageQuery(language, identity.kind)}`,
           StrongLexiconEntryDto
         )
-        const { resource: _resource, ...entry } = response
-        const toAvailability = (
-          moduleId: 'resources' | 'entities',
-          state: typeof entry.modules.resources
-        ): StrongLexiconModuleAvailability =>
-          state.status === 'available'
-            ? {
-                status: 'available',
-                moduleId,
-                revision: state.revision,
-                schemaVersion: STRONG_LEXICON_MODULE_SCHEMA_VERSION,
-              }
-            : state.status === 'incompatible'
-              ? { status: 'incompatible', moduleId, installedRevision: state.revision }
-              : { status: 'missing', moduleId }
-        return {
-          ...entry,
-          modules: {
-            resources: toAvailability('resources', entry.modules.resources),
-            entities: toAvailability('entities', entry.modules.entities),
-          },
-        } as StrongLexiconEntry
+        return toEntry(response)
       } catch (error) {
         if (error instanceof ResourceAccessError && error.code === 'NOT_FOUND') return undefined
         throw error
@@ -1254,8 +1297,20 @@ export const createHttpStrongLexiconAccess = ({
       )
       return entries.filter((entry): entry is StrongLexiconEntry => Boolean(entry))
     },
+    async loadEntryCards(identities, language) {
+      if (identities.length === 0) return []
+      const params = new URLSearchParams({
+        language,
+        identities: identities.map(identity => `${identity.kind}:${identity.code}`).join(','),
+      })
+      const response = await get(
+        `/v1/strong-lexicon/entries/batch?${params}`,
+        StrongLexiconEntryCardsDto
+      )
+      return response.entries.map(({ resource: _resource, ...entry }) => entry)
+    },
     async loadPreview(identities, language) {
-      const entries = await this.loadEntries(identities, language)
+      const entries = await this.loadEntryCards(identities, language)
       return entries.map(entry => ({
         id: entry.id,
         selectedIdentity: entry.selectedIdentity,
@@ -1299,13 +1354,13 @@ export const createHttpStrongLexiconAccess = ({
       )
       return response.entities.map(entity => ({ ...entity, verses: [...entity.verses] }))
     },
-    listEntries({ language, lexicalLanguage, search, prefix, limit = 100, cursor }) {
+    listEntries({ signal, language, lexicalLanguage, search, prefix, limit = 100, cursor }) {
       const query = new URLSearchParams({ language, limit: String(limit) })
       if (lexicalLanguage) query.set('lexicalLanguage', lexicalLanguage)
       if (search) query.set('search', search)
       if (prefix) query.set('prefix', prefix)
       if (cursor) query.set('cursor', cursor)
-      return loadSearch(query)
+      return loadSearch(query, signal)
     },
     search(query, language, limit = 100) {
       return this.listEntries({ language, search: query, limit }).then(page => page.entries)
@@ -1399,6 +1454,12 @@ export const createHybridStrongLexiconAccess = ({
         'core',
         () => offline.loadEntries(identities, language),
         () => online.loadEntries(identities, language)
+      ),
+    loadEntryCards: (identities, language) =>
+      select(
+        'core',
+        () => offline.loadEntryCards(identities, language),
+        () => online.loadEntryCards(identities, language)
       ),
     loadMorphologies: (codes, language) =>
       select(

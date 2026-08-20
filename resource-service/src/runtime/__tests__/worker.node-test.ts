@@ -8,7 +8,7 @@ import {
   makeResourceWorkerHandler,
   routeResourceApiRequest,
 } from '../worker'
-import { resourceApiCacheEpochFrom } from '../resourceApiCache'
+import { resourceApiCacheEpochFrom, resourceApiCacheRevisionFrom } from '../resourceApiCache'
 
 class MemoryEdgeCache {
   readonly entries = new Map<string, Response>()
@@ -144,8 +144,9 @@ describe('Resource Worker binding', () => {
     assert.deepEqual(failures, ['match'])
   })
 
-  it('never caches dynamic search requests', async () => {
+  it('briefly caches identical authenticated search requests without token-specific keys', async () => {
     const cache = new MemoryEdgeCache()
+    const backgroundWrites: Promise<unknown>[] = []
     let originReads = 0
     const route = () =>
       routeResourceApiRequest({
@@ -153,7 +154,7 @@ describe('Resource Worker binding', () => {
         authorize: async () => true,
         cache,
         cacheEpoch: 'catalog-release-1',
-        waitUntil: () => undefined,
+        waitUntil: promise => backgroundWrites.push(promise),
         load: async () => {
           originReads += 1
           return Response.json({ results: [] })
@@ -161,14 +162,38 @@ describe('Resource Worker binding', () => {
       })
 
     const first = await route()
+    await Promise.all(backgroundWrites)
     const second = await route()
+
+    assert.equal(originReads, 1)
+    assert.equal(cache.entries.size, 1)
+    assert.equal(first.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(second.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(first.headers.get('cache-control'), 'private, no-store')
+    assert.equal(second.headers.get('cache-control'), 'private, no-store')
+  })
+
+  it('does not cache random resource selection', async () => {
+    const cache = new MemoryEdgeCache()
+    let originReads = 0
+    const route = () =>
+      routeResourceApiRequest({
+        request: new Request('https://api.bible-strong.app/v1/timelines/fr/events/random'),
+        authorize: async () => true,
+        cache,
+        cacheEpoch: 'catalog-release-1',
+        waitUntil: () => undefined,
+        load: async () => {
+          originReads += 1
+          return Response.json({ id: originReads })
+        },
+      })
+
+    await route()
+    await route()
 
     assert.equal(originReads, 2)
     assert.equal(cache.entries.size, 0)
-    assert.equal(first.headers.get('x-resource-cache'), null)
-    assert.equal(second.headers.get('x-resource-cache'), null)
-    assert.equal(first.headers.get('cache-control'), 'private, no-store')
-    assert.equal(second.headers.get('cache-control'), 'private, no-store')
   })
 
   it('rejects unauthenticated requests before cache and database access', async () => {
@@ -239,6 +264,23 @@ describe('Resource Worker binding', () => {
 
     assert.match(first, /^[a-f0-9]{64}$/)
     assert.notEqual(first, changedContent)
+  })
+
+  it('invalidates a Bible cache key only when that Bible publication changes', async () => {
+    const request = new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1')
+    const catalog = (lsg: string, dby: string) => ({
+      resources: {
+        'bible:LSG': { contentSha256: lsg },
+        'bible:DBY': { contentSha256: dby },
+      },
+    })
+
+    const first = await resourceApiCacheRevisionFrom(request, catalog('lsg-r1', 'dby-r1'))
+    const unrelatedChange = await resourceApiCacheRevisionFrom(request, catalog('lsg-r1', 'dby-r2'))
+    const relevantChange = await resourceApiCacheRevisionFrom(request, catalog('lsg-r2', 'dby-r2'))
+
+    assert.equal(first, unrelatedChange)
+    assert.notEqual(first, relevantChange)
   })
 
   it('does not cache unsuccessful origin responses', async () => {

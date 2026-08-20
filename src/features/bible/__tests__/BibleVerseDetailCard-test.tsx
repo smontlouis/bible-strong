@@ -14,7 +14,7 @@ const mockResourceAccess = {
   bibleContent: { loadCoverage: mockLoadCoverage },
   lexiconBible: { loadVerse: mockLoadVerse },
   strongLexicon: {
-    loadEntries: mockLoadEntries,
+    loadEntryCards: mockLoadEntries,
     getModuleAvailability: mockGetModuleAvailability,
     getModuleRecoveryActions: mockGetModuleRecoveryActions,
   },

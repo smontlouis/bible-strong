@@ -90,6 +90,7 @@ export interface SearchResult {
 export type SearchSortOrder = 'relevance' | 'book'
 
 export interface SearchOptions {
+  signal?: AbortSignal
   version?: string
   book?: number
   section?: 'ot' | 'nt'

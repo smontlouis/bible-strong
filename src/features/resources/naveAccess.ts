@@ -34,7 +34,7 @@ export type NaveTopicReference = {
 }
 
 export type NaveVerseTopics = [NaveTopicReference[] | undefined, NaveTopicReference[] | undefined]
-export type NavePageOptions = { limit?: number; cursor?: string }
+export type NavePageOptions = { limit?: number; cursor?: string; signal?: AbortSignal }
 export type NavePage = { topics: NaveTopicSummary[]; nextCursor?: string }
 
 export type NaveAccess = {
@@ -163,8 +163,11 @@ export const createHttpNaveAccess = ({
   timeoutMs = 10_000,
 }: HttpNaveAccessOptions): NaveAccess => {
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
-  const request = async (path: string): Promise<unknown> => {
+  const request = async (path: string, signal?: AbortSignal): Promise<unknown> => {
     const controller = new AbortController()
+    const abort = () => controller.abort()
+    signal?.addEventListener('abort', abort, { once: true })
+    if (signal?.aborted) controller.abort()
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
     try {
       const response = await fetcher(`${normalizedBaseUrl}${path}`, {
@@ -179,12 +182,14 @@ export const createHttpNaveAccess = ({
       }
       return payload
     } catch (error) {
+      if (signal?.aborted) throw error
       if (error instanceof ResourceAccessError) throw error
       throw new ResourceAccessError(
         (await isOnline()) ? 'TEMPORARY_UNAVAILABLE' : 'NETWORK_OFFLINE'
       )
     } finally {
       clearTimeout(timeout)
+      signal?.removeEventListener('abort', abort)
     }
   }
 
@@ -260,12 +265,14 @@ export const createHttpNaveAccess = ({
     language,
     limit = 50,
     cursor,
+    signal,
   }: {
     initial?: string
     search?: string
     language?: ResourceLanguage
     limit?: number
     cursor?: string
+    signal?: AbortSignal
   }): Promise<NavePage> {
     const lang = languageOrFrench(language)
     const params = new URLSearchParams({
@@ -276,7 +283,7 @@ export const createHttpNaveAccess = ({
     })
     const decoded = decode(
       NaveTopicListResponseDto,
-      await request(`/v1/naves/${encodeURIComponent(lang)}/topics?${params}`)
+      await request(`/v1/naves/${encodeURIComponent(lang)}/topics?${params}`, signal)
     )
     assertResponseLanguage(decoded.resource.language, lang)
     const topics = initial

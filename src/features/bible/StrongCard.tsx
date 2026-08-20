@@ -17,7 +17,10 @@ import { currentStudyIdAtom, openedFromTabAtom } from '~features/studies/atom'
 import { StudyNavigateBibleType } from '~common/types'
 import { Theme } from '@emotion/react'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
+import type {
+  StrongLexiconEntry,
+  StrongLexiconEntryCard,
+} from '~features/resources/strongLexiconAccess'
 import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
 import { createStrongIdentity } from '~helpers/strongIdentities'
 import type { StrongVerseContext } from './strongResourceCardContext'
@@ -54,7 +57,7 @@ type Props = {
   index?: number
   theme: Theme
   book: string
-  strongEntry: StrongLexiconEntry
+  strongEntry: StrongLexiconEntryCard | StrongLexiconEntry
   isSelectionMode?: StudyNavigateBibleType
   onClosed?: () => void
   strongVerseContext?: StrongVerseContext

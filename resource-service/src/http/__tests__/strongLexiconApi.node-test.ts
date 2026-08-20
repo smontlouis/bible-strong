@@ -38,12 +38,13 @@ const entity = {
   relations: [],
 }
 let lastListInput: Parameters<StrongLexiconRepositoryService['listEntries']>[0] | undefined
+let entryReads = 0
 
 const repository: StrongLexiconRepositoryService = {
   getModuleState: moduleId =>
     Effect.succeed({ moduleId, status: 'available', revision: `${moduleId}-r1` }),
   findEntry: input =>
-    input.reference === 'absent'
+    ((entryReads += 1), input.reference === 'absent')
       ? Effect.fail(new StrongLexiconEntryNotFound(input))
       : Effect.succeed({
           revision,
@@ -111,6 +112,32 @@ const request = (path: string) =>
   })
 
 describe('v1 Strong lexicon API', () => {
+  it('loads multiple identities through one batch endpoint', async () => {
+    entryReads = 0
+    let batchReads = 0
+    const batchRepository: StrongLexiconRepositoryService = {
+      ...repository,
+      findEntryCards: () => {
+        batchReads += 1
+        return Effect.succeed([])
+      },
+    }
+    const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: batchRepository })
+    try {
+      const response = await web.handler(
+        request(
+          '/v1/strong-lexicon/entries/batch?language=fr&identities=strong%3AG3056%2Cstrong%3Aabsent'
+        )
+      )
+      assert.equal(response.status, 200, await response.clone().text())
+      assert.equal(batchReads, 1)
+      assert.equal(entryReads, 0)
+      assert.equal(((await response.json()) as { entries: unknown[] }).entries.length, 0)
+    } finally {
+      await web.dispose()
+    }
+  })
+
   it('serves module, entry, browse, random, morphology, entity, and chapter contracts', async () => {
     lastListInput = undefined
     const web = makeResourceWebHandler(undefined, undefined, { strongLexicon: repository })

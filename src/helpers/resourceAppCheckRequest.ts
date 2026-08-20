@@ -4,6 +4,7 @@ const RESOURCE_API_PATH_PREFIX = '/v1/'
 const PUBLIC_RESOURCE_CATALOG_PATH = '/v1/offline-catalog'
 
 export type ResourceAppCheckTokenProvider = (forceRefresh?: boolean) => Promise<string>
+type ResourceAppCheckFetchOptions = { timeoutMs?: number }
 
 export const isResourceAppCheckProtectedUrl = (input: RequestInfo | URL): boolean => {
   try {
@@ -35,24 +36,68 @@ export const getResourceAppCheckHeaders = async (
     ? { [FIREBASE_APP_CHECK_HEADER]: await getToken(forceRefresh) }
     : {}
 
+const runWithRequestDeadline = <T>(
+  operation: (signal: AbortSignal) => Promise<T>,
+  sourceSignal: AbortSignal | undefined,
+  timeoutMs: number
+): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    const controller = new AbortController()
+    let settled = false
+    const finish = (callback: () => void) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timeout)
+      sourceSignal?.removeEventListener('abort', abortFromCaller)
+      callback()
+    }
+    const fail = (message: string) => {
+      controller.abort()
+      finish(() => reject(new Error(message)))
+    }
+    const abortFromCaller = () => fail('RESOURCE_REQUEST_ABORTED')
+    const timeout = setTimeout(() => fail('RESOURCE_REQUEST_TIMEOUT'), timeoutMs)
+
+    if (sourceSignal?.aborted) {
+      abortFromCaller()
+      return
+    }
+    sourceSignal?.addEventListener('abort', abortFromCaller, { once: true })
+
+    operation(controller.signal).then(
+      value => finish(() => resolve(value)),
+      error => finish(() => reject(error))
+    )
+  })
+
 export const createResourceAppCheckFetch = (
   fetcher: typeof fetch,
-  getToken: ResourceAppCheckTokenProvider
+  getToken: ResourceAppCheckTokenProvider,
+  { timeoutMs = 10_000 }: ResourceAppCheckFetchOptions = {}
 ): typeof fetch => {
   const appCheckFetch: typeof fetch = async (input, init) => {
     if (!isResourceAppCheckProtectedUrl(input)) return fetcher(input, init)
 
-    const send = async (forceRefresh: boolean) => {
-      const headers = requestHeaders(input, init)
-      headers.set(FIREBASE_APP_CHECK_HEADER, await getToken(forceRefresh))
-      return fetcher(input, { ...init, headers })
-    }
+    const sourceSignal = init?.signal ?? (input instanceof Request ? input.signal : undefined)
+    return runWithRequestDeadline(
+      async signal => {
+        const send = async (forceRefresh: boolean) => {
+          const headers = requestHeaders(input, init)
+          headers.set(FIREBASE_APP_CHECK_HEADER, await getToken(forceRefresh))
+          return fetcher(input, { ...init, headers, signal })
+        }
 
-    const response = await send(false)
-    const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase()
-    return response.status === 401 && (method === 'GET' || method === 'HEAD')
-      ? send(true)
-      : response
+        const response = await send(false)
+        const method = (
+          init?.method ?? (input instanceof Request ? input.method : 'GET')
+        ).toUpperCase()
+        return response.status === 401 && (method === 'GET' || method === 'HEAD')
+          ? send(true)
+          : response
+      },
+      sourceSignal,
+      timeoutMs
+    )
   }
   return appCheckFetch
 }

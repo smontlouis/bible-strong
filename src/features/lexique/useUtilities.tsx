@@ -15,7 +15,7 @@ interface UseSearchValueOptions {
 
 export const useSearchValue = ({ onDebouncedValue }: UseSearchValueOptions = {}) => {
   const [searchValue, setSearchValue] = useState('')
-  const debouncedSearchValue = useDebounce(searchValue, 300)
+  const debouncedSearchValue = useDebounce(searchValue, 600)
 
   useEffect(() => {
     if (!debouncedSearchValue && onDebouncedValue) {
@@ -30,7 +30,7 @@ export const useSearchValue = ({ onDebouncedValue }: UseSearchValueOptions = {})
 type Page<T> = { entries: T[]; nextCursor?: string } | { topics: T[]; nextCursor?: string }
 type PageQuery<T> = (
   value: string,
-  options: { limit: number; cursor?: string },
+  options: { limit: number; cursor?: string; signal?: AbortSignal },
   resourceLanguage?: ResourceLanguage
 ) => Promise<Page<T>>
 
@@ -61,15 +61,16 @@ export const useInfiniteResultsByLetterOrSearch = <T,>(
       active.value,
       isConnected,
     ],
-    queryFn: ({ pageParam }) =>
+    queryFn: ({ pageParam, signal }) =>
       active.query(
         active.value,
-        { limit, ...(pageParam ? { cursor: pageParam } : {}) },
+        { signal, limit, ...(pageParam ? { cursor: pageParam } : {}) },
         active.resourceLanguage
       ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: page => page.nextCursor,
     staleTime: Infinity,
+    retry: false,
     ...localQueryOptions,
   })
   return {

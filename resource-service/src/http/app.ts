@@ -8,6 +8,7 @@ import {
   BibleChapterRepository,
   BibleChapterRepositoryFailure,
   readBibleChapter,
+  readBibleChapters,
   readBibleVerseTexts,
   readBiblePericopes,
   readBibleCoverage,
@@ -19,6 +20,7 @@ import {
   BibleSearchRepository,
   BibleSearchRepositoryFailure,
   readBibleSearch,
+  readBibleSearchMany,
   type BibleSearchRepositoryService,
 } from '../domain/bibleSearch'
 import {
@@ -74,6 +76,7 @@ import {
   readRandomStrongLexiconEntry,
   readStrongLexiconChapterEntities,
   readStrongLexiconEntry,
+  readStrongLexiconEntryCards,
   readStrongLexiconEntity,
   readStrongLexiconModuleState,
   readStrongLexiconMorphologies,
@@ -357,6 +360,29 @@ const addResponseHeaders = (headers: Record<string, string>) =>
 
 const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
   handlers
+    .handle('searchBibles', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      const versionIds = urlParams.versions.split(',')
+      return readBibleSearchMany({
+        versionIds,
+        query: urlParams.q,
+        book: urlParams.book,
+        section: urlParams.section,
+        sortOrder: urlParams.sortOrder,
+        limit: urlParams.limit,
+        offset: urlParams.offset,
+      }).pipe(
+        Effect.tap(response =>
+          addResponseHeaders({
+            'x-request-id': requestId,
+            'x-resource-revisions': response.resources
+              .map(resource => `${resource.versionId}:${resource.revision}`)
+              .join(','),
+          })
+        ),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
     .handle('searchBible', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
@@ -409,6 +435,24 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
         yield* addResponseHeaders(headers)
         return response
       })
+    })
+    .handle('getBibleChapters', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return readBibleChapters({
+        versionIds: [...new Set(urlParams.versions.split(','))],
+        book: urlParams.book,
+        chapter: urlParams.chapter,
+      }).pipe(
+        Effect.tap(response =>
+          addResponseHeaders({
+            'x-request-id': requestId,
+            'x-resource-revisions': response.chapters
+              .map(value => `${value.resource.versionId}:${value.resource.revision}`)
+              .join(','),
+          })
+        ),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
     })
     .handle('getBibleVerseTexts', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
@@ -722,6 +766,24 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
         ['strong-lexicon', path.reference, urlParams.language, urlParams.kind ?? 'strong']
       )
     })
+    .handle('getStrongLexiconEntries', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      const identities = urlParams.identities.split(',').flatMap(value => {
+        const [kind, ...reference] = value.split(':')
+        return ['strong', 'estrong', 'dstrong', 'ustrong'].includes(kind) && reference.length
+          ? [
+              {
+                kind: kind as 'strong' | 'estrong' | 'dstrong' | 'ustrong',
+                reference: reference.join(':'),
+              },
+            ]
+          : []
+      })
+      return readStrongLexiconEntryCards({ identities, language: urlParams.language }).pipe(
+        Effect.tap(() => addResponseHeaders({ 'x-request-id': requestId })),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
     .handle('browseStrongLexicon', ({ urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
@@ -869,6 +931,10 @@ const unavailableRepository: BibleChapterRepositoryService = {
 const unavailableBibleSearchRepository: BibleSearchRepositoryService = {
   search: input =>
     Effect.fail(new ActiveBibleSearchPublicationUnavailable({ versionId: input.versionId })),
+  searchMany: input =>
+    Effect.fail(
+      new ActiveBibleSearchPublicationUnavailable({ versionId: input.versionIds[0] ?? 'UNKNOWN' })
+    ),
 }
 
 const unavailableNaveRepository: NaveRepositoryService = {

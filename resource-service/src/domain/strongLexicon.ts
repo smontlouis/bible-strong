@@ -4,6 +4,8 @@ import {
   StrongLexiconChapterEntitiesResponseDto,
   StrongLexiconChapterEntityDto,
   StrongLexiconEntryDto,
+  StrongLexiconEntryCardDto,
+  StrongLexiconEntryCardsDto,
   StrongLexiconEntityResponseDto,
   StrongLexiconEntityDto,
   StrongLexiconEntityRelationDto,
@@ -18,6 +20,7 @@ import {
 import type {
   StrongLexiconChapterEntity,
   StrongLexiconEntry,
+  StrongLexiconEntryCard,
   StrongLexiconEntity,
   StrongLexiconMorphology,
   StrongLexiconSearchResult,
@@ -65,6 +68,13 @@ export type StrongLexiconRepositoryService = {
     language: StrongLexiconLanguage
     kind?: StrongIdentityKind
   }) => Effect.Effect<ActiveStrongLexiconValue<StrongLexiconEntry>, StrongLexiconRepositoryError>
+  findEntryCards?: (input: {
+    identities: { reference: string; kind: StrongIdentityKind }[]
+    language: StrongLexiconLanguage
+  }) => Effect.Effect<
+    ActiveStrongLexiconValue<StrongLexiconEntryCard>[],
+    StrongLexiconRepositoryError
+  >
   listEntries: (input: {
     language: StrongLexiconLanguage
     lexicalLanguage?: StrongLexicalLanguage
@@ -119,6 +129,37 @@ export const readStrongLexiconModuleState = (moduleId: StrongLexiconModuleId) =>
     return new StrongLexiconModuleStateDto(state)
   })
 
+const strongLexiconEntryDto = (active: ActiveStrongLexiconValue<StrongLexiconEntry>) => {
+  const toState = (
+    moduleId: 'resources' | 'entities',
+    value: StrongLexiconEntry['modules']['resources']
+  ) =>
+    new StrongLexiconModuleStateDto({
+      moduleId,
+      status:
+        value.status === 'available'
+          ? 'available'
+          : value.status === 'incompatible'
+            ? 'incompatible'
+            : 'unavailable',
+      ...('revision' in value && value.revision ? { revision: value.revision } : {}),
+    })
+  return new StrongLexiconEntryDto({
+    resource: { revision: active.revision },
+    ...active.value,
+    ...(active.value.morphology
+      ? { morphology: new StrongLexiconMorphologyDto(active.value.morphology) }
+      : {}),
+    relations: active.value.relations.map(relation => new StrongLexiconRelationDto(relation)),
+    resources: active.value.resources.map(resource => new StrongLexiconResourceDto(resource)),
+    ...(active.value.entity ? { entity: entityDto(active.value.entity) } : {}),
+    modules: {
+      resources: toState('resources', active.value.modules.resources),
+      entities: toState('entities', active.value.modules.entities),
+    },
+  })
+}
+
 export const readStrongLexiconEntry = (input: {
   reference: string
   language: StrongLexiconLanguage
@@ -126,33 +167,43 @@ export const readStrongLexiconEntry = (input: {
 }) =>
   Effect.gen(function* () {
     const active = yield* (yield* StrongLexiconRepository).findEntry(input)
-    const toState = (
-      moduleId: 'resources' | 'entities',
-      value: StrongLexiconEntry['modules']['resources']
-    ) =>
-      new StrongLexiconModuleStateDto({
-        moduleId,
-        status:
-          value.status === 'available'
-            ? 'available'
-            : value.status === 'incompatible'
-              ? 'incompatible'
-              : 'unavailable',
-        ...('revision' in value && value.revision ? { revision: value.revision } : {}),
-      })
-    return new StrongLexiconEntryDto({
-      resource: { revision: active.revision },
-      ...active.value,
-      ...(active.value.morphology
-        ? { morphology: new StrongLexiconMorphologyDto(active.value.morphology) }
-        : {}),
-      relations: active.value.relations.map(relation => new StrongLexiconRelationDto(relation)),
-      resources: active.value.resources.map(resource => new StrongLexiconResourceDto(resource)),
-      ...(active.value.entity ? { entity: entityDto(active.value.entity) } : {}),
-      modules: {
-        resources: toState('resources', active.value.modules.resources),
-        entities: toState('entities', active.value.modules.entities),
-      },
+    return strongLexiconEntryDto(active)
+  })
+
+export const readStrongLexiconEntryCards = (input: {
+  identities: { reference: string; kind: StrongIdentityKind }[]
+  language: StrongLexiconLanguage
+}) =>
+  Effect.gen(function* () {
+    const repository = yield* StrongLexiconRepository
+    const values = repository.findEntryCards
+      ? yield* repository.findEntryCards(input)
+      : yield* Effect.all(
+          input.identities.map(identity =>
+            repository.findEntry({ ...identity, language: input.language }).pipe(
+              Effect.catchIf(
+                cause => cause instanceof StrongLexiconEntryNotFound,
+                () => Effect.succeed(undefined)
+              )
+            )
+          ),
+          { concurrency: 8 }
+        )
+    return new StrongLexiconEntryCardsDto({
+      entries: values
+        .filter(
+          (value): value is ActiveStrongLexiconValue<StrongLexiconEntryCard> => value !== undefined
+        )
+        .map(
+          active =>
+            new StrongLexiconEntryCardDto({
+              resource: { revision: active.revision },
+              ...active.value,
+              ...(active.value.morphology
+                ? { morphology: new StrongLexiconMorphologyDto(active.value.morphology) }
+                : {}),
+            })
+        ),
     })
   })
 

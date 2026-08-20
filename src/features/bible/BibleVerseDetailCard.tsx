@@ -24,7 +24,7 @@ import { StudyNavigateBibleType } from '~common/types'
 import Button from '~common/ui/Button'
 import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleResourceAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import type { StrongLexiconEntry } from '~features/resources/strongLexiconAccess'
+import type { StrongLexiconEntryCard } from '~features/resources/strongLexiconAccess'
 import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { localQueryOptions } from '~helpers/queryOptions'
@@ -116,7 +116,7 @@ class StrongVerseQueryError extends Error {
 }
 
 interface StrongCardItem {
-  entry: StrongLexiconEntry
+  entry: StrongLexiconEntryCard
   context: StrongVerseContext
   occurrenceIndex: number
 }
@@ -217,7 +217,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       ]
       const [coverage, strongReferencesResult] = await Promise.all([
         resources.bibleContent.loadCoverage(result.provenance.versionId),
-        resources.strongLexicon.loadEntries(strongIdentities, strongResourceLanguage),
+        resources.strongLexicon.loadEntryCards(strongIdentities, strongResourceLanguage),
       ])
       const versesInCurrentChapterResult =
         getChapterVerseCountFromCoverage(coverage, verseBook, verseChapter) ?? 0

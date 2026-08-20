@@ -31,8 +31,13 @@ const chapter = {
     },
   ],
 } as const
+let batchReads = 0
 
 const repository: BibleChapterRepositoryService = {
+  findActiveChapters: input => {
+    batchReads += 1
+    return Effect.succeed(input.versionIds.map(versionId => ({ ...chapter, versionId })))
+  },
   findActiveVerseTexts: input =>
     input.locations.every(location => location.book !== chapter.book)
       ? Effect.fail(new BibleVerseSelectionNotFound(input))
@@ -107,6 +112,26 @@ const request = (path: string, headers?: HeadersInit) =>
   })
 
 describe('v1 Bible chapter API', () => {
+  it('returns several parallel versions through one repository batch', async () => {
+    batchReads = 0
+    const web = makeResourceWebHandler(repository)
+    try {
+      const response = await web.handler(
+        request('/v1/bibles/chapters?versions=LSG%2CDBY&book=1&chapter=1')
+      )
+      assert.equal(response.status, 200, await response.clone().text())
+      assert.equal(batchReads, 1)
+      assert.deepEqual(
+        (
+          (await response.json()) as { chapters: { resource: { versionId: string } }[] }
+        ).chapters.map(value => value.resource.versionId),
+        ['LSG', 'DBY']
+      )
+    } finally {
+      await web.dispose()
+    }
+  })
+
   it('returns the canonical DTO in verse order with the active revision and ETag', async () => {
     const web = makeResourceWebHandler(repository)
     try {

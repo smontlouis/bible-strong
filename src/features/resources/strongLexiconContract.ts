@@ -41,6 +41,21 @@ export class StrongLexiconEntryQuery extends Schema.Class<StrongLexiconEntryQuer
   kind: Schema.optional(StrongLexiconIdentityKind),
 }) {}
 
+export class StrongLexiconEntriesQuery extends Schema.Class<StrongLexiconEntriesQuery>(
+  'StrongLexiconEntriesQuery'
+)({
+  language: StrongLexiconLanguage,
+  identities: Schema.NonEmptyString.pipe(
+    Schema.filter(
+      value =>
+        value.split(',').length <= 100 &&
+        value
+          .split(',')
+          .every(identity => /^(?:strong|estrong|dstrong|ustrong):[^,]+$/.test(identity))
+    )
+  ),
+}) {}
+
 export class StrongLexiconBrowseQuery extends Schema.Class<StrongLexiconBrowseQuery>(
   'StrongLexiconBrowseQuery'
 )({
@@ -176,6 +191,30 @@ export class StrongLexiconEntryDto extends Schema.Class<StrongLexiconEntryDto>(
     entities: StrongLexiconModuleStateDto,
   }),
 }) {}
+
+export class StrongLexiconEntryCardDto extends Schema.Class<StrongLexiconEntryCardDto>(
+  'StrongLexiconEntryCardDto'
+)({
+  resource: Schema.Struct({ revision: Schema.String }),
+  id: Schema.Int,
+  selectedIdentity: Schema.Struct({ kind: StrongLexiconIdentityKind, code: Schema.String }),
+  stepCode: Schema.String,
+  classicStrong: Schema.String,
+  eStrong: Schema.String,
+  dStrong: Schema.String,
+  language: StrongLexicalLanguage,
+  baseCode: Schema.Int,
+  original: Schema.String,
+  transliteration: Schema.String,
+  pronunciation: Schema.optional(Schema.String),
+  gloss: Schema.String,
+  definitionHtml: Schema.optional(Schema.String),
+  morphology: Schema.optional(StrongLexiconMorphologyDto),
+}) {}
+
+export class StrongLexiconEntryCardsDto extends Schema.Class<StrongLexiconEntryCardsDto>(
+  'StrongLexiconEntryCardsDto'
+)({ entries: Schema.Array(StrongLexiconEntryCardDto) }) {}
 
 export class StrongLexiconSearchResultDto extends Schema.Class<StrongLexiconSearchResultDto>(
   'StrongLexiconSearchResultDto'

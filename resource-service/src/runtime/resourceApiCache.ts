@@ -13,6 +13,65 @@ export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<strin
 
 export const RESOURCE_API_CACHE_EPOCH = resourceApiCacheEpochFrom(mobileResourceCatalog)
 
+type CatalogEntry = { contentSha256?: unknown; archiveSha256?: unknown }
+
+const catalogResourceIdsFrom = (request: Request): string[] => {
+  const url = new URL(request.url)
+  const pathname = url.pathname
+  const match = (pattern: RegExp) => pathname.match(pattern)?.slice(1)
+  if (pathname === '/v1/bibles/search' || pathname === '/v1/bibles/chapters') {
+    return (url.searchParams.get('versions') ?? '')
+      .split(',')
+      .filter(Boolean)
+      .map(version => `bible:${version}`)
+  }
+  if (pathname.startsWith('/v1/strong-lexicon/')) {
+    return ['strong-lexicon:core', 'strong-lexicon:resources', 'strong-lexicon:entities']
+  }
+  const bible = match(/^\/v1\/bibles\/([^/]+)\//)
+  if (bible && bible[0] !== 'search') return [`bible:${decodeURIComponent(bible[0])}`]
+  const strongBible = match(/^\/v1\/strong-bibles\/([^/]+)\//)
+  if (strongBible) return [`bible-strong:${decodeURIComponent(strongBible[0])}`]
+  const interlinear = match(/^\/v1\/interlinear-bibles\/([^/]+)\/languages\/([^/]+)\//)
+  if (interlinear) {
+    return [
+      `bible-interlinear:${decodeURIComponent(interlinear[0])}:${decodeURIComponent(interlinear[1])}`,
+    ]
+  }
+  const database = match(/^\/v1\/(naves|dictionaries|timelines)\/([^/]+)\//)
+  if (database) {
+    const names = { naves: 'NAVE', dictionaries: 'DICTIONNAIRE', timelines: 'TIMELINE' }
+    return [
+      `database:${names[database[0] as keyof typeof names]}:${decodeURIComponent(database[1])}`,
+    ]
+  }
+  return []
+}
+
+export const resourceApiCacheRevisionFrom = async (
+  request: Request,
+  catalog: unknown
+): Promise<string> => {
+  const resourceIds = catalogResourceIdsFrom(request)
+  if (resourceIds.length && catalog && typeof catalog === 'object' && 'resources' in catalog) {
+    const resources = catalog.resources
+    if (resources && typeof resources === 'object') {
+      const revisions = resourceIds.map(resourceId => {
+        const entry = (resources as Record<string, CatalogEntry>)[resourceId]
+        const revision = entry?.contentSha256 ?? entry?.archiveSha256
+        return typeof revision === 'string' && revision ? [resourceId, revision] : undefined
+      })
+      if (revisions.every((revision): revision is [string, string] => revision !== undefined)) {
+        return resourceApiCacheEpochFrom(revisions)
+      }
+    }
+  }
+  return resourceApiCacheEpochFrom(catalog)
+}
+
+export const RESOURCE_API_CACHE_REVISION = (request: Request) =>
+  resourceApiCacheRevisionFrom(request, mobileResourceCatalog)
+
 export type ResourceApiEdgeCache = {
   match(request: Request): Promise<Response | undefined>
   put(request: Request, response: Response): Promise<void>
@@ -27,6 +86,7 @@ export const enforceResourceApiAppCheck = async (
 }
 
 const LONG_LIVED_PATHS = [
+  /^\/v1\/bibles\/chapters$/,
   /^\/v1\/bibles\/[^/]+\/(?:books\/\d+\/chapters\/\d+|verses|pericopes|coverage)$/,
   /^\/v1\/naves\/[^/]+\/(?:topics\/[^/]+|verses\/[^/]+\/topics)$/,
   /^\/v1\/dictionaries\/[^/]+\/(?:entries\/(?:batch|by-id\/[^/]+|[^/]+)|verses\/[^/]+\/words)$/,
@@ -49,7 +109,8 @@ const SHORT_LIVED_PATHS = [
 const cacheTtlSeconds = (request: Request): number | undefined => {
   if (request.method !== 'GET') return undefined
   const url = new URL(request.url)
-  if (isDynamicResourceRequest(request)) return undefined
+  if (url.pathname.endsWith('/random')) return undefined
+  if (isDynamicResourceRequest(request)) return 60
   if (LONG_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return 24 * 60 * 60
   if (SHORT_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return 60 * 60
   return undefined

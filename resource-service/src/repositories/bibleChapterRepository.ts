@@ -30,6 +30,68 @@ const bibleMetadata = (value: Record<string, unknown>): BiblePublicationMetadata
 export const makeKyselyBibleChapterRepository = (
   database: Kysely<ResourceDatabase>
 ): BibleChapterRepositoryService => ({
+  findActiveChapters: input =>
+    Effect.gen(function* () {
+      const identities = input.versionIds.map(versionId => `bible-text:${versionId}`)
+      const rows = yield* tryDatabasePromise('bible.chapters.read-active', () =>
+        database
+          .selectFrom('resource_publications')
+          .leftJoin('bible_verses', join =>
+            join
+              .onRef('bible_verses.publication_id', '=', 'resource_publications.id')
+              .on('bible_verses.book', '=', input.book)
+              .on('bible_verses.chapter', '=', input.chapter)
+          )
+          .select([
+            'resource_publications.resource_identity',
+            'resource_publications.revision',
+            'resource_publications.metadata',
+            'bible_verses.verse',
+            'bible_verses.text',
+            'bible_verses.presentation',
+          ])
+          .where('resource_publications.resource_identity', 'in', identities)
+          .where('resource_publications.status', '=', 'active')
+          .orderBy('resource_publications.resource_identity')
+          .orderBy('bible_verses.verse')
+          .execute()
+      ).pipe(Effect.mapError(cause => new BibleChapterRepositoryFailure({ cause })))
+
+      const rowsByVersion = new Map<string, typeof rows>()
+      for (const row of rows) {
+        const versionId = row.resource_identity.slice('bible-text:'.length)
+        rowsByVersion.set(versionId, [...(rowsByVersion.get(versionId) ?? []), row])
+      }
+      const chapters: ActiveBibleChapter[] = []
+      for (const versionId of input.versionIds) {
+        const versionRows = rowsByVersion.get(versionId)
+        if (!versionRows) return yield* new ActiveBiblePublicationUnavailable({ versionId })
+        if (versionRows[0]?.verse === null) {
+          return yield* new BibleChapterNotFound({
+            versionId,
+            book: input.book,
+            chapter: input.chapter,
+          })
+        }
+        const metadata = bibleMetadata(versionRows[0]!.metadata)
+        chapters.push({
+          versionId,
+          book: input.book,
+          chapter: input.chapter,
+          revision:
+            metadata.resource_revision ?? metadata.text_revision ?? versionRows[0]!.revision,
+          textRevision:
+            metadata.text_revision ?? metadata.resource_revision ?? versionRows[0]!.revision,
+          ...(metadata.text_sha256 ? { textSha256: metadata.text_sha256 } : {}),
+          verses: versionRows.map(row => ({
+            number: row.verse!,
+            text: row.text!,
+            presentation: row.presentation!,
+          })),
+        })
+      }
+      return chapters
+    }),
   findActiveVerseTexts: input =>
     Effect.gen(function* () {
       const publication = yield* tryDatabasePromise('bible.verse-texts.read-publication', () =>

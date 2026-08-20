@@ -8,6 +8,7 @@ import { resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 import { warnAboutRecoverableResourceIntegrity } from './recoverableIntegrity'
 import {
   BibleChapterDto,
+  BibleChaptersDto,
   BibleVerseTextsDto,
   BibleVersionCoverageDto,
   parseBibleVerseKey,
@@ -40,6 +41,11 @@ export type BibleChapterSourceResult =
 
 export type BibleChapterAdapter = {
   loadChapter: (version: string, book: number, chapter: number) => Promise<BibleChapterSourceResult>
+  loadChapters?: (
+    versions: string[],
+    book: number,
+    chapter: number
+  ) => Promise<BibleChapterSourceResult[]>
   loadCoverage: (version: string) => Promise<BibleCoverageSourceResult>
   loadVerseTexts?: (
     version: string,
@@ -181,6 +187,31 @@ export const createHybridBibleChapterAdapter = ({
   offline: BibleChapterAdapter
   online: BibleChapterAdapter
 }): BibleChapterAdapter => ({
+  async loadChapters(versions, book, chapter) {
+    const localResults = await Promise.all(
+      versions.map(version => offline.loadChapter(version, book, chapter))
+    )
+    const remoteIndexes = localResults.flatMap((result, index) =>
+      result.status === 'available' || result.reason === 'chapter-not-available' ? [] : [index]
+    )
+    if (!remoteIndexes.length) return localResults
+    const remoteVersions = remoteIndexes.map(index => versions[index])
+    const remoteResults = online.loadChapters
+      ? await online.loadChapters(remoteVersions, book, chapter)
+      : await Promise.all(remoteVersions.map(version => online.loadChapter(version, book, chapter)))
+    const results = [...localResults]
+    remoteIndexes.forEach((index, remoteIndex) => {
+      const local = localResults[index]
+      const remote = remoteResults[remoteIndex]
+      results[index] =
+        remote.status === 'available' || remote.reason === 'chapter-not-available'
+          ? remote
+          : local.status === 'unavailable' && local.reason === 'offline-copy-invalid'
+            ? local
+            : remote
+    })
+    return results
+  },
   async loadVerseTexts(version, verseKeys, shouldCancel) {
     const local = offline.loadVerseTexts
       ? await offline.loadVerseTexts(version, verseKeys, shouldCancel)
@@ -356,6 +387,46 @@ export const createHttpBibleChapterAdapter = ({
   }
 
   return {
+    async loadChapters(versions, book, chapter) {
+      if (!versions.length) return []
+      const params = new URLSearchParams({
+        versions: versions.join(','),
+        book: String(book),
+        chapter: String(chapter),
+      })
+      const result = await requestResource(
+        `/v1/bibles/chapters?${params}`,
+        Schema.decodeUnknownSync(BibleChaptersDto)
+      )
+      if (result.status === 'unavailable') {
+        return Promise.all(versions.map(version => this.loadChapter(version, book, chapter)))
+      }
+      const chaptersByVersion = new Map(
+        result.value.chapters.map(value => [value.resource.versionId, value])
+      )
+      return Promise.all(
+        versions.map(version => {
+          const decoded = chaptersByVersion.get(version)
+          if (!decoded || decoded.book !== book || decoded.chapter !== chapter) {
+            return this.loadChapter(version, book, chapter)
+          }
+          return {
+            status: 'available' as const,
+            presentation: 'canonical' as const,
+            textRevision: decoded.resource.textRevision ?? decoded.resource.revision,
+            ...(decoded.resource.textSha256 ? { textSha256: decoded.resource.textSha256 } : {}),
+            verses: decoded.verses.map(verse =>
+              toVerse(
+                book,
+                chapter,
+                decoded.resource.textRevision ?? decoded.resource.revision,
+                verse
+              )
+            ),
+          }
+        })
+      )
+    },
     async loadVerseTexts(version, verseKeys, shouldCancel) {
       const references = [...new Set(verseKeys.filter(key => parseBibleVerseKey(key)))]
       if (!references.length || shouldCancel?.()) return { status: 'available', texts: {} }
