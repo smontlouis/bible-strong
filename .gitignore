@@ -135,6 +135,7 @@ android/
 ios/
 
 .env
+.env.resource-publication.local
 
 
 .worktree/

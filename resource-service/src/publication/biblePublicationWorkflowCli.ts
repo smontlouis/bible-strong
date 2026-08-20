@@ -3,11 +3,11 @@ import { createHash, randomUUID } from 'node:crypto'
 import { access, copyFile, cp, mkdir, readFile, rename, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { sql } from 'kysely'
-
-import { makeLocalDatabase } from '../database/localDatabase'
 import {
-  assertProtectedProductionPublicationEnvironment,
+  acquireLocalDatabaseAdvisoryLock,
+  assertLocalDatabaseReachable,
+} from '../database/localDatabase'
+import {
   executeBiblePublicationWorkflow,
   parseBiblePublicationWorkflowArgs,
   type BiblePublicationWorkflowOperations,
@@ -28,6 +28,7 @@ import { validatePublicationBundle } from './publicationBundle'
 import { WranglerR2ArtifactStore } from './wranglerR2ArtifactStore'
 
 const EXPECTED_RESOURCE_COUNT = 72
+const PRODUCTION_PUBLICATION_LOCK_ID = '204116128917'
 
 const runCommand = async (
   command: string,
@@ -44,27 +45,20 @@ const runCommand = async (
     })
   })
 
-const runCommandOutput = async (
+const readCommandOutput = async (
   command: string,
   args: readonly string[],
   cwd: string,
   env: NodeJS.ProcessEnv = process.env
 ) =>
   new Promise<string>((resolve, reject) => {
-    const child = spawn(command, [...args], { cwd, env, stdio: ['ignore', 'pipe', 'pipe'] })
+    const child = spawn(command, [...args], { cwd, env, stdio: ['ignore', 'pipe', 'ignore'] })
     const stdout: Buffer[] = []
-    const stderr: Buffer[] = []
     child.stdout.on('data', chunk => stdout.push(Buffer.from(chunk)))
-    child.stderr.on('data', chunk => stderr.push(Buffer.from(chunk)))
     child.once('error', reject)
     child.once('exit', (code, signal) => {
       if (code === 0) resolve(Buffer.concat(stdout).toString('utf8').trim())
-      else
-        reject(
-          new Error(
-            `BIBLE_PUBLICATION_COMMAND_FAILED:${command}:${code ?? signal}:${Buffer.concat(stderr).toString('utf8').trim()}`
-          )
-        )
+      else reject(new Error(`BIBLE_PUBLICATION_COMMAND_FAILED:${command}:${code ?? signal}`))
     })
   })
 
@@ -217,8 +211,8 @@ const createState = async (
   await access(publicationRoot).catch(() => {
     throw new Error(`BIBLE_PUBLICATION_BASELINE_MISSING:${publicationRoot}`)
   })
-  await mkdir(path.dirname(workspacePath), { recursive: true })
-  await mkdir(workspacePath, { recursive: false })
+  await mkdir(path.dirname(workspacePath), { recursive: true, mode: 0o700 })
+  await mkdir(workspacePath, { recursive: false, mode: 0o700 })
   return {
     appRoot,
     makerRoot,
@@ -337,50 +331,50 @@ const createOperations = (
   validateR2Publication: async () => {
     if (!state.overlay) throw new Error('BIBLE_PUBLICATION_OVERLAY_MISSING')
     if (options.activateProduction) {
-      assertProtectedProductionPublicationEnvironment({
-        ci: process.env.CI,
-        githubActions: process.env.GITHUB_ACTIONS,
-        githubEventName: process.env.GITHUB_EVENT_NAME,
-        githubRef: process.env.GITHUB_REF,
-        githubWorkflowRef: process.env.GITHUB_WORKFLOW_REF,
-        protectedEnvironment: process.env.RESOURCE_PUBLICATION_ENVIRONMENT,
-      })
       const databasePolicy = resolveCatalogImportPolicy({
         mode: 'hosted',
         connectionString: requireEnvironment('RESOURCE_DATABASE_URL'),
       })
-      const database = makeLocalDatabase({
+      await assertLocalDatabaseReachable({
         connectionString: databasePolicy.connectionString,
         maxConnections: 1,
       })
-      try {
-        await sql`select 1`.execute(database)
-      } finally {
-        await database.destroy()
-      }
       const bucket = requireEnvironment('RESOURCE_R2_BUCKET')
       const appCheckToken = await mintResourceAppCheckToken()
       await runCommand(
         'git',
-        ['diff', '--quiet', 'HEAD', '--', 'src/assets/mobile-resource-catalog.json'],
+        ['diff', '--quiet', 'HEAD', '--', '.'],
         state.appRoot,
         buildEnvironment()
       )
+      const currentBranch = await readCommandOutput(
+        'git',
+        ['branch', '--show-current'],
+        state.appRoot,
+        buildEnvironment()
+      )
+      if (currentBranch !== 'master')
+        throw new Error('BIBLE_PUBLICATION_PRODUCTION_BRANCH_REQUIRED')
       await runCommand(
         'git',
         ['fetch', '--no-tags', 'origin', 'master'],
         state.appRoot,
         buildEnvironment()
       )
-      const remoteRevision = await runCommandOutput(
+      const [localRevision, productionRevision] = await Promise.all([
+        readCommandOutput('git', ['rev-parse', 'HEAD'], state.appRoot, buildEnvironment()),
+        readCommandOutput('git', ['rev-parse', 'origin/master'], state.appRoot, buildEnvironment()),
+      ])
+      if (localRevision !== productionRevision) {
+        throw new Error('BIBLE_PUBLICATION_PRODUCTION_REVISION_REQUIRED')
+      }
+      const untrackedFiles = await readCommandOutput(
         'git',
-        ['rev-parse', 'origin/master'],
+        ['ls-files', '--others', '--exclude-standard'],
         state.appRoot,
         buildEnvironment()
       )
-      if (remoteRevision !== requireEnvironment('GITHUB_SHA')) {
-        throw new Error('BIBLE_PUBLICATION_GIT_BASELINE_MOVED')
-      }
+      if (untrackedFiles) throw new Error('BIBLE_PUBLICATION_WORKTREE_UNTRACKED')
       const currentCatalog = path.join(state.appRoot, 'src/assets/mobile-resource-catalog.json')
       await copyFile(currentCatalog, state.catalogBackupPath)
       const [currentCatalogJson, candidateCatalogJson] = await Promise.all([
@@ -641,34 +635,6 @@ const createOperations = (
       }
     }
   },
-
-  persistDeployedCatalog: async () => {
-    await runCommand(
-      'git',
-      ['config', 'user.name', 'github-actions[bot]'],
-      state.appRoot,
-      buildEnvironment()
-    )
-    await runCommand(
-      'git',
-      ['config', 'user.email', '41898282+github-actions[bot]@users.noreply.github.com'],
-      state.appRoot,
-      buildEnvironment()
-    )
-    await runCommand(
-      'git',
-      ['add', 'src/assets/mobile-resource-catalog.json'],
-      state.appRoot,
-      buildEnvironment()
-    )
-    await runCommand(
-      'git',
-      ['commit', '-m', `chore(resources): publish ${options.versionId} catalog`],
-      state.appRoot,
-      buildEnvironment()
-    )
-    await runCommand('git', ['push', 'origin', 'HEAD:master'], state.appRoot, buildEnvironment())
-  },
 })
 
 const compensateProductionActivation = async (state: WorkflowState, originalCause: unknown) => {
@@ -721,22 +687,40 @@ const compensateProductionActivation = async (state: WorkflowState, originalCaus
 export const runBiblePublicationWorkflowCli = async (rawArgs: readonly string[]) => {
   const options = parseBiblePublicationWorkflowArgs(rawArgs)
   const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
-  const state = await createState(appRoot, options)
-  let result: Awaited<ReturnType<typeof executeBiblePublicationWorkflow>>
+  const databasePolicy = options.activateProduction
+    ? resolveCatalogImportPolicy({
+        mode: 'hosted',
+        connectionString: requireEnvironment('RESOURCE_DATABASE_URL'),
+      })
+    : undefined
+  const publicationLock = databasePolicy
+    ? await acquireLocalDatabaseAdvisoryLock(
+        { connectionString: databasePolicy.connectionString, maxConnections: 1 },
+        PRODUCTION_PUBLICATION_LOCK_ID
+      )
+    : undefined
+  if (databasePolicy && !publicationLock) throw new Error('BIBLE_PUBLICATION_ALREADY_RUNNING')
+
   try {
-    result = await executeBiblePublicationWorkflow(options, createOperations(state, options))
-  } catch (cause) {
-    if (options.activateProduction && (state.neonActivated || state.catalogActivated)) {
-      await compensateProductionActivation(state, cause)
+    const state = await createState(appRoot, options)
+    let result: Awaited<ReturnType<typeof executeBiblePublicationWorkflow>>
+    try {
+      result = await executeBiblePublicationWorkflow(options, createOperations(state, options))
+    } catch (cause) {
+      if (options.activateProduction && (state.neonActivated || state.catalogActivated)) {
+        await compensateProductionActivation(state, cause)
+      }
+      throw cause
     }
-    throw cause
-  }
-  return {
-    ...result,
-    workspacePath: state.workspacePath,
-    catalogPath: state.catalogPath,
-    changedCatalogIds: state.overlay?.changedCatalogIds ?? [],
-    bibleRevision: state.overlay?.bibleRevision,
+    return {
+      ...result,
+      workspacePath: state.workspacePath,
+      catalogPath: state.catalogPath,
+      changedCatalogIds: state.overlay?.changedCatalogIds ?? [],
+      bibleRevision: state.overlay?.bibleRevision,
+    }
+  } finally {
+    await publicationLock?.release()
   }
 }
 

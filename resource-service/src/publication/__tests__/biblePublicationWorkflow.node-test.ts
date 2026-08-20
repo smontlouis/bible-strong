@@ -3,7 +3,6 @@ import path from 'node:path'
 import { describe, it } from 'node:test'
 
 import {
-  assertProtectedProductionPublicationEnvironment,
   createBiblePublicationPlan,
   executeBiblePublicationWorkflow,
   parseBiblePublicationWorkflowArgs,
@@ -85,7 +84,6 @@ describe('Bible publication workflow', () => {
       activateOfflineCatalog: operation('catalog-activate'),
       deployResourceWorker: operation('worker'),
       smokeProduction: operation('smoke'),
-      persistDeployedCatalog: operation('persist'),
     }
 
     const result = await executeBiblePublicationWorkflow(
@@ -128,6 +126,8 @@ describe('Bible publication workflow', () => {
       '--workspace',
       './candidate',
       '--activate-production',
+      '--confirm-production',
+      'bible-strong.app',
     ])
 
     assert.equal(options.versionId, 'BHG')
@@ -149,6 +149,8 @@ describe('Bible publication workflow', () => {
         '--source',
         '/editorial/bible-lsg.json',
         '--activate-production',
+        '--confirm-production',
+        'bible-strong.app',
       ])
     )
 
@@ -160,44 +162,44 @@ describe('Bible publication workflow', () => {
       'activate-offline-catalog',
       'deploy-resource-worker',
       'smoke-production',
-      'persist-deployed-catalog',
     ])
   })
 
-  it('allows live activation only inside the protected production CI environment', () => {
+  it('requires an explicit production confirmation without depending on CI', () => {
     assert.throws(
       () =>
-        assertProtectedProductionPublicationEnvironment({
-          ci: 'true',
-          githubActions: 'true',
-          githubEventName: 'workflow_dispatch',
-          githubRef: 'refs/heads/master',
-          githubWorkflowRef: 'owner/repo/.github/workflows/publish-bible.yml@refs/heads/main',
-          protectedEnvironment: 'staging',
-        }),
-      /BIBLE_PUBLICATION_PROTECTED_CI_REQUIRED/
+        parseBiblePublicationWorkflowArgs([
+          '--version',
+          'LSG',
+          '--source',
+          '/editorial/bible-lsg.json',
+          '--activate-production',
+        ]),
+      /BIBLE_PUBLICATION_PRODUCTION_CONFIRMATION_REQUIRED/
+    )
+    assert.throws(
+      () =>
+        parseBiblePublicationWorkflowArgs([
+          '--version',
+          'LSG',
+          '--source',
+          '/editorial/bible-lsg.json',
+          '--activate-production',
+          '--confirm-production',
+          'wrong-project',
+        ]),
+      /BIBLE_PUBLICATION_PRODUCTION_CONFIRMATION_REQUIRED/
     )
     assert.doesNotThrow(() =>
-      assertProtectedProductionPublicationEnvironment({
-        ci: 'true',
-        githubActions: 'true',
-        githubEventName: 'workflow_dispatch',
-        githubRef: 'refs/heads/master',
-        githubWorkflowRef: 'owner/repo/.github/workflows/publish-bible.yml@refs/heads/main',
-        protectedEnvironment: 'production',
-      })
-    )
-    assert.throws(
-      () =>
-        assertProtectedProductionPublicationEnvironment({
-          ci: 'true',
-          githubActions: 'false',
-          githubEventName: 'workflow_dispatch',
-          githubRef: 'refs/heads/master',
-          githubWorkflowRef: 'owner/repo/.github/workflows/publish-bible.yml@refs/heads/main',
-          protectedEnvironment: 'production',
-        }),
-      /BIBLE_PUBLICATION_PROTECTED_CI_REQUIRED/
+      parseBiblePublicationWorkflowArgs([
+        '--version',
+        'LSG',
+        '--source',
+        '/editorial/bible-lsg.json',
+        '--activate-production',
+        '--confirm-production',
+        'bible-strong.app',
+      ])
     )
   })
 })

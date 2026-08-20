@@ -158,9 +158,9 @@ allow-listed native App ID before opening Hyperdrive or reading R2. The artifact
 byte ranges through the binding. Missing or invalid attestation returns `401`. `/health` and the
 non-sensitive `/v1/offline-catalog` remain public. Publishing does not expose
 an R2 custom domain. The mobile catalog and all resource artifact URLs use the Worker route
-`/v1/offline-artifacts/`; the application has no Firebase Storage fallback for resources. Move
-subsequent publication credentials and recovery retention into the manually triggered protected CI
-environment required by ADR-0010.
+`/v1/offline-artifacts/`; the application has no Firebase Storage fallback for resources. Keep
+subsequent publication credentials in the gitignored local operator environment described by
+ADR-0027.
 
 The Worker configuration contains only the non-secret Firebase project number and the six native
 App IDs already declared by the development, staging, and production Firebase application files.
@@ -191,17 +191,30 @@ data with its dedicated Maker workflow, then supply the resulting publication on
 `--dependent-bundle /absolute/path/to/bundle-or-root`. The preflight rejects an omitted, stale, or
 partially rebuilt dependency before any production write.
 
-After reviewing the candidate, run the **Publish Bible resources** GitHub Actions workflow. It is a
-manual `workflow_dispatch` job bound to the protected `production` environment and to the dedicated
-`bible-publication` self-hosted runner. Enter the version, canonical source path, Maker checkout,
-verified 72-bundle baseline, and any rebuilt dependent bundle roots in the workflow form. Production
-activation cannot be enabled by setting local environment variables.
+For production, copy the example environment once and fill it with the direct Neon publication URL,
+R2 bucket, Firebase App Check debug credential, Firebase application values, and optionally a
+Cloudflare API token. The local file is gitignored:
 
-On success the job commits the deployed mobile catalog back to `master` and stores the full
-workspace as a private 30-day Actions artifact. Its `verified-publication-baseline` directory is the
-exhaustive 72-bundle baseline for the following publication; retain/extract it on the protected
-runner and pass that directory as `publication_root`. The artifact also contains the previous
-catalog and candidates needed to audit or recover the release.
+```bash
+install -m 600 .env.resource-publication.example .env.resource-publication.local
+```
+
+After reviewing the candidate, run the production CLI. The script adds the activation flag, but the
+operator must type the exact production confirmation on every run:
+
+```bash
+yarn resources:publish:bible:prod \
+  --confirm-production bible-strong.app \
+  --version LSG \
+  --source /absolute/path/to/bible-lsg.json
+```
+
+Add rebuilt dependencies with repeated `--dependent-bundle` options when required. Wrangler may use
+the Cloudflare values from the local environment file or an existing `yarn wrangler login` session.
+Production requires a clean Git worktree (ignored local credentials are unaffected) and holds an
+exclusive Neon advisory lock until activation or compensation finishes. Its `master` revision must
+match a freshly fetched `origin/master`, preventing an old checkout or feature branch from deploying
+the production Worker.
 
 Production mode runs every preflight gate before its first production write, then publishes the
 validated Offline copies to immutable, content-addressed private R2 keys, imports and activates only the changed publications in
@@ -210,11 +223,15 @@ catalog parity, App Check rejection for an unattested artifact request, and an a
 immutable-artifact checksum plus revision reads through Worker/Hyperdrive. The preflight first
 proves that the checked-out catalog, live Worker catalog, baseline bundles, live Neon revisions, and
 the configured production R2 bucket describe the same release. The Neon URL must be a direct
-non-pooler connection. The protected environment stores a registered Firebase App Check debug
-credential, and the workflow exchanges it for a fresh short-lived JWT separately for preflight and
-smoke reads. Database, App Check, and Cloudflare credentials are scoped to the protected environment
-and only passed to the subprocess that needs each credential; they are never written into the
-workspace.
+non-pooler connection. The local protected environment stores a registered Firebase App Check debug
+credential, and the CLI exchanges it for a fresh short-lived JWT separately for preflight and smoke
+reads. Database, App Check, and Cloudflare credentials are only passed to the subprocess that needs
+each credential; they are never written into the workspace.
+
+On success, `src/assets/mobile-resource-catalog.json` remains modified locally for review and a
+normal commit. The retained workspace's `verified-publication-baseline` directory is the exhaustive
+72-bundle baseline for the following publication; pass it later with `--publication-root`. The same
+workspace contains the previous catalog and candidates needed to audit or recover the release.
 
 The generated date can be pinned with `--generated-at`; sibling checkout locations can be changed
 with `--maker-root` and `--publication-root`. Every workspace is intentionally retained as the

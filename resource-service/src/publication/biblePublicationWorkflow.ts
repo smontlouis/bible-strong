@@ -22,7 +22,6 @@ export type BiblePublicationWorkflowStep =
   | 'activate-offline-catalog'
   | 'deploy-resource-worker'
   | 'smoke-production'
-  | 'persist-deployed-catalog'
 
 export type BiblePublicationWorkflowOperation = (
   options: BiblePublicationWorkflowOptions
@@ -39,27 +38,6 @@ export type BiblePublicationWorkflowOperations = {
   activateOfflineCatalog: BiblePublicationWorkflowOperation
   deployResourceWorker: BiblePublicationWorkflowOperation
   smokeProduction: BiblePublicationWorkflowOperation
-  persistDeployedCatalog: BiblePublicationWorkflowOperation
-}
-
-export const assertProtectedProductionPublicationEnvironment = (environment: {
-  ci?: string
-  githubActions?: string
-  githubEventName?: string
-  githubRef?: string
-  githubWorkflowRef?: string
-  protectedEnvironment?: string
-}) => {
-  if (
-    environment.ci !== 'true' ||
-    environment.githubActions !== 'true' ||
-    environment.githubEventName !== 'workflow_dispatch' ||
-    environment.githubRef !== 'refs/heads/master' ||
-    !environment.githubWorkflowRef?.includes('/.github/workflows/publish-bible.yml@') ||
-    environment.protectedEnvironment !== 'production'
-  ) {
-    throw new Error('BIBLE_PUBLICATION_PROTECTED_CI_REQUIRED')
-  }
 }
 
 const requiredValue = (values: Map<string, string>, name: string): string => {
@@ -90,6 +68,7 @@ export const parseBiblePublicationWorkflowArgs = (
         '--publication-root',
         '--workspace',
         '--dependent-bundle',
+        '--confirm-production',
       ].includes(name)
     ) {
       throw new Error(`BIBLE_PUBLICATION_OPTION_INVALID:${name ?? '<missing>'}`)
@@ -112,6 +91,13 @@ export const parseBiblePublicationWorkflowArgs = (
   const generatedAt = values.get('--generated-at') ?? new Date().toISOString()
   if (!Number.isFinite(Date.parse(generatedAt))) {
     throw new Error('BIBLE_PUBLICATION_GENERATED_AT_INVALID')
+  }
+  const productionConfirmation = values.get('--confirm-production')
+  if (
+    (activateProduction && productionConfirmation !== 'bible-strong.app') ||
+    (!activateProduction && productionConfirmation !== undefined)
+  ) {
+    throw new Error('BIBLE_PUBLICATION_PRODUCTION_CONFIRMATION_REQUIRED')
   }
   return {
     versionId,
@@ -143,7 +129,6 @@ export const createBiblePublicationPlan = (options: BiblePublicationWorkflowOpti
     'activate-offline-catalog',
     'deploy-resource-worker',
     'smoke-production',
-    'persist-deployed-catalog',
   ]
   return {
     versionId: options.versionId,
@@ -171,7 +156,6 @@ export const executeBiblePublicationWorkflow = async (
     'activate-offline-catalog': operations.activateOfflineCatalog,
     'deploy-resource-worker': operations.deployResourceWorker,
     'smoke-production': operations.smokeProduction,
-    'persist-deployed-catalog': operations.persistDeployedCatalog,
   }
   const completedSteps: BiblePublicationWorkflowStep[] = []
   for (const step of plan.steps) {
