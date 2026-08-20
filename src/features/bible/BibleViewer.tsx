@@ -1012,6 +1012,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         book: JSON.stringify(getBook(target.book)),
         chapter: String(target.chapter),
         verse: String(target.verse),
+        version,
         ...(target.focusVerses ? { focusVerses: JSON.stringify(target.focusVerses) } : {}),
       },
     })
