@@ -41,6 +41,7 @@ DerivedData
 *.aab
 *.apk
 *.app
+*.tar.gz
 *.xcuserstate
 project.xcworkspace
 ios/build/
