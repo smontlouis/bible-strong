@@ -9,7 +9,6 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import booksDesc from '~assets/bible_versions/books-desc'
-import { getBook } from '~helpers/bibleBookCatalog'
 import DropdownMenu from '~common/DropdownMenu'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
@@ -64,6 +63,7 @@ import {
   type SearchSectionId,
 } from './searchResultsModel'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { getBibleViewParamsForReferenceSegment } from './searchNavigation'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
@@ -1099,15 +1099,7 @@ const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
       onPress={() =>
         pushRouteOnce({
           pathname: '/bible-view',
-          params: {
-            contextDisplayMode: 'focused',
-            book: JSON.stringify(getBook(segment.book)),
-            chapter: String(segment.chapter),
-            verse: String(segment.startVerse),
-            ...(segment.isWholeChapter
-              ? {}
-              : { focusVerses: JSON.stringify(verseIds.map(v => v.Verset)) }),
-          },
+          params: getBibleViewParamsForReferenceSegment(segment),
         })
       }
     >

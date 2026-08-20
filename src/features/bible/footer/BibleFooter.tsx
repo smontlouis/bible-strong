@@ -21,6 +21,7 @@ type BibleFooterProps = {
   version: VersionCode
   bibleAtom: PrimitiveAtom<BibleTab>
   coverage?: BibleVersionCoverage
+  isInTab?: boolean
 }
 
 const BibleFooter = ({
@@ -33,6 +34,7 @@ const BibleFooter = ({
   disabled,
   version,
   coverage,
+  isInTab = true,
 }: BibleFooterProps) => {
   const bibleTab = useAtomValue(bibleAtom)
   const bibleVersion = getVersions()[version] as Version
@@ -48,7 +50,7 @@ const BibleFooter = ({
     setAudioMode(canSwitch ? 'url' : 'tts')
   }, [version, canSwitch])
 
-  if (!isCurrentTab && !isTabPlaying) {
+  if (isInTab && !isCurrentTab && !isTabPlaying) {
     return null
   }
 

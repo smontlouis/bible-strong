@@ -1344,6 +1344,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
           goToNextChapter={goToNextAvailableChapter}
           goToChapter={actions.goToChapter}
           version={version}
+          isInTab={isInTab}
         />
       )}
       {!hidePersonalBibleData && (

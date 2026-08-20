@@ -12,6 +12,7 @@ import { removeBreakLines } from '~helpers/utils'
 import i18n from '~i18n'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { getBibleViewParamsForReferenceSegment } from './searchNavigation'
 
 export interface ParsedSegment {
   book: number
@@ -104,15 +105,7 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
       onPress={() =>
         pushRouteOnce({
           pathname: '/bible-view',
-          params: {
-            contextDisplayMode: 'focused',
-            book: JSON.stringify(getBook(segment.book)),
-            chapter: String(segment.chapter),
-            verse: String(segment.startVerse),
-            ...(segment.isWholeChapter
-              ? {}
-              : { focusVerses: JSON.stringify(verseIds.map(v => v.Verset)) }),
-          },
+          params: getBibleViewParamsForReferenceSegment(segment),
         })
       }
     >
