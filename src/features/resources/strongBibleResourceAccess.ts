@@ -16,12 +16,15 @@ import {
   type StrongBibleVerseCountByBook,
 } from '~helpers/strongBibleSidecar'
 import {
+  getStrongDatasetId,
   getStrongBibleFallbackPriority,
   isStrongCapableBibleVersion,
   resolveStrongBibleVersion,
   type StrongBibleDatasetId,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
+import { getStrongBibleConcordanceCandidates } from '~helpers/strongBibleConcordance'
+import { STRONG_IDENTITY_KINDS } from '~helpers/strongIdentities'
 import {
   StrongBibleChapterDto,
   StrongBibleCountsDto,
@@ -390,11 +393,41 @@ export const createHttpStrongBibleResourceAdapter = ({
     }
   }
 
-  const loadChapter = (versionId: StrongBibleVersionId, book: number, chapter: number) =>
-    get(
+  const assertPublicationIdentity = (
+    resource: { versionId: string; datasetId: string },
+    versionId: StrongBibleVersionId
+  ) => {
+    if (resource.versionId !== versionId || resource.datasetId !== getStrongDatasetId(versionId)) {
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    }
+  }
+
+  const assertConcordanceIdentity = (
+    identity: { kind: (typeof STRONG_IDENTITY_KINDS)[number]; code: string } | undefined,
+    request: { book: number; reference: string | number }
+  ) => {
+    if (!identity) return
+    const matchesRequest = getStrongBibleConcordanceCandidates(
+      request.book,
+      request.reference
+    ).some(
+      candidate =>
+        candidate.code === identity.code && STRONG_IDENTITY_KINDS[candidate.kind] === identity.kind
+    )
+    if (!matchesRequest) throw new ResourceAccessError('INTEGRITY_FAILURE')
+  }
+
+  const loadChapter = async (versionId: StrongBibleVersionId, book: number, chapter: number) => {
+    const response = await get(
       `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${book}/chapters/${chapter}`,
       StrongBibleChapterDto
     )
+    assertPublicationIdentity(response.resource, versionId)
+    if (response.book !== book || response.chapter !== chapter) {
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    }
+    return response
+  }
 
   return {
     async getAvailability(versionId) {
@@ -404,6 +437,7 @@ export const createHttpStrongBibleResourceAdapter = ({
           `/v1/strong-bibles/${encodeURIComponent(versionId)}/coverage`,
           StrongBibleCoverageDto
         )
+        assertPublicationIdentity(coverage.resource, versionId)
         const bibleCoverage = await bibleChapterAdapter.loadCoverage(versionId)
         if (bibleCoverage.status !== 'available') {
           throw bibleChapterUnavailableError(bibleCoverage)
@@ -493,6 +527,8 @@ export const createHttpStrongBibleResourceAdapter = ({
         `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/counts`,
         StrongBibleCountsDto
       )
+      assertPublicationIdentity(response.resource, versionId)
+      assertConcordanceIdentity(response.identity, request)
       return {
         counts: response.counts.map(count => ({
           Livre: count.book,
@@ -513,6 +549,8 @@ export const createHttpStrongBibleResourceAdapter = ({
         `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/occurrences${query.size ? `?${query}` : ''}`,
         StrongBibleOccurrencesDto
       )
+      assertPublicationIdentity(response.resource, versionId)
+      assertConcordanceIdentity(response.identity, request)
       const verseKeys = response.verses.map(
         verse => `${verse.book}-${verse.chapter}-${verse.verse}`
       )
@@ -551,6 +589,8 @@ export const createHttpStrongBibleResourceAdapter = ({
         `/v1/strong-bibles/${encodeURIComponent(versionId)}/books/${request.book}/identities/${encodeURIComponent(String(request.reference))}/lemmas`,
         StrongBibleLemmaStatsDto
       )
+      assertPublicationIdentity(response.resource, versionId)
+      assertConcordanceIdentity(response.identity, request)
       return {
         lemmas: response.lemmas.map(lemma => ({ ...lemma })),
         ...(response.identity

@@ -372,6 +372,9 @@ export const createHttpBibleChapterAdapter = ({
         )
         if (result.status === 'unavailable') return result
         const decoded = result.value
+        if (decoded.resource.versionId !== version) {
+          return { status: 'unavailable', reason: 'integrity-failure' }
+        }
         const revision = decoded.resource.textRevision ?? decoded.resource.revision
         if (
           (textRevision !== undefined && revision !== textRevision) ||
@@ -386,8 +389,22 @@ export const createHttpBibleChapterAdapter = ({
         }
         textRevision ??= revision
         textSha256 ??= decoded.resource.textSha256
+        const requestedReferences = new Set(batch)
+        const omittedVerseKeys: string[] = []
         for (const verse of decoded.verses) {
-          texts[`${verse.book}-${verse.chapter}-${verse.number}`] = verse.text
+          const key = `${verse.book}-${verse.chapter}-${verse.number}`
+          if (!requestedReferences.has(key)) {
+            omittedVerseKeys.push(key)
+            continue
+          }
+          texts[key] = verse.text
+        }
+        if (omittedVerseKeys.length) {
+          warnAboutRecoverableResourceIntegrity('bible-verse-text-unrequested-rows', {
+            version,
+            batchOffset: offset,
+            omittedVerseKeys,
+          })
         }
       }
       return { status: 'available', texts, textRevision, textSha256 }
@@ -399,6 +416,13 @@ export const createHttpBibleChapterAdapter = ({
       )
       if (result.status === 'unavailable') return result
       const decoded = result.value
+      if (
+        decoded.resource.versionId !== version ||
+        decoded.book !== book ||
+        decoded.chapter !== chapter
+      ) {
+        return { status: 'unavailable', reason: 'integrity-failure' }
+      }
       return {
         status: 'available',
         presentation: 'canonical',
@@ -421,6 +445,9 @@ export const createHttpBibleChapterAdapter = ({
       )
       if (result.status === 'unavailable') return result
       const decoded = result.value
+      if (decoded.resource.versionId !== version) {
+        return { status: 'unavailable', reason: 'integrity-failure' }
+      }
       return {
         status: 'available',
         textRevision: decoded.resource.textRevision ?? decoded.resource.revision,

@@ -192,6 +192,40 @@ describe('interlinear Bible HTTP resource access', () => {
     )
   })
 
+  it('rejects interlinear responses for another language or chapter', async () => {
+    const wrongLanguage = createHttpInterlinearBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: () =>
+        jsonResponse({
+          resource: { ...resource, language: 'en' },
+          books: [1],
+          chaptersByBook: { 1: [1] },
+          verseCountByBookChapter: { '1-1': 1 },
+        }),
+      isOnline: async () => true,
+      bibleChapterAdapter,
+    })
+    await expect(wrongLanguage.getAvailability('fr')).rejects.toMatchObject({
+      code: 'INTEGRITY_FAILURE',
+    })
+
+    const wrongChapter = createHttpInterlinearBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: () =>
+        jsonResponse({
+          resource,
+          book: 1,
+          chapter: 2,
+          verses: [{ number: 1, tokens: [token] }],
+        }),
+      isOnline: async () => true,
+      bibleChapterAdapter,
+    })
+    await expect(
+      wrongChapter.loadChapterTokens('fr', { book: 1, chapter: 1 })
+    ).rejects.toMatchObject({ code: 'INTEGRITY_FAILURE' })
+  })
+
   it('prefers installed SQLite and returns to HTTP after removal', async () => {
     const offline = unavailableAdapter()
     let installed = true

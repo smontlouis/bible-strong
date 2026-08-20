@@ -232,6 +232,69 @@ describe('Strong Bible HTTP resource access', () => {
     })
   })
 
+  it('rejects Strong responses for another publication, chapter, or identity', async () => {
+    const wrongPublication = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: () =>
+        jsonResponse({
+          resource: { ...resource, versionId: 'KJV', datasetId: 'KJV' },
+          books: [1],
+          chaptersByBook: { 1: [1] },
+          verseCountByBookChapter: { '1-1': 1 },
+        }),
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+      },
+    })
+    await expect(wrongPublication.getAvailability('LSG')).rejects.toMatchObject({
+      code: 'INTEGRITY_FAILURE',
+    })
+
+    const wrongChapter = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: () =>
+        jsonResponse({
+          resource,
+          book: 2,
+          chapter: 1,
+          verses: [{ number: 1, spans: [span] }],
+        }),
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+      },
+    })
+    await expect(
+      wrongChapter.loadChapterSpans('LSG', { book: 1, chapter: 1 })
+    ).rejects.toMatchObject({ code: 'INTEGRITY_FAILURE' })
+
+    const wrongIdentity = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: () =>
+        jsonResponse({
+          resource,
+          identity: { kind: 'strong', code: 'H9999' },
+          counts: [],
+        }),
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+      },
+    })
+    await expect(
+      wrongIdentity.loadCountsByBook('LSG', {
+        currentVersionId: 'LSG',
+        defaultVersionId: 'LSG',
+        book: 1,
+        reference: 'H0430',
+      })
+    ).rejects.toMatchObject({ code: 'INTEGRITY_FAILURE' })
+  })
+
   it('keeps remote Strong available when Bible revision metadata differs', async () => {
     const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
     const fetcher: typeof fetch = () =>

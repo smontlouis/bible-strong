@@ -129,6 +129,9 @@ export const createHttpInterlinearBibleResourceAdapter = ({
     async getAvailability(locale) {
       try {
         const coverage = await get(`${resourcePath(locale)}/coverage`, InterlinearBibleCoverageDto)
+        if (coverage.resource.language !== locale) {
+          throw new ResourceAccessError('INTEGRITY_FAILURE')
+        }
         const bibleCoverage = await bibleChapterAdapter.loadCoverage('BHG')
         if (bibleCoverage.status !== 'available') {
           throw resourceAccessErrorFromBibleChapterUnavailable(
@@ -167,6 +170,13 @@ export const createHttpInterlinearBibleResourceAdapter = ({
         ),
         bibleChapterAdapter.loadChapter('BHG', request.book, request.chapter),
       ])
+      if (
+        chapter.resource.language !== locale ||
+        chapter.book !== request.book ||
+        chapter.chapter !== request.chapter
+      ) {
+        throw new ResourceAccessError('INTEGRITY_FAILURE')
+      }
       if (bibleChapter.status !== 'available') {
         throw resourceAccessErrorFromBibleChapterUnavailable(
           bibleChapter.reason,

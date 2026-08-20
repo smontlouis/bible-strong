@@ -479,4 +479,73 @@ describe('HTTP Bible chapter adapter', () => {
       reason: 'integrity-failure',
     })
   })
+
+  it('rejects decoded Bible responses that belong to another requested identity', async () => {
+    const chapter = createHttpBibleChapterAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: jest.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            resource: { kind: 'bible-text', versionId: 'KJV', revision: 'kjv-r1' },
+            book: 2,
+            chapter: 1,
+            verses: [],
+          }),
+          { status: 200 }
+        )
+      ),
+      isOnline: async () => true,
+    })
+    await expect(chapter.loadChapter('LSG', 1, 1)).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'integrity-failure',
+    })
+
+    const selection = createHttpBibleChapterAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: jest.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            resource: { kind: 'bible-text', versionId: 'KJV', revision: 'kjv-r1' },
+            verses: [{ book: 1, chapter: 1, number: 1, text: 'In the beginning' }],
+          }),
+          { status: 200 }
+        )
+      ),
+      isOnline: async () => true,
+    })
+    await expect(selection.loadVerseTexts?.('LSG', ['1-1-1'])).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'integrity-failure',
+    })
+  })
+
+  it('ignores decoded verse rows outside the requested batch and warns in development', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const http = createHttpBibleChapterAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: jest.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            resource: { kind: 'bible-text', versionId: 'LSG', revision: 'lsg-r1' },
+            verses: [
+              { book: 1, chapter: 1, number: 1, text: 'Au commencement' },
+              { book: 2, chapter: 1, number: 1, text: 'Hors requête' },
+            ],
+          }),
+          { status: 200 }
+        )
+      ),
+      isOnline: async () => true,
+    })
+
+    await expect(http.loadVerseTexts?.('LSG', ['1-1-1'])).resolves.toMatchObject({
+      status: 'available',
+      texts: { '1-1-1': 'Au commencement' },
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: bible-verse-text-unrequested-rows',
+      { version: 'LSG', batchOffset: 0, omittedVerseKeys: ['2-1-1'] }
+    )
+  })
 })
