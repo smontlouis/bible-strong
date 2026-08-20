@@ -20,16 +20,14 @@ import { makeKyselySupplementaryRepository } from '../repositories/supplementary
 import { makeKyselyTimelineRepository } from '../repositories/timelineRepository'
 import { routeR2ArtifactRequest } from './r2ArtifactDelivery'
 import { createFirebaseAppCheckConfig, verifyFirebaseAppCheckRequest } from './firebaseAppCheck'
+import {
+  enforceResourceApiAppCheck,
+  RESOURCE_API_CACHE_EPOCH,
+  routeResourceApiRequest,
+} from './resourceApiCache'
 
 export const RESOURCE_API_PATH_PREFIX = '/v1/'
-
-export const enforceResourceApiAppCheck = async (
-  request: Request,
-  authorize: (request: Request) => Promise<boolean>
-): Promise<Response | undefined> => {
-  if (!new URL(request.url).pathname.startsWith(RESOURCE_API_PATH_PREFIX)) return undefined
-  return (await authorize(request)) ? undefined : new Response(null, { status: 401 })
-}
+export { enforceResourceApiAppCheck, routeResourceApiRequest }
 
 export const makeResourceWorkerHandler = (
   repository: BibleChapterRepositoryService,
@@ -53,7 +51,7 @@ export const makeResourceWorkerHandler = (
   })
 
 export default {
-  async fetch(request: Request, bindings: Env): Promise<Response> {
+  async fetch(request: Request, bindings: Env, ctx: ExecutionContext): Promise<Response> {
     const appCheckConfig = createFirebaseAppCheckConfig({
       projectNumber: bindings.FIREBASE_APP_CHECK_PROJECT_NUMBER,
       allowedAppIds: bindings.FIREBASE_APP_CHECK_ALLOWED_APP_IDS,
@@ -65,28 +63,42 @@ export default {
     })
     if (artifactResponse) return artifactResponse
 
-    const appCheckFailure = await enforceResourceApiAppCheck(request, candidate =>
-      verifyFirebaseAppCheckRequest(candidate, appCheckConfig)
-    )
-    if (appCheckFailure) return appCheckFailure
+    return routeResourceApiRequest({
+      request,
+      authorize: candidate => verifyFirebaseAppCheckRequest(candidate, appCheckConfig),
+      cache: caches.default,
+      cacheEpoch: await RESOURCE_API_CACHE_EPOCH,
+      waitUntil: promise => ctx.waitUntil(promise),
+      reportCacheFailure: (operation, cause) => {
+        console.error(
+          JSON.stringify({
+            message: 'resource API edge cache failure',
+            operation,
+            path: new URL(request.url).pathname,
+            error: cause instanceof Error ? cause.message : String(cause),
+          })
+        )
+      },
+      load: async () => {
+        const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString)
+        const web = makeResourceWorkerHandler(
+          makeKyselyBibleChapterRepository(database),
+          makeKyselyNaveRepository(database),
+          makeKyselyDictionaryRepository(database),
+          makeKyselyStrongBibleRepository(database),
+          makeKyselyInterlinearBibleRepository(database),
+          makeKyselyStrongLexiconRepository(database),
+          makeKyselySupplementaryRepository(database),
+          makeKyselyTimelineRepository(database),
+          makeKyselyBibleSearchRepository(database)
+        )
 
-    const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString)
-    const web = makeResourceWorkerHandler(
-      makeKyselyBibleChapterRepository(database),
-      makeKyselyNaveRepository(database),
-      makeKyselyDictionaryRepository(database),
-      makeKyselyStrongBibleRepository(database),
-      makeKyselyInterlinearBibleRepository(database),
-      makeKyselyStrongLexiconRepository(database),
-      makeKyselySupplementaryRepository(database),
-      makeKyselyTimelineRepository(database),
-      makeKyselyBibleSearchRepository(database)
-    )
-
-    try {
-      return await web.handler(request)
-    } finally {
-      await database.destroy()
-    }
+        try {
+          return await web.handler(request)
+        } finally {
+          await database.destroy()
+        }
+      },
+    })
   },
 } satisfies ExportedHandler<Env>

@@ -110,13 +110,12 @@ import {
   ResourceNotFoundProblem,
   ResourceUnavailableProblem,
 } from './problems'
+import { resourceEtagMatches as etagMatches } from './conditionalRequest'
+import { resourceRequestIdFrom as requestIdFrom } from './requestId'
 
 const SystemApiLive = HttpApiBuilder.group(ResourceApi, 'system', handlers =>
   handlers.handle('health', () => Effect.succeed(new HealthResponse({ status: 'ok' })))
 )
-
-const requestIdFrom = (value: string | undefined) =>
-  value && /^[A-Za-z0-9._:-]{1,128}$/.test(value) ? value : crypto.randomUUID()
 
 const problemFields = (requestId: string, detail: string) => ({
   type: 'https://bible-strong.app/problems/resource',
@@ -350,12 +349,6 @@ const representationEtag = (...identity: readonly (string | number)[]) =>
       ''
     )}"`
   })
-
-const etagMatches = (ifNoneMatch: string | undefined, etag: string) =>
-  ifNoneMatch
-    ?.split(',')
-    .map(candidate => candidate.trim())
-    .some(candidate => candidate === '*' || candidate.replace(/^W\//, '') === etag) ?? false
 
 const addResponseHeaders = (headers: Record<string, string>) =>
   HttpApp.appendPreResponseHandler((_request, response) =>
