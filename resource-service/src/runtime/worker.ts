@@ -56,11 +56,12 @@ export default {
       projectNumber: bindings.FIREBASE_APP_CHECK_PROJECT_NUMBER,
       allowedAppIds: bindings.FIREBASE_APP_CHECK_ALLOWED_APP_IDS,
     })
+    const edgeCache = await caches.open('bible-strong-resources-api')
     const artifactResponse = await routeR2ArtifactRequest({
       request,
       bucket: bindings.RESOURCE_ARTIFACTS,
       authorize: candidate => verifyFirebaseAppCheckRequest(candidate, appCheckConfig),
-      cache: caches.default,
+      cache: edgeCache,
       waitUntil: promise => ctx.waitUntil(promise),
       reportCacheFailure: (operation, cause) => {
         console.error(
@@ -78,7 +79,7 @@ export default {
     return routeResourceApiRequest({
       request,
       authorize: candidate => verifyFirebaseAppCheckRequest(candidate, appCheckConfig),
-      cache: caches.default,
+      cache: edgeCache,
       cacheEpoch: await RESOURCE_API_CACHE_EPOCH,
       waitUntil: promise => ctx.waitUntil(promise),
       reportCacheFailure: (operation, cause) => {
