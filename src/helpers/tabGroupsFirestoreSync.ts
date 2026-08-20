@@ -148,8 +148,21 @@ export function hydrateTabGroup(
   localGroup?: TabGroup
 ): TabGroup {
   const tabs = firestoreGroup.tabs.map(firestoreTab => {
-    // Try to preserve local base64Preview
+    // Preserve state that is intentionally local-only and therefore absent
+    // from (or cleared in) the Firestore representation.
     const localTab = localGroup?.tabs.find(t => t.id === firestoreTab.id)
+
+    if (firestoreTab.type === 'bible' && localTab?.type === 'bible') {
+      return {
+        ...firestoreTab,
+        data: {
+          ...firestoreTab.data,
+          selectedVerses: localTab.data.selectedVerses,
+        },
+        base64Preview: localTab.base64Preview,
+      } as TabItem
+    }
+
     return {
       ...firestoreTab,
       base64Preview: localTab?.base64Preview,

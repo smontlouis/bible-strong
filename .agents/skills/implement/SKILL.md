@@ -1,15 +1,20 @@
 ---
 name: implement
-description: "Implement a piece of work based on a spec or set of tickets."
+description: Implement substantial work from a spec or set of tickets.
 disable-model-invocation: true
 ---
 
-Implement the work described by the user in the spec or tickets.
+# Implement
 
-Use /tdd where possible, at pre-agreed seams.
+Implement the explicitly supplied spec or tickets end to end.
 
-Run typechecking regularly, single test files regularly, and the full test suite once at the end.
+## Workflow
 
-Once done, use /code-review to review the work.
+1. Read the spec or tickets and the relevant repository guidance.
+2. Implement the smallest coherent solution that satisfies them.
+3. Validate in proportion to the change's scope and risk. Prefer targeted checks; run broad suites only when the change warrants them or the user requests them.
+4. Report what changed, what was validated, and any remaining limitation.
 
-Commit your work to the current branch.
+## Scope
+
+Keep the work in the current thread. Delegate, run a formal code review, or create a commit only when the user explicitly requests it.

@@ -129,6 +129,37 @@ describe('tabGroupsFirestoreSync', () => {
     expect(hydrated.tabs[2].base64Preview).toBe('preview-b')
   })
 
+  it('preserves local selected verses when hydrating a synced Bible tab', () => {
+    const local = makeGroup([makeBibleTab()])
+    const remoteBibleTab: BibleTab = {
+      ...makeBibleTab(),
+      title: 'Genèse 2',
+      data: {
+        ...makeBibleTab().data,
+        selectedChapter: 2,
+        selectedVerses: {},
+      },
+    }
+    const remote: FirestoreTabGroup = {
+      id: 'group-1',
+      name: 'Group',
+      isDefault: false,
+      tabs: [remoteBibleTab],
+      createdAt: 1,
+      updatedAt: 10,
+    }
+
+    const hydrated = hydrateTabGroup(remote, local)
+    const hydratedBibleTab = hydrated.tabs[0] as BibleTab
+
+    expect(hydratedBibleTab.title).toBe('Genèse 2')
+    expect(hydratedBibleTab.data.selectedChapter).toBe(2)
+    expect(hydratedBibleTab.data.selectedVerses).toEqual({
+      '1-1-1': true,
+      '1-1-2': true,
+    })
+  })
+
   it('clamps the local active tab index when the active tab was deleted remotely', () => {
     const local = makeGroup([makeTab('a'), makeTab('b'), makeTab('c')], 2)
     const remote: FirestoreTabGroup = {

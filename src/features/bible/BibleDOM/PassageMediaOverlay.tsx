@@ -2,6 +2,7 @@ import { m, useReducedMotion, type Transition } from 'motion/react'
 import { createPortal } from 'react-dom'
 import { formatPassageMediaDuration, type ResolvedPassageMedia } from '../passageMedia'
 import { useTranslations } from './TranslationsContext'
+import OverlayCloseButton from './OverlayCloseButton'
 import PassageMediaImage from './PassageMediaImage'
 import PassageMediaPlayer from './PassageMediaPlayer'
 import { useModalOverlayLifecycle } from './overlayLifecycle'
@@ -150,7 +151,9 @@ const PassageMediaGalleryCard = ({
         }}
         style={{ padding: '10px 2px 0' }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}
+        >
           <div
             style={{
               display: '-webkit-box',
@@ -342,6 +345,14 @@ const PassageMediaOverlay = ({
         transition: `-webkit-backdrop-filter ${shouldReduceMotion ? 0 : 0.2}s ease`,
       }}
     >
+      {isOpen && (
+        <OverlayCloseButton
+          label={translations.passageMediaClose}
+          color={colors.default}
+          backgroundColor={colors.reverse}
+          onClose={closeOverlay}
+        />
+      )}
       {mode === 'gallery' && !showSections && (
         <m.div
           key="gallery"

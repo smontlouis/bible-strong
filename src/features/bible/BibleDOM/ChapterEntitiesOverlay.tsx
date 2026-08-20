@@ -6,7 +6,9 @@ import type {
   StrongLexiconEntityCategory,
 } from '~features/resources/strongLexiconAccess'
 import { getChapterEntityAvatarUri } from './chapterEntityAvatar'
+import OverlayCloseButton from './OverlayCloseButton'
 import { useModalOverlayLifecycle } from './overlayLifecycle'
+import { useTranslations } from './TranslationsContext'
 import {
   getOverlayAdditionalStartDelay,
   getOverlayLayoutTransition,
@@ -42,6 +44,7 @@ const ChapterEntitiesOverlay = ({
   onClose,
   onSelect,
 }: Props) => {
+  const translations = useTranslations()
   const shouldReduceMotion = useReducedMotion()
   const overlayRef = useModalOverlayLifecycle({ isOpen, onClose })
   const spring = getOverlayLayoutTransition(shouldReduceMotion)
@@ -82,6 +85,14 @@ const ChapterEntitiesOverlay = ({
         WebkitBackdropFilter: isOpen ? 'blur(8px)' : 'blur(0px)',
       }}
     >
+      {isOpen && (
+        <OverlayCloseButton
+          label={translations.passageMediaClose}
+          color={colors.default}
+          backgroundColor={colors.reverse}
+          onClose={onClose}
+        />
+      )}
       {isOpen && (
         <m.div
           layoutScroll
