@@ -120,49 +120,6 @@ describe('HTTP Bible search access', () => {
     )
   })
 
-  it('falls back to per-version routes when the aggregate route is not deployed yet', async () => {
-    const fetcher = jest.fn(async (input: string | URL | Request) => {
-      const url = String(input)
-      if (url.includes('/v1/bibles/search?')) return new Response(undefined, { status: 404 })
-
-      const version = url.includes('/LSG/') ? 'LSG' : 'DBY'
-      return new Response(
-        JSON.stringify({
-          resource: {
-            kind: 'bible-text',
-            versionId: version,
-            revision: `${version.toLowerCase()}-r1`,
-            textRevision: `${version.toLowerCase()}-r1`,
-          },
-          results: [
-            {
-              version,
-              book: 43,
-              chapter: 11,
-              verse: 35,
-              text: 'Jésus pleura.',
-              highlighted: '{{Jésus}} pleura.',
-            },
-          ],
-          count: 1,
-        }),
-        { status: 200, headers: { 'content-type': 'application/json' } }
-      )
-    })
-    const access = createHttpBibleSearchAccess({
-      baseUrl: 'http://resource.test',
-      versions: ['LSG', 'DBY'],
-      fetcher,
-      isOnline: async () => true,
-    })
-
-    await expect(access.searchPage('Jésus', { limit: 20 })).resolves.toMatchObject({
-      count: 2,
-      results: [{ version: 'LSG' }, { version: 'DBY' }],
-    })
-    expect(fetcher).toHaveBeenCalledTimes(3)
-  })
-
   it('forwards cancellation to the active HTTP search', async () => {
     let receivedSignal: AbortSignal | undefined
     const fetcher = jest.fn((_url: string | URL | Request, init?: RequestInit) => {

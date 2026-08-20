@@ -114,20 +114,6 @@ export const createHttpBibleSearchAccess = ({
     }
   }
 
-  const searchVersionsIndividually = async (
-    requestedVersions: string[],
-    query: string,
-    options: SearchOptions
-  ) => {
-    const results = await Promise.all(
-      requestedVersions.map(version => searchVersion(version, query, options))
-    )
-    return {
-      results: results.flatMap(value => Array.from(value.results)),
-      count: results.reduce((total, value) => total + value.count, 0),
-    }
-  }
-
   const run = async (query: string, options: SearchOptions = {}) => {
     const requestedVersions = options.version ? [options.version] : [...versions]
     if (requestedVersions.length === 0) throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
@@ -148,9 +134,6 @@ export const createHttpBibleSearchAccess = ({
         if (!response.ok) {
           const code =
             payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
-          if (response.status === 404 && code === undefined) {
-            return searchVersionsIndividually(requestedVersions, query, options)
-          }
           throw requestError(response, code)
         }
         try {
@@ -169,7 +152,13 @@ export const createHttpBibleSearchAccess = ({
         request.dispose()
       }
     }
-    return searchVersionsIndividually(requestedVersions, query, options)
+    const results = await Promise.all(
+      requestedVersions.map(version => searchVersion(version, query, options))
+    )
+    return {
+      results: results.flatMap(value => Array.from(value.results)),
+      count: results.reduce((total, value) => total + value.count, 0),
+    }
   }
 
   return {
