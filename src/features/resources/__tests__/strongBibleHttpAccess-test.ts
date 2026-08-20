@@ -419,6 +419,92 @@ describe('Strong Bible HTTP resource access', () => {
     )
   })
 
+  it('omits occurrences outside a book-scoped request and preserves the server cursor', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const fetcher: typeof fetch = () =>
+      jsonResponse({
+        resource,
+        identity: { kind: 'strong', code: 'H0430' },
+        verses: [
+          { book: 1, chapter: 1, verse: 1, spans: [span] },
+          { book: 2, chapter: 1, verse: 1, spans: [span] },
+        ],
+        nextCursor: 'strong:v1:2:1:1',
+      })
+    const loadVerseTexts = jest.fn().mockResolvedValue({
+      status: 'available',
+      texts: { '1-1-1': 'Au commencement' },
+      textRevision: resource.textRevision,
+      textSha256: resource.textSha256,
+    })
+    const online = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher,
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'chapter-not-available' }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+        loadVerseTexts,
+      },
+    })
+
+    await expect(
+      online.loadFoundVersesByBook('LSG', {
+        currentVersionId: 'LSG',
+        defaultVersionId: 'LSG',
+        book: 1,
+        reference: 'H0430',
+      })
+    ).resolves.toMatchObject({
+      verses: [expect.objectContaining({ Livre: 1, Texte: 'Au commencement' })],
+      nextCursor: 'strong:v1:2:1:1',
+    })
+    expect(loadVerseTexts).toHaveBeenCalledWith('LSG', ['1-1-1'], undefined)
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: strong-occurrences-unrequested-books',
+      { versionId: 'LSG', requestedBook: 1, omittedVerseKeys: ['2-1-1'] }
+    )
+  })
+
+  it('keeps text-only HTTP Strong occurrences and warns about their missing spans', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const online = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: () =>
+        jsonResponse({
+          resource,
+          identity: { kind: 'strong', code: 'H0430' },
+          verses: [{ book: 1, chapter: 1, verse: 1, spans: [] }],
+        }),
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'chapter-not-available' }),
+        loadCoverage: async () => ({ status: 'unavailable', reason: 'resource-unsupported' }),
+        loadVerseTexts: async () => ({
+          status: 'available',
+          texts: { '1-1-1': 'Au commencement' },
+          textRevision: resource.textRevision,
+          textSha256: resource.textSha256,
+        }),
+      },
+    })
+
+    await expect(
+      online.loadFoundVersesByBook('LSG', {
+        currentVersionId: 'LSG',
+        defaultVersionId: 'LSG',
+        book: 1,
+        reference: 'H0430',
+      })
+    ).resolves.toMatchObject({
+      verses: [expect.objectContaining({ Texte: 'Au commencement', StrongSpans: [] })],
+    })
+    expect(warning).toHaveBeenCalledWith(
+      '[ResourceAccess] Recoverable integrity warning: strong-occurrences-incomplete',
+      expect.objectContaining({ versionId: 'LSG', missingTextCount: 0, missingSpansCount: 1 })
+    )
+  })
+
   it('returns the exact Bible dependency from the same HTTP Strong chapter response', async () => {
     const fetcher: typeof fetch = () =>
       jsonResponse({

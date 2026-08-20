@@ -551,9 +551,20 @@ export const createHttpStrongBibleResourceAdapter = ({
       )
       assertPublicationIdentity(response.resource, versionId)
       assertConcordanceIdentity(response.identity, request)
-      const verseKeys = response.verses.map(
-        verse => `${verse.book}-${verse.chapter}-${verse.verse}`
-      )
+      const omittedVerseKeys: string[] = []
+      const scopedVerses = response.verses.filter(verse => {
+        if (request.allBooks === true || verse.book === request.book) return true
+        omittedVerseKeys.push(`${verse.book}-${verse.chapter}-${verse.verse}`)
+        return false
+      })
+      if (omittedVerseKeys.length) {
+        warnAboutRecoverableResourceIntegrity('strong-occurrences-unrequested-books', {
+          versionId,
+          requestedBook: request.book,
+          omittedVerseKeys,
+        })
+      }
+      const verseKeys = scopedVerses.map(verse => `${verse.book}-${verse.chapter}-${verse.verse}`)
       const texts = await loadVerseTextsFromChapterAdapter(
         bibleChapterAdapter,
         versionId,
@@ -562,8 +573,22 @@ export const createHttpStrongBibleResourceAdapter = ({
         response.resource.textRevision,
         response.resource.textSha256
       )
+      const missingTextCount = verseKeys.filter(key => texts[key] === undefined).length
+      const missingSpansCount = scopedVerses.filter(verse => {
+        const key = `${verse.book}-${verse.chapter}-${verse.verse}`
+        return texts[key] !== undefined && verse.spans.length === 0
+      }).length
+      if (missingSpansCount) {
+        warnAboutRecoverableResourceIntegrity('strong-occurrences-incomplete', {
+          versionId,
+          book: request.book,
+          reference: String(request.reference),
+          missingTextCount,
+          missingSpansCount,
+        })
+      }
       return {
-        verses: response.verses.flatMap(verse => {
+        verses: scopedVerses.flatMap(verse => {
           const key = `${verse.book}-${verse.chapter}-${verse.verse}`
           const text = texts[key]
           return text == null
