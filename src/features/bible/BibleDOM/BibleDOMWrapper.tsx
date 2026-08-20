@@ -147,6 +147,7 @@ export type ParallelVerse = {
   id: VersionCode
   verses: Verse[]
   error?: BibleError
+  interlinearMode?: InterlinearMode
 }
 
 export type TaggedVerse = {

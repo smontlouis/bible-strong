@@ -395,7 +395,7 @@ export function UnifiedVersesRenderer({
         const comment = comments?.[Verset]
         const isVerseToScroll = !isContextFocused && verseToScroll == Verset
         const parallelVerse = isParallelVerse
-          ? getParallelVerseRows(i, parallelVerses, verse, version)
+          ? getParallelVerseRows(i, parallelVerses, verse, version, interlinearMode)
           : []
 
         const hasWordAnnotations = versesWithWordAnnotationsByKey.has(verseKey)

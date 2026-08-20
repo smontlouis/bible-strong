@@ -146,6 +146,7 @@ Core user activities:
 ## Invariants
 
 - The app is expected to work offline for already downloaded Bible/resource data.
+- Parallel Bible reading resolves enriched presentation capabilities per column. A Bible without the requested Strong or interlinear capability remains readable as plain text; a capable Bible whose required enrichment fails keeps an actionable error. BHG uses its Strong presentation during Strong comparison and its detailed interlinear presentation during interlinear or reverse-interlinear comparison.
 - Passage media discovery uses the application or route language strictly. A missing French edition is not replaced by an English edition, and a missing English edition is not replaced by a French edition.
 - Resource access modules should preserve the offline behavior of downloaded Bible/resource data while creating seams for future remote adapters.
 - No editorial resource is required to initialize or enter the app. LSG and KJV are language-specific default Bible choices, not mandatory Offline copies, and their optional Strong indexes remain separate resources.

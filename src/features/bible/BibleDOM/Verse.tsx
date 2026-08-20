@@ -45,7 +45,7 @@ import {
 } from './canonicalVersePresentation'
 import { getCanonicalBibleNoteLabel, type CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { isInterlinearModeEnabled, type InterlinearMode } from '~helpers/interlinearDisplayMode'
-import { getParallelVerseModeProps, shouldHighlightOnlyVerseNumber } from './verseRenderingModel'
+import { shouldHighlightOnlyVerseNumber } from './verseRenderingModel'
 import { getBibleTextFontSize } from './verseTypography'
 import type { ResolvedPassageMedia } from '../passageMedia'
 import PassageMediaThumbnails from './PassageMediaThumbnails'
@@ -457,6 +457,7 @@ interface Props {
     version: string
     verse: TVerse
     error?: BibleError
+    interlinearMode?: InterlinearMode
   }[]
   isSelected: boolean
   highlightedColor?: keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']]
@@ -656,10 +657,6 @@ const Verse = ({
         <div>
           {parallelVerse.map((p, i) => {
             const isMainVersion = i === 0
-            const parallelModeProps = getParallelVerseModeProps({
-              columnIndex: i,
-              interlinearMode,
-            })
             return (
               <div key={i}>
                 <VerticalVersionTitle
@@ -677,7 +674,7 @@ const Verse = ({
                     isHebreu={isHebreu}
                     verse={p.verse}
                     version={p.version}
-                    {...parallelModeProps}
+                    interlinearMode={p.interlinearMode}
                     settings={settings}
                     isSelected={isSelected}
                     isSelectedMode={isSelectedMode}
@@ -725,10 +722,6 @@ const Verse = ({
       >
         {parallelVerse.map((p, i) => {
           const isMainVersion = i === 0
-          const parallelModeProps = getParallelVerseModeProps({
-            columnIndex: i,
-            interlinearMode,
-          })
 
           // Error state: show translated error message
           if (p.error) {
@@ -753,7 +746,7 @@ const Verse = ({
                 isHebreu={isHebreu}
                 verse={p.verse}
                 version={p.version}
-                {...parallelModeProps}
+                interlinearMode={p.interlinearMode}
                 settings={settings}
                 isSelected={isSelected}
                 isSelectedMode={isSelectedMode}

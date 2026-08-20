@@ -1,6 +1,7 @@
 import type { Verse as TVerse } from '~common/types'
 import type { BibleError } from '~helpers/bibleErrors'
 import type { InterlinearMode } from '~helpers/interlinearDisplayMode'
+import { isInterlinearCapableBibleVersion } from '~helpers/interlinearBiblePublications'
 import type { WordAnnotationsObj } from '~redux/modules/user'
 import type { ParallelVerse, TaggedVerse, WebViewProps } from './BibleDOMWrapper'
 
@@ -113,16 +114,29 @@ export const getParallelVerseRows = (
   index: number,
   parallelVerses: ParallelVerse[],
   verse: TVerse,
-  version: string
-): { version: string; verse: TVerse; error?: BibleError }[] => {
-  const result: { version: string; verse: TVerse; error?: BibleError }[] = [{ version, verse }]
+  version: string,
+  interlinearMode?: InterlinearMode
+): { version: string; verse: TVerse; error?: BibleError; interlinearMode?: InterlinearMode }[] => {
+  const result: {
+    version: string
+    verse: TVerse
+    error?: BibleError
+    interlinearMode?: InterlinearMode
+  }[] = [
+    {
+      version,
+      verse,
+      ...getParallelVerseModeProps({ version, interlinearMode }),
+    },
+  ]
 
-  parallelVerses.forEach(({ id, verses, error }) => {
+  parallelVerses.forEach(({ id, verses, error, interlinearMode }) => {
     const parallelVerse = verses?.[index]
     result.push({
       version: id,
       verse: parallelVerse || { ...verse, Texte: '' },
       error,
+      ...getParallelVerseModeProps({ version: id, interlinearMode }),
     })
   })
 
@@ -130,13 +144,13 @@ export const getParallelVerseRows = (
 }
 
 export const getParallelVerseModeProps = ({
-  columnIndex,
+  version,
   interlinearMode,
 }: {
-  columnIndex: number
+  version: string
   interlinearMode?: InterlinearMode
 }) =>
-  columnIndex === 0
+  isInterlinearCapableBibleVersion(version)
     ? { interlinearMode }
     : {
         interlinearMode: undefined,

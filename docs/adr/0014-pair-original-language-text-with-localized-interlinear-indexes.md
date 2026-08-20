@@ -5,7 +5,8 @@
 Superseded by the legacy-resource removal decision added to ADR-0013. The BHG and localized-index
 architecture below remains current, but INT and INT_EN are now migrated and removed rather than
 retained as runtime fallbacks. ADR-0028 additionally supersedes locale and cross-index substitution
-after a requested resource load fails.
+after a requested resource load fails. ADR-0030 supersedes the parallel-display clause that limited
+advanced BHG presentation to the primary Bible column.
 
 ## Context
 

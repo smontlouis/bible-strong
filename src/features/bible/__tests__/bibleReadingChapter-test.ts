@@ -115,6 +115,149 @@ describe('canonical V4 Bible chapter extras', () => {
     })
   })
 
+  it.each(['visible', 'reverse-interlinear'] as const)(
+    'loads plain text for a parallel Bible without the requested %s capability',
+    async strongMode => {
+      const resources = createResources()
+
+      await loadBibleReadingParallelVerses(
+        {
+          book: 1,
+          chapter: 1,
+          version: 'LSG',
+          parallelVersions: ['BDS'],
+          commentsDisplay: false,
+          strongMode,
+          interlinearLocale: 'fr',
+          interlinearLocaleAutomatic: true,
+        },
+        resources
+      )
+
+      expect(resources.bibleContent.loadChapter).toHaveBeenCalledWith({
+        book: 1,
+        chapter: 1,
+        version: 'BDS',
+        strongMode: 'hidden',
+        interlinearLocale: 'fr',
+        interlinearLocaleAutomatic: true,
+      })
+    }
+  )
+
+  it('preserves a Strong loading error for a compatible parallel Bible', async () => {
+    const resources = createResources()
+    ;(resources.bibleContent.loadChapter as jest.Mock).mockResolvedValue({
+      success: false,
+      error: { type: 'RESOURCE_UNAVAILABLE', version: 'LSG', book: 1, chapter: 1 },
+    })
+
+    const result = await loadBibleReadingParallelVerses(
+      {
+        book: 1,
+        chapter: 1,
+        version: 'DBY',
+        parallelVersions: ['LSG'],
+        commentsDisplay: false,
+        strongMode: 'visible',
+      },
+      resources
+    )
+
+    expect(resources.bibleContent.loadChapter).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 'LSG', strongMode: 'visible' })
+    )
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'LSG',
+        error: expect.objectContaining({ type: 'RESOURCE_UNAVAILABLE' }),
+      })
+    )
+  })
+
+  it('does not apply the main interlinear presentation to parallel Bible versions', async () => {
+    const resources = createResources()
+
+    await loadBibleReadingParallelVerses(
+      {
+        book: 1,
+        chapter: 1,
+        version: 'BHG',
+        parallelVersions: ['BDS'],
+        commentsDisplay: false,
+        interlinearMode: 'interlinear',
+      },
+      resources
+    )
+
+    expect(resources.bibleContent.loadChapter).toHaveBeenCalledWith(
+      expect.not.objectContaining({ interlinearMode: expect.anything() })
+    )
+  })
+
+  it('keeps interlinear presentation and loading errors for a compatible parallel Bible', async () => {
+    const resources = createResources()
+    ;(resources.bibleContent.loadChapter as jest.Mock).mockResolvedValue({
+      success: false,
+      error: { type: 'RESOURCE_UNAVAILABLE', version: 'BHG', book: 1, chapter: 1 },
+    })
+
+    const result = await loadBibleReadingParallelVerses(
+      {
+        book: 1,
+        chapter: 1,
+        version: 'BHG',
+        parallelVersions: ['BHG'],
+        commentsDisplay: false,
+        interlinearMode: 'interlinear',
+      },
+      resources
+    )
+
+    expect(resources.bibleContent.loadChapter).toHaveBeenCalledWith(
+      expect.objectContaining({ version: 'BHG', interlinearMode: 'interlinear' })
+    )
+    expect(result[0]).toEqual(
+      expect.objectContaining({
+        id: 'BHG',
+        error: expect.objectContaining({ type: 'RESOURCE_UNAVAILABLE' }),
+      })
+    )
+  })
+
+  it.each([
+    ['visible', 'strong'],
+    ['reverse-interlinear', 'interlinear'],
+  ] as const)(
+    'uses the BHG %s presentation in parallel mode',
+    async (strongMode, expectedInterlinearMode) => {
+      const resources = createResources()
+
+      const result = await loadBibleReadingParallelVerses(
+        {
+          book: 1,
+          chapter: 1,
+          version: 'LSG',
+          parallelVersions: ['BHG'],
+          commentsDisplay: false,
+          strongMode,
+        },
+        resources
+      )
+
+      expect(resources.bibleContent.loadChapter).toHaveBeenCalledWith(
+        expect.objectContaining({
+          version: 'BHG',
+          strongMode: 'hidden',
+          interlinearMode: expectedInterlinearMode,
+        })
+      )
+      expect(result[0]).toEqual(
+        expect.objectContaining({ interlinearMode: expectedInterlinearMode })
+      )
+    }
+  )
+
   it('groups plain parallel versions through the batch chapter access', async () => {
     const resources = createResources()
     resources.bibleContent.loadChapters = jest.fn().mockResolvedValue([

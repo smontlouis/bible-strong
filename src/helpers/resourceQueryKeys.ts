@@ -45,6 +45,7 @@ export const resourceQueryKeys = {
     chapter: number
     versions: readonly string[]
     strongMode?: string
+    interlinearMode?: string
     interlinearLocale?: string
     interlinearLocaleAutomatic?: boolean
   }) => [...bibleContent, 'parallel', request] as const,

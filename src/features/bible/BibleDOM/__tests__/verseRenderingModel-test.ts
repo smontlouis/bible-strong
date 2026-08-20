@@ -177,12 +177,44 @@ describe('verseRenderingModel', () => {
     ])
   })
 
+  it('preserves the resolved presentation mode of each parallel row', () => {
+    const rows = getParallelVerseRows(
+      0,
+      [
+        {
+          id: 'BHG',
+          verses: [verse],
+          interlinearMode: 'strong',
+        },
+      ],
+      verse,
+      'LSG'
+    )
+
+    expect(rows[1]).toEqual({
+      version: 'BHG',
+      verse,
+      error: undefined,
+      interlinearMode: 'strong',
+    })
+  })
+
+  it('resolves the primary presentation in the shared parallel row model', () => {
+    const rows = getParallelVerseRows(0, [], verse, 'BHG', 'interlinear')
+
+    expect(rows[0]).toEqual({
+      version: 'BHG',
+      verse,
+      interlinearMode: 'interlinear',
+    })
+  })
+
   it.each(['interlinear', 'strong', 'transliteration'] as const)(
     'keeps the primary BHG %s mode in parallel display',
     interlinearMode => {
       expect(
         getParallelVerseModeProps({
-          columnIndex: 0,
+          version: 'BHG',
           interlinearMode,
         })
       ).toEqual({
@@ -191,14 +223,25 @@ describe('verseRenderingModel', () => {
     }
   )
 
-  it('does not apply the primary interlinear mode to another parallel Bible', () => {
+  it('does not apply the primary interlinear mode to an incompatible parallel Bible', () => {
     expect(
       getParallelVerseModeProps({
-        columnIndex: 1,
+        version: 'BDS',
         interlinearMode: 'strong',
       })
     ).toEqual({
       interlinearMode: undefined,
+    })
+  })
+
+  it('applies the primary interlinear mode to a compatible parallel Bible', () => {
+    expect(
+      getParallelVerseModeProps({
+        version: 'BHG',
+        interlinearMode: 'strong',
+      })
+    ).toEqual({
+      interlinearMode: 'strong',
     })
   })
 })
