@@ -30,7 +30,6 @@ const protectedFailure = (requestId: string, status: 401 | 429): Response => {
     'x-request-id': requestId,
   })
   if (status === 401) return new Response(null, { status, headers })
-  headers.set('content-type', 'application/problem+json')
   headers.set('retry-after', '60')
   return Response.json(
     new ResourceRateLimitedProblem({

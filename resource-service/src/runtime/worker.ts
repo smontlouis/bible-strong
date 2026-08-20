@@ -101,7 +101,7 @@ export default {
       reportCacheFailure: (operation, cause) => {
         console.error(
           JSON.stringify({
-            message: 'R2 artifact edge cache failure',
+            message: 'resource delivery edge cache failure',
             operation,
             path: new URL(request.url).pathname,
             error: cause instanceof Error ? cause.message : String(cause),

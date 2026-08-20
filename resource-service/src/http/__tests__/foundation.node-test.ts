@@ -28,8 +28,9 @@ describe('Resource service foundation', () => {
     assert.ok(specification.paths['/v1/bibles/{version}/books/{book}/chapters/{chapter}']?.get)
     assert.ok(specification.paths['/v1/bibles/{version}/verses']?.get)
     assert.ok(
-      specification.paths['/v1/bibles/{version}/books/{book}/chapters/{chapter}']?.get
-        ?.responses['429']
+      specification.paths['/v1/bibles/{version}/books/{book}/chapters/{chapter}']?.get?.responses[
+        '429'
+      ]
     )
     assert.equal(specification.paths['/health']?.get?.responses['429'], undefined)
   })

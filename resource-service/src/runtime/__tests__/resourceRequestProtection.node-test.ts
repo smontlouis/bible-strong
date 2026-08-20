@@ -45,6 +45,7 @@ describe('Resource request protection', () => {
     assert.equal(response?.status, 429)
     assert.equal(response?.headers.get('retry-after'), '60')
     assert.equal(response?.headers.get('cache-control'), 'private, no-store')
+    assert.equal(response?.headers.get('content-type'), 'application/json')
     assert.equal(response?.headers.get('x-request-id'), 'reading_burst')
     assert.deepEqual(await response?.json(), {
       _tag: 'ResourceRateLimitedProblem',
