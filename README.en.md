@@ -8,6 +8,12 @@
 </h1>
 
 <p align="center">
+  <a href="https://play.google.com/apps/testing/com.smontlouis.biblestrong">Android beta</a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://testflight.apple.com/join/Wh1Wz8Zb">iOS beta</a>
+</p>
+
+<p align="center">
   <strong>Discover the Bible in a new light</strong><br>
   <em>A complete Bible study application with Strong's concordance</em>
 </p>
