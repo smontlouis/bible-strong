@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted, with recoverable integrity handling superseded by ADR-0029.
 
 ## Context
 
@@ -21,8 +21,9 @@ than the presentation or corpus the user requested.
 
 Fail a requested resource presentation when its selected logical resource fails during loading.
 Do not switch locale, Bible index, presentation kind, or lexical dataset after a request error. Do
-not reconstruct missing reverse-interlinear tokens from the Strong lexicon. Treat missing required
-alignments as an integrity failure.
+not reconstruct missing reverse-interlinear tokens through a fan-out of Strong lexicon network
+reads. ADR-0029 supersedes the original decision to fail the entire presentation when already-loaded
+datasets contain incomplete alignments.
 
 Automatic selectors may choose an available resource before loading begins. Once selected, a load
 failure is final for that operation. A manual selection is never replaced automatically. Physical

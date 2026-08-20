@@ -83,6 +83,7 @@ const createDependencies = () => ({
     }
   })(),
   logError: jest.fn(),
+  logWarning: jest.fn(),
 })
 
 describe('BibleContentAccess', () => {
@@ -103,7 +104,7 @@ describe('BibleContentAccess', () => {
     expect(dependencies.chapterAdapter.loadChapter).not.toHaveBeenCalled()
   })
 
-  it('fails Strong mode when its sidecar belongs to a different revision or hash', async () => {
+  it('keeps Strong mode visible and warns in development when revisions differ', async () => {
     const dependencies = createDependencies()
     dependencies.chapterAdapter.loadChapter.mockResolvedValue({
       status: 'available',
@@ -112,7 +113,22 @@ describe('BibleContentAccess', () => {
       verses: [{ Livre: 1, Chapitre: 1, Verset: 1, Texte: 'Texte local ancien' }],
     } as Awaited<ReturnType<BibleChapterAdapter['loadChapter']>>)
     const loadStrongBibleChapterSpans = jest.fn().mockResolvedValue({
-      spansByVerse: { 1: [] },
+      spansByVerse: {
+        1: [
+          {
+            ordinal: 0,
+            startOffset: 0,
+            length: 5,
+            identities: [{ kind: 'strong', code: 'H0001' }],
+          },
+          {
+            ordinal: 1,
+            startOffset: 999,
+            length: 5,
+            identities: [{ kind: 'strong', code: 'H0002' }],
+          },
+        ],
+      },
       textRevision: 'lsg-text-v1',
       textSha256: '1'.repeat(64),
     })
@@ -124,13 +140,24 @@ describe('BibleContentAccess', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        success: false,
-        error: expect.objectContaining({ type: 'RESOURCE_INTEGRITY_ERROR' }),
+        success: true,
+        data: expect.objectContaining({
+          kind: 'strong',
+          verses: [
+            expect.objectContaining({
+              StrongSpans: [expect.objectContaining({ ordinal: 0 })],
+            }),
+          ],
+        }),
       })
     )
-    expect(dependencies.logError).toHaveBeenCalledWith(
-      '[BibleContentAccess] Error loading chapter:',
-      expect.objectContaining({ code: 'INTEGRITY_FAILURE' })
+    expect(dependencies.logWarning).toHaveBeenCalledWith(
+      '[BibleContentAccess] Recoverable integrity warning: strong-text-revision-mismatch',
+      expect.objectContaining({ version: 'LSG', book: 1, chapter: 1 })
+    )
+    expect(dependencies.logWarning).toHaveBeenCalledWith(
+      '[BibleContentAccess] Recoverable integrity warning: invalid-strong-target-spans',
+      expect.objectContaining({ spanCount: 1 })
     )
   })
 
@@ -219,7 +246,24 @@ describe('BibleContentAccess', () => {
         segments: [],
       },
     ]
-    const loadInterlinearChapterTokens = jest.fn().mockResolvedValue({ 1: tokens })
+    const loadInterlinearChapterTokens = jest.fn().mockResolvedValue({
+      1: [
+        ...tokens,
+        {
+          ordinal: 1,
+          startOffset: 999,
+          length: 1,
+          segments: [],
+        },
+        {
+          ordinal: 2,
+          startOffset: 1,
+          length: 2,
+          segments: [],
+        },
+      ],
+      999: [{ ordinal: 0, startOffset: 0, length: 1, segments: [] }],
+    })
 
     await expect(
       loadBibleContentChapter(
@@ -248,6 +292,10 @@ describe('BibleContentAccess', () => {
       })
     )
     expect(loadInterlinearChapterTokens).toHaveBeenCalledWith('BHG', 'en', 1, 1)
+    expect(dependencies.logWarning).toHaveBeenCalledWith(
+      '[BibleContentAccess] Recoverable integrity warning: invalid-interlinear-token-offsets',
+      expect.objectContaining({ tokenCount: 3 })
+    )
   })
 
   it('fails the requested BHG interlinear mode when its index cannot be loaded', async () => {
@@ -651,6 +699,94 @@ describe('BibleContentAccess', () => {
     )
   })
 
+  it('reconstructs missing Psalm STEP links and warns without hiding the chapter', async () => {
+    const dependencies = createDependencies()
+    dependencies.getChapterVerses.mockImplementation(async version =>
+      version === 'BHG'
+        ? [{ Livre: 19, Chapitre: 8, Verset: 0, Texte: 'על' }]
+        : [{ Livre: 19, Chapitre: 8, Verset: 1, Texte: 'Sur xyz' }]
+    )
+    const loadReverseInterlinearChapterSpans = jest.fn().mockResolvedValue({
+      1: [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 3,
+          identities: [{ kind: 'strong', code: 'H5921' }],
+        },
+        {
+          ordinal: 1,
+          startOffset: 4,
+          length: 3,
+          identities: [{ kind: 'strong', code: 'H9999' }],
+        },
+      ],
+    })
+    const loadInterlinearChapterTokens = jest.fn().mockResolvedValue({
+      0: [
+        {
+          id: 196237,
+          ordinal: 0,
+          startOffset: 0,
+          length: 2,
+          segments: [
+            {
+              ordinal: 0,
+              startOffset: 0,
+              length: 2,
+              transliteration: 'al',
+              lemma: 'על',
+              morphology: 'HR',
+              gloss: 'sur',
+              identities: [{ kind: 'strong', code: 'H5921' }],
+            },
+          ],
+        },
+      ],
+    })
+
+    const result = await loadBibleContentChapter(
+      {
+        book: 19,
+        chapter: 8,
+        version: 'DBR',
+        strongMode: 'reverse-interlinear',
+        interlinearLocale: 'fr',
+      },
+      {
+        ...dependencies,
+        loadReverseInterlinearChapterSpans,
+        loadInterlinearChapterTokens,
+      }
+    )
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({
+          kind: 'reverse-interlinear',
+          verses: [
+            expect.objectContaining({
+              ReverseInterlinearSpans: [
+                expect.objectContaining({
+                  sourceTokens: [expect.objectContaining({ id: 196237, surface: 'על' })],
+                }),
+                expect.objectContaining({ sourceTokens: [] }),
+              ],
+            }),
+          ],
+        }),
+      })
+    )
+    expect(dependencies.logWarning).toHaveBeenCalledWith(
+      '[BibleContentAccess] Recoverable integrity warning: reverse-interlinear-reconciliation',
+      expect.objectContaining({
+        inferredAssociationCount: 1,
+        unresolvedStrongReferences: ['1:1:9999'],
+      })
+    )
+  })
+
   it('fails the requested reverse interlinear mode without another locale or lexical reconstruction', async () => {
     const dependencies = createDependencies()
     dependencies.getChapterVerses.mockImplementation(async version =>
@@ -817,7 +953,7 @@ describe('BibleContentAccess', () => {
     })
   })
 
-  it('does not apply online reverse interlinear spans from another text revision', async () => {
+  it('keeps reverse interlinear visible and warns when its text revision differs', async () => {
     const chapterAdapter: BibleChapterAdapter = {
       loadChapter: jest.fn(async version => ({
         status: 'available' as const,
@@ -862,10 +998,11 @@ describe('BibleContentAccess', () => {
       })
     ).resolves.toEqual(
       expect.objectContaining({
-        success: false,
-        error: expect.objectContaining({ type: 'RESOURCE_INTEGRITY_ERROR' }),
+        success: true,
+        data: expect.objectContaining({ kind: 'reverse-interlinear' }),
       })
     )
+    expect(chapterAdapter.loadChapter).toHaveBeenCalledTimes(2)
   })
 
   it('returns BIBLE_NOT_FOUND when a chapter has no rows and the version needs download', async () => {

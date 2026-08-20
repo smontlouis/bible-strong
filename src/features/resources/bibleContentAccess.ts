@@ -38,12 +38,11 @@ import {
 } from '~helpers/interlinearDisplayMode'
 import { loadInterlinearChapterTokens } from '~helpers/interlinearBibleSidecar'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import {
-  buildReverseInterlinearSpans,
-  getMissingReverseInterlinearStrongCodes,
-} from '~helpers/reverseInterlinearBible'
+import { reconcileReverseInterlinearChapter } from '~helpers/reverseInterlinearBible'
 import { resolveDisplayedStrongIdentities } from '~helpers/strongIdentities'
 import { collectStrongSelectionMorphologies } from '~helpers/strongSelection'
+import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
+import { buildTokenizedVerseLayout } from '~helpers/interlinearVerseLayout'
 import {
   type BibleChapterAdapter,
   type BibleChapterUnavailableReason,
@@ -125,6 +124,7 @@ const loadLocalBibleCoverage = async (version: string): Promise<BibleVersionCove
 type BibleContentAccessDependencies = {
   chapterAdapter: BibleChapterAdapter
   logError: (message: string, error: unknown) => void
+  logWarning?: (message: string, details: unknown) => void
   loadStrongBibleChapterSpans?: (
     versionId: StrongBibleVersionId,
     book: number,
@@ -311,10 +311,49 @@ const resourceAccessErrorToBibleErrorType = (
 const defaultDependencies: BibleContentAccessDependencies = {
   chapterAdapter: localBibleChapterAdapter,
   logError: (message, error) => console.log(message, error),
+  logWarning: (message, details) => console.warn(message, details),
   loadStrongBibleChapterSpans,
   loadReverseInterlinearChapterSpans,
   loadInterlinearChapterTokens,
   getInterlinearAvailability: localInterlinearBibleResourceAccess.getAvailability,
+}
+
+const warnAboutRecoverableIntegrity = (
+  dependencies: BibleContentAccessDependencies,
+  issue: string,
+  details: unknown
+) => {
+  if (typeof __DEV__ !== 'undefined' && !__DEV__) return
+  dependencies.logWarning?.(`[BibleContentAccess] Recoverable integrity warning: ${issue}`, details)
+}
+
+const filterValidStrongSpans = (
+  spansByVerse: Record<number, StrongBibleSpan[]>,
+  verses: Verse[]
+): { spansByVerse: Record<number, StrongBibleSpan[]>; invalidSpanCount: number } => {
+  const textByVerse = new Map(verses.map(verse => [Number(verse.Verset), verse.Texte] as const))
+  let invalidSpanCount = 0
+  return {
+    spansByVerse: Object.fromEntries(
+      Object.entries(spansByVerse).map(([verse, spans]) => {
+        const text = textByVerse.get(Number(verse))
+        return [
+          verse,
+          spans.filter(span => {
+            const endOffset = span.startOffset + span.length
+            const valid =
+              text !== undefined &&
+              span.startOffset >= 0 &&
+              span.length >= 0 &&
+              endOffset <= text.length
+            if (!valid) invalidSpanCount += 1
+            return valid
+          }),
+        ]
+      })
+    ),
+    invalidSpanCount,
+  }
 }
 
 const resolveRequestedInterlinearLocale = async (
@@ -392,19 +431,46 @@ const loadRegularBibleChapter = async (
     dependencies.loadInterlinearChapterTokens
   ) {
     const locale = await resolveRequestedInterlinearLocale(request, dependencies)
-    const tokensByVerse = await dependencies.loadInterlinearChapterTokens(
+    const unvalidatedTokensByVerse = await dependencies.loadInterlinearChapterTokens(
       'BHG',
       locale,
       request.book,
       request.chapter
     )
-    if (
-      verses.some(verse => {
-        const tokens = tokensByVerse[Number(verse.Verset)]
-        return !tokens || tokens.length === 0
+    let invalidTokenCount = 0
+    const verseTextByNumber = new Map(
+      verses.map(verse => [Number(verse.Verset), verse.Texte] as const)
+    )
+    for (const [verse, tokens] of Object.entries(unvalidatedTokensByVerse)) {
+      if (!verseTextByNumber.has(Number(verse))) invalidTokenCount += tokens.length
+    }
+    const tokensByVerse = Object.fromEntries(
+      verses.map(verse => {
+        const text = verse.Texte
+        const tokens = unvalidatedTokensByVerse[Number(verse.Verset)] ?? []
+        const validTokens = buildTokenizedVerseLayout(text, tokens).pieces.map(piece => piece.token)
+        invalidTokenCount += tokens.length - validTokens.length
+        return [Number(verse.Verset), validTokens]
       })
-    ) {
-      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    )
+    if (invalidTokenCount > 0) {
+      warnAboutRecoverableIntegrity(dependencies, 'invalid-interlinear-token-offsets', {
+        version: request.version,
+        book: request.book,
+        chapter: request.chapter,
+        tokenCount: invalidTokenCount,
+      })
+    }
+    const versesWithoutTokens = verses
+      .filter(verse => !tokensByVerse[Number(verse.Verset)]?.length)
+      .map(verse => Number(verse.Verset))
+    if (versesWithoutTokens.length > 0) {
+      warnAboutRecoverableIntegrity(dependencies, 'interlinear-verses-without-tokens', {
+        version: request.version,
+        book: request.book,
+        chapter: request.chapter,
+        verses: versesWithoutTokens,
+      })
     }
     return successResult({
       kind: 'interlinear',
@@ -430,7 +496,7 @@ const loadRegularBibleChapter = async (
       ),
       dependencies.chapterAdapter.loadChapter('BHG', request.book, request.chapter),
     ])
-    const targetSpansByVerse =
+    const unvalidatedTargetSpansByVerse =
       'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
     if (
       'spansByVerse' in strongChapter &&
@@ -438,7 +504,15 @@ const loadRegularBibleChapter = async (
         chapter.textRevision !== strongChapter.textRevision) ||
         (strongChapter.textSha256 !== undefined && chapter.textSha256 !== strongChapter.textSha256))
     ) {
-      throw new ResourceAccessError('INTEGRITY_FAILURE')
+      warnAboutRecoverableIntegrity(dependencies, 'reverse-interlinear-text-revision-mismatch', {
+        version: request.version,
+        book: request.book,
+        chapter: request.chapter,
+        bibleTextRevision: chapter.textRevision,
+        strongTextRevision: strongChapter.textRevision,
+        bibleTextSha256: chapter.textSha256,
+        strongTextSha256: strongChapter.textSha256,
+      })
     }
     if (originalVerses.status === 'unavailable') {
       throw resourceAccessErrorFromBibleChapterUnavailable(
@@ -446,6 +520,16 @@ const loadRegularBibleChapter = async (
         originalVerses.recoveries,
         originalVerses.diagnostics
       )
+    }
+    const targetSpanValidation = filterValidStrongSpans(unvalidatedTargetSpansByVerse, verses)
+    const targetSpansByVerse = targetSpanValidation.spansByVerse
+    if (targetSpanValidation.invalidSpanCount > 0) {
+      warnAboutRecoverableIntegrity(dependencies, 'invalid-reverse-interlinear-target-spans', {
+        version: request.version,
+        book: request.book,
+        chapter: request.chapter,
+        spanCount: targetSpanValidation.invalidSpanCount,
+      })
     }
     const locale = await resolveRequestedInterlinearLocale(request, dependencies)
     const sourceTokensByVerse = await dependencies.loadInterlinearChapterTokens(
@@ -457,46 +541,55 @@ const loadRegularBibleChapter = async (
     const originalTextByVerse = new Map(
       originalVerses.verses.map(verse => [Number(verse.Verset), verse.Texte] as const)
     )
+    let invalidSourceTokenCount = 0
     const sourceTokens = Object.entries(sourceTokensByVerse).flatMap(([verse, tokens]) => {
       const originalText = originalTextByVerse.get(Number(verse))
-      if (originalText === undefined) return []
-      return tokens.flatMap(token => {
-        const tokenEnd = token.startOffset + token.length
-        if (token.startOffset < 0 || token.length < 0 || tokenEnd > originalText.length) return []
-        return [{ ...token, surface: originalText.slice(token.startOffset, tokenEnd) }]
-      })
+      if (originalText === undefined) {
+        invalidSourceTokenCount += tokens.length
+        return []
+      }
+      const layout = buildTokenizedVerseLayout(originalText, tokens)
+      invalidSourceTokenCount += tokens.length - layout.pieces.length
+      return layout.pieces.map(piece => ({
+        ...piece.token,
+        verse: Number(verse),
+        surface: piece.surface,
+      }))
     })
-    const sourceTokenIds = new Set(
-      sourceTokens.flatMap(token => (token.id === undefined ? [] : [token.id]))
-    )
-    const requiredSourceTokenIds = Object.values(targetSpansByVerse)
-      .flat()
-      .flatMap(span => span.stepTokenIds ?? [])
-    if (requiredSourceTokenIds.some(tokenId => !sourceTokenIds.has(tokenId))) {
-      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    if (invalidSourceTokenCount > 0) {
+      warnAboutRecoverableIntegrity(dependencies, 'invalid-interlinear-source-token-offsets', {
+        version: request.version,
+        book: request.book,
+        chapter: request.chapter,
+        tokenCount: invalidSourceTokenCount,
+      })
     }
-    const reverseSpansByVerse = Object.fromEntries(
-      Object.entries(targetSpansByVerse).map(([verse, spans]) => [
-        verse,
-        buildReverseInterlinearSpans({
-          targetSpans: spans,
-          sourceTokens,
-        }),
-      ])
-    )
-    const missingReferences = [
-      ...new Set(
-        Object.values(reverseSpansByVerse).flat().flatMap(getMissingReverseInterlinearStrongCodes)
-      ),
-    ]
-    if (missingReferences.length > 0) throw new ResourceAccessError('INTEGRITY_FAILURE')
+    const reconciliation = reconcileReverseInterlinearChapter({
+      targetSpansByVerse,
+      sourceTokens,
+    })
+    const { diagnostics } = reconciliation
+    if (
+      diagnostics.inferredAssociationCount > 0 ||
+      diagnostics.missingExplicitTokenIds.length > 0 ||
+      diagnostics.duplicateExplicitTokenIds.length > 0 ||
+      diagnostics.incompatibleExplicitAssociations.length > 0 ||
+      diagnostics.unresolvedStrongReferences.length > 0
+    ) {
+      warnAboutRecoverableIntegrity(dependencies, 'reverse-interlinear-reconciliation', {
+        version: request.version,
+        book: request.book,
+        chapter: request.chapter,
+        ...diagnostics,
+      })
+    }
 
     return successResult({
       kind: 'reverse-interlinear',
       presentation,
       verses: verses.map(verse => ({
         ...verse,
-        ReverseInterlinearSpans: reverseSpansByVerse[Number(verse.Verset)] ?? [],
+        ReverseInterlinearSpans: reconciliation.spansByVerse[Number(verse.Verset)] ?? [],
       })),
     })
   }
@@ -510,14 +603,33 @@ const loadRegularBibleChapter = async (
     request.book,
     request.chapter
   )
-  const spansByVerse = 'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
+  const unvalidatedSpansByVerse =
+    'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
   if (
     'spansByVerse' in strongChapter &&
     ((strongChapter.textRevision !== undefined &&
       chapter.textRevision !== strongChapter.textRevision) ||
       (strongChapter.textSha256 !== undefined && chapter.textSha256 !== strongChapter.textSha256))
   ) {
-    throw new ResourceAccessError('INTEGRITY_FAILURE')
+    warnAboutRecoverableIntegrity(dependencies, 'strong-text-revision-mismatch', {
+      version: request.version,
+      book: request.book,
+      chapter: request.chapter,
+      bibleTextRevision: chapter.textRevision,
+      strongTextRevision: strongChapter.textRevision,
+      bibleTextSha256: chapter.textSha256,
+      strongTextSha256: strongChapter.textSha256,
+    })
+  }
+  const spanValidation = filterValidStrongSpans(unvalidatedSpansByVerse, verses)
+  const spansByVerse = spanValidation.spansByVerse
+  if (spanValidation.invalidSpanCount > 0) {
+    warnAboutRecoverableIntegrity(dependencies, 'invalid-strong-target-spans', {
+      version: request.version,
+      book: request.book,
+      chapter: request.chapter,
+      spanCount: spanValidation.invalidSpanCount,
+    })
   }
   let alignedTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
   if (dependencies.loadInterlinearChapterTokens) {
