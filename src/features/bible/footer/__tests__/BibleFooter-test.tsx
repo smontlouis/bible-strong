@@ -33,6 +33,9 @@ describe('BibleFooter', () => {
 
   it('renders on a standalone full-chapter screen outside the primary Bible tab', () => {
     const bibleAtom = atom({ id: 'standalone-bible', data: {} } as BibleTab)
+    const chapterVerses = [
+      { Livre: 49, Chapitre: 2, Verset: 1, Texte: 'Vous étiez morts.' },
+    ] as never
     let renderer: ReturnType<typeof create>
 
     act(() => {
@@ -41,6 +44,7 @@ describe('BibleFooter', () => {
           bibleAtom={bibleAtom}
           book={{ Numero: 49, Nom: 'Éphésiens', Chapitres: 6 }}
           chapter={2}
+          chapterVerses={chapterVerses}
           goToPrevChapter={jest.fn()}
           goToNextChapter={jest.fn()}
           goToChapter={jest.fn()}
@@ -50,6 +54,8 @@ describe('BibleFooter', () => {
       )
     })
 
-    expect(renderer!.root.find(node => String(node.type) === 'AudioTTSFooter')).toBeDefined()
+    expect(
+      renderer!.root.find(node => String(node.type) === 'AudioTTSFooter').props.chapterVerses
+    ).toBe(chapterVerses)
   })
 })

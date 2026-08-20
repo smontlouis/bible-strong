@@ -22,6 +22,7 @@ import { useStrongRouteNavigation } from './useStrongRouteNavigation'
 
 interface StrongMainScreenProps {
   context: StrongDetailRouteContext
+  hasBackButton?: boolean
   isFormSheet?: boolean
   onBack?: () => void
   onTitleChange?: (title: string) => void
@@ -29,6 +30,7 @@ interface StrongMainScreenProps {
 
 const StrongMainScreen = ({
   context,
+  hasBackButton,
   isFormSheet = false,
   onBack,
   onTitleChange,
@@ -228,6 +230,7 @@ const StrongMainScreen = ({
       context={activeContext}
       entryState={entryState}
       fontSize={19}
+      hasBackButton={hasBackButton}
       isFormSheet={isFormSheet}
       onBack={onBack}
       showEntryMenu

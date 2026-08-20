@@ -77,15 +77,22 @@ const isCanonicalChapterForVersion = (version: string, book: number, chapter: nu
 
 export type BibleChapterPresentationSource = 'canonical' | 'legacy-sidecars'
 
-export type BibleChapterData =
-  | { kind: 'plain'; verses: Verse[]; presentation: BibleChapterPresentationSource }
-  | { kind: 'strong'; verses: Verse[]; presentation: BibleChapterPresentationSource }
-  | { kind: 'interlinear'; verses: Verse[]; presentation: BibleChapterPresentationSource }
-  | {
-      kind: 'reverse-interlinear'
-      verses: Verse[]
-      presentation: BibleChapterPresentationSource
-    }
+type BibleChapterIdentity = {
+  presentation: BibleChapterPresentationSource
+  textRevision?: string
+  textSha256?: string
+}
+
+export type BibleChapterData = BibleChapterIdentity &
+  (
+    | { kind: 'plain'; verses: Verse[] }
+    | { kind: 'strong'; verses: Verse[] }
+    | { kind: 'interlinear'; verses: Verse[] }
+    | {
+        kind: 'reverse-interlinear'
+        verses: Verse[]
+      }
+  )
 
 export type BibleChapterRequest = {
   book: number
@@ -427,6 +434,11 @@ const loadRegularBibleChapter = async (
   const presentation =
     chapter.presentation ??
     (usesCanonicalBibleExtras(request.version) ? 'canonical' : 'legacy-sidecars')
+  const chapterIdentity: BibleChapterIdentity = {
+    presentation,
+    ...(chapter.textRevision ? { textRevision: chapter.textRevision } : {}),
+    ...(chapter.textSha256 ? { textSha256: chapter.textSha256 } : {}),
+  }
 
   if (
     request.version === 'BHG' &&
@@ -477,7 +489,7 @@ const loadRegularBibleChapter = async (
     }
     return successResult({
       kind: 'interlinear',
-      presentation,
+      ...chapterIdentity,
       verses: verses.map(verse => ({
         ...verse,
         InterlinearTokens: tokensByVerse[Number(verse.Verset)] ?? [],
@@ -589,7 +601,7 @@ const loadRegularBibleChapter = async (
 
     return successResult({
       kind: 'reverse-interlinear',
-      presentation,
+      ...chapterIdentity,
       verses: verses.map(verse => ({
         ...verse,
         ReverseInterlinearSpans: reconciliation.spansByVerse[Number(verse.Verset)] ?? [],
@@ -598,7 +610,7 @@ const loadRegularBibleChapter = async (
   }
 
   if (request.strongMode !== 'visible') {
-    return successResult({ kind: 'plain', verses, presentation })
+    return successResult({ kind: 'plain', verses, ...chapterIdentity })
   }
 
   const strongChapter = await dependencies.loadStrongBibleChapterSpans!(
@@ -649,7 +661,7 @@ const loadRegularBibleChapter = async (
   }
   return successResult({
     kind: 'strong',
-    presentation,
+    ...chapterIdentity,
     verses: verses.map(verse => {
       const verseNumber = Number(verse.Verset)
       const alignedTokens = alignedTokensByVerse[verseNumber] ?? []

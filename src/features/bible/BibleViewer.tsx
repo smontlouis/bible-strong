@@ -103,6 +103,10 @@ import {
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
+import {
+  getChapterEntityQueryPlan,
+  getDisplayedChapterEntityStrongCodes,
+} from './chapterEntityQueryPlan'
 import { useAnnotationMode } from './hooks'
 import ResourcesModal from './resources/ResourceModal'
 import {
@@ -270,6 +274,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     queryKey: resourceQueryKeys.bibleCoverage(version),
     queryFn: () => resources.bibleContent.loadCoverage(version),
     enabled: !!version,
+    staleTime: Infinity,
     ...localQueryOptions,
   })
   const goToPrevAvailableChapter = () => actions.goToPrevChapter(coverageData)
@@ -422,19 +427,23 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         >)
       : undefined
   const redWordsFailureIsTemporary = redWordsAvailabilityQuery.isError || redWordsQuery.isError
-  const displayedChapterEntityStrongCodes = [
-    ...new Set(
-      verses.flatMap(verse =>
-        (verse.StrongSpans ?? []).flatMap(span => span.identities.map(identity => identity.code))
-      )
-    ),
-  ]
+  const displayedChapterEntityStrongCodes = getDisplayedChapterEntityStrongCodes(verses)
+  const chapterStrongCodeSourcePlan = getChapterEntityQueryPlan({
+    chapterReady: extrasEnabled,
+    chapterKind: mainChapterData?.kind,
+    contextualInformationDisplay,
+    displayedStrongCodes: displayedChapterEntityStrongCodes,
+    isContextFocused,
+    strongCodesQueryFetched: false,
+  })
   const chapterStrongCodesQuery = useQuery({
     queryKey: resourceQueryKeys.strongBibleChapterCodes({
       currentVersionId: version,
       defaultVersionId: settings.defaultStrongBibleVersionId ?? 'LSG',
       book: book.Numero,
       chapter,
+      expectedTextRevision: mainChapterData?.textRevision,
+      expectedTextSha256: mainChapterData?.textSha256,
     }),
     queryFn: () =>
       resources.strongBible.loadChapterCodes({
@@ -442,20 +451,32 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         defaultVersionId: settings.defaultStrongBibleVersionId ?? 'LSG',
         book: book.Numero,
         chapter,
+        expectedTextRevision: mainChapterData?.textRevision,
+        expectedTextSha256: mainChapterData?.textSha256,
       }),
-    enabled: extrasEnabled && contextualInformationDisplay && !isContextFocused,
+    enabled: chapterStrongCodeSourcePlan.shouldLoadStrongCodes,
     staleTime: Infinity,
     ...localQueryOptions,
   })
-  const chapterEntityStrongCodes =
-    chapterStrongCodesQuery.data?.status === 'available'
-      ? chapterStrongCodesQuery.data.codes
-      : displayedChapterEntityStrongCodes
+  const chapterEntityQueryPlan = getChapterEntityQueryPlan({
+    chapterReady: extrasEnabled,
+    chapterKind: mainChapterData?.kind,
+    contextualInformationDisplay,
+    displayedStrongCodes: displayedChapterEntityStrongCodes,
+    isContextFocused,
+    loadedStrongCodes:
+      chapterStrongCodesQuery.data?.status === 'available'
+        ? chapterStrongCodesQuery.data.codes
+        : undefined,
+    strongCodesQueryFetched: chapterStrongCodesQuery.isFetched,
+  })
+  const chapterEntityStrongCodes = chapterEntityQueryPlan.codes
   const chapterEntityAvailabilityQuery = useQuery({
-    queryKey: ['strong-lexicon', 'availability', 'entities'],
+    queryKey: resourceQueryKeys.strongLexiconAvailability('entities'),
     queryFn: () => resources.strongLexicon.getModuleAvailability('entities'),
-    enabled: contextualInformationDisplay,
+    enabled: chapterEntityQueryPlan.shouldCheckAvailability,
     networkMode: 'always',
+    staleTime: Infinity,
   })
   const chapterEntityDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId: 'entities' })
@@ -484,14 +505,12 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     !isContextFocused &&
     chapterEntityAvailabilityQuery.data?.status === 'available'
   const chapterEntitiesQuery = useQuery({
-    queryKey: [
-      'strong-lexicon',
-      'chapter-entities',
-      lang,
-      book.Numero,
+    queryKey: resourceQueryKeys.strongLexiconChapterEntities({
+      language: lang,
+      book: book.Numero,
       chapter,
-      chapterEntityStrongCodes.join(','),
-    ],
+      strongCodes: chapterEntityStrongCodes,
+    }),
     queryFn: () =>
       resources.strongLexicon.loadChapterEntities(
         book.Numero,
@@ -499,7 +518,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         lang,
         chapterEntityStrongCodes
       ),
-    enabled: extrasEnabled && chapterEntitiesAvailable,
+    enabled: chapterEntitiesAvailable && chapterEntityQueryPlan.shouldLoadEntities,
     staleTime: Infinity,
     ...localQueryOptions,
   })
@@ -1342,6 +1361,9 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
           disabled={isLoading}
           book={book}
           chapter={chapter}
+          chapterVerses={
+            mainReadingQuery.isPlaceholderData || !mainChapterData ? undefined : verses
+          }
           coverage={coverageData}
           goToPrevChapter={goToPrevAvailableChapter}
           goToNextChapter={goToNextAvailableChapter}

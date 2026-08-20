@@ -66,6 +66,8 @@ export interface StrongBibleVerseRequest extends StrongBibleResolutionRequest {
 export interface StrongBibleChapterRequest extends StrongBibleResolutionRequest {
   book: number
   chapter: number
+  expectedTextRevision?: string
+  expectedTextSha256?: string
 }
 
 export interface StrongBibleConcordanceRequest extends StrongBibleResolutionRequest {
@@ -294,7 +296,11 @@ type HttpStrongBibleResourceAdapterOptions = {
   isOnline: () => Promise<boolean>
   bibleChapterAdapter: BibleChapterAdapter
   timeoutMs?: number
+  availabilityStaleTimeMs?: number
+  now?: () => number
 }
+
+const STRONG_BIBLE_AVAILABILITY_STALE_TIME_MS = 6 * 60 * 60 * 1000
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, '')
 
@@ -366,8 +372,14 @@ export const createHttpStrongBibleResourceAdapter = ({
   isOnline,
   bibleChapterAdapter,
   timeoutMs = 10_000,
+  availabilityStaleTimeMs = STRONG_BIBLE_AVAILABILITY_STALE_TIME_MS,
+  now = Date.now,
 }: HttpStrongBibleResourceAdapterOptions): StrongBibleResourceAdapter => {
   const normalizedBaseUrl = normalizeBaseUrl(baseUrl)
+  const availabilityCache = new Map<
+    string,
+    { expiresAt: number; promise: Promise<StrongBibleSidecarAvailability> }
+  >()
   const get = async <A>(path: string, schema: Schema.Schema<A>): Promise<A> => {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
@@ -429,44 +441,63 @@ export const createHttpStrongBibleResourceAdapter = ({
     return response
   }
 
-  return {
-    async getAvailability(versionId) {
-      if (!isStrongCapableBibleVersion(versionId)) return { status: 'unsupported' }
-      try {
-        const coverage = await get(
-          `/v1/strong-bibles/${encodeURIComponent(versionId)}/coverage`,
-          StrongBibleCoverageDto
-        )
-        assertPublicationIdentity(coverage.resource, versionId)
-        const bibleCoverage = await bibleChapterAdapter.loadCoverage(versionId)
-        if (bibleCoverage.status !== 'available') {
-          throw bibleChapterUnavailableError(bibleCoverage)
-        }
-        if (
-          bibleCoverage.textRevision !== coverage.resource.textRevision ||
-          bibleCoverage.textSha256 !== coverage.resource.textSha256
-        ) {
-          warnAboutRecoverableResourceIntegrity('strong-bible-coverage-revision-mismatch', {
-            versionId,
-            bibleTextRevision: bibleCoverage.textRevision,
-            strongTextRevision: coverage.resource.textRevision,
-          })
-        }
-        return {
-          status: 'available',
-          versionId,
-          datasetId: coverage.resource.datasetId,
-          textRevision: coverage.resource.textRevision,
-          textSha256: coverage.resource.textSha256,
-          strongRevision: coverage.resource.strongRevision,
-        }
-      } catch (error) {
-        if (error instanceof ResourceAccessError && error.code === 'RESOURCE_UNSUPPORTED') {
-          return { status: 'unsupported' }
-        }
-        throw error
+  const loadAvailability = async (versionId: string): Promise<StrongBibleSidecarAvailability> => {
+    if (!isStrongCapableBibleVersion(versionId)) return { status: 'unsupported' }
+    try {
+      const coverage = await get(
+        `/v1/strong-bibles/${encodeURIComponent(versionId)}/coverage`,
+        StrongBibleCoverageDto
+      )
+      assertPublicationIdentity(coverage.resource, versionId)
+      const bibleCoverage = await bibleChapterAdapter.loadCoverage(versionId)
+      if (bibleCoverage.status !== 'available') {
+        throw bibleChapterUnavailableError(bibleCoverage)
       }
-    },
+      if (
+        bibleCoverage.textRevision !== coverage.resource.textRevision ||
+        bibleCoverage.textSha256 !== coverage.resource.textSha256
+      ) {
+        warnAboutRecoverableResourceIntegrity('strong-bible-coverage-revision-mismatch', {
+          versionId,
+          bibleTextRevision: bibleCoverage.textRevision,
+          strongTextRevision: coverage.resource.textRevision,
+        })
+      }
+      return {
+        status: 'available',
+        versionId,
+        datasetId: coverage.resource.datasetId,
+        textRevision: coverage.resource.textRevision,
+        textSha256: coverage.resource.textSha256,
+        strongRevision: coverage.resource.strongRevision,
+      }
+    } catch (error) {
+      if (error instanceof ResourceAccessError && error.code === 'RESOURCE_UNSUPPORTED') {
+        return { status: 'unsupported' }
+      }
+      throw error
+    }
+  }
+
+  const getAvailability = (versionId: string) => {
+    const cached = availabilityCache.get(versionId)
+    if (cached && cached.expiresAt > now()) return cached.promise
+
+    const promise = loadAvailability(versionId).catch(error => {
+      if (availabilityCache.get(versionId)?.promise === promise) {
+        availabilityCache.delete(versionId)
+      }
+      throw error
+    })
+    availabilityCache.set(versionId, {
+      expiresAt: now() + availabilityStaleTimeMs,
+      promise,
+    })
+    return promise
+  }
+
+  return {
+    getAvailability,
     async loadChapterSpans(versionId, request) {
       try {
         const chapter = await loadChapter(versionId, request.book, request.chapter)
@@ -784,6 +815,13 @@ export const createStrongBibleResourceAccess = (
         book: request.book,
         chapter: request.chapter,
       })
+      if (
+        (request.expectedTextRevision &&
+          spansByVerse.textRevision !== request.expectedTextRevision) ||
+        (request.expectedTextSha256 && spansByVerse.textSha256 !== request.expectedTextSha256)
+      ) {
+        throw new ResourceAccessError('INTEGRITY_FAILURE')
+      }
       return {
         status: 'available',
         provenance: resolution.provenance,

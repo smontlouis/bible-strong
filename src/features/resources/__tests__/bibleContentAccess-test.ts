@@ -87,6 +87,31 @@ const createDependencies = () => ({
 })
 
 describe('BibleContentAccess', () => {
+  it('preserves canonical text identity on a plain chapter result', async () => {
+    const dependencies = createDependencies()
+    dependencies.chapterAdapter.loadChapter.mockResolvedValue({
+      status: 'available',
+      presentation: 'canonical',
+      textRevision: 'lsg-text-v1',
+      textSha256: '1'.repeat(64),
+      verses: [{ Livre: 40, Chapitre: 21, Verset: 1, Texte: 'Ils approchèrent.' }],
+    })
+
+    await expect(
+      loadBibleContentChapter({ book: 40, chapter: 21, version: 'LSG' }, dependencies)
+    ).resolves.toEqual(
+      expect.objectContaining({
+        success: true,
+        data: expect.objectContaining({
+          kind: 'plain',
+          presentation: 'canonical',
+          textRevision: 'lsg-text-v1',
+          textSha256: '1'.repeat(64),
+        }),
+      })
+    )
+  })
+
   it('fails explicitly when Strong presentation is requested for an unsupported Bible', async () => {
     const dependencies = createDependencies()
 

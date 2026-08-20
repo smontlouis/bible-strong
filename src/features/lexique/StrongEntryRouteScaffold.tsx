@@ -33,6 +33,7 @@ type Props = {
   context: StrongDetailRouteContext
   entryState: StrongEntryLoadState
   fontSize?: number
+  hasBackButton?: boolean
   isFormSheet?: boolean
   onBack?: () => void
   requireEntry?: boolean
@@ -46,6 +47,7 @@ const StrongEntryRouteScaffold = ({
   context,
   entryState,
   fontSize,
+  hasBackButton,
   isFormSheet = false,
   onBack,
   requireEntry = true,
@@ -73,7 +75,7 @@ const StrongEntryRouteScaffold = ({
   const openEntityRelations = useOpenEntityRelations()
   const header = (
     <Header
-      hasBackButton={onBack ? true : isFormSheet ? canGoBackInStack : true}
+      hasBackButton={hasBackButton ?? (onBack ? true : isFormSheet ? canGoBackInStack : true)}
       onCustomBackPress={onBack}
       fontSize={fontSize}
       subTitle={subTitle}
