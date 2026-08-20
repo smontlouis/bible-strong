@@ -278,4 +278,31 @@ describe('interlinear Bible HTTP resource access', () => {
       offlineAdapter.loadChapterTokens('fr', { book: 1, chapter: 1 })
     ).rejects.toMatchObject({ code: 'NETWORK_OFFLINE' })
   })
+
+  it('keeps HTTP diagnostics when an interlinear request is rate limited', async () => {
+    const adapter = createHttpInterlinearBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: async () =>
+        new Response(JSON.stringify({ code: 'RESOURCE_RATE_LIMITED' }), {
+          status: 429,
+          headers: {
+            'content-type': 'application/json',
+            'retry-after': '60',
+            'x-request-id': 'request-123',
+          },
+        }),
+      isOnline: async () => true,
+      bibleChapterAdapter,
+    })
+
+    await expect(adapter.loadChapterTokens('fr', { book: 1, chapter: 1 })).rejects.toMatchObject({
+      code: 'TEMPORARY_UNAVAILABLE',
+      httpStatus: 429,
+      requestId: 'request-123',
+      retryAfterSeconds: 60,
+      serverCode: 'RESOURCE_RATE_LIMITED',
+      message:
+        'TEMPORARY_UNAVAILABLE (HTTP 429, RESOURCE_RATE_LIMITED, requestId=request-123, retryAfter=60s)',
+    })
+  })
 })

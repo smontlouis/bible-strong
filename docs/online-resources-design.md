@@ -249,8 +249,8 @@ not work started during this design session.
 
 - Local and remote adapters run the same contract scenarios and must produce equivalent domain
   results.
-- Source-selection tests cover local priority, recoverable local failure, remote fallback, and
-  structured failure when no source is available.
+- Source-selection tests cover local priority, same-identity Offline/Online recovery, fail-closed
+  semantic reads, and structured failure when no source is available.
 - Publication tests verify import validation, artifact generation, integrity metadata, and parity
   between canonical Neon content and generated offline artifacts.
 - Worker tests cover valid and invalid App Check tokens, caching, rate limiting, and API contracts.

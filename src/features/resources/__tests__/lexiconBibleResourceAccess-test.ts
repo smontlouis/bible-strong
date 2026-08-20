@@ -117,7 +117,7 @@ describe('lexiconBibleResourceAccess', () => {
     expect(dependencies.strongBible.loadVerse).not.toHaveBeenCalled()
   })
 
-  it('falls back to the other installed BHG locale', async () => {
+  it('does not substitute another BHG locale for the requested locale', async () => {
     const dependencies = createDependencies()
     dependencies.interlinear.getInterlinearAvailability
       .mockResolvedValueOnce({ status: 'missing' })
@@ -159,16 +159,13 @@ describe('lexiconBibleResourceAccess', () => {
       verse: 1,
     })
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        status: 'available',
-        provenance: expect.objectContaining({ versionId: 'BHG', locale: 'en' }),
-      })
-    )
-    expect(dependencies.interlinear.loadVerse).toHaveBeenCalledWith(
-      'en',
-      expect.objectContaining({ book: 43, chapter: 1, verse: 1 })
-    )
+    expect(result).toEqual({
+      status: 'unavailable',
+      attempts: [{ locale: 'fr', status: 'missing' }],
+    })
+    expect(dependencies.interlinear.getInterlinearAvailability).toHaveBeenCalledTimes(1)
+    expect(dependencies.interlinear.loadVerse).not.toHaveBeenCalled()
+    expect(dependencies.strongBible.loadVerse).not.toHaveBeenCalled()
   })
 
   it('respects a manual Strong Bible source instead of BHG', async () => {
@@ -275,7 +272,7 @@ describe('lexiconBibleResourceAccess', () => {
     )
   })
 
-  it('falls back to regular Strong Bibles when no BHG index is installed', async () => {
+  it('does not substitute a Strong Bible when the requested BHG index is unavailable', async () => {
     const dependencies = createDependencies()
     dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({ status: 'missing' })
     ;(dependencies.strongBible.loadVerse as jest.Mock).mockResolvedValue({
@@ -294,14 +291,14 @@ describe('lexiconBibleResourceAccess', () => {
       verse: 1,
     })
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        provenance: expect.objectContaining({ versionId: 'LSG' }),
-      })
-    )
+    expect(result).toEqual({
+      status: 'unavailable',
+      attempts: [{ locale: 'fr', status: 'missing' }],
+    })
+    expect(dependencies.strongBible.loadVerse).not.toHaveBeenCalled()
   })
 
-  it('falls back to regular Strong Bibles when an installed BHG index cannot be read', async () => {
+  it('propagates a BHG index read failure without substituting a Strong Bible', async () => {
     const dependencies = createDependencies()
     dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
@@ -316,20 +313,42 @@ describe('lexiconBibleResourceAccess', () => {
     })
     const access = createLexiconBibleResourceAccess(dependencies)
 
-    const result = await access.loadVerse({
-      currentVersionId: 'BHG',
-      defaultVersionId: 'LSG',
-      preferredInterlinearLocale: 'fr',
-      book: 43,
-      chapter: 1,
-      verse: 1,
-    })
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        provenance: expect.objectContaining({ versionId: 'LSG' }),
+    await expect(
+      access.loadVerse({
+        currentVersionId: 'BHG',
+        defaultVersionId: 'LSG',
+        preferredInterlinearLocale: 'fr',
+        book: 43,
+        chapter: 1,
+        verse: 1,
       })
-    )
+    ).rejects.toThrow('Unreadable sidecar')
+    expect(dependencies.strongBible.loadVerse).not.toHaveBeenCalled()
+  })
+
+  it('treats an existing BHG verse without lexical spans as an integrity failure', async () => {
+    const dependencies = createDependencies()
+    dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
+      status: 'available',
+      locale: 'fr',
+      textRevision: 'bhg-test',
+    })
+    dependencies.interlinear.loadVerse.mockResolvedValue({
+      text: 'בְּרֵאשִׁית',
+      tokens: [],
+    })
+    const access = createLexiconBibleResourceAccess(dependencies)
+
+    await expect(
+      access.loadVerse({
+        currentVersionId: 'BHG',
+        defaultVersionId: 'LSG',
+        preferredInterlinearLocale: 'fr',
+        book: 1,
+        chapter: 1,
+        verse: 1,
+      })
+    ).rejects.toMatchObject({ code: 'INTEGRITY_FAILURE' })
   })
 
   it('loads a BHG concordance page with an opaque domain page token', async () => {
@@ -437,7 +456,7 @@ describe('lexiconBibleResourceAccess', () => {
         limit: 60,
         pageToken: 'interlinear:bhg:26046',
       })
-    ).rejects.toThrow('interlinear continuation')
+    ).rejects.toThrow('Unreadable V5 index')
     expect(dependencies.strongBible.loadFoundVersesByBook).not.toHaveBeenCalled()
   })
 
@@ -483,7 +502,7 @@ describe('lexiconBibleResourceAccess', () => {
     )
   })
 
-  it('falls back to traditional Strong counts when the BHG verse index cannot be read', async () => {
+  it('propagates a BHG count failure without substituting traditional Strong counts', async () => {
     const dependencies = createDependencies()
     dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({
       status: 'available',
@@ -498,20 +517,17 @@ describe('lexiconBibleResourceAccess', () => {
     })
     const access = createLexiconBibleResourceAccess(dependencies)
 
-    const result = await access.loadCountsByBook({
-      currentVersionId: 'BHG',
-      defaultVersionId: 'LSG',
-      preferredInterlinearLocale: 'fr',
-      book: 40,
-      reference: 'G03056',
-      allBooks: true,
-    })
-
-    expect(result).toEqual(
-      expect.objectContaining({
-        provenance: expect.objectContaining({ versionId: 'LSG' }),
+    await expect(
+      access.loadCountsByBook({
+        currentVersionId: 'BHG',
+        defaultVersionId: 'LSG',
+        preferredInterlinearLocale: 'fr',
+        book: 40,
+        reference: 'G03056',
+        allBooks: true,
       })
-    )
+    ).rejects.toThrow('Unreadable V5 index')
+    expect(dependencies.strongBible.loadCountsByBook).not.toHaveBeenCalled()
   })
 })
 

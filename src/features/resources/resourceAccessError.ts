@@ -1,5 +1,6 @@
 import type { DatabaseError } from '~helpers/catchDatabaseError'
 import { isDatabaseError } from '~helpers/queryResult'
+import type { BibleChapterUnavailableReason } from './bibleChapterSource'
 
 export type ResourceAccessErrorCode =
   | 'OFFLINE_COPY_REQUIRED'
@@ -16,6 +17,14 @@ export type ResourceRecoveryAction =
   | 'acquire-offline-copy'
   | 'repair-offline-copy'
   | 'manage-offline-copies'
+  | 'reset-offline-store'
+
+export type ResourceAccessErrorDiagnostics = {
+  httpStatus?: number
+  requestId?: string
+  retryAfterSeconds?: number
+  serverCode?: string
+}
 
 const getDefaultRecoveries = (code: ResourceAccessErrorCode): ResourceRecoveryAction[] => {
   switch (code) {
@@ -33,10 +42,80 @@ const getDefaultRecoveries = (code: ResourceAccessErrorCode): ResourceRecoveryAc
 export class ResourceAccessError extends Error {
   constructor(
     public readonly code: ResourceAccessErrorCode,
-    public readonly recoveries: ResourceRecoveryAction[] = getDefaultRecoveries(code)
+    public readonly recoveries: ResourceRecoveryAction[] = getDefaultRecoveries(code),
+    diagnostics: ResourceAccessErrorDiagnostics = {}
   ) {
-    super(code)
+    const diagnosticParts = [
+      diagnostics.httpStatus === undefined ? undefined : `HTTP ${diagnostics.httpStatus}`,
+      diagnostics.serverCode,
+      diagnostics.requestId ? `requestId=${diagnostics.requestId}` : undefined,
+      diagnostics.retryAfterSeconds === undefined
+        ? undefined
+        : `retryAfter=${diagnostics.retryAfterSeconds}s`,
+    ].filter((part): part is string => Boolean(part))
+    super(diagnosticParts.length ? `${code} (${diagnosticParts.join(', ')})` : code)
     this.name = 'ResourceAccessError'
+    this.httpStatus = diagnostics.httpStatus
+    this.requestId = diagnostics.requestId
+    this.retryAfterSeconds = diagnostics.retryAfterSeconds
+    this.serverCode = diagnostics.serverCode
+  }
+
+  readonly httpStatus?: number
+  readonly requestId?: string
+  readonly retryAfterSeconds?: number
+  readonly serverCode?: string
+}
+
+export const resourceAccessErrorFromHttpResponse = (
+  code: ResourceAccessErrorCode,
+  response: Response,
+  serverCode: unknown,
+  recoveries?: ResourceRecoveryAction[]
+): ResourceAccessError => {
+  const retryAfterHeader = response.headers.get('retry-after')
+  const retryAfter = retryAfterHeader === null ? undefined : Number(retryAfterHeader)
+  return new ResourceAccessError(code, recoveries ?? getDefaultRecoveries(code), {
+    httpStatus: response.status,
+    ...(response.headers.get('x-request-id')
+      ? { requestId: response.headers.get('x-request-id') ?? undefined }
+      : {}),
+    ...(retryAfter !== undefined && Number.isFinite(retryAfter) && retryAfter >= 0
+      ? { retryAfterSeconds: retryAfter }
+      : {}),
+    ...(typeof serverCode === 'string' && serverCode ? { serverCode } : {}),
+  })
+}
+
+export const resourceAccessErrorFromBibleChapterUnavailable = (
+  reason: BibleChapterUnavailableReason,
+  recoveries?: ResourceRecoveryAction[],
+  diagnostics?: ResourceAccessErrorDiagnostics
+): ResourceAccessError => {
+  switch (reason) {
+    case 'publication-not-available':
+      return new ResourceAccessError(
+        'OFFLINE_COPY_REQUIRED',
+        recoveries ?? ['acquire-offline-copy'],
+        diagnostics
+      )
+    case 'chapter-not-available':
+    case 'verses-not-available':
+      return new ResourceAccessError('NOT_FOUND', recoveries, diagnostics)
+    case 'offline-copy-invalid':
+      return new ResourceAccessError(
+        'INVALID_OFFLINE_COPY',
+        recoveries ?? ['acquire-offline-copy', 'manage-offline-copies'],
+        diagnostics
+      )
+    case 'resource-unsupported':
+      return new ResourceAccessError('RESOURCE_UNSUPPORTED', recoveries, diagnostics)
+    case 'network-offline':
+      return new ResourceAccessError('NETWORK_OFFLINE', recoveries, diagnostics)
+    case 'temporary-unavailable':
+      return new ResourceAccessError('TEMPORARY_UNAVAILABLE', recoveries, diagnostics)
+    case 'integrity-failure':
+      return new ResourceAccessError('INTEGRITY_FAILURE', recoveries, diagnostics)
   }
 }
 

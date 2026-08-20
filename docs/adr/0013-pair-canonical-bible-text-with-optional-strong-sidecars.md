@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted, with automatic cross-index fallback clauses superseded by ADR-0028.
 
 ## Context
 

@@ -20,7 +20,7 @@ const adapter = (
 })
 
 describe('hybrid Bible chapter source', () => {
-  it('loads comparison verses through the same source and preserves partial results', async () => {
+  it('rejects comparison verses when any requested chapter is unavailable', async () => {
     const source: BibleChapterAdapter = {
       loadChapter: jest
         .fn()
@@ -40,7 +40,7 @@ describe('hybrid Bible chapter source', () => {
 
     await expect(
       loadVerseTextsFromChapterAdapter(source, 'LSG', ['1-1-2', '1-2-1', 'invalid'])
-    ).resolves.toEqual({ '1-1-2': 'Second' })
+    ).rejects.toMatchObject({ reason: 'chapter-not-available' })
     expect(source.loadChapter).toHaveBeenCalledTimes(2)
   })
 
@@ -266,6 +266,7 @@ describe('HTTP Bible chapter adapter', () => {
     await expect(http.loadVerseTexts?.('LSG', references)).resolves.toEqual({
       status: 'unavailable',
       reason: 'temporary-unavailable',
+      diagnostics: { httpStatus: 500, serverCode: 'RESOURCE_INTERNAL_FAILURE' },
     })
     expect(fetcher).toHaveBeenCalledTimes(2)
   })
@@ -339,6 +340,35 @@ describe('HTTP Bible chapter adapter', () => {
     await expect(http.loadChapter('LSG', 1, 1)).resolves.toEqual({
       status: 'unavailable',
       reason,
+      diagnostics: { httpStatus: status, serverCode: code },
+    })
+  })
+
+  it('preserves request and retry diagnostics on a temporary HTTP failure', async () => {
+    const http = createHttpBibleChapterAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher: jest.fn().mockResolvedValue(
+        new Response(JSON.stringify({ code: 'RESOURCE_RATE_LIMITED' }), {
+          status: 429,
+          headers: {
+            'content-type': 'application/json',
+            'retry-after': '60',
+            'x-request-id': 'request-429',
+          },
+        })
+      ),
+      isOnline: async () => true,
+    })
+
+    await expect(http.loadChapter('LSG', 1, 1)).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'temporary-unavailable',
+      diagnostics: {
+        httpStatus: 429,
+        requestId: 'request-429',
+        retryAfterSeconds: 60,
+        serverCode: 'RESOURCE_RATE_LIMITED',
+      },
     })
   })
 

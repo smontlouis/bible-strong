@@ -2,6 +2,7 @@ import {
   createStrongBibleResourceAccess,
   type StrongBibleResourceAdapter,
 } from '../strongBibleResourceAccess'
+import { ResourceAccessError } from '../resourceAccessError'
 
 jest.mock('~helpers/biblesDb', () => ({
   getMultipleVerses: jest.fn(),
@@ -130,6 +131,26 @@ describe('strongBibleResourceAccess', () => {
       })
     )
     expect(dependencies.getAvailability).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not switch Bible indexes after an availability request fails', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability
+      .mockRejectedValueOnce(new ResourceAccessError('TEMPORARY_UNAVAILABLE'))
+      .mockResolvedValueOnce(available('LSG'))
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    await expect(
+      access.loadVerse({
+        currentVersionId: 'DBY',
+        defaultVersionId: 'LSG',
+        book: 1,
+        chapter: 1,
+        verse: 1,
+      })
+    ).rejects.toMatchObject({ code: 'TEMPORARY_UNAVAILABLE' })
+    expect(dependencies.getAvailability).toHaveBeenCalledTimes(1)
+    expect(dependencies.loadVerse).not.toHaveBeenCalled()
   })
 
   it('falls back to the configured Strong Bible and discloses its provenance', async () => {
@@ -310,7 +331,7 @@ describe('strongBibleResourceAccess', () => {
     expect(dependencies.getAvailability).toHaveBeenCalledWith('DBR')
   })
 
-  it('returns to automatic resolution when a manual Strong Bible choice is unavailable', async () => {
+  it('does not replace a manual Strong Bible choice when it is unavailable', async () => {
     const dependencies = createDependencies()
     dependencies.getAvailability
       .mockResolvedValueOnce({ status: 'missing' })
@@ -328,18 +349,12 @@ describe('strongBibleResourceAccess', () => {
       verse: 1,
     })
 
-    expect(result).toEqual(
-      expect.objectContaining({
-        status: 'available',
-        provenance: {
-          versionId: 'DBY',
-          datasetId: 'DBY',
-          isFallback: false,
-        },
-      })
-    )
-    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(1, 'DBR')
-    expect(dependencies.getAvailability).toHaveBeenNthCalledWith(2, 'DBY')
+    expect(result).toEqual({
+      status: 'unavailable',
+      attempts: [{ versionId: 'DBR', status: 'missing' }],
+    })
+    expect(dependencies.getAvailability).toHaveBeenCalledTimes(1)
+    expect(dependencies.getAvailability).toHaveBeenCalledWith('DBR')
   })
 
   it('returns an actionable unavailable state when no fallback sidecar can be used', async () => {

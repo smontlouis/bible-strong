@@ -322,8 +322,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleContent: createBibleContentAccess(
     bibleChapterAdapter,
     strongBibleAccess,
-    interlinearBibleAccess,
-    strongLexiconAccess
+    interlinearBibleAccess
   ),
   bibleReading: createHybridBibleReadingResourceAccess({
     local: offlineSource('Bible reading resources', localBibleReadingResourceAccess),

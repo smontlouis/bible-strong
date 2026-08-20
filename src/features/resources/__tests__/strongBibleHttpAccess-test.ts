@@ -375,7 +375,7 @@ describe('Strong Bible HTTP resource access', () => {
     })
   })
 
-  it('continues to an installed fallback after a preferred remote availability failure', async () => {
+  it('does not continue to another index after a preferred availability failure', async () => {
     const adapter = unavailableAdapter()
     adapter.getAvailability.mockImplementation(async versionId => {
       if (versionId === 'LSG') throw new ResourceAccessError('TEMPORARY_UNAVAILABLE')
@@ -401,9 +401,8 @@ describe('Strong Bible HTTP resource access', () => {
         book: 1,
         chapter: 1,
       })
-    ).resolves.toMatchObject({
-      status: 'available',
-      provenance: { versionId: 'DBY', isFallback: true },
-    })
+    ).rejects.toMatchObject({ code: 'TEMPORARY_UNAVAILABLE' })
+    expect(adapter.getAvailability).toHaveBeenCalledTimes(1)
+    expect(adapter.loadChapterSpans).not.toHaveBeenCalled()
   })
 })

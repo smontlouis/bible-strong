@@ -7,7 +7,7 @@ import {
 } from '~helpers/biblesDb'
 import { Schema } from 'effect'
 import { BibleSearchResponseDto } from './bibleChapterContract'
-import { ResourceAccessError } from './resourceAccessError'
+import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 
 export type { SearchOptions, SearchResult, SearchSortOrder } from '~helpers/biblesDb'
 
@@ -46,12 +46,13 @@ type HttpBibleSearchAccessOptions = {
 
 const normalizeBaseUrl = (value: string) => value.replace(/\/+$/, '')
 
-const requestError = (status: number, code: unknown) => {
-  if (status === 404 && code === 'BIBLE_UNSUPPORTED') {
-    return new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+const requestError = (response: Response, code: unknown) => {
+  if (response.status === 404 && code === 'BIBLE_UNSUPPORTED') {
+    return resourceAccessErrorFromHttpResponse('RESOURCE_UNSUPPORTED', response, code, [
+      'acquire-offline-copy',
+    ])
   }
-  if (status === 503) return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
-  return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+  return resourceAccessErrorFromHttpResponse('TEMPORARY_UNAVAILABLE', response, code)
 }
 
 export const createHttpBibleSearchAccess = ({
@@ -81,7 +82,7 @@ export const createHttpBibleSearchAccess = ({
       if (!response.ok) {
         const code =
           payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
-        throw requestError(response.status, code)
+        throw requestError(response, code)
       }
       try {
         return Schema.decodeUnknownSync(BibleSearchResponseDto)(payload)
@@ -101,19 +102,12 @@ export const createHttpBibleSearchAccess = ({
   const run = async (query: string, options: SearchOptions = {}) => {
     const requestedVersions = options.version ? [options.version] : [...versions]
     if (requestedVersions.length === 0) throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
-    const results = await Promise.allSettled(
+    const results = await Promise.all(
       requestedVersions.map(version => searchVersion(version, query, options))
     )
-    const fulfilled = results.flatMap(result =>
-      result.status === 'fulfilled' ? [result.value] : []
-    )
-    if (fulfilled.length === 0) {
-      const failure = results.find(result => result.status === 'rejected')
-      throw failure?.reason ?? new ResourceAccessError('TEMPORARY_UNAVAILABLE')
-    }
     return {
-      results: fulfilled.flatMap(value => Array.from(value.results)),
-      count: fulfilled.reduce((total, value) => total + value.count, 0),
+      results: results.flatMap(value => Array.from(value.results)),
+      count: results.reduce((total, value) => total + value.count, 0),
     }
   }
 
@@ -142,40 +136,23 @@ export const createHybridBibleSearchAccess = ({
   remotelyReadableVersions: ReadonlySet<string>
   isOnline: () => Promise<boolean>
 }): BibleSearchAccess => {
-  const run = async <T>(
-    operation: (access: BibleSearchAccess) => Promise<T>,
-    fallback: () => Promise<T>
-  ) => {
-    if (await isOnline()) {
-      try {
-        return await operation(online)
-      } catch (error) {
-        if (!(error instanceof ResourceAccessError) || error.code === 'INTEGRITY_FAILURE') {
-          throw error
-        }
-      }
-    }
-    return fallback()
+  const select = async (options?: SearchOptions): Promise<BibleSearchAccess> => {
+    if (!(await isOnline())) return offline
+    if (options?.version && !remotelyReadableVersions.has(options.version)) return offline
+    return online
   }
+  const run = async <T>(
+    options: SearchOptions | undefined,
+    operation: (access: BibleSearchAccess) => Promise<T>
+  ) => operation(await select(options))
   return {
     getInstalledVersions: async () => {
       const local = await offline.getInstalledVersions()
       return Array.from(new Set([...local, ...remotelyReadableVersions]))
     },
-    searchPage: (query, options) =>
-      run(
-        access => access.searchPage(query, options),
-        () => offline.searchPage(query, options)
-      ),
-    searchVerses: (query, options) =>
-      run(
-        access => access.searchVerses(query, options),
-        () => offline.searchVerses(query, options)
-      ),
+    searchPage: (query, options) => run(options, access => access.searchPage(query, options)),
+    searchVerses: (query, options) => run(options, access => access.searchVerses(query, options)),
     searchVersesCount: (query, options) =>
-      run(
-        access => access.searchVersesCount(query, options),
-        () => offline.searchVersesCount(query, options)
-      ),
+      run(options, access => access.searchVersesCount(query, options)),
   }
 }

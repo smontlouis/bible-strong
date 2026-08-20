@@ -74,6 +74,20 @@ describe('commentary access', () => {
     })
   })
 
+  it('does not return a partial commentary page when one connected corpus fails', async () => {
+    const local: CommentaryAccess = { loadVersePage: jest.fn(async () => comments('MHY', 0)) }
+    const remote: CommentaryAccess = {
+      loadVersePage: jest.fn(async () => {
+        throw new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+      }),
+    }
+    const access = createCommentaryAccess({ isOnline: async () => true, local, remote })
+
+    await expect(access.loadVersePage('1-1-1')).rejects.toMatchObject({
+      code: 'TEMPORARY_UNAVAILABLE',
+    })
+  })
+
   it('does not merge the French MHY copy into English commentary results', async () => {
     const local: CommentaryAccess = { loadVersePage: jest.fn(async () => comments('MHY', 0)) }
     const remote: CommentaryAccess = { loadVersePage: jest.fn(async () => comments('REMOTE')) }

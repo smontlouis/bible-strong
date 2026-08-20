@@ -1,7 +1,6 @@
 import type { Verse } from '~common/types'
 import { getMultipleVerses, getVerseText } from '~helpers/biblesDb'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { getInterlinearLocalePriority } from '~helpers/interlinearBiblePublications'
 import {
   getInterlinearSidecarAvailability,
   loadInterlinearStrongOccurrencePage,
@@ -30,6 +29,10 @@ import {
 } from './strongBibleResourceAccess'
 import type { BibleChapterAdapter } from './bibleChapterSource'
 import type { InterlinearBibleResourceAccess } from './interlinearBibleResourceAccess'
+import {
+  ResourceAccessError,
+  resourceAccessErrorFromBibleChapterUnavailable,
+} from './resourceAccessError'
 
 export type BhgLexiconProvenance = {
   sourceKind: 'interlinear'
@@ -45,6 +48,8 @@ export type LexiconBibleProvenance =
 
 export type LexiconBibleVerseResult =
   | Exclude<StrongBibleVerseResult, { status: 'available' }>
+  | BhgLexiconUnavailable
+  | BhgLexiconMissingLocation
   | {
       status: 'available'
       provenance: LexiconBibleProvenance
@@ -77,6 +82,13 @@ export type BhgLexiconAvailability =
         status: InterlinearSidecarAvailability['status']
       }[]
     }
+
+type BhgLexiconUnavailable = Extract<BhgLexiconAvailability, { status: 'unavailable' }>
+
+type BhgLexiconMissingLocation = {
+  status: 'missing-location'
+  provenance: BhgLexiconProvenance
+}
 
 export interface InterlinearLexiconAdapter {
   getInterlinearAvailability: (locale: ResourceLanguage) => Promise<InterlinearSidecarAvailability>
@@ -114,6 +126,7 @@ export interface LexiconBibleResourceAccess {
 
 export type LexiconBibleCountsResult =
   | Exclude<StrongBibleCountsResult, { status: 'available' }>
+  | BhgLexiconUnavailable
   | {
       status: 'available'
       provenance: LexiconBibleProvenance
@@ -129,6 +142,7 @@ type BhgLexiconFoundVersesResult = {
 
 export type LexiconBibleFoundVersesResult =
   | Exclude<StrongBibleFoundVersesResult, { status: 'available' }>
+  | BhgLexiconUnavailable
   | BhgLexiconFoundVersesResult
   | {
       status: 'available'
@@ -140,6 +154,7 @@ export type LexiconBibleFoundVersesResult =
 
 export type LexiconBibleLemmaStatsResult =
   | Exclude<StrongBibleLemmaStatsResult, { status: 'available' }>
+  | BhgLexiconUnavailable
   | {
       status: 'available'
       provenance: LexiconBibleProvenance
@@ -168,12 +183,24 @@ export const localInterlinearLexiconAdapter: InterlinearLexiconAdapter = {
       'BHG',
       page.occurrences.map(({ Livre, Chapitre, Verset }) => `${Livre}-${Chapitre}-${Verset}`)
     )
+    const spansByVerse = new Map(
+      page.occurrences.map(({ tokens, ...location }) => [
+        `${location.Livre}-${location.Chapitre}-${location.Verset}`,
+        createBhgStrongSpans(tokens),
+      ])
+    )
+    if (
+      page.occurrences.some(({ Livre, Chapitre, Verset }) => {
+        const key = `${Livre}-${Chapitre}-${Verset}`
+        return !texts[key] || (spansByVerse.get(key)?.length ?? 0) === 0
+      })
+    ) {
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    }
     const verses = page.occurrences.flatMap(({ tokens, ...location }) => {
       const key = `${location.Livre}-${location.Chapitre}-${location.Verset}`
       const text = texts[key]
-      return text == null
-        ? []
-        : [{ ...location, Texte: text, StrongSpans: createBhgStrongSpans(tokens) }]
+      return text == null ? [] : [{ ...location, Texte: text, StrongSpans: spansByVerse.get(key)! }]
     })
     return { verses, ...(page.nextCursor ? { nextCursor: page.nextCursor } : {}) }
   },
@@ -190,7 +217,13 @@ export const createHybridInterlinearLexiconAdapter = (
       bibleChapterAdapter.loadChapter('BHG', request.book, request.chapter),
       interlinearBible.loadChapterTokens(locale, request),
     ])
-    if (chapter.status !== 'available') return undefined
+    if (chapter.status !== 'available') {
+      throw resourceAccessErrorFromBibleChapterUnavailable(
+        chapter.reason,
+        chapter.recoveries,
+        chapter.diagnostics
+      )
+    }
     const text = chapter.verses.find(verse => Number(verse.Verset) === request.verse)?.Texte
     if (text == null) return undefined
     return { text, tokens: interlinear.tokensByVerse[request.verse] ?? [] }
@@ -225,11 +258,11 @@ const resolveBhgAvailability = async (
 ): Promise<BhgLexiconAvailability> => {
   const attempts: Extract<BhgLexiconAvailability, { status: 'unavailable' }>['attempts'] = []
 
-  for (const locale of getInterlinearLocalePriority(preferredLocale)) {
-    const availability = await getAvailability(locale)
-    if (availability.status === 'available') return { status: 'available', locale }
-    attempts.push({ locale, status: availability.status })
+  const availability = await getAvailability(preferredLocale)
+  if (availability.status === 'available') {
+    return { status: 'available', locale: preferredLocale }
   }
+  attempts.push({ locale: preferredLocale, status: availability.status })
 
   return { status: 'unavailable', attempts }
 }
@@ -292,15 +325,6 @@ const enrichStrongVerseWithInterlinearTokens = (
 export const createLexiconBibleResourceAccess = (
   dependencies: LexiconBibleResourceDependencies = defaultDependencies
 ): LexiconBibleResourceAccess => {
-  const resolveBhg = async (request: LexiconBibleConcordanceRequest) => {
-    if (request.currentVersionId !== 'BHG' || request.preferredVersionId) return undefined
-    const availability = await resolveBhgAvailability(
-      request.preferredInterlinearLocale,
-      dependencies.interlinear.getInterlinearAvailability
-    )
-    return availability.status === 'available' ? availability.locale : undefined
-  }
-
   const bhgProvenance = (locale: ResourceLanguage): BhgLexiconProvenance => ({
     sourceKind: 'interlinear',
     versionId: 'BHG',
@@ -313,36 +337,28 @@ export const createLexiconBibleResourceAccess = (
     getInterlinearAvailability: dependencies.interlinear.getInterlinearAvailability,
     async loadVerse(request) {
       if (request.currentVersionId === 'BHG' && !request.preferredVersionId) {
-        try {
-          const availability = await resolveBhgAvailability(
-            request.preferredInterlinearLocale,
-            dependencies.interlinear.getInterlinearAvailability
-          )
-          if (availability.status === 'available') {
-            const loaded = await dependencies.interlinear.loadVerse(availability.locale, request)
-            const spans = createBhgStrongSpans(loaded?.tokens ?? [])
-            if (loaded && spans.length) {
-              return {
-                status: 'available',
-                provenance: {
-                  sourceKind: 'interlinear',
-                  versionId: 'BHG',
-                  datasetId: 'STEP',
-                  locale: availability.locale,
-                  isFallback: false,
-                },
-                verse: {
-                  Livre: request.book,
-                  Chapitre: request.chapter,
-                  Verset: request.verse,
-                  Texte: loaded.text,
-                  StrongSpans: spans,
-                },
-              }
-            }
-          }
-        } catch {
-          // A corrupt or unreadable contextual index must not block the traditional Strong fallback.
+        const availability = await resolveBhgAvailability(
+          request.preferredInterlinearLocale,
+          dependencies.interlinear.getInterlinearAvailability
+        )
+        if (availability.status === 'unavailable') return availability
+        const provenance = bhgProvenance(availability.locale)
+        const loaded = await dependencies.interlinear.loadVerse(availability.locale, request)
+        const spans = createBhgStrongSpans(loaded?.tokens ?? [])
+        if (!loaded) {
+          return { status: 'missing-location', provenance }
+        }
+        if (!spans.length) throw new ResourceAccessError('INTEGRITY_FAILURE')
+        return {
+          status: 'available',
+          provenance,
+          verse: {
+            Livre: request.book,
+            Chapitre: request.chapter,
+            Verset: request.verse,
+            Texte: loaded.text,
+            StrongSpans: spans,
+          },
         }
       }
 
@@ -367,17 +383,19 @@ export const createLexiconBibleResourceAccess = (
     },
 
     async loadCountsByBook(request) {
-      const locale = await resolveBhg(request)
-      if (!locale) return dependencies.strongBible.loadCountsByBook(request)
-      try {
+      if (request.currentVersionId === 'BHG' && !request.preferredVersionId) {
+        const availability = await resolveBhgAvailability(
+          request.preferredInterlinearLocale,
+          dependencies.interlinear.getInterlinearAvailability
+        )
+        if (availability.status === 'unavailable') return availability
         return {
           status: 'available',
-          provenance: bhgProvenance(locale),
-          counts: await dependencies.interlinear.loadCountsByBook(locale, request),
+          provenance: bhgProvenance(availability.locale),
+          counts: await dependencies.interlinear.loadCountsByBook(availability.locale, request),
         }
-      } catch {
-        return dependencies.strongBible.loadCountsByBook(request)
       }
+      return dependencies.strongBible.loadCountsByBook(request)
     },
 
     async loadFoundVersesByBook(request) {
@@ -394,38 +412,49 @@ export const createLexiconBibleResourceAccess = (
         }
       }
 
-      const locale = page?.kind === 'strong' ? undefined : await resolveBhg(request)
-      if (!locale) return loadStrongPage()
-      try {
-        const interlinearPage = await dependencies.interlinear.loadFoundVersesByBook(locale, {
+      if (request.currentVersionId !== 'BHG' || request.preferredVersionId) return loadStrongPage()
+      if (page?.kind === 'strong') throw new Error('BHG concordance cannot use a Strong page token')
+      const availability = await resolveBhgAvailability(
+        request.preferredInterlinearLocale,
+        dependencies.interlinear.getInterlinearAvailability
+      )
+      if (availability.status === 'unavailable') return availability
+      const interlinearPage = await dependencies.interlinear.loadFoundVersesByBook(
+        availability.locale,
+        {
           ...request,
           cursor: page?.kind === 'interlinear' ? page.cursor : undefined,
-        })
-        return {
-          status: 'available',
-          provenance: bhgProvenance(locale),
-          verses: interlinearPage.verses,
-          ...(interlinearPage.nextCursor
-            ? {
-                nextPageToken: encodePageToken({
-                  kind: 'interlinear',
-                  cursor: interlinearPage.nextCursor,
-                }),
-              }
-            : {}),
         }
-      } catch {
-        if (page?.kind === 'interlinear') {
-          throw new Error('The interlinear continuation could not be loaded')
-        }
-        return loadStrongPage()
+      )
+      return {
+        status: 'available',
+        provenance: bhgProvenance(availability.locale),
+        verses: interlinearPage.verses,
+        ...(interlinearPage.nextCursor
+          ? {
+              nextPageToken: encodePageToken({
+                kind: 'interlinear',
+                cursor: interlinearPage.nextCursor,
+              }),
+            }
+          : {}),
       }
     },
 
     async loadLemmaStats(request) {
-      const locale = await resolveBhg(request)
-      if (!locale) return dependencies.strongBible.loadLemmaStats(request)
-      return { status: 'available', provenance: bhgProvenance(locale), lemmas: [] }
+      if (request.currentVersionId === 'BHG' && !request.preferredVersionId) {
+        const availability = await resolveBhgAvailability(
+          request.preferredInterlinearLocale,
+          dependencies.interlinear.getInterlinearAvailability
+        )
+        if (availability.status === 'unavailable') return availability
+        return {
+          status: 'available',
+          provenance: bhgProvenance(availability.locale),
+          lemmas: [],
+        }
+      }
+      return dependencies.strongBible.loadLemmaStats(request)
     },
   }
 }

@@ -3,6 +3,8 @@ import { Schema } from 'effect'
 import type { Verse } from '~common/types'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import type { BibleRecoveryAction } from '~helpers/bibleErrors'
+import type { ResourceAccessErrorDiagnostics } from './resourceAccessError'
+import { resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 import {
   BibleChapterDto,
   BibleVerseTextsDto,
@@ -32,6 +34,7 @@ export type BibleChapterSourceResult =
       status: 'unavailable'
       reason: BibleChapterUnavailableReason
       recoveries?: BibleRecoveryAction[]
+      diagnostics?: ResourceAccessErrorDiagnostics
     }
 
 export type BibleChapterAdapter = {
@@ -55,6 +58,7 @@ export type BibleVerseTextsSourceResult =
       status: 'unavailable'
       reason: BibleChapterUnavailableReason
       recoveries?: BibleRecoveryAction[]
+      diagnostics?: ResourceAccessErrorDiagnostics
     }
 
 export type BibleCoverageSourceResult =
@@ -64,7 +68,11 @@ export type BibleCoverageSourceResult =
       textRevision?: string
       textSha256?: string
     }
-  | { status: 'unavailable'; reason: BibleChapterUnavailableReason }
+  | {
+      status: 'unavailable'
+      reason: BibleChapterUnavailableReason
+      diagnostics?: ResourceAccessErrorDiagnostics
+    }
 
 export const isUsableBibleCoverage = (result: BibleCoverageSourceResult) =>
   result.status === 'available' && result.coverage.books.length > 0
@@ -72,7 +80,8 @@ export const isUsableBibleCoverage = (result: BibleCoverageSourceResult) =>
 export class BibleVerseTextSourceError extends Error {
   constructor(
     public readonly reason: BibleChapterUnavailableReason,
-    public readonly recoveries?: BibleRecoveryAction[]
+    public readonly recoveries?: BibleRecoveryAction[],
+    public readonly diagnostics?: ResourceAccessErrorDiagnostics
   ) {
     super(reason)
     this.name = 'BibleVerseTextSourceError'
@@ -90,13 +99,21 @@ export const loadVerseTextsFromChapterAdapter = async (
   if (adapter.loadVerseTexts) {
     const selection = await adapter.loadVerseTexts(version, verseKeys, shouldCancel)
     if (selection.status === 'unavailable') {
-      throw new BibleVerseTextSourceError(selection.reason, selection.recoveries)
+      throw new BibleVerseTextSourceError(
+        selection.reason,
+        selection.recoveries,
+        selection.diagnostics
+      )
     }
     if (
       (expectedTextRevision !== undefined && selection.textRevision !== expectedTextRevision) ||
       (expectedTextSha256 !== undefined && selection.textSha256 !== expectedTextSha256)
     ) {
       throw new BibleVerseTextSourceError('integrity-failure')
+    }
+    const requestedVerseKeys = verseKeys.filter(verseKey => parseBibleVerseKey(verseKey))
+    if (requestedVerseKeys.some(verseKey => selection.texts[verseKey] === undefined)) {
+      throw new BibleVerseTextSourceError('verses-not-available')
     }
     return selection.texts
   }
@@ -114,13 +131,15 @@ export const loadVerseTextsFromChapterAdapter = async (
   }
 
   const result: Record<string, string> = {}
-  let firstUnavailable: Extract<BibleChapterSourceResult, { status: 'unavailable' }> | undefined
   for (const group of chapters.values()) {
     if (shouldCancel?.()) return result
     const chapterResult = await adapter.loadChapter(version, group.book, group.chapter)
     if (chapterResult.status !== 'available') {
-      firstUnavailable ??= chapterResult
-      continue
+      throw new BibleVerseTextSourceError(
+        chapterResult.reason,
+        chapterResult.recoveries,
+        chapterResult.diagnostics
+      )
     }
     if (
       (expectedTextRevision !== undefined && chapterResult.textRevision !== expectedTextRevision) ||
@@ -136,8 +155,9 @@ export const loadVerseTextsFromChapterAdapter = async (
     }
   }
 
-  if (Object.keys(result).length === 0 && firstUnavailable) {
-    throw new BibleVerseTextSourceError(firstUnavailable.reason, firstUnavailable.recoveries)
+  const requestedVerseKeys = [...chapters.values()].flatMap(group => group.verseKeys)
+  if (requestedVerseKeys.some(verseKey => result[verseKey] === undefined)) {
+    throw new BibleVerseTextSourceError('verses-not-available')
   }
 
   return result
@@ -271,7 +291,11 @@ export const createHttpBibleChapterAdapter = ({
     decode: (payload: unknown) => Value
   ): Promise<
     | { status: 'success'; value: Value }
-    | { status: 'unavailable'; reason: BibleChapterUnavailableReason }
+    | {
+        status: 'unavailable'
+        reason: BibleChapterUnavailableReason
+        diagnostics?: ResourceAccessErrorDiagnostics
+      }
   > => {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
@@ -284,7 +308,26 @@ export const createHttpBibleChapterAdapter = ({
       if (!response.ok) {
         const code =
           payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
-        return { status: 'unavailable', reason: problemReason(response.status, code) }
+        const reason = problemReason(response.status, code)
+        const resourceCode =
+          reason === 'resource-unsupported'
+            ? 'RESOURCE_UNSUPPORTED'
+            : reason === 'chapter-not-available' || reason === 'verses-not-available'
+              ? 'NOT_FOUND'
+              : 'TEMPORARY_UNAVAILABLE'
+        const error = resourceAccessErrorFromHttpResponse(resourceCode, response, code)
+        return {
+          status: 'unavailable',
+          reason,
+          diagnostics: {
+            ...(error.httpStatus === undefined ? {} : { httpStatus: error.httpStatus }),
+            ...(error.requestId === undefined ? {} : { requestId: error.requestId }),
+            ...(error.retryAfterSeconds === undefined
+              ? {}
+              : { retryAfterSeconds: error.retryAfterSeconds }),
+            ...(error.serverCode === undefined ? {} : { serverCode: error.serverCode }),
+          },
+        }
       }
       try {
         return { status: 'success', value: decode(payload) }

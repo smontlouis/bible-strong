@@ -24,7 +24,7 @@ import {
   StrongLexiconMorphologyResponseDto,
   StrongLexiconSearchResponseDto,
 } from './strongLexiconContract'
-import { ResourceAccessError } from './resourceAccessError'
+import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 
 const STRONG_LEXICON_MODULE_SCHEMA_VERSION = 2
 
@@ -1136,17 +1136,19 @@ type HttpStrongLexiconAccessOptions = {
   timeoutMs?: number
 }
 
-const mapHttpStrongLexiconFailure = (status: number, code: unknown) => {
+const mapHttpStrongLexiconFailure = (response: Response, code: unknown) => {
   if (
-    status === 404 &&
+    response.status === 404 &&
     (code === 'STRONG_LEXICON_ENTRY_NOT_FOUND' || code === 'STRONG_LEXICON_ENTITY_NOT_FOUND')
   ) {
-    return new ResourceAccessError('NOT_FOUND')
+    return resourceAccessErrorFromHttpResponse('NOT_FOUND', response, code)
   }
-  if (status === 503 && code === 'STRONG_LEXICON_PUBLICATION_INACTIVE') {
-    return new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+  if (response.status === 503 && code === 'STRONG_LEXICON_PUBLICATION_INACTIVE') {
+    return resourceAccessErrorFromHttpResponse('OFFLINE_COPY_REQUIRED', response, code, [
+      'acquire-offline-copy',
+    ])
   }
-  return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+  return resourceAccessErrorFromHttpResponse('TEMPORARY_UNAVAILABLE', response, code)
 }
 
 export const createHttpStrongLexiconAccess = ({
@@ -1168,7 +1170,7 @@ export const createHttpStrongLexiconAccess = ({
       if (!response.ok) {
         const code =
           payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
-        throw mapHttpStrongLexiconFailure(response.status, code)
+        throw mapHttpStrongLexiconFailure(response, code)
       }
       try {
         return Schema.decodeUnknownSync(schema)(payload)

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Accepted, with semantic fallback clauses superseded by ADR-0028.
 
 ## Context
 

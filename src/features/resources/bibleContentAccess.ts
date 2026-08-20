@@ -21,10 +21,8 @@ import {
   getIfVersionNeedsDownload,
 } from '~helpers/bibleVersions'
 import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
-import { localStrongLexiconAccess, type StrongLexiconAccess } from './strongLexiconAccess'
 import {
   isStrongCapableBibleVersion,
-  resolveStrongBibleVersion,
   type StrongBibleVersionId,
   type StrongMode,
   usesCanonicalBibleExtras,
@@ -36,7 +34,6 @@ import {
 import {
   getInterlinearLocalePriority,
   isInterlinearModeEnabled,
-  normalizeInterlinearMode,
   type InterlinearMode,
 } from '~helpers/interlinearDisplayMode'
 import { loadInterlinearChapterTokens } from '~helpers/interlinearBibleSidecar'
@@ -44,14 +41,9 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import {
   buildReverseInterlinearSpans,
   getMissingReverseInterlinearStrongCodes,
-  type ReverseInterlinearLexicalEntry,
 } from '~helpers/reverseInterlinearBible'
-import {
-  createStrongIdentityForBook,
-  resolveDisplayedStrongIdentities,
-} from '~helpers/strongIdentities'
+import { resolveDisplayedStrongIdentities } from '~helpers/strongIdentities'
 import { collectStrongSelectionMorphologies } from '~helpers/strongSelection'
-import { getResourceLanguage } from '~state/resourcesLanguage'
 import {
   type BibleChapterAdapter,
   type BibleChapterUnavailableReason,
@@ -63,7 +55,10 @@ import {
   type StrongBibleChapterSpansPayload,
   type StrongBibleResourceAccess,
 } from './strongBibleResourceAccess'
-import { ResourceAccessError } from './resourceAccessError'
+import {
+  ResourceAccessError,
+  resourceAccessErrorFromBibleChapterUnavailable,
+} from './resourceAccessError'
 import {
   localInterlinearBibleResourceAccess,
   type InterlinearBibleResourceAccess,
@@ -128,8 +123,6 @@ const loadLocalBibleCoverage = async (version: string): Promise<BibleVersionCove
 }
 
 type BibleContentAccessDependencies = {
-  strongLexicon: Pick<StrongLexiconAccess, 'loadPreview'>
-  getStrongResourceLanguage: () => ResourceLanguage
   chapterAdapter: BibleChapterAdapter
   logError: (message: string, error: unknown) => void
   loadStrongBibleChapterSpans?: (
@@ -149,6 +142,7 @@ type BibleContentAccessDependencies = {
     | StrongBibleChapterSpansPayload
   >
   loadInterlinearChapterTokens?: typeof loadInterlinearChapterTokens
+  getInterlinearAvailability?: InterlinearBibleResourceAccess['getAvailability']
 }
 
 export const localBibleChapterAdapter: BibleChapterAdapter = {
@@ -291,26 +285,92 @@ const unavailableReasonToErrorType = (
   }
 }
 
+const resourceAccessErrorToBibleErrorType = (
+  code: ResourceAccessError['code']
+): import('~helpers/bibleErrors').BibleErrorType => {
+  switch (code) {
+    case 'OFFLINE_COPY_REQUIRED':
+      return 'BIBLE_NOT_FOUND'
+    case 'INVALID_OFFLINE_COPY':
+      return 'OFFLINE_COPY_INVALID'
+    case 'NETWORK_OFFLINE':
+      return 'RESOURCE_OFFLINE'
+    case 'RESOURCE_UNSUPPORTED':
+      return 'RESOURCE_UNSUPPORTED'
+    case 'INTEGRITY_FAILURE':
+      return 'RESOURCE_INTEGRITY_ERROR'
+    case 'TEMPORARY_UNAVAILABLE':
+      return 'RESOURCE_TEMPORARY_UNAVAILABLE'
+    case 'NOT_FOUND':
+      return 'CHAPTER_NOT_FOUND'
+    case 'UNKNOWN':
+      return 'UNKNOWN_ERROR'
+  }
+}
+
 const defaultDependencies: BibleContentAccessDependencies = {
-  strongLexicon: localStrongLexiconAccess,
-  getStrongResourceLanguage: () => getResourceLanguage('STRONG'),
   chapterAdapter: localBibleChapterAdapter,
   logError: (message, error) => console.log(message, error),
   loadStrongBibleChapterSpans,
   loadReverseInterlinearChapterSpans,
   loadInterlinearChapterTokens,
+  getInterlinearAvailability: localInterlinearBibleResourceAccess.getAvailability,
+}
+
+const resolveRequestedInterlinearLocale = async (
+  request: BibleChapterRequest,
+  dependencies: BibleContentAccessDependencies
+): Promise<ResourceLanguage> => {
+  const preferredLocale = request.interlinearLocale ?? 'fr'
+  if (!request.interlinearLocaleAutomatic || !dependencies.getInterlinearAvailability) {
+    return preferredLocale
+  }
+  for (const locale of getInterlinearLocalePriority(preferredLocale)) {
+    const availability = await dependencies.getInterlinearAvailability(locale)
+    if (availability.status === 'available') return locale
+    if (availability.status !== 'missing') return preferredLocale
+  }
+  return preferredLocale
 }
 
 const loadRegularBibleChapter = async (
   request: BibleChapterRequest,
   dependencies: BibleContentAccessDependencies
 ): Promise<BibleChapterResult<BibleChapterData>> => {
+  if (
+    request.version === 'BHG' &&
+    isInterlinearModeEnabled(request.interlinearMode) &&
+    !dependencies.loadInterlinearChapterTokens
+  ) {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
+  }
+  if (
+    request.strongMode === 'reverse-interlinear' &&
+    (!isStrongCapableBibleVersion(request.version) ||
+      !dependencies.loadReverseInterlinearChapterSpans ||
+      !dependencies.loadInterlinearChapterTokens)
+  ) {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
+  }
+  if (
+    request.strongMode === 'visible' &&
+    (!isStrongCapableBibleVersion(request.version) || !dependencies.loadStrongBibleChapterSpans)
+  ) {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
+  }
   const chapter = await dependencies.chapterAdapter.loadChapter(
     request.version,
     request.book,
     request.chapter
   )
   if (chapter.status === 'unavailable') {
+    if (chapter.diagnostics) {
+      throw resourceAccessErrorFromBibleChapterUnavailable(
+        chapter.reason,
+        chapter.recoveries,
+        chapter.diagnostics
+      )
+    }
     return errorResult(
       createBibleError(
         unavailableReasonToErrorType(chapter.reason),
@@ -331,37 +391,29 @@ const loadRegularBibleChapter = async (
     isInterlinearModeEnabled(request.interlinearMode) &&
     dependencies.loadInterlinearChapterTokens
   ) {
-    const preferredLocale = request.interlinearLocale ?? 'fr'
-    const displayMode = normalizeInterlinearMode(request.interlinearMode)
-    const locales =
-      request.interlinearLocaleAutomatic || displayMode !== 'interlinear'
-        ? getInterlinearLocalePriority(preferredLocale)
-        : ([preferredLocale] as const)
-
-    for (const locale of locales) {
-      try {
-        const tokensByVerse = await dependencies.loadInterlinearChapterTokens(
-          'BHG',
-          locale,
-          request.book,
-          request.chapter
-        )
-        return successResult({
-          kind: 'interlinear',
-          presentation,
-          verses: verses.map(verse => ({
-            ...verse,
-            InterlinearTokens: tokensByVerse[Number(verse.Verset)] ?? [],
-          })),
-        })
-      } catch (error) {
-        dependencies.logError(
-          `[BibleContentAccess] Interlinear ${locale} sidecar unavailable:`,
-          error
-        )
-      }
+    const locale = await resolveRequestedInterlinearLocale(request, dependencies)
+    const tokensByVerse = await dependencies.loadInterlinearChapterTokens(
+      'BHG',
+      locale,
+      request.book,
+      request.chapter
+    )
+    if (
+      verses.some(verse => {
+        const tokens = tokensByVerse[Number(verse.Verset)]
+        return !tokens || tokens.length === 0
+      })
+    ) {
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
     }
-    return successResult({ kind: 'plain', verses, presentation })
+    return successResult({
+      kind: 'interlinear',
+      presentation,
+      verses: verses.map(verse => ({
+        ...verse,
+        InterlinearTokens: tokensByVerse[Number(verse.Verset)] ?? [],
+      })),
+    })
   }
 
   if (
@@ -370,126 +422,15 @@ const loadRegularBibleChapter = async (
     dependencies.loadReverseInterlinearChapterSpans &&
     dependencies.loadInterlinearChapterTokens
   ) {
-    try {
-      const [strongChapter, originalVerses] = await Promise.all([
-        dependencies.loadReverseInterlinearChapterSpans(
-          request.version as StrongBibleVersionId,
-          request.book,
-          request.chapter
-        ),
-        dependencies.chapterAdapter.loadChapter('BHG', request.book, request.chapter),
-      ])
-      const targetSpansByVerse =
-        'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
-      if (
-        'spansByVerse' in strongChapter &&
-        ((strongChapter.textRevision !== undefined &&
-          chapter.textRevision !== strongChapter.textRevision) ||
-          (strongChapter.textSha256 !== undefined &&
-            chapter.textSha256 !== strongChapter.textSha256))
-      ) {
-        throw new ResourceAccessError('INTEGRITY_FAILURE')
-      }
-      const preferredLocale = request.interlinearLocale ?? 'fr'
-      let sourceTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
-      for (const locale of getInterlinearLocalePriority(preferredLocale)) {
-        try {
-          sourceTokensByVerse = await dependencies.loadInterlinearChapterTokens(
-            'BHG',
-            locale,
-            request.book,
-            request.chapter
-          )
-          break
-        } catch (error) {
-          dependencies.logError(
-            `[BibleContentAccess] Reverse interlinear ${locale} index unavailable:`,
-            error
-          )
-        }
-      }
-
-      const originalTextByVerse = new Map(
-        (originalVerses.status === 'available' ? originalVerses.verses : []).map(
-          verse => [Number(verse.Verset), verse.Texte] as const
-        )
-      )
-      let lexicalEntries: ReverseInterlinearLexicalEntry[] = []
-      let reverseSpansByVerse = Object.fromEntries(
-        Object.entries(targetSpansByVerse).map(([verse, spans]) => [
-          verse,
-          buildReverseInterlinearSpans({
-            originalText: originalTextByVerse.get(Number(verse)) ?? '',
-            targetSpans: spans,
-            sourceTokens: sourceTokensByVerse[Number(verse)] ?? [],
-            lexicalEntries,
-          }),
-        ])
-      )
-      const fallbackReferences = [
-        ...new Set(
-          Object.values(reverseSpansByVerse).flat().flatMap(getMissingReverseInterlinearStrongCodes)
-        ),
-      ]
-      if (fallbackReferences.length > 0) {
-        try {
-          const loadedEntries = await dependencies.strongLexicon.loadPreview(
-            fallbackReferences.map(reference =>
-              createStrongIdentityForBook(reference, request.book)
-            ),
-            dependencies.getStrongResourceLanguage()
-          )
-          lexicalEntries = loadedEntries.map(entry => ({
-            Code: entry.classicStrong,
-            Hebreu: entry.language === 'hebrew' ? entry.original : '',
-            Grec: entry.language === 'greek' ? entry.original : '',
-            Phonetique: entry.transliteration,
-          }))
-          reverseSpansByVerse = Object.fromEntries(
-            Object.entries(targetSpansByVerse).map(([verse, spans]) => [
-              verse,
-              buildReverseInterlinearSpans({
-                originalText: originalTextByVerse.get(Number(verse)) ?? '',
-                targetSpans: spans,
-                sourceTokens: sourceTokensByVerse[Number(verse)] ?? [],
-                lexicalEntries,
-              }),
-            ])
-          )
-        } catch (error) {
-          dependencies.logError('[BibleContentAccess] Strong lexical fallback unavailable:', error)
-        }
-      }
-
-      return successResult({
-        kind: 'reverse-interlinear',
-        presentation,
-        verses: verses.map(verse => ({
-          ...verse,
-          ReverseInterlinearSpans: reverseSpansByVerse[Number(verse.Verset)] ?? [],
-        })),
-      })
-    } catch (error) {
-      dependencies.logError('[BibleContentAccess] Reverse interlinear unavailable:', error)
-      return successResult({ kind: 'plain', verses, presentation })
-    }
-  }
-
-  if (
-    request.strongMode !== 'visible' ||
-    !isStrongCapableBibleVersion(request.version) ||
-    !dependencies.loadStrongBibleChapterSpans
-  ) {
-    return successResult({ kind: 'plain', verses, presentation })
-  }
-
-  try {
-    const strongChapter = await dependencies.loadStrongBibleChapterSpans(
-      request.version as StrongBibleVersionId,
-      request.book,
-      request.chapter
-    )
-    const spansByVerse =
+    const [strongChapter, originalVerses] = await Promise.all([
+      dependencies.loadReverseInterlinearChapterSpans(
+        request.version as StrongBibleVersionId,
+        request.book,
+        request.chapter
+      ),
+      dependencies.chapterAdapter.loadChapter('BHG', request.book, request.chapter),
+    ])
+    const targetSpansByVerse =
       'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
     if (
       'spansByVerse' in strongChapter &&
@@ -499,55 +440,127 @@ const loadRegularBibleChapter = async (
     ) {
       throw new ResourceAccessError('INTEGRITY_FAILURE')
     }
-    let alignedTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
-    if (dependencies.loadInterlinearChapterTokens) {
-      for (const locale of getInterlinearLocalePriority(request.interlinearLocale ?? 'fr')) {
-        try {
-          alignedTokensByVerse = await dependencies.loadInterlinearChapterTokens(
-            'BHG',
-            locale,
-            request.book,
-            request.chapter
-          )
-          break
-        } catch {
-          // The Strong view remains available without the optional BHG alignment.
-        }
-      }
+    if (originalVerses.status === 'unavailable') {
+      throw resourceAccessErrorFromBibleChapterUnavailable(
+        originalVerses.reason,
+        originalVerses.recoveries,
+        originalVerses.diagnostics
+      )
     }
-    return successResult({
-      kind: 'strong',
-      presentation,
-      verses: verses.map(verse => {
-        const verseNumber = Number(verse.Verset)
-        const alignedTokens = alignedTokensByVerse[verseNumber] ?? []
-        const alignedTokensById = new Map(
-          alignedTokens.flatMap(token => (token.id == null ? [] : [[token.id, token] as const]))
-        )
-        return {
-          ...verse,
-          StrongSpans: (spansByVerse[verseNumber] ?? []).map(span => {
-            const alignedSegments = (span.stepTokenIds ?? []).flatMap(
-              tokenId => alignedTokensById.get(tokenId)?.segments ?? []
-            )
-            const identities = resolveDisplayedStrongIdentities(
-              span.identities,
-              alignedSegments.flatMap(segment => segment.identities)
-            )
-            const morphologies = collectStrongSelectionMorphologies(identities, alignedSegments)
-            return {
-              ...span,
-              identities,
-              ...(morphologies.length ? { morphologies } : {}),
-            }
-          }),
-        }
-      }),
+    const locale = await resolveRequestedInterlinearLocale(request, dependencies)
+    const sourceTokensByVerse = await dependencies.loadInterlinearChapterTokens(
+      'BHG',
+      locale,
+      request.book,
+      request.chapter
+    )
+    const originalTextByVerse = new Map(
+      originalVerses.verses.map(verse => [Number(verse.Verset), verse.Texte] as const)
+    )
+    const sourceTokens = Object.entries(sourceTokensByVerse).flatMap(([verse, tokens]) => {
+      const originalText = originalTextByVerse.get(Number(verse))
+      if (originalText === undefined) return []
+      return tokens.flatMap(token => {
+        const tokenEnd = token.startOffset + token.length
+        if (token.startOffset < 0 || token.length < 0 || tokenEnd > originalText.length) return []
+        return [{ ...token, surface: originalText.slice(token.startOffset, tokenEnd) }]
+      })
     })
-  } catch (error) {
-    dependencies.logError('[BibleContentAccess] Strong sidecar unavailable:', error)
+    const sourceTokenIds = new Set(
+      sourceTokens.flatMap(token => (token.id === undefined ? [] : [token.id]))
+    )
+    const requiredSourceTokenIds = Object.values(targetSpansByVerse)
+      .flat()
+      .flatMap(span => span.stepTokenIds ?? [])
+    if (requiredSourceTokenIds.some(tokenId => !sourceTokenIds.has(tokenId))) {
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    }
+    const reverseSpansByVerse = Object.fromEntries(
+      Object.entries(targetSpansByVerse).map(([verse, spans]) => [
+        verse,
+        buildReverseInterlinearSpans({
+          targetSpans: spans,
+          sourceTokens,
+        }),
+      ])
+    )
+    const missingReferences = [
+      ...new Set(
+        Object.values(reverseSpansByVerse).flat().flatMap(getMissingReverseInterlinearStrongCodes)
+      ),
+    ]
+    if (missingReferences.length > 0) throw new ResourceAccessError('INTEGRITY_FAILURE')
+
+    return successResult({
+      kind: 'reverse-interlinear',
+      presentation,
+      verses: verses.map(verse => ({
+        ...verse,
+        ReverseInterlinearSpans: reverseSpansByVerse[Number(verse.Verset)] ?? [],
+      })),
+    })
+  }
+
+  if (request.strongMode !== 'visible') {
     return successResult({ kind: 'plain', verses, presentation })
   }
+
+  const strongChapter = await dependencies.loadStrongBibleChapterSpans!(
+    request.version as StrongBibleVersionId,
+    request.book,
+    request.chapter
+  )
+  const spansByVerse = 'spansByVerse' in strongChapter ? strongChapter.spansByVerse : strongChapter
+  if (
+    'spansByVerse' in strongChapter &&
+    ((strongChapter.textRevision !== undefined &&
+      chapter.textRevision !== strongChapter.textRevision) ||
+      (strongChapter.textSha256 !== undefined && chapter.textSha256 !== strongChapter.textSha256))
+  ) {
+    throw new ResourceAccessError('INTEGRITY_FAILURE')
+  }
+  let alignedTokensByVerse: Awaited<ReturnType<typeof loadInterlinearChapterTokens>> = {}
+  if (dependencies.loadInterlinearChapterTokens) {
+    try {
+      alignedTokensByVerse = await dependencies.loadInterlinearChapterTokens(
+        'BHG',
+        request.interlinearLocale ?? 'fr',
+        request.book,
+        request.chapter
+      )
+    } catch {
+      // BHG morphology is optional enrichment; never replace its locale after a load failure.
+    }
+  }
+  return successResult({
+    kind: 'strong',
+    presentation,
+    verses: verses.map(verse => {
+      const verseNumber = Number(verse.Verset)
+      const alignedTokens = alignedTokensByVerse[verseNumber] ?? []
+      const alignedTokensById = new Map(
+        alignedTokens.flatMap(token => (token.id == null ? [] : [[token.id, token] as const]))
+      )
+      return {
+        ...verse,
+        StrongSpans: (spansByVerse[verseNumber] ?? []).map(span => {
+          const alignedSegments = (span.stepTokenIds ?? []).flatMap(
+            tokenId => alignedTokensById.get(tokenId)?.segments ?? []
+          )
+          const identities = resolveDisplayedStrongIdentities(
+            span.identities,
+            alignedSegments.flatMap(segment => segment.identities)
+          )
+          const morphologies = collectStrongSelectionMorphologies(identities, alignedSegments)
+          return {
+            ...span,
+            identities,
+            ...(morphologies.length ? { morphologies } : {}),
+          }
+        }),
+      }
+    }),
+  })
 }
 
 export const loadBibleContentChapter = async (
@@ -555,18 +568,25 @@ export const loadBibleContentChapter = async (
   dependencies: BibleContentAccessDependencies = defaultDependencies
 ): Promise<BibleChapterResult<BibleChapterData>> => {
   try {
-    const resolved = resolveStrongBibleVersion(request.version, request.strongMode)
-    const normalizedRequest = {
-      ...request,
-      version: resolved.versionId,
-      strongMode: resolved.strongMode,
-    }
-    return await loadRegularBibleChapter(normalizedRequest, dependencies)
+    return await loadRegularBibleChapter(request, dependencies)
   } catch (error) {
     dependencies.logError('[BibleContentAccess] Error loading chapter:', error)
 
     if (error instanceof BibleLoadingError) {
       return errorResult(createBibleError(error.type, error.version, request.book, request.chapter))
+    }
+
+    if (error instanceof ResourceAccessError) {
+      const type = resourceAccessErrorToBibleErrorType(error.code)
+      return errorResult(
+        createBibleError(
+          type,
+          request.version,
+          request.book,
+          request.chapter,
+          getBibleRecoveryActions(type)
+        )
+      )
     }
 
     return errorResult(
@@ -593,9 +613,8 @@ export const createBibleContentAccess = (
   } = localStrongBibleResourceAccess,
   interlinearBibleAccess: Pick<
     InterlinearBibleResourceAccess,
-    'loadChapterTokens'
-  > = localInterlinearBibleResourceAccess,
-  strongLexiconAccess: Pick<StrongLexiconAccess, 'loadPreview'> = localStrongLexiconAccess
+    'getAvailability' | 'loadChapterTokens'
+  > = localInterlinearBibleResourceAccess
 ): BibleContentAccess => {
   const loadConfiguredStrongBibleChapterSpans = async (
     versionId: StrongBibleVersionId,
@@ -621,7 +640,6 @@ export const createBibleContentAccess = (
       loadBibleContentChapter(request, {
         ...defaultDependencies,
         chapterAdapter,
-        strongLexicon: strongLexiconAccess,
         loadStrongBibleChapterSpans: async (versionId, book, chapter) => {
           const result = await loadConfiguredStrongBibleChapterSpans(versionId, book, chapter)
           return {
@@ -638,6 +656,7 @@ export const createBibleContentAccess = (
               chapter,
             })
           ).tokensByVerse,
+        getInterlinearAvailability: interlinearBibleAccess.getAvailability,
       }),
     loadVerseTexts: async ({ version, verseKeys, shouldCancel }) => {
       try {
@@ -649,6 +668,13 @@ export const createBibleContentAccess = (
         )
       } catch (error) {
         if (error instanceof BibleVerseTextSourceError) {
+          if (error.diagnostics) {
+            throw resourceAccessErrorFromBibleChapterUnavailable(
+              error.reason,
+              error.recoveries,
+              error.diagnostics
+            )
+          }
           throw new BibleLoadingError(unavailableReasonToErrorType(error.reason), version)
         }
         throw error
@@ -657,6 +683,13 @@ export const createBibleContentAccess = (
     loadCoverage: async version => {
       const result = await chapterAdapter.loadCoverage(version)
       if (result.status === 'available') return result.coverage
+      if (result.diagnostics) {
+        throw resourceAccessErrorFromBibleChapterUnavailable(
+          result.reason,
+          undefined,
+          result.diagnostics
+        )
+      }
       throw new BibleLoadingError(unavailableReasonToErrorType(result.reason), version)
     },
   }

@@ -10,7 +10,12 @@ import {
 } from '~helpers/interlinearBibleSidecar'
 import type { BibleChapterAdapter } from './bibleChapterSource'
 import { InterlinearBibleChapterDto, InterlinearBibleCoverageDto } from './interlinearBibleContract'
-import { mapLocalResourceError, ResourceAccessError } from './resourceAccessError'
+import {
+  mapLocalResourceError,
+  ResourceAccessError,
+  resourceAccessErrorFromBibleChapterUnavailable,
+  resourceAccessErrorFromHttpResponse,
+} from './resourceAccessError'
 
 export type InterlinearChapterTokensPayload = {
   tokensByVerse: InterlinearChapterTokens
@@ -56,39 +61,12 @@ const problemCode = (payload: unknown) =>
 const mapHttpFailure = (response: Response, payload: unknown): ResourceAccessError => {
   const code = problemCode(payload)
   if (response.status === 404 && code === 'INTERLINEAR_CHAPTER_NOT_FOUND') {
-    return new ResourceAccessError('NOT_FOUND')
+    return resourceAccessErrorFromHttpResponse('NOT_FOUND', response, code)
   }
   if (response.status === 404 && code === 'INTERLINEAR_UNSUPPORTED') {
-    return new ResourceAccessError('RESOURCE_UNSUPPORTED')
+    return resourceAccessErrorFromHttpResponse('RESOURCE_UNSUPPORTED', response, code)
   }
-  return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
-}
-
-const unavailableBibleError = (
-  reason: Extract<
-    Awaited<ReturnType<BibleChapterAdapter['loadCoverage']>>,
-    { status: 'unavailable' }
-  >['reason']
-) => {
-  switch (reason) {
-    case 'publication-not-available':
-      return new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
-    case 'chapter-not-available':
-      return new ResourceAccessError('NOT_FOUND')
-    case 'offline-copy-invalid':
-      return new ResourceAccessError('INVALID_OFFLINE_COPY', [
-        'acquire-offline-copy',
-        'manage-offline-copies',
-      ])
-    case 'resource-unsupported':
-      return new ResourceAccessError('RESOURCE_UNSUPPORTED')
-    case 'network-offline':
-      return new ResourceAccessError('NETWORK_OFFLINE')
-    case 'integrity-failure':
-      return new ResourceAccessError('INTEGRITY_FAILURE')
-    case 'temporary-unavailable':
-      return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
-  }
+  return resourceAccessErrorFromHttpResponse('TEMPORARY_UNAVAILABLE', response, code)
 }
 
 const toInterlinearToken = (
@@ -152,7 +130,11 @@ export const createHttpInterlinearBibleResourceAdapter = ({
         const coverage = await get(`${resourcePath(locale)}/coverage`, InterlinearBibleCoverageDto)
         const bibleCoverage = await bibleChapterAdapter.loadCoverage('BHG')
         if (bibleCoverage.status !== 'available') {
-          throw unavailableBibleError(bibleCoverage.reason)
+          throw resourceAccessErrorFromBibleChapterUnavailable(
+            bibleCoverage.reason,
+            undefined,
+            bibleCoverage.diagnostics
+          )
         }
         if (
           bibleCoverage.textRevision !== coverage.resource.textRevision ||
@@ -181,7 +163,11 @@ export const createHttpInterlinearBibleResourceAdapter = ({
         bibleChapterAdapter.loadChapter('BHG', request.book, request.chapter),
       ])
       if (bibleChapter.status !== 'available') {
-        throw unavailableBibleError(bibleChapter.reason)
+        throw resourceAccessErrorFromBibleChapterUnavailable(
+          bibleChapter.reason,
+          bibleChapter.recoveries,
+          bibleChapter.diagnostics
+        )
       }
       if (
         bibleChapter.textRevision !== chapter.resource.textRevision ||

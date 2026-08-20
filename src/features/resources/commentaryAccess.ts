@@ -10,6 +10,7 @@ import { CommentaryVerseResponseDto } from './supplementaryContract'
 import {
   mapLocalResourceError,
   ResourceAccessError,
+  resourceAccessErrorFromHttpResponse,
   unwrapLocalResourceResult,
 } from './resourceAccessError'
 
@@ -174,7 +175,7 @@ export const createHttpCommentaryAccess = ({
         if (response.status === 404 && code === 'SUPPLEMENTARY_CONTENT_NOT_FOUND') {
           throw new CommentaryAccessError('NOT_FOUND')
         }
-        throw new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+        throw resourceAccessErrorFromHttpResponse('TEMPORARY_UNAVAILABLE', response, code)
       }
       let decoded: Schema.Schema.Type<typeof CommentaryVerseResponseDto>
       try {
@@ -263,40 +264,29 @@ export const createCommentaryAccess = ({
         }
       }
     }
-    const [localResult, remoteResult] = await Promise.allSettled([
-      local.loadVersePage(verse),
-      connected
-        ? remote.loadVersePage(verse, undefined, language)
-        : Promise.reject(new ResourceAccessError('NETWORK_OFFLINE')),
-    ])
-
-    if (localResult.status === 'fulfilled' && !combineResults) return localResult.value
-    if (localResult.status === 'fulfilled' && remoteResult.status === 'fulfilled') {
-      return {
-        id: verse,
-        count: localResult.value.count + remoteResult.value.count,
-        comments: [...localResult.value.comments, ...remoteResult.value.comments],
-      }
-    }
-    if (localResult.status === 'fulfilled') return localResult.value
-    if (remoteResult.status === 'fulfilled') return remoteResult.value
-
     if (!connected) {
-      if (
-        localResult.reason instanceof ResourceAccessError &&
-        ['INVALID_OFFLINE_COPY', 'INTEGRITY_FAILURE'].includes(localResult.reason.code)
-      ) {
-        throw localResult.reason
+      try {
+        return await local.loadVersePage(verse)
+      } catch (error) {
+        if (
+          error instanceof ResourceAccessError &&
+          ['INVALID_OFFLINE_COPY', 'INTEGRITY_FAILURE'].includes(error.code)
+        ) {
+          throw error
+        }
+        throw new ResourceAccessError('NETWORK_OFFLINE', ['retry', 'acquire-offline-copy'])
       }
-      throw new ResourceAccessError('NETWORK_OFFLINE', ['retry', 'acquire-offline-copy'])
     }
-    if (remoteResult.reason instanceof CommentaryAccessError) {
-      if (localResult.reason instanceof CommentaryAccessError) throw remoteResult.reason
-      throw localResult.reason
+
+    const [localPage, remotePage] = await Promise.all([
+      local.loadVersePage(verse),
+      remote.loadVersePage(verse, undefined, language),
+    ])
+    return {
+      id: verse,
+      count: localPage.count + remotePage.count,
+      comments: [...localPage.comments, ...remotePage.comments],
     }
-    throw remoteResult.reason instanceof ResourceAccessError
-      ? remoteResult.reason
-      : new ResourceAccessError('TEMPORARY_UNAVAILABLE')
   },
 })
 

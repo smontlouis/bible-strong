@@ -4,7 +4,8 @@
 
 Superseded by the legacy-resource removal decision added to ADR-0013. The BHG and localized-index
 architecture below remains current, but INT and INT_EN are now migrated and removed rather than
-retained as runtime fallbacks.
+retained as runtime fallbacks. ADR-0028 additionally supersedes locale and cross-index substitution
+after a requested resource load fails.
 
 ## Context
 
@@ -52,7 +53,8 @@ When the resource modal opens its Lexicon view from BHG, an installed compatible
 index is the contextual first source. It appears explicitly in the source selector and is selected
 automatically for BHG, while a manually selected traditional Strong Bible remains an override. This
 contextual choice does not change the user's global default Strong Bible. If neither localized BHG
-index is compatible, the existing traditional Strong fallback order remains available.
+index is compatible, the BHG lexical view is unavailable until the user installs or explicitly
+selects a compatible source; it does not substitute a traditional Strong Bible automatically.
 
 BHG keeps one persisted display preference with four states: original text, detailed interlinear,
 original text with Strong identities, or continuous Latin transliteration. The legacy `visible`
@@ -61,10 +63,10 @@ language-neutral and may use either compatible installed index. In parallel disp
 active mode when it is the primary Bible; that mode is not applied to the additional Bible columns.
 
 Gloss language is a separate persisted preference. Automatic follows the application language and
-may fall back to the other installed localized index. An explicit French or English choice never
-silently substitutes the other language: if its index is missing, the selector offers that index
-for download. A completed interlinear-index download invalidates currently displayed Bible data so
-the requested mode or newly available gloss language appears without navigating away.
+selects that locale before loading. Neither Automatic nor an explicit French or English choice
+switches locale after a missing or failed index request; the selector offers the requested index for
+download. A completed interlinear-index download invalidates currently displayed Bible data so the
+requested mode or newly available gloss language appears without navigating away.
 
 ## Consequences
 

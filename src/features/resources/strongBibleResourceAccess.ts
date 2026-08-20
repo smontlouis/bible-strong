@@ -31,7 +31,12 @@ import {
 } from './strongBibleContract'
 import type { BibleChapterAdapter } from './bibleChapterSource'
 import { loadVerseTextsFromChapterAdapter } from './bibleChapterSource'
-import { mapLocalResourceError, ResourceAccessError } from './resourceAccessError'
+import {
+  mapLocalResourceError,
+  ResourceAccessError,
+  resourceAccessErrorFromBibleChapterUnavailable,
+  resourceAccessErrorFromHttpResponse,
+} from './resourceAccessError'
 
 export type { StrongBibleLemmaStat, StrongBibleVerseCountByBook } from '~helpers/strongBibleSidecar'
 
@@ -248,6 +253,9 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
       getMultipleVerses(versionId, keys),
       loadStrongBibleVersesSpans(versionId, locations),
     ])
+    if (keys.some(key => texts[key] === undefined || (spansByVerse[key]?.length ?? 0) === 0)) {
+      throw new ResourceAccessError('INTEGRITY_FAILURE')
+    }
     const verses = locations.flatMap(location => {
       const key = `${location.Livre}-${location.Chapitre}-${location.Verset}`
       const text = texts[key]
@@ -285,12 +293,12 @@ const mapHttpFailure = async (
 ): Promise<ResourceAccessError> => {
   const code = problemCode(payload)
   if (response.status === 404 && code === 'STRONG_BIBLE_CHAPTER_NOT_FOUND') {
-    return new ResourceAccessError('NOT_FOUND')
+    return resourceAccessErrorFromHttpResponse('NOT_FOUND', response, code)
   }
   if (response.status === 404 && code === 'STRONG_BIBLE_UNSUPPORTED') {
-    return new ResourceAccessError('RESOURCE_UNSUPPORTED')
+    return resourceAccessErrorFromHttpResponse('RESOURCE_UNSUPPORTED', response, code)
   }
-  return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+  return resourceAccessErrorFromHttpResponse('TEMPORARY_UNAVAILABLE', response, code)
 }
 
 const toStrongBibleSpan = (
@@ -334,27 +342,12 @@ const bibleChapterUnavailableError = (
     Awaited<ReturnType<BibleChapterAdapter['loadChapter']>>,
     { status: 'unavailable' }
   >
-) => {
-  switch (chapter.reason) {
-    case 'chapter-not-available':
-      return new ResourceAccessError('NOT_FOUND')
-    case 'publication-not-available':
-      return new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
-    case 'offline-copy-invalid':
-      return new ResourceAccessError('INVALID_OFFLINE_COPY', [
-        'acquire-offline-copy',
-        'manage-offline-copies',
-      ])
-    case 'resource-unsupported':
-      return new ResourceAccessError('RESOURCE_UNSUPPORTED')
-    case 'network-offline':
-      return new ResourceAccessError('NETWORK_OFFLINE')
-    case 'integrity-failure':
-      return new ResourceAccessError('INTEGRITY_FAILURE')
-    case 'temporary-unavailable':
-      return new ResourceAccessError('TEMPORARY_UNAVAILABLE')
-  }
-}
+) =>
+  resourceAccessErrorFromBibleChapterUnavailable(
+    chapter.reason,
+    chapter.recoveries,
+    chapter.diagnostics
+  )
 
 export const createHttpStrongBibleResourceAdapter = ({
   baseUrl,
@@ -665,16 +658,12 @@ export const createStrongBibleResourceAccess = (
     const currentVersionId = resolveStrongBibleVersion(request.currentVersionId).versionId
     const languagePriority = getStrongBibleFallbackPriority(currentVersionId)
     const fallbackVersionIds = request.fallbackVersionIds ?? languagePriority
-    const candidates = [
-      ...new Set([
-        request.preferredVersionId,
-        currentVersionId,
-        request.defaultVersionId,
-        ...fallbackVersionIds,
-      ]),
-    ].filter((candidate): candidate is string => Boolean(candidate))
+    const candidates = request.preferredVersionId
+      ? [request.preferredVersionId]
+      : [...new Set([currentVersionId, request.defaultVersionId, ...fallbackVersionIds])].filter(
+          (candidate): candidate is string => Boolean(candidate)
+        )
     const attempts: StrongBibleAttempt[] = []
-    let firstAvailabilityError: unknown
 
     for (const candidate of candidates) {
       if (!isStrongCapableBibleVersion(candidate)) {
@@ -685,8 +674,7 @@ export const createStrongBibleResourceAccess = (
       try {
         availability = await adapter.getAvailability(candidate)
       } catch (error) {
-        firstAvailabilityError ??= error
-        continue
+        throw error
       }
       if (availability.status === 'available') {
         return {
@@ -701,7 +689,6 @@ export const createStrongBibleResourceAccess = (
       attempts.push({ versionId: candidate, status: availability.status })
     }
 
-    if (firstAvailabilityError !== undefined) throw firstAvailabilityError
     return { status: 'unavailable', attempts }
   }
 
