@@ -88,4 +88,14 @@ describe('resolveBibleTabResources', () => {
 
     expect(result.parallelVersions).toEqual(['LSG'])
   })
+
+  it('preserves duplicate parallel Bible versions', async () => {
+    const data = {
+      ...createData('RV1895'),
+      parallelVersions: ['LSG', 'LSG'] as BibleTab['data']['parallelVersions'],
+    }
+    const result = await resolveBibleTabResources(data)
+
+    expect(result.parallelVersions).toEqual(['LSG', 'LSG'])
+  })
 })

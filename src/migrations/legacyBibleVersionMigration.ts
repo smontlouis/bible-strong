@@ -30,14 +30,8 @@ export const migrateLegacyBibleVersionId = (versionId: string): string => {
   return versionId
 }
 
-export const migrateLegacyParallelVersions = (
-  versions: readonly string[],
-  selectedVersion?: string
-): string[] => [
-  ...new Set(
-    versions.map(migrateLegacyBibleVersionId).filter(versionId => versionId !== selectedVersion)
-  ),
-]
+export const migrateLegacyParallelVersions = (versions: readonly string[]): string[] =>
+  versions.map(migrateLegacyBibleVersionId)
 
 export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data: T): T => {
   const legacyVersion = data.selectedVersion
@@ -46,7 +40,7 @@ export const migrateLegacyBibleTabData = <T extends PersistedBibleTabData>(data:
   const migrated = {
     ...data,
     selectedVersion,
-    parallelVersions: migrateLegacyParallelVersions(data.parallelVersions ?? [], selectedVersion),
+    parallelVersions: migrateLegacyParallelVersions(data.parallelVersions ?? []),
   } as PersistedBibleTabData
 
   if (legacyVersion === 'LSGS' || legacyVersion === 'KJVS') {

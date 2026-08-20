@@ -131,7 +131,7 @@ describe('migrateLegacyPersistedReferences', () => {
       strongMode: 'hidden',
       interlinearMode: 'hidden',
       interlinearLocale: 'en',
-      parallelVersions: ['LSG', 'KJV'],
+      parallelVersions: ['LSG', 'KJV', 'LSG'],
       pendingModeAcquisition: {
         kind: 'interlinear',
         mode: 'interlinear',
@@ -153,7 +153,7 @@ describe('migrateLegacyPersistedReferences', () => {
         planIds: ['bible-strong:LSG'],
       },
     })
-    expect(JSON.parse(values.get('savedParallelVersions')!)).toEqual(['BHG', 'KJV'])
+    expect(JSON.parse(values.get('savedParallelVersions')!)).toEqual(['BHG', 'BHG', 'KJV'])
   })
 
   it('leaves malformed and already canonical persisted values untouched', () => {

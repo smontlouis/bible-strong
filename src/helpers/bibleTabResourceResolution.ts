@@ -25,13 +25,9 @@ export const resolveBibleTabResources = async (
           selectedVersion: resolvedStrong.versionId as VersionCode,
         }
 
-  const resolvedParallelVersions: VersionCode[] = []
-  for (const parallelVersion of nextData.parallelVersions) {
-    const resolvedVersion = resolveStrongBibleVersion(parallelVersion).versionId as VersionCode
-    if (!resolvedParallelVersions.includes(resolvedVersion)) {
-      resolvedParallelVersions.push(resolvedVersion)
-    }
-  }
+  const resolvedParallelVersions = nextData.parallelVersions.map(
+    parallelVersion => resolveStrongBibleVersion(parallelVersion).versionId as VersionCode
+  )
 
   const parallelVersionsUnchanged =
     resolvedParallelVersions.length === nextData.parallelVersions.length &&

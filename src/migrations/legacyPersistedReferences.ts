@@ -81,10 +81,7 @@ const migrateValue = (value: unknown, field?: string): unknown => {
       Array.isArray(nested) &&
       nested.every(item => typeof item === 'string')
     ) {
-      migrated[key] = migrateLegacyParallelVersions(
-        nested,
-        typeof prepared.selectedVersion === 'string' ? prepared.selectedVersion : undefined
-      )
+      migrated[key] = migrateLegacyParallelVersions(nested)
     } else {
       migrated[key] = migrateValue(nested, key)
     }

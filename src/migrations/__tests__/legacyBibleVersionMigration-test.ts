@@ -71,10 +71,13 @@ describe('legacy Bible version migration', () => {
     ).toMatchObject(expected)
   })
 
-  it('deduplicates canonical parallel versions and removes the selected Bible', () => {
-    expect(migrateLegacyParallelVersions(['LSGS', 'INT', 'INT_EN', 'KJVS', 'LSG'], 'LSG')).toEqual([
+  it('canonicalizes parallel versions while preserving every occurrence', () => {
+    expect(migrateLegacyParallelVersions(['LSGS', 'INT', 'INT_EN', 'KJVS', 'LSG'])).toEqual([
+      'LSG',
+      'BHG',
       'BHG',
       'KJV',
+      'LSG',
     ])
   })
 
