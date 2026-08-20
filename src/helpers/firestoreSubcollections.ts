@@ -445,6 +445,8 @@ export type SubcollectionChangeCallback = (
     added: SubcollectionData
     modified: SubcollectionData
     removed: string[]
+    fromCache: boolean
+    isFirstSnapshot: boolean
   }
 ) => void
 export type SubcollectionErrorCallback = (error: Error) => void
@@ -457,7 +459,8 @@ export function subscribeToSubcollection(
   userId: string,
   collectionName: SubcollectionName,
   onChange: SubcollectionChangeCallback,
-  onError?: SubcollectionErrorCallback
+  onError?: SubcollectionErrorCallback,
+  options?: { includeMetadataChanges?: boolean }
 ): () => void {
   let currentUnsubscribe: (() => void) | null = null
   let isDisposed = false
@@ -469,6 +472,7 @@ export function subscribeToSubcollection(
 
     const unsubscribe = onSnapshot(
       collectionRef,
+      { includeMetadataChanges: options?.includeMetadataChanges ?? false },
       snapshot => {
         // Connection is healthy — allow retry on next error
         hasRetried = false
@@ -491,6 +495,8 @@ export function subscribeToSubcollection(
             added: data,
             modified: {},
             removed: [],
+            fromCache: snapshot.metadata.fromCache,
+            isFirstSnapshot: true,
           })
           return
         }
@@ -517,7 +523,13 @@ export function subscribeToSubcollection(
           }
         })
 
-        onChange(data, { added, modified, removed })
+        onChange(data, {
+          added,
+          modified,
+          removed,
+          fromCache: snapshot.metadata.fromCache,
+          isFirstSnapshot: false,
+        })
       },
       async error => {
         const errorWithCode = error as Error & { code?: string }

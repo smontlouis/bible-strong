@@ -438,6 +438,59 @@ describe('guest adoption checkpoint and replay', () => {
     expect(repository.getCompleted('user-a')).toMatchObject({ snapshotId: snapshot.id })
   })
 
+  it('keeps the checkpoint pending when Firestore pending writes never settle', async () => {
+    const repository = createGuestAdoptionRepository(new MemoryStorage())
+    const remote = new MemoryRemote()
+    remote.waitForPendingWrites = () => new Promise<void>(() => undefined)
+    const snapshot = createGuestDataSnapshot({ state: createState(), tabGroups, now: 100 })
+    repository.begin('user-a', snapshot, 101)
+
+    const result = await Promise.race([
+      runPendingGuestAdoption({
+        userId: 'user-a',
+        repository,
+        remote,
+        getAuthenticatedUserId: () => 'user-a',
+        timeoutMs: 5,
+        now: () => 102,
+      }),
+      new Promise<'still-running'>(resolve => setTimeout(() => resolve('still-running'), 50)),
+    ])
+
+    expect(result).toMatchObject({
+      status: 'pending',
+      errorCode: 'GUEST_ADOPTION_TIMEOUT',
+    })
+    expect(repository.getPendingForUser('user-a')).toMatchObject({
+      lastErrorCode: 'GUEST_ADOPTION_TIMEOUT',
+    })
+  })
+
+  it('cancels a blocked adoption when the account session ends', async () => {
+    const repository = createGuestAdoptionRepository(new MemoryStorage())
+    const remote = new MemoryRemote()
+    remote.waitForPendingWrites = () => new Promise<void>(() => undefined)
+    const snapshot = createGuestDataSnapshot({ state: createState(), tabGroups, now: 100 })
+    repository.begin('user-a', snapshot, 101)
+    const controller = new AbortController()
+
+    const adoption = runPendingGuestAdoption({
+      userId: 'user-a',
+      repository,
+      remote,
+      getAuthenticatedUserId: () => 'user-a',
+      signal: controller.signal,
+      timeoutMs: 60_000,
+      now: () => 102,
+    })
+    controller.abort()
+
+    await expect(adoption).resolves.toMatchObject({
+      status: 'pending',
+      errorCode: 'GUEST_ADOPTION_CANCELLED',
+    })
+  })
+
   it('reuses the first durable snapshot when authentication callbacks repeat', () => {
     const repository = createGuestAdoptionRepository(new MemoryStorage())
     const first = createGuestDataSnapshot({ state: createState(), tabGroups, now: 100 })

@@ -1,9 +1,11 @@
 /* eslint-disable import/first */
 
 const mockDownloadAsync = jest.fn()
+const mockCancelAsync = jest.fn(() => Promise.resolve())
 const mockCreateDownloadResumable = jest.fn(
   (_url: unknown, _fileUri: unknown, _options: unknown, _callback: unknown) => ({
     downloadAsync: mockDownloadAsync,
+    cancelAsync: mockCancelAsync,
   })
 )
 const mockGetResourceDownloadHeaders = jest.fn((_url: unknown) => Promise.resolve({}))
@@ -67,5 +69,33 @@ describe('R2 resource artifact download', () => {
       { headers: { 'X-Firebase-AppCheck': 'token' } },
       undefined
     )
+  })
+
+  it('times out while App Check headers are blocked before the download starts', async () => {
+    mockGetResourceDownloadHeaders.mockReturnValueOnce(new Promise(() => undefined))
+
+    await expect(
+      downloadResourceArtifact({
+        url: 'https://api.bible-strong.app/v1/offline-artifacts/databases/nave.sqlite.zip',
+        archiveSha256: 'a'.repeat(64),
+        destinationPath: '/tmp/nave.zip',
+        timeoutMs: 5,
+      })
+    ).rejects.toThrow('RESOURCE_DOWNLOAD_TIMEOUT')
+    expect(mockCreateDownloadResumable).not.toHaveBeenCalled()
+  })
+
+  it('cancels a native download when its total deadline expires', async () => {
+    mockDownloadAsync.mockReturnValueOnce(new Promise(() => undefined))
+
+    await expect(
+      downloadResourceArtifact({
+        url: 'https://api.bible-strong.app/v1/offline-artifacts/databases/nave.sqlite.zip',
+        archiveSha256: 'a'.repeat(64),
+        destinationPath: '/tmp/nave.zip',
+        timeoutMs: 5,
+      })
+    ).rejects.toThrow('RESOURCE_DOWNLOAD_TIMEOUT')
+    expect(mockCancelAsync).toHaveBeenCalled()
   })
 })

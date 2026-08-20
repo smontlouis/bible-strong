@@ -8,6 +8,7 @@ import {
   SubcollectionChangeCallback,
 } from './firestoreSubcollections'
 import { storage } from './storage'
+import type { FirestoreSyncIntent, SerializableDocument } from './firestoreSyncOutbox'
 
 const MIGRATION_KEY = 'tabGroups_migratedToFirestore'
 
@@ -92,6 +93,32 @@ export function prepareTabGroupForSync(
   }
 
   return removeUndefined(prepared)
+}
+
+export const createTabGroupsSyncIntent = (
+  newGroups: TabGroup[],
+  oldGroups: TabGroup[]
+): FirestoreSyncIntent => {
+  const newIds = new Set(newGroups.map(group => group.id))
+  const set = Object.fromEntries(
+    newGroups
+      .filter(group => {
+        const oldGroup = oldGroups.find(candidate => candidate.id === group.id)
+        return (
+          !oldGroup ||
+          JSON.stringify(prepareTabGroupForSync(group)) !==
+            JSON.stringify(prepareTabGroupForSync(oldGroup))
+        )
+      })
+      .map(group => [group.id, prepareTabGroupForSync(group) as unknown as SerializableDocument])
+  )
+
+  return {
+    kind: 'subcollection',
+    collection: 'tabGroups',
+    set,
+    delete: oldGroups.filter(group => !newIds.has(group.id)).map(group => group.id),
+  }
 }
 
 function resolveLocalActiveTabIndex(remoteTabs: FirestoreTabItem[], localGroup?: TabGroup): number {
@@ -186,7 +213,9 @@ export function subscribeToTabGroupsFirestore(
   userId: string,
   onChange: SubcollectionChangeCallback
 ): () => void {
-  return subscribeToSubcollection(userId, 'tabGroups', onChange)
+  return subscribeToSubcollection(userId, 'tabGroups', onChange, undefined, {
+    includeMetadataChanges: true,
+  })
 }
 
 // ============================================================================
@@ -235,6 +264,44 @@ export function mergeTabGroups(localGroups: TabGroup[], remoteGroups: TabGroup[]
 
   // Sort by createdAt to maintain consistent order
   return merged.sort((a, b) => a.createdAt - b.createdAt)
+}
+
+/**
+ * Reconcile a live Firestore snapshot with device-local tab groups.
+ *
+ * Cache-only snapshots are bootstrap data, not proof that a local group was
+ * deleted remotely. They must therefore be merged non-destructively. Once a
+ * snapshot is confirmed by the server, only explicit removed document IDs
+ * may delete local state. Absence from a snapshot is not proof that an
+ * established local group was deleted remotely.
+ */
+export function reconcileTabGroupsSnapshot({
+  localGroups,
+  remoteGroups,
+  removedIds,
+  fromCache,
+}: {
+  localGroups: TabGroup[]
+  remoteGroups: TabGroup[]
+  removedIds: string[]
+  fromCache: boolean
+}): TabGroup[] {
+  if (fromCache) {
+    return mergeTabGroups(localGroups, remoteGroups)
+  }
+
+  const removedIdSet = new Set(removedIds)
+  const localWithoutDeleted = localGroups.filter(group => !removedIdSet.has(group.id))
+  const remoteIds = new Set(remoteGroups.map(group => group.id))
+  const finalGroups = [...remoteGroups]
+
+  for (const localGroup of localWithoutDeleted) {
+    if (!remoteIds.has(localGroup.id)) {
+      finalGroups.push(localGroup)
+    }
+  }
+
+  return finalGroups.sort((a, b) => a.createdAt - b.createdAt)
 }
 
 // ============================================================================

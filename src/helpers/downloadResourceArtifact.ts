@@ -11,6 +11,7 @@ type DownloadResourceArtifactOptions = {
   onDownloadProgress?: FileSystem.DownloadProgressCallback
   onResumable?: (resumable: FileSystem.DownloadResumable | null) => void
   isCancelled?: () => boolean
+  timeoutMs?: number
 }
 
 export interface DownloadResourceArtifactResult {
@@ -27,20 +28,23 @@ export const downloadResourceArtifact = async ({
   onDownloadProgress,
   onResumable,
   isCancelled,
+  timeoutMs = 5 * 60 * 1000,
 }: DownloadResourceArtifactOptions): Promise<DownloadResourceArtifactResult> => {
-  const appCheckHeaders = await getResourceDownloadHeaders(url)
-  const resumable = FileSystem.createDownloadResumable(
-    url,
-    destinationPath,
-    {
-      ...downloadOptions,
-      headers: { ...downloadOptions?.headers, ...appCheckHeaders },
-    },
-    onDownloadProgress
-  )
+  let resumable: FileSystem.DownloadResumable | undefined
+  let timeout: ReturnType<typeof setTimeout> | undefined
+  const download = async () => {
+    const appCheckHeaders = await getResourceDownloadHeaders(url)
+    resumable = FileSystem.createDownloadResumable(
+      url,
+      destinationPath,
+      {
+        ...downloadOptions,
+        headers: { ...downloadOptions?.headers, ...appCheckHeaders },
+      },
+      onDownloadProgress
+    )
 
-  onResumable?.(resumable)
-  try {
+    onResumable?.(resumable)
     const result = await resumable.downloadAsync()
     if (!result) throw new Error('RESOURCE_DOWNLOAD_RESULT_MISSING')
     if (isCancelled?.()) throw new Error('CANCELLED')
@@ -54,7 +58,17 @@ export const downloadResourceArtifact = async ({
         archiveSha256
       ),
     }
+  }
+  const deadline = new Promise<never>((_, reject) => {
+    timeout = setTimeout(() => {
+      resumable?.cancelAsync().catch(() => undefined)
+      reject(new Error('RESOURCE_DOWNLOAD_TIMEOUT'))
+    }, timeoutMs)
+  })
+  try {
+    return await Promise.race([download(), deadline])
   } finally {
+    if (timeout) clearTimeout(timeout)
     onResumable?.(null)
   }
 }

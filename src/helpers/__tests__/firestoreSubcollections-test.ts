@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react-native'
-import { batchWriteSubcollection } from '../firestoreSubcollections'
-import { writeBatch } from '../firebase'
+import { batchWriteSubcollection, subscribeToSubcollection } from '../firestoreSubcollections'
+import { onSnapshot, writeBatch } from '../firebase'
 
 jest.mock('@sentry/react-native', () => ({
   captureException: jest.fn(),
@@ -140,5 +140,38 @@ describe('firestoreSubcollections', () => {
     )
 
     errorSpy.mockRestore()
+  })
+
+  it('exposes whether subscription snapshots come from the Firestore cache', () => {
+    let emitSnapshot: ((snapshot: unknown) => void) | undefined
+    ;(onSnapshot as jest.Mock).mockImplementationOnce((_reference, options, onChange) => {
+      expect(options).toEqual({ includeMetadataChanges: true })
+      emitSnapshot = onChange
+      return jest.fn()
+    })
+    const onChange = jest.fn()
+
+    subscribeToSubcollection('user-1', 'tabGroups', onChange, undefined, {
+      includeMetadataChanges: true,
+    })
+
+    const makeSnapshot = (fromCache: boolean) => ({
+      metadata: { hasPendingWrites: false, fromCache },
+      forEach: jest.fn(),
+      docChanges: jest.fn(() => []),
+    })
+    emitSnapshot?.(makeSnapshot(true))
+    emitSnapshot?.(makeSnapshot(false))
+
+    expect(onChange).toHaveBeenNthCalledWith(
+      1,
+      {},
+      expect.objectContaining({ fromCache: true, isFirstSnapshot: true })
+    )
+    expect(onChange).toHaveBeenNthCalledWith(
+      2,
+      {},
+      expect.objectContaining({ fromCache: false, isFirstSnapshot: false })
+    )
   })
 })

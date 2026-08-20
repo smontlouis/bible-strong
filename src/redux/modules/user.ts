@@ -826,10 +826,12 @@ const userSlice = createSlice({
           | 'wordAnnotations'
         data: Record<string, unknown>
         isInitialLoad: boolean
+        fromCache?: boolean
         changes?: SubcollectionUpdateChanges
       }>
     ) {
-      const { collection, data, isInitialLoad, changes } = action.payload
+      const { collection, data, isInitialLoad, fromCache = false, changes } = action.payload
+      const shouldReplaceCollection = isInitialLoad && !fromCache
 
       // Update the specific subcollection
       switch (collection) {
@@ -837,7 +839,7 @@ const userSlice = createSlice({
           state.bible.bookmarks = applySubcollectionChanges(
             state.bible.bookmarks,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           ) as BookmarksObj
           break
@@ -845,7 +847,7 @@ const userSlice = createSlice({
           state.bible.highlights = applySubcollectionChanges(
             state.bible.highlights,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           ) as HighlightsObj
           break
@@ -853,7 +855,7 @@ const userSlice = createSlice({
           state.bible.notes = applySubcollectionChanges(
             state.bible.notes,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           ) as NotesObj
           backfillSystemRelations(state)
@@ -862,7 +864,7 @@ const userSlice = createSlice({
           state.bible.links = applySubcollectionChanges(
             state.bible.links,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           ) as LinksObj
           backfillSystemRelations(state)
@@ -871,7 +873,7 @@ const userSlice = createSlice({
           state.bible.relations = applySubcollectionChanges(
             state.bible.relations,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           ) as RelationsObj
           backfillSystemRelations(state)
@@ -886,7 +888,7 @@ const userSlice = createSlice({
           state.bible.tags = applySubcollectionChanges(
             state.bible.tags,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           ) as TagsObj
           break
@@ -894,7 +896,7 @@ const userSlice = createSlice({
           state.bible.strongsHebreu = applySubcollectionChanges(
             state.bible.strongsHebreu as Record<string, unknown>,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           )
           break
@@ -902,7 +904,7 @@ const userSlice = createSlice({
           state.bible.strongsGrec = applySubcollectionChanges(
             state.bible.strongsGrec as Record<string, unknown>,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           )
           break
@@ -910,7 +912,7 @@ const userSlice = createSlice({
           state.bible.words = applySubcollectionChanges(
             state.bible.words as Record<string, unknown>,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           )
           break
@@ -918,7 +920,7 @@ const userSlice = createSlice({
           state.bible.naves = applySubcollectionChanges(
             state.bible.naves as Record<string, unknown>,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           )
           break
@@ -926,7 +928,7 @@ const userSlice = createSlice({
           state.bible.wordAnnotations = applySubcollectionChanges(
             state.bible.wordAnnotations,
             data,
-            isInitialLoad,
+            shouldReplaceCollection,
             changes
           ) as WordAnnotationsObj
           break

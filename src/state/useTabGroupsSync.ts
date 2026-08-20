@@ -24,8 +24,15 @@ import {
   setTabGroupsMigrated,
   prepareTabGroupForSync,
   FirestoreTabGroup,
+  reconcileTabGroupsSnapshot,
+  createTabGroupsSyncIntent,
 } from '~helpers/tabGroupsFirestoreSync'
 import { batchWriteSubcollection, type BatchChanges } from '~helpers/firestoreSubcollections'
+import {
+  firestoreSyncOutbox,
+  runFirestoreSyncIntentsSerialized,
+  type FirestoreSyncIntent,
+} from '~helpers/firestoreSyncOutbox'
 import { registerCleanup } from '~helpers/cleanupRegistry'
 import useLogin from '~helpers/useLogin'
 import { isMigrationInProgress } from './migration'
@@ -103,31 +110,41 @@ export const useTabGroupsSync = ({
       }
 
       isSyncingRef.current = true
+      const intent = createTabGroupsSyncIntent(newGroups, oldGroups)
 
       try {
-        const newGroupIds = new Set(newGroups.map(g => g.id))
+        await runFirestoreSyncIntentsSerialized(userId, [intent], async () => {
+          try {
+            const newGroupIds = new Set(newGroups.map(g => g.id))
 
-        // Deleted groups
-        for (const oldGroup of oldGroups) {
-          if (!newGroupIds.has(oldGroup.id)) {
-            await deleteTabGroupFromFirestore(userId, oldGroup.id)
-            // Clear from pending deletions after successful deletion
-            pendingDeletionsRef.current.delete(oldGroup.id)
+            // Deleted groups
+            for (const oldGroup of oldGroups) {
+              if (!newGroupIds.has(oldGroup.id)) {
+                await deleteTabGroupFromFirestore(userId, oldGroup.id)
+                pendingDeletionsRef.current.delete(oldGroup.id)
+              }
+            }
+
+            // Added or modified groups
+            for (const newGroup of newGroups) {
+              const oldGroup = oldGroups.find(g => g.id === newGroup.id)
+
+              const newForCompare = prepareTabGroupForSync(newGroup)
+              const oldForCompare = oldGroup ? prepareTabGroupForSync(oldGroup) : null
+
+              if (
+                !oldForCompare ||
+                JSON.stringify(newForCompare) !== JSON.stringify(oldForCompare)
+              ) {
+                await syncTabGroupToFirestore(userId, newGroup)
+              }
+            }
+            firestoreSyncOutbox.supersedePending(userId, intent)
+          } catch (error) {
+            firestoreSyncOutbox.enqueue(userId, intent)
+            throw error
           }
-        }
-
-        // Added or modified groups
-        for (const newGroup of newGroups) {
-          const oldGroup = oldGroups.find(g => g.id === newGroup.id)
-
-          // Compare without base64Preview to detect actual changes
-          const newForCompare = prepareTabGroupForSync(newGroup)
-          const oldForCompare = oldGroup ? prepareTabGroupForSync(oldGroup) : null
-
-          if (!oldForCompare || JSON.stringify(newForCompare) !== JSON.stringify(oldForCompare)) {
-            await syncTabGroupToFirestore(userId, newGroup)
-          }
-        }
+        })
         console.log(`[TabGroupsSync] Synced groups to Firestore`)
       } catch (error) {
         console.error('[TabGroupsSync] Error syncing to Firestore:', error)
@@ -152,11 +169,13 @@ export const useTabGroupsSync = ({
    */
   const handleInitialLoad = useCallback(
     async (userId: string) => {
+      let migrationChanges: BatchChanges | undefined
       try {
-        const localGroups = getDefaultStore().get(tabGroupsAtom)
-
         // Fetch remote groups (uses cache-first mode internally for instant response)
         const remoteGroups = await fetchTabGroupsFromFirestore(userId)
+        // Local state may have changed while Firestore was resolving its first
+        // snapshot, so always reconcile against the latest persisted workspace.
+        const localGroups = getDefaultStore().get(tabGroupsAtom)
 
         if (remoteGroups.length === 0) {
           // No remote groups - upload local groups (initial migration)
@@ -172,7 +191,23 @@ export const useTabGroupsSync = ({
               changes.set[group.id] = prepareTabGroupForSync(group, { updatedAt: Date.now() })
             }
 
-            await batchWriteSubcollection(userId, 'tabGroups', changes)
+            migrationChanges = changes
+            const intent: FirestoreSyncIntent = {
+              kind: 'subcollection',
+              collection: 'tabGroups',
+              set: changes.set,
+              delete: changes.delete,
+            }
+            await runFirestoreSyncIntentsSerialized(userId, [intent], async () => {
+              try {
+                await batchWriteSubcollection(userId, 'tabGroups', changes)
+                firestoreSyncOutbox.supersedePending(userId, intent)
+              } catch (error) {
+                firestoreSyncOutbox.enqueue(userId, intent)
+                migrationChanges = undefined
+                throw error
+              }
+            })
             setTabGroupsMigrated()
             console.log('[TabGroupsSync] Migration complete')
           }
@@ -201,6 +236,14 @@ export const useTabGroupsSync = ({
           console.log('[TabGroupsSync] Loaded and merged groups from Firestore')
         }
       } catch (error) {
+        if (migrationChanges) {
+          firestoreSyncOutbox.enqueue(userId, {
+            kind: 'subcollection',
+            collection: 'tabGroups',
+            set: migrationChanges.set,
+            delete: migrationChanges.delete,
+          })
+        }
         console.error('[TabGroupsSync] Error during initial load:', error)
         Sentry.captureException(error, {
           tags: { feature: 'tabGroupsSync', action: 'initialLoad' },
@@ -236,7 +279,9 @@ export const useTabGroupsSync = ({
         )
 
         const localGroups = getDefaultStore().get(tabGroupsAtom)
-        const removedIds = new Set(changes.removed)
+        // Cache snapshots are bootstrap data and cannot authoritatively delete
+        // device-local groups or change the active workspace.
+        const removedIds = new Set(changes.fromCache ? [] : changes.removed)
 
         // Filter out deleted groups from local state
         const localWithoutDeleted = localGroups.filter(g => !removedIds.has(g.id))
@@ -264,26 +309,12 @@ export const useTabGroupsSync = ({
         // Sort by createdAt
         remoteGroups.sort((a, b) => a.createdAt - b.createdAt)
 
-        // For real-time updates, use remote as source of truth
-        // Only preserve local groups that don't exist in remote AND weren't deleted
-        const remoteIds = new Set(remoteGroups.map(g => g.id))
-        const localOnlyGroups = localWithoutDeleted.filter(g => !remoteIds.has(g.id))
-
-        // Combine: remote groups + local-only groups (not yet synced)
-        const finalGroups = [...remoteGroups]
-
-        // Only add local-only groups if they're very recent (created in last 5 seconds)
-        // This prevents re-adding deleted groups while allowing new local groups
-        const RECENT_THRESHOLD = 5000
-        const now = Date.now()
-        for (const localOnly of localOnlyGroups) {
-          if (now - localOnly.createdAt < RECENT_THRESHOLD) {
-            finalGroups.push(localOnly)
-          }
-        }
-
-        // Re-sort after adding local groups
-        finalGroups.sort((a, b) => a.createdAt - b.createdAt)
+        const finalGroups = reconcileTabGroupsSnapshot({
+          localGroups,
+          remoteGroups,
+          removedIds: changes.removed,
+          fromCache: changes.fromCache,
+        })
 
         // Check if active group was deleted
         const activeGroupId = getDefaultStore().get(activeGroupIdAtom)
@@ -363,11 +394,25 @@ export const useTabGroupsSync = ({
       console.log(`[TabGroupsSync] Syncing ${deletedGroups.length} deletion(s) immediately`)
       ;(async () => {
         isSyncingRef.current = true
+        const intent: FirestoreSyncIntent = {
+          kind: 'subcollection',
+          collection: 'tabGroups',
+          set: {},
+          delete: deletedGroups.map(group => group.id),
+        }
         try {
-          for (const deleted of deletedGroups) {
-            await deleteTabGroupFromFirestore(user.id, deleted.id)
-            pendingDeletionsRef.current.delete(deleted.id)
-          }
+          await runFirestoreSyncIntentsSerialized(user.id, [intent], async () => {
+            try {
+              for (const deleted of deletedGroups) {
+                await deleteTabGroupFromFirestore(user.id, deleted.id)
+                pendingDeletionsRef.current.delete(deleted.id)
+              }
+              firestoreSyncOutbox.supersedePending(user.id, intent)
+            } catch (error) {
+              firestoreSyncOutbox.enqueue(user.id, intent)
+              throw error
+            }
+          })
           console.log(`[TabGroupsSync] Immediate deletion sync complete`)
         } catch (error) {
           console.error('[TabGroupsSync] Error syncing deletions:', error)
@@ -400,7 +445,23 @@ export const useTabGroupsSync = ({
         additionsOrModifications.map(group => group.id)
       )
       additionsOrModifications.forEach(group => {
-        syncTabGroupToFirestore(user.id, group).catch(error => {
+        const intent: FirestoreSyncIntent = {
+          kind: 'subcollection',
+          collection: 'tabGroups',
+          set: {
+            [group.id]: prepareTabGroupForSync(group) as unknown as Record<string, unknown>,
+          },
+          delete: [],
+        }
+        runFirestoreSyncIntentsSerialized(user.id, [intent], async () => {
+          try {
+            await syncTabGroupToFirestore(user.id, group)
+            firestoreSyncOutbox.supersedePending(user.id, intent)
+          } catch (error) {
+            firestoreSyncOutbox.enqueue(user.id, intent)
+            throw error
+          }
+        }).catch(error => {
           console.error('[TabGroupsSync] Error syncing outgoing-only group:', error)
           Sentry.captureException(error, {
             tags: { feature: 'tabGroupsSync', action: 'outgoingOnlySync' },

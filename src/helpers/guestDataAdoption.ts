@@ -84,6 +84,8 @@ export type GuestAdoptionErrorCode =
   | 'GUEST_ADOPTION_CHECKPOINT_INVALID'
   | 'GUEST_ADOPTION_PENDING_UID_MISMATCH'
   | 'GUEST_ADOPTION_UID_CHANGED'
+  | 'GUEST_ADOPTION_CANCELLED'
+  | 'GUEST_ADOPTION_TIMEOUT'
   | 'GUEST_ADOPTION_PERMISSION_DENIED'
   | 'GUEST_ADOPTION_UNAVAILABLE'
   | 'GUEST_ADOPTION_WRITE_FAILED'
@@ -611,6 +613,8 @@ const classifyAdoptionError = (error: unknown): GuestAdoptionErrorCode => {
       return 'GUEST_ADOPTION_CHECKPOINT_INVALID'
     }
     if (error.message === 'GUEST_ADOPTION_UID_CHANGED') return 'GUEST_ADOPTION_UID_CHANGED'
+    if (error.message === 'GUEST_ADOPTION_CANCELLED') return 'GUEST_ADOPTION_CANCELLED'
+    if (error.message === 'GUEST_ADOPTION_TIMEOUT') return 'GUEST_ADOPTION_TIMEOUT'
     if (error.message === 'GUEST_ADOPTION_PENDING_UID_MISMATCH') {
       return 'GUEST_ADOPTION_PENDING_UID_MISMATCH'
     }
@@ -627,6 +631,30 @@ const classifyAdoptionError = (error: unknown): GuestAdoptionErrorCode => {
     return 'GUEST_ADOPTION_UNAVAILABLE'
   }
   return 'GUEST_ADOPTION_WRITE_FAILED'
+}
+
+const withGuestAdoptionDeadline = async <T>(
+  operation: Promise<T>,
+  timeoutMs: number,
+  signal?: AbortSignal
+): Promise<T> => {
+  if (signal?.aborted) throw new Error('GUEST_ADOPTION_CANCELLED')
+
+  let timeout: ReturnType<typeof setTimeout> | undefined
+  let rejectCancellation: ((error: Error) => void) | undefined
+  const deadline = new Promise<never>((_, reject) => {
+    rejectCancellation = reject
+    timeout = setTimeout(() => reject(new Error('GUEST_ADOPTION_TIMEOUT')), timeoutMs)
+  })
+  const cancel = () => rejectCancellation?.(new Error('GUEST_ADOPTION_CANCELLED'))
+  signal?.addEventListener('abort', cancel, { once: true })
+
+  try {
+    return await Promise.race([operation, deadline])
+  } finally {
+    if (timeout) clearTimeout(timeout)
+    signal?.removeEventListener('abort', cancel)
+  }
 }
 
 const writeSnapshot = async ({
@@ -713,6 +741,8 @@ export const runPendingGuestAdoption = async ({
   getAuthenticatedUserId,
   getLatestSnapshot,
   now = Date.now,
+  timeoutMs = 15000,
+  signal,
 }: {
   userId: string
   repository: GuestAdoptionRepository
@@ -720,6 +750,8 @@ export const runPendingGuestAdoption = async ({
   getAuthenticatedUserId: () => string | undefined
   getLatestSnapshot?: () => GuestDataSnapshot | undefined
   now?: () => number
+  timeoutMs?: number
+  signal?: AbortSignal
 }): Promise<GuestAdoptionRunResult> => {
   const pending = repository.getPendingForUser(userId)
   if (!pending) {
@@ -743,13 +775,17 @@ export const runPendingGuestAdoption = async ({
       if (!currentPending.inFlightSnapshot) {
         currentPending = repository.recordWriteStarted(userId, adoptionId, snapshotToWrite)
       }
-      counts = await writeSnapshot({
-        userId,
-        snapshot: snapshotToWrite,
-        previousSnapshot: currentPending.appliedSnapshot,
-        remote,
-        getAuthenticatedUserId,
-      })
+      counts = await withGuestAdoptionDeadline(
+        writeSnapshot({
+          userId,
+          snapshot: snapshotToWrite,
+          previousSnapshot: currentPending.appliedSnapshot,
+          remote,
+          getAuthenticatedUserId,
+        }),
+        timeoutMs,
+        signal
+      )
       currentPending = repository.recordWriteCompleted(userId, adoptionId, snapshotToWrite.id)
       const latestSnapshot = getLatestSnapshot?.()
       if (latestSnapshot && latestSnapshot.id !== currentPending.snapshot.id) {

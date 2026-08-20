@@ -5,7 +5,11 @@ import useLiveUpdates from '~helpers/useLiveUpdates'
 
 const mockDispatch = jest.fn()
 const mockOnSnapshot = jest.fn(() => jest.fn())
-const mockSubscribeToSubcollection = jest.fn(() => jest.fn())
+let mockSubcollectionOnChange: ((data: unknown, changes: unknown) => void) | undefined
+const mockSubscribeToSubcollection = jest.fn((...args: unknown[]) => {
+  mockSubcollectionOnChange = args[2] as typeof mockSubcollectionOnChange
+  return jest.fn()
+})
 
 jest.mock('react-redux', () => ({
   useDispatch: () => mockDispatch,
@@ -25,6 +29,10 @@ jest.mock('~helpers/usePrevious', () => ({
   usePrevious: () => false,
 }))
 
+jest.mock('~helpers/useConnection', () => ({
+  useConnectionStatus: () => 'internet',
+}))
+
 jest.mock('~helpers/cleanupRegistry', () => ({
   registerCleanup: jest.fn(),
 }))
@@ -40,7 +48,15 @@ jest.mock('~helpers/firebase', () => ({
 
 jest.mock('~helpers/firestoreSubcollections', () => ({
   USER_DATA_SUBCOLLECTION_NAMES: ['bookmarks'],
-  subscribeToSubcollection: (..._args: unknown[]) => mockSubscribeToSubcollection(),
+  subscribeToSubcollection: (...args: unknown[]) => mockSubscribeToSubcollection(...args),
+}))
+
+jest.mock('~helpers/firestoreSyncOutbox', () => ({
+  firestoreSyncOutbox: {
+    replay: jest.fn(async () => undefined),
+    cancelReplay: jest.fn(),
+    resumeReplay: jest.fn(),
+  },
 }))
 
 jest.mock('~redux/modules/user', () => ({
@@ -79,6 +95,7 @@ describe('useLiveUpdates account-entry gate', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockSubcollectionOnChange = undefined
     jest.spyOn(console, 'log').mockImplementation(() => undefined)
     jest.spyOn(console, 'error').mockImplementation(() => undefined)
   })
@@ -105,12 +122,124 @@ describe('useLiveUpdates account-entry gate', () => {
 
     await act(async () => {
       renderer.update(<Harness enabled />)
-      await Promise.resolve()
+      await new Promise(resolve => setTimeout(resolve, 0))
     })
 
     expect(runBeforeSync).toHaveBeenCalledWith('user-1', expect.any(Object))
     expect(mockSubscribeToSubcollection).toHaveBeenCalledTimes(1)
+    expect(mockSubscribeToSubcollection).toHaveBeenCalledWith(
+      'user-1',
+      'bookmarks',
+      expect.any(Function),
+      expect.any(Function),
+      { includeMetadataChanges: true }
+    )
     expect(mockOnSnapshot).toHaveBeenCalledTimes(2)
+
+    await act(async () => {
+      renderer.unmount()
+    })
+  })
+
+  it('marks an initial cache snapshot as non-authoritative for Redux hydration', async () => {
+    const runBeforeSync = jest.fn(async () => true)
+    const Harness = ({ enabled }: { enabled: boolean }) => {
+      useLiveUpdates({ enabled, runBeforeSync, resumeToken: 0 })
+      return null
+    }
+
+    let renderer!: ReturnType<typeof create>
+    await act(async () => {
+      renderer = create(<Harness enabled={false} />)
+    })
+    await act(async () => {
+      renderer.update(<Harness enabled />)
+      await Promise.resolve()
+    })
+
+    act(() => {
+      mockSubcollectionOnChange?.(
+        {},
+        {
+          added: {},
+          modified: {},
+          removed: [],
+          fromCache: true,
+        }
+      )
+    })
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'user/receive-subcollection',
+      payload: expect.objectContaining({
+        collection: 'bookmarks',
+        isInitialLoad: true,
+        fromCache: true,
+      }),
+    })
+
+    await act(async () => {
+      renderer.unmount()
+    })
+  })
+
+  it('treats the first server snapshot as authoritative even without document changes', async () => {
+    const runBeforeSync = jest.fn(async () => true)
+    const Harness = () => {
+      useLiveUpdates({ enabled: true, runBeforeSync, resumeToken: 0 })
+      return null
+    }
+
+    let renderer!: ReturnType<typeof create>
+    await act(async () => {
+      renderer = create(<Harness />)
+      await Promise.resolve()
+    })
+
+    act(() => {
+      mockSubcollectionOnChange?.(
+        { remote: { id: 'remote' } },
+        {
+          added: { remote: { id: 'remote' } },
+          modified: {},
+          removed: [],
+          fromCache: true,
+        }
+      )
+      mockSubcollectionOnChange?.(
+        { remote: { id: 'remote' } },
+        { added: {}, modified: {}, removed: [], fromCache: false }
+      )
+      mockSubcollectionOnChange?.(
+        { remote: { id: 'remote' } },
+        {
+          added: { remote: { id: 'remote' } },
+          modified: {},
+          removed: [],
+          fromCache: true,
+          isFirstSnapshot: true,
+        }
+      )
+      mockSubcollectionOnChange?.(
+        { remote: { id: 'remote' } },
+        {
+          added: {},
+          modified: {},
+          removed: [],
+          fromCache: false,
+          isFirstSnapshot: false,
+        }
+      )
+    })
+
+    expect(mockDispatch).toHaveBeenLastCalledWith({
+      type: 'user/receive-subcollection',
+      payload: expect.objectContaining({
+        collection: 'bookmarks',
+        isInitialLoad: true,
+        fromCache: false,
+      }),
+    })
 
     await act(async () => {
       renderer.unmount()

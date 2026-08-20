@@ -3,6 +3,11 @@ import { isAnyOf, Middleware } from '@reduxjs/toolkit'
 import * as Sentry from '@sentry/react-native'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
 import { tokenManager } from '~helpers/TokenManager'
+import {
+  firestoreSyncOutbox,
+  runFirestoreSyncIntentsSerialized,
+  type FirestoreSyncIntent,
+} from '~helpers/firestoreSyncOutbox'
 
 // Import action creators from user.ts
 import {
@@ -94,7 +99,7 @@ import {
 } from '~helpers/firestoreSubcollections'
 import i18n from '~i18n'
 import { RootState } from '~redux/modules/reducer'
-import { deleteDoc, deleteField, doc, firebaseDb, getDoc, setDoc } from '../helpers/firebase'
+import { deleteDoc, deleteField, doc, firebaseDb, setDoc } from '../helpers/firebase'
 import { fetchPlan, markAsRead, removePlan, resetPlan } from './modules/plan'
 import { canonicalizeImportedDataForFirestore } from './firestoreImportDataCanonicalization'
 import {
@@ -120,6 +125,10 @@ type SyncDiffState = {
       settings?: unknown
     }
   }
+}
+
+const enqueueSyncIntents = (userId: string, intents: FirestoreSyncIntent[]) => {
+  intents.forEach(intent => firestoreSyncOutbox.enqueue(userId, intent))
 }
 
 const executeUserBibleSyncOperation = async ({
@@ -165,6 +174,14 @@ const executeUserBibleSyncOperationGroups = async ({
   state: RootState
 }) => {
   for (const group of groupUserBibleSyncOperations(operations)) {
+    const fallbackIntents = group.operations.flatMap(operation =>
+      createOutboxIntentsForUserBibleOperation({
+        operation,
+        diffBible,
+        bible,
+        deleteMarker,
+      })
+    )
     await handleSyncWithRetry(
       async () => {
         for (const operation of group.operations) {
@@ -179,7 +196,9 @@ const executeUserBibleSyncOperationGroups = async ({
       },
       userId,
       group.actionName,
-      state
+      state,
+      () => enqueueSyncIntents(userId, fallbackIntents),
+      fallbackIntents
     )
   }
 }
@@ -257,6 +276,48 @@ function extractSubcollectionChanges(diffData: unknown, deleteMarker: unknown): 
   return changes
 }
 
+const createSubcollectionOutboxIntent = (
+  collection: BibleSyncCollection,
+  diffData: unknown,
+  fullData: SubcollectionData | undefined,
+  deleteMarker: unknown
+): FirestoreSyncIntent[] => {
+  const changes = extractSubcollectionChanges(diffData, deleteMarker)
+  const set = Object.keys(changes.set).reduce<Record<string, SyncRecord>>((result, id) => {
+    const document = fullData?.[id]
+    if (document) result[id] = removeUndefinedVariables(document)
+    return result
+  }, {})
+  if (Object.keys(set).length === 0 && changes.delete.length === 0) return []
+  return [{ kind: 'subcollection', collection, set, delete: changes.delete }]
+}
+
+const createOutboxIntentsForUserBibleOperation = ({
+  operation,
+  diffBible,
+  bible,
+  deleteMarker,
+}: {
+  operation: UserBibleSyncOperation
+  diffBible: BibleSyncData
+  bible: RootState['user']['bible']
+  deleteMarker: unknown
+}): FirestoreSyncIntent[] => {
+  const collections: BibleSyncCollection[] =
+    operation.type === 'relations'
+      ? ['relations', 'relationIndex', 'relationPairs']
+      : [operation.collection]
+
+  return collections.flatMap(collection =>
+    createSubcollectionOutboxIntent(
+      collection,
+      diffBible[collection],
+      bible[collection] as SubcollectionData | undefined,
+      deleteMarker
+    )
+  )
+}
+
 /**
  * Synchronise les changements d'une sous-collection vers Firestore
  */
@@ -330,49 +391,59 @@ async function handleSyncWithRetry(
   operation: () => Promise<void>,
   userId: string,
   actionName: string,
-  state: RootState
+  state: RootState,
+  onFinalFailure?: () => void,
+  serializationIntents: FirestoreSyncIntent[] = []
 ): Promise<boolean> {
-  try {
-    await operation()
-    return true
-  } catch (error) {
-    console.error(`[Sync] ${actionName} failed:`, error)
-    const errorCode = getErrorCode(error)
+  return runFirestoreSyncIntentsSerialized(userId, serializationIntents, async () => {
+    const supersedePending = () => {
+      serializationIntents.forEach(intent => firestoreSyncOutbox.supersedePending(userId, intent))
+    }
+    try {
+      await operation()
+      supersedePending()
+      return true
+    } catch (error) {
+      console.error(`[Sync] ${actionName} failed:`, error)
+      const errorCode = getErrorCode(error)
 
-    // SAFETY NET: Si permission-denied, tente un refresh manuel du token
-    if (errorCode === 'permission-denied') {
-      console.warn('[Sync] Permission denied detected, attempting manual token refresh...')
+      // SAFETY NET: Si permission-denied, tente un refresh manuel du token
+      if (errorCode === 'permission-denied') {
+        console.warn('[Sync] Permission denied detected, attempting manual token refresh...')
 
-      const refreshed = await tokenManager.tryRefresh()
+        const refreshed = await tokenManager.tryRefresh()
 
-      if (refreshed) {
-        try {
-          await operation()
-          console.log('[Sync] Retry succeeded after token refresh')
-          return true
-        } catch (retryError) {
-          console.error('[Sync] Retry failed after token refresh:', retryError)
-          Sentry.captureException(retryError, {
-            tags: { feature: 'sync', action: 'retry_after_refresh' },
-            extra: { userId, originalError: errorCode },
-          })
+        if (refreshed) {
+          try {
+            await operation()
+            supersedePending()
+            console.log('[Sync] Retry succeeded after token refresh')
+            return true
+          } catch (retryError) {
+            console.error('[Sync] Retry failed after token refresh:', retryError)
+            Sentry.captureException(retryError, {
+              tags: { feature: 'sync', action: 'retry_after_refresh' },
+              extra: { userId, originalError: errorCode },
+            })
+          }
         }
       }
+
+      Sentry.captureException(error, {
+        tags: { feature: 'sync', action: actionName },
+        extra: { userId, errorCode },
+      })
+
+      // SAFETY: Créer un backup immédiat en cas d'erreur de sync
+      autoBackupManager.createBackupNow(state, 'sync_error').catch(backupError => {
+        console.error('[AutoBackup] Failed to create error backup:', backupError)
+      })
+
+      onFinalFailure?.()
+      toast.error(i18n.t('app.syncError'))
+      return false
     }
-
-    Sentry.captureException(error, {
-      tags: { feature: 'sync', action: actionName },
-      extra: { userId, errorCode },
-    })
-
-    // SAFETY: Créer un backup immédiat en cas d'erreur de sync
-    autoBackupManager.createBackupNow(state, 'sync_error').catch(backupError => {
-      console.error('[AutoBackup] Failed to create error backup:', backupError)
-    })
-
-    toast.error(i18n.t('app.syncError'))
-    return false
-  }
+  })
 }
 
 // RTK Matchers for action grouping
@@ -498,20 +569,21 @@ const firestoreMiddleware: Middleware = store => next => async action => {
 
   // ========== PLAN SYNC ==========
   if (isPlanAction(action)) {
-    try {
-      await setDoc(
-        userDocRef,
-        { plan: removeUndefinedVariables(plan.ongoingPlans) },
-        { merge: true }
-      )
-    } catch (error) {
-      console.log('[Firestore] Error syncing plan:', error)
-      toast.error(i18n.t('app.syncError'))
-      Sentry.captureException(error, {
-        tags: { feature: 'sync', action: 'plan_sync' },
-        extra: { userId },
-      })
+    const data = { plan: removeUndefinedVariables(plan.ongoingPlans) }
+    const intent: FirestoreSyncIntent = {
+      kind: 'document-set',
+      path: ['users', userId],
+      data,
+      merge: true,
     }
+    await handleSyncWithRetry(
+      () => setDoc(userDocRef, data, { merge: true }),
+      userId,
+      'plan_sync',
+      state,
+      () => firestoreSyncOutbox.enqueue(userId, intent),
+      [intent]
+    )
     return result
   }
 
@@ -524,13 +596,22 @@ const firestoreMiddleware: Middleware = store => next => async action => {
     // Ne pas sync si le résultat est vide/null (évite les erreurs Firestore)
     if (!cleanedSettings) return result
 
+    const data = { bible: { settings: cleanedSettings as SyncRecord } }
+    const intent: FirestoreSyncIntent = {
+      kind: 'document-set',
+      path: ['users', userId],
+      data,
+      merge: true,
+    }
     await handleSyncWithRetry(
       async () => {
-        await setDoc(userDocRef, { bible: { settings: cleanedSettings } }, { merge: true })
+        await setDoc(userDocRef, data, { merge: true })
       },
       userId,
       'settings_sync',
-      state
+      state,
+      () => firestoreSyncOutbox.enqueue(userId, intent),
+      [intent]
     )
     return result
   }
@@ -538,24 +619,29 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   // ========== CUSTOM HIGHLIGHT COLORS SYNC ==========
   if (isCustomColorAction(action)) {
     const customHighlightColors = state.user.bible.settings.customHighlightColors ?? []
+    const data = {
+      bible: {
+        settings: {
+          customHighlightColors: removeUndefinedVariables(customHighlightColors),
+        },
+      },
+    }
+    const intent: FirestoreSyncIntent = {
+      kind: 'document-set',
+      path: ['users', userId],
+      data,
+      merge: true,
+    }
 
     await handleSyncWithRetry(
       async () => {
-        await setDoc(
-          userDocRef,
-          {
-            bible: {
-              settings: {
-                customHighlightColors: removeUndefinedVariables(customHighlightColors),
-              },
-            },
-          },
-          { merge: true }
-        )
+        await setDoc(userDocRef, data, { merge: true })
       },
       userId,
       'custom_colors_sync',
-      state
+      state,
+      () => firestoreSyncOutbox.enqueue(userId, intent),
+      [intent]
     )
     return result
   }
@@ -677,6 +763,12 @@ const firestoreMiddleware: Middleware = store => next => async action => {
     if (!diffState?.user?.bible) return result
 
     for (const operation of planToggleTagEntitySync(diffState.user.bible, SUBCOLLECTION_NAMES)) {
+      const fallbackIntents = createOutboxIntentsForUserBibleOperation({
+        operation,
+        diffBible: diffState.user.bible,
+        bible: user.bible,
+        deleteMarker,
+      })
       await handleSyncWithRetry(
         async () => {
           await executeUserBibleSyncOperation({
@@ -689,7 +781,9 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         },
         userId,
         operation.actionName,
-        state
+        state,
+        () => enqueueSyncIntents(userId, fallbackIntents),
+        fallbackIntents
       )
     }
     return result
@@ -706,16 +800,26 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         Object.entries(studies).map(async ([studyId, obj]) => {
           const studyDocRef = doc(firebaseDb, 'studies', studyId)
           const studyContent = state.user.bible.studies[studyId]?.content?.ops
+          const intent: FirestoreSyncIntent = {
+            kind: 'document-set',
+            path: ['studies', studyId],
+            data: {
+              ...(removeUndefinedVariables(obj) as SyncRecord),
+              content: { ops: studyContent || [] },
+            },
+            merge: true,
+          }
 
           try {
-            await setDoc(
-              studyDocRef,
-              {
-                ...(removeUndefinedVariables(obj) as SyncRecord),
-                content: { ops: studyContent || [] },
-              },
-              { merge: true }
-            )
+            await runFirestoreSyncIntentsSerialized(userId, [intent], async () => {
+              try {
+                await setDoc(studyDocRef, intent.data, { merge: true })
+                firestoreSyncOutbox.supersedePending(userId, intent)
+              } catch (error) {
+                firestoreSyncOutbox.enqueue(userId, intent)
+                throw error
+              }
+            })
             console.log(`[Firestore] Study ${studyId} synced successfully`)
           } catch (studyError) {
             console.error(`Failed to sync study ${studyId}:`, studyError)
@@ -742,15 +846,21 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       await Promise.all(
         Object.entries(studies).map(async ([studyId]) => {
           const studyDocRef = doc(firebaseDb, 'studies', studyId)
+          const intent: FirestoreSyncIntent = {
+            kind: 'document-delete',
+            path: ['studies', studyId],
+          }
 
           try {
-            const studyDocSnap = await getDoc(studyDocRef)
-            if (!studyDocSnap.exists()) {
-              console.log(`[Firestore] Study ${studyId} already deleted`)
-              return
-            }
-
-            await deleteDoc(studyDocRef)
+            await runFirestoreSyncIntentsSerialized(userId, [intent], async () => {
+              try {
+                await deleteDoc(studyDocRef)
+                firestoreSyncOutbox.supersedePending(userId, intent)
+              } catch (error) {
+                firestoreSyncOutbox.enqueue(userId, intent)
+                throw error
+              }
+            })
             console.log(`[Firestore] Study ${studyId} deleted successfully`)
           } catch (deleteError) {
             console.error(`Failed to delete study ${studyId}:`, deleteError)
@@ -777,6 +887,36 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       plan: importedPlan,
     } = canonicalizeImportedDataForFirestore(action.payload) as ImportDataPayload & {
       plan?: RootState['plan']['ongoingPlans']
+    }
+    const importedBible = bible as unknown as Record<string, unknown>
+    const importFallbackIntents: FirestoreSyncIntent[] = SUBCOLLECTION_NAMES.flatMap(collection => {
+      if (collection === 'tabGroups') return []
+      const collectionData = importedBible?.[collection]
+      if (!isRecord(collectionData) || Object.keys(collectionData).length === 0) return []
+      return [
+        {
+          kind: 'subcollection' as const,
+          collection,
+          set: removeUndefinedVariables(collectionData) as Record<string, SyncRecord>,
+          delete: [],
+        },
+      ]
+    })
+    if (bible?.settings) {
+      importFallbackIntents.push({
+        kind: 'document-set',
+        path: ['users', userId],
+        data: { bible: { settings: removeUndefinedVariables(bible.settings) } },
+        merge: true,
+      })
+    }
+    if (importedPlan) {
+      importFallbackIntents.push({
+        kind: 'document-set',
+        path: ['users', userId],
+        data: { plan: removeUndefinedVariables(importedPlan) },
+        merge: true,
+      })
     }
 
     await handleSyncWithRetry(
@@ -818,7 +958,9 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       },
       userId,
       'import_data',
-      state
+      state,
+      () => enqueueSyncIntents(userId, importFallbackIntents),
+      importFallbackIntents
     )
 
     // 4. Sync studies (collection séparée)
@@ -826,8 +968,20 @@ const firestoreMiddleware: Middleware = store => next => async action => {
       try {
         await Promise.all(
           Object.entries(studies).map(async ([studyId, study]) => {
-            await setDoc(doc(firebaseDb, 'studies', studyId), removeUndefinedVariables(study), {
+            const intent: FirestoreSyncIntent = {
+              kind: 'document-set',
+              path: ['studies', studyId],
+              data: removeUndefinedVariables(study) as unknown as SyncRecord,
               merge: true,
+            }
+            await runFirestoreSyncIntentsSerialized(userId, [intent], async () => {
+              try {
+                await setDoc(doc(firebaseDb, 'studies', studyId), intent.data, { merge: true })
+                firestoreSyncOutbox.supersedePending(userId, intent)
+              } catch (error) {
+                firestoreSyncOutbox.enqueue(userId, intent)
+                throw error
+              }
             })
           })
         )

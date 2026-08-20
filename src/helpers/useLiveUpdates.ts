@@ -34,6 +34,8 @@ import {
   migrateLegacyPersistedValue,
 } from '../migrations/legacyPersistedReferences'
 import { appLogger } from './agentObservability'
+import { firestoreSyncOutbox } from './firestoreSyncOutbox'
+import { useConnectionStatus } from './useConnection'
 
 let isFirstSnapshotListener = true
 
@@ -89,6 +91,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
   const dispatch = useDispatch()
   const migrationRunRef = useRef<Promise<boolean> | undefined>(undefined)
   const migrationRunnerRef = useRef(runBeforeSync)
+  const connectionStatus = useConnectionStatus()
   migrationRunnerRef.current = runBeforeSync
 
   const isNewlyLogged = isLogged && isLoggedPrev !== isLogged && typeof isLoggedPrev !== 'undefined'
@@ -99,12 +102,20 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
   )
 
   useEffect(() => {
+    if (!enabled || !isLogged || !user.id || connectionStatus !== 'internet') return
+    firestoreSyncOutbox.resumeReplay(user.id)
+    void firestoreSyncOutbox.replay(user.id)
+    return () => firestoreSyncOutbox.cancelReplay(user.id)
+  }, [connectionStatus, enabled, isLogged, user.id])
+
+  useEffect(() => {
     // Use module-level variables for cleanup access before logout
     currentUnsubscribeUsers = undefined
     currentUnsubscribeStudies = undefined
     currentSubcollectionUnsubscribes = []
     let syncFallbackTimeout: ReturnType<typeof setTimeout> | undefined
     let disposed = false
+    const authoritativeSubcollections = new Set<string>()
 
     const setupListeners = async () => {
       if (!enabled || !isLogged || isLoading !== false || !user.id) {
@@ -220,6 +231,11 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
             const canonical = canonicalizeLegacySubcollectionData(data)
             const canonicalAdded = canonicalizeLegacySubcollectionData(changes.added).data
             const canonicalModified = canonicalizeLegacySubcollectionData(changes.modified).data
+            if (changes.isFirstSnapshot) authoritativeSubcollections.delete(collection)
+            const isFirstAuthoritativeSnapshot =
+              !changes.fromCache &&
+              (changes.isFirstSnapshot || !authoritativeSubcollections.has(collection))
+            if (!changes.fromCache) authoritativeSubcollections.add(collection)
             if (Object.keys(canonical.changedDocuments).length > 0) {
               batchWriteSubcollection(userId, collection, {
                 set: canonical.changedDocuments as SubcollectionData,
@@ -244,7 +260,10 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
                   removed: changes.removed,
                 },
                 isInitialLoad:
-                  Object.keys(canonicalAdded).length === Object.keys(canonical.data).length,
+                  isFirstAuthoritativeSnapshot ||
+                  (changes.fromCache &&
+                    Object.keys(canonicalAdded).length === Object.keys(canonical.data).length),
+                fromCache: changes.fromCache,
               })
             )
           },
@@ -253,7 +272,8 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
             if (isTrackedSyncCollection(collection)) {
               dispatch(markUserDataSyncCollectionLoaded({ collection }))
             }
-          }
+          },
+          { includeMetadataChanges: true }
         )
         currentSubcollectionUnsubscribes.push(unsubscribe)
       }

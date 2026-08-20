@@ -16,8 +16,12 @@ jest.mock('../storage', () => ({
 import {
   hydrateTabGroup,
   prepareTabGroupForSync,
+  reconcileTabGroupsSnapshot,
+  subscribeToTabGroupsFirestore,
+  createTabGroupsSyncIntent,
   type FirestoreTabGroup,
 } from '../tabGroupsFirestoreSync'
+import { subscribeToSubcollection } from '../firestoreSubcollections'
 import type { BibleTab, TabGroup, TabItem } from '~state/tabs'
 
 const makeTab = (id: string, base64Preview?: string): TabItem => ({
@@ -90,6 +94,23 @@ describe('tabGroupsFirestoreSync', () => {
     expect(syncedTab.data.strongBibleSourceVersionId).toBe('DBY')
   })
 
+  it('builds a durable intent containing changed and deleted tab groups', () => {
+    const unchanged = { ...makeGroup([makeTab('a')]), id: 'unchanged' }
+    const changedBefore = { ...makeGroup([makeTab('b')]), id: 'changed', name: 'Before' }
+    const changedAfter = { ...changedBefore, name: 'After', updatedAt: 3 }
+    const deleted = { ...makeGroup([makeTab('c')]), id: 'deleted' }
+
+    expect(
+      createTabGroupsSyncIntent([unchanged, changedAfter], [unchanged, changedBefore, deleted])
+    ).toEqual(
+      expect.objectContaining({
+        collection: 'tabGroups',
+        set: { changed: expect.objectContaining({ name: 'After' }) },
+        delete: ['deleted'],
+      })
+    )
+  })
+
   it('keeps the local active tab by tab id when hydrating reordered remote tabs', () => {
     const local = makeGroup([makeTab('a'), makeTab('b', 'preview-b'), makeTab('c')], 1)
     const remote: FirestoreTabGroup = {
@@ -123,5 +144,72 @@ describe('tabGroupsFirestoreSync', () => {
 
     expect(hydrated.activeTabIndex).toBe(1)
     expect(hydrated.tabs[1].id).toBe('b')
+  })
+
+  it('preserves local groups when the initial Firestore snapshot is an empty cache snapshot', () => {
+    const localGroups = [
+      { ...makeGroup([makeTab('a')]), id: 'local-1', createdAt: 1 },
+      { ...makeGroup([makeTab('b')]), id: 'local-2', createdAt: 2 },
+    ]
+
+    const reconciled = reconcileTabGroupsSnapshot({
+      localGroups,
+      remoteGroups: [],
+      removedIds: [],
+      fromCache: true,
+    })
+
+    expect(reconciled).toEqual(localGroups)
+  })
+
+  it('only removes established local-only groups after an explicit remote deletion', () => {
+    const localGroups = [
+      { ...makeGroup([makeTab('a')]), id: 'local-only', createdAt: 1 },
+      { ...makeGroup([makeTab('b')]), id: 'shared', createdAt: 2 },
+    ]
+    const remoteGroups = [
+      { ...makeGroup([makeTab('b')]), id: 'shared', createdAt: 2, updatedAt: 3 },
+    ]
+
+    expect(
+      reconcileTabGroupsSnapshot({
+        localGroups,
+        remoteGroups,
+        removedIds: [],
+        fromCache: true,
+      }).map(group => group.id)
+    ).toEqual(['local-only', 'shared'])
+
+    expect(
+      reconcileTabGroupsSnapshot({
+        localGroups,
+        remoteGroups,
+        removedIds: [],
+        fromCache: false,
+      }).map(group => group.id)
+    ).toEqual(['local-only', 'shared'])
+
+    expect(
+      reconcileTabGroupsSnapshot({
+        localGroups,
+        remoteGroups,
+        removedIds: ['local-only'],
+        fromCache: false,
+      }).map(group => group.id)
+    ).toEqual(['shared'])
+  })
+
+  it('requests metadata events only for the tab-groups subscription', () => {
+    const onChange = jest.fn()
+
+    subscribeToTabGroupsFirestore('user-1', onChange)
+
+    expect(subscribeToSubcollection).toHaveBeenCalledWith(
+      'user-1',
+      'tabGroups',
+      onChange,
+      undefined,
+      { includeMetadataChanges: true }
+    )
   })
 })

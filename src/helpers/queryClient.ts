@@ -1,6 +1,7 @@
 import NetInfo from '@react-native-community/netinfo'
 import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query'
 import { AppState, Platform } from 'react-native'
+import { connectionStatusFromNetInfo } from './useConnection'
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +23,7 @@ export const configureQueryManagers = () => {
 
   onlineManager.setEventListener(setOnline =>
     NetInfo.addEventListener(state => {
-      setOnline(state.isConnected === true)
+      setOnline(connectionStatusFromNetInfo(state) === 'internet')
     })
   )
 

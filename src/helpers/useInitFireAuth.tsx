@@ -45,6 +45,7 @@ const useInitFireAuth = () => {
   const store = useStore<RootState>()
   const [accountEntryState, setAccountEntryState] = useState(createAccountEntryState)
   const activeEntryUserIdRef = useRef<string | undefined>(undefined)
+  const guestAdoptionAbortRef = useRef<AbortController | undefined>(undefined)
 
   useEffect(() => {
     const onLogin = async ({
@@ -55,6 +56,7 @@ const useInitFireAuth = () => {
       accountEntryClassification: AccountEntryClassification
     }) => {
       console.log(`[Auth] Bienvenue ${profile.displayName}.`)
+      guestAdoptionAbortRef.current?.abort()
       activeEntryUserIdRef.current = profile.id
       let nextEntryState = reduceAccountEntry(createAccountEntryState(), {
         type: 'authentication-started',
@@ -142,11 +144,14 @@ const useInitFireAuth = () => {
       if (nextEntryState.phase !== 'adopting-guest-data' || !pendingAdoption) return
 
       const startedAt = Date.now()
+      const adoptionAbortController = new AbortController()
+      guestAdoptionAbortRef.current = adoptionAbortController
       const result = await runPendingGuestAdoption({
         userId: profile.id,
         repository: guestAdoptionRepository,
         remote: firebaseGuestAdoptionRemote,
         getAuthenticatedUserId,
+        signal: adoptionAbortController.signal,
         getLatestSnapshot: () => {
           if (
             activeEntryUserIdRef.current !== profile.id ||
@@ -160,6 +165,9 @@ const useInitFireAuth = () => {
           })
         },
       })
+      if (guestAdoptionAbortRef.current === adoptionAbortController) {
+        guestAdoptionAbortRef.current = undefined
+      }
       if (activeEntryUserIdRef.current !== profile.id) return
 
       if (result.status === 'completed') {
@@ -198,6 +206,8 @@ const useInitFireAuth = () => {
       console.log('[Auth] User changed', profile.id)
     const onLogout = async () => {
       const currentEntryUserId = activeEntryUserIdRef.current
+      guestAdoptionAbortRef.current?.abort()
+      guestAdoptionAbortRef.current = undefined
       activeEntryUserIdRef.current = undefined
       const currentState = store.getState()
 
@@ -267,6 +277,10 @@ const useInitFireAuth = () => {
     }
 
     FireAuth.init(onLogin, onUserChange, onLogout, emailVerified, onError, dispatch)
+    return () => {
+      guestAdoptionAbortRef.current?.abort()
+      guestAdoptionAbortRef.current = undefined
+    }
   }, [dispatch, store, resetAtoms])
 
   return accountEntryState

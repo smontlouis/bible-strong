@@ -534,6 +534,39 @@ describe('User Reducer', () => {
   })
 
   describe('receiveSubcollectionUpdates', () => {
+    it('preserves locally restored data when the initial snapshot only comes from cache', () => {
+      const localState = createState({
+        bible: {
+          ...initialState.bible,
+          bookmarks: {
+            local: {
+              id: 'local',
+              name: 'Local bookmark',
+              color: '#123456',
+              book: 1,
+              chapter: 1,
+              verse: 1,
+              version: 'LSG',
+              date: 1,
+            },
+          },
+        },
+      })
+
+      const nextState = reducer(
+        localState,
+        receiveSubcollectionUpdates({
+          collection: 'bookmarks',
+          data: {},
+          changes: { added: {}, modified: {}, removed: [] },
+          isInitialLoad: true,
+          fromCache: true,
+        })
+      )
+
+      expect(nextState.bible.bookmarks).toHaveProperty('local')
+    })
+
     it('should update bookmarks collection', () => {
       const bookmarksData = {
         'bookmark-1': {
