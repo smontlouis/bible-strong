@@ -278,9 +278,13 @@ requests keep their ETag/304 behavior. A SHA-256 fingerprint of the complete gen
 catalog is part of every internal cache key, so publishing and deploying changed catalog content
 starts a fresh cache namespace without a global purge, even when `--generated-at` is pinned.
 
-This cache is local to each Cloudflare data center. R2 artifacts are still streamed through the
-authenticated Worker and are not yet stored in the Cache API; add that separately after measuring
-artifact traffic and confirming range-request behavior.
+This cache is local to each Cloudflare data center. Complete successful R2 artifacts are also cached
+for one year after App Check succeeds. Their stable legacy objects are never overwritten and their
+current URLs select immutable SHA-addressed objects, so the long TTL cannot cross publication
+revisions. A cached complete ZIP can satisfy later `Range`, conditional GET, and `HEAD` requests
+without reopening R2. A range request that misses the cache streams only the requested bytes from
+R2 and is not cached because Cloudflare rejects `206 Partial Content` in `cache.put()`. Artifact
+responses sent to the application remain `private, no-store`, and cache failures fall back to R2.
 
 The local Effect HttpApi exposes Bible reading, Strong Bible indexes, BHG interlinear indexes, and
 the Nave operations consumed by the app:

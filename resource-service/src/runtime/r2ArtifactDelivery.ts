@@ -1,4 +1,5 @@
 import mobileResourceCatalog from '../../../src/assets/mobile-resource-catalog.json'
+import { resourceRequestIdFrom } from '../http/requestId'
 
 export const R2_ARTIFACT_ROUTE_PREFIX = '/v1/offline-artifacts/'
 export const MOBILE_RESOURCE_CATALOG_ROUTE = '/v1/offline-catalog'
@@ -11,6 +12,7 @@ export type ArtifactRange =
 type R2ArtifactObject = {
   readonly size: number
   readonly httpEtag: string
+  readonly uploaded: Date
   readonly range?: ArtifactRange
   writeHttpMetadata(headers: Headers): void
 }
@@ -28,6 +30,11 @@ export type R2ArtifactBucket = {
 }
 
 export type ArtifactRequestAuthorizer = (request: Request) => Promise<boolean>
+
+export type ArtifactEdgeCache = {
+  match(request: Request): Promise<Response | undefined>
+  put(request: Request, response: Response): Promise<void>
+}
 
 const mobileArtifacts = new Map(
   Object.values(mobileResourceCatalog.resources).map(resource => [
@@ -62,6 +69,7 @@ const artifactHeaders = (object: R2ArtifactObject): Headers => {
   headers.set('accept-ranges', 'bytes')
   headers.set('cache-control', 'private, no-store')
   headers.set('etag', object.httpEtag)
+  headers.set('last-modified', object.uploaded.toUTCString())
   headers.set('x-content-type-options', 'nosniff')
   if (object.range) {
     const contentRange = contentRangeFrom(object.range, object.size)
@@ -82,17 +90,133 @@ const artifactHeaders = (object: R2ArtifactObject): Headers => {
   return headers
 }
 
-const failedPreconditionStatus = (request: Request): number =>
-  request.headers.has('if-none-match') ? 304 : 412
+const etagMatches = (value: string, etag: string, weak: boolean): boolean =>
+  value.split(',').some(candidate => {
+    const trimmed = candidate.trim()
+    if (trimmed === '*') return true
+    if (weak) return trimmed.replace(/^W\//, '') === etag.replace(/^W\//, '')
+    return !trimmed.startsWith('W/') && !etag.startsWith('W/') && trimmed === etag
+  })
+
+const preconditionStatus = (request: Request, headers: Headers): 304 | 412 | undefined => {
+  const etag = headers.get('etag')
+  const lastModified = headers.get('last-modified')
+  const ifMatch = request.headers.get('if-match')
+  if (ifMatch && (!etag || !etagMatches(ifMatch, etag, false))) return 412
+
+  const ifUnmodifiedSince = request.headers.get('if-unmodified-since')
+  if (!ifMatch && ifUnmodifiedSince && lastModified) {
+    const conditionTime = Date.parse(ifUnmodifiedSince)
+    const modifiedTime = Date.parse(lastModified)
+    if (
+      Number.isFinite(conditionTime) &&
+      Number.isFinite(modifiedTime) &&
+      modifiedTime > conditionTime
+    ) {
+      return 412
+    }
+  }
+
+  const ifNoneMatch = request.headers.get('if-none-match')
+  if (ifNoneMatch && etag && etagMatches(ifNoneMatch, etag, true)) {
+    return request.method === 'GET' || request.method === 'HEAD' ? 304 : 412
+  }
+
+  const ifModifiedSince = request.headers.get('if-modified-since')
+  if (
+    !ifNoneMatch &&
+    (request.method === 'GET' || request.method === 'HEAD') &&
+    ifModifiedSince &&
+    lastModified
+  ) {
+    const conditionTime = Date.parse(ifModifiedSince)
+    const modifiedTime = Date.parse(lastModified)
+    if (
+      Number.isFinite(conditionTime) &&
+      Number.isFinite(modifiedTime) &&
+      modifiedTime <= conditionTime
+    ) {
+      return 304
+    }
+  }
+  return undefined
+}
+
+const isInvalidRangeError = (cause: unknown): boolean =>
+  cause instanceof Error && cause.name === 'InvalidRange'
+
+const artifactCacheRequest = (request: Request, options: { includeRange: boolean }): Request => {
+  const url = new URL(request.url)
+  const sha256 = url.searchParams.get('sha256')
+  url.search = ''
+  if (sha256) url.searchParams.set('sha256', sha256)
+  const headers = new Headers()
+  if (options.includeRange) {
+    const range = request.headers.get('range')
+    if (range) headers.set('range', range)
+  }
+  return new Request(url, { method: 'GET', headers })
+}
+
+const ifRangeMatches = (validator: string, headers: Headers): boolean => {
+  if (validator.startsWith('W/')) return false
+  if (validator.startsWith('"')) {
+    const etag = headers.get('etag')
+    return !!etag && !etag.startsWith('W/') && validator === etag
+  }
+  return validator === headers.get('last-modified')
+}
+
+const artifactResponseForClient = (
+  response: Response,
+  request: Request,
+  cacheStatus?: 'HIT' | 'MISS'
+): Response => {
+  const headers = new Headers(response.headers)
+  headers.set('cache-control', 'private, no-store')
+  headers.set(
+    'x-request-id',
+    resourceRequestIdFrom(request.headers.get('x-request-id') ?? undefined)
+  )
+  if (cacheStatus) headers.set('x-resource-cache', cacheStatus)
+  if (response.status === 304 || response.status === 412) headers.delete('content-length')
+  const body =
+    request.method === 'HEAD' || response.status === 304 || response.status === 412
+      ? null
+      : response.body
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
+}
+
+const artifactResponseForCache = (response: Response): Response => {
+  const headers = new Headers(response.headers)
+  headers.set('cache-control', 'public, max-age=31536000, immutable')
+  headers.delete('x-request-id')
+  headers.delete('x-resource-cache')
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
+}
 
 export const routeR2ArtifactRequest = async ({
   request,
   bucket,
   authorize,
+  cache,
+  waitUntil = () => undefined,
+  reportCacheFailure = () => undefined,
 }: {
   request: Request
   bucket: R2ArtifactBucket
   authorize: ArtifactRequestAuthorizer
+  cache?: ArtifactEdgeCache
+  waitUntil?: (promise: Promise<unknown>) => void
+  reportCacheFailure?: (operation: 'match' | 'put', cause: unknown) => void
 }): Promise<Response | undefined> => {
   const url = new URL(request.url)
   const pathname = url.pathname
@@ -112,30 +236,123 @@ export const routeR2ArtifactRequest = async ({
   if (!pathname.startsWith(R2_ARTIFACT_ROUTE_PREFIX)) return undefined
 
   const key = r2KeyForRequest(url)
-  if (!key) return new Response(null, { status: 404 })
+  if (!key) return artifactResponseForClient(new Response(null, { status: 404 }), request)
   if (request.method !== 'GET' && request.method !== 'HEAD') {
-    return new Response(null, { status: 405, headers: { allow: 'GET, HEAD' } })
+    return artifactResponseForClient(
+      new Response(null, { status: 405, headers: { allow: 'GET, HEAD' } }),
+      request
+    )
   }
-  if (!(await authorize(request))) return new Response(null, { status: 401 })
+  if (!(await authorize(request))) {
+    return artifactResponseForClient(new Response(null, { status: 401 }), request)
+  }
+
+  if (cache) {
+    try {
+      const range = request.method === 'GET' ? request.headers.get('range') : undefined
+      const complete = await cache.match(artifactCacheRequest(request, { includeRange: false }))
+      if (complete) {
+        const conditionalStatus = preconditionStatus(request, complete.headers)
+        if (conditionalStatus) {
+          return artifactResponseForClient(
+            new Response(null, { status: conditionalStatus, headers: complete.headers }),
+            request,
+            'HIT'
+          )
+        }
+        const ifRange = range ? request.headers.get('if-range') : undefined
+        if (!range || (ifRange && !ifRangeMatches(ifRange, complete.headers))) {
+          return artifactResponseForClient(complete, request, 'HIT')
+        }
+        const partial = await cache.match(artifactCacheRequest(request, { includeRange: true }))
+        if (partial) return artifactResponseForClient(partial, request, 'HIT')
+      }
+    } catch (cause) {
+      reportCacheFailure('match', cause)
+    }
+  }
 
   if (request.method === 'HEAD') {
     const object = await bucket.head(key)
-    return object
-      ? new Response(null, { status: 200, headers: artifactHeaders(object) })
+    const headers = object ? artifactHeaders(object) : undefined
+    const conditionalStatus = headers ? preconditionStatus(request, headers) : undefined
+    const response = object
+      ? new Response(null, {
+          status: conditionalStatus ?? 200,
+          headers,
+        })
       : new Response(null, { status: 404 })
+    return artifactResponseForClient(response, request, cache ? 'MISS' : undefined)
   }
 
-  const object = await bucket.get(key, {
-    onlyIf: request.headers,
-    range: request.headers,
-  })
-  if (!object) return new Response(null, { status: 404 })
+  const r2RequestHeaders = new Headers(request.headers)
+  const ifRange = r2RequestHeaders.has('range') ? r2RequestHeaders.get('if-range') : undefined
+  if (ifRange) {
+    const current = await bucket.head(key)
+    if (!current) {
+      return artifactResponseForClient(
+        new Response(null, { status: 404 }),
+        request,
+        cache ? 'MISS' : undefined
+      )
+    }
+    if (!ifRangeMatches(ifRange, artifactHeaders(current))) {
+      r2RequestHeaders.delete('range')
+    }
+    r2RequestHeaders.delete('if-range')
+  }
+  let object: Awaited<ReturnType<R2ArtifactBucket['get']>>
+  try {
+    object = await bucket.get(key, {
+      onlyIf: r2RequestHeaders,
+      range: r2RequestHeaders,
+    })
+  } catch (cause) {
+    if (!isInvalidRangeError(cause)) throw cause
+    const current = await bucket.head(key)
+    if (!current) {
+      return artifactResponseForClient(
+        new Response(null, { status: 404 }),
+        request,
+        cache ? 'MISS' : undefined
+      )
+    }
+    const headers = artifactHeaders(current)
+    headers.set('content-range', `bytes */${current.size}`)
+    headers.delete('content-length')
+    return artifactResponseForClient(
+      new Response(null, { status: 416, headers }),
+      request,
+      cache ? 'MISS' : undefined
+    )
+  }
+  if (!object) {
+    return artifactResponseForClient(
+      new Response(null, { status: 404 }),
+      request,
+      cache ? 'MISS' : undefined
+    )
+  }
   const headers = artifactHeaders(object)
   if (!('body' in object)) {
-    return new Response(null, { status: failedPreconditionStatus(request), headers })
+    return artifactResponseForClient(
+      new Response(null, { status: preconditionStatus(request, headers) ?? 412, headers }),
+      request,
+      cache ? 'MISS' : undefined
+    )
   }
-  return new Response(object.body, {
+  const response = new Response(object.body, {
     status: object.range ? 206 : 200,
     headers,
   })
+  if (cache && response.status === 200) {
+    const keyRequest = artifactCacheRequest(request, { includeRange: false })
+    const cacheResponse = artifactResponseForCache(response.clone())
+    waitUntil(
+      cache.put(keyRequest, cacheResponse).catch(cause => {
+        reportCacheFailure('put', cause)
+      })
+    )
+  }
+  return artifactResponseForClient(response, request, cache ? 'MISS' : undefined)
 }

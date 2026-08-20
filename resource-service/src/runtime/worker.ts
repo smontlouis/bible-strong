@@ -60,6 +60,18 @@ export default {
       request,
       bucket: bindings.RESOURCE_ARTIFACTS,
       authorize: candidate => verifyFirebaseAppCheckRequest(candidate, appCheckConfig),
+      cache: caches.default,
+      waitUntil: promise => ctx.waitUntil(promise),
+      reportCacheFailure: (operation, cause) => {
+        console.error(
+          JSON.stringify({
+            message: 'R2 artifact edge cache failure',
+            operation,
+            path: new URL(request.url).pathname,
+            error: cause instanceof Error ? cause.message : String(cause),
+          })
+        )
+      },
     })
     if (artifactResponse) return artifactResponse
 
