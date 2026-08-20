@@ -612,6 +612,8 @@
   "migration.account.description": "Your account data is being moved to the current secure storage format. Sync will resume when the update is complete.",
   "migration.progress": "Progress",
   "migration.start": "Update now",
+  "migration.useOnline": "No thanks, use online",
+  "migration.useOnlineDescription": "You can continue without downloading. Legacy resources will be removed and their content will remain available online with an internet connection.",
   "migration.retry": "Try again",
   "migration.account.continue": "Continue to the app",
   "migration.resource.interlinear": "BHG — Interlinear ({{language}})",

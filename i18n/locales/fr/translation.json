@@ -620,6 +620,8 @@
   "migration.account.description": "Les données de votre compte sont transférées vers le format de stockage sécurisé actuel. La synchronisation reprendra à la fin de la mise à jour.",
   "migration.progress": "Progression",
   "migration.start": "Mettre à jour",
+  "migration.useOnline": "Non merci, utiliser en ligne",
+  "migration.useOnlineDescription": "Vous pouvez poursuivre sans téléchargement. Les anciennes ressources seront supprimées et leur contenu restera accessible en ligne avec une connexion internet.",
   "migration.retry": "Réessayer",
   "migration.account.continue": "Continuer dans l’application",
   "migration.resource.interlinear": "BHG — Interlinéaire ({{language}})",

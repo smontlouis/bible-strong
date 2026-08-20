@@ -22,6 +22,11 @@ export interface MigrationPlan {
 }
 
 export type MigrationTerminalOutcome = 'completed' | 'abandoned-after-failure'
+export interface MigrationRunOptions {
+  mode?: MigrationRunMode
+}
+export type MigrationRunMode = 'full' | 'online-only'
+export type MigrationStepRequirement = 'required' | 'offline-copy'
 export type MigrationExecutionStatus =
   | 'detected'
   | 'awaiting-confirmation'
@@ -62,6 +67,7 @@ export interface AppMigrationDefinition<TContext extends MigrationContext = Migr
   phase: MigrationPhase
   order: number
   completionPolicy?: 'once' | 'recheck'
+  getStepRequirement?(step: MigrationStep): MigrationStepRequirement
   detect(context: TContext): Promise<MigrationPlan | null>
   executeStep(input: {
     context: TContext
@@ -90,6 +96,7 @@ export interface PersistedMigrationExecution {
   completedStepIds: string[]
   completedCleanupStepIds: string[]
   cleanupOutcome?: MigrationTerminalOutcome
+  runMode?: MigrationRunMode
   currentStepId?: string
   currentCleanupStepId?: string
   errorCode?: string
@@ -135,6 +142,7 @@ export type MigrationSnapshot =
       completedStepIds: string[]
       completedCleanupStepIds: string[]
       cleanupOutcome?: MigrationTerminalOutcome
+      runMode?: MigrationRunMode
       currentStepId?: string
       currentCleanupStepId?: string
       progress?: number
@@ -153,7 +161,11 @@ export type MigrationStartupDisposition =
 export interface AppMigrationOrchestrator<TContext extends MigrationContext = MigrationContext> {
   getStartupDisposition(context: TContext): MigrationStartupDisposition
   inspect(context: TContext): Promise<MigrationSnapshot>
-  run(context: TContext, onChange?: MigrationSnapshotListener): Promise<MigrationSnapshot>
+  run(
+    context: TContext,
+    onChange?: MigrationSnapshotListener,
+    options?: MigrationRunOptions
+  ): Promise<MigrationSnapshot>
   abandon(context: TContext, onChange?: MigrationSnapshotListener): Promise<MigrationSnapshot>
 }
 
@@ -246,6 +258,9 @@ const isPersistedExecution = (value: unknown): value is PersistedMigrationExecut
     (typeof value.cleanupOutcome !== 'undefined' &&
       value.cleanupOutcome !== 'completed' &&
       value.cleanupOutcome !== 'abandoned-after-failure') ||
+    (typeof value.runMode !== 'undefined' &&
+      value.runMode !== 'full' &&
+      value.runMode !== 'online-only') ||
     (typeof value.currentStepId !== 'undefined' && typeof value.currentStepId !== 'string') ||
     (typeof value.currentCleanupStepId !== 'undefined' &&
       typeof value.currentCleanupStepId !== 'string') ||
@@ -448,6 +463,7 @@ const toSnapshot = (execution: PersistedMigrationExecution): MigrationSnapshot =
   completedStepIds: [...execution.completedStepIds],
   completedCleanupStepIds: [...execution.completedCleanupStepIds],
   cleanupOutcome: execution.cleanupOutcome,
+  runMode: execution.runMode,
   currentStepId: execution.currentStepId,
   currentCleanupStepId: execution.currentCleanupStepId,
   errorCode: execution.errorCode,
@@ -790,7 +806,8 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
 
   const runUnlocked = async (
     context: TContext,
-    onChange?: MigrationSnapshotListener
+    onChange?: MigrationSnapshotListener,
+    options?: MigrationRunOptions
   ): Promise<MigrationSnapshot> => {
     const state = await loadState(context)
 
@@ -805,7 +822,16 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
         throw new MigrationExecutionError('APP_MIGRATION_ABANDON_IN_PROGRESS')
       }
 
+      const requestedRunMode = options?.mode ?? execution.runMode ?? 'full'
+      if (execution.runMode && execution.runMode !== requestedRunMode) {
+        throw new MigrationExecutionError('APP_MIGRATION_RUN_MODE_LOCKED')
+      }
+      if (requestedRunMode === 'online-only' && !migration.getStepRequirement) {
+        throw new MigrationExecutionError('APP_MIGRATION_ONLINE_ONLY_UNSUPPORTED')
+      }
+
       const isRetry = execution.status === 'failed'
+      execution.runMode = requestedRunMode
       execution.status = 'running'
       execution.errorCode = undefined
       touchExecution(execution)
@@ -816,6 +842,17 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
       try {
         for (const step of execution.plan.steps) {
           if (execution.completedStepIds.includes(step.id)) continue
+
+          if (
+            execution.runMode === 'online-only' &&
+            migration.getStepRequirement?.(step) === 'offline-copy'
+          ) {
+            execution.completedStepIds.push(step.id)
+            touchExecution(execution)
+            await store.save(state)
+            emitSnapshot(onChange, toSnapshot(execution))
+            continue
+          }
 
           execution.currentStepId = step.id
           touchExecution(execution)
@@ -982,7 +1019,8 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
   return {
     getStartupDisposition,
     inspect: context => store.runExclusive(() => inspectUnlocked(context)),
-    run: (context, onChange) => store.runExclusive(() => runUnlocked(context, onChange)),
+    run: (context, onChange, options) =>
+      store.runExclusive(() => runUnlocked(context, onChange, options)),
     abandon: (context, onChange) => store.runExclusive(() => abandonUnlocked(context, onChange)),
   }
 }

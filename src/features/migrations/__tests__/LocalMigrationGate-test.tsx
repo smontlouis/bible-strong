@@ -206,7 +206,7 @@ describe('LocalMigrationGate', () => {
     )
   })
 
-  it('blocks normal content and system back without exposing a pre-failure skip action', async () => {
+  it('blocks normal content and offers online access without downloading', async () => {
     const orchestrator = createFakeOrchestrator({
       inspections: [migrationSnapshot('awaiting-confirmation')],
     })
@@ -214,9 +214,29 @@ describe('LocalMigrationGate', () => {
     const renderer = await renderGate(orchestrator)
 
     expect(renderer.root.findByProps({ testID: 'migration-start' })).toBeTruthy()
-    expect(renderer.root.findAllByProps({ testID: 'migration-continue-without' })).toHaveLength(0)
+    expect(renderer.root.findByProps({ testID: 'migration-use-online' })).toBeTruthy()
     expect(renderer.toJSON()).not.toEqual('Application')
     expect(backHandler?.()).toBe(true)
+  })
+
+  it('migrates in online-only mode and enters the app without installing resources', async () => {
+    const orchestrator = createFakeOrchestrator({
+      inspections: [
+        migrationSnapshot('awaiting-confirmation'),
+        { status: 'idle', isResuming: false },
+      ],
+    })
+    const renderer = await renderGate(orchestrator)
+
+    await act(async () => {
+      renderer.root.findByProps({ testID: 'migration-use-online' }).props.onPress()
+    })
+
+    expect(orchestrator.run).toHaveBeenCalledWith(context, expect.any(Function), {
+      mode: 'online-only',
+    })
+    expect(orchestrator.abandon).not.toHaveBeenCalled()
+    expect(renderer.toJSON()).toBe('Application')
   })
 
   it('localizes interlinear resources from their serialized migration identity', async () => {

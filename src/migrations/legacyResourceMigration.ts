@@ -143,6 +143,11 @@ export const createLegacyResourceMigration = (
   version: 1,
   phase: 'local',
   order: 100,
+  getStepRequirement(step) {
+    if (!step.payload?.identity) return 'required'
+    const identity = parseIdentity(step.payload.identity)
+    return step.id === `install:${identityKey(identity)}` ? 'offline-copy' : 'required'
+  },
   async detect() {
     const evidence = await dependencies.inspectEvidence()
     const legacyIdentities = orderLegacyIdentities(evidence.legacyIdentities)

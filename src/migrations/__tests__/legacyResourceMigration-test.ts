@@ -48,6 +48,16 @@ describe('legacyResourceMigration', () => {
     const plan = await migration.detect(localContext)
 
     expect(dependencies.resolveReplacementPlan).toHaveBeenCalledWith(replacementIdentity)
+    expect(
+      migration.getStepRequirement?.({ id: 'migrate-persisted-references', label: 'refs' })
+    ).toBe('required')
+    expect(
+      migration.getStepRequirement?.({
+        id: `install:${identityKey({ kind: 'strong-lexicon-module', moduleId: 'core' })}`,
+        label: 'install',
+        payload: { identity: { kind: 'strong-lexicon-module', moduleId: 'core' } },
+      })
+    ).toBe('offline-copy')
     expect(plan).toMatchObject({
       steps: [
         { id: 'migrate-persisted-references' },

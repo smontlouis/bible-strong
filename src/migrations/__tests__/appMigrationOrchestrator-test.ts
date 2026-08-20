@@ -453,6 +453,68 @@ describe('appMigrationOrchestrator', () => {
     expect(finalizerCalls).toBe(2)
   })
 
+  it('persists online-only mode across retries and skips only classified offline-copy steps', async () => {
+    const store = createMemoryStore()
+    const executedSteps: string[] = []
+    let mandatoryAttempts = 0
+    const migration = createMigration({
+      id: 'online-only',
+      order: 10,
+      getStepRequirement: step => (step.id === 'install-resource' ? 'offline-copy' : 'required'),
+      async detect() {
+        return {
+          steps: [
+            { id: 'migrate-references', label: 'online.references' },
+            {
+              id: 'install-resource',
+              label: 'online.install',
+            },
+          ],
+        }
+      },
+      async executeStep({ step }) {
+        executedSteps.push(step.id)
+        if (step.id === 'migrate-references' && mandatoryAttempts++ === 0) {
+          throw new MigrationExecutionError('REFERENCE_RETRY_REQUIRED')
+        }
+      },
+    })
+    const firstRunner = createAppMigrationOrchestrator({ migrations: [migration], store })
+
+    await firstRunner.inspect(context)
+    await expect(
+      firstRunner.run(context, undefined, { mode: 'online-only' })
+    ).resolves.toMatchObject({
+      status: 'failed',
+      runMode: 'online-only',
+      completedStepIds: [],
+    })
+
+    const resumedRunner = createAppMigrationOrchestrator({ migrations: [migration], store })
+    await expect(resumedRunner.run(context)).resolves.toMatchObject({
+      status: 'completed',
+      runMode: 'online-only',
+      completedStepIds: ['migrate-references', 'install-resource'],
+    })
+    expect(executedSteps).toEqual(['migrate-references', 'migrate-references'])
+  })
+
+  it('rejects online-only mode when a migration does not classify offline-copy steps', async () => {
+    const store = createMemoryStore()
+    const executeStep = jest.fn(async () => {})
+    const orchestrator = createAppMigrationOrchestrator({
+      migrations: [createMigration({ id: 'required-only', order: 10, executeStep })],
+      store,
+    })
+
+    await orchestrator.inspect(context)
+
+    await expect(orchestrator.run(context, undefined, { mode: 'online-only' })).rejects.toThrow(
+      'APP_MIGRATION_ONLINE_ONLY_UNSUPPORTED'
+    )
+    expect(executeStep).not.toHaveBeenCalled()
+  })
+
   it('allows abandonment only after failure and finalizes it as a terminal outcome', async () => {
     const store = createMemoryStore()
     const outcomes: string[] = []

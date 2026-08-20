@@ -242,10 +242,12 @@ const LocalMigrationGate = ({
     return () => subscription.remove()
   }, [state.kind])
 
-  const runMigration = async (): Promise<void> => {
+  const runMigration = async (onlineOnly = false): Promise<void> => {
     setActionPending(true)
     try {
-      const result = await orchestrator.run(context, showSnapshot)
+      const result = onlineOnly
+        ? await orchestrator.run(context, showSnapshot, { mode: 'online-only' })
+        : await orchestrator.run(context, showSnapshot)
       if (isTerminal(result)) await inspectGate()
       else applyInspectionResult(result)
     } catch (error) {
@@ -400,6 +402,11 @@ const LocalMigrationGate = ({
                       </Text>
                     </HStack>
                   ))}
+                  <Box mt={8} p={16} borderRadius={16} bg="lightGrey">
+                    <Text color="grey" fontSize={13} lineHeight={19}>
+                      {t('migration.useOnlineDescription')}
+                    </Text>
+                  </Box>
                 </VStack>
               )}
             </>
@@ -447,13 +454,33 @@ const LocalMigrationGate = ({
 
           <VStack mt={32} gap={12}>
             {isConfirmation && (
-              <Button testID="migration-start" isLoading={actionPending} onPress={runMigration}>
-                {t('migration.start')}
-              </Button>
+              <>
+                <Button
+                  testID="migration-start"
+                  isLoading={actionPending}
+                  onPress={() => runMigration()}
+                >
+                  {t('migration.start')}
+                </Button>
+                {resources.length > 0 && (
+                  <Button
+                    testID="migration-use-online"
+                    reverse
+                    disabled={actionPending}
+                    onPress={() => runMigration(true)}
+                  >
+                    {t('migration.useOnline')}
+                  </Button>
+                )}
+              </>
             )}
             {isFailure && (
               <>
-                <Button testID="migration-retry" isLoading={actionPending} onPress={runMigration}>
+                <Button
+                  testID="migration-retry"
+                  isLoading={actionPending}
+                  onPress={() => runMigration()}
+                >
                   {t('migration.retry')}
                 </Button>
                 <Button
