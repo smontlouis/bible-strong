@@ -19,10 +19,19 @@ import {
   getStrongLexiconModuleAvailability,
   type StrongLexiconModuleAvailability,
 } from '~helpers/strongLexiconModules'
+import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
+import { requirePericopePath } from '~helpers/pericopes'
+import { requireRedWordsPath } from '~helpers/redWords'
 
 type FileInfo = {
   exists: boolean
 }
+
+const getBibleChildResourcePath = (
+  kind: 'bible-pericope' | 'bible-red-words',
+  versionId: string
+): string =>
+  kind === 'bible-pericope' ? requirePericopePath(versionId) : requireRedWordsPath(versionId)
 
 export type LocalResourceRef = OfflineCopyIdentity
 
@@ -127,10 +136,7 @@ export const getLocalResourceAvailability = async (
   dependencies: ResourceAvailabilityDependencies = defaultDependencies
 ): Promise<LocalResourceAvailability> => {
   if (resource.kind === 'bible-pericope' || resource.kind === 'bible-red-words') {
-    const expectedPath =
-      resource.kind === 'bible-pericope'
-        ? `${FileSystem.documentDirectory}bible-${resource.versionId.toLowerCase()}-pericope.json`
-        : `${FileSystem.documentDirectory}red-words-${resource.versionId}.json`
+    const expectedPath = getBibleChildResourcePath(resource.kind, resource.versionId)
     await dependencies.restoreBackup?.(expectedPath)
     const file = await dependencies.getFileInfo(expectedPath)
     return file.exists
@@ -194,6 +200,19 @@ export const getLocalResourceAvailability = async (
 
   const installed = await dependencies.isVersionInstalled(resource.versionId)
   if (installed) {
+    const archiveEntries = getMobileResourceCatalogEntry(createOfflineCopyId(resource)).entries
+    const requiredChildKinds = [
+      ...(archiveEntries.pericope ? (['bible-pericope'] as const) : []),
+      ...(archiveEntries.redWords ? (['bible-red-words'] as const) : []),
+    ]
+    for (const kind of requiredChildKinds) {
+      const expectedPath = getBibleChildResourcePath(kind, resource.versionId)
+      await dependencies.restoreBackup?.(expectedPath)
+      if (!(await dependencies.getFileInfo(expectedPath)).exists) {
+        return { status: 'missing', resource, expectedPath }
+      }
+    }
+
     return {
       status: 'available',
       resource,

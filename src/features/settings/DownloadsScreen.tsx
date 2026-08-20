@@ -44,9 +44,6 @@ import { mobileResourceCatalogAtom } from '~helpers/mobileResourceCatalog'
 import useLanguage from '~helpers/useLanguage'
 import { getDefaultStore } from 'jotai/vanilla'
 import {
-  getStrongBibleAttributionKey,
-  getStrongBiblePublication,
-  isStrongCapableBibleVersion,
   STRONG_BIBLE_PUBLICATIONS,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
@@ -58,8 +55,7 @@ import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
-import { buildBibleVersionGroups, getStrongIndexBibleName } from './downloadVersionGroups'
-import { BHG_INTERLINEAR_PUBLICATION } from '~helpers/interlinearBiblePublications'
+import { buildBibleVersionGroups } from './downloadVersionGroups'
 import {
   getInterlinearSidecarAvailability,
   type InterlinearSidecarAvailability,
@@ -74,23 +70,14 @@ import { resolveResourceCatalogStatus } from '~helpers/resourcePublication'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceIdentityFromOfflineCopy } from '~features/resources/resourceModel'
 import useConnection from '~helpers/useConnection'
-import { versionHasPericope } from '~helpers/pericopes'
-import { versionHasRedWords } from '~helpers/redWords'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import { buildBibleItems, type UnifiedDownloadItem } from './downloadBibleItems'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
 // ---------------------------------------------------------------------------
 
-interface UnifiedItem {
-  id: string // itemId for DownloadableItem, e.g. "bible:LSG" or "strong-lexicon:core"
-  name: string
-  subtitle?: string
-  parentItemId?: string
-  estimatedSize: number
-  lang: 'fr' | 'en' | 'other'
-  searchText: string // for search filtering
-}
+type UnifiedItem = UnifiedDownloadItem
 
 interface UnifiedSection {
   key: string
@@ -180,94 +167,6 @@ function buildSharedDatabaseItems(): UnifiedItem[] {
       lang: 'fr' as const,
       searchText: `${db.name} ${db.desc} ${dbId}`.toLowerCase(),
     }
-  })
-}
-
-function buildBibleItems(
-  versionList: Version[],
-  appLang: string,
-  t: (key: string, options?: Record<string, unknown>) => string
-): UnifiedItem[] {
-  return versionList.flatMap(v => {
-    const displayName = appLang === 'en' && v.name_en ? v.name_en : v.name
-    const base: UnifiedItem = {
-      id: createOfflineCopyId({ kind: 'bible', versionId: v.id }),
-      name: `${v.id}  ${displayName}`,
-      subtitle: v.c,
-      estimatedSize:
-        v.id === 'BHG' ? BHG_INTERLINEAR_PUBLICATION.canonical.archiveBytes : 2_500_000,
-      lang: (v.type === 'en' ? 'en' : v.type === 'other' ? 'other' : 'fr') as 'fr' | 'en' | 'other',
-      searchText: `${v.id} ${v.name} ${v.name_en || ''} ${v.c || ''}`.toLowerCase(),
-    }
-    const presentationItems: UnifiedItem[] = [
-      ...(versionHasPericope(v.id)
-        ? [
-            {
-              id: createOfflineCopyId({ kind: 'bible-pericope', versionId: v.id }),
-              name: t('downloads.pericopeData'),
-              subtitle: t('downloads.includedInBibleArchive'),
-              parentItemId: base.id,
-              estimatedSize: 0,
-              lang: base.lang,
-              searchText: `${v.id} pericope headings`.toLowerCase(),
-            },
-          ]
-        : []),
-      ...(versionHasRedWords(v.id)
-        ? [
-            {
-              id: createOfflineCopyId({ kind: 'bible-red-words', versionId: v.id }),
-              name: t('downloads.redWordsData'),
-              subtitle: t('downloads.includedInBibleArchive'),
-              parentItemId: base.id,
-              estimatedSize: 0,
-              lang: base.lang,
-              searchText: `${v.id} red words jesus`.toLowerCase(),
-            },
-          ]
-        : []),
-    ]
-    if (v.id === 'BHG') {
-      return [
-        base,
-        ...presentationItems,
-        ...(['fr', 'en'] as ResourceLanguage[]).map(locale => {
-          const artifact = BHG_INTERLINEAR_PUBLICATION.indexes[locale]
-          return {
-            id: createOfflineCopyId({
-              kind: 'interlinear-index',
-              versionId: 'BHG',
-              language: locale,
-            }),
-            name: `${t('downloads.interlinearIndexName')} · ${t(
-              `versionCatalog.language.${locale}`
-            )}`,
-            subtitle: t('downloads.interlinearAttribution'),
-            parentItemId: base.id,
-            estimatedSize: artifact.archiveBytes,
-            lang: 'other' as const,
-            searchText: `BHG STEP interlinear ${locale}`.toLowerCase(),
-          }
-        }),
-      ]
-    }
-    if (!isStrongCapableBibleVersion(v.id)) return [base, ...presentationItems]
-    const publication = getStrongBiblePublication(v.id)
-    const strongIndexBibleName = getStrongIndexBibleName(displayName)
-    return [
-      base,
-      ...presentationItems,
-      {
-        id: createOfflineCopyId({ kind: 'strong-bible-index', versionId: v.id }),
-        name: t('downloads.strongIndexName', { bible: strongIndexBibleName }),
-        subtitle: t(getStrongBibleAttributionKey(v.id)),
-        parentItemId: base.id,
-        estimatedSize: publication.strong.archiveBytes,
-        lang: v.type === 'en' ? 'en' : 'fr',
-        searchText:
-          `${v.id} ${v.name} ${strongIndexBibleName} strong index ${publication.datasetId}`.toLowerCase(),
-      },
-    ]
   })
 }
 
@@ -388,33 +287,6 @@ function useDownloadedItems() {
       )
       for (const [vId, available] of bibleEntries) {
         if (available) set.add(createOfflineCopyId({ kind: 'bible', versionId: vId }))
-      }
-
-      const biblePresentationEntries = await Promise.all(
-        Object.keys(versions).flatMap(versionId => [
-          ...(versionHasPericope(versionId)
-            ? [
-                isLocalResourceAvailable({ kind: 'bible-pericope', versionId }).then(
-                  available =>
-                    [createOfflineCopyId({ kind: 'bible-pericope', versionId }), available] as const
-                ),
-              ]
-            : []),
-          ...(versionHasRedWords(versionId)
-            ? [
-                isLocalResourceAvailable({ kind: 'bible-red-words', versionId }).then(
-                  available =>
-                    [
-                      createOfflineCopyId({ kind: 'bible-red-words', versionId }),
-                      available,
-                    ] as const
-                ),
-              ]
-            : []),
-        ])
-      )
-      for (const [itemId, available] of biblePresentationEntries) {
-        if (available) set.add(itemId)
       }
 
       const availabilityMap = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
@@ -754,7 +626,7 @@ const DownloadsScreen = () => {
         return createOfflineCopyDownloadPlan(identity)
       case 'bible-pericope':
       case 'bible-red-words':
-        return createOfflineCopyDownloadPlan(identity)
+        throw new Error(`BIBLE_CHILD_RESOURCE_IS_NOT_MANAGED_SEPARATELY:${itemId}`)
     }
   }
 

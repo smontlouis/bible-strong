@@ -75,6 +75,8 @@ import { removeStrongBibleSidecar } from '../strongBibleSidecar'
 import { removeInterlinearSidecar } from '../interlinearBibleSidecar'
 import { removeStrongLexiconModule } from '../strongLexiconModules'
 import { queryClient } from '../queryClient'
+import { deletePericopeFile } from '../pericopes'
+import { deleteRedWordsFile } from '../redWords'
 
 const mockGetInfoAsync = jest.mocked(FileSystem.getInfoAsync)
 const mockIsVersionInstalled = jest.mocked(isVersionInstalled)
@@ -84,6 +86,8 @@ const mockRemoveInterlinearSidecar = jest.mocked(removeInterlinearSidecar)
 const mockRemoveStrongLexiconModule = jest.mocked(removeStrongLexiconModule)
 const mockGetDatabase = jest.mocked(dbManager.getDB)
 const mockInvalidateQueries = jest.mocked(queryClient.invalidateQueries)
+const mockDeletePericopeFile = jest.mocked(deletePericopeFile)
+const mockDeleteRedWordsFile = jest.mocked(deleteRedWordsFile)
 
 describe('deleteDownloadedItem', () => {
   beforeEach(() => {
@@ -115,6 +119,30 @@ describe('deleteDownloadedItem', () => {
     expect(mockRemoveBibleVersion).toHaveBeenCalledWith('LSG')
     expect(mockRemoveStrongBibleSidecar).not.toHaveBeenCalled()
   })
+
+  it.each(['remove', 'replace'] as const)(
+    'removes bundled pericope and red-word data when the parent Bible is in %s mode',
+    async bibleMode => {
+      await deleteDownloadedItem(createDownloadedItemDeletionPlan('bible:LSG', { bibleMode }))
+
+      expect(mockDeletePericopeFile).toHaveBeenCalledWith('LSG')
+      expect(mockDeleteRedWordsFile).toHaveBeenCalledWith('LSG')
+    }
+  )
+
+  it.each(['bible-pericope:DBY', 'bible-red-words:DBY'])(
+    'redirects legacy child deletion %s to the complete parent Bible bundle',
+    async itemId => {
+      const plan = createDownloadedItemDeletionPlan(itemId)
+
+      expect(plan).toEqual(expect.objectContaining({ kind: 'bible', versionId: 'DBY' }))
+      await deleteDownloadedItem(plan)
+
+      expect(mockRemoveBibleVersion).toHaveBeenCalledWith('DBY')
+      expect(mockDeletePericopeFile).toHaveBeenCalledWith('DBY')
+      expect(mockDeleteRedWordsFile).toHaveBeenCalledWith('DBY')
+    }
+  )
 
   it('removes a sidecar without removing its Bible', async () => {
     await deleteDownloadedItem(createDownloadedItemDeletionPlan('bible-strong:DBY'))

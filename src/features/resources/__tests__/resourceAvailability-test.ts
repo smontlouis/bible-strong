@@ -9,6 +9,32 @@ jest.mock('~helpers/biblesDb', () => ({
   isVersionInstalled: jest.fn(),
 }))
 
+jest.mock('~helpers/bibleVersions', () => ({
+  versions: {
+    LSG: { id: 'LSG' },
+    DBY: { id: 'DBY', hasPericope: true, hasRedWords: true },
+    NBS: { id: 'NBS', hasPericope: true, hasRedWords: true },
+  },
+}))
+
+jest.mock('~helpers/mobileResourceCatalog', () => ({
+  getMobileResourceCatalogEntry: (resourceId: string) => ({
+    entries:
+      resourceId === 'bible:NBS'
+        ? { canonical: {}, pericope: {}, redWords: {} }
+        : { canonical: {} },
+  }),
+}))
+
+jest.mock('~helpers/pericopes', () => ({
+  requirePericopePath: (versionId: string) =>
+    `file:///docs/bible-${versionId.toLowerCase()}-pericope.json`,
+}))
+
+jest.mock('~helpers/redWords', () => ({
+  requireRedWordsPath: (versionId: string) => `file:///docs/red-words-${versionId}.json`,
+}))
+
 jest.mock('~helpers/databases', () => ({
   getDbPath: jest.fn(),
   initLanguageDirs: jest.fn(),
@@ -126,6 +152,42 @@ describe('resourceAvailability', () => {
       status: 'missing',
       resource: { kind: 'bible', versionId: 'DBY' },
     })
+  })
+
+  it('reports a bundled Bible as missing when one of its presentation files is absent', async () => {
+    const dependencies = createDependencies({
+      installedVersions: new Set(['NBS']),
+      files: new Set(['file:///docs/bible-nbs-pericope.json']),
+    })
+
+    await expect(
+      getLocalResourceAvailability({ kind: 'bible', versionId: 'NBS' }, dependencies)
+    ).resolves.toEqual({
+      status: 'missing',
+      resource: { kind: 'bible', versionId: 'NBS' },
+      expectedPath: 'file:///docs/red-words-NBS.json',
+    })
+  })
+
+  it('reports a bundled Bible available only when all of its presentation files exist', async () => {
+    const dependencies = createDependencies({
+      installedVersions: new Set(['NBS']),
+      files: new Set(['file:///docs/bible-nbs-pericope.json', 'file:///docs/red-words-NBS.json']),
+    })
+
+    await expect(
+      isLocalResourceAvailable({ kind: 'bible', versionId: 'NBS' }, dependencies)
+    ).resolves.toBe(true)
+  })
+
+  it('does not require child files that are absent from the Bible archive contract', async () => {
+    const dependencies = createDependencies({
+      installedVersions: new Set(['DBY']),
+    })
+
+    await expect(
+      isLocalResourceAvailable({ kind: 'bible', versionId: 'DBY' }, dependencies)
+    ).resolves.toBe(true)
   })
 
   it('reports missing resources as needing download', async () => {

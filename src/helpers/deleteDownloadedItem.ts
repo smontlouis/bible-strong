@@ -36,10 +36,6 @@ export type DownloadedItemDeletionPlan =
   | { kind: 'interlinear-sidecar'; language: ResourceLanguage }
   | { kind: 'strong-lexicon-module'; moduleId: StrongLexiconModuleId }
   | { kind: 'database'; databaseId: DatabaseId; language: ResourceLanguage }
-  | {
-      kind: 'bible-child'
-      identity: Extract<OfflineCopyIdentity, { kind: 'bible-pericope' | 'bible-red-words' }>
-    }
   | { kind: 'unknown'; itemId: string }
 
 export const createDownloadedItemDeletionPlan = (
@@ -64,7 +60,10 @@ export const createDownloadedItemDeletionPlan = (
       }
     case 'bible-pericope':
     case 'bible-red-words':
-      return { kind: 'bible-child', identity }
+      return createDownloadedItemDeletionPlan(
+        createOfflineCopyId({ kind: 'bible', versionId: identity.versionId }),
+        { bibleMode }
+      )
     case 'bible': {
       const { versionId } = identity
       return {
@@ -103,15 +102,6 @@ const invalidateAndForgetPublication = async (identity: OfflineCopyIdentity): Pr
 }
 
 export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Promise<void> => {
-  if (plan.kind === 'bible-child') {
-    if (plan.identity.kind === 'bible-pericope') {
-      await deletePericopeFile(plan.identity.versionId)
-    } else {
-      await deleteRedWordsFile(plan.identity.versionId)
-    }
-    await invalidateAndForgetPublication(plan.identity)
-    return
-  }
   if (plan.kind === 'strong-lexicon-module') {
     await removeStrongLexiconModule(plan.moduleId)
     await invalidateAndForgetPublication({
