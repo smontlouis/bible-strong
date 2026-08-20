@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
+import type { Verse } from '~common/types'
 import { Book } from '~assets/bible_versions/books-desc'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { getVersions, Version } from '~helpers/bibleVersions'
@@ -20,12 +21,14 @@ type BibleFooterProps = {
   disabled?: boolean
   version: VersionCode
   bibleAtom: PrimitiveAtom<BibleTab>
+  chapterVerses?: Verse[]
   coverage?: BibleVersionCoverage
   isInTab?: boolean
 }
 
 const BibleFooter = ({
   bibleAtom,
+  chapterVerses,
   book,
   chapter,
   goToNextChapter,
@@ -90,6 +93,7 @@ const BibleFooter = ({
       <AudioTTSFooter
         book={book}
         chapter={chapter}
+        chapterVerses={chapterVerses}
         goToNextChapter={goToNextChapter}
         goToPrevChapter={goToPrevChapter}
         disabled={disabled}

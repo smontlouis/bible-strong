@@ -62,6 +62,7 @@ const StrongTabScreen = ({ strongAtom }: StrongTabScreenProps) => {
   return (
     <StrongMainScreen
       context={strongTab.data}
+      hasBackButton={false}
       onBack={returnToLexicon}
       onTitleChange={updateTitle}
     />

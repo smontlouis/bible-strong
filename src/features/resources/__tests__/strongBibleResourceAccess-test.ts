@@ -127,6 +127,28 @@ describe('strongBibleResourceAccess', () => {
     expect(dependencies.loadChapterSpans).toHaveBeenCalledWith('DBY', { book: 3, chapter: 1 })
   })
 
+  it('rejects contextual Strong codes from a different canonical text revision', async () => {
+    const dependencies = createDependencies()
+    dependencies.getAvailability.mockResolvedValue(available('LSG'))
+    dependencies.loadChapterSpans.mockResolvedValue({
+      spansByVerse: {},
+      textRevision: 'old-lsg-text',
+      textSha256: '0'.repeat(64),
+    })
+    const access = createStrongBibleResourceAccess(dependencies)
+
+    await expect(
+      access.loadChapterCodes({
+        currentVersionId: 'LSG',
+        defaultVersionId: 'LSG',
+        book: 40,
+        chapter: 21,
+        expectedTextRevision: 'current-lsg-text',
+        expectedTextSha256: '1'.repeat(64),
+      })
+    ).rejects.toMatchObject({ code: 'INTEGRITY_FAILURE' })
+  })
+
   it('keeps Strong spans on a contextual verse so untranslated occurrences remain positionable', async () => {
     const dependencies = createDependencies()
     const spans = [

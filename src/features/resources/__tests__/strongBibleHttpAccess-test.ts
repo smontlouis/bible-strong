@@ -145,6 +145,73 @@ describe('Strong Bible HTTP resource access', () => {
     )
   })
 
+  it('reuses compatible remote availability across chapter loads', async () => {
+    const fetcher = jest.fn((url: string) => {
+      if (url.endsWith('/coverage')) {
+        return jsonResponse({
+          resource,
+          books: [1],
+          chaptersByBook: { 1: [1, 2] },
+          verseCountByBookChapter: { '1-1': 1, '1-2': 1 },
+        })
+      }
+      const chapter = url.endsWith('/2') ? 2 : 1
+      return jsonResponse({
+        resource,
+        book: 1,
+        chapter,
+        verses: [{ number: 1, spans: [span] }],
+      })
+    }) as jest.MockedFunction<typeof fetch>
+    const loadCoverage = jest.fn(async () => ({
+      status: 'available' as const,
+      coverage: {
+        canon: { id: 'protestant-66', orderedBooks: [1] },
+        versification: 'protestant-66',
+        books: [1],
+        chaptersByBook: { 1: [1, 2] },
+        verseCountByBookChapter: { '1-1': 1, '1-2': 1 },
+      },
+      textRevision: resource.textRevision,
+      textSha256: resource.textSha256,
+    }))
+    const online = createHttpStrongBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher,
+      isOnline: async () => true,
+      bibleChapterAdapter: {
+        loadChapter: async () => ({ status: 'unavailable', reason: 'chapter-not-available' }),
+        loadCoverage,
+      },
+    })
+    const hybrid = createHybridStrongBibleResourceAdapter({
+      offline: unavailableAdapter(),
+      online,
+      remotelyReadableVersions: new Set(['LSG']),
+      isOnline: async () => true,
+    })
+    const access = createStrongBibleResourceAccess(hybrid)
+
+    await access.loadChapterCodes({
+      currentVersionId: 'LSG',
+      defaultVersionId: 'LSG',
+      book: 1,
+      chapter: 1,
+    })
+    await access.loadChapterCodes({
+      currentVersionId: 'LSG',
+      defaultVersionId: 'LSG',
+      book: 1,
+      chapter: 2,
+    })
+
+    expect(loadCoverage).toHaveBeenCalledTimes(1)
+    expect(fetcher.mock.calls.filter(([url]) => String(url).endsWith('/coverage'))).toHaveLength(1)
+    expect(
+      fetcher.mock.calls.filter(([url]) => String(url).includes('/books/1/chapters/'))
+    ).toHaveLength(2)
+  })
+
   it('prefers installed SQLite, then returns to HTTP after that copy is removed', async () => {
     const offline = unavailableAdapter()
     let installed = true

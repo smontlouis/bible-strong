@@ -53,4 +53,20 @@ describe('resourceQueryKeys', () => {
       request,
     ])
   })
+
+  it('keeps contextual chapter entities under the Strong lexicon invalidation root', () => {
+    const request = {
+      language: 'fr',
+      book: 40,
+      chapter: 21,
+      strongCodes: ['G2424'],
+    }
+
+    expect(resourceQueryKeys.strongLexiconChapterEntities(request)).toEqual([
+      'resource',
+      'strong-lexicon',
+      'chapter-entities',
+      request,
+    ])
+  })
 })

@@ -58,6 +58,26 @@ describe('resource source development logger', () => {
     expect(consoleLog).toHaveBeenCalledWith('[ResourceSource] Cache · OFFLINE · loadCached')
   })
 
+  it('distinguishes array arguments from array results', async () => {
+    const adapter = withResourceSourceLogging(
+      {
+        loadChapterEntities: async (
+          _book: number,
+          _chapter: number,
+          _language: string,
+          _strongCodes: string[]
+        ) => ['Jesus', 'Jerusalem'],
+      },
+      { resource: 'Strong lexicon', source: 'online', enabled: true }
+    )
+
+    await adapter.loadChapterEntities(40, 21, 'fr', ['G2424', 'G2414', 'G1519'])
+
+    expect(consoleLog).toHaveBeenCalledWith(
+      '[ResourceSource] Strong lexicon · ONLINE · loadChapterEntities · 40 · 21 · fr · strongCodes=3 · result=2'
+    )
+  })
+
   it('logs only the online source when the installed Bible is unavailable', async () => {
     const offline = withResourceSourceLogging<BibleChapterAdapter>(
       {

@@ -11,6 +11,14 @@ const TRACEABLE_OPERATION = /^(?:browse|find|list|load|random|search)/u
 
 const truncate = (value: string) => (value.length > 40 ? `${value.slice(0, 37)}...` : value)
 
+const ARRAY_ARGUMENT_LABELS: Record<string, Record<number, string>> = {
+  loadChapterEntities: { 3: 'strongCodes' },
+  loadEntries: { 0: 'identities' },
+  loadEntryCards: { 0: 'identities' },
+  loadMorphologies: { 0: 'codes' },
+  loadPreview: { 0: 'identities' },
+}
+
 const describeArgument = (value: unknown): string | undefined => {
   if (typeof value === 'string') return truncate(value)
   if (typeof value === 'number' || typeof value === 'boolean') return String(value)
@@ -48,11 +56,21 @@ const didLoadResource = (value: unknown) => {
 const logResourceSource = (
   options: ResourceSourceLoggerOptions,
   operation: string,
-  args: unknown[]
+  args: unknown[],
+  result: unknown
 ) => {
-  const details = args.map(describeArgument).filter(Boolean).join(' · ')
+  const details = args
+    .map((argument, index) => {
+      if (Array.isArray(argument)) {
+        const label = ARRAY_ARGUMENT_LABELS[operation]?.[index]
+        return label ? `${label}=${argument.length}` : `[${argument.length} items]`
+      }
+      return describeArgument(argument)
+    })
+    .filter(Boolean)
+  if (Array.isArray(result)) details.push(`result=${result.length}`)
   console.log(
-    `[ResourceSource] ${options.resource} · ${options.source.toUpperCase()} · ${operation}${details ? ` · ${details}` : ''}`
+    `[ResourceSource] ${options.resource} · ${options.source.toUpperCase()} · ${operation}${details.length ? ` · ${details.join(' · ')}` : ''}`
   )
 }
 
@@ -87,14 +105,14 @@ export const withResourceSourceLogging = <Adapter extends object>(
         if (result instanceof Promise) {
           return result.then(value => {
             if (shouldLogResult(options, property, value)) {
-              logResourceSource(options, property, args)
+              logResourceSource(options, property, args, value)
             }
             return value
           })
         }
 
         if (shouldLogResult(options, property, result)) {
-          logResourceSource(options, property, args)
+          logResourceSource(options, property, args, result)
         }
         return result
       }

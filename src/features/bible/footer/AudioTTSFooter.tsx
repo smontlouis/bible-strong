@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { Platform } from 'react-native'
 import { BibleTab, VersionCode } from 'src/state/tabs'
 import { Book } from '~assets/bible_versions/books-desc'
+import type { Verse } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
@@ -19,7 +20,6 @@ import {
   resolveBibleCoverageCanonId,
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
-import { useResourceAccess } from '~features/resources/resourceAccess'
 import AudioContainer from './AudioContainer'
 import BasicFooter from './BasicFooter'
 import ChapterButton from './ChapterButton'
@@ -35,6 +35,7 @@ import {
   ttsSpeedAtom,
   ttsVoiceAtom,
 } from './atom'
+import { createTtsChapterData } from './ttsChapterData'
 
 type UseLoadSoundProps = {
   book: Book
@@ -43,6 +44,7 @@ type UseLoadSoundProps = {
   goToNextChapter: () => void
   goToPrevChapter: () => void
   bibleAtom: PrimitiveAtom<BibleTab>
+  chapterVerses?: Verse[]
 }
 
 // iOS workaround: play silent audio to enable TTS in silent mode
@@ -56,9 +58,9 @@ const useLoadSound = ({
   goToNextChapter,
   goToPrevChapter,
   bibleAtom,
+  chapterVerses,
 }: UseLoadSoundProps) => {
   const bibleTab = useAtomValue(bibleAtom)
-  const resources = useResourceAccess()
   const setPlayingBibleTabId = useSetAtom(playingBibleTabIdAtom)
   const currentVerseIndex = useRef(0)
   const verseKeys = useRef<number[]>([])
@@ -194,32 +196,22 @@ const useLoadSound = ({
   const audioTitle = `${t(book.Nom)} ${chapter}:${currentVerseNum} ${version}`
   const audioSubtitle = bibleVersion?.name
 
-  // Effect 1: Load verse data when chapter/book/version changes
+  // Keep TTS on the exact chapter already loaded by the reader.
   useEffect(() => {
     let cancelled = false
     currentVerseIndex.current = 0
     verseKeys.current = []
     versesData.current = {}
+    if (!chapterVerses) {
+      Speech.stop()
+      return
+    }
+
+    const chapterData = createTtsChapterData(chapterVerses)
+    verseKeys.current = chapterData.verseKeys
+    versesData.current = chapterData.versesByNumber
     ;(async () => {
       try {
-        const chapterResult = await resources.bibleContent.loadChapter({
-          version,
-          book: book.Numero,
-          chapter,
-        })
-        if (cancelled) return
-        if (!chapterResult.success) throw chapterResult.error
-
-        const obj: Record<number, string> = {}
-        for (const row of chapterResult.data.verses) {
-          obj[Number(row.Verset)] = row.Texte
-        }
-        const sorted = Object.keys(obj)
-          .map(Number)
-          .sort((a, b) => a - b)
-        verseKeys.current = sorted
-        versesData.current = obj
-
         // Auto-play if currently playing (e.g., chapter changed during playback)
         if (isPlayingRef.current) {
           if (Platform.OS === 'ios') {
@@ -242,7 +234,7 @@ const useLoadSound = ({
       cancelled = true
       Speech.stop()
     }
-  }, [book.Numero, chapter, version, resources.bibleContent])
+  }, [book.Numero, chapter, version, chapterVerses])
 
   // Effect 2: Start/stop playback when user presses play/stop
   useEffect(() => {
@@ -301,6 +293,7 @@ const useLoadSound = ({
 type AudioTTSFooterProps = {
   book: Book
   chapter: number
+  chapterVerses?: Verse[]
   goToNextChapter: () => void
   goToPrevChapter: () => void
   disabled?: boolean
@@ -313,6 +306,7 @@ type AudioTTSFooterProps = {
 const AudioTTSFooter = ({
   book,
   chapter,
+  chapterVerses,
   goToNextChapter,
   goToPrevChapter,
   disabled,
@@ -340,6 +334,7 @@ const AudioTTSFooter = ({
   } = useLoadSound({
     book,
     chapter,
+    chapterVerses,
     version,
     goToNextChapter,
     goToPrevChapter,

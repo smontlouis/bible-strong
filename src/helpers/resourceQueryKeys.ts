@@ -73,6 +73,8 @@ export const resourceQueryKeys = {
     defaultVersionId: string
     book: number
     chapter: number
+    expectedTextRevision?: string
+    expectedTextSha256?: string
   }) => [...strongBible, 'chapter-codes', request] as const,
   strongBibleCounts: (request: LexiconBibleQueryRequest) =>
     [...strongBible, 'counts', request] as const,
@@ -81,6 +83,12 @@ export const resourceQueryKeys = {
   strongLexicon: () => strongLexicon,
   strongLexiconAvailability: (moduleId: string) =>
     [...strongLexicon, 'availability', moduleId] as const,
+  strongLexiconChapterEntities: (request: {
+    language: string
+    book: number
+    chapter: number
+    strongCodes: readonly string[]
+  }) => [...strongLexicon, 'chapter-entities', request] as const,
   offlineDatabaseAvailability: (databaseId: string, language: string) =>
     [...offlineDatabase, 'availability', databaseId, language] as const,
   timeline: (language: string) => [...timeline, language] as const,

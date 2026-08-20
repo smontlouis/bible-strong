@@ -176,6 +176,37 @@ describe('StrongEntryRouteScaffold', () => {
     expect(renderer.root.find(node => node.props.routeContent === 'entity')).toBeDefined()
   })
 
+  it('can hide the back button even when a custom back action exists', () => {
+    act(() => {
+      renderer = create(
+        <StrongEntryRouteScaffold
+          context={{ book: 1, reference: 'H0310A' }}
+          entryState={
+            {
+              identity: { kind: 'dstrong', code: 'H0310A' },
+              coreAvailability: { isPending: false, data: { status: 'available' } },
+              entryQuery: { isPending: false, isError: false },
+              entry: {
+                stepCode: 'H0310A',
+                language: 'hebrew',
+                gloss: 'après',
+                original: 'אַחַר',
+              },
+            } as never
+          }
+          hasBackButton={false}
+          onBack={jest.fn()}
+          title="Étude de mot"
+        >
+          <></>
+        </StrongEntryRouteScaffold>
+      )
+    })
+
+    const header = renderer.root.find(node => String(node.type) === 'Header')
+    expect(header.props.hasBackButton).toBe(false)
+  })
+
   it('renders a network failure instead of claiming that the Strong entry is absent', () => {
     act(() => {
       renderer = create(

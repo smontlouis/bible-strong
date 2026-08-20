@@ -99,6 +99,7 @@ describe('lexicon navigation mode', () => {
 
     const detail = renderer.root.find(node => String(node.type) === 'StrongMainScreen')
     expect(detail.props).not.toHaveProperty('onStrongSelect')
+    expect(detail.props.hasBackButton).toBe(false)
 
     act(() => detail.props.onBack())
 
