@@ -105,6 +105,35 @@ describe('R2 artifact delivery', () => {
     assert.deepEqual(reads, [])
   })
 
+  it('stores and reuses the public mobile catalog in the shared edge cache', async () => {
+    const { bucket, reads } = makeBucket()
+    const cache = new MemoryArtifactCache()
+    const pending: Promise<unknown>[] = []
+    const request = new Request(`https://api.bible-strong.app${MOBILE_RESOURCE_CATALOG_ROUTE}`)
+
+    const first = await routeR2ArtifactRequest({
+      request,
+      bucket,
+      authorize: async () => false,
+      cache,
+      waitUntil: promise => pending.push(promise),
+    })
+    await Promise.all(pending)
+    const second = await routeR2ArtifactRequest({
+      request,
+      bucket,
+      authorize: async () => false,
+      cache,
+    })
+
+    assert.equal(first?.status, 200)
+    assert.equal(first?.headers.get('x-resource-cache'), 'MISS')
+    assert.equal(second?.status, 200)
+    assert.equal(second?.headers.get('x-resource-cache'), 'HIT')
+    assert.deepEqual(await second?.json(), mobileResourceCatalog)
+    assert.deepEqual(reads, [])
+  })
+
   it('does not handle unrelated Resource API routes', async () => {
     const { bucket, reads } = makeBucket()
 

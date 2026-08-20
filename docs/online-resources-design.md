@@ -162,8 +162,12 @@ not work started during this design session.
   `/v1/offline-catalog` are public.
 - Verified official clients share deterministic cached responses; the App Check token is not part
   of the content cache key.
-- Rate limits still apply, with stricter controls for dynamic search than deterministic cached
-  reads. Exact thresholds remain open.
+- After verification, the Worker hashes the short-lived App Check token for a private per-client
+  limiter key. Deterministic and bounded reads allow 300 requests per minute, dynamic search and
+  random routes allow 60, and R2 artifact/range requests allow 120. Rejection returns `429` with a
+  60-second retry hint before cache, Hyperdrive, or R2 access. The public offline catalog stays
+  outside these application counters and relies on shared caching and Cloudflare's network-level
+  protection.
 
 ## Canonical content and publication
 
@@ -264,7 +268,7 @@ not work started during this design session.
 - PostgreSQL migrations and detailed schemas for each resource domain.
 - Exact Cloudflare cache keys, TTLs, purge policy, and R2 signed-URL expiry/resume behavior.
 - App Check verification implementation in the Worker and debug-provider workflow.
-- Search query semantics, indexes, ranking, limits, debounce, and rate-limit thresholds.
+- Search query semantics, indexes, ranking, result limits, and debounce.
 - Detailed implementation plan, task breakdown, and validation commands for the accepted LSG slice.
 - Persistent partial cache.
 - Physical dev/staging/prod separation.

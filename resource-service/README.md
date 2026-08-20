@@ -286,6 +286,22 @@ without reopening R2. A range request that misses the cache streams only the req
 R2 and is not cached because Cloudflare rejects `206 Partial Content` in `cache.put()`. Artifact
 responses sent to the application remain `private, no-store`, and cache failures fall back to R2.
 
+### Resource API rate limits
+
+After App Check succeeds and before any cache, Hyperdrive, or R2 access, the Worker fingerprints the
+short-lived attestation token with SHA-256 and applies a Cloudflare-local counter. The raw token is
+never used as a counter key or written to logs. Deterministic and bounded reads allow 300 requests
+per minute per attested client, dynamic search and random routes allow 60, and artifact requests
+including byte ranges allow 120. A rejected request returns `429`, `Retry-After: 60`, and
+`private, no-store`; the protected origin is not opened. Counter failures fail open and emit a
+structured error so a Cloudflare limiter incident does not make resources unavailable.
+
+`/v1/offline-catalog` remains public and outside the application counters because it is a small
+shared CDN-cached manifest with no trustworthy per-client identity. Cloudflare's network-level DDoS
+protection remains its coarse abuse boundary. Worker counters are intentionally approximate and
+local to each Cloudflare location; they protect service capacity rather than providing billing or
+globally exact quotas.
+
 The local Effect HttpApi exposes Bible reading, Strong Bible indexes, BHG interlinear indexes, and
 the Nave operations consumed by the app:
 

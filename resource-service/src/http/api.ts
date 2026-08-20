@@ -87,6 +87,7 @@ import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,
   ResourceNotFoundProblem,
+  ResourceRateLimitedProblem,
   ResourceUnavailableProblem,
 } from './problems'
 
@@ -146,6 +147,7 @@ const BibleApi = HttpApiGroup.make('bibles')
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
   )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const NaveApi = HttpApiGroup.make('naves')
   .add(
@@ -185,6 +187,7 @@ const NaveApi = HttpApiGroup.make('naves')
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
   )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const DictionaryApi = HttpApiGroup.make('dictionaries')
   .add(
@@ -237,6 +240,7 @@ const DictionaryApi = HttpApiGroup.make('dictionaries')
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
   )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const StrongBibleApi = HttpApiGroup.make('strongBibles')
   .add(
@@ -297,6 +301,7 @@ const StrongBibleApi = HttpApiGroup.make('strongBibles')
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
   )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const InterlinearBibleApi = HttpApiGroup.make('interlinearBibles')
   .add(
@@ -323,6 +328,7 @@ const InterlinearBibleApi = HttpApiGroup.make('interlinearBibles')
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
   )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
   .add(
@@ -387,6 +393,7 @@ const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
   )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const SupplementaryApi = HttpApiGroup.make('supplementary')
   .add(
@@ -421,6 +428,7 @@ const SupplementaryApi = HttpApiGroup.make('supplementary')
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
   )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const TimelineApi = HttpApiGroup.make('timelines')
   .add(
@@ -433,6 +441,7 @@ const TimelineApi = HttpApiGroup.make('timelines')
       .addError(ResourceUnavailableProblem, { status: 503 })
       .addError(ResourceInternalProblem, { status: 500 })
   )
+  .addError(ResourceRateLimitedProblem, { status: 429 })
   .add(
     HttpApiEndpoint.get('getTimelineEvent', '/v1/timelines/:language/events/:slug')
       .setPath(TimelineEventPath)

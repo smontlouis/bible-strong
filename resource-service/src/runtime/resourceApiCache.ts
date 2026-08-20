@@ -1,6 +1,7 @@
 import mobileResourceCatalog from '../../../src/assets/mobile-resource-catalog.json'
 import { resourceEtagMatches } from '../http/conditionalRequest'
 import { resourceRequestIdFrom } from '../http/requestId'
+import { isDynamicResourceRequest } from './resourceRoutePolicy'
 
 export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<string> => {
   const digest = await crypto.subtle.digest(
@@ -48,13 +49,7 @@ const SHORT_LIVED_PATHS = [
 const cacheTtlSeconds = (request: Request): number | undefined => {
   if (request.method !== 'GET') return undefined
   const url = new URL(request.url)
-  if (
-    url.pathname.endsWith('/search') ||
-    url.pathname.endsWith('/random') ||
-    url.searchParams.has('search')
-  ) {
-    return undefined
-  }
+  if (isDynamicResourceRequest(request)) return undefined
   if (LONG_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return 24 * 60 * 60
   if (SHORT_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return 60 * 60
   return undefined

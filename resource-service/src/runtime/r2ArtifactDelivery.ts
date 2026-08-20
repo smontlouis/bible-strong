@@ -43,6 +43,52 @@ const mobileArtifacts = new Map(
   ])
 )
 
+const mobileResourceCatalogJson = JSON.stringify(mobileResourceCatalog)
+
+const mobileResourceCatalogSha256 = async (): Promise<string> => {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(mobileResourceCatalogJson)
+  )
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, '0')).join('')
+}
+
+const mobileResourceCatalogCacheRequest = async (request: Request): Promise<Request> => {
+  const url = new URL(request.url)
+  url.pathname = `/__mobile-resource-catalog/${await mobileResourceCatalogSha256()}`
+  url.search = ''
+  return new Request(url, { method: 'GET' })
+}
+
+const mobileResourceCatalogResponse = async (): Promise<Response> => {
+  const bytes = new TextEncoder().encode(mobileResourceCatalogJson)
+  return new Response(bytes, {
+    status: 200,
+    headers: {
+      'cache-control': 'public, max-age=300',
+      'content-length': String(bytes.byteLength),
+      'content-type': 'application/json; charset=utf-8',
+      etag: `"${await mobileResourceCatalogSha256()}"`,
+    },
+  })
+}
+
+const mobileResourceCatalogResponseForClient = (
+  response: Response,
+  request: Request,
+  cacheStatus?: 'HIT' | 'MISS'
+): Response => {
+  const headers = new Headers(response.headers)
+  if (cacheStatus) headers.set('x-resource-cache', cacheStatus)
+  const conditionalStatus = preconditionStatus(request, headers)
+  if (conditionalStatus) headers.delete('content-length')
+  return new Response(request.method === 'HEAD' || conditionalStatus ? null : response.body, {
+    status: conditionalStatus ?? response.status,
+    statusText: conditionalStatus ? undefined : response.statusText,
+    headers,
+  })
+}
+
 const r2KeyForRequest = (url: URL): string | undefined => {
   const stableKey = url.pathname.slice(R2_ARTIFACT_ROUTE_PREFIX.length)
   if (!mobileArtifacts.has(stableKey)) return undefined
@@ -224,14 +270,24 @@ export const routeR2ArtifactRequest = async ({
     if (request.method !== 'GET' && request.method !== 'HEAD') {
       return new Response(null, { status: 405, headers: { allow: 'GET, HEAD' } })
     }
-    const body = JSON.stringify(mobileResourceCatalog)
-    return new Response(request.method === 'HEAD' ? null : body, {
-      status: 200,
-      headers: {
-        'cache-control': 'public, max-age=300',
-        'content-type': 'application/json; charset=utf-8',
-      },
-    })
+    const cacheKey = cache ? await mobileResourceCatalogCacheRequest(request) : undefined
+    if (cache && cacheKey) {
+      try {
+        const hit = await cache.match(cacheKey)
+        if (hit) return mobileResourceCatalogResponseForClient(hit, request, 'HIT')
+      } catch (cause) {
+        reportCacheFailure('match', cause)
+      }
+    }
+    const response = await mobileResourceCatalogResponse()
+    if (cache && cacheKey) {
+      waitUntil(
+        cache.put(cacheKey, response.clone()).catch(cause => {
+          reportCacheFailure('put', cause)
+        })
+      )
+    }
+    return mobileResourceCatalogResponseForClient(response, request, cache ? 'MISS' : undefined)
   }
   if (!pathname.startsWith(R2_ARTIFACT_ROUTE_PREFIX)) return undefined
 

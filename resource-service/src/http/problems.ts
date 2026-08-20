@@ -60,6 +60,16 @@ export class ResourceUnavailableProblem extends Schema.TaggedError<ResourceUnava
   }
 ) {}
 
+export class ResourceRateLimitedProblem extends Schema.TaggedError<ResourceRateLimitedProblem>()(
+  'ResourceRateLimitedProblem',
+  {
+    ...ProblemFields,
+    status: Schema.Literal(429),
+    code: Schema.Literal('RESOURCE_RATE_LIMITED'),
+    retryAfterSeconds: Schema.Int.pipe(Schema.positive()),
+  }
+) {}
+
 export class ResourceInternalProblem extends Schema.TaggedError<ResourceInternalProblem>()(
   'ResourceInternalProblem',
   {

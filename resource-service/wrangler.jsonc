@@ -15,6 +15,23 @@
     "FIREBASE_APP_CHECK_PROJECT_NUMBER": "204116128917",
     "FIREBASE_APP_CHECK_ALLOWED_APP_IDS": "1:204116128917:android:3ae4e716f079e5a002579c,1:204116128917:android:48985d9ab5229d3b02579c,1:204116128917:android:3fdbe48f9c6db8e702579c,1:204116128917:ios:116748d319a72c8c02579c,1:204116128917:ios:253ce7fa4e328e2702579c,1:204116128917:ios:db04ad99d1581a9e02579c",
   },
+  "ratelimits": [
+    {
+      "name": "READING_RATE_LIMITER",
+      "namespace_id": "2041161289171",
+      "simple": { "limit": 300, "period": 60 },
+    },
+    {
+      "name": "SEARCH_RATE_LIMITER",
+      "namespace_id": "2041161289172",
+      "simple": { "limit": 60, "period": 60 },
+    },
+    {
+      "name": "ARTIFACT_RATE_LIMITER",
+      "namespace_id": "2041161289173",
+      "simple": { "limit": 120, "period": 60 },
+    },
+  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 0.1,
