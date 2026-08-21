@@ -261,19 +261,19 @@ export const validateStrongLexiconModuleDatabase = async (
   }
 
   const tables = await database.getAllAsync<{ name: string }>(
-    `SELECT name FROM sqlite_schema WHERE type='table'`
+    `SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%'`
   )
-  const tableNames = new Set(tables.map(table => table.name))
+  const applicationTables = tables.filter(table => !table.name.startsWith('sqlite_'))
+  const tableNames = new Set(applicationTables.map(table => table.name))
   const missingTable = REQUIRED_TABLES[moduleId].find(table => !tableNames.has(table))
   if (missingTable) {
     throw new Error(`STRONG_LEXICON_SCHEMA_MISMATCH:${moduleId}:${missingTable}`)
   }
   const allowedTables = new Set([
     ...REQUIRED_TABLES[moduleId],
-    'sqlite_sequence',
     ...(moduleId === 'entities' ? ['EntityNames', 'EntityTranslationProvenance'] : []),
   ])
-  if (tables.some(table => !allowedTables.has(table.name))) {
+  if (applicationTables.some(table => !allowedTables.has(table.name))) {
     throw new Error(`STRONG_LEXICON_SCHEMA_MISMATCH:${moduleId}:unexpected-table`)
   }
   const metadataTable = moduleId === 'entities' ? 'EntityMeta' : 'DictionaryMeta'

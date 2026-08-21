@@ -16,7 +16,7 @@ import type { SQLiteDatabase } from '../sqlite'
 import { validateStrongLexiconModuleDatabase } from '../strongLexiconModules'
 import { getStrongLexiconPublication } from '../strongLexiconPublications'
 
-const createResourcesDatabase = () =>
+const createResourcesDatabase = (additionalTables: string[] = []) =>
   ({
     getFirstAsync: jest.fn(async () => ({ integrity_check: 'ok' })),
     getAllAsync: jest.fn(async (sql: string) => {
@@ -26,6 +26,7 @@ const createResourcesDatabase = () =>
           { name: 'DictionaryMeta' },
           { name: 'LexiconResources' },
           { name: 'LexiconResourceTranslations' },
+          ...additionalTables.map(name => ({ name })),
         ]
       }
 
@@ -81,5 +82,35 @@ describe('Strong lexicon module validation', () => {
         moduleId: 'core',
       }))
     ).resolves.toEqual({ status: 'core-missing', moduleId: 'resources' })
+  })
+
+  it('ignores SQLite-owned statistics tables created by ANALYZE', async () => {
+    await expect(
+      validateStrongLexiconModuleDatabase(
+        'resources',
+        createResourcesDatabase(['sqlite_stat1']),
+        async () => ({
+          status: 'available',
+          moduleId: 'core',
+          revision: getStrongLexiconPublication('core').resourceRevision,
+          schemaVersion: 2,
+        })
+      )
+    ).resolves.toEqual(expect.objectContaining({ status: 'available', moduleId: 'resources' }))
+  })
+
+  it('still rejects unknown application tables', async () => {
+    await expect(
+      validateStrongLexiconModuleDatabase(
+        'resources',
+        createResourcesDatabase(['UnexpectedContent']),
+        async () => ({
+          status: 'available',
+          moduleId: 'core',
+          revision: getStrongLexiconPublication('core').resourceRevision,
+          schemaVersion: 2,
+        })
+      )
+    ).rejects.toThrow('STRONG_LEXICON_SCHEMA_MISMATCH:resources:unexpected-table')
   })
 })
