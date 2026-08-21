@@ -1,6 +1,6 @@
-import * as Sentry from '@sentry/react-native'
 import { toast } from '~helpers/toast'
 import i18n from '~i18n'
+import { appLogger } from '~helpers/agentObservability'
 
 const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
   try {
@@ -11,6 +11,12 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
     cb?.()
 
     if (!e) {
+      appLogger.captureError(
+        'database',
+        'query.unknown_failure',
+        new Error('DATABASE_UNKNOWN_ERROR'),
+        { errorCode: 'UNKNOWN_ERROR' }
+      )
       toast.error(i18n.t('Une error est survenue.'), { duration: 5000 })
       throw new Error('UNKNOWN_ERROR')
     }
@@ -26,15 +32,17 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
         { duration: 5000 }
       )
 
-      Sentry.withScope(scope => {
-        scope.setExtra('Error', e.toString())
-        Sentry.captureMessage('Database corrupted')
+      appLogger.captureError('database', 'query.corrupted_database', e, {
+        errorCode: 'CORRUPTED_DATABASE',
       })
 
       throw new Error('CORRUPTED_DATABASE')
     }
 
     if (diskError) {
+      appLogger.captureError('database', 'query.disk_io_failed', e, {
+        errorCode: 'DISK_IO',
+      })
       toast.error(i18n.t('Redémarrez votre application'), { duration: 5000 })
 
       throw new Error('DISK_IO')
@@ -45,7 +53,7 @@ const catchDBError = async <T>(fn: () => Promise<T>, cb?: () => void) => {
     })
 
     console.log('[Database] Error:', e)
-    Sentry.captureException(e)
+    appLogger.captureError('database', 'query.failed', e, { errorCode: 'UNKNOWN_ERROR' })
 
     throw new Error('UNKNOWN_ERROR')
   }

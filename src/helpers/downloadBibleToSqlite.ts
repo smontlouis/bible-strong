@@ -28,6 +28,7 @@ import type { ResourceInstallationLifecycle } from './resourceInstallationLifecy
 import { countImportableBibleVerses } from './bibleJsonImport'
 import { validatePericopeResource, validateRedWordsResource } from './bibleResourceValidation'
 import { rollbackActivatedResourceFiles, type ActivatedResourceFile } from './atomicResourceFile'
+import { appLogger } from './agentObservability'
 
 export type BibleArchiveEntries = {
   canonical: string
@@ -194,6 +195,10 @@ export async function downloadAndInsertBible(
         await persistor.flush()
         clearAnnotationMigrationJournal()
       } catch (error) {
+        appLogger.captureError('download', 'bible.annotation_realignment_persist_failed', error, {
+          versionId,
+          updateCount: Object.keys(realignmentPlan.updates).length,
+        })
         console.error(
           `[DownloadBible] ${versionId} installed, but annotation realignment persistence failed:`,
           error

@@ -9,6 +9,8 @@
  * before signing out.
  */
 
+import { appLogger } from './agentObservability'
+
 type CleanupFn = () => void
 
 const cleanupFunctions: Map<string, CleanupFn> = new Map()
@@ -41,6 +43,7 @@ export const runAllCleanups = (): void => {
       console.log(`[CleanupRegistry] Running cleanup: ${key}`)
       fn()
     } catch (error) {
+      appLogger.captureError('sync', 'logout.cleanup_failed', error, { cleanupKey: key })
       console.error(`[CleanupRegistry] Error in cleanup "${key}":`, error)
     }
   })

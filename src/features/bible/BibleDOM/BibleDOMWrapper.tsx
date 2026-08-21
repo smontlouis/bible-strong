@@ -1,5 +1,4 @@
 import { useTheme } from '@emotion/react'
-import * as Sentry from '@sentry/react-native'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
 import produce from 'immer'
@@ -718,7 +717,15 @@ export const BibleDOMWrapper = ({
 
         if (!targetBook) {
           toast.error("Erreur lors de l'ouverture du verset")
-          Sentry.captureMessage(JSON.stringify(action))
+          appLogger.captureError(
+            'webview',
+            'bible_navigation.unknown_book_code',
+            new Error('BIBLE_NAVIGATION_BOOK_CODE_UNKNOWN'),
+            {
+              actionType: action.type,
+              bookCode: action.bookCode,
+            }
+          )
           return
         }
 

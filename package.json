@@ -289,6 +289,9 @@
     "testPathIgnorePatterns": [
       "/resource-service/"
     ],
+    "moduleNameMapper": {
+      "^@sentry/react-native$": "<rootDir>/test/jestSentryMock.js"
+    },
     "transformIgnorePatterns": [
       "/node_modules/(?!bible-passage-reference-parser/)"
     ]

@@ -24,6 +24,7 @@ import { appLogger } from '~helpers/agentObservability'
 import { ignoreSentryErrors } from '~helpers/ignoreSentryErrors'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { configureQueryManagers, queryClient } from '~helpers/queryClient'
+import { initializeResourceAppCheck } from '~helpers/resourceAppCheck'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import { useRemoteConfig } from '~helpers/useRemoteConfig'
 import { RootState } from '~redux/modules/reducer'
@@ -82,13 +83,19 @@ let sentryInitialized = false
 const initSentry = () => {
   if (sentryInitialized) return
   sentryInitialized = true
-  appLogger.info('startup', 'sentry.init')
   Sentry.init({
     dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
-    sampleRate: 0.5,
+    // Error events are low-volume and operationally critical. Do not sample them,
+    // especially during startup where a single failed migration can block the app.
+    sampleRate: 1,
+    sendDefaultPii: false,
+    maxBreadcrumbs: 100,
     ignoreErrors: ignoreSentryErrors,
   })
+  appLogger.info('startup', 'sentry.init')
 }
+
+if (!isPlaygroundEnabled) initSentry()
 
 configureQueryManagers()
 
@@ -119,19 +126,31 @@ const useAppLoad = () => {
   useEffect(() => {
     let active = true
     ;(async () => {
+      let preparationStep = 'resource_app_check'
       try {
         setLoadError(undefined)
+        if (!isPlaygroundEnabled) {
+          // RNFirebase requires App Check to be initialized before any Firebase
+          // backend service. Starting it before the first await also keeps the
+          // migration gate from becoming the first code path that configures it.
+          await initializeResourceAppCheck()
+          appLogger.info('startup', 'resource_app_check.initialized')
+        }
+        preparationStep = 'i18n'
         appLogger.info('startup', 'i18n.init.started')
         await setI18n()
         appLogger.info('startup', 'i18n.init.completed')
         if (!isPlaygroundEnabled) {
+          preparationStep = 'local_migration'
           const { prepareLocalMigrationStartup } =
             await import('../src/migrations/localMigrationRegistry')
           await prepareLocalMigrationStartup()
         } else {
+          preparationStep = 'playground_fonts'
           await preparePlaygroundFonts()
           appLogger.info('startup', 'playground.mode_enabled')
         }
+        preparationStep = 'redux_persistence'
         startPersistence()
         if (!active) return
         setIsLoadingCompleted(true)
@@ -143,7 +162,7 @@ const useAppLoad = () => {
           })
         }
       } catch (error) {
-        appLogger.error('startup', 'legacy_storage.preparation.failed', { error })
+        appLogger.captureError('startup', 'app.preparation.failed', error, { preparationStep })
         if (active) {
           setLoadError(error instanceof Error ? error.message : 'STARTUP_PREPARATION_FAILED')
         }
@@ -234,7 +253,6 @@ function RootLayout() {
     if (isLoadingCompleted) {
       appLogger.info('startup', 'root.layout.ready')
       SplashScreen.hide()
-      if (!isPlaygroundEnabled) initSentry()
     }
   }, [isLoadingCompleted])
 

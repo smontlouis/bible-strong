@@ -3,7 +3,7 @@ import { useRef, useState } from 'react'
 import { StyleProp, ViewStyle } from 'react-native'
 import literata from '~assets/fonts/literata'
 import { Theme } from '~themes'
-import * as Sentry from '@sentry/react-native'
+import { appLogger } from '~helpers/agentObservability'
 import WebView from 'react-native-webview'
 import {
   WebViewMessageEvent,
@@ -171,12 +171,12 @@ const useHTMLView = ({
           const { nativeEvent } = syntheticEvent
           console.warn('Content process terminated, reloading...')
           ref.current?.reload()
-          Sentry.captureException(nativeEvent)
+          appLogger.captureError('webview', 'content_process.terminated', nativeEvent)
         },
         onRenderProcessGone: (syntheticEvent: WebViewRenderProcessGoneEvent) => {
           const { nativeEvent } = syntheticEvent
           ref.current?.reload()
-          Sentry.captureException(nativeEvent)
+          appLogger.captureError('webview', 'render_process.gone', nativeEvent)
         },
       }
     },

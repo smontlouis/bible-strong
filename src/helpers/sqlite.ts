@@ -45,7 +45,6 @@ class DB {
         console.log(`[DBManager] ${this.name} loaded`)
         resolve(true)
       } catch (error) {
-        appLogger.error('database', 'legacy.open.failed', { database: this.name, error })
         console.error('Error opening database:', error)
         reject(error)
       }
@@ -64,6 +63,9 @@ class DB {
         console.log('[DBManager] Database deleted:', this.name)
       }
     } catch (error) {
+      appLogger.captureError('database', 'legacy.delete.failed', error, {
+        database: this.name,
+      })
       console.error('Error deleting database:', error)
       throw error
     }
@@ -147,7 +149,12 @@ class LanguageAwareDB {
           language: this.lang,
         }
       )
-      await this.ensureResourceQueryIndexes()
+      await appLogger.measure(
+        'database',
+        'language_aware.ensure_indexes',
+        () => this.ensureResourceQueryIndexes(),
+        { database: this.dbId, language: this.lang }
+      )
       console.log(`[DBManager] ${this.dbId} (${this.lang}) loaded from ${this.path}`)
     })()
 
@@ -176,6 +183,10 @@ class LanguageAwareDB {
         this.db = undefined
         console.log(`[DBManager] ${this.dbId} (${this.lang}) closed`)
       } catch (error) {
+        appLogger.captureError('database', 'language_aware.close.failed', error, {
+          database: this.dbId,
+          language: this.lang,
+        })
         console.error(`[DBManager] Error closing ${this.dbId}:`, error)
       }
     }
@@ -190,6 +201,10 @@ class LanguageAwareDB {
         console.log(`[DBManager] ${this.dbId} (${this.lang}) deleted`)
       }
     } catch (error) {
+      appLogger.captureError('database', 'language_aware.delete.failed', error, {
+        database: this.dbId,
+        language: this.lang,
+      })
       console.error(`[DBManager] Error deleting ${this.dbId}:`, error)
       throw error
     }

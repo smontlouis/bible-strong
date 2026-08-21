@@ -41,6 +41,9 @@ export async function migrateFromAsyncStorage(): Promise<void> {
         AsyncStorage.removeItem(key)
       }
     } catch (error) {
+      appLogger.captureError('startup', 'storage.async_to_mmkv.key_failed', error, {
+        storageKey: key,
+      })
       console.error(`Failed to migrate key "${key}" from AsyncStorage to MMKV!`, error)
       throw error
     }
@@ -95,6 +98,7 @@ export async function migrateFromFileSystemStorage(): Promise<void> {
 
         console.log(`[Storage] Migrated root key from FileSystem to MMKV`)
       } catch (readError) {
+        appLogger.error('startup', 'storage.filesystem_to_mmkv.read_failed', { error: readError })
         console.error('Error reading or parsing persistStore file:', readError)
         throw readError
       }
@@ -108,6 +112,7 @@ export async function migrateFromFileSystemStorage(): Promise<void> {
     const end = global.performance.now()
     console.log(`[Storage] Migrated from FileSystem -> MMKV in ${end - start}ms!`)
   } catch (error) {
+    appLogger.captureError('startup', 'storage.filesystem_to_mmkv.failed', error)
     console.error('Error during FileSystem to MMKV migration:', error)
     throw error
   }
@@ -232,7 +237,7 @@ export const prepareLegacyStorageForLocalMigrations = async ({
     } catch (error) {
       // Evidence inspection also checks old root paths, so a failed move
       // remains safely detectable under the historical recovery policy.
-      appLogger.warn('startup', 'legacy_storage.language_folders.failed', { error })
+      appLogger.error('startup', 'legacy_storage.language_folders.failed', { error })
     } finally {
       backend.set('hasMigratedToLanguageFolders', true)
     }

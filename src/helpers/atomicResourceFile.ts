@@ -1,4 +1,5 @@
 import * as FileSystem from 'expo-file-system/legacy'
+import { appLogger } from './agentObservability'
 
 export const restoreOrphanedResourceBackup = async (
   destinationPath: string,
@@ -145,6 +146,7 @@ export const installAtomicResourceFile = async ({
   try {
     await FileSystem.deleteAsync(backupPath, { idempotent: true })
   } catch (error) {
+    appLogger.captureError('download', 'atomic_resource.stale_backup_cleanup_failed', error)
     console.warn('[AtomicResourceFile] Could not remove stale backup:', error)
   }
 }

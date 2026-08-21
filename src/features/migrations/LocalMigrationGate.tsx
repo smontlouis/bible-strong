@@ -189,9 +189,8 @@ const LocalMigrationGate = ({
         durationMs: Date.now() - startedAt,
       })
     } catch (error) {
-      appLogger.error('startup', 'app_migration.inspection_failed', {
+      appLogger.captureError('startup', 'app_migration.inspection_failed', error, {
         phase: context.phase,
-        error,
       })
       setState({ kind: 'inspection-error', errorCode: getErrorCode(error) })
     }
@@ -223,9 +222,8 @@ const LocalMigrationGate = ({
       })
       .catch(error => {
         if (active) {
-          appLogger.error('startup', 'app_migration.inspection_failed', {
+          appLogger.captureError('startup', 'app_migration.inspection_failed', error, {
             phase: context.phase,
-            error,
           })
           setState({ kind: 'inspection-error', errorCode: getErrorCode(error) })
         }

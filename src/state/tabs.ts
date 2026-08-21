@@ -26,6 +26,7 @@ import type { InterlinearMode } from '~helpers/interlinearBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { PendingBibleModeAcquisition } from '~helpers/bibleModeAcquisition'
 import { migrateLegacyBibleTabData } from '../migrations/legacyBibleVersionMigration'
+import { appLogger } from '~helpers/agentObservability'
 
 // ============================================================================
 // SHARED BIBLE DOM (single WebView instance for all Bible tabs)
@@ -465,6 +466,7 @@ const migrateTabGroups = (groups: TabGroup[]): TabGroup[] => {
       }
     }
   } catch (e) {
+    appLogger.captureError('startup', 'tab_groups.legacy_storage_migration_failed', e)
     console.error('[TabGroups] Migration from old storage failed:', e)
   }
 

@@ -221,7 +221,9 @@ const FireAuth = class {
           if (!__DEV__) {
             analyticsSetUserId(getAnalytics(), profile.id)
           }
-          Sentry.getCurrentScope().setUser(profile)
+          // Keep enough identity to correlate a support report without attaching the
+          // complete Firebase profile (display name, photo URL and account metadata).
+          Sentry.getCurrentScope().setUser({ id: profile.id, email: profile.email })
           return
         }
 

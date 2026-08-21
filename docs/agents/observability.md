@@ -49,9 +49,16 @@ Current structured `[AgentLog]` areas include startup, navigation, Redux, ErrorB
 ## Error Capture
 
 - Sentry is initialized in `app/_layout.tsx` with `EXPO_PUBLIC_SENTRY_DSN`.
+- Error-event sampling is `1.0`: handled startup, migration, storage, download, and sync failures must not be probabilistically discarded.
+- Default PII collection is disabled. The authenticated Sentry user is limited to the Firebase user ID and email; diagnostic contexts must not include profile data or user-generated content.
 - The root UI is wrapped with `Sentry.wrap`.
 - `src/common/ErrorBoundary.tsx` captures render crashes and shows a fallback.
+- `appLogger.captureError(area, event, error, context)` is the standard capture boundary for handled failures. It adds stable tags, sanitized technical context, and the preceding `appLogger` breadcrumbs.
+- `appLogger.error` and `appLogger.warn` add breadcrumbs only. Use them for recoverable intermediate attempts; use `captureError` once when an operation finally fails or a sensitive recovery path is degraded.
 - Additional Sentry capture points exist around database, WebView, sync, audio, notes, links, and backup flows.
+- Protected artifact downloads validate the HTTP status before checksum verification. A first `401` is retried once with a forced App Check refresh; a persistent refusal is captured as `resource_artifact.http_failed` with the status, Worker request ID, retry flag, and non-secret token-shape diagnostics. Never interpret an archive checksum mismatch as an authentication failure.
+
+Safe diagnostic context includes migration/step/resource/version IDs, error codes, retry counts, durations, HTTP status, lifecycle phase, and boolean capability flags. Never attach tokens, authorization headers, signed URL query strings, Redux/MMKV payloads, notes, highlights, studies, search text, verse contents, full Firebase profiles, or raw native/WebView event payloads. The logger sanitizes common sensitive keys and values as a second line of defense; callers are still responsible for sending only the minimum technical context needed to diagnose the failure.
 
 ## Common Debug Targets
 

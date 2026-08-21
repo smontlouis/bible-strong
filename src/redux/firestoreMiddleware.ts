@@ -1,7 +1,7 @@
 import { getAuth } from '@react-native-firebase/auth'
 import { isAnyOf, Middleware } from '@reduxjs/toolkit'
-import * as Sentry from '@sentry/react-native'
 import { autoBackupManager } from '~helpers/AutoBackupManager'
+import { appLogger } from '~helpers/agentObservability'
 import { tokenManager } from '~helpers/TokenManager'
 import {
   firestoreSyncOutbox,
@@ -421,22 +421,30 @@ async function handleSyncWithRetry(
             return true
           } catch (retryError) {
             console.error('[Sync] Retry failed after token refresh:', retryError)
-            Sentry.captureException(retryError, {
-              tags: { feature: 'sync', action: 'retry_after_refresh' },
-              extra: { userId, originalError: errorCode },
-            })
+            appLogger.captureError(
+              'sync',
+              'firestore.retry_after_token_refresh_failed',
+              retryError,
+              {
+                action: actionName,
+                originalErrorCode: errorCode,
+              }
+            )
           }
         }
       }
 
-      Sentry.captureException(error, {
-        tags: { feature: 'sync', action: actionName },
-        extra: { userId, errorCode },
+      appLogger.captureError('sync', 'firestore.operation_failed', error, {
+        action: actionName,
+        errorCode,
       })
 
       // SAFETY: Créer un backup immédiat en cas d'erreur de sync
       autoBackupManager.createBackupNow(state, 'sync_error').catch(backupError => {
         console.error('[AutoBackup] Failed to create error backup:', backupError)
+        appLogger.captureError('sync', 'sync_error.backup_failed', backupError, {
+          action: actionName,
+        })
       })
 
       onFinalFailure?.()
@@ -823,9 +831,8 @@ const firestoreMiddleware: Middleware = store => next => async action => {
             console.log(`[Firestore] Study ${studyId} synced successfully`)
           } catch (studyError) {
             console.error(`Failed to sync study ${studyId}:`, studyError)
-            Sentry.captureException(studyError, {
-              tags: { feature: 'sync', action: 'study_sync', studyId },
-              extra: { userId, studyTitle: getRecordTitle(obj) },
+            appLogger.captureError('sync', 'study.sync_failed', studyError, {
+              operation: 'write',
             })
             throw studyError
           }
@@ -864,9 +871,8 @@ const firestoreMiddleware: Middleware = store => next => async action => {
             console.log(`[Firestore] Study ${studyId} deleted successfully`)
           } catch (deleteError) {
             console.error(`Failed to delete study ${studyId}:`, deleteError)
-            Sentry.captureException(deleteError, {
-              tags: { feature: 'sync', action: 'study_delete', studyId },
-              extra: { userId },
+            appLogger.captureError('sync', 'study.sync_failed', deleteError, {
+              operation: 'delete',
             })
             throw deleteError
           }
@@ -988,6 +994,9 @@ const firestoreMiddleware: Middleware = store => next => async action => {
         console.log('[Sync] Studies imported successfully')
       } catch (studiesError) {
         console.error('[Sync] Failed to import studies:', studiesError)
+        appLogger.captureError('sync', 'studies.import_failed', studiesError, {
+          studyCount: Object.keys(studies).length,
+        })
         toast.error(i18n.t('app.syncError'))
       }
     }

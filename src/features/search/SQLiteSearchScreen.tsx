@@ -410,7 +410,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           }
         )
       } catch (e) {
-        appLogger.error('database', 'search.sqlite.failed', { error: e })
         console.error('[Search] FTS5 error:', e)
         throw e
       }
@@ -462,7 +461,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             : { search: trimmedSearchValue }),
         })
       } catch (error) {
-        appLogger.error('database', 'search.strong.failed', { error })
+        appLogger.captureError('database', 'search.strong.failed', error)
         throw error
       }
     },
@@ -505,7 +504,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
               resourcesLanguage.DICTIONNAIRE
             )
       } catch (error) {
-        appLogger.error('database', 'search.dictionary.failed', { error })
+        appLogger.captureError('database', 'search.dictionary.failed', error)
         throw error
       }
     },
@@ -548,7 +547,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
               resourcesLanguage.NAVE
             )
       } catch (error) {
-        appLogger.error('database', 'search.nave.failed', { error })
+        appLogger.captureError('database', 'search.nave.failed', error)
         throw error
       }
     },

@@ -17,6 +17,7 @@ import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
 import { reconcileResourceInstallationJournal } from '~helpers/resourceInstallationJournal'
 import { installManagedResource } from '~helpers/managedResourceInstallation'
 import { refreshPersistedDownloadItem } from '~helpers/persistedDownloadItem'
+import { appLogger } from '~helpers/agentObservability'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -188,6 +189,7 @@ class DownloadManager {
         this.processQueue()
       }
     } catch (e) {
+      appLogger.captureError('download', 'queue.restore_failed', e)
       console.error('[DownloadManager] Failed to restore queue:', e)
     }
   }
@@ -220,6 +222,15 @@ class DownloadManager {
         const states = this.jotaiStore.get(downloadItemStatesAtom)
         const { next, blocked } = getDownloadQueueDecision(states, onlineManager.isOnline())
         if (blocked) {
+          appLogger.captureError(
+            'download',
+            'queue.dependency_failed',
+            new Error('DOWNLOAD_DEPENDENCY_FAILED'),
+            {
+              resourceId: blocked.item.id,
+              dependencyResourceId: blocked.item.dependsOnId,
+            }
+          )
           this.updateItemStatus(
             blocked.item.id,
             'failed',
@@ -290,6 +301,12 @@ class DownloadManager {
       const states = new Map(this.jotaiStore.get(downloadItemStatesAtom))
       const current = states.get(item.id)
       if (current && current.item.retryCount < MAX_RETRIES) {
+        appLogger.warn('download', 'resource.retry_scheduled', {
+          resourceId: item.id,
+          resourceType: item.type,
+          retryCount: current.item.retryCount + 1,
+          error: e,
+        })
         states.set(item.id, {
           ...current,
           item: { ...current.item, retryCount: current.item.retryCount + 1 },
@@ -300,6 +317,11 @@ class DownloadManager {
         })
         this.jotaiStore.set(downloadItemStatesAtom, states)
       } else {
+        appLogger.captureError('download', 'resource.install_failed', e, {
+          resourceId: item.id,
+          resourceType: item.type,
+          retryCount: current?.item.retryCount ?? item.retryCount,
+        })
         this.updateItemStatus(item.id, 'failed', errorMessage || 'Unknown error')
       }
     }
@@ -361,6 +383,7 @@ class DownloadManager {
       })
       storage.set(PERSIST_KEY, JSON.stringify(toPersist))
     } catch (e) {
+      appLogger.captureError('download', 'queue.persist_failed', e)
       console.error('[DownloadManager] Persist failed:', e)
     }
   }

@@ -1,5 +1,5 @@
 import { getAuth } from '@react-native-firebase/auth'
-import * as Sentry from '@sentry/react-native'
+import { appLogger } from './agentObservability'
 
 /**
  * TokenManager - Safety net pour les edge cases où le SDK Firestore
@@ -98,15 +98,8 @@ class TokenManager {
     } catch (error) {
       console.error('[TokenManager] Manual refresh failed:', error)
 
-      Sentry.captureException(error, {
-        tags: {
-          feature: 'token_manager',
-          action: 'manual_refresh',
-        },
-        extra: {
-          userId: currentUser.uid,
-          lastRefreshTime: this.lastRefreshTime,
-        },
+      appLogger.captureError('sync', 'auth_token.manual_refresh_failed', error, {
+        hasPreviousRefresh: this.lastRefreshTime > 0,
       })
 
       return false

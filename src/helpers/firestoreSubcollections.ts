@@ -1,4 +1,3 @@
-import * as Sentry from '@sentry/react-native'
 import { tokenManager } from './TokenManager'
 import type { FirebaseFirestoreTypes } from '@react-native-firebase/firestore'
 import {
@@ -13,6 +12,7 @@ import {
   writeBatch,
 } from './firebase'
 import { SUBCOLLECTION_NAMES, type SubcollectionName } from './firestoreSubcollectionNames'
+import { appLogger } from './agentObservability'
 
 export { SUBCOLLECTION_NAMES }
 export type { SubcollectionName }
@@ -123,9 +123,8 @@ export async function writeToSubcollection(
     await setDoc(docRef, data, { merge: true })
   } catch (error) {
     console.error(`[Subcollections] Failed to write to ${collectionName}/${docId}:`, error)
-    Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'write', collection: collectionName },
-      extra: { userId, docId },
+    appLogger.captureError('sync', 'subcollection.write_failed', error, {
+      collection: collectionName,
     })
     throw error
   }
@@ -144,9 +143,8 @@ export async function deleteFromSubcollection(
     await deleteDoc(docRef)
   } catch (error) {
     console.error(`[Subcollections] Failed to delete from ${collectionName}/${docId}:`, error)
-    Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'delete', collection: collectionName },
-      extra: { userId, docId },
+    appLogger.captureError('sync', 'subcollection.delete_failed', error, {
+      collection: collectionName,
     })
     throw error
   }
@@ -245,13 +243,10 @@ export async function batchWriteSubcollection(
     const error = new Error(
       `[Subcollections] Refusing to write ${collectionName}: ${skippedItems.length} invalid document ID(s)`
     )
-    Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'validate_ids', collection: collectionName },
-      extra: {
-        ...(aggregateOnly ? {} : { userId }),
-        skippedCount: skippedItems.length,
-        reasons: [...new Set(skippedItems.map(item => item.reason))].join(', '),
-      },
+    appLogger.captureError('sync', 'subcollection.invalid_document_ids', error, {
+      collection: collectionName,
+      skippedCount: skippedItems.length,
+      reasons: [...new Set(skippedItems.map(item => item.reason))].join(', '),
     })
     throw error
   }
@@ -312,10 +307,15 @@ export async function batchWriteSubcollection(
     } else {
       console.error(`[Subcollections] Batch write failed for ${collectionName}:`, error)
     }
-    Sentry.captureException(aggregateOnly ? new Error('Subcollection batch write failed') : error, {
-      tags: { feature: 'subcollections', action: 'batch_write', collection: collectionName },
-      extra: { ...(aggregateOnly ? {} : { userId }), operationsCount: operations.length },
-    })
+    appLogger.captureError(
+      'sync',
+      'subcollection.batch_write_failed',
+      aggregateOnly ? new Error('SUBCOLLECTION_BATCH_WRITE_FAILED') : error,
+      {
+        collection: collectionName,
+        operationsCount: operations.length,
+      }
+    )
     throw error
   }
 }
@@ -381,9 +381,8 @@ export async function clearSubcollection(
     console.log(`[Subcollections] Cleared ${collectionName}: ${docIds.length} docs deleted`)
   } catch (error) {
     console.error(`[Subcollections] Failed to clear ${collectionName}:`, error)
-    Sentry.captureException(error, {
-      tags: { feature: 'subcollections', action: 'clear', collection: collectionName },
-      extra: { userId },
+    appLogger.captureError('sync', 'subcollection.clear_failed', error, {
+      collection: collectionName,
     })
     throw error
   }
@@ -426,9 +425,8 @@ export function fetchSubcollection(
       error => {
         unsubscribe()
         console.error(`[Subcollections] Failed to fetch ${collectionName}:`, error)
-        Sentry.captureException(error, {
-          tags: { feature: 'subcollections', action: 'fetch', collection: collectionName },
-          extra: { userId },
+        appLogger.captureError('sync', 'subcollection.fetch_failed', error, {
+          collection: collectionName,
         })
         reject(error)
       }
@@ -556,9 +554,9 @@ export function subscribeToSubcollection(
         }
 
         console.error(`[Subcollections] Subscription error for ${collectionName}:`, error)
-        Sentry.captureException(error, {
-          tags: { feature: 'subcollections', action: 'subscribe', collection: collectionName },
-          extra: { userId },
+        appLogger.captureError('sync', 'subcollection.subscription_failed', error, {
+          collection: collectionName,
+          retriedAfterTokenRefresh: hasRetried,
         })
         onError?.(error as Error)
       }
@@ -595,6 +593,9 @@ export async function existsInSubcollection(
       `[Subcollections] Failed to check existence in ${collectionName}/${docId}:`,
       error
     )
+    appLogger.captureError('sync', 'subcollection.exists_failed', error, {
+      collection: collectionName,
+    })
     return false
   }
 }

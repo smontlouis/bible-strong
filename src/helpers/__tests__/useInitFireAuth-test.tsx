@@ -71,7 +71,7 @@ jest.mock('~state/tabs', () => ({
 }))
 
 jest.mock('~helpers/agentObservability', () => ({
-  appLogger: { info: jest.fn(), warn: jest.fn() },
+  appLogger: { captureError: jest.fn(), info: jest.fn(), warn: jest.fn() },
 }))
 
 jest.mock('~helpers/toast', () => ({

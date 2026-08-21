@@ -1,6 +1,6 @@
-import * as Sentry from '@sentry/react-native'
 import { firebaseDb, doc, getDoc, updateDoc, deleteField } from './firebase'
 import { autoBackupManager } from './AutoBackupManager'
+import { appLogger } from './agentObservability'
 import {
   SUBCOLLECTION_NAMES,
   SubcollectionName,
@@ -198,16 +198,7 @@ export async function isUserMigrated(userId: string): Promise<boolean> {
     return userData?._migrated === true
   } catch (error) {
     console.error('[FirestoreMigration] Failed to check migration status:', error)
-    Sentry.captureException(error, {
-      tags: {
-        feature: 'firestore_migration',
-        action: 'check_migration_status',
-      },
-      extra: {
-        userId,
-        errorMessage: getErrorMessage(error),
-      },
-    })
+    appLogger.captureError('sync', 'firestore_migration.status_check_failed', error)
     return false
   }
 }
@@ -220,16 +211,7 @@ export async function isUserRelationsMigrated(userId: string): Promise<boolean> 
     return userData?._relationsMigrated === true
   } catch (error) {
     console.error('[FirestoreMigration] Failed to check relations migration status:', error)
-    Sentry.captureException(error, {
-      tags: {
-        feature: 'firestore_migration',
-        action: 'check_relations_migration_status',
-      },
-      extra: {
-        userId,
-        errorMessage: getErrorMessage(error),
-      },
-    })
+    appLogger.captureError('sync', 'firestore_migration.relations_status_check_failed', error)
     return false
   }
 }
@@ -242,16 +224,7 @@ async function isRelationsCleanupCurrent(userId: string): Promise<boolean> {
     return Number(userData?._relationsCleanupVersion || 0) >= RELATIONS_CLEANUP_VERSION
   } catch (error) {
     console.error('[FirestoreMigration] Failed to check relations cleanup status:', error)
-    Sentry.captureException(error, {
-      tags: {
-        feature: 'firestore_migration',
-        action: 'check_relations_cleanup_status',
-      },
-      extra: {
-        userId,
-        errorMessage: getErrorMessage(error),
-      },
-    })
+    appLogger.captureError('sync', 'firestore_migration.relations_cleanup_check_failed', error)
     return false
   }
 }
@@ -406,10 +379,7 @@ export async function migrateUserRelationsArchitecture(
     return { success: true }
   } catch (error) {
     console.error('[RelationsMigration] Migration failed:', error)
-    Sentry.captureException(error, {
-      tags: { feature: 'firestore_migration', action: 'relations_architecture_migration' },
-      extra: { userId, errorMessage: getErrorMessage(error) },
-    })
+    appLogger.captureError('sync', 'firestore_migration.relations_failed', error)
     return {
       success: false,
       error: getErrorMessage(error, 'Unknown error during relations migration'),
@@ -431,16 +401,7 @@ export async function checkForEmbeddedData(userId: string): Promise<{
     return await inspectEmbeddedDataMigration(userId)
   } catch (error) {
     console.error('[FirestoreMigration] Failed to check for embedded data:', error)
-    Sentry.captureException(error, {
-      tags: {
-        feature: 'firestore_migration',
-        action: 'check_embedded_data',
-      },
-      extra: {
-        userId,
-        errorMessage: getErrorMessage(error),
-      },
-    })
+    appLogger.captureError('sync', 'firestore_migration.embedded_data_check_failed', error)
     return { hasEmbeddedData: false, collectionsWithData: [] }
   }
 }
@@ -511,16 +472,7 @@ async function markAsMigrated(userId: string): Promise<void> {
     })
   } catch (error) {
     console.error('[FirestoreMigration] Failed to mark user as migrated:', error)
-    Sentry.captureException(error, {
-      tags: {
-        feature: 'firestore_migration',
-        action: 'mark_as_migrated',
-      },
-      extra: {
-        userId,
-        errorMessage: getErrorMessage(error),
-      },
-    })
+    appLogger.captureError('sync', 'firestore_migration.checkpoint_write_failed', error)
     throw error // Re-throw to let caller handle it
   }
 }
@@ -541,16 +493,7 @@ async function removeEmbeddedData(userId: string): Promise<void> {
     console.log('[FirestoreMigration] Embedded data removed from user document')
   } catch (error) {
     console.error('[FirestoreMigration] Failed to remove embedded data:', error)
-    Sentry.captureException(error, {
-      tags: {
-        feature: 'firestore_migration',
-        action: 'remove_embedded_data',
-      },
-      extra: {
-        userId,
-        errorMessage: getErrorMessage(error),
-      },
-    })
+    appLogger.captureError('sync', 'firestore_migration.embedded_cleanup_failed', error)
     throw error // Re-throw to let caller handle it
   }
 }
@@ -727,10 +670,7 @@ export async function migrateImportedDataToSubcollections(
     console.error('[FirestoreMigration] ========================================')
     console.error('[FirestoreMigration] FAILED to migrate imported data:', error)
     console.error('[FirestoreMigration] ========================================')
-    Sentry.captureException(error, {
-      tags: { feature: 'migration', action: 'migrate_imported_data' },
-      extra: { userId },
-    })
+    appLogger.captureError('sync', 'firestore_migration.imported_data_failed', error)
     throw error
   } finally {
     // Always hide the modal when done
@@ -948,21 +888,11 @@ export async function resumableMigrateUserData(
         const errorMessage = getErrorMessage(error)
         console.error(`[FirestoreMigration] Failed to migrate ${collection}:`, error)
 
-        // Capturer l'erreur dans Sentry avec contexte détaillé
-        Sentry.captureException(error, {
-          tags: {
-            feature: 'firestore_migration',
-            collection,
-            action: 'migrate_collection',
-          },
-          extra: {
-            userId,
-            collectionName: collection,
-            itemCount,
-            completedCollections: completedCollections.join(', '),
-            failedCollections: failedCollections.join(', '),
-            errorMessage,
-          },
+        appLogger.captureError('sync', 'firestore_migration.collection_failed', error, {
+          collection,
+          itemCount,
+          completedCollectionCount: completedCollections.length,
+          failedCollectionCount: failedCollections.length,
         })
 
         // Marquer comme échoué et continuer
@@ -999,19 +929,15 @@ export async function resumableMigrateUserData(
       const errorMessage = `Migration partielle: ${failedCollections.length} collection(s) échouée(s)`
       console.error(`[FirestoreMigration] ${errorMessage}:`, failedCollections)
 
-      // Capturer la migration partielle dans Sentry
-      Sentry.captureMessage(errorMessage, {
-        level: 'error',
-        tags: {
-          feature: 'firestore_migration',
-          action: 'partial_failure',
-        },
-        extra: {
-          userId,
-          failedCollections: failedCollections.join(', '),
-          completedCollections: completedCollections.join(', '),
-        },
-      })
+      appLogger.captureError(
+        'sync',
+        'firestore_migration.partial_failure',
+        new Error('FIRESTORE_MIGRATION_PARTIAL_FAILURE'),
+        {
+          failedCollections,
+          completedCollections,
+        }
+      )
 
       return {
         success: false,
@@ -1023,16 +949,9 @@ export async function resumableMigrateUserData(
   } catch (error) {
     console.error('[FirestoreMigration] Migration failed with unexpected error:', error)
 
-    Sentry.captureException(error, {
-      tags: {
-        feature: 'firestore_migration',
-        action: 'unexpected_error',
-      },
-      extra: {
-        userId,
-        completedCollections: completedCollections.join(', '),
-        failedCollections: failedCollections.join(', '),
-      },
+    appLogger.captureError('sync', 'firestore_migration.unexpected_failure', error, {
+      completedCollections,
+      failedCollections,
     })
 
     return {

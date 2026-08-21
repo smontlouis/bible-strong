@@ -3,6 +3,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 import { storage } from '~helpers/storage'
 import { insertBibleVersion, isVersionInstalled, openBiblesDb } from '~helpers/biblesDb'
 import { versions } from '~helpers/bibleVersions'
+import { appLogger } from '~helpers/agentObservability'
 
 const MIGRATION_KEY = 'hasMigratedBiblesToSqlite'
 const MIGRATED_VERSIONS_KEY = 'migratedBibleVersions'
@@ -31,7 +32,8 @@ function getMigratedVersionIds(): Set<string> {
   if (!raw) return new Set()
   try {
     return new Set(JSON.parse(raw))
-  } catch {
+  } catch (error) {
+    appLogger.captureError('startup', 'bible_json_migration.checkpoint_corrupt', error)
     return new Set()
   }
 }
@@ -149,6 +151,10 @@ export async function migrateBibleJsonToSqlite(
       await FileSystem.deleteAsync(filePath, { idempotent: true })
       console.log(`[BibleMigration] Migrated ${versionId} successfully`)
     } catch (e) {
+      appLogger.captureError('startup', 'bible_json_migration.version_failed', e, {
+        versionId,
+        attempt: attempts,
+      })
       console.error(`[BibleMigration] Failed to migrate ${versionId}:`, e)
       failedVersions.push(versionId)
       // Continue with next version - don't block migration

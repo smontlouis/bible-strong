@@ -153,7 +153,9 @@ export const useAccountMigrations = ({
         setPresentation({ kind: 'active', snapshot: result })
       }
     } catch (error) {
-      appLogger.error('startup', 'account_migration.inspection_failed', { error })
+      appLogger.captureError('startup', 'account_migration.inspection_failed', error, {
+        errorCode: safeInspectionErrorCode(error),
+      })
       if (activeUserRef.current === context.userId) {
         setReadyUserId(undefined)
         setWriteUserId(context.userId)
@@ -222,6 +224,11 @@ export const useAccountMigrations = ({
         setResumeToken(value => value + 1)
       }
     } catch (error) {
+      appLogger.captureError('startup', 'account_migration.abandon_failed', error, {
+        migrationId: presentation.snapshot?.migrationId,
+        stepId: presentation.snapshot?.currentStepId,
+        errorCode: safeInspectionErrorCode(error),
+      })
       setPresentation({
         kind: 'failed',
         snapshot: presentation.snapshot,

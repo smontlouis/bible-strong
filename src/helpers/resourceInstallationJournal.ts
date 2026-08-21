@@ -4,6 +4,7 @@ import { getBibleVersionMetadata } from './biblesDb'
 import type { DownloadResourceArtifactResult } from './downloadResourceArtifact'
 import { resourcePublicationStore, type InstalledResourcePublication } from './resourcePublication'
 import { storage } from './storage'
+import { appLogger } from './agentObservability'
 
 const JOURNAL_KEY = 'resource-installation-journal'
 
@@ -35,7 +36,8 @@ const readJournal = (): ResourceInstallationJournal | undefined => {
       // conservative, pre-commit state.
       phase: journal.phase === 'committed' ? 'committed' : 'prepared',
     }
-  } catch {
+  } catch (error) {
+    appLogger.captureError('download', 'resource_journal.corrupt', error)
     storage.remove(JOURNAL_KEY)
     return undefined
   }
@@ -138,6 +140,11 @@ const reconcileBibleInstallation = async (journal: ResourceInstallationJournal) 
 export const reconcileResourceInstallationJournal = async (): Promise<void> => {
   const journal = readJournal()
   if (!journal) return
+  appLogger.info('download', 'resource_journal.reconcile_started', {
+    resourceId: journal.resourceId,
+    phase: journal.phase,
+    recoveryKind: journal.recoveryTarget.kind,
+  })
   if (journal.recoveryTarget.kind === 'file') {
     await reconcileFileInstallation(journal)
   } else {

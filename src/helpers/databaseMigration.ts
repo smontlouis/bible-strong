@@ -8,6 +8,7 @@ import {
   BASE_SQLITE_DIR,
 } from '~helpers/databaseTypes'
 import { getDbFileName, initLanguageDirs } from '~helpers/databases'
+import { appLogger } from '~helpers/agentObservability'
 
 // SQLite databases that need migration
 const SQLITE_DBS_TO_MIGRATE: DatabaseId[] = ['DICTIONNAIRE', 'NAVE', 'MHY']
@@ -52,6 +53,9 @@ export async function migrateToLanguageFolders(currentLang: ResourceLanguage): P
 
     console.log('[DB Migration] Migration completed successfully!')
   } catch (error) {
+    appLogger.captureError('startup', 'database_migration.language_folders.failed', error, {
+      language: currentLang,
+    })
     console.error('[DB Migration] Error during migration:', error)
     throw error
   }
@@ -118,6 +122,9 @@ async function moveFileIfExists(oldPath: string, newPath: string, dbId: string):
     })
     console.log(`[DB Migration] ${dbId}: Migration successful`)
   } catch (error) {
+    appLogger.captureError('startup', 'database_migration.file_move.failed', error, {
+      database: dbId,
+    })
     console.error(`[DB Migration] ${dbId}: Error moving file:`, error)
     // Don't throw - continue with other migrations
   }

@@ -57,6 +57,16 @@ export const localMigrationOrchestrator = createAppMigrationOrchestrator({
       appLogger.info('startup', `app_migration.${event.name}`, payload)
     }
   },
+  onFailure: event => {
+    appLogger.captureError('startup', 'app_migration.failed', event.cause, {
+      migrationId: event.migrationId,
+      migrationVersion: event.migrationVersion,
+      phase: event.phase,
+      stepId: event.stepId,
+      resourceId: event.resourceId,
+      errorCode: event.errorCode,
+    })
+  },
 })
 
 export const prepareLocalMigrationStartup = async ({

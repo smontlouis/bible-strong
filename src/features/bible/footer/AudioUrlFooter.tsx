@@ -1,7 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import * as Sentry from '@sentry/react-native'
 
 import { PrimitiveAtom } from 'jotai/vanilla'
 import TrackPlayer, {
@@ -24,6 +23,7 @@ import {
   resolveBibleCoverageCanonId,
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
+import { appLogger } from '~helpers/agentObservability'
 import { BibleTab, VersionCode } from '../../../state/tabs'
 import AudioBar from './AudioBar'
 import AudioContainer from './AudioContainer'
@@ -74,11 +74,10 @@ const getBookTracks = (
       artwork: require('~assets/images/icon.png'),
     }))
     return tracks
-  } catch {
-    Sentry.withScope(scope => {
-      scope.setExtra('Version', `${version}`)
-      scope.setExtra('Book', `${book.Numero}`)
-      Sentry.captureException('getBookTracks error')
+  } catch (error) {
+    appLogger.captureError('download', 'audio.book_tracks_failed', error, {
+      versionId: version,
+      hasCoverage: Boolean(coverage),
     })
     return []
   }

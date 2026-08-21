@@ -1,7 +1,7 @@
 import { VerseIds, VerseRefContent } from '~common/types'
 import { VersionCode } from '../state/tabs'
 import verseToReference from './verseToReference'
-import * as Sentry from '@sentry/react-native'
+import { appLogger } from '~helpers/agentObservability'
 
 export type LoadVerseTexts = (
   version: string,
@@ -64,17 +64,11 @@ export default async ({
       versesContent += `${quoteStartContent}${verseNumberContent}${text}${quoteEndContent}${inlineVerseContent} `
     } catch (e) {
       if (version !== 'POV') {
-        Sentry.withScope(scope => {
-          const [book, chapter, verse] = key.split('-')
-          scope.setExtra('reference', `${reference} ${version}`)
-          scope.setExtra('failedVerseKey', key)
-          scope.setExtra('book', book)
-          scope.setExtra('chapter', chapter)
-          scope.setExtra('verse', verse)
-          scope.setExtra('version', version)
-          scope.setExtra('allSelectedVerses', selectedVerses)
-          scope.setExtra('versesMapKeys', Object.keys(versesMap))
-          Sentry.captureException(e)
+        appLogger.captureError('database', 'verse_content.missing', e, {
+          versionId: version,
+          failedIndex: index,
+          selectedVerseCount: selectedVerses.length,
+          loadedVerseCount: Object.keys(versesMap).length,
         })
       }
       versesContent = 'Impossible de charger ce verset.'

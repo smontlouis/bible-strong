@@ -12,7 +12,7 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import Text from '~common/ui/Text'
-import * as Sentry from '@sentry/react-native'
+import { appLogger } from '~helpers/agentObservability'
 import { Version, getBibleVersionCanonId, getVersions } from '~helpers/bibleVersions'
 import {
   getNextAvailableChapterLocation,
@@ -223,9 +223,8 @@ const useLoadSound = ({
         }
       } catch (e) {
         if (cancelled) return
-        Sentry.withScope(scope => {
-          scope.setExtra('Reference', `${book.Numero}-${chapter} ${version}`)
-          Sentry.captureException(e)
+        appLogger.captureError('download', 'audio.tts_chapter_load_failed', e, {
+          versionId: version,
         })
       }
     })()

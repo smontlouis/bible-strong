@@ -78,6 +78,55 @@ describe('Resource App Check requests', () => {
     await expect(
       getResourceAppCheckHeaders('https://api.bible-strong.app/v1/offline-catalog', getToken)
     ).resolves.toEqual({})
+    await expect(
+      getResourceAppCheckHeaders(
+        'https://api.bible-strong.app/v1/offline-catalog?cache-bust=1',
+        getToken
+      )
+    ).resolves.toEqual({})
+    await expect(
+      getResourceAppCheckHeaders(
+        'https://api.bible-strong.app.evil.example/v1/offline-artifacts/file.zip',
+        getToken
+      )
+    ).resolves.toEqual({})
+  })
+
+  it('recognizes protected string URLs when React Native URL globals are unavailable', async () => {
+    const originalRequest = globalThis.Request
+    const originalUrl = globalThis.URL
+    const getToken = jest.fn(async () => 'download-token')
+
+    Object.defineProperty(globalThis, 'Request', {
+      configurable: true,
+      value: undefined,
+      writable: true,
+    })
+    Object.defineProperty(globalThis, 'URL', {
+      configurable: true,
+      value: undefined,
+      writable: true,
+    })
+
+    try {
+      await expect(
+        getResourceAppCheckHeaders(
+          'https://api.bible-strong.app/v1/offline-artifacts/bibles/bible-lsg.json.zip',
+          getToken
+        )
+      ).resolves.toEqual({ [FIREBASE_APP_CHECK_HEADER]: 'download-token' })
+    } finally {
+      Object.defineProperty(globalThis, 'Request', {
+        configurable: true,
+        value: originalRequest,
+        writable: true,
+      })
+      Object.defineProperty(globalThis, 'URL', {
+        configurable: true,
+        value: originalUrl,
+        writable: true,
+      })
+    }
   })
 
   it('applies the request deadline while waiting for an App Check token', async () => {

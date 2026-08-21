@@ -340,6 +340,7 @@ describe('appMigrationOrchestrator', () => {
   it('resumes after failure without replaying completed steps', async () => {
     const store = createMemoryStore()
     const executedSteps: string[] = []
+    const failures: unknown[] = []
     let shouldFail = true
     const migration = createMigration({
       id: 'resumable',
@@ -360,7 +361,11 @@ describe('appMigrationOrchestrator', () => {
         }
       },
     })
-    const firstRunner = createAppMigrationOrchestrator({ migrations: [migration], store })
+    const firstRunner = createAppMigrationOrchestrator({
+      migrations: [migration],
+      store,
+      onFailure: failure => failures.push(failure),
+    })
 
     await firstRunner.inspect(context)
     await expect(firstRunner.run(context)).resolves.toMatchObject({
@@ -371,6 +376,14 @@ describe('appMigrationOrchestrator', () => {
       errorCode: 'RESOURCE_ACTIVATION_FAILED',
       isResuming: true,
     })
+    expect(failures).toEqual([
+      expect.objectContaining({
+        migrationId: 'resumable',
+        stepId: 'activate',
+        errorCode: 'RESOURCE_ACTIVATION_FAILED',
+        cause: expect.objectContaining({ message: 'RESOURCE_ACTIVATION_FAILED' }),
+      }),
+    ])
 
     const resumedRunner = createAppMigrationOrchestrator({ migrations: [migration], store })
     await expect(resumedRunner.inspect(context)).resolves.toMatchObject({
@@ -383,6 +396,44 @@ describe('appMigrationOrchestrator', () => {
       completedStepIds: ['download', 'activate'],
     })
     expect(executedSteps).toEqual(['download', 'activate', 'activate'])
+  })
+
+  it('persists safe technical error codes exposed by resource boundaries', async () => {
+    const store = createMemoryStore()
+    const migration = createMigration({
+      id: 'resource-error-code',
+      order: 10,
+      async executeStep() {
+        throw Object.assign(new Error('Firebase provider details'), {
+          code: 'RESOURCE_APPCHECK_TOKEN_ERROR',
+        })
+      },
+    })
+    const orchestrator = createAppMigrationOrchestrator({ migrations: [migration], store })
+
+    await orchestrator.inspect(context)
+    await expect(orchestrator.run(context)).resolves.toMatchObject({
+      status: 'failed',
+      errorCode: 'RESOURCE_APPCHECK_TOKEN_ERROR',
+    })
+  })
+
+  it('does not persist arbitrary exception messages as migration error codes', async () => {
+    const store = createMemoryStore()
+    const migration = createMigration({
+      id: 'private-error-message',
+      order: 10,
+      async executeStep() {
+        throw new Error('Request for user@example.com failed')
+      },
+    })
+    const orchestrator = createAppMigrationOrchestrator({ migrations: [migration], store })
+
+    await orchestrator.inspect(context)
+    await expect(orchestrator.run(context)).resolves.toMatchObject({
+      status: 'failed',
+      errorCode: 'APP_MIGRATION_UNEXPECTED_ERROR',
+    })
   })
 
   it('recovers when persisting a completed main-step checkpoint fails once', async () => {

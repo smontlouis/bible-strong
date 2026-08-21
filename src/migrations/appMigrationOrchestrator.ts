@@ -61,6 +61,11 @@ export interface MigrationEvent {
   errorCode?: string
 }
 
+export interface MigrationFailureEvent extends MigrationEvent {
+  name: 'failed'
+  cause: unknown
+}
+
 export interface AppMigrationDefinition<TContext extends MigrationContext = MigrationContext> {
   id: string
   version: number
@@ -174,6 +179,7 @@ interface AppMigrationOrchestratorOptions<TContext extends MigrationContext> {
   store: MigrationStateStore
   now?: () => number
   onEvent?: (event: MigrationEvent) => void
+  onFailure?: (event: MigrationFailureEvent) => void
 }
 
 const createEmptyState = (): PersistedMigrationState => ({
@@ -472,8 +478,23 @@ const toSnapshot = (execution: PersistedMigrationExecution): MigrationSnapshot =
     execution.completedStepIds.length > 0,
 })
 
-const getErrorCode = (error: unknown): string =>
-  error instanceof MigrationExecutionError ? error.code : 'APP_MIGRATION_UNEXPECTED_ERROR'
+const TECHNICAL_ERROR_CODE_PATTERN = /^[A-Z][A-Z0-9_]{2,127}$/
+
+const getErrorCode = (error: unknown): string => {
+  if (error instanceof MigrationExecutionError) return error.code
+
+  if (isRecord(error) && typeof error.code === 'string') {
+    const code = error.code.trim().toUpperCase()
+    if (TECHNICAL_ERROR_CODE_PATTERN.test(code)) return code
+  }
+
+  if (error instanceof Error) {
+    const message = error.message.trim().toUpperCase()
+    if (TECHNICAL_ERROR_CODE_PATTERN.test(message)) return message
+  }
+
+  return 'APP_MIGRATION_UNEXPECTED_ERROR'
+}
 
 const assertValidPlan = (plan: MigrationPlan): void => {
   if (!isMigrationPlan(plan)) {
@@ -486,6 +507,7 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
   store,
   now = Date.now,
   onEvent,
+  onFailure,
 }: AppMigrationOrchestratorOptions<TContext>): AppMigrationOrchestrator<TContext> => {
   const migrationKeys = migrations.map(migration =>
     JSON.stringify([migration.phase, migration.id, migration.version])
@@ -688,6 +710,18 @@ export const createAppMigrationOrchestrator = <TContext extends MigrationContext
       resourceId: currentStep?.resourceId,
       errorCode: execution.errorCode,
     })
+    try {
+      onFailure?.({
+        name: 'failed',
+        migrationId: migration.id,
+        migrationVersion: migration.version,
+        phase: migration.phase,
+        stepId: execution.currentCleanupStepId ?? execution.currentStepId,
+        resourceId: currentStep?.resourceId,
+        errorCode: execution.errorCode,
+        cause: error,
+      })
+    } catch {}
     return snapshot
   }
 

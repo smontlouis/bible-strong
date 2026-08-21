@@ -25,7 +25,7 @@ jest.mock('expo-file-system/legacy', () => ({
   readAsStringAsync: jest.fn(),
 }))
 jest.mock('../agentObservability', () => ({
-  appLogger: { warn: jest.fn() },
+  appLogger: { captureError: jest.fn(), error: jest.fn(), warn: jest.fn() },
 }))
 
 import { prepareLegacyStorageForLocalMigrations } from '../storage'

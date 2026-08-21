@@ -1,8 +1,8 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import * as Sentry from '@sentry/react-native'
 import { getDefaultStore } from 'jotai/vanilla'
 import { RootState } from '~redux/modules/reducer'
 import { tabGroupsAtom, TabGroup } from '~state/tabs'
+import { appLogger } from './agentObservability'
 
 type BackupBibleData = Omit<RootState['user']['bible'], 'changelog' | 'studies'>
 
@@ -65,9 +65,7 @@ class AutoBackupManager {
       console.log('[AutoBackup] Initialized')
     } catch (error) {
       console.error('[AutoBackup] Failed to initialize:', error)
-      Sentry.captureException(error, {
-        tags: { feature: 'auto_backup', action: 'initialize' },
-      })
+      appLogger.captureError('sync', 'auto_backup.initialize_failed', error)
     }
   }
 
@@ -186,9 +184,8 @@ class AutoBackupManager {
       return true
     } catch (error) {
       console.error('[AutoBackup] Failed to create backup:', error)
-      Sentry.captureException(error, {
-        tags: { feature: 'auto_backup', action: 'create', trigger },
-        extra: { userId: state.user.id },
+      appLogger.captureError('sync', 'auto_backup.create_failed', error, {
+        backupTrigger: trigger,
       })
       return false
     }
@@ -218,6 +215,7 @@ class AutoBackupManager {
       return newDataJson !== oldDataJson
     } catch (error) {
       console.error('[AutoBackup] Failed to check data changes:', error)
+      appLogger.captureError('sync', 'auto_backup.change_detection_failed', error)
       // En cas d'erreur, on crée le backup par sécurité
       return true
     }
@@ -247,6 +245,7 @@ class AutoBackupManager {
       }
     } catch (error) {
       console.error('[AutoBackup] Failed to clean old backups:', error)
+      appLogger.captureError('sync', 'auto_backup.rotation_failed', error)
       // Non critique, on continue
     }
   }
@@ -306,6 +305,9 @@ class AutoBackupManager {
             }
           } catch (error) {
             console.warn(`[AutoBackup] Failed to read stats for ${file}:`, error)
+            appLogger.captureError('sync', 'auto_backup.stats_read_failed', error, {
+              backupFilename: file,
+            })
             // stats reste undefined en cas d'erreur
           }
 
@@ -323,6 +325,7 @@ class AutoBackupManager {
       return backups
     } catch (error) {
       console.error('[AutoBackup] Failed to list backups:', error)
+      appLogger.captureError('sync', 'auto_backup.list_failed', error)
       return []
     }
   }
@@ -346,9 +349,8 @@ class AutoBackupManager {
       return backup
     } catch (error) {
       console.error('[AutoBackup] Failed to restore backup:', error)
-      Sentry.captureException(error, {
-        tags: { feature: 'auto_backup', action: 'restore' },
-        extra: { filename },
+      appLogger.captureError('sync', 'auto_backup.restore_failed', error, {
+        backupFilename: filename,
       })
       return null
     }
@@ -364,6 +366,7 @@ class AutoBackupManager {
       console.log('[AutoBackup] All backups cleared')
     } catch (error) {
       console.error('[AutoBackup] Failed to clear backups:', error)
+      appLogger.captureError('sync', 'auto_backup.clear_failed', error)
     }
   }
 

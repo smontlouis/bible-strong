@@ -1,9 +1,10 @@
-import * as Sentry from '@sentry/react-native'
 import { batchWriteSubcollection, subscribeToSubcollection } from '../firestoreSubcollections'
 import { onSnapshot, writeBatch } from '../firebase'
 
-jest.mock('@sentry/react-native', () => ({
-  captureException: jest.fn(),
+const mockCaptureError = jest.fn()
+
+jest.mock('../agentObservability', () => ({
+  appLogger: { captureError: (...args: unknown[]) => mockCaptureError(...args) },
 }))
 
 jest.mock('../TokenManager', () => ({
@@ -78,14 +79,13 @@ describe('firestoreSubcollections', () => {
     ).rejects.toThrow('invalid document ID')
 
     expect(writeBatch).not.toHaveBeenCalled()
-    expect(Sentry.captureException).toHaveBeenCalledWith(
+    expect(mockCaptureError).toHaveBeenCalledWith(
+      'sync',
+      'subcollection.invalid_document_ids',
       expect.any(Error),
       expect.objectContaining({
-        tags: expect.objectContaining({
-          feature: 'subcollections',
-          action: 'validate_ids',
-          collection: 'notes',
-        }),
+        collection: 'notes',
+        skippedCount: 1,
       })
     )
 
@@ -109,9 +109,7 @@ describe('firestoreSubcollections', () => {
     ).rejects.toThrow('invalid document ID')
 
     expect(warnSpy.mock.calls.flat().join(' ')).not.toContain('sensitive-document-id')
-    expect(JSON.stringify((Sentry.captureException as jest.Mock).mock.calls)).not.toContain(
-      'sensitive-user-id'
-    )
+    expect(JSON.stringify(mockCaptureError.mock.calls)).not.toContain('sensitive-user-id')
 
     warnSpy.mockRestore()
   })
@@ -135,9 +133,7 @@ describe('firestoreSubcollections', () => {
     ).rejects.toThrow('sensitive-user-id')
 
     expect(JSON.stringify(errorSpy.mock.calls)).not.toContain('sensitive-user-id')
-    expect(JSON.stringify((Sentry.captureException as jest.Mock).mock.calls)).not.toContain(
-      'sensitive-user-id'
-    )
+    expect(JSON.stringify(mockCaptureError.mock.calls)).not.toContain('sensitive-user-id')
 
     errorSpy.mockRestore()
   })

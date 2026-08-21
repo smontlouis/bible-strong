@@ -24,7 +24,7 @@ jest.mock('../legacyResourceMigrationRuntime', () => ({
 }))
 
 jest.mock('~helpers/agentObservability', () => ({
-  appLogger: { info: jest.fn(), warn: jest.fn(), error: jest.fn() },
+  appLogger: { captureError: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
 }))
 
 import {

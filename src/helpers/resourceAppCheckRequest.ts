@@ -1,20 +1,29 @@
 export const FIREBASE_APP_CHECK_HEADER = 'X-Firebase-AppCheck'
-const RESOURCE_API_HOSTNAME = 'api.bible-strong.app'
+const RESOURCE_API_ORIGIN = 'https://api.bible-strong.app'
 const RESOURCE_API_PATH_PREFIX = '/v1/'
 const PUBLIC_RESOURCE_CATALOG_PATH = '/v1/offline-catalog'
 
 export type ResourceAppCheckTokenProvider = (forceRefresh?: boolean) => Promise<string>
 type ResourceAppCheckFetchOptions = { timeoutMs?: number }
 
+const isRequestInstance = (input: RequestInfo | URL): input is Request =>
+  typeof Request !== 'undefined' && input instanceof Request
+
+const resourceApiPathname = (value: string): string | undefined => {
+  if (!value.startsWith(`${RESOURCE_API_ORIGIN}/`)) return undefined
+  const queryIndex = value.indexOf('?')
+  const hashIndex = value.indexOf('#')
+  const endIndexes = [queryIndex, hashIndex].filter(index => index >= 0)
+  const endIndex = endIndexes.length ? Math.min(...endIndexes) : value.length
+  return value.slice(RESOURCE_API_ORIGIN.length, endIndex)
+}
+
 export const isResourceAppCheckProtectedUrl = (input: RequestInfo | URL): boolean => {
   try {
-    const value = input instanceof Request ? input.url : input.toString()
-    const url = new URL(value)
-    return (
-      url.protocol === 'https:' &&
-      url.hostname === RESOURCE_API_HOSTNAME &&
-      url.pathname.startsWith(RESOURCE_API_PATH_PREFIX) &&
-      url.pathname !== PUBLIC_RESOURCE_CATALOG_PATH
+    const value = isRequestInstance(input) ? input.url : String(input)
+    const pathname = resourceApiPathname(value)
+    return Boolean(
+      pathname?.startsWith(RESOURCE_API_PATH_PREFIX) && pathname !== PUBLIC_RESOURCE_CATALOG_PATH
     )
   } catch {
     return false
@@ -22,7 +31,7 @@ export const isResourceAppCheckProtectedUrl = (input: RequestInfo | URL): boolea
 }
 
 const requestHeaders = (input: RequestInfo | URL, init?: RequestInit): Headers => {
-  const headers = new Headers(input instanceof Request ? input.headers : undefined)
+  const headers = new Headers(isRequestInstance(input) ? input.headers : undefined)
   new Headers(init?.headers).forEach((value, key) => headers.set(key, value))
   return headers
 }
@@ -78,7 +87,7 @@ export const createResourceAppCheckFetch = (
   const appCheckFetch: typeof fetch = async (input, init) => {
     if (!isResourceAppCheckProtectedUrl(input)) return fetcher(input, init)
 
-    const sourceSignal = init?.signal ?? (input instanceof Request ? input.signal : undefined)
+    const sourceSignal = init?.signal ?? (isRequestInstance(input) ? input.signal : undefined)
     return runWithRequestDeadline(
       async signal => {
         const send = async (forceRefresh: boolean) => {
@@ -89,7 +98,7 @@ export const createResourceAppCheckFetch = (
 
         const response = await send(false)
         const method = (
-          init?.method ?? (input instanceof Request ? input.method : 'GET')
+          init?.method ?? (isRequestInstance(input) ? input.method : 'GET')
         ).toUpperCase()
         return response.status === 401 && (method === 'GET' || method === 'HEAD')
           ? send(true)

@@ -17,7 +17,7 @@ const isReduxAction = (action: unknown): action is ReduxActionLike =>
 
 const summarizeValue = (value: unknown): unknown => {
   if (value == null || typeof value === 'boolean' || typeof value === 'number') return value
-  if (typeof value === 'string') return value.length > 160 ? `${value.slice(0, 160)}...` : value
+  if (typeof value === 'string') return { type: 'string', length: value.length }
   if (Array.isArray(value)) return { type: 'array', length: value.length }
   if (isRecord(value)) return { type: 'object', keys: Object.keys(value).slice(0, 20) }
   return typeof value

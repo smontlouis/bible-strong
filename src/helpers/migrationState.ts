@@ -1,5 +1,6 @@
 import { storage } from './storage'
 import { SubcollectionName, SUBCOLLECTION_NAMES } from './firestoreSubcollections'
+import { appLogger } from './agentObservability'
 
 const MIGRATION_STATE_KEY = 'firestore_migration_state'
 
@@ -26,6 +27,7 @@ export const getMigrationState = (): MigrationState | null => {
     const json = storage.getString(MIGRATION_STATE_KEY)
     return json ? JSON.parse(json) : null
   } catch (error) {
+    appLogger.captureError('startup', 'legacy_migration_state.read_failed', error)
     console.error('[MigrationState] Failed to get migration state:', error)
     return null
   }
@@ -38,6 +40,7 @@ export const setMigrationState = (state: MigrationState): void => {
   try {
     storage.set(MIGRATION_STATE_KEY, JSON.stringify(state))
   } catch (error) {
+    appLogger.captureError('startup', 'legacy_migration_state.write_failed', error)
     console.error('[MigrationState] Failed to set migration state:', error)
   }
 }
@@ -49,6 +52,7 @@ export const clearMigrationState = (): void => {
   try {
     storage.remove(MIGRATION_STATE_KEY)
   } catch (error) {
+    appLogger.captureError('startup', 'legacy_migration_state.clear_failed', error)
     console.error('[MigrationState] Failed to clear migration state:', error)
   }
 }

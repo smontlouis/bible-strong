@@ -35,7 +35,7 @@ const PostMigrationStartup = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     void loadMobileResourceCatalog().then(() =>
       downloadManager.restore().catch(error => {
-        appLogger.error('startup', 'resource_recovery.failed', { error })
+        appLogger.captureError('startup', 'resource_recovery.failed', error)
       })
     )
   }, [])

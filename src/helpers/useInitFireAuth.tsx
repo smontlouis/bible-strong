@@ -98,7 +98,7 @@ const useInitFireAuth = () => {
           type: 'account-entry-failed',
           errorCode,
         })
-        appLogger.warn('sync', 'account_entry.adoption_checkpoint_failed', {
+        appLogger.captureError('sync', 'account_entry.adoption_checkpoint_failed', error, {
           lifecycleState: nextEntryState.phase,
           classification: accountEntryClassification,
           failureStage: 'checkpoint',
@@ -191,13 +191,18 @@ const useInitFireAuth = () => {
         errorCode: result.errorCode,
       })
       setAccountEntryState(nextEntryState)
-      appLogger.warn('sync', 'account_entry.adoption_pending', {
-        lifecycleState: nextEntryState.phase,
-        classification: accountEntryClassification,
-        durationMs: Date.now() - startedAt,
-        failureStage: 'adoption',
-        errorCode: result.errorCode,
-      })
+      appLogger.captureError(
+        'sync',
+        'account_entry.adoption_pending',
+        new Error(result.errorCode),
+        {
+          lifecycleState: nextEntryState.phase,
+          classification: accountEntryClassification,
+          durationMs: Date.now() - startedAt,
+          failureStage: 'adoption',
+          errorCode: result.errorCode,
+        }
+      )
       toast.warning(i18n.t('accountEntry.adoptionPending'))
     }
 
@@ -224,8 +229,8 @@ const useInitFireAuth = () => {
               })
             )
           }
-        } catch {
-          appLogger.warn('sync', 'account_entry.logout_checkpoint_failed', {
+        } catch (error) {
+          appLogger.captureError('sync', 'account_entry.logout_checkpoint_failed', error, {
             failureStage: 'checkpoint',
             errorCode: 'GUEST_ADOPTION_CHECKPOINT_INVALID',
           })
@@ -239,6 +244,9 @@ const useInitFireAuth = () => {
         await autoBackupManager.createBackupNow(currentState, 'logout')
         console.log('[Logout] Backup created successfully')
       } catch (error) {
+        appLogger.captureError('sync', 'logout.backup_failed', error, {
+          backupReason: 'logout',
+        })
         console.error('[Logout] Failed to create backup:', error)
         // Continue quand même avec le logout
       }

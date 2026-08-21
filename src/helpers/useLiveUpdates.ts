@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import * as Sentry from '@sentry/react-native'
 import type { RootState } from '~redux/modules/reducer'
 import {
   addStudies,
@@ -131,6 +130,12 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
         }
 
         console.warn('[LiveUpdates] User data sync timed out, keeping local data visible')
+        appLogger.captureError(
+          'sync',
+          'account_sync.initial_load_timeout',
+          new Error('ACCOUNT_SYNC_INITIAL_LOAD_TIMEOUT'),
+          { timeoutMs: SYNC_FALLBACK_TIMEOUT_MS }
+        )
         dispatch(finishUserDataSync())
       }, SYNC_FALLBACK_TIMEOUT_MS)
 
@@ -147,17 +152,9 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
       try {
         accountMigrationsCompleted = await migrationRun
       } catch (error) {
-        appLogger.error('startup', 'account_sync.migration_failed', { error })
-        const errorMessage = error instanceof Error ? error.message : String(error)
-        Sentry.captureException(error, {
-          tags: {
-            feature: 'firestore_migration',
-            action: 'run_account_migrations',
-          },
-          extra: {
-            userId,
-            errorMessage,
-          },
+        appLogger.captureError('startup', 'account_sync.migration_failed', error, {
+          feature: 'firestore_migration',
+          action: 'run_account_migrations',
         })
       }
       if (migrationRunRef.current === migrationRun) {
@@ -198,7 +195,11 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
           updateDoc(doc(firebaseDb, 'users', userId), {
             'bible.settings': canonicalSettings,
           }).catch(error => {
-            appLogger.error('startup', 'account_sync.legacy_settings_writeback_failed', { error })
+            appLogger.captureError(
+              'startup',
+              'account_sync.legacy_settings_writeback_failed',
+              error
+            )
           })
         }
 
@@ -242,10 +243,14 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
                 delete: [],
                 merge: false,
               }).catch(error => {
-                appLogger.error('startup', 'account_sync.legacy_reference_writeback_failed', {
-                  collection,
+                appLogger.captureError(
+                  'startup',
+                  'account_sync.legacy_reference_writeback_failed',
                   error,
-                })
+                  {
+                    collection,
+                  }
+                )
               })
             }
 
@@ -269,6 +274,9 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
           },
           error => {
             console.warn(`[LiveUpdates] ${collection} sync unavailable, using local data`, error)
+            appLogger.captureError('sync', 'account_sync.subscription_failed', error, {
+              collection,
+            })
             if (isTrackedSyncCollection(collection)) {
               dispatch(markUserDataSyncCollectionLoaded({ collection }))
             }
@@ -328,15 +336,7 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
         },
         error => {
           console.warn('[LiveUpdates] Studies sync unavailable, using local data', error)
-          Sentry.captureException(error, {
-            tags: {
-              feature: 'firestore_live_updates',
-              action: 'subscribe_studies',
-            },
-            extra: {
-              userId,
-            },
-          })
+          appLogger.captureError('sync', 'account_sync.studies_subscription_failed', error)
           dispatch(markUserDataSyncCollectionLoaded({ collection: 'studies' }))
         }
       )

@@ -1,35 +1,26 @@
 import { SQLDictionnaireTransaction } from '~helpers/getSQLTransaction'
 import catchDatabaseError from '~helpers/catchDatabaseError.new'
-import * as Sentry from '@sentry/react-native'
 
 type DictionaryRefQuery = {
   ref: string
 }[]
 
 const loadDictionnaireWords = async (v: string): Promise<string[]> =>
-  catchDatabaseError(
-    async () => {
-      const result: DictionaryRefQuery = await SQLDictionnaireTransaction(
-        `SELECT ref
+  catchDatabaseError(async () => {
+    const result: DictionaryRefQuery = await SQLDictionnaireTransaction(
+      `SELECT ref
       FROM verses
       WHERE id LIKE (?)
       `,
-        [v]
-      )
+      [v]
+    )
 
-      // Defensive check: return empty array if no result found
-      if (!result || !result[0]) {
-        return []
-      }
-
-      return (JSON.parse(result[0].ref) as string[]).map(word => word.toLowerCase())
-    },
-    () => {
-      Sentry.withScope(scope => {
-        scope.setExtra('verse', v)
-        Sentry.captureMessage('Nave issue')
-      })
+    // Defensive check: return empty array if no result found
+    if (!result || !result[0]) {
+      return []
     }
-  )
+
+    return (JSON.parse(result[0].ref) as string[]).map(word => word.toLowerCase())
+  })
 
 export default loadDictionnaireWords
