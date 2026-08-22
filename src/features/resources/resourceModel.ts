@@ -9,8 +9,8 @@ export type ResourceAvailability =
   | { status: 'available' }
   | {
       status: 'unavailable'
-      reason: 'offline-copy-required' | 'invalid-offline-copy'
-      recoveries: ('acquire-offline-copy' | 'manage-offline-copies')[]
+      reason: 'offline-copy-required' | 'invalid-offline-copy' | 'network-offline'
+      recoveries: ('retry' | 'acquire-offline-copy' | 'manage-offline-copies')[]
     }
 
 export type ResourceIdentity =

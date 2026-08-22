@@ -100,9 +100,15 @@ export const ReferenceCard = ({
       <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'TRESOR', language: resourceLanguage }}
         title={t('resource.crossReferences.offlineCopyNeeded')}
+        offlineTitle={t('resource.crossReferences.temporarilyUnavailable')}
         fileSize={10}
         size="small"
+        mt={100}
         failure={resourceFailureFromAvailability(availabilityQuery.data)}
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          void referencesQuery.refetch()
+        }}
       />
     )
   }
@@ -115,6 +121,7 @@ export const ReferenceCard = ({
         fileSize={10}
         failure={resourceFailureFromAccessError(error ?? availabilityQuery.error)}
         size="small"
+        mt={100}
         onRetry={() => {
           void availabilityQuery.refetch()
           void referencesQuery.refetch()

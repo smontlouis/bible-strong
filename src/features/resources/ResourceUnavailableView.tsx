@@ -12,26 +12,37 @@ import { getResourceFailurePresentation, type ResourceFailure } from './resource
 type Props = {
   identity?: OfflineCopyIdentity
   title: string
+  offlineTitle?: string
   fileSize?: number
   failure: ResourceFailure
   onRetry?: () => void
   onManage?: () => void
   size?: 'small' | 'large'
+  mt?: number
 }
 
 const ResourceUnavailableView = ({
   identity,
   title,
+  offlineTitle,
   fileSize,
   failure,
   onRetry,
   onManage,
   size = 'large',
+  mt,
 }: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const isOnline = useConnection()
-  const presentation = getResourceFailurePresentation(failure, { isOnline })
+  const isOfflineFailure =
+    !isOnline && (failure.cause === 'network-offline' || failure.cause === 'offline-copy-required')
+  const isDisconnectedMissingCopy = !isOnline && failure.cause === 'offline-copy-required'
+  const effectiveFailure: ResourceFailure = isDisconnectedMissingCopy
+    ? { cause: 'network-offline', recoveries: onRetry ? ['retry'] : [] }
+    : failure
+  const presentation = getResourceFailurePresentation(effectiveFailure, { isOnline })
+  const displayedTitle = isOfflineFailure && offlineTitle ? offlineTitle : title
 
   if (
     identity &&
@@ -51,7 +62,7 @@ const ResourceUnavailableView = ({
           ]
         : []),
     ]
-    return (
+    const recovery = (
       <OfflineResourceRecovery
         identity={identity}
         title={title}
@@ -62,17 +73,23 @@ const ResourceUnavailableView = ({
         secondaryActions={secondaryActions}
       />
     )
+    return mt == null ? recovery : <Box mt={mt}>{recovery}</Box>
   }
 
-  const padding = size === 'small' ? 10 : 30
+  const padding = size === 'small' ? 7 : 30
   return (
-    <Box flex={size === 'large' ? 1 : undefined} center padding={padding}>
+    <Box flex={size === 'large' ? 1 : undefined} center padding={padding} mt={mt}>
       <Box center maxWidth={320}>
         <FeatherIcon name={presentation.icon} size={size === 'small' ? 20 : 72} color="tertiary" />
-        <Text textAlign="center" marginTop={padding}>
-          {title}
+        <Text textAlign="center" bold marginTop={padding}>
+          {displayedTitle}
         </Text>
-        <Text textAlign="center" color="tertiary" marginTop={8}>
+        <Text
+          textAlign="center"
+          color="tertiary"
+          fontSize={size === 'small' ? 12 : 16}
+          marginTop={8}
+        >
           {t(presentation.detailKey)}
         </Text>
         {presentation.connectionRequired && (
@@ -81,7 +98,13 @@ const ResourceUnavailableView = ({
           </Text>
         )}
         {presentation.actions.includes('retry') && onRetry && (
-          <Text bold color="primary" marginTop={padding} onPress={onRetry}>
+          <Text
+            bold
+            color="primary"
+            fontSize={size === 'small' ? 12 : 16}
+            marginTop={padding}
+            onPress={onRetry}
+          >
             {t('bible.error.retry')}
           </Text>
         )}

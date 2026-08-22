@@ -2,6 +2,7 @@ import NetInfo from '@react-native-community/netinfo'
 import { focusManager, onlineManager, QueryClient } from '@tanstack/react-query'
 import { AppState, Platform } from 'react-native'
 import { connectionStatusFromNetInfo } from './useConnection'
+import { isOfflineModeForced } from './runtimeConfig'
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,11 +22,15 @@ export const configureQueryManagers = () => {
   if (managersConfigured) return
   managersConfigured = true
 
-  onlineManager.setEventListener(setOnline =>
-    NetInfo.addEventListener(state => {
-      setOnline(connectionStatusFromNetInfo(state) === 'internet')
-    })
-  )
+  if (isOfflineModeForced) {
+    onlineManager.setOnline(false)
+  } else {
+    onlineManager.setEventListener(setOnline =>
+      NetInfo.addEventListener(state => {
+        setOnline(connectionStatusFromNetInfo(state) === 'internet')
+      })
+    )
+  }
 
   if (Platform.OS !== 'web') {
     focusManager.setEventListener(setFocused => {

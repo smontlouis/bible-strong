@@ -1,4 +1,8 @@
-import { createHttpDictionaryAccess } from '../dictionaryAccess'
+import {
+  createHttpDictionaryAccess,
+  createHybridDictionaryAccess,
+  type DictionaryAccess,
+} from '../dictionaryAccess'
 
 jest.mock('~helpers/loadDictionnaireByLetter', () => jest.fn())
 jest.mock('~helpers/loadDictionnaireBySearch', () => jest.fn())
@@ -65,5 +69,100 @@ describe('HTTP dictionary access', () => {
       'http://resource.test/v1/dictionaries/fr/entries/batch?words=amour%2Cange',
       expect.any(Object)
     )
+  })
+})
+
+const dictionaryEntry = { id: 1, word: 'Amour', normalizedWord: 'amour' }
+const makeDictionaryAccess = (
+  availability: 'available' | 'missing',
+  label: string
+): DictionaryAccess => ({
+  getAvailability: jest.fn(async () =>
+    availability === 'available'
+      ? { status: 'available' as const }
+      : {
+          status: 'unavailable' as const,
+          reason: 'offline-copy-required' as const,
+          recoveries: ['acquire-offline-copy' as const],
+        }
+  ),
+  listByLetter: jest.fn(async () => [{ ...dictionaryEntry, word: label }]),
+  search: jest.fn(async () => [{ ...dictionaryEntry, word: label }]),
+  listByLetterPage: jest.fn(async () => ({ entries: [{ ...dictionaryEntry, word: label }] })),
+  searchPage: jest.fn(async () => ({ entries: [{ ...dictionaryEntry, word: label }] })),
+  loadItem: jest.fn(async () => ({ word: label, definition: label })),
+  loadItems: jest.fn(async () => [{ word: label, definition: label }]),
+  loadItemByRowId: jest.fn(async () => ({ word: label })),
+  loadWordsForVerse: jest.fn(async () => [label]),
+})
+
+describe('hybrid dictionary routing', () => {
+  it('prefers an installed local copy while logically offline', async () => {
+    const offline = makeDictionaryAccess('available', 'offline')
+    const online = makeDictionaryAccess('available', 'online')
+    const access = createHybridDictionaryAccess({
+      offline,
+      online,
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => false,
+    })
+
+    await expect(access.loadItemByRowId(1, 'fr')).resolves.toEqual({ word: 'offline' })
+    expect(online.loadItemByRowId).not.toHaveBeenCalled()
+  })
+
+  it('uses HTTP with no local copy while connected', async () => {
+    const online = makeDictionaryAccess('available', 'online')
+    const access = createHybridDictionaryAccess({
+      offline: makeDictionaryAccess('missing', 'offline'),
+      online,
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => true,
+    })
+
+    await expect(access.loadItemByRowId(1, 'fr')).resolves.toEqual({ word: 'online' })
+  })
+
+  it('does not use HTTP with no local copy while logically offline', async () => {
+    const online = makeDictionaryAccess('available', 'online')
+    const access = createHybridDictionaryAccess({
+      offline: makeDictionaryAccess('missing', 'offline'),
+      online,
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => false,
+    })
+
+    await expect(access.loadItemByRowId(1, 'fr')).rejects.toMatchObject({
+      code: 'NETWORK_OFFLINE',
+    })
+    expect(online.loadItemByRowId).not.toHaveBeenCalled()
+  })
+
+  it('reports network-offline availability with no local copy while logically offline', async () => {
+    const access = createHybridDictionaryAccess({
+      offline: makeDictionaryAccess('missing', 'offline'),
+      online: makeDictionaryAccess('available', 'online'),
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => false,
+    })
+
+    await expect(access.getAvailability?.('fr')).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'network-offline',
+      recoveries: ['retry'],
+    })
+  })
+
+  it('requires an Offline copy for a language that is not remotely readable', async () => {
+    const access = createHybridDictionaryAccess({
+      offline: makeDictionaryAccess('missing', 'offline'),
+      online: makeDictionaryAccess('available', 'online'),
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => true,
+    })
+
+    await expect(access.loadItemByRowId(1, 'en')).rejects.toMatchObject({
+      code: 'OFFLINE_COPY_REQUIRED',
+    })
   })
 })

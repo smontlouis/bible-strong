@@ -1,5 +1,5 @@
 import React from 'react'
-import { TouchableOpacity } from 'react-native'
+import { ActivityIndicator, TouchableOpacity } from 'react-native'
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -14,6 +14,10 @@ interface BatchActionBarProps {
   onDownload: () => void
   onDelete: () => void
   downloadsDisabled?: boolean
+  deletionProgress?: {
+    completed: number
+    total: number
+  } | null
 }
 
 const BatchActionBar = ({
@@ -23,10 +27,15 @@ const BatchActionBar = ({
   onDownload,
   onDelete,
   downloadsDisabled = false,
+  deletionProgress = null,
 }: BatchActionBarProps) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const insets = useSafeAreaInsets()
+  const isDeleting = deletionProgress !== null
+  const progressPercent = deletionProgress
+    ? Math.round((deletionProgress.completed / deletionProgress.total) * 100)
+    : 0
 
   if (selectedCount === 0) return null
 
@@ -45,17 +54,20 @@ const BatchActionBar = ({
       lightShadow
     >
       <Box row alignItems="center" gap={12}>
-        <Text fontSize={14} bold flex>
-          {t('downloads.selectedCount', { count: selectedCount })}
+        <Text fontSize={14} bold flex accessibilityLiveRegion={isDeleting ? 'polite' : undefined}>
+          {deletionProgress
+            ? t('downloads.deletingProgress', deletionProgress)
+            : t('downloads.selectedCount', { count: selectedCount })}
         </Text>
 
         {hasDownloadable && (
           <TouchableOpacity
-            accessibilityState={{ disabled: downloadsDisabled }}
-            disabled={downloadsDisabled}
+            accessibilityState={{ disabled: downloadsDisabled || isDeleting }}
+            disabled={downloadsDisabled || isDeleting}
             onPress={onDownload}
             style={{
-              backgroundColor: downloadsDisabled ? theme.colors.tertiary : theme.colors.primary,
+              backgroundColor:
+                downloadsDisabled || isDeleting ? theme.colors.tertiary : theme.colors.primary,
               paddingHorizontal: 16,
               paddingVertical: 10,
               borderRadius: 8,
@@ -71,20 +83,32 @@ const BatchActionBar = ({
 
         {hasDeletable && (
           <TouchableOpacity
+            accessibilityState={{ disabled: isDeleting, busy: isDeleting }}
+            disabled={isDeleting}
             onPress={onDelete}
             style={{
-              backgroundColor: theme.colors.quart,
+              backgroundColor: isDeleting ? theme.colors.tertiary : theme.colors.quart,
               paddingHorizontal: 16,
               paddingVertical: 10,
               borderRadius: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 8,
             }}
           >
+            {isDeleting && <ActivityIndicator size="small" color="#fff" />}
             <Text fontSize={14} bold style={{ color: '#fff' }}>
-              {t('Supprimer')}
+              {isDeleting ? t('downloads.deleting') : t('Supprimer')}
             </Text>
           </TouchableOpacity>
         )}
       </Box>
+
+      {deletionProgress && (
+        <Box mt={12} h={3} bg="border" borderRadius={2} overflow="hidden">
+          <Box h={3} width={`${progressPercent}%`} bg="primary" />
+        </Box>
+      )}
     </Box>
   )
 }

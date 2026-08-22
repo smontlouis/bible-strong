@@ -1,22 +1,29 @@
 import { useEffect, useRef, useState } from 'react'
 import { AppState, AppStateStatus, Platform } from 'react-native'
 import NetInfo, { NetInfoState } from '@react-native-community/netinfo'
+import { isOfflineModeForced } from './runtimeConfig'
 
 export type ConnectionStatus = 'unknown' | 'offline' | 'internet'
 
 export const connectionStatusFromNetInfo = (
-  state: Pick<NetInfoState, 'isConnected' | 'isInternetReachable'>
+  state: Pick<NetInfoState, 'isConnected' | 'isInternetReachable'>,
+  forceOffline = isOfflineModeForced
 ): ConnectionStatus => {
+  if (forceOffline) return 'offline'
   if (state.isConnected === false || state.isInternetReachable === false) return 'offline'
   if (state.isConnected === true && state.isInternetReachable === true) return 'internet'
   return 'unknown'
 }
 
 export const useConnectionStatus = (): ConnectionStatus => {
-  const [status, setStatus] = useState<ConnectionStatus>('unknown')
+  const [status, setStatus] = useState<ConnectionStatus>(
+    isOfflineModeForced ? 'offline' : 'unknown'
+  )
   const appStateRef = useRef(AppState.currentState)
 
   useEffect(() => {
+    if (isOfflineModeForced) return
+
     let unsubscribeNetInfo: (() => void) | null = null
 
     const updateStatus = (state: NetInfoState) => {

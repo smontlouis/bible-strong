@@ -30,6 +30,7 @@ import DictionnaireVerseReference from './DictionnaireVerseReference'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import useConnection from '~helpers/useConnection'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import {
   resourceFailureFromAccessError,
@@ -188,6 +189,7 @@ const DictionnaireVerseDetailScreen = ({
 }) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const isConnected = useConnection()
   const queryClient = useQueryClient()
   const carousel = useRef<ICarouselInstance>(null)
   const { Livre, Chapitre, Verset } = verse
@@ -202,7 +204,10 @@ const DictionnaireVerseDetailScreen = ({
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.DICTIONNAIRE
   const dictionaryAvailabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', resourceLang),
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', resourceLang),
+      isConnected,
+    ],
     queryFn: () =>
       resources.dictionary.getAvailability?.(resourceLang) ??
       Promise.resolve({ status: 'available' as const }),
@@ -241,9 +246,16 @@ const DictionnaireVerseDetailScreen = ({
       <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
         title={t('resource.dictionary.offlineCopyNeeded')}
+        offlineTitle={t('resource.dictionary.temporarilyUnavailable')}
         fileSize={22}
         size="small"
+        mt={100}
         failure={resourceFailureFromAvailability(dictionaryAvailabilityQuery.data)}
+        onRetry={() => {
+          void dictionaryAvailabilityQuery.refetch()
+          void queryClient.invalidateQueries({ queryKey: ['dictionaryWords'] })
+          void queryClient.invalidateQueries({ queryKey: ['words'] })
+        }}
       />
     )
   }
@@ -256,6 +268,7 @@ const DictionnaireVerseDetailScreen = ({
         fileSize={22}
         failure={resourceFailureFromAccessError(dictionaryWordsError ?? wordsError)}
         size="small"
+        mt={100}
         onRetry={() => {
           void dictionaryAvailabilityQuery.refetch()
           void queryClient.invalidateQueries({ queryKey: ['dictionaryWords'] })
@@ -282,6 +295,7 @@ const DictionnaireVerseDetailScreen = ({
             )
           )}
           failure={{ cause: 'offline-copy-required', recoveries: ['acquire-offline-copy'] }}
+          mt={100}
         />
       </Container>
     )

@@ -16,6 +16,7 @@ import {
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
 import Empty from '~common/Empty'
+import useConnection from '~helpers/useConnection'
 
 type Props = {
   selectedVerse: string
@@ -25,12 +26,13 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const resources = useResourceAccess()
+  const isConnected = useConnection()
 
   // Get resource language from Jotai for cache key invalidation
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.NAVE
   const availabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability('NAVE', resourceLang),
+    queryKey: [...resourceQueryKeys.offlineDatabaseAvailability('NAVE', resourceLang), isConnected],
     queryFn: () =>
       resources.nave.getAvailability?.(resourceLang) ??
       Promise.resolve({ status: 'available' as const }),
@@ -39,7 +41,7 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
   })
 
   const naveQuery = useQuery({
-    queryKey: ['nave', selectedVerse, resourceLang],
+    queryKey: ['nave', selectedVerse, resourceLang, isConnected],
     queryFn: () => resources.nave.loadByVerse(selectedVerse, resourceLang),
   })
   const { isLoading, error, data } = naveQuery
@@ -49,9 +51,15 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
       <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLang }}
         title={t('resource.nave.offlineCopyNeeded')}
+        offlineTitle={t('resource.nave.temporarilyUnavailable')}
         fileSize={7}
         size="small"
+        mt={100}
         failure={resourceFailureFromAvailability(availabilityQuery.data)}
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          void naveQuery.refetch()
+        }}
       />
     )
   }
@@ -64,6 +72,7 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
         fileSize={7}
         failure={resourceFailureFromAccessError(error ?? availabilityQuery.error)}
         size="small"
+        mt={100}
         onRetry={() => {
           void availabilityQuery.refetch()
           void naveQuery.refetch()

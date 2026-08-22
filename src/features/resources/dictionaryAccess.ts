@@ -20,6 +20,7 @@ import {
   DictionaryEntryResponseDto,
   DictionaryVerseWordsResponseDto,
 } from './dictionaryContract'
+import { resolveHybridResourceSource } from './hybridResourcePolicy'
 
 export type DictionarySummary = {
   id: number
@@ -417,21 +418,33 @@ export const createHybridDictionaryAccess = ({
     const state = await availability(language)
     if (state.local.status === 'available') {
       try {
-        const local = await localOperation()
-        if (local !== undefined) return local
+        return await localOperation()
       } catch (error) {
         if (!(error instanceof ResourceAccessError) || error.code !== 'NOT_FOUND') throw error
       }
     }
-    if (!state.remotelyReadable) throw localFailure(state)
-    return remoteOperation()
+    const source = await resolveHybridResourceSource({
+      localAvailable: false,
+      remotelyReadable: state.remotelyReadable,
+      isOnline,
+    })
+    if (source === 'remote') return remoteOperation()
+    if (source === 'offline') throw new ResourceAccessError('NETWORK_OFFLINE')
+    throw localFailure(state)
   }
   return {
     getAvailability: async language => {
       const state = await availability(language)
-      return state.local.status === 'available' || state.remotelyReadable
+      if (state.local.status === 'available') return { status: 'available' }
+      if (state.local.reason === 'invalid-offline-copy') return state.local
+      if (!state.remotelyReadable) return state.local
+      return (await isOnline())
         ? { status: 'available' }
-        : state.local
+        : {
+            status: 'unavailable',
+            reason: 'network-offline',
+            recoveries: ['retry'],
+          }
     },
     listByLetter: (letter, language = 'fr') =>
       runSearch(

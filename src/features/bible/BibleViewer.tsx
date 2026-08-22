@@ -1277,6 +1277,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
           <ResourceUnavailableView
             identity={commentsUnavailable.recoveryIdentity}
             title={t('resource.commentary.offlineCopyNeeded')}
+            offlineTitle={t('resource.commentary.temporarilyUnavailable')}
             fileSize={Math.round(databases('fr').MHY.fileSize / 1_000_000)}
             failure={resourceFailureFromAvailability({
               reason: commentsUnavailable.reason,
@@ -1286,6 +1287,10 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
                   : ['acquire-offline-copy'],
             })}
             size="small"
+            onRetry={() => {
+              void commentsAvailabilityQuery.refetch()
+              void commentsQuery.refetch()
+            }}
           />
         </Box>
       )}
@@ -1317,6 +1322,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
           <ResourceUnavailableView
             identity={redWordsUnavailable.recoveryIdentity}
             title={t('resource.redWords.offlineCopyNeeded')}
+            offlineTitle={t('resource.redWords.temporarilyUnavailable')}
             fileSize={Math.max(
               1,
               Math.round(
@@ -1332,6 +1338,10 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
                   : ['acquire-offline-copy'],
             })}
             size="small"
+            onRetry={() => {
+              void redWordsAvailabilityQuery.refetch()
+              void redWordsQuery.refetch()
+            }}
           />
         </Box>
       )}

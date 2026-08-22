@@ -227,6 +227,7 @@ const StrongSelectionSheet = ({
             <ResourceUnavailableView
               identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
               title={t('resource.strong.offlineCopyNeeded')}
+              offlineTitle={t('resource.strong.temporarilyUnavailable')}
               fileSize={35}
               failure={resourceFailureFromStrongModuleAvailability(availabilityQuery.data)}
               size="small"

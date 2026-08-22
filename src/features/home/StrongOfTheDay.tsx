@@ -40,6 +40,7 @@ const StrongOfTheDay = ({
   const resources = useResourceAccess()
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).STRONG
   const isConnected = useConnection()
+  const resourceTitle = t('Lexique Strong')
 
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
@@ -65,7 +66,7 @@ const StrongOfTheDay = ({
     return (
       <WidgetContainer>
         <ResourceUnavailableView
-          title={t('resource.strong.temporarilyUnavailable')}
+          title={resourceTitle}
           failure={resourceFailureFromAccessError(availabilityQuery.error)}
           size="small"
           onRetry={() => void availabilityQuery.refetch()}
@@ -80,8 +81,12 @@ const StrongOfTheDay = ({
     return (
       <ResourceDownloadWidget
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-        title={t('resource.strong.offlineCopyNeeded')}
+        title={resourceTitle}
         fileSize={35}
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          void strongQuery.refetch()
+        }}
       />
     )
   }
@@ -90,7 +95,7 @@ const StrongOfTheDay = ({
       <WidgetContainer>
         <ResourceUnavailableView
           identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-          title={t('resource.strong.temporarilyUnavailable')}
+          title={resourceTitle}
           fileSize={35}
           failure={resourceFailureFromStrongModuleAvailability(
             availabilityQuery.data.availability,
@@ -112,9 +117,7 @@ const StrongOfTheDay = ({
       <WidgetContainer>
         <ResourceUnavailableView
           identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-          title={
-            error === 'NOT_FOUND' ? t('Pas de strong pour ce Code.') : t('Une erreur est survenue.')
-          }
+          title={resourceTitle}
           fileSize={35}
           failure={
             error === 'NOT_FOUND'

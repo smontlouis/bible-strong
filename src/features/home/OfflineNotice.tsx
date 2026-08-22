@@ -17,18 +17,20 @@ const OfflineNotice = () => {
   return (
     <Box
       row
-      padding={10}
+      alignItems="center"
+      px={20}
+      py={16}
       bg="reverse"
-      lightShadow
-      borderRadius={3}
-      borderLeftWidth={4}
-      borderLeftColor="rgb(255,188,0)"
-      marginTop={10}
-      marginBottom={20}
+      borderRadius={28}
+      mx={32}
+      mt={10}
+      mb={32}
     >
-      <FeatherIcon size={20} name="alert-triangle" color="secondary" />
-      <Box marginLeft={10} paddingRight={10}>
-        <Text bold>{t('app.youAreOffline')}</Text>
+      <Box size={32} borderRadius={16} bg="lightGrey" center>
+        <FeatherIcon size={17} name="wifi-off" color="tertiary" />
+      </Box>
+      <Box ml={10} flex>
+        <Text color="tertiary">{t('app.youAreOffline')}</Text>
       </Box>
     </Box>
   )

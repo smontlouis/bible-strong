@@ -75,6 +75,36 @@ describe('hybrid Nave access', () => {
     expect(remote.loadRandom).toHaveBeenCalledWith('fr')
   })
 
+  it('does not load a remotely readable topic list while logically offline', async () => {
+    const remote = makeAccess()
+    const access = createHybridNaveAccess({
+      offline: makeAccess(),
+      online: remote,
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => false,
+    })
+
+    await expect(access.listByLetterPage('a', undefined, 'fr')).rejects.toMatchObject({
+      code: 'NETWORK_OFFLINE',
+    })
+    expect(remote.listByLetterPage).not.toHaveBeenCalled()
+  })
+
+  it('reports network-offline availability with no local copy while logically offline', async () => {
+    const access = createHybridNaveAccess({
+      offline: makeAccess(),
+      online: makeAccess(),
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => false,
+    })
+
+    await expect(access.getAvailability?.('fr')).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'network-offline',
+      recoveries: ['retry'],
+    })
+  })
+
   it('preserves corrupt-copy recovery when HTTP also fails', async () => {
     const local = makeAccess({
       getAvailability: jest.fn(async () => ({

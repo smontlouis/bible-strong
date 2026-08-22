@@ -40,6 +40,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import useConnection from '~helpers/useConnection'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import {
   resourceFailureFromAccessError,
@@ -59,6 +60,7 @@ const DictionnaryDetailScreen = ({
   const pushRouteOnce = usePushRouteOnce()
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
   const resources = useResourceAccess()
+  const isConnected = useConnection()
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
@@ -71,10 +73,10 @@ const DictionnaryDetailScreen = ({
   const { t } = useTranslation()
   const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
   const dictionaryAvailabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability(
-      'DICTIONNAIRE',
-      dictionaryResourceLanguage
-    ),
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', dictionaryResourceLanguage),
+      isConnected,
+    ],
     queryFn: () =>
       resources.dictionary.getAvailability?.(dictionaryResourceLanguage) ??
       Promise.resolve({ status: 'available' as const }),
@@ -202,8 +204,13 @@ const DictionnaryDetailScreen = ({
           language: dictionaryResourceLanguage,
         }}
         title={t('resource.dictionary.offlineCopyNeeded')}
+        offlineTitle={t('resource.dictionary.temporarilyUnavailable')}
         fileSize={22}
         failure={resourceFailureFromAvailability(dictionaryAvailabilityQuery.data)}
+        onRetry={() => {
+          void dictionaryAvailabilityQuery.refetch()
+          void dictionaryQuery.refetch()
+        }}
       />
     )
   }

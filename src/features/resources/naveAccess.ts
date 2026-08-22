@@ -19,6 +19,7 @@ import {
   NaveTopicResponseDto,
   NaveVerseTopicsResponseDto,
 } from './naveContract'
+import { resolveHybridResourceSource } from './hybridResourcePolicy'
 
 export type NaveTopicSummary = {
   normalizedName: string
@@ -361,9 +362,23 @@ export const createHybridNaveAccess = ({
     remoteOperation: () => Promise<T>
   ): Promise<T> => {
     const state = await availability(language)
-    if (state.local.status === 'available') return localOperation()
-    if (!state.remotelyReadable) {
+    const source = await resolveHybridResourceSource({
+      localAvailable: state.local.status === 'available',
+      remotelyReadable: state.remotelyReadable,
+      isOnline,
+    })
+    if (source === 'local') return localOperation()
+    if (source === 'unsupported') {
       throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    }
+    if (source === 'offline') {
+      if (state.local.status === 'unavailable' && state.local.reason === 'invalid-offline-copy') {
+        throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
+          'acquire-offline-copy',
+          'manage-offline-copies',
+        ])
+      }
+      throw new ResourceAccessError('NETWORK_OFFLINE')
     }
     try {
       return await remoteOperation()
@@ -452,9 +467,16 @@ export const createHybridNaveAccess = ({
   return {
     getAvailability: async language => {
       const state = await availability(language)
-      return state.local.status === 'available' || state.remotelyReadable
+      if (state.local.status === 'available') return { status: 'available' }
+      if (state.local.reason === 'invalid-offline-copy') return state.local
+      if (!state.remotelyReadable) return state.local
+      return (await isOnline())
         ? { status: 'available' }
-        : state.local
+        : {
+            status: 'unavailable',
+            reason: 'network-offline',
+            recoveries: ['retry'],
+          }
     },
     listByLetter: (letter, language) => {
       const lang = languageOrFrench(language)

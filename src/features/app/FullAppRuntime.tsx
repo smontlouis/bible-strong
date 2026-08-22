@@ -30,6 +30,7 @@ import { Theme } from '~themes/index'
 import { PlaybackService } from '../../../playbackService'
 import { downloadManager } from '~helpers/downloadManager'
 import { loadMobileResourceCatalog } from '~helpers/mobileResourceCatalog'
+import { useAutomaticUpdates } from '~helpers/useAutomaticUpdates'
 
 const PostMigrationStartup = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
@@ -111,6 +112,11 @@ type FullAppRuntimeProps = {
   theme: Theme
 }
 
+const AutomaticUpdates = () => {
+  useAutomaticUpdates()
+  return null
+}
+
 const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
   useKeepAwake()
 
@@ -160,6 +166,7 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                       />
                     </Stack>
                     <ThemedToaster />
+                    <AutomaticUpdates />
                     <DeferredModals />
                   </StrongAudioProvider>
                 </BookSelectorSheetProvider>

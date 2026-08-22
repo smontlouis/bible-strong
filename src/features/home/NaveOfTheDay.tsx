@@ -27,6 +27,7 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
   const resources = useResourceAccess()
   const [resourceLanguage] = useResourceLanguage('NAVE')
   const isConnected = useConnection()
+  const resourceTitle = t('Thématique Nave')
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
     queryKey: [
@@ -53,24 +54,29 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
     return (
       <ResourceDownloadWidget
         identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLanguage }}
-        title={t('resource.nave.offlineCopyNeeded')}
+        title={resourceTitle}
         fileSize={7}
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          void naveQuery.refetch()
+        }}
       />
     )
   }
 
-  if (
-    availabilityQuery.data?.status === 'unavailable' &&
-    availabilityQuery.data.reason === 'invalid-offline-copy'
-  ) {
+  if (availabilityQuery.data?.status === 'unavailable') {
     return (
       <WidgetContainer>
         <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLanguage }}
-          title={t('resource.nave.temporarilyUnavailable')}
+          title={resourceTitle}
           fileSize={7}
           failure={resourceFailureFromAvailability(availabilityQuery.data)}
           size="small"
+          onRetry={() => {
+            void availabilityQuery.refetch()
+            void naveQuery.refetch()
+          }}
         />
       </WidgetContainer>
     )
@@ -81,7 +87,7 @@ const NaveOfTheDay = ({ color1 = 'rgb(80, 83, 140)', color2 = 'rgb(48, 51, 107)'
       <WidgetContainer>
         <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLanguage }}
-          title={t('Une erreur est survenue.')}
+          title={resourceTitle}
           fileSize={7}
           failure={
             availabilityQuery.isError || naveQuery.isError

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useQueries, useQuery } from '@tanstack/react-query'
 import { Alert, TextInput, TouchableOpacity } from 'react-native'
 import { useTheme } from '@emotion/react'
@@ -238,8 +238,9 @@ function buildAllSections(
 
 function useDownloadedItems() {
   const installedSignal = useAtomValue(installedVersionsSignalAtom)
+  const previousInstalledSignal = useRef(installedSignal)
   const availabilityQuery = useQuery({
-    queryKey: ['downloads', 'installed-resources', installedSignal],
+    queryKey: ['downloads', 'installed-resources'],
     networkMode: 'always',
     queryFn: async () => {
       const set = new Set<string>()
@@ -410,6 +411,13 @@ function useDownloadedItems() {
       }
     },
   })
+  const refetchAvailability = availabilityQuery.refetch
+
+  useEffect(() => {
+    if (previousInstalledSignal.current === installedSignal) return
+    previousInstalledSignal.current = installedSignal
+    void refetchAvailability()
+  }, [installedSignal, refetchAvailability])
 
   return {
     downloadedSet: availabilityQuery.data?.downloadedSet ?? new Set<string>(),
@@ -447,6 +455,10 @@ const DownloadsScreen = () => {
   // Local state
   const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
+  const [batchDeletionProgress, setBatchDeletionProgress] = useState<{
+    completed: number
+    total: number
+  } | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<Set<StatusFilter>>(new Set())
   const [langFilter, setLangFilter] = useState<Set<LangFilter>>(new Set())
@@ -573,6 +585,7 @@ const DownloadsScreen = () => {
 
   // Actions
   const toggleSelect = (itemId: string) => {
+    if (batchDeletionProgress) return
     setSelectedItems(prev => {
       const next = new Set(prev)
       if (next.has(itemId)) next.delete(itemId)
@@ -582,6 +595,7 @@ const DownloadsScreen = () => {
   }
 
   const toggleSelectAll = (sectionData: UnifiedItem[]) => {
+    if (batchDeletionProgress) return
     const allIds = sectionData.map(i => i.id)
     const allSelected = allIds.every(id => selectedItems.has(id))
 
@@ -646,27 +660,27 @@ const DownloadsScreen = () => {
   }
 
   const handleBatchDelete = () => {
-    const deletionPlans = Array.from(selectedItems).flatMap(id =>
-      downloadedSet.has(id) ? [createDownloadedItemDeletionPlan(id)] : []
+    const deletionEntries = Array.from(selectedItems).flatMap(itemId =>
+      downloadedSet.has(itemId) ? [{ itemId, plan: createDownloadedItemDeletionPlan(itemId) }] : []
     )
-    if (deletionPlans.length === 0) return
+    if (deletionEntries.length === 0) return
 
-    const deletesStrongSidecar = deletionPlans.some(
-      plan =>
+    const deletesStrongSidecar = deletionEntries.some(
+      ({ plan }) =>
         plan.kind === 'bible' &&
         plan.strongSidecar !== undefined &&
         downloadedSet.has(plan.strongSidecar.itemId)
     )
-    const deletesInterlinearSidecar = deletionPlans.some(
-      plan =>
+    const deletesInterlinearSidecar = deletionEntries.some(
+      ({ plan }) =>
         plan.kind === 'bible' &&
         plan.interlinearSidecars?.some(sidecar => downloadedSet.has(sidecar.itemId))
     )
     const confirmation = deletesInterlinearSidecar
-      ? t('downloads.deleteCountWithInterlinear', { count: deletionPlans.length })
+      ? t('downloads.deleteCountWithInterlinear', { count: deletionEntries.length })
       : deletesStrongSidecar
-        ? t('downloads.deleteCountWithStrong', { count: deletionPlans.length })
-        : t('downloads.deleteCount', { count: deletionPlans.length })
+        ? t('downloads.deleteCountWithStrong', { count: deletionEntries.length })
+        : t('downloads.deleteCount', { count: deletionEntries.length })
 
     Alert.alert(t('Attention'), confirmation, [
       { text: t('Non'), style: 'cancel' },
@@ -674,12 +688,32 @@ const DownloadsScreen = () => {
         text: t('Oui'),
         style: 'destructive',
         onPress: async () => {
-          for (const plan of deletionPlans) {
-            await deleteDownloadedItem(plan)
+          const deletedItemIds: string[] = []
+          setBatchDeletionProgress({ completed: 0, total: deletionEntries.length })
+
+          try {
+            for (const { itemId, plan } of deletionEntries) {
+              await deleteDownloadedItem(plan)
+              deletedItemIds.push(itemId)
+              setBatchDeletionProgress({
+                completed: deletedItemIds.length,
+                total: deletionEntries.length,
+              })
+            }
+            await refreshInstalledStateAfterDeletion()
+            setIsSelectMode(false)
+            setSelectedItems(new Set())
+          } catch {
+            await refreshInstalledStateAfterDeletion().catch(() => undefined)
+            setSelectedItems(previous => {
+              const remaining = new Set(previous)
+              deletedItemIds.forEach(itemId => remaining.delete(itemId))
+              return remaining
+            })
+            Alert.alert(t('Erreur'), t('downloads.deleteFailed'))
+          } finally {
+            setBatchDeletionProgress(null)
           }
-          await refreshInstalledStateAfterDeletion()
-          setIsSelectMode(false)
-          setSelectedItems(new Set())
         },
       },
     ])
@@ -827,6 +861,8 @@ const DownloadsScreen = () => {
               </TouchableOpacity>
             )}
             <TouchableOpacity
+              accessibilityState={{ disabled: batchDeletionProgress !== null }}
+              disabled={batchDeletionProgress !== null}
               onPress={() => {
                 setIsSelectMode(prev => !prev)
                 if (isSelectMode) setSelectedItems(new Set())
@@ -978,6 +1014,7 @@ const DownloadsScreen = () => {
             onDownload={handleBatchDownload}
             onDelete={handleBatchDelete}
             downloadsDisabled={!isConnected}
+            deletionProgress={batchDeletionProgress}
           />
         ) : (
           <GlobalDownloadBar />

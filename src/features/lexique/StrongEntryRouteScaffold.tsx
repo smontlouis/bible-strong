@@ -123,12 +123,14 @@ const StrongEntryRouteScaffold = ({
   if (requireEntry && entryState.coreAvailability.isError) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        {header}
-        <ResourceUnavailableView
-          title={t('resource.strong.temporarilyUnavailable')}
-          failure={resourceFailureFromAccessError(entryState.coreAvailability.error)}
-          onRetry={() => void entryState.coreAvailability.refetch()}
-        />
+        <Box flex>
+          {header}
+          <ResourceUnavailableView
+            title={t('resource.strong.temporarilyUnavailable')}
+            failure={resourceFailureFromAccessError(entryState.coreAvailability.error)}
+            onRetry={() => void entryState.coreAvailability.refetch()}
+          />
+        </Box>
       </FormSheetScreen>
     )
   }
@@ -140,14 +142,17 @@ const StrongEntryRouteScaffold = ({
   ) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        {header}
-        <ResourceUnavailableView
-          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-          title={t('resource.strong.coreUnavailable')}
-          fileSize={35}
-          failure={resourceFailureFromStrongModuleAvailability(entryState.coreAvailability.data)}
-          onRetry={() => void entryState.coreAvailability.refetch()}
-        />
+        <Box flex>
+          {header}
+          <ResourceUnavailableView
+            identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+            title={t('resource.strong.coreUnavailable')}
+            offlineTitle={t('resource.strong.temporarilyUnavailable')}
+            fileSize={35}
+            failure={resourceFailureFromStrongModuleAvailability(entryState.coreAvailability.data)}
+            onRetry={() => void entryState.coreAvailability.refetch()}
+          />
+        </Box>
       </FormSheetScreen>
     )
   }
@@ -155,12 +160,14 @@ const StrongEntryRouteScaffold = ({
   if (requireEntry && entryState.entryQuery.isError) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
-        {header}
-        <ResourceUnavailableView
-          title={t("Cette entrée Strong n'a pas pu être chargée.")}
-          failure={resourceFailureFromAccessError(entryState.entryQuery.error)}
-          onRetry={() => void entryState.entryQuery.refetch()}
-        />
+        <Box flex>
+          {header}
+          <ResourceUnavailableView
+            title={t("Cette entrée Strong n'a pas pu être chargée.")}
+            failure={resourceFailureFromAccessError(entryState.entryQuery.error)}
+            onRetry={() => void entryState.entryQuery.refetch()}
+          />
+        </Box>
       </FormSheetScreen>
     )
   }

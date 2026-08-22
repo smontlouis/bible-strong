@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 
 import Loading from '~common/Loading'
+import Header from '~common/Header'
 import Box from '~common/ui/Box'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -21,7 +22,15 @@ const TimelineDetailsContext = createContext<TimelineEventSummary[]>([])
 
 export const useTimelineDetails = () => useContext(TimelineDetailsContext)
 
-const TimelineResourceBoundary = ({ children }: { children: ReactNode }) => {
+const TimelineResourceBoundary = ({
+  children,
+  hasBackButton,
+  onBackPress,
+}: {
+  children: ReactNode
+  hasBackButton?: boolean
+  onBackPress?: () => void
+}) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const language = useAtomValue(resourcesLanguageAtom).TIMELINE
@@ -44,14 +53,15 @@ const TimelineResourceBoundary = ({ children }: { children: ReactNode }) => {
     const reason =
       query.data?.status === 'unavailable' ? query.data.reason : 'temporary-unavailable'
     return (
-      <Box flex center>
+      <Box flex bg="reverse">
+        <Header
+          hasBackButton={hasBackButton}
+          title={t('La Chronologie biblique')}
+          onCustomBackPress={onBackPress}
+        />
         <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'TIMELINE', language }}
-          title={
-            reason === 'temporary-unavailable'
-              ? t('resource.timeline.temporarilyUnavailable')
-              : t('resource.timeline.offlineCopyNeeded')
-          }
+          title={t('La Chronologie biblique')}
           fileSize={Math.round(databases(language).TIMELINE.fileSize / 1_000_000)}
           failure={
             query.data?.status === 'unavailable'

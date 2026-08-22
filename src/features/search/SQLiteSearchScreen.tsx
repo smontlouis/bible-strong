@@ -618,9 +618,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         <ResourceUnavailableView
           identity={recoveryIdentity}
           title={t('resource.search.offlineCopyNeeded')}
+          offlineTitle={t('resource.search.temporarilyUnavailable')}
           fileSize={recoveryFileSize}
           failure={{ cause: 'offline-copy-required', recoveries: ['acquire-offline-copy'] }}
           size="small"
+          onRetry={() => {
+            void installedVersionsQuery.refetch()
+            void passageQuery.refetch()
+          }}
         />
       )
     }
@@ -726,12 +731,17 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         <ResourceUnavailableView
           identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
           title={t('resource.strong.offlineCopyNeeded')}
+          offlineTitle={t('resource.strong.temporarilyUnavailable')}
           fileSize={35}
           size="small"
           failure={resourceFailureFromStrongModuleAvailability(
             strongAvailabilityQuery.data.availability,
             strongAvailabilityQuery.data.recoveries
           )}
+          onRetry={() => {
+            void strongAvailabilityQuery.refetch()
+            void strongQuery.refetch()
+          }}
         />
       )
     }
@@ -748,9 +758,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             language: resourcesLanguage.DICTIONNAIRE,
           }}
           title={t('resource.dictionary.offlineCopyNeeded')}
+          offlineTitle={t('resource.dictionary.temporarilyUnavailable')}
           fileSize={22}
           size="small"
           failure={resourceFailureFromAvailability(dictionaryAvailabilityQuery.data)}
+          onRetry={() => {
+            void dictionaryAvailabilityQuery.refetch()
+            void dictionaryQuery.refetch()
+          }}
         />
       )
     }
@@ -760,9 +775,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'NAVE', language: resourcesLanguage.NAVE }}
           title={t('resource.nave.offlineCopyNeeded')}
+          offlineTitle={t('resource.nave.temporarilyUnavailable')}
           fileSize={7}
           size="small"
           failure={resourceFailureFromAvailability(naveAvailabilityQuery.data)}
+          onRetry={() => {
+            void naveAvailabilityQuery.refetch()
+            void naveQuery.refetch()
+          }}
         />
       )
     }

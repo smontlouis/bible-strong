@@ -153,9 +153,14 @@ const onlineBibleChapterAdapter = resourceApiBaseUrl
       })
     )
   : unavailableHttpBibleChapterAdapter
+const remotelyReadableBibleVersions = new Set(
+  resourceApiBaseUrl ? (__DEV__ ? getMobileBibleVersionIds() : PUBLIC_ONLINE_BIBLE_VERSION_IDS) : []
+)
 const bibleChapterAdapter = createHybridBibleChapterAdapter({
   offline: localBibleChapterSource,
   online: onlineBibleChapterAdapter,
+  remotelyReadableVersions: remotelyReadableBibleVersions,
+  isOnline: async () => onlineManager.isOnline(),
 })
 const onlineNaveAccess = resourceApiBaseUrl
   ? onlineSource(
@@ -250,9 +255,6 @@ const strongLexiconAccess = createHybridStrongLexiconAccess({
 })
 const remotelyReadableStrongLexiconModules = new Set(
   resourceApiBaseUrl ? ['core', 'resources', 'entities'] : []
-)
-const remotelyReadableBibleVersions = new Set(
-  resourceApiBaseUrl ? (__DEV__ ? getMobileBibleVersionIds() : PUBLIC_ONLINE_BIBLE_VERSION_IDS) : []
 )
 const onlineBibleSearchAccess = resourceApiBaseUrl
   ? onlineSource(

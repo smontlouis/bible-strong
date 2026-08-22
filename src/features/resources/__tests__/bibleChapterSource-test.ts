@@ -138,6 +138,23 @@ describe('hybrid Bible chapter source', () => {
     expect(online.loadChapter).not.toHaveBeenCalled()
   })
 
+  it('does not load a remotely readable Bible while connectivity is logically offline', async () => {
+    const offline = adapter({ status: 'unavailable', reason: 'publication-not-available' })
+    const online = adapter({ status: 'available', verses })
+    const hybrid = createHybridBibleChapterAdapter({
+      offline,
+      online,
+      remotelyReadableVersions: new Set(['LSG']),
+      isOnline: async () => false,
+    })
+
+    await expect(hybrid.loadChapter('LSG', 1, 1)).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'network-offline',
+    })
+    expect(online.loadChapter).not.toHaveBeenCalled()
+  })
+
   it.each(['publication-not-available', 'offline-copy-invalid'] as const)(
     'falls back to HTTP when the local copy reports %s',
     async reason => {

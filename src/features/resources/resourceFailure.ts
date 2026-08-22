@@ -103,15 +103,21 @@ export const resourceFailureFromAvailability = ({
   reason,
   recoveries,
 }: {
-  reason: 'offline-copy-required' | 'invalid-offline-copy' | 'temporary-unavailable'
+  reason:
+    | 'offline-copy-required'
+    | 'invalid-offline-copy'
+    | 'network-offline'
+    | 'temporary-unavailable'
   recoveries: ResourceRecoveryAction[]
 }): ResourceFailure =>
   resourceFailureFromAccessCode(
     reason === 'invalid-offline-copy'
       ? 'INVALID_OFFLINE_COPY'
-      : reason === 'temporary-unavailable'
-        ? 'TEMPORARY_UNAVAILABLE'
-        : 'OFFLINE_COPY_REQUIRED',
+      : reason === 'network-offline'
+        ? 'NETWORK_OFFLINE'
+        : reason === 'temporary-unavailable'
+          ? 'TEMPORARY_UNAVAILABLE'
+          : 'OFFLINE_COPY_REQUIRED',
     reason === 'temporary-unavailable' && recoveries.length === 0 ? ['retry'] : recoveries
   )
 

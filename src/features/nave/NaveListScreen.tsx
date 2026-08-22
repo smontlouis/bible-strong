@@ -27,7 +27,8 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import useConnection from '~helpers/useConnection'
+import ResourceUnavailableScreen from '~features/resources/ResourceUnavailableScreen'
 import {
   resourceFailureFromAccessCode,
   resourceFailureFromAccessError,
@@ -78,6 +79,7 @@ const NaveListScreen = ({
 }: NaveListScreenProps) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const isConnected = useConnection()
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
@@ -85,7 +87,10 @@ const NaveListScreen = ({
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
   const availabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability('NAVE', naveResourceLanguage),
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('NAVE', naveResourceLanguage),
+      isConnected,
+    ],
     queryFn: () =>
       resources.nave.getAvailability?.(naveResourceLanguage) ??
       Promise.resolve({ status: 'available' as const }),
@@ -114,11 +119,19 @@ const NaveListScreen = ({
 
   if (availabilityQuery.data?.status === 'unavailable') {
     return (
-      <ResourceUnavailableView
+      <ResourceUnavailableScreen
+        headerTitle={t('Désolé...')}
+        hasBackButton={showBackButton}
+        isFormSheet={isFormSheet}
         identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
         title={t('resource.nave.offlineCopyNeeded')}
+        offlineTitle={t('resource.nave.temporarilyUnavailable')}
         fileSize={7}
         failure={resourceFailureFromAvailability(availabilityQuery.data)}
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          retry()
+        }}
       />
     )
   }
@@ -149,25 +162,23 @@ const NaveListScreen = ({
 
   if (availabilityQuery.isError || error) {
     return (
-      <FormSheetScreen isFormSheet={isFormSheet}>
-        <Box flex bg="reverse">
-          <Header hasBackButton={showBackButton} title={t('Désolé...')} />
-          <ResourceUnavailableView
-            identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
-            title={t('resource.nave.temporarilyUnavailable')}
-            fileSize={7}
-            failure={
-              error
-                ? resourceFailureFromAccessCode(error, recoveries)
-                : resourceFailureFromAccessError(availabilityQuery.error)
-            }
-            onRetry={() => {
-              void availabilityQuery.refetch()
-              retry()
-            }}
-          />
-        </Box>
-      </FormSheetScreen>
+      <ResourceUnavailableScreen
+        headerTitle={t('Désolé...')}
+        hasBackButton={showBackButton}
+        isFormSheet={isFormSheet}
+        identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
+        title={t('resource.nave.temporarilyUnavailable')}
+        fileSize={7}
+        failure={
+          error
+            ? resourceFailureFromAccessCode(error, recoveries)
+            : resourceFailureFromAccessError(availabilityQuery.error)
+        }
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          retry()
+        }}
+      />
     )
   }
 

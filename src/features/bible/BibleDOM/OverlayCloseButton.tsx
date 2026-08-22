@@ -35,7 +35,7 @@ const OverlayCloseButton = ({ label, color, backgroundColor, onClose }: Props) =
       WebkitTapHighlightColor: 'transparent',
     }}
   >
-    <Feather name="x" size={21} />
+    <Feather name="x" size={21} color={color} />
   </button>
 )
 

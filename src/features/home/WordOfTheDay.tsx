@@ -32,6 +32,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const resources = useResourceAccess()
   const lang = useLanguage()
   const isConnected = useConnection()
+  const resourceTitle = t('Dictionnaire Westphal')
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
     queryKey: [...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', lang), isConnected],
@@ -59,24 +60,29 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     return (
       <ResourceDownloadWidget
         identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
-        title={t('resource.dictionary.offlineCopyNeeded')}
+        title={resourceTitle}
         fileSize={22}
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          void strongQuery.refetch()
+        }}
       />
     )
   }
 
-  if (
-    availabilityQuery.data?.status === 'unavailable' &&
-    availabilityQuery.data.reason === 'invalid-offline-copy'
-  ) {
+  if (availabilityQuery.data?.status === 'unavailable') {
     return (
       <WidgetContainer>
         <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
-          title={t('resource.dictionary.temporarilyUnavailable')}
+          title={resourceTitle}
           fileSize={22}
           failure={resourceFailureFromAvailability(availabilityQuery.data)}
           size="small"
+          onRetry={() => {
+            void availabilityQuery.refetch()
+            void strongQuery.refetch()
+          }}
         />
       </WidgetContainer>
     )
@@ -91,7 +97,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
       <WidgetContainer>
         <ResourceUnavailableView
           identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
-          title={t('Une erreur est survenue.')}
+          title={resourceTitle}
           fileSize={22}
           failure={
             availabilityQuery.isError || strongQuery.isError

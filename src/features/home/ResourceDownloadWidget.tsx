@@ -10,7 +10,6 @@ import { downloadManager } from '~helpers/downloadManager'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import useConnection from '~helpers/useConnection'
-import { itemHeight, itemWidth } from './widget'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import {
   getResourceActions,
@@ -18,14 +17,17 @@ import {
   type OfflineCopyState,
 } from '~features/resources/resourceModel'
 import { getResourceFailurePresentation } from '~features/resources/resourceFailure'
+import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import { WidgetContainer, itemHeight, itemWidth } from './widget'
 
 type Props = {
   identity: OfflineCopyIdentity
   title: string
   fileSize: number
+  onRetry?: () => void
 }
 
-const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
+const ResourceDownloadWidget = ({ identity, title, fileSize, onRetry }: Props) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const isConnected = useConnection()
@@ -66,6 +68,19 @@ const ResourceDownloadWidget = ({ identity, title, fileSize }: Props) => {
     } else {
       downloadManager.enqueue([createOfflineCopyDownloadItem(identity)])
     }
+  }
+
+  if (!isConnected) {
+    return (
+      <WidgetContainer>
+        <ResourceUnavailableView
+          title={title}
+          failure={{ cause: 'network-offline', recoveries: onRetry ? ['retry'] : [] }}
+          size="small"
+          onRetry={onRetry}
+        />
+      </WidgetContainer>
+    )
   }
 
   return (

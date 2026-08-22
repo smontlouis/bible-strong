@@ -9,7 +9,7 @@ import {
   type LocalResourceAvailability,
   type LocalResourceRef,
 } from './resourceAvailability'
-import { ResourceAccessError } from './resourceAccessError'
+import { ResourceAccessError, type ResourceRecoveryAction } from './resourceAccessError'
 import { TimelineEventResponseDto, TimelineEventsResponseDto } from './timelineContract'
 
 export type TimelineEventSummary = Pick<
@@ -21,8 +21,12 @@ export type TimelineDetailsResult =
   | { status: 'available'; details: TimelineEventDetail[] }
   | {
       status: 'unavailable'
-      reason: 'offline-copy-required' | 'invalid-offline-copy' | 'temporary-unavailable'
-      recoveries: ('acquire-offline-copy' | 'manage-offline-copies')[]
+      reason:
+        | 'offline-copy-required'
+        | 'invalid-offline-copy'
+        | 'network-offline'
+        | 'temporary-unavailable'
+      recoveries: ResourceRecoveryAction[]
     }
 
 export type TimelineIndexResult =
@@ -328,53 +332,67 @@ export const createHybridTimelineAccess = ({
   online: TimelineAccess
   remotelyReadableLanguages: ReadonlySet<ResourceLanguage>
   isOnline: () => Promise<boolean>
-}): TimelineAccess => ({
-  getAvailability: async language => {
-    const local = await offline.getAvailability?.(language)
-    if (local?.status === 'available' || remotelyReadableLanguages.has(language)) {
-      return { status: 'available' }
-    }
-    return (
-      local ?? {
-        status: 'unavailable' as const,
-        reason: 'offline-copy-required' as const,
-        recoveries: ['acquire-offline-copy'] as const,
+}): TimelineAccess => {
+  const offlineResult = <T extends TimelineIndexResult | TimelineEventResult>(local: T): T =>
+    local.status === 'unavailable' && local.reason === 'offline-copy-required'
+      ? ({
+          status: 'unavailable',
+          reason: 'network-offline',
+          recoveries: ['retry'],
+        } as T)
+      : local
+
+  return {
+    getAvailability: async language => {
+      const local = await offline.getAvailability?.(language)
+      if (local?.status === 'available' || remotelyReadableLanguages.has(language)) {
+        return { status: 'available' }
       }
-    )
-  },
-  loadIndex: async language => {
-    const local = await offline.loadIndex(language)
-    if (local.status === 'available') return local
-    if (!remotelyReadableLanguages.has(language) || !(await isOnline())) return local
-    try {
-      return await online.loadIndex(language)
-    } catch (error) {
-      if (error instanceof ResourceAccessError && error.code === 'NETWORK_OFFLINE') return local
-      throw error
-    }
-  },
-  searchIndex: async (query, language, limit) => {
-    const local = await offline.searchIndex(query, language, limit)
-    if (local.status === 'available') return local
-    if (!remotelyReadableLanguages.has(language) || !(await isOnline())) return local
-    try {
-      return await online.searchIndex(query, language, limit)
-    } catch (error) {
-      if (error instanceof ResourceAccessError && error.code === 'NETWORK_OFFLINE') return local
-      throw error
-    }
-  },
-  loadEvent: async (language, slug) => {
-    const local = await offline.loadEvent(language, slug)
-    if (local.status === 'available') return local
-    if (!remotelyReadableLanguages.has(language) || !(await isOnline())) return local
-    try {
-      return await online.loadEvent(language, slug)
-    } catch (error) {
-      if (error instanceof ResourceAccessError && error.code === 'NETWORK_OFFLINE') return local
-      throw error
-    }
-  },
-})
+      return (
+        local ?? {
+          status: 'unavailable' as const,
+          reason: 'offline-copy-required' as const,
+          recoveries: ['acquire-offline-copy'] as const,
+        }
+      )
+    },
+    loadIndex: async language => {
+      const local = await offline.loadIndex(language)
+      if (local.status === 'available') return local
+      if (!remotelyReadableLanguages.has(language)) return local
+      if (!(await isOnline())) return offlineResult(local)
+      try {
+        return await online.loadIndex(language)
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'NETWORK_OFFLINE') return local
+        throw error
+      }
+    },
+    searchIndex: async (query, language, limit) => {
+      const local = await offline.searchIndex(query, language, limit)
+      if (local.status === 'available') return local
+      if (!remotelyReadableLanguages.has(language)) return local
+      if (!(await isOnline())) return offlineResult(local)
+      try {
+        return await online.searchIndex(query, language, limit)
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'NETWORK_OFFLINE') return local
+        throw error
+      }
+    },
+    loadEvent: async (language, slug) => {
+      const local = await offline.loadEvent(language, slug)
+      if (local.status === 'available') return local
+      if (!remotelyReadableLanguages.has(language)) return local
+      if (!(await isOnline())) return offlineResult(local)
+      try {
+        return await online.loadEvent(language, slug)
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'NETWORK_OFFLINE') return local
+        throw error
+      }
+    },
+  }
+}
 
 export const localTimelineAccess = createLocalTimelineAccess()

@@ -1,5 +1,7 @@
 import { connectionStatusFromNetInfo } from '../useConnection'
 
+jest.mock('../runtimeConfig', () => ({ isOfflineModeForced: false }))
+
 jest.mock('react-native', () => ({
   AppState: { currentState: 'active', addEventListener: jest.fn() },
   Platform: { OS: 'ios' },
@@ -24,5 +26,11 @@ describe('connectionStatusFromNetInfo', () => {
     expect(connectionStatusFromNetInfo({ isConnected: true, isInternetReachable: true })).toBe(
       'internet'
     )
+  })
+
+  it('can force the effective connection status offline', () => {
+    expect(
+      connectionStatusFromNetInfo({ isConnected: true, isInternetReachable: true }, true)
+    ).toBe('offline')
   })
 })

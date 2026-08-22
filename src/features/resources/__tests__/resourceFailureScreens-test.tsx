@@ -2,14 +2,22 @@ import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 
 import DictionaryListScreen from '~features/dictionnary/DictionaryListScreen'
+import LexiqueListScreen from '~features/lexique/LexiqueListScreen'
 import NaveListScreen from '~features/nave/NaveListScreen'
+
+let mockIsOnline = true
+let mockStrongAvailability: { status: 'available' | 'missing'; moduleId?: 'core' } = {
+  status: 'available',
+}
 
 jest.mock('react-native-section-list-get-item-layout', () => () => jest.fn())
 jest.mock('@expo/vector-icons', () => ({ Feather: () => null }))
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
 jest.mock('@tanstack/react-query', () => ({
-  useQuery: () => ({
-    data: { status: 'available' },
+  useQuery: ({ queryKey }: { queryKey: readonly unknown[] }) => ({
+    data: queryKey.includes('strong-lexicon')
+      ? { availability: mockStrongAvailability, recoveries: [] }
+      : { status: 'available' },
     error: undefined,
     isError: false,
     refetch: jest.fn(),
@@ -25,8 +33,9 @@ jest.mock('src/state/resourcesLanguage', () => ({ useResourceLanguage: () => ['f
   virtual: true,
 })
 jest.mock('~helpers/useLanguage', () => () => 'fr')
+jest.mock('~helpers/useConnection', () => () => mockIsOnline)
 jest.mock('~features/resources/resourceAccess', () => ({
-  useResourceAccess: () => ({ dictionary: {}, nave: {} }),
+  useResourceAccess: () => ({ dictionary: {}, nave: {}, strongLexicon: {} }),
 }))
 jest.mock('~features/lexique/useUtilities', () => ({
   useSearchValue: () => ({
@@ -59,7 +68,10 @@ jest.mock('~common/ui/FormSheetScreen', () => {
   return ({ children }: React.PropsWithChildren) =>
     ReactModule.createElement('FormSheetScreen', null, children)
 })
-jest.mock('~common/Header', () => () => null)
+jest.mock('~common/Header', () => {
+  const ReactModule = jest.requireActual<typeof React>('react')
+  return (props: Record<string, unknown>) => ReactModule.createElement('Header', props)
+})
 jest.mock('~common/AlphabetList', () => () => null)
 jest.mock('~common/Empty', () => () => null)
 jest.mock('~common/Loading', () => () => null)
@@ -70,6 +82,7 @@ jest.mock('~common/ui/MenuView', () => ({ MenuView: () => null }), { virtual: tr
 jest.mock('~common/ui/SectionList', () => () => null)
 jest.mock('~common/ui/Text', () => () => null)
 jest.mock('~features/dictionnary/DictionnaireItem', () => () => null)
+jest.mock('~features/lexique/LexiqueItem', () => () => null)
 jest.mock('~features/nave/NaveItem', () => () => null)
 jest.mock('~navigation/useCanGoBackInStack', () => ({ useCanGoBackInStack: () => false }))
 jest.mock('~navigation/usePushRouteOnce', () => ({ usePushRouteOnce: () => jest.fn() }))
@@ -85,10 +98,15 @@ describe('resource failure list screens', () => {
     ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
   })
 
-  afterEach(() => act(() => renderer.unmount()))
+  afterEach(() => {
+    act(() => renderer.unmount())
+    mockIsOnline = true
+    mockStrongAvailability = { status: 'available' }
+  })
 
   it.each([
     ['Dictionary', <DictionaryListScreen key="dictionary" dictionaryAtom={{} as never} />],
+    ['Lexique', <LexiqueListScreen key="lexique" />],
     ['Nave', <NaveListScreen key="nave" naveAtom={{} as never} />],
   ])('keeps %s network errors classified as offline', (_name, screen) => {
     act(() => {
@@ -98,5 +116,32 @@ describe('resource failure list screens', () => {
     expect(
       renderer.root.find(node => String(node.type) === 'ResourceUnavailableView').props.failure
     ).toEqual({ cause: 'network-offline', recoveries: ['retry'] })
+  })
+
+  it('keeps the Lexique back button on the offline screen', () => {
+    act(() => {
+      renderer = create(<LexiqueListScreen hasBackButton />)
+    })
+
+    expect(renderer.root.find(node => String(node.type) === 'Header').props).toEqual(
+      expect.objectContaining({ hasBackButton: true, title: 'Désolé...' })
+    )
+  })
+
+  it('describes a missing Strong copy as an offline connection when offline', () => {
+    mockIsOnline = false
+    mockStrongAvailability = { status: 'missing', moduleId: 'core' }
+    act(() => {
+      renderer = create(<LexiqueListScreen />)
+    })
+
+    expect(
+      renderer.root.find(node => String(node.type) === 'ResourceUnavailableView').props
+    ).toEqual(
+      expect.objectContaining({
+        title: 'resource.strong.temporarilyUnavailable',
+        failure: { cause: 'network-offline', recoveries: ['retry'] },
+      })
+    )
   })
 })

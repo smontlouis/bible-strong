@@ -181,7 +181,7 @@ describe('Home resource download widgets', () => {
           String(node.type) === 'AnimatedTouchableBox' && typeof node.props.onPress === 'function'
       )
     ).toHaveLength(1)
-    expect(JSON.stringify(renderer.toJSON())).toContain('resource.nave.offlineCopyNeeded')
+    expect(JSON.stringify(renderer.toJSON())).toContain('Thématique Nave')
     expect(JSON.stringify(renderer.toJSON())).toContain('"color":"tertiary"')
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Télécharger')
 
@@ -211,7 +211,7 @@ describe('Home resource download widgets', () => {
           String(node.type) === 'AnimatedTouchableBox' && typeof node.props.onPress === 'function'
       )
     ).toHaveLength(1)
-    expect(JSON.stringify(renderer.toJSON())).toContain('resource.dictionary.offlineCopyNeeded')
+    expect(JSON.stringify(renderer.toJSON())).toContain('Dictionnaire Westphal')
     expect(JSON.stringify(renderer.toJSON())).toContain('"color":"tertiary"')
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Télécharger')
 
@@ -231,7 +231,7 @@ describe('Home resource download widgets', () => {
     })
 
     const recovery = renderer.root.find(node => String(node.type) === 'AnimatedTouchableBox')
-    expect(JSON.stringify(renderer.toJSON())).toContain('resource.strong.offlineCopyNeeded')
+    expect(JSON.stringify(renderer.toJSON())).toContain('Lexique Strong')
     act(() => recovery.props.onPress())
     expect(downloadManager.enqueue).toHaveBeenCalledWith([
       {
@@ -241,18 +241,32 @@ describe('Home resource download widgets', () => {
     ])
   })
 
-  it('keeps a missing resource visible without attempting an impossible Offline download', () => {
+  it.each([
+    ['Nave', 'Thématique Nave', <NaveOfTheDay key="nave" />],
+    ['Dictionary', 'Dictionnaire Westphal', <WordOfTheDay key="dictionary" />],
+    ['Strong', 'Lexique Strong', <StrongOfTheDay key="strong" type="grec" />],
+  ])('uses the same informational offline state for %s', (_label, title, widget) => {
     mockIsConnected = false
     act(() => {
-      renderer = create(<NaveOfTheDay />)
+      renderer = create(widget)
     })
 
-    const recovery = renderer.root.find(node => String(node.type) === 'AnimatedTouchableBox')
-    expect(recovery.props.accessibilityState).toEqual({ disabled: true })
-    expect(JSON.stringify(renderer.toJSON())).toContain('resource.action.connectionRequired')
+    const unavailable = renderer.root.find(node => String(node.type) === 'ResourceUnavailableView')
+    expect(unavailable.props).toEqual(
+      expect.objectContaining({
+        title,
+        failure: { cause: 'network-offline', recoveries: ['retry'] },
+        size: 'small',
+      })
+    )
+    expect(
+      renderer.root.findAll(node => String(node.type) === 'AnimatedTouchableBox')
+    ).toHaveLength(0)
 
-    act(() => recovery.props.onPress?.())
+    act(() => unavailable.props.onRetry())
 
+    expect(mockAvailabilityRefetch).toHaveBeenCalledTimes(1)
+    expect(mockContentRefetch).toHaveBeenCalledTimes(1)
     expect(downloadManager.enqueue).not.toHaveBeenCalled()
   })
 
@@ -288,15 +302,16 @@ describe('Home resource download widgets', () => {
   })
 
   it.each([
-    ['Nave', <NaveOfTheDay key="nave" />],
-    ['Dictionary', <WordOfTheDay key="dictionary" />],
-  ])('retries both %s availability and content queries', (_label, widget) => {
+    ['Nave', 'Thématique Nave', <NaveOfTheDay key="nave" />],
+    ['Dictionary', 'Dictionnaire Westphal', <WordOfTheDay key="dictionary" />],
+  ])('retries both %s availability and content queries', (_label, title, widget) => {
     mockAvailabilityError = true
     act(() => {
       renderer = create(widget)
     })
 
     const unavailable = renderer.root.find(node => String(node.type) === 'ResourceUnavailableView')
+    expect(unavailable.props.title).toBe(title)
     act(() => unavailable.props.onRetry())
 
     expect(mockAvailabilityRefetch).toHaveBeenCalledTimes(1)

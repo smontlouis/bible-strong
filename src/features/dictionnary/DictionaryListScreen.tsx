@@ -25,7 +25,8 @@ import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResol
 import { useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import useConnection from '~helpers/useConnection'
+import ResourceUnavailableScreen from '~features/resources/ResourceUnavailableScreen'
 import {
   resourceFailureFromAccessCode,
   resourceFailureFromAccessError,
@@ -82,6 +83,7 @@ const DictionaryListScreen = ({
 }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const isConnected = useConnection()
   const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
@@ -89,10 +91,10 @@ const DictionaryListScreen = ({
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
   const availabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability(
-      'DICTIONNAIRE',
-      dictionaryResourceLanguage
-    ),
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', dictionaryResourceLanguage),
+      isConnected,
+    ],
     queryFn: () =>
       resources.dictionary.getAvailability?.(dictionaryResourceLanguage) ??
       Promise.resolve({ status: 'available' as const }),
@@ -121,15 +123,23 @@ const DictionaryListScreen = ({
 
   if (availabilityQuery.data?.status === 'unavailable') {
     return (
-      <ResourceUnavailableView
+      <ResourceUnavailableScreen
+        headerTitle={t('Désolé...')}
+        hasBackButton={showBackButton}
+        isFormSheet={isFormSheet}
         identity={{
           kind: 'database',
           databaseId: 'DICTIONNAIRE',
           language: dictionaryResourceLanguage,
         }}
         title={t('resource.dictionary.offlineCopyNeeded')}
+        offlineTitle={t('resource.dictionary.temporarilyUnavailable')}
         fileSize={22}
         failure={resourceFailureFromAvailability(availabilityQuery.data)}
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          retry()
+        }}
       />
     )
   }
@@ -151,29 +161,27 @@ const DictionaryListScreen = ({
 
   if (availabilityQuery.isError || error) {
     return (
-      <FormSheetScreen isFormSheet={isFormSheet}>
-        <Box flex bg="reverse">
-          <Header hasBackButton={showBackButton} title={t('Désolé...')} />
-          <ResourceUnavailableView
-            identity={{
-              kind: 'database',
-              databaseId: 'DICTIONNAIRE',
-              language: dictionaryResourceLanguage,
-            }}
-            title={t('resource.dictionary.temporarilyUnavailable')}
-            fileSize={22}
-            failure={
-              error
-                ? resourceFailureFromAccessCode(error, recoveries)
-                : resourceFailureFromAccessError(availabilityQuery.error)
-            }
-            onRetry={() => {
-              void availabilityQuery.refetch()
-              retry()
-            }}
-          />
-        </Box>
-      </FormSheetScreen>
+      <ResourceUnavailableScreen
+        headerTitle={t('Désolé...')}
+        hasBackButton={showBackButton}
+        isFormSheet={isFormSheet}
+        identity={{
+          kind: 'database',
+          databaseId: 'DICTIONNAIRE',
+          language: dictionaryResourceLanguage,
+        }}
+        title={t('resource.dictionary.temporarilyUnavailable')}
+        fileSize={22}
+        failure={
+          error
+            ? resourceFailureFromAccessCode(error, recoveries)
+            : resourceFailureFromAccessError(availabilityQuery.error)
+        }
+        onRetry={() => {
+          void availabilityQuery.refetch()
+          retry()
+        }}
+      />
     )
   }
 

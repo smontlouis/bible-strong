@@ -364,12 +364,18 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       <ResourceUnavailableView
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
         title={t('resource.strong.offlineCopyNeeded')}
+        offlineTitle={t('resource.strong.temporarilyUnavailable')}
         fileSize={35}
         size="small"
+        mt={100}
         failure={resourceFailureFromStrongModuleAvailability(
           coreAvailabilityQuery.data.availability,
           coreAvailabilityQuery.data.recoveries
         )}
+        onRetry={() => {
+          void coreAvailabilityQuery.refetch()
+          void strongVerseQuery.refetch()
+        }}
       />
     )
   }
@@ -412,6 +418,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           strongVerseQuery.error ?? coreAvailabilityQuery.error
         )}
         size="small"
+        mt={100}
         onRetry={() => {
           void coreAvailabilityQuery.refetch()
           void strongVerseQuery.refetch()

@@ -588,6 +588,7 @@ const VersionSelectorItem = ({
       ? strongSelectionAvailability.status !== 'available'
       : undefined
     : versionNeedsDownload
+  const isUnavailableOffline = selectionNeedsDownload === true && !isConnected
 
   if (onOpenOfflineDetails) {
     return (
@@ -595,14 +596,17 @@ const VersionSelectorItem = ({
         <Box flex row alignItems="center">
           <TouchableOpacity
             style={{ flex: 1 }}
+            disabled={isUnavailableOffline}
             onPress={() => onChange?.(version.id)}
             accessibilityRole={showSelectionCheckbox ? 'checkbox' : 'button'}
             accessibilityLabel={`${t('Sélectionner les versions')}: ${version.displayName || version.name}`}
             accessibilityState={
-              showSelectionCheckbox ? { checked: Boolean(isSelected) } : undefined
+              showSelectionCheckbox
+                ? { checked: Boolean(isSelected), disabled: isUnavailableOffline }
+                : { disabled: isUnavailableOffline }
             }
           >
-            <Box flex row alignItems="center">
+            <Box flex row alignItems="center" opacity={isUnavailableOffline ? 0.45 : 1}>
               {renderSelectionCheckbox()}
               <VersionIdentity
                 version={version}
@@ -643,6 +647,10 @@ const VersionSelectorItem = ({
                     </Box>
                   )}
                 </Box>
+              ) : isUnavailableOffline ? (
+                <Box width={30} height={28} center>
+                  <FeatherIcon name="wifi-off" size={18} color="tertiary" />
+                </Box>
               ) : null}
             </Box>
           </TouchableOpacity>
@@ -663,13 +671,13 @@ const VersionSelectorItem = ({
     return (
       <Box>
         <VersionItemContainer
-          onPress={() => onChange?.(version.id)}
+          onPress={isUnavailableOffline ? undefined : () => onChange?.(version.id)}
           hasDependency={
             (showStrongCapability && isStrongIndexExpanded) ||
             (showInterlinearCapability && isInterlinearIndexExpanded)
           }
         >
-          <Box flex row alignItems="center">
+          <Box flex row alignItems="center" opacity={isUnavailableOffline ? 0.45 : 1}>
             <Box flex>
               <VersionIdentity
                 version={version}

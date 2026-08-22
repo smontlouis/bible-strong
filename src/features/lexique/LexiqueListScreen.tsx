@@ -26,7 +26,8 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
 import { useStrongLexiconLanguage } from './useStrongLexiconLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
+import useConnection from '~helpers/useConnection'
+import ResourceUnavailableScreen from '~features/resources/ResourceUnavailableScreen'
 import {
   resourceFailureFromAccessCode,
   resourceFailureFromAccessError,
@@ -75,6 +76,7 @@ const LexiqueListScreen = ({
   onStrongSelect,
 }: LexiqueListScreenProps) => {
   const { t } = useTranslation()
+  const isOnline = useConnection()
   const resources = useResourceAccess()
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
@@ -148,40 +150,56 @@ const LexiqueListScreen = ({
     coreAvailabilityQuery.data &&
     coreAvailabilityQuery.data.availability.status !== 'available'
   ) {
+    const isOffline = !isOnline
     return (
-      <ResourceUnavailableView
+      <ResourceUnavailableScreen
+        headerTitle={t('Désolé...')}
+        hasBackButton={showBackButton}
+        isFormSheet={isFormSheet}
         identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-        title={t('resource.strong.offlineCopyNeeded')}
-        fileSize={35}
-        failure={resourceFailureFromStrongModuleAvailability(
-          coreAvailabilityQuery.data.availability,
-          coreAvailabilityQuery.data.recoveries
+        title={t(
+          isOffline ? 'resource.strong.temporarilyUnavailable' : 'resource.strong.offlineCopyNeeded'
         )}
+        fileSize={35}
+        failure={
+          isOffline
+            ? { cause: 'network-offline', recoveries: ['retry'] }
+            : resourceFailureFromStrongModuleAvailability(
+                coreAvailabilityQuery.data.availability,
+                coreAvailabilityQuery.data.recoveries
+              )
+        }
+        onRetry={
+          isOffline
+            ? () => {
+                void coreAvailabilityQuery.refetch()
+                retry()
+              }
+            : undefined
+        }
       />
     )
   }
 
   if (coreAvailabilityQuery.isError || error) {
     return (
-      <FormSheetScreen isFormSheet={isFormSheet}>
-        <Box flex bg="reverse">
-          <Header hasBackButton={showBackButton} title={t('Désolé...')} />
-          <ResourceUnavailableView
-            identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
-            title={t('resource.strong.temporarilyUnavailable')}
-            fileSize={35}
-            failure={
-              error
-                ? resourceFailureFromAccessCode(error, recoveries)
-                : resourceFailureFromAccessError(coreAvailabilityQuery.error)
-            }
-            onRetry={() => {
-              void coreAvailabilityQuery.refetch()
-              retry()
-            }}
-          />
-        </Box>
-      </FormSheetScreen>
+      <ResourceUnavailableScreen
+        headerTitle={t('Désolé...')}
+        hasBackButton={showBackButton}
+        isFormSheet={isFormSheet}
+        identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+        title={t('resource.strong.temporarilyUnavailable')}
+        fileSize={35}
+        failure={
+          error
+            ? resourceFailureFromAccessCode(error, recoveries)
+            : resourceFailureFromAccessError(coreAvailabilityQuery.error)
+        }
+        onRetry={() => {
+          void coreAvailabilityQuery.refetch()
+          retry()
+        }}
+      />
     )
   }
 

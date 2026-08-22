@@ -38,6 +38,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import useConnection from '~helpers/useConnection'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import {
   resourceFailureFromAccessError,
@@ -54,6 +55,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   const pushRouteOnce = usePushRouteOnce()
   const [naveTab, setNaveTab] = useAtom(naveAtom)
   const resources = useResourceAccess()
+  const isConnected = useConnection()
   const { isInTab } = useTabContext()
   const canGoBackInStack = useCanGoBackInStack()
   const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
@@ -80,7 +82,10 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
   }, [isInTab, setNaveTab, router])
 
   const naveAvailabilityQuery = useQuery({
-    queryKey: resourceQueryKeys.offlineDatabaseAvailability('NAVE', naveResourceLanguage),
+    queryKey: [
+      ...resourceQueryKeys.offlineDatabaseAvailability('NAVE', naveResourceLanguage),
+      isConnected,
+    ],
     queryFn: () =>
       resources.nave.getAvailability?.(naveResourceLanguage) ??
       Promise.resolve({ status: 'available' as const }),
@@ -88,7 +93,7 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
     staleTime: Infinity,
   })
   const naveQuery = useQuery({
-    queryKey: ['nave-detail', naveResourceLanguage, name_lower],
+    queryKey: ['nave-detail', naveResourceLanguage, name_lower, isConnected],
     queryFn: async () =>
       name_lower
         ? ((await resources.nave.loadItem(name_lower, naveResourceLanguage)) ?? null)
@@ -198,8 +203,13 @@ const NaveDetailScreen = ({ naveAtom, isFormSheet = false }: NaveDetailScreenPro
       <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'NAVE', language: naveResourceLanguage }}
         title={t('resource.nave.offlineCopyNeeded')}
+        offlineTitle={t('resource.nave.temporarilyUnavailable')}
         fileSize={7}
         failure={resourceFailureFromAvailability(naveAvailabilityQuery.data)}
+        onRetry={() => {
+          void naveAvailabilityQuery.refetch()
+          void naveQuery.refetch()
+        }}
       />
     )
   }

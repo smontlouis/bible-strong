@@ -13,6 +13,7 @@ import {
   BibleVersionCoverageDto,
   parseBibleVerseKey,
 } from './bibleChapterContract'
+import { resolveHybridResourceSource, type HybridResourceSource } from './hybridResourcePolicy'
 
 export type BibleChapterUnavailableReason =
   | 'publication-not-available'
@@ -183,81 +184,122 @@ export const loadVerseTextsFromChapterAdapter = async (
 export const createHybridBibleChapterAdapter = ({
   offline,
   online,
+  remotelyReadableVersions,
+  isOnline = async () => true,
 }: {
   offline: BibleChapterAdapter
   online: BibleChapterAdapter
-}): BibleChapterAdapter => ({
-  async loadChapters(versions, book, chapter) {
-    const localResults = await Promise.all(
-      versions.map(version => offline.loadChapter(version, book, chapter))
-    )
-    const remoteIndexes = localResults.flatMap((result, index) =>
-      result.status === 'available' || result.reason === 'chapter-not-available' ? [] : [index]
-    )
-    if (!remoteIndexes.length) return localResults
-    const remoteVersions = remoteIndexes.map(index => versions[index])
-    const remoteResults = online.loadChapters
-      ? await online.loadChapters(remoteVersions, book, chapter)
-      : await Promise.all(remoteVersions.map(version => online.loadChapter(version, book, chapter)))
-    const results = [...localResults]
-    remoteIndexes.forEach((index, remoteIndex) => {
-      const local = localResults[index]
-      const remote = remoteResults[remoteIndex]
-      results[index] =
-        remote.status === 'available' || remote.reason === 'chapter-not-available'
-          ? remote
-          : local.status === 'unavailable' && local.reason === 'offline-copy-invalid'
-            ? local
-            : remote
+  remotelyReadableVersions?: ReadonlySet<string>
+  isOnline?: () => Promise<boolean>
+}): BibleChapterAdapter => {
+  const getSource = (version: string) =>
+    resolveHybridResourceSource({
+      localAvailable: false,
+      remotelyReadable: remotelyReadableVersions?.has(version) ?? true,
+      isOnline,
     })
-    return results
-  },
-  async loadVerseTexts(version, verseKeys, shouldCancel) {
-    const local = offline.loadVerseTexts
-      ? await offline.loadVerseTexts(version, verseKeys, shouldCancel)
-      : undefined
-    if (local?.status === 'available' || local?.reason === 'verses-not-available') return local
-
-    const remote = online.loadVerseTexts
-      ? await online.loadVerseTexts(version, verseKeys, shouldCancel)
-      : undefined
-    if (remote?.status === 'available' || remote?.reason === 'verses-not-available') return remote
-    if (local?.reason === 'offline-copy-invalid') {
-      return {
-        status: 'unavailable',
-        reason: 'offline-copy-invalid',
-        recoveries: ['manage-offline-copies', 'reset-offline-store'],
-      }
-    }
-    return remote ?? local ?? { status: 'unavailable', reason: 'resource-unsupported' }
-  },
-  async loadChapter(version, book, chapter) {
-    const local = await offline.loadChapter(version, book, chapter)
-    if (local.status === 'available' || local.reason === 'chapter-not-available') return local
-
-    const remote = await online.loadChapter(version, book, chapter)
-    if (remote.status === 'available') return remote
-    if (remote.reason === 'chapter-not-available') return remote
-    if (local.reason === 'offline-copy-invalid') {
-      return {
-        status: 'unavailable',
-        reason: 'offline-copy-invalid',
-        recoveries: ['manage-offline-copies', 'reset-offline-store'],
-      }
-    }
-    if (remote.reason === 'resource-unsupported') return remote
-    return remote
-  },
-  async loadCoverage(version) {
-    const local = await offline.loadCoverage(version)
-    if (isUsableBibleCoverage(local)) return local
-    const remote = await online.loadCoverage(version)
-    if (remote.status === 'available') return remote
-    return local.status === 'unavailable' && local.reason === 'offline-copy-invalid'
+  const blockedResult = <T extends BibleChapterSourceResult | BibleVerseTextsSourceResult>(
+    local: T,
+    source: HybridResourceSource
+  ): T | { status: 'unavailable'; reason: 'network-offline' } =>
+    local.status === 'unavailable' && local.reason === 'offline-copy-invalid'
       ? local
-      : remote
-  },
-})
+      : source === 'offline'
+        ? { status: 'unavailable', reason: 'network-offline' }
+        : local
+
+  return {
+    async loadChapters(versions, book, chapter) {
+      const localResults = await Promise.all(
+        versions.map(version => offline.loadChapter(version, book, chapter))
+      )
+      const results = [...localResults]
+      const remoteIndexes: number[] = []
+      for (const [index, local] of localResults.entries()) {
+        if (local.status === 'available' || local.reason === 'chapter-not-available') continue
+        const source = await getSource(versions[index])
+        if (source === 'remote') remoteIndexes.push(index)
+        else results[index] = blockedResult(local, source)
+      }
+      if (!remoteIndexes.length) return results
+      const remoteVersions = remoteIndexes.map(index => versions[index])
+      const remoteResults = online.loadChapters
+        ? await online.loadChapters(remoteVersions, book, chapter)
+        : await Promise.all(
+            remoteVersions.map(version => online.loadChapter(version, book, chapter))
+          )
+      remoteIndexes.forEach((index, remoteIndex) => {
+        const local = localResults[index]
+        const remote = remoteResults[remoteIndex]
+        results[index] =
+          remote.status === 'available' || remote.reason === 'chapter-not-available'
+            ? remote
+            : local.status === 'unavailable' && local.reason === 'offline-copy-invalid'
+              ? local
+              : remote
+      })
+      return results
+    },
+    async loadVerseTexts(version, verseKeys, shouldCancel) {
+      const local = offline.loadVerseTexts
+        ? await offline.loadVerseTexts(version, verseKeys, shouldCancel)
+        : undefined
+      if (local?.status === 'available' || local?.reason === 'verses-not-available') return local
+
+      const source = await getSource(version)
+      if (source !== 'remote' && local) return blockedResult(local, source)
+      if (source !== 'remote') return { status: 'unavailable', reason: 'resource-unsupported' }
+
+      const remote = online.loadVerseTexts
+        ? await online.loadVerseTexts(version, verseKeys, shouldCancel)
+        : undefined
+      if (remote?.status === 'available' || remote?.reason === 'verses-not-available') return remote
+      if (local?.reason === 'offline-copy-invalid') {
+        return {
+          status: 'unavailable',
+          reason: 'offline-copy-invalid',
+          recoveries: ['manage-offline-copies', 'reset-offline-store'],
+        }
+      }
+      return remote ?? local ?? { status: 'unavailable', reason: 'resource-unsupported' }
+    },
+    async loadChapter(version, book, chapter) {
+      const local = await offline.loadChapter(version, book, chapter)
+      if (local.status === 'available' || local.reason === 'chapter-not-available') return local
+
+      const source = await getSource(version)
+      if (source !== 'remote') return blockedResult(local, source)
+
+      const remote = await online.loadChapter(version, book, chapter)
+      if (remote.status === 'available') return remote
+      if (remote.reason === 'chapter-not-available') return remote
+      if (local.reason === 'offline-copy-invalid') {
+        return {
+          status: 'unavailable',
+          reason: 'offline-copy-invalid',
+          recoveries: ['manage-offline-copies', 'reset-offline-store'],
+        }
+      }
+      if (remote.reason === 'resource-unsupported') return remote
+      return remote
+    },
+    async loadCoverage(version) {
+      const local = await offline.loadCoverage(version)
+      if (isUsableBibleCoverage(local)) return local
+      const source = await getSource(version)
+      if (source !== 'remote') {
+        return local.status === 'unavailable' && source === 'offline'
+          ? { status: 'unavailable', reason: 'network-offline' }
+          : local
+      }
+      const remote = await online.loadCoverage(version)
+      if (remote.status === 'available') return remote
+      return local.status === 'unavailable' && local.reason === 'offline-copy-invalid'
+        ? local
+        : remote
+    },
+  }
+}
 
 type HttpBibleChapterAdapterOptions = {
   baseUrl: string

@@ -78,6 +78,32 @@ describe('ResourceUnavailableView', () => {
     expect(renderer.root.findAll(node => String(node.type) === 'OfflineRecovery')).toHaveLength(1)
   })
 
+  it('uses neutral offline wording instead of download wording when disconnected', () => {
+    mockIsOnline = false
+    act(() => {
+      renderer = create(
+        <ResourceUnavailableView
+          identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+          title="Ces données ne sont pas installées"
+          offlineTitle="Le lexique Strong n’a pas pu être ouvert."
+          fileSize={35}
+          failure={{ cause: 'offline-copy-required', recoveries: ['acquire-offline-copy'] }}
+          onRetry={jest.fn()}
+        />
+      )
+    })
+
+    expect(renderer.root.findAll(node => String(node.type) === 'OfflineRecovery')).toHaveLength(0)
+    expect(
+      renderer.root.findByProps({ children: 'Le lexique Strong n’a pas pu être ouvert.' })
+    ).toBeDefined()
+    expect(renderer.root.findByProps({ children: 'app.youAreOffline' })).toBeDefined()
+    expect(
+      renderer.root.findAllByProps({ children: 'resource.action.connectionRequired' })
+    ).toHaveLength(0)
+    expect(renderer.root.findByProps({ children: 'bible.error.retry' })).toBeDefined()
+  })
+
   it('keeps the invalid-copy warning icon while offering repair', () => {
     mockIsOnline = true
     act(() => {

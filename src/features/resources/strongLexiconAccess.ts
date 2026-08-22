@@ -25,6 +25,7 @@ import {
   StrongLexiconMorphologyResponseDto,
   StrongLexiconSearchResponseDto,
 } from './strongLexiconContract'
+import { resolveHybridResourceSource } from './hybridResourcePolicy'
 import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 
 const STRONG_LEXICON_MODULE_SCHEMA_VERSION = 2
@@ -1396,11 +1397,21 @@ export const createHybridStrongLexiconAccess = ({
     localOperation: () => Promise<T>,
     remoteOperation: () => Promise<T>
   ) => {
-    if (await localAvailable(moduleId)) return localOperation()
-    if (!remotelyReadable) {
-      throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    const source = await resolveHybridResourceSource({
+      localAvailable: await localAvailable(moduleId),
+      remotelyReadable,
+      isOnline,
+    })
+    switch (source) {
+      case 'local':
+        return localOperation()
+      case 'remote':
+        return remoteOperation()
+      case 'offline':
+        throw new ResourceAccessError('NETWORK_OFFLINE')
+      case 'unsupported':
+        throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
     }
-    return remoteOperation()
   }
   const searchFirstOnline = async <T>(
     localOperation: () => Promise<T>,
@@ -1427,6 +1438,7 @@ export const createHybridStrongLexiconAccess = ({
     async getModuleAvailability(moduleId) {
       const local = await offline.getModuleAvailability(moduleId)
       if (local.status === 'available' || !remotelyReadable) return local
+      if (!(await isOnline())) return local
       try {
         return await online.getModuleAvailability(moduleId)
       } catch {

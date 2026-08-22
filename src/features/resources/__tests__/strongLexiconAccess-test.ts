@@ -945,6 +945,23 @@ describe('hybrid Strong lexicon routing', () => {
     })
   })
 
+  it('does not use HTTP when the local core is absent and connectivity is logically offline', async () => {
+    const offline = createHybridStub('missing', 'offline')
+    const online = createHybridStub('available', 'online')
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => false,
+    })
+
+    await expect(access.loadEntry({ kind: 'strong', code: 'G3056' }, 'fr')).rejects.toMatchObject({
+      code: 'NETWORK_OFFLINE',
+    })
+    expect(online.loadEntry).not.toHaveBeenCalled()
+    expect(online.getModuleAvailability).not.toHaveBeenCalled()
+  })
+
   it('searches online first, then uses the installed index while offline', async () => {
     const offline = createHybridStub('available', 'offline')
     const online = createHybridStub('available', 'online')

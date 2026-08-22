@@ -150,6 +150,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
           <ResourceUnavailableView
             identity={recoveryIdentity}
             title={t('resource.pericope.offlineCopyNeeded')}
+            offlineTitle={t('resource.pericope.temporarilyUnavailable')}
             fileSize={recoveryFileSize}
             failure={resourceFailureFromAvailability({
               reason: unavailable.reason,
@@ -158,6 +159,10 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
                   ? ['acquire-offline-copy', 'manage-offline-copies']
                   : ['acquire-offline-copy'],
             })}
+            onRetry={() => {
+              void availabilityQuery.refetch()
+              void pericopeQuery.refetch()
+            }}
           />
         ) : (
           <ScrollView>

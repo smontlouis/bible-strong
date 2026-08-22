@@ -4,7 +4,12 @@ jest.mock('expo-file-system/legacy', () => ({ readAsStringAsync: jest.fn() }))
 jest.mock('~helpers/databases', () => ({ getDbPath: jest.fn() }))
 jest.mock('../resourceAvailability', () => ({ getLocalResourceAvailability: jest.fn() }))
 
-import { createHttpTimelineAccess, createLocalTimelineAccess } from '../timelineAccess'
+import {
+  createHttpTimelineAccess,
+  createHybridTimelineAccess,
+  createLocalTimelineAccess,
+  type TimelineAccess,
+} from '../timelineAccess'
 
 describe('Timeline Resource access', () => {
   it.each(['fr', 'en'] as const)(
@@ -223,5 +228,39 @@ describe('Timeline Resource access', () => {
       'https://resources.test/v1/timelines/fr/events',
       'https://resources.test/v1/timelines/fr/events/creation',
     ])
+  })
+})
+
+describe('hybrid Timeline access', () => {
+  it('classifies a missing local copy as offline without calling HTTP', async () => {
+    const unavailable = {
+      status: 'unavailable' as const,
+      reason: 'offline-copy-required' as const,
+      recoveries: ['acquire-offline-copy' as const, 'manage-offline-copies' as const],
+    }
+    const offline: TimelineAccess = {
+      getAvailability: jest.fn(async () => unavailable),
+      loadIndex: jest.fn(async () => unavailable),
+      searchIndex: jest.fn(async () => unavailable),
+      loadEvent: jest.fn(async () => unavailable),
+    }
+    const online: TimelineAccess = {
+      loadIndex: jest.fn(),
+      searchIndex: jest.fn(),
+      loadEvent: jest.fn(),
+    }
+    const access = createHybridTimelineAccess({
+      offline,
+      online,
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => false,
+    })
+
+    await expect(access.loadIndex('fr')).resolves.toEqual({
+      status: 'unavailable',
+      reason: 'network-offline',
+      recoveries: ['retry'],
+    })
+    expect(online.loadIndex).not.toHaveBeenCalled()
   })
 })
