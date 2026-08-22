@@ -39,6 +39,16 @@ describe('relationDisplayActions', () => {
       verseIds: ['1-1-1', '1-1-2'],
       relationId: 'relation-2',
     })
+    expect(
+      getVerseStudyRelationsPayload(
+        '1-1-2',
+        createRelationItem({
+          activeEndpoint: { type: 'annotation', annotationId: 'annotation-1' },
+        })
+      )
+    ).toMatchObject({
+      endpoint: { type: 'annotation', annotationId: 'annotation-1' },
+    })
   })
 
   it('opens existing Note targets directly', () => {

@@ -1,6 +1,7 @@
 import type { Bookmark, StudyNavigateBibleType, Verse } from '~common/types'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { createStrongSelection, type StrongSelection } from '~helpers/strongSelection'
+import type { RelationEndpoint } from '~features/studyRelations/domain'
 
 export type StudyRelationsModalTarget =
   | string
@@ -8,6 +9,7 @@ export type StudyRelationsModalTarget =
       verseKey?: string
       verseIds?: string[]
       relationId?: string
+      endpoint?: RelationEndpoint
     }
 
 export type BibleDOMBridgeAction = {
@@ -73,13 +75,17 @@ export const getStudyRelationsModalTarget = (
   const verseKey = getStringPayload(payload.verseKey)
   const relationId = getStringPayload(payload.relationId)
   const verseIds = getVerseIdsPayload(payload)
+  const endpoint = isRecord(payload.endpoint)
+    ? (payload.endpoint as unknown as RelationEndpoint)
+    : undefined
 
-  if (!verseKey && !verseIds.length) return undefined
+  if (!verseKey && !verseIds.length && !endpoint) return undefined
 
   return {
     verseKey,
     relationId,
     verseIds,
+    endpoint,
   }
 }
 

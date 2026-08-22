@@ -206,7 +206,7 @@ const StudyRelationList = ({
   const exactRelations = useSelector((state: RootState) => selectDisplayModels(state, endpoint))
   const startingVerseSections = useSelector((state: RootState) =>
     includeStartingVerseRelations && endpoint.type === 'verse' && endpoint.verseKeys.length === 1
-      ? selectDisplaySectionsForStartingVerseKey(state, endpoint.verseKeys[0])
+      ? selectDisplaySectionsForStartingVerseKey(state, endpoint.verseKeys[0], endpoint.version)
       : []
   )
   const sections = includeStartingVerseRelations

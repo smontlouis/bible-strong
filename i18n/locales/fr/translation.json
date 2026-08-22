@@ -270,6 +270,7 @@
   "des tags": "des étiquettes",
   "des relations": "des relations",
   "Cette annotation a {{items}} associé(s). Voulez-vous vraiment la supprimer ?": "Cette annotation a {{items}} associé(s). Voulez-vous vraiment la supprimer ?",
+  "Certaines annotations ont {{items}} associé(s). Voulez-vous vraiment les supprimer ?": "Certaines annotations ont {{items}} associé(s). Voulez-vous vraiment les supprimer ?",
   "study.loginRequired": "Connectez-vous pour créer une étude",
   "resource.commentary.temporarilyUnavailable": "Les commentaires Matthew Henry n’ont pas pu être ouverts.",
   "resource.commentary.offlineCopyNeeded": "Les commentaires Matthew Henry ne sont pas encore disponibles en ligne. Ajoutez leur copie hors ligne pour les afficher.",

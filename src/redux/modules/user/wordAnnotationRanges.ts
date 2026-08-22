@@ -32,6 +32,24 @@ export const compareVerseKeys = (a: string, b: string): number => {
   return pa.verse - pb.verse
 }
 
+export const sortWordAnnotationRanges = (ranges: AnnotationRange[]): AnnotationRange[] =>
+  [...ranges].sort((left, right) => {
+    const verseOrder = compareVerseKeys(left.verseKey, right.verseKey)
+    if (verseOrder) return verseOrder
+    if (left.startWordIndex !== right.startWordIndex) {
+      return left.startWordIndex - right.startWordIndex
+    }
+    return left.endWordIndex - right.endWordIndex
+  })
+
+export const getWordAnnotationAnchorRange = (
+  annotation: Pick<WordAnnotation, 'ranges'>,
+  edge: 'start' | 'end'
+): AnnotationRange | undefined => {
+  const ranges = sortWordAnnotationRanges(annotation.ranges)
+  return edge === 'start' ? ranges[0] : ranges[ranges.length - 1]
+}
+
 export const normalizeWordSelectionRange = (
   start: WordPosition,
   end: WordPosition

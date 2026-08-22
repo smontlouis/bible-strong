@@ -222,7 +222,7 @@ describe('compute verse metadata', () => {
       },
     }
 
-    const currentItem = getVerseRelationsMetadata(verses, relations, 'inline', {
+    const currentMetadata = getVerseRelationsMetadata(verses, relations, 'inline', {
       wordAnnotations: {
         annotation1: {
           id: 'annotation1',
@@ -236,18 +236,146 @@ describe('compute verse metadata', () => {
           date: 1,
         },
       },
-    }).items['1'][0]
+      version: 'LSG',
+    })
+    const currentItem = currentMetadata.annotationItems.annotation1[0]
 
     expect(currentItem).toMatchObject({
-      label: 'Au commencement … la terre',
+      label: 'Genèse 1:1',
+      activeEndpoint: { type: 'annotation', annotationId: 'annotation1' },
+      targetEndpoint: { type: 'verse', verseKeys: ['1-1-1'] },
       targetEntityExists: true,
       targetIsAvailable: true,
     })
+    expect(currentMetadata.items).toEqual({})
+    expect(currentMetadata.counts).toEqual({})
 
     expect(getVerseRelationsMetadata(verses, relations, 'inline').items['1'][0]).toMatchObject({
       label: 'Ancien texte',
       targetEntityExists: false,
       targetIsAvailable: false,
     })
+  })
+
+  it('mixes annotation relations into the first verse in icon mode', () => {
+    const relations: StudyRelationsObj = {
+      relation1: {
+        id: 'relation1',
+        kind: 'manual',
+        type: 'linked',
+        direction: 'none',
+        endpoints: [
+          {
+            type: 'annotation',
+            key: 'annotation:annotation1',
+            annotationId: 'annotation1',
+            labelFallback: 'Annotation',
+          },
+          {
+            type: 'study',
+            key: 'study:study1',
+            studyId: 'study1',
+            labelFallback: 'Étude',
+          },
+        ],
+        endpointKeys: ['annotation:annotation1', 'study:study1'],
+        endpointTypes: ['annotation', 'study'],
+        pairKey: 'annotation:annotation1|study:study1',
+        duplicateKey: 'linked:annotation:annotation1|study:study1',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+
+    const metadata = getVerseRelationsMetadata(verses, relations, 'block', {
+      version: 'LSG',
+      wordAnnotations: {
+        annotation1: {
+          id: 'annotation1',
+          version: 'LSG',
+          ranges: [
+            { verseKey: '1-1-3', startWordIndex: 2, endWordIndex: 3, text: 'fin' },
+            { verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'début' },
+          ],
+          color: 'color1',
+          type: 'underline',
+          date: 1,
+        },
+      },
+    })
+
+    expect(metadata.counts).toEqual({ '2': 1 })
+    expect(metadata.items['2'][0]).toMatchObject({
+      relationId: 'relation1',
+      activeEndpoint: { type: 'annotation', annotationId: 'annotation1' },
+      targetEndpoint: { type: 'study', studyId: 'study1' },
+      verseIds: ['1-1-2', '1-1-3'],
+    })
+  })
+
+  it('projects an annotation note beside its annotation instead of at the verse end', () => {
+    const relations: StudyRelationsObj = {
+      noteRelation: {
+        id: 'noteRelation',
+        kind: 'system',
+        type: 'annotates',
+        direction: 'none',
+        endpoints: [
+          {
+            type: 'note',
+            key: 'note:annotation:annotation1',
+            noteId: 'annotation:annotation1',
+            labelFallback: 'Note',
+          },
+          {
+            type: 'verse',
+            key: 'verse:1-1-1/1-1-2',
+            verseKeys: ['1-1-1', '1-1-2'],
+            labelFallback: '1-1-1/1-1-2',
+          },
+        ],
+        endpointKeys: ['note:annotation:annotation1', 'verse:1-1-1/1-1-2'],
+        endpointTypes: ['note', 'verse'],
+        pairKey: 'note:annotation:annotation1|verse:1-1-1/1-1-2',
+        duplicateKey: 'annotates:note:annotation:annotation1|verse:1-1-1/1-1-2',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+    const data = {
+      version: 'LSG',
+      notes: {
+        'annotation:annotation1': {
+          id: 'annotation:annotation1',
+          title: '',
+          description: 'Ma note',
+          date: 1,
+        },
+      },
+      wordAnnotations: {
+        annotation1: {
+          id: 'annotation1',
+          version: 'LSG' as const,
+          ranges: [
+            { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: 'début' },
+            { verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'fin' },
+          ],
+          color: 'color1',
+          type: 'underline' as const,
+          date: 1,
+          noteId: 'annotation:annotation1',
+        },
+      },
+    }
+
+    const inline = getVerseRelationsMetadata(verses, relations, 'inline', data)
+    expect(inline.items).toEqual({})
+    expect(inline.annotationItems.annotation1[0]).toMatchObject({
+      label: 'Ma note',
+      targetEndpoint: { type: 'note', noteId: 'annotation:annotation1' },
+    })
+
+    const block = getVerseRelationsMetadata(verses, relations, 'block', data)
+    expect(block.counts).toEqual({ '1': 1 })
   })
 })

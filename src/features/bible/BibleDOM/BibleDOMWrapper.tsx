@@ -97,6 +97,7 @@ import {
   OPEN_CANONICAL_BIBLE_REFERENCE,
   OPEN_CROSS_VERSION_MODAL,
   OPEN_HIGHLIGHT_TAGS,
+  OPEN_ANNOTATION_TAGS,
   OPEN_VERSE_TAGS_MODAL,
   OPEN_DOWNLOADS,
   REMOVE_PARALLEL_VERSION,
@@ -139,6 +140,8 @@ import { getStrongSelectionPayload, type StrongSelection } from '~helpers/strong
 import type { ResolvedPassageMediaChapter } from '../passageMedia'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
+import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
+import type { UnifiedTagsModalProps } from '~state/app'
 
 export type { StudyRelationsModalTarget } from './bibleDomBridgeCommands'
 
@@ -163,11 +166,7 @@ export type RootStyles = {
 
 export type PericopeChapter = Pericope[string][string]
 
-type HighlightTagsModalPayload = {
-  mode: 'select'
-  entity: 'highlights'
-  ids: Record<string, true>
-}
+type TagsModalPayload = Exclude<UnifiedTagsModalProps, false>
 
 export type Dispatch = (props: BibleDOMBridgeAction) => Promise<void>
 
@@ -235,7 +234,7 @@ export type WebViewProps = {
   addParallelVersion?: () => void
   goToPrevChapter?: () => void
   goToNextChapter?: () => void
-  setUnifiedTagsModal?: (payload: HighlightTagsModalPayload) => void
+  setUnifiedTagsModal?: (payload: TagsModalPayload) => void
   onOpenResourceForVerse?: (resourceType: BibleResource, verseKey: string) => void
   onOpenBookmarkModal?: (bookmark: Bookmark) => void
   onOpenCanonicalBibleReference?: (osis: string) => void
@@ -317,6 +316,7 @@ export type VerseRelationItem = {
   relationId: string
   relationType: RelationType
   relationKind: RelationKind
+  activeEndpoint?: RelationEndpoint
   targetEndpoint: RelationEndpoint
   targetType: RelationEndpoint['type']
   label: string
@@ -776,6 +776,19 @@ export const BibleDOMWrapper = ({
         break
       }
 
+      case OPEN_ANNOTATION_TAGS: {
+        const annotationId = getStringPayload(action.payload)
+        const annotation = annotationId ? wordAnnotations[annotationId] : undefined
+        if (!annotationId || !annotation) break
+        setUnifiedTagsModal?.({
+          mode: 'select',
+          id: annotationId,
+          entity: 'wordAnnotations',
+          title: getWordAnnotationText(annotation),
+        })
+        break
+      }
+
       case OPEN_BOOKMARK_MODAL: {
         const bookmark = getBookmarkPayload(action.payload)
         if (bookmark) onOpenBookmarkModal?.(bookmark)
@@ -942,6 +955,7 @@ export const BibleDOMWrapper = ({
       notes: allNotes,
       links: allLinks,
       wordAnnotations,
+      version,
     }
   )
   const TOP_INSET = isFormSheet ? 0 : insets.top
@@ -1023,6 +1037,7 @@ export const BibleDOMWrapper = ({
         annotationNotesCountByVerse={annotationNotesCountByVerse}
         relationItemsCount={relationMetadata.counts}
         relationItemsText={relationMetadata.items}
+        annotationRelationItems={relationMetadata.annotationItems}
         isFormSheet={isFormSheet}
         isConnected={isConnected}
       />

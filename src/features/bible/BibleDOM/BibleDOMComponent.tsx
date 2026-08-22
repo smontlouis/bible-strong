@@ -62,6 +62,7 @@ import { tokenizeVerseText, WordToken, getWordIndexFromCharOffset } from '~helpe
 import { getCaretInfoFromPoint } from './AnnotationMode/domUtils'
 // Unified verse renderer
 import { UnifiedVersesRenderer } from './UnifiedVersesRenderer'
+import AnnotationInlineItems from './AnnotationInlineItems'
 import { isDarkTheme } from './utils'
 import { getScrollTargetVerse } from './verseRenderingModel'
 import { shouldSuppressVerseGestures } from '~helpers/interlinearDisplayMode'
@@ -192,6 +193,7 @@ type Props = Pick<
   annotationNotesCountByVerse: { [key: string]: number }
   relationItemsCount: { [key: string]: number }
   relationItemsText: { [key: string]: VerseRelationItem[] }
+  annotationRelationItems: Record<string, VerseRelationItem[]>
   // Annotation mode props (uncontrolled - DOM manages local annotation state)
   annotationMode?: boolean
   clearSelectionTrigger?: number
@@ -570,6 +572,7 @@ const LoadedBibleContent = ({
   annotationNotesCountByVerse,
   relationItemsCount,
   relationItemsText,
+  annotationRelationItems,
   isFormSheet,
 }: Props) => {
   // Ref for highlight layer
@@ -597,6 +600,25 @@ const LoadedBibleContent = ({
   const [returnToSelectedVersePosition, setReturnToSelectedVersePosition] = useState<
     'top' | 'bottom' | null
   >(null)
+  const annotationInlineContentKey = [
+    version,
+    interlinearMode || '',
+    annotationMode ? 'annotation' : 'reading',
+    contextDisplayMode || '',
+    focusVerses?.join(',') || '',
+    settings.textDisplay,
+    ...verses.map(verse => {
+      const verseKey = `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`
+      return [
+        verseKey,
+        verse.TextRevision || verse.Texte,
+        verse.StrongSpans?.length || 0,
+        verse.ReverseInterlinearSpans?.length || 0,
+        verse.InterlinearTokens?.length || 0,
+        JSON.stringify(redWords?.[verseKey] || []),
+      ].join(':')
+    }),
+  ].join('|')
 
   // Tokens getter function with caching
   // Cache key includes text length and first char to detect content mismatch
@@ -1282,6 +1304,14 @@ const LoadedBibleContent = ({
                 redWords={redWords}
                 passageMediaAfterVerses={passageMedia.afterVerses}
                 passageMediaGallerySections={passageMediaGallerySections}
+              />
+              <AnnotationInlineItems
+                wordAnnotations={wordAnnotations}
+                annotationRelationItems={annotationRelationItems}
+                version={version}
+                settings={settings}
+                annotationMode={annotationMode}
+                contentKey={annotationInlineContentKey}
               />
             </m.div>
           </HorizontalScrollWrapper>

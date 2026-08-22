@@ -24,8 +24,13 @@ import {
   getAnnotationIdForSystemNoteRelation,
   projectRelationForEndpoint,
   relationIncludesVerseKey,
+  createAnnotationEndpoint,
   createVerseEndpoint,
 } from '~features/studyRelations/domain'
+import {
+  getWordAnnotationAnchorRange,
+  getWordAnnotationText,
+} from '~redux/modules/user/wordAnnotationRanges'
 import {
   buildGroupedWordAnnotations,
   type GroupedWordAnnotationRow,
@@ -225,17 +230,36 @@ export const makeStudyRelationsByChapterSelector = () =>
   createSelector(
     [
       selectRelations,
-      (_: RootState, bookNumber: number, chapter: number) => `${bookNumber}-${chapter}-`,
+      selectWordAnnotations,
+      (_: RootState, bookNumber: number, chapter: number, version?: string) => ({
+        prefix: `${bookNumber}-${chapter}-`,
+        version,
+      }),
     ],
-    (relations, prefix): RelationsObj => {
+    (relations, wordAnnotations, { prefix, version }): RelationsObj => {
       const result: RelationsObj = {}
       for (const [id, relation] of Object.entries(relations)) {
-        if (
-          relation.endpoints.some(
-            endpoint =>
-              endpoint.type === 'verse' && endpoint.verseKeys.some(key => key.startsWith(prefix))
+        const hasVerseInChapter = relation.endpoints.some(
+          endpoint =>
+            endpoint.type === 'verse' && endpoint.verseKeys.some(key => key.startsWith(prefix))
+        )
+        const explicitAnnotationIds = relation.endpoints.flatMap(endpoint =>
+          endpoint.type === 'annotation' ? [endpoint.annotationId] : []
+        )
+        const projectedAnnotationId = getAnnotationIdForSystemNoteRelation(relation)
+        const annotationIds = projectedAnnotationId
+          ? [...explicitAnnotationIds, projectedAnnotationId]
+          : explicitAnnotationIds
+        const hasAnnotationInChapter = annotationIds.some(annotationId => {
+          const annotation = wordAnnotations[annotationId]
+          return (
+            Boolean(annotation) &&
+            (!version || annotation.version === version) &&
+            annotation.ranges.some(range => range.verseKey.startsWith(prefix))
           )
-        ) {
+        })
+
+        if (hasVerseInChapter || hasAnnotationInChapter) {
           result[id] = relation
         }
       }
@@ -310,7 +334,7 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
       selectWords,
       selectLinks,
       selectWordAnnotations,
-      (_: RootState, verseKey: string) => verseKey,
+      (_: RootState, verseKey: string, version?: string) => ({ verseKey, version }),
     ],
     (
       relations,
@@ -322,7 +346,7 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
       words,
       links,
       wordAnnotations,
-      verseKey
+      { verseKey, version }
     ) => {
       const sections = new Map<
         string,
@@ -334,13 +358,27 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
       >()
 
       for (const relation of Object.values(relations)) {
-        const endpoint = relation.endpoints.find(
-          relationEndpoint =>
-            relationEndpoint.type === 'verse' && relationEndpoint.verseKeys[0] === verseKey
-        )
+        const annotationEndpoint = Object.values(wordAnnotations).flatMap(annotation => {
+          if (version && annotation.version !== version) return []
+          const firstRange = getWordAnnotationAnchorRange(annotation, 'start')
+          if (firstRange?.verseKey !== verseKey) return []
+          const endpoint = createAnnotationEndpoint(
+            annotation.id,
+            getWordAnnotationText(annotation)
+          )
+          return projectRelationForEndpoint(relation, endpoint) ? [endpoint] : []
+        })[0]
+        const endpoint =
+          annotationEndpoint ||
+          relation.endpoints.find(
+            relationEndpoint =>
+              relationEndpoint.type === 'verse' && relationEndpoint.verseKeys[0] === verseKey
+          )
         if (!endpoint) continue
 
-        const model = getRelationDisplayModel(relation, endpoint, {
+        const projectedRelation = projectRelationForEndpoint(relation, endpoint)
+        if (!projectedRelation) continue
+        const model = getRelationDisplayModel(projectedRelation, endpoint, {
           notes,
           studies,
           links,
@@ -892,12 +930,15 @@ export type TaggedItem =
   | TaggedItemNote
   | TaggedItemLink
 
-// Selector factory for getting direct verse/highlight tags for a specific verse.
-// Tags owned by related notes/links/annotations are exposed through their relation/entity surfaces.
+// Selector factory for verse highlight tags plus annotation tags anchored to their first range.
 export const makeTaggedItemsForVerseSelector = () =>
   createSelector(
-    [selectHighlights, (_: RootState, verseKey: string, _currentVersion?: string) => verseKey],
-    (highlights, verseKey): TaggedItem[] => {
+    [
+      selectHighlights,
+      selectWordAnnotations,
+      (_: RootState, verseKey: string, currentVersion?: string) => ({ verseKey, currentVersion }),
+    ],
+    (highlights, wordAnnotations, { verseKey, currentVersion }): TaggedItem[] => {
       const items: TaggedItem[] = []
 
       // Highlight for this verse
@@ -905,6 +946,15 @@ export const makeTaggedItemsForVerseSelector = () =>
       if (highlight?.tags && Object.keys(highlight.tags).length > 0) {
         items.push({ type: 'highlight', data: highlight, verseKey })
       }
+
+      Object.values(wordAnnotations).forEach(annotation => {
+        if (currentVersion && annotation.version !== currentVersion) return
+        if (!annotation.tags || Object.keys(annotation.tags).length === 0) return
+        const firstRange = getWordAnnotationAnchorRange(annotation, 'start')
+        if (firstRange?.verseKey === verseKey) {
+          items.push({ type: 'annotation', data: annotation })
+        }
+      })
 
       return items
     }
@@ -928,13 +978,18 @@ export const makeTaggedVersesInChapterSelector = () =>
   createSelector(
     [
       selectHighlights,
+      selectWordAnnotations,
       (_: RootState, bookNumber: number, chapter: number, currentVersion: string) => ({
         bookNumber,
         chapter,
         currentVersion,
       }),
     ],
-    (highlights, { bookNumber, chapter }): TaggedVersesInChapterResult => {
+    (
+      highlights,
+      wordAnnotations,
+      { bookNumber, chapter, currentVersion }
+    ): TaggedVersesInChapterResult => {
       const counts: Record<number, number> = {}
       const hasNonHighlightTags: Record<number, boolean> = {}
       const prefix = `${bookNumber}-${chapter}-`
@@ -949,6 +1004,16 @@ export const makeTaggedVersesInChapterSelector = () =>
           }
         }
       }
+
+      Object.values(wordAnnotations).forEach(annotation => {
+        if (annotation.version !== currentVersion) return
+        if (!annotation.tags || Object.keys(annotation.tags).length === 0) return
+        const firstRange = getWordAnnotationAnchorRange(annotation, 'start')
+        if (!firstRange?.verseKey.startsWith(prefix)) return
+        const verseNum = parseInt(firstRange.verseKey.split('-')[2])
+        counts[verseNum] = (counts[verseNum] || 0) + 1
+        hasNonHighlightTags[verseNum] = true
+      })
 
       return { counts, hasNonHighlightTags }
     }

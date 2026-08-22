@@ -1,6 +1,7 @@
 import {
   annotationRangeOverlapsSelection,
   findOverlappingWordAnnotationIds,
+  getWordAnnotationAnchorRange,
   getWordAnnotationText,
   normalizeWordSelectionRange,
 } from '../wordAnnotationRanges'
@@ -30,6 +31,17 @@ describe('wordAnnotationRanges', () => {
         ],
       })
     ).toBe('Au commencement … la lumière')
+  })
+
+  it('finds canonical start and end ranges even when persisted ranges are unordered', () => {
+    const annotation = makeAnnotation('annotation', 'LSG', [
+      { verseKey: '1-1-3', startWordIndex: 0, endWordIndex: 2, text: 'fin' },
+      { verseKey: '1-1-1', startWordIndex: 4, endWordIndex: 5, text: 'début' },
+      { verseKey: '1-1-1', startWordIndex: 8, endWordIndex: 9, text: 'suite' },
+    ])
+
+    expect(getWordAnnotationAnchorRange(annotation, 'start')?.text).toBe('début')
+    expect(getWordAnnotationAnchorRange(annotation, 'end')?.text).toBe('fin')
   })
 
   describe('normalizeWordSelectionRange', () => {

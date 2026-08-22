@@ -119,7 +119,7 @@ describe('openable study objects', () => {
     })
   })
 
-  it('opens an annotation at its current ranges and selects it', () => {
+  it('opens an annotation passage without selecting the annotation', () => {
     const endpoint = createAnnotationEndpoint('annotation-1', 'Au commencement')
 
     expect(
@@ -147,7 +147,6 @@ describe('openable study objects', () => {
         verse: '1',
         focusVerses: JSON.stringify([1]),
         version: 'LSG',
-        annotationId: 'annotation-1',
       },
     })
     expect(getOpenableActionForRelationEndpoint(endpoint)).toEqual({

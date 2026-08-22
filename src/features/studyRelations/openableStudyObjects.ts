@@ -111,7 +111,6 @@ export const getOpenableActionForRelationEndpoint = (
             annotation.ranges.map(range => range.verseKey),
             annotation.version
           ),
-          annotationId: endpoint.annotationId,
         },
       }
     }

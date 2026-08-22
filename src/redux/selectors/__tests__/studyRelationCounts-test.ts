@@ -2,6 +2,10 @@ import {
   makeWordAnnotationsByChapterSelector,
   makeNotesForVerseSelector,
   makeStudyRelationDisplayModelsSelector,
+  makeStudyRelationDisplaySectionsForStartingVerseKeySelector,
+  makeStudyRelationsByChapterSelector,
+  makeTaggedItemsForVerseSelector,
+  makeTaggedVersesInChapterSelector,
   makeTagDataSelector,
   selectRelationCountsByEndpointIdentity,
 } from '../bible'
@@ -178,6 +182,108 @@ describe('makeStudyRelationDisplayModelsSelector', () => {
       activeEndpoint: { type: 'annotation', annotationId: 'annotation-1' },
       targetEndpoint: { type: 'note', noteId: 'annotation:annotation-1' },
       targetLabel: 'Ma note',
+    })
+  })
+})
+
+describe('annotation items anchored to Bible verses', () => {
+  it('keeps annotation-only relations in the current Bible chapter', () => {
+    const state = createState({
+      manual: {
+        id: 'manual',
+        endpoints: [
+          { type: 'annotation', annotationId: 'annotation-1', label: 'mot' },
+          { type: 'study', studyId: 'study-1', label: 'Étude' },
+        ],
+        type: 'linked',
+        direction: 'none',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    })
+    state.user.bible.wordAnnotations = {
+      'annotation-1': {
+        id: 'annotation-1',
+        version: 'LSG',
+        ranges: [{ verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 0, text: 'mot' }],
+        color: 'color1',
+        type: 'underline',
+        date: 1,
+      },
+    }
+
+    expect(Object.keys(makeStudyRelationsByChapterSelector()(state, 1, 1, 'LSG'))).toEqual([
+      'manual',
+    ])
+    expect(makeStudyRelationsByChapterSelector()(state, 1, 1, 'KJV')).toEqual({})
+  })
+
+  it('mixes annotation relations into the first verse relation sections', () => {
+    const state = createState({
+      manual: {
+        id: 'manual',
+        endpoints: [
+          { type: 'annotation', annotationId: 'annotation-1', label: 'mot' },
+          { type: 'study', studyId: 'study-1', label: 'Étude' },
+        ],
+        type: 'linked',
+        direction: 'none',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    })
+    state.user.bible.wordAnnotations = {
+      'annotation-1': {
+        id: 'annotation-1',
+        version: 'LSG',
+        ranges: [
+          { verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'fin' },
+          { verseKey: '1-1-1', startWordIndex: 2, endWordIndex: 3, text: 'début' },
+        ],
+        color: 'color1',
+        type: 'underline',
+        date: 1,
+      },
+    }
+
+    const sections = makeStudyRelationDisplaySectionsForStartingVerseKeySelector()(
+      state,
+      '1-1-1',
+      'LSG'
+    )
+
+    expect(sections).toHaveLength(1)
+    expect(sections[0].data[0]).toMatchObject({
+      activeEndpoint: { type: 'annotation', annotationId: 'annotation-1' },
+      targetEndpoint: { type: 'study', studyId: 'study-1' },
+    })
+  })
+
+  it('mixes annotation tags into the first verse tag items and count', () => {
+    const state = createState({})
+    state.user.bible.highlights = {
+      '1-1-1': { color: 'color1', date: 1, tags: { verse: { id: 'verse', name: 'Verset' } } },
+    }
+    state.user.bible.wordAnnotations = {
+      'annotation-1': {
+        id: 'annotation-1',
+        version: 'LSG',
+        ranges: [
+          { verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'fin' },
+          { verseKey: '1-1-1', startWordIndex: 2, endWordIndex: 3, text: 'début' },
+        ],
+        color: 'color1',
+        type: 'underline',
+        date: 1,
+        tags: { annotation: { id: 'annotation', name: 'Annotation' } },
+      },
+    }
+
+    const items = makeTaggedItemsForVerseSelector()(state, '1-1-1', 'LSG')
+    expect(items.map(item => item.type)).toEqual(['highlight', 'annotation'])
+    expect(makeTaggedVersesInChapterSelector()(state, 1, 1, 'LSG')).toEqual({
+      counts: { 1: 2 },
+      hasNonHighlightTags: { 1: true },
     })
   })
 })

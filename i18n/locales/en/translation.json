@@ -265,6 +265,7 @@
   "des tags": "tags",
   "des relations": "relations",
   "Cette annotation a {{items}} associé(s). Voulez-vous vraiment la supprimer ?": "This annotation has {{items}} associated. Do you really want to delete it?",
+  "Certaines annotations ont {{items}} associé(s). Voulez-vous vraiment les supprimer ?": "Some annotations have {{items}} associated. Do you really want to delete them?",
   "study.loginRequired": "Sign in to create a study",
   "resource.commentary.temporarilyUnavailable": "Matthew Henry commentary could not be opened.",
   "resource.commentary.offlineCopyNeeded": "Matthew Henry commentary is not available online yet. Add its Offline copy to display it.",

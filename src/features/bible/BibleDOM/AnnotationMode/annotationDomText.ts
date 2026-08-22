@@ -1,3 +1,5 @@
+import { getTokenByWordIndex, tokenizeVerseText } from '~helpers/wordTokenizer'
+
 export interface AnnotationTextNodeInfo {
   node: Text
   startOffset: number
@@ -32,6 +34,27 @@ export const collectAnnotationTextNodes = (
   return {
     fullText: textNodes.map(item => item.node.textContent).join(''),
     textNodes,
+  }
+}
+
+export const getAnnotationInsertionPoint = (
+  verseElement: Element,
+  endWordIndex: number
+): { node: Text; offset: number } | undefined => {
+  const { fullText, textNodes } = collectAnnotationTextNodes(verseElement)
+  if (!fullText || !textNodes.length) return undefined
+
+  const endToken = getTokenByWordIndex(tokenizeVerseText(fullText), endWordIndex)
+  if (!endToken) return undefined
+
+  const textNode = textNodes.find(
+    item => endToken.charEnd >= item.startOffset && endToken.charEnd <= item.endOffset
+  )
+  if (!textNode) return undefined
+
+  return {
+    node: textNode.node,
+    offset: endToken.charEnd - textNode.startOffset,
   }
 }
 

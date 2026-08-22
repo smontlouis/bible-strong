@@ -104,7 +104,6 @@ const CrossVersionAnnotationsModal = ({
         focusVerses: JSON.stringify([verse]),
       },
     })
-    sheetRef.current?.dismiss()
   }
 
   const reference = verseKey ? formatVerseReference(verseKey) : ''
@@ -124,6 +123,7 @@ const CrossVersionAnnotationsModal = ({
   return (
     <Sheet
       ref={sheetRef}
+      backdrop={false}
       onDismiss={onClose}
       header={
         <SheetHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />

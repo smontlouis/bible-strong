@@ -525,7 +525,6 @@ const Verse = ({
   isTouched = false,
   annotationMode = false,
   taggedItemsCount = 0,
-  hasNonHighlightTags = false,
   columnCount = 1,
   columnWidth = 75,
   parallelDisplayMode = 'horizontal',
@@ -816,18 +815,28 @@ const Verse = ({
                 isDisabled={annotationMode}
               />
             )}
-          {taggedItemsCount > 0 &&
-            (settings.tagsDisplay !== 'inline' || hasNonHighlightTags) &&
-            !isSelectionMode && (
-              <TagsIndicator
-                count={taggedItemsCount}
-                settings={settings}
-                onClick={navigateToVerseTags}
-                isDisabled={annotationMode}
-              />
-            )}
+          {taggedItemsCount > 0 && settings.tagsDisplay !== 'inline' && !isSelectionMode && (
+            <TagsIndicator
+              count={taggedItemsCount}
+              settings={settings}
+              onClick={navigateToVerseTags}
+              isDisabled={annotationMode}
+            />
+          )}
 
           <VerseText
+            key={[
+              version,
+              verseKey,
+              annotationMode ? 'annotation' : 'reading',
+              interlinearMode || '',
+              settings.textDisplay,
+              verse.TextRevision || verse.Texte,
+              verse.StrongSpans?.length || 0,
+              verse.ReverseInterlinearSpans?.length || 0,
+              verse.InterlinearTokens?.length || 0,
+              JSON.stringify(redWords?.[verseKey] || []),
+            ].join(':')}
             isParallel={isParallel}
             settings={settings}
             id={`verse-text-${verseKey}`}

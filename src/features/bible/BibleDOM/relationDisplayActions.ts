@@ -21,6 +21,7 @@ export const getVerseStudyRelationsPayload = (
         verseKey,
         verseIds: relationItem.verseIds,
         relationId: relationItem.relationId,
+        ...(relationItem.activeEndpoint && { endpoint: relationItem.activeEndpoint }),
       }
     : verseKey
 

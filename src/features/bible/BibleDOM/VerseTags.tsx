@@ -67,9 +67,10 @@ interface Props {
   settings: RootState['user']['bible']['settings']
   tag: TaggedVerse
   isDisabled?: boolean
+  onOpenTags?: () => void
 }
 
-const VerseTags = ({ tag, settings, isDisabled }: Props) => {
+const VerseTags = ({ tag, settings, isDisabled, onOpenTags }: Props) => {
   const dispatch = useDispatch()
   const [isExpanded, setIsExpanded] = useState(false)
 
@@ -87,6 +88,10 @@ const VerseTags = ({ tag, settings, isDisabled }: Props) => {
 
   const handleTagIconClick = (e: React.MouseEvent) => {
     e.stopPropagation()
+    if (onOpenTags) {
+      onOpenTags()
+      return
+    }
     dispatch({
       type: OPEN_HIGHLIGHT_TAGS,
       payload: tag,

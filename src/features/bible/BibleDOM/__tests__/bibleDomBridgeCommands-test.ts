@@ -64,6 +64,13 @@ describe('bibleDomBridgeCommands', () => {
       verseIds: ['1-1-1', '1-1-2'],
     })
     expect(getStudyRelationsModalTarget({ relationId: 'relation-1' })).toBeUndefined()
+    expect(
+      getStudyRelationsModalTarget({
+        endpoint: { type: 'annotation', annotationId: 'annotation-1' },
+      })
+    ).toMatchObject({
+      endpoint: { type: 'annotation', annotationId: 'annotation-1' },
+    })
   })
 
   it('parses note navigation payloads from legacy and structured commands', () => {

@@ -1,10 +1,15 @@
 import { TagsObj, Verse } from '~common/types'
 import { HighlightsObj, NotesObj, LinksObj, StudyRelationsObj } from '~redux/modules/user'
 import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
-import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import {
+  getWordAnnotationText,
+  sortWordAnnotationRanges,
+} from '~redux/modules/user/wordAnnotationRanges'
+import {
+  createAnnotationEndpoint,
   endpointIdentity,
   getEndpointFallbackLabel,
+  getAnnotationIdForSystemNoteRelation,
   type RelationEndpoint,
 } from '~features/studyRelations/domain'
 import type {
@@ -19,6 +24,10 @@ import { getNoteTitle } from '~helpers/getNoteTitle'
 export interface AnnotationNotesInfo {
   versesWithAnnotationNotes: Record<string, boolean>
   annotationNotesCountByVerse: { [key: string]: number }
+}
+
+export interface AnnotationRelationMetadata {
+  items: Record<string, VerseRelationItem[]>
 }
 
 type VerseItemDisplayMode = 'inline' | 'block'
@@ -51,6 +60,33 @@ const getRelationTargetEndpoint = (
 ) => {
   const activeKey = endpointIdentity(activeEndpoint)
   return relation.endpoints.find(endpoint => endpointIdentity(endpoint) !== activeKey)
+}
+
+const getAnnotationOwnerEndpoint = (
+  relation: StudyRelationsObj[string],
+  wordAnnotations: WordAnnotationsObj | undefined,
+  version?: string
+): Extract<RelationEndpoint, { type: 'annotation' }> | undefined => {
+  const explicitEndpoint = relation.endpoints.find(
+    (endpoint): endpoint is Extract<RelationEndpoint, { type: 'annotation' }> => {
+      if (endpoint.type !== 'annotation') return false
+      const annotation = wordAnnotations?.[endpoint.annotationId]
+      return Boolean(annotation) && (!version || annotation?.version === version)
+    }
+  )
+  const annotationId =
+    explicitEndpoint?.annotationId || getAnnotationIdForSystemNoteRelation(relation)
+  if (!annotationId) return undefined
+
+  const annotation = wordAnnotations?.[annotationId]
+  if (!annotation || (version && annotation.version !== version)) return undefined
+
+  if (explicitEndpoint) return explicitEndpoint
+  const projectedEndpoint = createAnnotationEndpoint(
+    annotationId,
+    getWordAnnotationText(annotation)
+  )
+  return projectedEndpoint.type === 'annotation' ? projectedEndpoint : undefined
 }
 
 const getTargetEntityExists = (
@@ -118,18 +154,72 @@ export function getVerseRelationsMetadata(
   verses: Verse[],
   relations: StudyRelationsObj | undefined,
   displayMode: VerseItemDisplayMode = 'inline',
-  data: { notes?: NotesObj; links?: LinksObj; wordAnnotations?: WordAnnotationsObj } = {}
+  data: {
+    notes?: NotesObj
+    links?: LinksObj
+    wordAnnotations?: WordAnnotationsObj
+    version?: string
+  } = {}
 ): {
   counts: { [key: string]: number }
   items: { [key: string]: VerseRelationItem[] }
+  annotationItems: AnnotationRelationMetadata['items']
 } {
   const counts: { [key: string]: number } = {}
   const items: { [key: string]: VerseRelationItem[] } = {}
-  if (!verses?.length || !relations) return { counts, items }
+  const annotationItems: AnnotationRelationMetadata['items'] = {}
+  if (!verses?.length || !relations) return { counts, items, annotationItems }
 
   const { Livre, Chapitre } = verses[0]
 
   for (const relation of Object.values(relations)) {
+    const annotationEndpoint = getAnnotationOwnerEndpoint(
+      relation,
+      data.wordAnnotations,
+      data.version
+    )
+    if (annotationEndpoint) {
+      const annotation = data.wordAnnotations?.[annotationEndpoint.annotationId]
+      const targetEndpoint = getRelationTargetEndpoint(relation, annotationEndpoint)
+      if (!annotation || !targetEndpoint) continue
+
+      const targetEntityExists = getTargetEntityExists(targetEndpoint, data)
+      const verseIds = [
+        ...new Set(sortWordAnnotationRanges(annotation.ranges).map(range => range.verseKey)),
+      ]
+      const item: VerseRelationItem = {
+        key: `${relation.id}:${endpointIdentity(annotationEndpoint)}`,
+        relationId: relation.id,
+        relationType: relation.type,
+        relationKind: relation.kind,
+        activeEndpoint: annotationEndpoint,
+        targetEndpoint,
+        targetType: targetEndpoint.type,
+        label: getRelationTargetLabel(targetEndpoint, data),
+        targetIsAvailable:
+          targetEntityExists ||
+          (targetEndpoint.type !== 'note' && targetEndpoint.type !== 'annotation'),
+        targetEntityExists,
+        verseIds,
+        updatedAt: relation.updatedAt,
+      }
+
+      const existingAnnotationItems = annotationItems[annotationEndpoint.annotationId]
+      if (existingAnnotationItems) existingAnnotationItems.push(item)
+      else annotationItems[annotationEndpoint.annotationId] = [item]
+
+      if (displayMode === 'block') {
+        const anchorVerseRef = getAnchorVerseRef(verseIds, displayMode)
+        const [bookStr, chapterStr, verseStr] = anchorVerseRef.split('-')
+        if (Number(bookStr) === Livre && Number(chapterStr) === Chapitre) {
+          counts[verseStr] = (counts[verseStr] || 0) + 1
+          if (items[verseStr]) items[verseStr].push(item)
+          else items[verseStr] = [item]
+        }
+      }
+      continue
+    }
+
     for (const endpoint of relation.endpoints) {
       if (endpoint.type !== 'verse') continue
       const anchorVerseRef = getRelationAnchorVerse(endpoint, displayMode)
@@ -146,6 +236,7 @@ export function getVerseRelationsMetadata(
         relationId: relation.id,
         relationType: relation.type,
         relationKind: relation.kind,
+        activeEndpoint: endpoint,
         targetEndpoint,
         targetType: targetEndpoint.type,
         label: getRelationTargetLabel(targetEndpoint, data),
@@ -166,8 +257,9 @@ export function getVerseRelationsMetadata(
   }
 
   Object.values(items).forEach(sortRelationItems)
+  Object.values(annotationItems).forEach(sortRelationItems)
 
-  return { counts, items }
+  return { counts, items, annotationItems }
 }
 
 export function sortVersesToTags(highlightedVerses: HighlightsObj): TaggedVerse[] | null {
