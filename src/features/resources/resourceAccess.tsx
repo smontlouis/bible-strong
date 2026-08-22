@@ -87,11 +87,8 @@ import {
   type OnlineAccessState,
   type ResourceIdentity,
 } from '~features/resources/resourceModel'
-import {
-  configureResourceArtifactBaseUrl,
-  getMobileBibleVersionIds,
-} from '~helpers/mobileResourceCatalog'
-import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
+import { configureResourceArtifactBaseUrl } from '~helpers/mobileResourceCatalog'
+import { ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
 import { STRONG_BIBLE_FALLBACK_PRIORITY } from '~helpers/strongBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { withResourceSourceLogging } from '~features/resources/resourceSourceLogger'
@@ -153,9 +150,7 @@ const onlineBibleChapterAdapter = resourceApiBaseUrl
       })
     )
   : unavailableHttpBibleChapterAdapter
-const remotelyReadableBibleVersions = new Set(
-  resourceApiBaseUrl ? (__DEV__ ? getMobileBibleVersionIds() : PUBLIC_ONLINE_BIBLE_VERSION_IDS) : []
-)
+const remotelyReadableBibleVersions = new Set(resourceApiBaseUrl ? ONLINE_BIBLE_VERSION_IDS : [])
 const bibleChapterAdapter = createHybridBibleChapterAdapter({
   offline: localBibleChapterSource,
   online: onlineBibleChapterAdapter,

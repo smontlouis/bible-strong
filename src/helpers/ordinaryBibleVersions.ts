@@ -7,20 +7,7 @@ export const ORDINARY_BIBLE_VERSION_IDS = Object.freeze(
     .sort()
 )
 
-export const PUBLIC_ONLINE_BIBLE_VERSION_IDS = Object.freeze([
-  'ASV',
-  'BHG',
-  'BSB',
-  'DARBY',
-  'DBY',
-  'FMAR',
-  'LAU',
-  'LSG',
-  'OST',
-  'RV1895',
-  'RWEBSTER',
-  'VUL',
-])
+export const ONLINE_BIBLE_VERSION_IDS = ORDINARY_BIBLE_VERSION_IDS
 
 const ordinaryBibleVersionIds = new Set<string>(ORDINARY_BIBLE_VERSION_IDS)
 

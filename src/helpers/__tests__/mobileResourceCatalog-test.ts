@@ -10,7 +10,7 @@ import {
   resolveMobileResourceArtifactUrl,
   resolveMobileResourceCatalog,
 } from '../mobileResourceCatalog'
-import { PUBLIC_ONLINE_BIBLE_VERSION_IDS } from '../ordinaryBibleVersions'
+import { ONLINE_BIBLE_VERSION_IDS } from '../ordinaryBibleVersions'
 
 describe('mobile resource catalog', () => {
   it('declares every ordinary Bible identity exactly once', () => {
@@ -18,21 +18,9 @@ describe('mobile resource catalog', () => {
     expect(new Set(getMobileBibleVersionIds()).size).toBe(47)
   })
 
-  it('keeps public Online delivery limited to documented ordinary Bible identities', () => {
-    expect(PUBLIC_ONLINE_BIBLE_VERSION_IDS).toEqual([
-      'ASV',
-      'BHG',
-      'BSB',
-      'DARBY',
-      'DBY',
-      'FMAR',
-      'LAU',
-      'LSG',
-      'OST',
-      'RV1895',
-      'RWEBSTER',
-      'VUL',
-    ])
+  it('makes every ordinary Bible available through Online delivery', () => {
+    expect(ONLINE_BIBLE_VERSION_IDS).toEqual(getMobileBibleVersionIds())
+    expect(ONLINE_BIBLE_VERSION_IDS).toContain('PDV2017')
   })
 
   it('contains every downloadable resource as a ZIP', () => {
