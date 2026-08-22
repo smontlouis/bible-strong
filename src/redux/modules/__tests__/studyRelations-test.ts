@@ -7,7 +7,7 @@ import {
   type StudyRelation,
 } from '../user/studyRelations'
 import { addNoteAction } from '../user/notes'
-import { addWordAnnotationAction } from '../user/wordAnnotations'
+import { addWordAnnotationAction, removeWordAnnotationAction } from '../user/wordAnnotations'
 import { normalizeRelation } from '~features/studyRelations/domain'
 
 const mockSetTabGroups = jest.fn()
@@ -182,6 +182,34 @@ describe('study relation reducer', () => {
       type: 'annotates',
       kind: 'system',
     })
+  })
+
+  it('keeps manual relations when their annotation endpoint is deleted', () => {
+    const withAnnotation = userReducer(
+      initialState,
+      addWordAnnotationAction({
+        id: 'annotation-1',
+        version: 'LSG',
+        ranges: [{ verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'terre' }],
+        color: 'color1',
+        type: 'underline',
+        date: 1,
+      })
+    )
+    const relation = createRelation({
+      endpoints: [
+        { type: 'annotation', annotationId: 'annotation-1', labelFallback: 'terre' },
+        { type: 'study', studyId: 'study-1', labelFallback: 'Étude' },
+      ],
+    })
+    const withRelation = userReducer(withAnnotation, addStudyRelationAction(relation))
+    const withoutAnnotation = userReducer(withRelation, removeWordAnnotationAction('annotation-1'))
+
+    expect(withoutAnnotation.bible.wordAnnotations['annotation-1']).toBeUndefined()
+    expect(withoutAnnotation.bible.relations[relation.id]).toMatchObject({
+      endpointKeys: ['annotation:annotation-1', 'study:study-1'],
+    })
+    expect(withoutAnnotation.bible.relationIndex['annotation:annotation-1'].totalCount).toBe(1)
   })
 
   it('attaches an existing note to a verse with the same annotates relation model', () => {

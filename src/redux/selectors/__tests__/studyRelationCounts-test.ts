@@ -1,6 +1,7 @@
 import {
   makeWordAnnotationsByChapterSelector,
   makeNotesForVerseSelector,
+  makeStudyRelationDisplayModelsSelector,
   makeTagDataSelector,
   selectRelationCountsByEndpointIdentity,
 } from '../bible'
@@ -80,6 +81,104 @@ describe('selectRelationCountsByEndpointIdentity', () => {
     expect(counts['verse:1-1-2/1-1-3']).toBe(1)
     expect(counts['verse:1-1-2']).toBeUndefined()
     expect(counts['verse:1-1-3']).toBeUndefined()
+  })
+
+  it('counts an attached note as a relation of its word annotation', () => {
+    const relations: Record<string, LegacyRelation> = {
+      annotationNote: {
+        id: 'annotationNote',
+        kind: 'system',
+        endpoints: [
+          { type: 'note', noteId: 'annotation:annotation-1', label: 'Ma note' },
+          { type: 'verse', verseKeys: ['1-1-1'] },
+        ],
+        type: 'annotates',
+        direction: 'none',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+      manual: {
+        id: 'manual',
+        endpoints: [
+          { type: 'annotation', annotationId: 'annotation-1', label: 'mot' },
+          { type: 'study', studyId: 'study-1', label: 'Étude' },
+        ],
+        type: 'linked',
+        direction: 'none',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+    const state = createState(relations)
+    state.user.bible.notes = {
+      'annotation:annotation-1': {
+        title: 'Ma note',
+        description: 'Contenu',
+        date: 1,
+      },
+    }
+    state.user.bible.wordAnnotations = {
+      'annotation-1': {
+        id: 'annotation-1',
+        version: 'LSG',
+        ranges: [{ verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 0, text: 'mot' }],
+        color: 'color1',
+        type: 'underline',
+        date: 1,
+        noteId: 'annotation:annotation-1',
+      },
+    }
+
+    expect(selectRelationCountsByEndpointIdentity(state)['annotation:annotation-1']).toBe(2)
+  })
+})
+
+describe('makeStudyRelationDisplayModelsSelector', () => {
+  it('shows the attached note among an annotation relations', () => {
+    const state = createState({
+      annotationNote: {
+        id: 'annotationNote',
+        kind: 'system',
+        endpoints: [
+          { type: 'note', noteId: 'annotation:annotation-1', label: 'Ma note' },
+          { type: 'verse', verseKeys: ['1-1-1'] },
+        ],
+        type: 'annotates',
+        direction: 'none',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    })
+    state.user.bible.notes = {
+      'annotation:annotation-1': {
+        title: 'Ma note',
+        description: 'Contenu',
+        date: 1,
+      },
+    }
+    state.user.bible.wordAnnotations = {
+      'annotation-1': {
+        id: 'annotation-1',
+        version: 'LSG',
+        ranges: [{ verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 0, text: 'mot' }],
+        color: 'color1',
+        type: 'underline',
+        date: 1,
+        noteId: 'annotation:annotation-1',
+      },
+    }
+
+    const models = makeStudyRelationDisplayModelsSelector()(state, {
+      type: 'annotation',
+      annotationId: 'annotation-1',
+    })
+
+    expect(models).toHaveLength(1)
+    expect(models[0]).toMatchObject({
+      activeEndpoint: { type: 'annotation', annotationId: 'annotation-1' },
+      targetEndpoint: { type: 'note', noteId: 'annotation:annotation-1' },
+      targetLabel: 'Ma note',
+    })
   })
 })
 

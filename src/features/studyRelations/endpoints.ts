@@ -12,6 +12,16 @@ export const createNoteEndpoint = (noteId: string, labelFallback?: string): Endp
 export const createStudyEndpoint = (studyId: string, labelFallback?: string): EndpointOf<'study'> =>
   normalizeRelationEndpoint({ type: 'study', studyId, labelFallback }) as EndpointOf<'study'>
 
+export const createAnnotationEndpoint = (
+  annotationId: string,
+  labelFallback?: string
+): EndpointOf<'annotation'> =>
+  normalizeRelationEndpoint({
+    type: 'annotation',
+    annotationId,
+    labelFallback,
+  }) as EndpointOf<'annotation'>
+
 export const createStrongEndpoint = ({
   language,
   code,

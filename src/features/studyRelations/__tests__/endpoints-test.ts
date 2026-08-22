@@ -1,4 +1,5 @@
 import {
+  createAnnotationEndpoint,
   createDictionaryEndpoint,
   createExternalLinkEndpointFromLink,
   createNaveEndpoint,
@@ -23,6 +24,9 @@ describe('relation endpoint builders', () => {
   it('normalizes durable identities for user-owned endpoints', () => {
     expect(endpointIdentity(createNoteEndpoint(' note-1 ', 'Note'))).toBe('note:note-1')
     expect(endpointIdentity(createStudyEndpoint(' study-1 ', 'Étude'))).toBe('study:study-1')
+    expect(endpointIdentity(createAnnotationEndpoint(' annotation-1 ', 'Au commencement'))).toBe(
+      'annotation:annotation-1'
+    )
   })
 
   it('normalizes resource endpoint identities', () => {

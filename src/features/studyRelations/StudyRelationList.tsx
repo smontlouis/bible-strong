@@ -78,6 +78,7 @@ const targetIconConfig: Record<
   nave: { name: 'layers', color: 'quint' },
   dictionary: { name: 'book', color: 'secondary' },
   externalLink: { name: 'link', color: 'secondary' },
+  annotation: { name: 'edit-3', color: 'primary' },
   word: { name: 'type', color: 'tertiary' },
 }
 

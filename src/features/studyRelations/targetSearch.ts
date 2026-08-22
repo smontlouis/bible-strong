@@ -10,7 +10,11 @@ import {
   getStudySearchItems,
 } from '~features/search/shared/searchItems'
 import type { SearchEntityResultWithEndpoint } from '~features/search/shared/searchResultTypes'
-import { createStrongEndpoint } from './endpoints'
+import { createAnnotationEndpoint, createStrongEndpoint } from './endpoints'
+import type { RelationEndpoint } from './domain'
+import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
+import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
+import verseToReference from '~helpers/verseToReference'
 
 export type RelationTargetResult = SearchEntityResultWithEndpoint
 
@@ -18,7 +22,35 @@ type SearchData = {
   notes?: NotesObj
   links?: LinksObj
   studies?: StudiesObj
+  wordAnnotations?: WordAnnotationsObj
 }
+
+export const getAnnotationTargetItems = (
+  wordAnnotations: WordAnnotationsObj = {}
+): RelationTargetResult[] =>
+  Object.values(wordAnnotations).map(annotation => {
+    const title = getWordAnnotationText(annotation) || i18n.t('Annotation sans texte')
+    const verseKeys = annotation.ranges.map(range => range.verseKey)
+    return {
+      id: `annotation:${annotation.id}`,
+      type: 'passages',
+      iconType: 'passages',
+      title,
+      subtitle: i18n.t('Annotation'),
+      description: `${verseToReference(verseKeys)} · ${annotation.version}`,
+      endpoint: createAnnotationEndpoint(annotation.id, title),
+    }
+  })
+
+export const getSortedAnnotationTargetItems = (
+  wordAnnotations: WordAnnotationsObj = {}
+): RelationTargetResult[] =>
+  getAnnotationTargetItems(wordAnnotations).sort((left, right) => {
+    const leftId = (left.endpoint as Extract<RelationEndpoint, { type: 'annotation' }>).annotationId
+    const rightId = (right.endpoint as Extract<RelationEndpoint, { type: 'annotation' }>)
+      .annotationId
+    return Number(wordAnnotations[rightId]?.date || 0) - Number(wordAnnotations[leftId]?.date || 0)
+  })
 
 const searchVerseTargets = (query: string): RelationTargetResult[] =>
   getReferenceSearchItems(query, { mode: 'target' })
@@ -113,6 +145,20 @@ const searchStudyTargets = (query: string, studies: StudiesObj = {}): RelationTa
     .slice(0, 12)
 }
 
+const searchAnnotationTargets = (
+  query: string,
+  wordAnnotations: WordAnnotationsObj = {}
+): RelationTargetResult[] => {
+  const normalizedQuery = normalizeText(query)
+  if (!normalizedQuery) return []
+
+  return getAnnotationTargetItems(wordAnnotations)
+    .filter(annotation =>
+      normalizeText(`${annotation.title} ${annotation.description || ''}`).includes(normalizedQuery)
+    )
+    .slice(0, 12)
+}
+
 export const searchRelationTargets = (
   query: string,
   data: SearchData = {}
@@ -126,5 +172,6 @@ export const searchRelationTargets = (
     ...searchNoteTargets(trimmed, data.notes),
     ...searchLinkTargets(trimmed, data.links),
     ...searchStudyTargets(trimmed, data.studies),
+    ...searchAnnotationTargets(trimmed, data.wordAnnotations),
   ]
 }

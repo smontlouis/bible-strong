@@ -41,6 +41,7 @@ type BibleScreenContentProps = {
   verse?: number
   version: string
   strongMode?: StrongMode
+  annotationId?: string
 }
 
 const BibleScreenContent = ({
@@ -52,6 +53,7 @@ const BibleScreenContent = ({
   verse,
   version,
   strongMode,
+  annotationId,
 }: BibleScreenContentProps) => {
   const initialValues = produce(getDefaultBibleTab(version as VersionCode), draft => {
     draft.id = `bible-${generateUUID()}`
@@ -74,7 +76,14 @@ const BibleScreenContent = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bibleAtom = useMemo(() => atom<BibleTab>(initialValues), [])
 
-  return <BibleTabScreen bibleAtom={bibleAtom} isFormSheet={IS_FORM_SHEET} isInTab={false} />
+  return (
+    <BibleTabScreen
+      bibleAtom={bibleAtom}
+      isFormSheet={IS_FORM_SHEET}
+      isInTab={false}
+      initialAnnotationId={annotationId}
+    />
+  )
 }
 
 const BibleScreen = () => {
@@ -88,6 +97,7 @@ const BibleScreen = () => {
     verse?: string
     version?: string
     strongMode?: StrongMode
+    annotationId?: string
   }>()
 
   // Parse params from URL strings
@@ -102,6 +112,7 @@ const BibleScreen = () => {
   const resources = useResourceAccess()
   const requestedVersion = params.version || undefined
   const strongMode = params.strongMode
+  const annotationId = params.annotationId
   const bookNumber = typeof book === 'number' ? book : book?.Numero
   const requestedVerseKeys = getBibleLocationVerseKeys({
     book: bookNumber,
@@ -162,6 +173,7 @@ const BibleScreen = () => {
       verse={verse}
       version={resolvedVersion}
       strongMode={strongMode}
+      annotationId={annotationId}
     />
   )
 

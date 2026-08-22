@@ -3,6 +3,7 @@ import { getBibleReferenceLocation } from '~helpers/bibleReferenceLocation'
 import type { SearchResult } from '~helpers/biblesDb'
 import type { SearchEntityResult } from '~features/search/shared/searchResultTypes'
 import type { RelationEndpoint } from './domain'
+import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
 
 export type OpenableStudyObject =
   | { endpoint: RelationEndpoint; passage?: never }
@@ -45,7 +46,8 @@ export const getBibleViewParamsForSearchResult = (result: BibleViewSearchResult)
 })
 
 export const getOpenableActionForRelationEndpoint = (
-  endpoint: RelationEndpoint
+  endpoint: RelationEndpoint,
+  data: { wordAnnotations?: WordAnnotationsObj } = {}
 ): OpenableStudyObjectAction => {
   switch (endpoint.type) {
     case 'verse': {
@@ -96,12 +98,32 @@ export const getOpenableActionForRelationEndpoint = (
         pathname: '/link',
         params: { linkId: endpoint.linkId },
       }
+    case 'annotation': {
+      const annotation = data.wordAnnotations?.[endpoint.annotationId]
+      if (!annotation?.ranges.length) {
+        return { type: 'toast', messageKey: 'Annotation introuvable' }
+      }
+      return {
+        type: 'route',
+        pathname: '/bible-view',
+        params: {
+          ...getBibleViewParamsForVerseKeys(
+            annotation.ranges.map(range => range.verseKey),
+            annotation.version
+          ),
+          annotationId: endpoint.annotationId,
+        },
+      }
+    }
     case 'word':
       return { type: 'none' }
   }
 }
 
-export const getOpenableAction = (object: OpenableStudyObject): OpenableStudyObjectAction => {
+export const getOpenableAction = (
+  object: OpenableStudyObject,
+  data: { wordAnnotations?: WordAnnotationsObj } = {}
+): OpenableStudyObjectAction => {
   if ('passage' in object && object.passage) {
     return {
       type: 'route',
@@ -122,7 +144,7 @@ export const getOpenableAction = (object: OpenableStudyObject): OpenableStudyObj
   }
 
   if ('endpoint' in object && object.endpoint) {
-    return getOpenableActionForRelationEndpoint(object.endpoint)
+    return getOpenableActionForRelationEndpoint(object.endpoint, data)
   }
 
   return { type: 'none' }

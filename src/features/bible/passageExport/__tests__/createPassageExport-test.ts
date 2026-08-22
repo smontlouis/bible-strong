@@ -339,6 +339,94 @@ describe('createPassageExport', () => {
     expect(result.text).toContain('• lié à → [study] Étude intéressante')
   })
 
+  it('anchors annotation relations to the annotation ranges', async () => {
+    const annotationRelation = normalizeRelation({
+      id: 'annotation-study-relation',
+      kind: 'manual',
+      type: 'linked',
+      direction: 'none',
+      endpoints: [
+        { type: 'annotation', annotationId: 'annotation-1', labelFallback: 'Au commencement' },
+        { type: 'study', studyId: 'study-1', labelFallback: 'Étude création' },
+      ],
+      createdAt: 1,
+      updatedAt: 1,
+    })
+
+    const result = await createPassageExport({
+      scope: 'selection',
+      selectedVerseKeys: ['1-1-1'],
+      version: { code: 'LSG', name: 'Bible Segond 1910' },
+      options: { bibleText: false, notes: false, links: false, relations: true, tags: false },
+      data: {
+        notes: {},
+        links: {},
+        relations: { [annotationRelation.id]: annotationRelation },
+        wordAnnotations: {
+          'annotation-1': {
+            id: 'annotation-1',
+            version: 'LSG',
+            ranges: [
+              { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: 'Au commencement' },
+            ],
+            color: 'color1',
+            type: 'underline',
+            date: 1,
+          },
+        },
+        studies: {},
+      },
+      loadVerseTexts: async () => ({}),
+    })
+
+    expect(result.counts.relations).toBe(1)
+    expect(result.text).toContain('• lié à → [study] Étude création')
+  })
+
+  it('does not anchor relations from annotations belonging to another Bible version', async () => {
+    const annotationRelation = normalizeRelation({
+      id: 'kjv-annotation-study-relation',
+      kind: 'manual',
+      type: 'linked',
+      direction: 'none',
+      endpoints: [
+        { type: 'annotation', annotationId: 'annotation-kjv', labelFallback: 'In the beginning' },
+        { type: 'study', studyId: 'study-1', labelFallback: 'Creation study' },
+      ],
+      createdAt: 1,
+      updatedAt: 1,
+    })
+
+    const result = await createPassageExport({
+      scope: 'selection',
+      selectedVerseKeys: ['1-1-1'],
+      version: { code: 'LSG', name: 'Bible Segond 1910' },
+      options: { bibleText: false, notes: false, links: false, relations: true, tags: false },
+      data: {
+        notes: {},
+        links: {},
+        relations: { [annotationRelation.id]: annotationRelation },
+        wordAnnotations: {
+          'annotation-kjv': {
+            id: 'annotation-kjv',
+            version: 'KJV',
+            ranges: [
+              { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: 'In the beginning' },
+            ],
+            color: 'color1',
+            type: 'underline',
+            date: 1,
+          },
+        },
+        studies: {},
+      },
+      loadVerseTexts: async () => ({}),
+    })
+
+    expect(result.counts.relations).toBe(0)
+    expect(result.text).not.toContain('Creation study')
+  })
+
   it('prints the Strong code with the target entity type', async () => {
     const strongRelation = normalizeRelation({
       id: 'verse-strong-relation',

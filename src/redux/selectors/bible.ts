@@ -21,7 +21,8 @@ import {
   getRelationDisplayModel,
   getEndpointFallbackLabel,
   endpointIdentity,
-  relationIncludesEndpoint,
+  getAnnotationIdForSystemNoteRelation,
+  projectRelationForEndpoint,
   relationIncludesVerseKey,
   createVerseEndpoint,
 } from '~features/studyRelations/domain'
@@ -123,15 +124,24 @@ export const selectNotes = (state: RootState) => state.user.bible.notes ?? {}
 export const selectWordAnnotations = (state: RootState) => state.user.bible.wordAnnotations ?? {}
 
 export const selectRelationCountsByEndpointIdentity = createSelector(
-  [selectRelationIndex],
-  (relationIndex): Record<string, number> =>
-    Object.entries(relationIndex).reduce(
-      (counts, [entityKey, entry]) => ({
-        ...counts,
-        [entityKey]: entry.totalCount,
-      }),
-      {} as Record<string, number>
-    )
+  [selectRelationIndex, selectRelations],
+  (relationIndex, relations): Record<string, number> => {
+    const counts: Record<string, number> = {}
+    for (const [entityKey, entry] of Object.entries(relationIndex)) {
+      counts[entityKey] = entry.totalCount
+    }
+
+    for (const relation of Object.values(relations)) {
+      const annotationId = getAnnotationIdForSystemNoteRelation(relation)
+      if (!annotationId) continue
+      const annotationKey = `annotation:${annotationId}`
+      if (!relation.endpointKeys.includes(annotationKey)) {
+        counts[annotationKey] = (counts[annotationKey] || 0) + 1
+      }
+    }
+
+    return counts
+  }
 )
 
 // Selector factory for highlights by chapter
@@ -238,7 +248,8 @@ export const makeStudyRelationsForEndpointSelector = () =>
     [selectRelations, (_: RootState, endpoint: RelationEndpoint) => endpoint],
     (relations, endpoint): Relation[] =>
       Object.values(relations)
-        .filter(relation => relationIncludesEndpoint(relation, endpoint))
+        .map(relation => projectRelationForEndpoint(relation, endpoint))
+        .filter((relation): relation is Relation => Boolean(relation))
         .sort((a, b) => b.updatedAt - a.updatedAt)
   )
 
@@ -253,13 +264,26 @@ export const makeStudyRelationDisplayModelsSelector = () =>
       selectNaves,
       selectWords,
       selectLinks,
+      selectWordAnnotations,
       (_: RootState, endpoint: RelationEndpoint) => endpoint,
     ],
-    (relations, notes, studies, strongsGrec, strongsHebreu, naves, words, links, endpoint) =>
+    (
+      relations,
+      notes,
+      studies,
+      strongsGrec,
+      strongsHebreu,
+      naves,
+      words,
+      links,
+      wordAnnotations,
+      endpoint
+    ) =>
       Object.values(relations)
-        .filter(relation => relationIncludesEndpoint(relation, endpoint))
-        .map(relation =>
-          getRelationDisplayModel(relation, endpoint, {
+        .flatMap(relation => {
+          const projectedRelation = projectRelationForEndpoint(relation, endpoint)
+          if (!projectedRelation) return []
+          const model = getRelationDisplayModel(projectedRelation, endpoint, {
             notes,
             studies,
             links,
@@ -267,9 +291,10 @@ export const makeStudyRelationDisplayModelsSelector = () =>
             strongsHebreu,
             naves,
             words,
+            wordAnnotations,
           })
-        )
-        .filter((model): model is NonNullable<typeof model> => Boolean(model))
+          return model ? [model] : []
+        })
         .sort((a, b) => b.relation.updatedAt - a.relation.updatedAt)
   )
 
@@ -284,9 +309,21 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
       selectNaves,
       selectWords,
       selectLinks,
+      selectWordAnnotations,
       (_: RootState, verseKey: string) => verseKey,
     ],
-    (relations, notes, studies, strongsGrec, strongsHebreu, naves, words, links, verseKey) => {
+    (
+      relations,
+      notes,
+      studies,
+      strongsGrec,
+      strongsHebreu,
+      naves,
+      words,
+      links,
+      wordAnnotations,
+      verseKey
+    ) => {
       const sections = new Map<
         string,
         {
@@ -311,6 +348,7 @@ export const makeStudyRelationDisplaySectionsForStartingVerseKeySelector = () =>
           strongsHebreu,
           naves,
           words,
+          wordAnnotations,
         })
         if (!model) continue
 

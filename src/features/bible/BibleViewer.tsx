@@ -23,6 +23,8 @@ import { useAddVerseToStudy } from '~features/studies/hooks/useAddVerseToStudy'
 import VerseFormatSheet from '~features/studies/VerseFormatSheet'
 import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
 import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRelations'
+import { useRelationCount } from '~features/studyRelations/useRelationCount'
+import { createAnnotationEndpoint } from '~features/studyRelations/endpoints'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import {
@@ -171,9 +173,16 @@ interface BibleViewerProps {
   settings: RootState['user']['bible']['settings']
   isFormSheet?: boolean
   isInTab?: boolean
+  initialAnnotationId?: string
 }
 
-const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerProps) => {
+const BibleViewer = ({
+  bibleAtom,
+  settings,
+  isFormSheet,
+  isInTab,
+  initialAnnotationId,
+}: BibleViewerProps) => {
   const { t } = useTranslation()
   const pushRouteOnce = usePushRouteOnce()
   const openEntityRelations = useOpenEntityRelations()
@@ -198,6 +207,17 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
   // Annotation mode
   const annotationMode = useAnnotationMode()
   const annotationToolbar = useSheet()
+  const didOpenInitialAnnotationRef = useRef(false)
+  const initialAnnotation = useSelector((state: RootState) =>
+    initialAnnotationId ? state.user.bible.wordAnnotations[initialAnnotationId] : undefined
+  )
+  const selectedAnnotationEndpoint = annotationMode.selectedAnnotation
+    ? createAnnotationEndpoint(
+        annotationMode.selectedAnnotation.id,
+        annotationMode.selectedAnnotation.text
+      )
+    : null
+  const annotationRelationCount = useRelationCount(selectedAnnotationEndpoint)
 
   // Cross-version annotations modal
   const crossVersionModal = useSheet()
@@ -574,6 +594,30 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     annotationToolbar.close()
   }, [annotationMode, annotationToolbar])
 
+  useEffect(() => {
+    if (
+      didOpenInitialAnnotationRef.current ||
+      !initialAnnotationId ||
+      !initialAnnotation ||
+      initialAnnotation.version !== version ||
+      hidePersonalBibleData
+    ) {
+      return
+    }
+
+    didOpenInitialAnnotationRef.current = true
+    annotationMode.enterMode(version)
+    annotationMode.handleAnnotationSelected(initialAnnotationId)
+    annotationToolbar.open()
+  }, [
+    annotationMode,
+    annotationToolbar,
+    hidePersonalBibleData,
+    initialAnnotation,
+    initialAnnotationId,
+    version,
+  ])
+
   const clearHiddenPersonalBibleState = useEffectEvent(() => {
     if (hasSelectedVerses(selectedVerses)) {
       actions.clearSelectedVerses()
@@ -607,17 +651,24 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     })
   }, [annotationMode.selectedAnnotation, setUnifiedTagsModal])
 
+  const handleAnnotationRelationsPress = () => {
+    if (!selectedAnnotationEndpoint) return
+    openEntityRelations(selectedAnnotationEndpoint)
+  }
+
   // Handler for deleting annotation with confirmation if it has a note or tags
   const handleDeleteAnnotation = useCallback(() => {
     if (!annotationMode.selectedAnnotation) return
 
     const hasNote = !!annotationMode.selectedAnnotation.noteId
     const hasTags = Object.keys(annotationMode.selectedAnnotation.tags || {}).length > 0
+    const hasRelations = annotationRelationCount > 0
 
-    if (hasNote || hasTags) {
+    if (hasNote || hasTags || hasRelations) {
       const warnings = []
       if (hasNote) warnings.push(t('une note'))
       if (hasTags) warnings.push(t('des tags'))
+      if (hasRelations) warnings.push(t('des relations'))
 
       Alert.alert(
         t('Attention'),
@@ -636,7 +687,7 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
     } else {
       annotationMode.deleteSelectedAnnotation()
     }
-  }, [annotationMode, t])
+  }, [annotationMode, annotationRelationCount, t])
 
   // Keep annotation mode's verses reference updated
   const { enabled: annotationModeEnabled, setVerses: setAnnotationVerses } = annotationMode
@@ -1466,7 +1517,9 @@ const BibleViewer = ({ bibleAtom, settings, isFormSheet, isInTab }: BibleViewerP
         onClearAnnotationSelection={annotationMode.clearAnnotationSelection}
         onNotePress={handleAnnotationNotePress}
         onTagsPress={handleAnnotationTagsPress}
+        onRelationsPress={handleAnnotationRelationsPress}
         tagsCount={Object.keys(annotationMode.selectedAnnotation?.tags || {}).length}
+        relationsCount={annotationRelationCount}
         isEnabled={annotationMode.enabled && !hidePersonalBibleData}
       />
       <CrossVersionAnnotationsModal

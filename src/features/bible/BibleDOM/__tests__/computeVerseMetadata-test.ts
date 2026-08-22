@@ -191,4 +191,63 @@ describe('compute verse metadata', () => {
       targetEntityExists: true,
     })
   })
+
+  it('resolves annotation labels and availability from the current annotation data', () => {
+    const relations: StudyRelationsObj = {
+      relation1: {
+        id: 'relation1',
+        kind: 'manual',
+        type: 'linked',
+        direction: 'none',
+        endpoints: [
+          {
+            type: 'verse',
+            key: 'verse:1-1-1',
+            verseKeys: ['1-1-1'],
+            labelFallback: 'Genèse 1:1',
+          },
+          {
+            type: 'annotation',
+            key: 'annotation:annotation1',
+            annotationId: 'annotation1',
+            labelFallback: 'Ancien texte',
+          },
+        ],
+        endpointKeys: ['verse:1-1-1', 'annotation:annotation1'],
+        endpointTypes: ['verse', 'annotation'],
+        pairKey: 'annotation:annotation1|verse:1-1-1',
+        duplicateKey: 'linked:annotation:annotation1|verse:1-1-1',
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    }
+
+    const currentItem = getVerseRelationsMetadata(verses, relations, 'inline', {
+      wordAnnotations: {
+        annotation1: {
+          id: 'annotation1',
+          version: 'LSG',
+          ranges: [
+            { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: 'Au commencement' },
+            { verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'la terre' },
+          ],
+          color: 'color1',
+          type: 'underline',
+          date: 1,
+        },
+      },
+    }).items['1'][0]
+
+    expect(currentItem).toMatchObject({
+      label: 'Au commencement … la terre',
+      targetEntityExists: true,
+      targetIsAvailable: true,
+    })
+
+    expect(getVerseRelationsMetadata(verses, relations, 'inline').items['1'][0]).toMatchObject({
+      label: 'Ancien texte',
+      targetEntityExists: false,
+      targetIsAvailable: false,
+    })
+  })
 })

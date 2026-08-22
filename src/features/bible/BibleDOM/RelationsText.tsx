@@ -124,6 +124,8 @@ const getIconColor = (
       return colors.quint
     case 'dictionary':
       return colors.secondary
+    case 'annotation':
+      return colors.primary
     case 'word':
       return colors.tertiary
     default:
@@ -184,6 +186,8 @@ const RelationIcon = ({
       return <SvgMaskIcon source={relationSvgSources.nave} color={color} />
     case 'dictionary':
       return <SvgMaskIcon source={relationSvgSources.dictionary} color={color} />
+    case 'annotation':
+      return <Feather color={color} name="edit-3" size={16} />
     case 'word':
       return <Feather color={color} name="type" size={16} />
     case 'verse':

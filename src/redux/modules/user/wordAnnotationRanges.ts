@@ -10,6 +10,15 @@ export interface NormalizedWordSelectionRange {
   end: WordPosition
 }
 
+export const getWordAnnotationText = (annotation: Pick<WordAnnotation, 'ranges'>): string =>
+  annotation.ranges
+    .reduce<string[]>((texts, range) => {
+      const text = range.text.trim()
+      if (text) texts.push(text)
+      return texts
+    }, [])
+    .join(' … ')
+
 export const parseVerseKey = (key: string) => {
   const [book, chapter, verse] = key.split('-').map(Number)
   return { book, chapter, verse }

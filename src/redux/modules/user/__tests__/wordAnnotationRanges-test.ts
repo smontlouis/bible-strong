@@ -1,6 +1,7 @@
 import {
   annotationRangeOverlapsSelection,
   findOverlappingWordAnnotationIds,
+  getWordAnnotationText,
   normalizeWordSelectionRange,
 } from '../wordAnnotationRanges'
 import type { WordAnnotation } from '../wordAnnotations'
@@ -19,6 +20,18 @@ const makeAnnotation = (
 })
 
 describe('wordAnnotationRanges', () => {
+  it('builds the durable annotation text from every non-empty range', () => {
+    expect(
+      getWordAnnotationText({
+        ranges: [
+          { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: ' Au commencement ' },
+          { verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: ' ' },
+          { verseKey: '1-1-3', startWordIndex: 0, endWordIndex: 1, text: 'la lumière' },
+        ],
+      })
+    ).toBe('Au commencement … la lumière')
+  })
+
   describe('normalizeWordSelectionRange', () => {
     it('keeps an ordered range as-is', () => {
       expect(

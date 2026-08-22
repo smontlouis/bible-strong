@@ -91,6 +91,7 @@ type BibleScreenProps = {
   verse?: number
   version?: VersionCode
   strongMode?: 'visible' | 'hidden'
+  annotationId?: string
 }
 
 type CompareVersesScreenProps = {

@@ -13,6 +13,7 @@ import {
 } from '~redux/modules/user/wordAnnotations'
 import { VersionCode } from '~state/tabs'
 import { RootState } from '~redux/modules/reducer'
+import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import generateUUID from '~helpers/generateUUID'
 import {
   INITIAL_ANNOTATION_SESSION_STATE,
@@ -110,7 +111,7 @@ export function useAnnotationMode(): UseAnnotationModeReturn {
     return {
       id: selectedAnnotationId,
       verseKey: firstRange.verseKey,
-      text: firstRange.text,
+      text: getWordAnnotationText(selectedAnnotationFromRedux),
       color: selectedAnnotationFromRedux.color,
       type: selectedAnnotationFromRedux.type,
       noteId: selectedAnnotationFromRedux.noteId,

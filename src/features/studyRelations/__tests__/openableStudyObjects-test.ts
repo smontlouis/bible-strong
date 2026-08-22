@@ -5,6 +5,7 @@ import {
   getOpenableActionForRelationEndpoint,
 } from '../openableStudyObjects'
 import {
+  createAnnotationEndpoint,
   createExternalLinkEndpoint,
   createNoteEndpoint,
   createStrongEndpoint,
@@ -115,6 +116,43 @@ describe('openable study objects', () => {
         focusVerses: JSON.stringify([1]),
         version: 'VUL',
       },
+    })
+  })
+
+  it('opens an annotation at its current ranges and selects it', () => {
+    const endpoint = createAnnotationEndpoint('annotation-1', 'Au commencement')
+
+    expect(
+      getOpenableActionForRelationEndpoint(endpoint, {
+        wordAnnotations: {
+          'annotation-1': {
+            id: 'annotation-1',
+            version: 'LSG',
+            ranges: [
+              { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: 'Au commencement' },
+            ],
+            color: 'color1',
+            type: 'underline',
+            date: 1,
+          },
+        },
+      })
+    ).toEqual({
+      type: 'route',
+      pathname: '/bible-view',
+      params: {
+        contextDisplayMode: 'focused',
+        book: JSON.stringify({ Numero: 1, Nom: 'Genèse', Chapitres: 50 }),
+        chapter: '1',
+        verse: '1',
+        focusVerses: JSON.stringify([1]),
+        version: 'LSG',
+        annotationId: 'annotation-1',
+      },
+    })
+    expect(getOpenableActionForRelationEndpoint(endpoint)).toEqual({
+      type: 'toast',
+      messageKey: 'Annotation introuvable',
     })
   })
 

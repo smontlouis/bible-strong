@@ -35,9 +35,15 @@ interface BibleTabScreenProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   isFormSheet?: boolean
   isInTab?: boolean
+  initialAnnotationId?: string
 }
 
-const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScreenProps) => {
+const BibleTabScreen = ({
+  bibleAtom,
+  isFormSheet,
+  isInTab = true,
+  initialAnnotationId,
+}: BibleTabScreenProps) => {
   const [bible, setBible] = useAtom(bibleAtom)
   const selectedVersion = bible.data.selectedVersion
   const strongMode = bible.data.strongMode
@@ -209,6 +215,7 @@ const BibleTabScreen = ({ bibleAtom, isFormSheet, isInTab = true }: BibleTabScre
       bibleAtom={bibleAtom}
       isFormSheet={isFormSheet}
       isInTab={isInTab}
+      initialAnnotationId={initialAnnotationId}
     />
   )
   const content =

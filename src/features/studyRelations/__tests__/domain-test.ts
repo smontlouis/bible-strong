@@ -184,6 +184,41 @@ describe('study relation domain', () => {
     expect(model?.isTargetAvailable).toBe(true)
   })
 
+  it('resolves annotations by durable id while keeping a deleted fallback', () => {
+    const relation = normalizeStudyRelation({
+      id: 'annotation-relation',
+      endpoints: [
+        { type: 'annotation', annotationId: 'annotation-1', label: 'Ancien extrait' },
+        { type: 'note', noteId: 'note-1', label: 'Note' },
+      ],
+      type: 'linked',
+      direction: 'none',
+      createdAt: 1,
+      updatedAt: 1,
+    })
+
+    expect(endpointIdentity(relation.endpoints[0])).toBe('annotation:annotation-1')
+    expect(
+      getRelationDisplayModel(relation, relation.endpoints[1], {
+        wordAnnotations: {
+          'annotation-1': {
+            id: 'annotation-1',
+            version: 'LSG',
+            ranges: [
+              { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: 'Au commencement' },
+            ],
+            color: 'color1',
+            type: 'underline',
+            date: 1,
+          },
+        },
+      })
+    ).toMatchObject({ targetLabel: 'Au commencement', isTargetAvailable: true })
+    expect(
+      getRelationDisplayModel(relation, relation.endpoints[1], { wordAnnotations: {} })
+    ).toMatchObject({ targetLabel: 'Ancien extrait', isTargetAvailable: false })
+  })
+
   it('supports Nave and dictionary endpoints as relation targets', () => {
     const relation = normalizeStudyRelation({
       id: 'r1',

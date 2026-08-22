@@ -71,7 +71,9 @@ type Props = {
   onClearAnnotationSelection?: () => void
   onNotePress?: () => void
   onTagsPress?: () => void
+  onRelationsPress?: () => void
   tagsCount?: number
+  relationsCount?: number
   isEnabled: boolean
 }
 
@@ -223,7 +225,9 @@ const AnnotationToolbar = ({
   onClearAnnotationSelection,
   onNotePress,
   onTagsPress,
+  onRelationsPress,
   tagsCount = 0,
+  relationsCount = 0,
   isEnabled,
 }: Props) => {
   const { t } = useTranslation()
@@ -335,6 +339,40 @@ const AnnotationToolbar = ({
                     >
                       <Text fontSize={8} color="reverse" bold>
                         {tagsCount}
+                      </Text>
+                    </Box>
+                  )}
+                </Box>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onRelationsPress} disabled={disabled}>
+                <Box position="relative" overflow="visible">
+                  <Box
+                    width={32}
+                    height={32}
+                    borderRadius={10}
+                    center
+                    borderColor="border"
+                    borderWidth={1}
+                  >
+                    <FeatherIcon
+                      name="git-merge"
+                      size={18}
+                      color={relationsCount > 0 ? 'primary' : 'grey'}
+                    />
+                  </Box>
+                  {relationsCount > 0 && (
+                    <Box
+                      position="absolute"
+                      bottom={-1}
+                      right={-4}
+                      bg="primary"
+                      borderRadius={8}
+                      width={14}
+                      height={14}
+                      center
+                    >
+                      <Text fontSize={8} color="reverse" bold>
+                        {relationsCount}
                       </Text>
                     </Box>
                   )}

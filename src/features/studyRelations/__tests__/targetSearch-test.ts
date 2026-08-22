@@ -93,4 +93,28 @@ describe('searchRelationTargets', () => {
       endpoint: { type: 'study', studyId: 'legacyStudy' },
     })
   })
+
+  it('returns word annotations as durable relation targets', () => {
+    const [result] = searchRelationTargets('commencement', {
+      wordAnnotations: {
+        annotation1: {
+          id: 'annotation1',
+          version: 'LSG',
+          ranges: [
+            { verseKey: '1-1-1', startWordIndex: 0, endWordIndex: 1, text: 'Au commencement' },
+          ],
+          color: 'color1',
+          type: 'underline',
+          date: 1,
+        },
+      },
+    })
+
+    expect(result).toMatchObject({
+      id: 'annotation:annotation1',
+      title: 'Au commencement',
+      description: 'Livre 1 1:1 · LSG',
+      endpoint: { type: 'annotation', annotationId: 'annotation1' },
+    })
+  })
 })

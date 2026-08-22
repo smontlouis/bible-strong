@@ -40,6 +40,7 @@ import {
   getSortedLinkTargetItems,
   getSortedNoteTargetItems,
   getSortedStudyTargetItems,
+  getSortedAnnotationTargetItems,
   searchReferenceAndStrongTargets,
   type RelationTargetResult,
 } from './targetSearch'
@@ -57,6 +58,7 @@ type DictionaryRow = DictionarySummary
 type MatchedRelationTargetResult = RelationTargetResult
 type RelationTargetSectionId =
   | 'passages'
+  | 'annotations'
   | 'notes'
   | 'links'
   | 'studies'
@@ -92,6 +94,7 @@ const relationTypeToSearchItemType: Record<RelationEndpoint['type'], SearchItemT
   verse: 'passages',
   note: 'notes',
   externalLink: 'links',
+  annotation: 'passages',
   study: 'studies',
   strong: 'strong',
   nave: 'nave',
@@ -186,6 +189,7 @@ const getSourceEndpointSubtitle = (
       return endpoint.labelFallback || getEndpointFallbackLabel(endpoint)
     case 'dictionary':
     case 'externalLink':
+    case 'annotation':
     case 'word':
       return endpoint.labelFallback || getEndpointFallbackLabel(endpoint)
   }
@@ -324,6 +328,7 @@ const CreateEntityRelationModal = ({
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
   const studies = useSelector((state: RootState) => state.user.bible.studies)
+  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const shouldBuildNoteTargets =
     itemFilters.notes &&
     (deferredBrowseMode === 'note' || (!deferredBrowseMode && deferredSearchHasValue))
@@ -336,9 +341,15 @@ const CreateEntityRelationModal = ({
   const noteTargets = shouldBuildNoteTargets ? getSortedNoteTargetItems(notes) : []
   const studyTargets = shouldBuildStudyTargets ? getSortedStudyTargetItems(studies) : []
   const linkTargets = shouldBuildLinkTargets ? getSortedLinkTargetItems(links) : []
+  const shouldBuildAnnotationTargets =
+    itemFilters.passages && !deferredBrowseMode && deferredSearchHasValue
+  const annotationTargets = shouldBuildAnnotationTargets
+    ? getSortedAnnotationTargetItems(wordAnnotations)
+    : []
   const fuzzyNoteTargets = searchWithMatches(noteTargets, deferredSearchValue)
   const fuzzyLinkTargets = searchWithMatches(linkTargets, deferredSearchValue)
   const fuzzyStudyTargets = searchWithMatches(studyTargets, deferredSearchValue)
+  const fuzzyAnnotationTargets = searchWithMatches(annotationTargets, deferredSearchValue)
   const isAllowed = (type: RelationEndpoint['type']) => {
     const itemType = relationTypeToSearchItemType[type]
     return enabledItemTypes.includes(itemType) && itemFilters[itemType]
@@ -515,6 +526,7 @@ const CreateEntityRelationModal = ({
   const noteItems = itemFilters.notes ? fuzzyNoteTargets : []
   const linkItems = itemFilters.links ? fuzzyLinkTargets : []
   const studyItems = itemFilters.studies ? fuzzyStudyTargets : []
+  const annotationItems = itemFilters.passages ? fuzzyAnnotationTargets : []
   const directStrongItems = immediateReferenceResults.filter(
     result => result.endpoint.type === 'strong' && isAllowed('strong')
   )
@@ -541,6 +553,16 @@ const CreateEntityRelationModal = ({
             title: t('Passages'),
             count: referenceItems.length,
             items: referenceItems,
+          },
+        ]
+      : []),
+    ...(annotationItems.length
+      ? [
+          {
+            id: 'annotations' as const,
+            title: t('Annotations'),
+            count: annotationItems.length,
+            items: annotationItems,
           },
         ]
       : []),

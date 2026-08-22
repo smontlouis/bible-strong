@@ -1,6 +1,7 @@
 import { getBook } from '~helpers/bibleBookCatalog'
 import type { Link, Note, Study } from '~redux/modules/user'
 import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
+import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import verseToReference from '~helpers/verseToReference'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import i18n from '~i18n'
@@ -23,6 +24,7 @@ export type RelationEndpointType =
   | 'nave'
   | 'dictionary'
   | 'externalLink'
+  | 'annotation'
   | 'word'
 
 export type RelationEndpointBase = {
@@ -79,6 +81,11 @@ export type ExternalLinkRelationEndpoint = RelationEndpointBase & {
   url: string
 }
 
+export type AnnotationRelationEndpoint = RelationEndpointBase & {
+  type: 'annotation'
+  annotationId: string
+}
+
 export type WordRelationEndpoint = RelationEndpointBase & {
   type: 'word'
   resourceLanguage?: string
@@ -93,6 +100,7 @@ export type RelationEndpoint =
   | NaveRelationEndpoint
   | DictionaryRelationEndpoint
   | ExternalLinkRelationEndpoint
+  | AnnotationRelationEndpoint
   | WordRelationEndpoint
 
 export type Relation = {
@@ -158,6 +166,11 @@ export type LegacyRelationEndpoint =
     } & Partial<StrongRelationEndpoint>)
   | ({ type: 'nave'; nameLower: string; label?: string } & Partial<NaveRelationEndpoint>)
   | ({ type: 'dictionary'; word: string; label?: string } & Partial<DictionaryRelationEndpoint>)
+  | ({
+      type: 'annotation'
+      annotationId: string
+      label?: string
+    } & Partial<AnnotationRelationEndpoint>)
   | Partial<ExternalLinkRelationEndpoint>
   | Partial<WordRelationEndpoint>
 
@@ -201,6 +214,7 @@ const endpointTypeLabels: Record<RelationEndpointType, string> = {
   nave: 'Nave',
   dictionary: 'Dictionnaire',
   externalLink: 'Lien',
+  annotation: 'Annotation',
   word: 'Mot',
 }
 
@@ -368,6 +382,15 @@ export const normalizeRelationEndpoint = (endpoint: LegacyRelationEndpoint): Rel
         labelFallback: endpoint.labelFallback || getEndpointLegacyLabel(endpoint),
       }
     }
+    case 'annotation': {
+      const annotationId = endpoint.annotationId.trim()
+      return {
+        type: 'annotation',
+        key: `annotation:${annotationId}`,
+        annotationId,
+        labelFallback: endpoint.labelFallback || getEndpointLegacyLabel(endpoint),
+      }
+    }
     case 'word': {
       const word = endpoint.word || ''
       const resourceLanguage = endpoint.resourceLanguage || 'fr'
@@ -487,6 +510,34 @@ export const endpointsMatch = (left: RelationEndpoint, right: RelationEndpoint):
 export const relationIncludesEndpoint = (relation: Relation, endpoint: RelationEndpoint): boolean =>
   relation.endpointKeys.includes(endpointIdentity(endpoint))
 
+export const getAnnotationIdForSystemNoteRelation = (relation: Relation): string | undefined => {
+  if (relation.kind !== 'system' || relation.type !== 'annotates') return undefined
+
+  const noteEndpoint = relation.endpoints.find(endpoint => endpoint.type === 'note')
+  if (noteEndpoint?.type !== 'note' || !noteEndpoint.noteId.startsWith('annotation:')) {
+    return undefined
+  }
+
+  return noteEndpoint.noteId.slice('annotation:'.length) || undefined
+}
+
+export const projectRelationForEndpoint = (
+  relation: Relation,
+  endpoint: RelationEndpoint
+): Relation | undefined => {
+  if (relationIncludesEndpoint(relation, endpoint)) return relation
+  if (endpoint.type !== 'annotation') return undefined
+  if (getAnnotationIdForSystemNoteRelation(relation) !== endpoint.annotationId) return undefined
+
+  const noteEndpoint = relation.endpoints.find(item => item.type === 'note')
+  if (noteEndpoint?.type !== 'note') return undefined
+
+  return normalizeRelation({
+    ...relation,
+    endpoints: [endpoint, noteEndpoint],
+  })
+}
+
 export const relationIncludesVerseKey = (relation: Relation, verseKey: string): boolean =>
   relation.endpoints.some(
     endpoint => endpoint.type === 'verse' && endpoint.verseKeys.includes(verseKey)
@@ -501,6 +552,12 @@ export const createVerseEndpoint = (
 
 export const createNoteEndpoint = (noteId: string, labelFallback?: string): RelationEndpoint =>
   normalizeRelationEndpoint({ type: 'note', noteId, labelFallback })
+
+export const createAnnotationEndpoint = (
+  annotationId: string,
+  labelFallback?: string
+): RelationEndpoint =>
+  normalizeRelationEndpoint({ type: 'annotation', annotationId, labelFallback })
 
 export const createExternalLinkEndpoint = (
   sourceEndpoint: RelationEndpoint,
@@ -718,6 +775,8 @@ export const getEndpointFallbackLabel = (endpoint: RelationEndpoint): string => 
       return normalizedEndpoint.labelFallback || normalizedEndpoint.word || i18n.t('Mot supprimé')
     case 'externalLink':
       return normalizedEndpoint.labelFallback || normalizedEndpoint.url || i18n.t('Lien supprimé')
+    case 'annotation':
+      return normalizedEndpoint.labelFallback || i18n.t('Annotation supprimée')
     case 'word':
       return normalizedEndpoint.labelFallback || normalizedEndpoint.word || i18n.t('Mot supprimé')
   }
@@ -729,6 +788,7 @@ export const getResolvedEndpointLabel = (
     notes?: Record<string, Note>
     studies?: Record<string, Study>
     links?: Record<string, Link>
+    wordAnnotations?: WordAnnotationsObj
     strongsGrec?: Record<string, unknown>
     strongsHebreu?: Record<string, unknown>
     naves?: Record<string, unknown>
@@ -786,6 +846,14 @@ export const getResolvedEndpointLabel = (
           endpoint.url ||
           i18n.t('Lien supprimé'),
         isAvailable: Boolean(link) || Boolean(endpoint.url),
+      }
+    }
+    case 'annotation': {
+      const annotation = data.wordAnnotations?.[endpoint.annotationId]
+      const currentLabel = annotation ? getWordAnnotationText(annotation) : undefined
+      return {
+        label: currentLabel || getEndpointFallbackLabel(endpoint),
+        isAvailable: Boolean(annotation),
       }
     }
   }

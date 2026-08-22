@@ -1,5 +1,7 @@
 import { TagsObj, Verse } from '~common/types'
 import { HighlightsObj, NotesObj, LinksObj, StudyRelationsObj } from '~redux/modules/user'
+import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
+import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import {
   endpointIdentity,
   getEndpointFallbackLabel,
@@ -34,7 +36,8 @@ const relationTargetOrder: Record<string, number> = {
   strong: 4,
   nave: 5,
   dictionary: 6,
-  word: 7,
+  annotation: 7,
+  word: 8,
 }
 
 const getRelationAnchorVerse = (
@@ -52,7 +55,7 @@ const getRelationTargetEndpoint = (
 
 const getTargetEntityExists = (
   endpoint: RelationEndpoint,
-  data: { notes?: NotesObj; links?: LinksObj }
+  data: { notes?: NotesObj; links?: LinksObj; wordAnnotations?: WordAnnotationsObj }
 ) => {
   switch (endpoint.type) {
     case 'note':
@@ -65,6 +68,8 @@ const getTargetEntityExists = (
         data.links?.[endpoint.linkId] ||
         Object.values(data.links || {}).some(link => link.id === endpoint.linkId)
       )
+    case 'annotation':
+      return Boolean(data.wordAnnotations?.[endpoint.annotationId])
     default:
       return true
   }
@@ -72,7 +77,7 @@ const getTargetEntityExists = (
 
 const getRelationTargetLabel = (
   endpoint: RelationEndpoint,
-  data: { notes?: NotesObj; links?: LinksObj }
+  data: { notes?: NotesObj; links?: LinksObj; wordAnnotations?: WordAnnotationsObj }
 ) => {
   switch (endpoint.type) {
     case 'note': {
@@ -88,6 +93,12 @@ const getRelationTargetLabel = (
       return (
         link?.customTitle || link?.ogData?.title || link?.url || getEndpointFallbackLabel(endpoint)
       )
+    }
+    case 'annotation': {
+      const annotation = data.wordAnnotations?.[endpoint.annotationId]
+      return annotation
+        ? getWordAnnotationText(annotation) || getEndpointFallbackLabel(endpoint)
+        : getEndpointFallbackLabel(endpoint)
     }
     default:
       return getEndpointFallbackLabel(endpoint)
@@ -107,7 +118,7 @@ export function getVerseRelationsMetadata(
   verses: Verse[],
   relations: StudyRelationsObj | undefined,
   displayMode: VerseItemDisplayMode = 'inline',
-  data: { notes?: NotesObj; links?: LinksObj } = {}
+  data: { notes?: NotesObj; links?: LinksObj; wordAnnotations?: WordAnnotationsObj } = {}
 ): {
   counts: { [key: string]: number }
   items: { [key: string]: VerseRelationItem[] }
@@ -138,7 +149,9 @@ export function getVerseRelationsMetadata(
         targetEndpoint,
         targetType: targetEndpoint.type,
         label: getRelationTargetLabel(targetEndpoint, data),
-        targetIsAvailable: targetEntityExists || targetEndpoint.type !== 'note',
+        targetIsAvailable:
+          targetEntityExists ||
+          (targetEndpoint.type !== 'note' && targetEndpoint.type !== 'annotation'),
         targetEntityExists,
         verseIds: endpoint.verseKeys,
         updatedAt: relation.updatedAt,

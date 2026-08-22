@@ -941,6 +941,7 @@ export const BibleDOMWrapper = ({
     {
       notes: allNotes,
       links: allLinks,
+      wordAnnotations,
     }
   )
   const TOP_INSET = isFormSheet ? 0 : insets.top

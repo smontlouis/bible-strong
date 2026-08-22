@@ -147,6 +147,8 @@ const isValidRelationEndpoint = (endpoint: RelationEndpoint) => {
       return Boolean(endpoint.word)
     case 'externalLink':
       return Boolean(endpoint.linkId)
+    case 'annotation':
+      return Boolean(endpoint.annotationId)
     default:
       return false
   }
@@ -397,17 +399,29 @@ const getLinkExports = (
 const getRelationExports = (
   data: PassageExportData,
   relations: Relation[],
+  annotations: WordAnnotation[],
   isInScope: (verseKey: string) => boolean,
   diagnostics: ExportDiagnostics
-): ExportRelation[] =>
-  relations.flatMap(relation => {
-    if (relation.deletedAt || relation.kind !== 'manual') return []
-    const activeEndpoints = relation.endpoints.filter(
-      (endpoint): endpoint is VerseRelationEndpoint =>
-        endpoint.type === 'verse' && endpoint.verseKeys.some(isInScope)
-    )
+): ExportRelation[] => {
+  const annotationVerseKeysById = Object.fromEntries(
+    annotations.map(annotation => [annotation.id, annotation.ranges.map(range => range.verseKey)])
+  )
 
-    return activeEndpoints.flatMap(activeEndpoint => {
+  return relations.flatMap(relation => {
+    if (relation.deletedAt || relation.kind !== 'manual') return []
+    const getActiveEndpointVerseKeys = (endpoint: RelationEndpoint) => {
+      if (endpoint.type === 'verse') return endpoint.verseKeys
+      if (endpoint.type === 'annotation') {
+        return annotationVerseKeysById[endpoint.annotationId] || []
+      }
+      return []
+    }
+    const activeEndpoints = relation.endpoints.flatMap(endpoint => {
+      const verseKeys = getActiveEndpointVerseKeys(endpoint)
+      return verseKeys.some(isInScope) ? [{ endpoint, verseKeys }] : []
+    })
+
+    return activeEndpoints.flatMap(({ endpoint: activeEndpoint, verseKeys }) => {
       let displayModel
       try {
         displayModel = getRelationDisplayModel(relation, activeEndpoint, data)
@@ -424,13 +438,14 @@ const getRelationExports = (
       return [
         {
           id: relation.id,
-          verseKeys: activeEndpoint.verseKeys,
+          verseKeys,
           text: `${relationLabel} → [${targetMarker}] ${displayModel.targetLabel}`,
-          extendsBeyondScope: activeEndpoint.verseKeys.some(key => !isInScope(key)),
+          extendsBeyondScope: verseKeys.some(key => !isInScope(key)),
         },
       ]
     })
   })
+}
 
 const getTagsByVerse = (
   data: PassageExportData,
@@ -619,7 +634,7 @@ export const createPassageExport = async ({
   const links = options.links ? attachedLinks : []
   const attachedRelations =
     options.relations || options.bibleText
-      ? getRelationExports(data, validRelations, isInScope, diagnostics)
+      ? getRelationExports(data, validRelations, annotations, isInScope, diagnostics)
       : []
   const relations = options.relations ? attachedRelations : []
   const attachedTagsByVerse =

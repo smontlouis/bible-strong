@@ -53,7 +53,7 @@ Core user activities:
 | Relation | Binary edge between two relation endpoints that can be opened inside Bible Strong. | `src/features/studyRelations/` |
 | System relation | Relation implied by a feature action, such as connecting a note or link to a verse. | `src/features/studyRelations/` |
 | Manual relation | Relation intentionally created by the user to express a study connection between two endpoints. | `src/features/studyRelations/` |
-| Relation endpoint | Openable study object that can participate in a relation, such as a verse, note, study, Strong entry, Nave topic, dictionary word, word, or external link. | `src/features/studyRelations/` |
+| Relation endpoint | Openable study object that can participate in a relation, such as a verse, word annotation, note, study, Strong entry, Nave topic, dictionary word, word, or external link. | `src/features/studyRelations/` |
 | Relation target picker | Surface for choosing the target endpoint of a study relation through unified search or by browsing a specific endpoint type. | Planned |
 | Relation type | Meaning assigned to a relation, such as linked, references, explains, contrasts, mentions, annotates, or external link. | `src/features/studyRelations/` |
 | Relation display | Bible reading setting that controls whether verse relations appear as a grouped icon at the start of their range or as short inline chips at the end of their range. | `src/features/bible/BibleDOM/` |
@@ -128,8 +128,8 @@ Core user activities:
 - A **Strong** relation endpoint is identified by original-language family and numeric Strong code, with the Strong word as its display label fallback.
 - Opening a **Relation** navigates to the target endpoint; opening that target in a new tab remains an action of the target screen.
 - A **Relation** is discoverable from both of its **Relation endpoints**.
-- **Verse** relations are surfaced in the Bible reading surface; **Note**, **Study**, and **Strong** relations are surfaced near tags in their detail surfaces.
-- A **Manual relation** can be created from selected verses, note details, study items, and Strong details.
+- **Verse** relations are surfaced in the Bible reading surface; **Word annotation**, **Note**, **Study**, and **Strong** relations are surfaced near tags in their detail surfaces.
+- A **Manual relation** can be created from selected verses, selected Word annotations, note details, study items, and Strong details.
 - Relation target selection follows the app search language for Bible references and Strong codes, then adds Notes and Studies as searchable target types.
 - A **Verse** relation target is a global Bible reference, not a specific Bible version rendering.
 - **Verse** relation endpoints identify Bible locations, not Bible version-specific text.
