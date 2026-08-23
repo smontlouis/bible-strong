@@ -20,6 +20,10 @@ export interface SelectionAnnotationDeletionImpact {
   hasRelations: boolean
 }
 
+export const requiresSelectionAnnotationDeletionConfirmation = (
+  impact: SelectionAnnotationDeletionImpact
+): boolean => impact.annotationCount > 0
+
 export const getSelectionAnnotationDeletionImpact = ({
   wordAnnotations,
   version,

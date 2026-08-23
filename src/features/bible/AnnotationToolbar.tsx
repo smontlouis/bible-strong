@@ -86,14 +86,13 @@ interface IconButtonProps extends BoxProps {
 
 const IconButton = ({ disabled, children, isSelected, label, ...props }: IconButtonProps) => (
   <Box
-    width="100%"
-    height={96}
+    px={20}
+    py={10}
     borderRadius={18}
     center
     gap={10}
     borderColor={isSelected ? 'primary' : 'border'}
     borderWidth={isSelected ? 2 : 1}
-    bg={isSelected ? 'lightPrimary' : disabled ? 'lightGrey' : 'reverse'}
     opacity={isSelected ? 1 : disabled ? 0.5 : 0.85}
     style={
       {
@@ -105,7 +104,7 @@ const IconButton = ({ disabled, children, isSelected, label, ...props }: IconBut
   >
     {children}
     {label && (
-      <Text fontSize={14} bold color={isSelected ? 'primary' : 'tertiary'} numberOfLines={1}>
+      <Text fontSize={12} bold color={isSelected ? 'primary' : 'tertiary'} numberOfLines={1}>
         {label}
       </Text>
     )}
@@ -129,7 +128,7 @@ const AnnotationTypeButton = ({
   children,
   label,
 }: AnnotationTypeButtonProps) => (
-  <TouchableBox flex height={96} disabled={disabled} onPress={() => onPress(type)}>
+  <TouchableBox disabled={disabled} onPress={() => onPress(type)}>
     <IconButton disabled={disabled} isSelected={!disabled && activeType === type} label={label}>
       {children}
     </IconButton>
@@ -167,10 +166,6 @@ const AnnotationColorPalette = ({
 }: AnnotationColorPaletteProps) => {
   const colorItems = useColorItems()
   const setColorPickerModal = useSetAtom(colorPickerModalAtom)
-
-  if (disabled) {
-    return null
-  }
 
   return (
     <HStack center gap={10} pb={16} px={20}>
@@ -425,53 +420,49 @@ const AnnotationToolbar = ({
         </Box>
 
         <AnimatedBox layout={LinearTransition}>
-          <HStack center pt={14} pb={18} px={20}>
-            <HStack flex gap={10}>
-              <AnnotationTypeButton
-                disabled={disabled}
-                type="background"
-                activeType={activeAnnotationType}
-                onPress={setActiveAnnotationType}
-                label={t('Surligner')}
-              >
-                <BackgroundIcon width={30} height={30} color={getColor('background')} />
-              </AnnotationTypeButton>
+          <HStack px={20} pb={20} gap={10} center>
+            <AnnotationTypeButton
+              disabled={disabled}
+              type="background"
+              activeType={activeAnnotationType}
+              onPress={setActiveAnnotationType}
+              label={t('Surligner')}
+            >
+              <BackgroundIcon width={30} height={30} color={getColor('background')} />
+            </AnnotationTypeButton>
 
-              <AnnotationTypeButton
-                disabled={disabled}
-                type="underline"
-                activeType={activeAnnotationType}
-                onPress={setActiveAnnotationType}
-                label={t('Souligner')}
-              >
-                <FeatherIcon name="underline" size={28} color={getColor('underline')} />
-              </AnnotationTypeButton>
+            <AnnotationTypeButton
+              disabled={disabled}
+              type="underline"
+              activeType={activeAnnotationType}
+              onPress={setActiveAnnotationType}
+              label={t('Souligner')}
+            >
+              <FeatherIcon name="underline" size={28} color={getColor('underline')} />
+            </AnnotationTypeButton>
 
-              <AnnotationTypeButton
-                disabled={disabled}
-                type="circle"
-                activeType={activeAnnotationType}
-                onPress={setActiveAnnotationType}
-                label={t('Entourer')}
-              >
-                <CircleSketchIcon width={28} height={28} color={getColor('circle')} />
-              </AnnotationTypeButton>
-            </HStack>
+            <AnnotationTypeButton
+              disabled={disabled}
+              type="circle"
+              activeType={activeAnnotationType}
+              onPress={setActiveAnnotationType}
+              label={t('Entourer')}
+            >
+              <CircleSketchIcon width={28} height={28} color={getColor('circle')} />
+            </AnnotationTypeButton>
           </HStack>
-          {!disabled && (
-            <Box borderTopWidth={1} borderColor="border" pt={12}>
-              <AnnotationColorPalette
-                disabled={disabled}
-                type={activeAnnotationType}
-                selectedColor={
-                  selectedAnnotation?.type === activeAnnotationType
-                    ? selectedAnnotation.color
-                    : undefined
-                }
-                onSelectColor={handleApply}
-              />
-            </Box>
-          )}
+          <Box borderTopWidth={1} borderColor="border" pt={12}>
+            <AnnotationColorPalette
+              disabled={disabled}
+              type={activeAnnotationType}
+              selectedColor={
+                selectedAnnotation?.type === activeAnnotationType
+                  ? selectedAnnotation.color
+                  : undefined
+              }
+              onSelectColor={handleApply}
+            />
+          </Box>
         </AnimatedBox>
       </SheetView>
     </Sheet>

@@ -110,7 +110,7 @@ import {
   getChapterEntityQueryPlan,
   getDisplayedChapterEntityStrongCodes,
 } from './chapterEntityQueryPlan'
-import { useAnnotationMode } from './hooks'
+import { useAnnotationMode, type AnnotationType } from './hooks'
 import ResourcesModal from './resources/ResourceModal'
 import {
   getSelectedVerseKeys,
@@ -139,7 +139,10 @@ import {
   shouldDismissStrongSelectionForViewerState,
 } from './strongSelectionLifecycle'
 import { getPassageMediaForChapter } from './passageMedia'
-import { getSelectionAnnotationDeletionImpact } from './annotationDeletionImpact'
+import {
+  getSelectionAnnotationDeletionImpact,
+  requiresSelectionAnnotationDeletionConfirmation,
+} from './annotationDeletionImpact'
 
 const EMPTY_PASSAGE_MEDIA = {
   introduction: [],
@@ -753,7 +756,7 @@ const BibleViewer = ({
   )
   const relationCountsByEndpointIdentity = useSelector(selectRelationCountsByEndpointIdentity)
 
-  const handleEraseAnnotations = () => {
+  const confirmSelectionAnnotationDeletion = (onConfirm: () => void) => {
     if (!annotationMode.selection || !annotationMode.version) return
 
     const impact = getSelectionAnnotationDeletionImpact({
@@ -764,8 +767,8 @@ const BibleViewer = ({
       relationCountsByEndpointIdentity,
     })
 
-    if (!impact.hasNote && !impact.hasTags && !impact.hasRelations) {
-      annotationMode.eraseSelection()
+    if (!requiresSelectionAnnotationDeletionConfirmation(impact)) {
+      onConfirm()
       return
     }
 
@@ -774,15 +777,40 @@ const BibleViewer = ({
     if (impact.hasTags) warnings.push(t('des tags'))
     if (impact.hasRelations) warnings.push(t('des relations'))
 
-    const message =
+    const annotationWarning =
       impact.annotationCount === 1
-        ? 'Cette annotation a {{items}} associé(s). Voulez-vous vraiment la supprimer ?'
-        : 'Certaines annotations ont {{items}} associé(s). Voulez-vous vraiment les supprimer ?'
+        ? t('annotation.selectionDeletion.single')
+        : t('annotation.selectionDeletion.multiple', {
+            count: impact.annotationCount,
+          })
 
-    Alert.alert(t('Attention'), t(message, { items: warnings.join(' ' + t('et') + ' ') }), [
+    const associatedItemsWarning =
+      warnings.length > 0
+        ? t('annotation.selectionDeletion.associatedItems', {
+            items: warnings.join(' ' + t('et') + ' '),
+          })
+        : null
+
+    const message = [
+      annotationWarning,
+      associatedItemsWarning,
+      t('annotation.selectionDeletion.confirm'),
+    ]
+      .filter(Boolean)
+      .join('\n\n')
+
+    Alert.alert(t('Attention'), message, [
       { text: t('Non'), style: 'cancel' },
-      { text: t('Oui'), style: 'destructive', onPress: annotationMode.eraseSelection },
+      { text: t('Oui'), style: 'destructive', onPress: onConfirm },
     ])
+  }
+
+  const handleEraseAnnotations = () => {
+    confirmSelectionAnnotationDeletion(annotationMode.eraseSelection)
+  }
+
+  const handleApplyAnnotation = (color: string, type: AnnotationType) => {
+    confirmSelectionAnnotationDeletion(() => annotationMode.applyAnnotation(color, type))
   }
 
   const selectedVerseHighlightColor = useSelector((state: RootState) =>
@@ -1545,7 +1573,7 @@ const BibleViewer = ({
         ref={annotationToolbar.getRef()}
         hasSelection={annotationMode.hasSelection}
         selection={annotationMode.selection}
-        onApplyAnnotation={annotationMode.applyAnnotation}
+        onApplyAnnotation={handleApplyAnnotation}
         onClearSelection={annotationMode.clearSelection}
         onEraseAnnotations={handleEraseAnnotations}
         onClose={handleExitAnnotationMode}

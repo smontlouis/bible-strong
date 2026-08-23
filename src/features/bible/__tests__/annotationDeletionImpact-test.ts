@@ -1,5 +1,8 @@
 import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
-import { getSelectionAnnotationDeletionImpact } from '../annotationDeletionImpact'
+import {
+  getSelectionAnnotationDeletionImpact,
+  requiresSelectionAnnotationDeletionConfirmation,
+} from '../annotationDeletionImpact'
 
 const wordAnnotations: WordAnnotationsObj = {
   note: {
@@ -28,13 +31,21 @@ const wordAnnotations: WordAnnotationsObj = {
     type: 'circle',
     date: 3,
   },
+  empty: {
+    id: 'empty',
+    version: 'LSG',
+    ranges: [{ verseKey: '1-1-4', startWordIndex: 2, endWordIndex: 3, text: 'empty' }],
+    color: '#fff',
+    type: 'background',
+    date: 4,
+  },
   otherVersion: {
     id: 'otherVersion',
     version: 'S21',
     ranges: [{ verseKey: '1-1-2', startWordIndex: 0, endWordIndex: 1, text: 'other' }],
     color: '#fff',
     type: 'background',
-    date: 4,
+    date: 5,
     noteId: 'annotation:otherVersion',
   },
 }
@@ -89,5 +100,23 @@ describe('getSelectionAnnotationDeletionImpact', () => {
       hasTags: true,
       hasRelations: false,
     })
+  })
+
+  it('reports an overlapping annotation even when it has no associated items', () => {
+    const impact = getSelectionAnnotationDeletionImpact({
+      wordAnnotations,
+      version: 'LSG',
+      start: { verseKey: '1-1-4', wordIndex: 2 },
+      end: { verseKey: '1-1-4', wordIndex: 3 },
+      relationCountsByEndpointIdentity: {},
+    })
+
+    expect(impact).toEqual({
+      annotationCount: 1,
+      hasNote: false,
+      hasTags: false,
+      hasRelations: false,
+    })
+    expect(requiresSelectionAnnotationDeletionConfirmation(impact)).toBe(true)
   })
 })
