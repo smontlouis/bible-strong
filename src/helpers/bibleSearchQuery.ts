@@ -1,28 +1,26 @@
-const EXPLICIT_OPERATOR_REGEX = /\b(AND|OR|NOT)\b/
+import { parseBibleTextSearchQuery } from './bibleSearchInput'
 
-const normalizeFtsTokenBoundaries = (value: string) => value.replace(/[^\p{L}\p{N}\s"*]/gu, ' ')
+const quoteFtsPhrase = (terms: readonly string[]) => `"${terms.join(' ')}"`
 
 export const buildNearFtsQuery = (raw: string, distance: number = 5): string | null => {
-  const trimmed = raw.trim()
+  const query = parseBibleTextSearchQuery(raw)
+  if (!query || query.kind === 'phrase' || query.terms.length < 2) return null
 
-  if (EXPLICIT_OPERATOR_REGEX.test(trimmed) || trimmed.includes('"')) return null
-
-  const tokens = normalizeFtsTokenBoundaries(trimmed).split(/\s+/).filter(Boolean)
-
-  if (tokens.length < 2) return null
-
-  return `NEAR(${tokens.join(' ')}, ${distance})`
+  return `NEAR(${query.terms.join(' ')}, ${distance})`
 }
 
+/**
+ * Compiles the product's small search language to FTS5.
+ *
+ * An entirely quoted input is a phrase. Everything else is a natural list of
+ * terms combined implicitly with AND. Prefixes are applied automatically so
+ * the user never needs to type FTS operators or `*`.
+ */
 export const sanitizeFtsQuery = (raw: string): string => {
-  const trimmed = raw.trim()
-  if (!trimmed) return ''
+  const query = parseBibleTextSearchQuery(raw)
+  if (!query) return ''
 
-  if (EXPLICIT_OPERATOR_REGEX.test(trimmed) || trimmed.includes('"')) {
-    return normalizeFtsTokenBoundaries(trimmed).replace(/\s+/g, ' ').trim()
-  }
+  if (query.kind === 'phrase') return quoteFtsPhrase(query.terms)
 
-  const tokens = normalizeFtsTokenBoundaries(trimmed).split(/\s+/).filter(Boolean)
-
-  return tokens.map(token => (token.endsWith('*') ? token : `${token}*`)).join(' ')
+  return query.terms.map(term => `${term}*`).join(' ')
 }

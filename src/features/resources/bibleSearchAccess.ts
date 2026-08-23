@@ -85,6 +85,7 @@ export const createHttpBibleSearchAccess = ({
       const params = new URLSearchParams({ q: query })
       if (options.book !== undefined) params.set('book', String(options.book))
       if (options.section) params.set('section', options.section)
+      if (options.canon) params.set('canon', options.canon)
       if (options.sortOrder) params.set('sortOrder', options.sortOrder)
       if (options.limit !== undefined) params.set('limit', String(options.limit))
       if (options.offset !== undefined) params.set('offset', String(options.offset))
@@ -115,14 +116,19 @@ export const createHttpBibleSearchAccess = ({
   }
 
   const run = async (query: string, options: SearchOptions = {}) => {
-    const requestedVersions = options.version ? [options.version] : [...versions]
-    if (requestedVersions.length === 0) throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
+    const requestedVersions = options.version
+      ? [options.version]
+      : options.versionIds
+        ? [...options.versionIds]
+        : [...versions]
+    if (requestedVersions.length === 0) return { results: [], count: 0 }
     if (!options.version) {
       const request = createRequestController(options.signal, timeoutMs)
       try {
         const params = new URLSearchParams({ q: query, versions: requestedVersions.join(',') })
         if (options.book !== undefined) params.set('book', String(options.book))
         if (options.section) params.set('section', options.section)
+        if (options.canon) params.set('canon', options.canon)
         if (options.sortOrder) params.set('sortOrder', options.sortOrder)
         if (options.limit !== undefined) params.set('limit', String(options.limit))
         if (options.offset !== undefined) params.set('offset', String(options.offset))

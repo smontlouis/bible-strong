@@ -5,6 +5,7 @@ import { Image } from 'expo-image'
 
 import Box, { HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
+import { hp } from '~helpers/utils'
 
 type Props = {
   onExamplePress: (value: string) => void
@@ -20,40 +21,20 @@ const ExampleChip = ({ label, onPress }: { label: string; onPress: () => void })
   </TouchableOpacity>
 )
 
-type SectionProps = {
-  title: string
-  examples: string[]
-  onExamplePress: (value: string) => void
-}
-
-const Section = ({ title, examples, onExamplePress }: SectionProps) => (
-  <Box mb={20}>
-    <Text fontSize={13} color="tertiary" bold mb={8}>
-      {title}
-    </Text>
-    <HStack gap={8} wrap>
-      {examples.map(example => (
-        <ExampleChip key={example} label={example} onPress={() => onExamplePress(example)} />
-      ))}
-    </HStack>
-  </Box>
-)
-
 const SearchEmptyState = ({ onExamplePress }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
+  const examples = [
+    t('search.empty.verses.examples').split('|')[0],
+    t('search.empty.verse_words.examples').split('|')[0],
+    'H1234',
+    'G26',
+    t('search.empty.words.examples').split('|')[0],
+  ]
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingHorizontal: 20,
-      }}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Box alignItems="center" mb={24}>
+    <Box h={hp(60)} justifyContent="center" alignItems="center">
+      <Box alignItems="center" mt={30} mb={24}>
         <Box mb={16}>
           <Image
             source={require('~assets/images/empty-state-icons/search.svg')}
@@ -67,29 +48,12 @@ const SearchEmptyState = ({ onExamplePress }: Props) => {
         </Text>
       </Box>
 
-      <Box w="100%">
-        <Section
-          title={t('search.empty.verses')}
-          examples={t('search.empty.verses.examples').split('|')}
-          onExamplePress={onExamplePress}
-        />
-        <Section
-          title={t('search.empty.verse_words')}
-          examples={t('search.empty.verse_words.examples').split('|')}
-          onExamplePress={onExamplePress}
-        />
-        <Section
-          title={t('search.empty.strong')}
-          examples={['H1234', 'G26']}
-          onExamplePress={onExamplePress}
-        />
-        <Section
-          title={t('search.empty.words')}
-          examples={t('search.empty.words.examples').split('|')}
-          onExamplePress={onExamplePress}
-        />
-      </Box>
-    </ScrollView>
+      <HStack maxWidth={320} alignSelf="center" justifyContent="center" gap={8} wrap>
+        {examples.map(example => (
+          <ExampleChip key={example} label={example} onPress={() => onExamplePress(example)} />
+        ))}
+      </HStack>
+    </Box>
   )
 }
 

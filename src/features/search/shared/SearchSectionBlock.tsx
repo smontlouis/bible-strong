@@ -4,7 +4,9 @@ import Text from '~common/ui/Text'
 import { Chip } from '~common/ui/NewChip'
 import i18n from '~i18n'
 import SharedSearchEntityResultRow from './SearchEntityResultRow'
+import SearchTypeIcon from './SearchTypeIcon'
 import type { SearchEntityResult } from './searchResultTypes'
+import type { SearchItemType } from '~state/searchFilters'
 
 export const SEARCH_SECTION_PREVIEW_LIMIT = 5
 export const SEARCH_SECTION_LOAD_MORE_COUNT = 10
@@ -14,6 +16,7 @@ export type SearchResultSection<SectionId extends string = string> = {
   title: string
   count: number
   items: SearchEntityResult[]
+  iconType?: SearchItemType
 }
 
 type Props<SectionId extends string = string> = {
@@ -26,6 +29,7 @@ type Props<SectionId extends string = string> = {
   isLoading?: boolean
   hasMore?: boolean
   showLoadMoreButton?: boolean
+  headerAction?: ReactNode
 }
 
 const SearchSectionBlock = <SectionId extends string = string>({
@@ -38,6 +42,7 @@ const SearchSectionBlock = <SectionId extends string = string>({
   isLoading,
   hasMore = false,
   showLoadMoreButton = true,
+  headerAction,
 }: Props<SectionId>) => {
   const visibleItems = section.items.slice(0, visibleCount)
   const remaining = Math.max(0, section.items.length - visibleCount)
@@ -45,10 +50,24 @@ const SearchSectionBlock = <SectionId extends string = string>({
   return (
     <Box pt={10}>
       <HStack px={20} py={8} alignItems="center" gap={8}>
+        {section.iconType ? (
+          <Box
+            width={36}
+            height={36}
+            borderRadius={10}
+            bg="lightGrey"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <SearchTypeIcon type={section.iconType} />
+          </Box>
+        ) : null}
         <Text title fontSize={16} opacity={0.6}>
           {section.title}
         </Text>
         <Chip variant="bold">{section.count}</Chip>
+        <Box flex />
+        {headerAction}
       </HStack>
       {statusMessage}
       {isLoading && !visibleItems.length ? (

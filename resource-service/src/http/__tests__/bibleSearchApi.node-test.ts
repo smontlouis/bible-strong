@@ -38,7 +38,7 @@ describe('v1 aggregate Bible search API', () => {
     try {
       const response = await web.handler(
         new Request(
-          'http://localhost/v1/bibles/search?q=Dieu&versions=LSG,DBY&limit=20&sortOrder=book'
+          'http://localhost/v1/bibles/search?q=Dieu&versions=LSG,DBY&canon=catholic-73&limit=20&sortOrder=book'
         )
       )
 
@@ -47,6 +47,7 @@ describe('v1 aggregate Bible search API', () => {
       assert.equal(receivedInput?.query, 'Dieu')
       assert.equal(receivedInput?.limit, 20)
       assert.equal(receivedInput?.sortOrder, 'book')
+      assert.equal(receivedInput?.canon, 'catholic-73')
       assert.deepEqual(await response.json(), {
         resources: [
           {

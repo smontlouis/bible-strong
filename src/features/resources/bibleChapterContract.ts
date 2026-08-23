@@ -63,9 +63,12 @@ export class BibleVerseTextsQuery extends Schema.Class<BibleVerseTextsQuery>(
 }) {}
 
 export class BibleSearchQuery extends Schema.Class<BibleSearchQuery>('BibleSearchQuery')({
-  q: Schema.NonEmptyString,
+  q: Schema.NonEmptyString.pipe(Schema.maxLength(200)),
   book: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 77))),
   section: Schema.optional(Schema.Literal('ot', 'nt')),
+  canon: Schema.optional(
+    Schema.Literal('protestant-66', 'catholic-73', 'clementine-vulgate', 'theotex-septuagint')
+  ),
   sortOrder: Schema.optional(Schema.Literal('relevance', 'book')),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))),
   offset: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.nonNegative())),

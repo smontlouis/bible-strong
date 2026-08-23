@@ -29,6 +29,23 @@ export type SQLiteSearchResultSection = SearchResultSection<SearchSectionId> & {
   itemFilterType: SearchItemType
 }
 
+export type SearchFacetId = 'all' | SearchItemType
+
+export type SearchFacet = {
+  id: SearchFacetId
+  count: number
+}
+
+const searchFacetOrder: SearchItemType[] = [
+  'passages',
+  'notes',
+  'links',
+  'studies',
+  'strong',
+  'dictionary',
+  'nave',
+]
+
 type SearchItemFilters = Record<SearchItemType, boolean>
 
 type SearchLoadingState = {
@@ -76,6 +93,7 @@ const getSection = ({
   title,
   count,
   items,
+  iconType: itemFilterType,
   itemFilterType,
 })
 
@@ -92,6 +110,25 @@ export const shouldShowSearchResultsList = ({
   (Boolean(debouncedQuery) &&
     query.trim().length >= SEARCH_MIN_QUERY_LENGTH &&
     debouncedQuery.trim().length >= SEARCH_MIN_QUERY_LENGTH)
+
+export const getSearchFacets = (sections: SQLiteSearchResultSection[]): SearchFacet[] => {
+  const counts = new Map<SearchItemType, number>()
+
+  sections.forEach(section => {
+    counts.set(section.itemFilterType, (counts.get(section.itemFilterType) || 0) + section.count)
+  })
+
+  const facets = searchFacetOrder.flatMap(id => {
+    const count = counts.get(id)
+    return count === undefined ? [] : [{ id, count }]
+  })
+  const totalCount = facets.reduce((total, facet) => total + facet.count, 0)
+
+  return [{ id: 'all', count: totalCount }, ...facets]
+}
+
+export const getSectionsForFacet = (sections: SQLiteSearchResultSection[], facet: SearchFacetId) =>
+  facet === 'all' ? sections : sections.filter(section => section.itemFilterType === facet)
 
 export const getSearchResultsModel = ({
   query,
@@ -126,6 +163,17 @@ export const getSearchResultsModel = ({
             id: 'reference',
             title: t('Référence biblique'),
             items: referenceItems,
+            itemFilterType: 'passages',
+          }),
+        ]
+      : []),
+    ...(passageItems.length || (itemFilters.passages && (loading.passages || searchError))
+      ? [
+          getSection({
+            id: 'passages',
+            title: t('Passages'),
+            count: totalPassageCount || passageItems.length,
+            items: passageItems,
             itemFilterType: 'passages',
           }),
         ]
@@ -168,17 +216,6 @@ export const getSearchResultsModel = ({
       : []),
     ...(naveItems.length
       ? [getSection({ id: 'nave', title: t('Nave'), items: naveItems, itemFilterType: 'nave' })]
-      : []),
-    ...(passageItems.length || (itemFilters.passages && (loading.passages || searchError))
-      ? [
-          getSection({
-            id: 'passages',
-            title: t('Passages'),
-            count: totalPassageCount || passageItems.length,
-            items: passageItems,
-            itemFilterType: 'passages',
-          }),
-        ]
       : []),
   ]
 

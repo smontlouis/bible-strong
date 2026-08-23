@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 
 import Back from '~common/Back'
+import FilterHeaderButton from '~common/FilterHeaderButton'
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -31,13 +32,6 @@ const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
   const activeFilters = filters.filter(filter => filter.active)
   const activeFilterCount = activeFilters.length
   const activeFilterIcon = activeFilters[0]?.icon
-  const accessibilityLabel =
-    activeFilterCount === 0
-      ? t('Filtrer')
-      : activeFilterCount === 1
-        ? t('filters.activeCount_one', { count: activeFilterCount })
-        : t('filters.activeCount_other', { count: activeFilterCount })
-
   const openFilters = () => {
     filtersRef.current?.present()
   }
@@ -63,37 +57,13 @@ const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
             {title}
           </Text>
         </Box>
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          accessibilityLabel={accessibilityLabel}
-          onPress={openFilters}
-        >
-          <HStack flex alignItems="center" justifyContent="flex-end" pr={15} py={15}>
-            {activeFilterCount ? (
-              <HStack bg="primary" minWidth={50} height={22} borderRadius={13} alignItems="stretch">
-                <Box minWidth={28} pl={8} pr={6} center>
-                  {activeFilterCount === 1 && activeFilterIcon ? (
-                    <FeatherIcon name={activeFilterIcon} size={14} color="reverse" />
-                  ) : (
-                    <Text color="reverse" fontSize={14} bold>
-                      {activeFilterCount}
-                    </Text>
-                  )}
-                </Box>
-                <Box pl={4} pr={6} borderLeftWidth={2} borderLeftColor="reverse" center>
-                  <FeatherIcon name="chevron-down" size={13} color="reverse" />
-                </Box>
-              </HStack>
-            ) : (
-              <>
-                <Text fontSize={14} mr={5} numberOfLines={1}>
-                  {t('Filtrer')}
-                </Text>
-                <FeatherIcon name="chevron-down" size={15} />
-              </>
-            )}
-          </HStack>
-        </TouchableOpacity>
+        <Box flex alignItems="flex-end">
+          <FilterHeaderButton
+            activeFilterCount={activeFilterCount}
+            activeFilterIcon={activeFilterIcon}
+            onPress={openFilters}
+          />
+        </Box>
       </HStack>
       <Sheet
         ref={filtersRef}

@@ -8,12 +8,14 @@ import {
 } from '../../../src/features/resources/bibleChapterContract'
 import { isOrdinaryBibleVersionId } from '../../../src/helpers/ordinaryBibleVersions'
 import { UnsupportedBibleVersion } from './bibleChapter'
+import type { BibleCanonId } from '../../../src/helpers/bibleBookCatalog'
 
 export type BibleSearchInput = {
   versionId: string
   query: string
   book?: number
   section?: 'ot' | 'nt'
+  canon?: BibleCanonId
   sortOrder?: 'relevance' | 'book'
   limit?: number
   offset?: number

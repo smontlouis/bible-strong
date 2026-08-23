@@ -1,20 +1,20 @@
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, ScrollView, TouchableOpacity } from 'react-native'
+import { FlatList, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@emotion/react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import booksDesc from '~assets/bible_versions/books-desc'
-import DropdownMenu from '~common/DropdownMenu'
 import Empty from '~common/Empty'
 import AlphabetList from '~common/AlphabetList'
+import FilterHeaderButton from '~common/FilterHeaderButton'
 import SearchInput from '~common/SearchInput'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import Box, { HStack, TouchableBox, VStack } from '~common/ui/Box'
 import { Chip } from '~common/ui/NewChip'
+import { FeatherIcon } from '~common/ui/Icon'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
 import type {
@@ -32,15 +32,22 @@ import SearchEmptyState from '~features/search/SearchEmptyState'
 import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import type { RootState } from '~redux/modules/reducer'
 import { useSelector } from 'react-redux'
-import { searchFiltersAtom, SearchItemType, SearchSection } from '~state/searchFilters'
+import {
+  searchFiltersAtom,
+  SearchItemType,
+  SearchSection,
+  type SearchCanon,
+} from '~state/searchFilters'
+import {
+  DEFAULT_BIBLE_VERSION_FILTER,
+  resolveSearchVersionFilter,
+} from '~state/searchVersionFilter'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import { installedVersionsSignalAtom } from '~state/app'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import SharedSearchEntityResultRow from './shared/SearchEntityResultRow'
-import SearchItemFilterBar, {
-  getNextSearchItemFilters,
-  searchItemFilterOrder,
-} from './shared/SearchItemFilterBar'
+import { allSearchItemFilters, searchItemFilterOrder } from './shared/SearchItemFilterBar'
+import SearchFacetBar from './shared/SearchFacetBar'
 import SearchSectionBlock, {
   SEARCH_SECTION_LOAD_MORE_COUNT,
   SEARCH_SECTION_PREVIEW_LIMIT,
@@ -58,8 +65,11 @@ import Header from '~common/Header'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import {
   getSearchResultsModel,
+  getSearchFacets,
+  getSectionsForFacet,
   SEARCH_MIN_QUERY_LENGTH,
   type SQLiteSearchResultSection,
+  type SearchFacetId,
   type SearchSectionId,
 } from './searchResultsModel'
 import { localQueryOptions } from '~helpers/queryOptions'
@@ -73,6 +83,14 @@ import {
   resourceFailureFromAvailability,
   resourceFailureFromStrongModuleAvailability,
 } from '~features/resources/resourceFailure'
+import PassageSearchFiltersSheet from './PassageSearchFiltersSheet'
+import type { SheetRef } from '~common/sheet'
+import SearchSourceFiltersSheet from './SearchSourceFiltersSheet'
+import { parseStrongReference } from '~helpers/bibleSearchInput'
+import { getBooksForCanon } from '~helpers/bibleBookCatalog'
+import { getBibleVersionCanonId } from '~helpers/bibleVersions'
+import { createStrongIdentity } from '~helpers/strongIdentities'
+import { isExactBibleReferenceInput } from '~helpers/bcvParser'
 
 type Props = {
   searchValue: string
@@ -80,7 +98,6 @@ type Props = {
 }
 
 const MIN_SEARCH_LENGTH = SEARCH_MIN_QUERY_LENGTH
-const STRONG_CODE_REGEX = /^[HG]\d+$/i
 const SEARCH_ALPHABET_FOOTER_HEIGHT = 70
 const PASSAGE_SEARCH_PAGE_SIZE = 20
 
@@ -122,14 +139,21 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const [isLinkSearching, setIsLinkSearching] = useState(false)
   const [isStudySearching, setIsStudySearching] = useState(false)
   const [visibleCounts, setVisibleCounts] = useState<Partial<Record<SearchSectionId, number>>>({})
+  const [selectedFacet, setSelectedFacet] = useState<SearchFacetId>('all')
   const [strongLetter, setStrongLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
   const [section, _setSection] = useState<SearchSection>(globalFilters.section)
+  const [canon, _setCanon] = useState<SearchCanon>(globalFilters.canon)
   const [book, _setBook] = useState(globalFilters.book)
-  const [selectedVersion, _setSelectedVersion] = useState(globalFilters.selectedVersion)
+  const [selectedVersion, _setSelectedVersion] = useState(
+    globalFilters.selectedVersion || DEFAULT_BIBLE_VERSION_FILTER
+  )
+  const resolvedSelectedVersion = resolveSearchVersionFilter(selectedVersion, defaultBibleVersion)
   const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(globalFilters.sortOrder)
   const [itemFilters, _setItemFilters] = useState(globalFilters.itemFilters)
+  const sourceFiltersRef = useRef<SheetRef>(null)
+  const passageFiltersRef = useRef<SheetRef>(null)
   const activeItemFilterTypes = searchItemFilterOrder.filter(itemType => itemFilters[itemType])
   const singleActiveItemType =
     activeItemFilterTypes.length === 1 ? activeItemFilterTypes[0] : undefined
@@ -188,17 +212,38 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setGlobalFilters(prev => ({ ...prev, book: v }))
   }
   const setSelectedVersion = (v: string) => {
+    const resolvedVersion = resolveSearchVersionFilter(v, defaultBibleVersion)
+    const versionCanon = getBibleVersionCanonId(resolvedVersion)
+    const nextCanon = canon && canon !== versionCanon ? '' : canon
+    const nextBook =
+      book && !getBooksForCanon(versionCanon).some(candidate => candidate.Numero === book)
+        ? 0
+        : book
+
     _setSelectedVersion(v)
-    setGlobalFilters(prev => ({ ...prev, selectedVersion: v }))
+    if (nextCanon !== canon) _setCanon(nextCanon)
+    if (nextBook !== book) _setBook(nextBook)
+    setGlobalFilters(prev => ({
+      ...prev,
+      selectedVersion: v,
+      canon: nextCanon,
+      book: nextBook,
+    }))
   }
   const setSortOrder = (v: SearchSortOrder) => {
     _setSortOrder(v)
     setGlobalFilters(prev => ({ ...prev, sortOrder: v }))
   }
   const toggleItemFilter = (type: SearchItemType) => {
-    const next = getNextSearchItemFilters(itemFilters, type)
+    const next = { ...itemFilters, [type]: !itemFilters[type] }
+    if (!searchItemFilterOrder.some(itemType => next[itemType])) return
+
     _setItemFilters(next)
     setGlobalFilters(prev => ({ ...prev, itemFilters: next }))
+  }
+  const resetItemFilters = () => {
+    _setItemFilters(allSearchItemFilters)
+    setGlobalFilters(prev => ({ ...prev, itemFilters: allSearchItemFilters }))
   }
   const increaseVisibleCount = (sectionId: SearchSectionId) => {
     setVisibleCounts(prev => ({
@@ -218,37 +263,89 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
   useEffect(() => {
     if (!installedVersionsQuery.isSuccess) return
-    if (selectedVersion && !installedVersions.includes(selectedVersion)) {
-      setSelectedVersion('')
+    const compatibleVersions = canon
+      ? installedVersions.filter(version => getBibleVersionCanonId(version) === canon)
+      : installedVersions
+    if (!resolvedSelectedVersion || !compatibleVersions.includes(resolvedSelectedVersion)) {
+      const fallbackVersionFilter = compatibleVersions.includes(defaultBibleVersion)
+        ? DEFAULT_BIBLE_VERSION_FILTER
+        : compatibleVersions[0] || ''
+      setSelectedVersion(fallbackVersionFilter)
     }
-    // Reconcile the persisted filter when the installed-version inventory changes.
+    // Reconcile the persisted filter when the inventory or selected canon changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [installedVersions, installedVersionsQuery.isSuccess, selectedVersion])
+  }, [
+    canon,
+    defaultBibleVersion,
+    installedVersions,
+    installedVersionsQuery.isSuccess,
+    resolvedSelectedVersion,
+  ])
 
+  const canonBooks = getBooksForCanon(canon || getBibleVersionCanonId(resolvedSelectedVersion))
   const books = [
     {
       Numero: 0,
       Nom: t('Tout'),
       Chapitres: 0,
     },
-    ...booksDesc,
+    ...canonBooks,
   ].map(b => ({
     value: b.Numero,
     label: t(b.Nom),
   }))
 
-  const sectionValues = [
-    { value: '', label: t('Tout') },
+  const sectionValues: { value: SearchSection; label: string }[] = [
+    { value: '', label: t('Toute la Bible') },
     { value: 'at', label: t('Ancien Testament') },
     { value: 'nt', label: t('Nouveau Testament') },
   ]
 
+  const canonLabels: Record<Exclude<SearchCanon, ''>, string> = {
+    'protestant-66': t('search.canon.protestant'),
+    'catholic-73': t('search.canon.catholic'),
+    'clementine-vulgate': t('search.canon.clementine'),
+    'theotex-septuagint': t('search.canon.septuagint'),
+  }
+  const availableCanons = Array.from(
+    new Set(installedVersions.map(version => getBibleVersionCanonId(version)))
+  )
+  const setCanon = (v: SearchCanon) => {
+    const compatibleVersions = v
+      ? installedVersions.filter(version => getBibleVersionCanonId(version) === v)
+      : installedVersions
+    const nextVersion = compatibleVersions.includes(resolvedSelectedVersion)
+      ? selectedVersion
+      : compatibleVersions.includes(defaultBibleVersion)
+        ? DEFAULT_BIBLE_VERSION_FILTER
+        : compatibleVersions[0] || ''
+    const nextBook =
+      v && book && !getBooksForCanon(v).some(candidate => candidate.Numero === book) ? 0 : book
+
+    _setCanon(v)
+    if (nextVersion !== selectedVersion) _setSelectedVersion(nextVersion)
+    if (nextBook !== book) _setBook(nextBook)
+    setGlobalFilters(prev => ({
+      ...prev,
+      canon: v,
+      selectedVersion: nextVersion,
+      book: nextBook,
+    }))
+  }
+  const canonValues: { value: SearchCanon; label: string }[] = [
+    { value: '', label: t('Tous les canons') },
+    ...availableCanons.map(value => ({ value, label: canonLabels[value] })),
+  ]
+
   const versionValues = [
-    { value: '', label: t('Toutes les versions') },
+    {
+      value: DEFAULT_BIBLE_VERSION_FILTER,
+      label: `${t('bibleDefaults.defaultReadingTitle')} (${defaultBibleVersion})`,
+    },
     ...installedVersions.map(v => ({ value: v, label: v })),
   ]
 
-  const sortOrderValues = [
+  const sortOrderValues: { value: SearchSortOrder; label: string }[] = [
     { value: 'relevance', label: t('Pertinence') },
     { value: 'book', label: t('Ordre biblique') },
   ]
@@ -369,18 +466,23 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   }, [browseItemType, debouncedSearchValue, itemFilters.links, links, searchValue, t])
 
   const trimmedSearchValue = debouncedSearchValue.trim()
+  const strongReference = parseStrongReference(trimmedSearchValue)
+  const isBibleReference = isExactBibleReferenceInput(trimmedSearchValue)
   const shouldSearchPassages =
     itemFilters.passages &&
     searchValue.trim().length >= MIN_SEARCH_LENGTH &&
     trimmedSearchValue.length >= MIN_SEARCH_LENGTH &&
-    !STRONG_CODE_REGEX.test(trimmedSearchValue)
+    Boolean(resolvedSelectedVersion) &&
+    !strongReference &&
+    !isBibleReference
   const passageQuery = useInfiniteQuery({
     queryKey: [
       'sqlite-passage-search',
       trimmedSearchValue,
       section,
+      canon,
       book,
-      selectedVersion,
+      resolvedSelectedVersion,
       sortOrder,
       isConnected,
     ],
@@ -392,9 +494,10 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           limit: PASSAGE_SEARCH_PAGE_SIZE,
           offset: pageParam,
           sortOrder,
-          ...(selectedVersion && { version: selectedVersion }),
+          version: resolvedSelectedVersion,
           ...(book && { book }),
           ...(sectionMap[section] && { section: sectionMap[section] }),
+          ...(canon && { canon }),
         }
 
         return await appLogger.measure(
@@ -403,15 +506,16 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           () => resources.bibleSearch.searchPage(debouncedSearchValue, options),
           {
             queryLength: debouncedSearchValue.length,
-            version: selectedVersion,
+            version: resolvedSelectedVersion,
             book,
             section,
+            canon,
             sortOrder,
           }
         )
-      } catch (e) {
-        console.error('[Search] FTS5 error:', e)
-        throw e
+      } catch (error) {
+        console.error('[Search] Bible search error:', error)
+        throw error
       }
     },
     initialPageParam: 0,
@@ -426,7 +530,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   })
   const results: SearchResult[] | null = !itemFilters.passages
     ? null
-    : STRONG_CODE_REGEX.test(trimmedSearchValue)
+    : strongReference || isBibleReference
       ? []
       : shouldSearchPassages
         ? (passageQuery.data?.pages.flatMap(page => page.results) ?? null)
@@ -451,6 +555,23 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     ],
     queryFn: async ({ pageParam, signal }) => {
       try {
+        if (strongReference) {
+          const entries = await resources.strongLexicon.loadPreview(
+            [createStrongIdentity(strongReference.number, strongReference.language)],
+            resourcesLanguage.STRONG
+          )
+          return {
+            entries: entries.map(entry => ({
+              id: entry.id,
+              stepCode: entry.stepCode,
+              classicStrong: entry.classicStrong,
+              language: entry.language,
+              original: entry.original,
+              transliteration: entry.transliteration,
+              gloss: entry.gloss,
+            })),
+          }
+        }
         return await resources.strongLexicon.listEntries({
           signal,
           language: resourcesLanguage.STRONG,
@@ -587,6 +708,46 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     },
     t,
   })
+  const searchFacets = getSearchFacets(searchModel.sections)
+  const effectiveSelectedFacet = searchFacets.some(facet => facet.id === selectedFacet)
+    ? selectedFacet
+    : 'all'
+  const visibleSearchSections = getSectionsForFacet(searchModel.sections, effectiveSelectedFacet)
+  const shouldShowFacets =
+    !browseItemType &&
+    searchValue.trim().length >= MIN_SEARCH_LENGTH &&
+    trimmedSearchValue.length >= MIN_SEARCH_LENGTH &&
+    searchFacets.length > 1
+  const activePassageFilterCount = [
+    selectedVersion !== DEFAULT_BIBLE_VERSION_FILTER,
+    section !== '',
+    canon !== '',
+    book !== 0,
+    sortOrder !== 'relevance',
+  ].filter(Boolean).length
+  const sourceFilterCount =
+    activeItemFilterTypes.length === searchItemFilterOrder.length ? 0 : activeItemFilterTypes.length
+
+  const resetPassageFilters = () => {
+    _setSelectedVersion(DEFAULT_BIBLE_VERSION_FILTER)
+    _setSection('')
+    _setCanon('')
+    _setBook(0)
+    _setSortOrder('relevance')
+    setGlobalFilters(previous => ({
+      ...previous,
+      selectedVersion: DEFAULT_BIBLE_VERSION_FILTER,
+      section: '',
+      canon: '',
+      book: 0,
+      sortOrder: 'relevance',
+    }))
+  }
+
+  const updateSearchValue = (value: string) => {
+    setSelectedFacet('all')
+    setSearchValue(value)
+  }
 
   function renderPassageError(): ReactNode {
     const recoveryIdentity = { kind: 'bible', versionId: defaultBibleVersion } as const
@@ -868,7 +1029,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             paddingBottom: listBottomInset,
           }}
           removeClippedSubviews
-          data={searchModel.sections}
+          data={visibleSearchSections}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
             if (
@@ -913,7 +1074,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 <SearchNoResultsState query={debouncedSearchValue} />
               )
             ) : (
-              <SearchEmptyState onExamplePress={setSearchValue} />
+              <SearchEmptyState onExamplePress={updateSearchValue} />
             )
           }
           renderItem={({ item: section }: { item: SQLiteSearchResultSection }) => (
@@ -987,6 +1148,23 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 (section.id === 'nave' && naveQuery.hasNextPage)
               }
               showLoadMoreButton={!isSoloPaginatedSection(section.id)}
+              headerAction={
+                section.id === 'passages' ? (
+                  <TouchableBox
+                    center
+                    minHeight={40}
+                    px={8}
+                    accessibilityLabel={t('Filtrer')}
+                    onPress={() => passageFiltersRef.current?.present()}
+                  >
+                    <FeatherIcon
+                      name="sliders"
+                      size={15}
+                      color={activePassageFilterCount ? 'primary' : 'tertiary'}
+                    />
+                  </TouchableBox>
+                ) : undefined
+              }
             />
           )}
         />
@@ -998,65 +1176,67 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
   return (
     <Box flex={1}>
-      <Header title={t('Rechercher')}>
-        <>
+      <Header
+        title=""
+        rightComponent={
+          <FilterHeaderButton
+            activeFilterCount={sourceFilterCount}
+            onPress={() => sourceFiltersRef.current?.present()}
+          />
+        }
+      >
+        <Box pb={5}>
           <Box px={20}>
             <SearchInput
               placeholder={t('search.placeholder')}
-              onChangeText={setSearchValue}
+              onChangeText={updateSearchValue}
               value={searchValue}
-              onDelete={() => setSearchValue('')}
+              onDelete={() => updateSearchValue('')}
             />
           </Box>
           <Box>
             <VStack>
-              <SearchItemFilterBar
-                itemFilters={itemFilters}
-                onToggle={toggleItemFilter}
-                px={20}
-                mb={0}
-                maxHeight={40}
-              />
-              {hasInstalledVersions && (
-                <ScrollView horizontal>
-                  <HStack
-                    px={20}
-                    opacity={itemFilters.passages ? 1 : 0.3}
-                    pointerEvents={itemFilters.passages ? 'auto' : 'none'}
-                  >
-                    {installedVersions.length > 1 && (
-                      <DropdownMenu
-                        title={t('Version')}
-                        currentValue={selectedVersion}
-                        setValue={setSelectedVersion}
-                        choices={versionValues}
-                      />
-                    )}
-                    <DropdownMenu
-                      title={t('Section')}
-                      currentValue={section}
-                      setValue={(v: string) => setSection(v as SearchSection)}
-                      choices={sectionValues}
-                    />
-                    <DropdownMenu
-                      title={t('Livre')}
-                      currentValue={book}
-                      setValue={setBook}
-                      choices={books}
-                    />
-                    <DropdownMenu
-                      title={t('Ordre')}
-                      currentValue={sortOrder}
-                      setValue={(v: string) => setSortOrder(v as SearchSortOrder)}
-                      choices={sortOrderValues}
-                    />
-                  </HStack>
-                </ScrollView>
-              )}
+              {shouldShowFacets ? (
+                <SearchFacetBar
+                  facets={searchFacets}
+                  selectedFacet={effectiveSelectedFacet}
+                  onSelect={setSelectedFacet}
+                />
+              ) : null}
             </VStack>
           </Box>
-        </>
+        </Box>
       </Header>
+
+      <SearchSourceFiltersSheet
+        ref={sourceFiltersRef}
+        itemFilters={itemFilters}
+        passageFilterCount={activePassageFilterCount}
+        onToggle={toggleItemFilter}
+        onReset={resetItemFilters}
+        onOpenPassageFilters={() => passageFiltersRef.current?.present()}
+      />
+
+      <PassageSearchFiltersSheet
+        ref={passageFiltersRef}
+        defaultVersionValue={DEFAULT_BIBLE_VERSION_FILTER}
+        section={section}
+        canon={canon}
+        book={book}
+        selectedVersion={selectedVersion}
+        sortOrder={sortOrder}
+        sectionChoices={sectionValues}
+        canonChoices={canonValues}
+        bookChoices={books}
+        versionChoices={versionValues}
+        sortOrderChoices={sortOrderValues}
+        onSectionChange={setSection}
+        onCanonChange={setCanon}
+        onBookChange={setBook}
+        onVersionChange={setSelectedVersion}
+        onSortOrderChange={setSortOrder}
+        onReset={resetPassageFilters}
+      />
 
       {renderContent()}
       {browseAlphabet ? (

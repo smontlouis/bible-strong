@@ -10,7 +10,12 @@ jest.mock('~i18n', () => ({
   },
 }))
 
-import { getSearchResultsModel, shouldShowSearchResultsList } from '../searchResultsModel'
+import {
+  getSearchFacets,
+  getSearchResultsModel,
+  getSectionsForFacet,
+  shouldShowSearchResultsList,
+} from '../searchResultsModel'
 import type { SearchEntityResult } from '../shared/searchResultTypes'
 
 const t = (key: string) => key
@@ -150,5 +155,75 @@ describe('searchResultsModel', () => {
 
     expect(model.showNoResults).toBe(true)
     expect(model.shouldRenderSearchList).toBe(true)
+  })
+
+  it('builds result facets by source and aggregates the global count', () => {
+    const model = getSearchResultsModel({
+      ...baseInput,
+      noteResults: [noteResult],
+      strongResults: [
+        {
+          id: 26,
+          stepCode: 'G0026',
+          classicStrong: 'G0026',
+          language: 'greek',
+          original: 'ἀγάπη',
+          transliteration: 'agapē',
+          gloss: 'amour',
+        },
+      ],
+    })
+
+    expect(getSearchFacets(model.sections)).toEqual([
+      { id: 'all', count: 2 },
+      { id: 'notes', count: 1 },
+      { id: 'strong', count: 1 },
+    ])
+  })
+
+  it('filters result sections without mutating the search source filters', () => {
+    const model = getSearchResultsModel({
+      ...baseInput,
+      noteResults: [noteResult],
+      linkResults: [
+        {
+          id: 'link:1',
+          type: 'links',
+          iconType: 'links',
+          title: 'Link 1',
+          subtitle: 'Link',
+        },
+      ],
+    })
+
+    expect(getSectionsForFacet(model.sections, 'notes').map(section => section.id)).toEqual([
+      'notes',
+    ])
+    expect(getSectionsForFacet(model.sections, 'all')).toBe(model.sections)
+  })
+
+  it('keeps passage facets first even when passage results arrive last', () => {
+    expect(
+      getSearchFacets([
+        {
+          id: 'notes',
+          title: 'Notes',
+          count: 1,
+          items: [],
+          itemFilterType: 'notes',
+        },
+        {
+          id: 'passages',
+          title: 'Passages',
+          count: 12,
+          items: [],
+          itemFilterType: 'passages',
+        },
+      ])
+    ).toEqual([
+      { id: 'all', count: 13 },
+      { id: 'passages', count: 12 },
+      { id: 'notes', count: 1 },
+    ])
   })
 })

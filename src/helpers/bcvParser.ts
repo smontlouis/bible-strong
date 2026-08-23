@@ -219,6 +219,22 @@ export const parseInlineBibleReferences = (
   return mergeSameChapterSequence(text, parsedReferences)
 }
 
+export const isExactBibleReferenceInput = (text: string, parserLanguage?: BcvLanguage): boolean => {
+  const trimmed = text.trim()
+  if (!trimmed) return false
+
+  const references = parseInlineBibleReferences(trimmed, parserLanguage)
+  if (references.length === 0 || references[0].start !== 0) return false
+
+  let previousEnd = 0
+  for (const reference of references) {
+    if (!/^[,;\s]*$/u.test(trimmed.slice(previousEnd, reference.start))) return false
+    previousEnd = reference.end
+  }
+
+  return previousEnd === trimmed.length
+}
+
 export function getIntermediateChapters(startRef: string, endRef: string) {
   const [startBook, startChapterStr, startVerseStr] = startRef.split('.')
   const [endBook, endChapterStr, endVerseStr] = endRef.split('.')

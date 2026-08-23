@@ -46,6 +46,21 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
             return [{ osis: 'Ps.23', translations: [''], indices: [0, 9] }]
           }
 
+          if (text === 'Jean 3:16') {
+            return [{ osis: 'John.3.16', translations: [''], indices: [0, 9] }]
+          }
+
+          if (text === 'Jean 3:16; Romains 5:1') {
+            return [
+              { osis: 'John.3.16', translations: [''], indices: [0, 9] },
+              { osis: 'Rom.5.1', translations: [''], indices: [11, 22] },
+            ]
+          }
+
+          if (text === 'Lire Jean 3:16') {
+            return [{ osis: 'John.3.16', translations: [''], indices: [5, 14] }]
+          }
+
           if (text === 'Actes 7:59, 60') {
             return [
               { osis: 'Acts.7.59', translations: [''], indices: [0, 10] },
@@ -67,8 +82,14 @@ jest.mock('bible-passage-reference-parser/esm/bcv_parser.js', () => ({
   },
 }))
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const { bcv, osisToBibleReferenceTarget, parseInlineBibleReferences } = require('../bcvParser')
+/* eslint-disable @typescript-eslint/no-require-imports */
+const {
+  bcv,
+  isExactBibleReferenceInput,
+  osisToBibleReferenceTarget,
+  parseInlineBibleReferences,
+} = require('../bcvParser')
+/* eslint-enable @typescript-eslint/no-require-imports */
 
 describe('bcvParser', () => {
   it('uses strict book matching for prose extraction', () => {
@@ -161,6 +182,15 @@ describe('bcvParser', () => {
           },
         },
       ])
+    })
+  })
+
+  describe('isExactBibleReferenceInput', () => {
+    it('distinguishes a direct navigation query from surrounding prose', () => {
+      expect(isExactBibleReferenceInput('Jean 3:16')).toBe(true)
+      expect(isExactBibleReferenceInput('Jean 3:16; Romains 5:1')).toBe(true)
+      expect(isExactBibleReferenceInput('Lire Jean 3:16')).toBe(false)
+      expect(isExactBibleReferenceInput('jesus pleura')).toBe(false)
     })
   })
 

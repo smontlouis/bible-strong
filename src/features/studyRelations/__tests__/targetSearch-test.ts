@@ -51,6 +51,16 @@ describe('searchRelationTargets', () => {
       code: '7225',
       labelFallback: 'H7225',
     })
+
+    expect(searchRelationTargets(' h 0430 ')[0]).toMatchObject({
+      title: 'H430',
+      endpoint: {
+        type: 'strong',
+        language: 'hebrew',
+        code: '430',
+        labelFallback: 'H430',
+      },
+    })
   })
 
   it('returns note and study targets from user data', () => {
@@ -73,6 +83,18 @@ describe('searchRelationTargets', () => {
     expect(results.map(result => result.type)).toEqual(['notes', 'studies'])
     expect(results[0].endpoint).toMatchObject({ type: 'note', noteId: 'note1' })
     expect(results[1].endpoint).toMatchObject({ type: 'study', studyId: 'study1' })
+  })
+
+  it('normalizes accents, Greek diacritics, and Hebrew niqqud for local targets', () => {
+    const notes = {
+      french: { title: 'Éternel', description: 'Une note', date: 1 },
+      greek: { title: 'Ἀγάπη', description: 'Une note', date: 2 },
+      hebrew: { title: 'אֱלֹהִים', description: 'Une note', date: 3 },
+    }
+
+    expect(searchRelationTargets('eternel', { notes })[0].id).toBe('note:french')
+    expect(searchRelationTargets('αγαπη', { notes })[0].id).toBe('note:greek')
+    expect(searchRelationTargets('אלהים', { notes })[0].id).toBe('note:hebrew')
   })
 
   it('falls back to the study map key when persisted studies have no id field', () => {

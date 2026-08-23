@@ -1,11 +1,11 @@
 import { TouchableOpacity } from 'react-native'
 import type { FuseResultMatch } from 'fuse.js'
-import Box, { HStack, VStack } from '~common/ui/Box'
+import { HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Chip } from '~common/ui/NewChip'
 import Paragraph from '~common/ui/Paragraph'
 import Text from '~common/ui/Text'
-import SearchTypeIcon from './SearchTypeIcon'
+import { searchTypeIconConfig } from './SearchTypeIcon'
 import { mergeRanges, normalizeDisplayedText, normalizeSearchText } from './searchFuzzy'
 import type { MatchRange, SearchEntityResult } from './searchResultTypes'
 
@@ -167,17 +167,16 @@ export const SearchEntityResultRow = ({
   descriptionColor?: string
 }) => (
   <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-    <HStack px={20} py={12} borderBottomWidth={1} borderColor="border" alignItems="center" gap={12}>
-      <Box
-        width={36}
-        height={36}
-        borderRadius={10}
-        bg="lightGrey"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <SearchTypeIcon type={item.iconType} />
-      </Box>
+    <HStack
+      px={20}
+      py={12}
+      borderBottomWidth={1}
+      borderLeftWidth={3}
+      borderLeftColor={searchTypeIconConfig[item.iconType].color}
+      borderColor="border"
+      alignItems="center"
+      gap={12}
+    >
       <VStack flex={1}>
         <HStack alignItems="center" gap={6} mb={2}>
           <HighlightedText value={item.title} match={getMatchForKey(item, 'title')} bold />

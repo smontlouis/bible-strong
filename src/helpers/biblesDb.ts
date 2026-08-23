@@ -3,10 +3,17 @@ import * as Sentry from '@sentry/react-native'
 import * as SQLite from 'expo-sqlite'
 import { getSharedSqliteDirPath } from '~helpers/databaseTypes'
 import { databaseBiblesName } from '~helpers/databases'
-import { buildNearFtsQuery, sanitizeFtsQuery } from '~helpers/bibleSearchQuery'
+import { sanitizeFtsQuery } from '~helpers/bibleSearchQuery'
+import {
+  findClosestBibleSearchTerm,
+  highlightBibleSearchText,
+  normalizeBibleSearchText,
+  parseBibleTextSearchQuery,
+} from '~helpers/bibleSearchInput'
 import { getImportableBibleVerses } from '~helpers/bibleJsonImport'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import type { CanonicalBibleHeading } from '~helpers/canonicalBibleHeadings'
+import type { BibleCanonId } from '~helpers/bibleBookCatalog'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -92,8 +99,10 @@ export type SearchSortOrder = 'relevance' | 'book'
 export interface SearchOptions {
   signal?: AbortSignal
   version?: string
+  versionIds?: readonly string[]
   book?: number
   section?: 'ot' | 'nt'
+  canon?: BibleCanonId
   sortOrder?: SearchSortOrder
   limit?: number
   offset?: number
@@ -189,6 +198,7 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
           chapter INTEGER NOT NULL,
           verse INTEGER NOT NULL,
           text TEXT NOT NULL,
+          normalized_text TEXT NOT NULL DEFAULT '',
           start_tags_json TEXT NOT NULL DEFAULT '[]',
           layout_json TEXT NOT NULL DEFAULT '[]',
           notes_json TEXT NOT NULL DEFAULT '[]',
@@ -203,6 +213,7 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
 
         CREATE VIRTUAL TABLE IF NOT EXISTS verses_fts USING fts5(
           text,
+          normalized_text,
           content='verses',
           content_rowid='id',
           tokenize='unicode61 remove_diacritics 2'
@@ -223,11 +234,13 @@ export async function openBiblesDb(): Promise<SQLite.SQLiteDatabase> {
       await ensureTableColumn(instance, 'verses', 'start_tags_json', "TEXT NOT NULL DEFAULT '[]'")
       await ensureTableColumn(instance, 'verses', 'notes_json', "TEXT NOT NULL DEFAULT '[]'")
       await ensureTableColumn(instance, 'verses', 'headings_json', "TEXT NOT NULL DEFAULT '[]'")
+      await ensureTableColumn(instance, 'verses', 'normalized_text', 'TEXT')
       await ensureTableColumn(instance, 'versions_meta', 'text_revision', 'TEXT')
       await ensureTableColumn(instance, 'versions_meta', 'text_sha256', 'TEXT')
       await ensureTableColumn(instance, 'versions_meta', 'source_sha256', 'TEXT')
       await ensureTableColumn(instance, 'versions_meta', 'schema_version', 'INTEGER')
       await ensureTableColumn(instance, 'versions_meta', 'resource_generation', 'TEXT')
+      await ensureBibleSearchIndex(instance)
 
       db = instance
       openPromise = null
@@ -340,6 +353,68 @@ async function ensureTableColumn(
   if (!columns.some(item => item.name === column)) {
     await database.execAsync(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`)
   }
+}
+
+const NORMALIZED_TEXT_MIGRATION_BATCH_SIZE = 200
+
+async function populateMissingNormalizedVerseText(
+  database: SQLite.SQLiteDatabase
+): Promise<boolean> {
+  let changed = false
+
+  while (true) {
+    const rows = await database.getAllAsync<{ id: number; text: string }>(
+      `SELECT id, text
+       FROM verses
+       WHERE normalized_text IS NULL
+       ORDER BY id
+       LIMIT ?`,
+      [NORMALIZED_TEXT_MIGRATION_BATCH_SIZE]
+    )
+    if (rows.length === 0) return changed
+
+    const assignments = rows.map(() => 'WHEN ? THEN ?').join(' ')
+    const ids = rows.map(() => '?').join(', ')
+    const params: (string | number)[] = []
+    rows.forEach(row => params.push(row.id, normalizeBibleSearchText(row.text)))
+    rows.forEach(row => params.push(row.id))
+
+    await database.runAsync(
+      `UPDATE verses
+       SET normalized_text = CASE id ${assignments} ELSE normalized_text END
+       WHERE id IN (${ids})`,
+      params
+    )
+    changed = true
+  }
+}
+
+async function ensureBibleSearchIndex(database: SQLite.SQLiteDatabase): Promise<void> {
+  const ftsColumns = await database.getAllAsync<{ name: string }>('PRAGMA table_info(verses_fts)')
+  const normalizedTextChanged = await populateMissingNormalizedVerseText(database)
+  const requiresRebuild =
+    normalizedTextChanged || !ftsColumns.some(column => column.name === 'normalized_text')
+
+  if (requiresRebuild) {
+    await database.withExclusiveTransactionAsync(async () => {
+      await database.execAsync(`
+        DROP TABLE IF EXISTS verses_fts_vocab;
+        DROP TABLE IF EXISTS verses_fts;
+        CREATE VIRTUAL TABLE verses_fts USING fts5(
+          text,
+          normalized_text,
+          content='verses',
+          content_rowid='id',
+          tokenize='unicode61 remove_diacritics 2'
+        );
+        INSERT INTO verses_fts(verses_fts) VALUES('rebuild');
+      `)
+    })
+  }
+
+  await database.execAsync(
+    "CREATE VIRTUAL TABLE IF NOT EXISTS verses_fts_vocab USING fts5vocab(verses_fts, 'row')"
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -696,8 +771,8 @@ export function insertBibleVersion(
       // Delete existing data for this version first (re-download case)
       // Remove FTS entries before deleting verses (content-sync table needs explicit delete)
       await d.runAsync(
-        `INSERT INTO verses_fts(verses_fts, rowid, text)
-       SELECT 'delete', id, text FROM verses WHERE version = ?`,
+        `INSERT INTO verses_fts(verses_fts, rowid, text, normalized_text)
+       SELECT 'delete', id, text, normalized_text FROM verses WHERE version = ?`,
         [version]
       )
       await d.runAsync('DELETE FROM verses WHERE version = ?', [version])
@@ -715,7 +790,18 @@ export function insertBibleVersion(
       }
       const versesData: BibleVerseImportData =
         canonicalPublication?.verses ?? (jsonData as LegacyBibleJsonData)
-      const allRows: [string, number, number, number, string, string, string, string, string][] = []
+      const allRows: [
+        string,
+        number,
+        number,
+        number,
+        string,
+        string,
+        string,
+        string,
+        string,
+        string,
+      ][] = []
       let canonicalNoteCount = 0
       let canonicalHeadingCount = 0
       for (const { bookNumber, chapterNumber, verseNumber, verseData } of getImportableBibleVerses(
@@ -728,6 +814,7 @@ export function insertBibleVersion(
             chapterNumber,
             verseNumber,
             verseData,
+            normalizeBibleSearchText(verseData),
             '[]',
             '[]',
             '[]',
@@ -743,6 +830,7 @@ export function insertBibleVersion(
           chapterNumber,
           verseNumber,
           verseData.text,
+          normalizeBibleSearchText(verseData.text),
           JSON.stringify(verseData.startTags ?? []),
           JSON.stringify(verseData.layout ?? []),
           JSON.stringify(verseData.notes ?? []),
@@ -789,7 +877,7 @@ export function insertBibleVersion(
         }
 
         const batch = allRows.slice(i, i + BATCH_SIZE)
-        const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
+        const placeholders = batch.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ')
         const flatParams: (string | number)[] = []
         for (const row of batch) {
           flatParams.push(...row)
@@ -797,8 +885,8 @@ export function insertBibleVersion(
 
         await d.runAsync(
           `INSERT INTO verses (
-             version, book, chapter, verse, text, start_tags_json, layout_json, notes_json,
-             headings_json
+             version, book, chapter, verse, text, normalized_text, start_tags_json, layout_json,
+             notes_json, headings_json
            )
            VALUES ${placeholders}`,
           flatParams
@@ -812,8 +900,8 @@ export function insertBibleVersion(
 
       // Populate FTS index for this version
       await d.runAsync(
-        `INSERT INTO verses_fts(rowid, text)
-       SELECT id, text FROM verses WHERE version = ?`,
+        `INSERT INTO verses_fts(rowid, text, normalized_text)
+       SELECT id, text, normalized_text FROM verses WHERE version = ?`,
         [version]
       )
 
@@ -882,8 +970,8 @@ export function removeBibleVersion(version: string): Promise<void> {
     await d.withExclusiveTransactionAsync(async () => {
       // Remove FTS entries first (content-sync table needs explicit delete)
       await d.runAsync(
-        `INSERT INTO verses_fts(verses_fts, rowid, text)
-         SELECT 'delete', id, text FROM verses WHERE version = ?`,
+        `INSERT INTO verses_fts(verses_fts, rowid, text, normalized_text)
+         SELECT 'delete', id, text, normalized_text FROM verses WHERE version = ?`,
         [version]
       )
 
@@ -922,6 +1010,14 @@ function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
     existsConditions.push('vf.book = ?')
     existsParams.push(options.book)
   }
+  if (options?.versionIds) {
+    if (options.versionIds.length === 0) {
+      existsConditions.push('FALSE')
+    } else {
+      existsConditions.push(`vf.version IN (${options.versionIds.map(() => '?').join(', ')})`)
+      existsParams.push(...options.versionIds)
+    }
+  }
   if (options?.section === 'ot') {
     existsConditions.push('(vf.book BETWEEN 1 AND 39 OR vf.book BETWEEN 67 AND 77)')
   } else if (options?.section === 'nt') {
@@ -943,127 +1039,129 @@ function buildSearchFilter(ftsQuery: string, options?: SearchOptions) {
   return { where, params }
 }
 
-/**
- * Build a NEAR query from raw user input for proximity-boosted ranking.
- * Returns null for single-word queries or inputs with explicit operators.
- */
-/**
- * Search verses using FTS5 full-text search.
- *
- * Supports:
- * - Prefix search: "amou*"
- * - Phrase search: "\"amour de Dieu\""
- * - Boolean: "amour OR grace", "amour NOT colere"
- *
- * For multi-word queries sorted by relevance, uses two-tier proximity ranking:
- * 1. NEAR results (words within 5 tokens of each other), ranked by BM25
- * 2. Broad results (standard prefix search), ranked by BM25, deduped
- *
- * Results are highlighted with {{ and }} markers.
- */
+const scopeNormalizedFtsQuery = (ftsQuery: string) => `{normalized_text} : (${ftsQuery})`
+
+type ResolvedFtsQuery = {
+  ftsQuery: string
+  highlightQuery: string
+}
+
+const resolveFtsQuery = async (
+  database: SQLite.SQLiteDatabase,
+  rawQuery: string,
+  options?: SearchOptions
+): Promise<ResolvedFtsQuery | null> => {
+  const parsed = parseBibleTextSearchQuery(rawQuery)
+  const primaryQuery = sanitizeFtsQuery(rawQuery)
+  if (!parsed || !primaryQuery) return null
+
+  const scopedPrimaryQuery = scopeNormalizedFtsQuery(primaryQuery)
+  const { where, params } = buildSearchFilter(scopedPrimaryQuery, options)
+  const primaryMatch = await database.getFirstAsync<{ found: number }>(
+    `SELECT EXISTS(SELECT 1 FROM verses_fts ${where} LIMIT 1) AS found`,
+    params
+  )
+  if (primaryMatch?.found || parsed.kind === 'phrase') {
+    return { ftsQuery: scopedPrimaryQuery, highlightQuery: rawQuery }
+  }
+
+  let changed = false
+  const correctableTerms = parsed.terms.filter(term => term.length >= 4)
+  const initialCharacters = [...new Set(correctableTerms.map(term => term.charAt(0)))]
+  const candidateRows =
+    correctableTerms.length > 0
+      ? await database.getAllAsync<{ term: string }>(
+          `SELECT term
+       FROM verses_fts_vocab
+       WHERE substr(term, 1, 1) IN (${initialCharacters.map(() => '?').join(', ')})
+         AND length(term) BETWEEN ? AND ?
+       LIMIT 2000`,
+          [
+            ...initialCharacters,
+            Math.max(1, Math.min(...correctableTerms.map(term => term.length)) - 2),
+            Math.max(...correctableTerms.map(term => term.length)) + 2,
+          ]
+        )
+      : []
+  const correctedTerms = parsed.terms.map(term => {
+    if (term.length < 4) return term
+    const candidates: string[] = []
+    for (const candidateRow of candidateRows) {
+      const candidate = candidateRow.term
+      if (candidate.charAt(0) === term.charAt(0) && Math.abs(candidate.length - term.length) <= 2) {
+        candidates.push(candidate)
+      }
+    }
+    const correction = findClosestBibleSearchTerm(term, candidates)
+    changed ||= Boolean(correction && correction !== term)
+    return correction ?? term
+  })
+
+  if (!changed) return { ftsQuery: scopedPrimaryQuery, highlightQuery: rawQuery }
+
+  return {
+    ftsQuery: scopeNormalizedFtsQuery(correctedTerms.map(term => `${term}*`).join(' ')),
+    highlightQuery: correctedTerms.join(' '),
+  }
+}
+
+const highlightSearchResults = (results: SearchResult[], query: string): SearchResult[] =>
+  results.map(result => ({
+    ...result,
+    highlighted: highlightBibleSearchText(result.text, query),
+  }))
+
+/** Search verses using natural terms or an entirely quoted phrase. */
 export function searchVerses(query: string, options?: SearchOptions): Promise<SearchResult[]> {
   return withDbError('searchVerses', async () => {
     const d = await getDb()
-    const ftsQuery = sanitizeFtsQuery(query)
-    if (!ftsQuery) return []
+    const resolved = await resolveFtsQuery(d, query, options)
+    const parsed = parseBibleTextSearchQuery(query)
+    if (!resolved || !parsed) return []
 
     const limit = options?.limit ?? 100
     const offset = options?.offset ?? 0
-    const orderBy = options?.sortOrder === 'book' ? 'v.book, v.chapter, v.verse' : 'rank'
-
-    const nearQuery = buildNearFtsQuery(query)
-
-    // Two-tier proximity search for multi-word + relevance sort
-    if (nearQuery && options?.sortOrder !== 'book') {
-      try {
-        const { where: nearWhere, params: nearParams } = buildSearchFilter(nearQuery, options)
-        const nearSql = `
-          WITH fts AS MATERIALIZED (
-            SELECT rowid, highlight(verses_fts, 0, '{{', '}}') AS highlighted, rank
-            FROM verses_fts
-            ${nearWhere}
-            ORDER BY rank LIMIT ?
-          )
-          SELECT v.version, v.book, v.chapter, v.verse, v.text, fts.highlighted
-          FROM fts
-          JOIN verses v ON v.id = fts.rowid
-          ORDER BY fts.rank
-        `
-        nearParams.push(limit)
-        const nearResults = await d.getAllAsync<SearchResult>(nearSql, nearParams)
-
-        if (nearResults.length >= limit) return nearResults
-
-        // Fill remaining slots with broader results
-        const remaining = limit - nearResults.length
-        const { where: broadWhere, params: broadParams } = buildSearchFilter(ftsQuery, options)
-        const broadSql = `
-          WITH fts AS MATERIALIZED (
-            SELECT rowid, highlight(verses_fts, 0, '{{', '}}') AS highlighted, rank
-            FROM verses_fts
-            ${broadWhere}
-            ORDER BY rank LIMIT ?
-          )
-          SELECT v.version, v.book, v.chapter, v.verse, v.text, fts.highlighted
-          FROM fts
-          JOIN verses v ON v.id = fts.rowid
-          ORDER BY fts.rank
-        `
-        // Over-fetch to account for dedup
-        broadParams.push(remaining + nearResults.length)
-        const broadResults = await d.getAllAsync<SearchResult>(broadSql, broadParams)
-
-        // Dedup: remove broad results already in NEAR results
-        const nearKeys = new Set(
-          nearResults.map(r => `${r.version}-${r.book}-${r.chapter}-${r.verse}`)
-        )
-        const extra = broadResults.filter(
-          r => !nearKeys.has(`${r.version}-${r.book}-${r.chapter}-${r.verse}`)
-        )
-
-        return [...nearResults, ...extra].slice(0, limit)
-      } catch {
-        // NEAR query failed (e.g. syntax issue) → fall through to standard search
-      }
-    }
-
-    // Standard single-tier search (single word, book order, or NEAR fallback)
-    const { where, params } = buildSearchFilter(ftsQuery, options)
+    const { where, params } = buildSearchFilter(resolved.ftsQuery, options)
 
     let sql: string
-    if (orderBy === 'rank') {
-      // Relevance sort: paginate inside CTE, outer just joins for metadata
+    if (options?.sortOrder !== 'book') {
       sql = `
         WITH fts AS MATERIALIZED (
-          SELECT rowid, highlight(verses_fts, 0, '{{', '}}') AS highlighted, rank
+          SELECT rowid,
+                 rank,
+                 CASE WHEN instr(lower(text), lower(?)) > 0 THEN 0 ELSE 1 END AS exact_tier
           FROM verses_fts
           ${where}
-          ORDER BY rank LIMIT ? OFFSET ?
+          ORDER BY exact_tier, rank, rowid
+          LIMIT ? OFFSET ?
         )
-        SELECT v.version, v.book, v.chapter, v.verse, v.text, fts.highlighted
+        SELECT v.version, v.book, v.chapter, v.verse, v.text, v.text AS highlighted
         FROM fts
         JOIN verses v ON v.id = fts.rowid
-        ORDER BY fts.rank
+        ORDER BY fts.exact_tier, fts.rank, fts.rowid
       `
+      params.unshift(parsed.raw)
       params.push(limit, offset)
     } else {
-      // Book sort: CTE does MATCH + filter only, outer does ordering + pagination
       sql = `
         WITH fts AS MATERIALIZED (
-          SELECT rowid, highlight(verses_fts, 0, '{{', '}}') AS highlighted
+          SELECT rowid
           FROM verses_fts
           ${where}
         )
-        SELECT v.version, v.book, v.chapter, v.verse, v.text, fts.highlighted
+        SELECT v.version, v.book, v.chapter, v.verse, v.text, v.text AS highlighted
         FROM fts
         JOIN verses v ON v.id = fts.rowid
-        ORDER BY v.book, v.chapter, v.verse
+        ORDER BY v.book, v.chapter, v.verse, v.version
         LIMIT ? OFFSET ?
       `
       params.push(limit, offset)
     }
 
-    return d.getAllAsync<SearchResult>(sql, params)
+    return highlightSearchResults(
+      await d.getAllAsync<SearchResult>(sql, params),
+      resolved.highlightQuery
+    )
   })
 }
 
@@ -1073,10 +1171,10 @@ export function searchVerses(query: string, options?: SearchOptions): Promise<Se
 export function searchVersesCount(query: string, options?: SearchOptions): Promise<number> {
   return withDbError('searchVersesCount', async () => {
     const d = await getDb()
-    const ftsQuery = sanitizeFtsQuery(query)
-    if (!ftsQuery) return 0
+    const resolved = await resolveFtsQuery(d, query, options)
+    if (!resolved) return 0
 
-    const { where, params } = buildSearchFilter(ftsQuery, options)
+    const { where, params } = buildSearchFilter(resolved.ftsQuery, options)
 
     // No JOIN needed: filtering is handled via correlated EXISTS inside buildSearchFilter
     const sql = `

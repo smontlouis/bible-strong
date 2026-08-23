@@ -15,6 +15,7 @@ import type { RelationEndpoint } from './domain'
 import type { WordAnnotationsObj } from '~redux/modules/user/wordAnnotations'
 import { getWordAnnotationText } from '~redux/modules/user/wordAnnotationRanges'
 import verseToReference from '~helpers/verseToReference'
+import { normalizeBibleSearchText, parseStrongReference } from '~helpers/bibleSearchInput'
 
 export type RelationTargetResult = SearchEntityResultWithEndpoint
 
@@ -61,11 +62,11 @@ const searchVerseTargets = (query: string): RelationTargetResult[] =>
     }))
 
 const searchStrongTargets = (query: string): RelationTargetResult[] => {
-  const match = query.trim().match(/^([gh])\s*0*(\d+)$/i)
-  if (!match) return []
+  const reference = parseStrongReference(query)
+  if (!reference) return []
 
-  const language = match[1].toUpperCase() === 'G' ? 'greek' : 'hebrew'
-  const endpoint = createStrongEndpoint({ language, code: match[2] })
+  const { language } = reference
+  const endpoint = createStrongEndpoint({ language, code: String(reference.number) })
   const code = endpoint.code
   const prefix = language === 'greek' ? 'G' : 'H'
 
@@ -88,7 +89,7 @@ export const searchReferenceAndStrongTargets = (query: string): RelationTargetRe
   return [...searchVerseTargets(trimmed), ...searchStrongTargets(trimmed)]
 }
 
-const normalizeText = (text: string) => text.toLowerCase().trim()
+const normalizeText = normalizeBibleSearchText
 
 export const getNoteTargetItems = (notes: NotesObj = {}): RelationTargetResult[] =>
   getNoteSearchItems(notes).filter((item): item is RelationTargetResult => Boolean(item.endpoint))

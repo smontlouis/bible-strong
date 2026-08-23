@@ -134,6 +134,13 @@
       "when": 1787003626166,
       "tag": "0021_timeline_unaccent_search",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1787482000000,
+      "tag": "0022_bible_normalized_search",
+      "breakpoints": true
     }
   ]
 }

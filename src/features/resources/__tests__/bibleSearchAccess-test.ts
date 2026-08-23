@@ -120,6 +120,60 @@ describe('HTTP Bible search access', () => {
     )
   })
 
+  it('forwards the canon and its locally selected version set', async () => {
+    const fetcher = jest.fn(async () =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            resources: [
+              {
+                kind: 'bible-text',
+                versionId: 'BFC',
+                revision: 'bfc-r1',
+                textRevision: 'bfc-r1',
+              },
+            ],
+            results: [],
+            count: 0,
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } }
+        )
+      )
+    )
+    const access = createHttpBibleSearchAccess({
+      baseUrl: 'http://resource.test',
+      versions: ['LSG', 'BFC'],
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await access.searchPage('Dieu', {
+      canon: 'catholic-73',
+      versionIds: ['BFC'],
+    })
+
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://resource.test/v1/bibles/search?q=Dieu&versions=BFC&canon=catholic-73',
+      expect.any(Object)
+    )
+  })
+
+  it('returns an empty page while the requested version set is still empty', async () => {
+    const fetcher = jest.fn()
+    const access = createHttpBibleSearchAccess({
+      baseUrl: 'http://resource.test',
+      versions: ['LSG'],
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(access.searchPage('Dieu', { versionIds: [] })).resolves.toEqual({
+      results: [],
+      count: 0,
+    })
+    expect(fetcher).not.toHaveBeenCalled()
+  })
+
   it('forwards cancellation to the active HTTP search', async () => {
     let receivedSignal: AbortSignal | undefined
     const fetcher = jest.fn((_url: string | URL | Request, init?: RequestInit) => {
