@@ -130,3 +130,11 @@ export const getBooksForCanon = (
     .map(getBook)
     .filter((book): book is Book => Boolean(book))
 }
+
+export const getBookOrderForCanon = (canonId: BibleCanonId, bookId: number) => {
+  const index = BOOK_ORDER_BY_CANON[canonId].indexOf(bookId)
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index + 1
+}
+
+export const getBookIdsForCanon = (canonId: BibleCanonId): readonly number[] =>
+  BOOK_ORDER_BY_CANON[canonId]

@@ -495,9 +495,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           offset: pageParam,
           sortOrder,
           version: resolvedSelectedVersion,
+          canon: canon || getBibleVersionCanonId(resolvedSelectedVersion),
           ...(book && { book }),
           ...(sectionMap[section] && { section: sectionMap[section] }),
-          ...(canon && { canon }),
         }
 
         return await appLogger.measure(
@@ -1010,6 +1010,116 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }
 
     if (shouldRenderSearchList) {
+      const soloPaginatedSection =
+        visibleSearchSections.length === 1 && isSoloPaginatedSection(visibleSearchSections[0].id)
+          ? visibleSearchSections[0]
+          : undefined
+
+      const renderSearchResult = (item: SearchEntityResult) =>
+        item.referenceSegment ? (
+          <ReferenceSearchResultRow key={item.id} item={item} />
+        ) : (
+          <SharedSearchEntityResultRow
+            key={item.id}
+            item={item}
+            onPress={() => openSearchItem(item)}
+          />
+        )
+
+      const fetchNextPage = (sectionId: SearchSectionId) => {
+        if (
+          sectionId === 'passages' &&
+          passageQuery.hasNextPage &&
+          !passageQuery.isFetchingNextPage
+        ) {
+          void passageQuery.fetchNextPage()
+        }
+        if (sectionId === 'strong' && strongQuery.hasNextPage && !strongQuery.isFetchingNextPage) {
+          void strongQuery.fetchNextPage()
+        }
+        if (
+          sectionId === 'dictionary' &&
+          dictionaryQuery.hasNextPage &&
+          !dictionaryQuery.isFetchingNextPage
+        ) {
+          void dictionaryQuery.fetchNextPage()
+        }
+        if (sectionId === 'nave' && naveQuery.hasNextPage && !naveQuery.isFetchingNextPage) {
+          void naveQuery.fetchNextPage()
+        }
+      }
+
+      const isSectionLoading = (sectionId: SearchSectionId) =>
+        (sectionId === 'passages' && isSearching) ||
+        (sectionId === 'links' && isLinkSearching) ||
+        (sectionId === 'strong' && isStrongSearching) ||
+        (sectionId === 'dictionary' && isDictionarySearching) ||
+        (sectionId === 'nave' && isNaveSearching)
+
+      const sectionHasMore = (sectionId: SearchSectionId) =>
+        (sectionId === 'passages' && passageQuery.hasNextPage) ||
+        (sectionId === 'strong' && strongQuery.hasNextPage) ||
+        (sectionId === 'dictionary' && dictionaryQuery.hasNextPage) ||
+        (sectionId === 'nave' && naveQuery.hasNextPage)
+
+      const passageFilterAction = (
+        <TouchableBox
+          center
+          minHeight={40}
+          px={8}
+          accessibilityLabel={t('Filtrer')}
+          onPress={() => passageFiltersRef.current?.present()}
+        >
+          <FeatherIcon
+            name="sliders"
+            size={15}
+            color={activePassageFilterCount ? 'primary' : 'tertiary'}
+          />
+        </TouchableBox>
+      )
+
+      if (soloPaginatedSection) {
+        return (
+          <FlatList
+            keyboardShouldPersistTaps="handled"
+            renderScrollComponent={props => (
+              <KeyboardAwareScrollView
+                {...props}
+                bottomOffset={listBottomInset}
+                disableScrollOnKeyboardHide
+              />
+            )}
+            style={{
+              flex: 1,
+              backgroundColor: theme.colors.reverse,
+            }}
+            ListFooterComponent={listBottomInset ? <Box height={listBottomInset} /> : null}
+            removeClippedSubviews
+            data={soloPaginatedSection.items}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => renderSearchResult(item)}
+            onEndReachedThreshold={0.4}
+            onEndReached={() => fetchNextPage(soloPaginatedSection.id)}
+            ListHeaderComponent={
+              <SearchSectionBlock
+                section={soloPaginatedSection}
+                visibleCount={0}
+                onLoadMore={() => undefined}
+                onPressItem={openSearchItem}
+                statusMessage={soloPaginatedSection.id === 'passages' ? renderPassageError() : null}
+                isLoading={isSectionLoading(soloPaginatedSection.id)}
+                hasMore={sectionHasMore(soloPaginatedSection.id)}
+                showLoadMoreButton={false}
+                headerAction={
+                  soloPaginatedSection.id === 'passages' ? passageFilterAction : undefined
+                }
+                renderItems={false}
+              />
+            }
+          />
+        )
+      }
+
       return (
         <FlatList
           keyboardShouldPersistTaps="handled"
@@ -1021,45 +1131,15 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             />
           )}
           style={{
-            paddingBottom: listBottomInset || 40,
             flex: 1,
             backgroundColor: theme.colors.reverse,
           }}
-          contentContainerStyle={{
-            paddingBottom: listBottomInset,
-          }}
+          ListFooterComponent={listBottomInset ? <Box height={listBottomInset} /> : null}
           removeClippedSubviews
           data={visibleSearchSections}
           onEndReachedThreshold={0.4}
           onEndReached={() => {
-            if (
-              singleActiveItemType === 'passages' &&
-              passageQuery.hasNextPage &&
-              !passageQuery.isFetchingNextPage
-            ) {
-              void passageQuery.fetchNextPage()
-            }
-            if (
-              browseItemType === 'strong' &&
-              strongQuery.hasNextPage &&
-              !strongQuery.isFetchingNextPage
-            ) {
-              void strongQuery.fetchNextPage()
-            }
-            if (
-              browseItemType === 'dictionary' &&
-              dictionaryQuery.hasNextPage &&
-              !dictionaryQuery.isFetchingNextPage
-            ) {
-              void dictionaryQuery.fetchNextPage()
-            }
-            if (
-              browseItemType === 'nave' &&
-              naveQuery.hasNextPage &&
-              !naveQuery.isFetchingNextPage
-            ) {
-              void naveQuery.fetchNextPage()
-            }
+            if (singleActiveItemType) fetchNextPage(singleActiveItemType)
           }}
           keyExtractor={(section: SQLiteSearchResultSection) => section.id}
           ListEmptyComponent={
@@ -1122,49 +1202,12 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 }
               }}
               onPressItem={openSearchItem}
-              renderItem={item =>
-                item.referenceSegment ? (
-                  <ReferenceSearchResultRow key={item.id} item={item} />
-                ) : (
-                  <SharedSearchEntityResultRow
-                    key={item.id}
-                    item={item}
-                    onPress={() => openSearchItem(item)}
-                  />
-                )
-              }
+              renderItem={renderSearchResult}
               statusMessage={section.id === 'passages' ? renderPassageError() : null}
-              isLoading={
-                (section.id === 'passages' && isSearching) ||
-                (section.id === 'links' && isLinkSearching) ||
-                (section.id === 'strong' && isStrongSearching) ||
-                (section.id === 'dictionary' && isDictionarySearching) ||
-                (section.id === 'nave' && isNaveSearching)
-              }
-              hasMore={
-                (section.id === 'passages' && passageQuery.hasNextPage) ||
-                (section.id === 'strong' && strongQuery.hasNextPage) ||
-                (section.id === 'dictionary' && dictionaryQuery.hasNextPage) ||
-                (section.id === 'nave' && naveQuery.hasNextPage)
-              }
+              isLoading={isSectionLoading(section.id)}
+              hasMore={sectionHasMore(section.id)}
               showLoadMoreButton={!isSoloPaginatedSection(section.id)}
-              headerAction={
-                section.id === 'passages' ? (
-                  <TouchableBox
-                    center
-                    minHeight={40}
-                    px={8}
-                    accessibilityLabel={t('Filtrer')}
-                    onPress={() => passageFiltersRef.current?.present()}
-                  >
-                    <FeatherIcon
-                      name="sliders"
-                      size={15}
-                      color={activePassageFilterCount ? 'primary' : 'tertiary'}
-                    />
-                  </TouchableBox>
-                ) : undefined
-              }
+              headerAction={section.id === 'passages' ? passageFilterAction : undefined}
             />
           )}
         />

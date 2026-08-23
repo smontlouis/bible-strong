@@ -16,6 +16,7 @@ import {
   highlightFuzzyBibleSearchText,
   parseBibleTextSearchQuery,
 } from '../../../src/helpers/bibleSearchInput'
+import { highlightStemmedBibleSearchText } from '../search/bibleSearchStemming'
 
 type BibleMetadata = {
   resource_revision?: string
@@ -36,6 +37,7 @@ export const makeKyselyBibleSearchRepository = (
     chapter: number | null
     verse: number | null
     text: string | null
+    language: string | null
     match_tier: number | null
     total_count: number | string
   }
@@ -52,12 +54,33 @@ export const makeKyselyBibleSearchRepository = (
       const query = input.query.trim()
       const parsed = parseBibleTextSearchQuery(query)
       const normalizedQuery = parsed?.normalized ?? ''
-      const textSearchQuery =
+      const normalizedText = sql`bible_search_normalize(bv.text)`
+      const queryText = parsed?.terms.map(term => `${term}:*`).join(' & ') ?? ''
+      const simpleQuery =
         parsed?.kind === 'phrase'
           ? sql`phraseto_tsquery('simple', ${normalizedQuery})`
-          : sql`to_tsquery('simple', ${parsed?.terms.map(term => `${term}:*`).join(' & ') ?? ''})`
-      const normalizedText = sql`bible_search_normalize(bv.text)`
-      const textSearchVector = sql`to_tsvector('simple', ${normalizedText})`
+          : sql`to_tsquery('simple', ${queryText})`
+      const frenchQuery =
+        parsed?.kind === 'phrase'
+          ? sql`phraseto_tsquery('french', ${normalizedQuery})`
+          : sql`to_tsquery('french', ${queryText})`
+      const englishQuery =
+        parsed?.kind === 'phrase'
+          ? sql`phraseto_tsquery('english', ${normalizedQuery})`
+          : sql`to_tsquery('english', ${queryText})`
+      const simpleVector = sql`to_tsvector('simple', ${normalizedText})`
+      const frenchVector = sql`to_tsvector('french', ${normalizedText})`
+      const englishVector = sql`to_tsvector('english', ${normalizedText})`
+      const textSearchPredicate = sql`(
+        (ap.language = 'fr' AND ${frenchVector} @@ ${frenchQuery}) OR
+        (ap.language = 'en' AND ${englishVector} @@ ${englishQuery}) OR
+        (ap.language NOT IN ('fr', 'en') AND ${simpleVector} @@ ${simpleQuery})
+      )`
+      const relevanceScore = sql`CASE
+        WHEN ap.language = 'fr' THEN ts_rank_cd(${frenchVector}, ${frenchQuery})
+        WHEN ap.language = 'en' THEN ts_rank_cd(${englishVector}, ${englishQuery})
+        ELSE ts_rank_cd(${simpleVector}, ${simpleQuery})
+      END`
       const filters: RawBuilder<boolean>[] = []
       if (input.book !== undefined) filters.push(sql<boolean>`bv.book = ${input.book}`)
       if (input.canon) filters.push(sql<boolean>`ap.canon_id = ${input.canon}`)
@@ -68,6 +91,8 @@ export const makeKyselyBibleSearchRepository = (
       const filterSql = filters.length > 0 ? sql.join(filters, sql` AND `) : sql`TRUE`
       const fuzzyTerms =
         parsed?.kind === 'terms' ? parsed.terms.filter(term => term.length >= 4) : []
+      const requiredShortTerms =
+        parsed?.kind === 'terms' ? parsed.terms.filter(term => term.length < 4) : []
       const fuzzyPredicate =
         fuzzyTerms.length > 0
           ? sql.join(
@@ -75,6 +100,12 @@ export const makeKyselyBibleSearchRepository = (
               sql` AND `
             )
           : sql`FALSE`
+      const shortTermsPredicate =
+        requiredShortTerms.length > 0
+          ? sql`${simpleVector} @@ to_tsquery('simple', ${requiredShortTerms
+              .map(term => `${term}:*`)
+              .join(' & ')})`
+          : sql`TRUE`
       const fuzzyScore =
         fuzzyTerms.length > 0
           ? sql`(${sql.join(
@@ -84,8 +115,8 @@ export const makeKyselyBibleSearchRepository = (
           : sql`0`
       const resultOrder =
         input.sortOrder === 'book'
-          ? sql`book, chapter, verse, version_order`
-          : sql`match_tier, relevance_score DESC, book, chapter, verse, version_order`
+          ? sql`canonical_book_order, chapter, verse, version_order`
+          : sql`match_tier, relevance_score DESC, canonical_book_order, chapter, verse, version_order`
       const limit = input.limit ?? 100
       const offset = input.offset ?? 0
 
@@ -95,8 +126,14 @@ export const makeKyselyBibleSearchRepository = (
             SELECT rp.id,
                    replace(rp.resource_identity, 'bible-text:', '') AS version_id,
                    rp.revision,
+                   rp.language,
                    rp.metadata,
                    rp.metadata -> 'canon' ->> 'id' AS canon_id,
+                   ARRAY(
+                     SELECT jsonb_array_elements_text(
+                       rp.metadata -> 'canon' -> 'orderedBooks'
+                     )::integer
+                   ) AS canonical_books,
                    array_position(
                      ARRAY[${sql.join(resourceIdentities.map(identity => sql`${identity}`))}]::text[],
                      rp.resource_identity
@@ -110,27 +147,31 @@ export const makeKyselyBibleSearchRepository = (
           exact_matches AS MATERIALIZED (
             SELECT ap.version_id,
                    ap.version_order,
+                   ap.language,
                    bv.book,
                    bv.chapter,
                    bv.verse,
                    bv.text,
+                   array_position(ap.canonical_books, bv.book) AS canonical_book_order,
                    CASE
                      WHEN strpos(lower(bv.text), lower(${parsed?.raw ?? query})) > 0 THEN 0
                      ELSE 1
                    END AS match_tier,
-                   ts_rank_cd(${textSearchVector}, ${textSearchQuery}) AS relevance_score
+                   ${relevanceScore} AS relevance_score
               FROM active_publications ap
               JOIN bible_verses bv ON bv.publication_id = ap.id
              WHERE ${filterSql}
-               AND ${parsed ? sql`${textSearchVector} @@ ${textSearchQuery}` : sql`FALSE`}
+               AND ${parsed ? textSearchPredicate : sql`FALSE`}
           ),
           fuzzy_matches AS MATERIALIZED (
             SELECT ap.version_id,
                    ap.version_order,
+                   ap.language,
                    bv.book,
                    bv.chapter,
                    bv.verse,
                    bv.text,
+                   array_position(ap.canonical_books, bv.book) AS canonical_book_order,
                    2 AS match_tier,
                    ${fuzzyScore} AS relevance_score
               FROM active_publications ap
@@ -138,6 +179,7 @@ export const makeKyselyBibleSearchRepository = (
              WHERE ${filterSql}
                AND NOT EXISTS (SELECT 1 FROM exact_matches)
                AND ${fuzzyPredicate}
+               AND ${shortTermsPredicate}
           ),
           matched AS (
             SELECT combined.*,
@@ -158,6 +200,7 @@ export const makeKyselyBibleSearchRepository = (
                  page.chapter,
                  page.verse,
                  page.text,
+                 page.language,
                  page.match_tier,
                  totals.total_count
             FROM active_publications ap
@@ -213,7 +256,9 @@ export const makeKyselyBibleSearchRepository = (
                   highlighted:
                     row.match_tier === 2
                       ? highlightFuzzyBibleSearchText(row.text, query)
-                      : highlightBibleSearchText(row.text, query),
+                      : row.language === 'fr' || row.language === 'en'
+                        ? highlightStemmedBibleSearchText(row.text, query, row.language)
+                        : highlightBibleSearchText(row.text, query),
                 },
               ]
         ),

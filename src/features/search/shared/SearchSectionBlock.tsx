@@ -30,6 +30,7 @@ type Props<SectionId extends string = string> = {
   hasMore?: boolean
   showLoadMoreButton?: boolean
   headerAction?: ReactNode
+  renderItems?: boolean
 }
 
 const SearchSectionBlock = <SectionId extends string = string>({
@@ -43,8 +44,9 @@ const SearchSectionBlock = <SectionId extends string = string>({
   hasMore = false,
   showLoadMoreButton = true,
   headerAction,
+  renderItems = true,
 }: Props<SectionId>) => {
-  const visibleItems = section.items.slice(0, visibleCount)
+  const visibleItems = renderItems ? section.items.slice(0, visibleCount) : []
   const remaining = Math.max(0, section.items.length - visibleCount)
 
   return (

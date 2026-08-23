@@ -1,5 +1,6 @@
 import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
+import { normalizeBibleSearchText } from '../../../src/helpers/bibleSearchInput'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
@@ -876,12 +877,12 @@ export const makeKyselyStrongLexiconRepository = (
           candidateFilters.push(sql<boolean>`e.language = ${input.lexicalLanguage}`)
         }
         if (search) {
-          const pattern = `%${search.toLocaleLowerCase()}%`
+          const pattern = `%${normalizeBibleSearchText(search)}%`
           candidateFilters.push(
             sql<boolean>`(
-              lower(coalesce(e.payload->>'original', '') || ' ' || coalesce(e.payload->>'transliteration', '') || ' ' || coalesce(e.payload->>'gloss', '') || ' ' || e.e_strong || ' ' || e.d_strong || ' ' || e.u_strong) LIKE ${pattern}
-              OR lower(i.step_code) LIKE ${pattern}
-              OR lower(coalesce(tr.payload->>'gloss', '')) LIKE ${pattern}
+              bible_search_normalize(coalesce(e.payload->>'original', '') || ' ' || coalesce(nullif(e.payload->>'classicTransliteration', ''), e.payload->>'transliteration', '') || ' ' || coalesce(e.payload->>'gloss', '') || ' ' || e.e_strong || ' ' || e.d_strong || ' ' || e.u_strong) LIKE ${pattern}
+              OR bible_search_normalize(i.step_code) LIKE ${pattern}
+              OR bible_search_normalize(coalesce(tr.payload->>'gloss', '')) LIKE ${pattern}
             )`
           )
         }

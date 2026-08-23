@@ -141,6 +141,20 @@
       "when": 1787482000000,
       "tag": "0022_bible_normalized_search",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1787509853087,
+      "tag": "0023_bible_search_language_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1787511435652,
+      "tag": "0024_strong_lexicon_normalized_search",
+      "breakpoints": true
     }
   ]
 }

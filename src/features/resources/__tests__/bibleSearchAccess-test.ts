@@ -244,7 +244,35 @@ describe('HTTP Bible search access', () => {
 })
 
 describe('hybrid Bible search access', () => {
-  it('does not replace a failed connected search with a smaller Offline corpus', async () => {
+  it('falls back to Offline after a temporary Online failure when the full scope is installed', async () => {
+    const onlineError = new ResourceAccessError('TEMPORARY_UNAVAILABLE')
+    const online = {
+      getInstalledVersions: jest.fn(),
+      searchPage: jest.fn().mockRejectedValue(onlineError),
+      searchVerses: jest.fn(),
+      searchVersesCount: jest.fn(),
+    } satisfies BibleSearchAccess
+    const offline = {
+      getInstalledVersions: jest.fn().mockResolvedValue(['LSG', 'DBY']),
+      searchPage: jest.fn().mockResolvedValue({ results: [{ version: 'LSG' }], count: 1 }),
+      searchVerses: jest.fn(),
+      searchVersesCount: jest.fn(),
+    } satisfies BibleSearchAccess
+    const access = createHybridBibleSearchAccess({
+      offline,
+      online,
+      remotelyReadableVersions: new Set(['LSG', 'DBY']),
+      isOnline: async () => true,
+    })
+
+    await expect(access.searchPage('grâce')).resolves.toEqual({
+      results: [{ version: 'LSG' }],
+      count: 1,
+    })
+    expect(offline.searchPage).toHaveBeenCalledWith('grâce', undefined)
+  })
+
+  it('keeps the Online error when the complete requested scope is not installed', async () => {
     const onlineError = new ResourceAccessError('TEMPORARY_UNAVAILABLE')
     const online = {
       getInstalledVersions: jest.fn(),
@@ -254,7 +282,7 @@ describe('hybrid Bible search access', () => {
     } satisfies BibleSearchAccess
     const offline = {
       getInstalledVersions: jest.fn().mockResolvedValue(['LSG']),
-      searchPage: jest.fn().mockResolvedValue({ results: [], count: 0 }),
+      searchPage: jest.fn(),
       searchVerses: jest.fn(),
       searchVersesCount: jest.fn(),
     } satisfies BibleSearchAccess

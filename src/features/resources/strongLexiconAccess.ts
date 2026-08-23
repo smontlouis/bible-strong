@@ -27,8 +27,51 @@ import {
 } from './strongLexiconContract'
 import { resolveHybridResourceSource } from './hybridResourcePolicy'
 import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
+import { normalizeBibleSearchText } from '~helpers/bibleSearchInput'
 
 const STRONG_LEXICON_MODULE_SCHEMA_VERSION = 2
+
+const SQLITE_SEARCH_DIACRITIC_REPLACEMENTS = [
+  ['ā', 'a'],
+  ['ă', 'a'],
+  ['â', 'a'],
+  ['ä', 'a'],
+  ['á', 'a'],
+  ['à', 'a'],
+  ['ē', 'e'],
+  ['ĕ', 'e'],
+  ['ê', 'e'],
+  ['ë', 'e'],
+  ['é', 'e'],
+  ['è', 'e'],
+  ['ī', 'i'],
+  ['ĭ', 'i'],
+  ['î', 'i'],
+  ['ï', 'i'],
+  ['í', 'i'],
+  ['ì', 'i'],
+  ['ō', 'o'],
+  ['ŏ', 'o'],
+  ['ô', 'o'],
+  ['ö', 'o'],
+  ['ó', 'o'],
+  ['ò', 'o'],
+  ['ū', 'u'],
+  ['ŭ', 'u'],
+  ['û', 'u'],
+  ['ü', 'u'],
+  ['ú', 'u'],
+  ['ù', 'u'],
+  ['ç', 'c'],
+  ['ñ', 'n'],
+] as const
+
+const sqliteNormalizedStrongSearchExpression = (expression: string) =>
+  SQLITE_SEARCH_DIACRITIC_REPLACEMENTS.reduce(
+    (normalized, [diacritic, replacement]) =>
+      `replace(${normalized}, '${diacritic}', '${replacement}')`,
+    `lower(${expression})`
+  )
 
 export type StrongLexiconMorphology = {
   code: string
@@ -1042,7 +1085,8 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
     limit = 100,
     cursor: encodedCursor,
   }) {
-    const normalizedSearch = search?.trim()
+    const rawSearch = search?.trim()
+    const normalizedSearch = rawSearch ? normalizeBibleSearchText(rawSearch) : undefined
     const normalizedPrefix = prefix?.trim()
     if (!normalizedSearch && !normalizedPrefix) return { entries: [] }
     const cursor = decodeStrongLexiconPageCursor(encodedCursor)
@@ -1057,7 +1101,7 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
       }
       candidateFilters.push(
         normalizedSearch
-          ? `(i.stepCode LIKE ? OR e.eStrong LIKE ? OR e.dStrong LIKE ? OR e.original LIKE ? OR e.transliteration LIKE ? OR e.gloss LIKE ? OR tr.gloss LIKE ?)`
+          ? `(lower(i.stepCode) LIKE ? OR lower(e.eStrong) LIKE ? OR lower(e.dStrong) LIKE ? OR lower(e.original) LIKE ? OR ${sqliteNormalizedStrongSearchExpression("COALESCE(NULLIF(e.classicTransliteration, ''), e.transliteration)")} LIKE ? OR ${sqliteNormalizedStrongSearchExpression('e.gloss')} LIKE ? OR ${sqliteNormalizedStrongSearchExpression("COALESCE(tr.gloss, '')")} LIKE ?)`
           : `lower(COALESCE(NULLIF(tr.gloss, ''), e.gloss)) LIKE ?`
       )
       parameters.push(...Array(normalizedSearch ? 7 : 1).fill(pattern))

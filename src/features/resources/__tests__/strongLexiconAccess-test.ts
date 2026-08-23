@@ -318,17 +318,48 @@ describe('strongLexiconAccess', () => {
         classicStrong: 'H3651',
       }),
     ])
-    expect(database.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('dStrong LIKE ?'), [
+    expect(database.getAllAsync).toHaveBeenCalledWith(expect.stringContaining('lower(e.dStrong)'), [
       'fr',
-      '%H3651C%',
-      '%H3651C%',
-      '%H3651C%',
-      '%H3651C%',
-      '%H3651C%',
-      '%H3651C%',
-      '%H3651C%',
+      '%h3651c%',
+      '%h3651c%',
+      '%h3651c%',
+      '%h3651c%',
+      '%h3651c%',
+      '%h3651c%',
+      '%h3651c%',
       26,
     ])
+  })
+
+  it('finds a Greek Strong from an ASCII transliteration', async () => {
+    const database = createDatabase()
+    database.getAllAsync.mockResolvedValue([
+      {
+        id: 28,
+        language: 'greek',
+        baseCode: 26,
+        eStrong: 'G0026',
+        dStrong: 'G0026',
+        uStrong: 'G0026',
+        stepCode: 'G0026',
+        original: 'ἀγάπη',
+        transliteration: 'agapē',
+        classicTransliteration: '',
+        gloss: 'love',
+        localizedGloss: 'amour',
+      },
+    ])
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    await expect(localStrongLexiconAccess.search('agape', 'fr', 25)).resolves.toEqual([
+      expect.objectContaining({ stepCode: 'G0026', transliteration: 'agapē' }),
+    ])
+    expect(database.getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining('classicTransliteration'),
+      ['fr', ...Array(7).fill('%agape%'), 26]
+    )
   })
 
   it('does not expand an existing Strong identity through its shared unified code', async () => {

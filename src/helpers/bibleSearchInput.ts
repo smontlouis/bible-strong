@@ -20,7 +20,6 @@ const QUOTE_PAIRS: Readonly<Record<string, string>> = {
 
 const collapseWhitespace = (value: string) => value.replace(/\s+/gu, ' ').trim()
 const LETTER_OR_NUMBER_REGEX = /[\p{L}\p{N}]/u
-
 type FoldedSearchText = {
   value: string
   sourceOffsets: number[]
@@ -138,11 +137,7 @@ const mergeSourceRanges = (ranges: SourceRange[]): SourceRange[] =>
       return merged
     }, [])
 
-/** Adds the existing `{{...}}` display markers while preserving original script and accents. */
-export const highlightBibleSearchText = (text: string, rawQuery: string): string => {
-  const query = parseBibleTextSearchQuery(rawQuery)
-  if (!query) return text
-
+const findExactBibleSearchRanges = (text: string, query: BibleTextSearchQuery) => {
   const foldedText = foldBibleSearchText(text.replace(APOSTROPHE_REGEX, ' '))
   const normalizedMatches: SourceRange[] = []
   const needles = query.kind === 'phrase' ? [query.normalized] : query.terms
@@ -174,7 +169,11 @@ export const highlightBibleSearchText = (text: string, rawQuery: string): string
     }
   }
 
-  return mergeSourceRanges(normalizedMatches)
+  return normalizedMatches
+}
+
+const applyBibleSearchHighlights = (text: string, ranges: SourceRange[]) =>
+  mergeSourceRanges(ranges)
     .sort((left, right) => right.start - left.start)
     .reduce(
       (highlighted, range) =>
@@ -184,6 +183,36 @@ export const highlightBibleSearchText = (text: string, rawQuery: string): string
         )}}}${highlighted.slice(range.end)}`,
       text
     )
+
+/** Adds the existing `{{...}}` display markers while preserving original script and accents. */
+export const highlightBibleSearchText = (text: string, rawQuery: string): string => {
+  const query = parseBibleTextSearchQuery(rawQuery)
+  if (!query) return text
+  return applyBibleSearchHighlights(text, findExactBibleSearchRanges(text, query))
+}
+
+export const highlightBibleSearchTextByNormalizedTerms = (
+  text: string,
+  rawQuery: string,
+  normalizeTerm: (term: string) => string
+): string => {
+  const query = parseBibleTextSearchQuery(rawQuery)
+  if (!query || query.kind === 'phrase') return highlightBibleSearchText(text, rawQuery)
+
+  const normalizedTerms = new Set(query.terms.map(normalizeTerm))
+  const normalizedRanges: SourceRange[] = []
+  for (const match of text.matchAll(/[\p{L}\p{N}][\p{L}\p{N}\p{M}]*/gu)) {
+    const token = match[0]
+    const start = match.index ?? 0
+    if (normalizedTerms.has(normalizeTerm(token))) {
+      normalizedRanges.push({ start, end: start + token.length })
+    }
+  }
+
+  return applyBibleSearchHighlights(text, [
+    ...findExactBibleSearchRanges(text, query),
+    ...normalizedRanges,
+  ])
 }
 
 const boundedEditDistance = (left: string, right: string, maximum: number): number => {

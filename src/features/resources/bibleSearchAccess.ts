@@ -2,6 +2,7 @@ import {
   getInstalledVersions,
   searchVerses,
   searchVersesCount,
+  searchVersesPage,
   type SearchOptions,
   type SearchResult,
 } from '~helpers/biblesDb'
@@ -25,13 +26,7 @@ export type BibleSearchAccess = {
 
 export const localBibleSearchAccess: BibleSearchAccess = {
   getInstalledVersions,
-  searchPage: async (query, options) => {
-    const [results, count] = await Promise.all([
-      searchVerses(query, options),
-      searchVersesCount(query, options),
-    ])
-    return { results, count }
-  },
+  searchPage: searchVersesPage,
   searchVerses,
   searchVersesCount,
 }
@@ -192,15 +187,43 @@ export const createHybridBibleSearchAccess = ({
   remotelyReadableVersions: ReadonlySet<string>
   isOnline: () => Promise<boolean>
 }): BibleSearchAccess => {
+  const getRequestedVersions = (options?: SearchOptions) =>
+    options?.version
+      ? [options.version]
+      : options?.versionIds
+        ? [...options.versionIds]
+        : [...remotelyReadableVersions]
+
   const select = async (options?: SearchOptions): Promise<BibleSearchAccess> => {
     if (!(await isOnline())) return offline
-    if (options?.version && !remotelyReadableVersions.has(options.version)) return offline
+    const requestedVersions = getRequestedVersions(options)
+    if (requestedVersions.every(version => remotelyReadableVersions.has(version))) return online
+    const installedVersions = new Set(await offline.getInstalledVersions())
+    if (requestedVersions.every(version => installedVersions.has(version))) return offline
     return online
   }
   const run = async <T>(
     options: SearchOptions | undefined,
     operation: (access: BibleSearchAccess) => Promise<T>
-  ) => operation(await select(options))
+  ) => {
+    const access = await select(options)
+    try {
+      return await operation(access)
+    } catch (error) {
+      const canRetryOffline =
+        access === online &&
+        !options?.signal?.aborted &&
+        error instanceof ResourceAccessError &&
+        (error.code === 'NETWORK_OFFLINE' || error.code === 'TEMPORARY_UNAVAILABLE')
+      if (!canRetryOffline) throw error
+
+      const installedVersions = new Set(await offline.getInstalledVersions())
+      if (!getRequestedVersions(options).every(version => installedVersions.has(version))) {
+        throw error
+      }
+      return operation(offline)
+    }
+  }
   return {
     getInstalledVersions: async () => {
       const local = await offline.getInstalledVersions()

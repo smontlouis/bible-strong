@@ -90,7 +90,22 @@ export const bibleVerses = pgTable(
       table.chapter,
       table.verse
     ),
-    index('bible_verses_text_trigram').using('gin', sql`${table.text} gin_trgm_ops`),
+    index('bible_verses_normalized_fts').using(
+      'gin',
+      sql`to_tsvector('simple', bible_search_normalize(${table.text}))`
+    ),
+    index('bible_verses_normalized_french_fts').using(
+      'gin',
+      sql`to_tsvector('french', bible_search_normalize(${table.text}))`
+    ),
+    index('bible_verses_normalized_english_fts').using(
+      'gin',
+      sql`to_tsvector('english', bible_search_normalize(${table.text}))`
+    ),
+    index('bible_verses_normalized_trigram').using(
+      'gin',
+      sql`bible_search_normalize(${table.text}) gin_trgm_ops`
+    ),
   ]
 )
 
@@ -653,7 +668,7 @@ export const strongLexiconEntries = pgTable(
       .where(sql`${table.payload}->>'gloss' <> ''`),
     index('strong_lexicon_entries_search').using(
       'gin',
-      sql`lower(coalesce(${table.payload}->>'original', '') || ' ' || coalesce(${table.payload}->>'transliteration', '') || ' ' || coalesce(${table.payload}->>'gloss', '') || ' ' || ${table.e_strong} || ' ' || ${table.d_strong} || ' ' || ${table.u_strong}) gin_trgm_ops`
+      sql`bible_search_normalize(coalesce(${table.payload}->>'original', '') || ' ' || coalesce(nullif(${table.payload}->>'classicTransliteration', ''), ${table.payload}->>'transliteration', '') || ' ' || coalesce(${table.payload}->>'gloss', '') || ' ' || ${table.e_strong} || ' ' || ${table.d_strong} || ' ' || ${table.u_strong}) gin_trgm_ops`
     ),
   ]
 )

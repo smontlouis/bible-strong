@@ -1,4 +1,10 @@
-import { getBook, getBookCorpus, getBooksForCanon, isBookInTestament } from '../bibleBookCatalog'
+import {
+  getBook,
+  getBookCorpus,
+  getBookOrderForCanon,
+  getBooksForCanon,
+  isBookInTestament,
+} from '../bibleBookCatalog'
 
 describe('bibleBookCatalog', () => {
   it('exposes stable identities for the seven deuterocanonical books', () => {
@@ -38,6 +44,12 @@ describe('bibleBookCatalog', () => {
     expect(bookNumbers).toHaveLength(73)
     expect(bookNumbers.slice(14, 23)).toEqual([15, 16, 67, 68, 17, 72, 73, 18, 19])
     expect(bookNumbers.slice(25, 32)).toEqual([22, 69, 70, 23, 24, 25, 71])
+    expect(getBookOrderForCanon('catholic-73', 67)).toBeLessThan(
+      getBookOrderForCanon('catholic-73', 17)
+    )
+    expect(getBookOrderForCanon('catholic-73', 40)).toBeGreaterThan(
+      getBookOrderForCanon('catholic-73', 39)
+    )
   })
 
   it('filters installed coverage without losing the canon order', () => {

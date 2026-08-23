@@ -8,6 +8,7 @@ import Text from '~common/ui/Text'
 import { searchTypeIconConfig } from './SearchTypeIcon'
 import { mergeRanges, normalizeDisplayedText, normalizeSearchText } from './searchFuzzy'
 import type { MatchRange, SearchEntityResult } from './searchResultTypes'
+import { getPassageSearchExcerpt } from './searchPassageExcerpt'
 
 const getMatchForKey = (item: SearchEntityResult, key: string) =>
   item.matches?.find(match => match.key === key)
@@ -135,7 +136,7 @@ export const HighlightedText = ({
 }
 
 const PassageDescription = ({ highlighted }: { highlighted?: string }) => {
-  const parts = (highlighted || '').split(/(\{\{.*?\}\})/g)
+  const parts = getPassageSearchExcerpt(highlighted || '').split(/(\{\{.*?\}\})/g)
 
   return (
     <Paragraph small numberOfLines={1}>

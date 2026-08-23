@@ -144,7 +144,7 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
           metadata: {
             resource_revision: 'lsg-search-r1',
             text_revision: 'lsg-search-r1',
-            canon: { id: 'catholic-73', orderedBooks: [1, 40, 43, 67] },
+            canon: { id: 'catholic-73', orderedBooks: [1, 67, 40, 43] },
           },
         })
         .returning('id')
@@ -210,6 +210,14 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
             text: 'Dieu nouveau',
             presentation,
           },
+          {
+            publication_id: publication.id,
+            book: 40,
+            chapter: 1,
+            verse: 2,
+            text: 'Ils furent condamnés',
+            presentation,
+          },
         ])
         .execute()
 
@@ -235,6 +243,21 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
       assert.equal(typo.count, 1)
       assert.equal(typo.results[0]?.verse, 25)
       assert.match(typo.results[0]?.highlighted ?? '', /\{\{résurrection\}\}/u)
+
+      const typoWithShortTerm = await search('la resurection')
+      assert.equal(typoWithShortTerm.count, 1)
+      assert.equal(typoWithShortTerm.results[0]?.verse, 25)
+
+      const inflection = await search('condamner')
+      assert.equal(inflection.count, 1)
+      assert.equal(inflection.results[0]?.text, 'Ils furent condamnés')
+      assert.equal(inflection.results[0]?.highlighted, 'Ils furent {{condamnés}}')
+
+      const canonicalOrder = await search('Dieu', { sortOrder: 'book' })
+      assert.deepEqual(
+        canonicalOrder.results.map(result => result.book),
+        [67, 40, 43, 43]
+      )
 
       const oldTestament = await search('Dieu', { section: 'ot' })
       assert.deepEqual(

@@ -7207,6 +7207,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/snowball-stemmers@npm:^0":
+  version: 0.6.2
+  resolution: "@types/snowball-stemmers@npm:0.6.2"
+  checksum: 10c0/16a5e5a3a07422b903c09f2bc672469f5f39470e8ce7550a2ece0057fc4d260a814a0b2549e26f6ac0ae0533ae422acf72fdee59a1bea6af95638b44f453300d
+  languageName: node
+  linkType: hard
+
 "@types/sql.js@npm:^1.4.11":
   version: 1.4.11
   resolution: "@types/sql.js@npm:1.4.11"
@@ -8561,6 +8568,7 @@ __metadata:
     "@types/react-dom": "npm:^19.2.3"
     "@types/react-redux": "npm:^7.1.33"
     "@types/react-test-renderer": "npm:^19.1.0"
+    "@types/snowball-stemmers": "npm:^0"
     "@types/sql.js": "npm:^1.4.11"
     "@vitejs/plugin-react": "npm:^6.0.2"
     "@xyflow/react": "npm:^12.10.2"
@@ -8676,6 +8684,7 @@ __metadata:
     redux-thunk: "npm:^2.3.0"
     rn-fetch-blob: "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch"
     slugify: "npm:^1.4.0"
+    snowball-stemmers: "npm:0.6.0"
     sonner-native: "npm:^0.22.2"
     sql.js: "npm:^1.14.2"
     trunc-html: "npm:^1.1.2"
@@ -18890,6 +18899,13 @@ __metadata:
   version: 4.2.0
   resolution: "smart-buffer@npm:4.2.0"
   checksum: 10c0/a16775323e1404dd43fabafe7460be13a471e021637bc7889468eb45ce6a6b207261f454e4e530a19500cc962c4cc5348583520843b363f4193cee5c00e1e539
+  languageName: node
+  linkType: hard
+
+"snowball-stemmers@npm:0.6.0":
+  version: 0.6.0
+  resolution: "snowball-stemmers@npm:0.6.0"
+  checksum: 10c0/36cdd4f24fd0651cfd0e4f9dd96719831b44e5c552b36645a13bc9c395f3aa610f2a8da03ff5027a50d025993d1c5d19ccbebc23bd5d45686eb6aa457e896cd8
   languageName: node
   linkType: hard
 

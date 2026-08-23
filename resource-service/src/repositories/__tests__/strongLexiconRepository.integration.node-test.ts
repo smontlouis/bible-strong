@@ -53,6 +53,15 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
           transliteration: 'yhwh',
           gloss: 'Lord',
         },
+        {
+          id: 3,
+          language: 'greek',
+          code: 'G0026',
+          baseCode: 26,
+          original: 'ἀγάπη',
+          transliteration: 'agapē',
+          gloss: 'love',
+        },
       ] as const
 
       await database
@@ -125,6 +134,14 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
           { revision: 'core:core-r1', stepCode: 'G3056', gloss: 'word' },
           { revision: 'core:core-r1', stepCode: 'H3068', gloss: 'Lord' },
         ]
+      )
+
+      const normalizedTransliteration = await Effect.runPromise(
+        repository.listEntries({ language: 'fr', search: 'agape', limit: 20 })
+      )
+      assert.deepEqual(
+        normalizedTransliteration.value.entries.map(entry => entry.stepCode),
+        ['G0026']
       )
     } finally {
       await isolated.dispose()

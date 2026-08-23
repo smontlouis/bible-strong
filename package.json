@@ -240,6 +240,7 @@
     "redux-thunk": "^2.3.0",
     "rn-fetch-blob": "patch:rn-fetch-blob@npm%3A0.12.0#~/.yarn/patches/rn-fetch-blob-npm-0.12.0-cf02e3c544.patch",
     "slugify": "^1.4.0",
+    "snowball-stemmers": "0.6.0",
     "sonner-native": "^0.22.2",
     "trunc-html": "^1.1.2"
   },
@@ -256,6 +257,7 @@
     "@types/react": "~19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/react-test-renderer": "^19.1.0",
+    "@types/snowball-stemmers": "^0",
     "@types/sql.js": "^1.4.11",
     "@vitejs/plugin-react": "^6.0.2",
     "@xyflow/react": "^12.10.2",
