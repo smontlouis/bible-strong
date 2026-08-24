@@ -32,7 +32,7 @@ const SearchEmptyState = ({ isOnline, onExamplePress }: Props) => {
     'G26',
     'H430',
     ...(isOnline
-      ? ['ἀγάπη', 'אֱלֹהִים', 'agapē', 'elohiym', ...t('search.empty.semantic.examples').split('|')]
+      ? ['ἀγάπη', 'אֱלֹהִים', 'agapē', ...t('search.empty.semantic.examples').split('|')]
       : []),
   ]
 
