@@ -52,7 +52,16 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
 
   return (
     <Box bg="opacity5" borderRadius={14} overflow="hidden">
-      <TouchableBox row alignItems="center" py={12} px={16} onPress={toggleExpand}>
+      <TouchableBox
+        accessibilityLabel={reference}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: isExpanded }}
+        row
+        alignItems="center"
+        py={12}
+        px={16}
+        onPress={toggleExpand}
+      >
         <HStack flex alignItems="center" gap={8}>
           <FeatherIcon name="book-open" size={16} color={theme.colors.primary} />
           <Text fontSize={14} color="primary" bold>
@@ -79,7 +88,11 @@ const VerseAccordion = ({ noteVerses, version }: VerseAccordionProps) => {
         <Box px={16}>
           {isLoading ? (
             <Box center py={10}>
-              <ActivityIndicator color={theme.colors.grey} />
+              <ActivityIndicator
+                accessibilityLabel={t('Chargement...')}
+                accessibilityRole="progressbar"
+                color={theme.colors.grey}
+              />
             </Box>
           ) : verseContent ? (
             <Paragraph scale={-2} scaleLineHeight={-1}>

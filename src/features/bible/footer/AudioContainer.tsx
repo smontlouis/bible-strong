@@ -1,8 +1,8 @@
 import React from 'react'
 import { Linking, TouchableOpacityProps } from 'react-native'
 import { useAtomValue } from 'jotai/react'
+import { useTranslation } from 'react-i18next'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
-import Link from '~common/Link'
 import Box, { AnimatedBox, BoxProps, HStack, TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
@@ -38,6 +38,7 @@ const Chip = ({ children, isActive, ...props }: ChipProps & BoxProps & Touchable
 )
 
 const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioContainerProps) => {
+  const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
   const isBibleOverlayOpen = useAtomValue(isBibleOverlayOpenAtom)
@@ -66,22 +67,43 @@ const AudioContainer = ({ children, onReduce, audioMode, onChangeMode }: AudioCo
       <HStack row pos="absolute" top={8} right={20} zIndex={10} gap={3}>
         {!!onChangeMode && (
           <>
-            <Chip isActive={audioMode === 'url'} onPress={() => onChangeMode('url')}>
+            <Chip
+              isActive={audioMode === 'url'}
+              onPress={() => onChangeMode('url')}
+              accessibilityRole="radio"
+              accessibilityLabel={t('accessibility.audioSource', { source: 'Audio' })}
+              accessibilityState={{ checked: audioMode === 'url' }}
+            >
               Audio
             </Chip>
-            <Chip isActive={audioMode === 'tts'} onPress={() => onChangeMode('tts')}>
+            <Chip
+              isActive={audioMode === 'tts'}
+              onPress={() => onChangeMode('tts')}
+              accessibilityRole="radio"
+              accessibilityLabel={t('accessibility.audioSource', { source: 'TTS' })}
+              accessibilityState={{ checked: audioMode === 'tts' }}
+            >
               TTS
             </Chip>
           </>
         )}
-        <Chip onPress={() => Linking.openURL('https://click.audibible.app/5nmN/stephane30')}>
+        <Chip
+          onPress={() => Linking.openURL('https://click.audibible.app/5nmN/stephane30')}
+          accessibilityRole="link"
+          accessibilityLabel={t('accessibility.openAudibible')}
+        >
           Audibible
         </Chip>
       </HStack>
       <Box center mb={10}>
-        <Link onPress={onReduce} style={{ padding: 5 }}>
+        <TouchableBox
+          onPress={onReduce}
+          padding={5}
+          accessibilityRole="button"
+          accessibilityLabel={t('accessibility.reduceAudioPlayer')}
+        >
           <FeatherIcon name="chevron-down" size={20} color="tertiary" />
-        </Link>
+        </TouchableBox>
       </Box>
       {children}
     </AnimatedBox>

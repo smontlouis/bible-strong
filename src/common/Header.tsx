@@ -48,7 +48,14 @@ const Header = ({
         )}
         <VStack flex pl={hasBackButton ? 0 : 20}>
           <HStack>
-            <Text numberOfLines={1} bold fontSize={fontSize} onPress={onTitlePress} shrink={1}>
+            <Text
+              accessibilityRole={onTitlePress ? 'button' : 'header'}
+              numberOfLines={1}
+              bold
+              fontSize={fontSize}
+              onPress={onTitlePress}
+              shrink={1}
+            >
               {title}
             </Text>
             {!!detail && (

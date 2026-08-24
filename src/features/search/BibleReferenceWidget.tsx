@@ -101,6 +101,7 @@ const ReferenceItem = ({ segment }: { segment: ParsedSegment }) => {
 
   return (
     <TouchableOpacity
+      accessibilityRole="button"
       activeOpacity={0.7}
       onPress={() =>
         pushRouteOnce({

@@ -20,6 +20,8 @@ import StudiesTabScreen from '~features/studies/StudiesTabScreen'
 import TimelineTabScreen from '~features/timeline/TimelineTabScreen'
 import {
   BibleTab,
+  activeTabIdAtom,
+  appSwitcherModeAtom,
   CommentaryTab,
   CompareTab,
   DictionaryTab,
@@ -76,11 +78,14 @@ export type TabScreenProps = {
 
 const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
   const tab = useAtomValue(tabAtom)
+  const activeTabId = useAtomValue(activeTabIdAtom)
+  const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
   const { height: HEIGHT } = useSafeAreaFrame()
   const { activeTabScreen } = useAppSwitcherContext()
   const scrollToActiveTab = useScrollToActiveTab()
 
   const tabId = tab.id
+  const isAccessibilityVisible = appSwitcherMode === 'view' && activeTabId === tabId
 
   const tabComponent = renderTabComponent(tab, tabAtom)
 
@@ -112,14 +117,24 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
 
   if (tabComponent) {
     return (
-      <TabScreenWrapper style={imageStyles} ref={ref}>
+      <TabScreenWrapper
+        style={imageStyles}
+        ref={ref}
+        accessibilityElementsHidden={!isAccessibilityVisible}
+        importantForAccessibility={isAccessibilityVisible ? 'auto' : 'no-hide-descendants'}
+      >
         {tabComponent}
       </TabScreenWrapper>
     )
   }
 
   return (
-    <TabScreenWrapper style={imageStyles} ref={ref}>
+    <TabScreenWrapper
+      style={imageStyles}
+      ref={ref}
+      accessibilityElementsHidden={!isAccessibilityVisible}
+      importantForAccessibility={isAccessibilityVisible ? 'auto' : 'no-hide-descendants'}
+    >
       <Box flex={1} bg="reverse" style={StyleSheet.absoluteFill} center>
         <Text>{tab.title} - need component</Text>
       </Box>

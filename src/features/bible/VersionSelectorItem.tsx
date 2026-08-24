@@ -87,7 +87,17 @@ const VersionItemContainer = ({
     </Box>
   )
 
-  return onPress ? <TouchableOpacity onPress={onPress}>{content}</TouchableOpacity> : content
+  return onPress ? (
+    <TouchableOpacity
+      accessibilityRole="button"
+      accessibilityState={{ selected: Boolean(selected) }}
+      onPress={onPress}
+    >
+      {content}
+    </TouchableOpacity>
+  ) : (
+    content
+  )
 }
 
 const ActionColumn = ({ children, opacity }: React.PropsWithChildren<{ opacity?: number }>) => (
@@ -710,6 +720,9 @@ const VersionSelectorItem = ({
             </Box>
             {selectionNeedsDownload === true && !isLoading && !isQueued && (
               <ActionButton
+                accessibilityLabel={t('accessibility.downloadVersion', {
+                  version: version.displayName || version.name,
+                })}
                 disabled={!isConnected}
                 onPress={() => {
                   void startDownload()
@@ -720,6 +733,9 @@ const VersionSelectorItem = ({
             )}
             {(versionAvailabilityQuery.isError || strongSelectionQuery.isError) && (
               <ActionButton
+                accessibilityLabel={t('accessibility.retryVersionStatus', {
+                  version: version.displayName || version.name,
+                })}
                 onPress={() => {
                   void versionAvailabilityQuery.refetch()
                   void strongSelectionQuery.refetch()
@@ -767,6 +783,9 @@ const VersionSelectorItem = ({
           <VersionIdentity version={version} color="default" />
           {needsUpdate ? (
             <TouchableOpacity
+              accessibilityLabel={t('accessibility.updateVersion', {
+                version: version.displayName || version.name,
+              })}
               accessibilityRole="button"
               accessibilityState={{ disabled: !isConnected }}
               disabled={!isConnected}
@@ -780,7 +799,14 @@ const VersionSelectorItem = ({
               />
             </TouchableOpacity>
           ) : (
-            <TouchableOpacity onPress={confirmDelete} style={{ padding: 10 }}>
+            <TouchableOpacity
+              accessibilityLabel={t('accessibility.deleteVersion', {
+                version: version.displayName || version.name,
+              })}
+              accessibilityRole="button"
+              onPress={confirmDelete}
+              style={{ padding: 10 }}
+            >
               <FeatherIcon name="trash-2" size={18} color="quart" />
             </TouchableOpacity>
           )}

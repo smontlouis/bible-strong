@@ -32,6 +32,10 @@ interface TextInputWrapperProps extends RNTextInputProps {
 export default withTheme((props: TextInputWrapperProps) => (
   <Box position="relative">
     {props.leftIcon && <LeftIcon>{props.leftIcon}</LeftIcon>}
-    <StyledTextInput placeholderTextColor={props.theme.colors.grey} {...props} />
+    <StyledTextInput
+      accessibilityLabel={props.accessibilityLabel ?? props.placeholder}
+      placeholderTextColor={props.theme.colors.grey}
+      {...props}
+    />
   </Box>
 ))

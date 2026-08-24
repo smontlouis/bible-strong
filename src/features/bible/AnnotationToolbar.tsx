@@ -266,6 +266,9 @@ const AnnotationToolbar = ({
           {(selectedAnnotation || hasSelection) && (
             <AnimatedBox layout={LinearTransition} position="absolute" right={20} top={0}>
               <TouchableOpacity
+                accessibilityLabel={t('Supprimer')}
+                accessibilityRole="button"
+                accessibilityState={{ disabled }}
                 onPress={selectedAnnotation ? onDeleteAnnotation : onEraseAnnotations}
                 disabled={disabled}
               >
@@ -293,7 +296,13 @@ const AnnotationToolbar = ({
               top={0}
               overflow="visible"
             >
-              <TouchableOpacity onPress={onNotePress} disabled={disabled}>
+              <TouchableOpacity
+                accessibilityLabel={t('Note')}
+                accessibilityRole="button"
+                accessibilityState={{ disabled }}
+                onPress={onNotePress}
+                disabled={disabled}
+              >
                 <Box
                   width={32}
                   height={32}
@@ -309,7 +318,13 @@ const AnnotationToolbar = ({
                   />
                 </Box>
               </TouchableOpacity>
-              <TouchableOpacity onPress={onTagsPress} disabled={disabled}>
+              <TouchableOpacity
+                accessibilityLabel={`${t('Étiquettes')}, ${tagsCount}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled }}
+                onPress={onTagsPress}
+                disabled={disabled}
+              >
                 <Box position="relative" overflow="visible">
                   <Box
                     width={32}
@@ -339,7 +354,13 @@ const AnnotationToolbar = ({
                   )}
                 </Box>
               </TouchableOpacity>
-              <TouchableOpacity onPress={onRelationsPress} disabled={disabled}>
+              <TouchableOpacity
+                accessibilityLabel={`${t('Relations')}, ${relationsCount}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled }}
+                onPress={onRelationsPress}
+                disabled={disabled}
+              >
                 <Box position="relative" overflow="visible">
                   <Box
                     width={32}

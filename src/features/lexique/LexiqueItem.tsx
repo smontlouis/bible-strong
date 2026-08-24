@@ -60,7 +60,11 @@ const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueI
         <Text title fontSize={18} color="default" flex paddingRight={20}>
           {gloss}
         </Text>
-        <Text fontSize={18} color="default">
+        <Text
+          accessibilityLanguage={language === 'hebrew' ? 'he-IL' : 'el-GR'}
+          fontSize={18}
+          color="default"
+        >
           {original}
         </Text>
       </Box>
@@ -68,7 +72,11 @@ const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueI
   )
 
   if (onSelect) {
-    return <Pressable onPress={handlePress}>{content}</Pressable>
+    return (
+      <Pressable accessibilityRole="button" onPress={handlePress}>
+        {content}
+      </Pressable>
+    )
   }
 
   return (

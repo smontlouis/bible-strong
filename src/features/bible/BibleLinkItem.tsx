@@ -96,7 +96,11 @@ const BibleLinkItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
             onRelationPress={onRelationPress}
           />
         </Box>
-        <Link padding onPress={() => onMenuPress(item.linkId)}>
+        <Link
+          accessibilityLabel={t('accessibility.options')}
+          padding
+          onPress={() => onMenuPress(item.linkId)}
+        >
           <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
         </Link>
       </LinkItemContainer>

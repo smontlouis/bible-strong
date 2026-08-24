@@ -30,7 +30,13 @@ const AddTabButton = (_props: AddTabButtonProps) => {
   }
 
   return (
-    <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
+    <TouchableBox
+      center
+      size={TAB_ICON_SIZE}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={t('accessibility.addTab')}
+    >
       <FeatherIcon name="plus" size={23} color="tertiary" />
     </TouchableBox>
   )

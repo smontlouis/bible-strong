@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -10,6 +11,8 @@ type BackBottomTabBarProps = {
 }
 
 const BackBottomTabBar = ({ onClose, direction }: BackBottomTabBarProps) => {
+  const { t } = useTranslation()
+
   return (
     <Box
       row
@@ -25,7 +28,13 @@ const BackBottomTabBar = ({ onClose, direction }: BackBottomTabBarProps) => {
       borderColor="border"
       justifyContent={direction === 'left' ? 'flex-start' : 'flex-end'}
     >
-      <TouchableBox center size={TAB_ICON_SIZE} onPress={onClose}>
+      <TouchableBox
+        center
+        size={TAB_ICON_SIZE}
+        onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.back')}
+      >
         <FeatherIcon
           name={direction === 'left' ? 'arrow-left' : 'arrow-right'}
           size={23}

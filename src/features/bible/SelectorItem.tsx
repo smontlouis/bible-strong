@@ -29,7 +29,11 @@ type Props = {
 }
 
 const SelectorItem = ({ item, isSelected, onChange, onLongChange }: Props) => (
-  <TouchableOpacity onPress={() => onChange(item)} onLongPress={() => onLongChange?.(item)}>
+  <TouchableOpacity
+    accessibilityRole="button"
+    onPress={() => onChange(item)}
+    onLongPress={() => onLongChange?.(item)}
+  >
     <Text isSelected={isSelected}>{item}</Text>
   </TouchableOpacity>
 )

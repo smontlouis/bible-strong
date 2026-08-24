@@ -120,7 +120,11 @@ const TagItem = ({ item, setOpen }: TagItemProps) => {
               )}
             </Box>
           </Box>
-          <Link onPress={() => setOpen(item.tag)} padding>
+          <Link
+            accessibilityLabel={t('accessibility.options')}
+            onPress={() => setOpen(item.tag)}
+            padding
+          >
             <FeatherIcon name="more-vertical" size={20} />
           </Link>
         </Box>
@@ -288,6 +292,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
           }}
         />
         <FabButton
+          accessibilityLabel={t('accessibility.addTag')}
           icon="plus"
           onPress={() => {
             setTagToEdit({ id: '', name: '' })

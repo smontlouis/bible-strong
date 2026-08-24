@@ -6,8 +6,12 @@ import {
   type MenuComponentRef,
 } from '@expo/ui/community/menu'
 import React from 'react'
+import { View } from 'react-native'
 
-export type { MenuAction, MenuComponentProps, MenuComponentRef }
+export type { MenuAction, MenuComponentRef }
+export type AccessibleMenuComponentProps = MenuComponentProps & {
+  accessibilityLabel?: string
+}
 
 const menuIcons = {
   'arrow.down': Icon.select({
@@ -153,9 +157,17 @@ const withAndroidMenuIcons = (actions: MenuAction[]): MenuAction[] =>
     subactions: action.subactions ? withAndroidMenuIcons(action.subactions) : undefined,
   }))
 
-export const MenuView = React.forwardRef<MenuComponentRef, MenuComponentProps>(
-  ({ actions, ...props }, ref) => (
-    <ExpoMenuView {...props} ref={ref} actions={withAndroidMenuIcons(actions)} />
+export const MenuView = React.forwardRef<MenuComponentRef, AccessibleMenuComponentProps>(
+  ({ accessibilityLabel, actions, children, ...props }, ref) => (
+    <ExpoMenuView {...props} ref={ref} actions={withAndroidMenuIcons(actions)}>
+      <View
+        accessible={Boolean(accessibilityLabel)}
+        accessibilityRole={accessibilityLabel ? 'button' : undefined}
+        accessibilityLabel={accessibilityLabel}
+      >
+        {children}
+      </View>
+    </ExpoMenuView>
   )
 )
 

@@ -4,7 +4,13 @@ import { AnimatedText } from '~common/ui/Text'
 import type { TabButtonProps } from '../types'
 
 const TabButton = ({ label, isActive, onPress }: TabButtonProps) => (
-  <Pressable onPress={onPress} style={{ flex: 1, zIndex: 1 }}>
+  <Pressable
+    accessibilityLabel={label}
+    accessibilityRole="tab"
+    accessibilityState={{ selected: isActive }}
+    onPress={onPress}
+    style={{ flex: 1, zIndex: 1 }}
+  >
     <Box py={10}>
       <AnimatedText
         fontSize={14}

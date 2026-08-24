@@ -1,6 +1,6 @@
 export {
   MenuView,
   type MenuAction,
-  type MenuComponentProps,
+  type AccessibleMenuComponentProps,
   type MenuComponentRef,
 } from './MenuView.ios'

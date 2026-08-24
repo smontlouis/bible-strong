@@ -39,6 +39,8 @@ const TabPreviewCarousel = () => {
       bg="lightGrey"
       style={styles}
       overflow="visible"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
     >
       <Box position="absolute" inset={-300} bg="lightGrey" pointerEvents="none" />
       {deferredTabsAtoms.map((tabAtom, i) => (

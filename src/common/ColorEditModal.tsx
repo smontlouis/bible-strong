@@ -95,10 +95,6 @@ const ColorEditModal = ({
     modalRef.current?.dismiss()
   }
 
-  const handleClose = () => {
-    modalRef.current?.dismiss()
-  }
-
   const getModalTitle = () => {
     return mode === 'add'
       ? t('Nouvelle couleur')
@@ -114,7 +110,15 @@ const ColorEditModal = ({
           title={getModalTitle()}
           rightComponent={
             onDelete ? (
-              <TouchableBox onPress={onDelete} width={48} height={48} center marginRight={10}>
+              <TouchableBox
+                accessibilityLabel={t('Supprimer')}
+                accessibilityRole="button"
+                onPress={onDelete}
+                width={48}
+                height={48}
+                center
+                marginRight={10}
+              >
                 <FeatherIcon name="trash-2" size={16} color="quart" />
               </TouchableBox>
             ) : undefined
@@ -142,6 +146,9 @@ const ColorEditModal = ({
           </Text>
           <TypeSelectorContainer>
             <TypeButton
+              accessibilityLabel={t('Fond')}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: chosenType === 'background' }}
               isSelected={chosenType === 'background'}
               onPress={() => setChosenType('background')}
               style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
@@ -151,6 +158,9 @@ const ColorEditModal = ({
               </Text>
             </TypeButton>
             <TypeButton
+              accessibilityLabel={t('Texte')}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: chosenType === 'textColor' }}
               isSelected={chosenType === 'textColor'}
               onPress={() => setChosenType('textColor')}
               style={{ borderRadius: 0 }}
@@ -160,6 +170,9 @@ const ColorEditModal = ({
               </Text>
             </TypeButton>
             <TypeButton
+              accessibilityLabel={t('Soulignement')}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: chosenType === 'underline' }}
               isSelected={chosenType === 'underline'}
               onPress={() => setChosenType('underline')}
               style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}

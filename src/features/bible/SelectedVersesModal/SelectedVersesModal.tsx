@@ -1,6 +1,7 @@
 import { Sheet, SheetView } from '~common/sheet'
 import { useAtom } from 'jotai/react'
 import { useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import Animated from 'react-native-reanimated'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
 import Box, { HStack } from '~common/ui/Box'
@@ -45,6 +46,7 @@ const SelectedVersesModal = ({
   onEnterAnnotationMode,
   focusVerses,
 }: SelectedVersesModalProps) => {
+  const { t } = useTranslation()
   const exportSheetRef = useRef<SheetRef>(null)
   const selectedVersesTitle = verseToReference(selectedVerses)
   const [activeTabIndex, setActiveTabIndex] = useAtom(selectedVersesTabIndexAtom)
@@ -104,7 +106,13 @@ const SelectedVersesModal = ({
               <Text bold fontSize={18} textAlign="center">
                 {selectedVersesTitle.toUpperCase()}
               </Text>
-              <TouchableIcon name="arrow-right" size={20} onPress={sendVerseData} noFlex />
+              <TouchableIcon
+                accessibilityLabel={t('Continuer')}
+                name="arrow-right"
+                size={20}
+                onPress={sendVerseData}
+                noFlex
+              />
             </HStack>
           ) : typeof isSelectionMode === 'string' && isSelectionMode.includes('strong') ? (
             <></>

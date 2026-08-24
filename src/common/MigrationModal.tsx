@@ -74,7 +74,7 @@ const MigrationModal = () => {
 
   return (
     <Modal visible={progress.isActive} animationType="fade" transparent statusBarTranslucent>
-      <Backdrop>
+      <Backdrop accessibilityViewIsModal>
         <ModalContent>
           <IconContainer>
             <FeatherIcon name={hasError ? 'alert-circle' : 'database'} size={50} color="primary" />
@@ -111,14 +111,30 @@ const MigrationModal = () => {
 
           {!hasError && (
             <Box width="100%" marginBottom={30}>
-              <Box marginBottom={10}>
+              <Box
+                accessible
+                accessibilityLabel={t('migration.progress')}
+                accessibilityRole="progressbar"
+                accessibilityValue={{
+                  min: 0,
+                  max: 100,
+                  now: Math.round(progress.overallProgress * 100),
+                }}
+                marginBottom={10}
+              >
                 <ProgressBar progress={progress.overallProgress} />
               </Box>
               <Text textAlign="center" fontSize={16} bold>
                 {Math.round(progress.overallProgress * 100)}%
               </Text>
               {progress.message && (
-                <Text textAlign="center" fontSize={12} color="grey" marginTop={8}>
+                <Text
+                  accessibilityLiveRegion="polite"
+                  textAlign="center"
+                  fontSize={12}
+                  color="grey"
+                  marginTop={8}
+                >
                   {progress.message}
                 </Text>
               )}

@@ -143,6 +143,7 @@ import {
   getSelectionAnnotationDeletionImpact,
   requiresSelectionAnnotationDeletionConfirmation,
 } from './annotationDeletionImpact'
+import { useChapterAccessibilityAnnouncement } from './useChapterAccessibilityAnnouncement'
 
 const EMPTY_PASSAGE_MEDIA = {
   introduction: [],
@@ -320,6 +321,17 @@ const BibleViewer = ({
   })
   const mainResult = mainReadingQuery.data
   const mainChapterData = mainResult?.success ? mainResult.data : undefined
+  const chapterAccessibilityKey = `${book.Numero}:${chapter}:${version}`
+  useChapterAccessibilityAnnouncement({
+    announcement: t('accessibility.chapterLoaded', {
+      book: t(book.Nom),
+      chapter,
+      version,
+    }),
+    locationKey: chapterAccessibilityKey,
+    ready: !mainReadingQuery.isPlaceholderData && Boolean(mainChapterData),
+  })
+
   const verses = mainChapterData?.verses ?? EMPTY_VERSES
   const usesCanonicalPresentation = mainChapterData?.presentation === 'canonical'
   const legacyPericopeQuery = useQuery({

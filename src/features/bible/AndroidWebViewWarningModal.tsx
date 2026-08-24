@@ -21,7 +21,12 @@ const AndroidWebViewWarningModal = ({ top }: { top: number }) => {
 
   return (
     <Modal transparent visible animationType="fade" statusBarTranslucent onRequestClose={dismiss}>
-      <View pointerEvents="box-none" style={{ flex: 1 }}>
+      <View
+        accessibilityViewIsModal
+        onAccessibilityEscape={dismiss}
+        pointerEvents="box-none"
+        style={{ flex: 1 }}
+      >
         <Box
           position="absolute"
           left={20}
@@ -50,7 +55,12 @@ const AndroidWebViewWarningModal = ({ top }: { top: number }) => {
                 {t('tips.bible-dom-wrapper-android')}
               </Text>
             </Box>
-            <TouchableOpacity hitSlop={12} onPress={dismiss}>
+            <TouchableOpacity
+              accessibilityLabel={t('Fermer')}
+              accessibilityRole="button"
+              hitSlop={12}
+              onPress={dismiss}
+            >
               <FeatherIcon name="x" size={22} color="tertiary" />
             </TouchableOpacity>
           </Box>

@@ -49,7 +49,11 @@ const DictionnaireItem = memo(({ word, onSelect }: DictionnaireItemProps) => {
 
   // If onSelect is provided, use Pressable directly instead of Link
   if (onSelect) {
-    return <Pressable onPress={handlePress}>{content}</Pressable>
+    return (
+      <Pressable accessibilityRole="button" onPress={handlePress}>
+        {content}
+      </Pressable>
+    )
   }
 
   // Otherwise use Link for standard navigation

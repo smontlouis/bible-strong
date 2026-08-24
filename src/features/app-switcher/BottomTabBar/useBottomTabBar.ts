@@ -60,6 +60,7 @@ const useBottomTabBar = () => {
 
   return {
     onPress,
+    isViewMode,
     listStyles,
     viewStyles,
   }

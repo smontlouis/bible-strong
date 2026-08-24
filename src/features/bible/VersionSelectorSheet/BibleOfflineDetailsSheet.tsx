@@ -411,6 +411,8 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
                   </Text>
                 </Box>
                 <Switch
+                  accessibilityLabel={t('bibleOfflineDetails.indexOptionTitle')}
+                  accessibilityState={{ checked: includeIndex }}
                   value={includeIndex}
                   onValueChange={enabled => setIndexChoice({ versionId, enabled })}
                   trackColor={{ false: theme.colors.border, true: theme.colors.primary }}

@@ -13,7 +13,7 @@ type Props = {
 }
 
 const ExampleChip = ({ label, onPress }: { label: string; onPress: () => void }) => (
-  <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+  <TouchableOpacity accessibilityRole="button" onPress={onPress} activeOpacity={0.7}>
     <Box px={12} py={4} borderRadius={20} bg="lightGrey" borderWidth={1} borderColor="border">
       <Text fontSize={14} color="default">
         {label}

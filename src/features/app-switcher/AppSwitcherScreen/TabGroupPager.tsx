@@ -25,7 +25,7 @@ const TabGroupPager = () => {
   const { width } = useWindowDimensions()
   const groups = useAtomValue(tabGroupsAtom)
   const bufferedGroupIds = useAtomValue(bufferedGroupIdsAtom)
-  useAtomValue(appSwitcherModeAtom)
+  const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
   // Différer le chargement des groupes adjacents (basse priorité)
   const deferredBufferedGroupIds = useDeferredValue(bufferedGroupIds)
   const { activeGroupIndex, groupPager, createGroupPage } = useAppSwitcherContext()
@@ -141,7 +141,12 @@ const TabGroupPager = () => {
   return (
     <>
       <GestureDetector gesture={panGesture}>
-        <AnimatedBox flex={1} bg="lightGrey">
+        <AnimatedBox
+          flex={1}
+          bg="lightGrey"
+          accessibilityElementsHidden={appSwitcherMode === 'view'}
+          importantForAccessibility={appSwitcherMode === 'view' ? 'no-hide-descendants' : 'auto'}
+        >
           <AnimatedBox row style={[{ width: totalPages * width, height: '100%' }, containerStyle]}>
             {groups.map((group, index) => (
               <TabGroupPage

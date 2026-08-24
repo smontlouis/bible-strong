@@ -15,7 +15,16 @@ import { MainStackProps } from '~navigation/type'
 import { routeMapping } from '~navigation/routeMapping'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
-export interface LinkProps<R extends keyof MainStackProps> {
+export interface LinkProps<R extends keyof MainStackProps> extends Pick<
+  TouchableOpacityProps,
+  | 'accessibilityActions'
+  | 'accessibilityHint'
+  | 'accessibilityLabel'
+  | 'accessibilityRole'
+  | 'accessibilityState'
+  | 'disabled'
+  | 'onAccessibilityAction'
+> {
   route?: R
   href?: string
   share?: string
@@ -61,6 +70,7 @@ const Link = <R extends keyof MainStackProps>({
   paddingSmall,
   style,
   size,
+  accessibilityRole,
   ...props
 }: PropsWithChildren<LinkProps<R>>) => {
   const router = useRouter()
@@ -106,6 +116,7 @@ const Link = <R extends keyof MainStackProps>({
   return (
     <TouchableOpacity
       activeOpacity={0.5}
+      accessibilityRole={accessibilityRole ?? (route || href ? 'link' : 'button')}
       {...props}
       onPress={handlePress}
       style={{

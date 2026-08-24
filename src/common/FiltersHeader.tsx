@@ -73,7 +73,7 @@ const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
             rightComponent={
               activeFilterCount > 0 && onReset ? (
                 <Box mr={12}>
-                  <TouchableOpacity onPress={onReset}>
+                  <TouchableOpacity accessibilityRole="button" onPress={onReset}>
                     <Box py={4} px={8}>
                       <Text color="primary" fontSize={14}>
                         {t('Réinitialiser')}
@@ -88,7 +88,7 @@ const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
       >
         <SheetView>
           {filters.map(filter => (
-            <TouchableOpacity key={filter.key} onPress={filter.onPress}>
+            <TouchableOpacity accessibilityRole="button" key={filter.key} onPress={filter.onPress}>
               <HStack alignItems="center" p={16} borderBottomWidth={1} borderColor="border">
                 <Box row flex={1}>
                   <FeatherIcon

@@ -21,7 +21,11 @@ const FilterHeaderButton = ({ activeFilterCount, activeFilterIcon, onPress }: Pr
         : t('filters.activeCount_other', { count: activeFilterCount })
 
   return (
-    <TouchableOpacity accessibilityLabel={accessibilityLabel} onPress={onPress}>
+    <TouchableOpacity
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      onPress={onPress}
+    >
       <HStack alignItems="center" justifyContent="flex-end" px={15} py={15} minHeight={48}>
         {activeFilterCount ? (
           <HStack bg="primary" minWidth={50} height={22} borderRadius={13} alignItems="stretch">

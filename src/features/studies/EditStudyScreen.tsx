@@ -188,7 +188,13 @@ const EditStudyScreen = ({
           dispatch(updateStudy({ id: currentStudy.id, title: value, modified_at: Date.now() }))
         }}
       />
-      {isReadOnly && <FabButton icon="edit-2" onPress={() => setIsReadOnly(false)} />}
+      {isReadOnly && (
+        <FabButton
+          accessibilityLabel={t('accessibility.editStudy')}
+          icon="edit-2"
+          onPress={() => setIsReadOnly(false)}
+        />
+      )}
     </FormSheetScreen>
   )
 }

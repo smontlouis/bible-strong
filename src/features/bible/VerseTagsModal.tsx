@@ -80,7 +80,7 @@ const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () 
   })()
 
   return (
-    <TouchableOpacity onPress={onEditTags}>
+    <TouchableOpacity accessibilityRole="button" onPress={onEditTags}>
       <ItemRow>
         <IconContainer>
           <FeatherIcon

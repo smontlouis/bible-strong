@@ -70,7 +70,13 @@ const BookItem = memo(
 
     return (
       <Box>
-        <TouchableOpacity activeOpacity={0.8} onPress={() => onBookSelect(book)}>
+        <TouchableOpacity
+          accessibilityLabel={t(book.Nom)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: shouldRenderChapters }}
+          activeOpacity={0.8}
+          onPress={() => onBookSelect(book)}
+        >
           <HStack
             px={20}
             backgroundColor={isSelected ? 'lightGrey' : 'transparent'}
@@ -106,6 +112,8 @@ const BookItem = memo(
               {chapters.map(chapter => (
                 <TouchableOpacity
                   key={chapter}
+                  accessibilityLabel={`${t('Chapitre')} ${chapter}`}
+                  accessibilityRole="button"
                   onPress={() => handleChapterSelect(chapter)}
                   onLongPress={() => handleLongPressChapterSelect(chapter)}
                 >

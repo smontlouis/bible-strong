@@ -21,26 +21,35 @@ import { unifiedTagsModalAtom, type UnifiedTagsModalProps } from '~state/app'
 import SheetSearchInput from './SheetSearchInput'
 import { FadeIn, FadeOut, LinearTransition } from 'react-native-reanimated'
 
-const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => void }) => (
-  <AnimatedBox
-    entering={FadeIn}
-    exiting={FadeOut}
-    layout={LinearTransition}
-    row
-    bg="primary"
-    borderRadius={20}
-    px={12}
-    py={5}
-    alignItems="center"
-  >
-    <Text color="reverse" fontSize={14} numberOfLines={1} maxWidth={200}>
-      {label}
-    </Text>
-    <TouchableOpacity onPress={onRemove} style={{ marginLeft: 6 }}>
-      <FeatherIcon name="x" size={14} color="reverse" />
-    </TouchableOpacity>
-  </AnimatedBox>
-)
+const RemovableChip = ({ label, onRemove }: { label: string; onRemove: () => void }) => {
+  const { t } = useTranslation()
+
+  return (
+    <AnimatedBox
+      entering={FadeIn}
+      exiting={FadeOut}
+      layout={LinearTransition}
+      row
+      bg="primary"
+      borderRadius={20}
+      px={12}
+      py={5}
+      alignItems="center"
+    >
+      <Text color="reverse" fontSize={14} numberOfLines={1} maxWidth={200}>
+        {label}
+      </Text>
+      <TouchableOpacity
+        accessibilityLabel={t('accessibility.removeTag', { tag: label })}
+        accessibilityRole="button"
+        onPress={onRemove}
+        style={{ marginLeft: 6 }}
+      >
+        <FeatherIcon name="x" size={14} color="reverse" />
+      </TouchableOpacity>
+    </AnimatedBox>
+  )
+}
 
 type UnifiedTagsModalInstanceProps = {
   item: UnifiedTagsModalProps

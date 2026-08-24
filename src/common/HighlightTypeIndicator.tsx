@@ -4,6 +4,7 @@ import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import Text from '~common/ui/Text'
 import type { HighlightType } from '~redux/modules/user'
+import { useTranslation } from 'react-i18next'
 
 const Touchable = styled.TouchableOpacity({
   alignItems: 'center',
@@ -42,6 +43,7 @@ const TextContainer = styled.View<{ size: number; isSelected?: boolean }>(
 )
 
 type Props = {
+  accessibilityLabel?: string
   color: string
   type?: HighlightType
   size?: number
@@ -52,6 +54,7 @@ type Props = {
 }
 
 const HighlightTypeIndicator = ({
+  accessibilityLabel,
   color,
   type = 'background',
   size = 30,
@@ -61,6 +64,7 @@ const HighlightTypeIndicator = ({
   isSelected = false,
 }: Props) => {
   const theme = useTheme()
+  const { t } = useTranslation()
   const fontSize = size * 0.85
 
   const renderIndicator = () => {
@@ -118,11 +122,22 @@ const HighlightTypeIndicator = ({
   if (onPress || onLongPress) {
     return (
       <Touchable
+        accessibilityActions={
+          onLongPress ? [{ name: 'edit', label: t('accessibility.editColor') }] : undefined
+        }
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        accessibilityState={{ disabled, selected: isSelected }}
         activeOpacity={0.7}
         onPress={onPress}
         onLongPress={onLongPress}
         disabled={disabled}
         hitSlop={10}
+        onAccessibilityAction={event => {
+          if (event.nativeEvent.actionName === 'edit') {
+            onLongPress?.()
+          }
+        }}
       >
         {renderIndicator()}
       </Touchable>

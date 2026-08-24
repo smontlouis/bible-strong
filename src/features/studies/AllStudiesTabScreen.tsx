@@ -258,6 +258,7 @@ const StudiesScreen = ({
         )}
         {isLogged && (
           <FabButton
+            accessibilityLabel={t('accessibility.newStudy')}
             icon="plus"
             onPress={() => {
               const studyUuid = generateUUID()

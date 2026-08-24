@@ -37,8 +37,10 @@ export default ({
   label,
   disabled,
   name,
+  accessibilityLabel,
   ...props
 }: {
+  accessibilityLabel: string
   onPress: () => void
   color?: string
   isSelected?: boolean
@@ -49,7 +51,16 @@ export default ({
   name: keyof typeof Icon.Feather.glyphMap
 } & TouchableOpacityProps) => {
   return (
-    <Touchable onPress={onPress} noFlex={noFlex} disabled={disabled} {...props}>
+    <Touchable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: Boolean(disabled), selected: Boolean(isSelected) }}
+      onPress={onPress}
+      noFlex={noFlex}
+      disabled={disabled}
+      hitSlop={8}
+      {...props}
+    >
       <StyledIcon
         name={name}
         size={size}

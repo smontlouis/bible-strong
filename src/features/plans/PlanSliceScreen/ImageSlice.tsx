@@ -10,7 +10,7 @@ import { useFireStorage } from '../plan.hooks'
 
 const imageWidth = wp(100) > 600 ? 600 : wp(100)
 
-const ImageSlice = ({ src }: ImageSliceProps) => {
+const ImageSlice = ({ alt, src }: ImageSliceProps) => {
   const imageUrl = useFireStorage(src)
   const { colorScheme } = useCurrentThemeSelector()
 
@@ -24,6 +24,8 @@ const ImageSlice = ({ src }: ImageSliceProps) => {
     >
       {imageUrl ? (
         <Image
+          alt={alt}
+          accessible={Boolean(alt)}
           style={{ width: imageWidth, height: imageWidth }}
           source={{
             uri: imageUrl,

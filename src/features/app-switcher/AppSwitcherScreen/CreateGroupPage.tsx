@@ -195,11 +195,21 @@ const CreateGroupPage = memo(
             py={8}
             lightShadow
           >
-            <TouchableBox onPress={handleCancel} padding={8} borderRadius={24} bg="reverse">
+            <TouchableBox
+              accessibilityLabel={t('Annuler')}
+              accessibilityRole="button"
+              onPress={handleCancel}
+              padding={8}
+              borderRadius={24}
+              bg="reverse"
+            >
               <FeatherIcon name="x" size={24} color="tertiary" />
             </TouchableBox>
 
             <TouchableBox
+              accessibilityLabel={t('accessibility.createGroup')}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: isDisabled }}
               onPress={handleCreate}
               padding={8}
               borderRadius={24}
@@ -227,21 +237,24 @@ const CreateGroupPage = memo(
                 color: theme.colors.default,
               }}
             />
-            <HStack gap={12} overflow="visible">
-              {GROUP_COLORS.map(color => (
+            <HStack gap={8} overflow="visible">
+              {GROUP_COLORS.map((color, index) => (
                 <TouchableBox
                   key={color}
+                  accessibilityLabel={t('accessibility.colorOption', { index: index + 1 })}
+                  accessibilityRole="radio"
+                  accessibilityState={{ checked: selectedColor === color }}
                   onPress={() => setSelectedColor(color)}
-                  width={20}
-                  height={20}
-                  borderRadius={10}
+                  width={32}
+                  height={32}
+                  borderRadius={16}
                   center
                   style={{
                     backgroundColor: color,
                   }}
                 >
                   {selectedColor === color && (
-                    <Box width={10} height={10} borderRadius={5} bg="black" opacity={0.5} />
+                    <Box width={12} height={12} borderRadius={6} bg="black" opacity={0.5} />
                   )}
                 </TouchableBox>
               ))}

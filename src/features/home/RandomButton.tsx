@@ -1,10 +1,14 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import Link from '~common/Link'
 import { FeatherIcon } from '~common/ui/Icon'
 
 const RandomButton = ({ onPress }: { onPress: () => void }) => {
+  const { t } = useTranslation()
+
   return (
     <Link
+      accessibilityLabel={t('backups.refresh')}
       onPress={onPress}
       style={{
         position: 'absolute',

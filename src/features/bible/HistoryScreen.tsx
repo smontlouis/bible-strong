@@ -177,7 +177,7 @@ const History = () => {
         hasBackButton
         title={t('Historique')}
         rightComponent={
-          <Link onPress={deleteHistory} padding>
+          <Link accessibilityLabel={t('Supprimer')} onPress={deleteHistory} padding>
             <FeatherIcon size={20} name="trash-2" color="quart" />
           </Link>
         }

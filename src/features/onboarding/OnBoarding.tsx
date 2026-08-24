@@ -69,7 +69,7 @@ const OnBoarding = () => {
       onRequestClose={completeOnboarding}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Box flex bg="reverse">
+        <Box accessibilityViewIsModal onAccessibilityEscape={completeOnboarding} flex bg="reverse">
           {step === 'abel' ? (
             <AbelOnboarding onComplete={() => setStep('choice')} />
           ) : step === 'choice' ? (

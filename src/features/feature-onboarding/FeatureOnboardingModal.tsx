@@ -78,6 +78,8 @@ const FeatureOnboardingModal = () => {
     <Sheet ref={ref} dismissible={false} onDismiss={handleClose}>
       <SheetView>
         <TouchableBox
+          accessibilityLabel={t('Fermer')}
+          accessibilityRole="button"
           onPress={() => {
             ref?.current?.close()
             handleClose()

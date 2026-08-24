@@ -1,4 +1,5 @@
 import { ScrollView, TouchableOpacity } from 'react-native'
+import { useTranslation } from 'react-i18next'
 
 import Box, { HStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -10,6 +11,7 @@ import { COLOR_CIRCLE_MIN_WIDTH } from '~helpers/constants'
 export interface ColorItem {
   key: string
   hex: string
+  name?: string
   type?: HighlightType
 }
 
@@ -49,12 +51,15 @@ const ColorCircleGrid = ({
   scrollPadding,
   itemHeight = 60,
 }: ColorCircleGridProps) => {
+  const { t } = useTranslation()
+
   if (layout === 'grid') {
     return (
       <HStack gap={8} wrap overflow="visible" justifyContent="flex-end">
-        {colors.map(color => (
+        {colors.map((color, index) => (
           <HighlightTypeIndicator
             key={color.key}
+            accessibilityLabel={color.name || t('accessibility.colorOption', { index: index + 1 })}
             color={color.hex}
             type={color.type || 'background'}
             onPress={() => onSelect(color.key)}
@@ -64,7 +69,11 @@ const ColorCircleGrid = ({
           />
         ))}
         {showAddButton && onAddPress && (
-          <TouchableOpacity onPress={onAddPress}>
+          <TouchableOpacity
+            accessibilityLabel={t('Ajouter une couleur')}
+            accessibilityRole="button"
+            onPress={onAddPress}
+          >
             <FeatherIcon name="arrow-right-circle" size={circleSize} color="tertiary" />
           </TouchableOpacity>
         )}
@@ -88,9 +97,10 @@ const ColorCircleGrid = ({
         paddingHorizontal: scrollPadding?.horizontal,
       }}
     >
-      {colors.map(color => (
+      {colors.map((color, index) => (
         <Box key={color.key} width={itemWidth} height={itemHeight} center>
           <HighlightTypeIndicator
+            accessibilityLabel={color.name || t('accessibility.colorOption', { index: index + 1 })}
             color={color.hex}
             type={color.type || 'background'}
             onPress={() => onSelect(color.key)}
@@ -102,7 +112,11 @@ const ColorCircleGrid = ({
       ))}
       {showAddButton && onAddPress && (
         <Box width={itemWidth} height={itemHeight} center>
-          <TouchableOpacity onPress={onAddPress}>
+          <TouchableOpacity
+            accessibilityLabel={t('Ajouter une couleur')}
+            accessibilityRole="button"
+            onPress={onAddPress}
+          >
             <FeatherIcon name="arrow-right-circle" size={circleSize} color="tertiary" />
           </TouchableOpacity>
         </Box>

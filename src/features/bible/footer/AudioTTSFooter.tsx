@@ -314,6 +314,7 @@ const AudioTTSFooter = ({
   bibleAtom,
   coverage,
 }: AudioTTSFooterProps) => {
+  const { t } = useTranslation()
   const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(version))
   const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
   const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
@@ -371,6 +372,9 @@ const AudioTTSFooter = ({
             disabled={disabled}
             activeOpacity={0.5}
             onPress={goToPrevVerse}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.previousVerse')}
+            accessibilityState={{ disabled }}
             width={40}
             height={40}
             center
@@ -387,6 +391,9 @@ const AudioTTSFooter = ({
             disabled={disabled}
             activeOpacity={0.5}
             onPress={goToNextVerse}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.nextVerse')}
+            accessibilityState={{ disabled }}
             width={40}
             height={40}
             center
@@ -394,7 +401,12 @@ const AudioTTSFooter = ({
             <FeatherIcon name="chevron-right" size={18} color="tertiary" />
           </TouchableBox>
         </Box>
-        <ChapterButton hasNextChapter={hasNextChapter} direction="right" onPress={onNextChapter} />
+        <ChapterButton
+          disabled={disabled}
+          hasNextChapter={hasNextChapter}
+          direction="right"
+          onPress={onNextChapter}
+        />
       </Box>
       <HStack alignItems="center" justifyContent="center" mt={10}>
         <TTSVoiceButton currentVersion={version} />

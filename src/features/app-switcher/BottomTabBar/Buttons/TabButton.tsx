@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { TAB_ICON_SIZE } from '../../utils/constants'
@@ -7,11 +8,18 @@ import { getContrastTextColor } from '~helpers/highlightUtils'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 
 const TabButton = () => {
+  const { t } = useTranslation()
   const { onPress, tabsCount, iconStyle, groupColor } = useTabButtonPress()
   const { colorScheme } = useCurrentThemeSelector()
 
   return (
-    <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
+    <TouchableBox
+      center
+      size={TAB_ICON_SIZE}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={t('accessibility.tabs', { count: tabsCount })}
+    >
       <AnimatedBox
         size={20}
         borderWidth={2}

@@ -72,6 +72,7 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
           />
         </Box>
         <Link
+          accessibilityLabel={t('accessibility.options')}
           padding
           onPress={event => {
             event?.stopPropagation()

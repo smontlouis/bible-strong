@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router'
 import React, { FC, PropsWithChildren } from 'react'
+import { useTranslation } from 'react-i18next'
 import { StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native'
 
 type BackProps = {
@@ -16,6 +17,7 @@ const Back: FC<PropsWithChildren<BackProps>> = ({
   onGoBack,
   ...props
 }: BackProps) => {
+  const { t } = useTranslation()
   const router = useRouter()
 
   const handlePress = () => {
@@ -27,6 +29,8 @@ const Back: FC<PropsWithChildren<BackProps>> = ({
     <TouchableOpacity
       {...props}
       onPress={onCustomPress || handlePress}
+      accessibilityRole="button"
+      accessibilityLabel={t('accessibility.back')}
       style={{
         ...StyleSheet.flatten(style),
         ...(padding && {

@@ -117,17 +117,30 @@ const VerseSheet = ({ sheetRef, bookSelectorRef, actions, data }: VerseSheetProp
         }}
         showsVerticalScrollIndicator={false}
       >
-        {verses?.map((verse, index) => (
+        {verses?.map(verse => (
           <TouchableBox
-            key={index}
+            key={String(verse.Verset)}
+            accessibilityActions={[
+              {
+                name: 'openNewTab',
+                label: t('accessibility.openInNewTab'),
+              },
+            ]}
+            accessibilityLabel={`${t('Verset')} ${verse.Verset}`}
+            accessibilityRole="button"
             backgroundColor="opacity5"
             borderRadius={3}
-            w={ITEM_WIDTH}
-            h={40}
+            w={Math.max(ITEM_WIDTH, 48)}
+            h={48}
             alignItems="center"
             justifyContent="center"
             onPress={() => handleSelect(verse)}
             onLongPress={() => handleLongPress(verse)}
+            onAccessibilityAction={event => {
+              if (event.nativeEvent.actionName === 'openNewTab') {
+                handleLongPress(verse)
+              }
+            }}
           >
             <Box
               style={{

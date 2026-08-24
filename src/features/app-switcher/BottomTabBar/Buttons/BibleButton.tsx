@@ -1,5 +1,6 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSelector } from 'react-redux'
 import { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
@@ -12,6 +13,7 @@ import { TAB_ICON_SIZE } from '../../utils/constants'
 export type BibleButtonProps = Record<string, never>
 
 const BibleButton = (_props: BibleButtonProps) => {
+  const { t } = useTranslation()
   const tabs = useAtomValue(tabsAtom)
   const setTabs = useSetAtom(tabsAtom)
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
@@ -36,7 +38,13 @@ const BibleButton = (_props: BibleButtonProps) => {
   }
 
   return (
-    <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
+    <TouchableBox
+      center
+      size={TAB_ICON_SIZE}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={t('tabs.bible')}
+    >
       <FeatherIcon name="book-open" size={23} color={'tertiary'} />
     </TouchableBox>
   )

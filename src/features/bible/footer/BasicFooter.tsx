@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai/react'
+import { useTranslation } from 'react-i18next'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import { AnimatedHStack, AnimatedTouchableBox, TouchableBox } from '~common/ui/Box'
@@ -28,6 +29,7 @@ const BasicFooter = ({
   onNextChapter,
   type,
 }: BasicFooterProps) => {
+  const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const insets = useSafeAreaInsets()
   const isFullScreenBible = useAtomValue(isFullScreenBibleAtom)
@@ -41,11 +43,14 @@ const BasicFooter = ({
   return (
     <>
       <AnimatedTouchableBox
-        disabled={isDisabled}
+        disabled={isDisabled || !onPrevChapter}
         width={40}
         height={40}
         overflow="visible"
         onPress={onPrevChapter}
+        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.previousChapter')}
+        accessibilityState={{ disabled: isDisabled || !onPrevChapter }}
         borderWidth={2}
         borderRadius={20}
         borderColor="lightGrey"
@@ -72,12 +77,15 @@ const BasicFooter = ({
         centerTranslateY={centerTranslateY}
       />
       <AnimatedTouchableBox
-        disabled={isDisabled}
+        disabled={isDisabled || !onNextChapter}
         width={40}
         height={40}
         center
         overflow="visible"
         onPress={onNextChapter}
+        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.nextChapter')}
+        accessibilityState={{ disabled: isDisabled || !onNextChapter }}
         borderWidth={2}
         borderRadius={20}
         borderColor="lightGrey"
@@ -113,7 +121,16 @@ const PlayableButtons = ({
   type,
   centerTranslateY,
 }: PlayableButtonsProps) => {
+  const { t } = useTranslation()
   const { bottomBarHeight } = useBottomBarHeightInTab()
+  const accessibilityLabel = hasError
+    ? t('accessibility.audioUnavailable')
+    : isLoading
+      ? t('accessibility.audioLoading')
+      : isPlaying
+        ? t('accessibility.pauseAudio')
+        : t('accessibility.playAudio')
+
   return (
     <AnimatedHStack
       position="absolute"
@@ -137,6 +154,9 @@ const PlayableButtons = ({
         disabled={isDisabled}
         activeOpacity={0.5}
         onPress={onPlay}
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        accessibilityState={{ disabled: isDisabled, busy: isLoading }}
         bg={isPlaying ? 'primary' : 'reverse'}
         borderWidth={2}
         borderRadius={25}

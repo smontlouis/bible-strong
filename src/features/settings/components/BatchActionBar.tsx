@@ -62,6 +62,7 @@ const BatchActionBar = ({
 
         {hasDownloadable && (
           <TouchableOpacity
+            accessibilityRole="button"
             accessibilityState={{ disabled: downloadsDisabled || isDeleting }}
             disabled={downloadsDisabled || isDeleting}
             onPress={onDownload}
@@ -83,6 +84,7 @@ const BatchActionBar = ({
 
         {hasDeletable && (
           <TouchableOpacity
+            accessibilityRole="button"
             accessibilityState={{ disabled: isDeleting, busy: isDeleting }}
             disabled={isDeleting}
             onPress={onDelete}

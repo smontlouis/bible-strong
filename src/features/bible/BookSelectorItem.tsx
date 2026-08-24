@@ -18,7 +18,11 @@ const BookSelectorItem = ({ book, isSelected, onBookSelect }: BookSelectorItemPr
 
   return (
     <Box>
-      <TouchableOpacity activeOpacity={0.8} onPress={() => onBookSelect(book)}>
+      <TouchableOpacity
+        accessibilityRole="button"
+        activeOpacity={0.8}
+        onPress={() => onBookSelect(book)}
+      >
         <HStack
           px={20}
           backgroundColor={isSelected ? 'lightGrey' : 'transparent'}

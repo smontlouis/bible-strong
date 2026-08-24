@@ -4,6 +4,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { dismissTipAtom, useTip } from './atom'
 import { useSetAtom } from 'jotai/react'
+import { useTranslation } from 'react-i18next'
 
 export const HelpTip = ({
   id,
@@ -17,6 +18,7 @@ export const HelpTip = ({
 } & BoxProps) => {
   const isDismissed = useTip(id)
   const dismissTip = useSetAtom(dismissTipAtom)
+  const { t } = useTranslation()
   const dismiss = () => dismissTip(id)
 
   if (isDismissed) return null
@@ -40,7 +42,12 @@ export const HelpTip = ({
       <Text flex color={type === 'info' ? 'tertiary' : 'reverse'} fontSize={14}>
         {description}
       </Text>
-      <TouchableOpacity hitSlop={10} onPress={dismiss}>
+      <TouchableOpacity
+        accessibilityLabel={t('Fermer')}
+        accessibilityRole="button"
+        hitSlop={10}
+        onPress={dismiss}
+      >
         <FeatherIcon name="x" size={20} color={type === 'info' ? 'tertiary' : 'reverse'} />
       </TouchableOpacity>
     </HStack>

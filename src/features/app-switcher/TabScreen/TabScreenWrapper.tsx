@@ -7,15 +7,29 @@ interface TabScreenWrapperProps {
   children: React.ReactNode
   style: AnimatedStyle<ViewStyle | ImageStyle | TextStyle>
   ref?: Ref<View>
+  accessibilityElementsHidden?: boolean
+  importantForAccessibility?: 'auto' | 'yes' | 'no' | 'no-hide-descendants'
 }
 
 const RefableAnimatedBox = AnimatedBox as ComponentType<
   ComponentProps<typeof AnimatedBox> & { ref?: Ref<View> }
 >
 
-const TabScreenWrapper = ({ style, children, ref }: TabScreenWrapperProps) => {
+const TabScreenWrapper = ({
+  style,
+  children,
+  ref,
+  accessibilityElementsHidden,
+  importantForAccessibility,
+}: TabScreenWrapperProps) => {
   return (
-    <RefableAnimatedBox bg="reverse" style={style} ref={ref}>
+    <RefableAnimatedBox
+      bg="reverse"
+      style={style}
+      ref={ref}
+      accessibilityElementsHidden={accessibilityElementsHidden}
+      importantForAccessibility={importantForAccessibility}
+    >
       {children}
     </RefableAnimatedBox>
   )

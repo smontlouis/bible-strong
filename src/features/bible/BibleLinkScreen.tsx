@@ -433,7 +433,11 @@ const BibleLinkScreen = () => {
         </KeyboardAvoidingView>
         {!isEditing && (
           <Box position="absolute" bottom={insets.bottom + 20} right={20}>
-            <Fab icon="edit-2" onPress={editLink} />
+            <Fab
+              accessibilityLabel={t('accessibility.editLink')}
+              icon="edit-2"
+              onPress={editLink}
+            />
           </Box>
         )}
       </Box>

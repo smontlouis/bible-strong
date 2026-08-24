@@ -23,6 +23,7 @@ const StyledIcon = styled(Icon.Feather)(() => ({
 }))
 
 interface FabProps {
+  accessibilityLabel: string
   icon?: string
   onPress?: () => void
   route?: keyof MainStackProps
@@ -30,13 +31,21 @@ interface FabProps {
   component?: React.ComponentType<{ color: string }>
 }
 
-const Fab = ({ icon, onPress, route, params, component: Component }: FabProps) => {
+const Fab = ({
+  accessibilityLabel,
+  icon,
+  onPress,
+  route,
+  params,
+  component: Component,
+}: FabProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
     <StyledLink
       route={route}
       params={params}
       onPress={onPress}
+      accessibilityLabel={accessibilityLabel}
       style={{
         bottom: bottomBarHeight + 30,
       }}

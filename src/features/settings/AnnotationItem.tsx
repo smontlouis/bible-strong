@@ -64,7 +64,7 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
   }
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={openBibleView}>
+    <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
       <AnnotationContainer>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
           <HStack flex row alignItems="center" gap={10}>
@@ -86,6 +86,7 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
           </DateText>
           {onSettingsPress && (
             <LinkBox
+              accessibilityLabel={t('accessibility.options')}
               p={4}
               ml={10}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}

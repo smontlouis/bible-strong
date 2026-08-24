@@ -59,6 +59,7 @@ export function useColorItems(options?: UseColorItemsOptions): ColorItem[] {
   const customColors: ColorItem[] = customHighlightColors.map(c => ({
     key: c.id,
     hex: c.hex,
+    name: c.name,
     ...(options?.includeTypes && { type: c.type || 'background' }),
   }))
 

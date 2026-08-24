@@ -60,18 +60,21 @@ const ThemeScreen = () => {
             <Text fontSize={15}>{preferredColorSchemeToString[preferredColorScheme]}</Text>
             <HStack marginLeft="auto" gap={20}>
               <TouchableIcon
+                accessibilityLabel={preferredColorSchemeToString.light}
                 isSelected={preferredColorScheme === 'light'}
                 name="sun"
                 onPress={() => dispatch(setSettingsPreferredColorScheme('light'))}
                 noFlex
               />
               <TouchableIcon
+                accessibilityLabel={preferredColorSchemeToString.dark}
                 isSelected={preferredColorScheme === 'dark'}
                 name="moon"
                 onPress={() => dispatch(setSettingsPreferredColorScheme('dark'))}
                 noFlex
               />
               <TouchableIcon
+                accessibilityLabel={preferredColorSchemeToString.auto}
                 isSelected={preferredColorScheme === 'auto'}
                 name="sunrise"
                 onPress={() => dispatch(setSettingsPreferredColorScheme('auto'))}
@@ -93,24 +96,48 @@ const ThemeScreen = () => {
             <Text flex fontSize={15}>
               {preferredLightThemeToString[preferredLightTheme]}
             </Text>
-            <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}>
+            <LinkBox
+              accessibilityLabel={preferredLightThemeToString.default}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredLightTheme === 'default' }}
+              size={40}
+              onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
+            >
               <Circle
                 isSelected={preferredLightTheme === 'default'}
                 size={28}
                 color="rgb(255,255,255)"
               />
             </LinkBox>
-            <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}>
+            <LinkBox
+              accessibilityLabel={preferredLightThemeToString.sepia}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredLightTheme === 'sepia' }}
+              size={40}
+              onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
+            >
               <Circle
                 isSelected={preferredLightTheme === 'sepia'}
                 size={28}
                 color="rgb(245,242,227)"
               />
             </LinkBox>
-            <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}>
+            <LinkBox
+              accessibilityLabel={preferredLightThemeToString.nature}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredLightTheme === 'nature' }}
+              size={40}
+              onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
+            >
               <Circle isSelected={preferredLightTheme === 'nature'} size={28} color="#EAF9EC" />
             </LinkBox>
-            <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}>
+            <LinkBox
+              accessibilityLabel={preferredLightThemeToString.sunset}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredLightTheme === 'sunset' }}
+              size={40}
+              onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
+            >
               <Circle isSelected={preferredLightTheme === 'sunset'} size={28} color="#FAE0D5" />
             </LinkBox>
           </RowContainer>
@@ -128,16 +155,40 @@ const ThemeScreen = () => {
             <Text flex fontSize={15}>
               {preferredDarkThemeToString[preferredDarkTheme]}
             </Text>
-            <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}>
+            <LinkBox
+              accessibilityLabel={preferredDarkThemeToString.dark}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredDarkTheme === 'dark' }}
+              size={40}
+              onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
+            >
               <Circle isSelected={preferredDarkTheme === 'dark'} size={28} color="rgb(18,45,66)" />
             </LinkBox>
-            <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}>
+            <LinkBox
+              accessibilityLabel={preferredDarkThemeToString.black}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredDarkTheme === 'black' }}
+              size={40}
+              onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
+            >
               <Circle isSelected={preferredDarkTheme === 'black'} size={28} color="black" />
             </LinkBox>
-            <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}>
+            <LinkBox
+              accessibilityLabel={preferredDarkThemeToString.mauve}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredDarkTheme === 'mauve' }}
+              size={40}
+              onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
+            >
               <Circle isSelected={preferredDarkTheme === 'mauve'} size={28} color="rgb(51,4,46)" />
             </LinkBox>
-            <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}>
+            <LinkBox
+              accessibilityLabel={preferredDarkThemeToString.night}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: preferredDarkTheme === 'night' }}
+              size={40}
+              onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
+            >
               <Circle isSelected={preferredDarkTheme === 'night'} size={28} color="rgb(0,50,100)" />
             </LinkBox>
           </RowContainer>

@@ -51,7 +51,11 @@ const TagItemCard = ({ item, variant, badge }: Props) => {
   const navigationConfig = getNavigationConfig(variant, item)
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={() => pushRouteOnce(navigationConfig)}>
+    <TouchableOpacity
+      accessibilityRole="button"
+      activeOpacity={0.7}
+      onPress={() => pushRouteOnce(navigationConfig)}
+    >
       <VStack gap={6} mx={20} paddingVertical={15} borderBottomWidth={1} borderColor="border">
         <HStack gap={10} alignItems="center">
           <Text fontSize={14} bold>

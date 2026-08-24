@@ -49,7 +49,7 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
   }
 
   const renderNewStudyButton = () => (
-    <TouchableOpacity onPress={handleCreateNewStudy}>
+    <TouchableOpacity accessibilityRole="button" onPress={handleCreateNewStudy}>
       <HStack
         paddingVertical={16}
         paddingHorizontal={20}
@@ -74,7 +74,7 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
     })
 
     return (
-      <TouchableOpacity onPress={() => handleSelectStudy(item.id)}>
+      <TouchableOpacity accessibilityRole="button" onPress={() => handleSelectStudy(item.id)}>
         <HStack
           paddingVertical={16}
           paddingHorizontal={20}

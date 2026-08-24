@@ -13,7 +13,7 @@ interface SectionHeaderProps {
 const SectionHeader = ({ icon, title }: SectionHeaderProps) => (
   <Container>
     <FeatherIcon name={icon} size={16} color="grey" />
-    <Title>{title}</Title>
+    <Title accessibilityRole="header">{title}</Title>
   </Container>
 )
 

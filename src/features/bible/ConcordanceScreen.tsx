@@ -99,6 +99,7 @@ const ConcordanceScreen = () => {
           keyExtractor={item => `book${item.Livre}`}
           renderItem={({ item }) => (
             <TouchableOpacity
+              accessibilityRole="button"
               onPress={() => {
                 pushRouteOnce({
                   pathname: '/concordance-by-book',

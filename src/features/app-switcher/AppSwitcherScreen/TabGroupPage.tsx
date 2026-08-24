@@ -194,7 +194,7 @@ const TabGroupPage = ({ group, index, isBuffered, scrollX, groupCount }: TabGrou
               style={{ width: 150, height: 150, opacity: 0.3 }}
               tintColor={theme.colors.tertiary}
             />
-            <TouchableOpacity onPress={handleCreateTab}>
+            <TouchableOpacity accessibilityRole="button" onPress={handleCreateTab}>
               <Box
                 bg="primary"
                 paddingVertical={12}

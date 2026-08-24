@@ -3,15 +3,14 @@ import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, useWindowDimensions } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Alert } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
-import { TAB_ICON_SIZE } from '../utils/constants'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 
 interface GroupActionsPopoverProps {
+  accessibilityLabel: string
   children: React.ReactNode
   group: TabGroup
   onCreateGroup: () => void
@@ -20,7 +19,14 @@ interface GroupActionsPopoverProps {
 }
 
 const GroupActionsPopover = memo(
-  ({ children, group, onCreateGroup, onEditGroup, onViewGroups }: GroupActionsPopoverProps) => {
+  ({
+    accessibilityLabel,
+    children,
+    group,
+    onCreateGroup,
+    onEditGroup,
+    onViewGroups,
+  }: GroupActionsPopoverProps) => {
     const { t } = useTranslation()
     const sheetRef = useRef<SheetRef>(null)
     const closeAllTabs = useSetAtom(closeAllTabsAtom)
@@ -75,7 +81,13 @@ const GroupActionsPopover = memo(
 
     return (
       <>
-        <TouchableBox onPress={() => sheetRef.current?.present()}>{children}</TouchableBox>
+        <TouchableBox
+          onPress={() => sheetRef.current?.present()}
+          accessibilityRole="button"
+          accessibilityLabel={accessibilityLabel}
+        >
+          {children}
+        </TouchableBox>
         <Sheet ref={sheetRef} detached>
           <SheetView>
             <Box minWidth={200}>

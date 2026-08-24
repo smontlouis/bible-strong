@@ -72,7 +72,7 @@ const RatingPrompt = ({ modalRef, onClose }: Props) => {
             </Button>
           </Box>
           <Box center mt={15}>
-            <TouchableOpacity onPress={handleDecline}>
+            <TouchableOpacity accessibilityRole="button" onPress={handleDecline}>
               <Paragraph scale={-3} color="grey" style={{ textDecorationLine: 'underline' }}>
                 {t('rating.decline')}
               </Paragraph>

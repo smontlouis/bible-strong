@@ -30,7 +30,11 @@ const DropdownMenu = <T extends string | number = string>({
   }
   return (
     <>
-      <TouchableBox onPress={() => open()}>
+      <TouchableBox
+        onPress={() => open()}
+        accessibilityRole="button"
+        accessibilityLabel={choice ? `${title}: ${choice.label}` : title}
+      >
         {customRender || (
           <Box padding={10}>
             <Text color="grey" fontSize={12}>

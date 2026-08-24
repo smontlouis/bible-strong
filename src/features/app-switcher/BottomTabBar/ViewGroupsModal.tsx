@@ -41,7 +41,7 @@ const TabPreviewGrid = ({ group, size: gridSize = 50 }: TabPreviewGridProps) => 
     if (showCount) {
       return (
         <Box
-          key={`badge-${index}`}
+          key="remaining-tabs"
           width={cellSize}
           height={cellSize}
           borderRadius={cellBorderRadius}
@@ -131,6 +131,9 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
       bg="lightGrey"
       alignItems="center"
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`${displayName}. ${getCreatedText()}`}
+      accessibilityState={{ selected: isActive }}
       style={
         isActive
           ? {

@@ -368,7 +368,7 @@ const ColorPickerModal = () => {
           })}
 
           {customHighlightColors.length < MAX_CUSTOM_COLORS && (
-            <TouchableOpacity onPress={openAddModal}>
+            <TouchableOpacity accessibilityRole="button" onPress={openAddModal}>
               <Box row alignItems="center" padding={15}>
                 <Box
                   width={30}

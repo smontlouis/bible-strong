@@ -7,6 +7,7 @@ import Text from '~common/ui/Text'
 import useTimeout from '~helpers/useTimeout'
 import styled from '@emotion/native'
 import { Theme } from '~themes'
+import { useTranslation } from 'react-i18next'
 
 const Container = styled.View(({ theme }) => ({
   flex: 1,
@@ -25,13 +26,22 @@ interface Props {
 const Loading = ({ message, subMessage, style, children }: Props) => {
   const [isReady] = useTimeout(3000)
   const theme: Theme = useTheme()
+  const { t } = useTranslation()
 
   return (
     <Container style={style}>
-      {!children && <ActivityIndicator color={theme.colors.grey} />}
+      {!children && (
+        <ActivityIndicator
+          accessibilityLabel={message || t('Chargement...')}
+          accessibilityRole="progressbar"
+          color={theme.colors.grey}
+        />
+      )}
       {message && (
         <Box>
-          <Text marginTop={20}>{message}</Text>
+          <Text accessibilityLiveRegion="polite" marginTop={20}>
+            {message}
+          </Text>
         </Box>
       )}
       {subMessage && isReady() && (

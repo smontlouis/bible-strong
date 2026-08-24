@@ -539,7 +539,11 @@ ${currentNote.description}
           bottom={(isFormSheet ? insets.bottom : bottomBarHeight) + 20}
           right={20}
         >
-          <Fab icon="edit-2" onPress={onEditNote} />
+          <Fab
+            accessibilityLabel={t('accessibility.editNote')}
+            icon="edit-2"
+            onPress={onEditNote}
+          />
         </Box>
       )}
     </Box>

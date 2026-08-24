@@ -119,13 +119,16 @@ const EditGroupModal = ({
             {t('Couleur')}
           </Text>
           <HStack gap={12} alignItems="center" justifyContent="space-between">
-            {GROUP_COLORS.map(color => (
+            {GROUP_COLORS.map((color, index) => (
               <TouchableBox
                 key={color}
                 onPress={() => setSelectedColor(color)}
-                width={20}
-                height={20}
-                borderRadius={10}
+                accessibilityRole="radio"
+                accessibilityLabel={t('accessibility.colorOption', { index: index + 1 })}
+                accessibilityState={{ checked: selectedColor === color }}
+                width={32}
+                height={32}
+                borderRadius={16}
                 center
                 style={{ backgroundColor: color }}
               >

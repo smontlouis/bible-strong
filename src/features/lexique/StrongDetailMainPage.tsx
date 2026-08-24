@@ -229,6 +229,7 @@ const StrongDetailMainPage = ({
         <HStack alignItems="flex-end" gap={16}>
           <VStack flex gap={5}>
             <Text
+              accessibilityLanguage={entry.language === 'hebrew' ? 'he-IL' : 'el-GR'}
               fontWeight="400"
               style={getScaledStrongTextStyle(
                 isOriginalUnnamed ? 32 : 40,

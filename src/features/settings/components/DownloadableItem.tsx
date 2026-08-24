@@ -121,50 +121,73 @@ const DownloadableItem = ({
 
   const isActive =
     visualState === 'downloading' || visualState === 'inserting' || visualState === 'queued'
+  const isMainInteractive =
+    Boolean(isSelectMode) ||
+    ['not-downloaded', 'needs-update', 'invalid', 'failed'].includes(visualState)
+  const isMainDisabled =
+    downloadsDisabled &&
+    ['not-downloaded', 'needs-update', 'invalid', 'failed'].includes(visualState)
 
   return (
-    <TouchableOpacity
-      onPress={handlePress}
-      activeOpacity={isActive ? 1 : 0.7}
-      accessibilityState={{
-        disabled:
-          downloadsDisabled &&
-          ['not-downloaded', 'needs-update', 'invalid', 'failed'].includes(visualState),
+    <Animated.View
+      style={{
+        paddingRight: 20,
+        paddingLeft: isDependency ? 78 : 45,
+        paddingVertical: isDependency ? 10 : 12,
+        opacity: visualState === 'not-downloaded' ? 0.5 : 1,
+        backgroundColor: visualState === 'selected' ? theme.colors.lightPrimary : 'transparent',
+        borderLeftWidth: ['needs-update', 'invalid'].includes(visualState) ? 4 : 0,
+        borderLeftColor:
+          visualState === 'needs-update'
+            ? theme.colors.success
+            : visualState === 'invalid'
+              ? theme.colors.quart
+              : 'transparent',
+        overflow: 'visible',
+        transitionProperty: ['opacity', 'backgroundColor'],
+        transitionDuration: 200,
       }}
     >
-      <Animated.View
-        style={{
-          paddingRight: 20,
-          paddingLeft: isDependency ? 78 : 45,
-          paddingVertical: isDependency ? 10 : 12,
-          opacity: visualState === 'not-downloaded' ? 0.5 : 1,
-          backgroundColor: visualState === 'selected' ? theme.colors.lightPrimary : 'transparent',
-          borderLeftWidth: ['needs-update', 'invalid'].includes(visualState) ? 4 : 0,
-          borderLeftColor:
-            visualState === 'needs-update'
-              ? theme.colors.success
-              : visualState === 'invalid'
-                ? theme.colors.quart
-                : 'transparent',
-          overflow: 'visible',
-          transitionProperty: ['opacity', 'backgroundColor'],
-          transitionDuration: 200,
-        }}
-      >
-        {isDependency ? (
-          <Box
-            pos="absolute"
-            top={-14}
-            left={52}
-            width={20}
-            height={36}
-            borderLeftWidth={2}
-            borderBottomWidth={2}
-            borderBottomLeftRadius={10}
-            borderColor="border"
-          />
-        ) : null}
-        <Box row flex alignItems="center">
+      {isDependency ? (
+        <Box
+          pos="absolute"
+          top={-14}
+          left={52}
+          width={20}
+          height={36}
+          borderLeftWidth={2}
+          borderBottomWidth={2}
+          borderBottomLeftRadius={10}
+          borderColor="border"
+        />
+      ) : null}
+      <Box row flex alignItems="center">
+        <TouchableOpacity
+          accessibilityLabel={name}
+          accessibilityRole={isSelectMode ? 'checkbox' : isMainInteractive ? 'button' : 'text'}
+          accessibilityState={{
+            checked: isSelectMode ? Boolean(isSelected) : undefined,
+            busy: isActive,
+            disabled: isMainDisabled,
+          }}
+          accessibilityValue={
+            queueState && (visualState === 'downloading' || visualState === 'inserting')
+              ? {
+                  min: 0,
+                  max: 100,
+                  now: Math.round(
+                    (visualState === 'inserting'
+                      ? queueState.insertProgress
+                      : queueState.downloadProgress) * 100
+                  ),
+                }
+              : undefined
+          }
+          disabled={isMainDisabled}
+          onPress={isMainInteractive ? handlePress : undefined}
+          activeOpacity={isActive ? 1 : 0.7}
+          style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+        >
           {/* Checkbox in select mode */}
           {isSelectMode && (
             <Animated.View
@@ -245,136 +268,149 @@ const DownloadableItem = ({
               </Box>
             )}
           </Box>
+        </TouchableOpacity>
 
-          {/* Right side action */}
-          <Box ml={12} alignItems="flex-end" justifyContent="center">
-            {visualState === 'not-downloaded' && !isSelectMode && (
-              <Box alignItems="flex-end" mr={5}>
-                <FeatherIcon
-                  name={downloadsDisabled ? 'wifi-off' : 'download-cloud'}
-                  size={16}
-                  color={downloadsDisabled ? 'tertiary' : 'primary'}
-                />
-                {estimatedSize != null && estimatedSize > 0 && (
-                  <Text fontSize={10} color="tertiary" mt={2}>
-                    {formatSize(estimatedSize, t)}
-                  </Text>
-                )}
-              </Box>
-            )}
-
-            {visualState === 'selected' && estimatedSize != null && estimatedSize > 0 && (
-              <Text fontSize={10} color="tertiary">
-                {formatSize(estimatedSize, t)}
-              </Text>
-            )}
-
-            {visualState === 'queued' && <FeatherIcon name="clock" size={18} color="tertiary" />}
-
-            {visualState === 'downloading' && queueState && (
-              <Box row alignItems="center" gap={8}>
-                <Text fontSize={12} color="tertiary">
-                  {Math.round(queueState.downloadProgress * 100)}%
+        {/* Right side action */}
+        <Box ml={12} alignItems="flex-end" justifyContent="center">
+          {visualState === 'not-downloaded' && !isSelectMode && (
+            <Box alignItems="flex-end" mr={5}>
+              <FeatherIcon
+                name={downloadsDisabled ? 'wifi-off' : 'download-cloud'}
+                size={16}
+                color={downloadsDisabled ? 'tertiary' : 'primary'}
+              />
+              {estimatedSize != null && estimatedSize > 0 && (
+                <Text fontSize={10} color="tertiary" mt={2}>
+                  {formatSize(estimatedSize, t)}
                 </Text>
-                <TouchableOpacity
-                  onPress={handleCancel}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <FeatherIcon name="x" size={18} color="quart" />
-                </TouchableOpacity>
-              </Box>
-            )}
+              )}
+            </Box>
+          )}
 
-            {visualState === 'inserting' && (
-              <Text fontSize={12} color="success">
-                {t('downloads.inserting')}
+          {visualState === 'selected' && estimatedSize != null && estimatedSize > 0 && (
+            <Text fontSize={10} color="tertiary">
+              {formatSize(estimatedSize, t)}
+            </Text>
+          )}
+
+          {visualState === 'queued' && <FeatherIcon name="clock" size={18} color="tertiary" />}
+
+          {visualState === 'downloading' && queueState && (
+            <Box row alignItems="center" gap={8}>
+              <Text fontSize={12} color="tertiary">
+                {Math.round(queueState.downloadProgress * 100)}%
               </Text>
-            )}
-
-            {visualState === 'downloaded' && !isSelectMode && isDefault && (
               <TouchableOpacity
+                accessibilityLabel={t('accessibility.cancelDownload', { item: name })}
+                accessibilityRole="button"
+                onPress={handleCancel}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <FeatherIcon name="x" size={18} color="quart" />
+              </TouchableOpacity>
+            </Box>
+          )}
+
+          {visualState === 'inserting' && (
+            <Text fontSize={12} color="success">
+              {t('downloads.inserting')}
+            </Text>
+          )}
+
+          {visualState === 'downloaded' && !isSelectMode && isDefault && (
+            <TouchableOpacity
+              accessibilityLabel={t('accessibility.redownload', { item: name })}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: downloadsDisabled }}
+              disabled={downloadsDisabled}
+              onPress={onRedownload}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ padding: 4 }}
+            >
+              <FeatherIcon
+                name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
+                size={16}
+                color="tertiary"
+              />
+            </TouchableOpacity>
+          )}
+
+          {visualState === 'downloaded' && !isSelectMode && !isDefault && (
+            <TouchableOpacity
+              accessibilityLabel={t('accessibility.deleteDownload', { item: name })}
+              accessibilityRole="button"
+              onPress={onDelete}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ padding: 4 }}
+            >
+              <FeatherIcon name="trash-2" size={16} color="quart" />
+            </TouchableOpacity>
+          )}
+
+          {visualState === 'needs-update' && !isSelectMode && (
+            <TouchableOpacity
+              accessibilityLabel={t('accessibility.updateDownload', { item: name })}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: downloadsDisabled }}
+              disabled={downloadsDisabled}
+              onPress={onUpdate}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ padding: 4 }}
+            >
+              <FeatherIcon
+                name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
+                size={18}
+                color={downloadsDisabled ? 'tertiary' : 'success'}
+              />
+            </TouchableOpacity>
+          )}
+
+          {visualState === 'invalid' && !isSelectMode && (
+            <TouchableOpacity
+              accessibilityLabel={t('accessibility.redownload', { item: name })}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: downloadsDisabled }}
+              disabled={downloadsDisabled}
+              onPress={onRedownload}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ padding: 4 }}
+            >
+              <FeatherIcon
+                name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
+                size={18}
+                color={downloadsDisabled ? 'tertiary' : 'quart'}
+              />
+            </TouchableOpacity>
+          )}
+
+          {visualState === 'failed' && !isSelectMode && (
+            <Box row gap={8} alignItems="center">
+              <TouchableOpacity
+                accessibilityRole="button"
                 accessibilityState={{ disabled: downloadsDisabled }}
                 disabled={downloadsDisabled}
-                onPress={onRedownload}
+                onPress={() => downloadManager.retry(itemId)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                style={{ padding: 4 }}
               >
-                <FeatherIcon
-                  name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
-                  size={16}
-                  color="tertiary"
-                />
+                <Text fontSize={12} color={downloadsDisabled ? 'tertiary' : 'primary'} bold>
+                  {downloadsDisabled
+                    ? t('resource.action.connectionRequired')
+                    : t('downloads.retry')}
+                </Text>
               </TouchableOpacity>
-            )}
-
-            {visualState === 'downloaded' && !isSelectMode && !isDefault && (
               <TouchableOpacity
-                onPress={onDelete}
+                accessibilityLabel={t('accessibility.cancelDownload', { item: name })}
+                accessibilityRole="button"
+                onPress={handleCancel}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                style={{ padding: 4 }}
               >
-                <FeatherIcon name="trash-2" size={16} color="quart" />
+                <FeatherIcon name="x" size={16} color="quart" />
               </TouchableOpacity>
-            )}
-
-            {visualState === 'needs-update' && !isSelectMode && (
-              <TouchableOpacity
-                accessibilityState={{ disabled: downloadsDisabled }}
-                disabled={downloadsDisabled}
-                onPress={onUpdate}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                style={{ padding: 4 }}
-              >
-                <FeatherIcon
-                  name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
-                  size={18}
-                  color={downloadsDisabled ? 'tertiary' : 'success'}
-                />
-              </TouchableOpacity>
-            )}
-
-            {visualState === 'invalid' && !isSelectMode && (
-              <TouchableOpacity
-                accessibilityState={{ disabled: downloadsDisabled }}
-                disabled={downloadsDisabled}
-                onPress={onRedownload}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                style={{ padding: 4 }}
-              >
-                <FeatherIcon
-                  name={downloadsDisabled ? 'wifi-off' : 'refresh-cw'}
-                  size={18}
-                  color={downloadsDisabled ? 'tertiary' : 'quart'}
-                />
-              </TouchableOpacity>
-            )}
-
-            {visualState === 'failed' && !isSelectMode && (
-              <Box row gap={8} alignItems="center">
-                <TouchableOpacity
-                  accessibilityState={{ disabled: downloadsDisabled }}
-                  disabled={downloadsDisabled}
-                  onPress={() => downloadManager.retry(itemId)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Text fontSize={12} color={downloadsDisabled ? 'tertiary' : 'primary'} bold>
-                    {downloadsDisabled
-                      ? t('resource.action.connectionRequired')
-                      : t('downloads.retry')}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={handleCancel}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <FeatherIcon name="x" size={16} color="quart" />
-                </TouchableOpacity>
-              </Box>
-            )}
-          </Box>
+            </Box>
+          )}
         </Box>
-      </Animated.View>
-    </TouchableOpacity>
+      </Box>
+    </Animated.View>
   )
 }
 

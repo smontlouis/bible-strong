@@ -199,16 +199,19 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             {preferredColorSchemeToString[preferredColorScheme]}
           </Text>
           <TouchableIcon
+            accessibilityLabel={preferredColorSchemeToString.light}
             isSelected={preferredColorScheme === 'light'}
             name="sun"
             onPress={() => dispatch(setSettingsPreferredColorScheme('light'))}
           />
           <TouchableIcon
+            accessibilityLabel={preferredColorSchemeToString.dark}
             isSelected={preferredColorScheme === 'dark'}
             name="moon"
             onPress={() => dispatch(setSettingsPreferredColorScheme('dark'))}
           />
           <TouchableIcon
+            accessibilityLabel={preferredColorSchemeToString.auto}
             isSelected={preferredColorScheme === 'auto'}
             name="sunrise"
             onPress={() => dispatch(setSettingsPreferredColorScheme('auto'))}
@@ -219,24 +222,48 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           <Text marginLeft={5} fontSize={12} bold>
             {preferredLightThemeToString[preferredLightTheme]}
           </Text>
-          <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}>
+          <LinkBox
+            accessibilityLabel={preferredLightThemeToString.default}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: preferredLightTheme === 'default' }}
+            size={40}
+            onPress={() => dispatch(setSettingsPreferredLightTheme('default'))}
+          >
             <Circle
               isSelected={preferredLightTheme === 'default'}
               size={20}
               color="rgb(255,255,255)"
             />
           </LinkBox>
-          <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}>
+          <LinkBox
+            accessibilityLabel={preferredLightThemeToString.sepia}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: preferredLightTheme === 'sepia' }}
+            size={40}
+            onPress={() => dispatch(setSettingsPreferredLightTheme('sepia'))}
+          >
             <Circle
               isSelected={preferredLightTheme === 'sepia'}
               size={20}
               color="rgb(245,242,227)"
             />
           </LinkBox>
-          <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}>
+          <LinkBox
+            accessibilityLabel={preferredLightThemeToString.nature}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: preferredLightTheme === 'nature' }}
+            size={40}
+            onPress={() => dispatch(setSettingsPreferredLightTheme('nature'))}
+          >
             <Circle isSelected={preferredLightTheme === 'nature'} size={20} color="#EAF9EC" />
           </LinkBox>
-          <LinkBox onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}>
+          <LinkBox
+            accessibilityLabel={preferredLightThemeToString.sunset}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: preferredLightTheme === 'sunset' }}
+            size={40}
+            onPress={() => dispatch(setSettingsPreferredLightTheme('sunset'))}
+          >
             <Circle isSelected={preferredLightTheme === 'sunset'} size={20} color="#FAE0D5" />
           </LinkBox>
         </HalfContainer>
@@ -245,16 +272,40 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           <Text marginLeft={5} fontSize={12} bold>
             {preferredDarkThemeToString[preferredDarkTheme]}
           </Text>
-          <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}>
+          <LinkBox
+            accessibilityLabel={preferredDarkThemeToString.dark}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: preferredDarkTheme === 'dark' }}
+            size={40}
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('dark'))}
+          >
             <Circle isSelected={preferredDarkTheme === 'dark'} size={20} color="rgb(18,45,66)" />
           </LinkBox>
-          <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}>
+          <LinkBox
+            accessibilityLabel={preferredDarkThemeToString.black}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: preferredDarkTheme === 'black' }}
+            size={40}
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('black'))}
+          >
             <Circle isSelected={preferredDarkTheme === 'black'} size={20} color="black" />
           </LinkBox>
-          <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}>
+          <LinkBox
+            accessibilityLabel={preferredDarkThemeToString.mauve}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: preferredDarkTheme === 'mauve' }}
+            size={40}
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('mauve'))}
+          >
             <Circle isSelected={preferredDarkTheme === 'mauve'} size={20} color="rgb(51,4,46)" />
           </LinkBox>
-          <LinkBox onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}>
+          <LinkBox
+            accessibilityLabel={preferredDarkThemeToString.night}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: preferredDarkTheme === 'night' }}
+            size={40}
+            onPress={() => dispatch(setSettingsPreferredDarkTheme('night'))}
+          >
             <Circle isSelected={preferredDarkTheme === 'night'} size={20} color="rgb(0,50,100)" />
           </LinkBox>
         </HalfContainer>
@@ -262,11 +313,16 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
           <Text flex={5}>{t('Taille du texte')}</Text>
           <Text marginLeft={5} fontSize={12} bold>{`${100 + fontSizeScale * 10}%`}</Text>
           <TouchableIcon
+            accessibilityLabel={t('accessibility.decreaseTextSize')}
             name="type"
             size={15}
             onPress={() => dispatch(decreaseSettingsFontSizeScale())}
           />
-          <TouchableIcon name="type" onPress={() => dispatch(increaseSettingsFontSizeScale())} />
+          <TouchableIcon
+            accessibilityLabel={t('accessibility.increaseTextSize')}
+            name="type"
+            onPress={() => dispatch(increaseSettingsFontSizeScale())}
+          />
         </HalfContainer>
         <HalfContainer border>
           <Text flex={5}>{t('Alignement du texte')}</Text>
@@ -274,6 +330,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             {alignContentToString[alignContent]}
           </Text>
           <TouchableIcon
+            accessibilityLabel={`${t('Alignement du texte')}: ${alignContentToString[alignContent]}`}
             isSelected
             name={alignContent === 'left' ? 'align-left' : 'align-justify'}
             onPress={() => {
@@ -288,6 +345,8 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             {lineHeightToString[lineHeight]}
           </Text>
           <TouchableBox
+            accessibilityLabel={`${t('Hauteur de ligne')}: ${lineHeightToString[lineHeight]}`}
+            accessibilityRole="button"
             onPress={() => {
               const nextLineHeight = {
                 small: 'normal',
@@ -310,6 +369,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             {textDisplayToString[textDisplay]}
           </Text>
           <TouchableIcon
+            accessibilityLabel={`${t('Mode des versets')}: ${textDisplayToString[textDisplay]}`}
             isSelected
             name={textDisplay === 'inline' ? 'arrow-right' : 'corner-down-right'}
             onPress={() => {
@@ -325,6 +385,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             {relationsDisplayToString[relationsDisplay]}
           </Text>
           <TouchableIcon
+            accessibilityLabel={`${t('Affichage des relations')}: ${relationsDisplayToString[relationsDisplay]}`}
             isSelected
             name={relationsDisplay === 'inline' ? 'align-left' : 'git-merge'}
             onPress={() => {
@@ -339,6 +400,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             {tagsDisplayToString[tagsDisplay]}
           </Text>
           <TouchableIcon
+            accessibilityLabel={`${t('Affichage des tags')}: ${tagsDisplayToString[tagsDisplay]}`}
             isSelected
             name={tagsDisplay === 'inline' ? 'align-left' : 'tag'}
             onPress={() => {
@@ -353,6 +415,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             {contextualInformationDisplay ? t('Activé') : t('Désactivé')}
           </Text>
           <TouchableIcon
+            accessibilityLabel={t('Contexte et médias')}
             isSelected={contextualInformationDisplay}
             name="film"
             onPress={() =>
@@ -366,6 +429,7 @@ const BibleParamsModal = ({ modalRef }: BibleParamsModalprops) => {
             {redWordsDisplay ? t('Activé') : t('Désactivé')}
           </Text>
           <TouchableIcon
+            accessibilityLabel={t('Paroles de Jésus en rouge')}
             isSelected={redWordsDisplay}
             name="type"
             onPress={() => dispatch(setSettingsRedWordsDisplay(!redWordsDisplay))}

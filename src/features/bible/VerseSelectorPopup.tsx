@@ -48,7 +48,13 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
 
   return (
     <>
-      <TouchableBox center height="100%" onPress={() => sheetRef.current?.present()}>
+      <TouchableBox
+        center
+        height="100%"
+        onPress={() => sheetRef.current?.present()}
+        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.chooseVerse')}
+      >
         {children}
       </TouchableBox>
       <Sheet ref={sheetRef} header={<SheetHeader title={t('goToVerse')} centerTitle />}>
@@ -65,9 +71,9 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
           showsVerticalScrollIndicator={false}
         >
           {verses?.success && verses.data.verses.length ? (
-            verses.data.verses.map((verse, index) => (
+            verses.data.verses.map(verse => (
               <TouchableBox
-                key={index}
+                key={String(verse.Verset)}
                 backgroundColor="opacity5"
                 borderRadius={3}
                 w={ITEM_WIDTH}
@@ -75,6 +81,9 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
                 alignItems="center"
                 justifyContent="center"
                 onPress={() => handleSelect(Number(verse.Verset))}
+                accessibilityRole="button"
+                accessibilityLabel={`${t('Verset')} ${verse.Verset}`}
+                accessibilityState={{ selected: Number(verse.Verset) === bible.data.selectedVerse }}
               >
                 <Box
                   style={{

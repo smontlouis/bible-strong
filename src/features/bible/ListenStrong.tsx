@@ -1,11 +1,10 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import { LinkBox } from '~common/Link'
 import Box from '~common/ui/Box'
 import { IonIcon } from '~common/ui/Icon'
 import { useStrongAudio } from './StrongAudioProvider'
-
-type AudioStatus = 'Idle' | 'Loading' | 'Playing'
 
 interface Props {
   type: 'hebreu' | 'grec'
@@ -30,6 +29,7 @@ const ListenToStrong = ({ type, code, iconSize = 20, touchSize }: Props) => {
       : `https://content.swncdn.com/biblestudytools/audio/lexicons/greek-mp3/${codeId}g.mp3`
 
   const { getStatus, play } = useStrongAudio()
+  const { t } = useTranslation()
   const audioStatus = getStatus(audioId)
 
   if (!hasStrongAudio(type, code)) return null
@@ -38,24 +38,30 @@ const ListenToStrong = ({ type, code, iconSize = 20, touchSize }: Props) => {
     play({ id: audioId, url })
   }
 
+  const isLoading = audioStatus === 'Loading'
+  const isPlaying = audioStatus === 'Playing'
+
   return (
-    <Box>
+    <LinkBox
+      accessibilityLabel={
+        isLoading
+          ? t('accessibility.pronunciationLoading')
+          : isPlaying
+            ? t('accessibility.pronunciationPlaying')
+            : t('accessibility.playPronunciation')
+      }
+      accessibilityState={{ busy: isLoading, disabled: isLoading || isPlaying }}
+      disabled={isLoading || isPlaying}
+      onPress={playAudio}
+      style={{
+        width: Math.max(touchSize ?? 44, 44),
+        height: Math.max(touchSize ?? 44, 44),
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
       {audioStatus === 'Idle' && (
-        <LinkBox
-          onPress={playAudio}
-          style={
-            touchSize
-              ? {
-                  width: touchSize,
-                  height: touchSize,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }
-              : undefined
-          }
-        >
-          <IonIcon name="play" size={iconSize} color="primary" style={{ marginLeft: 2 }} />
-        </LinkBox>
+        <IonIcon name="play" size={iconSize} color="primary" style={{ marginLeft: 2 }} />
       )}
       {audioStatus === 'Loading' && (
         <Box width={20} height={20} center>
@@ -63,16 +69,14 @@ const ListenToStrong = ({ type, code, iconSize = 20, touchSize }: Props) => {
         </Box>
       )}
       {audioStatus === 'Playing' && (
-        <Box>
-          <IonIcon
-            name="play"
-            size={iconSize}
-            color="primary"
-            style={{ opacity: 0.3, marginLeft: 2 }}
-          />
-        </Box>
+        <IonIcon
+          name="play"
+          size={iconSize}
+          color="primary"
+          style={{ opacity: 0.3, marginLeft: 2 }}
+        />
       )}
-    </Box>
+    </LinkBox>
   )
 }
 

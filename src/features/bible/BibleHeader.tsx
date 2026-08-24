@@ -499,6 +499,8 @@ const Header = ({
 
           <AnimatedTouchableBox
             onPress={onExitAnnotationMode}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.exitAnnotationMode')}
             position="absolute"
             right={0}
             bottom={isFormSheet ? -10 : 0}
@@ -621,6 +623,7 @@ const Header = ({
                 {strongModeButton}
                 {interlinearModeButton}
                 <MenuView
+                  accessibilityLabel={t('accessibility.focusOptions')}
                   actions={focusMenuActions}
                   onPressAction={({ nativeEvent }) => {
                     switch (nativeEvent.event) {
@@ -676,6 +679,10 @@ const Header = ({
                       data: getDefaultStore().get(bibleAtom).data,
                     })
                   }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('accessibility.chooseBookAndChapter', {
+                    reference: `${t(bookName)} ${chapter}`,
+                  })}
                   center
                   pl={12}
                   pr={7}
@@ -706,6 +713,8 @@ const Header = ({
                     data: getDefaultStore().get(bibleAtom).data,
                   })
                 }
+                accessibilityRole="button"
+                accessibilityLabel={t('accessibility.chooseVersion', { version })}
                 center
                 pl={7}
                 pr={12}
@@ -737,6 +746,7 @@ const Header = ({
               <HStack marginLeft="auto" alignItems="center">
                 {isParallel && (
                   <MenuView
+                    accessibilityLabel={t('accessibility.parallelOptions')}
                     actions={parallelMenuActions}
                     onPressAction={({ nativeEvent }) => {
                       if (nativeEvent.event.startsWith('remove-version-')) {
@@ -797,6 +807,7 @@ const Header = ({
 
                 {/* Three-dots menu */}
                 <MenuView
+                  accessibilityLabel={t('accessibility.bibleOptions')}
                   actions={mainMenuActions}
                   onPressAction={({ nativeEvent }) => {
                     switch (nativeEvent.event) {
@@ -844,6 +855,8 @@ const Header = ({
                 {focusVerses && focusVerses.length > 0 && (
                   <TouchableBox
                     onPress={() => actions.clearFocusVerses()}
+                    accessibilityRole="button"
+                    accessibilityLabel={t('accessibility.clearFocus')}
                     center
                     width={40}
                     height={32}
@@ -878,7 +891,13 @@ const Header = ({
       )}
       {currentChapterBookmark && (
         <Box position="absolute" right={24} bottom={-18}>
-          <TouchableBox center height="100%" onPress={() => bookmarkModalRef.current?.present()}>
+          <TouchableBox
+            center
+            height="100%"
+            onPress={() => bookmarkModalRef.current?.present()}
+            accessibilityRole="button"
+            accessibilityLabel={t('Modifier le marque-page')}
+          >
             <IonIcon name="bookmark" size={24} color={currentChapterBookmark.color} />
           </TouchableBox>
         </Box>

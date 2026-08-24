@@ -6,12 +6,20 @@ type Props = {
   title: React.ReactNode
   children: React.ReactNode
   defaultExpanded?: boolean
+  accessibilityLabel?: string
 }
-const Accordion = ({ title, children, defaultExpanded = false }: Props) => {
+const Accordion = ({ title, children, defaultExpanded = false, accessibilityLabel }: Props) => {
   const [expanded, setExpanded] = React.useState(defaultExpanded)
   return (
     <Box py={20}>
-      <TouchableBox row onPress={() => setExpanded(s => !s)} alignItems="center">
+      <TouchableBox
+        accessibilityLabel={accessibilityLabel ?? (typeof title === 'string' ? title : undefined)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+        row
+        onPress={() => setExpanded(s => !s)}
+        alignItems="center"
+      >
         <Box flex>{title}</Box>
         <FeatherIcon name={expanded ? 'chevron-up' : 'chevron-down'} size={24} />
       </TouchableBox>

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { ActivityIndicator } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon, IonIcon } from '~common/ui/Icon'
@@ -12,9 +13,20 @@ type PlayButtonProps = {
 }
 
 const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayButtonProps) => {
+  const { t } = useTranslation()
+
   if (error) {
     return (
-      <Box width={50} height={50} bg="reverse" mx={10} center>
+      <Box
+        width={50}
+        height={50}
+        bg="reverse"
+        mx={10}
+        center
+        accessible
+        accessibilityRole="text"
+        accessibilityLabel={t('accessibility.audioUnavailable')}
+      >
         <FeatherIcon name="x" size={23} color="quart" />
       </Box>
     )
@@ -22,7 +34,18 @@ const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayBut
   // IsBuffering
   if (isLoading) {
     return (
-      <Box width={50} height={50} bg="primary" borderRadius={25} center mx={10}>
+      <Box
+        width={50}
+        height={50}
+        bg="primary"
+        borderRadius={25}
+        center
+        mx={10}
+        accessible
+        accessibilityRole="progressbar"
+        accessibilityLabel={t('accessibility.audioLoading')}
+        accessibilityLiveRegion="polite"
+      >
         <ActivityIndicator color="white" />
       </Box>
     )
@@ -33,6 +56,9 @@ const PlayButton = ({ disabled, isPlaying, onToggle, error, isLoading }: PlayBut
       disabled={disabled}
       activeOpacity={0.5}
       onPress={onToggle}
+      accessibilityRole="button"
+      accessibilityLabel={isPlaying ? t('accessibility.pauseAudio') : t('accessibility.playAudio')}
+      accessibilityState={{ disabled }}
       center
       width={50}
       height={50}

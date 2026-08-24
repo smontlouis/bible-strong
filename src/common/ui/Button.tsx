@@ -1,6 +1,12 @@
 import React from 'react'
 import styled from '@emotion/native'
-import { ActivityIndicator, StyleProp, TouchableOpacityProps, ViewStyle } from 'react-native'
+import {
+  AccessibilityState,
+  ActivityIndicator,
+  StyleProp,
+  TouchableOpacityProps,
+  ViewStyle,
+} from 'react-native'
 import Link, { LinkProps } from '~common/Link'
 
 import Box from '~common/ui/Box'
@@ -26,6 +32,10 @@ interface Props {
   subTitle?: string
   testID?: string
   theme?: Theme
+  accessibilityHint?: string
+  accessibilityLabel?: string
+  accessibilityRole?: TouchableOpacityProps['accessibilityRole']
+  accessibilityState?: AccessibilityState
 }
 
 type WrapperButtonProps = Partial<Props> & {
@@ -115,7 +125,13 @@ const Button = ({
   subTitle,
   fullWidth,
   testID,
+  accessibilityHint,
+  accessibilityLabel,
+  accessibilityRole,
+  accessibilityState,
 }: Props) => {
+  const textLabel =
+    typeof children === 'string' || typeof children === 'number' ? String(children) : undefined
   const sharedProps = {
     fullWidth,
     disabled: disabled || isLoading,
@@ -127,6 +143,14 @@ const Button = ({
     success,
     color,
     testID,
+    accessibilityHint,
+    accessibilityLabel: accessibilityLabel ?? textLabel,
+    accessibilityRole: accessibilityRole ?? (route ? 'link' : 'button'),
+    accessibilityState: {
+      ...accessibilityState,
+      disabled: Boolean(disabled || isLoading || accessibilityState?.disabled),
+      busy: Boolean(isLoading || accessibilityState?.busy),
+    },
   }
 
   return (
@@ -134,7 +158,7 @@ const Button = ({
       {onPress ? (
         <WrapperButton {...sharedProps}>
           {isLoading ? (
-            <ActivityIndicator color="white" />
+            <ActivityIndicator accessible={false} color="white" />
           ) : (
             <>
               {leftIcon}
@@ -148,7 +172,7 @@ const Button = ({
       ) : (
         <WrapperLink {...sharedProps} route={route}>
           {isLoading ? (
-            <ActivityIndicator color="white" />
+            <ActivityIndicator accessible={false} color="white" />
           ) : (
             <>
               {leftIcon}

@@ -158,6 +158,8 @@ export const Home = ({ closeHome }: HomeProps) => {
           />
         </Box>
         <TouchableBox
+          accessibilityLabel={t('Fermer')}
+          accessibilityRole="button"
           center
           width={50}
           height={50}

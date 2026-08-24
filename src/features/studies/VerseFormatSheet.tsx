@@ -29,7 +29,7 @@ const VerseFormatSheet = ({
     >
       <SheetView p={20}>
         {/* Inline format option */}
-        <TouchableOpacity onPress={() => onSelectFormat('inline')}>
+        <TouchableOpacity accessibilityRole="radio" onPress={() => onSelectFormat('inline')}>
           <HStack
             paddingVertical={16}
             paddingHorizontal={16}
@@ -52,7 +52,7 @@ const VerseFormatSheet = ({
         </TouchableOpacity>
 
         {/* Block format option */}
-        <TouchableOpacity onPress={() => onSelectFormat('block')}>
+        <TouchableOpacity accessibilityRole="radio" onPress={() => onSelectFormat('block')}>
           <HStack
             paddingVertical={16}
             paddingHorizontal={16}

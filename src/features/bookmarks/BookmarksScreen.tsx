@@ -39,6 +39,7 @@ type BookmarkItemProps = {
 }
 
 const BookmarkItem = ({ item, onEdit, onNavigate }: BookmarkItemProps) => {
+  const { t } = useTranslation()
   const reference = formatReference(item)
 
   return (
@@ -55,7 +56,7 @@ const BookmarkItem = ({ item, onEdit, onNavigate }: BookmarkItemProps) => {
             </VStack>
           </Box>
         </Link>
-        <Link onPress={() => onEdit(item)} padding>
+        <Link accessibilityLabel={t('accessibility.options')} onPress={() => onEdit(item)} padding>
           <FeatherIcon name="more-vertical" size={20} />
         </Link>
       </Box>

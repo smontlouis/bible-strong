@@ -847,6 +847,7 @@ const DownloadsScreen = () => {
           <Box row alignItems="center">
             {itemsToUpdate.length > 0 && !isSelectMode && (
               <TouchableOpacity
+                accessibilityRole="button"
                 accessibilityState={{ disabled: !isConnected }}
                 disabled={!isConnected}
                 onPress={handleUpdateAll}
@@ -861,6 +862,12 @@ const DownloadsScreen = () => {
               </TouchableOpacity>
             )}
             <TouchableOpacity
+              accessibilityLabel={
+                isSelectMode
+                  ? t('accessibility.finishSelection')
+                  : t('accessibility.startSelection')
+              }
+              accessibilityRole="button"
               accessibilityState={{ disabled: batchDeletionProgress !== null }}
               disabled={batchDeletionProgress !== null}
               onPress={() => {
@@ -910,6 +917,7 @@ const DownloadsScreen = () => {
               >
                 <FeatherIcon name="search" size={16} color="tertiary" />
                 <TextInput
+                  accessibilityLabel={t('downloads.search')}
                   value={searchQuery}
                   onChangeText={setSearchQuery}
                   placeholder={t('downloads.search')}
@@ -923,7 +931,12 @@ const DownloadsScreen = () => {
                   }}
                 />
                 {searchQuery.length > 0 && (
-                  <TouchableOpacity onPress={() => setSearchQuery('')}>
+                  <TouchableOpacity
+                    accessibilityLabel={t('accessibility.clearSearch')}
+                    accessibilityRole="button"
+                    hitSlop={12}
+                    onPress={() => setSearchQuery('')}
+                  >
                     <FeatherIcon name="x" size={16} color="tertiary" />
                   </TouchableOpacity>
                 )}

@@ -58,11 +58,14 @@ const BackToAudioFooter = ({
   return (
     <>
       <AnimatedTouchableBox
-        disabled={disabled}
+        disabled={disabled || !hasPreviousChapter}
         width={40}
         height={40}
         overflow="visible"
         onPress={hasPreviousChapter ? goToPrevChapter : undefined}
+        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.previousChapter')}
+        accessibilityState={{ disabled: disabled || !hasPreviousChapter }}
         borderWidth={2}
         borderRadius={20}
         borderColor="lightGrey"
@@ -99,6 +102,8 @@ const BackToAudioFooter = ({
           paddingHorizontal={15}
           paddingVertical={10}
           onPress={() => slideToIndex(playingBibleTabIndex)}
+          accessibilityRole="button"
+          accessibilityLabel={t('audio.goBack')}
           bg={'primary'}
           borderRadius={12}
           borderColor="lightGrey"
@@ -111,12 +116,15 @@ const BackToAudioFooter = ({
         </TouchableBox>
       </AnimatedHStack>
       <AnimatedTouchableBox
-        disabled={disabled}
+        disabled={disabled || !hasNextChapter}
         width={40}
         height={40}
         center
         overflow="visible"
         onPress={hasNextChapter ? goToNextChapter : undefined}
+        accessibilityRole="button"
+        accessibilityLabel={t('accessibility.nextChapter')}
+        accessibilityState={{ disabled: disabled || !hasNextChapter }}
         borderWidth={2}
         borderRadius={20}
         borderColor="lightGrey"

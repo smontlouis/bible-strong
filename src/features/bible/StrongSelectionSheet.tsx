@@ -327,6 +327,7 @@ const StrongSelectionSheet = ({
                 const selected = selectedPreviewIndex === index
                 return (
                   <TouchableOpacity
+                    accessibilityRole="button"
                     key={`${preview.selectedIdentity.kind}:${preview.selectedIdentity.code}`}
                     onPress={() => selectPreview(index)}
                     activeOpacity={0.7}
@@ -383,6 +384,7 @@ const StrongSelectionSheet = ({
                     width={previewWidth}
                   >
                     <TouchableOpacity
+                      accessibilityRole="button"
                       onPress={() => openEntry(preview.stepCode, preview.language, morphologyCodes)}
                       activeOpacity={0.7}
                     >

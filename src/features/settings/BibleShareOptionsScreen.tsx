@@ -77,6 +77,8 @@ const BibleShareOptionsScreen = () => {
         <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasVerseNumbers')}</Text>
           <Switch
+            accessibilityLabel={t('bible.settings.hasVerseNumbers')}
+            accessibilityState={{ checked: hasVerseNumbers }}
             value={hasVerseNumbers}
             onValueChange={() => {
               dispatch(toggleSettingsShareVerseNumbers())
@@ -86,6 +88,8 @@ const BibleShareOptionsScreen = () => {
         <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasInlineVerses')}</Text>
           <Switch
+            accessibilityLabel={t('bible.settings.hasInlineVerses')}
+            accessibilityState={{ checked: hasInlineVerses }}
             value={hasInlineVerses}
             onValueChange={() => {
               dispatch(toggleSettingsShareLineBreaks())
@@ -95,6 +99,8 @@ const BibleShareOptionsScreen = () => {
         <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasQuotes')}</Text>
           <Switch
+            accessibilityLabel={t('bible.settings.hasQuotes')}
+            accessibilityState={{ checked: hasQuotes }}
             value={hasQuotes}
             onValueChange={() => {
               dispatch(toggleSettingsShareQuotes())
@@ -106,6 +112,8 @@ const BibleShareOptionsScreen = () => {
             <Text>{t('bible.settings.hasAppName')}</Text>
           </Box>
           <Switch
+            accessibilityLabel={t('bible.settings.hasAppName')}
+            accessibilityState={{ checked: hasAppName }}
             value={hasAppName}
             onValueChange={() => {
               dispatch(toggleSettingsShareAppName())

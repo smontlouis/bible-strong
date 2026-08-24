@@ -1476,6 +1476,7 @@ const ReferenceSearchResultRow = ({
 
   return (
     <TouchableOpacity
+      accessibilityRole="button"
       activeOpacity={0.7}
       onPress={() => {
         onOpen()

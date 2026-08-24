@@ -1,8 +1,9 @@
 import { useTheme } from '@emotion/react'
 import * as Icon from '@expo/vector-icons'
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { TextInput, TextInputProps } from 'react-native'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from './ui/Icon'
 
 interface Props {
@@ -20,6 +21,7 @@ const SearchInput = ({
   ...props
 }: Props & TextInputProps) => {
   const theme = useTheme()
+  const { t } = useTranslation()
   return (
     <Box>
       <Box
@@ -41,6 +43,7 @@ const SearchInput = ({
         />
         <Box flex>
           <TextInput
+            accessibilityLabel={props.accessibilityLabel ?? placeholder}
             placeholder={placeholder}
             placeholderTextColor={theme.colors.grey}
             onChangeText={onChangeText}
@@ -55,7 +58,18 @@ const SearchInput = ({
             {...props}
           />
         </Box>
-        {!!value && <FeatherIcon name="x" size={20} onPress={onDelete} />}
+        {!!value && (
+          <TouchableBox
+            accessibilityLabel={t('accessibility.clearSearch')}
+            accessibilityRole="button"
+            minWidth={44}
+            minHeight={44}
+            center
+            onPress={onDelete}
+          >
+            <FeatherIcon name="x" size={20} />
+          </TouchableBox>
+        )}
       </Box>
     </Box>
   )

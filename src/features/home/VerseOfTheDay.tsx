@@ -183,14 +183,22 @@ const VerseOfTheDay = ({ addDay }: Props) => {
       <Box row alignItems="center" mt="auto">
         <Box row center opacity={0.5}>
           {!addDay && (
-            <Link onPress={() => notificationModalRef.current?.present()} size={30}>
+            <Link
+              accessibilityLabel={t('Recevoir une notification quotidienne')}
+              onPress={() => notificationModalRef.current?.present()}
+              size={44}
+            >
               <FeatherIcon size={16} name="bell" />
             </Link>
           )}
-          <Link size={30} onPress={shareVerse}>
+          <Link accessibilityLabel={t('Partager')} size={44} onPress={shareVerse}>
             <FeatherIcon size={16} name="share-2" />
           </Link>
-          <Link size={30} onPress={() => imageModalRef.current?.present()}>
+          <Link
+            accessibilityLabel={t('accessibility.createVerseImage')}
+            size={44}
+            onPress={() => imageModalRef.current?.present()}
+          >
             <FeatherIcon size={16} name="image" />
           </Link>
         </Box>
@@ -207,6 +215,8 @@ const VerseOfTheDay = ({ addDay }: Props) => {
               {t('Recevoir une notification quotidienne')}
             </Text>
             <Switch
+              accessibilityLabel={t('Recevoir une notification quotidienne')}
+              accessibilityState={{ checked: Boolean(verseOfTheDayTime) }}
               value={!!verseOfTheDayTime}
               onValueChange={() => {
                 if (verseOfTheDayTime) {

@@ -187,6 +187,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
                       const { h1, h2, h3, h4 } = verseObject
                       return (
                         <TouchableOpacity
+                          accessibilityRole="button"
                           key={verseKey}
                           onPress={() =>
                             pushRouteOnce({

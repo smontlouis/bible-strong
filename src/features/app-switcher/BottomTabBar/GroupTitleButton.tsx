@@ -55,6 +55,7 @@ const GroupTitleButton = () => {
   return (
     <Box flex={1}>
       <GroupActionsPopover
+        accessibilityLabel={displayName}
         group={activeGroup}
         onCreateGroup={handleOpenCreateGroup}
         onEditGroup={handleOpenEdit}

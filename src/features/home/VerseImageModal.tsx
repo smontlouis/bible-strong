@@ -1,11 +1,9 @@
 import { Sheet, SheetView, type SheetRef } from '~common/sheet'
-import { useTheme } from '@emotion/react'
 import { Image } from 'expo-image'
 import * as FileSystem from 'expo-file-system/legacy'
 import * as Sharing from 'expo-sharing'
 import React, { useState } from 'react'
 import { ActivityIndicator } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Empty from '~common/Empty'
 import { LinkBox } from '~common/Link'
 import Loading from '~common/Loading'
@@ -33,8 +31,6 @@ interface Props {
 }
 
 const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
-  const theme = useTheme()
-  const insets = useSafeAreaInsets()
   const [shareIsLoading, setShareIsLoading] = useState(false)
   const { t } = useTranslation()
   const imageSize = wp(100, true) - 80
@@ -81,6 +77,8 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
     return (
       <Box position="relative">
         <Image
+          accessibilityLabel={t('accessibility.verseImage', { reference: verseOfTheDay.v })}
+          accessible
           source={{ uri: imageUrls.large }}
           placeholder={{ uri: imageUrls.small }}
           style={{
@@ -92,11 +90,14 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
           transition={300}
         />
         <LinkBox
+          accessibilityLabel={t('accessibility.shareVerseImage')}
+          accessibilityState={{ busy: shareIsLoading, disabled: shareIsLoading }}
+          disabled={shareIsLoading}
           position="absolute"
           bottom={10}
           left={10}
-          width={36}
-          height={36}
+          width={44}
+          height={44}
           onPress={shareImage}
           bg="reverse"
           center
@@ -104,7 +105,7 @@ const VerseImageModal = ({ modalRef, imageUrls, verseOfTheDay }: Props) => {
           opacity={0.6}
         >
           {shareIsLoading ? (
-            <ActivityIndicator size={14} />
+            <ActivityIndicator accessible={false} size={14} />
           ) : (
             <FeatherIcon name="share-2" size={16} />
           )}

@@ -78,6 +78,7 @@ const ResourcesModalFooter = memo(({ resourceType, onChangeResourceType }: Props
           </Box>
           <Box w={iconWidth} opacity={resourceType === 'compare' ? 1 : 0.3}>
             <TouchableOpacity
+              accessibilityRole="button"
               onPress={() => onPress('compare')}
               style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
             >

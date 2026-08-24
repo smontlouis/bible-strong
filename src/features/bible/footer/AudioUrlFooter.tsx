@@ -296,6 +296,7 @@ const AudioUrlFooter = ({
   bibleAtom,
   coverage,
 }: AudioUrlFooterProps) => {
+  const { t } = useTranslation()
   const canonId = resolveBibleCoverageCanonId(coverage, getBibleVersionCanonId(version))
   const hasPreviousChapter = !!getPreviousAvailableChapterLocation(book, chapter, coverage, canonId)
   const hasNextChapter = !!getNextAvailableChapterLocation(book, chapter, coverage, canonId)
@@ -353,6 +354,9 @@ const AudioUrlFooter = ({
             disabled={disabled || isLoading || !isSetup}
             activeOpacity={0.5}
             onPress={() => TrackPlayer.seekTo(progress.position - 10)}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.rewindTenSeconds')}
+            accessibilityState={{ disabled: disabled || isLoading || !isSetup }}
             width={40}
             height={40}
             center
@@ -370,6 +374,9 @@ const AudioUrlFooter = ({
             disabled={disabled || isLoading}
             activeOpacity={0.5}
             onPress={() => TrackPlayer.seekTo(progress.position + 10)}
+            accessibilityRole="button"
+            accessibilityLabel={t('accessibility.forwardTenSeconds')}
+            accessibilityState={{ disabled: disabled || isLoading }}
             width={40}
             height={40}
             center

@@ -167,7 +167,7 @@ export const SearchEntityResultRow = ({
   description?: React.ReactNode
   descriptionColor?: string
 }) => (
-  <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+  <TouchableOpacity accessibilityRole="button" onPress={onPress} activeOpacity={0.7}>
     <HStack
       px={20}
       py={12}

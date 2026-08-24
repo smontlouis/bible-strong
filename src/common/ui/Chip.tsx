@@ -42,7 +42,15 @@ interface ChipProps {
 }
 
 const Chip = ({ label, isSelected, onPress }: ChipProps) => (
-  <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+  <TouchableOpacity
+    accessibilityLabel={label}
+    accessibilityRole={onPress ? 'button' : undefined}
+    accessibilityState={onPress ? { selected: Boolean(isSelected) } : undefined}
+    accessible={Boolean(onPress)}
+    disabled={!onPress}
+    onPress={onPress}
+    activeOpacity={0.7}
+  >
     <StyledChip isSelected={isSelected}>
       <StyledText isSelected={isSelected}>{label}</StyledText>
     </StyledChip>

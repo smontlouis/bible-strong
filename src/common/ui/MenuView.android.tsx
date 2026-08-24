@@ -11,7 +11,10 @@ import Box, { TouchableBox } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 
-export type { MenuAction, MenuComponentProps, MenuComponentRef }
+export type { MenuAction, MenuComponentRef }
+export type AccessibleMenuComponentProps = MenuComponentProps & {
+  accessibilityLabel?: string
+}
 
 type FeatherIconName = ComponentProps<typeof FeatherIcon>['name']
 
@@ -77,7 +80,7 @@ const makeEvent = (action: MenuAction): NativeActionEvent => ({
   nativeEvent: { event: getActionId(action) },
 })
 
-export const MenuView = forwardRef<MenuComponentRef, MenuComponentProps>(
+export const MenuView = forwardRef<MenuComponentRef, AccessibleMenuComponentProps>(
   (
     {
       actions,
@@ -85,6 +88,7 @@ export const MenuView = forwardRef<MenuComponentRef, MenuComponentProps>(
       onCloseMenu,
       onOpenMenu,
       onPressAction,
+      accessibilityLabel,
       shouldOpenOnLongPress,
       style,
       testID,
@@ -134,6 +138,8 @@ export const MenuView = forwardRef<MenuComponentRef, MenuComponentProps>(
           activeOpacity={0.7}
           onPress={shouldOpenOnLongPress ? undefined : openMenu}
           onLongPress={shouldOpenOnLongPress ? openMenu : undefined}
+          accessibilityRole="button"
+          accessibilityLabel={accessibilityLabel}
         >
           {children}
         </TouchableBox>
@@ -161,6 +167,13 @@ export const MenuView = forwardRef<MenuComponentRef, MenuComponentProps>(
                 key={getActionId(action)}
                 disabled={disabled}
                 onPress={() => handleActionPress(action)}
+                accessibilityRole="button"
+                accessibilityLabel={action.title}
+                accessibilityState={{
+                  disabled,
+                  selected: action.state === 'on',
+                  expanded: action.subactions?.length ? false : undefined,
+                }}
                 row
                 alignItems="center"
                 justifyContent="space-between"

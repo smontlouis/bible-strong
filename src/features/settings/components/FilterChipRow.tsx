@@ -72,7 +72,12 @@ const FilterChipRow = ({
       contentContainerStyle={{ paddingHorizontal: 16, gap: 8, paddingVertical: 8 }}
     >
       {chips.map(chip => (
-        <TouchableOpacity key={chip.key} onPress={chip.onPress} activeOpacity={0.7}>
+        <TouchableOpacity
+          accessibilityRole="button"
+          key={chip.key}
+          onPress={chip.onPress}
+          activeOpacity={0.7}
+        >
           <EaseView
             animate={{
               backgroundColor: chip.isActive ? theme.colors.primary : theme.colors.border,

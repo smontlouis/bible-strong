@@ -68,7 +68,15 @@ const AccountMigrationModal = ({
       statusBarTranslucent
       onRequestClose={() => undefined}
     >
-      <Box flex={1} center bg="reverse" px={30} py={40} testID="account-migration-modal">
+      <Box
+        accessibilityViewIsModal
+        flex={1}
+        center
+        bg="reverse"
+        px={30}
+        py={40}
+        testID="account-migration-modal"
+      >
         <VStack width="100%" maxWidth={520} alignItems="center">
           <Box
             size={88}

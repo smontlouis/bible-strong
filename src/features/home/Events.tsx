@@ -99,7 +99,7 @@ export const Events = () => {
   if (!event) return null
 
   return (
-    <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
+    <TouchableOpacity accessibilityRole="button" onPress={handlePress} activeOpacity={0.8}>
       <VStack
         paddingHorizontal={20}
         borderRadius={30}

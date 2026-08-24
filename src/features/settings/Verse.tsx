@@ -101,7 +101,7 @@ const VerseComponent = ({
   }
 
   return (
-    <TouchableOpacity activeOpacity={0.7} onPress={openBibleView}>
+    <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
       <Container>
         <Box row style={{ marginBottom: 10 }} alignItems="center">
           <Box flex row alignItems="center">
@@ -115,6 +115,7 @@ const VerseComponent = ({
           </DateText>
           {setSettings && stringIds && (
             <LinkBox
+              accessibilityLabel={t('accessibility.options')}
               p={4}
               ml={10}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}

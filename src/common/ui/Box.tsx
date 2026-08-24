@@ -304,7 +304,10 @@ export const AnimatedSafeAreaBox = ({
   const insets = useSafeAreaInsets()
   return <AnimatedBox ref={ref} paddingTop={insets.top} paddingBottom={insets.bottom} {...props} />
 }
-const BasicTouchableBox = Box.withComponent(TouchableOpacity)
+const StyledTouchableBox = Box.withComponent(TouchableOpacity)
+const BasicTouchableBox = (props: React.ComponentProps<typeof StyledTouchableBox>) => (
+  <StyledTouchableBox accessibilityRole="button" {...props} />
+)
 export const TouchableBox = BasicTouchableBox
 
 export const AnimatedBox = Animated.createAnimatedComponent(Box)

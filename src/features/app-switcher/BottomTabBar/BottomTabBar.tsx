@@ -1,6 +1,7 @@
 import { useAtomValue } from 'jotai/react'
 import { GestureDetector } from 'react-native-gesture-handler'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useTranslation } from 'react-i18next'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -21,7 +22,8 @@ type BottomTabBarProps = {
 }
 
 const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
-  const { onPress, listStyles, viewStyles } = useBottomTabBar()
+  const { t } = useTranslation()
+  const { onPress, isViewMode, listStyles, viewStyles } = useBottomTabBar()
   const { panGesture } = useTabBarSwipeGesture()
   const insets = useSafeAreaInsets()
   const bottomBarHeight = TAB_ICON_SIZE + insets.bottom
@@ -53,6 +55,8 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
           absoluteFill
           paddingBottom={insets.bottom}
           style={viewStyles}
+          accessibilityElementsHidden={!isViewMode}
+          importantForAccessibility={isViewMode ? 'auto' : 'no-hide-descendants'}
           key="view"
         >
           <HomeButton openHome={openHome} />
@@ -70,11 +74,19 @@ const BottomTabBar = ({ openMenu, openHome }: BottomTabBarProps) => {
         absoluteFill
         paddingBottom={insets.bottom}
         style={listStyles}
+        accessibilityElementsHidden={isViewMode}
+        importantForAccessibility={isViewMode ? 'no-hide-descendants' : 'auto'}
         key="list"
       >
         <AddTabButton />
         <GroupTitleButton />
-        <TouchableBox center size={TAB_ICON_SIZE} onPress={onPress}>
+        <TouchableBox
+          center
+          size={TAB_ICON_SIZE}
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={t('accessibility.openSelectedTab')}
+        >
           <Text bold>OK</Text>
         </TouchableBox>
       </AnimatedBox>

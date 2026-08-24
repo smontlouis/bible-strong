@@ -140,6 +140,9 @@ const SegmentedLanguageToggle = ({
 
       {/* FR Button */}
       <Pressable
+        accessibilityLabel="Français"
+        accessibilityRole="radio"
+        accessibilityState={{ checked: value === 'fr' }}
         onPress={() => onChange('fr')}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
       >
@@ -148,6 +151,9 @@ const SegmentedLanguageToggle = ({
 
       {/* EN Button */}
       <Pressable
+        accessibilityLabel="English"
+        accessibilityRole="radio"
+        accessibilityState={{ checked: value === 'en' }}
         onPress={() => onChange('en')}
         style={{ flex: 1, justifyContent: 'center', alignItems: 'center', zIndex: 1 }}
       >

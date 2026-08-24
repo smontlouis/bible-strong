@@ -20,7 +20,12 @@ const TTSRepeatButton = (props: TTSRepeatButtonProps) => {
   const isActive = isRepeat
 
   return (
-    <TouchableBox onPress={onToggle}>
+    <TouchableBox
+      onPress={onToggle}
+      accessibilityRole="switch"
+      accessibilityLabel={t('audio.repeat')}
+      accessibilityState={{ checked: isActive }}
+    >
       <AudioChip {...props} isActive={isActive}>
         <FeatherIcon name="repeat" size={14} color={isActive ? 'primary' : 'grey'} />
         <Text ml={5} bold fontSize={10} color={isActive ? 'primary' : 'grey'}>

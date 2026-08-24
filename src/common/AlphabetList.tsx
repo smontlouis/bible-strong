@@ -58,15 +58,19 @@ const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
             alignItems: 'center',
             justifyContent: 'center',
           }}
-          itemWidth={25}
-          itemHeight={30}
+          itemWidth={36}
+          itemHeight={44}
           data={alphabet}
           renderItem={({ item: section, index: itemIndex }) => (
             <TouchableOpacity
+              accessibilityLabel={section.toUpperCase()}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: letter === section }}
               onPress={() => {
                 CarouselAlphabet.current?.scrollTo({ index: itemIndex, animated: true })
                 setLetter(section)
               }}
+              style={{ minWidth: 36, minHeight: 44, justifyContent: 'center' }}
             >
               <Box>
                 <StyledText isSelected={letter === section} textAlign="center" fontSize={26}>

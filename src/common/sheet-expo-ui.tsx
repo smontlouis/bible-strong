@@ -231,6 +231,7 @@ const SheetHeader = ({
         >
           {!!title && (
             <FadingText
+              accessibilityRole="header"
               numberOfLines={1}
               bold
               fontSize={16}
@@ -254,6 +255,7 @@ const SheetHeader = ({
 
 const SheetItem = ({ children, tag, onPress, ...props }: SheetItemProps) => (
   <TouchableBox
+    accessibilityRole="button"
     onPress={onPress}
     row
     alignItems="center"
