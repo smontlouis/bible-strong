@@ -295,9 +295,9 @@ curl --fail https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1
 
 The Worker uses Cloudflare's Cache API for successful deterministic database reads after App Check
 authorization. Detail, chapter, coverage, and other revisioned responses are cached for 24 hours;
-bounded browse/list responses are cached for one hour. Search and random endpoints, non-GET
-requests, unknown future routes, and every non-200 response bypass the cache. Cache failures fail
-open to Neon and are emitted as structured Worker errors.
+search responses are also cached for 24 hours, and bounded browse/list responses are cached for one
+hour. Random endpoints, non-GET requests, unknown future routes, and every non-200 response bypass
+the cache. Cache failures fail open to Neon and are emitted as structured Worker errors.
 
 The App Check token and request ID are excluded from cache keys and stored responses. Every client
 response remains `private, no-store`; `x-resource-cache: MISS` or `HIT` exposes the Worker cache
@@ -305,6 +305,10 @@ result without allowing an intermediary to serve protected data before attestati
 requests keep their ETag/304 behavior. A SHA-256 fingerprint of the complete generated mobile
 catalog is part of every internal cache key, so publishing and deploying changed catalog content
 starts a fresh cache namespace without a global purge, even when `--generated-at` is pinned.
+Search keys additionally include the thematic-index, embedding model/contract/threshold, and ranking
+revisions from `src/search/bibleSearchRevision.ts`. Bump the explicit index revision after a thematic
+import and the ranking revision after changing result fusion or ordering; deploying then creates a
+fresh 24-hour search namespace immediately.
 
 This cache is local to each Cloudflare data center. Complete successful R2 artifacts are also cached
 for one year after App Check succeeds. Their stable legacy objects are never overwritten and their

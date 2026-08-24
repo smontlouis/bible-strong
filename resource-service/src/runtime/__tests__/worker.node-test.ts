@@ -144,7 +144,7 @@ describe('Resource Worker binding', () => {
     assert.deepEqual(failures, ['match'])
   })
 
-  it('briefly caches identical authenticated search requests without token-specific keys', async () => {
+  it('caches identical authenticated search requests for 24 hours without token-specific keys', async () => {
     const cache = new MemoryEdgeCache()
     const backgroundWrites: Promise<unknown>[] = []
     let originReads = 0
@@ -167,6 +167,10 @@ describe('Resource Worker binding', () => {
 
     assert.equal(originReads, 1)
     assert.equal(cache.entries.size, 1)
+    assert.equal(
+      [...cache.entries.values()][0]?.headers.get('cache-control'),
+      'public, max-age=86400'
+    )
     assert.equal(first.headers.get('x-resource-cache'), 'MISS')
     assert.equal(second.headers.get('x-resource-cache'), 'HIT')
     assert.equal(first.headers.get('cache-control'), 'private, no-store')
@@ -281,6 +285,30 @@ describe('Resource Worker binding', () => {
 
     assert.equal(first, unrelatedChange)
     assert.notEqual(first, relevantChange)
+  })
+
+  it('invalidates search only when its Bible publication or search revision changes', async () => {
+    const searchRequest = new Request('https://api.bible-strong.app/v1/bibles/LSG/search?q=amour')
+    const chapterRequest = new Request(
+      'https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1'
+    )
+    const catalog = {
+      resources: {
+        'bible:LSG': { contentSha256: 'lsg-r1' },
+      },
+    }
+
+    const firstSearch = await resourceApiCacheRevisionFrom(searchRequest, catalog, 'search-r1')
+    const changedSearch = await resourceApiCacheRevisionFrom(searchRequest, catalog, 'search-r2')
+    const firstChapter = await resourceApiCacheRevisionFrom(chapterRequest, catalog, 'search-r1')
+    const unchangedChapter = await resourceApiCacheRevisionFrom(
+      chapterRequest,
+      catalog,
+      'search-r2'
+    )
+
+    assert.notEqual(firstSearch, changedSearch)
+    assert.equal(firstChapter, unchangedChapter)
   })
 
   it('does not cache unsuccessful origin responses', async () => {

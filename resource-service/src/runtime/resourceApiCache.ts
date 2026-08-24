@@ -1,6 +1,7 @@
 import mobileResourceCatalog from '../../../src/assets/mobile-resource-catalog.json'
 import { resourceEtagMatches } from '../http/conditionalRequest'
 import { resourceRequestIdFrom } from '../http/requestId'
+import { BIBLE_SEARCH_CACHE_REVISION } from '../search/bibleSearchRevision'
 import { isDynamicResourceRequest } from './resourceRoutePolicy'
 
 export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<string> => {
@@ -50,9 +51,11 @@ const catalogResourceIdsFrom = (request: Request): string[] => {
 
 export const resourceApiCacheRevisionFrom = async (
   request: Request,
-  catalog: unknown
+  catalog: unknown,
+  searchRevision = BIBLE_SEARCH_CACHE_REVISION
 ): Promise<string> => {
   const resourceIds = catalogResourceIdsFrom(request)
+  let catalogRevision: string
   if (resourceIds.length && catalog && typeof catalog === 'object' && 'resources' in catalog) {
     const resources = catalog.resources
     if (resources && typeof resources === 'object') {
@@ -62,11 +65,20 @@ export const resourceApiCacheRevisionFrom = async (
         return typeof revision === 'string' && revision ? [resourceId, revision] : undefined
       })
       if (revisions.every((revision): revision is [string, string] => revision !== undefined)) {
-        return resourceApiCacheEpochFrom(revisions)
+        catalogRevision = await resourceApiCacheEpochFrom(revisions)
+      } else {
+        catalogRevision = await resourceApiCacheEpochFrom(catalog)
       }
+    } else {
+      catalogRevision = await resourceApiCacheEpochFrom(catalog)
     }
+  } else {
+    catalogRevision = await resourceApiCacheEpochFrom(catalog)
   }
-  return resourceApiCacheEpochFrom(catalog)
+
+  return isDynamicResourceRequest(request) && !new URL(request.url).pathname.endsWith('/random')
+    ? resourceApiCacheEpochFrom([catalogRevision, searchRevision])
+    : catalogRevision
 }
 
 export const RESOURCE_API_CACHE_REVISION = (request: Request) =>
@@ -110,7 +122,7 @@ const cacheTtlSeconds = (request: Request): number | undefined => {
   if (request.method !== 'GET') return undefined
   const url = new URL(request.url)
   if (url.pathname.endsWith('/random')) return undefined
-  if (isDynamicResourceRequest(request)) return 60
+  if (isDynamicResourceRequest(request)) return 24 * 60 * 60
   if (LONG_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return 24 * 60 * 60
   if (SHORT_LIVED_PATHS.some(pattern => pattern.test(url.pathname))) return 60 * 60
   return undefined
