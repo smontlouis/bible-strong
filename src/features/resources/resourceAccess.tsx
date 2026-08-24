@@ -93,11 +93,17 @@ import { STRONG_BIBLE_FALLBACK_PRIORITY } from '~helpers/strongBiblePublications
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { withResourceSourceLogging } from '~features/resources/resourceSourceLogger'
 import { resourceApiFetch } from '~helpers/resourceAppCheck'
+import {
+  createHttpSearchAnalyticsAccess,
+  noOpSearchAnalyticsAccess,
+  type SearchAnalyticsAccess,
+} from '~features/resources/searchAnalyticsAccess'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
   bibleReading: BibleReadingResourceAccess
   bibleSearch: BibleSearchAccess
+  searchAnalytics: SearchAnalyticsAccess
   dictionary: DictionaryAccess
   lexiconBible: LexiconBibleResourceAccess
   nave: NaveAccess
@@ -262,6 +268,13 @@ const onlineBibleSearchAccess = resourceApiBaseUrl
       })
     )
   : localBibleSearchAccess
+const searchAnalyticsAccess = resourceApiBaseUrl
+  ? createHttpSearchAnalyticsAccess({
+      baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
+      isOnline: async () => onlineManager.isOnline(),
+    })
+  : noOpSearchAnalyticsAccess
 const onlineBibleReadingAccess = resourceApiBaseUrl
   ? onlineSource(
       'Bible reading resources',
@@ -333,6 +346,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     remotelyReadableVersions: remotelyReadableBibleVersions,
     isOnline: async () => onlineManager.isOnline(),
   }),
+  searchAnalytics: searchAnalyticsAccess,
   dictionary: createHybridDictionaryAccess({
     offline: offlineSource('Dictionary', localDictionaryAccess),
     online: onlineDictionaryAccess,

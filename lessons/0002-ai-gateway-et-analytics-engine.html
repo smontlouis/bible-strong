@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Gateway et Analytics Engine — Bible Strong</title>
+    <link rel="stylesheet" href="../assets/teaching.css" />
+  </head>
+  <body>
+    <main>
+      <p class="formula">MINI-LEÇON 02 · 5 MINUTES</p>
+      <h1>Observer sans lire les recherches</h1>
+      <p class="lede">
+        <b>AI Gateway surveille Qwen.</b> <b>Analytics Engine mesure toute la chaîne.</b> En mode
+        metadata-only, aucun des deux ne conserve ce que l'utilisateur a écrit.
+      </p>
+
+      <h2>Le trajet d'une recherche</h2>
+      <div class="pipeline">
+        <div class="step">
+          <b>1. Resource Worker</b
+          ><small>Vérifie App Check et cherche la réponse dans le cache 24 h.</small>
+        </div>
+        <div class="step">
+          <b>2. AI Gateway</b
+          ><small>Sur un cache miss, mesure l'appel à Qwen sans stocker la requête.</small>
+        </div>
+        <div class="step">
+          <b>3. Qwen + PostgreSQL</b
+          ><small>Qwen encode le sens ; PostgreSQL retrouve et classe les passages.</small>
+        </div>
+        <div class="step">
+          <b>4. Analytics Engine</b
+          ><small>Reçoit uniquement des chiffres et catégories sur le trajet complet.</small>
+        </div>
+      </div>
+
+      <h2>AI Gateway : le compteur devant Qwen</h2>
+      <p>
+        Aujourd'hui, le Worker appelle directement Qwen avec <code>env.AI.run()</code>. Avec une
+        Gateway, il fait le même appel en ajoutant une configuration <code>gateway</code>. Le texte
+        traverse toujours Cloudflare pour être transformé en embedding, mais la Gateway ne doit pas
+        le conserver dans ses logs.
+      </p>
+      <p>
+        Elle peut enregistrer : modèle utilisé, durée, nombre de tokens, coût estimé, succès, erreur
+        ou timeout. Elle peut aussi imposer un plafond de dépense. Elle ne voit pas le classement
+        PostgreSQL et ne sait pas si les résultats finaux sont bons.
+      </p>
+
+      <div class="callout">
+        <b>Metadata-only :</b> conserver « Qwen · 38 ms · 9 tokens · succès », jamais «
+        l'utilisateur a recherché anxiété ». Les logs AI Gateway contenant les payloads sont activés
+        par défaut ; leur désactivation est donc une condition de sécurité.
+      </div>
+
+      <h2>Analytics Engine : notre tableau de bord de recherche</h2>
+      <p>
+        Le Worker écrit lui-même un petit datapoint technique pour décrire le trajet complet. Par
+        exemple :
+      </p>
+      <p class="formula">
+        langue=fr · cache=MISS · chemin=semantic<br />total=180 ms · qwen=38 ms · sql=112 ms ·
+        résultats=20
+      </p>
+      <p>
+        On peut ensuite calculer les p50/p95, les taux d'échec et la proportion de recherches qui
+        atteignent réellement Qwen. Ce sont des tendances agrégées, pas un journal permettant de
+        retrouver une recherche individuelle.
+      </p>
+
+      <h2>Exemple : « anxiété »</h2>
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>Situation</th>
+            <th>AI Gateway</th>
+            <th>Analytics Engine</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Premier appel, cache MISS</td>
+            <td>Mesure Qwen : tokens, durée, coût, statut.</td>
+            <td>Mesure cache + Qwen + SQL + résultats.</td>
+          </tr>
+          <tr>
+            <td>Deuxième appel, cache HIT</td>
+            <td>Aucun événement : Qwen n'est pas appelé.</td>
+            <td>Enregistre un HIT rapide, sans SQL ni Qwen.</td>
+          </tr>
+          <tr>
+            <td>Recherche lente</td>
+            <td>Indique si Qwen est lent.</td>
+            <td>Indique si le temps vient du cache, de Qwen ou de PostgreSQL.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Ce que nous ne stockons pas</h2>
+      <ul>
+        <li>pas de texte de recherche ;</li>
+        <li>pas de hash de la recherche ;</li>
+        <li>pas d'UID Firebase ni d'identifiant stable de l'appareil ;</li>
+        <li>pas de résultats ou de préoccupations spirituelles individuelles.</li>
+      </ul>
+
+      <h2>Ce que ces outils ne font pas</h2>
+      <p>
+        Ils n'améliorent pas directement la pertinence, ne remplacent ni pgvector ni PostgreSQL, ne
+        changent pas l'interface et ne remplacent pas App Check. Ils donnent les mesures nécessaires
+        pour décider ensuite si un reranker, Smart Placement ou Vectorize apporte réellement quelque
+        chose.
+      </p>
+
+      <h2>Vérification rapide</h2>
+      <p>
+        Une recherche est lente mais Qwen répond en 25 ms. Quel outil permet de découvrir que
+        PostgreSQL prend 400 ms ?
+      </p>
+      <details>
+        <summary>Afficher la réponse</summary>
+        <p>
+          Analytics Engine, car il mesure le pipeline complet. AI Gateway sait seulement que l'appel
+          à Qwen a pris 25 ms.
+        </p>
+      </details>
+
+      <p class="sources">
+        Sources principales :
+        <a href="https://developers.cloudflare.com/ai-gateway/usage/worker-binding-methods/"
+          >AI Gateway avec Workers AI</a
+        >,
+        <a href="https://developers.cloudflare.com/ai-gateway/observability/logging/"
+          >contrôle des payloads</a
+        >
+        et
+        <a href="https://developers.cloudflare.com/analytics/analytics-engine/"
+          >Workers Analytics Engine</a
+        >. Voir aussi l'<a href="../reference/observabilite-recherche-cloudflare.html"
+          >aide-mémoire imprimable</a
+        >.
+      </p>
+      <p class="sources">
+        Une notion reste floue ? Demande-moi de suivre une recherche précise étape par étape.
+      </p>
+    </main>
+  </body>
+</html>

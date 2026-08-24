@@ -2,6 +2,12 @@ import { HttpApiBuilder, HttpApp, HttpServer, HttpServerResponse } from '@effect
 import { Effect, Layer } from 'effect'
 
 import {
+  noOpSearchAnalyticsSink,
+  recordSearchAnalytics,
+  SearchAnalyticsSink,
+  type SearchAnalyticsSinkService,
+} from '../domain/searchAnalytics'
+import {
   ActiveBiblePublicationUnavailable,
   BibleChapterNotFound,
   BibleVerseSelectionNotFound,
@@ -106,6 +112,7 @@ import {
   type TimelineRepositoryService,
 } from '../domain/timeline'
 import { HealthResponse, ResourceApi } from './api'
+import { SearchAnalyticsAcceptedDto } from '../../../src/features/resources/searchAnalyticsContract'
 import { parseBibleVerseKey } from '../../../src/features/resources/bibleChapterContract'
 import {
   InvalidResourceRequestProblem,
@@ -118,6 +125,14 @@ import { resourceRequestIdFrom as requestIdFrom } from './requestId'
 
 const SystemApiLive = HttpApiBuilder.group(ResourceApi, 'system', handlers =>
   handlers.handle('health', () => Effect.succeed(new HealthResponse({ status: 'ok' })))
+)
+
+const SearchAnalyticsApiLive = HttpApiBuilder.group(ResourceApi, 'searchAnalytics', handlers =>
+  handlers.handle('recordSearchEvent', ({ payload }) =>
+    recordSearchAnalytics(payload).pipe(
+      Effect.map(accepted => new SearchAnalyticsAcceptedDto({ accepted }))
+    )
+  )
 )
 
 const problemFields = (requestId: string, detail: string) => ({
@@ -912,6 +927,7 @@ const TimelineApiLive = HttpApiBuilder.group(ResourceApi, 'timelines', handlers 
 
 export const ResourceApiLive = HttpApiBuilder.api(ResourceApi).pipe(
   Layer.provide(SystemApiLive),
+  Layer.provide(SearchAnalyticsApiLive),
   Layer.provide(BibleApiLive),
   Layer.provide(NaveApiLive),
   Layer.provide(DictionaryApiLive),
@@ -1034,7 +1050,8 @@ export const provideResourceRepositories = (
   strongLexiconRepository: StrongLexiconRepositoryService = unavailableStrongLexiconRepository,
   supplementaryRepository: SupplementaryRepositoryService = unavailableSupplementaryRepository,
   timelineRepository: TimelineRepositoryService = unavailableTimelineRepository,
-  bibleSearchRepository: BibleSearchRepositoryService = unavailableBibleSearchRepository
+  bibleSearchRepository: BibleSearchRepositoryService = unavailableBibleSearchRepository,
+  searchAnalyticsSink: SearchAnalyticsSinkService = noOpSearchAnalyticsSink
 ) =>
   ResourceApiLive.pipe(
     Layer.provide(
@@ -1047,7 +1064,8 @@ export const provideResourceRepositories = (
         Layer.succeed(InterlinearBibleRepository, interlinearBibleRepository),
         Layer.succeed(StrongLexiconRepository, strongLexiconRepository),
         Layer.succeed(SupplementaryRepository, supplementaryRepository),
-        Layer.succeed(TimelineRepository, timelineRepository)
+        Layer.succeed(TimelineRepository, timelineRepository),
+        Layer.succeed(SearchAnalyticsSink, searchAnalyticsSink)
       )
     )
   )
@@ -1068,7 +1086,8 @@ export const makeResourceWebHandler = (
         overrides.strongLexicon ?? unavailableStrongLexiconRepository,
         overrides.supplementary ?? unavailableSupplementaryRepository,
         overrides.timeline ?? unavailableTimelineRepository,
-        overrides.bibleSearch ?? unavailableBibleSearchRepository
+        overrides.bibleSearch ?? unavailableBibleSearchRepository,
+        overrides.searchAnalytics ?? noOpSearchAnalyticsSink
       ),
       HttpServer.layerContext
     )
@@ -1110,4 +1129,5 @@ export type ResourceRepositoryOverrides = {
   strongLexicon?: StrongLexiconRepositoryService
   supplementary?: SupplementaryRepositoryService
   timeline?: TimelineRepositoryService
+  searchAnalytics?: SearchAnalyticsSinkService
 }

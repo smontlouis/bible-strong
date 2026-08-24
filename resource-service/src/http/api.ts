@@ -2,6 +2,10 @@ import { HttpApi, HttpApiEndpoint, HttpApiGroup } from '@effect/platform'
 import { Schema } from 'effect'
 
 import {
+  SearchAnalyticsAcceptedDto,
+  SearchAnalyticsEventDto,
+} from '../../../src/features/resources/searchAnalyticsContract'
+import {
   BibleChapterDto,
   BibleChaptersDto,
   BibleChaptersQuery,
@@ -103,6 +107,14 @@ export class HealthResponse extends Schema.Class<HealthResponse>('HealthResponse
 
 const SystemApi = HttpApiGroup.make('system').add(
   HttpApiEndpoint.get('health', '/health').addSuccess(HealthResponse)
+)
+
+const SearchAnalyticsApi = HttpApiGroup.make('searchAnalytics').add(
+  HttpApiEndpoint.post('recordSearchEvent', '/v1/search-events')
+    .setPayload(SearchAnalyticsEventDto)
+    .addSuccess(SearchAnalyticsAcceptedDto, { status: 202 })
+    .addError(InvalidResourceRequestProblem, { status: 400 })
+    .addError(ResourceRateLimitedProblem, { status: 429 })
 )
 
 const BibleApi = HttpApiGroup.make('bibles')
@@ -487,6 +499,7 @@ const TimelineApi = HttpApiGroup.make('timelines')
 
 export class ResourceApi extends HttpApi.make('resource-api')
   .add(SystemApi)
+  .add(SearchAnalyticsApi)
   .add(BibleApi)
   .add(NaveApi)
   .add(DictionaryApi)

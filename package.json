@@ -60,6 +60,7 @@
     "resources:sync:local": "yarn resources:db:up && yarn resources:migrate && RESOURCE_PUBLICATION_ROOTS=../bible-lexicon-maker/outputs/resource-publications yarn resources:import-catalog",
     "resources:topics:import": "tsx resource-service/src/search/topicIngestionCli.ts",
     "resources:topics:benchmark": "tsx resource-service/src/search/topicSearchBenchmarkCli.ts",
+    "resources:analytics:search": "tsx resource-service/src/analytics/searchAnalyticsReportCli.ts",
     "resources:topics:embeddings:dev": "wrangler dev --config resource-service/wrangler.embedding.jsonc --port 8791",
     "clean": "rm -rf pnpm-lock.json && rm -rf node_modules && rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-map-* && pnpm && say I love react native",
     "lint": "eslint .",

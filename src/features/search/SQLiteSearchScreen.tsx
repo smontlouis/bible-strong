@@ -25,6 +25,7 @@ import type {
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { appLogger } from '~helpers/agentObservability'
 import type { StrongLexiconSearchResult } from '~features/resources/strongLexiconAccess'
+import type { SearchAnalyticsEvent } from '~features/resources/searchAnalyticsAccess'
 import useDebounce from '~helpers/useDebounce'
 import useBibleVerses from '~features/resources/useBibleVerses'
 import { removeBreakLines } from '~helpers/utils'
@@ -91,6 +92,13 @@ import { getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { createStrongIdentity } from '~helpers/strongIdentities'
 import { isExactBibleReferenceInput } from '~helpers/bcvParser'
+import {
+  getOpenedResultAnalytics,
+  getPassageMatchAnalytics,
+  getPublicSearchResultCounts,
+  getPublicSearchSources,
+  getSearchAnalyticsInputKind,
+} from './searchAnalyticsModel'
 
 type Props = {
   searchValue: string
@@ -152,6 +160,11 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const resolvedSelectedVersion = resolveSearchVersionFilter(selectedVersion, defaultBibleVersion)
   const [sortOrder, _setSortOrder] = useState<SearchSortOrder>(globalFilters.sortOrder)
   const [itemFilters, _setItemFilters] = useState(globalFilters.itemFilters)
+  const searchOriginRef = useRef<'typed' | 'example'>('typed')
+  const searchStartedAtRef = useRef(Date.now())
+  const searchStartedOnlineRef = useRef(isConnected)
+  const recordedSearchKeyRef = useRef('')
+  const recordedOpenKeyRef = useRef('')
   const sourceFiltersRef = useRef<SheetRef>(null)
   const passageFiltersRef = useRef<SheetRef>(null)
   const activeItemFilterTypes = searchItemFilterOrder.filter(itemType => itemFilters[itemType])
@@ -710,6 +723,116 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     t,
   })
   const searchFacets = getSearchFacets(searchModel.sections)
+  const publicSearchSources = getPublicSearchSources(itemFilters)
+  const publicResultCounts = getPublicSearchResultCounts(searchModel.sections)
+  const passageMatchAnalytics = getPassageMatchAnalytics(results ?? [])
+  const publicSearchErrorCount = [
+    itemFilters.passages && passageQuery.isError,
+    itemFilters.strong && strongQuery.isError,
+    itemFilters.dictionary && dictionaryQuery.isError,
+    itemFilters.nave && naveQuery.isError,
+  ].filter(Boolean).length
+  const isPublicSearchLoading =
+    isSearching || isStrongSearching || isDictionarySearching || isNaveSearching
+  const searchAnalyticsOutcome: SearchAnalyticsEvent['outcome'] = publicSearchErrorCount
+    ? publicResultCounts.total
+      ? 'partial_error'
+      : 'error'
+    : publicResultCounts.total
+      ? 'success'
+      : 'zero_results'
+  const searchAnalyticsKey = JSON.stringify([
+    trimmedSearchValue,
+    publicSearchSources,
+    resolvedSelectedVersion,
+    section,
+    canon,
+    book,
+    sortOrder,
+  ])
+  const searchAnalyticsLanguage = resourcesLanguage.NAVE === 'en' ? 'en' : 'fr'
+
+  useEffect(() => {
+    searchStartedAtRef.current = Date.now()
+    searchStartedOnlineRef.current = isConnected
+    recordedSearchKeyRef.current = ''
+    recordedOpenKeyRef.current = ''
+    // Reconnecting must not upload a search that started offline.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchAnalyticsKey])
+
+  const createSearchAnalyticsEvent = (
+    event: SearchAnalyticsEvent['event'],
+    openedItem?: SearchEntityResult
+  ): SearchAnalyticsEvent | undefined => {
+    if (
+      !isConnected ||
+      !searchStartedOnlineRef.current ||
+      !trimmedSearchValue ||
+      trimmedSearchValue.length < MIN_SEARCH_LENGTH ||
+      searchValue.trim() !== trimmedSearchValue ||
+      !publicSearchSources.length
+    ) {
+      return undefined
+    }
+
+    const opened = openedItem
+      ? getOpenedResultAnalytics(openedItem, searchModel.sections)
+      : undefined
+    if (openedItem && !opened) return undefined
+
+    return {
+      event,
+      query: trimmedSearchValue,
+      language: searchAnalyticsLanguage,
+      origin: searchOriginRef.current,
+      inputKind: getSearchAnalyticsInputKind({
+        query: trimmedSearchValue,
+        isBibleReference,
+        isStrongReference: Boolean(strongReference),
+        strongResults,
+      }),
+      sources: publicSearchSources,
+      versionIds: itemFilters.passages && resolvedSelectedVersion ? [resolvedSelectedVersion] : [],
+      outcome: searchAnalyticsOutcome,
+      resultCounts: publicResultCounts,
+      matchKind: passageMatchAnalytics.matchKind,
+      ...(passageMatchAnalytics.topicId ? { topicId: passageMatchAnalytics.topicId } : {}),
+      durationMs: Math.max(0, Date.now() - searchStartedAtRef.current),
+      ...(opened
+        ? {
+            clickedResultType: opened.type,
+            ...(opened.key ? { clickedResultKey: opened.key } : {}),
+            clickedRank: opened.rank,
+          }
+        : {}),
+    }
+  }
+
+  const recordSearchPerformed = () => {
+    if (recordedSearchKeyRef.current === searchAnalyticsKey) return
+    const event = createSearchAnalyticsEvent('search_performed')
+    if (!event) return
+    recordedSearchKeyRef.current = searchAnalyticsKey
+    void resources.searchAnalytics.record(event).catch(() => undefined)
+  }
+
+  const recordResultOpened = (item: SearchEntityResult) => {
+    if (recordedOpenKeyRef.current === searchAnalyticsKey) return
+    const event = createSearchAnalyticsEvent('result_opened', item)
+    if (!event) return
+    recordSearchPerformed()
+    recordedOpenKeyRef.current = searchAnalyticsKey
+    void resources.searchAnalytics.record(event).catch(() => undefined)
+  }
+
+  useEffect(() => {
+    if (isPublicSearchLoading) return
+    const timeout = setTimeout(recordSearchPerformed, 600)
+    return () => clearTimeout(timeout)
+    // The analytics key contains every filter that defines a new search interaction.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPublicSearchLoading, searchAnalyticsKey, publicResultCounts.total, publicSearchErrorCount])
   const effectiveSelectedFacet = searchFacets.some(facet => facet.id === selectedFacet)
     ? selectedFacet
     : 'all'
@@ -745,7 +868,8 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }))
   }
 
-  const updateSearchValue = (value: string) => {
+  const updateSearchValue = (value: string, origin: 'typed' | 'example' = 'typed') => {
+    searchOriginRef.current = origin
     setSelectedFacet('all')
     setSearchValue(value)
   }
@@ -796,6 +920,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   }
 
   const openSearchItem = (item: SearchEntityResult) => {
+    recordResultOpened(item)
     openStudyObject(item)
   }
 
@@ -1018,7 +1143,11 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
       const renderSearchResult = (item: SearchEntityResult) =>
         item.referenceSegment ? (
-          <ReferenceSearchResultRow key={item.id} item={item} />
+          <ReferenceSearchResultRow
+            key={item.id}
+            item={item}
+            onOpen={() => recordResultOpened(item)}
+          />
         ) : (
           <SharedSearchEntityResultRow
             key={item.id}
@@ -1144,9 +1273,9 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           }}
           keyExtractor={(section: SQLiteSearchResultSection) => section.id}
           ListEmptyComponent={
-            searchModel.isBrowseLoading ? (
+            searchModel.isLoading ? (
               <Box px={20} py={16}>
-                <Text color="grey">{String(t('Chargement...'))}</Text>
+                <Text color="grey">{String(t('Recherche en cours...'))}</Text>
               </Box>
             ) : searchModel.showNoResults ? (
               browseItemType ? (
@@ -1155,7 +1284,10 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 <SearchNoResultsState query={debouncedSearchValue} />
               )
             ) : (
-              <SearchEmptyState isOnline={isConnected} onExamplePress={updateSearchValue} />
+              <SearchEmptyState
+                isOnline={isConnected}
+                onExamplePress={value => updateSearchValue(value, 'example')}
+              />
             )
           }
           renderItem={({ item: section }: { item: SQLiteSearchResultSection }) => (
@@ -1322,7 +1454,13 @@ const SearchNoResultsState = ({ query }: { query: string }) => {
   )
 }
 
-const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
+const ReferenceSearchResultRow = ({
+  item,
+  onOpen,
+}: {
+  item: SearchEntityResult
+  onOpen: () => void
+}) => {
   const pushRouteOnce = usePushRouteOnce()
   const version = useDefaultBibleVersion()
   const segment = item.referenceSegment!
@@ -1339,12 +1477,13 @@ const ReferenceSearchResultRow = ({ item }: { item: SearchEntityResult }) => {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      onPress={() =>
+      onPress={() => {
+        onOpen()
         pushRouteOnce({
           pathname: '/bible-view',
           params: getBibleViewParamsForReferenceSegment(segment),
         })
-      }
+      }}
     >
       <Box px={20} py={12} borderBottomWidth={1} borderColor="border">
         <VStack>

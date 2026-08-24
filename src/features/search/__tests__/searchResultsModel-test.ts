@@ -150,6 +150,30 @@ describe('searchResultsModel', () => {
     expect(model.showNoResults).toBe(false)
   })
 
+  it('does not report no results while a Strong example is still loading', () => {
+    const model = getSearchResultsModel({
+      ...baseInput,
+      query: 'H430',
+      debouncedQuery: 'H430',
+      loading: { ...emptyLoading, strong: true },
+    })
+
+    expect(model.isLoading).toBe(true)
+    expect(model.showNoResults).toBe(false)
+  })
+
+  it('starts loading immediately when a Strong example is waiting for debounce', () => {
+    const model = getSearchResultsModel({
+      ...baseInput,
+      query: 'G26',
+      debouncedQuery: '',
+    })
+
+    expect(model.isLoading).toBe(true)
+    expect(model.showNoResults).toBe(false)
+    expect(model.shouldRenderSearchList).toBe(true)
+  })
+
   it('reports no results when the visible query has no sections and nothing is loading', () => {
     const model = getSearchResultsModel(baseInput)
 

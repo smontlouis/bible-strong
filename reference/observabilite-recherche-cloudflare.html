@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Observabilité de la recherche — Aide-mémoire</title>
+    <link rel="stylesheet" href="../assets/teaching.css" />
+  </head>
+  <body>
+    <main>
+      <p class="formula">AIDE-MÉMOIRE · BIBLE STRONG</p>
+      <h1>Gateway ou Analytics ?</h1>
+      <table class="compare">
+        <thead>
+          <tr>
+            <th></th>
+            <th>AI Gateway</th>
+            <th>Analytics Engine</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Périmètre</td>
+            <td>L'appel au modèle</td>
+            <td>Toute la recherche</td>
+          </tr>
+          <tr>
+            <td>Mesure</td>
+            <td>Tokens, coût, durée, erreurs Qwen</td>
+            <td>Cache, Qwen, SQL, résultats, p50/p95</td>
+          </tr>
+          <tr>
+            <td>Protection</td>
+            <td>Budget et rate limit IA</td>
+            <td>Aucune : outil de mesure</td>
+          </tr>
+          <tr>
+            <td>Cache</td>
+            <td>Désactivé pour Bible Strong</td>
+            <td>N'en fournit pas</td>
+          </tr>
+          <tr>
+            <td>Donnée interdite</td>
+            <td>Payload de la requête</td>
+            <td>Texte, hash et identifiants stables</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="formula">Gateway = comment va Qwen ?<br />Analytics = comment va la recherche ?</p>
+      <p class="sources">
+        <a href="../lessons/0002-ai-gateway-et-analytics-engine.html">Revenir à la mini-leçon</a>
+      </p>
+    </main>
+  </body>
+</html>

@@ -14,6 +14,7 @@ import { InterlinearBibleRepository } from '../domain/interlinearBible'
 import { StrongLexiconRepository } from '../domain/strongLexicon'
 import { SupplementaryRepository } from '../domain/supplementary'
 import { TimelineRepository } from '../domain/timeline'
+import { noOpSearchAnalyticsSink, SearchAnalyticsSink } from '../domain/searchAnalytics'
 import { ResourceApiLive } from '../http/app'
 import { makeKyselyBibleChapterRepository } from '../repositories/bibleChapterRepository'
 import { makeKyselyBibleSearchRepository } from '../repositories/bibleSearchRepository'
@@ -63,7 +64,8 @@ const RepositoryLive = Layer.mergeAll(
   Layer.succeed(InterlinearBibleRepository, makeKyselyInterlinearBibleRepository(database)),
   Layer.succeed(StrongLexiconRepository, makeKyselyStrongLexiconRepository(database)),
   Layer.succeed(SupplementaryRepository, makeKyselySupplementaryRepository(database)),
-  Layer.succeed(TimelineRepository, makeKyselyTimelineRepository(database))
+  Layer.succeed(TimelineRepository, makeKyselyTimelineRepository(database)),
+  Layer.succeed(SearchAnalyticsSink, noOpSearchAnalyticsSink)
 )
 const ApiLive = ResourceApiLive.pipe(Layer.provide(RepositoryLive))
 

@@ -226,21 +226,24 @@ export const getSearchResultsModel = ({
     (browseItemType === 'strong' && loading.strong) ||
     (browseItemType === 'dictionary' && loading.dictionary) ||
     (browseItemType === 'nave' && loading.nave)
+  const isWaitingForDebounce =
+    !browseItemType &&
+    query.trim().length >= SEARCH_MIN_QUERY_LENGTH &&
+    query.trim() !== debouncedQuery.trim()
+  const isLoading = browseItemType
+    ? isBrowseLoading
+    : isWaitingForDebounce || Object.values(loading).some(Boolean)
 
   const hasSearchQuery = Boolean(debouncedQuery)
   const showResultsList = shouldShowSearchResultsList({ query, debouncedQuery, browseItemType })
-  const showNoResults =
-    showResultsList &&
-    !loading.passages &&
-    !isBrowseLoading &&
-    sections.length === 0 &&
-    !searchError
+  const showNoResults = showResultsList && !isLoading && sections.length === 0 && !searchError
 
   return {
     hasSearchQuery,
     showResultsList,
     shouldRenderSearchList: showResultsList || !hasSearchQuery,
     isBrowseLoading,
+    isLoading,
     showNoResults,
     sections,
   }

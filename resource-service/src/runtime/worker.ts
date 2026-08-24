@@ -27,10 +27,20 @@ import {
 } from './resourceApiCache'
 import { protectResourceRequest } from './resourceRequestProtection'
 import { resourceRequestClassFrom } from './resourceRoutePolicy'
-import { makeWorkersAiTopicEmbeddingProvider } from '../search/topicEmbedding'
+import {
+  makeWorkersAiTopicEmbeddingProvider,
+  TOPIC_EMBEDDING_CONTRACT,
+} from '../search/topicEmbedding'
+import type { SearchAnalyticsSinkService } from '../domain/searchAnalytics'
+import {
+  makeAnalyticsEngineSearchSink,
+  makeMetadataOnlyAiGatewayOptions,
+  writeSearchRuntimeEvent,
+} from './searchAnalyticsEngine'
 
 export const RESOURCE_API_PATH_PREFIX = '/v1/'
 export { enforceResourceApiAppCheck, routeResourceApiRequest }
+const SEARCH_ANALYTICS_MAX_BODY_BYTES = 4_096
 
 export const makeResourceWorkerHandler = (
   repository: BibleChapterRepositoryService,
@@ -41,7 +51,8 @@ export const makeResourceWorkerHandler = (
   strongLexiconRepository?: StrongLexiconRepositoryService,
   supplementaryRepository?: SupplementaryRepositoryService,
   timelineRepository?: TimelineRepositoryService,
-  bibleSearchRepository?: BibleSearchRepositoryService
+  bibleSearchRepository?: BibleSearchRepositoryService,
+  searchAnalytics?: SearchAnalyticsSinkService
 ) =>
   makeResourceWebHandler(repository, naveRepository, {
     bibleSearch: bibleSearchRepository,
@@ -51,10 +62,43 @@ export const makeResourceWorkerHandler = (
     strongLexicon: strongLexiconRepository,
     supplementary: supplementaryRepository,
     timeline: timelineRepository,
+    searchAnalytics,
   })
+
+const analyticsEnabled = (bindings: Env) => bindings.SEARCH_ANALYTICS_ENABLED === 'true'
+
+const runtimeRouteFrom = (request: Request): string => {
+  const url = new URL(request.url)
+  if (url.pathname === '/v1/search-events') return 'search-events'
+  if (url.pathname === '/v1/bibles/search') return 'bible-search-many'
+  if (/^\/v1\/bibles\/[^/]+\/search$/u.test(url.pathname)) return 'bible-search-one'
+  if (url.pathname === '/v1/strong-lexicon/entries') return 'strong-search'
+  if (/^\/v1\/dictionaries\/[^/]+\/entries$/u.test(url.pathname)) return 'dictionary-search'
+  if (/^\/v1\/naves\/[^/]+\/topics$/u.test(url.pathname)) return 'nave-search'
+  return resourceRequestClassFrom(request)
+}
+
+const writeRuntimeSafely = (
+  bindings: Env,
+  event: Parameters<typeof writeSearchRuntimeEvent>[1]
+) => {
+  if (!analyticsEnabled(bindings)) return
+  try {
+    writeSearchRuntimeEvent(bindings.SEARCH_RUNTIME_ANALYTICS, event)
+  } catch (cause) {
+    console.error(
+      JSON.stringify({
+        message: 'search runtime analytics write failed',
+        event: event.event,
+        error: cause instanceof Error ? cause.name : 'UnknownError',
+      })
+    )
+  }
+}
 
 export default {
   async fetch(request: Request, bindings: Env, ctx: ExecutionContext): Promise<Response> {
+    const isSearchAnalyticsRequest = new URL(request.url).pathname === '/v1/search-events'
     const appCheckConfig = createFirebaseAppCheckConfig({
       projectNumber: bindings.FIREBASE_APP_CHECK_PROJECT_NUMBER,
       allowedAppIds: bindings.FIREBASE_APP_CHECK_ALLOWED_APP_IDS,
@@ -66,7 +110,9 @@ export default {
       authorize,
       limiters: {
         reading: bindings.READING_RATE_LIMITER,
-        search: bindings.SEARCH_RATE_LIMITER,
+        search: isSearchAnalyticsRequest
+          ? bindings.SEARCH_ANALYTICS_RATE_LIMITER
+          : bindings.SEARCH_RATE_LIMITER,
         artifact: bindings.ARTIFACT_RATE_LIMITER,
       },
       reportLimited: (category, requestId) => {
@@ -93,6 +139,31 @@ export default {
     })
     if (protectionFailure) return protectionFailure
 
+    if (isSearchAnalyticsRequest) {
+      const declaredBodyBytes = Number(request.headers.get('content-length'))
+      if (
+        Number.isFinite(declaredBodyBytes) &&
+        declaredBodyBytes > SEARCH_ANALYTICS_MAX_BODY_BYTES
+      ) {
+        return new Response(null, {
+          status: 413,
+          headers: { 'cache-control': 'private, no-store' },
+        })
+      }
+      const body = await request.arrayBuffer()
+      if (body.byteLength > SEARCH_ANALYTICS_MAX_BODY_BYTES) {
+        return new Response(null, {
+          status: 413,
+          headers: { 'cache-control': 'private, no-store' },
+        })
+      }
+      request = new Request(request.url, {
+        method: request.method,
+        headers: request.headers,
+        body,
+      })
+    }
+
     const edgeCache = await caches.open('bible-strong-resources-api')
     const artifactResponse = await routeR2ArtifactRequest({
       request,
@@ -115,11 +186,24 @@ export default {
 
     const startedAt = Date.now()
     let sqlStatements = 0
+    const searchAnalytics = makeAnalyticsEngineSearchSink({
+      dataset: bindings.SEARCH_PRODUCT_ANALYTICS,
+      enabled: analyticsEnabled(bindings),
+      environment: bindings.RESOURCE_ENVIRONMENT,
+      reportFailure: cause =>
+        console.error(
+          JSON.stringify({
+            message: 'search product analytics write failed',
+            error: cause instanceof Error ? cause.name : 'UnknownError',
+          })
+        ),
+    })
     const response = await routeResourceApiRequest({
       request,
       authorize: async () => true,
       cache: edgeCache,
-      cacheEpoch: await RESOURCE_API_CACHE_REVISION(request),
+      cacheEpoch:
+        request.method === 'GET' ? await RESOURCE_API_CACHE_REVISION(request) : 'uncached-request',
       waitUntil: promise => ctx.waitUntil(promise),
       reportCacheFailure: (operation, cause) => {
         console.error(
@@ -132,6 +216,15 @@ export default {
         )
       },
       load: async () => {
+        if (isSearchAnalyticsRequest) {
+          const analyticsWeb = makeResourceWebHandler(undefined, undefined, { searchAnalytics })
+          try {
+            return await analyticsWeb.handler(request)
+          } finally {
+            await analyticsWeb.dispose()
+          }
+        }
+
         const database = makeHyperdriveDatabase(bindings.HYPERDRIVE.connectionString).withPlugin({
           transformQuery(args) {
             sqlStatements += 1
@@ -142,7 +235,42 @@ export default {
           },
         })
         const topicEmbeddingProvider = makeWorkersAiTopicEmbeddingProvider({
-          run: (model, input) => bindings.AI.run(model, input),
+          run: async (model, input) => {
+            const embeddingStartedAt = Date.now()
+            try {
+              const output = await bindings.AI.run(
+                model,
+                input,
+                makeMetadataOnlyAiGatewayOptions({
+                  gatewayId: bindings.AI_GATEWAY_ID,
+                  environment: bindings.RESOURCE_ENVIRONMENT,
+                  contract: TOPIC_EMBEDDING_CONTRACT,
+                  enabled: analyticsEnabled(bindings),
+                })
+              )
+              writeRuntimeSafely(bindings, {
+                environment: bindings.RESOURCE_ENVIRONMENT,
+                event: 'embedding',
+                route: 'topic-query-embedding',
+                model,
+                contract: TOPIC_EMBEDDING_CONTRACT,
+                durationMs: Date.now() - embeddingStartedAt,
+              })
+              return output
+            } catch (cause) {
+              writeRuntimeSafely(bindings, {
+                environment: bindings.RESOURCE_ENVIRONMENT,
+                event: 'embedding',
+                route: 'topic-query-embedding',
+                model,
+                contract: TOPIC_EMBEDDING_CONTRACT,
+                errorClass: cause instanceof Error ? cause.name : 'UnknownError',
+                durationMs: Date.now() - embeddingStartedAt,
+                success: false,
+              })
+              throw cause
+            }
+          },
         })
         const web = makeResourceWorkerHandler(
           makeKyselyBibleChapterRepository(database),
@@ -160,10 +288,11 @@ export default {
                 JSON.stringify({
                   message: 'topic embedding unavailable; semantic search skipped',
                   model: topicEmbeddingProvider.model,
-                  error: cause instanceof Error ? cause.message : String(cause),
+                  errorClass: cause instanceof Error ? cause.name : 'UnknownError',
                 })
               ),
-          })
+          }),
+          searchAnalytics
         )
 
         try {
@@ -181,12 +310,25 @@ export default {
         path: new URL(request.url).pathname,
         status: response.status,
         cache: response.headers.get('x-resource-cache') ?? 'BYPASS',
-        originRead: response.headers.get('x-resource-cache') !== 'HIT',
+        originRead: request.method === 'GET' && response.headers.get('x-resource-cache') !== 'HIT',
         sqlStatements,
         durationMs: Date.now() - startedAt,
         requestId: response.headers.get('x-request-id'),
       })
     )
+    if (resourceRequestClassFrom(request) === 'search') {
+      writeRuntimeSafely(bindings, {
+        environment: bindings.RESOURCE_ENVIRONMENT,
+        event: 'request',
+        route: runtimeRouteFrom(request),
+        status: String(response.status),
+        cache: response.headers.get('x-resource-cache') ?? 'BYPASS',
+        durationMs: Date.now() - startedAt,
+        sqlStatements,
+        originRead: request.method === 'GET' && response.headers.get('x-resource-cache') !== 'HIT',
+        success: response.status < 500,
+      })
+    }
     return response
   },
 } satisfies ExportedHandler<Env>

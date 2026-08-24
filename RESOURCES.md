@@ -10,6 +10,12 @@
   Documentation primaire sur `tsvector`, les requêtes textuelles et le classement lexical. À consulter pour distinguer recherche par mots et recherche vectorielle.
 - [PostgreSQL — dictionnaires de recherche textuelle](https://www.postgresql.org/docs/current/textsearch-dictionaries.html)
   Explique la normalisation, les lexèmes et le stemming. À consulter pour comprendre les recherches françaises et anglaises tolérantes aux formes grammaticales.
+- [Cloudflare AI Gateway — Workers binding](https://developers.cloudflare.com/ai-gateway/usage/worker-binding-methods/)
+  Décrit le passage d'un appel Workers AI par une Gateway et ses options de cache, logs et métadonnées. À consulter pour observer et contrôler Qwen.
+- [Cloudflare AI Gateway — logging](https://developers.cloudflare.com/ai-gateway/observability/logging/)
+  Explique comment désactiver la conservation des prompts et réponses tout en gardant les métriques techniques. À consulter pour les décisions de confidentialité.
+- [Cloudflare Workers Analytics Engine](https://developers.cloudflare.com/analytics/analytics-engine/)
+  Référence du stockage de métriques personnalisées à forte cardinalité et de leur interrogation SQL. À consulter pour mesurer le pipeline de recherche sans données personnelles.
 
 ## Wisdom (Communities)
 

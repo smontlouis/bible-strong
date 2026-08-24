@@ -85,10 +85,19 @@ describe('Resource request protection', () => {
       authorize: async () => true,
       limiters,
     })
+    const analytics = await protectResourceRequest({
+      request: new Request('https://api.bible-strong.app/v1/search-events', {
+        method: 'POST',
+        headers: { 'x-firebase-appcheck': 'analytics-token' },
+      }),
+      authorize: async () => true,
+      limiters,
+    })
 
     assert.equal(search, undefined)
     assert.equal(random, undefined)
-    assert.deepEqual(calls, ['search', 'search'])
+    assert.equal(analytics, undefined)
+    assert.deepEqual(calls, ['search', 'search', 'search'])
   })
 
   it('limits an attested R2 range request with the artifact counter', async () => {
