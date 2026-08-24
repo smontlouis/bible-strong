@@ -36,7 +36,7 @@ describe('checkAndApplyAutomaticUpdate', () => {
     }
   }
 
-  it('announces, downloads and applies an available update', async () => {
+  it('announces and downloads an available update without reloading the app', async () => {
     const { options, updates, notifyAvailable, notifyReady } = createOptions(true)
 
     await expect(checkAndApplyAutomaticUpdate(options)).resolves.toBe(true)
@@ -44,15 +44,12 @@ describe('checkAndApplyAutomaticUpdate', () => {
     expect(notifyAvailable).toHaveBeenCalledWith(updateAvailableMessage)
     expect(updates.fetchUpdateAsync).toHaveBeenCalledTimes(1)
     expect(notifyReady).toHaveBeenCalledWith(updateReadyMessage)
-    expect(updates.reloadAsync).toHaveBeenCalledTimes(1)
+    expect(updates.reloadAsync).not.toHaveBeenCalled()
     expect(notifyAvailable.mock.invocationCallOrder[0]).toBeLessThan(
       updates.fetchUpdateAsync.mock.invocationCallOrder[0]
     )
     expect(updates.fetchUpdateAsync.mock.invocationCallOrder[0]).toBeLessThan(
       notifyReady.mock.invocationCallOrder[0]
-    )
-    expect(notifyReady.mock.invocationCallOrder[0]).toBeLessThan(
-      updates.reloadAsync.mock.invocationCallOrder[0]
     )
   })
 

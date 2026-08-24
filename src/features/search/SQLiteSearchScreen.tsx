@@ -496,6 +496,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           sortOrder,
           version: resolvedSelectedVersion,
           canon: canon || getBibleVersionCanonId(resolvedSelectedVersion),
+          searchLanguage: resourcesLanguage.NAVE,
           ...(book && { book }),
           ...(sectionMap[section] && { section: sectionMap[section] }),
         }
@@ -1154,7 +1155,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
                 <SearchNoResultsState query={debouncedSearchValue} />
               )
             ) : (
-              <SearchEmptyState onExamplePress={updateSearchValue} />
+              <SearchEmptyState isOnline={isConnected} onExamplePress={updateSearchValue} />
             )
           }
           renderItem={({ item: section }: { item: SQLiteSearchResultSection }) => (

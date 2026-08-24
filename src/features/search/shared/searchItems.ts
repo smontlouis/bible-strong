@@ -245,9 +245,18 @@ export const getNaveSearchItems = (results: NaveSearchItemRow[]) =>
 
 export const getPassageSearchItems = (results: SearchResult[]) =>
   results.map<SearchEntityResult>(result => {
-    const { title } = formatVerseContent([
-      { Livre: result.book, Chapitre: result.chapter, Verset: result.verse },
-    ])
+    const endVerse = result.endChapter === result.chapter ? result.endVerse : undefined
+    const verseIds = Array.from(
+      { length: endVerse && endVerse >= result.verse ? endVerse - result.verse + 1 : 1 },
+      (_, index) => ({ Livre: result.book, Chapitre: result.chapter, Verset: result.verse + index })
+    )
+    const { title: startTitle } = formatVerseContent(verseIds)
+    const title =
+      result.endChapter && result.endChapter !== result.chapter && result.endVerse
+        ? `${startTitle}–${result.endChapter}:${result.endVerse}`
+        : startTitle
+    const topicLabel = result.match?.topicLabel
+    const passageReason = topicLabel || undefined
 
     return {
       id: `passage:${result.version}:${result.book}:${result.chapter}:${result.verse}`,
@@ -257,5 +266,6 @@ export const getPassageSearchItems = (results: SearchResult[]) =>
       subtitle: result.version,
       description: result.highlighted,
       passage: result,
+      passageReason,
     }
   })

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aide-mémoire — recherche vectorielle Bible Strong</title>
+  <link rel="stylesheet" href="../assets/teaching.css">
+</head>
+<body><main>
+  <p class="formula">AIDE-MÉMOIRE · BIBLE STRONG</p>
+  <h1>Qui fait quoi ?</h1>
+  <table class="compare">
+    <thead><tr><th>Brique</th><th>Rôle</th><th>Ne fait pas</th></tr></thead>
+    <tbody>
+      <tr><td><b>Qwen3-Embedding</b></td><td>Transforme un texte en 1 024 coordonnées de sens</td><td>Ne rédige pas et ne trouve pas lui-même une ligne SQL</td></tr>
+      <tr><td><b>pgvector</b></td><td>Compare les coordonnées et trouve les thèmes voisins</td><td>Ne comprend pas le français : il calcule des distances</td></tr>
+      <tr><td><b>PostgreSQL</b></td><td>Stocke thèmes, vecteurs, liens et versets ; effectue les jointures</td><td>Ne décide pas seul de la pertinence finale</td></tr>
+      <tr><td><b>Classement hybride</b></td><td>Fusionne mots exacts, thèmes et similarité sémantique</td><td>Ne génère aucune réponse</td></tr>
+      <tr><td><b>Futur LLM</b></td><td>Explique ou synthétise à partir des passages retenus</td><td>Ne remplace pas une bonne récupération</td></tr>
+    </tbody>
+  </table>
+  <div class="callout"><b>Phrase à retenir :</b> Qwen dessine la carte du sens ; pgvector trouve les voisins sur la carte ; PostgreSQL retrouve les vrais passages.</div>
+  <p class="sources">Sources : <a href="https://qwenlm.github.io/blog/qwen3-embedding/">Qwen</a> · <a href="https://github.com/pgvector/pgvector">pgvector</a></p>
+</main></body>
+</html>

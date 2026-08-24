@@ -21,6 +21,8 @@ type BibleViewSearchResult = {
   chapter: number
   verse: number
   version: string
+  endChapter?: number
+  endVerse?: number
 }
 
 export const getBibleViewParamsForVerseKeys = (verseKeys: string[], version?: string) => {
@@ -36,14 +38,21 @@ export const getBibleViewParamsForVerseKeys = (verseKeys: string[], version?: st
   }
 }
 
-export const getBibleViewParamsForSearchResult = (result: BibleViewSearchResult) => ({
-  contextDisplayMode: 'focused',
-  book: JSON.stringify(getBook(result.book)),
-  chapter: String(result.chapter),
-  verse: String(result.verse),
-  version: result.version,
-  focusVerses: JSON.stringify([result.verse]),
-})
+export const getBibleViewParamsForSearchResult = (result: BibleViewSearchResult) => {
+  const lastVerse = result.endChapter === result.chapter ? result.endVerse : undefined
+  const focusVerses = Array.from(
+    { length: lastVerse && lastVerse >= result.verse ? lastVerse - result.verse + 1 : 1 },
+    (_, index) => result.verse + index
+  )
+  return {
+    contextDisplayMode: 'focused',
+    book: JSON.stringify(getBook(result.book)),
+    chapter: String(result.chapter),
+    verse: String(result.verse),
+    version: result.version,
+    focusVerses: JSON.stringify(focusVerses),
+  }
+}
 
 export const getOpenableActionForRelationEndpoint = (
   endpoint: RelationEndpoint,

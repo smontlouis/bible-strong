@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm'
 import {
   boolean,
+  customType,
   doublePrecision,
   index,
   foreignKey,
@@ -15,6 +16,12 @@ import {
 } from 'drizzle-orm/pg-core'
 
 import type { BibleVersePresentation } from '../../../src/features/resources/bibleChapterContract'
+
+const vector = customType<{ data: number[]; driverData: string; config: { dimensions: number } }>({
+  dataType: config => `vector(${config!.dimensions})`,
+  toDriver: value => `[${value.join(',')}]`,
+  fromDriver: value => value.slice(1, -1).split(',').filter(Boolean).map(Number),
+})
 
 export type ResourceProvenance = {
   generator?: string
@@ -157,6 +164,179 @@ export const naveVerseLinks = pgTable(
     index('nave_verse_links_verse_lookup').on(table.publication_id, table.verse_key),
     index('nave_verse_links_topic_lookup').on(table.publication_id, table.normalized_name),
   ]
+)
+
+export const thematicTopics = pgTable(
+  'thematic_topics',
+  {
+    id: text('id').primaryKey(),
+    canonical_name: text('canonical_name').notNull(),
+    normalized_name: text('normalized_name').notNull(),
+    language: text('language').notNull().default('en'),
+    parent_id: text('parent_id'),
+    active: boolean('active').notNull().default(true),
+  },
+  table => [
+    uniqueIndex('thematic_topics_normalized_name_unique').on(table.normalized_name),
+    index('thematic_topics_name_search').using(
+      'gin',
+      sql`to_tsvector('simple', bible_search_normalize(${table.canonical_name}))`
+    ),
+    index('thematic_topics_name_trigram').using(
+      'gin',
+      sql`bible_search_normalize(${table.canonical_name}) gin_trgm_ops`
+    ),
+  ]
+)
+
+export const thematicTopicSources = pgTable(
+  'thematic_topic_sources',
+  {
+    topic_id: text('topic_id')
+      .notNull()
+      .references(() => thematicTopics.id, { onDelete: 'cascade' }),
+    source: text('source').notNull(),
+    source_key: text('source_key').notNull(),
+    source_version: text('source_version').notNull(),
+    original_name: text('original_name').notNull(),
+    provenance: jsonb('provenance').$type<Record<string, unknown>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'thematic_topic_sources_primary',
+      columns: [table.source, table.source_key],
+    }),
+    index('thematic_topic_sources_topic_lookup').on(table.topic_id, table.source),
+  ]
+)
+
+export const thematicTopicAliases = pgTable(
+  'thematic_topic_aliases',
+  {
+    topic_id: text('topic_id')
+      .notNull()
+      .references(() => thematicTopics.id, { onDelete: 'cascade' }),
+    language: text('language').notNull(),
+    alias: text('alias').notNull(),
+    normalized_alias: text('normalized_alias').notNull(),
+    method: text('method').notNull(),
+    validation_status: text('validation_status').notNull(),
+    is_preferred: boolean('is_preferred').notNull().default(false),
+  },
+  table => [
+    primaryKey({
+      name: 'thematic_topic_aliases_primary',
+      columns: [table.topic_id, table.language, table.normalized_alias],
+    }),
+    index('thematic_topic_aliases_exact_lookup').on(table.language, table.normalized_alias),
+    index('thematic_topic_aliases_fts').using(
+      'gin',
+      sql`to_tsvector('simple', bible_search_normalize(${table.alias}))`
+    ),
+    index('thematic_topic_aliases_trigram').using(
+      'gin',
+      sql`bible_search_normalize(${table.alias}) gin_trgm_ops`
+    ),
+  ]
+)
+
+export const thematicTopicPassages = pgTable(
+  'thematic_topic_passages',
+  {
+    topic_id: text('topic_id')
+      .notNull()
+      .references(() => thematicTopics.id, { onDelete: 'cascade' }),
+    source: text('source').notNull(),
+    book: integer('book').notNull(),
+    chapter_start: integer('chapter_start').notNull(),
+    verse_start: integer('verse_start').notNull(),
+    chapter_end: integer('chapter_end').notNull(),
+    verse_end: integer('verse_end').notNull(),
+    source_score: doublePrecision('source_score'),
+    source_votes: integer('source_votes'),
+    provenance: jsonb('provenance').$type<Record<string, unknown>>().notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'thematic_topic_passages_primary',
+      columns: [
+        table.topic_id,
+        table.source,
+        table.book,
+        table.chapter_start,
+        table.verse_start,
+        table.chapter_end,
+        table.verse_end,
+      ],
+    }),
+    index('thematic_topic_passages_topic_lookup').on(
+      table.topic_id,
+      table.source,
+      table.source_score
+    ),
+    index('thematic_topic_passages_reference_lookup').on(
+      table.book,
+      table.chapter_start,
+      table.verse_start
+    ),
+  ]
+)
+
+export const thematicTopicRelations = pgTable(
+  'thematic_topic_relations',
+  {
+    topic_id: text('topic_id')
+      .notNull()
+      .references(() => thematicTopics.id, { onDelete: 'cascade' }),
+    related_topic_id: text('related_topic_id')
+      .notNull()
+      .references(() => thematicTopics.id, { onDelete: 'cascade' }),
+    relation_type: text('relation_type').notNull(),
+    source: text('source').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'thematic_topic_relations_primary',
+      columns: [table.topic_id, table.related_topic_id, table.relation_type, table.source],
+    }),
+    index('thematic_topic_relations_topic_lookup').on(table.topic_id, table.relation_type),
+  ]
+)
+
+export const thematicTopicEmbeddings = pgTable(
+  'thematic_topic_embeddings',
+  {
+    topic_id: text('topic_id')
+      .notNull()
+      .references(() => thematicTopics.id, { onDelete: 'cascade' }),
+    model: text('model').notNull(),
+    contract: text('contract').notNull(),
+    input_sha256: text('input_sha256').notNull(),
+    dimensions: integer('dimensions').notNull(),
+    embedding: vector('embedding', { dimensions: 1024 }).notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'thematic_topic_embeddings_primary',
+      columns: [table.topic_id, table.model, table.contract],
+    }),
+    index('thematic_topic_embeddings_cosine_hnsw')
+      .using('hnsw', table.embedding.op('vector_cosine_ops'))
+      .with({ m: 16, ef_construction: 64 }),
+  ]
+)
+
+export const thematicImportRuns = pgTable(
+  'thematic_import_runs',
+  {
+    id: text('id').primaryKey(),
+    source_versions: jsonb('source_versions').$type<Record<string, string>>().notNull(),
+    source_sha256: jsonb('source_sha256').$type<Record<string, string>>().notNull(),
+    started_at: timestamp('started_at', { withTimezone: true }).notNull(),
+    completed_at: timestamp('completed_at', { withTimezone: true }),
+    report: jsonb('report').$type<Record<string, unknown>>().notNull(),
+  },
+  table => [index('thematic_import_runs_completed').on(table.completed_at)]
 )
 
 export const commentaryVerses = pgTable(

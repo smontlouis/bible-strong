@@ -372,6 +372,7 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
         sortOrder: urlParams.sortOrder,
         limit: urlParams.limit,
         offset: urlParams.offset,
+        language: urlParams.language,
       }).pipe(
         Effect.tap(response =>
           addResponseHeaders({
@@ -396,6 +397,7 @@ const BibleApiLive = HttpApiBuilder.group(ResourceApi, 'bibles', handlers =>
           sortOrder: urlParams.sortOrder,
           limit: urlParams.limit,
           offset: urlParams.offset,
+          language: urlParams.language,
         }).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],

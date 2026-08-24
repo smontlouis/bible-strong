@@ -2,6 +2,9 @@ import { Context, Data, Effect } from 'effect'
 
 import {
   BibleMultiSearchResponseDto,
+  BibleSearchMatchDto,
+  BibleSearchDiagnosticsDto,
+  BibleSearchSourceCandidatesDto,
   BibleSearchResponseDto,
   BibleSearchResultDto,
   BibleTextRevisionDto,
@@ -19,6 +22,7 @@ export type BibleSearchInput = {
   sortOrder?: 'relevance' | 'book'
   limit?: number
   offset?: number
+  language?: 'fr' | 'en'
 }
 
 export type BibleMultiSearchInput = Omit<BibleSearchInput, 'versionId'> & {
@@ -38,7 +42,16 @@ export type ActiveBibleSearch = {
     verse: number
     text: string
     highlighted: string
+    match?: {
+      kind: 'lexical' | 'topic' | 'semantic' | 'hybrid'
+      topicId?: string
+      topicLabel?: string
+      sources?: string[]
+    }
+    endChapter?: number
+    endVerse?: number
   }[]
+  diagnostics?: ActiveBibleMultiSearch['diagnostics']
 }
 
 export type ActiveBibleMultiSearch = {
@@ -50,7 +63,23 @@ export type ActiveBibleMultiSearch = {
   }[]
   count: number
   results: ActiveBibleSearch['results']
+  diagnostics?: {
+    lexicalCandidates: number
+    topicCandidates: number
+    vectorTopicCandidates: number
+    thematicCandidates: number
+    fusedCandidates: number
+    sourceCandidates: { source: string; count: number }[]
+  }
 }
+
+const diagnosticsDto = (diagnostics: NonNullable<ActiveBibleMultiSearch['diagnostics']>) =>
+  new BibleSearchDiagnosticsDto({
+    ...diagnostics,
+    sourceCandidates: diagnostics.sourceCandidates.map(
+      source => new BibleSearchSourceCandidatesDto(source)
+    ),
+  })
 
 export class BibleSearchRepositoryFailure extends Data.TaggedError('BibleSearchRepositoryFailure')<{
   readonly cause: unknown
@@ -97,7 +126,21 @@ export const readBibleSearch = (
         ...(active.textSha256 ? { textSha256: active.textSha256 } : {}),
       }),
       count: active.count,
-      results: active.results.map(result => new BibleSearchResultDto(result)),
+      ...(active.diagnostics ? { diagnostics: diagnosticsDto(active.diagnostics) } : {}),
+      results: active.results.map(
+        result =>
+          new BibleSearchResultDto({
+            ...result,
+            ...(result.match
+              ? {
+                  match: new BibleSearchMatchDto({
+                    ...result.match,
+                    ...(result.match.sources ? { sources: Array.from(result.match.sources) } : {}),
+                  }),
+                }
+              : {}),
+          })
+      ),
     })
   })
 
@@ -126,6 +169,20 @@ export const readBibleSearchMany = (
           })
       ),
       count: active.count,
-      results: active.results.map(result => new BibleSearchResultDto(result)),
+      ...(active.diagnostics ? { diagnostics: diagnosticsDto(active.diagnostics) } : {}),
+      results: active.results.map(
+        result =>
+          new BibleSearchResultDto({
+            ...result,
+            ...(result.match
+              ? {
+                  match: new BibleSearchMatchDto({
+                    ...result.match,
+                    ...(result.match.sources ? { sources: Array.from(result.match.sources) } : {}),
+                  }),
+                }
+              : {}),
+          })
+      ),
     })
   })

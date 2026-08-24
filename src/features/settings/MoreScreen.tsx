@@ -88,7 +88,6 @@ export const More = ({ closeMenu }: MoreProps) => {
         toast.info(t('app.updateAvailable'))
         await Updates.fetchUpdateAsync()
         toast.success(t('app.updateReady'))
-        await Updates.reloadAsync()
       } else {
         toast.info(t('app.noUpdateAvailable'))
       }

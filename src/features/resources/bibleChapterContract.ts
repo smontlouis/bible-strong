@@ -72,6 +72,32 @@ export class BibleSearchQuery extends Schema.Class<BibleSearchQuery>('BibleSearc
   sortOrder: Schema.optional(Schema.Literal('relevance', 'book')),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 100))),
   offset: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.nonNegative())),
+  language: Schema.optional(Schema.Literal('fr', 'en')),
+}) {}
+
+export class BibleSearchMatchDto extends Schema.Class<BibleSearchMatchDto>('BibleSearchMatchDto')({
+  kind: Schema.Literal('lexical', 'topic', 'semantic', 'hybrid'),
+  topicId: Schema.optional(Schema.NonEmptyString),
+  topicLabel: Schema.optional(Schema.NonEmptyString),
+  sources: Schema.optional(Schema.Array(Schema.NonEmptyString)),
+}) {}
+
+export class BibleSearchSourceCandidatesDto extends Schema.Class<BibleSearchSourceCandidatesDto>(
+  'BibleSearchSourceCandidatesDto'
+)({
+  source: Schema.NonEmptyString,
+  count: Schema.NonNegativeInt,
+}) {}
+
+export class BibleSearchDiagnosticsDto extends Schema.Class<BibleSearchDiagnosticsDto>(
+  'BibleSearchDiagnosticsDto'
+)({
+  lexicalCandidates: Schema.NonNegativeInt,
+  topicCandidates: Schema.NonNegativeInt,
+  vectorTopicCandidates: Schema.NonNegativeInt,
+  thematicCandidates: Schema.NonNegativeInt,
+  fusedCandidates: Schema.NonNegativeInt,
+  sourceCandidates: Schema.Array(BibleSearchSourceCandidatesDto),
 }) {}
 
 export class BibleMultiSearchQuery extends Schema.Class<BibleMultiSearchQuery>(
@@ -99,6 +125,9 @@ export class BibleSearchResultDto extends Schema.Class<BibleSearchResultDto>(
   verse: Schema.Int.pipe(Schema.nonNegative()),
   text: Schema.String,
   highlighted: Schema.String,
+  match: Schema.optional(BibleSearchMatchDto),
+  endChapter: Schema.optional(Schema.Int.pipe(Schema.positive())),
+  endVerse: Schema.optional(Schema.Int.pipe(Schema.nonNegative())),
 }) {}
 
 export class BibleVersePresentationDto extends Schema.Class<BibleVersePresentationDto>(
@@ -166,6 +195,7 @@ export class BibleSearchResponseDto extends Schema.Class<BibleSearchResponseDto>
   resource: BibleTextRevisionDto,
   results: Schema.Array(BibleSearchResultDto),
   count: Schema.NonNegativeInt,
+  diagnostics: Schema.optional(BibleSearchDiagnosticsDto),
 }) {}
 
 export class BibleMultiSearchResponseDto extends Schema.Class<BibleMultiSearchResponseDto>(
@@ -174,6 +204,7 @@ export class BibleMultiSearchResponseDto extends Schema.Class<BibleMultiSearchRe
   resources: Schema.Array(BibleTextRevisionDto),
   results: Schema.Array(BibleSearchResultDto),
   count: Schema.NonNegativeInt,
+  diagnostics: Schema.optional(BibleSearchDiagnosticsDto),
 }) {}
 
 export class BibleChapterDto extends Schema.Class<BibleChapterDto>('BibleChapterDto')({

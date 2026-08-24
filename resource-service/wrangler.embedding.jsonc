@@ -1,0 +1,10 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "bible-strong-local-topic-embeddings",
+  "main": "src/runtime/topicEmbeddingDevWorker.ts",
+  "compatibility_date": "2026-08-19",
+  "ai": {
+    "binding": "AI",
+    "remote": true,
+  },
+}

@@ -6,7 +6,7 @@ import { appLogger } from './agentObservability'
 import { areAutomaticUpdatesEnabled } from './runtimeConfig'
 import { toast } from './toast'
 
-type UpdateClient = Pick<typeof Updates, 'checkForUpdateAsync' | 'fetchUpdateAsync' | 'reloadAsync'>
+type UpdateClient = Pick<typeof Updates, 'checkForUpdateAsync' | 'fetchUpdateAsync'>
 
 type AutomaticUpdateOptions = {
   updates: UpdateClient
@@ -30,7 +30,6 @@ export const checkAndApplyAutomaticUpdate = async ({
   notifyAvailable(updateAvailableMessage)
   await updates.fetchUpdateAsync()
   notifyReady(updateReadyMessage)
-  await updates.reloadAsync()
 
   return true
 }

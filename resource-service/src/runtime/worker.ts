@@ -27,6 +27,7 @@ import {
 } from './resourceApiCache'
 import { protectResourceRequest } from './resourceRequestProtection'
 import { resourceRequestClassFrom } from './resourceRoutePolicy'
+import { makeWorkersAiTopicEmbeddingProvider } from '../search/topicEmbedding'
 
 export const RESOURCE_API_PATH_PREFIX = '/v1/'
 export { enforceResourceApiAppCheck, routeResourceApiRequest }
@@ -140,6 +141,9 @@ export default {
             return args.result
           },
         })
+        const topicEmbeddingProvider = makeWorkersAiTopicEmbeddingProvider({
+          run: (model, input) => bindings.AI.run(model, input),
+        })
         const web = makeResourceWorkerHandler(
           makeKyselyBibleChapterRepository(database),
           makeKyselyNaveRepository(database),
@@ -149,7 +153,17 @@ export default {
           makeKyselyStrongLexiconRepository(database),
           makeKyselySupplementaryRepository(database),
           makeKyselyTimelineRepository(database),
-          makeKyselyBibleSearchRepository(database)
+          makeKyselyBibleSearchRepository(database, {
+            embeddingProvider: topicEmbeddingProvider,
+            reportEmbeddingFailure: cause =>
+              console.error(
+                JSON.stringify({
+                  message: 'topic embedding unavailable; semantic search skipped',
+                  model: topicEmbeddingProvider.model,
+                  error: cause instanceof Error ? cause.message : String(cause),
+                })
+              ),
+          })
         )
 
         try {

@@ -8,6 +8,7 @@ import Text from '~common/ui/Text'
 import { hp } from '~helpers/utils'
 
 type Props = {
+  isOnline: boolean
   onExamplePress: (value: string) => void
 }
 
@@ -21,15 +22,18 @@ const ExampleChip = ({ label, onPress }: { label: string; onPress: () => void })
   </TouchableOpacity>
 )
 
-const SearchEmptyState = ({ onExamplePress }: Props) => {
+const SearchEmptyState = ({ isOnline, onExamplePress }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const examples = [
     t('search.empty.verses.examples').split('|')[0],
-    t('search.empty.verse_words.examples').split('|')[0],
-    'H1234',
-    'G26',
+    `"${t('search.empty.verse_words.examples').split('|')[0]}"`,
     t('search.empty.words.examples').split('|')[0],
+    'G26',
+    'H430',
+    ...(isOnline
+      ? ['ἀγάπη', 'אֱלֹהִים', 'agapē', 'elohiym', ...t('search.empty.semantic.examples').split('|')]
+      : []),
   ]
 
   return (

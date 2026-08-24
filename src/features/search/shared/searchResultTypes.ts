@@ -21,6 +21,7 @@ export type SearchEntityResult = {
     code: string
   }
   passage?: SearchResult
+  passageReason?: string
   referenceSegment?: ParsedSegment
   matches?: readonly FuseResultMatch[]
 }

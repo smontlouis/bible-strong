@@ -95,11 +95,6 @@ const ErrorFallback = ({ error, errorInfo }: ErrorFallbackProps) => {
   const update = useMutation({
     mutationFn: async () => {
       await Updates.fetchUpdateAsync()
-
-      setTimeout(() => {
-        Updates.reloadAsync()
-      }, 1000)
-
       return true
     },
   })

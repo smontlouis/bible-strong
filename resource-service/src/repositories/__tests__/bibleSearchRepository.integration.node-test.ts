@@ -2,11 +2,35 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import { Effect } from 'effect'
+import { sql } from 'kysely'
 
 import { createIsolatedPostgres } from '../../database/__tests__/isolatedPostgresTestSupport'
 import { makeKyselyBibleSearchRepository } from '../bibleSearchRepository'
 import { makeKyselyBibleChapterRepository } from '../bibleChapterRepository'
 import type { BibleSearchInput } from '../../domain/bibleSearch'
+import {
+  TOPIC_EMBEDDING_CONTRACT,
+  TOPIC_EMBEDDING_DIMENSIONS,
+  TOPIC_EMBEDDING_MODEL,
+  type TopicEmbeddingProvider,
+} from '../../search/topicEmbedding'
+
+const testEmbedding = Array.from({ length: TOPIC_EMBEDDING_DIMENSIONS }, (_, index) =>
+  index === 0 ? 1 : 0
+)
+const unrelatedTestEmbedding = Array.from({ length: TOPIC_EMBEDDING_DIMENSIONS }, (_, index) =>
+  index === 1 ? 1 : 0
+)
+const testEmbeddingProvider: TopicEmbeddingProvider = {
+  model: TOPIC_EMBEDDING_MODEL,
+  dimensions: TOPIC_EMBEDDING_DIMENSIONS,
+  contract: TOPIC_EMBEDDING_CONTRACT,
+  embedDocuments: async texts => texts.map(() => testEmbedding),
+  embedQuery: async text =>
+    text === 'je me sens stresse sans raison' || text === 'monde dieu'
+      ? testEmbedding
+      : unrelatedTestEmbedding,
+}
 
 const runIntegration = process.env.RESOURCE_INTEGRATION === '1'
 const connectionString =
@@ -189,6 +213,14 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
           {
             publication_id: publication.id,
             book: 43,
+            chapter: 14,
+            verse: 27,
+            text: 'Je vous laisse la paix, que votre cœur ne se trouble point',
+            presentation,
+          },
+          {
+            publication_id: publication.id,
+            book: 43,
             chapter: 11,
             verse: 25,
             text: 'Je suis la résurrection et la vie',
@@ -221,7 +253,72 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
         ])
         .execute()
 
-      const repository = makeKyselyBibleSearchRepository(database)
+      await database
+        .insertInto('thematic_topics')
+        .values({
+          id: 'topic:anxiety',
+          canonical_name: 'Anxiety',
+          normalized_name: 'anxiety',
+          language: 'en',
+          active: true,
+        })
+        .execute()
+      await database
+        .insertInto('thematic_topic_aliases')
+        .values({
+          topic_id: 'topic:anxiety',
+          language: 'fr',
+          alias: 'Anxiété / Inquiétude',
+          normalized_alias: 'anxiete inquietude',
+          method: 'editorial-controlled',
+          validation_status: 'validated',
+          is_preferred: true,
+        })
+        .execute()
+      await database
+        .insertInto('thematic_topic_passages')
+        .values([
+          {
+            topic_id: 'topic:anxiety',
+            source: 'openbible',
+            book: 43,
+            chapter_start: 14,
+            verse_start: 27,
+            chapter_end: 14,
+            verse_end: 27,
+            source_score: 7,
+            source_votes: 100,
+            provenance: { osis: 'John.14.27' },
+          },
+          {
+            topic_id: 'topic:anxiety',
+            source: 'torrey',
+            book: 43,
+            chapter_start: 11,
+            verse_start: 25,
+            chapter_end: 11,
+            verse_end: 99,
+            source_score: null,
+            source_votes: null,
+            provenance: { test: 'missing-range-end' },
+          },
+        ])
+        .execute()
+      await database
+        .insertInto('thematic_topic_embeddings')
+        .values({
+          topic_id: 'topic:anxiety',
+          model: TOPIC_EMBEDDING_MODEL,
+          contract: TOPIC_EMBEDDING_CONTRACT,
+          input_sha256: '7'.repeat(64),
+          dimensions: TOPIC_EMBEDDING_DIMENSIONS,
+          embedding: sql`${`[${testEmbedding.join(',')}]`}::vector`,
+        })
+        .execute()
+
+      const repository = makeKyselyBibleSearchRepository(database, {
+        embeddingProvider: testEmbeddingProvider,
+      })
       const search = (
         query: string,
         options: Partial<Omit<BibleSearchInput, 'versionId' | 'query'>> = {}
@@ -234,7 +331,11 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
       )
 
       const terms = await search('monde dieu')
-      assert.equal(terms.count, 2)
+      assert.equal(terms.count, 3)
+      assert.deepEqual(
+        terms.results.slice(0, 2).map(result => result.verse),
+        [17, 16]
+      )
 
       assert.equal((await search('αγαπη')).results[0]?.text, 'Ἀγάπη Λόγος')
       assert.equal((await search('אלהים')).results[0]?.text, 'אֱלֹהִים בָּרָא')
@@ -252,6 +353,28 @@ describe('Bible search PostgreSQL repository', { skip: !runIntegration }, () => 
       assert.equal(inflection.count, 1)
       assert.equal(inflection.results[0]?.text, 'Ils furent condamnés')
       assert.equal(inflection.results[0]?.highlighted, 'Ils furent {{condamnés}}')
+
+      const thematic = await search('passages sur l’anxiété', { language: 'fr' })
+      assert.equal(thematic.count, 1)
+      assert.equal(thematic.results[0]?.verse, 27)
+      assert.deepEqual(thematic.results[0]?.match, {
+        kind: 'topic',
+        topicId: 'topic:anxiety',
+        topicLabel: 'Anxiété / Inquiétude',
+        sources: ['openbible'],
+      })
+
+      const semantic = await search('je me sens stressé sans raison', { language: 'fr' })
+      assert.equal(semantic.results[0]?.verse, 27)
+      assert.deepEqual(semantic.results[0]?.match, {
+        kind: 'semantic',
+        topicId: 'topic:anxiety',
+        topicLabel: 'Anxiété / Inquiétude',
+        sources: ['openbible'],
+      })
+
+      const noMatch = await search('xylophone quantique', { language: 'fr' })
+      assert.equal(noMatch.count, 0)
 
       const canonicalOrder = await search('Dieu', { sortOrder: 'book' })
       assert.deepEqual(

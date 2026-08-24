@@ -187,7 +187,14 @@ export const SearchEntityResultRow = ({
         {description ? (
           description
         ) : item.passage ? (
-          <PassageDescription highlighted={item.description} />
+          <VStack gap={3}>
+            <PassageDescription highlighted={item.description} />
+            {item.passageReason ? (
+              <Text fontSize={11} color="grey" numberOfLines={1}>
+                {item.passageReason}
+              </Text>
+            ) : null}
+          </VStack>
         ) : item.description ? (
           <HighlightedText
             value={item.description}

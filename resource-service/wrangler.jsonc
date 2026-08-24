@@ -41,6 +41,10 @@
       "head_sampling_rate": 0.1,
     },
   },
+  "ai": {
+    "binding": "AI",
+    "remote": true,
+  },
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",

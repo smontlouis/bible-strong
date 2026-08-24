@@ -14,6 +14,34 @@ The command starts persistent PostgreSQL, applies reviewed Drizzle Kit migration
 Effect HttpApi application. It never resets the database. Use `yarn resources:db:reset` only when an
 explicit destructive reset is intended.
 
+### Import the local thematic search index
+
+The online-only thematic index combines the already imported Nave publication with Torrey and
+OpenBible topic references. The command downloads missing source snapshots into the gitignored
+`resource-service/.local/topic-sources/` directory, records their versions and SHA-256 hashes,
+rebuilds the thematic index transactionally, and writes a measurable report to
+`resource-service/.local/topic-import-report.json`:
+
+```bash
+yarn resources:db:up
+yarn resources:migrate
+yarn resources:topics:embeddings:dev # terminal 1; Workers AI remote binding
+yarn resources:topics:import
+```
+
+The embedding development Worker listens on `127.0.0.1:8791` and uses the authenticated Wrangler
+account to run the non-generative Qwen3 embedding model. Workers AI usage is remote and billable
+even though the Worker and PostgreSQL are local. No Cloudflare Worker is deployed by this command.
+The importer fails instead of silently mixing or substituting another embedding model.
+Transient Workers AI capacity responses are retried with bounded exponential backoff; document
+generation uses limited concurrency and the database replacement begins only after every vector has
+been validated.
+
+Re-running the command replaces only the derived thematic tables and cannot create duplicate
+associations. It does not modify mobile SQLite artifacts. See
+[`docs/resources/thematic-search-sources.md`](../docs/resources/thematic-search-sources.md) for
+provenance, attribution, and known limits.
+
 To import one already validated publication before the API starts, select it explicitly:
 
 ```bash

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Qwen Embedding et pgvector — Bible Strong</title>
+  <link rel="stylesheet" href="../assets/teaching.css">
+</head>
+<body><main>
+  <p class="formula">MINI-LEÇON 01 · 5 MINUTES</p>
+  <h1>Du sens aux passages</h1>
+  <p class="lede">Le raccourci mental : <b>Qwen transforme le sens en coordonnées</b>, puis <b>pgvector cherche les coordonnées voisines</b>.</p>
+
+  <h2>Un exemple réel</h2>
+  <p>L'utilisateur écrit : « Comment pardonner quelqu'un qui m'a trahi ? ». Aucun verset ne contient forcément cette phrase. Une recherche par mots seuls est donc insuffisante.</p>
+
+  <div class="pipeline">
+    <div class="step"><b>1. Question</b><small>Une phrase naturelle en français ou en anglais.</small></div>
+    <div class="step"><b>2. Qwen</b><small>Produit un vecteur de 1 024 nombres représentant son sens.</small></div>
+    <div class="step"><b>3. pgvector</b><small>Trouve les thèmes aux vecteurs les plus proches : pardon, trahison, réconciliation…</small></div>
+    <div class="step"><b>4. PostgreSQL</b><small>Suit les liens de ces thèmes vers les références et charge les vrais versets.</small></div>
+  </div>
+
+  <h2>Qwen Embedding, concrètement</h2>
+  <p>Qwen3-Embedding-0.6B est un modèle neuronal, mais pas un chatbot. Il ne répond pas à la question. Il convertit un texte en une longue liste de nombres — dans notre cas, <b>1 024 dimensions</b>. Deux textes au sens voisin doivent produire des directions voisines, même s'ils n'utilisent pas les mêmes mots ou la même langue.</p>
+  <p>Image volontairement simplifiée : <code>pardon → [0,82; −0,14; 0,63; …]</code>. Les nombres n'ont pas séparément une traduction humaine. C'est leur position globale qui encode le sens.</p>
+
+  <h2>PostgreSQL et pgvector</h2>
+  <p>PostgreSQL reste notre base de données. L'extension <b>pgvector</b> lui ajoute un type <code>vector</code>, des mesures de distance et un index HNSW. Nous avons pré-calculé le vecteur de chaque thème biblique et l'avons stocké dans PostgreSQL.</p>
+  <p>À la recherche, pgvector calcule la proximité cosinus entre le vecteur de la question et ceux des thèmes. HNSW évite de comparer naïvement chaque nombre avec chaque thème : il parcourt un graphe de voisins pour atteindre rapidement les zones prometteuses.</p>
+
+  <div class="callout">
+    <b>Important :</b> Bible Strong ne vectorise actuellement pas tous les versets. Il vectorise les thèmes. Les thèmes trouvés conduisent ensuite à des références canoniques, puis au texte de la version biblique choisie.
+  </div>
+
+  <h2>Pourquoi garder la recherche classique ?</h2>
+  <table class="compare">
+    <thead><tr><th>Requête</th><th>Meilleur outil</th></tr></thead>
+    <tbody>
+      <tr><td>« Jésus pleura »</td><td>Recherche textuelle exacte</td></tr>
+      <tr><td>« condamner »</td><td>Recherche textuelle avec stemming</td></tr>
+      <tr><td>« Comment pardonner une trahison ? »</td><td>Thèmes + Qwen + pgvector</td></tr>
+    </tbody>
+  </table>
+  <p>Le classement hybride fusionne ensuite ces signaux. Un résultat textuel évident garde la priorité sur une ressemblance vectorielle incertaine.</p>
+
+  <h2>Vérification rapide</h2>
+  <p>Sans relire le diagramme : lequel comprend la phrase, et lequel recherche les voisins numériques ?</p>
+  <details><summary>Afficher la réponse</summary><p>Qwen comprend et encode la phrase. pgvector compare les vecteurs et retrouve les voisins. PostgreSQL relie ensuite les thèmes trouvés aux passages.</p></details>
+
+  <h2>À retenir</h2>
+  <p class="formula">Qwen = sens → coordonnées<br>pgvector = coordonnées → voisins<br>PostgreSQL = voisins → données bibliques</p>
+  <p>Cette chaîne prépare un futur LLM : le LLM pourra expliquer les meilleurs passages, mais la recherche devra toujours les retrouver correctement auparavant.</p>
+
+  <p class="sources">Source principale recommandée : <a href="https://qwenlm.github.io/blog/qwen3-embedding/">publication officielle Qwen3 Embedding</a>. Complément : <a href="https://github.com/pgvector/pgvector">documentation officielle pgvector</a>. Voir aussi l'<a href="../reference/recherche-vectorielle-bible-strong.html">aide-mémoire imprimable</a>.</p>
+  <p class="sources">Une notion reste floue ? Demande-moi un autre exemple ou un petit schéma centré sur cette notion.</p>
+</main></body>
+</html>

@@ -84,6 +84,7 @@ export const createHttpBibleSearchAccess = ({
       if (options.sortOrder) params.set('sortOrder', options.sortOrder)
       if (options.limit !== undefined) params.set('limit', String(options.limit))
       if (options.offset !== undefined) params.set('offset', String(options.offset))
+      if (options.searchLanguage) params.set('language', options.searchLanguage)
       const response = await fetcher(
         `${normalizedBaseUrl}/v1/bibles/${encodeURIComponent(version)}/search?${params}`,
         { headers: { accept: 'application/json' }, signal: request.signal }
@@ -127,6 +128,7 @@ export const createHttpBibleSearchAccess = ({
         if (options.sortOrder) params.set('sortOrder', options.sortOrder)
         if (options.limit !== undefined) params.set('limit', String(options.limit))
         if (options.offset !== undefined) params.set('offset', String(options.offset))
+        if (options.searchLanguage) params.set('language', options.searchLanguage)
         const response = await fetcher(`${normalizedBaseUrl}/v1/bibles/search?${params}`, {
           headers: { accept: 'application/json' },
           signal: request.signal,

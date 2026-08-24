@@ -93,6 +93,14 @@ export interface SearchResult {
   verse: number
   text: string
   highlighted: string
+  match?: {
+    kind: 'lexical' | 'topic' | 'semantic' | 'hybrid'
+    topicId?: string
+    topicLabel?: string
+    sources?: readonly string[]
+  }
+  endChapter?: number
+  endVerse?: number
 }
 
 export type SearchSortOrder = 'relevance' | 'book'
@@ -107,6 +115,7 @@ export interface SearchOptions {
   sortOrder?: SearchSortOrder
   limit?: number
   offset?: number
+  searchLanguage?: 'fr' | 'en'
 }
 
 export interface BibleVersionCoverage {

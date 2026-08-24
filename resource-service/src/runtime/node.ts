@@ -24,6 +24,7 @@ import { makeKyselyInterlinearBibleRepository } from '../repositories/interlinea
 import { makeKyselyStrongLexiconRepository } from '../repositories/strongLexiconRepository'
 import { makeKyselySupplementaryRepository } from '../repositories/supplementaryRepository'
 import { makeKyselyTimelineRepository } from '../repositories/timelineRepository'
+import { makeHttpTopicEmbeddingProvider } from '../search/topicEmbedding'
 
 const port = Number(process.env.RESOURCE_API_PORT ?? 8787)
 const database = makeLocalDatabase({
@@ -31,6 +32,9 @@ const database = makeLocalDatabase({
     process.env.RESOURCE_DATABASE_URL ??
     'postgresql://bible_strong:bible_strong@127.0.0.1:54329/bible_strong',
 })
+const topicEmbeddingProvider = makeHttpTopicEmbeddingProvider(
+  process.env.RESOURCE_TOPIC_EMBEDDING_URL ?? 'http://127.0.0.1:8791'
+)
 
 const RepositoryLive = Layer.mergeAll(
   Layer.scoped(
@@ -39,7 +43,20 @@ const RepositoryLive = Layer.mergeAll(
       Effect.promise(() => database.destroy())
     )
   ),
-  Layer.succeed(BibleSearchRepository, makeKyselyBibleSearchRepository(database)),
+  Layer.succeed(
+    BibleSearchRepository,
+    makeKyselyBibleSearchRepository(database, {
+      embeddingProvider: topicEmbeddingProvider,
+      reportEmbeddingFailure: cause =>
+        console.warn(
+          JSON.stringify({
+            message: 'topic embedding unavailable; semantic search skipped',
+            model: topicEmbeddingProvider.model,
+            error: cause instanceof Error ? cause.message : String(cause),
+          })
+        ),
+    })
+  ),
   Layer.succeed(NaveRepository, makeKyselyNaveRepository(database)),
   Layer.succeed(DictionaryRepository, makeKyselyDictionaryRepository(database)),
   Layer.succeed(StrongBibleRepository, makeKyselyStrongBibleRepository(database)),

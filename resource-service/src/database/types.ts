@@ -11,6 +11,13 @@ import type {
   interlinearBibleVerses,
   naveTopics,
   naveVerseLinks,
+  thematicImportRuns,
+  thematicTopicAliases,
+  thematicTopicEmbeddings,
+  thematicTopicPassages,
+  thematicTopicRelations,
+  thematicTopics,
+  thematicTopicSources,
   dictionaryEntries,
   dictionaryVerseLinks,
   resourcePublications,
@@ -43,6 +50,13 @@ export type CrossReferenceLinkRow = Kyselify<typeof crossReferenceLinks>
 export type TimelineEventRow = Kyselify<typeof timelineEvents>
 export type NaveTopicRow = Kyselify<typeof naveTopics>
 export type NaveVerseLinkRow = Kyselify<typeof naveVerseLinks>
+export type ThematicTopicRow = Kyselify<typeof thematicTopics>
+export type ThematicTopicSourceRow = Kyselify<typeof thematicTopicSources>
+export type ThematicTopicAliasRow = Kyselify<typeof thematicTopicAliases>
+export type ThematicTopicPassageRow = Kyselify<typeof thematicTopicPassages>
+export type ThematicTopicRelationRow = Kyselify<typeof thematicTopicRelations>
+export type ThematicTopicEmbeddingRow = Kyselify<typeof thematicTopicEmbeddings>
+export type ThematicImportRunRow = Kyselify<typeof thematicImportRuns>
 export type DictionaryEntryRow = Kyselify<typeof dictionaryEntries>
 export type DictionaryVerseLinkRow = Kyselify<typeof dictionaryVerseLinks>
 export type StrongBibleVerseRow = Kyselify<typeof strongBibleVerses>
@@ -80,6 +94,13 @@ export type ResourceDatabase = {
   timeline_events: TimelineEventRow
   nave_topics: NaveTopicRow
   nave_verse_links: NaveVerseLinkRow
+  thematic_topics: ThematicTopicRow
+  thematic_topic_sources: ThematicTopicSourceRow
+  thematic_topic_aliases: ThematicTopicAliasRow
+  thematic_topic_passages: ThematicTopicPassageRow
+  thematic_topic_relations: ThematicTopicRelationRow
+  thematic_topic_embeddings: ThematicTopicEmbeddingRow
+  thematic_import_runs: ThematicImportRunRow
   dictionary_entries: DictionaryEntryRow
   dictionary_verse_links: DictionaryVerseLinkRow
   strong_bible_verses: StrongBibleVerseRow
