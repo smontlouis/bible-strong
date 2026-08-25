@@ -1,14 +1,15 @@
 {
-  "name": "bible-strong-api",
+  "name": "@bible-strong/api-functions",
   "engines": {
     "node": "20"
   },
   "scripts": {
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
-    "serve": "npm run build && IS_OFFLINE=true firebase emulators:start",
-    "shell": "npm run build && firebase functions:shell",
-    "start": "npm run shell",
+    "typecheck": "tsc --noEmit",
+    "serve": "yarn build && IS_OFFLINE=true firebase emulators:start",
+    "shell": "yarn build && firebase functions:shell",
+    "start": "yarn shell",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log",
     "serve-db": "firebase emulators:start --only firestore  --import=../firestore/production_export"

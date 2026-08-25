@@ -1,12 +1,13 @@
 {
-  "name": "bible-strong-web-app",
+  "name": "@bible-strong/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --project tsconfig.json"
+    "lint": "tsc --project tsconfig.json",
+    "typecheck": "tsc --project tsconfig.json"
   },
   "husky": {
     "hooks": {

@@ -8,7 +8,7 @@ import {
   DictionaryRevisionDto,
   DictionarySummaryDto,
   DictionaryVerseWordsResponseDto,
-} from '../../../src/features/resources/dictionaryContract'
+} from '@bible-strong/mobile/src/features/resources/dictionaryContract'
 
 export type DictionaryLanguage = 'fr' | 'en'
 

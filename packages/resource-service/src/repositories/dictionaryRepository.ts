@@ -15,7 +15,7 @@ import type { ResourceDatabase } from '../database/types'
 import {
   decodeDictionaryPageCursor,
   encodeDictionaryPageCursor,
-} from '../../../src/features/resources/dictionaryContract'
+} from '@bible-strong/mobile/src/features/resources/dictionaryContract'
 
 const mapEntry = (row: {
   entry_id: number

@@ -8,7 +8,7 @@ import {
   NaveTopicResponseDto,
   NaveTopicSummaryDto,
   NaveVerseTopicsResponseDto,
-} from '../../../src/features/resources/naveContract'
+} from '@bible-strong/mobile/src/features/resources/naveContract'
 
 export type NaveLanguage = 'fr' | 'en'
 

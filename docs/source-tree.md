@@ -1,98 +1,42 @@
 # Source Tree
 
-## Root
+## Monorepo root
 
 | Path | Purpose |
 |---|---|
-| `app/` | Expo Router routes. Most files route into feature screens. |
-| `src/` | Application source. |
-| `i18n/` | Translation setup and locale JSON files. |
-| `firebase/` | Environment-specific Firebase config files. |
-| `builds/` | Local development client artifacts when present. |
-| `docs/` | Repo documentation and agent docs. |
-| `.agents/skills/` | Repo-local Codex skills. |
+| `apps/` | Independently runnable Bible Strong products. |
+| `packages/` | Shared libraries and backend/resource packages. |
+| `docs/` | System documentation, ADRs, mobile architecture, and agent guidance. |
+| `scripts/` | Repository-wide agent and quality scripts. |
+| `.yarn/patches/` | Versioned Yarn patches used by workspace dependencies. |
+| `.agents/skills/` | Repository-local Codex skills. |
+| `CONTEXT-MAP.md` | Map from system concerns to bounded-context glossaries. |
+| `package.json` | Root workspace commands and cross-workspace resolutions. |
+| `yarn.lock` | The only dependency lockfile in the repository. |
 
-## Important Root Files
+## Applications
 
-| File | Purpose |
-|---|---|
-| `app/_layout.tsx` | Runtime root and provider tree. |
-| `app/index.tsx` | Main app switcher route. |
-| `package.json` | Scripts, dependencies, Expo/RN versions. |
-| `app.config.ts` | Expo config and environment-sensitive native settings. |
-| `eas.json` | EAS build profiles. |
-| `babel.config.js` | Expo Babel config and import aliases. |
-| `tsconfig.json` | TypeScript config and path aliases. |
-| `AGENTS.md` | Instructions for coding agents. |
-| `CONTEXT.md` | Product/domain context. |
+| Path | Package | Purpose |
+|---|---|---|
+| `apps/mobile/` | `@bible-strong/mobile` | Expo/React Native Bible reading and study application. |
+| `apps/web/` | `@bible-strong/web` | Browser Bible Strong experience. |
+| `apps/api/` | `@bible-strong/api` | API workspace and Firebase deployment boundary. |
+| `apps/api/functions/` | `@bible-strong/api-functions` | Firebase Functions implementation. |
+| `apps/lexicon-editor/` | `@bible-strong/lexicon-editor` | Editorial UI and tooling for lexicon resources. |
 
-## App Routes
+## Packages
 
-Routes in `app/` use Expo Router. Examples:
+| Path | Package | Purpose |
+|---|---|---|
+| `packages/resource-service/` | `@bible-strong/resource-service` | Resource validation, publication, import, storage, and delivery. |
+| `packages/bible-reference-parser/` | `@bible-strong/bible-reference-parser` | French and English Bible passage parsing and OSIS conversion. |
 
-- `app/(explore)/bible-view.tsx`
-- `app/search.tsx`
-- `app/downloads.tsx`
-- `app/strong/index.tsx`
-- `app/strong/concordance.tsx`
-- `app/strong/entity.tsx`
-- `app/(library)/dictionnaire.tsx`
-- `app/(library)/studies.tsx`
-- `app/(library)/timeline-home.tsx`
+## Mobile application
 
-Legacy screen names are mapped in `src/navigation/routeMapping.ts` and typed in `src/navigation/type.ts`.
+The mobile routes live in `apps/mobile/app/`; its feature, state, helper, theme, and shared UI code lives in `apps/mobile/src/`. Environment files, Expo configuration, Firebase configuration, native projects, and EAS profiles are also scoped to `apps/mobile/`.
 
-## Source Folders
+Read `apps/mobile/AGENTS.md` before changing it. Detailed mobile architecture remains in `architecture.md`, `data-models.md`, `app-flows.md`, and `mobile-domain-reference.md`.
 
-| Path | Purpose |
-|---|---|
-| `src/features/` | Feature modules and screens. |
-| `src/common/` | Shared UI, modals, typography, layout, error boundary. |
-| `src/helpers/` | Storage, databases, Firebase, loaders, formatting, hooks, utilities. |
-| `src/redux/` | Redux store, modules, middleware, selectors, migrations. |
-| `src/state/` | Jotai atoms and local/persisted app state. |
-| `src/themes/` | Theme color sets and theme builder. |
-| `src/navigation/` | Route mapping and route param types. |
-| `src/assets/` | Images, icons, fonts, and bundled assets. |
+## Context and decisions
 
-## Feature Map
-
-| Feature | Purpose |
-|---|---|
-| `app-switcher` | Root workspace, tab groups, bottom nav, snapshots, new-tab flow. |
-| `bible` | Main reading surface, Bible DOM, selectors, verse actions, annotations, audio footer, Strong, compare, resources. |
-| `bookmarks` | Bookmark list and bookmark editing modal. |
-| `search` | Bible search and search result navigation. |
-| `resources` | Storage-independent Bible, Strong, dictionary, and Nave access contracts. |
-| `lexique` | Strong lexicon list/detail surfaces and resource cards. Standalone secondary pages are routed under `app/strong/`. |
-| `studies` | Study list/editor and study DOM support. |
-| `notes` | Notes list/details. |
-| `plans` | Reading plans, plan slices, progress. |
-| `dictionnary` | Westphal dictionary list/detail/search widgets. |
-| `nave` | Nave topical Bible resource. |
-| `commentaries` | Commentary screens/cards. |
-| `timeline` | Biblical timeline surfaces. |
-| `onboarding` | First-run resource selection/download flow. |
-| `feature-onboarding` | Feature-level onboarding modals. |
-| `profile` | Account/profile/auth-adjacent screens. |
-| `settings` | App settings and Bible display settings. |
-| `audio` | Audio documentation; runtime audio UI mostly lives under `bible/footer`. |
-
-## High-Traffic Files
-
-| File | Why it matters |
-|---|---|
-| `src/features/bible/BibleViewer.tsx` | Central Bible orchestration. High blast radius. |
-| `src/features/bible/BibleDOM/BibleDOMWrapper.tsx` | Bridge between native state and DOM-rendered Bible content. |
-| `src/features/bible/BibleDOM/BibleDOMComponent.tsx` | DOM-side rendering controller. |
-| `src/features/bible/hooks/useAnnotationMode.ts` | Word annotation state/actions. |
-| `src/state/tabs.ts` | Tab groups, active tab, cached tabs, Bible tab actions. |
-| `src/redux/modules/user.ts` | Main persisted user Bible state. |
-| `src/redux/firestoreMiddleware.ts` | Cloud sync side effects. |
-| `src/features/resources/strongLexiconAccess.ts` | Storage-independent access to modular Strong entries, morphology, relations, resources, and entities. |
-| `src/helpers/mobileResourceCatalog.ts` | Validates and resolves the current mobile artifact catalog. |
-| `src/helpers/strongBibleSidecar.ts` | Version-specific Strong index lifecycle and queries. |
-| `src/helpers/interlinearBibleSidecar.ts` | Localized BHG interlinear index lifecycle and queries. |
-| `src/helpers/strongLexiconModules.ts` | Core and optional Strong lexicon module lifecycle. |
-| `src/helpers/databases.ts` | General database metadata and local paths; Strong/interlinear modules use dedicated helpers. |
-| `src/helpers/downloadManager.ts` | Executes resource download/install items and their lifecycle callbacks. |
+Each top-level app or package has a `CONTEXT.md` containing only its domain vocabulary. Begin at `CONTEXT-MAP.md`, then read relevant ADRs under `docs/adr/`. A context may add local ADRs under its own `docs/adr/` when a decision does not affect the rest of the system.

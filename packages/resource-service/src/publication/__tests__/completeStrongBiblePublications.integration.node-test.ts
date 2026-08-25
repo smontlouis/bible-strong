@@ -5,11 +5,11 @@ import { describe, it } from 'node:test'
 
 import { Effect } from 'effect'
 
-import { getMobileStrongBibleVersionIds } from '../../../../src/helpers/mobileResourceCatalog'
+import { getMobileStrongBibleVersionIds } from '@bible-strong/mobile/src/helpers/mobileResourceCatalog'
 import {
   getStrongBibleCatalogIdentity,
   type StrongBibleVersionId,
-} from '../../../../src/helpers/strongBibleCatalog'
+} from '@bible-strong/mobile/src/helpers/strongBibleCatalog'
 import { createIsolatedPostgres } from '../../database/__tests__/isolatedPostgresTestSupport'
 import { makeKyselyStrongBibleRepository } from '../../repositories/strongBibleRepository'
 import { importPublicationBundle } from '../../repositories/publicationImporter'

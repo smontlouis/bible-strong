@@ -7,7 +7,7 @@ import type { ResourceDatabase } from '../database/types'
 import {
   decodeNavePageCursor,
   encodeNavePageCursor,
-} from '../../../src/features/resources/naveContract'
+} from '@bible-strong/mobile/src/features/resources/naveContract'
 import {
   ActiveNavePublicationUnavailable,
   NaveRepositoryFailure,

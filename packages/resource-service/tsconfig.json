@@ -4,10 +4,22 @@
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
     "strict": true,
+    "ignoreDeprecations": "6.0",
     "noEmit": true,
     "skipLibCheck": true,
-    "types": ["node"]
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "~assets/*": ["../../apps/mobile/src/assets/*"],
+      "~common/*": ["../../apps/mobile/src/common/*"],
+      "~features/*": ["../../apps/mobile/src/features/*"],
+      "~helpers/*": ["../../apps/mobile/src/helpers/*"],
+      "~i18n": ["../../apps/mobile/i18n"]
+    }
   },
   "include": ["src/**/*.ts", "drizzle.config.ts"],
   "exclude": [

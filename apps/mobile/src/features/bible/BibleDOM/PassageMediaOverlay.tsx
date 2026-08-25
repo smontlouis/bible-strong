@@ -151,9 +151,7 @@ const PassageMediaGalleryCard = ({
         }}
         style={{ padding: '10px 2px 0' }}
       >
-        <div
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}
-        >
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6 }}>
           <div
             style={{
               display: '-webkit-box',

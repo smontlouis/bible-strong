@@ -6,7 +6,7 @@ import { Effect } from 'effect'
 import {
   SearchAnalyticsEventDto,
   SearchAnalyticsResultCountsDto,
-} from '../../../../src/features/resources/searchAnalyticsContract'
+} from '@bible-strong/mobile/src/features/resources/searchAnalyticsContract'
 import { sanitizeSearchAnalyticsEvent } from '../../analytics/searchAnalytics'
 import {
   makeAnalyticsEngineSearchSink,

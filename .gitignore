@@ -87,6 +87,7 @@ node_modules
 /bots/node_modules/
 package-lock.json
 pnpm-lock.yaml
+*.tsbuildinfo
 
 # Yarn
 .yarn/cache/

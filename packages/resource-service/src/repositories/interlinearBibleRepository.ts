@@ -1,12 +1,12 @@
 import { Effect } from 'effect'
 import type { Kysely } from 'kysely'
 
-import type { ResourceLanguage } from '../../../src/helpers/databaseTypes'
+import type { ResourceLanguage } from '@bible-strong/mobile/src/helpers/databaseTypes'
 import type {
   InterlinearIdentityKind,
   InterlinearToken,
-} from '../../../src/helpers/interlinearBibleSidecar'
-import { STRONG_IDENTITY_KINDS } from '../../../src/helpers/strongIdentities'
+} from '@bible-strong/mobile/src/helpers/interlinearBibleSidecar'
+import { STRONG_IDENTITY_KINDS } from '@bible-strong/mobile/src/helpers/strongIdentities'
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import type { ResourceDatabase } from '../database/types'

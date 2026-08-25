@@ -25,7 +25,7 @@ const BibleAudioReaderHighlight = ({
           background={
             index === currentAudioIndex ? 'rgb(119, 179, 253, .2)' : 'none'
           }
-          ref={(node) => {
+          ref={(node: HTMLParagraphElement | null) => {
             if (node) {
               textsRef.current.set(index, node)
             } else {

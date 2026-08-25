@@ -4,7 +4,7 @@ import { Schema } from 'effect'
 import {
   SearchAnalyticsAcceptedDto,
   SearchAnalyticsEventDto,
-} from '../../../src/features/resources/searchAnalyticsContract'
+} from '@bible-strong/mobile/src/features/resources/searchAnalyticsContract'
 import {
   BibleChapterDto,
   BibleChaptersDto,
@@ -19,7 +19,7 @@ import {
   BibleSearchResponseDto,
   BibleVerseTextsDto,
   BibleVerseTextsQuery,
-} from '../../../src/features/resources/bibleChapterContract'
+} from '@bible-strong/mobile/src/features/resources/bibleChapterContract'
 import {
   NaveLanguagePath,
   NaveTopicListResponseDto,
@@ -28,7 +28,7 @@ import {
   NaveTopicsQuery,
   NaveVersePath,
   NaveVerseTopicsResponseDto,
-} from '../../../src/features/resources/naveContract'
+} from '@bible-strong/mobile/src/features/resources/naveContract'
 import {
   DictionaryEntriesBatchQuery,
   DictionaryEntriesBatchResponseDto,
@@ -40,7 +40,7 @@ import {
   DictionaryLanguagePath,
   DictionaryVersePath,
   DictionaryVerseWordsResponseDto,
-} from '../../../src/features/resources/dictionaryContract'
+} from '@bible-strong/mobile/src/features/resources/dictionaryContract'
 import {
   StrongBibleChapterDto,
   StrongBibleChapterPath,
@@ -51,13 +51,13 @@ import {
   StrongBibleOccurrencesDto,
   StrongBibleOccurrencesQuery,
   StrongBibleVersionPath,
-} from '../../../src/features/resources/strongBibleContract'
+} from '@bible-strong/mobile/src/features/resources/strongBibleContract'
 import {
   InterlinearBibleChapterDto,
   InterlinearBibleChapterPath,
   InterlinearBibleCoverageDto,
   InterlinearBibleCoveragePath,
-} from '../../../src/features/resources/interlinearBibleContract'
+} from '@bible-strong/mobile/src/features/resources/interlinearBibleContract'
 import {
   StrongLexiconBrowseQuery,
   StrongLexiconChapterEntitiesPath,
@@ -77,7 +77,7 @@ import {
   StrongLexiconMorphologyResponseDto,
   StrongLexiconRandomQuery,
   StrongLexiconSearchResponseDto,
-} from '../../../src/features/resources/strongLexiconContract'
+} from '@bible-strong/mobile/src/features/resources/strongLexiconContract'
 import {
   CommentaryChapterPath,
   CommentaryChapterResponseDto,
@@ -85,14 +85,14 @@ import {
   CommentaryVerseResponseDto,
   CrossReferencePath,
   CrossReferenceResponseDto,
-} from '../../../src/features/resources/supplementaryContract'
+} from '@bible-strong/mobile/src/features/resources/supplementaryContract'
 import {
   TimelineEventPath,
   TimelineEventResponseDto,
   TimelineEventsQuery,
   TimelineEventsResponseDto,
   TimelineLanguagePath,
-} from '../../../src/features/resources/timelineContract'
+} from '@bible-strong/mobile/src/features/resources/timelineContract'
 import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,

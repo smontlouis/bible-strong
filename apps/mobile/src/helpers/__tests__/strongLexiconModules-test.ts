@@ -13,8 +13,12 @@ jest.mock('../firebase', () => ({ cdnUrl: (path: string) => `https://assets.test
 jest.mock('../sqlite', () => ({ openSQLiteDatabase: jest.fn() }))
 
 import type { SQLiteDatabase } from '../sqlite'
+import { createOfflineCopyId } from '../offlineCopyId'
+import { getMobileResourceCatalogEntry } from '../mobileResourceCatalog'
 import { validateStrongLexiconModuleDatabase } from '../strongLexiconModules'
-import { getStrongLexiconPublication } from '../strongLexiconPublications'
+
+const getCatalogPublication = (moduleId: 'core' | 'resources') =>
+  getMobileResourceCatalogEntry(createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId }))
 
 const createResourcesDatabase = (additionalTables: string[] = []) =>
   ({
@@ -51,9 +55,9 @@ const createResourcesDatabase = (additionalTables: string[] = []) =>
         { key: 'resourceIdentity', value: 'strong-lexicon:resources' },
         {
           key: 'resourceRevision',
-          value: getStrongLexiconPublication('resources').resourceRevision,
+          value: getCatalogPublication('resources').resourceRevision,
         },
-        { key: 'coreRevision', value: getStrongLexiconPublication('resources').coreRevision },
+        { key: 'coreRevision', value: getCatalogPublication('resources').coreRevision },
       ]
     }),
   }) as unknown as SQLiteDatabase
@@ -64,13 +68,13 @@ describe('Strong lexicon module validation', () => {
       validateStrongLexiconModuleDatabase('resources', createResourcesDatabase(), async () => ({
         status: 'available',
         moduleId: 'core',
-        revision: getStrongLexiconPublication('core').resourceRevision,
+        revision: getCatalogPublication('core').resourceRevision,
         schemaVersion: 2,
       }))
     ).resolves.toEqual({
       status: 'available',
       moduleId: 'resources',
-      revision: getStrongLexiconPublication('resources').resourceRevision,
+      revision: getCatalogPublication('resources').resourceRevision,
       schemaVersion: 2,
     })
   })
@@ -92,7 +96,7 @@ describe('Strong lexicon module validation', () => {
         async () => ({
           status: 'available',
           moduleId: 'core',
-          revision: getStrongLexiconPublication('core').resourceRevision,
+          revision: getCatalogPublication('core').resourceRevision,
           schemaVersion: 2,
         })
       )
@@ -107,7 +111,7 @@ describe('Strong lexicon module validation', () => {
         async () => ({
           status: 'available',
           moduleId: 'core',
-          revision: getStrongLexiconPublication('core').resourceRevision,
+          revision: getCatalogPublication('core').resourceRevision,
           schemaVersion: 2,
         })
       )

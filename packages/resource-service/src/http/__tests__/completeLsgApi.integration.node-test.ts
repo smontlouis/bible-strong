@@ -11,7 +11,7 @@ import {
 import { makeKyselyBibleChapterRepository } from '../../repositories/bibleChapterRepository'
 import { importPublicationBundle } from '../../repositories/publicationImporter'
 import { makeResourceWebHandler } from '../app'
-import type { BibleChapterAdapter } from '../../../../src/features/resources/bibleChapterSource'
+import type { BibleChapterAdapter } from '@bible-strong/mobile/src/features/resources/bibleChapterSource'
 
 const bundlePath = process.env.RESOURCE_LSG_BUNDLE
 const connectionString =
@@ -21,7 +21,7 @@ const connectionString =
 describe('Complete LSG API', { skip: !bundlePath }, () => {
   it('serves every published chapter through the v1 contract', async () => {
     const { createHttpBibleChapterAdapter } =
-      await import('../../../../src/features/resources/bibleChapterSource')
+      await import('@bible-strong/mobile/src/features/resources/bibleChapterSource')
     const isolated = await createIsolatedPostgres(connectionString, 'lsg_api_chapters')
     const { database } = isolated
     const web = makeResourceWebHandler(makeKyselyBibleChapterRepository(database))
@@ -118,7 +118,7 @@ describe('Complete LSG API', { skip: !bundlePath }, () => {
 
   it('exercises the complete mobile source-selection journey against the real API', async () => {
     const { createHttpBibleChapterAdapter, createHybridBibleChapterAdapter } =
-      await import('../../../../src/features/resources/bibleChapterSource')
+      await import('@bible-strong/mobile/src/features/resources/bibleChapterSource')
     const isolated = await createIsolatedPostgres(connectionString, 'lsg_api_source_selection')
     const { database } = isolated
     const web = makeResourceWebHandler(makeKyselyBibleChapterRepository(database))

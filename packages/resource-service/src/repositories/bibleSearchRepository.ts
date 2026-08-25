@@ -15,7 +15,7 @@ import {
   highlightBibleSearchText,
   highlightFuzzyBibleSearchText,
   parseBibleTextSearchQuery,
-} from '../../../src/helpers/bibleSearchInput'
+} from '@bible-strong/mobile/src/helpers/bibleSearchInput'
 import { highlightStemmedBibleSearchText } from '../search/bibleSearchStemming'
 import {
   normalizeTopicSearchText,

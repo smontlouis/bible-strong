@@ -1,0 +1,12 @@
+{
+  "name": "@bible-strong/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "yarn workspace @bible-strong/api-functions build",
+    "lint": "yarn workspace @bible-strong/api-functions lint",
+    "serve": "yarn workspace @bible-strong/api-functions serve",
+    "deploy": "yarn workspace @bible-strong/api-functions deploy",
+    "logs": "yarn workspace @bible-strong/api-functions logs"
+  }
+}

@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const repoRoot = process.cwd()
-const featuresDir = path.join(repoRoot, 'src/features')
+const featuresDir = path.join(repoRoot, 'apps/mobile/src/features')
 const docsDir = path.join(repoRoot, 'docs/agents')
 const scratchDir = path.join(repoRoot, '.scratch/quality')
 const markdownPath = path.join(docsDir, 'quality-score.md')

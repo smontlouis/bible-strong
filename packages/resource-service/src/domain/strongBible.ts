@@ -13,9 +13,9 @@ import {
   StrongBibleOccurrenceVerseDto,
   StrongBibleRevisionDto,
   StrongBibleSpanDto,
-} from '../../../src/features/resources/strongBibleContract'
-import type { StrongBibleSpan } from '../../../src/helpers/canonicalStrongVerse'
-import { isStrongBibleVersionId } from '../../../src/helpers/strongBibleCatalog'
+} from '@bible-strong/mobile/src/features/resources/strongBibleContract'
+import type { StrongBibleSpan } from '@bible-strong/mobile/src/helpers/canonicalStrongVerse'
+import { isStrongBibleVersionId } from '@bible-strong/mobile/src/helpers/strongBibleCatalog'
 
 export type StrongBibleResourceRevision = {
   versionId: string

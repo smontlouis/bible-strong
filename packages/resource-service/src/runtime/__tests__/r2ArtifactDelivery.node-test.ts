@@ -8,7 +8,7 @@ import {
   type ArtifactRange,
   type R2ArtifactBucket,
 } from '../r2ArtifactDelivery'
-import mobileResourceCatalog from '../../../../src/assets/mobile-resource-catalog.json'
+import mobileResourceCatalog from '@bible-strong/mobile/src/assets/mobile-resource-catalog.json'
 
 const artifactKey = 'bibles/bible-lsg.json.zip'
 const artifactSha256 = mobileResourceCatalog.resources['bible:LSG'].archiveSha256

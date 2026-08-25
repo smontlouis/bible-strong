@@ -112,8 +112,8 @@ import {
   type TimelineRepositoryService,
 } from '../domain/timeline'
 import { HealthResponse, ResourceApi } from './api'
-import { SearchAnalyticsAcceptedDto } from '../../../src/features/resources/searchAnalyticsContract'
-import { parseBibleVerseKey } from '../../../src/features/resources/bibleChapterContract'
+import { SearchAnalyticsAcceptedDto } from '@bible-strong/mobile/src/features/resources/searchAnalyticsContract'
+import { parseBibleVerseKey } from '@bible-strong/mobile/src/features/resources/bibleChapterContract'
 import {
   InvalidResourceRequestProblem,
   ResourceInternalProblem,

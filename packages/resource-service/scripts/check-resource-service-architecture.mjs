@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const sourceRoot = path.join(root, 'resource-service', 'src')
+const sourceRoot = path.join(root, 'src')
 
 const collectTypeScriptFiles = async directory => {
   const entries = await readdir(directory, { withFileTypes: true })
@@ -27,8 +27,8 @@ for (const file of await collectTypeScriptFiles(sourceRoot)) {
 
   if (/from ['"]drizzle-orm(?:\/[^'"]+)?['"]/.test(source)) {
     const allowed = new Set([
-      'resource-service/src/database/schema.ts',
-      'resource-service/src/database/types.ts',
+      'src/database/schema.ts',
+      'src/database/types.ts',
     ])
     if (!allowed.has(relative)) {
       violations.push(`${relative}: Drizzle imports are limited to schema and type derivation`)
@@ -37,10 +37,10 @@ for (const file of await collectTypeScriptFiles(sourceRoot)) {
 
   if (/from ['"](?:kysely|kysely-neon|pg|@neondatabase\/serverless)['"]/.test(source)) {
     const allowed = new Set([
-      'resource-service/src/database/localDatabase.ts',
-      'resource-service/src/database/hyperdriveDatabase.ts',
-      'resource-service/src/database/neonDatabase.ts',
-      'resource-service/src/database/types.ts',
+      'src/database/localDatabase.ts',
+      'src/database/hyperdriveDatabase.ts',
+      'src/database/neonDatabase.ts',
+      'src/database/types.ts',
     ])
     if (!allowed.has(relative) && !relative.includes('/repositories/')) {
       violations.push(`${relative}: database clients must stay behind database/repository modules`)

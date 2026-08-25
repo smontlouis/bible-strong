@@ -36,14 +36,14 @@ const sourceFiles = git([
   '*.tsx',
 ])
   .split('\n')
-  .filter(Boolean)
+  .filter(file => file.startsWith('apps/mobile/src/'))
 
 const findings = []
 const staleBaselineEntries = []
 const currentCounts = new Map()
 
 for (const file of sourceFiles) {
-  if (file.startsWith('src/common/ui/') || !existsSync(file)) continue
+  if (file.startsWith('apps/mobile/src/common/ui/') || !existsSync(file)) continue
 
   const lines = readFileSync(file, 'utf8').split('\n')
   if (lines.some(line => exceptionPattern.test(line))) {
@@ -97,7 +97,7 @@ if (findings.length > 0) {
   }
   console.error(
     '\nUse ~common/ui primitives (Box, HStack, VStack, Text, etc.). ' +
-      'For a genuine primitive gap, add a shared primitive under src/common/ui/.'
+      'For a genuine primitive gap, add a shared primitive under apps/mobile/src/common/ui/.'
   )
   console.error(
     'Rare feature-level exceptions require `// harness-allow-styled: <reason>` in the same file.'

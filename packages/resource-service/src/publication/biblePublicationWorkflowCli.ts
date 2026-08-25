@@ -195,7 +195,7 @@ const createState = async (
   appRoot: string,
   options: ReturnType<typeof parseBiblePublicationWorkflowArgs>
 ): Promise<WorkflowState> => {
-  const makerRoot = options.makerRoot ?? path.resolve(appRoot, '../bible-lexicon-maker')
+  const makerRoot = options.makerRoot ?? path.resolve(appRoot, '../../apps/lexicon-editor')
   const publicationRoot =
     options.publicationRoot ?? path.join(makerRoot, 'outputs/resource-publications')
   const safeDate = options.generatedAt.replace(/[^0-9A-Za-z]+/g, '-')

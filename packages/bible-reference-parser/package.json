@@ -14,5 +14,8 @@
     "LICENSE.md",
     "README.md"
   ],
+  "dependencies": {
+    "@babel/runtime": "^7.28.4"
+  },
   "license": "MIT"
 }

@@ -8,7 +8,7 @@ import { Effect } from 'effect'
 import {
   BHG_INTERLINEAR_PUBLICATION_CATALOG,
   getInterlinearBiblePublicationLanguages,
-} from '../../../../src/helpers/interlinearBiblePublicationCatalog'
+} from '@bible-strong/mobile/src/helpers/interlinearBiblePublicationCatalog'
 import { createIsolatedPostgres } from '../../database/__tests__/isolatedPostgresTestSupport'
 import { makeResourceWebHandler } from '../../http/app'
 import { makeKyselyBibleChapterRepository } from '../../repositories/bibleChapterRepository'
