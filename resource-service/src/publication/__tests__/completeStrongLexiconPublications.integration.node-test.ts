@@ -64,6 +64,22 @@ describe('Complete Strong lexicon publications', { skip: !runIntegration }, () =
         repository.listEntries({ language: 'fr', search: 'parole', limit: 10 })
       )
       assert.ok(search.value.entries.length > 0)
+
+      const corePublication = await isolated.database
+        .selectFrom('resource_publications')
+        .select('id')
+        .where('resource_identity', '=', 'strong-lexicon:core')
+        .executeTakeFirstOrThrow()
+      await isolated.database
+        .deleteFrom('resource_publications')
+        .where('id', '=', corePublication.id)
+        .executeTakeFirstOrThrow()
+      const remainingRelations = await isolated.database
+        .selectFrom('strong_lexicon_relations')
+        .select(({ fn }) => fn.countAll<number>().as('count'))
+        .where('publication_id', '=', corePublication.id)
+        .executeTakeFirstOrThrow()
+      assert.equal(Number(remainingRelations.count), 0)
     } finally {
       await isolated.dispose()
     }

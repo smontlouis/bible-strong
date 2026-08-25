@@ -1000,7 +1000,7 @@ export const strongLexiconRelations = pgTable(
       name: 'strong_lexicon_relations_to_entry_fk',
       columns: [table.publication_id, table.to_entry_id],
       foreignColumns: [strongLexiconEntries.publication_id, strongLexiconEntries.entry_id],
-    }).onDelete('set null'),
+    }).onDelete('cascade'),
     foreignKey({
       name: 'strong_lexicon_relations_kind_fk',
       columns: [table.publication_id, table.relation_kind_id],

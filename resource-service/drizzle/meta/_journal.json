@@ -183,6 +183,13 @@
       "when": 1787544984700,
       "tag": "0028_topic_embedding_contract_v2",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1787682889766,
+      "tag": "0029_nifty_omega_sentinel",
+      "breakpoints": true
     }
   ]
 }
