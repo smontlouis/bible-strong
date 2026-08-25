@@ -149,8 +149,8 @@ ios/
 .scratch/generated/
 
 # Local Resource service publications and imported artifacts
-/resource-service/.local/
-/resource-service/.wrangler/
+/packages/resource-service/.local/
+/packages/resource-service/.wrangler/
 
 # Service account keys
 scripts/google-service-account.json
