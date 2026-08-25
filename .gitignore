@@ -156,3 +156,4 @@ ios/
 
 # Service account keys
 scripts/google-service-account.json
+/apps/api/functions/helpers/service-account.json
