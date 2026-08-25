@@ -321,6 +321,17 @@ const StrongDetailMainPage = ({
         title={t('strongDetail.definition.title')}
         onLayout={event => setAnchor('definition', event.nativeEvent.layout.y)}
       >
+        {entry.nameMeaningHtml && (
+          <VStack mb={entry.definitionHtml ? 18 : 0} gap={8}>
+            <StrongEyebrow>{t('strongDetail.definition.nameMeaning')}</StrongEyebrow>
+            <StrongEditorialHtml
+              value={entry.nameMeaningHtml}
+              readingTypography={readingTypography}
+              onOpenBibleReference={onOpenBibleReference}
+              onOpenStrong={onOpenStrong}
+            />
+          </VStack>
+        )}
         {entry.definitionHtml ? (
           <StrongEditorialHtml
             value={entry.definitionHtml}
@@ -328,13 +339,13 @@ const StrongDetailMainPage = ({
             onOpenBibleReference={onOpenBibleReference}
             onOpenStrong={onOpenStrong}
           />
-        ) : (
+        ) : !entry.nameMeaningHtml ? (
           <Text color="tertiary">
             {t('strongLexicon.definitionUnavailable', {
               language: entry.language,
             })}
           </Text>
-        )}
+        ) : null}
         {lexicalRelations.alternateSenses.length > 0 && (
           <VStack mt={10} pt={18} borderTopWidth={1} borderColor="border" gap={9}>
             <StrongEyebrow>{t('strongLexicon.otherMeanings')}</StrongEyebrow>

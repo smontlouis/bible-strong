@@ -1,7 +1,7 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-08-19T20:30:09.143Z",
+  "generatedAt": "2026-08-25T00:00:00.000Z",
   "resourceCount": 72,
   "resources": {
     "bible-interlinear:BHG:en": {
@@ -1611,68 +1611,68 @@
     },
     "strong-lexicon:core": {
       "id": "strong-lexicon:core",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.core.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.core.sqlite.zip?sha256=386c4801c520fc0688253d1db5fbfa21152bab323e54479dad03476e9b4e4fb4",
       "file": "databases/strong_lexicon.core.sqlite.zip",
       "entry": "strong_lexicon.core.sqlite",
       "entries": {
         "canonical": {
           "entry": "strong_lexicon.core.sqlite",
-          "sha256": "7a3b4638109483b00b80644536be39f290f24709eebe06b81af9677da92d485b",
-          "bytes": 30371840
+          "sha256": "77a6358eb8bf395997f4cbd990816dc6fb34054b3ab7d1574f36d78891cca54f",
+          "bytes": 32182272
         }
       },
-      "archiveSha256": "7f2357e954b14c322f86b50f299634ed3e7e9db3f30ac721ba24d1195a89505a",
-      "archiveBytes": 6543530,
-      "contentSha256": "7a3b4638109483b00b80644536be39f290f24709eebe06b81af9677da92d485b",
-      "contentBytes": 30371840,
-      "installedBytes": 30371840,
-      "peakInstallationBytes": 42452676,
+      "archiveSha256": "386c4801c520fc0688253d1db5fbfa21152bab323e54479dad03476e9b4e4fb4",
+      "archiveBytes": 6908566,
+      "contentSha256": "77a6358eb8bf395997f4cbd990816dc6fb34054b3ab7d1574f36d78891cca54f",
+      "contentBytes": 32182272,
+      "installedBytes": 32182272,
+      "peakInstallationBytes": 44954464,
       "strategy": "archive-extract",
-      "resourceRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699"
+      "resourceRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833"
     },
     "strong-lexicon:entities": {
       "id": "strong-lexicon:entities",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/bible_entities.production.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/bible_entities.production.sqlite.zip?sha256=a5e45f1fcf91a6f6d70cdb31878354777076456263b40888cd4ef717c27e1f6f",
       "file": "databases/bible_entities.production.sqlite.zip",
       "entry": "bible_entities.production.sqlite",
       "entries": {
         "canonical": {
           "entry": "bible_entities.production.sqlite",
-          "sha256": "89849a14e352604c6cd0d3bd886b56637708d8fff93760aee086a956102c6611",
+          "sha256": "1fffddc9e20aaa96dd0c32457c6f4da12acf65a5855328adafe701ea21f032f9",
           "bytes": 19873792
         }
       },
-      "archiveSha256": "82a4023c4d13b7ee9c9a445ad3612b59f28eea828746872ffb1325f172f5b08e",
-      "archiveBytes": 5369907,
-      "contentSha256": "89849a14e352604c6cd0d3bd886b56637708d8fff93760aee086a956102c6611",
+      "archiveSha256": "a5e45f1fcf91a6f6d70cdb31878354777076456263b40888cd4ef717c27e1f6f",
+      "archiveBytes": 5369895,
+      "contentSha256": "1fffddc9e20aaa96dd0c32457c6f4da12acf65a5855328adafe701ea21f032f9",
       "contentBytes": 19873792,
       "installedBytes": 19873792,
-      "peakInstallationBytes": 29030254,
+      "peakInstallationBytes": 29030241,
       "strategy": "archive-extract",
-      "resourceRevision": "strong-lexicon-entities-8235604fb1a30e9714b32a69",
-      "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699"
+      "resourceRevision": "strong-lexicon-entities-98e0d81b2004d9073eb51d6f",
+      "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833"
     },
     "strong-lexicon:resources": {
       "id": "strong-lexicon:resources",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.resources.sqlite.zip",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/strong_lexicon.resources.sqlite.zip?sha256=55a390e1a845138b4f397ae51a714d4825b409e587a8b91c3dd836b534814e28",
       "file": "databases/strong_lexicon.resources.sqlite.zip",
       "entry": "strong_lexicon.resources.sqlite",
       "entries": {
         "canonical": {
           "entry": "strong_lexicon.resources.sqlite",
-          "sha256": "c0a891f171c6679a16ca9f8f05839c4e546cb36982da36ae6f08a509c4892e00",
+          "sha256": "b4709a918d527e8fbc7abfbca53f5b4088c005048f1da42f75a4f0f616553409",
           "bytes": 52072448
         }
       },
-      "archiveSha256": "e81155bbf7c2583e65f55c13e5c4586b477a7014f74e2f78221e0b446f62b199",
-      "archiveBytes": 11492264,
-      "contentSha256": "c0a891f171c6679a16ca9f8f05839c4e546cb36982da36ae6f08a509c4892e00",
+      "archiveSha256": "55a390e1a845138b4f397ae51a714d4825b409e587a8b91c3dd836b534814e28",
+      "archiveBytes": 11492502,
+      "contentSha256": "b4709a918d527e8fbc7abfbca53f5b4088c005048f1da42f75a4f0f616553409",
       "contentBytes": 52072448,
       "installedBytes": 52072448,
-      "peakInstallationBytes": 73099419,
+      "peakInstallationBytes": 73099693,
       "strategy": "archive-extract",
-      "resourceRevision": "strong-lexicon-resources-c8cb209a32d429e67fb5f06b",
-      "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699"
+      "resourceRevision": "strong-lexicon-resources-4ad1a07442692f44a6babcfe",
+      "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833"
     }
   }
 }

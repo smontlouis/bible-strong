@@ -29,7 +29,7 @@ import { resolveHybridResourceSource } from './hybridResourcePolicy'
 import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
 import { normalizeBibleSearchText } from '~helpers/bibleSearchInput'
 
-const STRONG_LEXICON_MODULE_SCHEMA_VERSION = 2
+const STRONG_LEXICON_MODULE_SCHEMA_VERSION = 3
 
 const SQLITE_SEARCH_DIACRITIC_REPLACEMENTS = [
   ['ā', 'a'],
@@ -154,6 +154,7 @@ export type StrongLexiconEntry = {
   transliteration: string
   pronunciation?: string
   gloss: string
+  nameMeaningHtml?: string
   definitionHtml?: string
   morphology?: StrongLexiconMorphology
   relations: StrongLexiconRelation[]
@@ -176,6 +177,7 @@ export type StrongLexiconPreview = Pick<
   | 'original'
   | 'transliteration'
   | 'gloss'
+  | 'nameMeaningHtml'
   | 'definitionHtml'
 >
 
@@ -193,6 +195,7 @@ export type StrongLexiconEntryCard = Pick<
   | 'transliteration'
   | 'pronunciation'
   | 'gloss'
+  | 'nameMeaningHtml'
   | 'definitionHtml'
   | 'morphology'
 >
@@ -279,6 +282,33 @@ const chooseLocalized = (
   localized: string | null,
   fallback: string
 ): string => (language === 'fr' && localized?.trim() ? localized : fallback)
+
+const loadNameMeaning = async (
+  database: SQLiteDatabase,
+  stepEntryId: number,
+  language: ResourceLanguage
+): Promise<string | undefined> => {
+  const table = await database.getFirstAsync<{ present: number }>(
+    `SELECT 1 AS present FROM sqlite_master
+     WHERE type='table' AND name='LexiconNameMeanings'`,
+    []
+  )
+  if (!table) return undefined
+  const row = await database.getFirstAsync<{ valueHtml: string }>(
+    `SELECT valueHtml FROM LexiconNameMeanings
+     WHERE stepEntryId=? AND language=?`,
+    [stepEntryId, language]
+  )
+  if (row?.valueHtml.trim()) return row.valueHtml
+  if (language === 'en') return undefined
+  return (
+    await database.getFirstAsync<{ valueHtml: string }>(
+      `SELECT valueHtml FROM LexiconNameMeanings
+       WHERE stepEntryId=? AND language='en'`,
+      [stepEntryId]
+    )
+  )?.valueHtml
+}
 
 const resolveCoreEntry = async (
   database: SQLiteDatabase,
@@ -830,7 +860,8 @@ const toEntry = async (
     getStrongLexiconModuleAvailability('resources'),
     getStrongLexiconModuleAvailability('entities'),
   ])
-  const [morphology, relations] = await Promise.all([
+  const [nameMeaningHtml, morphology, relations] = await Promise.all([
+    loadNameMeaning(core, row.id, language),
     loadMorphology(core, row, language),
     includeExtended ? loadRelations(core, row.id, language) : Promise.resolve([]),
   ])
@@ -863,6 +894,7 @@ const toEntry = async (
     transliteration: row.classicTransliteration || row.transliteration,
     ...(row.pronunciation ? { pronunciation: row.pronunciation } : {}),
     gloss: chooseLocalized(language, row.localizedGloss, row.gloss),
+    ...(nameMeaningHtml ? { nameMeaningHtml } : {}),
     ...(definitionHtml ? { definitionHtml } : {}),
     ...(morphology ? { morphology } : {}),
     relations,

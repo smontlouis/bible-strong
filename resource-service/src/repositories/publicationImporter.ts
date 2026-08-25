@@ -98,6 +98,12 @@ const importStrongLexiconDomainProjection = async (
 ) => {
   const rows = canonical.tables
   if (canonical.moduleId === 'core') {
+    const nameMeanings = new Map(
+      (rows.LexiconNameMeanings ?? []).map(row => [
+        `${rowNumber(row, 'stepEntryId')}:${rowString(row, 'language')}`,
+        rowString(row, 'valueHtml'),
+      ])
+    )
     await insertChunks(
       transaction,
       'strong_lexicon_entries',
@@ -108,7 +114,15 @@ const importStrongLexiconDomainProjection = async (
         e_strong: rowString(row, 'eStrong'),
         d_strong: rowString(row, 'dStrong'),
         u_strong: rowString(row, 'uStrong'),
-        payload: row,
+        payload: {
+          ...row,
+          ...(nameMeanings.get(`${rowNumber(row, 'id')}:en`)
+            ? { nameMeaningEnHtml: nameMeanings.get(`${rowNumber(row, 'id')}:en`)! }
+            : {}),
+          ...(nameMeanings.get(`${rowNumber(row, 'id')}:fr`)
+            ? { nameMeaningFrHtml: nameMeanings.get(`${rowNumber(row, 'id')}:fr`)! }
+            : {}),
+        },
       }))
     )
     await insertChunks(

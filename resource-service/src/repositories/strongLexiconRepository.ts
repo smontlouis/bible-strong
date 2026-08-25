@@ -400,6 +400,11 @@ export const makeKyselyStrongLexiconRepository = (
         text(translation, 'meaningHtml') || text(translation, 'meaning'),
         text(entry, 'meaning')
       )
+      const nameMeaning = localized(
+        input.language,
+        text(entry, 'nameMeaningFrHtml'),
+        text(entry, 'nameMeaningEnHtml')
+      )
       return [
         {
           revision: `core:${core.revision}`,
@@ -422,6 +427,7 @@ export const makeKyselyStrongLexiconRepository = (
               ? { pronunciation: text(entry, 'pronunciation') }
               : {}),
             gloss: localized(input.language, text(translation, 'gloss'), text(entry, 'gloss')),
+            ...(nameMeaning ? { nameMeaningHtml: nameMeaning } : {}),
             ...(definition ? { definitionHtml: definition } : {}),
             ...(morphologyRow ? { morphology: { code: text(entry, 'morph'), meaning } } : {}),
           },
@@ -831,6 +837,19 @@ export const makeKyselyStrongLexiconRepository = (
           transliteration: text(entry, 'classicTransliteration') || text(entry, 'transliteration'),
           ...(text(entry, 'pronunciation') ? { pronunciation: text(entry, 'pronunciation') } : {}),
           gloss: localized(input.language, text(translation ?? {}, 'gloss'), text(entry, 'gloss')),
+          ...(localized(
+            input.language,
+            text(entry, 'nameMeaningFrHtml'),
+            text(entry, 'nameMeaningEnHtml')
+          )
+            ? {
+                nameMeaningHtml: localized(
+                  input.language,
+                  text(entry, 'nameMeaningFrHtml'),
+                  text(entry, 'nameMeaningEnHtml')
+                ),
+              }
+            : {}),
           ...(localized(
             input.language,
             text(translation ?? {}, 'meaningHtml') || text(translation ?? {}, 'meaning'),

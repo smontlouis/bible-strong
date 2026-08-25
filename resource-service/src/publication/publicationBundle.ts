@@ -311,7 +311,7 @@ const StrongLexiconPublicationBundleManifestSchema = Schema.Struct({
   ...PublicationBundleCommonFields,
   canonical: Schema.Struct({
     ...PublicationBundleCommonFields.canonical.fields,
-    schemaVersion: Schema.Literal(1),
+    schemaVersion: Schema.Literal(1, 2),
   }),
   identity: Schema.Struct({
     kind: Schema.Literal('strong-lexicon-module'),
@@ -615,7 +615,7 @@ export type CanonicalPublication =
 
 export type CanonicalStrongLexiconModulePublication = {
   format: 'bible-strong-canonical-strong-lexicon-module'
-  schemaVersion: 1
+  schemaVersion: 1 | 2
   moduleId: 'core' | 'resources' | 'entities'
   revision: string
   dependencies: { resourceIdentity: 'strong-lexicon:core'; revision: string }[]
@@ -2216,6 +2216,14 @@ const STRONG_LEXICON_TABLES = {
   entities: ['Entities', 'EntityTranslations', 'EntityRefs', 'EntityRelations', 'EntityPlaces'],
 } as const
 
+const strongLexiconTables = (
+  moduleId: CanonicalStrongLexiconModulePublication['moduleId'],
+  schemaVersion: CanonicalStrongLexiconModulePublication['schemaVersion']
+): readonly string[] =>
+  moduleId === 'core' && schemaVersion >= 2
+    ? [...STRONG_LEXICON_TABLES.core, 'LexiconNameMeanings']
+    : STRONG_LEXICON_TABLES[moduleId]
+
 const STRONG_LEXICON_TABLE_COLUMNS: Record<
   keyof typeof STRONG_LEXICON_TABLES,
   Record<string, readonly string[]>
@@ -2238,6 +2246,16 @@ const STRONG_LEXICON_TABLE_COLUMNS: Record<
     ],
     StepEntryIdentities: ['stepEntryId', 'stepCode'],
     LexiconTranslations: ['stepEntryId', 'language', 'gloss', 'meaning', 'meaningHtml'],
+    LexiconNameMeanings: [
+      'stepEntryId',
+      'language',
+      'valueHtml',
+      'valueText',
+      'source',
+      'sourceField',
+      'sourceTextSha256',
+      'translationEngine',
+    ],
     RelationKinds: ['id', 'kind', 'labelEn', 'labelFr'],
     LexiconRelations: [
       'id',
@@ -2312,6 +2330,7 @@ const STRONG_LEXICON_TABLE_PRIMARY_KEYS: Record<
     StepEntries: ['id'],
     StepEntryIdentities: ['stepEntryId'],
     LexiconTranslations: ['stepEntryId', 'language'],
+    LexiconNameMeanings: ['stepEntryId', 'language'],
     RelationKinds: ['id'],
     LexiconRelations: ['id'],
     MorphologyCodes: ['id'],
@@ -2353,6 +2372,15 @@ const STRONG_LEXICON_REQUIRED_COLUMNS: Record<
     StepEntries: ['language', 'eStrong', 'dStrong', 'uStrong', 'gloss'],
     StepEntryIdentities: ['stepCode'],
     LexiconTranslations: ['language'],
+    LexiconNameMeanings: [
+      'language',
+      'valueHtml',
+      'valueText',
+      'source',
+      'sourceField',
+      'sourceTextSha256',
+      'translationEngine',
+    ],
     RelationKinds: ['kind'],
     LexiconRelations: ['toStepCode', 'groupKind'],
     MorphologyCodes: ['code', 'normalizedCode', 'language', 'scope'],
@@ -2396,6 +2424,7 @@ const STRONG_LEXICON_REQUIRED_INTEGER_COLUMNS: Record<
     StepEntries: ['id', 'baseCode'],
     StepEntryIdentities: ['stepEntryId'],
     LexiconTranslations: ['stepEntryId'],
+    LexiconNameMeanings: ['stepEntryId'],
     RelationKinds: ['id'],
     LexiconRelations: ['id', 'fromStepEntryId', 'relationKindId'],
     MorphologyCodes: ['id'],
@@ -2475,10 +2504,11 @@ export const deriveStrongLexiconModuleRevision = (
 
 const validateStrongLexiconRows = (
   moduleId: CanonicalStrongLexiconModulePublication['moduleId'],
-  tables: CanonicalStrongLexiconModulePublication['tables']
+  tables: CanonicalStrongLexiconModulePublication['tables'],
+  schemaVersion: CanonicalStrongLexiconModulePublication['schemaVersion']
 ) => {
   const ids = new Map<string, Set<number>>()
-  for (const table of STRONG_LEXICON_TABLES[moduleId]) {
+  for (const table of strongLexiconTables(moduleId, schemaVersion)) {
     const expectedColumns = STRONG_LEXICON_TABLE_COLUMNS[moduleId][table]
     const rows = tables[table] ?? []
     const required = new Set(STRONG_LEXICON_REQUIRED_COLUMNS[moduleId][table] ?? [])
@@ -2569,6 +2599,7 @@ const validateStrongLexiconRows = (
     }
     references('StepEntryIdentities', 'stepEntryId', 'StepEntries')
     references('LexiconTranslations', 'stepEntryId', 'StepEntries')
+    references('LexiconNameMeanings', 'stepEntryId', 'StepEntries')
     references('LexiconRelations', 'fromStepEntryId', 'StepEntries')
     references('LexiconRelations', 'toStepEntryId', 'StepEntries')
     references('LexiconRelations', 'relationKindId', 'RelationKinds')
@@ -2664,7 +2695,7 @@ export const decodeCanonicalStrongLexiconModule = (
   const candidate = value as Partial<CanonicalStrongLexiconModulePublication>
   if (
     candidate.format !== 'bible-strong-canonical-strong-lexicon-module' ||
-    candidate.schemaVersion !== 1 ||
+    ![1, 2].includes(candidate.schemaVersion ?? 0) ||
     !candidate.moduleId ||
     !Object.hasOwn(STRONG_LEXICON_TABLES, candidate.moduleId) ||
     typeof candidate.revision !== 'string' ||
@@ -2677,7 +2708,8 @@ export const decodeCanonicalStrongLexiconModule = (
   ) {
     throw new Error('CANONICAL_STRONG_LEXICON_INVALID')
   }
-  const expectedTables = STRONG_LEXICON_TABLES[candidate.moduleId]
+  const schemaVersion = candidate.schemaVersion as 1 | 2
+  const expectedTables = strongLexiconTables(candidate.moduleId, schemaVersion)
   if (
     Object.keys(candidate.tables).sort().join('|') !== [...expectedTables].sort().join('|') ||
     Object.keys(candidate.counts ?? {})
@@ -2716,7 +2748,7 @@ export const decodeCanonicalStrongLexiconModule = (
   ) {
     throw new Error('CANONICAL_STRONG_LEXICON_DEPENDENCY_INVALID')
   }
-  validateStrongLexiconRows(candidate.moduleId, candidate.tables)
+  validateStrongLexiconRows(candidate.moduleId, candidate.tables, schemaVersion)
   return candidate as CanonicalStrongLexiconModulePublication
 }
 
@@ -2752,8 +2784,9 @@ const validateStrongLexiconOfflineParity = async (
       database,
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
     ).map(row => String(row.name))
+    const expectedTables = strongLexiconTables(canonical.moduleId, canonical.schemaVersion)
     const allowedTables = new Set([
-      ...STRONG_LEXICON_TABLES[canonical.moduleId],
+      ...expectedTables,
       metadataTable,
       ...(canonical.moduleId === 'entities' ? ['EntityNames', 'EntityTranslationProvenance'] : []),
     ])
@@ -2775,7 +2808,7 @@ const validateStrongLexiconOfflineParity = async (
       throw new Error('OFFLINE_ARTIFACT_METADATA_SCHEMA_INVALID')
     }
     const actualContent = Object.fromEntries(
-      STRONG_LEXICON_TABLES[canonical.moduleId].map(table => {
+      expectedTables.map(table => {
         const columns = rowsFromSqlJs(database!, `PRAGMA table_info("${table}")`)
         validateStrongLexiconSqliteTableSchema(database!, canonical.moduleId, table)
         const primary = columns
@@ -2808,7 +2841,7 @@ const validateStrongLexiconOfflineParity = async (
       metadata.resourceIdentity !== `strong-lexicon:${canonical.moduleId}` ||
       metadata.resourceRevision !== canonical.revision ||
       metadata.moduleKind !== canonical.moduleId ||
-      metadata.moduleSchemaVersion !== '2' ||
+      metadata.moduleSchemaVersion !== String(canonical.schemaVersion + 1) ||
       (canonical.moduleId !== 'core' &&
         metadata.coreRevision !== canonical.dependencies[0]?.revision)
     ) {

@@ -180,6 +180,7 @@ export class StrongLexiconEntryDto extends Schema.Class<StrongLexiconEntryDto>(
   transliteration: Schema.String,
   pronunciation: Schema.optional(Schema.String),
   gloss: Schema.String,
+  nameMeaningHtml: Schema.optional(Schema.String),
   definitionHtml: Schema.optional(Schema.String),
   morphology: Schema.optional(StrongLexiconMorphologyDto),
   relations: Schema.Array(StrongLexiconRelationDto),
@@ -208,6 +209,7 @@ export class StrongLexiconEntryCardDto extends Schema.Class<StrongLexiconEntryCa
   transliteration: Schema.String,
   pronunciation: Schema.optional(Schema.String),
   gloss: Schema.String,
+  nameMeaningHtml: Schema.optional(Schema.String),
   definitionHtml: Schema.optional(Schema.String),
   morphology: Schema.optional(StrongLexiconMorphologyDto),
 }) {}

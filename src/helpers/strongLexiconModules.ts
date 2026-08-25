@@ -166,6 +166,16 @@ const REQUIRED_TABLE_COLUMNS: Record<StrongLexiconModuleId, Record<string, strin
     ],
     StepEntryIdentities: ['stepEntryId', 'stepCode'],
     LexiconTranslations: ['stepEntryId', 'language', 'gloss', 'meaning', 'meaningHtml'],
+    LexiconNameMeanings: [
+      'stepEntryId',
+      'language',
+      'valueHtml',
+      'valueText',
+      'source',
+      'sourceField',
+      'sourceTextSha256',
+      'translationEngine',
+    ],
     RelationKinds: ['id', 'kind', 'labelEn', 'labelFr'],
     LexiconRelations: [
       'id',
@@ -253,6 +263,11 @@ export const validateStrongLexiconModuleDatabase = async (
   getCoreAvailability: () => Promise<StrongLexiconModuleAvailability> = () =>
     getStrongLexiconModuleAvailability('core')
 ): Promise<StrongLexiconModuleAvailability> => {
+  const publication = getExpectedStrongLexiconPublication(moduleId)
+  const requiredTables =
+    moduleId === 'core' && publication.schemaVersion >= 3
+      ? [...REQUIRED_TABLES.core, 'LexiconNameMeanings']
+      : REQUIRED_TABLES[moduleId]
   const integrity = await database.getFirstAsync<{ integrity_check: string }>(
     'PRAGMA integrity_check'
   )
@@ -265,12 +280,12 @@ export const validateStrongLexiconModuleDatabase = async (
   )
   const applicationTables = tables.filter(table => !table.name.startsWith('sqlite_'))
   const tableNames = new Set(applicationTables.map(table => table.name))
-  const missingTable = REQUIRED_TABLES[moduleId].find(table => !tableNames.has(table))
+  const missingTable = requiredTables.find(table => !tableNames.has(table))
   if (missingTable) {
     throw new Error(`STRONG_LEXICON_SCHEMA_MISMATCH:${moduleId}:${missingTable}`)
   }
   const allowedTables = new Set([
-    ...REQUIRED_TABLES[moduleId],
+    ...requiredTables,
     ...(moduleId === 'entities' ? ['EntityNames', 'EntityTranslationProvenance'] : []),
   ])
   if (applicationTables.some(table => !allowedTables.has(table.name))) {
@@ -299,7 +314,7 @@ export const validateStrongLexiconModuleDatabase = async (
   if ((await database.getAllAsync('PRAGMA foreign_key_check')).length > 0) {
     throw new Error(`STRONG_LEXICON_FOREIGN_KEY_FAILED:${moduleId}`)
   }
-  for (const table of REQUIRED_TABLES[moduleId].filter(table => !table.endsWith('Meta'))) {
+  for (const table of requiredTables.filter(table => !table.endsWith('Meta'))) {
     const columns = await database.getAllAsync<{
       name: string
       type: string
@@ -353,7 +368,6 @@ export const validateStrongLexiconModuleDatabase = async (
     database,
     moduleId === 'entities' ? 'EntityMeta' : 'DictionaryMeta'
   )
-  const publication = getExpectedStrongLexiconPublication(moduleId)
   const schemaVersion = Number(metadata.moduleSchemaVersion ?? 0)
   const revision = metadata.resourceRevision
   if (

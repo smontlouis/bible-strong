@@ -70,6 +70,10 @@ const rows = {
 const createDatabase = () => ({
   getFirstAsync: jest.fn(async (sql: string, parameters: unknown[]) => {
     if (sql.includes('MorphologyCodes')) return null
+    if (sql.includes("name='LexiconNameMeanings'")) return { present: 1 }
+    if (sql.includes('FROM LexiconNameMeanings')) {
+      return parameters[0] === 15149 ? { valueHtml: 'YHWH = « celui qui est »' } : null
+    }
     const code = parameters.find(
       parameter => parameter === 'H3068G' || parameter === 'H3068' || parameter === 'H0413'
     )
@@ -173,6 +177,7 @@ describe('strongLexiconAccess', () => {
         stepCode: 'H3068G',
         classicStrong: 'H3068',
         gloss: 'SEIGNEUR',
+        nameMeaningHtml: 'YHWH = « celui qui est »',
         definitionHtml: '<p>celui qui existe</p>',
       })
     )

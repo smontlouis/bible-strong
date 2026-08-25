@@ -46,6 +46,14 @@ describe('Complete Strong lexicon publications', { skip: !runIntegration }, () =
       assert.equal(entry.value.modules.resources.status, 'available')
       assert.equal(entry.value.modules.entities.status, 'available')
 
+      const paul = await Effect.runPromise(
+        repository.findEntry({ reference: 'G4569G', language: 'fr' })
+      )
+      assert.equal(
+        paul.value.nameMeaningHtml,
+        'Saül, « demandé » ou <i>peut-être</i> « consacré à Dieu »'
+      )
+
       const entity = await Effect.runPromise(
         repository.findEntity({ uniqueName: 'Adam@Gen.2.19-Jud', language: 'fr' })
       )
