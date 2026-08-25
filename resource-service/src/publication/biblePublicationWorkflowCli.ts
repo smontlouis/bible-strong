@@ -483,11 +483,12 @@ const createOperations = (
     if (!state.overlay) throw new Error('BIBLE_PUBLICATION_OVERLAY_MISSING')
     const bucket = requireEnvironment('RESOURCE_R2_BUCKET')
     await publishR2PublicationCatalog(
-      state.overlay.bundlePaths,
+      state.overlay.changedBundlePaths,
       state.catalogPath,
       new WranglerR2ArtifactStore({ bucket, env: cloudflareEnvironment() }),
       {
         expectedCatalogResourceCount: EXPECTED_RESOURCE_COUNT,
+        bundleSelection: 'changed',
         onResult: (result, index, total) => {
           const detail = result.status === 'skipped' ? result.reason : result.key
           console.error(

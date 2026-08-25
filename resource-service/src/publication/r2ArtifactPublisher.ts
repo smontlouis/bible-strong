@@ -39,6 +39,13 @@ export type ValidatedR2PublicationCandidate = {
   stableKey: string
 }
 
+export type R2PublicationBundleSelection = 'exhaustive' | 'changed'
+
+type R2PublicationCatalogOptions = {
+  expectedCatalogResourceCount?: number
+  bundleSelection?: R2PublicationBundleSelection
+}
+
 export const immutableR2ArtifactKey = (stableKey: string, archiveSha256: string) =>
   `revisions/${archiveSha256}/${stableKey}`
 
@@ -188,9 +195,7 @@ export const publishR2PublicationBundle = async (
 export const validateR2PublicationCatalog = async (
   bundlePaths: readonly string[],
   mobileCatalogPath: string,
-  options: {
-    expectedCatalogResourceCount?: number
-  } = {}
+  options: R2PublicationCatalogOptions = {}
 ): Promise<ValidatedR2PublicationCandidate[]> => {
   const [validatedBundles, mobileCatalog] = await Promise.all([
     Promise.all(bundlePaths.map(validatePublicationBundle)),
@@ -229,9 +234,11 @@ export const validateR2PublicationCatalog = async (
     seenIds.add(candidate.catalogId)
     seenKeys.add(candidate.stableKey)
   }
-  const missingIds = [...mobileCatalog.resources.keys()].filter(id => !seenIds.has(id))
-  if (missingIds.length > 0) {
-    throw new Error(`R2_PUBLICATION_CATALOG_INCOMPLETE:${missingIds.join(',')}`)
+  if ((options.bundleSelection ?? 'exhaustive') === 'exhaustive') {
+    const missingIds = [...mobileCatalog.resources.keys()].filter(id => !seenIds.has(id))
+    if (missingIds.length > 0) {
+      throw new Error(`R2_PUBLICATION_CATALOG_INCOMPLETE:${missingIds.join(',')}`)
+    }
   }
   return candidates
 }
@@ -243,6 +250,7 @@ export const publishR2PublicationCatalog = async (
   options: {
     onResult?: (result: R2ArtifactPublicationResult, index: number, total: number) => void
     expectedCatalogResourceCount?: number
+    bundleSelection?: R2PublicationBundleSelection
   } = {}
 ): Promise<R2ArtifactPublicationResult[]> => {
   const candidates = await validateR2PublicationCatalog(bundlePaths, mobileCatalogPath, options)

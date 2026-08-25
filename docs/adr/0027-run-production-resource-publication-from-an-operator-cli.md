@@ -9,7 +9,7 @@ Accepted
 ADR-0010 initially placed production publication credentials in protected CI. Bible Strong is
 currently operated by one publisher, and maintaining a GitHub Actions runner, environment, and
 automatic repository push adds operational complexity without adding a separate human approval.
-The publication workflow already has exhaustive validation, additive immutable R2 writes, live
+The publication workflow already has exhaustive catalog validation, differential additive immutable R2 writes, live
 baseline checks, post-deployment smoke tests, and compensation for Neon and Worker activation.
 
 ## Decision
@@ -22,6 +22,10 @@ The operator enters the confirmation value for each run. Before live preflight, 
 clean tracked and untracked worktree so Wrangler cannot deploy unrelated local code, and it holds a
 Neon advisory lock through activation and compensation so two publications cannot interleave. The
 clean `master` checkout must also match the freshly fetched `origin/master` revision.
+
+Ordinary releases publish only the bundles selected as changed by the validated overlay. The full
+catalog remains checked and deployed atomically, while exhaustive R2 traversal is reserved for an
+explicit bucket bootstrap or storage audit.
 
 The CLI never commits or pushes Git changes. After a successful publication it leaves the deployed
 mobile catalog modified in the working tree and retains the complete workspace, including the

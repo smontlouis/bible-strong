@@ -418,6 +418,86 @@ describe('R2 artifact publisher', () => {
     }
   })
 
+  it('publishes only selected changed bundles while retaining an exhaustive catalog', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-changed-selection-'))
+    const store = new MemoryR2ArtifactStore()
+
+    try {
+      const bundle = path.join(root, 'changed')
+      const { manifest } = await writeStrongPublicationFixture(bundle)
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/bible-lsg-strong.sqlite.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+        'bible:UNCHANGED': {
+          file: 'bibles/unchanged.zip',
+          archiveSha256: '0'.repeat(64),
+          archiveBytes: 1,
+          contentSha256: '1'.repeat(64),
+        },
+      })
+
+      const results = await publishR2PublicationCatalog([bundle], catalogPath, store, {
+        bundleSelection: 'changed',
+        expectedCatalogResourceCount: 2,
+      })
+      const key = immutableR2ArtifactKey(
+        'bibles/bible-lsg-strong.sqlite.zip',
+        manifest.offlineArtifact.sha256
+      )
+
+      assert.equal(results.length, 1)
+      assert.equal(results[0]?.resourceIdentity, 'strong-bible-index:LSG')
+      assert.deepEqual(store.puts, [key, `${key}.metadata.json`])
+      assert.equal(
+        [...store.objects.keys()].some(objectKey => objectKey.includes('unchanged')),
+        false
+      )
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
+  it('rejects a changed selection that collides with an unchanged catalog path', async () => {
+    const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-changed-collision-'))
+    const store = new MemoryR2ArtifactStore()
+
+    try {
+      const bundle = path.join(root, 'changed')
+      const { manifest } = await writeStrongPublicationFixture(bundle)
+      const catalogPath = path.join(root, 'mobile-resource-catalog.json')
+      await writeMobileCatalog(catalogPath, {
+        'bible-strong:LSG': {
+          file: 'bibles/shared.zip',
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+        },
+        'bible:UNCHANGED': {
+          file: 'bibles/shared.zip',
+          archiveSha256: '0'.repeat(64),
+          archiveBytes: 1,
+          contentSha256: '1'.repeat(64),
+        },
+      })
+
+      await assert.rejects(
+        publishR2PublicationCatalog([bundle], catalogPath, store, {
+          bundleSelection: 'changed',
+          expectedCatalogResourceCount: 2,
+        }),
+        /MOBILE_RESOURCE_CATALOG_DUPLICATE_FILE:bibles\/shared.zip/
+      )
+      assert.deepEqual(store.puts, [])
+    } finally {
+      await rm(root, { recursive: true, force: true })
+    }
+  })
+
   it('rejects a catalog whose artifact integrity differs from its publication bundle', async () => {
     const root = await mkdtemp(path.join(os.tmpdir(), 'r2-artifact-catalog-integrity-'))
     const store = new MemoryR2ArtifactStore()

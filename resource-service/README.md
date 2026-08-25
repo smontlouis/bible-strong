@@ -155,10 +155,29 @@ active publication.
 ## Publish Offline-copy artifacts to private R2
 
 The resource publisher uploads only bundles whose manifest independently authorizes Offline-copy
-delivery. It validates the complete catalog before the first write, derives an immutable R2 key
-from each stable mobile path plus its archive SHA-256, writes an integrity metadata sidecar, and reads both objects back for size and
-checksum verification. Re-running an identical verified catalog reports `unchanged` without
-overwriting it:
+delivery. Normal releases use an explicit changed-bundle selection: the checked-in exhaustive
+catalog is decoded and count-checked locally, every selected bundle must match its catalog entry,
+and only those selected immutable R2 objects and metadata sidecars are contacted. Each upload is
+read back for size and checksum verification before the Worker catalog is deployed.
+
+Publish one or more changed bundles with repeated `--root` arguments:
+
+```bash
+RESOURCE_R2_BUCKET=bible-strong-resource-artifacts-prod \
+  yarn resources:r2:publish-changed \
+    --root /absolute/path/to/changed-bundle \
+    --root /absolute/path/to/another-changed-bundle
+```
+
+For the three Strong lexicon modules in the standard sibling-checkout workspace:
+
+```bash
+yarn resources:r2:publish-strong-lexicon:prod
+```
+
+The end-to-end Bible publication workflow derives the same selection from its overlay and publishes
+only `changedBundlePaths`. The full 72-bundle command remains available for an explicit bootstrap or
+storage audit, not for an ordinary release:
 
 ```bash
 RESOURCE_R2_BUCKET=bible-strong-resource-artifacts-prod \
@@ -166,18 +185,17 @@ RESOURCE_PUBLICATION_ROOTS=/absolute/path/to/resource-publications \
   yarn resources:r2:publish-catalog
 ```
 
-In the standard sibling-checkout workspace, the production shortcut supplies both non-secret
-values automatically:
+Its production audit shortcut supplies both non-secret values automatically:
 
 ```bash
 yarn resources:r2:publish-catalog:prod
 ```
 
-The publisher checks the discovered bundles against the exhaustive catalog at
-`src/assets/mobile-resource-catalog.json`, including every identity and stable object key. The
-publication manifest independently authorizes and validates the newly generated revision, archive
-entries, byte size, and SHA-256. Production publishing requires the checked-in exhaustive 72-entry
-inventory; it cannot be replaced by an environment override.
+Both modes use the exhaustive catalog at `src/assets/mobile-resource-catalog.json`. The changed mode
+requires the checked-in 72-entry inventory but does not require 72 bundle paths. The publication
+manifest independently authorizes and validates every selected revision, archive entry, byte size,
+and SHA-256. Update the catalog before publishing; deploy the Worker only after the selected R2
+uploads and hosted imports succeed.
 
 The bucket remains private. Every production `/v1` resource request is protected by Firebase App
 Check. The Worker verifies the Firebase JWT signature, project, expiration, audience, and
@@ -244,13 +262,14 @@ exclusive Neon advisory lock until activation or compensation finishes. Its `mas
 match a freshly fetched `origin/master`, preventing an old checkout or feature branch from deploying
 the production Worker.
 
-Production mode runs every preflight gate before its first production write, then publishes the
-validated Offline copies to immutable, content-addressed private R2 keys, imports and activates only the changed publications in
+Production mode runs every preflight gate before its first production write, then publishes only the
+changed validated Offline copies to immutable, content-addressed private R2 keys, imports and activates only the changed publications in
 Neon, atomically replaces the checked-in Worker catalog, deploys the Worker, and checks health,
 catalog parity, App Check rejection for an unattested artifact request, and an authenticated
 immutable-artifact checksum plus revision reads through Worker/Hyperdrive. The preflight first
 proves that the checked-out catalog, live Worker catalog, baseline bundles, live Neon revisions, and
-the configured production R2 bucket describe the same release. The Neon URL must be a direct
+the changed rollback objects in the configured production R2 bucket describe the same release.
+Exhaustive R2 traversal is reserved for explicit bootstrap or storage audits. The Neon URL must be a direct
 non-pooler connection. The local protected environment stores a registered Firebase App Check debug
 credential, and the CLI exchanges it for a fresh short-lived JWT separately for preflight and smoke
 reads. Database, App Check, and Cloudflare credentials are only passed to the subprocess that needs

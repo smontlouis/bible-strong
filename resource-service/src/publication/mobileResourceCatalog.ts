@@ -94,5 +94,12 @@ export const readMobileResourceCatalog = async (
   if (resources.size !== decoded.resourceCount) {
     throw new Error('MOBILE_RESOURCE_CATALOG_RESOURCE_COUNT_MISMATCH')
   }
+  const files = new Set<string>()
+  for (const entry of resources.values()) {
+    if (files.has(entry.file)) {
+      throw new Error(`MOBILE_RESOURCE_CATALOG_DUPLICATE_FILE:${entry.file}`)
+    }
+    files.add(entry.file)
+  }
   return { resources }
 }
