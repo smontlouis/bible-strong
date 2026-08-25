@@ -273,7 +273,16 @@ const DownloadableItem = ({
         {/* Right side action */}
         <Box ml={12} alignItems="flex-end" justifyContent="center">
           {visualState === 'not-downloaded' && !isSelectMode && (
-            <Box alignItems="flex-end" mr={5}>
+            <TouchableOpacity
+              accessibilityLabel={t('accessibility.downloadItem', { item: name })}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: downloadsDisabled }}
+              disabled={downloadsDisabled}
+              onPress={onDownload}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              style={{ alignItems: 'flex-end', marginRight: 5, padding: 4 }}
+            >
               <FeatherIcon
                 name={downloadsDisabled ? 'wifi-off' : 'download-cloud'}
                 size={16}
@@ -284,7 +293,7 @@ const DownloadableItem = ({
                   {formatSize(estimatedSize, t)}
                 </Text>
               )}
-            </Box>
+            </TouchableOpacity>
           )}
 
           {visualState === 'selected' && estimatedSize != null && estimatedSize > 0 && (

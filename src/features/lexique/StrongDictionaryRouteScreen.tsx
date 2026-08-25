@@ -35,7 +35,6 @@ const StrongDictionaryRouteScreen = ({ context, isFormSheet }: Props) => {
       {entryState.entry && (
         <StrongDictionaryPage
           entry={entryState.entry}
-          availability={entryState.entry.modules.resources}
           readingTypography={readingTypography}
           onOpenBibleReference={navigation.openBibleReference}
           onOpenStrong={navigation.openStrong}

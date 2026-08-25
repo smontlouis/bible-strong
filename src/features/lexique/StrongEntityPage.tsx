@@ -11,20 +11,17 @@ import type {
   StrongLexiconEntity,
   StrongLexiconEntityRelation,
 } from '~features/resources/strongLexiconAccess'
-import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import {
   StrongEditorialSection,
   StrongEntityRelationList,
   StrongEntitySummaryCard,
 } from './StrongDetailUI'
 import { StrongEntityRelationGraph } from './StrongEntityRelationGraph'
-import StrongLexiconModuleCard from './StrongLexiconModuleCard'
 import { splitStrongEntityRelations } from './strongEntityPresentation'
 import type { StrongReadingTypography } from './strongEditorialHtmlStyles'
 
 type Props = {
   entity?: StrongLexiconEntity
-  availability: StrongLexiconModuleAvailability
   loading: boolean
   readingTypography: StrongReadingTypography
   onOpenBibleReference: (osis: string) => void
@@ -37,7 +34,6 @@ const ENTITY_LOCATION_VISIBLE = false
 
 const StrongEntityPage = ({
   entity,
-  availability,
   loading,
   readingTypography,
   onOpenBibleReference,
@@ -48,21 +44,6 @@ const StrongEntityPage = ({
   const { t } = useTranslation()
   if (loading) return <Loading message={t('Chargement...')} />
   if (!entity) {
-    if (availability.status !== 'available') {
-      return (
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 }}
-        >
-          <StrongLexiconModuleCard
-            moduleId="entities"
-            availability={availability}
-            title={t('strongLexicon.biblicalEntities')}
-            description={t('strongLexicon.biblicalEntitiesDescription')}
-          />
-        </ScrollView>
-      )
-    }
     return (
       <Empty
         source={require('~assets/images/empty.json')}

@@ -49,7 +49,6 @@ const StrongEntityRouteScreen = ({ context, entityKey, isFormSheet = false }: Pr
     >
       <StrongEntityPage
         entity={entityQuery.data}
-        availability={availability}
         readingTypography={readingTypography}
         loading={
           availabilityQuery.isPending ||

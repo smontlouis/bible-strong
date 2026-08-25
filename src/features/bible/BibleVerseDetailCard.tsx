@@ -446,7 +446,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
           showsVerticalScrollIndicator={false}
           style={verseMaxHeight ? { maxHeight: verseMaxHeight } : undefined}
           contentContainerStyle={{
-            paddingTop: 10,
             paddingRight: 20,
             marginTop: 20,
           }}

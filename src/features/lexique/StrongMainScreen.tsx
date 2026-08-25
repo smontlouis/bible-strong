@@ -254,8 +254,6 @@ const StrongMainScreen = ({
           }
           clickedWord={activeContext.clickedWord}
           contextMorphologies={contextMorphologiesQuery.data}
-          resourcesAvailability={entry.modules.resources}
-          entitiesAvailability={entry.modules.entities}
           concordanceCount={concordanceCount}
           concordanceTotalCount={concordanceTotalCount}
           concordanceVersion={concordanceQuery.data?.version ?? currentStrongBibleVersionId}

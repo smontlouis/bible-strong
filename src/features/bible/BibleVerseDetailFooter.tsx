@@ -35,11 +35,11 @@ const BibleVerseDetailFooter = ({
   const currentVerseNumber = Number(verseNumber)
 
   return (
-    <Box row paddingLeft={20} paddingRight={20} my={20}>
+    <Box row paddingLeft={20} paddingRight={20} mb={20}>
       {currentVerseNumber !== 1 && (
         <IconButton activeOpacity={0.5} onPress={() => goToPrevVerse(versesInCurrentChapter)}>
-          <FeatherIcon name="arrow-left-circle" size={20} />
-          <Text paddingLeft={10} color="darkGrey">
+          <FeatherIcon name="arrow-left-circle" size={16} />
+          <Text fontSize={12} paddingLeft={10} color="darkGrey">
             {t('Verset précédent')}
           </Text>
         </IconButton>
@@ -47,10 +47,10 @@ const BibleVerseDetailFooter = ({
       <Box flex />
       {currentVerseNumber !== versesInCurrentChapter && (
         <IconButton activeOpacity={0.5} onPress={() => goToNextVerse(versesInCurrentChapter)}>
-          <Text paddingRight={10} color="darkGrey">
+          <Text fontSize={12} paddingRight={10} color="darkGrey">
             {t('Verset suivant')}
           </Text>
-          <FeatherIcon name="arrow-right-circle" size={20} />
+          <FeatherIcon name="arrow-right-circle" size={16} />
         </IconButton>
       )}
     </Box>

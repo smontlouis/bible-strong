@@ -923,16 +923,40 @@ describe('strongLexiconAccess', () => {
 })
 
 const createHybridStub = (
-  availability: 'available' | 'missing',
+  availability:
+    | 'available'
+    | 'missing'
+    | Partial<Record<StrongLexiconModuleId, 'available' | 'missing'>>,
   label: string
 ): StrongLexiconAccess => ({
-  getModuleAvailability: jest.fn(async moduleId =>
-    availability === 'available'
+  getModuleAvailability: jest.fn(async moduleId => {
+    const moduleAvailability =
+      typeof availability === 'string' ? availability : (availability[moduleId] ?? 'missing')
+    return moduleAvailability === 'available'
       ? { status: 'available' as const, moduleId, revision: label, schemaVersion: 2 }
       : { status: 'missing' as const, moduleId }
-  ),
+  }),
   loadPreview: jest.fn(async () => []),
-  loadEntry: jest.fn(async identity => ({ label, selectedIdentity: identity }) as never),
+  loadEntry: jest.fn(
+    async identity =>
+      ({
+        label,
+        selectedIdentity: identity,
+        resources: label === 'online' ? [{ id: 1, title: 'LSJ' }] : [],
+        lsjAbsent: false,
+        entity: label === 'online' ? { uniqueName: 'Logos' } : undefined,
+        modules: {
+          resources:
+            typeof availability === 'string' || availability.resources === 'available'
+              ? { status: availability === 'missing' ? 'missing' : 'available' }
+              : { status: 'missing' },
+          entities:
+            typeof availability === 'string' || availability.entities === 'available'
+              ? { status: availability === 'missing' ? 'missing' : 'available' }
+              : { status: 'missing' },
+        },
+      }) as never
+  ),
   loadEntries: jest.fn(async () => []),
   loadEntryCards: jest.fn(async () => []),
   loadMorphologies: jest.fn(async () => []),
@@ -974,6 +998,31 @@ describe('hybrid Strong lexicon routing', () => {
     await expect(access.loadEntry({ kind: 'strong', code: 'G3056' }, 'fr')).resolves.toMatchObject({
       label: 'online',
     })
+  })
+
+  it('enriches an installed core entry from HTTP when optional modules are not installed', async () => {
+    const offline = createHybridStub(
+      { core: 'available', resources: 'missing', entities: 'missing' },
+      'offline'
+    )
+    const online = createHybridStub('available', 'online')
+    const access = createHybridStrongLexiconAccess({
+      offline,
+      online,
+      remotelyReadable: true,
+      isOnline: async () => true,
+    })
+
+    await expect(access.loadEntry({ kind: 'strong', code: 'G3056' }, 'fr')).resolves.toMatchObject({
+      label: 'offline',
+      resources: [{ id: 1, title: 'LSJ' }],
+      entity: { uniqueName: 'Logos' },
+      modules: {
+        resources: { status: 'available' },
+        entities: { status: 'available' },
+      },
+    })
+    expect(online.loadEntry).toHaveBeenCalledWith({ kind: 'strong', code: 'G3056' }, 'fr')
   })
 
   it('does not use HTTP when the local core is absent and connectivity is logically offline', async () => {

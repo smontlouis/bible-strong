@@ -14,10 +14,8 @@ import type {
   StrongLexiconMorphology,
 } from '~features/resources/strongLexiconAccess'
 import type { StrongBibleLemmaStat } from '~helpers/strongBibleSidecar'
-import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import { getStrongReferenceNumber } from '~helpers/strongIdentities'
 import type { Verse } from '~common/types'
-import StrongLexiconModuleCard from './StrongLexiconModuleCard'
 import {
   StrongEditorialHtml,
   StrongEditorialPreview,
@@ -51,8 +49,6 @@ type Props = {
   contextVersion?: string
   clickedWord?: string
   contextMorphologies?: StrongLexiconMorphology[]
-  resourcesAvailability: StrongLexiconModuleAvailability
-  entitiesAvailability: StrongLexiconModuleAvailability
   concordanceCount: number
   concordanceTotalCount: number
   concordanceVersion: string
@@ -148,8 +144,6 @@ const StrongDetailMainPage = ({
   contextVersion,
   clickedWord,
   contextMorphologies = [],
-  resourcesAvailability,
-  entitiesAvailability,
   concordanceCount,
   concordanceTotalCount,
   concordanceVersion,
@@ -384,15 +378,6 @@ const StrongDetailMainPage = ({
                 />
               )}
           </StrongEditorialSection>
-        ) : resourcesAvailability.status !== 'available' && entry.language === 'greek' ? (
-          <StrongLexiconModuleCard
-            moduleId="resources"
-            availability={resourcesAvailability}
-            sectionTitle={t('strongDetail.dictionary.light')}
-            title={t('strongLexicon.greekDictionary')}
-            description={t('strongLexicon.greekDictionaryDescription')}
-            dismissible
-          />
         ) : null)}
 
       {passageMedia.length > 0 && (
@@ -451,16 +436,6 @@ const StrongDetailMainPage = ({
             />
           )}
         </VStack>
-      ) : entitiesAvailability.status !== 'available' ? (
-        <StrongLexiconModuleCard
-          moduleId="entities"
-          availability={entitiesAvailability}
-          sectionTitle={t('strongDetail.entity.context')}
-          title={t('strongLexicon.biblicalEntities')}
-          description={t('strongLexicon.biblicalEntitiesDescription')}
-          dismissible
-          separated
-        />
       ) : null}
 
       {lexicalRelations.relatedWords.length > 0 && (

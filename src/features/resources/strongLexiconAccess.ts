@@ -1478,6 +1478,47 @@ export const createHybridStrongLexiconAccess = ({
     if (await localAvailable('core')) return localOperation()
     throw new ResourceAccessError(remotelyReadable ? 'NETWORK_OFFLINE' : 'OFFLINE_COPY_REQUIRED')
   }
+  const loadEntry = async (identity: StrongIdentity, language: ResourceLanguage) => {
+    const source = await resolveHybridResourceSource({
+      localAvailable: await localAvailable('core'),
+      remotelyReadable,
+      isOnline,
+    })
+    if (source !== 'local') {
+      if (source === 'remote') return online.loadEntry(identity, language)
+      if (source === 'offline') throw new ResourceAccessError('NETWORK_OFFLINE')
+      throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    }
+
+    const localEntry = await offline.loadEntry(identity, language)
+    if (!localEntry || !remotelyReadable) return localEntry
+
+    const needsRemoteResources = localEntry.modules.resources.status !== 'available'
+    const needsRemoteEntities = localEntry.modules.entities.status !== 'available'
+    if ((!needsRemoteResources && !needsRemoteEntities) || !(await isOnline())) return localEntry
+
+    try {
+      const remoteEntry = await online.loadEntry(identity, language)
+      if (!remoteEntry) return localEntry
+      return {
+        ...localEntry,
+        resources: needsRemoteResources ? remoteEntry.resources : localEntry.resources,
+        lsjAbsent: needsRemoteResources ? remoteEntry.lsjAbsent : localEntry.lsjAbsent,
+        entity: needsRemoteEntities ? remoteEntry.entity : localEntry.entity,
+        modules: {
+          resources: needsRemoteResources
+            ? remoteEntry.modules.resources
+            : localEntry.modules.resources,
+          entities: needsRemoteEntities
+            ? remoteEntry.modules.entities
+            : localEntry.modules.entities,
+        },
+      }
+    } catch (error) {
+      if (error instanceof ResourceAccessError) return localEntry
+      throw error
+    }
+  }
   return {
     async getModuleAvailability(moduleId) {
       const local = await offline.getModuleAvailability(moduleId)
@@ -1499,12 +1540,7 @@ export const createHybridStrongLexiconAccess = ({
         () => offline.loadPreview(identities, language),
         () => online.loadPreview(identities, language)
       ),
-    loadEntry: (identity, language) =>
-      select(
-        'core',
-        () => offline.loadEntry(identity, language),
-        () => online.loadEntry(identity, language)
-      ),
+    loadEntry,
     loadEntries: (identities, language) =>
       select(
         'core',

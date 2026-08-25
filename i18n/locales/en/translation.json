@@ -151,6 +151,7 @@
   "accessibility.pronunciationLoading": "Loading pronunciation",
   "accessibility.pronunciationPlaying": "Pronunciation playing",
   "accessibility.selectAllInSection": "Select all in {{section}}",
+  "accessibility.downloadItem": "Download {{item}}",
   "accessibility.cancelDownload": "Cancel download of {{item}}",
   "accessibility.redownload": "Download {{item}} again",
   "accessibility.deleteDownload": "Delete download of {{item}}",

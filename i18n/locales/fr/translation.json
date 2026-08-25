@@ -156,6 +156,7 @@
   "accessibility.pronunciationLoading": "Chargement de la prononciation",
   "accessibility.pronunciationPlaying": "Prononciation en cours",
   "accessibility.selectAllInSection": "Tout sélectionner dans {{section}}",
+  "accessibility.downloadItem": "Télécharger {{item}}",
   "accessibility.cancelDownload": "Annuler le téléchargement de {{item}}",
   "accessibility.redownload": "Télécharger à nouveau {{item}}",
   "accessibility.deleteDownload": "Supprimer le téléchargement de {{item}}",
