@@ -70,4 +70,5 @@ jobs:
       - name: Publish preview update
         uses: expo/expo-github-action/preview@v8
         with:
-          command: cd apps/mobile && eas update --auto
+          command: eas update --auto
+          working-directory: apps/mobile
