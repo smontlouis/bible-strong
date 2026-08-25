@@ -22,7 +22,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17-alpine
+        image: pgvector/pgvector:pg17
         env:
           POSTGRES_DB: bible_strong
           POSTGRES_USER: bible_strong
