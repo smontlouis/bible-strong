@@ -1,0 +1,241 @@
+import {
+  BUNDLED_MOBILE_RESOURCE_CATALOG as catalogJson,
+  type MobileResourceCatalog,
+  type MobileResourceCatalogEntry,
+  type MobileResourceCatalogFileEntry,
+  type MobileResourceEntryRole,
+} from '@bible-strong/resource-catalog/catalog'
+import { ORDINARY_BIBLE_VERSION_IDS } from './ordinaryBibleVersions'
+import { atom, getDefaultStore } from 'jotai/vanilla'
+
+export type {
+  MobileResourceCatalog,
+  MobileResourceCatalogEntry,
+  MobileResourceCatalogFileEntry,
+  MobileResourceEntryRole,
+  MobileResourceInstallationStrategy,
+} from '@bible-strong/resource-catalog/catalog'
+
+export const MOBILE_RESOURCE_CATALOG_URL = 'https://api.bible-strong.app/v1/offline-catalog'
+export const MOBILE_RESOURCE_ARTIFACT_BASE_URL =
+  'https://api.bible-strong.app/v1/offline-artifacts/'
+export const resourceArtifactUrl = (path: string): string =>
+  new URL(path, MOBILE_RESOURCE_ARTIFACT_BASE_URL).toString()
+const MOBILE_RESOURCE_CATALOG_TIMEOUT_MS = 3_000
+const CATALOG_ENTRY_ROLES = new Set<MobileResourceEntryRole>(['canonical', 'pericope', 'redWords'])
+
+const isPositiveByteCount = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value) && value > 0
+
+const isSha256 = (value: unknown): value is string =>
+  typeof value === 'string' && /^[a-f0-9]{64}$/.test(value)
+
+const isSafeRelativePath = (value: unknown): value is string =>
+  typeof value === 'string' &&
+  value.length > 0 &&
+  !value.startsWith('/') &&
+  !value.includes('\\') &&
+  value.split('/').every(segment => segment.length > 0 && segment !== '.' && segment !== '..')
+
+const isHttpsUrl = (value: unknown): value is string => {
+  if (typeof value !== 'string') return false
+  try {
+    return new URL(value).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+const isCatalogFileEntry = (value: unknown): value is MobileResourceCatalogFileEntry => {
+  if (!value || typeof value !== 'object') return false
+  const entry = value as Partial<MobileResourceCatalogFileEntry>
+  return (
+    isSafeRelativePath(entry.entry) && isSha256(entry.sha256) && isPositiveByteCount(entry.bytes)
+  )
+}
+
+const isCatalogEntry = (value: unknown): value is MobileResourceCatalogEntry => {
+  if (!value || typeof value !== 'object') return false
+  const entry = value as Partial<MobileResourceCatalogEntry>
+  const entries = entry.entries
+  if (!entries || typeof entries !== 'object') return false
+  const artifactUrl = isHttpsUrl(entry.url) ? new URL(entry.url) : undefined
+  const archiveEntries = Object.entries(entries)
+  const isStrongLexicon = typeof entry.id === 'string' && entry.id.startsWith('strong-lexicon:')
+  return (
+    typeof entry.id === 'string' &&
+    entry.id.length > 0 &&
+    artifactUrl?.pathname.endsWith('.zip') === true &&
+    isSafeRelativePath(entry.file) &&
+    entry.file.endsWith('.zip') &&
+    isSafeRelativePath(entry.entry) &&
+    isCatalogFileEntry(entries.canonical) &&
+    entries.canonical.entry === entry.entry &&
+    archiveEntries.every(
+      ([role, fileEntry]) =>
+        CATALOG_ENTRY_ROLES.has(role as MobileResourceEntryRole) && isCatalogFileEntry(fileEntry)
+    ) &&
+    isSha256(entry.archiveSha256) &&
+    (artifactUrl.searchParams.get('sha256') === null ||
+      artifactUrl.searchParams.get('sha256') === entry.archiveSha256) &&
+    isPositiveByteCount(entry.archiveBytes) &&
+    isSha256(entry.contentSha256) &&
+    isPositiveByteCount(entry.contentBytes) &&
+    (!isStrongLexicon ||
+      (typeof entry.resourceRevision === 'string' &&
+        entry.resourceRevision.length > 0 &&
+        (entry.id === 'strong-lexicon:core' ||
+          (typeof entry.coreRevision === 'string' && entry.coreRevision.length > 0)))) &&
+    isPositiveByteCount(entry.installedBytes) &&
+    isPositiveByteCount(entry.peakInstallationBytes) &&
+    (entry.strategy === 'sqlite-import' || entry.strategy === 'archive-extract')
+  )
+}
+
+export const isMobileResourceCatalog = (value: unknown): value is MobileResourceCatalog => {
+  if (!value || typeof value !== 'object') return false
+  const catalog = value as Partial<MobileResourceCatalog>
+  return (
+    catalog.format === 'bible-strong-mobile-resource-catalog' &&
+    catalog.schemaVersion === 1 &&
+    typeof catalog.generatedAt === 'string' &&
+    typeof catalog.resourceCount === 'number' &&
+    !!catalog.resources &&
+    typeof catalog.resources === 'object' &&
+    catalog.resourceCount === Object.keys(catalog.resources).length &&
+    Object.entries(catalog.resources).every(
+      ([resourceId, entry]) =>
+        resourceId === (entry as MobileResourceCatalogEntry)?.id && isCatalogEntry(entry)
+    )
+  )
+}
+
+if (!isMobileResourceCatalog(catalogJson)) throw new Error('MOBILE_RESOURCE_CATALOG_INVALID')
+
+export const BUNDLED_MOBILE_RESOURCE_CATALOG: MobileResourceCatalog = catalogJson
+export let MOBILE_RESOURCE_CATALOG: MobileResourceCatalog = BUNDLED_MOBILE_RESOURCE_CATALOG
+export const mobileResourceCatalogAtom = atom<MobileResourceCatalog>(
+  BUNDLED_MOBILE_RESOURCE_CATALOG
+)
+
+const hasBundledResourceIdentities = (catalog: MobileResourceCatalog): boolean => {
+  const bundledIds = Object.keys(BUNDLED_MOBILE_RESOURCE_CATALOG.resources).sort()
+  return bundledIds.every(id => id in catalog.resources)
+}
+
+export const resolveMobileResourceCatalog = (value: unknown): MobileResourceCatalog => {
+  if (!isMobileResourceCatalog(value) || !hasBundledResourceIdentities(value)) {
+    return BUNDLED_MOBILE_RESOURCE_CATALOG
+  }
+  const bundledTimestamp = Date.parse(BUNDLED_MOBILE_RESOURCE_CATALOG.generatedAt)
+  const candidateTimestamp = Date.parse(value.generatedAt)
+  return Number.isFinite(candidateTimestamp) && candidateTimestamp >= bundledTimestamp
+    ? value
+    : BUNDLED_MOBILE_RESOURCE_CATALOG
+}
+
+let catalogRequest: Promise<MobileResourceCatalog> | undefined
+let catalogResolved = false
+let resolvedFetcher: typeof fetch | undefined
+
+export const loadMobileResourceCatalog = (
+  fetcher: typeof fetch = fetch
+): Promise<MobileResourceCatalog> => {
+  if (catalogResolved && resolvedFetcher === fetcher) {
+    return Promise.resolve(MOBILE_RESOURCE_CATALOG)
+  }
+  if (catalogRequest) return catalogRequest
+
+  const abortController = new AbortController()
+  let timeout: ReturnType<typeof setTimeout> | undefined
+  const timeoutRequest = new Promise<Response>((_, reject) => {
+    timeout = setTimeout(() => {
+      abortController.abort()
+      reject(new Error('MOBILE_RESOURCE_CATALOG_TIMEOUT'))
+    }, MOBILE_RESOURCE_CATALOG_TIMEOUT_MS)
+  })
+  catalogRequest = Promise.race([
+    fetcher(MOBILE_RESOURCE_CATALOG_URL, {
+      headers: { Accept: 'application/json' },
+      signal: abortController.signal,
+    }),
+    timeoutRequest,
+  ])
+    .then(async response => {
+      if (!response.ok) throw new Error(`MOBILE_RESOURCE_CATALOG_HTTP_${response.status}`)
+      const remoteCatalog: unknown = await response.json()
+      const resolvedCatalog = resolveMobileResourceCatalog(remoteCatalog)
+      if (
+        resolvedCatalog === BUNDLED_MOBILE_RESOURCE_CATALOG &&
+        remoteCatalog !== BUNDLED_MOBILE_RESOURCE_CATALOG
+      ) {
+        throw new Error('MOBILE_RESOURCE_REMOTE_CATALOG_INVALID')
+      }
+      MOBILE_RESOURCE_CATALOG = resolvedCatalog
+      getDefaultStore().set(mobileResourceCatalogAtom, resolvedCatalog)
+      return MOBILE_RESOURCE_CATALOG
+    })
+    .catch(() => {
+      MOBILE_RESOURCE_CATALOG = BUNDLED_MOBILE_RESOURCE_CATALOG
+      getDefaultStore().set(mobileResourceCatalogAtom, BUNDLED_MOBILE_RESOURCE_CATALOG)
+      return BUNDLED_MOBILE_RESOURCE_CATALOG
+    })
+    .finally(() => {
+      if (timeout) clearTimeout(timeout)
+      catalogResolved = true
+      resolvedFetcher = fetcher
+      catalogRequest = undefined
+    })
+
+  return catalogRequest
+}
+
+export const getMobileResourceCatalogEntry = (resourceId: string): MobileResourceCatalogEntry => {
+  const entry = MOBILE_RESOURCE_CATALOG.resources[resourceId]
+  if (!entry) throw new Error(`MOBILE_RESOURCE_CATALOG_ENTRY_MISSING:${resourceId}`)
+  return {
+    ...entry,
+    url: resolveMobileResourceArtifactUrl(entry),
+  }
+}
+
+export const getMobileBibleVersionIds = (
+  catalog: MobileResourceCatalog = MOBILE_RESOURCE_CATALOG
+): string[] =>
+  catalog === BUNDLED_MOBILE_RESOURCE_CATALOG
+    ? [...ORDINARY_BIBLE_VERSION_IDS]
+    : Object.keys(catalog.resources)
+        .filter(resourceId => resourceId.startsWith('bible:'))
+        .map(resourceId => resourceId.slice('bible:'.length))
+        .sort()
+
+export const getMobileStrongBibleVersionIds = (
+  catalog: MobileResourceCatalog = MOBILE_RESOURCE_CATALOG
+): string[] =>
+  Object.keys(catalog.resources)
+    .filter(resourceId => resourceId.startsWith('bible-strong:'))
+    .map(resourceId => resourceId.slice('bible-strong:'.length))
+    .sort()
+
+let configuredResourceArtifactBaseUrl: string | undefined
+
+export const configureResourceArtifactBaseUrl = (value: string | undefined): void => {
+  configuredResourceArtifactBaseUrl = value
+}
+
+export const resolveMobileResourceArtifactUrl = (
+  entry: Pick<MobileResourceCatalogEntry, 'file' | 'url'>,
+  configuredBaseUrl = configuredResourceArtifactBaseUrl ?? MOBILE_RESOURCE_ARTIFACT_BASE_URL
+): string => {
+  if (!configuredBaseUrl) return entry.url
+  try {
+    const baseUrl = new URL(configuredBaseUrl)
+    if (baseUrl.protocol !== 'http:' && baseUrl.protocol !== 'https:') return entry.url
+    if (!baseUrl.pathname.endsWith('/')) baseUrl.pathname += '/'
+    const resolved = new URL(entry.file, baseUrl)
+    resolved.search = new URL(entry.url).search
+    return resolved.toString()
+  } catch {
+    return entry.url
+  }
+}

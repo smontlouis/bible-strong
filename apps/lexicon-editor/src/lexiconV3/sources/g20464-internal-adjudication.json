@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "lexicon-v3-internal-greek-adjudication@1",
+  "entryKey": "greek:G20464",
+  "stepIdentity": {
+    "stepEntryId": 10008,
+    "language": "greek",
+    "baseCode": 20464,
+    "eStrong": "G20464",
+    "dStrong": "G20464 =",
+    "uStrong": "G20464"
+  },
+  "rawSourceRecord": {
+    "id": 10008,
+    "language": "greek",
+    "baseCode": 20464,
+    "eStrong": "G20464",
+    "dStrong": "G20464 =",
+    "uStrong": "G20464",
+    "original": "ἐσσήν",
+    "transliteration": "essēn",
+    "morph": "",
+    "gloss": "[hudot ]ōšen",
+    "meaning": "[hudot ]ōšen",
+    "classicTransliteration": "",
+    "pronunciation": ""
+  },
+  "sourceRecordSha256": "c487b224a14f635d458802a9b9d21c5141eb71735cb14d88e412085189187e20",
+  "localProofBoundary": {
+    "limit": "The pinned local sources prove the exact STEP identity, the opaque raw source fields, and the stated absences only; they do not locally attest the reconstructed morphology or senses.",
+    "targetRow": {
+      "source": "TBESG",
+      "path": "data/external/stepbible/TBESG.txt",
+      "locator": "TBESG:10098@4593900",
+      "lineSha256": "e7848bd8dd60e9187addb55f43fdd5f25abe50c618f069b21205aae7e8944382",
+      "exactLine": "G20464\tG20464 =\tG20464\tἐσσήν\tessēn\t\t[hudot ]ōšen\t[hudot ]ōšen "
+    },
+    "tflsj": {
+      "exactHeadwordMatchCount": 0,
+      "semanticDefinitionPresent": false
+    },
+    "tagnt": {
+      "exactDStrongOccurrenceCount": 0,
+      "exactLemmaOccurrenceCount": 0,
+      "references": [],
+      "occurrenceCorpusSha256": "ff34149786c31b0c8fea544fc769ab3f9b4124a2dd5759629b3b0d82061a936a"
+    },
+    "prohibitedClaim": "The reconstructed morphology and senses must never be described as proven by the pinned STEP, TFLSJ, or TAGNT files."
+  },
+  "judgments": [
+    {
+      "judgmentId": "risky-greek-independent-adjudication-1:G20464",
+      "reportPath": "reports/lexicon-v3-staging/risky-greek-independent-adjudication-1.json",
+      "reportSha256": "145a2b370cdff604e169578dc2c75e2775ff27e3a7b10d0bf4f47f1aef309637",
+      "reviewRole": "independent-internal-lexicographic-review",
+      "classification": "RECONSTRUCTION",
+      "confidence": 0.94,
+      "morph": "G:N-M",
+      "gloss": "king bee; priest of Artemis at Ephesus",
+      "meaning": "<b>ἐσσήν</b>: the <b>king bee</b>; also a title of the priest of Artemis at Ephesus.",
+      "independenceStatement": "This judgment was produced in a separate risky-entry adjudication before the final two-entry arbitration."
+    },
+    {
+      "judgmentId": "g21122-g20464-independent-arbitration:G20464",
+      "reportPath": "reports/lexicon-v3-staging/g21122-g20464-independent-arbitration.json",
+      "reportSha256": "76bb72844bd4eaa29b6899a473c7fc94f4e7646c3ca572bc89a31dc52d098099",
+      "reviewRole": "independent-offline-lexicographic-arbitrator",
+      "classification": "EDITORIAL_RECONSTRUCTION",
+      "confidence": 0.94,
+      "morph": "G:N-M",
+      "gloss": "king bee; priest of Artemis at Ephesus",
+      "meaning": "<b>ἐσσήν</b>: the <b>king bee</b>; also a title of the priest of Artemis at Ephesus.",
+      "independenceStatement": "This judgment independently rechecked the exact identity, local proof limit, morphology, and both proposed senses."
+    }
+  ],
+  "consensus": {
+    "judgmentCount": 2,
+    "unanimous": true,
+    "independenceLimit": "Independence is procedural: two separate checked-in reports and review roles; the reports do not provide cryptographic reviewer or model identities and are not two external lexical attestations.",
+    "publicationProvenance": "editorial reconstruction from two independent internal lexicographic judgments",
+    "localAttestationClaimed": false
+  },
+  "payload": {
+    "classification": "editorial_reconstruction",
+    "morph": "G:N-M",
+    "gloss": "king bee; priest of Artemis at Ephesus",
+    "meaning": "<b>ἐσσήν</b>: the <b>king bee</b>; also a title of the priest of Artemis at Ephesus.",
+    "publicationProvenance": "internal-adjudication-consensus"
+  },
+  "payloadSha256": "1a3d4e28705249f68c83194bd59f5ce114076bbd98660e9fbe0dc9b0cba9cae7"
+}

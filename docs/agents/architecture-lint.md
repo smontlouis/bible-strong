@@ -7,7 +7,7 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 ## Summary
 
 - Errors: 0
-- Warnings: 474
+- Warnings: 473
 
 ## Rules
 
@@ -17,481 +17,480 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 | `helpers-feature-boundary` | warning | 5 | Shared helpers should not depend on features. |
 | `feature-firebase-boundary` | warning | 8 | Feature code should avoid direct Firebase access. |
 | `deep-relative-import` | warning | 55 | Prefer aliases or public module boundaries over deep relative imports. |
-| `raw-console` | warning | 406 | Prefer `appLogger` for agent-queryable diagnostics. |
+| `raw-console` | warning | 405 | Prefer `appLogger` for agent-queryable diagnostics. |
 
 ## Findings
 
-- WARNING `raw-console` src/common/ErrorBoundary.tsx:41 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:38 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:84 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:133 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:148 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:153 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:159 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:171 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:182 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/InitHooks.tsx:186 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/__tests__/ChoiceFilterModal-test.tsx:71 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/__tests__/FiltersHeader-test.tsx:96 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/__tests__/MultipleChoiceFilterModal-test.tsx:89 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/common/__tests__/SearchFilterModal-test.tsx:35 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/devtools/reduxDevtoolsPolyfill.ts:39 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/devtools/reduxDevtoolsPolyfill.ts:119 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `feature-firebase-boundary` src/features/app/FullAppRuntime.tsx:2 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
-- WARNING `deep-relative-import` src/features/app/FullAppRuntime.tsx:30 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/app/FullAppRuntime.tsx:87 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/app-rating/useAppRating.ts:33 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/app-rating/useAppRating.ts:87 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/app-rating/useAppRating.ts:101 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/AppSwitcherScreen.tsx:11 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/CreateGroupPage.tsx:21 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/CreateGroupPage.tsx:22 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/StaticTabPreview.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/TabGroupPage.tsx:18 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/TabGroupPage.tsx:19 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/TabGroupPager.tsx:11 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/TabPreview.tsx:12 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/AppSwitcherScreen/useTabPreview.ts:13 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/Buttons/AddTabButton.tsx:8 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/Buttons/BibleButton.tsx:8 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/Buttons/BibleButton.tsx:9 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/Buttons/MenuButton.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/Buttons/useSearchButton.ts:5 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/Buttons/useTabButtonPress.ts:11 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/EditGroupModal.tsx:18 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/GroupActionsPopover.tsx:9 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/GroupActionsPopover.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/GroupTitleButton.tsx:6 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/GroupTitleButton.tsx:7 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/ViewGroupsModal.tsx:11 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/BottomTabBar/useBottomTabBar.ts:5 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/app-switcher/CachedTabScreens.tsx:21 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/app-switcher/TabPreviewCarousel/TabPreview.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/TabPreviewCarousel/TabPreviewCarousel.tsx:5 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/TabScreen/NewTab/NewTabItem.tsx:9 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/TabScreen/NewTab/NewTabItem.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/TabScreen/NewTab/NewTabScreen.tsx:15 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/TabScreen/NewTab/SelectBibleReferenceModal.tsx:8 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/TabScreen/NewTab/SelectBibleReferenceModalProvider.tsx:3 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/TabScreen/NewTab/atoms.ts:2 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/TabScreen/TabScreen.tsx:21 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/utils/getIconByTabType.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/utils/tabHelpers.ts:4 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/utils/useExpandNewTab.ts:5 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/utils/useOnceAtoms.ts:3 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/utils/useOpenInNewTab.ts:6 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/app-switcher/utils/useProviderEffects.ts:74 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/app-switcher/utils/useSlideNewTab.ts:4 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/utils/useTabAnimations.ts:6 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:6 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:14 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:19 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:26 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:34 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/app-switcher/utils/useWhyDidYouUpdate.ts:30 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/AnnotationMode/useAnnotationEvents.ts:45 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/AnnotationMode/useAnnotationEvents.ts:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/AnnotationMode/useAnnotationEvents.ts:100 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/AnnotationMode/useAnnotationEvents.ts:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/AnnotationMode/useAnnotationHighlights.ts:131 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/AnnotationMode/useAnnotationModeController.ts:107 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/AnnotationMode/useAnnotationModeController.ts:138 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:673 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:687 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:718 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:731 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:742 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:749 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:805 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:812 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:836 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:843 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:858 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:865 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:904 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:917 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:1458 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:1473 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:1484 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:1495 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMComponent.tsx:1519 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMWrapper.tsx:512 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMWrapper.tsx:536 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/BibleDOMWrapper.tsx:894 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/bible/BibleDOM/ContainerText.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/bible/BibleDOM/__tests__/interlinearStrongSelectionContext-test.tsx:26 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleDOM/__tests__/interlinearStrongSelectionContext-test.tsx:36 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleErrorView.tsx:74 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleHeader.tsx:485 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleHeader.tsx:544 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleHeader.tsx:592 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleLinkScreen.tsx:225 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleLinkScreen.tsx:350 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleLinkScreen.tsx:351 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BibleViewer.tsx:1184 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/BookSelectorSheet/__tests__/BookSelectorList-test.tsx:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/bible/SelectedVersesModal/SelectedVersesModal.tsx:9 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/bible/SelectedVersesModal/hooks/useVerseActions.ts:12 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/bible/SelectedVersesModal/types.ts:3 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/bible/StrongAudioProvider.tsx:75 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/StrongAudioProvider.tsx:100 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/StrongAudioProvider.tsx:140 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/__tests__/InterlinearIndexSelectorItem-test.tsx:103 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/__tests__/VersionCatalogView-test.tsx:109 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/bible/footer/AudioUrlFooter.tsx:27 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:115 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:191 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:226 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/bible/footer/AudioUrlFooter.tsx:254 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/bible/footer/BackToAudioFooter.tsx:12 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/bible/passageMedia.ts:4 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/bible/resources/ResourceModal.tsx:30 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `feature-firebase-boundary` src/features/commentaries/Comment.tsx:19 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
-- WARNING `raw-console` src/features/commentaries/Comment.tsx:146 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/dictionnary/DictionaryDetailTabScreen.tsx:188 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `feature-firebase-boundary` src/features/home/Events.tsx:5 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
-- WARNING `feature-firebase-boundary` src/features/home/HomeScreen.tsx:2 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
-- WARNING `raw-console` src/features/home/PlanHome.tsx:44 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/home/VerseImageModal.tsx:58 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:167 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:175 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/home/useVerseOfTheDay.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/migrations/__tests__/AccountMigrationModal-test.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/migrations/__tests__/LocalMigrationGate-test.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/migrations/__tests__/LocalMigrationGate-test.tsx:143 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/nave/NaveDetailTabScreen.tsx:161 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/nave/NaveDetailTabScreen.tsx:191 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/notes/NoteDetailTabScreen.tsx:294 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/onboarding/OnBoarding.tsx:27 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/onboarding/__tests__/ResourceSetupChoice-copy-test.ts:1 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/onboarding/useOfflineSetupDownload.ts:161 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/plans/Explore/ExplorePlanItem.tsx:117 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:21 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `deep-relative-import` src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:22 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:192 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/plans/PlanSliceScreen/Slice.tsx:26 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/plans/PlanSliceScreen/VideoSlice.tsx:31 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/plans/PlanSliceScreen/VideoSlice.tsx:32 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/plans/PlanSliceScreen/VideoSlice.tsx:33 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/plans/PlanSliceScreen/VideoSlice.tsx:34 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `feature-firebase-boundary` src/features/plans/plan.hooks.ts:7 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
-- WARNING `raw-console` src/features/plans/plan.hooks.ts:340 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `feature-firebase-boundary` src/features/profile/components/DeleteAccountModal.tsx:14 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
-- WARNING `raw-console` src/features/profile/components/DeleteAccountModal.tsx:59 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/resources/bibleContentAccess.ts:323 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/resources/bibleContentAccess.ts:324 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `feature-firebase-boundary` src/features/resources/commentaryAccess.ts:5 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
-- WARNING `raw-console` src/features/resources/recoverableIntegrity.ts:10 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/resources/resourceSourceLogger.ts:72 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/search/SQLiteSearchScreen.tsx:517 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/AutomaticBackupsScreen.tsx:62 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/AutomaticBackupsScreen.tsx:117 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/AutomaticBackupsScreen.tsx:121 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/AutomaticBackupsScreen.tsx:127 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/AutomaticBackupsScreen.tsx:133 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/ImportExportScreen.tsx:113 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/ImportExportScreen.tsx:157 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/ImportExportScreen.tsx:207 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `feature-firebase-boundary` src/features/settings/MoreScreen.tsx:2 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
-- WARNING `deep-relative-import` src/features/settings/MoreScreen.tsx:29 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/settings/MoreScreen.tsx:96 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/settings/__tests__/Verse-test.tsx:112 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/EditStudyScreen.tsx:109 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/PublishStudyMenuItem.tsx:146 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/InlineStrong.ts:24 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/ModuleBlockVerse.ts:47 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/ModuleBlockVerse.ts:71 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StrongBlock.tsx:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:99 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:183 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:259 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:273 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:276 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:86 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:89 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:96 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:130 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:189 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:194 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `deep-relative-import` src/features/studies/hooks/useAddVerseToStudy.ts:9 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` src/features/studies/hooks/useAddVerseToStudy.ts:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/features/timeline/EventDetailsMedia.tsx:112 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:61 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:67 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:138 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:145 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:179 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:186 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:217 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:243 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:247 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:307 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:327 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:348 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:351 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:366 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/AutoBackupManager.ts:368 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:154 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:159 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:207 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:232 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:239 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:266 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:275 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:277 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:302 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:325 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:342 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:348 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:465 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:485 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:507 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:523 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:535 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:573 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/FireAuth.ts:581 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/TokenManager.ts:38 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/TokenManager.ts:43 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/TokenManager.ts:77 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/TokenManager.ts:89 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/TokenManager.ts:95 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/TokenManager.ts:99 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/TokenManager.ts:123 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/atomicResourceFile.ts:137 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/atomicResourceFile.ts:150 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:62 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:68 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:70 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:129 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:138 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:152 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:158 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:173 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:182 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleMigration.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleResource.ts:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/bibleResource.ts:50 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `helpers-feature-boundary` src/helpers/bibleVersions.ts:2 - Shared helpers must not depend on feature modules.
-- WARNING `raw-console` src/helpers/biblesDb.ts:257 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/biblesDb.ts:279 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/biblesDb.ts:339 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/biblesDb.ts:509 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/biblesDb.ts:972 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/biblesDb.ts:1025 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/captureError.ts:5 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/catchDatabaseError.new.ts:9 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/catchDatabaseError.new.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/catchDatabaseError.ts:12 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/catchDatabaseError.ts:43 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/cleanupRegistry.ts:40 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/cleanupRegistry.ts:43 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/cleanupRegistry.ts:47 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/cleanupRegistry.ts:51 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:33 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:34 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:54 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:59 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:105 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:112 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:118 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:123 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databaseMigration.ts:128 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/databases.ts:109 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadBibleToSqlite.ts:78 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadBibleToSqlite.ts:149 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadBibleToSqlite.ts:202 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadBibleToSqlite.ts:209 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadBibleToSqlite.ts:215 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadBibleToSqlite.ts:314 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadManager.ts:193 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadManager.ts:298 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/downloadManager.ts:387 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `helpers-feature-boundary` src/helpers/firestoreMigration.ts:28 - Shared helpers must not depend on feature modules.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:106 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:200 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:213 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:226 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:325 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:381 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:403 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:474 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:493 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:495 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:517 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:518 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:519 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:522 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:525 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:547 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:559 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:564 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:602 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:611 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:624 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:639 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:647 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:652 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:663 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:664 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:665 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:670 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:671 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:672 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:726 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:744 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:747 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:755 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:760 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:767 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:777 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:785 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:814 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:821 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:839 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:889 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:924 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:930 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreMigration.ts:950 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:125 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:145 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:218 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:230 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:234 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:236 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:264 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:290 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:301 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:306 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:308 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:334 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:361 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:381 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:383 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:420 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:427 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:540 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:547 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:556 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/firestoreSubcollections.ts:592 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/getSQLTransaction.ts:19 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/getSQLTransaction.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/getSQLTransaction.ts:63 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/getSQLTransaction.ts:81 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/getSQLTransaction.ts:89 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `helpers-feature-boundary` src/helpers/guestDataAdoption.ts:1 - Shared helpers must not depend on feature modules.
-- WARNING `helpers-feature-boundary` src/helpers/loadBibleChapter.ts:2 - Shared helpers must not depend on feature modules.
-- WARNING `raw-console` src/helpers/migrationState.ts:31 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/migrationState.ts:44 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/migrationState.ts:56 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/migrationState.ts:92 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:22 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:26 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:32 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:39 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:62 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:78 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/nukeApp.ts:82 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/react-native-youtube-iframe/YoutubeIframe.tsx:181 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:45 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:48 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:63 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:69 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:158 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:164 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:184 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:201 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:208 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:269 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:277 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:356 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:373 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:377 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/sqlite.ts:382 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:25 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:47 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:82 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:99 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:102 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:106 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:113 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:136 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/storage.ts:184 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `helpers-feature-boundary` src/helpers/strongBibleSidecar.ts:29 - Shared helpers must not depend on feature modules.
-- WARNING `raw-console` src/helpers/styledProps.ts:13 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/tabGroupsFirestoreSync.ts:196 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/tabGroupsFirestoreSync.ts:209 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/tabGroupsFirestoreSync.ts:218 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/toast.ts:17 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useHTMLView.ts:172 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useInitFireAuth.tsx:58 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useInitFireAuth.tsx:211 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useInitFireAuth.tsx:243 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useInitFireAuth.tsx:245 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useInitFireAuth.tsx:250 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useInitFireAuth.tsx:283 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useInitFireAuth.tsx:284 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:66 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:75 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:132 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:226 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:230 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:276 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:303 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:311 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:320 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:328 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useLiveUpdates.ts:338 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useRemoteConfig.ts:19 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/helpers/useRemoteConfig.ts:21 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:350 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:407 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:412 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:420 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:423 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:444 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:831 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:833 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:842 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:871 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:873 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:882 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:994 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/firestoreMiddleware.ts:996 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/logMiddleware.ts:53 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/logMiddleware.ts:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/migrations.ts:38 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/modules/user.ts:289 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/redux/modules/user.ts:1553 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabGroups.ts:49 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabGroups.ts:82 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabGroups.ts:129 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabGroups.ts:134 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabGroups.ts:166 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabGroups.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabs.ts:453 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/tabs.ts:470 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:58 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:108 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:148 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:150 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:183 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:212 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:236 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:247 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:264 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:273 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:297 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:378 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:394 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:416 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:418 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` src/state/useTabGroupsSync.ts:465 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/ErrorBoundary.tsx:41 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:38 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:84 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:133 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:148 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:153 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:159 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:171 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:182 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/InitHooks.tsx:186 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/__tests__/ChoiceFilterModal-test.tsx:71 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/__tests__/FiltersHeader-test.tsx:96 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/__tests__/MultipleChoiceFilterModal-test.tsx:89 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/common/__tests__/SearchFilterModal-test.tsx:35 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/devtools/reduxDevtoolsPolyfill.ts:39 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/devtools/reduxDevtoolsPolyfill.ts:119 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `feature-firebase-boundary` apps/mobile/src/features/app/FullAppRuntime.tsx:2 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
+- WARNING `deep-relative-import` apps/mobile/src/features/app/FullAppRuntime.tsx:30 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/app/FullAppRuntime.tsx:87 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/app-rating/useAppRating.ts:33 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/app-rating/useAppRating.ts:87 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/app-rating/useAppRating.ts:101 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/AppSwitcherScreen.tsx:11 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/CreateGroupPage.tsx:21 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/CreateGroupPage.tsx:22 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/StaticTabPreview.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/TabGroupPage.tsx:18 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/TabGroupPage.tsx:19 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/TabGroupPager.tsx:11 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/TabPreview.tsx:12 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/AppSwitcherScreen/useTabPreview.ts:13 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/Buttons/AddTabButton.tsx:8 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/Buttons/BibleButton.tsx:9 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/Buttons/BibleButton.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/Buttons/MenuButton.tsx:5 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/Buttons/useSearchButton.ts:5 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/Buttons/useTabButtonPress.ts:11 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/EditGroupModal.tsx:18 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/GroupActionsPopover.tsx:8 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/GroupActionsPopover.tsx:9 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/GroupTitleButton.tsx:6 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/GroupTitleButton.tsx:7 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/ViewGroupsModal.tsx:11 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/BottomTabBar/useBottomTabBar.ts:5 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/app-switcher/CachedTabScreens.tsx:21 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabPreviewCarousel/TabPreview.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabPreviewCarousel/TabPreviewCarousel.tsx:5 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabScreen/NewTab/NewTabItem.tsx:9 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabScreen/NewTab/NewTabItem.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabScreen/NewTab/NewTabScreen.tsx:15 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabScreen/NewTab/SelectBibleReferenceModal.tsx:8 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabScreen/NewTab/SelectBibleReferenceModalProvider.tsx:3 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabScreen/NewTab/atoms.ts:2 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/TabScreen/TabScreen.tsx:21 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/utils/getIconByTabType.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/utils/tabHelpers.ts:4 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/utils/useExpandNewTab.ts:5 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/utils/useOnceAtoms.ts:3 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/utils/useOpenInNewTab.ts:6 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/app-switcher/utils/useProviderEffects.ts:74 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/utils/useSlideNewTab.ts:4 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/utils/useTabAnimations.ts:6 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:6 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:14 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:19 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:26 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/app-switcher/utils/useTakeActiveTabSnapshot.ts:34 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/app-switcher/utils/useWhyDidYouUpdate.ts:30 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/AnnotationMode/useAnnotationEvents.ts:45 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/AnnotationMode/useAnnotationEvents.ts:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/AnnotationMode/useAnnotationEvents.ts:100 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/AnnotationMode/useAnnotationEvents.ts:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/AnnotationMode/useAnnotationHighlights.ts:131 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/AnnotationMode/useAnnotationModeController.ts:107 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/AnnotationMode/useAnnotationModeController.ts:138 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:673 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:687 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:718 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:731 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:742 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:749 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:805 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:812 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:836 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:843 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:858 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:865 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:904 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:917 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:1458 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:1473 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:1484 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:1495 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMComponent.tsx:1519 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMWrapper.tsx:512 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMWrapper.tsx:536 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/BibleDOMWrapper.tsx:894 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/bible/BibleDOM/ContainerText.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/__tests__/interlinearStrongSelectionContext-test.tsx:26 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleDOM/__tests__/interlinearStrongSelectionContext-test.tsx:36 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleErrorView.tsx:74 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleHeader.tsx:485 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleHeader.tsx:546 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleHeader.tsx:594 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleLinkScreen.tsx:225 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleLinkScreen.tsx:350 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleLinkScreen.tsx:351 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BibleViewer.tsx:1196 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/BookSelectorSheet/__tests__/BookSelectorList-test.tsx:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/bible/SelectedVersesModal/SelectedVersesModal.tsx:10 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/bible/SelectedVersesModal/hooks/useVerseActions.ts:12 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/bible/SelectedVersesModal/types.ts:3 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/bible/StrongAudioProvider.tsx:75 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/StrongAudioProvider.tsx:100 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/StrongAudioProvider.tsx:140 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/__tests__/BibleOfflineDetailsSheet-test.tsx:139 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/__tests__/InterlinearIndexSelectorItem-test.tsx:103 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/__tests__/VersionCatalogView-test.tsx:109 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/bible/footer/AudioUrlFooter.tsx:27 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/bible/footer/AudioUrlFooter.tsx:115 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/footer/AudioUrlFooter.tsx:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/footer/AudioUrlFooter.tsx:191 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/footer/AudioUrlFooter.tsx:226 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/bible/footer/AudioUrlFooter.tsx:254 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/bible/footer/BackToAudioFooter.tsx:12 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/bible/passageMedia.ts:4 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/bible/resources/ResourceModal.tsx:30 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `feature-firebase-boundary` apps/mobile/src/features/commentaries/Comment.tsx:19 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
+- WARNING `raw-console` apps/mobile/src/features/commentaries/Comment.tsx:146 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/dictionnary/DictionaryDetailTabScreen.tsx:188 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `feature-firebase-boundary` apps/mobile/src/features/home/Events.tsx:5 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
+- WARNING `feature-firebase-boundary` apps/mobile/src/features/home/HomeScreen.tsx:2 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
+- WARNING `raw-console` apps/mobile/src/features/home/PlanHome.tsx:44 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/home/VerseImageModal.tsx:54 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:167 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:175 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/migrations/__tests__/AccountMigrationModal-test.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/migrations/__tests__/LocalMigrationGate-test.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/migrations/__tests__/LocalMigrationGate-test.tsx:143 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/nave/NaveDetailTabScreen.tsx:161 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/nave/NaveDetailTabScreen.tsx:191 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/notes/NoteDetailTabScreen.tsx:315 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/onboarding/OnBoarding.tsx:27 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/onboarding/__tests__/ResourceSetupChoice-copy-test.ts:1 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/onboarding/useOfflineSetupDownload.ts:161 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/plans/Explore/ExplorePlanItem.tsx:117 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:21 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `deep-relative-import` apps/mobile/src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:22 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/plans/PlanSliceScreen/PlanSliceScreen.tsx:192 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/plans/PlanSliceScreen/Slice.tsx:26 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/plans/PlanSliceScreen/VideoSlice.tsx:31 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/plans/PlanSliceScreen/VideoSlice.tsx:32 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/plans/PlanSliceScreen/VideoSlice.tsx:33 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/plans/PlanSliceScreen/VideoSlice.tsx:34 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `feature-firebase-boundary` apps/mobile/src/features/plans/plan.hooks.ts:7 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
+- WARNING `raw-console` apps/mobile/src/features/plans/plan.hooks.ts:340 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `feature-firebase-boundary` apps/mobile/src/features/profile/components/DeleteAccountModal.tsx:14 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
+- WARNING `raw-console` apps/mobile/src/features/profile/components/DeleteAccountModal.tsx:59 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/resources/bibleContentAccess.ts:323 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/resources/bibleContentAccess.ts:324 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `feature-firebase-boundary` apps/mobile/src/features/resources/commentaryAccess.ts:5 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
+- WARNING `raw-console` apps/mobile/src/features/resources/recoverableIntegrity.ts:10 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/resources/resourceSourceLogger.ts:72 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/search/SQLiteSearchScreen.tsx:531 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/AutomaticBackupsScreen.tsx:62 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/AutomaticBackupsScreen.tsx:117 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/AutomaticBackupsScreen.tsx:121 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/AutomaticBackupsScreen.tsx:127 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/AutomaticBackupsScreen.tsx:133 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/ImportExportScreen.tsx:113 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/ImportExportScreen.tsx:157 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/ImportExportScreen.tsx:207 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `feature-firebase-boundary` apps/mobile/src/features/settings/MoreScreen.tsx:2 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
+- WARNING `deep-relative-import` apps/mobile/src/features/settings/MoreScreen.tsx:29 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/settings/MoreScreen.tsx:95 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/settings/__tests__/Verse-test.tsx:112 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/EditStudyScreen.tsx:109 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/PublishStudyMenuItem.tsx:146 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/InlineStrong.ts:24 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/ModuleBlockVerse.ts:47 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/ModuleBlockVerse.ts:71 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StrongBlock.tsx:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:107 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:171 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:261 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:275 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDOMComponent.tsx:278 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:130 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:186 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:258 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/studies/StudiesDOM/StudiesDomWrapper.tsx:263 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `deep-relative-import` apps/mobile/src/features/studies/hooks/useAddVerseToStudy.ts:9 - Prefer path aliases or a small public module boundary over deep relative imports.
+- WARNING `raw-console` apps/mobile/src/features/studies/hooks/useAddVerseToStudy.ts:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/timeline/EventDetailsMedia.tsx:112 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:61 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:67 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:138 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:145 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:179 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:186 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:217 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:243 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:247 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:307 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:327 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:348 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:351 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:366 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/AutoBackupManager.ts:368 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:154 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:159 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:207 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:232 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:239 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:266 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:275 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:277 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:302 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:325 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:342 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:348 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:465 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:485 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:507 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:523 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:535 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:573 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/FireAuth.ts:581 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/TokenManager.ts:38 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/TokenManager.ts:43 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/TokenManager.ts:77 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/TokenManager.ts:89 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/TokenManager.ts:95 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/TokenManager.ts:99 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/TokenManager.ts:123 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/atomicResourceFile.ts:137 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/atomicResourceFile.ts:150 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:62 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:68 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:70 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:129 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:138 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:152 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:158 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:173 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:182 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleMigration.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleResource.ts:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/bibleResource.ts:50 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `helpers-feature-boundary` apps/mobile/src/helpers/bibleVersions.ts:2 - Shared helpers must not depend on feature modules.
+- WARNING `raw-console` apps/mobile/src/helpers/biblesDb.ts:262 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/biblesDb.ts:284 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/biblesDb.ts:344 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/biblesDb.ts:511 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/biblesDb.ts:971 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/biblesDb.ts:1024 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/captureError.ts:5 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/catchDatabaseError.new.ts:9 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/catchDatabaseError.new.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/catchDatabaseError.ts:12 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/catchDatabaseError.ts:43 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/cleanupRegistry.ts:40 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/cleanupRegistry.ts:43 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/cleanupRegistry.ts:47 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/cleanupRegistry.ts:51 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:33 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:34 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:54 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:59 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:105 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:112 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:118 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:123 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databaseMigration.ts:128 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/databases.ts:109 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadBibleToSqlite.ts:78 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadBibleToSqlite.ts:149 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadBibleToSqlite.ts:202 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadBibleToSqlite.ts:209 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadBibleToSqlite.ts:215 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadBibleToSqlite.ts:314 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadManager.ts:193 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadManager.ts:298 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/downloadManager.ts:387 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `helpers-feature-boundary` apps/mobile/src/helpers/firestoreMigration.ts:28 - Shared helpers must not depend on feature modules.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:106 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:200 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:213 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:226 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:325 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:381 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:403 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:474 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:493 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:495 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:517 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:518 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:519 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:522 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:525 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:547 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:559 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:564 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:602 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:611 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:624 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:639 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:647 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:652 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:663 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:664 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:665 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:670 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:671 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:672 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:726 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:744 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:747 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:755 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:760 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:767 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:777 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:785 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:814 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:821 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:839 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:889 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:924 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:930 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreMigration.ts:950 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:125 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:145 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:218 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:230 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:234 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:236 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:264 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:290 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:301 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:306 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:308 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:334 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:361 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:381 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:383 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:420 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:427 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:540 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:547 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:556 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/firestoreSubcollections.ts:592 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/getSQLTransaction.ts:19 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/getSQLTransaction.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/getSQLTransaction.ts:63 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/getSQLTransaction.ts:81 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/getSQLTransaction.ts:89 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `helpers-feature-boundary` apps/mobile/src/helpers/guestDataAdoption.ts:1 - Shared helpers must not depend on feature modules.
+- WARNING `helpers-feature-boundary` apps/mobile/src/helpers/loadBibleChapter.ts:2 - Shared helpers must not depend on feature modules.
+- WARNING `raw-console` apps/mobile/src/helpers/migrationState.ts:31 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/migrationState.ts:44 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/migrationState.ts:56 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/migrationState.ts:92 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:22 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:26 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:32 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:39 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:46 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:62 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:78 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/nukeApp.ts:82 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/react-native-youtube-iframe/YoutubeIframe.tsx:181 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:45 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:48 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:63 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:69 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:158 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:164 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:184 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:201 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:208 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:269 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:277 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:356 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:373 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:377 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/sqlite.ts:382 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:25 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:47 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:82 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:99 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:102 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:106 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:113 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:116 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:136 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/storage.ts:184 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `helpers-feature-boundary` apps/mobile/src/helpers/strongBibleSidecar.ts:29 - Shared helpers must not depend on feature modules.
+- WARNING `raw-console` apps/mobile/src/helpers/styledProps.ts:13 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/tabGroupsFirestoreSync.ts:196 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/tabGroupsFirestoreSync.ts:209 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/tabGroupsFirestoreSync.ts:218 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/toast.ts:17 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useHTMLView.ts:172 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useInitFireAuth.tsx:58 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useInitFireAuth.tsx:211 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useInitFireAuth.tsx:243 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useInitFireAuth.tsx:245 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useInitFireAuth.tsx:250 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useInitFireAuth.tsx:283 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useInitFireAuth.tsx:284 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:66 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:75 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:132 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:226 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:230 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:276 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:303 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:311 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:320 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:328 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useLiveUpdates.ts:338 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useRemoteConfig.ts:19 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/helpers/useRemoteConfig.ts:21 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:350 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:407 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:412 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:420 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:423 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:444 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:831 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:833 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:842 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:871 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:873 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:882 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:994 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/firestoreMiddleware.ts:996 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/logMiddleware.ts:53 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/logMiddleware.ts:65 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/migrations.ts:38 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/modules/user.ts:289 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/redux/modules/user.ts:1553 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/tabGroups.ts:49 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/tabGroups.ts:82 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/tabGroups.ts:129 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/tabGroups.ts:134 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/tabGroups.ts:166 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/tabGroups.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/tabs.ts:453 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/tabs.ts:470 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:55 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:58 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:108 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:148 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:150 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:183 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:212 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:236 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:247 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:264 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:273 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:297 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:378 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:394 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:416 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:418 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/state/useTabGroupsSync.ts:465 - Prefer appLogger for app-owned diagnostic events that agents should query.

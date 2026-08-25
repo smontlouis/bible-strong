@@ -1,0 +1,15 @@
+{
+  "resourceId": "MHY",
+  "sourceVersion": "mhy-fr-mobile-source-v1",
+  "rights": {
+    "holder": "Public domain",
+    "termsReference": "Matthew Henry Concise Commentary",
+    "attribution": "Matthew Henry; French translation Dominique Osché",
+    "online": true,
+    "offline": true
+  },
+  "deliveryCapabilities": {
+    "onlineAccess": true,
+    "offlineDownload": true
+  }
+}

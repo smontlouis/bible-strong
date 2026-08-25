@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "perseus-lsj-entry@1",
+  "entryKey": "greek:G20354",
+  "source": {
+    "name": "A Greek-English Lexicon (LSJ)",
+    "provider": "Perseus Digital Library",
+    "repository": "https://github.com/PerseusDL/lexica",
+    "commit": "b5e707bdda2d6c8e0bb6c29657454996b4fb04d7",
+    "path": "CTS_XML_TEI/perseus/pdllex/grc/lsj/grc.lsj.perseus-eng5.xml",
+    "rawUrl": "https://raw.githubusercontent.com/PerseusDL/lexica/b5e707bdda2d6c8e0bb6c29657454996b4fb04d7/CTS_XML_TEI/perseus/pdllex/grc/lsj/grc.lsj.perseus-eng5.xml",
+    "viewerUrl": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn%3Acite2%3Ascaife-viewer%3Adictionaries.v1%3Alsj-n35193/",
+    "urn": "urn:cite2:scaife-viewer:dictionaries.v1:lsj-n35193",
+    "accessedAt": "2026-07-14",
+    "sourceFileSha256": "2e0ef90281c62e320f5386364b875f1000d1bcb22718369a5dbe0b6c68d5ad95",
+    "sourceFragmentSha256": "89c4765f8d7a06a1db40d88ed5c5b1a95b362ed76583986382fda0ab716157b6",
+    "sourceFragmentBytes": 1910
+  },
+  "license": {
+    "spdx": "CC-BY-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "attribution": "Text provided under a CC BY-SA license by Perseus Digital Library, http://www.perseus.tufts.edu, with funding from The National Endowment for the Humanities.",
+    "provenanceUrl": "https://github.com/PerseusDL/lexica/blob/b5e707bdda2d6c8e0bb6c29657454996b4fb04d7/CTS_XML_TEI/perseus/pdllex/grc/lsj/README.md",
+    "modifications": "The TEI entry was reduced to a canonical semantic payload; the beta-code headword and citations were expanded for readability, and the source wording was otherwise preserved."
+  },
+  "payload": {
+    "definition": "alter; in the passive, sodomite",
+    "headword": "ἐνδιαλλάσσω",
+    "shortDef": "alter; passive, to be a sodomite",
+    "citations": [
+      "Aristotle, Physiognomonica 806a13",
+      "LXX 3 Kings 22:47",
+      "Aquila Genesis 38:21"
+    ],
+    "sourceForms": {
+      "headwordBetaCode": "e)ndialla/ssw",
+      "atticBetaCode": "e)ndia/-ttw",
+      "passiveBetaCode": "-agme/nos, o("
+    },
+    "urn": "urn:cite2:scaife-viewer:dictionaries.v1:lsj-n35193"
+  },
+  "payloadSha256": "2b28f5170734d0e17c881a4144df2c92d9bfb9cbb17f9ac33858196eaf010550"
+}

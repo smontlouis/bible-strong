@@ -6,7 +6,9 @@ This directory is the repo-level reference set for agents and humans working on 
 
 | Document | Purpose |
 |---|---|
-| `../CONTEXT.md` | Product/domain context, glossary, and invariants. |
+| `../CONTEXT-MAP.md` | Monorepo context map and links to each bounded-context glossary. |
+| `source-tree.md` | Monorepo workspace map and package ownership. |
+| `dev-guide.md` | Root setup, workspace scripts, Yarn patches, and validation. |
 | `architecture.md` | System architecture and cross-cutting flows. |
 | `app-flows.md` | Detailed product flows, screens, states, and route inventory. |
 | `assets/app-flows/dist/index.html` | Built React Flow app flow map with pan, zoom, drag, curated-flow filters, inventory filters, thumbnails, and detail panel. |
@@ -14,8 +16,7 @@ This directory is the repo-level reference set for agents and humans working on 
 | `assets/app-flows/data/app-flows.json` | Structured app-flow graph generated from the screenshot manifest and curated flows. |
 | `assets/app-flows/data/screenshots.json` | Versioned screenshot manifest for visual and agent-consumable flow mapping. |
 | `assets/app-flows/capture-notes.md` | Argent capture notes, limitations, state mutations, and remaining capture targets. |
-| `source-tree.md` | Annotated map of important folders and files. |
-| `dev-guide.md` | Setup, scripts, simulator workflow, and validation. |
+| `mobile-domain-reference.md` | Detailed mobile product invariants and implementation references; not a glossary. |
 | `data-models.md` | Persisted state, local databases, Firestore sync, and identifiers. |
 | `relations-architecture.md` | Target architecture for a unified relation graph, query strategy, and denormalized indexes. |
 | `conventions.md` | Coding conventions and project-specific rules. |
@@ -58,3 +59,5 @@ This directory is the repo-level reference set for agents and humans working on 
 ## Decision Records
 
 ADRs live in `adr/`. Do not invent ADRs retroactively; add one when a new durable engineering decision is made or when an existing implicit decision is confirmed.
+
+`adr/0032-adopt-yarn-workspace-monorepo.md` records the workspace layout, package names, imported histories, and Yarn patch policy.

@@ -1,0 +1,9 @@
+node_modules/
+dist/
+coverage/
+data/
+artifacts/
+cache/
+output/
+outputs/
+package-lock.json

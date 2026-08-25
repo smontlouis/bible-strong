@@ -1,0 +1,55 @@
+{
+  "name": "@bible-strong/api-functions",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "lint": "tslint --project tsconfig.json",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "serve": "yarn build && IS_OFFLINE=true firebase emulators:start",
+    "shell": "yarn build && firebase functions:shell",
+    "start": "yarn shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "serve-db": "firebase emulators:start --only firestore  --import=../firestore/production_export"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "@sparticuz/chromium-min": "^131.0.0",
+    "@types/express": "^5.0.6",
+    "@types/express-serve-static-core": "^5.1.0",
+    "@types/mime-types": "^3.0.1",
+    "@types/node-fetch": "^2.6.13",
+    "@types/puppeteer": "^7.0.4",
+    "@types/serve-static": "^2.2.0",
+    "add": "^2.0.6",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "express": "^5.2.1",
+    "firebase-admin": "^13.6.0",
+    "firebase-functions": "^7.0.2",
+    "form-data": "^4.0.5",
+    "jszip": "^3.10.1",
+    "metascraper": "5.49.7",
+    "metascraper-author": "5.49.7",
+    "metascraper-description": "5.49.7",
+    "metascraper-image": "5.49.7",
+    "metascraper-logo": "5.49.7",
+    "metascraper-title": "5.49.7",
+    "mime-types": "^3.0.2",
+    "multer": "emadalam/multer",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "24.34.0",
+    "puppeteer-core": "^24.34.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/multer": "^2.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.50.0",
+    "@typescript-eslint/parser": "^8.50.0",
+    "tslint": "^6.1.3",
+    "typescript": "5.9.3"
+  },
+  "private": true
+}

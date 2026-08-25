@@ -2,115 +2,73 @@
 
 ## Setup
 
+Run installation from the repository root:
+
 ```bash
 corepack enable
 yarn install
 ```
 
-Copy `.env.example` to the environment file you need and fill real values locally. Do not commit secrets.
+The repository uses Yarn 4, one root `yarn.lock`, and workspace dependencies. Hoisting stops at workspace boundaries so applications with different React and framework versions retain isolated dependency trees. Do not run another package manager inside an app or commit a subproject lockfile.
+
+## Start a workspace
 
 ```bash
-cp .env.example .env.development
+yarn dev:mobile
+yarn dev:web
+yarn dev:api
+yarn dev:lexicon
+yarn dev:resources
 ```
 
-## Daily Commands
+Run any app-specific command by package name, for example:
 
 ```bash
-yarn start
-yarn ios
-yarn android
+yarn workspace @bible-strong/mobile ios
+yarn workspace @bible-strong/mobile android
+yarn workspace @bible-strong/api-functions build
+yarn workspace @bible-strong/resource-service test
 ```
 
-The app uses a custom Expo development client. It is not expected to run in Expo Go.
+The mobile app uses a custom Expo development client and is not expected to run in Expo Go.
 
-## Playground mode
+## Validation
 
-Set `EXPO_PUBLIC_PLAYGROUND=true` (or `1`) to boot the lightweight development dashboard. It
-keeps the Redux/persistence, theme, query, database, resource-access, and error-boundary providers,
-but does not mount the full Expo Router stack or the app's background initialization hooks.
-For a machine-local override, `.env.development.local` is the most robust choice; `.env` also works
-when `.env.development` does not redefine the same key. Expo gives the more specific files priority.
-
-```bash
-EXPO_PUBLIC_PLAYGROUND=true yarn start --clear
-```
-
-The flag is evaluated when Metro builds the bundle, so restart Metro after changing it. Set it to
-`false` to return to the complete application.
-
-## Validation Commands
+Root commands run the applicable validation scripts across the relevant workspaces:
 
 ```bash
 yarn typecheck
-yarn test
 yarn lint
+yarn test
+yarn build
 yarn format:check
 ```
 
-Use `docs/agents/validation.md` for the current canonical validation matrix.
+For a focused change, validate the affected workspaces. For dependency, lockfile, patch, shared-package, or workspace configuration changes, run root-wide checks. The detailed matrix is in `agents/validation.md`.
 
-## Simulator Smoke
+## Environment files
 
-Argent is the preferred simulator control path for agent-driven mobile validation.
-
-Use the Argent MCP tools to connect to the target simulator, inspect the screen, perform interactions, capture screenshots, and stop simulator servers when finished.
-
-The last Level 1 smoke used the existing `builds/biblestrong.dev.app` dev client on an iPhone 17 simulator and launched bundle id `com.smontlouis.biblestrong.dev`.
-
-In this environment, `yarn start` under Node 22 failed before Metro bound a port with a `freeport-async` bad-port error. The working command was:
+Environment files belong to the application that consumes them. Mobile development, staging, and production files live under `apps/mobile/`; other apps document their own environment contracts in their README files.
 
 ```bash
-npx -y -p node@20 node /Users/stephane/.cache/node/corepack/v1/yarn/4.12.0/yarn.js start --port 8081
+cp apps/mobile/.env.example apps/mobile/.env.development
 ```
 
-Prefer Node 20 or 18 for Expo development until the compatibility issue is resolved.
+Do not commit secrets. Mobile variables used by client code must use the `EXPO_PUBLIC_*` prefix. Treat Firebase files, bundle identifiers, package names, and EAS profiles as sensitive.
 
-## Build Commands
+## Yarn patches
 
-Run build commands only when native config, Expo plugins, Firebase service files, identity, background modes, EAS profiles, or release behavior is in scope.
+All patches live in root `.yarn/patches/` and are resolved from workspace manifests or root `resolutions`. When changing a patched dependency:
 
-```bash
-yarn build:android:dev
-yarn build:android:staging
-yarn build:android:prod
-yarn build:android:prod:apk
-yarn build:ios:dev
-yarn build:ios:dev-sim
-yarn build:ios:staging
-yarn build:ios:prod
-```
+1. Run the Yarn patch workflow from the root (`yarn patch` and `yarn patch-commit`).
+2. Update the applicable manifest resolution and patch reference.
+3. Commit the patch file and `yarn.lock` together.
+4. Verify with `yarn install --immutable` and the affected workspace checks.
 
-## Environment Model
+Never replace a `patch:` dependency with a plain version merely to make workspace installation succeed.
 
-The app uses development, staging, and production environment files:
+## Mobile development notes
 
-- `.env.development`
-- `.env.staging`
-- `.env.production`
+Mobile import aliases (`~assets`, `~common`, `~features`, `~helpers`, `~redux`, and related aliases) are configured inside `apps/mobile/`. Playground mode is enabled with `EXPO_PUBLIC_PLAYGROUND=true` in the mobile environment and requires restarting Metro.
 
-Environment variables used by app code should be exposed as `EXPO_PUBLIC_*`.
-
-Firebase config differs by environment. Treat `.env*`, Firebase files, bundle identifiers, package names, and EAS profiles as sensitive.
-
-## Import Aliases
-
-Configured in both Babel and TypeScript:
-
-- `~assets`
-- `~common`
-- `~devtools`
-- `~features`
-- `~helpers`
-- `~navigation`
-- `~redux`
-- `~themes`
-- `~state`
-- `~i18n`
-
-Prefer aliases over long relative paths.
-
-## Testing Notes
-
-Current automated test coverage is concentrated in Redux modules. UI flows are mostly validated manually through simulator smoke tests.
-
-The current lint command passes but emits ESLint flat-config warnings for `/* eslint-env */` comments in Redux test files. These warnings are known and non-blocking until ESLint v10 makes them errors.
+Prefer Node 20 or 18 for Expo development if the local Node version triggers Metro/free-port incompatibilities. Build commands remain workspace scripts, for example `yarn workspace @bible-strong/mobile build:ios:dev`.

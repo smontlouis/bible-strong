@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Revue produit Strong FR V2</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./lexicon.css?v=3" />
+  </head>
+  <body class="lexicon-page">
+    <main class="lexicon-shell review-shell">
+      <header class="lexicon-topbar">
+        <a
+          class="lexicon-brand"
+          href="./lexicon.html"
+          aria-label="Strong Lexicon"
+        >
+          <span class="lexicon-brand-mark">S</span>
+          <span>
+            <strong>Strong Lexicon</strong>
+            <small>FR V2 review</small>
+          </span>
+        </a>
+        <nav class="lexicon-nav" aria-label="Navigation viewer">
+          <a href="./">TSV</a>
+          <a href="./lexicon.html">Lexique</a>
+          <a href="./entities-tree.html">Entités</a>
+          <a href="./review.html">Revue TSV</a>
+        </nav>
+      </header>
+
+      <section
+        class="lexicon-search-panel review-search-panel"
+        aria-label="Recherche revue lexique"
+      >
+        <div class="search-field">
+          <label for="reviewSearch">Recherche</label>
+          <input
+            id="reviewSearch"
+            type="search"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="G3056, grâce, manual-fix, ratio-low..."
+          />
+        </div>
+
+        <div class="segment-control" aria-label="Filtrer par langue originale">
+          <button class="is-active" type="button" data-language="all">
+            Tous
+          </button>
+          <button type="button" data-language="greek">Grec</button>
+          <button type="button" data-language="hebrew">Hébreu</button>
+        </div>
+
+        <div
+          class="segment-control review-bucket-control"
+          aria-label="Filtrer par risque"
+        >
+          <button class="is-active" type="button" data-bucket="top">Top</button>
+          <button type="button" data-bucket="critical">Critiques</button>
+          <button type="button" data-bucket="anomaly">Anomalies</button>
+          <button type="button" data-bucket="manual">Manuelles</button>
+          <button type="button" data-bucket="long">Longues</button>
+          <button type="button" data-bucket="refs">Refs</button>
+        </div>
+
+        <div class="lexicon-metrics" id="reviewMetrics" aria-live="polite">
+          <span>22 717 entrées</span>
+          <span>0 review</span>
+        </div>
+      </section>
+
+      <section class="lexicon-workspace">
+        <aside class="result-pane" aria-label="Entrées à reviewer">
+          <div class="pane-header">
+            <h1>Priorité</h1>
+            <span id="reviewResultCount">-</span>
+          </div>
+          <div
+            id="reviewResultList"
+            class="result-list review-result-list"
+          ></div>
+        </aside>
+
+        <article class="entry-pane" aria-label="Comparaison EN FR">
+          <div id="reviewEntryDetail" class="entry-detail empty-detail">
+            <p>Sélectionne une entrée pour comparer STEP EN et FR V2.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./lexicon-product-review.js?v=1"></script>
+  </body>
+</html>

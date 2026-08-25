@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Entités bibliques - Family tree</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./entities-tree.css?v=1" />
+  </head>
+  <body class="entity-tree-page">
+    <main class="tree-shell">
+      <header class="tree-topbar">
+        <a class="tree-brand" href="./entities-tree.html" aria-label="Entités bibliques">
+          <span class="tree-brand-mark">E</span>
+          <span>
+            <strong>Entités bibliques</strong>
+            <small>Relations & familles</small>
+          </span>
+        </a>
+
+        <nav class="tree-nav" aria-label="Navigation viewer">
+          <a href="./">TSV</a>
+          <a href="./lexicon.html">Lexique</a>
+          <a class="is-active" href="./entities-tree.html">Entités</a>
+          <a href="./review.html">Revue TSV</a>
+        </nav>
+      </header>
+
+      <section class="tree-toolbar" aria-label="Contrôles du graphe">
+        <form id="treeSearchForm" class="tree-search">
+          <label for="treeSearch">Recherche</label>
+          <input
+            id="treeSearch"
+            type="search"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="Nom biblique, ex. Abraham, David, Marie"
+          />
+          <button type="submit">Centrer</button>
+        </form>
+
+        <div class="tree-filter-group" aria-label="Relations visibles">
+          <label><input type="checkbox" value="parent" checked /> Parents</label>
+          <label><input type="checkbox" value="partner" checked /> Couples</label>
+          <label><input type="checkbox" value="sibling" /> Fratries</label>
+        </div>
+
+        <div class="tree-zoom-controls" aria-label="Zoom et déplacement">
+          <button id="zoomOut" type="button" aria-label="Dézoomer">-</button>
+          <button id="zoomIn" type="button" aria-label="Zoomer">+</button>
+          <button id="resetView" type="button">Réinitialiser</button>
+        </div>
+      </section>
+
+      <section class="tree-workspace">
+        <aside class="tree-inspector" aria-label="Personnage sélectionné">
+          <div id="inspectorContent" class="inspector-empty">
+            <div class="empty-avatar" aria-hidden="true"></div>
+            <h1>Family tree biblique</h1>
+            <p>
+              Recherchez une personne ou cliquez sur un avatar pour afficher ses
+              relations directes.
+            </p>
+          </div>
+        </aside>
+
+        <section class="tree-canvas-panel" aria-label="Graphe des relations">
+          <div class="tree-status" id="treeStatus">Chargement des entités...</div>
+          <svg id="treeSvg" class="tree-svg" role="img" aria-label="Family tree biblique">
+            <defs>
+              <filter id="nodeShadow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow
+                  dx="0"
+                  dy="8"
+                  stdDeviation="8"
+                  flood-color="#19324f"
+                  flood-opacity="0.12"
+                />
+              </filter>
+            </defs>
+            <g id="viewportGroup"></g>
+          </svg>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./entities-tree.js?v=1"></script>
+  </body>
+</html>

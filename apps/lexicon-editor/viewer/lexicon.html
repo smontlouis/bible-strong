@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strong Lexicon FR/EN</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./lexicon.css?v=2" />
+  </head>
+  <body class="lexicon-page">
+    <main class="lexicon-shell">
+      <header class="lexicon-topbar">
+        <a
+          class="lexicon-brand"
+          href="./lexicon.html"
+          aria-label="Strong Lexicon"
+        >
+          <span class="lexicon-brand-mark">S</span>
+          <span>
+            <strong>Strong Lexicon</strong>
+            <small>FR / EN</small>
+          </span>
+        </a>
+        <nav class="lexicon-nav" aria-label="Navigation viewer">
+          <a href="./">TSV</a>
+          <a href="./workflow.html">Workflow</a>
+          <a class="is-active" href="./lexicon.html">Lexique</a>
+          <a href="./entities-tree.html">Entités</a>
+          <a href="./review.html">Revue TSV</a>
+        </nav>
+      </header>
+
+      <section
+        id="dictionaryPanel"
+        class="lexicon-dictionary-panel"
+        aria-label="Recherche lexique"
+      >
+        <form id="lexiconSearchForm" class="dictionary-search-form">
+          <div class="search-field dictionary-search-field">
+            <label for="lexiconSearch">Recherche</label>
+            <input
+              id="lexiconSearch"
+              type="search"
+              autocomplete="off"
+              spellcheck="false"
+              placeholder="Code strong ou mot"
+            />
+          </div>
+
+          <label class="language-select-label" for="languageSelect"
+            >Langue</label
+          >
+          <select id="languageSelect" class="language-select">
+            <option value="greek">Grec</option>
+            <option value="hebrew">Hébreu</option>
+          </select>
+
+          <button class="dictionary-submit" type="submit">Rechercher</button>
+        </form>
+
+        <p class="dictionary-help">
+          Vous pouvez saisir un mot en français, en grec, en hébreu ou un code
+          strong.
+        </p>
+
+        <nav
+          id="letterFilter"
+          class="letter-filter"
+          aria-label="Filtrer par première lettre"
+        ></nav>
+      </section>
+
+      <section
+        id="dictionaryResults"
+        class="dictionary-results-section"
+        aria-label="Résultats du dictionnaire"
+      >
+        <div class="dictionary-result-header">
+          <h1>Lexique</h1>
+          <div class="lexicon-metrics" id="lexiconMetrics" aria-live="polite">
+            <span>Chargement</span>
+          </div>
+        </div>
+
+        <div id="resultList" class="dictionary-table-wrap"></div>
+      </section>
+
+      <section
+        id="entryPage"
+        class="dictionary-entry-page"
+        aria-label="Détail Strong"
+        hidden
+      >
+        <div class="entry-page-toolbar">
+          <button id="backToList" class="secondary-action" type="button">
+            Retour à la liste
+          </button>
+          <div class="entry-page-nav" aria-label="Navigation entre les Strong">
+            <button id="previousEntry" class="secondary-action" type="button">
+              Précédent
+            </button>
+            <span id="entryPosition" class="entry-position"></span>
+            <button id="nextEntry" class="secondary-action" type="button">
+              Suivant
+            </button>
+          </div>
+        </div>
+        <article class="entry-pane dictionary-entry-pane">
+          <div id="entryDetail" class="entry-detail empty-detail">
+            <p>Chargement de l'entrée...</p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./lexicon.js?v=2"></script>
+  </body>
+</html>

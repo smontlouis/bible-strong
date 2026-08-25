@@ -1,0 +1,78 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "bible-strong-resources-api",
+  "main": "src/runtime/worker.ts",
+  "compatibility_date": "2026-08-19",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [
+    {
+      "pattern": "api.bible-strong.app",
+      "custom_domain": true,
+    },
+  ],
+  "vars": {
+    "FIREBASE_APP_CHECK_PROJECT_NUMBER": "204116128917",
+    "FIREBASE_APP_CHECK_ALLOWED_APP_IDS": "1:204116128917:android:3ae4e716f079e5a002579c,1:204116128917:android:48985d9ab5229d3b02579c,1:204116128917:android:3fdbe48f9c6db8e702579c,1:204116128917:ios:116748d319a72c8c02579c,1:204116128917:ios:253ce7fa4e328e2702579c,1:204116128917:ios:db04ad99d1581a9e02579c",
+    "SEARCH_ANALYTICS_ENABLED": "true",
+    "RESOURCE_ENVIRONMENT": "production",
+    "AI_GATEWAY_ID": "default",
+  },
+  "ratelimits": [
+    {
+      "name": "READING_RATE_LIMITER",
+      "namespace_id": "2041161289171",
+      "simple": { "limit": 300, "period": 60 },
+    },
+    {
+      "name": "SEARCH_RATE_LIMITER",
+      "namespace_id": "2041161289172",
+      "simple": { "limit": 60, "period": 60 },
+    },
+    {
+      "name": "SEARCH_ANALYTICS_RATE_LIMITER",
+      "namespace_id": "2041161289174",
+      "simple": { "limit": 120, "period": 60 },
+    },
+    {
+      "name": "ARTIFACT_RATE_LIMITER",
+      "namespace_id": "2041161289173",
+      "simple": { "limit": 120, "period": 60 },
+    },
+  ],
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 0.1,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 0.1,
+    },
+  },
+  "ai": {
+    "binding": "AI",
+    "remote": true,
+  },
+  "analytics_engine_datasets": [
+    {
+      "binding": "SEARCH_PRODUCT_ANALYTICS",
+      "dataset": "bible_search_product_v1",
+    },
+    {
+      "binding": "SEARCH_RUNTIME_ANALYTICS",
+      "dataset": "bible_search_runtime_v1",
+    },
+  ],
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "8d808a268c90412aa69ec2f59e40725f",
+    },
+  ],
+  "r2_buckets": [
+    {
+      "binding": "RESOURCE_ARTIFACTS",
+      "bucket_name": "bible-strong-resource-artifacts-prod",
+    },
+  ],
+}

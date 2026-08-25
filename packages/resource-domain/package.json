@@ -1,0 +1,31 @@
+{
+  "name": "@bible-strong/resource-domain",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./contracts/*": "./src/contracts/*.ts",
+    "./bible-canon": "./src/bibleCanon.ts",
+    "./bible-search-input": "./src/bibleSearchInput.ts",
+    "./interlinear-bible": "./src/interlinearBible.ts",
+    "./resource-page-cursor": "./src/resourcePageCursor.ts",
+    "./strong-bible": "./src/strongBible.ts",
+    "./strong-bible-concordance": "./src/strongBibleConcordance.ts",
+    "./strong-identities": "./src/strongIdentities.ts",
+    "./strong-lexicon": "./src/strongLexicon.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.node-test.ts"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.28.4",
+    "effect": "3.22.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "4.20.6",
+    "typescript": "~6.0.3"
+  }
+}

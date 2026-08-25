@@ -1,0 +1,21 @@
+{
+  "name": "@bible-strong/bible-reference-parser",
+  "version": "3.2.0-bible-strong.2",
+  "description": "Bible Strong's reproducible snapshot of its Bible reference parser",
+  "type": "module",
+  "main": "esm/",
+  "exports": {
+    "./esm/*": "./esm/*",
+    "./osis-reference": "./src/osisReference.ts"
+  },
+  "files": [
+    "esm/",
+    "src/",
+    "LICENSE.md",
+    "README.md"
+  ],
+  "dependencies": {
+    "@babel/runtime": "^7.28.4"
+  },
+  "license": "MIT"
+}

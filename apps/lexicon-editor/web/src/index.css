@@ -1,0 +1,1269 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.99 0.004 106);
+  --foreground: oklch(0.19 0.026 248);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.19 0.026 248);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.19 0.026 248);
+  --primary: oklch(0.44 0.113 190);
+  --primary-foreground: oklch(0.98 0.01 190);
+  --secondary: oklch(0.94 0.015 235);
+  --secondary-foreground: oklch(0.22 0.03 248);
+  --muted: oklch(0.95 0.012 235);
+  --muted-foreground: oklch(0.48 0.028 248);
+  --accent: oklch(0.91 0.04 145);
+  --accent-foreground: oklch(0.23 0.045 150);
+  --destructive: oklch(0.58 0.19 28);
+  --border: oklch(0.88 0.018 235);
+  --input: oklch(0.9 0.014 235);
+  --ring: oklch(0.58 0.118 190);
+  --chart-1: oklch(0.55 0.13 190);
+  --chart-2: oklch(0.62 0.11 145);
+  --chart-3: oklch(0.68 0.12 76);
+  --chart-4: oklch(0.58 0.13 25);
+  --chart-5: oklch(0.54 0.1 285);
+}
+
+.dark {
+  --background: oklch(0.16 0.018 248);
+  --foreground: oklch(0.96 0.01 235);
+  --card: oklch(0.2 0.021 248);
+  --card-foreground: oklch(0.96 0.01 235);
+  --popover: oklch(0.2 0.021 248);
+  --popover-foreground: oklch(0.96 0.01 235);
+  --primary: oklch(0.69 0.12 190);
+  --primary-foreground: oklch(0.13 0.02 248);
+  --secondary: oklch(0.25 0.025 248);
+  --secondary-foreground: oklch(0.95 0.01 235);
+  --muted: oklch(0.25 0.025 248);
+  --muted-foreground: oklch(0.72 0.026 235);
+  --accent: oklch(0.28 0.055 150);
+  --accent-foreground: oklch(0.91 0.04 145);
+  --destructive: oklch(0.62 0.18 26);
+  --border: oklch(0.31 0.026 248);
+  --input: oklch(0.31 0.026 248);
+  --ring: oklch(0.62 0.11 190);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+  }
+}
+
+@layer components {
+  .lexicon-panel {
+    @apply overflow-hidden rounded-xl border bg-card/70 shadow-sm;
+  }
+
+  .lexicon-panel-summary {
+    @apply flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 bg-muted/20 px-4 py-3 transition-colors hover:bg-muted/40;
+  }
+
+  .lexicon-panel-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .lexicon-panel-chevron {
+    @apply size-4 shrink-0 text-muted-foreground transition-transform duration-200;
+  }
+
+  .lexicon-panel[open] > .lexicon-panel-summary .lexicon-panel-chevron {
+    transform: rotate(90deg);
+  }
+
+  .lexicon-panel-title {
+    @apply text-sm font-semibold tracking-tight;
+  }
+
+  .lexicon-panel-content {
+    @apply border-t;
+  }
+
+  .lexicon-field-section {
+    @apply border-t pt-5 first:border-t-0 first:pt-0;
+  }
+
+  .lexicon-field-label {
+    @apply text-muted-foreground mb-2 text-xs font-medium uppercase tracking-[0.16em];
+  }
+}
+
+@layer components {
+  .legend-dot {
+    @apply inline-block size-2 rounded-full;
+  }
+
+  .legend-dot-witness {
+    background: oklch(0.62 0.11 190);
+  }
+
+  .legend-dot-original {
+    background: oklch(0.68 0.12 76);
+  }
+
+  .legend-dot-step {
+    background: oklch(0.56 0.12 285);
+  }
+
+  .legend-dot-lexical {
+    background: oklch(0.62 0.11 145);
+  }
+
+  .legend-dot-reviewed {
+    background: oklch(0.65 0.16 25);
+  }
+
+  .legend-dot-empty {
+    background: oklch(0.62 0.18 25);
+  }
+
+  .strong-text {
+    @apply text-[1.05rem] leading-9;
+  }
+
+  .strong-text w,
+  .strong-text .strong-word {
+    @apply mx-0.5 inline rounded-md px-1.5 py-0.5 font-medium transition;
+    background: color-mix(in oklab, var(--primary) 34%, transparent);
+  }
+
+  .strong-text w:hover,
+  .strong-text .strong-word:hover {
+    @apply ring-ring cursor-pointer ring-2;
+  }
+
+  .strong-text w[data-source="semantic-lexicon"] {
+    background: color-mix(in oklab, var(--accent) 56%, transparent);
+  }
+
+  .strong-text w[data-source="original-complete"] {
+    background: color-mix(in oklab, oklch(0.56 0.12 285) 46%, transparent);
+  }
+
+  .strong-text w[data-source="reference-backed-original"] {
+    background: color-mix(in oklab, oklch(0.68 0.12 76) 42%, transparent);
+  }
+
+  .strong-text w[data-source="phrase-transfer"] {
+    background: color-mix(in oklab, oklch(0.56 0.12 190) 48%, transparent);
+  }
+
+  .strong-text w[data-source="curated-override"] {
+    background: color-mix(in oklab, oklch(0.66 0.16 42) 45%, transparent);
+    box-shadow: inset 0 -1px 0
+      color-mix(in oklab, oklch(0.8 0.13 55) 72%, transparent);
+  }
+
+  .strong-text w[data-placement="empty"],
+  .strong-text .empty-strong {
+    @apply rounded-full border px-1.5 py-0 text-xs;
+    background: color-mix(in oklab, var(--destructive) 22%, transparent);
+    border-color: color-mix(in oklab, var(--destructive) 70%, transparent);
+  }
+
+  .strong-text sup {
+    @apply text-muted-foreground ml-0.5 text-[0.68em] font-semibold;
+  }
+
+  .strong-text details {
+    @apply border-border bg-muted/40 mt-2 rounded-lg border p-3 text-sm;
+  }
+
+  .strong-text summary {
+    @apply cursor-pointer font-medium;
+  }
+
+  .prose-strong p {
+    @apply mb-3 last:mb-0;
+  }
+
+  .prose-strong a {
+    @apply text-primary underline underline-offset-4;
+  }
+
+  .workflow-shell {
+    background:
+      linear-gradient(180deg, rgba(15, 23, 31, 0.96), rgba(10, 15, 22, 0.98)),
+      var(--background);
+  }
+
+  .workflow-canvas {
+    background:
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px), #0b1017;
+    background-size: 44px 44px;
+  }
+
+  .workflow-flow .react-flow__pane {
+    cursor: grab;
+  }
+
+  .workflow-flow .react-flow__pane:active {
+    cursor: grabbing;
+  }
+
+  .workflow-node {
+    backdrop-filter: blur(12px);
+  }
+
+  .workflow-node-active {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 22px 70px rgba(0, 0, 0, 0.42);
+  }
+
+  .quality-shell {
+    background:
+      linear-gradient(120deg, rgba(23, 116, 105, 0.08), transparent 38%),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 79px,
+        rgba(255, 255, 255, 0.018) 80px
+      ),
+      var(--background);
+  }
+
+  .quality-header {
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(96deg, rgba(8, 15, 22, 0.97), rgba(18, 30, 35, 0.92)),
+      var(--card);
+  }
+
+  .quality-header::after {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: min(34vw, 520px);
+    content: "";
+    pointer-events: none;
+    opacity: 0.28;
+    background: repeating-linear-gradient(
+      135deg,
+      transparent 0,
+      transparent 11px,
+      rgba(105, 207, 188, 0.2) 12px,
+      transparent 13px
+    );
+    mask-image: linear-gradient(90deg, transparent, black);
+  }
+
+  .quality-kicker,
+  .quality-section-label,
+  .quality-pulse-label {
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+
+  .quality-kicker {
+    color: oklch(0.75 0.1 190);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .quality-title {
+    max-width: 760px;
+    font-family: "Avenir Next", Avenir, "Helvetica Neue", sans-serif;
+    font-size: clamp(2rem, 4.2vw, 4.4rem);
+    font-weight: 640;
+    line-height: 0.98;
+    letter-spacing: -0.055em;
+  }
+
+  .quality-section-label {
+    color: var(--muted-foreground);
+    font-size: 0.64rem;
+    font-weight: 700;
+  }
+
+  .quality-pulse {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+    border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+    border-top-color: var(--pulse-color, var(--primary));
+    border-radius: 0.5rem;
+    padding: 0.8rem;
+    background: rgba(7, 14, 20, 0.72);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.18);
+  }
+
+  .quality-pulse strong {
+    display: block;
+    margin-top: 0.35rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+
+  .quality-pulse > span:last-child {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--muted-foreground);
+    font-size: 0.68rem;
+  }
+
+  .quality-pulse-label {
+    color: var(--muted-foreground);
+    font-size: 0.58rem;
+  }
+
+  .quality-pulse-critical {
+    --pulse-color: oklch(0.68 0.19 29);
+  }
+
+  .quality-pulse-warn {
+    --pulse-color: oklch(0.76 0.15 75);
+  }
+
+  .quality-pulse-good {
+    --pulse-color: oklch(0.72 0.12 164);
+  }
+
+  .quality-pulse-neutral {
+    --pulse-color: oklch(0.68 0.1 245);
+  }
+
+  .quality-bucket {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.7rem;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    padding: 0.7rem;
+    text-align: left;
+    transition:
+      border-color 160ms ease,
+      background 160ms ease,
+      transform 160ms ease;
+  }
+
+  .quality-bucket:hover {
+    border-color: var(--border);
+    background: color-mix(in oklab, var(--muted) 58%, transparent);
+    transform: translateX(2px);
+  }
+
+  .quality-bucket-active {
+    border-color: color-mix(in oklab, var(--primary) 46%, var(--border));
+    background: color-mix(in oklab, var(--primary) 12%, transparent);
+  }
+
+  .quality-bucket-icon {
+    display: flex;
+    width: 2rem;
+    height: 2rem;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    color: var(--primary);
+    background: color-mix(in oklab, var(--background) 65%, transparent);
+  }
+
+  .quality-bucket-icon svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .quality-bucket strong,
+  .quality-bucket small {
+    display: block;
+  }
+
+  .quality-bucket strong {
+    font-size: 0.82rem;
+  }
+
+  .quality-bucket small {
+    margin-top: 0.12rem;
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: 0.68rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .quality-bucket-count,
+  .quality-strong-code,
+  .quality-priority {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  .quality-bucket-count {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .quality-gate {
+    background:
+      linear-gradient(135deg, rgba(44, 133, 112, 0.12), transparent 65%),
+      color-mix(in oklab, var(--card) 76%, transparent);
+  }
+
+  .quality-review-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+    padding: 1rem 1rem 1rem 1.15rem;
+    background: color-mix(in oklab, var(--card) 88%, transparent);
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.12);
+    animation: quality-card-enter 360ms both cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .quality-review-card:hover {
+    border-color: color-mix(in oklab, var(--tier-color) 55%, var(--border));
+  }
+
+  .quality-card-rail {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--tier-color);
+  }
+
+  .quality-tier-p0 {
+    --tier-color: oklch(0.68 0.19 29);
+  }
+
+  .quality-tier-p1 {
+    --tier-color: oklch(0.76 0.15 75);
+  }
+
+  .quality-tier-p2 {
+    --tier-color: oklch(0.69 0.11 231);
+  }
+
+  .quality-tier-p3 {
+    --tier-color: oklch(0.62 0.03 245);
+  }
+
+  .quality-priority {
+    border: 1px solid color-mix(in oklab, var(--tier-color) 65%, transparent);
+    border-radius: 999px;
+    padding: 0.12rem 0.42rem;
+    color: color-mix(in oklab, var(--tier-color) 85%, white);
+    background: color-mix(in oklab, var(--tier-color) 13%, transparent);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .quality-strong-code {
+    border-radius: 0.3rem;
+    padding: 0.16rem 0.42rem;
+    color: oklch(0.88 0.09 190);
+    background: rgba(67, 174, 155, 0.1);
+    font-size: 0.75rem;
+  }
+
+  .quality-datum {
+    min-width: 0;
+    border: 1px solid color-mix(in oklab, var(--border) 72%, transparent);
+    border-radius: 0.4rem;
+    padding: 0.55rem 0.65rem;
+    background: color-mix(in oklab, var(--background) 35%, transparent);
+  }
+
+  .quality-datum span,
+  .quality-datum strong {
+    display: block;
+  }
+
+  .quality-datum span {
+    color: var(--muted-foreground);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .quality-datum strong {
+    margin-top: 0.26rem;
+    overflow: hidden;
+    font-size: 0.76rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .quality-reason-chip {
+    border: 1px dashed color-mix(in oklab, var(--tier-color) 48%, var(--border));
+    border-radius: 999px;
+    padding: 0.18rem 0.48rem;
+    color: var(--muted-foreground);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6rem;
+  }
+
+  .quality-trace {
+    background:
+      linear-gradient(90deg, rgba(177, 92, 154, 0.1), transparent),
+      color-mix(in oklab, var(--muted) 35%, transparent);
+  }
+
+  .quality-trace-index {
+    display: inline-flex;
+    width: 1.4rem;
+    height: 1.4rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(220, 125, 192, 0.38);
+    border-radius: 999px;
+    color: rgb(245, 196, 229);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.58rem;
+  }
+
+  @keyframes quality-card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quality-review-card {
+      animation: none;
+    }
+
+    .quality-bucket {
+      transition: none;
+    }
+  }
+
+  .workflow-flow .react-flow__controls,
+  .workflow-flow .react-flow__minimap {
+    border: 1px solid color-mix(in oklab, var(--border) 78%, transparent);
+    border-radius: 8px;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--card) 92%, transparent);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+  }
+
+  .workflow-flow .react-flow__controls-button {
+    background: color-mix(in oklab, var(--card) 92%, transparent);
+    color: var(--foreground);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .workflow-flow .react-flow__controls-button:hover {
+    background: var(--muted);
+  }
+
+  @media (max-width: 767px) {
+    .workflow-flow .react-flow__minimap {
+      display: none;
+    }
+  }
+
+  .jsonl-shell {
+    --jsonl-ost: oklch(0.72 0.12 56);
+    --jsonl-fmar: oklch(0.7 0.13 28);
+    --jsonl-nvs78p: oklch(0.7 0.12 305);
+    --jsonl-neg79: oklch(0.75 0.12 96);
+    --jsonl-nbs: oklch(0.7 0.13 340);
+    --jsonl-dby: oklch(0.69 0.11 190);
+    --jsonl-dbyr: oklch(0.68 0.12 250);
+    --jsonl-lsg: oklch(0.72 0.12 145);
+    background:
+      radial-gradient(
+        circle at 12% -8%,
+        color-mix(in oklab, var(--jsonl-ost) 10%, transparent),
+        transparent 32rem
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0,
+        transparent 95px,
+        rgba(255, 255, 255, 0.014) 96px
+      ),
+      var(--background);
+  }
+
+  .jsonl-masthead {
+    background:
+      linear-gradient(100deg, rgba(9, 15, 21, 0.98), rgba(18, 27, 32, 0.94)),
+      var(--background);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.2);
+  }
+
+  .jsonl-kicker {
+    color: oklch(0.8 0.1 72);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .jsonl-title {
+    font-family:
+      Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: clamp(2rem, 4.5vw, 4.25rem);
+    font-weight: 520;
+    line-height: 0.92;
+    letter-spacing: -0.052em;
+  }
+
+  .jsonl-version-toggle {
+    border-color: color-mix(in oklab, var(--version-color) 40%, var(--border));
+    background: color-mix(in oklab, var(--version-color) 8%, transparent);
+    color: color-mix(in oklab, var(--version-color) 76%, white);
+  }
+
+  .jsonl-version-toggle.is-active {
+    border-color: color-mix(in oklab, var(--version-color) 70%, white 8%);
+    background: color-mix(in oklab, var(--version-color) 19%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklab, var(--version-color) 16%, transparent);
+  }
+
+  .jsonl-display-switch {
+    border-color: color-mix(in oklab, var(--border) 82%, transparent);
+    background: rgba(4, 9, 13, 0.58);
+  }
+
+  .jsonl-display-switch button {
+    color: var(--muted-foreground);
+  }
+
+  .jsonl-display-switch button.is-active {
+    color: oklch(0.91 0.04 78);
+    background: color-mix(in oklab, oklch(0.72 0.12 72) 16%, var(--card));
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.26);
+  }
+
+  .jsonl-version-ost {
+    --version-color: var(--jsonl-ost);
+  }
+
+  .jsonl-version-fmar {
+    --version-color: var(--jsonl-fmar);
+  }
+
+  .jsonl-version-nvs78p {
+    --version-color: var(--jsonl-nvs78p);
+  }
+
+  .jsonl-version-neg79 {
+    --version-color: var(--jsonl-neg79);
+  }
+
+  .jsonl-version-nbs {
+    --version-color: var(--jsonl-nbs);
+  }
+
+  .jsonl-version-dby {
+    --version-color: var(--jsonl-dby);
+  }
+
+  .jsonl-version-dbyr {
+    --version-color: var(--jsonl-dbyr);
+  }
+
+  .jsonl-version-lsg {
+    --version-color: var(--jsonl-lsg);
+  }
+
+  .jsonl-version-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: var(--version-color, var(--primary));
+    box-shadow: 0 0 12px
+      color-mix(in oklab, var(--version-color) 52%, transparent);
+  }
+
+  .jsonl-stat-card {
+    overflow: hidden;
+    background:
+      linear-gradient(120deg, rgba(255, 255, 255, 0.03), transparent),
+      color-mix(in oklab, var(--card) 88%, transparent);
+  }
+
+  .jsonl-stat-icon {
+    display: flex;
+    width: 2.4rem;
+    height: 2.4rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid color-mix(in oklab, var(--jsonl-ost) 28%, var(--border));
+    border-radius: 0.5rem;
+    color: oklch(0.79 0.1 72);
+    background: color-mix(in oklab, var(--jsonl-ost) 9%, transparent);
+  }
+
+  .jsonl-stat-icon svg {
+    width: 1rem;
+  }
+
+  .jsonl-reading-table {
+    border-color: color-mix(in oklab, var(--border) 82%, transparent);
+    background: rgba(7, 12, 17, 0.55);
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.24);
+  }
+
+  .jsonl-natural-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr));
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .jsonl-natural-column {
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--border) 84%, transparent);
+    border-radius: 0.9rem;
+    background:
+      linear-gradient(
+        115deg,
+        color-mix(in oklab, var(--version-color) 5%, transparent),
+        transparent 18rem
+      ),
+      rgba(7, 12, 17, 0.72);
+    box-shadow: 0 24px 62px rgba(0, 0, 0, 0.22);
+  }
+
+  .jsonl-natural-heading {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    background: rgba(10, 16, 22, 0.94);
+    backdrop-filter: blur(16px);
+  }
+
+  .jsonl-natural-heading div {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: 0.65rem;
+  }
+
+  .jsonl-natural-heading strong {
+    color: color-mix(in oklab, var(--version-color) 76%, white);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+  }
+
+  .jsonl-natural-heading span:last-child {
+    overflow: hidden;
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .jsonl-natural-page {
+    max-width: 49rem;
+    margin: 0 auto;
+    padding: clamp(1.4rem, 4vw, 3rem) clamp(1.15rem, 4.5vw, 3.4rem);
+  }
+
+  .jsonl-reading-block {
+    margin: 0 0 1.4em;
+    color: oklch(0.92 0.014 85);
+    font-family:
+      Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: clamp(1.05rem, 0.7vw + 0.88rem, 1.24rem);
+    line-height: 1.85;
+    text-wrap: pretty;
+  }
+
+  .jsonl-reading-block:last-child {
+    margin-bottom: 0;
+  }
+
+  .jsonl-reading-block.is-poetry {
+    margin-block: 1.65rem;
+    padding-left: clamp(0.8rem, 4vw, 2.5rem);
+    border-left: 2px solid
+      color-mix(in oklab, var(--version-color) 45%, var(--border));
+    font-style: italic;
+  }
+
+  .jsonl-reading-block.is-poetry l {
+    display: block;
+    padding-left: 1.2rem;
+    text-indent: -1.2rem;
+  }
+
+  .jsonl-reading-verse {
+    scroll-margin-top: 9rem;
+    border-radius: 0.28rem;
+    transition:
+      background 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .jsonl-reading-verse.is-selected {
+    background: color-mix(in oklab, var(--version-color) 10%, transparent);
+    box-shadow: 0 0 0 0.2rem
+      color-mix(in oklab, var(--version-color) 10%, transparent);
+  }
+
+  .jsonl-natural-page .jsonl-verse-text w {
+    margin: 0;
+    border-bottom: 1px dotted
+      color-mix(in oklab, var(--version-color) 34%, transparent);
+    border-radius: 0.12rem;
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    font-weight: inherit;
+  }
+
+  .jsonl-natural-page .jsonl-verse-text w:hover,
+  .jsonl-natural-page .jsonl-verse-text w:focus-visible {
+    background: color-mix(in oklab, var(--version-color) 20%, transparent);
+    box-shadow: 0 0 0 0.14rem
+      color-mix(in oklab, var(--version-color) 20%, transparent);
+    outline: none;
+  }
+
+  .jsonl-natural-page .jsonl-verse-text w::after {
+    display: none;
+  }
+
+  .jsonl-natural-page .jsonl-verse-text w:empty {
+    display: none;
+  }
+
+  .jsonl-inline-verse-number {
+    position: relative;
+    top: -0.25em;
+    display: inline-block;
+    min-width: 1.2rem;
+    margin-right: 0.16rem;
+    color: color-mix(
+      in oklab,
+      var(--version-color) 72%,
+      var(--muted-foreground)
+    );
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.57em;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .jsonl-inline-verse-number:hover,
+  .jsonl-inline-verse-number:focus-visible {
+    color: color-mix(in oklab, var(--version-color) 72%, white);
+    outline: none;
+  }
+
+  .jsonl-column-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10, 16, 22, 0.96);
+    backdrop-filter: blur(16px);
+  }
+
+  .jsonl-version-heading {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 0.5rem;
+    align-items: center;
+    min-height: 3.1rem;
+    border-left: 1px solid var(--border);
+    padding: 0.65rem 0.8rem;
+    color: color-mix(in oklab, var(--version-color) 78%, white);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
+
+  .jsonl-version-heading small {
+    justify-self: end;
+    color: var(--muted-foreground);
+    font-family: inherit;
+    font-size: 0.62rem;
+    letter-spacing: 0;
+  }
+
+  .jsonl-verse-row {
+    border-bottom: 1px solid color-mix(in oklab, var(--border) 74%, transparent);
+  }
+
+  .jsonl-verse-row:last-child {
+    border-bottom: 0;
+  }
+
+  .jsonl-verse-row:hover {
+    background: rgba(255, 255, 255, 0.018);
+  }
+
+  .jsonl-verse-gutter {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.25rem;
+    padding: 0.9rem 0.35rem;
+    color: var(--muted-foreground);
+    background: rgba(4, 9, 13, 0.62);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  .jsonl-verse-gutter strong {
+    color: oklch(0.83 0.08 72);
+    font-size: 1rem;
+  }
+
+  .jsonl-verse-gutter span {
+    max-width: 3.5rem;
+    overflow: hidden;
+    font-size: 0.54rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .jsonl-verse-cell {
+    position: relative;
+    min-height: 5rem;
+    border-left: 1px solid var(--border);
+    padding: 0.95rem 0.85rem 1.15rem;
+    transition:
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .jsonl-verse-cell::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    content: "";
+    opacity: 0.45;
+    background: var(--version-color, transparent);
+  }
+
+  .jsonl-verse-cell.is-selected {
+    background: color-mix(in oklab, var(--version-color) 8%, transparent);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in oklab, var(--version-color) 32%, transparent);
+  }
+
+  .jsonl-verse-cell.is-missing {
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+
+  .jsonl-verse-text {
+    color: oklch(0.92 0.014 85);
+    font-family:
+      Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .jsonl-verse-text p {
+    display: inline;
+    margin: 0;
+  }
+
+  .jsonl-verse-text divinename {
+    font-variant: small-caps;
+    letter-spacing: 0.045em;
+  }
+
+  .jsonl-verse-text note {
+    position: relative;
+    display: inline;
+    color: inherit;
+    vertical-align: super;
+  }
+
+  .jsonl-note-marker {
+    display: inline-flex;
+    width: 1.05rem;
+    height: 1.05rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid
+      color-mix(in oklab, var(--version-color) 44%, var(--border));
+    border-radius: 999px;
+    color: color-mix(in oklab, var(--version-color) 72%, white);
+    background: color-mix(in oklab, var(--version-color) 10%, var(--card));
+    font-family: ui-monospace, monospace;
+    font-size: 0.58rem;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 1;
+    cursor: help;
+  }
+
+  .jsonl-note-content {
+    position: absolute;
+    z-index: 20;
+    bottom: calc(100% + 0.65rem);
+    left: 50%;
+    display: block;
+    width: min(19rem, 72vw);
+    padding: 0.75rem 0.85rem;
+    border: 1px solid
+      color-mix(in oklab, var(--version-color) 35%, var(--border));
+    border-radius: 0.55rem;
+    opacity: 0;
+    color: var(--foreground);
+    background: color-mix(in oklab, var(--card) 94%, black);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    font-style: normal;
+    line-height: 1.5;
+    pointer-events: none;
+    transform: translate(-50%, 0.25rem);
+    transition:
+      opacity 130ms ease,
+      transform 130ms ease;
+  }
+
+  .jsonl-verse-text note:hover .jsonl-note-content,
+  .jsonl-verse-text note:focus .jsonl-note-content,
+  .jsonl-verse-text note:focus-within .jsonl-note-content {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
+
+  .jsonl-note-content ref {
+    color: color-mix(in oklab, var(--version-color) 72%, white);
+    font-style: normal;
+    text-decoration: underline;
+    text-decoration-color: color-mix(
+      in oklab,
+      var(--version-color) 45%,
+      transparent
+    );
+    text-underline-offset: 0.15em;
+  }
+
+  .jsonl-verse-text w {
+    position: relative;
+    display: inline;
+    margin: 0 0.08em;
+    border-radius: 0.24rem;
+    padding: 0.08em 0.16em;
+    background: color-mix(in oklab, var(--version-color) 18%, transparent);
+    box-decoration-break: clone;
+    color: color-mix(in oklab, var(--version-color) 32%, white);
+    font-weight: 620;
+    -webkit-box-decoration-break: clone;
+  }
+
+  .jsonl-verse-text w:hover,
+  .jsonl-verse-text w:focus-visible {
+    cursor: pointer;
+    background: color-mix(in oklab, var(--version-color) 34%, transparent);
+    outline: 1px solid color-mix(in oklab, var(--version-color) 80%, white 8%);
+  }
+
+  .jsonl-verse-text w::after {
+    position: relative;
+    top: -0.44em;
+    margin-left: 0.18rem;
+    content: attr(data-strong-label);
+    color: color-mix(in oklab, var(--version-color) 78%, white);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.48rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+  }
+
+  .jsonl-verse-text w:empty {
+    display: inline-flex;
+    min-width: 1.7rem;
+    min-height: 1rem;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed
+      color-mix(in oklab, var(--version-color) 62%, transparent);
+    border-radius: 999px;
+    vertical-align: middle;
+  }
+
+  .jsonl-verse-text w:empty::after {
+    top: 0;
+    margin: 0;
+  }
+
+  .jsonl-inspector {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent),
+      rgba(8, 14, 19, 0.7);
+  }
+
+  .jsonl-inspector-card {
+    overflow: hidden;
+    border-top-color: color-mix(
+      in oklab,
+      var(--version-color, var(--primary)) 65%,
+      var(--border)
+    );
+  }
+
+  .jsonl-inspector-word {
+    font-family: Charter, "Iowan Old Style", Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 520;
+  }
+
+  .jsonl-identity-level {
+    border-left: 2px solid var(--identity-color, var(--border));
+    padding: 0.6rem 0.7rem;
+    background: color-mix(
+      in oklab,
+      var(--identity-color, var(--muted)) 7%,
+      transparent
+    );
+  }
+
+  .jsonl-identity-level > div > span {
+    color: var(--identity-color, var(--foreground));
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+  }
+
+  .jsonl-identity-level code,
+  .jsonl-lookup-rule code {
+    border-radius: 0.3rem;
+    padding: 0.18rem 0.38rem;
+    color: color-mix(
+      in oklab,
+      var(--identity-color, var(--primary)) 72%,
+      white
+    );
+    background: rgba(0, 0, 0, 0.32);
+    font-size: 0.72rem;
+  }
+
+  .jsonl-identity-level em {
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+  }
+
+  .jsonl-identity-level p {
+    margin-top: 0.3rem;
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    line-height: 1.45;
+  }
+
+  .jsonl-identity-level.is-classic {
+    --identity-color: oklch(0.72 0.12 56);
+  }
+
+  .jsonl-identity-level.is-extended {
+    --identity-color: oklch(0.69 0.11 190);
+  }
+
+  .jsonl-identity-level.is-distinguished {
+    --identity-color: oklch(0.68 0.12 250);
+  }
+
+  .jsonl-identity-level.is-unified {
+    --identity-color: oklch(0.72 0.12 145);
+  }
+
+  .jsonl-lookup-rule {
+    background: repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.018) 0,
+      rgba(255, 255, 255, 0.018) 6px,
+      transparent 6px,
+      transparent 12px
+    );
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .jsonl-verse-row {
+      animation: jsonl-row-enter 240ms ease both;
+    }
+  }
+
+  @keyframes jsonl-row-enter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

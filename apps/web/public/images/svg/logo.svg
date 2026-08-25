@@ -1,0 +1,31 @@
+<svg width="441px" height="99px" viewBox="0 0 441 99" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>Group</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <radialGradient cx="23.2947843%" cy="11.0471934%" fx="23.2947843%" fy="11.0471934%" r="100%" id="radialGradient-1">
+            <stop stop-color="#000000" stop-opacity="0.180508379" offset="0%"></stop>
+            <stop stop-color="#000000" stop-opacity="0.555819746" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="Page-2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard" transform="translate(-296.000000, -163.000000)">
+            <g id="Group" transform="translate(296.000000, 163.000000)">
+                <g id="Group-3">
+                    <path d="M49.25,92.5766807 C73.178665,92.5766807 92.5766807,73.178665 92.5766807,49.25 C92.5766807,25.321335 73.178665,5.92331933 49.25,5.92331933 C25.321335,5.92331933 5.92331933,25.321335 5.92331933,49.25 C5.92331933,73.178665 25.321335,92.5766807 49.25,92.5766807 Z M49.25,98.5 C22.0499761,98.5 0,76.4500239 0,49.25 C0,22.0499761 22.0499761,0 49.25,0 C76.4500239,0 98.5,22.0499761 98.5,49.25 C98.5,76.4500239 76.4500239,98.5 49.25,98.5 Z" id="Oval" fill="url(#radialGradient-1)" fill-rule="nonzero"></path>
+                    <circle id="Oval-Copy" fill="#0984E3" cx="50" cy="49" r="25"></circle>
+                </g>
+                <g id="Group-2" transform="translate(110.000000, 0.000000)">
+                    <rect id="Rectangle" fill-opacity="0.231855752" fill="#0984E3" x="135" y="3.6" width="195.3" height="61.2" rx="3.6"></rect>
+                    <text id="bible-strong" font-family="Helvetica" font-size="58.5" font-weight="normal" fill="#000000">
+                        <tspan x="0.18215332" y="57">bible </tspan>
+                        <tspan x="140.033716" y="57" font-family="Helvetica-Bold, Helvetica" font-weight="bold">strong</tspan>
+                    </text>
+                </g>
+                <text id="Découvrir-la-Bible-s" font-family="Helvetica-Light, Helvetica" font-size="17" font-weight="300" fill="#000000">
+                    <tspan x="110.2465" y="86">Découvrir la Bible sous un nouveau jour.</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>

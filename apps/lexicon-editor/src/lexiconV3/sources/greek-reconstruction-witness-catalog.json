@@ -1,0 +1,831 @@
+{
+  "schemaVersion": "lexicon-v3-greek-witness-catalog@1",
+  "policy": {
+    "sourceRecordDigest": "sha256 over canonical JSON of the exact STEP language, Strong identities, headword, transliteration, morphology, gloss, and meaning",
+    "occurrenceCount": "count of unique TAGNT tokens whose parsed strongByBase contains the reconstructed STEP code; form-alias rules use the independently digested Alternate Strong corpus and never the exact dStrong channel; exact-absence rules additionally bind the separately digested empty exact-dStrong corpus",
+    "witnessDigests": "pre-audited source slices or canonical objects; reusable only while this catalog and every declared global source digest remain exact"
+  },
+  "sourceDigests": {
+    "step.database": "48a023568f83ebbc37de2e811dcefa54ba422f92d0cbb66c25f2b8245c79d9d8",
+    "TBESG": "e8f58a8f841f2a338b3df648466a773928127e6080c06d32ee88694fb761facb",
+    "TBESH": "da0a8d2aafba429421f55f2906e8896a7ea83458a0d905deb2668d91f2a75e31",
+    "TFLSJ": "fcc2845412132a7bb91fc3dbb5a544c807daf57e4791c4d9af61efe209e97691",
+    "TAGNT.Act-Rev": "524e32375361e6d3fa2f7ef00b87605fdc4317a762f395651a05fdc31ad031b7",
+    "TAGNT.Mat-Jhn": "ab8eaaeb68e17a1dcfa34e1e9350358f22f03bc2a97244d848750ad81044bc8e",
+    "TIPNR.people": "af26347131e130f5abf060522437f1b03ebf0a9b60338065ce9b4e1e9a8ef4a1",
+    "legacy.database": "f5e658e54b4ff89bcbcdfdb899d3f48aec1aab16d0a2c3f5ec856d0d82b2c978",
+    "perseus.lsj": "15b1b7ca0a6c88e5a14e97f2339a0c7a7dfae71c028bdfb45fcee04c79a754f7",
+    "perseus.artifact": "f0ba0f76ab464617d412235905503ada2245ab8359b2b87f1fd48285b29f8dac",
+    "internal-adjudication.G20464.artifact": "2feb9851981c53aefda670849a25ab5df6ac64a89cb513ba342c67f42cdc47af",
+    "internal-adjudication.G20464.artifact-file": "b03e9a15dbf4f93b81011346b36b33b5652cb63701c6876b7316a847b81bcb06",
+    "kaikki.fr": "b337fcc95d1fefeeb28164ea9dfec890a282d81b74269f1758de0fe5d0283030"
+  },
+  "entries": {
+    "greek:G0001H": {
+      "sourceRecordDigest": "59c788e6ce46d5750ba5de1a62a637a382d1ade7893ee343f571a1b86b683332",
+      "occurrenceCount": null,
+      "witnessDigests": {
+        "perseus.lsj.n3.fragment": "c6db2a6fa2024976aae6b3e197dc9fde9865fc7f0168bd796100a8e1a4ddf420",
+        "perseus.lsj.n3.semantic-payload": "04215068163e47a95512bbc7e1bc7e4bb8a959aa388117ca810eafcc66203b8f",
+        "legacy.G0001": "948b6fe5b62204221f3936cb2857589a84b711c974111956a3e0b61cc73aa2a6"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G0001H@1",
+        "classification": "source-replacement",
+        "witnessLocators": {
+          "perseus.lsj.n3.fragment": "grc.lsj.perseus-eng1.xml#entryFree[id=n3]",
+          "perseus.lsj.n3.semantic-payload": "urn:cite2:scaife-viewer:dictionaries.v1:lsj-n3",
+          "legacy.G0001": "strong:G0001"
+        }
+      }
+    },
+    "greek:G0567": {
+      "sourceRecordDigest": "1a35f9a91542f53d8936166f26aa5e1d6c253ee5e7020a2dd7fce7eb7a4ffd91",
+      "occurrenceCount": 6,
+      "witnessDigests": {
+        "TBESG.G0567.raw-row": "fc4bf85ca9f133db7505567ac2db47464090440f5c11e44af3ff1cedcffdb0c9",
+        "TBESG.G0568.middle-segment": "a377a35237b6e9a6adb6648f900cfe988f92e5056be56b35557f415bc0ae6b4d",
+        "TFLSJ.G0567.middle-segment": "3621c32f409fe03dd4b190aee524281c654bb17d572612cc5348a0b7c8d73095",
+        "TAGNT.G0567.alternate-alias-corpus": "236bc7b85683a45f563c3f1c29b8e11ee641ac0b1e6aaf51a9ed9cd7782bd569"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G0567@1",
+        "classification": "source-reconciled-form-alias",
+        "aliasStrong": "G0567",
+        "primaryDStrong": "G0568",
+        "uStrong": "G0568",
+        "relationKind": "form_of",
+        "references": [
+          "1Pet.2.11",
+          "1Thess.4.3",
+          "1Thess.5.22",
+          "1Tim.4.3",
+          "Acts.15.20",
+          "Acts.15.29"
+        ],
+        "morphologyCounts": {
+          "V-PMM-2P": 1,
+          "V-PMN": 5
+        },
+        "witnessLocators": {
+          "TBESG.G0567.raw-row": "exact LF-delimited TBESG line beginning G0567\\t",
+          "TBESG.G0568.middle-segment": "G0568 substring from Mid., <b>to abstain</b>: through .†",
+          "TFLSJ.G0567.middle-segment": "G0567 substring from middle section II through before section III",
+          "TAGNT.G0567.alternate-alias-corpus": "six exact alternate-Strong G0567 aliases whose primary dStrong is G0568"
+        },
+        "witnessRecipes": {
+          "TBESG.G0567.raw-row": "SHA-256 of the exact UTF-8 line without its line terminator",
+          "TBESG.G0568.middle-segment": "SHA-256 of the exact UTF-8 substring beginning Mid., <b>to abstain</b>: and ending .†",
+          "TFLSJ.G0567.middle-segment": "SHA-256 of the exact UTF-8 substring beginning <Level2><b>__II</b></Level2> <i>middle</i> and ending immediately before <Level2><b>__III</b></Level2>",
+          "TAGNT.G0567.alternate-alias-corpus": "englishAlternateStrongAliasCorpusDigest over the six canonical native occurrences and both pinned TAGNT source digests"
+        }
+      }
+    },
+    "greek:G1489": {
+      "sourceRecordDigest": "02b6931232cad86ff140393bc6b709c3fa04fad71d7fc6c4bfaf5ae8cb40f6e9",
+      "occurrenceCount": 5,
+      "witnessDigests": {
+        "TFLSJ.G1489.slice": "be91509027cfcecb4270e9e5bf0aa983f89e03cc57824f376dd5628ffe927b74",
+        "TAGNT.G1489.adjacent-groups": "2e042777da6015c768b71494c594dcbac5037c2d0398b24437fb7acea635ce14",
+        "legacy.G1489": "4460a5e592fdff3b309ba2269ce36d742c7298ba1e9a74d9e920eca81ba5d0a5"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G1489@1",
+        "classification": "composition",
+        "witnessLocators": {
+          "TFLSJ.G1489.slice": "TFLSJ eige / ei ge conditional slice",
+          "TAGNT.G1489.adjacent-groups": "five exact adjacent ei + ge groups",
+          "legacy.G1489": "strong:G1489"
+        }
+      }
+    },
+    "greek:G1490": {
+      "sourceRecordDigest": "df4713252dfc614313c5ba86c263fe7a4fbd05ad2c8fc4fc64db13764a0e4bcf",
+      "occurrenceCount": 14,
+      "witnessDigests": {
+        "TFLSJ.G1490.slice": "b5e3d540c40d2944e0109708c867d0499d8606fae0d4dfe9e222cc9a9c186154",
+        "TAGNT.G1490.sequences": "e836c47138e442dbb67f3ec3d499fe65e3e232e23083cf98d4f0b04141e59c4c",
+        "legacy.G1490": "1152fc194e5f71728689ae8dc49d004ee38d30005f04c238a0bddefed20cd3ef"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G1490@1",
+        "classification": "composition",
+        "witnessLocators": {
+          "TFLSJ.G1490.slice": "TFLSJ ei de me(ge) conditional slice",
+          "TAGNT.G1490.sequences": "fourteen exact ei de me(ge) sequences",
+          "legacy.G1490": "strong:G1490"
+        }
+      }
+    },
+    "greek:G1503": {
+      "sourceRecordDigest": "72594030a1d7236aef99b3ab1b68e5a5bccd0f7f476787e94c6d489fc6f6acb6",
+      "occurrenceCount": 2,
+      "witnessDigests": {
+        "TBESG.G1503.raw-row": "16a5f6bc6b552f238e42638539bea719c7982fc234fcb597a1f271150526c90b",
+        "TFLSJ.G1503.raw-row": "e3096a938b55f306273f36a3d0c817f02071355ff1a95b41a3c59c3368cc53f2",
+        "TAGNT.G1503.exact-occurrence-corpus": "aa4c140f4a6ce2ee2e62555ad7ab7a7b8fbbf176f02168145672502fd2d105e6"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G1503@1",
+        "classification": "direct-source-extraction",
+        "confidence": 0.99,
+        "references": ["Jas.1.6", "Jas.1.23"],
+        "witnessLocators": {
+          "TBESG.G1503.raw-row": "TBESG.txt line 1643, byte 927352; exact UTF-8 row without LF",
+          "TFLSJ.G1503.raw-row": "TFLSJ.txt line 1616, byte 5255292; exact UTF-8 row without LF",
+          "TAGNT.G1503.exact-occurrence-corpus": "Jas.1.6#10 and Jas.1.23#11 exact G1503 tokens across the pinned TAGNT corpus"
+        }
+      }
+    },
+    "greek:G1507": {
+      "sourceRecordDigest": "bd3482ca11924f8ad7f5b18478750d6125ab91bd7b1bae4e8c18128f34b00e9e",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G1507.raw-row": "9bd4f16c0f91033cca617878105561918ea280f7a1e3473dac958226c396b03b",
+        "TFLSJ.G1507.raw-row": "04e3e4222222a6e5e445d81f9630c3da64981f43d08f1b9338f1516100936454",
+        "TAGNT.G1507.zero-exact-occurrence-corpus": "3ed8b3e6dd5072514b92ff2952193d013661caebbe8dde1bca3631b006d887d0"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G1507@1",
+        "classification": "direct-alias-extraction",
+        "confidence": 0.99,
+        "witnessLocators": {
+          "TBESG.G1507.raw-row": "TBESG.txt line 1647, byte 929823; exact UTF-8 row without LF",
+          "TFLSJ.G1507.raw-row": "TFLSJ.txt line 1620, byte 5279488; exact UTF-8 row without LF",
+          "TAGNT.G1507.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G1507 across both pinned files"
+        }
+      }
+    },
+    "greek:G1970": {
+      "sourceRecordDigest": "d07c38ab98708de32a970cc4ac8a3bb7de84ed077227c9fa2c980f3376f6ba93",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G1970.raw-row": "40940a3d32802a9bfba105acce64190cbe6c41625cc254b9e1390a7e6fa0d0e1",
+        "TFLSJ.G1970.raw-row": "e144b45cb07ecd28a1b6e37571f318f2ef96adc0e54758269a14ae84af0878f7",
+        "TAGNT.G1970.zero-exact-occurrence-corpus": "c7f33736d2b1116725c6ebb461af4dcdd8cf495c9f66699d38db39e16c83856e"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G1970@1",
+        "classification": "direct-source-extraction",
+        "confidence": 0.98,
+        "witnessLocators": {
+          "TBESG.G1970.raw-row": "TBESG.txt line 2111, byte 1247327; exact UTF-8 row without LF",
+          "TFLSJ.G1970.raw-row": "TFLSJ.txt line 2084, byte 7203379; exact UTF-8 row without LF",
+          "TAGNT.G1970.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G1970 across both pinned files"
+        }
+      }
+    },
+    "greek:G2199H": {
+      "sourceRecordDigest": "b566b50667abbd3a90b09d24e29138fb41bce91294dffe0931a09f2ed70ac2c8",
+      "occurrenceCount": null,
+      "witnessDigests": {
+        "TIPNR.G2199H.root": "99666f01c6d87cb6cf832db1feed736341ed7536e827693c383f628f41438913",
+        "TIPNR.G2199H.relationships": "e254eb4ec39351c046b4a8b5dd1a394b29fd6b3d096fcdaccde325deb5ae7e7e",
+        "legacy.G2199": "8ac589a5021add61213270f00de73d9dfa6dd33d225d7e3944cf1dad830ec51a"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G2199H@1",
+        "classification": "entity-template",
+        "witnessLocators": {
+          "TIPNR.G2199H.root": "people.json unique dStrong G2199H root object",
+          "TIPNR.G2199H.relationships": "Matthew 20:20; partner Zebedee; offspring James and John",
+          "legacy.G2199": "strong:G2199 base Zebedee row"
+        }
+      }
+    },
+    "greek:G2424K": {
+      "sourceRecordDigest": "ce679873eb3f72b31e7e429d3fea0c957ddb7e4706995a34f2d27a39ca0ea791",
+      "occurrenceCount": 1,
+      "witnessDigests": {
+        "TIPNR.G2424K.root": "9520aef790a2245b2469ee66a8f07363bb7724fd22dca3a10c1aedee434fbc57",
+        "TIPNR.G2424K.relationships": "d9a186756784b0b5dcd0ff32c01a8ccf4c952ced57137e5f44180c337ed7b299",
+        "TAGNT.G2424K.direct": "946f1ebab36d8f0e60161d8f58338b26fb36d3fc101c6b41f0955e97d06476af",
+        "legacy.G2424": "8b3d182473764f370e777299e8b77bf5328de4d888058d6e9dd1ffff617bb2ec"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G2424K@1",
+        "classification": "entity-template",
+        "witnessLocators": {
+          "TIPNR.G2424K.root": "people.json unique dStrong G2424K root object",
+          "TIPNR.G2424K.relationships": "Luke 3:29; son of Eliezer; father of Er; Jose variant",
+          "TAGNT.G2424K.direct": "Luke.3.29 direct occurrence",
+          "legacy.G2424": "strong:G2424 base row"
+        }
+      }
+    },
+    "greek:G2501O": {
+      "sourceRecordDigest": "618b02814a68c95b583ab7dd08153130eaa37463c01d1150dc1538f82134c476",
+      "occurrenceCount": 1,
+      "witnessDigests": {
+        "TIPNR.G2501O.barnabas": "6b10ac25a7dbf654a68d579e28310db0aa61c1b9b1b5eaab6c7729fd48eefa0e",
+        "TIPNR.G2501O.identity": "5f1df7325346fc5e90669fd2e006625b9bd0361daa9e8e4175a4b41b66153f09",
+        "TAGNT.G2501O.direct": "1b2211533331c3d40d13ad58ad7fe612b877f404dfe79c8c9f5629be0b3a546d",
+        "legacy.G2501": "93a713da9ab43e39ca16fe63264f4c828fc147500aa9944f69af2c3a515cf50e"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G2501O@1",
+        "classification": "entity-template",
+        "witnessLocators": {
+          "TIPNR.G2501O.barnabas": "people.json Barnabas root object",
+          "TIPNR.G2501O.identity": "Acts 4:36; Levite from Cyprus; Barnabas; Joses variant",
+          "TAGNT.G2501O.direct": "Acts.4.36 direct occurrence",
+          "legacy.G2501": "strong:G2501 base row"
+        }
+      }
+    },
+    "greek:G4245G": {
+      "sourceRecordDigest": "ee6f5f041d215f0cd5f327f80665990e4511f460fb9f54c36d5934003da917cd",
+      "occurrenceCount": 60,
+      "witnessDigests": {
+        "TBESG.G4245G.office-sense": "a18350af820cb39c6e98d750e1a09c176380a0ab11c0a673d2799313bc3807be",
+        "TBESG.G4245G.traditional-elders": "58a67849267acf5a1819e19c14ab939775651479cd2303135b3fd97be6e16da2",
+        "TAGNT.G4245G.direct": "7121a81e5452389045aff0955a0338b9342c6bf0412d5ed9c1052fc8685dd5c0",
+        "legacy.G4245": "e77d6b41350e105815c0e0c1ebe3588b67bb1aa889b779fd5ff27a92690ad5c2"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G4245G@1",
+        "classification": "sense-extraction",
+        "witnessLocators": {
+          "TBESG.G4245G.office-sense": "presbuteros sense 2 status or office",
+          "TBESG.G4245G.traditional-elders": "ancestral or traditional elders sub-sense",
+          "TAGNT.G4245G.direct": "sixty exact G4245G occurrences, excluding G4245H",
+          "legacy.G4245": "strong:G4245 base row"
+        }
+      }
+    },
+    "greek:G5441": {
+      "sourceRecordDigest": "46cb24ba5e3e62ca6d824635919b68823dc903f3935d5210c4c3bc82ab7336c1",
+      "occurrenceCount": 3,
+      "witnessDigests": {
+        "TBESG.G5441.full": "8fe42b0c40afdd221f86cdf47d0d4871c63deae04295569367cea40c3fc3b0a8",
+        "TAGNT.G5441.direct": "4fdf9c8660f4cb9117386892f4af8406ef23cb1b67a18a7926ee1a736fd0a580",
+        "legacy.G5441": "e66fcc30576c6565ca929703d42466152254fc3d44aefca25e65285625581702"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G5441@1",
+        "classification": "identity-repair-exact-extraction",
+        "witnessLocators": {
+          "TBESG.G5441.full": "exact phulax brief definition",
+          "TAGNT.G5441.direct": "Acts 5:23; 12:6,19 exact occurrences",
+          "legacy.G5441": "strong:G5441"
+        }
+      }
+    },
+    "greek:G6087": {
+      "sourceRecordDigest": "971ce2c2f86035e33ff4d60e1fb1ed56486a04069aade454af4a20a944a69faa",
+      "occurrenceCount": 3,
+      "witnessDigests": {
+        "TAGNT.G6087.composition": "81ef8f9714c01947c471a8e5f70bcf7f416a5a889519e53ad683940fb78e6254",
+        "TBESG.G4053.cross-reference": "db55c2110c06a11cff7c1048cbdf4da6d8f0fc7829b66825d8a9e1cd4d2147d3",
+        "STEP.G4057.source-record": "91460d8aafb557ff16ad8489d64a80e185402829eea309f660f85dc98350194f",
+        "STEP.G4057.meaning": "60e85008c17dc463e98824cf595e7861ae3307f00669256c919bbc721147cda9",
+        "legacy.G6087.absent": null
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G6087@1",
+        "classification": "composition",
+        "witnessLocators": {
+          "TAGNT.G6087.composition": "three exact hyper + ek perissou compositions",
+          "TBESG.G4053.cross-reference": "G4053 ek perissou cross-reference slice",
+          "STEP.G4057.source-record": "validated G4057 source record",
+          "STEP.G4057.meaning": "validated G4057 meaning",
+          "legacy.G6087.absent": "no G6087 row; legacy maximum Greek code is G5877"
+        }
+      }
+    },
+    "greek:G6243": {
+      "sourceRecordDigest": "822c87166f8d9d1320d5cedb96f38a713a94b3af99890768501d1c1d8c373713",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G6243.raw-row": "729f1889b167091a79bda24dbf13ea6333c9c3de97bf7167eb5d1a22a31d2651",
+        "TBESG.G6242.raw-row": "67c4887da1c858a3579a31ec0b1b2d79c4a9addaa873d19bbee58e9d54b7e6e8",
+        "TAGNT.G6243.zero-exact-occurrence-corpus": "1371cd306e530e912fa43bb57769cd20d82853b1ac1cabdc531d147a99481b43"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G6243@1",
+        "classification": "morphological-reconstruction",
+        "confidence": 0.98,
+        "witnessLocators": {
+          "TBESG.G6243.raw-row": "TBESG.txt line 6028, byte 3680973; exact UTF-8 row without LF",
+          "TBESG.G6242.raw-row": "TBESG.txt line 6027, byte 3680806; exact G6242 UTF-8 row without LF",
+          "TAGNT.G6243.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G6243 across both pinned files"
+        }
+      }
+    },
+    "greek:G8216": {
+      "sourceRecordDigest": "fc70897e95b5f39a8448df442a68f63775cb3ff8b213d766ea7a5eb5145da691",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G8216.raw-row": "23c1ce9d12b161a149c1ba60dc3e667d26c536920b9236ec45f04530f69b223f",
+        "TBESG.G8216.raw-meaning": "f7ebc97499b9c594752dfa415ec20f7c2879ec45a05a5936c0e63bd1dfd4bd66",
+        "TFLSJ.G3483.mu-acute-oath-fragment": "f17f7e6495a3f717ece4dfaef890921da8e73e378cb2b035ebf4f4d5c54a2be7",
+        "TAGNT.G8216.zero-exact-occurrence-corpus": "06889d7c68de7bed23dab02a4a38171656defa45bbba45f8702135d449936f85"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G8216@1",
+        "classification": "source-reconciled-homograph/accent-confusion",
+        "rawHeadword": "μᾶ",
+        "conflictingHomograph": "μά",
+        "semanticAttestation": "vocative/direct-address",
+        "outputGlossDigest": "6fed61c929fbc17a9ff7f2308b8b27ba70f195769e4f8141e7fc0f51e2ad23c7",
+        "outputMeaningDigest": "460a85b3ca6f386502a2b3959876a155c9c1a8a9dada1206ba406305c1ce4a75",
+        "exactOccurrenceCount": 0,
+        "identityUnchanged": true,
+        "witnessLocators": {
+          "TBESG.G8216.raw-row": "TBESG.txt line 7996, byte 4094134; exact UTF-8 row without LF",
+          "TBESG.G8216.raw-meaning": "G8216 exact raw meaning beginning shortened doric form for μάτηρ",
+          "TFLSJ.G3483.mu-acute-oath-fragment": "TFLSJ.txt line 3569, byte 13200857 including UTF-8 BOM (13200854 after BOM); exact fragment ν. μά <b>yea by</b>..",
+          "TAGNT.G8216.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G8216 across both pinned files"
+        },
+        "witnessRecipes": {
+          "TBESG.G8216.raw-row": "SHA-256 of the exact UTF-8 line without its line terminator",
+          "TBESG.G8216.raw-meaning": "SHA-256 of the exact, unnormalized meaning field",
+          "TFLSJ.G3483.mu-acute-oath-fragment": "SHA-256 of the exact UTF-8 substring, preserving acute μά",
+          "TAGNT.G8216.zero-exact-occurrence-corpus": "englishExactOccurrenceCorpusDigest for TAGNT, G8216, and the canonical empty occurrence list"
+        }
+      }
+    },
+    "greek:G20014": {
+      "sourceRecordDigest": "3a149712f171a28fb80c14443f717db77cf023b4c32bcaa2f357a8362c93a755",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20014.raw-row": "c57890d9ea80fe3ce80515a1ed82415431b1a62749163209cebb43993714437e",
+        "TBESG.G0058.raw-row": "49b66c1d59c8b14121447c2e2844cfba87f3fd2c050fd5ef81ca34fbc510cb58",
+        "TFLSJ.G3739.raw-row": "1bb67451c095c4f00a1bff958579f0c7b9f3f5eed4e33a0bfef9ca848906334f",
+        "TAGNT.G20014.zero-exact-occurrence-corpus": "c11fee551029e25f841dd2ded667f99b85eba8bb5bf03c9c7adf7abad1505038"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20014@1",
+        "classification": "editorial_reconstruction",
+        "confidence": 0.99,
+        "stepIdentity": {
+          "stepEntryId": 9563,
+          "language": "greek",
+          "baseCode": 20014,
+          "eStrong": "G20014",
+          "dStrong": "G20014 =",
+          "uStrong": "G20014"
+        },
+        "rawSourceRecord": {
+          "id": 9563,
+          "language": "greek",
+          "baseCode": 20014,
+          "eStrong": "G20014",
+          "dStrong": "G20014 =",
+          "uStrong": "G20014",
+          "original": "ἄγυια",
+          "transliteration": "aguia",
+          "morph": "",
+          "gloss": "city",
+          "meaning": "<b>ἀγυιά</b>, see: ἀγορά, [in LXX: 3Ma.1:20 4:3 *]. <br /> (AS)",
+          "classicTransliteration": "",
+          "pronunciation": ""
+        },
+        "witnessLocators": {
+          "TBESG.G20014.raw-row": "TBESG.txt line 9653, byte 4530926; exact G20014 UTF-8 row without LF",
+          "TBESG.G0058.raw-row": "TBESG.txt line 153, byte 50156; exact reciprocal G0058 UTF-8 row without LF",
+          "TFLSJ.G3739.raw-row": "TFLSJ.txt line 3829, byte 14323758; exact contextual street witness without LF",
+          "TAGNT.G20014.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20014 across both pinned files"
+        }
+      }
+    },
+    "greek:G20128": {
+      "sourceRecordDigest": "b89dfc7148d22599f567d8707577872ca2b5f1cc609ad02c8696b0b18fd7de40",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20128.raw-row": "ee6d4360e71c54b67ab5d186a39c2e447632f8534558caf2a330fe57789e9fe9",
+        "TBESG.G20128.abrupt-fragment": "0eec7292aa9ec71a79570055fce1c5048bb0569bb37cd4f0fe8f2296bf292227",
+        "TBESG.G20128.severe-fragment": "72c924ba282a65fc362307ace67d56bd9c386038698d1df8206204d3e4779f32",
+        "TAGNT.G20128.zero-exact-occurrence-corpus": "c714894452ee2a8d9b6054dbed4cb9e5a71c04b88dd16f5339c5907b649f6045"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20128@1",
+        "classification": "morphological-reconstruction",
+        "confidence": 0.99,
+        "witnessLocators": {
+          "TBESG.G20128.raw-row": "TBESG.txt line 9766, byte 4545358; exact UTF-8 row without LF",
+          "TBESG.G20128.abrupt-fragment": "G20128 exact source fragment cut off, abrupt, precipitous",
+          "TBESG.G20128.severe-fragment": "G20128 exact source fragment severe, relentless",
+          "TAGNT.G20128.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20128 across both pinned files"
+        }
+      }
+    },
+    "greek:G20209": {
+      "sourceRecordDigest": "e1bf7c0ebbc1613e3693051a8e52a02d0d8b96b9d34ba4a18a7ba321fca6dfc7",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20209.raw-row": "d73f01ef5884bf4cc1388c35be7d030083c7c8be9f0d3762db289b10b01c6ec6",
+        "TBESG.G6792.raw-row": "3af6accc33a3d71389f6493e5affa728a78dd45fb7b8154087690ecb5ae4554e",
+        "TAGNT.G20209.zero-exact-occurrence-corpus": "2c27ec1597fefb3e8b76ec5ad0d419e716caff3a475b6391343d6167977fbd62"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20209@1",
+        "classification": "direct-source-extraction",
+        "confidence": 0.99,
+        "witnessLocators": {
+          "TBESG.G20209.raw-row": "TBESG.txt line 9847, byte 4559998; exact UTF-8 row without LF",
+          "TBESG.G6792.raw-row": "TBESG.txt line 6574, byte 3794534; exact G6792 UTF-8 row without LF",
+          "TAGNT.G20209.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20209 across both pinned files"
+        }
+      }
+    },
+    "greek:G20278": {
+      "sourceRecordDigest": "ec30d9c44ee9e2f5fdd55c5f9ba4aa16f4fd6f74be576a379c6feb9d2c90c4a6",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20278.raw-row": "62308c2d7959c0b92ebdedae34231ea90b85a2c3355a99de305da9fde5a2b418",
+        "TBESG.G7116.raw-row": "10fbb85cc6a4e03d9d50b6dfd2985c9c4ceded44c61a6e35999f5377b35d123b",
+        "TAGNT.G20278.zero-exact-occurrence-corpus": "a1a01de5e1d2b890215421033c60389695e1515afd0d1b0258e0683f31263588"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20278@1",
+        "classification": "editorial_reconstruction",
+        "confidence": 0.94,
+        "stepIdentity": {
+          "stepEntryId": 9826,
+          "language": "greek",
+          "baseCode": 20278,
+          "eStrong": "G20278",
+          "dStrong": "G20278 =",
+          "uStrong": "G20278"
+        },
+        "rawSourceRecord": {
+          "id": 9826,
+          "language": "greek",
+          "baseCode": 20278,
+          "eStrong": "G20278",
+          "dStrong": "G20278 =",
+          "uStrong": "G20278",
+          "original": "ἐγκαταλοχίζω",
+          "transliteration": "egkatalochizō",
+          "morph": "G:V",
+          "gloss": "to divide into teams",
+          "meaning": "courses",
+          "classicTransliteration": "",
+          "pronunciation": ""
+        },
+        "witnessLocators": {
+          "TBESG.G20278.raw-row": "TBESG.txt line 9916, byte 4567343; exact G20278 UTF-8 row without LF",
+          "TBESG.G7116.raw-row": "TBESG.txt line 6896, byte 3857996; exact local word-family witness without LF",
+          "TAGNT.G20278.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20278 across both pinned files"
+        }
+      }
+    },
+    "greek:G20394": {
+      "sourceRecordDigest": "75d9eee230a4ba755d9708d6b2d8c83f42f2e78303625e5eea6c985413f0144e",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20394.raw-row": "007db376839b47dd4773e02c5c0fac27e2aedd30b62f593277bbac424abc3082",
+        "TBESG.G7336.raw-row": "5dcf5e8816ac2f33f932a80029bd949d31f62aae2c653c0a66db5757db876632",
+        "TBESG.G7730.raw-row": "4fa24c483b94b7cff77d68f9194ba7c81c5c6db48926ecc95aa48df020973346",
+        "TAGNT.G20394.zero-exact-occurrence-corpus": "3e595434121897e26b13dd85bb78774f79f9f03a224e29615ccb469f33a3eb9b"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20394@1",
+        "classification": "direct-source-extraction",
+        "confidence": 0.99,
+        "witnessLocators": {
+          "TBESG.G20394.raw-row": "TBESG.txt line 10030, byte 4584026; exact UTF-8 row without LF",
+          "TBESG.G7336.raw-row": "TBESG.txt line 7116, byte 3906773; exact G7336 UTF-8 row without LF",
+          "TBESG.G7730.raw-row": "TBESG.txt line 7510, byte 3991589; exact G7730 UTF-8 row without LF",
+          "TAGNT.G20394.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20394 across both pinned files"
+        }
+      }
+    },
+    "greek:G20464": {
+      "sourceRecordDigest": "c487b224a14f635d458802a9b9d21c5141eb71735cb14d88e412085189187e20",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20464.raw-row": "e7848bd8dd60e9187addb55f43fdd5f25abe50c618f069b21205aae7e8944382",
+        "InternalAdjudication.G20464.semantic-payload": "1a3d4e28705249f68c83194bd59f5ce114076bbd98660e9fbe0dc9b0cba9cae7",
+        "TAGNT.G20464.zero-exact-occurrence-corpus": "ff34149786c31b0c8fea544fc769ab3f9b4124a2dd5759629b3b0d82061a936a"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20464@1",
+        "classification": "editorial_reconstruction",
+        "confidence": 0.94,
+        "stepIdentity": {
+          "stepEntryId": 10008,
+          "language": "greek",
+          "baseCode": 20464,
+          "eStrong": "G20464",
+          "dStrong": "G20464 =",
+          "uStrong": "G20464"
+        },
+        "rawSourceRecord": {
+          "id": 10008,
+          "language": "greek",
+          "baseCode": 20464,
+          "eStrong": "G20464",
+          "dStrong": "G20464 =",
+          "uStrong": "G20464",
+          "original": "ἐσσήν",
+          "transliteration": "essēn",
+          "morph": "",
+          "gloss": "[hudot ]ōšen",
+          "meaning": "[hudot ]ōšen",
+          "classicTransliteration": "",
+          "pronunciation": ""
+        },
+        "localProofLimit": "Local files prove exact identity, opaque raw fields, and absence only; morphology and senses come from two internal judgments, not two external attestations.",
+        "adjudicationArtifact": "src/lexiconV3/sources/g20464-internal-adjudication.json",
+        "witnessLocators": {
+          "TBESG.G20464.raw-row": "TBESG.txt line 10098, byte 4593900; exact G20464 UTF-8 row without LF",
+          "InternalAdjudication.G20464.semantic-payload": "g20464-internal-adjudication.json payload agreed by both independent judgments",
+          "TAGNT.G20464.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20464 across both pinned files"
+        }
+      }
+    },
+    "greek:G20467": {
+      "sourceRecordDigest": "e4c8a5bdf7b10cf109a3b10be6d868804b29a39d9f3983d94c02c410da9f2198",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20467.raw-row": "b82dc782a1880e44cfe26c7743229e3fcc8c33e0789124b54b3b3496b8812353",
+        "TFLSJ.G3741.raw-row": "5ed3350ff7856bb2f1206660ec762d5186ef7fd082797761554077ff17b42e57",
+        "TAGNT.G20467.zero-exact-occurrence-corpus": "51553f38871e6508588f1f6a695e94e29332930c1e48724e8154d054e554857f"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20467@1",
+        "classification": "contextual-extraction",
+        "confidence": 0.96,
+        "witnessLocators": {
+          "TBESG.G20467.raw-row": "TBESG.txt line 10101, byte 4594182; exact UTF-8 row without LF",
+          "TFLSJ.G3741.raw-row": "TFLSJ.txt line 3831, byte 14338575; exact G3741 UTF-8 row without LF",
+          "TAGNT.G20467.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20467 across both pinned files"
+        }
+      }
+    },
+    "greek:G20490": {
+      "sourceRecordDigest": "3f872c02d4bd6f5a7e4beded41ae46cff8fc78d3971b06bddd2bb7e715d1fb9b",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20490.raw-row": "5229644b5804fd46dc746c1eacc4dd6fcfc0c14da2d052a95901cf8a99a82a5e",
+        "TFLSJ.G2198.raw-row": "013e9a3216d8c9d57cd51ba18b51530b95bbfc69f94b5af237ddd6795c953c3c",
+        "TAGNT.G20490.zero-exact-occurrence-corpus": "2dbe5579dd44c0b31afc907774882ebfb68a2dec34f9c6e1b9c61f20254168fc"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20490@1",
+        "classification": "direct-alias-extraction",
+        "confidence": 0.99,
+        "witnessLocators": {
+          "TBESG.G20490.raw-row": "TBESG.txt line 10124, byte 4596841; exact UTF-8 row without LF",
+          "TFLSJ.G2198.raw-row": "TFLSJ.txt line 2314, byte 8353182; exact G2198 UTF-8 row without LF",
+          "TAGNT.G20490.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20490 across both pinned files"
+        }
+      }
+    },
+    "greek:G20583": {
+      "sourceRecordDigest": "7c575b096b7c0ce3d8b97560383c8f02d012d64f956af440659534b5de6e93fc",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20583.raw-row": "f3fb94096eef9cbe370003730ec8ab4fec33140aeaa21d3eb67ea76d385581ce",
+        "TBESG.G1830.raw-row": "aac6136f1453af3625831d178566e103d5ab5596a009d89858cb6816856d717d",
+        "TBESG.G2045.raw-row": "ba819ad9adef73ba9609edcd4b02dbdf4e79131df16dedfeb71e81970d498fa7",
+        "TAGNT.G20583.zero-exact-occurrence-corpus": "4550895c7b4ec0cf08a2ad87f2c17e6060410e4ae4027dd97b97c2be594b4fc8"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20583@1",
+        "classification": "morphological-reconstruction",
+        "confidence": 0.97,
+        "witnessLocators": {
+          "TBESG.G20583.raw-row": "TBESG.txt line 10215, byte 4608698; exact UTF-8 row without LF",
+          "TBESG.G1830.raw-row": "TBESG.txt line 1971, byte 1159885; exact G1830 UTF-8 row without LF",
+          "TBESG.G2045.raw-row": "TBESG.txt line 2186, byte 1289623; exact G2045 UTF-8 row without LF",
+          "TAGNT.G20583.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20583 across both pinned files"
+        }
+      }
+    },
+    "greek:G20654": {
+      "sourceRecordDigest": "3f390ba7e965b4b170f3b066946aff6c165d2ebe4519cc86f200b79771eb5e13",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20654.raw-row": "18993c70c5a49748f7675bd915eae10f6aa9c50afa07ba5afb23862ad08cbe41",
+        "TBESG.G20654.ish-madhon-fragment": "74252a3343a57a739717b65f7b61bb029f4268ae88bb666a6796ce05739e9e49",
+        "TBESH.H0376G.raw-row": "4e72818b021fc1334922ddf529debad62e5ff43a11813012e021a1f33233221c",
+        "TBESH.H4066.raw-row": "4e8118f8cc811d11fbaa28ea6fe5526e7cd32504c26878a9f0435e511b04cd6f",
+        "TBESH.H4067.raw-row": "3532e091dd0d335a796f1a8d971f8198dca1d25afb471142902baf79d84eaacf",
+        "TBESH.H4068.raw-row": "9875421756f7810d1e77a54491e24a44b7eeccf021b6a5c145d227fc8730adcd",
+        "TAGNT.G20654.zero-exact-occurrence-corpus": "593b798d471d6a550ed3d0ae31a8d55ed5609aa10ced652fd776203fca35af6c"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20654@1",
+        "classification": "editorial_reconstruction",
+        "confidence": 0.94,
+        "stepRelationIntroduced": false,
+        "witnessLocators": {
+          "TBESG.G20654.raw-row": "TBESG.txt line 10283, byte 4618216; exact UTF-8 row without LF",
+          "TBESG.G20654.ish-madhon-fragment": "G20654 exact raw fragment íš mādhón",
+          "TBESH.H0376G.raw-row": "TBESH.txt line 546, byte 136257; exact H0376G UTF-8 row without LF",
+          "TBESH.H4066.raw-row": "TBESH.txt line 5577, byte 1557711; exact H4066 UTF-8 row without LF",
+          "TBESH.H4067.raw-row": "TBESH.txt line 5578, byte 1557840; exact H4067 stature row excluded",
+          "TBESH.H4068.raw-row": "TBESH.txt line 5579, byte 1557908; exact H4068 place-name Madon row excluded",
+          "TAGNT.G20654.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20654 across both pinned files"
+        }
+      }
+    },
+    "greek:G20665": {
+      "sourceRecordDigest": "f7d233bb8bf7624262b85be4cad5a8f966fc8e1372003ba706c5197a7d6d1687",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20665.raw-row": "1f9f7718e3905c988e398afff90f2f35c301a795400175db84220d03522be1ad",
+        "Kaikki.fr.manticore.raw-row": "b23c381205de2af0dcc10db9b192df444a5ec4f8f99b3baa6cfb0f971d10ff57",
+        "TAGNT.G20665.zero-exact-occurrence-corpus": "e07024783222ca7f4b8f390dc7e26f5018234160e4d2c2ad045aed4f9f41ce4a"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20665@1",
+        "classification": "editorial_reconstruction",
+        "confidence": 0.96,
+        "stepRelationIntroduced": false,
+        "witnessLocators": {
+          "TBESG.G20665.raw-row": "TBESG.txt line 10294, byte 4619223; exact UTF-8 row without LF",
+          "Kaikki.fr.manticore.raw-row": "kaikki.org-dictionary-French.jsonl line 2484, byte 8480400; exact UTF-8 row without LF",
+          "TAGNT.G20665.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20665 across both pinned files"
+        },
+        "sourceGlossRole": "Iranian etymon, not an English definition",
+        "kaikkiWord": "manticore",
+        "kaikkiCategory": "Mythological creatures"
+      }
+    },
+    "greek:G20765": {
+      "sourceRecordDigest": "687cd93d41079033d4d0cefb080ec763ff3b8e1c8827cdae5f62c1dbb38527db",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20765.raw-row": "6bc5369707fc049348490c8c2a9517c38fc72761d2ca63dbabf7d18abd58ab39",
+        "TBESG.G20765.unpublished-papyrus-fragment": "ca40a517362ec757c6151999f307d77eaab13f014ddab4c217fe58076f772eb2",
+        "TBESG.G3448.raw-row": "719ee4d2a0dac0a7627c6cea79f1ef1f97bc3fe01ea98a0f63fe8282789d4876",
+        "TBESG.G3448.young-shoot-fragment": "0923b43a07903a312f010009d9abd71142397d30bff1692470fc428f5d98781d",
+        "STEP.G3448.source-record": "d5e9ba7019ddc1091d2e6d34a584328ba8d7a8435d86b629570dcee12b07c5ec",
+        "TAGNT.G20765.zero-exact-occurrence-corpus": "7e5d2c34968773c22ecb99091729410f9c74bc5352ed1866a492da7230d7b083"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20765@1",
+        "classification": "editorial-morphological-reconstruction",
+        "rawHeadword": "μόσχευμα",
+        "baseWitnessEntryKey": "greek:G3448",
+        "baseWitnessHeadword": "μόσχος",
+        "directStepDefinition": false,
+        "rawStepCitation": "PLond.ined.",
+        "outputGlossDigest": "fb864c9b0059c1b1be65be9a31de1bb1ac1e795ee446393a5f92411b8d48925c",
+        "outputMeaningDigest": "8931ea444175a63e4c7af8a750847db82f9f5da5b516f35dbdf2894ff3722a79",
+        "exactOccurrenceCount": 0,
+        "stepRelationUnchanged": true,
+        "identityUnchanged": true,
+        "witnessLocators": {
+          "TBESG.G20765.raw-row": "TBESG.txt line 10394, byte 4631880; exact UTF-8 row without LF",
+          "TBESG.G20765.unpublished-papyrus-fragment": "G20765 exact bibliographic fragment PLond.ined.",
+          "TBESG.G3448.raw-row": "TBESG.txt line 3561, byte 2217105; exact G3448 UTF-8 row without LF",
+          "TBESG.G3448.young-shoot-fragment": "G3448 exact fragment a young shoot or twig.",
+          "STEP.G3448.source-record": "greek:G3448 exact source-record projection in the pinned STEP SQLite",
+          "TAGNT.G20765.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20765 across both pinned files"
+        },
+        "witnessRecipes": {
+          "TBESG.G20765.raw-row": "SHA-256 of the exact UTF-8 line without its line terminator",
+          "TBESG.G20765.unpublished-papyrus-fragment": "SHA-256 of the exact bibliographic token",
+          "TBESG.G3448.raw-row": "SHA-256 of the exact UTF-8 line without its line terminator",
+          "TBESG.G3448.young-shoot-fragment": "SHA-256 of the exact English source substring",
+          "STEP.G3448.source-record": "digestGreekReconstructionSourceRecord over the exact G3448 SQLite row",
+          "TAGNT.G20765.zero-exact-occurrence-corpus": "englishExactOccurrenceCorpusDigest for TAGNT, G20765, and the canonical empty occurrence list"
+        }
+      }
+    },
+    "greek:G20937": {
+      "sourceRecordDigest": "9376ae6714fc5af8faa9988d399012d92c4a9c315f12f3ddde9117ff0a8e488f",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G20937.raw-row": "58fe831758623666faacadb738630b8ae3f296a7ef21b0222b4c863b64612288",
+        "TBESG.G1041.raw-row": "e1d0b4c3e244ab3f18ee1f8a63dc66ad86ca3d3dfe09ff982cd80d03db4c4dbb",
+        "TAGNT.G20937.zero-exact-occurrence-corpus": "9475151827db1c8f4bc33394d45e4c1b45247ab12cb6c67ad69a009b84a32162"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G20937@1",
+        "classification": "direct-source-extraction",
+        "confidence": 0.99,
+        "witnessLocators": {
+          "TBESG.G20937.raw-row": "TBESG.txt line 10564, byte 4656580; exact UTF-8 row without LF",
+          "TBESG.G1041.raw-row": "TBESG.txt line 1163, byte 573874; exact G1041 UTF-8 row without LF",
+          "TAGNT.G20937.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G20937 across both pinned files"
+        }
+      }
+    },
+    "greek:G21057": {
+      "sourceRecordDigest": "081aebb4da542448a7a38c317bc4febbf8f55dffcddc567c454815f5af26f480",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G21057.raw-row": "74811805f201bc3a638231f86e3591c3e7e09091e28e5143f2e83ddf07891370",
+        "TBESG.G21057.obtutus-fragment": "150fc17f580c8ce82ec6330b8e23e8bba26b9a035a4edf89a7c45d91dcecdb1b",
+        "TFLSJ.G4337.raw-row": "41d25882df7ecfe11780ce5141e8089f6c76f6fbc5fac0bcc6e86b47a33a8392",
+        "TAGNT.G21057.zero-exact-occurrence-corpus": "a640b162dbd50626af79d01a9bdb2e12c28189368d7115093193606c0b7dba92"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G21057@1",
+        "classification": "editorial_reconstruction",
+        "confidence": 0.92,
+        "stepRelationIntroduced": false,
+        "witnessLocators": {
+          "TBESG.G21057.raw-row": "TBESG.txt line 10683, byte 4674085; exact UTF-8 row without LF",
+          "TBESG.G21057.obtutus-fragment": "G21057 exact raw bibliographic/Latin fragment obtutus)",
+          "TFLSJ.G4337.raw-row": "TFLSJ.txt line 4440, byte 17401621; exact G4337 UTF-8 row without LF",
+          "TAGNT.G21057.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G21057 across both pinned files"
+        }
+      }
+    },
+    "greek:G21118": {
+      "sourceRecordDigest": "b341309368878744b9739b24f059ffcfafcfd2c055438646b136a6bb43f98291",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G21118.raw-row": "88883e4660add2bd58eeced04b8a8572a66d7ac0dc35504821e3ff888fb865f1",
+        "TBESG.G21117.raw-row": "38e700e9861204a98633e50fe56dddda423d2a517843cc7246be76f3562b1267",
+        "TBESG.G4698.raw-row": "2b72f3dcedf36f555780d9bde2e1d89c241ac68f932af765d74ee431cffa9ccc",
+        "TBESG.G5314.raw-row": "e42e7ec57c5f1d153c6cb5325bbabb57e669c96f0696f6e3f8933fe7ce45b215",
+        "TAGNT.G21118.zero-exact-occurrence-corpus": "a1151fe2622a89663c54ed87c69ab21d68055d7dbc41aa2632559ef3847d208b"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G21118@1",
+        "classification": "direct-source-extraction",
+        "confidence": 0.99,
+        "excludedSense": "G4698 affection",
+        "witnessLocators": {
+          "TBESG.G21118.raw-row": "TBESG.txt line 10743, byte 4682729; exact UTF-8 row without LF",
+          "TBESG.G21117.raw-row": "TBESG.txt line 10742, byte 4682584; exact G21117 UTF-8 row without LF",
+          "TBESG.G4698.raw-row": "TBESG.txt line 4846, byte 3060322; exact G4698 UTF-8 row without LF",
+          "TBESG.G5314.raw-row": "TBESG.txt line 5470, byte 3414535; exact G5314 UTF-8 row without LF",
+          "TAGNT.G21118.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G21118 across both pinned files"
+        }
+      }
+    },
+    "greek:G21241": {
+      "sourceRecordDigest": "b81afe6b56d8f2922ed2be57b649582c12a7871e1be704113de5ba411e1c6259",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G21241.raw-row": "7d810bf962c15d7740b3f885ac8a154042a313968386a962785219b8519254b8",
+        "TBESG.G9466.raw-row": "5c8ed5d6d7ae13d608bd5764d7b61d18083f8f90194bd82e3252cead6e7da165",
+        "TFLSJ.G5117.raw-row": "0b3520c90c17bac012830e3bcaffeb6eb994e5600cb307a807f349bb2796f2fc",
+        "TAGNT.G21241.zero-exact-occurrence-corpus": "4866788afe43df65b5dd8bfa069b40793c1452af60e3f82455931c1fafbbd8e5"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G21241@1",
+        "classification": "direct-source-extraction",
+        "confidence": 0.99,
+        "stepRelationIntroduced": false,
+        "witnessLocators": {
+          "TBESG.G21241.raw-row": "TBESG.txt line 10866, byte 4703494; exact UTF-8 row without LF",
+          "TBESG.G9466.raw-row": "TBESG.txt line 9245, byte 4428320; exact G9466 UTF-8 row without LF",
+          "TFLSJ.G5117.raw-row": "TFLSJ.txt line 5245, byte 20570459; exact G5117 UTF-8 row without LF",
+          "TAGNT.G21241.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G21241 across both pinned files"
+        }
+      }
+    },
+    "greek:G21273": {
+      "sourceRecordDigest": "6be9b92841af20ae67a797598ff3330f9e5c6fc38a27a0be2af26b2705897475",
+      "occurrenceCount": 0,
+      "witnessDigests": {
+        "TBESG.G21273.raw-row": "0c7f0688a37fd1176cf7c70b17c60154c7c3e12f858f7d99bf58eb1b8d164f52",
+        "TBESG.G0071.raw-row": "bf37f53c334164fbb195db6e4c4be5695694a6498ea8b7d2e848a89f65261bf7",
+        "TBESG.G5228.raw-row": "137b467879d235e86d9bb29f3b3b57d6d2bd37c15724edad04e2a8e06964841d",
+        "TFLSJ.G0071.raw-row": "e12ac283e24f726cfd7172f2279ec10cc273e8969ae2673019b8d4a7d2a97fdb",
+        "TFLSJ.G5228.raw-row": "44e9001b7364ee336af694e6568501c0382c3a3eab82b88060203a1895147eb0",
+        "TFLSJ.G5229.raw-row": "6d87120f972a2f9173f7cecda2bb2326b058599baae260161a90f7ac3b470435",
+        "TAGNT.G21273.zero-exact-occurrence-corpus": "492e0bce3e6b0807c3b98b5e1904732ec41f221eafe920673c11c8ce8084e848"
+      },
+      "facts": {
+        "ruleId": "greek-reconstruction:G21273@1",
+        "classification": "editorial_reconstruction",
+        "confidence": 0.93,
+        "stepIdentity": {
+          "stepEntryId": 10807,
+          "language": "greek",
+          "baseCode": 21273,
+          "eStrong": "G21273",
+          "dStrong": "G21273 =",
+          "uStrong": "G21273"
+        },
+        "rawSourceRecord": {
+          "id": 10807,
+          "language": "greek",
+          "baseCode": 21273,
+          "eStrong": "G21273",
+          "dStrong": "G21273 =",
+          "uStrong": "G21273",
+          "original": "ὑπεράγω",
+          "transliteration": "huperagō",
+          "morph": "G:V",
+          "gloss": "to exalt",
+          "meaning": "excessive",
+          "classicTransliteration": "",
+          "pronunciation": ""
+        },
+        "tflsjExactHeadwordMatchCount": 0,
+        "witnessLocators": {
+          "TBESG.G21273.raw-row": "TBESG.txt line 10897, byte 4707557; exact G21273 UTF-8 row without LF",
+          "TBESG.G0071.raw-row": "TBESG.txt line 168, byte 57303; exact ἄγω component row without LF",
+          "TBESG.G5228.raw-row": "TBESG.txt line 5383, byte 3364788; exact ὑπέρ component row without LF",
+          "TFLSJ.G0071.raw-row": "TFLSJ.txt line 141, byte 157565; exact ἄγω component row without LF",
+          "TFLSJ.G5228.raw-row": "TFLSJ.txt line 5356, byte 21419991; exact ὑπέρ component row without LF",
+          "TFLSJ.G5229.raw-row": "TFLSJ.txt line 5357, byte 21446809; exact figurative elevation analogue without LF",
+          "TAGNT.G21273.zero-exact-occurrence-corpus": "canonical exact-dStrong TAGNT corpus for G21273 across both pinned files"
+        }
+      }
+    }
+  },
+  "catalogDigest": "dc922ca9e0a610674d88d4de8998e6abedab668ca75f96b9c181a2e1be018dde"
+}

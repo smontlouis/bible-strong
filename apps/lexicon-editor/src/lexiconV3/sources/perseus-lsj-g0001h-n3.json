@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "perseus-lsj-entry@1",
+  "entryKey": "greek:G0001H",
+  "source": {
+    "name": "A Greek-English Lexicon (LSJ)",
+    "provider": "Perseus Digital Library",
+    "repository": "https://github.com/PerseusDL/lexica",
+    "commit": "b5e707bdda2d6c8e0bb6c29657454996b4fb04d7",
+    "path": "CTS_XML_TEI/perseus/pdllex/grc/lsj/grc.lsj.perseus-eng1.xml",
+    "rawUrl": "https://raw.githubusercontent.com/PerseusDL/lexica/b5e707bdda2d6c8e0bb6c29657454996b4fb04d7/CTS_XML_TEI/perseus/pdllex/grc/lsj/grc.lsj.perseus-eng1.xml",
+    "viewerUrl": "https://atlas.perseus.tufts.edu/dictionaries/entry/urn%3Acite2%3Ascaife-viewer%3Adictionaries.v1%3Alsj-n3/",
+    "urn": "urn:cite2:scaife-viewer:dictionaries.v1:lsj-n3",
+    "accessedAt": "2026-07-13",
+    "sourceFileSha256": "15b1b7ca0a6c88e5a14e97f2339a0c7a7dfae71c028bdfb45fcee04c79a754f7",
+    "sourceFragmentSha256": "c6db2a6fa2024976aae6b3e197dc9fde9865fc7f0168bd796100a8e1a4ddf420",
+    "sourceFragmentBytes": 7293
+  },
+  "license": {
+    "spdx": "CC-BY-SA-4.0",
+    "url": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "attribution": "Text provided under a CC BY-SA license by Perseus Digital Library, http://www.perseus.tufts.edu, with funding from The National Endowment for the Humanities.",
+    "provenanceUrl": "https://github.com/PerseusDL/lexica/blob/b5e707bdda2d6c8e0bb6c29657454996b4fb04d7/CTS_XML_TEI/perseus/pdllex/grc/lsj/README.md",
+    "modifications": "The TEI entry was reduced to a canonical semantic payload; wording in the payload is otherwise unchanged."
+  },
+  "payload": {
+    "definition": "Hom. always ἆ δειλέ, ἆ δειλώ, ἆ δειλοί, Il. 11.441, 17.443, Od. 20.351, cf. Thgn. 351, Theoc. Ep. 6; also in Lyr., Archil. 135, and Trag., A. Ag. 1087, etc.; in reproofs or warnings, ἆ, μηδαμῶς . . S. Ph. 1300, cf. OT 1147, E. Hel. 445, etc.:—freq. with adj., ἆ μάκαρ Thgn. 1013, Choeril. 1; ἆ τάλας Semon. 7.76, cf. B. 15.30; ἆ τρισευδαίμων Id. 3.10; rarely alone, Ar. Ra. 759; sts. doubled, ἆ ἆ A. Pr. 114, 566, Ar. V. 1379. —Rare in Prose, Pl. Hp.Ma. 295a (Euclus ap. Sch. ad loc. is said to have used it = νῦν).",
+    "headword": "ἆ",
+    "shortDef": "ah!",
+    "urn": "urn:cite2:scaife-viewer:dictionaries.v1:lsj-n3"
+  },
+  "payloadSha256": "04215068163e47a95512bbc7e1bc7e4bb8a959aa388117ca810eafcc66203b8f"
+}

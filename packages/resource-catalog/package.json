@@ -1,0 +1,25 @@
+{
+  "name": "@bible-strong/resource-catalog",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./catalog": "./src/catalog.ts",
+    "./interlinear-bible": "./src/interlinearBiblePublicationCatalog.ts",
+    "./ordinary-bibles": "./src/ordinaryBibleVersions.ts",
+    "./strong-bibles": "./src/strongBibleCatalog.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/**/*.node-test.ts"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.28.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "tsx": "4.20.6",
+    "typescript": "~6.0.3"
+  }
+}

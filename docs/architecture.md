@@ -81,7 +81,7 @@ from the shared Bible database, a sidecar, or another local resource database.
 
 The offline resource layer is split by responsibility:
 
-- `src/assets/mobile-resource-catalog.json` is the bundled catalog of distributable ZIP artifacts.
+- `packages/resource-catalog/src/mobile-resource-catalog.json` is the canonical bundled catalog of distributable ZIP artifacts.
 - `src/helpers/mobileResourceCatalog.ts` validates the bundled or remotely refreshed catalog and
   never accepts a catalog that drops a bundled resource identity.
 - `src/helpers/downloadManager.ts` and `src/state/downloadQueue.ts` own queue execution and

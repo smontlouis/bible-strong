@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strong File Viewer</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell has-lexicon-drawer">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">S</div>
+          <div>
+            <h1>Strong File Viewer</h1>
+            <p>
+              Inspecte les placements Strong, leur source et les Strong non
+              placés.
+            </p>
+          </div>
+        </div>
+
+        <nav class="page-nav">
+          <a class="is-active" href="./">Viewer</a>
+          <a href="./workflow.html">Workflow</a>
+          <a href="./lexicon.html">Lexique</a>
+          <a href="./review.html">Revue LLM</a>
+        </nav>
+
+        <label class="drop-zone" id="dropZone">
+          <input
+            id="fileInput"
+            type="file"
+            accept=".tsv,.csv,.json,application/json,text/tab-separated-values,text/csv,text/plain"
+          />
+          <span class="drop-title">Charger un TSV ou CSV</span>
+          <span class="drop-copy"
+            >Glisse un fichier ici ou clique pour choisir.</span
+          >
+        </label>
+
+        <section class="panel">
+          <h2>Navigation</h2>
+          <label>
+            Livre
+            <select id="bookSelect" disabled></select>
+          </label>
+          <label>
+            Chapitre
+            <select id="chapterSelect" disabled></select>
+          </label>
+          <label>
+            Recherche
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Strong, mot, référence..."
+              disabled
+            />
+          </label>
+          <label>
+            Mode
+            <select id="viewModeSelect" disabled>
+              <option value="normal">Normal</option>
+              <option value="advanced">Advanced</option>
+              <option value="debug">Debug</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="panel stats-panel">
+          <h2>Résumé</h2>
+          <div id="stats" class="stats-grid">
+            <div>
+              <span class="stat-label">Versets</span>
+              <strong>-</strong>
+            </div>
+            <div>
+              <span class="stat-label">Tags</span>
+              <strong>-</strong>
+            </div>
+            <div>
+              <span class="stat-label">Vides</span>
+              <strong>-</strong>
+            </div>
+            <div>
+              <span class="stat-label">Mots taggés</span>
+              <strong>-</strong>
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <section class="reader">
+        <header class="reader-toolbar">
+          <div>
+            <p id="fileName" class="file-name">Aucun fichier chargé</p>
+            <h2 id="chapterTitle">Aperçu Strong</h2>
+          </div>
+          <div class="toolbar-actions">
+            <button id="prevChapter" type="button" disabled>Précédent</button>
+            <button id="nextChapter" type="button" disabled>Suivant</button>
+          </div>
+        </header>
+
+        <div class="legend" aria-label="Légende des couleurs Strong">
+          <span
+            title="Strong repris directement depuis une Bible témoin locale : Sg1910, Darby ou DarbyR."
+            ><i class="legend-chip"></i> Témoin direct</span
+          >
+          <span
+            title="Strong placé par une correspondance déterministe apprise depuis les Bibles témoins locales."
+            ><i class="legend-reference-learned"></i> Témoin appris</span
+          >
+          <span
+            title="Strong placé sur une expression française multi-mots apprise depuis les Bibles témoins."
+            ><i class="legend-phrase"></i> Expression témoin</span
+          >
+          <span
+            title="Strong placé automatiquement grâce à des sources lexicales françaises déterministes : dictionnaire Strong FR, lemmatisation, synonymes externes, Kaikki, WOLF, OpenOffice ou RezoJDM selon disponibilité."
+            ><i class="legend-dictionary"></i> Lexique FR validé</span
+          >
+          <span
+            title="Strong attendu par les témoins et confirmé par l'inventaire original TAHOT/TAGNT."
+            ><i class="legend-reference-original"></i> Témoin via original</span
+          >
+          <span
+            title="Strong venant de l'inventaire original STEP Bible : TAHOT pour l'hébreu/araméen, TAGNT pour le grec. Ce n'est pas Macula."
+            ><i class="legend-step-only"></i> Original TAHOT/TAGNT</span
+          >
+          <span
+            title="Placement issu d'une décision validée manuellement ou via workflow de revue."
+            ><i class="legend-curated"></i> Correction revue</span
+          >
+          <span
+            title="Strong valide attendu, mais aucun mot ou expression française fiable n'a été trouvé."
+            ><i class="legend-empty"></i> Strong vide</span
+          >
+          <span
+            title="Strong grammatical ou structurel, souvent sans équivalent français direct : particule, article, préposition, marqueur d'objet, etc."
+            ><i class="legend-technical"></i> Technique</span
+          >
+          <span title="Nombre Strong canonique affiché en exposant."
+            ><sup>430</sup> numéro Strong</span
+          >
+        </div>
+
+        <article id="chapterView" class="chapter-view empty-state">
+          <p>
+            Charge un JSON enrichi, TSV ou CSV contenant les colonnes
+            <code>book_id</code>, <code>num_chapter</code>,
+            <code>num_verse</code>, <code>text</code>.
+          </p>
+        </article>
+      </section>
+
+      <aside
+        class="lexicon-drawer"
+        id="lexiconDrawer"
+        aria-label="Détail lexique Strong"
+      >
+        <div class="lexicon-drawer-empty">
+          <p class="drawer-kicker">Lexique FR</p>
+          <h2>Sélectionne un Strong</h2>
+          <p>Clique sur un mot taggé ou un Strong vide pour ouvrir sa fiche.</p>
+        </div>
+      </aside>
+    </main>
+
+    <script type="module" src="./strong-viewer.js"></script>
+  </body>
+</html>
