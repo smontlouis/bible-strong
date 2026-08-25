@@ -44,7 +44,7 @@ describe('BibleStrongReference', () => {
     }) as React.ReactElement<{
       children: (value: StrongResourceScrollValue) => React.ReactElement<{
         onPress: () => void
-        onLayout: (event: { nativeEvent: { layout: { x: number } } }) => void
+        onLayout: (event: { nativeEvent: { layout: { y: number } } }) => void
         children: React.ReactElement<{ style?: typeof textStyle }>
       }>
     }>
@@ -54,7 +54,7 @@ describe('BibleStrongReference', () => {
       scrollToStrongCard,
     })
     lexicalToken.props.onPress()
-    lexicalToken.props.onLayout({ nativeEvent: { layout: { x: 120 } } })
+    lexicalToken.props.onLayout({ nativeEvent: { layout: { y: 120 } } })
 
     expect(scrollToStrongCard).toHaveBeenCalledWith(reference, 2)
     expect(registerStrongWordLayout).toHaveBeenCalledWith(2, 120)

@@ -39,6 +39,8 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
           id: 1,
           language: 'greek',
           code: 'G3056',
+          identityCode: 'G3056',
+          uStrong: 'G3056',
           baseCode: 3056,
           original: 'λόγος',
           transliteration: 'logos',
@@ -48,6 +50,8 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
           id: 2,
           language: 'hebrew',
           code: 'H3068',
+          identityCode: 'H3068',
+          uStrong: 'H3068',
           baseCode: 3068,
           original: 'יהוה',
           transliteration: 'yhwh',
@@ -57,10 +61,34 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
           id: 3,
           language: 'greek',
           code: 'G0026',
+          identityCode: 'G0026',
+          uStrong: 'G0026',
           baseCode: 26,
           original: 'ἀγάπη',
           transliteration: 'agapē',
           gloss: 'love',
+        },
+        {
+          id: 4,
+          language: 'greek',
+          code: 'G2096',
+          identityCode: 'G2096',
+          uStrong: 'H2332',
+          baseCode: 2096,
+          original: 'Εὕα',
+          transliteration: 'Heua',
+          gloss: 'Eve',
+        },
+        {
+          id: 5,
+          language: 'hebrew',
+          code: 'H2332',
+          identityCode: 'H2332A',
+          uStrong: 'H2332A',
+          baseCode: 2332,
+          original: 'חַוָּה',
+          transliteration: 'chavvah',
+          gloss: 'Eve',
         },
       ] as const
 
@@ -79,7 +107,7 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
               language: entry.language,
               eStrong: entry.code,
               dStrong: entry.code,
-              uStrong: entry.code,
+              uStrong: entry.uStrong,
               baseCode: entry.baseCode,
               original: entry.original,
               transliteration: entry.transliteration,
@@ -97,7 +125,7 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
           entries.map(entry => ({
             publication_id: publication.id,
             step_entry_id: entry.id,
-            step_code: entry.code,
+            step_code: entry.identityCode,
           }))
         )
         .execute()
@@ -133,6 +161,27 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
         [
           { revision: 'core:core-r1', stepCode: 'G3056', gloss: 'word' },
           { revision: 'core:core-r1', stepCode: 'H3068', gloss: 'Lord' },
+        ]
+      )
+
+      const classicalEve = await Effect.runPromise(
+        repository.findEntryCards!({
+          identities: [{ kind: 'strong', reference: 'H2332' }],
+          language: 'fr',
+        })
+      )
+      assert.deepEqual(
+        classicalEve.map(card => ({
+          selectedIdentity: card.value.selectedIdentity,
+          classicStrong: card.value.classicStrong,
+          language: card.value.language,
+        })),
+        [
+          {
+            selectedIdentity: { kind: 'strong', code: 'H2332' },
+            classicStrong: 'H2332',
+            language: 'hebrew',
+          },
         ]
       )
 

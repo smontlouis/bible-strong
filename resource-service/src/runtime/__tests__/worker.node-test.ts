@@ -311,6 +311,28 @@ describe('Resource Worker binding', () => {
     assert.equal(firstChapter, unchangedChapter)
   })
 
+  it('uses a dedicated response revision for Strong lexicon batches', async () => {
+    const catalog = {
+      resources: {
+        'strong-lexicon:core': { contentSha256: 'core-r1' },
+        'strong-lexicon:resources': { contentSha256: 'resources-r1' },
+        'strong-lexicon:entities': { contentSha256: 'entities-r1' },
+      },
+    }
+    const batch = await resourceApiCacheRevisionFrom(
+      new Request(
+        'https://api.bible-strong.app/v1/strong-lexicon/entries/batch?language=fr&identities=strong%3AH2332'
+      ),
+      catalog
+    )
+    const entry = await resourceApiCacheRevisionFrom(
+      new Request('https://api.bible-strong.app/v1/strong-lexicon/entries/H2332?language=fr'),
+      catalog
+    )
+
+    assert.notEqual(batch, entry)
+  })
+
   it('does not cache unsuccessful origin responses', async () => {
     const cache = new MemoryEdgeCache()
     let originReads = 0

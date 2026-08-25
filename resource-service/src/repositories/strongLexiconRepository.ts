@@ -327,29 +327,54 @@ export const makeKyselyStrongLexiconRepository = (
         identity => text(identity, 'stepCode') === reference
       )
       const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
-      const entry = entries.find(candidate => {
-        if (
-          requestedIdentity &&
-          number(candidate, 'id') === number(requestedIdentity, 'stepEntryId')
-        ) {
-          return true
-        }
-        if (requested.kind === 'dstrong') return text(candidate, 'dStrong').startsWith(reference)
-        if (requested.kind === 'estrong') return text(candidate, 'eStrong') === reference
-        if (requested.kind === 'ustrong') return text(candidate, 'uStrong') === reference
-        return (
-          [
-            text(candidate, 'eStrong'),
-            text(candidate, 'dStrong'),
-            text(candidate, 'uStrong'),
-          ].includes(reference) ||
-          (number(candidate, 'baseCode') === base &&
-            text(candidate, 'language') === (reference.startsWith('G') ? 'greek' : 'hebrew'))
+      const lexicalLanguage = reference.startsWith('G') ? 'greek' : 'hebrew'
+      const entry = entries
+        .map((candidate, index) => {
+          const candidateId = number(candidate, 'id')
+          let rank: number | undefined
+
+          if (requestedIdentity && candidateId === number(requestedIdentity, 'stepEntryId')) {
+            rank = 0
+          } else if (
+            requested.kind === 'dstrong' &&
+            text(candidate, 'dStrong').startsWith(reference)
+          ) {
+            rank = 1
+          } else if (requested.kind === 'estrong' && text(candidate, 'eStrong') === reference) {
+            rank = 1
+          } else if (requested.kind === 'ustrong' && text(candidate, 'uStrong') === reference) {
+            rank = 1
+          } else if (
+            requested.kind === 'strong' &&
+            number(candidate, 'baseCode') === base &&
+            text(candidate, 'language') === lexicalLanguage
+          ) {
+            rank = 1
+          } else if (
+            [
+              text(candidate, 'eStrong'),
+              text(candidate, 'dStrong'),
+              text(candidate, 'uStrong'),
+            ].includes(reference)
+          ) {
+            rank = 2
+          }
+
+          return rank === undefined ? undefined : { candidate, index, rank }
+        })
+        .filter(
+          (match): match is { candidate: Payload; index: number; rank: number } =>
+            match !== undefined
         )
-      })
+        .sort((left, right) => left.rank - right.rank || left.index - right.index)[0]?.candidate
       if (!entry) return []
       const entryId = number(entry, 'id')
-      const identity = identities.find(candidate => number(candidate, 'stepEntryId') === entryId)
+      const entryIdentities = identities.filter(
+        candidate => number(candidate, 'stepEntryId') === entryId
+      )
+      const identity =
+        entryIdentities.find(candidate => text(candidate, 'stepCode') === reference) ??
+        entryIdentities[0]
       if (!identity) return []
       const translation =
         translations.find(candidate => number(candidate, 'stepEntryId') === entryId) ?? {}
@@ -382,7 +407,7 @@ export const makeKyselyStrongLexiconRepository = (
             id: entryId,
             selectedIdentity: {
               kind: requested.kind,
-              code: text(identity, 'stepCode'),
+              code: reference,
             },
             stepCode: text(identity, 'stepCode'),
             classicStrong: classicStrong(entry),

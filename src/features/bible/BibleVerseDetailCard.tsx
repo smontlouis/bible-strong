@@ -38,8 +38,8 @@ import { wp } from '~helpers/utils'
 import type { RootState } from '~redux/modules/reducer'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import type { VersionCode } from '~state/tabs'
-import { scaleFontSize } from './BibleDOM/scaleFontSize'
 import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
+import { getBibleTextFontSize } from './BibleDOM/verseTypography'
 import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
 import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
@@ -51,12 +51,6 @@ import {
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth + itemHorizontalMargin * 2
-
-const VerseText = styled.View(() => ({
-  flexWrap: 'nowrap',
-  alignItems: 'flex-start',
-  flexDirection: 'row',
-}))
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -163,6 +157,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const hasDisplayedStrongVerseRef = useRef(false)
   const insets = useSafeAreaInsets()
   const [currentStrongCardIndex, setCurrentStrongCardIndex] = useState(0)
+  const [modalContentHeight, setModalContentHeight] = useState(0)
   const coreAvailabilityQuery = useQuery({
     queryKey: resourceQueryKeys.strongLexiconAvailability('core'),
     queryFn: async () => ({
@@ -285,15 +280,15 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     }
   }
 
-  const registerStrongWordLayout = (occurrenceIndex: number, verseContentOffsetX: number) => {
-    strongWordLayoutsRef.current.set(occurrenceIndex, verseContentOffsetX)
+  const registerStrongWordLayout = (occurrenceIndex: number, verseContentOffsetY: number) => {
+    strongWordLayoutsRef.current.set(occurrenceIndex, verseContentOffsetY)
   }
 
   const scrollVerseToOccurrence = (occurrenceIndex: number) => {
-    const x = strongWordLayoutsRef.current.get(occurrenceIndex)
-    if (x === undefined) return
+    const y = strongWordLayoutsRef.current.get(occurrenceIndex)
+    if (y === undefined) return
 
-    verseScrollRef.current?.scrollTo({ x, animated: true })
+    verseScrollRef.current?.scrollTo({ y, animated: true })
   }
 
   const selectStrongCardFromOffset = (offsetX: number) => {
@@ -331,7 +326,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     isProgrammaticCardsScrollRef.current = false
     setCurrentStrongCardIndex(0)
     onStrongBibleProvenanceChange?.(strongVerseData.provenance)
-    verseScrollRef.current?.scrollTo({ x: 0, animated: false })
+    verseScrollRef.current?.scrollTo({ y: 0, animated: false })
     strongCardsScrollRef.current?.scrollTo({ x: 0, animated: false })
   }, [onStrongBibleProvenanceChange, strongVerseData, strongVerseQuery.isPlaceholderData])
 
@@ -432,17 +427,24 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   }
 
   const verseTextStyle = {
-    fontSize: Number.parseFloat(scaleFontSize(24, fontSizeScale)),
-    lineHeight: Number.parseFloat(scaleLineHeight(30, lineHeightSetting, fontSizeScale)),
+    fontSize: Number.parseFloat(getBibleTextFontSize(false, fontSizeScale)),
+    lineHeight: Number.parseFloat(scaleLineHeight(24, lineHeightSetting, fontSizeScale)),
   }
+  const verseMaxHeight = modalContentHeight ? modalContentHeight * 0.4 : undefined
 
   return (
-    <Box flex={1}>
+    <Box
+      flex={1}
+      testID="resource-modal-content"
+      onLayout={event => setModalContentHeight(event.nativeEvent.layout.height)}
+    >
       <Box position="relative" zIndex={1}>
         <ScrollView
           ref={verseScrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
+          testID="resource-verse-scroll"
+          nestedScrollEnabled
+          showsVerticalScrollIndicator={false}
+          style={verseMaxHeight ? { maxHeight: verseMaxHeight } : undefined}
           contentContainerStyle={{
             paddingTop: 10,
             paddingRight: 20,
@@ -465,9 +467,9 @@ const BibleVerseDetailCard: React.FC<Props> = ({
                 scrollToStrongCard,
               }}
             >
-              <VerseText>
+              <Box flex={1} row wrap alignItems="flex-start" testID="resource-verse-text">
                 {React.cloneElement(formattedTexte, { textStyle: verseTextStyle })}
-              </VerseText>
+              </Box>
             </StrongResourceScrollProvider>
           </StyledVerse>
         </ScrollView>

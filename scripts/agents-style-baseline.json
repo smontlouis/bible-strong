@@ -24,7 +24,7 @@
   "src/features/bible/BibleParamsModal.tsx": 3,
   "src/features/bible/BibleSelectTabBar.tsx": 2,
   "src/features/bible/BibleStrongReference.tsx": 6,
-  "src/features/bible/BibleVerseDetailCard.tsx": 5,
+  "src/features/bible/BibleVerseDetailCard.tsx": 4,
   "src/features/bible/BibleVerseDetailFooter.tsx": 3,
   "src/features/bible/ConcordanceScreen.tsx": 4,
   "src/features/bible/ConcordanceVerse.tsx": 3,

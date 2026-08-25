@@ -14,6 +14,8 @@ export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<strin
 
 export const RESOURCE_API_CACHE_EPOCH = resourceApiCacheEpochFrom(mobileResourceCatalog)
 
+const STRONG_LEXICON_BATCH_RESPONSE_REVISION = 'strong-lexicon-batch-identity-selection-v2'
+
 type CatalogEntry = { contentSha256?: unknown; archiveSha256?: unknown }
 
 const catalogResourceIdsFrom = (request: Request): string[] => {
@@ -76,9 +78,15 @@ export const resourceApiCacheRevisionFrom = async (
     catalogRevision = await resourceApiCacheEpochFrom(catalog)
   }
 
-  return isDynamicResourceRequest(request) && !new URL(request.url).pathname.endsWith('/random')
-    ? resourceApiCacheEpochFrom([catalogRevision, searchRevision])
-    : catalogRevision
+  const pathname = new URL(request.url).pathname
+  const requestRevision =
+    isDynamicResourceRequest(request) && !pathname.endsWith('/random')
+      ? await resourceApiCacheEpochFrom([catalogRevision, searchRevision])
+      : catalogRevision
+
+  return pathname === '/v1/strong-lexicon/entries/batch'
+    ? resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_BATCH_RESPONSE_REVISION])
+    : requestRevision
 }
 
 export const RESOURCE_API_CACHE_REVISION = (request: Request) =>

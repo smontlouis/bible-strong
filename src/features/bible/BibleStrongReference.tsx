@@ -114,7 +114,7 @@ const BibleStrongRef = ({
         const { currentTarget, registerStrongWordLayout, scrollToStrongCard } = value
         const registerLayout = (event: LayoutChangeEvent) => {
           for (const target of selectionTargets ?? [{ reference, occurrenceIndex }]) {
-            registerStrongWordLayout(target.occurrenceIndex, event.nativeEvent.layout.x)
+            registerStrongWordLayout(target.occurrenceIndex, event.nativeEvent.layout.y)
           }
         }
         const isSelected = Boolean(
