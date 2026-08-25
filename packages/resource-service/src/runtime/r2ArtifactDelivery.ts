@@ -1,4 +1,4 @@
-import mobileResourceCatalog from '@bible-strong/mobile/src/assets/mobile-resource-catalog.json'
+import mobileResourceCatalog from '@bible-strong/resource-catalog/catalog'
 import { resourceRequestIdFrom } from '../http/requestId'
 
 export const R2_ARTIFACT_ROUTE_PREFIX = '/v1/offline-artifacts/'

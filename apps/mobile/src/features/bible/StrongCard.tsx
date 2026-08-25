@@ -208,6 +208,7 @@ const StrongCard = (props: Props) => {
                   p: { ...smallTextStyle(theme) },
                   em: { ...smallTextStyle(theme) },
                   strong: { ...smallTextStyle(theme) },
+                  b: { ...smallTextStyle(theme), color: theme.colors.quart },
                   a: { ...smallLinkStyle(theme) },
                   i: { ...smallTextStyle(theme) },
                   li: { ...smallTextStyle(theme) },

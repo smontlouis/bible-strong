@@ -1,18 +1,10 @@
 import books, { type Book } from '~assets/bible_versions/books-desc'
+import { isBibleCanonId, type BibleCanonId } from '@bible-strong/resource-domain/bible-canon'
 
-export type BibleCanonId =
-  | 'protestant-66'
-  | 'catholic-73'
-  | 'clementine-vulgate'
-  | 'theotex-septuagint'
+export { isBibleCanonId }
+export type { BibleCanonId }
 export type BibleBookCorpus = 'old' | 'deuterocanonical' | 'septuagint' | 'new'
 export type BibleTestament = 'old' | 'new'
-
-export const isBibleCanonId = (value: string): value is BibleCanonId =>
-  value === 'protestant-66' ||
-  value === 'catholic-73' ||
-  value === 'clementine-vulgate' ||
-  value === 'theotex-septuagint'
 
 const PROTESTANT_BOOK_ORDER = Array.from({ length: 66 }, (_, index) => index + 1)
 const GENESIS_TO_NEHEMIAH = Array.from({ length: 16 }, (_, index) => index + 1)

@@ -1,4 +1,5 @@
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import {
   findPublicationBundlesRecursively,
@@ -17,7 +18,10 @@ const run = async () => {
   if (changedFlags.length > 1) throw new Error('R2_PUBLICATION_CHANGED_FLAG_DUPLICATE')
   const bundleSelection = changedFlags.length === 1 ? ('changed' as const) : ('exhaustive' as const)
   const roots = parsePublicationCatalogRoots(rawOptions.filter(option => option !== '--changed'))
-  const mobileCatalogPath = path.resolve(process.cwd(), 'src/assets/mobile-resource-catalog.json')
+  const mobileCatalogPath = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '../../../resource-catalog/src/mobile-resource-catalog.json'
+  )
   const bundles = await findPublicationBundlesRecursively(roots)
   if (bundles.length === 0) throw new Error('RESOURCE_PUBLICATION_CATALOG_EMPTY')
 

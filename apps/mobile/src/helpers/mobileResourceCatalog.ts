@@ -1,40 +1,20 @@
-import catalogJson from '~assets/mobile-resource-catalog.json'
+import {
+  BUNDLED_MOBILE_RESOURCE_CATALOG as catalogJson,
+  type MobileResourceCatalog,
+  type MobileResourceCatalogEntry,
+  type MobileResourceCatalogFileEntry,
+  type MobileResourceEntryRole,
+} from '@bible-strong/resource-catalog/catalog'
 import { ORDINARY_BIBLE_VERSION_IDS } from './ordinaryBibleVersions'
 import { atom, getDefaultStore } from 'jotai/vanilla'
 
-export type MobileResourceInstallationStrategy = 'sqlite-import' | 'archive-extract'
-export type MobileResourceEntryRole = 'canonical' | 'pericope' | 'redWords'
-
-export type MobileResourceCatalogFileEntry = {
-  entry: string
-  sha256: string
-  bytes: number
-}
-
-export type MobileResourceCatalogEntry = {
-  id: string
-  url: string
-  file: string
-  entry: string
-  entries: Partial<Record<MobileResourceEntryRole, MobileResourceCatalogFileEntry>>
-  archiveSha256: string
-  archiveBytes: number
-  contentSha256: string
-  contentBytes: number
-  resourceRevision?: string
-  coreRevision?: string
-  installedBytes: number
-  peakInstallationBytes: number
-  strategy: MobileResourceInstallationStrategy
-}
-
-export type MobileResourceCatalog = {
-  format: 'bible-strong-mobile-resource-catalog'
-  schemaVersion: 1
-  generatedAt: string
-  resourceCount: number
-  resources: Record<string, MobileResourceCatalogEntry>
-}
+export type {
+  MobileResourceCatalog,
+  MobileResourceCatalogEntry,
+  MobileResourceCatalogFileEntry,
+  MobileResourceEntryRole,
+  MobileResourceInstallationStrategy,
+} from '@bible-strong/resource-catalog/catalog'
 
 export const MOBILE_RESOURCE_CATALOG_URL = 'https://api.bible-strong.app/v1/offline-catalog'
 export const MOBILE_RESOURCE_ARTIFACT_BASE_URL =

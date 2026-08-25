@@ -13,6 +13,8 @@ apps/
 
 packages/
   resource-service/        Resource API and publication runtime
+  resource-domain/         Shared resource contracts and invariants
+  resource-catalog/        Shared generated resource catalog
   bible-reference-parser/  French and English Bible reference parser
 ```
 

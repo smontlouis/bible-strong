@@ -3,7 +3,7 @@ import { describe, it } from 'node:test'
 
 import { Effect } from 'effect'
 
-import { encodeStrongLexiconPageCursor } from '@bible-strong/mobile/src/helpers/resourcePageCursor'
+import { encodeStrongLexiconPageCursor } from '@bible-strong/resource-domain/resource-page-cursor'
 
 import {
   ActiveStrongLexiconPublicationUnavailable,

@@ -5,7 +5,7 @@ import {
   CommentaryVerseResponseDto,
   CrossReferenceResponseDto,
   SupplementaryRevisionDto,
-} from '@bible-strong/mobile/src/features/resources/supplementaryContract'
+} from '@bible-strong/resource-domain/contracts/supplementaryContract'
 
 export type SupplementaryLanguage = 'fr'
 export type CommentaryVerseLookup = { collection: 'MHY'; language: 'fr'; verseKey: string }

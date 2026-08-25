@@ -1,9 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
-import type { ActiveLanguage } from '~helpers/languageUtils'
+import type { ResourceLanguage } from '@bible-strong/resource-domain/interlinear-bible'
 
-// ResourceLanguage is an alias for ActiveLanguage
-// This allows resource databases to support every active language in the app
-export type ResourceLanguage = ActiveLanguage
+export type { ResourceLanguage } from '@bible-strong/resource-domain/interlinear-bible'
 
 export type DatabaseId = 'DICTIONNAIRE' | 'NAVE' | 'TRESOR' | 'MHY' | 'TIMELINE' | 'BIBLES'
 

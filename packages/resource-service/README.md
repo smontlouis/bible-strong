@@ -191,7 +191,7 @@ Its production audit shortcut supplies both non-secret values automatically:
 yarn resources:r2:publish-catalog:prod
 ```
 
-Both modes use the exhaustive catalog at `src/assets/mobile-resource-catalog.json`. The changed mode
+Both modes use the exhaustive catalog at `packages/resource-catalog/src/mobile-resource-catalog.json`. The changed mode
 requires the checked-in 72-entry inventory but does not require 72 bundle paths. The publication
 manifest independently authorizes and validates every selected revision, archive entry, byte size,
 and SHA-256. Update the catalog before publishing; deploy the Worker only after the selected R2
@@ -275,7 +275,7 @@ credential, and the CLI exchanges it for a fresh short-lived JWT separately for 
 reads. Database, App Check, and Cloudflare credentials are only passed to the subprocess that needs
 each credential; they are never written into the workspace.
 
-On success, `src/assets/mobile-resource-catalog.json` remains modified locally for review and a
+On success, `packages/resource-catalog/src/mobile-resource-catalog.json` remains modified locally for review and a
 normal commit. The retained workspace's `verified-publication-baseline` directory is the exhaustive
 72-bundle baseline for the following publication; pass it later with `--publication-root`. The same
 workspace contains the previous catalog and candidates needed to audit or recover the release.

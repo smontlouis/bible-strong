@@ -211,7 +211,7 @@ Local paths:
 - BHG interlinear sidecars: `documentDirectory/SQLite/shared/interlinear-bibles`
 - Language-specific JSON: `documentDirectory/{lang}`
 
-The bundled resource catalog is `src/assets/mobile-resource-catalog.json`. Its runtime loader may
+The bundled resource catalog is `packages/resource-catalog/src/mobile-resource-catalog.json`. Its runtime loader may
 accept a newer compatible catalog from `/v1/offline-catalog`. Every downloadable resource URL is
 derived from the Resource API artifact base and served from private R2 after App Check verification;
 there is no Firebase Storage fallback in the resource installation path.

@@ -29,6 +29,8 @@
 | Path | Package | Purpose |
 |---|---|---|
 | `packages/resource-service/` | `@bible-strong/resource-service` | Resource validation, publication, import, storage, and delivery. |
+| `packages/resource-domain/` | `@bible-strong/resource-domain` | Platform-neutral resource schemas, identities, cursors, and invariants. |
+| `packages/resource-catalog/` | `@bible-strong/resource-catalog` | Generated artifact catalog and immutable publication metadata. |
 | `packages/bible-reference-parser/` | `@bible-strong/bible-reference-parser` | French and English Bible passage parsing and OSIS conversion. |
 
 ## Mobile application

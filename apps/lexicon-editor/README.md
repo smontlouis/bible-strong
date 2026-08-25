@@ -173,7 +173,7 @@ Build a complete candidate and its global catalog with:
 ```sh
 npm run resources:release:mobile -- \
   --output-dir outputs/releases/mobile-resources-<revision> \
-  --app-root ../bible-strong-app
+  --app-root ../..
 ```
 
 When a producer has just generated new local bytes, pass a JSON override map so
@@ -184,7 +184,7 @@ deployed object:
 npm run resources:release:mobile -- \
   --output-dir outputs/releases/mobile-resources-<revision> \
   --source-overrides outputs/releases/source-overrides.json \
-  --app-root ../bible-strong-app
+  --app-root ../..
 ```
 
 The override shape is `{ "bible:NBS": { "canonical": "path/to/new.json",
@@ -204,7 +204,7 @@ the matching catalog is incomplete.
 The command only creates a candidate. Upload/activation remains a protected
 publication step and must place every candidate file at the catalog's stable
 object path before replacing the global catalog. `--app-root` atomically
-synchronizes the same catalog into the app fallback asset; omitting it is appropriate
+synchronizes the same catalog into `packages/resource-catalog`; omitting it is appropriate
 only for an isolated maker validation build.
 
 Generate the canonical Strong ledger first. This is the production source of

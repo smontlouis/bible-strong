@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { Effect } from 'effect'
 import { Pool } from 'pg'
 
-import { getMobileBibleVersionIds } from '@bible-strong/mobile/src/helpers/mobileResourceCatalog'
+import { getMobileBibleVersionIds } from '@bible-strong/resource-catalog/catalog'
 import { makeLocalDatabase } from '../../database/localDatabase'
 import { makeResourceWebHandler } from '../../http/app'
 import { makeKyselyBibleChapterRepository } from '../../repositories/bibleChapterRepository'

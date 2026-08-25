@@ -1,6 +1,6 @@
 import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
-import { normalizeBibleSearchText } from '@bible-strong/mobile/src/helpers/bibleSearchInput'
+import { normalizeBibleSearchText } from '@bible-strong/resource-domain/bible-search-input'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
@@ -24,16 +24,16 @@ import type {
   StrongLexiconEntryCard,
   StrongLexiconMorphology,
   StrongLexiconSearchResult,
-} from '@bible-strong/mobile/src/features/resources/strongLexiconAccess'
+} from '@bible-strong/resource-domain/strong-lexicon'
 import {
   decodeStrongLexiconPageCursor,
   encodeStrongLexiconPageCursor,
-} from '@bible-strong/mobile/src/features/resources/strongLexiconContract'
+} from '@bible-strong/resource-domain/contracts/strongLexiconContract'
 import {
   createStrongIdentity,
   getDisplayedStrongIdentities,
   type StrongIdentityKind,
-} from '@bible-strong/mobile/src/helpers/strongIdentities'
+} from '@bible-strong/resource-domain/strong-identities'
 
 type Payload = Record<string, string | number | null>
 type Publication = { id: number; revision: string; metadata: Record<string, unknown> }

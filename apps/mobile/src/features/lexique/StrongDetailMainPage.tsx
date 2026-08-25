@@ -323,7 +323,6 @@ const StrongDetailMainPage = ({
       >
         {entry.nameMeaningHtml && (
           <VStack mb={entry.definitionHtml ? 18 : 0} gap={8}>
-            <StrongEyebrow>{t('strongDetail.definition.nameMeaning')}</StrongEyebrow>
             <StrongEditorialHtml
               value={entry.nameMeaningHtml}
               readingTypography={readingTypography}

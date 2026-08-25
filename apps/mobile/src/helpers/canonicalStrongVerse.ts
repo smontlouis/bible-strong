@@ -6,19 +6,10 @@ import {
   type StrongIdentity,
 } from './strongIdentities'
 
-export type StrongBibleIdentityKind = 'strong' | 'estrong' | 'dstrong' | 'ustrong'
-
-export interface StrongBibleSpan {
-  ordinal: number
-  startOffset: number
-  length: number
-  stepTokenIds?: number[]
-  identities: {
-    kind: StrongBibleIdentityKind
-    code: string
-  }[]
-  morphologies?: import('./strongSelection').StrongSelectionMorphology[]
-}
+export type {
+  StrongBibleIdentityKind,
+  StrongBibleSpan,
+} from '@bible-strong/resource-domain/strong-bible'
 
 export type CanonicalStrongVerseRun =
   | { kind: 'text'; text: string }

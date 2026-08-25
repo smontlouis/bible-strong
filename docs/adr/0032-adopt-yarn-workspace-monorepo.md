@@ -29,7 +29,7 @@ The external repositories are imported with their complete Git histories. Yarn p
 
 The `node-modules` linker limits hoisting to workspace boundaries. This prevents incompatible React, Next.js, Expo, and tooling dependency trees from leaking between applications while retaining conventional `node_modules` behavior.
 
-The Resource service still consumes several mobile resource contracts during this structural migration. That dependency is made explicit and is transitional. Extracting those contracts into a neutral shared package requires a separate boundary decision and is not hidden inside this move.
+The Resource service initially consumed several mobile resource contracts during this structural migration. ADR-0033 subsequently removes that transitional dependency through neutral Resource-domain and Resource-catalog packages.
 
 The repository uses a root `CONTEXT-MAP.md` and one glossary-only `CONTEXT.md` per bounded context. System-wide decisions live under root `docs/adr/`.
 
@@ -40,4 +40,4 @@ The repository uses a root `CONTEXT-MAP.md` and one glossary-only `CONTEXT.md` p
 - Subproject lockfiles are removed.
 - A patched dependency update must update the manifest resolution, patch file, and root lockfile together, followed by an immutable install check.
 - Application histories remain inspectable with normal Git history traversal.
-- The temporary Resource-service-to-mobile dependency is visible and can be removed through a future contract-extraction change.
+- The temporary Resource-service-to-mobile dependency is resolved by ADR-0033.

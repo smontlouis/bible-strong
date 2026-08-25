@@ -1,13 +1,13 @@
 import { Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
 
-import { getStrongBibleConcordanceCandidates } from '@bible-strong/mobile/src/helpers/strongBibleConcordance'
+import { getStrongBibleConcordanceCandidates } from '@bible-strong/resource-domain/strong-bible-concordance'
 import {
   decodeStrongBibleOccurrenceCursor,
   encodeStrongBibleOccurrenceCursor,
-} from '@bible-strong/mobile/src/features/resources/strongBibleContract'
-import type { StrongBibleSpan } from '@bible-strong/mobile/src/helpers/canonicalStrongVerse'
-import { STRONG_IDENTITY_KINDS } from '@bible-strong/mobile/src/helpers/strongIdentities'
+} from '@bible-strong/resource-domain/contracts/strongBibleContract'
+import type { StrongBibleSpan } from '@bible-strong/resource-domain/strong-bible'
+import { STRONG_IDENTITY_KINDS } from '@bible-strong/resource-domain/strong-identities'
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
 import type { ResourceDatabase } from '../database/types'

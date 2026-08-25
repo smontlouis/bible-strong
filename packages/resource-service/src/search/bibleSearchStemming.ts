@@ -3,7 +3,7 @@ import { newStemmer } from 'snowball-stemmers'
 import {
   highlightBibleSearchTextByNormalizedTerms,
   normalizeBibleSearchText,
-} from '@bible-strong/mobile/src/helpers/bibleSearchInput'
+} from '@bible-strong/resource-domain/bible-search-input'
 
 export type BibleSearchStemLanguage = 'fr' | 'en'
 

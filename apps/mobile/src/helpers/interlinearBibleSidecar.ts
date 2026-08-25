@@ -1,5 +1,9 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import { unzip } from 'react-native-zip-archive'
+import type {
+  InterlinearChapterTokens,
+  InterlinearToken,
+} from '@bible-strong/resource-domain/interlinear-bible'
 
 import { getBibleVersionMetadata } from './biblesDb'
 import { getSharedSqliteDirPath, type ResourceLanguage } from './databaseTypes'
@@ -19,6 +23,13 @@ import { openSQLiteDatabase, type SQLiteDatabase } from './sqlite'
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
+export type {
+  InterlinearChapterTokens,
+  InterlinearIdentityKind,
+  InterlinearSegment,
+  InterlinearToken,
+} from '@bible-strong/resource-domain/interlinear-bible'
+
 class InterlinearSidecarMissingError extends Error {}
 
 const interlinearConnections = new AsyncConnectionRegistry<ResourceLanguage, SQLiteDatabase>(
@@ -36,29 +47,6 @@ const interlinearConnections = new AsyncConnectionRegistry<ResourceLanguage, SQL
   database => database.closeAsync()
 )
 const validatedSidecars = new Map<ResourceLanguage, { textRevision: string; textSha256: string }>()
-
-export type InterlinearIdentityKind = 'strong' | 'estrong' | 'dstrong' | 'ustrong'
-
-export interface InterlinearSegment {
-  ordinal: number
-  startOffset: number
-  length: number
-  transliteration: string
-  lemma: string
-  morphology: string
-  gloss: string
-  identities: { kind: InterlinearIdentityKind; code: string }[]
-}
-
-export interface InterlinearToken {
-  id?: number
-  ordinal: number
-  startOffset: number
-  length: number
-  segments: InterlinearSegment[]
-}
-
-export type InterlinearChapterTokens = Record<number, InterlinearToken[]>
 
 export interface InterlinearStrongVerseCountByBook {
   Livre: number

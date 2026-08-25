@@ -1,4 +1,4 @@
-import mobileResourceCatalog from '@bible-strong/mobile/src/assets/mobile-resource-catalog.json'
+import mobileResourceCatalog from '@bible-strong/resource-catalog/catalog'
 import { resourceEtagMatches } from '../http/conditionalRequest'
 import { resourceRequestIdFrom } from '../http/requestId'
 import { BIBLE_SEARCH_CACHE_REVISION } from '../search/bibleSearchRevision'

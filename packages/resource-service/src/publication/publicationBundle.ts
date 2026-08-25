@@ -11,12 +11,12 @@ import { buildCanonicalBibleFromLegacy, hashCanonicalVerses } from './legacyBibl
 import {
   BibleVersePresentationDto,
   type BibleVersePresentation,
-} from '@bible-strong/mobile/src/features/resources/bibleChapterContract'
+} from '@bible-strong/resource-domain/contracts/bibleChapterContract'
 import {
   getStrongBibleCatalogIdentity,
   isStrongBibleVersionId,
-} from '@bible-strong/mobile/src/helpers/strongBibleCatalog'
-import { STRONG_IDENTITY_KINDS } from '@bible-strong/mobile/src/helpers/strongIdentities'
+} from '@bible-strong/resource-catalog/strong-bibles'
+import { STRONG_IDENTITY_KINDS } from '@bible-strong/resource-domain/strong-identities'
 
 const Sha256 = Schema.String.pipe(Schema.pattern(/^[a-f0-9]{64}$/))
 const Language = Schema.String.pipe(Schema.pattern(/^[a-z]{2,3}(?:-[A-Za-z0-9]+)*$/))

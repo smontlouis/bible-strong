@@ -21,15 +21,16 @@ for (const file of await collectTypeScriptFiles(sourceRoot)) {
   const relative = path.relative(root, file)
   const source = await readFile(file, 'utf8')
 
+  if (source.includes('@bible-strong/mobile') || source.includes('apps/mobile')) {
+    violations.push(`${relative}: resource-service must not import the mobile application`)
+  }
+
   if (source.includes('@effect/sql-kysely')) {
     violations.push(`${relative}: @effect/sql-kysely is not allowed`)
   }
 
   if (/from ['"]drizzle-orm(?:\/[^'"]+)?['"]/.test(source)) {
-    const allowed = new Set([
-      'src/database/schema.ts',
-      'src/database/types.ts',
-    ])
+    const allowed = new Set(['src/database/schema.ts', 'src/database/types.ts'])
     if (!allowed.has(relative)) {
       violations.push(`${relative}: Drizzle imports are limited to schema and type derivation`)
     }

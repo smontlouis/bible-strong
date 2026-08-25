@@ -1,4 +1,4 @@
-import type { SearchAnalyticsEventDto } from '@bible-strong/mobile/src/features/resources/searchAnalyticsContract'
+import type { SearchAnalyticsEventDto } from '@bible-strong/resource-domain/contracts/searchAnalyticsContract'
 
 const MAX_QUERY_LENGTH = 160
 const EMAIL_PATTERN = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/giu

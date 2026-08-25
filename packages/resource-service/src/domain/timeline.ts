@@ -9,7 +9,7 @@ import {
   TimelineEventsResponseDto,
   TimelineEventResponseDto,
   TimelineRevisionDto,
-} from '@bible-strong/mobile/src/features/resources/timelineContract'
+} from '@bible-strong/resource-domain/contracts/timelineContract'
 
 export type TimelineLanguage = 'fr' | 'en'
 export type TimelineEvent = {

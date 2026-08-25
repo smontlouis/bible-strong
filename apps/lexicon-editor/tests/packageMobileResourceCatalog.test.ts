@@ -291,7 +291,10 @@ describe("mobile resource catalog", () => {
     assert.deepEqual(
       JSON.parse(
         await readFile(
-          path.join(appRoot, "src/assets/mobile-resource-catalog.json"),
+          path.join(
+            appRoot,
+            "packages/resource-catalog/src/mobile-resource-catalog.json"
+          ),
           "utf8"
         )
       ),

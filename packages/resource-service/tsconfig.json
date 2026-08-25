@@ -12,14 +12,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": ["node"],
-    "baseUrl": ".",
-    "paths": {
-      "~assets/*": ["../../apps/mobile/src/assets/*"],
-      "~common/*": ["../../apps/mobile/src/common/*"],
-      "~features/*": ["../../apps/mobile/src/features/*"],
-      "~helpers/*": ["../../apps/mobile/src/helpers/*"],
-      "~i18n": ["../../apps/mobile/i18n"]
-    }
+    "baseUrl": "."
   },
   "include": ["src/**/*.ts", "drizzle.config.ts"],
   "exclude": [

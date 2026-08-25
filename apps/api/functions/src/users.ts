@@ -18,7 +18,15 @@ export const createUser = functions.auth.user().onCreate(async (user) => {
   await userRef.set(userData, { merge: true })
 })
 
-export const deleteUser = functions.auth.user().onDelete(async (user) => {
+const deleteUserRuntimeOpts: functions.RuntimeOptions = {
+  timeoutSeconds: 540, // 9 minutes (max pour v1)
+  memory: '1GB',
+}
+
+export const deleteUser = functions
+  .runWith(deleteUserRuntimeOpts)
+  .auth.user()
+  .onDelete(async (user) => {
   const { uid } = user
   const db = admin.firestore()
   const userRef = db.collection('users').doc(uid)

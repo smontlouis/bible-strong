@@ -1,7 +1,7 @@
 # Matrice de parcours des ressources
 
 Cette matrice décrit le contrat partagé par les parcours mobile. Les identités exactes restent
-dans `src/assets/mobile-resource-catalog.json` et dans le contrat Maker
+dans `packages/resource-catalog/src/mobile-resource-catalog.json` et dans le contrat Maker
 `config/mobile-resource-required-ids.json` : le smoke de réconciliation vérifie qu'il y en a 72,
 une seule fois chacune.
 

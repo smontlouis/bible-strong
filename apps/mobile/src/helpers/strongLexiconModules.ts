@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system/legacy'
 import { unzip } from 'react-native-zip-archive'
+import type { StrongLexiconModuleAvailability } from '@bible-strong/resource-domain/strong-lexicon'
 
 import { installAtomicResourceFile, restoreOrphanedResourceBackup } from './atomicResourceFile'
 import { AsyncConnectionRegistry } from './asyncConnectionRegistry'
@@ -21,21 +22,7 @@ import {
 } from './strongLexiconPublications'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 
-export type StrongLexiconModuleAvailability =
-  | { status: 'missing'; moduleId: StrongLexiconModuleId }
-  | { status: 'core-missing'; moduleId: Exclude<StrongLexiconModuleId, 'core'> }
-  | {
-      status: 'incompatible'
-      moduleId: StrongLexiconModuleId
-      installedRevision?: string
-    }
-  | { status: 'corrupt'; moduleId: StrongLexiconModuleId; reason: string }
-  | {
-      status: 'available'
-      moduleId: StrongLexiconModuleId
-      revision?: string
-      schemaVersion: number
-    }
+export type { StrongLexiconModuleAvailability } from '@bible-strong/resource-domain/strong-lexicon'
 
 export interface StrongLexiconInstallCallbacks {
   onDownloadProgress?: FileSystem.DownloadProgressCallback

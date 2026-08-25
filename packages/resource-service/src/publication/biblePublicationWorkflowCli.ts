@@ -195,7 +195,7 @@ const createState = async (
   appRoot: string,
   options: ReturnType<typeof parseBiblePublicationWorkflowArgs>
 ): Promise<WorkflowState> => {
-  const makerRoot = options.makerRoot ?? path.resolve(appRoot, '../../apps/lexicon-editor')
+  const makerRoot = options.makerRoot ?? path.resolve(appRoot, 'apps/lexicon-editor')
   const publicationRoot =
     options.publicationRoot ?? path.join(makerRoot, 'outputs/resource-publications')
   const safeDate = options.generatedAt.replace(/[^0-9A-Za-z]+/g, '-')
@@ -375,7 +375,10 @@ const createOperations = (
         buildEnvironment()
       )
       if (untrackedFiles) throw new Error('BIBLE_PUBLICATION_WORKTREE_UNTRACKED')
-      const currentCatalog = path.join(state.appRoot, 'src/assets/mobile-resource-catalog.json')
+      const currentCatalog = path.join(
+        state.appRoot,
+        'packages/resource-catalog/src/mobile-resource-catalog.json'
+      )
       await copyFile(currentCatalog, state.catalogBackupPath)
       const [currentCatalogJson, candidateCatalogJson] = await Promise.all([
         readRawCatalog(currentCatalog),
@@ -533,7 +536,10 @@ const createOperations = (
   },
 
   activateOfflineCatalog: async () => {
-    const destination = path.join(state.appRoot, 'src/assets/mobile-resource-catalog.json')
+    const destination = path.join(
+      state.appRoot,
+      'packages/resource-catalog/src/mobile-resource-catalog.json'
+    )
     const temporary = `${destination}.tmp-${process.pid}-${randomUUID()}`
     await copyFile(state.catalogPath, temporary)
     await rename(temporary, destination)
@@ -640,7 +646,10 @@ const createOperations = (
 
 const compensateProductionActivation = async (state: WorkflowState, originalCause: unknown) => {
   const failures: unknown[] = [originalCause]
-  const catalogDestination = path.join(state.appRoot, 'src/assets/mobile-resource-catalog.json')
+  const catalogDestination = path.join(
+    state.appRoot,
+    'packages/resource-catalog/src/mobile-resource-catalog.json'
+  )
 
   if (state.neonActivated && state.overlay) {
     try {
@@ -687,7 +696,7 @@ const compensateProductionActivation = async (state: WorkflowState, originalCaus
 
 export const runBiblePublicationWorkflowCli = async (rawArgs: readonly string[]) => {
   const options = parseBiblePublicationWorkflowArgs(rawArgs)
-  const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
+  const appRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..')
   const databasePolicy = options.activateProduction
     ? resolveCatalogImportPolicy({
         mode: 'hosted',

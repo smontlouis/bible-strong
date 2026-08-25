@@ -667,7 +667,12 @@ async function synchronizeCatalogWithApp(options: {
   outputDir: string;
   appRoot: string;
 }): Promise<void> {
-  const assetsDirectory = path.join(options.appRoot, "src", "assets");
+  const assetsDirectory = path.join(
+    options.appRoot,
+    "packages",
+    "resource-catalog",
+    "src"
+  );
   await mkdir(assetsDirectory, { recursive: true });
   const files = [
     {

@@ -4,7 +4,10 @@ import process from 'node:process'
 
 const baseUrl = (process.env.RESOURCE_API_BASE_URL ?? 'http://127.0.0.1:8787').replace(/\/$/u, '')
 const catalog = JSON.parse(
-  await readFile(new URL('../src/assets/mobile-resource-catalog.json', import.meta.url), 'utf8')
+  await readFile(
+    new URL('../../../packages/resource-catalog/src/mobile-resource-catalog.json', import.meta.url),
+    'utf8'
+  )
 )
 
 const endpointFor = id => {
