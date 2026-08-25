@@ -1,0 +1,15 @@
+{
+  "language": "en",
+  "sourceVersion": "timeline-en-mobile-source-v1",
+  "rights": {
+    "holder": "Bible Strong",
+    "termsReference": "Bible Strong timeline source",
+    "attribution": "Bible Strong timeline editorial data",
+    "online": true,
+    "offline": true
+  },
+  "deliveryCapabilities": {
+    "onlineAccess": true,
+    "offlineDownload": true
+  }
+}

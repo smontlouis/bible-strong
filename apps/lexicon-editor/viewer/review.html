@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Strong LLM Review</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">R</div>
+          <div>
+            <h1>Strong LLM Review</h1>
+            <p>Valide les suggestions LLM avant de les rendre durables.</p>
+          </div>
+        </div>
+
+        <nav class="page-nav">
+          <a href="./">Viewer</a>
+          <a href="./workflow.html">Workflow</a>
+          <a href="./lexicon.html">Lexique</a>
+          <a href="./entities-tree.html">Entités</a>
+          <a class="is-active" href="./review.html">Revue LLM</a>
+        </nav>
+
+        <label class="drop-zone" id="reviewDropZone">
+          <input
+            id="reviewFileInput"
+            type="file"
+            accept=".json,application/json"
+            multiple
+          />
+          <span class="drop-title">Charger une revue LLM</span>
+          <span class="drop-copy"
+            >Glisse des fichiers <code>llm-review-*.json</code> ou ouvre cette
+            page avec <code>?review=...</code> /
+            <code>?manifest=...</code>.</span
+          >
+        </label>
+
+        <label class="drop-zone review-drop-zone" id="reviewFolderZone">
+          <input
+            id="reviewFolderInput"
+            type="file"
+            accept=".json,application/json"
+            webkitdirectory
+            multiple
+          />
+          <span class="drop-title">Charger un dossier</span>
+          <span class="drop-copy"
+            >Sélectionne un dossier contenant les revues par livre.</span
+          >
+        </label>
+
+        <section class="panel filter-panel">
+          <h2>Filtres</h2>
+          <div class="filter-tabs" id="decisionFilters">
+            <button type="button" data-filter="pending">À revoir</button>
+            <button type="button" data-filter="accept">Acceptées</button>
+            <button type="button" data-filter="reject">Rejetées</button>
+            <button type="button" data-filter="all">Tout</button>
+          </div>
+          <label class="search-label">
+            Recherche
+            <input
+              id="reviewSearch"
+              type="search"
+              placeholder="Gen.2.12, H8033, trouvent..."
+            />
+          </label>
+          <label class="search-label">
+            Livre
+            <select id="bookFilter">
+              <option value="all">Tous les livres</option>
+            </select>
+          </label>
+          <button id="nextBook" class="secondary-action" type="button" disabled>
+            Livre suivant
+          </button>
+          <p id="visibleCount" class="filter-summary">-</p>
+        </section>
+
+        <section class="panel stats-panel">
+          <h2>Décisions</h2>
+          <dl id="stats">
+            <div>
+              <dt>Suggestions</dt>
+              <dd>-</dd>
+            </div>
+            <div>
+              <dt>Acceptées</dt>
+              <dd>-</dd>
+            </div>
+            <div>
+              <dt>Rejetées</dt>
+              <dd>-</dd>
+            </div>
+            <div>
+              <dt>À revoir</dt>
+              <dd>-</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="panel review-actions">
+          <h2>Sauvegarde</h2>
+          <button id="saveReview" type="button" disabled>
+            Enregistrer décisions
+          </button>
+          <p id="saveStatus" class="save-status"></p>
+        </section>
+      </aside>
+
+      <section class="reader">
+        <header class="reader-toolbar">
+          <div>
+            <p id="fileName" class="file-name">Aucune revue chargée</p>
+            <h2 id="reviewTitle">Revue LLM</h2>
+          </div>
+        </header>
+
+        <article id="reviewView" class="chapter-view empty-state">
+          <p>Charge un fichier de revue LLM pour commencer.</p>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="./reviewer.js"></script>
+  </body>
+</html>

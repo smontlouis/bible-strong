@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "."
+  },
+  "include": [
+    "src/**/*.ts",
+    "scripts/*LexiconV3*.ts",
+    "tests/lexiconV3*.test.ts",
+    "tests/strongDictionaryLexicon.test.ts",
+    "tests/translationLexicon.test.ts",
+    "tests/stepOriginals.test.ts",
+    "tests/lexicalCandidateReport.test.ts"
+  ]
+}

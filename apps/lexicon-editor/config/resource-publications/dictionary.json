@@ -1,0 +1,14 @@
+{
+  "sourceVersion": "dictionary-mobile-source-v1",
+  "rights": {
+    "holder": "Bible Strong editorial team",
+    "termsReference": "Dictionary source terms are recorded in the publication provenance.",
+    "attribution": "Bible Strong Dictionary",
+    "online": true,
+    "offline": true
+  },
+  "deliveryCapabilities": {
+    "onlineAccess": true,
+    "offlineDownload": true
+  }
+}

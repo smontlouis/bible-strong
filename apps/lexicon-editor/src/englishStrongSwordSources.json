@@ -1,0 +1,87 @@
+{
+  "format": "bible-strong-sword-source-catalog",
+  "schemaVersion": 1,
+  "sources": [
+    {
+      "id": "kjv",
+      "applicationVersionId": "KJV",
+      "datasetId": "KJV",
+      "moduleName": "KJV",
+      "archiveName": "KJV.zip",
+      "url": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/KJV.zip",
+      "sha256": "873815aa4b4123025616d1f41eae75f412111275f4c3884e36f92d4f46dcba1d"
+    },
+    {
+      "id": "nasb2020",
+      "applicationVersionId": "NASB2020",
+      "datasetId": "NASB2020",
+      "moduleName": "NASB",
+      "archiveName": "NASB2020.zip",
+      "url": "https://www.crosswire.org/ftpmirror/pub/sword/lockmanpackages/NASB.zip",
+      "sha256": "69808a76c54dd118cdf23bd4ade61072138f61ce7df4c2ad624e0e158103af68"
+    },
+    {
+      "id": "nasb1995",
+      "applicationVersionId": "NASB1995",
+      "datasetId": "NASB1995",
+      "moduleName": "NASB1995",
+      "archiveName": "NASB1995.zip",
+      "url": "https://www.crosswire.org/ftpmirror/pub/sword/lockmanpackages/NASB1995.zip",
+      "sha256": "4b39457e8ce1e12fcea19b84333873cf8b3d7b4bfe82e092fdf9fa9fe3e8462c"
+    },
+    {
+      "id": "bsb",
+      "applicationVersionId": "BSB",
+      "datasetId": "BSB",
+      "moduleName": "BSB",
+      "archiveName": "BSB.zip",
+      "url": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/BSB.zip",
+      "sha256": "28d0680ff3204f0ff7e1be819068e88b674c0704c3ac05718e490d6e36ca236a"
+    },
+    {
+      "id": "asv",
+      "applicationVersionId": "ASV",
+      "datasetId": "ASV",
+      "moduleName": "ASV",
+      "archiveName": "ASV.zip",
+      "url": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/ASV.zip",
+      "sha256": "8f3d708510f7122a947a1c3eaa775a03c8ef5b1d456833abf506b78e689fcf18"
+    },
+    {
+      "id": "darby-en",
+      "applicationVersionId": "DARBY",
+      "datasetId": "DARBY_EN",
+      "moduleName": "Darby",
+      "archiveName": "Darby.zip",
+      "url": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/Darby.zip",
+      "sha256": "5b9a8041f75a6189fc2d8cbe5f25204ff0d5cd237d7e1c842f2963fc7d04ab75"
+    },
+    {
+      "id": "rlt",
+      "applicationVersionId": "RLT",
+      "datasetId": "RLT",
+      "moduleName": "RLT",
+      "archiveName": "RLT.zip",
+      "url": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/RLT.zip",
+      "sha256": "958924773e81162f753e671c9fa505fc64a247f9910451e51f9543fc74e80f63"
+    },
+    {
+      "id": "rwebster",
+      "applicationVersionId": "RWEBSTER",
+      "datasetId": "RWEBSTER",
+      "moduleName": "RWebster",
+      "archiveName": "RWebster.zip",
+      "url": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/RWebster.zip",
+      "sha256": "739014700c5e6981d7b06412fe4246a080b03d89c1b9cef97ef33e20ca18df67"
+    },
+    {
+      "id": "rv1895",
+      "applicationVersionId": "RV1895",
+      "datasetId": "RV1895",
+      "moduleName": "RV_th",
+      "archiveName": "RV1895.zip",
+      "url": "https://public.modules.stepbible.org/packages/RV_th.zip",
+      "sha256": "706e3ec1843ab204ff2bbf203db5fc929de95a85d3ed0bb9cd9ddaed70b86c94"
+    }
+  ]
+}
