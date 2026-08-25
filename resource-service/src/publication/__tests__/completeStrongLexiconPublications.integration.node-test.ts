@@ -65,6 +65,22 @@ describe('Complete Strong lexicon publications', { skip: !runIntegration }, () =
       )
       assert.ok(search.value.entries.length > 0)
 
+      const entitiesPublication = await isolated.database
+        .selectFrom('resource_publications')
+        .select('id')
+        .where('resource_identity', '=', 'strong-lexicon:entities')
+        .executeTakeFirstOrThrow()
+      await isolated.database
+        .deleteFrom('resource_publications')
+        .where('id', '=', entitiesPublication.id)
+        .executeTakeFirstOrThrow()
+      const remainingEntityRelations = await isolated.database
+        .selectFrom('strong_lexicon_entity_relations')
+        .select(({ fn }) => fn.countAll<number>().as('count'))
+        .where('publication_id', '=', entitiesPublication.id)
+        .executeTakeFirstOrThrow()
+      assert.equal(Number(remainingEntityRelations.count), 0)
+
       const corePublication = await isolated.database
         .selectFrom('resource_publications')
         .select('id')

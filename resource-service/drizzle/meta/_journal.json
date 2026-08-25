@@ -190,6 +190,13 @@
       "when": 1787682889766,
       "tag": "0029_nifty_omega_sentinel",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1787683157051,
+      "tag": "0030_tiny_grey_gargoyle",
+      "breakpoints": true
     }
   ]
 }

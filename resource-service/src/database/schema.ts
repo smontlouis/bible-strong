@@ -1184,7 +1184,7 @@ export const strongLexiconEntityRelations = pgTable(
       name: 'strong_lexicon_entity_relations_to_fk',
       columns: [table.publication_id, table.to_entity_id],
       foreignColumns: [strongLexiconEntities.publication_id, strongLexiconEntities.entity_id],
-    }).onDelete('set null'),
+    }).onDelete('cascade'),
     index('strong_lexicon_entity_relations_from_lookup').on(
       table.publication_id,
       table.from_entity_id
