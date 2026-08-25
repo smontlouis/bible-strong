@@ -113,6 +113,7 @@ export type ResourceAccessRegistry = {
   timeline: TimelineAccess
   commentary: CommentaryAccess
   offlineCopies: {
+    getStrongBibleAvailability: StrongBibleResourceAccess['getAvailability']
     isAvailable: (identity: LocalResourceRef) => Promise<boolean>
   }
   capabilities: {
@@ -370,7 +371,10 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     isOnline: async () => onlineManager.isOnline(),
   }),
   commentary: commentaryAccess,
-  offlineCopies: { isAvailable: isLocalResourceAvailable },
+  offlineCopies: {
+    getStrongBibleAvailability: localStrongBibleResourceAdapter.getAvailability,
+    isAvailable: isLocalResourceAvailable,
+  },
   capabilities: {
     getOnlineAccess: identity =>
       getResourceOnlineAccess(

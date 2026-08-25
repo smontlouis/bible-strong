@@ -358,15 +358,25 @@ const VersionSelectorItem = ({
       downloadCompletionSignal,
     ],
     queryFn: () => resources.strongBible.getAvailability(strongVersionId!),
-    enabled: requiresStrong || Boolean(onOpenOfflineDetails && strongVersionId),
+    enabled: requiresStrong,
     placeholderData: keepPreviousData,
   })
   const strongSelectionAvailability: StrongBibleSidecarAvailability | undefined =
     strongSelectionQuery.data
+  const strongOfflineAvailabilityQuery = useQuery({
+    queryKey: getStrongOfflineDetailsQueryKey(
+      strongVersionId ?? '',
+      installedVersionsSignal,
+      downloadCompletionSignal
+    ),
+    queryFn: () => resources.offlineCopies.getStrongBibleAvailability(strongVersionId!),
+    enabled: Boolean(onOpenOfflineDetails && strongVersionId),
+    placeholderData: keepPreviousData,
+  })
   const strongPresent =
-    strongSelectionAvailability?.status === 'available' ||
-    strongSelectionAvailability?.status === 'incompatible' ||
-    strongSelectionAvailability?.status === 'corrupt'
+    strongOfflineAvailabilityQuery.data?.status === 'available' ||
+    strongOfflineAvailabilityQuery.data?.status === 'incompatible' ||
+    strongOfflineAvailabilityQuery.data?.status === 'corrupt'
   const strongQueueState = useDownloadItemStatus(
     isStrongCapableBibleVersion(version.id)
       ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version.id })
@@ -410,9 +420,9 @@ const VersionSelectorItem = ({
         ? await resources.offlineCopies.isAvailable({ kind: 'bible', versionId: version.id })
         : !versionNeedsDownload
     const strongAvailability = strongVersionId
-      ? strongSelectionAvailability && !strongSelectionQuery.isPlaceholderData
-        ? strongSelectionAvailability
-        : await resources.strongBible.getAvailability(strongVersionId)
+      ? strongOfflineAvailabilityQuery.data && !strongOfflineAvailabilityQuery.isPlaceholderData
+        ? strongOfflineAvailabilityQuery.data
+        : await resources.offlineCopies.getStrongBibleAvailability(strongVersionId)
       : undefined
     const interlinearLocale = getLanguage()
     const interlinearInstalled = isInterlinearCapableBibleVersion(version.id)

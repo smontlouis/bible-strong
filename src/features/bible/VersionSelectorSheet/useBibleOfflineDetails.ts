@@ -40,14 +40,15 @@ export const useBibleOfflineDetails = () => {
     ]
 
     if (isStrongCapableBibleVersion(nextVersion.id)) {
+      const strongVersionId = nextVersion.id
       preloadTasks.push(
         queryClient.ensureQueryData({
           queryKey: getStrongOfflineDetailsQueryKey(
-            nextVersion.id,
+            strongVersionId,
             installedSignal,
             completionSignal
           ),
-          queryFn: () => resources.strongBible.getAvailability(nextVersion.id),
+          queryFn: () => resources.offlineCopies.getStrongBibleAvailability(strongVersionId),
         })
       )
     }

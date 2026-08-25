@@ -108,7 +108,7 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       completionSignal
     ),
     enabled: Boolean(strongVersionId),
-    queryFn: () => resources.strongBible.getAvailability(strongVersionId!),
+    queryFn: () => resources.offlineCopies.getStrongBibleAvailability(strongVersionId!),
   })
   const interlinearAvailability = useQuery({
     queryKey: getInterlinearOfflineDetailsQueryKey(
