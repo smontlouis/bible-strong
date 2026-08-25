@@ -126,6 +126,21 @@ npm run resources:publication:strong-lexicon -- validate \
   --bundle /absolute/path/to/strong-lexicon-issue-305/core
 ```
 
+The production source must contain the bilingual `LexiconNameMeanings` table.
+Rebuild it deterministically from the pinned STEP compiled lexicons before
+packaging:
+
+```sh
+npm run lexicon:name-meanings
+```
+
+Hebrew rows come from `NameMeans`. Greek rows come only from classified
+named-entity `MounceShortDef` values that contain a meaning cue; ordinary word
+and verb definitions are excluded. French translations are deduplicated by
+source hash and retained in
+`config/lexicon-name-meaning-translations.fr.jsonl`, so subsequent builds reuse
+the checked-in editorial artifact without another translation request.
+
 The command emits exactly `core`, `resources`, and `entities`. Each directory
 contains normalized canonical JSON, one matching SQLite ZIP, and a strict
 rights-aware manifest under its own content-derived Resource revision. The

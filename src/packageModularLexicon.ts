@@ -157,6 +157,7 @@ export function packageModularLexicon(
         counts: databaseCounts(corePath, [
           "StepEntries",
           "LexiconTranslations",
+          "LexiconNameMeanings",
           "StepEntryIdentities",
           "RelationKinds",
           "LexiconRelations",
@@ -330,6 +331,24 @@ function buildCoreDatabase(options: {
       INSERT INTO LexiconTranslations
       SELECT stepEntryId,language,gloss,meaning,meaningHtml
         FROM source.LexiconTranslations ORDER BY stepEntryId,language;
+
+      CREATE TABLE LexiconNameMeanings (
+        stepEntryId INTEGER NOT NULL,
+        language TEXT NOT NULL,
+        valueHtml TEXT NOT NULL,
+        valueText TEXT NOT NULL,
+        source TEXT NOT NULL,
+        sourceField TEXT NOT NULL,
+        sourceTextSha256 TEXT NOT NULL,
+        translationEngine TEXT NOT NULL,
+        PRIMARY KEY(stepEntryId,language)
+      ) WITHOUT ROWID;
+      INSERT INTO LexiconNameMeanings
+      SELECT stepEntryId,language,valueHtml,valueText,source,sourceField,
+             sourceTextSha256,translationEngine
+        FROM source.LexiconNameMeanings ORDER BY stepEntryId,language;
+      CREATE INDEX idx_LexiconNameMeanings_language
+        ON LexiconNameMeanings(language,stepEntryId);
 
       CREATE TABLE RelationKinds (
         id INTEGER PRIMARY KEY,
@@ -517,6 +536,15 @@ function validateProjection(options: {
       right: core,
       rightSql:
         "SELECT stepEntryId,language,gloss,meaning,meaningHtml FROM LexiconTranslations ORDER BY stepEntryId,language"
+    });
+    compareFingerprints({
+      label: "LexiconNameMeanings",
+      left: source,
+      leftSql:
+        "SELECT stepEntryId,language,valueHtml,valueText,source,sourceField,sourceTextSha256,translationEngine FROM LexiconNameMeanings ORDER BY stepEntryId,language",
+      right: core,
+      rightSql:
+        "SELECT stepEntryId,language,valueHtml,valueText,source,sourceField,sourceTextSha256,translationEngine FROM LexiconNameMeanings ORDER BY stepEntryId,language"
     });
     compareFingerprints({
       label: "StepEntryIdentities",

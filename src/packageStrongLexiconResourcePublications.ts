@@ -39,8 +39,8 @@ const MODULE_IDS: readonly StrongLexiconModuleId[] = [
   "resources",
   "entities"
 ];
-const CANONICAL_SCHEMA_VERSION = 1;
-const SQLITE_SCHEMA_VERSION = 2;
+const CANONICAL_SCHEMA_VERSION = 2;
+const SQLITE_SCHEMA_VERSION = 3;
 const MAX_SQLITE_BYTES = 256 * 1024 * 1024;
 const ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
 
@@ -55,6 +55,7 @@ const TABLES: Record<StrongLexiconModuleId, readonly string[]> = {
     "StepEntries",
     "StepEntryIdentities",
     "LexiconTranslations",
+    "LexiconNameMeanings",
     "RelationKinds",
     "LexiconRelations",
     "MorphologyCodes",
@@ -97,6 +98,16 @@ const TABLE_COLUMNS: Record<
       "gloss",
       "meaning",
       "meaningHtml"
+    ],
+    LexiconNameMeanings: [
+      "stepEntryId",
+      "language",
+      "valueHtml",
+      "valueText",
+      "source",
+      "sourceField",
+      "sourceTextSha256",
+      "translationEngine"
     ],
     RelationKinds: ["id", "kind", "labelEn", "labelFr"],
     LexiconRelations: [
@@ -183,6 +194,7 @@ const TABLE_PRIMARY_KEYS: Record<
     StepEntries: ["id"],
     StepEntryIdentities: ["stepEntryId"],
     LexiconTranslations: ["stepEntryId", "language"],
+    LexiconNameMeanings: ["stepEntryId", "language"],
     RelationKinds: ["id"],
     LexiconRelations: ["id"],
     MorphologyCodes: ["id"],
@@ -224,6 +236,15 @@ const NON_EMPTY_COLUMNS: Record<
     StepEntries: ["language", "eStrong", "dStrong", "uStrong", "gloss"],
     StepEntryIdentities: ["stepCode"],
     LexiconTranslations: ["language"],
+    LexiconNameMeanings: [
+      "language",
+      "valueHtml",
+      "valueText",
+      "source",
+      "sourceField",
+      "sourceTextSha256",
+      "translationEngine"
+    ],
     RelationKinds: ["kind"],
     LexiconRelations: ["toStepCode", "groupKind"],
     MorphologyCodes: ["code", "normalizedCode", "language", "scope"],
@@ -267,6 +288,7 @@ const REQUIRED_INTEGER_COLUMNS: Record<
     StepEntries: ["id", "baseCode"],
     StepEntryIdentities: ["stepEntryId"],
     LexiconTranslations: ["stepEntryId"],
+    LexiconNameMeanings: ["stepEntryId"],
     RelationKinds: ["id"],
     LexiconRelations: ["id", "fromStepEntryId", "relationKindId"],
     MorphologyCodes: ["id"],
@@ -324,7 +346,7 @@ type JsonRow = Record<string, string | number | null>;
 
 export interface CanonicalStrongLexiconModule {
   format: "bible-strong-canonical-strong-lexicon-module";
-  schemaVersion: 1;
+  schemaVersion: 2;
   moduleId: StrongLexiconModuleId;
   revision: string;
   dependencies: Array<{
@@ -342,7 +364,7 @@ export interface StrongLexiconResourcePublicationManifest extends ResourcePublic
     resourceId: `strong-lexicon:${StrongLexiconModuleId}`;
     language: "mul";
   };
-  canonical: ResourcePublicationEnvelope["canonical"] & { schemaVersion: 1 };
+  canonical: ResourcePublicationEnvelope["canonical"] & { schemaVersion: 2 };
   dependencies: CanonicalStrongLexiconModule["dependencies"];
   counts: Record<string, number>;
 }
@@ -513,6 +535,7 @@ const validateRows = (
     }
     references("StepEntryIdentities", "stepEntryId", "StepEntries");
     references("LexiconTranslations", "stepEntryId", "StepEntries");
+    references("LexiconNameMeanings", "stepEntryId", "StepEntries");
     references("LexiconRelations", "fromStepEntryId", "StepEntries");
     references("LexiconRelations", "toStepEntryId", "StepEntries");
     references("LexiconRelations", "relationKindId", "RelationKinds");
@@ -962,7 +985,7 @@ export async function buildAllStrongLexiconResourcePublications(
         canonical: {
           path: `canonical/${moduleId}.json`,
           mediaType: "application/json",
-          schemaVersion: 1,
+          schemaVersion: CANONICAL_SCHEMA_VERSION,
           sha256: await sha256ResourcePublicationFile(canonicalPath),
           bytes: statSync(canonicalPath).size
         },
@@ -1142,7 +1165,7 @@ const decodeCanonical = (value: unknown): CanonicalStrongLexiconModule => {
   if (
     !isRecord(value) ||
     value.format !== "bible-strong-canonical-strong-lexicon-module" ||
-    value.schemaVersion !== 1 ||
+    value.schemaVersion !== CANONICAL_SCHEMA_VERSION ||
     !MODULE_IDS.includes(value.moduleId as StrongLexiconModuleId) ||
     !isNonEmptyString(value.revision) ||
     !Array.isArray(value.dependencies) ||
@@ -1193,7 +1216,7 @@ const decodeManifest = (
     !MODULE_IDS.includes(moduleId) ||
     value.identity.resourceId !== `strong-lexicon:${moduleId}` ||
     value.identity.language !== "mul" ||
-    envelope.canonical.schemaVersion !== 1 ||
+    envelope.canonical.schemaVersion !== CANONICAL_SCHEMA_VERSION ||
     !Array.isArray(value.dependencies) ||
     !isRecord(value.counts) ||
     Object.values(value.counts).some((count) => !isNonNegativeInteger(count)) ||

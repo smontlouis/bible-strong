@@ -1054,7 +1054,7 @@
   },
   {
     "id": "strong-lexicon:core",
-    "resourceRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699",
+    "resourceRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
     "artifactUrl": "https://assets.bible-strong.app/databases/strong_lexicon.core.sqlite.zip",
     "sources": [
       {
@@ -1067,8 +1067,8 @@
   },
   {
     "id": "strong-lexicon:entities",
-    "resourceRevision": "strong-lexicon-entities-8235604fb1a30e9714b32a69",
-    "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699",
+    "resourceRevision": "strong-lexicon-entities-98e0d81b2004d9073eb51d6f",
+    "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
     "artifactUrl": "https://assets.bible-strong.app/databases/bible_entities.production.sqlite.zip",
     "sources": [
       {
@@ -1081,8 +1081,8 @@
   },
   {
     "id": "strong-lexicon:resources",
-    "resourceRevision": "strong-lexicon-resources-c8cb209a32d429e67fb5f06b",
-    "coreRevision": "strong-lexicon-core-4392debcb0c9fb65d2ca9699",
+    "resourceRevision": "strong-lexicon-resources-4ad1a07442692f44a6babcfe",
+    "coreRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
     "artifactUrl": "https://assets.bible-strong.app/databases/strong_lexicon.resources.sqlite.zip",
     "sources": [
       {
