@@ -152,7 +152,7 @@ const StrongCard = (props: Props) => {
               accessibilityRole="link"
               accessibilityLabel={`${stepStrongCode} · ${Mot}`}
             >
-              <VStack flex gap={4}>
+              <VStack gap={4}>
                 <Text color="primary" bold fontSize={12} textTransform="uppercase">
                   {stepStrongCode}
                 </Text>

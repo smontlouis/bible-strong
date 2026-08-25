@@ -1215,6 +1215,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
             renderScrollComponent={props => (
               <KeyboardAwareScrollView
                 {...props}
+                keyboardShouldPersistTaps="handled"
                 bottomOffset={listBottomInset}
                 disableScrollOnKeyboardHide
               />
@@ -1256,6 +1257,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           renderScrollComponent={props => (
             <KeyboardAwareScrollView
               {...props}
+              keyboardShouldPersistTaps="handled"
               bottomOffset={listBottomInset}
               disableScrollOnKeyboardHide
             />

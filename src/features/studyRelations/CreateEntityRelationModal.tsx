@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next'
 import AlphabetList from '~common/AlphabetList'
 import SheetSearchInput from '~common/SheetSearchInput'
 import Empty from '~common/Empty'
-import Box, { VStack } from '~common/ui/Box'
+import Box, { TouchableBox, VStack } from '~common/ui/Box'
+import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import useBibleVerses from '~features/resources/useBibleVerses'
 import useDebounce from '~helpers/useDebounce'
@@ -51,6 +52,13 @@ import { ResourceAccessError } from '~features/resources/resourceAccessError'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
+import type { BibleTab, VersionCode } from '~state/tabs'
+
+const VERSION_SELECTOR_BOOK = { Numero: 1, Nom: 'Genèse', Chapitres: 50 } as const
+const EMPTY_VERSIONS: VersionCode[] = []
+const EMPTY_SELECTED_VERSES = {}
 
 type BrowseMode = 'note' | 'link' | 'study' | 'strong' | 'nave' | 'dictionary'
 type NaveRow = NaveTopicSummary
@@ -78,6 +86,7 @@ type Props = {
   title?: string
   sourceEndpoint: RelationEndpoint | null
   onCreated?: () => void
+  onSelectTarget?: (target: RelationTargetResult) => void | Promise<void>
   allowedTypes?: RelationEndpoint['type'][]
 }
 
@@ -279,10 +288,13 @@ const CreateEntityRelationModal = ({
   title,
   sourceEndpoint,
   onCreated,
+  onSelectTarget,
   allowedTypes,
 }: Props) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const defaultBibleVersion = useDefaultBibleVersion()
+  const { openVersionSelector } = useBookAndVersionSelector()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const dispatch = useDispatch<AppDispatch>()
   const allowedTypesKey = allowedTypes?.join('|') || ''
@@ -293,6 +305,7 @@ const CreateEntityRelationModal = ({
   const [strongLetter, setStrongLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
+  const [passageVersion, setPassageVersion] = useState<VersionCode>(defaultBibleVersion)
   const [visibleCounts, setVisibleCounts] = useState<
     Partial<Record<RelationTargetSectionId, number>>
   >({})
@@ -498,9 +511,22 @@ const CreateEntityRelationModal = ({
     }))
   }
 
-  const selectTarget = (endpoint: RelationEndpoint) => {
-    if (!sourceEndpoint) return
-    if (endpointsMatch(sourceEndpoint, endpoint)) return
+  const resetPicker = () => {
+    handleSearch('')
+    setItemFilters(getSearchItemFiltersForTypes(enabledItemTypes))
+    setVisibleCounts({})
+  }
+
+  const selectTarget = async (target: RelationTargetResult) => {
+    const endpoint = target.endpoint
+
+    if (onSelectTarget) {
+      resetPicker()
+      await onSelectTarget(target)
+      return
+    }
+
+    if (!sourceEndpoint || endpointsMatch(sourceEndpoint, endpoint)) return
 
     const noteVerseAttachment = getNoteVerseAttachmentEndpoints(sourceEndpoint, endpoint)
 
@@ -513,13 +539,11 @@ const CreateEntityRelationModal = ({
         })
       )
     }
-    handleSearch('')
-    setItemFilters(getSearchItemFiltersForTypes(enabledItemTypes))
-    setVisibleCounts({})
+    resetPicker()
     onCreated?.()
   }
 
-  const immediateReferenceResults = searchReferenceAndStrongTargets(searchValue)
+  const immediateReferenceResults = searchReferenceAndStrongTargets(searchValue, passageVersion)
   const referenceItems = immediateReferenceResults.filter(
     result => result.endpoint.type === 'verse' && isAllowed('verse')
   )
@@ -677,7 +701,7 @@ const CreateEntityRelationModal = ({
       <RelationTargetRow
         key={item.id}
         item={item as RelationTargetResult}
-        onPress={() => selectTarget(endpoint)}
+        onPress={() => void selectTarget(item as RelationTargetResult)}
       />
     )
   }
@@ -707,6 +731,51 @@ const CreateEntityRelationModal = ({
     </Box>
   )
   const renderLoadingState = () => <LoadingIndicator />
+
+  const passageVersionSelector = (
+    <TouchableBox
+      accessibilityRole="button"
+      accessibilityLabel={t('accessibility.chooseVersion', { version: passageVersion })}
+      onPress={() =>
+        openVersionSelector({
+          actions: {
+            setSelectedVersion: version => setPassageVersion(version),
+            setParallelVersion: () => undefined,
+          },
+          data: {
+            selectedVersion: passageVersion,
+            parallelVersions: EMPTY_VERSIONS,
+            selectedBook: VERSION_SELECTOR_BOOK,
+            selectedChapter: 1,
+            selectedVerse: 1,
+            focusVerses: undefined,
+            temp: {
+              selectedBook: VERSION_SELECTOR_BOOK,
+              selectedChapter: 1,
+              selectedVerse: 1,
+            },
+            selectedVerses: EMPTY_SELECTED_VERSES,
+            selectionMode: 'grid',
+            isSelectionMode: undefined,
+            contextDisplayMode: 'focused',
+          } satisfies BibleTab['data'],
+        })
+      }
+      row
+      center
+      gap={5}
+      px={8}
+      py={6}
+      borderRadius={8}
+      bg="lightGrey"
+    >
+      <FeatherIcon name="book-open" size={14} color="primary" />
+      <Text color="primary" fontSize={13} fontWeight="bold">
+        {passageVersion}
+      </Text>
+      <FeatherIcon name="chevron-down" size={13} color="primary" />
+    </TouchableBox>
+  )
 
   const searchHeader = (
     <Box px={20} pt={8} pb={12}>
@@ -760,6 +829,7 @@ const CreateEntityRelationModal = ({
           />
         ) : (
           <SheetFlashList
+            keyboardShouldPersistTaps="handled"
             data={searchSections}
             onEndReachedThreshold={0.4}
             onEndReached={() => {
@@ -784,6 +854,7 @@ const CreateEntityRelationModal = ({
             renderItem={({ item: section }: { item: RelationTargetSection }) => (
               <SearchSectionBlock
                 section={section}
+                headerAction={section.id === 'passages' ? passageVersionSelector : undefined}
                 visibleCount={
                   browseMode === section.id &&
                   (section.id === 'strong' || section.id === 'dictionary' || section.id === 'nave')

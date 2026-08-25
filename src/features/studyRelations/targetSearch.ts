@@ -53,8 +53,8 @@ export const getSortedAnnotationTargetItems = (
     return Number(wordAnnotations[rightId]?.date || 0) - Number(wordAnnotations[leftId]?.date || 0)
   })
 
-const searchVerseTargets = (query: string): RelationTargetResult[] =>
-  getReferenceSearchItems(query, { mode: 'target' })
+const searchVerseTargets = (query: string, version?: string): RelationTargetResult[] =>
+  getReferenceSearchItems(query, { mode: 'target', version })
     .filter((item): item is RelationTargetResult => Boolean(item.endpoint))
     .map(item => ({
       ...item,
@@ -82,11 +82,14 @@ const searchStrongTargets = (query: string): RelationTargetResult[] => {
   ]
 }
 
-export const searchReferenceAndStrongTargets = (query: string): RelationTargetResult[] => {
+export const searchReferenceAndStrongTargets = (
+  query: string,
+  verseVersion?: string
+): RelationTargetResult[] => {
   const trimmed = query.trim()
   if (!trimmed) return []
 
-  return [...searchVerseTargets(trimmed), ...searchStrongTargets(trimmed)]
+  return [...searchVerseTargets(trimmed, verseVersion), ...searchStrongTargets(trimmed)]
 }
 
 const normalizeText = normalizeBibleSearchText

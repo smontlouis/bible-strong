@@ -164,7 +164,7 @@ export const getSortedStudySearchItems = (
 
 export const getReferenceSearchItems = (
   query: string,
-  options: { mode: SearchReferenceMode } = { mode: 'navigation' }
+  options: { mode: SearchReferenceMode; version?: string } = { mode: 'navigation' }
 ): SearchEntityResult[] =>
   parseBibleReference(query).map((segment, index) => {
     const startVerse = segment.startVerse
@@ -194,7 +194,7 @@ export const getReferenceSearchItems = (
         endVerse,
         isWholeChapter,
       },
-      endpoint: createVerseEndpoint(verseKeys),
+      endpoint: createVerseEndpoint(verseKeys, undefined, options.version),
     }
   })
 

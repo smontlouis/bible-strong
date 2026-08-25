@@ -177,6 +177,7 @@ const EditStudyScreen = ({
         params={{ ...params, studyId }}
         studyAtom={studyAtom}
         studyId={studyId}
+        isFormSheet={isFormSheet}
       />
       <RenameModal
         sheetRef={renameModalRef}

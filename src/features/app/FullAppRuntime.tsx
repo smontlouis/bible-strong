@@ -5,7 +5,7 @@ import * as Sentry from '@sentry/react-native'
 import { Stack, useLocalSearchParams, usePathname, useSegments } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { InteractionManager } from 'react-native'
+import { InteractionManager, Platform } from 'react-native'
 import { RootSiblingParent } from 'react-native-root-siblings'
 import { useKeepAwake } from 'expo-keep-awake'
 import TrackPlayer from 'react-native-track-player'
@@ -151,7 +151,8 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                         name="(explore)"
                         options={createFormSheetOptions(theme, {
                           contentStyle: { bottom: 0 },
-                          sheetAllowedDetents: [0.45, 1],
+                          sheetAllowedDetents:
+                            Platform.OS === 'ios' && Platform.isPad ? [1] : [0.45, 1],
                           sheetLargestUndimmedDetentIndex: 0,
                         })}
                       />

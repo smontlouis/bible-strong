@@ -16,17 +16,22 @@ import type {
   StrongBlockPayload,
   VerseBlockPayload,
 } from './quill-types'
+import type { StudyEntityEmbedPayload } from '../studyEntityEmbeds'
 import './quill.snow.css'
 
 import './InlineStrong'
 import './InlineVerse'
 import './StrongBlock'
 import './VerseBlock'
+import './InlineEntity'
+import './EntityBlock'
 
 import './DividerBlock'
 import './ModuleBlockVerse'
 import './ModuleFormat'
 import './ModuleInlineVerse'
+import './ModuleEntity'
+import { installStudyBlockSelection } from './studyBlockSelection'
 
 interface Props {
   dom: import('expo/dom').DOMProps
@@ -51,6 +56,8 @@ type StudyDOMAction =
   | { type: 'GET_BIBLE_STRONG'; payload: InlineStrongPayload }
   | { type: 'GET_BIBLE_VERSES_BLOCK'; payload: VerseBlockPayload }
   | { type: 'GET_BIBLE_STRONG_BLOCK'; payload: StrongBlockPayload }
+  | { type: 'INSERT_ENTITY_LINK'; payload: StudyEntityEmbedPayload }
+  | { type: 'INSERT_ENTITY_BLOCK'; payload: StudyEntityEmbedPayload }
   | { type: 'BLOCK_DIVIDER' }
   | { type: 'TOGGLE_FORMAT'; payload: { type: string; value?: unknown } }
 
@@ -72,6 +79,8 @@ const isStudyDOMAction = (value: unknown): value is StudyDOMAction => {
     case 'GET_BIBLE_STRONG':
     case 'GET_BIBLE_VERSES_BLOCK':
     case 'GET_BIBLE_STRONG_BLOCK':
+    case 'INSERT_ENTITY_LINK':
+    case 'INSERT_ENTITY_BLOCK':
       return isRecord(value.payload)
     case 'TOGGLE_FORMAT':
       return isRecord(value.payload) && typeof value.payload.type === 'string'
@@ -122,6 +131,7 @@ export default function StudiesDOMComponent({
   })
 
   const quillRef = useRef<QuillInstance | null>(null)
+  const blockSelectionCleanupRef = useRef<() => void>(() => undefined)
   const initialContent = decodeDeltaContent(encodedContentToDisplay, contentToDisplay)
 
   function onChangeText(delta: unknown, oldDelta: unknown, source: unknown): void {
@@ -149,6 +159,7 @@ export default function StudiesDOMComponent({
         toolbar: false,
         'inline-verse': true,
         'block-verse': true,
+        entity: true,
         format: true,
       },
       placeholder:
@@ -163,10 +174,12 @@ export default function StudiesDOMComponent({
     quill.setContents(initialContent, Quill.sources.SILENT)
 
     addTextChangeEventToEditor()
+    blockSelectionCleanupRef.current = installStudyBlockSelection(quill)
   }
 
   useEffect(() => {
     loadEditor({ fontFamily, language })
+    return () => blockSelectionCleanupRef.current()
   }, [])
 
   useEffect(() => {
@@ -217,6 +230,18 @@ export default function StudiesDOMComponent({
         case 'GET_BIBLE_STRONG_BLOCK': {
           const blockModule = quill.getModule('block-verse')
           blockModule.receiveStrongBlock(event.payload)
+          break
+        }
+
+        case 'INSERT_ENTITY_LINK': {
+          const entityModule = quill.getModule('entity')
+          entityModule.receiveEntityLink(event.payload)
+          break
+        }
+
+        case 'INSERT_ENTITY_BLOCK': {
+          const entityModule = quill.getModule('entity')
+          entityModule.receiveEntityBlock(event.payload)
           break
         }
 

@@ -1,5 +1,6 @@
 import Quill from './quill'
 import { dispatch } from './dispatch'
+import type { StudyEntityEmbedPayload } from '../studyEntityEmbeds'
 import type {
   QuillBlot,
   QuillBlotConstructor,
@@ -11,6 +12,7 @@ import type {
 const Tooltip = Quill.import('ui/tooltip') as QuillTooltipConstructor
 const InlineVerseBlot = Quill.import('formats/inline-verse') as QuillBlotConstructor
 const InlineStrongBlot = Quill.import('formats/inline-strong') as QuillBlotConstructor
+const InlineEntityBlot = Quill.import('formats/inline-entity') as QuillBlotConstructor
 
 class InlineTooltip extends Tooltip {
   title: HTMLElement
@@ -33,6 +35,7 @@ class InlineTooltip extends Tooltip {
 
       this.quill.format('inline-verse', false)
       this.quill.format('inline-strong', false)
+      this.quill.format('inline-entity', false)
 
       event.preventDefault()
       this.hide()
@@ -45,8 +48,10 @@ class InlineTooltip extends Tooltip {
 
       if (this.type === 'inline-verse') {
         dispatch('SELECT_BIBLE_VERSE')
-      } else {
+      } else if (this.type === 'inline-strong') {
         dispatch('SELECT_BIBLE_STRONG')
+      } else {
+        dispatch('SELECT_STUDY_ENTITY_LINK')
       }
     })
 
@@ -55,9 +60,8 @@ class InlineTooltip extends Tooltip {
 
       if (type === Quill.events.SELECTION_CHANGE) {
         const range = rangeValue as QuillRange | null
-        if (!range) return
-
-        if (isReadOnly) {
+        if (!range || isReadOnly) {
+          this.hide()
           return
         }
 
@@ -68,6 +72,11 @@ class InlineTooltip extends Tooltip {
 
         const [linkStrong, offsetStrong] = this.quill.scroll.descendant(
           InlineStrongBlot,
+          range.index
+        ) as [QuillBlot | null, number]
+
+        const [linkEntity, offsetEntity] = this.quill.scroll.descendant(
+          InlineEntityBlot,
           range.index
         ) as [QuillBlot | null, number]
 
@@ -87,6 +96,16 @@ class InlineTooltip extends Tooltip {
           this.type = 'inline-strong'
           const data = InlineStrongBlot.formats(linkStrong.domNode)
           this.title.textContent = String(data.title || '')
+
+          this.show()
+          this.position(this.quill.getBounds(range))
+        } else if (this.quill.getFormat(range)['inline-entity'] && linkEntity) {
+          this.linkRange = [range.index - offsetEntity, linkEntity.length()]
+          this.type = 'inline-entity'
+          const data = InlineEntityBlot.formats(
+            linkEntity.domNode
+          ) as unknown as StudyEntityEmbedPayload
+          this.title.textContent = String(data.display?.title || '')
 
           this.show()
           this.position(this.quill.getBounds(range))

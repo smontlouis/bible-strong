@@ -33,6 +33,8 @@ import verseToReference from '~helpers/verseToReference'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+
+const IPAD_FORM_SHEET_KEYBOARD_OFFSET = -54
 import { RootState } from '~redux/modules/reducer'
 import type { RelationEndpoint } from '~redux/modules/user'
 import { addNote, deleteNote } from '~redux/modules/user'
@@ -98,6 +100,7 @@ const NoteDetailTabScreen = ({
   const { colorScheme } = useCurrentThemeSelector()
   const fontSizeScale = useSelector((state: RootState) => state.user.bible.settings.fontSizeScale)
   const isCreating = !noteId
+  const isIPadFormSheet = isFormSheet && Platform.OS === 'ios' && Platform.isPad
 
   const handleSizeChange = (_width: number, height: number) => {
     setWebViewHeight(Math.max(NOTE_EDITOR_MIN_HEIGHT, Math.ceil(height)))
@@ -451,7 +454,12 @@ ${currentNote.description}
           ) : undefined
         }
       />
-      <KeyboardAvoidingView automaticOffset behavior="padding" style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        automaticOffset
+        behavior={isIPadFormSheet ? 'height' : 'padding'}
+        keyboardVerticalOffset={isIPadFormSheet ? IPAD_FORM_SHEET_KEYBOARD_OFFSET : 0}
+        style={{ flex: 1 }}
+      >
         <ScrollView
           ref={scrollViewRef}
           style={{ flex: 1 }}

@@ -1,0 +1,191 @@
+.inline-entity {
+  color: rgb(48, 51, 107);
+  cursor: pointer;
+}
+
+.inline-entity[data-entity-type='strong'],
+.inline-entity[data-entity-type='dictionary'],
+.inline-entity[data-entity-type='word'] {
+  color: rgb(9, 132, 227);
+}
+
+.inline-entity,
+.inline-verse,
+.inline-strong {
+  border-radius: 4px;
+  padding: 1px 2px;
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.inline-entity:active,
+.inline-entity:focus,
+.inline-verse:active,
+.inline-verse:focus,
+.inline-strong:active,
+.inline-strong:focus {
+  background-color: rgba(89, 131, 240, 0.14);
+  opacity: 0.68;
+}
+
+.block-entity--content,
+.block-entity--strong,
+.block-verse--wrapper,
+.block-strong > .block-strong--content {
+  box-sizing: border-box;
+  padding: 10px 44px 38px 10px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background-color: rgba(89, 131, 240, 0.06);
+  transition:
+    background-color 120ms ease,
+    opacity 120ms ease,
+    transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.block-entity--content:active,
+.block-entity--content:focus,
+.block-entity--strong:active,
+.block-entity--strong:focus,
+.block-verse--wrapper:active,
+.block-verse--wrapper:focus,
+.block-strong > .block-strong--content:active,
+.block-strong > .block-strong--content:focus {
+  opacity: 0.62;
+  transform: scale(0.995);
+}
+
+.study-block-selected > span > div {
+  background-color: rgba(89, 131, 240, 0.12);
+  border-color: rgb(89, 131, 240);
+  box-shadow: inset 0 0 0 1px rgba(89, 131, 240, 0.22);
+}
+
+.study-block-selected .block-delete {
+  display: flex;
+}
+
+.ql-disabled .study-block-selected .block-delete {
+  display: none;
+}
+
+.block-entity--content {
+  --entity-accent: rgb(48, 51, 107);
+  position: relative;
+  z-index: 10;
+  color: rgb(48, 51, 107);
+  font-size: 12px;
+  cursor: pointer;
+  padding-right: 44px;
+}
+
+.block-entity--content[data-entity-type='externalLink'] {
+  --entity-accent: rgb(172, 126, 0);
+}
+
+.block-entity--content[data-entity-type='study'] {
+  --entity-accent: rgb(98, 113, 122);
+}
+
+.block-entity--content[data-entity-type='note'] {
+  --entity-accent: rgb(194, 69, 83);
+}
+
+.block-entity--content[data-entity-type='dictionary'],
+.block-entity--content[data-entity-type='word'] {
+  --entity-accent: rgb(255, 188, 0);
+}
+
+.block-entity--strong {
+  --entity-accent: rgb(89, 131, 240);
+  position: relative;
+  color: rgb(48, 51, 107);
+}
+
+.block-entity--strong .block-strong--content {
+  position: static;
+}
+
+.block-entity--type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  opacity: 0.75;
+  color: var(--entity-accent);
+}
+
+.block-entity--icon {
+  display: inline-flex;
+  width: 15px;
+  height: 15px;
+}
+
+.block-entity--icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.block-entity--icon text {
+  fill: currentColor;
+  stroke: none;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+.block-entity--title {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.25;
+}
+
+.block-entity--content[data-entity-type='note'] .block-entity--title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.block-entity--description {
+  margin-top: 3px;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.block-entity--arrow {
+  position: absolute;
+  right: 15px;
+  bottom: 38px;
+}
+
+.block-entity--strong .block-strong--arrow,
+.block-verse--wrapper .block-verse--arrow,
+.block-strong > .block-strong--content .block-strong--arrow {
+  right: 15px;
+  bottom: 38px;
+}
+
+.block-entity--content > .block-delete,
+.block-entity--strong .block-delete,
+.block-verse--wrapper > .block-delete,
+.block-strong > .block-strong--content > .block-delete {
+  right: 10px;
+  bottom: 8px;
+}
+
+.ql-disabled .inline-entity,
+.ql-disabled .block-entity--content {
+  cursor: pointer;
+}

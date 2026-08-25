@@ -55,6 +55,7 @@ Core user activities:
 | Manual relation | Relation intentionally created by the user to express a study connection between two endpoints. | `src/features/studyRelations/` |
 | Relation endpoint | Openable study object that can participate in a relation, such as a verse, word annotation, note, study, Strong entry, Nave topic, dictionary word, word, or external link. | `src/features/studyRelations/` |
 | Relation target picker | Surface for choosing the target endpoint of a study relation through unified search or by browsing a specific endpoint type. | Planned |
+| Study entity embed | A link or block embedded in a Study that points to a Relation endpoint and reloads the endpoint's current display data while retaining a fallback label. | `src/features/studies/` |
 | Relation type | Meaning assigned to a relation, such as linked, references, explains, contrasts, mentions, annotates, or external link. | `src/features/studyRelations/` |
 | Relation display | Bible reading setting that controls whether verse relations appear as a grouped icon at the start of their range or as short inline chips at the end of their range. | `src/features/bible/BibleDOM/` |
 | Study | Rich text document authored by the user; can be tagged and can receive verse references. | `src/features/studies/`, `src/redux/modules/user.ts` |
@@ -131,6 +132,9 @@ Core user activities:
 - **Verse** relations are surfaced in the Bible reading surface; **Word annotation**, **Note**, **Study**, and **Strong** relations are surfaced near tags in their detail surfaces.
 - A **Manual relation** can be created from selected verses, selected Word annotations, note details, study items, and Strong details.
 - Relation target selection follows the app search language for Bible references and Strong codes, then adds Notes and Studies as searchable target types.
+- A **Study entity embed** reuses the **Relation endpoint** identity language but belongs to the Study document; it does not create a Relation.
+- A **Study entity embed** can target every Relation endpoint type and is displayed either as an inline format applied to selected text (or an inserted label when there is no selection) or as a block.
+- A **Study entity embed** reloads current endpoint data when the Study opens and keeps its stored display snapshot only as a fallback.
 - A **Verse** relation target is a global Bible reference, not a specific Bible version rendering.
 - **Verse** relation endpoints identify Bible locations, not Bible version-specific text.
 - A directional **Relation** is visible from both endpoints, with active wording from the source and passive wording from the target.

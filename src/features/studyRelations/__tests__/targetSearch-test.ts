@@ -1,4 +1,4 @@
-import { searchRelationTargets } from '../targetSearch'
+import { searchReferenceAndStrongTargets, searchRelationTargets } from '../targetSearch'
 
 jest.mock('~features/search/BibleReferenceWidget', () => ({
   parseBibleReference: (query: string) =>
@@ -34,6 +34,16 @@ describe('searchRelationTargets', () => {
         type: 'verse',
         verseKeys: ['43-3-16'],
       },
+    })
+  })
+
+  it('stores the selected bible version on passage targets', () => {
+    const [result] = searchReferenceAndStrongTargets('Jean 3:16', 'NBS')
+
+    expect(result.endpoint).toMatchObject({
+      type: 'verse',
+      verseKeys: ['43-3-16'],
+      version: 'NBS',
     })
   })
 

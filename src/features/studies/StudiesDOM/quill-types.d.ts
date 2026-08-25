@@ -41,6 +41,8 @@ export interface QuillModule {
   receiveStrongLink(payload: InlineStrongPayload): void
   receiveVerseBlock(payload: VerseBlockPayload): void
   receiveStrongBlock(payload: StrongBlockPayload): void
+  receiveEntityLink(payload: import('../studyEntityEmbeds').StudyEntityEmbedPayload): void
+  receiveEntityBlock(payload: import('../studyEntityEmbeds').StudyEntityEmbedPayload): void
 }
 
 export interface InlineVersePayload {
@@ -97,6 +99,7 @@ export interface QuillInstance {
   getLength(): number
 
   getSelection(focus?: boolean): QuillRange | null
+  getIndex(blot: QuillBlot): number
   setSelection(range: QuillRange | null, source?: string): void
   setSelection(index: number, source?: string): void
   setSelection(index: number, length: number, source?: string): void
@@ -167,6 +170,7 @@ interface QuillStatic {
     USER: string
   }
   import(path: string): unknown
+  find(domNode: Node, bubble?: boolean): QuillBlot | null
   register(definitions: Record<string, unknown>, overwrite?: boolean): void
 }
 

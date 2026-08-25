@@ -1,8 +1,11 @@
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
+import { Platform } from 'react-native'
 import { WebViewMessageEvent } from 'react-native-webview'
 import { useTheme } from '@emotion/react'
+import { useAtomValue } from 'jotai/react'
+import { useSelector } from 'react-redux'
 
 import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { StudyTab, TabItem, useIsCurrentTab } from 'src/state/tabs'
@@ -18,6 +21,21 @@ import StudyFooter from '../StudyFooter'
 import StudiesDOMComponent, { StudyDOMRef } from './StudiesDOMComponent'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getBibleViewParamsForVerseKeys } from '~features/studyRelations/openableStudyObjects'
+import CreateEntityRelationModal from '~features/studyRelations/CreateEntityRelationModal'
+import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
+import type { RelationTargetResult } from '~features/studyRelations/targetSearch'
+import { useSheet } from '~helpers/useSheet'
+import { createStudyEntityEmbedPayload } from '../studyEntityEmbeds'
+import {
+  refreshStudyEntityEmbedPayload,
+  refreshStudyEntityEmbeds,
+} from '../refreshStudyEntityEmbeds'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
+import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import type { RootState } from '~redux/modules/reducer'
+
+const IPAD_FORM_SHEET_KEYBOARD_OFFSET = -54
 
 type Props = {
   params: Readonly<EditStudyScreenProps>
@@ -32,6 +50,7 @@ type Props = {
   fontFamily: string
   studyAtom?: PrimitiveAtom<StudyTab>
   studyId: string
+  isFormSheet?: boolean
 }
 
 type StudyDomMessage = {
@@ -59,11 +78,23 @@ export default function StudiesDomWrapper({
   fontFamily,
   studyAtom,
   studyId,
+  isFormSheet = false,
 }: Props) {
   const ref = useRef<StudyDOMRef>(null)
   const pushRouteOnce = usePushRouteOnce()
+  const openStudyObject = useOpenStudyObject()
+  const entityPicker = useSheet()
+  const resources = useResourceAccess()
+  const defaultBibleVersion = useDefaultBibleVersion()
+  const resourceLanguages = useAtomValue(resourcesLanguageAtom)
+  const notes = useSelector((state: RootState) => state.user.bible.notes)
+  const links = useSelector((state: RootState) => state.user.bible.links)
+  const studies = useSelector((state: RootState) => state.user.bible.studies)
+  const wordAnnotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const theme = useTheme()
   const [activeFormats, setActiveFormats] = useState({})
+  const [entityInsertionMode, setEntityInsertionMode] = useState<'link' | 'block'>('link')
+  const isIPadFormSheet = isFormSheet && Platform.OS === 'ios' && Platform.isPad
   const { colorScheme } = useCurrentThemeSelector()
   const encodedContentToDisplay = encodeDeltaContent(contentToDisplay)
 
@@ -71,13 +102,28 @@ export default function StudiesDomWrapper({
   const isCurrentTab = studyAtom ? getIsCurrentTab(studyAtom as PrimitiveAtom<TabItem>) : false
 
   useEffect(() => {
-    console.log('[Studies] isCurrentTab', isCurrentTab)
+    if (!isReadOnly || (studyAtom && !isCurrentTab)) return
+    let active = true
 
-    if (ref.current?.reloadEditor && isCurrentTab) {
-      console.log('[Studies] Reloading editor')
-      ref.current.reloadEditor(encodedContentToDisplay)
+    void refreshStudyEntityEmbeds(contentToDisplay, {
+      resources,
+      defaultBibleVersion,
+      resourceLanguages,
+      notes,
+      links,
+      studies,
+      wordAnnotations,
+    }).then(content => {
+      if (!active || !content || !ref.current?.reloadEditor) return
+      ref.current.reloadEditor(encodeDeltaContent(content))
+    })
+
+    return () => {
+      active = false
     }
-  }, [isCurrentTab, encodedContentToDisplay])
+    // Refresh on entry/re-entry, not after each editor keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [studyId, isCurrentTab, isReadOnly])
 
   function dispatchToWebView(type: string, payload?: JSONValue): void {
     if (ref.current) {
@@ -94,6 +140,28 @@ export default function StudiesDomWrapper({
       pathname: '/bible-view',
       params: { isSelectionMode: selectionMode },
     })
+  }
+
+  function openEntityPicker(mode: 'link' | 'block'): void {
+    setEntityInsertionMode(mode)
+    entityPicker.open()
+  }
+
+  async function insertEntity(target: RelationTargetResult): Promise<void> {
+    const payload = await refreshStudyEntityEmbedPayload(createStudyEntityEmbedPayload(target), {
+      resources,
+      defaultBibleVersion,
+      resourceLanguages,
+      notes,
+      links,
+      studies,
+      wordAnnotations,
+    })
+    dispatchToWebView(
+      entityInsertionMode === 'link' ? 'INSERT_ENTITY_LINK' : 'INSERT_ENTITY_BLOCK',
+      payload as unknown as JSONValue
+    )
+    entityPicker.close()
   }
 
   useEffect(() => {
@@ -157,6 +225,19 @@ export default function StudiesDomWrapper({
           return
         }
 
+        case 'VIEW_STUDY_ENTITY': {
+          const endpoint = msgData.payload?.endpoint
+          if (endpoint && typeof endpoint === 'object') {
+            openStudyObject({ endpoint: endpoint as RelationTargetResult['endpoint'] })
+          }
+          return
+        }
+
+        case 'SELECT_STUDY_ENTITY_LINK': {
+          openEntityPicker('link')
+          return
+        }
+
         case 'SELECT_BIBLE_VERSE':
         case 'SELECT_BIBLE_STRONG':
         case 'SELECT_BIBLE_VERSE_BLOCK':
@@ -185,7 +266,7 @@ export default function StudiesDomWrapper({
 
   const footer = !isReadOnly ? (
     <StudyFooter
-      navigateBibleView={navigateToSelectionMode}
+      onInsertEntity={openEntityPicker}
       dispatchToWebView={dispatchToWebView}
       activeFormats={activeFormats}
     />
@@ -217,7 +298,8 @@ export default function StudiesDomWrapper({
   return (
     <KeyboardAvoidingView
       automaticOffset
-      behavior="padding"
+      behavior={isIPadFormSheet ? 'height' : 'padding'}
+      keyboardVerticalOffset={isIPadFormSheet ? IPAD_FORM_SHEET_KEYBOARD_OFFSET : 0}
       style={{
         flex: 1,
         backgroundColor: theme.colors.reverse,
@@ -226,6 +308,14 @@ export default function StudiesDomWrapper({
       <Box flex bg="reverse">
         {editor}
         {footer}
+        <CreateEntityRelationModal
+          ref={entityPicker.getRef()}
+          title={
+            entityInsertionMode === 'link' ? i18n.t('Ajouter un lien') : i18n.t('Ajouter un bloc')
+          }
+          sourceEndpoint={null}
+          onSelectTarget={insertEntity}
+        />
       </Box>
     </KeyboardAvoidingView>
   )

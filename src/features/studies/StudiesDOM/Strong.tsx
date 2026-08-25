@@ -21,7 +21,7 @@ const Strong = ({ title, code, codeStrong, phonetique, original }: StrongProps) 
         [{phonetique}] - {code || codeStrong} - {original}
       </div>
       <div className="block-strong--arrow">
-        <ArrowRight color="rgb(9,132,227)" />
+        <ArrowRight color="rgb(48,51,107)" />
       </div>
       <div className="block-delete" />
     </div>

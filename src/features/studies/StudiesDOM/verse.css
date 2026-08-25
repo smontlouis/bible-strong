@@ -1,15 +1,15 @@
 .block-verse--wrapper {
-  color: rgba(48, 51, 107,1.0);
+  color: rgba(48, 51, 107, 1);
   position: relative;
   z-index: 10;
 }
 
 .block-verse--content {
-  quotes: "“" "”" "‘" "’";
+  quotes: '“' '”' '‘' '’';
   font-style: italic;
 }
 
-.block-verse--content:before {  
+.block-verse--content:before {
   content: open-quote;
 }
 
@@ -22,7 +22,7 @@
   font-size: 20px;
   font-weight: bold;
   line-height: 0px;
-  color: rgba(48, 51, 107,1.0);
+  color: rgba(48, 51, 107, 1);
   opacity: 0.2;
 }
 
@@ -34,11 +34,11 @@
 }
 
 .block-verse--verse {
-  margin-right: 10px
+  margin-right: 10px;
 }
 
 .block-verse--version {
-  font-weight: bold;  
+  font-weight: bold;
 }
 
 .block-verse--arrow {
@@ -48,26 +48,36 @@
 }
 
 .block-delete {
-    height: 20px;
-    background-color: rgb(194,40,57);
-    padding: 0 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 17px;
-    font-family: arial;
-    color: white;
-    border-radius: 20px;
-    position: absolute;
-    bottom: -25px;
-    right: 0;
+  height: 22px;
+  padding: 0 9px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  color: rgb(166, 58, 70);
+  background-color: rgba(194, 40, 57, 0.07);
+  border: 1px solid rgba(194, 40, 57, 0.18);
+  border-radius: 20px;
+  position: absolute;
+  bottom: -25px;
+  right: 0;
+  transition:
+    color 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
+.block-delete:active {
+  color: rgb(145, 35, 48);
+  background-color: rgba(194, 40, 57, 0.16);
+  border-color: rgba(194, 40, 57, 0.3);
+}
 
 .block-delete:before {
-  content:"Effacer";
+  content: 'Effacer';
   font-size: 11px;
-  display:block;
+  display: block;
 }
 
 .ql-disabled .block-delete {

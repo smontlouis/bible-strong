@@ -1,7 +1,7 @@
 import styled from '@emotion/native'
 import { useAtom } from 'jotai/react'
 import type { JSONValue } from 'expo/build/dom/dom.types'
-import React, { memo, useState } from 'react'
+import React, { useState } from 'react'
 import { TouchableOpacity, type TouchableOpacityProps } from 'react-native'
 
 import { useTranslation } from 'react-i18next'
@@ -12,13 +12,12 @@ import QuoteIcon from '~assets/images/QuoteIcon'
 import ColorPicker from '~common/ColorPicker'
 import Link from '~common/Link'
 import Border from '~common/ui/Border'
-import Box, { AnimatedBox, TouchableBox, fadeSlideBottomAnimations } from '~common/ui/Box'
+import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import Button from '~common/ui/Button'
 import { FeatherIcon, MaterialIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import type { StudyNavigateBibleType } from '~common/types'
 import { recentColorsAtom } from './atom'
-import { FadeInDown, FadeInUp, FadeOutDown, FadeOutUp } from 'react-native-reanimated'
+import { FadeInDown, FadeOutDown } from 'react-native-reanimated'
 
 type DispatchToWebView = (type: string, payload?: JSONValue) => void
 
@@ -345,21 +344,21 @@ const SelectMore = ({
 }
 
 const SelectBlock = ({
-  navigateBibleView,
+  onInsertEntity,
   isOpen,
   onToggle,
   onClose,
 }: {
-  navigateBibleView: (type: StudyNavigateBibleType) => void
+  onInsertEntity: (mode: 'link' | 'block') => void
   isOpen: boolean
   onToggle: () => void
   onClose: () => void
 }) => {
   const { t } = useTranslation()
 
-  const handleNavigate = (type: StudyNavigateBibleType) => {
+  const handleInsert = (mode: 'link' | 'block') => {
     onClose()
-    navigateBibleView(type)
+    onInsertEntity(mode)
   }
 
   return (
@@ -371,23 +370,13 @@ const SelectBlock = ({
         <StudyFooterPopover bottom={30} right={0} width={250}>
           <PopoverItem
             icon="link-2"
-            label={t('Insérer un lien de verset')}
-            onPress={() => handleNavigate('verse')}
+            label={t('Ajouter un lien')}
+            onPress={() => handleInsert('link')}
           />
           <PopoverItem
             icon="file-text"
-            label={t('Insérer un texte de verset')}
-            onPress={() => handleNavigate('verse-block')}
-          />
-          <PopoverItem
-            icon="link-2"
-            label={t('Insérer un lien de strong')}
-            onPress={() => handleNavigate('strong')}
-          />
-          <PopoverItem
-            icon="file-text"
-            label={t('Insérer un texte de strong')}
-            onPress={() => handleNavigate('strong-block')}
+            label={t('Ajouter un bloc')}
+            onPress={() => handleInsert('block')}
           />
         </StudyFooterPopover>
       )}
@@ -407,15 +396,11 @@ const FormatIcon = styled(TouchableOpacity)<TouchableOpacityProps & { isSelected
 
 type StudyFooterProps = {
   dispatchToWebView: DispatchToWebView
-  navigateBibleView: (type: StudyNavigateBibleType) => void
+  onInsertEntity: (mode: 'link' | 'block') => void
   activeFormats: ActiveFormats
 }
 
-const StudyFooterComponent = ({
-  dispatchToWebView,
-  navigateBibleView,
-  activeFormats,
-}: StudyFooterProps) => {
+const StudyFooter = ({ dispatchToWebView, onInsertEntity, activeFormats }: StudyFooterProps) => {
   const [openMenu, setOpenMenu] = useState<StudyFooterMenu>(null)
   const toggleMenu = (menu: Exclude<StudyFooterMenu, null>) => {
     setOpenMenu(currentMenu => (currentMenu === menu ? null : menu))
@@ -488,7 +473,7 @@ const StudyFooterComponent = ({
         />
         <Box marginLeft="auto" />
         <SelectBlock
-          navigateBibleView={navigateBibleView}
+          onInsertEntity={onInsertEntity}
           isOpen={openMenu === 'block'}
           onToggle={() => toggleMenu('block')}
           onClose={closeMenu}
@@ -500,9 +485,5 @@ const StudyFooterComponent = ({
     </Box>
   )
 }
-
-const StudyFooter = memo(StudyFooterComponent, (prevProps, nextProps) => {
-  return JSON.stringify(prevProps.activeFormats) === JSON.stringify(nextProps.activeFormats)
-})
 
 export default StudyFooter
