@@ -4,14 +4,10 @@ import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { useRouter } from 'expo-router'
 import { produce } from 'immer'
 import { PrimitiveAtom, useAtom, useSetAtom } from 'jotai'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert, Platform, ScrollView, Share } from 'react-native'
-import {
-  KeyboardAvoidingView,
-  KeyboardStickyView,
-  useKeyboardState,
-} from 'react-native-keyboard-controller'
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useDispatch, useSelector } from 'react-redux'
 import EntityChipList from '~common/EntityChipList'
@@ -50,7 +46,6 @@ import {
 import { isFullScreenBibleAtom, unifiedTagsModalAtom } from '~state/app'
 import { NotesTab, useIsCurrentTab } from '~state/tabs'
 
-const FOOTER_HEIGHT = 54
 const NOTE_EDITOR_MIN_HEIGHT = 240
 
 const verseKeysToVerseIds = (verseKeys: string[]): VerseIds =>
@@ -94,7 +89,11 @@ const NoteDetailTabScreen = ({
   const [isEditing, setIsEditing] = useState(false)
   const [editorResetKey, setEditorResetKey] = useState(0)
   const [webViewHeight, setWebViewHeight] = useState(NOTE_EDITOR_MIN_HEIGHT)
-  const keyboardHeight = useKeyboardState(state => state.height)
+  const scrollViewRef = useRef<ScrollView>(null)
+  const scrollOffsetRef = useRef(0)
+  const scrollViewportHeightRef = useRef(0)
+  const editorLayoutYRef = useRef(0)
+  const cursorBottomRef = useRef(0)
   const { bottomBarHeight } = useBottomBarHeightInTab()
   const { colorScheme } = useCurrentThemeSelector()
   const fontSizeScale = useSelector((state: RootState) => state.user.bible.settings.fontSizeScale)
@@ -102,6 +101,25 @@ const NoteDetailTabScreen = ({
 
   const handleSizeChange = (_width: number, height: number) => {
     setWebViewHeight(Math.max(NOTE_EDITOR_MIN_HEIGHT, Math.ceil(height)))
+  }
+
+  const keepEditorCursorVisible = (viewportHeight = scrollViewportHeightRef.current) => {
+    if (!isEditing || !viewportHeight || !cursorBottomRef.current) return
+
+    const cursorY = editorLayoutYRef.current + cursorBottomRef.current
+    const visibleTop = scrollOffsetRef.current
+    const visibleBottom = visibleTop + viewportHeight
+    const margin = 20
+
+    if (cursorY > visibleBottom - margin) {
+      const nextOffset = cursorY - viewportHeight + margin
+      scrollViewRef.current?.scrollTo({ y: nextOffset, animated: true })
+      return
+    }
+
+    if (cursorY < visibleTop + margin) {
+      scrollViewRef.current?.scrollTo({ y: Math.max(0, cursorY - margin), animated: true })
+    }
   }
 
   // Force full screen bible mode off when this tab becomes active
@@ -433,18 +451,24 @@ ${currentNote.description}
           ) : undefined
         }
       />
-      <KeyboardAvoidingView
-        automaticOffset
-        behavior={!isFormSheet ? 'padding' : undefined}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView automaticOffset behavior="padding" style={{ flex: 1 }}>
         <ScrollView
+          ref={scrollViewRef}
           style={{ flex: 1 }}
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          keyboardShouldPersistTaps="handled"
+          scrollEventThrottle={16}
+          onLayout={event => {
+            const viewportHeight = event.nativeEvent.layout.height
+            scrollViewportHeightRef.current = viewportHeight
+            keepEditorCursorVisible(viewportHeight)
+          }}
+          onScroll={event => {
+            scrollOffsetRef.current = event.nativeEvent.contentOffset.y
+          }}
           contentContainerStyle={{
             padding: 20,
-            paddingBottom: isEditing
-              ? FOOTER_HEIGHT + (isFormSheet ? keyboardHeight : bottomBarHeight) + 20
-              : insets.bottom + 100,
+            paddingBottom: isEditing ? 20 : insets.bottom + 100,
           }}
         >
           <Box gap={20}>
@@ -478,59 +502,60 @@ ${currentNote.description}
                 />
               )
             ) : null}
-            <NoteEditorDOMComponent
-              key={`${noteId || 'new'}-${editorResetKey}`}
-              encodedDefaultTitle={encodeURIComponent(currentNote?.title || '')}
-              encodedDefaultDescription={encodeURIComponent(currentNote?.description || '')}
-              resetKey={editorResetKey}
-              isEditing={isEditing}
-              fontSizeScale={fontSizeScale}
-              colorScheme={colorScheme}
-              textColor={theme.colors.default}
-              editorBackgroundColor={theme.colors.opacity5}
-              placeholderColor={theme.colors.grey}
-              placeholderTitle={t('notes.titlePlaceholder')}
-              placeholderDescription={t('Description')}
-              onTitleChange={setTitle}
-              onDescriptionChange={setDescription}
-              onSizeChange={handleSizeChange}
-              dom={{
-                useExpoDOMWebView: false,
-                containerStyle: { height: webViewHeight, overflow: 'hidden' },
-                style: { overflow: 'hidden' },
-                scrollEnabled: false,
-                hideKeyboardAccessoryView: true,
+            <Box
+              onLayout={event => {
+                editorLayoutYRef.current = event.nativeEvent.layout.y
               }}
-            />
+            >
+              <NoteEditorDOMComponent
+                key={`${noteId || 'new'}-${editorResetKey}`}
+                encodedDefaultTitle={encodeURIComponent(currentNote?.title || '')}
+                encodedDefaultDescription={encodeURIComponent(currentNote?.description || '')}
+                resetKey={editorResetKey}
+                isEditing={isEditing}
+                fontSizeScale={fontSizeScale}
+                colorScheme={colorScheme}
+                textColor={theme.colors.default}
+                editorBackgroundColor={theme.colors.opacity5}
+                placeholderColor={theme.colors.grey}
+                placeholderTitle={t('notes.titlePlaceholder')}
+                placeholderDescription={t('Description')}
+                onTitleChange={setTitle}
+                onDescriptionChange={setDescription}
+                onSizeChange={handleSizeChange}
+                onCursorPositionChange={bottom => {
+                  cursorBottomRef.current = bottom
+                  keepEditorCursorVisible()
+                }}
+                dom={{
+                  useExpoDOMWebView: false,
+                  containerStyle: { height: webViewHeight, overflow: 'hidden' },
+                  style: { overflow: 'hidden' },
+                  scrollEnabled: false,
+                  keyboardDisplayRequiresUserAction: false,
+                  hideKeyboardAccessoryView: true,
+                }}
+              />
+            </Box>
           </Box>
         </ScrollView>
         {isEditing && (
-          <KeyboardStickyView
-            // TODO: temp fix
-            enabled={isFormSheet || Platform.OS === 'android'}
-            style={
-              isFormSheet || Platform.OS === 'android'
-                ? { position: 'absolute', left: 0, right: 0, bottom: 0 }
-                : undefined
-            }
+          <HStack
+            py={10}
+            px={20}
+            justifyContent="flex-end"
+            bg="reverse"
+            borderTopWidth={1}
+            borderColor="border"
+            gap={10}
           >
-            <HStack
-              py={10}
-              px={20}
-              justifyContent="flex-end"
-              bg="reverse"
-              borderTopWidth={1}
-              borderColor="border"
-              gap={10}
-            >
-              <Button reverse onPress={cancelEditing}>
-                {t('Annuler')}
-              </Button>
-              <Button disabled={submitIsDisabled} onPress={onSaveNote}>
-                {t('Sauvegarder')}
-              </Button>
-            </HStack>
-          </KeyboardStickyView>
+            <Button reverse onPress={cancelEditing}>
+              {t('Annuler')}
+            </Button>
+            <Button disabled={submitIsDisabled} onPress={onSaveNote}>
+              {t('Sauvegarder')}
+            </Button>
+          </HStack>
         )}
       </KeyboardAvoidingView>
       {!isEditing && (

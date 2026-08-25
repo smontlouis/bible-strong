@@ -25,9 +25,10 @@
   box-sizing: border-box;
   cursor: text;
   line-height: 1.42;
-  height: 100%;
+  height: auto;
+  min-height: 100%;
   outline: none;
-  overflow-y: auto;
+  overflow-y: visible;
   padding: 12px 15px;
   tab-size: 4;
   -moz-tab-size: 4;
@@ -336,10 +337,16 @@
   color: #93f;
 }
 .ql-editor .ql-font-serif {
-  font-family: Georgia, Times New Roman, serif;
+  font-family:
+    Georgia,
+    Times New Roman,
+    serif;
 }
 .ql-editor .ql-font-monospace {
-  font-family: Monaco, Courier New, monospace;
+  font-family:
+    Monaco,
+    Courier New,
+    monospace;
 }
 .ql-editor .ql-size-small {
   font-size: 0.75em;
@@ -685,24 +692,12 @@
   top: 50%;
   width: 18px;
 }
-.ql-snow
-  .ql-picker.ql-header
-  .ql-picker-label[data-label]:not([data-label=''])::before,
-.ql-snow
-  .ql-picker.ql-font
-  .ql-picker-label[data-label]:not([data-label=''])::before,
-.ql-snow
-  .ql-picker.ql-size
-  .ql-picker-label[data-label]:not([data-label=''])::before,
-.ql-snow
-  .ql-picker.ql-header
-  .ql-picker-item[data-label]:not([data-label=''])::before,
-.ql-snow
-  .ql-picker.ql-font
-  .ql-picker-item[data-label]:not([data-label=''])::before,
-.ql-snow
-  .ql-picker.ql-size
-  .ql-picker-item[data-label]:not([data-label=''])::before {
+.ql-snow .ql-picker.ql-header .ql-picker-label[data-label]:not([data-label=''])::before,
+.ql-snow .ql-picker.ql-font .ql-picker-label[data-label]:not([data-label=''])::before,
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-label]:not([data-label=''])::before,
+.ql-snow .ql-picker.ql-header .ql-picker-item[data-label]:not([data-label=''])::before,
+.ql-snow .ql-picker.ql-font .ql-picker-item[data-label]:not([data-label=''])::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-label]:not([data-label=''])::before {
   content: attr(data-label);
 }
 .ql-snow .ql-picker.ql-header {
@@ -770,10 +765,16 @@
   content: 'Monospace';
 }
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='serif']::before {
-  font-family: Georgia, Times New Roman, serif;
+  font-family:
+    Georgia,
+    Times New Roman,
+    serif;
 }
 .ql-snow .ql-picker.ql-font .ql-picker-item[data-value='monospace']::before {
-  font-family: Monaco, Courier New, monospace;
+  font-family:
+    Monaco,
+    Courier New,
+    monospace;
 }
 .ql-snow .ql-picker.ql-size {
   width: 98px;
@@ -910,13 +911,13 @@ body {
 
 html,
 body {
-  height: 100vh;
+  height: 100%;
 }
 
 #root {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100%;
 }
 
 #toolbar {
@@ -933,7 +934,7 @@ body {
 
 #editor {
   flex: 1;
-  overflow: auto;
+  overflow: visible;
 }
 
 .ql-toolbar-wrapper {

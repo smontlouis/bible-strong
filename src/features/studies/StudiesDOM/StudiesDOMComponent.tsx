@@ -12,7 +12,6 @@ import type {
   InlineStrongPayload,
   InlineVersePayload,
   QuillInstance,
-  QuillRange,
   QuillJSONValue,
   StrongBlockPayload,
   VerseBlockPayload,
@@ -139,28 +138,6 @@ export default function StudiesDOMComponent({
     const quill = quillRef.current!
 
     quill.on('text-change', debounce(onChangeText, 500))
-
-    quill.on(Quill.events.EDITOR_CHANGE, (type, rangeValue) => {
-      const range = rangeValue as QuillRange | null
-      const editorDisabled = quill.container.classList.contains('ql-disabled')
-      if (editorDisabled) return
-      if (type !== Quill.events.SELECTION_CHANGE) return
-
-      if (range) {
-        const selectedBottom = quill.getBounds(range).bottom
-
-        setTimeout(() => {
-          const windowHeight = document.body.getBoundingClientRect().height
-
-          if (selectedBottom > windowHeight) {
-            const editor = document.querySelector<HTMLElement>('.ql-editor')
-            if (editor) {
-              editor.scrollTo(0, editor.scrollTop + selectedBottom - windowHeight + 30)
-            }
-          }
-        }, 300)
-      }
-    })
   }
 
   function loadEditor(options: { fontFamily: string; language: string }): void {

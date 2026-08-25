@@ -24,6 +24,7 @@ interface Props {
   onTitleChange: (value: string) => void
   onDescriptionChange: (value: string) => void
   onSizeChange: (width: number, height: number) => void
+  onCursorPositionChange?: (bottom: number) => void
   onFocus?: () => void
   onBlur?: () => void
 }
@@ -45,6 +46,7 @@ export default function NoteEditorDOMComponent({
   onTitleChange,
   onDescriptionChange,
   onSizeChange,
+  onCursorPositionChange,
   onFocus,
   onBlur,
 }: Props) {
@@ -113,16 +115,31 @@ export default function NoteEditorDOMComponent({
     }
   }, [isEditing])
 
+  const reportCursorPosition = () => {
+    const container = containerRef.current
+    const selection = window.getSelection()
+    if (!container || !selection?.rangeCount || !container.contains(selection.anchorNode)) return
+
+    const range = selection.getRangeAt(0).cloneRange()
+    range.collapse(false)
+    const cursorRect = range.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    onCursorPositionChange?.(Math.max(0, cursorRect.bottom - containerRect.top))
+  }
+
   const handleTitleInput = () => {
     onTitleChange(titleRef.current?.innerText || '')
+    requestAnimationFrame(reportCursorPosition)
   }
 
   const handleDescriptionInput = () => {
     onDescriptionChange(descriptionRef.current?.innerText || '')
+    requestAnimationFrame(reportCursorPosition)
   }
 
   const handleFocus = () => {
     onFocus?.()
+    requestAnimationFrame(reportCursorPosition)
   }
 
   const handleBlur = () => {
@@ -152,10 +169,14 @@ export default function NoteEditorDOMComponent({
         key={`title-${resetKey}`}
         ref={titleRef}
         contentEditable={isEditing}
+        role="textbox"
+        aria-label={placeholderTitle}
         suppressContentEditableWarning
         onInput={handleTitleInput}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onClick={reportCursorPosition}
+        onKeyUp={reportCursorPosition}
         data-placeholder={placeholderTitle}
         style={{
           padding: 5,
@@ -174,10 +195,15 @@ export default function NoteEditorDOMComponent({
         key={`description-${resetKey}`}
         ref={descriptionRef}
         contentEditable={isEditing}
+        role="textbox"
+        aria-label={placeholderDescription}
+        aria-multiline="true"
         suppressContentEditableWarning
         onInput={handleDescriptionInput}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        onClick={reportCursorPosition}
+        onKeyUp={reportCursorPosition}
         data-placeholder={placeholderDescription}
         style={{
           padding: 5,
