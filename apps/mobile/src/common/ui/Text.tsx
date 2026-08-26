@@ -160,7 +160,7 @@ const Text = styled.Text<TextProps>((props): TextStyle => {
     borderBottomRightRadius: props.borderBottomRightRadius,
     transform: props.transform,
 
-    overflow: props.overflow ? 'visible' : 'hidden',
+    overflow: props.overflow,
     width: props.width ?? props.w,
     maxWidth: props.maxWidth ?? props.maxW,
     minWidth: props.minWidth ?? props.minW,

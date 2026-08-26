@@ -134,7 +134,9 @@ const BookItem = memo(
                         alignItems: 'center',
                       }}
                     >
-                      <Text textAlign="center">{chapter}</Text>
+                      <Text width={ITEM_WIDTH} textAlign="center">
+                        {chapter}
+                      </Text>
                     </Box>
                   </Box>
                 </TouchableOpacity>
