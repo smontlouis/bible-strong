@@ -9,6 +9,8 @@ import { getLocalResourceAvailability } from '../resourceAvailability'
 import {
   CommentaryAccessError,
   createCommentaryAccess,
+  defaultCommentaryAccess,
+  firestoreCommentaryAccess,
   localMhyCommentaryAccess,
   type CommentaryAccess,
 } from '../commentaryAccess'
@@ -37,6 +39,10 @@ const comments = (id: string, order = 1) => ({
 
 describe('commentary access', () => {
   beforeEach(() => jest.clearAllMocks())
+
+  it('keeps the Commentaries feature backed exclusively by Firestore', () => {
+    expect(defaultCommentaryAccess).toBe(firestoreCommentaryAccess)
+  })
 
   it('reads an installed Matthew Henry commentary without a network source', async () => {
     mockAvailability.mockResolvedValue({

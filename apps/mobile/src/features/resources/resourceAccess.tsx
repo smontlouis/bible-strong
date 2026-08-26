@@ -72,10 +72,7 @@ import {
   type TimelineAccess,
 } from '~features/resources/timelineAccess'
 import {
-  createCommentaryAccess,
-  createHttpCommentaryAccess,
-  firestoreCommentaryAccess,
-  localMhyCommentaryAccess,
+  defaultCommentaryAccess,
   type CommentaryAccess,
 } from '~features/resources/commentaryAccess'
 import {
@@ -313,22 +310,6 @@ const onlineTimelineAccess = resourceApiBaseUrl
       })
     )
   : localTimelineAccess
-const commentaryAccess = createCommentaryAccess({
-  local: offlineSource('Commentary', localMhyCommentaryAccess),
-  remote: resourceApiBaseUrl
-    ? onlineSource(
-        'Commentary',
-        createHttpCommentaryAccess({
-          baseUrl: resourceApiBaseUrl,
-          fetcher: resourceApiFetch,
-          isOnline: async () => onlineManager.isOnline(),
-        })
-      )
-    : onlineSource('Commentary', firestoreCommentaryAccess),
-  isOnline: async () => onlineManager.isOnline(),
-  combineResults: !resourceApiBaseUrl,
-})
-
 export const defaultResourceAccess: ResourceAccessRegistry = {
   bibleContent: createBibleContentAccess(
     bibleChapterAdapter,
@@ -370,7 +351,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     remotelyReadableLanguages: remotelyReadableTimelineLanguages,
     isOnline: async () => onlineManager.isOnline(),
   }),
-  commentary: commentaryAccess,
+  commentary: defaultCommentaryAccess,
   offlineCopies: {
     getStrongBibleAvailability: localStrongBibleResourceAdapter.getAvailability,
     isAvailable: isLocalResourceAvailable,

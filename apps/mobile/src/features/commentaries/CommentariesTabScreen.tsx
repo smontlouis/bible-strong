@@ -10,7 +10,6 @@ import { LinkBox } from '~common/Link'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
-import RoundedCorner from '~common/ui/RoundedCorner'
 import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { useResolvedBibleVerses, verseStringToObject } from '~features/resources/useBibleVerses'
@@ -28,7 +27,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { HStack } from '~common/ui/Stack'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import { localQueryOptions } from '~helpers/queryOptions'
+import { localQueryOptions, remoteQueryOptions } from '~helpers/queryOptions'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -38,7 +37,6 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
-import { databases } from '~helpers/databases'
 import { CommentaryAccessError } from '~features/resources/commentaryAccess'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
@@ -61,6 +59,7 @@ const NumberText = styled(Paragraph)({
 const StyledVerse = styled.View({
   paddingLeft: 0,
   paddingRight: 10,
+  paddingBottom: 10,
   flexDirection: 'row',
 })
 
@@ -79,7 +78,7 @@ const useComments = (verse: string) => {
         ? lastPage.comments.at(-1)?.order
         : undefined
     },
-    ...localQueryOptions,
+    ...remoteQueryOptions,
   })
   const data = query.data
     ? {
@@ -229,7 +228,7 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
         scrollIndicatorInsets={{ right: 1 }}
       >
         <>
-          <Box background paddingTop={10}>
+          <Box background paddingTop={10} borderBottomLeftRadius={30} borderBottomRightRadius={30}>
             <StyledVerse>
               <VersetWrapper>
                 <NumberText>{verseText?.Verset}</NumberText>
@@ -275,18 +274,13 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
               versesInCurrentChapter={versesInCurrentChapter}
             />
           </Box>
-          <Box bg="lightGrey">
-            <RoundedCorner />
-          </Box>
           {isPending ? (
             <Box height={100} center>
               <Loading />
             </Box>
           ) : isError && !(error instanceof CommentaryAccessError) ? (
             <ResourceUnavailableView
-              identity={{ kind: 'database', databaseId: 'MHY', language: 'fr' }}
               title={t('resource.commentaries.temporarilyUnavailable')}
-              fileSize={Math.max(1, Math.round(databases('fr').MHY.fileSize / 1_000_000))}
               failure={resourceFailureFromAccessError(error)}
               onRetry={() => void retry()}
             />

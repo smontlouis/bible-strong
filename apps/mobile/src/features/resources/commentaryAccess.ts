@@ -290,4 +290,6 @@ export const createCommentaryAccess = ({
   },
 })
 
-export const defaultCommentaryAccess = createCommentaryAccess()
+// The multi-author Commentaries feature is a legacy Firestore surface. Matthew Henry's
+// Resource API and Offline copy are separate corpora and must not replace this access path.
+export const defaultCommentaryAccess = firestoreCommentaryAccess
