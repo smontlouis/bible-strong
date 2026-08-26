@@ -7,6 +7,7 @@ import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatab
 import type { ResourceDatabase } from '../database/types'
 import {
   ActiveStrongLexiconPublicationUnavailable,
+  STRONG_LEXICON_ENTRY_RESPONSE_REVISION,
   StrongLexiconEntityNotFound,
   StrongLexiconEntryNotFound,
   StrongLexiconRepositoryFailure,
@@ -72,6 +73,19 @@ const normalizeText = (value: string): string =>
 const classicStrong = (row: Payload) =>
   `${text(row, 'language') === 'greek' ? 'G' : 'H'}${String(number(row, 'baseCode')).padStart(4, '0')}`
 
+const parseClassicStrong = (
+  value: string
+): { code: string; language: 'greek' | 'hebrew'; baseCode: number } | undefined => {
+  const code = normalizeCode(value)
+  const match = /^([GH])(\d+)$/u.exec(code)
+  if (!match) return undefined
+  return {
+    code,
+    language: match[1] === 'G' ? 'greek' : 'hebrew',
+    baseCode: Number(match[2]),
+  }
+}
+
 const mapRepositoryCause = (
   cause: unknown
 ):
@@ -128,6 +142,7 @@ const entryRepresentationRevision = (
   entities: StrongLexiconModuleState
 ): string =>
   [
+    STRONG_LEXICON_ENTRY_RESPONSE_REVISION,
     `core:${core.revision}`,
     `resources:${moduleStateRevision(resources)}`,
     `entities:${moduleStateRevision(entities)}`,
@@ -657,9 +672,49 @@ export const makeKyselyStrongLexiconRepository = (
           getState('entities'),
         ])
         const targetIds = relationRows.map(row => number(row, 'toStepEntryId')).filter(Boolean)
-        const targetEntries = targetIds.length
+        const directTargetEntries = targetIds.length
           ? await records(core.id, 'StepEntries', query => query.where('entry_id', 'in', targetIds))
           : []
+        const unresolvedClassicTargets = Array.from(
+          new Map(
+            relationRows
+              .filter(row => !number(row, 'toStepEntryId'))
+              .flatMap(row => {
+                const target = parseClassicStrong(text(row, 'toStepCode'))
+                return target ? [[target.code, target] as const] : []
+              })
+          ).values()
+        )
+        const fallbackTargetEntries = unresolvedClassicTargets.length
+          ? (
+              await records(core.id, 'StepEntries', query =>
+                query.where(
+                  sql<boolean>`(${sql.join(
+                    unresolvedClassicTargets.map(
+                      target =>
+                        sql<boolean>`payload->>'language' = ${target.language} AND (payload->>'baseCode')::integer = ${target.baseCode}`
+                    ),
+                    sql` OR `
+                  )})`
+                )
+              )
+            ).filter(row =>
+              unresolvedClassicTargets.some(target => target.code === classicStrong(row))
+            )
+          : []
+        const fallbackTargetIdentities = fallbackTargetEntries.length
+          ? await records(core.id, 'StepEntryIdentities', query =>
+              query.where(
+                'entry_id',
+                'in',
+                fallbackTargetEntries.map(row => number(row, 'id'))
+              )
+            )
+          : []
+        const targetEntries = [...directTargetEntries, ...fallbackTargetEntries].filter(
+          (row, index, rows) =>
+            rows.findIndex(candidate => number(candidate, 'id') === number(row, 'id')) === index
+        )
         const relationTranslations = targetEntries.length
           ? await records(core.id, 'LexiconTranslations', query =>
               query
@@ -864,36 +919,62 @@ export const makeKyselyStrongLexiconRepository = (
               }
             : {}),
           ...(morphology ? { morphology } : {}),
-          relations: relationRowsForDisplay.map(relation => {
-            const target = targetEntries.find(
+          relations: relationRowsForDisplay.flatMap(relation => {
+            const directTarget = directTargetEntries.find(
               row => number(row, 'id') === number(relation, 'toStepEntryId')
             )
-            const targetTranslation = target
-              ? relationTranslations.find(
-                  translated => number(translated, 'stepEntryId') === number(target, 'id')
-                )
-              : undefined
+            const classicTarget = parseClassicStrong(text(relation, 'toStepCode'))
+            const targets = directTarget
+              ? [directTarget]
+              : classicTarget
+                ? fallbackTargetEntries
+                    .filter(target => classicStrong(target) === classicTarget.code)
+                    .sort((left, right) => {
+                      const leftCode = text(
+                        fallbackTargetIdentities.find(
+                          identity => number(identity, 'stepEntryId') === number(left, 'id')
+                        ) ?? {},
+                        'stepCode'
+                      )
+                      const rightCode = text(
+                        fallbackTargetIdentities.find(
+                          identity => number(identity, 'stepEntryId') === number(right, 'id')
+                        ) ?? {},
+                        'stepCode'
+                      )
+                      return leftCode.localeCompare(rightCode)
+                    })
+                : []
             const kind = relationKinds.find(
               row => number(row, 'id') === number(relation, 'relationKindId')
             )
-            return {
-              group: text(relation, 'groupKind') as 'subentry' | 'identity' | 'family',
-              relationKind: text(kind ?? {}, 'kind'),
-              label:
-                input.language === 'fr'
-                  ? text(kind ?? {}, 'labelFr') || text(kind ?? {}, 'labelEn')
-                  : text(kind ?? {}, 'labelEn'),
-              stepCode: text(relation, 'toStepCode'),
-              gloss: localized(
-                input.language,
-                text(targetTranslation ?? {}, 'gloss'),
-                text(target ?? {}, 'gloss')
-              ),
-              original: text(target ?? {}, 'original'),
-              transliteration:
-                text(target ?? {}, 'classicTransliteration') ||
-                text(target ?? {}, 'transliteration'),
-            }
+            return targets.map(target => {
+              const targetTranslation = relationTranslations.find(
+                translated => number(translated, 'stepEntryId') === number(target, 'id')
+              )
+              const fallbackIdentity = fallbackTargetIdentities.find(
+                identity => number(identity, 'stepEntryId') === number(target, 'id')
+              )
+              return {
+                group: text(relation, 'groupKind') as 'subentry' | 'identity' | 'family',
+                relationKind: text(kind ?? {}, 'kind'),
+                label:
+                  input.language === 'fr'
+                    ? text(kind ?? {}, 'labelFr') || text(kind ?? {}, 'labelEn')
+                    : text(kind ?? {}, 'labelEn'),
+                stepCode: directTarget
+                  ? text(relation, 'toStepCode')
+                  : text(fallbackIdentity ?? {}, 'stepCode'),
+                gloss: localized(
+                  input.language,
+                  text(targetTranslation ?? {}, 'gloss'),
+                  text(target, 'gloss')
+                ),
+                original: text(target, 'original'),
+                transliteration:
+                  text(target, 'classicTransliteration') || text(target, 'transliteration'),
+              }
+            })
           }),
           resources,
           lsjAbsent,

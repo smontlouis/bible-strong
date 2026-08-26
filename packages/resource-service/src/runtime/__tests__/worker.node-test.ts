@@ -329,8 +329,13 @@ describe('Resource Worker binding', () => {
       new Request('https://api.bible-strong.app/v1/strong-lexicon/entries/H2332?language=fr'),
       catalog
     )
+    const module = await resourceApiCacheRevisionFrom(
+      new Request('https://api.bible-strong.app/v1/strong-lexicon/modules/core'),
+      catalog
+    )
 
     assert.notEqual(batch, entry)
+    assert.notEqual(entry, module)
   })
 
   it('does not cache unsuccessful origin responses', async () => {

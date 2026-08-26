@@ -188,6 +188,96 @@ describe('strongLexiconAccess', () => {
     expect(String(relationQuery)).not.toContain('LIMIT 72')
   })
 
+  it('expands an unresolved classical relation into every matching STEP entry', async () => {
+    const database = createDatabase()
+    database.getAllAsync.mockImplementation(async (sql: string) => {
+      if (!sql.includes('FROM LexiconRelations')) return []
+      return [
+        {
+          targetId: 22018,
+          groupKind: 'family',
+          relationKind: 'derived_from',
+          labelEn: 'Derived from',
+          labelFr: 'dérivé de',
+          stepCode: 'H8138A',
+          gloss: 'to change',
+          localizedGloss: 'changer',
+          original: 'שָׁנָה',
+          transliteration: 'sha.nah',
+          classicTransliteration: 'shânâh',
+        },
+        {
+          targetId: 22019,
+          groupKind: 'family',
+          relationKind: 'derived_from',
+          labelEn: 'Derived from',
+          labelFr: 'dérivé de',
+          stepCode: 'H8138B',
+          gloss: 'to repeat',
+          localizedGloss: 'répéter',
+          original: 'שָׁנָה',
+          transliteration: 'sha.nah',
+          classicTransliteration: 'shânâh',
+        },
+      ]
+    })
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    const entry = await localStrongLexiconAccess.loadEntry({ kind: 'strong', code: 'H3068' }, 'fr')
+
+    expect(entry?.relations).toEqual([
+      expect.objectContaining({
+        label: 'dérivé de',
+        stepCode: 'H8138A',
+        gloss: 'changer',
+        original: 'שָׁנָה',
+      }),
+      expect.objectContaining({
+        label: 'dérivé de',
+        stepCode: 'H8138B',
+        gloss: 'répéter',
+        original: 'שָׁנָה',
+      }),
+    ])
+    const relationQuery = database.getAllAsync.mock.calls.find(([sql]) =>
+      String(sql).includes('FROM LexiconRelations')
+    )?.[0]
+    expect(String(relationQuery)).toContain('fallbackTarget.baseCode')
+    expect(String(relationQuery)).toContain('fallbackIdentity.stepCode')
+  })
+
+  it('omits an unresolved relation when no matching STEP entry exists', async () => {
+    const database = createDatabase()
+    database.getAllAsync.mockImplementation(async (sql: string) =>
+      sql.includes('FROM LexiconRelations')
+        ? [
+            {
+              targetId: null,
+              groupKind: 'family',
+              relationKind: 'derived_from',
+              labelEn: 'Derived from',
+              labelFr: 'dérivé de',
+              stepCode: 'H9999',
+              gloss: null,
+              localizedGloss: null,
+              original: null,
+              transliteration: null,
+              classicTransliteration: null,
+            },
+          ]
+        : []
+    )
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    const entry = await localStrongLexiconAccess.loadEntry({ kind: 'strong', code: 'H3068' }, 'fr')
+
+    expect(entry?.relations).toEqual([])
+  })
+
   it('resolves a legacy classical study reference against the unified lexicon', async () => {
     const entry = await localStrongLexiconAccess.loadEntry({ kind: 'strong', code: 'H3068' }, 'fr')
 

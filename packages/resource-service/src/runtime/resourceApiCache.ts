@@ -2,6 +2,7 @@ import mobileResourceCatalog from '@bible-strong/resource-catalog/catalog'
 import { resourceEtagMatches } from '../http/conditionalRequest'
 import { resourceRequestIdFrom } from '../http/requestId'
 import { BIBLE_SEARCH_CACHE_REVISION } from '../search/bibleSearchRevision'
+import { STRONG_LEXICON_ENTRY_RESPONSE_REVISION } from '../domain/strongLexicon'
 import { isDynamicResourceRequest } from './resourceRoutePolicy'
 
 export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<string> => {
@@ -84,8 +85,11 @@ export const resourceApiCacheRevisionFrom = async (
       ? await resourceApiCacheEpochFrom([catalogRevision, searchRevision])
       : catalogRevision
 
-  return pathname === '/v1/strong-lexicon/entries/batch'
-    ? resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_BATCH_RESPONSE_REVISION])
+  if (pathname === '/v1/strong-lexicon/entries/batch') {
+    return resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_BATCH_RESPONSE_REVISION])
+  }
+  return /^\/v1\/strong-lexicon\/entries\/[^/]+$/u.test(pathname)
+    ? resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_ENTRY_RESPONSE_REVISION])
     : requestRevision
 }
 

@@ -32,6 +32,8 @@ export type StrongLexiconLanguage = 'fr' | 'en'
 export type StrongLexicalLanguage = 'greek' | 'hebrew'
 export type StrongLexiconModuleId = 'core' | 'resources' | 'entities'
 
+export const STRONG_LEXICON_ENTRY_RESPONSE_REVISION = 'strong-lexicon-classic-relation-expansion-v1'
+
 export type ActiveStrongLexiconValue<T> = { revision: string; value: T }
 export type StrongLexiconModuleState = {
   moduleId: StrongLexiconModuleId

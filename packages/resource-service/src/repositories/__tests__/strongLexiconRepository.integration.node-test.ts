@@ -90,6 +90,39 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
           transliteration: 'chavvah',
           gloss: 'Eve',
         },
+        {
+          id: 6,
+          language: 'hebrew',
+          code: 'H8138A',
+          identityCode: 'H8138A',
+          uStrong: 'H8138A',
+          baseCode: 8138,
+          original: 'שָׁנָה',
+          transliteration: 'shanah',
+          gloss: 'changer',
+        },
+        {
+          id: 7,
+          language: 'hebrew',
+          code: 'H8138B',
+          identityCode: 'H8138B',
+          uStrong: 'H8138B',
+          baseCode: 8138,
+          original: 'שָׁנָה',
+          transliteration: 'shanah',
+          gloss: 'répéter',
+        },
+        {
+          id: 8,
+          language: 'hebrew',
+          code: 'H8141',
+          identityCode: 'H8141',
+          uStrong: 'H8141',
+          baseCode: 8141,
+          original: 'שָׁנָה',
+          transliteration: 'shanah',
+          gloss: 'année',
+        },
       ] as const
 
       await database
@@ -128,6 +161,41 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
             step_code: entry.identityCode,
           }))
         )
+        .execute()
+      await database
+        .insertInto('strong_lexicon_relation_kinds')
+        .values({
+          publication_id: publication.id,
+          relation_kind_id: 1,
+          kind: 'derived_from',
+          label_en: 'Derived from',
+          label_fr: 'dérivé de',
+          payload: {
+            id: 1,
+            kind: 'derived_from',
+            labelEn: 'Derived from',
+            labelFr: 'dérivé de',
+          },
+        })
+        .execute()
+      await database
+        .insertInto('strong_lexicon_relations')
+        .values({
+          publication_id: publication.id,
+          relation_id: 1,
+          from_entry_id: 8,
+          to_entry_id: null,
+          relation_kind_id: 1,
+          payload: {
+            id: 1,
+            fromStepEntryId: 8,
+            toStepEntryId: null,
+            toStepCode: 'H8138',
+            groupKind: 'family',
+            relationKindId: 1,
+            sortOrder: 50,
+          },
+        })
         .execute()
 
       let statementCount = 0
@@ -191,6 +259,21 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
       assert.deepEqual(
         normalizedTransliteration.value.entries.map(entry => entry.stepCode),
         ['G0026']
+      )
+
+      const derivedYear = await Effect.runPromise(
+        repository.findEntry({ reference: 'H8141', language: 'fr' })
+      )
+      assert.deepEqual(
+        derivedYear.value.relations.map(relation => ({
+          label: relation.label,
+          stepCode: relation.stepCode,
+          gloss: relation.gloss,
+        })),
+        [
+          { label: 'dérivé de', stepCode: 'H8138A', gloss: 'changer' },
+          { label: 'dérivé de', stepCode: 'H8138B', gloss: 'répéter' },
+        ]
       )
     } finally {
       await isolated.dispose()

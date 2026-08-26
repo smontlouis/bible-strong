@@ -331,6 +331,7 @@ const loadRelations = async (
   language: ResourceLanguage
 ): Promise<StrongLexiconRelation[]> => {
   const rows = await database.getAllAsync<{
+    targetId: number | null
     groupKind: 'subentry' | 'identity' | 'family'
     relationKind: string
     labelEn: string
@@ -342,21 +343,39 @@ const loadRelations = async (
     transliteration: string
     classicTransliteration: string
   }>(
-    `SELECT r.groupKind, k.kind AS relationKind, k.labelEn, k.labelFr,
-            r.toStepCode AS stepCode,
-            target.gloss, tr.gloss AS localizedGloss,
-            target.original, target.transliteration, target.classicTransliteration
+    `SELECT COALESCE(target.id, fallbackTarget.id) AS targetId,
+            r.groupKind, k.kind AS relationKind, k.labelEn, k.labelFr,
+            COALESCE(fallbackIdentity.stepCode, r.toStepCode) AS stepCode,
+            COALESCE(target.gloss, fallbackTarget.gloss) AS gloss,
+            COALESCE(tr.gloss, fallbackTr.gloss) AS localizedGloss,
+            COALESCE(target.original, fallbackTarget.original) AS original,
+            COALESCE(target.transliteration, fallbackTarget.transliteration) AS transliteration,
+            COALESCE(target.classicTransliteration, fallbackTarget.classicTransliteration)
+              AS classicTransliteration
        FROM LexiconRelations r
        JOIN RelationKinds k ON k.id=r.relationKindId
        LEFT JOIN StepEntries target ON target.id=r.toStepEntryId
        LEFT JOIN LexiconTranslations tr
          ON tr.stepEntryId=target.id AND tr.language=?
+       LEFT JOIN StepEntries fallbackTarget
+         ON r.toStepEntryId IS NULL
+        AND r.toStepCode GLOB '[GH][0-9][0-9][0-9][0-9]'
+        AND fallbackTarget.language=CASE substr(r.toStepCode, 1, 1)
+              WHEN 'G' THEN 'greek'
+              ELSE 'hebrew'
+            END
+        AND fallbackTarget.baseCode=CAST(substr(r.toStepCode, 2) AS INTEGER)
+       LEFT JOIN StepEntryIdentities fallbackIdentity
+         ON fallbackIdentity.stepEntryId=fallbackTarget.id
+       LEFT JOIN LexiconTranslations fallbackTr
+         ON fallbackTr.stepEntryId=fallbackTarget.id AND fallbackTr.language=?
       WHERE r.fromStepEntryId=?
-      ORDER BY r.groupKind, r.sortOrder`,
-    [language, entryId]
+      ORDER BY r.groupKind, r.sortOrder, fallbackIdentity.stepCode`,
+    [language, language, entryId]
   )
   const counts = new Map<string, number>()
   return rows.flatMap(row => {
+    if (!row.targetId) return []
     const count = counts.get(row.groupKind) ?? 0
     if (count >= 24) return []
     counts.set(row.groupKind, count + 1)
