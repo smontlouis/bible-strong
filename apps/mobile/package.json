@@ -1,6 +1,6 @@
 {
   "name": "@bible-strong/mobile",
-  "version": "27.0.7",
+  "version": "27.0.8",
   "main": "expo-router/entry",
   "scripts": {
     "eas-build-pre-install": "corepack enable",
