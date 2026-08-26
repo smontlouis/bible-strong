@@ -1,31 +1,83 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$script_dir"
 
 # Check for correct usage
-if [[ "$1" != "patch" && "$1" != "minor" && "$1" != "major" ]]; then
+release_type="${1:-}"
+if [[ "$release_type" != "patch" && "$release_type" != "minor" && "$release_type" != "major" ]]; then
   echo "Usage: $0 [patch|minor|major]"
   exit 1
 fi
 
-# Increment version in package.json using npm and capture the new version
-newVersion=$(npm version $1 --no-git-tag-version --tag-version-prefix='' | sed 's/^.*\([0-9]\+\.[0-9]\+\.[0-9]\+\)$/\1/')
-
-# Update app.config.ts and package.json
-node -e "
+# Update package.json and app.config.ts without invoking npm, which cannot
+# resolve the Yarn workspace:* protocol used by this monorepo.
+new_version=$(node - "$release_type" <<'NODE'
 const fs = require('fs');
+const releaseType = process.argv[2];
 
-// Update package.json
-let packageJson = require('./package.json');
-packageJson.version = '${newVersion}';
-fs.writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
+const packagePath = 'package.json';
+const configPath = 'app.config.ts';
+const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+const versionMatch = /^(\d+)\.(\d+)\.(\d+)$/.exec(packageJson.version);
 
-// Update app.config.ts
-let config = fs.readFileSync('app.config.ts', 'utf8');
-config = config.replace(/version: '.*?'/, \`version: '${newVersion}'\`);
-config = config.replace(/buildNumber: '(\d+)'/, (match, number) => \`buildNumber: '\${parseInt(number) + 1}'\`);
-config = config.replace(/versionCode: (\d+)/, (match, number) => \`versionCode: \${parseInt(number) + 1}\`);
-fs.writeFileSync('app.config.ts', config);
-"
+if (!versionMatch) {
+  throw new Error(`Unsupported package version: ${packageJson.version}`);
+}
+
+let [, major, minor, patch] = versionMatch.map(Number);
+if (releaseType === 'major') {
+  major += 1;
+  minor = 0;
+  patch = 0;
+} else if (releaseType === 'minor') {
+  minor += 1;
+  patch = 0;
+} else {
+  patch += 1;
+}
+
+const newVersion = `${major}.${minor}.${patch}`;
+packageJson.version = newVersion;
+
+let config = fs.readFileSync(configPath, 'utf8');
+
+const replaceRequired = (source, pattern, replacement, label) => {
+  if (!pattern.test(source)) {
+    throw new Error(`Could not find ${label} in ${configPath}`);
+  }
+  return source.replace(pattern, replacement);
+};
+
+config = replaceRequired(
+  config,
+  /version: '\d+\.\d+\.\d+'/,
+  `version: '${newVersion}'`,
+  'version'
+);
+config = replaceRequired(
+  config,
+  /buildNumber: '(\d+)'/,
+  (_match, number) => `buildNumber: '${Number(number) + 1}'`,
+  'buildNumber'
+);
+config = replaceRequired(
+  config,
+  /versionCode: (\d+)/,
+  (_match, number) => `versionCode: ${Number(number) + 1}`,
+  'versionCode'
+);
+
+fs.writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 2)}\n`);
+fs.writeFileSync(configPath, config);
+process.stdout.write(newVersion);
+NODE
+)
+
+echo "Version bumped to $new_version"
 
 # Commit the changes
-git add package.json app.config.ts
+git add -- package.json app.config.ts
 git commit -m "chore: increment version"
