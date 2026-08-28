@@ -118,6 +118,7 @@ const REQUIRED_TABLES: Record<StrongLexiconModuleId, string[]> = {
     'StepEntries',
     'StepEntryIdentities',
     'LexiconTranslations',
+    'LexiconNameMeanings',
     'RelationKinds',
     'LexiconRelations',
     'MorphologyCodes',
@@ -251,10 +252,7 @@ export const validateStrongLexiconModuleDatabase = async (
     getStrongLexiconModuleAvailability('core')
 ): Promise<StrongLexiconModuleAvailability> => {
   const publication = getExpectedStrongLexiconPublication(moduleId)
-  const requiredTables =
-    moduleId === 'core' && publication.schemaVersion >= 3
-      ? [...REQUIRED_TABLES.core, 'LexiconNameMeanings']
-      : REQUIRED_TABLES[moduleId]
+  const requiredTables = REQUIRED_TABLES[moduleId]
   const integrity = await database.getFirstAsync<{ integrity_check: string }>(
     'PRAGMA integrity_check'
   )
@@ -265,18 +263,10 @@ export const validateStrongLexiconModuleDatabase = async (
   const tables = await database.getAllAsync<{ name: string }>(
     `SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%'`
   )
-  const applicationTables = tables.filter(table => !table.name.startsWith('sqlite_'))
-  const tableNames = new Set(applicationTables.map(table => table.name))
+  const tableNames = new Set(tables.map(table => table.name))
   const missingTable = requiredTables.find(table => !tableNames.has(table))
   if (missingTable) {
     throw new Error(`STRONG_LEXICON_SCHEMA_MISMATCH:${moduleId}:${missingTable}`)
-  }
-  const allowedTables = new Set([
-    ...requiredTables,
-    ...(moduleId === 'entities' ? ['EntityNames', 'EntityTranslationProvenance'] : []),
-  ])
-  if (applicationTables.some(table => !allowedTables.has(table.name))) {
-    throw new Error(`STRONG_LEXICON_SCHEMA_MISMATCH:${moduleId}:unexpected-table`)
   }
   const metadataTable = moduleId === 'entities' ? 'EntityMeta' : 'DictionaryMeta'
   const metadataColumns = await database.getAllAsync<{
@@ -285,16 +275,17 @@ export const validateStrongLexiconModuleDatabase = async (
     notnull: number
     pk: number
   }>(`PRAGMA table_info("${metadataTable}")`)
+  const metadataKey = metadataColumns.find(column => column.name === 'key')
+  const metadataValue = metadataColumns.find(column => column.name === 'value')
   if (
-    metadataColumns.length !== 2 ||
-    metadataColumns.map(column => column.name).join('|') !== 'key|value' ||
-    metadataColumns.some(
-      column =>
-        column.type.toUpperCase() !== 'TEXT' ||
-        column.notnull !== 1 ||
-        (column.name === 'key' && column.pk !== 1) ||
-        (column.name === 'value' && column.pk !== 0)
-    )
+    !metadataKey ||
+    !metadataValue ||
+    metadataKey.type.toUpperCase() !== 'TEXT' ||
+    metadataValue.type.toUpperCase() !== 'TEXT' ||
+    metadataKey.notnull !== 1 ||
+    metadataValue.notnull !== 1 ||
+    metadataKey.pk !== 1 ||
+    metadataValue.pk !== 0
   ) {
     throw new Error(`STRONG_LEXICON_SCHEMA_MISMATCH:${moduleId}:metadata`)
   }
@@ -309,16 +300,12 @@ export const validateStrongLexiconModuleDatabase = async (
       pk: number
     }>(`PRAGMA table_info("${table}")`)
     const expected = REQUIRED_TABLE_COLUMNS[moduleId][table]
-    if (
-      columns.length === 0 ||
-      columns
-        .map(column => column.name)
-        .sort()
-        .join('|') !== [...expected].sort().join('|')
-    ) {
+    const columnsByName = new Map(columns.map(column => [column.name, column]))
+    if (expected.some(columnName => !columnsByName.has(columnName))) {
       throw new Error(`STRONG_LEXICON_SCHEMA_COLUMNS_MISMATCH:${moduleId}:${table}`)
     }
-    for (const column of columns) {
+    for (const columnName of expected) {
+      const column = columnsByName.get(columnName)!
       const integerColumns = new Set([
         'id',
         'baseCode',
@@ -360,7 +347,6 @@ export const validateStrongLexiconModuleDatabase = async (
   if (
     metadata.moduleKind !== moduleId ||
     metadata.resourceIdentity !== `strong-lexicon:${moduleId}` ||
-    schemaVersion !== publication.schemaVersion ||
     revision !== publication.resourceRevision ||
     (moduleId !== 'core' && metadata.coreRevision !== publication.coreRevision)
   ) {
@@ -521,7 +507,6 @@ export const installStrongLexiconModule = async (
     if (
       publication.id !== moduleId ||
       publication.entry !== expectedPublication.entry ||
-      publication.schemaVersion !== expectedPublication.schemaVersion ||
       publication.resourceRevision !== expectedPublication.resourceRevision ||
       publication.coreRevision !== expectedPublication.coreRevision
     ) {

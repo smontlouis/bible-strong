@@ -11,7 +11,6 @@ describe('Strong lexicon modular publications', () => {
       required: true,
       entry: 'strong_lexicon.core.sqlite',
       archiveBytes: 6_543_526,
-      schemaVersion: 2,
     })
     expect(
       getStrongLexiconPublication('core').url.endsWith('databases/strong_lexicon.core.sqlite.zip')

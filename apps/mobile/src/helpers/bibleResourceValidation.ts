@@ -1,6 +1,17 @@
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value)
 
+export const validateCanonicalBibleResourceIdentity = <
+  Value extends { applicationVersionId: string },
+>(
+  versionId: string,
+  value: Value
+): void => {
+  if (value.applicationVersionId !== versionId) {
+    throw new Error('CANONICAL_BIBLE_METADATA_MISMATCH')
+  }
+}
+
 export const validatePericopeResource = (value: unknown): void => {
   const valid =
     isRecord(value) &&

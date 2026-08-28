@@ -1,6 +1,28 @@
-import { validatePericopeResource, validateRedWordsResource } from '../bibleResourceValidation'
+import {
+  validateCanonicalBibleResourceIdentity,
+  validatePericopeResource,
+  validateRedWordsResource,
+} from '../bibleResourceValidation'
 
 describe('Bible child resource validation', () => {
+  it('accepts additive canonical Bible schema metadata', () => {
+    expect(() =>
+      validateCanonicalBibleResourceIdentity('LSG', {
+        applicationVersionId: 'LSG',
+        schemaVersion: 999,
+      })
+    ).not.toThrow()
+  })
+
+  it('still rejects a canonical Bible published under another identity', () => {
+    expect(() =>
+      validateCanonicalBibleResourceIdentity('LSG', {
+        applicationVersionId: 'KJV',
+        schemaVersion: 999,
+      })
+    ).toThrow('CANONICAL_BIBLE_METADATA_MISMATCH')
+  })
+
   it('accepts the nested pericope publication shape', () => {
     expect(() =>
       validatePericopeResource({

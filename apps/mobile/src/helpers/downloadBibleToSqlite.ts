@@ -26,7 +26,11 @@ import {
 } from './annotationMigrationJournal'
 import type { ResourceInstallationLifecycle } from './resourceInstallationLifecycle'
 import { countImportableBibleVerses } from './bibleJsonImport'
-import { validatePericopeResource, validateRedWordsResource } from './bibleResourceValidation'
+import {
+  validateCanonicalBibleResourceIdentity,
+  validatePericopeResource,
+  validateRedWordsResource,
+} from './bibleResourceValidation'
 import { rollbackActivatedResourceFiles, type ActivatedResourceFile } from './atomicResourceFile'
 import { appLogger } from './agentObservability'
 
@@ -350,9 +354,7 @@ const validateCanonicalBiblePublication = (
   if (!isCanonicalBibleJsonData(data)) {
     throw new Error('CANONICAL_BIBLE_INVALID_FORMAT')
   }
-  if (data.applicationVersionId !== versionId || data.schemaVersion !== artifact.schemaVersion) {
-    throw new Error('CANONICAL_BIBLE_METADATA_MISMATCH')
-  }
+  validateCanonicalBibleResourceIdentity(versionId, data)
 }
 
 const buildRealignmentPlan = async (

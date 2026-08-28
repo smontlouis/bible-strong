@@ -59,8 +59,6 @@ export type {
   StrongLexiconSearchResult,
 } from '@bible-strong/resource-domain/strong-lexicon'
 
-const STRONG_LEXICON_MODULE_SCHEMA_VERSION = 3
-
 const SQLITE_SEARCH_DIACRITIC_REPLACEMENTS = [
   ['ā', 'a'],
   ['ă', 'a'],
@@ -1223,7 +1221,6 @@ export const createHttpStrongLexiconAccess = ({
             status: 'available',
             moduleId,
             revision: state.revision,
-            schemaVersion: STRONG_LEXICON_MODULE_SCHEMA_VERSION,
           }
         : state.status === 'incompatible'
           ? { status: 'incompatible', moduleId, installedRevision: state.revision }
@@ -1244,7 +1241,6 @@ export const createHttpStrongLexiconAccess = ({
           status: 'available',
           moduleId,
           revision: state.revision,
-          schemaVersion: STRONG_LEXICON_MODULE_SCHEMA_VERSION,
         }
       }
       if (state.status === 'incompatible') {

@@ -12,7 +12,7 @@ export type StrongLexiconModuleAvailability =
       status: 'available'
       moduleId: StrongLexiconModuleId
       revision?: string
-      schemaVersion: number
+      schemaVersion?: number
     }
 
 export type StrongLexiconMorphology = { code: string; meaning: string; description?: string }
