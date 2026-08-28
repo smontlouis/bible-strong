@@ -28,8 +28,10 @@ import { ContainerText, resolveHighlightInfo } from './ContainerText'
 import { convertHex } from './convertHex'
 import { HIGHLIGHT_BACKGROUND_OPACITY, getContrastTextColor } from '~helpers/highlightUtils'
 import { isDarkTheme } from './utils'
-const StructuredInterlinearVerse = React.lazy(() => import('./StructuredInterlinearVerse'))
-const ReverseInterlinearVerse = React.lazy(() => import('./ReverseInterlinearVerse'))
+// Keep optional verse renderers in the main DOM bundle: EAS Update stores DOM assets under
+// hashed flat paths, so React.lazy chunks cannot be resolved by the production WebView.
+import StructuredInterlinearVerse from './StructuredInterlinearVerse'
+import ReverseInterlinearVerse from './ReverseInterlinearVerse'
 import VerseTags from './VerseTags'
 import { BibleError } from '~helpers/bibleErrors'
 import { useTranslations } from './TranslationsContext'
@@ -843,28 +845,24 @@ const Verse = ({
             data-verse-key={verseKey}
           >
             {verse.ReverseInterlinearSpans?.length ? (
-              <React.Suspense fallback={<>{verse.Texte}</>}>
-                <ReverseInterlinearVerse
-                  isParallel={Boolean(isParallel)}
-                  settings={settings}
-                  verse={verse}
-                  version={version}
-                  selectedCode={selectedCode}
-                />
-              </React.Suspense>
+              <ReverseInterlinearVerse
+                isParallel={Boolean(isParallel)}
+                settings={settings}
+                verse={verse}
+                version={version}
+                selectedCode={selectedCode}
+              />
             ) : version === 'BHG' &&
               isInterlinearModeEnabled(interlinearMode) &&
               verse.InterlinearTokens?.length ? (
-              <React.Suspense fallback={<>{verse.Texte}</>}>
-                <StructuredInterlinearVerse
-                  isHebreu={isHebreu}
-                  settings={settings}
-                  verse={verse}
-                  version={version}
-                  selectedCode={selectedCode}
-                  mode={interlinearMode}
-                />
-              </React.Suspense>
+              <StructuredInterlinearVerse
+                isHebreu={isHebreu}
+                settings={settings}
+                verse={verse}
+                version={version}
+                selectedCode={selectedCode}
+                mode={interlinearMode}
+              />
             ) : (
               text
             )}
