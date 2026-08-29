@@ -1,0 +1,633 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "acbc",
+  "generatedAt": "2026-08-27T19:38:44.938Z",
+  "issueCounts": [
+    {
+      "issue": "mixed-language",
+      "count": 38
+    },
+    {
+      "issue": "probably-english",
+      "count": 13
+    }
+  ],
+  "entries": [
+    {
+      "id": "16757",
+      "passage": "2-16-31",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 127,
+      "translationCharacters": 131,
+      "sourceSha256": "7891e43c182fb643d818477adf0f259ecb1d7ef48f6b201f605279b0b1c6c081",
+      "translationSha256": "45f25b0ab14490a91158cb5a8c3fba0221ad376849575d2fadf459e02b61b5e9"
+    },
+    {
+      "id": "45098",
+      "passage": "9-9-23",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 487,
+      "translationCharacters": 453,
+      "sourceSha256": "786c4086e5eee524054cf9ea371c4e838c60f898469b6ef2f985d18e6212b322",
+      "translationSha256": "1d17584205e905f267364856ac409b714fcca84837899e00b668ab2a6e70dc8e"
+    },
+    {
+      "id": "60707",
+      "passage": "14-23-11",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 150,
+      "translationCharacters": 145,
+      "sourceSha256": "cf23958ed77f666012e577e6efa3a8ca6232ae8aeb9ade01825be5d2ceacbc9d",
+      "translationSha256": "003cad5d4a03b0e2472846df689893deed5c524be8e36142e8aa4c1d3b11ad92"
+    },
+    {
+      "id": "64631",
+      "passage": "17-6-9",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 249,
+      "translationCharacters": 242,
+      "sourceSha256": "a5991775ac64d1c7332eb4334988b3a6e8442c7fd98504261c8258ee4c97cf90",
+      "translationSha256": "0e0e1e3c33e1f4e472b32c804fc1ec9a0f064112f2ec69dc7ed52ac18e576fa2"
+    },
+    {
+      "id": "65909",
+      "passage": "18-10-9",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 271,
+      "translationCharacters": 298,
+      "sourceSha256": "95c4a882d3a31881d6fca527668743a4c41a8e47ed03c780a458b485d0dce470",
+      "translationSha256": "9abdfb1d2397d5a3f4bfcb905253f3a3426e0847873bf7de25ef22c708f427b1"
+    },
+    {
+      "id": "68412",
+      "passage": "18-33-32",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 214,
+      "translationCharacters": 194,
+      "sourceSha256": "d83a778e0284c91110faaae7b39ab3a099c09ea4fae8c7403e68479edb4dc9da",
+      "translationSha256": "44fd2f0bb801ed468ddde8e65500348cbac271329cbc7b5072502d20c042503d"
+    },
+    {
+      "id": "70134",
+      "passage": "19-12-2",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 1099,
+      "translationCharacters": 1136,
+      "sourceSha256": "21470ab86e435e962211068b285a135705e3b8316d73639a9dcdec3a65868230",
+      "translationSha256": "3b18115e6a3303c2eb4839599c61b6a60acd9950eb4178e8ae9f0c707732d13d"
+    },
+    {
+      "id": "70312",
+      "passage": "19-16-10",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 1470,
+      "translationCharacters": 1462,
+      "sourceSha256": "2536e594818aee4c4f61bf1f26549afc43074b910df139888fc5a8a504f42618",
+      "translationSha256": "7a7fbce2c340c7a9ebc910864253e00c955605e73d2370df0777b96f120b2ea4"
+    },
+    {
+      "id": "70351",
+      "passage": "19-17-4",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 784,
+      "translationCharacters": 866,
+      "sourceSha256": "eddd0e564bac2381e318d30fbf57bbca58227511df8738b892eb7bd3a5862ab1",
+      "translationSha256": "e61fcf5e041d8b44aef5a5d22b7ef5f9b8b95c31c9f64bb724b3fac785a8dbe7"
+    },
+    {
+      "id": "70564",
+      "passage": "19-18-27",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 116,
+      "translationCharacters": 112,
+      "sourceSha256": "74c42d164d736b94636dc2bdc49019154c8e5c5b6ef21f216a05628e55fc888a",
+      "translationSha256": "3f8a115fa95cf9c7b40171a5ec82298919811e5e2f9a1590fe4759102ea246df"
+    },
+    {
+      "id": "70627",
+      "passage": "19-18-40",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 192,
+      "translationCharacters": 176,
+      "sourceSha256": "372b818ed634b403c4850a97ebbfde18952547595e77c85bbf3893c306a55afa",
+      "translationSha256": "4267f22c957649f8e87fbd44ca3a24dc94122e47e10710b8329ab2094c7485e3"
+    },
+    {
+      "id": "71676",
+      "passage": "19-30-2",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 138,
+      "translationCharacters": 115,
+      "sourceSha256": "2d776a5eed92a37604cb6ea39eb8d1f2ce16b1c9f6b60b4404986db4069378f2",
+      "translationSha256": "d2a2bcb60b13be284e4afac03ae8416c8cdf24ae4010a52d81d993581524d6dd"
+    },
+    {
+      "id": "71704",
+      "passage": "19-30-7",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 186,
+      "translationCharacters": 185,
+      "sourceSha256": "f9fe96ecad69e5033cf72b628f0bff4eaa7e3b1c75c1471f36c9381e59324d49",
+      "translationSha256": "127a7081afc209016a6d382842671c0bb23363cb9239e54253e27e04f1f6b5eb"
+    },
+    {
+      "id": "72186",
+      "passage": "19-34-10",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 755,
+      "translationCharacters": 663,
+      "sourceSha256": "efbc78b30c3af4add7173e7f7dd090a8e94f72a87cd152606f4990218a29908e",
+      "translationSha256": "932a541a5459a02f0833a57549d7ab1de3cf8845d1bcbe6fa8321a7092c654f7"
+    },
+    {
+      "id": "73965",
+      "passage": "19-50-18",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 169,
+      "translationCharacters": 199,
+      "sourceSha256": "a6ad9da5223c057bb7c587edfa0cbe4255012b90337016cb19702efeed8d5ab4",
+      "translationSha256": "461d1f9eefd7668d4dfd1d712c70fea14af2af9878f72be47124fa151c382693"
+    },
+    {
+      "id": "75251",
+      "passage": "19-68-26",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 53,
+      "translationCharacters": 57,
+      "sourceSha256": "ce0dcf45279871bc7fcb6e63ca3bab2729eea1617a3dc18a87c145d95568eff5",
+      "translationSha256": "d668b7ad472477b0b1fa6017f4d317c3ac2c150d611f029152203adcdc3ae1a4"
+    },
+    {
+      "id": "75259",
+      "passage": "19-68-28",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 88,
+      "translationCharacters": 92,
+      "sourceSha256": "8f52549e3be55e1ef149dc08056d86306c31e0e6d2f3fd9cc14f6ce1eb86d2a4",
+      "translationSha256": "29fea13c79c86658b47792e59c494f452c17fc142c84c63e6cc7b3b475544290"
+    },
+    {
+      "id": "75471",
+      "passage": "19-71-3",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 596,
+      "translationCharacters": 551,
+      "sourceSha256": "9eff882c7df63afbefa02a2d1a5f112aa3007cbd6f436b0607cf67865c0adb8b",
+      "translationSha256": "5065a761445db478133c900dc20bec438f3e16e2a47e607a45f50c2b7c4c051b"
+    },
+    {
+      "id": "75479",
+      "passage": "19-71-5",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 223,
+      "translationCharacters": 195,
+      "sourceSha256": "5dcfcf7b76366093c8285711710112afa8f4be91970b152fac202ed2705eec03",
+      "translationSha256": "c3e64e6d215e5536ac91e18da62d632baefe3786c7507ad93d2e89fdb411fb78"
+    },
+    {
+      "id": "75871",
+      "passage": "19-74-15",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 280,
+      "translationCharacters": 249,
+      "sourceSha256": "e94420af53c0244eddb81dfac2cafc5fc27c3d70bb5e23247541bdf4a7a01b0a",
+      "translationSha256": "d9f6c5d6034e4e98dc59ebc960d57cbf85706fc63da48f8fa5ed89afcf6a2dfc"
+    },
+    {
+      "id": "75879",
+      "passage": "19-74-17",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 286,
+      "translationCharacters": 288,
+      "sourceSha256": "f329f6d7309d4ee19ef1138381bbad99b98ce6e35f51e23de7c45ae9fee860aa",
+      "translationSha256": "057507a5512096c5f5afeec79fb985edc9f090d8a61c19a16154e18a5b0fa772"
+    },
+    {
+      "id": "76892",
+      "passage": "19-85-1",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 242,
+      "translationCharacters": 219,
+      "sourceSha256": "027a74f25466ff57f2d809db7e714de3d60aa0670fbabf3da42f52a546937e06",
+      "translationSha256": "ea05eede51b17d198ee5fc152290825fedfbd2d8a078c62fda03d52b666781d4"
+    },
+    {
+      "id": "76900",
+      "passage": "19-85-3",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 313,
+      "translationCharacters": 272,
+      "sourceSha256": "1c482db84d7486026dd32fb6dd8584ba54f8d38137f5ae3e1e6084e626035292",
+      "translationSha256": "dbc02400f788a2a4e0bda091cf18b1ef9010d0fa6a8683ca32642893ab1af585"
+    },
+    {
+      "id": "77141",
+      "passage": "19-88-14",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 177,
+      "translationCharacters": 180,
+      "sourceSha256": "32c256b3bd79c1efc723567f01433092999425f8cce237ae33cf134b6af7f898",
+      "translationSha256": "3d5d32ad4b1076719bf489c5a4a6d8f9e22bd4322e19d536abcd71e1fb2321ab"
+    },
+    {
+      "id": "77209",
+      "passage": "19-89-11",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 1652,
+      "translationCharacters": 1350,
+      "sourceSha256": "6098371d62be6c22b0a82d27cf24d7fb91c7360e9a33ff6c69c05c526a20845b",
+      "translationSha256": "417e4b3d387946c3a68da6c9b434ef7dd6b4900556a898bf425f772d72bd46bc"
+    },
+    {
+      "id": "77376",
+      "passage": "19-89-44",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 131,
+      "translationCharacters": 110,
+      "sourceSha256": "e95ecd65f56011d6cd6ae11a77574c28a43b897b550772c05e1937fcbd04c3a2",
+      "translationSha256": "38e51bcf3fa6481e8b9311b81b2875de2f26f8feef2f9ffa21fe687aa42413c9"
+    },
+    {
+      "id": "78275",
+      "passage": "19-102-10",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 277,
+      "translationCharacters": 270,
+      "sourceSha256": "e5802db8977de3399ac91142b828b15c1f2811af56dd3476f8acffed835050e1",
+      "translationSha256": "6d2f7eab25cf06f24568feec07482156e52d4e207653b43e369ed65d510d8bac"
+    },
+    {
+      "id": "79951",
+      "passage": "19-116-8",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 622,
+      "translationCharacters": 623,
+      "sourceSha256": "8221c7b19bcf15da9a7f9e19029b8e46c5d48630f6d3d4327afcd1bb16c9bd9d",
+      "translationSha256": "75d977703ae16ebc561af9d381b67de7b90239642c061c37b7a9ed18b53af451"
+    },
+    {
+      "id": "80132",
+      "passage": "19-118-29",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 270,
+      "translationCharacters": 317,
+      "sourceSha256": "a994ce1f30a0a61cebbce81b7c667d7b5c2a6a7b0adfc2e75442951a0b5b4fec",
+      "translationSha256": "d3aad12f948fbc3ae0a66516ef00a4a44347d53ebb2ac533971d0d4419978b51"
+    },
+    {
+      "id": "80422",
+      "passage": "19-119-38",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 76,
+      "translationCharacters": 79,
+      "sourceSha256": "3a62519b7a8ab491192644532e4631c453d78d0388a693ab6502510cd0420195",
+      "translationSha256": "592d5a3d7f5ff70cd543ab8ab4f623d67ad652c0ee10e6dbf5d31a45379ee69b"
+    },
+    {
+      "id": "81523",
+      "passage": "19-127-1",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 268,
+      "translationCharacters": 164,
+      "sourceSha256": "c9297832e679c6f7615ee79342a8909c37c23cc2d38bdfb78692e18d596ae6df",
+      "translationSha256": "d3189fc35df8d24206859b713d96a129965d057324d39c8bea1a5c56992395e6"
+    },
+    {
+      "id": "81701",
+      "passage": "19-127-5",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 493,
+      "translationCharacters": 397,
+      "sourceSha256": "7877e4c16deda754b32c1c3f6478140904519920c67757ff31a477c46326f171",
+      "translationSha256": "8e4922212eeab9f31c7712bc5789a33f98063988d9b3004c84ec4990c5245fc1"
+    },
+    {
+      "id": "84187",
+      "passage": "20-10-31",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 356,
+      "translationCharacters": 416,
+      "sourceSha256": "5e0ccd0fcb2313949da24a0d3796be72798f6a32f7e9eae5586b11277e7af29e",
+      "translationSha256": "280234a466ec36f0a2fb75e1a49319e96c9b8efb8cdacf17215b3f250e806399"
+    },
+    {
+      "id": "87663",
+      "passage": "22-1-15",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 151,
+      "translationCharacters": 151,
+      "sourceSha256": "2b8d78cab50e0bd7b48a7f1fb1aa289c69912c552cd49e1dd498ce5e83f25eff",
+      "translationSha256": "8c43a2ef43425a9cc411b95d33efeb6bfdf784a5a19084e7c4bc0b4a275f924c"
+    },
+    {
+      "id": "87718",
+      "passage": "22-2-7",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 208,
+      "translationCharacters": 231,
+      "sourceSha256": "6a94201472aaf5a93510db72a3d8d74288757f627db95889d263b1a620545e45",
+      "translationSha256": "9cb04ae2ca3e775cc2ab9c20f1a2d00c679bb0524108e19f88e95a4eec50e66a"
+    },
+    {
+      "id": "89464",
+      "passage": "23-9-3",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 1115,
+      "translationCharacters": 868,
+      "sourceSha256": "b61d3e14b502571e4f279ccb5890ef6b01e69e710b669e21d43d2c043e27bfd1",
+      "translationSha256": "b973e7bba7f4a2e01c53178b6c97db3ab4822cc4a127a0c8face713b69608181"
+    },
+    {
+      "id": "89523",
+      "passage": "23-9-8",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 322,
+      "translationCharacters": 272,
+      "sourceSha256": "3a48b871626fda5d17cd8ef6daacd647c8f77c6f5a80de75ed439c5ae07e4993",
+      "translationSha256": "c1eec08dbfc072c4d4747801d74bce9433d62080fd80058a9c15e5644c5a805e"
+    },
+    {
+      "id": "89546",
+      "passage": "23-9-14",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 288,
+      "translationCharacters": 253,
+      "sourceSha256": "c2e2928628eae2f6d460721e2be287132941e1bcd0e3db74d3680c21500759db",
+      "translationSha256": "58009e72d2ac679720efed60d89ba499bdf79eab99be818e0d37519280b6e8cc"
+    },
+    {
+      "id": "89825",
+      "passage": "23-11-13",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 632,
+      "translationCharacters": 525,
+      "sourceSha256": "6e8d5085cabc6153e47607ee0e9c67b9f70ce2644734cc2257ff9d996e226cfa",
+      "translationSha256": "eeb416d3e12fa72eda7ca0daba68a0d897a7287eb280fa6be72421504dc68e1f"
+    },
+    {
+      "id": "91965",
+      "passage": "23-30-20",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 463,
+      "translationCharacters": 388,
+      "sourceSha256": "650376e4a71d371bf60d747fdf99c1c01f586ed96a9c9a6c4e2c21c0656403d7",
+      "translationSha256": "1b13c16d6f420296e0d4a69c43c20552eb7954aeb240bfb8dcd282a867c39b23"
+    },
+    {
+      "id": "92149",
+      "passage": "23-32-12",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 596,
+      "translationCharacters": 552,
+      "sourceSha256": "7308b1d57dfecb52ed658666aaa202ea001f30bc2efddb3422d1a59e1de4a0f5",
+      "translationSha256": "ff38b09f7c67adebf27c5756430a52f33c51f2caf6b6b77c4823a21ec785b601"
+    },
+    {
+      "id": "92476",
+      "passage": "23-34-15",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 1386,
+      "translationCharacters": 1312,
+      "sourceSha256": "8470bc0c6714678f669c91e61304990253a9c535458b355cf16a96928116c1ae",
+      "translationSha256": "d65d27b5e65ce4548fd57134ad6e3c4458c5dae5e7f58f215108a33ba3ff810e"
+    },
+    {
+      "id": "94341",
+      "passage": "23-48-6",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 754,
+      "translationCharacters": 650,
+      "sourceSha256": "0a9e74c9741e4da294cec0901a2138508cde631dc3920eba24c06a275a92e0c5",
+      "translationSha256": "703113dcfc6aa56df19c2fb3d94d13883a4ca74189297198c6a7c284b031ea7c"
+    },
+    {
+      "id": "102370",
+      "passage": "24-39-18",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 343,
+      "translationCharacters": 310,
+      "sourceSha256": "c87516587fc797f5ed4fd21a262b5c877c0e816bd8f1e2bc956d1f479b70aa13",
+      "translationSha256": "d56e217cc353b8442fe7a5cc4490575087d7d912213d960c61ec60da4da2b447"
+    },
+    {
+      "id": "106910",
+      "passage": "26-28-12",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 242,
+      "translationCharacters": 223,
+      "sourceSha256": "2b043ffd27194df52493fbb48200acbf48860b8b5dbe545d5f4261f0c2322c4c",
+      "translationSha256": "02f17f7f105aa58ac0534f876c6f96c69bf8d2c6ee89b87f19e39b23bfe24dbe"
+    },
+    {
+      "id": "107116",
+      "passage": "26-28-18",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 251,
+      "translationCharacters": 263,
+      "sourceSha256": "53fa52e9723bcc769e5708f08c47161e7ab1824a3b867ac3cc17c51482663fa0",
+      "translationSha256": "3be6517b898ff6fb9fc42c3c9b4ecf30b47e5e30831ef9b87cfb66ebab427778"
+    },
+    {
+      "id": "114951",
+      "passage": "31-1-11",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 312,
+      "translationCharacters": 311,
+      "sourceSha256": "3d1b5557469dd178203464aac84e6fbb5e7561282c2226e867dfd3bc61385974",
+      "translationSha256": "1b0dccdd3c47ef158c887367f5c41c7e406996f58d578d759b048593ccfd7220"
+    },
+    {
+      "id": "116255",
+      "passage": "35-2-10",
+      "issues": [
+        "probably-english"
+      ],
+      "probableLanguage": "en",
+      "sourceCharacters": 82,
+      "translationCharacters": 76,
+      "sourceSha256": "8f3e58e8de857007ea0cb13208ab92a078d4abd84ecfb5b36f6e20e67efc9d29",
+      "translationSha256": "c843452c72f0e0acd5ee74307f4afc2424ea594d03d82dfce4572b9afc06d997"
+    },
+    {
+      "id": "129898",
+      "passage": "40-15-17",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 997,
+      "translationCharacters": 1011,
+      "sourceSha256": "7e86e5ad63ed6c7c8ff6d1659f580cfcf8ab1cd4c804083af2d7d85f19bff6c1",
+      "translationSha256": "06cdba23f817ff21f20f9ce48c845899e3b459c08f82bd1795101b5c5e7c414f"
+    },
+    {
+      "id": "181803",
+      "passage": "44-12-9",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 112,
+      "translationCharacters": 104,
+      "sourceSha256": "fa699f136ea8a9391892953a7cabcfbb8753f7bb3c5b81406137b84ffeba78d4",
+      "translationSha256": "6bd819b1149d6ac8409fe7bc38dd7efcda5ce4b3d67c48ff8cd80a44d0799621"
+    },
+    {
+      "id": "226898",
+      "passage": "66-3-8",
+      "issues": [
+        "mixed-language"
+      ],
+      "probableLanguage": "mixed",
+      "sourceCharacters": 585,
+      "translationCharacters": 579,
+      "sourceSha256": "e199f5c7ccd0b506e68f58f95f3338ae30c412cb2987c1c007aa2dd94db69eaf",
+      "translationSha256": "fcf2580414a3bd8584fd35f5f2397d962f4dedac48b314c123eee57dd5b317e5"
+    }
+  ],
+  "repeatedTranslationBodyGroups": 11,
+  "duplicateSourceIds": [],
+  "invalidIdentities": [],
+  "note": "Les corps répétés peuvent être éditorialement légitimes; ils ne sont pas classés comme erreurs sans revue."
+}

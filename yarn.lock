@@ -3023,50 +3023,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@bible-strong/lexicon-editor@workspace:apps/lexicon-editor":
-  version: 0.0.0-use.local
-  resolution: "@bible-strong/lexicon-editor@workspace:apps/lexicon-editor"
-  dependencies:
-    "@eslint/js": "npm:^9.28.0"
-    "@radix-ui/react-dialog": "npm:^1.1.17"
-    "@radix-ui/react-label": "npm:^2.1.10"
-    "@radix-ui/react-progress": "npm:^1.1.10"
-    "@radix-ui/react-scroll-area": "npm:^1.2.12"
-    "@radix-ui/react-select": "npm:^2.3.1"
-    "@radix-ui/react-separator": "npm:^1.1.10"
-    "@radix-ui/react-slot": "npm:^1.3.0"
-    "@radix-ui/react-tabs": "npm:^1.1.15"
-    "@radix-ui/react-toggle-group": "npm:^1.1.13"
-    "@radix-ui/react-tooltip": "npm:^1.2.10"
-    "@tailwindcss/vite": "npm:^4.3.1"
-    "@types/node": "npm:^22.15.29"
-    "@types/react": "npm:^19.2.17"
-    "@types/react-dom": "npm:^19.2.3"
-    "@vitejs/plugin-react": "npm:^6.0.3"
-    "@xyflow/react": "npm:^12.11.1"
-    class-variance-authority: "npm:^0.7.1"
-    clsx: "npm:^2.1.1"
-    eslint: "npm:^9.28.0"
-    lucide-react: "npm:^1.22.0"
-    next-themes: "npm:^0.4.6"
-    prettier: "npm:^3.5.3"
-    radix-ui: "npm:^1.6.0"
-    react: "npm:^19.2.7"
-    react-dom: "npm:^19.2.7"
-    sonner: "npm:^2.0.7"
-    tailwind-merge: "npm:^3.6.0"
-    tailwindcss: "npm:^4.3.1"
-    tsx: "npm:^4.19.4"
-    tw-animate-css: "npm:^1.4.0"
-    typescript: "npm:^5.8.3"
-    typescript-eslint: "npm:^8.33.1"
-    vite: "npm:^8.1.0"
-    wink-lemmatizer: "npm:^3.0.1"
-    wink-lexicon: "npm:^2.2.0"
-    wink-pos-tagger: "npm:^2.2.2"
-  languageName: unknown
-  linkType: soft
-
 "@bible-strong/mobile@workspace:apps/mobile":
   version: 0.0.0-use.local
   resolution: "@bible-strong/mobile@workspace:apps/mobile"
@@ -3287,6 +3243,51 @@ __metadata:
     tsx: "npm:4.20.6"
     typescript: "npm:~6.0.3"
     wrangler: "npm:^4.124.0"
+  languageName: unknown
+  linkType: soft
+
+"@bible-strong/resource-studio@workspace:apps/resource-studio":
+  version: 0.0.0-use.local
+  resolution: "@bible-strong/resource-studio@workspace:apps/resource-studio"
+  dependencies:
+    "@eslint/js": "npm:^9.28.0"
+    "@radix-ui/react-dialog": "npm:^1.1.17"
+    "@radix-ui/react-label": "npm:^2.1.10"
+    "@radix-ui/react-progress": "npm:^1.1.10"
+    "@radix-ui/react-scroll-area": "npm:^1.2.12"
+    "@radix-ui/react-select": "npm:^2.3.1"
+    "@radix-ui/react-separator": "npm:^1.1.10"
+    "@radix-ui/react-slot": "npm:^1.3.0"
+    "@radix-ui/react-tabs": "npm:^1.1.15"
+    "@radix-ui/react-toggle-group": "npm:^1.1.13"
+    "@radix-ui/react-tooltip": "npm:^1.2.10"
+    "@tailwindcss/vite": "npm:^4.3.1"
+    "@types/node": "npm:^22.15.29"
+    "@types/react": "npm:^19.2.17"
+    "@types/react-dom": "npm:^19.2.3"
+    "@vitejs/plugin-react": "npm:^6.0.3"
+    "@xyflow/react": "npm:^12.11.1"
+    class-variance-authority: "npm:^0.7.1"
+    clsx: "npm:^2.1.1"
+    eslint: "npm:^9.28.0"
+    globals: "npm:^14.0.0"
+    lucide-react: "npm:^1.22.0"
+    next-themes: "npm:^0.4.6"
+    prettier: "npm:^3.5.3"
+    radix-ui: "npm:^1.6.0"
+    react: "npm:^19.2.7"
+    react-dom: "npm:^19.2.7"
+    sonner: "npm:^2.0.7"
+    tailwind-merge: "npm:^3.6.0"
+    tailwindcss: "npm:^4.3.1"
+    tsx: "npm:^4.19.4"
+    tw-animate-css: "npm:^1.4.0"
+    typescript: "npm:^5.8.3"
+    typescript-eslint: "npm:^8.33.1"
+    vite: "npm:^8.1.0"
+    wink-lemmatizer: "npm:^3.0.1"
+    wink-lexicon: "npm:^2.2.0"
+    wink-pos-tagger: "npm:^2.2.2"
   languageName: unknown
   linkType: soft
 

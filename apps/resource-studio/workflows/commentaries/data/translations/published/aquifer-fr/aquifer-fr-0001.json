@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "aquifer-fr",
+  "batchId": "aquifer-fr-0001",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "xhigh"
+  },
+  "entries": [
+    {
+      "id": "aquifer:20653",
+      "passage": "42-17-37",
+      "sourceSha256": "ec7150881a2db5519b9c71dc5ec0ae4c0aad57cfc6f5108dba6af2a4a09039ea",
+      "translatedHtml": "<p>Ainsi ces signes indiquent que la fin est proche : cette clause, qui n'apparaît pas explicitement dans le grec, explique la signification de la parole énigmatique au sujet du vautour.</p>"
+    }
+  ]
+}

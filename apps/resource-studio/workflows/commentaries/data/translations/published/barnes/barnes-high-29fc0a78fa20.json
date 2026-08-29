@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "barnes",
+  "batchId": "barnes-high-29fc0a78fa20",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "high"
+  },
+  "entries": [
+    {
+      "id": "159410",
+      "passage": "42-20-23",
+      "sourceSha256": "29fc0a78fa20a5eac750e1e9992996f448158c93780252b9e60ca6ede8865ba6",
+      "translatedHtml": "<a name=\"20\"></a><a name=\"21\"></a><a name=\"22\"></a><a name=\"23\"></a><a name=\"24\"></a><a name=\"25\"></a><a name=\"26\"></a><a name=\"27\"></a><a name=\"28\"></a><a name=\"29\"></a><a name=\"30\"></a><a name=\"31\"></a><a name=\"32\"></a><a name=\"33\"></a><a name=\"34\"></a><a name=\"35\"></a><a name=\"36\"></a><a name=\"37\"></a><a name=\"38\"></a><span class=\"large emphasis bold\" name=\"20-38\"> Versets 20 à 38</span><br><p> Voir ce qui est expliqué dans le<a class=\"bible-ref\" href=\"/Mark_12.13\"> Marque 12:13-27</a> Remarques.</p><p></p>"
+    },
+    {
+      "id": "159494",
+      "passage": "42-20-40",
+      "sourceSha256": "f7ae4f2ccab676be12a5b784774741b240b71b012e9d787c6860c748764121d0",
+      "translatedHtml": "<a name=\"40\"></a><a name=\"41\"></a><a name=\"42\"></a><a name=\"43\"></a><a name=\"44\"></a><span class=\"large emphasis bold\" name=\"40-44\"> Versets 40-44</span><br><p> Voir les notes en bas de page<a class=\"bible-ref\" href=\"/Matt_22.41\"> Matthieu 22:41-46</a></p><p></p>"
+    },
+    {
+      "id": "159513",
+      "passage": "42-20-45",
+      "sourceSha256": "2467cd6acb0b1117a132ef3a775aa6bea6a154625c6bc51a8ecd1262c49cdbc4",
+      "translatedHtml": "<a name=\"45\"></a><a name=\"46\"></a><a name=\"47\"></a><span class=\"large emphasis bold\" name=\"45-47\"> Versets 45 à 47</span><br><p> Voir<a class=\"bible-ref\" href=\"/Matt_23.1\"> Matthieu 23:1</a></p><p></p>"
+    },
+    {
+      "id": "160236",
+      "passage": "42-22-23",
+      "sourceSha256": "d5806b3b4e2c3e6d3a4838ae3ddc8dd523c38f8947e7b6064077801c3fa22585",
+      "translatedHtml": "<a name=\"21\"></a><a name=\"22\"></a><a name=\"23\"></a><span class=\"large emphasis bold\" name=\"21-23\"> Versets 21 à 23</span><br><p> Voir les notes en bas de page<a class=\"bible-ref\" href=\"/Matt_26.21\"> Matthieu 26:21-25</a></p><p></p>"
+    },
+    {
+      "id": "160630",
+      "passage": "42-22-57",
+      "sourceSha256": "5bb459e542ddc2ceabdbf43f7b0a8fddc14896b0d511f702478d60353f0ebdff",
+      "translatedHtml": "<a name=\"54\"></a><a name=\"55\"></a><a name=\"56\"></a><a name=\"57\"></a><a name=\"58\"></a><a name=\"59\"></a><a name=\"60\"></a><a name=\"61\"></a><a name=\"62\"></a><span class=\"large emphasis bold\" name=\"54-62\"> Versets 54 à 62</span><br><p> Voir les notes en bas de page<a class=\"bible-ref\" href=\"/Matt_26.57\"> Matthieu 26:57-75</a></p><p></p>"
+    },
+    {
+      "id": "160726",
+      "passage": "42-22-63",
+      "sourceSha256": "d9f0531e574194e293dd0ceb09775b418cdb09c52490fff9e2ad58917d411d0d",
+      "translatedHtml": "<a name=\"63\"></a><a name=\"64\"></a><a name=\"65\"></a><a name=\"66\"></a><a name=\"67\"></a><a name=\"68\"></a><a name=\"69\"></a><a name=\"70\"></a><a name=\"71\"></a><span class=\"large emphasis bold\" name=\"63-71\"> Versets 63 à 71</span><br><p> Voir les notes en bas de page<a class=\"bible-ref\" href=\"/Matt_26.57\"> Matthieu 26:57-68</a></p><p></p>"
+    },
+    {
+      "id": "160981",
+      "passage": "42-23-23",
+      "sourceSha256": "1eb6bdac8d524514ffdfd7a12dc26fddd2d3c800475b7b0ce0d40fa9d484dbb2",
+      "translatedHtml": "<a name=\"18\"></a><a name=\"19\"></a><a name=\"20\"></a><a name=\"21\"></a><a name=\"22\"></a><a name=\"23\"></a><span class=\"large emphasis bold\" name=\"18-23\"> Versets 18 à 23</span><br><p> Voir les notes en bas de page<a class=\"bible-ref\" href=\"/Matt_27.20\"> Matthieu 27:20-23</a></p><p></p>"
+    },
+    {
+      "id": "160991",
+      "passage": "42-23-24",
+      "sourceSha256": "aeee6081cf95d0b266a981b148c7c734bb5849ef8770c4f12bf3277e5f996233",
+      "translatedHtml": "<p> Voir les notes en bas de page<a class=\"bible-ref\" href=\"/Matt_27.26\"> Matthieu 27:26</a></p><p></p>"
+    },
+    {
+      "id": "181536",
+      "passage": "44-11-7",
+      "sourceSha256": "ec7e0c31f96fb336744ddcf23d1fc7af63e822f4e5a53389680803d15baeb414",
+      "translatedHtml": "<a name=\"5\"></a><a name=\"6\"></a><a name=\"7\"></a><a name=\"8\"></a><a name=\"9\"></a><a name=\"10\"></a><a name=\"11\"></a><a name=\"12\"></a><a name=\"13\"></a><span class=\"large emphasis bold\" name=\"5-13\"> Versets 5 à 13</span><br><p> Voir<a class=\"bible-ref\" href=\"/Acts_10.9\"> Actes 10:9-33</a></p><p></p>"
+    },
+    {
+      "id": "182257",
+      "passage": "44-14-4",
+      "sourceSha256": "a9f9c69da4f66d8f56951b38b0f12b7939b09b2b6c5a373d6ddffdc410e390f1",
+      "translatedHtml": "<p><b> Était divisé -</b> Grèce: il y avait un schisme -<span class=\"greek-hebrew\"> &Epsilon;&#787;&sigma;&chi;&iota;&#769;&sigma;&theta;&eta; </span><span class=\"translit\">Eschisthe&#772; — Et une partie se rallia aux Juifs — elle adhéra aux doctrines des Juifs, en opposition aux apôtres. Un réveil religieux suscite souvent l’excitation des mauvaises passions de ses adversaires. Les ennemis de la vérité forment des partis et organisent l’opposition. Il n’est même pas rare aujourd’hui que de tels partis se forment ; mais la faute n’est pas au christianisme. Elle réside chez ceux qui forment un parti contre la religion et qui s’unissent pour s’y opposer, comme cela s’est produit ici.</span></p><p></p>"
+    },
+    {
+      "id": "182402",
+      "passage": "44-14-24",
+      "sourceSha256": "1da42720bd8109d22886b0e706639d27c1ffafe23dcbbab5acbf8e13cb57b79e",
+      "translatedHtml": "<p><b> Tout au long de Pisidia -</b> Voir la note à<a class=\"bible-ref\" href=\"/Acts_13.14\"> Actes 13:14</a></p><p><b> Ils sont venus à Pamphylia.</b> Voir les notes sur<a class=\"bible-ref\" href=\"/Acts_13.13\"> Actes 13:13</a>. Ces endroits qu'ils avaient visités auparavant.</p><p></p>"
+    },
+    {
+      "id": "182408",
+      "passage": "44-14-25",
+      "sourceSha256": "67b366d597002d59d56b65bd2e009bf3d8d3b285b631f54d754f918179c7afbb",
+      "translatedHtml": "<p><b>En Perga -</b> Voir les notes sur<a class=\"bible-ref\" href=\"/Acts_13.13\"> Actes 13:13</a></p><p><b> Ils sont descendus à Attalia.</b>&ldquo;Attalia avait quelque chose de la même relation avec Perga que Cadix a à Séville. Dans chaque cas, la ville est approchée par un voyage fluvial, et la première est plus commodément placée sur la mer. Attalus Philadelphus, roi de Pergame, dont les dominions s'étendaient du coin nord-ouest de l'Asie Miner à la mer de Pamphylie, avait construit cette ville dans une position commode pour commander le commerce de la Syrie ou de l'Egypte. Quand Alexandre le Grand a passé cette voie, aucune telle ville n'était en existence; mais depuis les jours des rois de Pergame, qui ont hérité un fragment de son vaste empire, Attalia a toujours existé et prospéré, conservant le nom du monarque qui l'a construit. Son ancien site n'est pas connu maintenant&rdquo;(Vie et épîtres de Paul, vol. i. p. 200,201). Il est probable que c'est la Satalie moderne.</p><p></p>"
+    },
+    {
+      "id": "182426",
+      "passage": "44-14-28",
+      "sourceSha256": "54fe6e04d79454594dc6bbf592a954fafe414bbfa779aa6e4088aab324d36eed",
+      "translatedHtml": "<p><b>Et ils sont là-bas.</b> À Antioche.</p><p><b>Longtemps -</b> Combien de temps n'est pas intime ; mais nous n'entendons plus d'entre eux jusqu'au concile de Jérusalem, mentionné dans le chapitre suivant. Si les transactions enregistrées dans ce chapitre se sont produites, comme on le croit, vers 45 a.d. ou 46 a.d., et le concile de Jérusalem a assemblé 51 a.d. ou 53 a.d., comme on le croit, alors voici un intervalle de cinq à huit ans dans lequel nous n'avons aucun compte d'eux. Là où ils étaient, ou quel était leur emploi dans cet intervalle, l'historien sacré ne nous a pas informé. Il est certain, cependant, que Paul a fait plusieurs voyages dont nous n'avons pas d'enregistrement particulier dans le Nouveau Testament, et il est possible que certains de ces voyages se soient produits pendant cet intervalle. Ainsi, il a prêché l'évangile jusqu'à Illyricum,<a class=\"bible-ref\" href=\"/Rom_15.19\"> Romains 15:19</a>. Et en<a class=\"bible-ref\" href=\"/2Cor_11.23\">2 Corinthiens 11:23-27</a> Nous pouvons être certains que ces saints hommes n'étaient pas oisifs. De l'exemple de Paul et Barnabas, tel qu'il est consigné dans ce chapitre, nous pouvons apprendre à supporter toutes les persécutions et toutes les épreuves sans reproche, et à reconnaître la bonne main de Dieu dans nos voyages; dans notre défense lorsque nous sommes persécutés; dans toutes les occasions qui peuvent être ouvertes devant nous pour faire le bien; et dans tout le succès qui peut assister à nos efforts. Les chrétiens doivent se rappeler que c'est Dieu qui ouvre des portes d'utilité; et ils devraient considérer cela comme une question de grâce, car ces portes sont ouvertes, et qu'ils sont autorisés à répandre l'Évangile, quel que soit le travail qu'il peut coûter, quelle que soit la persécution qu'ils peuvent endurer, quels que soient les périls qu'ils peuvent rencontrer.</p><p></p>"
+    },
+    {
+      "id": "182613",
+      "passage": "44-15-18",
+      "sourceSha256": "346ddb25ee97ecbe4b13f968249b663a0eb565768711690f7e220ad8697b6738",
+      "translatedHtml": "<p><b>Connu par Dieu&#133;</b> Voir les notes sur<a class=\"bible-ref\" href=\"/Acts_1.24\"> Actes 1:24</a>. Le sens de ce verset, à ce sujet, est ceci. Dieu voit tout l'avenir; il sait ce qu'il accomplira; il a un plan; toutes ses œuvres sont si disposées dans son esprit qu'il voit tout distinctement et clairement. Comme il l'avait prédit, il faisait partie de son plan; et comme il faisait partie de son plan depuis longtemps annoncé, il ne devrait pas être opposé et résisté par nous.</p><p></p>"
+    },
+    {
+      "id": "189465",
+      "passage": "45-11-31",
+      "sourceSha256": "6edb2443802b1c74f1ec80a11ae1e181115f4361fab8243b6567a6a33fce620e",
+      "translatedHtml": "<p><b> Même si c'est le cas,&#133;</b>C'est-à-dire, les Juifs.</p><p><b>C'est grâce à ta miséricorde&#133;</b>L'effet immédiat de l'incrédulité des Juifs était de donner le salut aux Gentils, ou d'ouvrir la voie à la prédication de l'Évangile à eux. Mais son effet lointain serait d'assurer la prédication de l'évangile de nouveau aux Juifs. Par la miséricorde, c'est-à-dire la compassion ou le sentiment profond des Gentils convertis; par la miséricorde profonde et tendre qu'ils ressentiraient pour les Juifs aveuglés et dégradés: l'évangile devrait être de nouveau porté à eux, et ils devraient être rappelés à la faveur longtemps perdue de Dieu. Chaque partie devrait donc faire venir le salut à l'autre - les Juifs aux Gentils par leur incrédulité; mais les Gentils, à leur tour, aux Juifs par leur croyance.</p><p>(1) Que les Juifs doivent être convertis par l'instrumentalité des Gentils. Ce n'est pas par miracle, mais par la manière régulière et commune par laquelle Dieu bénit les gens.</p><p>(2) que cela doit être fait par la miséricorde, ou la compassion des Gentils; par leur pitié sur la condition perdue et misérable du peuple juif.</p><p>(3) c'est quand l'abondance des Gentils - c'est-à-dire quand un grand nombre de Gentils - sera appelé.</p><p>On peut se demander ici si le temps n'est pas venu pour les Gentils de faire des efforts pour amener les Juifs à la connaissance du Messie. Jusqu'à ces efforts ont été infructueux; mais il ne sera pas toujours ainsi; le moment est venu où les promesses de Dieu à leur égard seront accomplies. Les chrétiens seront émus avec une profonde compassion pour les Juifs dégradés et abandonnés, et ils seront appelés dans le royaume de Dieu, et ils seront faits des agents efficaces pour étendre l'évangile à travers le monde entier. Que le moment arrive bientôt où ils se sentiront comme ils devraient, pour les enfants rejetés et abandonnés d'Abraham, et quand leurs travaux pour leur conversion seront assistés avec succès.</p><p></p>"
+    },
+    {
+      "id": "196262",
+      "passage": "46-16-7",
+      "sourceSha256": "1a6fc8bd31291fc2adeaf76e1e7ceb92a3c2445dc1b76eed09c3246ea186406a",
+      "translatedHtml": "<p><b>Car je ne te verrai pas au fait.</b>Sur le chemin de la Macédoine. Quelque chose est arrivé pour changer d'avis, et de l'inciter à aller en Macédoine par un autre moyen.</p><p><b> Mais j'ai confiance pour rester un moment avec toi.</b>C'est-à-dire à mon retour de Macédoine,<a class=\"bible-ref\" href=\"/1Cor_16.5\">1 Corinthiens 16:5</a>. grecque,&ldquo;J'espère rester avec vous un peu de temps.</p><p><b>Si le Seigneur le permet...</b>L'apôtre n'a pas utilisé le langage de la certitude et de la confiance. Il a senti sa dépendance à l'égard de Dieu, et a considéré tous comme sous sa direction; voir la même forme d'expression en<a class=\"bible-ref\" href=\"/1Cor_4.19\">1 Corinthiens 4:19</a>, et la note sur cet endroit.</p><p></p>"
+    },
+    {
+      "id": "198016",
+      "passage": "47-6-9",
+      "sourceSha256": "ff1f4efaf4ffda297daf62ba9444d4869d94b942b9c97f676b140219ab3c9258",
+      "translatedHtml": "<p><b> Comme inconnu -</b> Comme ceux qui sont considérés comme d'un rang obscur et ignoble dans la vie, inconnu du grand, inconnu à la gloire. L'idée, je pense, est qu'ils sont allés comme étrangers, comme des personnes inconnues, dans la prédication de l'évangile. Pourtant, bien qu'ils ne soient pas ainsi inconnus, ils s'efforcent de se recommander comme ministres de Dieu. Bien que parmi les étrangers; bien qu'ayant aucune introduction des grands et des nobles, ils se sont efforcés d'agir de manière à convaincre le monde qu'ils étaient ministres de Dieu. Cela ne pourrait être fait que par une vie sainte, et par la preuve de l'approbation divine qui les assisterait dans leur travail. Et par cela, les ministres de la religion, s'ils sont fidèles, peuvent se faire connaître même parmi ceux qui étaient étrangers, et peuvent vivre ainsi que pour&ldquo;ne vous vexez pas.&rdquo; Tous les ministres et tous les chrétiens, même quand ils sont&ldquo; inconnu&rdquo;Et quand il y a des étrangers, il faut se souvenir de leur haute qualité de serviteurs de Dieu, et vivre de façon à recommander la religion qu'ils professent aimer, ou qu'ils sont appelés à prêcher. Or, combien de fois les ministres, quand parmi des étrangers, semblent se sentir libres de mettre de côté leur caractère ministériel, et de se livrer à la conversation, et même de participer à des divertissements qu'ils considéreraient comme tout à fait inappropriés s'ils étaient connus qu'ils étaient les ambassadeurs de Dieu! Et combien de fois est-ce le cas que professant des chrétiens en voyageant, lorsque parmi des étrangers, quand dans des pays étrangers, oublient leur vocation élevée, et conduisent d'une manière totalement différente de ce qu'ils faisaient lorsqu'ils étaient entourés de chrétiens; et quand ils sont restreints par les sentiments et par les yeux d'une communauté chrétienne!</p><p><b>Et pourtant bien connu -</b> Nous n'avons pas de dissimulations à faire. Nous ne pratiquons aucun déguisement. Nous essayons d'imposer à personne. Bien que obscurs dans notre origine; bien que sans rang, de richesse, de pouvoir, ou de patronage, pour nous recommander de favoriser, nous avons réussi à nous faire connaître au monde. Bien que obscurs dans notre origine, nous ne sommes pas obscurs maintenant. Bien que soupçonnés de conceptions sombres, nos principes sont tous bien connus du monde. Aucun peuple de la même obscurité de la naissance n'a jamais réussi à se faire connaître plus largement que les apôtres. Le monde en général a connu avec eux; et par leur renoncement, leur zèle et leur succès, ils ont étendu leur réputation partout dans le monde.</p><p><b> Comme mourant...</b>C'est-à-dire, considérés par d'autres comme mourants, souvent condamnés à mort, exposés à la mort, au milieu des épreuves qui nous exposent à la mort et qui sont habituellement suivies de la mort; voir la note sur<a class=\"bible-ref\" href=\"/1Cor_15.31\">1 Corinthiens 15:31</a>, sur la phrase,&ldquo;Je meurs tous les jours.&rdquo; Ils passèrent par tant d'épreuves qu'il pourrait dire qu'ils mouraient constamment.&ldquo;Et voici, nous vivons.&rdquo; Aussi étrange que cela puisse paraître, nous survivons encore. Par toutes nos épreuves nous sommes préservés, et bien que souvent exposés à la mort, nous vivons encore. L'idée ici est que dans toutes ces épreuves, et dans ces expositions à la mort, ils se sont efforcés de se recommander comme ministres de Dieu. Ils ont porté leurs épreuves avec patience, soumis à ces expositions sans plainte, et attribué leur préservation à l'interposition de Dieu.</p><p><b> Comme châtié -</b>Le mot&ldquo;châtié&rdquo;<span class=\"greek-hebrew\"> &pi;&alpha;&iota;&delta;&epsilon;&upsilon;&omicron;&#769;&mu;&epsilon;&nu;&omicron;&iota; </span><span class=\"translit\">paideuomenoi) means corrected, &ldquo;chastised.&rdquo; It is applied to the chastening which God causes by afflictions and calamities;   <a class=\"bible-ref\" href=\"/1Cor_11.32\">1 Corinthiens 11:32</a>;   <a class=\"bible-ref\" href=\"/Rev_3.19\">Apocalypse 3:19</a>;   <a class=\"bible-ref\" href=\"/Heb_12.6\">Hébreux 12:6</a>. It refers here, not to the scourgings to which they were subjected in the synagogues and elsewhere, but to the chastisements which God inflicted; the trials to which he subjected them. And the idea is, that in the midst of these trials, they endeavored to act as became the ministers of God. They bore them with patience. They submitted to them as coming from his hand. They felt that they were right; and they submitted without a complaint.<p><b>And not killed - </b>Though severely chastened, yet we are not put to death. We survive them - preserved by the interposition of God.</p>\n\n<p></p></span></p>"
+    },
+    {
+      "id": "199413",
+      "passage": "47-11-22",
+      "sourceSha256": "4b08408d9c46567c7812913a092a9f55d2cab7b09bb68cc5a3176f9291143cd0",
+      "translatedHtml": "<p><b>Ce sont des Hébreux ?</b> Cela prouve que les personnes qui avaient fait la difficulté à Corinthe étaient ceux qui étaient d'origine hébraïque, bien qu'il soit possible qu'ils soient nés en Grèce et qu'ils aient été éduqués dans la philosophie grecque et l'art de la rhétorique. Il est également clair qu'ils se vantaient d'être juifs - d'avoir un lien avec le peuple et la terre d'où émanait la religion que l'église corinthienne aujourd'hui professée. Les indications sont visibles partout dans le Nouveau Testament de la supériorité que les juifs convertis au christianisme revendiquaient sur ceux convertis d'entre les païens. Leur vanité serait probablement qu'ils étaient les descendants des patriarches; que la terre des prophètes était à eux; qu'ils parlaient la langue dans laquelle les oracles de Dieu ont été donnés; que la vraie religion avait été faite d'eux, etc.</p><p><b> Moi aussi, je...</b>J'ai des revendications aussi élevées que n'importe lequel d'entre eux à distinguer sur cette tête. Paul avait tous leurs avantages de la naissance. Il était un israélite; de rite honoré tribu de Benjamin; un pharisien, circoncis à l'heure habituelle<a class=\"bible-ref\" href=\"/Phlm_3.5\">Philémon 3:5</a>, et éduqué de la meilleure manière aux pieds de l'un de leurs enseignants les plus éminents;<a class=\"bible-ref\" href=\"/Acts_22.3\"> Actes 22:3</a></p><p><b> Sont - ils Israélites?</b>Un autre nom, signifiant essentiellement la même chose. La seule différence est que le mot&ldquo;Hébreu&rdquo; signifie bien celui qui était de l'au-delà (<span class=\"greek-hebrew\">&#1510;&#1489;&#1512;&#1497;</span><span style=\"unicode-bidi: embed;\"></span><span class=\"translit\">&#8219;Ibriy de <span class=\"greek-hebrew\">&#1510;&#1489;&#1512;</span> &lsaquo;<span class=\"translit\">aabarto passer, traverser — d’où son application à Abraham, puisqu’il était venu d’un pays étranger ; et le mot désignait proprement un étranger — un homme venu du pays ou de la contrée située au-delà, <span class=\"greek-hebrew\">&#1510;&#1489;&#1512;</span><span style=\"unicode-bidi: embed;\"></span>  &lsaquo;<span class=\"translit\">aabarthe de l’Euphrate. Le nom Israélite désignait proprement un descendant d’Israël ou de Jacob, et la différence entre les deux était que le nom Israélite, étant un patronyme dérivé de l’un des fondateurs de leur nation, était employé parmi eux ; le nom Hébreu leur était appliqué par les Cananéens parce qu’ils étaient venus d’au-delà du fleuve, et c’était le nom courant parmi les tribus et les nations étrangères. Voir le Lexique de Gesenius&lsquo; sur le mot <span class=\"greek-hebrew\">&#1510;&#1489;&#1512;&#1497;</span><span style=\"unicode-bidi: embed;\"></span>  <span class=\"translit\">&#8219;Ibriy Hébreu. Paul veut dire dans le passage qui nous occupe qu’il avait autant de droit à l’honneur d’être un descendant israélite de naissance qu’aucun d’eux ne pouvait en revendiquer.<p><b>Sont-ils la descendance d’Abraham ? — </b>Se vantent-ils d’être descendants d’Abraham ? Cela était considéré par tous les Juifs comme un honneur insigne (voir   <a class=\"bible-ref\" href=\"/Matt_3.9\">Matthieu 3:9</a>;   <a class=\"bible-ref\" href=\"/John_8.39\">Jean 8:39</a>), et nul doute que les faux docteurs de Corinthe s’en vantaient comme d’un titre éminent pour exercer le ministère.</p><p><b>Moi aussi — </b>Paul possédait la même qualification. Il était également juif de naissance. Il était de la tribu de Benjamin ;   <a class=\"bible-ref\" href=\"/Phlm_3.5\">Philémon 3:5</a>.</p>\n\n<p></p></span></span></span></span></p>"
+    },
+    {
+      "id": "199745",
+      "passage": "47-12-17",
+      "sourceSha256": "1f845333cac5c86c43b1c018d88f75b3b30ee77b8735b22279e6a45ae51f8081",
+      "translatedHtml": "<p><b> Ai-je gagné un gain&#133;</b>En réfutant cette calomnie, Paul lance un appel hardi aux faits et à ce qu'ils savaient.&ldquo;Pareil pour l'homme.&rdquo;Il dit :&ldquo;Si l'accusation est fondée, qu'il soit précisé, et que le mode dans lequel elle a été faite soit clairement indiqué.&rdquo;La phrase&ldquo; faire un gain&rdquo;(à partir<span class=\"greek-hebrew\"> &pi;&lambda;&epsilon;&omicron;&nu;&epsilon;&kappa;&tau;&epsilon;&#769;&omega; </span><span class=\"translit\"> pleonekteo&#772;), signifie proprement avoir un avantage ; puis tirer avantage, chercher un gain illégitime. Ici, Paul demande s’il les avait trompés par l’intermédiaire de quelqu’un qu’il leur avait envoyé.</span></p><p></p>"
+    }
+  ]
+}

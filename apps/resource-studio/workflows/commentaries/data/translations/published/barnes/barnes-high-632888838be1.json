@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "barnes",
+  "batchId": "barnes-high-632888838be1",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "high"
+  },
+  "entries": [
+    {
+      "id": "57451",
+      "passage": "13-2-25",
+      "sourceSha256": "632888838be14271ddc38c91bab81ac67d532c9e3caa842beb97c2ca15b8d056",
+      "translatedHtml": "<p><b>Et Achija...</b>Il n'y a pas de&ldquo;et&rdquo;dans l'original. Ainsi, certains liraient:&ldquo;les fils&rdquo; sont nés&ldquo;des&rdquo;ou&ldquo;d'Ahija,&rdquo;la première femme de Jerahmeel (voir le verset suivant).</p><p></p>"
+    },
+    {
+      "id": "57458",
+      "passage": "13-2-42",
+      "sourceSha256": "b65eb6cb8b5c56de71f8d3f01a471ac962dd8f71d7a3b18d0dbb0abb5ddda297",
+      "translatedHtml": "<p> Une troisième ligne de descente de Caleb, le fils de Hezron, la question probablement d'une mère différente, peut-être Jerioth<a class=\"bible-ref\" href=\"/1Chr_2.18\">1 Chroniques 2:18</a>. Les prétendues omissions de ce verset ont été fournies comme suit:</p><p>&ldquo;Mécha, père de Ziph, et fils de Ziph, Maréscha, père d`Hébron;&rdquo;ou</p><p>&ldquo;Maréscha, père de Ziph, et les fils de Maréscha, père de Ziph, Hébron.&rdquo;</p><p>Ziph, comme Jorkoam<a class=\"bible-ref\" href=\"/1Chr_2.44\">1 Chroniques 2:44</a>et Beth-tsur<a class=\"bible-ref\" href=\"/1Chr_2.45\">1 Chroniques 2:45</a>, est le nom d'un lieu où les chefs respectifs (&ldquo; Pères&rdquo;De même Madmannah, Machbenah et Gabaa<a class=\"bible-ref\" href=\"/1Chr_2.49\">1 Chroniques 2:49</a>, Kirjath-jearim (<a class=\"bible-ref\" href=\"/Josh_9.17\"> Josué 9:17</a>note), Bethléem et Beth-Gader (Jédur,<a class=\"bible-ref\" href=\"/1Chr_2.51\">1 Chroniques 2:51</a>) sont des noms indiscutables des lieux dans la liste, noms qui n'est pas probable ont jamais été portés par des personnes.</p><p></p>"
+    },
+    {
+      "id": "57487",
+      "passage": "13-3-10",
+      "sourceSha256": "a822912ee0e94f51734ecda1372d4619ae3db19a81903d6a19b73699c7c82bbc",
+      "translatedHtml": "<p><b>Abia -</b> Plutôt,&ldquo;Abijah,&rdquo; comme dans<a class=\"bible-ref\" href=\"/2Chr_1114.1\">2 Chroniques 1114</a>, où le mot hébreu est exactement le même.</p><p></p>"
+    },
+    {
+      "id": "57489",
+      "passage": "13-3-11",
+      "sourceSha256": "35c005bc8bf7320cbaec40157e2b767a74491f9cb6419c6bad53263b69d79366",
+      "translatedHtml": "<p><b>Ahaziah -</b> Appelé&ldquo;Jehoachaz&rdquo;par une transposition des éléments composant le nom, et&ldquo;Azariah,&rdquo; probablement par un transcritr&lsquo;s erreur (voir notes et références marginales).</p><p></p>"
+    },
+    {
+      "id": "57491",
+      "passage": "13-3-12",
+      "sourceSha256": "58c08c593a6e322e4d46a882d6ac19d358f36aa1d9b3df59193a6b274a1e3efa",
+      "translatedHtml": "<p><b>Azariah -</b>Ailleurs dans les Chroniques appelées uniformément&ldquo;Ozias&rdquo;<a class=\"bible-ref\" href=\"/2Chr_26.1\">2 Chroniques 26:1</a>, 2Chroniques 26:3,<a class=\"bible-ref\" href=\"/2Chr_26.9\">2 Chroniques 26:9</a><a class=\"bible-ref\" href=\"/2Chr_26.11\">2 Chroniques 26:11</a>, etc.), mais appelé indifféremment&ldquo;Azariah&rdquo;et&ldquo;Ozias&rdquo;dans les Rois (&ldquo;Azariah&rdquo;en<a class=\"bible-ref\" href=\"/2Kgs_14.21\">2 Rois 14:21</a><a class=\"bible-ref\" href=\"/2Kgs_15.1\">2 Rois 15:1</a>, 2 Rois 15:6,<a class=\"bible-ref\" href=\"/2Kgs_15.17\">2 Rois 15:17</a><a class=\"bible-ref\" href=\"/2Kgs_15.23\">2 Rois 15:23</a><a class=\"bible-ref\" href=\"/2Kgs_15.27\">2 Rois 15:27</a>, etc.;&ldquo;Ozias&rdquo;en<a class=\"bible-ref\" href=\"/2Kgs_15.13\">2 Rois 15:13</a><a class=\"bible-ref\" href=\"/2Kgs_15.32\">2 Rois 15:32</a><a class=\"bible-ref\" href=\"/2Kgs_15.34\">2 Rois 15:34</a></p><p></p>"
+    },
+    {
+      "id": "57531",
+      "passage": "13-4-18",
+      "sourceSha256": "d029edadcc957122d755ab873f1c5cca1599a26d0adcddd1bf699de5594c24d3",
+      "translatedHtml": "<p><b>Sa femme...</b>i. e. Mered&lsquo;s. Mered, il semblerait, avait deux femmes, Bithia, une femme égyptienne, et une femme juive (voir la marge), dont le nom n'est pas donné. Si Mered était un chef de rang, Bithia peut avoir été marié à lui avec le consentement de son père, car les rois égyptiens ont souvent donné leurs filles en mariage à des étrangers. Ou elle peut avoir choisi d'abandonner ses compatriotes et s'attacher à un mari juif, devenant un converti à sa religion. Son nom, Bithia,&ldquo; fille de l`Éternel,&rdquo;est comme celui d'un converti.</p><p></p>"
+    },
+    {
+      "id": "57533",
+      "passage": "13-4-19",
+      "sourceSha256": "3f3d30fb0154538ee3d589238cf1b96e537bf7b41aaa2df2dc56ff79fcdcc056",
+      "translatedHtml": "<p><b>Sa femme Hodiah -</b>Pas comme dans la marge, mais plutôt,&ldquo;les fils de la femme d`Hodiah.&rdquo;Hodiah est toujours un homme ailleurs.&lsquo;s nom<a class=\"bible-ref\" href=\"/Neh_8.7\"> Néhémie 8:7</a><a class=\"bible-ref\" href=\"/Neh_9.5\"> Néhémie 9:5</a><a class=\"bible-ref\" href=\"/Neh_10.10\"> Néhémie 10:10</a><a class=\"bible-ref\" href=\"/Neh_10.13\"> Néhémie 10:13</a><a class=\"bible-ref\" href=\"/Neh_10.18\"> Néhémie 10:18</a></p><p></p>"
+    },
+    {
+      "id": "57550",
+      "passage": "13-4-31",
+      "sourceSha256": "9c71daa3f67aa02b3b169c81f3a73e8155383ee822f4b73ae4edef07b9f72362",
+      "translatedHtml": "<p><b> Jusqu'au règne de David</b>Il n'est pas très clair pourquoi cette clause est ajoutée. Peut-être l'auteur cite-t-il un document appartenant à David&lsquo;s règne. Ou, il peut signifier que certaines villes, comme Ziklag<a class=\"bible-ref\" href=\"/1Sam_27.6\">1 Samuel 27:6</a>, ont été perdus contre Simeon à propos de David&lsquo;S l'heure.</p><p></p>"
+    },
+    {
+      "id": "57553",
+      "passage": "13-4-33",
+      "sourceSha256": "61c78befe2906aa1724e4b3b1ea167d244b5deaae29db8f96ae63a96cb216427",
+      "translatedHtml": "<p><b>Et leur généalogie -</b> Plutôt,&ldquo;et leur registre était conforme à celui-ci&rdquo;- ils ont été enregistrés, c'est-à-dire selon les endroits où ils habitaient.</p><p></p>"
+    },
+    {
+      "id": "57582",
+      "passage": "13-5-9",
+      "sourceSha256": "7d3b8148f512d523b3d85b84eb999c578e18364be80aaf6e6a5255c7077c42ac",
+      "translatedHtml": "<p><b>Il habitait...</b>i. e. Ruben. vers l'est les Rubénites habités jusqu'au début du grand désert syrien, qui s'étendait tout le chemin du fleuve Euphrate à leurs frontières.</p><p></p>"
+    },
+    {
+      "id": "57585",
+      "passage": "13-5-10",
+      "sourceSha256": "61cb2eb10149da118255094b2cbc7b41bc8b350501990fd69c75992f66b4fb85",
+      "translatedHtml": "<p>Les&ldquo;Agarites&rdquo;ou&ldquo;Agarènes&rdquo; sont généralement considérés comme descendants d'Agar, et une branche distincte des Ismaélites<a class=\"bible-ref\" href=\"/1Chr_27.30\">1 Chroniques 27:30-31</a><a class=\"bible-ref\" href=\"/Ps_83.6\"> Psaume 83:6</a>. Ils semblent avoir été l'un des plus riches<a class=\"bible-ref\" href=\"/1Chr_5.21\">1 Chroniques 5:21</a>et des tribus très répandues du désert syrien, se trouvant du côté de l'Euphrate en contact avec les Assyriens, et aussi dans le Hauran, dans le quartier de Palestine, en contact avec les Moabites et les Israélites. Si identique à l'Agraei des écrivains classiques, leur nom peut être considéré comme survivant encore dans celui du district appelé Hejer ou Hejera dans le nord-est de l'Arabie, aux frontières du golfe Persique.<a class=\"bible-ref\" href=\"/1Chr_5.18\">1 Chroniques 5:18-22</a></p><p></p>"
+    },
+    {
+      "id": "57587",
+      "passage": "13-5-11",
+      "sourceSha256": "7c1cbe5f9ad73640093236e8e3a5e501a83b5066fb7d6494c5422f5fc391fef0",
+      "translatedHtml": "<p>De ce passage et du récit ultérieur des Manassites<a class=\"bible-ref\" href=\"/1Chr_5.23\">1 Chroniques 5:23-24</a>, les Gadites s'étendirent au nord aux dépens de leurs frères, occupant progressivement une partie considérable du territoire initialement attribué au&ldquo;La demi-tribu.&rdquo;</p><p></p>"
+    },
+    {
+      "id": "57598",
+      "passage": "13-5-19",
+      "sourceSha256": "2f78fc0ebaf51573e7cea86e0310225171c6daf245e9f10a6df8a7af7c41606b",
+      "translatedHtml": "<p>Jetur donna sans doute son nom à l'importante tribu des Ituréens qui habita la région au sud-ouest de la plaine damascène, entre Gaulonitis (Jaulan) et le Ledjah. Cette tribu fut remarquée pour ses habitudes thiévistes, et fut considérée comme sauvage et guerrière.</p><p></p>"
+    },
+    {
+      "id": "57606",
+      "passage": "13-5-23",
+      "sourceSha256": "bd7b54cd1f166da2b89ff0497c0249c96d368857a2e26db0769285288f318d17",
+      "translatedHtml": "<p>&ldquo;Baal-Hermon,&rdquo;&ldquo;Sénir&rdquo;<a class=\"bible-ref\" href=\"/Deut_3.9\">Deutéronome 3:9</a>et&ldquo;Le mont Hermon,&rdquo;ne sont ici pas tant trois noms de la grande éminence de neige dans laquelle l'Anti-Liban se termine vers le sud, comme trois parties de la montagne - peut-être la&ldquo; trois sommets&rdquo;dans lequel il se termine.</p><p></p>"
+    },
+    {
+      "id": "57621",
+      "passage": "13-6-9",
+      "sourceSha256": "9aa750cb6365c6b92cba7cde50ecaa23c4ed4b092b70b513f35d482863c2aa31",
+      "translatedHtml": "<p><b>Ahimaaz a engendré Azariah -</b>Il doit, apparemment, être ce Azaria, et non le fils de Johanan<a class=\"bible-ref\" href=\"/1Chr_6.10\">1 Chroniques 6:10</a>, qui était grand prêtre à la dédicace de Salomon&lsquo;S Temple. Pour Tsadok, qui a vécu dans le règne de Salomon<a class=\"bible-ref\" href=\"/1Kgs_4.4\">1 Rois 4:4</a>un arrière-arrière-petit-fils n'a pas pu réussir.<a class=\"bible-ref\" href=\"/1Chr_6.10\">1 Chroniques 6:10</a>, qui est attaché à la seconde Azaria, doit, sans aucun doute, appartenir correctement à la première.</p><p></p>"
+    },
+    {
+      "id": "57630",
+      "passage": "13-6-15",
+      "sourceSha256": "b95ee511a61657e5dc8be8f5c8473bb2a3c564890ef855c36a42d1e63fe2e611",
+      "translatedHtml": "<p><b>Jehozadak -</b>La signification du nom est :&ldquo; Jéhovah est juste.&rdquo;Il a été noté comme remarquable que les chefs à la fois du sacerdoce et du stock royal porté à Babylone auraient dû avoir des noms (Sédécias et Jehozadak) composés des mêmes éléments, et l'affirmation de la&ldquo;la justice de Dieu,&rdquo;que leurs souffrances ont montrés si clairement.</p><p></p>"
+    },
+    {
+      "id": "57635",
+      "passage": "13-6-20",
+      "sourceSha256": "011112882e741e0ea55a875fce05e8e5b4829b72564869fed1ca6e6e0fd62124",
+      "translatedHtml": "<p><b>De Gershom</b>Les noms de cette liste sont curieusement différents de ceux de 1 Chroniques 6:41-43, qui semblent représenter la même ligne inversée. Probablement les deux listes sont plus ou moins corrompues, et, comme dans beaucoup de généalogies, l'omission est faite, pour réduire le nombre des noms à sept.<a class=\"bible-ref\" href=\"/Matt_1.1\"> Matthieu 1:1-17</a></p><p></p>"
+    },
+    {
+      "id": "57650",
+      "passage": "13-6-34",
+      "sourceSha256": "b5f10732af1c94f648609cab4699d847c7b2777a16356f7acd11d515eb7e2b3d",
+      "translatedHtml": "<a name=\"31\"></a><a name=\"32\"></a><a name=\"33\"></a><a name=\"34\"></a><a name=\"35\"></a><a name=\"36\"></a><a name=\"37\"></a><a name=\"38\"></a><a name=\"39\"></a><a name=\"40\"></a><a name=\"41\"></a><a name=\"42\"></a><a name=\"43\"></a><a name=\"44\"></a><a name=\"45\"></a><a name=\"46\"></a><a name=\"47\"></a><a name=\"48\"></a><span class=\"large emphasis bold\" name=\"31-48\"> Versets 31 à 48</span><br><p>Les généalogies de David&lsquo;s trois chanteurs en chef, Heman, Asaph et Ethan ou Jeduthun.</p><p><b>1 Chroniques 6:32</b></p><p><b> Ils ont attendu dans leur bureau.</b>Sur l'établissement et la poursuite du service choral dans le temple, voir<a class=\"bible-ref\" href=\"/2Chr_5.12\">2 Chroniques 5:12</a><a class=\"bible-ref\" href=\"/2Chr_29.27\">2 Chroniques 29:27-30</a><a class=\"bible-ref\" href=\"/2Chr_35.15\">2 Chroniques 35:15</a></p><p><b>1 Chroniques 6:33</b></p><p><b>C'est quoi, ça ?</b>En général Asaph a priorité sur Heman et Jeduthun, mais ici Heman est placé en premier, parce que sa famille, celle des Kohathites, avait le rang le plus élevé sacerdotal, étant la famille qui a fourni les grands prêtres (voir<a class=\"bible-ref\" href=\"/1Chr_6.2\">1 Chroniques 6:2-15</a></p><p><b>Shemuel -</b>i. e.&ldquo;Samuel.&rdquo; Nos traducteurs ont donné ici l'hébreu, tandis qu'ailleurs ils donnent uniformelv le grec, forme du nom. Nous apprenons par cette généalogie que Heman était Samuel&lsquo;Petit-fils.</p><p><b>1 Chroniques 6:39</b></p><p><b>Son frère Asaph -</b>Pas&ldquo; frère&rdquo;dans le sens ordinaire du terme, puisque Asaph était fils de Bérachia, et un Guershonite, et non un Kehathite.&ldquo; Frère.&rdquo; ici peut signifier&ldquo;un collègue&rdquo;(comparer<a class=\"bible-ref\" href=\"/1Chr_25.7\">1 Chroniques 25:7</a></p><p><b>1 Chroniques 6:44</b></p><p><b>Ethan -</b>Ou Jeduthun (voir la marge). La corruption ne sera guère responsable des deux formes du nom, puisque Ethan est utilisé de façon persistante jusqu'à un certain point<a class=\"bible-ref\" href=\"/1Chr_15.19\">1 Chroniques 15:19</a>, après quoi nous avons uniformément&ldquo;Jeduthun.&rdquo;Le cas semble être plutôt un dans lequel un nouveau nom a été pris après un certain temps, qui a ensuite remplacé l'ancien. Comparez Abraham, Sara, Josué, Jehoïakim, Sédécias, etc.</p><p></p>"
+    },
+    {
+      "id": "57672",
+      "passage": "13-6-50",
+      "sourceSha256": "496534156362733b4a699d04fc0082dc0abbdf31a8fff90f259b80a19711d6d5",
+      "translatedHtml": "<p><b>Les fils d'Aaron -</b> Cette liste, une simple répétition de cela dans<a class=\"bible-ref\" href=\"/1Chr_6.3\">1 Chroniques 6:3-8</a>, est venu, probablement, d'une source différente - une source appartenant à l'époque de David, avec qui Ahimaaz (le nom de famille sur la liste) était contemporain.<a class=\"bible-ref\" href=\"/1Chr_6.4\">1 Chroniques 6:4-15</a>est venu, sans aucun doute, d'un document appartenant au temps de la captivité (voir<a class=\"bible-ref\" href=\"/1Chr_6.15\">1 Chroniques 6:15</a></p><p></p>"
+    },
+    {
+      "id": "57674",
+      "passage": "13-6-54",
+      "sourceSha256": "fa1339c22a8d133d6a177b92e02235835f571b56a5f74b7559c5d4f0db92b6e5",
+      "translatedHtml": "<p><b> Leurs&lsquo;C'était le lot...</b>i. e.&ldquo;le premier lot.&rdquo;Les Kohathites avaient le premier lot parmi les familles lévitiques, comme étant la famille où était attaché le souverain sacerdoce (comparer<a class=\"bible-ref\" href=\"/Josh_21.10\"> Josué 21:10</a></p><p></p>"
+    },
+    {
+      "id": "57677",
+      "passage": "13-6-56",
+      "sourceSha256": "7312c44df6875b468c1b697f6e3ebeb4b4b2d4bf9274801ae90380c023674c93",
+      "translatedHtml": "<a name=\"56\"></a><a name=\"57\"></a><a name=\"58\"></a><a name=\"59\"></a><a name=\"60\"></a><a name=\"61\"></a><a name=\"62\"></a><a name=\"63\"></a><a name=\"64\"></a><a name=\"65\"></a><a name=\"66\"></a><a name=\"67\"></a><a name=\"68\"></a><a name=\"69\"></a><a name=\"70\"></a><a name=\"71\"></a><a name=\"72\"></a><a name=\"73\"></a><a name=\"74\"></a><a name=\"75\"></a><a name=\"76\"></a><a name=\"77\"></a><a name=\"78\"></a><a name=\"79\"></a><a name=\"80\"></a><a name=\"81\"></a><span class=\"large emphasis bold\" name=\"56-81\"> Versets 56 à 81</span><br><p>L'écrivain avait évidemment devant lui<a class=\"bible-ref\" href=\"/1Chr_6.58\">1 Chroniques 6:58</a><a class=\"bible-ref\" href=\"/1Chr_6.60\">1 Chroniques 6:60</a><a class=\"bible-ref\" href=\"/1Chr_6.72\">1 Chroniques 6:72</a>, etc.); dans quelques-uns, il a substitué à l'ancien un nom entièrement nouveau, l'orthographe moderne, probablement, du site ancien<a class=\"bible-ref\" href=\"/1Chr_6.70\">1 Chroniques 6:70</a><a class=\"bible-ref\" href=\"/1Chr_6.77\">1 Chroniques 6:77</a>. A un moment, il semblerait, son intention était de donner seulement les villes des prêtres, et de se contenter d'indiquer le seul nombre du reste. Son récit de la question a alors été amené à une conclusion, et résumé, en<a class=\"bible-ref\" href=\"/1Chr_6.64\">1 Chroniques 6:64</a> Mais, après cela, lui ou un écrivain plus tard a pensé qu'il valait mieux ajouter à la liste des villes sacerdotales les informations contenues dans les Juges sur ceux qui n'étaient pas sacerdotaux, mais simplement Lévitiques.<a class=\"bible-ref\" href=\"/1Chr_6.60\">1 Chroniques 6:60</a>. Dans la deuxième liste<a class=\"bible-ref\" href=\"/1Chr_6.67\">1 Chroniques 6:67-70</a>il y a aussi une omission de deux villes, Eltekeh et Gibbethon, qui sont voulus pour constituer le nombre dix<a class=\"bible-ref\" href=\"/1Chr_6.61\">1 Chroniques 6:61</a>. La troisième liste est complète, bien que certains noms soient très différents de ceux de Josué. Dans la quatrième, deux noms sont à nouveau en manque, ceux de Jokneam et Kartah.</p><p><b>1 Chroniques 6:61</b></p><p><b> Aux fils de Kehath qui étaient restés</b>i. e. à ceux d'entre eux qui n'étaient pas prêtres.</p><p><b>De la demi-tribu&#133; Dix villes -</b>La demi-tribu n'a fourni que deux villes (<a class=\"bible-ref\" href=\"/1Chr_6.70\">1 Chroniques 6:70</a>, et comparer<a class=\"bible-ref\" href=\"/Josh_21.25\"> Josué 21:25</a>). Il est donc évident que quelque chose est tombé. Nous pouvons fournir de Josué les paroles&ldquo;d'Éphraïm et de Dan,&rdquo; avant&ldquo;de la demi-tribu.&rdquo;</p><p><b>1 Chroniques 6:77</b></p><p><b>Au reste des enfants de Merari -</b> Plutôt,&ldquo;Au reste les enfants de Merari&rdquo;- c'est-à-dire,&ldquo;pour le reste des Lévites, descendants de Merari&rdquo;- les deux autres branches, les Kohathites et les Gershomites, ayant été traitées auparavant.</p><p></p>"
+    },
+    {
+      "id": "57727",
+      "passage": "13-7-7",
+      "sourceSha256": "3d1b19b83ecba6279f6ecb6ea1572d57a5900e699e41cc564589de475d4a04a7",
+      "translatedHtml": "<a name=\"7\"></a><a name=\"8\"></a><a name=\"9\"></a><a name=\"10\"></a><span class=\"large emphasis bold\" name=\"7-10\"> Versets 7 à 10</span><br /><p>Les listes ici sont remarquablement différentes de celles des références marginales Probablement les personnes mentionnées ici n'étaient pas littéralement&ldquo; fils,&rdquo; mais étaient parmi les descendants plus tard des fondateurs, étant les chefs de la famille au temps de David&lsquo;s le recensement.</p><p></p>"
+    },
+    {
+      "id": "57737",
+      "passage": "13-7-17",
+      "sourceSha256": "d728a5411b5b0a8620d265c0cbfc180bbbc8405bfecc9395502ed0b3896eae24",
+      "translatedHtml": "<p><b>Ce sont là les fils de Galaad.</b>i. e. ces descendants de Machir ont été comptés dans la famille de Galaad.&ldquo;Galaad&rdquo;a prévalu avant tout dans la ligne de Manassé, le terme&ldquo;Galaadite&rdquo; presque à la place&ldquo;- Manassé.&rdquo;</p><p></p>"
+    },
+    {
+      "id": "57739",
+      "passage": "13-7-18",
+      "sourceSha256": "54df0736be68ebaa6f485f5480dee618078f9ec2a34be1bde59a1fa090aa1a3e",
+      "translatedHtml": "<p><b>Abiézer -</b> Ses descendants formèrent l'une des branches les plus importantes des Manassites. Ils donnèrent à Israël le plus grand des Juges, Gédéon.<a class=\"bible-ref\" href=\"/Jude_6.11\"> Juges 6:11</a><a class=\"bible-ref\" href=\"/Jude_6.24\"> Juges 6:24</a><a class=\"bible-ref\" href=\"/Jude_6.34\"> Juges 6:34</a>, et ont été considérés comme la principale famille parmi les soi-disant&ldquo; fils de Galaad.</p><p></p>"
+    },
+    {
+      "id": "57741",
+      "passage": "13-7-20",
+      "sourceSha256": "82ccff86d1b6e661916fdd34dc81418067468fc1423d428018af68419796ac1d",
+      "translatedHtml": "<p><b>Les fils d'Éphraïm -</b>La généalogie est difficile. Il vaut peut-être mieux considérer Ezer et Elead<a class=\"bible-ref\" href=\"/1Chr_7.21\">1 Chroniques 7:21</a> comme les fils de Tsabad et les frères de la seconde Shuthéla, mais les fils naturels d`Éphraïm. Le passage courrait ainsi.</p><p>&ldquo;Et les fils d`Éphraïm, Schuthéla, et Bered, son fils, Tahath, son fils, et Elada, son fils, Tahath, son fils, Tsabad, son fils, et Shuthéla, son fils, et Ézer et Éléad, que les hommes de Gath tuèrent.&rdquo;(c.-à-d. les habitants établis, contrairement aux Hébreux nomades, Amalekites, etc.).</p><p></p>"
+    },
+    {
+      "id": "57753",
+      "passage": "13-7-34",
+      "sourceSha256": "7e331d3de42a6e0fa16c7a0566e31b335c543a861c577b9be35c78cd84192a2c",
+      "translatedHtml": "<p><b>Shamer, Ahi et Rohgah -</b>Traduisez comme suit:&ldquo;Les fils de Shamer<a class=\"bible-ref\" href=\"/1Chr_7.32\">1 Chroniques 7:32</a>, son frère, Rohgah, etc.&rdquo;</p><p></p>"
+    },
+    {
+      "id": "57788",
+      "passage": "13-9-3",
+      "sourceSha256": "a09fb32cb1c66be98dff7570f46bfa97233795a8b0886310a6b13987ab09ab69",
+      "translatedHtml": "<p>La correspondance et la diversité entre le récit ici et dans Néhémie<a class=\"bible-ref\" href=\"/Neh_11.4\"> Néhémie 11:4-19</a> Ils ont choisi, dans certains cas, des noms différents, ou des noms qui sont maintenant différents par la corruption; et ils ont souvent exprimé les généalogies des mêmes personnes différemment, en suivant le principe de la compression par omission, mais en omettant de leur liste des liens différents de la chaîne.</p><p></p>"
+    },
+    {
+      "id": "57795",
+      "passage": "13-9-10",
+      "sourceSha256": "25ca85738f0463e1cd67b925955576163882e9e913a23bedc19050880fddd31b",
+      "translatedHtml": "<p>&ldquo;Jedaiah,&rdquo;&ldquo;Jehoiarib,&rdquo;et&ldquo;Jachin,&rdquo;ne sont pas ici les noms d'individus, mais de familles sacerdotales.<a class=\"bible-ref\" href=\"/1Chr_24.7\">1 Chroniques 24:7-17</a>, il semble que Jehoiarib était la tête originale de la première&ldquo; Bien sûr,&rdquo;Jedaia du deuxième quart, et Jachin du vingt et unième quart.</p><p></p>"
+    },
+    {
+      "id": "57808",
+      "passage": "13-9-19",
+      "sourceSha256": "ed8b767dbad1e018aa86f79a0d0564e68a057bb85ae307c1aa21167d3cfd037b",
+      "translatedHtml": "<p><b>Shallum, fils de Kore -</b> Une personne différente du Shallum de<a class=\"bible-ref\" href=\"/1Chr_9.17\">1 Chroniques 9:17</a>, et avec un bureau différent, à savoir, la garde des portes intérieures du temple. L'original Shallum, Schelemaiah, ou Meshelemaïa, était un Lévite du temps de David<a class=\"bible-ref\" href=\"/1Chr_26.14\">1 Chroniques 26:14</a>. Ses descendants étaient encore appelés par son nom, mais avaient maintenant une charge plus importante qui leur avait été assignée.</p><p></p>"
+    },
+    {
+      "id": "57829",
+      "passage": "13-9-36",
+      "sourceSha256": "9cfaaefdc8504c1d53525a3674441883bcc5097c1ed76449cc55d7d158899e49",
+      "translatedHtml": "<a name=\"35\"></a><a name=\"36\"></a><a name=\"37\"></a><a name=\"38\"></a><a name=\"39\"></a><a name=\"40\"></a><a name=\"41\"></a><a name=\"42\"></a><a name=\"43\"></a><a name=\"44\"></a><span class=\"large emphasis bold\" name=\"35-44\"> Versets 35 à 44</span><br><p> Une répétition presque exacte de<a class=\"bible-ref\" href=\"/1Chr_8.29\">1 Chroniques 8:29-38</a>Pour relier la section généalogique de son travail à l'historique, il réintroduit la généalogie de la personne à la mort de laquelle s'ouvre sa section historique.</p><p></p>"
+    }
+  ]
+}

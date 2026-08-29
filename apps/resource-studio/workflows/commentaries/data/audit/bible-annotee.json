@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-28T06:17:56.090Z",
+  "resourceId": "bible-annotee",
+  "provider": "ThéoTeX",
+  "authorization": {
+    "status": "confirmed-by-project-owner",
+    "confirmedAt": "2026-08-28",
+    "scope": "Usage, transformation et redistribution dans Bible Strong confirmés par le responsable du projet ; pièce d’archive à rattacher au manifeste."
+  },
+  "format": "commentary-json-v1",
+  "counts": {
+    "entries": 23320,
+    "exactDuplicatesRemoved": 5,
+    "oldTestamentEntries": 16923,
+    "newTestamentEntries": 6397,
+    "chapterIntroductions": 667,
+    "bookIntroductions": 27,
+    "books": 66,
+    "sourcePages": 1642,
+    "sourceGaps": 1
+  },
+  "corpus": {
+    "path": "bible-annotee.json",
+    "sha256": "d06534ed25cf36b94cbfb94c68aa8ef184f67dc55b9aff1b409744874b6178b7",
+    "byteLength": 34064332
+  },
+  "sourceRoots": [
+    "https://theotex.org/ba/",
+    "https://theotex.org/nta/"
+  ],
+  "sourceSections": {
+    "OT": {
+      "pages": 929,
+      "bytes": 13007055,
+      "extractedEntries": 16923
+    },
+    "NT": {
+      "pages": 659,
+      "bytes": 11808288,
+      "extractedEntries": 6375
+    },
+    "NT-plan": {
+      "pages": 27,
+      "bytes": 228501,
+      "extractedEntries": 0
+    },
+    "NT-introduction": {
+      "pages": 27,
+      "bytes": 910319,
+      "extractedEntries": 27
+    }
+  },
+  "sourcePageInventorySha256": "fbe0771b60926cadf3ff4da0fce52a1a19d95a422d948b116a9fb2035266d998",
+  "sourceGaps": [
+    {
+      "url": "https://theotex.org/nta/Luc/Luc_nta_29.html",
+      "reason": "La page ThéoTeX ne contient aucune ligne de note exploitable."
+    }
+  ]
+}

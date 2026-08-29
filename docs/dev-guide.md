@@ -17,7 +17,7 @@ The repository uses Yarn 4, one root `yarn.lock`, and workspace dependencies. Ho
 yarn dev:mobile
 yarn dev:web
 yarn dev:api
-yarn dev:lexicon
+yarn dev:studio
 yarn dev:resources
 ```
 
@@ -28,6 +28,7 @@ yarn workspace @bible-strong/mobile ios
 yarn workspace @bible-strong/mobile android
 yarn workspace @bible-strong/api-functions build
 yarn workspace @bible-strong/resource-service test
+yarn workspace @bible-strong/resource-studio commentaries:validate
 ```
 
 The mobile app uses a custom Expo development client and is not expected to run in Expo Go.

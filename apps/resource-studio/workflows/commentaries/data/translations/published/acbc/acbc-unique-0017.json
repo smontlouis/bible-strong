@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "acbc",
+  "batchId": "acbc-unique-0017",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "xhigh"
+  },
+  "entries": [
+    {
+      "id": "104089",
+      "passage": "25-4-17",
+      "sourceSha256": "7c1bcdf8ac0e272c4b6112f315f04a2438f20879f712b7a1af6013a75c3ae92e",
+      "translatedHtml": "<p><b>Nous avons attendu une nation — </b>C’est-à-dire les Égyptiens, qui étaient leurs alliés prétendus, mais qui n’étaient ni capables ni désireux de les aider contre les Chaldéens.</p>"
+    },
+    {
+      "id": "104092",
+      "passage": "25-4-18",
+      "sourceSha256": "331f06aa1bb2520787849805f6e6bef172103b186112b9cf53253ec1dda4e5c2",
+      "translatedHtml": "<p><b>Nous ne pouvons pas entrer dans nos rues — </b>On suppose que cela fait référence aux flèches et autres projectiles lancés depuis les remblais qu’ils avaient élevés à l’extérieur des murailles, et qui tourmentaient gravement ceux qui marchaient dans les rues, sans qu’ils puissent se protéger.</p>"
+    },
+    {
+      "id": "104132",
+      "passage": "25-5-6",
+      "sourceSha256": "9fcc63640bccee2061225f530b060814ef3a4c8f03010969cf0531ec08d2ca46",
+      "translatedHtml": "<p><b>Nous avons tendu la main aux Égyptiens — </b>Nous avons recherché des alliances avec les Égyptiens et les Assyriens et conclu des pactes avec eux pour obtenir le nécessaire à la vie. Ou bien, partout où nous sommes maintenant chassés, nous sommes obligés de nous soumettre aux peuples des pays afin de préserver notre vie.</p>"
+    },
+    {
+      "id": "104161",
+      "passage": "25-5-14",
+      "sourceSha256": "dc2755ba3d8e6d907c495b8060674c96a17196c0b3bb7f611e9defc652537fd8",
+      "translatedHtml": "<p><b>Les anciens ont cessé de siéger à la porte — </b>Il n’y a désormais plus de justice rendue au peuple ; il est soumis à la loi militaire ou traité en tout point selon le caprice de ses maîtres.</p>"
+    },
+    {
+      "id": "104815",
+      "passage": "26-7-22",
+      "sourceSha256": "c9f0d58c8ac52ad2bb6382b311e175b5228139595295468b20205c6c8a694679",
+      "translatedHtml": "<p><b>Les brigands y entreront — </b>Les Chaldéens ne se contenteront pas de détruire la ville ; ils entreront dans le temple, le profaneront, le pilleront et le brûleront jusqu’au sol.</p>"
+    },
+    {
+      "id": "105123",
+      "passage": "26-11-9",
+      "sourceSha256": "99cb2cb25e1e01836eca387a1f241aa610257c67c4c6e85a9cff21a5ebc0781a",
+      "translatedHtml": "<p><b>Et vous livrer entre les mains d’étrangers — </b>Cela semble se rapporter principalement à Sédécias et à sa famille.</p>"
+    },
+    {
+      "id": "105818",
+      "passage": "26-18-10",
+      "sourceSha256": "c7ff463d4676ef8a2d3a6573507e4507706756fc29ffd656aec2d23c883f62d8",
+      "translatedHtml": "<p><b>S’il engendre un fils — </b>Qui sera l’inverse du caractère juste décrit plus haut, selon les treize articles déjà énoncés et expliqués.</p>"
+    },
+    {
+      "id": "106124",
+      "passage": "26-20-22",
+      "sourceSha256": "4ed88eba0fb59056aa1556383257c1548afac6ed8f8cc42112adf93cc658083a",
+      "translatedHtml": "<p><b>J’ai retiré ma main — </b>Je venais de la lever pour les écraser en un instant ; car eux aussi étaient idolâtres et marchaient sur les traces de leurs pères.</p>"
+    },
+    {
+      "id": "106221",
+      "passage": "26-20-48",
+      "sourceSha256": "27277d3bc4037c90f22c2f5f6c348eec631717c0fcc44eddda7cf2bb9394dcbf",
+      "translatedHtml": "<p><b>Toute chair — </b>Tout le peuple verra que cette guerre est un jugement du Seigneur.</p><p><b>Elle ne sera pas éteinte — </b>Jusqu’à ce que tout le pays soit entièrement ruiné.</p>"
+    },
+    {
+      "id": "106225",
+      "passage": "26-20-49",
+      "sourceSha256": "4b051623e70f58435113b93fa480c1b1b5bcf9bb3cbf156c514d8fe3651e0057",
+      "translatedHtml": "<p><b>Ah ! Seigneur Dieu — </b>Ô mon Dieu, considère ma situation ; qui croira ce que je vais dire ? Ils éloignent de leur pensée le jour du malheur.</p><p><b>Ne parle-t-il pas en paraboles ? — </b><span class=\"greek-hebrew\">&#1492;&#1493;&#1488; &#1502;&#1513;&#1500;&#1497;&#1501; &#1502;&#1502;&#1513;&#1500; &#1492;&#1500;&#1488; </span>   <span class=\"translit\">halo memashshel meshalim hu</span>, « N’est-il pas un fabricant de paraboles ? » N’a-t-il pas coutume de parler par énigmes ? Ses figures ne doivent pas être comprises ; nous ne sommes pas obligés d’en sonder le sens ; et peut-être, après tout, ne nous concernent-elles pas, ou ne s’accompliront-elles pas de notre temps, même si elles concernent le pays. Ainsi ont-ils écarté ce qui aurait pu leur faire du bien et rejeté contre eux-mêmes le conseil de Dieu.</p><p>En partageant la parole avec notre prochain, nous perdons souvent le bénéfice des menaces comme des promesses. Ils ont volontairement fermé leurs yeux ; puis Dieu, dans son jugement, les a scellés dans les ténèbres.</p><p> </p>"
+    },
+    {
+      "id": "106408",
+      "passage": "26-22-19",
+      "sourceSha256": "1918cd4ca10cc806809303ac22fa9f5286ea34870ec2a5fae8d58de1b069ed68",
+      "translatedHtml": "<p><b>Je vous rassemblerai — </b>Jérusalem est représentée ici comme le creuset ; tout le peuple doit y être rassemblé et le feu chaldéen doit faire fondre l’ensemble. Et Dieu augmentera vos souffrances : comme le fondeur souffle sur le feu avec ses soufflets, ainsi Dieu soufflera sur vous avec le feu de sa colère,  <a class=\"bible-ref\" href=\"/Ezek_22.21\">Ézéchiel 22:21</a>.</p>"
+    },
+    {
+      "id": "106478",
+      "passage": "26-23-14",
+      "sourceSha256": "98f2acbd897dd35724c75c109e5eefdfdcd6f7ddaa447eb37cadd9d730804c75",
+      "translatedHtml": "<p><b>Des hommes représentés sur la muraille — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Ezek_8.10\">Ézéchiel 8:10</a>.</p>"
+    },
+    {
+      "id": "106490",
+      "passage": "26-23-23",
+      "sourceSha256": "41d9eb2c3acecc0672735ea599550dde1ec3b47db41dd6aa7a49a4431fdbf85d",
+      "translatedHtml": "<p><b>Pékod, Choa et Koa — </b><span class=\"greek-hebrew\">&#1493;&#1511;&#1493;&#1506; &#1493;&#1513;&#1493;&#1506; &#1508;&#1511;&#1493;&#1491; </span>. On a pensé que ces noms désignaient certains peuples voisins des Chaldéens ; mais aucun géographe n’a jamais réussi à les identifier.</p><p>Dans nos anciennes traductions, ces noms étaient considérés comme des appellatifs : dirigeants, hommes puissants et tyrans. D’autres, suivant le sens littéral des mots, ont traduit : visiter, crier et se retirer. D’autres encore les ont appliqués aux habitudes des soldats chaldéens. Pékod signifierait le rassemblement ou la revue des armées ; Choa, la magnificence de leur uniforme et de leurs armes ; et Koa, les marques ou broderies des vêtements des capitaines et des généraux. Grotius pensait qu’il pouvait s’agir de noms de nations contiguës : Pékod, les Bactriens ; Choa, un peuple d’Arménie ; et Koa, les Mèdes. Je n’ai rien à ajouter qui puisse me satisfaire moi-même ou édifier mes lecteurs.</p>"
+    },
+    {
+      "id": "106525",
+      "passage": "26-23-47",
+      "sourceSha256": "778917014c2c533f0fd68e9f9a29bf2420b8de3afc0954ee56024baa781e1ac6",
+      "translatedHtml": "<p><b>Ils les lapideront — </b>Comme ils lapidaient les femmes adultères sous la loi. Voir  <a class=\"bible-ref\" href=\"/Lev_20.10\">Lévitique 20:10</a> ;  <a class=\"bible-ref\" href=\"/Deut_22.22\">Deutéronome 22:22</a>, comparé à  <a class=\"bible-ref\" href=\"/John_8.3\">Jean 8:3</a>.</p>"
+    },
+    {
+      "id": "106611",
+      "passage": "26-25-1",
+      "sourceSha256": "8add132b101335c20423e032527f0fa657b52874f161f36d05c1962fdb3eecad",
+      "translatedHtml": "<p><b>La parole du Seigneur — </b>L’ordre chronologique de ce chapitre se situe après  <a class=\"bible-ref\" href=\"/Ezek_33.21\">Ézéchiel 33:21</a>, etc. Voir l’archevêque Newcome.</p>"
+    },
+    {
+      "id": "106622",
+      "passage": "26-25-4",
+      "sourceSha256": "9be2195b3e40bc18a1140b74c8224c0050d7a7ee4eccb180520d61533ad24dcb",
+      "translatedHtml": "<p><b>Il te livrera aux hommes de l’Orient — </b>Probablement les Arabes scénites, les Ismaélites et les gens de Kédar, qui s’emparèrent des provinces des Ammonites vaincus, etc. La description suivante ne convient qu’à ce peuple, vivant de fruits, du lait de ses troupeaux et utilisant des chameaux, etc. Certains pensent que les gens de l’Orient désignent les Chaldéens.</p>"
+    },
+    {
+      "id": "106644",
+      "passage": "26-25-10",
+      "sourceSha256": "adeb1a6750962740339193afddadede18f30b72ffcab4523efa7bcdf95208bb0",
+      "translatedHtml": "<p><b>Que les Ammonites — </b>Le syriaque porte : « Que Rabba des fils d’Ammon ne soit pas rappelée. »</p>"
+    },
+    {
+      "id": "106813",
+      "passage": "26-27-20",
+      "sourceSha256": "05dc76145fe1af93c8ce132304f2997d7bff1a6558d1e3cbd95070c4f82ebdf8",
+      "translatedHtml": "<p><b>Dédan — </b>Peut-être les descendants de Dédan, fils de Rama, voir  <a class=\"bible-ref\" href=\"/Gen_10.7\">Genèse 10:7</a>.</p><p><b>En vêtements précieux pour les chars — </b>Soit des tapis fins, soit de riches housses pour chevaux, chameaux, etc., utilisées pour monter.</p>"
+    },
+    {
+      "id": "106821",
+      "passage": "26-27-22",
+      "sourceSha256": "15be9e32703c954516c86bb52858f419f6c6c3b34a6a6c7e2c891171ddeab202",
+      "translatedHtml": "<p><b>Séba et Rama — </b>Habitants de l’Arabie Heureuse, à l’entrée du golfe Persique, célèbres pour leurs richesses et leurs épices.</p>"
+    },
+    {
+      "id": "107309",
+      "passage": "26-30-20",
+      "sourceSha256": "b91947f6d4d4bd3d57a4df85641d29150c721f09294fb0171a2fac88fb79cf4a",
+      "translatedHtml": "<p><b>La onzième année, le premier mois, le septième jour — </b>C’était la onzième année de la captivité de Jéconias, et cette date correspond au 26 avril de l’an du monde 3416 ; une prophétie antérieure de plusieurs années à celle qui avait déjà été prononcée. En rassemblant les écrits d’Ézéchiel, on a pris davantage soin de réunir tout ce qui se rapportait à un même sujet que de respecter l’ordre chronologique.</p>"
+    },
+    {
+      "id": "107452",
+      "passage": "26-32-17",
+      "sourceSha256": "014f2a42d450ecd6b891ab2d714a9d8d5dde8cb6f64a16011b484819e8e601e7",
+      "translatedHtml": "<p><b>La douzième année — </b>Deux manuscrits de Kennicott, un de De Rossi et un des miens (celui mentionné dans  <a class=\"bible-ref\" href=\"/Ezek_32.1\">Ézéchiel 32:1</a>) portent « la onzième année » ; il en va de même du syriaque, comme précédemment. Cette prophétie concerne le peuple d’Égypte.</p>"
+    },
+    {
+      "id": "108349",
+      "passage": "26-40-9",
+      "sourceSha256": "cd8466b1908a03e2b243ad8c718eee871f3ae6f4dfad11af5d3c44a7dbc13875",
+      "translatedHtml": "<p><b>Le porche de la porte — </b>Voir la description des portes sur le plan.</p>"
+    },
+    {
+      "id": "108385",
+      "passage": "26-40-30",
+      "sourceSha256": "303bae5bf94f063f605d81da1cdcc5edcd80988d156d5b0f3827dd29f90fb6e4",
+      "translatedHtml": "<p><b>Et les arches tout autour avaient vingt-cinq coudées de longueur — </b>Il est évident que les cinq coudées de largeur doivent se lire vingt-cinq d’après  <a class=\"bible-ref\" href=\"/Ezek_40.21\">Ézéchiel 40:21</a>,  <a class=\"bible-ref\" href=\"/Ezek_40.25\">Ézéchiel 40:25</a>,  <a class=\"bible-ref\" href=\"/Ezek_40.29\">Ézéchiel 40:29</a>,  <a class=\"bible-ref\" href=\"/Ezek_40.33\">Ézéchiel 40:33</a> et  <a class=\"bible-ref\" href=\"/Ezek_40.36\">Ézéchiel 40:36</a>. Le mot <span class=\"greek-hebrew\">&#1493;&#1506;&#1513;&#1512;&#1497;&#1501; </span>   <span class=\"translit\">veesrim</span>, vingt, a probablement disparu du texte. En effet, le verset entier manque dans deux manuscrits de Kennicott, un de De Rossi et un des miens (Cod. B.). Il a été ajouté dans la marge du mien par une main plus tardive. On rapporte qu’il manquait autrefois dans de nombreux manuscrits.</p>"
+    },
+    {
+      "id": "108391",
+      "passage": "26-40-39",
+      "sourceSha256": "a480e9846cc3d9e39b7d3e4b0eec0558e892185e305a87964e486cc7bc1895b3",
+      "translatedHtml": "<p><b>Le porche de la porte — </b>La porte nord de la cour des prêtres. Voir Q sur le plan.</p><p><b>Deux tables — </b>Certains disent qu’elles étaient de marbre. Voir dddd sur le plan.</p>"
+    },
+    {
+      "id": "108396",
+      "passage": "26-40-41",
+      "sourceSha256": "15eceb53b742ac7c9a366613f51b22161b13997d2380f5826bdac256b38f0737",
+      "translatedHtml": "<p><b>Quatre tables — </b>Elles se trouvaient dans le porche de la porte nord, dans la cour des prêtres ; c’est sur elles qu’ils tuaient, écorchaient et découpaient les victimes. Voir dddd sur le plan.</p>"
+    },
+    {
+      "id": "108405",
+      "passage": "26-40-47",
+      "sourceSha256": "d3246696e73705190d537468003679ae5e55659e4dea404e868101bbf544f448",
+      "translatedHtml": "<p><b>Il mesura la cour — </b>C’était la cour des prêtres. Voir FFF sur le plan.</p>"
+    },
+    {
+      "id": "108408",
+      "passage": "26-40-48",
+      "sourceSha256": "1df78cce2936f41bff78e88a8910a3f43f900ce64ab622efbb7a3084cf1ff327",
+      "translatedHtml": "<p><b>La largeur de la porte — </b>Il est évident que la porte était à deux battants ou munie de portes pliantes. La longueur du porche était de vingt coudées. Josèphe dit que le vestibule avait vingt coudées de longueur et dix de largeur. Antiquités, livre 8, 3, 2.</p>"
+    },
+    {
+      "id": "108426",
+      "passage": "26-41-6",
+      "sourceSha256": "9363c21a144b2664f5307c645c6263b0c1592ce12aea67186bd424aa3d9d6ecf",
+      "translatedHtml": "<p><b>Les chambres latérales étaient au nombre de trois — </b>Nous apprenons par Josèphe, Antiquités 8:3, 2, qu’autour du temple de Salomon se trouvaient des chambres de trois étages, chaque étage comprenant trente chambres. On suppose que douze étaient placées au nord du temple, douze au sud et six à l’est.</p><p><b>Elles entraient dans la muraille — </b>Les poutres étaient encastrées dans le mur extérieur, mais reposaient sur des saillies du mur intérieur.</p>"
+    },
+    {
+      "id": "108439",
+      "passage": "26-41-11",
+      "sourceSha256": "099224b3ab978786ce3f2ee2fed25d0693cdcce3d70199dba360510f6427d775",
+      "translatedHtml": "<p><b>Et les portes — </b>Voir le plan, aa, bb.</p>"
+    },
+    {
+      "id": "108442",
+      "passage": "26-41-12",
+      "sourceSha256": "4e671df1885862bb48d84cf6be5f0181b94c86335bfcaf3b71dcc191051664c9",
+      "translatedHtml": "<p><b>La longueur en était de quatre-vingt-dix coudées — </b>Le temple, avec les bâtiments qui l’entouraient, mesurait quatre-vingt-une coudées de longueur ; ajoutez dix coudées pour le vestibule, ou cinq pour la partie séparée et cinq pour son mur : en tout, quatre-vingt-dix coudées. Voir le plan, LHIL. Par la partie séparée, je suppose que le temple lui-même est désigné.</p>"
+    },
+    {
+      "id": "108445",
+      "passage": "26-41-13",
+      "sourceSha256": "f8db78e5b90e108b5a476675dda1697abd574195790c5eb52374238ac1218d2e",
+      "translatedHtml": "<p><b>Ainsi il mesura la maison — </b>Le temple, mesuré depuis le mur qui l’entourait, du côté occidental jusqu’au vestibule, avait cent une coudées : cinq pour la partie séparée, neuf pour le mur et les chambres attenantes au temple, soixante pour le sanctuaire et le lieu saint, dix pour le vestibule et douze pour les deux grandes murailles à l’ouest et à l’est du temple ; en tout, cent une coudées. Voir le plan, GHI.</p>"
+    },
+    {
+      "id": "108447",
+      "passage": "26-41-14",
+      "sourceSha256": "8bcafe3218d7568e9bf40830c186c91e9f0e8282f7d879664ed3373c16c6d40f",
+      "translatedHtml": "<p><b>La largeur de la façade de la maison — </b>C’est-à-dire le devant. Voir le plan, FRR.</p>"
+    },
+    {
+      "id": "108480",
+      "passage": "26-42-4",
+      "sourceSha256": "556a1b96dd329177f56d2ccbaacbb53df248b46dbee896860535e5abcd54610a",
+      "translatedHtml": "<p><b>Une allée de dix coudées de largeur vers l’intérieur — </b>Cela semble avoir été une sorte de parapet.</p>"
+    },
+    {
+      "id": "108502",
+      "passage": "26-42-16",
+      "sourceSha256": "0886c4fcedbaa380ad66611067d92e7c44fd46122262b787eaad9f195b5199a0",
+      "translatedHtml": "<p><b>Il mesura le côté est, nord, sud et ouest — </b>Chacun mesurait cinq cents roseaux ; et, comme le bâtiment était carré, la superficie devait être de près de treize mille pas. Il n’est pas étonnant que cela ait été appelé une ville. Voir  <a class=\"bible-ref\" href=\"/Ezek_40.2\">Ézéchiel 40:2</a>.</p>"
+    },
+    {
+      "id": "108538",
+      "passage": "26-43-13",
+      "sourceSha256": "9e368d9f54ffe08cc24306dedcb51d3f0bf90bf1b52a547e941c2f51b5444d39",
+      "translatedHtml": "<p><b>La coudée est une coudée et une largeur de main — </b>C’est la même coudée que celle avec laquelle toutes les mesures précédentes ont été faites ; elle avait une largeur de main, ou quatre pouces, de plus que la coudée babylonienne.</p>"
+    },
+    {
+      "id": "108545",
+      "passage": "26-43-17",
+      "sourceSha256": "fb442591a0df161319c51e8a54db4405c5e5f431010c33a74ca3d8dbb9333976",
+      "translatedHtml": "<p><b>Et le rebord — </b>La saillie sur laquelle les prêtres marchaient autour de l’autel, voir  <a class=\"bible-ref\" href=\"/Ezek_43.14\">Ézéchiel 43:14</a>. Grâce à ces rebords ou saillies, l’autel se rétrécissait vers le sommet. « La montée sera tournée vers l’orient » ; cette montée était un plan incliné. Mais ces rebords, ou plus exactement ces saillies, comme les traduit l’évêque Newcome, peuvent être calculés ainsi. L’autel lui-même avait dix pieds de haut et vingt de large, comme celui de Salomon,  <a class=\"bible-ref\" href=\"/2Chr_4.1\">2 Chroniques 4:1</a>.</p><p align=\"center\">                                                       <b>Hauteur, coudées   </b>                                                   Pour la base,  <a class=\"bible-ref\" href=\"/Ezek_43.13\">Ézéchiel 43:13</a>, hauteur : 1                                                            De la surface de la base au premier rebord,  <a class=\"bible-ref\" href=\"/Ezek_43.14\">Ézéchiel 43:14</a> : 1         Du rebord inférieur au supérieur,  <a class=\"bible-ref\" href=\"/Ezek_43.14\">Ézéchiel 43:14</a> : 4         Du rebord supérieur à l’ariel ou foyer,  <a class=\"bible-ref\" href=\"/Ezek_43.15\">Ézéchiel 43:15</a> : 4                                                      <b>En tout : 10                                                           Largeur, coudées   </b>                                                   Quant à la largeur, le rebord supérieur,  <a class=\"bible-ref\" href=\"/Ezek_43.17\">Ézéchiel 43:17</a>, mesurait 14                                                            Ajoutez une coudée de chaque côté pour le rebord supérieur,  <a class=\"bible-ref\" href=\"/Ezek_43.14\">Ézéchiel 43:14</a>, dernière partie : 2         Ajoutez une coudée de chaque côté pour le rebord inférieur,  <a class=\"bible-ref\" href=\"/Ezek_43.14\">Ézéchiel 43:14</a>, première partie : 2         Ajoutez une coudée de chaque côté pour la base,  <a class=\"bible-ref\" href=\"/Ezek_43.13\">Ézéchiel 43:13</a> : 2                                                            <b>En tout : 20     </b></p><p> L’autel des holocaustes, décrit dans  <a class=\"bible-ref\" href=\"/Exod_27.1\">Exode 27:1</a> ;  <a class=\"bible-ref\" href=\"/Exod_38.1\">Exode 38:1</a>, était plus petit que celui-ci, parce qu’il devait être déplacé d’un lieu à l’autre avec le tabernacle. Celui-ci était destiné à un temple permanent. Voir l’évêque Newcome sur ce chapitre.</p>"
+    },
+    {
+      "id": "108639",
+      "passage": "26-45-6",
+      "sourceSha256": "658bc3879a9dafb00bee474bcd52644c26657202e2ecf5c187a2ed41b20ee573",
+      "translatedHtml": "<p><b>Vous établirez — </b>Voir le plan, FF.</p>"
+    },
+    {
+      "id": "108668",
+      "passage": "26-45-20",
+      "sourceSha256": "f9353cc4c6df82d581b6857919a614f758b747bc91bf213070e45717b3aaf6ed",
+      "translatedHtml": "<p><b>Pour celui qui est simple — </b>Qui manque de discernement pour se conduire convenablement.</p>"
+    },
+    {
+      "id": "108677",
+      "passage": "26-45-25",
+      "sourceSha256": "3b712fa95d20e2f15c64bc6edd81d3a765546371ae0c91aa5e0a3a9bff4d129a",
+      "translatedHtml": "<p><b>Au septième mois — </b>Il fera à la fête des Tabernacles les mêmes choses qu’il lui était demandé de faire à la Pâque. Le prince offrira le même nombre de victimes, de même qualité et avec les mêmes cérémonies, durant les sept jours susmentionnés. Les offrandes étaient des sacrifices pour le péché, des holocaustes et des sacrifices de paix.</p><p> </p>"
+    },
+    {
+      "id": "108692",
+      "passage": "26-46-7",
+      "sourceSha256": "acc8a42afd488b154df57169d99fcc28811c1750f8a7a959f0edc7fe2c45c4f6",
+      "translatedHtml": "<p><b>Selon ce que sa main pourra atteindre — </b>Selon ses capacités, selon ce que la providence de Dieu a placé dans sa main, c’est-à-dire son pouvoir. Cette proportion d’offrandes diffère de celle prescrite par la loi mosaïque,  <a class=\"bible-ref\" href=\"/Num_15.4\">Nombres 15:4-12</a>.</p>"
+    },
+    {
+      "id": "108698",
+      "passage": "26-46-10",
+      "sourceSha256": "ddea0ab267ead2a1ec537c15af1e33b8da56a7c15db6d92c85467ff2abf53e9a",
+      "translatedHtml": "<p><b>Et le prince au milieu d’eux — </b>Lui aussi agira de la même manière : il devra également aller droit devant lui et ne jamais tourner le dos pour sortir par la même porte que celle par laquelle il est entré. Le prince et le peuple devaient commencer et achever leur culte en même temps.</p>"
+    },
+    {
+      "id": "108720",
+      "passage": "26-46-23",
+      "sourceSha256": "d4b50b292083bc61b136bc21543b1708d1ce6bae2012a23349aa8104b2d14c6a",
+      "translatedHtml": "<p><b>Il y avait des lieux de cuisson — </b>C’étaient des pièces découvertes où l’on entretenait des feux pour préparer les parties des sacrifices de paix offerts dans le temple par des particuliers, par principe de dévotion. Leurs familles et leurs amis festoyaient avec ces sacrifices, et des portions étaient envoyées aux pauvres, aux veuves et aux orphelins. Ainsi l’esprit de dévotion contribuait à préserver dans le pays l’esprit de miséricorde, de charité et de bienveillance. Que cette parole est vraie : « La piété est utile à toutes choses. »</p><p> </p>"
+    },
+    {
+      "id": "108782",
+      "passage": "26-47-17",
+      "sourceSha256": "9cb759e67a5332b0647fdbc72e6fe4c7c0e841586e0d87b924c59d01949e50de",
+      "translatedHtml": "<p><b>La frontière depuis la mer — </b>La frontière nord vers l’est est définie dans  <a class=\"bible-ref\" href=\"/Ezek_47.15\">Ézéchiel 47:15</a>,  <a class=\"bible-ref\" href=\"/Ezek_47.16\">Ézéchiel 47:16</a> ; ici, il est montré jusqu’où elle s’étend vers le nord.</p><p><b>Hatsar-Énan — </b>Le village d’Énan,  <a class=\"bible-ref\" href=\"/Num_34.9\">Nombres 34:9</a>, situé au nord de Césarée de Philippe. Tsiphron, voir  <a class=\"bible-ref\" href=\"/Num_34.9\">Nombres 34:9</a>, appelé Saphion par le syriaque.</p>"
+    },
+    {
+      "id": "108785",
+      "passage": "26-47-18",
+      "sourceSha256": "730af25ecfdbacfeba238dae99dc219077a9f44b012abc085534d66852d4fcef",
+      "translatedHtml": "<p><b>La mer orientale — </b>La même que la mer Morte.</p>"
+    },
+    {
+      "id": "108791",
+      "passage": "26-47-20",
+      "sourceSha256": "a9fa9bb309efd60e764a82fc346f027c43f3db1eba8f6e3d63ff1cb679beec19",
+      "translatedHtml": "<p><b>La grande mer — </b>La Méditerranée.</p><p><b>Depuis la frontière — </b>La frontière méridionale, mentionnée dans  <a class=\"bible-ref\" href=\"/Ezek_47.19\">Ézéchiel 47:19</a>.</p>"
+    },
+    {
+      "id": "108803",
+      "passage": "26-48-15",
+      "sourceSha256": "fd396978282037a7093860e47448088db4f8a06bdf4898ae27e5514beb0e11b7",
+      "translatedHtml": "<p><b>Et les cinq mille qui restent — </b>Le territoire des Lévites était de vingt-cinq mille coudées carrées,  <a class=\"bible-ref\" href=\"/Ezek_48.20\">Ézéchiel 48:20</a>, mais leur ville ne mesurait que quatre mille cinq cents coudées carrées, voir  <a class=\"bible-ref\" href=\"/Ezek_48.13\">Ézéchiel 48:13</a> et  <a class=\"bible-ref\" href=\"/Ezek_48.16\">Ézéchiel 48:16</a> ; il restait donc dix mille coudées carrées à diviser, dont cinq mille coudées de largeur sur vingt-cinq mille de longueur, à l’est et à l’ouest, étaient réservées à une sorte de seconde ville, ou à des faubourgs où pourraient habiter des laïcs employés par les prêtres et les Lévites logés dans le temple et dans la ville,  <a class=\"bible-ref\" href=\"/Ezek_48.18\">Ézéchiel 48:18</a>. Un autre espace de mille coudées de largeur sur vingt-cinq mille de longueur, qui ne s’étendait que du nord au sud, était destiné aux champs et aux jardins affectés à la subsistance de ces serviteurs laïcs. On peut remarquer qu’il n’y avait aucune terre cultivée entre la portion des Lévites et celle du prince, mais seulement sur les côtés est et ouest. Voir  <a class=\"bible-ref\" href=\"/Ezek_45.6\">Ézéchiel 45:6</a> et la carte FF.</p>"
+    },
+    {
+      "id": "108812",
+      "passage": "26-48-21",
+      "sourceSha256": "d30f78aab16523bf06c3ec213e1f01aef717f3841f6119dafbc7a20b9cee7696",
+      "translatedHtml": "<p><b>Et le reste — pour le prince — </b>Sa portion se trouvait à côté de celle des Lévites, d’ouest en est ; de chaque côté, elle mesurait vingt-cinq mille coudées de longueur, de l’est à l’ouest, sur douze mille cinq cents coudées de largeur du nord au sud. L’espace situé au-dessus comme au-dessous était égal, entre la tribu de Juda et celle de Benjamin au nord et au sud ; et la portion des Lévites avait Juda et Benjamin au nord et au sud, tandis que la portion du prince se trouvait à l’est et à l’ouest. Voir la carte.</p>"
+    },
+    {
+      "id": "108816",
+      "passage": "26-48-28",
+      "sourceSha256": "bf4c07ac11d373ab302191e0894d5fb09b26a299d17fda4fada7bffa124fff7a",
+      "translatedHtml": "<p><b>De Tamar — à Kadès — </b>La première se trouvait au sud de la mer Morte ; la seconde, ou Kadès-Barnéa, était encore plus au sud, à l’extrémité du territoire de Gad, qui était la tribu la plus méridionale, tandis que Dan était la plus septentrionale.</p>"
+    },
+    {
+      "id": "113243",
+      "passage": "28-6-10",
+      "sourceSha256": "c385fbfa1b2f53d37a90c11ea6fabcbfd1284145b02c57d46d2eaf5b946b7869",
+      "translatedHtml": "<p><b>J’ai vu une chose horrible — </b>C’est-à-dire l’idolâtrie qui prévalait en Israël à un tel point que tout le pays en était souillé.</p>"
+    },
+    {
+      "id": "113528",
+      "passage": "28-10-15",
+      "sourceSha256": "561940faee836b5c797c6d0151deec6b9805a3fcaad3823335ac42d143d0bad1",
+      "translatedHtml": "<p><b>Ainsi Béthel vous traitera — </b>Tel sera le résultat de votre idolâtrie.</p><p><b>En un matin, le roi d’Israël sera entièrement retranché — </b>Soudainement, de manière inattendue. Osée, roi d’Israël, sera retranché par les Assyriens. Certains faits sont évoqués dans ce chapitre, mais ne peuvent être vérifiés facilement, car nous ne connaissons pas suffisamment l’histoire de ces temps.</p><p> </p>"
+    },
+    {
+      "id": "113600",
+      "passage": "28-11-12",
+      "sourceSha256": "a4fea011b3c57966f0cfe02294bd247df1cc3450940e95cabdb7c1d9f0a0b02e",
+      "translatedHtml": "<p><b>Éphraïm m’entoure de mensonges — </b>Je pense que ce verset ne s’accorde pas bien avec ce qui précède ; il appartient à un autre sujet et devrait commencer le chapitre suivant, comme dans l’hébreu.</p><p><b>Juda gouverne encore avec Dieu — </b>Il y a ici une allusion à  <a class=\"bible-ref\" href=\"/Gen_32.24\">Genèse 32:24</a>, où Jacob, après avoir « lutté avec l’Ange », reçut le nom d’Israël, celui qui gouverne avec Dieu. Les Israélites avaient perdu cette gloire par leur idolâtrie ; mais Juda conservait encore le vrai culte et méritait seul le nom d’Israël.</p><p>L’évêque Newcome traduit cette clause ainsi : — </p><p>    « Mais par la suite ils descendront, peuple de Dieu, peuple même de saints fidèles. »</p><p>Même en admettant que ce soit l’interprétation la plus correcte de l’original, je ne vois pas ce que nous gagnons à ce changement.</p><p> </p>"
+    }
+  ]
+}

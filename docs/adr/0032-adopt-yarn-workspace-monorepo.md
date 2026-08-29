@@ -18,7 +18,7 @@ Deployable or independently runnable products live under `apps/`:
 - `apps/mobile` — `@bible-strong/mobile`
 - `apps/web` — `@bible-strong/web`
 - `apps/api` — `@bible-strong/api`; its Firebase functions workspace is `@bible-strong/api-functions`
-- `apps/lexicon-editor` — `@bible-strong/lexicon-editor`
+- `apps/resource-studio` — `@bible-strong/resource-studio` (renamed from Lexicon Editor by ADR-0035)
 
 Shared or service packages live under `packages/`:
 

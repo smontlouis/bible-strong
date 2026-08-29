@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "acbc",
+  "batchId": "acbc-unique-0005",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "xhigh"
+  },
+  "entries": [
+    {
+      "id": "51050",
+      "passage": "11-6-36",
+      "sourceSha256": "ba18a23eda049aee442ea86e690c5c2b1dd0f867807cb4ca66b9a6c0b9ea3334",
+      "translatedHtml": "<p><b>Trois</b> <b>rangées</b> <b>de</b> <b>pierres</b> <b>taillées</b>, <b>et</b> <b>une</b> <b>rangée</b> <b>de</b> <b>poutres</b> <b>de cèdre — </b>Cela n’indique-t-il pas qu’il y avait trois assises de pierre, puis une assise de bois, sur toute l’étendue de ce mur ? Trois couches de pierre et une couche de bois, et ainsi de suite. Si tel était le cas, un tel édifice pouvait-il être très durable ? Il en est également question dans le chapitre suivant,  <a class=\"bible-ref\" href=\"/1Kgs_7.11\">1 Rois 7:11</a> ; et puisque le temple et la maison de Salomon furent construits de la même manière, nous pouvons supposer que c’était la façon ordinaire dont les édifices de meilleure qualité étaient construits. Calmet pense que le prophète fait allusion à ce mode de construction,  <a class=\"bible-ref\" href=\"/Hab_2.11\">Habacuc 2:11</a> : la pierre criera du mur, et la poutre de bois lui répondra. Mais il faut observer que cela se trouvait dans la cour intérieure et que le bois n’était donc pas exposé aux intempéries. La cour extérieure ne semble pas avoir été bâtie assise après assise de pierre et de bois.</p>\n\n"
+    },
+    {
+      "id": "51618",
+      "passage": "11-9-18",
+      "sourceSha256": "44ba0c92c82e2db29f99e74ae5e485e1d40c52387f5752e5d2b964175ee7e288",
+      "translatedHtml": "<p><b>Et</b> <b>Tadmor</b> <b>dans</b> <b>le</b> <b>désert — </b>On admet presque universellement que cette ville est la célèbre Palmyre, dont les ruines subsistent encore aujourd’hui et nous donnent la plus haute idée de la splendeur et de la magnificence de Salomon. Palmyre se dressait dans une plaine fertile entourée d’un désert aride, l’Euphrate coulant à l’est. Les ruines sont bien décrites par MM. Dawkes et Wood, qui en donnent de belles représentations. Elles sont également bien décrites dans la partie ancienne de l’Histoire universelle, vol. I, p. 367-370. La description se termine ainsi : « Le monde n’a jamais vu de ville plus glorieuse ; la fierté, selon toute apparence, des temps anciens, et le reproche des nôtres ; une ville qui ne se distinguait pas davantage par la majesté de ses édifices et l’originalité de sa situation que par les personnages extraordinaires qui y fleurirent autrefois, parmi lesquels la célèbre Zénobie et l’incomparable Longin doivent être à jamais rappelés avec admiration et regret. »</p>\n"
+    },
+    {
+      "id": "51752",
+      "passage": "11-10-22",
+      "sourceSha256": "dd6f663344ae10a023ee3a726882c9b119a92020a108f02f61572707d974660a",
+      "translatedHtml": "<p><b>Une</b> <b>flotte</b> <b>de</b> <b>Tarsis — </b>Pour les conjectures vraisemblables concernant ce lieu et le voyage de trois ans, voir à la fin de  <a class=\"bible-ref\" href=\"/1Kgs_10.29\">1 Rois 10:29</a> ; (note), ainsi que le chapitre précédent, 1 Rois 9 (note).</p><p><b>Des singes — </b><span class=\"greek-hebrew\">&#1511;&#1508;&#1497;&#1501; </span>   <span class=\"translit\">kophim</span> ; probablement une espèce de singe plutôt qu’un grand singe.</p>\n\n"
+    },
+    {
+      "id": "51780",
+      "passage": "11-10-25",
+      "sourceSha256": "410b8768d227ddf9fff1c42f1e7636dbbdf8468a3f44a3e9f089eb746c85c1d2",
+      "translatedHtml": "<p><b>Ils</b> <b>apportèrent</b> <b>chacun</b> <b>son</b> <b>présent</b> <b>— </b>Cela signifie un tribut ; et cela nous montre de quelle sorte était ce tribut, à savoir des vases d’or et d’argent, probablement des lingots ; des vêtements faits d’étoffes très riches ; des armes, car on en fabriquait fort peu en Judée ; des épices, qui se vendaient sans doute bien dans ce pays ; des chevaux, qui étaient très rares ; et des mulets, l’animal le plus nécessaire à tous les usages de la vie.</p>\n"
+    },
+    {
+      "id": "51787",
+      "passage": "11-10-26",
+      "sourceSha256": "8c3035cff78be1057bbe06d3a333fbcd70b01bf6fc9a7ccfa52d8f3e13d2768e",
+      "translatedHtml": "<p><b>Il</b> <b>avait</b> <b>mille</b> <b>et</b> <b>quatre</b> <b>cent</b> <b>chars</b> <b>— </b>Voir la note sur  <a class=\"bible-ref\" href=\"/1Kgs_4.26\">1 Rois 4:26</a>.</p>\n\n"
+    },
+    {
+      "id": "52619",
+      "passage": "11-15-25",
+      "sourceSha256": "0ee2901370f520a8888223aa0dbc6989c413cbd3d9437d86ee151c3f89204afd",
+      "translatedHtml": "<p><b>Nadab</b> — <b>commença</b> <b>à</b> <b>régner</b> <b>sur</b> <b>Israël — </b>Il commença à régner la deuxième année du règne d’Asa et régna deux ans.</p>\n"
+    },
+    {
+      "id": "55197",
+      "passage": "12-8-17",
+      "sourceSha256": "380eb93bdfbdac22726573ef5ded94627f335b899499f8663355d6992aec7d90",
+      "translatedHtml": "<p><b>Il</b> <b>régna</b> <b>huit</b> <b>ans</b> <b>à</b> <b>Jérusalem — </b>À partir de la cinquième année de Joram, roi d’Israël. Il régna trois ans avec Josaphat, son père, et cinq ans seul, c’est-à-dire de l’an 3112 à l’an 3119 du monde, selon l’archevêque Usher.</p>\n"
+    },
+    {
+      "id": "55731",
+      "passage": "12-13-12",
+      "sourceSha256": "b13ba1763c4c8ba24edfcf8f7bfeb891a6df9d959193bad77d15ddfe0a6e4770",
+      "translatedHtml": "<p><b>Avec</b> <b>quoi</b> <b>il</b> <b>combattit</b> <b>Amatsia — </b>Cette guerre contre Amatsia peut être vue dans le détail en 2 Chroniques 25 ; elle se termina par la défaite totale d’Amatsia, qui fut fait prisonnier par Joas, puis tué dans une conspiration à Lakis. Joas prit Jérusalem, abattit quatre cents coudées de la muraille et emporta tous les trésors royaux ainsi que les trésors de la maison de Dieu. Voir  <a class=\"bible-ref\" href=\"/2Chr_25.20\">2 Chroniques 25:20-27</a>.</p>\n\n"
+    },
+    {
+      "id": "57325",
+      "passage": "13-1-12",
+      "sourceSha256": "c45aa361f7a779b0ca6904d45d14353adc407a3a87a1a2c1a2f70913b0fe4ca7",
+      "translatedHtml": "<p><b>Caphthorim — </b>« Les Cappadociens. » — T.</p>\n"
+    },
+    {
+      "id": "57390",
+      "passage": "13-1-44",
+      "sourceSha256": "23576584035831e1bc8fc4178688a16d2885757700266ec5facc8c12baa9cf2f",
+      "translatedHtml": "<p><b>Béla</b> <b>était</b> <b>mort — </b>« Ayant été tué par Phinées, dans le désert. » — T.</p><p><b>Jobab</b> <b>le</b> <b>fils</b> <b>de</b> <b>Zérah — </b>Certains supposent qu’il est le même que Job, dont le livre constitue une partie du canon de l’Écriture. Mais leurs noms ne présentent aucune similitude ; Job s’écrit <span class=\"greek-hebrew\">&#1488;&#1497;&#1493;&#1489; </span>   <span class=\"translit\">aiyob</span> ; Jobab, <span class=\"greek-hebrew\">&#1497;&#1493;&#1489;&#1489; </span>   <span class=\"translit\">yobab</span>. Voir les notes sur Job et le passage parallèle dans la Genèse.</p>\n"
+    },
+    {
+      "id": "57400",
+      "passage": "13-1-48",
+      "sourceSha256": "77f6d47b21164b6cb92fca2e724448dbc62d8a850fc11eea948c220d7d5487c6",
+      "translatedHtml": "<p><b>Près</b> <b>du</b> <b>fleuve — </b>« Shaul de Plathiutha, une grande ville bâtie sur les rives de l’Euphrate. » — T.</p>\n"
+    },
+    {
+      "id": "57408",
+      "passage": "13-1-51",
+      "sourceSha256": "45d12986df4ece5eb38eeb4a0c7ae80b19bb4a60db9c8f6a3ece5c6c25ceb1f7",
+      "translatedHtml": "<p><b>Hadad</b> <b>mourut — </b>« Et son royaume prit fin ; car son pays fut soumis par les enfants d’Ésaü, et les chefs d’Édom régnèrent dans le pays de Gebala. » — T.</p><p>Pour divers détails de ce chapitre, voir Genèse 10 (note) et Genèse 36 (note), ainsi que les passages parallèles.</p><p> </p>\n"
+    },
+    {
+      "id": "57457",
+      "passage": "13-2-42",
+      "sourceSha256": "b5788d1e7def1c66266b0015b1e2c2bc7acd59e081381d525189656621daf8fc",
+      "translatedHtml": "<p><b>Maintenant</b> <b>les</b> <b>fils</b> <b>de</b> <b>Caleb — </b>Ce n’était pas Caleb, fils de Jephunné, mais Caleb, fils de Hetsron,  <a class=\"bible-ref\" href=\"/1Chr_2.18\">1 Chroniques 2:18</a>,  <a class=\"bible-ref\" href=\"/1Chr_2.50\">1 Chroniques 2:50</a>. Mais certains pensent que Caleb, fils de Hetsron, était le petit-fils de Caleb, fils de Jephunné ; mais cela est probablement une invention.</p><p><b>Le</b> <b>père</b> <b>de</b> <b>Tsiph — </b>« Le prince des Tsiphites. » — T.</p>\n\n"
+    },
+    {
+      "id": "57468",
+      "passage": "13-2-52",
+      "sourceSha256": "9735996140a5f6106791aab3ffa2938605ea60c39f5b0901615efb722399dd02",
+      "translatedHtml": "<p><b>Shobal</b> — <b>avait</b> <b>des fils — </b>« Des disciples et des prêtres, auxquels appartenait la moitié des oblations. » — T.</p>\n"
+    },
+    {
+      "id": "57498",
+      "passage": "13-3-18",
+      "sourceSha256": "fb52b59d1ad313d2ab9c225b777cf5205bb310d2c6b95882ce2398fa3fc93a86",
+      "translatedHtml": "<p><b>Malchiram</b> <b>aussi — </b>Calmet suppose qu’il faudrait lire ici : Et les fils de Salathiel furent Malchiram et Pedaïa, etc.</p>\n"
+    },
+    {
+      "id": "57544",
+      "passage": "13-4-24",
+      "sourceSha256": "f9d394ef096bccfe0848bae94164ae80ba38d087d28289af3084bba5399c3041",
+      "translatedHtml": "<p><b>Les</b> <b>fils</b> <b>de</b> <b>Siméon — </b>Cette généalogie est très différente de celle donnée dans  <a class=\"bible-ref\" href=\"/Gen_46.10\">Genèse 46:10</a> et  <a class=\"bible-ref\" href=\"/Num_26.12\">Nombres 26:12</a>. Cela peut s’expliquer par le fait qu’une même personne ait porté plusieurs noms, une liste prenant un nom, une autre liste un autre, et ainsi de suite ; il est impossible de les réconcilier, et inutile de tenter de le faire.</p>\n\n"
+    },
+    {
+      "id": "57549",
+      "passage": "13-4-31",
+      "sourceSha256": "01e67e8343940675baf86964c63c6b6cea4067c53f2fa43a1ef087070e69b1df",
+      "translatedHtml": "<p><b>Ce</b> <b>furent</b> <b>leurs</b> <b>villes</b> <b>jusqu’au</b> <b>règne</b> <b>de</b> <b>David</b> <b>— </b>Il semble que David ait pris certaines villes des Siméonites et les ait ajoutées à Juda, par exemple Tsiklag,  <a class=\"bible-ref\" href=\"/1Sam_27.6\">1 Samuel 27:6</a>.</p><p>Comme la tribu de Siméon avait retiré son allégeance à la maison de David, les rois de Juda étendirent autant que possible leur domination sur les territoires de cette tribu, de sorte que les Siméonites furent obligés de chercher des pâturages pour leurs troupeaux à Gedor et dans les montagnes de Séir, comme nous le trouvons dans  <a class=\"bible-ref\" href=\"/1Chr_4.39\">1 Chroniques 4:39-42</a>.</p>\n\n"
+    },
+    {
+      "id": "57579",
+      "passage": "13-5-6",
+      "sourceSha256": "d4b755ef3be9cdd899c356da6a8bbe2012370944238a09966b351dbbbb1d3cd8",
+      "translatedHtml": "<p><b>Bééra</b> <b>son</b> <b>fils — </b>Après leur séparation d’avec la maison de David, les dix tribus continuèrent d’avoir des princes issus des tribus ; cela dura jusqu’au moment où Tiglath-Piléser les emmena captifs en Assyrie. À cette époque, Bééra était leur prince ou leur chef ; avec lui prit fin cette forme de domination ou de préséance. Selon le Targum, Bééra était le même que le prophète Baruch.</p>\n"
+    },
+    {
+      "id": "57580",
+      "passage": "13-5-8",
+      "sourceSha256": "bb54399be9357e2e5c5f362ab3836534455813432163ef8cba5ce5273a0fbfa5",
+      "translatedHtml": "<p><b>Qui</b> <b>habitait</b> <b>à</b> <b>Aroër — </b>Cette ville était située sur le torrent de l’Arnon ; et Nébo était à la fois une ville et une montagne dans le même pays. Toutes deux se trouvaient de l’autre côté du Jourdain.</p>\n"
+    },
+    {
+      "id": "57584",
+      "passage": "13-5-10",
+      "sourceSha256": "0adc31f061bde4dbdcecfd9565b2559ef12616d3671fa655872a8734f9e76dbd",
+      "translatedHtml": "<p><b>Et</b> <b>ils</b> <b>habitaient</b> <b>dans</b> <b>leurs</b> <b>tentes — </b>Les Hagarites étaient des tribus d’Arabes nomades ou scénites, des gens qui vivaient sous des tentes, sans habitation fixe, et dont la richesse consistait en bétail. Les descendants de Ruben exterminèrent ces Hagarites, s’emparèrent de leurs biens et de leurs tentes, et habitèrent à leur place.</p>\n"
+    },
+    {
+      "id": "57589",
+      "passage": "13-5-12",
+      "sourceSha256": "ce1b9c32be44cbe8a6d927c5bd23f5347e053e26470769fdd5666112e2d937d6",
+      "translatedHtml": "<p><b>Joël</b> <b>le</b> <b>chef — </b>« Joël, prince du Sanhédrin ; et Shapham, maître du collège ; et Jaanai et Shaphat, juges à Mathnan. » — T.</p>\n"
+    },
+    {
+      "id": "57593",
+      "passage": "13-5-16",
+      "sourceSha256": "4674b3b6e192dac56eb439ca4920da74e9860b1c2a2516e3d89ffe1731b68efe",
+      "translatedHtml": "<p><b>Les</b> <b>faubourgs</b> <b>de</b> <b>Sharon — </b>Il y avait trois lieux de ce nom : celui mentionné ici était une région du pays de Basan, au-delà du Jourdain (voir  <a class=\"bible-ref\" href=\"/Josh_12.18\">Josué 12:18</a> ;) ; il y en avait un autre entre Césarée de Palestine et Joppé ; et un troisième entre le mont Thabor et la mer de Tibériade. Voir Calmet.</p>\n\n"
+    },
+    {
+      "id": "57597",
+      "passage": "13-5-19",
+      "sourceSha256": "81c0e6893c0c7277d961f2c75d6ff9fed5f705af72bc8d2175942ac4bf50bc5c",
+      "translatedHtml": "<p><b>Ils</b> <b>firent</b> <b>la</b> <b>guerre</b> <b>aux</b> <b>Hagarites — </b>C’est probablement la même guerre que celle mentionnée dans  <a class=\"bible-ref\" href=\"/1Chr_5.10\">1 Chroniques 5:10</a>. Ceux qui sont appelés Hagarites dans le texte sont partout désignés par le Targum sous le nom de <span class=\"greek-hebrew\">&#1492;&#1493;&#1504;&#1490;&#1512;&#1488;&#1497;&#1497; </span>   <span class=\"translit\">Hongaraai</span>, Hongarites.</p>\n\n"
+    },
+    {
+      "id": "57603",
+      "passage": "13-5-21",
+      "sourceSha256": "732875779f608529a21eb0f1ec4327ea03054122a3d459a05ea226d031202c58",
+      "translatedHtml": "<p><b>Ils</b> <b>emportèrent</b> <b>au loin</b> <b>leur</b> <b>bétail — </b>Ce fut une guerre d’extermination quant à l’état politique du peuple, que rien ne pouvait justifier sinon une direction particulière de Dieu ; et il ne pouvait jamais donner une telle direction contre qui que ce soit, à moins que la coupe de son iniquité ne fût pleine. Les Hagarites étaient remplis d’idolâtrie : voir  <a class=\"bible-ref\" href=\"/1Chr_5.25\">1 Chroniques 5:25</a>.</p>\n\n"
+    },
+    {
+      "id": "57617",
+      "passage": "13-6-4",
+      "sourceSha256": "41c93a67fd9cf6cd0bc3ea58b006a0eeb3f3c73b102105cda86b80a37f179ccb",
+      "translatedHtml": "<p><b>Éléazar</b> <b>engendra</b> <b>Phinées — </b>Comme le souverain sacerdoce demeura longtemps dans cette famille, l’historien sacré s’en tient principalement à celle-ci, omettant Nadab et Abihu, et même la famille d’Ithamar.</p>\n"
+    },
+    {
+      "id": "57620",
+      "passage": "13-6-8",
+      "sourceSha256": "15c96dc4ab8d36f09d99346a7c51e0305f3170ba8d401a19a90870721dc2aab2",
+      "translatedHtml": "<p><b>Achithub</b> <b>engendra</b> <b>Zadok — </b>C’est par cette personne que le souverain sacerdoce entra de nouveau dans la famille d’Éléazar.</p>\n"
+    },
+    {
+      "id": "57623",
+      "passage": "13-6-10",
+      "sourceSha256": "a2cf68e4fdeba57fda70ccc608fdc69b81213c1c678b0f1a7f4af9a25e0e33fc",
+      "translatedHtml": "<p><b>Johanan — </b>On suppose qu’il est le même que Jehojada.</p><p><b>Exerçait</b> <b>la</b> <b>fonction</b> <b>du</b> <b>sacerdoce — </b>Cela fait probablement référence à la manière digne dont Azariah s’opposa au roi Ozias, qui souhaitait usurper la fonction sacerdotale et offrir de l’encens dans le temple. Voir  <a class=\"bible-ref\" href=\"/2Chr_26.17\">2 Chroniques 26:17</a>,  <a class=\"bible-ref\" href=\"/2Chr_26.18\">2 Chroniques 26:18</a>.</p>\n\n"
+    },
+    {
+      "id": "57628",
+      "passage": "13-6-14",
+      "sourceSha256": "d89ff5e4d2be530f88ec5d64bf98762a63f8cbcd16716e2dafeee9a660ad299f",
+      "translatedHtml": "<p><b>Seraïa — </b>Il fut mis à mort par Nabuchodonosor,  <a class=\"bible-ref\" href=\"/2Kgs_25.18\">2 Rois 25:18</a>,  <a class=\"bible-ref\" href=\"/2Kgs_25.21\">2 Rois 25:21</a>.</p>\n\n"
+    },
+    {
+      "id": "57671",
+      "passage": "13-6-50",
+      "sourceSha256": "50341bcd0ef6380be36a77a1807356a49ce84e0a94064b287eeb59f2b0fd31f3",
+      "translatedHtml": "<p><b>Voici</b> <b>les</b> <b>fils</b> <b>d’</b> <b>Aaron</b> <b>— </b>Nous en avons déjà eu une liste (voir  <a class=\"bible-ref\" href=\"/1Chr_6.3\">1 Chroniques 6:3-16</a> ;) ; celle-ci en est une seconde, mais moins étendue, et prouve que l’auteur de ce livre avait devant lui plusieurs listes, dans lesquelles il a puisé selon ce qu’il jugeait bon.</p>\n\n"
+    },
+    {
+      "id": "57673",
+      "passage": "13-6-54",
+      "sourceSha256": "41c541e7beec078b6cbfa139de2e5777f9a9e40d597570c401ed7ee5f98ed000",
+      "translatedHtml": "<p><b>Leur</b> <b>fut</b> <b>le</b> <b>lot — </b>Toutes les tribus et les familles obtinrent leurs héritages respectifs par le sort, mais le premier lot échut aux fils d’Aaron ; c’est ainsi que les versions syriaque et arabe ont compris ce passage. Le premier lot, dit Jarchi, échut à Juda, afin qu’ils donnent aux prêtres et aux Lévites les villes indiquées ci-dessous. Voir le récit des possessions des prêtres et des Lévites,  <a class=\"bible-ref\" href=\"/Josh_20.1\">Josué 20:1-9</a>, 21.</p>\n\n"
+    },
+    {
+      "id": "57682",
+      "passage": "13-6-60",
+      "sourceSha256": "2af6aba826422e63935313fe442cdc873722f92d86f8e239964efe0888d15c89",
+      "translatedHtml": "<p><b>Toutes</b> <b>leurs</b> <b>villes</b> <b>étaient</b> <b>au nombre de treize — </b>Mais il n’y en a que onze qui soient dénombrées ici, Gabaon et Jutta étant omises, et les noms de certaines autres ayant été changés. Aucune des versions ne donne la liste complète des noms, bien qu’elles donnent toutes le nombre total de treize.</p>\n"
+    },
+    {
+      "id": "57691",
+      "passage": "13-6-65",
+      "sourceSha256": "6d0ef8a1d8e943e380d75947dcb5354157ff44b0dd94e0e406226fb2059d69b9",
+      "translatedHtml": "<p><b>Celles</b> <b>qui</b> <b>sont</b> <b>appelées</b> <b>par</b> <b>leurs noms — </b>Il est probable que chaque famille donnait son propre nom à la ville qui lui échut en partage.</p>\n"
+    },
+    {
+      "id": "57698",
+      "passage": "13-6-69",
+      "sourceSha256": "d4b6502274e4b3a4e7133fb7ab80bf232b498a053d4f7d32e16cd6ff475da8f9",
+      "translatedHtml": "<p><b>Aijalon</b> <b>avec</b> <b>ses</b> <b>faubourgs — </b>Il manque ici les deux villes d’Eltekeh et de Guibethon. Voir  <a class=\"bible-ref\" href=\"/Josh_21.23\">Josué 21:23</a>.</p>\n\n"
+    },
+    {
+      "id": "57702",
+      "passage": "13-6-71",
+      "sourceSha256": "347ad94a4ff23b2cb2c57418e8f1fb16d4efb2377b11a4f0e3d5548696ac31e8",
+      "translatedHtml": "<p>Nous verrons par  <a class=\"bible-ref\" href=\"/Josh_21.28\">Josué 21:28</a>, etc., que plusieurs de ces villes portent des noms différents.</p><p>Combien ce registre est aride pour nous, tant par les faits que par l’intérêt ! Et pourtant, de même que les rochers arides et les déserts sablonneux constituent des parties intégrales et nécessaires du globe, ces tables généalogiques constituent des parties nécessaires de l’histoire de la providence et de la grâce dans le maintien de la vérité et l’établissement de l’Église de Christ. C’est pourquoi personne de ceux qui craignent Dieu ne les méprisera ni ne les estimera à la légère.</p><p> </p>\n"
+    },
+    {
+      "id": "57723",
+      "passage": "13-7-3",
+      "sourceSha256": "1e3681c057f3beece0d17e78d169833df988fce03baadf91e04de975c3ba2a04",
+      "translatedHtml": "<p><b>Les</b> <b>fils</b> <b>d’</b> <b>Izrahiah</b> <b>— cinq — </b>Il n’y a cependant que quatre noms dans le texte. Au lieu de cinq, les versions syriaque et arabe lisent quatre. Si cinq est la véritable leçon, alors Izrahiah doit être compté avec ses quatre fils.</p>\n"
+    },
+    {
+      "id": "57752",
+      "passage": "13-7-32",
+      "sourceSha256": "67d1197026a16dc9355ddc51610bd610e9a6383b2ddd17e2a28c5146f8ee2bb5",
+      "translatedHtml": "<p><b>Et</b> <b>Shua</b> <b>leur</b> <b>sœur — </b>Il est très rare que des femmes apparaissent dans les généalogies juives, et elles n’y sont jamais insérées que pour des raisons particulières.</p>\n"
+    },
+    {
+      "id": "57755",
+      "passage": "13-7-40",
+      "sourceSha256": "f71eb6d5edbbd9d3406890c22a2a627d40bcf11275d0362b99a7d311809587e2",
+      "translatedHtml": "<p><b>Les</b> <b>enfants</b> <b>d’</b><b>Aser</b> — Les rabbins disent que les filles d’Aser étaient très belles et qu’elles furent toutes mariées à des rois ou à des prêtres. Plusieurs éléments relatifs aux sujets de ce chapitre sont expliqués dans les passages parallèles indiqués dans la marge.</p><p> </p>\n"
+    },
+    {
+      "id": "57787",
+      "passage": "13-9-3",
+      "sourceSha256": "5ed4ed0e6ec6c1a0a8c92c61b6eeece389177be6ce3103d3934710424ddd9df6",
+      "translatedHtml": "<p><b>Et</b> <b>à</b> <b>Jérusalem</b> <b>habitaient — </b>Plusieurs membres des tribus de Juda, de Benjamin, d’Éphraïm et de Manassé profitèrent de la proclamation de Cyrus pour retourner à Jérusalem ; ils se mêlèrent ainsi aux Israélites et à ceux auxquels Jérusalem avait auparavant appartenu ; cela était nécessaire afin de fournir une population suffisante à une ville aussi grande.</p>\n"
+    },
+    {
+      "id": "57790",
+      "passage": "13-9-4",
+      "sourceSha256": "b19d98c5071175d79971e7e52b9c29931cb51c2a9542bac9ec6d1b67aa2813ef",
+      "translatedHtml": "<p><b>Uthaï</b> <b>le</b> <b>fils</b> <b>d’</b> <b>Ammihud — </b>La liste donnée ici est presque la même que celles que l’on trouve dans Esdras et Néhémie, et contient ceux qui retournèrent à Jérusalem avec Zorobabel ; mais la liste de Néhémie est plus étendue, probablement parce qu’elle contient ceux qui vinrent ensuite. L’objectif de l’auteur sacré était ici de donner la liste de ceux qui arrivèrent les premiers. Or, les premiers habitants, etc.</p>\n"
+    },
+    {
+      "id": "57797",
+      "passage": "13-9-11",
+      "sourceSha256": "62adcd39f94ff533d4781a29a00d702fd75bc91b2a76cf99c44190434dc4f1bd",
+      "translatedHtml": "<p><b>Le</b> <b>chef</b> <b>de</b> <b>la</b> <b>maison</b> <b>de</b> <b>Dieu — </b>Le souverain sacrificateur à cette époque était Josué, fils de Jotsadak ( <a class=\"bible-ref\" href=\"/Ezra_3.8\">Esdras 3:8</a> ;) ; et Seraïa ( <a class=\"bible-ref\" href=\"/Neh_11.11\">Néhémie 11:11</a> ;), appelé ici Azariah, était le chef de la maison, la personne qui venait immédiatement après le souverain sacrificateur en autorité et qui avait probablement la garde du temple ainsi que le commandement des prêtres, des Lévites, etc. Il est probable que cette personne soit la même que celle appelée le second prêtre,  <a class=\"bible-ref\" href=\"/2Kgs_25.18\">2 Rois 25:18</a> ; (note), qui était le <span class=\"translit\">sagan</span>, ou adjoint du souverain sacrificateur. Voir la note à cet endroit.</p>\n\n"
+    },
+    {
+      "id": "57807",
+      "passage": "13-9-19",
+      "sourceSha256": "49050ca59617e9b4ee76444904bc6a37fd9d2a349abc98f27438c7c6deb3a807",
+      "translatedHtml": "<p><b>Gardiens</b> <b>de</b> <b>l’</b> <b>entrée — </b>Ils avaient pour fonction de ne laisser personne venir au tabernacle, sauf les prêtres, pendant l’accomplissement du service sacré ; voir Jarchi.</p>\n"
+    },
+    {
+      "id": "57809",
+      "passage": "13-9-20",
+      "sourceSha256": "5c5ef5be86825b2b334c0189362ba17ebf8ca73ba02cc107089e8cca0b8d182c",
+      "translatedHtml": "<p><b>Et</b> <b>Phinées — </b>Le Targum dit : « Et Phinées, fils d’Éléazar, les dirigeait depuis les temps anciens, depuis le jour où le tabernacle fut dressé dans le désert ; et la Parole du Seigneur était son aide. »</p>\n"
+    },
+    {
+      "id": "57820",
+      "passage": "13-9-30",
+      "sourceSha256": "733154365c35ea1d4e1dfde54655c2d4d3583ca9fd2bc269d3504bf4ac1594c3",
+      "translatedHtml": "<p><b>Les</b> <b>fils</b> <b>des</b> <b>prêtres</b> <b>prépa</b><b>raient</b> <b>l’</b> <b>onction — </b>Seuls les prêtres étaient autorisés à préparer cette onction ; tous les autres en étaient empêchés sous peine de mort ; voir  <a class=\"bible-ref\" href=\"/Exod_30.34\">Exode 30:34-38</a> ; (note), et les notes à cet endroit.</p>\n\n"
+    },
+    {
+      "id": "58044",
+      "passage": "13-12-39",
+      "sourceSha256": "f396d2adae29345e30f9e8ac6f63e17149e386de02dc722cb603a2697fa292c8",
+      "translatedHtml": "<p><b>Ils</b> <b>furent</b> <b>avec</b> <b>David</b> <b>trois</b> <b>jours — </b>C’étaient les députés des différents peuples mentionnés ici ; il est impossible que tous les milliers mentionnés plus haut aient pu festoyer avec David pendant trois jours ; et pourtant, il apparaît qu’ils étaient même en grand nombre, car les hommes d’Issacar, de Zabulon et de Nephtali, qui étaient les plus proches de ce lieu de rassemblement, avaient apporté tout ce qui était nécessaire à un tel festin. De l’ensemble, il ressort très clairement que la grande majorité des tribus d’Israël souhaitait voir le royaume affermi entre les mains de David ; et jamais, dans aucun pays, un homme ne fut plus digne du choix du peuple. Homme d’État, guerrier, héros, poète et théologien, il reste sans égal dans les annales du monde ; par lui seul, les Israélites furent élevés à la plus haute splendeur ; leur nom devint une terreur pour leurs ennemis et une louange sur la terre. Mais hélas, comme les puissants sont maintenant tombés !</p><p> </p>\n"
+    },
+    {
+      "id": "58098",
+      "passage": "13-14-4",
+      "sourceSha256": "5f8c5e84f00a63127e6ffc9a469379924070872367021f4c7030d6ac6e49bec5",
+      "translatedHtml": "<p><b>Voici</b> <b>les</b> <b>noms</b> <b>de</b> <b>ses</b> <b>en</b><b>fants — </b>Dans  <a class=\"bible-ref\" href=\"/2Sam_5.14\">2 Samuel 5:14-16</a> ; (note), onze personnes seulement sont mentionnées dans le texte hébreu, mais la Septante en compte vingt-quatre ; ici, il y en a treize, et toutes les versions donnent le même nombre, avec certaines variantes dans les noms. Voir les notes à cet endroit.</p>\n\n"
+    },
+    {
+      "id": "58126",
+      "passage": "13-15-1",
+      "sourceSha256": "5e034855d8dccae7b5e761b5fdb28a3b144d490d069317dd2339d08fb1a2218d",
+      "translatedHtml": "<p><b>Lui</b> <b>construisit</b> <b>des maisons — </b>L’une pour lui-même et l’autre pour l’arche ; dans cette dernière se trouvait une tente sous laquelle l’arche était placée.</p>\n"
+    },
+    {
+      "id": "58399",
+      "passage": "13-18-2",
+      "sourceSha256": "4129bf27f746e1839796e108e2e49bfd8bcd7107843f1395604978d47822aa38",
+      "translatedHtml": "<p><b>Apportèrent</b> <b>des présents — </b>Furent soumis au tribut.</p>\n"
+    },
+    {
+      "id": "58420",
+      "passage": "13-18-16",
+      "sourceSha256": "0399d68b275768489a3c7a17d3615c0303525959a9f00e9f490e2ddde70659a6",
+      "translatedHtml": "<p><b>Tsadok</b> — <b>et</b> <b>Abimélec</b> — <b>prêtres — </b>Tous deux étaient des souverains sacrificateurs, l’un à Gabaon et l’autre à Jérusalem, comme nous l’avons vu dans  <a class=\"bible-ref\" href=\"/1Chr_16.39\">1 Chroniques 16:39</a>.</p><p><b>Shavsha</b> <b>était</b> <b>scribe — </b>Appelé Seraïa,  <a class=\"bible-ref\" href=\"/2Sam_8.17\">2 Samuel 8:17</a>.</p>\n\n"
+    },
+    {
+      "id": "58422",
+      "passage": "13-18-17",
+      "sourceSha256": "6c4d59931152420a91cd3efbe71b2a2feec8edaa741d5c125c701af4c1c211da",
+      "translatedHtml": "<p><b>Créthiens</b> <b>et</b> <b>les</b> <b>Péléthiens — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/2Sam_8.18\">2 Samuel 8:18</a>.</p><p>Le Targum dit : « Benaïa était à la tête du grand Sanhédrin et du petit Sanhédrin, et consultait l’Urim et le Thummim. Sur son ordre, les archers et les frondeurs allaient au combat. »</p><p><b>Les</b> <b>fils</b> <b>de</b> <b>David — </b>Ceux-ci étaient les plus élevés en autorité.</p><p> </p>\n\n"
+    },
+    {
+      "id": "58433",
+      "passage": "13-19-7",
+      "sourceSha256": "bd655bad5953734c944e9675796096ea81b609b8eead07b6c91121bcda9a2a61",
+      "translatedHtml": "<p><b>Trente</b> <b>et</b> <b>deux</b> <b>mille — </b>Le nombre total mentionné dans Samuel est le suivant : les Syriens de Beth-Rehob et de Tsoba, vingt mille ; du roi de Maaca, mille ; d’Ish-Tob, douze mille ; en tout, trente-trois mille. Il n’est fait aucune mention de chars ou de cavalerie. Ceux-ci ne pouvaient pas constituer toute l’armée.</p>\n"
+    }
+  ]
+}

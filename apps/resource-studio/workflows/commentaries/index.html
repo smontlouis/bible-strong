@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Prototype local de lecture comparée des commentaires Bible Strong" />
+    <title>Le Cabinet des Commentaires — Bible Strong</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23172326'/%3E%3Ctext x='32' y='39' text-anchor='middle' fill='%23f8f4e9' font-family='serif' font-size='23'%3EBS%3C/text%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="masthead">
+      <a class="brand" href="#" aria-label="Accueil du prototype">
+        <span class="brand-mark">BS</span>
+        <span>
+          <strong>Le Cabinet</strong>
+          <small>des commentaires</small>
+        </span>
+      </a>
+      <div class="masthead-center">
+        <span class="eyebrow">Prototype éditorial · données JSON locales</span>
+        <h1>Lire les voix autour du texte</h1>
+      </div>
+      <button class="catalog-button" id="catalog-button" type="button">
+        <span id="catalog-count">—</span>
+        <small>ressources repérées</small>
+      </button>
+    </header>
+
+    <main class="workspace">
+      <aside class="passage-panel" aria-label="Navigation des passages">
+        <div class="panel-heading">
+          <span class="folio">01</span>
+          <div>
+            <p class="eyebrow">Passage</p>
+            <h2>Ouvrir le texte</h2>
+          </div>
+        </div>
+        <label class="search-field">
+          <span>Référence</span>
+          <input id="reference-input" type="search" placeholder="Genèse 1.1" autocomplete="off" />
+          <kbd>↵</kbd>
+        </label>
+        <div class="chapter-picker">
+          <label><span>Livre</span><select id="book-select" aria-label="Livre biblique"></select></label>
+          <label><span>Chapitre</span><select id="chapter-select" aria-label="Chapitre"></select></label>
+        </div>
+        <nav class="passage-list" id="passage-list" aria-label="Passages disponibles"></nav>
+        <div class="coverage-note">
+          <span class="signal"></span>
+          <p><strong>Bibliothèque locale.</strong> Chaque chapitre est chargé depuis un fichier JSON indépendant.</p>
+        </div>
+      </aside>
+
+      <section class="reading-room" aria-live="polite">
+        <div class="reading-toolbar">
+          <div>
+            <p class="eyebrow" id="passage-kicker">Passage sélectionné</p>
+            <h2 id="passage-title">Chargement…</h2>
+          </div>
+          <div class="view-toggle" role="group" aria-label="Mode de lecture">
+            <button class="active" type="button" data-view="compare">Comparer</button>
+            <button type="button" data-view="fr">Français</button>
+            <button type="button" data-view="en">English</button>
+          </div>
+        </div>
+
+        <div class="filter-row">
+          <label>
+            <span>Ressource</span>
+            <select id="resource-filter"><option value="all">Toutes les voix</option></select>
+          </label>
+          <label>
+            <span>Tradition</span>
+            <select id="tradition-filter"><option value="all">Toutes</option></select>
+          </label>
+          <label>
+            <span>Tag</span>
+            <select id="tag-filter"><option value="all">Tous</option></select>
+          </label>
+          <div class="legend" aria-label="Légende">
+            <span><i class="dot translated"></i> présent</span>
+            <span><i class="dot missing"></i> manquant</span>
+          </div>
+        </div>
+
+        <div class="commentary-stack" id="commentary-stack"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <span>∅</span>
+          <h3>Aucune voix pour ce filtre</h3>
+          <p>Changez de ressource ou ouvrez le catalogue pour voir ce qui reste à importer.</p>
+        </div>
+      </section>
+
+      <aside class="registry-panel" id="registry-panel" aria-label="Registre des ressources">
+        <div class="panel-heading">
+          <span class="folio">02</span>
+          <div>
+            <p class="eyebrow">Registre</p>
+            <h2>Œuvres & droits</h2>
+          </div>
+        </div>
+        <div class="registry-tabs" role="tablist">
+          <button class="active" type="button" data-registry="current">Sélection</button>
+          <button type="button" data-registry="catalog">Catalogue</button>
+        </div>
+        <div id="registry-content"></div>
+      </aside>
+    </main>
+
+    <footer>
+      <span>Bible Strong · laboratoire local</span>
+      <span id="dataset-note">Chargement du manifeste…</span>
+    </footer>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

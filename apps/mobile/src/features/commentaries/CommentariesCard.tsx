@@ -8,9 +8,11 @@ import { useAtom } from 'jotai/react'
 
 const CommentariesCard = ({
   verse,
+  preferredVersion,
   onChangeVerse,
 }: {
   verse: string | null
+  preferredVersion?: string
   onChangeVerse: (verse: string) => void
 }) => {
   const onTheFlyAtom = useMemo(
@@ -36,6 +38,12 @@ const CommentariesCard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [commentaryTab.data.verse])
 
-  return <CommentariesTabScreen hasHeader={false} commentaryAtom={onTheFlyAtom} />
+  return (
+    <CommentariesTabScreen
+      hasHeader={false}
+      commentaryAtom={onTheFlyAtom}
+      preferredVersion={preferredVersion}
+    />
+  )
 }
 export default CommentariesCard

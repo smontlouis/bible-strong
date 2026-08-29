@@ -427,6 +427,7 @@ const Resource = ({
       <Slide key="commentary">
         <CommentariesCard
           verse={selectedVerse}
+          preferredVersion={selectedVersion}
           onChangeVerse={onChangeVerse ?? actions.selectSelectedVerse}
         />
       </Slide>

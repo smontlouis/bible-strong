@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-27T19:38:44.938Z",
+  "methodology": "Requête Firestore filtrée resource.code sur chaque document verse-commentaries, puis batchGet exact de commentaries-FR par identifiant.",
+  "passagesVisited": 30826,
+  "remoteWrites": false,
+  "resources": {
+    "acbc": {
+      "sourceCount": 20794,
+      "translatedCount": 20047,
+      "missingCount": 747,
+      "coveragePercent": 96.41,
+      "issueCount": 51,
+      "duplicateTranslationGroups": 11,
+      "contentSha256": "e58d6eafe687abf2efcace5f4c0b1ac138e7571238ef596b2787f47922666f1a",
+      "issueCounts": [
+        {
+          "issue": "mixed-language",
+          "count": 38
+        },
+        {
+          "issue": "probably-english",
+          "count": 13
+        }
+      ],
+      "duplicateSourceIdCount": 0,
+      "invalidIdentityCount": 0,
+      "missingManifest": "missing-acbc.json",
+      "qualityManifest": "quality-acbc.json"
+    },
+    "barnes": {
+      "sourceCount": 24224,
+      "translatedCount": 22470,
+      "missingCount": 1754,
+      "coveragePercent": 92.76,
+      "issueCount": 53,
+      "duplicateTranslationGroups": 911,
+      "contentSha256": "4dae64a0dbe6461cb76b2ef906929e42c47f48578ee3f244301d70a396421c49",
+      "issueCounts": [
+        {
+          "issue": "mixed-language",
+          "count": 12
+        },
+        {
+          "issue": "probably-english",
+          "count": 2
+        },
+        {
+          "issue": "dangerous-html",
+          "count": 39
+        }
+      ],
+      "duplicateSourceIdCount": 0,
+      "invalidIdentityCount": 0,
+      "missingManifest": "missing-barnes.json",
+      "qualityManifest": "quality-barnes.json"
+    }
+  },
+  "translationReadyBatches": ".local/full-export/missing/*.json (non versionnés car ils contiennent les textes sources complets)"
+}

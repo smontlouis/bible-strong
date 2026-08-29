@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-08-28",
+  "sourcePolicy": "accepted-as-published",
+  "provider": "janvier-s/original-douay-rheims",
+  "repositoryUrl": "https://github.com/janvier-s/original-douay-rheims",
+  "commit": "0bf4218b9b46b5b00d29a703b5b74226051b97a5",
+  "licenseId": "CC0-1.0",
+  "corpus": {
+    "sha256": "499de68f064b8c9da36b6385326118c99bc19109815c406e3c900852b64401d6",
+    "entryCount": 1659,
+    "chapterCount": 390,
+    "bookCount": 53
+  },
+  "editorialDecision": "Le JSON publié est utilisé comme source faisant foi. Bible Strong ne collationne pas les annotations avec les fac-similés, ne reconstitue pas les éléments absents et ne modifie pas leur contenu éditorial."
+}

@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "acbc",
+  "batchId": "acbc-unique-0018",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "xhigh"
+  },
+  "entries": [
+    {
+      "id": "114365",
+      "passage": "30-2-15",
+      "sourceSha256": "e8ce17871c5cccc5f520cd372d416c7375b1baefb92088cc714150bb6f21ede8",
+      "translatedHtml": "<p><b>Ni celui qui monte à cheval ne se délivrera — </b>Je crois que toutes ces paroles,  <a class=\"bible-ref\" href=\"/Amos_2.13\">Amos 2:13-16</a>, sont des proverbes destinés à montrer l’inutilité de toutes les tentatives, même dans les meilleures circonstances, pour échapper au destin maintenant décrété, parce que la coupe de leur iniquité était pleine.</p>"
+    },
+    {
+      "id": "114427",
+      "passage": "30-3-13",
+      "sourceSha256": "5b7aa47c6cb3556a4c7fe2c03371b7cafc2b916c1177039a999c6d0542eb0ed5",
+      "translatedHtml": "<p><b>Écoutez — </b>C’est une adresse au prophète.</p>"
+    },
+    {
+      "id": "114587",
+      "passage": "30-5-17",
+      "sourceSha256": "fe9887fa0497fd7badeff85b47024b4c59baf1896506adc449c4214426304096",
+      "translatedHtml": "<p><b>Et dans toutes les vignes, il y aura des lamentations — </b>Les lieux où la réjouissance prévalait particulièrement autrefois.</p><p><b>Je traverserai ton pays — </b>Comme je traversai l’Égypte par le ministère de l’ange destructeur, non pour épargner, mais pour détruire.</p>"
+    },
+    {
+      "id": "114838",
+      "passage": "30-9-4",
+      "sourceSha256": "fbde9f6d7c36c5d92c8ee3b8813da49e5a8a363ceceb13027d475cee0c0996dd",
+      "translatedHtml": "<p><b>Je tournerai contre eux mes yeux pour le mal — </b>J’emploierai contre eux cette même providence qui auparavant travaillait à leur bien. S’ils lèvent les yeux, ils ne verront rien d’autre que l’œil terrible, pareil à un éclair, d’un Dieu vengeur du péché.</p>"
+    },
+    {
+      "id": "115569",
+      "passage": "33-5-15",
+      "sourceSha256": "56f6e1dac5ea26ef0695f1e4c232f02e68dfe1f6569ba018c1a78eea80cbe71b",
+      "translatedHtml": "<p><b>J’exécuterai la vengeance contre les nations — </b>Et il le fit ; car les empires des Assyriens, des Chaldéens et d’autres, ennemis jurés des Juifs, ont depuis longtemps été entièrement détruits.</p><p> </p>"
+    },
+    {
+      "id": "115740",
+      "passage": "33-6-12",
+      "sourceSha256": "287c430f882b1e310e52f93b1f8dbcf4ca1e68c1da757bb35c309c2da0a9b96c",
+      "translatedHtml": "<p><b>Car ses riches sont pleins de violence — </b>Cela montre qu’ils n’aimaient pas la miséricorde.</p><p><b>Ses habitants ont dit des mensonges — </b>Cela montre qu’ils ne se sont pas humiliés pour marcher avec Dieu.</p>"
+    },
+    {
+      "id": "115746",
+      "passage": "33-6-13",
+      "sourceSha256": "cd8f4c8e1b35dbec47a639220e8a50615cee987daf71b75519293c63244fc8ec",
+      "translatedHtml": "<p><b>Te rendrai-je malade en te frappant ? — </b>Peut-être vaut-il mieux traduire : « Moi aussi, je suis las de te frapper, en te désolant à cause de tes péchés. » Ils furent corrigés, mais sans résultat ; ils reçurent coup sur coup, sans être amendés.</p>"
+    },
+    {
+      "id": "116009",
+      "passage": "34-2-10",
+      "sourceSha256": "798994ecf318e9b12cea4bcaf103274da837e03dd114af923e1531bd9e5960b4",
+      "translatedHtml": "<p><b>Elle est vide, déserte et désolée — </b>L’original est fortement emphatique ; les mots ont la même sonorité et s’allongent à mesure qu’ils expriment une désolation grande, plus grande et très grande.</p><p>    <span class=\"greek-hebrew\">&#1493;&#1502;&#1489;&#1500;&#1511;&#1492; &#1493;&#1502;&#1489;&#1493;&#1511;&#1492; &#1489;&#1493;&#1511;&#1492; </span> </p><p>   <span class=\"translit\">Bukah<i></i></span>,<span class=\"translit\"> umebukah<i></i></span>,<span class=\"translit\"> umebullakah</span> .</p><p>Elle est vide, déserte et désolée.</p><p><b>Le visage de tous s’assombrit — </b>Cela indique l’état maladif auquel le peuple avait été réduit par la famine, etc. ; car, comme le remarque justement M. Ward, « la maladie transforme beaucoup le visage des Hindous, si bien qu’une personne qui était assez claire de teint en bonne santé devient presque noire sous l’effet de la maladie ». C’était un cas général chez les Asiatiques.</p>"
+    },
+    {
+      "id": "116050",
+      "passage": "34-3-6",
+      "sourceSha256": "0eb03e04f60283f1b55d9741417fba0810f0adf5f4b13a470495591ab0549461",
+      "translatedHtml": "<p><b>Je répandrai sur toi des immondices abominables — </b>Je ferai de toi un objet de spectacle. C’était une punition exactement semblable à notre pilori. On mettait au pilori certaines femmes comme objets de spectacle ; puis les enfants et les autres leur jetaient de la boue, de la saleté et toutes sortes d’immondices.</p>"
+    },
+    {
+      "id": "116080",
+      "passage": "34-3-14",
+      "sourceSha256": "d894d25f561517ad0d0b262c68e5d33de9fbdc887fd2f3a8b25c7eb806144200",
+      "translatedHtml": "<p><b>Tirez de l’eau pour le siège — </b>Le Tigre coulait près de Ninive, et on les exhortait ici à faire provision d’une grande quantité d’eau fraîche, de peur que le siège ne dure longtemps et que l’ennemi ne coupe cet approvisionnement.</p><p><b>Va dans l’argile et foule le mortier — </b>Cela fait référence à la manière dont on formait autrefois les briques dans ces pays : on extrayait l’argile, on la pétrissait convenablement en la foulant aux pieds, on la mélangeait avec de la paille ou de l’herbe grossière, on moulait les briques et on les faisait sécher au soleil. J’ai maintenant devant moi quelques-unes des briques identiques qui ont été rapportées de ce pays, et elles présentent toutes ces caractéristiques. Elles sont compactes et très dures, mais entièrement solubles dans l’eau. Il y en avait cependant d’autres sans paille, qui semblent avoir été cuites dans un four comme les nôtres. Je possède également quelques fragments ou morceaux de ces briques provenant de Babylone.</p>"
+    },
+    {
+      "id": "116092",
+      "passage": "34-3-17",
+      "sourceSha256": "7b277a6caff6344f022017b219863f6a1418e711332b6689756e595cd606a6ac",
+      "translatedHtml": "<p><b>Tes couronnés sont comme les sauterelles — </b>Tu as de nombreux princes et de nombreux commandants.</p><p><b>Qui campent dans les haies pendant les jours froids — </b>On dit que les sauterelles se tiennent à l’abri autour des haies des lieux fertiles lorsque le temps est froid ou durant la nuit ; mais dès que le soleil brille et chauffe, elles sortent pour se nourrir ou prennent leur envol.</p>"
+    },
+    {
+      "id": "116096",
+      "passage": "34-3-18",
+      "sourceSha256": "34fbcd4ef63a1389d39b2d0b88e12a8f7c227944bf568949c93d1e0469aaf36c",
+      "translatedHtml": "<p><b>Tes bergers sommeillent — </b>C’est-à-dire les dirigeants et les princes tributaires qui, comme nous l’apprend Hérodote, abandonnèrent Ninive au jour de sa détresse et ne s’avancèrent pas pour lui porter secours.</p><p>Diodore de Sicile dit, livre II, que lorsque l’ennemi enferma le roi dans la ville, de nombreux peuples se révoltèrent, chacun passant du côté des assiégeants pour obtenir sa liberté ; que le roi envoya des messagers à tous ses sujets, leur demandant de lui fournir des forces pour le secourir ; et qu’il se croyait capable de supporter le siège, demeurant dans l’attente des armées qui devaient être levées dans tout son empire, s’appuyant sur l’oracle selon lequel la ville ne serait pas prise avant que le fleuve ne devienne son ennemi. Voir la note sur  <a class=\"bible-ref\" href=\"/Nah_2.6\">Nahum 2:6</a>.</p>"
+    },
+    {
+      "id": "117017",
+      "passage": "37-2-20",
+      "sourceSha256": "eb298bb7fe829b4a1c43b00ff44418403c1a4b61af13f762d5569f87ebc94edb",
+      "translatedHtml": "<p><b>La parole du Seigneur vint de nouveau — </b>C’était une seconde communication le même jour.</p>"
+    },
+    {
+      "id": "118002",
+      "passage": "38-11-11",
+      "sourceSha256": "3bd45a02e82ac6bb56ac9b8cb9fcf2a2a9a90268b5e36a606a22879ae9025fc7",
+      "translatedHtml": "<p><b>Ainsi les pauvres du troupeau — </b>Les hommes pieux qui prêtaient attention à mon enseignement virent que c’était la parole, le dessein, de Dieu.</p>"
+    },
+    {
+      "id": "139784",
+      "passage": "40-26-60",
+      "sourceSha256": "b400ced1f7f8a624e2564ff81190340d8e28fbf7a50a48de00de34b0ae87a718",
+      "translatedHtml": "<p><b>Bien que de nombreux faux témoins se soient présentés — </b>Il existe une confusion inexplicable dans les manuscrits de ce verset ; sans exposer les variantes, que l’on peut voir chez Griesbach, je donnerai le sens authentique de l’évangéliste, selon ce que je crois. Alors les principaux sacrificateurs, les anciens et tout le conseil cherchèrent de faux témoins contre Jésus pour le faire mourir ; mais ils n’en trouvèrent pas, bien que de nombreux faux témoins se fussent présentés. Enfin deux faux témoins se présentèrent et dirent : Cet homme a dit, etc. Le propre du mensonge est d’être toujours inconsistant et de se contredire ; ils ne pouvaient donc trouver deux témoignages concordants, sans lesquels la loi juive ne permettait de mettre personne à mort. Cependant, la main de Dieu était dans cette affaire : pour la réputation de Jésus et l’honneur de la religion chrétienne, il ne permit pas qu’il fût condamné sur une accusation mensongère ; c’est pourquoi, finalement, ils furent obligés de changer de terrain et, à la confusion éternelle du conseil injuste, il fut condamné sur le témoignage même de son innocence, de sa pureté et de sa vérité !</p>"
+    },
+    {
+      "id": "141939",
+      "passage": "41-1-36",
+      "sourceSha256": "7c9ec80bfb76c64abd0125c875fa600deb093966acf3680c7a6bce24fc69ed80",
+      "translatedHtml": "<p><b>Et Simon le suivit — </b><span class=\"greek-hebrew\">&Kappa;&alpha;&tau;&epsilon;&delta;&iota;&omega;&xi;&alpha;&nu;</span>, le suivit avec empressement. Ils avaient commencé à goûter la bonne parole de Dieu et pensaient ne jamais pouvoir en entendre trop. Beaucoup possèdent cet esprit lorsqu’ils sont d’abord convertis à Dieu. Oh ! quel dommage qu’ils le perdent un jour ! L’âme qui prend plaisir à la parole de Dieu croît toujours par elle dans la grâce.</p>"
+    },
+    {
+      "id": "159440",
+      "passage": "42-20-29",
+      "sourceSha256": "8f91e1b6d94628031961161489df81ead0904d814ddf55c6e847843296fd2512",
+      "translatedHtml": "<p><b>Il y avait donc sept frères — </b>Voir sur  <a class=\"bible-ref\" href=\"/Matt_22.23\">Matthieu 22:23-33</a> ; (note).</p>"
+    },
+    {
+      "id": "159493",
+      "passage": "42-20-40",
+      "sourceSha256": "0126c1ab039af6e1747e90257fdad4cc3978494cb66757564fa8a6fdfac43069",
+      "translatedHtml": "<p><b>Ils n’osèrent pas demander — </b>Ou bien ils ne se risquèrent pas à poser une autre question, de peur d’être de nouveau confondus, comme ils l’avaient déjà été.</p>"
+    },
+    {
+      "id": "160725",
+      "passage": "42-22-63",
+      "sourceSha256": "22fdfbfc3370f219761787cc5f8babb2a90108483947135c88da8f97bc663dae",
+      "translatedHtml": "<p><b>Se moquèrent de lui et le frappèrent — </b>Ce verset et les suivants sont placés par Matthieu et Marc avant le récit du reniement de Pierre. Pour leur explication, voir sur  <a class=\"bible-ref\" href=\"/Matt_26.67\">Matthieu 26:67</a>,  <a class=\"bible-ref\" href=\"/Matt_26.68\">Matthieu 26:68</a> ; (note).</p>"
+    },
+    {
+      "id": "160752",
+      "passage": "42-22-68",
+      "sourceSha256": "fec292099001ce3d62b087d4ac78ce3abf7b263458781546a142fcafb738ade3",
+      "translatedHtml": "<p><b>Et si je vous interrogeais aussi — </b>Au sujet du Christ, au cas où vous ne pourriez me donner une réponse qui prouve que je ne suis pas le Christ, vous ne me laisseriez pas partir ; car je sais que vous êtes déterminés à me mettre à mort.</p>"
+    },
+    {
+      "id": "182401",
+      "passage": "44-14-24",
+      "sourceSha256": "771ba1ca8084792571f219a82de5e432754124e492e607abe518b0dbb5fcd5bc",
+      "translatedHtml": "<p><b>Ayant traversé la Pisidie, ils vinrent en Pamphylie — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Acts_13.13\">Actes 13:13</a>.</p>"
+    },
+    {
+      "id": "182407",
+      "passage": "44-14-25",
+      "sourceSha256": "7fb3acf28cfa7a057e898463833329c907264e8943230c6ecbd0fb84e6deb9f3",
+      "translatedHtml": "<p><b>Ils descendirent à Attalie — </b>C’était une ville portuaire de la Pamphylie. Ainsi, nous trouvons que les apôtres voyagèrent de Derbe à Lystre, de Lystre à Iconium, d’Iconium à Antioche de Pisidie, d’Antioche à Perge en Pamphylie, et de Perge à Attalie ; et il apparaît qu’ils traversèrent trois provinces de l’Asie Mineure : la Pamphylie, la Lycaonie et la Pisidie. Voir Calmet et la carte.</p>"
+    },
+    {
+      "id": "184682",
+      "passage": "44-21-19",
+      "sourceSha256": "55e7ee8baf8677e499fa435b6525d62daf7844c7857bdca1c1cf2846aadb9671",
+      "translatedHtml": "<p><b>Déclara en détail, etc. — </b>Il avait sans aucun doute appris qu’ils étaient prévenus contre lui ; et, en déclarant ce que Dieu avait accompli par son ministère parmi les païens, il montra combien ce préjugé était sans fondement : car, s’il avait été un homme mauvais ou s’il avait fait quoi que ce soit qu’il ne devait pas faire, Dieu n’aurait pas fait de lui un instrument aussi singulier d’un si grand bien.</p>"
+    }
+  ]
+}

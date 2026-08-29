@@ -5,19 +5,19 @@ production.
 
 ## 1. Produire et réconcilier les bundles
 
-Dans Bible Lexicon Maker, chaque producteur écrit un dossier contenant `manifest.json`, un fichier
+Dans Resource Studio, chaque producteur écrit un dossier contenant `manifest.json`, un fichier
 canonique JSON et son artefact `SQLite.zip` ou `JSON.zip`. Les commandes producteur existantes sont
 regroupées par domaine :
 
 ```bash
-npm run resources:publication:bibles -- --output <ordinary-root>
-npm run resources:publication:strong-bibles -- --output-dir <strong-root>
-npm run resources:publication:interlinear-bibles -- --output-dir <interlinear-root>
-npm run resources:publication:strong-lexicon -- --output <lexicon-root>
-npm run resources:publication:dictionary -- --output-dir <dictionary-root>
-npm run resources:publication:nave -- build --output-dir <nave-root> ...
-npm run resources:publication:supplementary -- build-all --output-dir <editorial-root> ...
-npm run resources:publication:timeline -- build --output-dir <timeline-root> ...
+yarn workspace @bible-strong/resource-studio resources:publication:bibles --output <ordinary-root>
+yarn workspace @bible-strong/resource-studio resources:publication:strong-bibles --output-dir <strong-root>
+yarn workspace @bible-strong/resource-studio resources:publication:interlinear-bibles --output-dir <interlinear-root>
+yarn workspace @bible-strong/resource-studio resources:publication:strong-lexicon --output <lexicon-root>
+yarn workspace @bible-strong/resource-studio resources:publication:dictionary --output-dir <dictionary-root>
+yarn workspace @bible-strong/resource-studio resources:publication:nave build --output-dir <nave-root> ...
+yarn workspace @bible-strong/resource-studio resources:publication:supplementary build-all --output-dir <editorial-root> ...
+yarn workspace @bible-strong/resource-studio resources:publication:timeline build --output-dir <timeline-root> ...
 ```
 
 Les options d’entrée restent celles de chaque producteur (sources éditoriales et fichiers
@@ -26,20 +26,19 @@ catalogue sont présentes exactement une fois et que chaque bundle possède ses 
 
 ```bash
 RESOURCE_PUBLICATION_ROOTS="<ordinary-root>:<strong-root>:<interlinear-root>:<lexicon-root>:<dictionary-root>:<nave-root>:<editorial-root>:<timeline-root>" \
-  npm run resources:publication:reconcile
+  yarn workspace @bible-strong/resource-studio resources:publication:reconcile
 ```
 
 ## 2. Synchroniser PostgreSQL local
 
-Avec l'organisation locale standard (`bible-strong-app` et `bible-lexicon-maker` côte à côte), cette
-commande démarre PostgreSQL, applique les migrations et importe le catalogue canonique :
+Dans le monorepo, cette commande démarre PostgreSQL, applique les migrations et importe le catalogue canonique :
 
 ```bash
 yarn resources:sync:local
 ```
 
-Elle est à lancer au premier démarrage, puis uniquement lorsque les publications de Bible Lexicon
-Maker ont changé. La base reste dans le volume Docker `resource-postgres-data` : cette commande ne
+Elle est à lancer au premier démarrage, puis uniquement lorsque les publications de Resource
+Studio ont changé. La base reste dans le volume Docker `resource-postgres-data` : cette commande ne
 la détruit pas et les révisions déjà importées sont rapportées `unchanged`.
 
 Pour synchroniser un autre emplacement :

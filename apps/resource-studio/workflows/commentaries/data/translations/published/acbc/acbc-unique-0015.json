@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "acbc",
+  "batchId": "acbc-unique-0015",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "xhigh"
+  },
+  "entries": [
+    {
+      "id": "100264",
+      "passage": "24-21-7",
+      "sourceSha256": "8249f6618726afe0e7c51d30b4fde5ef7244eb4f556a7699ac515ea148d66fbe",
+      "translatedHtml": "<p><b>Nébucadretsar — </b>Ce nom est orthographié comme ci-dessus dans vingt-six passages de ce livre ; et dans dix passages il est orthographié Nebucadnetsar, qui est l’orthographe courante. La différence n’est qu’un <span class=\"greek-hebrew\">&#1512; </span>   <span class=\"translit\">resh</span> à la place d’un <span class=\"greek-hebrew\">&#1504; </span>   <span class=\"translit\">nun</span> ; mais les manuscrits varient sur ce point. Il s’agit de la même personne sous les deux noms ; et ici toutes les Versions, sauf l’arabe, qui omet le nom, l’ont sous la forme habituelle.</p>"
+    },
+    {
+      "id": "100274",
+      "passage": "24-21-10",
+      "sourceSha256": "899380bebdc52338c9394ec2c76de239cea863034a5050d810c4674a14df7c2c",
+      "translatedHtml": "<p><b>Il le brûlera par le feu — </b>Quel message accablant pour tous, et particulièrement pour ceux qui avaient quelque crainte de Dieu ou quelque révérence pour le temple et ses services sacrés !</p>"
+    },
+    {
+      "id": "100377",
+      "passage": "24-22-23",
+      "sourceSha256": "c6c421b99da8bf05422295911672b435bbfeb7f5f7ea938ac004e19d14700896",
+      "translatedHtml": "<p><b>Combien tu seras gracieux — </b>Une forte ironie.</p>"
+    },
+    {
+      "id": "100637",
+      "passage": "24-25-7",
+      "sourceSha256": "847270164f511e0c2a254192080033a04dc04b31cce59fe226aaeeec19843e55",
+      "translatedHtml": "<p><b>Afin que vous provoquiez — </b>Vous ne vouliez pas écouter ; mais vous avez choisi de me provoquer par votre colère.</p>"
+    },
+    {
+      "id": "100784",
+      "passage": "24-26-4",
+      "sourceSha256": "c7640adfd366350a2e464cf153c2bc58ce8af1f0b08077a06f38d195da1d6570",
+      "translatedHtml": "<p><b>Si vous ne voulez pas écouter — </b>Ceci et plusieurs des versets suivants sont presque identiques à ceux de  <a class=\"bible-ref\" href=\"/Jer_7.13\">Jérémie 7:13</a>, etc. ; voir les notes à cet endroit.</p>"
+    },
+    {
+      "id": "100843",
+      "passage": "24-26-17",
+      "sourceSha256": "6c5d71bb0d432510ccae68b9f0d36ebb13b5780c8fdb8e79039ba8dceb934a3b",
+      "translatedHtml": "<p><b>Certains des anciens — </b>C’est réellement une belle défense, et l’argument était parfaitement concluant. Certains pensent que c’est Ahiqam qui entreprit la défense du prophète.</p>"
+    },
+    {
+      "id": "101175",
+      "passage": "24-30-5",
+      "sourceSha256": "58bfe3dac3f26a4e6ffffb51af357ca01548c14a30c4690fdfe9390159f037bc",
+      "translatedHtml": "<p><b>Nous avons entendu une voix de tremblement — </b>Cela peut se rapporter à l’état et aux sentiments du peuple pendant la guerre que Cyrus mena contre les Babyloniens. Le tremblement et la terreur les affectèrent sans doute et mirent fin à la paix et à toute prospérité ; car ils ne pouvaient savoir quelle serait l’issue de la lutte, ni si leur situation s’améliorerait ou empirerait si leurs maîtres actuels tombaient dans le conflit. Ceci est bien décrit au verset suivant, où les hommes sont représentés, sous l’effet de la douleur et de l’angoisse, comme des femmes en travail. Voir la même comparaison  <a class=\"bible-ref\" href=\"/Isa_13.6\">Ésaïe 13:6-8</a>.</p>"
+    },
+    {
+      "id": "101275",
+      "passage": "24-30-22",
+      "sourceSha256": "945cc459807055c480677fd00f1c73626aa1050d49a48f537b1a7dffd97fc372",
+      "translatedHtml": "<p><b>Vous serez mon peuple — </b>L’ancienne alliance sera renouvelée.</p>"
+    },
+    {
+      "id": "101421",
+      "passage": "24-31-23",
+      "sourceSha256": "f7fb735ce022b287537805cfb6553e3458391c1483a76c4f0d5c71d70a1513f1",
+      "translatedHtml": "<p><b>Que le Seigneur te bénisse, ô demeure de justice — </b>Après leur retour, ils seront remarquablement prospères. La piété et l’industrie iront de pair ; ils auront leurs cultivateurs, leurs bergers et leurs bouviers,  <a class=\"bible-ref\" href=\"/Jer_31.24\">Jérémie 31:24</a>. Et Jérusalem deviendra une ville juste, et le temple sera un lieu de sainteté ; ainsi les fatigués y trouveront du repos et les affligés seront abondamment consolés,  <a class=\"bible-ref\" href=\"/Jer_31.24\">Jérémie 31:24</a>,  <a class=\"bible-ref\" href=\"/Jer_31.25\">Jérémie 31:25</a>.</p>"
+    },
+    {
+      "id": "101632",
+      "passage": "24-32-29",
+      "sourceSha256": "c55e74cb70bb6cb617d5885c6d4772cc3311f25f78498b4b14f13e9e1a0260aa",
+      "translatedHtml": "<p><b>Avec les maisons, sur les toits desquelles — </b>Comme il est très probable que Baal était le soleil, ils ont pu choisir les toits des maisons, toujours plats et entourés de parapets, pour lui offrir de l’encens et des sacrifices à son lever et tandis qu’il était visible au-dessus de l’horizon.</p>"
+    },
+    {
+      "id": "101646",
+      "passage": "24-32-33",
+      "sourceSha256": "2f42b154d410e0287822c97710e29d0c5483dc8676a0e47cede641b9c538f01b",
+      "translatedHtml": "<p><b>Bien que je leur aie enseigné, me levant tôt et les instruisant — </b>Cette référence fréquente permet de conclure naturellement que la prédication matinale était très répandue en Judée.</p>"
+    },
+    {
+      "id": "101694",
+      "passage": "24-32-44",
+      "sourceSha256": "ea4912bd3639ab7c6b8d9946688dbe309758632d56a3a2bbbf43cc994d269c64",
+      "translatedHtml": "<p><b>Les hommes achèteront des champs pour de l’argent — </b>Il s’agit d’une référence à l’achat symbolique mentionné au début du chapitre ; celui-ci peut être considéré par eux comme un signe certain de leur restauration, non seulement dans le même pays, mais aussi dans leurs héritages respectifs dans ce pays. Seule la puissance de Dieu pouvait accomplir cela.</p><p> </p>"
+    },
+    {
+      "id": "101849",
+      "passage": "24-34-11",
+      "sourceSha256": "074414f3be3e34f2c4c6b568a76092366d460e9f1dfbad931d97e50f69521c34",
+      "translatedHtml": "<p><b>Mais ensuite ils se ravisèrent — </b>Ils avaient accepté de les affranchir à la fin de la septième année ; mais lorsque la septième année fut achevée, ils revinrent sur leur engagement et retinrent leurs serviteurs. C’est, je crois, ce qui est signifié ici.</p>"
+    },
+    {
+      "id": "101972",
+      "passage": "24-36-3",
+      "sourceSha256": "f4a078d597844f3098633a9847ff9ed8f7610f21c5ed509404b75e2d3255a025",
+      "translatedHtml": "<p><b>Il se peut que la maison de Juda écoute — </b>Il était encore possible de détourner les jugements qui avaient si souvent été prononcés contre eux. Mais pour cela, ils devaient — </p><ol>  <li>Écouter ce que Dieu avait dit.</li></ol>  <li>Que chaque homme se détourne de sa mauvaise voie.</li><p>    3. S’ils le font, Dieu promet avec grâce de pardonner leur iniquité et leur péché.</p>"
+    },
+    {
+      "id": "101995",
+      "passage": "24-36-7",
+      "sourceSha256": "dd9ba4b0da2d35078256e0a179ba587174cf8f217636bd0840980179224f666c",
+      "translatedHtml": "<p><b>Présenter leur supplication</b> — « Que leur supplication tombe », afin qu’ils tombent devant Dieu et déplorent leurs péchés.</p>"
+    },
+    {
+      "id": "102064",
+      "passage": "24-36-25",
+      "sourceSha256": "923361083854a7f5f180a9f879b2fb1ec4be52f25a38b4987df4c3e8ac896638",
+      "translatedHtml": "<p><b>Élnathan, Delaïa et Guemaria — </b>Trois des princes souhaitaient sauver le rouleau et supplièrent le roi de ne pas le brûler. Ils l’auraient retiré du feu, mais le roi ne permit pas qu’on le fasse.</p>"
+    },
+    {
+      "id": "102107",
+      "passage": "24-37-4",
+      "sourceSha256": "f170318fcfed8e4841cbb0b2814995bcbd1d73acd144a26ba8c65f6d38fb686f",
+      "translatedHtml": "<p><b>Jérémie entrait et sortait alors — </b>Après la levée du siège, il jouissait d’une certaine liberté ; il n’était pas étroitement confiné, comme il le fut par la suite. Voir  <a class=\"bible-ref\" href=\"/Jer_37.16\">Jérémie 37:16</a>.</p>"
+    },
+    {
+      "id": "102111",
+      "passage": "24-37-5",
+      "sourceSha256": "ff13b91f1943872a4dc32a88f7f1f9b1af2355c1a3114fe7cad4f20dd0270842",
+      "translatedHtml": "<p><b>Alors l’armée de Pharaon — </b>Il s’agissait de Pharaon-Hophra ou Apriès, qui régnait alors en Égypte à la place de son père Néchao. Voir  <a class=\"bible-ref\" href=\"/Ezek_29.6\">Ézéchiel 29:6</a>, etc. Nébucadnetsar, apprenant que l’armée égyptienne, sur laquelle les Juifs comptaient tant, marchait au secours de la ville, leva soudain le siège et alla à sa rencontre. Entre-temps, Sédécias envoya chercher Jérémie pour consulter le Seigneur et savoir s’ils pouvaient se considérer en sécurité.</p>"
+    },
+    {
+      "id": "102153",
+      "passage": "24-37-15",
+      "sourceSha256": "890cb7494103ca92f06507ca426b9a918cf7d116634f552e815cce6d5f9d56ab",
+      "translatedHtml": "<p><b>Et le frappa — </b>Sans aucune preuve de la trahison alléguée, sans aucune forme de justice.</p><p><b>En prison dans la maison de Jonathan — </b>Dans les pays asiatiques, les maisons des officiers de la loi comportent une pièce destinée à enfermer tous les accusés qui leur sont amenés. Jonathan était scribe ou secrétaire et possédait dans sa maison une prison de ce genre.</p>"
+    },
+    {
+      "id": "102164",
+      "passage": "24-37-17",
+      "sourceSha256": "9348a42587c0ea5afea307042cac57824b1b45088befeff0b037a95e65a315d8",
+      "translatedHtml": "<p><b>Y a-t-il une parole du Seigneur ? — </b>Y a-t-il une révélation supplémentaire ?</p><p><b>Il y en a une : tu seras délivré — </b>Quelle fidélité audacieuse ! Et à l’égard d’un roi, entre les mains duquel sa vie se trouvait maintenant.</p>"
+    },
+    {
+      "id": "102189",
+      "passage": "24-38-3",
+      "sourceSha256": "c13cd671c66d060b498482b3aa112ee655459060f9438224d808a8663cd716e9",
+      "translatedHtml": "<p><b>Cette ville sera certainement livrée — </b>C’était un témoignage qu’il rendait constamment : il en avait reçu l’autorité de Dieu. Il savait que c’était vrai et ne vacilla ni ne tergiversa jamais.</p>"
+    },
+    {
+      "id": "102256",
+      "passage": "24-38-16",
+      "sourceSha256": "6a0d0e64696182c756fa07aeb456f92943ab971743505e0613732afbda502063",
+      "translatedHtml": "<p><b>Le Seigneur est vivant, lui qui nous a donné cette âme — </b>Il est le Dieu vivant et l’Auteur de la vie que chacun de nous possède ; et aussi sûrement qu’il vit et que nous vivons par lui, je ne te mettrai pas à mort et ne te livrerai pas entre les mains de ces hommes qui cherchent ta vie. Un serment très solennel ; et le premier exemple attesté de la coutume profane de jurer par l’âme.</p>"
+    },
+    {
+      "id": "102432",
+      "passage": "24-41-7",
+      "sourceSha256": "fd16dd4f2dacc53dee2dbdc37b46dd280328c7dec20e06748bebca3221eebc91",
+      "translatedHtml": "<p><b>Les tua — </b>Il garda secret le meurtre de Guedalia et ne manqua sans doute pas de loger une troupe de ses assassins à Mitspa ; puis il attira ces quatre-vingts hommes en ce lieu afin d’avoir la force de les tuer. Il en garda dix en vie parce qu’ils lui dirent qu’ils avaient des trésors cachés dans un champ et qu’ils les lui montreraient. Il n’est pas rapporté s’il tint parole avec eux. Il ne pouvait rien faire de bon ni de grand ; et il est probable qu’après s’être emparé de ces trésors, il les traita comme il avait traité leurs compagnons. Jusqu’à aujourd’hui, le grain est conservé dans des fosses souterraines appelées matamores, en différentes régions de l’Orient.</p>"
+    },
+    {
+      "id": "102452",
+      "passage": "24-41-14",
+      "sourceSha256": "f77363786d0df0deed2068989a4d3a7d869b9cfc8f92d822aa13f2a74d40897d",
+      "translatedHtml": "<p><b>Allèrent auprès de Johanân — </b>Ils étaient las de la tyrannie d’Ismaël et se réjouirent de l’occasion de l’abandonner.</p>"
+    },
+    {
+      "id": "102456",
+      "passage": "24-41-16",
+      "sourceSha256": "b86f0581e6b90740020f56ad05947c62ef62c20fd3cd06116d614c2689a7af00",
+      "translatedHtml": "<p><b>Les femmes, les enfants et les eunuques — </b>Il s’agissait très probablement de personnes appartenant au palais et au harem de Sédécias : certaines étaient ses propres concubines et leurs enfants.</p>"
+    },
+    {
+      "id": "102499",
+      "passage": "24-42-15",
+      "sourceSha256": "f72050243ea18ae76485149670936fc09474cfeff4f20d089241dae867b079b3",
+      "translatedHtml": "<p><b>Si vous tournez vos visages vers l’Égypte pour y entrer, etc. — </b>Tout le mal que vous redoutiez en restant dans votre propre pays vous atteindra en Égypte.</p>"
+    },
+    {
+      "id": "102555",
+      "passage": "24-43-11",
+      "sourceSha256": "edeb7bbba381da5b001debe98a7ecad1bc9c62968b15d370b56d307f5e570696",
+      "translatedHtml": "<p><b>Ceux qui sont destinés à la mort, à la mort — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Jer_15.2\">Jérémie 15:2</a>.</p>"
+    },
+    {
+      "id": "102559",
+      "passage": "24-43-12",
+      "sourceSha256": "cb72cd96a72c0a42e73d4c9c3dfe163c59d011fc7ab42c669f71b4a25b141ee8",
+      "translatedHtml": "<p><b>Il les brûlera et les emmènera captifs — </b>Certains de ces dieux, ceux qui étaient en bois, il les brûlera ; ceux qui étaient en métal, il les emportera. Certains étaient en or. Voir ci-dessous.</p><p><b>Il se revêtira du pays d’Égypte — </b>Il en prendra toute la richesse et toute la grandeur ; il en prendra tout le butin.</p><p><b>Comme un berger met son vêtement — </b>Avec autant de facilité et aussi peu d’opposition, et avec l’assurance entière que le pays lui appartient désormais.</p><p><b>Il en sortira en paix — </b>Il ne subira aucune interruption ni aucun désastre à son retour de son expédition en Égypte. Voir la preuve de tout cela dans les notes à la fin de  <a class=\"bible-ref\" href=\"/Jer_44.30\">Jérémie 44:30</a> ; (note).</p>"
+    },
+    {
+      "id": "102563",
+      "passage": "24-43-13",
+      "sourceSha256": "1706353adaac5b941f75c51c98c4deb3a114f60f4b15525ed847eaffaa61a1ab",
+      "translatedHtml": "<p><b>Il brisera aussi les images de Beth-Shémesh — </b><span class=\"greek-hebrew\">&#1513;&#1502;&#1513; &#1489;&#1497;&#1514; </span>   <span class=\"translit\">beith shemesh</span> signifie littéralement la maison ou le temple du soleil ; celui-ci y était adoré, et l’on dit que ses images étaient en or massif. Nébucadnetsar devait les briser et les emporter ; et les maisons des dieux — tous les temples d’Égypte — il devait les brûler par le feu. Beth-Shémesh est la même ville qu’Héliopolis.</p><p> </p>"
+    },
+    {
+      "id": "102570",
+      "passage": "24-44-2",
+      "sourceSha256": "808b539c40cf6200a322b6271a570f70e4a756f7d5755232b9716b4ae7a82be6",
+      "translatedHtml": "<p><b>Aucun homme n’y habite — </b>La désolation du pays de Judée devait être extrêmement grande pour que cela puisse être dit de lui, presque en quelque sens que ce soit.</p>"
+    },
+    {
+      "id": "102669",
+      "passage": "24-46-4",
+      "sourceSha256": "1fa443ac4e5cf5434ca7f012f309aedc82bdb0d40283361d4aca126fae2acbf0",
+      "translatedHtml": "<p><b>Polissez les lances — </b>Nettoyez-les, faites-les briller et aiguisez-les ; du franco-gaulois <i>fourbir</i>, polir, faire briller.</p><p><b>Brigandines — </b>Une cotte de mailles, particulièrement celle qui était faite en écailles, une plaque recouvrant l’autre comme les écailles des poissons.</p>"
+    },
+    {
+      "id": "102677",
+      "passage": "24-46-6",
+      "sourceSha256": "79a7b0512a9ad00224e2f48ffb8e1c2692957094279fa037c9971151f50452bd",
+      "translatedHtml": "<p><b>Que le rapide ne s’enfuie pas — </b>Même le plus rapide ne pourra pas s’échapper.</p><p><b>Ils tomberont vers le nord — </b>Près de l’Euphrate, qui se trouvait au nord de la Judée. C’est là que l’armée égyptienne fut mise en déroute avec un grand</p><p>massacre.</p>"
+    },
+    {
+      "id": "102681",
+      "passage": "24-46-7",
+      "sourceSha256": "741c042c5bf4f7891fe64f65cdb23a5686d5fdf269c08b9bab2f78873e757b56",
+      "translatedHtml": "<p><b>Qui est celui qui monte comme un fleuve — </b>La vaste multitude du peuple est ici représentée comme un fleuve, par exemple le Jourdain, soudain gonflé par les pluies de la moisson, roulant ses eaux et débordant sur tout le pays. Une belle image pour représenter les incursions de vastes armées emportant tout sur leur passage. Telle était l’armée de Pharaon-Néco dans sa marche vers Karkémish.</p>"
+    },
+    {
+      "id": "102699",
+      "passage": "24-46-12",
+      "sourceSha256": "3fe5ca38992ba42bd348b76046cdf09695f615cab50e733b44507070b91c5e77",
+      "translatedHtml": "<p><b>Les nations ont entendu parler de ta honte — </b>De ta disgrâce, causée par ce massacre prodigieux de tes troupes.</p>"
+    },
+    {
+      "id": "102703",
+      "passage": "24-46-13",
+      "sourceSha256": "86322efd2095798496928148f830535119169a5029a1e833ca74f23588f5f828",
+      "translatedHtml": "<p><b>Comment Nébucadretsar viendrait frapper le pays d’Égypte — </b>Voir sur Jérémie 44 (note). Cela eut lieu après qu’Amasis eut repoussé Pharaon-Néco en Haute-Égypte. Voir  <a class=\"bible-ref\" href=\"/Jer_44.30\">Jérémie 44:30</a>.</p>"
+    },
+    {
+      "id": "102714",
+      "passage": "24-46-16",
+      "sourceSha256": "6bcbdd0ce5f516c87da11801012eab3c98f6ea389afaf99366232e2868e45885",
+      "translatedHtml": "<p><b>L’un tomba sur l’autre — </b>Dans leur terreur et leur confusion, les rangs tombaient sur les rangs et se renversaient les uns les autres.</p><p><b>Retournons auprès de notre peuple — </b>Fuyons vers notre pays avec toute la vitesse possible. Il s’agissait des auxiliaires.</p>"
+    },
+    {
+      "id": "102718",
+      "passage": "24-46-17",
+      "sourceSha256": "0013d53754e87207bccce4e7c32d840e10b974f2e1357381e540f420f31ecc97",
+      "translatedHtml": "<p><b>Ils crièrent là — </b>Le Dr Blayney traduit ce cri ainsi : — </p><p>     — « Ô Pharaon, roi d’Égypte, un tumulte a fait échouer la rencontre prévue. »</p><p>Ces alliés envoyèrent leurs excuses à Pharaon : les désastres qu’ils avaient subis les avaient empêchés de le rejoindre comme ils l’avaient prévu.</p>"
+    },
+    {
+      "id": "102733",
+      "passage": "24-46-21",
+      "sourceSha256": "2c2bb8464bdec68eb676d2e723f30f3b6b4d8eeb4ad83a36a119a9b2b9f05f9c",
+      "translatedHtml": "<p><b>Se sont enfuis ensemble — </b>Il y a peut-être ici une référence au cas d’une vache piquée par des moucherons. Elle court çà et là sans savoir où aller ; il en sera ainsi de ce peuple dispersé.</p>"
+    },
+    {
+      "id": "102742",
+      "passage": "24-46-23",
+      "sourceSha256": "598d2e083eba24c778ec1865f1b7a2f1e51079c185237acb4435bf63ab90b92c",
+      "translatedHtml": "<p><b>Ils abattront sa forêt — </b>On suppose que cela signifie ses villes, dont l’Égypte ne comptait pas moins de mille vingt.</p>"
+    },
+    {
+      "id": "102807",
+      "passage": "24-48-9",
+      "sourceSha256": "e3652e10adb6f9ab69678eb52f494563cde1f495d8fe2de9be051b1227be088e",
+      "translatedHtml": "<p><b>Donnez des ailes à Moab — </b>Il n’y a aucun espoir dans la résistance et, pour s’échapper, il faut fuir avec la plus grande rapidité. Je ne peux concevoir comment Dahler en est venu à traduire ainsi : <i>Tirez Moab par les chevaux</i>, « Traînez Moab par les cheveux de la tête. »</p>"
+    },
+    {
+      "id": "102841",
+      "passage": "24-48-17",
+      "sourceSha256": "cc138aba499402e96a1165883a606ba82c88ba758dd191a65442e031f877ad55",
+      "translatedHtml": "<p><b>Comme le bâton puissant est brisé — </b>Le sceptre. La souveraineté de Moab est détruite.</p>"
+    },
+    {
+      "id": "102844",
+      "passage": "24-48-18",
+      "sourceSha256": "cb53c5f06155cae17f6be205cb2e3e2427c8e1533c5eb6a5e44f4a9c9990ef2e",
+      "translatedHtml": "<p><b>Toi qui habites Dibon — </b>Cette ville était autrefois une ville des Rubénites, habitée ensuite par les Moabites, à environ deux lieues au nord du fleuve Arnon et environ six à l’est de la mer Morte. — Dahler.</p>"
+    },
+    {
+      "id": "102848",
+      "passage": "24-48-19",
+      "sourceSha256": "0dcd2507b093865b61ef19c86f6cbede94f0bf930b782d32f15fd10f32afb32c",
+      "translatedHtml": "<p><b>Ô habitant d’Aroër — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Jer_48.6\">Jérémie 48:6</a> ; (note). Cette ville, étant plus éloignée, est exhortée à veiller à sa propre sécurité et à demander à chaque passant : Que se passe-t-il ? afin de savoir quand faire ses bagages et partir.</p>"
+    },
+    {
+      "id": "102852",
+      "passage": "24-48-20",
+      "sourceSha256": "f3d9c27555b68c349834897237b5ec71a00d119ce86d12691faf427631d0dcc0",
+      "translatedHtml": "<p><b>Annoncez-le en Arnon — </b>Informez les habitants de ce lieu que les territoires de Moab sont envahis et que le pays est sur le point d’être détruit, afin qu’ils pourvoient à leur propre sécurité.</p>"
+    },
+    {
+      "id": "102856",
+      "passage": "24-48-21",
+      "sourceSha256": "de24a28dfbb12b665e194867de29b5044407740ee9c7183b49754b964f05bc61",
+      "translatedHtml": "<p><b>Sur Holon, etc. — </b>Toutes ces villes étaient des villes moabites, mais plusieurs ne sont mentionnées nulle part ailleurs.</p>"
+    },
+    {
+      "id": "102869",
+      "passage": "24-48-25",
+      "sourceSha256": "658c929c510f15a2b17bd1b268e90d8a3d916658e0257070b38ff2c876fe6993",
+      "translatedHtml": "<p><b>La corne de Moab est coupée et son bras est brisé — </b>Ses puissances politique et physique ne sont plus.</p>"
+    },
+    {
+      "id": "102876",
+      "passage": "24-48-27",
+      "sourceSha256": "b0ba08d8b042542e20c1e6ff8f88ed10f15232ad5b5c267e55adb0a6e77f0f9d",
+      "translatedHtml": "<p><b>Israël n’était-il pas une dérision pour toi ? — </b>N’as-tu pas tourné mon peuple en dérision, en disant que son Dieu ne valait pas mieux que les dieux des autres nations ? Voir  <a class=\"bible-ref\" href=\"/Ezek_25.8\">Ézéchiel 25:8</a>.</p><p><b>A-t-il été trouvé parmi des voleurs ? — </b>Les Israélites sont-ils venus te voler et te piller ? Pourquoi donc les tourner en dérision et te réjouir de leur désolation lorsque leurs ennemis prenaient le dessus sur eux ? C’est ce que le Seigneur ressent particulièrement.</p>"
+    },
+    {
+      "id": "102897",
+      "passage": "24-48-34",
+      "sourceSha256": "0ff5bbd1e914c7a260756c62af4e3f212f8e55010b59ba538a2ad6799c55eecb",
+      "translatedHtml": "<p><b>Comme une génisse de trois ans — </b>Qui court en meuglant d’un lieu à l’autre à la recherche de son veau, perdu ou enlevé.</p>"
+    },
+    {
+      "id": "102924",
+      "passage": "24-48-43",
+      "sourceSha256": "2cbcf1f23fa3a102bd08e4454516effd456258214af2cfc3491470089b971dd0",
+      "translatedHtml": "<p><b>La peur, la fosse et le piège — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Isa_24.17\">Ésaïe 24:17</a>,  <a class=\"bible-ref\" href=\"/Isa_24.18\">Ésaïe 24:18</a>.</p>"
+    },
+    {
+      "id": "102929",
+      "passage": "24-48-45",
+      "sourceSha256": "2f90f7a35be1c3240bbadd9352671ac6413b309525f8e319f6110cccaf3f529a",
+      "translatedHtml": "<p><b>Ceux qui s’étaient enfuis se tinrent à l’ombre de Hesbon — </b>Hesbon étant une place fortifiée, ceux qui avaient été vaincus dans la bataille y fuirent et se rallièrent sous ses murailles ; mais, au lieu de la sécurité, ils se trouvèrent déçus, trahis et ruinés. Voir  <a class=\"bible-ref\" href=\"/Jer_48.2\">Jérémie 48:2</a> ; (note), et la note à cet endroit.</p><p><b>Mais un feu sortira de Hesbon — </b>Jérémie a emprunté cette partie de son discours à un ancien poète cité par Moïse,  <a class=\"bible-ref\" href=\"/Num_21.28\">Nombres 21:28</a> ; (note) ; voir les notes à cet endroit.</p><p><b>La couronne de la tête — </b>Les personnes les plus choisies de toute la nation.</p>"
+    },
+    {
+      "id": "103002",
+      "passage": "24-49-18",
+      "sourceSha256": "5f20e966499c9d502743872e21b817bf25415cb042733a7f8ef2e4025102671b",
+      "translatedHtml": "<p><b>Comme dans le renversement de Sodome — </b>La destruction de Sodome et de Gomorrhe et des villes voisines fut si terrible que, lorsque Dieu prononce des jugements contre des pécheurs incorrigibles, il leur dit qu’ils seront comme Sodome et Gomorrhe.</p><p><b>Aucun homme n’y séjournera — </b>Le lieu sera si désolé qu’il ne sera pas habitable. Les voyageurs pourront y passer une nuit sur le sol, mais il ne pourra devenir une habitation permanente.</p>"
+    },
+    {
+      "id": "103005",
+      "passage": "24-49-19",
+      "sourceSha256": "62d707f9b92de12e5209bc50c4155da4cb9342c5a96fd5ed7211c74948e0d44f",
+      "translatedHtml": "<p><b>Voici, il montera comme un lion — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Jer_12.5\">Jérémie 12:5</a>. La comparaison employée ici est bien illustrée par le Dr Blayney : « Lorsque je provoquerai dans son pays (l’Idumée) une agitation semblable à celle qu’un lion féroce et puissant est censé provoquer dans des bergeries, je ferai alors qu’il (l’homme dont il est dit au verset précédent qu’il ne devait pas y habiter) s’enfuie loin d’elle comme les bergers épouvantés et leurs troupeaux fuient le lion. »</p><p><b>Un homme choisi — </b>Nébucadnetsar. C’est-à-dire que Dieu a choisi cet homme et lui a confié une mission contre l’Idumée.</p>"
+    },
+    {
+      "id": "103009",
+      "passage": "24-49-20",
+      "sourceSha256": "dba2ba13cc88ac21d6cc2d3f2664b62d59045e15aedafc5a6b900c49f0560533",
+      "translatedHtml": "<p><b>Les habitants de Théman — </b>Pris ici pour l’ensemble de l’Idumée. Ce sont des sortes de synonymes qui empêchent la monotonie et donnent de la variété à la versification du poète.</p><p><b>Certainement le plus petit du troupeau les entraînera — </b>Ils seront comme des brebis timides ; l’ennemi le plus faible les vaincra.</p>"
+    },
+    {
+      "id": "103013",
+      "passage": "24-49-21",
+      "sourceSha256": "c71c27a6bdc58d7b3c195764d739a97b60357d23acb611ba4a7a299479683dad",
+      "translatedHtml": "<p><b>La terre est ébranlée — </b>Tout l’État est ici représenté comme un vaste édifice soudainement renversé, de sorte que la terre tremble et que le bruit s’entende à grande distance.</p>"
+    },
+    {
+      "id": "103042",
+      "passage": "24-49-30",
+      "sourceSha256": "ea69aaffb1f9df152af1382f4500f421447abbd20689f54aa88577e691a47747",
+      "translatedHtml": "<p><b>Habitez dans les profondeurs — </b>Retirez-vous dans les profondeurs du désert. Voir sur  <a class=\"bible-ref\" href=\"/Jer_49.8\">Jérémie 49:8</a> ; (note).</p><p><b>Les habitants de Hatsor — </b>Je ne trouve pas ce lieu. Il se trouvait sans doute en Arabie et était un endroit d’une certaine importance ; mais il n’existe plus aujourd’hui.</p>"
+    },
+    {
+      "id": "103045",
+      "passage": "24-49-31",
+      "sourceSha256": "c56ac9c178b6f311ab88a4faa968ca050b12a90d4db10d0c6c1eaeba6844d2ea",
+      "translatedHtml": "<p><b>La nation riche — </b><span class=\"greek-hebrew\">&#1513;&#1500;&#1497;&#1493; &#1490;&#1493;&#1497; </span>   <span class=\"translit\">goi sheleiv</span>, « la nation paisible » — </p><p><b>N’ont ni portes ni barres — </b>Les Arabes, qui n’avaient que leurs tentes, sans villes ni même villages permanents.</p>"
+    }
+  ]
+}

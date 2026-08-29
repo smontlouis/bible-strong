@@ -6,20 +6,19 @@ Accepted
 
 ## Context
 
-Bible Lexicon Maker and the Resource service live in separate repositories and have different
-responsibilities. Reading the maker's working tree or treating a global mobile release as one
+Resource Studio and the Resource service have different responsibilities. Reading the studio's working tree or treating a global mobile release as one
 indivisible database would couple publication to repository layout and prevent independent
 resource revisions.
 
 ## Decision
 
-Bible Lexicon Maker emits one independently importable Resource publication bundle for each Resource
+Resource Studio emits one independently importable Resource publication bundle for each Resource
 identity and immutable, content-derived Resource revision. A bundle contains both a canonical import representation and the
 matching Offline-copy artifact, plus its manifest, provenance, distribution rights, format version,
 counts, and checksums. The global Resource catalog is derived from active independent publications;
 it is not their transport envelope.
 
-Bible Lexicon Maker owns and versions the bundle schema. The Resource service importer declares the
+Resource Studio owns and versions the bundle schema. The Resource service importer declares the
 schema versions it supports and validates every boundary before writing. Reimporting an existing
 identity and revision is an idempotent no-op only when all relevant checksums match; reusing a
 revision for different content is a blocking publication error.

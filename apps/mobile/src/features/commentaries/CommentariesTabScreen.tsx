@@ -101,13 +101,15 @@ const useComments = (verse: string) => {
 
 const useVerseInCurrentChapter = (
   book: string | number | undefined,
-  chapter: string | number | undefined
+  chapter: string | number | undefined,
+  preferredVersion?: string
 ) => {
   const defaultVersion = useDefaultBibleVersion()
+  const version = preferredVersion || defaultVersion
   const resources = useResourceAccess()
   const { data: coverage } = useQuery({
-    queryKey: resourceQueryKeys.bibleCoverage(defaultVersion),
-    queryFn: () => resources.bibleContent.loadCoverage(defaultVersion),
+    queryKey: resourceQueryKeys.bibleCoverage(version),
+    queryFn: () => resources.bibleContent.loadCoverage(version),
     enabled: !!book && !!chapter,
     ...localQueryOptions,
   })
@@ -120,9 +122,14 @@ const useVerseInCurrentChapter = (
 interface CommentariesScreenProps {
   hasHeader?: boolean
   commentaryAtom: PrimitiveAtom<CommentaryTab>
+  preferredVersion?: string
 }
 
-const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: CommentariesScreenProps) => {
+const CommentariesTabScreen = ({
+  hasHeader = true,
+  commentaryAtom,
+  preferredVersion,
+}: CommentariesScreenProps) => {
   const { t } = useTranslation()
   const theme: Theme = useTheme()
 
@@ -158,14 +165,19 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
     : { title: t('Chargement') }
 
   const defaultVersion = useDefaultBibleVersion()
-  const verseResolution = useResolvedBibleVerses(verseFormatted)
+  const requestedVersion = preferredVersion || defaultVersion
+  const verseResolution = useResolvedBibleVerses(verseFormatted, preferredVersion)
   const [verseText] = verseResolution.verses
-  const { versesInCurrentChapter } = useVerseInCurrentChapter(verseText?.Livre, verseText?.Chapitre)
+  const { versesInCurrentChapter } = useVerseInCurrentChapter(
+    verseText?.Livre,
+    verseText?.Chapitre,
+    preferredVersion
+  )
   const unavailableBibleVersion =
     verse &&
     !verseResolution.isLoading &&
     verseResolution.recoveries?.includes('acquire-offline-copy')
-      ? defaultVersion
+      ? requestedVersion
       : null
   const bibleTemporarilyUnavailable = verseResolution.recoveries?.includes('retry')
 
@@ -257,7 +269,7 @@ const CommentariesTabScreen = ({ hasHeader = true, commentaryAtom }: Commentarie
                   />
                 ) : bibleTemporarilyUnavailable ? (
                   <ResourceUnavailableView
-                    title={t('resource.bible.referenceUnavailable', { version: defaultVersion })}
+                    title={t('resource.bible.referenceUnavailable', { version: requestedVersion })}
                     failure={{ cause: 'temporary-unavailable', recoveries: ['retry'] }}
                     size="small"
                     onRetry={verseResolution.retry}

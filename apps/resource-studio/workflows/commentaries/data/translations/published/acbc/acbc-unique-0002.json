@@ -1,0 +1,270 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "acbc",
+  "batchId": "acbc-unique-0002",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "xhigh"
+  },
+  "entries": [
+    {
+      "id": "39575",
+      "passage": "6-10-15",
+      "sourceSha256": "dcdefcf67e161dc0c80a46becec646cb8a7b411a3c206b887cd5b0306d76810f",
+      "translatedHtml": "<p><b>Et</b> <b>Josué</b> <b>retourna —</b> <b>au</b> <b>camp</b> <b>de</b> <b>Guilgal</b> — Il ressort clairement des passages suivants de ce chapitre que l’armée israélite ne retourna pas au camp de Guilgal avant la pendaison des cinq rois et la destruction de leurs villes. Lorsque toute cette affaire fut achevée, et pas avant, ils retournèrent au camp de Guilgal ; voir  <a class=\"bible-ref\" href=\"/Josh_10.43\">Josué 10:43</a>. Ce verset est omis par la Septante et par la version anglo-saxonne ; il ne semble pas avoir existé dans les anciennes versions hexaplaires ; il se trouve à sa place propre dans  <a class=\"bible-ref\" href=\"/Josh_10.43\">Josué 10:43</a> et n’est pas seulement inutile là où il se trouve, mais paraît être une surcharge du récit. S’il devait être considéré comme authentique et à sa place, je proposerais de lire <span class=\"greek-hebrew\">&#1502;&#1511;&#1491;&#1492; </span>   <span class=\"translit\">makkedah</span> au lieu de <span class=\"greek-hebrew\">&#1490;&#1500;&#1490;&#1500;&#1492; </span>   <span class=\"translit\">gilgalah</span>, car nous voyons par  <a class=\"bible-ref\" href=\"/Josh_10.21\">Josué 10:21</a> que Josué y avait un campement temporaire. Josué retourna alors, et tout Israël avec lui, au camp de Makkedah ; après quoi nous pouvons supposer que Josué, ayant sécurisé la caverne, envoya des détachements parcourir le pays et exterminer tous les Cananéens restés à l’écart ; lorsque cela fut fait, ils retournèrent eux aussi au camp de Makkedah, comme le rapporte  <a class=\"bible-ref\" href=\"/Josh_10.21\">Josué 10:21</a> ; et, l’affaire achevée, ils levèrent le camp de Makkedah, et tous retournèrent à leur camp fortifié de Guilgal,  <a class=\"bible-ref\" href=\"/Josh_10.43\">Josué 10:43</a>.</p>\n\n"
+    },
+    {
+      "id": "39578",
+      "passage": "6-10-16",
+      "sourceSha256": "8fc8d80ad70887afb67eaf589c212bfa49d065c513f13263e16f9f455ad5fa15",
+      "translatedHtml": "<p><b>Se</b> <b>cachèrent</b> <b>dans</b> <b>une</b> <b>caverne — </b>Il est très vraisemblable que cette caverne était un lieu fortifié parmi des rochers ; car il y avait beaucoup de tels endroits dans différentes parties de la Palestine.</p>\n"
+    },
+    {
+      "id": "39619",
+      "passage": "6-10-34",
+      "sourceSha256": "ac75fdf645a795545606fb2d224d55ac8f83770d069999b7f7432b14ea3f7909",
+      "translatedHtml": "<p><b>Eglon — </b>Il est probable que cette ville ne se trouvait pas très loin de Lakis. Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_10.3\">Josué 10:3</a> ; (note).</p>\n\n"
+    },
+    {
+      "id": "39623",
+      "passage": "6-10-36",
+      "sourceSha256": "e2723d835d1a1c7979bd07a1649baf93570d6831b25ec5c55dc91462b73538a3",
+      "translatedHtml": "<p><b>Hébron</b> — <b>et</b> <b>son</b> <b>roi</b> <b>— </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_10.3\">Josué 10:3</a>. Nous apprenons par  <a class=\"bible-ref\" href=\"/Josh_10.23\">Josué 10:23</a> que le roi d’Hébron était l’un des cinq que Josué tua et pendit à cinq arbres à Makkedah. Comment peut-il donc être dit qu’il tua le roi d’Hébron lorsqu’il prit la ville, ce qui eut lieu plusieurs jours après les événements de Makkedah ? Soit cette mise à mort du roi d’Hébron se rapporte à ce qui avait déjà été accompli, soit les Hébronites, voyant leur roi tomber au combat, en avaient établi un autre à sa place ; et c’est ce dernier que Josué tua après avoir pris la ville et ses dépendances, comme le rapporte  <a class=\"bible-ref\" href=\"/Josh_10.37\">Josué 10:37</a>. Il semble que la ville d’Hébron soit retombée entre les mains des Cananéens, car elle leur fut reprise par la tribu de Juda,  <a class=\"bible-ref\" href=\"/Jude_1.10\">Juges 1:10</a>. Debir était également retombée entre leurs mains, car elle fut reconquise par Othniel, le gendre de Caleb,  <a class=\"bible-ref\" href=\"/Jude_1.11\">Juges 1:11-13</a>. La manière dont Calmet explique cela est très naturelle : dans ses conquêtes rapides, Josué se contenta de prendre, démolir et brûler ces villes, mais n’en garnit aucune, de peur d’affaiblir son armée. Dans plusieurs cas, il ne fait aucun doute que les Cananéens dispersés revinrent, repeuplèrent ces villes et les mirent en état de défense. C’est pourquoi les Israélites furent obligés de les conquérir une seconde fois. C’est une façon plus rationnelle d’expliquer ces choses que celle qui suppose que le premier chapitre des Juges donne le récit plus détaillé des événements rapportés ici ; car il y est expressément dit que ces événements eurent lieu après la mort de Josué (voir  <a class=\"bible-ref\" href=\"/Jude_1.1\">Juges 1:1</a>), et ne peuvent donc être les mêmes que ceux mentionnés ici.</p>\n\n"
+    },
+    {
+      "id": "39683",
+      "passage": "6-11-10",
+      "sourceSha256": "a4ee42c9ccbe362090f2ba68357667ca626a9d4b8b4dda77c9ee9aabee67b906",
+      "translatedHtml": "<p><b>Prendit</b> <b>Hatsor</b> — Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_11.1\">Josué 11:1</a> ; (note).</p>\n\n"
+    },
+    {
+      "id": "39715",
+      "passage": "6-11-21",
+      "sourceSha256": "3b2f653876b858383bf72a56d91f2a3e771f2185ce113c6c894ae4feac58a0a0",
+      "translatedHtml": "<p><b>Ils</b> <b>retranchèrent</b> <b>les</b> <b>Anakim — d’</b> <b>Hébron</b>, <b>de</b> <b>Debir</b> — C’est manifestement une récapitulation des opérations militaires détaillées dans  <a class=\"bible-ref\" href=\"/Josh_10.36\">Josué 10:36-41</a>.</p><p><b>Détruisirent</b> — <b>leurs</b> <b>villes</b> — C’est-à-dire celles des Anakim ; car nous apprenons par  <a class=\"bible-ref\" href=\"/Josh_11.13\">Josué 11:13</a> que Josué conserva certaines autres villes.</p>\n\n"
+    },
+    {
+      "id": "39785",
+      "passage": "6-12-18",
+      "sourceSha256": "7a4d15c5bf120096909b42a336a19addc3b7d4597f803e04ba44d6ad1f1de658",
+      "translatedHtml": "<p><b>Aphek — </b>Il y avait plusieurs villes de ce nom : l’une dans la tribu d’Aser,  <a class=\"bible-ref\" href=\"/Josh_19.30\">Josué 19:30</a>, une autre dans la tribu de Juda,  <a class=\"bible-ref\" href=\"/1Sam_4.1\">1 Samuel 4:1</a> ;  <a class=\"bible-ref\" href=\"/1Sam_29.1\">1 Samuel 29:1</a> ; et une troisième en Syrie,  <a class=\"bible-ref\" href=\"/1Kgs_20.26\">1 Rois 20:26</a>, et  <a class=\"bible-ref\" href=\"/2Kgs_13.17\">2 Rois 13:17</a>. Laquelle des deux premières est ici visée, on ne peut l’établir.</p><p><b>Lasharon — </b>On ne connaît aucune ville de ce nom. Certains considèrent le <span class=\"greek-hebrew\">&#1500; </span>   <span class=\"translit\">lamed</span> dans le mot <span class=\"greek-hebrew\">&#1500;&#1513;&#1512;&#1493;&#1503; </span>   <span class=\"translit\">lashsharon</span> comme le signe du génitif, et c’est en ce sens qu’il semble avoir été compris par la Vulgate, qui traduit <i>rex Saron</i>, le roi de Saron. Il s’agissait plutôt d’une région que d’une ville, et elle est célébrée dans les Écritures pour sa fertilité ;  <a class=\"bible-ref\" href=\"/Isa_33.9\">Ésaïe 33:9</a> ;  <a class=\"bible-ref\" href=\"/Isa_35.2\">Ésaïe 35:2</a>. Certains supposent qu’elle était identique à Saron, près de Lydda, mentionnée dans  <a class=\"bible-ref\" href=\"/Acts_9.35\">Actes 9:35</a>.</p>\n\n"
+    },
+    {
+      "id": "39790",
+      "passage": "6-12-20",
+      "sourceSha256": "5e0ecdb07ef48c4847e70e680003d601154dbc19060c96bbfd5928be6f5b7ab1",
+      "translatedHtml": "<p><b>Shimron-Meron — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_11.1\">Josué 11:1</a> ; (note).</p>\n\n"
+    },
+    {
+      "id": "39828",
+      "passage": "6-13-5",
+      "sourceSha256": "9bf49c1294f528b4dd4ce7155406e1472ffe7e889ef5bb325c61ea59fb806cee",
+      "translatedHtml": "<p><b>Le pays des Guibliens — </b>Ce peuple habitait au-delà des limites du pays de Canaan, à l’est de Tyr et de Sidon. Voir  <a class=\"bible-ref\" href=\"/Ezek_27.9\">Ézéchiel 27:9</a> ;  <a class=\"bible-ref\" href=\"/Ps_83.7\">Psaume 83:7</a> ; leur capitale s’appelait Guébal. Voir Dodd.</p><p><b>Tout le Liban — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_11.17\">Josué 11:17</a> ; (note).</p>\n\n"
+    },
+    {
+      "id": "39844",
+      "passage": "6-13-9",
+      "sourceSha256": "34e5b3d0b9de20dcc9be90dc6bfd3aeb517df0d68fb38949bd43368bf411b107",
+      "translatedHtml": "<p><b>Depuis Aroër — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_12.2\">Josué 12:2</a> ; (note).</p>\n\n"
+    },
+    {
+      "id": "39851",
+      "passage": "6-13-11",
+      "sourceSha256": "331ebfb00c1526a57f82bd0b189337d0bf6e21521158c33af3373b5e97861766",
+      "translatedHtml": "<p><b>La frontière des Gueshuriens — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_12.5\">Josué 12:5</a> ; (note).</p>\n\n"
+    },
+    {
+      "id": "39872",
+      "passage": "6-13-17",
+      "sourceSha256": "645474b88dfc8ac72a8bf6d7aa8da59b68dba5c3ba401e1aa6f446bbcd5f1948",
+      "translatedHtml": "<p><b>Bamoth-Baal — </b>Les hauts lieux de Baal, probablement ainsi nommés à cause des autels élevés sur les collines pour le culte impur de ce Priape cananéen.</p>\n"
+    },
+    {
+      "id": "39875",
+      "passage": "6-13-18",
+      "sourceSha256": "94f915a118c3bd3a55f7b8cd49906fef42f46a833b102b88bd251b4401bf83f6",
+      "translatedHtml": "<p><b>Jahaza — </b>Une ville près de Médeba et de Dibon. Elle fut donnée aux Lévites,  <a class=\"bible-ref\" href=\"/1Chr_6.78\">1 Chroniques 6:78</a>.</p><p><b>Kedémoth — </b>Mentionnée dans  <a class=\"bible-ref\" href=\"/Deut_2.26\">Deutéronome 2:26</a> ; on suppose qu’elle était située au-delà du torrent de l’Arnon.</p><p><b>Méphaath — </b>Située sur les frontières de Moab, dans la partie orientale du désert. Elle fut donnée aux Lévites,  <a class=\"bible-ref\" href=\"/Josh_21.37\">Josué 21:37</a>.</p>\n\n"
+    },
+    {
+      "id": "39878",
+      "passage": "6-13-19",
+      "sourceSha256": "16436898823b20f6cdb4fbc09383750e61daf4ed44ceaba4d2ecc6ecd83ddca1",
+      "translatedHtml": "<p><b>Kirjathaïm — </b>Cette ville, selon Eusèbe, se trouvait à neuf milles de Médeba, vers l’est. Elle passa des Émim aux Moabites, des Moabites aux Amorites, et des Amorites aux Israélites,  <a class=\"bible-ref\" href=\"/Gen_14.6\">Genèse 14:6</a> ;  <a class=\"bible-ref\" href=\"/Deut_2.20\">Deutéronome 2:20</a>. Calmet suppose que les Rubénites la possédèrent jusqu’à l’époque où ils furent emmenés par les Assyriens ; les Moabites semblent alors s’en être emparés de nouveau, comme il le déduit de  <a class=\"bible-ref\" href=\"/Jer_48.1\">Jérémie 48:1</a> ; etc., et de  <a class=\"bible-ref\" href=\"/Ezek_25.9\">Ézéchiel 25:9</a> ; etc.</p><p><b>Sibma — </b>Un lieu remarquable par ses vignes. Voir  <a class=\"bible-ref\" href=\"/Isa_16.8\">Ésaïe 16:8</a>,  <a class=\"bible-ref\" href=\"/Isa_16.9\">Ésaïe 16:9</a>,  <a class=\"bible-ref\" href=\"/Jer_48.32\">Jérémie 48:32</a>.</p><p><b>Tséreth-Schahar, dans la montagne de la vallée — </b>Cela désigne probablement une ville située sur une colline ou près d’une colline, dans quelque contrée plate.</p>\n\n"
+    },
+    {
+      "id": "39882",
+      "passage": "6-13-20",
+      "sourceSha256": "e3de587b23e330e39710876d8302c9a2748114ca60eb58cc91c069e4ba279036",
+      "translatedHtml": "<p><b>Beth-Péor — </b>La maison ou le temple de Péor, situé au pied de la montagne du même nom. Voir  <a class=\"bible-ref\" href=\"/Num_25.3\">Nombres 25:3</a>.</p>\n\n"
+    },
+    {
+      "id": "39885",
+      "passage": "6-13-21",
+      "sourceSha256": "9e70daa5b5cb2007ed48f9f6d3f61dd7f4eb806b4d9b1215479c1be3efc49960",
+      "translatedHtml": "<p><b>Les princes de Madian — </b>Voir l’histoire de cette guerre,  <a class=\"bible-ref\" href=\"/Num_31.1\">Nombres 31:1</a>, etc. ; et ce verset ainsi que le suivant semblent avoir été empruntés à ce passage, car l’introduction de la mort de Balaam ici paraît tout à fait hors de propos.</p>\n\n"
+    },
+    {
+      "id": "39893",
+      "passage": "6-13-23",
+      "sourceSha256": "5b8ddda6dae555055148d3167e956615da153d5066869e8c05fcf935929916c0",
+      "translatedHtml": "<p><b>Les villes et les villages — </b>Par villages, <span class=\"greek-hebrew\">&#1495;&#1510;&#1512;&#1497;&#1501; </span>   <span class=\"translit\">chatserim</span>, il est probable qu’il faut entendre des villages mobiles ou des tentes, telles qu’en utilisent les Arabes bédouins ; des lieux où ils avaient coutume de faire paître et parquer leur bétail.</p>\n"
+    },
+    {
+      "id": "39902",
+      "passage": "6-13-26",
+      "sourceSha256": "f6e619d14eb7800659b61821ca2c9868c2b11be93796812117a1ca1007611dbf",
+      "translatedHtml": "<p><b>Ramath-Mizpé — </b>Identique à Ramoth-Galaad. C’était l’une des villes de refuge,  <a class=\"bible-ref\" href=\"/Josh_20.8\">Josué 20:8</a> ;  <a class=\"bible-ref\" href=\"/Deut_4.47\">Deutéronome 4:47</a>.</p><p><b>Mahanaïm — </b>Ou les deux camps. Située sur le côté septentrional du torrent du Jabbok, elle est célèbre pour la vision des deux camps d’anges que Jacob y eut ; voir  <a class=\"bible-ref\" href=\"/Gen_32.2\">Genèse 32:2</a>.</p>\n\n"
+    },
+    {
+      "id": "39906",
+      "passage": "6-13-27",
+      "sourceSha256": "37b1b952e7f17e821d5743c57efe525ffca0277e217f9c0bd20fafc59faac748",
+      "translatedHtml": "<p><b>Beth-Aram — </b>Cette ville fut reconstruite par Hérode et appelée Livias, en l’honneur de Livie, la femme d’Auguste. Josèphe l’appelle Julias, Julia étant le nom que les Grecs donnent généralement à Livie. — Calmet.</p><p><b>Succoth — </b>Un lieu entre le Jabbok et le Jourdain où Jacob dressa ses tentes ; c’est de cette circonstance qu’il tira son nom. Voir  <a class=\"bible-ref\" href=\"/Gen_33.17\">Genèse 33:17</a>.</p>\n\n"
+    },
+    {
+      "id": "39912",
+      "passage": "6-13-29",
+      "sourceSha256": "ed3ff6f4c8c756aecaa3ca53c4ed75446177299340cf15175615122a54c0050b",
+      "translatedHtml": "<p><b>La demi-tribu de Manassé — </b>Lorsque les tribus de Ruben et de Gad demandèrent à s’établir sur le côté oriental du Jourdain, il ne semble pas qu’une partie quelconque de la tribu de Manassé ait demandé à être établie au même endroit. Mais comme cette tribu était nombreuse et possédait beaucoup de bétail, Moïse jugea bon d’en établir la moitié à l’est du Jourdain, et d’envoyer l’autre passer de l’autre côté pour s’établir sur la rive occidentale de ce fleuve.</p>\n"
+    },
+    {
+      "id": "39916",
+      "passage": "6-13-30",
+      "sourceSha256": "fb3584e04a3f0c796d35624a868c1fc80c7c53a026c6081c7c1ec761f80b92ed",
+      "translatedHtml": "<p><b>Les villes de Jaïr — </b>C’étaient soixante villes ; elles sont mentionnées plus loin et dans  <a class=\"bible-ref\" href=\"/1Chr_2.21\">1 Chroniques 2:21</a>, etc. Ce sont les mêmes que les Havoth-Jaïr mentionnées dans  <a class=\"bible-ref\" href=\"/Num_32.41\">Nombres 32:41</a>. Jaïr était le fils de Segub, le petit-fils d’Esron ou Hetsron, et l’arrière-petit-fils de Makir du côté de sa grand-mère, laquelle avait épousé Hetsron de la tribu de Juda. Voir sa généalogie,  <a class=\"bible-ref\" href=\"/1Chr_2.21\">1 Chroniques 2:21-24</a>.</p>\n\n"
+    },
+    {
+      "id": "40014",
+      "passage": "6-15-4",
+      "sourceSha256": "0b7d375954481e44d0009529fdc3ad3b1748bccc5047d426822ad8b8352d61c3",
+      "translatedHtml": "<p><b>Vers</b> <b>Azmon — </b>C’était la dernière ville qu’ils possédaient du côté de l’Égypte.</p><p><b>Le</b> <b>fleuve</b> <b>d’</b> <b>Égypte — </b>La branche la plus orientale du fleuve du Nil. Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_13.3\">Josué 13:3</a> ; (note). Mais il y a de bonnes raisons de douter qu’il s’agisse d’une branche du Nil et que la terre promise s’étende jusqu’à ce fleuve. Sur ce sujet, il est impossible de décider dans un sens ou dans l’autre.</p>\n\n"
+    },
+    {
+      "id": "40033",
+      "passage": "6-15-9",
+      "sourceSha256": "a64281bac5402cef64b75bad3c607023ab829732bd971bc72f31a5033659bbd9",
+      "translatedHtml": "<p><b>Baalah</b>, <b>qui</b> <b>est</b> <b>Kirjath-Jearim</b> — Ce lieu devint célèbre dans l’Écriture parce qu’il fut la résidence de l’arche pendant vingt ans après son renvoi par les Philistins ; voir 1 Samuel 5:1-7:2.</p>\n"
+    },
+    {
+      "id": "40037",
+      "passage": "6-15-10",
+      "sourceSha256": "dd8915cfa510b04c3cd18d323f5686827a483f1824eb2c9e1ecefa327d3c4fe8",
+      "translatedHtml": "<p><b>Beth-Schémesh — </b>La maison ou le temple du soleil. Il est évident que le soleil était un objet d’adoration chez les Cananéens ; c’est pourquoi des sources, des collines, etc., lui étaient consacrées. Beth-Schémesh est remarquable par le massacre de ses habitants, conséquence de leur curiosité indiscrète, sinon impie, envers l’arche du Seigneur lorsqu’elle fut renvoyée par les Philistins. Voir  <a class=\"bible-ref\" href=\"/1Sam_6.19\">1 Samuel 6:19</a>.</p>\n\n"
+    },
+    {
+      "id": "40044",
+      "passage": "6-15-12",
+      "sourceSha256": "d4185a6f88bc302b6efb944ff4ba217b4807464da1eb3848609039bb55678fa2",
+      "translatedHtml": "<p><b>La</b> <b>grande</b> <b>mer — </b>La Méditerranée.</p>\n"
+    },
+    {
+      "id": "40082",
+      "passage": "6-15-24",
+      "sourceSha256": "ce17fd0cb94e9127a59b78deba3fa6cef494671ae51c8b56daf3c7e7f8134ab2",
+      "translatedHtml": "<p><b>Tsiph — </b>Il y avait deux villes de ce nom dans la tribu de Juda, celle mentionnée ici et une autre dans  <a class=\"bible-ref\" href=\"/Josh_15.55\">Josué 15:55</a>. L’une de ces deux villes est connue comme le refuge de David lorsqu’il était persécuté par Saül, ainsi que pour les tentatives de ses habitants de le livrer aux mains de son persécuteur. Voir  <a class=\"bible-ref\" href=\"/1Sam_23.14\">1 Samuel 23:14-24</a>.</p>\n\n"
+    },
+    {
+      "id": "40091",
+      "passage": "6-15-28",
+      "sourceSha256": "752b89e05985f36627692f22df26bb802e7f6eb08acb71d527f412ef4683e595",
+      "translatedHtml": "<p><b>Béer-Schéba — </b>Une ville célèbre dans le livre de la Genèse comme résidence des patriarches Abraham et Jacob,  <a class=\"bible-ref\" href=\"/Gen_22.19\">Genèse 22:19</a> ;  <a class=\"bible-ref\" href=\"/Gen_28.10\">Genèse 28:10</a> ;  <a class=\"bible-ref\" href=\"/Gen_46.1\">Genèse 46:1</a>. Voir la note sur  <a class=\"bible-ref\" href=\"/Gen_21.31\">Genèse 21:31</a>. Elle se trouvait sur la route entre Canaan et l’Égypte, à environ quarante milles de Jérusalem.</p>\n\n"
+    },
+    {
+      "id": "40096",
+      "passage": "6-15-30",
+      "sourceSha256": "bc1b70628932c3bb2d2116d4048b4bdc8c48307f16bfe54cbd3ec0a705d28680",
+      "translatedHtml": "<p><b>Hormah — </b>Un lieu rendu célèbre par la défaite des Hébreux face aux Cananéens. Voir  <a class=\"bible-ref\" href=\"/Num_14.45\">Nombres 14:45</a>,  <a class=\"bible-ref\" href=\"/Deut_1.44\">Deutéronome 1:44</a>.</p>\n\n"
+    },
+    {
+      "id": "40099",
+      "passage": "6-15-31",
+      "sourceSha256": "9b57f2ec599ea46da9ade22e590aa528135713afa480a0c140f656be60c82757",
+      "translatedHtml": "<p><b>Tsiklag — </b>Les Philistins semblent avoir conservé cette ville jusqu’au temps de David, qui la reçut d’Akisch, roi de Gath,  <a class=\"bible-ref\" href=\"/1Sam_27.6\">1 Samuel 27:6</a> ; après quoi elle resta en possession des rois de Juda.</p>\n\n"
+    },
+    {
+      "id": "40102",
+      "passage": "6-15-32",
+      "sourceSha256": "ad4a0c1d61e319dea500531d332e330d1b5aba4aa5a7701f5d695c4831237735",
+      "translatedHtml": "<p><b>Toutes</b> <b>les</b> <b>villes</b> <b>sont</b> <b>au nombre de vingt</b> <b>et</b> <b>neuf</b>, <b>avec</b> <b>leurs</b> <b>villages — </b>Mais, après un examen attentif, nous en trouverons trente-huit ; toutefois, on suppose que neuf en sont exceptées, à savoir Béer-Schéba, Molada, Hatsar-Schual, Baala, Azem, Hormah, Tsiklag, Aïn et Rimmon, qui furent ensuite données à la tribu de Siméon. Cela peut sembler satisfaisant, mais la vérité se trouvera peut-être être la suivante : plusieurs villes du pays promis sont désignées par des termes composés ; ne connaissant pas les lieux, différentes traductions réunissent ce qui devrait être séparé et, dans bien des cas, séparent ce qui devrait être réuni. Ainsi, des villes sont formées à partir d’épithètes. Pour cette raison, nous avons ici trente-huit villes au total, au lieu de vingt-neuf.</p>\n"
+    },
+    {
+      "id": "40106",
+      "passage": "6-15-33",
+      "sourceSha256": "58483fa46882dbb39a85632ecc9394633ec860ed4ebd578d0a07b34d5302ad3d",
+      "translatedHtml": "<p><b>Eshtaol</b>, <b>et</b> <b>Tsorea</b> — C’est ici que Samson fut enseveli, ce lieu étant le sépulcre de ses pères ; voir  <a class=\"bible-ref\" href=\"/Jude_16.31\">Juges 16:31</a>. Ces lieux, bien qu’ayant d’abord été donnés à Juda, échurent ensuite à la tribu de Dan,  <a class=\"bible-ref\" href=\"/Josh_19.41\">Josué 19:41</a>.</p>\n\n"
+    },
+    {
+      "id": "40112",
+      "passage": "6-15-35",
+      "sourceSha256": "396e333fc244508f4965874ca752da7781924ca43fca83ce9df8bf1ea38c89a4",
+      "translatedHtml": "<p><b>Jarmuth — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_10.3\">Josué 10:3</a>.</p><p><b>Adullam — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_12.15\">Josué 12:15</a>.</p><p><b>Socoh — </b>C’est près de ce lieu que David combattit Goliath, le champion des Philistins, et le tua,  <a class=\"bible-ref\" href=\"/1Sam_17.1\">1 Samuel 17:1</a>.</p>\n\n"
+    },
+    {
+      "id": "40115",
+      "passage": "6-15-36",
+      "sourceSha256": "757ba86d2ce56f0565b4135878772283344e59de3b1fb88ea774751975553cc7",
+      "translatedHtml": "<p><b>Gederah — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_12.13\">Josué 12:13</a>.</p><p><b>Quatorze</b> <b>villes — </b>Si l’on compte correctement, on trouvera ici quinze villes ; mais il est probable que Gederah et Gederothaïm ( <a class=\"bible-ref\" href=\"/Josh_15.36\">Josué 15:36</a>) sont le même lieu. Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_15.32\">Josué 15:32</a>.</p>\n\n"
+    },
+    {
+      "id": "40122",
+      "passage": "6-15-39",
+      "sourceSha256": "fd1e3783352f548461622c4050f4b9cc9e4f0de939b09e247647670654d2549f",
+      "translatedHtml": "<p><b>Lakis</b> — <b>et</b> <b>Eglon</b> — Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_10.3\">Josué 10:3</a> ; (note).</p>\n\n"
+    },
+    {
+      "id": "40130",
+      "passage": "6-15-42",
+      "sourceSha256": "31263e8ebac1ae7de8fa6d9d8276b8182a81507da5388425cf1554bae48560f9",
+      "translatedHtml": "<p><b>Libna — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_10.29\">Josué 10:29</a>.</p><p><b>Éther — </b>Nous apprenons par  <a class=\"bible-ref\" href=\"/Josh_19.7\">Josué 19:7</a> que cette ville fut ensuite donnée à la tribu de Siméon.</p>\n\n"
+    },
+    {
+      "id": "40140",
+      "passage": "6-15-46",
+      "sourceSha256": "0cfe3d0c37103c23e6afcad90f4e83dc1cc373c80be444e38c02f6b19cfed71b",
+      "translatedHtml": "<p><b>Ékron — </b>L’une des cinq principautés philistines ; voir la note sur  <a class=\"bible-ref\" href=\"/Josh_13.3\">Josué 13:3</a>.</p>\n\n"
+    },
+    {
+      "id": "40143",
+      "passage": "6-15-47",
+      "sourceSha256": "0c67229aba57efe835952f991c3dc1ff8acff7dc354b145aa37debedc4b9868c",
+      "translatedHtml": "<p><b>Asdod — </b>Également appelée Azot,  <a class=\"bible-ref\" href=\"/Acts_8.40\">Actes 8:40</a>.</p><p><b>Jusqu’au</b> <b>fleuve</b> <b>d’</b> <b>Égypte</b><b> — </b>La branche pélusienne du Nil, ou le Sichor. Mais voir la note sur  <a class=\"bible-ref\" href=\"/Josh_15.4\">Josué 15:4</a> ; (note).</p><p><b>La</b> <b>grande</b> <b>mer — </b>La Méditerranée.</p>\n\n"
+    },
+    {
+      "id": "40146",
+      "passage": "6-15-48",
+      "sourceSha256": "cfbed4216b6c62f6d7fb6b120d674c676b67fecf9822b5df854a657d20694964",
+      "translatedHtml": "<p><b>Socoh — </b>Voir une ville de ce nom,  <a class=\"bible-ref\" href=\"/Josh_15.35\">Josué 15:35</a> ; (note).</p>\n\n"
+    },
+    {
+      "id": "40150",
+      "passage": "6-15-49",
+      "sourceSha256": "d089c29fd5fbd0b90d94d694476155f00beb8c3a8da2366018a1c82568f1398e",
+      "translatedHtml": "<p><b>Kirjath-Sannah — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_15.15\">Josué 15:15</a>.</p>\n\n"
+    },
+    {
+      "id": "40155",
+      "passage": "6-15-51",
+      "sourceSha256": "8b74a3a4ffd510d37269a42f9946e2daa69be0992475d92bee7f0a0f2162c91f",
+      "translatedHtml": "<p><b>Gosen — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_10.41\">Josué 10:41</a>.</p><p><b>Gilo — </b>Le pays du traître Achitophel,  <a class=\"bible-ref\" href=\"/2Sam_15.12\">2 Samuel 15:12</a>.</p>\n\n"
+    },
+    {
+      "id": "40160",
+      "passage": "6-15-53",
+      "sourceSha256": "60b38fa35f4df96d9348876a62ca32d50b00c9c99174b0ebc83299e3311ef7c1",
+      "translatedHtml": "<p><b>Beth-Tappuach — </b>La maison du pommier ou du cédratier. Probablement un lieu où ces arbres poussaient en grande abondance et avec une grande perfection.</p><p><b>Apheka — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_12.18\">Josué 12:18</a>.</p>\n\n"
+    },
+    {
+      "id": "40163",
+      "passage": "6-15-54",
+      "sourceSha256": "c3d38876abfeb9421600c6386697da3a23a32d167d2a892cc440f2149e9286a9",
+      "translatedHtml": "<p><b>Kirjath-Arba — </b>Voir la note sur  <a class=\"bible-ref\" href=\"/Josh_14.15\">Josué 14:15</a>.</p>\n\n"
+    },
+    {
+      "id": "40171",
+      "passage": "6-15-57",
+      "sourceSha256": "8892bb48e5aaaf53ff66604777d67e0097b8365203fb72e4a83108e358303be3",
+      "translatedHtml": "<p><b>Timna — </b>Une ville frontière des Philistins ; c’est dans ce lieu que Samson prit sa femme, voir Juges 14:1-15:20.</p>\n"
+    }
+  ]
+}

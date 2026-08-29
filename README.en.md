@@ -145,7 +145,7 @@ This repository brings together the Bible Strong applications, services, and sha
 | `apps/mobile` | `@bible-strong/mobile` | Expo / React Native application presented in this README |
 | `apps/web` | `@bible-strong/web` | Bible Strong web application |
 | `apps/api` | `@bible-strong/api` and `@bible-strong/api-functions` | API and Firebase functions |
-| `apps/lexicon-editor` | `@bible-strong/lexicon-editor` | Editorial production of lexicons and resources |
+| `apps/resource-studio` | `@bible-strong/resource-studio` | Resource acquisition, transformation, and packaging |
 | `packages/resource-service` | `@bible-strong/resource-service` | Publication and delivery of Bible resources |
 | `packages/resource-domain` | `@bible-strong/resource-domain` | Shared resource contracts and invariants |
 | `packages/resource-catalog` | `@bible-strong/resource-catalog` | Shared catalog of published resources |
@@ -228,7 +228,7 @@ See [`CONTEXT-MAP.md`](./CONTEXT-MAP.md) for the domain contexts and [`docs/inde
 | `yarn dev:mobile` | Start the mobile Expo server |
 | `yarn dev:web` | Start the web application |
 | `yarn dev:api` | Start the local Firebase API |
-| `yarn dev:lexicon` | Start the lexicon editorial tooling |
+| `yarn dev:studio` | Start the resource authoring studio |
 | `yarn dev:resources` | Start the Resource service |
 | `yarn lint` | Check configured workspaces with ESLint |
 | `yarn typecheck` | Check TypeScript types across all workspaces |
@@ -371,7 +371,7 @@ bible-strong/
 │   │   └── firebase/                   # Firebase configs per environment
 │   ├── web/                            # Web application
 │   ├── api/                            # API and Firebase functions
-│   └── lexicon-editor/                 # Editorial tools and publications
+│   └── resource-studio/                # Resource authoring studio and workflows
 ├── packages/
 │   ├── resource-service/               # Publication, API, and offline copies
 │   ├── resource-domain/                # Shared contracts and invariants

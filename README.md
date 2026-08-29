@@ -145,7 +145,7 @@ Ce repository regroupe les applications, services et packages partages de Bible 
 | `apps/mobile` | `@bible-strong/mobile` | Application Expo / React Native presentee dans ce README |
 | `apps/web` | `@bible-strong/web` | Application web Bible Strong |
 | `apps/api` | `@bible-strong/api` et `@bible-strong/api-functions` | API et fonctions Firebase |
-| `apps/lexicon-editor` | `@bible-strong/lexicon-editor` | Production editoriale des lexiques et ressources |
+| `apps/resource-studio` | `@bible-strong/resource-studio` | Acquisition, transformation et fabrication des ressources |
 | `packages/resource-service` | `@bible-strong/resource-service` | Publication et livraison des ressources bibliques |
 | `packages/resource-domain` | `@bible-strong/resource-domain` | Contrats et invariants partages des ressources |
 | `packages/resource-catalog` | `@bible-strong/resource-catalog` | Catalogue partage des ressources publiees |
@@ -228,7 +228,7 @@ Consultez le [`CONTEXT-MAP.md`](./CONTEXT-MAP.md) pour les contextes metier et [
 | `yarn dev:mobile` | Demarre le serveur Expo de l'application mobile |
 | `yarn dev:web` | Demarre l'application web |
 | `yarn dev:api` | Demarre l'API Firebase locale |
-| `yarn dev:lexicon` | Demarre l'outil editorial de lexique |
+| `yarn dev:studio` | Demarre l'atelier editorial des ressources |
 | `yarn dev:resources` | Demarre le Resource service |
 | `yarn lint` | Verifie les workspaces configures avec ESLint |
 | `yarn typecheck` | Verifie les types de tous les workspaces |
@@ -371,7 +371,7 @@ bible-strong/
 │   │   └── firebase/                   # Configs Firebase par environnement
 │   ├── web/                            # Application web
 │   ├── api/                            # API et fonctions Firebase
-│   └── lexicon-editor/                 # Outils editoriaux et publications
+│   └── resource-studio/                # Atelier de production des ressources
 ├── packages/
 │   ├── resource-service/               # Publication, API et copies hors ligne
 │   ├── resource-domain/                # Contrats et invariants partages

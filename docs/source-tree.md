@@ -22,7 +22,11 @@
 | `apps/web/` | `@bible-strong/web` | Browser Bible Strong experience. |
 | `apps/api/` | `@bible-strong/api` | API workspace and Firebase deployment boundary. |
 | `apps/api/functions/` | `@bible-strong/api-functions` | Firebase Functions implementation. |
-| `apps/lexicon-editor/` | `@bible-strong/lexicon-editor` | Editorial UI and tooling for lexicon resources. |
+| `apps/resource-studio/` | `@bible-strong/resource-studio` | Editorial UI and authoring workflows for every Bible Strong resource family. |
+
+Resource Studio keeps one workflow per Resource family. The complete commentary workflow and its
+local reader live under `apps/resource-studio/workflows/commentaries/`; documentation under `docs/`
+records audits and decisions but does not own production generators.
 
 ## Packages
 

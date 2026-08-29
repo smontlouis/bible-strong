@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "acbc",
+  "batchId": "acbc-unique-0004",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "xhigh"
+  },
+  "entries": [
+    {
+      "id": "40658",
+      "passage": "6-21-19",
+      "sourceSha256": "ff90fd412b279440d67d822155bf73e4a0075685fe55c8d8a67f35ddb34c5da8",
+      "translatedHtml": "<p><b>Treize</b> <b>villes</b> <b>avec</b> <b>leurs</b> <b>faubourgs</b> - À l'époque mentionnée ici, treize villes constituaient certainement une proportion trop élevée pour les prêtres, eux-mêmes et leurs familles étant très peu nombreux ; mais cette vaste disposition fut prise en prévision de leur grand accroissement dans les temps ultérieurs, lorsqu'ils formèrent vingt-quatre classes, comme aux jours de David.</p>"
+    },
+    {
+      "id": "40683",
+      "passage": "6-21-24",
+      "sourceSha256": "1b03fd5d2f0d9580759214fd8535408dbf7473f702155987c6d95875b96f6ca4",
+      "translatedHtml": "<p><b>Aijalon</b> - Voir la note sur <a class=\"bible-ref\" href=\"/Josh_10.12\">Josué 10:12</a>; (note).</p>"
+    },
+    {
+      "id": "40734",
+      "passage": "6-21-35",
+      "sourceSha256": "628f4171b6844e3eab39d5bf850f0d0ecc5d4c1a516b63b35a8e5ce694f4954c",
+      "translatedHtml": "<p><b>Dimnah</b> <b>avec</b> <b>ses</b> <b>faubourgs</b>, <b>etc. - </b>Tout spécialiste de l'hébreu sait que les deux versets suivants sont entièrement omis par la Massore et qu'ils sont absents de certaines des Bibles hébraïques les plus exactes et les plus authentiques. Il existe entre les critiques une controverse considérable au sujet de l'authenticité de ces versets ; ceux qui désirent voir les arguments développés des deux côtés doivent consulter les Variae Lectiones de De Rossi sur ce passage. Le docteur Kennicott, ardent défenseur de leur authenticité, argumente ainsi en leur faveur : « <a class=\"bible-ref\" href=\"/Josh_21.41\">Josué 21:41</a> et <a class=\"bible-ref\" href=\"/Josh_21.42\">Josué 21:42</a> de ce chapitre nous disent que les villes lévitiques étaient au nombre de quarante-huit et qu'elles avaient toutes été décrites comme telles ; elles doivent donc toutes être spécifiées dans ce chapitre ; alors que maintenant, dans toutes les copies hébraïques imprimées en pleine obéissance à la Massore, qui exclut deux versets contenant quatre de ces villes, le nombre ne s'élève qu'à quarante-quatre.</p><p>« Les villes sont d'abord mentionnées en général comme étant au nombre de treize et dix, puis de treize et douze, ce qui fait bien quarante-huit. Et pourtant, lorsqu'elles sont nommées en détail, <a class=\"bible-ref\" href=\"/Josh_21.13\">Josué 21:13-19</a> donne treize villes ; <a class=\"bible-ref\" href=\"/Josh_21.20\">Josué 21:20-26</a> donne dix villes ; <a class=\"bible-ref\" href=\"/Josh_21.27\">Josué 21:27-33</a> en donne treize ; <a class=\"bible-ref\" href=\"/Josh_21.34\">Josué 21:34-36</a> donne quatre villes ; et <a class=\"bible-ref\" href=\"/Josh_21.35\">Josué 21:35-36</a> en donne quatre autres, ce qui ne peut en faire que quarante-quatre. Et ce qui accroît encore l'étonnement, c'est que <a class=\"bible-ref\" href=\"/Josh_21.40\">Josué 21:40</a> déduit des versets qui précèdent immédiatement que les villes accordées aux Merarites étaient au nombre de douze, alors qu'elles ne sont ici que huit, à moins que nous n'admettions les quatre autres villes exprimées dans ces deux versets, rejetés par ce guide aveugle qu'est la Massore. Au mépris de cette autorité, ces deux versets, absolument nécessaires, furent insérés dans les toutes premières éditions du texte hébreu et se trouvent dans la Polyglotte de Walton ainsi que dans notre Bible anglaise. Mais ils n'ont encore presque jamais été imprimés intégralement, comme suit : “Et de la tribu de Ruben, une ville de refuge pour le meurtrier, Bétser, dans le désert, avec ses faubourgs, et Jahats avec ses faubourgs, Qedémoth avec ses faubourgs, et Méphaath avec ses faubourgs ; quatre villes.” Voir sur ce passage mon édition de la Bible hébraïque, où pas moins de cent quarante-neuf copies sont décrites, qui ont heureusement conservé ces versets, manifestement indispensables à la vérité et à la cohérence de ce chapitre. Voir aussi le General Discourse, p. 19, 26, 54. »</p><p>Bien que le raisonnement du docteur Kennicott paraisse très concluant, les manuscrits qui conservent ces versets et ceux qui les rejettent présentent tant de variantes importantes qu'il est très difficile de trancher la question de leur authenticité. Aux cent quarante-neuf manuscrits du docteur Kennicott qui possèdent ces deux versets, on peut en ajouter plus de quarante collationnés par De Rossi. Ceux qui nient leur authenticité disent qu'ils ont été insérés ici d'après <a class=\"bible-ref\" href=\"/1Chr_6.78\">1 Chroniques 6:78</a>, <a class=\"bible-ref\" href=\"/1Chr_6.79\">1 Chroniques 6:79</a>, où ils se trouvent, il est vrai, en général, mais pas exactement comme ils apparaissent ici et dans la Bible hébraïque du docteur Kennicott.</p>"
+    },
+    {
+      "id": "40740",
+      "passage": "6-21-36",
+      "sourceSha256": "debdde3829ddaefee6ad44dbb862c2b06c1c3c0941a93d79ba72a108f461ed86",
+      "translatedHtml": "<p><b>Jahazah</b> - Voir la note sur <a class=\"bible-ref\" href=\"/Josh_13.18\">Josué 13:18</a>; (note).</p>"
+    },
+    {
+      "id": "40923",
+      "passage": "6-22-31",
+      "sourceSha256": "303bb035650df89fbfb5fb974c50ce1bb2f77ef7d2275f74de43e3243d1d1b03",
+      "translatedHtml": "<p><b>Nous</b> <b>voyons</b> <b>que</b> <b>l'Éternel</b> <b>est</b> <b>au</b> <b>milieu</b> <b>de nous</b> - Ou, selon le Targum de Jonathan : « En ce jour, nous savons que la majesté de Jéhovah demeure parmi nous, parce que vous n'avez pas commis cette prévarication contre la Parole de l'Éternel et que vous avez ainsi délivré les enfants d'Israël de la main de la Parole de l'Éternel. » Ils se réjouissent de les trouver innocents et de constater qu'il n'y a aucun motif de querelle entre les enfants d'une même famille. De là, ils tirent une conclusion très favorable : puisque Dieu était parmi eux comme l'unique objet de leur culte religieux, il demeurerait avec eux comme leur protecteur et leur part ; et, puisqu'ils étaient ses amis, ils tiennent pour acquis qu'il les délivrera des mains de leurs ennemis.</p>"
+    },
+    {
+      "id": "41011",
+      "passage": "6-23-15",
+      "sourceSha256": "d720074dde1bb4799f76172da44620e8c841c5783608c5d704655b546dd4c64b",
+      "translatedHtml": "<p><b>Ainsi</b> <b>l'</b><b>Éternel</b> <b>fera</b> <b>venir</b> <b>sur</b> <b>vous</b> <b>tous</b> <b>les</b> <b>maux</b> - Sa fidélité à accomplir ses promesses prouve qu'il accomplira avec la même fidélité ses menaces, car la véracité de Dieu est également engagée pour les unes et pour les autres.</p>"
+    },
+    {
+      "id": "41375",
+      "passage": "7-1-31",
+      "sourceSha256": "29f8ba46f64e95e08f229dcd05c9da2e148f0269807e895b407a3d317bf52b7a",
+      "translatedHtml": "<p><b>Asher</b> <b>ne</b> <b>fit pas non plus</b> - Voir la note sur <a class=\"bible-ref\" href=\"/Josh_19.24\">Josué 19:24-31</a>; (note).</p><p><b>Accho</b> - On suppose qu'il s'agit de la ville de Ptolémaïs, près du mont Carmel.</p>"
+    },
+    {
+      "id": "41397",
+      "passage": "7-1-35",
+      "sourceSha256": "236c5288bbc5de3bc98f1ef1ab84bc393a1c76e4611306edf69efcb1bdd0a735",
+      "translatedHtml": "<p><b>Les</b> <b>Amorites</b> <b>voudraient</b> <b>habiter</b> <b>sur</b> <b>le mont</b> <b>Hérès</b> - Ils consentirent peut-être à habiter dans la région montagneuse, étant incapables de se maintenir dans la plaine, et pourtant ils étaient si puissants que les Danites ne purent pas les expulser totalement ; ils furent cependant soumis au tribut, et la maison de Joseph eut ainsi la souveraineté. La Septante a cherché un sens littéral aux noms de plusieurs de ces lieux et rend le verset ainsi : « Et les Amorites commencèrent à habiter sur la montagne des Tuiles, où il y a des ours et où il y a des renards. » C'est ainsi qu'elle traduit Hérès, Aijalon et Shaalbim.</p>"
+    },
+    {
+      "id": "41453",
+      "passage": "7-2-12",
+      "sourceSha256": "2b5b4aa1031234cdfb99f8efb371766455cacc5b16eb730aa4f2275c85ef570e",
+      "translatedHtml": "<p><b>Qui</b> <b>les</b> <b>fit</b> <b>sortir</b> <b>hors</b> <b>du</b> <b>pays</b> <b>d'</b><b>Égypte</b> - C'était l'une des circonstances les plus aggravantes de leur offense : ils abandonnèrent le Dieu qui les avait fait sortir d'Égypte, pays où ils avaient subi l'oppression la plus pénible et été soumis à la servitude la plus dégradante, dont ils n'auraient jamais pu se délivrer eux-mêmes ; et ils furent délivrés par une manifestation si éclatante de la puissance, de la justice et de la miséricorde de Dieu qu'elle n'aurait jamais dû être oubliée, car elle était la plus prodigieuse qui eût jamais été montrée. Ils l'abandonnèrent et servirent des idoles aussi dépourvues d'existence réelle que d'influence et de puissance.</p>"
+    },
+    {
+      "id": "41489",
+      "passage": "7-2-20",
+      "sourceSha256": "98499322dc60150c63abaa95833003f81aa2272507ceb9551e4853e78c937ad2",
+      "translatedHtml": "<p><b>La</b> <b>colère</b> <b>de</b> <b>l'Éternel</b> <b>s'était</b> <b>fortement</b> <b>enflammée</b> - Ils étaient comme du combustible par leurs transgressions ; et le mécontentement de l'Éternel était comme un feu prêt à embraser et à consumer ce combustible.</p>"
+    },
+    {
+      "id": "41577",
+      "passage": "7-3-18",
+      "sourceSha256": "1f6eeef7e8d9e8300400e0ed4635c95499412c911913ed2e8282896d658b2652",
+      "translatedHtml": "<p><b>Il</b> <b>acheva</b> <b>alors</b> <b>d'</b><b>offrir</b> <b>le</b> <b>présent</b> - Dans les pays orientaux, les présents, tributs, etc. étaient offerts avec une très grande cérémonie ; et, pour faire davantage d'apparat, plusieurs personnes, ordinairement des esclaves, richement vêtues et en nombre considérable, étaient employées à porter ce qui n'aurait même pas été un fardeau pour une seule personne. Cela semble avoir été le cas ici.</p>"
+    },
+    {
+      "id": "42121",
+      "passage": "7-7-23",
+      "sourceSha256": "1a8bad898456b71c1d7844b1ac6db836ae849dd5b28676029247f7b6654f7396",
+      "translatedHtml": "<p><b>Les</b> <b>hommes</b> <b>d'Israël</b> <b>se</b> <b>rassemblèrent</b> - Il est très probable qu'il s'agissait de quelques hommes que Gédéon avait renvoyés chez eux la veille et qui, apprenant alors que les Madianites étaient en déroute, se mirent immédiatement à leur poursuite.</p>"
+    },
+    {
+      "id": "42383",
+      "passage": "7-9-35",
+      "sourceSha256": "9cbe1790332c577f24b869633f3ca883d2d52ee6cf91d8c58d4280abb6fd58d7",
+      "translatedHtml": "<p><b>Ils</b> <b>se tinrent</b> <b>à</b> <b>l'entrée</b> <b>de</b> <b>la</b> <b>porte</b> - Ayant probablement reçu quelques indications sur les projets de Zébul et d'Abimélec.</p>"
+    },
+    {
+      "id": "42437",
+      "passage": "7-9-56",
+      "sourceSha256": "01a5023c86cf8f4eec7b64b4d8c99a8d2ecc4d10d2236bc534f1f8654a9df2ca",
+      "translatedHtml": "<p><b>Ainsi</b> <b>Dieu</b> <b>rendit</b>, <b>etc. - </b>Le fratricide Abimélec et les hommes sans principes de Sichem eurent tous deux à subir l'iniquité dont ils s'étaient rendus coupables. On peut éviter le jugement des hommes ; mais il n'y a pas d'échappatoire aux jugements de Dieu.</p><p>J'ai dit que la fable de Jotham est la plus ancienne, et peut-être la meilleure du monde ; et j'ai renvoyé pour d'autres détails à la fin du chapitre.</p><p>Sur le sujet général de la fable, de l'apologue et de la parabole, le lecteur trouvera une dissertation considérable à la fin de <a class=\"bible-ref\" href=\"/Matt_13.58\">Matthieu 13:58</a> ; je n'ajouterai ici que quelques éléments, qui se rapporteront à la plus ancienne collection de fables existante. Elles sont d'origine indienne et conservées en sanskrit, d'où elles ont été traduites dans différentes langues, asiatiques et européennes, sous des titres variés. La collection s'appelle Hitopadesa et son auteur Veshnoo Sarma ; mais elles sont connues en Europe sous le nom de Contes et fables de Bidpay, ou Pilpay, ancien philosophe indien. Sir William Jones en donne l'avis suivant : « Les fables de Veshnoo Sarma, que nous appelons ridiculement Pilpay, sont la plus belle, sinon la plus ancienne, collection d'apologues du monde. Elles furent d'abord traduites du sanskrit, au VIe siècle, par Buzerchumihr, ou “brillant comme le soleil”, médecin en chef puis vizir du grand Anushirwan ; elles existent sous des noms variés dans plus de vingt langues. Mais leur titre original est Hitopadesa, ou instruction amicale ; et, comme l'existence même d'Ésope, que les Arabes croient avoir été un Abyssin, paraît quelque peu douteuse, je ne suis pas peu enclin à supposer que les premières fables morales parues en Europe étaient d'origine indienne ou éthiopienne. »</p><p>M. Frazer, dans sa collection de manuscrits orientaux à la fin de son Histoire de Nadir Shah, nous donne le récit suivant de cet ouvrage curieux et instructif : </p><p>« Les anciens brahmanes de l'Inde, après beaucoup de temps et de travail, compilèrent un traité (qu'ils appelèrent Kurtuk Dumnik), dans lequel furent insérés les trésors les plus précieux de la sagesse et les règles les plus parfaites pour gouverner un peuple. Ils présentèrent ce livre à leurs rajahs, qui le conservèrent avec le plus grand secret et le plus grand soin. Vers l'époque de la naissance de Mahomet, ou à la fin du VIe siècle, Noishervan le Juste, qui régnait alors en Perse, manifesta un grand désir de voir ce livre ; dans ce but, Burzuvia, un médecin qui possédait un talent remarquable pour apprendre plusieurs langues, notamment le sanskrit, lui fut présenté comme la personne la plus propre à en obtenir une copie. Il se rendit en Inde, où, après y être resté plusieurs années et avoir connu de grandes difficultés, il l'obtint. Lui et Buzrjumehr, le vizir, le traduisirent en pehlevi (l'ancienne langue persane). Noishervan, puis tous ses successeurs, les rois persans, tinrent ce livre en haute estime et prirent le plus grand soin de le garder secret. Enfin Abu Jaffer Munsour zu Nikky, qui était le deuxième calife du règne abbasside, en obtint une copie en langue pehlevie après de longues recherches et ordonna à l'imam Hassan Abdal Mokaffa, le plus savant homme de son époque, de le traduire en arabe. Ce prince en fit ensuite son guide, non seulement dans les affaires relatives au gouvernement, mais aussi dans la vie privée.</p><p>« En l'an 380 de l'Hégire, le sultan Mahmud Ghazi le mit en vers ; puis, en l'an 515, sur l'ordre de Bheram Shah ben Massaud, ce qu'Abdal Mokaffa avait traduit fut retraduit en persan par Abdul Mala Nasser Allah Mustofi ; et c'est ce Kulila Dumna qui existe aujourd'hui. Comme cette dernière version contenait trop de vers arabes et de phrases désuètes, Molana Ali beg Hessein Vaes, à la demande de l'émir Soheli, gardien des sceaux du sultan Hossein Mirza, la remania dans un style plus moderne et lui donna le titre d'Anuar Soheli.</p><p>« En l'an 1002, le grand moghol Jalal o Din Mohommed Akbar ordonna à son propre secrétaire et vizir, le savant Abul Fazl, d'éclaircir les passages obscurs, d'abréger les longues digressions et de donner à l'ouvrage un style qui serait accessible à tous les esprits ; ce qu'il fit, et il lui donna le nom d'Ayar Danish, ou le Critère de la sagesse. » Voilà ce que dit M. Frazer sous le mot Ayar Danish.</p><p>« En l'an 1709, dit le docteur Wilkins, le Kulila Dumna, version persane d'Abul Mala Nasser Allah Mustofi, réalisée la 515e année de l'Hégire, fut traduit en français sous le titre de Les Conseils et les Maximes de Pilpay, Philosophe Indien, sur les divers États de la Vie. Cette édition ressemble davantage à l'Hitopadesa qu'à toute autre alors connue ; et elle est manifestement l'original immédiat des Fables instructives et divertissantes de Pilpay, ancien philosophe indien, qui, en 1775, avait déjà connu cinq éditions.</p><p>« L'Anuar Soheli mentionné plus haut fut traduit en turc vers l'an 1540 ; on dit que le traducteur y consacra vingt années de travail. En 1724, M. Galland commença à traduire cette édition en français, et les quatre premiers chapitres furent alors publiés ; mais, en 1778, M. Cardonne acheva l'ouvrage en trois volumes et lui donna le titre de Contes et Fables Indiennes de Bidpai et de Lokman ; traduites d'Ali Tcheleby ben Saleh, amateur Turc ; “Contes et fables indiennes de Bidpay et de Lockman, traduits d'Aly Tcheleby ben Saleh, auteur turc.” »</p><p>Les fables de Lockman furent publiées en arabe et en latin, avec des notes, par Erpenius, 4e éd., Amstel., 1636 ; et par le célèbre Golius, à la fin de son édition de la grammaire arabe d'Erpen, Lugd. Bat., 1656, avec des notes supplémentaires ; et aussi dans l'édition de cette même grammaire par Albert Schultens, Lugd. Bat., 1748, 4e éd. Elles ne sont qu'au nombre de trente-sept.</p><p>De l'Hitopadesa, ou des fables de Veshnoo Sarma, nous possédons deux traductions anglaises très élégantes à partir du sanskrit original : l'une par Sir William Jones, imprimée dans ses œuvres, 4e éd., vol. 6, Londres, 1799 ; l'autre par le père de la littérature sanskrite en Europe, le docteur Charles Wilkins, in-8°, Bath, 1787, avec une collection de notes très importantes.</p><p>Le Bahar Danush, ou Mer de la sagesse, abonde en maximes, apophthegmes, etc., semblables à ceux des ouvrages précédents ; il fut traduit très fidèlement du persan par le docteur Jonathan Scott, ancien secrétaire persan de Son Excellence Warren Hastings, et publié en trois volumes in-12, avec des notes, à Shrewsbury, en 1799. C'est la version la plus exacte d'un ouvrage persan qui ait encore été offerte au public. L'original est d'Einaut Ullah. On peut dire de ces ouvrages qu'ils renferment la sagesse du monde oriental ; et que les nombreuses maximes qui y sont disséminées ne le cèdent en importance qu'à celles des écrits sacrés. Les fables attribuées à Ésope ont été maintes fois publiées en grec et en latin, ainsi que dans toutes les langues d'Europe, et sont bien connues. Celles de Phèdre ne sont généralement qu'une version métrique des fables d'Ésope. Les compositions de La Fontaine, en français, et celles de M. Gay, en anglais, ont une grande valeur.</p><p> </p>"
+    },
+    {
+      "id": "42518",
+      "passage": "7-10-17",
+      "sourceSha256": "2650ddee4107106306314ce1c24bd93532e45d9c88faa1d01ed793e7e987c4ad",
+      "translatedHtml": "<p><b>Les</b> <b>enfants</b> <b>d'Ammon</b> <b>se</b> <b>rassemblèrent</b> <b>tous</b> <b>ensemble</b> - Littéralement, ils crièrent contre Israël : ils envoyèrent des crieurs dans différentes directions pour soulever tous les ennemis d'Israël ; et, après avoir rassemblé une grande multitude, ils campèrent en Galaad.</p>"
+    },
+    {
+      "id": "43730",
+      "passage": "8-4-19",
+      "sourceSha256": "5f14968ccc9908dc3ab1db7e294c9eefdd51f8f2c8413285d56e66364dc47b1f",
+      "translatedHtml": "<p><b>Hetsron</b> <b>engendra</b> <b>Ram</b> - La Septante l'appelle ici Aram, et aussi saint Matthieu, <a class=\"bible-ref\" href=\"/Matt_1.3\">Matthieu 1:3</a>.</p>"
+    },
+    {
+      "id": "43732",
+      "passage": "8-4-20",
+      "sourceSha256": "7524a48ee47ee1739c05b1870181c9f6faa204b05ccf0548f1b8f3a3eff7d7fc",
+      "translatedHtml": "<p><b>Amminadab</b> <b>engendra</b> <b>Nahshon</b> - Le Targum ajoute : « Et Nahshon était le chef de la maison de son père dans la tribu de Juda. »</p><p><b>Nahshon</b> <b>engendra</b> <b>Salmon</b> - En hébreu, c'est <span class=\"greek-hebrew\">&#1513;&#1500;&#1502;&#1492; </span>   <span class=\"translit\">Salmah</span>, ce que Houbigant considère comme une erreur d'un ancien scribe, commise avant que les lettres finales ne soient reconnues dans l'alphabet hébreu : car alors le mot aurait été écrit <span class=\"greek-hebrew\">&#1513;&#1500;&#1502;&#1493;&#1503; </span>   <span class=\"translit\">Salmon</span>, ce qu'un scribe, après l'admission des lettres finales, aurait pu prendre pour <span class=\"greek-hebrew\">&#1513;&#1500;&#1502;&#1492; </span>   <span class=\"translit\">Salmah</span>, et l'écrire ainsi au lieu de <span class=\"greek-hebrew\">&#1513;&#1500;&#1502;&#1493;&#1503; </span>   <span class=\"translit\">Salmon</span>, le <span class=\"greek-hebrew\">&#1493; </span>   <span class=\"translit\">vau</span> et le <span class=\"translit\">nun</span> final réunis (<span class=\"greek-hebrew\">&#1493;&#1503; </span>) présentant une certaine ressemblance avec <span class=\"greek-hebrew\">&#1492; </span>.</p><p>Le Targum l'appelle « Salmah le Juste ; il était le Salmah de Bethléhem et de Netopha, dont les fils abolirent les postes que Jéroboam avait établis sur les routes ; leurs œuvres et celles de leur père étaient bonnes à Netopha. »</p>"
+    },
+    {
+      "id": "51021",
+      "passage": "11-6-26",
+      "sourceSha256": "adda7ff98e717b1e59caed91237323b569b04c910ccf229249b16ca31a1ecbfe",
+      "translatedHtml": "<p><b>La</b> <b>hauteur</b> <b>de</b> <b>l'un</b> <b>des</b> <b>chérubins</b> <b>était</b> <b>de</b> <b>dix coudées</b> - Concernant les chérubins, leur forme, etc., voir ma note sur <a class=\"bible-ref\" href=\"/Exod_25.18\">Exode 25:18</a>; (note). La hauteur de chaque chérubin était d'environ dix-huit pieds et trois pouces.</p>"
+    }
+  ]
+}

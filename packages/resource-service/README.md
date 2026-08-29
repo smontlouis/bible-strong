@@ -57,15 +57,15 @@ RESOURCE_PUBLICATION_ROOTS="/path/to/ordinary:/path/to/strong:/path/to/interline
   RESOURCE_API_PORT=8787 yarn resources:dev
 ```
 
-## Bible Lexicon Maker handoff
+## Resource Studio handoff
 
-Bible Strong never scans or reads a neighboring Bible Lexicon Maker checkout. The handoff input is
-an explicit immutable publication bundle produced and validated by Bible Lexicon Maker. Copy or
+The Resource service never scans Resource Studio's working files. The handoff input is
+an explicit immutable publication bundle produced and validated by Resource Studio. Copy or
 mount that bundle at a path selected explicitly for local validation or import; Bible Strong does
 not generate its manifest, editorial metadata, or Offline-copy artifact:
 
 ```bash
-yarn resources:bundle:validate --bundle /absolute/path/to/bible-lexicon-maker/lsg-bundle
+yarn resources:bundle:validate --bundle /absolute/path/to/resource-studio/lsg-bundle
 ```
 
 The accepted schema-v1 bundle represents exactly one `bible-text`, `strong-bible-index`,

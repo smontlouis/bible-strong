@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-28T04:19:59.256Z",
+  "sourceIndexes": {
+    "sefariaBooksSha256": "14ff88ef0727312f28c7e839831d1f595fac2383f1b76b269da2cd978791aa53"
+  },
+  "resources": {
+    "mhcc": {
+      "provider": "CrossWire",
+      "module": "MHCC",
+      "moduleVersion": "2.0",
+      "moduleDate": "2021-02-14",
+      "distributionLicense": "Public Domain",
+      "textSource": "https://ccel.org/ccel/h/henry/mhcc/cache/mhcc.txt",
+      "archiveSha256": "2180fb630df8732896fd8a3800f0c43b9dd2484d6a29bea2612de25746fa7ca8",
+      "entryCount": 4059,
+      "outputSha256": "4cc82cabb0d18f3758a097f47202dfd1b87063d6ca78cfcb7db1ab15a51f784c"
+    },
+    "jfb": {
+      "provider": "CrossWire",
+      "module": "JFB",
+      "moduleVersion": "3.0",
+      "moduleDate": "2021-02-15",
+      "distributionLicense": "Public Domain",
+      "textSource": "https://ccel.org/ccel/j/jamieson/jfb/cache/jfb.txt",
+      "archiveSha256": "ca8cdaaf58784bff85f2ec4f1a77115743bc50c98d19fbbe627feaebb0cfd7b7",
+      "entryCount": 16945,
+      "outputSha256": "8e137e84f95464db76c7ea2f264c4a8922f7bb5bab34e763a058c6a88c28db8f"
+    },
+    "wesley": {
+      "provider": "CrossWire",
+      "module": "Wesley",
+      "moduleVersion": "1.1",
+      "moduleDate": "2001-11-28",
+      "distributionLicense": "Public Domain",
+      "textSource": null,
+      "archiveSha256": "d4423b084bfc2a4dd00f7ed0b2004113d62010317ddb14a62c1b31801fff360e",
+      "entryCount": 16930,
+      "outputSha256": "947f5d8c9d5ad0c6b3e48420b70a54919c67380a77280308aff47b087c9ac57c"
+    },
+    "fre-aug": {
+      "provider": "CrossWire",
+      "module": "FreAug",
+      "moduleVersion": "1.1",
+      "moduleDate": "2023-11-06",
+      "distributionLicense": "Public Domain",
+      "textSource": "https://fr.wikisource.org/wiki/Auteur:Augustin_d%E2%80%99Hippone",
+      "archiveSha256": "b94cce950c21c94916d77de1c309a33e023e466e634fdb2fe652e07ea48df13e",
+      "entryCount": 1726,
+      "outputSha256": "cf6598bd93b369bd45a2b4e3d0546ad2841291a342aa664d417def9c679ced45"
+    },
+    "fre-chry": {
+      "provider": "CrossWire",
+      "module": "FreChry",
+      "moduleVersion": "2.2",
+      "moduleDate": "2026-01-29",
+      "distributionLicense": "Public Domain",
+      "textSource": "https://fr.wikisource.org/wiki/Auteur/Jean_Chrysostome",
+      "archiveSha256": "c594279e34b81ea69abd517d0062890e95427c255495e59646633c0f641ecdc7",
+      "entryCount": 693,
+      "outputSha256": "f63b26586286b13e3631607c902fd1df15a9f53f67ebac0d1486bcfb9051e30d"
+    },
+    "calvin": {
+      "provider": "CrossWire",
+      "module": "CalvinCommentaries",
+      "moduleVersion": "1.1",
+      "moduleDate": "2022-08-01",
+      "distributionLicense": "Public Domain",
+      "textSource": "http://www.ccel.org/",
+      "archiveSha256": "df66fc8c03537499ad006d069481d2c95b600887cdbd6ce75ec5d264b573192a",
+      "entryCount": 11063,
+      "outputSha256": "e33bea37cbd749da504e72dcb65a086cf66f530d66057fd2dae658c5e980f4dd"
+    },
+    "treasury-david": {
+      "provider": "CrossWire",
+      "module": "TDavid",
+      "moduleVersion": "2.1",
+      "moduleDate": "2022-06-05",
+      "distributionLicense": "Public Domain",
+      "textSource": "http://archive.spurgeon.org/treasury/",
+      "archiveSha256": "d0081cba094f399ceb95f372e13068a4d76814de4529bc6794eab0f2ed6e89cc",
+      "entryCount": 151,
+      "outputSha256": "a4de3a25cd85250b85ec83a51905fc5b99530e4ed469e74da798eb28b1ddfa16"
+    },
+    "rashi-en": {
+      "provider": "Sefaria",
+      "entryCount": 28060,
+      "outputSha256": "6d4e7c141786367da60331dac954ba3335e89b4bdfc0f9b4e6370b22422465f8",
+      "editions": [
+        {
+          "book": 1,
+          "title": "Rashi on Genesis",
+          "versionTitle": "Rashi Chumash, Metsudah Publications, 2009",
+          "versionSource": "https://www.nli.org.il/he/books/NNL_ALEPH002691623",
+          "license": "CC-BY",
+          "sourceSha256": "15e933d0b8dc409e33bdccf084e8cc8f2a11017e65177f71811c121397c8d4a5",
+          "entryCount": 2004
+        },
+        {
+          "book": 2,
+          "title": "Rashi on Exodus",
+          "versionTitle": "Rashi Chumash, Metsudah Publications, 2009",
+          "versionSource": "https://www.nli.org.il/he/books/NNL_ALEPH002691623",
+          "license": "CC-BY",
+          "sourceSha256": "f0050c0458bec793de1c25e5a8d7c6cb470f2db8aad9f7a2ed049ec5fa70b8d6",
+          "entryCount": 1807
+        },
+        {
+          "book": 3,
+          "title": "Rashi on Leviticus",
+          "versionTitle": "Rashi Chumash, Metsudah Publications, 2009",
+          "versionSource": "https://www.nli.org.il/he/books/NNL_ALEPH002691623",
+          "license": "CC-BY",
+          "sourceSha256": "484644c41044e00e0d4aefd6b1f674b8034a1d9e89a30c01558b3b463f91bac7",
+          "entryCount": 1325
+        },
+        {
+          "book": 4,
+          "title": "Rashi on Numbers",
+          "versionTitle": "Rashi Chumash, Metsudah Publications, 2009",
+          "versionSource": "https://www.nli.org.il/he/books/NNL_ALEPH002691623",
+          "license": "CC-BY",
+          "sourceSha256": "a5a82d5776d1548f57888949938499162d96beab3b0ab12d667799b7888700f4",
+          "entryCount": 1286
+        },
+        {
+          "book": 5,
+          "title": "Rashi on Deuteronomy",
+          "versionTitle": "Rashi Chumash, Metsudah Publications, 2009",
+          "versionSource": "https://www.nli.org.il/he/books/NNL_ALEPH002691623",
+          "license": "CC-BY",
+          "sourceSha256": "aed54dbe2dbbfce3b024bb2b150132bcc3d380e060e246dc9816272659f2e50d",
+          "entryCount": 1365
+        },
+        {
+          "book": 6,
+          "title": "Rashi on Joshua",
+          "versionTitle": "The Book of Joshua, Metsudah Publications, 1997",
+          "versionSource": "http://www.judaicaplace.com/search/brand/Metsudah-Publications/",
+          "license": "CC-BY",
+          "sourceSha256": "86256950efa0abca956964c57be7e6cff3d7ea3ad637c923acd1847e747b3179",
+          "entryCount": 362
+        },
+        {
+          "book": 7,
+          "title": "Rashi on Judges",
+          "versionTitle": "The Metsudah Tanach series, Lakewood, N.J",
+          "versionSource": "https://www.judaicaplace.com/search/brand/Metsudah-Publications/",
+          "license": "CC-BY",
+          "sourceSha256": "c8d7723c9b72b1121645da5c65e88317c17014cc2322735ba2a01d768e3fe4ec",
+          "entryCount": 457
+        },
+        {
+          "book": 8,
+          "title": "Rashi on Ruth",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "7f4a4f3dc6cb4fa302d4d8fd031ab310e8a504564fdfb32d5af88c2c2870a68c",
+          "entryCount": 82
+        },
+        {
+          "book": 9,
+          "title": "Rashi on I Samuel",
+          "versionTitle": "The Metsudah Tanach series, Lakewood, N.J",
+          "versionSource": "https://www.judaicaplace.com/search/brand/Metsudah-Publications/",
+          "license": "CC-BY",
+          "sourceSha256": "0f0a447517915ceb116e8b2ea1a62beed5ba894a87bd40b8071332f7da2a5c9a",
+          "entryCount": 639
+        },
+        {
+          "book": 10,
+          "title": "Rashi on II Samuel",
+          "versionTitle": "The Metsudah Tanach series, Lakewood, N.J",
+          "versionSource": "https://www.judaicaplace.com/search/brand/Metsudah-Publications/",
+          "license": "CC-BY",
+          "sourceSha256": "c8cf593a69f79a43af3a71f4e2a06b2413af3316f494e21aebd0d7f017d50ae4",
+          "entryCount": 473
+        },
+        {
+          "book": 11,
+          "title": "Rashi on I Kings",
+          "versionTitle": "The Metsudah Tanach series, Lakewood, N.J",
+          "versionSource": "https://www.judaicaplace.com/metsudah-kings-i-hardcover/m143/",
+          "license": "CC-BY",
+          "sourceSha256": "c8842324c801a956053d4cd2acdcae557448aa38242dbda0b1a3878cbed196b2",
+          "entryCount": 629
+        },
+        {
+          "book": 12,
+          "title": "Rashi on II Kings",
+          "versionTitle": "The Metsudah Tanach series, Lakewood, N.J",
+          "versionSource": "https://www.judaicaplace.com/search/brand/Metsudah-Publications/",
+          "license": "CC-BY",
+          "sourceSha256": "a24c8de0b2ba5d5a362a9a84dca8b0314df6e038094a07fa6ea8cf55003f3a82",
+          "entryCount": 503
+        },
+        {
+          "book": 13,
+          "title": "Rashi on I Chronicles",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "9155f0d09c5fd0844408254ce7d120da57b263b8d50de00d8b05765bcecea973",
+          "entryCount": 619
+        },
+        {
+          "book": 14,
+          "title": "Rashi on II Chronicles",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "fbe4584aed16a59dc995216e532bc62131b3b1eed1a3ba8ea136953a075ed2c0",
+          "entryCount": 690
+        },
+        {
+          "book": 15,
+          "title": "Rashi on Ezra",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "6d12acd507ac1abcc70da48269a7c2369c0027b7c6572da9e9379d0c9c989f45",
+          "entryCount": 431
+        },
+        {
+          "book": 16,
+          "title": "Rashi on Nehemiah",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "d20d00cc74fb2878dea2565b432b4d01ea73778d7a4fa6c0648630daf8d8542c",
+          "entryCount": 450
+        },
+        {
+          "book": 17,
+          "title": "Rashi on Esther",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "68229e0975509313f73f593b9dbe2718d85662e4c9c42d72bc3436cbf77c9371",
+          "entryCount": 146
+        },
+        {
+          "book": 18,
+          "title": "Rashi on Job",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "feeac0f759732d1c3cbacd6dfcde4f6be86b5a2c892c26f9210d2f6e53fcb383",
+          "entryCount": 1487
+        },
+        {
+          "book": 19,
+          "title": "Rashi on Psalms",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "8086df711ac7b63da03c4c43acbc9f4e4a804fdc2f5c1119649681dabd8ad42f",
+          "entryCount": 2497
+        },
+        {
+          "book": 20,
+          "title": "Rashi on Proverbs",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "8c877a27f5349263fffa4799194b9a5f200996ad99cde94e7a9de341157c065f",
+          "entryCount": 1158
+        },
+        {
+          "book": 21,
+          "title": "Rashi on Ecclesiastes",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "27adf7f3804adc2543fea588e6670b994b7fbc542a7c8bb5c4a6c8de35fa2a75",
+          "entryCount": 596
+        },
+        {
+          "book": 22,
+          "title": "Rashi on Song of Songs",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "1e787a2618e6988f124594f415b58cf506dc0e394f8a065ded2919aa058a0748",
+          "entryCount": 381
+        },
+        {
+          "book": 23,
+          "title": "Rashi on Isaiah",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "69145411110c84854cdf7a7f31be321673fdc9216ef48d73cb26c29ab1490ad2",
+          "entryCount": 2700
+        },
+        {
+          "book": 24,
+          "title": "Rashi on Jeremiah",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "f34fa501c9c74a2a99e34fed663f9149e075d52d7f35e256de0b3282e9d395db",
+          "entryCount": 1355
+        },
+        {
+          "book": 25,
+          "title": "Rashi on Lamentations",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "db68eb8cc41d4ba012a16027f94bccc1ddc7a8ffeaa6f10a9f30ee590cbbc7ec",
+          "entryCount": 225
+        },
+        {
+          "book": 26,
+          "title": "Rashi on Ezekiel",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "1bf93fd8501a1bc10c905013407f5779c4b111ffd15a010bf683e3f36aa10fdf",
+          "entryCount": 1766
+        },
+        {
+          "book": 27,
+          "title": "Rashi on Daniel",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "3cffe4692fa4a919c919f33454af086530f66d42101068dfb7ce113da758b9a0",
+          "entryCount": 760
+        },
+        {
+          "book": 28,
+          "title": "Rashi on Hosea",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "efdece81b57b6ded0f3a93f66c63819b970887af5600d929f2d7e7bba363034b",
+          "entryCount": 415
+        },
+        {
+          "book": 29,
+          "title": "Rashi on Joel",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "52ff51ff8e7c11247332b5e5c4e916a4ef0a424a363b6b75c1f4a6b38e450e49",
+          "entryCount": 98
+        },
+        {
+          "book": 30,
+          "title": "Rashi on Amos",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "d370631509b2c213a55f76c6d6c14557f0712f7fd5828d16e86c9f420664ad03",
+          "entryCount": 246
+        },
+        {
+          "book": 31,
+          "title": "Rashi on Obadiah",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "bfd3201aabf58e2a4cae08f1caf1eb0e669b13678af27886e529b6b44d2af9ef",
+          "entryCount": 35
+        },
+        {
+          "book": 32,
+          "title": "Rashi on Jonah",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "49df3e2166e950f076aa4086c547a3fc9ba12d5cc2a7550d71da18bb8cbd694a",
+          "entryCount": 53
+        },
+        {
+          "book": 33,
+          "title": "Rashi on Micah",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "207afdb9fe26438f394bde067cadc1cae8a54bfdd4552a62db9c19f7190d25cd",
+          "entryCount": 179
+        },
+        {
+          "book": 34,
+          "title": "Rashi on Nahum",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "ceab52d3a364c0177fb8a1bcee1de34dbae99b9c084727cd3e8aebf950ef2341",
+          "entryCount": 118
+        },
+        {
+          "book": 35,
+          "title": "Rashi on Habakkuk",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "e84fefe5512431d5c84b581df0e0bc62bf84ae8fbc440cae3be36dd7dc7c46a9",
+          "entryCount": 143
+        },
+        {
+          "book": 36,
+          "title": "Rashi on Zephaniah",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "4e219b8a1db3e89475e2fe7fdb1b00591d03bf28999750c79b8a1eb0fec9ed07",
+          "entryCount": 81
+        },
+        {
+          "book": 37,
+          "title": "Rashi on Haggai",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "5d001aff4a0d0a41308ca83a3c794413609d3a3d4352de6572b682c42c676cc5",
+          "entryCount": 48
+        },
+        {
+          "book": 38,
+          "title": "Rashi on Zechariah",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "44253684c6a980b81057d035f88f2dad0c9da061b3c3da5aef248786f7ce0535",
+          "entryCount": 365
+        },
+        {
+          "book": 39,
+          "title": "Rashi on Malachi",
+          "versionTitle": "The Judaica Press complete Tanach with Rashi, translated by A. J. Rosenberg",
+          "versionSource": "https://www.nli.org.il/en/items/NNL_ALEPH990019164710205171/NLI",
+          "license": "CC-BY",
+          "sourceSha256": "c5f383dfe151372f7a6823df86fba055f33665c34dc0496f22d15a8e40935b1e",
+          "entryCount": 86
+        }
+      ]
+    }
+  }
+}

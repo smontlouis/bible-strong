@@ -1,0 +1,567 @@
+{
+  "schemaVersion": 2,
+  "updatedAt": "2026-08-28",
+  "resources": [
+    {
+      "id": "acbc",
+      "shortName": "Clarke",
+      "title": "Adam Clarke Bible Commentary",
+      "description": {
+        "fr": "Commentaire méthodiste couvrant l’ensemble de la Bible, attentif au vocabulaire, aux langues anciennes et au contexte historique. Clarke associe explication du texte, discussion philologique et applications théologiques.",
+        "en": "A Methodist commentary covering the whole Bible, with close attention to vocabulary, ancient languages, and historical context. Clarke combines textual explanation, philological discussion, and theological application."
+      },
+      "author": "Adam Clarke",
+      "era": "1831",
+      "tradition": "Protestantisme",
+      "tags": ["Méthodiste", "Wesleyen", "Arminien"],
+      "languages": ["en", "fr"],
+      "coverage": "Ancien et Nouveau Testament",
+      "rights": "Domaine public pour l’original anglais ; traduction française historique à qualifier",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "Bible Strong Firestore ; comparaison prévue avec CrossWire Clarke"
+    },
+    {
+      "id": "barnes",
+      "shortName": "Barnes",
+      "title": "Barnes’ Notes on the Bible",
+      "description": {
+        "fr": "Commentaire explicatif du XIXe siècle, rédigé pour accompagner une lecture suivie et accessible du texte biblique. Ses développements peuvent couvrir plusieurs versets et combinent contexte, argumentation et application pastorale.",
+        "en": "A nineteenth-century explanatory commentary written to support a continuous and accessible reading of Scripture. Its discussions may span several verses and combine context, argument, and pastoral application."
+      },
+      "author": "Albert Barnes",
+      "era": "1832–1870",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Presbytérien"],
+      "languages": ["en", "fr"],
+      "coverage": "Corpus Bible Strong ; module CrossWire officiel limité au Nouveau Testament",
+      "rights": "Domaine public pour l’original anglais ; traduction française historique à qualifier",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "Bible Strong Firestore ; CrossWire Barnes pour la provenance anglaise"
+    },
+    {
+      "id": "mhy-fr",
+      "shortName": "Henry FR",
+      "title": "Commentaire concis de Matthew Henry",
+      "description": {
+        "fr": "Édition française du commentaire concis de Matthew Henry, organisée principalement par groupes de versets. Elle propose une lecture réformée, pastorale et pratique, centrée sur le sens spirituel et l’application du passage."
+      },
+      "author": "Matthew Henry",
+      "era": "1706–1710 / traduction moderne",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Presbytérien", "Puritain"],
+      "languages": ["fr"],
+      "coverage": "66 livres, 4 145 unités par chapitre et plage",
+      "rights": "Permission directe de Dominique Osché retrouvée ; portée à archiver précisément",
+      "licenseId": "CustomPermission",
+      "status": "available",
+      "source": "Fichier MHY.zip transmis à Bible Strong en novembre 2019"
+    },
+    {
+      "id": "mhcc",
+      "shortName": "Henry EN",
+      "title": "Matthew Henry Concise Commentary",
+      "description": {
+        "en": "A condensed English edition of Matthew Henry’s work, structured by chapters and verse ranges. It summarizes interpretation, spiritual teaching, and practical application in a substantially shorter form than the complete commentary."
+      },
+      "author": "Matthew Henry",
+      "era": "1706–1710",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Presbytérien", "Puritain"],
+      "languages": ["en"],
+      "coverage": "66 livres, 4 059 unités CrossWire",
+      "rights": "Domaine public",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire MHCC 2.0"
+    },
+    {
+      "id": "aquifer-fr",
+      "shortName": "Aquifer",
+      "title": "Tyndale Open Study Notes",
+      "description": {
+        "fr": "Notes d’étude évangéliques contemporaines disponibles ici en anglais et en français. Elles expliquent le contexte littéraire et historique, les notions importantes et les liens entre passages dans un langage destiné à un large public.",
+        "en": "Contemporary evangelical study notes available here in English and French. They explain literary and historical context, important concepts, and connections between passages in language intended for a broad readership."
+      },
+      "author": "Tyndale House Publishers",
+      "era": "Contemporain",
+      "tradition": "Protestantisme",
+      "tags": ["Évangélique"],
+      "languages": ["en", "fr"],
+      "coverage": "66 livres, 16 923 unités disponibles en anglais et en français",
+      "rights": "CC BY-SA 4.0 ; adaptation et attribution obligatoires",
+      "licenseId": "CC-BY-SA-4.0",
+      "status": "available",
+      "source": "Bible Aquifer Open Study Notes"
+    },
+    {
+      "id": "jfb",
+      "shortName": "JFB",
+      "title": "Jamieson–Fausset–Brown Commentary",
+      "description": {
+        "en": "A classic Protestant commentary designed as a compact reference for the whole Bible. It brings together exegetical, historical, and doctrinal observations, often organized around sections spanning several verses."
+      },
+      "author": "R. Jamieson, A. R. Fausset, D. Brown",
+      "era": "1871",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Presbytérien", "Anglican"],
+      "languages": ["en"],
+      "coverage": "66 livres, 16 945 unités CrossWire",
+      "rights": "Domaine public",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire JFB"
+    },
+    {
+      "id": "fre-aug",
+      "shortName": "Augustin",
+      "title": "Commentaires de saint Augustin",
+      "description": {
+        "fr": "Ensemble français de traités, exposés et homélies d’Augustin liés à des passages bibliques. Ces textes relèvent davantage de la lecture théologique et pastorale d’une œuvre patristique que d’un commentaire systématique verset par verset."
+      },
+      "author": "Augustin d’Hippone",
+      "era": "Antiquité / traduction 1864–1872",
+      "tradition": "Christianisme ancien",
+      "tags": ["Patristique", "Patristique occidentale"],
+      "languages": ["fr"],
+      "coverage": "Partielle, 1 726 unités sur canon protestant et deutérocanoniques présents",
+      "rights": "Domaine public",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire FreAug"
+    },
+    {
+      "id": "fre-chry",
+      "shortName": "Chrysostome",
+      "title": "Commentaires de saint Jean Chrysostome",
+      "description": {
+        "fr": "Collection française d’homélies et d’expositions de Jean Chrysostome sur une sélection de livres bibliques. L’explication suit le mouvement du discours et développe largement les dimensions morales, pastorales et théologiques du passage."
+      },
+      "author": "Jean Chrysostome",
+      "era": "Antiquité / traduction historique",
+      "tradition": "Christianisme ancien",
+      "tags": ["Patristique", "Patristique orientale"],
+      "languages": ["fr"],
+      "coverage": "Partielle, 693 unités",
+      "rights": "Domaine public",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire FreChry"
+    },
+    {
+      "id": "rashi-en",
+      "shortName": "Rachi",
+      "title": "Rashi on Tanakh",
+      "description": {
+        "en": "A classic Jewish commentary on the Tanakh presented as concise glosses, sometimes with several comments on one verse. Rashi illuminates the language of the text while combining plain-sense reading, rabbinic tradition, and midrashic interpretation."
+      },
+      "author": "Rachi",
+      "era": "XIe siècle / traductions modernes",
+      "tradition": "Judaïsme",
+      "tags": ["Rabbinique"],
+      "languages": ["en"],
+      "coverage": "39 livres du Tanakh, 28 060 unités",
+      "rights": "CC BY pour les versions anglaises sélectionnées ; version exacte obligatoire",
+      "licenseId": "CC-BY",
+      "status": "available",
+      "source": "Sefaria Export"
+    },
+    {
+      "id": "calvin",
+      "shortName": "Calvin",
+      "title": "Calvin’s Commentaries",
+      "description": {
+        "en": "John Calvin’s commentaries on a broad selection of biblical books, presented in a historical English edition. The work follows the argument of the text and combines exegesis, Reformed theology, and pastoral concerns."
+      },
+      "author": "Jean Calvin",
+      "era": "XVIe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Calviniste"],
+      "languages": ["en"],
+      "coverage": "47 livres, 11 063 unités CrossWire",
+      "rights": "Domaine public pour les éditions sélectionnées",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CCEL / CrossWire"
+    },
+    {
+      "id": "kd",
+      "shortName": "K&D",
+      "title": "Keil & Delitzsch Commentary",
+      "description": {
+        "en": "A scholarly nineteenth-century commentary devoted to the Old Testament. Keil and Delitzsch give sustained attention to Hebrew, grammar, historical context, and the literary progression of extended sections."
+      },
+      "author": "C. F. Keil et F. Delitzsch",
+      "era": "XIXe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Luthérien"],
+      "languages": ["en"],
+      "coverage": "Ancien Testament, 8 806 unités sur 929 chapitres",
+      "rights": "Domaine public déclaré par CrossWire ; autorisation STEP/auteurs confirmée par le responsable Bible Strong",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire KD 2.0, Wikisource et module BibleWorks documenté"
+    },
+    {
+      "id": "wesley",
+      "shortName": "Wesley",
+      "title": "John Wesley’s Notes",
+      "description": {
+        "en": "John Wesley’s concise notes on the whole Bible, written to accompany ordinary reading of Scripture. They favor brief doctrinal and practical explanation within the Methodist and Arminian traditions."
+      },
+      "author": "John Wesley",
+      "era": "XVIIIe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Méthodiste", "Wesleyen", "Arminien"],
+      "languages": ["en"],
+      "coverage": "66 livres, 16 930 unités CrossWire",
+      "rights": "Domaine public",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Wesley"
+    },
+    {
+      "id": "treasury-david",
+      "shortName": "Treasury",
+      "title": "The Treasury of David",
+      "description": {
+        "en": "Charles Spurgeon’s extensive exposition of the Psalms, combining commentary, quotations from earlier writers, and material for preaching. Each unit addresses an entire psalm rather than only the first verse where it is anchored."
+      },
+      "author": "Charles Spurgeon",
+      "era": "XIXe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Baptiste", "Réformé", "Évangélique"],
+      "languages": ["en"],
+      "coverage": "150 Psaumes et introduction, 151 unités longues",
+      "rights": "Domaine public",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire TDavid"
+    },
+    {
+      "id": "catena-aurea",
+      "shortName": "Catena",
+      "title": "Catena Aurea",
+      "description": {
+        "en": "A chain of patristic commentary on the four Gospels compiled by Thomas Aquinas. Each section assembles excerpts from Church Fathers, allowing several ancient interpretations to speak alongside one another on the same passage."
+      },
+      "author": "Thomas d’Aquin (compilateur)",
+      "era": "XIIIe siècle / traduction historique",
+      "tradition": "Catholicisme",
+      "tags": ["Patristique", "Scolastique", "Thomiste"],
+      "languages": ["en"],
+      "coverage": "Quatre Évangiles, 821 unités sur 89 chapitres",
+      "rights": "Domaine public déclaré par CrossWire ; autorisation STEP/auteurs confirmée par le responsable Bible Strong",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Catena 1.0.1"
+    },
+    {
+      "id": "abbott",
+      "shortName": "Abbott",
+      "title": "Illustrated New Testament",
+      "description": {
+        "en": "A narrative and explanatory New Testament commentary written for accessible reading. The Abbott brothers develop the setting, characters, and teaching of the text in units that are generally concise."
+      },
+      "author": "John S. C. Abbott et Jacob Abbott",
+      "era": "1878",
+      "tradition": "Protestantisme",
+      "tags": ["Congrégationaliste"],
+      "languages": ["en"],
+      "coverage": "Nouveau Testament, 3 367 unités sur 287 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Abbott 1.1"
+    },
+    {
+      "id": "burkitt",
+      "shortName": "Burkitt",
+      "title": "Burkitt’s Expository Notes",
+      "description": {
+        "en": "An Anglican exposition of the New Testament organized by passage. Burkitt combines textual explanation, doctrinal summaries, and practical lessons in the pastoral style of the early eighteenth century."
+      },
+      "author": "William Burkitt",
+      "era": "1700–1703",
+      "tradition": "Protestantisme",
+      "tags": ["Anglican"],
+      "languages": ["en"],
+      "coverage": "Nouveau Testament, 3 276 unités sur 260 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Burkitt 1.0"
+    },
+    {
+      "id": "darby-notes",
+      "shortName": "Darby",
+      "title": "Darby Translation Notes",
+      "description": {
+        "en": "Notes associated with John Nelson Darby’s Bible translation rather than a continuous commentary on every passage. They primarily record translation choices, variants, lexical clarifications, and occasional observations on the text."
+      },
+      "author": "John Nelson Darby",
+      "era": "XIXe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Évangélique", "Frères", "Dispensationaliste"],
+      "languages": ["en"],
+      "coverage": "Canon protestant et deutérocanoniques présents, 8 873 unités sur 1 251 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire DTN 1.0"
+    },
+    {
+      "id": "family-notes",
+      "shortName": "Family",
+      "title": "Family Bible Notes",
+      "description": {
+        "en": "Concise Protestant notes designed for family study of the New Testament. They offer direct explanations, cross-references, and practical applications from an evangelical perspective."
+      },
+      "author": "Justin Edwards et collaborateurs",
+      "era": "XIXe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Évangélique", "Congrégationaliste"],
+      "languages": ["en"],
+      "coverage": "Nouveau Testament, 5 306 unités sur 256 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Family 1.1"
+    },
+    {
+      "id": "geneva-notes",
+      "shortName": "Genève",
+      "title": "Geneva Bible Translation Notes",
+      "description": {
+        "en": "Marginal notes from the tradition of the Geneva Bible and the English-speaking Reformation. They provide translation clarifications, links between texts, and theological interpretations in a generally compressed form."
+      },
+      "author": "Traducteurs de la Bible de Genève",
+      "era": "XVIe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Calviniste"],
+      "languages": ["en"],
+      "coverage": "66 livres, 14 713 unités sur 1 161 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Geneva 1.1"
+    },
+    {
+      "id": "king-comments",
+      "shortName": "KingComments",
+      "title": "Kingcomments",
+      "description": {
+        "en": "A contemporary evangelical commentary covering the whole Bible and organized in chapter sections. Ger de Koning offers a continuous, practical, and theological reading shaped by the Brethren tradition."
+      },
+      "author": "Ger de Koning",
+      "era": "Contemporain",
+      "tradition": "Protestantisme",
+      "tags": ["Évangélique", "Frères", "Dispensationaliste"],
+      "languages": ["en"],
+      "coverage": "66 livres, 7 590 unités sur 1 189 chapitres",
+      "rights": "Autorisation STEP/auteur confirmée par le responsable Bible Strong ; pièce d’archive à rattacher",
+      "licenseId": "CustomPermission",
+      "status": "available",
+      "source": "CrossWire KingComments 1.3"
+    },
+    {
+      "id": "lightfoot",
+      "shortName": "Lightfoot",
+      "title": "John Lightfoot Commentary",
+      "description": {
+        "en": "A selection of John Lightfoot’s commentary on the New Testament. The resource makes particular use of the author’s historical, linguistic, and rabbinic learning to illuminate the world behind the biblical text."
+      },
+      "author": "John Lightfoot",
+      "era": "XVIIe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Puritain", "Réformé"],
+      "languages": ["en"],
+      "coverage": "Couverture NT sélectionnée, 853 unités sur 91 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Lightfoot 1.0"
+    },
+    {
+      "id": "luther",
+      "shortName": "Luther",
+      "title": "Luther’s Commentary on Selected Bible Passages",
+      "description": {
+        "en": "An English collection of Martin Luther’s sermons and expositions on selected passages. Coverage is not continuous: units often follow a sermon or theological section extending beyond the verse used as their anchor."
+      },
+      "author": "Martin Luther",
+      "era": "XVIe siècle / traductions historiques",
+      "tradition": "Protestantisme",
+      "tags": ["Luthérien"],
+      "languages": ["en"],
+      "coverage": "Passages sélectionnés, 754 unités sur 191 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Luther 1.1"
+    },
+    {
+      "id": "mhc",
+      "shortName": "Henry complet",
+      "title": "Matthew Henry’s Complete Commentary",
+      "description": {
+        "en": "The complete edition of Matthew Henry’s commentary, developed mainly at the level of chapters and their major sections. It combines Reformed exposition, spiritual meditation, and numerous pastoral applications."
+      },
+      "author": "Matthew Henry",
+      "era": "1706–1710",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Presbytérien", "Puritain"],
+      "languages": ["en"],
+      "coverage": "66 livres et introductions, 5 360 unités sur 1 194 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire MHC 2.2 / CCEL"
+    },
+    {
+      "id": "mhm",
+      "shortName": "Henry moderne",
+      "title": "Matthew Henry’s Modern English Commentary",
+      "description": {
+        "en": "STEPBible’s modern-English adaptation of Matthew Henry’s commentary. It preserves the organization and pastoral orientation of the original work while making its wording more accessible to present-day readers."
+      },
+      "author": "Matthew Henry ; adaptation STEPBible",
+      "era": "2025",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Presbytérien", "Puritain"],
+      "languages": ["en"],
+      "coverage": "66 livres, 21 367 unités sur 1 189 chapitres",
+      "rights": "CC BY 4.0 annoncé par STEP ; autorisation STEP/auteurs confirmée",
+      "licenseId": "CC-BY-4.0",
+      "status": "available",
+      "source": "STEPBible MHM, adaptation ChatGPT 4 de MHC réalisée en 2025"
+    },
+    {
+      "id": "pnt",
+      "shortName": "PNT",
+      "title": "The People’s New Testament",
+      "description": {
+        "en": "A New Testament commentary intended for personal study and teaching. B. W. Johnson combines verse-by-verse explanation, historical context, parallel references, and practical summaries."
+      },
+      "author": "B. W. Johnson",
+      "era": "1891",
+      "tradition": "Protestantisme",
+      "tags": ["Restaurationniste"],
+      "languages": ["en"],
+      "coverage": "Nouveau Testament, 6 084 unités sur 259 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire PNT 1.1"
+    },
+    {
+      "id": "rwp",
+      "shortName": "RWP",
+      "title": "Robertson’s Word Pictures",
+      "description": {
+        "en": "A linguistic commentary on the New Testament grounded in Greek. A. T. Robertson explains words, grammatical forms, and textual expressions in order to bring out their nuances and vivid imagery."
+      },
+      "author": "A. T. Robertson",
+      "era": "1930–1933",
+      "tradition": "Protestantisme",
+      "tags": ["Baptiste", "Évangélique"],
+      "languages": ["en"],
+      "coverage": "Nouveau Testament, 7 228 unités sur 287 chapitres",
+      "rights": "Autorisation STEP/auteurs confirmée par le responsable Bible Strong ; pièce d’archive à rattacher",
+      "licenseId": "CustomPermission",
+      "status": "available",
+      "source": "CrossWire RWP 2.0"
+    },
+    {
+      "id": "scofield",
+      "shortName": "Scofield",
+      "title": "Scofield Reference Notes, 1917 Edition",
+      "description": {
+        "en": "Selective reference notes accompanying the 1917 Scofield edition. They connect passages, summarize major biblical themes, and present an explicitly dispensational interpretation."
+      },
+      "author": "C. I. Scofield",
+      "era": "1917",
+      "tradition": "Protestantisme",
+      "tags": ["Évangélique", "Dispensationaliste"],
+      "languages": ["en"],
+      "coverage": "66 livres, 3 214 unités sur 948 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire Scofield 2.1 / Wikisource"
+    },
+    {
+      "id": "fourfold-gospel",
+      "shortName": "Fourfold",
+      "title": "The Fourfold Gospel and Commentary on Acts",
+      "description": {
+        "en": "A harmonized commentary on the four Gospels, followed by an exposition of Acts. The authors bring parallel narratives together and comment on complete pericopes rather than treating each Gospel in isolation."
+      },
+      "author": "J. W. McGarvey et Philip Y. Pendleton",
+      "era": "1863–1914",
+      "tradition": "Protestantisme",
+      "tags": ["Restaurationniste"],
+      "languages": ["en"],
+      "coverage": "Évangiles et Actes, 4 229 unités sur 121 chapitres",
+      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "licenseId": "PublicDomain",
+      "status": "available",
+      "source": "CrossWire TFG 1.5"
+    },
+    {
+      "id": "douay-rheims-notes",
+      "shortName": "Douay",
+      "title": "Original Douay–Rheims Annotations",
+      "description": {
+        "en": "Historical Catholic annotations published with the Douay–Rheims Bible and preserved according to the source JSON segmentation. They reflect the doctrinal and controversial reading of their period without reconstruction or supplementation by Bible Strong."
+      },
+      "author": "Collège anglais de Douai–Reims",
+      "era": "1582–1609",
+      "tradition": "Catholicisme",
+      "tags": ["Catholique"],
+      "languages": ["en"],
+      "coverage": "1 659 annotations JSON publiées, 390 chapitres et 53 livres avec contenu",
+      "rights": "CC0 1.0 déclaré par le dépôt source ; données acceptées telles que publiées",
+      "licenseId": "CC0-1.0",
+      "status": "available",
+      "source": "janvier-s/original-douay-rheims @ 0bf4218b9b46b5b00d29a703b5b74226051b97a5"
+    },
+    {
+      "id": "bible-annotee",
+      "shortName": "Bible annotée",
+      "title": "Bible Annotée de Neuchâtel",
+      "description": {
+        "fr": "Commentaire protestant francophone réalisé par une société de théologiens et de pasteurs. Il réunit introductions, analyses de sections et notes détaillées, avec une attention soutenue au contexte, à la langue et à l’interprétation du texte."
+      },
+      "author": "Collectif Bonnet, Bovet, Godet et collaborateurs",
+      "era": "XIXe–XXe siècle",
+      "tradition": "Protestantisme",
+      "tags": ["Réformé", "Réformé francophone"],
+      "languages": ["fr"],
+      "coverage": "66 livres, 23 320 unités : commentaires, 667 introductions de chapitre AT et 27 introductions de livre NT",
+      "rights": "Autorisation d’usage, de transformation et de redistribution ThéoTeX confirmée par le responsable Bible Strong ; pièce d’archive à rattacher au manifeste",
+      "licenseId": "CustomPermission",
+      "status": "available",
+      "source": "ThéoTeX, Bible Annotée AT et Nouveau Testament Annoté ; export intégral JSON du 28 août 2026"
+    },
+    {
+      "id": "sdabc",
+      "shortName": "SDA Commentary",
+      "title": "Seventh-day Adventist Bible Commentary",
+      "description": {
+        "en": "A collaborative Seventh-day Adventist commentary covering all 66 books with introductions and detailed exegesis. The prototype keeps the general commentary, Ellen G. White supplements, and the scripture index to her writings as distinct layers."
+      },
+      "author": "Francis D. Nichol (dir.) et contributeurs",
+      "era": "Édition 1978 ; compilation EGW complémentaire",
+      "tradition": "Protestantisme",
+      "tags": ["Adventiste"],
+      "languages": ["en"],
+      "coverage": "66 livres, 1 189 chapitres : 25 062 unités du commentaire général et des introductions, complétées par 3 664 extraits EGW et 14 042 entrées de l’index scripturaire EGW",
+      "rights": "Autorisation d’usage, d’extraction, de transformation et de redistribution du SDA Bible Commentary et des ressources EGW confirmée par le responsable Bible Strong ; pièces d’approbation à archiver",
+      "licenseId": "CustomPermission",
+      "status": "available",
+      "source": "Seventh-day Adventist Bible Commentary, vol. 1–7 (F. D. Nichol, dir.), archive numérique 1978 ; EGW Writings 1BC–7BC et Complete Scripture Index"
+    }
+  ]
+}

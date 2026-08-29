@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "barnes",
+  "batchId": "barnes-high-81584e52dd91",
+  "translator": {
+    "provider": "OpenAI",
+    "model": "gpt-5.6-luna",
+    "reasoningEffort": "high"
+  },
+  "entries": [
+    {
+      "id": "208889",
+      "passage": "52-5-27",
+      "sourceSha256": "81584e52dd9132873f160a150f11e6a5f256904dcd9b275824248a3907c0c4ce",
+      "translatedHtml": "<p><b>Je vous adjure par le Seigneur - </b>En marge, &ldquo;adjurez.&rdquo; En grec, &ldquo;je vous place sous serment par le Seigneur&rdquo; - <span class=\"greek-hebrew\"> &epsilon;&nu;&omicron;&rho;&kappa;&iota;&#769;&zeta;&omega; &upsilon;&#788;&mu;&alpha;&#834;&sigmaf; &tau;&omicron;&#768;&nu; &Kappa;&upsilon;&#769;&rho;&iota;&omicron;&nu; </span> <span class=\"translit\">enorkizo&#772; humas ton KurionCela équivaut à lier des personnes par un serment ; voir les notes sur   <a class=\"bible-ref\" href=\"/Matt_26.63\">Matthieu 26:63</a> ; comparer   <a class=\"bible-ref\" href=\"/Gen_21.23\">Genèse 21:23-24</a> ;   <a class=\"bible-ref\" href=\"/Gen_24.3\">Genèse 24:3</a>,   <a class=\"bible-ref\" href=\"/Gen_24.37\">Genèse 24:37</a>.<p><b>Que cette épître soit lue à tous les saints frères - </b>À toute l’Église ; comparer les notes sur   <a class=\"bible-ref\" href=\"/Col_4.16\">Colossiens 4:16</a>. Le sens est que l’épître devait être lue à toute l’Église à une occasion où celle-ci était assemblée. Elle n’était pas destinée uniquement à la personne ou aux personnes entre les mains desquelles elle pourrait tomber, mais, puisqu’elle contenait des sujets d’intérêt commun et était destinée à l’ensemble des croyants de Thessalonique, l’apôtre donne l’ordre solennel de ne pas la supprimer ni de la leur cacher. Les injonctions de ce genre qui apparaissent dans les épîtres donnent à penser que les apôtres se considéraient comme étant sous l’influence de l’inspiration et comme ayant autorité pour donner aux Églises des instructions infaillibles.</p>\n\n<p></p></span></p>"
+    }
+  ]
+}

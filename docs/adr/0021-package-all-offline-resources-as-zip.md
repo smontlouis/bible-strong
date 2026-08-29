@@ -23,7 +23,7 @@ publications, resource SQLite databases, timeline JSON, Strong Bible sidecars, i
 and modular Strong lexicon databases retain their existing entries. Installed files keep their
 existing JSON or SQLite names and schemas; ZIP is a delivery envelope, not a schema migration.
 
-`bible-lexicon-maker/config/mobile-resource-inventory.json` is the complete publication inventory.
+`apps/resource-studio/config/mobile-resource-inventory.json` is the complete publication inventory.
 Its mobile resource release command packages historical direct sources deterministically, validates
 already-zipped sources, and emits one global `mobile-resource-catalog.json` with every identity, stable artifact URL,
 archive entries and roles, SHA-256 checksums, byte sizes, installation strategy, and peak-space

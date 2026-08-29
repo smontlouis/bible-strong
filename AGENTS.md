@@ -15,7 +15,7 @@ This repository is the shared Yarn workspace for Bible Strong products and suppo
 - `apps/mobile` — Expo/React Native application (`@bible-strong/mobile`).
 - `apps/web` — web application (`@bible-strong/web`).
 - `apps/api` — API workspace and Firebase functions (`@bible-strong/api-functions`).
-- `apps/lexicon-editor` — editorial application (`@bible-strong/lexicon-editor`).
+- `apps/resource-studio` — resource authoring application and workflows (`@bible-strong/resource-studio`).
 - `packages/resource-service` — resource publication and delivery service.
 - `packages/bible-reference-parser` — Bible passage reference parser.
 
@@ -31,7 +31,7 @@ yarn test
 yarn build
 ```
 
-Start one product from the root with `yarn dev:mobile`, `yarn dev:web`, `yarn dev:api`, `yarn dev:lexicon`, or `yarn dev:resources`. Run a workspace-specific command with `yarn workspace <package-name> <script>`.
+Start one product from the root with `yarn dev:mobile`, `yarn dev:web`, `yarn dev:api`, `yarn dev:studio`, or `yarn dev:resources`. Resource-authoring commands use the `resources:<domain>:<action>` prefix; production import, upload, and activation remain owned by the Resource service. Run a workspace-specific command with `yarn workspace <package-name> <script>`.
 
 ## Dependency rules
 
