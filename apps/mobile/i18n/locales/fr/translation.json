@@ -210,6 +210,8 @@
   "Afficher la note": "Afficher la note",
   "Péricopes": "Péricopes",
   "bible.passageMedia.title": "Vidéos",
+  "bible.passageMedia.openInYoutube": "Ouvrir dans YouTube",
+  "bible.passageMedia.openFailed": "Impossible d’ouvrir YouTube.",
   "Fermer": "Fermer",
   "bible.passageMedia.sections.introduction": "Introduction",
   "bible.passageMedia.sections.passages": "Passages bibliques",

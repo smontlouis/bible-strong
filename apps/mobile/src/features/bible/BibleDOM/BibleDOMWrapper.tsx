@@ -7,7 +7,7 @@ import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
-import { Alert, Platform } from 'react-native'
+import { Alert, Linking, Platform } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { isBibleOverlayOpenAtom, isFullScreenBibleAtom } from 'src/state/app'
 import { selectBibleTabVersion } from '~helpers/bibleTabVersionSelection'
@@ -100,6 +100,7 @@ import {
   OPEN_ANNOTATION_TAGS,
   OPEN_VERSE_TAGS_MODAL,
   OPEN_DOWNLOADS,
+  OPEN_PASSAGE_MEDIA_SOURCE,
   REMOVE_PARALLEL_VERSION,
   RESET_BIBLE_DATABASE,
   RETRY_BIBLE_RESOURCE,
@@ -482,6 +483,7 @@ export const BibleDOMWrapper = ({
     pericopeIndex: t('Péricopes'),
     passageMediaTitle: t('bible.passageMedia.title'),
     passageMediaClose: t('Fermer'),
+    passageMediaOpenInYoutube: t('bible.passageMedia.openInYoutube'),
     passageMediaBookName: t(book.Nom),
     passageMediaChapter: chapter,
     passageMediaSections: {
@@ -528,6 +530,22 @@ export const BibleDOMWrapper = ({
         isBibleOverlayOpenRef.current = action.payload
         setIsBibleOverlayOpen(action.payload)
         setIsFullScreenBible(action.payload ? true : wasFullScreenBeforeOverlayRef.current)
+        break
+      }
+      case OPEN_PASSAGE_MEDIA_SOURCE: {
+        const sourceUrl = getStringPayload(action.payload)
+        if (!sourceUrl || !/^https:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\//i.test(sourceUrl)) {
+          break
+        }
+
+        try {
+          await Linking.openURL(sourceUrl)
+        } catch (error) {
+          appLogger.captureError('webview', 'passage_media.open_source_failed', error, {
+            sourceUrl,
+          })
+          toast.error(t('bible.passageMedia.openFailed'))
+        }
         break
       }
       case NAVIGATE_TO_BIBLE_VERSE_DETAIL: {
@@ -977,6 +995,8 @@ export const BibleDOMWrapper = ({
           allowsInlineMediaPlayback: true,
           allowsFullscreenVideo: true,
           mediaPlaybackRequiresUserAction: false,
+          sharedCookiesEnabled: true,
+          thirdPartyCookiesEnabled: true,
           style: {
             flex: 1,
             backgroundColor: theme.colors.reverse,

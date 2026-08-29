@@ -44,7 +44,12 @@
 
     <script>
       const player = document.getElementById('player')
-      const videoId = new URLSearchParams(window.location.search).get('v') || ''
+      const searchParams = new URLSearchParams(window.location.search)
+      const videoId = searchParams.get('v') || ''
+      const requestedAppId = searchParams.get('appId') || ''
+      const appId = /^[A-Za-z0-9.-]+$/.test(requestedAppId)
+        ? requestedAppId
+        : 'com.smontlouis.biblestrong'
 
       if (!/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
         player.className = 'error'
@@ -55,6 +60,7 @@
           playsinline: '1',
           rel: '0',
           origin: window.location.origin,
+          widget_referrer: `https://${appId}`,
         })
         const iframe = document.createElement('iframe')
 

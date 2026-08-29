@@ -21,6 +21,7 @@ export interface BibleDOMTranslations {
   pericopeIndex: string
   passageMediaTitle: string
   passageMediaClose: string
+  passageMediaOpenInYoutube: string
   passageMediaBookName: string
   passageMediaChapter: number
   passageMediaSections: {

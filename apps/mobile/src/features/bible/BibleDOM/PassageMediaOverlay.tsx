@@ -458,6 +458,8 @@ const PassageMediaOverlay = ({
           )}
           layoutTransition={spring}
           borderColor={colors.reverse}
+          buttonColor={colors.default}
+          buttonBackgroundColor={colors.reverse}
         />
       )}
     </m.div>,
