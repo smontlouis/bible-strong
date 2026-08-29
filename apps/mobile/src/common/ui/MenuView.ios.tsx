@@ -6,7 +6,6 @@ import {
   type MenuComponentRef,
 } from '@expo/ui/community/menu'
 import React from 'react'
-import { View } from 'react-native'
 
 export type { MenuAction, MenuComponentRef }
 export type AccessibleMenuComponentProps = MenuComponentProps & {
@@ -158,17 +157,22 @@ const withAndroidMenuIcons = (actions: MenuAction[]): MenuAction[] =>
   }))
 
 export const MenuView = React.forwardRef<MenuComponentRef, AccessibleMenuComponentProps>(
-  ({ accessibilityLabel, actions, children, ...props }, ref) => (
-    <ExpoMenuView {...props} ref={ref} actions={withAndroidMenuIcons(actions)}>
-      <View
-        accessible={Boolean(accessibilityLabel)}
-        accessibilityRole={accessibilityLabel ? 'button' : undefined}
-        accessibilityLabel={accessibilityLabel}
-      >
-        {children}
-      </View>
-    </ExpoMenuView>
-  )
+  ({ accessibilityLabel, actions, children, ...props }, ref) => {
+    const trigger =
+      accessibilityLabel && React.isValidElement<Record<string, unknown>>(children)
+        ? React.cloneElement(children, {
+            accessible: true,
+            accessibilityRole: 'button',
+            accessibilityLabel,
+          })
+        : children
+
+    return (
+      <ExpoMenuView {...props} ref={ref} actions={withAndroidMenuIcons(actions)}>
+        {trigger}
+      </ExpoMenuView>
+    )
+  }
 )
 
 MenuView.displayName = 'MenuView'
