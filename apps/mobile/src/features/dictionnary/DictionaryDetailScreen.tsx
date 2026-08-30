@@ -8,7 +8,12 @@ import DictionaryDetailTabScreen from './DictionaryDetailTabScreen'
 import { IS_FORM_SHEET } from '~helpers/constants'
 
 const DictionaryDetailScreen = () => {
-  const params = useLocalSearchParams<{ word?: string }>()
+  const params = useLocalSearchParams<{
+    word?: string
+    work?: string
+    resourceId?: string
+    dictionaryTitle?: string
+  }>()
 
   // Parse params from URL strings
   const word = params.word || ''
@@ -23,10 +28,12 @@ const DictionaryDetailScreen = () => {
         type: 'dictionary',
         data: {
           word,
+          work: params.work,
+          resourceId: params.resourceId,
+          dictionaryTitle: params.dictionaryTitle,
         },
       } as DictionaryTab),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [word]
+    [params.dictionaryTitle, params.resourceId, params.work, word]
   )
 
   return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} isFormSheet={IS_FORM_SHEET} />

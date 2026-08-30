@@ -388,7 +388,14 @@ export const importPublicationBundle = (
           : isDictionaryPublicationBundleManifest(manifest)
             ? {
                 resource_id: manifest.identity.resourceId,
+                work: manifest.identity.work,
                 language: manifest.identity.language,
+                title: manifest.editorial.title,
+                abbreviation: manifest.editorial.abbreviation,
+                authors: manifest.editorial.authors,
+                description: manifest.editorial.description,
+                edition: manifest.editorial.edition,
+                source: manifest.editorial.source,
                 alphabetical_browse: manifest.alphabeticalBrowse,
                 delivery_capabilities: manifest.deliveryCapabilities,
                 counts: manifest.counts,

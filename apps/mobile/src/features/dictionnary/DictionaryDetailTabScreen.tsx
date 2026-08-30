@@ -26,6 +26,7 @@ import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
 import { useTabContext } from '~features/app-switcher/context/TabContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import { getDefaultDictionaryWork } from '~features/resources/dictionaryAccess'
 import { RootState } from '~redux/modules/reducer'
 import { makeWordTagsSelector } from '~redux/selectors/bible'
 import { historyAtom, unifiedTagsModalAtom } from '../../state/app'
@@ -39,7 +40,6 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import {
@@ -66,28 +66,45 @@ const DictionnaryDetailScreen = ({
   const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
-    data: { word },
+    data: { word, work: storedWork, resourceId, dictionaryTitle },
   } = dictionaryTab
 
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
   const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  const work = storedWork ?? getDefaultDictionaryWork(dictionaryResourceLanguage)
+  const resolvedDictionaryTitle =
+    dictionaryTitle ??
+    (work === 'easton-webster'
+      ? 'Easton’s Bible Dictionary & Webster’s 1828 Dictionary'
+      : work === 'westphal'
+        ? 'Dictionnaire encyclopédique de la Bible'
+        : work)
+  const offlineIdentity = resourceId
+    ? ({
+        kind: 'dictionary' as const,
+        work,
+        resourceId,
+        language: dictionaryResourceLanguage,
+      } as const)
+    : ({
+        kind: 'database' as const,
+        databaseId: 'DICTIONNAIRE' as const,
+        language: dictionaryResourceLanguage,
+      } as const)
   const dictionaryAvailabilityQuery = useQuery({
-    queryKey: [
-      ...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', dictionaryResourceLanguage),
-      isConnected,
-    ],
+    queryKey: ['dictionary-availability', work, dictionaryResourceLanguage, isConnected],
     queryFn: () =>
-      resources.dictionary.getAvailability?.(dictionaryResourceLanguage) ??
+      resources.dictionary.getAvailability?.(dictionaryResourceLanguage, work) ??
       Promise.resolve({ status: 'available' as const }),
     networkMode: 'always',
     staleTime: Infinity,
   })
   const dictionaryQuery = useQuery({
-    queryKey: ['dictionary-detail', dictionaryResourceLanguage, word],
+    queryKey: ['dictionary-detail', work, dictionaryResourceLanguage, word],
     queryFn: async () =>
       word
-        ? ((await resources.dictionary.loadItem(word, dictionaryResourceLanguage)) ?? null)
+        ? ((await resources.dictionary.loadItem(word, dictionaryResourceLanguage, work)) ?? null)
         : null,
     enabled: !!word,
     staleTime: Infinity,
@@ -103,7 +120,7 @@ const DictionnaryDetailScreen = ({
       setDictionaryTab(
         produce(draft => {
           draft.title = 'Dictionnaire'
-          draft.data = {}
+          draft.data.word = undefined
         })
       )
     } else {
@@ -166,7 +183,12 @@ const DictionnaryDetailScreen = ({
     } else {
       pushRouteOnce({
         pathname: '/dictionnary-detail',
-        params: { word: href },
+        params: {
+          word: href,
+          work,
+          ...(resourceId ? { resourceId } : {}),
+          dictionaryTitle: resolvedDictionaryTitle,
+        },
       })
     }
   }
@@ -198,11 +220,7 @@ const DictionnaryDetailScreen = ({
   if (dictionaryAvailabilityQuery.data?.status === 'unavailable') {
     return (
       <ResourceUnavailableView
-        identity={{
-          kind: 'database',
-          databaseId: 'DICTIONNAIRE',
-          language: dictionaryResourceLanguage,
-        }}
+        identity={offlineIdentity}
         title={t('resource.dictionary.offlineCopyNeeded')}
         offlineTitle={t('resource.dictionary.temporarilyUnavailable')}
         fileSize={22}
@@ -237,11 +255,7 @@ const DictionnaryDetailScreen = ({
           title={t('Dictionnaire')}
         />
         <ResourceUnavailableView
-          identity={{
-            kind: 'database',
-            databaseId: 'DICTIONNAIRE',
-            language: dictionaryResourceLanguage,
-          }}
+          identity={offlineIdentity}
           title={t('resource.dictionary.temporarilyUnavailable')}
           fileSize={22}
           failure={resourceFailureFromAccessError(
@@ -277,6 +291,7 @@ const DictionnaryDetailScreen = ({
       <Header
         hasBackButton={hasBackButton}
         title={word}
+        subTitle={resolvedDictionaryTitle}
         rightComponent={
           <MenuView
             actions={
@@ -319,7 +334,12 @@ const DictionnaryDetailScreen = ({
                     title: t('tabs.new'),
                     isRemovable: true,
                     type: 'dictionary',
-                    data: { word },
+                    data: {
+                      word,
+                      work,
+                      resourceId,
+                      dictionaryTitle: resolvedDictionaryTitle,
+                    },
                   })
                   break
               }

@@ -7,11 +7,11 @@ import {
   SupplementaryRevisionDto,
 } from '@bible-strong/resource-domain/contracts/supplementaryContract'
 
-export type SupplementaryLanguage = 'fr'
-export type CommentaryVerseLookup = { collection: 'MHY'; language: 'fr'; verseKey: string }
+export type SupplementaryLanguage = 'fr' | 'en'
+export type CommentaryVerseLookup = { collection: string; language: SupplementaryLanguage; verseKey: string }
 export type CommentaryChapterLookup = {
-  collection: 'MHY'
-  language: 'fr'
+  collection: string
+  language: SupplementaryLanguage
   book: number
   chapter: number
 }
@@ -63,16 +63,17 @@ export class SupplementaryRepository extends Context.Tag('SupplementaryRepositor
 
 const revisionDto = (
   kind: 'commentary' | 'cross-references',
-  resourceId: 'MHY' | 'TRESOR',
+  resourceId: string,
+  language: SupplementaryLanguage,
   revision: string
-) => new SupplementaryRevisionDto({ kind, resourceId, language: 'fr', revision })
+) => new SupplementaryRevisionDto({ kind, resourceId, language, revision })
 
 export const readCommentaryVerse = (input: CommentaryVerseLookup) =>
   Effect.gen(function* () {
     const repository = yield* SupplementaryRepository
     const active = yield* repository.findCommentaryVerse(input)
     return new CommentaryVerseResponseDto({
-      resource: revisionDto('commentary', 'MHY', active.revision),
+      resource: revisionDto('commentary', active.collection, active.language, active.revision),
       verseKey: active.verseKey,
       content: active.content,
     })
@@ -83,7 +84,7 @@ export const readCommentaryChapter = (input: CommentaryChapterLookup) =>
     const repository = yield* SupplementaryRepository
     const active = yield* repository.findCommentaryChapter(input)
     return new CommentaryChapterResponseDto({
-      resource: revisionDto('commentary', 'MHY', active.revision),
+      resource: revisionDto('commentary', active.collection, active.language, active.revision),
       book: active.book,
       chapter: active.chapter,
       serializedComments: JSON.stringify(active.comments),
@@ -95,7 +96,7 @@ export const readCrossReferences = (input: CrossReferenceLookup) =>
     const repository = yield* SupplementaryRepository
     const active = yield* repository.findCrossReferences(input)
     return new CrossReferenceResponseDto({
-      resource: revisionDto('cross-references', 'TRESOR', active.revision),
+      resource: revisionDto('cross-references', 'TRESOR', 'fr', active.revision),
       verseKey: active.verseKey,
       references: active.references,
     })

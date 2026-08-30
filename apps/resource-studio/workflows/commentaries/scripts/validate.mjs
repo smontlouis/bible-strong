@@ -27,11 +27,23 @@ if (!aquifer || aquifer.shortName !== 'Aquifer' || aquifer.languages.join(',') !
 }
 const descriptions = new Set()
 const traditions = new Set(['Protestantisme', 'Catholicisme', 'Christianisme ancien', 'Judaïsme', 'Interconfessionnel'])
+const rightsLabels = new Set([
+  'Domaine public',
+  'CC0 1.0',
+  '© Éditions CLÉ / Dominique Osché · tous droits réservés',
+  '© Mission Mutual / Tyndale House Publishers · CC BY-SA 4.0',
+  'Metsudah Publications / Judaica Press · CC BY',
+  '© Ger de Koning · tous droits réservés',
+  'STEPBible · CC BY 4.0',
+  'ThéoTeX · tous droits réservés',
+  'Review and Herald Publishing Association · tous droits réservés',
+])
 for (const resource of catalog.resources) {
   if (!resource.title || !resource.author || !resource.rights || !resource.source || !resource.status) {
     fail(`Métadonnées de catalogue incomplètes : ${resource.id}`)
   }
   if (!traditions.has(resource.tradition)) fail(`Tradition inconnue : ${resource.id} (${resource.tradition})`)
+  if (!rightsLabels.has(resource.rights)) fail(`Copyright non normalisé : ${resource.id} (${resource.rights})`)
   if (!Array.isArray(resource.tags) || resource.tags.length === 0) fail(`Tags absents : ${resource.id}`)
   if (resource.tags.some(tag => typeof tag !== 'string' || !tag.trim())) fail(`Tag invalide : ${resource.id}`)
   if (new Set(resource.tags).size !== resource.tags.length) fail(`Tag dupliqué : ${resource.id}`)

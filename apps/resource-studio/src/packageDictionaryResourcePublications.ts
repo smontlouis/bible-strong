@@ -36,6 +36,15 @@ const execFileAsync = promisify(execFile);
 export type DictionaryLanguage = "fr" | "en";
 
 export interface DictionaryPublicationMetadata {
+  work: string;
+  resourceId: string;
+  language: DictionaryLanguage;
+  title: string;
+  abbreviation: string;
+  authors: string[];
+  description: string;
+  edition: string;
+  source: string;
   sourceVersion: string;
   rights: {
     holder: string;
@@ -64,9 +73,14 @@ export type CanonicalDictionaryVerseAnchor = {
 
 export interface CanonicalDictionaryPublication {
   format: "bible-strong-canonical-dictionary";
-  schemaVersion: 1;
-  resourceId: "DICTIONNAIRE";
+  schemaVersion: 2;
+  resourceId: string;
+  work: string;
   language: DictionaryLanguage;
+  editorial: Pick<
+    DictionaryPublicationMetadata,
+    "title" | "abbreviation" | "authors" | "description" | "edition" | "source"
+  >;
   revision: string;
   sourceVersion: string;
   sourceSha256: string;
@@ -79,14 +93,16 @@ export interface DictionaryResourcePublicationManifest {
   schemaVersion: 1;
   identity: {
     kind: "dictionary";
-    resourceId: "DICTIONNAIRE";
+    resourceId: string;
+    work: string;
     language: DictionaryLanguage;
   };
+  editorial: CanonicalDictionaryPublication["editorial"];
   revision: string;
   canonical: {
     path: string;
     mediaType: "application/json";
-    schemaVersion: 1;
+    schemaVersion: 2;
     sha256: string;
     bytes: number;
   };
@@ -126,10 +142,14 @@ type DictionarySqliteEntry = {
 
 type DictionarySqliteVerse = { id: string; ref: string };
 
-const LANGUAGE_IDS: readonly DictionaryLanguage[] = ["fr", "en"];
-
 const isDictionaryLanguage = (value: unknown): value is DictionaryLanguage =>
   value === "fr" || value === "en";
+
+const isDictionaryWork = (value: unknown): value is string =>
+  typeof value === "string" && /^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(value);
+
+const isDictionaryResourceId = (value: unknown): value is string =>
+  typeof value === "string" && /^[A-Z0-9][A-Z0-9_]{1,63}$/u.test(value);
 
 const sha256Buffer = (value: Buffer): string =>
   createHash("sha256").update(value).digest("hex");
@@ -237,8 +257,6 @@ const readDictionarySqlite = async (
     sqlitePath,
     "SELECT id, ref FROM verses ORDER BY id"
   );
-  if (verseRows.length === 0)
-    throw new Error(`dictionary-publication-verse-anchors-empty:${language}`);
   const verseKeys = new Set<string>();
   const verseAnchors = verseRows.map((row) => {
     if (!isDictionaryVerseKey(row.id) || verseKeys.has(row.id)) {
@@ -280,12 +298,14 @@ const readDictionarySqlite = async (
 };
 
 export const deriveDictionaryRevision = (
+  work: string,
   language: DictionaryLanguage,
   content: Pick<CanonicalDictionaryPublication, "entries" | "verseAnchors">
 ): string => {
   const semanticSha256 = sha256Buffer(
     Buffer.from(
       JSON.stringify({
+        work,
         language,
         entries: content.entries,
         verseAnchors: content.verseAnchors
@@ -293,7 +313,7 @@ export const deriveDictionaryRevision = (
       "utf8"
     )
   );
-  return `dictionary-${language}-${semanticSha256.slice(0, 20)}`;
+  return `dictionary-${work}-${language}-${semanticSha256.slice(0, 20)}`;
 };
 
 const countCanonical = (canonical: CanonicalDictionaryPublication) => ({
@@ -326,6 +346,13 @@ const deriveAlphabeticalBrowse = (
 
 const validateMetadata = (metadata: DictionaryPublicationMetadata) => {
   for (const [label, value] of [
+    ["work", metadata.work],
+    ["resource-id", metadata.resourceId],
+    ["title", metadata.title],
+    ["abbreviation", metadata.abbreviation],
+    ["description", metadata.description],
+    ["edition", metadata.edition],
+    ["source", metadata.source],
     ["source-version", metadata.sourceVersion],
     ["rights-holder", metadata.rights.holder],
     ["terms-reference", metadata.rights.termsReference],
@@ -333,6 +360,19 @@ const validateMetadata = (metadata: DictionaryPublicationMetadata) => {
   ] as const) {
     if (!value.trim())
       throw new Error(`dictionary-publication-${label}-missing`);
+  }
+  if (!isDictionaryWork(metadata.work))
+    throw new Error("dictionary-publication-work-invalid");
+  if (!isDictionaryResourceId(metadata.resourceId))
+    throw new Error("dictionary-publication-resource-id-invalid");
+  if (!isDictionaryLanguage(metadata.language))
+    throw new Error("dictionary-publication-language-invalid");
+  if (
+    !Array.isArray(metadata.authors) ||
+    metadata.authors.length === 0 ||
+    metadata.authors.some((author) => !isNonEmptyString(author))
+  ) {
+    throw new Error("dictionary-publication-authors-invalid");
   }
   if (
     (metadata.deliveryCapabilities.onlineAccess && !metadata.rights.online) ||
@@ -353,13 +393,15 @@ const writePublicationMetadata = async (
      DROP TABLE IF EXISTS RESOURCE_METADATA;
      CREATE TABLE RESOURCE_METADATA (
        resource_id TEXT NOT NULL,
+       work TEXT NOT NULL,
        language TEXT NOT NULL,
        revision TEXT NOT NULL,
        source_version TEXT NOT NULL,
        source_sha256 TEXT NOT NULL
      );
      INSERT INTO RESOURCE_METADATA VALUES (
-       ${quote(`dictionary:${canonical.language}`)},
+       ${quote(`dictionary:${canonical.work}:${canonical.language}`)},
+       ${quote(canonical.work)},
        ${quote(canonical.language)},
        ${quote(canonical.revision)},
        ${quote(canonical.sourceVersion)},
@@ -398,7 +440,6 @@ const assertSingleBoundedZipEntry = async (archivePath: string) => {
 
 export async function buildDictionaryResourcePublication(
   options: DictionaryPublicationMetadata & {
-    language: DictionaryLanguage;
     sqlitePath: string;
     outputDir: string;
     generatedAt?: string;
@@ -412,8 +453,6 @@ export async function buildDictionaryResourcePublication(
 }> {
   const sourceSqlitePath = path.resolve(options.sqlitePath);
   const outputDir = path.resolve(options.outputDir);
-  if (!isDictionaryLanguage(options.language))
-    throw new Error("dictionary-publication-language-invalid");
   if (!existsSync(sourceSqlitePath)) {
     throw new Error(
       `dictionary-publication-source-missing:${sourceSqlitePath}`
@@ -425,12 +464,25 @@ export async function buildDictionaryResourcePublication(
 
   const sourceSha256 = await sha256File(sourceSqlitePath);
   const source = await readDictionarySqlite(sourceSqlitePath, options.language);
-  const revision = deriveDictionaryRevision(options.language, source);
+  const revision = deriveDictionaryRevision(
+    options.work,
+    options.language,
+    source
+  );
   const canonical: CanonicalDictionaryPublication = {
     format: "bible-strong-canonical-dictionary",
-    schemaVersion: 1,
-    resourceId: "DICTIONNAIRE",
+    schemaVersion: 2,
+    resourceId: options.resourceId,
+    work: options.work,
     language: options.language,
+    editorial: {
+      title: options.title,
+      abbreviation: options.abbreviation,
+      authors: options.authors,
+      description: options.description,
+      edition: options.edition,
+      source: options.source
+    },
     revision,
     sourceVersion: options.sourceVersion,
     sourceSha256,
@@ -440,8 +492,8 @@ export async function buildDictionaryResourcePublication(
 
   const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const mobileReleaseDir = `${temporaryDir}-mobile`;
-  const canonicalRelativePath = `canonical/dictionary-${options.language}.json`;
-  const offlineRelativePath = `offline/dictionnaire-${options.language}.sqlite.zip`;
+  const canonicalRelativePath = `canonical/dictionary-${options.work}-${options.language}.json`;
+  const offlineRelativePath = `offline/dictionary-${options.work}-${options.language}.sqlite.zip`;
   const canonicalPath = path.join(temporaryDir, canonicalRelativePath);
   const normalizedSqlitePath = path.join(
     temporaryDir,
@@ -461,12 +513,12 @@ export async function buildDictionaryResourcePublication(
       generatedAt: options.generatedAt,
       inventory: [
         {
-          id: `database:DICTIONNAIRE:${options.language}`,
-          artifactUrl: `https://local.invalid/databases/dictionnaire-${options.language}.sqlite.zip`,
+          id: `database:${options.resourceId}:${options.language}`,
+          artifactUrl: `https://local.invalid/databases/dictionary-${options.work}-${options.language}.sqlite.zip`,
           sources: [
             {
               role: "canonical",
-              sourceUrl: `https://local.invalid/databases/dictionnaire-${options.language}.sqlite`,
+              sourceUrl: `https://local.invalid/databases/dictionary-${options.work}-${options.language}.sqlite`,
               sourcePath: normalizedSqlitePath,
               entry: currentArchiveEntry
             }
@@ -474,13 +526,13 @@ export async function buildDictionaryResourcePublication(
           strategy: "archive-extract"
         }
       ],
-      requiredIds: [`database:DICTIONNAIRE:${options.language}`]
+      requiredIds: [`database:${options.resourceId}:${options.language}`]
     });
     const catalog = JSON.parse(
       await readFile(mobileResult.catalogPath, "utf8")
     ) as MobileResourceCatalog;
     const mobileArtifact =
-      catalog.resources[`database:DICTIONNAIRE:${options.language}`];
+      catalog.resources[`database:${options.resourceId}:${options.language}`];
     if (!mobileArtifact)
       throw new Error("dictionary-publication-offline-missing");
 
@@ -502,14 +554,16 @@ export async function buildDictionaryResourcePublication(
       schemaVersion: 1,
       identity: {
         kind: "dictionary",
-        resourceId: "DICTIONNAIRE",
+        resourceId: options.resourceId,
+        work: options.work,
         language: options.language
       },
+      editorial: canonical.editorial,
       revision,
       canonical: {
         path: canonicalRelativePath,
         mediaType: "application/json",
-        schemaVersion: 1,
+        schemaVersion: 2,
         sha256: canonicalSha256,
         bytes: canonicalStats.size
       },
@@ -557,10 +611,8 @@ export async function buildDictionaryResourcePublication(
 }
 
 export async function buildAllDictionaryResourcePublications(options: {
-  frSqlitePath: string;
-  enSqlitePath: string;
   outputDir: string;
-  metadata: DictionaryPublicationMetadata;
+  publications: Array<DictionaryPublicationMetadata & { sqlitePath: string }>;
   generatedAt?: string;
 }): Promise<DictionaryResourcePublicationManifest[]> {
   const outputDir = path.resolve(options.outputDir);
@@ -571,14 +623,18 @@ export async function buildAllDictionaryResourcePublications(options: {
   );
   try {
     const manifests: DictionaryResourcePublicationManifest[] = [];
-    for (const language of LANGUAGE_IDS) {
+    const identities = new Set<string>();
+    for (const publication of options.publications) {
+      const identity = `${publication.work}:${publication.language}`;
+      if (identities.has(identity))
+        throw new Error(
+          `dictionary-publication-identity-duplicate:${identity}`
+        );
+      identities.add(identity);
       const result = await buildDictionaryResourcePublication({
-        ...options.metadata,
+        ...publication,
         generatedAt: options.generatedAt,
-        language,
-        sqlitePath:
-          language === "fr" ? options.frSqlitePath : options.enSqlitePath,
-        outputDir: path.join(stagingDir, language)
+        outputDir: path.join(stagingDir, publication.work, publication.language)
       });
       manifests.push(result.manifest);
     }
@@ -626,10 +682,14 @@ export async function validateDictionaryResourcePublication(
     JSON.parse(await readFile(canonicalPath, "utf8"))
   );
   if (
+    canonical.resourceId !== manifest.identity.resourceId ||
+    canonical.work !== manifest.identity.work ||
     canonical.language !== manifest.identity.language ||
+    JSON.stringify(canonical.editorial) !==
+      JSON.stringify(manifest.editorial) ||
     canonical.revision !== manifest.revision ||
     canonical.revision !==
-      deriveDictionaryRevision(canonical.language, canonical) ||
+      deriveDictionaryRevision(canonical.work, canonical.language, canonical) ||
     canonical.sourceVersion !== manifest.provenance.sourceVersion ||
     canonical.sourceSha256 !== manifest.provenance.sourceSha256 ||
     JSON.stringify(countCanonical(canonical)) !==
@@ -671,18 +731,21 @@ export async function validateDictionaryResourcePublication(
     }
     const metadataRows = await queryJson<{
       resource_id: string;
+      work: string;
       language: string;
       revision: string;
       source_version: string;
       source_sha256: string;
     }>(
       sqlitePath,
-      "SELECT resource_id, language, revision, source_version, source_sha256 FROM RESOURCE_METADATA"
+      "SELECT resource_id, work, language, revision, source_version, source_sha256 FROM RESOURCE_METADATA"
     );
     const metadata = metadataRows[0];
     if (
       metadataRows.length !== 1 ||
-      metadata?.resource_id !== `dictionary:${canonical.language}` ||
+      metadata?.resource_id !==
+        `dictionary:${canonical.work}:${canonical.language}` ||
+      metadata.work !== canonical.work ||
       metadata.language !== canonical.language ||
       metadata.revision !== canonical.revision ||
       metadata.source_version !== canonical.sourceVersion ||
@@ -704,16 +767,25 @@ const decodeCanonicalDictionary = (
   const candidate = value as Partial<CanonicalDictionaryPublication>;
   if (
     candidate.format !== "bible-strong-canonical-dictionary" ||
-    candidate.schemaVersion !== 1 ||
-    candidate.resourceId !== "DICTIONNAIRE" ||
+    candidate.schemaVersion !== 2 ||
+    !isDictionaryResourceId(candidate.resourceId) ||
+    !isDictionaryWork(candidate.work) ||
     !isDictionaryLanguage(candidate.language) ||
+    !isRecord(candidate.editorial) ||
+    !isNonEmptyString(candidate.editorial.title) ||
+    !isNonEmptyString(candidate.editorial.abbreviation) ||
+    !Array.isArray(candidate.editorial.authors) ||
+    candidate.editorial.authors.length === 0 ||
+    candidate.editorial.authors.some((author) => !isNonEmptyString(author)) ||
+    !isNonEmptyString(candidate.editorial.description) ||
+    !isNonEmptyString(candidate.editorial.edition) ||
+    !isNonEmptyString(candidate.editorial.source) ||
     !isNonEmptyString(candidate.revision) ||
     !isNonEmptyString(candidate.sourceVersion) ||
     !isSha256(candidate.sourceSha256) ||
     !Array.isArray(candidate.entries) ||
     !Array.isArray(candidate.verseAnchors) ||
-    candidate.entries.length === 0 ||
-    candidate.verseAnchors.length === 0
+    candidate.entries.length === 0
   ) {
     throw new Error("dictionary-publication-canonical-invalid");
   }
@@ -757,9 +829,11 @@ const decodeDictionaryManifest = (
   if (
     !isRecord(candidate.identity) ||
     candidate.identity.kind !== "dictionary" ||
-    candidate.identity.resourceId !== "DICTIONNAIRE" ||
+    !isDictionaryResourceId(candidate.identity.resourceId) ||
+    !isDictionaryWork(candidate.identity.work) ||
     !isDictionaryLanguage(candidate.identity.language) ||
-    envelope.canonical.schemaVersion !== 1 ||
+    !isRecord(candidate.editorial) ||
+    envelope.canonical.schemaVersion !== 2 ||
     envelope.offlineArtifact.entry !== currentArchiveEntry ||
     !isRecord(candidate.alphabeticalBrowse) ||
     !Array.isArray(candidate.alphabeticalBrowse.initials) ||
@@ -810,28 +884,30 @@ const main = async () => {
   }
   const args = parseCliArgs(
     command === "build" ? rawArgs : [command, ...rawArgs],
-    new Set(["--fr-sqlite", "--en-sqlite", "--output-dir", "--metadata"])
+    new Set(["--config", "--output-dir"])
   );
-  if (
-    !args["--fr-sqlite"] ||
-    !args["--en-sqlite"] ||
-    !args["--output-dir"] ||
-    !args["--metadata"]
-  ) {
+  if (!args["--config"] || !args["--output-dir"]) {
     throw new Error("dictionary-publication-cli-required-options-missing");
   }
-  const metadata = JSON.parse(
-    await readFile(path.resolve(args["--metadata"]), "utf8")
-  ) as DictionaryPublicationMetadata;
+  const configPath = path.resolve(args["--config"]);
+  const config = JSON.parse(await readFile(configPath, "utf8")) as {
+    publications: Array<DictionaryPublicationMetadata & { sqlitePath: string }>;
+  };
+  if (!Array.isArray(config.publications) || config.publications.length === 0) {
+    throw new Error("dictionary-publication-config-empty");
+  }
+  const configDir = path.dirname(configPath);
   const manifests = await buildAllDictionaryResourcePublications({
-    frSqlitePath: args["--fr-sqlite"],
-    enSqlitePath: args["--en-sqlite"],
     outputDir: args["--output-dir"],
-    metadata
+    publications: config.publications.map((publication) => ({
+      ...publication,
+      sqlitePath: path.resolve(configDir, publication.sqlitePath)
+    }))
   });
   console.log(
     JSON.stringify(
       manifests.map((manifest) => ({
+        work: manifest.identity.work,
         language: manifest.identity.language,
         revision: manifest.revision
       })),

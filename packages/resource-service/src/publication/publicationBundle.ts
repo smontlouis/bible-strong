@@ -20,6 +20,12 @@ import { STRONG_IDENTITY_KINDS } from '@bible-strong/resource-domain/strong-iden
 
 const Sha256 = Schema.String.pipe(Schema.pattern(/^[a-f0-9]{64}$/))
 const Language = Schema.String.pipe(Schema.pattern(/^[a-z]{2,3}(?:-[A-Za-z0-9]+)*$/))
+const CommentaryResourceId = Schema.String.pipe(Schema.pattern(/^[A-Za-z0-9][A-Za-z0-9-]{1,63}$/))
+const DictionaryResourceId = Schema.String.pipe(Schema.pattern(/^[A-Z0-9][A-Z0-9_]{1,63}$/))
+const DictionaryWorkId = Schema.String.pipe(Schema.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/))
+const CommentaryOfflineEntry = Schema.String.pipe(
+  Schema.pattern(/^(?:commentaires-mhy|commentary-[a-z0-9][a-z0-9-]*-(?:fr|en))\.sqlite$/)
+)
 const Artifact = Schema.Struct({
   path: Schema.NonEmptyString,
   mediaType: Schema.NonEmptyString,
@@ -145,7 +151,7 @@ const DictionaryPublicationBundleManifestSchema = Schema.Struct({
   ...PublicationBundleCommonFields,
   canonical: Schema.Struct({
     ...PublicationBundleCommonFields.canonical.fields,
-    schemaVersion: Schema.Literal(1),
+    schemaVersion: Schema.Literal(2),
   }),
   offlineArtifact: Schema.Struct({
     ...PublicationBundleCommonFields.offlineArtifact.fields,
@@ -153,8 +159,17 @@ const DictionaryPublicationBundleManifestSchema = Schema.Struct({
   }),
   identity: Schema.Struct({
     kind: Schema.Literal('dictionary'),
-    resourceId: Schema.Literal('DICTIONNAIRE'),
+    resourceId: DictionaryResourceId,
+    work: DictionaryWorkId,
     language: Schema.Literal('fr', 'en'),
+  }),
+  editorial: Schema.Struct({
+    title: Schema.NonEmptyString,
+    abbreviation: Schema.NonEmptyString,
+    authors: Schema.NonEmptyArray(Schema.NonEmptyString),
+    description: Schema.NonEmptyString,
+    edition: Schema.NonEmptyString,
+    source: Schema.NonEmptyString,
   }),
   alphabeticalBrowse: Schema.Struct({
     initials: Schema.Array(Schema.NonEmptyString),
@@ -178,12 +193,12 @@ const CommentaryPublicationBundleManifestSchema = Schema.Struct({
   }),
   offlineArtifact: Schema.Struct({
     ...PublicationBundleCommonFields.offlineArtifact.fields,
-    entry: Schema.Literal('commentaires-mhy.sqlite'),
+    entry: CommentaryOfflineEntry,
   }),
   identity: Schema.Struct({
     kind: Schema.Literal('commentary'),
-    resourceId: Schema.Literal('MHY'),
-    language: Schema.Literal('fr'),
+    resourceId: CommentaryResourceId,
+    language: Schema.Literal('fr', 'en'),
   }),
   counts: Schema.Struct({
     chapters: Schema.NonNegativeInt,
@@ -465,9 +480,18 @@ export type CanonicalDictionaryVerseAnchor = {
 
 export type CanonicalDictionaryPublication = {
   format: 'bible-strong-canonical-dictionary'
-  schemaVersion: 1
-  resourceId: 'DICTIONNAIRE'
+  schemaVersion: 2
+  resourceId: string
+  work: string
   language: 'fr' | 'en'
+  editorial: {
+    title: string
+    abbreviation: string
+    authors: string[]
+    description: string
+    edition: string
+    source: string
+  }
   revision: string
   sourceVersion: string
   sourceSha256: string
@@ -478,8 +502,8 @@ export type CanonicalDictionaryPublication = {
 export type CanonicalCommentaryPublication = {
   format: 'bible-strong-canonical-commentary'
   schemaVersion: 1
-  resourceId: 'MHY'
-  language: 'fr'
+  resourceId: string
+  language: 'fr' | 'en'
   revision: string
   sourceVersion: string
   sourceSha256: string
@@ -641,7 +665,7 @@ export const derivePublicationRevision = (manifest: PublicationBundleManifest): 
     manifest.identity.kind === 'nave'
       ? manifest.identity.resourceId.toLowerCase()
       : manifest.identity.kind === 'dictionary'
-        ? `dictionary-${manifest.identity.language}`
+        ? `dictionary-${manifest.identity.work}-${manifest.identity.language}`
         : manifest.identity.kind === 'commentary'
           ? `commentary-${manifest.identity.resourceId.toLowerCase()}-${manifest.identity.language}`
           : manifest.identity.kind === 'cross-references'
@@ -725,8 +749,10 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
   }
   if (
     isCommentaryPublicationBundleManifest(manifest) &&
-    (manifest.identity.resourceId !== 'MHY' ||
-      manifest.offlineArtifact.entry !== 'commentaires-mhy.sqlite' ||
+    (manifest.offlineArtifact.entry !==
+      (manifest.identity.resourceId === 'MHY' && manifest.identity.language === 'fr'
+        ? 'commentaires-mhy.sqlite'
+        : `commentary-${manifest.identity.resourceId.toLowerCase()}-${manifest.identity.language}.sqlite`) ||
       manifest.counts.verses === 0)
   ) {
     throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
@@ -750,8 +776,7 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
     isDictionaryPublicationBundleManifest(manifest) &&
     (manifest.alphabeticalBrowse.initials.length === 0 ||
       Object.values(manifest.alphabeticalBrowse.entryCountByInitial).some(count => count === 0) ||
-      manifest.counts.entries === 0 ||
-      manifest.counts.verseAnchors === 0)
+      manifest.counts.entries === 0)
   ) {
     throw new Error('PUBLICATION_BUNDLE_ALPHABETICAL_BROWSE_INVALID')
   }
@@ -919,16 +944,27 @@ export const decodeCanonicalDictionary = (value: unknown): CanonicalDictionaryPu
   const candidate = value as Partial<CanonicalDictionaryPublication>
   if (
     candidate.format !== 'bible-strong-canonical-dictionary' ||
-    candidate.schemaVersion !== 1 ||
-    candidate.resourceId !== 'DICTIONNAIRE' ||
+    candidate.schemaVersion !== 2 ||
+    !isNonEmptyString(candidate.resourceId) ||
+    !/^[A-Z0-9][A-Z0-9_]{1,63}$/u.test(candidate.resourceId) ||
+    !isNonEmptyString(candidate.work) ||
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(candidate.work) ||
     (candidate.language !== 'fr' && candidate.language !== 'en') ||
+    !candidate.editorial ||
+    !isNonEmptyString(candidate.editorial.title) ||
+    !isNonEmptyString(candidate.editorial.abbreviation) ||
+    !Array.isArray(candidate.editorial.authors) ||
+    candidate.editorial.authors.length === 0 ||
+    candidate.editorial.authors.some(author => !isNonEmptyString(author)) ||
+    !isNonEmptyString(candidate.editorial.description) ||
+    !isNonEmptyString(candidate.editorial.edition) ||
+    !isNonEmptyString(candidate.editorial.source) ||
     !isNonEmptyString(candidate.revision) ||
     !isNonEmptyString(candidate.sourceVersion) ||
     !/^[a-f0-9]{64}$/u.test(candidate.sourceSha256 ?? '') ||
     !Array.isArray(candidate.entries) ||
     !Array.isArray(candidate.verseAnchors) ||
-    candidate.entries.length === 0 ||
-    candidate.verseAnchors.length === 0
+    candidate.entries.length === 0
   ) {
     throw new Error('CANONICAL_DICTIONARY_INVALID')
   }
@@ -966,7 +1002,7 @@ export const decodeCanonicalDictionary = (value: unknown): CanonicalDictionaryPu
 }
 
 const isSupplementaryVerseKey = (value: unknown): value is string =>
-  typeof value === 'string' && /^[1-9]\d*-[1-9]\d*-(?:0|[1-9]\d*)$/u.test(value)
+  typeof value === 'string' && /^[1-9]\d*-(?:0-0|[1-9]\d*-(?:0|[1-9]\d*))$/u.test(value)
 
 export const decodeCanonicalCommentary = (value: unknown): CanonicalCommentaryPublication => {
   if (!value || typeof value !== 'object') throw new Error('CANONICAL_COMMENTARY_INVALID')
@@ -974,8 +1010,9 @@ export const decodeCanonicalCommentary = (value: unknown): CanonicalCommentaryPu
   if (
     candidate.format !== 'bible-strong-canonical-commentary' ||
     candidate.schemaVersion !== 1 ||
-    candidate.resourceId !== 'MHY' ||
-    candidate.language !== 'fr' ||
+    !isNonEmptyString(candidate.resourceId) ||
+    !/^[A-Za-z0-9][A-Za-z0-9-]{1,63}$/u.test(candidate.resourceId) ||
+    (candidate.language !== 'fr' && candidate.language !== 'en') ||
     !isNonEmptyString(candidate.revision) ||
     !isNonEmptyString(candidate.sourceVersion) ||
     !/^[a-f0-9]{64}$/u.test(candidate.sourceSha256 ?? '') ||
@@ -1416,18 +1453,22 @@ const isDictionaryVerseKey = (value: unknown): value is string =>
   !/[\\/\u0000-\u001f]/u.test(value)
 
 export const deriveDictionaryResourceRevision = (
-  publication: Pick<CanonicalDictionaryPublication, 'language' | 'entries' | 'verseAnchors'>
+  publication: Pick<
+    CanonicalDictionaryPublication,
+    'work' | 'language' | 'entries' | 'verseAnchors'
+  >
 ): string => {
   const digest = createHash('sha256')
     .update(
       JSON.stringify({
+        work: publication.work,
         language: publication.language,
         entries: publication.entries,
         verseAnchors: publication.verseAnchors,
       })
     )
     .digest('hex')
-  return `dictionary-${publication.language}-${digest.slice(0, 20)}`
+  return `dictionary-${publication.work}-${publication.language}-${digest.slice(0, 20)}`
 }
 
 export const countCanonicalDictionaryContent = (publication: CanonicalDictionaryPublication) => ({
@@ -1671,12 +1712,14 @@ const validateDictionaryOfflineParity = async (
     }
     const metadataRows = readSqliteRows(
       database,
-      'SELECT resource_id, language, revision, source_version, source_sha256 FROM RESOURCE_METADATA'
+      'SELECT resource_id, work, language, revision, source_version, source_sha256 FROM RESOURCE_METADATA'
     )
     const metadata = metadataRows[0]
     if (
       metadataRows.length !== 1 ||
-      requireSqliteString(metadata?.resource_id) !== `dictionary:${canonical.language}` ||
+      requireSqliteString(metadata?.resource_id) !==
+        `dictionary:${canonical.work}:${canonical.language}` ||
+      requireSqliteString(metadata?.work) !== canonical.work ||
       requireSqliteString(metadata?.language) !== canonical.language ||
       requireSqliteString(metadata?.revision) !== canonical.revision ||
       requireSqliteString(metadata?.source_version) !== canonical.sourceVersion ||
@@ -3037,7 +3080,9 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     canonical = decodeCanonicalDictionary(canonicalValue)
     if (
       canonical.resourceId !== manifest.identity.resourceId ||
+      canonical.work !== manifest.identity.work ||
       canonical.language !== manifest.identity.language ||
+      JSON.stringify(canonical.editorial) !== JSON.stringify(manifest.editorial) ||
       canonical.revision !== manifest.revision ||
       deriveDictionaryResourceRevision(canonical) !== manifest.revision ||
       canonical.sourceVersion !== manifest.provenance.sourceVersion ||

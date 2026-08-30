@@ -16,7 +16,7 @@
       "tags": ["Méthodiste", "Wesleyen", "Arminien"],
       "languages": ["en", "fr"],
       "coverage": "Ancien et Nouveau Testament",
-      "rights": "Domaine public pour l’original anglais ; traduction française historique à qualifier",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "Bible Strong Firestore ; comparaison prévue avec CrossWire Clarke"
@@ -35,7 +35,7 @@
       "tags": ["Réformé", "Presbytérien"],
       "languages": ["en", "fr"],
       "coverage": "Corpus Bible Strong ; module CrossWire officiel limité au Nouveau Testament",
-      "rights": "Domaine public pour l’original anglais ; traduction française historique à qualifier",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "Bible Strong Firestore ; CrossWire Barnes pour la provenance anglaise"
@@ -53,7 +53,7 @@
       "tags": ["Réformé", "Presbytérien", "Puritain"],
       "languages": ["fr"],
       "coverage": "66 livres, 4 145 unités par chapitre et plage",
-      "rights": "Permission directe de Dominique Osché retrouvée ; portée à archiver précisément",
+      "rights": "© Éditions CLÉ / Dominique Osché · tous droits réservés",
       "licenseId": "CustomPermission",
       "status": "available",
       "source": "Fichier MHY.zip transmis à Bible Strong en novembre 2019"
@@ -90,7 +90,7 @@
       "tags": ["Évangélique"],
       "languages": ["en", "fr"],
       "coverage": "66 livres, 16 923 unités disponibles en anglais et en français",
-      "rights": "CC BY-SA 4.0 ; adaptation et attribution obligatoires",
+      "rights": "© Mission Mutual / Tyndale House Publishers · CC BY-SA 4.0",
       "licenseId": "CC-BY-SA-4.0",
       "status": "available",
       "source": "Bible Aquifer Open Study Notes"
@@ -162,7 +162,7 @@
       "tags": ["Rabbinique"],
       "languages": ["en"],
       "coverage": "39 livres du Tanakh, 28 060 unités",
-      "rights": "CC BY pour les versions anglaises sélectionnées ; version exacte obligatoire",
+      "rights": "Metsudah Publications / Judaica Press · CC BY",
       "licenseId": "CC-BY",
       "status": "available",
       "source": "Sefaria Export"
@@ -180,7 +180,7 @@
       "tags": ["Réformé", "Calviniste"],
       "languages": ["en"],
       "coverage": "47 livres, 11 063 unités CrossWire",
-      "rights": "Domaine public pour les éditions sélectionnées",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CCEL / CrossWire"
@@ -198,7 +198,7 @@
       "tags": ["Luthérien"],
       "languages": ["en"],
       "coverage": "Ancien Testament, 8 806 unités sur 929 chapitres",
-      "rights": "Domaine public déclaré par CrossWire ; autorisation STEP/auteurs confirmée par le responsable Bible Strong",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire KD 2.0, Wikisource et module BibleWorks documenté"
@@ -252,7 +252,7 @@
       "tags": ["Patristique", "Scolastique", "Thomiste"],
       "languages": ["en"],
       "coverage": "Quatre Évangiles, 821 unités sur 89 chapitres",
-      "rights": "Domaine public déclaré par CrossWire ; autorisation STEP/auteurs confirmée par le responsable Bible Strong",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire Catena 1.0.1"
@@ -270,7 +270,7 @@
       "tags": ["Congrégationaliste"],
       "languages": ["en"],
       "coverage": "Nouveau Testament, 3 367 unités sur 287 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire Abbott 1.1"
@@ -288,7 +288,7 @@
       "tags": ["Anglican"],
       "languages": ["en"],
       "coverage": "Nouveau Testament, 3 276 unités sur 260 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire Burkitt 1.0"
@@ -306,7 +306,7 @@
       "tags": ["Évangélique", "Frères", "Dispensationaliste"],
       "languages": ["en"],
       "coverage": "Canon protestant et deutérocanoniques présents, 8 873 unités sur 1 251 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire DTN 1.0"
@@ -324,7 +324,7 @@
       "tags": ["Évangélique", "Congrégationaliste"],
       "languages": ["en"],
       "coverage": "Nouveau Testament, 5 306 unités sur 256 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire Family 1.1"
@@ -342,7 +342,7 @@
       "tags": ["Réformé", "Calviniste"],
       "languages": ["en"],
       "coverage": "66 livres, 14 713 unités sur 1 161 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire Geneva 1.1"
@@ -360,7 +360,7 @@
       "tags": ["Évangélique", "Frères", "Dispensationaliste"],
       "languages": ["en"],
       "coverage": "66 livres, 7 590 unités sur 1 189 chapitres",
-      "rights": "Autorisation STEP/auteur confirmée par le responsable Bible Strong ; pièce d’archive à rattacher",
+      "rights": "© Ger de Koning · tous droits réservés",
       "licenseId": "CustomPermission",
       "status": "available",
       "source": "CrossWire KingComments 1.3"
@@ -378,7 +378,7 @@
       "tags": ["Puritain", "Réformé"],
       "languages": ["en"],
       "coverage": "Couverture NT sélectionnée, 853 unités sur 91 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire Lightfoot 1.0"
@@ -396,7 +396,7 @@
       "tags": ["Luthérien"],
       "languages": ["en"],
       "coverage": "Passages sélectionnés, 754 unités sur 191 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire Luther 1.1"
@@ -414,7 +414,7 @@
       "tags": ["Réformé", "Presbytérien", "Puritain"],
       "languages": ["en"],
       "coverage": "66 livres et introductions, 5 360 unités sur 1 194 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire MHC 2.2 / CCEL"
@@ -432,7 +432,7 @@
       "tags": ["Réformé", "Presbytérien", "Puritain"],
       "languages": ["en"],
       "coverage": "66 livres, 21 367 unités sur 1 189 chapitres",
-      "rights": "CC BY 4.0 annoncé par STEP ; autorisation STEP/auteurs confirmée",
+      "rights": "STEPBible · CC BY 4.0",
       "licenseId": "CC-BY-4.0",
       "status": "available",
       "source": "STEPBible MHM, adaptation ChatGPT 4 de MHC réalisée en 2025"
@@ -450,7 +450,7 @@
       "tags": ["Restaurationniste"],
       "languages": ["en"],
       "coverage": "Nouveau Testament, 6 084 unités sur 259 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire PNT 1.1"
@@ -468,7 +468,7 @@
       "tags": ["Baptiste", "Évangélique"],
       "languages": ["en"],
       "coverage": "Nouveau Testament, 7 228 unités sur 287 chapitres",
-      "rights": "Autorisation STEP/auteurs confirmée par le responsable Bible Strong ; pièce d’archive à rattacher",
+      "rights": "Domaine public",
       "licenseId": "CustomPermission",
       "status": "available",
       "source": "CrossWire RWP 2.0"
@@ -486,7 +486,7 @@
       "tags": ["Évangélique", "Dispensationaliste"],
       "languages": ["en"],
       "coverage": "66 livres, 3 214 unités sur 948 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire Scofield 2.1 / Wikisource"
@@ -504,7 +504,7 @@
       "tags": ["Restaurationniste"],
       "languages": ["en"],
       "coverage": "Évangiles et Actes, 4 229 unités sur 121 chapitres",
-      "rights": "Domaine public CrossWire ; autorisation STEP/auteurs confirmée",
+      "rights": "Domaine public",
       "licenseId": "PublicDomain",
       "status": "available",
       "source": "CrossWire TFG 1.5"
@@ -522,7 +522,7 @@
       "tags": ["Catholique"],
       "languages": ["en"],
       "coverage": "1 659 annotations JSON publiées, 390 chapitres et 53 livres avec contenu",
-      "rights": "CC0 1.0 déclaré par le dépôt source ; données acceptées telles que publiées",
+      "rights": "CC0 1.0",
       "licenseId": "CC0-1.0",
       "status": "available",
       "source": "janvier-s/original-douay-rheims @ 0bf4218b9b46b5b00d29a703b5b74226051b97a5"
@@ -540,7 +540,7 @@
       "tags": ["Réformé", "Réformé francophone"],
       "languages": ["fr"],
       "coverage": "66 livres, 23 320 unités : commentaires, 667 introductions de chapitre AT et 27 introductions de livre NT",
-      "rights": "Autorisation d’usage, de transformation et de redistribution ThéoTeX confirmée par le responsable Bible Strong ; pièce d’archive à rattacher au manifeste",
+      "rights": "ThéoTeX · tous droits réservés",
       "licenseId": "CustomPermission",
       "status": "available",
       "source": "ThéoTeX, Bible Annotée AT et Nouveau Testament Annoté ; export intégral JSON du 28 août 2026"
@@ -558,7 +558,7 @@
       "tags": ["Adventiste"],
       "languages": ["en"],
       "coverage": "66 livres, 1 189 chapitres : 25 062 unités du commentaire général et des introductions, complétées par 3 664 extraits EGW et 14 042 entrées de l’index scripturaire EGW",
-      "rights": "Autorisation d’usage, d’extraction, de transformation et de redistribution du SDA Bible Commentary et des ressources EGW confirmée par le responsable Bible Strong ; pièces d’approbation à archiver",
+      "rights": "Review and Herald Publishing Association · tous droits réservés",
       "licenseId": "CustomPermission",
       "status": "available",
       "source": "Seventh-day Adventist Bible Commentary, vol. 1–7 (F. D. Nichol, dir.), archive numérique 1978 ; EGW Writings 1BC–7BC et Complete Scripture Index"

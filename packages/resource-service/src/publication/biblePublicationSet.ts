@@ -44,7 +44,7 @@ export const resolveBiblePublicationOverlay = (
   baselineEntries: readonly BiblePublicationSetEntry[],
   candidateEntries: readonly BiblePublicationSetEntry[],
   versionId: string,
-  expectedResourceCount = 72
+  expectedResourceCount = 105
 ): BiblePublicationOverlay => {
   const targetResourceIdentity = `bible-text:${versionId}`
   const targetCatalogId = `bible:${versionId}`
@@ -139,7 +139,7 @@ export const buildBiblePublicationOverlay = async (
   baselineBundlePaths: readonly string[],
   candidateBundlePaths: readonly string[],
   versionId: string,
-  expectedResourceCount = 72
+  expectedResourceCount = 105
 ) =>
   resolveBiblePublicationOverlay(
     await Promise.all(baselineBundlePaths.map(describeBiblePublicationBundle)),

@@ -88,6 +88,19 @@ export const parseOfflineCopyId = (id: string): OfflineCopyIdentity | undefined 
       : undefined
   }
 
+  if (parts[0] === 'dictionary' && parts.length === 4) {
+    const work = parts[1]
+    const resourceId = parts[2]
+    const language = parts[3] as ResourceLanguage
+    return work &&
+      resourceId &&
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(work) &&
+      /^[A-Z0-9][A-Z0-9_]{1,63}$/u.test(resourceId) &&
+      RESOURCE_LANGUAGES.has(language)
+      ? { kind: 'dictionary', work, resourceId, language }
+      : undefined
+  }
+
   if (parts[0] === 'database' && parts.length === 3) {
     const databaseId = parts[1] as DatabaseId
     const language = parts[2] as ResourceLanguage
@@ -152,6 +165,19 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
         ['interlinear-index-availability', identity.language],
         ['interlinear-mode-availability'],
         ['strong-mode-availability'],
+        publicationKey,
+      ]
+    case 'dictionary':
+      return [
+        ['dictionary'],
+        ['resource-results', 'dictionary'],
+        ['resource-infinite-results', 'dictionary'],
+        ['dictionary-detail'],
+        ['dictionaryWords'],
+        ['words'],
+        ['home-dictionary-random'],
+        ['sqlite-dictionary-search'],
+        ['relation-dictionary-targets'],
         publicationKey,
       ]
     case 'database':
@@ -228,11 +254,21 @@ export type DatabaseDownloadItem = DownloadItemCommon & {
   archiveEntry: string
 }
 
+export type DictionaryDownloadItem = DownloadItemCommon & {
+  type: 'dictionary'
+  work: string
+  resourceId: string
+  lang: ResourceLanguage
+  destinationPath: string
+  archiveEntry: string
+}
+
 export type DownloadItem =
   | BibleDownloadItem
   | StrongBibleIndexDownloadItem
   | InterlinearIndexDownloadItem
   | StrongLexiconModuleDownloadItem
+  | DictionaryDownloadItem
   | DatabaseDownloadItem
 
 export type DownloadItemType = DownloadItem['type']
@@ -247,6 +283,13 @@ export const getDownloadItemIdentity = (item: DownloadItem): OfflineCopyIdentity
       return { kind: 'interlinear-index', versionId: 'BHG', language: item.lang }
     case 'strong-lexicon-module':
       return { kind: 'strong-lexicon-module', moduleId: item.strongLexiconModuleId }
+    case 'dictionary':
+      return {
+        kind: 'dictionary',
+        work: item.work,
+        resourceId: item.resourceId,
+        language: item.lang,
+      }
     case 'database':
       return { kind: 'database', databaseId: item.databaseId, language: item.lang }
   }

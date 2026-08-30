@@ -21,6 +21,9 @@ export const databaseNaveName = 'nave.sqlite'
 
 export const databaseBiblesName = 'bibles.sqlite'
 
+export const getDictionaryDbPath = (work: string, lang: ResourceLanguage): string =>
+  `${getSqliteDirPath(lang)}/dictionaries/${work}.sqlite`
+
 // Map DatabaseId to file names
 export const databaseFileNames: Record<DatabaseId, string> = {
   DICTIONNAIRE: databaseDictionnaireName,

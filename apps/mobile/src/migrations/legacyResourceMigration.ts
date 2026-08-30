@@ -73,6 +73,13 @@ const serializeIdentity = (identity: OfflineCopyIdentity): { [key: string]: Json
       }
     case 'strong-lexicon-module':
       return { kind: identity.kind, moduleId: identity.moduleId }
+    case 'dictionary':
+      return {
+        kind: identity.kind,
+        work: identity.work,
+        resourceId: identity.resourceId,
+        language: identity.language,
+      }
     case 'database':
       return {
         kind: identity.kind,

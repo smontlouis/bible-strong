@@ -1,7 +1,7 @@
 import * as FileSystem from 'expo-file-system/legacy'
 
 import { isVersionInstalled } from '~helpers/biblesDb'
-import { getDbPath, initLanguageDirs } from '~helpers/databases'
+import { getDbPath, getDictionaryDbPath, initLanguageDirs } from '~helpers/databases'
 import { dbManager, initSQLiteDir } from '~helpers/sqlite'
 import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
 import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
@@ -194,6 +194,15 @@ export const getLocalResourceAvailability = async (
       resource,
       expectedPath,
     }
+  }
+
+  if (resource.kind === 'dictionary') {
+    const expectedPath = getDictionaryDbPath(resource.work, resource.language)
+    await dependencies.restoreBackup?.(expectedPath)
+    const file = await dependencies.getFileInfo(expectedPath)
+    return file.exists
+      ? { status: 'available', resource }
+      : { status: 'missing', resource, expectedPath }
   }
 
   await dependencies.initSQLiteDir()

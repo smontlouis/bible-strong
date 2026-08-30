@@ -1,20 +1,26 @@
 import { Schema } from 'effect'
 
-const VerseKey = Schema.String.pipe(Schema.pattern(/^[1-9]\d*-[1-9]\d*-(?:0|[1-9]\d*)$/u))
+const VerseKey = Schema.String.pipe(
+  Schema.pattern(/^[1-9]\d*-(?:0-0|[1-9]\d*-(?:0|[1-9]\d*))$/u)
+)
+const CommentaryCollection = Schema.String.pipe(
+  Schema.pattern(/^[A-Za-z0-9][A-Za-z0-9-]{1,63}$/u)
+)
+const CommentaryLanguage = Schema.Literal('fr', 'en')
 
 export class CommentaryPath extends Schema.Class<CommentaryPath>('CommentaryPath')({
-  collection: Schema.Literal('MHY'),
-  language: Schema.Literal('fr'),
+  collection: CommentaryCollection,
+  language: CommentaryLanguage,
   verseKey: VerseKey,
 }) {}
 
 export class CommentaryChapterPath extends Schema.Class<CommentaryChapterPath>(
   'CommentaryChapterPath'
 )({
-  collection: Schema.Literal('MHY'),
-  language: Schema.Literal('fr'),
+  collection: CommentaryCollection,
+  language: CommentaryLanguage,
   book: Schema.NumberFromString.pipe(Schema.int(), Schema.positive()),
-  chapter: Schema.NumberFromString.pipe(Schema.int(), Schema.positive()),
+  chapter: Schema.NumberFromString.pipe(Schema.int(), Schema.nonNegative()),
 }) {}
 
 export class CrossReferencePath extends Schema.Class<CrossReferencePath>('CrossReferencePath')({
@@ -26,8 +32,8 @@ export class SupplementaryRevisionDto extends Schema.Class<SupplementaryRevision
   'SupplementaryRevisionDto'
 )({
   kind: Schema.Literal('commentary', 'cross-references'),
-  resourceId: Schema.Literal('MHY', 'TRESOR'),
-  language: Schema.Literal('fr'),
+  resourceId: CommentaryCollection,
+  language: CommentaryLanguage,
   revision: Schema.NonEmptyString,
 }) {}
 
@@ -44,7 +50,7 @@ export class CommentaryChapterResponseDto extends Schema.Class<CommentaryChapter
 )({
   resource: SupplementaryRevisionDto,
   book: Schema.Int.pipe(Schema.positive()),
-  chapter: Schema.Int.pipe(Schema.positive()),
+  chapter: Schema.Int.pipe(Schema.nonNegative()),
   serializedComments: Schema.String,
 }) {}
 

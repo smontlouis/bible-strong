@@ -11,26 +11,35 @@ const DictionaryVerseKey = Schema.String.pipe(
   Schema.pattern(/^[^\\/\u0000-\u001f\s]+-[^\\/\u0000-\u001f\s]+-[^\\/\u0000-\u001f\s]+$/u)
 )
 
-export class DictionaryLanguagePath extends Schema.Class<DictionaryLanguagePath>(
-  'DictionaryLanguagePath'
+export const DictionaryWorkId = Schema.String.pipe(Schema.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u))
+
+export class DictionaryCatalogQuery extends Schema.Class<DictionaryCatalogQuery>(
+  'DictionaryCatalogQuery'
 )({
+  language: Schema.optional(Schema.Literal('fr', 'en')),
+}) {}
+
+export class DictionaryResourcePath extends Schema.Class<DictionaryResourcePath>(
+  'DictionaryResourcePath'
+)({
+  work: DictionaryWorkId,
   language: Schema.Literal('fr', 'en'),
 }) {}
 
 export class DictionaryEntryPath extends Schema.Class<DictionaryEntryPath>('DictionaryEntryPath')({
-  ...DictionaryLanguagePath.fields,
+  ...DictionaryResourcePath.fields,
   word: Schema.NonEmptyString,
 }) {}
 
 export class DictionaryEntryIdPath extends Schema.Class<DictionaryEntryIdPath>(
   'DictionaryEntryIdPath'
 )({
-  ...DictionaryLanguagePath.fields,
+  ...DictionaryResourcePath.fields,
   id: Schema.NumberFromString.pipe(Schema.int(), Schema.positive()),
 }) {}
 
 export class DictionaryVersePath extends Schema.Class<DictionaryVersePath>('DictionaryVersePath')({
-  ...DictionaryLanguagePath.fields,
+  ...DictionaryResourcePath.fields,
   verseKey: DictionaryVerseKey,
 }) {}
 
@@ -53,8 +62,29 @@ export class DictionaryRevisionDto extends Schema.Class<DictionaryRevisionDto>(
   'DictionaryRevisionDto'
 )({
   kind: Schema.Literal('dictionary'),
+  work: DictionaryWorkId,
   language: Schema.Literal('fr', 'en'),
   revision: Schema.NonEmptyString,
+}) {}
+
+export class DictionaryWorkDto extends Schema.Class<DictionaryWorkDto>('DictionaryWorkDto')({
+  resource: DictionaryRevisionDto,
+  resourceId: Schema.NonEmptyString,
+  title: Schema.NonEmptyString,
+  abbreviation: Schema.NonEmptyString,
+  authors: Schema.Array(Schema.NonEmptyString),
+  description: Schema.NonEmptyString,
+  edition: Schema.NonEmptyString,
+  source: Schema.NonEmptyString,
+  attribution: Schema.NonEmptyString,
+  onlineAccess: Schema.Boolean,
+  offlineDownload: Schema.Boolean,
+}) {}
+
+export class DictionaryCatalogResponseDto extends Schema.Class<DictionaryCatalogResponseDto>(
+  'DictionaryCatalogResponseDto'
+)({
+  dictionaries: Schema.Array(DictionaryWorkDto),
 }) {}
 
 export class DictionarySummaryDto extends Schema.Class<DictionarySummaryDto>(

@@ -14,17 +14,22 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
+import { MenuView } from '~common/ui/MenuView'
+import { FeatherIcon } from '~common/ui/Icon'
 import { getFirstLetterFrom } from '~helpers/alphabet'
-import type { DictionarySummary } from '~features/resources/dictionaryAccess'
+import {
+  getDefaultDictionaryWork,
+  type DictionarySummary,
+  type DictionaryWork,
+} from '~features/resources/dictionaryAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { DictionaryTab } from '../../state/tabs'
 import { useInfiniteResultsByLetterOrSearch, useSearchValue } from '../lexique/useUtilities'
 import DictionnaireItem from './DictionnaireItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
-import { useAtomValue } from 'jotai/react'
+import { useAtom, useAtomValue } from 'jotai/react'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import useConnection from '~helpers/useConnection'
 import ResourceUnavailableScreen from '~features/resources/ResourceUnavailableScreen'
 import {
@@ -75,6 +80,7 @@ interface DictionaryListScreenProps {
 }
 
 const DictionaryListScreen = ({
+  dictionaryAtom,
   hasBackButton,
   isFormSheet = false,
   isNewTabSelection = false,
@@ -85,18 +91,81 @@ const DictionaryListScreen = ({
   const resources = useResourceAccess()
   const isConnected = useConnection()
   const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
   const showBackButton = isFormSheet ? canGoBackInStack : hasBackButton
   const [letter, setLetter] = useState('a')
   const { searchValue, debouncedSearchValue, setSearchValue } = useSearchValue()
+  const dictionaryCatalogQuery = useQuery({
+    queryKey: ['dictionary-catalog', dictionaryResourceLanguage, isConnected],
+    queryFn: () => resources.dictionary.listWorks?.(dictionaryResourceLanguage) ?? [],
+    networkMode: 'always',
+    staleTime: Infinity,
+    retry: false,
+  })
+  const defaultWork = getDefaultDictionaryWork(dictionaryResourceLanguage)
+  const fallbackDictionary: DictionaryWork = {
+    resource: {
+      kind: 'dictionary',
+      work: defaultWork,
+      language: dictionaryResourceLanguage,
+      revision: 'legacy',
+    },
+    resourceId: dictionaryResourceLanguage === 'en' ? 'EASTON_WEBSTER' : 'WESTPHAL',
+    title:
+      dictionaryResourceLanguage === 'en'
+        ? 'Easton’s Bible Dictionary & Webster’s 1828 Dictionary'
+        : 'Dictionnaire encyclopédique de la Bible',
+    abbreviation: dictionaryResourceLanguage === 'en' ? 'Easton + Webster 1828' : 'Westphal',
+    authors:
+      dictionaryResourceLanguage === 'en'
+        ? ['Matthew George Easton', 'Noah Webster']
+        : ['Alexandre Westphal et collaborateurs'],
+    description: '',
+    edition: '',
+    source: 'Bible Strong',
+    attribution: '',
+    onlineAccess: true,
+    offlineDownload: true,
+  }
+  const catalogDictionaries = dictionaryCatalogQuery.data ?? []
+  const storedDictionary =
+    dictionaryTab.data.work && dictionaryTab.data.resourceId
+      ? {
+          ...fallbackDictionary,
+          resource: {
+            ...fallbackDictionary.resource,
+            work: dictionaryTab.data.work,
+          },
+          resourceId: dictionaryTab.data.resourceId,
+          title: dictionaryTab.data.dictionaryTitle ?? dictionaryTab.data.work,
+          abbreviation: dictionaryTab.data.dictionaryTitle ?? dictionaryTab.data.work,
+        }
+      : undefined
+  const selectedDictionary =
+    catalogDictionaries.find(item => item.resource.work === dictionaryTab.data.work) ??
+    storedDictionary ??
+    catalogDictionaries.find(item => item.resource.work === defaultWork) ??
+    fallbackDictionary
+  const selectedWork = selectedDictionary.resource.work
+  const hasDedicatedIdentity = selectedDictionary !== fallbackDictionary
+  const offlineIdentity = hasDedicatedIdentity
+    ? ({
+        kind: 'dictionary' as const,
+        work: selectedWork,
+        resourceId: selectedDictionary.resourceId,
+        language: dictionaryResourceLanguage,
+      } as const)
+    : ({
+        kind: 'database' as const,
+        databaseId: 'DICTIONNAIRE' as const,
+        language: dictionaryResourceLanguage,
+      } as const)
   const availabilityQuery = useQuery({
-    queryKey: [
-      ...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', dictionaryResourceLanguage),
-      isConnected,
-    ],
+    queryKey: ['dictionary-availability', selectedWork, dictionaryResourceLanguage, isConnected],
     queryFn: () =>
-      resources.dictionary.getAvailability?.(dictionaryResourceLanguage) ??
+      resources.dictionary.getAvailability?.(dictionaryResourceLanguage, selectedWork) ??
       Promise.resolve({ status: 'available' as const }),
     networkMode: 'always',
     staleTime: Infinity,
@@ -109,12 +178,14 @@ const DictionaryListScreen = ({
         query: resources.dictionary.searchPage,
         value: debouncedSearchValue,
         resourceLanguage: dictionaryResourceLanguage,
+        resourceWork: selectedWork,
       },
       {
         queryKey: ['dictionary'],
         query: resources.dictionary.listByLetterPage,
         value: letter,
         resourceLanguage: dictionaryResourceLanguage,
+        resourceWork: selectedWork,
       }
     )
 
@@ -127,11 +198,7 @@ const DictionaryListScreen = ({
         headerTitle={t('Désolé...')}
         hasBackButton={showBackButton}
         isFormSheet={isFormSheet}
-        identity={{
-          kind: 'database',
-          databaseId: 'DICTIONNAIRE',
-          language: dictionaryResourceLanguage,
-        }}
+        identity={offlineIdentity}
         title={t('resource.dictionary.offlineCopyNeeded')}
         offlineTitle={t('resource.dictionary.temporarilyUnavailable')}
         fileSize={22}
@@ -145,13 +212,27 @@ const DictionaryListScreen = ({
   }
 
   const selectWord = (word: string) => {
+    setDictionaryTab(current => ({
+      ...current,
+      data: {
+        ...current.data,
+        work: selectedWork,
+        resourceId: selectedDictionary.resourceId,
+        dictionaryTitle: selectedDictionary.title,
+      },
+    }))
     if (isNewTabSelection) {
       resolveNewTabSelection({
         id: newTabId || 'new',
         title: word,
         isRemovable: true,
         type: 'dictionary',
-        data: { word },
+        data: {
+          word,
+          work: selectedWork,
+          resourceId: selectedDictionary.resourceId,
+          dictionaryTitle: selectedDictionary.title,
+        },
       })
       return
     }
@@ -165,11 +246,7 @@ const DictionaryListScreen = ({
         headerTitle={t('Désolé...')}
         hasBackButton={showBackButton}
         isFormSheet={isFormSheet}
-        identity={{
-          kind: 'database',
-          databaseId: 'DICTIONNAIRE',
-          language: dictionaryResourceLanguage,
-        }}
+        identity={offlineIdentity}
         title={t('resource.dictionary.temporarilyUnavailable')}
         fileSize={22}
         failure={
@@ -188,7 +265,46 @@ const DictionaryListScreen = ({
   return (
     <FormSheetScreen isFormSheet={isFormSheet}>
       <Box flex bg="reverse">
-        <Header hasBackButton={showBackButton} fontSize={18} title={t('Dictionnaire Westphal')}>
+        <Header
+          hasBackButton={showBackButton}
+          fontSize={18}
+          title={selectedDictionary.abbreviation}
+          subTitle={selectedDictionary.title}
+          rightComponent={
+            catalogDictionaries.length > 1 ? (
+              <MenuView
+                actions={catalogDictionaries.map(dictionary => ({
+                  id: dictionary.resource.work,
+                  title: dictionary.abbreviation,
+                  state: dictionary.resource.work === selectedWork ? ('on' as const) : undefined,
+                }))}
+                onPressAction={({ nativeEvent }) => {
+                  const dictionary = catalogDictionaries.find(
+                    item => item.resource.work === nativeEvent.event
+                  )
+                  if (!dictionary) return
+                  setLetter('a')
+                  setSearchValue('')
+                  setDictionaryTab(current => ({
+                    ...current,
+                    title: dictionary.abbreviation,
+                    data: {
+                      ...current.data,
+                      word: undefined,
+                      work: dictionary.resource.work,
+                      resourceId: dictionary.resourceId,
+                      dictionaryTitle: dictionary.title,
+                    },
+                  }))
+                }}
+              >
+                <Box row center height={60} width={60}>
+                  <FeatherIcon name="book-open" size={18} />
+                </Box>
+              </MenuView>
+            ) : undefined
+          }
+        >
           <Box pb={10} px={20}>
             <SearchInput
               placeholder={t('Recherche par mot')}

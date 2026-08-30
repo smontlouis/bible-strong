@@ -72,33 +72,136 @@
     "database:TRESOR:fr",
     "strong-lexicon:core",
     "strong-lexicon:entities",
-    "strong-lexicon:resources"
+    "strong-lexicon:resources",
+    "database:abbott:en",
+    "database:acbc:en",
+    "database:acbc:fr",
+    "database:aquifer-fr:en",
+    "database:aquifer-fr:fr",
+    "database:barnes:en",
+    "database:barnes:fr",
+    "database:bible-annotee:fr",
+    "database:burkitt:en",
+    "database:calvin:en",
+    "database:catena-aurea:en",
+    "database:darby-notes:en",
+    "database:douay-rheims-notes:en",
+    "database:family-notes:en",
+    "database:fourfold-gospel:en",
+    "database:fre-aug:fr",
+    "database:fre-chry:fr",
+    "database:geneva-notes:en",
+    "database:jfb:en",
+    "database:kd:en",
+    "database:king-comments:en",
+    "database:lightfoot:en",
+    "database:luther:en",
+    "database:mhc:en",
+    "database:mhcc:en",
+    "database:mhm:en",
+    "database:pnt:en",
+    "database:rashi-en:en",
+    "database:rwp:en",
+    "database:scofield:en",
+    "database:sdabc:en",
+    "database:treasury-david:en",
+    "database:wesley:en"
   ],
   "bundleRoles": {
-    "bible:AMP": ["pericope", "redWords"],
-    "bible:BCC1923": ["pericope", "redWords"],
-    "bible:BDS": ["pericope", "redWords"],
-    "bible:BFC": ["pericope", "redWords"],
-    "bible:CHU": ["redWords"],
-    "bible:CSB": ["pericope", "redWords"],
-    "bible:EASY": ["pericope", "redWords"],
-    "bible:ESV": ["pericope", "redWords"],
-    "bible:FMAR": ["pericope", "redWords"],
-    "bible:FRC97": ["pericope", "redWords"],
-    "bible:GW": ["pericope", "redWords"],
-    "bible:KJF": ["redWords"],
-    "bible:NBS": ["pericope", "redWords"],
-    "bible:NEG79": ["pericope", "redWords"],
-    "bible:NET": ["pericope", "redWords"],
-    "bible:NFC": ["pericope", "redWords"],
-    "bible:NIV": ["pericope", "redWords"],
-    "bible:NKJV": ["pericope", "redWords"],
-    "bible:NLT": ["pericope", "redWords"],
-    "bible:NVS78P": ["pericope", "redWords"],
-    "bible:OST": ["redWords"],
-    "bible:PDV2017": ["pericope", "redWords"],
-    "bible:POV": ["redWords"],
-    "bible:S21": ["pericope", "redWords"],
-    "bible:TLV": ["redWords"]
+    "bible:AMP": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:BCC1923": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:BDS": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:BFC": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:CHU": [
+      "redWords"
+    ],
+    "bible:CSB": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:EASY": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:ESV": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:FMAR": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:FRC97": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:GW": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:KJF": [
+      "redWords"
+    ],
+    "bible:NBS": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:NEG79": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:NET": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:NFC": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:NIV": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:NKJV": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:NLT": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:NVS78P": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:OST": [
+      "redWords"
+    ],
+    "bible:PDV2017": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:POV": [
+      "redWords"
+    ],
+    "bible:S21": [
+      "pericope",
+      "redWords"
+    ],
+    "bible:TLV": [
+      "redWords"
+    ]
   }
 }

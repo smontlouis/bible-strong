@@ -30,7 +30,6 @@ const run = async () => {
     mobileCatalogPath,
     new WranglerR2ArtifactStore({ bucket }),
     {
-      expectedCatalogResourceCount: 72,
       bundleSelection,
       onResult: (result, index, total) => {
         const detail = result.status === 'skipped' ? result.reason : result.key

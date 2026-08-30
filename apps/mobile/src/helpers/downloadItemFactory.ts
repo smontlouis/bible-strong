@@ -1,7 +1,7 @@
 import type { DownloadItem } from '~state/downloadQueue'
 import { isSharedDB, type DatabaseId, type ResourceLanguage } from '~helpers/databaseTypes'
 import { versions, type Version } from '~helpers/bibleVersions'
-import { databases, getDbPath } from '~helpers/databases'
+import { databases, getDbPath, getDictionaryDbPath } from '~helpers/databases'
 import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
 import {
   getStrongBiblePublication,
@@ -183,6 +183,8 @@ export const createOfflineCopyDownloadItem = (identity: OfflineCopyIdentity): Do
       return createInterlinearSidecarDownloadItem(identity.language)
     case 'strong-lexicon-module':
       return createStrongLexiconModuleDownloadItem(identity.moduleId)
+    case 'dictionary':
+      return createDictionaryDownloadItem(identity)
     case 'database':
       return createDatabaseDownloadItem(identity.databaseId, identity.language)
     case 'bible-pericope':
@@ -215,11 +217,41 @@ export const createOfflineCopyDownloadPlan = (
         identity.moduleId,
         context.isStrongLexiconCoreAvailable ?? false
       )
+    case 'dictionary':
+      return [createDictionaryDownloadItem(identity)]
     case 'database':
       return [createDatabaseDownloadItem(identity.databaseId, identity.language)]
     case 'bible-pericope':
     case 'bible-red-words':
       return [createBibleDownloadItem(identity.versionId)]
+  }
+}
+
+export function createDictionaryDownloadItem(
+  identity: Extract<
+    OfflineCopyIdentity,
+    {
+      kind: 'dictionary'
+    }
+  >
+): DownloadItem {
+  const catalogArtifact = getMobileResourceCatalogEntry(
+    `database:${identity.resourceId}:${identity.language}`
+  )
+  return {
+    id: createOfflineCopyId(identity),
+    type: 'dictionary',
+    name: identity.work,
+    work: identity.work,
+    resourceId: identity.resourceId,
+    lang: identity.language,
+    url: catalogArtifact.url,
+    destinationPath: getDictionaryDbPath(identity.work, identity.language),
+    archiveEntry: catalogArtifact.entry,
+    estimatedSize: catalogArtifact.archiveBytes,
+    expectedArchiveSha256: catalogArtifact.archiveSha256,
+    addedAt: Date.now(),
+    retryCount: 0,
   }
 }
 

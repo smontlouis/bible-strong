@@ -27,7 +27,7 @@ import {
 import { validatePublicationBundle } from './publicationBundle'
 import { WranglerR2ArtifactStore } from './wranglerR2ArtifactStore'
 
-const EXPECTED_RESOURCE_COUNT = 72
+const EXPECTED_RESOURCE_COUNT = 105
 const PRODUCTION_PUBLICATION_LOCK_ID = '204116128917'
 
 const runCommand = async (

@@ -132,6 +132,9 @@ export interface DictionaryTab extends TabBase {
   type: 'dictionary'
   data: {
     word?: string
+    work?: string
+    resourceId?: string
+    dictionaryTitle?: string
   }
 }
 

@@ -11,8 +11,9 @@ import {
   type SupplementaryRepositoryService,
 } from '../domain/supplementary'
 
-const commentaryIdentity = 'commentary:MHY:fr'
 const crossReferenceIdentity = 'cross-references:fr'
+const commentaryIdentity = (collection: string, language: string) =>
+  `commentary:${collection}:${language}`
 
 export const makeKyselySupplementaryRepository = (
   database: Kysely<ResourceDatabase>
@@ -30,10 +31,11 @@ export const makeKyselySupplementaryRepository = (
   return {
     findCommentaryVerse: input =>
       Effect.gen(function* () {
-        const publication = yield* findActivePublication(commentaryIdentity)
+        const resourceIdentity = commentaryIdentity(input.collection, input.language)
+        const publication = yield* findActivePublication(resourceIdentity)
         if (!publication) {
           return yield* new ActiveSupplementaryPublicationUnavailable({
-            resourceIdentity: commentaryIdentity,
+            resourceIdentity,
           })
         }
         const row = yield* tryDatabasePromise('supplementary.commentary.read-verse', () =>
@@ -46,7 +48,7 @@ export const makeKyselySupplementaryRepository = (
         ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
         if (!row) {
           return yield* new SupplementaryContentNotFound({
-            resourceIdentity: commentaryIdentity,
+            resourceIdentity,
             verseKey: input.verseKey,
           })
         }
@@ -59,10 +61,11 @@ export const makeKyselySupplementaryRepository = (
       }),
     findCommentaryChapter: input =>
       Effect.gen(function* () {
-        const publication = yield* findActivePublication(commentaryIdentity)
+        const resourceIdentity = commentaryIdentity(input.collection, input.language)
+        const publication = yield* findActivePublication(resourceIdentity)
         if (!publication) {
           return yield* new ActiveSupplementaryPublicationUnavailable({
-            resourceIdentity: commentaryIdentity,
+            resourceIdentity,
           })
         }
         const prefix = `${input.book}-${input.chapter}-`
@@ -77,7 +80,7 @@ export const makeKyselySupplementaryRepository = (
         ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
         if (rows.length === 0) {
           return yield* new SupplementaryContentNotFound({
-            resourceIdentity: commentaryIdentity,
+            resourceIdentity,
           })
         }
         return {

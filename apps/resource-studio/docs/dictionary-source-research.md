@@ -1,34 +1,41 @@
 # Bible dictionary source research
 
-Date: 2026-08-29
+Date: 2026-08-30
 
 Related issue: [#327 — Rebuild dictionaries as multilingual multi-dictionary Resources with reliable verse linking](https://github.com/smontlouis/bible-strong/issues/327)
 
 ## Conclusion
 
-The best initial four-work catalog is:
+The agreed initial catalog is now five independently identified resources:
 
-1. **Westphal (French)** — already authorized for Bible Strong by a private agreement with the
-   levangile.com owner; keep it as the existing rich French work and rebuild it with explicit work
-   identity and provenance.
-2. **Bost (French)** — public-domain original, more than 4,000 entries, and downloadable scan plus
-   OCR source. This is the best additional French pilot.
-3. **Easton (English)** — public-domain original with mature SWORD/CCEL sources and normalized JSON.
-4. **Smith (English)** — public-domain original with mature SWORD/CCEL sources and normalized JSON.
+1. **Westphal (French)** — the current Bible Strong resource, retained with explicit identity and
+   provenance.
+2. **Easton + Webster 1828 (English)** — the current combined English database, retained as one
+   honestly named resource because Easton supplies the biblical articles while Webster supplies
+   useful historical-English definitions.
+3. **Bost (French)** — imported independently from the authorized levangile.com edition.
+4. **Calmet (French)** — imported independently from the authorized levangile.com edition.
+5. **Lelièvre (French)** — imported independently from the authorized levangile.com edition.
 
-Calmet, Vigouroux, ISBE, and the American Tract Society dictionary are credible second-wave works.
+Smith, Vigouroux, ISBE, and the American Tract Society dictionary remain credible later additions.
 Door43 French Translation Words is useful as a separate modern biblical-concepts/translation-help
 resource, not as a replacement for an encyclopedic Bible dictionary.
 
 This is a source and rights screening, not legal advice. Rights must be recorded per exact edition
 and digital source before publication.
 
+Resource Studio can now acquire the three levangile.com additions reproducibly and package all five
+works. The 2026-08-30 candidate contains 5,436 Westphal entries, 8,620 Easton + Webster entries,
+2,308 Bost entries, 5,130 Calmet entries, and 142 Lelièvre entries. Newly acquired articles ship
+without automatically inferred verse anchors until a conservative, auditable linker is available;
+this avoids recreating the legacy short-token false positives described in issue #327.
+
 ## Existing Bible Strong authorization
 
 The maintainer states that Thomas Mathey, creator of levangile.com, granted Bible Strong the rights
-to use the site's content and that Bible Strong already has permission to use Westphal. This private
-authorization changes the product decision even though the public terms visible on levangile.com
-and CrossWire are more restrictive.
+to use the site's Westphal, Bost, Calmet, and Lelièvre content. This private authorization changes
+the product decision even though the public terms visible on levangile.com and CrossWire are more
+restrictive.
 
 Before republishing the rebuilt work, retain evidence that the authorization covers the operations
 Bible Strong actually performs:
@@ -128,8 +135,6 @@ obtain the appropriate Gallica permission before using its files in a commercial
 
 ### Sources not yet cleared
 
-- **Charles Lelièvre, Lexique de la Bible:** useful and concise, but no reliable open licence or clear
-  rights chain was found. Obtain permission or complete a formal rights audit before ingestion.
 - **David Martin 1744 glossary:** CrossWire offers about 970 definitions but labels the electronic
   module `Copyrighted; Freely distributable`, which is too ambiguous about modification and product
   redistribution. Seek clarification before using the module.
@@ -167,7 +172,7 @@ Strong's lexical surfaces.
   level evidence and no automatic overwrite of reviewed STEP-based content.
 
 Other public-domain specialized works worth a later catalog pass include Charles Huré's
-*Dictionnaire universel de philologie sacrée*, Barbié du Bocage's biblical geography dictionary,
+_Dictionnaire universel de philologie sacrée_, Barbié du Bocage's biblical geography dictionary,
 Honoré Simon's 1693 dictionary, the 1806 Chompré/Petitot abridgment, E. Spol's 1876 proper-name
 dictionary, and Marchand-Ennery's 1827 Hebrew–French dictionary. Each still needs an exact-edition,
 scan-rights, OCR-quality, and product-value audit before acquisition.

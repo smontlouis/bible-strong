@@ -47,6 +47,7 @@ import {
   DictionaryEntryNotFound,
   DictionaryRepository,
   DictionaryRepositoryFailure,
+  listDictionaryWorks,
   readDictionaryEntry,
   readDictionaryEntryById,
   readDictionaryEntries,
@@ -593,10 +594,28 @@ const NaveApiLive = HttpApiBuilder.group(ResourceApi, 'naves', handlers =>
 
 const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', handlers =>
   handlers
+    .handle('listDictionaries', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return listDictionaryWorks(urlParams.language).pipe(
+        Effect.tap(response =>
+          addResponseHeaders({
+            'x-request-id': requestId,
+            'x-resource-revisions': response.dictionaries
+              .map(
+                dictionary =>
+                  `${dictionary.resource.work}:${dictionary.resource.language}:${dictionary.resource.revision}`
+              )
+              .join(','),
+          })
+        ),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
     .handle('listDictionaryEntries', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
         browseDictionaryEntries({
+          work: path.work,
           language: path.language,
           initial: urlParams.initial,
           search: urlParams.search,
@@ -609,6 +628,7 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
           ? undefined
           : [
               'dictionary',
+              path.work,
               path.language,
               'browse',
               urlParams.initial ?? '*',
@@ -624,7 +644,7 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
         .filter(Boolean)
         .slice(0, 100)
       return serveRevisionedResponse(
-        readDictionaryEntries({ language: path.language, words }).pipe(
+        readDictionaryEntries({ work: path.work, language: path.language, words }).pipe(
           Effect.mapError(cause => toHttpProblem(cause, requestId))
         ),
         requestId,
@@ -637,7 +657,7 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
         readDictionaryEntry(path).pipe(Effect.mapError(cause => toHttpProblem(cause, requestId))),
         requestId,
         request.headers['if-none-match'],
-        ['dictionary', path.language, 'entry', path.word]
+        ['dictionary', path.work, path.language, 'entry', path.word]
       )
     })
     .handle('getDictionaryEntryById', ({ path, request }) => {
@@ -648,7 +668,7 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
         ),
         requestId,
         request.headers['if-none-match'],
-        ['dictionary', path.language, 'entry-id', path.id]
+        ['dictionary', path.work, path.language, 'entry-id', path.id]
       )
     })
     .handle('getDictionaryVerseWords', ({ path, request }) => {
@@ -659,7 +679,7 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
         ),
         requestId,
         request.headers['if-none-match'],
-        ['dictionary', path.language, 'verse', path.verseKey]
+        ['dictionary', path.work, path.language, 'verse', path.verseKey]
       )
     })
 )
@@ -969,16 +989,27 @@ const unavailableNaveRepository: NaveRepositoryService = {
 }
 
 const unavailableDictionaryRepository: DictionaryRepositoryService = {
+  listWorks: () => Effect.succeed([]),
   listEntries: input =>
-    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+    Effect.fail(
+      new ActiveDictionaryPublicationUnavailable({ work: input.work, language: input.language })
+    ),
   findEntry: input =>
-    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+    Effect.fail(
+      new ActiveDictionaryPublicationUnavailable({ work: input.work, language: input.language })
+    ),
   findEntryById: input =>
-    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+    Effect.fail(
+      new ActiveDictionaryPublicationUnavailable({ work: input.work, language: input.language })
+    ),
   findEntries: input =>
-    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+    Effect.fail(
+      new ActiveDictionaryPublicationUnavailable({ work: input.work, language: input.language })
+    ),
   findVerseWords: input =>
-    Effect.fail(new ActiveDictionaryPublicationUnavailable({ language: input.language })),
+    Effect.fail(
+      new ActiveDictionaryPublicationUnavailable({ work: input.work, language: input.language })
+    ),
 }
 
 const unavailableStrongBibleRepository: StrongBibleRepositoryService = {
@@ -1021,13 +1052,17 @@ const unavailableStrongLexiconRepository: StrongLexiconRepositoryService = {
 }
 
 const unavailableSupplementaryRepository: SupplementaryRepositoryService = {
-  findCommentaryVerse: () =>
+  findCommentaryVerse: input =>
     Effect.fail(
-      new ActiveSupplementaryPublicationUnavailable({ resourceIdentity: 'commentary:MHY:fr' })
+      new ActiveSupplementaryPublicationUnavailable({
+        resourceIdentity: `commentary:${input.collection}:${input.language}`,
+      })
     ),
-  findCommentaryChapter: () =>
+  findCommentaryChapter: input =>
     Effect.fail(
-      new ActiveSupplementaryPublicationUnavailable({ resourceIdentity: 'commentary:MHY:fr' })
+      new ActiveSupplementaryPublicationUnavailable({
+        resourceIdentity: `commentary:${input.collection}:${input.language}`,
+      })
     ),
   findCrossReferences: () =>
     Effect.fail(

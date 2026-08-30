@@ -176,7 +176,7 @@ yarn resources:r2:publish-strong-lexicon:prod
 ```
 
 The end-to-end Bible publication workflow derives the same selection from its overlay and publishes
-only `changedBundlePaths`. The full 72-bundle command remains available for an explicit bootstrap or
+only `changedBundlePaths`. The full 105-bundle command remains available for an explicit bootstrap or
 storage audit, not for an ordinary release:
 
 ```bash
@@ -192,7 +192,7 @@ yarn resources:r2:publish-catalog:prod
 ```
 
 Both modes use the exhaustive catalog at `packages/resource-catalog/src/mobile-resource-catalog.json`. The changed mode
-requires the checked-in 72-entry inventory but does not require 72 bundle paths. The publication
+requires the checked-in 105-entry inventory but does not require 105 bundle paths. The publication
 manifest independently authorizes and validates every selected revision, archive entry, byte size,
 and SHA-256. Update the catalog before publishing; deploy the Worker only after the selected R2
 uploads and hosted imports succeed.
@@ -221,7 +221,7 @@ files.
 
 Use the unified workflow after editing a legacy or canonical Bible JSON. Without the production
 flag, it creates and validates a candidate only: it packages the Bible, verifies any existing
-Strong or interlinear sidecars that depend on its text, rebuilds the exhaustive 72-resource mobile
+Strong or interlinear sidecars that depend on its text, rebuilds the exhaustive 105-resource mobile
 catalog, validates every publication bundle, and proves R2/catalog parity without contacting R2 or
 Neon:
 
@@ -277,7 +277,7 @@ each credential; they are never written into the workspace.
 
 On success, `packages/resource-catalog/src/mobile-resource-catalog.json` remains modified locally for review and a
 normal commit. The retained workspace's `verified-publication-baseline` directory is the exhaustive
-72-bundle baseline for the following publication; pass it later with `--publication-root`. The same
+105-bundle baseline for the following publication; pass it later with `--publication-root`. The same
 workspace contains the previous catalog and candidates needed to audit or recover the release.
 
 The generated date can be pinned with `--generated-at`; sibling checkout locations can be changed

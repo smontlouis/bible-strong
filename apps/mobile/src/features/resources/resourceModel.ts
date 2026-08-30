@@ -23,7 +23,7 @@ export type ResourceIdentity =
   | { kind: 'strong-bible-index'; versionId: string }
   | { kind: 'interlinear-index'; versionId: 'BHG'; language: ResourceLanguage }
   | { kind: 'strong-lexicon'; moduleId: StrongLexiconModuleId }
-  | { kind: 'dictionary'; language: ResourceLanguage }
+  | { kind: 'dictionary'; work: string; language: ResourceLanguage }
   | { kind: 'nave'; language: ResourceLanguage }
   | { kind: 'cross-references' }
   | { kind: 'commentary'; collection: 'MHY'; language: 'fr' }
@@ -113,7 +113,7 @@ export const createResourceIdentityId = (identity: ResourceIdentity): string => 
     case 'strong-lexicon':
       return `strong-lexicon:${identity.moduleId}`
     case 'dictionary':
-      return `dictionary:${identity.language}`
+      return `dictionary:${identity.work}:${identity.language}`
     case 'nave':
       return `nave:${identity.language}`
     case 'cross-references':
@@ -149,10 +149,16 @@ export const resourceIdentityFromOfflineCopy = (
       return identity
     case 'strong-lexicon-module':
       return { kind: 'strong-lexicon', moduleId: identity.moduleId }
+    case 'dictionary':
+      return { kind: 'dictionary', work: identity.work, language: identity.language }
     case 'database':
       switch (identity.databaseId) {
         case 'DICTIONNAIRE':
-          return { kind: 'dictionary', language: identity.language }
+          return {
+            kind: 'dictionary',
+            work: identity.language === 'en' ? 'easton-webster' : 'westphal',
+            language: identity.language,
+          }
         case 'NAVE':
           return { kind: 'nave', language: identity.language }
         case 'TRESOR':

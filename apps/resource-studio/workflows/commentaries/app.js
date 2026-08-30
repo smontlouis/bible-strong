@@ -301,7 +301,7 @@ const renderRegistryCard = resource => `
       <dt>Tags</dt><dd>${resource.tags?.join(' · ') || '—'}</dd>
       <dt>Langues</dt><dd>${resource.languages.join(' / ').toLocaleUpperCase('fr')}</dd>
       <dt>Couverture</dt><dd>${resource.coverage}</dd>
-      <dt>Droits</dt><dd>${resource.rights}</dd>
+      <dt>Copyright</dt><dd>${resource.rights}</dd>
       <dt>Source</dt><dd>${resource.source}</dd>
     </dl>
   </article>

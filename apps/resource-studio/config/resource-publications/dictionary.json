@@ -1,14 +1,124 @@
 {
-  "sourceVersion": "dictionary-mobile-source-v1",
-  "rights": {
-    "holder": "Bible Strong editorial team",
-    "termsReference": "Dictionary source terms are recorded in the publication provenance.",
-    "attribution": "Bible Strong Dictionary",
-    "online": true,
-    "offline": true
-  },
-  "deliveryCapabilities": {
-    "onlineAccess": true,
-    "offlineDownload": true
-  }
+  "publications": [
+    {
+      "work": "westphal",
+      "resourceId": "WESTPHAL",
+      "language": "fr",
+      "title": "Dictionnaire encyclopédique de la Bible",
+      "abbreviation": "Westphal",
+      "authors": ["Alexandre Westphal et collaborateurs"],
+      "description": "Encyclopédie biblique française dirigée par Alexandre Westphal.",
+      "edition": "Édition numérique Bible Strong issue de l’édition 1932–1935",
+      "source": "levangile.com",
+      "sourceVersion": "westphal-bible-strong-legacy-v1",
+      "sqlitePath": "../../outputs/resource-publications/dictionary/fr/work/dictionnaire.sqlite",
+      "rights": {
+        "holder": "Autorisation privée de Thomas Mathey pour Bible Strong",
+        "termsReference": "Autorisation privée couvrant l’utilisation par Bible Strong ; archiver la preuve exacte avant activation en production.",
+        "attribution": "Dictionnaire encyclopédique de la Bible — Alexandre Westphal, source levangile.com",
+        "online": true,
+        "offline": true
+      },
+      "deliveryCapabilities": {
+        "onlineAccess": true,
+        "offlineDownload": true
+      }
+    },
+    {
+      "work": "easton-webster",
+      "resourceId": "EASTON_WEBSTER",
+      "language": "en",
+      "title": "Easton’s Bible Dictionary & Webster’s 1828 Dictionary",
+      "abbreviation": "Easton + Webster 1828",
+      "authors": ["Matthew George Easton", "Noah Webster"],
+      "description": "Easton’s biblical entries supplemented by historical English definitions from Webster’s 1828 Dictionary.",
+      "edition": "Bible Strong combined digital edition",
+      "source": "Bible Strong legacy English dictionary database",
+      "sourceVersion": "easton-webster-bible-strong-legacy-v1",
+      "sqlitePath": "../../outputs/resource-publications/dictionary/en/work/dictionnaire.sqlite",
+      "rights": {
+        "holder": "Public-domain works; Bible Strong digital compilation",
+        "termsReference": "Easton’s 1897 and Webster’s 1828 editions are public-domain works; preserve source-level attribution.",
+        "attribution": "Matthew George Easton, Easton’s Bible Dictionary; Noah Webster, American Dictionary of the English Language (1828)",
+        "online": true,
+        "offline": true
+      },
+      "deliveryCapabilities": {
+        "onlineAccess": true,
+        "offlineDownload": true
+      }
+    },
+    {
+      "work": "lelievre",
+      "resourceId": "LELIEVRE",
+      "language": "fr",
+      "title": "Lexique de la Bible",
+      "abbreviation": "Lelièvre",
+      "authors": ["Charles Lelièvre"],
+      "description": "Lexique concis des notions, institutions et coutumes bibliques.",
+      "edition": "Édition numérique levangile.com acquise le 30 août 2026",
+      "source": "levangile.com",
+      "sourceVersion": "levangile-lelievre-2026-08-30",
+      "sqlitePath": "../../outputs/dictionary-sources/lelievre/lelievre.sqlite",
+      "rights": {
+        "holder": "Autorisation privée de Thomas Mathey pour Bible Strong",
+        "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
+        "attribution": "Lexique de la Bible — Charles Lelièvre, source levangile.com",
+        "online": true,
+        "offline": true
+      },
+      "deliveryCapabilities": {
+        "onlineAccess": true,
+        "offlineDownload": true
+      }
+    },
+    {
+      "work": "bost",
+      "resourceId": "BOST",
+      "language": "fr",
+      "title": "Dictionnaire de la Bible",
+      "abbreviation": "Bost",
+      "authors": ["Jean-Augustin Bost"],
+      "description": "Dictionnaire biblique français couvrant personnes, lieux, coutumes et notions bibliques.",
+      "edition": "Édition numérique levangile.com acquise le 30 août 2026",
+      "source": "levangile.com",
+      "sourceVersion": "levangile-bost-2026-08-30",
+      "sqlitePath": "../../outputs/dictionary-sources/bost/bost.sqlite",
+      "rights": {
+        "holder": "Autorisation privée de Thomas Mathey pour Bible Strong ; œuvre originale dans le domaine public",
+        "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
+        "attribution": "Dictionnaire de la Bible — Jean-Augustin Bost, source levangile.com",
+        "online": true,
+        "offline": true
+      },
+      "deliveryCapabilities": {
+        "onlineAccess": true,
+        "offlineDownload": true
+      }
+    },
+    {
+      "work": "calmet",
+      "resourceId": "CALMET",
+      "language": "fr",
+      "title": "Dictionnaire historique et critique de la Bible",
+      "abbreviation": "Calmet",
+      "authors": ["Augustin Calmet"],
+      "description": "Dictionnaire historique, géographique, philologique et critique de la Bible.",
+      "edition": "Édition numérique levangile.com acquise le 30 août 2026",
+      "source": "levangile.com",
+      "sourceVersion": "levangile-calmet-2026-08-30",
+      "sqlitePath": "../../outputs/dictionary-sources/calmet/calmet.sqlite",
+      "rights": {
+        "holder": "Autorisation privée de Thomas Mathey pour Bible Strong ; œuvre originale dans le domaine public",
+        "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
+        "attribution": "Dictionnaire historique et critique de la Bible — Augustin Calmet, source levangile.com",
+        "online": true,
+        "offline": true
+      },
+      "deliveryCapabilities": {
+        "onlineAccess": true,
+        "offlineDownload": true
+      }
+    }
+  ]
 }

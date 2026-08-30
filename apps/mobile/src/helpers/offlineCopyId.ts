@@ -7,6 +7,12 @@ export type OfflineCopyIdentity =
   | { kind: 'strong-bible-index'; versionId: StrongBibleVersionId }
   | { kind: 'interlinear-index'; versionId: 'BHG'; language: ResourceLanguage }
   | { kind: 'strong-lexicon-module'; moduleId: StrongLexiconModuleId }
+  | {
+      kind: 'dictionary'
+      work: string
+      resourceId: string
+      language: ResourceLanguage
+    }
   | { kind: 'database'; databaseId: Exclude<DatabaseId, 'BIBLES'>; language: ResourceLanguage }
   | { kind: 'bible-pericope'; versionId: string }
   | { kind: 'bible-red-words'; versionId: string }
@@ -23,6 +29,8 @@ export const createOfflineCopyId = (identity: OfflineCopyIdentity): OfflineCopyI
       return `bible-interlinear:${identity.versionId}:${identity.language}`
     case 'strong-lexicon-module':
       return `strong-lexicon:${identity.moduleId}`
+    case 'dictionary':
+      return `dictionary:${identity.work}:${identity.resourceId}:${identity.language}`
     case 'database':
       return `database:${identity.databaseId}:${identity.language}`
     case 'bible-pericope':

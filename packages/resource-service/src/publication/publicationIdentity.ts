@@ -25,7 +25,7 @@ export const getPublicationIdentityProjection = (
         }
       : isDictionaryPublicationBundleManifest(manifest)
         ? {
-            resourceIdentity: `dictionary:${manifest.identity.language}`,
+            resourceIdentity: `dictionary:${manifest.identity.work}:${manifest.identity.language}`,
             mobileCatalogId: `database:${manifest.identity.resourceId}:${manifest.identity.language}`,
           }
         : isCommentaryPublicationBundleManifest(manifest)

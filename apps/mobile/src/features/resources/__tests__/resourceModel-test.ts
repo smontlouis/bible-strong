@@ -24,8 +24,11 @@ describe('Resource model', () => {
     [{ kind: 'strong-lexicon', moduleId: 'core' }, 'strong-lexicon:core'],
     [{ kind: 'strong-lexicon', moduleId: 'resources' }, 'strong-lexicon:resources'],
     [{ kind: 'strong-lexicon', moduleId: 'entities' }, 'strong-lexicon:entities'],
-    [{ kind: 'dictionary', language: 'fr' }, 'dictionary:fr'],
-    [{ kind: 'dictionary', language: 'en' }, 'dictionary:en'],
+    [{ kind: 'dictionary', work: 'westphal', language: 'fr' }, 'dictionary:westphal:fr'],
+    [
+      { kind: 'dictionary', work: 'easton-webster', language: 'en' },
+      'dictionary:easton-webster:en',
+    ],
     [{ kind: 'nave', language: 'fr' }, 'nave:fr'],
     [{ kind: 'nave', language: 'en' }, 'nave:en'],
     [{ kind: 'cross-references' }, 'cross-references'],
@@ -57,7 +60,10 @@ describe('Resource model', () => {
       getResourceOnlineAccess({ kind: 'bible-text', versionId: 'LSG' }, new Set(['LSG']))
     ).toEqual({ status: 'remotely-readable' })
     expect(
-      getResourceOnlineAccess({ kind: 'dictionary', language: 'fr' }, new Set(['LSG']))
+      getResourceOnlineAccess(
+        { kind: 'dictionary', work: 'westphal', language: 'fr' },
+        new Set(['LSG'])
+      )
     ).toEqual({ status: 'unsupported' })
     expect(
       getResourceOnlineAccess({ kind: 'nave', language: 'fr' }, new Set(['LSG']), new Set(['fr']))
@@ -124,7 +130,7 @@ describe('Resource model', () => {
     ],
     [
       { kind: 'database', databaseId: 'DICTIONNAIRE', language: 'fr' },
-      { kind: 'dictionary', language: 'fr' },
+      { kind: 'dictionary', work: 'westphal', language: 'fr' },
     ],
     [
       { kind: 'database', databaseId: 'NAVE', language: 'en' },
@@ -162,7 +168,7 @@ describe('Resource model', () => {
   it.each<[ResourceState, string[]]>([
     [
       {
-        identity: { kind: 'dictionary', language: 'fr' },
+        identity: { kind: 'dictionary', work: 'westphal', language: 'fr' },
         operations: ['read', 'browse', 'search'],
         onlineAccess: { status: 'remotely-readable' },
         offlineCopy: { status: 'update-available', revision: 'dictionary-fr-1' },

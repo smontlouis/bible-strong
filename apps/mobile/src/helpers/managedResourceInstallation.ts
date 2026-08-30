@@ -34,6 +34,8 @@ const getResourceInstallationRecoveryTarget = (
       return { kind: 'bible-sqlite', versionId: item.versionId }
     case 'database':
       return { kind: 'file', destinationPath: item.destinationPath }
+    case 'dictionary':
+      return { kind: 'file', destinationPath: item.destinationPath }
     case 'bible-strong-sidecar':
       return { kind: 'file', destinationPath: getStrongBibleSidecarPath(item.versionId) }
     case 'bible-interlinear-sidecar':

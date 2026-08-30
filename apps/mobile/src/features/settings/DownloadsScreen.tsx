@@ -636,6 +636,7 @@ const DownloadsScreen = () => {
             strongLexiconAvailability.get('core')?.status === 'available',
         })
       case 'bible':
+      case 'dictionary':
       case 'database':
         return createOfflineCopyDownloadPlan(identity)
       case 'bible-pericope':

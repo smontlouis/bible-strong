@@ -31,7 +31,8 @@ type Page<T> = { entries: T[]; nextCursor?: string } | { topics: T[]; nextCursor
 type PageQuery<T> = (
   value: string,
   options: { limit: number; cursor?: string; signal?: AbortSignal },
-  resourceLanguage?: ResourceLanguage
+  resourceLanguage?: ResourceLanguage,
+  resourceWork?: string
 ) => Promise<Page<T>>
 
 export const useInfiniteResultsByLetterOrSearch = <T,>(
@@ -40,12 +41,14 @@ export const useInfiniteResultsByLetterOrSearch = <T,>(
     query: PageQuery<T>
     value: string
     resourceLanguage?: ResourceLanguage
+    resourceWork?: string
   },
   letter: {
     queryKey: QueryKey
     query: PageQuery<T>
     value: string
     resourceLanguage?: ResourceLanguage
+    resourceWork?: string
   },
   limit = 50
 ) => {
@@ -57,6 +60,7 @@ export const useInfiniteResultsByLetterOrSearch = <T,>(
       'resource-infinite-results',
       ...active.queryKey,
       active.resourceLanguage,
+      active.resourceWork,
       mode,
       active.value,
       isConnected,
@@ -65,7 +69,8 @@ export const useInfiniteResultsByLetterOrSearch = <T,>(
       active.query(
         active.value,
         { signal, limit, ...(pageParam ? { cursor: pageParam } : {}) },
-        active.resourceLanguage
+        active.resourceLanguage,
+        active.resourceWork
       ),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: page => page.nextCursor,

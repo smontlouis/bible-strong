@@ -10,6 +10,7 @@ import type { DownloadItem } from '~state/downloadQueue'
 import type {
   BibleDownloadItem,
   DatabaseDownloadItem,
+  DictionaryDownloadItem,
   InterlinearIndexDownloadItem,
   StrongBibleIndexDownloadItem,
   StrongLexiconModuleDownloadItem,
@@ -33,7 +34,7 @@ export interface ResourceInstallationCallbacks {
 }
 
 const downloadFile = async (
-  item: DatabaseDownloadItem,
+  item: DatabaseDownloadItem | DictionaryDownloadItem,
   callbacks: ResourceInstallationCallbacks,
   destinationPath = item.destinationPath!
 ) => {
@@ -78,10 +79,10 @@ const installBible = async (item: BibleDownloadItem, callbacks: ResourceInstalla
 }
 
 const installDatabase = async (
-  item: DatabaseDownloadItem,
+  item: DatabaseDownloadItem | DictionaryDownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
-  const dbId = item.databaseId
+  const dbId = item.type === 'dictionary' ? item.resourceId : item.databaseId
   const lang = item.lang
   const destinationPath = item.destinationPath
   const archivePath = `${destinationPath}.download.zip`
@@ -106,7 +107,7 @@ const installDatabase = async (
     if (!extractedInfo.exists || extractedInfo.isDirectory) {
       throw new Error(`RESOURCE_DATABASE_ARCHIVE_ENTRY_MISSING:${dbId}:${lang}`)
     }
-    if (dbId === 'TIMELINE') {
+    if (item.type === 'database' && dbId === 'TIMELINE') {
       const timeline = JSON.parse(await FileSystem.readAsStringAsync(temporaryPath)) as unknown
       if (
         !Array.isArray(timeline) ||
@@ -136,9 +137,10 @@ const installDatabase = async (
         )
         const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
         if (
-          resourceDatabaseRequiredTables[dbId as DatabaseId]?.some(
-            table => !tableNames.has(table.toLowerCase())
-          )
+          (item.type === 'dictionary'
+            ? ['dictionnaire']
+            : resourceDatabaseRequiredTables[dbId as DatabaseId]
+          )?.some(table => !tableNames.has(table.toLowerCase()))
         ) {
           throw new Error(`RESOURCE_DATABASE_SCHEMA_MISMATCH:${dbId}:${lang}`)
         }
@@ -147,17 +149,19 @@ const installDatabase = async (
       }
     }
 
-    const database = dbManager.getDB(dbId as DatabaseId, lang)
+    const database =
+      item.type === 'database' ? dbManager.getDB(item.databaseId as DatabaseId, lang) : undefined
     await installAtomicResourceFile({
       candidatePath: temporaryPath,
       destinationPath,
-      beforeSwap: () => database.close(),
+      beforeSwap: () => database?.close(),
       afterSwap: async () => {
-        if (dbId !== 'TIMELINE') await database.init()
+        if (item.type === 'database' && dbId !== 'TIMELINE') await database?.init()
         await callbacks.installationLifecycle.commit(result)
       },
-      beforeRollback: () => database.close(),
-      afterRollback: restored => (restored && dbId !== 'TIMELINE' ? database.init() : undefined),
+      beforeRollback: () => database?.close(),
+      afterRollback: restored =>
+        restored && item.type === 'database' && dbId !== 'TIMELINE' ? database?.init() : undefined,
     })
     return result
   } finally {
@@ -234,6 +238,8 @@ export const installResourceDatabaseItem = async (
     case 'strong-lexicon-module':
       return installLexiconModule(item, callbacks)
     case 'database':
+      return installDatabase(item, callbacks)
+    case 'dictionary':
       return installDatabase(item, callbacks)
   }
 }
