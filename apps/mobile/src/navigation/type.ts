@@ -10,6 +10,7 @@ import {
 } from '~common/types'
 import { Theme } from '~themes/index'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import type { ResourceLanguage } from '~helpers/databaseTypes'
 
 interface Verse {
   Livre: string
@@ -110,6 +111,12 @@ export type EditStudyScreenProps = {
 
 type DictionaryDetailScreenProps = {
   word: string
+  entryId?: number | string
+  correspondenceId?: string
+  work?: string
+  resourceId?: string
+  dictionaryTitle?: string
+  language?: ResourceLanguage
 }
 
 type TagScreenProps = {

@@ -14,7 +14,7 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import SectionList from '~common/ui/SectionList'
 import Text from '~common/ui/Text'
-import { MenuView } from '~common/ui/MenuView'
+import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { FeatherIcon } from '~common/ui/Icon'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import {
@@ -29,8 +29,8 @@ import { useInfiniteResultsByLetterOrSearch, useSearchValue } from '../lexique/u
 import DictionnaireItem from './DictionnaireItem'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
-import { useAtom, useAtomValue } from 'jotai/react'
-import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import { useAtom } from 'jotai/react'
+import { useResourceLanguage } from '~state/resourcesLanguage'
 import useConnection from '~helpers/useConnection'
 import ResourceUnavailableScreen from '~features/resources/ResourceUnavailableScreen'
 import {
@@ -38,6 +38,8 @@ import {
   resourceFailureFromAccessError,
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { toast } from '~helpers/toast'
 
 type DictionaryRow = DictionarySummary | DictionaryDirectoryItem
 
@@ -97,8 +99,10 @@ const DictionaryListScreen = ({
 }: DictionaryListScreenProps) => {
   const { t } = useTranslation()
   const resources = useResourceAccess()
+  const pushRouteOnce = usePushRouteOnce()
   const isConnected = useConnection()
-  const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  const [dictionaryResourceLanguage, setDictionaryResourceLanguage] =
+    useResourceLanguage('DICTIONNAIRE')
   const [dictionaryTab, setDictionaryTab] = useAtom(dictionaryAtom)
   const resolveNewTabSelection = useResolveNewTabSelection(newTabId)
   const canGoBackInStack = useCanGoBackInStack()
@@ -138,9 +142,12 @@ const DictionaryListScreen = ({
     offlineDownload: true,
   }
   const catalogDictionaries = dictionaryCatalogQuery.data ?? []
-  const directoryMode = (dictionaryTab.data.directory ?? true) && isConnected
+  const directoryRequested = dictionaryTab.data.directory ?? true
+  const directoryMode = directoryRequested && isConnected
   const storedDictionary =
-    dictionaryTab.data.work && dictionaryTab.data.resourceId
+    dictionaryTab.data.work &&
+    dictionaryTab.data.resourceId &&
+    dictionaryTab.data.language === dictionaryResourceLanguage
       ? {
           ...fallbackDictionary,
           resource: {
@@ -207,6 +214,67 @@ const DictionaryListScreen = ({
   const dictionaryResults = Array.isArray(results) ? results : []
   const sectionResults = useSectionResults(dictionaryResults)
 
+  const resetBrowseState = () => {
+    setLetter('a')
+    setSearchValue('')
+  }
+
+  const selectLanguage = (language: 'fr' | 'en') => {
+    if (language === dictionaryResourceLanguage) return
+    resetBrowseState()
+    setDictionaryResourceLanguage(language)
+    setDictionaryTab(current => ({
+      ...current,
+      title: t('Dictionnaire'),
+      data: {
+        ...current.data,
+        word: undefined,
+        entryId: undefined,
+        correspondenceId: undefined,
+        work: undefined,
+        resourceId: undefined,
+        dictionaryTitle: undefined,
+        language,
+        directory: true,
+      },
+    }))
+    toast(
+      t('menu.languageChanged', {
+        language: t(
+          language === 'fr' ? 'versionCatalog.language.fr' : 'versionCatalog.language.en'
+        ),
+      })
+    )
+  }
+
+  const selectDirectory = () => {
+    resetBrowseState()
+    setDictionaryTab(current => ({
+      ...current,
+      title: t('Dictionnaire'),
+      data: { ...current.data, word: undefined, directory: true },
+    }))
+  }
+
+  const selectDictionary = (dictionary: DictionaryWork) => {
+    resetBrowseState()
+    setDictionaryTab(current => ({
+      ...current,
+      title: t('Dictionnaire'),
+      data: {
+        ...current.data,
+        word: undefined,
+        entryId: undefined,
+        correspondenceId: undefined,
+        work: dictionary.resource.work,
+        resourceId: dictionary.resourceId,
+        dictionaryTitle: dictionary.title,
+        language: dictionary.resource.language,
+        directory: false,
+      },
+    }))
+  }
+
   if (availabilityQuery.data?.status === 'unavailable') {
     return (
       <ResourceUnavailableScreen
@@ -236,6 +304,7 @@ const DictionaryListScreen = ({
       ...current,
       data: {
         ...current.data,
+        word,
         work: dictionary.resource.work,
         resourceId: dictionary.resourceId,
         dictionaryTitle: dictionary.title,
@@ -265,7 +334,23 @@ const DictionaryListScreen = ({
       return
     }
 
-    onWordSelect?.(word)
+    if (onWordSelect) {
+      onWordSelect(word)
+      return
+    }
+
+    pushRouteOnce({
+      pathname: '/dictionnary-detail',
+      params: {
+        word,
+        work: dictionary.resource.work,
+        resourceId: dictionary.resourceId,
+        dictionaryTitle: dictionary.title,
+        language: dictionary.resource.language,
+        ...(entryId !== undefined ? { entryId: String(entryId) } : {}),
+        ...(correspondenceId ? { correspondenceId } : {}),
+      },
+    })
   }
 
   if (availabilityQuery.isError || error) {
@@ -296,63 +381,65 @@ const DictionaryListScreen = ({
         <Header
           hasBackButton={showBackButton}
           fontSize={18}
-          title={directoryMode ? t('Dictionnaires') : selectedDictionary.abbreviation}
-          subTitle={directoryMode ? t('Toutes les ressources') : selectedDictionary.title}
+          title={t('Dictionnaire')}
           rightComponent={
-            catalogDictionaries.length > 1 ? (
-              <MenuView
-                actions={[
+            <MenuView
+              actions={
+                [
                   {
-                    id: 'directory',
-                    title: t('Tous les dictionnaires'),
-                    state: directoryMode ? ('on' as const) : undefined,
+                    id: 'language',
+                    title: `${t('menu.language')}: ${t(
+                      dictionaryResourceLanguage === 'fr'
+                        ? 'versionCatalog.language.fr'
+                        : 'versionCatalog.language.en'
+                    )}`,
+                    image: 'globe',
                   },
-                  ...catalogDictionaries.map(dictionary => ({
-                    id: dictionary.resource.work,
-                    title: dictionary.abbreviation,
-                    state:
-                      !directoryMode && dictionary.resource.work === selectedWork
-                        ? ('on' as const)
-                        : undefined,
-                  })),
-                ]}
-                onPressAction={({ nativeEvent }) => {
-                  if (nativeEvent.event === 'directory') {
-                    setLetter('a')
-                    setSearchValue('')
-                    setDictionaryTab(current => ({
-                      ...current,
-                      title: t('Dictionnaires'),
-                      data: { ...current.data, directory: true },
-                    }))
-                    return
-                  }
-                  const dictionary = catalogDictionaries.find(
-                    item => item.resource.work === nativeEvent.event
-                  )
-                  if (!dictionary) return
-                  setLetter('a')
-                  setSearchValue('')
-                  setDictionaryTab(current => ({
-                    ...current,
-                    title: dictionary.abbreviation,
-                    data: {
-                      ...current.data,
-                      word: undefined,
-                      work: dictionary.resource.work,
-                      resourceId: dictionary.resourceId,
-                      dictionaryTitle: dictionary.title,
-                      language: dictionary.resource.language,
-                      directory: false,
-                    },
-                  }))
-                }}
-              >
-                <Box row center height={60} width={60}>
-                  <FeatherIcon name="book-open" size={18} />
-                </Box>
-              </MenuView>
-            ) : undefined
+                  {
+                    id: 'dictionary-source',
+                    title: `${t('Dictionnaire')}: ${
+                      directoryRequested ? t('Tous') : selectedDictionary.abbreviation
+                    }`,
+                    image: 'book',
+                    subactions: [
+                      {
+                        id: 'directory',
+                        title: t('Tous les dictionnaires'),
+                        state: directoryRequested ? ('on' as const) : undefined,
+                      },
+                      ...catalogDictionaries.map(dictionary => ({
+                        id: `dictionary:${dictionary.resource.work}`,
+                        title: dictionary.abbreviation,
+                        state:
+                          !directoryRequested && dictionary.resource.work === selectedWork
+                            ? ('on' as const)
+                            : undefined,
+                      })),
+                    ],
+                  },
+                ] satisfies MenuAction[]
+              }
+              onPressAction={({ nativeEvent }) => {
+                if (nativeEvent.event === 'language') {
+                  selectLanguage(dictionaryResourceLanguage === 'fr' ? 'en' : 'fr')
+                  return
+                }
+                if (nativeEvent.event === 'directory') {
+                  selectDirectory()
+                  return
+                }
+                if (nativeEvent.event.startsWith('dictionary:')) {
+                  const work = nativeEvent.event.slice('dictionary:'.length)
+                  const dictionary = catalogDictionaries.find(item => item.resource.work === work)
+                  if (dictionary) selectDictionary(dictionary)
+                }
+              }}
+              accessibilityLabel={t('Options du dictionnaire')}
+            >
+              <Box row center height={60} width={60}>
+                <FeatherIcon name="more-vertical" size={18} />
+              </Box>
+            </MenuView>
           }
         >
           <Box pb={10} px={20}>
@@ -362,6 +449,16 @@ const DictionaryListScreen = ({
               value={searchValue}
               onDelete={() => setSearchValue('')}
             />
+            {directoryRequested && !isConnected ? (
+              <Box mt={10} px={10} py={8} borderRadius={8} bg="lightGrey">
+                <Text fontSize={11} color="tertiary">
+                  {t('Hors ligne')} ·{' '}
+                  {t('Résultats dans {{source}}', {
+                    source: selectedDictionary.abbreviation,
+                  })}
+                </Text>
+              </Box>
+            ) : null}
           </Box>
         </Header>
         <Box flex paddingTop={20}>
@@ -392,30 +489,17 @@ const DictionaryListScreen = ({
                         offlineDownload: true,
                       })
                     : undefined
+                  if (!source || !dictionary) return null
                   return (
                     <DictionnaireItem
                       word={item.label}
-                      sourceLabels={item.sources.map(candidate => candidate.abbreviation)}
-                      onSelect={
-                        source && dictionary
-                          ? () =>
-                              selectWord(
-                                source.word,
-                                dictionary,
-                                source.id,
-                                item.correspondenceId
-                              )
-                          : undefined
+                      onSelect={() =>
+                        selectWord(source.word, dictionary, source.id, item.correspondenceId)
                       }
                     />
                   )
                 }
-                return (
-                  <DictionnaireItem
-                    word={item.word}
-                    onSelect={isNewTabSelection || onWordSelect ? selectWord : undefined}
-                  />
-                )
+                return <DictionnaireItem word={item.word} onSelect={() => selectWord(item.word)} />
               }}
               removeClippedSubviews
               maxToRenderPerBatch={100}

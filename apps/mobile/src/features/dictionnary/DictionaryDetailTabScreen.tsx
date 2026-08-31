@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
-import { Share } from 'react-native'
+import { ScrollView, Share } from 'react-native'
 import { useSelector } from 'react-redux'
 import truncHTML from 'trunc-html'
 
@@ -48,6 +48,9 @@ import {
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
 import { getCommentaryBibleViewRoute } from '~features/commentaries/commentaryReferenceNavigation'
+import { createStrongDetailRoute } from '~features/lexique/strongDetailRoutes'
+import { findDirectoryItemForArticle } from './dictionaryExperience'
+import { createDictionaryInternalLinkRoute } from './dictionaryInternalNavigation'
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
@@ -116,11 +119,7 @@ const DictionnaryDetailScreen = ({
     queryFn: async () =>
       word
         ? ((entryId
-            ? await resources.dictionary.loadEntryById(
-                entryId,
-                dictionaryResourceLanguage,
-                work
-              )
+            ? await resources.dictionary.loadEntryById(entryId, dictionaryResourceLanguage, work)
             : await resources.dictionary.loadItem(word, dictionaryResourceLanguage, work)) ?? null)
         : null,
     enabled: !!word,
@@ -144,29 +143,28 @@ const DictionnaryDetailScreen = ({
         preferredDictionaryLanguage
       )
       return (
-        page.entries.find(item => item.correspondenceId === correspondenceId) ??
-        page.entries.find(item =>
-          item.sources.some(
-            source =>
-              source.resource.work === work &&
-              source.resource.language === dictionaryResourceLanguage &&
-              source.id === entryId
-          )
-        ) ??
-        null
+        findDirectoryItemForArticle(page.entries, {
+          correspondenceId,
+          work,
+          language: dictionaryResourceLanguage,
+          entryId,
+          word,
+        }) ?? null
       )
     },
     enabled: !!word && isConnected,
+    placeholderData: previousData => previousData,
     staleTime: Infinity,
     retry: false,
   })
-  const correspondenceSources =
-    correspondenceQuery.data?.sources.filter(
-      source =>
-        source.resource.work !== work ||
-        source.resource.language !== dictionaryResourceLanguage ||
-        source.id !== entryId
-    ) ?? []
+  const normalizedCurrentWord = word?.trim().toLocaleLowerCase() ?? ''
+  const correspondenceSources = correspondenceQuery.data?.sources ?? []
+  const isCurrentSource = (source: (typeof correspondenceSources)[number]) =>
+    source.resource.work === work &&
+    source.resource.language === dictionaryResourceLanguage &&
+    (entryId !== undefined
+      ? source.id === entryId
+      : source.word.trim().toLocaleLowerCase() === normalizedCurrentWord)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
@@ -220,6 +218,20 @@ const DictionnaryDetailScreen = ({
       const route = getCommentaryBibleViewRoute(href.slice('bible://'.length))
       if (route) pushRouteOnce(route)
       else toast.error('Impossible de charger cette référence biblique.')
+    } else if (href.startsWith('strong://')) {
+      const code = href.slice('strong://'.length).trim().toUpperCase()
+      if (/^[HG]\d+[A-Z]?$/u.test(code)) {
+        pushRouteOnce(
+          createStrongDetailRoute('index', {
+            book: code.startsWith('G') ? 40 : 1,
+            identityKind: 'dstrong',
+            identityCode: code,
+            reference: code,
+          })
+        )
+      } else {
+        toast.error('Impossible de charger cette entrée Strong.')
+      }
     } else if (type.includes('verse')) {
       try {
         const sanitizedHref = href.replace(String.fromCharCode(160), ' ')
@@ -241,15 +253,14 @@ const DictionnaryDetailScreen = ({
         toast.error('Impossible de charger ce mot.')
       }
     } else {
-      pushRouteOnce({
-        pathname: '/dictionnary-detail',
-        params: {
-          word: href,
+      pushRouteOnce(
+        createDictionaryInternalLinkRoute(href, {
           work,
-          ...(resourceId ? { resourceId } : {}),
+          resourceId,
           dictionaryTitle: resolvedDictionaryTitle,
-        },
-      })
+          language: dictionaryResourceLanguage,
+        })
+      )
     }
   }
 
@@ -293,19 +304,6 @@ const DictionnaryDetailScreen = ({
     )
   }
 
-  if (dictionaryQuery.isPending) {
-    return (
-      <FormSheetScreen isFormSheet={isFormSheet}>
-        <Header
-          hasBackButton={hasBackButton}
-          onCustomBackPress={goBack}
-          title={t('Dictionnaire')}
-        />
-        <Loading message={t('Chargement...')} />
-      </FormSheetScreen>
-    )
-  }
-
   if (dictionaryAvailabilityQuery.isError || dictionaryQuery.isError) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
@@ -330,7 +328,7 @@ const DictionnaryDetailScreen = ({
     )
   }
 
-  if (!dictionnaireItem) {
+  if (!dictionnaireItem && !dictionaryQuery.isPending) {
     return (
       <FormSheetScreen isFormSheet={isFormSheet}>
         <Header
@@ -416,41 +414,56 @@ const DictionnaryDetailScreen = ({
         }
       />
       <AppScrollView>
-        {correspondenceSources.length > 0 && (
-          <Box px={20} pb={8} wrap row>
-            {correspondenceSources.map(source => (
-              <TouchableBox
-                key={`${source.resource.work}:${source.resource.language}:${source.id}`}
-                onPress={() =>
-                  setDictionaryTab(current => ({
-                    ...current,
-                    title: source.word,
-                    data: {
-                      ...current.data,
-                      word: source.word,
-                      entryId: source.id,
-                      correspondenceId: correspondenceQuery.data?.correspondenceId,
-                      work: source.resource.work,
-                      resourceId: source.resourceId,
-                      dictionaryTitle: source.title,
-                      language: source.resource.language,
-                      directory: true,
-                    },
-                  }))
-                }
-                borderWidth={1}
-                borderColor="border"
-                borderRadius={14}
-                px={8}
-                py={4}
-                mr={6}
-                mb={6}
-              >
-                <Text fontSize={12} color="primary">
-                  {source.abbreviation} · {source.word}
-                </Text>
-              </TouchableBox>
-            ))}
+        {correspondenceSources.length > 1 && (
+          <Box px={20} pb={12}>
+            <Text fontSize={12} fontWeight="bold" color="tertiary" mb={7}>
+              {t('Aussi dans {{count}} dictionnaires', {
+                count: correspondenceSources.length,
+              })}
+            </Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {correspondenceSources.map(source => {
+                const selected = isCurrentSource(source)
+                return (
+                  <TouchableBox
+                    key={`${source.resource.work}:${source.resource.language}:${source.id}`}
+                    disabled={selected}
+                    onPress={() =>
+                      setDictionaryTab(current => ({
+                        ...current,
+                        title: source.word,
+                        data: {
+                          ...current.data,
+                          word: source.word,
+                          entryId: source.id,
+                          correspondenceId: correspondenceQuery.data?.correspondenceId,
+                          work: source.resource.work,
+                          resourceId: source.resourceId,
+                          dictionaryTitle: source.title,
+                          language: source.resource.language,
+                          directory: true,
+                        },
+                      }))
+                    }
+                    borderWidth={1}
+                    borderColor={selected ? 'secondary' : 'border'}
+                    bg={selected ? 'lightGrey' : undefined}
+                    borderRadius={14}
+                    px={8}
+                    py={4}
+                    mr={6}
+                  >
+                    <Text
+                      fontSize={12}
+                      color={selected ? 'secondary' : 'primary'}
+                      fontWeight={selected ? 'bold' : undefined}
+                    >
+                      {source.abbreviation}
+                    </Text>
+                  </TouchableBox>
+                )
+              })}
+            </ScrollView>
           </Box>
         )}
         {(tags || relationCount > 0) && (
@@ -462,8 +475,12 @@ const DictionnaryDetailScreen = ({
             />
           </Box>
         )}
-        {dictionnaireItem?.definition && (
-          <WebView {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))} />
+        {dictionaryQuery.isPending ? (
+          <Loading message={t('Chargement...')} />
+        ) : (
+          dictionnaireItem?.definition && (
+            <WebView {...webviewProps(dictionnaireItem.definition.replace(/\n/gi, ''))} />
+          )
         )}
       </AppScrollView>
     </FormSheetScreen>

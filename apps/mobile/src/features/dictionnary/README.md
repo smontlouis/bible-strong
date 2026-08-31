@@ -1,201 +1,55 @@
-# Feature Dictionary
+# Expérience dictionnaire
 
-## Vue d'ensemble
+## Modèle utilisateur
 
-La feature Dictionary (Dictionnaire) fournit un accès au dictionnaire biblique Westphal, permettant aux utilisateurs de rechercher et consulter des définitions détaillées de termes, personnages et concepts bibliques.
+L’expérience distingue deux objets :
 
-## Fonctionnalités principales
+- une **notion** regroupe les variantes françaises et anglaises reconnues comme équivalentes ;
+- un **article** reste une définition exacte, appartenant à un dictionnaire, une langue et une révision.
 
-### Navigation et recherche
-- Liste alphabétique des entrées
-- Recherche par mot-clé
-- Navigation par lettre (A-Z)
-- Historique de consultation
-- Suggestions de mots similaires
+Les définitions ne sont jamais fusionnées. La notion sert uniquement à découvrir les articles disponibles et à passer d’une source à une autre.
 
-### Affichage du contenu
-- Définitions détaillées avec formatage HTML
-- Références bibliques cliquables
-- Liens vers d'autres entrées du dictionnaire
-- Support des tags utilisateur
-- Mode de lecture optimisé
+## Points d’entrée
 
-### Actions utilisateur
-- Marquer des entrées avec des tags personnalisés
-- Partager des définitions
-- Ouvrir dans un nouvel onglet
-- Copier le contenu
-- Navigation vers les versets référencés
+### Répertoire global
 
-## Architecture
+`DictionaryListScreen` ouvre par défaut le répertoire commun :
 
-### Structure des composants
+- recherche et navigation alphabétique sur les notions ;
+- choix de la langue française ou anglaise dans le menu d’options ;
+- choix entre le répertoire commun et un dictionnaire précis dans le même menu ;
+- liste volontairement sobre : seul le terme est affiché, les sources apparaissent dans le détail.
 
-```
-dictionnary/
-├── DictionaryTabScreen         # Liste principale avec alphabet
-│   ├── DictionnaireItem       # Élément de liste
-│   └── SearchBar              # Barre de recherche
-├── DictionaryDetailTabScreen   # Vue détaillée d'une entrée
-│   ├── WebView               # Affichage HTML du contenu
-│   ├── Header                # En-tête avec actions
-│   └── TagSelector           # Sélection de tags
-├── Cards/
-│   ├── DictionnaireCard      # Carte de contenu
-│   └── DictionnaireVerseDetailCard # Carte pour versets
-```
+En ligne, le répertoire est fédéré par le Resource service. Hors ligne, l’interface indique explicitement qu’elle consulte le dictionnaire installé sélectionné : elle ne prétend pas fournir un index global incomplet.
 
-### Structure de la base de données
+### Depuis un verset
 
-```typescript
-interface DictionaryEntry {
-  id: string              // Identifiant unique
-  word: string            // Mot ou terme
-  definition: string      // Contenu HTML
-  letter: string          // Première lettre (A-Z)
-  references?: string[]   // Références bibliques
-  relatedWords?: string[] // Mots liés
-}
-```
+`DictionnaireVerseDetailCard` affiche les **articles qui citent précisément le verset**. Il ne cherche pas naïvement les mots de la traduction biblique affichée et ne précharge plus toutes les définitions. Les résultats sont regroupés par notion, puis l’utilisateur ouvre l’article de son choix.
 
-### Gestion d'état
+### Lecture d’un article
 
-- **Redux** :
-  - Tags utilisateur dans `state.user.bible.dictionnary`
-  - Historique de consultation
-  
-- **État local** :
-  - Résultats de recherche
-  - Lettre sélectionnée
-  - État de chargement
+`DictionaryDetailTabScreen` conserve l’identité exacte de l’article (`work`, `resourceId`, `language`, `entryId`). Lorsqu’une correspondance existe, un sélecteur montre les autres dictionnaires et variantes linguistiques. Les liens `bible://`, `strong://` et les liens vers d’autres articles ouvrent leur surface native.
 
-## Base de données
+### Accueil et téléchargements
 
-### Chargement
-```typescript
-// Les surfaces passent par le provider Resource access actif.
-const resources = useResourceAccess()
-const entries = await resources.dictionary.listByLetter(letter)
+Le widget d’accueil ouvre l’article dans la ressource réellement utilisée et propose son téléchargement géré. Les copies hors ligne restent gérées par dictionnaire dans l’écran de téléchargements ; elles ne sont pas confondues avec le répertoire de découverte.
 
-// L'adapter local conserve les détails SQLite et l'acquisition offline.
-```
+## Accès aux données
 
-### Gestion des erreurs
-- Détection de base corrompue
-- Message d'erreur utilisateur
-- Fallback gracieux
+Toutes les surfaces passent par `useResourceAccess().dictionary`. Le contrat fournit notamment :
 
-## Utilisation
+- `listWorks` pour le catalogue ;
+- `browseDirectoryPage` et `searchDirectoryPage` pour les notions ;
+- `listByLetterPage` et `searchPage` pour un dictionnaire précis ;
+- `loadEntryById` pour préserver l’identité d’un article ;
+- `discoverPassageEntries` pour les citations d’un verset.
 
-### Recherche d'un mot
-```typescript
-// Recherche par lettre
-const words = await loadDictionnaireByLetter('A')
+`dictionaryExperience.ts` contient les règles déterministes de regroupement, de préférence linguistique et de résolution d’une notion depuis un article. Ces règles sont testées indépendamment des composants.
 
-// Recherche par mot-clé
-const results = await loadDictionnaireBySearch('amour')
-```
+## Invariants
 
-### Navigation vers une définition
-```typescript
-navigation.navigate('DictionnaryDetail', {
-  word: selectedWord
-})
-```
-
-### Gestion des liens internes
-```typescript
-// Dans la WebView
-const handleMessage = (event) => {
-  const { type, payload } = JSON.parse(event.nativeEvent.data)
-  
-  if (type === 'navigate-to-verse') {
-    navigateToBibleVerse(payload)
-  } else if (type === 'navigate-to-word') {
-    navigateToDictionaryWord(payload)
-  }
-}
-```
-
-## WebView et affichage
-
-### Injection CSS
-```css
-/* Styles adaptés au thème */
-body {
-  font-family: -apple-system, BlinkMacSystemFont;
-  color: ${theme.colors.text};
-  background: ${theme.colors.background};
-}
-
-/* Liens cliquables */
-a.verse-link {
-  color: ${theme.colors.primary};
-  text-decoration: underline;
-}
-```
-
-### Communication WebView
-```javascript
-// Envoi de message depuis la WebView
-window.ReactNativeWebView.postMessage(JSON.stringify({
-  type: 'navigate-to-verse',
-  payload: { book: 43, chapter: 3, verse: 16 }
-}))
-```
-
-## Performance
-
-### Optimisations
-- **Section List** : Utilisation de `getItemLayout` pour performances
-- **Lazy loading** : Chargement par lettre à la demande
-- **Cache** : Mise en cache des définitions consultées
-- **Debounce** : Sur la recherche (300ms)
-
-### Index alphabétique
-```typescript
-const sections = [
-  { title: 'A', data: wordsStartingWithA },
-  { title: 'B', data: wordsStartingWithB },
-  // ...
-]
-```
-
-## Intégrations
-
-### Avec la Bible
-- Navigation vers les versets référencés
-- Affichage des versets dans le contexte
-- Support des références multiples
-
-### Avec les études
-- Possibilité d'insérer des définitions dans les études
-- Liens depuis les études vers le dictionnaire
-
-### Avec le système de tags
-- Tags partagés avec les autres features
-- Filtrage par tags
-- Synchronisation Firebase
-
-## Points d'extension
-
-Pour enrichir le dictionnaire :
-1. Ajouter de nouvelles entrées dans la DB
-2. Implémenter des catégories thématiques
-3. Ajouter des illustrations ou médias
-4. Créer des liens vers d'autres ressources
-
-## Configuration
-
-### Paramètres disponibles
-- Taille de police pour la lecture
-- Thème d'affichage (clair/sombre)
-- Affichage des références inline/footnote
-
-## Dépendances clés
-
-- `react-native-webview` : Affichage du contenu HTML
-- `react-native-section-list-get-item-layout` : Optimisation liste
-- Base de données SQLite locale
-- `expo-haptics` : Retour haptique
-- Système de tags partagé avec l'app
+- Ne jamais fusionner le texte de plusieurs dictionnaires.
+- Ne jamais déduire une correspondance à partir d’un identifiant absent.
+- Transporter l’identité complète lorsqu’un article est ouvert.
+- Présenter les liens depuis un verset comme des citations d’articles, pas comme une concordance exhaustive.
+- Rendre toute dégradation hors ligne visible pour l’utilisateur.

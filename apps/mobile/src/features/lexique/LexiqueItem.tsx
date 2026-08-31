@@ -73,7 +73,11 @@ const LexiqueItem = ({ stepCode, language, original, gloss, onSelect }: LexiqueI
 
   if (onSelect) {
     return (
-      <Pressable accessibilityRole="button" onPress={handlePress}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={handlePress}
+        style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1 })}
+      >
         {content}
       </Pressable>
     )

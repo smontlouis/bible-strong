@@ -51,6 +51,7 @@ export type DictionaryPage = { entries: DictionarySummary[]; nextCursor?: string
 export type DictionaryDirectoryItem = Schema.Schema.Type<
   typeof DictionaryDirectoryResponseDto
 >['items'][number]
+export type DictionaryDirectorySource = DictionaryDirectoryItem['sources'][number]
 export type DictionaryDirectoryPage = {
   entries: DictionaryDirectoryItem[]
   nextCursor?: string
@@ -61,6 +62,46 @@ export type DictionaryPassageAnchor = DictionarySummary & {
 export type DictionaryPassageDiscoveryEntry = Schema.Schema.Type<
   typeof DictionaryPassageDiscoveryResponseDto
 >['entries'][number]
+
+export const KNOWN_DICTIONARY_WORKS: readonly DictionaryWork[] = [
+  ['westphal', 'WESTPHAL', 'fr', 'Dictionnaire encyclopédique de la Bible', 'Westphal'],
+  ['lelievre', 'LELIEVRE', 'fr', 'Lexique de la Bible', 'Lelièvre'],
+  ['bost', 'BOST', 'fr', 'Dictionnaire de la Bible', 'Bost'],
+  ['calmet', 'CALMET', 'fr', 'Dictionnaire historique et critique de la Bible', 'Calmet'],
+  [
+    'easton-webster',
+    'EASTON_WEBSTER',
+    'en',
+    'Easton’s Bible Dictionary & Webster’s 1828 Dictionary',
+    'Easton + Webster',
+  ],
+  ['smith', 'SMITH', 'en', 'Smith’s Bible Dictionary', 'Smith'],
+  ['isbe', 'ISBE', 'en', 'International Standard Bible Encyclopedia', 'ISBE 1915'],
+  [
+    'unfoldingword-translation-words',
+    'UNFOLDINGWORD_TW',
+    'en',
+    'Translation Words',
+    'Translation Words',
+  ],
+].map(([work, resourceId, language, title, abbreviation]) => ({
+  resource: {
+    kind: 'dictionary' as const,
+    work,
+    language: language as ResourceLanguage,
+    revision: 'catalog',
+  },
+  resourceId,
+  title,
+  abbreviation,
+  authors: [],
+  description: '',
+  edition: '',
+  source: '',
+  attribution: '',
+  onlineAccess: true,
+  offlineDownload: true,
+}))
 
 export type DictionaryAccess = {
   listWorks?: (language?: ResourceLanguage) => Promise<DictionaryWork[]>
@@ -179,6 +220,8 @@ const isLegacyDictionaryWork = (language: ResourceLanguage, work?: DictionaryWor
 }
 
 export const localDictionaryAccess: DictionaryAccess = {
+  listWorks: async language =>
+    KNOWN_DICTIONARY_WORKS.filter(work => !language || work.resource.language === language),
   getAvailability: async (language, work) => {
     if (!isLegacyDictionaryWork(language, work)) {
       const resource = getDictionaryResource(work!, language)
@@ -457,8 +500,7 @@ export const localDictionaryAccess: DictionaryAccess = {
             kind: 'dictionary' as const,
             work: resource.work,
             language: resource.language,
-            revision:
-              registryEntry.installedRevision ?? registryEntry.catalogRevision ?? 'offline',
+            revision: registryEntry.installedRevision ?? registryEntry.catalogRevision ?? 'offline',
           },
           resourceId: resource.resourceId,
           title: resource.work,
@@ -671,9 +713,7 @@ export const createHttpDictionaryAccess = ({
       const params = language ? `?${new URLSearchParams({ language })}` : ''
       const decoded = decode(
         DictionaryPassageDiscoveryResponseDto,
-        await request(
-          `/v1/dictionaries/verses/${encodeURIComponent(verseId)}/entries${params}`
-        )
+        await request(`/v1/dictionaries/verses/${encodeURIComponent(verseId)}/entries${params}`)
       )
       if (decoded.verseKey !== verseId) throw new ResourceAccessError('INTEGRITY_FAILURE')
       return [...decoded.entries]
@@ -884,7 +924,21 @@ export const createHybridDictionaryAccess = ({
     throw localFailure(state)
   }
   return {
-    listWorks: language => online.listWorks?.(language) ?? Promise.resolve([]),
+    listWorks: async language => {
+      if (await isOnline()) {
+        try {
+          return (await online.listWorks?.(language)) ?? []
+        } catch (error) {
+          if (
+            !(error instanceof ResourceAccessError) ||
+            (error.code !== 'NETWORK_OFFLINE' && error.code !== 'TEMPORARY_UNAVAILABLE')
+          ) {
+            throw error
+          }
+        }
+      }
+      return (await offline.listWorks?.(language)) ?? []
+    },
     getAvailability: async (language, work) => {
       const state = await availability(language, work)
       if (state.local.status === 'available') return { status: 'available' }

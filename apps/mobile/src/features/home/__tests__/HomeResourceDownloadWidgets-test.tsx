@@ -211,7 +211,7 @@ describe('Home resource download widgets', () => {
           String(node.type) === 'AnimatedTouchableBox' && typeof node.props.onPress === 'function'
       )
     ).toHaveLength(1)
-    expect(JSON.stringify(renderer.toJSON())).toContain('Dictionnaire Westphal')
+    expect(JSON.stringify(renderer.toJSON())).toContain('Dictionnaire encyclopédique de la Bible')
     expect(JSON.stringify(renderer.toJSON())).toContain('"color":"tertiary"')
     expect(JSON.stringify(renderer.toJSON())).not.toContain('Télécharger')
 
@@ -220,7 +220,12 @@ describe('Home resource download widgets', () => {
     expect(downloadManager.enqueue).toHaveBeenCalledWith([
       {
         id: 'offline-copy-id',
-        identity: { kind: 'database', databaseId: 'DICTIONNAIRE', language: 'fr' },
+        identity: {
+          kind: 'dictionary',
+          work: 'westphal',
+          resourceId: 'WESTPHAL',
+          language: 'fr',
+        },
       },
     ])
   })
@@ -243,7 +248,7 @@ describe('Home resource download widgets', () => {
 
   it.each([
     ['Nave', 'Thématique Nave', <NaveOfTheDay key="nave" />],
-    ['Dictionary', 'Dictionnaire Westphal', <WordOfTheDay key="dictionary" />],
+    ['Dictionary', 'Dictionnaire encyclopédique de la Bible', <WordOfTheDay key="dictionary" />],
     ['Strong', 'Lexique Strong', <StrongOfTheDay key="strong" type="grec" />],
   ])('uses the same informational offline state for %s', (_label, title, widget) => {
     mockIsConnected = false
@@ -303,7 +308,7 @@ describe('Home resource download widgets', () => {
 
   it.each([
     ['Nave', 'Thématique Nave', <NaveOfTheDay key="nave" />],
-    ['Dictionary', 'Dictionnaire Westphal', <WordOfTheDay key="dictionary" />],
+    ['Dictionary', 'Dictionnaire encyclopédique de la Bible', <WordOfTheDay key="dictionary" />],
   ])('retries both %s availability and content queries', (_label, title, widget) => {
     mockAvailabilityError = true
     act(() => {

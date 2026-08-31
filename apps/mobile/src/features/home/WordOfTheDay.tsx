@@ -32,12 +32,29 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const resources = useResourceAccess()
   const lang = useLanguage()
   const isConnected = useConnection()
-  const resourceTitle = t('Dictionnaire Westphal')
+  const work = lang === 'en' ? 'easton-webster' : 'westphal'
+  const dictionary =
+    lang === 'en'
+      ? {
+          resourceId: 'EASTON_WEBSTER',
+          title: 'Easton’s Bible Dictionary & Webster’s 1828 Dictionary',
+        }
+      : {
+          resourceId: 'WESTPHAL',
+          title: 'Dictionnaire encyclopédique de la Bible',
+        }
+  const resourceTitle = dictionary.title
+  const resourceIdentity = {
+    kind: 'dictionary' as const,
+    work,
+    resourceId: dictionary.resourceId,
+    language: lang,
+  }
   const [randomSeed, setRandomSeed] = useState(0)
   const availabilityQuery = useQuery({
     queryKey: [...resourceQueryKeys.offlineDatabaseAvailability('DICTIONNAIRE', lang), isConnected],
     queryFn: () =>
-      resources.dictionary.getAvailability?.(lang) ??
+      resources.dictionary.getAvailability?.(lang, work) ??
       Promise.resolve({ status: 'available' as const }),
     networkMode: 'always',
     staleTime: Infinity,
@@ -46,8 +63,9 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     queryKey: ['home-dictionary-random', lang, randomSeed, isConnected],
     queryFn: async () =>
       (await resources.dictionary.loadItemByRowId(
-        lang === 'fr' ? randomIntFromInterval(5437, 10872) : randomIntFromInterval(1, 8620),
-        lang
+        lang === 'fr' ? randomIntFromInterval(1, 5436) : randomIntFromInterval(1, 8620),
+        lang,
+        work
       )) ?? null,
     ...localQueryOptions,
   })
@@ -59,7 +77,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   ) {
     return (
       <ResourceDownloadWidget
-        identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
+        identity={resourceIdentity}
         title={resourceTitle}
         fileSize={22}
         onRetry={() => {
@@ -74,7 +92,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
     return (
       <WidgetContainer>
         <ResourceUnavailableView
-          identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: lang }}
+          identity={resourceIdentity}
           title={resourceTitle}
           fileSize={22}
           failure={resourceFailureFromAvailability(availabilityQuery.data)}
@@ -121,7 +139,16 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const { word } = strongReference
 
   return (
-    <Link route="DictionnaryDetail" params={{ word }}>
+    <Link
+      route="DictionnaryDetail"
+      params={{
+        word,
+        work,
+        resourceId: dictionary.resourceId,
+        dictionaryTitle: dictionary.title,
+        language: lang,
+      }}
+    >
       <WidgetContainer>
         <Box
           style={{
@@ -149,7 +176,7 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
           <Box row center backgroundColor="rgba(0,0,0,0.04)" paddingVertical={10}>
             <DictionnaireIcon style={{ marginRight: 10 }} size={20} color="white" />
             <Text color="white" bold fontSize={12}>
-              {t('Dictionnaire W.')}
+              {t('Explorer les dictionnaires')}
             </Text>
           </Box>
         </Link>
