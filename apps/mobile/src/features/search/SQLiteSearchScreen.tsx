@@ -44,7 +44,8 @@ import {
   resolveSearchVersionFilter,
 } from '~state/searchVersionFilter'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
-import { installedVersionsSignalAtom } from '~state/app'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
 import SharedSearchEntityResultRow from './shared/SearchEntityResultRow'
 import { allSearchItemFilters, searchItemFilterOrder } from './shared/SearchItemFilterBar'
@@ -129,7 +130,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const resources = useResourceAccess()
   const isConnected = useConnection()
   const defaultBibleVersion = useDefaultBibleVersion()
-  const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
+  const resourceRegistry = useOfflineResourceRegistry()
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const notes = useSelector((state: RootState) => state.user.bible.notes)
   const links = useSelector((state: RootState) => state.user.bible.links)
@@ -266,16 +267,15 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }))
   }
 
-  const installedVersionsQuery = useQuery({
-    queryKey: ['search-installed-bible-versions', installedVersionsSignal],
-    queryFn: () => resources.bibleSearch.getInstalledVersions(),
-    ...localQueryOptions,
-  })
-  const installedVersions = installedVersionsQuery.data ?? []
-  const hasInstalledVersions = !installedVersionsQuery.isSuccess || installedVersions.length > 0
+  const installedVersions = [...resourceRegistry.resources.values()].flatMap(entry =>
+    entry.resource.kind === 'bible' &&
+    (entry.availability.status === 'available' || entry.availability.status === 'corrupt')
+      ? [entry.resource.versionId]
+      : []
+  )
+  const hasInstalledVersions = installedVersions.length > 0
 
   useEffect(() => {
-    if (!installedVersionsQuery.isSuccess) return
     const compatibleVersions = canon
       ? installedVersions.filter(version => getBibleVersionCanonId(version) === canon)
       : installedVersions
@@ -287,13 +287,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }
     // Reconcile the persisted filter when the inventory or selected canon changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    canon,
-    defaultBibleVersion,
-    installedVersions,
-    installedVersionsQuery.isSuccess,
-    resolvedSelectedVersion,
-  ])
+  }, [canon, defaultBibleVersion, installedVersions, resolvedSelectedVersion])
 
   const canonBooks = getBooksForCanon(canon || getBibleVersionCanonId(resolvedSelectedVersion))
   const books = [
@@ -881,18 +875,16 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       Math.round(createOfflineCopyDownloadItem(recoveryIdentity).estimatedSize / 1_000_000)
     )
 
-    if (searchError || installedVersionsQuery.isError) {
+    if (searchError) {
       return (
         <ResourceUnavailableView
           identity={recoveryIdentity}
           title={t('resource.search.temporarilyUnavailable')}
           fileSize={recoveryFileSize}
-          failure={resourceFailureFromAccessError(
-            passageQuery.error ?? installedVersionsQuery.error
-          )}
+          failure={resourceFailureFromAccessError(passageQuery.error)}
           size="small"
           onRetry={() => {
-            void installedVersionsQuery.refetch()
+            void offlineResourceRegistry.reconcileAll()
             void passageQuery.refetch()
           }}
         />
@@ -909,7 +901,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           failure={{ cause: 'offline-copy-required', recoveries: ['acquire-offline-copy'] }}
           size="small"
           onRetry={() => {
-            void installedVersionsQuery.refetch()
+            void offlineResourceRegistry.reconcileAll()
             void passageQuery.refetch()
           }}
         />

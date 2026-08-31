@@ -3,6 +3,10 @@
 jest.mock('expo-file-system/legacy', () => ({ getInfoAsync: jest.fn() }))
 jest.mock('~helpers/databases', () => ({ getCommentaryDbPath: jest.fn() }))
 jest.mock('~helpers/sqlite', () => ({ openSQLiteDatabase: jest.fn() }))
+jest.mock('../resourceAvailability', () => ({
+  getLocalResourceAvailability: jest.fn(),
+  offlineResourceRegistry: { markCorrupt: jest.fn() },
+}))
 
 import {
   createCommentaryAccess,

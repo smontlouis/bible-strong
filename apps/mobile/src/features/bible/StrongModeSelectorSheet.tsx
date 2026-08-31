@@ -1,6 +1,5 @@
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
-import { useQuery } from '@tanstack/react-query'
 import { type RefObject, useEffect } from 'react'
 import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -17,18 +16,18 @@ import {
   type StrongMode,
 } from '~helpers/strongBiblePublications'
 import useLanguage from '~helpers/useLanguage'
-import { downloadCompletionSignalAtom, downloadItemStatesAtom } from '~state/downloadQueue'
+import { downloadItemStatesAtom } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
 import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 
 import BibleDisplayModeCard from './BibleDisplayModeCard'
 import { toast } from '~helpers/toast'
-import { useResourceAccess } from '~features/resources/resourceAccess'
 import useConnection from '~helpers/useConnection'
-import {
-  loadStrongModeAvailability,
-  type StrongModeAvailabilityState,
-} from './loadStrongModeAvailability'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { getInterlinearLocalePriority } from '~helpers/interlinearDisplayMode'
+import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
+import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
+import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -40,9 +39,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const appLanguage = useLanguage()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
-  const resources = useResourceAccess()
   const isConnected = useConnection()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const downloadStates = useAtomValue(downloadItemStatesAtom)
   const selectedMode = bible.data.strongMode ?? 'hidden'
   const version = bible.data.selectedVersion
@@ -58,19 +55,33 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const morphologyPreview = isHebrew ? 'HNcmpa' : 'GNcmsn'
   const strongPreview = isHebrew ? 'H0430' : 'G2316'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
+  const strongResource = useOfflineResourceState(
+    isStrongCapableBibleVersion(version)
+      ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version })
+      : undefined
+  )
+  const frenchInterlinearResource = useOfflineResourceState(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'fr' })
+  )
+  const englishInterlinearResource = useOfflineResourceState(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'en' })
+  )
 
-  const availabilityQuery = useQuery<StrongModeAvailabilityState>({
-    queryKey: ['strong-mode-availability', version, appLanguage, downloadCompletionSignal],
-    queryFn: () =>
-      loadStrongModeAvailability({
-        appLanguage,
-        getInterlinearAvailability: resources.lexiconBible.getInterlinearAvailability,
-        getStrongAvailability: resources.strongBible.getAvailability,
-        version,
-      }),
-  })
-  const availability = availabilityQuery.data ?? { interlinear: [] }
-  const availabilityFailed = availabilityQuery.isError
+  const availability = {
+    strong: strongResource?.availability as StrongBibleSidecarAvailability | undefined,
+    interlinear: getInterlinearLocalePriority(appLanguage).flatMap(locale => {
+      const resource = locale === 'fr' ? frenchInterlinearResource : englishInterlinearResource
+      return resource
+        ? [
+            {
+              locale,
+              availability: resource.availability as InterlinearSidecarAvailability,
+            },
+          ]
+        : []
+    }),
+  }
+  const availabilityFailed = false
 
   const strongAvailable = availability.strong?.status === 'available'
   const installedInterlinear = availability.interlinear.find(
@@ -79,19 +90,12 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const reverseInterlinearAvailable = strongAvailable && Boolean(installedInterlinear)
 
   useEffect(() => {
-    if (!availabilityQuery.isSuccess || !availability.strong || selectedMode === 'hidden') return
+    if (!availability.strong || selectedMode === 'hidden') return
     const selectedModeAvailable =
       selectedMode === 'visible' ? strongAvailable : reverseInterlinearAvailable
     if (selectedModeAvailable) return
     actions.setStrongMode('hidden')
-  }, [
-    actions,
-    availability.strong,
-    availabilityQuery.isSuccess,
-    reverseInterlinearAvailable,
-    selectedMode,
-    strongAvailable,
-  ])
+  }, [actions, availability.strong, reverseInterlinearAvailable, selectedMode, strongAvailable])
   const getModeDownloadPresentation = (mode: Exclude<StrongMode, 'hidden'>) => {
     return getBibleModeAcquisitionPresentation(
       pendingAcquisition?.mode === mode ? pendingAcquisition : undefined,
@@ -154,7 +158,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     }
   }
 
-  const hasLoadedAvailability = availabilityQuery.isSuccess && Boolean(availability.strong)
+  const hasLoadedAvailability = Boolean(availability.strong)
   const strongDownloadRequired = hasLoadedAvailability && !strongAvailable
   const reverseInterlinearDownloadRequired = hasLoadedAvailability && !reverseInterlinearAvailable
   const strongDownloading =
@@ -171,16 +175,6 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   return (
     <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
       <SheetView p={16} gap={10}>
-        {availabilityFailed && (
-          <Box center py={8}>
-            <Text color="tertiary" textAlign="center">
-              {t('resource.action.temporarilyUnavailable')}
-            </Text>
-            <Text bold color="primary" mt={8} onPress={() => void availabilityQuery.refetch()}>
-              {t('bible.error.retry')}
-            </Text>
-          </Box>
-        )}
         <BibleDisplayModeCard
           layout="list"
           label={t('Texte')}

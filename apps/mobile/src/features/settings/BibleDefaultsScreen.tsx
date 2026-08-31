@@ -1,6 +1,4 @@
 import React from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -21,11 +19,10 @@ import {
 import { getLanguage } from '~i18n'
 import { RootState } from '~redux/modules/reducer'
 import { setDefaultBibleVersion, setDefaultStrongBibleVersion } from '~redux/modules/user'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import type { VersionCode } from '~state/tabs'
 import BibleDefaultSelectorSheet from './BibleDefaultSelectorSheet'
-import { localQueryOptions } from '~helpers/queryOptions'
-import { useResourceAccess } from '~features/resources/resourceAccess'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 
 type DefaultVersionCardProps = {
   title: string
@@ -91,12 +88,10 @@ const DefaultVersionCard = ({
 
 const BibleDefaultsScreen = () => {
   const { t } = useTranslation()
-  const resources = useResourceAccess()
   const dispatch = useDispatch()
   const language = getLanguage()
   const readingSheetRef = React.useRef<SheetRef>(null)
   const strongSheetRef = React.useRef<SheetRef>(null)
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
 
   const preferredVersion = useSelector(
     (state: RootState) =>
@@ -113,16 +108,10 @@ const BibleDefaultsScreen = () => {
     resolveStrongNavigationVersionId(storedDefaultStrongVersion ?? '') ?? 'LSG'
   const selectedVersion = versions[defaultVersion]
   const selectedStrongVersion = versions[defaultStrongVersion]
-  const { data: isDefaultStrongAvailable = false } = useQuery({
-    queryKey: [
-      'default-strong-sidecar-availability',
-      defaultStrongVersion,
-      downloadCompletionSignal,
-    ],
-    queryFn: async () =>
-      (await resources.strongBible.getAvailability(defaultStrongVersion)).status === 'available',
-    ...localQueryOptions,
-  })
+  const defaultStrongResource = useOfflineResourceState(
+    createOfflineCopyId({ kind: 'strong-bible-index', versionId: defaultStrongVersion })
+  )
+  const isDefaultStrongAvailable = defaultStrongResource?.availability.status === 'available'
 
   const selectReadingVersion = (versionId: VersionCode) => {
     dispatch(setDefaultBibleVersion(versionId))

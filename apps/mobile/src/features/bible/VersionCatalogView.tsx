@@ -1,9 +1,8 @@
 import React from 'react'
 import { SectionList, TouchableOpacity, type SectionListRenderItem } from 'react-native'
 import { useNavigation } from 'expo-router'
-import { useAtom, useAtomValue } from 'jotai/react'
+import { useAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
 
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
@@ -14,9 +13,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { type TranslationReadingProfile, type Version } from '~helpers/bibleVersions'
 import useLanguage from '~helpers/useLanguage'
-import { installedVersionsSignalAtom } from '~state/app'
 import { bibleVersionGroupingAtom } from './versionCatalogState'
-import { getDownloadedBibleVersionIds } from './versionAvailability'
 import {
   filterVersionCatalogByAvailability,
   getVersionCatalogLocation,
@@ -27,8 +24,7 @@ import {
   type VersionCatalogItem,
   type VersionCatalogSection,
 } from './versionCatalog'
-import { localQueryOptions } from '~helpers/queryOptions'
-import { useResourceAccess } from '~features/resources/resourceAccess'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 
 const STYLE_INFO_KEYS: Record<TranslationReadingProfile, string> = {
   'word-for-word': 'versionCatalog.style.wordForWord.description',
@@ -37,7 +33,6 @@ const STYLE_INFO_KEYS: Record<TranslationReadingProfile, string> = {
   paraphrase: 'versionCatalog.style.paraphrase.description',
 }
 
-const EMPTY_DOWNLOADED_VERSION_IDS = new Set<string>()
 const ESTIMATED_CATALOG_ROW_HEIGHT = 72
 
 export const useVersionCatalog = (
@@ -45,21 +40,20 @@ export const useVersionCatalog = (
   { resetSearchOnFocus = false }: { resetSearchOnFocus?: boolean } = {}
 ) => {
   const { t } = useTranslation()
-  const resources = useResourceAccess()
+  const resourceRegistry = useOfflineResourceRegistry()
   const navigation = useNavigation()
   const uiLanguage = useLanguage()
-  const installedVersionsSignal = useAtomValue(installedVersionsSignalAtom)
   const [grouping, setGrouping] = useAtom(bibleVersionGroupingAtom)
   const [query, setQuery] = React.useState('')
   const [availability, setAvailability] = React.useState<BibleVersionAvailability>('all')
-  const { data: downloadedVersionIds = null } = useQuery({
-    queryKey: ['downloaded-bible-version-ids', installedVersionsSignal],
-    queryFn: () =>
-      getDownloadedBibleVersionIds(installedVersionsSignal, versionId =>
-        resources.offlineCopies.isAvailable({ kind: 'bible', versionId })
-      ),
-    ...localQueryOptions,
-  })
+  const downloadedVersionIds = new Set(
+    [...resourceRegistry.resources.values()].flatMap(entry =>
+      entry.resource.kind === 'bible' &&
+      (entry.availability.status === 'available' || entry.availability.status === 'corrupt')
+        ? [entry.resource.versionId]
+        : []
+    )
+  )
   const [activeStyleInfo, setActiveStyleInfo] = React.useState<TranslationReadingProfile | null>(
     null
   )
@@ -98,7 +92,7 @@ export const useVersionCatalog = (
   const visibleCatalog = filterVersionCatalogByAvailability(
     catalog,
     availability,
-    downloadedVersionIds ?? EMPTY_DOWNLOADED_VERSION_IDS
+    downloadedVersionIds
   )
   const sections = getVersionCatalogSections({
     catalog: visibleCatalog,

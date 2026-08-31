@@ -6,6 +6,7 @@ import type { ResourceLanguage } from '~helpers/databaseTypes'
 import { getDbPath } from '~helpers/databases'
 import {
   getLocalResourceAvailability,
+  offlineResourceRegistry,
   type LocalResourceAvailability,
   type LocalResourceRef,
 } from './resourceAvailability'
@@ -57,18 +58,21 @@ type TimelineAccessDependencies = {
   getAvailability: (identity: LocalResourceRef) => Promise<LocalResourceAvailability>
   getPath: (databaseId: 'TIMELINE', language: ResourceLanguage) => string
   readText: (path: string) => Promise<string>
-  getCacheKey?: (path: string) => Promise<string>
+  getCacheKey?: (path: string, language: ResourceLanguage) => Promise<string>
 }
 
 const defaultDependencies: TimelineAccessDependencies = {
   getAvailability: getLocalResourceAvailability,
   getPath: getDbPath,
   readText: FileSystem.readAsStringAsync,
-  getCacheKey: async path => {
-    const info = await FileSystem.getInfoAsync(path)
-    return info.exists
-      ? `${path}:${info.modificationTime ?? 0}:${'size' in info ? info.size : 0}`
-      : `${path}:missing`
+  getCacheKey: async (path, language) => {
+    const snapshot = offlineResourceRegistry.getSnapshot()
+    const entry = offlineResourceRegistry.get({
+      kind: 'database',
+      databaseId: 'TIMELINE',
+      language,
+    })
+    return `${path}:${entry?.installedRevision ?? 'missing'}:${snapshot.revision}`
   },
 }
 
@@ -85,7 +89,7 @@ export const createLocalTimelineAccess = (
   >()
   const loadDetails = async (language: ResourceLanguage) => {
     const path = dependencies.getPath('TIMELINE', language)
-    const key = dependencies.getCacheKey ? await dependencies.getCacheKey(path) : path
+    const key = dependencies.getCacheKey ? await dependencies.getCacheKey(path, language) : path
     const cached = cache.get(language)
     if (cached?.key === key) return cached.pending
     const pending = loadTimelineDetails(language, path)

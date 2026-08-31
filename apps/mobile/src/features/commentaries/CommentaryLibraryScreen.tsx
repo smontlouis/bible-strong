@@ -3,9 +3,7 @@ import {
   type CommentaryCatalogEntry,
   type CommentaryLanguage,
 } from '@bible-strong/resource-catalog/commentaries'
-import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
-import { useAtomValue } from 'jotai/react'
 import React from 'react'
 import { SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -19,10 +17,7 @@ import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { getLocalResourceAvailability } from '~features/resources/resourceAvailability'
-import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { installedVersionsSignalAtom } from '~state/app'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { useIsOfflineResourceInstalled } from '~features/resources/useOfflineResourceRegistry'
 import CommentaryAvatar from './CommentaryAvatar'
 import CommentaryOfflineDetailsSheet from './CommentaryOfflineDetailsSheet'
 import {
@@ -49,21 +44,13 @@ const CommentaryLibraryItem = ({
   onOpenDetails: () => void
 }) => {
   const { t } = useTranslation()
-  const installedSignal = useAtomValue(installedVersionsSignalAtom)
-  const completionSignal = useAtomValue(downloadCompletionSignalAtom)
   const { entry, language } = projection
   const identity = {
     kind: 'commentary' as const,
     resourceId: entry.publicationId,
     language,
   }
-  const itemId = createOfflineCopyId(identity)
-  const availability = useQuery({
-    queryKey: ['commentary-library-availability', itemId, installedSignal, completionSignal],
-    queryFn: () => getLocalResourceAvailability(identity),
-    networkMode: 'always',
-  })
-  const installed = availability.data?.status === 'available'
+  const installed = useIsOfflineResourceInstalled(identity)
 
   return (
     <Box

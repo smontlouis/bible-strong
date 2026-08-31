@@ -1,6 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
 import { useTheme } from '@emotion/react'
-import { useAtomValue } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import React from 'react'
 import { Alert, Platform, Switch } from 'react-native'
@@ -32,16 +30,11 @@ import {
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
-import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
-import { bibleDataRefreshSignalAtom, installedVersionsSignalAtom } from '~state/app'
-import { useResourceAccess } from '~features/resources/resourceAccess'
+import { getDownloadItemProgress } from '~state/downloadQueue'
+import { bibleDataRefreshSignalAtom } from '~state/app'
+import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 import useConnection from '~helpers/useConnection'
 import { getLanguage } from '~i18n'
-import {
-  getBibleOfflineDetailsQueryKey,
-  getInterlinearOfflineDetailsQueryKey,
-  getStrongOfflineDetailsQueryKey,
-} from './bibleOfflineDetailsQueryKeys'
 
 const megabyteFormatters = new Map<string, Intl.NumberFormat>()
 
@@ -62,10 +55,7 @@ type Props = {
 const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
-  const resources = useResourceAccess()
   const isConnected = useConnection()
-  const installedSignal = useAtomValue(installedVersionsSignalAtom)
-  const completionSignal = useAtomValue(downloadCompletionSignalAtom)
   const versionId = version?.id
   const bibleId = versionId ? createOfflineCopyId({ kind: 'bible', versionId }) : undefined
   const strongVersionId =
@@ -87,6 +77,9 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   const bibleQueue = useDownloadItemStatus(bibleId)
   const strongQueue = useDownloadItemStatus(strongId)
   const interlinearQueue = useDownloadItemStatus(interlinearId)
+  const bibleResourceState = useOfflineResourceState(bibleId)
+  const strongResourceState = useOfflineResourceState(strongId)
+  const interlinearResourceState = useOfflineResourceState(interlinearId)
   const [indexChoice, setIndexChoice] = React.useState({
     versionId,
     enabled: Boolean(strongVersionId || hasInterlinearIndex),
@@ -96,47 +89,22 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
       ? indexChoice.enabled
       : Boolean(strongVersionId || hasInterlinearIndex)
 
-  const bibleAvailability = useQuery({
-    queryKey: getBibleOfflineDetailsQueryKey(versionId!, installedSignal, completionSignal),
-    enabled: Boolean(versionId),
-    queryFn: () => resources.offlineCopies.isAvailable({ kind: 'bible', versionId: versionId! }),
-  })
-  const strongAvailability = useQuery({
-    queryKey: getStrongOfflineDetailsQueryKey(
-      strongVersionId ?? versionId ?? '',
-      installedSignal,
-      completionSignal
-    ),
-    enabled: Boolean(strongVersionId),
-    queryFn: () => resources.offlineCopies.getStrongBibleAvailability(strongVersionId!),
-  })
-  const interlinearAvailability = useQuery({
-    queryKey: getInterlinearOfflineDetailsQueryKey(
-      interlinearLocale,
-      installedSignal,
-      completionSignal
-    ),
-    enabled: hasInterlinearIndex,
-    queryFn: () =>
-      resources.offlineCopies.isAvailable({
-        kind: 'interlinear-index',
-        versionId: 'BHG',
-        language: interlinearLocale,
-      }),
-  })
-
   if (!version || !versionId || !bibleId) return null
 
-  const bibleInstalled = bibleAvailability.data
+  const bibleInstalled = bibleResourceState
+    ? bibleResourceState.availability.status === 'available'
+    : undefined
   const strongInstalled = strongVersionId
-    ? strongAvailability.data?.status === 'available'
+    ? strongResourceState?.availability.status === 'available'
     : undefined
   const strongPresent = strongVersionId
-    ? strongAvailability.data?.status === 'available' ||
-      strongAvailability.data?.status === 'incompatible' ||
-      strongAvailability.data?.status === 'corrupt'
+    ? strongResourceState?.availability.status === 'available' ||
+      strongResourceState?.availability.status === 'incompatible' ||
+      strongResourceState?.availability.status === 'corrupt'
     : false
-  const interlinearInstalled = hasInterlinearIndex ? interlinearAvailability.data : undefined
+  const interlinearInstalled = hasInterlinearIndex
+    ? interlinearResourceState?.availability.status === 'available'
+    : undefined
   const indexInstalled = strongVersionId ? strongInstalled : interlinearInstalled
   const indexPresent = strongVersionId ? strongPresent : interlinearInstalled === true
   const bibleArtifact = getMobileResourceCatalogEntry(bibleId)
@@ -154,9 +122,9 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
   )
   const progress = activeQueue ? getDownloadItemProgress(activeQueue) : 0
   const availabilityReady =
-    bibleAvailability.data !== undefined &&
-    (!strongVersionId || strongAvailability.data !== undefined) &&
-    (!hasInterlinearIndex || interlinearAvailability.data !== undefined)
+    bibleResourceState !== undefined &&
+    (!strongVersionId || strongResourceState !== undefined) &&
+    (!hasInterlinearIndex || interlinearResourceState !== undefined)
   const languageKey = version.language === 'he-grc' ? 'heGrc' : version.language
   const languageLabel = t(`versionCatalog.language.${languageKey}`)
   const bookCount = getBooksForCanon(version.canonId ?? 'protestant-66').length
@@ -176,7 +144,6 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
 
   const refreshInstalledState = () => {
     const store = getDefaultStore()
-    store.set(installedVersionsSignalAtom, current => current + 1)
     store.set(bibleDataRefreshSignalAtom, current => current + 1)
   }
 
@@ -193,7 +160,9 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
           strongVersionId,
           bibleInstalled === false
             ? 'base-missing'
-            : (strongAvailability.data?.status ?? 'base-missing')
+            : strongResourceState?.availability.status === 'core-missing'
+              ? 'missing'
+              : (strongResourceState?.availability.status ?? 'base-missing')
         )
       )
       return
@@ -355,37 +324,14 @@ const BibleOfflineDetailsSheet = ({ sheetRef, version }: Props) => {
           </Box>
         )}
 
-        {(bibleAvailability.isError ||
-          (strongVersionId && strongAvailability.isError) ||
-          (hasInterlinearIndex && interlinearAvailability.isError)) && (
-          <TouchableBox
-            onPress={() => {
-              void bibleAvailability.refetch()
-              if (strongVersionId) void strongAvailability.refetch()
-              if (hasInterlinearIndex) void interlinearAvailability.refetch()
-            }}
-            mt={14}
-            py={8}
-          >
-            <Text color="primary" bold>
-              {t('Réessayer')}
+        {!activeQueue && !failedQueue && !availabilityReady && (
+          <Box row alignItems="center" justifyContent="center" py={32}>
+            <FeatherIcon name="clock" size={17} color="tertiary" />
+            <Text ml={9} color="tertiary">
+              {t('bibleOfflineDetails.checking')}
             </Text>
-          </TouchableBox>
+          </Box>
         )}
-
-        {!activeQueue &&
-          !failedQueue &&
-          !bibleAvailability.isError &&
-          !strongAvailability.isError &&
-          !interlinearAvailability.isError &&
-          !availabilityReady && (
-            <Box row alignItems="center" justifyContent="center" py={32}>
-              <FeatherIcon name="clock" size={17} color="tertiary" />
-              <Text ml={9} color="tertiary">
-                {t('bibleOfflineDetails.checking')}
-              </Text>
-            </Box>
-          )}
 
         {!activeQueue && !failedQueue && availabilityReady && (
           <Box mt={22} p={16} bg="lightGrey" borderRadius={22} gap={14}>

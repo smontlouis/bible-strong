@@ -31,14 +31,18 @@ import { PlaybackService } from '../../../playbackService'
 import { downloadManager } from '~helpers/downloadManager'
 import { loadMobileResourceCatalog } from '~helpers/mobileResourceCatalog'
 import { useAutomaticUpdates } from '~helpers/useAutomaticUpdates'
+import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 
 const PostMigrationStartup = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
-    void loadMobileResourceCatalog().then(() =>
-      downloadManager.restore().catch(error => {
+    void loadMobileResourceCatalog().then(async catalog => {
+      try {
+        await downloadManager.restore()
+      } catch (error) {
         appLogger.captureError('startup', 'resource_recovery.failed', error)
-      })
-    )
+      }
+      await offlineResourceRegistry.reconcileAll(catalog)
+    })
   }, [])
 
   return children

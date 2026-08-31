@@ -30,6 +30,13 @@ jest.mock('~helpers/strongBibleSidecar', () => ({
   loadStrongBibleVersesSpans: jest.fn(),
 }))
 
+jest.mock('../resourceAvailability', () => ({
+  getRegisteredStrongBibleAvailability: (versionId: string) =>
+    jest
+      .requireMock('../../../helpers/strongBibleSidecar')
+      .getStrongBibleSidecarAvailability(versionId),
+}))
+
 const available = (versionId: 'LSG' | 'DBY' | 'DBR') => ({
   status: 'available' as const,
   versionId,

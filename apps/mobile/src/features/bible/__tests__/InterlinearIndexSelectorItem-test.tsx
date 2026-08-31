@@ -5,15 +5,8 @@ import { downloadManager } from '~helpers/downloadManager'
 import InterlinearIndexSelectorItem from '../InterlinearIndexSelectorItem'
 
 const mockGetInterlinearAvailability = jest.fn()
-const mockRefetch = jest.fn()
 const mockUseDownloadItemStatus = jest.fn()
-const mockUseQuery = jest.fn()
-
-jest.mock('@tanstack/react-query', () => ({
-  useQuery: (options: unknown) => mockUseQuery(options),
-}))
-
-jest.mock('jotai/react', () => ({ useAtomValue: () => 0 }))
+const mockUseOfflineResourceState = jest.fn()
 
 jest.mock('react-i18next', () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -68,6 +61,10 @@ jest.mock('~features/resources/resourceAccess', () => ({
   }),
 }))
 
+jest.mock('~features/resources/useOfflineResourceRegistry', () => ({
+  useOfflineResourceState: (...args: unknown[]) => mockUseOfflineResourceState(...args),
+}))
+
 jest.mock('~helpers/downloadItemFactory', () => ({
   createInterlinearSidecarDownloadPlan: (locale: string, status: string) => [
     { id: `interlinear-update:${locale}:${status}` },
@@ -104,9 +101,8 @@ describe('InterlinearIndexSelectorItem', () => {
     })
     jest.mocked(downloadManager.enqueue).mockReset()
     mockGetInterlinearAvailability.mockReset()
-    mockRefetch.mockReset()
     mockUseDownloadItemStatus.mockReset().mockReturnValue(undefined)
-    mockUseQuery.mockReset()
+    mockUseOfflineResourceState.mockReset()
   })
 
   afterEach(() => {
@@ -128,12 +124,8 @@ describe('InterlinearIndexSelectorItem', () => {
   }
 
   it('marks a zero-copy HTTP index as selectable without offering a download', () => {
-    mockUseQuery.mockReturnValue({
-      data: { status: 'available', locale: 'fr', textRevision: 'bhg-r1' },
-      isPending: false,
-      isFetching: false,
-      isError: false,
-      refetch: mockRefetch,
+    mockUseOfflineResourceState.mockReturnValue({
+      availability: { status: 'available', locale: 'fr', textRevision: 'bhg-r1' },
     })
     const onAvailabilityChange = renderItem()
 
@@ -144,12 +136,8 @@ describe('InterlinearIndexSelectorItem', () => {
   })
 
   it('offers the dependency-aware update plan for an incompatible installed index', async () => {
-    mockUseQuery.mockReturnValue({
-      data: { status: 'base-incompatible' },
-      isPending: false,
-      isFetching: false,
-      isError: false,
-      refetch: mockRefetch,
+    mockUseOfflineResourceState.mockReturnValue({
+      availability: { status: 'base-incompatible' },
     })
     renderItem()
 

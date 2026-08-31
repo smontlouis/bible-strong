@@ -1,5 +1,10 @@
 /* eslint-disable import/first */
 
+jest.mock('../resourceAvailability', () => ({
+  getRegisteredInterlinearAvailability: jest.fn(async () => ({ status: 'missing' })),
+  getRegisteredStrongBibleAvailability: jest.fn(async () => ({ status: 'missing' })),
+}))
+
 jest.mock('~helpers/biblesDb', () => ({
   getChapterVerses: jest.fn(),
   getVerseText: jest.fn(),

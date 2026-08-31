@@ -1,5 +1,4 @@
 import React from 'react'
-import { useAtomValue } from 'jotai/react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Sheet, type SheetRef } from '~common/sheet'
@@ -14,9 +13,9 @@ import {
   type BibleDefaultSelectionKind,
 } from '~features/bible/bibleDefaultCatalog'
 import { isStrongCapableBibleVersion } from '~helpers/strongBiblePublications'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import type { VersionCode } from '~state/tabs'
-import { useResourceAccess } from '~features/resources/resourceAccess'
+import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 
 type Props = {
   kind: BibleDefaultSelectionKind
@@ -34,11 +33,14 @@ const BibleDefaultSelectorSheet = ({
   onSelect,
 }: Props) => {
   const insets = useSafeAreaInsets()
-  const resources = useResourceAccess()
   const versionCatalog = useVersionCatalog(getBibleDefaultCatalog(kind))
   const [revealKey, setRevealKey] = React.useState(0)
   const [pendingStrongVersionId, setPendingStrongVersionId] = React.useState<VersionCode>()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const pendingStrongResource = useOfflineResourceState(
+    pendingStrongVersionId && isStrongCapableBibleVersion(pendingStrongVersionId)
+      ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: pendingStrongVersionId })
+      : undefined
+  )
 
   const selectVersion = (versionId: VersionCode) => {
     if (kind === 'strong' && !isStrongCapableBibleVersion(versionId)) return
@@ -49,23 +51,12 @@ const BibleDefaultSelectorSheet = ({
 
   React.useEffect(() => {
     if (kind !== 'strong' || !pendingStrongVersionId) return
+    if (pendingStrongResource?.availability.status !== 'available') return
 
-    let cancelled = false
-    resources.strongBible
-      .getAvailability(pendingStrongVersionId)
-      .then(availability => {
-        if (cancelled || availability.status !== 'available') return
-
-        setPendingStrongVersionId(undefined)
-        onSelect(pendingStrongVersionId)
-        sheetRef.current?.dismiss()
-      })
-      .catch(() => undefined)
-
-    return () => {
-      cancelled = true
-    }
-  }, [downloadCompletionSignal, kind, onSelect, pendingStrongVersionId, resources, sheetRef])
+    setPendingStrongVersionId(undefined)
+    onSelect(pendingStrongVersionId)
+    sheetRef.current?.dismiss()
+  }, [kind, onSelect, pendingStrongResource?.availability.status, pendingStrongVersionId, sheetRef])
 
   const headerProps =
     kind === 'strong'

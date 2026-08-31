@@ -18,12 +18,17 @@ jest.mock('~helpers/bibleVersions', () => ({
 }))
 
 jest.mock('~helpers/mobileResourceCatalog', () => ({
+  MOBILE_RESOURCE_CATALOG: { resources: {} },
   getMobileResourceCatalogEntry: (resourceId: string) => ({
     entries:
       resourceId === 'bible:NBS'
         ? { canonical: {}, pericope: {}, redWords: {} }
         : { canonical: {} },
   }),
+}))
+
+jest.mock('~helpers/resourcePublication', () => ({
+  resourcePublicationStore: { read: jest.fn(() => undefined) },
 }))
 
 jest.mock('~helpers/pericopes', () => ({

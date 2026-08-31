@@ -5,19 +5,19 @@ import { getDefaultStore } from 'jotai/vanilla'
 
 import {
   downloadItemStatesAtom,
-  downloadCompletionSignalAtom,
   isQueueProcessingAtom,
   type DownloadItem,
   type DownloadItemState,
   type DownloadStatus,
 } from '~state/downloadQueue'
-import { installedVersionsSignalAtom, bibleDataRefreshSignalAtom } from '~state/app'
+import { bibleDataRefreshSignalAtom } from '~state/app'
 import { storage } from '~helpers/storage'
 import { getDownloadQueueDecision } from '~helpers/downloadQueueScheduling'
 import { reconcileResourceInstallationJournal } from '~helpers/resourceInstallationJournal'
 import { installManagedResource } from '~helpers/managedResourceInstallation'
 import { refreshPersistedDownloadItem } from '~helpers/persistedDownloadItem'
 import { appLogger } from '~helpers/agentObservability'
+import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 
 const PERSIST_KEY = 'downloadQueue'
 const MAX_RETRIES = 2
@@ -272,9 +272,7 @@ class DownloadManager {
       })
       this.updateItemStatus(item.id, 'completed')
 
-      // Signal to VersionSelectorItem instances
-      this.jotaiStore.set(installedVersionsSignalAtom, (c: number) => c + 1)
-      this.jotaiStore.set(downloadCompletionSignalAtom, (c: number) => c + 1)
+      offlineResourceRegistry.markInstalled(item.id)
 
       // Signal to BibleViewer instances to reload verses (a version they
       // were trying to display may now be available).

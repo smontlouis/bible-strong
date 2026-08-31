@@ -3,7 +3,6 @@ import { Schema } from 'effect'
 import { getMultipleVerses, getVerseText } from '~helpers/biblesDb'
 import type { StrongBibleSpan } from '~helpers/canonicalStrongVerse'
 import {
-  getStrongBibleSidecarAvailability,
   loadStrongBibleLemmaStatsResult,
   loadStrongBibleChapterSpans,
   loadStrongBibleOccurrenceLocations,
@@ -15,6 +14,7 @@ import {
   type StrongBibleSidecarAvailability,
   type StrongBibleVerseCountByBook,
 } from '~helpers/strongBibleSidecar'
+import { getRegisteredStrongBibleAvailability } from './resourceAvailability'
 import {
   getStrongDatasetId,
   getStrongBibleFallbackPriority,
@@ -213,11 +213,11 @@ export interface StrongBibleResourceAccess {
 }
 
 export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
-  getAvailability: getStrongBibleSidecarAvailability,
+  getAvailability: getRegisteredStrongBibleAvailability,
   async loadChapterSpans(versionId, request) {
     const [spansByVerse, availability] = await Promise.all([
       loadStrongBibleChapterSpans(versionId, request.book, request.chapter),
-      getStrongBibleSidecarAvailability(versionId),
+      getRegisteredStrongBibleAvailability(versionId),
     ])
     return {
       spansByVerse,

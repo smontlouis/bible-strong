@@ -13,8 +13,8 @@ import Media from './EventDetailsMedia'
 import Loading from '~common/Loading'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 
 export type EventDetailsProps = Pick<
   TimelineEventProps,
@@ -52,13 +52,13 @@ export const EventDetailsContent = ({
   const date = calculateLabel(start, end)
   const resources = useResourceAccess()
   const resourceLanguage = useAtomValue(resourcesLanguageAtom).TIMELINE
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const resourceRegistry = useOfflineResourceRegistry()
   const eventQuery = useQuery({
     queryKey: [
       ...resourceQueryKeys.timeline(resourceLanguage),
       'event',
       slug,
-      downloadCompletionSignal,
+      resourceRegistry.revision,
     ],
     queryFn: () => resources.timeline.loadEvent(resourceLanguage, slug),
     networkMode: 'always',

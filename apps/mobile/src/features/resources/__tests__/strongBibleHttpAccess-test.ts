@@ -6,6 +6,10 @@ import {
 } from '../strongBibleResourceAccess'
 import { ResourceAccessError } from '../resourceAccessError'
 
+jest.mock('../resourceAvailability', () => ({
+  getRegisteredStrongBibleAvailability: jest.fn(async () => ({ status: 'missing' })),
+}))
+
 jest.mock('~helpers/firebase', () => ({
   cdnUrl: (path: string) => `https://assets.example/${path}`,
 }))

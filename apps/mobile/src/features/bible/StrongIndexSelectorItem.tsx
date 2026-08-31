@@ -1,7 +1,5 @@
-import { useAtomValue } from 'jotai/react'
-import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { ActivityIndicator, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
 import Box from '~common/ui/Box'
@@ -17,8 +15,8 @@ import {
 import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
-import { useResourceAccess } from '~features/resources/resourceAccess'
+import { getDownloadItemProgress } from '~state/downloadQueue'
+import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 import useConnection from '~helpers/useConnection'
 
 interface Props {
@@ -32,20 +30,15 @@ const isActiveDownload = (status?: string) =>
 
 const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: Props) => {
   const { t } = useTranslation()
-  const resources = useResourceAccess()
   const isConnected = useConnection()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus(createOfflineCopyId({ kind: 'bible', versionId }))
   const strongDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'strong-bible-index', versionId })
   )
-  const availabilityQuery = useQuery({
-    queryKey: ['strong-index-availability', versionId, downloadCompletionSignal],
-    queryFn: () => resources.strongBible.getAvailability(versionId),
-  })
-  const availability = availabilityQuery.data
-  const isChecking = availabilityQuery.isPending || availabilityQuery.isFetching
-  const availabilityFailed = availabilityQuery.isError
+  const resourceState = useOfflineResourceState(
+    createOfflineCopyId({ kind: 'strong-bible-index', versionId })
+  )
+  const availability = resourceState?.availability as StrongBibleSidecarAvailability | undefined
 
   React.useEffect(() => {
     onAvailabilityChange(availability?.status === 'available')
@@ -56,28 +49,12 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
   const isAvailable = availability?.status === 'available'
   const progress = strongActiveDownload ? getDownloadItemProgress(strongActiveDownload) : 0
 
-  const handlePress = async () => {
-    if (isChecking || isAvailable || strongActiveDownload) return
-
-    if (availabilityFailed) {
-      await availabilityQuery.refetch()
-      return
-    }
-
+  const handlePress = () => {
+    if (isAvailable || strongActiveDownload) return
     if (!isConnected) return
-
-    let resolvedAvailability: StrongBibleSidecarAvailability | undefined = availability
-    if (!resolvedAvailability) {
-      const result = await availabilityQuery.refetch()
-      if (result.isError) return
-      resolvedAvailability = result.data
-    }
-
-    if (resolvedAvailability) {
-      downloadManager.enqueue(
-        createStrongSidecarDownloadPlan(versionId, resolvedAvailability.status)
-      )
-    }
+    downloadManager.enqueue(
+      createStrongSidecarDownloadPlan(versionId, availability?.status ?? 'missing')
+    )
   }
 
   if (!expanded) return null
@@ -120,39 +97,22 @@ const StrongIndexSelectorItem = ({ versionId, expanded, onAvailabilityChange }: 
         ) : (
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel={
-              availabilityFailed
-                ? t('resource.action.temporarilyUnavailable')
-                : t('downloads.strongIndexName', { bible: versionId })
-            }
+            accessibilityLabel={t('downloads.strongIndexName', { bible: versionId })}
             accessibilityState={{
-              disabled:
-                (!availabilityFailed && !isConnected) ||
-                isChecking ||
-                Boolean(strongActiveDownload),
+              disabled: !isConnected || Boolean(strongActiveDownload),
             }}
             activeOpacity={strongActiveDownload ? 1 : 0.7}
-            disabled={
-              (!availabilityFailed && !isConnected) || isChecking || Boolean(strongActiveDownload)
-            }
+            disabled={!isConnected || Boolean(strongActiveDownload)}
             onPress={handlePress}
           >
             <Box width={48} minHeight={40} center>
-              {isChecking ? (
-                <ActivityIndicator size="small" />
-              ) : strongActiveDownload?.status === 'queued' ? (
+              {strongActiveDownload?.status === 'queued' ? (
                 <FeatherIcon name="clock" size={18} color="tertiary" />
               ) : strongActiveDownload ? (
                 <Progress progress={Math.max(progress, 0.04)} size={22} thickness={2.5} />
               ) : (
                 <FeatherIcon
-                  name={
-                    availabilityFailed || failedDownload
-                      ? 'rotate-cw'
-                      : !isConnected
-                        ? 'wifi-off'
-                        : 'download-cloud'
-                  }
+                  name={failedDownload ? 'rotate-cw' : !isConnected ? 'wifi-off' : 'download-cloud'}
                   size={16}
                 />
               )}

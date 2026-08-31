@@ -1,8 +1,5 @@
 import type { CommentaryCatalogEntry } from '@bible-strong/resource-catalog/commentaries'
 import { useTheme } from '@emotion/react'
-import { useQuery } from '@tanstack/react-query'
-import { useAtomValue } from 'jotai/react'
-import { getDefaultStore } from 'jotai/vanilla'
 import React from 'react'
 import { Alert } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -13,7 +10,7 @@ import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
 import Text from '~common/ui/Text'
-import { getLocalResourceAvailability } from '~features/resources/resourceAvailability'
+import { useIsOfflineResourceInstalled } from '~features/resources/useOfflineResourceRegistry'
 import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
@@ -26,8 +23,7 @@ import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import useConnection from '~helpers/useConnection'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
-import { installedVersionsSignalAtom } from '~state/app'
-import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
+import { getDownloadItemProgress } from '~state/downloadQueue'
 import CommentaryAvatar from './CommentaryAvatar'
 
 type CommentaryProjection = {
@@ -47,8 +43,6 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const isConnected = useConnection()
-  const installedSignal = useAtomValue(installedVersionsSignalAtom)
-  const completionSignal = useAtomValue(downloadCompletionSignalAtom)
   const identity = projection
     ? {
         kind: 'commentary' as const,
@@ -58,13 +52,7 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
     : undefined
   const itemId = identity ? createOfflineCopyId(identity) : undefined
   const queueState = useDownloadItemStatus(itemId)
-  const availability = useQuery({
-    queryKey: ['commentary-offline-details', itemId, installedSignal, completionSignal],
-    enabled: Boolean(identity),
-    queryFn: () => getLocalResourceAvailability(identity!),
-    networkMode: 'always',
-  })
-  const installed = availability.data?.status === 'available'
+  const installed = useIsOfflineResourceInstalled(identity)
   const publicationStatus = useResourcePublicationStatus({
     resourceId: itemId ?? '',
     isInstalled: installed,
@@ -83,10 +71,6 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
     value: formatMegabytes(artifact.installedBytes, i18n.language),
   })
 
-  const refresh = () => {
-    getDefaultStore().set(installedVersionsSignalAtom, current => current + 1)
-  }
-
   const download = () => {
     if (!isConnected) return
     downloadManager.enqueue([createCommentaryDownloadItem(identity, entry.title)])
@@ -100,7 +84,6 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
         style: 'destructive',
         onPress: async () => {
           await deleteDownloadedItem(createDownloadedItemDeletionPlan(itemId))
-          refresh()
         },
       },
     ])

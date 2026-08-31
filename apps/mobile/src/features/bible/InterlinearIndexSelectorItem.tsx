@@ -1,7 +1,5 @@
-import { useAtomValue } from 'jotai/react'
-import { useQuery } from '@tanstack/react-query'
 import React from 'react'
-import { ActivityIndicator, TouchableOpacity } from 'react-native'
+import { TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
 import Box from '~common/ui/Box'
@@ -14,8 +12,8 @@ import { createInterlinearSidecarDownloadPlan } from '~helpers/downloadItemFacto
 import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { downloadCompletionSignalAtom, getDownloadItemProgress } from '~state/downloadQueue'
-import { useResourceAccess } from '~features/resources/resourceAccess'
+import { getDownloadItemProgress } from '~state/downloadQueue'
+import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 import useConnection from '~helpers/useConnection'
 
 interface Props {
@@ -29,22 +27,17 @@ const isActiveDownload = (status?: string) =>
 
 const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }: Props) => {
   const { t } = useTranslation()
-  const resources = useResourceAccess()
   const isConnected = useConnection()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const bibleDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'bible', versionId: 'BHG' })
   )
   const indexDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: locale })
   )
-  const availabilityQuery = useQuery({
-    queryKey: ['interlinear-index-availability', locale, downloadCompletionSignal],
-    queryFn: () => resources.lexiconBible.getInterlinearAvailability(locale),
-  })
-  const availability = availabilityQuery.data
-  const isChecking = availabilityQuery.isPending || availabilityQuery.isFetching
-  const availabilityFailed = availabilityQuery.isError
+  const resourceState = useOfflineResourceState(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: locale })
+  )
+  const availability = resourceState?.availability as InterlinearSidecarAvailability | undefined
 
   React.useEffect(() => {
     onAvailabilityChange(availability?.status === 'available')
@@ -55,26 +48,11 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
   const isAvailable = availability?.status === 'available'
   const progress = activeDownload ? getDownloadItemProgress(activeDownload) : 0
 
-  const handlePress = async () => {
-    if (isChecking || isAvailable || activeDownload) return
-
-    if (availabilityFailed) {
-      await availabilityQuery.refetch()
-      return
-    }
-
+  const handlePress = () => {
+    if (isAvailable || activeDownload) return
     if (!isConnected) return
-
-    let resolvedAvailability: InterlinearSidecarAvailability | undefined = availability
-    if (!resolvedAvailability) {
-      const result = await availabilityQuery.refetch()
-      if (result.isError) return
-      resolvedAvailability = result.data
-    }
-
-    if (!resolvedAvailability || resolvedAvailability.status === 'available') return
     downloadManager.enqueue(
-      createInterlinearSidecarDownloadPlan(locale, resolvedAvailability.status)
+      createInterlinearSidecarDownloadPlan(locale, availability?.status ?? 'missing')
     )
   }
 
@@ -118,37 +96,22 @@ const InterlinearIndexSelectorItem = ({ locale, expanded, onAvailabilityChange }
         ) : (
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel={
-              availabilityFailed
-                ? t('resource.action.temporarilyUnavailable')
-                : t('downloads.interlinearIndexName')
-            }
+            accessibilityLabel={t('downloads.interlinearIndexName')}
             accessibilityState={{
-              disabled:
-                (!availabilityFailed && !isConnected) || isChecking || Boolean(activeDownload),
+              disabled: !isConnected || Boolean(activeDownload),
             }}
             activeOpacity={activeDownload ? 1 : 0.7}
-            disabled={
-              (!availabilityFailed && !isConnected) || isChecking || Boolean(activeDownload)
-            }
+            disabled={!isConnected || Boolean(activeDownload)}
             onPress={handlePress}
           >
             <Box width={48} minHeight={40} center>
-              {isChecking ? (
-                <ActivityIndicator size="small" />
-              ) : activeDownload?.status === 'queued' ? (
+              {activeDownload?.status === 'queued' ? (
                 <FeatherIcon name="clock" size={18} color="tertiary" />
               ) : activeDownload ? (
                 <Progress progress={Math.max(progress, 0.04)} size={22} thickness={2.5} />
               ) : (
                 <FeatherIcon
-                  name={
-                    availabilityFailed || failedDownload
-                      ? 'rotate-cw'
-                      : !isConnected
-                        ? 'wifi-off'
-                        : 'download-cloud'
-                  }
+                  name={failedDownload ? 'rotate-cw' : !isConnected ? 'wifi-off' : 'download-cloud'}
                   size={16}
                 />
               )}

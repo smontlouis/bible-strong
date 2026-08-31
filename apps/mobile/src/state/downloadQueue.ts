@@ -41,9 +41,6 @@ export const downloadItemStatesAtom = atom<Map<string, DownloadItemState>>(new M
 /** Whether the queue processor is currently running */
 export const isQueueProcessingAtom = atom(false)
 
-/** Incremented after each download completion — components can watch this for reactivity */
-export const downloadCompletionSignalAtom = atom(0)
-
 // ---------------------------------------------------------------------------
 // Derived atoms (read-only)
 // ---------------------------------------------------------------------------

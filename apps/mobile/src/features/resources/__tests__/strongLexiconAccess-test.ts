@@ -6,6 +6,13 @@ jest.mock('~helpers/strongLexiconModules', () => ({
   withOptionalStrongLexiconDatabase: jest.fn(),
 }))
 
+jest.mock('../resourceAvailability', () => ({
+  getRegisteredStrongLexiconAvailability: (moduleId: string) =>
+    jest
+      .requireMock('../../../helpers/strongLexiconModules')
+      .getStrongLexiconModuleAvailability(moduleId),
+}))
+
 import {
   getStrongLexiconModuleAvailability,
   withOptionalStrongLexiconDatabase,

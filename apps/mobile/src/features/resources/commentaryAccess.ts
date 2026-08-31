@@ -3,7 +3,6 @@ import {
   type CommentaryCatalogEntry,
 } from '@bible-strong/resource-catalog/commentaries'
 import { Schema } from 'effect'
-import * as FileSystem from 'expo-file-system/legacy'
 import { DomUtils, parseDocument } from 'htmlparser2'
 
 import type { Comment } from '~features/commentaries/types'
@@ -15,6 +14,7 @@ import {
   CommentaryCoverageResponseDto,
 } from './supplementaryContract'
 import { ResourceAccessError, resourceAccessErrorFromHttpResponse } from './resourceAccessError'
+import { getLocalResourceAvailability, offlineResourceRegistry } from './resourceAvailability'
 
 export type CommentaryChapterRequest = {
   book: number
@@ -145,12 +145,18 @@ const decodeSerializedComments = (value: string): SerializedCommentaryChapter =>
 
 export const localCommentaryChapterSource: CommentaryChapterSource = {
   async loadResourceChapter(publicationId, language, book, chapter) {
-    const path = getCommentaryDbPath(publicationId, language)
-    const info = await FileSystem.getInfoAsync(path)
-    if (!info.exists || info.isDirectory) {
-      throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    const availability = await getLocalResourceAvailability({
+      kind: 'commentary',
+      resourceId: publicationId,
+      language,
+    })
+    if (availability.status !== 'available') {
+      throw new ResourceAccessError(
+        availability.status === 'corrupt' ? 'INVALID_OFFLINE_COPY' : 'OFFLINE_COPY_REQUIRED',
+        ['acquire-offline-copy']
+      )
     }
-
+    const path = getCommentaryDbPath(publicationId, language)
     const fileName = path.split('/').pop()!
     const directory = path.slice(0, -(fileName.length + 1))
     let database: Awaited<ReturnType<typeof openSQLiteDatabase>> | undefined
@@ -163,6 +169,11 @@ export const localCommentaryChapterSource: CommentaryChapterSource = {
       return row ? decodeSerializedComments(row.commentaires) : {}
     } catch (error) {
       if (error instanceof ResourceAccessError) throw error
+      offlineResourceRegistry.markCorrupt({
+        kind: 'commentary',
+        resourceId: publicationId,
+        language,
+      })
       throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
         'acquire-offline-copy',
         'manage-offline-copies',
@@ -172,12 +183,18 @@ export const localCommentaryChapterSource: CommentaryChapterSource = {
     }
   },
   async loadResourceCoverage(publicationId, language) {
-    const path = getCommentaryDbPath(publicationId, language)
-    const info = await FileSystem.getInfoAsync(path)
-    if (!info.exists || info.isDirectory) {
-      throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    const availability = await getLocalResourceAvailability({
+      kind: 'commentary',
+      resourceId: publicationId,
+      language,
+    })
+    if (availability.status !== 'available') {
+      throw new ResourceAccessError(
+        availability.status === 'corrupt' ? 'INVALID_OFFLINE_COPY' : 'OFFLINE_COPY_REQUIRED',
+        ['acquire-offline-copy']
+      )
     }
-
+    const path = getCommentaryDbPath(publicationId, language)
     const fileName = path.split('/').pop()!
     const directory = path.slice(0, -(fileName.length + 1))
     let database: Awaited<ReturnType<typeof openSQLiteDatabase>> | undefined
@@ -187,6 +204,11 @@ export const localCommentaryChapterSource: CommentaryChapterSource = {
       return buildCommentaryCoverage(rows.map(row => row.id))
     } catch (error) {
       if (error instanceof ResourceAccessError) throw error
+      offlineResourceRegistry.markCorrupt({
+        kind: 'commentary',
+        resourceId: publicationId,
+        language,
+      })
       throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
         'acquire-offline-copy',
         'manage-offline-copies',

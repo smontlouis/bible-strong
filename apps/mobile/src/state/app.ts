@@ -65,10 +65,6 @@ export const colorChangeModalAtom = atom<ColorChangeModalProps>(false)
 // Atom to trigger animation state reset in AppSwitcherProvider
 export const resetTabAnimationTriggerAtom = atom(0)
 
-// Signal atom — incremented whenever a Bible version is downloaded or deleted,
-// so that all mounted VersionSelectorItem instances re-check install status.
-export const installedVersionsSignalAtom = atom(0)
-
 // Signal atom — incremented after Bible migration completes,
 // so that all mounted BibleViewer instances reload verses from SQLite.
 export const bibleDataRefreshSignalAtom = atom(0)

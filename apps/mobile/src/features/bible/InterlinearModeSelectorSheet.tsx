@@ -1,6 +1,5 @@
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
-import { useQuery } from '@tanstack/react-query'
 import { type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform, Pressable } from 'react-native'
@@ -21,16 +20,12 @@ import {
 import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import useLanguage from '~helpers/useLanguage'
-import {
-  downloadCompletionSignalAtom,
-  downloadItemStatesAtom,
-  getDownloadItemProgress,
-} from '~state/downloadQueue'
+import { downloadItemStatesAtom, getDownloadItemProgress } from '~state/downloadQueue'
 import { useBibleTabActions, type BibleTab } from '~state/tabs'
 import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisition'
 import BibleDisplayModeCard from './BibleDisplayModeCard'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { useResourceAccess } from '~features/resources/resourceAccess'
+import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
 import useConnection from '~helpers/useConnection'
 
 type Props = {
@@ -49,9 +44,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const appLanguage = useLanguage()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
-  const resources = useResourceAccess()
   const isConnected = useConnection()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
   const downloadStates = useAtomValue(downloadItemStatesAtom)
   const frenchDownload = useDownloadItemStatus(
     createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'fr' })
@@ -66,52 +59,36 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const transliterationPreview = isHebrew ? 'Elohim bara' : 'logos en'
   const glossPreview = isHebrew ? 'Dieu · H0430' : 'Parole · G3056'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
+  const frenchResource = useOfflineResourceState(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'fr' })
+  )
+  const englishResource = useOfflineResourceState(
+    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'en' })
+  )
   const pendingAcquisition =
     bible.data.pendingModeAcquisition?.kind === 'interlinear'
       ? bible.data.pendingModeAcquisition
       : undefined
 
-  const availabilityQuery = useQuery<AvailabilityByLocale>({
-    queryKey: [
-      'interlinear-mode-availability',
-      downloadCompletionSignal,
-      englishDownload?.status,
-      frenchDownload?.status,
-    ],
-    queryFn: async () => {
-      const [fr, en] = await Promise.all([
-        resources.lexiconBible.getInterlinearAvailability('fr'),
-        resources.lexiconBible.getInterlinearAvailability('en'),
-      ])
-      return { fr, en }
-    },
-  })
-  const availability = availabilityQuery.data ?? {}
-  const availabilityFailed = availabilityQuery.isError
+  const availability: AvailabilityByLocale = {
+    fr: frenchResource?.availability as InterlinearSidecarAvailability | undefined,
+    en: englishResource?.availability as InterlinearSidecarAvailability | undefined,
+  }
+  const availabilityFailed = false
 
   const getDownload = (locale: ResourceLanguage) =>
     locale === 'fr' ? frenchDownload : englishDownload
 
   const isAvailable = (locale: ResourceLanguage) => availability[locale]?.status === 'available'
 
-  const ensureAvailability = async (): Promise<AvailabilityByLocale> => {
-    if (availability.fr && availability.en) return availability
-
-    const result = await availabilityQuery.refetch()
-    return result.data ?? {}
-  }
-
-  const requestDownload = async (
+  const requestDownload = (
     locale: ResourceLanguage,
     _modeLabel: string,
     modeAfterDownload?: InterlinearDisplayMode,
     knownAvailability?: InterlinearSidecarAvailability
   ) => {
     if (!isConnected || availabilityFailed) return
-    const resolvedAvailability =
-      knownAvailability ??
-      availability[locale] ??
-      (await resources.lexiconBible.getInterlinearAvailability(locale).catch(() => undefined))
+    const resolvedAvailability = knownAvailability ?? availability[locale]
     if (!resolvedAvailability) return
     if (resolvedAvailability.status === 'available') {
       if (modeAfterDownload) {
@@ -133,7 +110,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     downloadManager.enqueue(plan)
   }
 
-  const selectMode = async (mode: DisplayMode) => {
+  const selectMode = (mode: DisplayMode) => {
     if (mode === 'hidden') {
       if (bible.data.pendingModeAcquisition) {
         actions.finishBibleModeAcquisition(false)
@@ -145,7 +122,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
 
     const preferredLocale = selectedLocale
     const fallbackLocale = preferredLocale === 'fr' ? 'en' : 'fr'
-    const resolvedAvailability = await ensureAvailability()
+    const resolvedAvailability = availability
     const mayFallback = mode !== 'interlinear'
     if (
       resolvedAvailability[preferredLocale]?.status === 'available' ||
@@ -226,8 +203,7 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     )
   }
 
-  const hasLoadedAvailability =
-    availabilityQuery.isSuccess && Boolean(availability.fr && availability.en)
+  const hasLoadedAvailability = Boolean(availability.fr && availability.en)
   const preferredAvailable = isAvailable(selectedLocale)
   const fallbackLocale: ResourceLanguage = selectedLocale === 'fr' ? 'en' : 'fr'
   const fallbackAvailable = isAvailable(fallbackLocale)
@@ -253,16 +229,6 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   return (
     <Sheet ref={sheetRef} header={<SheetHeader title={t('Affichage du texte')} />}>
       <SheetView p={16} gap={10}>
-        {availabilityFailed && (
-          <Box center py={8}>
-            <Text color="tertiary" textAlign="center">
-              {t('resource.action.temporarilyUnavailable')}
-            </Text>
-            <Text bold color="primary" mt={8} onPress={() => void availabilityQuery.refetch()}>
-              {t('bible.error.retry')}
-            </Text>
-          </Box>
-        )}
         <Box row gap={10}>
           <BibleDisplayModeCard
             label={t('Original')}

@@ -2,12 +2,12 @@ import { Schema } from 'effect'
 
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import {
-  getInterlinearSidecarAvailability,
   loadInterlinearChapterTokens,
   type InterlinearChapterTokens,
   type InterlinearSidecarAvailability,
   type InterlinearToken,
 } from '~helpers/interlinearBibleSidecar'
+import { getRegisteredInterlinearAvailability } from './resourceAvailability'
 import type { BibleChapterAdapter } from './bibleChapterSource'
 import { InterlinearBibleChapterDto, InterlinearBibleCoverageDto } from './interlinearBibleContract'
 import {
@@ -35,11 +35,11 @@ export interface InterlinearBibleResourceAdapter {
 export type InterlinearBibleResourceAccess = InterlinearBibleResourceAdapter
 
 export const localInterlinearBibleResourceAdapter: InterlinearBibleResourceAdapter = {
-  getAvailability: getInterlinearSidecarAvailability,
+  getAvailability: getRegisteredInterlinearAvailability,
   async loadChapterTokens(locale, request) {
     const [tokensByVerse, availability] = await Promise.all([
       loadInterlinearChapterTokens('BHG', locale, request.book, request.chapter),
-      getInterlinearSidecarAvailability(locale),
+      getRegisteredInterlinearAvailability(locale),
     ])
     return {
       tokensByVerse,

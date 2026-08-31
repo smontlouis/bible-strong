@@ -64,8 +64,8 @@ jest.mock('~common/sheet', () => ({
   SheetView: ({ children }: React.PropsWithChildren) => children,
 }))
 jest.mock('~helpers/useLanguage', () => () => 'fr')
-jest.mock('~state/app', () => ({
-  installedVersionsSignalAtom: Symbol('installedVersionsSignalAtom'),
+jest.mock('~features/resources/useOfflineResourceRegistry', () => ({
+  useOfflineResourceRegistry: () => ({ revision: 0, phase: 'ready', resources: new Map() }),
 }))
 jest.mock('../versionCatalogState', () => ({
   bibleVersionGroupingAtom: Symbol('bibleVersionGroupingAtom'),

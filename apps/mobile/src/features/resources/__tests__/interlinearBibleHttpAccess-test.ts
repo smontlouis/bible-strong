@@ -5,6 +5,10 @@ import {
 } from '../interlinearBibleResourceAccess'
 import { ResourceAccessError } from '../resourceAccessError'
 
+jest.mock('../resourceAvailability', () => ({
+  getRegisteredInterlinearAvailability: jest.fn(async () => ({ status: 'missing' })),
+}))
+
 jest.mock('~helpers/firebase', () => ({
   cdnUrl: (path: string) => `https://assets.example/${path}`,
 }))

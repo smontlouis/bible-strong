@@ -14,6 +14,7 @@ import type { StrongLexiconModuleId } from './strongLexiconPublications'
 import { invalidateOfflineCopyQueries } from './offlineCopyQueries'
 import { createOfflineCopyId, parseOfflineCopyId, type OfflineCopyIdentity } from './offlineCopy'
 import { getCommentaryDbPath, getDictionaryDbPath } from './databases'
+import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 
 interface DeleteDownloadedItemOptions {
   bibleMode?: 'remove' | 'replace'
@@ -110,6 +111,7 @@ export const createDownloadedItemDeletionPlan = (
 
 const invalidateAndForgetPublication = async (identity: OfflineCopyIdentity): Promise<void> => {
   resourcePublicationStore.remove(createOfflineCopyId(identity))
+  offlineResourceRegistry.markMissing(identity)
   await invalidateOfflineCopyQueries(identity)
 }
 

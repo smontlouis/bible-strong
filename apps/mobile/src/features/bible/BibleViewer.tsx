@@ -78,7 +78,7 @@ import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { selectIsLogged } from '~redux/selectors/user'
 import type { AppDispatch } from '~redux/store'
 import { historyAtom } from '../../state/app'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import {
   activeBibleTabIdAtom,
   bibleDOMHostLayoutsAtom,
@@ -194,7 +194,7 @@ const BibleViewer = ({
   const openEntityRelations = useOpenEntityRelations()
   const openNote = useOpenNote()
   const resources = useResourceAccess()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const resourceRegistry = useOfflineResourceRegistry()
 
   const setUnifiedTagsModal = useUnifiedTagsModal()
   const [selectedCode, setSelectedCodeState] = useState<SelectedCode | null>(null)
@@ -405,7 +405,7 @@ const BibleViewer = ({
   const commentsAvailabilityQuery = useQuery({
     queryKey: [
       ...resourceQueryKeys.offlineDatabaseAvailability('MHY', 'fr'),
-      downloadCompletionSignal,
+      resourceRegistry.revision,
     ],
     queryFn: () =>
       resources.bibleReading.getMhyAvailability?.(lang) ??
@@ -436,7 +436,7 @@ const BibleViewer = ({
     queryKey: [
       ...resourceQueryKeys.bibleRedWords(version),
       'availability',
-      downloadCompletionSignal,
+      resourceRegistry.revision,
     ],
     queryFn: () =>
       resources.bibleReading.getRedWordsAvailability?.(version) ??

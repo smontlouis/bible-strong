@@ -70,6 +70,7 @@ jest.mock('../queryClient', () => ({
 
 jest.mock('../resourcePublication', () => ({
   resourcePublicationStore: {
+    read: jest.fn(),
     remove: jest.fn(),
   },
 }))

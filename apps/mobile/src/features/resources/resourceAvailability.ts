@@ -8,7 +8,12 @@ import {
   initLanguageDirs,
 } from '~helpers/databases'
 import { dbManager, initSQLiteDir } from '~helpers/sqlite'
-import type { DatabaseId, ResourceLanguage } from '~helpers/databaseTypes'
+import {
+  LANGUAGE_SPECIFIC_DBS,
+  SHARED_DBS,
+  type DatabaseId,
+  type ResourceLanguage,
+} from '~helpers/databaseTypes'
 import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
 import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
@@ -24,9 +29,17 @@ import {
   getStrongLexiconModuleAvailability,
   type StrongLexiconModuleAvailability,
 } from '~helpers/strongLexiconModules'
-import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
+import {
+  getMobileResourceCatalogEntry,
+  MOBILE_RESOURCE_CATALOG,
+  type MobileResourceCatalog,
+} from '~helpers/mobileResourceCatalog'
+import { resourcePublicationStore } from '~helpers/resourcePublication'
 import { requirePericopePath } from '~helpers/pericopes'
 import { requireRedWordsPath } from '~helpers/redWords'
+
+const REGISTRY_DATABASE_IDS = new Set<DatabaseId>([...LANGUAGE_SPECIFIC_DBS, ...SHARED_DBS])
+const RESOURCE_RECONCILIATION_CONCURRENCY = 4
 
 type FileInfo = {
   exists: boolean
@@ -55,15 +68,9 @@ export type LocalResourceAvailability =
       resource: LocalResourceRef
       reason: 'integrity-check-failed'
     }
-  | (Exclude<StrongBibleSidecarAvailability, { status: 'available' | 'missing' }> & {
-      resource: LocalResourceRef
-    })
-  | (Exclude<InterlinearSidecarAvailability, { status: 'available' | 'missing' }> & {
-      resource: LocalResourceRef
-    })
-  | (Exclude<StrongLexiconModuleAvailability, { status: 'available' | 'missing' }> & {
-      resource: LocalResourceRef
-    })
+  | (StrongBibleSidecarAvailability & { resource: LocalResourceRef })
+  | (InterlinearSidecarAvailability & { resource: LocalResourceRef })
+  | (StrongLexiconModuleAvailability & { resource: LocalResourceRef })
 
 type ResourceAvailabilityDependencies = {
   getFileInfo: (path: string) => Promise<FileInfo>
@@ -136,7 +143,7 @@ const defaultDependencies: ResourceAvailabilityDependencies = {
 export const getLocalResourceKey = (resource: LocalResourceRef): string =>
   createOfflineCopyId(resource)
 
-export const getLocalResourceAvailability = async (
+export const probeLocalResourceAvailability = async (
   resource: LocalResourceRef,
   dependencies: ResourceAvailabilityDependencies = defaultDependencies
 ): Promise<LocalResourceAvailability> => {
@@ -153,27 +160,21 @@ export const getLocalResourceAvailability = async (
     const availability = await (
       dependencies.getStrongBibleAvailability ?? getStrongBibleSidecarAvailability
     )(resource.versionId)
-    return availability.status === 'available'
-      ? { status: 'available', resource }
-      : { ...availability, resource }
+    return { ...availability, resource }
   }
 
   if (resource.kind === 'interlinear-index') {
     const availability = await (
       dependencies.getInterlinearAvailability ?? getInterlinearSidecarAvailability
     )(resource.language)
-    return availability.status === 'available'
-      ? { status: 'available', resource }
-      : { ...availability, resource }
+    return { ...availability, resource }
   }
 
   if (resource.kind === 'strong-lexicon-module') {
     const availability = await (
       dependencies.getStrongLexiconAvailability ?? getStrongLexiconModuleAvailability
     )(resource.moduleId)
-    return availability.status === 'available'
-      ? { status: 'available', resource }
-      : { ...availability, resource }
+    return { ...availability, resource }
   }
 
   if (resource.kind === 'database') {
@@ -247,6 +248,327 @@ export const getLocalResourceAvailability = async (
     resource,
   }
 }
+
+export type OfflineResourceRegistryEntry = {
+  id: string
+  resource: LocalResourceRef
+  availability: LocalResourceAvailability
+  verified: boolean
+  installedRevision?: string
+  catalogRevision?: string
+  updateAvailable: boolean
+}
+
+export type OfflineResourceRegistrySnapshot = {
+  revision: number
+  phase: 'idle' | 'reconciling' | 'ready'
+  resources: ReadonlyMap<string, OfflineResourceRegistryEntry>
+}
+
+const getCatalogResourceRefs = (catalog: MobileResourceCatalog): LocalResourceRef[] => {
+  const refs: LocalResourceRef[] = []
+  for (const resourceId of Object.keys(catalog.resources)) {
+    const resource = parseRegistryResourceId(resourceId)
+    if (!resource) continue
+
+    refs.push(resource)
+    if (resource.kind !== 'bible') continue
+    const entries = catalog.resources[resourceId]?.entries
+    if (entries?.pericope) {
+      refs.push({ kind: 'bible-pericope', versionId: resource.versionId })
+    }
+    if (entries?.redWords) {
+      refs.push({ kind: 'bible-red-words', versionId: resource.versionId })
+    }
+  }
+
+  return [...new Map(refs.map(resource => [createOfflineCopyId(resource), resource])).values()]
+}
+
+const parseRegistryResourceId = (id: string): LocalResourceRef | undefined => {
+  const parts = id.split(':')
+  const language = parts.at(-1) as ResourceLanguage
+  if (parts[0] === 'bible' && parts[1]) return { kind: 'bible', versionId: parts[1] }
+  if (parts[0] === 'bible-strong' && parts[1]) {
+    return { kind: 'strong-bible-index', versionId: parts[1] as never }
+  }
+  if (parts[0] === 'bible-interlinear' && parts[1] === 'BHG' && parts.length === 3) {
+    return { kind: 'interlinear-index', versionId: 'BHG', language }
+  }
+  if (parts[0] === 'strong-lexicon' && parts[1]) {
+    return { kind: 'strong-lexicon-module', moduleId: parts[1] as never }
+  }
+  if (parts[0] === 'dictionary' && parts.length === 4) {
+    return { kind: 'dictionary', work: parts[1], resourceId: parts[2], language }
+  }
+  if (parts[0] === 'database' && parts[1] && parts.length === 3) {
+    return REGISTRY_DATABASE_IDS.has(parts[1] as DatabaseId)
+      ? {
+          kind: 'database',
+          databaseId: parts[1] as Exclude<DatabaseId, 'BIBLES'>,
+          language,
+        }
+      : { kind: 'commentary', resourceId: parts[1], language }
+  }
+  if (parts[0] === 'bible-pericope' && parts[1]) {
+    return { kind: 'bible-pericope', versionId: parts[1] }
+  }
+  if (parts[0] === 'bible-red-words' && parts[1]) {
+    return { kind: 'bible-red-words', versionId: parts[1] }
+  }
+  return undefined
+}
+
+export type OfflineResourceRegistryDependencies = {
+  probe: (resource: LocalResourceRef) => Promise<LocalResourceAvailability>
+  readPublication: typeof resourcePublicationStore.read
+  getCatalog: () => MobileResourceCatalog
+}
+
+const defaultRegistryDependencies: OfflineResourceRegistryDependencies = {
+  probe: resource => probeLocalResourceAvailability(resource),
+  readPublication: resourceId => resourcePublicationStore.read(resourceId),
+  getCatalog: () => MOBILE_RESOURCE_CATALOG,
+}
+
+export class OfflineResourceRegistry {
+  private listeners = new Set<() => void>()
+  private entries = new Map<string, OfflineResourceRegistryEntry>()
+  private snapshot: OfflineResourceRegistrySnapshot = {
+    revision: 0,
+    phase: 'idle',
+    resources: this.entries,
+  }
+  private reconciliationTasks = new Map<string, Promise<LocalResourceAvailability>>()
+  private allReconciliationTask?: Promise<void>
+
+  constructor(
+    private readonly dependencies: OfflineResourceRegistryDependencies = defaultRegistryDependencies
+  ) {
+    this.syncCatalog(this.dependencies.getCatalog(), false)
+  }
+
+  getSnapshot = (): OfflineResourceRegistrySnapshot => this.snapshot
+
+  subscribe = (listener: () => void): (() => void) => {
+    this.listeners.add(listener)
+    return () => this.listeners.delete(listener)
+  }
+
+  get(resource: LocalResourceRef | string): OfflineResourceRegistryEntry | undefined {
+    const id = typeof resource === 'string' ? resource : createOfflineCopyId(resource)
+    return this.entries.get(id)
+  }
+
+  isInstalled(resource: LocalResourceRef | string): boolean {
+    const entry = this.get(resource)
+    return entry?.availability.status === 'available' || entry?.availability.status === 'corrupt'
+  }
+
+  syncCatalog(catalog: MobileResourceCatalog = MOBILE_RESOURCE_CATALOG, emit = true): void {
+    if (!catalog?.resources) return
+    let changed = false
+    const catalogResources = getCatalogResourceRefs(catalog)
+    const catalogResourceIds = new Set(catalogResources.map(createOfflineCopyId))
+    for (const id of this.entries.keys()) {
+      if (catalogResourceIds.has(id)) continue
+      this.entries.delete(id)
+      changed = true
+    }
+    for (const resource of catalogResources) {
+      const id = createOfflineCopyId(resource)
+      const catalogRevision = catalog.resources[id]?.archiveSha256
+      const installed = this.dependencies.readPublication(id)
+      const previous = this.entries.get(id)
+      const availability: LocalResourceAvailability =
+        previous?.verified === true
+          ? previous.availability
+          : installed
+            ? { status: 'available', resource }
+            : (previous?.availability ?? { status: 'missing', resource })
+      const next: OfflineResourceRegistryEntry = {
+        id,
+        resource,
+        availability,
+        verified: previous?.verified ?? false,
+        installedRevision: installed?.archiveSha256,
+        catalogRevision,
+        updateAvailable: Boolean(
+          installed && catalogRevision && installed.archiveSha256 !== catalogRevision
+        ),
+      }
+      if (
+        !previous ||
+        previous.catalogRevision !== next.catalogRevision ||
+        previous.installedRevision !== next.installedRevision ||
+        previous.updateAvailable !== next.updateAvailable ||
+        previous.availability.status !== next.availability.status
+      ) {
+        this.entries.set(id, next)
+        changed = true
+      }
+    }
+    if (changed && emit) this.emit()
+  }
+
+  async getAvailability(resource: LocalResourceRef): Promise<LocalResourceAvailability> {
+    const entry = this.get(resource)
+    if (entry?.verified) return entry.availability
+    return this.reconcile(resource)
+  }
+
+  reconcile(resource: LocalResourceRef): Promise<LocalResourceAvailability> {
+    const id = createOfflineCopyId(resource)
+    const currentTask = this.reconciliationTasks.get(id)
+    if (currentTask) return currentTask
+
+    const task = this.dependencies
+      .probe(resource)
+      .then(availability => {
+        this.setAvailability(resource, availability, true)
+        return availability
+      })
+      .finally(() => this.reconciliationTasks.delete(id))
+    this.reconciliationTasks.set(id, task)
+    return task
+  }
+
+  reconcileAll(catalog: MobileResourceCatalog = this.dependencies.getCatalog()): Promise<void> {
+    if (this.allReconciliationTask) return this.allReconciliationTask
+    this.syncCatalog(catalog)
+    this.setPhase('reconciling')
+    const resources = getCatalogResourceRefs(catalog)
+    let cursor = 0
+    const reconcileNext = async (): Promise<void> => {
+      while (cursor < resources.length) {
+        const resource = resources[cursor++]
+        await this.reconcile(resource).catch(() => undefined)
+      }
+    }
+    const task = Promise.all(
+      Array.from(
+        { length: Math.min(RESOURCE_RECONCILIATION_CONCURRENCY, resources.length) },
+        reconcileNext
+      )
+    )
+      .then(() => this.setPhase('ready'))
+      .finally(() => {
+        this.allReconciliationTask = undefined
+      })
+    this.allReconciliationTask = task
+    return task
+  }
+
+  markInstalled(resource: LocalResourceRef | string): void {
+    const resolved = typeof resource === 'string' ? parseRegistryResourceId(resource) : resource
+    if (!resolved) return
+    // Installation is visible synchronously. The first content access then performs
+    // the single specialised reconciliation needed to hydrate sidecar metadata.
+    this.setAvailability(resolved, { status: 'available', resource: resolved }, false)
+  }
+
+  markMissing(resource: LocalResourceRef | string): void {
+    const resolved = typeof resource === 'string' ? parseRegistryResourceId(resource) : resource
+    if (!resolved) return
+    this.setAvailability(resolved, { status: 'missing', resource: resolved }, true)
+  }
+
+  markCorrupt(resource: LocalResourceRef | string): void {
+    const resolved = typeof resource === 'string' ? parseRegistryResourceId(resource) : resource
+    if (!resolved) return
+    this.setAvailability(
+      resolved,
+      { status: 'corrupt', resource: resolved, reason: 'integrity-check-failed' },
+      true
+    )
+  }
+
+  invalidate(resource: LocalResourceRef | string): void {
+    const resolved = typeof resource === 'string' ? parseRegistryResourceId(resource) : resource
+    if (!resolved) return
+    const id = createOfflineCopyId(resolved)
+    const previous = this.entries.get(id)
+    if (!previous) return
+    this.entries.set(id, { ...previous, verified: false })
+    this.emit()
+  }
+
+  private setAvailability(
+    resource: LocalResourceRef,
+    availability: LocalResourceAvailability,
+    verified: boolean
+  ): void {
+    const id = createOfflineCopyId(resource)
+    const installed = this.dependencies.readPublication(id)
+    const catalogRevision = this.dependencies.getCatalog().resources[id]?.archiveSha256
+    this.entries.set(id, {
+      id,
+      resource,
+      availability,
+      verified,
+      installedRevision: installed?.archiveSha256,
+      catalogRevision,
+      updateAvailable: Boolean(
+        installed && catalogRevision && installed.archiveSha256 !== catalogRevision
+      ),
+    })
+    this.emit()
+  }
+
+  private setPhase(phase: OfflineResourceRegistrySnapshot['phase']): void {
+    if (this.snapshot.phase === phase) return
+    this.snapshot = { ...this.snapshot, phase }
+    this.emit(false)
+  }
+
+  private emit(refreshSnapshot = true): void {
+    if (refreshSnapshot) {
+      this.snapshot = {
+        revision: this.snapshot.revision + 1,
+        phase: this.snapshot.phase,
+        resources: new Map(this.entries),
+      }
+    } else {
+      this.snapshot = { ...this.snapshot, revision: this.snapshot.revision + 1 }
+    }
+    this.listeners.forEach(listener => listener())
+  }
+}
+
+export const offlineResourceRegistry = new OfflineResourceRegistry()
+
+export const getRegisteredStrongBibleAvailability = async (
+  versionId: string
+): Promise<StrongBibleSidecarAvailability> =>
+  offlineResourceRegistry.getAvailability({
+    kind: 'strong-bible-index',
+    versionId: versionId as never,
+  }) as Promise<StrongBibleSidecarAvailability>
+
+export const getRegisteredInterlinearAvailability = async (
+  language: ResourceLanguage
+): Promise<InterlinearSidecarAvailability> =>
+  offlineResourceRegistry.getAvailability({
+    kind: 'interlinear-index',
+    versionId: 'BHG',
+    language,
+  }) as Promise<InterlinearSidecarAvailability>
+
+export const getRegisteredStrongLexiconAvailability = async (
+  moduleId: Extract<OfflineCopyIdentity, { kind: 'strong-lexicon-module' }>['moduleId']
+): Promise<StrongLexiconModuleAvailability> =>
+  offlineResourceRegistry.getAvailability({
+    kind: 'strong-lexicon-module',
+    moduleId,
+  }) as Promise<StrongLexiconModuleAvailability>
+
+export const getLocalResourceAvailability = async (
+  resource: LocalResourceRef,
+  dependencies?: ResourceAvailabilityDependencies
+): Promise<LocalResourceAvailability> =>
+  dependencies
+    ? probeLocalResourceAvailability(resource, dependencies)
+    : offlineResourceRegistry.getAvailability(resource)
 
 export const isLocalResourceAvailable = async (
   resource: LocalResourceRef,

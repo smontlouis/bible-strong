@@ -92,6 +92,18 @@ jest.mock('~features/resources/resourceAccess', () => ({
   }),
 }))
 
+jest.mock('~features/resources/useOfflineResourceRegistry', () => ({
+  useOfflineResourceState: (id?: string) =>
+    id
+      ? {
+          id,
+          availability: {
+            status: id.startsWith('bible:') ? 'available' : 'missing',
+          },
+        }
+      : undefined,
+}))
+
 jest.mock('~helpers/bibleBookCatalog', () => ({ getBooksForCanon: () => [] }))
 jest.mock('~helpers/downloadItemFactory', () => ({
   createBibleDownloadItem: () => ({ id: 'bible:LSG' }),
@@ -117,10 +129,8 @@ jest.mock('~helpers/useDownloadQueue', () => ({ useDownloadItemStatus: () => und
 jest.mock('~i18n', () => ({ getLanguage: () => 'fr' }))
 jest.mock('~state/app', () => ({
   bibleDataRefreshSignalAtom: Symbol('bibleDataRefreshSignalAtom'),
-  installedVersionsSignalAtom: Symbol('installedVersionsSignalAtom'),
 }))
 jest.mock('~state/downloadQueue', () => ({
-  downloadCompletionSignalAtom: Symbol('downloadCompletionSignalAtom'),
   getDownloadItemProgress: () => 0,
 }))
 
@@ -166,6 +176,5 @@ describe('BibleOfflineDetailsSheet', () => {
     })
 
     expect(renderer.root.findByType('Switch' as never)).toBeTruthy()
-    expect(mockLocalAvailability).toHaveBeenCalledWith('LSG')
   })
 })

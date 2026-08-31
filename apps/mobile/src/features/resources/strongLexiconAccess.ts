@@ -23,11 +23,11 @@ import {
 } from '~helpers/strongIdentities'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import {
-  getStrongLexiconModuleAvailability,
   withOptionalStrongLexiconDatabase,
   withStrongLexiconDatabase,
   type StrongLexiconModuleAvailability,
 } from '~helpers/strongLexiconModules'
+import { getRegisteredStrongLexiconAvailability } from './resourceAvailability'
 import {
   decodeStrongLexiconPageCursor,
   encodeStrongLexiconPageCursor,
@@ -785,8 +785,8 @@ const toEntry = async (
 ): Promise<StrongLexiconEntry> => {
   const card = await toEntryCard(core, row, identity, language)
   const [resourcesAvailability, entitiesAvailability, relations] = await Promise.all([
-    getStrongLexiconModuleAvailability('resources'),
-    getStrongLexiconModuleAvailability('entities'),
+    getRegisteredStrongLexiconAvailability('resources'),
+    getRegisteredStrongLexiconAvailability('entities'),
     loadRelations(core, row.id, language),
   ])
   const [resourceResult, entity] = await Promise.all([
@@ -891,7 +891,7 @@ const toSearchResult = (
 })
 
 export const localStrongLexiconAccess: StrongLexiconAccess = {
-  getModuleAvailability: getStrongLexiconModuleAvailability,
+  getModuleAvailability: getRegisteredStrongLexiconAvailability,
   getModuleRecoveryActions: async () => ['acquire-offline-copy'],
 
   async loadPreview(identities, language) {
@@ -931,7 +931,7 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
   },
 
   async loadEntity(uniqueName, language) {
-    const availability = await getStrongLexiconModuleAvailability('entities')
+    const availability = await getRegisteredStrongLexiconAvailability('entities')
     if (availability.status !== 'available') return undefined
     return withStrongLexiconDatabase('core', core =>
       withOptionalStrongLexiconDatabase('entities', async database => {
@@ -957,7 +957,7 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
   async loadChapterEntities(book, chapter, language, strongCodes = []) {
     const bookCode = getTipnrBookCode(book)
     if (!bookCode) return []
-    const availability = await getStrongLexiconModuleAvailability('entities')
+    const availability = await getRegisteredStrongLexiconAvailability('entities')
     if (availability.status !== 'available') return []
     const normalizedStrongCodes = [
       ...new Set(strongCodes.map(code => code.trim().toUpperCase()).filter(Boolean)),

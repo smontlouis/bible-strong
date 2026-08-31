@@ -9,9 +9,8 @@ import {
   ResourceAccessError,
   unwrapLocalResourceResult,
 } from './resourceAccessError'
-import { getLocalResourceAvailability } from './resourceAvailability'
+import { getLocalResourceAvailability, offlineResourceRegistry } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import * as FileSystem from 'expo-file-system/legacy'
 import { getDictionaryDbPath } from '~helpers/databases'
 import { openSQLiteDatabase } from '~helpers/sqlite'
 import type { ResourceAvailability } from './resourceModel'
@@ -100,16 +99,27 @@ export type DictionaryAccess = {
 export const getDefaultDictionaryWork = (language: ResourceLanguage): DictionaryWorkId =>
   language === 'en' ? 'easton-webster' : 'westphal'
 
+const getDictionaryResource = (work: DictionaryWorkId, language: ResourceLanguage) =>
+  [...offlineResourceRegistry.getSnapshot().resources.values()].find(
+    entry =>
+      entry.resource.kind === 'dictionary' &&
+      entry.resource.work === work &&
+      entry.resource.language === language
+  )?.resource
+
 const withInstalledDictionary = async <T>(
   work: DictionaryWorkId,
   language: ResourceLanguage,
   query: (database: Awaited<ReturnType<typeof openSQLiteDatabase>>) => Promise<T>
 ): Promise<T> => {
-  const databasePath = getDictionaryDbPath(work, language)
-  const info = await FileSystem.getInfoAsync(databasePath)
-  if (!info.exists || info.isDirectory) {
+  const resource = getDictionaryResource(work, language)
+  const availability = resource
+    ? await offlineResourceRegistry.getAvailability(resource)
+    : undefined
+  if (availability?.status !== 'available') {
     throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
   }
+  const databasePath = getDictionaryDbPath(work, language)
   const fileName = databasePath.split('/').pop()!
   const directory = databasePath.slice(0, -(fileName.length + 1))
   const database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
@@ -126,8 +136,11 @@ const isLegacyDictionaryWork = (language: ResourceLanguage, work?: DictionaryWor
 export const localDictionaryAccess: DictionaryAccess = {
   getAvailability: async (language, work) => {
     if (!isLegacyDictionaryWork(language, work)) {
-      const info = await FileSystem.getInfoAsync(getDictionaryDbPath(work!, language))
-      return info.exists && !info.isDirectory
+      const resource = getDictionaryResource(work!, language)
+      const availability = resource
+        ? await offlineResourceRegistry.getAvailability(resource)
+        : undefined
+      return availability?.status === 'available'
         ? { status: 'available' }
         : {
             status: 'unavailable',

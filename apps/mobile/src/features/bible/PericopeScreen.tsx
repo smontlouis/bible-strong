@@ -26,8 +26,7 @@ import type { VersionCode } from '~state/tabs'
 import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { useAtomValue } from 'jotai/react'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import {
   resourceFailureFromAccessError,
@@ -79,7 +78,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   const canGoBackInStack = useCanGoBackInStack()
   const { t } = useTranslation()
   const resources = useResourceAccess()
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const resourceRegistry = useOfflineResourceRegistry()
   const defaultVersion = useDefaultBibleVersion()
   const params = useLocalSearchParams<{ book?: string; version?: string }>()
   const version = (params.version || defaultVersion) as VersionCode
@@ -92,7 +91,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
     queryKey: [
       ...resourceQueryKeys.biblePericope(version),
       'availability',
-      downloadCompletionSignal,
+      resourceRegistry.revision,
     ],
     queryFn: () =>
       resources.bibleReading.getPericopeAvailability?.(version) ??

@@ -4,10 +4,8 @@ import {
   type CommentaryLanguage,
 } from '@bible-strong/resource-catalog/commentaries'
 import { useTheme } from '@emotion/react'
-import { useQuery } from '@tanstack/react-query'
-import { useAtomValue } from 'jotai/react'
 import React from 'react'
-import { InteractionManager, SectionList, TouchableOpacity } from 'react-native'
+import { SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -20,11 +18,8 @@ import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { getLocalResourceAvailability } from '~features/resources/resourceAvailability'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { resourcePublicationStore } from '~helpers/resourcePublication'
-import { installedVersionsSignalAtom } from '~state/app'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import CommentaryOfflineDetailsSheet from './CommentaryOfflineDetailsSheet'
 import {
   COMMENTARY_CURRENTS,
@@ -142,8 +137,7 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const dispatch = useDispatch()
-  const installedSignal = useAtomValue(installedVersionsSignalAtom)
-  const completionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const resourceRegistry = useOfflineResourceRegistry()
   const selected = useSelector((state: RootState) => state.user.bible.settings.commentarySelection)
   const [query, setQuery] = React.useState('')
   const [traditions, setTraditions] = React.useState<string[]>([])
@@ -154,10 +148,6 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
   const traditionsRef = React.useRef<SheetRef>(null)
   const currentsRef = React.useRef<SheetRef>(null)
   const detailsRef = React.useRef<SheetRef>(null)
-  const availabilityTaskRef = React.useRef<ReturnType<
-    typeof InteractionManager.runAfterInteractions
-  > | null>(null)
-  const [availabilityEnabled, setAvailabilityEnabled] = React.useState(false)
   const normalizedQuery = query.trim().toLocaleLowerCase()
   const projections = React.useMemo(
     () =>
@@ -170,43 +160,18 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
       ),
     []
   )
-  const registeredInstalledProjectionIds = new Set(
+  const installedProjectionIds = new Set(
     projections.flatMap(projection => {
       const itemId = createOfflineCopyId({
         kind: 'commentary',
         resourceId: projection.entry.publicationId,
         language: projection.language,
       })
-      return resourcePublicationStore.read(itemId) ? [projection.projectionId] : []
+      const availability = resourceRegistry.resources.get(itemId)?.availability
+      return availability?.status === 'available' || availability?.status === 'corrupt'
+        ? [projection.projectionId]
+        : []
     })
-  )
-  const availability = useQuery({
-    queryKey: ['commentary-selector-availability-map', installedSignal, completionSignal],
-    queryFn: async () => {
-      const results = await Promise.all(
-        projections.map(async projection => {
-          const result = await getLocalResourceAvailability({
-            kind: 'commentary',
-            resourceId: projection.entry.publicationId,
-            language: projection.language,
-          })
-          return result.status === 'available' ? projection.projectionId : undefined
-        })
-      )
-      return new Set(results.filter((result): result is CommentaryProjectionId => Boolean(result)))
-    },
-    enabled: availabilityEnabled,
-    initialData: registeredInstalledProjectionIds,
-    initialDataUpdatedAt: 0,
-    networkMode: 'always',
-  })
-  const installedProjectionIds = availability.data ?? registeredInstalledProjectionIds
-
-  React.useEffect(
-    () => () => {
-      availabilityTaskRef.current?.cancel()
-    },
-    []
   )
   const selectedProjections = React.useMemo(
     () =>
@@ -298,16 +263,6 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
         onPresent={() => {
           setQuery('')
           setLimitReached(false)
-          availabilityTaskRef.current?.cancel()
-          availabilityTaskRef.current = InteractionManager.runAfterInteractions(() => {
-            availabilityTaskRef.current = null
-            setAvailabilityEnabled(true)
-          })
-        }}
-        onClose={() => {
-          availabilityTaskRef.current?.cancel()
-          availabilityTaskRef.current = null
-          setAvailabilityEnabled(false)
         }}
         header={
           <>

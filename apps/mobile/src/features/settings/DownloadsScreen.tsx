@@ -1,9 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { useQueries, useQuery } from '@tanstack/react-query'
+import React, { useState } from 'react'
 import { Alert, TextInput, TouchableOpacity } from 'react-native'
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
-import { useAtomValue } from 'jotai/react'
 
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -28,10 +26,8 @@ import {
   type DatabaseId,
   type ResourceLanguage,
 } from '~helpers/databaseTypes'
-import {
-  getLocalResourceAvailability,
-  isLocalResourceAvailable,
-} from '~features/resources/resourceAvailability'
+import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import {
   createCommentaryDownloadItem,
   createOfflineCopyDownloadItem,
@@ -40,34 +36,18 @@ import {
 } from '~helpers/downloadItemFactory'
 import { createOfflineCopyId, parseOfflineCopyId } from '~helpers/offlineCopy'
 import { useDownloadQueue } from '~helpers/useDownloadQueue'
-import { installedVersionsSignalAtom } from '~state/app'
-import { mobileResourceCatalogAtom } from '~helpers/mobileResourceCatalog'
 import useLanguage from '~helpers/useLanguage'
-import { getDefaultStore } from 'jotai/vanilla'
-import {
-  STRONG_BIBLE_PUBLICATIONS,
-  type StrongBibleVersionId,
-} from '~helpers/strongBiblePublications'
-import {
-  getStrongBibleSidecarAvailability,
-  type StrongBibleSidecarAvailability,
-} from '~helpers/strongBibleSidecar'
+import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
 import { buildBibleVersionGroups } from './downloadVersionGroups'
-import {
-  getInterlinearSidecarAvailability,
-  type InterlinearSidecarAvailability,
-} from '~helpers/interlinearBibleSidecar'
+import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import { getBibleRelatedPublicationResources } from '~helpers/bibleRelatedPublications'
-import {
-  getStrongLexiconModuleAvailability,
-  type StrongLexiconModuleAvailability,
-} from '~helpers/strongLexiconModules'
+import type { StrongLexiconModuleAvailability } from '~helpers/strongLexiconModules'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
-import { resolveResourceCatalogStatus } from '~helpers/resourcePublication'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceIdentityFromOfflineCopy } from '~features/resources/resourceModel'
 import useConnection from '~helpers/useConnection'
@@ -280,225 +260,52 @@ function buildAllSections(
 // ---------------------------------------------------------------------------
 
 function useDownloadedItems() {
-  const installedSignal = useAtomValue(installedVersionsSignalAtom)
-  const previousInstalledSignal = useRef(installedSignal)
-  const availabilityQuery = useQuery({
-    queryKey: ['downloads', 'installed-resources'],
-    networkMode: 'always',
-    queryFn: async () => {
-      const set = new Set<string>()
-      const invalidSet = new Set<string>()
+  const registry = useOfflineResourceRegistry()
+  const downloadedSet = new Set<string>()
+  const invalidSet = new Set<string>()
+  const updateAvailableSet = new Set<string>()
+  const strongAvailability = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
+  const interlinearAvailability = new Map<ResourceLanguage, InterlinearSidecarAvailability>()
+  const strongLexiconAvailability = new Map<
+    StrongLexiconModuleId,
+    StrongLexiconModuleAvailability
+  >()
 
-      const lexiconAvailabilityMap = new Map<
-        StrongLexiconModuleId,
-        StrongLexiconModuleAvailability
-      >()
-      const lexiconEntries = await Promise.all(
-        (['core', 'resources', 'entities'] as StrongLexiconModuleId[]).map(async moduleId => {
-          const availability = await getStrongLexiconModuleAvailability(moduleId)
-          return [moduleId, availability] as const
-        })
+  for (const entry of registry.resources.values()) {
+    const { resource, availability } = entry
+    if (
+      availability.status === 'available' ||
+      availability.status === 'corrupt' ||
+      availability.status === 'incompatible' ||
+      availability.status === 'core-missing'
+    ) {
+      downloadedSet.add(entry.id)
+    }
+    if (availability.status === 'corrupt') invalidSet.add(entry.id)
+    if (entry.updateAvailable) updateAvailableSet.add(entry.id)
+
+    if (resource.kind === 'strong-bible-index') {
+      strongAvailability.set(resource.versionId, availability as StrongBibleSidecarAvailability)
+    } else if (resource.kind === 'interlinear-index') {
+      interlinearAvailability.set(resource.language, availability as InterlinearSidecarAvailability)
+    } else if (resource.kind === 'strong-lexicon-module') {
+      strongLexiconAvailability.set(
+        resource.moduleId,
+        availability as StrongLexiconModuleAvailability
       )
-      for (const [moduleId, availability] of lexiconEntries) {
-        lexiconAvailabilityMap.set(moduleId, availability)
-        if (
-          availability.status === 'available' ||
-          availability.status === 'incompatible' ||
-          availability.status === 'corrupt' ||
-          availability.status === 'core-missing'
-        ) {
-          set.add(
-            createOfflineCopyId({
-              kind: 'strong-lexicon-module',
-              moduleId,
-            })
-          )
-        }
-        if (availability.status === 'corrupt') {
-          invalidSet.add(createOfflineCopyId({ kind: 'strong-lexicon-module', moduleId }))
-        }
-      }
-
-      // Check all Bible versions
-      const bibleEntries = await Promise.all(
-        Object.keys(versions).map(async versionId => {
-          const available = await isLocalResourceAvailable({
-            kind: 'bible',
-            versionId,
-          })
-          return [versionId, available] as const
-        })
-      )
-      for (const [vId, available] of bibleEntries) {
-        if (available) set.add(createOfflineCopyId({ kind: 'bible', versionId: vId }))
-      }
-
-      const availabilityMap = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
-      const strongEntries = await Promise.all(
-        (Object.keys(STRONG_BIBLE_PUBLICATIONS) as StrongBibleVersionId[]).map(
-          async versionId =>
-            [versionId, await getStrongBibleSidecarAvailability(versionId)] as const
-        )
-      )
-      for (const [versionId, availability] of strongEntries) {
-        availabilityMap.set(versionId, availability)
-        if (
-          availability.status === 'available' ||
-          availability.status === 'incompatible' ||
-          availability.status === 'corrupt'
-        ) {
-          set.add(createOfflineCopyId({ kind: 'strong-bible-index', versionId }))
-        }
-        if (availability.status === 'corrupt') {
-          invalidSet.add(createOfflineCopyId({ kind: 'strong-bible-index', versionId }))
-        }
-      }
-
-      const interlinearAvailabilityEntries = await Promise.all(
-        (['fr', 'en'] as ResourceLanguage[]).map(async locale => {
-          const availability = await getInterlinearSidecarAvailability(locale)
-          return [locale, availability] as const
-        })
-      )
-      const interlinearAvailabilityMap = new Map<ResourceLanguage, InterlinearSidecarAvailability>()
-      for (const [locale, availability] of interlinearAvailabilityEntries) {
-        interlinearAvailabilityMap.set(locale, availability)
-        if (
-          availability.status === 'available' ||
-          availability.status === 'incompatible' ||
-          availability.status === 'corrupt'
-        ) {
-          set.add(
-            createOfflineCopyId({
-              kind: 'interlinear-index',
-              versionId: 'BHG',
-              language: locale,
-            })
-          )
-        }
-        if (availability.status === 'corrupt') {
-          invalidSet.add(
-            createOfflineCopyId({
-              kind: 'interlinear-index',
-              versionId: 'BHG',
-              language: locale,
-            })
-          )
-        }
-      }
-
-      // Check databases for both languages
-      const databaseEntries = await Promise.all(
-        (['fr', 'en'] as ResourceLanguage[]).flatMap(lang =>
-          LANGUAGE_SPECIFIC_DBS.flatMap(dbId =>
-            dbId !== 'BIBLES' && (lang !== 'en' || !FRENCH_ONLY_DBS.includes(dbId))
-              ? [
-                  getLocalResourceAvailability({
-                    kind: 'database',
-                    databaseId: dbId,
-                    language: lang,
-                  }).then(availability => [dbId, lang, availability] as const),
-                ]
-              : []
-          )
-        )
-      )
-      for (const [dbId, lang, availability] of databaseEntries) {
-        const itemId = createOfflineCopyId({
-          kind: 'database',
-          databaseId: dbId,
-          language: lang,
-        })
-        if (availability.status === 'available' || availability.status === 'corrupt') {
-          set.add(itemId)
-        }
-        if (availability.status === 'corrupt') {
-          invalidSet.add(itemId)
-        }
-      }
-
-      const commentaryEntries = await Promise.all(
-        (['fr', 'en'] as ResourceLanguage[]).flatMap(language =>
-          getCommentaryCatalogForLanguage(language).map(async entry => {
-            const identity = {
-              kind: 'commentary' as const,
-              resourceId: entry.publicationId,
-              language,
-            }
-            return [identity, await getLocalResourceAvailability(identity)] as const
-          })
-        )
-      )
-      for (const [identity, availability] of commentaryEntries) {
-        const itemId = createOfflineCopyId(identity)
-        if (availability.status === 'available' || availability.status === 'corrupt') {
-          set.add(itemId)
-        }
-        if (availability.status === 'corrupt') invalidSet.add(itemId)
-      }
-
-      // Check shared databases
-      const sharedEntries = await Promise.all(
-        SHARED_DBS.flatMap(dbId =>
-          dbId === 'BIBLES'
-            ? []
-            : [
-                getLocalResourceAvailability({
-                  kind: 'database',
-                  databaseId: dbId,
-                  language: 'fr',
-                }).then(availability => [dbId, availability] as const),
-              ]
-        )
-      )
-      for (const [dbId, availability] of sharedEntries) {
-        const itemId = createOfflineCopyId({
-          kind: 'database',
-          databaseId: dbId,
-          language: 'fr',
-        })
-        if (availability.status === 'available' || availability.status === 'corrupt') {
-          set.add(itemId)
-        }
-        if (availability.status === 'corrupt') {
-          invalidSet.add(itemId)
-        }
-      }
-
-      return {
-        downloadedSet: set,
-        invalidSet,
-        strongAvailability: availabilityMap,
-        interlinearAvailability: interlinearAvailabilityMap,
-        strongLexiconAvailability: lexiconAvailabilityMap,
-      }
-    },
-  })
-  const refetchAvailability = availabilityQuery.refetch
-
-  useEffect(() => {
-    if (previousInstalledSignal.current === installedSignal) return
-    previousInstalledSignal.current = installedSignal
-    void refetchAvailability()
-  }, [installedSignal, refetchAvailability])
+    }
+  }
 
   return {
-    downloadedSet: availabilityQuery.data?.downloadedSet ?? new Set<string>(),
-    invalidSet: availabilityQuery.data?.invalidSet ?? new Set<string>(),
-    strongAvailability:
-      availabilityQuery.data?.strongAvailability ??
-      new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>(),
-    interlinearAvailability:
-      availabilityQuery.data?.interlinearAvailability ??
-      new Map<ResourceLanguage, InterlinearSidecarAvailability>(),
-    strongLexiconAvailability:
-      availabilityQuery.data?.strongLexiconAvailability ??
-      new Map<StrongLexiconModuleId, StrongLexiconModuleAvailability>(),
-    isAvailabilityPending: availabilityQuery.isPending,
-    isAvailabilityError: availabilityQuery.isError,
-    refreshDownloadedItems: async () => {
-      await availabilityQuery.refetch()
-    },
+    downloadedSet,
+    invalidSet,
+    updateAvailableSet,
+    strongAvailability,
+    interlinearAvailability,
+    strongLexiconAvailability,
+    isAvailabilityPending: false,
+    isAvailabilityError: false,
+    refreshDownloadedItems: () => offlineResourceRegistry.reconcileAll(),
   }
 }
 
@@ -510,7 +317,6 @@ const DownloadsScreen = () => {
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
-  const catalog = useAtomValue(mobileResourceCatalogAtom)
   const resources = useResourceAccess()
   const isConnected = useConnection()
   const { enqueue, clearCompleted } = useDownloadQueue()
@@ -530,6 +336,7 @@ const DownloadsScreen = () => {
   const {
     downloadedSet,
     invalidSet,
+    updateAvailableSet,
     strongAvailability,
     interlinearAvailability,
     strongLexiconAvailability,
@@ -538,46 +345,9 @@ const DownloadsScreen = () => {
     refreshDownloadedItems,
   } = useDownloadedItems()
   const allSections = buildAllSections(lang, t)
-  const publicationResources = allSections.flatMap(section =>
-    section.data.flatMap(item => {
-      if (!downloadedSet.has(item.id)) return []
-      const identity = parseOfflineCopyId(item.id)
-      if (!identity) return []
-      const relatedResources =
-        identity.kind === 'bible'
-          ? (getBibleRelatedPublicationResources(identity.versionId) ?? [])
-          : []
-
-      return [
-        { itemId: item.id, resourceId: item.id },
-        ...relatedResources.map(resource => ({ itemId: item.id, ...resource })),
-      ]
-    })
-  )
-  const publicationQueries = useQueries({
-    queries: publicationResources.map(resource => ({
-      queryKey: [
-        'resource-publication',
-        resource.resourceId,
-        catalog.resources[resource.resourceId]?.archiveSha256,
-      ],
-      queryFn: () => resolveResourceCatalogStatus(resource.resourceId, { catalog }),
-      // Canonical Bible bundles can register bundled presentation copies (pericopes/red words)
-      // that intentionally have no standalone catalog publication.
-      enabled: Boolean(catalog.resources[resource.resourceId]),
-      staleTime: 6 * 60 * 60 * 1000,
-      refetchOnMount: 'always' as const,
-      retry: false,
-    })),
-  })
-  const publicationUpdateIds = new Set(
-    publicationResources.flatMap((resource, index) => {
-      return publicationQueries[index]?.data === 'update-available' ? [resource.itemId] : []
-    })
-  )
 
   const itemNeedsUpdate = (item: UnifiedItem) => {
-    if (publicationUpdateIds.has(item.id)) return true
+    if (updateAvailableSet.has(item.id)) return true
     const identity = parseOfflineCopyId(item.id)
     if (!identity) return false
 
@@ -675,8 +445,6 @@ const DownloadsScreen = () => {
 
   const refreshInstalledStateAfterDeletion = async () => {
     clearCompleted()
-    await refreshDownloadedItems()
-    getDefaultStore().set(installedVersionsSignalAtom, (c: number) => c + 1)
   }
 
   const createDownloadPlanForId = (itemId: string) => {

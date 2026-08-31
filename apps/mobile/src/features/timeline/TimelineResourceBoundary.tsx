@@ -10,8 +10,8 @@ import ResourceUnavailableView from '~features/resources/ResourceUnavailableView
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { databases } from '~helpers/databases'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import type { TimelineEventSummary } from '~features/resources/timelineAccess'
 import {
   resourceFailureFromAccessError,
@@ -34,9 +34,9 @@ const TimelineResourceBoundary = ({
   const { t } = useTranslation()
   const resources = useResourceAccess()
   const language = useAtomValue(resourcesLanguageAtom).TIMELINE
-  const downloadCompletionSignal = useAtomValue(downloadCompletionSignalAtom)
+  const resourceRegistry = useOfflineResourceRegistry()
   const query = useQuery({
-    queryKey: [...resourceQueryKeys.timeline(language), downloadCompletionSignal],
+    queryKey: [...resourceQueryKeys.timeline(language), resourceRegistry.revision],
     queryFn: () => resources.timeline.loadIndex(language),
     networkMode: 'always',
   })
@@ -50,8 +50,6 @@ const TimelineResourceBoundary = ({
   }
 
   if (query.isError || !query.data || query.data.status === 'unavailable') {
-    const reason =
-      query.data?.status === 'unavailable' ? query.data.reason : 'temporary-unavailable'
     return (
       <Box flex bg="reverse">
         <Header

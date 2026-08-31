@@ -1,14 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import * as FileSystem from 'expo-file-system/legacy'
 import { useTranslation } from 'react-i18next'
-import { useAtomValue } from 'jotai/react'
 
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
-import { downloadCompletionSignalAtom } from '~state/downloadQueue'
-import { BASE_SQLITE_DIR } from '~helpers/databaseTypes'
 import { localQueryOptions } from '~helpers/queryOptions'
+import { MOBILE_RESOURCE_CATALOG } from '~helpers/mobileResourceCatalog'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 
 const formatBytes = (
   bytes: number,
@@ -23,24 +22,18 @@ const formatBytes = (
 
 const StorageSummaryCard = () => {
   const { t } = useTranslation()
-  const completionSignal = useAtomValue(downloadCompletionSignalAtom)
-  const { data: storage } = useQuery({
-    queryKey: ['storage-summary', completionSignal],
-    queryFn: async () => {
-      let total = 0
-
-      const sqliteDir = await FileSystem.getInfoAsync(BASE_SQLITE_DIR)
-      if (sqliteDir.exists) {
-        total += await getDirSize(BASE_SQLITE_DIR)
-      }
-
-      const free = await FileSystem.getFreeDiskStorageAsync()
-      return { usedBytes: total, freeBytes: free }
-    },
+  const registry = useOfflineResourceRegistry()
+  const usedBytes = [...registry.resources.values()].reduce((total, entry) => {
+    if (entry.availability.status !== 'available' && entry.availability.status !== 'corrupt') {
+      return total
+    }
+    return total + (MOBILE_RESOURCE_CATALOG.resources[entry.id]?.installedBytes ?? 0)
+  }, 0)
+  const { data: freeBytes = 0 } = useQuery({
+    queryKey: ['storage-free-space', registry.revision],
+    queryFn: () => FileSystem.getFreeDiskStorageAsync(),
     ...localQueryOptions,
   })
-  const usedBytes = storage?.usedBytes ?? 0
-  const freeBytes = storage?.freeBytes ?? 0
 
   const totalAvailable = usedBytes + freeBytes
   const progressRatio = totalAvailable > 0 ? usedBytes / totalAvailable : 0
@@ -63,27 +56,6 @@ const StorageSummaryCard = () => {
       </Box>
     </Box>
   )
-}
-
-async function getDirSize(dirPath: string): Promise<number> {
-  let total = 0
-  try {
-    const entries = await FileSystem.readDirectoryAsync(dirPath)
-    for (const entry of entries) {
-      const entryPath = `${dirPath}/${entry}`
-      const info = await FileSystem.getInfoAsync(entryPath)
-      if (info.exists) {
-        if (info.isDirectory) {
-          total += await getDirSize(entryPath)
-        } else if (info.size) {
-          total += info.size
-        }
-      }
-    }
-  } catch {
-    // Ignore errors for individual files/dirs
-  }
-  return total
 }
 
 export default StorageSummaryCard
