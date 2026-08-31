@@ -18,12 +18,14 @@ import type {
   StrongLexiconModuleId,
   StrongLexiconPublicationArtifact,
 } from './strongLexiconPublications'
+import { COMMENTARY_CATALOG } from '@bible-strong/resource-catalog/commentaries'
 import { createOfflineCopyId, type OfflineCopyId, type OfflineCopyIdentity } from './offlineCopyId'
 export { createOfflineCopyId, type OfflineCopyId, type OfflineCopyIdentity } from './offlineCopyId'
 
 const DATABASE_IDS = new Set<DatabaseId>([...LANGUAGE_SPECIFIC_DBS, ...SHARED_DBS])
 const RESOURCE_LANGUAGES = new Set<ResourceLanguage>(['fr', 'en'])
 const STRONG_LEXICON_MODULE_IDS = new Set<StrongLexiconModuleId>(['core', 'resources', 'entities'])
+const COMMENTARY_PUBLICATION_IDS = new Set(COMMENTARY_CATALOG.map(entry => entry.publicationId))
 const DATABASE_DOMAIN_QUERY_KEYS: Record<Exclude<DatabaseId, 'BIBLES'>, QueryKey[]> = {
   DICTIONNAIRE: [
     ['dictionary'],
@@ -104,14 +106,16 @@ export const parseOfflineCopyId = (id: string): OfflineCopyIdentity | undefined 
   if (parts[0] === 'database' && parts.length === 3) {
     const databaseId = parts[1] as DatabaseId
     const language = parts[2] as ResourceLanguage
-    return databaseId !== 'BIBLES' &&
-      DATABASE_IDS.has(databaseId) &&
-      RESOURCE_LANGUAGES.has(language)
-      ? {
-          kind: 'database',
-          databaseId: databaseId as Exclude<DatabaseId, 'BIBLES'>,
-          language,
-        }
+    if (!RESOURCE_LANGUAGES.has(language)) return undefined
+    if (databaseId !== 'BIBLES' && DATABASE_IDS.has(databaseId)) {
+      return {
+        kind: 'database',
+        databaseId: databaseId as Exclude<DatabaseId, 'BIBLES'>,
+        language,
+      }
+    }
+    return COMMENTARY_PUBLICATION_IDS.has(parts[1])
+      ? { kind: 'commentary', resourceId: parts[1], language }
       : undefined
   }
 
@@ -180,6 +184,8 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
         ['relation-dictionary-targets'],
         publicationKey,
       ]
+    case 'commentary':
+      return [['commentaries'], publicationKey]
     case 'database':
       return [
         ...(identity.databaseId === 'MHY' || identity.databaseId === 'TRESOR'
@@ -263,12 +269,21 @@ export type DictionaryDownloadItem = DownloadItemCommon & {
   archiveEntry: string
 }
 
+export type CommentaryDownloadItem = DownloadItemCommon & {
+  type: 'commentary'
+  resourceId: string
+  lang: ResourceLanguage
+  destinationPath: string
+  archiveEntry: string
+}
+
 export type DownloadItem =
   | BibleDownloadItem
   | StrongBibleIndexDownloadItem
   | InterlinearIndexDownloadItem
   | StrongLexiconModuleDownloadItem
   | DictionaryDownloadItem
+  | CommentaryDownloadItem
   | DatabaseDownloadItem
 
 export type DownloadItemType = DownloadItem['type']
@@ -290,6 +305,8 @@ export const getDownloadItemIdentity = (item: DownloadItem): OfflineCopyIdentity
         resourceId: item.resourceId,
         language: item.lang,
       }
+    case 'commentary':
+      return { kind: 'commentary', resourceId: item.resourceId, language: item.lang }
     case 'database':
       return { kind: 'database', databaseId: item.databaseId, language: item.lang }
   }

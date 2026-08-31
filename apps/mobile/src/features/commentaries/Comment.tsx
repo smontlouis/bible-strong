@@ -1,231 +1,64 @@
-import * as Sentry from '@sentry/react-native'
-import { useQuery } from '@tanstack/react-query'
-import { Image } from 'expo-image'
-import { useAtomValue } from 'jotai'
-import React, { memo, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Linking, Share } from 'react-native'
-import { toast } from '~helpers/toast'
-import { resourcesLanguageAtom } from 'src/state/resourcesLanguage'
-import truncHTML from 'trunc-html'
-import books, { bookMappingComments } from '~assets/bible_versions/books-desc-2'
-import Link, { LinkBox } from '~common/Link'
-import StylizedHTMLView from '~common/StylizedHTMLView'
-import { Status } from '~common/types'
-import Box, { AnimatedBox } from '~common/ui/Box'
-import { FeatherIcon } from '~common/ui/Icon'
-import Text from '~common/ui/Text'
-import { useFireStorage } from '~features/plans/plan.hooks'
-import { firebaseDb } from '~helpers/firebase'
-import { Comment as CommentProps, EGWComment } from './types'
-import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-import { remoteQueryOptions } from '~helpers/queryOptions'
+import { FadeIn, FadeOut, LinearTransition, useReducedMotion } from 'react-native-reanimated'
 
-const findBookNumber = (bookName: string) => {
-  bookName = bookMappingComments[bookName] || bookName
-  const bookNumber = books.find(b => b[1] === bookName)?.[0]
-  return bookNumber || ''
-}
+import Box, { AnimatedBox } from '~common/ui/Box'
+import Text from '~common/ui/Text'
+import { Comment as CommentProps, EGWComment } from './types'
+import CommentaryAvatar from './CommentaryAvatar'
 
 interface Props {
   comment: CommentProps | EGWComment
+  passageLabel: string
 }
 
-// Hook for automatic translation based on selected language
-const useCommentTranslation = (id: string, content: string, enabled = true) => {
-  const { t } = useTranslation()
-
-  const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
-  const commentLang = resourcesLanguage.COMMENTARIES
-  const query = useQuery({
-    queryKey: ['comment-translation', commentLang, id, content],
-    queryFn: async () => {
-      const commentRef = await firebaseDb.collection('commentaries-FR').doc(id.toString()).get()
-      if (commentRef.exists()) return commentRef.data()!.content as string
-
-      const data = `auth_key=${process.env.EXPO_PUBLIC_DEEPL_AUTH_KEY}&text=${encodeURIComponent(
-        content
-      )}&target_lang=FR&source_lang=EN&preserve_formatting=1&tag_handling=xml`
-      const response = await fetch('https://api.deepl.com/v2/translate', {
-        method: 'POST',
-        body: data,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': data.length.toString(),
-        },
-      })
-      if (!response.ok) throw new Error(`Translation request failed (${response.status})`)
-      const result = await response.json()
-      if (result.message === 'Quota Exceeded') {
-        toast.error(t('comment.quotaExceeded'))
-        throw new Error('TRANSLATION_QUOTA_EXCEEDED')
-      }
-      const translatedContent = result.translations?.[0]?.text
-      if (!translatedContent) throw new Error('Translation response is empty')
-
-      await firebaseDb
-        .collection('commentaries-FR')
-        .doc(id.toString())
-        .set({ content: translatedContent })
-      return translatedContent as string
-    },
-    enabled: enabled && commentLang !== 'en',
-    ...remoteQueryOptions,
-    staleTime: Infinity,
-    retry: false,
-  })
-  const status: Status =
-    !enabled || commentLang === 'en'
-      ? 'Idle'
-      : query.fetchStatus === 'paused'
-        ? 'Rejected'
-        : query.isPending
-          ? 'Pending'
-          : query.isError
-            ? 'Rejected'
-            : 'Resolved'
-
-  return {
-    status,
-    translatedContent: !enabled || commentLang === 'en' ? '' : (query.data ?? ''),
-  }
-}
-
-const fastImageStyle = { width: 40, height: 40 }
-
-const Comment = ({ comment }: Props) => {
-  const { resource, content, href, id } = comment
-  const [isCollapsed, setCollapsed] = React.useState(true)
-  const cacheImage = useFireStorage(resource.logo)
-  const pushRouteOnce = usePushRouteOnce()
-  const fastImageSource = useMemo(
-    () => ({
-      uri: cacheImage,
-    }),
-    [cacheImage]
-  )
-  const { t } = useTranslation()
-  const { status, translatedContent } = useCommentTranslation(id, content, resource.code !== 'MHY')
-
-  const openLink = (href: string, innerHTML: string, type: string) => {
-    if (type.includes('egwlink_bible')) {
-      Linking.openURL(`https://m.egwwritings.org${href}`)
-    }
-    if (type.includes('egw-ref') || type.includes('egwlink_book')) {
-      Linking.openURL(href)
-    }
-    if (type === 'bible-ref') {
-      let [book, numbers] = href.substr(1).split('_')
-      book = findBookNumber(book.substr(0, 3).toUpperCase())
-      const [chapter, verse] = numbers.split('.')
-
-      pushRouteOnce({
-        pathname: '/bible-view',
-        params: {
-          contextDisplayMode: 'focused',
-          book: String(book),
-          chapter: String(chapter),
-          verse: String(verse),
-        },
-      })
-    }
-  }
-
-  const shareDefinition = async () => {
-    try {
-      const message = `${resource.author}
-${resource.name}
-
-${truncHTML(translatedContent || content, 10000).text}
-
-https://bible-strong.app
-      `
-      Share.share({ message })
-    } catch (e) {
-      toast.error('Erreur lors du partage.')
-      console.log('[Commentaries] Share error:', e)
-      Sentry.captureException(e)
-    }
-  }
+const Comment = ({ comment, passageLabel }: Props) => {
+  const { resource, content } = comment
+  const reduceMotion = useReducedMotion()
 
   return (
-    <Box m={20} marginBottom={0} p={20} rounded lightShadow bg="reverse">
-      <LinkBox row onPress={() => setCollapsed(s => !s)}>
-        <Box center width={40} height={40} borderRadius={20}>
-          {cacheImage && <Image style={fastImageStyle} source={fastImageSource} />}
-        </Box>
+    <AnimatedBox
+      m={20}
+      marginBottom={0}
+      p={20}
+      rounded
+      lightShadow
+      bg="reverse"
+      layout={reduceMotion ? undefined : LinearTransition.duration(220)}
+      entering={reduceMotion ? undefined : FadeIn.duration(160)}
+      exiting={reduceMotion ? undefined : FadeOut.duration(130)}
+    >
+      <Box row>
+        <CommentaryAvatar
+          resourceCode={resource.code}
+          author={resource.author}
+          fallback={resource.shortName ?? resource.name}
+          size={44}
+        />
         <Box ml={10} flex>
           <Text title fontSize={20}>
-            {resource.author === 'Ellen G. White' ? 'EGW' : resource.author}
-          </Text>
-          <Text color="grey" fontSize={14}>
             {resource.name}
           </Text>
-        </Box>
-        <Box width={30} center>
-          {!isCollapsed && (
-            <AnimatedBox
-              width={17}
-              height={17}
-              center
-              style={{
-                transform: [{ rotate: '180deg' }],
-              }}
-            >
-              <FeatherIcon color="grey" name="chevron-down" size={17} />
-            </AnimatedBox>
-          )}
-        </Box>
-        <LinkBox
-          width={30}
-          center
-          onPress={event => {
-            event?.stopPropagation()
-            shareDefinition()
-          }}
-        >
-          <FeatherIcon color="grey" name="share-2" size={17} />
-        </LinkBox>
-      </LinkBox>
-      <Box overflow="hidden" mt={10}>
-        <Box height={isCollapsed ? 100 : undefined}>
-          <StylizedHTMLView value={translatedContent || content} onLinkPress={openLink} />
-          {href && (
-            <Box my={20}>
-              <Link href={`https://m.egwwritings.org${href}`}>
-                <Text color="primary" fontSize={18} style={{ textDecorationLine: 'underline' }}>
-                  {t('Lire dans le contexte')}
-                </Text>
-              </Link>
-            </Box>
-          )}
-        </Box>
-        <Box row center borderTopWidth={1} borderColor="border">
-          {status === 'Pending' && (
-            <Box center style={{ marginRight: 'auto' }}>
-              <Text color="grey" fontSize={12}>
-                {t('Traduction en cours...')}
-              </Text>
-            </Box>
-          )}
-          <LinkBox center height={40} onPress={() => setCollapsed(s => !s)}>
-            <AnimatedBox
-              width={17}
-              height={17}
-              center
-              style={{
-                transform: [{ rotate: isCollapsed ? '0deg' : '180deg' }],
-                transitionProperty: 'transform',
-                transitionDuration: 500,
-              }}
-            >
-              <FeatherIcon color="grey" name="chevron-down" size={17} />
-            </AnimatedBox>
-          </LinkBox>
+          <Text color="grey" fontSize={14}>
+            {resource.author === 'Ellen G. White' ? 'EGW' : resource.author}
+          </Text>
         </Box>
       </Box>
-    </Box>
+      <AnimatedBox
+        key={comment.id}
+        layout={reduceMotion ? undefined : LinearTransition.duration(180)}
+        entering={reduceMotion ? undefined : FadeIn.duration(160)}
+        exiting={reduceMotion ? undefined : FadeOut.duration(110)}
+      >
+        <Text mt={14} fontSize={19} lineHeight={29} numberOfLines={5} ellipsizeMode="tail">
+          {content}
+        </Text>
+        <Box mt={14} px={10} py={5} borderRadius={12} bg="lightPrimary" alignSelf="flex-start">
+          <Text color="primary" fontSize={12}>
+            {passageLabel}
+          </Text>
+        </Box>
+      </AnimatedBox>
+    </AnimatedBox>
   )
 }
 
-export default memo(Comment)
+export default Comment

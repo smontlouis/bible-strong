@@ -156,6 +156,14 @@ const FullAppRuntime = ({ theme }: FullAppRuntimeProps) => {
                           sheetLargestUndimmedDetentIndex: 0,
                         })}
                       />
+                      <Stack.Screen
+                        name="(commentary)"
+                        options={createFormSheetOptions(theme, {
+                          contentStyle: { bottom: 0 },
+                          sheetAllowedDetents: [1],
+                          sheetLargestUndimmedDetentIndex: 0,
+                        })}
+                      />
                       <Stack.Screen name="(library)" options={{ contentStyle: { bottom: 0 } }} />
                       <Stack.Screen
                         name="strong"

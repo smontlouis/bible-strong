@@ -25,6 +25,7 @@ import { getBooksForCanon, isBibleCanonId } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
   sheetRef: React.RefObject<SheetRef | null>
@@ -33,6 +34,7 @@ interface BookSelectorSheetProps {
 export const bookSelectorDataAtom = atom<{
   actions?: BibleTabActions
   data?: BibleTab['data']
+  coverage?: BibleVersionCoverage
 }>({})
 
 const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
@@ -50,19 +52,23 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
   const bookSelectorHasVerses = verses === 'with-verses'
   const setTempSelectedBook = useSetAtom(tempSelectedBookAtom)
   const setTempSelectedChapter = useSetAtom(tempSelectedChapterAtom)
-  const { actions: bookSelectorActions, data: bookSelectorData } =
-    useAtomValue(bookSelectorDataAtom)
+  const {
+    actions: bookSelectorActions,
+    data: bookSelectorData,
+    coverage: providedCoverage,
+  } = useAtomValue(bookSelectorDataAtom)
   const openInNewTab = useOpenInNewTab()
   const verseSheetRef = useRef<SheetRef>(null)
   const selectedVersion = bookSelectorData?.selectedVersion
   const theme = useTheme()
   const resources = useResourceAccess()
 
-  const { data: coverageData } = useQuery({
+  const { data: bibleCoverageData } = useQuery({
     queryKey: resourceQueryKeys.bibleCoverage(selectedVersion || 'LSG'),
     queryFn: () => resources.bibleContent.loadCoverage(selectedVersion || 'LSG'),
-    enabled: !!selectedVersion,
+    enabled: !!selectedVersion && !providedCoverage,
   })
+  const coverageData = providedCoverage ?? bibleCoverageData
   const publishedCanonId = coverageData?.canon?.id
   const canonId =
     publishedCanonId && isBibleCanonId(publishedCanonId)

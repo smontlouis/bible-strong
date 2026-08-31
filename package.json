@@ -75,8 +75,17 @@
     "resources:commentaries:normalize-links": "yarn workspace @bible-strong/resource-studio commentaries:normalize-links",
     "resources:commentaries:test": "yarn workspace @bible-strong/resource-studio commentaries:test",
     "resources:commentaries:validate-library": "yarn workspace @bible-strong/resource-studio commentaries:validate-library",
+    "resources:commentaries:audit-canonical-units": "yarn workspace @bible-strong/resource-studio commentaries:audit-canonical-units",
     "resources:commentaries:validate": "yarn workspace @bible-strong/resource-studio commentaries:validate",
-    "resources:commentaries:serve": "yarn workspace @bible-strong/resource-studio commentaries:serve"
+    "resources:commentaries:serve": "yarn workspace @bible-strong/resource-studio commentaries:serve",
+    "resources:dictionaries:serve": "yarn workspace @bible-strong/resource-studio dictionaries:serve",
+    "resources:dictionaries:normalize": "yarn workspace @bible-strong/resource-studio dictionaries:normalize",
+    "resources:dictionaries:audit": "yarn workspace @bible-strong/resource-studio dictionaries:audit",
+    "resources:dictionaries:audit-smith": "yarn workspace @bible-strong/resource-studio dictionaries:audit-smith",
+    "resources:dictionaries:acquire-smith": "yarn workspace @bible-strong/resource-studio dictionaries:acquire-smith",
+    "resources:dictionaries:acquire-isbe": "yarn workspace @bible-strong/resource-studio dictionaries:acquire-isbe",
+    "resources:dictionaries:acquire-unfoldingword-tw": "yarn workspace @bible-strong/resource-studio dictionaries:acquire-unfoldingword-tw",
+    "resources:dictionaries:test": "yarn workspace @bible-strong/resource-studio dictionaries:test"
   },
   "resolutions": {
     "react-native-svg": "15.15.4",

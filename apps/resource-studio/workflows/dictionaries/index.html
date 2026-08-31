@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Lecteur local des dictionnaires de Bible Strong"
+    />
+    <title>Le Cabinet des Dictionnaires — Bible Strong</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='5' y='5' width='54' height='54' rx='14' fill='%231c2927'/%3E%3Ctext x='32' y='40' text-anchor='middle' fill='%23f6f0df' font-family='serif' font-size='25'%3ED%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="masthead">
+      <a class="brand" href="#" aria-label="Accueil du lecteur">
+        <span class="brand-mark">BS</span>
+        <span><strong>Le Cabinet</strong><small>des dictionnaires</small></span>
+      </a>
+      <div class="masthead-title">
+        <p class="eyebrow">Resource Studio · aperçu local</p>
+        <h1>Les mots, leurs mondes</h1>
+      </div>
+      <div class="catalog-total">
+        <strong id="catalog-count">—</strong>
+        <span>dictionnaires<br />inventoriés</span>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="library-panel" aria-label="Bibliothèque de dictionnaires">
+        <div class="panel-title">
+          <span class="folio">01</span>
+          <div>
+            <p class="eyebrow">Bibliothèque</p>
+            <h2>Choisir une œuvre</h2>
+          </div>
+        </div>
+        <label class="language-filter">
+          <span>Langue</span>
+          <select id="language-filter">
+            <option value="all">Toutes</option>
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
+        </label>
+        <div class="work-list" id="work-list"></div>
+      </aside>
+
+      <section class="index-panel" aria-label="Index alphabétique">
+        <div class="search-shell">
+          <label for="search-input">Chercher un mot ou une expression</label>
+          <div>
+            <input
+              id="search-input"
+              type="search"
+              placeholder="Alliance, arche, temple…"
+              autocomplete="off"
+            />
+            <kbd>⌘ K</kbd>
+          </div>
+        </div>
+        <nav
+          class="alphabet"
+          id="alphabet"
+          aria-label="Index alphabétique"
+        ></nav>
+        <div class="result-summary">
+          <p class="eyebrow" id="result-kicker">Index</p>
+          <strong id="result-count">Chargement…</strong>
+        </div>
+        <div class="entry-list" id="entry-list"></div>
+        <div class="pagination">
+          <button id="previous-page" type="button">← Précédent</button>
+          <span id="page-label">—</span>
+          <button id="next-page" type="button">Suivant →</button>
+        </div>
+      </section>
+
+      <article class="reading-room" aria-live="polite">
+        <div class="article-placeholder" id="article-placeholder">
+          <span class="drop-cap">A</span>
+          <p class="eyebrow">Feuilleter le fonds</p>
+          <h2>Sélectionnez une entrée</h2>
+          <p>
+            Choisissez un dictionnaire, parcourez son index puis ouvrez un
+            article.
+          </p>
+        </div>
+        <div id="article" hidden>
+          <header class="article-header">
+            <p class="eyebrow" id="article-source">Dictionnaire</p>
+            <h2 id="article-title"></h2>
+            <p id="article-byline"></p>
+          </header>
+          <div class="definition" id="article-definition"></div>
+        </div>
+      </article>
+
+      <aside class="provenance-panel" aria-label="Provenance de la ressource">
+        <div class="panel-title">
+          <span class="folio">02</span>
+          <div>
+            <p class="eyebrow">Registre</p>
+            <h2>Œuvre & provenance</h2>
+          </div>
+        </div>
+        <div id="resource-card" class="resource-card"></div>
+      </aside>
+    </main>
+
+    <footer>
+      <span>Bible Strong · laboratoire local</span>
+      <span id="status-line">Connexion aux SQLite…</span>
+    </footer>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

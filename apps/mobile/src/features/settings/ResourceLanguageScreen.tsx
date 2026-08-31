@@ -27,7 +27,6 @@ const icons = {
   strong: require('~assets/images/tab-icons/lexique.svg'),
   dictionary: require('~assets/images/tab-icons/dictionary.svg'),
   nave: require('~assets/images/tab-icons/nave.svg'),
-  commentary: require('~assets/images/tab-icons/comment.svg'),
 }
 
 // Resource configuration
@@ -68,13 +67,6 @@ const RESOURCES_CONFIG: ResourceConfig[] = [
     descriptionKey: 'resourceLanguage.timelineDesc',
     iconType: 'feather',
     icon: 'clock',
-  },
-  {
-    id: 'COMMENTARIES',
-    labelKey: 'Commentaires',
-    descriptionKey: 'resourceLanguage.commentariesDesc',
-    iconType: 'svg',
-    icon: 'commentary',
   },
 ]
 

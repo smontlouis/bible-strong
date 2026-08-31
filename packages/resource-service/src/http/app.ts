@@ -96,6 +96,7 @@ import {
 import {
   ActiveSupplementaryPublicationUnavailable,
   readCommentaryChapter,
+  readCommentaryCoverage,
   readCommentaryVerse,
   readCrossReferences,
   SupplementaryContentNotFound,
@@ -891,6 +892,17 @@ const StrongLexiconApiLive = HttpApiBuilder.group(ResourceApi, 'strongLexicon', 
 
 const SupplementaryApiLive = HttpApiBuilder.group(ResourceApi, 'supplementary', handlers =>
   handlers
+    .handle('getCommentaryCoverage', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readCommentaryCoverage(path).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['commentary', path.collection, path.language, 'coverage']
+      )
+    })
     .handle('getCommentaryVerse', ({ path, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
@@ -1059,6 +1071,12 @@ const unavailableSupplementaryRepository: SupplementaryRepositoryService = {
       })
     ),
   findCommentaryChapter: input =>
+    Effect.fail(
+      new ActiveSupplementaryPublicationUnavailable({
+        resourceIdentity: `commentary:${input.collection}:${input.language}`,
+      })
+    ),
+  findCommentaryCoverage: input =>
     Effect.fail(
       new ActiveSupplementaryPublicationUnavailable({
         resourceIdentity: `commentary:${input.collection}:${input.language}`,

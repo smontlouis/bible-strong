@@ -24,6 +24,11 @@ export const databaseBiblesName = 'bibles.sqlite'
 export const getDictionaryDbPath = (work: string, lang: ResourceLanguage): string =>
   `${getSqliteDirPath(lang)}/dictionaries/${work}.sqlite`
 
+export const getCommentaryDbPath = (resourceId: string, lang: ResourceLanguage): string =>
+  resourceId === 'MHY'
+    ? getDbPath('MHY', lang)
+    : `${getSqliteDirPath(lang)}/commentaries/${resourceId}.sqlite`
+
 // Map DatabaseId to file names
 export const databaseFileNames: Record<DatabaseId, string> = {
   DICTIONNAIRE: databaseDictionnaireName,

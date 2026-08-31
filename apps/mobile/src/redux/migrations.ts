@@ -18,6 +18,10 @@ import {
 } from '~features/studyRelations/domain'
 import { migrateLegacyBibleVersionId } from '../migrations/legacyBibleVersionMigration'
 import { normalizeCompareSelection } from './compareSelectionMigration'
+import {
+  getDefaultCommentarySelection,
+  normalizeCommentarySelection,
+} from '~features/commentaries/commentarySelection'
 
 type LegacyRootState = RootState & {
   bible?: Record<string, unknown>
@@ -649,4 +653,22 @@ export default {
       },
     },
   }),
+  38: (state: RootState) => {
+    const selection = normalizeCommentarySelection(
+      state.user.bible.settings.commentarySelection ?? getDefaultCommentarySelection()
+    )
+    return {
+      ...state,
+      user: {
+        ...state.user,
+        bible: {
+          ...state.user.bible,
+          settings: {
+            ...state.user.bible.settings,
+            commentarySelection: selection,
+          },
+        },
+      },
+    } as RootState
+  },
 }

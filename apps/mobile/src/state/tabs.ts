@@ -189,6 +189,16 @@ export interface CommentaryTab extends TabBase {
   }
 }
 
+export interface CommentaryResourceTab extends TabBase {
+  type: 'commentary-resource'
+  data: {
+    projectionId: string
+    book: number
+    chapter: number
+    sectionId?: string
+  }
+}
+
 export type TabItem =
   | BibleTab
   | SearchTab
@@ -201,6 +211,7 @@ export type TabItem =
   | PlanTab
   | TimelineTab
   | CommentaryTab
+  | CommentaryResourceTab
   | NewTab
 
 export const tabTypes = [

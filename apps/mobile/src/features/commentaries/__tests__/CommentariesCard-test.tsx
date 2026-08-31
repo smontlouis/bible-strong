@@ -39,18 +39,20 @@ describe('CommentariesCard', () => {
   })
 
   it('forwards the Bible version selected in the Resource modal', () => {
+    const commentarySelectorRef = React.createRef()
     act(() => {
       renderer = create(
         React.createElement(CommentariesCard as React.ComponentType<Record<string, unknown>>, {
           verse: '1-1-1',
           preferredVersion: 'VUL',
           onChangeVerse: jest.fn(),
+          commentarySelectorRef,
         })
       )
     })
 
     expect(mockCommentariesTabScreen).toHaveBeenCalledWith(
-      expect.objectContaining({ preferredVersion: 'VUL' })
+      expect.objectContaining({ preferredVersion: 'VUL', commentarySelectorRef })
     )
   })
 })

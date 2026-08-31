@@ -83,6 +83,8 @@ import {
 import {
   CommentaryChapterPath,
   CommentaryChapterResponseDto,
+  CommentaryCoveragePath,
+  CommentaryCoverageResponseDto,
   CommentaryPath,
   CommentaryVerseResponseDto,
   CrossReferencePath,
@@ -458,6 +460,15 @@ const StrongLexiconApi = HttpApiGroup.make('strongLexicon')
   .addError(ResourceRateLimitedProblem, { status: 429 })
 
 const SupplementaryApi = HttpApiGroup.make('supplementary')
+  .add(
+    HttpApiEndpoint.get('getCommentaryCoverage', '/v1/commentaries/:collection/:language/coverage')
+      .setPath(CommentaryCoveragePath)
+      .addSuccess(CommentaryCoverageResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
   .add(
     HttpApiEndpoint.get(
       'getCommentaryVerse',

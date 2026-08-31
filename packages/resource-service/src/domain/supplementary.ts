@@ -2,18 +2,27 @@ import { Context, Data, Effect } from 'effect'
 
 import {
   CommentaryChapterResponseDto,
+  CommentaryCoverageResponseDto,
   CommentaryVerseResponseDto,
   CrossReferenceResponseDto,
   SupplementaryRevisionDto,
 } from '@bible-strong/resource-domain/contracts/supplementaryContract'
 
 export type SupplementaryLanguage = 'fr' | 'en'
-export type CommentaryVerseLookup = { collection: string; language: SupplementaryLanguage; verseKey: string }
+export type CommentaryVerseLookup = {
+  collection: string
+  language: SupplementaryLanguage
+  verseKey: string
+}
 export type CommentaryChapterLookup = {
   collection: string
   language: SupplementaryLanguage
   book: number
   chapter: number
+}
+export type CommentaryCoverageLookup = {
+  collection: string
+  language: SupplementaryLanguage
 }
 export type CrossReferenceLookup = { language: 'fr'; verseKey: string }
 
@@ -21,6 +30,11 @@ type ActiveCommentaryVerse = CommentaryVerseLookup & { revision: string; content
 type ActiveCommentaryChapter = CommentaryChapterLookup & {
   revision: string
   comments: Record<string, string>
+}
+type ActiveCommentaryCoverage = CommentaryCoverageLookup & {
+  revision: string
+  books: number[]
+  chaptersByBook: Record<string, number[]>
 }
 type ActiveCrossReferences = CrossReferenceLookup & { revision: string; references: string[] }
 
@@ -51,6 +65,9 @@ export type SupplementaryRepositoryService = {
   findCommentaryChapter: (
     input: CommentaryChapterLookup
   ) => Effect.Effect<ActiveCommentaryChapter, SupplementaryRepositoryError>
+  findCommentaryCoverage: (
+    input: CommentaryCoverageLookup
+  ) => Effect.Effect<ActiveCommentaryCoverage, SupplementaryRepositoryError>
   findCrossReferences: (
     input: CrossReferenceLookup
   ) => Effect.Effect<ActiveCrossReferences, SupplementaryRepositoryError>
@@ -88,6 +105,17 @@ export const readCommentaryChapter = (input: CommentaryChapterLookup) =>
       book: active.book,
       chapter: active.chapter,
       serializedComments: JSON.stringify(active.comments),
+    })
+  })
+
+export const readCommentaryCoverage = (input: CommentaryCoverageLookup) =>
+  Effect.gen(function* () {
+    const repository = yield* SupplementaryRepository
+    const active = yield* repository.findCommentaryCoverage(input)
+    return new CommentaryCoverageResponseDto({
+      resource: revisionDto('commentary', active.collection, active.language, active.revision),
+      books: active.books,
+      chaptersByBook: active.chaptersByBook,
     })
   })
 

@@ -33,7 +33,7 @@ describe('Resource model', () => {
     [{ kind: 'nave', language: 'en' }, 'nave:en'],
     [{ kind: 'cross-references' }, 'cross-references'],
     [{ kind: 'commentary', collection: 'MHY', language: 'fr' }, 'commentary:MHY:fr'],
-    [{ kind: 'commentary', collection: 'FIRESTORE', language: 'en' }, 'commentary:FIRESTORE:en'],
+    [{ kind: 'commentary', collection: 'barnes', language: 'en' }, 'commentary:barnes:en'],
     [{ kind: 'timeline', language: 'fr' }, 'timeline:fr'],
     [{ kind: 'timeline', language: 'en' }, 'timeline:en'],
   ]
@@ -91,11 +91,17 @@ describe('Resource model', () => {
     ).toEqual({ status: 'remotely-readable' })
   })
 
-  it('represents Firestore commentaries as remote-only without changing MHY delivery', () => {
+  it('makes only published commentary collections remotely readable', () => {
     expect(
       getResourceOnlineAccess(
-        { kind: 'commentary', collection: 'FIRESTORE', language: 'en' },
-        new Set()
+        { kind: 'commentary', collection: 'barnes', language: 'en' },
+        new Set(),
+        new Set(),
+        new Set(),
+        new Set(),
+        new Set(),
+        new Set(),
+        new Set(['barnes'])
       )
     ).toEqual({ status: 'remotely-readable' })
     expect(
@@ -140,6 +146,10 @@ describe('Resource model', () => {
     [
       { kind: 'database', databaseId: 'MHY', language: 'fr' },
       { kind: 'commentary', collection: 'MHY', language: 'fr' },
+    ],
+    [
+      { kind: 'commentary', resourceId: 'barnes', language: 'en' },
+      { kind: 'commentary', collection: 'barnes', language: 'en' },
     ],
     [
       { kind: 'database', databaseId: 'TIMELINE', language: 'en' },

@@ -5,14 +5,17 @@ import BookSelectorSheet, { bookSelectorDataAtom } from './BookSelectorSheet'
 import VersionSelectorSheet from '../VersionSelectorSheet/VersionSelectorSheet'
 import { versionSelectorDataAtom } from '../VersionSelectorSheet/state'
 import { useSetAtom } from 'jotai/react'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
 
 interface BookSelectorContextType {
   openBookSelector: ({
     actions,
     data,
+    coverage,
   }: {
     actions: BibleTabActions
     data: BibleTab['data']
+    coverage?: BibleVersionCoverage
   }) => void
   openVersionSelector: ({
     actions,
@@ -44,11 +47,13 @@ export const BookSelectorSheetProvider = ({ children }: { children: React.ReactN
   const openBookSelector = ({
     actions,
     data,
+    coverage,
   }: {
     actions: BibleTabActions
     data: BibleTab['data']
+    coverage?: BibleVersionCoverage
   }) => {
-    setBookSelectorData({ actions, data })
+    setBookSelectorData({ actions, data, coverage })
     bookSheetRef.current?.present()
   }
 

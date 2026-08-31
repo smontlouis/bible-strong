@@ -1,7 +1,7 @@
 import type { DownloadItem } from '~state/downloadQueue'
 import { isSharedDB, type DatabaseId, type ResourceLanguage } from '~helpers/databaseTypes'
 import { versions, type Version } from '~helpers/bibleVersions'
-import { databases, getDbPath, getDictionaryDbPath } from '~helpers/databases'
+import { databases, getCommentaryDbPath, getDbPath, getDictionaryDbPath } from '~helpers/databases'
 import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
 import {
   getStrongBiblePublication,
@@ -185,6 +185,8 @@ export const createOfflineCopyDownloadItem = (identity: OfflineCopyIdentity): Do
       return createStrongLexiconModuleDownloadItem(identity.moduleId)
     case 'dictionary':
       return createDictionaryDownloadItem(identity)
+    case 'commentary':
+      return createCommentaryDownloadItem(identity)
     case 'database':
       return createDatabaseDownloadItem(identity.databaseId, identity.language)
     case 'bible-pericope':
@@ -219,6 +221,8 @@ export const createOfflineCopyDownloadPlan = (
       )
     case 'dictionary':
       return [createDictionaryDownloadItem(identity)]
+    case 'commentary':
+      return [createCommentaryDownloadItem(identity)]
     case 'database':
       return [createDatabaseDownloadItem(identity.databaseId, identity.language)]
     case 'bible-pericope':
@@ -247,6 +251,27 @@ export function createDictionaryDownloadItem(
     lang: identity.language,
     url: catalogArtifact.url,
     destinationPath: getDictionaryDbPath(identity.work, identity.language),
+    archiveEntry: catalogArtifact.entry,
+    estimatedSize: catalogArtifact.archiveBytes,
+    expectedArchiveSha256: catalogArtifact.archiveSha256,
+    addedAt: Date.now(),
+    retryCount: 0,
+  }
+}
+
+export function createCommentaryDownloadItem(
+  identity: Extract<OfflineCopyIdentity, { kind: 'commentary' }>,
+  name = identity.resourceId
+): DownloadItem {
+  const catalogArtifact = getMobileResourceCatalogEntry(createOfflineCopyId(identity))
+  return {
+    id: createOfflineCopyId(identity),
+    type: 'commentary',
+    name,
+    resourceId: identity.resourceId,
+    lang: identity.language,
+    url: catalogArtifact.url,
+    destinationPath: getCommentaryDbPath(identity.resourceId, identity.language),
     archiveEntry: catalogArtifact.entry,
     estimatedSize: catalogArtifact.archiveBytes,
     expectedArchiveSha256: catalogArtifact.archiveSha256,

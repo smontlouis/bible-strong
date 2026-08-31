@@ -30,6 +30,7 @@ describe('Offline copy identity', () => {
     { kind: 'interlinear-index', versionId: 'BHG', language: 'fr' },
     { kind: 'strong-lexicon-module', moduleId: 'resources' },
     { kind: 'dictionary', work: 'bost', resourceId: 'BOST', language: 'fr' },
+    { kind: 'commentary', resourceId: 'barnes', language: 'fr' },
     { kind: 'database', databaseId: 'NAVE', language: 'en' },
     { kind: 'bible-pericope', versionId: 'DBY' },
     { kind: 'bible-red-words', versionId: 'DBY' },

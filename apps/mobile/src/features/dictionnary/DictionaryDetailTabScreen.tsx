@@ -46,6 +46,7 @@ import {
   resourceFailureFromAccessError,
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
+import { getCommentaryBibleViewRoute } from '~features/commentaries/commentaryReferenceNavigation'
 
 interface DictionaryDetailScreenProps {
   dictionaryAtom: PrimitiveAtom<DictionaryTab>
@@ -160,7 +161,11 @@ const DictionnaryDetailScreen = ({
   }, [addHistory, dictionnaireItem, word])
 
   const openLink = ({ href, type }: HTMLViewLinkPayload) => {
-    if (type === 'verse') {
+    if (href.startsWith('bible://')) {
+      const route = getCommentaryBibleViewRoute(href.slice('bible://'.length))
+      if (route) pushRouteOnce(route)
+      else toast.error('Impossible de charger cette référence biblique.')
+    } else if (type.includes('verse')) {
       try {
         const sanitizedHref = href.replace(String.fromCharCode(160), ' ')
         const book = books.find(b => sanitizedHref.includes(b.Nom))

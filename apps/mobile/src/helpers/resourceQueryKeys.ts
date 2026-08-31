@@ -15,6 +15,7 @@ const strongBible = [...root, 'strong-bible'] as const
 const strongLexicon = [...root, 'strong-lexicon'] as const
 const offlineDatabase = [...root, 'offline-database'] as const
 const timeline = [...root, 'timeline'] as const
+const commentary = [...root, 'commentary'] as const
 
 type LexiconBibleQueryRequest = {
   currentVersionId: string
@@ -54,6 +55,8 @@ export const resourceQueryKeys = {
   bibleReferences: (verse: string) => [...bibleContent, 'references', verse] as const,
   bibleRedWords: (versionId: string) => [...bibleContent, 'red-words', versionId] as const,
   bibleCoverage: (versionId: string) => [...bibleContent, 'coverage', versionId] as const,
+  commentaryCoverage: (resourceId: string, language: string) =>
+    [...commentary, 'coverage', resourceId, language] as const,
   lexiconBible: () => lexiconBible,
   lexiconBibleVerse: (request: LexiconBibleQueryRequest) =>
     [...lexiconBible, 'verse', request] as const,

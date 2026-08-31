@@ -14,6 +14,7 @@ import {
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import {
@@ -32,6 +33,10 @@ import {
 } from "./resourcePublicationEnvelope.js";
 
 const execFileAsync = promisify(execFile);
+const normalizeDictionarySqliteScript = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../workflows/dictionaries/scripts/normalize-sqlite.mjs"
+);
 
 export type DictionaryLanguage = "fr" | "en";
 
@@ -463,33 +468,6 @@ export async function buildDictionaryResourcePublication(
   validateMetadata(options);
 
   const sourceSha256 = await sha256File(sourceSqlitePath);
-  const source = await readDictionarySqlite(sourceSqlitePath, options.language);
-  const revision = deriveDictionaryRevision(
-    options.work,
-    options.language,
-    source
-  );
-  const canonical: CanonicalDictionaryPublication = {
-    format: "bible-strong-canonical-dictionary",
-    schemaVersion: 2,
-    resourceId: options.resourceId,
-    work: options.work,
-    language: options.language,
-    editorial: {
-      title: options.title,
-      abbreviation: options.abbreviation,
-      authors: options.authors,
-      description: options.description,
-      edition: options.edition,
-      source: options.source
-    },
-    revision,
-    sourceVersion: options.sourceVersion,
-    sourceSha256,
-    entries: source.entries,
-    verseAnchors: source.verseAnchors
-  };
-
   const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const mobileReleaseDir = `${temporaryDir}-mobile`;
   const canonicalRelativePath = `canonical/dictionary-${options.work}-${options.language}.json`;
@@ -505,6 +483,44 @@ export async function buildDictionaryResourcePublication(
       mkdir(path.dirname(normalizedSqlitePath), { recursive: true })
     ]);
     await copyFile(sourceSqlitePath, normalizedSqlitePath);
+    await execFileAsync(process.execPath, [
+      normalizeDictionarySqliteScript,
+      "--database",
+      normalizedSqlitePath,
+      "--work",
+      options.work,
+      "--language",
+      options.language
+    ]);
+    const source = await readDictionarySqlite(
+      normalizedSqlitePath,
+      options.language
+    );
+    const revision = deriveDictionaryRevision(
+      options.work,
+      options.language,
+      source
+    );
+    const canonical: CanonicalDictionaryPublication = {
+      format: "bible-strong-canonical-dictionary",
+      schemaVersion: 2,
+      resourceId: options.resourceId,
+      work: options.work,
+      language: options.language,
+      editorial: {
+        title: options.title,
+        abbreviation: options.abbreviation,
+        authors: options.authors,
+        description: options.description,
+        edition: options.edition,
+        source: options.source
+      },
+      revision,
+      sourceVersion: options.sourceVersion,
+      sourceSha256,
+      entries: source.entries,
+      verseAnchors: source.verseAnchors
+    };
     await writePublicationMetadata(normalizedSqlitePath, canonical);
     await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
 
@@ -884,7 +900,7 @@ const main = async () => {
   }
   const args = parseCliArgs(
     command === "build" ? rawArgs : [command, ...rawArgs],
-    new Set(["--config", "--output-dir"])
+    new Set(["--config", "--output-dir", "--work"])
   );
   if (!args["--config"] || !args["--output-dir"]) {
     throw new Error("dictionary-publication-cli-required-options-missing");
@@ -897,9 +913,32 @@ const main = async () => {
     throw new Error("dictionary-publication-config-empty");
   }
   const configDir = path.dirname(configPath);
+  const requestedWorks = args["--work"]
+    ? new Set(
+        args["--work"]
+          .split(",")
+          .map((work) => work.trim())
+          .filter(Boolean)
+      )
+    : undefined;
+  const selectedPublications = requestedWorks
+    ? config.publications.filter((publication) =>
+        requestedWorks.has(publication.work)
+      )
+    : config.publications;
+  if (requestedWorks) {
+    const missingWorks = [...requestedWorks].filter(
+      (work) =>
+        !selectedPublications.some((publication) => publication.work === work)
+    );
+    if (missingWorks.length > 0)
+      throw new Error(
+        `dictionary-publication-cli-work-unknown:${missingWorks.join(",")}`
+      );
+  }
   const manifests = await buildAllDictionaryResourcePublications({
     outputDir: args["--output-dir"],
-    publications: config.publications.map((publication) => ({
+    publications: selectedPublications.map((publication) => ({
       ...publication,
       sqlitePath: path.resolve(configDir, publication.sqlitePath)
     }))

@@ -8,6 +8,7 @@ const icons = {
   bible: require('~assets/images/tab-icons/book-open.svg'),
   strong: require('~assets/images/tab-icons/lexique.svg'),
   commentary: require('~assets/images/tab-icons/comment.svg'),
+  'commentary-resource': require('~assets/images/tab-icons/comment.svg'),
   dictionary: require('~assets/images/tab-icons/dictionary.svg'),
   search: require('~assets/images/tab-icons/search.svg'),
   nave: require('~assets/images/tab-icons/nave.svg'),
@@ -29,6 +30,7 @@ export const tabIconColorConfig: Partial<Record<TabItem['type'], string>> = {
   nave: 'quint',
   dictionary: 'secondary',
   commentary: '#26A69A',
+  'commentary-resource': '#26A69A',
 }
 
 interface TabIconProps {

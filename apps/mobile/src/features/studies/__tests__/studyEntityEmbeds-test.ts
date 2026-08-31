@@ -29,7 +29,6 @@ const resourceLanguages = {
   NAVE: 'fr',
   MHY: 'fr',
   TIMELINE: 'fr',
-  COMMENTARIES: 'fr',
 } as const
 
 const createResources = (

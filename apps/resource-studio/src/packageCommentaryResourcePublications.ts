@@ -12,8 +12,10 @@ import {
 } from "node:fs/promises";
 import { DatabaseSync } from "node:sqlite";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
+
+import { materializeCommentaryBibleLinks } from "./commentaryPublicationHtml.js";
 
 const execFileAsync = promisify(execFile);
 const REPRODUCIBLE_ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
@@ -26,14 +28,26 @@ type LibraryEntry = {
   id: string;
   passage: Passage;
   passageEnd?: Passage;
-  source: { language: Language; html: string };
-  translation?: { language: Language; html: string } | null;
+  source: {
+    language: Language;
+    html: string;
+    references?: Array<{ id: string; kind: "bible"; osis: string }>;
+  };
+  translation?: {
+    language: Language;
+    html: string;
+    references?: Array<{ id: string; kind: "bible"; osis: string }>;
+  } | null;
   scope?: { kind: string; start: Passage; end?: Passage };
   sourceAnchors?: Array<{ id: string; passage: Passage }>;
   translationVariants?: Array<{
     id: string;
     passage: Passage;
-    translation?: { language: Language; html: string } | null;
+    translation?: {
+      language: Language;
+      html: string;
+      references?: Array<{ id: string; kind: "bible"; osis: string }>;
+    } | null;
   }>;
 };
 
@@ -182,29 +196,18 @@ const stableArtifactFile = (catalogId: string, language: Language): string =>
     ? "databases/commentaires-mhy.sqlite.zip"
     : `commentaries/commentary-${catalogId}-${language}.sqlite.zip`;
 
-const expandBarnesEntry = (entry: LibraryEntry): LibraryEntry[] => {
-  if (!entry.sourceAnchors?.length) return [entry];
-  const variants = new Map(
-    (entry.translationVariants ?? []).map(variant => [variant.id, variant.translation])
-  );
-  return entry.sourceAnchors.map((anchor, index) => ({
-    ...entry,
-    id: anchor.id,
-    passage: anchor.passage,
-    passageEnd: undefined,
-    scope: undefined,
-    sourceAnchors: undefined,
-    translationVariants: undefined,
-    translation: index === 0 ? entry.translation : (variants.get(anchor.id) ?? null)
-  }));
-};
-
-const htmlForLanguage = (entry: LibraryEntry, language: Language): string | undefined => {
-  if (entry.translation?.language === language && entry.translation.html.trim()) {
-    return entry.translation.html.trim();
+const htmlForLanguage = (
+  entry: LibraryEntry,
+  language: Language
+): string | undefined => {
+  if (
+    entry.translation?.language === language &&
+    entry.translation.html.trim()
+  ) {
+    return materializeCommentaryBibleLinks(entry.translation).trim();
   }
   if (entry.source.language === language && entry.source.html.trim()) {
-    return entry.source.html.trim();
+    return materializeCommentaryBibleLinks(entry.source).trim();
   }
   return undefined;
 };
@@ -219,7 +222,10 @@ const coveredPassages = (
     return [entry.passage];
   }
   const end = entry.scope?.end ?? entry.passageEnd;
-  if ((entry.scope?.kind === "range" || entry.scope?.kind === "section") && end) {
+  if (
+    (entry.scope?.kind === "range" || entry.scope?.kind === "section") &&
+    end
+  ) {
     const from = positions.get(start);
     const to = positions.get(end);
     if (from !== undefined && to !== undefined && to >= from) {
@@ -229,50 +235,69 @@ const coveredPassages = (
   return [entry.passage];
 };
 
-const loadEntries = async (
-  index: LibraryIndex
+export const loadCommentaryLibraryEntries = async (
+  index: LibraryIndex,
+  root = libraryRoot
 ): Promise<Map<string, LibraryEntry[]>> => {
-  const descriptors = new Map<string, { resourceId: string; path: string; sha256: string }>();
+  const descriptors = new Map<
+    string,
+    { resourceId: string; path: string; sha256: string }
+  >();
   for (const chapter of index.chapters) {
     for (const [resourceId, descriptor] of Object.entries(chapter.resources)) {
       descriptors.set(descriptor.path, { resourceId, ...descriptor });
     }
   }
   const entriesByResource = new Map<string, LibraryEntry[]>();
-  for (const descriptor of [...descriptors.values()].sort((a, b) => a.path.localeCompare(b.path))) {
-    const bytes = await readFile(path.join(libraryRoot, descriptor.path));
+  for (const descriptor of [...descriptors.values()].sort((a, b) =>
+    a.path.localeCompare(b.path)
+  )) {
+    const bytes = await readFile(path.join(root, descriptor.path));
     if (sha256Buffer(bytes) !== descriptor.sha256) {
-      throw new Error(`commentary-library-chunk-sha256-mismatch:${descriptor.path}`);
+      throw new Error(
+        `commentary-library-chunk-sha256-mismatch:${descriptor.path}`
+      );
     }
     const chunk = JSON.parse(bytes.toString("utf8")) as {
       resourceId: string;
       entries: LibraryEntry[];
     };
     if (chunk.resourceId !== descriptor.resourceId) {
-      throw new Error(`commentary-library-chunk-resource-mismatch:${descriptor.path}`);
+      throw new Error(
+        `commentary-library-chunk-resource-mismatch:${descriptor.path}`
+      );
     }
     const resourceEntries = entriesByResource.get(chunk.resourceId) ?? [];
-    resourceEntries.push(...chunk.entries.flatMap(expandBarnesEntry));
+    // Entries carrying sourceAnchors are already canonical editorial units.
+    // Re-expanding them would restore the provider's repeated per-verse anchors
+    // and, for translated resources such as Barnes, publish several competing
+    // translations of the same source note.
+    resourceEntries.push(...chunk.entries);
     entriesByResource.set(chunk.resourceId, resourceEntries);
   }
   return entriesByResource;
 };
 
-const buildCanonical = (
+export const buildCanonicalCommentary = (
   catalogResource: CatalogResource,
   language: Language,
   index: LibraryIndex,
   entries: readonly LibraryEntry[]
 ): CanonicalCommentary => {
-  const passages = index.chapters.flatMap(chapter => chapter.passages).sort(comparePassages);
-  const positions = new Map(passages.map((passage, position) => [passage, position]));
+  const passages = index.chapters
+    .flatMap((chapter) => chapter.passages)
+    .sort(comparePassages);
+  const positions = new Map(
+    passages.map((passage, position) => [passage, position])
+  );
   const contents = new Map<Passage, Array<{ id: string; html: string }>>();
   for (const entry of entries) {
     const html = htmlForLanguage(entry, language);
     if (!html) continue;
     for (const passage of coveredPassages(entry, passages, positions)) {
       const values = contents.get(passage) ?? [];
-      if (!values.some(value => value.id === entry.id)) values.push({ id: entry.id, html });
+      if (!values.some((value) => value.id === entry.id))
+        values.push({ id: entry.id, html });
       contents.set(passage, values);
     }
   }
@@ -281,10 +306,12 @@ const buildCanonical = (
     .sort(([left], [right]) => comparePassages(left, right))
     .map(([verseKey, values]) => ({
       verseKey,
-      content: values.map(value => value.html).join("<hr>")
+      content: values.map((value) => value.html).join("<hr>")
     }));
   if (verses.length === 0) {
-    throw new Error(`commentary-publication-language-empty:${catalogResource.id}:${language}`);
+    throw new Error(
+      `commentary-publication-language-empty:${catalogResource.id}:${language}`
+    );
   }
   const resourceId = publicationResourceId(catalogResource.id);
   const sourceVersion = `${index.sourceRevision}:${catalogResource.id}:${language}`;
@@ -336,8 +363,8 @@ const createSqlite = async (
       "INSERT INTO COMMENTAIRES (id, commentaires) VALUES (?, ?)"
     );
     database.exec("BEGIN IMMEDIATE");
-    for (const [id, commentaires] of [...chapters.entries()].sort(([left], [right]) =>
-      left.localeCompare(right, "en", { numeric: true })
+    for (const [id, commentaires] of [...chapters.entries()].sort(
+      ([left], [right]) => left.localeCompare(right, "en", { numeric: true })
     )) {
       insertChapter.run(id, JSON.stringify(commentaires));
     }
@@ -363,7 +390,11 @@ const buildBundle = async (
   language: Language,
   canonical: CanonicalCommentary,
   generatedAt: string
-): Promise<{ bundlePath: string; manifest: CommentaryManifest; sqliteBytes: number }> => {
+): Promise<{
+  bundlePath: string;
+  manifest: CommentaryManifest;
+  sqliteBytes: number;
+}> => {
   const stem =
     catalogResource.id === "mhy-fr" && language === "fr"
       ? "mhy-fr"
@@ -387,7 +418,9 @@ const buildBundle = async (
     stat(archivePath)
   ]);
   const chapters = new Set(
-    canonical.verses.map(verse => verse.verseKey.split("-").slice(0, 2).join("-"))
+    canonical.verses.map((verse) =>
+      verse.verseKey.split("-").slice(0, 2).join("-")
+    )
   );
   const manifest: CommentaryManifest = {
     format: "bible-strong-resource-publication",
@@ -430,10 +463,16 @@ const buildBundle = async (
     counts: {
       chapters: chapters.size,
       verses: canonical.verses.length,
-      characters: canonical.verses.reduce((total, verse) => total + verse.content.length, 0)
+      characters: canonical.verses.reduce(
+        (total, verse) => total + verse.content.length,
+        0
+      )
     }
   };
-  await writeFile(path.join(bundlePath, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+  await writeFile(
+    path.join(bundlePath, "manifest.json"),
+    `${JSON.stringify(manifest, null, 2)}\n`
+  );
   await rm(path.join(bundlePath, "work"), { recursive: true, force: true });
   return { bundlePath, manifest, sqliteBytes: sqliteStats.size };
 };
@@ -447,15 +486,19 @@ const synchronizeCatalogContracts = async (
     sqliteBytes: number;
   }[]
 ): Promise<void> => {
-  const mobileCatalog = JSON.parse(await readFile(mobileCatalogPath, "utf8")) as MobileCatalog;
-  const inventory = JSON.parse(await readFile(inventoryPath, "utf8")) as InventoryEntry[];
+  const mobileCatalog = JSON.parse(
+    await readFile(mobileCatalogPath, "utf8")
+  ) as MobileCatalog;
+  const inventory = JSON.parse(
+    await readFile(inventoryPath, "utf8")
+  ) as InventoryEntry[];
   const required = JSON.parse(await readFile(requiredIdsPath, "utf8")) as {
     schemaVersion: number;
     resourceIds: string[];
     bundleRoles: Record<string, string[]>;
   };
   const publicationIds = new Set<string>();
-  const inventoryById = new Map(inventory.map(item => [item.id, item]));
+  const inventoryById = new Map(inventory.map((item) => [item.id, item]));
   for (const publication of publications) {
     const { catalogResource, language, manifest, sqliteBytes } = publication;
     const id = mobileCatalogId(manifest.identity.resourceId, language);
@@ -502,23 +545,37 @@ const synchronizeCatalogContracts = async (
     });
   }
   mobileCatalog.resources = Object.fromEntries(
-    Object.entries(mobileCatalog.resources).sort(([left], [right]) => left.localeCompare(right))
+    Object.entries(mobileCatalog.resources).sort(([left], [right]) =>
+      left.localeCompare(right)
+    )
   );
   mobileCatalog.resourceCount = Object.keys(mobileCatalog.resources).length;
   mobileCatalog.generatedAt = new Date().toISOString();
   required.resourceIds = [
     ...required.resourceIds,
-    ...[...publicationIds].filter(id => !required.resourceIds.includes(id)).sort()
+    ...[...publicationIds]
+      .filter((id) => !required.resourceIds.includes(id))
+      .sort()
   ];
-  const knownCatalogIds = new Set(catalogResources.map(resource => resource.id));
+  const knownCatalogIds = new Set(
+    catalogResources.map((resource) => resource.id)
+  );
   if (knownCatalogIds.size !== catalogResources.length) {
     throw new Error("commentary-catalog-resource-id-duplicate");
   }
   await Promise.all([
-    writeFile(mobileCatalogPath, `${JSON.stringify(mobileCatalog, null, 2)}\n`, "utf8"),
+    writeFile(
+      mobileCatalogPath,
+      `${JSON.stringify(mobileCatalog, null, 2)}\n`,
+      "utf8"
+    ),
     writeFile(
       inventoryPath,
-      `${JSON.stringify([...inventoryById.values()].sort((a, b) => a.id.localeCompare(b.id)), null, 2)}\n`,
+      `${JSON.stringify(
+        [...inventoryById.values()].sort((a, b) => a.id.localeCompare(b.id)),
+        null,
+        2
+      )}\n`,
       "utf8"
     ),
     writeFile(requiredIdsPath, `${JSON.stringify(required, null, 2)}\n`, "utf8")
@@ -528,30 +585,64 @@ const synchronizeCatalogContracts = async (
 const main = async (): Promise<void> => {
   const libraryIndexPath = path.join(libraryRoot, "index.json");
   const catalogPath = path.join(workflowRoot, "data/catalog.json");
-  if (!existsSync(libraryIndexPath)) throw new Error("commentary-library-index-missing");
+  if (!existsSync(libraryIndexPath))
+    throw new Error("commentary-library-index-missing");
   const [index, catalogEnvelope] = await Promise.all([
-    readFile(libraryIndexPath, "utf8").then(value => JSON.parse(value) as LibraryIndex),
+    readFile(libraryIndexPath, "utf8").then(
+      (value) => JSON.parse(value) as LibraryIndex
+    ),
     readFile(catalogPath, "utf8").then(
-      value => JSON.parse(value) as { resources: CatalogResource[] }
+      (value) => JSON.parse(value) as { resources: CatalogResource[] }
     )
   ]);
-  const catalogResources = catalogEnvelope.resources.filter(resource => resource.languages.length > 0);
+  const catalogResources = catalogEnvelope.resources.filter(
+    (resource) => resource.languages.length > 0
+  );
   if (catalogResources.length !== Object.keys(index.resources).length) {
     throw new Error(
       `commentary-catalog-library-count-mismatch:${catalogResources.length}:${Object.keys(index.resources).length}`
     );
   }
-  const entriesByResource = await loadEntries(index);
+  const requestedResourceIds = new Set(
+    process.argv
+      .flatMap((argument, position, arguments_) =>
+        arguments_[position - 1] === "--resource" ? [argument] : []
+      )
+      .filter(Boolean)
+  );
+  const selectedCatalogResources = requestedResourceIds.size
+    ? catalogResources.filter((resource) =>
+        requestedResourceIds.has(resource.id)
+      )
+    : catalogResources;
+  if (selectedCatalogResources.length !== requestedResourceIds.size) {
+    const unknown = [...requestedResourceIds].filter(
+      (resourceId) =>
+        !catalogResources.some((resource) => resource.id === resourceId)
+    );
+    throw new Error(
+      `commentary-publication-resource-unknown:${unknown.join(",")}`
+    );
+  }
+  const entriesByResource = await loadCommentaryLibraryEntries(index);
   const stagingRoot = `${outputRoot}.tmp-${process.pid}-${randomUUID()}`;
   await rm(stagingRoot, { recursive: true, force: true });
   await mkdir(stagingRoot, { recursive: true });
   try {
     const publications = [];
-    for (const catalogResource of catalogResources) {
+    for (const catalogResource of selectedCatalogResources) {
       const entries = entriesByResource.get(catalogResource.id);
-      if (!entries?.length) throw new Error(`commentary-library-resource-empty:${catalogResource.id}`);
+      if (!entries?.length)
+        throw new Error(
+          `commentary-library-resource-empty:${catalogResource.id}`
+        );
       for (const language of catalogResource.languages) {
-        const canonical = buildCanonical(catalogResource, language, index, entries);
+        const canonical = buildCanonicalCommentary(
+          catalogResource,
+          language,
+          index,
+          entries
+        );
         const bundle = await buildBundle(
           stagingRoot,
           catalogResource,
@@ -563,9 +654,20 @@ const main = async (): Promise<void> => {
       }
     }
     await synchronizeCatalogContracts(catalogResources, publications);
-    await rm(outputRoot, { recursive: true, force: true });
-    await mkdir(path.dirname(outputRoot), { recursive: true });
-    await rename(stagingRoot, outputRoot);
+    if (requestedResourceIds.size === 0) {
+      await rm(outputRoot, { recursive: true, force: true });
+      await mkdir(path.dirname(outputRoot), { recursive: true });
+      await rename(stagingRoot, outputRoot);
+    } else {
+      await mkdir(outputRoot, { recursive: true });
+      for (const publication of publications) {
+        const bundleName = path.basename(publication.bundlePath);
+        const target = path.join(outputRoot, bundleName);
+        await rm(target, { recursive: true, force: true });
+        await rename(publication.bundlePath, target);
+      }
+      await rm(stagingRoot, { recursive: true, force: true });
+    }
     console.log(
       JSON.stringify(
         {
@@ -576,7 +678,7 @@ const main = async (): Promise<void> => {
             (total, publication) => total + publication.manifest.counts.verses,
             0
           ),
-          publications: publications.map(publication => ({
+          publications: publications.map((publication) => ({
             resourceId: publication.manifest.identity.resourceId,
             language: publication.language,
             revision: publication.manifest.revision,
@@ -596,7 +698,12 @@ const main = async (): Promise<void> => {
   }
 };
 
-main().catch(error => {
-  console.error(error);
-  process.exitCode = 1;
-});
+const isMain =
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+if (isMain) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

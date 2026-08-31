@@ -33,6 +33,7 @@ import {
   isLocalResourceAvailable,
 } from '~features/resources/resourceAvailability'
 import {
+  createCommentaryDownloadItem,
   createOfflineCopyDownloadItem,
   createOfflineCopyDownloadPlan,
   dedupeDownloadItems,
@@ -72,6 +73,7 @@ import { resourceIdentityFromOfflineCopy } from '~features/resources/resourceMod
 import useConnection from '~helpers/useConnection'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { buildBibleItems, type UnifiedDownloadItem } from './downloadBibleItems'
+import { getCommentaryCatalogForLanguage } from '@bible-strong/resource-catalog/commentaries'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -92,7 +94,7 @@ interface UnifiedSection {
 function buildDatabaseItems(lang: ResourceLanguage): UnifiedItem[] {
   const allDbs = databases(lang)
   return LANGUAGE_SPECIFIC_DBS.flatMap(dbId => {
-    if (dbId === 'BIBLES' || (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))) {
+    if (dbId === 'BIBLES' || dbId === 'MHY' || (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))) {
       return []
     }
     const db = allDbs[dbId as keyof typeof allDbs]
@@ -108,6 +110,27 @@ function buildDatabaseItems(lang: ResourceLanguage): UnifiedItem[] {
           },
         ]
       : []
+  })
+}
+
+function buildCommentaryItems(lang: ResourceLanguage): UnifiedItem[] {
+  return getCommentaryCatalogForLanguage(lang).map(entry => {
+    const identity = {
+      kind: 'commentary' as const,
+      resourceId: entry.publicationId,
+      language: lang,
+    }
+    const item = createCommentaryDownloadItem(identity, entry.title)
+    return {
+      id: item.id,
+      name: entry.title,
+      subtitle: `${entry.author} · ${entry.rights}`,
+      estimatedSize: item.estimatedSize,
+      lang,
+      searchText: [entry.title, entry.author, entry.shortName, entry.tradition, ...entry.tags]
+        .join(' ')
+        .toLocaleLowerCase(),
+    }
   })
 }
 
@@ -194,6 +217,11 @@ function buildAllSections(
         data: buildDatabaseItems('en'),
       },
       {
+        key: 'commentaries-en',
+        title: t('downloads.section.commentariesEn'),
+        data: buildCommentaryItems('en'),
+      },
+      {
         key: 'db-shared',
         title: t('downloads.section.crossReferences'),
         data: buildSharedDatabaseItems(),
@@ -203,6 +231,11 @@ function buildAllSections(
         key: 'db-fr',
         title: t('downloads.section.dbFr'),
         data: buildDatabaseItems('fr'),
+      },
+      {
+        key: 'commentaries-fr',
+        title: t('downloads.section.commentariesFr'),
+        data: buildCommentaryItems('fr'),
       },
     ].filter(s => s.data.length > 0)
   }
@@ -219,6 +252,11 @@ function buildAllSections(
       data: buildDatabaseItems('fr'),
     },
     {
+      key: 'commentaries-fr',
+      title: t('downloads.section.commentariesFr'),
+      data: buildCommentaryItems('fr'),
+    },
+    {
       key: 'db-shared',
       title: t('downloads.section.crossReferences'),
       data: buildSharedDatabaseItems(),
@@ -228,6 +266,11 @@ function buildAllSections(
       key: 'db-en',
       title: t('downloads.section.dbEn'),
       data: buildDatabaseItems('en'),
+    },
+    {
+      key: 'commentaries-en',
+      title: t('downloads.section.commentariesEn'),
+      data: buildCommentaryItems('en'),
     },
   ].filter(s => s.data.length > 0)
 }
@@ -372,6 +415,26 @@ function useDownloadedItems() {
         if (availability.status === 'corrupt') {
           invalidSet.add(itemId)
         }
+      }
+
+      const commentaryEntries = await Promise.all(
+        (['fr', 'en'] as ResourceLanguage[]).flatMap(language =>
+          getCommentaryCatalogForLanguage(language).map(async entry => {
+            const identity = {
+              kind: 'commentary' as const,
+              resourceId: entry.publicationId,
+              language,
+            }
+            return [identity, await getLocalResourceAvailability(identity)] as const
+          })
+        )
+      )
+      for (const [identity, availability] of commentaryEntries) {
+        const itemId = createOfflineCopyId(identity)
+        if (availability.status === 'available' || availability.status === 'corrupt') {
+          set.add(itemId)
+        }
+        if (availability.status === 'corrupt') invalidSet.add(itemId)
       }
 
       // Check shared databases
@@ -637,6 +700,7 @@ const DownloadsScreen = () => {
         })
       case 'bible':
       case 'dictionary':
+      case 'commentary':
       case 'database':
         return createOfflineCopyDownloadPlan(identity)
       case 'bible-pericope':

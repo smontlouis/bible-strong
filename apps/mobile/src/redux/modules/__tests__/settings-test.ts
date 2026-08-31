@@ -15,6 +15,8 @@ import {
   setSettingsLinksDisplay,
   setSettingsRelationsDisplay,
   setSettingsCommentaires,
+  setSettingsCommentarySelection,
+  reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
   isContextualInformationDisplayEnabled,
   toggleSettingsShareVerseNumbers,
@@ -352,6 +354,50 @@ describe('Settings Reducer', () => {
       const state = createState({ commentsDisplay: true })
       const newState = userReducer(state, setSettingsCommentaires(false))
       expect(newState.bible.settings.commentsDisplay).toBe(false)
+    })
+  })
+
+  describe('setSettingsCommentarySelection', () => {
+    it('stores the selected commentaries in display order', () => {
+      const newState = userReducer(
+        initialState,
+        setSettingsCommentarySelection(['acbc:fr', 'barnes:fr'])
+      )
+
+      expect(newState.bible.settings.commentarySelection).toEqual(['acbc:fr', 'barnes:fr'])
+    })
+
+    it('does not restore a removed commentary when a stale drag callback finishes', () => {
+      const selected = createState({
+        commentarySelection: ['acbc:fr', 'barnes:fr', 'mhy-fr:fr'],
+      })
+      const afterRemoval = userReducer(
+        selected,
+        setSettingsCommentarySelection(['acbc:fr', 'mhy-fr:fr'])
+      )
+      const afterStaleDrop = userReducer(
+        afterRemoval,
+        reorderSettingsCommentarySelection(['acbc:fr', 'barnes:fr', 'mhy-fr:fr'])
+      )
+
+      expect(afterStaleDrop.bible.settings.commentarySelection).toEqual(['acbc:fr', 'mhy-fr:fr'])
+    })
+
+    it('reorders every commentary that is still selected', () => {
+      const selected = createState({
+        commentarySelection: ['acbc:fr', 'barnes:fr', 'mhy-fr:fr'],
+      })
+
+      const reordered = userReducer(
+        selected,
+        reorderSettingsCommentarySelection(['mhy-fr:fr', 'acbc:fr', 'barnes:fr'])
+      )
+
+      expect(reordered.bible.settings.commentarySelection).toEqual([
+        'mhy-fr:fr',
+        'acbc:fr',
+        'barnes:fr',
+      ])
     })
   })
 

@@ -2,6 +2,7 @@ import type { DownloadItem } from '~state/downloadQueue'
 import {
   createBibleDownloadItem,
   createDatabaseDownloadItem,
+  createCommentaryDownloadItem,
   createInterlinearSidecarDownloadItem,
   createStrongSidecarDownloadItem,
   createStrongLexiconModuleDownloadItem,
@@ -14,6 +15,7 @@ import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
 import type { StrongLexiconModuleId } from '~helpers/strongLexiconPublications'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { getOnboardingResourceSelectionId } from './onboardingResourceSelectionId'
+import { getCommentaryByPublicationId } from '@bible-strong/resource-catalog/commentaries'
 
 export { getOnboardingResourceSelectionId } from './onboardingResourceSelectionId'
 
@@ -41,6 +43,11 @@ export type OnboardingResourceSelection =
     }
   | {
       kind: 'bible-interlinear'
+      lang: ResourceLanguage
+    }
+  | {
+      kind: 'commentary'
+      resourceId: string
       lang: ResourceLanguage
     }
 
@@ -85,6 +92,11 @@ export const getOnboardingResourceDisplayName = (
   if (resource.kind === 'bible-interlinear') {
     return translate(`offlineSetup.option.interlinear.${resource.lang}`)
   }
+  if (resource.kind === 'commentary') {
+    return (
+      getCommentaryByPublicationId(resource.resourceId, resource.lang)?.title ?? resource.resourceId
+    )
+  }
   return translate(DATABASE_RESOURCE_NAME_KEYS[resource.databaseId])
 }
 
@@ -100,6 +112,9 @@ export const getOnboardingResourceIdentity = (
   }
   if (resource.kind === 'bible-interlinear') {
     return { kind: 'interlinear-index', versionId: 'BHG', language: resource.lang }
+  }
+  if (resource.kind === 'commentary') {
+    return { kind: 'commentary', resourceId: resource.resourceId, language: resource.lang }
   }
   return { kind: 'database', databaseId: resource.databaseId, language: resource.lang }
 }
@@ -180,6 +195,13 @@ export const createDownloadItemFromOnboardingSelection = (
       ...createInterlinearSidecarDownloadItem(resource.lang),
       dependsOnId: createOfflineCopyId({ kind: 'bible', versionId: 'BHG' }),
     }
+  }
+  if (resource.kind === 'commentary') {
+    const entry = getCommentaryByPublicationId(resource.resourceId, resource.lang)
+    return createCommentaryDownloadItem(
+      { kind: 'commentary', resourceId: resource.resourceId, language: resource.lang },
+      entry?.title
+    )
   }
 
   return createDatabaseDownloadItem(resource.databaseId, resource.lang)

@@ -9,6 +9,7 @@ import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
 import type { DownloadItem } from '~state/downloadQueue'
 import type {
   BibleDownloadItem,
+  CommentaryDownloadItem,
   DatabaseDownloadItem,
   DictionaryDownloadItem,
   InterlinearIndexDownloadItem,
@@ -34,7 +35,7 @@ export interface ResourceInstallationCallbacks {
 }
 
 const downloadFile = async (
-  item: DatabaseDownloadItem | DictionaryDownloadItem,
+  item: DatabaseDownloadItem | DictionaryDownloadItem | CommentaryDownloadItem,
   callbacks: ResourceInstallationCallbacks,
   destinationPath = item.destinationPath!
 ) => {
@@ -79,17 +80,20 @@ const installBible = async (item: BibleDownloadItem, callbacks: ResourceInstalla
 }
 
 const installDatabase = async (
-  item: DatabaseDownloadItem | DictionaryDownloadItem,
+  item: DatabaseDownloadItem | DictionaryDownloadItem | CommentaryDownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
-  const dbId = item.type === 'dictionary' ? item.resourceId : item.databaseId
+  const dbId = item.type === 'database' ? item.databaseId : item.resourceId
   const lang = item.lang
   const destinationPath = item.destinationPath
+  const destinationFileName = destinationPath.split('/').pop()!
+  const destinationDirectory = destinationPath.slice(0, -(destinationFileName.length + 1))
   const archivePath = `${destinationPath}.download.zip`
   const extractionDirectory = `${destinationPath}.extract/`
   await FileSystem.deleteAsync(archivePath, { idempotent: true })
   await FileSystem.deleteAsync(extractionDirectory, { idempotent: true })
   try {
+    await FileSystem.makeDirectoryAsync(destinationDirectory, { intermediates: true })
     const result = await downloadFile(item, callbacks, archivePath)
     if (item.expectedArchiveSha256) {
       await verifyFileSha256(
@@ -139,7 +143,9 @@ const installDatabase = async (
         if (
           (item.type === 'dictionary'
             ? ['dictionnaire']
-            : resourceDatabaseRequiredTables[dbId as DatabaseId]
+            : item.type === 'commentary'
+              ? ['commentaires']
+              : resourceDatabaseRequiredTables[dbId as DatabaseId]
           )?.some(table => !tableNames.has(table.toLowerCase()))
         ) {
           throw new Error(`RESOURCE_DATABASE_SCHEMA_MISMATCH:${dbId}:${lang}`)
@@ -240,6 +246,8 @@ export const installResourceDatabaseItem = async (
     case 'database':
       return installDatabase(item, callbacks)
     case 'dictionary':
+      return installDatabase(item, callbacks)
+    case 'commentary':
       return installDatabase(item, callbacks)
   }
 }

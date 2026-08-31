@@ -5,6 +5,7 @@ jest.mock('~assets/bible_versions/books-desc', () => [{ Numero: 1, Nom: 'Genèse
 jest.mock('~i18n', () => ({
   __esModule: true,
   default: { t: (key: string) => key },
+  getLanguage: () => 'fr',
   t: (key: string) => key,
 }))
 
@@ -158,5 +159,16 @@ describe('redux migrations', () => {
 
     expect(migrated.user.bible.settings.compare).toEqual({})
     expect(migrated.user.bible.settings.compareSelectionVersion).toBe(2)
+  })
+
+  it('normalizes the commentary preference stored in synced user settings', () => {
+    const state = createLegacyState() as any
+    state.user.bible.settings = {
+      commentarySelection: ['acbc:fr', 'invalid', 'barnes:fr', 'acbc:fr'],
+    }
+
+    const migrated = migrations[38](state)
+
+    expect(migrated.user.bible.settings.commentarySelection).toEqual(['acbc:fr', 'barnes:fr'])
   })
 })

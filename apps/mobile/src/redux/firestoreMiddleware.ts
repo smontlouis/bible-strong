@@ -58,6 +58,8 @@ import {
   setDefaultStrongBibleVersion,
   setSettingsAlignContent,
   setSettingsCommentaires,
+  setSettingsCommentarySelection,
+  reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
   setSettingsLinksDisplay,
@@ -472,6 +474,8 @@ const isSettingsAction = isAnyOf(
   setSettingsRelationsDisplay,
   setSettingsTagsDisplay,
   setSettingsCommentaires,
+  setSettingsCommentarySelection,
+  reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
   changeColor,
   toggleCompareVersion,
@@ -599,7 +603,15 @@ const firestoreMiddleware: Middleware = store => next => async action => {
   if (isSettingsAction(action)) {
     if (!diffState?.user?.bible?.settings) return result
 
-    const cleanedSettings = cleanForFirestore(diffState.user.bible.settings)
+    // The generic deep diff represents arrays as numeric-keyed objects. Send the
+    // complete ordered selection so Firestore persists an actual array.
+    const isCommentarySelectionAction =
+      setSettingsCommentarySelection.match(action) ||
+      reorderSettingsCommentarySelection.match(action)
+    const settingsUpdate = isCommentarySelectionAction
+      ? { commentarySelection: state.user.bible.settings.commentarySelection }
+      : diffState.user.bible.settings
+    const cleanedSettings = cleanForFirestore(settingsUpdate)
 
     // Ne pas sync si le résultat est vide/null (évite les erreurs Firestore)
     if (!cleanedSettings) return result

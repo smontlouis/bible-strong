@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo } from 'react'
 
 import { atom } from 'jotai/vanilla'
+import type { SheetRef } from '~common/sheet'
 import generateUUID from '~helpers/generateUUID'
 import { CommentaryTab } from '../../state/tabs'
 import CommentariesTabScreen from './CommentariesTabScreen'
@@ -10,10 +11,12 @@ const CommentariesCard = ({
   verse,
   preferredVersion,
   onChangeVerse,
+  commentarySelectorRef,
 }: {
   verse: string | null
   preferredVersion?: string
   onChangeVerse: (verse: string) => void
+  commentarySelectorRef?: React.RefObject<SheetRef | null>
 }) => {
   const onTheFlyAtom = useMemo(
     () =>
@@ -43,6 +46,7 @@ const CommentariesCard = ({
       hasHeader={false}
       commentaryAtom={onTheFlyAtom}
       preferredVersion={preferredVersion}
+      commentarySelectorRef={commentarySelectorRef}
     />
   )
 }

@@ -211,6 +211,25 @@ const getExploreSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
       id: 'primary-language',
       titleKey: 'offlineSetup.section.primaryLanguage',
       options: [
+        {
+          id: `commentaries-classics:${lang}`,
+          label: '',
+          labelKey: 'offlineSetup.option.classicCommentaries',
+          descriptionKey: 'offlineSetup.option.classicCommentariesDescription',
+          language: lang,
+          selections:
+            lang === 'fr'
+              ? [
+                  { kind: 'commentary', resourceId: 'barnes', lang },
+                  { kind: 'commentary', resourceId: 'acbc', lang },
+                  { kind: 'commentary', resourceId: 'MHY', lang },
+                ]
+              : [
+                  { kind: 'commentary', resourceId: 'barnes', lang },
+                  { kind: 'commentary', resourceId: 'acbc', lang },
+                  { kind: 'commentary', resourceId: 'mhcc', lang },
+                ],
+        },
         ...primaryDatabaseIds.map(databaseId => createDatabaseOption(databaseId, lang, lang)),
         // Cross references use one shared physical copy with a canonical identity.
         createDatabaseOption('TRESOR', 'fr', 'fr'),

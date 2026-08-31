@@ -19,6 +19,10 @@ import { applyPreferredColorScheme, themeAppearanceMiddleware } from './themeApp
 import reducer from '~redux/modules/reducer'
 import { mmkvStorage, storage } from '~helpers/storage'
 import { tryCaptureLegacyReferenceEvidenceFromReduxState } from '../migrations/legacyResourceEvidence'
+import {
+  LEGACY_COMMENTARY_SELECTION_STORAGE_KEY,
+  migrateCommentarySelectionState,
+} from '~features/commentaries/commentarySelection'
 
 type RootReducerState = ReturnType<typeof reducer>
 type HotModule = NodeJS.Module & {
@@ -33,7 +37,7 @@ function configureStore() {
     keyPrefix: '',
     storage: mmkvStorage,
     stateReconciler: autoMergeLevel2,
-    version: 37,
+    version: 38,
     // debug: true,
     blacklist: ['plan'],
     migrate: createMigrate(migrations as unknown as Parameters<typeof createMigrate>[0], {
@@ -48,6 +52,24 @@ function configureStore() {
       getStoredState({ ...config, storage: FilesystemStorage })
     )) as PersistedState
     tryCaptureLegacyReferenceEvidenceFromReduxState(storedState, storage)
+    const legacyCommentarySelection = storage.getString(LEGACY_COMMENTARY_SELECTION_STORAGE_KEY)
+    if (legacyCommentarySelection && storedState && typeof storedState === 'object') {
+      try {
+        const persistedUser = (
+          storedState as PersistedState & {
+            user?: { bible?: { settings?: { commentarySelection?: unknown } } }
+          }
+        ).user
+        const persistedSettings = persistedUser?.bible?.settings
+        if (persistedSettings && persistedSettings.commentarySelection === undefined) {
+          persistedSettings.commentarySelection = migrateCommentarySelectionState(
+            JSON.parse(legacyCommentarySelection)
+          )
+        }
+      } catch {
+        // Ignore a malformed legacy preference; migration 38 will use language defaults.
+      }
+    }
     return storedState
   }
 

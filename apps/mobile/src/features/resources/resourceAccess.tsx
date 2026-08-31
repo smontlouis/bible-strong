@@ -72,9 +72,11 @@ import {
   type TimelineAccess,
 } from '~features/resources/timelineAccess'
 import {
-  defaultCommentaryAccess,
+  createCommentaryAccess,
+  createHttpCommentaryChapterSource,
   type CommentaryAccess,
 } from '~features/resources/commentaryAccess'
+import { COMMENTARY_CATALOG } from '@bible-strong/resource-catalog/commentaries'
 import {
   isLocalResourceAvailable,
   type LocalResourceRef,
@@ -177,7 +179,19 @@ const remotelyReadableDictionaryLanguages = new Set<ResourceLanguage>(
 const remotelyReadableNaveLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
-const remotelyReadableCommentaryCollections = new Set<string>(resourceApiBaseUrl ? ['MHY'] : [])
+const remotelyReadableCommentaryCollections = new Set<string>(
+  resourceApiBaseUrl ? COMMENTARY_CATALOG.map(entry => entry.publicationId) : []
+)
+const commentaryAccess = createCommentaryAccess({
+  remote: resourceApiBaseUrl
+    ? createHttpCommentaryChapterSource({
+        baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
+        isOnline: async () => onlineManager.isOnline(),
+      })
+    : undefined,
+  isOnline: async () => onlineManager.isOnline(),
+})
 const remotelyReadableTimelineLanguages = new Set<ResourceLanguage>(
   resourceApiBaseUrl ? ['fr', 'en'] : []
 )
@@ -351,7 +365,7 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
     remotelyReadableLanguages: remotelyReadableTimelineLanguages,
     isOnline: async () => onlineManager.isOnline(),
   }),
-  commentary: defaultCommentaryAccess,
+  commentary: commentaryAccess,
   offlineCopies: {
     getStrongBibleAvailability: localStrongBibleResourceAdapter.getAvailability,
     isAvailable: isLocalResourceAvailable,

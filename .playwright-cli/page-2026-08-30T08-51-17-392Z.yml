@@ -1,0 +1,56 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "Accueil du lecteur" [ref=e3] [cursor=pointer]:
+      - /url: "#"
+      - generic [ref=e4]: BS
+      - generic [ref=e5]:
+        - strong [ref=e6]: Le Cabinet
+        - generic [ref=e7]: des dictionnaires
+    - generic [ref=e8]:
+      - paragraph [ref=e9]: Resource Studio · aperçu local
+      - heading "Les mots, leurs mondes" [level=1] [ref=e10]
+    - generic [ref=e11]:
+      - strong [ref=e12]: —
+      - generic [ref=e13]: dictionnairesinventoriés
+  - main [ref=e14]:
+    - complementary "Bibliothèque de dictionnaires" [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]: "01"
+        - generic [ref=e18]:
+          - paragraph [ref=e19]: Bibliothèque
+          - heading "Choisir une œuvre" [level=2] [ref=e20]
+      - generic [ref=e21]:
+        - generic [ref=e22]: Langue
+        - combobox "Langue" [ref=e23] [cursor=pointer]:
+          - option "Toutes" [selected]
+          - option "Français"
+          - option "English"
+    - region "Index alphabétique" [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: Chercher un mot ou une expression
+        - generic [ref=e27]:
+          - searchbox "Chercher un mot ou une expression" [ref=e28]
+          - generic [ref=e29]: ⌘ K
+      - navigation "Index alphabétique" [ref=e30]
+      - generic [ref=e31]:
+        - paragraph [ref=e32]: Index
+        - strong [ref=e33]: Chargement…
+      - generic [ref=e35]:
+        - button "← Précédent" [ref=e36] [cursor=pointer]
+        - generic [ref=e37]: —
+        - button "Suivant →" [ref=e38] [cursor=pointer]
+    - article [ref=e39]:
+      - generic [ref=e40]:
+        - generic [ref=e41]: A
+        - paragraph [ref=e42]: Feuilleter le fonds
+        - heading "Sélectionnez une entrée" [level=2] [ref=e43]
+        - paragraph [ref=e44]: Choisissez un dictionnaire, parcourez son index puis ouvrez un article.
+    - complementary "Provenance de la ressource" [ref=e45]:
+      - generic [ref=e46]:
+        - generic [ref=e47]: "02"
+        - generic [ref=e48]:
+          - paragraph [ref=e49]: Registre
+          - heading "Œuvre & provenance" [level=2] [ref=e50]
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]: Bible Strong · laboratoire local
+    - generic [ref=e53]: Connexion aux SQLite…

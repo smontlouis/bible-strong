@@ -24,6 +24,13 @@ export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSel
       language: resource.lang,
     })
   }
+  if (resource.kind === 'commentary') {
+    return createOfflineCopyId({
+      kind: 'commentary',
+      resourceId: resource.resourceId,
+      language: resource.lang,
+    })
+  }
 
   return createOfflineCopyId({
     kind: 'database',

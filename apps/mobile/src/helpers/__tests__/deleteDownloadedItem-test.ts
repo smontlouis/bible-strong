@@ -30,6 +30,13 @@ jest.mock('../sqlite', () => ({
   },
 }))
 
+jest.mock('../databases', () => ({
+  getDictionaryDbPath: (work: string, language: string) =>
+    `file:///documents/SQLite/${language}/dictionaries/${work}.sqlite`,
+  getCommentaryDbPath: (resourceId: string, language: string) =>
+    `file:///documents/SQLite/${language}/commentaries/${resourceId}.sqlite`,
+}))
+
 jest.mock('~helpers/redWords', () => ({
   deleteRedWordsFile: jest.fn(),
 }))

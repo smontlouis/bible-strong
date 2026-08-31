@@ -84,13 +84,18 @@ La bibliothèque JSON utilise le contrat `chapter-json-v2`. Chaque unité possè
 
 Le lecteur résout les bornes inclusivement et affiche leur libellé sur chaque carte. Les contenus de chapitre sont accessibles depuis tous les versets du chapitre sans être dupliqués physiquement. Les 223 plages Aquifer franchissant au moins un chapitre sont retrouvées par `coverageChunks`, un index secondaire vers leur chunk de départ.
 
-La normalisation applique, dans cet ordre, les informations structurées Aquifer/MHM/SDABC, la déduplication exacte de Barnes, puis des parseurs conservateurs propres à MHY-FR, MHCC, JFB, Bible Annotée, Keil & Delitzsch, Fourfold Gospel et Luther. Une portée issue d’un titre porte `confidence: high` et reste distinguée d’une portée source `exact`. Une simple longueur ou une référence croisée ne suffit jamais à élargir une portée.
+La normalisation applique, dans cet ordre, les informations structurées Aquifer/MHM/SDABC, la déduplication des répétitions contiguës dont l'identité source est exacte, puis des parseurs conservateurs propres à MHY-FR, MHCC, JFB, Bible Annotée, Keil & Delitzsch, Fourfold Gospel et Luther. Une portée issue d’un titre porte `confidence: high` et reste distinguée d’une portée source `exact`. Une simple longueur, une similarité textuelle ou une référence croisée ne suffit jamais à élargir une portée.
 
 La normalisation est exécutée automatiquement après une construction ou une installation de corpus. Elle peut aussi être relancée seule, de façon idempotente :
 
 ```bash
 yarn resources:commentaries:normalize-scopes
+yarn resources:commentaries:audit-canonical-units
 ```
+
+L'audit des unités canoniques parcourt l'ensemble du catalogue et échoue si une même unité source
+reste répétée sur plusieurs ancres contiguës. Les `sourceAnchors` restent des métadonnées de
+provenance : le packaging ne les redéplie jamais en plusieurs commentaires.
 
 ## Références bibliques OSIS et nettoyage des liens
 
@@ -144,7 +149,7 @@ node apps/resource-studio/workflows/commentaries/scripts/install-sdabc-library.m
 node apps/resource-studio/workflows/commentaries/scripts/validate-library.mjs
 ```
 
-L’export contrôlé couvre les 66 livres et les 1 189 chapitres du canon protestant. Il produit 25 062 unités, dont 66 introductions, sous `.local/sdabc-export/`. Les rubriques imprimées `ELLEN G. WHITE COMMENTS` sont exclues de l’OCR général afin d’éviter les doublons : les 3 664 extraits EGW déjà extraits de façon structurée sont réinjectés comme compléments. Les 14 042 entrées du *Complete Scripture Index* sont conservées comme index de sources, et non présentées comme des commentaires exégétiques. Dans l’interface, ces trois couches appartiennent à une seule ressource utilisateur `sdabc`.
+L’export contrôlé couvre les 66 livres et les 1 189 chapitres du canon protestant. Il produit 25 062 unités, dont 66 introductions, sous `.local/sdabc-export/`. Les rubriques imprimées `ELLEN G. WHITE COMMENTS` sont exclues de l’OCR général afin d’éviter les doublons : les 3 664 extraits EGW déjà extraits de façon structurée sont réinjectés comme compléments. Les 14 042 entrées du _Complete Scripture Index_ sont conservées comme index de sources, et non présentées comme des commentaires exégétiques. Dans l’interface, ces trois couches appartiennent à une seule ressource utilisateur `sdabc`.
 
 ## Importer la Bible Annotée de Neuchâtel
 
@@ -172,7 +177,7 @@ yarn resources:commentaries:validate-library
 
 La vague source contient Abbott, Burkitt, Catena Aurea, Darby Notes, Family Notes, Geneva Notes, Keil & Delitzsch, KingComments, Lightfoot, Luther, Matthew Henry complet, Matthew Henry Modern English, People’s New Testament, Robertson’s Word Pictures, Scofield, Fourfold Gospel et Treasury of Scripture Knowledge. Les seize modules historiques sont téléchargés depuis le dépôt officiel CrossWire ; MHM est exporté depuis l’API STEP, chapitre par chapitre, avec un hash pour chacune des 1 189 réponses. TSK reste inventoriée dans l’audit de provenance, mais elle est exclue de la bibliothèque de commentaires parce que Bible Strong la distribue déjà comme références croisées sous l’identité `TRESOR`.
 
-`TNotes` n’est pas réimporté : STEP le décrit comme la même œuvre *Tyndale Open Study Notes* déjà présente depuis le dépôt officiel Aquifer. `Spurious` est volontairement exclu parce qu’il s’agit d’un appareil signalant des passages contestés du Nouveau Testament, pas d’un commentaire. Aucune traduction française n’est produite dans cette vague.
+`TNotes` n’est pas réimporté : STEP le décrit comme la même œuvre _Tyndale Open Study Notes_ déjà présente depuis le dépôt officiel Aquifer. `Spurious` est volontairement exclu parce qu’il s’agit d’un appareil signalant des passages contestés du Nouveau Testament, pas d’un commentaire. Aucune traduction française n’est produite dans cette vague.
 
 ## Produire et publier des traductions par lots
 

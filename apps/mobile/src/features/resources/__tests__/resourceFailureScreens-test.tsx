@@ -11,20 +11,27 @@ let mockStrongAvailability: { status: 'available' | 'missing'; moduleId?: 'core'
 }
 
 jest.mock('react-native-section-list-get-item-layout', () => () => jest.fn())
+jest.mock('expo-file-system/legacy', () => ({}))
+jest.mock('expo-sqlite', () => ({}))
 jest.mock('@expo/vector-icons', () => ({ Feather: () => null }))
 jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
 jest.mock('@tanstack/react-query', () => ({
   useQuery: ({ queryKey }: { queryKey: readonly unknown[] }) => ({
-    data: queryKey.includes('strong-lexicon')
-      ? { availability: mockStrongAvailability, recoveries: [] }
-      : { status: 'available' },
+    data: queryKey.includes('dictionary-catalog')
+      ? []
+      : queryKey.includes('strong-lexicon')
+        ? { availability: mockStrongAvailability, recoveries: [] }
+        : { status: 'available' },
     error: undefined,
     isError: false,
     refetch: jest.fn(),
   }),
 }))
 jest.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
-jest.mock('jotai/react', () => ({ useAtomValue: () => ({ DICTIONNAIRE: 'fr' }) }))
+jest.mock('jotai/react', () => ({
+  useAtom: () => [{ data: {} }, jest.fn()],
+  useAtomValue: () => ({ DICTIONNAIRE: 'fr' }),
+}))
 jest.mock('~state/resourcesLanguage', () => ({
   resourcesLanguageAtom: {},
   useResourceLanguage: () => ['fr', jest.fn()],
@@ -36,6 +43,9 @@ jest.mock('~helpers/useLanguage', () => () => 'fr')
 jest.mock('~helpers/useConnection', () => () => mockIsOnline)
 jest.mock('~features/resources/resourceAccess', () => ({
   useResourceAccess: () => ({ dictionary: {}, nave: {}, strongLexicon: {} }),
+}))
+jest.mock('~features/resources/dictionaryAccess', () => ({
+  getDefaultDictionaryWork: () => 'BDB',
 }))
 jest.mock('~features/lexique/useUtilities', () => ({
   useSearchValue: () => ({

@@ -31,6 +31,8 @@ export const SET_DEFAULT_STRONG_BIBLE_VERSION = 'user/SET_DEFAULT_STRONG_BIBLE_V
 export const SET_SETTINGS_RED_WORDS_DISPLAY = 'user/SET_SETTINGS_RED_WORDS_DISPLAY'
 export const SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY =
   'user/SET_SETTINGS_CONTEXTUAL_INFORMATION_DISPLAY'
+export const SET_SETTINGS_COMMENTARY_SELECTION = 'user/SET_SETTINGS_COMMENTARY_SELECTION'
+export const REORDER_SETTINGS_COMMENTARY_SELECTION = 'user/REORDER_SETTINGS_COMMENTARY_SELECTION'
 
 // RTK Action Creators
 export const setSettingsAlignContent = createAction(
@@ -86,6 +88,16 @@ export const setSettingsTagsDisplay = createAction(
 export const setSettingsCommentaires = createAction(
   SET_SETTINGS_COMMENTS_DISPLAY,
   (payload: boolean) => ({ payload })
+)
+
+export const setSettingsCommentarySelection = createAction(
+  SET_SETTINGS_COMMENTARY_SELECTION,
+  (payload: string[]) => ({ payload })
+)
+
+export const reorderSettingsCommentarySelection = createAction(
+  REORDER_SETTINGS_COMMENTARY_SELECTION,
+  (payload: string[]) => ({ payload })
 )
 
 export const increaseSettingsFontSizeScale = createAction(INCREASE_SETTINGS_FONTSIZE_SCALE)

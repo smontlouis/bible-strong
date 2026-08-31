@@ -152,6 +152,20 @@ type CommentariesScreenProps = {
   verse: string
 }
 
+type CommentaryChapterScreenProps = {
+  projectionId: string
+  book: number | string
+  chapter: number | string
+  focusVerse?: number | string
+}
+
+type CommentaryEntryScreenProps = {
+  projectionId: string
+  book: number | string
+  chapter: number | string
+  sectionId: string
+}
+
 export type MainStackProps = {
   AppSwitcher?: AppSwitcherScreenProps
   More: MoreScreenProps
@@ -203,6 +217,9 @@ export type MainStackProps = {
   Event: EventScreenProps
   Concordance: ConcordanceScreenProps
   Commentaries: CommentariesScreenProps
+  CommentaryLibrary: undefined
+  CommentaryChapter: CommentaryChapterScreenProps
+  CommentaryEntry: CommentaryEntryScreenProps
   BibleShareOptions: undefined
   ResourceLanguage: undefined
   BibleDefaults: undefined

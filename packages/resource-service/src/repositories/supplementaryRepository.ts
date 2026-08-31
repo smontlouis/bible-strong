@@ -1,5 +1,5 @@
 import { Effect } from 'effect'
-import { type Kysely } from 'kysely'
+import { sql, type Kysely } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
@@ -14,6 +14,29 @@ import {
 const crossReferenceIdentity = 'cross-references:fr'
 const commentaryIdentity = (collection: string, language: string) =>
   `commentary:${collection}:${language}`
+
+export const buildCommentaryCoverage = (verseKeys: readonly string[]) => {
+  const chapters = new Map<number, Set<number>>()
+  for (const verseKey of verseKeys) {
+    const [book, chapter] = verseKey.split('-', 3).map(Number)
+    if (!Number.isSafeInteger(book) || book < 1 || !Number.isSafeInteger(chapter) || chapter < 1) {
+      continue
+    }
+    const bookChapters = chapters.get(book) ?? new Set<number>()
+    bookChapters.add(chapter)
+    chapters.set(book, bookChapters)
+  }
+  const books = [...chapters.keys()].sort((left, right) => left - right)
+  return {
+    books,
+    chaptersByBook: Object.fromEntries(
+      books.map(book => [
+        String(book),
+        [...chapters.get(book)!].sort((left, right) => left - right),
+      ])
+    ),
+  }
+}
 
 export const makeKyselySupplementaryRepository = (
   database: Kysely<ResourceDatabase>
@@ -89,6 +112,31 @@ export const makeKyselySupplementaryRepository = (
           comments: Object.fromEntries(
             rows.map(row => [row.verse_key.slice(prefix.length), row.content])
           ),
+        }
+      }),
+    findCommentaryCoverage: input =>
+      Effect.gen(function* () {
+        const resourceIdentity = commentaryIdentity(input.collection, input.language)
+        const publication = yield* findActivePublication(resourceIdentity)
+        if (!publication) {
+          return yield* new ActiveSupplementaryPublicationUnavailable({ resourceIdentity })
+        }
+        const rows = yield* tryDatabasePromise('supplementary.commentary.read-coverage', () =>
+          database
+            .selectFrom('commentary_verses')
+            .select(
+              sql<string>`concat(split_part(verse_key, '-', 1), '-', split_part(verse_key, '-', 2))`.as(
+                'chapter_key'
+              )
+            )
+            .distinct()
+            .where('publication_id', '=', publication.id)
+            .execute()
+        ).pipe(Effect.mapError(cause => new SupplementaryRepositoryFailure({ cause })))
+        return {
+          ...input,
+          revision: publication.revision,
+          ...buildCommentaryCoverage(rows.map(row => row.chapter_key)),
         }
       }),
     findCrossReferences: input =>

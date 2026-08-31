@@ -11,6 +11,9 @@ import BibleTabScreen from '~features/bible/BibleTabScreen'
 import CompareVersesTabScreen from '~features/bible/CompareVersesTabScreen'
 import StrongTabScreen from '~features/lexique/StrongTabScreen'
 import CommentariesTabScreen from '~features/commentaries/CommentariesTabScreen'
+import CommentaryResourceTabScreen from '~features/commentaries/CommentaryResourceTabScreen'
+import InvalidCommentaryTabScreen from '~features/commentaries/InvalidCommentaryTabScreen'
+import { isValidCommentaryVerse } from '~features/commentaries/commentaryTabValidation'
 import DictionaryTabScreen from '~features/dictionnary/DictionaryTabScreen'
 import NaveTabScreen from '~features/nave/NaveTabScreen'
 import { NotesTabScreen } from '~features/notes'
@@ -23,6 +26,7 @@ import {
   activeTabIdAtom,
   appSwitcherModeAtom,
   CommentaryTab,
+  CommentaryResourceTab,
   CompareTab,
   DictionaryTab,
   NaveTab,
@@ -55,7 +59,17 @@ const renderTabComponent = (tab: TabItem, tabAtom: PrimitiveAtom<TabItem>) => {
     case 'dictionary':
       return <DictionaryTabScreen dictionaryAtom={tabAtom as PrimitiveAtom<DictionaryTab>} />
     case 'commentary':
-      return <CommentariesTabScreen commentaryAtom={tabAtom as PrimitiveAtom<CommentaryTab>} />
+      return isValidCommentaryVerse(tab.data?.verse) ? (
+        <CommentariesTabScreen commentaryAtom={tabAtom as PrimitiveAtom<CommentaryTab>} />
+      ) : (
+        <InvalidCommentaryTabScreen tabAtom={tabAtom} />
+      )
+    case 'commentary-resource':
+      return (
+        <CommentaryResourceTabScreen
+          commentaryAtom={tabAtom as PrimitiveAtom<CommentaryResourceTab>}
+        />
+      )
     case 'search':
       return <SearchTabScreen searchAtom={tabAtom as PrimitiveAtom<SearchTab>} />
     case 'new':

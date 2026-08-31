@@ -36,12 +36,14 @@ jest.mock('~common/sheet', () => {
 
   return {
     Sheet: ReactModule.forwardRef(
-      ({ children, header }: React.PropsWithChildren<{ header?: React.ReactNode }>, _ref) => (
-        <>
-          {header}
-          {children}
-        </>
-      )
+      (
+        {
+          children,
+          header,
+          ...props
+        }: React.PropsWithChildren<{ header?: React.ReactNode; snapPoints?: number[] }>,
+        _ref
+      ) => ReactModule.createElement('Sheet', props, header, children)
     ),
     SheetHeader: ({ title }: { title: string }) =>
       ReactModule.createElement('SheetHeader', { title }),
@@ -122,5 +124,23 @@ describe('MultipleChoiceFilterModal', () => {
 
     expect(onToggle).toHaveBeenCalledWith('tags')
     expect(onToggle).toHaveBeenCalledTimes(1)
+  })
+
+  it('constrains long lists to a full-height scrollable sheet', () => {
+    act(() => {
+      renderer = create(
+        <MultipleChoiceFilterModal
+          title="Movements"
+          selectedValues={[]}
+          options={Array.from({ length: 24 }, (_, index) => ({
+            value: `movement-${index}`,
+            label: `Movement ${index}`,
+          }))}
+          onToggle={jest.fn()}
+        />
+      )
+    })
+
+    expect(renderer.root.find(node => String(node.type) === 'Sheet').props.snapPoints).toEqual([1])
   })
 })

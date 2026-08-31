@@ -26,8 +26,7 @@ export type ResourceIdentity =
   | { kind: 'dictionary'; work: string; language: ResourceLanguage }
   | { kind: 'nave'; language: ResourceLanguage }
   | { kind: 'cross-references' }
-  | { kind: 'commentary'; collection: 'MHY'; language: 'fr' }
-  | { kind: 'commentary'; collection: 'FIRESTORE'; language: 'en' }
+  | { kind: 'commentary'; collection: string; language: ResourceLanguage }
   | { kind: 'timeline'; language: ResourceLanguage }
 
 export type OnlineAccessState =
@@ -93,8 +92,7 @@ export const getResourceOnlineAccess = (
   (identity.kind === 'dictionary' && remotelyReadableDictionaryLanguages.has(identity.language)) ||
   (identity.kind === 'nave' && remotelyReadableNaveLanguages.has(identity.language)) ||
   (identity.kind === 'commentary' &&
-    (identity.collection === 'FIRESTORE' ||
-      remotelyReadableCommentaryCollections.has(identity.collection))) ||
+    remotelyReadableCommentaryCollections.has(identity.collection)) ||
   (identity.kind === 'cross-references' && remotelyReadableCrossReferences) ||
   (identity.kind === 'timeline' && remotelyReadableTimelineLanguages.has(identity.language))
     ? { status: 'remotely-readable' }
@@ -151,6 +149,12 @@ export const resourceIdentityFromOfflineCopy = (
       return { kind: 'strong-lexicon', moduleId: identity.moduleId }
     case 'dictionary':
       return { kind: 'dictionary', work: identity.work, language: identity.language }
+    case 'commentary':
+      return {
+        kind: 'commentary',
+        collection: identity.resourceId,
+        language: identity.language,
+      }
     case 'database':
       switch (identity.databaseId) {
         case 'DICTIONNAIRE':

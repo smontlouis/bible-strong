@@ -20,6 +20,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { Slide, Slides } from '~common/ui/Slider'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import CommentariesCard from '~features/commentaries/CommentariesCard'
+import CommentarySelectorSheet from '~features/commentaries/CommentarySelectorSheet'
 import DictionnaireVerseDetailCard from '~features/dictionnary/DictionnaireVerseDetailCard'
 import NaveModalCard from '~features/nave/NaveModalCard'
 import formatVerseContent from '~helpers/formatVerseContent'
@@ -94,6 +95,7 @@ const ResourcesModal = ({
 }: Props) => {
   const { t } = useTranslation()
   const compareVersionSelectorRef = React.useRef<SheetRef>(null)
+  const commentarySelectorRef = React.useRef<SheetRef>(null)
   const strongBibleSourceSheetRef = React.useRef<SheetRef>(null)
   const [isOpen, setIsOpen] = useState(false)
   const [compareStrongMode, setCompareStrongMode] = useState(false)
@@ -102,7 +104,6 @@ const ResourcesModal = ({
   const [strongLanguage, setStrongLanguage] = useResourceLanguage('STRONG')
   const [dictionaryLanguage, setDictionaryLanguage] = useResourceLanguage('DICTIONNAIRE')
   const [naveLanguage, setNaveLanguage] = useResourceLanguage('NAVE')
-  const [commentariesLanguage, setCommentariesLanguage] = useResourceLanguage('COMMENTARIES')
   const {
     data: {
       selectedVersion: bibleSelectedVersion,
@@ -162,7 +163,11 @@ const ResourcesModal = ({
         return [languageAction(naveLanguage)]
       case 'commentary':
         return [
-          languageAction(commentariesLanguage),
+          {
+            id: 'choose-commentaries',
+            title: t('commentaries.selector.title'),
+            image: 'checkmark.square',
+          },
           {
             id: 'open-tab',
             title: t('tab.openInNewTab'),
@@ -195,12 +200,12 @@ const ResourcesModal = ({
           toggleResourceLanguage(dictionaryLanguage, setDictionaryLanguage)
         }
         if (resourceType === 'nave') toggleResourceLanguage(naveLanguage, setNaveLanguage)
-        if (resourceType === 'commentary') {
-          toggleResourceLanguage(commentariesLanguage, setCommentariesLanguage)
-        }
         break
       case 'choose-versions':
         compareVersionSelectorRef.current?.present()
+        break
+      case 'choose-commentaries':
+        commentarySelectorRef.current?.present()
         break
       case 'open-tab':
         if (resourceType === 'commentary') {
@@ -233,12 +238,12 @@ const ResourcesModal = ({
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
       if (!isOpen) return false
 
-      closeModal()
+      resourceModalRef.current?.close()
       return true
     })
 
     return () => subscription.remove()
-  }, [isOpen])
+  }, [isOpen, resourceModalRef])
 
   const renderRightComponent = () => {
     const menuActions = getMenuActionsByResourceType()
@@ -318,11 +323,13 @@ const ResourcesModal = ({
               compareStrongMode={compareStrongMode}
               onChangeVerse={onChangeVerse}
               onChooseCompareVersions={() => compareVersionSelectorRef.current?.present()}
+              commentarySelectorRef={commentarySelectorRef}
             />
           </View>
         )}
       </Sheet>
       <CompareVersionSelectorSheet sheetRef={compareVersionSelectorRef} />
+      <CommentarySelectorSheet sheetRef={commentarySelectorRef} />
       <StrongBibleSourceSheet
         sheetRef={strongBibleSourceSheetRef}
         bibleAtom={bibleAtom}
@@ -348,6 +355,7 @@ const Resource = ({
   compareStrongMode,
   onChangeVerse,
   onChooseCompareVersions,
+  commentarySelectorRef,
 }: {
   bibleAtom: PrimitiveAtom<BibleTab>
   resourceType: BibleResource | null
@@ -361,6 +369,7 @@ const Resource = ({
   compareStrongMode: boolean
   onChangeVerse?: (verseKey: string) => void
   onChooseCompareVersions: () => void
+  commentarySelectorRef: React.RefObject<SheetRef | null>
 }) => {
   const actions = useBibleTabActions(bibleAtom)
   const selectedVerse = Object.keys(selectedVerses)[0]
@@ -429,6 +438,7 @@ const Resource = ({
           verse={selectedVerse}
           preferredVersion={selectedVersion}
           onChangeVerse={onChangeVerse ?? actions.selectSelectedVerse}
+          commentarySelectorRef={commentarySelectorRef}
         />
       </Slide>
       <Slide key="compare">

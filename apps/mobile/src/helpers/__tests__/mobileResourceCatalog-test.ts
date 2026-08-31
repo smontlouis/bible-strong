@@ -25,8 +25,8 @@ describe('mobile resource catalog', () => {
 
   it('contains every downloadable resource as a ZIP', () => {
     expect(isMobileResourceCatalog(BUNDLED_MOBILE_RESOURCE_CATALOG)).toBe(true)
-    expect(MOBILE_RESOURCE_CATALOG.resourceCount).toBe(72)
-    expect(Object.values(MOBILE_RESOURCE_CATALOG.resources)).toHaveLength(72)
+    expect(MOBILE_RESOURCE_CATALOG.resourceCount).toBe(105)
+    expect(Object.values(MOBILE_RESOURCE_CATALOG.resources)).toHaveLength(105)
     expect(
       Object.values(MOBILE_RESOURCE_CATALOG.resources).every(resource =>
         new URL(resource.url).pathname.endsWith('.zip')

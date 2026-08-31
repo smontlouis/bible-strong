@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./catalog": "./src/catalog.ts",
+    "./commentaries": "./src/commentaryCatalog.ts",
     "./interlinear-bible": "./src/interlinearBiblePublicationCatalog.ts",
     "./ordinary-bibles": "./src/ordinaryBibleVersions.ts",
     "./strong-bibles": "./src/strongBibleCatalog.ts"

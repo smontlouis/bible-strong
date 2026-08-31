@@ -18,6 +18,10 @@ import { firebaseDb } from '~helpers/firebase'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
+import {
+  normalizeCommentarySelection,
+  type CommentarySelectionState,
+} from '~features/commentaries/commentarySelection'
 import { getLanguage } from '~i18n'
 import { TabGroup, tabGroupsAtom } from '~state/tabs'
 import { migrateLegacyPersistedValue } from '../../migrations/legacyPersistedReferences'
@@ -91,6 +95,8 @@ import {
   setDefaultColorType,
   setSettingsAlignContent,
   setSettingsCommentaires,
+  setSettingsCommentarySelection,
+  reorderSettingsCommentarySelection,
   setSettingsContextualInformationDisplay,
   setSettingsLineHeight,
   setSettingsLinksDisplay,
@@ -552,6 +558,7 @@ export interface UserState {
       relationsDisplay?: 'inline' | 'block'
       tagsDisplay: 'inline' | 'block'
       commentsDisplay: boolean
+      commentarySelection: CommentarySelectionState
       contextualInformationDisplay?: boolean
       redWordsDisplay: boolean
       shareVerses: {
@@ -651,6 +658,10 @@ const getInitialState = (): UserState => ({
       relationsDisplay: 'inline',
       tagsDisplay: 'inline',
       commentsDisplay: false,
+      commentarySelection:
+        getLanguage() === 'en'
+          ? ['barnes:en', 'acbc:en', 'mhcc:en']
+          : ['barnes:fr', 'acbc:fr', 'mhy-fr:fr'],
       contextualInformationDisplay: true,
       redWordsDisplay: true,
       shareVerses: {
@@ -758,12 +769,16 @@ const userSlice = createSlice({
       const currentStudies = state.bible.studies
       const currentChangelog = state.bible.changelog
       const currentWordAnnotations = state.bible.wordAnnotations
+      const currentCommentarySelection = state.bible.settings.commentarySelection
 
       // Merge bible (only settings and other non-subcollection data)
       // Clean corrupted data before merging (removes {_type: 'delete'} objects)
       const cleanedBible = cleanCorruptedFirestoreData(bible || {})
       state.bible = deepmerge(getInitialState().bible, cleanedBible)
       Object.assign(state.bible.settings, normalizeCompareSelection(bible?.settings))
+      state.bible.settings.commentarySelection = normalizeCommentarySelection(
+        bible?.settings?.commentarySelection ?? currentCommentarySelection
+      )
 
       // Restore subcollection data
       state.bible.bookmarks = currentBookmarks
@@ -1294,6 +1309,21 @@ const userSlice = createSlice({
     })
     builder.addCase(setSettingsCommentaires, (state, action) => {
       state.bible.settings.commentsDisplay = action.payload
+    })
+    builder.addCase(setSettingsCommentarySelection, (state, action) => {
+      state.bible.settings.commentarySelection = normalizeCommentarySelection(action.payload)
+    })
+    builder.addCase(reorderSettingsCommentarySelection, (state, action) => {
+      const current = state.bible.settings.commentarySelection
+      const requestedOrder = normalizeCommentarySelection(action.payload)
+      const reordered = requestedOrder.filter(projectionId => current.includes(projectionId))
+
+      // A DnD callback can finish after another interaction removed or added an item.
+      // Reorder only the current selection: never restore a stale removed projection.
+      current.forEach(projectionId => {
+        if (!reordered.includes(projectionId)) reordered.push(projectionId)
+      })
+      state.bible.settings.commentarySelection = reordered
     })
     builder.addCase(setSettingsContextualInformationDisplay, (state, action) => {
       state.bible.settings.contextualInformationDisplay = action.payload

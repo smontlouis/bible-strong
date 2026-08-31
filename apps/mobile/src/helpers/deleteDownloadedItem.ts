@@ -13,7 +13,7 @@ import { removeStrongLexiconModule } from './strongLexiconModules'
 import type { StrongLexiconModuleId } from './strongLexiconPublications'
 import { invalidateOfflineCopyQueries } from './offlineCopyQueries'
 import { createOfflineCopyId, parseOfflineCopyId, type OfflineCopyIdentity } from './offlineCopy'
-import { getDictionaryDbPath } from './databases'
+import { getCommentaryDbPath, getDictionaryDbPath } from './databases'
 
 interface DeleteDownloadedItemOptions {
   bibleMode?: 'remove' | 'replace'
@@ -42,6 +42,7 @@ export type DownloadedItemDeletionPlan =
       resourceId: string
       language: ResourceLanguage
     }
+  | { kind: 'commentary'; resourceId: string; language: ResourceLanguage }
   | { kind: 'database'; databaseId: DatabaseId; language: ResourceLanguage }
   | { kind: 'unknown'; itemId: string }
 
@@ -66,6 +67,8 @@ export const createDownloadedItemDeletionPlan = (
         language: identity.language,
       }
     case 'dictionary':
+      return identity
+    case 'commentary':
       return identity
     case 'bible-pericope':
     case 'bible-red-words':
@@ -194,6 +197,14 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
 
   if (plan.kind === 'dictionary') {
     await FileSystem.deleteAsync(getDictionaryDbPath(plan.work, plan.language), {
+      idempotent: true,
+    })
+    await invalidateAndForgetPublication(plan)
+    return
+  }
+
+  if (plan.kind === 'commentary') {
+    await FileSystem.deleteAsync(getCommentaryDbPath(plan.resourceId, plan.language), {
       idempotent: true,
     })
     await invalidateAndForgetPublication(plan)

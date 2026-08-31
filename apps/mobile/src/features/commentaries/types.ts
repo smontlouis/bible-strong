@@ -6,7 +6,10 @@ export interface Comments {
 
 export interface Comment {
   id: string
+  sectionId: string
   verseId: string
+  rangeStartVerse: number
+  rangeEndVerse: number
   content: string
   resource: Resource
   order: number
@@ -26,6 +29,7 @@ export interface EGWComment extends Omit<Comment, 'type'> {
 export interface Resource {
   name: string
   code: string
+  shortName?: string
   logo: string
   author: string
 }

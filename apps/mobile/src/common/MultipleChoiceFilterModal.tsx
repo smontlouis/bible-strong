@@ -2,7 +2,13 @@ import styled from '@emotion/native'
 import React, { forwardRef } from 'react'
 import { TouchableOpacity } from 'react-native'
 
-import { Sheet, SheetFlatList, SheetHeader, type SheetRef } from '~common/sheet'
+import {
+  Sheet,
+  SheetFlatList,
+  SheetHeader,
+  type SheetRef,
+  type SheetSnapPoint,
+} from '~common/sheet'
 import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 
@@ -13,6 +19,9 @@ const ChoiceRow = styled(TouchableOpacity)(({ theme }) => ({
   borderBottomWidth: 1,
   borderBottomColor: theme.colors.border,
 }))
+
+const FULL_HEIGHT_SNAP_POINTS: SheetSnapPoint[] = [1]
+const LONG_CHOICE_LIST_THRESHOLD = 10
 
 export type MultipleChoiceFilterOption<T extends string> = {
   value: T
@@ -30,7 +39,11 @@ const MultipleChoiceFilterModalInner = <T extends string>(
   { title, selectedValues, options, onToggle }: Props<T>,
   ref: React.ForwardedRef<SheetRef>
 ) => (
-  <Sheet ref={ref} header={<SheetHeader title={title} />}>
+  <Sheet
+    ref={ref}
+    snapPoints={options.length > LONG_CHOICE_LIST_THRESHOLD ? FULL_HEIGHT_SNAP_POINTS : undefined}
+    header={<SheetHeader title={title} />}
+  >
     <SheetFlatList
       data={options}
       extraData={selectedValues}

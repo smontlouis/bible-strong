@@ -14,8 +14,8 @@ This report is a directional agent-readability score, not a product quality verd
 | `audio` | 7/10 | 0 | 0 | no | no | no colocated feature tests; no mapped smoke path |
 | `bible` | 8/10 | 220 | 52 | yes | no | 45 console calls; 15 eslint-disable markers |
 | `bookmarks` | 6/10 | 2 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
-| `commentaries` | 5/10 | 5 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README; 4 eslint-disable markers |
-| `dictionnary` | 7/10 | 10 | 0 | yes | no | no colocated feature tests; 3 eslint-disable markers |
+| `commentaries` | 7/10 | 7 | 2 | no | no | no mapped smoke path; no feature README; 4 eslint-disable markers |
+| `dictionnary` | 7/10 | 10 | 0 | yes | no | no colocated feature tests; 2 eslint-disable markers |
 | `entityListQuery` | 8/10 | 6 | 5 | no | no | no mapped smoke path; no feature README |
 | `feature-onboarding` | 6/10 | 9 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 | `home` | 7/10 | 21 | 1 | no | no | no mapped smoke path; no feature README; 3 eslint-disable markers |

@@ -1,0 +1,442 @@
+import { bcv_parser } from "../../../../../packages/bible-reference-parser/esm/bcv_parser.js";
+import * as en from "../../../../../packages/bible-reference-parser/esm/lang/en.js";
+import * as fr from "../../../../../packages/bible-reference-parser/esm/lang/fr.js";
+
+export const DICTIONARY_LINK_NORMALIZATION_REVISION =
+  "dictionary-links-bible-uri-v1";
+export const DICTIONARY_BCV_PARSER_VERSION = "3.2.0-bible-strong.2";
+
+const OSIS_BOOKS = [
+  "Gen",
+  "Exod",
+  "Lev",
+  "Num",
+  "Deut",
+  "Josh",
+  "Judg",
+  "Ruth",
+  "1Sam",
+  "2Sam",
+  "1Kgs",
+  "2Kgs",
+  "1Chr",
+  "2Chr",
+  "Ezra",
+  "Neh",
+  "Esth",
+  "Job",
+  "Ps",
+  "Prov",
+  "Eccl",
+  "Song",
+  "Isa",
+  "Jer",
+  "Lam",
+  "Ezek",
+  "Dan",
+  "Hos",
+  "Joel",
+  "Amos",
+  "Obad",
+  "Jonah",
+  "Mic",
+  "Nah",
+  "Hab",
+  "Zeph",
+  "Hag",
+  "Zech",
+  "Mal",
+  "Matt",
+  "Mark",
+  "Luke",
+  "John",
+  "Acts",
+  "Rom",
+  "1Cor",
+  "2Cor",
+  "Gal",
+  "Eph",
+  "Phil",
+  "Col",
+  "1Thess",
+  "2Thess",
+  "1Tim",
+  "2Tim",
+  "Titus",
+  "Phlm",
+  "Heb",
+  "Jas",
+  "1Pet",
+  "2Pet",
+  "1John",
+  "2John",
+  "3John",
+  "Jude",
+  "Rev",
+  "Tob",
+  "Jdt",
+  "Wis",
+  "Sir",
+  "Bar",
+  "1Macc",
+  "2Macc"
+];
+const bookNumbers = new Map(OSIS_BOOKS.map((book, index) => [book, index + 1]));
+
+const createParser = (language) => {
+  const parser = new bcv_parser(language === "fr" ? fr : en);
+  parser.set_options({
+    book_match_strategy: "strict",
+    consecutive_combination_strategy: "separate",
+    sequence_combination_strategy: "separate",
+    passage_existence_strategy: "bcv",
+    testaments: "ona"
+  });
+  return parser;
+};
+
+const parsers = { en: createParser("en"), fr: createParser("fr") };
+const HTML_TOKEN_PATTERN = /<!--[\s\S]*?-->|<[^>]*>/gu;
+const ANCHOR_TOKEN_PATTERN = /^<\/?a(?:\s[^>]*)?>$/iu;
+const REFERENCE_TAIL_PATTERN = /^[\s.,;:()[\]{}—–-]*$/u;
+
+const decodeEntity = (entity) => {
+  const normalized = entity.toLocaleLowerCase();
+  if (normalized === "&nbsp;") return " ";
+  if (normalized === "&amp;") return "&";
+  if (normalized === "&quot;") return '"';
+  if (normalized === "&apos;" || normalized === "&#39;") return "'";
+  if (normalized === "&lt;") return "<";
+  if (normalized === "&gt;") return ">";
+  const decimal = /^&#(\d+);$/u.exec(entity);
+  if (decimal) return String.fromCodePoint(Number(decimal[1]));
+  const hexadecimal = /^&#x([\da-f]+);$/iu.exec(entity);
+  if (hexadecimal)
+    return String.fromCodePoint(Number.parseInt(hexadecimal[1], 16));
+  return entity;
+};
+
+const decodeHtmlText = (raw) =>
+  String(raw).replace(/&(?:#\d+|#x[\da-f]+|[a-z]+);/giu, (entity) =>
+    decodeEntity(entity)
+  );
+
+const decodeTextWithOffsets = (raw) => {
+  let text = "";
+  const starts = [];
+  const ends = [];
+  for (let index = 0; index < raw.length;) {
+    const entity =
+      raw[index] === "&"
+        ? /^&(?:#\d+|#x[\da-f]+|[a-z]+);/iu.exec(raw.slice(index))
+        : null;
+    const source = entity?.[0] ?? raw[index];
+    const decoded = entity ? decodeEntity(source) : source;
+    for (let unit = 0; unit < decoded.length; unit += 1) {
+      text += decoded[unit];
+      starts.push(index);
+      ends.push(index + source.length);
+    }
+    index += source.length;
+  }
+  return { text, starts, ends };
+};
+
+const stripMarkup = (html) =>
+  decodeHtmlText(String(html).replace(/<[^>]*>/gu, " "))
+    .replace(/\s+/gu, " ")
+    .trim();
+
+const readAttribute = (tag, name) => {
+  const match = new RegExp(
+    `\\b${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)'|([^\\s>]+))`,
+    "iu"
+  ).exec(tag);
+  return match ? (match[1] ?? match[2] ?? match[3] ?? "") : "";
+};
+
+const escapeAttribute = (value) =>
+  String(value).replace(/&/gu, "&amp;").replace(/"/gu, "&quot;");
+
+const rejectedBcvLabel = (label) => {
+  const trimmed = label.trim();
+  return (
+    /^le\s+(?:chapitre|texte|verset)\b/iu.test(trimmed) ||
+    /^(?:le|la|les)\s+\d+\s*$/iu.test(trimmed) ||
+    /^est\b[^\p{L}\p{N}]*\d/iu.test(trimmed)
+  );
+};
+
+const validOsis = (osis) =>
+  /^(?:[1-4]?[A-Za-z]+\.\d+(?:\.\d+)?)(?:-(?:[1-4]?[A-Za-z]+\.)?\d+(?:\.\d+)?)?(?:,(?:[1-4]?[A-Za-z]+\.\d+(?:\.\d+)?)(?:-(?:[1-4]?[A-Za-z]+\.)?\d+(?:\.\d+)?)?)*$/u.test(
+    osis
+  );
+
+const parseCompleteReference = (value) => {
+  let decoded;
+  try {
+    decoded = decodeURIComponent(decodeHtmlText(String(value)));
+  } catch {
+    decoded = decodeHtmlText(String(value));
+  }
+  decoded = decoded
+    .replace(/^bible:\/\//iu, "")
+    .replace(/^\//u, "")
+    .trim();
+  if (!decoded) return "";
+  for (const language of ["en", "fr"]) {
+    const parsed = parsers[language].parse(decoded);
+    const matches = parsed.osis_and_indices();
+    let cursor = 0;
+    let complete = matches.length > 0;
+    for (const match of matches) {
+      const [start, end] = match.indices;
+      if (!/^[\s,;]*$/u.test(decoded.slice(cursor, start))) complete = false;
+      cursor = end;
+    }
+    if (!/^[\s,;]*$/u.test(decoded.slice(cursor))) complete = false;
+    const osis = parsed.osis();
+    if (complete && validOsis(osis)) return osis;
+  }
+  return "";
+};
+
+const candidatesFor = (text, preferredLanguage) => {
+  const languages = preferredLanguage === "fr" ? ["fr", "en"] : ["en", "fr"];
+  const candidates = [];
+  for (const [priority, language] of languages.entries()) {
+    for (const candidate of parsers[language].parse(text).osis_and_indices()) {
+      const [start, end] = candidate.indices;
+      if (
+        !validOsis(candidate.osis) ||
+        start === undefined ||
+        end === undefined ||
+        end <= start
+      )
+        continue;
+      const label = text.slice(start, end);
+      if (!/\d/u.test(label) || rejectedBcvLabel(label)) continue;
+      candidates.push({ osis: candidate.osis, start, end, priority });
+    }
+  }
+  candidates.sort(
+    (left, right) =>
+      left.start - right.start ||
+      right.end - right.start - (left.end - left.start) ||
+      left.priority - right.priority
+  );
+  const selected = [];
+  for (const candidate of candidates) {
+    if (
+      !selected.some(
+        (current) =>
+          candidate.start < current.end && current.start < candidate.end
+      )
+    )
+      selected.push(candidate);
+  }
+  return selected.sort((left, right) => left.start - right.start);
+};
+
+const exactOsis = (text, language) => {
+  const trimmed = text.trim();
+  if (!trimmed || rejectedBcvLabel(trimmed)) return "";
+  for (const candidate of candidatesFor(trimmed, language)) {
+    if (
+      /^\s*$/u.test(trimmed.slice(0, candidate.start)) &&
+      REFERENCE_TAIL_PATTERN.test(trimmed.slice(candidate.end))
+    ) {
+      return candidate.osis;
+    }
+  }
+  return "";
+};
+
+const bibleLink = (inner, osis) => {
+  const escaped = escapeAttribute(osis);
+  return `<a class="verse bible-ref" href="bible://${escaped}" data-osis="${escaped}">${inner}</a>`;
+};
+
+const transformAnchors = (html, state) => {
+  const stack = [{ html: "" }];
+  let cursor = 0;
+  for (const match of html.matchAll(HTML_TOKEN_PATTERN)) {
+    const token = match[0];
+    stack.at(-1).html += html.slice(cursor, match.index);
+    cursor = match.index + token.length;
+    if (!ANCHOR_TOKEN_PATTERN.test(token)) {
+      stack.at(-1).html += token;
+      continue;
+    }
+    if (/^<a(?:\s|>)/iu.test(token) && !/\/\s*>$/u.test(token)) {
+      stack.push({ html: "", tag: token });
+      continue;
+    }
+    if (!/^<\/a\s*>$/iu.test(token) || stack.length === 1) continue;
+    const frame = stack.pop();
+    const href = decodeHtmlText(readAttribute(frame.tag, "href")).trim();
+    const className = readAttribute(frame.tag, "class");
+    const label = stripMarkup(frame.html);
+    const isWordLink = /(?:^|\s)word(?:\s|$)/u.test(className);
+    const isBibleLink = /(?:^|\s)(?:verse|bible-ref)(?:\s|$)/u.test(className);
+    if (
+      isWordLink &&
+      !isBibleLink &&
+      !href.startsWith("bible://") &&
+      href &&
+      !/^[a-z][a-z\d+.-]*:\/\//iu.test(href)
+    ) {
+      state.stats.wordLinksRetained += 1;
+      stack.at(-1).html +=
+        `<a class="word" href="${escapeAttribute(href)}">${frame.html}</a>`;
+      continue;
+    }
+    let osis = href.startsWith("bible://") ? parseCompleteReference(href) : "";
+    if (!osis && isBibleLink) {
+      osis = parseCompleteReference(href) || exactOsis(label, state.language);
+    }
+    if (!osis && label) osis = exactOsis(label, state.language);
+    if (osis) {
+      state.references.push(osis);
+      state.stats.bibleLinks += 1;
+      if (href.startsWith("bible://")) state.stats.normalizedBibleLinks += 1;
+      else state.stats.existingLinksConverted += 1;
+      stack.at(-1).html += bibleLink(frame.html, osis);
+      continue;
+    }
+    if (isWordLink && href && !/^[a-z][a-z\d+.-]*:\/\//iu.test(href)) {
+      state.stats.wordLinksRetained += 1;
+      stack.at(-1).html +=
+        `<a class="word" href="${escapeAttribute(href)}">${frame.html}</a>`;
+      continue;
+    }
+    if (href.startsWith("bible://")) state.stats.invalidBibleLinksRemoved += 1;
+    else if (href) state.stats.discardedLinks += 1;
+    stack.at(-1).html += frame.html;
+  }
+  stack.at(-1).html += html.slice(cursor);
+  while (stack.length > 1) stack.at(-2).html += stack.pop().html;
+  return stack[0].html;
+};
+
+const annotateText = (raw, state) => {
+  if (!raw.trim()) return raw;
+  const decoded = decodeTextWithOffsets(raw);
+  const candidates = candidatesFor(decoded.text, state.language);
+  if (!candidates.length) return raw;
+  let cursor = 0;
+  let result = "";
+  for (const candidate of candidates) {
+    const start = decoded.starts[candidate.start];
+    const end = decoded.ends[candidate.end - 1];
+    if (start === undefined || end === undefined || start < cursor) continue;
+    result += raw.slice(cursor, start);
+    const inner = raw.slice(start, end);
+    result += bibleLink(inner, candidate.osis);
+    state.references.push(candidate.osis);
+    state.stats.bibleLinks += 1;
+    state.stats.textLinksParsed += 1;
+    cursor = end;
+  }
+  return result + raw.slice(cursor);
+};
+
+const annotateResidualText = (html, state) => {
+  let cursor = 0;
+  let result = "";
+  let skippedDepth = 0;
+  for (const match of html.matchAll(HTML_TOKEN_PATTERN)) {
+    const token = match[0];
+    const text = html.slice(cursor, match.index);
+    result += skippedDepth ? text : annotateText(text, state);
+    const opensSkipped = /^<(?:a|script|style|code|pre)\b/iu.test(token);
+    const opensElement =
+      /^<[a-z][^>]*>$/iu.test(token) &&
+      !/^<(?:br|hr|img|input|meta|link)\b/iu.test(token) &&
+      !/\/\s*>$/u.test(token);
+    const closesElement = /^<\/[a-z][^>]*>$/iu.test(token);
+    if (skippedDepth && opensElement) skippedDepth += 1;
+    else if (opensSkipped) skippedDepth = 1;
+    result += token;
+    if (closesElement && skippedDepth) skippedDepth -= 1;
+    cursor = match.index + token.length;
+  }
+  const remaining = html.slice(cursor);
+  return result + (skippedDepth ? remaining : annotateText(remaining, state));
+};
+
+export const emptyDictionaryLinkStats = () => ({
+  entries: 0,
+  changedEntries: 0,
+  bibleLinks: 0,
+  normalizedBibleLinks: 0,
+  existingLinksConverted: 0,
+  textLinksParsed: 0,
+  wordLinksRetained: 0,
+  invalidBibleLinksRemoved: 0,
+  discardedLinks: 0,
+  indexedVerseLinks: 0,
+  broadReferencesNotIndexed: 0
+});
+
+export const addDictionaryLinkStats = (target, source) => {
+  for (const key of Object.keys(target)) target[key] += source[key] ?? 0;
+  return target;
+};
+
+export const normalizeDictionaryDefinition = ({ html, language }) => {
+  const stats = emptyDictionaryLinkStats();
+  stats.entries = 1;
+  const references = [];
+  const state = {
+    language: language === "en" ? "en" : "fr",
+    references,
+    stats
+  };
+  const anchored = transformAnchors(String(html ?? ""), state);
+  const normalizedHtml = annotateResidualText(anchored, state).replace(
+    /<a\b[^>]*$/giu,
+    ""
+  );
+  stats.changedEntries = normalizedHtml === String(html ?? "") ? 0 : 1;
+  return { html: normalizedHtml, references, stats };
+};
+
+const verseCounts = (book) =>
+  parsers.en.translations.systems.current.chapters?.[book] ?? [];
+
+export const expandOsisToVerseKeys = (osis, maximum = 500) => {
+  const keys = [];
+  const append = (book, chapter, verse) => {
+    const bookNumber = bookNumbers.get(book);
+    if (!bookNumber || keys.length >= maximum) return false;
+    keys.push(`${bookNumber}-${chapter}-${verse}`);
+    return true;
+  };
+  const entities = parsers.en
+    .parse(osis)
+    .parsed_entities()
+    .flatMap((entity) => entity.entities ?? []);
+  for (const entity of entities) {
+    const { start, end } = entity;
+    if (!start?.b || !start.c || !end?.b || !end.c || start.b !== end.b)
+      return [];
+    const counts = verseCounts(start.b);
+    for (let chapter = start.c; chapter <= end.c; chapter += 1) {
+      const chapterVerses = counts[chapter - 1];
+      if (!chapterVerses) return [];
+      const firstVerse = chapter === start.c && start.v ? start.v : 1;
+      const lastVerse = chapter === end.c && end.v ? end.v : chapterVerses;
+      for (let verse = firstVerse; verse <= lastVerse; verse += 1) {
+        if (!append(start.b, chapter, verse)) return [];
+      }
+    }
+  }
+  return [...new Set(keys)];
+};
+
+export const isCheckedBibleUri = (href) => {
+  if (!String(href).startsWith("bible://")) return false;
+  const osis = parseCompleteReference(href);
+  return Boolean(osis && `bible://${osis}` === href);
+};

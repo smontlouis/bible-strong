@@ -3158,6 +3158,7 @@ __metadata:
     react-native-nitro-modules: "npm:^0.31.10"
     react-native-reanimated: "npm:4.3.1"
     react-native-reanimated-carousel: "npm:^5.0.0-beta.3"
+    react-native-reanimated-dnd: "npm:2.0.0"
     react-native-root-siblings: "npm:5.0.1"
     react-native-safe-area-context: "npm:~5.7.0"
     react-native-screens: "patch:react-native-screens@npm%3A4.25.2#~/.yarn/patches/react-native-screens-npm-4.25.2-0de6719d95.patch"
@@ -26595,6 +26596,19 @@ multer@emadalam/multer:
     react-native-reanimated: ">=4.0.0"
     react-native-worklets: ">=0.5.0"
   checksum: 10c0/6aafe7fea50f166123dbe419d26287ea876bfb901502ea8b12f1fe93c42e08fe091c192e88c6e0b869a6d3a58a82c8af142edbf3366b897236ed020650e8c8b1
+  languageName: node
+  linkType: hard
+
+"react-native-reanimated-dnd@npm:2.0.0":
+  version: 2.0.0
+  resolution: "react-native-reanimated-dnd@npm:2.0.0"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-native: ">=0.80.0"
+    react-native-gesture-handler: ">=2.28.0"
+    react-native-reanimated: ">=4.2.0"
+    react-native-worklets: ">=0.7.0"
+  checksum: 10c0/fb106a8eb59b3f963fe0e647df2bc515fb817f53d0d6a46c284ddcbfe38234376cb78b974702fbda679dd370d22cca07b21618ba6c59854d4cef648ec46fad2a
   languageName: node
   linkType: hard
 

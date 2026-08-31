@@ -1,6 +1,7 @@
 import styled from '@emotion/native'
 import { getRemoteConfig, getValue } from '@react-native-firebase/remote-config'
 import { useSetAtom } from 'jotai/react'
+import { Image } from 'expo-image'
 import * as Updates from 'expo-updates'
 import React, { memo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -197,6 +198,20 @@ export const More = ({ closeMenu }: MoreProps) => {
             </IconCircle>
             <Text flex color="quint" fontSize={15}>
               {t('Bible Thématique Nave')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
+          <CardLinkItem route="CommentaryLibrary">
+            <IconCircle bg="rgba(38, 166, 154, 0.1)">
+              <Image
+                source={require('~assets/images/tab-icons/comment.svg')}
+                style={{ width: 20, height: 20 }}
+                tintColor="#26A69A"
+                contentFit="contain"
+              />
+            </IconCircle>
+            <Text flex color="#26A69A" fontSize={15}>
+              {t('Commentaires')}
             </Text>
             <FeatherIcon name="chevron-right" size={20} color="grey" />
           </CardLinkItem>

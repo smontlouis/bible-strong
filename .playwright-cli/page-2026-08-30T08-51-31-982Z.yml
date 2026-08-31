@@ -1,0 +1,397 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link "Accueil du lecteur" [ref=e3] [cursor=pointer]:
+      - /url: "#"
+      - generic [ref=e4]: BS
+      - generic [ref=e5]:
+        - strong [ref=e6]: Le Cabinet
+        - generic [ref=e7]: des dictionnaires
+    - generic [ref=e8]:
+      - paragraph [ref=e9]: Resource Studio · aperçu local
+      - heading "Les mots, leurs mondes" [level=1] [ref=e10]
+    - generic [ref=e11]:
+      - strong [ref=e12]: "5"
+      - generic [ref=e13]: dictionnairesinventoriés
+  - main [ref=e14]:
+    - complementary "Bibliothèque de dictionnaires" [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e17]: "01"
+        - generic [ref=e18]:
+          - paragraph [ref=e19]: Bibliothèque
+          - heading "Choisir une œuvre" [level=2] [ref=e20]
+      - generic [ref=e21]:
+        - generic [ref=e22]: Langue
+        - combobox "Langue" [ref=e23] [cursor=pointer]:
+          - option "Toutes" [selected]
+          - option "Français"
+          - option "English"
+      - generic [ref=e54]:
+        - button "W Westphal FR · 5 436 entrées →" [ref=e486] [cursor=pointer]:
+          - generic [ref=e487]: W
+          - generic [ref=e488]:
+            - strong [ref=e489]: Westphal
+            - generic [ref=e490]: FR · 5 436 entrées
+          - generic [ref=e491]: →
+        - button "E+ Easton + Webster 1828 EN · 8 620 entrées →" [ref=e492] [cursor=pointer]:
+          - generic [ref=e493]: E+
+          - generic [ref=e494]:
+            - strong [ref=e495]: Easton + Webster 1828
+            - generic [ref=e496]: EN · 8 620 entrées
+          - generic [ref=e497]: →
+        - button "L Lelièvre FR · 142 entrées →" [ref=e498] [cursor=pointer]:
+          - generic [ref=e499]: L
+          - generic [ref=e500]:
+            - strong [ref=e501]: Lelièvre
+            - generic [ref=e502]: FR · 142 entrées
+          - generic [ref=e503]: →
+        - button "B Bost FR · 2 308 entrées →" [ref=e504] [cursor=pointer]:
+          - generic [ref=e505]: B
+          - generic [ref=e506]:
+            - strong [ref=e507]: Bost
+            - generic [ref=e508]: FR · 2 308 entrées
+          - generic [ref=e509]: →
+        - button "C Calmet FR · 5 130 entrées →" [ref=e510] [cursor=pointer]:
+          - generic [ref=e511]: C
+          - generic [ref=e512]:
+            - strong [ref=e513]: Calmet
+            - generic [ref=e514]: FR · 5 130 entrées
+          - generic [ref=e515]: →
+    - region "Index alphabétique" [ref=e24]:
+      - generic [ref=e25]:
+        - generic [ref=e26]: Chercher un mot ou une expression
+        - generic [ref=e27]:
+          - searchbox "Chercher un mot ou une expression" [ref=e28]
+          - generic [ref=e29]: ⌘ K
+      - navigation "Index alphabétique" [ref=e30]:
+        - button "A" [ref=e516] [cursor=pointer]
+        - button "B" [ref=e517] [cursor=pointer]
+        - button "C" [ref=e518] [cursor=pointer]
+        - button "D" [ref=e519] [cursor=pointer]
+        - button "E" [ref=e520] [cursor=pointer]
+        - button "F" [ref=e521] [cursor=pointer]
+        - button "G" [ref=e522] [cursor=pointer]
+        - button "H" [ref=e523] [cursor=pointer]
+        - button "I" [ref=e524] [cursor=pointer]
+        - button "J" [ref=e525] [cursor=pointer]
+        - button "K" [ref=e526] [cursor=pointer]
+        - button "L" [ref=e527] [cursor=pointer]
+        - button "M" [ref=e528] [cursor=pointer]
+        - button "N" [ref=e529] [cursor=pointer]
+        - button "O" [ref=e530] [cursor=pointer]
+        - button "P" [ref=e531] [cursor=pointer]
+        - button "Q" [ref=e532] [cursor=pointer]
+        - button "R" [ref=e533] [cursor=pointer]
+        - button "S" [ref=e534] [cursor=pointer]
+        - button "T" [ref=e535] [cursor=pointer]
+        - button "U" [ref=e536] [cursor=pointer]
+        - button "V" [ref=e537] [cursor=pointer]
+        - button "W" [ref=e538] [cursor=pointer]
+        - button "X" [ref=e539] [cursor=pointer]
+        - button "Y" [ref=e540] [cursor=pointer]
+        - button "Z" [ref=e541] [cursor=pointer]
+      - generic [ref=e31]:
+        - paragraph [ref=e32]: Lettre A
+        - strong [ref=e33]: 1–80 sur 652
+      - generic [ref=e34]:
+        - button "Aaron aaron" [ref=e542] [cursor=pointer]:
+          - generic [ref=e543]: Aaron
+          - generic [ref=e544]: aaron
+        - button "Aaronites aaronites" [ref=e545] [cursor=pointer]:
+          - generic [ref=e546]: Aaronites
+          - generic [ref=e547]: aaronites
+        - button "Abaddon abaddon" [ref=e548] [cursor=pointer]:
+          - generic [ref=e549]: Abaddon
+          - generic [ref=e550]: abaddon
+        - button "Abagtha abagtha" [ref=e551] [cursor=pointer]:
+          - generic [ref=e552]: Abagtha
+          - generic [ref=e553]: abagtha
+        - button "Abana abana" [ref=e554] [cursor=pointer]:
+          - generic [ref=e555]: Abana
+          - generic [ref=e556]: abana
+        - button "Abarim abarim" [ref=e557] [cursor=pointer]:
+          - generic [ref=e558]: Abarim
+          - generic [ref=e559]: abarim
+        - button "Abase abase" [ref=e560] [cursor=pointer]:
+          - generic [ref=e561]: Abase
+          - generic [ref=e562]: abase
+        - button "Abased abased" [ref=e563] [cursor=pointer]:
+          - generic [ref=e564]: Abased
+          - generic [ref=e565]: abased
+        - button "Abasing abasing" [ref=e566] [cursor=pointer]:
+          - generic [ref=e567]: Abasing
+          - generic [ref=e568]: abasing
+        - button "Abated abated" [ref=e569] [cursor=pointer]:
+          - generic [ref=e570]: Abated
+          - generic [ref=e571]: abated
+        - button "Abba abba" [ref=e572] [cursor=pointer]:
+          - generic [ref=e573]: Abba
+          - generic [ref=e574]: abba
+        - button "Abda abda" [ref=e575] [cursor=pointer]:
+          - generic [ref=e576]: Abda
+          - generic [ref=e577]: abda
+        - button "Abdeel abdeel" [ref=e578] [cursor=pointer]:
+          - generic [ref=e579]: Abdeel
+          - generic [ref=e580]: abdeel
+        - button "Abdi abdi" [ref=e581] [cursor=pointer]:
+          - generic [ref=e582]: Abdi
+          - generic [ref=e583]: abdi
+        - button "Abdiel abdiel" [ref=e584] [cursor=pointer]:
+          - generic [ref=e585]: Abdiel
+          - generic [ref=e586]: abdiel
+        - button "Abdon abdon" [ref=e587] [cursor=pointer]:
+          - generic [ref=e588]: Abdon
+          - generic [ref=e589]: abdon
+        - button "Abednego abednego" [ref=e590] [cursor=pointer]:
+          - generic [ref=e591]: Abednego
+          - generic [ref=e592]: abednego
+        - button "Abel abel" [ref=e593] [cursor=pointer]:
+          - generic [ref=e594]: Abel
+          - generic [ref=e595]: abel
+        - button "Abelbethmaachah abelbethmaachah" [ref=e596] [cursor=pointer]:
+          - generic [ref=e597]: Abelbethmaachah
+          - generic [ref=e598]: abelbethmaachah
+        - button "Abelcheramim abelcheramim" [ref=e599] [cursor=pointer]:
+          - generic [ref=e600]: Abelcheramim
+          - generic [ref=e601]: abelcheramim
+        - button "Abelmeholah abelmeholah" [ref=e602] [cursor=pointer]:
+          - generic [ref=e603]: Abelmeholah
+          - generic [ref=e604]: abelmeholah
+        - button "Abelmizraim abelmizraim" [ref=e605] [cursor=pointer]:
+          - generic [ref=e606]: Abelmizraim
+          - generic [ref=e607]: abelmizraim
+        - button "Abelshittim abelshittim" [ref=e608] [cursor=pointer]:
+          - generic [ref=e609]: Abelshittim
+          - generic [ref=e610]: abelshittim
+        - button "Abez abez" [ref=e611] [cursor=pointer]:
+          - generic [ref=e612]: Abez
+          - generic [ref=e613]: abez
+        - button "Abhor abhor" [ref=e614] [cursor=pointer]:
+          - generic [ref=e615]: Abhor
+          - generic [ref=e616]: abhor
+        - button "Abhorred abhorred" [ref=e617] [cursor=pointer]:
+          - generic [ref=e618]: Abhorred
+          - generic [ref=e619]: abhorred
+        - button "Abhorring abhorring" [ref=e620] [cursor=pointer]:
+          - generic [ref=e621]: Abhorring
+          - generic [ref=e622]: abhorring
+        - button "Abia abia" [ref=e623] [cursor=pointer]:
+          - generic [ref=e624]: Abia
+          - generic [ref=e625]: abia
+        - button "Abialbon abialbon" [ref=e626] [cursor=pointer]:
+          - generic [ref=e627]: Abialbon
+          - generic [ref=e628]: abialbon
+        - button "Abiasaph abiasaph" [ref=e629] [cursor=pointer]:
+          - generic [ref=e630]: Abiasaph
+          - generic [ref=e631]: abiasaph
+        - button "Abiathar abiathar" [ref=e632] [cursor=pointer]:
+          - generic [ref=e633]: Abiathar
+          - generic [ref=e634]: abiathar
+        - button "Abib abib" [ref=e635] [cursor=pointer]:
+          - generic [ref=e636]: Abib
+          - generic [ref=e637]: abib
+        - button "Abida abida" [ref=e638] [cursor=pointer]:
+          - generic [ref=e639]: Abida
+          - generic [ref=e640]: abida
+        - button "Abidan abidan" [ref=e641] [cursor=pointer]:
+          - generic [ref=e642]: Abidan
+          - generic [ref=e643]: abidan
+        - button "Abide abide" [ref=e644] [cursor=pointer]:
+          - generic [ref=e645]: Abide
+          - generic [ref=e646]: abide
+        - button "Abiding abiding" [ref=e647] [cursor=pointer]:
+          - generic [ref=e648]: Abiding
+          - generic [ref=e649]: abiding
+        - button "Abieezer abieezer" [ref=e650] [cursor=pointer]:
+          - generic [ref=e651]: Abieezer
+          - generic [ref=e652]: abieezer
+        - button "Abiel abiel" [ref=e653] [cursor=pointer]:
+          - generic [ref=e654]: Abiel
+          - generic [ref=e655]: abiel
+        - button "Abiezrite abiezrite" [ref=e656] [cursor=pointer]:
+          - generic [ref=e657]: Abiezrite
+          - generic [ref=e658]: abiezrite
+        - button "Abigail abigail" [ref=e659] [cursor=pointer]:
+          - generic [ref=e660]: Abigail
+          - generic [ref=e661]: abigail
+        - button "Abihail abihail" [ref=e662] [cursor=pointer]:
+          - generic [ref=e663]: Abihail
+          - generic [ref=e664]: abihail
+        - button "Abihu abihu" [ref=e665] [cursor=pointer]:
+          - generic [ref=e666]: Abihu
+          - generic [ref=e667]: abihu
+        - button "Abihud abihud" [ref=e668] [cursor=pointer]:
+          - generic [ref=e669]: Abihud
+          - generic [ref=e670]: abihud
+        - button "Abijah abijah" [ref=e671] [cursor=pointer]:
+          - generic [ref=e672]: Abijah
+          - generic [ref=e673]: abijah
+        - button "Abijam abijam" [ref=e674] [cursor=pointer]:
+          - generic [ref=e675]: Abijam
+          - generic [ref=e676]: abijam
+        - button "Abilene abilene" [ref=e677] [cursor=pointer]:
+          - generic [ref=e678]: Abilene
+          - generic [ref=e679]: abilene
+        - button "Ability ability" [ref=e680] [cursor=pointer]:
+          - generic [ref=e681]: Ability
+          - generic [ref=e682]: ability
+        - button "Abimael abimael" [ref=e683] [cursor=pointer]:
+          - generic [ref=e684]: Abimael
+          - generic [ref=e685]: abimael
+        - button "Abimelech abimelech" [ref=e686] [cursor=pointer]:
+          - generic [ref=e687]: Abimelech
+          - generic [ref=e688]: abimelech
+        - button "Abinadab abinadab" [ref=e689] [cursor=pointer]:
+          - generic [ref=e690]: Abinadab
+          - generic [ref=e691]: abinadab
+        - button "Abinoam abinoam" [ref=e692] [cursor=pointer]:
+          - generic [ref=e693]: Abinoam
+          - generic [ref=e694]: abinoam
+        - button "Abiram abiram" [ref=e695] [cursor=pointer]:
+          - generic [ref=e696]: Abiram
+          - generic [ref=e697]: abiram
+        - button "Abishag abishag" [ref=e698] [cursor=pointer]:
+          - generic [ref=e699]: Abishag
+          - generic [ref=e700]: abishag
+        - button "Abishai abishai" [ref=e701] [cursor=pointer]:
+          - generic [ref=e702]: Abishai
+          - generic [ref=e703]: abishai
+        - button "Abishua abishua" [ref=e704] [cursor=pointer]:
+          - generic [ref=e705]: Abishua
+          - generic [ref=e706]: abishua
+        - button "Abishur abishur" [ref=e707] [cursor=pointer]:
+          - generic [ref=e708]: Abishur
+          - generic [ref=e709]: abishur
+        - button "Abital abital" [ref=e710] [cursor=pointer]:
+          - generic [ref=e711]: Abital
+          - generic [ref=e712]: abital
+        - button "Abitub abitub" [ref=e713] [cursor=pointer]:
+          - generic [ref=e714]: Abitub
+          - generic [ref=e715]: abitub
+        - button "Abjects abjects" [ref=e716] [cursor=pointer]:
+          - generic [ref=e717]: Abjects
+          - generic [ref=e718]: abjects
+        - button "Ablution ablution" [ref=e719] [cursor=pointer]:
+          - generic [ref=e720]: Ablution
+          - generic [ref=e721]: ablution
+        - button "Abner abner" [ref=e722] [cursor=pointer]:
+          - generic [ref=e723]: Abner
+          - generic [ref=e724]: abner
+        - button "Aboard aboard" [ref=e725] [cursor=pointer]:
+          - generic [ref=e726]: Aboard
+          - generic [ref=e727]: aboard
+        - button "Abode abode" [ref=e728] [cursor=pointer]:
+          - generic [ref=e729]: Abode
+          - generic [ref=e730]: abode
+        - button "Abolish abolish" [ref=e731] [cursor=pointer]:
+          - generic [ref=e732]: Abolish
+          - generic [ref=e733]: abolish
+        - button "Abolished abolished" [ref=e734] [cursor=pointer]:
+          - generic [ref=e735]: Abolished
+          - generic [ref=e736]: abolished
+        - button "Abominable abominable" [ref=e737] [cursor=pointer]:
+          - generic [ref=e738]: Abominable
+          - generic [ref=e739]: abominable
+        - button "Abominably abominably" [ref=e740] [cursor=pointer]:
+          - generic [ref=e741]: Abominably
+          - generic [ref=e742]: abominably
+        - button "Abomination abomination" [ref=e743] [cursor=pointer]:
+          - generic [ref=e744]: Abomination
+          - generic [ref=e745]: abomination
+        - button "Abound abound" [ref=e746] [cursor=pointer]:
+          - generic [ref=e747]: Abound
+          - generic [ref=e748]: abound
+        - button "Abounding abounding" [ref=e749] [cursor=pointer]:
+          - generic [ref=e750]: Abounding
+          - generic [ref=e751]: abounding
+        - button "Above above" [ref=e752] [cursor=pointer]:
+          - generic [ref=e753]: Above
+          - generic [ref=e754]: above
+        - button "Abraham abraham" [ref=e755] [cursor=pointer]:
+          - generic [ref=e756]: Abraham
+          - generic [ref=e757]: abraham
+        - button "Abram abram" [ref=e758] [cursor=pointer]:
+          - generic [ref=e759]: Abram
+          - generic [ref=e760]: abram
+        - button "Abroad abroad" [ref=e761] [cursor=pointer]:
+          - generic [ref=e762]: Abroad
+          - generic [ref=e763]: abroad
+        - button "Abronah abronah" [ref=e764] [cursor=pointer]:
+          - generic [ref=e765]: Abronah
+          - generic [ref=e766]: abronah
+        - button "Absalom absalom" [ref=e767] [cursor=pointer]:
+          - generic [ref=e768]: Absalom
+          - generic [ref=e769]: absalom
+        - button "Absence absence" [ref=e770] [cursor=pointer]:
+          - generic [ref=e771]: Absence
+          - generic [ref=e772]: absence
+        - button "Absent absent" [ref=e773] [cursor=pointer]:
+          - generic [ref=e774]: Absent
+          - generic [ref=e775]: absent
+        - button "Abstain abstain" [ref=e776] [cursor=pointer]:
+          - generic [ref=e777]: Abstain
+          - generic [ref=e778]: abstain
+        - button "Abstinence abstinence" [ref=e779] [cursor=pointer]:
+          - generic [ref=e780]: Abstinence
+          - generic [ref=e781]: abstinence
+      - generic [ref=e35]:
+        - button "← Précédent" [disabled] [ref=e36]
+        - generic [ref=e37]: Page 1 / 9
+        - button "Suivant →" [ref=e38] [cursor=pointer]
+    - article [ref=e39]:
+      - generic [ref=e351]:
+        - generic [ref=e352]:
+          - paragraph [ref=e353]: Easton + Webster 1828
+          - heading "Aaron" [level=2] [ref=e354]
+          - paragraph [ref=e355]: Matthew George Easton, Noah Webster · Bible Strong combined digital edition
+        - generic [ref=e356]:
+          - paragraph [ref=e782]:
+            - strong [ref=e783]: Aaron - (Easton's Bible Dictionary)
+          - paragraph [ref=e784]: The eldest son of Amram and Jochebed, a daughter of Levi (Ex. 6:20). Some explain the name as meaning mountaineer, others mountain of strength, illuminator. He was born in Egypt three years before his brother Moses, and a number of years after his sister Miriam (2:1, 4; 7:7). He married Elisheba, the daughter of Amminadab of the house of Judah (6:23; 1 Chr. 2:10), by whom he had four sons, Nadab and Abihu, Eleazar and Ithamar. When the time for the deliverance of Isarael out of Egypt drew nigh, he was sent by God (Ex. 4:14, 27-30) to meet his long-absent brother, that he might co-operate with him in all that they were required to do in bringing about the Exodus. He was to be the "mouth" or "prophet" of Moses, i.e., was to speak for him, because he was a man of a ready utterance (7:1, 2, 9, 10, 19). He was faithful to his trust, and stood by Moses in all his interviews with Pharaoh.
+          - paragraph [ref=e785]: When the ransomed tribes fought their first battle with Amalek in Rephidim, Moses stood on a hill overlooking the scene of the conflict with the rod of God in his outstretched hand. On this occasion he was attended by Aaron and Hur, his sister's husband, who held up his wearied hands till Joshua and the chosen warriors of Israel gained the victory (17:8-13).
+          - paragraph [ref=e786]: Afterwards, when encamped before Sinai, and when Moses at the command of God ascended the mount to receive the tables of the law, Aaron and his two sons, Nadab and Abihu, along with seventy of the elders of Israel, were permitted to accompany him part of the way, and to behold afar off the manifestation of the glory of Israel's God (Ex. 19:24; 24:9-11). While Moses remained on the mountain with God, Aaron returned unto the people; and yielding through fear, or ignorance, or instability of character, to their clamour, made unto them a golden calf, and set it up as an object of worship (Ex. 32:4; Ps. 106:19). On the return of Moses to the camp, Aaron was sternly rebuked by him for the part he had acted in this matter; but he interceded for him before God, who forgave his sin (Deut. 9:20).
+          - paragraph [ref=e787]: On the mount, Moses received instructions regarding the system of worship which was to be set up among the people; and in accordance therewith Aaron and his sons were consecrated to the priest's office (Lev. 8; 9). Aaron, as high priest, held henceforth the prominent place appertaining to that office.
+          - paragraph [ref=e788]: When Israel had reached Hazeroth, in "the wilderness of Paran," Aaron joined with his sister Miriam in murmuring against Moses, "because of the Ethiopian woman whom he had married," probably after the death of Zipporah. But the Lord vindicated his servant Moses, and punished Miriam with leprosy (Num. 12). Aaron acknowledged his own and his sister's guilt, and at the intercession of Moses they were forgiven.
+          - paragraph [ref=e789]: Twenty years after this, when the children of Israel were encamped in the wilderness of Paran, Korah, Dathan, and Abiram conspired against Aaron and his sons; but a fearful judgment from God fell upon them, and they were destroyed, and the next day thousands of the people also perished by a fierce pestilence, the ravages of which were only stayed by the interposition of Aaron (Num. 16). That there might be further evidence of the divine appointment of Aaron to the priestly office, the chiefs of the tribes were each required to bring to Moses a rod bearing on it the name of his tribe. And these, along with the rod of Aaron for the tribe of Levi, were laid up overnight in the tabernacle, and in the morning it was found that while the other rods remained unchanged, that of Aaron "for the house of Levi" budded, blossomed, and yielded almonds (Num. 17:1-10). This rod was afterwards preserved in the tabernacle (Heb. 9:4) as a memorial of the divine attestation of his appointment to the priesthood.
+          - paragraph [ref=e790]: Aaron was implicated in the sin of his brother at Meribah (Num. 20:8-13), and on that account was not permitted to enter the Promised Land. When the tribes arrived at Mount Hor, "in the edge of the land of Edom," at the command of God Moses led Aaron and his son Eleazar to the top of that mountain, in the sight of all the people. There he stripped Aaron of his priestly vestments, and put them upon Eleazar; and there Aaron died on the top of the mount, being 123 years old (Num. 20:23-29. Comp. Deut. 10:6; 32:50), and was "gathered unto his people." The people, "even all the house of Israel," mourned for him thirty days. Of Aaron's sons two survived him, Eleazar, whose family held the high-priesthood till the time of Eli; and Ithamar, in whose family, beginning with Eli, the high-priesthood was held till the time of Solomon. Aaron's other two sons had been struck dead (Lev. 10:1, 2) for the daring impiety of offering "strange fire" on the alter of incense.
+          - paragraph [ref=e791]: The Arabs still show with veneration the traditionary site of Aaron's grave on one of the two summits of Mount Hor, which is marked by a Mohammedan chapel. His name is mentioned in the Koran, and there are found in the writings of the rabbins many fabulous stories regarding him.
+          - paragraph [ref=e792]: He was the first anointed priest. His descendants, "the house of Aaron," constituted the priesthood in general. In the time of David they were very numerous (1 Chr. 12:27). The other branches of the tribe of Levi held subordinate positions in connection with the sacred office. Aaron was a type of Christ in his official character as the high priest. His priesthood was a "shadow of heavenly things," and was intended to lead the people of Israel to look forward to the time when "another priest" would arise "after the order of Melchizedek" (Heb. 6:20). (See [1]MOSES.)
+    - complementary "Provenance de la ressource" [ref=e45]:
+      - generic [ref=e46]:
+        - generic [ref=e47]: "02"
+        - generic [ref=e48]:
+          - paragraph [ref=e49]: Registre
+          - heading "Œuvre & provenance" [level=2] [ref=e50]
+      - generic [ref=e457]:
+        - generic [ref=e793]:
+          - generic [ref=e794]: E+
+          - generic [ref=e795]:
+            - paragraph [ref=e796]: EASTON_WEBSTER
+            - heading "Easton’s Bible Dictionary & Webster’s 1828 Dictionary" [level=3] [ref=e797]
+        - paragraph [ref=e798]: Easton’s biblical entries supplemented by historical English definitions from Webster’s 1828 Dictionary.
+        - generic [ref=e799]:
+          - generic [ref=e800]:
+            - term [ref=e801]: Auteurs
+            - definition [ref=e802]: Matthew George Easton, Noah Webster
+          - generic [ref=e803]:
+            - term [ref=e804]: Édition
+            - definition [ref=e805]: Bible Strong combined digital edition
+          - generic [ref=e806]:
+            - term [ref=e807]: Source
+            - definition [ref=e808]: Bible Strong legacy English dictionary database
+          - generic [ref=e809]:
+            - term [ref=e810]: Version source
+            - definition [ref=e811]: easton-webster-bible-strong-legacy-v1
+          - generic [ref=e812]:
+            - term [ref=e813]: Droits
+            - definition [ref=e814]: Public-domain works; Bible Strong digital compilation
+        - generic [ref=e815]:
+          - generic [ref=e816]:
+            - strong [ref=e817]: 8 620
+            - text: articles
+          - generic [ref=e818]:
+            - strong [ref=e819]: 31 059
+            - text: ancres
+        - paragraph [ref=e820]: Matthew George Easton, Easton’s Bible Dictionary; Noah Webster, American Dictionary of the English Language (1828)
+  - contentinfo [ref=e51]:
+    - generic [ref=e52]: Bible Strong · laboratoire local
+    - generic [ref=e53]: 5/5 SQLite disponibles · données locales uniquement

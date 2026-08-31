@@ -1,33 +1,35 @@
 import styled from '@emotion/native'
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, ScrollView } from 'react-native'
+import { ScrollView } from 'react-native'
+import Animated, {
+  LinearTransition,
+  useReducedMotion,
+  withTiming,
+  type EntryAnimationsValues,
+  type ExitAnimationsValues,
+} from 'react-native-reanimated'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
-import { LinkBox } from '~common/Link'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
 import Paragraph from '~common/ui/Paragraph'
-import Text from '~common/ui/Text'
 import formatVerseContent from '~helpers/formatVerseContent'
 import { useResolvedBibleVerses, verseStringToObject } from '~features/resources/useBibleVerses'
 import BibleVerseDetailFooter from '../bible/BibleVerseDetailFooter'
-import Comment from './Comment'
 
 import { useTheme } from '@emotion/react'
 import { produce } from 'immer'
-import { useAtom, useAtomValue } from 'jotai/react'
+import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
-import AdventistIcon from '~common/AdventistIcon'
 import { FeatherIcon } from '~common/ui/Icon'
-import { HStack } from '~common/ui/Stack'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import { localQueryOptions, remoteQueryOptions } from '~helpers/queryOptions'
+import { localQueryOptions } from '~helpers/queryOptions'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
@@ -37,9 +39,19 @@ import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
-import { CommentaryAccessError } from '~features/resources/commentaryAccess'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
-import { resourcesLanguageAtom } from '~state/resourcesLanguage'
+import CommentarySelectorSheet from './CommentarySelectorSheet'
+import { parseCommentaryProjectionId } from './commentarySelection'
+import type { SheetRef } from '~common/sheet'
+import CommentaryAvailabilityList from './CommentaryAvailabilityList'
+import { buildCommentaryVerseAvailability } from './commentaryVerseAvailability'
+import { useSelector } from 'react-redux'
+import type { RootState } from '~redux/modules/reducer'
+import useRetainedCommentaryContent from './useRetainedCommentaryContent'
+import { useSheetFooterInset } from '~common/sheet'
+import { getCommentaryScrollBottomInset } from './commentaryScrollInsets'
+import { getCommentaryResourceRoute } from './commentaryResourceNavigation'
+import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -63,38 +75,84 @@ const StyledVerse = styled.View({
   flexDirection: 'row',
 })
 
+const CONTENT_TRANSITION_DURATION = 180
+const CONTENT_LAYOUT_TRANSITION = LinearTransition.duration(220)
+
+const enterNextVerse = (_values: EntryAnimationsValues) => {
+  'worklet'
+  return {
+    initialValues: { opacity: 0, transform: [{ translateX: 10 }] },
+    animations: {
+      opacity: withTiming(1, { duration: CONTENT_TRANSITION_DURATION }),
+      transform: [{ translateX: withTiming(0, { duration: CONTENT_TRANSITION_DURATION }) }],
+    },
+  }
+}
+
+const exitNextVerse = (_values: ExitAnimationsValues) => {
+  'worklet'
+  return {
+    initialValues: { opacity: 1, transform: [{ translateX: 0 }] },
+    animations: {
+      opacity: withTiming(0, { duration: CONTENT_TRANSITION_DURATION - 40 }),
+      transform: [{ translateX: withTiming(-8, { duration: CONTENT_TRANSITION_DURATION - 40 }) }],
+    },
+  }
+}
+
+const enterPreviousVerse = (_values: EntryAnimationsValues) => {
+  'worklet'
+  return {
+    initialValues: { opacity: 0, transform: [{ translateX: -10 }] },
+    animations: {
+      opacity: withTiming(1, { duration: CONTENT_TRANSITION_DURATION }),
+      transform: [{ translateX: withTiming(0, { duration: CONTENT_TRANSITION_DURATION }) }],
+    },
+  }
+}
+
+const exitPreviousVerse = (_values: ExitAnimationsValues) => {
+  'worklet'
+  return {
+    initialValues: { opacity: 1, transform: [{ translateX: 0 }] },
+    animations: {
+      opacity: withTiming(0, { duration: CONTENT_TRANSITION_DURATION - 40 }),
+      transform: [{ translateX: withTiming(8, { duration: CONTENT_TRANSITION_DURATION - 40 }) }],
+    },
+  }
+}
+
 const useComments = (verse: string) => {
   const resources = useResourceAccess()
-  const commentariesLanguage = useAtomValue(resourcesLanguageAtom).COMMENTARIES
-  const query = useInfiniteQuery({
-    queryKey: ['commentaries', commentariesLanguage, verse],
-    initialPageParam: null as number | null,
-    queryFn: async ({ pageParam }) => {
-      return resources.commentary.loadVersePage(verse, pageParam ?? undefined, commentariesLanguage)
-    },
-    getNextPageParam: (lastPage, pages) => {
-      const loadedCommentCount = pages.reduce((count, page) => count + page.comments.length, 0)
-      return lastPage.comments.length > 0 && loadedCommentCount < pages[0].count
-        ? lastPage.comments.at(-1)?.order
-        : undefined
-    },
-    ...remoteQueryOptions,
+  const selectedProjectionIds = useSelector(
+    (state: RootState) => state.user.bible.settings.commentarySelection
+  )
+  const selectedResources = selectedProjectionIds.flatMap(projectionId => {
+    const projection = parseCommentaryProjectionId(projectionId)
+    return projection ? [{ resourceId: projection.resourceId, language: projection.language }] : []
   })
-  const data = query.data
-    ? {
-        ...query.data.pages[0],
-        comments: query.data.pages.flatMap(page => page.comments),
-      }
-    : undefined
+  const [book, chapter, verseNumber] = verse.split('-').map(Number)
+  const validVerse = [book, chapter, verseNumber].every(Number.isSafeInteger)
+  const query = useQuery({
+    queryKey: ['commentaries', book, chapter, selectedProjectionIds.join(',')],
+    queryFn: () =>
+      resources.commentary.loadChapter({
+        book,
+        chapter,
+        resources: selectedResources,
+      }),
+    enabled: validVerse && selectedResources.length > 0,
+    networkMode: 'always',
+    retry: false,
+  })
 
   return {
-    data,
+    commentsByVerse: query.data?.commentsByVerse ?? {},
+    unavailableResources: query.data?.unavailableResources ?? [],
+    selectedResourceIds: selectedProjectionIds,
     error: query.error,
-    loadMore: query.fetchNextPage,
-    canLoad: query.hasNextPage,
     isPending: query.isPending && query.fetchStatus === 'fetching',
-    isError: !data && (query.isError || query.fetchStatus === 'paused'),
-    isFetchingMore: query.isFetchingNextPage,
+    isError: query.isError,
     retry: query.refetch,
   }
 }
@@ -123,12 +181,14 @@ interface CommentariesScreenProps {
   hasHeader?: boolean
   commentaryAtom: PrimitiveAtom<CommentaryTab>
   preferredVersion?: string
+  commentarySelectorRef?: React.RefObject<SheetRef | null>
 }
 
 const CommentariesTabScreen = ({
   hasHeader = true,
   commentaryAtom,
   preferredVersion,
+  commentarySelectorRef: externalCommentarySelectorRef,
 }: CommentariesScreenProps) => {
   const { t } = useTranslation()
   const theme: Theme = useTheme()
@@ -136,6 +196,9 @@ const CommentariesTabScreen = ({
   const [commentaryTab, setCommentaryTab] = useAtom(commentaryAtom)
 
   const openInNewTab = useOpenInNewTab()
+  const pushRouteOnce = usePushRouteOnce()
+  const localCommentarySelectorRef = React.useRef<SheetRef>(null)
+  const commentarySelectorRef = externalCommentarySelectorRef ?? localCommentarySelectorRef
 
   const {
     hasBackButton,
@@ -156,11 +219,25 @@ const CommentariesTabScreen = ({
       })
     )
 
-  const { data, error, loadMore, canLoad, isPending, isError, isFetchingMore, retry } =
-    useComments(verse)
-  const verseFormatted = useMemo(() => verseStringToObject([verse]), [verse])
+  const {
+    commentsByVerse,
+    unavailableResources,
+    selectedResourceIds,
+    error,
+    isPending,
+    isError,
+    retry,
+  } = useComments(verse)
+  const currentVerseNumber = Number(verse.split('-')[2])
+  const commentaryAvailability = buildCommentaryVerseAvailability({
+    selectedProjectionIds: selectedResourceIds,
+    commentsByVerse,
+    verseNumber: currentVerseNumber,
+    unavailableResources,
+  })
+  const verseFormatted = verseStringToObject([verse])
 
-  const { title: headerTitle } = verseFormatted
+  const { title: requestedHeaderTitle } = verseFormatted
     ? formatVerseContent([verse])
     : { title: t('Chargement') }
 
@@ -180,19 +257,46 @@ const CommentariesTabScreen = ({
       ? requestedVersion
       : null
   const bibleTemporarilyUnavailable = verseResolution.recoveries?.includes('retry')
+  const requestedContent = {
+    verse,
+    headerTitle: requestedHeaderTitle,
+    verseText,
+    versesInCurrentChapter,
+    requestedVersion,
+    unavailableBibleVersion,
+    bibleTemporarilyUnavailable,
+    retryBible: verseResolution.retry,
+    commentaryAvailability,
+    selectedResourceIds,
+    error,
+    isPending,
+    isError,
+    retryCommentaries: retry,
+  }
+  const displayedContent = useRetainedCommentaryContent(
+    requestedContent,
+    !verseResolution.isLoading && !isPending
+  )
+  const [navigationDirection, setNavigationDirection] = React.useState<-1 | 1>(1)
+  const reduceMotion = useReducedMotion()
 
   const updateVerse = (value: -1 | 1) => {
     const [b, c, v] = verse.split('-').map(Number)
+    setNavigationDirection(value)
     setVerse(`${b}-${c}-${v + value}`)
   }
 
   const insets = useSafeAreaInsets()
   const { bottomBarHeight } = useBottomBarHeightInTab()
+  const sheetFooterInset = useSheetFooterInset()
+  const scrollBottomInset = getCommentaryScrollBottomInset({
+    bottomBarHeight,
+    sheetFooterInset,
+  })
   useEffect(() => {
-    setTitle(headerTitle)
+    setTitle(displayedContent.headerTitle)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headerTitle])
-
+  }, [displayedContent.headerTitle])
   return (
     <>
       {hasHeader && (
@@ -201,10 +305,15 @@ const CommentariesTabScreen = ({
           <Header
             background
             hasBackButton={hasBackButton}
-            title={headerTitle}
+            title={displayedContent.headerTitle}
             rightComponent={
               <MenuView
                 actions={[
+                  {
+                    id: 'choose-commentaries',
+                    title: t('commentaries.selector.title'),
+                    image: 'checkmark.square',
+                  },
                   {
                     id: 'open-tab',
                     title: t('tab.openInNewTab'),
@@ -212,6 +321,9 @@ const CommentariesTabScreen = ({
                   },
                 ]}
                 onPressAction={({ nativeEvent }) => {
+                  if (nativeEvent.event === 'choose-commentaries') {
+                    commentarySelectorRef.current?.present()
+                  }
                   if (nativeEvent.event === 'open-tab') {
                     openInNewTab({
                       id: `commentary-${generateUUID()}`,
@@ -236,107 +348,119 @@ const CommentariesTabScreen = ({
 
       <ScrollView
         style={{ backgroundColor: theme.colors.lightGrey }}
-        contentContainerStyle={{ paddingBottom: 20 + bottomBarHeight }}
+        contentContainerStyle={{ paddingBottom: scrollBottomInset }}
         scrollIndicatorInsets={{ right: 1 }}
       >
         <>
           <Box background paddingTop={10} borderBottomLeftRadius={30} borderBottomRightRadius={30}>
-            <StyledVerse>
-              <VersetWrapper>
-                <NumberText>{verseText?.Verset}</NumberText>
-              </VersetWrapper>
-              <Box flex>
-                {unavailableBibleVersion ? (
-                  <ResourceUnavailableView
-                    identity={{ kind: 'bible', versionId: unavailableBibleVersion }}
-                    title={t('resource.bible.referenceUnavailable', {
-                      version: unavailableBibleVersion,
-                    })}
-                    fileSize={Math.max(
-                      1,
-                      Math.round(
-                        createOfflineCopyDownloadItem({
+            <Animated.View layout={reduceMotion ? undefined : CONTENT_LAYOUT_TRANSITION}>
+              <Animated.View
+                key={displayedContent.verse}
+                entering={
+                  reduceMotion
+                    ? undefined
+                    : navigationDirection === 1
+                      ? enterNextVerse
+                      : enterPreviousVerse
+                }
+                exiting={
+                  reduceMotion
+                    ? undefined
+                    : navigationDirection === 1
+                      ? exitNextVerse
+                      : exitPreviousVerse
+                }
+              >
+                <StyledVerse>
+                  <VersetWrapper>
+                    <NumberText>{displayedContent.verseText?.Verset}</NumberText>
+                  </VersetWrapper>
+                  <Box flex>
+                    {displayedContent.unavailableBibleVersion ? (
+                      <ResourceUnavailableView
+                        identity={{
                           kind: 'bible',
-                          versionId: unavailableBibleVersion,
-                        }).estimatedSize / 1_000_000
-                      )
+                          versionId: displayedContent.unavailableBibleVersion,
+                        }}
+                        title={t('resource.bible.referenceUnavailable', {
+                          version: displayedContent.unavailableBibleVersion,
+                        })}
+                        fileSize={Math.max(
+                          1,
+                          Math.round(
+                            createOfflineCopyDownloadItem({
+                              kind: 'bible',
+                              versionId: displayedContent.unavailableBibleVersion,
+                            }).estimatedSize / 1_000_000
+                          )
+                        )}
+                        failure={{
+                          cause: 'offline-copy-required',
+                          recoveries: ['acquire-offline-copy'],
+                        }}
+                        size="small"
+                      />
+                    ) : displayedContent.bibleTemporarilyUnavailable ? (
+                      <ResourceUnavailableView
+                        title={t('resource.bible.referenceUnavailable', {
+                          version: displayedContent.requestedVersion,
+                        })}
+                        failure={{ cause: 'temporary-unavailable', recoveries: ['retry'] }}
+                        size="small"
+                        onRetry={displayedContent.retryBible}
+                      />
+                    ) : (
+                      <Paragraph>{displayedContent.verseText?.Texte.replace(/\n/gi, '')}</Paragraph>
                     )}
-                    failure={{
-                      cause: 'offline-copy-required',
-                      recoveries: ['acquire-offline-copy'],
-                    }}
-                    size="small"
-                  />
-                ) : bibleTemporarilyUnavailable ? (
-                  <ResourceUnavailableView
-                    title={t('resource.bible.referenceUnavailable', { version: requestedVersion })}
-                    failure={{ cause: 'temporary-unavailable', recoveries: ['retry'] }}
-                    size="small"
-                    onRetry={verseResolution.retry}
-                  />
-                ) : (
-                  <Paragraph>{verseText?.Texte.replace(/\n/gi, '')}</Paragraph>
-                )}
-              </Box>
-            </StyledVerse>
+                  </Box>
+                </StyledVerse>
+              </Animated.View>
+            </Animated.View>
             <BibleVerseDetailFooter
-              verseNumber={verseText?.Verset}
+              verseNumber={displayedContent.verseText?.Verset}
               goToNextVerse={() => updateVerse(+1)}
               goToPrevVerse={() => updateVerse(-1)}
-              versesInCurrentChapter={versesInCurrentChapter}
+              versesInCurrentChapter={displayedContent.versesInCurrentChapter}
             />
           </Box>
-          {isPending ? (
+          {displayedContent.isPending ? (
             <Box height={100} center>
               <Loading />
             </Box>
-          ) : isError && !(error instanceof CommentaryAccessError) ? (
+          ) : displayedContent.isError ? (
             <ResourceUnavailableView
               title={t('resource.commentaries.temporarilyUnavailable')}
-              failure={resourceFailureFromAccessError(error)}
-              onRetry={() => void retry()}
+              failure={resourceFailureFromAccessError(displayedContent.error)}
+              onRetry={() => void displayedContent.retryCommentaries()}
             />
-          ) : isError ? (
+          ) : displayedContent.selectedResourceIds.length === 0 ? (
             <Empty
               icon={require('~assets/images/empty-state-icons/comment.svg')}
-              message={t('Aucun commentaire disponible pour ce verset.')}
+              message={t('commentaries.selector.noneSelected')}
             />
           ) : (
             <>
-              {data?.comments.map((comment, i) => {
-                return <Comment comment={comment} key={i} />
-              })}
-              {canLoad && (
-                <LinkBox
-                  m={20}
-                  height={50}
-                  rounded
-                  lightShadow
-                  bg="reverse"
-                  center
-                  opacity={isFetchingMore ? 0.3 : 1}
-                  onPress={() => {
-                    if (!isFetchingMore) {
-                      loadMore()
-                    }
-                  }}
-                >
-                  {isFetchingMore ? (
-                    <ActivityIndicator />
-                  ) : (
-                    <HStack row center>
-                      <Text color="primary" fontSize={15}>
-                        {t('Plus de résultats')}
-                      </Text>
-                      <AdventistIcon color="primary" />
-                    </HStack>
-                  )}
-                </LinkBox>
-              )}
+              <CommentaryAvailabilityList
+                items={displayedContent.commentaryAvailability}
+                headerTitle={displayedContent.headerTitle}
+                onManage={() => commentarySelectorRef.current?.present()}
+                onOpen={item => {
+                  const [book, chapter, verseNumber] = displayedContent.verse.split('-').map(Number)
+                  const route = getCommentaryResourceRoute(item, {
+                    book,
+                    chapter,
+                    verse: verseNumber,
+                  })
+                  if (route) pushRouteOnce(route)
+                }}
+              />
             </>
           )}
         </>
       </ScrollView>
+      {!externalCommentarySelectorRef ? (
+        <CommentarySelectorSheet sheetRef={localCommentarySelectorRef} />
+      ) : null}
     </>
   )
 }

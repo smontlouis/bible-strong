@@ -11,7 +11,6 @@ export type ResourcesLanguageState = {
   NAVE: ResourceLanguage
   MHY: ResourceLanguage
   TIMELINE: ResourceLanguage
-  COMMENTARIES: ResourceLanguage
 }
 
 // Helper to get default resources language based on current UI language
@@ -23,7 +22,6 @@ const getDefaultResourcesLanguage = (): ResourcesLanguageState => {
     NAVE: defaultLang,
     MHY: defaultLang,
     TIMELINE: defaultLang,
-    COMMENTARIES: defaultLang,
   }
 }
 
@@ -63,6 +61,5 @@ export const resetAllResourcesLanguage = (lang: ResourceLanguage) => {
     NAVE: lang,
     MHY: lang,
     TIMELINE: lang,
-    COMMENTARIES: lang,
   })
 }
