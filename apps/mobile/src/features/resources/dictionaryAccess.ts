@@ -19,9 +19,12 @@ import {
   decodeDictionaryPageCursor,
   encodeDictionaryPageCursor,
   DictionaryCatalogResponseDto,
+  DictionaryDirectoryResponseDto,
   DictionaryEntriesBatchResponseDto,
   DictionaryEntriesResponseDto,
   DictionaryEntryResponseDto,
+  DictionaryPassageAnchorsResponseDto,
+  DictionaryPassageDiscoveryResponseDto,
   DictionaryVerseWordsResponseDto,
 } from './dictionaryContract'
 import { resolveHybridResourceSource } from './hybridResourcePolicy'
@@ -45,6 +48,19 @@ export type DictionaryWork = Schema.Schema.Type<
 >['dictionaries'][number]
 export type DictionaryPageOptions = { limit?: number; cursor?: string; signal?: AbortSignal }
 export type DictionaryPage = { entries: DictionarySummary[]; nextCursor?: string }
+export type DictionaryDirectoryItem = Schema.Schema.Type<
+  typeof DictionaryDirectoryResponseDto
+>['items'][number]
+export type DictionaryDirectoryPage = {
+  entries: DictionaryDirectoryItem[]
+  nextCursor?: string
+}
+export type DictionaryPassageAnchor = DictionarySummary & {
+  evidenceKind: 'source-citation'
+}
+export type DictionaryPassageDiscoveryEntry = Schema.Schema.Type<
+  typeof DictionaryPassageDiscoveryResponseDto
+>['entries'][number]
 
 export type DictionaryAccess = {
   listWorks?: (language?: ResourceLanguage) => Promise<DictionaryWork[]>
@@ -74,8 +90,23 @@ export type DictionaryAccess = {
     language?: ResourceLanguage,
     work?: DictionaryWorkId
   ) => Promise<DictionaryPage>
+  browseDirectoryPage: (
+    initial: string,
+    options?: DictionaryPageOptions,
+    language?: ResourceLanguage
+  ) => Promise<DictionaryDirectoryPage>
+  searchDirectoryPage: (
+    searchValue: string,
+    options?: DictionaryPageOptions,
+    language?: ResourceLanguage
+  ) => Promise<DictionaryDirectoryPage>
   loadItem: (
     word: string,
+    language?: ResourceLanguage,
+    work?: DictionaryWorkId
+  ) => Promise<DictionaryEntry | undefined>
+  loadEntryById: (
+    id: number,
     language?: ResourceLanguage,
     work?: DictionaryWorkId
   ) => Promise<DictionaryEntry | undefined>
@@ -94,6 +125,15 @@ export type DictionaryAccess = {
     language?: ResourceLanguage,
     work?: DictionaryWorkId
   ) => Promise<string[]>
+  loadPassageAnchors: (
+    verseId: string,
+    language?: ResourceLanguage,
+    work?: DictionaryWorkId
+  ) => Promise<DictionaryPassageAnchor[]>
+  discoverPassageEntries: (
+    verseId: string,
+    language?: ResourceLanguage
+  ) => Promise<DictionaryPassageDiscoveryEntry[]>
 }
 
 export const getDefaultDictionaryWork = (language: ResourceLanguage): DictionaryWorkId =>
@@ -130,8 +170,13 @@ const withInstalledDictionary = async <T>(
   }
 }
 
-const isLegacyDictionaryWork = (language: ResourceLanguage, work?: DictionaryWorkId) =>
-  !work || work === getDefaultDictionaryWork(language)
+const isLegacyDictionaryWork = (language: ResourceLanguage, work?: DictionaryWorkId) => {
+  const resolvedWork = work ?? getDefaultDictionaryWork(language)
+  return (
+    resolvedWork === getDefaultDictionaryWork(language) &&
+    getDictionaryResource(resolvedWork, language) === undefined
+  )
+}
 
 export const localDictionaryAccess: DictionaryAccess = {
   getAvailability: async (language, work) => {
@@ -283,6 +328,12 @@ export const localDictionaryAccess: DictionaryAccess = {
         : {}),
     }
   },
+  browseDirectoryPage: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
+  },
+  searchDirectoryPage: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
+  },
   loadItem: async (word, language = 'fr', work) => {
     if (!isLegacyDictionaryWork(language, work)) {
       return withInstalledDictionary(work!, language, database =>
@@ -300,6 +351,18 @@ export const localDictionaryAccess: DictionaryAccess = {
     } catch (error) {
       throw mapLocalResourceError(error)
     }
+  },
+  loadEntryById: async (id, language = 'fr', work) => {
+    if (!isLegacyDictionaryWork(language, work)) {
+      return withInstalledDictionary(work!, language, database =>
+        database.getFirstAsync<DictionaryEntry>(
+          'SELECT id, word, definition FROM dictionnaire WHERE id = ?',
+          id
+        )
+      ).then(entry => entry ?? undefined)
+    }
+    const reference = unwrapLocalResourceResult(await loadDictionnaireItemByRowId(id))
+    return reference ? localDictionaryAccess.loadItem(reference.word, language, work) : undefined
   },
   loadItems: async (words, language = 'fr', work) => {
     if (!isLegacyDictionaryWork(language, work)) {
@@ -347,6 +410,64 @@ export const localDictionaryAccess: DictionaryAccess = {
     } catch (error) {
       throw mapLocalResourceError(error)
     }
+  },
+  loadPassageAnchors: async (verseId, language = 'fr', work) => {
+    if (isLegacyDictionaryWork(language, work)) return []
+    return withInstalledDictionary(work!, language, database =>
+      database.getAllAsync<{
+        id: number
+        word: string
+        sanitized_word: string
+        evidence_kind: 'source-citation'
+      }>(
+        `SELECT entry.id, entry.word, entry.sanitized_word, anchor.evidence_kind
+         FROM dictionary_passage_anchors anchor
+         JOIN dictionnaire entry ON entry.id = anchor.entry_id
+         WHERE anchor.verse_key = ?
+         ORDER BY anchor.ordinal, entry.id`,
+        verseId
+      )
+    ).then(rows =>
+      rows.map(row => ({
+        id: row.id,
+        word: row.word,
+        normalizedWord: row.sanitized_word,
+        evidenceKind: row.evidence_kind,
+      }))
+    )
+  },
+  discoverPassageEntries: async (verseId, language = 'fr') => {
+    const installed = [...offlineResourceRegistry.getSnapshot().resources.values()].filter(
+      entry =>
+        entry.resource.kind === 'dictionary' &&
+        entry.resource.language === language &&
+        entry.availability.status === 'available'
+    )
+    const results = await Promise.all(
+      installed.map(async registryEntry => {
+        if (registryEntry.resource.kind !== 'dictionary') return []
+        const resource = registryEntry.resource
+        const entries = await localDictionaryAccess.loadPassageAnchors(
+          verseId,
+          resource.language,
+          resource.work
+        )
+        return entries.map(entry => ({
+          resource: {
+            kind: 'dictionary' as const,
+            work: resource.work,
+            language: resource.language,
+            revision:
+              registryEntry.installedRevision ?? registryEntry.catalogRevision ?? 'offline',
+          },
+          resourceId: resource.resourceId,
+          title: resource.work,
+          abbreviation: resource.work,
+          ...entry,
+        }))
+      })
+    )
+    return results.flat()
   },
 }
 
@@ -457,6 +578,10 @@ export const createHttpDictionaryAccess = ({
       createPageRequest({ initial: letter, language, work, ...options }),
     searchPage: (search, options, language, work) =>
       createPageRequest({ search, language, work, ...options }),
+    browseDirectoryPage: (initial, options, language) =>
+      createDirectoryPageRequest({ initial, language, ...options }),
+    searchDirectoryPage: (search, options, language) =>
+      createDirectoryPageRequest({ search, language, ...options }),
     loadItem: async (word, language, selectedWork) => {
       const lang = languageOrFrench(language)
       const work = workOrDefault(selectedWork, lang)
@@ -467,6 +592,23 @@ export const createHttpDictionaryAccess = ({
         const decoded = decode(DictionaryEntryResponseDto, payload)
         assertResource(decoded.resource, lang, work)
         if (decoded.entry.word.length === 0) throw new ResourceAccessError('INTEGRITY_FAILURE')
+        return decoded.entry
+      } catch (error) {
+        if (error instanceof ResourceAccessError && error.code === 'NOT_FOUND') return undefined
+        throw error
+      }
+    },
+    loadEntryById: async (id, language, selectedWork) => {
+      const lang = languageOrFrench(language)
+      const work = workOrDefault(selectedWork, lang)
+      try {
+        const decoded = decode(
+          DictionaryEntryResponseDto,
+          await request(
+            `/v1/dictionaries/${encodeURIComponent(work)}/${encodeURIComponent(lang)}/entries/by-id/${encodeURIComponent(String(id))}`
+          )
+        )
+        assertResource(decoded.resource, lang, work)
         return decoded.entry
       } catch (error) {
         if (error instanceof ResourceAccessError && error.code === 'NOT_FOUND') return undefined
@@ -514,6 +656,28 @@ export const createHttpDictionaryAccess = ({
       if (decoded.verseKey !== verseId) throw new ResourceAccessError('INTEGRITY_FAILURE')
       return [...decoded.words]
     },
+    loadPassageAnchors: async (verseId, language, selectedWork) => {
+      const lang = languageOrFrench(language)
+      const work = workOrDefault(selectedWork, lang)
+      const payload = await request(
+        `/v1/dictionaries/${encodeURIComponent(work)}/${encodeURIComponent(lang)}/verses/${encodeURIComponent(verseId)}/entries`
+      )
+      const decoded = decode(DictionaryPassageAnchorsResponseDto, payload)
+      assertResource(decoded.resource, lang, work)
+      if (decoded.verseKey !== verseId) throw new ResourceAccessError('INTEGRITY_FAILURE')
+      return [...decoded.entries]
+    },
+    discoverPassageEntries: async (verseId, language) => {
+      const params = language ? `?${new URLSearchParams({ language })}` : ''
+      const decoded = decode(
+        DictionaryPassageDiscoveryResponseDto,
+        await request(
+          `/v1/dictionaries/verses/${encodeURIComponent(verseId)}/entries${params}`
+        )
+      )
+      if (decoded.verseKey !== verseId) throw new ResourceAccessError('INTEGRITY_FAILURE')
+      return [...decoded.entries]
+    },
   }
 
   async function createPageRequest({
@@ -554,6 +718,39 @@ export const createHttpDictionaryAccess = ({
       ...(decoded.nextCursor ? { nextCursor: decoded.nextCursor } : {}),
     }
   }
+
+  async function createDirectoryPageRequest({
+    initial,
+    search,
+    language = 'fr',
+    limit = 50,
+    cursor,
+    signal,
+  }: {
+    initial?: string
+    search?: string
+    language?: ResourceLanguage
+    limit?: number
+    cursor?: string
+    signal?: AbortSignal
+  }): Promise<DictionaryDirectoryPage> {
+    const params = new URLSearchParams({
+      language,
+      ...(initial ? { initial } : {}),
+      ...(search ? { search } : {}),
+      limit: String(limit),
+      ...(cursor ? { cursor } : {}),
+    })
+    const decoded = decode(
+      DictionaryDirectoryResponseDto,
+      await request(`/v1/dictionaries/directory?${params}`, signal)
+    )
+    assertLanguage(decoded.language, language)
+    return {
+      entries: [...decoded.items],
+      ...(decoded.nextCursor ? { nextCursor: decoded.nextCursor } : {}),
+    }
+  }
 }
 
 export const unavailableHttpDictionaryAccess: DictionaryAccess = {
@@ -575,7 +772,16 @@ export const unavailableHttpDictionaryAccess: DictionaryAccess = {
   searchPage: async () => {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
+  browseDirectoryPage: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
+  },
+  searchDirectoryPage: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
+  },
   loadItem: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+  },
+  loadEntryById: async () => {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
   loadItems: async () => {
@@ -585,6 +791,12 @@ export const unavailableHttpDictionaryAccess: DictionaryAccess = {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
   loadWordsForVerse: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+  },
+  loadPassageAnchors: async () => {
+    throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
+  },
+  discoverPassageEntries: async () => {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
 }
@@ -714,12 +926,33 @@ export const createHybridDictionaryAccess = ({
         () => offline.searchPage(value, options, language, work),
         () => online.searchPage(value, options, language, work)
       ),
+    browseDirectoryPage: (initial, options, language = 'fr') =>
+      runSearch(
+        language,
+        undefined,
+        () => offline.browseDirectoryPage(initial, options, language),
+        () => online.browseDirectoryPage(initial, options, language)
+      ),
+    searchDirectoryPage: (value, options, language = 'fr') =>
+      runSearch(
+        language,
+        undefined,
+        () => offline.searchDirectoryPage(value, options, language),
+        () => online.searchDirectoryPage(value, options, language)
+      ),
     loadItem: (word, language = 'fr', work) =>
       runRead(
         language,
         work,
         () => offline.loadItem(word, language, work),
         () => online.loadItem(word, language, work)
+      ),
+    loadEntryById: (id, language = 'fr', work) =>
+      runRead(
+        language,
+        work,
+        () => offline.loadEntryById(id, language, work),
+        () => online.loadEntryById(id, language, work)
       ),
     loadItems: (words, language = 'fr', work) =>
       runRead(
@@ -742,5 +975,27 @@ export const createHybridDictionaryAccess = ({
         () => offline.loadWordsForVerse(verse, language, work),
         () => online.loadWordsForVerse(verse, language, work)
       ),
+    loadPassageAnchors: (verse, language = 'fr', work) =>
+      runRead(
+        language,
+        work,
+        () => offline.loadPassageAnchors(verse, language, work),
+        () => online.loadPassageAnchors(verse, language, work)
+      ),
+    discoverPassageEntries: async (verse, language = 'fr') => {
+      if (remotelyReadableLanguages.has(language) && (await isOnline())) {
+        try {
+          return await online.discoverPassageEntries(verse, language)
+        } catch (error) {
+          if (
+            !(error instanceof ResourceAccessError) ||
+            (error.code !== 'NETWORK_OFFLINE' && error.code !== 'TEMPORARY_UNAVAILABLE')
+          ) {
+            throw error
+          }
+        }
+      }
+      return offline.discoverPassageEntries(verse, language)
+    },
   }
 }

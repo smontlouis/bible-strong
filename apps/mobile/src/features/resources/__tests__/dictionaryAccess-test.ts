@@ -54,6 +54,42 @@ describe('HTTP dictionary access', () => {
     )
   })
 
+  it('browses the global directory with exact source identities', async () => {
+    const items = [
+      {
+        key: 'c:dictionary-correspondence-ange',
+        label: 'Ange',
+        normalizedLabel: 'ange',
+        correspondenceId: 'dictionary-correspondence-ange',
+        sources: [
+          {
+            resource: { kind: 'dictionary', work: 'westphal', language: 'fr', revision: 'r1' },
+            resourceId: 'WESTPHAL',
+            title: 'Dictionnaire encyclopédique de la Bible',
+            abbreviation: 'Westphal',
+            id: 43,
+            word: 'Ange',
+            normalizedWord: 'ange',
+          },
+        ],
+      },
+    ]
+    const fetcher = jest.fn(() => response({ language: 'fr', items, limit: 50 }))
+    const access = createHttpDictionaryAccess({
+      baseUrl: 'http://resource.test',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(access.browseDirectoryPage('a', { limit: 50 }, 'fr')).resolves.toEqual({
+      entries: items,
+    })
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://resource.test/v1/dictionaries/directory?language=fr&initial=a&limit=50',
+      expect.any(Object)
+    )
+  })
+
   it('continues browse with the server cursor without offset pagination', async () => {
     const cursor = encodeURIComponent(JSON.stringify(['amour', 42]))
     const fetcher = jest.fn(() =>
@@ -103,6 +139,64 @@ describe('HTTP dictionary access', () => {
       expect.any(Object)
     )
   })
+
+  it('loads exact passage anchors instead of parsing surface words', async () => {
+    const fetcher = jest.fn(() =>
+      response({
+        resource: { kind: 'dictionary', work: 'westphal', language: 'fr', revision: 'r1' },
+        verseKey: '43-3-16',
+        entries: [
+          {
+            id: 7,
+            word: 'Amour',
+            normalizedWord: 'amour',
+            evidenceKind: 'source-citation',
+          },
+        ],
+      })
+    )
+    const access = createHttpDictionaryAccess({
+      baseUrl: 'http://resource.test',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(access.loadPassageAnchors('43-3-16', 'fr')).resolves.toEqual([
+      { id: 7, word: 'Amour', normalizedWord: 'amour', evidenceKind: 'source-citation' },
+    ])
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://resource.test/v1/dictionaries/westphal/fr/verses/43-3-16/entries',
+      expect.any(Object)
+    )
+  })
+
+  it('discovers passage entries across dictionaries without merging definitions', async () => {
+    const entries = [
+      {
+        resource: { kind: 'dictionary', work: 'westphal', language: 'fr', revision: 'r1' },
+        resourceId: 'WESTPHAL',
+        title: 'Dictionnaire encyclopédique de la Bible',
+        abbreviation: 'Westphal',
+        id: 7,
+        word: 'Amour',
+        normalizedWord: 'amour',
+        evidenceKind: 'source-citation',
+        correspondenceId: 'dictionary-correspondence-amour',
+      },
+    ]
+    const fetcher = jest.fn(() => response({ verseKey: '43-3-16', entries }))
+    const access = createHttpDictionaryAccess({
+      baseUrl: 'http://resource.test',
+      fetcher,
+      isOnline: async () => true,
+    })
+
+    await expect(access.discoverPassageEntries('43-3-16', 'fr')).resolves.toEqual(entries)
+    expect(fetcher).toHaveBeenCalledWith(
+      'http://resource.test/v1/dictionaries/verses/43-3-16/entries?language=fr',
+      expect.any(Object)
+    )
+  })
 })
 
 const dictionaryEntry = { id: 1, word: 'Amour', normalizedWord: 'amour' }
@@ -123,10 +217,27 @@ const makeDictionaryAccess = (
   search: jest.fn(async () => [{ ...dictionaryEntry, word: label }]),
   listByLetterPage: jest.fn(async () => ({ entries: [{ ...dictionaryEntry, word: label }] })),
   searchPage: jest.fn(async () => ({ entries: [{ ...dictionaryEntry, word: label }] })),
+  browseDirectoryPage: jest.fn(async () => ({ entries: [] })),
+  searchDirectoryPage: jest.fn(async () => ({ entries: [] })),
   loadItem: jest.fn(async () => ({ word: label, definition: label })),
+  loadEntryById: jest.fn(async id => ({ id, word: label, definition: label })),
   loadItems: jest.fn(async () => [{ word: label, definition: label }]),
   loadItemByRowId: jest.fn(async () => ({ word: label })),
   loadWordsForVerse: jest.fn(async () => [label]),
+  loadPassageAnchors: jest.fn(async () => [
+    { ...dictionaryEntry, word: label, evidenceKind: 'source-citation' as const },
+  ]),
+  discoverPassageEntries: jest.fn(async () => [
+    {
+      resource: { kind: 'dictionary' as const, work: 'westphal', language: 'fr' as const, revision: 'r1' },
+      resourceId: 'WESTPHAL',
+      title: 'Westphal',
+      abbreviation: 'Westphal',
+      ...dictionaryEntry,
+      word: label,
+      evidenceKind: 'source-citation' as const,
+    },
+  ]),
 })
 
 describe('hybrid dictionary routing', () => {

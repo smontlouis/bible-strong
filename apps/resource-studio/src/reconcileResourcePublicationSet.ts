@@ -65,7 +65,7 @@ const parseArgs = (raw: readonly string[]) => {
 const nonEmpty = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
 
-const publicationId = (
+export const publicationId = (
   identity: ResourceIdentity | undefined
 ): string | undefined => {
   if (!identity || !nonEmpty(identity.kind)) return undefined;
@@ -83,8 +83,8 @@ const publicationId = (
         ? `bible-interlinear:${identity.versionId}:${identity.language}`
         : undefined;
     case "dictionary":
-      return nonEmpty(identity.language)
-        ? `database:DICTIONNAIRE:${identity.language}`
+      return nonEmpty(identity.resourceId) && nonEmpty(identity.language)
+        ? `database:${identity.resourceId}:${identity.language}`
         : undefined;
     case "nave":
       return nonEmpty(identity.language)

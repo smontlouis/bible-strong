@@ -718,6 +718,7 @@ export const importPublicationBundle = (
                   word: entry.word,
                   normalized_word: entry.normalizedWord,
                   definition: entry.definition,
+                  correspondence_id: entry.correspondenceId ?? null,
                   payload: {
                     id: entry.id,
                     word: entry.word,
@@ -726,15 +727,36 @@ export const importPublicationBundle = (
                   },
                 }))
               )
-              const links = dictionaryCanonical.verseAnchors.flatMap(anchor =>
-                anchor.words.map((word, ordinal) => ({
-                  publication_id: publication.id,
-                  verse_key: anchor.verseKey,
-                  ordinal,
-                  word,
-                  normalized_word: word.trim().toLocaleLowerCase(),
-                }))
+              const entryById = new Map(
+                dictionaryCanonical.entries.map(entry => [entry.id, entry])
               )
+              const links = dictionaryCanonical.passageAnchors
+                ? dictionaryCanonical.passageAnchors.flatMap(anchor =>
+                    anchor.entries.map((reference, ordinal) => {
+                      const entry = entryById.get(reference.entryId)
+                      if (!entry) throw new Error('DICTIONARY_PASSAGE_ENTRY_MISSING')
+                      return {
+                        publication_id: publication.id,
+                        verse_key: anchor.verseKey,
+                        ordinal,
+                        word: entry.word,
+                        normalized_word: entry.normalizedWord,
+                        entry_id: entry.id,
+                        evidence_kind: reference.evidenceKind,
+                      }
+                    })
+                  )
+                : dictionaryCanonical.verseAnchors.flatMap(anchor =>
+                    anchor.words.map((word, ordinal) => ({
+                      publication_id: publication.id,
+                      verse_key: anchor.verseKey,
+                      ordinal,
+                      word,
+                      normalized_word: word.trim().toLocaleLowerCase(),
+                      entry_id: null,
+                      evidence_kind: null,
+                    }))
+                  )
               await insertChunks(transaction, 'dictionary_verse_links', links)
             } else if (canonical.format === 'bible-strong-canonical-commentary') {
               const commentaryCanonical = canonical as CanonicalCommentaryPublication

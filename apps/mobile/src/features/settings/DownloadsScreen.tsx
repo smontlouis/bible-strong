@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Alert, TextInput, TouchableOpacity } from 'react-native'
 import { useTheme } from '@emotion/react'
 import { useTranslation } from 'react-i18next'
@@ -54,6 +55,7 @@ import useConnection from '~helpers/useConnection'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { buildBibleItems, type UnifiedDownloadItem } from './downloadBibleItems'
 import { getCommentaryCatalogForLanguage } from '@bible-strong/resource-catalog/commentaries'
+import type { DictionaryWork } from '~features/resources/dictionaryAccess'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -71,10 +73,18 @@ interface UnifiedSection {
 // Build unified sections
 // ---------------------------------------------------------------------------
 
-function buildDatabaseItems(lang: ResourceLanguage): UnifiedItem[] {
+function buildDatabaseItems(
+  lang: ResourceLanguage,
+  includeLegacyDictionary: boolean
+): UnifiedItem[] {
   const allDbs = databases(lang)
   return LANGUAGE_SPECIFIC_DBS.flatMap(dbId => {
-    if (dbId === 'BIBLES' || dbId === 'MHY' || (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))) {
+    if (
+      dbId === 'BIBLES' ||
+      dbId === 'MHY' ||
+      (!includeLegacyDictionary && dbId === 'DICTIONNAIRE') ||
+      (lang === 'en' && FRENCH_ONLY_DBS.includes(dbId))
+    ) {
       return []
     }
     const db = allDbs[dbId as keyof typeof allDbs]
@@ -90,6 +100,34 @@ function buildDatabaseItems(lang: ResourceLanguage): UnifiedItem[] {
           },
         ]
       : []
+  })
+}
+
+function buildDictionaryItems(works: readonly DictionaryWork[]): UnifiedItem[] {
+  return works.flatMap(work => {
+    const identity = {
+      kind: 'dictionary' as const,
+      work: work.resource.work,
+      resourceId: work.resourceId,
+      language: work.resource.language,
+    }
+    try {
+      const item = createOfflineCopyDownloadItem(identity)
+      return [
+        {
+          id: item.id,
+          name: work.title,
+          subtitle: `${work.authors.join(', ')} · ${work.edition}`,
+          estimatedSize: item.estimatedSize,
+          lang: work.resource.language,
+          searchText: [work.title, work.abbreviation, work.source, ...work.authors]
+            .join(' ')
+            .toLocaleLowerCase(),
+        },
+      ]
+    } catch {
+      return []
+    }
   })
 }
 
@@ -175,7 +213,8 @@ function buildSharedDatabaseItems(): UnifiedItem[] {
 
 function buildAllSections(
   appLang: string,
-  t: (key: string, options?: Record<string, unknown>) => string
+  t: (key: string, options?: Record<string, unknown>) => string,
+  dictionaryWorks: readonly DictionaryWork[]
 ): UnifiedSection[] {
   const allVersions = Object.values(versions) as Version[]
   const bibleSections = buildBibleVersionGroups(allVersions, appLang).map(group => ({
@@ -183,6 +222,8 @@ function buildAllSections(
     title: t(group.titleKey),
     data: buildBibleItems(group.versions, appLang, t),
   }))
+  const frenchDictionaries = dictionaryWorks.filter(work => work.resource.language === 'fr')
+  const englishDictionaries = dictionaryWorks.filter(work => work.resource.language === 'en')
 
   if (appLang === 'en') {
     return [
@@ -194,7 +235,12 @@ function buildAllSections(
       {
         key: 'db-en',
         title: t('downloads.section.dbEn'),
-        data: buildDatabaseItems('en'),
+        data: buildDatabaseItems('en', englishDictionaries.length === 0),
+      },
+      {
+        key: 'dictionaries-en',
+        title: t('Dictionnaires anglais'),
+        data: buildDictionaryItems(englishDictionaries),
       },
       {
         key: 'commentaries-en',
@@ -210,7 +256,12 @@ function buildAllSections(
       {
         key: 'db-fr',
         title: t('downloads.section.dbFr'),
-        data: buildDatabaseItems('fr'),
+        data: buildDatabaseItems('fr', frenchDictionaries.length === 0),
+      },
+      {
+        key: 'dictionaries-fr',
+        title: t('Dictionnaires français'),
+        data: buildDictionaryItems(frenchDictionaries),
       },
       {
         key: 'commentaries-fr',
@@ -229,7 +280,12 @@ function buildAllSections(
     {
       key: 'db-fr',
       title: t('downloads.section.dbFr'),
-      data: buildDatabaseItems('fr'),
+      data: buildDatabaseItems('fr', frenchDictionaries.length === 0),
+    },
+    {
+      key: 'dictionaries-fr',
+      title: t('Dictionnaires français'),
+      data: buildDictionaryItems(frenchDictionaries),
     },
     {
       key: 'commentaries-fr',
@@ -245,7 +301,12 @@ function buildAllSections(
     {
       key: 'db-en',
       title: t('downloads.section.dbEn'),
-      data: buildDatabaseItems('en'),
+      data: buildDatabaseItems('en', englishDictionaries.length === 0),
+    },
+    {
+      key: 'dictionaries-en',
+      title: t('Dictionnaires anglais'),
+      data: buildDictionaryItems(englishDictionaries),
     },
     {
       key: 'commentaries-en',
@@ -319,6 +380,13 @@ const DownloadsScreen = () => {
   const lang = useLanguage()
   const resources = useResourceAccess()
   const isConnected = useConnection()
+  const dictionaryCatalogQuery = useQuery({
+    queryKey: ['dictionary-download-catalog', isConnected],
+    queryFn: () => resources.dictionary.listWorks?.() ?? [],
+    networkMode: 'always',
+    staleTime: Infinity,
+    retry: false,
+  })
   const { enqueue, clearCompleted } = useDownloadQueue()
 
   // Local state
@@ -344,7 +412,7 @@ const DownloadsScreen = () => {
     isAvailabilityError,
     refreshDownloadedItems,
   } = useDownloadedItems()
-  const allSections = buildAllSections(lang, t)
+  const allSections = buildAllSections(lang, t, dictionaryCatalogQuery.data ?? [])
 
   const itemNeedsUpdate = (item: UnifiedItem) => {
     if (updateAvailableSet.has(item.id)) return true

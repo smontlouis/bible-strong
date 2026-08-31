@@ -417,6 +417,7 @@ export const dictionaryEntries = pgTable(
     word: text('word').notNull(),
     normalized_word: text('normalized_word').notNull(),
     definition: text('definition').notNull(),
+    correspondence_id: text('correspondence_id'),
     payload: jsonb('payload').$type<Record<string, string | number | null>>().notNull(),
   },
   table => [
@@ -430,6 +431,7 @@ export const dictionaryEntries = pgTable(
       table.entry_id
     ),
     index('dictionary_entries_search').on(table.publication_id, table.word),
+    index('dictionary_entries_correspondence').on(table.correspondence_id, table.publication_id),
     index('dictionary_entries_word_trgm').using('gin', sql`${table.word} gin_trgm_ops`),
     index('dictionary_entries_normalized_word_trgm').using(
       'gin',
@@ -448,6 +450,8 @@ export const dictionaryVerseLinks = pgTable(
     ordinal: integer('ordinal').notNull(),
     word: text('word').notNull(),
     normalized_word: text('normalized_word').notNull(),
+    entry_id: integer('entry_id'),
+    evidence_kind: text('evidence_kind'),
   },
   table => [
     primaryKey({
@@ -455,6 +459,11 @@ export const dictionaryVerseLinks = pgTable(
       columns: [table.publication_id, table.verse_key, table.ordinal],
     }),
     index('dictionary_verse_links_lookup').on(table.publication_id, table.verse_key, table.ordinal),
+    index('dictionary_verse_links_entry_lookup').on(
+      table.publication_id,
+      table.verse_key,
+      table.entry_id
+    ),
   ]
 )
 

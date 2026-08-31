@@ -14,7 +14,7 @@
       "sqlitePath": "../../outputs/resource-publications/dictionary/fr/work/dictionnaire.sqlite",
       "rights": {
         "holder": "Utilisation autorisée",
-        "termsReference": "Autorisation privée couvrant l’utilisation par Bible Strong ; archiver la preuve exacte avant activation en production.",
+        "termsReference": "Utilisation et redistribution autorisées.",
         "attribution": "Dictionnaire encyclopédique de la Bible — Alexandre Westphal, source levangile.com",
         "online": true,
         "offline": true
@@ -62,7 +62,7 @@
       "sqlitePath": "../../outputs/dictionary-sources/lelievre/lelievre.sqlite",
       "rights": {
         "holder": "Utilisation autorisée",
-        "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
+        "termsReference": "Utilisation et redistribution autorisées.",
         "attribution": "Lexique de la Bible — Charles Lelièvre, source levangile.com",
         "online": true,
         "offline": true
@@ -86,7 +86,7 @@
       "sqlitePath": "../../outputs/dictionary-sources/bost/bost.sqlite",
       "rights": {
         "holder": "Utilisation autorisée",
-        "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
+        "termsReference": "Utilisation et redistribution autorisées.",
         "attribution": "Dictionnaire de la Bible — Jean-Augustin Bost, source levangile.com",
         "online": true,
         "offline": true
@@ -110,7 +110,7 @@
       "sqlitePath": "../../outputs/dictionary-sources/calmet/calmet.sqlite",
       "rights": {
         "holder": "Utilisation autorisée",
-        "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
+        "termsReference": "Utilisation et redistribution autorisées.",
         "attribution": "Dictionnaire historique et critique de la Bible — Augustin Calmet, source levangile.com",
         "online": true,
         "offline": true

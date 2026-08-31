@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react'
+import React from 'react'
 import styled from '@emotion/native'
 import { Pressable } from 'react-native'
 
@@ -9,6 +9,7 @@ import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 
 interface DictionnaireItemProps {
   word: string
+  sourceLabels?: readonly string[]
   onSelect?: (word: string) => void
 }
 
@@ -23,10 +24,10 @@ const SectionItem = styled(Box)(({ theme }) => ({
   justifyContent: 'center',
 }))
 
-const DictionnaireItem = memo(({ word, onSelect }: DictionnaireItemProps) => {
+const DictionnaireItem = ({ word, sourceLabels, onSelect }: DictionnaireItemProps) => {
   const pushRouteOnce = usePushRouteOnce()
 
-  const handlePress = useCallback(() => {
+  const handlePress = () => {
     if (onSelect) {
       onSelect(word)
     } else {
@@ -35,14 +36,19 @@ const DictionnaireItem = memo(({ word, onSelect }: DictionnaireItemProps) => {
         params: { word },
       })
     }
-  }, [onSelect, word, pushRouteOnce])
+  }
 
   const content = (
     <SectionItem>
-      <Box row>
+      <Box>
         <Text title fontSize={18} color="default" flex paddingRight={20}>
           {word}
         </Text>
+        {sourceLabels?.length ? (
+          <Text fontSize={11} color="tertiary">
+            {sourceLabels.join(' · ')}
+          </Text>
+        ) : null}
       </Box>
     </SectionItem>
   )
@@ -62,6 +68,6 @@ const DictionnaireItem = memo(({ word, onSelect }: DictionnaireItemProps) => {
       {content}
     </Link>
   )
-})
+}
 
 export default DictionnaireItem

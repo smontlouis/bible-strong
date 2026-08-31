@@ -1,5 +1,5 @@
 import { Effect } from 'effect'
-import type { Kysely } from 'kysely'
+import { sql, type Kysely } from 'kysely'
 
 import { tryDatabasePromise } from '../database/databaseEffect'
 import { makeNeonDatabase, type NeonDatabaseConfig } from '../database/neonDatabase'
@@ -15,6 +15,8 @@ import {
 import type { ResourceDatabase } from '../database/types'
 import {
   decodeDictionaryPageCursor,
+  decodeDictionaryDirectoryPageCursor,
+  encodeDictionaryDirectoryPageCursor,
   encodeDictionaryPageCursor,
 } from '@bible-strong/resource-domain/contracts/dictionaryContract'
 
@@ -94,6 +96,121 @@ export const makeKyselyDictionaryRepository = (
     })
 
   return {
+    browseDirectory: input =>
+      tryDatabasePromise('dictionary.directory.browse', async () => {
+        const limit = input.limit ?? 100
+        const cursor = decodeDictionaryDirectoryPageCursor(input.cursor)
+        const initial = input.initial?.trim().toLocaleLowerCase()
+        const search = input.search?.trim()
+        const result = await sql<{
+          group_key: string
+          label: string
+          normalized_label: string
+          correspondence_id: string | null
+          sources: Array<{
+            work: string
+            language: DictionaryLanguage
+            revision: string
+            resourceId: string
+            title: string
+            abbreviation: string
+            id: number
+            word: string
+            normalizedWord: string
+          }>
+        }>`
+          WITH active_entries AS (
+            SELECT
+              CASE
+                WHEN entry.correspondence_id IS NOT NULL
+                  THEN 'c:' || entry.correspondence_id
+                ELSE 'e:' || publication.id::text || ':' || entry.entry_id::text
+              END AS group_key,
+              entry.correspondence_id,
+              publication.resource_identity,
+              publication.revision,
+              publication.language,
+              publication.metadata,
+              entry.entry_id,
+              entry.word,
+              entry.normalized_word
+            FROM dictionary_entries entry
+            JOIN resource_publications publication ON publication.id = entry.publication_id
+            WHERE publication.resource_kind = 'dictionary'
+              AND publication.status = 'active'
+              AND publication.resource_identity ~ '^dictionary:[a-z0-9]+(?:-[a-z0-9]+)*:(?:fr|en)$'
+              AND coalesce(publication.metadata->>'resource_id', '') <> ''
+              AND coalesce(publication.metadata->>'title', '') <> ''
+              AND coalesce(publication.metadata->>'abbreviation', '') <> ''
+          ),
+          directory_keys AS (
+            SELECT
+              group_key,
+              (array_agg(word ORDER BY (language = ${input.language}) DESC, normalized_word, resource_identity, entry_id))[1] AS label,
+              (array_agg(normalized_word ORDER BY (language = ${input.language}) DESC, normalized_word, resource_identity, entry_id))[1] AS normalized_label,
+              max(correspondence_id) AS correspondence_id,
+              bool_or(${search ?? null}::text IS NULL OR word ILIKE ${search ? `%${search}%` : null} OR normalized_word ILIKE ${search ? `%${search}%` : null}) AS matches_search
+            FROM active_entries
+            GROUP BY group_key
+            HAVING bool_or(language = ${input.language})
+          ),
+          page_keys AS (
+            SELECT group_key, label, normalized_label, correspondence_id
+            FROM directory_keys
+            WHERE matches_search
+              AND (${initial ?? null}::text IS NULL OR normalized_label ILIKE ${initial ? `${initial}%` : null})
+              AND (
+                ${cursor?.[0] ?? null}::text IS NULL
+                OR normalized_label > ${cursor?.[0] ?? null}
+                OR (normalized_label = ${cursor?.[0] ?? null} AND group_key > ${cursor?.[1] ?? null})
+              )
+            ORDER BY normalized_label, group_key
+            LIMIT ${limit + 1}
+          )
+          SELECT
+            key.group_key,
+            key.label,
+            key.normalized_label,
+            key.correspondence_id,
+            jsonb_agg(
+              jsonb_build_object(
+                'work', split_part(entry.resource_identity, ':', 2),
+                'language', entry.language,
+                'revision', entry.revision,
+                'resourceId', entry.metadata->>'resource_id',
+                'title', entry.metadata->>'title',
+                'abbreviation', entry.metadata->>'abbreviation',
+                'id', entry.entry_id,
+                'word', entry.word,
+                'normalizedWord', entry.normalized_word
+              ) ORDER BY entry.language, entry.resource_identity, entry.entry_id
+            ) AS sources
+          FROM page_keys key
+          JOIN active_entries entry ON entry.group_key = key.group_key
+          GROUP BY key.group_key, key.label, key.normalized_label, key.correspondence_id
+          ORDER BY key.normalized_label, key.group_key
+        `.execute(database)
+        const rows = result.rows
+        const pageRows = rows.slice(0, limit)
+        return {
+          items: pageRows.map(row => ({
+            key: row.group_key,
+            label: row.label,
+            normalizedLabel: row.normalized_label,
+            ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
+            sources: row.sources,
+          })),
+          limit,
+          ...(rows.length > limit && pageRows.length > 0
+            ? {
+                nextCursor: encodeDictionaryDirectoryPageCursor([
+                  pageRows.at(-1)!.normalized_label,
+                  pageRows.at(-1)!.group_key,
+                ]),
+              }
+            : {}),
+        }
+      }).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause }))),
     listWorks: language =>
       tryDatabasePromise('dictionary.publications.list-active', async () => {
         let query = database
@@ -261,6 +378,95 @@ export const makeKyselyDictionaryRepository = (
           words: rows.map(row => row.word),
         }
       }),
+    findPassageAnchors: input =>
+      Effect.gen(function* () {
+        const publication = yield* requirePublication(input.work, input.language)
+        const rows = yield* tryDatabasePromise('dictionary.verse.read-anchors', () =>
+          database
+            .selectFrom('dictionary_verse_links as link')
+            .innerJoin('dictionary_entries as entry', join =>
+              join
+                .onRef('entry.publication_id', '=', 'link.publication_id')
+                .onRef('entry.entry_id', '=', 'link.entry_id')
+            )
+            .select([
+              'entry.entry_id as entry_id',
+              'entry.word as word',
+              'entry.normalized_word as normalized_word',
+              'link.evidence_kind as evidence_kind',
+            ])
+            .where('link.publication_id', '=', publication.id)
+            .where('link.verse_key', '=', input.verseKey)
+            .where('link.entry_id', 'is not', null)
+            .where('link.evidence_kind', '=', 'source-citation')
+            .orderBy('link.ordinal')
+            .execute()
+        ).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause })))
+        return {
+          work: input.work,
+          language: input.language,
+          revision: publication.revision,
+          verseKey: input.verseKey,
+          entries: rows.map(row => ({
+            id: row.entry_id,
+            word: row.word,
+            normalizedWord: row.normalized_word,
+            evidenceKind: row.evidence_kind as 'source-citation',
+          })),
+        }
+      }),
+    discoverPassageEntries: input =>
+      tryDatabasePromise('dictionary.passage.discover', async () => {
+        let query = database
+          .selectFrom('dictionary_verse_links as link')
+          .innerJoin('resource_publications as publication', 'publication.id', 'link.publication_id')
+          .innerJoin('dictionary_entries as entry', join =>
+            join
+              .onRef('entry.publication_id', '=', 'link.publication_id')
+              .onRef('entry.entry_id', '=', 'link.entry_id')
+          )
+          .select([
+            'publication.resource_identity',
+            'publication.revision',
+            'publication.language',
+            'publication.metadata',
+            'entry.entry_id',
+            'entry.word',
+            'entry.normalized_word',
+            'entry.correspondence_id',
+            'link.evidence_kind',
+            'link.ordinal',
+          ])
+          .where('publication.resource_kind', '=', 'dictionary')
+          .where('publication.status', '=', 'active')
+          .where('link.verse_key', '=', input.verseKey)
+          .where('link.entry_id', 'is not', null)
+          .where('link.evidence_kind', '=', 'source-citation')
+        if (input.language) query = query.where('publication.language', '=', input.language)
+        const rows = await query
+          .orderBy('publication.language')
+          .orderBy('publication.resource_identity')
+          .orderBy('link.ordinal')
+          .orderBy('entry.entry_id')
+          .execute()
+        return rows.map(row => {
+          const work = row.resource_identity.split(':')[1] ?? ''
+          const language: DictionaryLanguage = row.language === 'en' ? 'en' : 'fr'
+          return {
+            work,
+            language,
+            revision: row.revision,
+            resourceId: metadataString(row.metadata, 'resource_id'),
+            title: metadataString(row.metadata, 'title'),
+            abbreviation: metadataString(row.metadata, 'abbreviation'),
+            id: row.entry_id,
+            word: row.word,
+            normalizedWord: row.normalized_word,
+            evidenceKind: 'source-citation' as const,
+            ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
+          }
+        })
+      }).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause }))),
   }
 }
 

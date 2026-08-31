@@ -1,0 +1,2 @@
+ALTER TABLE "dictionary_entries" ADD COLUMN "correspondence_id" text;--> statement-breakpoint
+CREATE INDEX "dictionary_entries_correspondence" ON "dictionary_entries" USING btree ("correspondence_id","publication_id");

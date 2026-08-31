@@ -68,9 +68,18 @@ type DictionnaireRef = {
 type Props = {
   dictionnaireRef: DictionnaireRef
   isSelectionMode?: StudyNavigateBibleType
+  sourceLabel?: string
+  routeParams?: {
+    entryId: number
+    work: string
+    resourceId: string
+    dictionaryTitle: string
+    language: 'fr' | 'en'
+    correspondenceId?: string
+  }
 }
 
-const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
+const DictionnaireCard = ({ dictionnaireRef, isSelectionMode, sourceLabel, routeParams }: Props) => {
   const theme = useTheme()
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()
@@ -95,7 +104,7 @@ const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
     } else {
       pushRouteOnce({
         pathname: '/dictionnary-detail',
-        params: { word },
+        params: { word, ...routeParams },
       })
     }
   }
@@ -125,6 +134,11 @@ const DictionnaireCard = ({ dictionnaireRef, isSelectionMode }: Props) => {
               <IconFeather name="maximize-2" size={20} />
             )}
           </OpenStrongIcon>
+          {sourceLabel ? (
+            <Text fontSize={11} color="tertiary">
+              {sourceLabel}
+            </Text>
+          ) : null}
           <TitleBorder />
         </Box>
       </Box>

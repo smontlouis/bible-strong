@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
 import { Share } from 'react-native'
@@ -7,7 +7,8 @@ import truncHTML from 'trunc-html'
 
 import { WebView } from 'react-native-webview'
 import books from '~assets/bible_versions/books-desc'
-import Box from '~common/ui/Box'
+import Box, { TouchableBox } from '~common/ui/Box'
+import Text from '~common/ui/Text'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import Header from '~common/Header'
@@ -67,12 +68,21 @@ const DictionnaryDetailScreen = ({
   const hasBackButton = isFormSheet ? canGoBackInStack : !isInTab
 
   const {
-    data: { word, work: storedWork, resourceId, dictionaryTitle },
+    data: {
+      word,
+      entryId,
+      correspondenceId,
+      work: storedWork,
+      resourceId,
+      dictionaryTitle,
+      language: storedLanguage,
+    },
   } = dictionaryTab
 
   const openInNewTab = useOpenInNewTab()
   const { t } = useTranslation()
-  const dictionaryResourceLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  const preferredDictionaryLanguage = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  const dictionaryResourceLanguage = storedLanguage ?? preferredDictionaryLanguage
   const work = storedWork ?? getDefaultDictionaryWork(dictionaryResourceLanguage)
   const resolvedDictionaryTitle =
     dictionaryTitle ??
@@ -102,21 +112,66 @@ const DictionnaryDetailScreen = ({
     staleTime: Infinity,
   })
   const dictionaryQuery = useQuery({
-    queryKey: ['dictionary-detail', work, dictionaryResourceLanguage, word],
+    queryKey: ['dictionary-detail', work, dictionaryResourceLanguage, entryId, word],
     queryFn: async () =>
       word
-        ? ((await resources.dictionary.loadItem(word, dictionaryResourceLanguage, work)) ?? null)
+        ? ((entryId
+            ? await resources.dictionary.loadEntryById(
+                entryId,
+                dictionaryResourceLanguage,
+                work
+              )
+            : await resources.dictionary.loadItem(word, dictionaryResourceLanguage, work)) ?? null)
         : null,
     enabled: !!word,
     staleTime: Infinity,
     ...localQueryOptions,
   })
   const dictionnaireItem = dictionaryQuery.data ?? null
+  const correspondenceQuery = useQuery({
+    queryKey: [
+      'dictionary-correspondence',
+      correspondenceId,
+      word,
+      preferredDictionaryLanguage,
+      isConnected,
+    ],
+    queryFn: async () => {
+      if (!word || !isConnected) return null
+      const page = await resources.dictionary.searchDirectoryPage(
+        word,
+        { limit: 100 },
+        preferredDictionaryLanguage
+      )
+      return (
+        page.entries.find(item => item.correspondenceId === correspondenceId) ??
+        page.entries.find(item =>
+          item.sources.some(
+            source =>
+              source.resource.work === work &&
+              source.resource.language === dictionaryResourceLanguage &&
+              source.id === entryId
+          )
+        ) ??
+        null
+      )
+    },
+    enabled: !!word && isConnected,
+    staleTime: Infinity,
+    retry: false,
+  })
+  const correspondenceSources =
+    correspondenceQuery.data?.sources.filter(
+      source =>
+        source.resource.work !== work ||
+        source.resource.language !== dictionaryResourceLanguage ||
+        source.id !== entryId
+    ) ?? []
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const addHistory = useSetAtom(historyAtom)
 
   // Go back to list view (for tab context)
-  const goBack = useCallback(() => {
+  const goBack = () => {
     if (isInTab) {
       setDictionaryTab(
         produce(draft => {
@@ -127,7 +182,7 @@ const DictionnaryDetailScreen = ({
     } else {
       router.back()
     }
-  }, [isInTab, setDictionaryTab, router])
+  }
 
   const selectWordTags = makeWordTagsSelector()
   const tags = useSelector((state: RootState) => selectWordTags(state, word ?? ''))
@@ -341,9 +396,13 @@ const DictionnaryDetailScreen = ({
                     type: 'dictionary',
                     data: {
                       word,
+                      entryId,
+                      correspondenceId,
                       work,
                       resourceId,
                       dictionaryTitle: resolvedDictionaryTitle,
+                      language: dictionaryResourceLanguage,
+                      directory: dictionaryTab.data.directory,
                     },
                   })
                   break
@@ -357,6 +416,43 @@ const DictionnaryDetailScreen = ({
         }
       />
       <AppScrollView>
+        {correspondenceSources.length > 0 && (
+          <Box px={20} pb={8} wrap row>
+            {correspondenceSources.map(source => (
+              <TouchableBox
+                key={`${source.resource.work}:${source.resource.language}:${source.id}`}
+                onPress={() =>
+                  setDictionaryTab(current => ({
+                    ...current,
+                    title: source.word,
+                    data: {
+                      ...current.data,
+                      word: source.word,
+                      entryId: source.id,
+                      correspondenceId: correspondenceQuery.data?.correspondenceId,
+                      work: source.resource.work,
+                      resourceId: source.resourceId,
+                      dictionaryTitle: source.title,
+                      language: source.resource.language,
+                      directory: true,
+                    },
+                  }))
+                }
+                borderWidth={1}
+                borderColor="border"
+                borderRadius={14}
+                px={8}
+                py={4}
+                mr={6}
+                mb={6}
+              >
+                <Text fontSize={12} color="primary">
+                  {source.abbreviation} · {source.word}
+                </Text>
+              </TouchableBox>
+            ))}
+          </Box>
+        )}
         {(tags || relationCount > 0) && (
           <Box px={20}>
             <EntityChipList

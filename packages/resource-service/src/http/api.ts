@@ -32,6 +32,8 @@ import {
 import {
   DictionaryCatalogQuery,
   DictionaryCatalogResponseDto,
+  DictionaryDirectoryQuery,
+  DictionaryDirectoryResponseDto,
   DictionaryEntriesBatchQuery,
   DictionaryEntriesBatchResponseDto,
   DictionaryEntriesQuery,
@@ -39,6 +41,10 @@ import {
   DictionaryEntryIdPath,
   DictionaryEntryPath,
   DictionaryEntryResponseDto,
+  DictionaryPassageAnchorsResponseDto,
+  DictionaryPassageDiscoveryResponseDto,
+  DictionaryPassagePath,
+  DictionaryPassageQuery,
   DictionaryResourcePath,
   DictionaryVersePath,
   DictionaryVerseWordsResponseDto,
@@ -240,6 +246,25 @@ const DictionaryApi = HttpApiGroup.make('dictionaries')
       .addError(ResourceInternalProblem, { status: 500 })
   )
   .add(
+    HttpApiEndpoint.get('browseDictionaryDirectory', '/v1/dictionaries/directory')
+      .setUrlParams(DictionaryDirectoryQuery)
+      .addSuccess(DictionaryDirectoryResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get('discoverDictionaryPassageEntries', '/v1/dictionaries/verses/:verseKey/entries')
+      .setPath(DictionaryPassagePath)
+      .setUrlParams(DictionaryPassageQuery)
+      .addSuccess(DictionaryPassageDiscoveryResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
     HttpApiEndpoint.get('listDictionaryEntries', '/v1/dictionaries/:work/:language/entries')
       .setPath(DictionaryResourcePath)
       .setUrlParams(DictionaryEntriesQuery)
@@ -290,6 +315,18 @@ const DictionaryApi = HttpApiGroup.make('dictionaries')
     )
       .setPath(DictionaryVersePath)
       .addSuccess(DictionaryVerseWordsResponseDto)
+      .addError(InvalidResourceRequestProblem, { status: 400 })
+      .addError(ResourceNotFoundProblem, { status: 404 })
+      .addError(ResourceUnavailableProblem, { status: 503 })
+      .addError(ResourceInternalProblem, { status: 500 })
+  )
+  .add(
+    HttpApiEndpoint.get(
+      'getDictionaryPassageAnchors',
+      '/v1/dictionaries/:work/:language/verses/:verseKey/entries'
+    )
+      .setPath(DictionaryVersePath)
+      .addSuccess(DictionaryPassageAnchorsResponseDto)
       .addError(InvalidResourceRequestProblem, { status: 400 })
       .addError(ResourceNotFoundProblem, { status: 404 })
       .addError(ResourceUnavailableProblem, { status: 503 })

@@ -44,7 +44,6 @@
   "apps/mobile/src/features/commentaries/CommentariesTabScreen.tsx": 4,
   "apps/mobile/src/features/dictionnary/DictionnaireCard.tsx": 6,
   "apps/mobile/src/features/dictionnary/DictionnaireItem.tsx": 2,
-  "apps/mobile/src/features/dictionnary/DictionnaireVerseDetailCard.tsx": 5,
   "apps/mobile/src/features/dictionnary/DictionnaireVerseReference.tsx": 3,
   "apps/mobile/src/features/home/UserWidget.tsx": 2,
   "apps/mobile/src/features/lexique/LexiqueItem.tsx": 3,

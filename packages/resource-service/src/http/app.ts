@@ -43,14 +43,17 @@ import {
 } from '../domain/nave'
 import {
   ActiveDictionaryPublicationUnavailable,
+  browseDictionaryDirectory,
   browseDictionaryEntries,
   DictionaryEntryNotFound,
   DictionaryRepository,
   DictionaryRepositoryFailure,
+  discoverDictionaryPassageEntries,
   listDictionaryWorks,
   readDictionaryEntry,
   readDictionaryEntryById,
   readDictionaryEntries,
+  readDictionaryPassageAnchors,
   readDictionaryVerseWords,
   type DictionaryRepositoryService,
 } from '../domain/dictionary'
@@ -612,6 +615,41 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
         Effect.mapError(cause => toHttpProblem(cause, requestId))
       )
     })
+    .handle('browseDictionaryDirectory', ({ urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return browseDictionaryDirectory({
+        language: urlParams.language,
+        initial: urlParams.initial,
+        search: urlParams.search,
+        limit: urlParams.limit,
+        cursor: urlParams.cursor,
+      }).pipe(
+        Effect.tap(() => addResponseHeaders({ 'x-request-id': requestId })),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
+    .handle('discoverDictionaryPassageEntries', ({ path, urlParams, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return discoverDictionaryPassageEntries({
+        verseKey: path.verseKey,
+        language: urlParams.language,
+      }).pipe(
+        Effect.tap(response =>
+          addResponseHeaders({
+            'x-request-id': requestId,
+            'x-resource-revisions': [
+              ...new Set(
+                response.entries.map(
+                  entry =>
+                    `${entry.resource.work}:${entry.resource.language}:${entry.resource.revision}`
+                )
+              ),
+            ].join(','),
+          })
+        ),
+        Effect.mapError(cause => toHttpProblem(cause, requestId))
+      )
+    })
     .handle('listDictionaryEntries', ({ path, urlParams, request }) => {
       const requestId = requestIdFrom(request.headers['x-request-id'])
       return serveRevisionedResponse(
@@ -681,6 +719,17 @@ const DictionaryApiLive = HttpApiBuilder.group(ResourceApi, 'dictionaries', hand
         requestId,
         request.headers['if-none-match'],
         ['dictionary', path.work, path.language, 'verse', path.verseKey]
+      )
+    })
+    .handle('getDictionaryPassageAnchors', ({ path, request }) => {
+      const requestId = requestIdFrom(request.headers['x-request-id'])
+      return serveRevisionedResponse(
+        readDictionaryPassageAnchors(path).pipe(
+          Effect.mapError(cause => toHttpProblem(cause, requestId))
+        ),
+        requestId,
+        request.headers['if-none-match'],
+        ['dictionary', path.work, path.language, 'passage-anchors', path.verseKey]
       )
     })
 )
@@ -1001,6 +1050,7 @@ const unavailableNaveRepository: NaveRepositoryService = {
 }
 
 const unavailableDictionaryRepository: DictionaryRepositoryService = {
+  browseDirectory: () => Effect.succeed({ items: [], limit: 100 }),
   listWorks: () => Effect.succeed([]),
   listEntries: input =>
     Effect.fail(
@@ -1021,6 +1071,17 @@ const unavailableDictionaryRepository: DictionaryRepositoryService = {
   findVerseWords: input =>
     Effect.fail(
       new ActiveDictionaryPublicationUnavailable({ work: input.work, language: input.language })
+    ),
+  findPassageAnchors: input =>
+    Effect.fail(
+      new ActiveDictionaryPublicationUnavailable({ work: input.work, language: input.language })
+    ),
+  discoverPassageEntries: input =>
+    Effect.fail(
+      new ActiveDictionaryPublicationUnavailable({
+        work: 'directory',
+        language: input.language ?? 'fr',
+      })
     ),
 }
 

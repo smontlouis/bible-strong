@@ -66,7 +66,7 @@ export const normalizeDictionarySqlite = async ({
   );
   const stats = emptyDictionaryLinkStats();
   const updates = [];
-  const verseWords = new Map();
+  const passageAnchors = new Map();
 
   for (const entry of entries) {
     const result = normalizeDictionaryDefinition({
@@ -85,11 +85,11 @@ export const normalizeDictionarySqlite = async ({
         continue;
       }
       for (const verseKey of verseKeys) {
-        if (!verseWords.has(verseKey)) verseWords.set(verseKey, new Set());
-        const words = verseWords.get(verseKey);
-        const previousSize = words.size;
-        words.add(entry.word);
-        if (words.size !== previousSize) stats.indexedVerseLinks += 1;
+        if (!passageAnchors.has(verseKey)) passageAnchors.set(verseKey, new Map());
+        const entriesForVerse = passageAnchors.get(verseKey);
+        const previousSize = entriesForVerse.size;
+        entriesForVerse.set(Number(entry.id), entry.word);
+        if (entriesForVerse.size !== previousSize) stats.indexedVerseLinks += 1;
       }
     }
   }
@@ -100,15 +100,36 @@ export const normalizeDictionarySqlite = async ({
       `UPDATE dictionnaire SET definition=${quoteSql(update.definition)} WHERE id=${Number(update.id)};`
     );
   }
-  sql.push("DELETE FROM verses;");
-  for (const [verseKey, words] of [...verseWords.entries()].sort(([a], [b]) =>
+  sql.push(
+    "DELETE FROM verses;",
+    "DROP TABLE IF EXISTS dictionary_passage_anchors;",
+    `CREATE TABLE dictionary_passage_anchors (
+       verse_key TEXT NOT NULL,
+       entry_id INTEGER NOT NULL,
+       evidence_kind TEXT NOT NULL CHECK (evidence_kind IN ('source-citation')),
+       ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+       PRIMARY KEY (verse_key, entry_id, evidence_kind),
+       FOREIGN KEY (entry_id) REFERENCES dictionnaire(id) ON DELETE CASCADE
+     );`
+  );
+  for (const [verseKey, entriesForVerse] of [...passageAnchors.entries()].sort(([a], [b]) =>
     a.localeCompare(b, "en", { numeric: true })
   )) {
+    const orderedEntries = [...entriesForVerse.entries()];
     sql.push(
-      `INSERT INTO verses (id, ref) VALUES (${quoteSql(verseKey)}, ${quoteSql(JSON.stringify([...words]))});`
+      `INSERT INTO verses (id, ref) VALUES (${quoteSql(verseKey)}, ${quoteSql(JSON.stringify(orderedEntries.map(([, word]) => word)))});`
     );
+    orderedEntries.forEach(([entryId], ordinal) => {
+      sql.push(
+        `INSERT INTO dictionary_passage_anchors (verse_key, entry_id, evidence_kind, ordinal) VALUES (${quoteSql(verseKey)}, ${entryId}, 'source-citation', ${ordinal});`
+      );
+    });
   }
-  sql.push("COMMIT;", "PRAGMA optimize;");
+  sql.push(
+    "CREATE INDEX dictionary_passage_anchors_entry ON dictionary_passage_anchors (entry_id, verse_key);",
+    "COMMIT;",
+    "PRAGMA optimize;"
+  );
   await executeSql(databasePath, `${sql.join("\n")}\n`);
 
   const finalIntegrity = await queryJson(
@@ -125,7 +146,8 @@ export const normalizeDictionarySqlite = async ({
     parserVersion: DICTIONARY_BCV_PARSER_VERSION,
     entries: entries.length,
     updatedDefinitions: updates.length,
-    verseAnchors: verseWords.size,
+    verseAnchors: passageAnchors.size,
+    passageAnchors: stats.indexedVerseLinks,
     stats
   };
   if (reportPath)

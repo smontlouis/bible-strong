@@ -182,6 +182,7 @@ const DictionaryPublicationBundleManifestSchema = Schema.Struct({
     entries: Schema.NonNegativeInt,
     verseAnchors: Schema.NonNegativeInt,
     wordReferences: Schema.NonNegativeInt,
+    passageEntryReferences: Schema.optional(Schema.NonNegativeInt),
   }),
 })
 
@@ -471,11 +472,20 @@ export type CanonicalDictionaryEntry = {
   word: string
   normalizedWord: string
   definition: string
+  correspondenceId?: string
 }
 
 export type CanonicalDictionaryVerseAnchor = {
   verseKey: string
   words: string[]
+}
+
+export type CanonicalDictionaryPassageAnchor = {
+  verseKey: string
+  entries: Array<{
+    entryId: number
+    evidenceKind: 'source-citation'
+  }>
 }
 
 export type CanonicalDictionaryPublication = {
@@ -497,6 +507,7 @@ export type CanonicalDictionaryPublication = {
   sourceSha256: string
   entries: CanonicalDictionaryEntry[]
   verseAnchors: CanonicalDictionaryVerseAnchor[]
+  passageAnchors?: CanonicalDictionaryPassageAnchor[]
 }
 
 export type CanonicalCommentaryPublication = {
@@ -978,6 +989,7 @@ export const decodeCanonicalDictionary = (value: unknown): CanonicalDictionaryPu
       !isNonEmptyString(entry.normalizedWord) ||
       entry.normalizedWord !== entry.normalizedWord.trim().toLocaleLowerCase() ||
       typeof entry.definition !== 'string' ||
+      (entry.correspondenceId !== undefined && !isNonEmptyString(entry.correspondenceId)) ||
       entryIds.has(entry.id)
     ) {
       throw new Error('CANONICAL_DICTIONARY_ENTRY_INVALID')
@@ -997,6 +1009,38 @@ export const decodeCanonicalDictionary = (value: unknown): CanonicalDictionaryPu
       throw new Error('CANONICAL_DICTIONARY_VERSE_INVALID')
     }
     verseKeys.add(anchor.verseKey)
+  }
+  if (candidate.passageAnchors !== undefined) {
+    if (!Array.isArray(candidate.passageAnchors)) {
+      throw new Error('CANONICAL_DICTIONARY_PASSAGE_INVALID')
+    }
+    const passageKeys = new Set<string>()
+    for (const anchor of candidate.passageAnchors) {
+      if (
+        !anchor ||
+        !isDictionaryVerseKey(anchor.verseKey) ||
+        !Array.isArray(anchor.entries) ||
+        anchor.entries.length === 0 ||
+        passageKeys.has(anchor.verseKey)
+      ) {
+        throw new Error('CANONICAL_DICTIONARY_PASSAGE_INVALID')
+      }
+      passageKeys.add(anchor.verseKey)
+      const identities = new Set<string>()
+      for (const entry of anchor.entries) {
+        const identity = `${entry?.entryId}:${entry?.evidenceKind}`
+        if (
+          !entry ||
+          !isPositiveInteger(entry.entryId) ||
+          !entryIds.has(entry.entryId) ||
+          entry.evidenceKind !== 'source-citation' ||
+          identities.has(identity)
+        ) {
+          throw new Error('CANONICAL_DICTIONARY_PASSAGE_INVALID')
+        }
+        identities.add(identity)
+      }
+    }
   }
   return candidate as CanonicalDictionaryPublication
 }
@@ -1455,7 +1499,7 @@ const isDictionaryVerseKey = (value: unknown): value is string =>
 export const deriveDictionaryResourceRevision = (
   publication: Pick<
     CanonicalDictionaryPublication,
-    'work' | 'language' | 'entries' | 'verseAnchors'
+    'work' | 'language' | 'entries' | 'verseAnchors' | 'passageAnchors'
   >
 ): string => {
   const digest = createHash('sha256')
@@ -1465,6 +1509,9 @@ export const deriveDictionaryResourceRevision = (
         language: publication.language,
         entries: publication.entries,
         verseAnchors: publication.verseAnchors,
+        ...(publication.passageAnchors === undefined
+          ? {}
+          : { passageAnchors: publication.passageAnchors }),
       })
     )
     .digest('hex')
@@ -1478,6 +1525,14 @@ export const countCanonicalDictionaryContent = (publication: CanonicalDictionary
     (count, anchor) => count + anchor.words.length,
     0
   ),
+  ...(publication.passageAnchors === undefined
+    ? {}
+    : {
+        passageEntryReferences: publication.passageAnchors.reduce(
+          (count, anchor) => count + anchor.entries.length,
+          0
+        ),
+      }),
 })
 
 export const getCanonicalDictionaryAlphabeticalBrowse = (
@@ -1705,8 +1760,13 @@ const validateDictionaryOfflineParity = async (
       database,
       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
     ).map(row => requireSqliteString(row.name))
+    const tableNames = new Set(tables)
     if (
-      JSON.stringify(tables) !== JSON.stringify(['RESOURCE_METADATA', 'dictionnaire', 'verses'])
+      !['RESOURCE_METADATA', 'dictionnaire', 'verses'].every(table => tableNames.has(table)) ||
+      (canonical.passageAnchors !== undefined &&
+        !tableNames.has('dictionary_passage_anchors')) ||
+      (canonical.entries.some(entry => entry.correspondenceId !== undefined) &&
+        !tableNames.has('dictionary_correspondences'))
     ) {
       throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
     }
@@ -1729,14 +1789,24 @@ const validateDictionaryOfflineParity = async (
     }
     const entries = readSqliteRows(
       database,
-      'SELECT id, sanitized_word, word, definition FROM dictionnaire ORDER BY id'
+      tableNames.has('dictionary_correspondences')
+        ? `SELECT entry.id, entry.sanitized_word, entry.word, entry.definition,
+                  correspondence.correspondence_id
+           FROM dictionnaire entry
+           LEFT JOIN dictionary_correspondences correspondence ON correspondence.entry_id = entry.id
+           ORDER BY entry.id`
+        : 'SELECT id, sanitized_word, word, definition, NULL AS correspondence_id FROM dictionnaire ORDER BY id'
     ).map(row => {
       const id = requireSqliteInteger(row.id)
       const normalizedWord = requireSqliteString(row.sanitized_word).trim().toLocaleLowerCase()
       const word = requireSqliteString(row.word)
       const definition = requireSqliteString(row.definition)
       if (id <= 0 || !normalizedWord || !word) throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
-      return { id, word, normalizedWord, definition }
+      const correspondenceId =
+        typeof row.correspondence_id === 'string' && row.correspondence_id.length > 0
+          ? row.correspondence_id
+          : undefined
+      return { id, word, normalizedWord, definition, ...(correspondenceId ? { correspondenceId } : {}) }
     })
     const verseAnchors = readSqliteRows(database, 'SELECT id, ref FROM verses ORDER BY id').map(
       row => {
@@ -1754,9 +1824,44 @@ const validateDictionaryOfflineParity = async (
         return { verseKey, words: [...new Set(words.map(word => word.trim().toLocaleLowerCase()))] }
       }
     )
+    const passageAnchors = canonical.passageAnchors
+      ? (() => {
+          const rows = readSqliteRows(
+            database,
+            `SELECT verse_key, entry_id, evidence_kind
+             FROM dictionary_passage_anchors
+             ORDER BY verse_key, ordinal, entry_id`
+          )
+          const byVerse = new Map<
+            string,
+            Array<{ entryId: number; evidenceKind: 'source-citation' }>
+          >()
+          for (const row of rows) {
+            const verseKey = requireSqliteString(row.verse_key)
+            const entryId = requireSqliteInteger(row.entry_id)
+            const evidenceKind = requireSqliteString(row.evidence_kind)
+            if (
+              !isDictionaryVerseKey(verseKey) ||
+              evidenceKind !== 'source-citation' ||
+              !canonical.entries.some(entry => entry.id === entryId)
+            ) {
+              throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+            }
+            const anchors = byVerse.get(verseKey) ?? []
+            anchors.push({ entryId, evidenceKind })
+            byVerse.set(verseKey, anchors)
+          }
+          return [...byVerse].map(([verseKey, passageEntries]) => ({
+            verseKey,
+            entries: passageEntries,
+          }))
+        })()
+      : undefined
     if (
       JSON.stringify(entries) !== JSON.stringify(canonical.entries) ||
-      JSON.stringify(verseAnchors) !== JSON.stringify(canonical.verseAnchors)
+      JSON.stringify(verseAnchors) !== JSON.stringify(canonical.verseAnchors) ||
+      (canonical.passageAnchors !== undefined &&
+        JSON.stringify(passageAnchors) !== JSON.stringify(canonical.passageAnchors))
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }

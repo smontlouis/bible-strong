@@ -1,10 +1,24 @@
 import { Schema } from 'effect'
-import { decodeDictionaryPageCursor, encodeDictionaryPageCursor } from '../resourcePageCursor'
+import {
+  decodeDictionaryDirectoryPageCursor,
+  decodeDictionaryPageCursor,
+  encodeDictionaryDirectoryPageCursor,
+  encodeDictionaryPageCursor,
+} from '../resourcePageCursor'
 
-export { decodeDictionaryPageCursor, encodeDictionaryPageCursor }
+export {
+  decodeDictionaryDirectoryPageCursor,
+  decodeDictionaryPageCursor,
+  encodeDictionaryDirectoryPageCursor,
+  encodeDictionaryPageCursor,
+}
 
 const DictionaryPageCursor = Schema.NonEmptyString.pipe(
   Schema.filter(value => decodeDictionaryPageCursor(value) !== undefined)
+)
+
+const DictionaryDirectoryCursor = Schema.NonEmptyString.pipe(
+  Schema.filter(value => decodeDictionaryDirectoryPageCursor(value) !== undefined)
 )
 
 const DictionaryVerseKey = Schema.String.pipe(
@@ -43,6 +57,18 @@ export class DictionaryVersePath extends Schema.Class<DictionaryVersePath>('Dict
   verseKey: DictionaryVerseKey,
 }) {}
 
+export class DictionaryPassagePath extends Schema.Class<DictionaryPassagePath>(
+  'DictionaryPassagePath'
+)({
+  verseKey: DictionaryVerseKey,
+}) {}
+
+export class DictionaryPassageQuery extends Schema.Class<DictionaryPassageQuery>(
+  'DictionaryPassageQuery'
+)({
+  language: Schema.optional(Schema.Literal('fr', 'en')),
+}) {}
+
 export class DictionaryEntriesQuery extends Schema.Class<DictionaryEntriesQuery>(
   'DictionaryEntriesQuery'
 )({
@@ -50,6 +76,16 @@ export class DictionaryEntriesQuery extends Schema.Class<DictionaryEntriesQuery>
   search: Schema.optional(Schema.NonEmptyString),
   limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
   cursor: Schema.optional(DictionaryPageCursor),
+}) {}
+
+export class DictionaryDirectoryQuery extends Schema.Class<DictionaryDirectoryQuery>(
+  'DictionaryDirectoryQuery'
+)({
+  language: Schema.Literal('fr', 'en'),
+  initial: Schema.optional(Schema.NonEmptyString),
+  search: Schema.optional(Schema.NonEmptyString),
+  limit: Schema.optional(Schema.NumberFromString.pipe(Schema.int(), Schema.between(1, 500))),
+  cursor: Schema.optional(DictionaryDirectoryCursor),
 }) {}
 
 export class DictionaryEntriesBatchQuery extends Schema.Class<DictionaryEntriesBatchQuery>(
@@ -130,4 +166,73 @@ export class DictionaryVerseWordsResponseDto extends Schema.Class<DictionaryVers
   resource: DictionaryRevisionDto,
   verseKey: DictionaryVerseKey,
   words: Schema.Array(Schema.NonEmptyString),
+}) {}
+
+export class DictionaryPassageAnchorDto extends Schema.Class<DictionaryPassageAnchorDto>(
+  'DictionaryPassageAnchorDto'
+)({
+  id: Schema.Int.pipe(Schema.positive()),
+  word: Schema.NonEmptyString,
+  normalizedWord: Schema.NonEmptyString,
+  evidenceKind: Schema.Literal('source-citation'),
+}) {}
+
+export class DictionaryPassageAnchorsResponseDto extends Schema.Class<DictionaryPassageAnchorsResponseDto>(
+  'DictionaryPassageAnchorsResponseDto'
+)({
+  resource: DictionaryRevisionDto,
+  verseKey: DictionaryVerseKey,
+  entries: Schema.Array(DictionaryPassageAnchorDto),
+}) {}
+
+export class DictionaryPassageDiscoveryEntryDto extends Schema.Class<DictionaryPassageDiscoveryEntryDto>(
+  'DictionaryPassageDiscoveryEntryDto'
+)({
+  resource: DictionaryRevisionDto,
+  resourceId: Schema.NonEmptyString,
+  title: Schema.NonEmptyString,
+  abbreviation: Schema.NonEmptyString,
+  id: Schema.Int.pipe(Schema.positive()),
+  word: Schema.NonEmptyString,
+  normalizedWord: Schema.NonEmptyString,
+  evidenceKind: Schema.Literal('source-citation'),
+  correspondenceId: Schema.optional(Schema.NonEmptyString),
+}) {}
+
+export class DictionaryPassageDiscoveryResponseDto extends Schema.Class<DictionaryPassageDiscoveryResponseDto>(
+  'DictionaryPassageDiscoveryResponseDto'
+)({
+  verseKey: DictionaryVerseKey,
+  entries: Schema.Array(DictionaryPassageDiscoveryEntryDto),
+}) {}
+
+export class DictionaryDirectorySourceDto extends Schema.Class<DictionaryDirectorySourceDto>(
+  'DictionaryDirectorySourceDto'
+)({
+  resource: DictionaryRevisionDto,
+  resourceId: Schema.NonEmptyString,
+  title: Schema.NonEmptyString,
+  abbreviation: Schema.NonEmptyString,
+  id: Schema.Int.pipe(Schema.positive()),
+  word: Schema.NonEmptyString,
+  normalizedWord: Schema.NonEmptyString,
+}) {}
+
+export class DictionaryDirectoryItemDto extends Schema.Class<DictionaryDirectoryItemDto>(
+  'DictionaryDirectoryItemDto'
+)({
+  key: Schema.NonEmptyString,
+  label: Schema.NonEmptyString,
+  normalizedLabel: Schema.NonEmptyString,
+  correspondenceId: Schema.optional(Schema.NonEmptyString),
+  sources: Schema.Array(DictionaryDirectorySourceDto).pipe(Schema.minItems(1)),
+}) {}
+
+export class DictionaryDirectoryResponseDto extends Schema.Class<DictionaryDirectoryResponseDto>(
+  'DictionaryDirectoryResponseDto'
+)({
+  language: Schema.Literal('fr', 'en'),
+  items: Schema.Array(DictionaryDirectoryItemDto),
+  limit: Schema.Int.pipe(Schema.positive()),
+  nextCursor: Schema.optional(Schema.NonEmptyString),
 }) {}

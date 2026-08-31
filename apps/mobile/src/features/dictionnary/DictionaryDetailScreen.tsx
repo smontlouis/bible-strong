@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useState } from 'react'
 
 import { atom } from 'jotai/vanilla'
 import { useLocalSearchParams } from 'expo-router'
@@ -13,13 +13,15 @@ const DictionaryDetailScreen = () => {
     work?: string
     resourceId?: string
     dictionaryTitle?: string
+    entryId?: string
+    correspondenceId?: string
+    language?: 'fr' | 'en'
   }>()
 
   // Parse params from URL strings
   const word = params.word || ''
 
-  const onTheFlyAtom = useMemo(
-    () =>
+  const [onTheFlyAtom] = useState(() =>
       atom<DictionaryTab>({
         id: `dictionary-${generateUUID()}`,
         title: 'Dictionary',
@@ -31,9 +33,11 @@ const DictionaryDetailScreen = () => {
           work: params.work,
           resourceId: params.resourceId,
           dictionaryTitle: params.dictionaryTitle,
+          entryId: params.entryId ? Number(params.entryId) : undefined,
+          correspondenceId: params.correspondenceId,
+          language: params.language,
         },
-      } as DictionaryTab),
-    [params.dictionaryTitle, params.resourceId, params.work, word]
+      } as DictionaryTab)
   )
 
   return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} isFormSheet={IS_FORM_SHEET} />

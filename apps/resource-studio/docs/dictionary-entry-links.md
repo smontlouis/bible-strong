@@ -3,6 +3,10 @@
 _Audit et enrichissement local exécutés le 31 août 2026. Aucune publication en production n’a été
 effectuée._
 
+Les renvois décrits ici relient deux articles d’une même œuvre. Ils sont distincts des
+**ancres dictionnaire–passage**, qui relient une citation biblique à l’identité exacte de l’article
+qui la contient.
+
 ## Modèle
 
 Un **renvoi d’entrée de dictionnaire** est un lien attesté depuis le texte d’un article vers une

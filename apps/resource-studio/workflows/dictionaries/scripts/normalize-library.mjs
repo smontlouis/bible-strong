@@ -8,19 +8,39 @@ import {
   DICTIONARY_LINK_NORMALIZATION_REVISION
 } from "./dictionary-links.mjs";
 import { normalizeDictionarySqlite } from "./normalize-sqlite.mjs";
-import { buildDictionaryCorrespondences } from "./build-correspondences.mjs";
+import {
+  buildDictionaryCorrespondences,
+  installDictionaryCorrespondenceMemberships
+} from "./build-correspondences.mjs";
 import { enrichDictionaryEntryLinks } from "./dictionary-entry-links.mjs";
+import { buildDictionaryDirectory } from "./build-directory.mjs";
 
 const workflowRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   ".."
 );
 const workspaceRoot = path.resolve(workflowRoot, "../../../..");
-const configPath = path.join(
+const defaultConfigPath = path.join(
   workspaceRoot,
   "apps/resource-studio/config/resource-publications/dictionary.json"
 );
-const outputRoot = path.join(workflowRoot, ".local/normalized");
+const defaultOutputRoot = path.join(workflowRoot, ".local/normalized");
+
+const readArguments = (values) => {
+  const result = {};
+  for (let index = 0; index < values.length; index += 2) {
+    const key = values[index];
+    const value = values[index + 1];
+    if (!key?.startsWith("--") || !value)
+      throw new Error("dictionary-normalization-cli-arguments-invalid");
+    result[key.slice(2)] = value;
+  }
+  return result;
+};
+
+const args = readArguments(process.argv.slice(2));
+const configPath = path.resolve(args.config ?? defaultConfigPath);
+const outputRoot = path.resolve(args["output-root"] ?? defaultOutputRoot);
 
 const config = JSON.parse(await readFile(configPath, "utf8"));
 await rm(outputRoot, { recursive: true, force: true });
@@ -51,8 +71,14 @@ const correspondences = await buildDictionaryCorrespondences({
   configPath,
   normalizedRoot: outputRoot
 });
+const correspondenceMemberships =
+  await installDictionaryCorrespondenceMemberships({
+    configPath,
+    normalizedRoot: outputRoot,
+    correspondenceIndex: correspondences
+  });
 process.stdout.write(
-  `correspondances: ${correspondences.stats.groups} groupes, ${correspondences.stats.bilingualGroups} bilingues\n`
+  `correspondances: ${correspondences.stats.groups} groupes, ${correspondences.stats.bilingualGroups} bilingues, ${correspondenceMemberships.memberships} membres projetés\n`
 );
 
 const entryLinks = await enrichDictionaryEntryLinks({
@@ -74,6 +100,14 @@ process.stdout.write(
   `renvois d’entrées: ${entryLinks.totals.finalLinks} liens (${entryLinks.totals.editorialCueLinks} See/Voir, ${entryLinks.totals.generatedLinks} générés, ${entryLinks.totals.selfLinksRemoved} auto-liens retirés)\n`
 );
 
+const directory = await buildDictionaryDirectory({
+  configPath,
+  normalizedRoot: outputRoot
+});
+process.stdout.write(
+  `répertoire: ${directory.counts.entries} entrées, ${directory.counts.passageAnchors} ancres exactes (${directory.revision})\n`
+);
+
 await writeFile(
   path.join(outputRoot, "manifest.json"),
   `${JSON.stringify(
@@ -82,6 +116,10 @@ await writeFile(
       parserVersion: DICTIONARY_BCV_PARSER_VERSION,
       correspondences: correspondences.stats,
       entryLinks: entryLinks.totals,
+      directory: {
+        revision: directory.revision,
+        ...directory.counts
+      },
       dictionaries: reports
     },
     null,

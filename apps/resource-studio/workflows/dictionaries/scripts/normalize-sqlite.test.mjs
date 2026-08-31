@@ -63,4 +63,34 @@ describe("normalisation d'un SQLite dictionnaire", () => {
     assert.equal(report.verseAnchors, 3);
     assert.equal(report.stats.indexedVerseLinks, 3);
   });
+
+  it("indexe chaque citation vers l'identité exacte de son article", () => {
+    const rows = query(
+      databasePath,
+      `SELECT verse_key, entry_id, evidence_kind, ordinal
+       FROM dictionary_passage_anchors
+       ORDER BY verse_key, ordinal`
+    );
+    assert.deepEqual(rows, [
+      {
+        verse_key: "1-1-1",
+        entry_id: 2,
+        evidence_kind: "source-citation",
+        ordinal: 0
+      },
+      {
+        verse_key: "43-3-16",
+        entry_id: 1,
+        evidence_kind: "source-citation",
+        ordinal: 0
+      },
+      {
+        verse_key: "43-3-17",
+        entry_id: 1,
+        evidence_kind: "source-citation",
+        ordinal: 0
+      }
+    ]);
+    assert.equal(report.passageAnchors, 3);
+  });
 });

@@ -19,6 +19,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { getFirstLetterFrom } from '~helpers/alphabet'
 import {
   getDefaultDictionaryWork,
+  type DictionaryDirectoryItem,
   type DictionarySummary,
   type DictionaryWork,
 } from '~features/resources/dictionaryAccess'
@@ -38,7 +39,7 @@ import {
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
 
-type DictionaryRow = DictionarySummary
+type DictionaryRow = DictionarySummary | DictionaryDirectoryItem
 
 interface DictionarySection {
   title: string
@@ -55,11 +56,18 @@ const getDictionaryItemLayout = sectionListGetItemLayout({
 const useSectionResults = (results: DictionaryRow[]) => {
   return results.reduce<DictionarySection[]>((list, dbItem) => {
     const listItem = list.find(
-      item => item.title && item.title === getFirstLetterFrom(dbItem.normalizedWord)
+      item =>
+        item.title &&
+        item.title ===
+          getFirstLetterFrom(
+            'normalizedLabel' in dbItem ? dbItem.normalizedLabel : dbItem.normalizedWord
+          )
     )
     if (!listItem) {
       list.push({
-        title: getFirstLetterFrom(dbItem.normalizedWord),
+        title: getFirstLetterFrom(
+          'normalizedLabel' in dbItem ? dbItem.normalizedLabel : dbItem.normalizedWord
+        ),
         data: [dbItem],
       })
     } else {
@@ -130,6 +138,7 @@ const DictionaryListScreen = ({
     offlineDownload: true,
   }
   const catalogDictionaries = dictionaryCatalogQuery.data ?? []
+  const directoryMode = (dictionaryTab.data.directory ?? true) && isConnected
   const storedDictionary =
     dictionaryTab.data.work && dictionaryTab.data.resourceId
       ? {
@@ -165,27 +174,33 @@ const DictionaryListScreen = ({
   const availabilityQuery = useQuery({
     queryKey: ['dictionary-availability', selectedWork, dictionaryResourceLanguage, isConnected],
     queryFn: () =>
-      resources.dictionary.getAvailability?.(dictionaryResourceLanguage, selectedWork) ??
-      Promise.resolve({ status: 'available' as const }),
+      directoryMode
+        ? Promise.resolve({ status: 'available' as const })
+        : (resources.dictionary.getAvailability?.(dictionaryResourceLanguage, selectedWork) ??
+          Promise.resolve({ status: 'available' as const })),
     networkMode: 'always',
     staleTime: Infinity,
   })
 
   const { results, isLoading, error, recoveries, retry, fetchNextPage, hasNextPage } =
-    useInfiniteResultsByLetterOrSearch(
+    useInfiniteResultsByLetterOrSearch<DictionaryRow>(
       {
         queryKey: ['dictionary'],
-        query: resources.dictionary.searchPage,
+        query: directoryMode
+          ? resources.dictionary.searchDirectoryPage
+          : resources.dictionary.searchPage,
         value: debouncedSearchValue,
         resourceLanguage: dictionaryResourceLanguage,
-        resourceWork: selectedWork,
+        resourceWork: directoryMode ? undefined : selectedWork,
       },
       {
         queryKey: ['dictionary'],
-        query: resources.dictionary.listByLetterPage,
+        query: directoryMode
+          ? resources.dictionary.browseDirectoryPage
+          : resources.dictionary.listByLetterPage,
         value: letter,
         resourceLanguage: dictionaryResourceLanguage,
-        resourceWork: selectedWork,
+        resourceWork: directoryMode ? undefined : selectedWork,
       }
     )
 
@@ -211,14 +226,23 @@ const DictionaryListScreen = ({
     )
   }
 
-  const selectWord = (word: string) => {
+  const selectWord = (
+    word: string,
+    dictionary = selectedDictionary,
+    entryId?: number,
+    correspondenceId?: string
+  ) => {
     setDictionaryTab(current => ({
       ...current,
       data: {
         ...current.data,
-        work: selectedWork,
-        resourceId: selectedDictionary.resourceId,
-        dictionaryTitle: selectedDictionary.title,
+        work: dictionary.resource.work,
+        resourceId: dictionary.resourceId,
+        dictionaryTitle: dictionary.title,
+        language: dictionary.resource.language,
+        directory: directoryMode,
+        entryId,
+        correspondenceId,
       },
     }))
     if (isNewTabSelection) {
@@ -229,9 +253,13 @@ const DictionaryListScreen = ({
         type: 'dictionary',
         data: {
           word,
-          work: selectedWork,
-          resourceId: selectedDictionary.resourceId,
-          dictionaryTitle: selectedDictionary.title,
+          work: dictionary.resource.work,
+          resourceId: dictionary.resourceId,
+          dictionaryTitle: dictionary.title,
+          language: dictionary.resource.language,
+          directory: directoryMode,
+          entryId,
+          correspondenceId,
         },
       })
       return
@@ -268,17 +296,37 @@ const DictionaryListScreen = ({
         <Header
           hasBackButton={showBackButton}
           fontSize={18}
-          title={selectedDictionary.abbreviation}
-          subTitle={selectedDictionary.title}
+          title={directoryMode ? t('Dictionnaires') : selectedDictionary.abbreviation}
+          subTitle={directoryMode ? t('Toutes les ressources') : selectedDictionary.title}
           rightComponent={
             catalogDictionaries.length > 1 ? (
               <MenuView
-                actions={catalogDictionaries.map(dictionary => ({
-                  id: dictionary.resource.work,
-                  title: dictionary.abbreviation,
-                  state: dictionary.resource.work === selectedWork ? ('on' as const) : undefined,
-                }))}
+                actions={[
+                  {
+                    id: 'directory',
+                    title: t('Tous les dictionnaires'),
+                    state: directoryMode ? ('on' as const) : undefined,
+                  },
+                  ...catalogDictionaries.map(dictionary => ({
+                    id: dictionary.resource.work,
+                    title: dictionary.abbreviation,
+                    state:
+                      !directoryMode && dictionary.resource.work === selectedWork
+                        ? ('on' as const)
+                        : undefined,
+                  })),
+                ]}
                 onPressAction={({ nativeEvent }) => {
+                  if (nativeEvent.event === 'directory') {
+                    setLetter('a')
+                    setSearchValue('')
+                    setDictionaryTab(current => ({
+                      ...current,
+                      title: t('Dictionnaires'),
+                      data: { ...current.data, directory: true },
+                    }))
+                    return
+                  }
                   const dictionary = catalogDictionaries.find(
                     item => item.resource.work === nativeEvent.event
                   )
@@ -294,6 +342,8 @@ const DictionaryListScreen = ({
                       work: dictionary.resource.work,
                       resourceId: dictionary.resourceId,
                       dictionaryTitle: dictionary.title,
+                      language: dictionary.resource.language,
+                      directory: false,
                     },
                   }))
                 }}
@@ -319,12 +369,54 @@ const DictionaryListScreen = ({
             <Loading message={t('Chargement...')} />
           ) : sectionResults.length ? (
             <SectionList<DictionaryRow, DictionarySection>
-              renderItem={({ item: { word } }) => (
-                <DictionnaireItem
-                  word={word}
-                  onSelect={isNewTabSelection || onWordSelect ? selectWord : undefined}
-                />
-              )}
+              renderItem={({ item }) => {
+                if ('sources' in item) {
+                  const source =
+                    item.sources.find(
+                      candidate => candidate.resource.language === dictionaryResourceLanguage
+                    ) ?? item.sources[0]
+                  const dictionary = source
+                    ? (catalogDictionaries.find(
+                        candidate => candidate.resource.work === source.resource.work
+                      ) ?? {
+                        resource: source.resource,
+                        resourceId: source.resourceId,
+                        title: source.title,
+                        abbreviation: source.abbreviation,
+                        authors: [],
+                        description: '',
+                        edition: '',
+                        source: '',
+                        attribution: '',
+                        onlineAccess: true,
+                        offlineDownload: true,
+                      })
+                    : undefined
+                  return (
+                    <DictionnaireItem
+                      word={item.label}
+                      sourceLabels={item.sources.map(candidate => candidate.abbreviation)}
+                      onSelect={
+                        source && dictionary
+                          ? () =>
+                              selectWord(
+                                source.word,
+                                dictionary,
+                                source.id,
+                                item.correspondenceId
+                              )
+                          : undefined
+                      }
+                    />
+                  )
+                }
+                return (
+                  <DictionnaireItem
+                    word={item.word}
+                    onSelect={isNewTabSelection || onWordSelect ? selectWord : undefined}
+                  />
+                )
+              }}
               removeClippedSubviews
               maxToRenderPerBatch={100}
               getItemLayout={(data, index) =>
@@ -340,7 +432,11 @@ const DictionaryListScreen = ({
               stickySectionHeadersEnabled
               sections={sectionResults}
               keyExtractor={(item, index) =>
-                item.id ? String(item.id) : `${item.normalizedWord}-${item.word}-${index}`
+                'key' in item
+                  ? item.key
+                  : item.id
+                    ? String(item.id)
+                    : `${item.normalizedWord}-${item.word}-${index}`
               }
               onEndReached={() => {
                 if (hasNextPage) fetchNextPage()

@@ -54,6 +54,10 @@ for (const dictionary of manifest.dictionaries) {
     databasePath,
     "SELECT id, word, definition FROM dictionnaire ORDER BY id"
   );
+  const correspondenceMemberships = await query(
+    databasePath,
+    "SELECT entry_id, correspondence_id, label FROM dictionary_correspondences ORDER BY entry_id"
+  );
   let bibleLinks = 0;
   let strongLinks = 0;
   let wordLinks = 0;
@@ -144,6 +148,7 @@ for (const dictionary of manifest.dictionaries) {
     editorialCueLinks,
     selfLinksRemoved: dictionary.entryLinks.selfLinksRemoved,
     verseAnchors: dictionary.verseAnchors,
+    correspondenceMemberships: correspondenceMemberships.length,
     status: "ok"
   });
 }
@@ -185,6 +190,41 @@ if (
 )
   throw new Error("Correspondance bilingue Nébucadnetsar absente");
 
+const directoryPath = path.join(normalizedRoot, "dictionary-directory.sqlite");
+await access(directoryPath);
+const directoryIntegrity = await query(directoryPath, "PRAGMA integrity_check");
+if (directoryIntegrity[0]?.integrity_check?.toLocaleLowerCase() !== "ok")
+  throw new Error("Répertoire global : contrôle d’intégrité SQLite en échec");
+const directoryColumns = await query(
+  directoryPath,
+  "PRAGMA table_info(dictionary_entries)"
+);
+if (directoryColumns.some((column) => column.name === "definition"))
+  throw new Error("Répertoire global : une définition a été copiée");
+const directoryMetadata = (
+  await query(
+    directoryPath,
+    `SELECT works_count AS works, entries_count AS entries,
+            correspondences_count AS correspondences,
+            passage_anchors_count AS passageAnchors
+     FROM RESOURCE_METADATA`
+  )
+)[0];
+const expectedPassageAnchors = manifest.dictionaries.reduce(
+  (total, dictionary) => total + dictionary.stats.indexedVerseLinks,
+  0
+);
+if (
+  directoryMetadata?.works !== manifest.dictionaries.length ||
+  directoryMetadata?.entries !== correspondenceIndex.stats.entries ||
+  directoryMetadata?.correspondences !== correspondenceIndex.stats.groups ||
+  directoryMetadata?.passageAnchors !== expectedPassageAnchors
+)
+  throw new Error("Répertoire global : compteurs divergents");
+const directoryForeignKeys = await query(directoryPath, "PRAGMA foreign_key_check");
+if (directoryForeignKeys.length > 0)
+  throw new Error("Répertoire global : références étrangères invalides");
+
 process.stdout.write(
   `${JSON.stringify(
     {
@@ -192,6 +232,10 @@ process.stdout.write(
       correspondences: {
         ...correspondenceIndex.stats,
         nebuchadnezzarMembers: nebuchadnezzar.members.length,
+        status: "ok"
+      },
+      directory: {
+        ...directoryMetadata,
         status: "ok"
       }
     },

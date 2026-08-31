@@ -35,3 +35,11 @@ _Avoid_: Universal entry, merged word
 **Dictionary entry link**:
 An evidenced navigation link from text in one dictionary article to one exact entry in the same dictionary.
 _Avoid_: Keyword link, inferred definition
+
+**Dictionary passage anchor**:
+An evidenced relationship from one canonical Bible verse to one exact dictionary entry, independent of the Bible version currently displayed.
+_Avoid_: Verse word, highlighted dictionary word
+
+**Dictionary directory**:
+A definition-free projection of dictionary works, entries, correspondence clusters, and passage anchors used for global discovery.
+_Avoid_: Merged dictionary, universal dictionary

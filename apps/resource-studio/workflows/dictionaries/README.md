@@ -13,6 +13,7 @@ yarn resources:dictionaries:test
 yarn resources:dictionaries:normalize
 yarn resources:dictionaries:correspondences
 yarn resources:dictionaries:entry-links
+yarn resources:dictionaries:directory
 yarn resources:dictionaries:audit
 yarn resources:dictionaries:audit-smith
 yarn resources:dictionaries:acquire-smith
@@ -37,6 +38,10 @@ Le lecteur propose :
 - les numéros Strong de Translation Words, rendus sous forme de liens canoniques `strong://` ;
 - les métadonnées éditoriales, compteurs, provenance, attribution et droits de chaque ressource.
 
+La normalisation complète produit également `dictionary-directory.sqlite`. Ce répertoire global ne
+contient aucune définition : il projette les identités des œuvres et articles, l’index alphabétique,
+les correspondances et les ancres passage–article exactes nécessaires aux surfaces de découverte.
+
 La configuration canonique reste
 `apps/resource-studio/config/resource-publications/dictionary.json`. Une œuvre dont le SQLite est
 absent apparaît indisponible. Pour régénérer Bost, Calmet et Lelièvre :
@@ -54,6 +59,9 @@ Westphal et Easton + Webster utilisent les SQLite issus du pipeline de publicati
 La normalisation travaille sur des copies locales sous `.local/normalized`, sans modifier les SQLite
 sources. Elle convertit les anciens liens, détecte les références non liées, supprime les liens
 bibliques invalides et reconstruit la table `verses` uniquement à partir des citations contrôlées.
+Elle crée aussi `dictionary_passage_anchors`, qui relie chaque verset à l’identifiant exact de
+l’article qui le cite avec la preuve `source-citation`. La table historique `verses` reste présente
+pour les lecteurs existants, mais elle ne constitue plus le contrat cible de découverte.
 Elle régénère ensuite `.local/normalized/correspondences.json`. Cette étape peut aussi être lancée
 seule avec `yarn resources:dictionaries:correspondences`.
 

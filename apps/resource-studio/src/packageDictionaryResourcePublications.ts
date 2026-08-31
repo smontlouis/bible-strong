@@ -37,6 +37,10 @@ const normalizeDictionarySqliteScript = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../workflows/dictionaries/scripts/normalize-sqlite.mjs"
 );
+const normalizeDictionaryLibraryScript = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "../workflows/dictionaries/scripts/normalize-library.mjs"
+);
 
 export type DictionaryLanguage = "fr" | "en";
 
@@ -62,6 +66,7 @@ export interface DictionaryPublicationMetadata {
     onlineAccess: boolean;
     offlineDownload: boolean;
   };
+  correspondenceSeedsPath?: string;
 }
 
 export type CanonicalDictionaryEntry = {
@@ -69,11 +74,20 @@ export type CanonicalDictionaryEntry = {
   word: string;
   normalizedWord: string;
   definition: string;
+  correspondenceId?: string;
 };
 
 export type CanonicalDictionaryVerseAnchor = {
   verseKey: string;
   words: string[];
+};
+
+export type CanonicalDictionaryPassageAnchor = {
+  verseKey: string;
+  entries: Array<{
+    entryId: number;
+    evidenceKind: "source-citation";
+  }>;
 };
 
 export interface CanonicalDictionaryPublication {
@@ -91,6 +105,7 @@ export interface CanonicalDictionaryPublication {
   sourceSha256: string;
   entries: CanonicalDictionaryEntry[];
   verseAnchors: CanonicalDictionaryVerseAnchor[];
+  passageAnchors: CanonicalDictionaryPassageAnchor[];
 }
 
 export interface DictionaryResourcePublicationManifest {
@@ -135,6 +150,7 @@ export interface DictionaryResourcePublicationManifest {
     entries: number;
     verseAnchors: number;
     wordReferences: number;
+    passageEntryReferences: number;
   };
 }
 
@@ -143,9 +159,16 @@ type DictionarySqliteEntry = {
   sanitized_word: string;
   word: string;
   definition: string;
+  correspondence_id: string | null;
 };
 
 type DictionarySqliteVerse = { id: string; ref: string };
+type DictionarySqlitePassageAnchor = {
+  verse_key: string;
+  entry_id: number;
+  evidence_kind: string;
+  ordinal: number;
+};
 
 const isDictionaryLanguage = (value: unknown): value is DictionaryLanguage =>
   value === "fr" || value === "en";
@@ -197,7 +220,10 @@ const readDictionarySqlite = async (
   sqlitePath: string,
   language: DictionaryLanguage
 ): Promise<
-  Pick<CanonicalDictionaryPublication, "entries" | "verseAnchors">
+  Pick<
+    CanonicalDictionaryPublication,
+    "entries" | "verseAnchors" | "passageAnchors"
+  >
 > => {
   const integrity = await queryJson<{ integrity_check: string }>(
     sqlitePath,
@@ -216,18 +242,23 @@ const readDictionarySqlite = async (
     "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"
   );
   const tableNames = tables.map((row) => row.name);
-  const expectedTables = ["dictionnaire", "verses"];
-  const tablesWithMetadata = ["RESOURCE_METADATA", ...expectedTables];
-  if (
-    JSON.stringify(tableNames) !== JSON.stringify(expectedTables) &&
-    JSON.stringify(tableNames) !== JSON.stringify(tablesWithMetadata)
-  ) {
+  const requiredTables = [
+    "dictionnaire",
+    "dictionary_correspondences",
+    "dictionary_passage_anchors",
+    "verses"
+  ];
+  if (requiredTables.some((table) => !tableNames.includes(table))) {
     throw new Error(`dictionary-publication-sqlite-tables-invalid:${language}`);
   }
 
   const entryRows = await queryJson<DictionarySqliteEntry>(
     sqlitePath,
-    "SELECT id, sanitized_word, word, definition FROM dictionnaire ORDER BY id"
+    `SELECT entry.id, entry.sanitized_word, entry.word, entry.definition,
+            correspondence.correspondence_id
+     FROM dictionnaire entry
+     LEFT JOIN dictionary_correspondences correspondence ON correspondence.entry_id = entry.id
+     ORDER BY entry.id`
   );
   if (entryRows.length === 0)
     throw new Error(`dictionary-publication-entries-empty:${language}`);
@@ -254,7 +285,10 @@ const readDictionarySqlite = async (
       id: row.id,
       word: row.word,
       normalizedWord,
-      definition: row.definition
+      definition: row.definition,
+      ...(isNonEmptyString(row.correspondence_id)
+        ? { correspondenceId: row.correspondence_id }
+        : {})
     };
   });
 
@@ -299,13 +333,49 @@ const readDictionarySqlite = async (
     }
     return { verseKey: row.id, words };
   });
-  return { entries, verseAnchors };
+  const passageRows = await queryJson<DictionarySqlitePassageAnchor>(
+    sqlitePath,
+    `SELECT verse_key, entry_id, evidence_kind, ordinal
+     FROM dictionary_passage_anchors
+     ORDER BY verse_key, ordinal, entry_id`
+  );
+  const passageAnchorsByVerse = new Map<
+    string,
+    CanonicalDictionaryPassageAnchor["entries"]
+  >();
+  const passageIdentities = new Set<string>();
+  for (const row of passageRows) {
+    const identity = `${row.verse_key}:${row.entry_id}:${row.evidence_kind}`;
+    if (
+      !isDictionaryVerseKey(row.verse_key) ||
+      !entryIds.has(row.entry_id) ||
+      row.evidence_kind !== "source-citation" ||
+      !Number.isSafeInteger(row.ordinal) ||
+      row.ordinal < 0 ||
+      passageIdentities.has(identity)
+    ) {
+      throw new Error(
+        `dictionary-publication-passage-anchor-invalid:${language}`
+      );
+    }
+    passageIdentities.add(identity);
+    const anchors = passageAnchorsByVerse.get(row.verse_key) ?? [];
+    anchors.push({ entryId: row.entry_id, evidenceKind: "source-citation" });
+    passageAnchorsByVerse.set(row.verse_key, anchors);
+  }
+  const passageAnchors = [...passageAnchorsByVerse].map(
+    ([verseKey, passageEntries]) => ({ verseKey, entries: passageEntries })
+  );
+  return { entries, verseAnchors, passageAnchors };
 };
 
 export const deriveDictionaryRevision = (
   work: string,
   language: DictionaryLanguage,
-  content: Pick<CanonicalDictionaryPublication, "entries" | "verseAnchors">
+  content: Pick<
+    CanonicalDictionaryPublication,
+    "entries" | "verseAnchors" | "passageAnchors"
+  >
 ): string => {
   const semanticSha256 = sha256Buffer(
     Buffer.from(
@@ -313,7 +383,8 @@ export const deriveDictionaryRevision = (
         work,
         language,
         entries: content.entries,
-        verseAnchors: content.verseAnchors
+        verseAnchors: content.verseAnchors,
+        passageAnchors: content.passageAnchors
       }),
       "utf8"
     )
@@ -326,6 +397,10 @@ const countCanonical = (canonical: CanonicalDictionaryPublication) => ({
   verseAnchors: canonical.verseAnchors.length,
   wordReferences: canonical.verseAnchors.reduce(
     (total, anchor) => total + anchor.words.length,
+    0
+  ),
+  passageEntryReferences: canonical.passageAnchors.reduce(
+    (total, anchor) => total + anchor.entries.length,
     0
   )
 });
@@ -448,6 +523,7 @@ export async function buildDictionaryResourcePublication(
     sqlitePath: string;
     outputDir: string;
     generatedAt?: string;
+    prepared?: boolean;
   }
 ): Promise<{
   outputDir: string;
@@ -483,15 +559,17 @@ export async function buildDictionaryResourcePublication(
       mkdir(path.dirname(normalizedSqlitePath), { recursive: true })
     ]);
     await copyFile(sourceSqlitePath, normalizedSqlitePath);
-    await execFileAsync(process.execPath, [
-      normalizeDictionarySqliteScript,
-      "--database",
-      normalizedSqlitePath,
-      "--work",
-      options.work,
-      "--language",
-      options.language
-    ]);
+    if (!options.prepared) {
+      await execFileAsync(process.execPath, [
+        normalizeDictionarySqliteScript,
+        "--database",
+        normalizedSqlitePath,
+        "--work",
+        options.work,
+        "--language",
+        options.language
+      ]);
+    }
     const source = await readDictionarySqlite(
       normalizedSqlitePath,
       options.language
@@ -519,7 +597,8 @@ export async function buildDictionaryResourcePublication(
       sourceVersion: options.sourceVersion,
       sourceSha256,
       entries: source.entries,
-      verseAnchors: source.verseAnchors
+      verseAnchors: source.verseAnchors,
+      passageAnchors: source.passageAnchors
     };
     await writePublicationMetadata(normalizedSqlitePath, canonical);
     await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
@@ -629,6 +708,9 @@ export async function buildDictionaryResourcePublication(
 export async function buildAllDictionaryResourcePublications(options: {
   outputDir: string;
   publications: Array<DictionaryPublicationMetadata & { sqlitePath: string }>;
+  normalizationPublications?: Array<
+    DictionaryPublicationMetadata & { sqlitePath: string }
+  >;
   generatedAt?: string;
 }): Promise<DictionaryResourcePublicationManifest[]> {
   const outputDir = path.resolve(options.outputDir);
@@ -637,7 +719,31 @@ export async function buildAllDictionaryResourcePublications(options: {
   const stagingDir = await mkdtemp(
     path.join(tmpdir(), "dictionary-publications-")
   );
+  const normalizationDir = await mkdtemp(
+    path.join(tmpdir(), "dictionary-normalization-")
+  );
   try {
+    const normalizationConfigPath = path.join(normalizationDir, "dictionary.json");
+    const normalizedRoot = path.join(normalizationDir, "normalized");
+    await writeFile(
+      normalizationConfigPath,
+      `${JSON.stringify(
+        {
+          publications:
+            options.normalizationPublications ?? options.publications
+        },
+        null,
+        2
+      )}\n`,
+      "utf8"
+    );
+    await execFileAsync(process.execPath, [
+      normalizeDictionaryLibraryScript,
+      "--config",
+      normalizationConfigPath,
+      "--output-root",
+      normalizedRoot
+    ], { maxBuffer: 16 * 1024 * 1024 });
     const manifests: DictionaryResourcePublicationManifest[] = [];
     const identities = new Set<string>();
     for (const publication of options.publications) {
@@ -649,6 +755,8 @@ export async function buildAllDictionaryResourcePublications(options: {
       identities.add(identity);
       const result = await buildDictionaryResourcePublication({
         ...publication,
+        sqlitePath: path.join(normalizedRoot, `${publication.work}.sqlite`),
+        prepared: true,
         generatedAt: options.generatedAt,
         outputDir: path.join(stagingDir, publication.work, publication.language)
       });
@@ -660,6 +768,8 @@ export async function buildAllDictionaryResourcePublications(options: {
   } catch (error) {
     await rm(stagingDir, { recursive: true, force: true });
     throw error;
+  } finally {
+    await rm(normalizationDir, { recursive: true, force: true });
   }
 }
 
@@ -801,6 +911,7 @@ const decodeCanonicalDictionary = (
     !isSha256(candidate.sourceSha256) ||
     !Array.isArray(candidate.entries) ||
     !Array.isArray(candidate.verseAnchors) ||
+    !Array.isArray(candidate.passageAnchors) ||
     candidate.entries.length === 0
   ) {
     throw new Error("dictionary-publication-canonical-invalid");
@@ -814,6 +925,8 @@ const decodeCanonicalDictionary = (
       !isNonEmptyString(entry.word) ||
       !isNonEmptyString(entry.normalizedWord) ||
       typeof entry.definition !== "string" ||
+      (entry.correspondenceId !== undefined &&
+        !isNonEmptyString(entry.correspondenceId)) ||
       entryIds.has(entry.id)
     ) {
       throw new Error("dictionary-publication-canonical-entry-invalid");
@@ -833,6 +946,33 @@ const decodeCanonicalDictionary = (
       throw new Error("dictionary-publication-canonical-verse-invalid");
     }
     verseKeys.add(anchor.verseKey);
+  }
+  const passageKeys = new Set<string>();
+  for (const anchor of candidate.passageAnchors) {
+    if (
+      !isRecord(anchor) ||
+      !isDictionaryVerseKey(anchor.verseKey) ||
+      !Array.isArray(anchor.entries) ||
+      anchor.entries.length === 0 ||
+      passageKeys.has(anchor.verseKey)
+    ) {
+      throw new Error("dictionary-publication-canonical-passage-invalid");
+    }
+    passageKeys.add(anchor.verseKey);
+    const identities = new Set<string>();
+    for (const entry of anchor.entries) {
+      if (
+        !isRecord(entry) ||
+        !isNonNegativeInteger(entry.entryId) ||
+        entry.entryId === 0 ||
+        !entryIds.has(entry.entryId) ||
+        entry.evidenceKind !== "source-citation" ||
+        identities.has(`${entry.entryId}:${entry.evidenceKind}`)
+      ) {
+        throw new Error("dictionary-publication-canonical-passage-invalid");
+      }
+      identities.add(`${entry.entryId}:${entry.evidenceKind}`);
+    }
   }
   return candidate as CanonicalDictionaryPublication;
 };
@@ -858,6 +998,7 @@ const decodeDictionaryManifest = (
     !isNonNegativeInteger(candidate.counts.entries) ||
     !isNonNegativeInteger(candidate.counts.verseAnchors) ||
     !isNonNegativeInteger(candidate.counts.wordReferences)
+    || !isNonNegativeInteger(candidate.counts.passageEntryReferences)
   ) {
     throw new Error("dictionary-publication-manifest-invalid");
   }
@@ -940,7 +1081,27 @@ const main = async () => {
     outputDir: args["--output-dir"],
     publications: selectedPublications.map((publication) => ({
       ...publication,
-      sqlitePath: path.resolve(configDir, publication.sqlitePath)
+      sqlitePath: path.resolve(configDir, publication.sqlitePath),
+      ...(publication.correspondenceSeedsPath
+        ? {
+            correspondenceSeedsPath: path.resolve(
+              configDir,
+              publication.correspondenceSeedsPath
+            )
+          }
+        : {})
+    })),
+    normalizationPublications: config.publications.map((publication) => ({
+      ...publication,
+      sqlitePath: path.resolve(configDir, publication.sqlitePath),
+      ...(publication.correspondenceSeedsPath
+        ? {
+            correspondenceSeedsPath: path.resolve(
+              configDir,
+              publication.correspondenceSeedsPath
+            )
+          }
+        : {})
     }))
   });
   console.log(

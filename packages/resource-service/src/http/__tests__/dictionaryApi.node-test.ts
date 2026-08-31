@@ -6,6 +6,31 @@ import type { DictionaryRepositoryService } from '../../domain/dictionary'
 import { makeResourceWebHandler } from '../app'
 
 const repository: DictionaryRepositoryService = {
+  browseDirectory: input =>
+    Effect.succeed({
+      items: [
+        {
+          key: 'c:dictionary-correspondence-ange',
+          label: 'Ange',
+          normalizedLabel: 'ange',
+          correspondenceId: 'dictionary-correspondence-ange',
+          sources: [
+            {
+              work: 'westphal',
+              language: input.language,
+              revision: 'dictionary-westphal-fr-r1',
+              resourceId: 'WESTPHAL',
+              title: 'Dictionnaire encyclopédique de la Bible',
+              abbreviation: 'Westphal',
+              id: 43,
+              word: 'Ange',
+              normalizedWord: 'ange',
+            },
+          ],
+        },
+      ],
+      limit: input.limit ?? 100,
+    }),
   listWorks: language =>
     Effect.succeed([
       {
@@ -66,6 +91,37 @@ const repository: DictionaryRepositoryService = {
       verseKey: input.verseKey,
       words: ['ange'],
     }),
+  findPassageAnchors: input =>
+    Effect.succeed({
+      work: input.work,
+      language: input.language,
+      revision: 'dictionary-westphal-fr-r1',
+      verseKey: input.verseKey,
+      entries: [
+        {
+          id: 43,
+          word: 'Ange',
+          normalizedWord: 'ange',
+          evidenceKind: 'source-citation' as const,
+        },
+      ],
+    }),
+  discoverPassageEntries: input =>
+    Effect.succeed([
+      {
+        work: 'westphal',
+        language: input.language ?? 'fr',
+        revision: 'dictionary-westphal-fr-r1',
+        resourceId: 'WESTPHAL',
+        title: 'Dictionnaire encyclopédique de la Bible',
+        abbreviation: 'Westphal',
+        id: 43,
+        word: 'Ange',
+        normalizedWord: 'ange',
+        evidenceKind: 'source-citation' as const,
+        correspondenceId: 'dictionary-correspondence-ange',
+      },
+    ]),
 }
 
 describe('v1 Dictionary API', () => {
@@ -81,6 +137,24 @@ describe('v1 Dictionary API', () => {
       }
       assert.equal(body.dictionaries[0]?.resource.work, 'westphal')
       assert.equal(body.dictionaries[0]?.title, 'Dictionnaire encyclopédique de la Bible')
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('browses one global list while preserving exact source entries', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { dictionary: repository })
+    try {
+      const response = await web.handler(
+        new Request('http://localhost/v1/dictionaries/directory?language=fr&initial=a')
+      )
+      assert.equal(response.status, 200)
+      const body = (await response.json()) as {
+        items: Array<{ label: string; sources: Array<{ resource: { work: string }; id: number }> }>
+      }
+      assert.equal(body.items[0]?.label, 'Ange')
+      assert.equal(body.items[0]?.sources[0]?.resource.work, 'westphal')
+      assert.equal(body.items[0]?.sources[0]?.id, 43)
     } finally {
       await web.dispose()
     }
@@ -124,6 +198,26 @@ describe('v1 Dictionary API', () => {
     }
   })
 
+  it('discovers exact entries for a passage across active dictionaries', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { dictionary: repository })
+    try {
+      const response = await web.handler(
+        new Request('http://localhost/v1/dictionaries/verses/43-3-16/entries?language=fr')
+      )
+      assert.equal(response.status, 200)
+      const body = (await response.json()) as {
+        verseKey: string
+        entries: Array<{ resource: { work: string }; id: number; correspondenceId?: string }>
+      }
+      assert.equal(body.verseKey, '43-3-16')
+      assert.equal(body.entries[0]?.resource.work, 'westphal')
+      assert.equal(body.entries[0]?.id, 43)
+      assert.equal(body.entries[0]?.correspondenceId, 'dictionary-correspondence-ange')
+    } finally {
+      await web.dispose()
+    }
+  })
+
   it('rejects malformed page cursors', async () => {
     const web = makeResourceWebHandler(undefined, undefined, { dictionary: repository })
     try {
@@ -131,6 +225,26 @@ describe('v1 Dictionary API', () => {
         new Request('http://localhost/v1/dictionaries/westphal/fr/entries?cursor=not-a-cursor')
       )
       assert.equal(response.status, 400)
+    } finally {
+      await web.dispose()
+    }
+  })
+
+  it('returns exact evidenced entries for a passage', async () => {
+    const web = makeResourceWebHandler(undefined, undefined, { dictionary: repository })
+    try {
+      const response = await web.handler(
+        new Request(
+          'http://localhost/v1/dictionaries/westphal/fr/verses/43-3-16/entries'
+        )
+      )
+      assert.equal(response.status, 200)
+      const body = (await response.json()) as {
+        entries: Array<{ id: number; word: string; evidenceKind: string }>
+      }
+      assert.deepEqual(body.entries, [
+        { id: 43, word: 'Ange', normalizedWord: 'ange', evidenceKind: 'source-citation' },
+      ])
     } finally {
       await web.dispose()
     }

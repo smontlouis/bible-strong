@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
-import { execFile } from "node:child_process";
+import { execFile, spawn } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -9,6 +9,25 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
+const quoteSql = (value) => `'${String(value).replaceAll("'", "''")}'`;
+
+const executeSql = (databasePath, sql) =>
+  new Promise((resolve, reject) => {
+    const child = spawn("sqlite3", [databasePath], {
+      stdio: ["pipe", "pipe", "pipe"]
+    });
+    let errorOutput = "";
+    child.stderr.setEncoding("utf8");
+    child.stderr.on("data", (chunk) => {
+      errorOutput += chunk;
+    });
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`sqlite3-exit-${code}:${errorOutput.trim()}`));
+    });
+    child.stdin.end(`${sql}\n`);
+  });
 const workflowRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   ".."
@@ -268,6 +287,63 @@ export const buildDictionaryCorrespondences = async ({
     `${JSON.stringify(result, null, 2)}\n`
   );
   return result;
+};
+
+export const installDictionaryCorrespondenceMemberships = async ({
+  configPath = defaultConfigPath,
+  normalizedRoot = defaultNormalizedRoot,
+  correspondenceIndex
+} = {}) => {
+  const config = JSON.parse(await readFile(path.resolve(configPath), "utf8"));
+  const membershipsByWork = new Map(
+    config.publications.map((publication) => [publication.work, []])
+  );
+  for (const group of correspondenceIndex.groups ?? []) {
+    for (const member of group.members ?? []) {
+      const memberships = membershipsByWork.get(member.work);
+      if (!memberships)
+        throw new Error(`dictionary-correspondence-work-unknown:${member.work}`);
+      memberships.push({
+        entryId: Number(member.id),
+        correspondenceId: group.id,
+        label: group.label
+      });
+    }
+  }
+  for (const publication of config.publications) {
+    const databasePath = path.join(
+      path.resolve(normalizedRoot),
+      `${publication.work}.sqlite`
+    );
+    const sql = [
+      "PRAGMA foreign_keys=ON;",
+      "BEGIN IMMEDIATE;",
+      "DROP TABLE IF EXISTS dictionary_correspondences;",
+      `CREATE TABLE dictionary_correspondences (
+         entry_id INTEGER PRIMARY KEY,
+         correspondence_id TEXT NOT NULL,
+         label TEXT NOT NULL,
+         FOREIGN KEY (entry_id) REFERENCES dictionnaire(id) ON DELETE CASCADE
+       );`
+    ];
+    for (const membership of membershipsByWork.get(publication.work) ?? []) {
+      sql.push(
+        `INSERT INTO dictionary_correspondences VALUES (${membership.entryId}, ${quoteSql(membership.correspondenceId)}, ${quoteSql(membership.label)});`
+      );
+    }
+    sql.push(
+      "CREATE INDEX dictionary_correspondences_group ON dictionary_correspondences (correspondence_id, entry_id);",
+      "COMMIT;",
+      "PRAGMA optimize;"
+    );
+    await executeSql(databasePath, sql.join("\n"));
+  }
+  return {
+    memberships: [...membershipsByWork.values()].reduce(
+      (total, memberships) => total + memberships.length,
+      0
+    )
+  };
 };
 
 if (
