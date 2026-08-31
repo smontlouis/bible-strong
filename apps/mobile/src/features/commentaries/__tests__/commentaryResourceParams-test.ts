@@ -2,7 +2,11 @@
 
 jest.mock('~i18n', () => ({ getLanguage: () => 'fr' }))
 
-import { commentaryHrefToOsis, parseCommentaryResourceParams } from '../commentaryResourceParams'
+import {
+  commentaryHrefToOsis,
+  formatCommentaryResourceTabTitle,
+  parseCommentaryResourceParams,
+} from '../commentaryResourceParams'
 
 describe('commentary resource params', () => {
   it('parses a supported commentary projection and passage', () => {
@@ -29,5 +33,23 @@ describe('commentary resource params', () => {
     expect(commentaryHrefToOsis('/Matt_3.13-Matt_3.17')).toBe('Matt.3.13-Matt.3.17')
     expect(commentaryHrefToOsis('https://example.com')).toBeUndefined()
     expect(commentaryHrefToOsis('#index')).toBeUndefined()
+  })
+
+  it('formats the commentary tab title for rooms and entry ranges', () => {
+    expect(
+      formatCommentaryResourceTabTitle({
+        shortName: 'Clarke',
+        bookLabel: 'Genèse',
+        chapter: 1,
+      })
+    ).toBe('Clarke - Genèse 1')
+    expect(
+      formatCommentaryResourceTabTitle({
+        shortName: 'Clarke',
+        bookLabel: 'Genèse',
+        chapter: 1,
+        range: { start: 1, end: 3 },
+      })
+    ).toBe('Clarke - Genèse 1:1-3')
   })
 })

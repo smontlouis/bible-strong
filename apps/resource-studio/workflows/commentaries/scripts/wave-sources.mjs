@@ -87,9 +87,13 @@ export const selectRashiEditions = books => [...RASHI_BOOKS].map(([bookName, boo
 })
 
 export const normalizeSourceMarkup = value => String(value ?? '')
+  .replace(/<(?:applet|embed|figure|iframe|object|script|style)\b[^>]*>[\s\S]*?<\/(?:applet|embed|figure|iframe|object|script|style)\s*>/gi, ' ')
+  .replace(/<(?:applet|embed|figure|iframe|object|script|style|img|image)\b[^>]*\/?\s*>/gi, ' ')
+  .replace(/<\/(?:img|image)\s*>/gi, ' ')
   .replace(/<milestone\b[^>]*\/?\s*>/gi, '')
   .replace(/<(?:chapter|div)\b[^>]*(?:sID|eID)="[^"]*"[^>]*\/?\s*>/gi, '')
   .replace(/<title\b[^>]*>([\s\S]*?)<\/title>/gi, '<h4>$1</h4>')
+  .replace(/<\/?title\b[^>]*>/gi, '')
   .replace(/<hi\b[^>]*type="(?:bold|x-b)"[^>]*>([\s\S]*?)<\/hi>/gi, '<strong>$1</strong>')
   .replace(/<hi\b[^>]*type="(?:italic|x-i)"[^>]*>([\s\S]*?)<\/hi>/gi, '<em>$1</em>')
   .replace(/<hi\b[^>]*>([\s\S]*?)<\/hi>/gi, '<span>$1</span>')

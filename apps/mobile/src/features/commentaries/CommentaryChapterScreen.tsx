@@ -24,6 +24,7 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { getDefaultBibleTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
 import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
+import CommentaryRoomIntro from './CommentaryRoomIntro'
 import { getCoveredCommentaryLocation } from './commentaryResourceNavigation'
 import { parseCommentaryResourceParams } from './commentaryResourceParams'
 
@@ -139,8 +140,7 @@ const CommentaryChapterScreen = () => {
         <Header
           background
           hasBackButton={IS_FORM_SHEET ? canGoBackInStack : true}
-          title={entry.title}
-          subTitle={entry.author}
+          title={entry.author}
           rightComponent={
             <Box mr={4}>
               <CommentaryResourceHeaderActions
@@ -149,41 +149,46 @@ const CommentaryChapterScreen = () => {
                 language={projection.language}
                 book={book}
                 chapter={chapter}
+                showAvatar={false}
               />
             </Box>
           }
         />
         <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 40 }}>
-          <TouchableBox
-            bg="reverse"
-            rounded
-            lightShadow
-            minHeight={64}
-            px={18}
-            row
-            alignItems="center"
-            onPress={() => {
-              openCommentaryBookSelector({
-                openBookSelector,
-                actions: selectorActions,
-                data: selectorTab.data,
-                coverage: coverageQuery.data,
-              })
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={t('commentaries.resource.chooseChapter')}
-          >
-            <FeatherIcon name="book-open" size={21} color="primary" />
-            <Text ml={12} bold fontSize={18} flex>
-              {bookLabel} {chapter}
-            </Text>
+          <CommentaryRoomIntro entry={entry} language={projection.language} />
+
+          <Box row alignItems="center" justifyContent="space-between">
+            <TouchableBox
+              bg="lightGrey"
+              borderRadius={20}
+              height={32}
+              px={12}
+              row
+              alignItems="center"
+              onPress={() => {
+                openCommentaryBookSelector({
+                  openBookSelector,
+                  actions: selectorActions,
+                  data: selectorTab.data,
+                  coverage: coverageQuery.data,
+                })
+              }}
+              accessibilityRole="button"
+              accessibilityLabel={t('commentaries.resource.chooseChapter')}
+            >
+              <Text bold fontSize={14}>
+                {bookLabel} {chapter}
+              </Text>
+              <FeatherIcon name="chevron-down" size={14} color="grey" style={{ marginLeft: 6 }} />
+            </TouchableBox>
             {query.data ? (
-              <Text color="grey" fontSize={13} mr={8}>
-                {t('commentaries.resource.sectionCount', { count: query.data.sections.length })}
+              <Text color="grey" fontSize={13}>
+                {t('commentaries.resource.commentaryCount', {
+                  count: query.data.sections.length,
+                })}
               </Text>
             ) : null}
-            <FeatherIcon name="chevron-down" size={19} color="grey" />
-          </TouchableBox>
+          </Box>
 
           {query.isPending ? (
             <Box minHeight={180} center>
@@ -201,17 +206,12 @@ const CommentaryChapterScreen = () => {
               message={t('commentaries.resource.emptyChapter')}
             />
           ) : (
-            <Box mt={18} gap={14}>
+            <Box mt={16} gap={12}>
               {query.data.sections.map(section => {
                 const highlighted =
                   Number.isSafeInteger(focusVerse) &&
                   focusVerse >= section.rangeStartVerse &&
                   focusVerse <= section.rangeEndVerse
-                const passage = `${bookLabel} ${chapter}:${formatRange(
-                  section.rangeStartVerse,
-                  section.rangeEndVerse,
-                  t('commentaries.resource.introduction')
-                )}`
                 return (
                   <TouchableBox
                     key={section.id}
@@ -219,7 +219,7 @@ const CommentaryChapterScreen = () => {
                     rounded
                     lightShadow
                     px={17}
-                    py={16}
+                    py={14}
                     borderWidth={highlighted ? 2 : 0}
                     borderColor="primary"
                     activeOpacity={0.62}
@@ -237,8 +237,8 @@ const CommentaryChapterScreen = () => {
                     accessibilityRole="button"
                   >
                     <Box row alignItems="flex-start">
-                      <Box px={11} py={7} borderRadius={14} bg="lightPrimary">
-                        <Text color="primary" bold fontSize={15}>
+                      <Box px={10} py={5} borderRadius={12} bg="lightPrimary">
+                        <Text color="primary" bold fontSize={12}>
                           {formatRange(
                             section.rangeStartVerse,
                             section.rangeEndVerse,
@@ -247,8 +247,8 @@ const CommentaryChapterScreen = () => {
                         </Text>
                       </Box>
                       <Box ml={13} flex>
-                        <Text bold fontSize={18} numberOfLines={2}>
-                          {section.title ?? passage}
+                        <Text color="grey" fontSize={14} lineHeight={20} numberOfLines={2}>
+                          {section.preview}
                         </Text>
                         {highlighted ? (
                           <Text color="primary" fontSize={12} mt={3}>
@@ -258,9 +258,6 @@ const CommentaryChapterScreen = () => {
                       </Box>
                       <FeatherIcon name="chevron-right" size={20} color="grey" />
                     </Box>
-                    <Text mt={11} color="grey" fontSize={15} lineHeight={21} numberOfLines={4}>
-                      {section.preview}
-                    </Text>
                   </TouchableBox>
                 )
               })}

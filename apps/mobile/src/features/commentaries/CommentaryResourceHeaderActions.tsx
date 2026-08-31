@@ -17,6 +17,7 @@ const CommentaryResourceHeaderActions = ({
   book,
   chapter,
   sectionId,
+  showAvatar = true,
 }: {
   entry: CommentaryCatalogEntry
   projectionId: CommentaryProjectionId
@@ -24,18 +25,21 @@ const CommentaryResourceHeaderActions = ({
   book: number
   chapter: number
   sectionId?: string
+  showAvatar?: boolean
 }) => {
   const { t } = useTranslation()
   const openInNewTab = useOpenInNewTab()
 
   return (
     <Box row alignItems="center">
-      <CommentaryAvatar
-        resourceCode={`${entry.publicationId}:${language}`}
-        author={entry.author}
-        fallback={entry.shortName}
-        size={42}
-      />
+      {showAvatar ? (
+        <CommentaryAvatar
+          resourceCode={`${entry.publicationId}:${language}`}
+          author={entry.author}
+          fallback={entry.shortName}
+          size={42}
+        />
+      ) : null}
       <MenuView
         actions={[
           {

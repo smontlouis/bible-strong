@@ -15,7 +15,10 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 
-import { materializeCommentaryBibleLinks } from "./commentaryPublicationHtml.js";
+import {
+  materializeCommentaryBibleLinks,
+  sanitizeCommentaryPublicationHtml
+} from "./commentaryPublicationHtml.js";
 
 const execFileAsync = promisify(execFile);
 const REPRODUCIBLE_ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
@@ -204,10 +207,14 @@ const htmlForLanguage = (
     entry.translation?.language === language &&
     entry.translation.html.trim()
   ) {
-    return materializeCommentaryBibleLinks(entry.translation).trim();
+    return sanitizeCommentaryPublicationHtml(
+      materializeCommentaryBibleLinks(entry.translation)
+    );
   }
   if (entry.source.language === language && entry.source.html.trim()) {
-    return materializeCommentaryBibleLinks(entry.source).trim();
+    return sanitizeCommentaryPublicationHtml(
+      materializeCommentaryBibleLinks(entry.source)
+    );
   }
   return undefined;
 };

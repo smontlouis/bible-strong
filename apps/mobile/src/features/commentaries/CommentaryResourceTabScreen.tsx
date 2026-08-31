@@ -12,9 +12,9 @@ import Loading from '~common/Loading'
 import StylizedHTMLView from '~common/StylizedHTMLView'
 import ScrollView from '~common/ui/ScrollView'
 import Box, { TouchableBox } from '~common/ui/Box'
+import FormSheetScreen from '~common/ui/FormSheetScreen'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
 import { useBookAndVersionSelector } from '~features/bible/BookSelectorSheet/BookSelectorSheetProvider'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { useResourceAccess } from '~features/resources/resourceAccess'
@@ -23,10 +23,18 @@ import { getBook } from '~helpers/bibleBookCatalog'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { getDefaultBibleTab, type CommentaryResourceTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
-import CommentaryAvatar from './CommentaryAvatar'
-import { getCommentaryBibleViewRoute } from './commentaryReferenceNavigation'
+import CommentaryEntryNavigation from './CommentaryEntryNavigation'
+import CommentaryRoomIntro from './CommentaryRoomIntro'
+import {
+  getCommentaryBibleViewRoute,
+  getCommentaryPassageBibleViewRoute,
+} from './commentaryReferenceNavigation'
 import { getCoveredCommentaryLocation } from './commentaryResourceNavigation'
-import { commentaryHrefToOsis, parseCommentaryResourceParams } from './commentaryResourceParams'
+import {
+  commentaryHrefToOsis,
+  formatCommentaryResourceTabTitle,
+  parseCommentaryResourceParams,
+} from './commentaryResourceParams'
 
 const formatRange = (start: number, end: number) => (start === end ? `${start}` : `${start}–${end}`)
 
@@ -44,7 +52,6 @@ const CommentaryResourceTabScreen = ({
   const resources = useResourceAccess()
   const router = useRouter()
   const { t } = useTranslation()
-  const { bottomBarHeight } = useBottomBarHeightInTab()
   const { openBookSelector } = useBookAndVersionSelector()
   const [selectorAtom] = React.useState(() => {
     const initial = getDefaultBibleTab()
@@ -61,6 +68,7 @@ const CommentaryResourceTabScreen = ({
   })
   const selectorTab = useAtomValue(selectorAtom)
   const selectorActions = useBibleTabActions(selectorAtom)
+  const detailScrollRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null)
 
   useEffect(() => {
     if (!parsed) return
@@ -75,15 +83,6 @@ const CommentaryResourceTabScreen = ({
       })
     )
   }, [parsed, selectorTab.data.selectedBook.Numero, selectorTab.data.selectedChapter, setTab])
-
-  useEffect(() => {
-    if (!parsed || tab.title === parsed.entry.shortName) return
-    setTab(
-      produce(draft => {
-        draft.title = parsed.entry.shortName
-      })
-    )
-  }, [parsed, setTab, tab.title])
 
   const query = useQuery({
     queryKey: [
@@ -103,6 +102,31 @@ const CommentaryResourceTabScreen = ({
     networkMode: 'always',
     retry: false,
   })
+  const titleSection = tab.data.sectionId
+    ? query.data?.sections.find(candidate => candidate.id === tab.data.sectionId)
+    : undefined
+  const titleBookLabel = parsed ? (getBook(parsed.book)?.Nom ?? String(parsed.book)) : undefined
+  const desiredTabTitle =
+    parsed && titleBookLabel
+      ? formatCommentaryResourceTabTitle({
+          shortName: parsed.entry.shortName,
+          bookLabel: titleBookLabel,
+          chapter: parsed.chapter,
+          range: titleSection
+            ? { start: titleSection.rangeStartVerse, end: titleSection.rangeEndVerse }
+            : undefined,
+        })
+      : undefined
+
+  useEffect(() => {
+    if (!desiredTabTitle || tab.title === desiredTabTitle) return
+    setTab(
+      produce(draft => {
+        draft.title = desiredTabTitle
+      })
+    )
+  }, [desiredTabTitle, setTab, tab.title])
+
   const coverageQuery = useQuery({
     queryKey: resourceQueryKeys.commentaryCoverage(
       parsed?.projection.resourceId ?? '',
@@ -132,13 +156,15 @@ const CommentaryResourceTabScreen = ({
 
   if (!parsed) {
     return (
-      <Box flex bg="lightGrey">
-        <Header background title={t('Commentaires')} />
-        <ResourceUnavailableView
-          title={t('commentaries.resource.invalid')}
-          failure={{ cause: 'not-found', recoveries: [] }}
-        />
-      </Box>
+      <FormSheetScreen isFormSheet={false}>
+        <Box flex bg="lightGrey">
+          <Header background title={t('Commentaires')} />
+          <ResourceUnavailableView
+            title={t('commentaries.resource.invalid')}
+            failure={{ cause: 'not-found', recoveries: [] }}
+          />
+        </Box>
+      </FormSheetScreen>
     )
   }
 
@@ -146,163 +172,234 @@ const CommentaryResourceTabScreen = ({
   const section = tab.data.sectionId
     ? query.data?.sections.find(candidate => candidate.id === tab.data.sectionId)
     : undefined
+  const sectionIndex = tab.data.sectionId
+    ? query.data?.sections.findIndex(candidate => candidate.id === tab.data.sectionId)
+    : undefined
+  const previousSection =
+    sectionIndex !== undefined && sectionIndex > 0
+      ? query.data?.sections[sectionIndex - 1]
+      : undefined
+  const nextSection =
+    sectionIndex !== undefined && sectionIndex >= 0
+      ? query.data?.sections[sectionIndex + 1]
+      : undefined
   const bookLabel = getBook(book)?.Nom ?? String(book)
-  const avatar = (
-    <Box mr={14}>
-      <CommentaryAvatar
-        resourceCode={`${entry.publicationId}:${projection.language}`}
-        author={entry.author}
-        fallback={entry.shortName}
-        size={42}
-      />
-    </Box>
-  )
-
+  const passage = section
+    ? `${bookLabel} ${chapter}:${formatRange(section.rangeStartVerse, section.rangeEndVerse)}`
+    : undefined
   return (
-    <Box flex bg="lightGrey">
-      <Header
-        background
-        hasBackButton={Boolean(tab.data.sectionId)}
-        onCustomBackPress={() =>
-          setTab(
-            produce(draft => {
-              draft.data.sectionId = undefined
-            })
-          )
-        }
-        title={entry.title}
-        subTitle={entry.author}
-        rightComponent={avatar}
-      />
-
-      {query.isPending ? (
-        <Box flex center>
-          <Loading />
-        </Box>
-      ) : query.isError ? (
-        <ResourceUnavailableView
-          title={t('commentaries.resource.unavailable')}
-          failure={resourceFailureFromAccessError(query.error)}
-          onRetry={() => void query.refetch()}
-        />
-      ) : tab.data.sectionId ? (
-        !section ? (
-          <ResourceUnavailableView
-            title={t('commentaries.resource.sectionMissing')}
-            failure={{ cause: 'not-found', recoveries: [] }}
-          />
-        ) : (
-          <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: bottomBarHeight + 32 }}>
-            <Box bg="reverse" rounded lightShadow px={18} py={18}>
-              <Box alignSelf="flex-start" px={11} py={7} borderRadius={14} bg="lightPrimary">
-                <Text color="primary" bold>
-                  {bookLabel} {chapter}:
-                  {formatRange(section.rangeStartVerse, section.rangeEndVerse)}
-                </Text>
-              </Box>
-              {section.title ? (
-                <Text mt={16} bold fontSize={22} lineHeight={27}>
-                  {section.title}
-                </Text>
-              ) : null}
-              <Box mt={14}>
-                <StylizedHTMLView
-                  value={section.content}
-                  onLinkPress={href => {
-                    const osis = commentaryHrefToOsis(href)
-                    const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
-                    if (route) router.push(route)
-                  }}
-                />
-              </Box>
-            </Box>
-          </ScrollView>
-        )
-      ) : (
-        <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: bottomBarHeight + 32 }}>
-          <TouchableBox
-            bg="reverse"
-            rounded
-            lightShadow
-            minHeight={64}
-            px={18}
-            row
-            alignItems="center"
-            onPress={() => {
-              openCommentaryBookSelector({
-                openBookSelector,
-                actions: selectorActions,
-                data: selectorTab.data,
-                coverage: coverageQuery.data,
+    <FormSheetScreen isFormSheet={false}>
+      <Box flex bg="lightGrey">
+        <Header
+          background
+          hasBackButton={Boolean(tab.data.sectionId)}
+          onCustomBackPress={() =>
+            setTab(
+              produce(draft => {
+                draft.data.sectionId = undefined
               })
-            }}
-            accessibilityRole="button"
-            accessibilityLabel={t('commentaries.resource.chooseChapter')}
-          >
-            <FeatherIcon name="book-open" size={21} color="primary" />
-            <Text ml={12} bold fontSize={18} flex>
-              {bookLabel} {chapter}
-            </Text>
-            <Text color="grey" fontSize={13} mr={8}>
-              {t('commentaries.resource.sectionCount', { count: query.data.sections.length })}
-            </Text>
-            <FeatherIcon name="chevron-down" size={19} color="grey" />
-          </TouchableBox>
+            )
+          }
+          title={entry.author}
+          subTitle={passage}
+        />
 
-          {query.data.sections.length === 0 ? (
-            <Empty
-              icon={require('~assets/images/empty-state-icons/comment.svg')}
-              message={t('commentaries.resource.emptyChapter')}
+        {tab.data.sectionId ? (
+          query.isPending ? (
+            <Box flex center>
+              <Loading />
+            </Box>
+          ) : query.isError ? (
+            <ResourceUnavailableView
+              title={t('commentaries.resource.unavailable')}
+              failure={resourceFailureFromAccessError(query.error)}
+              onRetry={() => void query.refetch()}
+            />
+          ) : !section ? (
+            <ResourceUnavailableView
+              title={t('commentaries.resource.sectionMissing')}
+              failure={{ cause: 'not-found', recoveries: [] }}
             />
           ) : (
-            <Box mt={18} gap={14}>
-              {query.data.sections.map(candidate => {
-                const passage = `${bookLabel} ${chapter}:${formatRange(
-                  candidate.rangeStartVerse,
-                  candidate.rangeEndVerse
-                )}`
-                return (
-                  <TouchableBox
-                    key={candidate.id}
-                    bg="reverse"
-                    rounded
-                    lightShadow
-                    px={17}
-                    py={16}
-                    activeOpacity={0.62}
-                    onPress={() =>
-                      setTab(
-                        produce(draft => {
-                          draft.data.sectionId = candidate.id
-                        })
-                      )
-                    }
-                    accessibilityRole="button"
-                  >
-                    <Box row alignItems="flex-start">
-                      <Box px={11} py={7} borderRadius={14} bg="lightPrimary">
-                        <Text color="primary" bold fontSize={15}>
-                          {formatRange(candidate.rangeStartVerse, candidate.rangeEndVerse)}
-                        </Text>
-                      </Box>
-                      <Box ml={13} flex>
-                        <Text bold fontSize={18} numberOfLines={2}>
-                          {candidate.title ?? passage}
-                        </Text>
-                      </Box>
-                      <FeatherIcon name="chevron-right" size={20} color="grey" />
-                    </Box>
-                    <Text mt={11} color="grey" fontSize={15} lineHeight={21} numberOfLines={4}>
-                      {candidate.preview}
-                    </Text>
-                  </TouchableBox>
-                )
-              })}
+            <ScrollView
+              ref={detailScrollRef}
+              contentContainerStyle={{ padding: 18, paddingBottom: 32 }}
+            >
+              <CommentaryRoomIntro
+                compact
+                entry={entry}
+                language={projection.language}
+                onPress={() =>
+                  setTab(
+                    produce(draft => {
+                      draft.data.sectionId = undefined
+                    })
+                  )
+                }
+              />
+              <Box bg="reverse" rounded lightShadow px={18} py={18}>
+                <CommentaryEntryNavigation
+                  hasPrevious={Boolean(previousSection)}
+                  hasNext={Boolean(nextSection)}
+                  reference={
+                    section.rangeStartVerse === 0 && section.rangeEndVerse === 0
+                      ? t('commentaries.resource.introduction')
+                      : passage!
+                  }
+                  referenceDisabled={section.rangeStartVerse === 0}
+                  onReferencePress={() => {
+                    const route = getCommentaryPassageBibleViewRoute({
+                      book,
+                      chapter,
+                      startVerse: section.rangeStartVerse,
+                      endVerse: section.rangeEndVerse,
+                    })
+                    if (route) router.push(route)
+                  }}
+                  onPrevious={() => {
+                    if (!previousSection) return
+                    setTab(
+                      produce(draft => {
+                        draft.data.sectionId = previousSection.id
+                      })
+                    )
+                    detailScrollRef.current?.scrollTo({ y: 0, animated: true })
+                  }}
+                  onNext={() => {
+                    if (!nextSection) return
+                    setTab(
+                      produce(draft => {
+                        draft.data.sectionId = nextSection.id
+                      })
+                    )
+                    detailScrollRef.current?.scrollTo({ y: 0, animated: true })
+                  }}
+                />
+                <Box mt={14}>
+                  <StylizedHTMLView
+                    value={section.content}
+                    onLinkPress={href => {
+                      const osis = commentaryHrefToOsis(href)
+                      const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
+                      if (route) router.push(route)
+                    }}
+                  />
+                </Box>
+              </Box>
+            </ScrollView>
+          )
+        ) : (
+          <ScrollView
+            stickyHeaderIndices={[1]}
+            contentContainerStyle={{ padding: 18, paddingBottom: 32 }}
+          >
+            <CommentaryRoomIntro entry={entry} language={projection.language} />
+
+            <Box
+              row
+              alignItems="center"
+              justifyContent="space-between"
+              mx={-18}
+              px={18}
+              py={8}
+              bg="lightGrey"
+              zIndex={10}
+            >
+              <TouchableBox
+                bg="lightGrey"
+                borderRadius={20}
+                height={32}
+                px={12}
+                row
+                alignItems="center"
+                onPress={() => {
+                  openCommentaryBookSelector({
+                    openBookSelector,
+                    actions: selectorActions,
+                    data: selectorTab.data,
+                    coverage: coverageQuery.data,
+                  })
+                }}
+                accessibilityRole="button"
+                accessibilityLabel={t('commentaries.resource.chooseChapter')}
+              >
+                <Text bold fontSize={14}>
+                  {bookLabel} {chapter}
+                </Text>
+                <FeatherIcon name="chevron-down" size={14} color="grey" style={{ marginLeft: 6 }} />
+              </TouchableBox>
+              {query.data ? (
+                <Text color="grey" fontSize={13}>
+                  {t('commentaries.resource.commentaryCount', {
+                    count: query.data.sections.length,
+                  })}
+                </Text>
+              ) : null}
             </Box>
-          )}
-        </ScrollView>
-      )}
-    </Box>
+
+            {query.isPending ? (
+              <Box py={40} center>
+                <Loading />
+              </Box>
+            ) : query.isError ? (
+              <ResourceUnavailableView
+                title={t('commentaries.resource.unavailable')}
+                failure={resourceFailureFromAccessError(query.error)}
+                onRetry={() => void query.refetch()}
+              />
+            ) : query.data.sections.length === 0 ? (
+              <Empty
+                icon={require('~assets/images/empty-state-icons/comment.svg')}
+                message={t('commentaries.resource.emptyChapter')}
+              />
+            ) : (
+              <Box mt={16} gap={12}>
+                {query.data.sections.map(candidate => {
+                  return (
+                    <TouchableBox
+                      key={candidate.id}
+                      bg="reverse"
+                      rounded
+                      lightShadow
+                      px={17}
+                      py={14}
+                      activeOpacity={0.62}
+                      onPress={() =>
+                        setTab(
+                          produce(draft => {
+                            draft.data.sectionId = candidate.id
+                          })
+                        )
+                      }
+                      accessibilityRole="button"
+                    >
+                      <Box row alignItems="flex-start">
+                        <Box px={10} py={5} borderRadius={12} bg="lightPrimary">
+                          <Text color="primary" bold fontSize={12}>
+                            {formatRange(candidate.rangeStartVerse, candidate.rangeEndVerse)}
+                          </Text>
+                        </Box>
+                        <Text
+                          ml={13}
+                          flex
+                          color="grey"
+                          fontSize={14}
+                          lineHeight={20}
+                          numberOfLines={2}
+                        >
+                          {candidate.preview}
+                        </Text>
+                        <FeatherIcon name="chevron-right" size={20} color="grey" />
+                      </Box>
+                    </TouchableBox>
+                  )
+                })}
+              </Box>
+            )}
+          </ScrollView>
+        )}
+      </Box>
+    </FormSheetScreen>
   )
 }
 

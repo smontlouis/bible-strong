@@ -7,7 +7,7 @@ import { useTheme } from '@emotion/react'
 import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
 import React from 'react'
-import { SectionList, TouchableOpacity } from 'react-native'
+import { InteractionManager, SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -22,6 +22,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
 import { getLocalResourceAvailability } from '~features/resources/resourceAvailability'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
+import { resourcePublicationStore } from '~helpers/resourcePublication'
 import { installedVersionsSignalAtom } from '~state/app'
 import { downloadCompletionSignalAtom } from '~state/downloadQueue'
 import CommentaryOfflineDetailsSheet from './CommentaryOfflineDetailsSheet'
@@ -65,32 +66,20 @@ type CommentarySection = {
 const CommentarySelectorItem = ({
   projection,
   selected,
+  installed,
   selectionDisabled,
   onToggle,
   onOpenDetails,
 }: {
   projection: CommentaryProjection
   selected: boolean
+  installed: boolean
   selectionDisabled: boolean
   onToggle: () => void
   onOpenDetails: () => void
 }) => {
   const { t } = useTranslation()
-  const installedSignal = useAtomValue(installedVersionsSignalAtom)
-  const completionSignal = useAtomValue(downloadCompletionSignalAtom)
-  const { entry, language } = projection
-  const identity = {
-    kind: 'commentary' as const,
-    resourceId: entry.publicationId,
-    language,
-  }
-  const itemId = createOfflineCopyId(identity)
-  const availability = useQuery({
-    queryKey: ['commentary-selector-availability', itemId, installedSignal, completionSignal],
-    queryFn: () => getLocalResourceAvailability(identity),
-    networkMode: 'always',
-  })
-  const installed = availability.data?.status === 'available'
+  const { entry } = projection
 
   return (
     <Box
@@ -153,6 +142,8 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
   const theme = useTheme()
   const insets = useSafeAreaInsets()
   const dispatch = useDispatch()
+  const installedSignal = useAtomValue(installedVersionsSignalAtom)
+  const completionSignal = useAtomValue(downloadCompletionSignalAtom)
   const selected = useSelector((state: RootState) => state.user.bible.settings.commentarySelection)
   const [query, setQuery] = React.useState('')
   const [traditions, setTraditions] = React.useState<string[]>([])
@@ -163,7 +154,60 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
   const traditionsRef = React.useRef<SheetRef>(null)
   const currentsRef = React.useRef<SheetRef>(null)
   const detailsRef = React.useRef<SheetRef>(null)
+  const availabilityTaskRef = React.useRef<ReturnType<
+    typeof InteractionManager.runAfterInteractions
+  > | null>(null)
+  const [availabilityEnabled, setAvailabilityEnabled] = React.useState(false)
   const normalizedQuery = query.trim().toLocaleLowerCase()
+  const projections = React.useMemo(
+    () =>
+      COMMENTARY_CATALOG.flatMap(entry =>
+        entry.languages.map(language => ({
+          entry,
+          language,
+          projectionId: createCommentaryProjectionId(entry.id, language),
+        }))
+      ),
+    []
+  )
+  const registeredInstalledProjectionIds = new Set(
+    projections.flatMap(projection => {
+      const itemId = createOfflineCopyId({
+        kind: 'commentary',
+        resourceId: projection.entry.publicationId,
+        language: projection.language,
+      })
+      return resourcePublicationStore.read(itemId) ? [projection.projectionId] : []
+    })
+  )
+  const availability = useQuery({
+    queryKey: ['commentary-selector-availability-map', installedSignal, completionSignal],
+    queryFn: async () => {
+      const results = await Promise.all(
+        projections.map(async projection => {
+          const result = await getLocalResourceAvailability({
+            kind: 'commentary',
+            resourceId: projection.entry.publicationId,
+            language: projection.language,
+          })
+          return result.status === 'available' ? projection.projectionId : undefined
+        })
+      )
+      return new Set(results.filter((result): result is CommentaryProjectionId => Boolean(result)))
+    },
+    enabled: availabilityEnabled,
+    initialData: registeredInstalledProjectionIds,
+    initialDataUpdatedAt: 0,
+    networkMode: 'always',
+  })
+  const installedProjectionIds = availability.data ?? registeredInstalledProjectionIds
+
+  React.useEffect(
+    () => () => {
+      availabilityTaskRef.current?.cancel()
+    },
+    []
+  )
   const selectedProjections = React.useMemo(
     () =>
       selected.flatMap(projectionId => {
@@ -175,33 +219,31 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
     [selected]
   )
 
-  const sections: CommentarySection[] = (['fr', 'en'] as const)
-    .map(language => ({
-      title: t(`versionCatalog.language.${language}`),
-      data: COMMENTARY_CATALOG.flatMap(entry => {
-        if (!entry.languages.includes(language)) return []
-        if (!matchesCommentaryTaxonomyFilters(entry, traditions, currents)) return []
-        const searchable = [
-          entry.title,
-          entry.author,
-          entry.shortName,
-          entry.tradition,
-          ...entry.tags,
-          entry.description[language] ?? '',
-        ]
-          .join(' ')
-          .toLocaleLowerCase()
-        if (normalizedQuery && !searchable.includes(normalizedQuery)) return []
-        return [
-          {
-            entry,
-            language,
-            projectionId: createCommentaryProjectionId(entry.id, language),
-          },
-        ]
-      }),
-    }))
-    .filter(section => section.data.length > 0)
+  const sections: CommentarySection[] = React.useMemo(
+    () =>
+      (['fr', 'en'] as const)
+        .map(language => ({
+          title: t(`versionCatalog.language.${language}`),
+          data: projections.filter(projection => {
+            if (projection.language !== language) return false
+            const { entry } = projection
+            if (!matchesCommentaryTaxonomyFilters(entry, traditions, currents)) return false
+            const searchable = [
+              entry.title,
+              entry.author,
+              entry.shortName,
+              entry.tradition,
+              ...entry.tags,
+              entry.description[language] ?? '',
+            ]
+              .join(' ')
+              .toLocaleLowerCase()
+            return !normalizedQuery || searchable.includes(normalizedQuery)
+          }),
+        }))
+        .filter(section => section.data.length > 0),
+    [currents, normalizedQuery, projections, t, traditions]
+  )
 
   const toggle = (projectionId: CommentaryProjectionId) => {
     const result = toggleCommentarySelection(selected, projectionId)
@@ -212,9 +254,7 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
   const removeSelection = React.useCallback(
     (projectionId: CommentaryProjectionId) => {
       dispatch(
-        setSettingsCommentarySelection(
-          selected.filter(candidate => candidate !== projectionId)
-        )
+        setSettingsCommentarySelection(selected.filter(candidate => candidate !== projectionId))
       )
     },
     [dispatch, selected]
@@ -223,9 +263,7 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
   const moveSelection = React.useCallback(
     (fromIndex: number, toIndex: number) => {
       dispatch(
-        reorderSettingsCommentarySelection(
-          reorderCommentarySelection(selected, fromIndex, toIndex)
-        )
+        reorderSettingsCommentarySelection(reorderCommentarySelection(selected, fromIndex, toIndex))
       )
     },
     [dispatch, selected]
@@ -260,6 +298,16 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
         onPresent={() => {
           setQuery('')
           setLimitReached(false)
+          availabilityTaskRef.current?.cancel()
+          availabilityTaskRef.current = InteractionManager.runAfterInteractions(() => {
+            availabilityTaskRef.current = null
+            setAvailabilityEnabled(true)
+          })
+        }}
+        onClose={() => {
+          availabilityTaskRef.current?.cancel()
+          availabilityTaskRef.current = null
+          setAvailabilityEnabled(false)
         }}
         header={
           <>
@@ -311,6 +359,9 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
           sections={sections}
           stickySectionHeadersEnabled
           keyboardShouldPersistTaps="handled"
+          initialNumToRender={6}
+          maxToRenderPerBatch={6}
+          windowSize={5}
           keyExtractor={item => item.projectionId}
           contentContainerStyle={{
             paddingBottom: insets.bottom,
@@ -346,6 +397,7 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
               <CommentarySelectorItem
                 projection={item}
                 selected={isSelected}
+                installed={installedProjectionIds.has(item.projectionId)}
                 selectionDisabled={!isSelected && selected.length >= MAX_SELECTED_COMMENTARIES}
                 onToggle={() => toggle(item.projectionId)}
                 onOpenDetails={() => openDetails(item)}

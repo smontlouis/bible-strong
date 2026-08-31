@@ -1032,7 +1032,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "barnes-en-8bdf07ce22d34a983853"
+    "resourceRevision": "barnes-en-b03b02707ab409656471"
   },
   {
     "id": "database:barnes:fr",
@@ -1045,7 +1045,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "barnes-fr-7d3653ffd52ae9c4d49b"
+    "resourceRevision": "barnes-fr-833aed48200b2ba6726f"
   },
   {
     "id": "database:bible-annotee:fr",
@@ -1084,7 +1084,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "calvin-en-b946a855d98035ade556"
+    "resourceRevision": "calvin-en-cd97f68a4494cb717d44"
   },
   {
     "id": "database:catena-aurea:en",
@@ -1186,7 +1186,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "fre-aug-fr-e29036acec068975843d"
+    "resourceRevision": "fre-aug-fr-415245c703a304a8b771"
   },
   {
     "id": "database:fre-chry:fr",
@@ -1199,7 +1199,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "fre-chry-fr-49cdc837306518a0a69b"
+    "resourceRevision": "fre-chry-fr-2bdfedc472c938567396"
   },
   {
     "id": "database:geneva-notes:en",
@@ -1264,7 +1264,7 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "lightfoot-en-0a9ec992ea25249d71ae"
+    "resourceRevision": "lightfoot-en-9d64acedb0a6da58d4be"
   },
   {
     "id": "database:luther:en",

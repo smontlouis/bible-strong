@@ -194,7 +194,6 @@ describe('commentary access', () => {
       id: 'barnes-en-41-1-1-2',
       rangeStartVerse: 1,
       rangeEndVerse: 2,
-      title: 'The beginning',
       content: fullContent,
     })
     expect(chapter.sections[0].content.length).toBeGreaterThan(1_200)
@@ -229,22 +228,58 @@ describe('commentary access', () => {
       expect.objectContaining({
         rangeStartVerse: 1,
         rangeEndVerse: 2,
-        title: '1–2: Shared section',
         content: shared,
       }),
       expect.objectContaining({
         rangeStartVerse: 2,
         rangeEndVerse: 2,
-        title: 'Verse two',
         content: verseTwo,
       }),
       expect.objectContaining({
         rangeStartVerse: 3,
         rangeEndVerse: 5,
-        title: '3–5: Next section',
         content: nextShared,
       }),
     ])
+  })
+
+  it('uses the same section identity in verse previews and the commentary room', async () => {
+    const shared = '<p>James explains the causes of conflict among people.</p>'
+    const local = source(async () => ({
+      4: `${shared}<hr><p>Verse four</p>`,
+      5: `${shared}<hr><p>Verse five</p>`,
+      6: shared,
+      7: `${shared}<hr><p>Verse seven</p>`,
+      8: `${shared}<hr><p>Verse eight</p>`,
+      9: shared,
+      10: `${shared}<hr><p>Verse ten</p>`,
+    }))
+    const access = createCommentaryAccess({ local, isOnline: async () => false })
+
+    const [verseChapter, resourceChapter] = await Promise.all([
+      access.loadChapter({
+        book: 59,
+        chapter: 4,
+        resources: [{ resourceId: 'aquifer-fr', language: 'en' }],
+      }),
+      access.loadResourceChapter({
+        resourceId: 'aquifer-fr',
+        language: 'en',
+        book: 59,
+        chapter: 4,
+      }),
+    ])
+
+    const verseComment = verseChapter.commentsByVerse['6'][0]
+    expect(resourceChapter.sections.some(section => section.id === verseComment.sectionId)).toBe(
+      true
+    )
+    expect(verseComment).toMatchObject({
+      sectionId: 'aquifer-fr-en-59-4-4-10',
+      rangeStartVerse: 4,
+      rangeEndVerse: 10,
+      content: 'James explains the causes of conflict among people.',
+    })
   })
 
   it('requests and validates one complete chapter from the resource API', async () => {

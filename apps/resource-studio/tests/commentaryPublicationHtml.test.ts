@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { materializeCommentaryBibleLinks } from "../src/commentaryPublicationHtml.js";
+import {
+  materializeCommentaryBibleLinks,
+  sanitizeCommentaryPublicationHtml
+} from "../src/commentaryPublicationHtml.js";
 
 test("materializes normalized commentary references as autonomous OSIS links", () => {
   assert.equal(
@@ -20,5 +23,32 @@ test("fails packaging when a normalized reference has lost its OSIS metadata", (
         html: '<span class="bible-ref" data-reference-id="r7">John 3:16</span>'
       }),
     /commentary-reference-unresolved:r7/u
+  );
+});
+
+test("unwraps malformed CrossWire titles and removes unavailable figures", () => {
+  assert.equal(
+    sanitizeCommentaryPublicationHtml(
+      '<h4> <title type="x-ms">SERMONS DE SAINT AUGUSTIN <figure size="span" src="Images/tiffany.jpg">Portrait</figure></h4><p>Le commentaire demeure.</p>'
+    ),
+    "<h4> SERMONS DE SAINT AUGUSTIN </h4><p>Le commentaire demeure.</p>"
+  );
+});
+
+test("removes remote advertising and decorative images", () => {
+  assert.equal(
+    sanitizeCommentaryPublicationHtml(
+      '<p>Avant <img src="http://www.studylight.info/ad.gif" alt="Sponsor a child today!"> après.</p>'
+    ),
+    "<p>Avant après.</p>"
+  );
+});
+
+test("preserves autonomous OSIS links while sanitizing publication HTML", () => {
+  assert.equal(
+    sanitizeCommentaryPublicationHtml(
+      '<p><a class="bible-ref" href="bible://John.3.16" data-osis="John.3.16">Jean 3:16</a></p>'
+    ),
+    '<p><a class="bible-ref" href="bible://John.3.16" data-osis="John.3.16">Jean 3:16</a></p>'
   );
 });

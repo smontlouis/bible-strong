@@ -9,7 +9,6 @@ import StylizedHTMLView from '~common/StylizedHTMLView'
 import ScrollView from '~common/ui/ScrollView'
 import Box from '~common/ui/Box'
 import FormSheetScreen from '~common/ui/FormSheetScreen'
-import Text from '~common/ui/Text'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
@@ -17,8 +16,13 @@ import { getBook } from '~helpers/bibleBookCatalog'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
-import { getCommentaryBibleViewRoute } from './commentaryReferenceNavigation'
+import CommentaryRoomIntro from './CommentaryRoomIntro'
+import {
+  getCommentaryBibleViewRoute,
+  getCommentaryPassageBibleViewRoute,
+} from './commentaryReferenceNavigation'
 import { commentaryHrefToOsis, parseCommentaryResourceParams } from './commentaryResourceParams'
+import CommentaryEntryNavigation from './CommentaryEntryNavigation'
 
 const CommentaryEntryScreen = () => {
   const params = useLocalSearchParams<{
@@ -32,6 +36,7 @@ const CommentaryEntryScreen = () => {
   const router = useRouter()
   const { t } = useTranslation()
   const canGoBackInStack = useCanGoBackInStack()
+  const scrollRef = React.useRef<React.ComponentRef<typeof ScrollView>>(null)
   const query = useQuery({
     queryKey: [
       'commentary-resource-chapter',
@@ -64,7 +69,23 @@ const CommentaryEntryScreen = () => {
 
   const { entry, projection, book, chapter } = parsed
   const section = query.data?.sections.find(candidate => candidate.id === params.sectionId)
+  const sectionIndex = query.data?.sections.findIndex(
+    candidate => candidate.id === params.sectionId
+  )
+  const previousSection =
+    sectionIndex !== undefined && sectionIndex > 0
+      ? query.data?.sections[sectionIndex - 1]
+      : undefined
+  const nextSection =
+    sectionIndex !== undefined && sectionIndex >= 0
+      ? query.data?.sections[sectionIndex + 1]
+      : undefined
   const bookLabel = getBook(book)?.Nom ?? String(book)
+  const passage = section
+    ? `${bookLabel} ${chapter}:${section.rangeStartVerse}${
+        section.rangeEndVerse !== section.rangeStartVerse ? `–${section.rangeEndVerse}` : ''
+      }`
+    : `${bookLabel} ${chapter}`
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
@@ -72,8 +93,8 @@ const CommentaryEntryScreen = () => {
         <Header
           background
           hasBackButton={IS_FORM_SHEET ? canGoBackInStack : true}
-          title={entry.title}
-          subTitle={entry.author}
+          title={entry.author}
+          subTitle={passage}
           rightComponent={
             <Box mr={4}>
               <CommentaryResourceHeaderActions
@@ -83,6 +104,7 @@ const CommentaryEntryScreen = () => {
                 book={book}
                 chapter={chapter}
                 sectionId={params.sectionId}
+                showAvatar={false}
               />
             </Box>
           }
@@ -103,24 +125,52 @@ const CommentaryEntryScreen = () => {
             failure={{ cause: 'not-found', recoveries: [] }}
           />
         ) : (
-          <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 44 }}>
+          <ScrollView ref={scrollRef} contentContainerStyle={{ padding: 18, paddingBottom: 44 }}>
+            <CommentaryRoomIntro
+              compact
+              entry={entry}
+              language={projection.language}
+              onPress={() =>
+                router.replace({
+                  pathname: '/commentary-chapter',
+                  params: {
+                    projectionId: projection.projectionId,
+                    book: String(book),
+                    chapter: String(chapter),
+                  },
+                })
+              }
+            />
             <Box bg="reverse" rounded lightShadow px={18} py={18}>
-              <Box alignSelf="flex-start" px={11} py={7} borderRadius={14} bg="lightPrimary">
-                <Text color="primary" bold>
-                  {section.rangeStartVerse === 0 && section.rangeEndVerse === 0
+              <CommentaryEntryNavigation
+                hasPrevious={Boolean(previousSection)}
+                hasNext={Boolean(nextSection)}
+                reference={
+                  section.rangeStartVerse === 0 && section.rangeEndVerse === 0
                     ? t('commentaries.resource.introduction')
-                    : `${bookLabel} ${chapter}:${section.rangeStartVerse}${
-                        section.rangeEndVerse !== section.rangeStartVerse
-                          ? `–${section.rangeEndVerse}`
-                          : ''
-                      }`}
-                </Text>
-              </Box>
-              {section.title ? (
-                <Text mt={16} bold fontSize={22} lineHeight={27}>
-                  {section.title}
-                </Text>
-              ) : null}
+                    : passage
+                }
+                referenceDisabled={section.rangeStartVerse === 0}
+                onReferencePress={() => {
+                  const route = getCommentaryPassageBibleViewRoute({
+                    book,
+                    chapter,
+                    startVerse: section.rangeStartVerse,
+                    endVerse: section.rangeEndVerse,
+                  })
+                  if (route) router.push(route)
+                }}
+                onPrevious={() => {
+                  if (!previousSection) return
+                  router.setParams({ sectionId: previousSection.id })
+                  scrollRef.current?.scrollTo({ y: 0, animated: true })
+                }}
+                onNext={() => {
+                  if (!nextSection) return
+                  router.setParams({ sectionId: nextSection.id })
+                  scrollRef.current?.scrollTo({ y: 0, animated: true })
+                }}
+              />
               <Box mt={14}>
                 <StylizedHTMLView
                   value={section.content}

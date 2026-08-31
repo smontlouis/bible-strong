@@ -22,6 +22,63 @@ const readAttribute = (tag: string, name: string): string => {
 const escapeAttribute = (value: string): string =>
   value.replace(/&/gu, "&amp;").replace(/"/gu, "&quot;");
 
+const REMOVED_BLOCK_TAGS = [
+  "applet",
+  "embed",
+  "figure",
+  "iframe",
+  "object",
+  "script",
+  "style"
+] as const;
+
+const REMOVED_VOID_TAGS = ["img", "image"] as const;
+
+const residualPublicationMarkup = new RegExp(
+  `<\\/?(?:${[...REMOVED_BLOCK_TAGS, ...REMOVED_VOID_TAGS, "title"].join("|")})(?:\\s|>)`,
+  "iu"
+);
+
+/**
+ * Removes source-document furniture that cannot be rendered from an autonomous
+ * commentary bundle. Textual commentary and normalized Bible links are kept.
+ */
+export const sanitizeCommentaryPublicationHtml = (html: string): string => {
+  let sanitized = html;
+
+  for (const tag of REMOVED_BLOCK_TAGS) {
+    sanitized = sanitized.replace(
+      new RegExp(`<${tag}\\b[^>]*>[\\s\\S]*?<\\/${tag}\\s*>`, "giu"),
+      " "
+    );
+    sanitized = sanitized.replace(
+      new RegExp(`<${tag}\\b[^>]*\\/?\\s*>`, "giu"),
+      " "
+    );
+  }
+
+  for (const tag of REMOVED_VOID_TAGS) {
+    sanitized = sanitized.replace(
+      new RegExp(`<${tag}\\b[^>]*\\/?\\s*>`, "giu"),
+      " "
+    );
+    sanitized = sanitized.replace(new RegExp(`<\\/${tag}\\s*>`, "giu"), " ");
+  }
+
+  // CrossWire title elements are metadata containers. Some source modules
+  // leave them unclosed inside an already-normalized heading, so unwrap them
+  // instead of trying to repair their document-level semantics.
+  sanitized = sanitized.replace(/<\/?title\b[^>]*>/giu, "");
+  sanitized = sanitized.replace(/<lb\b[^>]*\/?>/giu, "<br>");
+  sanitized = sanitized.replace(/[ \t]{2,}/gu, " ").trim();
+
+  if (residualPublicationMarkup.test(sanitized)) {
+    throw new Error("commentary-publication-unsafe-markup");
+  }
+
+  return sanitized;
+};
+
 export const materializeCommentaryBibleLinks = ({
   html,
   references = []

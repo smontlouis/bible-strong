@@ -37,3 +37,18 @@ export const commentaryHrefToOsis = (href: string) => {
   if (!normalized || /^(?:https?:|mailto:|#)/iu.test(normalized)) return undefined
   return normalized.replaceAll('_', '.')
 }
+
+export const formatCommentaryResourceTabTitle = ({
+  shortName,
+  bookLabel,
+  chapter,
+  range,
+}: {
+  shortName: string
+  bookLabel: string
+  chapter: number
+  range?: { start: number; end: number }
+}) =>
+  `${shortName} - ${bookLabel} ${chapter}${
+    range ? `:${range.start}${range.end === range.start ? '' : `-${range.end}`}` : ''
+  }`

@@ -1,4 +1,7 @@
-import { COMMENTARY_CATALOG_BY_ID } from '@bible-strong/resource-catalog/commentaries'
+import {
+  COMMENTARY_CATALOG_BY_ID,
+  type CommentaryCatalogEntry,
+} from '@bible-strong/resource-catalog/commentaries'
 import { Schema } from 'effect'
 import * as FileSystem from 'expo-file-system/legacy'
 import { DomUtils, parseDocument } from 'htmlparser2'
@@ -41,7 +44,6 @@ export type CommentaryResourceSection = {
   id: string
   rangeStartVerse: number
   rangeEndVerse: number
-  title?: string
   preview: string
   content: string
 }
@@ -81,13 +83,6 @@ const createCommentaryPreview = (html: string) =>
     .trim()
     .slice(0, COMMENTARY_PREVIEW_MAX_CHARACTERS)
     .trimEnd()
-
-const createCommentarySectionTitle = (html: string) => {
-  const match = html.match(/<(?:h[1-6]|strong|b)\b[^>]*>([\s\S]*?)<\/(?:h[1-6]|strong|b)>/iu)
-  if (!match?.[1]) return undefined
-  const title = DomUtils.textContent(parseDocument(match[1])).replace(/\s+/gu, ' ').trim()
-  return title.length > 0 && title.length <= 140 ? title : undefined
-}
 
 const createCommentarySectionId = (
   publicationId: string,
@@ -320,38 +315,26 @@ const toUnavailableCause = (error: unknown): CommentaryUnavailableResource['caus
 }
 
 const toComment = ({
-  content,
+  section,
   resourceId,
   language,
   verseId,
-  rangeStartVerse,
-  rangeEndVerse,
   order,
 }: {
-  content: string
+  section: CommentaryResourceSection
   resourceId: string
   language: ResourceLanguage
   verseId: string
-  rangeStartVerse: number
-  rangeEndVerse: number
   order: number
 }): Comment => {
   const entry = COMMENTARY_CATALOG_BY_ID.get(resourceId)!
-  const sectionId = createCommentarySectionId(
-    entry.publicationId,
-    language,
-    Number(verseId.split('-')[0]),
-    Number(verseId.split('-')[1]),
-    rangeStartVerse,
-    rangeEndVerse
-  )
   return {
     id: `${entry.publicationId}-${language}-${verseId}`,
-    sectionId,
+    sectionId: section.id,
     verseId,
-    rangeStartVerse,
-    rangeEndVerse,
-    content: createCommentaryPreview(content),
+    rangeStartVerse: section.rangeStartVerse,
+    rangeEndVerse: section.rangeEndVerse,
+    content: section.preview,
     resource: {
       name: entry.title,
       code: `${entry.publicationId}:${language}`,
@@ -363,32 +346,6 @@ const toComment = ({
     type: 'comment',
     isSDA: entry.id === 'sdabc',
   }
-}
-
-const getContentRangesByVerse = (comments: SerializedCommentaryChapter) => {
-  const ranges = new Map<number, { start: number; end: number }>()
-  const entries = Object.entries(comments)
-    .map(([verse, content]) => ({ verse: Number(verse), content }))
-    .sort((left, right) => left.verse - right.verse)
-
-  for (let index = 0; index < entries.length; ) {
-    const first = entries[index]
-    let endIndex = index
-    while (
-      endIndex + 1 < entries.length &&
-      entries[endIndex + 1].verse === entries[endIndex].verse + 1 &&
-      entries[endIndex + 1].content === first.content
-    ) {
-      endIndex += 1
-    }
-    const range = { start: first.verse, end: entries[endIndex].verse }
-    for (let position = index; position <= endIndex; position += 1) {
-      ranges.set(entries[position].verse, range)
-    }
-    index = endIndex + 1
-  }
-
-  return ranges
 }
 
 const splitCommentarySections = (content: string) =>
@@ -443,6 +400,53 @@ const getCommentarySectionRuns = (comments: SerializedCommentaryChapter) => {
     (left, right) =>
       left.start - right.start || left.fragmentIndex - right.fragmentIndex || left.end - right.end
   )
+}
+
+const buildCommentaryResourceSections = ({
+  entry,
+  language,
+  book,
+  chapter,
+  comments,
+}: {
+  entry: CommentaryCatalogEntry
+  language: ResourceLanguage
+  book: number
+  chapter: number
+  comments: SerializedCommentaryChapter
+}) => {
+  const sections: CommentaryResourceSection[] = []
+  const sectionIdOccurrences = new Map<string, number>()
+  for (const { start, end, content } of getCommentarySectionRuns(comments)) {
+    const baseId = createCommentarySectionId(
+      entry.publicationId,
+      language,
+      book,
+      chapter,
+      start,
+      end
+    )
+    const idOccurrence = sectionIdOccurrences.get(baseId) ?? 0
+    sectionIdOccurrences.set(baseId, idOccurrence + 1)
+    sections.push({
+      id: idOccurrence === 0 ? baseId : `${baseId}-${idOccurrence + 1}`,
+      rangeStartVerse: start,
+      rangeEndVerse: end,
+      preview: createCommentaryPreview(content),
+      content,
+    })
+  }
+  return sections
+}
+
+const getPrimaryCommentarySectionsByVerse = (sections: readonly CommentaryResourceSection[]) => {
+  const result = new Map<number, CommentaryResourceSection>()
+  for (const section of sections) {
+    for (let verse = section.rangeStartVerse; verse <= section.rangeEndVerse; verse += 1) {
+      if (!result.has(verse)) result.set(verse, section)
+    }
+  }
+  return result
 }
 
 export const createCommentaryAccess = ({
@@ -534,23 +538,38 @@ export const createCommentaryAccess = ({
           })
           return
         }
-        const rangesByVerse = getContentRangesByVerse(outcome.comments)
+        const sections = buildCommentaryResourceSections({
+          entry: outcome.entry,
+          language: outcome.language,
+          book,
+          chapter,
+          comments: outcome.comments,
+        })
+        const primarySectionsByVerse = getPrimaryCommentarySectionsByVerse(sections)
         for (const [verse, content] of Object.entries(outcome.comments)) {
           const verseId = `${book}-${chapter}-${verse}`
           const verseNumber = Number(verse)
-          const range = rangesByVerse.get(verseNumber) ?? {
-            start: verseNumber,
-            end: verseNumber,
+          const section = primarySectionsByVerse.get(verseNumber) ?? {
+            id: createCommentarySectionId(
+              outcome.entry.publicationId,
+              outcome.language,
+              book,
+              chapter,
+              verseNumber,
+              verseNumber
+            ),
+            rangeStartVerse: verseNumber,
+            rangeEndVerse: verseNumber,
+            preview: createCommentaryPreview(content),
+            content,
           }
           commentsByVerse[verse] ??= []
           commentsByVerse[verse].push(
             toComment({
-              content,
+              section,
               resourceId: outcome.entry.id,
               language: outcome.language,
               verseId,
-              rangeStartVerse: range.start,
-              rangeEndVerse: range.end,
               order,
             })
           )
@@ -575,28 +594,13 @@ export const createCommentaryAccess = ({
         book,
         chapter,
       })
-      const sections: CommentaryResourceSection[] = []
-      const sectionIdOccurrences = new Map<string, number>()
-      for (const { start, end, content } of getCommentarySectionRuns(comments)) {
-        const baseId = createCommentarySectionId(
-          entry.publicationId,
-          language,
-          book,
-          chapter,
-          start,
-          end
-        )
-        const idOccurrence = sectionIdOccurrences.get(baseId) ?? 0
-        sectionIdOccurrences.set(baseId, idOccurrence + 1)
-        sections.push({
-          id: idOccurrence === 0 ? baseId : `${baseId}-${idOccurrence + 1}`,
-          rangeStartVerse: start,
-          rangeEndVerse: end,
-          title: createCommentarySectionTitle(content),
-          preview: createCommentaryPreview(content),
-          content,
-        })
-      }
+      const sections = buildCommentaryResourceSections({
+        entry,
+        language,
+        book,
+        chapter,
+        comments,
+      })
 
       return { resourceId, language, book, chapter, sections }
     },

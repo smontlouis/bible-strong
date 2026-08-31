@@ -62,6 +62,11 @@ test('conserve le HTML éditorial utile et supprime les jalons OSIS', () => {
   assert.equal(normalized, '<h4>Heading</h4>')
 })
 
+test('retire les médias non publiés et déballe les titres CrossWire malformés', () => {
+  const normalized = normalizeSourceMarkup('<h4><title type="x-ms">SERMONS <figure src="Images/tiffany.jpg">Portrait</figure></h4><p>Texte <img src="ad.gif"></p>')
+  assert.equal(normalized, '<h4>SERMONS </h4><p>Texte </p>')
+})
+
 test('sélectionne une édition Rachi explicite plutôt qu’un assemblage merged', () => {
   const books = []
   for (const title of [
