@@ -18,7 +18,7 @@ describe("lecteur local des dictionnaires", () => {
     directory = await mkdtemp(
       path.join(os.tmpdir(), "bible-strong-dictionary-reader-")
     );
-    const databasePath = path.join(directory, "dictionary.sqlite");
+    const databasePath = path.join(directory, "test-work.sqlite");
     execFileSync("sqlite3", [
       databasePath,
       `CREATE TABLE dictionnaire (id INTEGER PRIMARY KEY, sanitized_word TEXT NOT NULL, word TEXT NOT NULL, definition TEXT NOT NULL);
@@ -42,7 +42,7 @@ describe("lecteur local des dictionnaires", () => {
             edition: "Test",
             source: "Local",
             sourceVersion: "1",
-            sqlitePath: "./dictionary.sqlite",
+            sqlitePath: "./test-work.sqlite",
             rights: {
               holder: "Test",
               termsReference: "Test",
@@ -53,7 +53,37 @@ describe("lecteur local des dictionnaires", () => {
         ]
       })
     );
-    store = await createDictionaryReaderStore(configPath);
+    await writeFile(
+      path.join(directory, "correspondences.json"),
+      JSON.stringify({
+        groups: [
+          {
+            id: "dictionary-correspondence-test",
+            label: "Alliance",
+            strategies: ["same-language-headword"],
+            members: [
+              {
+                work: "test-work",
+                resourceId: "TEST_WORK",
+                language: "fr",
+                id: 1,
+                word: "Alliance"
+              },
+              {
+                work: "test-work-2",
+                resourceId: "TEST_WORK_2",
+                language: "fr",
+                id: 7,
+                word: "Alliance"
+              }
+            ]
+          }
+        ]
+      })
+    );
+    store = await createDictionaryReaderStore(configPath, {
+      normalizedRoot: directory
+    });
   });
 
   after(async () => rm(directory, { recursive: true, force: true }));
@@ -81,5 +111,17 @@ describe("lecteur local des dictionnaires", () => {
       id: page.entries[0].id
     });
     assert.match(entry.definition, /autre définition/);
+  });
+
+  it("expose les correspondances disponibles sans fusionner les articles", async () => {
+    const correspondences = await store.getCorrespondences({
+      work: "test-work",
+      id: 1
+    });
+    assert.equal(correspondences.groupId, "dictionary-correspondence-test");
+    assert.deepEqual(
+      correspondences.members.map((member) => member.work),
+      ["test-work"]
+    );
   });
 });

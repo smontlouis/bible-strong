@@ -3,11 +3,13 @@ import { describe, it } from "node:test";
 import {
   expandOsisToVerseKeys,
   isCheckedBibleUri,
+  isCheckedStrongUri,
+  normalizeTranslationWordsStrong,
   normalizeDictionaryDefinition
 } from "./dictionary-links.mjs";
 
-const normalize = (html, language = "fr") =>
-  normalizeDictionaryDefinition({ html, language });
+const normalize = (html, language = "fr", work = "") =>
+  normalizeDictionaryDefinition({ html, language, work });
 
 describe("normalisation des liens bibliques des dictionnaires", () => {
   it("convertit et canonicalise les anciens liens de versets", () => {
@@ -76,5 +78,43 @@ describe("normalisation des liens bibliques des dictionnaires", () => {
       "43-3-18"
     ]);
     assert.equal(expandOsisToVerseKeys("Gen.1", 20).length, 0);
+  });
+
+  it("prépare les Strong de Translation Words avec une destination canonique", () => {
+    const result = normalize(
+      "<p>Strong’s: H0175, G00020, G43195</p>",
+      "en",
+      "unfoldingword-translation-words"
+    );
+    assert.equal(
+      result.html,
+      '<p>Strong’s: <a class="strong-ref" href="strong://H0175" data-strong-number="0175" data-strong-book="1" data-strong-source="H0175">H0175</a>, <a class="strong-ref" href="strong://G0002" data-strong-number="0002" data-strong-book="40" data-strong-source="G00020">G00020</a>, <a class="strong-ref" href="strong://G4319" data-strong-number="4319" data-strong-book="40" data-strong-source="G43195">G43195</a></p>'
+    );
+    assert.equal(result.stats.strongLinks, 3);
+    assert.equal(result.stats.strongTextLinksParsed, 3);
+  });
+
+  it("ne confond pas les repères H2 et G2 d’ISBE avec des Strong", () => {
+    const result = normalize(
+      "<p>Sections H1, H2, H3 et manuscrit G2.</p>",
+      "en",
+      "isbe"
+    );
+    assert.doesNotMatch(result.html, /strong:\/\//u);
+    assert.equal(result.stats.strongLinks, 0);
+  });
+
+  it("valide les URI Strong et reste idempotente", () => {
+    const once = normalize(
+      "<p>Strong’s: G00020</p>",
+      "en",
+      "unfoldingword-translation-words"
+    );
+    const twice = normalize(once.html, "en", "unfoldingword-translation-words");
+    assert.equal(twice.html, once.html);
+    assert.equal(normalizeTranslationWordsStrong("G00020"), "G0002");
+    assert.equal(normalizeTranslationWordsStrong("G43195"), "G4319");
+    assert.equal(isCheckedStrongUri("strong://G0002", "G00020"), true);
+    assert.equal(isCheckedStrongUri("strong://G0020", "G00020"), false);
   });
 });

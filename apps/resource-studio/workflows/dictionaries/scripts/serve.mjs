@@ -69,6 +69,13 @@ createServer(async (request, response) => {
         ? json(response, 200, { entry })
         : json(response, 404, { error: "Entrée absente" });
     }
+    if (url.pathname === "/api/correspondences") {
+      return json(
+        response,
+        200,
+        await store.getCorrespondences(Object.fromEntries(url.searchParams))
+      );
+    }
     await serveStatic(decodeURIComponent(url.pathname), response);
   } catch (error) {
     json(response, 404, { error: error.message ?? "Introuvable" });

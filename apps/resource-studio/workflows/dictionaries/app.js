@@ -14,6 +14,7 @@ const state = {
 const elements = {
   article: document.querySelector("#article"),
   articleByline: document.querySelector("#article-byline"),
+  articleCorrespondences: document.querySelector("#article-correspondences"),
   articleDefinition: document.querySelector("#article-definition"),
   articlePlaceholder: document.querySelector("#article-placeholder"),
   articleSource: document.querySelector("#article-source"),
@@ -158,16 +159,31 @@ const sanitizeDefinition = (unsafeHtml) => {
         continue;
       }
       const href = child.tagName === "A" ? child.getAttribute("href") : null;
+      const entryId =
+        child.tagName === "A" ? child.getAttribute("data-entry-id") : null;
+      const entrySection =
+        child.tagName === "A" ? child.getAttribute("data-entry-section") : null;
+      const strongNumber =
+        child.tagName === "A" ? child.getAttribute("data-strong-number") : null;
+      const strongBook =
+        child.tagName === "A" ? child.getAttribute("data-strong-book") : null;
+      const strongSource =
+        child.tagName === "A" ? child.getAttribute("data-strong-source") : null;
       const linkClass = child.classList.contains("word")
         ? "word"
         : child.classList.contains("verse")
           ? "verse"
-          : null;
+          : child.classList.contains("strong-ref")
+            ? "strong-ref"
+            : null;
       for (const attribute of [...child.attributes])
         child.removeAttribute(attribute.name);
       if (linkClass === "word" && href) {
         child.className = "word";
         child.dataset.word = href;
+        if (/^\d+$/u.test(entryId ?? "")) child.dataset.entryId = entryId;
+        if (/^(?:\d+|[IVXLCDM]+)$/iu.test(entrySection ?? ""))
+          child.dataset.entrySection = entrySection;
         child.setAttribute("role", "button");
         child.setAttribute("tabindex", "0");
       } else if (linkClass === "verse" && href?.startsWith("bible://")) {
@@ -175,6 +191,19 @@ const sanitizeDefinition = (unsafeHtml) => {
         child.href = href;
         child.dataset.osis = href.slice("bible://".length);
         child.title = href;
+      } else if (
+        linkClass === "strong-ref" &&
+        /^strong:\/\/[HG]\d{4}$/u.test(href ?? "") &&
+        /^\d{4}$/u.test(strongNumber ?? "") &&
+        /^(?:1|40)$/u.test(strongBook ?? "")
+      ) {
+        child.className = "strong-ref";
+        child.href = href;
+        child.dataset.strongNumber = strongNumber;
+        child.dataset.strongBook = strongBook;
+        if (/^[HG]\d{4,5}$/u.test(strongSource ?? ""))
+          child.dataset.strongSource = strongSource;
+        child.title = `${strongSource ?? child.textContent} → ${href}`;
       }
       clean(child);
     }
@@ -242,20 +271,68 @@ const loadEntries = async ({ selectFirst = false } = {}) => {
 
 const loadEntry = async (id) => {
   if (!state.work) return;
-  const { entry } = await requestJson(
-    `/api/entry?${new URLSearchParams({ work: state.work, id })}`
-  );
+  const parameters = new URLSearchParams({ work: state.work, id });
+  const [{ entry }, correspondences] = await Promise.all([
+    requestJson(`/api/entry?${parameters}`),
+    requestJson(`/api/correspondences?${parameters}`)
+  ]);
   const resource = currentDictionary();
   state.activeEntryId = entry.id;
   elements.articleTitle.textContent = entry.word;
   elements.articleSource.textContent = resource.abbreviation;
   elements.articleByline.textContent = `${resource.authors.join(", ")} · ${resource.edition}`;
+  const alternatives = correspondences.members.filter(
+    (member) => !(member.work === state.work && member.id === entry.id)
+  );
+  elements.articleCorrespondences.hidden = alternatives.length === 0;
+  elements.articleCorrespondences.innerHTML = alternatives.length
+    ? `<p>Articles correspondants</p><div>${alternatives
+        .map(
+          (member) =>
+            `<button type="button" data-correspondence-work="${escapeHtml(member.work)}" data-correspondence-id="${member.id}" data-correspondence-word="${escapeHtml(member.word)}"><strong>${escapeHtml(member.abbreviation)}</strong><span>${escapeHtml(member.word)}</span><small>${escapeHtml(member.language.toLocaleUpperCase())}</small></button>`
+        )
+        .join("")}</div>`
+    : "";
   elements.articleDefinition.innerHTML = sanitizeDefinition(entry.definition);
   elements.articlePlaceholder.hidden = true;
   elements.article.hidden = false;
   renderEntries();
   document.title = `${entry.word} — ${resource.abbreviation}`;
   elements.article.scrollTo?.({ top: 0 });
+};
+
+const openCorrespondence = async ({ work, id, word }) => {
+  state.language = "all";
+  elements.languageFilter.value = "all";
+  state.work = work;
+  state.search = word;
+  state.initial = word.slice(0, 1).toLocaleLowerCase();
+  state.offset = 0;
+  elements.searchInput.value = word;
+  renderWorks();
+  renderResource();
+  await loadEntries();
+  await loadEntry(id);
+};
+
+const openEntryLink = async ({ id, word, section = "" }) => {
+  state.search = word;
+  state.initial = word.slice(0, 1).toLocaleLowerCase();
+  state.offset = 0;
+  elements.searchInput.value = word;
+  await loadEntries();
+  await loadEntry(id);
+  if (section) {
+    const escapedSection = section.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+    const marker = new RegExp(
+      `^\\s*(?:\\(${escapedSection}\\)|${escapedSection}\\.)`,
+      "iu"
+    );
+    const sectionElement = [
+      ...elements.articleDefinition.querySelectorAll("p, h2, h3, h4, li")
+    ].find((element) => marker.test(element.textContent ?? ""));
+    sectionElement?.scrollIntoView({ block: "start" });
+  }
 };
 
 const selectWork = async (work) => {
@@ -323,10 +400,29 @@ elements.nextPage.addEventListener("click", () => {
 elements.articleDefinition.addEventListener("click", (event) => {
   const wordLink = event.target.closest("a.word");
   if (!wordLink) return;
+  const destinationId = Number(wordLink.dataset.entryId);
+  if (Number.isInteger(destinationId) && destinationId > 0) {
+    void openEntryLink({
+      id: destinationId,
+      word: wordLink.dataset.word.trim(),
+      section: wordLink.dataset.entrySection ?? ""
+    });
+    return;
+  }
   state.search = wordLink.dataset.word.trim();
   state.offset = 0;
   elements.searchInput.value = state.search;
   void loadEntries({ selectFirst: true });
+});
+
+elements.articleCorrespondences.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-correspondence-work]");
+  if (!button) return;
+  void openCorrespondence({
+    work: button.dataset.correspondenceWork,
+    id: Number(button.dataset.correspondenceId),
+    word: button.dataset.correspondenceWord
+  });
 });
 
 document.addEventListener("keydown", (event) => {

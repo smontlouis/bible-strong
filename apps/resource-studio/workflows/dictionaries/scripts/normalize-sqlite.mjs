@@ -71,7 +71,8 @@ export const normalizeDictionarySqlite = async ({
   for (const entry of entries) {
     const result = normalizeDictionaryDefinition({
       html: entry.definition,
-      language
+      language,
+      work
     });
     addDictionaryLinkStats(stats, result.stats);
     if (result.html !== entry.definition)

@@ -137,10 +137,9 @@ button:disabled {
 .workspace {
   min-height: calc(100vh - 148px);
   display: grid;
-  grid-template-columns: minmax(225px, 0.75fr) minmax(260px, 0.85fr) minmax(
-      460px,
-      1.8fr
-    ) minmax(260px, 0.85fr);
+  grid-template-columns:
+    minmax(225px, 0.75fr) minmax(260px, 0.85fr) minmax(460px, 1.8fr)
+    minmax(260px, 0.85fr);
 }
 .library-panel,
 .index-panel,
@@ -427,9 +426,54 @@ button:disabled {
   letter-spacing: -0.055em;
   overflow-wrap: anywhere;
 }
-.article-header > p:last-child {
+#article-byline {
   color: var(--ink-soft);
   font-style: italic;
+}
+.article-correspondences {
+  margin-top: 1.25rem;
+}
+.article-correspondences > p {
+  margin: 0 0 0.55rem;
+  color: var(--rust-dark);
+  font: 650 0.58rem var(--sans);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.article-correspondences > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.article-correspondences button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.4rem;
+  max-width: 100%;
+  padding: 0.42rem 0.58rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: rgba(250, 246, 234, 0.65);
+  font: 0.62rem var(--sans);
+}
+.article-correspondences button:hover {
+  border-color: var(--rust);
+  color: var(--rust-dark);
+  transform: translateY(-1px);
+}
+.article-correspondences button strong {
+  color: var(--ink);
+}
+.article-correspondences button span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.article-correspondences button small {
+  color: var(--gold);
+  font-size: 0.52rem;
 }
 .definition {
   padding-top: 1.5rem;
@@ -453,7 +497,8 @@ button:disabled {
   color: var(--ink-soft);
 }
 .definition a.word,
-.definition a.verse {
+.definition a.verse,
+.definition a.strong-ref {
   border-bottom: 1px dotted currentColor;
   color: var(--rust-dark);
   cursor: pointer;
@@ -462,6 +507,10 @@ button:disabled {
 .definition a.verse {
   color: var(--green);
   cursor: help;
+}
+.definition a.strong-ref {
+  color: var(--gold);
+  font-family: var(--mono);
 }
 .definition table {
   width: 100%;

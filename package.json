@@ -80,6 +80,8 @@
     "resources:commentaries:serve": "yarn workspace @bible-strong/resource-studio commentaries:serve",
     "resources:dictionaries:serve": "yarn workspace @bible-strong/resource-studio dictionaries:serve",
     "resources:dictionaries:normalize": "yarn workspace @bible-strong/resource-studio dictionaries:normalize",
+    "resources:dictionaries:correspondences": "yarn workspace @bible-strong/resource-studio dictionaries:correspondences",
+    "resources:dictionaries:entry-links": "yarn workspace @bible-strong/resource-studio dictionaries:entry-links",
     "resources:dictionaries:audit": "yarn workspace @bible-strong/resource-studio dictionaries:audit",
     "resources:dictionaries:audit-smith": "yarn workspace @bible-strong/resource-studio dictionaries:audit-smith",
     "resources:dictionaries:acquire-smith": "yarn workspace @bible-strong/resource-studio dictionaries:acquire-smith",

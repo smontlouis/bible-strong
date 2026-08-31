@@ -32,6 +32,8 @@
     "commentaries:serve": "node workflows/commentaries/scripts/serve.mjs",
     "dictionaries:serve": "node workflows/dictionaries/scripts/serve.mjs",
     "dictionaries:normalize": "node workflows/dictionaries/scripts/normalize-library.mjs",
+    "dictionaries:correspondences": "node workflows/dictionaries/scripts/build-correspondences.mjs",
+    "dictionaries:entry-links": "node workflows/dictionaries/scripts/dictionary-entry-links.mjs",
     "dictionaries:audit": "node workflows/dictionaries/scripts/audit-library.mjs",
     "dictionaries:audit-smith": "node workflows/dictionaries/scripts/audit-smith-overlap.mjs",
     "dictionaries:acquire-smith": "node workflows/dictionaries/scripts/acquire-smith.mjs",

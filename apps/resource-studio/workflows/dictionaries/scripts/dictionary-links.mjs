@@ -3,8 +3,9 @@ import * as en from "../../../../../packages/bible-reference-parser/esm/lang/en.
 import * as fr from "../../../../../packages/bible-reference-parser/esm/lang/fr.js";
 
 export const DICTIONARY_LINK_NORMALIZATION_REVISION =
-  "dictionary-links-bible-uri-v1";
+  "dictionary-links-bible-strong-uri-v2";
 export const DICTIONARY_BCV_PARSER_VERSION = "3.2.0-bible-strong.2";
+export const TRANSLATION_WORDS_WORK = "unfoldingword-translation-words";
 
 const OSIS_BOOKS = [
   "Gen",
@@ -99,6 +100,7 @@ const parsers = { en: createParser("en"), fr: createParser("fr") };
 const HTML_TOKEN_PATTERN = /<!--[\s\S]*?-->|<[^>]*>/gu;
 const ANCHOR_TOKEN_PATTERN = /^<\/?a(?:\s[^>]*)?>$/iu;
 const REFERENCE_TAIL_PATTERN = /^[\s.,;:()[\]{}—–-]*$/u;
+const TRANSLATION_WORDS_STRONG_PATTERN = /\b(H\d{4}|G\d{5})\b/gu;
 
 const decodeEntity = (entity) => {
   const normalized = entity.toLocaleLowerCase();
@@ -257,6 +259,34 @@ const bibleLink = (inner, osis) => {
   return `<a class="verse bible-ref" href="bible://${escaped}" data-osis="${escaped}">${inner}</a>`;
 };
 
+export const normalizeTranslationWordsStrong = (value) => {
+  const match = /^([HG])(\d+)$/u.exec(String(value).trim().toLocaleUpperCase());
+  if (!match) return null;
+  const [, prefix, digits] = match;
+  if (prefix === "H" && digits.length === 4) return `H${digits}`;
+  if (
+    prefix === "G" &&
+    digits.length === 5 &&
+    (digits.endsWith("0") || digits.endsWith("5"))
+  )
+    return `G${digits.slice(0, 4)}`;
+  return null;
+};
+
+const strongLink = (inner, sourceCode, canonicalCode) => {
+  const prefix = canonicalCode[0];
+  const number = canonicalCode.slice(1);
+  return `<a class="strong-ref" href="strong://${canonicalCode}" data-strong-number="${number}" data-strong-book="${prefix === "H" ? 1 : 40}" data-strong-source="${escapeAttribute(sourceCode)}">${inner}</a>`;
+};
+
+export const isCheckedStrongUri = (href, sourceCode = "") => {
+  const match = /^strong:\/\/([HG]\d{4})$/u.exec(String(href));
+  if (!match) return false;
+  return sourceCode
+    ? normalizeTranslationWordsStrong(sourceCode) === match[1]
+    : true;
+};
+
 const transformAnchors = (html, state) => {
   const stack = [{ html: "" }];
   let cursor = 0;
@@ -279,6 +309,20 @@ const transformAnchors = (html, state) => {
     const label = stripMarkup(frame.html);
     const isWordLink = /(?:^|\s)word(?:\s|$)/u.test(className);
     const isBibleLink = /(?:^|\s)(?:verse|bible-ref)(?:\s|$)/u.test(className);
+    const isStrongLink = /(?:^|\s)strong-ref(?:\s|$)/u.test(className);
+    const strongSource =
+      readAttribute(frame.tag, "data-strong-source") || label;
+    if (
+      state.work === TRANSLATION_WORDS_WORK &&
+      isStrongLink &&
+      isCheckedStrongUri(href, strongSource)
+    ) {
+      const canonicalCode = href.slice("strong://".length);
+      state.stats.strongLinks += 1;
+      state.stats.normalizedStrongLinks += 1;
+      stack.at(-1).html += strongLink(frame.html, strongSource, canonicalCode);
+      continue;
+    }
     if (
       isWordLink &&
       !isBibleLink &&
@@ -341,6 +385,43 @@ const annotateText = (raw, state) => {
   return result + raw.slice(cursor);
 };
 
+const annotateStrongText = (raw, state) => {
+  if (!raw.trim() || state.work !== TRANSLATION_WORDS_WORK) return raw;
+  return raw.replace(TRANSLATION_WORDS_STRONG_PATTERN, (sourceCode) => {
+    const canonicalCode = normalizeTranslationWordsStrong(sourceCode);
+    if (!canonicalCode) return sourceCode;
+    state.stats.strongLinks += 1;
+    state.stats.strongTextLinksParsed += 1;
+    return strongLink(sourceCode, sourceCode, canonicalCode);
+  });
+};
+
+const annotateStrongResidualText = (html, state) => {
+  let cursor = 0;
+  let result = "";
+  let skippedDepth = 0;
+  for (const match of html.matchAll(HTML_TOKEN_PATTERN)) {
+    const token = match[0];
+    const text = html.slice(cursor, match.index);
+    result += skippedDepth ? text : annotateStrongText(text, state);
+    const opensSkipped = /^<(?:a|script|style|code|pre)\b/iu.test(token);
+    const opensElement =
+      /^<[a-z][^>]*>$/iu.test(token) &&
+      !/^<(?:br|hr|img|input|meta|link)\b/iu.test(token) &&
+      !/\/\s*>$/u.test(token);
+    const closesElement = /^<\/[a-z][^>]*>$/iu.test(token);
+    if (skippedDepth && opensElement) skippedDepth += 1;
+    else if (opensSkipped) skippedDepth = 1;
+    result += token;
+    if (closesElement && skippedDepth) skippedDepth -= 1;
+    cursor = match.index + token.length;
+  }
+  const remaining = html.slice(cursor);
+  return (
+    result + (skippedDepth ? remaining : annotateStrongText(remaining, state))
+  );
+};
+
 const annotateResidualText = (html, state) => {
   let cursor = 0;
   let result = "";
@@ -369,9 +450,12 @@ export const emptyDictionaryLinkStats = () => ({
   entries: 0,
   changedEntries: 0,
   bibleLinks: 0,
+  strongLinks: 0,
   normalizedBibleLinks: 0,
+  normalizedStrongLinks: 0,
   existingLinksConverted: 0,
   textLinksParsed: 0,
+  strongTextLinksParsed: 0,
   wordLinksRetained: 0,
   invalidBibleLinksRemoved: 0,
   discardedLinks: 0,
@@ -384,17 +468,23 @@ export const addDictionaryLinkStats = (target, source) => {
   return target;
 };
 
-export const normalizeDictionaryDefinition = ({ html, language }) => {
+export const normalizeDictionaryDefinition = ({
+  html,
+  language,
+  work = ""
+}) => {
   const stats = emptyDictionaryLinkStats();
   stats.entries = 1;
   const references = [];
   const state = {
     language: language === "en" ? "en" : "fr",
+    work,
     references,
     stats
   };
   const anchored = transformAnchors(String(html ?? ""), state);
-  const normalizedHtml = annotateResidualText(anchored, state).replace(
+  const strongLinked = annotateStrongResidualText(anchored, state);
+  const normalizedHtml = annotateResidualText(strongLinked, state).replace(
     /<a\b[^>]*$/giu,
     ""
   );

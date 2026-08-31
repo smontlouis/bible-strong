@@ -23,3 +23,15 @@ _Avoid_: Output directory, database dump
 **Publication parity**:
 Proof that canonical import data and its matching Offline-copy artifact represent the same complete Resource revision.
 _Avoid_: Similar output, best-effort validation
+
+**Dictionary entry correspondence**:
+An evidenced relationship between independently authored dictionary entries that address the same headword or named subject.
+_Avoid_: Merged definition, duplicate article
+
+**Dictionary correspondence cluster**:
+A set of dictionary entry correspondences that lets a reader move among sources without combining their content or attribution.
+_Avoid_: Universal entry, merged word
+
+**Dictionary entry link**:
+An evidenced navigation link from text in one dictionary article to one exact entry in the same dictionary.
+_Avoid_: Keyword link, inferred definition

@@ -13,7 +13,7 @@
       "sourceVersion": "westphal-bible-strong-legacy-v1",
       "sqlitePath": "../../outputs/resource-publications/dictionary/fr/work/dictionnaire.sqlite",
       "rights": {
-        "holder": "Autorisation privée de Thomas Mathey pour Bible Strong",
+        "holder": "Utilisation autorisée",
         "termsReference": "Autorisation privée couvrant l’utilisation par Bible Strong ; archiver la preuve exacte avant activation en production.",
         "attribution": "Dictionnaire encyclopédique de la Bible — Alexandre Westphal, source levangile.com",
         "online": true,
@@ -37,7 +37,7 @@
       "sourceVersion": "easton-webster-bible-strong-legacy-v1",
       "sqlitePath": "../../outputs/resource-publications/dictionary/en/work/dictionnaire.sqlite",
       "rights": {
-        "holder": "Public-domain works; Bible Strong digital compilation",
+        "holder": "Domaine public",
         "termsReference": "Easton’s 1897 and Webster’s 1828 editions are public-domain works; preserve source-level attribution.",
         "attribution": "Matthew George Easton, Easton’s Bible Dictionary; Noah Webster, American Dictionary of the English Language (1828)",
         "online": true,
@@ -61,7 +61,7 @@
       "sourceVersion": "levangile-lelievre-2026-08-30",
       "sqlitePath": "../../outputs/dictionary-sources/lelievre/lelievre.sqlite",
       "rights": {
-        "holder": "Autorisation privée de Thomas Mathey pour Bible Strong",
+        "holder": "Utilisation autorisée",
         "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
         "attribution": "Lexique de la Bible — Charles Lelièvre, source levangile.com",
         "online": true,
@@ -85,7 +85,7 @@
       "sourceVersion": "levangile-bost-2026-08-30",
       "sqlitePath": "../../outputs/dictionary-sources/bost/bost.sqlite",
       "rights": {
-        "holder": "Autorisation privée de Thomas Mathey pour Bible Strong ; œuvre originale dans le domaine public",
+        "holder": "Utilisation autorisée",
         "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
         "attribution": "Dictionnaire de la Bible — Jean-Augustin Bost, source levangile.com",
         "online": true,
@@ -109,7 +109,7 @@
       "sourceVersion": "levangile-calmet-2026-08-30",
       "sqlitePath": "../../outputs/dictionary-sources/calmet/calmet.sqlite",
       "rights": {
-        "holder": "Autorisation privée de Thomas Mathey pour Bible Strong ; œuvre originale dans le domaine public",
+        "holder": "Utilisation autorisée",
         "termsReference": "Autorisation privée couvrant l’utilisation des contenus levangile.com par Bible Strong ; archiver la preuve exacte avant activation en production.",
         "attribution": "Dictionnaire historique et critique de la Bible — Augustin Calmet, source levangile.com",
         "online": true,
@@ -133,7 +133,7 @@
       "sourceVersion": "crosswire-smith-1.3-2001-12-15",
       "sqlitePath": "../../outputs/dictionary-sources/smith/smith.sqlite",
       "rights": {
-        "holder": "Public-domain work and public-domain CrossWire digital module",
+        "holder": "Domaine public",
         "termsReference": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/Smith.zip — module metadata declares DistributionLicense=Public Domain.",
         "attribution": "William Smith; revised by F. N. Peloubet and M. A. Peloubet; CrossWire SWORD module Smith 1.3",
         "online": true,
@@ -157,7 +157,7 @@
       "sourceVersion": "crosswire-isbe-2.2-2009-09-07",
       "sqlitePath": "../../outputs/dictionary-sources/isbe/isbe.sqlite",
       "rights": {
-        "holder": "Public-domain work and public-domain CrossWire digital module",
+        "holder": "Domaine public",
         "termsReference": "https://www.crosswire.org/ftpmirror/pub/sword/packages/rawzip/ISBE.zip — module metadata declares DistributionLicense=Public Domain.",
         "attribution": "International Standard Bible Encyclopedia — James Orr, general editor and contributors; CrossWire SWORD module ISBE 2.2",
         "online": true,
@@ -183,8 +183,9 @@
       "source": "unfoldingWord en_tw release v90",
       "sourceVersion": "unfoldingword-en-tw-v90-2026-08-14",
       "sqlitePath": "../../outputs/dictionary-sources/unfoldingword-translation-words/unfoldingword-translation-words.sqlite",
+      "correspondenceSeedsPath": "../../outputs/dictionary-sources/unfoldingword-translation-words/correspondence-seeds.json",
       "rights": {
-        "holder": "unfoldingWord — Creative Commons Attribution-ShareAlike 4.0 International",
+        "holder": "CC BY-SA 4.0",
         "termsReference": "https://git.door43.org/unfoldingWord/en_tw/src/tag/v90/LICENSE.md",
         "attribution": "The original work by unfoldingWord is available from https://www.unfoldingword.org/utw. Bible Strong converted the Markdown and resource links to its dictionary schema and normalized Bible references.",
         "online": true,

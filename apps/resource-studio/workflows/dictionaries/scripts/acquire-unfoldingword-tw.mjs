@@ -244,6 +244,19 @@ const main = async () => {
   const entries = await buildTranslationWordsEntries(
     path.join(repositoryRoot, "bible")
   );
+  const nameHeadwords = await Promise.all(
+    sourceFiles
+      .filter((relativePath) => relativePath.startsWith("names/"))
+      .map(async (relativePath) => {
+        const markdown = await readFile(
+          path.join(repositoryRoot, "bible", relativePath),
+          "utf8"
+        );
+        return /^#\s+(.+)$/mu.exec(markdown)?.[1]?.trim() ?? "";
+      })
+  );
+  if (nameHeadwords.some((headword) => !headword))
+    throw new Error("translation-words-name-seed-missing");
   const sqlitePath = await writeDictionarySourceSqlite({
     outputDir: options.output,
     fileName: "unfoldingword-translation-words.sqlite",
@@ -279,6 +292,21 @@ const main = async () => {
   await writeFile(
     path.join(options.output, "manifest.json"),
     `${JSON.stringify(manifestOutput, null, 2)}\n`
+  );
+  await writeFile(
+    path.join(options.output, "correspondence-seeds.json"),
+    `${JSON.stringify(
+      {
+        format: "bible-strong-dictionary-correspondence-seeds",
+        schemaVersion: 1,
+        work: "unfoldingword-translation-words",
+        namedSubjects: nameHeadwords.sort((left, right) =>
+          left.localeCompare(right, "en")
+        )
+      },
+      null,
+      2
+    )}\n`
   );
   process.stdout.write(`${JSON.stringify(manifestOutput, null, 2)}\n`);
 };

@@ -72,6 +72,18 @@ export const createDictionaryReaderStore = async (
   const byWork = new Map(
     publications.map((publication) => [publication.work, publication])
   );
+  const correspondencePath = normalizedRoot
+    ? path.resolve(normalizedRoot, "correspondences.json")
+    : null;
+  const correspondenceIndex =
+    correspondencePath && (await isReadable(correspondencePath))
+      ? JSON.parse(await readFile(correspondencePath, "utf8"))
+      : { groups: [] };
+  const correspondenceByEntry = new Map();
+  for (const group of correspondenceIndex.groups ?? []) {
+    for (const member of group.members ?? [])
+      correspondenceByEntry.set(`${member.work}:${member.id}`, group);
+  }
 
   const requirePublication = (work) => {
     const publication = byWork.get(work);
@@ -165,6 +177,31 @@ export const createDictionaryReaderStore = async (
          FROM dictionnaire WHERE id = ${entryId} LIMIT 1`
       );
       return rows[0] ?? null;
+    },
+
+    async getCorrespondences({ work, id }) {
+      requirePublication(work);
+      const entryId = clampInteger(id, 0, 1, Number.MAX_SAFE_INTEGER);
+      const group = correspondenceByEntry.get(`${work}:${entryId}`);
+      if (!group)
+        return { groupId: null, label: null, strategies: [], members: [] };
+      return {
+        groupId: group.id,
+        label: group.label,
+        strategies: group.strategies,
+        members: group.members
+          .map((member) => {
+            const publication = byWork.get(member.work);
+            return publication?.available
+              ? {
+                  ...member,
+                  abbreviation: publication.abbreviation,
+                  title: publication.title
+                }
+              : null;
+          })
+          .filter(Boolean)
+      };
     }
   };
 };

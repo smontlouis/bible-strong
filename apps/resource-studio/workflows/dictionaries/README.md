@@ -11,6 +11,8 @@ Depuis la racine du dépôt :
 ```bash
 yarn resources:dictionaries:test
 yarn resources:dictionaries:normalize
+yarn resources:dictionaries:correspondences
+yarn resources:dictionaries:entry-links
 yarn resources:dictionaries:audit
 yarn resources:dictionaries:audit-smith
 yarn resources:dictionaries:acquire-smith
@@ -30,7 +32,9 @@ Le lecteur propose :
 - une recherche dans les intitulés et les formes normalisées ;
 - la pagination et le rendu HTML complet de chaque article ;
 - la navigation entre les liens de mots présents dans les définitions ;
+- les articles correspondants dans les autres dictionnaires, sans fusionner leurs contenus ;
 - les références bibliques reconnues par le BCV parser, rendues sous forme de liens `bible://` ;
+- les numéros Strong de Translation Words, rendus sous forme de liens canoniques `strong://` ;
 - les métadonnées éditoriales, compteurs, provenance, attribution et droits de chaque ressource.
 
 La configuration canonique reste
@@ -50,8 +54,34 @@ Westphal et Easton + Webster utilisent les SQLite issus du pipeline de publicati
 La normalisation travaille sur des copies locales sous `.local/normalized`, sans modifier les SQLite
 sources. Elle convertit les anciens liens, détecte les références non liées, supprime les liens
 bibliques invalides et reconstruit la table `verses` uniquement à partir des citations contrôlées.
-Le lecteur préfère automatiquement ces copies lorsqu’elles existent. Le serveur et le pipeline de
-normalisation nécessitent la commande système `sqlite3`.
+Elle régénère ensuite `.local/normalized/correspondences.json`. Cette étape peut aussi être lancée
+seule avec `yarn resources:dictionaries:correspondences`.
+
+Les correspondances sont déterministes et conservatrices : intitulés normalisés dans une même
+langue, variantes explicitement écrites dans les intitulés (`;`, `or`, `ou`) et translittérations
+français/anglais de noms bibliques attestés par la liste `bible/names` de Translation Words. Tous
+les articles sont analysés, mais un article n’est relié que si une correspondance suffisamment sûre
+est trouvée. Les homographes génériques entre langues ne sont pas rapprochés automatiquement. Le
+lecteur préfère automatiquement les copies normalisées lorsqu’elles existent. Le serveur et le
+pipeline de normalisation nécessitent la commande système `sqlite3`.
+
+Translation Words est le seul corpus de cette bibliothèque qui fournisse un inventaire Strong
+structuré. Ses codes hébreux sont conservés tels quels. Sa convention grecque Door43 à cinq chiffres
+est reliée à l’entrée classique correspondante (`G00020` → `strong://G0002`) tout en conservant le
+libellé source visible et traçable. Les chaînes courtes d’ISBE comme `H2` ou `G2`, qui désignent des
+sections ou des manuscrits, ne sont pas interprétées comme des Strong.
+
+Après la construction des correspondances, le pipeline contrôle également les renvois internes des
+définitions. Les anciens liens sont résolus vers l’identifiant exact de leur destination ; les
+auto-liens et les destinations invérifiables sont retirés. Pour les corpus qui ne possèdent pas ces
+renvois, les indications éditoriales explicites `See`, `See also`, `Voir`, `Voir aussi` et `Voyez`
+sont reliées en priorité, sans contrainte de casse. Un numéro comme dans `See KEDESH, 3` permet de
+lever une ambiguïté entre plusieurs articles et d’ouvrir directement la section visée. Le pipeline
+lie ensuite au maximum la première occurrence d’un sujet par article, uniquement si le
+sujet est corroboré par plusieurs dictionnaires. La casse doit correspondre, les verbes ambigus et
+les termes très courts sont écartés, et les compléments Webster ne servent pas de destinations
+automatiques. Cette étape peut être relancée seule avec
+`yarn resources:dictionaries:entry-links`.
 
 L’audit Smith télécharge le module SWORD public-domain épinglé, l’extrait dans `.local/smith` et
 compare ses intitulés et son contenu à Easton + Webster. Il nécessite également `unzip` et un
