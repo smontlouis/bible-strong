@@ -1,8 +1,8 @@
 {
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
-  "generatedAt": "2026-08-31T16:43:07.719Z",
-  "resourceCount": 105,
+  "generatedAt": "2026-08-31T22:02:39.856Z",
+  "resourceCount": 113,
   "resources": {
     "bible-interlinear:BHG:en": {
       "id": "bible-interlinear:BHG:en",
@@ -1617,6 +1617,27 @@
       "peakInstallationBytes": 33947476,
       "strategy": "archive-extract"
     },
+    "database:BOST:fr": {
+      "id": "database:BOST:fr",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/dictionaries/dictionary-bost-fr.sqlite.zip?sha256=f5e66b831c5b95f0033b69fa0eb44fe8dce2e5c2cae78e248bfd9636d4d659ca",
+      "file": "dictionaries/dictionary-bost-fr.sqlite.zip",
+      "entry": "dictionnaire.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "dictionnaire.sqlite",
+          "sha256": "6f1da4f3d0230309446247d9dfc2ba204469214f1cd072afb8cf6f196b136399",
+          "bytes": 16232448
+        }
+      },
+      "archiveSha256": "f5e66b831c5b95f0033b69fa0eb44fe8dce2e5c2cae78e248bfd9636d4d659ca",
+      "archiveBytes": 4193372,
+      "contentSha256": "6f1da4f3d0230309446247d9dfc2ba204469214f1cd072afb8cf6f196b136399",
+      "contentBytes": 16232448,
+      "resourceRevision": "dictionary-bost-fr-6aab80e0a06bb152e43d",
+      "installedBytes": 16232448,
+      "peakInstallationBytes": 23489693,
+      "strategy": "archive-extract"
+    },
     "database:burkitt:en": {
       "id": "database:burkitt:en",
       "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-burkitt-en.sqlite.zip?sha256=db4f554187a34f791d5ae80dec3be8418f357e1bd157ee12b3ecc144a8b0b8fe",
@@ -1636,6 +1657,27 @@
       "resourceRevision": "burkitt-en-063b1c408020c9817c9b",
       "installedBytes": 6623232,
       "peakInstallationBytes": 10090007,
+      "strategy": "archive-extract"
+    },
+    "database:CALMET:fr": {
+      "id": "database:CALMET:fr",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/dictionaries/dictionary-calmet-fr.sqlite.zip?sha256=b57a08ddb67427a8f8f7b3dc7c6ded800c148a76c4ce244bed0b768baf493ac7",
+      "file": "dictionaries/dictionary-calmet-fr.sqlite.zip",
+      "entry": "dictionnaire.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "dictionnaire.sqlite",
+          "sha256": "44ebe0a0730dc46da16d4117588421e2abacd303fcf2393ce9dfff570fdf4b9f",
+          "bytes": 29667328
+        }
+      },
+      "archiveSha256": "b57a08ddb67427a8f8f7b3dc7c6ded800c148a76c4ce244bed0b768baf493ac7",
+      "archiveBytes": 7970993,
+      "contentSha256": "44ebe0a0730dc46da16d4117588421e2abacd303fcf2393ce9dfff570fdf4b9f",
+      "contentBytes": 29667328,
+      "resourceRevision": "dictionary-calmet-fr-8c62871c189f48162551",
+      "installedBytes": 29667328,
+      "peakInstallationBytes": 43284070,
       "strategy": "archive-extract"
     },
     "database:calvin:en": {
@@ -1762,6 +1804,27 @@
       "peakInstallationBytes": 3377632,
       "strategy": "archive-extract"
     },
+    "database:EASTON_WEBSTER:en": {
+      "id": "database:EASTON_WEBSTER:en",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/dictionaries/dictionary-easton-webster-en.sqlite.zip?sha256=a3f2ff0be3b191ab2ae98b7d156b2cf2ecec1c14a0d362a814e6206baa9dc2bb",
+      "file": "dictionaries/dictionary-easton-webster-en.sqlite.zip",
+      "entry": "dictionnaire.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "dictionnaire.sqlite",
+          "sha256": "522f0adb81bf82b00f2497eff7c40b5cb7e5851c1873d927781abedd6d7131e4",
+          "bytes": 35986432
+        }
+      },
+      "archiveSha256": "a3f2ff0be3b191ab2ae98b7d156b2cf2ecec1c14a0d362a814e6206baa9dc2bb",
+      "archiveBytes": 8574652,
+      "contentSha256": "522f0adb81bf82b00f2497eff7c40b5cb7e5851c1873d927781abedd6d7131e4",
+      "contentBytes": 35986432,
+      "resourceRevision": "dictionary-easton-webster-en-a30602d83b4a84e776d9",
+      "installedBytes": 35986432,
+      "peakInstallationBytes": 51245247,
+      "strategy": "archive-extract"
+    },
     "database:family-notes:en": {
       "id": "database:family-notes:en",
       "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-family-notes-en.sqlite.zip?sha256=4b0baf7d56c7e048acf84faca81038c6ee64c7ba23ee1d16f678969827d420ba",
@@ -1867,6 +1930,27 @@
       "peakInstallationBytes": 8662888,
       "strategy": "archive-extract"
     },
+    "database:ISBE:en": {
+      "id": "database:ISBE:en",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/dictionaries/dictionary-isbe-en.sqlite.zip?sha256=2717dd90faccdd95e71376265dbdcd134c7015f9c81d7bc6764f99c32236d847",
+      "file": "dictionaries/dictionary-isbe-en.sqlite.zip",
+      "entry": "dictionnaire.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "dictionnaire.sqlite",
+          "sha256": "d77a77ab221744b1cce85bf085489a9425f2d4d39114e3d61e1a82f9467bb117",
+          "bytes": 74260480
+        }
+      },
+      "archiveSha256": "2717dd90faccdd95e71376265dbdcd134c7015f9c81d7bc6764f99c32236d847",
+      "archiveBytes": 19328517,
+      "contentSha256": "d77a77ab221744b1cce85bf085489a9425f2d4d39114e3d61e1a82f9467bb117",
+      "contentBytes": 74260480,
+      "resourceRevision": "dictionary-isbe-en-fbaaa93d38286457cfa8",
+      "installedBytes": 74260480,
+      "peakInstallationBytes": 107627347,
+      "strategy": "archive-extract"
+    },
     "database:jfb:en": {
       "id": "database:jfb:en",
       "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-jfb-en.sqlite.zip?sha256=d9c3b687351fa5676dd321bda9a5b79356becaf27cd739c836bf540aac2d25db",
@@ -1928,6 +2012,27 @@
       "resourceRevision": "king-comments-en-d2755427acc046391663",
       "installedBytes": 28340224,
       "peakInstallationBytes": 42280781,
+      "strategy": "archive-extract"
+    },
+    "database:LELIEVRE:fr": {
+      "id": "database:LELIEVRE:fr",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/dictionaries/dictionary-lelievre-fr.sqlite.zip?sha256=a42ee7cabc37eb0247f6cf7c173048159d757b8bbdd270f88c8a698f6689cf73",
+      "file": "dictionaries/dictionary-lelievre-fr.sqlite.zip",
+      "entry": "dictionnaire.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "dictionnaire.sqlite",
+          "sha256": "847eb01bee6766b7d4bb0a62b4a09a555e7e027f0a13e210ac352532e4ee2df4",
+          "bytes": 1236992
+        }
+      },
+      "archiveSha256": "a42ee7cabc37eb0247f6cf7c173048159d757b8bbdd270f88c8a698f6689cf73",
+      "archiveBytes": 324437,
+      "contentSha256": "847eb01bee6766b7d4bb0a62b4a09a555e7e027f0a13e210ac352532e4ee2df4",
+      "contentBytes": 1236992,
+      "resourceRevision": "dictionary-lelievre-fr-2dbdf9b5e684dd81a797",
+      "installedBytes": 1236992,
+      "peakInstallationBytes": 1795644,
       "strategy": "archive-extract"
     },
     "database:lightfoot:en": {
@@ -2201,6 +2306,27 @@
       "peakInstallationBytes": 43815927,
       "strategy": "archive-extract"
     },
+    "database:SMITH:en": {
+      "id": "database:SMITH:en",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/dictionaries/dictionary-smith-en.sqlite.zip?sha256=1fad8d7c24aa1c6c6c7020ff8ab853ee405d022e62381e3c721e3f362f13b054",
+      "file": "dictionaries/dictionary-smith-en.sqlite.zip",
+      "entry": "dictionnaire.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "dictionnaire.sqlite",
+          "sha256": "f403b11896e33d3b59331562d8f00364588d151c16b4ad8a8712d2573b769e3f",
+          "bytes": 12128256
+        }
+      },
+      "archiveSha256": "1fad8d7c24aa1c6c6c7020ff8ab853ee405d022e62381e3c721e3f362f13b054",
+      "archiveBytes": 3150884,
+      "contentSha256": "f403b11896e33d3b59331562d8f00364588d151c16b4ad8a8712d2573b769e3f",
+      "contentBytes": 12128256,
+      "resourceRevision": "dictionary-smith-en-1116731be2ed4d9d7fde",
+      "installedBytes": 12128256,
+      "peakInstallationBytes": 17571011,
+      "strategy": "archive-extract"
+    },
     "database:TIMELINE:en": {
       "id": "database:TIMELINE:en",
       "url": "https://api.bible-strong.app/v1/offline-artifacts/databases/en/bible-timeline-events.json.zip",
@@ -2282,6 +2408,27 @@
       "peakInstallationBytes": 8420857,
       "strategy": "archive-extract"
     },
+    "database:UNFOLDINGWORD_TW:en": {
+      "id": "database:UNFOLDINGWORD_TW:en",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/dictionaries/dictionary-unfoldingword-translation-words-en.sqlite.zip?sha256=c5285db5431cbd132b61af7c43a8f4c59cf6119dea157b6cfb2eeca2bfae0470",
+      "file": "dictionaries/dictionary-unfoldingword-translation-words-en.sqlite.zip",
+      "entry": "dictionnaire.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "dictionnaire.sqlite",
+          "sha256": "0f5e053a71f1c7cd89be08c00057a0467c0a4ec395556eba7d0d908249c6d7cd",
+          "bytes": 5726208
+        }
+      },
+      "archiveSha256": "c5285db5431cbd132b61af7c43a8f4c59cf6119dea157b6cfb2eeca2bfae0470",
+      "archiveBytes": 1149839,
+      "contentSha256": "0f5e053a71f1c7cd89be08c00057a0467c0a4ec395556eba7d0d908249c6d7cd",
+      "contentBytes": 5726208,
+      "resourceRevision": "dictionary-unfoldingword-translation-words-en-61f474304e5c228ce37e",
+      "installedBytes": 5726208,
+      "peakInstallationBytes": 7907455,
+      "strategy": "archive-extract"
+    },
     "database:wesley:en": {
       "id": "database:wesley:en",
       "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-wesley-en.sqlite.zip?sha256=c8a227b9861dcba4255e1eb86b6f328cd7436a4763d4b03db3fb9e15634287b6",
@@ -2301,6 +2448,27 @@
       "resourceRevision": "wesley-en-bdcdb812f0cb9cbd35e7",
       "installedBytes": 6139904,
       "peakInstallationBytes": 9263609,
+      "strategy": "archive-extract"
+    },
+    "database:WESTPHAL:fr": {
+      "id": "database:WESTPHAL:fr",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/dictionaries/dictionary-westphal-fr.sqlite.zip?sha256=f0136627d5dfc357246f0d28f3193594926d73367bf67bc87396d921a554df1c",
+      "file": "dictionaries/dictionary-westphal-fr.sqlite.zip",
+      "entry": "dictionnaire.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "dictionnaire.sqlite",
+          "sha256": "cfa65e5a70ba6e61d719e50bc2668cd4767453970b936a1b158f0af8bf4f4271",
+          "bytes": 51221504
+        }
+      },
+      "archiveSha256": "f0136627d5dfc357246f0d28f3193594926d73367bf67bc87396d921a554df1c",
+      "archiveBytes": 11932927,
+      "contentSha256": "cfa65e5a70ba6e61d719e50bc2668cd4767453970b936a1b158f0af8bf4f4271",
+      "contentBytes": 51221504,
+      "resourceRevision": "dictionary-westphal-fr-1b193470a5d75f75a72d",
+      "installedBytes": 51221504,
+      "peakInstallationBytes": 72627596,
       "strategy": "archive-extract"
     },
     "strong-lexicon:core": {

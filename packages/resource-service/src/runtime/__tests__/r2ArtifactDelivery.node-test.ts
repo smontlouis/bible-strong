@@ -100,8 +100,8 @@ describe('R2 artifact delivery', () => {
     assert.equal(response?.status, 200)
     assert.equal(response?.headers.get('content-type'), 'application/json; charset=utf-8')
     const catalog = (await response?.json()) as { resourceCount?: number; resources?: object }
-    assert.equal(catalog.resourceCount, 105)
-    assert.equal(Object.keys(catalog.resources ?? {}).length, 105)
+    assert.equal(catalog.resourceCount, 113)
+    assert.equal(Object.keys(catalog.resources ?? {}).length, 113)
     assert.deepEqual(reads, [])
   })
 

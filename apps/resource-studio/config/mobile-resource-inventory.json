@@ -1061,6 +1061,19 @@
     "resourceRevision": "bible-annotee-fr-9aa26382402383ab2c08"
   },
   {
+    "id": "database:BOST:fr",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-bost-fr.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-bost-fr.sqlite",
+        "entry": "dictionnaire.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-bost-fr-6aab80e0a06bb152e43d"
+  },
+  {
     "id": "database:burkitt:en",
     "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-burkitt-en.sqlite.zip",
     "sources": [
@@ -1072,6 +1085,19 @@
     ],
     "strategy": "archive-extract",
     "resourceRevision": "burkitt-en-063b1c408020c9817c9b"
+  },
+  {
+    "id": "database:CALMET:fr",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-calmet-fr.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-calmet-fr.sqlite",
+        "entry": "dictionnaire.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-calmet-fr-8c62871c189f48162551"
   },
   {
     "id": "database:calvin:en",
@@ -1150,6 +1176,19 @@
     "resourceRevision": "douay-rheims-notes-en-fb804de36080ec88a5e7"
   },
   {
+    "id": "database:EASTON_WEBSTER:en",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-easton-webster-en.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-easton-webster-en.sqlite",
+        "entry": "dictionnaire.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-easton-webster-en-a30602d83b4a84e776d9"
+  },
+  {
     "id": "database:family-notes:en",
     "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-family-notes-en.sqlite.zip",
     "sources": [
@@ -1215,6 +1254,19 @@
     "resourceRevision": "geneva-notes-en-0770abc34d5bb7a13828"
   },
   {
+    "id": "database:ISBE:en",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-isbe-en.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-isbe-en.sqlite",
+        "entry": "dictionnaire.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-isbe-en-fbaaa93d38286457cfa8"
+  },
+  {
     "id": "database:jfb:en",
     "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-jfb-en.sqlite.zip",
     "sources": [
@@ -1252,6 +1304,19 @@
     ],
     "strategy": "archive-extract",
     "resourceRevision": "king-comments-en-d2755427acc046391663"
+  },
+  {
+    "id": "database:LELIEVRE:fr",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-lelievre-fr.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-lelievre-fr.sqlite",
+        "entry": "dictionnaire.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-lelievre-fr-2dbdf9b5e684dd81a797"
   },
   {
     "id": "database:lightfoot:en",
@@ -1421,6 +1486,19 @@
     "resourceRevision": "sdabc-en-924b6fb166861b7e0928"
   },
   {
+    "id": "database:SMITH:en",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-smith-en.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-smith-en.sqlite",
+        "entry": "dictionnaire.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-smith-en-1116731be2ed4d9d7fde"
+  },
+  {
     "id": "database:TIMELINE:en",
     "artifactUrl": "https://assets.bible-strong.app/databases/en/bible-timeline-events.json.zip",
     "sources": [
@@ -1470,6 +1548,19 @@
     "strategy": "archive-extract"
   },
   {
+    "id": "database:UNFOLDINGWORD_TW:en",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-unfoldingword-translation-words-en.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-unfoldingword-translation-words-en.sqlite",
+        "entry": "dictionnaire.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-unfoldingword-translation-words-en-61f474304e5c228ce37e"
+  },
+  {
     "id": "database:wesley:en",
     "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-wesley-en.sqlite.zip",
     "sources": [
@@ -1481,6 +1572,19 @@
     ],
     "strategy": "archive-extract",
     "resourceRevision": "wesley-en-bdcdb812f0cb9cbd35e7"
+  },
+  {
+    "id": "database:WESTPHAL:fr",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-westphal-fr.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-westphal-fr.sqlite",
+        "entry": "dictionnaire.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-westphal-fr-1b193470a5d75f75a72d"
   },
   {
     "id": "strong-lexicon:core",

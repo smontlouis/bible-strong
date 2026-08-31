@@ -6,6 +6,7 @@ import {
   lstat,
   mkdir,
   mkdtemp,
+  readdir,
   readFile,
   rename,
   rm,
@@ -723,7 +724,10 @@ export async function buildAllDictionaryResourcePublications(options: {
     path.join(tmpdir(), "dictionary-normalization-")
   );
   try {
-    const normalizationConfigPath = path.join(normalizationDir, "dictionary.json");
+    const normalizationConfigPath = path.join(
+      normalizationDir,
+      "dictionary.json"
+    );
     const normalizedRoot = path.join(normalizationDir, "normalized");
     await writeFile(
       normalizationConfigPath,
@@ -737,13 +741,17 @@ export async function buildAllDictionaryResourcePublications(options: {
       )}\n`,
       "utf8"
     );
-    await execFileAsync(process.execPath, [
-      normalizeDictionaryLibraryScript,
-      "--config",
-      normalizationConfigPath,
-      "--output-root",
-      normalizedRoot
-    ], { maxBuffer: 16 * 1024 * 1024 });
+    await execFileAsync(
+      process.execPath,
+      [
+        normalizeDictionaryLibraryScript,
+        "--config",
+        normalizationConfigPath,
+        "--output-root",
+        normalizedRoot
+      ],
+      { maxBuffer: 16 * 1024 * 1024 }
+    );
     const manifests: DictionaryResourcePublicationManifest[] = [];
     const identities = new Set<string>();
     for (const publication of options.publications) {
@@ -885,6 +893,156 @@ export async function validateDictionaryResourcePublication(
   return manifest;
 }
 
+type DictionaryCatalogContracts = {
+  catalogPath: string;
+  inventoryPath: string;
+  requiredIdsPath: string;
+};
+
+const dictionaryBundleDirectories = async (root: string): Promise<string[]> => {
+  const bundles: string[] = [];
+  for (const work of await readdir(path.resolve(root), {
+    withFileTypes: true
+  })) {
+    if (!work.isDirectory()) continue;
+    for (const language of await readdir(path.join(root, work.name), {
+      withFileTypes: true
+    })) {
+      if (language.isDirectory()) {
+        bundles.push(path.join(root, work.name, language.name));
+      }
+    }
+  }
+  return bundles.sort();
+};
+
+const zipEntryBytes = async (archivePath: string, entry: string) => {
+  const { stdout } = await execFileAsync("zipinfo", ["-l", archivePath, entry]);
+  const line = stdout
+    .split(/\r?\n/u)
+    .find((value) => value.trimEnd().endsWith(` ${entry}`));
+  const bytes = Number(line?.trim().split(/\s+/u)[3]);
+  if (!Number.isSafeInteger(bytes) || bytes <= 0) {
+    throw new Error("dictionary-publication-offline-size-invalid");
+  }
+  return bytes;
+};
+
+export async function synchronizeDictionaryCatalogContracts(
+  root: string,
+  contracts: DictionaryCatalogContracts
+): Promise<string[]> {
+  const [catalog, inventory, required] = await Promise.all([
+    readFile(contracts.catalogPath, "utf8").then((value) => JSON.parse(value)),
+    readFile(contracts.inventoryPath, "utf8").then((value) =>
+      JSON.parse(value)
+    ),
+    readFile(contracts.requiredIdsPath, "utf8").then((value) =>
+      JSON.parse(value)
+    )
+  ]);
+  if (
+    !catalog?.resources ||
+    !Array.isArray(inventory) ||
+    !Array.isArray(required?.resourceIds)
+  ) {
+    throw new Error("dictionary-publication-catalog-contract-invalid");
+  }
+  const inventoryById = new Map<
+    string,
+    { id: string } & Record<string, unknown>
+  >(
+    inventory.map((item: { id: string } & Record<string, unknown>) => [
+      item.id,
+      item
+    ])
+  );
+  const ids: string[] = [];
+  for (const bundleDir of await dictionaryBundleDirectories(root)) {
+    const manifest = await validateDictionaryResourcePublication(bundleDir);
+    const id = `database:${manifest.identity.resourceId}:${manifest.identity.language}`;
+    const file = `dictionaries/dictionary-${manifest.identity.work}-${manifest.identity.language}.sqlite.zip`;
+    const contentBytes = await zipEntryBytes(
+      path.join(bundleDir, manifest.offlineArtifact.path),
+      manifest.offlineArtifact.entry
+    );
+    const artifactUrl = new URL(
+      file,
+      "https://api.bible-strong.app/v1/offline-artifacts/"
+    );
+    artifactUrl.searchParams.set("sha256", manifest.offlineArtifact.sha256);
+    catalog.resources[id] = {
+      id,
+      url: artifactUrl.toString(),
+      file,
+      entry: manifest.offlineArtifact.entry,
+      entries: {
+        canonical: {
+          entry: manifest.offlineArtifact.entry,
+          sha256: manifest.offlineArtifact.contentSha256,
+          bytes: contentBytes
+        }
+      },
+      archiveSha256: manifest.offlineArtifact.sha256,
+      archiveBytes: manifest.offlineArtifact.bytes,
+      contentSha256: manifest.offlineArtifact.contentSha256,
+      contentBytes,
+      resourceRevision: manifest.revision,
+      installedBytes: contentBytes,
+      peakInstallationBytes: Math.ceil(
+        (manifest.offlineArtifact.bytes + contentBytes) * 1.15
+      ),
+      strategy: "archive-extract"
+    };
+    inventoryById.set(id, {
+      id,
+      artifactUrl: `https://assets.bible-strong.app/${file}`,
+      sources: [
+        {
+          role: "canonical",
+          sourceUrl: `https://assets.bible-strong.app/${file.replace(/\.zip$/u, "")}`,
+          entry: manifest.offlineArtifact.entry
+        }
+      ],
+      strategy: "archive-extract",
+      resourceRevision: manifest.revision
+    });
+    ids.push(id);
+  }
+  catalog.resources = Object.fromEntries(
+    Object.entries(catalog.resources).sort(([left], [right]) =>
+      left.localeCompare(right)
+    )
+  );
+  catalog.resourceCount = Object.keys(catalog.resources).length;
+  catalog.generatedAt = new Date().toISOString();
+  required.resourceIds = [...new Set([...required.resourceIds, ...ids])].sort();
+  await Promise.all([
+    writeFile(
+      contracts.catalogPath,
+      `${JSON.stringify(catalog, null, 2)}\n`,
+      "utf8"
+    ),
+    writeFile(
+      contracts.inventoryPath,
+      `${JSON.stringify(
+        [...inventoryById.values()].sort(
+          (a: { id: string }, b: { id: string }) => a.id.localeCompare(b.id)
+        ),
+        null,
+        2
+      )}\n`,
+      "utf8"
+    ),
+    writeFile(
+      contracts.requiredIdsPath,
+      `${JSON.stringify(required, null, 2)}\n`,
+      "utf8"
+    )
+  ]);
+  return ids.sort();
+}
+
 const decodeCanonicalDictionary = (
   value: unknown
 ): CanonicalDictionaryPublication => {
@@ -997,8 +1155,8 @@ const decodeDictionaryManifest = (
     !isRecord(candidate.counts) ||
     !isNonNegativeInteger(candidate.counts.entries) ||
     !isNonNegativeInteger(candidate.counts.verseAnchors) ||
-    !isNonNegativeInteger(candidate.counts.wordReferences)
-    || !isNonNegativeInteger(candidate.counts.passageEntryReferences)
+    !isNonNegativeInteger(candidate.counts.wordReferences) ||
+    !isNonNegativeInteger(candidate.counts.passageEntryReferences)
   ) {
     throw new Error("dictionary-publication-manifest-invalid");
   }
@@ -1026,6 +1184,36 @@ const parseCliArgs = (
 
 const main = async () => {
   const [command = "build", ...rawArgs] = process.argv.slice(2);
+  if (command === "sync-catalog") {
+    const args = parseCliArgs(rawArgs, new Set(["--root"]));
+    if (!args["--root"])
+      throw new Error("dictionary-publication-cli-root-missing");
+    const repositoryRoot = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      "../../.."
+    );
+    console.log(
+      JSON.stringify(
+        await synchronizeDictionaryCatalogContracts(args["--root"], {
+          catalogPath: path.join(
+            repositoryRoot,
+            "packages/resource-catalog/src/mobile-resource-catalog.json"
+          ),
+          inventoryPath: path.join(
+            repositoryRoot,
+            "apps/resource-studio/config/mobile-resource-inventory.json"
+          ),
+          requiredIdsPath: path.join(
+            repositoryRoot,
+            "apps/resource-studio/config/mobile-resource-required-ids.json"
+          )
+        }),
+        null,
+        2
+      )
+    );
+    return;
+  }
   if (command === "validate") {
     const args = parseCliArgs(rawArgs, new Set(["--bundle"]));
     if (!args["--bundle"])
