@@ -219,7 +219,7 @@ describe('Strong lexicon PostgreSQL repository', { skip: !runIntegration }, () =
         })
       )
 
-      assert.equal(statementCount, 6)
+      assert.equal(statementCount, 5)
       assert.deepEqual(
         cards.map(card => ({
           revision: card.revision,

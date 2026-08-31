@@ -296,45 +296,114 @@ export const makeKyselyStrongLexiconRepository = (
     const references = [
       ...new Set(input.identities.map(identity => normalizeCode(identity.reference))),
     ]
-    const requestedIdentityRows = await records(core.id, 'StepEntryIdentities', query =>
-      query.where('code', 'in', references)
-    )
+    const requestedIdentityRows = (
+      await database
+        .selectFrom('strong_lexicon_entry_identities')
+        .select(['step_entry_id', 'step_code'])
+        .where('publication_id', '=', core.id)
+        .where('step_code', 'in', references)
+        .orderBy('step_entry_id')
+        .execute()
+    ).map(row => ({ stepEntryId: row.step_entry_id, stepCode: row.step_code }))
     const requestedEntryIds = requestedIdentityRows.map(row => number(row, 'stepEntryId'))
-    const referenceSql = sql.join(references.map(reference => sql`${reference}`))
-    const baseFilters = input.identities.map(identity => {
-      const reference = normalizeCode(identity.reference)
-      const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
-      return sql<boolean>`(
-        (payload->>'baseCode')::integer = ${Number.isFinite(base) ? base : -1}
-        AND payload->>'language' = ${reference.startsWith('G') ? 'greek' : 'hebrew'}
-      )`
-    })
-    const entryIdFilter = requestedEntryIds.length
-      ? sql<boolean>`entry_id IN (${sql.join(requestedEntryIds.map(id => sql`${id}`))})`
-      : sql<boolean>`false`
-    const entries = await records(core.id, 'StepEntries', query =>
-      query.where(sql<boolean>`(
-        ${entryIdFilter}
-        OR upper(payload->>'eStrong') IN (${referenceSql})
-        OR upper(payload->>'dStrong') IN (${referenceSql})
-        OR upper(payload->>'uStrong') IN (${referenceSql})
-        OR ${sql.join(baseFilters, sql` OR `)}
-      )`)
+    const indexedEntries = requestedEntryIds.length
+      ? await database
+          .selectFrom('strong_lexicon_entries')
+          .select('payload')
+          .where('publication_id', '=', core.id)
+          .where('entry_id', 'in', requestedEntryIds)
+          .orderBy('entry_id')
+          .execute()
+      : []
+    const indexedReferences = new Set(requestedIdentityRows.map(row => text(row, 'stepCode')))
+    const unresolvedIdentities = input.identities.filter(
+      identity => !indexedReferences.has(normalizeCode(identity.reference))
     )
+    const fallbackReferences = [
+      ...new Set(unresolvedIdentities.map(identity => normalizeCode(identity.reference))),
+    ]
+    const fallbackEntries = fallbackReferences.length
+      ? await database
+          .selectFrom('strong_lexicon_entries')
+          .select('payload')
+          .where('publication_id', '=', core.id)
+          .where(
+            sql<boolean>`(
+              e_strong IN (${sql.join(fallbackReferences.map(reference => sql`${reference}`))})
+              OR d_strong IN (${sql.join(fallbackReferences.map(reference => sql`${reference}`))})
+              OR u_strong IN (${sql.join(fallbackReferences.map(reference => sql`${reference}`))})
+              OR ${sql.join(
+                unresolvedIdentities.map(identity => {
+                  const reference = normalizeCode(identity.reference)
+                  const base = Number(reference.replace(/^[HG]/u, '').replace(/^0+/u, ''))
+                  return sql<boolean>`(
+                    (payload->>'baseCode')::integer = ${Number.isFinite(base) ? base : -1}
+                    AND payload->>'language' = ${reference.startsWith('G') ? 'greek' : 'hebrew'}
+                  )`
+                }),
+                sql` OR `
+              )}
+            )`
+          )
+          .orderBy('entry_id')
+          .execute()
+      : []
+    const entries = [
+      ...new Map(
+        [...indexedEntries, ...fallbackEntries].map(row => [number(row.payload, 'id'), row.payload])
+      ).values(),
+    ]
     if (!entries.length) return []
     const entryIds = entries.map(entry => number(entry, 'id'))
+    const morphologyCodes = [...new Set(entries.map(entry => text(entry, 'morph')).filter(Boolean))]
     const [identities, translations, morphologyRows] = await Promise.all([
-      records(core.id, 'StepEntryIdentities', query => query.where('entry_id', 'in', entryIds)),
-      records(core.id, 'LexiconTranslations', query =>
-        query.where('entry_id', 'in', entryIds).where('language', '=', input.language)
-      ),
-      records(core.id, 'MorphologyCodes'),
+      database
+        .selectFrom('strong_lexicon_entry_identities')
+        .select(['step_entry_id', 'step_code'])
+        .where('publication_id', '=', core.id)
+        .where('step_entry_id', 'in', entryIds)
+        .orderBy('step_entry_id')
+        .execute()
+        .then(rows =>
+          rows.map(row => ({ stepEntryId: row.step_entry_id, stepCode: row.step_code }))
+        ),
+      database
+        .selectFrom('strong_lexicon_translations')
+        .select('payload')
+        .where('publication_id', '=', core.id)
+        .where('step_entry_id', 'in', entryIds)
+        .where('language', '=', input.language)
+        .orderBy('step_entry_id')
+        .execute()
+        .then(rows => rows.map(row => row.payload)),
+      morphologyCodes.length
+        ? database
+            .selectFrom('strong_lexicon_morphology_codes')
+            .select('payload')
+            .where('publication_id', '=', core.id)
+            .where('scope', '=', 'lexical_brief')
+            .where(expression =>
+              expression.or([
+                expression('code', 'in', morphologyCodes),
+                expression('normalized_code', 'in', morphologyCodes),
+              ])
+            )
+            .orderBy('morphology_code_id')
+            .execute()
+            .then(rows => rows.map(row => row.payload))
+        : Promise.resolve([]),
     ])
     const morphologyIds = morphologyRows.map(row => number(row, 'id'))
     const morphologyTranslations = morphologyIds.length
-      ? await records(core.id, 'MorphologyCodeTranslations', query =>
-          query.where('entry_id', 'in', morphologyIds).where('language', '=', input.language)
-        )
+      ? await database
+          .selectFrom('strong_lexicon_morphology_code_translations')
+          .select('payload')
+          .where('publication_id', '=', core.id)
+          .where('morphology_code_id', 'in', morphologyIds)
+          .where('language', '=', input.language)
+          .orderBy('morphology_code_id')
+          .execute()
+          .then(rows => rows.map(row => row.payload))
       : []
     return input.identities.flatMap(requested => {
       const reference = normalizeCode(requested.reference)

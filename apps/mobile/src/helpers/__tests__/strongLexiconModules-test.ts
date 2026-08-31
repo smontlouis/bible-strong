@@ -30,7 +30,9 @@ const createCoreDatabase = ({
   additionalStepEntryColumns?: string[]
 } = {}) =>
   ({
-    getFirstAsync: jest.fn(async () => ({ integrity_check: 'ok' })),
+    getFirstAsync: jest.fn(async (sql: string) =>
+      sql.includes('quick_check') ? { quick_check: 'ok' } : { integrity_check: 'ok' }
+    ),
     getAllAsync: jest.fn(async (sql: string) => {
       if (sql.includes('foreign_key_check')) return []
       if (sql.includes('sqlite_schema')) {
@@ -134,7 +136,9 @@ const createResourcesDatabase = (
   schemaVersion = 3
 ) =>
   ({
-    getFirstAsync: jest.fn(async () => ({ integrity_check: 'ok' })),
+    getFirstAsync: jest.fn(async (sql: string) =>
+      sql.includes('quick_check') ? { quick_check: 'ok' } : { integrity_check: 'ok' }
+    ),
     getAllAsync: jest.fn(async (sql: string) => {
       if (sql.includes('foreign_key_check')) return []
       if (sql.includes('sqlite_schema')) {
@@ -191,6 +195,16 @@ describe('Strong lexicon module validation', () => {
       revision: getCatalogPublication('core').resourceRevision,
       schemaVersion: 3,
     })
+  })
+
+  it('supports a quick integrity check for cached runtime availability reads', async () => {
+    const database = createCoreDatabase()
+
+    await validateStrongLexiconModuleDatabase('core', database, undefined, {
+      integrityCheck: 'quick',
+    })
+
+    expect(database.getFirstAsync).toHaveBeenCalledWith('PRAGMA quick_check')
   })
 
   it('accepts future additive core tables, columns, and schema metadata', async () => {

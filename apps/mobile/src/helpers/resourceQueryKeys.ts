@@ -60,6 +60,8 @@ export const resourceQueryKeys = {
   lexiconBible: () => lexiconBible,
   lexiconBibleVerse: (request: LexiconBibleQueryRequest) =>
     [...lexiconBible, 'verse', request] as const,
+  lexiconBibleVerseEnrichment: (request: LexiconBibleQueryRequest) =>
+    [...lexiconBible, 'verse-enrichment', request] as const,
   lexiconBibleCounts: (request: LexiconBibleQueryRequest) =>
     [...lexiconBible, 'counts', request] as const,
   lexiconBibleLemmaStats: (request: LexiconBibleQueryRequest) =>
@@ -86,6 +88,8 @@ export const resourceQueryKeys = {
   strongLexicon: () => strongLexicon,
   strongLexiconAvailability: (moduleId: string) =>
     [...strongLexicon, 'availability', moduleId] as const,
+  strongLexiconEntryCards: (language: string, identities: readonly string[]) =>
+    [...strongLexicon, 'entry-cards', language, identities] as const,
   strongLexiconChapterEntities: (request: {
     language: string
     book: number

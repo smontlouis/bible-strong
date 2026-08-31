@@ -5,14 +5,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import BibleVerseDetailCard from '../BibleVerseDetailCard'
 
 const mockLoadVerse = jest.fn()
+const mockEnrichVerse = jest.fn(async (_request: unknown, result: unknown) => result)
 const mockLoadEntries = jest.fn()
 const mockLoadCoverage = jest.fn()
 const mockGetModuleAvailability = jest.fn()
 const mockGetModuleRecoveryActions = jest.fn()
 const mockScrollTo = jest.fn()
+const mockScrollToOffset = jest.fn()
 const mockResourceAccess = {
   bibleContent: { loadCoverage: mockLoadCoverage },
-  lexiconBible: { loadVerse: mockLoadVerse },
+  lexiconBible: {
+    loadVerse: mockLoadVerse,
+    loadVerseBase: mockLoadVerse,
+    enrichVerse: mockEnrichVerse,
+  },
   strongLexicon: {
     loadEntryCards: mockLoadEntries,
     getModuleAvailability: mockGetModuleAvailability,
@@ -79,7 +85,28 @@ jest.mock('react-native', () => {
       return ReactModule.createElement('ScrollView', props, children)
     }
   )
+  const FlatList = ReactModule.forwardRef(
+    (
+      {
+        data = [],
+        renderItem,
+        ...props
+      }: {
+        data?: unknown[]
+        renderItem?: (input: { item: unknown; index: number }) => React.ReactNode
+      } & Record<string, unknown>,
+      ref: React.ForwardedRef<{ scrollToOffset: typeof mockScrollToOffset }>
+    ) => {
+      ReactModule.useImperativeHandle(ref, () => ({ scrollToOffset: mockScrollToOffset }))
+      return ReactModule.createElement(
+        'FlatList',
+        props,
+        data.map((item, index) => renderItem?.({ item, index }))
+      )
+    }
+  )
   return {
+    FlatList,
     ScrollView,
   }
 })
@@ -230,6 +257,7 @@ const makeAvailableVerse = (
 const flushQueryUpdates = async () => {
   await new Promise(resolve => setTimeout(resolve, 0))
   await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise(resolve => setTimeout(resolve, 0))
 }
 
 const renderCard = (
@@ -327,6 +355,83 @@ describe('BibleVerseDetailCard', () => {
     const loadedTree = JSON.stringify(renderer.toJSON())
     expect(loadedTree).toContain('Nouveau verset')
     expect(loadedTree).not.toContain('Ancien verset')
+  })
+
+  it('shows the Strong verse before its lexical cards finish loading', async () => {
+    let resolveEntries: (value: Awaited<ReturnType<typeof mockLoadEntries>>) => void = () =>
+      undefined
+    const pendingEntries = new Promise<Awaited<ReturnType<typeof mockLoadEntries>>>(resolve => {
+      resolveEntries = resolve
+    })
+    mockLoadVerse.mockResolvedValueOnce(
+      makeAvailableVerse('Verset disponible', [
+        {
+          ordinal: 0,
+          startOffset: 0,
+          length: 6,
+          identities: [{ kind: 'strong', code: 'H0430' }],
+        },
+      ])
+    )
+    mockLoadEntries.mockReturnValueOnce(pendingEntries)
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
+    })
+
+    const pendingTree = JSON.stringify(renderer.toJSON())
+    expect(pendingTree).toContain('Verset disponible')
+    expect(pendingTree).not.toContain('"type":"StrongCard"')
+
+    await act(async () => {
+      resolveEntries([
+        {
+          baseCode: 430,
+          stepCode: 'H0430',
+          selectedIdentity: { kind: 'strong', code: 'H0430' },
+          language: 'hebrew',
+          original: 'אֱלֹהִים',
+          transliteration: 'Elohim',
+          gloss: 'Dieu',
+        },
+      ])
+      await pendingEntries
+      await flushQueryUpdates()
+    })
+
+    expect(renderer.root.find(node => String(node.type) === 'StrongCard')).toBeDefined()
+  })
+
+  it('shows the Strong verse while its optional BHG enrichment is still loading', async () => {
+    let resolveEnrichment: (value: ReturnType<typeof makeAvailableVerse>) => void = () => undefined
+    const pendingEnrichment = new Promise<ReturnType<typeof makeAvailableVerse>>(resolve => {
+      resolveEnrichment = resolve
+    })
+    const baseVerse = makeAvailableVerse('Verset Strong immédiat')
+    mockLoadVerse.mockResolvedValueOnce(baseVerse)
+    mockEnrichVerse.mockReturnValueOnce(pendingEnrichment)
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
+    })
+
+    expect(JSON.stringify(renderer.toJSON())).toContain('Verset Strong immédiat')
+
+    await act(async () => {
+      resolveEnrichment(baseVerse)
+      await pendingEnrichment
+      await flushQueryUpdates()
+    })
   })
 
   it('does not duplicate the selected Strong Bible below the header', async () => {
@@ -435,10 +540,12 @@ describe('BibleVerseDetailCard', () => {
       await flushQueryUpdates()
     })
 
-    const cardsScrollView = renderer.root
-      .findAll(node => String(node.type) === 'ScrollView')
-      .find(node => node.props.snapToInterval === 64)
-    expect(cardsScrollView).toBeDefined()
+    const cardsList = renderer.root.find(
+      node => String(node.type) === 'FlatList' && node.props.snapToInterval === 64
+    )
+    expect(cardsList.props).toEqual(
+      expect.objectContaining({ initialNumToRender: 2, maxToRenderPerBatch: 2, windowSize: 3 })
+    )
     expect(renderer.root.find(node => String(node.type) === 'StrongCard')).toBeDefined()
   })
 
@@ -505,14 +612,14 @@ describe('BibleVerseDetailCard', () => {
       renderer.update(renderCard(1))
       await flushQueryUpdates()
     })
-    mockScrollTo.mockClear()
+    mockScrollToOffset.mockClear()
 
     const provider = renderer.root.find(
       node => String(node.type) === 'StrongResourceScrollProvider'
     )
     act(() => provider.props.value.scrollToStrongCard('430', 1))
 
-    expect(mockScrollTo).toHaveBeenCalledWith({ x: 64, animated: true })
+    expect(mockScrollToOffset).toHaveBeenCalledWith({ offset: 64, animated: true })
   })
 
   it('scrolls the wrapped verse vertically to the occurrence selected from the Strong cards', async () => {
@@ -545,12 +652,12 @@ describe('BibleVerseDetailCard', () => {
     const provider = renderer.root.find(
       node => String(node.type) === 'StrongResourceScrollProvider'
     )
-    const cardsScrollView = renderer.root
-      .findAll(node => String(node.type) === 'ScrollView')
-      .find(node => node.props.snapToInterval === 64)
+    const cardsScrollView = renderer.root.find(
+      node => String(node.type) === 'FlatList' && node.props.snapToInterval === 64
+    )
     act(() => provider.props.value.registerStrongWordLayout(1, 180))
     mockScrollTo.mockClear()
-    act(() => cardsScrollView?.props.onScroll({ nativeEvent: { contentOffset: { x: 64 } } }))
+    act(() => cardsScrollView.props.onScroll({ nativeEvent: { contentOffset: { x: 64 } } }))
 
     expect(mockScrollTo).toHaveBeenCalledWith({ y: 180, animated: true })
   })

@@ -188,6 +188,31 @@ describe('strongLexiconAccess', () => {
     expect(String(relationQuery)).not.toContain('LIMIT 72')
   })
 
+  it('loads lightweight offline entry cards without hydrating extended modules', async () => {
+    const database = createDatabase()
+    mockWithStrongLexiconDatabase.mockImplementation(async (_moduleId, operation) =>
+      operation(database as unknown as SQLiteDatabase)
+    )
+
+    await expect(
+      localStrongLexiconAccess.loadEntryCards(
+        [
+          { kind: 'dstrong', code: 'H3068G' },
+          { kind: 'strong', code: 'H0413' },
+        ],
+        'fr'
+      )
+    ).resolves.toEqual([
+      expect.objectContaining({ stepCode: 'H3068G', gloss: 'SEIGNEUR' }),
+      expect.objectContaining({ stepCode: 'H0413', gloss: 'vers' }),
+    ])
+    expect(mockGetStrongLexiconModuleAvailability).not.toHaveBeenCalled()
+    expect(mockWithOptionalStrongLexiconDatabase).not.toHaveBeenCalled()
+    expect(
+      database.getAllAsync.mock.calls.some(([sql]) => String(sql).includes('LexiconRelations'))
+    ).toBe(false)
+  })
+
   it('expands an unresolved classical relation into every matching STEP entry', async () => {
     const database = createDatabase()
     database.getAllAsync.mockImplementation(async (sql: string) => {

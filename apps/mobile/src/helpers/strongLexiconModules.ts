@@ -249,14 +249,17 @@ export const validateStrongLexiconModuleDatabase = async (
   moduleId: StrongLexiconModuleId,
   database: SQLiteDatabase,
   getCoreAvailability: () => Promise<StrongLexiconModuleAvailability> = () =>
-    getStrongLexiconModuleAvailability('core')
+    getStrongLexiconModuleAvailability('core'),
+  options: { integrityCheck?: 'full' | 'quick' } = {}
 ): Promise<StrongLexiconModuleAvailability> => {
   const publication = getExpectedStrongLexiconPublication(moduleId)
   const requiredTables = REQUIRED_TABLES[moduleId]
-  const integrity = await database.getFirstAsync<{ integrity_check: string }>(
-    'PRAGMA integrity_check'
-  )
-  if (integrity?.integrity_check !== 'ok') {
+  const integrityCheck = options.integrityCheck ?? 'full'
+  const integrity = await database.getFirstAsync<{
+    integrity_check?: string
+    quick_check?: string
+  }>(integrityCheck === 'quick' ? 'PRAGMA quick_check' : 'PRAGMA integrity_check')
+  if ((integrity?.quick_check ?? integrity?.integrity_check) !== 'ok') {
     throw new Error(`STRONG_LEXICON_INTEGRITY_FAILED:${moduleId}`)
   }
 
@@ -394,7 +397,12 @@ export const getStrongLexiconModuleAvailability = async (
   try {
     const installedModule = await withInstalledModule(moduleId, async database => {
       try {
-        const availability = await validateStrongLexiconModuleDatabase(moduleId, database)
+        const availability = await validateStrongLexiconModuleDatabase(
+          moduleId,
+          database,
+          undefined,
+          { integrityCheck: 'quick' }
+        )
         validatedModules.set(moduleId, availability)
         return availability
       } catch (error) {

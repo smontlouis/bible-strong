@@ -336,6 +336,30 @@ describe('lexiconBibleResourceAccess', () => {
     )
   })
 
+  it('can return a regular Strong verse before loading its optional BHG enrichment', async () => {
+    const dependencies = createDependencies()
+    ;(dependencies.strongBible.loadVerse as jest.Mock).mockResolvedValue({
+      status: 'available',
+      provenance: { versionId: 'LSG', datasetId: 'LSG', isFallback: false },
+      verse: { Livre: 2, Chapitre: 1, Verset: 1, Texte: 'Voici', StrongSpans: [] },
+    })
+    const access = createLexiconBibleResourceAccess(dependencies)
+    const request = {
+      currentVersionId: 'LSG' as const,
+      defaultVersionId: 'LSG' as const,
+      preferredInterlinearLocale: 'fr' as const,
+      book: 2,
+      chapter: 1,
+      verse: 1,
+    }
+
+    const result = await access.loadVerseBase(request)
+
+    expect(result).toEqual(expect.objectContaining({ status: 'available' }))
+    expect(dependencies.interlinear.getInterlinearAvailability).not.toHaveBeenCalled()
+    expect(dependencies.interlinear.loadVerse).not.toHaveBeenCalled()
+  })
+
   it('does not substitute a Strong Bible when the requested BHG index is unavailable', async () => {
     const dependencies = createDependencies()
     dependencies.interlinear.getInterlinearAvailability.mockResolvedValue({ status: 'missing' })

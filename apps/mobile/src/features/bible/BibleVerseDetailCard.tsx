@@ -16,13 +16,16 @@ import StrongCard from './StrongCard'
 import BibleVerseDetailFooter from './BibleVerseDetailFooter'
 
 import { useTranslation } from 'react-i18next'
-import { ScrollView } from 'react-native'
+import { FlatList, ScrollView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useSelector } from 'react-redux'
 import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { StudyNavigateBibleType } from '~common/types'
 import Button from '~common/ui/Button'
-import type { LexiconBibleProvenance } from '~features/resources/lexiconBibleResourceAccess'
+import type {
+  LexiconBibleProvenance,
+  LexiconBibleVerseResult,
+} from '~features/resources/lexiconBibleResourceAccess'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconEntryCard } from '~features/resources/strongLexiconAccess'
 import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
@@ -33,14 +36,18 @@ import {
   getStrongBibleFallbackPriority,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import { areStrongIdentitiesEqual } from '~helpers/strongIdentities'
+import { areStrongIdentitiesEqual, type StrongIdentity } from '~helpers/strongIdentities'
 import { wp } from '~helpers/utils'
 import type { RootState } from '~redux/modules/reducer'
 import { useResourcesLanguageValue } from '~state/resourcesLanguage'
 import type { VersionCode } from '~state/tabs'
 import { scaleLineHeight } from './BibleDOM/scaleLineHeight'
 import { getBibleTextFontSize } from './BibleDOM/verseTypography'
-import { getStrongWordOccurrences, type StrongVerseContext } from './strongResourceCardContext'
+import {
+  getStrongWordOccurrences,
+  type StrongVerseContext,
+  type StrongWordOccurrence,
+} from './strongResourceCardContext'
 import { StrongResourceScrollProvider } from './StrongResourceScrollContext'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import {
@@ -116,11 +123,12 @@ interface StrongCardItem {
 }
 
 interface StrongVerseQueryData {
-  strongCards: StrongCardItem[]
-  versesInCurrentChapter: number | null
   formattedTexte: React.ReactElement<React.ComponentProps<typeof CanonicalStrongVerseText>> | null
   provenance: LexiconBibleProvenance | null
   displayedVerse: Verse | null
+  strongIdentities: StrongIdentity[]
+  strongOccurrences: StrongWordOccurrence[]
+  sourceResult: Extract<LexiconBibleVerseResult, { status: 'available' }>
 }
 
 const BibleVerseDetailCard: React.FC<Props> = ({
@@ -150,7 +158,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   const verseChapter = verse.Chapitre
   const verseNumber = verse.Verset
   const verseScrollRef = useRef<ScrollView>(null)
-  const strongCardsScrollRef = useRef<ScrollView>(null)
+  const strongCardsScrollRef = useRef<FlatList<StrongCardItem>>(null)
   const strongWordLayoutsRef = useRef(new Map<number, number>())
   const currentStrongCardIndexRef = useRef(0)
   const isProgrammaticCardsScrollRef = useRef(false)
@@ -168,28 +176,57 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     staleTime: Infinity,
   })
 
+  const lexiconVerseRequest = {
+    currentVersionId: selectedVersion,
+    defaultVersionId: defaultStrongVersion,
+    preferredVersionId: preferredStrongVersionId,
+    preferredInterlinearLocale,
+    fallbackVersionIds: getStrongBibleFallbackPriority(selectedVersion),
+    book: verseBook,
+    chapter: verseChapter,
+    verse: verseNumber,
+  }
+  const lexiconVerseQueryKeyRequest = {
+    currentVersionId: selectedVersion,
+    defaultVersionId: defaultStrongVersion,
+    preferredInterlinearLocale,
+    preferredVersionId: preferredStrongVersionId,
+    resourceLanguage: strongResourceLanguage,
+    book: verseBook,
+    chapter: verseChapter,
+    verse: verseNumber,
+  }
+  const toStrongVerseQueryData = (
+    result: Extract<LexiconBibleVerseResult, { status: 'available' }>
+  ): StrongVerseQueryData => {
+    const strongVerse = result.verse
+    const strongOccurrences = getStrongWordOccurrences(strongVerse)
+    const strongIdentities = [
+      ...new Map(
+        strongOccurrences.map(occurrence => [
+          `${occurrence.identity.kind}:${occurrence.identity.code}`,
+          occurrence.identity,
+        ])
+      ).values(),
+    ]
+
+    return {
+      formattedTexte: <CanonicalStrongVerseText verse={{ ...strongVerse, Livre: verseBook }} />,
+      provenance: result.provenance,
+      strongIdentities,
+      strongOccurrences,
+      sourceResult: result,
+      displayedVerse: {
+        Livre: verseBook,
+        Chapitre: verseChapter,
+        Verset: verseNumber,
+      },
+    }
+  }
   const strongVerseQuery = useQuery({
-    queryKey: resourceQueryKeys.lexiconBibleVerse({
-      currentVersionId: selectedVersion,
-      defaultVersionId: defaultStrongVersion,
-      preferredInterlinearLocale,
-      preferredVersionId: preferredStrongVersionId,
-      resourceLanguage: strongResourceLanguage,
-      book: verseBook,
-      chapter: verseChapter,
-      verse: verseNumber,
-    }),
+    queryKey: resourceQueryKeys.lexiconBibleVerse(lexiconVerseQueryKeyRequest),
     queryFn: async (): Promise<StrongVerseQueryData> => {
-      const result = await resources.lexiconBible.loadVerse({
-        currentVersionId: selectedVersion,
-        defaultVersionId: defaultStrongVersion,
-        preferredVersionId: preferredStrongVersionId,
-        preferredInterlinearLocale,
-        fallbackVersionIds: getStrongBibleFallbackPriority(selectedVersion),
-        book: verseBook,
-        chapter: verseChapter,
-        verse: verseNumber,
-      })
+      const result = await resources.lexiconBible.loadVerseBase(lexiconVerseRequest)
       if (result.status !== 'available') {
         throw new StrongVerseQueryError(
           result.status === 'unavailable'
@@ -200,69 +237,81 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         )
       }
 
-      const strongVerse = result.verse
-      const strongOccurrences = getStrongWordOccurrences(strongVerse)
-      const strongIdentities = [
-        ...new Map(
-          strongOccurrences.map(occurrence => [
-            `${occurrence.identity.kind}:${occurrence.identity.code}`,
-            occurrence.identity,
-          ])
-        ).values(),
-      ]
-      const [coverage, strongReferencesResult] = await Promise.all([
-        resources.bibleContent.loadCoverage(result.provenance.versionId),
-        resources.strongLexicon.loadEntryCards(strongIdentities, strongResourceLanguage),
-      ])
-      const versesInCurrentChapterResult =
-        getChapterVerseCountFromCoverage(coverage, verseBook, verseChapter) ?? 0
-      const strongCards = strongOccurrences.flatMap((occurrence, occurrenceIndex) => {
-        const entry = strongReferencesResult.find(candidate =>
-          areStrongIdentitiesEqual(candidate.selectedIdentity, occurrence.identity)
-        )
-        if (!entry) return []
-
-        return [
-          {
-            entry,
-            occurrenceIndex,
-            context: {
-              bibleVersion: result.provenance.versionId,
-              ...(result.provenance.versionId === 'BHG'
-                ? {}
-                : { strongBibleVersionId: result.provenance.versionId }),
-              book: verseBook,
-              bibleChapter: verseChapter,
-              bibleVerse: verseNumber,
-              ...(occurrence.clickedWord ? { clickedWord: occurrence.clickedWord } : {}),
-              morphologyCodes: occurrence.morphologyCodes,
-            },
-          },
-        ]
-      })
-      const formattedTexte = (
-        <CanonicalStrongVerseText verse={{ ...strongVerse, Livre: verseBook }} />
-      )
-
-      return {
-        formattedTexte,
-        strongCards,
-        versesInCurrentChapter:
-          versesInCurrentChapterResult || countLsgChapters[`${verseBook}-${verseChapter}`],
-        provenance: result.provenance,
-        displayedVerse: {
-          Livre: verseBook,
-          Chapitre: verseChapter,
-          Verset: verseNumber,
-        },
-      }
+      return toStrongVerseQueryData(result)
     },
     placeholderData: keepPreviousData,
     staleTime: Infinity,
     ...localQueryOptions,
   })
-  const strongVerseData = strongVerseQuery.data
-  const strongCards = strongVerseData?.strongCards ?? []
+  const strongVerseBaseData = strongVerseQuery.data
+  const strongVerseEnrichmentQuery = useQuery({
+    queryKey: resourceQueryKeys.lexiconBibleVerseEnrichment(lexiconVerseQueryKeyRequest),
+    queryFn: async () => {
+      const result = await resources.lexiconBible.enrichVerse(
+        lexiconVerseRequest,
+        strongVerseBaseData!.sourceResult
+      )
+      return result.status === 'available' ? toStrongVerseQueryData(result) : strongVerseBaseData!
+    },
+    enabled:
+      Boolean(strongVerseBaseData) &&
+      !strongVerseQuery.isPlaceholderData &&
+      strongVerseBaseData?.provenance?.versionId !== 'BHG',
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
+  const strongVerseData = strongVerseEnrichmentQuery.data ?? strongVerseBaseData
+  const strongIdentityKeys = (strongVerseData?.strongIdentities ?? [])
+    .map(identity => `${identity.kind}:${identity.code}`)
+    .sort()
+  const strongCardsQuery = useQuery({
+    queryKey: resourceQueryKeys.strongLexiconEntryCards(strongResourceLanguage, strongIdentityKeys),
+    queryFn: () =>
+      resources.strongLexicon.loadEntryCards(
+        strongVerseData?.strongIdentities ?? [],
+        strongResourceLanguage
+      ),
+    enabled:
+      Boolean(strongVerseData) &&
+      !strongVerseQuery.isPlaceholderData &&
+      strongIdentityKeys.length > 0,
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
+  const provenanceVersionId = strongVerseData?.provenance?.versionId
+  const coverageQuery = useQuery({
+    queryKey: resourceQueryKeys.bibleCoverage(provenanceVersionId ?? 'pending'),
+    queryFn: () => resources.bibleContent.loadCoverage(provenanceVersionId!),
+    enabled: Boolean(provenanceVersionId),
+    staleTime: Infinity,
+    ...localQueryOptions,
+  })
+  const strongCards = (strongVerseData?.strongOccurrences ?? []).flatMap(
+    (occurrence, occurrenceIndex) => {
+      const entry = strongCardsQuery.data?.find(candidate =>
+        areStrongIdentitiesEqual(candidate.selectedIdentity, occurrence.identity)
+      )
+      if (!entry) return []
+
+      return [
+        {
+          entry,
+          occurrenceIndex,
+          context: {
+            bibleVersion: provenanceVersionId,
+            ...(provenanceVersionId && provenanceVersionId !== 'BHG'
+              ? { strongBibleVersionId: provenanceVersionId as StrongBibleVersionId }
+              : {}),
+            book: verseBook,
+            bibleChapter: verseChapter,
+            bibleVerse: verseNumber,
+            ...(occurrence.clickedWord ? { clickedWord: occurrence.clickedWord } : {}),
+            morphologyCodes: occurrence.morphologyCodes,
+          },
+        },
+      ]
+    }
+  )
 
   const findRefIndex = (ref: string | number, occurrenceIndex: number) =>
     strongCards.findIndex(
@@ -274,7 +323,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     const index = findRefIndex(ref, occurrenceIndex)
     if (index !== -1) {
       isProgrammaticCardsScrollRef.current = true
-      strongCardsScrollRef.current?.scrollTo({ x: index * itemWidth, animated: true })
+      strongCardsScrollRef.current?.scrollToOffset({ offset: index * itemWidth, animated: true })
       currentStrongCardIndexRef.current = index
       setCurrentStrongCardIndex(index)
     }
@@ -320,15 +369,15 @@ const BibleVerseDetailCard: React.FC<Props> = ({
   }
 
   useEffect(() => {
-    if (!strongVerseData || strongVerseQuery.isPlaceholderData) return
+    if (!strongVerseBaseData || strongVerseQuery.isPlaceholderData) return
     hasDisplayedStrongVerseRef.current = true
     currentStrongCardIndexRef.current = 0
     isProgrammaticCardsScrollRef.current = false
     setCurrentStrongCardIndex(0)
-    onStrongBibleProvenanceChange?.(strongVerseData.provenance)
+    onStrongBibleProvenanceChange?.(strongVerseBaseData.provenance)
     verseScrollRef.current?.scrollTo({ y: 0, animated: false })
-    strongCardsScrollRef.current?.scrollTo({ x: 0, animated: false })
-  }, [onStrongBibleProvenanceChange, strongVerseData, strongVerseQuery.isPlaceholderData])
+    strongCardsScrollRef.current?.scrollToOffset({ offset: 0, animated: false })
+  }, [onStrongBibleProvenanceChange, strongVerseBaseData, strongVerseQuery.isPlaceholderData])
 
   useEffect(() => {
     if (
@@ -340,10 +389,10 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     }
   }, [onStrongBibleProvenanceChange, strongVerseQuery.error])
 
-  const { versesInCurrentChapter, formattedTexte } = strongVerseData ?? {
-    versesInCurrentChapter: null,
-    formattedTexte: null,
-  }
+  const formattedTexte = strongVerseData?.formattedTexte ?? null
+  const versesInCurrentChapter =
+    getChapterVerseCountFromCoverage(coverageQuery.data, verseBook, verseChapter) ||
+    countLsgChapters[`${verseBook}-${verseChapter}`]
   const error =
     !strongVerseData && strongVerseQuery.error instanceof StrongVerseQueryError
       ? strongVerseQuery.error.code
@@ -483,37 +532,51 @@ const BibleVerseDetailCard: React.FC<Props> = ({
         <RoundedCorner />
       </Box>
       <Box bg="lightGrey" flex={1}>
-        <ScrollView
-          ref={strongCardsScrollRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          snapToInterval={itemWidth}
-          snapToAlignment="start"
-          decelerationRate="fast"
-          onScrollBeginDrag={() => {
-            isProgrammaticCardsScrollRef.current = false
-          }}
-          onMomentumScrollEnd={() => {
-            isProgrammaticCardsScrollRef.current = false
-          }}
-          onScroll={event => selectStrongCardFromOffset(event.nativeEvent.contentOffset.x)}
-          scrollEventThrottle={16}
-          contentContainerStyle={{
-            paddingLeft: 20,
-            paddingRight: 20,
-            paddingBottom: insets.bottom + 180,
-            gap: 10,
-          }}
-        >
-          {strongCards.map((item, index) => (
-            <Box
-              key={`${item.entry.selectedIdentity.kind}:${item.entry.selectedIdentity.code}:${item.occurrenceIndex}`}
-              width={itemWidth}
-            >
-              {renderStrongCard({ item, index })}
-            </Box>
-          ))}
-        </ScrollView>
+        {strongCardsQuery.isError ? (
+          <ResourceUnavailableView
+            identity={{ kind: 'strong-lexicon-module', moduleId: 'core' }}
+            title={t('resource.strong.temporarilyUnavailable')}
+            fileSize={35}
+            failure={resourceFailureFromAccessError(strongCardsQuery.error)}
+            size="small"
+            onRetry={() => void strongCardsQuery.refetch()}
+          />
+        ) : strongCardsQuery.isPending && strongIdentityKeys.length > 0 ? (
+          <Loading />
+        ) : (
+          <FlatList
+            ref={strongCardsScrollRef}
+            data={strongCards}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            snapToInterval={itemWidth}
+            snapToAlignment="start"
+            decelerationRate="fast"
+            initialNumToRender={2}
+            maxToRenderPerBatch={2}
+            windowSize={3}
+            keyExtractor={item =>
+              `${item.entry.selectedIdentity.kind}:${item.entry.selectedIdentity.code}:${item.occurrenceIndex}`
+            }
+            renderItem={({ item, index }) => (
+              <Box width={itemWidth}>{renderStrongCard({ item, index })}</Box>
+            )}
+            onScrollBeginDrag={() => {
+              isProgrammaticCardsScrollRef.current = false
+            }}
+            onMomentumScrollEnd={() => {
+              isProgrammaticCardsScrollRef.current = false
+            }}
+            onScroll={event => selectStrongCardFromOffset(event.nativeEvent.contentOffset.x)}
+            scrollEventThrottle={16}
+            contentContainerStyle={{
+              paddingLeft: 20,
+              paddingRight: 20,
+              paddingBottom: insets.bottom + 180,
+              gap: 10,
+            }}
+          />
+        )}
       </Box>
     </Box>
   )

@@ -744,33 +744,15 @@ const loadEntityForEntry = async (
   return hydrateEntity(database, core, entity, language)
 }
 
-const toEntry = async (
+const toEntryCard = async (
   core: SQLiteDatabase,
   row: CoreEntryRow,
   identity: StrongIdentity,
-  language: ResourceLanguage,
-  includeExtended: boolean
-): Promise<StrongLexiconEntry> => {
-  const [resourcesAvailability, entitiesAvailability] = await Promise.all([
-    getStrongLexiconModuleAvailability('resources'),
-    getStrongLexiconModuleAvailability('entities'),
-  ])
-  const [nameMeaningHtml, morphology, relations] = await Promise.all([
+  language: ResourceLanguage
+): Promise<StrongLexiconEntryCard> => {
+  const [nameMeaningHtml, morphology] = await Promise.all([
     loadNameMeaning(core, row.id, language),
     loadMorphology(core, row, language),
-    includeExtended ? loadRelations(core, row.id, language) : Promise.resolve([]),
-  ])
-  const [resourceResult, entity] = await Promise.all([
-    includeExtended && resourcesAvailability.status === 'available'
-      ? withOptionalStrongLexiconDatabase('resources', database =>
-          loadResources(database, row.id, language)
-        ).then(result => result ?? { resources: [], lsjAbsent: false })
-      : Promise.resolve({ resources: [], lsjAbsent: false }),
-    includeExtended && entitiesAvailability.status === 'available'
-      ? withOptionalStrongLexiconDatabase('entities', database =>
-          loadEntityForEntry(core, database, row, language)
-        ).then(result => result ?? undefined)
-      : Promise.resolve(undefined),
   ])
   const definitionHtml =
     language === 'fr'
@@ -792,6 +774,35 @@ const toEntry = async (
     ...(nameMeaningHtml ? { nameMeaningHtml } : {}),
     ...(definitionHtml ? { definitionHtml } : {}),
     ...(morphology ? { morphology } : {}),
+  }
+}
+
+const toEntry = async (
+  core: SQLiteDatabase,
+  row: CoreEntryRow,
+  identity: StrongIdentity,
+  language: ResourceLanguage
+): Promise<StrongLexiconEntry> => {
+  const card = await toEntryCard(core, row, identity, language)
+  const [resourcesAvailability, entitiesAvailability, relations] = await Promise.all([
+    getStrongLexiconModuleAvailability('resources'),
+    getStrongLexiconModuleAvailability('entities'),
+    loadRelations(core, row.id, language),
+  ])
+  const [resourceResult, entity] = await Promise.all([
+    resourcesAvailability.status === 'available'
+      ? withOptionalStrongLexiconDatabase('resources', database =>
+          loadResources(database, row.id, language)
+        ).then(result => result ?? { resources: [], lsjAbsent: false })
+      : Promise.resolve({ resources: [], lsjAbsent: false }),
+    entitiesAvailability.status === 'available'
+      ? withOptionalStrongLexiconDatabase('entities', database =>
+          loadEntityForEntry(core, database, row, language)
+        ).then(result => result ?? undefined)
+      : Promise.resolve(undefined),
+  ])
+  return {
+    ...card,
     relations,
     resources: resourceResult.resources,
     lsjAbsent: resourceResult.lsjAbsent,
@@ -902,7 +913,7 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
         const row = await resolveCoreEntry(core, identity, language)
         if (!row || seenEntries.has(row.id)) continue
         seenEntries.add(row.id)
-        const entry = await toEntry(core, row, identity, language, false)
+        const entry = await toEntryCard(core, row, identity, language)
         previews.push({
           id: entry.id,
           selectedIdentity: entry.selectedIdentity,
@@ -985,7 +996,7 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
   async loadEntry(identity, language) {
     return withStrongLexiconDatabase('core', async core => {
       const row = await resolveCoreEntry(core, identity, language)
-      return row ? toEntry(core, row, identity, language, true) : undefined
+      return row ? toEntry(core, row, identity, language) : undefined
     })
   },
 
@@ -997,7 +1008,15 @@ export const localStrongLexiconAccess: StrongLexiconAccess = {
   },
 
   async loadEntryCards(identities, language) {
-    return localStrongLexiconAccess.loadEntries(identities, language)
+    return withStrongLexiconDatabase('core', async core => {
+      const entries = await Promise.all(
+        identities.map(async identity => {
+          const row = await resolveCoreEntry(core, identity, language)
+          return row ? toEntryCard(core, row, identity, language) : undefined
+        })
+      )
+      return entries.filter((entry): entry is StrongLexiconEntryCard => Boolean(entry))
+    })
   },
 
   async loadMorphologies(codes, language) {
