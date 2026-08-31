@@ -148,3 +148,61 @@ test("keeps overlapping editorial sections distinct", () => {
     "<p>Section 1–2</p><hr><p>Note du verset 2</p>"
   );
 });
+
+test("introduces Ellen G. White supplements once after the general SDA commentary", () => {
+  const index = {
+    generatedAt: "2026-08-31T00:00:00.000Z",
+    sourceRevision: "fixture",
+    resources: { sdabc: {} },
+    chapters: [
+      {
+        book: 1,
+        chapter: 1,
+        passages: ["1-1-1"],
+        resources: {}
+      }
+    ]
+  };
+  const canonical = buildCanonicalCommentary(
+    {
+      id: "sdabc",
+      title: "Seventh-day Adventist Bible Commentary",
+      author: "Francis D. Nichol",
+      languages: ["en"],
+      rights: "Authorised",
+      source: "fixture"
+    },
+    "en",
+    index,
+    [
+      {
+        id: "egw-2",
+        passage: "1-1-1",
+        layer: "egw-supplement",
+        source: { language: "en", html: "<p>Second EGW excerpt.</p>" }
+      },
+      {
+        id: "general",
+        passage: "1-1-1",
+        layer: "general-commentary",
+        source: { language: "en", html: "<p>General commentary.</p>" }
+      },
+      {
+        id: "egw-1",
+        passage: "1-1-1",
+        layer: "egw-supplement",
+        source: { language: "en", html: "<p>First EGW excerpt.</p>" }
+      }
+    ]
+  );
+
+  assert.equal(
+    canonical.verses[0]?.content,
+    "<p>General commentary.</p><hr><br><br><h3>Ellen G. White</h3><br><p>Second EGW excerpt.</p><hr><p>First EGW excerpt.</p>"
+  );
+  assert.equal(
+    canonical.verses[0]?.content.match(/<h3>Ellen G\. White<\/h3>/gu)
+      ?.length,
+    1
+  );
+});

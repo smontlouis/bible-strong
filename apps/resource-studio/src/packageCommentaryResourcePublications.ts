@@ -31,6 +31,12 @@ type LibraryEntry = {
   id: string;
   passage: Passage;
   passageEnd?: Passage;
+  layer?:
+    | "general-commentary"
+    | "book-introduction"
+    | "egw-supplement"
+    | "egw-scripture-index";
+  editorialKind?: string;
   source: {
     language: Language;
     html: string;
@@ -52,6 +58,12 @@ type LibraryEntry = {
       references?: Array<{ id: string; kind: "bible"; osis: string }>;
     } | null;
   }>;
+};
+
+type CommentaryContentPart = {
+  id: string;
+  html: string;
+  layer?: LibraryEntry["layer"];
 };
 
 type LibraryIndex = {
@@ -285,6 +297,22 @@ export const loadCommentaryLibraryEntries = async (
   return entriesByResource;
 };
 
+const joinSdabcContent = (values: readonly CommentaryContentPart[]): string => {
+  const general = values.filter((value) => value.layer !== "egw-supplement");
+  const egw = values.filter((value) => value.layer === "egw-supplement");
+  const sections = general.map((value) => value.html);
+
+  if (egw.length > 0) {
+    sections.push(
+      `<br><br><h3>Ellen G. White</h3><br>${egw
+        .map((value) => value.html)
+        .join("<hr>")}`
+    );
+  }
+
+  return sections.join("<hr>");
+};
+
 export const buildCanonicalCommentary = (
   catalogResource: CatalogResource,
   language: Language,
@@ -297,14 +325,14 @@ export const buildCanonicalCommentary = (
   const positions = new Map(
     passages.map((passage, position) => [passage, position])
   );
-  const contents = new Map<Passage, Array<{ id: string; html: string }>>();
+  const contents = new Map<Passage, CommentaryContentPart[]>();
   for (const entry of entries) {
     const html = htmlForLanguage(entry, language);
     if (!html) continue;
     for (const passage of coveredPassages(entry, passages, positions)) {
       const values = contents.get(passage) ?? [];
       if (!values.some((value) => value.id === entry.id))
-        values.push({ id: entry.id, html });
+        values.push({ id: entry.id, html, layer: entry.layer });
       contents.set(passage, values);
     }
   }
@@ -313,7 +341,10 @@ export const buildCanonicalCommentary = (
     .sort(([left], [right]) => comparePassages(left, right))
     .map(([verseKey, values]) => ({
       verseKey,
-      content: values.map((value) => value.html).join("<hr>")
+      content:
+        catalogResource.id === "sdabc"
+          ? joinSdabcContent(values)
+          : values.map((value) => value.html).join("<hr>")
     }));
   if (verses.length === 0) {
     throw new Error(
