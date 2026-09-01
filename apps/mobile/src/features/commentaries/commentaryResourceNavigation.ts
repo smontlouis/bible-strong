@@ -10,6 +10,12 @@ type CommentarySectionRange = {
   rangeEndVerse: number
 }
 
+const DEFAULT_CHAPTER_CONTEXT_THRESHOLD = 8
+const CHAPTER_CONTEXT_RATIO = 0.6
+
+const getSectionSpan = (section: CommentarySectionRange) =>
+  section.rangeEndVerse - section.rangeStartVerse + 1
+
 export const getCommentarySectionsForVerse = <Section extends CommentarySectionRange>(
   sections: readonly Section[],
   verse: number | undefined
@@ -18,6 +24,39 @@ export const getCommentarySectionsForVerse = <Section extends CommentarySectionR
   return sections.filter(
     section => verse >= section.rangeStartVerse && verse <= section.rangeEndVerse
   )
+}
+
+export const groupCommentarySectionsForVerse = <Section extends CommentarySectionRange>({
+  sections,
+  verse,
+  chapterVerseCount,
+}: {
+  sections: readonly Section[]
+  verse: number
+  chapterVerseCount?: number
+}) => {
+  const matchingSections = getCommentarySectionsForVerse(sections, verse)
+  const chapterContextThreshold = chapterVerseCount
+    ? Math.max(3, Math.ceil(chapterVerseCount * CHAPTER_CONTEXT_RATIO))
+    : DEFAULT_CHAPTER_CONTEXT_THRESHOLD
+  const directSections: Section[] = []
+  const chapterContextSections: Section[] = []
+
+  for (const section of matchingSections) {
+    const target =
+      getSectionSpan(section) >= chapterContextThreshold ? chapterContextSections : directSections
+    target.push(section)
+  }
+
+  const bySpecificity = (left: Section, right: Section) =>
+    getSectionSpan(left) - getSectionSpan(right) ||
+    left.rangeStartVerse - right.rangeStartVerse ||
+    left.rangeEndVerse - right.rangeEndVerse
+
+  return {
+    directSections: directSections.sort(bySpecificity),
+    chapterContextSections: chapterContextSections.sort(bySpecificity),
+  }
 }
 
 export const getCoveredCommentaryLocation = (

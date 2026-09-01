@@ -467,6 +467,43 @@ export const dictionaryVerseLinks = pgTable(
   ]
 )
 
+export const dictionaryDirectoryVersePresences = pgTable(
+  'dictionary_directory_verse_presences',
+  {
+    publication_id: integer('publication_id')
+      .notNull()
+      .references(() => resourcePublications.id, { onDelete: 'cascade' }),
+    verse_key: text('verse_key').notNull(),
+    work: text('work').notNull(),
+    language: text('language').notNull(),
+    resource_id: text('resource_id').notNull(),
+    title: text('title').notNull(),
+    abbreviation: text('abbreviation').notNull(),
+    entry_id: integer('entry_id').notNull(),
+    word: text('word').notNull(),
+    normalized_word: text('normalized_word').notNull(),
+    correspondence_id: text('correspondence_id'),
+    evidence_kind: text('evidence_kind').notNull(),
+  },
+  table => [
+    primaryKey({
+      name: 'dictionary_directory_verse_presences_primary',
+      columns: [
+        table.publication_id,
+        table.verse_key,
+        table.work,
+        table.entry_id,
+        table.evidence_kind,
+      ],
+    }),
+    index('dictionary_directory_verse_presences_lookup').on(
+      table.publication_id,
+      table.verse_key,
+      table.language
+    ),
+  ]
+)
+
 export const strongBibleVerses = pgTable(
   'strong_bible_verses',
   {

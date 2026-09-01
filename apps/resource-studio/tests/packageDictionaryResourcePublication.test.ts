@@ -59,6 +59,31 @@ test("packages prepared entry links and exact passage anchors", async (t) => {
   });
   assert.ok(manifest);
   assert.equal(manifest.counts.passageEntryReferences, 1);
+  const directoryManifest = JSON.parse(
+    await readFile(
+      path.join(root, "publication/directory/manifest.json"),
+      "utf8"
+    )
+  ) as {
+    publicationRevision: string;
+    rights: { online: boolean; offline: boolean };
+    deliveryCapabilities: { onlineAccess: boolean; offlineDownload: boolean };
+  };
+  assert.match(
+    directoryManifest.publicationRevision,
+    /^dictionary-directory-[a-f0-9]{20}$/u
+  );
+  assert.deepEqual(directoryManifest.rights, {
+    holder: "Selon les ressources dictionnaires participantes",
+    termsReference: "Voir les droits de chaque dictionnaire participant.",
+    attribution: "Index de découverte des dictionnaires Bible Strong",
+    online: true,
+    offline: true
+  });
+  assert.deepEqual(directoryManifest.deliveryCapabilities, {
+    onlineAccess: true,
+    offlineDownload: true
+  });
   const canonical = JSON.parse(
     await readFile(
       path.join(

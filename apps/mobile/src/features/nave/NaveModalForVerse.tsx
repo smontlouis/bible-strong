@@ -11,16 +11,16 @@ interface NaveModalForVerseProps {
 }
 
 const NaveModalForVerse = ({ items, label }: NaveModalForVerseProps) => {
-  if (!items) {
+  if (!items?.length) {
     return null
   }
 
   return (
-    <Box>
+    <Box px={14} py={13} rounded bg="reverse" lightShadow>
       <Text title fontSize={14} color="grey">
         {label}
       </Text>
-      <Box row wrap marginTop={5} marginBottom={20}>
+      <Box row wrap gap={5} mt={5}>
         {items.map(item => (
           <NaveModalItem
             key={item.normalizedName}

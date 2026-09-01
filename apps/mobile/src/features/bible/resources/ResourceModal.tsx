@@ -420,13 +420,21 @@ const Resource = ({
             flex: 1,
           }}
         >
-          <DictionnaireVerseDetailCard verse={verseObj} updateVerse={updateVerse} />
+          <DictionnaireVerseDetailCard
+            verse={verseObj}
+            selectedVersion={selectedVersion}
+            updateVerse={updateVerse}
+          />
         </View>
       </Slide>
       <Slide key="nave">
-        <SheetScrollView contentContainerStyle={{}}>
-          <NaveModalCard selectedVerse={selectedVerse} />
-        </SheetScrollView>
+        <View style={{ flex: 1 }}>
+          <NaveModalCard
+            selectedVerse={selectedVerse}
+            selectedVersion={selectedVersion}
+            updateVerse={updateVerse}
+          />
+        </View>
       </Slide>
       <Slide key="reference">
         <SheetScrollView contentContainerStyle={{}}>

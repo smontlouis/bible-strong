@@ -1,44 +1,28 @@
-import styled from '@emotion/native'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
-import Animated, {
-  LinearTransition,
-  useReducedMotion,
-  withTiming,
-  type EntryAnimationsValues,
-  type ExitAnimationsValues,
-} from 'react-native-reanimated'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import Box from '~common/ui/Box'
-import Paragraph from '~common/ui/Paragraph'
 import formatVerseContent from '~helpers/formatVerseContent'
-import { useResolvedBibleVerses, verseStringToObject } from '~features/resources/useBibleVerses'
-import BibleVerseDetailFooter from '../bible/BibleVerseDetailFooter'
+import { verseStringToObject } from '~features/resources/useBibleVerses'
 
 import { useTheme } from '@emotion/react'
 import { produce } from 'immer'
 import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import { FeatherIcon } from '~common/ui/Icon'
 import { useOpenInNewTab } from '~features/app-switcher/utils/useOpenInNewTab'
 import generateUUID from '~helpers/generateUUID'
-import { localQueryOptions } from '~helpers/queryOptions'
 import { Theme } from '~themes'
 import { CommentaryTab } from '../../state/tabs'
 import { useBottomBarHeightInTab } from '~features/app-switcher/context/TabContext'
-import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
-import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import CommentarySelectorSheet from './CommentarySelectorSheet'
 import { parseCommentaryProjectionId } from './commentarySelection'
@@ -52,75 +36,9 @@ import { useSheetFooterInset } from '~common/sheet'
 import { getCommentaryScrollBottomInset } from './commentaryScrollInsets'
 import { getCommentaryResourceRoute } from './commentaryResourceNavigation'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
-
-const VersetWrapper = styled.View(() => ({
-  width: 25,
-  marginRight: 5,
-  borderRightWidth: 3,
-  borderRightColor: 'transparent',
-  alignItems: 'flex-end',
-}))
-
-const NumberText = styled(Paragraph)({
-  marginTop: 0,
-  fontSize: 9,
-  justifyContent: 'flex-end',
-  marginRight: 3,
-})
-
-const StyledVerse = styled.View({
-  paddingLeft: 0,
-  paddingRight: 10,
-  paddingBottom: 10,
-  flexDirection: 'row',
-})
-
-const CONTENT_TRANSITION_DURATION = 180
-const CONTENT_LAYOUT_TRANSITION = LinearTransition.duration(220)
-
-const enterNextVerse = (_values: EntryAnimationsValues) => {
-  'worklet'
-  return {
-    initialValues: { opacity: 0, transform: [{ translateX: 10 }] },
-    animations: {
-      opacity: withTiming(1, { duration: CONTENT_TRANSITION_DURATION }),
-      transform: [{ translateX: withTiming(0, { duration: CONTENT_TRANSITION_DURATION }) }],
-    },
-  }
-}
-
-const exitNextVerse = (_values: ExitAnimationsValues) => {
-  'worklet'
-  return {
-    initialValues: { opacity: 1, transform: [{ translateX: 0 }] },
-    animations: {
-      opacity: withTiming(0, { duration: CONTENT_TRANSITION_DURATION - 40 }),
-      transform: [{ translateX: withTiming(-8, { duration: CONTENT_TRANSITION_DURATION - 40 }) }],
-    },
-  }
-}
-
-const enterPreviousVerse = (_values: EntryAnimationsValues) => {
-  'worklet'
-  return {
-    initialValues: { opacity: 0, transform: [{ translateX: -10 }] },
-    animations: {
-      opacity: withTiming(1, { duration: CONTENT_TRANSITION_DURATION }),
-      transform: [{ translateX: withTiming(0, { duration: CONTENT_TRANSITION_DURATION }) }],
-    },
-  }
-}
-
-const exitPreviousVerse = (_values: ExitAnimationsValues) => {
-  'worklet'
-  return {
-    initialValues: { opacity: 1, transform: [{ translateX: 0 }] },
-    animations: {
-      opacity: withTiming(0, { duration: CONTENT_TRANSITION_DURATION - 40 }),
-      transform: [{ translateX: withTiming(8, { duration: CONTENT_TRANSITION_DURATION - 40 }) }],
-    },
-  }
-}
+import ResourceVerseContext, {
+  useResourceVerseContext,
+} from '~features/bible/resources/ResourceVerseContext'
 
 const useComments = (verse: string) => {
   const resources = useResourceAccess()
@@ -155,26 +73,6 @@ const useComments = (verse: string) => {
     isError: query.isError,
     retry: query.refetch,
   }
-}
-
-const useVerseInCurrentChapter = (
-  book: string | number | undefined,
-  chapter: string | number | undefined,
-  preferredVersion?: string
-) => {
-  const defaultVersion = useDefaultBibleVersion()
-  const version = preferredVersion || defaultVersion
-  const resources = useResourceAccess()
-  const { data: coverage } = useQuery({
-    queryKey: resourceQueryKeys.bibleCoverage(version),
-    queryFn: () => resources.bibleContent.loadCoverage(version),
-    enabled: !!book && !!chapter,
-    ...localQueryOptions,
-  })
-  const versesInCurrentChapter =
-    getChapterVerseCountFromCoverage(coverage, Number(book), Number(chapter)) ||
-    countLsgChapters[`${book}-${chapter}`]
-  return { versesInCurrentChapter }
 }
 
 interface CommentariesScreenProps {
@@ -241,31 +139,11 @@ const CommentariesTabScreen = ({
     ? formatVerseContent([verse])
     : { title: t('Chargement') }
 
-  const defaultVersion = useDefaultBibleVersion()
-  const requestedVersion = preferredVersion || defaultVersion
-  const verseResolution = useResolvedBibleVerses(verseFormatted, preferredVersion)
-  const [verseText] = verseResolution.verses
-  const { versesInCurrentChapter } = useVerseInCurrentChapter(
-    verseText?.Livre,
-    verseText?.Chapitre,
-    preferredVersion
-  )
-  const unavailableBibleVersion =
-    verse &&
-    !verseResolution.isLoading &&
-    verseResolution.recoveries?.includes('acquire-offline-copy')
-      ? requestedVersion
-      : null
-  const bibleTemporarilyUnavailable = verseResolution.recoveries?.includes('retry')
+  const verseContext = useResourceVerseContext(verse, preferredVersion)
   const requestedContent = {
     verse,
     headerTitle: requestedHeaderTitle,
-    verseText,
-    versesInCurrentChapter,
-    requestedVersion,
-    unavailableBibleVersion,
-    bibleTemporarilyUnavailable,
-    retryBible: verseResolution.retry,
+    ...verseContext,
     commentaryAvailability,
     selectedResourceIds,
     error,
@@ -275,10 +153,9 @@ const CommentariesTabScreen = ({
   }
   const displayedContent = useRetainedCommentaryContent(
     requestedContent,
-    !verseResolution.isLoading && !isPending
+    Boolean(verseContext.verseText) && !isPending
   )
   const [navigationDirection, setNavigationDirection] = React.useState<-1 | 1>(1)
-  const reduceMotion = useReducedMotion()
 
   const updateVerse = (value: -1 | 1) => {
     const [b, c, v] = verse.split('-').map(Number)
@@ -352,77 +229,17 @@ const CommentariesTabScreen = ({
         scrollIndicatorInsets={{ right: 1 }}
       >
         <>
-          <Box background paddingTop={10} borderBottomLeftRadius={30} borderBottomRightRadius={30}>
-            <Animated.View layout={reduceMotion ? undefined : CONTENT_LAYOUT_TRANSITION}>
-              <Animated.View
-                key={displayedContent.verse}
-                entering={
-                  reduceMotion
-                    ? undefined
-                    : navigationDirection === 1
-                      ? enterNextVerse
-                      : enterPreviousVerse
-                }
-                exiting={
-                  reduceMotion
-                    ? undefined
-                    : navigationDirection === 1
-                      ? exitNextVerse
-                      : exitPreviousVerse
-                }
-              >
-                <StyledVerse>
-                  <VersetWrapper>
-                    <NumberText>{displayedContent.verseText?.Verset}</NumberText>
-                  </VersetWrapper>
-                  <Box flex>
-                    {displayedContent.unavailableBibleVersion ? (
-                      <ResourceUnavailableView
-                        identity={{
-                          kind: 'bible',
-                          versionId: displayedContent.unavailableBibleVersion,
-                        }}
-                        title={t('resource.bible.referenceUnavailable', {
-                          version: displayedContent.unavailableBibleVersion,
-                        })}
-                        fileSize={Math.max(
-                          1,
-                          Math.round(
-                            createOfflineCopyDownloadItem({
-                              kind: 'bible',
-                              versionId: displayedContent.unavailableBibleVersion,
-                            }).estimatedSize / 1_000_000
-                          )
-                        )}
-                        failure={{
-                          cause: 'offline-copy-required',
-                          recoveries: ['acquire-offline-copy'],
-                        }}
-                        size="small"
-                      />
-                    ) : displayedContent.bibleTemporarilyUnavailable ? (
-                      <ResourceUnavailableView
-                        title={t('resource.bible.referenceUnavailable', {
-                          version: displayedContent.requestedVersion,
-                        })}
-                        failure={{ cause: 'temporary-unavailable', recoveries: ['retry'] }}
-                        size="small"
-                        onRetry={displayedContent.retryBible}
-                      />
-                    ) : (
-                      <Paragraph>{displayedContent.verseText?.Texte.replace(/\n/gi, '')}</Paragraph>
-                    )}
-                  </Box>
-                </StyledVerse>
-              </Animated.View>
-            </Animated.View>
-            <BibleVerseDetailFooter
-              verseNumber={displayedContent.verseText?.Verset}
-              goToNextVerse={() => updateVerse(+1)}
-              goToPrevVerse={() => updateVerse(-1)}
-              versesInCurrentChapter={displayedContent.versesInCurrentChapter}
-            />
-          </Box>
+          <ResourceVerseContext
+            verse={displayedContent.verse}
+            verseText={displayedContent.verseText}
+            versesInCurrentChapter={displayedContent.versesInCurrentChapter}
+            requestedVersion={displayedContent.requestedVersion}
+            unavailableBibleVersion={displayedContent.unavailableBibleVersion}
+            bibleTemporarilyUnavailable={displayedContent.bibleTemporarilyUnavailable}
+            retryBible={displayedContent.retryBible}
+            navigationDirection={navigationDirection}
+            updateVerse={updateVerse}
+          />
           {displayedContent.isPending ? (
             <Box height={100} center>
               <Loading />

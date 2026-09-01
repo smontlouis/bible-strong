@@ -150,6 +150,10 @@ ios/
 .scratch/issues/
 .scratch/generated/
 
+# Local browser QA artifacts
+/.playwright-cli/
+/output/playwright/
+
 # Local Resource service publications and imported artifacts
 /packages/resource-service/.local/
 /packages/resource-service/.wrangler/

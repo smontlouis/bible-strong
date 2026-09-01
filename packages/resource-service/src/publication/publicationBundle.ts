@@ -579,7 +579,8 @@ export type CanonicalCommentaryPublicationV2 = {
 }
 
 export type CanonicalCommentaryPublication =
-  CanonicalCommentaryPublicationV1 | CanonicalCommentaryPublicationV2
+  | CanonicalCommentaryPublicationV1
+  | CanonicalCommentaryPublicationV2
 
 export type CanonicalCrossReferencePublication = {
   format: 'bible-strong-canonical-cross-references'
@@ -3596,5 +3597,5 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     await validateStrongLexiconOfflineParity(offlineContent, canonical)
   }
 
-  return { manifest, canonical, canonicalPath, offlineArtifactPath }
+  return { manifest, canonical, canonicalPath, offlineArtifactPath, offlineContent }
 }

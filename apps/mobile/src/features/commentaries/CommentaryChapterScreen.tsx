@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -28,6 +29,7 @@ import CommentaryRoomIntro from './CommentaryRoomIntro'
 import {
   getCommentarySectionsForVerse,
   getCoveredCommentaryLocation,
+  groupCommentarySectionsForVerse,
 } from './commentaryResourceNavigation'
 import { parseCommentaryResourceParams } from './commentaryResourceParams'
 
@@ -35,6 +37,48 @@ const formatRange = (start: number, end: number, introductionLabel: string) => {
   if (start === 0 && end === 0) return introductionLabel
   return start === end ? `${start}` : `${start}–${end}`
 }
+
+type CommentarySectionCardProps = {
+  section: {
+    id: string
+    rangeStartVerse: number
+    rangeEndVerse: number
+    preview: string
+  }
+  introductionLabel: string
+  onPress: () => void
+}
+
+const CommentarySectionCard = ({
+  section,
+  introductionLabel,
+  onPress,
+}: CommentarySectionCardProps) => (
+  <TouchableBox
+    bg="reverse"
+    rounded
+    lightShadow
+    px={17}
+    py={14}
+    activeOpacity={0.62}
+    onPress={onPress}
+    accessibilityRole="button"
+  >
+    <Box row alignItems="flex-start">
+      <Box px={10} py={5} borderRadius={12} bg="lightPrimary">
+        <Text color="primary" bold fontSize={12}>
+          {formatRange(section.rangeStartVerse, section.rangeEndVerse, introductionLabel)}
+        </Text>
+      </Box>
+      <Box ml={13} flex>
+        <Text color="grey" fontSize={14} lineHeight={20} numberOfLines={2}>
+          {section.preview}
+        </Text>
+      </Box>
+      <FeatherIcon name="chevron-right" size={20} color="grey" />
+    </Box>
+  </TouchableBox>
+)
 
 const CommentaryChapterScreen = () => {
   const params = useLocalSearchParams<{
@@ -67,6 +111,7 @@ const CommentaryChapterScreen = () => {
   })
   const selectorTab = useAtomValue(selectorAtom)
   const selectorActions = useBibleTabActions(selectorAtom)
+  const [expandedChapterContextKey, setExpandedChapterContextKey] = React.useState<string>()
 
   useEffect(() => {
     if (!parsed) return
@@ -139,6 +184,28 @@ const CommentaryChapterScreen = () => {
   const { entry, projection, book, chapter } = parsed
   const bookLabel = getBook(book)?.Nom ?? String(book)
   const visibleSections = getCommentarySectionsForVerse(query.data?.sections ?? [], focusVerse)
+  const chapterContextKey = `${projection.projectionId}:${book}:${chapter}:${focusVerse ?? 'all'}`
+  const chapterContextExpanded = expandedChapterContextKey === chapterContextKey
+  const groupedSections =
+    focusVerse === undefined
+      ? { directSections: visibleSections, chapterContextSections: [] }
+      : groupCommentarySectionsForVerse({
+          sections: visibleSections,
+          verse: focusVerse,
+          chapterVerseCount: countLsgChapters[`${book}-${chapter}`],
+        })
+
+  const openSection = (sectionId: string) =>
+    router.push({
+      pathname: '/commentary-entry',
+      params: {
+        projectionId: projection.projectionId,
+        book: String(book),
+        chapter: String(chapter),
+        sectionId,
+        focusVerse: focusVerse === undefined ? undefined : String(focusVerse),
+      },
+    })
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
@@ -242,10 +309,18 @@ const CommentaryChapterScreen = () => {
             />
           ) : (
             <Box mt={16} gap={12}>
-              {visibleSections.map(section => {
-                return (
+              {groupedSections.directSections.map(section => (
+                <CommentarySectionCard
+                  key={section.id}
+                  section={section}
+                  introductionLabel={t('commentaries.resource.introduction')}
+                  onPress={() => openSection(section.id)}
+                />
+              ))}
+
+              {focusVerse !== undefined && groupedSections.chapterContextSections.length > 0 ? (
+                <>
                   <TouchableBox
-                    key={section.id}
                     bg="reverse"
                     rounded
                     lightShadow
@@ -253,38 +328,44 @@ const CommentaryChapterScreen = () => {
                     py={14}
                     activeOpacity={0.62}
                     onPress={() =>
-                      router.push({
-                        pathname: '/commentary-entry',
-                        params: {
-                          projectionId: projection.projectionId,
-                          book: String(book),
-                          chapter: String(chapter),
-                          sectionId: section.id,
-                        },
-                      })
+                      setExpandedChapterContextKey(currentKey =>
+                        currentKey === chapterContextKey ? undefined : chapterContextKey
+                      )
                     }
                     accessibilityRole="button"
+                    accessibilityState={{ expanded: chapterContextExpanded }}
                   >
-                    <Box row alignItems="flex-start">
-                      <Box px={10} py={5} borderRadius={12} bg="lightPrimary">
-                        <Text color="primary" bold fontSize={12}>
-                          {formatRange(
-                            section.rangeStartVerse,
-                            section.rangeEndVerse,
-                            t('commentaries.resource.introduction')
-                          )}
+                    <Box row alignItems="center" justifyContent="space-between">
+                      <Box flex>
+                        <Text bold fontSize={14}>
+                          {t('commentaries.resource.chapterContext')}
+                        </Text>
+                        <Text mt={3} color="grey" fontSize={12}>
+                          {t('commentaries.resource.sectionCount', {
+                            count: groupedSections.chapterContextSections.length,
+                          })}
                         </Text>
                       </Box>
-                      <Box ml={13} flex>
-                        <Text color="grey" fontSize={14} lineHeight={20} numberOfLines={2}>
-                          {section.preview}
-                        </Text>
-                      </Box>
-                      <FeatherIcon name="chevron-right" size={20} color="grey" />
+                      <FeatherIcon
+                        name={chapterContextExpanded ? 'chevron-up' : 'chevron-down'}
+                        size={20}
+                        color="grey"
+                      />
                     </Box>
                   </TouchableBox>
-                )
-              })}
+
+                  {chapterContextExpanded
+                    ? groupedSections.chapterContextSections.map(section => (
+                        <CommentarySectionCard
+                          key={section.id}
+                          section={section}
+                          introductionLabel={t('commentaries.resource.introduction')}
+                          onPress={() => openSection(section.id)}
+                        />
+                      ))
+                    : null}
+                </>
+              ) : null}
             </Box>
           )}
         </ScrollView>

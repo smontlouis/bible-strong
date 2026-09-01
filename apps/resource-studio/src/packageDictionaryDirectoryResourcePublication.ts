@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import {
@@ -49,6 +49,7 @@ export type DictionaryDirectoryResourcePublicationManifest = {
     language: "mul";
   };
   revision: string;
+  publicationRevision: string;
   canonical: {
     path: string;
     mediaType: "application/json";
@@ -78,11 +79,33 @@ export type DictionaryDirectoryResourcePublicationManifest = {
     offline: boolean;
   };
   deliveryCapabilities: {
-    onlineAccess: false;
+    onlineAccess: true;
     offlineDownload: true;
   };
   counts: DictionaryDirectoryCounts;
 };
+
+function sortJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortJsonValue);
+  if (value === null || typeof value !== "object") return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+      .map(([key, item]) => [key, sortJsonValue(item)])
+  );
+}
+
+function buildDictionaryDirectoryPublicationRevision(
+  manifest: Omit<
+    DictionaryDirectoryResourcePublicationManifest,
+    "publicationRevision"
+  >
+): string {
+  const digest = createHash("sha256")
+    .update(JSON.stringify(sortJsonValue(manifest)))
+    .digest("hex");
+  return `dictionary-directory-${digest.slice(0, 20)}`;
+}
 
 const queryDirectoryMetadata = async (sqlitePath: string) => {
   const { stdout } = await execFileAsync("sqlite3", [
@@ -192,7 +215,10 @@ export async function buildDictionaryDirectoryResourcePublication(options: {
       stat(canonicalPath),
       stat(offlineArtifactPath)
     ]);
-    const manifest: DictionaryDirectoryResourcePublicationManifest = {
+    const manifestWithoutPublicationRevision: Omit<
+      DictionaryDirectoryResourcePublicationManifest,
+      "publicationRevision"
+    > = {
       format: "bible-strong-resource-publication",
       schemaVersion: 1,
       identity: {
@@ -226,14 +252,20 @@ export async function buildDictionaryDirectoryResourcePublication(options: {
         holder: "Selon les ressources dictionnaires participantes",
         termsReference: "Voir les droits de chaque dictionnaire participant.",
         attribution: "Index de découverte des dictionnaires Bible Strong",
-        online: false,
+        online: true,
         offline: true
       },
       deliveryCapabilities: {
-        onlineAccess: false,
+        onlineAccess: true,
         offlineDownload: true
       },
       counts
+    };
+    const manifest: DictionaryDirectoryResourcePublicationManifest = {
+      ...manifestWithoutPublicationRevision,
+      publicationRevision: buildDictionaryDirectoryPublicationRevision(
+        manifestWithoutPublicationRevision
+      )
     };
     await writeFile(
       path.join(temporaryDir, "manifest.json"),
@@ -262,6 +294,8 @@ export async function validateDictionaryDirectoryResourcePublication(
   const manifest = JSON.parse(
     await readFile(path.join(root, "manifest.json"), "utf8")
   ) as DictionaryDirectoryResourcePublicationManifest;
+  const { publicationRevision, ...manifestWithoutPublicationRevision } =
+    manifest;
   if (
     manifest.format !== "bible-strong-resource-publication" ||
     manifest.schemaVersion !== 1 ||
@@ -269,7 +303,11 @@ export async function validateDictionaryDirectoryResourcePublication(
     manifest.identity.resourceId !== "DICTIONARY_DIRECTORY" ||
     manifest.identity.language !== "mul" ||
     manifest.offlineArtifact?.entry !== archiveEntry ||
-    manifest.canonical?.schemaVersion !== 1
+    manifest.canonical?.schemaVersion !== 1 ||
+    publicationRevision !==
+      buildDictionaryDirectoryPublicationRevision(
+        manifestWithoutPublicationRevision
+      )
   ) {
     throw new Error("dictionary-directory-publication-manifest-invalid");
   }

@@ -171,6 +171,7 @@ type CommentaryEntryScreenProps = {
   book: number | string
   chapter: number | string
   sectionId: string
+  focusVerse?: number | string
 }
 
 export type MainStackProps = {

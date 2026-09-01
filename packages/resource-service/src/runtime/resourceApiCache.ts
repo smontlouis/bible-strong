@@ -16,6 +16,7 @@ export const resourceApiCacheEpochFrom = async (catalog: unknown): Promise<strin
 export const RESOURCE_API_CACHE_EPOCH = resourceApiCacheEpochFrom(mobileResourceCatalog)
 
 const STRONG_LEXICON_BATCH_RESPONSE_REVISION = 'strong-lexicon-batch-identity-selection-v2'
+const DICTIONARY_PASSAGE_DISCOVERY_RESPONSE_REVISION = 'dictionary-passage-discovery-directory-v1'
 
 type CatalogEntry = { contentSha256?: unknown; archiveSha256?: unknown }
 
@@ -87,6 +88,12 @@ export const resourceApiCacheRevisionFrom = async (
 
   if (pathname === '/v1/strong-lexicon/entries/batch') {
     return resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_BATCH_RESPONSE_REVISION])
+  }
+  if (/^\/v1\/dictionaries\/verses\/[^/]+\/entries$/u.test(pathname)) {
+    return resourceApiCacheEpochFrom([
+      requestRevision,
+      DICTIONARY_PASSAGE_DISCOVERY_RESPONSE_REVISION,
+    ])
   }
   return /^\/v1\/strong-lexicon\/entries\/[^/]+$/u.test(pathname)
     ? resourceApiCacheEpochFrom([requestRevision, STRONG_LEXICON_ENTRY_RESPONSE_REVISION])

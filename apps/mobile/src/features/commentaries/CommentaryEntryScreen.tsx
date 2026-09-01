@@ -4,6 +4,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking } from 'react-native'
 
+import countLsgChapters from '~assets/bible_versions/countLsgChapters'
 import Header from '~common/Header'
 import Loading from '~common/Loading'
 import StylizedHTMLView from '~common/StylizedHTMLView'
@@ -24,6 +25,7 @@ import {
 } from './commentaryReferenceNavigation'
 import { commentaryHrefToOsis, parseCommentaryResourceParams } from './commentaryResourceParams'
 import CommentaryEntryNavigation from './CommentaryEntryNavigation'
+import { groupCommentarySectionsForVerse } from './commentaryResourceNavigation'
 
 const CommentaryEntryScreen = () => {
   const params = useLocalSearchParams<{
@@ -31,8 +33,12 @@ const CommentaryEntryScreen = () => {
     book?: string
     chapter?: string
     sectionId?: string
+    focusVerse?: string
   }>()
   const parsed = parseCommentaryResourceParams(params)
+  const parsedFocusVerse = Number(params.focusVerse)
+  const focusVerse =
+    Number.isSafeInteger(parsedFocusVerse) && parsedFocusVerse > 0 ? parsedFocusVerse : undefined
   const resources = useResourceAccess()
   const router = useRouter()
   const { t } = useTranslation()
@@ -69,18 +75,20 @@ const CommentaryEntryScreen = () => {
   }
 
   const { entry, projection, book, chapter } = parsed
+  const orderedSections = focusVerse
+    ? (() => {
+        const grouped = groupCommentarySectionsForVerse({
+          sections: query.data?.sections ?? [],
+          verse: focusVerse,
+          chapterVerseCount: countLsgChapters[`${book}-${chapter}`],
+        })
+        return [...grouped.directSections, ...grouped.chapterContextSections]
+      })()
+    : (query.data?.sections ?? [])
   const section = query.data?.sections.find(candidate => candidate.id === params.sectionId)
-  const sectionIndex = query.data?.sections.findIndex(
-    candidate => candidate.id === params.sectionId
-  )
-  const previousSection =
-    sectionIndex !== undefined && sectionIndex > 0
-      ? query.data?.sections[sectionIndex - 1]
-      : undefined
-  const nextSection =
-    sectionIndex !== undefined && sectionIndex >= 0
-      ? query.data?.sections[sectionIndex + 1]
-      : undefined
+  const sectionIndex = orderedSections.findIndex(candidate => candidate.id === params.sectionId)
+  const previousSection = sectionIndex > 0 ? orderedSections[sectionIndex - 1] : undefined
+  const nextSection = sectionIndex >= 0 ? orderedSections[sectionIndex + 1] : undefined
   const bookLabel = getBook(book)?.Nom ?? String(book)
   const passage = section
     ? `${bookLabel} ${chapter}:${section.rangeStartVerse}${
@@ -138,6 +146,7 @@ const CommentaryEntryScreen = () => {
                     projectionId: projection.projectionId,
                     book: String(book),
                     chapter: String(chapter),
+                    focusVerse: focusVerse === undefined ? undefined : String(focusVerse),
                   },
                 })
               }

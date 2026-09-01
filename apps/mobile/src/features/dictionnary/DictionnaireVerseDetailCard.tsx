@@ -9,12 +9,12 @@ import type { Verse } from '~common/types'
 import Box, { TouchableBox } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import { SheetScrollView } from '~common/sheet'
-import BibleVerseDetailFooter from '~features/bible/BibleVerseDetailFooter'
+import ResourceVerseContext, {
+  useResourceVerseContext,
+} from '~features/bible/resources/ResourceVerseContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
-import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
@@ -27,9 +27,11 @@ import {
 const DictionnaireVerseDetailScreen = ({
   verse,
   updateVerse,
+  selectedVersion,
 }: {
   verse: Verse
   updateVerse: (value: number) => void
+  selectedVersion: string
 }) => {
   const resources = useResourceAccess()
   const { t } = useTranslation()
@@ -37,41 +39,18 @@ const DictionnaireVerseDetailScreen = ({
   const { Livre, Chapitre, Verset } = verse
   const verseKey = `${Livre}-${Chapitre}-${Verset}`
   const resourceLang = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  const verseContext = useResourceVerseContext(verseKey, selectedVersion)
+  const [navigationDirection, setNavigationDirection] = React.useState<-1 | 1>(1)
+  const navigateVerse = (direction: -1 | 1) => {
+    setNavigationDirection(direction)
+    updateVerse(direction)
+  }
 
   const anchorsQuery = useQuery({
     queryKey: ['dictionary-passage-entries', verseKey, resourceLang],
     queryFn: () => resources.dictionary.discoverPassageEntries(verseKey, resourceLang),
     ...localQueryOptions,
   })
-  const chapterQuery = useQuery({
-    ...bibleChapterQueryOptions(
-      {
-        version: getDefaultBibleVersion(resourceLang),
-        book: Number(Livre),
-        chapter: Number(Chapitre),
-      },
-      resources
-    ),
-  })
-  const chapterResult = chapterQuery.data
-  const versesInCurrentChapter = chapterResult?.success ? chapterResult.data.verses.length : null
-
-  if (anchorsQuery.isPending) return <Loading />
-
-  if (anchorsQuery.isError) {
-    return (
-      <ResourceUnavailableView
-        identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
-        title={t('Les dictionnaires sont temporairement indisponibles.')}
-        fileSize={22}
-        failure={resourceFailureFromAccessError(anchorsQuery.error)}
-        size="small"
-        mt={100}
-        onRetry={() => void anchorsQuery.refetch()}
-      />
-    )
-  }
-
   const entries = anchorsQuery.data ?? []
   const presentConcepts = groupDictionaryPassageEntries(
     entries.filter(
@@ -87,45 +66,48 @@ const DictionnaireVerseDetailScreen = ({
     t(count === 1 ? '{{count}} article' : '{{count}} articles', { count })
 
   return (
-    <Box flex={1}>
-      <Box px={20} pt={16} pb={10}>
-        <BibleVerseDetailFooter
-          verseNumber={Verset}
-          versesInCurrentChapter={versesInCurrentChapter}
-          goToNextVerse={() => updateVerse(+1)}
-          goToPrevVerse={() => updateVerse(-1)}
+    <Box flex={1} bg="lightGrey">
+      <ResourceVerseContext
+        verse={verseKey}
+        {...verseContext}
+        navigationDirection={navigationDirection}
+        updateVerse={navigateVerse}
+      />
+      {anchorsQuery.isPending ? (
+        <Box height={120} center>
+          <Loading />
+        </Box>
+      ) : anchorsQuery.isError ? (
+        <ResourceUnavailableView
+          identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
+          title={t('Les dictionnaires sont temporairement indisponibles.')}
+          fileSize={22}
+          failure={resourceFailureFromAccessError(anchorsQuery.error)}
+          size="small"
+          mt={40}
+          onRetry={() => void anchorsQuery.refetch()}
         />
-      </Box>
-      {presentConcepts.length > 0 || citationConcepts.length > 0 ? (
+      ) : presentConcepts.length > 0 || citationConcepts.length > 0 ? (
         <SheetScrollView>
-          <Box px={20} pt={8} pb={32}>
+          <Box px={20} pt={20} pb={32} gap={20}>
             {[
               {
                 key: 'presence',
                 title: t('Présents dans ce verset'),
-                description: t(
-                  'Noms propres et expressions retrouvés exactement dans la Bible de référence.'
-                ),
                 concepts: presentConcepts,
               },
               {
                 key: 'citations',
                 title: t('Articles qui citent ce verset'),
-                description: t(
-                  'Ces liens viennent des références présentes dans les articles, indépendamment de la traduction biblique affichée.'
-                ),
                 concepts: citationConcepts,
               },
-            ].map((section, sectionIndex) =>
+            ].map(section =>
               section.concepts.length > 0 ? (
-                <Box key={section.key} mt={sectionIndex > 0 ? 22 : 0}>
+                <Box key={section.key} px={14} py={13} rounded bg="reverse" lightShadow>
                   <Text title fontSize={14} color="grey">
                     {section.title}
                   </Text>
-                  <Text fontSize={12} color="tertiary" mt={4}>
-                    {section.description}
-                  </Text>
-                  <Box row wrap gap={6} mt={10}>
+                  <Box row wrap gap={5} mt={5}>
                     {section.concepts.map(concept => {
                       const source = pickPreferredDictionarySource(concept.sources, resourceLang)
                       if (!source) return null
@@ -153,9 +135,9 @@ const DictionnaireVerseDetailScreen = ({
                           activeOpacity={0.55}
                           bg="secondary"
                           bgOpacity="010"
-                          borderRadius={6}
+                          borderRadius={5}
                           px={12}
-                          py={7}
+                          py={5}
                         >
                           <Text title fontSize={14} color="secondary">
                             {concept.label}

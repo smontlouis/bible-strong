@@ -4,6 +4,7 @@ import {
   getCommentarySectionsForVerse,
   getCommentaryResourceRoute,
   getCoveredCommentaryLocation,
+  groupCommentarySectionsForVerse,
 } from '../commentaryResourceNavigation'
 import type { CommentaryVerseAvailability } from '../commentaryVerseAvailability'
 
@@ -122,6 +123,25 @@ describe('commentary resource navigation', () => {
       'wide',
     ])
     expect(getCommentarySectionsForVerse(sections, undefined)).toEqual(sections)
+  })
+
+  it('prioritizes narrow matches and separates broad chapter context', () => {
+    const exact = { id: 'exact', rangeStartVerse: 4, rangeEndVerse: 4 }
+    const short = { id: 'short', rangeStartVerse: 3, rangeEndVerse: 6 }
+    const broad = { id: 'broad', rangeStartVerse: 1, rangeEndVerse: 27 }
+    const wholeChapter = { id: 'chapter', rangeStartVerse: 1, rangeEndVerse: 31 }
+    const unrelated = { id: 'unrelated', rangeStartVerse: 5, rangeEndVerse: 5 }
+
+    expect(
+      groupCommentarySectionsForVerse({
+        sections: [wholeChapter, short, unrelated, broad, exact],
+        verse: 4,
+        chapterVerseCount: 31,
+      })
+    ).toEqual({
+      directSections: [exact, short],
+      chapterContextSections: [broad, wholeChapter],
+    })
   })
 
   it('falls back to Genesis 1 when the current chapter has no content', () => {

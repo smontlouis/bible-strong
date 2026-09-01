@@ -417,7 +417,7 @@ export const makeKyselyDictionaryRepository = (
       }),
     discoverPassageEntries: input =>
       tryDatabasePromise('dictionary.passage.discover', async () => {
-        let query = database
+        let citationQuery = database
           .selectFrom('dictionary_verse_links as link')
           .innerJoin(
             'resource_publications as publication',
@@ -445,15 +445,54 @@ export const makeKyselyDictionaryRepository = (
           .where('publication.status', '=', 'active')
           .where('link.verse_key', '=', input.verseKey)
           .where('link.entry_id', 'is not', null)
-          .where('link.evidence_kind', 'in', ['source-citation', 'verse-name', 'verse-phrase'])
-        if (input.language) query = query.where('publication.language', '=', input.language)
-        const rows = await query
+          .where('link.evidence_kind', '=', 'source-citation')
+        if (input.language) {
+          citationQuery = citationQuery.where('publication.language', '=', input.language)
+        }
+        const citationRows = await citationQuery
           .orderBy('publication.language')
           .orderBy('publication.resource_identity')
           .orderBy('link.ordinal')
           .orderBy('entry.entry_id')
           .execute()
-        return rows.map(row => {
+
+        let presenceQuery = database
+          .selectFrom('dictionary_directory_verse_presences as presence')
+          .innerJoin(
+            'resource_publications as directory_publication',
+            'directory_publication.id',
+            'presence.publication_id'
+          )
+          .selectAll('presence')
+          .where('directory_publication.resource_kind', '=', 'dictionary-directory')
+          .where('directory_publication.status', '=', 'active')
+          .where('presence.verse_key', '=', input.verseKey)
+        if (input.language) {
+          presenceQuery = presenceQuery.where('presence.language', '=', input.language)
+        }
+        const presenceRows = await presenceQuery
+          .orderBy('presence.language')
+          .orderBy('presence.work')
+          .orderBy('presence.word')
+          .orderBy('presence.entry_id')
+          .execute()
+
+        let activeWorkQuery = database
+          .selectFrom('resource_publications')
+          .select(['resource_identity', 'revision', 'language', 'metadata'])
+          .where('resource_kind', '=', 'dictionary')
+          .where('status', '=', 'active')
+        if (input.language) {
+          activeWorkQuery = activeWorkQuery.where('language', '=', input.language)
+        }
+        const activeWorks = new Map(
+          (await activeWorkQuery.execute()).map(publication => [
+            `${publication.resource_identity.split(':')[1] ?? ''}:${publication.language ?? ''}`,
+            publication,
+          ])
+        )
+
+        const citations = citationRows.map(row => {
           const work = row.resource_identity.split(':')[1] ?? ''
           const language: DictionaryLanguage = row.language === 'en' ? 'en' : 'fr'
           return {
@@ -470,6 +509,27 @@ export const makeKyselyDictionaryRepository = (
             ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
           }
         })
+        const presences = presenceRows.flatMap(row => {
+          const publication = activeWorks.get(`${row.work}:${row.language}`)
+          if (!publication) return []
+          const language: DictionaryLanguage = row.language === 'en' ? 'en' : 'fr'
+          return [
+            {
+              work: row.work,
+              language,
+              revision: publication.revision,
+              resourceId: row.resource_id,
+              title: row.title,
+              abbreviation: row.abbreviation,
+              id: row.entry_id,
+              word: row.word,
+              normalizedWord: row.normalized_word,
+              evidenceKind: row.evidence_kind as 'verse-name' | 'verse-phrase',
+              ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
+            },
+          ]
+        })
+        return [...presences, ...citations]
       }).pipe(Effect.mapError(cause => new DictionaryRepositoryFailure({ cause }))),
   }
 }

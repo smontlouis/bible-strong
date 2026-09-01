@@ -19,6 +19,7 @@ import type {
   thematicTopics,
   thematicTopicSources,
   dictionaryEntries,
+  dictionaryDirectoryVersePresences,
   dictionaryVerseLinks,
   resourcePublications,
   strongBibleIdentities,
@@ -58,6 +59,7 @@ export type ThematicTopicRelationRow = Kyselify<typeof thematicTopicRelations>
 export type ThematicTopicEmbeddingRow = Kyselify<typeof thematicTopicEmbeddings>
 export type ThematicImportRunRow = Kyselify<typeof thematicImportRuns>
 export type DictionaryEntryRow = Kyselify<typeof dictionaryEntries>
+export type DictionaryDirectoryVersePresenceRow = Kyselify<typeof dictionaryDirectoryVersePresences>
 export type DictionaryVerseLinkRow = Kyselify<typeof dictionaryVerseLinks>
 export type StrongBibleVerseRow = Kyselify<typeof strongBibleVerses>
 export type StrongBibleLexemeRow = Kyselify<typeof strongBibleLexemes>
@@ -102,6 +104,7 @@ export type ResourceDatabase = {
   thematic_topic_embeddings: ThematicTopicEmbeddingRow
   thematic_import_runs: ThematicImportRunRow
   dictionary_entries: DictionaryEntryRow
+  dictionary_directory_verse_presences: DictionaryDirectoryVersePresenceRow
   dictionary_verse_links: DictionaryVerseLinkRow
   strong_bible_verses: StrongBibleVerseRow
   strong_bible_lexemes: StrongBibleLexemeRow

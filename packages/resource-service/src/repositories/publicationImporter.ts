@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 
 import { Data, Effect } from 'effect'
 import { sql, type Kysely } from 'kysely'
+import initSqlJs from 'sql.js'
 
 import { tryDatabasePromise, type DatabaseFailure } from '../database/databaseEffect'
 import type { ResourceDatabase } from '../database/types'
@@ -89,6 +90,87 @@ const insertChunks = async <Table extends keyof ResourceDatabase>(
       .insertInto(table)
       .values(values.slice(offset, offset + 1_000) as never)
       .execute()
+  }
+}
+
+type DictionaryDirectoryVersePresence = {
+  verse_key: string
+  work: string
+  language: string
+  resource_id: string
+  title: string
+  abbreviation: string
+  entry_id: number
+  word: string
+  normalized_word: string
+  correspondence_id: string | null
+  evidence_kind: 'verse-name' | 'verse-phrase'
+}
+
+export const readDictionaryDirectoryVersePresences = async (
+  offlineContent: Uint8Array
+): Promise<DictionaryDirectoryVersePresence[]> => {
+  const SQL = await initSqlJs()
+  const database = new SQL.Database(offlineContent)
+  try {
+    const result = database.exec(`
+      SELECT anchor.verse_key, work.work, work.language, work.resource_id, work.title,
+             work.abbreviation, entry.entry_id, entry.word, entry.normalized_word,
+             correspondence.correspondence_id, evidence.evidence_kind
+      FROM dictionary_passage_anchors anchor
+      JOIN dictionary_works work ON work.work_key = anchor.work_key
+      JOIN dictionary_entries entry
+        ON entry.work_key = anchor.work_key AND entry.entry_id = anchor.entry_id
+      JOIN dictionary_anchor_evidence evidence
+        ON evidence.evidence_key = anchor.evidence_key
+      LEFT JOIN dictionary_correspondence_members member
+        ON member.work_key = entry.work_key AND member.entry_id = entry.entry_id
+      LEFT JOIN dictionary_correspondences correspondence
+        ON correspondence.correspondence_key = member.correspondence_key
+      WHERE evidence.evidence_kind IN ('verse-name', 'verse-phrase')
+      ORDER BY anchor.verse_key, work.work_key, anchor.ordinal, entry.entry_id
+    `)[0]
+    if (!result) return []
+    return result.values.map(values => {
+      const row = Object.fromEntries(result.columns.map((column, index) => [column, values[index]]))
+      const evidenceKind = row.evidence_kind
+      if (evidenceKind !== 'verse-name' && evidenceKind !== 'verse-phrase') {
+        throw new Error('DICTIONARY_DIRECTORY_EVIDENCE_KIND_INVALID')
+      }
+      const requiredStrings = [
+        'verse_key',
+        'work',
+        'language',
+        'resource_id',
+        'title',
+        'abbreviation',
+        'word',
+        'normalized_word',
+      ] as const
+      if (
+        requiredStrings.some(key => typeof row[key] !== 'string' || row[key].length === 0) ||
+        typeof row.entry_id !== 'number' ||
+        !Number.isInteger(row.entry_id) ||
+        (row.correspondence_id !== null && typeof row.correspondence_id !== 'string')
+      ) {
+        throw new Error('DICTIONARY_DIRECTORY_PRESENCE_INVALID')
+      }
+      return {
+        verse_key: row.verse_key as string,
+        work: row.work as string,
+        language: row.language as string,
+        resource_id: row.resource_id as string,
+        title: row.title as string,
+        abbreviation: row.abbreviation as string,
+        entry_id: row.entry_id,
+        word: row.word as string,
+        normalized_word: row.normalized_word as string,
+        correspondence_id: row.correspondence_id as string | null,
+        evidence_kind: evidenceKind,
+      }
+    })
+  } finally {
+    database.close()
   }
 }
 
@@ -341,7 +423,7 @@ export const importPublicationBundle = (
     catch: toImportFailure,
   }).pipe(
     Effect.flatMap(validated => {
-      const { canonical, manifest } = validated
+      const { canonical, manifest, offlineContent } = validated
       const { resourceIdentity } = getPublicationIdentityProjection(manifest)
       const publicationStatus =
         manifest.deliveryCapabilities.onlineAccess ||
@@ -775,6 +857,16 @@ export const importPublicationBundle = (
                     }))
                   )
               await insertChunks(transaction, 'dictionary_verse_links', links)
+            } else if (canonical.format === 'bible-strong-canonical-dictionary-directory') {
+              const presences = await readDictionaryDirectoryVersePresences(offlineContent)
+              await insertChunks(
+                transaction,
+                'dictionary_directory_verse_presences',
+                presences.map(presence => ({
+                  publication_id: publication.id,
+                  ...presence,
+                }))
+              )
             } else if (canonical.format === 'bible-strong-canonical-commentary') {
               const commentaryCanonical = canonical as CanonicalCommentaryPublication
               const commentaryDocuments =

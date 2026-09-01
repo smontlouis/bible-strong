@@ -211,6 +211,13 @@
       "when": 1788207635715,
       "tag": "0032_legal_maverick",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1788269544929,
+      "tag": "0033_groovy_kronos",
+      "breakpoints": true
     }
   ]
 }

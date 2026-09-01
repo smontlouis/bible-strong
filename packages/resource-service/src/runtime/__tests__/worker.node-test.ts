@@ -338,6 +338,24 @@ describe('Resource Worker binding', () => {
     assert.notEqual(entry, module)
   })
 
+  it('invalidates dictionary passage discovery independently from generic dictionary reads', async () => {
+    const catalog = {
+      resources: {
+        'dictionary-directory': { contentSha256: 'directory-r1' },
+      },
+    }
+    const passage = await resourceApiCacheRevisionFrom(
+      new Request('https://api.bible-strong.app/v1/dictionaries/verses/1-1-1/entries?language=fr'),
+      catalog
+    )
+    const directory = await resourceApiCacheRevisionFrom(
+      new Request('https://api.bible-strong.app/v1/dictionaries/directory?language=fr'),
+      catalog
+    )
+
+    assert.notEqual(passage, directory)
+  })
+
   it('does not cache unsuccessful origin responses', async () => {
     const cache = new MemoryEdgeCache()
     let originReads = 0

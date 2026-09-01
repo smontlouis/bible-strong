@@ -17,12 +17,17 @@ import {
 } from '~features/resources/resourceFailure'
 import Empty from '~common/Empty'
 import useConnection from '~helpers/useConnection'
+import ResourceVerseContext, {
+  useResourceVerseContext,
+} from '~features/bible/resources/ResourceVerseContext'
 
 type Props = {
   selectedVerse: string
+  selectedVersion: string
+  updateVerse: (direction: number) => void
 }
 
-const NaveModalCard = ({ selectedVerse }: Props) => {
+const NaveModalCard = ({ selectedVerse, selectedVersion, updateVerse }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
   const resources = useResourceAccess()
@@ -31,6 +36,12 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
   // Get resource language from Jotai for cache key invalidation
   const resourcesLanguage = useAtomValue(resourcesLanguageAtom)
   const resourceLang = resourcesLanguage.NAVE
+  const verseContext = useResourceVerseContext(selectedVerse, selectedVersion)
+  const [navigationDirection, setNavigationDirection] = React.useState<-1 | 1>(1)
+  const navigateVerse = (direction: -1 | 1) => {
+    setNavigationDirection(direction)
+    updateVerse(direction)
+  }
   const availabilityQuery = useQuery({
     queryKey: [...resourceQueryKeys.offlineDatabaseAvailability('NAVE', resourceLang), isConnected],
     queryFn: () =>
@@ -46,8 +57,8 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
   })
   const { isLoading, error, data } = naveQuery
 
-  if (availabilityQuery.data?.status === 'unavailable') {
-    return (
+  const content =
+    availabilityQuery.data?.status === 'unavailable' ? (
       <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLang }}
         title={t('resource.nave.offlineCopyNeeded')}
@@ -61,11 +72,7 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
           void naveQuery.refetch()
         }}
       />
-    )
-  }
-
-  if (availabilityQuery.isError || error) {
-    return (
+    ) : availabilityQuery.isError || error ? (
       <ResourceUnavailableView
         identity={{ kind: 'database', databaseId: 'NAVE', language: resourceLang }}
         title={t('resource.nave.temporarilyUnavailable')}
@@ -78,16 +85,11 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
           void naveQuery.refetch()
         }}
       />
-    )
-  }
-
-  if (isLoading) {
-    return (
+    ) : isLoading ? (
       <Box flex center height={150}>
         <ActivityIndicator color={theme.colors.grey} />
       </Box>
-    )
-  }
+    ) : null
 
   if (!selectedVerse) {
     return null
@@ -97,21 +99,34 @@ const NaveModalCard = ({ selectedVerse }: Props) => {
   const hasTopics = Boolean(naveItemsForVerse?.length || naveItemsForChapter?.length)
 
   return (
-    <SheetScrollView>
-      <Box padding={20}>
-        {hasTopics ? (
-          <>
-            <NaveForVerse items={naveItemsForVerse} label={t('Concernant le verset')} />
-            <NaveForVerse items={naveItemsForChapter} label={t('Concernant le chapitre entier')} />
-          </>
-        ) : (
-          <Empty
-            source={require('~assets/images/empty.json')}
-            message={t('resource.nave.noTopicsForVerse')}
-          />
-        )}
-      </Box>
-    </SheetScrollView>
+    <Box flex={1} bg="lightGrey">
+      <ResourceVerseContext
+        verse={selectedVerse}
+        {...verseContext}
+        navigationDirection={navigationDirection}
+        updateVerse={navigateVerse}
+      />
+      {content ?? (
+        <SheetScrollView>
+          <Box px={20} pt={20} pb={32} gap={20}>
+            {hasTopics ? (
+              <>
+                <NaveForVerse items={naveItemsForVerse} label={t('Concernant le verset')} />
+                <NaveForVerse
+                  items={naveItemsForChapter}
+                  label={t('Concernant le chapitre entier')}
+                />
+              </>
+            ) : (
+              <Empty
+                source={require('~assets/images/empty.json')}
+                message={t('resource.nave.noTopicsForVerse')}
+              />
+            )}
+          </Box>
+        </SheetScrollView>
+      )}
+    </Box>
   )
 }
 
