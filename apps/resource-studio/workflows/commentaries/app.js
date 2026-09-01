@@ -1,4 +1,5 @@
-import { entryCoversPassage } from './scripts/commentary-scope.mjs'
+import { entryCoversPassage, matchPassageReference, parsePassage } from './scripts/commentary-scope.mjs'
+import { projectSdabcContent } from './shared/commentaryPresentation.js'
 
 const state = {
   catalog: [],
@@ -12,6 +13,25 @@ const state = {
   tag: 'all',
   view: 'compare',
   registry: 'current',
+}
+
+const egwIndexedWritingsResource = {
+  id: 'egw-writings',
+  shortName: 'EGW Writings',
+  title: 'EGW Writings',
+  description: {
+    en: 'Paragraphs from Ellen G. White writings linked to Bible passages by the Complete Scripture Index. Editorial chapter markers are expanded to the complete chapter while preserving a chapter-level association.',
+  },
+  author: 'Ellen G. White',
+  era: 'XIXe–XXe siècles',
+  tradition: 'Protestantisme',
+  tags: ['Adventiste'],
+  languages: ['en'],
+  coverage: '83 277 paragraphes uniques reliés par 354 656 citations du Complete Scripture Index, avec expansion ciblée de 481 chapitres explicites et 423 sections indexées',
+  rights: 'Ellen G. White Estate · autorisation personnalisée',
+  licenseId: 'CustomPermission',
+  status: 'available',
+  source: 'EGW Writings · Complete Scripture Index, paragraphes ciblés et chapitres explicitement associés',
 }
 
 const elements = {
@@ -60,7 +80,7 @@ const initials = name => name.split(/\s+/).map(part => part[0]).join('').slice(0
 
 const sanitizeHtml = (unsafeHtml, references = []) => {
   if (!unsafeHtml) return ''
-  const allowedTags = new Set(['B', 'BLOCKQUOTE', 'BR', 'EM', 'H2', 'H3', 'H4', 'I', 'LI', 'OL', 'P', 'SPAN', 'STRONG', 'SUB', 'SUP', 'UL'])
+  const allowedTags = new Set(['B', 'BLOCKQUOTE', 'BR', 'EM', 'H2', 'H3', 'H4', 'HR', 'I', 'LI', 'OL', 'P', 'SPAN', 'STRONG', 'SUB', 'SUP', 'UL'])
   const blockedTags = new Set(['EMBED', 'FORM', 'IFRAME', 'OBJECT', 'SCRIPT', 'STYLE', 'SVG'])
   const referencesById = new Map(references.map(reference => [reference.id, reference]))
   const documentFragment = new DOMParser().parseFromString(`<body>${unsafeHtml}</body>`, 'text/html')
@@ -102,6 +122,45 @@ const sanitizeHtml = (unsafeHtml, references = []) => {
 }
 
 const catalogById = id => state.catalog.find(resource => resource.id === id)
+
+const chunk = (values, size) => Array.from(
+  { length: Math.ceil(values.length / size) },
+  (_, index) => values.slice(index * size, (index + 1) * size)
+)
+
+const projectEgwIndexedWritings = async entries => {
+  const scriptureIndexEntries = entries.filter(entry => entry.editorialKind === 'scripture-index')
+  if (scriptureIndexEntries.length === 0) return entries
+  const paragraphIds = [...new Set(scriptureIndexEntries.flatMap(entry =>
+    entry.citations.flatMap(citation => citation.associatedParagraphIds ?? [citation.paragraphId])
+  ))]
+  const responses = await Promise.all(chunk(paragraphIds, 150).map(async ids => {
+    const response = await fetch(`./api/egw-paragraphs?ids=${encodeURIComponent(ids.join(','))}`)
+    if (!response.ok) throw new Error('La ressource des paragraphes EGW est indisponible. Relancez son export.')
+    return response.json()
+  }))
+  const missingIds = responses.flatMap(response => response.missingIds)
+  if (missingIds.length > 0) throw new Error(`${missingIds.length} paragraphes EGW ciblés sont absents de la ressource locale.`)
+  const paragraphsById = new Map(responses.flatMap(response => response.paragraphs).map(paragraph => [paragraph.id, paragraph]))
+  const projected = scriptureIndexEntries.map(entry => ({
+    ...entry,
+    id: `egw-indexed-writings:${entry.id}`,
+    resource: egwIndexedWritingsResource,
+    editorialKind: 'egw-indexed-writings',
+    layer: 'egw-indexed-writings',
+    paragraphs: entry.citations.flatMap(citation =>
+      (citation.associatedParagraphIds ?? [citation.paragraphId]).map(paragraphId => ({
+        ...paragraphsById.get(paragraphId),
+        citationLabel: citation.label,
+        association: citation.association ?? null,
+      }))
+    ),
+  }))
+  return [
+    ...entries.filter(entry => entry.editorialKind !== 'scripture-index' && entry.editorialKind !== 'egw-indexed-writings'),
+    ...projected,
+  ]
+}
 
 const passageGroups = () => {
   const indexedPassages = state.libraryIndex
@@ -162,10 +221,12 @@ const cardStatus = translation => {
   return ['available', 'FR disponible']
 }
 
-const renderProse = (document, language) => {
-  const content = sanitizeHtml(document?.html, document?.references)
+const renderProseHtml = (content, language) => {
   return `<div class="prose-shell commentary-copy collapsed"><div class="prose" lang="${language}">${content}</div><button class="expand-copy" type="button" data-collapsed-label="Lire plus" data-expanded-label="Réduire">Lire plus</button></div>`
 }
+
+const renderProse = (document, language) =>
+  renderProseHtml(sanitizeHtml(document?.html, document?.references), language)
 
 const syncProseOverflow = () => {
   document.querySelectorAll('.commentary-copy').forEach(shell => {
@@ -203,31 +264,148 @@ const scopeNames = {
   homily: 'Homélie',
 }
 
-const renderScope = entry => {
-  const scope = entry.scope ?? { kind: 'verse', start: entry.passage }
-  const label = scope.end
-    ? `${formatPassage(scope.start)}–${formatPassage(scope.end).replace(/^.*?\s(?=\d)/, '')}`
-    : scopeNames[scope.kind] ?? scope.kind
-  const inferred = scope.confidence === 'high' ? ' · titre interprété' : ''
-  return `<span class="scope-badge scope-${escapeHtml(scope.kind)}">${escapeHtml(label)}${inferred}</span>`
+const scopeLabel = scope => {
+  if (!scope.end) return scope.kind === 'verse' ? formatPassage(scope.start) : scopeNames[scope.kind] ?? formatPassage(scope.start)
+  const start = parsePassage(scope.start)
+  const end = parsePassage(scope.end)
+  if (start && end && start.book === end.book && start.chapter === end.chapter) {
+    return `${formatPassage(scope.start)}–${end.verse}`
+  }
+  if (start && end && start.book === end.book) {
+    return `${formatPassage(scope.start)}–${end.chapter}.${end.verse}`
+  }
+  return `${formatPassage(scope.start)}–${formatPassage(scope.end)}`
 }
 
-const renderScriptureIndex = (entry, resource, index) => {
-  const isLong = entry.citations.length > 30
-  const references = entry.citations.map(citation =>
-    '<li><a href="' + escapeHtml(citation.url) + '" target="_blank" rel="noreferrer">' +
-      escapeHtml(citation.label) + '</a><small>' + escapeHtml(citation.paragraphId) + '</small></li>'
-  ).join('')
-  return '<article class="commentary-card scripture-index-card" style="animation-delay:' + (index * 70) + 'ms">' +
-    '<header class="commentary-head"><div class="commentary-identity"><span class="author-seal">EGW</span><div>' +
-    '<h3>Index EGW complémentaire</h3><p>' + escapeHtml(entry.referenceLabel) +
-    ' · index de sources</p></div></div><span class="status-badge available">' + entry.citations.length +
-    ' référence' + (entry.citations.length > 1 ? 's' : '') + '</span></header>' +
-    '<section class="scripture-index-body"><p class="index-explanation">Ces liens signalent les écrits EGW associés à ce passage. ' +
-    'Une présence dans l’index ne signifie pas automatiquement qu’il s’agit d’un commentaire exégétique.</p>' +
-    '<div class="prose-shell ' + (isLong ? 'collapsed' : '') + '"><ol class="scripture-reference-list">' +
-    references + '</ol>' + (isLong ? '<button class="expand-copy" type="button">Voir toutes les références</button>' : '') +
-    '</div></section></article>'
+const renderScope = entry => {
+  const scope = entry.scope ?? { kind: 'verse', start: entry.passage }
+  const inferred = scope.confidence === 'high' ? ' · titre interprété' : ''
+  return `<span class="scope-badge scope-${escapeHtml(scope.kind)}">${escapeHtml(scopeLabel(scope))}${inferred}</span>`
+}
+
+const renderEgwIndexedWritings = (entries, index) => {
+  const paragraphsById = new Map()
+  for (const entry of entries) {
+    const indexScope = entry.scope ?? { kind: 'verse', start: entry.passage }
+    const indexScopeKey = `${indexScope.kind}:${indexScope.start}:${indexScope.end ?? ''}`
+    for (const paragraph of entry.paragraphs) {
+      const current = paragraphsById.get(paragraph.id) ?? { ...paragraph, indexScopes: [] }
+      if (!current.indexScopes.some(scope => scope.key === indexScopeKey)) {
+        current.indexScopes.push({ ...indexScope, key: indexScopeKey })
+      }
+      if (paragraph.association?.kind === 'chapter' || (!current.association && paragraph.association?.kind === 'section')) {
+        current.association = paragraph.association
+      }
+      paragraphsById.set(paragraph.id, current)
+    }
+  }
+  const paragraphs = [...paragraphsById.values()]
+  const groups = [...paragraphs.reduce((map, paragraph) => {
+    const key = `${paragraph.book.id}:${paragraph.section.title}`
+    const group = map.get(key) ?? { book: paragraph.book, section: paragraph.section, paragraphs: [], association: null, indexScopes: new Map() }
+    if (paragraph.association?.kind === 'chapter' || (!group.association && paragraph.association?.kind === 'section')) {
+      group.association = paragraph.association
+    }
+    for (const scope of paragraph.indexScopes) group.indexScopes.set(scope.key, scope)
+    group.paragraphs.push(paragraph)
+    map.set(key, group)
+    return map
+  }, new Map()).values()]
+  for (const group of groups) {
+    group.paragraphs.sort((left, right) => left.id.localeCompare(right.id, 'en', { numeric: true }))
+  }
+  const content = groups.map(group => `
+    <section class="egw-writing-group">
+      <header>
+        <div><h4>${escapeHtml(group.book.title)}</h4><p>${escapeHtml(group.section.title)}</p></div>
+        <div class="egw-writing-group-labels">
+          ${group.association ? `<span class="chapter-association-badge">${group.association.kind === 'chapter' ? 'Chapitre complet' : 'Section complète'}</span>` : ''}
+          ${group.book.code ? `<span>${escapeHtml(group.book.code)}</span>` : ''}
+        </div>
+      </header>
+      <div class="egw-index-scopes">
+        <span>Portée ECSI</span>
+        <div>${[...group.indexScopes.values()].map(scope => `<span class="scope-badge scope-${escapeHtml(scope.kind)}">${escapeHtml(scopeLabel(scope))}</span>`).join('')}</div>
+      </div>
+      ${group.association ? `
+        <div class="chapter-association-note">
+          <p>${group.association.kind === 'chapter'
+            ? 'L’autrice déclare explicitement la portée biblique de ce chapitre. Il est donc présenté une seule fois comme unité documentaire, sans rattacher artificiellement chacun de ses paragraphes à chaque verset.'
+            : 'L’index pointe vers le titre de cette section. Son contenu est donc présenté comme une seule unité documentaire ; sa portée biblique est déduite de l’ensemble des entrées ECSI qui citent cette ancre.'}</p>
+          ${group.association.scriptureScope?.label ? `<span class="scope-badge scope-${group.association.kind}">${escapeHtml(group.association.scriptureScope.label)}</span>` : ''}
+          <a class="egw-context-link" href="${escapeHtml(group.association.contextUrl ?? group.section.contextUrl)}" target="_blank" rel="noreferrer">Voir l’unité dans son contexte ↗</a>
+        </div>
+      ` : ''}
+      <div class="egw-writing-paragraphs">
+        ${group.paragraphs.map(paragraph => `
+          <article class="egw-writing-paragraph">
+            <div class="egw-paragraph-reference">${escapeHtml(paragraph.sourceReference ?? paragraph.citationLabel ?? paragraph.id)}</div>
+            ${renderProse(paragraph.source, paragraph.source.language ?? 'en')}
+            ${group.association ? '' : `<a class="egw-context-link" href="${escapeHtml(paragraph.section.contextUrl)}" target="_blank" rel="noreferrer">Voir dans son contexte ↗</a>`}
+          </article>
+        `).join('')}
+      </div>
+    </section>
+  `).join('')
+  return `
+    <article class="commentary-card egw-writings-card" style="animation-delay:${index * 70}ms">
+      <header class="commentary-head">
+        <div class="commentary-identity">
+          <span class="author-seal">EGW</span>
+          <div><h3>${egwIndexedWritingsResource.title}</h3><p>Ellen G. White · associations issues du Complete Scripture Index</p><div class="commentary-meta">${renderTaxonomy(egwIndexedWritingsResource)}</div></div>
+        </div>
+        <span class="status-badge available">${paragraphs.length} paragraphe${paragraphs.length > 1 ? 's' : ''}</span>
+      </header>
+      <div class="egw-writings-body">
+        <p class="index-explanation">Ces textes sont associés à ce passage par l’index scripturaire EGW. Cette association ne signifie pas nécessairement qu’il s’agit d’un commentaire exégétique.</p>
+        ${content}
+      </div>
+    </article>
+  `
+}
+
+const sdabcDocumentForLanguage = (entry, passage, language) => {
+  if (language === 'en') return entry.source?.language === 'en' ? entry.source : null
+  const translation = translationForPassage(entry, passage)
+  return translation?.language === language ? translation : null
+}
+
+const projectSdabcLanguage = (entries, passage, language) => projectSdabcContent(
+  entries.map(entry => {
+    const document = sdabcDocumentForLanguage(entry, passage, language)
+    return {
+      id: entry.id,
+      layer: entry.layer ?? entry.editorialKind,
+      html: sanitizeHtml(document?.html, document?.references),
+    }
+  })
+)
+
+const renderSdabc = (entries, resource, index) => {
+  const french = projectSdabcLanguage(entries, state.passage, 'fr')
+  const english = projectSdabcLanguage(entries, state.passage, 'en')
+  const [statusClass, statusLabel] = cardStatus(french ? { html: french } : null)
+  return `
+    <article class="commentary-card" style="animation-delay:${index * 70}ms">
+      <header class="commentary-head">
+        <div class="commentary-identity">
+          <span class="author-seal">${initials(resource.author)}</span>
+          <div><h3>${resource.shortName ?? resource.title}</h3><p>${resource.author} · ${resource.era ?? ''}</p><div class="commentary-meta">${renderTaxonomy(resource)}</div></div>
+        </div>
+        <span class="status-badge ${statusClass}">${statusLabel}</span>
+      </header>
+      <div class="commentary-columns">
+        <section class="commentary-column" data-language="fr">
+          <div class="column-label"><span>Français</span><span>${french ? 'disponible' : 'absent'}</span></div>
+          ${french ? renderProseHtml(french, 'fr') : '<div class="missing-copy">Traduction française absente du corpus local.<br />Ce passage figure dans le lot à compléter.</div>'}
+        </section>
+        <section class="commentary-column" data-language="en">
+          <div class="column-label"><span>English source</span><span>${english ? 'disponible' : 'absente'}</span></div>
+          ${english ? renderProseHtml(english, 'en') : '<div class="missing-copy">Source anglaise non incluse dans ce corpus local.</div>'}
+        </section>
+      </div>
+    </article>
+  `
 }
 
 const renderComments = () => {
@@ -240,10 +418,40 @@ const renderComments = () => {
   })
 
   elements.passageTitle.textContent = state.passage ? formatPassage(state.passage) : 'Aucun passage'
-  elements.passageKicker.textContent = `${entries.length} ${entries.length > 1 ? 'voix disponibles' : 'voix disponible'}`
-  elements.commentaryStack.innerHTML = entries.map((entry, index) => {
+  const sdabcCommentaries = entries.filter(entry =>
+    entry.resource.id === 'sdabc'
+  )
+  const egwIndexedWritings = entries.filter(entry => entry.editorialKind === 'egw-indexed-writings')
+  const displayEntries = []
+  let sdabcProjectionInserted = false
+  let egwProjectionInserted = false
+  for (const entry of entries) {
+    if (entry.editorialKind === 'egw-indexed-writings') {
+      if (!egwProjectionInserted) {
+        displayEntries.push({ kind: 'egw-indexed-writings-projection', entries: egwIndexedWritings })
+        egwProjectionInserted = true
+      }
+      continue
+    }
+    if (entry.resource.id !== 'sdabc') {
+      displayEntries.push(entry)
+      continue
+    }
+    if (!sdabcProjectionInserted && sdabcCommentaries.length > 0) {
+      displayEntries.push({ kind: 'sdabc-projection', entries: sdabcCommentaries })
+      sdabcProjectionInserted = true
+    }
+  }
+
+  elements.passageKicker.textContent = `${displayEntries.length} ${displayEntries.length > 1 ? 'voix disponibles' : 'voix disponible'}`
+
+  elements.commentaryStack.innerHTML = displayEntries.map((entry, index) => {
+    if (entry.kind === 'sdabc-projection') {
+      const resource = catalogById('sdabc') ?? entry.entries[0].resource
+      return renderSdabc(entry.entries, resource, index)
+    }
+    if (entry.kind === 'egw-indexed-writings-projection') return renderEgwIndexedWritings(entry.entries, index)
     const resource = catalogById(entry.resource.id) ?? entry.resource
-    if (entry.editorialKind === 'scripture-index') return renderScriptureIndex(entry, resource, index)
     const isEgwSupplement = entry.editorialKind === 'egw-supplement'
     const voiceAuthor = isEgwSupplement ? 'Ellen G. White' : resource.author
     const voiceTitle = isEgwSupplement ? 'Complément EGW' : (resource.shortName ?? resource.title)
@@ -274,7 +482,7 @@ const renderComments = () => {
       </article>
     `
   }).join('')
-  elements.emptyState.hidden = entries.length > 0
+  elements.emptyState.hidden = displayEntries.length > 0
   requestAnimationFrame(syncProseOverflow)
   renderRegistry()
 }
@@ -327,7 +535,8 @@ const loadChapter = async (chapter, preferredPassage = null) => {
     if (!response.ok) throw new Error(`Chapitre JSON introuvable : ${resource.path}`)
     return response.json()
   }))
-  state.entries = [...new Map(payloads.flatMap(payload => payload.entries).map(entry => [entry.id, entry])).values()]
+  const chapterEntries = [...new Map(payloads.flatMap(payload => payload.entries).map(entry => [entry.id, entry])).values()]
+  state.entries = await projectEgwIndexedWritings(chapterEntries)
   state.chapterKey = `${chapter.book}-${chapter.chapter}`
   const passages = passageGroups().map(([passage]) => passage)
   state.passage = preferredPassage && passages.includes(preferredPassage) ? preferredPassage : passages[0] ?? null
@@ -371,11 +580,14 @@ elements.passageList.addEventListener('click', async event => {
 })
 elements.referenceInput.addEventListener('keydown', async event => {
   if (event.key !== 'Enter') return
-  const query = event.currentTarget.value.toLocaleLowerCase('fr').replace(/[^\p{L}\p{N}]/gu, '')
   const passages = state.libraryIndex
     ? state.libraryIndex.chapters.flatMap(chapter => chapter.passages)
     : passageGroups().map(([passage]) => passage)
-  const match = passages.find(passage => formatPassage(passage).toLocaleLowerCase('fr').replace(/[^\p{L}\p{N}]/gu, '').includes(query))
+  const match = matchPassageReference(
+    passages,
+    event.currentTarget.value,
+    formatPassage,
+  )
   if (match) await selectPassage(match)
 })
 elements.bookSelect.addEventListener('change', async event => {
@@ -448,6 +660,9 @@ const load = async () => {
     if (!catalogResponse.ok) throw new Error('Le catalogue JSON local est introuvable.')
     const catalog = await catalogResponse.json()
     state.catalog = catalog.resources
+    if (!state.catalog.some(resource => resource.id === egwIndexedWritingsResource.id)) {
+      state.catalog.push(egwIndexedWritingsResource)
+    }
     elements.catalogCount.textContent = state.catalog.length
 
     if (libraryResponse.ok) {

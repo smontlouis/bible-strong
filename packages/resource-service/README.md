@@ -148,6 +148,24 @@ RESOURCE_PUBLICATION_ROOTS="/path/to/resource-publications" \
 The hosted command refuses a missing URL and Neon pooler hostnames. Keep the connection string out
 of shell history and committed environment files.
 
+The Neon CLI is available to publication operators through `yarn dlx neonctl`. A missing
+`RESOURCE_DATABASE_URL` is therefore not, by itself, a release blocker: authenticate or select the
+existing Neon profile, link the production project if necessary, then obtain a direct connection
+string with `connection-string` (its `--pooled` option defaults to `false`). Capture it without
+printing it or enabling shell tracing, and pass it only to the import subprocess:
+
+```bash
+yarn dlx neonctl auth
+yarn dlx neonctl link
+set +x
+RESOURCE_DATABASE_URL="$(yarn dlx -q neonctl connection-string main --pooled=false)" \
+  yarn resources:import-catalog:hosted --root /path/to/changed-publications
+```
+
+Never paste the returned URL into chat, logs, documentation, or a committed file. If the CLI is not
+already authenticated, stop for operator authentication rather than replacing the direct
+publication credential with a Hyperdrive or pooled connection.
+
 Reimporting the same revision and checksums returns `unchanged`. Reusing a revision with different
 content fails. Validation failures or Effect interruption roll back staging and preserve the prior
 active publication.
@@ -176,7 +194,7 @@ yarn resources:r2:publish-strong-lexicon:prod
 ```
 
 The end-to-end Bible publication workflow derives the same selection from its overlay and publishes
-only `changedBundlePaths`. The full 113-bundle command remains available for an explicit bootstrap or
+only `changedBundlePaths`. The full 114-bundle command remains available for an explicit bootstrap or
 storage audit, not for an ordinary release:
 
 ```bash
@@ -192,7 +210,7 @@ yarn resources:r2:publish-catalog:prod
 ```
 
 Both modes use the exhaustive catalog at `packages/resource-catalog/src/mobile-resource-catalog.json`. The changed mode
-requires the checked-in 113-entry inventory but does not require 113 bundle paths. The publication
+requires the checked-in 114-entry inventory but does not require 114 bundle paths. The publication
 manifest independently authorizes and validates every selected revision, archive entry, byte size,
 and SHA-256. Update the catalog before publishing; deploy the Worker only after the selected R2
 uploads and hosted imports succeed.
@@ -221,7 +239,7 @@ files.
 
 Use the unified workflow after editing a legacy or canonical Bible JSON. Without the production
 flag, it creates and validates a candidate only: it packages the Bible, verifies any existing
-Strong or interlinear sidecars that depend on its text, rebuilds the exhaustive 113-resource mobile
+Strong or interlinear sidecars that depend on its text, rebuilds the exhaustive 114-resource mobile
 catalog, validates every publication bundle, and proves R2/catalog parity without contacting R2 or
 Neon:
 
@@ -277,7 +295,7 @@ each credential; they are never written into the workspace.
 
 On success, `packages/resource-catalog/src/mobile-resource-catalog.json` remains modified locally for review and a
 normal commit. The retained workspace's `verified-publication-baseline` directory is the exhaustive
-113-bundle baseline for the following publication; pass it later with `--publication-root`. The same
+114-bundle baseline for the following publication; pass it later with `--publication-root`. The same
 workspace contains the previous catalog and candidates needed to audit or recover the release.
 
 The generated date can be pinned with `--generated-at`; sibling checkout locations can be changed

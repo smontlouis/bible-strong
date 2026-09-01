@@ -143,6 +143,15 @@ const decodeSerializedComments = (value: string): SerializedCommentaryChapter =>
   }
 }
 
+const hasNormalizedCommentarySchema = async (
+  database: Awaited<ReturnType<typeof openSQLiteDatabase>>
+) =>
+  Boolean(
+    await database.getFirstAsync<{ name: string }>(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'COMMENTARY_DOCUMENTS'"
+    )
+  )
+
 export const localCommentaryChapterSource: CommentaryChapterSource = {
   async loadResourceChapter(publicationId, language, book, chapter) {
     const availability = await getLocalResourceAvailability({
@@ -162,6 +171,30 @@ export const localCommentaryChapterSource: CommentaryChapterSource = {
     let database: Awaited<ReturnType<typeof openSQLiteDatabase>> | undefined
     try {
       database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+      if (await hasNormalizedCommentarySchema(database)) {
+        const prefix = `${book}-${chapter}-`
+        const rows = await database.getAllAsync<{
+          verse_key: string
+          ordinal: number
+          content: string
+        }>(
+          `SELECT links.verse_key, links.ordinal, documents.content
+             FROM COMMENTARY_VERSE_DOCUMENTS links
+             JOIN COMMENTARY_DOCUMENTS documents ON documents.id = links.document_id
+            WHERE links.verse_key LIKE ?
+            ORDER BY CAST(substr(links.verse_key, ?) AS INTEGER), links.ordinal`,
+          `${prefix}%`,
+          prefix.length + 1
+        )
+        const chapterContent: SerializedCommentaryChapter = {}
+        for (const row of rows) {
+          const verse = row.verse_key.slice(prefix.length)
+          chapterContent[verse] = chapterContent[verse]
+            ? `${chapterContent[verse]}<hr>${row.content}`
+            : row.content
+        }
+        return chapterContent
+      }
       const row = await database.getFirstAsync<{ commentaires: string }>(
         'SELECT commentaires FROM COMMENTAIRES WHERE id = ?',
         `${book}-${chapter}`
@@ -200,6 +233,14 @@ export const localCommentaryChapterSource: CommentaryChapterSource = {
     let database: Awaited<ReturnType<typeof openSQLiteDatabase>> | undefined
     try {
       database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+      if (await hasNormalizedCommentarySchema(database)) {
+        const rows = await database.getAllAsync<{ verse_key: string }>(
+          'SELECT DISTINCT verse_key FROM COMMENTARY_VERSE_DOCUMENTS'
+        )
+        return buildCommentaryCoverage(
+          rows.map(row => row.verse_key.replace(/-\d+$/u, ''))
+        )
+      }
       const rows = await database.getAllAsync<{ id: string }>('SELECT id FROM COMMENTAIRES')
       return buildCommentaryCoverage(rows.map(row => row.id))
     } catch (error) {

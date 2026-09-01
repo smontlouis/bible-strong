@@ -149,6 +149,88 @@ test("keeps overlapping editorial sections distinct", () => {
   );
 });
 
+test("uses a deterministic source version for structured library revisions", () => {
+  const index = {
+    generatedAt: "2026-09-01T00:00:00.000Z",
+    sourceRevision: { sdabc: "source-a", egw: "source-b" },
+    resources: { sdabc: {} },
+    chapters: [
+      { book: 1, chapter: 1, passages: ["1-1-1" as const], resources: {} }
+    ]
+  };
+  const canonical = buildCanonicalCommentary(
+    {
+      id: "sdabc",
+      title: "Seventh-day Adventist Bible Commentary",
+      author: "Francis D. Nichol",
+      languages: ["en"],
+      rights: "Authorised",
+      source: "fixture"
+    },
+    "en",
+    index,
+    [
+      {
+        id: "general",
+        passage: "1-1-1",
+        layer: "general-commentary",
+        source: { language: "en", html: "<p>General commentary.</p>" }
+      }
+    ]
+  );
+
+  assert.match(canonical.sourceVersion, /^library-[a-f0-9]{64}:sdabc:en$/u);
+  assert.ok(!canonical.sourceVersion.includes("[object Object]"));
+});
+
+test("publishes EGW context links alongside normalized Bible links", () => {
+  const index = {
+    generatedAt: "2026-09-01T00:00:00.000Z",
+    sourceRevision: { egwWritings: "fixture" },
+    resources: { "egw-writings": {} },
+    chapters: [
+      { book: 1, chapter: 1, passages: ["1-1-1" as const], resources: {} }
+    ]
+  };
+  const canonical = buildCanonicalCommentary(
+    {
+      id: "egw-writings",
+      title: "EGW Writings",
+      author: "Ellen G. White",
+      languages: ["en"],
+      rights: "Authorised",
+      source: "fixture"
+    },
+    "en",
+    index,
+    [
+      {
+        id: "egw-writings:fixture",
+        passage: "1-1-1",
+        resource: { id: "egw-writings" },
+        layer: "egw-indexed-writings",
+        source: {
+          language: "en",
+          html: '<p>See <span class="bible-ref" data-reference-id="r1">Genesis 1:1</span>.</p>',
+          references: [{ id: "r1", kind: "bible", osis: "Gen.1.1" }],
+          externalSources: [
+            {
+              label: "View context ↗",
+              url: "https://text.egwwritings.org/read/1.1",
+              policy: "metadata-only"
+            }
+          ]
+        }
+      }
+    ]
+  );
+
+  assert.equal(
+    canonical.verses[0]?.content,
+    '<p>See <a class="bible-ref" href="bible://Gen.1.1" data-osis="Gen.1.1">Genesis 1:1</a>.</p><p><a class="external-source" href="https://text.egwwritings.org/read/1.1">View context ↗</a></p>'
+  );
+});
+
 test("introduces Ellen G. White supplements once after the general SDA commentary", () => {
   const index = {
     generatedAt: "2026-08-31T00:00:00.000Z",
@@ -205,4 +287,63 @@ test("introduces Ellen G. White supplements once after the general SDA commentar
       ?.length,
     1
   );
+});
+
+test("projects French SDABC content with general commentary first and one EGW heading", () => {
+  const index = {
+    generatedAt: "2026-08-31T00:00:00.000Z",
+    sourceRevision: "fixture",
+    resources: { sdabc: {} },
+    chapters: [
+      { book: 1, chapter: 1, passages: ["1-1-1" as const], resources: {} }
+    ]
+  };
+  const canonical = buildCanonicalCommentary(
+    {
+      id: "sdabc",
+      title: "Seventh-day Adventist Bible Commentary",
+      author: "Francis D. Nichol",
+      languages: ["fr"],
+      rights: "Authorised",
+      source: "fixture"
+    },
+    "fr",
+    index,
+    [
+      {
+        id: "index",
+        passage: "1-1-1",
+        layer: "egw-scripture-index",
+        source: { language: "en", html: "<p>Index metadata.</p>" },
+        translation: { language: "fr", html: "<p>Métadonnées d’index.</p>" }
+      },
+      {
+        id: "egw-1",
+        passage: "1-1-1",
+        layer: "egw-supplement",
+        source: { language: "en", html: "<p>First supplement.</p>" },
+        translation: { language: "fr", html: "<p>Premier complément.</p>" }
+      },
+      {
+        id: "general",
+        passage: "1-1-1",
+        layer: "general-commentary",
+        source: { language: "en", html: "<p>General.</p>" },
+        translation: { language: "fr", html: "<p>Commentaire général.</p>" }
+      },
+      {
+        id: "egw-2",
+        passage: "1-1-1",
+        layer: "egw-supplement",
+        source: { language: "en", html: "<p>Second supplement.</p>" },
+        translation: { language: "fr", html: "<p>Deuxième complément.</p>" }
+      }
+    ]
+  );
+
+  assert.equal(
+    canonical.verses[0]?.content,
+    "<p>Commentaire général.</p><hr><br><br><h3>Ellen G. White</h3><br><p>Premier complément.</p><hr><p>Deuxième complément.</p>"
+  );
+  assert.doesNotMatch(canonical.verses[0]?.content ?? "", /index/iu);
 });

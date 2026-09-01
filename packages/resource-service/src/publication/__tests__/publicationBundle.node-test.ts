@@ -9,6 +9,8 @@ import { strToU8, zipSync } from 'fflate'
 
 import {
   countCanonicalContent,
+  commentaryVerseContent,
+  decodeCanonicalCommentary,
   decodePublicationBundleManifest,
   validatePublicationBundle,
   type BiblePublicationBundleManifest,
@@ -69,6 +71,28 @@ const makeManifest = (overrides: Partial<BiblePublicationBundleManifest> = {}) =
   }) satisfies BiblePublicationBundleManifest
 
 describe('Resource publication bundle', () => {
+  it('decodes normalized commentary documents and expands one verse deterministically', () => {
+    const canonical = decodeCanonicalCommentary({
+      format: 'bible-strong-canonical-commentary',
+      schemaVersion: 2,
+      resourceId: 'egw-writings',
+      language: 'en',
+      revision: 'egw-writings-en-fixture',
+      sourceVersion: 'fixture',
+      sourceSha256: 'a'.repeat(64),
+      documents: [
+        { id: 'p1', content: '<p>First.</p>' },
+        { id: 'p2', content: '<p>Second.</p>' },
+      ],
+      verses: [{ verseKey: '1-1-1', documentIds: ['p1', 'p2'] }],
+    })
+
+    assert.equal(
+      commentaryVerseContent(canonical, canonical.verses[0]!),
+      '<p>First.</p><hr><p>Second.</p>'
+    )
+  })
+
   it('rejects malformed editorial presentation before import', () => {
     const canonical = {
       format: 'bible-strong-canonical-bible',

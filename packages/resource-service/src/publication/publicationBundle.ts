@@ -213,7 +213,7 @@ const CommentaryPublicationBundleManifestSchema = Schema.Struct({
   ...PublicationBundleCommonFields,
   canonical: Schema.Struct({
     ...PublicationBundleCommonFields.canonical.fields,
-    schemaVersion: Schema.Literal(1),
+    schemaVersion: Schema.Literal(1, 2),
   }),
   offlineArtifact: Schema.Struct({
     ...PublicationBundleCommonFields.offlineArtifact.fields,
@@ -555,7 +555,7 @@ export type CanonicalDictionaryDirectoryPublication = {
   }
 }
 
-export type CanonicalCommentaryPublication = {
+export type CanonicalCommentaryPublicationV1 = {
   format: 'bible-strong-canonical-commentary'
   schemaVersion: 1
   resourceId: string
@@ -565,6 +565,21 @@ export type CanonicalCommentaryPublication = {
   sourceSha256: string
   verses: Array<{ verseKey: string; content: string }>
 }
+
+export type CanonicalCommentaryPublicationV2 = {
+  format: 'bible-strong-canonical-commentary'
+  schemaVersion: 2
+  resourceId: string
+  language: 'fr' | 'en'
+  revision: string
+  sourceVersion: string
+  sourceSha256: string
+  documents: Array<{ id: string; content: string }>
+  verses: Array<{ verseKey: string; documentIds: string[] }>
+}
+
+export type CanonicalCommentaryPublication =
+  CanonicalCommentaryPublicationV1 | CanonicalCommentaryPublicationV2
 
 export type CanonicalCrossReferencePublication = {
   format: 'bible-strong-canonical-cross-references'
@@ -1135,7 +1150,7 @@ export const decodeCanonicalCommentary = (value: unknown): CanonicalCommentaryPu
   const candidate = value as Partial<CanonicalCommentaryPublication>
   if (
     candidate.format !== 'bible-strong-canonical-commentary' ||
-    candidate.schemaVersion !== 1 ||
+    (candidate.schemaVersion !== 1 && candidate.schemaVersion !== 2) ||
     !isNonEmptyString(candidate.resourceId) ||
     !/^[A-Za-z0-9][A-Za-z0-9-]{1,63}$/u.test(candidate.resourceId) ||
     (candidate.language !== 'fr' && candidate.language !== 'en') ||
@@ -1147,8 +1162,41 @@ export const decodeCanonicalCommentary = (value: unknown): CanonicalCommentaryPu
   ) {
     throw new Error('CANONICAL_COMMENTARY_INVALID')
   }
+  if (candidate.schemaVersion === 2) {
+    if (!Array.isArray(candidate.documents) || candidate.documents.length === 0) {
+      throw new Error('CANONICAL_COMMENTARY_INVALID')
+    }
+    const documentIds = new Set<string>()
+    for (const document of candidate.documents) {
+      if (
+        !document ||
+        !isNonEmptyString(document.id) ||
+        !isNonEmptyString(document.content) ||
+        documentIds.has(document.id)
+      ) {
+        throw new Error('CANONICAL_COMMENTARY_DOCUMENT_INVALID')
+      }
+      documentIds.add(document.id)
+    }
+    const keys = new Set<string>()
+    for (const verse of candidate.verses) {
+      if (
+        !verse ||
+        !isSupplementaryVerseKey(verse.verseKey) ||
+        !Array.isArray(verse.documentIds) ||
+        verse.documentIds.length === 0 ||
+        new Set(verse.documentIds).size !== verse.documentIds.length ||
+        verse.documentIds.some(id => !documentIds.has(id)) ||
+        keys.has(verse.verseKey)
+      ) {
+        throw new Error('CANONICAL_COMMENTARY_VERSE_INVALID')
+      }
+      keys.add(verse.verseKey)
+    }
+    return candidate as CanonicalCommentaryPublicationV2
+  }
   const keys = new Set<string>()
-  for (const verse of candidate.verses) {
+  for (const verse of candidate.verses as CanonicalCommentaryPublicationV1['verses']) {
     if (
       !verse ||
       !isSupplementaryVerseKey(verse.verseKey) ||
@@ -1160,7 +1208,24 @@ export const decodeCanonicalCommentary = (value: unknown): CanonicalCommentaryPu
     }
     keys.add(verse.verseKey)
   }
-  return candidate as CanonicalCommentaryPublication
+  return candidate as CanonicalCommentaryPublicationV1
+}
+
+export const commentaryVerseContent = (
+  canonical: CanonicalCommentaryPublication,
+  verse:
+    | CanonicalCommentaryPublicationV1['verses'][number]
+    | CanonicalCommentaryPublicationV2['verses'][number],
+  documents = canonical.schemaVersion === 2
+    ? new Map(canonical.documents.map(document => [document.id, document.content]))
+    : new Map<string, string>()
+): string => {
+  if (canonical.schemaVersion === 1) {
+    return (verse as CanonicalCommentaryPublicationV1['verses'][number]).content
+  }
+  return (verse as CanonicalCommentaryPublicationV2['verses'][number]).documentIds
+    .map(id => documents.get(id) ?? '')
+    .join('<hr>')
 }
 
 export const decodeCanonicalCrossReferences = (
@@ -1845,8 +1910,7 @@ const validateDictionaryOfflineParity = async (
     const tableNames = new Set(tables)
     if (
       !['RESOURCE_METADATA', 'dictionnaire', 'verses'].every(table => tableNames.has(table)) ||
-      (canonical.passageAnchors !== undefined &&
-        !tableNames.has('dictionary_passage_anchors')) ||
+      (canonical.passageAnchors !== undefined && !tableNames.has('dictionary_passage_anchors')) ||
       (canonical.entries.some(entry => entry.correspondenceId !== undefined) &&
         !tableNames.has('dictionary_correspondences'))
     ) {
@@ -1888,7 +1952,13 @@ const validateDictionaryOfflineParity = async (
         typeof row.correspondence_id === 'string' && row.correspondence_id.length > 0
           ? row.correspondence_id
           : undefined
-      return { id, word, normalizedWord, definition, ...(correspondenceId ? { correspondenceId } : {}) }
+      return {
+        id,
+        word,
+        normalizedWord,
+        definition,
+        ...(correspondenceId ? { correspondenceId } : {}),
+      }
     })
     const verseAnchors = readSqliteRows(database, 'SELECT id, ref FROM verses ORDER BY id').map(
       row => {
@@ -2042,6 +2112,44 @@ const validateCommentaryOfflineParity = async (
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }
+    if (canonical.schemaVersion === 2) {
+      const documentRows = readSqliteRows(database, 'SELECT id, content FROM COMMENTARY_DOCUMENTS')
+      if (documentRows.length !== canonical.documents.length) {
+        throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+      }
+      const offlineDocuments = new Map(
+        documentRows.map(row => [requireSqliteString(row.id), requireSqliteString(row.content)])
+      )
+      if (
+        canonical.documents.some(document => offlineDocuments.get(document.id) !== document.content)
+      ) {
+        throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+      }
+      const associationRows = readSqliteRows(
+        database,
+        `SELECT verse_key, ordinal, document_id
+           FROM COMMENTARY_VERSE_DOCUMENTS
+          ORDER BY verse_key, ordinal`
+      )
+      const offlineAssociations = new Map<string, string[]>()
+      for (const row of associationRows) {
+        const verseKey = requireSqliteString(row.verse_key)
+        const values = offlineAssociations.get(verseKey) ?? []
+        values.push(requireSqliteString(row.document_id))
+        offlineAssociations.set(verseKey, values)
+      }
+      if (
+        offlineAssociations.size !== canonical.verses.length ||
+        canonical.verses.some(
+          verse =>
+            JSON.stringify(offlineAssociations.get(verse.verseKey)) !==
+            JSON.stringify(verse.documentIds)
+        )
+      ) {
+        throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+      }
+      return
+    }
     const verses = readSqliteRows(database, 'SELECT id, commentaires FROM COMMENTAIRES')
       .flatMap(row => {
         const chapterKey = requireSqliteString(row.id)
@@ -2061,8 +2169,15 @@ const validateCommentaryOfflineParity = async (
         )
       })
       .sort(compareVerseKey)
-    if (JSON.stringify(verses) !== JSON.stringify([...canonical.verses].sort(compareVerseKey))) {
+    const canonicalVerses = [...canonical.verses].sort(compareVerseKey)
+    if (verses.length !== canonicalVerses.length) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+    for (const [index, verse] of verses.entries()) {
+      const canonicalVerse = canonicalVerses[index]!
+      if (verse.verseKey !== canonicalVerse.verseKey || verse.content !== canonicalVerse.content) {
+        throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+      }
     }
   } catch (cause) {
     if (cause instanceof Error && cause.message.startsWith('OFFLINE_ARTIFACT_')) throw cause
@@ -3361,20 +3476,33 @@ export const validatePublicationBundle = async (bundlePath: string) => {
     }
     await validateDictionaryDirectoryOfflineParity(offlineContent, canonical)
   } else if (isCommentaryPublicationBundleManifest(manifest)) {
-    canonical = decodeCanonicalCommentary(canonicalValue)
+    const commentaryCanonical = decodeCanonicalCommentary(canonicalValue)
+    canonical = commentaryCanonical
     if (
-      canonical.resourceId !== manifest.identity.resourceId ||
-      canonical.language !== manifest.identity.language ||
-      canonical.revision !== manifest.revision ||
-      canonical.sourceVersion !== manifest.provenance.sourceVersion ||
-      canonical.sourceSha256 !== manifest.provenance.sourceSha256 ||
-      manifest.counts.verses !== canonical.verses.length ||
+      commentaryCanonical.resourceId !== manifest.identity.resourceId ||
+      commentaryCanonical.language !== manifest.identity.language ||
+      commentaryCanonical.revision !== manifest.revision ||
+      commentaryCanonical.sourceVersion !== manifest.provenance.sourceVersion ||
+      commentaryCanonical.sourceSha256 !== manifest.provenance.sourceSha256 ||
+      manifest.counts.verses !== commentaryCanonical.verses.length ||
       manifest.counts.characters !==
-        canonical.verses.reduce((total, verse) => total + verse.content.length, 0)
+        (() => {
+          const documents =
+            commentaryCanonical.schemaVersion === 2
+              ? new Map(
+                  commentaryCanonical.documents.map(document => [document.id, document.content])
+                )
+              : undefined
+          return commentaryCanonical.verses.reduce(
+            (total, verse) =>
+              total + commentaryVerseContent(commentaryCanonical, verse, documents).length,
+            0
+          )
+        })()
     ) {
       throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
     }
-    await validateCommentaryOfflineParity(offlineContent, canonical)
+    await validateCommentaryOfflineParity(offlineContent, commentaryCanonical)
   } else if (isCrossReferencePublicationBundleManifest(manifest)) {
     canonical = decodeCanonicalCrossReferences(canonicalValue)
     if (

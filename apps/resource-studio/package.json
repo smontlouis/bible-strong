@@ -7,6 +7,8 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "commentaries:export": "node workflows/commentaries/scripts/export-firestore.mjs",
+    "commentaries:export-egw": "node --max-old-space-size=4096 --expose-gc workflows/commentaries/scripts/export-egw.mjs --concurrency 4",
+    "commentaries:install-egw-writings": "node --max-old-space-size=4096 workflows/commentaries/scripts/install-egw-writings-library.mjs",
     "commentaries:audit": "node workflows/commentaries/scripts/publish-audit.mjs",
     "commentaries:export-waves": "node --max-old-space-size=2048 workflows/commentaries/scripts/export-wave-corpora.mjs",
     "commentaries:audit-waves": "node workflows/commentaries/scripts/publish-wave-audit.mjs",
@@ -23,6 +25,7 @@
     "commentaries:sdabc:translations:prepare": "node workflows/commentaries/scripts/prepare-sdabc-french-translation-batches.mjs",
     "commentaries:sdabc:translations:run": "node workflows/commentaries/scripts/run-sdabc-french-codex-translations.mjs",
     "commentaries:sdabc:translations:validate": "node workflows/commentaries/scripts/validate-sdabc-french-codex-translations.mjs",
+    "commentaries:sdabc:translations:audit": "node workflows/commentaries/scripts/audit-sdabc-french-codex-translations.mjs",
     "commentaries:sdabc:translations:persist": "node workflows/commentaries/scripts/persist-sdabc-french-codex-translations.mjs",
     "commentaries:validate-translations": "node workflows/commentaries/scripts/validate-published-translations.mjs",
     "commentaries:apply-translations": "node workflows/commentaries/scripts/apply-published-translations-to-library.mjs",

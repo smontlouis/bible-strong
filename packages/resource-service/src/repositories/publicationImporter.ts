@@ -15,6 +15,7 @@ import {
   isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
   isStrongLexiconPublicationBundleManifest,
+  commentaryVerseContent,
   validatePublicationBundle,
   type CanonicalStrongLexiconModulePublication,
   type CanonicalDictionaryPublication,
@@ -745,9 +746,7 @@ export const importPublicationBundle = (
                   },
                 }))
               )
-              const entryById = new Map(
-                dictionaryCanonical.entries.map(entry => [entry.id, entry])
-              )
+              const entryById = new Map(dictionaryCanonical.entries.map(entry => [entry.id, entry]))
               const links = dictionaryCanonical.passageAnchors
                 ? dictionaryCanonical.passageAnchors.flatMap(anchor =>
                     anchor.entries.map((reference, ordinal) => {
@@ -778,13 +777,19 @@ export const importPublicationBundle = (
               await insertChunks(transaction, 'dictionary_verse_links', links)
             } else if (canonical.format === 'bible-strong-canonical-commentary') {
               const commentaryCanonical = canonical as CanonicalCommentaryPublication
+              const commentaryDocuments =
+                commentaryCanonical.schemaVersion === 2
+                  ? new Map(
+                      commentaryCanonical.documents.map(document => [document.id, document.content])
+                    )
+                  : undefined
               await insertChunks(
                 transaction,
                 'commentary_verses',
                 commentaryCanonical.verses.map(verse => ({
                   publication_id: publication.id,
                   verse_key: verse.verseKey,
-                  content: verse.content,
+                  content: commentaryVerseContent(commentaryCanonical, verse, commentaryDocuments),
                 }))
               )
             } else if (canonical.format === 'bible-strong-canonical-cross-references') {

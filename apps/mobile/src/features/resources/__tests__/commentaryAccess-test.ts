@@ -11,9 +11,13 @@ jest.mock('../resourceAvailability', () => ({
 import {
   createCommentaryAccess,
   createHttpCommentaryChapterSource,
+  localCommentaryChapterSource,
   type CommentaryChapterSource,
 } from '../commentaryAccess'
 import { ResourceAccessError } from '../resourceAccessError'
+import { getCommentaryDbPath } from '~helpers/databases'
+import { openSQLiteDatabase } from '~helpers/sqlite'
+import { getLocalResourceAvailability } from '../resourceAvailability'
 
 const request = {
   book: 1,
@@ -36,6 +40,29 @@ const source = (
 })
 
 describe('commentary access', () => {
+  it('reads normalized EGW documents from the offline SQLite artifact', async () => {
+    jest.mocked(getLocalResourceAvailability).mockResolvedValue({ status: 'available' } as never)
+    jest.mocked(getCommentaryDbPath).mockReturnValue('/documents/commentary-egw-writings-en.sqlite')
+    const database = {
+      getFirstAsync: jest.fn().mockResolvedValue({ name: 'COMMENTARY_DOCUMENTS' }),
+      getAllAsync: jest.fn().mockResolvedValue([
+        { verse_key: '1-1-1', ordinal: 0, content: '<p>First.</p>' },
+        { verse_key: '1-1-1', ordinal: 1, content: '<p>Second.</p>' },
+        { verse_key: '1-1-2', ordinal: 0, content: '<p>Third.</p>' },
+      ]),
+      closeAsync: jest.fn(),
+    }
+    jest.mocked(openSQLiteDatabase).mockResolvedValue(database as never)
+
+    await expect(
+      localCommentaryChapterSource.loadResourceChapter('egw-writings', 'en', 1, 1)
+    ).resolves.toEqual({
+      1: '<p>First.</p><hr><p>Second.</p>',
+      2: '<p>Third.</p>',
+    })
+    expect(database.closeAsync).toHaveBeenCalled()
+  })
+
   it('prefers installed coverage and preserves its compact selector shape', async () => {
     const local = source(
       async () => ({}),

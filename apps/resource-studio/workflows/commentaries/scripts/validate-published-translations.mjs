@@ -25,6 +25,8 @@ const tagNames = html => [...html.matchAll(/<\/?([a-z][a-z0-9]*)\b/gi)].map(matc
 let batchCount = 0
 let entryCount = 0
 for (const resourceId of await readdir(translationsRoot)) {
+  // SDABC has a dedicated content-addressed Luna/high runner and validator.
+  if (resourceId === 'sdabc') continue
   for (const filename of await filesIn(path.join(translationsRoot, resourceId))) {
     const [job, publication] = await Promise.all([
       readJson(path.join(jobsRoot, resourceId, filename)),

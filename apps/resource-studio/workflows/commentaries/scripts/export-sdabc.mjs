@@ -12,6 +12,7 @@ import {
   SDABC_METADATA_URL,
   parseBookIntroduction,
   parseChapterCommentary,
+  repairGenesis39HistoricalOutline,
   selectBiblePdfs,
   sha256,
   splitBookChapters,
@@ -108,13 +109,13 @@ for (const source of sources) {
     if (introduction) entries.push(introduction)
     for (const chapterBlock of chapters) {
       const maxVerse = canonical.get(`${book}-${chapterBlock.chapter}`)
-      const parsed = parseChapterCommentary({
+      const parsed = repairGenesis39HistoricalOutline(parseChapterCommentary({
         text: chapterBlock.text,
         book,
         chapter: chapterBlock.chapter,
         maxVerse,
         singleChapterBook: chapterCount === 1,
-      })
+      }))
       for (const entry of parsed) {
         entry.resource = {
           id: 'sdabc',

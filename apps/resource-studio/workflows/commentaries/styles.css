@@ -324,6 +324,28 @@ button, select { cursor: pointer; }
 .scripture-reference-list small { display: block; margin-top: 0.15rem; color: var(--ink-soft); font: 0.58rem var(--sans); letter-spacing: 0.04em; }
 .scripture-index-body .prose-shell.collapsed .scripture-reference-list { max-height: 34rem; overflow: hidden; }
 .scripture-index-body .prose-shell.collapsed::after { inset: auto 0 2.4rem; }
+.egw-writings-card::before { background: var(--gold); }
+.egw-writings-body { display: grid; gap: 1.2rem; padding: 1.25rem 1.5rem 1.6rem; }
+.egw-writing-group { border: 1px solid rgba(23, 35, 38, 0.12); background: rgba(255, 255, 255, 0.28); }
+.egw-writing-group > header { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding: 0.85rem 1rem; border-bottom: 1px solid var(--line); }
+.egw-writing-group > header h4 { margin: 0; font-size: 0.96rem; font-weight: 600; }
+.egw-writing-group > header p { margin: 0.2rem 0 0; color: var(--ink-soft); font-size: 0.72rem; }
+.egw-writing-group-labels { display: flex; flex: 0 0 auto; flex-wrap: wrap; justify-content: flex-end; gap: 0.35rem; }
+.egw-writing-group-labels > span { border: 1px solid rgba(174, 134, 80, 0.35); border-radius: 999px; padding: 0.2rem 0.45rem; color: var(--gold-dark); font: 650 0.56rem var(--sans); }
+.egw-writing-group-labels > .chapter-association-badge { border-color: rgba(48, 94, 81, 0.28); background: rgba(48, 94, 81, 0.08); color: var(--sage-dark); }
+.egw-index-scopes { display: flex; align-items: baseline; gap: 0.65rem; padding: 0.65rem 1rem; border-bottom: 1px solid var(--line); background: rgba(174, 134, 80, 0.04); }
+.egw-index-scopes > span { flex: 0 0 auto; color: var(--ink-soft); font: 650 0.58rem var(--sans); letter-spacing: 0.08em; text-transform: uppercase; }
+.egw-index-scopes > div { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.egw-index-scopes .scope-badge { margin: 0; }
+.chapter-association-note { display: flex; align-items: center; flex-wrap: wrap; gap: 0.55rem 0.8rem; margin: 0; padding: 0.7rem 1rem; border-bottom: 1px solid var(--line); background: rgba(48, 94, 81, 0.045); color: var(--ink-soft); font-size: 0.76rem; line-height: 1.5; }
+.chapter-association-note p { flex: 1 1 28rem; margin: 0; }
+.chapter-association-note .scope-badge { flex: 0 0 auto; margin: 0; }
+.chapter-association-note .egw-context-link { flex: 0 0 auto; margin: 0; }
+.egw-writing-paragraphs { display: grid; }
+.egw-writing-paragraph { min-width: 0; padding: 1rem; }
+.egw-writing-paragraph + .egw-writing-paragraph { border-top: 1px solid var(--line); }
+.egw-paragraph-reference { margin-bottom: 0.65rem; color: var(--gold-dark); font: 700 0.6rem var(--sans); letter-spacing: 0.08em; text-transform: uppercase; }
+.egw-context-link { display: inline-block; margin-top: 0.8rem; color: var(--red-dark); font: 650 0.64rem var(--sans); text-underline-offset: 3px; }
 .reading-room[data-view="fr"] .commentary-column[data-language="en"],
 .reading-room[data-view="en"] .commentary-column[data-language="fr"] { display: none; }
 .reading-room[data-view="fr"] .commentary-columns,

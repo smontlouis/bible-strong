@@ -3,11 +3,26 @@ import test from "node:test";
 import {
   entryCoversPassage,
   expandBarnesEntries,
+  matchPassageReference,
   normalizeBarnesEntries,
   normalizeEntryScope,
   normalizeRepeatedSourceEntries,
   parseDeclaredRange
 } from "./commentary-scope.mjs";
+
+test("privilégie une référence exacte aux sous-chaînes ambiguës", () => {
+  const passages = ["19-5-11", "19-51-1"];
+  const labels = new Map([
+    ["19-5-11", "Psaumes 5.11"],
+    ["19-51-1", "Psaumes 51.1"]
+  ]);
+  assert.equal(
+    matchPassageReference(passages, "Psaumes 51:1", (passage) =>
+      labels.get(passage)
+    ),
+    "19-51-1"
+  );
+});
 
 const entry = ({
   resourceId,

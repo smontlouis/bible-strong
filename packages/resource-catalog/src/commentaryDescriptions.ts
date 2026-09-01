@@ -93,6 +93,10 @@ export const COMMENTARY_DESCRIPTIONS = {
     fr: 'Commentaire protestant francophone réalisé par une société de théologiens et de pasteurs. Il réunit introductions, analyses de sections et notes détaillées, avec une attention soutenue au contexte, à la langue et à l’interprétation du texte.',
   },
   sdabc: {
-    en: 'A collaborative Seventh-day Adventist commentary covering all 66 books with introductions and detailed exegesis. The prototype keeps the general commentary, Ellen G. White supplements, and the scripture index to her writings as distinct layers.',
+    en: 'A collaborative Seventh-day Adventist commentary covering all 66 books with introductions and detailed exegesis. This edition includes the general commentary and Ellen G. White supplements.',
+    fr: 'Commentaire biblique adventiste collaboratif couvrant les 66 livres, avec introductions et exégèse détaillée. Cette édition comprend le commentaire général et les compléments d’Ellen G. White.',
+  },
+  'egw-writings': {
+    en: 'Ellen G. White writings associated with Bible passages by the Complete Scripture Index. Each entry includes the indexed paragraphs, their book and section headings, Bible-reference links, and links back to the original context.',
   },
 } as const

@@ -36,6 +36,25 @@ export const comparePassages = (left, right) => {
   return a.book - b.book || a.chapter - b.chapter || a.verse - b.verse;
 };
 
+export const normalizeReferenceQuery = (value) =>
+  String(value)
+    .toLocaleLowerCase("fr")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+
+export const matchPassageReference = (passages, query, formatPassage) => {
+  const normalizedQuery = normalizeReferenceQuery(query);
+  const candidates = passages.map((passage) => [
+    passage,
+    normalizeReferenceQuery(formatPassage(passage))
+  ]);
+  return (
+    candidates.find(([, label]) => label === normalizedQuery)?.[0] ??
+    candidates.find(([, label]) => label.includes(normalizedQuery))?.[0] ??
+    null
+  );
+};
+
 const visibleText = (html) =>
   String(html ?? "")
     .replace(/<br\s*\/?\s*>/gi, " ")

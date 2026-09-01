@@ -2,7 +2,7 @@
   "format": "bible-strong-mobile-resource-catalog",
   "schemaVersion": 1,
   "generatedAt": "2026-09-01T10:04:35.326Z",
-  "resourceCount": 114,
+  "resourceCount": 116,
   "resources": {
     "bible-interlinear:BHG:en": {
       "id": "bible-interlinear:BHG:en",
@@ -1825,6 +1825,27 @@
       "peakInstallationBytes": 48656367,
       "strategy": "archive-extract"
     },
+    "database:egw-writings:en": {
+      "id": "database:egw-writings:en",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-egw-writings-en.sqlite.zip?sha256=987af4605f7fc1ef8f4ccbae3e22802b6f01d6c575677ef2cfae6538311faca5",
+      "file": "commentaries/commentary-egw-writings-en.sqlite.zip",
+      "entry": "commentary-egw-writings-en.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "commentary-egw-writings-en.sqlite",
+          "sha256": "69d23b47a0a0da9262efd6b2eb3a11dc77d923d70126ef3970ffc2cd3ea3ef6a",
+          "bytes": 183607296
+        }
+      },
+      "archiveSha256": "987af4605f7fc1ef8f4ccbae3e22802b6f01d6c575677ef2cfae6538311faca5",
+      "archiveBytes": 47384606,
+      "contentSha256": "69d23b47a0a0da9262efd6b2eb3a11dc77d923d70126ef3970ffc2cd3ea3ef6a",
+      "contentBytes": 183607296,
+      "resourceRevision": "egw-writings-en-d6a3c4a1fdfdba1b9eaa",
+      "installedBytes": 183607296,
+      "peakInstallationBytes": 265640688,
+      "strategy": "archive-extract"
+    },
     "database:family-notes:en": {
       "id": "database:family-notes:en",
       "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-family-notes-en.sqlite.zip?sha256=4b0baf7d56c7e048acf84faca81038c6ee64c7ba23ee1d16f678969827d420ba",
@@ -2287,23 +2308,44 @@
     },
     "database:sdabc:en": {
       "id": "database:sdabc:en",
-      "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-sdabc-en.sqlite.zip?sha256=f67a46b55ef7e5367550234572859cf126c2c768c565b77252d535bc1cfbd2bb",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-sdabc-en.sqlite.zip?sha256=d3c4e61cd73ed319a8846a51b50400503e40b2bd8914195d5b074a06ca2ce3c2",
       "file": "commentaries/commentary-sdabc-en.sqlite.zip",
       "entry": "commentary-sdabc-en.sqlite",
       "entries": {
         "canonical": {
           "entry": "commentary-sdabc-en.sqlite",
-          "sha256": "643c6545ca5e9f3b05207d4108d3264709908fc438db41a5c508b4da81a5279b",
-          "bytes": 29220864
+          "sha256": "1cdc4f872ff36014666c8334b7d92d07e4a99d01db3992393ec442a116683908",
+          "bytes": 29286400
         }
       },
-      "archiveSha256": "f67a46b55ef7e5367550234572859cf126c2c768c565b77252d535bc1cfbd2bb",
-      "archiveBytes": 8879942,
-      "contentSha256": "643c6545ca5e9f3b05207d4108d3264709908fc438db41a5c508b4da81a5279b",
-      "contentBytes": 29220864,
-      "resourceRevision": "sdabc-en-924b6fb166861b7e0928",
-      "installedBytes": 29220864,
-      "peakInstallationBytes": 43815927,
+      "archiveSha256": "d3c4e61cd73ed319a8846a51b50400503e40b2bd8914195d5b074a06ca2ce3c2",
+      "archiveBytes": 8887825,
+      "contentSha256": "1cdc4f872ff36014666c8334b7d92d07e4a99d01db3992393ec442a116683908",
+      "contentBytes": 29286400,
+      "resourceRevision": "sdabc-en-1a8c21e8b487d9f854b2",
+      "installedBytes": 29286400,
+      "peakInstallationBytes": 43900359,
+      "strategy": "archive-extract"
+    },
+    "database:sdabc:fr": {
+      "id": "database:sdabc:fr",
+      "url": "https://api.bible-strong.app/v1/offline-artifacts/commentaries/commentary-sdabc-fr.sqlite.zip?sha256=a2574c99cac8bdbb43c263ba04f9e05639fdce758856e1ac64f1b92b28a6a746",
+      "file": "commentaries/commentary-sdabc-fr.sqlite.zip",
+      "entry": "commentary-sdabc-fr.sqlite",
+      "entries": {
+        "canonical": {
+          "entry": "commentary-sdabc-fr.sqlite",
+          "sha256": "9554728d867c89561ee0428a19706267dd7f4debf0ff98752f3fb91f747dd9cb",
+          "bytes": 37511168
+        }
+      },
+      "archiveSha256": "a2574c99cac8bdbb43c263ba04f9e05639fdce758856e1ac64f1b92b28a6a746",
+      "archiveBytes": 10165921,
+      "contentSha256": "9554728d867c89561ee0428a19706267dd7f4debf0ff98752f3fb91f747dd9cb",
+      "contentBytes": 37511168,
+      "resourceRevision": "sdabc-fr-03cad47bb468c679790c",
+      "installedBytes": 37511168,
+      "peakInstallationBytes": 54828653,
       "strategy": "archive-extract"
     },
     "database:SMITH:en": {

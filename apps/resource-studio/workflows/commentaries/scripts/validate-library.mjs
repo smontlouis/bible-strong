@@ -41,7 +41,8 @@ const expectedCounts = {
   scofield: 3214,
   'fourfold-gospel': 4229,
   mhm: 21367,
-  sdabc: 42768,
+  sdabc: 42764,
+  'egw-writings': 14042,
   'douay-rheims-notes': 1659,
 }
 const observed = Object.fromEntries(Object.keys(expectedCounts).map(resourceId => [resourceId, {

@@ -332,10 +332,20 @@ export const COMMENTARY_CATALOG = [
     shortName: 'SDA Commentary',
     title: 'Seventh-day Adventist Bible Commentary',
     author: 'Francis D. Nichol (dir.) et contributeurs',
-    languages: ['en'],
+    languages: ['en', 'fr'],
     tradition: 'Protestantisme',
     tags: ['Adventiste'],
     rights: 'Review and Herald Publishing Association · tous droits réservés',
+  }),
+  commentary({
+    id: 'egw-writings',
+    shortName: 'EGW Writings',
+    title: 'EGW Writings',
+    author: 'Ellen G. White',
+    languages: ['en'],
+    tradition: 'Protestantisme',
+    tags: ['Adventiste'],
+    rights: 'Ellen G. White Estate · tous droits réservés',
   }),
 ] as const satisfies readonly CommentaryCatalogEntry[]
 

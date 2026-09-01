@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { createReadStream, existsSync } from "node:fs";
 import {
   mkdir,
+  open,
   readFile,
   rename,
   rm,
@@ -19,6 +20,7 @@ import {
   materializeCommentaryBibleLinks,
   sanitizeCommentaryPublicationHtml
 } from "./commentaryPublicationHtml.js";
+import { projectSdabcContent } from "./commentaryPresentation.js";
 
 const execFileAsync = promisify(execFile);
 const REPRODUCIBLE_ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
@@ -31,21 +33,37 @@ type LibraryEntry = {
   id: string;
   passage: Passage;
   passageEnd?: Passage;
+  resource?: { id: string };
   layer?:
     | "general-commentary"
     | "book-introduction"
     | "egw-supplement"
-    | "egw-scripture-index";
+    | "egw-scripture-index"
+    | "egw-indexed-writings";
   editorialKind?: string;
+  citations?: Array<{
+    paragraphId: string;
+    associatedParagraphIds?: string[];
+  }>;
   source: {
     language: Language;
     html: string;
     references?: Array<{ id: string; kind: "bible"; osis: string }>;
+    externalSources?: Array<{
+      label: string;
+      url: string;
+      policy: "metadata-only";
+    }>;
   };
   translation?: {
     language: Language;
     html: string;
     references?: Array<{ id: string; kind: "bible"; osis: string }>;
+    externalSources?: Array<{
+      label: string;
+      url: string;
+      policy: "metadata-only";
+    }>;
   } | null;
   scope?: { kind: string; start: Passage; end?: Passage };
   sourceAnchors?: Array<{ id: string; passage: Passage }>;
@@ -68,7 +86,7 @@ type CommentaryContentPart = {
 
 type LibraryIndex = {
   generatedAt: string;
-  sourceRevision: string;
+  sourceRevision: string | Record<string, unknown>;
   resources: Record<string, unknown>;
   chapters: Array<{
     book: number;
@@ -98,6 +116,20 @@ type CanonicalCommentary = {
   verses: Array<{ verseKey: Passage; content: string }>;
 };
 
+type CanonicalNormalizedCommentary = {
+  format: "bible-strong-canonical-commentary";
+  schemaVersion: 2;
+  resourceId: string;
+  language: Language;
+  revision: string;
+  sourceVersion: string;
+  sourceSha256: string;
+  documents: Array<{ id: string; content: string }>;
+  verses: Array<{ verseKey: Passage; documentIds: string[] }>;
+};
+
+type AnyCanonicalCommentary = CanonicalCommentary | CanonicalNormalizedCommentary;
+
 type CommentaryManifest = {
   format: "bible-strong-resource-publication";
   schemaVersion: 1;
@@ -106,7 +138,7 @@ type CommentaryManifest = {
   canonical: {
     path: string;
     mediaType: "application/json";
-    schemaVersion: 1;
+    schemaVersion: 1 | 2;
     sha256: string;
     bytes: number;
   };
@@ -180,6 +212,30 @@ const requiredIdsPath = path.join(
 const sha256Buffer = (value: Buffer | string): string =>
   createHash("sha256").update(value).digest("hex");
 
+const updateJsonArrayHash = <T>(
+  hash: ReturnType<typeof createHash>,
+  values: readonly T[]
+): void => {
+  hash.update("[");
+  values.forEach((value, index) => {
+    if (index > 0) hash.update(",");
+    hash.update(JSON.stringify(value));
+  });
+  hash.update("]");
+};
+
+const escapeHtmlAttribute = (value: string | null | undefined): string =>
+  String(value ?? "")
+    .replace(/&/gu, "&amp;")
+    .replace(/</gu, "&lt;")
+    .replace(/>/gu, "&gt;")
+    .replace(/"/gu, "&quot;");
+
+const sourceRevisionToken = (sourceRevision: LibraryIndex["sourceRevision"]): string =>
+  typeof sourceRevision === "string"
+    ? sourceRevision
+    : `library-${sha256Buffer(JSON.stringify(sourceRevision))}`;
+
 const sha256File = async (filePath: string): Promise<string> => {
   const hash = createHash("sha256");
   for await (const chunk of createReadStream(filePath)) hash.update(chunk);
@@ -215,17 +271,38 @@ const htmlForLanguage = (
   entry: LibraryEntry,
   language: Language
 ): string | undefined => {
+  const appendExternalSources = (
+    html: string,
+    externalSources: LibraryEntry["source"]["externalSources"] = []
+  ): string => {
+    if (entry.resource?.id !== "egw-writings" || externalSources.length === 0) {
+      return html;
+    }
+    const links = externalSources
+      .map(
+        ({ label, url }) =>
+          `<p><a class="external-source" href="${escapeHtmlAttribute(url)}">${escapeHtmlAttribute(label)}</a></p>`
+      )
+      .join("");
+    return `${html}${links}`;
+  };
   if (
     entry.translation?.language === language &&
     entry.translation.html.trim()
   ) {
     return sanitizeCommentaryPublicationHtml(
-      materializeCommentaryBibleLinks(entry.translation)
+      appendExternalSources(
+        materializeCommentaryBibleLinks(entry.translation),
+        entry.translation.externalSources
+      )
     );
   }
   if (entry.source.language === language && entry.source.html.trim()) {
     return sanitizeCommentaryPublicationHtml(
-      materializeCommentaryBibleLinks(entry.source)
+      appendExternalSources(
+        materializeCommentaryBibleLinks(entry.source),
+        entry.source.externalSources
+      )
     );
   }
   return undefined;
@@ -256,7 +333,8 @@ const coveredPassages = (
 
 export const loadCommentaryLibraryEntries = async (
   index: LibraryIndex,
-  root = libraryRoot
+  root = libraryRoot,
+  selectedResourceIds?: ReadonlySet<string>
 ): Promise<Map<string, LibraryEntry[]>> => {
   const descriptors = new Map<
     string,
@@ -264,6 +342,7 @@ export const loadCommentaryLibraryEntries = async (
   >();
   for (const chapter of index.chapters) {
     for (const [resourceId, descriptor] of Object.entries(chapter.resources)) {
+      if (selectedResourceIds && !selectedResourceIds.has(resourceId)) continue;
       descriptors.set(descriptor.path, { resourceId, ...descriptor });
     }
   }
@@ -297,22 +376,6 @@ export const loadCommentaryLibraryEntries = async (
   return entriesByResource;
 };
 
-const joinSdabcContent = (values: readonly CommentaryContentPart[]): string => {
-  const general = values.filter((value) => value.layer !== "egw-supplement");
-  const egw = values.filter((value) => value.layer === "egw-supplement");
-  const sections = general.map((value) => value.html);
-
-  if (egw.length > 0) {
-    sections.push(
-      `<br><br><h3>Ellen G. White</h3><br>${egw
-        .map((value) => value.html)
-        .join("<hr>")}`
-    );
-  }
-
-  return sections.join("<hr>");
-};
-
 export const buildCanonicalCommentary = (
   catalogResource: CatalogResource,
   language: Language,
@@ -343,7 +406,7 @@ export const buildCanonicalCommentary = (
       verseKey,
       content:
         catalogResource.id === "sdabc"
-          ? joinSdabcContent(values)
+          ? projectSdabcContent(values)
           : values.map((value) => value.html).join("<hr>")
     }));
   if (verses.length === 0) {
@@ -352,13 +415,17 @@ export const buildCanonicalCommentary = (
     );
   }
   const resourceId = publicationResourceId(catalogResource.id);
-  const sourceVersion = `${index.sourceRevision}:${catalogResource.id}:${language}`;
-  const sourceSha256 = sha256Buffer(
-    JSON.stringify({ resourceId, language, sourceVersion, verses })
+  const sourceVersion = `${sourceRevisionToken(index.sourceRevision)}:${catalogResource.id}:${language}`;
+  const sourceHash = createHash("sha256");
+  sourceHash.update(
+    `{"resourceId":${JSON.stringify(resourceId)},"language":${JSON.stringify(language)},"sourceVersion":${JSON.stringify(sourceVersion)},"verses":`
   );
-  const revision = `${resourceId.toLowerCase()}-${language}-${sha256Buffer(
-    JSON.stringify(verses)
-  ).slice(0, 20)}`;
+  updateJsonArrayHash(sourceHash, verses);
+  sourceHash.update("}");
+  const sourceSha256 = sourceHash.digest("hex");
+  const revisionHash = createHash("sha256");
+  updateJsonArrayHash(revisionHash, verses);
+  const revision = `${resourceId.toLowerCase()}-${language}-${revisionHash.digest("hex").slice(0, 20)}`;
   return {
     format: "bible-strong-canonical-commentary",
     schemaVersion: 1,
@@ -371,16 +438,162 @@ export const buildCanonicalCommentary = (
   };
 };
 
+const buildCanonicalEgwWritings = async (
+  catalogResource: CatalogResource,
+  index: LibraryIndex,
+  entries: readonly LibraryEntry[]
+): Promise<CanonicalNormalizedCommentary> => {
+  const artifactPath = path.join(
+    workflowRoot,
+    ".local/egw-export/egw-indexed-writings.json"
+  );
+  const artifactBytes = await readFile(artifactPath);
+  const expectedArtifactSha =
+    typeof index.sourceRevision === "object"
+      ? index.sourceRevision.egwWritings
+      : undefined;
+  if (
+    typeof expectedArtifactSha !== "string" ||
+    sha256Buffer(artifactBytes) !== expectedArtifactSha
+  ) {
+    throw new Error("egw-writings-artifact-sha256-mismatch");
+  }
+  const paragraphs = JSON.parse(artifactBytes.toString("utf8")) as Array<{
+    id: string;
+    book: { title: string };
+    section: { title: string; contextUrl: string };
+    sourceReference: string;
+    source: LibraryEntry["source"];
+  }>;
+  const requiredDocumentIds = new Set(
+    entries.flatMap((entry) =>
+      (entry.citations ?? []).flatMap(
+        (citation) => citation.associatedParagraphIds ?? [citation.paragraphId]
+      )
+    )
+  );
+  const documents = paragraphs
+    .filter((paragraph) => requiredDocumentIds.has(paragraph.id))
+    .map((paragraph) => {
+      const prose = sanitizeCommentaryPublicationHtml(
+        materializeCommentaryBibleLinks(paragraph.source)
+      );
+      const contextLink = /^https?:\/\//iu.test(paragraph.section.contextUrl)
+        ? `<p><a class="external-source" href="${escapeHtmlAttribute(paragraph.section.contextUrl)}">View “${escapeHtmlAttribute(paragraph.section.title)}” in context ↗</a></p>`
+        : "";
+      return {
+        id: paragraph.id,
+        content: `<h3>${escapeHtmlAttribute(paragraph.book.title)}</h3><h4>${escapeHtmlAttribute(paragraph.section.title)}</h4><p><strong>${escapeHtmlAttribute(paragraph.sourceReference)}</strong></p>${prose}${contextLink}`
+      };
+    });
+  if (documents.length !== requiredDocumentIds.size) {
+    throw new Error(
+      `egw-writings-document-count-mismatch:${documents.length}:${requiredDocumentIds.size}`
+    );
+  }
+  const documentOrder = new Map(
+    documents.map((document, position) => [document.id, position])
+  );
+
+  const passages = index.chapters
+    .flatMap((chapter) => chapter.passages)
+    .sort(comparePassages);
+  const positions = new Map(
+    passages.map((passage, position) => [passage, position])
+  );
+  const documentsByVerse = new Map<Passage, Set<string>>();
+  for (const entry of entries) {
+    const documentIds = (entry.citations ?? []).flatMap(
+      (citation) => citation.associatedParagraphIds ?? [citation.paragraphId]
+    );
+    for (const passage of coveredPassages(entry, passages, positions)) {
+      const values = documentsByVerse.get(passage) ?? new Set<string>();
+      for (const documentId of documentIds) values.add(documentId);
+      documentsByVerse.set(passage, values);
+    }
+  }
+  const verses = [...documentsByVerse]
+    .sort(([left], [right]) => comparePassages(left, right))
+    .map(([verseKey, documentIds]) => ({
+      verseKey,
+      documentIds: [...documentIds].sort(
+        (left, right) =>
+          (documentOrder.get(left) ?? Number.MAX_SAFE_INTEGER) -
+          (documentOrder.get(right) ?? Number.MAX_SAFE_INTEGER)
+      )
+    }));
+  const resourceId = publicationResourceId(catalogResource.id);
+  const language = "en" as const;
+  const sourceVersion = `${sourceRevisionToken(index.sourceRevision)}:${catalogResource.id}:${language}`;
+  const sourceHash = createHash("sha256");
+  sourceHash.update(
+    `{"resourceId":${JSON.stringify(resourceId)},"language":"en","sourceVersion":${JSON.stringify(sourceVersion)},"documents":`
+  );
+  updateJsonArrayHash(sourceHash, documents);
+  sourceHash.update(',"verses":');
+  updateJsonArrayHash(sourceHash, verses);
+  sourceHash.update("}");
+  const revisionHash = createHash("sha256");
+  updateJsonArrayHash(revisionHash, documents);
+  updateJsonArrayHash(revisionHash, verses);
+  return {
+    format: "bible-strong-canonical-commentary",
+    schemaVersion: 2,
+    resourceId,
+    language,
+    revision: `${resourceId}-${language}-${revisionHash.digest("hex").slice(0, 20)}`,
+    sourceVersion,
+    sourceSha256: sourceHash.digest("hex"),
+    documents,
+    verses
+  };
+};
+
+const writeCanonicalJson = async (
+  canonicalPath: string,
+  canonical: AnyCanonicalCommentary
+): Promise<void> => {
+  const file = await open(canonicalPath, "w");
+  try {
+    const metadata = {
+      format: canonical.format,
+      schemaVersion: canonical.schemaVersion,
+      resourceId: canonical.resourceId,
+      language: canonical.language,
+      revision: canonical.revision,
+      sourceVersion: canonical.sourceVersion,
+      sourceSha256: canonical.sourceSha256
+    };
+    const prefix = JSON.stringify(metadata).slice(0, -1);
+    await file.write(prefix);
+    if (canonical.schemaVersion === 2) {
+      await file.write(',"documents":[');
+      for (const [index, document] of canonical.documents.entries()) {
+        if (index > 0) await file.write(",");
+        await file.write(JSON.stringify(document));
+      }
+      await file.write("]");
+    }
+    await file.write(',"verses":[');
+    for (const [index, verse] of canonical.verses.entries()) {
+      if (index > 0) await file.write(",");
+      await file.write(JSON.stringify(verse));
+    }
+    await file.write("]}\n");
+  } finally {
+    await file.close();
+  }
+};
+
 const createSqlite = async (
   sqlitePath: string,
-  canonical: CanonicalCommentary
+  canonical: AnyCanonicalCommentary
 ): Promise<void> => {
   const database = new DatabaseSync(sqlitePath);
   try {
     database.exec(`
       PRAGMA journal_mode = DELETE;
       PRAGMA synchronous = FULL;
-      CREATE TABLE COMMENTAIRES (id TEXT PRIMARY KEY NOT NULL, commentaires TEXT NOT NULL);
       CREATE TABLE RESOURCE_METADATA (
         resource_id TEXT NOT NULL,
         language TEXT NOT NULL,
@@ -389,22 +602,61 @@ const createSqlite = async (
         source_sha256 TEXT NOT NULL
       );
     `);
-    const chapters = new Map<string, Record<string, string>>();
-    for (const verse of canonical.verses) {
-      const [book, chapter, number] = parsePassage(verse.verseKey);
-      const key = `${book}-${chapter}`;
-      const values = chapters.get(key) ?? {};
-      values[String(number)] = verse.content;
-      chapters.set(key, values);
+    if (canonical.schemaVersion === 2) {
+      database.exec(`
+        CREATE TABLE COMMENTARY_DOCUMENTS (
+          id TEXT PRIMARY KEY NOT NULL,
+          content TEXT NOT NULL
+        );
+        CREATE TABLE COMMENTARY_VERSE_DOCUMENTS (
+          verse_key TEXT NOT NULL,
+          ordinal INTEGER NOT NULL,
+          document_id TEXT NOT NULL REFERENCES COMMENTARY_DOCUMENTS(id),
+          PRIMARY KEY (verse_key, ordinal)
+        );
+        CREATE INDEX COMMENTARY_VERSE_DOCUMENTS_LOOKUP
+          ON COMMENTARY_VERSE_DOCUMENTS (verse_key);
+      `);
+      const insertDocument = database.prepare(
+        "INSERT INTO COMMENTARY_DOCUMENTS (id, content) VALUES (?, ?)"
+      );
+      const insertAssociation = database.prepare(
+        "INSERT INTO COMMENTARY_VERSE_DOCUMENTS (verse_key, ordinal, document_id) VALUES (?, ?, ?)"
+      );
+      database.exec("BEGIN IMMEDIATE");
+      for (const document of canonical.documents) {
+        insertDocument.run(document.id, document.content);
+      }
+      for (const verse of canonical.verses) {
+        verse.documentIds.forEach((documentId, ordinal) => {
+          insertAssociation.run(verse.verseKey, ordinal, documentId);
+        });
+      }
+      database.exec("COMMIT");
+    } else {
+      database.exec(
+        "CREATE TABLE COMMENTAIRES (id TEXT PRIMARY KEY NOT NULL, commentaires TEXT NOT NULL)"
+      );
     }
-    const insertChapter = database.prepare(
-      "INSERT INTO COMMENTAIRES (id, commentaires) VALUES (?, ?)"
-    );
-    database.exec("BEGIN IMMEDIATE");
-    for (const [id, commentaires] of [...chapters.entries()].sort(
-      ([left], [right]) => left.localeCompare(right, "en", { numeric: true })
-    )) {
-      insertChapter.run(id, JSON.stringify(commentaires));
+    if (canonical.schemaVersion === 1) {
+      const chapters = new Map<string, Record<string, string>>();
+      for (const verse of canonical.verses) {
+        const [book, chapter, number] = parsePassage(verse.verseKey);
+        const key = `${book}-${chapter}`;
+        const values = chapters.get(key) ?? {};
+        values[String(number)] = verse.content;
+        chapters.set(key, values);
+      }
+      const insertChapter = database.prepare(
+        "INSERT INTO COMMENTAIRES (id, commentaires) VALUES (?, ?)"
+      );
+      database.exec("BEGIN IMMEDIATE");
+      for (const [id, commentaires] of [...chapters.entries()].sort(
+        ([left], [right]) => left.localeCompare(right, "en", { numeric: true })
+      )) {
+        insertChapter.run(id, JSON.stringify(commentaires));
+      }
+      database.exec("COMMIT");
     }
     database
       .prepare("INSERT INTO RESOURCE_METADATA VALUES (?, ?, ?, ?, ?)")
@@ -415,7 +667,7 @@ const createSqlite = async (
         canonical.sourceVersion,
         canonical.sourceSha256
       );
-    database.exec("COMMIT; VACUUM;");
+    database.exec("VACUUM;");
   } finally {
     database.close();
   }
@@ -426,7 +678,7 @@ const buildBundle = async (
   stagingRoot: string,
   catalogResource: CatalogResource,
   language: Language,
-  canonical: CanonicalCommentary,
+  canonical: AnyCanonicalCommentary,
   generatedAt: string
 ): Promise<{
   bundlePath: string;
@@ -447,7 +699,7 @@ const buildBundle = async (
   await mkdir(path.dirname(canonicalPath), { recursive: true });
   await mkdir(path.dirname(sqlitePath), { recursive: true });
   await mkdir(path.dirname(archivePath), { recursive: true });
-  await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
+  await writeCanonicalJson(canonicalPath, canonical);
   await createSqlite(sqlitePath, canonical);
   await execFileAsync("zip", ["-q", "-X", "-j", archivePath, sqlitePath]);
   const [canonicalStats, sqliteStats, archiveStats] = await Promise.all([
@@ -472,7 +724,7 @@ const buildBundle = async (
     canonical: {
       path: canonicalRelativePath,
       mediaType: "application/json",
-      schemaVersion: 1,
+      schemaVersion: canonical.schemaVersion,
       sha256: await sha256File(canonicalPath),
       bytes: canonicalStats.size
     },
@@ -501,10 +753,30 @@ const buildBundle = async (
     counts: {
       chapters: chapters.size,
       verses: canonical.verses.length,
-      characters: canonical.verses.reduce(
-        (total, verse) => total + verse.content.length,
-        0
-      )
+      characters:
+        canonical.schemaVersion === 1
+          ? canonical.verses.reduce(
+              (total, verse) => total + verse.content.length,
+              0
+            )
+          : (() => {
+              const lengths = new Map(
+                canonical.documents.map((document) => [
+                  document.id,
+                  document.content.length
+                ])
+              );
+              return canonical.verses.reduce(
+                (total, verse) =>
+                  total +
+                  verse.documentIds.reduce(
+                    (sum, id) => sum + (lengths.get(id) ?? 0),
+                    0
+                  ) +
+                  Math.max(0, verse.documentIds.length - 1) * 4,
+                0
+              );
+            })()
     }
   };
   await writeFile(
@@ -662,7 +934,11 @@ const main = async (): Promise<void> => {
       `commentary-publication-resource-unknown:${unknown.join(",")}`
     );
   }
-  const entriesByResource = await loadCommentaryLibraryEntries(index);
+  const entriesByResource = await loadCommentaryLibraryEntries(
+    index,
+    undefined,
+    new Set(selectedCatalogResources.map((resource) => resource.id))
+  );
   const stagingRoot = `${outputRoot}.tmp-${process.pid}-${randomUUID()}`;
   await rm(stagingRoot, { recursive: true, force: true });
   await mkdir(stagingRoot, { recursive: true });
@@ -675,12 +951,15 @@ const main = async (): Promise<void> => {
           `commentary-library-resource-empty:${catalogResource.id}`
         );
       for (const language of catalogResource.languages) {
-        const canonical = buildCanonicalCommentary(
-          catalogResource,
-          language,
-          index,
-          entries
-        );
+        const canonical =
+          catalogResource.id === "egw-writings"
+            ? await buildCanonicalEgwWritings(catalogResource, index, entries)
+            : buildCanonicalCommentary(
+                catalogResource,
+                language,
+                index,
+                entries
+              );
         const bundle = await buildBundle(
           stagingRoot,
           catalogResource,

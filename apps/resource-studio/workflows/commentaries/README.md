@@ -14,7 +14,7 @@ yarn resources:commentaries:serve
 
 Puis ouvrir <http://127.0.0.1:4177>. Le port peut être changé avec `COMMENTARY_READER_PORT`.
 
-Quand la bibliothèque locale a été construite, le lecteur expose trente et un corpus disponibles en JSON. Les 315 301 ancres source sont normalisées en 309 647 unités éditoriales et découpées par chapitre afin que le navigateur ne charge que les fichiers nécessaires au passage consulté. La différence provient de la déduplication réversible des plages Barnes : chaque ancre et chaque variante française historique restent conservées. La bibliothèque comprend les douze corpus initiaux, la Bible Annotée de Neuchâtel, seize commentaires de la vague 3 issue de STEP/CrossWire, le SDA Bible Commentary enrichi par les couches EGW et les annotations originales Douay–Rheims. TSK reste la source historique de la ressource de références croisées `TRESOR` de Bible Strong et n’est donc pas présentée comme un commentaire.
+Quand la bibliothèque locale a été construite, le lecteur expose trente-deux corpus disponibles en JSON. Les 329 339 ancres source sont normalisées en 323 682 unités éditoriales et découpées par chapitre afin que le navigateur ne charge que les fichiers nécessaires au passage consulté. La différence provient de la déduplication réversible des plages Barnes : chaque ancre et chaque variante française historique restent conservées. La bibliothèque comprend les douze corpus initiaux, la Bible Annotée de Neuchâtel, seize commentaires de la vague 3 issue de STEP/CrossWire, le SDA Bible Commentary enrichi par les compléments EGW, la ressource documentaire distincte `EGW Writings` et les annotations originales Douay–Rheims. TSK reste la source historique de la ressource de références croisées `TRESOR` de Bible Strong et n’est donc pas présentée comme un commentaire.
 
 Le jeu versionné `data/comments.json` ne sert plus que de repli léger lorsque la bibliothèque complète, volontairement ignorée par Git, n'est pas présente. `data/catalog.json` inventorie aussi les autres œuvres examinées, même quand leur contenu n'est pas encore importé.
 
@@ -66,7 +66,8 @@ Le script lit également, sans le modifier, le SQLite MHY déjà présent dans l
 - Rachi EN : 28 060 unités sur les 39 livres du Tanakh.
 - Bible Annotée de Neuchâtel FR : 23 320 unités sur les 66 livres, dont 667 introductions de chapitre AT et 27 introductions de livre NT.
 - Vague 3 STEP/CrossWire : 101 841 unités anglaises réparties entre 16 commentaires. Les 31 151 unités TSK sont exclues du lecteur, car elles appartiennent à la ressource de références croisées `TRESOR`.
-- SDA Bible Commentary : 25 062 unités anglaises sur les 66 livres et 1 189 chapitres, dont 66 introductions ; cette couche principale est enrichie dans la même ressource par 3 664 extraits EGW et 14 042 entrées de l’index scripturaire EGW.
+- SDA Bible Commentary : 25 058 unités anglaises sur les 66 livres et 1 189 chapitres, dont 66 introductions ; cette couche principale est enrichie dans la même ressource par 3 664 extraits EGW et publiée en anglais et en français.
+- EGW Writings : 14 042 associations du _Complete Scripture Index_ couvrant 79 885 paragraphes anglais, avec leur livre, leur section, leurs références bibliques normalisées et leur lien de contexte. Le canon de publication v2 stocke chaque paragraphe une seule fois puis relie les passages à ses identifiants ; le SQLite hors ligne reprend le même modèle normalisé.
 - Original Douay–Rheims Annotations : 1 659 annotations anglaises publiées en JSON, sur 390 chapitres et 53 livres comportant du contenu.
 
 Les huit corpus des vagues 1 et 2 sont publiés dans leur langue source. Aucune traduction n'est produite par ces scripts.
@@ -144,12 +145,29 @@ L’instantané courant est épinglé au commit `0bf4218b9b46b5b00d29a703b5b7422
 Le responsable Bible Strong confirme disposer des autorisations couvrant l’usage, l’extraction, la transformation et la redistribution du SDA Bible Commentary complet et des ressources EGW associées. Le prototype reste exclusivement en JSON. Les PDF des volumes 1 à 7 sont récupérés livre par livre depuis l’archive `SdaBibleCommentary1980`, mis en cache localement, convertis en texte avec conservation de la mise en page puis découpés en introductions et commentaires bibliques.
 
 ```bash
+yarn resources:commentaries:export-egw
 node apps/resource-studio/workflows/commentaries/scripts/export-sdabc.mjs
 node apps/resource-studio/workflows/commentaries/scripts/install-sdabc-library.mjs
 node apps/resource-studio/workflows/commentaries/scripts/validate-library.mjs
 ```
 
-L’export contrôlé couvre les 66 livres et les 1 189 chapitres du canon protestant. Il produit 25 062 unités, dont 66 introductions, sous `.local/sdabc-export/`. Les rubriques imprimées `ELLEN G. WHITE COMMENTS` sont exclues de l’OCR général afin d’éviter les doublons : les 3 664 extraits EGW déjà extraits de façon structurée sont réinjectés comme compléments. Les 14 042 entrées du _Complete Scripture Index_ sont conservées comme index de sources, et non présentées comme des commentaires exégétiques. Dans l’interface, ces trois couches appartiennent à une seule ressource utilisateur `sdabc`.
+L’export contrôlé couvre les 66 livres et les 1 189 chapitres du canon protestant. Il produit 25 058 unités, dont 66 introductions, sous `.local/sdabc-export/`. Les rubriques imprimées `ELLEN G. WHITE COMMENTS` sont exclues de l’OCR général afin d’éviter les doublons : les 3 664 extraits EGW déjà extraits de façon structurée sont réinjectés comme compléments. Les 14 042 entrées du _Complete Scripture Index_ sont conservées comme index de sources, et non présentées comme des commentaires exégétiques. L’export EGW matérialise en plus `egw-indexed-writings.json`, un corpus dédupliqué de 79 885 unités reliées par les 352 867 citations de l’index. Les cibles ordinaires restent strictement limitées au paragraphe cité. Les 481 marqueurs éditoriaux `This chapter is based on…` sont en revanche remplacés par les 11 380 paragraphes réels de leurs chapitres : la relation reste explicitement typée au niveau du chapitre et le marqueur n’est pas présenté comme du contenu EGW. Chaque unité conserve le titre du livre, la section et un lien vers son contexte sur EGW Writings. Son contenu anglais passe par le normaliseur BCV commun : les références reconnues sont stockées en OSIS avec leurs marqueurs `bible-ref`, sans parsing au runtime. Dans l’interface, la ressource conserve son identité anglaise `EGW Writings`; les trois couches bibliques appartiennent à une seule ressource utilisateur `sdabc`, tandis que ce corpus documentaire reste une ressource distincte reliée par les identifiants de paragraphes ECSI.
+
+Les traductions françaises historiques certaines sont conservées séparément des traductions
+produites par Codex sous `data/translations/historical/sdabc/`. Leur contrat porte explicitement
+`origin.kind: historical-import`, l’identifiant Firestore historique et les hashes de la source
+historique, de la source canonique et du HTML français normalisé. Il ne leur attribue aucun modèle.
+Le rapport complet des ambiguïtés reste local et distinct du magasin versionné.
+
+```bash
+node apps/resource-studio/workflows/commentaries/scripts/import-sdabc-firestore-translations.mjs \
+  --historical-store apps/resource-studio/workflows/commentaries/data/translations/historical
+```
+
+`install-sdabc-library.mjs` recharge automatiquement ce magasin lors de chaque reconstruction. Une
+traduction n’est appliquée qu’à son identifiant canonique et seulement si son hash source correspond ;
+une révision source différente ou une traduction déjà présente et différente fait échouer
+l’installation.
 
 ## Importer la Bible Annotée de Neuchâtel
 
@@ -195,6 +213,61 @@ Les entrées sources restent sous `.local/translation-jobs/`. La commande `prepa
 Les traductions présentes dans ce répertoire sont le contenu français publiable de référence. Elles ne portent aucun état de brouillon ou de revue. Les contrôles automatiques garantissent l'identité de la source, la structure HTML, les références bibliques normalisées et la traçabilité du lot. Les corrections ultérieures suivent un modèle réactif : un signalement utilisateur conduit à corriger le segment concerné et à republier les artefacts.
 
 Au 29 août 2026, 1 727 textes français traçables sont publiés dans 127 lots : 747 ACBC, 979 Barnes et l'unique absence Aquifer. Leur application complète la couverture française d'ACBC, de Barnes et d'Aquifer.
+
+### Lots français SDABC scellés
+
+Le reliquat SDABC possède un pipeline séparé. Il ne remet jamais le HTML complet au modèle : le
+préparateur extrait seulement les nœuds textuels traduisibles et conserve dans un template immuable
+les balises, attributs, identifiants de références, citations EGW et translittérations. Les entrées
+d'index scripturaire EGW ne sont pas traduites. Les séparateurs sans texte linguistique sont copiés
+mécaniquement.
+
+Avant la préparation, appliquer ou exclure les correspondances Firestore certaines. Le générateur
+ignore toute entrée déjà traduite et place dans `review` les incohérences d'ancre, de portée ou de
+références. Le cas historique attesté de Genèse 39 est réparé en amont par sa signature exacte : le
+plan Hyksos reste sous le verset 1 et les vrais commentaires des versets 2, 6 et 7 sont restaurés.
+
+```bash
+yarn workspace @bible-strong/resource-studio commentaries:sdabc:translations:prepare
+```
+
+La sortie locale se trouve sous `.local/sdabc-french-translation-plan/`. Le manifeste et les lots
+sont content-addressés. Le seuil par défaut est de 5 000 caractères source ; les grandes unités
+sont découpées par groupes de segments textuels tout en gardant la même identité canonique.
+
+Le runner est mono-rôle, verrouillé sur `gpt-5.6-luna` avec l'effort `high`, huit processus et deux
+tentatives par défaut. Il utilise un sandbox Codex en lecture seule, un runtime épinglé propre au
+SDABC et un `CODEX_HOME` isolé. Placer un `auth.json` valide avec permissions restrictives sous
+`.local/sdabc-codex-home/` avant le premier lancement. Ne pas réutiliser ni modifier le pin Lexicon
+V3 pour cette opération. Chaque valeur traduite doit aussi recopier un `sourceText` scellé par le
+schéma du lot ; ce contrat source-bound empêche qu'une traduction soit silencieusement décalée vers
+la clé voisine lorsqu'une référence ou une citation interrompt la prose.
+
+Pour éprouver un seul lot avant toute exécution complète :
+
+```bash
+yarn workspace @bible-strong/resource-studio commentaries:sdabc:translations:run -- \
+  --batch sdabc-fr-IDENTIFIANT_DU_LOT
+```
+
+Une exécution complète reprend les receipts valides et ne rappelle pas le modèle pour les lots déjà
+scellés :
+
+```bash
+yarn workspace @bible-strong/resource-studio commentaries:sdabc:translations:run
+yarn workspace @bible-strong/resource-studio commentaries:sdabc:translations:validate
+yarn workspace @bible-strong/resource-studio commentaries:sdabc:translations:audit
+yarn workspace @bible-strong/resource-studio commentaries:sdabc:translations:persist
+```
+
+La validation exige la cardinalité et l'ordre exacts des tâches et segments, tous les hashes
+d'entrée, l'enveloppe HTML originale, l'équilibre des balises et la séquence exacte des références
+OSIS. La persistance réexécute ces contrôles, écrit uniquement les traductions Luna dans le magasin
+versionné `data/translations/published/sdabc/`, puis l'installation SDABC peut les réappliquer par
+identifiant et hash source. Les marqueurs `*****` reçoivent séparément une copie mécanique. Aucune de
+ces commandes ne fabrique de bundle et aucune n'effectue d'écriture R2 ou Neon.
+L'audit linguistique bloque aussi les longs segments recopiés en anglais et les traductions fortement
+tronquées ou anormalement développées ; son rapport détaillé reste sous `.local/`.
 
 ## Reproduire l'audit ACBC/Barnes
 

@@ -1189,6 +1189,19 @@
     "resourceRevision": "dictionary-easton-webster-en-a30602d83b4a84e776d9"
   },
   {
+    "id": "database:egw-writings:en",
+    "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-egw-writings-en.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/commentaries/commentary-egw-writings-en.sqlite",
+        "entry": "commentary-egw-writings-en.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "egw-writings-en-d6a3c4a1fdfdba1b9eaa"
+  },
+  {
     "id": "database:family-notes:en",
     "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-family-notes-en.sqlite.zip",
     "sources": [
@@ -1483,7 +1496,20 @@
       }
     ],
     "strategy": "archive-extract",
-    "resourceRevision": "sdabc-en-924b6fb166861b7e0928"
+    "resourceRevision": "sdabc-en-1a8c21e8b487d9f854b2"
+  },
+  {
+    "id": "database:sdabc:fr",
+    "artifactUrl": "https://assets.bible-strong.app/commentaries/commentary-sdabc-fr.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/commentaries/commentary-sdabc-fr.sqlite",
+        "entry": "commentary-sdabc-fr.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "sdabc-fr-03cad47bb468c679790c"
   },
   {
     "id": "database:SMITH:en",
