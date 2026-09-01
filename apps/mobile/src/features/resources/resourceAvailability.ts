@@ -515,6 +515,15 @@ export class OfflineResourceRegistry {
         this.setAvailability(resource, availability, true)
         return availability
       })
+      .catch(() => {
+        const availability: LocalResourceAvailability = {
+          status: 'corrupt',
+          resource,
+          reason: 'integrity-check-failed',
+        }
+        this.setAvailability(resource, availability, true)
+        return availability
+      })
       .finally(() => this.reconciliationTasks.delete(id))
     this.reconciliationTasks.set(id, task)
     return task

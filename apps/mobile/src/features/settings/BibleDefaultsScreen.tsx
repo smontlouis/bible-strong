@@ -1,4 +1,5 @@
 import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -23,6 +24,8 @@ import type { VersionCode } from '~state/tabs'
 import BibleDefaultSelectorSheet from './BibleDefaultSelectorSheet'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
 import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 type DefaultVersionCardProps = {
   title: string
@@ -88,6 +91,7 @@ const DefaultVersionCard = ({
 
 const BibleDefaultsScreen = () => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const dispatch = useDispatch()
   const language = getLanguage()
   const readingSheetRef = React.useRef<SheetRef>(null)
@@ -111,7 +115,16 @@ const BibleDefaultsScreen = () => {
   const defaultStrongResource = useOfflineResourceState(
     createOfflineCopyId({ kind: 'strong-bible-index', versionId: defaultStrongVersion })
   )
-  const isDefaultStrongAvailable = defaultStrongResource?.availability.status === 'available'
+  const { data: isDefaultStrongAvailable = false } = useQuery({
+    queryKey: [
+      'default-strong-sidecar-availability',
+      defaultStrongVersion,
+      defaultStrongResource?.availability.status,
+    ],
+    queryFn: async () =>
+      (await resources.strongBible.getAvailability(defaultStrongVersion)).status === 'available',
+    ...localQueryOptions,
+  })
 
   const selectReadingVersion = (versionId: VersionCode) => {
     dispatch(setDefaultBibleVersion(versionId))

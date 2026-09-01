@@ -1,5 +1,6 @@
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
+import { useQuery } from '@tanstack/react-query'
 import { type RefObject, useEffect } from 'react'
 import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -22,12 +23,14 @@ import { getBibleModeAcquisitionPresentation } from '~helpers/bibleModeAcquisiti
 
 import BibleDisplayModeCard from './BibleDisplayModeCard'
 import { toast } from '~helpers/toast'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import useConnection from '~helpers/useConnection'
-import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { getInterlinearLocalePriority } from '~helpers/interlinearDisplayMode'
-import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
-import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
-import { useOfflineResourceState } from '~features/resources/useOfflineResourceRegistry'
+import {
+  loadStrongModeAvailability,
+  type StrongModeAvailabilityState,
+} from './loadStrongModeAvailability'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -39,7 +42,9 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const appLanguage = useLanguage()
   const bible = useAtomValue(bibleAtom)
   const actions = useBibleTabActions(bibleAtom)
+  const resources = useResourceAccess()
   const isConnected = useConnection()
+  const resourceRegistry = useOfflineResourceRegistry()
   const downloadStates = useAtomValue(downloadItemStatesAtom)
   const selectedMode = bible.data.strongMode ?? 'hidden'
   const version = bible.data.selectedVersion
@@ -55,33 +60,19 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const morphologyPreview = isHebrew ? 'HNcmpa' : 'GNcmsn'
   const strongPreview = isHebrew ? 'H0430' : 'G2316'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
-  const strongResource = useOfflineResourceState(
-    isStrongCapableBibleVersion(version)
-      ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version })
-      : undefined
-  )
-  const frenchInterlinearResource = useOfflineResourceState(
-    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'fr' })
-  )
-  const englishInterlinearResource = useOfflineResourceState(
-    createOfflineCopyId({ kind: 'interlinear-index', versionId: 'BHG', language: 'en' })
-  )
-
-  const availability = {
-    strong: strongResource?.availability as StrongBibleSidecarAvailability | undefined,
-    interlinear: getInterlinearLocalePriority(appLanguage).flatMap(locale => {
-      const resource = locale === 'fr' ? frenchInterlinearResource : englishInterlinearResource
-      return resource
-        ? [
-            {
-              locale,
-              availability: resource.availability as InterlinearSidecarAvailability,
-            },
-          ]
-        : []
-    }),
-  }
-  const availabilityFailed = false
+  const availabilityQuery = useQuery<StrongModeAvailabilityState>({
+    queryKey: ['strong-mode-availability', version, appLanguage, resourceRegistry.revision],
+    queryFn: () =>
+      loadStrongModeAvailability({
+        appLanguage,
+        getInterlinearAvailability: resources.lexiconBible.getInterlinearAvailability,
+        getStrongAvailability: resources.strongBible.getAvailability,
+        version,
+      }),
+    ...localQueryOptions,
+  })
+  const availability = availabilityQuery.data ?? { interlinear: [] }
+  const availabilityFailed = availabilityQuery.isError
 
   const strongAvailable = availability.strong?.status === 'available'
   const installedInterlinear = availability.interlinear.find(
@@ -90,12 +81,19 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const reverseInterlinearAvailable = strongAvailable && Boolean(installedInterlinear)
 
   useEffect(() => {
-    if (!availability.strong || selectedMode === 'hidden') return
+    if (!availabilityQuery.isSuccess || !availability.strong || selectedMode === 'hidden') return
     const selectedModeAvailable =
       selectedMode === 'visible' ? strongAvailable : reverseInterlinearAvailable
     if (selectedModeAvailable) return
     actions.setStrongMode('hidden')
-  }, [actions, availability.strong, reverseInterlinearAvailable, selectedMode, strongAvailable])
+  }, [
+    actions,
+    availability.strong,
+    availabilityQuery.isSuccess,
+    reverseInterlinearAvailable,
+    selectedMode,
+    strongAvailable,
+  ])
   const getModeDownloadPresentation = (mode: Exclude<StrongMode, 'hidden'>) => {
     return getBibleModeAcquisitionPresentation(
       pendingAcquisition?.mode === mode ? pendingAcquisition : undefined,
@@ -158,7 +156,7 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
     }
   }
 
-  const hasLoadedAvailability = Boolean(availability.strong)
+  const hasLoadedAvailability = availabilityQuery.isSuccess && Boolean(availability.strong)
   const strongDownloadRequired = hasLoadedAvailability && !strongAvailable
   const reverseInterlinearDownloadRequired = hasLoadedAvailability && !reverseInterlinearAvailable
   const strongDownloading =

@@ -167,6 +167,31 @@ describe('OfflineResourceRegistry', () => {
     expect(registry.get(identity)?.updateAvailable).toBe(true)
   })
 
+  it('does not keep optimistic availability when physical reconciliation fails', async () => {
+    const registry = new OfflineResourceRegistry({
+      probe: jest.fn().mockRejectedValue(new Error('filesystem unavailable')),
+      readPublication: () => ({
+        revision: sha('a'),
+        archiveSha256: sha('a'),
+        installedAt: 1,
+        size: 1,
+        sourceUrl: 'https://example.test/barnes.zip',
+      }),
+      getCatalog: () => catalog(),
+    })
+
+    expect(registry.get(identity)?.availability.status).toBe('available')
+    expect(registry.get(identity)?.verified).toBe(false)
+
+    await registry.reconcileAll(catalog())
+
+    expect(registry.get(identity)?.availability).toMatchObject({
+      status: 'corrupt',
+      reason: 'integrity-check-failed',
+    })
+    expect(registry.get(identity)?.verified).toBe(true)
+  })
+
   it('keeps a downloaded dictionary addressable after catalog reconciliation', async () => {
     const dictionaryIdentity = {
       kind: 'dictionary' as const,

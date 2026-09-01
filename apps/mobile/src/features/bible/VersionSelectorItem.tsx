@@ -1,5 +1,6 @@
 import React from 'react'
 import { Alert, Linking, Platform, TouchableOpacity } from 'react-native'
+import { useQuery } from '@tanstack/react-query'
 
 import { getDefaultStore } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
@@ -38,6 +39,8 @@ import {
   deleteDownloadedItem,
 } from '~helpers/deleteDownloadedItem'
 import useConnection from '~helpers/useConnection'
+import { useResourceAccess } from '~features/resources/resourceAccess'
+import { localQueryOptions } from '~helpers/queryOptions'
 
 const VersionItemContainer = ({
   children,
@@ -299,6 +302,7 @@ const VersionSelectorItem = ({
     React.useState<boolean>()
   const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
   const isConnected = useConnection()
+  const resources = useResourceAccess()
 
   // Subscribe to download queue state for this item
   const itemId = createOfflineCopyId({ kind: 'bible', versionId: version.id })
@@ -311,10 +315,19 @@ const VersionSelectorItem = ({
       ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: strongVersionId })
       : undefined
   )
-  const strongSelectionAvailability = strongResourceState?.availability as
+  const strongOfflineAvailability = strongResourceState?.availability as
     | StrongBibleSidecarAvailability
     | undefined
   const requiresStrong = selectionRequirement === 'strong' && Boolean(strongVersionId)
+  const { data: strongUsageAvailability } = useQuery({
+    queryKey: ['strong-selection-availability', strongVersionId, strongOfflineAvailability?.status],
+    queryFn: () => resources.strongBible.getAvailability(strongVersionId!),
+    enabled: requiresStrong,
+    ...localQueryOptions,
+  })
+  const strongSelectionAvailability = requiresStrong
+    ? strongUsageAvailability
+    : strongOfflineAvailability
   const versionNeedsDownload = offlineResourceState
     ? offlineResourceState.availability.status !== 'available'
     : undefined
@@ -326,9 +339,9 @@ const VersionSelectorItem = ({
   })
   const needsUpdate = publicationStatus.status === 'update-available'
   const strongPresent =
-    strongSelectionAvailability?.status === 'available' ||
-    strongSelectionAvailability?.status === 'incompatible' ||
-    strongSelectionAvailability?.status === 'corrupt'
+    strongOfflineAvailability?.status === 'available' ||
+    strongOfflineAvailability?.status === 'incompatible' ||
+    strongOfflineAvailability?.status === 'corrupt'
   const strongQueueState = useDownloadItemStatus(
     isStrongCapableBibleVersion(version.id)
       ? createOfflineCopyId({ kind: 'strong-bible-index', versionId: version.id })

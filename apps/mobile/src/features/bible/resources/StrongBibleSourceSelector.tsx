@@ -1,7 +1,8 @@
 import { produce } from 'immer'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
-import { useEffect, useMemo, useState, type RefObject } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useEffect, useState, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ActivityIndicator, Pressable } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -25,15 +26,18 @@ import {
   FRENCH_STRONG_BIBLE_PRIORITY,
   type StrongBibleVersionId,
 } from '~helpers/strongBiblePublications'
-import type { InterlinearSidecarAvailability } from '~helpers/interlinearBibleSidecar'
 import type { StrongBibleSidecarAvailability } from '~helpers/strongBibleSidecar'
 import { useDownloadItemStatus, useDownloadQueue } from '~helpers/useDownloadQueue'
 import { getDownloadItemProgress, type DownloadItemState } from '~state/downloadQueue'
 import type { BibleTab } from '~state/tabs'
 import { getLanguage } from '~i18n'
 import { createOfflineCopyId } from '~helpers/offlineCopyId'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import { useResourceAccess } from '~features/resources/resourceAccess'
 import useConnection from '~helpers/useConnection'
+import { toast } from '~helpers/toast'
+import { localQueryOptions } from '~helpers/queryOptions'
+import { loadStrongBibleSourceAvailability } from './loadStrongBibleSourceAvailability'
+import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 
 type SharedProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -73,6 +77,8 @@ const FRENCH_FIRST_SOURCE_GROUPS = [
     versionIds: ENGLISH_STRONG_BIBLE_PRIORITY,
   },
 ] as const
+
+const EMPTY_STRONG_AVAILABILITY = new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>()
 
 type StrongBibleSourceLanguage = 'en' | 'fr'
 
@@ -358,15 +364,22 @@ const BhgStrongSourceRow = ({
   )
 }
 
-export const StrongBibleSourceSheet = ({ sheetRef, bibleAtom, resolvedProvenance }: SheetProps) => {
+export const StrongBibleSourceSheet = ({
+  sheetRef,
+  bibleAtom,
+  isResourceModalOpen,
+  resolvedProvenance,
+}: SheetProps) => {
   const { t } = useTranslation()
+  const resources = useResourceAccess()
   const isConnected = useConnection()
   const insets = useSafeAreaInsets()
   const bible = useAtomValue(bibleAtom)
   const setBible = useSetAtom(bibleAtom)
+  const resourceRegistry = useOfflineResourceRegistry()
   const { enqueue } = useDownloadQueue()
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
   const [pendingSelectionVersionId, setPendingSelectionVersionId] = useState<StrongBibleVersionId>()
-  const registry = useOfflineResourceRegistry()
   const strongBibleSourceVersionId = bible.data.strongBibleSourceVersionId
   const isBhgBible = bible.data.selectedVersion === 'BHG'
   const preferredInterlinearLocale = bible.data.interlinearLocale ?? getLanguage()
@@ -405,41 +418,32 @@ export const StrongBibleSourceSheet = ({ sheetRef, bibleAtom, resolvedProvenance
     setBible(updateStrongBibleSourceVersion(versionId))
   }
 
-  const availabilityByVersion = useMemo(
-    () =>
-      new Map<StrongBibleVersionId, StrongBibleSidecarAvailability>(
-        sourceGroups.flatMap(group =>
-          group.versionIds.flatMap(versionId => {
-            const entry = registry.resources.get(
-              createOfflineCopyId({ kind: 'strong-bible-index', versionId })
-            )
-            return entry
-              ? [[versionId, entry.availability as StrongBibleSidecarAvailability] as const]
-              : []
-          })
-        )
-      ),
-    [registry.resources, sourceGroups]
-  )
-  const bhgSidecar = registry.resources.get(
-    createOfflineCopyId({
-      kind: 'interlinear-index',
-      versionId: 'BHG',
-      language: preferredInterlinearLocale,
-    })
-  )?.availability as InterlinearSidecarAvailability | undefined
-  const bhgAvailability: BhgLexiconAvailability | undefined = isBhgBible
-    ? bhgSidecar?.status === 'available'
-      ? { status: 'available', locale: preferredInterlinearLocale }
-      : {
-          status: 'unavailable',
-          attempts: bhgSidecar
-            ? [{ locale: preferredInterlinearLocale, status: bhgSidecar.status }]
-            : [],
-        }
-    : undefined
+  const availabilityQuery = useQuery({
+    queryKey: [
+      'strong-bible-source-availability',
+      isEnglishBible ? 'en' : 'fr',
+      isBhgBible,
+      preferredInterlinearLocale,
+      resourceRegistry.revision,
+    ],
+    queryFn: () =>
+      loadStrongBibleSourceAvailability({
+        versionIds: sourceGroups.flatMap(group => [...group.versionIds]),
+        includeBhg: isBhgBible,
+        preferredInterlinearLocale,
+        getStrongAvailability: resources.strongBible.getAvailability,
+        getInterlinearAvailability: resources.lexiconBible.getInterlinearAvailability,
+      }),
+    enabled: isResourceModalOpen || isSheetOpen,
+    ...localQueryOptions,
+  })
+  const availabilityByVersion =
+    availabilityQuery.data?.availabilityByVersion ?? EMPTY_STRONG_AVAILABILITY
+  const bhgAvailability: BhgLexiconAvailability | undefined =
+    availabilityQuery.data?.bhgAvailability
 
   useEffect(() => {
+    if (!availabilityQuery.isSuccess) return
     if (
       pendingSelectionVersionId &&
       availabilityByVersion.get(pendingSelectionVersionId)?.status === 'available'
@@ -455,7 +459,13 @@ export const StrongBibleSourceSheet = ({ sheetRef, bibleAtom, resolvedProvenance
     ) {
       setBible(updateStrongBibleSourceVersion())
     }
-  }, [availabilityByVersion, pendingSelectionVersionId, setBible, strongBibleSourceVersionId])
+  }, [
+    availabilityByVersion,
+    availabilityQuery.isSuccess,
+    pendingSelectionVersionId,
+    setBible,
+    strongBibleSourceVersionId,
+  ])
 
   const selectSource = (versionId?: StrongBibleVersionId) => {
     setPendingSelectionVersionId(undefined)
@@ -463,23 +473,34 @@ export const StrongBibleSourceSheet = ({ sheetRef, bibleAtom, resolvedProvenance
     sheetRef.current?.dismiss()
   }
 
-  const downloadSource = (versionId: StrongBibleVersionId) => {
+  const downloadSource = async (versionId: StrongBibleVersionId) => {
     if (!isConnected) return
-    const availability = availabilityByVersion.get(versionId)
-    if (!availability) return
-    setPendingSelectionVersionId(versionId)
-    enqueue(createStrongSidecarDownloadPlan(versionId, availability.status))
+    try {
+      const availability =
+        availabilityByVersion.get(versionId) ??
+        (await resources.strongBible.getAvailability(versionId))
+      setPendingSelectionVersionId(versionId)
+      enqueue(createStrongSidecarDownloadPlan(versionId, availability.status))
+    } catch {
+      toast.error(t('resource.action.temporarilyUnavailable'))
+    }
   }
 
-  const downloadBhgSource = () => {
+  const downloadBhgSource = async () => {
     if (!isConnected) return
-    if (!bhgSidecar) return
-    if (bhgSidecar.status === 'available') {
-      selectSource()
-      return
+    try {
+      const availability = await resources.lexiconBible.getInterlinearAvailability(
+        preferredInterlinearLocale
+      )
+      if (availability.status === 'available') {
+        selectSource()
+        return
+      }
+      setStrongBibleSourceVersion()
+      enqueue(createInterlinearSidecarDownloadPlan(preferredInterlinearLocale, availability.status))
+    } catch {
+      toast.error(t('resource.action.temporarilyUnavailable'))
     }
-    setStrongBibleSourceVersion()
-    enqueue(createInterlinearSidecarDownloadPlan(preferredInterlinearLocale, bhgSidecar.status))
   }
 
   const automaticDescription = strongBibleSourceVersionId
@@ -491,6 +512,7 @@ export const StrongBibleSourceSheet = ({ sheetRef, bibleAtom, resolvedProvenance
       : t('strongSource.autoDescription.default')
 
   const handleSheetOpenChange = (isOpen: boolean) => {
+    setIsSheetOpen(isOpen)
     if (!isOpen) return
 
     setExpandedLanguages({
@@ -585,21 +607,31 @@ export const StrongBibleSourceSheet = ({ sheetRef, bibleAtom, resolvedProvenance
           ) : item.type === 'bhg-source' ? (
             <BhgStrongSourceRow
               availability={bhgAvailability}
-              downloadDisabled={!isConnected}
-              isChecking={false}
+              availabilityError={availabilityQuery.isError}
+              downloadDisabled={!isConnected && !availabilityQuery.isError}
+              isChecking={availabilityQuery.isPending || availabilityQuery.isFetching}
               selected={!strongBibleSourceVersionId && resolvedProvenance?.versionId === 'BHG'}
               onSelect={() => selectSource()}
-              onDownload={downloadBhgSource}
+              onDownload={() =>
+                availabilityQuery.isError
+                  ? void availabilityQuery.refetch()
+                  : void downloadBhgSource()
+              }
             />
           ) : (
             <StrongBibleSourceRow
               versionId={item.versionId}
               availability={availabilityByVersion.get(item.versionId)}
-              isChecking={false}
-              downloadDisabled={!isConnected}
+              isChecking={availabilityQuery.isPending || availabilityQuery.isFetching}
+              availabilityError={availabilityQuery.isError}
+              downloadDisabled={!isConnected && !availabilityQuery.isError}
               selected={strongBibleSourceVersionId === item.versionId}
               onSelect={() => selectSource(item.versionId)}
-              onDownload={() => downloadSource(item.versionId)}
+              onDownload={() =>
+                availabilityQuery.isError
+                  ? void availabilityQuery.refetch()
+                  : void downloadSource(item.versionId)
+              }
             />
           )
         }
