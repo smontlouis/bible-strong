@@ -53,11 +53,11 @@ const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
           <Box width={15} />
         )}
         <Box flex justifyContent="center">
-          <Text fontSize={16} bold>
+          <Text fontSize={16} bold numberOfLines={1}>
             {title}
           </Text>
         </Box>
-        <Box flex alignItems="flex-end">
+        <Box alignItems="flex-end">
           <FilterHeaderButton
             activeFilterCount={activeFilterCount}
             activeFilterIcon={activeFilterIcon}

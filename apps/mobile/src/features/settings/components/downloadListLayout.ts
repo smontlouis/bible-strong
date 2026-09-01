@@ -1,8 +1,8 @@
 export const DOWNLOAD_LIST_LAYOUT = {
-  sectionPaddingHorizontal: 8,
-  subsectionPaddingLeft: 30,
+  sectionPaddingHorizontal: 16,
+  subsectionPaddingLeft: 12,
   subsectionPaddingRight: 12,
-  itemPaddingLeft: 52,
-  dependencyPaddingLeft: 82,
-  dependencyConnectorLeft: 62,
+  itemPaddingLeft: 28,
+  dependencyPaddingLeft: 60,
+  dependencyConnectorLeft: 42,
 } as const

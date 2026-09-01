@@ -1,10 +1,8 @@
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { EaseView } from 'react-native-ease'
 
 import Box from '~common/ui/Box'
-import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
 import { DOWNLOAD_LIST_LAYOUT } from './downloadListLayout'
@@ -15,9 +13,6 @@ interface DownloadSectionHeaderProps {
   onToggleCollapse: () => void
   downloadedCount: number
   totalCount: number
-  isSelectMode?: boolean
-  allSelected?: boolean
-  onToggleSelectAll?: () => void
 }
 
 const DownloadSectionHeader = ({
@@ -26,12 +21,7 @@ const DownloadSectionHeader = ({
   onToggleCollapse,
   downloadedCount,
   totalCount,
-  isSelectMode,
-  allSelected,
-  onToggleSelectAll,
 }: DownloadSectionHeaderProps) => {
-  const { t } = useTranslation()
-
   return (
     <Box
       minHeight={52}
@@ -43,24 +33,6 @@ const DownloadSectionHeader = ({
       borderBottomWidth={1}
       borderColor="border"
     >
-      {isSelectMode && (
-        <TouchableOpacity
-          accessibilityLabel={t('accessibility.selectAllInSection', { section: title })}
-          accessibilityRole="checkbox"
-          accessibilityState={{ checked: Boolean(allSelected) }}
-          onPress={onToggleSelectAll}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          style={{
-            marginRight: 8,
-            width: 28,
-            height: 28,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Checkbox checked={Boolean(allSelected)} variant="icon" size={22} />
-        </TouchableOpacity>
-      )}
       <TouchableOpacity
         accessibilityLabel={title}
         accessibilityRole="button"

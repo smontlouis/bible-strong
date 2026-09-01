@@ -1,22 +1,24 @@
 import React, { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Alert, TextInput, TouchableOpacity } from 'react-native'
-import { useTheme } from '@emotion/react'
+import { Alert } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
-import Header from '~common/Header'
+import FiltersHeader from '~common/FiltersHeader'
 import Loading from '~common/Loading'
+import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
+import SearchFilterModal from '~common/SearchFilterModal'
+import { type SheetRef } from '~common/sheet'
 import Box from '~common/ui/Box'
 import Container from '~common/ui/Container'
 import SectionList from '~common/ui/SectionList'
-import { FeatherIcon } from '~common/ui/Icon'
 
 import DownloadableItem from './components/DownloadableItem'
 import StorageSummaryCard from './components/StorageSummaryCard'
-import FilterChipRow, { type StatusFilter, type LangFilter } from './components/FilterChipRow'
+import type { StatusFilter, LangFilter } from './components/FilterChipRow'
 import DownloadSectionHeader from './components/DownloadSectionHeader'
 import DownloadSubsectionHeader from './components/DownloadSubsectionHeader'
 import BatchActionBar from './components/BatchActionBar'
+import { AvailableUpdatesSheet, AvailableUpdatesWidget } from './components/AvailableUpdatesWidget'
 
 import { versions, type Version } from '~helpers/bibleVersions'
 import { databases } from '~helpers/databases'
@@ -324,10 +326,13 @@ function useDownloadedItems() {
 
 const DownloadsScreen = () => {
   const { t } = useTranslation()
-  const theme = useTheme()
   const lang = useLanguage()
   const resources = useResourceAccess()
   const isConnected = useConnection()
+  const searchRef = React.useRef<SheetRef>(null)
+  const statusRef = React.useRef<SheetRef>(null)
+  const languageRef = React.useRef<SheetRef>(null)
+  const updatesRef = React.useRef<SheetRef>(null)
   const dictionaryCatalogQuery = useQuery({
     queryKey: ['dictionary-download-catalog', isConnected],
     queryFn: () => resources.dictionary.listWorks?.() ?? [],
@@ -655,27 +660,9 @@ const DownloadsScreen = () => {
     ])
   }
 
-  const handleUpdateAll = () => {
+  const handleDownloadUpdates = () => {
     if (!isConnected) return
-    Alert.alert(
-      t('downloads.updateAvailable'),
-      t(
-        itemsToUpdate.length === 1
-          ? 'downloads.updateCountConfirm_one'
-          : 'downloads.updateCountConfirm_other',
-        { count: itemsToUpdate.length }
-      ),
-      [
-        { text: t('downloads.later'), style: 'cancel' },
-        {
-          text: t('downloads.update'),
-          onPress: () =>
-            enqueue(
-              dedupeDownloadItems(itemsToUpdate.flatMap(item => createDownloadPlanForId(item.id)))
-            ),
-        },
-      ]
-    )
+    enqueue(dedupeDownloadItems(itemsToUpdate.flatMap(item => createDownloadPlanForId(item.id))))
   }
 
   const handleDeleteItem = (item: UnifiedItem) => {
@@ -727,32 +714,60 @@ const DownloadsScreen = () => {
   // Count downloadable/deletable in selection
   const selectedDownloadable = Array.from(selectedItems).filter(id => !downloadedSet.has(id)).length
   const selectedDeletable = Array.from(selectedItems).filter(id => downloadedSet.has(id)).length
+  const statusOptions = [
+    { value: 'downloaded' as const, label: t('downloads.filter.downloaded') },
+    { value: 'notDownloaded' as const, label: t('downloads.filter.notDownloaded') },
+  ]
+  const languageOptions = [
+    { value: 'fr' as const, label: t('versionCatalog.language.fr') },
+    { value: 'en' as const, label: t('versionCatalog.language.en') },
+    { value: 'other' as const, label: t('downloads.language.original') },
+  ]
+  const filterSummary = <T extends string>(
+    selected: ReadonlySet<T>,
+    options: readonly { value: T; label: string }[]
+  ) => {
+    if (selected.size === 0) return t('Tous')
+    if (selected.size === 1) return options.find(option => selected.has(option.value))?.label
+    return t('downloads.filter.selectedCount', { count: selected.size })
+  }
 
   return (
     <Container>
-      <Header
+      <FiltersHeader
         hasBackButton
         title={t('downloads.title')}
-        rightComponent={
-          <Box row alignItems="center">
-            {itemsToUpdate.length > 0 && (
-              <TouchableOpacity
-                accessibilityRole="button"
-                accessibilityState={{ disabled: !isConnected }}
-                disabled={!isConnected}
-                onPress={handleUpdateAll}
-                accessibilityLabel={t('downloads.update')}
-                style={{ padding: 8 }}
-              >
-                <FeatherIcon
-                  name={isConnected ? 'refresh-cw' : 'wifi-off'}
-                  size={20}
-                  color={isConnected ? 'success' : 'tertiary'}
-                />
-              </TouchableOpacity>
-            )}
-          </Box>
-        }
+        onReset={() => {
+          setSearchQuery('')
+          setStatusFilter(new Set())
+          setLangFilter(new Set())
+        }}
+        filters={[
+          {
+            key: 'search',
+            icon: 'search',
+            label: t('Rechercher'),
+            value: searchQuery.trim() || undefined,
+            active: Boolean(searchQuery.trim()),
+            onPress: () => searchRef.current?.present(),
+          },
+          {
+            key: 'status',
+            icon: 'download-cloud',
+            label: t('downloads.filter.status'),
+            value: filterSummary(statusFilter, statusOptions),
+            active: statusFilter.size > 0,
+            onPress: () => statusRef.current?.present(),
+          },
+          {
+            key: 'language',
+            icon: 'globe',
+            label: t('downloads.filter.language'),
+            value: filterSummary(langFilter, languageOptions),
+            active: langFilter.size > 0,
+            onPress: () => languageRef.current?.present(),
+          },
+        ]}
       />
 
       {isAvailabilityPending ? (
@@ -773,53 +788,11 @@ const DownloadsScreen = () => {
           contentContainerStyle={{ paddingBottom: 100 }}
           ListHeaderComponent={
             <>
-              {/* Search */}
-              <Box
-                mx={16}
-                mt={12}
-                row
-                alignItems="center"
-                bg="border"
-                borderRadius={10}
-                px={12}
-                height={40}
-              >
-                <FeatherIcon name="search" size={16} color="tertiary" />
-                <TextInput
-                  accessibilityLabel={t('downloads.search')}
-                  value={searchQuery}
-                  onChangeText={setSearchQuery}
-                  placeholder={t('downloads.search')}
-                  placeholderTextColor={theme.colors.tertiary}
-                  style={{
-                    flex: 1,
-                    marginLeft: 8,
-                    fontSize: 14,
-                    color: theme.colors.default,
-                    padding: 0,
-                  }}
-                />
-                {searchQuery.length > 0 && (
-                  <TouchableOpacity
-                    accessibilityLabel={t('accessibility.clearSearch')}
-                    accessibilityRole="button"
-                    hitSlop={12}
-                    onPress={() => setSearchQuery('')}
-                  >
-                    <FeatherIcon name="x" size={16} color="tertiary" />
-                  </TouchableOpacity>
-                )}
-              </Box>
-
-              {/* Filters */}
-              <FilterChipRow
-                statusFilter={statusFilter}
-                langFilter={langFilter}
-                onStatusToggle={handleStatusToggle}
-                onLangToggle={handleLangToggle}
-              />
-
               <StorageSummaryCard />
+              <AvailableUpdatesWidget
+                count={itemsToUpdate.length}
+                onPress={() => updatesRef.current?.present()}
+              />
             </>
           }
           renderSectionHeader={({ section }) => {
@@ -837,9 +810,6 @@ const DownloadsScreen = () => {
                 onToggleCollapse={() => toggleCollapse(section.key)}
                 downloadedCount={downloadedCount}
                 totalCount={totalCount}
-                isSelectMode
-                allSelected={sectionItems.every((i: UnifiedItem) => selectedItems.has(i.id))}
-                onToggleSelectAll={() => toggleSelectAll(sectionItems)}
               />
             )
           }}
@@ -918,6 +888,34 @@ const DownloadsScreen = () => {
           }}
         />
       )}
+
+      <SearchFilterModal
+        ref={searchRef}
+        title={t('Rechercher')}
+        placeholder={t('downloads.search')}
+        value={searchQuery}
+        onChange={setSearchQuery}
+      />
+      <MultipleChoiceFilterModal
+        ref={statusRef}
+        title={t('downloads.filter.status')}
+        selectedValues={[...statusFilter]}
+        options={statusOptions}
+        onToggle={handleStatusToggle}
+      />
+      <MultipleChoiceFilterModal
+        ref={languageRef}
+        title={t('downloads.filter.language')}
+        selectedValues={[...langFilter]}
+        options={languageOptions}
+        onToggle={handleLangToggle}
+      />
+      <AvailableUpdatesSheet
+        sheetRef={updatesRef}
+        items={itemsToUpdate}
+        disabled={!isConnected}
+        onDownload={handleDownloadUpdates}
+      />
 
       {/* Bottom bars */}
       {!isAvailabilityPending && !isAvailabilityError && (
