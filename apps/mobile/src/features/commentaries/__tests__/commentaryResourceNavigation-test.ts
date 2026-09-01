@@ -1,6 +1,7 @@
 import { COMMENTARY_CATALOG_BY_ID } from '@bible-strong/resource-catalog/commentaries'
 
 import {
+  getCommentarySectionsForVerse,
   getCommentaryResourceRoute,
   getCoveredCommentaryLocation,
 } from '../commentaryResourceNavigation'
@@ -28,7 +29,7 @@ describe('commentary resource navigation', () => {
     })
   })
 
-  it('opens the exact section when the commentary covers the verse', () => {
+  it('opens the exact section when it is the only one covering the verse', () => {
     const item: CommentaryVerseAvailability = {
       ...baseItem,
       state: 'verse',
@@ -38,6 +39,7 @@ describe('commentary resource navigation', () => {
         verseId: '41-1-1',
         rangeStartVerse: 1,
         rangeEndVerse: 8,
+        matchingSectionCount: 1,
         content: 'Preview',
         resource: {
           name: 'Barnes',
@@ -62,16 +64,64 @@ describe('commentary resource navigation', () => {
     })
   })
 
-  it('keeps the current chapter when another verse has commentary', () => {
+  it('opens a verse-filtered list when several sections cover the verse', () => {
+    const item: CommentaryVerseAvailability = {
+      ...baseItem,
+      state: 'verse',
+      comment: {
+        id: 'egw-en-1-1-1',
+        sectionId: 'egw-en-1-1-1-1',
+        verseId: '1-1-1',
+        rangeStartVerse: 1,
+        rangeEndVerse: 1,
+        matchingSectionCount: 7,
+        content: 'Preview',
+        resource: {
+          name: 'EGW Writings',
+          code: 'EGW:en',
+          logo: '',
+          author: 'Ellen G. White',
+        },
+        order: 0,
+        type: 'comment',
+        isSDA: true,
+      },
+    }
+
+    expect(getCommentaryResourceRoute(item, { book: 1, chapter: 1, verse: 1 })).toEqual({
+      pathname: '/commentary-chapter',
+      params: {
+        projectionId: 'barnes:fr',
+        book: '1',
+        chapter: '1',
+        focusVerse: '1',
+      },
+    })
+  })
+
+  it('keeps the whole current chapter when only another verse has commentary', () => {
     expect(getCommentaryResourceRoute(baseItem, { book: 41, chapter: 1, verse: 1 })).toEqual({
       pathname: '/commentary-chapter',
       params: {
         projectionId: 'barnes:fr',
         book: '41',
         chapter: '1',
-        focusVerse: '1',
       },
     })
+  })
+
+  it('filters sections to ranges containing the requested verse', () => {
+    const sections = [
+      { id: 'one', rangeStartVerse: 1, rangeEndVerse: 1 },
+      { id: 'wide', rangeStartVerse: 1, rangeEndVerse: 27 },
+      { id: 'other', rangeStartVerse: 2, rangeEndVerse: 2 },
+    ]
+
+    expect(getCommentarySectionsForVerse(sections, 1).map(section => section.id)).toEqual([
+      'one',
+      'wide',
+    ])
+    expect(getCommentarySectionsForVerse(sections, undefined)).toEqual(sections)
   })
 
   it('falls back to Genesis 1 when the current chapter has no content', () => {

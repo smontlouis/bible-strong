@@ -108,6 +108,11 @@ const CommentaryAvailabilityList = ({ items, headerTitle, onManage, onOpen }: Pr
                   {item.comment ? (
                     <Text mt={5} color="primary" fontSize={11} numberOfLines={1}>
                       {formatCommentaryPassageLabel(headerTitle, item.comment)}
+                      {(item.comment.matchingSectionCount ?? 1) > 1
+                        ? ` · ${t('commentaries.resource.sectionCount', {
+                            count: item.comment.matchingSectionCount,
+                          })}`
+                        : ''}
                     </Text>
                   ) : null}
                 </AnimatedBox>

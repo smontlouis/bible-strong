@@ -25,7 +25,10 @@ import { getDefaultBibleTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
 import CommentaryResourceHeaderActions from './CommentaryResourceHeaderActions'
 import CommentaryRoomIntro from './CommentaryRoomIntro'
-import { getCoveredCommentaryLocation } from './commentaryResourceNavigation'
+import {
+  getCommentarySectionsForVerse,
+  getCoveredCommentaryLocation,
+} from './commentaryResourceNavigation'
 import { parseCommentaryResourceParams } from './commentaryResourceParams'
 
 const formatRange = (start: number, end: number, introductionLabel: string) => {
@@ -41,7 +44,9 @@ const CommentaryChapterScreen = () => {
     focusVerse?: string
   }>()
   const parsed = parseCommentaryResourceParams(params)
-  const focusVerse = Number(params.focusVerse)
+  const parsedFocusVerse = Number(params.focusVerse)
+  const focusVerse =
+    Number.isSafeInteger(parsedFocusVerse) && parsedFocusVerse > 0 ? parsedFocusVerse : undefined
   const resources = useResourceAccess()
   const router = useRouter()
   const { t } = useTranslation()
@@ -133,6 +138,7 @@ const CommentaryChapterScreen = () => {
 
   const { entry, projection, book, chapter } = parsed
   const bookLabel = getBook(book)?.Nom ?? String(book)
+  const visibleSections = getCommentarySectionsForVerse(query.data?.sections ?? [], focusVerse)
 
   return (
     <FormSheetScreen isFormSheet={IS_FORM_SHEET}>
@@ -158,33 +164,62 @@ const CommentaryChapterScreen = () => {
           <CommentaryRoomIntro entry={entry} language={projection.language} />
 
           <Box row alignItems="center" justifyContent="space-between">
-            <TouchableBox
-              bg="lightGrey"
-              borderRadius={20}
-              height={32}
-              px={12}
-              row
-              alignItems="center"
-              onPress={() => {
-                openCommentaryBookSelector({
-                  openBookSelector,
-                  actions: selectorActions,
-                  data: selectorTab.data,
-                  coverage: coverageQuery.data,
-                })
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={t('commentaries.resource.chooseChapter')}
-            >
-              <Text bold fontSize={14}>
-                {bookLabel} {chapter}
-              </Text>
-              <FeatherIcon name="chevron-down" size={14} color="grey" style={{ marginLeft: 6 }} />
-            </TouchableBox>
+            <Box row alignItems="center" gap={7}>
+              <TouchableBox
+                bg="lightGrey"
+                borderRadius={20}
+                height={32}
+                px={12}
+                row
+                alignItems="center"
+                disabled={focusVerse !== undefined}
+                onPress={
+                  focusVerse === undefined
+                    ? () => {
+                        openCommentaryBookSelector({
+                          openBookSelector,
+                          actions: selectorActions,
+                          data: selectorTab.data,
+                          coverage: coverageQuery.data,
+                        })
+                      }
+                    : undefined
+                }
+                accessibilityRole="button"
+                accessibilityLabel={t('commentaries.resource.chooseChapter')}
+              >
+                <Text bold fontSize={14}>
+                  {bookLabel} {chapter}
+                  {focusVerse === undefined ? '' : `:${focusVerse}`}
+                </Text>
+                {focusVerse === undefined ? (
+                  <FeatherIcon
+                    name="chevron-down"
+                    size={14}
+                    color="grey"
+                    style={{ marginLeft: 6 }}
+                  />
+                ) : null}
+              </TouchableBox>
+              {focusVerse !== undefined ? (
+                <TouchableBox
+                  size={28}
+                  borderRadius={16}
+                  bg="lightGrey"
+                  center
+                  activeOpacity={0.62}
+                  onPress={() => router.setParams({ focusVerse: undefined })}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('commentaries.resource.exitVerseFilter')}
+                >
+                  <FeatherIcon name="x" size={14} />
+                </TouchableBox>
+              ) : null}
+            </Box>
             {query.data ? (
               <Text color="grey" fontSize={13}>
-                {t('commentaries.resource.commentaryCount', {
-                  count: query.data.sections.length,
+                {t('commentaries.resource.sectionCount', {
+                  count: visibleSections.length,
                 })}
               </Text>
             ) : null}
@@ -200,18 +235,14 @@ const CommentaryChapterScreen = () => {
               failure={resourceFailureFromAccessError(query.error)}
               onRetry={() => void query.refetch()}
             />
-          ) : query.data.sections.length === 0 ? (
+          ) : visibleSections.length === 0 ? (
             <Empty
               icon={require('~assets/images/empty-state-icons/comment.svg')}
               message={t('commentaries.resource.emptyChapter')}
             />
           ) : (
             <Box mt={16} gap={12}>
-              {query.data.sections.map(section => {
-                const highlighted =
-                  Number.isSafeInteger(focusVerse) &&
-                  focusVerse >= section.rangeStartVerse &&
-                  focusVerse <= section.rangeEndVerse
+              {visibleSections.map(section => {
                 return (
                   <TouchableBox
                     key={section.id}
@@ -220,8 +251,6 @@ const CommentaryChapterScreen = () => {
                     lightShadow
                     px={17}
                     py={14}
-                    borderWidth={highlighted ? 2 : 0}
-                    borderColor="primary"
                     activeOpacity={0.62}
                     onPress={() =>
                       router.push({
@@ -250,11 +279,6 @@ const CommentaryChapterScreen = () => {
                         <Text color="grey" fontSize={14} lineHeight={20} numberOfLines={2}>
                           {section.preview}
                         </Text>
-                        {highlighted ? (
-                          <Text color="primary" fontSize={12} mt={3}>
-                            {t('commentaries.resource.containsCurrentVerse')}
-                          </Text>
-                        ) : null}
                       </Box>
                       <FeatherIcon name="chevron-right" size={20} color="grey" />
                     </Box>

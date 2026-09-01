@@ -3,6 +3,7 @@ import {
   hasWidthSensitiveHtmlContent,
   LINK_TEXT_ATTRIBUTE,
   linkifyStrongReferences,
+  normalizeExternalContextLinks,
 } from '../stylizedHtmlUtils'
 
 describe('linkifyStrongReferences', () => {
@@ -39,6 +40,24 @@ describe('hasWidthSensitiveHtmlContent', () => {
 
   it('does not delay ordinary lexical HTML', () => {
     expect(hasWidthSensitiveHtmlContent('<p>Texte <strong>lexical</strong></p>')).toBe(false)
+  })
+})
+
+describe('normalizeExternalContextLinks', () => {
+  it('uses one plain context label with breathing room above it', () => {
+    expect(
+      normalizeExternalContextLinks(
+        '<p>Paragraph.</p><p><a class="external-source" href="https://example.com">View “A title” in context ↗</a></p>'
+      )
+    ).toBe(
+      '<p>Paragraph.</p><p><br /><a class="external-source" href="https://example.com">View in context</a></p>'
+    )
+  })
+
+  it('does not alter ordinary links', () => {
+    expect(normalizeExternalContextLinks('<p><a href="bible://Gen.1.1">Genesis 1:1</a></p>')).toBe(
+      '<p><a href="bible://Gen.1.1">Genesis 1:1</a></p>'
+    )
   })
 })
 

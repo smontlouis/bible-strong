@@ -234,6 +234,57 @@ describe('commentary access', () => {
     })
   })
 
+  it('reports how many reconstructed sections cover each verse preview', async () => {
+    const local = source(async () => ({
+      1: '<p>Whole passage</p><hr><p>First verse only</p>',
+      2: '<p>Whole passage</p>',
+    }))
+    const access = createCommentaryAccess({ local, isOnline: async () => false })
+
+    const chapter = await access.loadChapter({
+      book: 1,
+      chapter: 1,
+      resources: [{ resourceId: 'barnes', language: 'en' }],
+    })
+
+    expect(chapter.commentsByVerse['1'][0].matchingSectionCount).toBe(2)
+    expect(chapter.commentsByVerse['2'][0].matchingSectionCount).toBe(1)
+  })
+
+  it('presents consecutive EGW paragraphs from one source section as one reading unit', async () => {
+    const paragraph = (reference: string, content: string, sourceId: string) =>
+      `<h3>Daughters of God</h3><h4>Eve, Mother of All</h4><p><strong>${reference}</strong></p><span>${content}</span><p><a class="external-source" href="https://text.egwwritings.org/read/27.${sourceId}">View “Eve, Mother of All” in context ↗</a></p>`
+    const first = paragraph('DG 21.1', 'First paragraph.', '58')
+    const second = paragraph('DG 21.2', 'Second paragraph.', '59')
+    const local = source(async () => ({
+      1: `${first}<hr>${second}`,
+      2: `${first}<hr>${second}`,
+    }))
+    const access = createCommentaryAccess({ local, isOnline: async () => false })
+
+    const chapter = await access.loadResourceChapter({
+      resourceId: 'egw-writings',
+      language: 'en',
+      book: 1,
+      chapter: 1,
+    })
+
+    expect(chapter.sections).toHaveLength(1)
+    expect(chapter.sections[0]).toMatchObject({
+      rangeStartVerse: 1,
+      rangeEndVerse: 2,
+    })
+    expect(chapter.sections[0].content.match(/<h3>/gu)).toHaveLength(1)
+    expect(chapter.sections[0].content.match(/<h4>/gu)).toHaveLength(1)
+    expect(chapter.sections[0].content).toContain('DG 21.1')
+    expect(chapter.sections[0].content).toContain('DG 21.2')
+    expect(chapter.sections[0].content).toContain('<br /><br />')
+    expect(chapter.sections[0].content.match(/external-source/gu)).toHaveLength(1)
+    expect(chapter.sections[0].content.indexOf('DG 21.1')).toBeLessThan(
+      chapter.sections[0].content.indexOf('DG 21.2')
+    )
+  })
+
   it('reconstructs overlapping shared and verse-specific sections separated by hr', async () => {
     const shared = '<h3>1–2: Shared section</h3><p>Shared commentary</p>'
     const verseTwo = '<h3>Verse two</h3><p>Specific commentary</p>'

@@ -10,6 +10,7 @@ export interface Comment {
   verseId: string
   rangeStartVerse: number
   rangeEndVerse: number
+  matchingSectionCount?: number
   content: string
   resource: Resource
   order: number

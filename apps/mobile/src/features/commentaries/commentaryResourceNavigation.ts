@@ -5,6 +5,21 @@ type CommentaryCoverage = {
   chaptersByBook: Record<number, readonly number[]>
 }
 
+type CommentarySectionRange = {
+  rangeStartVerse: number
+  rangeEndVerse: number
+}
+
+export const getCommentarySectionsForVerse = <Section extends CommentarySectionRange>(
+  sections: readonly Section[],
+  verse: number | undefined
+) => {
+  if (verse === undefined || !Number.isSafeInteger(verse) || verse < 1) return [...sections]
+  return sections.filter(
+    section => verse >= section.rangeStartVerse && verse <= section.rangeEndVerse
+  )
+}
+
 export const getCoveredCommentaryLocation = (
   coverage: CommentaryCoverage,
   current: { book: number; chapter: number }
@@ -41,7 +56,7 @@ export const getCommentaryResourceRoute = (
 ): CommentaryResourceRoute | undefined => {
   if (item.state === 'unavailable') return undefined
 
-  if (item.state === 'verse' && item.comment) {
+  if (item.state === 'verse' && item.comment && (item.comment.matchingSectionCount ?? 1) === 1) {
     return {
       pathname: '/commentary-entry',
       params: {
@@ -53,7 +68,7 @@ export const getCommentaryResourceRoute = (
     }
   }
 
-  if (item.state === 'chapter') {
+  if (item.state === 'verse' && item.comment) {
     return {
       pathname: '/commentary-chapter',
       params: {
@@ -61,6 +76,17 @@ export const getCommentaryResourceRoute = (
         book: String(location.book),
         chapter: String(location.chapter),
         focusVerse: String(location.verse),
+      },
+    }
+  }
+
+  if (item.state === 'chapter') {
+    return {
+      pathname: '/commentary-chapter',
+      params: {
+        projectionId: item.projectionId,
+        book: String(location.book),
+        chapter: String(location.chapter),
       },
     }
   }

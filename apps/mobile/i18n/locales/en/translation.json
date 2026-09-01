@@ -561,6 +561,7 @@
   "commentaries.resource.chooseChapter": "Choose a book and chapter",
   "commentaries.resource.sectionCount": "{{count}} section",
   "commentaries.resource.sectionCount_plural": "{{count}} sections",
+  "commentaries.resource.exitVerseFilter": "Show the whole chapter",
   "commentaries.resource.commentaryCount": "{{count}} commentary",
   "commentaries.resource.commentaryCount_plural": "{{count}} commentaries",
   "commentaries.resource.containsCurrentVerse": "Contains the current verse",

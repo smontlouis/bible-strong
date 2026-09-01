@@ -141,7 +141,7 @@ const buildEntry = (entry) => {
     }
     if (/^https?:\/\//iu.test(group.section.contextUrl ?? "")) {
       externalSources.push({
-        label: `View “${group.section.title}” in context ↗`,
+        label: "View in context",
         url: group.section.contextUrl,
         policy: "metadata-only"
       });

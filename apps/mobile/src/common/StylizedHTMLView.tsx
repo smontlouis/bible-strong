@@ -11,6 +11,7 @@ import {
   hasWidthSensitiveHtmlContent,
   LINK_TEXT_ATTRIBUTE,
   linkifyStrongReferences,
+  normalizeExternalContextLinks,
 } from './stylizedHtmlUtils'
 
 export { linkifyStrongReferences } from './stylizedHtmlUtils'
@@ -129,8 +130,18 @@ const StylizedHTMLView = ({
   const [measuredContentWidth, setMeasuredContentWidth] = useState<number | null>(null)
   const lastLayoutWidth = useRef<number | null>(null)
   const tagStyles = { ...styles(theme), ...htmlStyle }
+  const classStyles: Record<string, MixedStyleDeclaration> = {
+    'external-source': {
+      borderWidth: 0,
+      borderColor: 'transparent',
+      textDecorationLine: 'underline',
+      textDecorationColor: theme.colors.default,
+    },
+  }
 
-  const html = value && onLinkPress ? linkifyStrongReferences(value) : (value ?? '')
+  const normalizedValue = normalizeExternalContextLinks(value ?? '')
+  const html =
+    normalizedValue && onLinkPress ? linkifyStrongReferences(normalizedValue) : normalizedValue
   const needsMeasuredContentWidth = hasWidthSensitiveHtmlContent(html)
   const contentWidth = measuredContentWidth ?? (needsMeasuredContentWidth ? null : width)
 
@@ -162,6 +173,7 @@ const StylizedHTMLView = ({
           contentWidth={contentWidth}
           source={{ html }}
           tagsStyles={tagStyles}
+          classesStyles={classStyles}
           baseStyle={tagStyles.p}
           defaultTextProps={{ selectable: true }}
           enableUserAgentStyles={false}

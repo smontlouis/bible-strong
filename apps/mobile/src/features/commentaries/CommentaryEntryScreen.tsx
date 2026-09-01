@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { Linking } from 'react-native'
 
 import Header from '~common/Header'
 import Loading from '~common/Loading'
@@ -178,6 +179,7 @@ const CommentaryEntryScreen = () => {
                     const osis = commentaryHrefToOsis(href)
                     const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
                     if (route) router.push(route)
+                    else if (/^https?:\/\//iu.test(href)) void Linking.openURL(href)
                   }}
                 />
               </Box>

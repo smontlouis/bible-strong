@@ -5,6 +5,7 @@ import { atom, type PrimitiveAtom } from 'jotai/vanilla'
 import { useRouter } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Linking } from 'react-native'
 
 import Empty from '~common/Empty'
 import Header from '~common/Header'
@@ -282,6 +283,7 @@ const CommentaryResourceTabScreen = ({
                       const osis = commentaryHrefToOsis(href)
                       const route = osis ? getCommentaryBibleViewRoute(osis) : undefined
                       if (route) router.push(route)
+                      else if (/^https?:\/\//iu.test(href)) void Linking.openURL(href)
                     }}
                   />
                 </Box>
@@ -330,7 +332,7 @@ const CommentaryResourceTabScreen = ({
               </TouchableBox>
               {query.data ? (
                 <Text color="grey" fontSize={13}>
-                  {t('commentaries.resource.commentaryCount', {
+                  {t('commentaries.resource.sectionCount', {
                     count: query.data.sections.length,
                   })}
                 </Text>

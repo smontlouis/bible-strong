@@ -227,7 +227,7 @@ test("publishes EGW context links alongside normalized Bible links", () => {
 
   assert.equal(
     canonical.verses[0]?.content,
-    '<p>See <a class="bible-ref" href="bible://Gen.1.1" data-osis="Gen.1.1">Genesis 1:1</a>.</p><p><a class="external-source" href="https://text.egwwritings.org/read/1.1">View context ↗</a></p>'
+    '<p>See <a class="bible-ref" href="bible://Gen.1.1" data-osis="Gen.1.1">Genesis 1:1</a>.</p><p><br><a class="external-source" href="https://text.egwwritings.org/read/1.1">View in context</a></p>'
   );
 });
 
@@ -283,8 +283,7 @@ test("introduces Ellen G. White supplements once after the general SDA commentar
     "<p>General commentary.</p><hr><br><br><h3>Ellen G. White</h3><br><p>Second EGW excerpt.</p><hr><p>First EGW excerpt.</p>"
   );
   assert.equal(
-    canonical.verses[0]?.content.match(/<h3>Ellen G\. White<\/h3>/gu)
-      ?.length,
+    canonical.verses[0]?.content.match(/<h3>Ellen G\. White<\/h3>/gu)?.length,
     1
   );
 });

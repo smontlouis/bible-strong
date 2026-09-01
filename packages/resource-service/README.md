@@ -156,9 +156,13 @@ printing it or enabling shell tracing, and pass it only to the import subprocess
 
 ```bash
 yarn dlx neonctl auth
-yarn dlx neonctl link
+yarn dlx neonctl link --project-id holy-smoke-13882397
 set +x
-RESOURCE_DATABASE_URL="$(yarn dlx -q neonctl connection-string main --pooled=false)" \
+RESOURCE_DATABASE_URL="$(yarn dlx -q neonctl connection-string production \
+  --project-id holy-smoke-13882397 \
+  --role-name neondb_owner \
+  --database-name neondb \
+  --pooled=false)" \
   yarn resources:import-catalog:hosted --root /path/to/changed-publications
 ```
 

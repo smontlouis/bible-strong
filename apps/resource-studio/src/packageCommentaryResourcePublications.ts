@@ -280,8 +280,8 @@ const htmlForLanguage = (
     }
     const links = externalSources
       .map(
-        ({ label, url }) =>
-          `<p><a class="external-source" href="${escapeHtmlAttribute(url)}">${escapeHtmlAttribute(label)}</a></p>`
+        ({ url }) =>
+          `<p><br><a class="external-source" href="${escapeHtmlAttribute(url)}">View in context</a></p>`
       )
       .join("");
     return `${html}${links}`;
@@ -479,7 +479,7 @@ const buildCanonicalEgwWritings = async (
         materializeCommentaryBibleLinks(paragraph.source)
       );
       const contextLink = /^https?:\/\//iu.test(paragraph.section.contextUrl)
-        ? `<p><a class="external-source" href="${escapeHtmlAttribute(paragraph.section.contextUrl)}">View “${escapeHtmlAttribute(paragraph.section.title)}” in context ↗</a></p>`
+        ? `<p><br><a class="external-source" href="${escapeHtmlAttribute(paragraph.section.contextUrl)}">View in context</a></p>`
         : "";
       return {
         id: paragraph.id,

@@ -1,6 +1,10 @@
 const STRONG_REF_PATTERN = /\b([HG])(\d{4}[A-Z]|\d+)\b/g
 const HTML_TOKEN_PATTERN = /<!--[\s\S]*?-->|<[^>]*>/g
 const WIDTH_SENSITIVE_CONTENT_PATTERN = /<(?:iframe|img|svg|table|video)(?:\s|>)/i
+const EXTERNAL_CONTEXT_LINK_PATTERN =
+  /<a\b([^>]*\bclass=(?:"[^"]*\bexternal-source\b[^"]*"|'[^']*\bexternal-source\b[^']*')[^>]*)>[\s\S]*?<\/a>/giu
+const EXTERNAL_CONTEXT_PARAGRAPH_PATTERN =
+  /<p>\s*(<a\b[^>]*\bclass=(?:"[^"]*\bexternal-source\b[^"]*"|'[^']*\bexternal-source\b[^']*')[^>]*>)/giu
 
 const STRONG_BOOK_ATTRIBUTE = 'data-strong-book'
 const STRONG_NUMBER_ATTRIBUTE = 'data-strong-number'
@@ -8,6 +12,11 @@ export const LINK_TEXT_ATTRIBUTE = 'data-native-link-text'
 
 export const hasWidthSensitiveHtmlContent = (html: string) =>
   WIDTH_SENSITIVE_CONTENT_PATTERN.test(html)
+
+export const normalizeExternalContextLinks = (html: string) =>
+  html
+    .replace(EXTERNAL_CONTEXT_LINK_PATTERN, '<a$1>View in context</a>')
+    .replace(EXTERNAL_CONTEXT_PARAGRAPH_PATTERN, '<p><br />$1')
 
 export const getLegacyLinkPressArguments = (
   href: string,
