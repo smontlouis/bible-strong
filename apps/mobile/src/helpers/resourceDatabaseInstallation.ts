@@ -12,6 +12,7 @@ import type {
   CommentaryDownloadItem,
   DatabaseDownloadItem,
   DictionaryDownloadItem,
+  DictionaryDirectoryDownloadItem,
   InterlinearIndexDownloadItem,
   StrongBibleIndexDownloadItem,
   StrongLexiconModuleDownloadItem,
@@ -35,7 +36,11 @@ export interface ResourceInstallationCallbacks {
 }
 
 const downloadFile = async (
-  item: DatabaseDownloadItem | DictionaryDownloadItem | CommentaryDownloadItem,
+  item:
+    | DatabaseDownloadItem
+    | DictionaryDownloadItem
+    | DictionaryDirectoryDownloadItem
+    | CommentaryDownloadItem,
   callbacks: ResourceInstallationCallbacks,
   destinationPath = item.destinationPath!
 ) => {
@@ -80,11 +85,20 @@ const installBible = async (item: BibleDownloadItem, callbacks: ResourceInstalla
 }
 
 const installDatabase = async (
-  item: DatabaseDownloadItem | DictionaryDownloadItem | CommentaryDownloadItem,
+  item:
+    | DatabaseDownloadItem
+    | DictionaryDownloadItem
+    | DictionaryDirectoryDownloadItem
+    | CommentaryDownloadItem,
   callbacks: ResourceInstallationCallbacks
 ) => {
-  const dbId = item.type === 'database' ? item.databaseId : item.resourceId
-  const lang = item.lang
+  const dbId =
+    item.type === 'database'
+      ? item.databaseId
+      : item.type === 'dictionary-directory'
+        ? 'DICTIONARY_DIRECTORY'
+        : item.resourceId
+  const lang = 'lang' in item ? item.lang : 'shared'
   const destinationPath = item.destinationPath
   const destinationFileName = destinationPath.split('/').pop()!
   const destinationDirectory = destinationPath.slice(0, -(destinationFileName.length + 1))
@@ -141,11 +155,19 @@ const installDatabase = async (
         )
         const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
         if (
-          (item.type === 'dictionary'
-            ? ['dictionnaire']
-            : item.type === 'commentary'
-              ? ['commentaires']
-              : resourceDatabaseRequiredTables[dbId as DatabaseId]
+          (item.type === 'dictionary-directory'
+            ? [
+                'dictionary_works',
+                'dictionary_entries',
+                'dictionary_correspondences',
+                'dictionary_correspondence_members',
+                'dictionary_passage_anchors',
+              ]
+            : item.type === 'dictionary'
+              ? ['dictionnaire']
+              : item.type === 'commentary'
+                ? ['commentaires']
+                : resourceDatabaseRequiredTables[dbId as DatabaseId]
           )?.some(table => !tableNames.has(table.toLowerCase()))
         ) {
           throw new Error(`RESOURCE_DATABASE_SCHEMA_MISMATCH:${dbId}:${lang}`)
@@ -156,7 +178,9 @@ const installDatabase = async (
     }
 
     const database =
-      item.type === 'database' ? dbManager.getDB(item.databaseId as DatabaseId, lang) : undefined
+      item.type === 'database'
+        ? dbManager.getDB(item.databaseId as DatabaseId, item.lang)
+        : undefined
     await installAtomicResourceFile({
       candidatePath: temporaryPath,
       destinationPath,
@@ -246,6 +270,8 @@ export const installResourceDatabaseItem = async (
     case 'database':
       return installDatabase(item, callbacks)
     case 'dictionary':
+      return installDatabase(item, callbacks)
+    case 'dictionary-directory':
       return installDatabase(item, callbacks)
     case 'commentary':
       return installDatabase(item, callbacks)

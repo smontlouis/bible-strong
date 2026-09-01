@@ -14,6 +14,7 @@ import {
 } from "./build-correspondences.mjs";
 import { enrichDictionaryEntryLinks } from "./dictionary-entry-links.mjs";
 import { buildDictionaryDirectory } from "./build-directory.mjs";
+import { installDictionaryVersePresences } from "./dictionary-verse-presences.mjs";
 
 const workflowRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -100,6 +101,23 @@ process.stdout.write(
   `renvois d’entrées: ${entryLinks.totals.finalLinks} liens (${entryLinks.totals.editorialCueLinks} See/Voir, ${entryLinks.totals.generatedLinks} générés, ${entryLinks.totals.selfLinksRemoved} auto-liens retirés)\n`
 );
 
+const versePresences = await installDictionaryVersePresences({
+  configPath,
+  normalizedRoot: outputRoot,
+  correspondenceIndex: correspondences,
+  ...(args["lsg-bible"] || args["kjv-bible"]
+    ? {
+        biblePaths: {
+          fr: args["lsg-bible"],
+          en: args["kjv-bible"]
+        }
+      }
+    : {})
+});
+process.stdout.write(
+  `présences LSG/KJV: ${versePresences.stats.verseConceptMatches} correspondances, ${versePresences.stats.rejectedAmbiguousAliases} alias ambigus rejetés\n`
+);
+
 const directory = await buildDictionaryDirectory({
   configPath,
   normalizedRoot: outputRoot
@@ -116,6 +134,7 @@ await writeFile(
       parserVersion: DICTIONARY_BCV_PARSER_VERSION,
       correspondences: correspondences.stats,
       entryLinks: entryLinks.totals,
+      versePresences: versePresences.stats,
       directory: {
         revision: directory.revision,
         ...directory.counts

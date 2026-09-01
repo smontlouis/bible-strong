@@ -111,6 +111,7 @@
     "database:sdabc:en",
     "database:treasury-david:en",
     "database:wesley:en",
+    "dictionary-directory",
     "strong-lexicon:core",
     "strong-lexicon:entities",
     "strong-lexicon:resources"

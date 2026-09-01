@@ -23,6 +23,10 @@ import {
   type MobileResourceCatalog
 } from "./packageMobileResourceCatalog.js";
 import {
+  buildDictionaryDirectoryResourcePublication,
+  validateDictionaryDirectoryResourcePublication
+} from "./packageDictionaryDirectoryResourcePublication.js";
+import {
   assertResourcePublicationArtifact,
   decodeResourcePublicationEnvelope,
   isNonEmptyString,
@@ -44,6 +48,8 @@ const normalizeDictionaryLibraryScript = path.resolve(
 );
 
 export type DictionaryLanguage = "fr" | "en";
+export type DictionaryPassageEvidenceKind =
+  "source-citation" | "verse-name" | "verse-phrase";
 
 export interface DictionaryPublicationMetadata {
   work: string;
@@ -87,7 +93,7 @@ export type CanonicalDictionaryPassageAnchor = {
   verseKey: string;
   entries: Array<{
     entryId: number;
-    evidenceKind: "source-citation";
+    evidenceKind: DictionaryPassageEvidenceKind;
   }>;
 };
 
@@ -215,7 +221,10 @@ const isDictionaryVerseKey = (value: unknown): value is string =>
   value === value.trim() &&
   value.split("-").length === 3 &&
   value.split("-").every((segment) => segment.length > 0) &&
-  !/[\\/\u0000-\u001f]/u.test(value);
+  !Array.from(value).some(
+    (character) =>
+      character === "\\" || character === "/" || character.charCodeAt(0) <= 0x1f
+  );
 
 const readDictionarySqlite = async (
   sqlitePath: string,
@@ -350,7 +359,9 @@ const readDictionarySqlite = async (
     if (
       !isDictionaryVerseKey(row.verse_key) ||
       !entryIds.has(row.entry_id) ||
-      row.evidence_kind !== "source-citation" ||
+      !["source-citation", "verse-name", "verse-phrase"].includes(
+        row.evidence_kind
+      ) ||
       !Number.isSafeInteger(row.ordinal) ||
       row.ordinal < 0 ||
       passageIdentities.has(identity)
@@ -361,7 +372,10 @@ const readDictionarySqlite = async (
     }
     passageIdentities.add(identity);
     const anchors = passageAnchorsByVerse.get(row.verse_key) ?? [];
-    anchors.push({ entryId: row.entry_id, evidenceKind: "source-citation" });
+    anchors.push({
+      entryId: row.entry_id,
+      evidenceKind: row.evidence_kind as DictionaryPassageEvidenceKind
+    });
     passageAnchorsByVerse.set(row.verse_key, anchors);
   }
   const passageAnchors = [...passageAnchorsByVerse].map(
@@ -752,6 +766,22 @@ export async function buildAllDictionaryResourcePublications(options: {
       ],
       { maxBuffer: 16 * 1024 * 1024 }
     );
+    await buildDictionaryDirectoryResourcePublication({
+      sqlitePath: path.join(normalizedRoot, "dictionary-directory.sqlite"),
+      outputDir: path.join(stagingDir, "directory"),
+      generatedAt: options.generatedAt
+    });
+    await Promise.all(
+      options.publications.map((publication) =>
+        execFileAsync("sqlite3", [
+          path.join(normalizedRoot, `${publication.work}.sqlite`),
+          `DELETE FROM dictionary_passage_anchors
+           WHERE evidence_kind IN ('verse-name', 'verse-phrase');
+           PRAGMA optimize;
+           VACUUM;`
+        ])
+      )
+    );
     const manifests: DictionaryResourcePublicationManifest[] = [];
     const identities = new Set<string>();
     for (const publication of options.publications) {
@@ -905,6 +935,10 @@ const dictionaryBundleDirectories = async (root: string): Promise<string[]> => {
     withFileTypes: true
   })) {
     if (!work.isDirectory()) continue;
+    if (existsSync(path.join(root, work.name, "manifest.json"))) {
+      bundles.push(path.join(root, work.name));
+      continue;
+    }
     for (const language of await readdir(path.join(root, work.name), {
       withFileTypes: true
     })) {
@@ -959,6 +993,64 @@ export async function synchronizeDictionaryCatalogContracts(
   );
   const ids: string[] = [];
   for (const bundleDir of await dictionaryBundleDirectories(root)) {
+    if (existsSync(path.join(bundleDir, "manifest.json"))) {
+      const candidate = JSON.parse(
+        await readFile(path.join(bundleDir, "manifest.json"), "utf8")
+      ) as { identity?: { kind?: string } };
+      if (candidate.identity?.kind === "dictionary-directory") {
+        const manifest =
+          await validateDictionaryDirectoryResourcePublication(bundleDir);
+        const id = "dictionary-directory";
+        const file = "dictionaries/dictionary-directory.sqlite.zip";
+        const contentBytes = await zipEntryBytes(
+          path.join(bundleDir, manifest.offlineArtifact.path),
+          manifest.offlineArtifact.entry
+        );
+        const artifactUrl = new URL(
+          file,
+          "https://api.bible-strong.app/v1/offline-artifacts/"
+        );
+        artifactUrl.searchParams.set("sha256", manifest.offlineArtifact.sha256);
+        catalog.resources[id] = {
+          id,
+          url: artifactUrl.toString(),
+          file,
+          entry: manifest.offlineArtifact.entry,
+          entries: {
+            canonical: {
+              entry: manifest.offlineArtifact.entry,
+              sha256: manifest.offlineArtifact.contentSha256,
+              bytes: contentBytes
+            }
+          },
+          archiveSha256: manifest.offlineArtifact.sha256,
+          archiveBytes: manifest.offlineArtifact.bytes,
+          contentSha256: manifest.offlineArtifact.contentSha256,
+          contentBytes,
+          resourceRevision: manifest.revision,
+          installedBytes: contentBytes,
+          peakInstallationBytes: Math.ceil(
+            (manifest.offlineArtifact.bytes + contentBytes) * 1.15
+          ),
+          strategy: "archive-extract"
+        };
+        inventoryById.set(id, {
+          id,
+          artifactUrl: `https://assets.bible-strong.app/${file}`,
+          sources: [
+            {
+              role: "canonical",
+              sourceUrl: `https://assets.bible-strong.app/${file.replace(/\.zip$/u, "")}`,
+              entry: manifest.offlineArtifact.entry
+            }
+          ],
+          strategy: "archive-extract",
+          resourceRevision: manifest.revision
+        });
+        ids.push(id);
+        continue;
+      }
+    }
     const manifest = await validateDictionaryResourcePublication(bundleDir);
     const id = `database:${manifest.identity.resourceId}:${manifest.identity.language}`;
     const file = `dictionaries/dictionary-${manifest.identity.work}-${manifest.identity.language}.sqlite.zip`;
@@ -1124,7 +1216,9 @@ const decodeCanonicalDictionary = (
         !isNonNegativeInteger(entry.entryId) ||
         entry.entryId === 0 ||
         !entryIds.has(entry.entryId) ||
-        entry.evidenceKind !== "source-citation" ||
+        !["source-citation", "verse-name", "verse-phrase"].includes(
+          entry.evidenceKind
+        ) ||
         identities.has(`${entry.entryId}:${entry.evidenceKind}`)
       ) {
         throw new Error("dictionary-publication-canonical-passage-invalid");

@@ -1,7 +1,13 @@
 import type { DownloadItem } from '~state/downloadQueue'
 import { isSharedDB, type DatabaseId, type ResourceLanguage } from '~helpers/databaseTypes'
 import { versions, type Version } from '~helpers/bibleVersions'
-import { databases, getCommentaryDbPath, getDbPath, getDictionaryDbPath } from '~helpers/databases'
+import {
+  databases,
+  getCommentaryDbPath,
+  getDbPath,
+  getDictionaryDbPath,
+  getDictionaryDirectoryDbPath,
+} from '~helpers/databases'
 import { getMobileResourceCatalogEntry } from '~helpers/mobileResourceCatalog'
 import {
   getStrongBiblePublication,
@@ -171,6 +177,7 @@ type OfflineCopyDownloadPlanContext = {
     | StrongBibleSidecarAvailability['status']
     | InterlinearSidecarAvailability['status']
   isStrongLexiconCoreAvailable?: boolean
+  isDictionaryDirectoryAvailable?: boolean
 }
 
 export const createOfflineCopyDownloadItem = (identity: OfflineCopyIdentity): DownloadItem => {
@@ -185,6 +192,8 @@ export const createOfflineCopyDownloadItem = (identity: OfflineCopyIdentity): Do
       return createStrongLexiconModuleDownloadItem(identity.moduleId)
     case 'dictionary':
       return createDictionaryDownloadItem(identity)
+    case 'dictionary-directory':
+      return createDictionaryDirectoryDownloadItem()
     case 'commentary':
       return createCommentaryDownloadItem(identity)
     case 'database':
@@ -220,7 +229,9 @@ export const createOfflineCopyDownloadPlan = (
         context.isStrongLexiconCoreAvailable ?? false
       )
     case 'dictionary':
-      return [createDictionaryDownloadItem(identity)]
+      return createDictionaryDownloadPlan(identity, context.isDictionaryDirectoryAvailable ?? false)
+    case 'dictionary-directory':
+      return [createDictionaryDirectoryDownloadItem()]
     case 'commentary':
       return [createCommentaryDownloadItem(identity)]
     case 'database':
@@ -229,6 +240,31 @@ export const createOfflineCopyDownloadPlan = (
     case 'bible-red-words':
       return [createBibleDownloadItem(identity.versionId)]
   }
+}
+
+export function createDictionaryDirectoryDownloadItem(): DownloadItem {
+  const catalogArtifact = getMobileResourceCatalogEntry('dictionary-directory')
+  return {
+    id: 'dictionary-directory',
+    type: 'dictionary-directory',
+    name: 'Dictionary Directory',
+    url: catalogArtifact.url,
+    destinationPath: getDictionaryDirectoryDbPath(),
+    archiveEntry: catalogArtifact.entry,
+    estimatedSize: catalogArtifact.archiveBytes,
+    expectedArchiveSha256: catalogArtifact.archiveSha256,
+    addedAt: Date.now(),
+    retryCount: 0,
+  }
+}
+
+export const createDictionaryDownloadPlan = (
+  identity: Extract<OfflineCopyIdentity, { kind: 'dictionary' }>,
+  isDirectoryAvailable = false
+): DownloadItem[] => {
+  if (isDirectoryAvailable) return [createDictionaryDownloadItem(identity)]
+  const directory = createDictionaryDirectoryDownloadItem()
+  return [directory, { ...createDictionaryDownloadItem(identity), dependsOnId: directory.id }]
 }
 
 export function createDictionaryDownloadItem(

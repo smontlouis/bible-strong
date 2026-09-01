@@ -186,6 +186,29 @@ const DictionaryPublicationBundleManifestSchema = Schema.Struct({
   }),
 })
 
+const DictionaryDirectoryPublicationBundleManifestSchema = Schema.Struct({
+  ...PublicationBundleCommonFields,
+  canonical: Schema.Struct({
+    ...PublicationBundleCommonFields.canonical.fields,
+    schemaVersion: Schema.Literal(1),
+  }),
+  offlineArtifact: Schema.Struct({
+    ...PublicationBundleCommonFields.offlineArtifact.fields,
+    entry: Schema.Literal('dictionary-directory.sqlite'),
+  }),
+  identity: Schema.Struct({
+    kind: Schema.Literal('dictionary-directory'),
+    resourceId: Schema.Literal('DICTIONARY_DIRECTORY'),
+    language: Schema.Literal('mul'),
+  }),
+  counts: Schema.Struct({
+    works: Schema.NonNegativeInt,
+    entries: Schema.NonNegativeInt,
+    correspondences: Schema.NonNegativeInt,
+    passageAnchors: Schema.NonNegativeInt,
+  }),
+})
+
 const CommentaryPublicationBundleManifestSchema = Schema.Struct({
   ...PublicationBundleCommonFields,
   canonical: Schema.Struct({
@@ -352,6 +375,7 @@ const PublicationBundleManifestSchema = Schema.Union(
   BiblePublicationBundleManifestSchema,
   NavePublicationBundleManifestSchema,
   DictionaryPublicationBundleManifestSchema,
+  DictionaryDirectoryPublicationBundleManifestSchema,
   CommentaryPublicationBundleManifestSchema,
   CrossReferencePublicationBundleManifestSchema,
   TimelinePublicationBundleManifestSchema,
@@ -364,6 +388,8 @@ export type BiblePublicationBundleManifest = typeof BiblePublicationBundleManife
 export type NavePublicationBundleManifest = typeof NavePublicationBundleManifestSchema.Type
 export type DictionaryPublicationBundleManifest =
   typeof DictionaryPublicationBundleManifestSchema.Type
+export type DictionaryDirectoryPublicationBundleManifest =
+  typeof DictionaryDirectoryPublicationBundleManifestSchema.Type
 export type CommentaryPublicationBundleManifest =
   typeof CommentaryPublicationBundleManifestSchema.Type
 export type CrossReferencePublicationBundleManifest =
@@ -379,6 +405,7 @@ export type PublicationBundleManifest =
   | BiblePublicationBundleManifest
   | NavePublicationBundleManifest
   | DictionaryPublicationBundleManifest
+  | DictionaryDirectoryPublicationBundleManifest
   | CommentaryPublicationBundleManifest
   | CrossReferencePublicationBundleManifest
   | TimelinePublicationBundleManifest
@@ -397,6 +424,11 @@ export const isNavePublicationBundleManifest = (
 export const isDictionaryPublicationBundleManifest = (
   manifest: PublicationBundleManifest
 ): manifest is DictionaryPublicationBundleManifest => manifest.identity.kind === 'dictionary'
+
+export const isDictionaryDirectoryPublicationBundleManifest = (
+  manifest: PublicationBundleManifest
+): manifest is DictionaryDirectoryPublicationBundleManifest =>
+  manifest.identity.kind === 'dictionary-directory'
 
 export const isCommentaryPublicationBundleManifest = (
   manifest: PublicationBundleManifest
@@ -484,7 +516,7 @@ export type CanonicalDictionaryPassageAnchor = {
   verseKey: string
   entries: Array<{
     entryId: number
-    evidenceKind: 'source-citation'
+    evidenceKind: 'source-citation' | 'verse-name' | 'verse-phrase'
   }>
 }
 
@@ -508,6 +540,19 @@ export type CanonicalDictionaryPublication = {
   entries: CanonicalDictionaryEntry[]
   verseAnchors: CanonicalDictionaryVerseAnchor[]
   passageAnchors?: CanonicalDictionaryPassageAnchor[]
+}
+
+export type CanonicalDictionaryDirectoryPublication = {
+  format: 'bible-strong-canonical-dictionary-directory'
+  schemaVersion: 1
+  revision: string
+  contentSha256: string
+  counts: {
+    works: number
+    entries: number
+    correspondences: number
+    passageAnchors: number
+  }
 }
 
 export type CanonicalCommentaryPublication = {
@@ -641,6 +686,7 @@ export type CanonicalPublication =
   | CanonicalBiblePublication
   | CanonicalNavePublication
   | CanonicalDictionaryPublication
+  | CanonicalDictionaryDirectoryPublication
   | CanonicalCommentaryPublication
   | CanonicalCrossReferencePublication
   | CanonicalTimelinePublication
@@ -677,15 +723,17 @@ export const derivePublicationRevision = (manifest: PublicationBundleManifest): 
       ? manifest.identity.resourceId.toLowerCase()
       : manifest.identity.kind === 'dictionary'
         ? `dictionary-${manifest.identity.work}-${manifest.identity.language}`
-        : manifest.identity.kind === 'commentary'
-          ? `commentary-${manifest.identity.resourceId.toLowerCase()}-${manifest.identity.language}`
-          : manifest.identity.kind === 'cross-references'
-            ? `cross-references-${manifest.identity.language}`
-            : manifest.identity.kind === 'timeline'
-              ? `timeline-${manifest.identity.language}`
-              : manifest.identity.kind === 'strong-lexicon-module'
-                ? manifest.identity.resourceId
-                : manifest.identity.versionId.toLowerCase()
+        : manifest.identity.kind === 'dictionary-directory'
+          ? 'dictionary-directory'
+          : manifest.identity.kind === 'commentary'
+            ? `commentary-${manifest.identity.resourceId.toLowerCase()}-${manifest.identity.language}`
+            : manifest.identity.kind === 'cross-references'
+              ? `cross-references-${manifest.identity.language}`
+              : manifest.identity.kind === 'timeline'
+                ? `timeline-${manifest.identity.language}`
+                : manifest.identity.kind === 'strong-lexicon-module'
+                  ? manifest.identity.resourceId
+                  : manifest.identity.versionId.toLowerCase()
   const digest = createHash('sha256')
     .update(JSON.stringify(normalizeJson(envelope)))
     .digest('hex')
@@ -790,6 +838,14 @@ export const decodePublicationBundleManifest = (value: unknown): PublicationBund
       manifest.counts.entries === 0)
   ) {
     throw new Error('PUBLICATION_BUNDLE_ALPHABETICAL_BROWSE_INVALID')
+  }
+  if (
+    isDictionaryDirectoryPublicationBundleManifest(manifest) &&
+    (manifest.offlineArtifact.entry !== 'dictionary-directory.sqlite' ||
+      manifest.counts.works === 0 ||
+      manifest.counts.entries === 0)
+  ) {
+    throw new Error('PUBLICATION_BUNDLE_MANIFEST_INVALID')
   }
   if (
     isStrongBiblePublicationBundleManifest(manifest) &&
@@ -1033,7 +1089,7 @@ export const decodeCanonicalDictionary = (value: unknown): CanonicalDictionaryPu
           !entry ||
           !isPositiveInteger(entry.entryId) ||
           !entryIds.has(entry.entryId) ||
-          entry.evidenceKind !== 'source-citation' ||
+          !['source-citation', 'verse-name', 'verse-phrase'].includes(entry.evidenceKind) ||
           identities.has(identity)
         ) {
           throw new Error('CANONICAL_DICTIONARY_PASSAGE_INVALID')
@@ -1043,6 +1099,32 @@ export const decodeCanonicalDictionary = (value: unknown): CanonicalDictionaryPu
     }
   }
   return candidate as CanonicalDictionaryPublication
+}
+
+export const decodeCanonicalDictionaryDirectory = (
+  value: unknown
+): CanonicalDictionaryDirectoryPublication => {
+  if (!value || typeof value !== 'object') {
+    throw new Error('CANONICAL_DICTIONARY_DIRECTORY_INVALID')
+  }
+  const candidate = value as Partial<CanonicalDictionaryDirectoryPublication>
+  const counts = candidate.counts
+  if (
+    candidate.format !== 'bible-strong-canonical-dictionary-directory' ||
+    candidate.schemaVersion !== 1 ||
+    !isNonEmptyString(candidate.revision) ||
+    !/^[a-f0-9]{64}$/u.test(candidate.contentSha256 ?? '') ||
+    !counts ||
+    !isNonNegativeInteger(counts.works) ||
+    !isNonNegativeInteger(counts.entries) ||
+    !isNonNegativeInteger(counts.correspondences) ||
+    !isNonNegativeInteger(counts.passageAnchors) ||
+    counts.works === 0 ||
+    counts.entries === 0
+  ) {
+    throw new Error('CANONICAL_DICTIONARY_DIRECTORY_INVALID')
+  }
+  return candidate as CanonicalDictionaryDirectoryPublication
 }
 
 const isSupplementaryVerseKey = (value: unknown): value is string =>
@@ -1834,7 +1916,10 @@ const validateDictionaryOfflineParity = async (
           )
           const byVerse = new Map<
             string,
-            Array<{ entryId: number; evidenceKind: 'source-citation' }>
+            Array<{
+              entryId: number
+              evidenceKind: 'source-citation' | 'verse-name' | 'verse-phrase'
+            }>
           >()
           for (const row of rows) {
             const verseKey = requireSqliteString(row.verse_key)
@@ -1842,13 +1927,16 @@ const validateDictionaryOfflineParity = async (
             const evidenceKind = requireSqliteString(row.evidence_kind)
             if (
               !isDictionaryVerseKey(verseKey) ||
-              evidenceKind !== 'source-citation' ||
+              !['source-citation', 'verse-name', 'verse-phrase'].includes(evidenceKind) ||
               !canonical.entries.some(entry => entry.id === entryId)
             ) {
               throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
             }
             const anchors = byVerse.get(verseKey) ?? []
-            anchors.push({ entryId, evidenceKind })
+            anchors.push({
+              entryId,
+              evidenceKind: evidenceKind as 'source-citation' | 'verse-name' | 'verse-phrase',
+            })
             byVerse.set(verseKey, anchors)
           }
           return [...byVerse].map(([verseKey, passageEntries]) => ({
@@ -1862,6 +1950,60 @@ const validateDictionaryOfflineParity = async (
       JSON.stringify(verseAnchors) !== JSON.stringify(canonical.verseAnchors) ||
       (canonical.passageAnchors !== undefined &&
         JSON.stringify(passageAnchors) !== JSON.stringify(canonical.passageAnchors))
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
+    }
+  } catch (cause) {
+    if (cause instanceof Error && cause.message.startsWith('OFFLINE_ARTIFACT_')) throw cause
+    throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID', { cause })
+  } finally {
+    database?.close()
+  }
+}
+
+const validateDictionaryDirectoryOfflineParity = async (
+  offlineContent: Uint8Array,
+  canonical: CanonicalDictionaryDirectoryPublication
+) => {
+  const SQL = await initSqlJs()
+  let database: Database | undefined
+  try {
+    database = new SQL.Database(offlineContent)
+    const integrity = readSqliteRows(database, 'PRAGMA integrity_check')
+    if (integrity.length !== 1 || Object.values(integrity[0] ?? {}).some(value => value !== 'ok')) {
+      throw new Error('OFFLINE_ARTIFACT_INTEGRITY_INVALID')
+    }
+    const tables = new Set(
+      readSqliteRows(
+        database,
+        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+      ).map(row => requireSqliteString(row.name))
+    )
+    if (
+      ![
+        'RESOURCE_METADATA',
+        'dictionary_works',
+        'dictionary_entries',
+        'dictionary_correspondences',
+        'dictionary_correspondence_members',
+        'dictionary_passage_anchors',
+      ].every(table => tables.has(table))
+    ) {
+      throw new Error('OFFLINE_ARTIFACT_SCHEMA_INVALID')
+    }
+    const metadataRows = readSqliteRows(
+      database,
+      `SELECT revision, works_count, entries_count, correspondences_count,
+              passage_anchors_count FROM RESOURCE_METADATA`
+    )
+    const metadata = metadataRows[0]
+    if (
+      metadataRows.length !== 1 ||
+      requireSqliteString(metadata?.revision) !== canonical.revision ||
+      requireSqliteInteger(metadata?.works_count) !== canonical.counts.works ||
+      requireSqliteInteger(metadata?.entries_count) !== canonical.counts.entries ||
+      requireSqliteInteger(metadata?.correspondences_count) !== canonical.counts.correspondences ||
+      requireSqliteInteger(metadata?.passage_anchors_count) !== canonical.counts.passageAnchors
     ) {
       throw new Error('OFFLINE_ARTIFACT_CONTENT_MISMATCH')
     }
@@ -3073,6 +3215,7 @@ export const validatePublicationBundle = async (bundlePath: string) => {
   if (
     (isNavePublicationBundleManifest(manifest) ||
       isDictionaryPublicationBundleManifest(manifest) ||
+      isDictionaryDirectoryPublicationBundleManifest(manifest) ||
       isCommentaryPublicationBundleManifest(manifest) ||
       isCrossReferencePublicationBundleManifest(manifest) ||
       isStrongBiblePublicationBundleManifest(manifest) ||
@@ -3207,6 +3350,16 @@ export const validatePublicationBundle = async (bundlePath: string) => {
       throw new Error('PUBLICATION_BUNDLE_ALPHABETICAL_BROWSE_MISMATCH')
     }
     await validateDictionaryOfflineParity(offlineContent, canonical)
+  } else if (isDictionaryDirectoryPublicationBundleManifest(manifest)) {
+    canonical = decodeCanonicalDictionaryDirectory(canonicalValue)
+    if (
+      canonical.revision !== manifest.revision ||
+      canonical.contentSha256 !== manifest.offlineArtifact.contentSha256 ||
+      JSON.stringify(canonical.counts) !== JSON.stringify(manifest.counts)
+    ) {
+      throw new Error('PUBLICATION_BUNDLE_IDENTITY_MISMATCH')
+    }
+    await validateDictionaryDirectoryOfflineParity(offlineContent, canonical)
   } else if (isCommentaryPublicationBundleManifest(manifest)) {
     canonical = decodeCanonicalCommentary(canonicalValue)
     if (

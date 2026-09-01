@@ -54,6 +54,38 @@ jest.mock('~helpers/languageUtils', () => ({
   getDefaultBibleVersion: jest.fn((lang: string) => (lang === 'fr' ? 'LSG' : 'KJV')),
 }))
 
+jest.mock('~features/resources/dictionaryAccess', () => ({
+  KNOWN_DICTIONARY_WORKS: [
+    {
+      resource: { work: 'westphal', language: 'fr' },
+      resourceId: 'WESTPHAL',
+      title: 'Westphal',
+      abbreviation: 'Westphal',
+      authors: ['Alexandre Westphal'],
+      description: '',
+      offlineDownload: true,
+    },
+    {
+      resource: { work: 'bost', language: 'fr' },
+      resourceId: 'BOST',
+      title: 'Bost',
+      abbreviation: 'Bost',
+      authors: ['Jean-Augustin Bost'],
+      description: '',
+      offlineDownload: true,
+    },
+    {
+      resource: { work: 'smith', language: 'en' },
+      resourceId: 'SMITH',
+      title: 'Smith’s Bible Dictionary',
+      abbreviation: 'Smith',
+      authors: ['William Smith'],
+      description: 'Historical Bible dictionary covering people, places, institutions and customs.',
+      offlineDownload: true,
+    },
+  ],
+}))
+
 jest.mock('~helpers/strongBiblePublications', () => ({
   STRONG_BIBLE_PUBLICATIONS: {
     LSG: {},
@@ -280,24 +312,57 @@ describe('offline setup folders', () => {
     expect(selectionKinds).not.toContain('database')
   })
 
-  it('offers localized exploration resources and keeps biblical entities', () => {
+  it('offers commentaries and dictionaries as individual exploration resources', () => {
     const sections = getOfflineSetupFolderSections('explore-bible', 'en')
-    const options = sections.flatMap(section => section.options)
-    expect(sections.map(section => section.id)).toEqual(['resources', 'other-languages'])
-    expect(sections[0]?.options.map(option => option.id)).toEqual(
-      expect.arrayContaining(['database:TRESOR:fr', 'strong-lexicon:entities'])
-    )
-    expect(sections[1]?.collapsedByDefault).toBe(true)
+    const options = sections.flatMap(section => [
+      ...section.options,
+      ...(section.groups?.flatMap(group => group.options) ?? []),
+    ])
+    expect(sections.map(section => section.id)).toEqual([
+      'dictionaries',
+      'commentaries',
+      'study-tools',
+      'other-languages',
+    ])
+    expect(
+      sections.find(section => section.id === 'dictionaries')?.options.map(({ id }) => id)
+    ).toEqual(['dictionary:smith:SMITH:en'])
+    expect(
+      sections.find(section => section.id === 'dictionaries')?.options.map(({ label }) => label)
+    ).toEqual(['William Smith — Smith’s Bible Dictionary'])
+    expect(
+      sections
+        .find(section => section.id === 'dictionaries')
+        ?.options.map(({ description }) => description)
+    ).toEqual(['Historical Bible dictionary covering people, places, institutions and customs.'])
+    expect(
+      sections.find(section => section.id === 'commentaries')?.options.map(({ id }) => id)
+    ).toEqual(expect.arrayContaining(['commentary:barnes:en', 'commentary:acbc:en']))
+    expect(sections.find(section => section.id === 'commentaries')?.collapsedByDefault).toBeFalsy()
+    expect(
+      sections.find(section => section.id === 'study-tools')?.options.map(({ id }) => id)
+    ).toEqual(expect.arrayContaining(['database:TRESOR:fr', 'strong-lexicon:entities']))
+    expect(sections.at(-1)?.collapsedByDefault).toBe(true)
+    expect(sections.at(-1)?.groups?.map(group => group.id)).toEqual([
+      'other-language-dictionaries',
+      'other-language-commentaries',
+      'other-language-study-tools',
+    ])
     expect(options.map(option => option.id)).toEqual(
       expect.arrayContaining([
-        'database:DICTIONNAIRE:en',
+        'dictionary:smith:SMITH:en',
+        'dictionary:westphal:WESTPHAL:fr',
+        'dictionary:bost:BOST:fr',
+        'commentary:barnes:en',
+        'commentary:barnes:fr',
         'database:NAVE:en',
         'database:TRESOR:fr',
         'strong-lexicon:entities',
-        'database:DICTIONNAIRE:fr',
-        'database:MHY:fr',
       ])
     )
+    expect(options.map(option => option.id)).not.toContain('commentaries-classics:en')
+    expect(options.map(option => option.id)).not.toContain('database:DICTIONNAIRE:en')
+    expect(options.map(option => option.id)).not.toContain('database:MHY:fr')
     expect(options.map(option => option.id)).not.toContain('database:MHY:en')
   })
 
@@ -327,7 +392,7 @@ describe('offline setup folders', () => {
     }
   )
 
-  it.each(['read-bible', 'understand-words', 'explore-bible', 'original-languages'] as const)(
+  it.each(['read-bible', 'understand-words', 'original-languages'] as const)(
     'keeps only Other languages as a titled section in %s',
     folderId => {
       const sections = getOfflineSetupFolderSections(folderId, 'fr')

@@ -152,8 +152,14 @@ const OfflineSetupFolderDetail = ({
               const collapsed = Boolean(
                 section.collapsedByDefault && !expandedSectionIds.has(section.id)
               )
+              const optionGroups = [
+                ...(section.options.length
+                  ? [{ id: section.id, titleKey: undefined, options: section.options }]
+                  : []),
+                ...(section.groups ?? []),
+              ]
               return (
-                <VStack key={section.id} gap={8}>
+                <VStack key={section.id} gap={section.groups?.length ? 16 : 8}>
                   <OfflineSetupSectionTitle
                     collapsed={collapsed}
                     collapsible={Boolean(section.collapsedByDefault)}
@@ -161,24 +167,37 @@ const OfflineSetupFolderDetail = ({
                     palette={palette}
                     titleKey={section.titleKey}
                   />
-                  {!collapsed
-                    ? section.options.map(option => {
-                        const selected = selectedIds.has(option.id)
-                        const locked = lockedOptionIds.has(option.id)
-                        return (
-                          <OfflineSetupResourceOption
-                            key={option.id}
-                            lang={lang}
-                            locked={locked}
-                            onPress={() => onToggleOption(option)}
-                            option={option}
-                            selected={selected}
-                            sizeManifest={sizeManifest}
+                  {!collapsed ? (
+                    <VStack gap={18}>
+                      {optionGroups.map(group => (
+                        <VStack key={group.id} gap={8}>
+                          <OfflineSetupSectionTitle
+                            collapsed={false}
+                            collapsible={false}
+                            onToggle={() => undefined}
                             palette={palette}
+                            titleKey={group.titleKey}
                           />
-                        )
-                      })
-                    : null}
+                          {group.options.map(option => {
+                            const selected = selectedIds.has(option.id)
+                            const locked = lockedOptionIds.has(option.id)
+                            return (
+                              <OfflineSetupResourceOption
+                                key={option.id}
+                                lang={lang}
+                                locked={locked}
+                                onPress={() => onToggleOption(option)}
+                                option={option}
+                                selected={selected}
+                                sizeManifest={sizeManifest}
+                                palette={palette}
+                              />
+                            )
+                          })}
+                        </VStack>
+                      ))}
+                    </VStack>
+                  ) : null}
                 </VStack>
               )
             })}

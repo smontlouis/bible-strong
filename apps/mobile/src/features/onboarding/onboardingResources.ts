@@ -3,6 +3,8 @@ import {
   createBibleDownloadItem,
   createDatabaseDownloadItem,
   createCommentaryDownloadItem,
+  createDictionaryDownloadItem,
+  createDictionaryDirectoryDownloadItem,
   createInterlinearSidecarDownloadItem,
   createStrongSidecarDownloadItem,
   createStrongLexiconModuleDownloadItem,
@@ -49,6 +51,13 @@ export type OnboardingResourceSelection =
       kind: 'commentary'
       resourceId: string
       lang: ResourceLanguage
+    }
+  | {
+      kind: 'dictionary'
+      work: string
+      resourceId: string
+      lang: ResourceLanguage
+      title: string
     }
 
 type TranslateResourceName = (key: string, options?: Record<string, string | undefined>) => string
@@ -97,6 +106,7 @@ export const getOnboardingResourceDisplayName = (
       getCommentaryByPublicationId(resource.resourceId, resource.lang)?.title ?? resource.resourceId
     )
   }
+  if (resource.kind === 'dictionary') return resource.title
   return translate(DATABASE_RESOURCE_NAME_KEYS[resource.databaseId])
 }
 
@@ -115,6 +125,14 @@ export const getOnboardingResourceIdentity = (
   }
   if (resource.kind === 'commentary') {
     return { kind: 'commentary', resourceId: resource.resourceId, language: resource.lang }
+  }
+  if (resource.kind === 'dictionary') {
+    return {
+      kind: 'dictionary',
+      work: resource.work,
+      resourceId: resource.resourceId,
+      language: resource.lang,
+    }
   }
   return { kind: 'database', databaseId: resource.databaseId, language: resource.lang }
 }
@@ -203,6 +221,28 @@ export const createDownloadItemFromOnboardingSelection = (
       entry?.title
     )
   }
+  if (resource.kind === 'dictionary') {
+    const directory = createDictionaryDirectoryDownloadItem()
+    return {
+      ...createDictionaryDownloadItem({
+        kind: 'dictionary',
+        work: resource.work,
+        resourceId: resource.resourceId,
+        language: resource.lang,
+      }),
+      name: resource.title,
+      dependsOnId: directory.id,
+    }
+  }
 
   return createDatabaseDownloadItem(resource.databaseId, resource.lang)
+}
+
+export const createDownloadItemsFromOnboardingSelections = (
+  resources: readonly OnboardingResourceSelection[]
+): DownloadItem[] => {
+  const selectedItems = resources.map(createDownloadItemFromOnboardingSelection)
+  if (!resources.some(resource => resource.kind === 'dictionary')) return selectedItems
+  const directory = createDictionaryDirectoryDownloadItem()
+  return [directory, ...selectedItems]
 }

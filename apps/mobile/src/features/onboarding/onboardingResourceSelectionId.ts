@@ -31,6 +31,14 @@ export const getOnboardingResourceSelectionId = (resource: OnboardingResourceSel
       language: resource.lang,
     })
   }
+  if (resource.kind === 'dictionary') {
+    return createOfflineCopyId({
+      kind: 'dictionary',
+      work: resource.work,
+      resourceId: resource.resourceId,
+      language: resource.lang,
+    })
+  }
 
   return createOfflineCopyId({
     kind: 'database',

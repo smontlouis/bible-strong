@@ -13,6 +13,11 @@ import {
 } from '~features/bible/bibleDefaultCatalog'
 import type { OnboardingResourceSelection } from './onboardingResources'
 import { getOnboardingResourceSelectionId } from './onboardingResourceSelectionId'
+import {
+  getCommentaryCatalogForLanguage,
+  type CommentaryCatalogEntry,
+} from '@bible-strong/resource-catalog/commentaries'
+import { KNOWN_DICTIONARY_WORKS } from '~features/resources/dictionaryAccess'
 
 export const OFFLINE_SETUP_FOLDER_IDS = [
   'read-bible',
@@ -39,6 +44,11 @@ export type OfflineSetupSection = {
   titleKey?: string
   collapsedByDefault?: boolean
   options: OfflineSetupOption[]
+  groups?: {
+    id: string
+    titleKey: string
+    options: OfflineSetupOption[]
+  }[]
 }
 
 export type OfflineSetupFolderOptionIds = Record<OfflineSetupFolderId, string[]>
@@ -91,6 +101,63 @@ const createDatabaseOption = (
     labelKey: resourceLang === currentLang ? undefined : 'offlineSetup.option.localizedResource',
     selections: [{ kind: 'database', databaseId, lang: resourceLang }],
   }
+}
+
+const createCommentaryOption = (
+  commentary: CommentaryCatalogEntry,
+  resourceLang: ResourceLanguage,
+  currentLang: ResourceLanguage
+): OfflineSetupOption => ({
+  id: `commentary:${commentary.publicationId}:${resourceLang}`,
+  label: commentary.title,
+  description: commentary.description[resourceLang],
+  language: resourceLang,
+  labelKey: resourceLang === currentLang ? undefined : 'offlineSetup.option.localizedResource',
+  selections: [{ kind: 'commentary', resourceId: commentary.publicationId, lang: resourceLang }],
+})
+
+const getCommentaryOptions = (
+  resourceLang: ResourceLanguage,
+  currentLang: ResourceLanguage
+): OfflineSetupOption[] =>
+  getCommentaryCatalogForLanguage(resourceLang).map(commentary =>
+    createCommentaryOption(commentary, resourceLang, currentLang)
+  )
+
+const getDictionaryOptions = (
+  resourceLang: ResourceLanguage,
+  currentLang: ResourceLanguage
+): OfflineSetupOption[] => {
+  const options: OfflineSetupOption[] = []
+
+  for (const dictionary of KNOWN_DICTIONARY_WORKS) {
+    if (dictionary.resource.language !== resourceLang || dictionary.offlineDownload === false) {
+      continue
+    }
+
+    const label = dictionary.authors[0]
+      ? `${dictionary.authors[0]} — ${dictionary.title}`
+      : dictionary.title
+
+    options.push({
+      id: `dictionary:${dictionary.resource.work}:${dictionary.resourceId}:${resourceLang}`,
+      label,
+      description: dictionary.description || undefined,
+      language: resourceLang,
+      labelKey: resourceLang === currentLang ? undefined : 'offlineSetup.option.localizedResource',
+      selections: [
+        {
+          kind: 'dictionary',
+          work: dictionary.resource.work,
+          resourceId: dictionary.resourceId,
+          lang: resourceLang,
+          title: label,
+        },
+      ],
+    })
+  }
+
+  return options
 }
 
 const VERSION_CATALOG_LABELS: VersionCatalogLabels = {
@@ -199,38 +266,25 @@ const getStrongSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
 
 const getExploreSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
   const otherLang: ResourceLanguage = lang === 'fr' ? 'en' : 'fr'
-  const primaryDatabaseIds = [
-    'DICTIONNAIRE',
-    'NAVE',
-    ...(lang === 'fr' ? (['MHY'] as const) : []),
-    'TIMELINE',
-  ] as const
 
   return [
     {
-      id: 'primary-language',
-      titleKey: 'offlineSetup.section.primaryLanguage',
+      id: 'dictionaries',
+      titleKey: 'offlineSetup.section.dictionaries',
+      options: getDictionaryOptions(lang, lang),
+    },
+    {
+      id: 'commentaries',
+      titleKey: 'offlineSetup.section.commentaries',
+      options: getCommentaryOptions(lang, lang),
+    },
+    {
+      id: 'study-tools',
+      titleKey: 'offlineSetup.section.studyTools',
       options: [
-        {
-          id: `commentaries-classics:${lang}`,
-          label: '',
-          labelKey: 'offlineSetup.option.classicCommentaries',
-          descriptionKey: 'offlineSetup.option.classicCommentariesDescription',
-          language: lang,
-          selections:
-            lang === 'fr'
-              ? [
-                  { kind: 'commentary', resourceId: 'barnes', lang },
-                  { kind: 'commentary', resourceId: 'acbc', lang },
-                  { kind: 'commentary', resourceId: 'MHY', lang },
-                ]
-              : [
-                  { kind: 'commentary', resourceId: 'barnes', lang },
-                  { kind: 'commentary', resourceId: 'acbc', lang },
-                  { kind: 'commentary', resourceId: 'mhcc', lang },
-                ],
-        },
-        ...primaryDatabaseIds.map(databaseId => createDatabaseOption(databaseId, lang, lang)),
+        ...(['NAVE', 'TIMELINE'] as const).map(databaseId =>
+          createDatabaseOption(databaseId, lang, lang)
+        ),
         // Cross references use one shared physical copy with a canonical identity.
         createDatabaseOption('TRESOR', 'fr', 'fr'),
         {
@@ -250,11 +304,26 @@ const getExploreSections = (lang: ResourceLanguage): OfflineSetupSection[] => {
       id: 'other-languages',
       titleKey: 'offlineSetup.section.otherLanguages',
       collapsedByDefault: true,
-      options: [
-        ...(['DICTIONNAIRE', 'NAVE'] as const),
-        ...(otherLang === 'fr' ? (['MHY'] as const) : []),
-        'TIMELINE' as const,
-      ].map(databaseId => createDatabaseOption(databaseId, otherLang, lang)),
+      options: [],
+      groups: [
+        {
+          id: 'other-language-dictionaries',
+          titleKey: 'offlineSetup.section.dictionaries',
+          options: getDictionaryOptions(otherLang, lang),
+        },
+        {
+          id: 'other-language-commentaries',
+          titleKey: 'offlineSetup.section.commentaries',
+          options: getCommentaryOptions(otherLang, lang),
+        },
+        {
+          id: 'other-language-study-tools',
+          titleKey: 'offlineSetup.section.studyTools',
+          options: (['NAVE', 'TIMELINE'] as const).map(databaseId =>
+            createDatabaseOption(databaseId, otherLang, lang)
+          ),
+        },
+      ],
     },
   ]
 }
@@ -340,7 +409,7 @@ export const getOfflineSetupFolderSections = (
     case 'understand-words':
       return flattenResourceSections(getStrongSections(lang))
     case 'explore-bible':
-      return flattenResourceSections(getExploreSections(lang))
+      return getExploreSections(lang)
     case 'original-languages':
       return flattenResourceSections(getOriginalLanguageSections(lang))
   }
@@ -360,7 +429,10 @@ const getFolderOptions = (
 ): Record<OfflineSetupFolderId, OfflineSetupOption[]> => {
   const entries = OFFLINE_SETUP_FOLDER_IDS.map(folderId => [
     folderId,
-    getOfflineSetupFolderSections(folderId, lang).flatMap(section => section.options),
+    getOfflineSetupFolderSections(folderId, lang).flatMap(section => [
+      ...section.options,
+      ...(section.groups?.flatMap(group => group.options) ?? []),
+    ]),
   ])
   return Object.fromEntries(entries) as Record<OfflineSetupFolderId, OfflineSetupOption[]>
 }
@@ -491,7 +563,9 @@ export const resolveOfflineSetupFolderSelections = (
 ): OnboardingResourceSelection[] => {
   const selectedIds = new Set(optionIds)
   const selections = getOfflineSetupFolderSections(folderId, lang).flatMap(section =>
-    section.options.flatMap(option => (selectedIds.has(option.id) ? option.selections : []))
+    [...section.options, ...(section.groups?.flatMap(group => group.options) ?? [])].flatMap(
+      option => (selectedIds.has(option.id) ? option.selections : [])
+    )
   )
 
   return getUniqueResourceSelections(selections)

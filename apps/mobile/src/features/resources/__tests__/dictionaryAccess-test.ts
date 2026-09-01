@@ -183,6 +183,17 @@ describe('HTTP dictionary access', () => {
         evidenceKind: 'source-citation',
         correspondenceId: 'dictionary-correspondence-amour',
       },
+      {
+        resource: { kind: 'dictionary', work: 'westphal', language: 'fr', revision: 'r1' },
+        resourceId: 'WESTPHAL',
+        title: 'Dictionnaire encyclopédique de la Bible',
+        abbreviation: 'Westphal',
+        id: 8,
+        word: 'Jésus',
+        normalizedWord: 'jésus',
+        evidenceKind: 'verse-name',
+        correspondenceId: 'dictionary-correspondence-jesus',
+      },
     ]
     const fetcher = jest.fn(() => response({ verseKey: '43-3-16', entries }))
     const access = createHttpDictionaryAccess({

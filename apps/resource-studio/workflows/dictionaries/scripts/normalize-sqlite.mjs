@@ -106,7 +106,7 @@ export const normalizeDictionarySqlite = async ({
     `CREATE TABLE dictionary_passage_anchors (
        verse_key TEXT NOT NULL,
        entry_id INTEGER NOT NULL,
-       evidence_kind TEXT NOT NULL CHECK (evidence_kind IN ('source-citation')),
+       evidence_kind TEXT NOT NULL CHECK (evidence_kind IN ('source-citation', 'verse-name', 'verse-phrase')),
        ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
        PRIMARY KEY (verse_key, entry_id, evidence_kind),
        FOREIGN KEY (entry_id) REFERENCES dictionnaire(id) ON DELETE CASCADE

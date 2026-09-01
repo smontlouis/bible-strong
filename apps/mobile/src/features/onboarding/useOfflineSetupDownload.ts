@@ -7,7 +7,7 @@ import { bibleDomRemountSignalAtom } from '~state/app'
 import { downloadItemStatesAtom } from '~state/downloadQueue'
 import { selectedResourcesAtom } from './atom'
 import {
-  createDownloadItemFromOnboardingSelection,
+  createDownloadItemsFromOnboardingSelections,
   getOnboardingResourceSelectionId,
 } from './onboardingResources'
 import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
@@ -59,7 +59,9 @@ const useOfflineSetupDownload = ({
   const [closing, setClosing] = useState(false)
   const [successMessage, setSuccessMessage] = useState<OfflineSetupSuccessMessage>('ready')
   const [trackingStarted, setTrackingStarted] = useState(false)
-  const [trackedItemIds] = useState(() => selectedResources.map(getOnboardingResourceSelectionId))
+  const [trackedItemIds] = useState(() =>
+    createDownloadItemsFromOnboardingSelections(selectedResources).map(item => item.id)
+  )
   const timers = useRef<Set<Timer>>(new Set())
   const previewInterval = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
   const verificationStarted = useRef(false)
@@ -97,9 +99,7 @@ const useOfflineSetupDownload = ({
   }
 
   const enqueueSelectedResources = () => {
-    const items = selectedResources.map(resource =>
-      createDownloadItemFromOnboardingSelection(resource)
-    )
+    const items = createDownloadItemsFromOnboardingSelections(selectedResources)
     if (items.length > 0) downloadManager.enqueue(items)
     return items.length
   }

@@ -20,6 +20,13 @@ entries for discovery, but opening it always resolves to an exact work and entry
 identify exact entries and record their evidence; they do not assert that an entry heading occurs
 in every Bible translation.
 
+The directory may also contain version-scoped Dictionary verse presences generated from designated
+reference Bibles. French presence uses LSG and English presence uses KJV. Automatic generation is
+fail-closed: it accepts controlled biblical names and exact multi-token expressions only, preserves
+accents, rejects aliases shared by unrelated concepts, and performs no fuzzy, substring, stemming,
+or grammatical matching. Presence evidence remains distinct from an article's explicit passage
+citation.
+
 ## Consequences
 
 The application can expose one multilingual alphabet and search surface while preserving separate

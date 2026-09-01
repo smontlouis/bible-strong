@@ -535,10 +535,16 @@ const DownloadsScreen = () => {
             strongLexiconAvailability.get('core')?.status === 'available',
         })
       case 'bible':
-      case 'dictionary':
+      case 'dictionary-directory':
       case 'commentary':
       case 'database':
         return createOfflineCopyDownloadPlan(identity)
+      case 'dictionary':
+        return createOfflineCopyDownloadPlan(identity, {
+          isDictionaryDirectoryAvailable:
+            offlineResourceRegistry.isInstalled('dictionary-directory') &&
+            !offlineResourceRegistry.get('dictionary-directory')?.updateAvailable,
+        })
       case 'bible-pericope':
       case 'bible-red-words':
         throw new Error(`BIBLE_CHILD_RESOURCE_IS_NOT_MANAGED_SEPARATELY:${itemId}`)

@@ -13,7 +13,7 @@ import { removeStrongLexiconModule } from './strongLexiconModules'
 import type { StrongLexiconModuleId } from './strongLexiconPublications'
 import { invalidateOfflineCopyQueries } from './offlineCopyQueries'
 import { createOfflineCopyId, parseOfflineCopyId, type OfflineCopyIdentity } from './offlineCopy'
-import { getCommentaryDbPath, getDictionaryDbPath } from './databases'
+import { getCommentaryDbPath, getDictionaryDbPath, getDictionaryDirectoryDbPath } from './databases'
 import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 
 interface DeleteDownloadedItemOptions {
@@ -43,6 +43,7 @@ export type DownloadedItemDeletionPlan =
       resourceId: string
       language: ResourceLanguage
     }
+  | { kind: 'dictionary-directory' }
   | { kind: 'commentary'; resourceId: string; language: ResourceLanguage }
   | { kind: 'database'; databaseId: DatabaseId; language: ResourceLanguage }
   | { kind: 'unknown'; itemId: string }
@@ -68,6 +69,8 @@ export const createDownloadedItemDeletionPlan = (
         language: identity.language,
       }
     case 'dictionary':
+      return identity
+    case 'dictionary-directory':
       return identity
     case 'commentary':
       return identity
@@ -201,6 +204,12 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
     await FileSystem.deleteAsync(getDictionaryDbPath(plan.work, plan.language), {
       idempotent: true,
     })
+    await invalidateAndForgetPublication(plan)
+    return
+  }
+
+  if (plan.kind === 'dictionary-directory') {
+    await FileSystem.deleteAsync(getDictionaryDirectoryDbPath(), { idempotent: true })
     await invalidateAndForgetPublication(plan)
     return
   }

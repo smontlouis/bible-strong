@@ -3,6 +3,7 @@ import {
   isCommentaryPublicationBundleManifest,
   isCrossReferencePublicationBundleManifest,
   isDictionaryPublicationBundleManifest,
+  isDictionaryDirectoryPublicationBundleManifest,
   isInterlinearBiblePublicationBundleManifest,
   isNavePublicationBundleManifest,
   isStrongLexiconPublicationBundleManifest,
@@ -28,32 +29,37 @@ export const getPublicationIdentityProjection = (
             resourceIdentity: `dictionary:${manifest.identity.work}:${manifest.identity.language}`,
             mobileCatalogId: `database:${manifest.identity.resourceId}:${manifest.identity.language}`,
           }
-        : isCommentaryPublicationBundleManifest(manifest)
+        : isDictionaryDirectoryPublicationBundleManifest(manifest)
           ? {
-              resourceIdentity: `commentary:${manifest.identity.resourceId}:${manifest.identity.language}`,
-              mobileCatalogId: `database:${manifest.identity.resourceId}:${manifest.identity.language}`,
+              resourceIdentity: 'dictionary-directory',
+              mobileCatalogId: 'dictionary-directory',
             }
-          : isCrossReferencePublicationBundleManifest(manifest)
+          : isCommentaryPublicationBundleManifest(manifest)
             ? {
-                resourceIdentity: `cross-references:${manifest.identity.language}`,
+                resourceIdentity: `commentary:${manifest.identity.resourceId}:${manifest.identity.language}`,
                 mobileCatalogId: `database:${manifest.identity.resourceId}:${manifest.identity.language}`,
               }
-            : isTimelinePublicationBundleManifest(manifest)
+            : isCrossReferencePublicationBundleManifest(manifest)
               ? {
-                  resourceIdentity: `timeline:${manifest.identity.language}`,
+                  resourceIdentity: `cross-references:${manifest.identity.language}`,
                   mobileCatalogId: `database:${manifest.identity.resourceId}:${manifest.identity.language}`,
                 }
-              : isInterlinearBiblePublicationBundleManifest(manifest)
+              : isTimelinePublicationBundleManifest(manifest)
                 ? {
-                    resourceIdentity: `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`,
-                    mobileCatalogId: `bible-interlinear:${manifest.identity.versionId}:${manifest.identity.language}`,
+                    resourceIdentity: `timeline:${manifest.identity.language}`,
+                    mobileCatalogId: `database:${manifest.identity.resourceId}:${manifest.identity.language}`,
                   }
-                : isStrongLexiconPublicationBundleManifest(manifest)
+                : isInterlinearBiblePublicationBundleManifest(manifest)
                   ? {
-                      resourceIdentity: manifest.identity.resourceId,
-                      mobileCatalogId: manifest.identity.resourceId,
+                      resourceIdentity: `interlinear-index:${manifest.identity.versionId}:${manifest.identity.language}`,
+                      mobileCatalogId: `bible-interlinear:${manifest.identity.versionId}:${manifest.identity.language}`,
                     }
-                  : {
-                      resourceIdentity: `strong-bible-index:${manifest.identity.versionId}`,
-                      mobileCatalogId: `bible-strong:${manifest.identity.versionId}`,
-                    }
+                  : isStrongLexiconPublicationBundleManifest(manifest)
+                    ? {
+                        resourceIdentity: manifest.identity.resourceId,
+                        mobileCatalogId: manifest.identity.resourceId,
+                      }
+                    : {
+                        resourceIdentity: `strong-bible-index:${manifest.identity.versionId}`,
+                        mobileCatalogId: `bible-strong:${manifest.identity.versionId}`,
+                      }

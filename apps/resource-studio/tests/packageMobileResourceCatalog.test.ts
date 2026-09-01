@@ -52,7 +52,7 @@ describe("mobile resource catalog", () => {
       required.resourceIds,
       required.bundleRoles
     );
-    assert.equal(inventory.length, 105);
+    assert.equal(inventory.length, 114);
     assert.equal(
       inventory.filter((item: { id: string }) => item.id.startsWith("bible:"))
         .length,
@@ -62,7 +62,12 @@ describe("mobile resource catalog", () => {
       inventory.filter((item: { id: string }) =>
         item.id.startsWith("database:")
       ).length,
-      41
+      49
+    );
+    assert.ok(
+      inventory.some(
+        (item: { id: string }) => item.id === "dictionary-directory"
+      )
     );
     assert.equal(
       inventory.filter(

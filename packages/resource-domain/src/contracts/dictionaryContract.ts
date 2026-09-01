@@ -25,6 +25,12 @@ const DictionaryVerseKey = Schema.String.pipe(
   Schema.pattern(/^[^\\/\u0000-\u001f\s]+-[^\\/\u0000-\u001f\s]+-[^\\/\u0000-\u001f\s]+$/u)
 )
 
+export const DictionaryPassageEvidenceKind = Schema.Literal(
+  'source-citation',
+  'verse-name',
+  'verse-phrase'
+)
+
 export const DictionaryWorkId = Schema.String.pipe(Schema.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u))
 
 export class DictionaryCatalogQuery extends Schema.Class<DictionaryCatalogQuery>(
@@ -174,7 +180,7 @@ export class DictionaryPassageAnchorDto extends Schema.Class<DictionaryPassageAn
   id: Schema.Int.pipe(Schema.positive()),
   word: Schema.NonEmptyString,
   normalizedWord: Schema.NonEmptyString,
-  evidenceKind: Schema.Literal('source-citation'),
+  evidenceKind: DictionaryPassageEvidenceKind,
 }) {}
 
 export class DictionaryPassageAnchorsResponseDto extends Schema.Class<DictionaryPassageAnchorsResponseDto>(
@@ -195,7 +201,7 @@ export class DictionaryPassageDiscoveryEntryDto extends Schema.Class<DictionaryP
   id: Schema.Int.pipe(Schema.positive()),
   word: Schema.NonEmptyString,
   normalizedWord: Schema.NonEmptyString,
-  evidenceKind: Schema.Literal('source-citation'),
+  evidenceKind: DictionaryPassageEvidenceKind,
   correspondenceId: Schema.optional(Schema.NonEmptyString),
 }) {}
 

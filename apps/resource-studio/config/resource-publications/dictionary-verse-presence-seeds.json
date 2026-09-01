@@ -1,0 +1,8 @@
+{
+  "format": "bible-strong-dictionary-verse-presence-seeds",
+  "schemaVersion": 1,
+  "approvedSingleTokenSubjects": {
+    "fr": ["Aï", "Christ", "Dieu", "Jésus", "Satan", "Yahvé"],
+    "en": ["Christ", "God", "Jesus", "Satan", "Yahweh"]
+  }
+}

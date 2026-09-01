@@ -11,13 +11,15 @@ import {
 } from './resourceAccessError'
 import { getLocalResourceAvailability, offlineResourceRegistry } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { getDictionaryDbPath } from '~helpers/databases'
+import { getDictionaryDbPath, getDictionaryDirectoryDbPath } from '~helpers/databases'
 import { openSQLiteDatabase } from '~helpers/sqlite'
 import type { ResourceAvailability } from './resourceModel'
 import { Schema } from 'effect'
 import {
   decodeDictionaryPageCursor,
+  decodeDictionaryDirectoryPageCursor,
   encodeDictionaryPageCursor,
+  encodeDictionaryDirectoryPageCursor,
   DictionaryCatalogResponseDto,
   DictionaryDirectoryResponseDto,
   DictionaryEntriesBatchResponseDto,
@@ -57,34 +59,88 @@ export type DictionaryDirectoryPage = {
   nextCursor?: string
 }
 export type DictionaryPassageAnchor = DictionarySummary & {
-  evidenceKind: 'source-citation'
+  evidenceKind: 'source-citation' | 'verse-name' | 'verse-phrase'
 }
 export type DictionaryPassageDiscoveryEntry = Schema.Schema.Type<
   typeof DictionaryPassageDiscoveryResponseDto
 >['entries'][number]
 
-export const KNOWN_DICTIONARY_WORKS: readonly DictionaryWork[] = [
-  ['westphal', 'WESTPHAL', 'fr', 'Dictionnaire encyclopédique de la Bible', 'Westphal'],
-  ['lelievre', 'LELIEVRE', 'fr', 'Lexique de la Bible', 'Lelièvre'],
-  ['bost', 'BOST', 'fr', 'Dictionnaire de la Bible', 'Bost'],
-  ['calmet', 'CALMET', 'fr', 'Dictionnaire historique et critique de la Bible', 'Calmet'],
+export const KNOWN_DICTIONARY_WORKS: readonly DictionaryWork[] = (
   [
-    'easton-webster',
-    'EASTON_WEBSTER',
-    'en',
-    'Easton’s Bible Dictionary & Webster’s 1828 Dictionary',
-    'Easton + Webster',
-  ],
-  ['smith', 'SMITH', 'en', 'Smith’s Bible Dictionary', 'Smith'],
-  ['isbe', 'ISBE', 'en', 'International Standard Bible Encyclopedia', 'ISBE 1915'],
-  [
-    'unfoldingword-translation-words',
-    'UNFOLDINGWORD_TW',
-    'en',
-    'Translation Words',
-    'Translation Words',
-  ],
-].map(([work, resourceId, language, title, abbreviation]) => ({
+    [
+      'westphal',
+      'WESTPHAL',
+      'fr',
+      'Dictionnaire encyclopédique de la Bible',
+      'Westphal',
+      'Encyclopédie biblique française dirigée par Alexandre Westphal.',
+      ['Alexandre Westphal et collaborateurs'],
+    ],
+    [
+      'lelievre',
+      'LELIEVRE',
+      'fr',
+      'Lexique de la Bible',
+      'Lelièvre',
+      'Lexique concis des notions, institutions et coutumes bibliques.',
+      ['Charles Lelièvre'],
+    ],
+    [
+      'bost',
+      'BOST',
+      'fr',
+      'Dictionnaire de la Bible',
+      'Bost',
+      'Dictionnaire biblique français couvrant personnes, lieux, coutumes et notions bibliques.',
+      ['Jean-Augustin Bost'],
+    ],
+    [
+      'calmet',
+      'CALMET',
+      'fr',
+      'Dictionnaire historique et critique de la Bible',
+      'Calmet',
+      'Dictionnaire historique, géographique, philologique et critique de la Bible.',
+      ['Augustin Calmet'],
+    ],
+    [
+      'easton-webster',
+      'EASTON_WEBSTER',
+      'en',
+      'Easton’s Bible Dictionary & Webster’s 1828 Dictionary',
+      'Easton + Webster',
+      'Easton’s biblical entries supplemented by historical English definitions from Webster’s 1828 Dictionary.',
+      ['Matthew George Easton', 'Noah Webster'],
+    ],
+    [
+      'smith',
+      'SMITH',
+      'en',
+      'Smith’s Bible Dictionary',
+      'Smith',
+      'Historical Bible dictionary covering people, places, institutions and customs.',
+      ['William Smith', 'F. N. Peloubet', 'M. A. Peloubet'],
+    ],
+    [
+      'isbe',
+      'ISBE',
+      'en',
+      'International Standard Bible Encyclopedia',
+      'ISBE 1915',
+      'Extensive historical Bible encyclopedia covering people, places, texts, languages, history and theology.',
+      ['James Orr and contributors'],
+    ],
+    [
+      'unfoldingword-translation-words',
+      'UNFOLDINGWORD_TW',
+      'en',
+      'Translation Words',
+      'Translation Words',
+      'A modern Bible translation lexicon with concise definitions, translation suggestions, related concepts and biblical examples.',
+      ['Door43 World Missions Community', 'unfoldingWord contributors'],
+    ],
+  ] satisfies readonly [string, string, ResourceLanguage, string, string, string, string[]][]
+).map(([work, resourceId, language, title, abbreviation, description, authors]) => ({
   resource: {
     kind: 'dictionary' as const,
     work,
@@ -94,8 +150,8 @@ export const KNOWN_DICTIONARY_WORKS: readonly DictionaryWork[] = [
   resourceId,
   title,
   abbreviation,
-  authors: [],
-  description: '',
+  authors,
+  description,
   edition: '',
   source: '',
   attribution: '',
@@ -109,6 +165,7 @@ export type DictionaryAccess = {
     language: ResourceLanguage,
     work?: DictionaryWorkId
   ) => Promise<ResourceAvailability>
+  getDirectoryAvailability?: () => Promise<ResourceAvailability>
   listByLetter: (
     letter: string,
     language?: ResourceLanguage,
@@ -211,6 +268,31 @@ const withInstalledDictionary = async <T>(
   }
 }
 
+const dictionaryDirectoryIdentity = { kind: 'dictionary-directory' as const }
+
+const withInstalledDictionaryDirectory = async <T>(
+  query: (database: Awaited<ReturnType<typeof openSQLiteDatabase>>) => Promise<T>
+): Promise<T> => {
+  const availability = await offlineResourceRegistry.getAvailability(dictionaryDirectoryIdentity)
+  if (availability.status !== 'available') {
+    throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+  }
+  const databasePath = getDictionaryDirectoryDbPath()
+  const fileName = databasePath.split('/').pop()!
+  const directory = databasePath.slice(0, -(fileName.length + 1))
+  const database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+  try {
+    return await query(database)
+  } finally {
+    await database.closeAsync()
+  }
+}
+
+const getInstalledDictionaryEntries = () =>
+  [...offlineResourceRegistry.getSnapshot().resources.values()].filter(
+    entry => entry.resource.kind === 'dictionary' && entry.availability.status === 'available'
+  )
+
 const isLegacyDictionaryWork = (language: ResourceLanguage, work?: DictionaryWorkId) => {
   const resolvedWork = work ?? getDefaultDictionaryWork(language)
   return (
@@ -241,6 +323,22 @@ export const localDictionaryAccess: DictionaryAccess = {
       databaseId: 'DICTIONNAIRE',
       language,
     })
+    return availability.status === 'available'
+      ? { status: 'available' }
+      : availability.status === 'corrupt'
+        ? {
+            status: 'unavailable',
+            reason: 'invalid-offline-copy',
+            recoveries: ['acquire-offline-copy', 'manage-offline-copies'],
+          }
+        : {
+            status: 'unavailable',
+            reason: 'offline-copy-required',
+            recoveries: ['acquire-offline-copy'],
+          }
+  },
+  getDirectoryAvailability: async () => {
+    const availability = await offlineResourceRegistry.getAvailability(dictionaryDirectoryIdentity)
     return availability.status === 'available'
       ? { status: 'available' }
       : availability.status === 'corrupt'
@@ -371,12 +469,10 @@ export const localDictionaryAccess: DictionaryAccess = {
         : {}),
     }
   },
-  browseDirectoryPage: async () => {
-    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
-  },
-  searchDirectoryPage: async () => {
-    throw new ResourceAccessError('RESOURCE_UNSUPPORTED')
-  },
+  browseDirectoryPage: (initial, options = {}, language = 'fr') =>
+    loadLocalDirectoryPage({ initial, options, language }),
+  searchDirectoryPage: (search, options = {}, language = 'fr') =>
+    loadLocalDirectoryPage({ search, options, language }),
   loadItem: async (word, language = 'fr', work) => {
     if (!isLegacyDictionaryWork(language, work)) {
       return withInstalledDictionary(work!, language, database =>
@@ -461,7 +557,7 @@ export const localDictionaryAccess: DictionaryAccess = {
         id: number
         word: string
         sanitized_word: string
-        evidence_kind: 'source-citation'
+        evidence_kind: 'source-citation' | 'verse-name' | 'verse-phrase'
       }>(
         `SELECT entry.id, entry.word, entry.sanitized_word, anchor.evidence_kind
          FROM dictionary_passage_anchors anchor
@@ -480,37 +576,208 @@ export const localDictionaryAccess: DictionaryAccess = {
     )
   },
   discoverPassageEntries: async (verseId, language = 'fr') => {
-    const installed = [...offlineResourceRegistry.getSnapshot().resources.values()].filter(
-      entry =>
-        entry.resource.kind === 'dictionary' &&
-        entry.resource.language === language &&
-        entry.availability.status === 'available'
+    const installed = getInstalledDictionaryEntries().filter(
+      entry => entry.resource.kind === 'dictionary' && entry.resource.language === language
     )
-    const results = await Promise.all(
-      installed.map(async registryEntry => {
-        if (registryEntry.resource.kind !== 'dictionary') return []
-        const resource = registryEntry.resource
-        const entries = await localDictionaryAccess.loadPassageAnchors(
-          verseId,
-          resource.language,
-          resource.work
-        )
-        return entries.map(entry => ({
-          resource: {
-            kind: 'dictionary' as const,
-            work: resource.work,
-            language: resource.language,
-            revision: registryEntry.installedRevision ?? registryEntry.catalogRevision ?? 'offline',
-          },
-          resourceId: resource.resourceId,
-          title: resource.work,
-          abbreviation: resource.work,
-          ...entry,
-        }))
-      })
+    if (installed.length === 0) return []
+    const installedByWork = new Map(
+      installed.flatMap(entry =>
+        entry.resource.kind === 'dictionary' ? [[entry.resource.work, entry] as const] : []
+      )
     )
-    return results.flat()
+    const works = [...installedByWork.keys()]
+    const placeholders = works.map(() => '?').join(',')
+    const rows = await withInstalledDictionaryDirectory(database =>
+      database.getAllAsync<{
+        work: string
+        resource_id: string
+        language: ResourceLanguage
+        title: string
+        abbreviation: string
+        entry_id: number
+        word: string
+        normalized_word: string
+        evidence_kind: 'source-citation' | 'verse-name' | 'verse-phrase'
+        correspondence_id: string | null
+      }>(
+        `SELECT work.work, work.resource_id, work.language, work.title, work.abbreviation,
+                entry.entry_id, entry.word, entry.normalized_word, evidence.evidence_kind,
+                correspondence.correspondence_id
+         FROM dictionary_passage_anchors anchor
+         JOIN dictionary_works work ON work.work_key = anchor.work_key
+         JOIN dictionary_entries entry
+           ON entry.work_key = anchor.work_key AND entry.entry_id = anchor.entry_id
+         JOIN dictionary_anchor_evidence evidence ON evidence.evidence_key = anchor.evidence_key
+         LEFT JOIN dictionary_correspondence_members member
+           ON member.work_key = entry.work_key AND member.entry_id = entry.entry_id
+         LEFT JOIN dictionary_correspondences correspondence
+           ON correspondence.correspondence_key = member.correspondence_key
+         WHERE anchor.verse_key = ? AND work.language = ? AND work.work IN (${placeholders})
+         ORDER BY work.work_key, anchor.ordinal, entry.entry_id`,
+        verseId,
+        language,
+        ...works
+      )
+    )
+    return rows.map(row => {
+      const registryEntry = installedByWork.get(row.work)!
+      return {
+        resource: {
+          kind: 'dictionary' as const,
+          work: row.work,
+          language: row.language,
+          revision: registryEntry.installedRevision ?? registryEntry.catalogRevision ?? 'offline',
+        },
+        resourceId: row.resource_id,
+        title: row.title,
+        abbreviation: row.abbreviation,
+        id: row.entry_id,
+        word: row.word,
+        normalizedWord: row.normalized_word,
+        evidenceKind: row.evidence_kind,
+        ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
+      }
+    })
   },
+}
+
+const loadLocalDirectoryPage = async ({
+  initial,
+  search,
+  options,
+  language,
+}: {
+  initial?: string
+  search?: string
+  options: DictionaryPageOptions
+  language: ResourceLanguage
+}): Promise<DictionaryDirectoryPage> => {
+  const installed = getInstalledDictionaryEntries()
+  if (installed.length === 0) return { entries: [] }
+  const installedByWork = new Map(
+    installed.flatMap(entry =>
+      entry.resource.kind === 'dictionary' ? [[entry.resource.work, entry] as const] : []
+    )
+  )
+  const works = [...installedByWork.keys()]
+  const workPlaceholders = works.map(() => '?').join(',')
+  const limit = options.limit ?? 50
+  const cursor = options.cursor ? decodeDictionaryDirectoryPageCursor(options.cursor) : undefined
+  const normalizedInitial = initial?.trim().toLocaleLowerCase()
+  const normalizedSearch = search?.trim().toLocaleLowerCase()
+  const rows = await withInstalledDictionaryDirectory(database =>
+    database.getAllAsync<{
+      group_key: string
+      label: string
+      normalized_label: string
+      correspondence_id: string | null
+      work: string
+      resource_id: string
+      language: ResourceLanguage
+      title: string
+      abbreviation: string
+      entry_id: number
+      word: string
+      normalized_word: string
+    }>(
+      `WITH installed_entries AS (
+         SELECT CASE
+                  WHEN correspondence.correspondence_id IS NOT NULL
+                    THEN 'c:' || correspondence.correspondence_id
+                  ELSE 'e:' || entry.work_key || ':' || entry.entry_id
+                END AS group_key,
+                correspondence.correspondence_id,
+                work.work, work.resource_id, work.language, work.title, work.abbreviation,
+                entry.entry_id, entry.word, entry.normalized_word
+         FROM dictionary_entries entry
+         JOIN dictionary_works work ON work.work_key = entry.work_key
+         LEFT JOIN dictionary_correspondence_members member
+           ON member.work_key = entry.work_key AND member.entry_id = entry.entry_id
+         LEFT JOIN dictionary_correspondences correspondence
+           ON correspondence.correspondence_key = member.correspondence_key
+         WHERE work.work IN (${workPlaceholders})
+       ), directory_keys AS (
+         SELECT candidate.group_key, MAX(candidate.correspondence_id) AS correspondence_id,
+                (SELECT localized.word FROM installed_entries localized
+                 WHERE localized.group_key = candidate.group_key AND localized.language = ?
+                 ORDER BY localized.normalized_word, localized.work, localized.entry_id LIMIT 1) AS label,
+                (SELECT localized.normalized_word FROM installed_entries localized
+                 WHERE localized.group_key = candidate.group_key AND localized.language = ?
+                 ORDER BY localized.normalized_word, localized.work, localized.entry_id LIMIT 1) AS normalized_label
+         FROM installed_entries candidate
+         GROUP BY candidate.group_key
+         HAVING SUM(CASE WHEN candidate.language = ? THEN 1 ELSE 0 END) > 0
+       ), page_keys AS (
+         SELECT group_key, correspondence_id, label, normalized_label
+         FROM directory_keys
+         WHERE (? IS NULL OR normalized_label LIKE ?)
+           AND (? IS NULL OR lower(label) LIKE ? OR normalized_label LIKE ?)
+           AND (? IS NULL OR normalized_label > ? OR (normalized_label = ? AND group_key > ?))
+         ORDER BY normalized_label, group_key
+         LIMIT ?
+       )
+       SELECT key.group_key, key.label, key.normalized_label, key.correspondence_id,
+              entry.work, entry.resource_id, entry.language, entry.title, entry.abbreviation,
+              entry.entry_id, entry.word, entry.normalized_word
+       FROM page_keys key
+       JOIN installed_entries entry ON entry.group_key = key.group_key
+       ORDER BY key.normalized_label, key.group_key, entry.language, entry.work, entry.entry_id`,
+      ...works,
+      language,
+      language,
+      language,
+      normalizedInitial ?? null,
+      normalizedInitial ? `${normalizedInitial}%` : null,
+      normalizedSearch ?? null,
+      normalizedSearch ? `%${normalizedSearch}%` : null,
+      normalizedSearch ? `%${normalizedSearch}%` : null,
+      cursor?.[0] ?? null,
+      cursor?.[0] ?? null,
+      cursor?.[0] ?? null,
+      cursor?.[1] ?? null,
+      limit + 1
+    )
+  )
+  const grouped = new Map<string, DictionaryDirectoryItem>()
+  for (const row of rows) {
+    const registryEntry = installedByWork.get(row.work)
+    if (!registryEntry) continue
+    const source = {
+      resource: {
+        kind: 'dictionary' as const,
+        work: row.work,
+        language: row.language,
+        revision: registryEntry.installedRevision ?? registryEntry.catalogRevision ?? 'offline',
+      },
+      resourceId: row.resource_id,
+      title: row.title,
+      abbreviation: row.abbreviation,
+      id: row.entry_id,
+      word: row.word,
+      normalizedWord: row.normalized_word,
+    }
+    const existing = grouped.get(row.group_key)
+    if (existing)
+      grouped.set(row.group_key, { ...existing, sources: [...existing.sources, source] })
+    else {
+      grouped.set(row.group_key, {
+        key: row.group_key,
+        label: row.label,
+        normalizedLabel: row.normalized_label,
+        ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
+        sources: [source],
+      })
+    }
+  }
+  const groups = [...grouped.values()]
+  const page = groups.slice(0, limit)
+  const last = page.at(-1)
+  return {
+    entries: page,
+    ...(groups.length > limit && last
+      ? { nextCursor: encodeDictionaryDirectoryPageCursor([last.normalizedLabel, last.key]) }
+      : {}),
+  }
 }
 
 type HttpDictionaryAccessOptions = {
@@ -610,6 +877,7 @@ export const createHttpDictionaryAccess = ({
             reason: 'offline-copy-required',
             recoveries: ['acquire-offline-copy'],
           },
+    getDirectoryAvailability: async () => ({ status: 'available' }),
     listByLetter: async (letter, language, work) => {
       return (await createPageRequest({ initial: letter, language, work })).entries
     },
@@ -800,6 +1068,11 @@ export const unavailableHttpDictionaryAccess: DictionaryAccess = {
     reason: 'offline-copy-required',
     recoveries: ['acquire-offline-copy'],
   }),
+  getDirectoryAvailability: async () => ({
+    status: 'unavailable',
+    reason: 'offline-copy-required',
+    recoveries: ['acquire-offline-copy'],
+  }),
   listByLetter: async () => {
     throw new ResourceAccessError('RESOURCE_UNSUPPORTED', ['acquire-offline-copy'])
   },
@@ -870,6 +1143,41 @@ export const createHybridDictionaryAccess = ({
       ])
     }
     return new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+  }
+  const directoryAvailability = async () =>
+    (await offline.getDirectoryAvailability?.()) ??
+    ({
+      status: 'unavailable',
+      reason: 'offline-copy-required',
+      recoveries: ['acquire-offline-copy'],
+    } as const)
+  const runDirectorySearch = async <T>(
+    localOperation: () => Promise<T>,
+    remoteOperation: () => Promise<T>
+  ): Promise<T> => {
+    const local = await directoryAvailability()
+    if (await isOnline()) {
+      try {
+        return await remoteOperation()
+      } catch (error) {
+        if (
+          local.status === 'available' &&
+          error instanceof ResourceAccessError &&
+          (error.code === 'NETWORK_OFFLINE' || error.code === 'TEMPORARY_UNAVAILABLE')
+        ) {
+          return localOperation()
+        }
+        throw error
+      }
+    }
+    if (local.status === 'available') return localOperation()
+    if (local.reason === 'invalid-offline-copy') {
+      throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
+        'acquire-offline-copy',
+        'manage-offline-copies',
+      ])
+    }
+    throw new ResourceAccessError('NETWORK_OFFLINE')
   }
   const runSearch = async <T>(
     language: ResourceLanguage,
@@ -952,6 +1260,7 @@ export const createHybridDictionaryAccess = ({
             recoveries: ['retry'],
           }
     },
+    getDirectoryAvailability: directoryAvailability,
     listByLetter: (letter, language = 'fr', work) =>
       runSearch(
         language,
@@ -981,16 +1290,12 @@ export const createHybridDictionaryAccess = ({
         () => online.searchPage(value, options, language, work)
       ),
     browseDirectoryPage: (initial, options, language = 'fr') =>
-      runSearch(
-        language,
-        undefined,
+      runDirectorySearch(
         () => offline.browseDirectoryPage(initial, options, language),
         () => online.browseDirectoryPage(initial, options, language)
       ),
     searchDirectoryPage: (value, options, language = 'fr') =>
-      runSearch(
-        language,
-        undefined,
+      runDirectorySearch(
         () => offline.searchDirectoryPage(value, options, language),
         () => online.searchDirectoryPage(value, options, language)
       ),

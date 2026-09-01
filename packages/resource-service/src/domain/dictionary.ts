@@ -21,6 +21,7 @@ import {
 
 export type DictionaryLanguage = 'fr' | 'en'
 export type DictionaryWorkId = string
+export type DictionaryPassageEvidenceKind = 'source-citation' | 'verse-name' | 'verse-phrase'
 
 export type DictionaryWork = {
   work: DictionaryWorkId
@@ -90,7 +91,7 @@ export type ActiveDictionaryVerseWords = ActiveDictionaryBase & {
   words: readonly string[]
 }
 export type DictionaryPassageAnchor = DictionarySummary & {
-  evidenceKind: 'source-citation'
+  evidenceKind: DictionaryPassageEvidenceKind
 }
 export type ActiveDictionaryPassageAnchors = ActiveDictionaryBase & {
   verseKey: string
@@ -146,9 +147,7 @@ export class DictionaryRepositoryFailure extends Data.TaggedError('DictionaryRep
 }> {}
 
 export type DictionaryRepositoryError =
-  | ActiveDictionaryPublicationUnavailable
-  | DictionaryEntryNotFound
-  | DictionaryRepositoryFailure
+  ActiveDictionaryPublicationUnavailable | DictionaryEntryNotFound | DictionaryRepositoryFailure
 
 export type DictionaryRepositoryService = {
   listWorks: (

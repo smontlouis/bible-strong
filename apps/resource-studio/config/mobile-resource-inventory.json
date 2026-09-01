@@ -1587,6 +1587,19 @@
     "resourceRevision": "dictionary-westphal-fr-1b193470a5d75f75a72d"
   },
   {
+    "id": "dictionary-directory",
+    "artifactUrl": "https://assets.bible-strong.app/dictionaries/dictionary-directory.sqlite.zip",
+    "sources": [
+      {
+        "role": "canonical",
+        "sourceUrl": "https://assets.bible-strong.app/dictionaries/dictionary-directory.sqlite",
+        "entry": "dictionary-directory.sqlite"
+      }
+    ],
+    "strategy": "archive-extract",
+    "resourceRevision": "dictionary-directory-1731e1bc9c4b6676be23"
+  },
+  {
     "id": "strong-lexicon:core",
     "resourceRevision": "strong-lexicon-core-fe91da3f72fe28da25c60833",
     "artifactUrl": "https://assets.bible-strong.app/databases/strong_lexicon.core.sqlite.zip",

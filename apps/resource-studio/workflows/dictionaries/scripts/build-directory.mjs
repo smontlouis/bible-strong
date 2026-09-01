@@ -109,6 +109,8 @@ CREATE TABLE dictionary_anchor_evidence (
   evidence_kind TEXT NOT NULL UNIQUE
 );
 INSERT INTO dictionary_anchor_evidence VALUES (1, 'source-citation');
+INSERT INTO dictionary_anchor_evidence VALUES (2, 'verse-name');
+INSERT INTO dictionary_anchor_evidence VALUES (3, 'verse-phrase');
 CREATE TABLE dictionary_passage_anchors (
   verse_key TEXT NOT NULL,
   work_key INTEGER NOT NULL,
@@ -127,7 +129,11 @@ const insertCorrespondences = async (
   workKeys,
   batchSize = 250
 ) => {
-  for (let offset = 0; offset < correspondenceIndex.groups.length; offset += batchSize) {
+  for (
+    let offset = 0;
+    offset < correspondenceIndex.groups.length;
+    offset += batchSize
+  ) {
     const groups = correspondenceIndex.groups.slice(offset, offset + batchSize);
     const sql = ["PRAGMA foreign_keys=ON;", "BEGIN IMMEDIATE;"];
     for (const [groupOffset, group] of groups.entries()) {
@@ -142,7 +148,8 @@ const insertCorrespondences = async (
       }
       group.members.forEach((member, ordinal) => {
         const workKey = workKeys.get(member.work);
-        if (!workKey) throw new Error(`dictionary-directory-work-unknown:${member.work}`);
+        if (!workKey)
+          throw new Error(`dictionary-directory-work-unknown:${member.work}`);
         sql.push(
           `INSERT INTO dictionary_correspondence_members VALUES (${correspondenceKey}, ${workKey}, ${Number(member.id)}, ${ordinal});`
         );
@@ -177,7 +184,10 @@ export const buildDictionaryDirectory = async ({
   await executeSql(resolvedOutputPath, schemaSql);
   try {
     const workKeys = new Map(
-      config.publications.map((publication, index) => [publication.work, index + 1])
+      config.publications.map((publication, index) => [
+        publication.work,
+        index + 1
+      ])
     );
     for (const publication of config.publications) {
       const workKey = workKeys.get(publication.work);
@@ -202,14 +212,19 @@ export const buildDictionaryDirectory = async ({
            SELECT ${workKey}, id, ${quoteSql(publication.language)}, word, sanitized_word
            FROM source_dictionary.dictionnaire ORDER BY id;
          INSERT INTO dictionary_passage_anchors (verse_key, work_key, entry_id, evidence_key, ordinal)
-           SELECT verse_key, ${workKey}, entry_id, 1, ordinal
-           FROM source_dictionary.dictionary_passage_anchors
+           SELECT anchor.verse_key, ${workKey}, anchor.entry_id, evidence.evidence_key, anchor.ordinal
+           FROM source_dictionary.dictionary_passage_anchors anchor
+           JOIN dictionary_anchor_evidence evidence ON evidence.evidence_kind = anchor.evidence_kind
            ORDER BY verse_key, ordinal;
          COMMIT;
          DETACH DATABASE source_dictionary;`
       );
     }
-    await insertCorrespondences(resolvedOutputPath, correspondenceIndex, workKeys);
+    await insertCorrespondences(
+      resolvedOutputPath,
+      correspondenceIndex,
+      workKeys
+    );
     await executeSql(
       resolvedOutputPath,
       `PRAGMA foreign_keys=ON;
@@ -231,7 +246,10 @@ export const buildDictionaryDirectory = async ({
            (SELECT COUNT(*) FROM dictionary_passage_anchors) AS passageAnchors`
       )
     )[0];
-    const integrity = await queryJson(resolvedOutputPath, "PRAGMA integrity_check");
+    const integrity = await queryJson(
+      resolvedOutputPath,
+      "PRAGMA integrity_check"
+    );
     if (integrity[0]?.integrity_check?.toLocaleLowerCase() !== "ok")
       throw new Error("dictionary-directory-integrity-invalid");
     const revision = `dictionary-directory-${createHash("sha256")
@@ -275,7 +293,10 @@ const readArguments = (values) => {
   return result;
 };
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   const args = readArguments(process.argv.slice(2));
   const result = await buildDictionaryDirectory({
     configPath: args.config,

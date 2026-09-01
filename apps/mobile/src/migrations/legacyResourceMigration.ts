@@ -80,6 +80,8 @@ const serializeIdentity = (identity: OfflineCopyIdentity): { [key: string]: Json
         resourceId: identity.resourceId,
         language: identity.language,
       }
+    case 'dictionary-directory':
+      return { kind: identity.kind }
     case 'commentary':
       return {
         kind: identity.kind,

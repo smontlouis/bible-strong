@@ -1,6 +1,7 @@
 import type { DownloadItem } from '~state/downloadQueue'
 import {
   createDownloadItemFromOnboardingSelection,
+  createDownloadItemsFromOnboardingSelections,
   getDefaultOnboardingResourceSelection,
   getOnboardingDatabaseResourceOptions,
   getOnboardingResourceDisplayName,
@@ -69,6 +70,35 @@ jest.mock('~helpers/downloadItemFactory', () => ({
         strongLexiconModuleId: moduleId,
       }) as DownloadItem
   ),
+  createDictionaryDownloadItem: jest.fn(
+    ({ work, resourceId, language }) =>
+      ({
+        id: `dictionary:${work}:${resourceId}:${language}`,
+        type: 'dictionary',
+        name: work,
+        work,
+        resourceId,
+        lang: language,
+      }) as DownloadItem
+  ),
+  createDictionaryDirectoryDownloadItem: jest.fn(
+    (): DownloadItem =>
+      ({
+        id: 'dictionary-directory',
+        type: 'dictionary-directory',
+        name: 'Dictionary Directory',
+      }) as DownloadItem
+  ),
+  createCommentaryDownloadItem: jest.fn(
+    ({ resourceId, language }, name) =>
+      ({
+        id: `database:${resourceId}:${language}`,
+        type: 'commentary',
+        name: name ?? resourceId,
+        resourceId,
+        lang: language,
+      }) as DownloadItem
+  ),
 }))
 
 jest.mock('~helpers/databases', () => ({
@@ -85,6 +115,18 @@ describe('onboardingResources', () => {
 
   it('stores the modular Strong core with its dedicated durable identifier', () => {
     expect(getOnboardingResourceSelectionId({ kind: 'strong-lexicon' })).toBe('strong-lexicon:core')
+  })
+
+  it('stores each dictionary as an independent offline copy', () => {
+    expect(
+      getOnboardingResourceSelectionId({
+        kind: 'dictionary',
+        work: 'smith',
+        resourceId: 'SMITH',
+        lang: 'en',
+        title: 'Smith’s Bible Dictionary',
+      })
+    ).toBe('dictionary:smith:SMITH:en')
   })
 
   it('stores Strong sidecar selections separately from their base Bible', () => {
@@ -132,6 +174,50 @@ describe('onboardingResources', () => {
         lang: 'en',
       })
     )
+  })
+
+  it('converts one dictionary selection without merging it with another work', () => {
+    expect(
+      createDownloadItemFromOnboardingSelection({
+        kind: 'dictionary',
+        work: 'westphal',
+        resourceId: 'WESTPHAL',
+        lang: 'fr',
+        title: 'Dictionnaire encyclopédique de la Bible',
+      })
+    ).toEqual(
+      expect.objectContaining({
+        id: 'dictionary:westphal:WESTPHAL:fr',
+        name: 'Dictionnaire encyclopédique de la Bible',
+        work: 'westphal',
+        dependsOnId: 'dictionary-directory',
+      })
+    )
+  })
+
+  it('adds the hidden Dictionary Directory only once to the onboarding plan', () => {
+    expect(
+      createDownloadItemsFromOnboardingSelections([
+        {
+          kind: 'dictionary',
+          work: 'westphal',
+          resourceId: 'WESTPHAL',
+          lang: 'fr',
+          title: 'Westphal',
+        },
+        {
+          kind: 'dictionary',
+          work: 'bost',
+          resourceId: 'BOST',
+          lang: 'fr',
+          title: 'Bost',
+        },
+      ]).map(item => item.id)
+    ).toEqual([
+      'dictionary-directory',
+      'dictionary:westphal:WESTPHAL:fr',
+      'dictionary:bost:BOST:fr',
+    ])
   })
 
   it('converts Strong sidecar selections through the download item Adapter', () => {

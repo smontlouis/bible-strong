@@ -24,6 +24,7 @@ export type ResourceIdentity =
   | { kind: 'interlinear-index'; versionId: 'BHG'; language: ResourceLanguage }
   | { kind: 'strong-lexicon'; moduleId: StrongLexiconModuleId }
   | { kind: 'dictionary'; work: string; language: ResourceLanguage }
+  | { kind: 'dictionary-directory' }
   | { kind: 'nave'; language: ResourceLanguage }
   | { kind: 'cross-references' }
   | { kind: 'commentary'; collection: string; language: ResourceLanguage }
@@ -90,6 +91,7 @@ export const getResourceOnlineAccess = (
   (identity.kind === 'strong-lexicon' &&
     remotelyReadableStrongLexiconModules.has(identity.moduleId)) ||
   (identity.kind === 'dictionary' && remotelyReadableDictionaryLanguages.has(identity.language)) ||
+  identity.kind === 'dictionary-directory' ||
   (identity.kind === 'nave' && remotelyReadableNaveLanguages.has(identity.language)) ||
   (identity.kind === 'commentary' &&
     remotelyReadableCommentaryCollections.has(identity.collection)) ||
@@ -112,6 +114,8 @@ export const createResourceIdentityId = (identity: ResourceIdentity): string => 
       return `strong-lexicon:${identity.moduleId}`
     case 'dictionary':
       return `dictionary:${identity.work}:${identity.language}`
+    case 'dictionary-directory':
+      return 'dictionary-directory'
     case 'nave':
       return `nave:${identity.language}`
     case 'cross-references':
@@ -149,6 +153,8 @@ export const resourceIdentityFromOfflineCopy = (
       return { kind: 'strong-lexicon', moduleId: identity.moduleId }
     case 'dictionary':
       return { kind: 'dictionary', work: identity.work, language: identity.language }
+    case 'dictionary-directory':
+      return identity
     case 'commentary':
       return {
         kind: 'commentary',

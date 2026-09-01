@@ -411,7 +411,7 @@ export const makeKyselyDictionaryRepository = (
             id: row.entry_id,
             word: row.word,
             normalizedWord: row.normalized_word,
-            evidenceKind: row.evidence_kind as 'source-citation',
+            evidenceKind: row.evidence_kind as 'source-citation' | 'verse-name' | 'verse-phrase',
           })),
         }
       }),
@@ -419,7 +419,11 @@ export const makeKyselyDictionaryRepository = (
       tryDatabasePromise('dictionary.passage.discover', async () => {
         let query = database
           .selectFrom('dictionary_verse_links as link')
-          .innerJoin('resource_publications as publication', 'publication.id', 'link.publication_id')
+          .innerJoin(
+            'resource_publications as publication',
+            'publication.id',
+            'link.publication_id'
+          )
           .innerJoin('dictionary_entries as entry', join =>
             join
               .onRef('entry.publication_id', '=', 'link.publication_id')
@@ -441,7 +445,7 @@ export const makeKyselyDictionaryRepository = (
           .where('publication.status', '=', 'active')
           .where('link.verse_key', '=', input.verseKey)
           .where('link.entry_id', 'is not', null)
-          .where('link.evidence_kind', '=', 'source-citation')
+          .where('link.evidence_kind', 'in', ['source-citation', 'verse-name', 'verse-phrase'])
         if (input.language) query = query.where('publication.language', '=', input.language)
         const rows = await query
           .orderBy('publication.language')
@@ -462,7 +466,7 @@ export const makeKyselyDictionaryRepository = (
             id: row.entry_id,
             word: row.word,
             normalizedWord: row.normalized_word,
-            evidenceKind: 'source-citation' as const,
+            evidenceKind: row.evidence_kind as 'source-citation' | 'verse-name' | 'verse-phrase',
             ...(row.correspondence_id ? { correspondenceId: row.correspondence_id } : {}),
           }
         })

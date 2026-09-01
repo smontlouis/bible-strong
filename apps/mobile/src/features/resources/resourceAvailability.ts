@@ -5,9 +5,10 @@ import {
   getCommentaryDbPath,
   getDbPath,
   getDictionaryDbPath,
+  getDictionaryDirectoryDbPath,
   initLanguageDirs,
 } from '~helpers/databases'
-import { dbManager, initSQLiteDir } from '~helpers/sqlite'
+import { dbManager, initSQLiteDir, openSQLiteDatabase } from '~helpers/sqlite'
 import {
   LANGUAGE_SPECIFIC_DBS,
   SHARED_DBS,
@@ -211,6 +212,43 @@ export const probeLocalResourceAvailability = async (
       : { status: 'missing', resource, expectedPath }
   }
 
+  if (resource.kind === 'dictionary-directory') {
+    const expectedPath = getDictionaryDirectoryDbPath()
+    await dependencies.restoreBackup?.(expectedPath)
+    const file = await dependencies.getFileInfo(expectedPath)
+    if (!file.exists) return { status: 'missing', resource, expectedPath }
+    const fileName = expectedPath.split('/').pop()!
+    const directory = expectedPath.slice(0, -(fileName.length + 1))
+    try {
+      const database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+      try {
+        const integrity = await database.getFirstAsync<{ integrity_check: string }>(
+          'PRAGMA quick_check'
+        )
+        const tables = await database.getAllAsync<{ name: string }>(
+          `SELECT name FROM sqlite_schema WHERE type = 'table'`
+        )
+        const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
+        const valid =
+          integrity?.integrity_check === 'ok' &&
+          [
+            'dictionary_works',
+            'dictionary_entries',
+            'dictionary_correspondences',
+            'dictionary_correspondence_members',
+            'dictionary_passage_anchors',
+          ].every(table => tableNames.has(table))
+        return valid
+          ? { status: 'available', resource }
+          : { status: 'corrupt', resource, reason: 'integrity-check-failed' }
+      } finally {
+        await database.closeAsync()
+      }
+    } catch {
+      return { status: 'corrupt', resource, reason: 'integrity-check-failed' }
+    }
+  }
+
   if (resource.kind === 'commentary') {
     const expectedPath = getCommentaryDbPath(resource.resourceId, resource.language)
     await dependencies.restoreBackup?.(expectedPath)
@@ -286,6 +324,7 @@ const getCatalogResourceRefs = (catalog: MobileResourceCatalog): LocalResourceRe
 }
 
 const parseRegistryResourceId = (id: string): LocalResourceRef | undefined => {
+  if (id === 'dictionary-directory') return { kind: 'dictionary-directory' }
   const parts = id.split(':')
   const language = parts.at(-1) as ResourceLanguage
   if (parts[0] === 'bible' && parts[1]) return { kind: 'bible', versionId: parts[1] }
