@@ -726,6 +726,7 @@ export async function buildAllDictionaryResourcePublications(options: {
   normalizationPublications?: Array<
     DictionaryPublicationMetadata & { sqlitePath: string }
   >;
+  referenceBibles?: { fr: string; en: string };
   generatedAt?: string;
 }): Promise<DictionaryResourcePublicationManifest[]> {
   const outputDir = path.resolve(options.outputDir);
@@ -755,17 +756,24 @@ export async function buildAllDictionaryResourcePublications(options: {
       )}\n`,
       "utf8"
     );
-    await execFileAsync(
-      process.execPath,
-      [
-        normalizeDictionaryLibraryScript,
-        "--config",
-        normalizationConfigPath,
-        "--output-root",
-        normalizedRoot
-      ],
-      { maxBuffer: 16 * 1024 * 1024 }
-    );
+    const normalizationArguments = [
+      normalizeDictionaryLibraryScript,
+      "--config",
+      normalizationConfigPath,
+      "--output-root",
+      normalizedRoot
+    ];
+    if (options.referenceBibles) {
+      normalizationArguments.push(
+        "--lsg-bible",
+        path.resolve(options.referenceBibles.fr),
+        "--kjv-bible",
+        path.resolve(options.referenceBibles.en)
+      );
+    }
+    await execFileAsync(process.execPath, normalizationArguments, {
+      maxBuffer: 16 * 1024 * 1024
+    });
     await buildDictionaryDirectoryResourcePublication({
       sqlitePath: path.join(normalizedRoot, "dictionary-directory.sqlite"),
       outputDir: path.join(stagingDir, "directory"),

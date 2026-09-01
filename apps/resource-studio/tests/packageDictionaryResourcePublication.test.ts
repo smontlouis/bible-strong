@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
@@ -11,7 +11,9 @@ import { buildAllDictionaryResourcePublications } from "../src/packageDictionary
 const execFileAsync = promisify(execFile);
 
 test("packages prepared entry links and exact passage anchors", async (t) => {
-  const root = await mkdtemp(path.join(tmpdir(), "dictionary-resource-publication-"));
+  const root = await mkdtemp(
+    path.join(tmpdir(), "dictionary-resource-publication-")
+  );
   t.after(async () => rm(root, { recursive: true, force: true }));
   const sourcePath = path.join(root, "source.sqlite");
   await execFileAsync("sqlite3", [
@@ -43,9 +45,16 @@ test("packages prepared entry links and exact passage anchors", async (t) => {
     deliveryCapabilities: { onlineAccess: true, offlineDownload: true },
     sqlitePath: sourcePath
   };
+  const lsgPath = path.join(root, "lsg.json");
+  const kjvPath = path.join(root, "kjv.json");
+  await Promise.all([
+    writeFile(lsgPath, '{"verses":{}}\n', "utf8"),
+    writeFile(kjvPath, '{"verses":{}}\n', "utf8")
+  ]);
   const [manifest] = await buildAllDictionaryResourcePublications({
     outputDir: path.join(root, "publication"),
     publications: [metadata],
+    referenceBibles: { fr: lsgPath, en: kjvPath },
     generatedAt: "2026-08-31T00:00:00.000Z"
   });
   assert.ok(manifest);
@@ -79,7 +88,7 @@ test("packages prepared entry links and exact passage anchors", async (t) => {
     databasePath,
     `SELECT
        (SELECT COUNT(*) FROM dictionary_passage_anchors WHERE entry_id = 1 AND verse_key = '43-3-16') AS anchors,
-       (SELECT COUNT(*) FROM dictionnaire WHERE definition LIKE '%data-entry-id=\"2\"%' AND definition LIKE '%data-link-origin=\"cue\"%') AS cues`
+       (SELECT COUNT(*) FROM dictionnaire WHERE definition LIKE '%data-entry-id="2"%' AND definition LIKE '%data-link-origin="cue"%') AS cues`
   ]);
   assert.deepEqual(JSON.parse(stdout), [{ anchors: 1, cues: 1 }]);
 });
