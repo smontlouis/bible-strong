@@ -7,6 +7,7 @@ import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
 import { FeatherIcon } from '~common/ui/Icon'
+import { DOWNLOAD_LIST_LAYOUT } from './downloadListLayout'
 
 interface DownloadSectionHeaderProps {
   title: string
@@ -33,9 +34,8 @@ const DownloadSectionHeader = ({
 
   return (
     <Box
-      mt={16}
       minHeight={52}
-      px={20}
+      px={DOWNLOAD_LIST_LAYOUT.sectionPaddingHorizontal}
       row
       alignItems="center"
       bg="lightGrey"

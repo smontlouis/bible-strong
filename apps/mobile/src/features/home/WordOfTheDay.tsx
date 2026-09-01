@@ -21,11 +21,7 @@ import {
   resourceFailureFromAvailability,
 } from '~features/resources/resourceFailure'
 import ResourceDownloadWidget from './ResourceDownloadWidget'
-
-function randomIntFromInterval(min: number, max: number) {
-  // min and max included
-  return Math.floor(Math.random() * (max - min + 1) + min)
-}
+import { getRandomDictionaryEntryId } from './dictionaryWidgetEntry'
 
 const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47,128,237,1)' }) => {
   const { t } = useTranslation()
@@ -62,11 +58,8 @@ const DictionnaireOfTheDay = ({ color1 = 'rgba(86,204,242,1)', color2 = 'rgba(47
   const strongQuery = useQuery({
     queryKey: ['home-dictionary-random', lang, randomSeed, isConnected],
     queryFn: async () =>
-      (await resources.dictionary.loadItemByRowId(
-        lang === 'fr' ? randomIntFromInterval(1, 5436) : randomIntFromInterval(1, 8620),
-        lang,
-        work
-      )) ?? null,
+      (await resources.dictionary.loadItemByRowId(getRandomDictionaryEntryId(lang), lang, work)) ??
+      null,
     ...localQueryOptions,
   })
   const strongReference = strongQuery.data

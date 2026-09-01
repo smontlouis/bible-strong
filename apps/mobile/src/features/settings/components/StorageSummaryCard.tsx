@@ -55,6 +55,7 @@ const StorageSummaryCard = () => {
     <Box
       mx={16}
       mt={16}
+      mb={16}
       p={16}
       borderRadius={16}
       borderWidth={1}

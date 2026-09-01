@@ -5,6 +5,7 @@ import { downloadManager } from '~helpers/downloadManager'
 import NaveOfTheDay from '../NaveOfTheDay'
 import StrongOfTheDay from '../StrongOfTheDay'
 import WordOfTheDay from '../WordOfTheDay'
+import { getRandomDictionaryEntryId } from '../dictionaryWidgetEntry'
 
 let mockIsConnected = true
 let mockAvailabilityReason: 'offline-copy-required' | 'invalid-offline-copy' =
@@ -322,4 +323,18 @@ describe('Home resource download widgets', () => {
     expect(mockAvailabilityRefetch).toHaveBeenCalledTimes(1)
     expect(mockContentRefetch).toHaveBeenCalledTimes(1)
   })
+})
+
+describe('Dictionary home widget entry selection', () => {
+  it.each([
+    ['fr', 0, 5437],
+    ['fr', 0.999999, 10872],
+    ['en', 0, 1],
+    ['en', 0.999999, 8620],
+  ] as const)(
+    'selects an existing %s dictionary entry for random value %s',
+    (language, random, id) => {
+      expect(getRandomDictionaryEntryId(language, random)).toBe(id)
+    }
+  )
 })

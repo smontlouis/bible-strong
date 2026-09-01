@@ -7,8 +7,10 @@ import { useRouter } from 'expo-router'
 import React from 'react'
 import { SectionList, TouchableOpacity } from 'react-native'
 import { useTranslation } from 'react-i18next'
+import { useSelector } from 'react-redux'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import FiltersHeader from '~common/FiltersHeader'
 import MultipleChoiceFilterModal from '~common/MultipleChoiceFilterModal'
 import SearchFilterModal from '~common/SearchFilterModal'
@@ -28,6 +30,9 @@ import {
   toggleCommentaryTaxonomyFilter,
 } from './commentaryCatalogFilters'
 import { createCommentaryProjectionId } from './commentarySelection'
+import type { RootState } from '~redux/modules/reducer'
+
+type CommentarySelectionFilter = 'all' | 'selected'
 
 type Projection = {
   entry: CommentaryCatalogEntry
@@ -109,16 +114,24 @@ const CommentaryLibraryScreen = () => {
   const searchRef = React.useRef<SheetRef>(null)
   const traditionsRef = React.useRef<SheetRef>(null)
   const currentsRef = React.useRef<SheetRef>(null)
+  const selectionRef = React.useRef<SheetRef>(null)
+  const selectedCommentaries = useSelector(
+    (state: RootState) => state.user.bible.settings.commentarySelection
+  )
   const [detailsProjection, setDetailsProjection] = React.useState<Projection>()
   const [query, setQuery] = React.useState('')
   const [traditions, setTraditions] = React.useState<string[]>([])
   const [currents, setCurrents] = React.useState<string[]>([])
+  const [selectionFilter, setSelectionFilter] = React.useState<CommentarySelectionFilter>('all')
   const normalizedQuery = query.trim().toLocaleLowerCase()
+  const selectedCommentaryIds = new Set(selectedCommentaries)
   const sections = (['fr', 'en'] as const)
     .map(language => ({
       title: t(`versionCatalog.language.${language}`),
       data: COMMENTARY_CATALOG.flatMap(entry => {
         if (!entry.languages.includes(language)) return []
+        const projectionId = createCommentaryProjectionId(entry.id, language)
+        if (selectionFilter === 'selected' && !selectedCommentaryIds.has(projectionId)) return []
         if (!matchesCommentaryTaxonomyFilters(entry, traditions, currents)) return []
         const searchable = [
           entry.title,
@@ -157,6 +170,7 @@ const CommentaryLibraryScreen = () => {
             setQuery('')
             setTraditions([])
             setCurrents([])
+            setSelectionFilter('all')
           }}
           filters={[
             {
@@ -166,6 +180,19 @@ const CommentaryLibraryScreen = () => {
               value: query.trim() || undefined,
               active: Boolean(query.trim()),
               onPress: () => searchRef.current?.present(),
+            },
+            {
+              key: 'selection',
+              icon: 'check-square',
+              label: t('commentaries.filters.selection'),
+              value:
+                selectionFilter === 'selected'
+                  ? t('commentaries.filters.selectedCount', {
+                      count: selectedCommentaries.length,
+                    })
+                  : t('Tous'),
+              active: selectionFilter === 'selected',
+              onPress: () => selectionRef.current?.present(),
             },
             {
               key: 'traditions',
@@ -219,6 +246,19 @@ const CommentaryLibraryScreen = () => {
           placeholder={t('commentaries.selector.search')}
           value={query}
           onChange={setQuery}
+        />
+        <ChoiceFilterModal
+          ref={selectionRef}
+          title={t('commentaries.filters.selection')}
+          selectedValue={selectionFilter}
+          options={[
+            { value: 'all', label: t('Tous') },
+            { value: 'selected', label: t('commentaries.filters.selected') },
+          ]}
+          onSelect={value => {
+            setSelectionFilter(value)
+            selectionRef.current?.dismiss()
+          }}
         />
         <MultipleChoiceFilterModal
           ref={traditionsRef}

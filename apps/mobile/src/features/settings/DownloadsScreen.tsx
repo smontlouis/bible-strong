@@ -347,6 +347,7 @@ const DownloadsScreen = () => {
   const [statusFilter, setStatusFilter] = useState<Set<StatusFilter>>(new Set())
   const [langFilter, setLangFilter] = useState<Set<LangFilter>>(new Set())
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => new Set())
+  const [collapsedSubsections, setCollapsedSubsections] = useState<Set<string>>(() => new Set())
 
   const {
     downloadedSet,
@@ -405,6 +406,15 @@ const DownloadsScreen = () => {
     })
   }
 
+  const toggleSubsectionCollapse = (subsectionKey: string) => {
+    setCollapsedSubsections(previous => {
+      const next = new Set(previous)
+      if (next.has(subsectionKey)) next.delete(subsectionKey)
+      else next.add(subsectionKey)
+      return next
+    })
+  }
+
   // When searching or filtering, expand all sections so results are visible
   const hasActiveFilters = searchQuery.length > 0 || statusFilter.size > 0 || langFilter.size > 0
 
@@ -448,7 +458,15 @@ const DownloadsScreen = () => {
   // Build display sections: collapse items when section is collapsed (and no active filters)
   const displaySections = filteredSections.map(section => ({
     ...section,
-    data: !hasActiveFilters && collapsedSections.has(section.key) ? [] : section.data,
+    data:
+      !hasActiveFilters && collapsedSections.has(section.key)
+        ? []
+        : section.data.filter(
+            item =>
+              item.startsSubsection ||
+              hasActiveFilters ||
+              !collapsedSubsections.has(`${section.key}:${item.subsectionKey}`)
+          ),
   }))
 
   // Actions
@@ -832,6 +850,9 @@ const DownloadsScreen = () => {
             const subsectionItems = item.startsSubsection
               ? (section.subsections.find(({ key }) => key === item.subsectionKey)?.data ?? [])
               : []
+            const subsectionCollapseKey = `${section.key}:${item.subsectionKey}`
+            const isSubsectionCollapsed =
+              !hasActiveFilters && collapsedSubsections.has(subsectionCollapseKey)
             const isNestedDependency = item.parentItemId !== undefined
             const hasDependency = section.data.some(
               sectionItem => sectionItem.parentItemId === item.id
@@ -850,39 +871,48 @@ const DownloadsScreen = () => {
                 {item.startsSubsection && (
                   <DownloadSubsectionHeader
                     title={item.subsectionTitle}
+                    isCollapsed={isSubsectionCollapsed}
+                    downloadedCount={
+                      subsectionItems.filter(subsectionItem => downloadedSet.has(subsectionItem.id))
+                        .length
+                    }
+                    totalCount={subsectionItems.length}
                     allSelected={subsectionItems.every(subsectionItem =>
                       selectedItems.has(subsectionItem.id)
                     )}
                     onToggleSelectAll={() => toggleSelectAll(subsectionItems)}
+                    onToggleCollapse={() => toggleSubsectionCollapse(subsectionCollapseKey)}
                   />
                 )}
-                <DownloadableItem
-                  itemId={item.id}
-                  relatedResources={relatedResources}
-                  name={item.name}
-                  subtitle={item.subtitle}
-                  estimatedSize={item.estimatedSize}
-                  isSelectMode
-                  isSelected={selectedItems.has(item.id)}
-                  onToggleSelect={() => toggleSelect(item.id)}
-                  onDownload={() => handleDownloadItem(item)}
-                  onDelete={() => handleDeleteItem(item)}
-                  onRedownload={() => handleRedownloadItem(item)}
-                  onUpdate={() => handleUpdateItem(item)}
-                  isDownloaded={isDownloaded}
-                  isDefault={false}
-                  needsUpdate={itemNeedsUpdate(item)}
-                  isInvalid={invalidSet.has(item.id)}
-                  variant={isNestedDependency ? 'dependency' : 'standard'}
-                  hasDependency={hasDependency}
-                  hasFollowingSibling={hasFollowingSibling}
-                  onlineAccessStatus={
-                    resourceIdentity
-                      ? resources.capabilities.getOnlineAccess(resourceIdentity).status
-                      : 'unsupported'
-                  }
-                  downloadsDisabled={!isConnected}
-                />
+                {!isSubsectionCollapsed && (
+                  <DownloadableItem
+                    itemId={item.id}
+                    relatedResources={relatedResources}
+                    name={item.name}
+                    subtitle={item.subtitle}
+                    estimatedSize={item.estimatedSize}
+                    isSelectMode
+                    isSelected={selectedItems.has(item.id)}
+                    onToggleSelect={() => toggleSelect(item.id)}
+                    onDownload={() => handleDownloadItem(item)}
+                    onDelete={() => handleDeleteItem(item)}
+                    onRedownload={() => handleRedownloadItem(item)}
+                    onUpdate={() => handleUpdateItem(item)}
+                    isDownloaded={isDownloaded}
+                    isDefault={false}
+                    needsUpdate={itemNeedsUpdate(item)}
+                    isInvalid={invalidSet.has(item.id)}
+                    variant={isNestedDependency ? 'dependency' : 'standard'}
+                    hasDependency={hasDependency}
+                    hasFollowingSibling={hasFollowingSibling}
+                    onlineAccessStatus={
+                      resourceIdentity
+                        ? resources.capabilities.getOnlineAccess(resourceIdentity).status
+                        : 'unsupported'
+                    }
+                    downloadsDisabled={!isConnected}
+                  />
+                )}
               </>
             )
           }}

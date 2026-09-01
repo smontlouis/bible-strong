@@ -12,6 +12,7 @@ import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import type { DownloadItemState } from '~state/downloadQueue'
 import { downloadManager } from '~helpers/downloadManager'
 import { useResourcePublicationStatus } from '~helpers/useResourcePublicationStatus'
+import { DOWNLOAD_LIST_LAYOUT } from './downloadListLayout'
 
 interface DownloadableItemProps {
   itemId: string
@@ -137,7 +138,9 @@ const DownloadableItem = ({
       style={{
         minHeight: isDependency ? 52 : 76,
         paddingRight: 12,
-        paddingLeft: isDependency ? 56 : 20,
+        paddingLeft: isDependency
+          ? DOWNLOAD_LIST_LAYOUT.dependencyPaddingLeft
+          : DOWNLOAD_LIST_LAYOUT.itemPaddingLeft,
         paddingVertical: isDependency ? 8 : 12,
         backgroundColor: visualState === 'selected' ? theme.colors.lightPrimary : 'transparent',
         borderBottomWidth: hasDependency || hasFollowingSibling ? 0 : 1,
@@ -158,7 +161,7 @@ const DownloadableItem = ({
         <Box
           pos="absolute"
           top={-10}
-          left={32}
+          left={DOWNLOAD_LIST_LAYOUT.dependencyConnectorLeft}
           width={16}
           height={36}
           borderLeftWidth={2}
@@ -167,7 +170,7 @@ const DownloadableItem = ({
           borderColor="border"
         />
       ) : null}
-      <Box row flex alignItems="flex-start">
+      <Box row flex alignItems="center">
         <TouchableOpacity
           accessibilityLabel={name}
           accessibilityRole={isSelectMode ? 'checkbox' : isMainInteractive ? 'button' : 'text'}
@@ -211,9 +214,21 @@ const DownloadableItem = ({
 
           {/* Content */}
           <Box flex>
-            <Text fontSize={isDependency ? 14 : 16} numberOfLines={1}>
-              {name}
-            </Text>
+            <Box row alignItems="center">
+              <Text
+                fontSize={isDependency ? 14 : 16}
+                color={isDownloaded ? 'primary' : 'default'}
+                numberOfLines={1}
+                style={{ flexShrink: 1 }}
+              >
+                {name}
+              </Text>
+              {isDownloaded && (
+                <Box ml={5}>
+                  <FeatherIcon name="cloud" size={14} color="primary" />
+                </Box>
+              )}
+            </Box>
 
             {/* Subtitle / status text */}
             {visualState === 'queued' && (
