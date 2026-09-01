@@ -1,13 +1,14 @@
 import DownloadRequired from '~common/DownloadRequired'
 import Loading from '~common/Loading'
 import Progress from '~common/ui/Progress'
-import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
+import { createOfflineCopyDownloadPlan } from '~helpers/downloadItemFactory'
 import { downloadManager } from '~helpers/downloadManager'
 import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
 import { useResourceAccess } from './resourceAccess'
 import { getResourceActions, resourceIdentityFromOfflineCopy } from './resourceModel'
 import useConnection from '~helpers/useConnection'
+import { useOfflineResourceRegistry } from './useOfflineResourceRegistry'
 import { useTranslation } from 'react-i18next'
 import type { ResourceFailureIcon } from './resourceFailure'
 
@@ -32,6 +33,7 @@ const OfflineResourceRecovery = ({
 }: Props) => {
   const resources = useResourceAccess()
   const isConnected = useConnection()
+  const registry = useOfflineResourceRegistry()
   const { t } = useTranslation()
   const queue = useDownloadItemStatus(createOfflineCopyId(identity))
   const isActive =
@@ -86,7 +88,12 @@ const OfflineResourceRecovery = ({
         if (queue?.status === 'failed') {
           downloadManager.retry(createOfflineCopyId(identity))
         } else {
-          downloadManager.enqueue([createOfflineCopyDownloadItem(identity)])
+          downloadManager.enqueue(
+            createOfflineCopyDownloadPlan(identity, {
+              isDictionaryDirectoryAvailable:
+                registry.resources.get('dictionary-directory')?.availability.status === 'available',
+            })
+          )
         }
       }}
     />

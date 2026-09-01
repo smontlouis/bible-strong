@@ -5,6 +5,7 @@ import { Platform } from 'react-native'
 import { downloadManager } from '~helpers/downloadManager'
 import { bibleDomRemountSignalAtom } from '~state/app'
 import { downloadItemStatesAtom } from '~state/downloadQueue'
+import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 import { selectedResourcesAtom } from './atom'
 import {
   createDownloadItemsFromOnboardingSelections,
@@ -59,9 +60,13 @@ const useOfflineSetupDownload = ({
   const [closing, setClosing] = useState(false)
   const [successMessage, setSuccessMessage] = useState<OfflineSetupSuccessMessage>('ready')
   const [trackingStarted, setTrackingStarted] = useState(false)
-  const [trackedItemIds] = useState(() =>
-    createDownloadItemsFromOnboardingSelections(selectedResources).map(item => item.id)
+  const [plannedItems] = useState(() =>
+    createDownloadItemsFromOnboardingSelections(selectedResources).filter(item => {
+      const installed = offlineResourceRegistry.get(item.id)
+      return installed?.availability.status !== 'available' || installed.updateAvailable
+    })
   )
+  const trackedItemIds = plannedItems.map(item => item.id)
   const timers = useRef<Set<Timer>>(new Set())
   const previewInterval = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
   const verificationStarted = useRef(false)
@@ -99,9 +104,8 @@ const useOfflineSetupDownload = ({
   }
 
   const enqueueSelectedResources = () => {
-    const items = createDownloadItemsFromOnboardingSelections(selectedResources)
-    if (items.length > 0) downloadManager.enqueue(items)
-    return items.length
+    if (plannedItems.length > 0) downloadManager.enqueue(plannedItems)
+    return plannedItems.length
   }
 
   const retry = () => {

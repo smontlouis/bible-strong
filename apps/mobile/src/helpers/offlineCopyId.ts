@@ -45,3 +45,13 @@ export const createOfflineCopyId = (identity: OfflineCopyIdentity): OfflineCopyI
       return `bible-red-words:${identity.versionId}`
   }
 }
+
+/**
+ * The mobile artifact catalog predates first-class dictionary Offline-copy identities and
+ * still projects dictionary artifacts through the generic `database:*` namespace. Keep that
+ * delivery detail at the catalog boundary while the rest of the app uses `dictionary:*`.
+ */
+export const getOfflineCopyCatalogId = (identity: OfflineCopyIdentity): OfflineCopyId =>
+  identity.kind === 'dictionary'
+    ? `database:${identity.resourceId}:${identity.language}`
+    : createOfflineCopyId(identity)

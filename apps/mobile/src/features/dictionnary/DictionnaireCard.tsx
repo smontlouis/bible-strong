@@ -79,7 +79,12 @@ type Props = {
   }
 }
 
-const DictionnaireCard = ({ dictionnaireRef, isSelectionMode, sourceLabel, routeParams }: Props) => {
+const DictionnaireCard = ({
+  dictionnaireRef,
+  isSelectionMode,
+  sourceLabel,
+  routeParams,
+}: Props) => {
   const theme = useTheme()
   const router = useRouter()
   const pushRouteOnce = usePushRouteOnce()

@@ -10,7 +10,9 @@ describe('offlineResourceSizeManifest', () => {
     expect(bundledOfflineResourceSizeManifest).toEqual(
       toOfflineResourceSizeManifest(BUNDLED_MOBILE_RESOURCE_CATALOG)
     )
-    expect(Object.keys(bundledOfflineResourceSizeManifest.resources)).toHaveLength(105)
+    expect(Object.keys(bundledOfflineResourceSizeManifest.resources)).toHaveLength(
+      BUNDLED_MOBILE_RESOURCE_CATALOG.resourceCount
+    )
   })
 
   it('uses decompressed installed bytes from the manifest', () => {

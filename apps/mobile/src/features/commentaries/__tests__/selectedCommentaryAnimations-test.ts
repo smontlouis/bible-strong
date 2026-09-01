@@ -20,8 +20,6 @@ describe('selected commentary animations', () => {
   })
 
   it('does not animate every commentary when the header first mounts', () => {
-    expect(getAddedCommentaryProjectionIds(undefined, ['barnes:fr', 'acbc:fr'])).toEqual(
-      new Set()
-    )
+    expect(getAddedCommentaryProjectionIds(undefined, ['barnes:fr', 'acbc:fr'])).toEqual(new Set())
   })
 })

@@ -15,6 +15,7 @@ import {
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useTranslation } from 'react-i18next'
+import useConnection from '~helpers/useConnection'
 
 import Box, { AnimatedBox, FadingBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -162,6 +163,7 @@ const OfflineSetupReviewSheet = ({
   summary,
 }: OfflineSetupReviewSheetProps) => {
   const { t } = useTranslation()
+  const isConnected = useConnection()
   const viewport = useWindowDimensions()
   const reviewMotion = OFFLINE_SETUP_MOTION.reviewSheet
   const layout = reviewMotion.layout
@@ -193,7 +195,9 @@ const OfflineSetupReviewSheet = ({
   const canReview = displayedItems.length > 0
   const gestureEnabled = canReview || Boolean(folderContext)
   const gestureLocked = !canReview
-  const disabled = folderContext ? false : downloading || !availabilityReady
+  const disabled = folderContext
+    ? false
+    : downloading || !availabilityReady || (canReview && !isConnected)
   const buttonTranslationKey = getButtonTranslationKey({
     folderContext: Boolean(folderContext),
     reviewOpen,

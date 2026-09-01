@@ -23,7 +23,6 @@ import {
   sortVersesToTags,
   getAnnotationNotesInfo,
   getVerseRelationsMetadata,
-  transformComments,
 } from './computeVerseMetadata'
 import booksJson from '~assets/bible_versions/books.json'
 import { Book } from '~assets/bible_versions/books-desc'
@@ -230,7 +229,6 @@ export type WebViewProps = {
   openLink?: (linkId: string) => void
   setSelectedCode: (selectedCode: StrongSelection) => void
   selectedCode: SelectedCode | null
-  comments: { [key: string]: string } | null
   removeParallelVersion?: (index: number) => void
   addParallelVersion?: () => void
   goToPrevChapter?: () => void
@@ -353,7 +351,6 @@ export const BibleDOMWrapper = ({
   chapter,
   isSelectionMode,
   selectedCode,
-  comments,
   annotationMode,
   clearSelectionTrigger,
   applyAnnotationTrigger,
@@ -955,7 +952,6 @@ export const BibleDOMWrapper = ({
   }
 
   // Pre-compute verse metadata on native side (avoids DOM JS thread work)
-  const computedComments = transformComments(comments, versesToSend.length)
   const taggedVerses = sortVersesToTags(highlightedVerses)
   const { versesWithAnnotationNotes, annotationNotesCountByVerse } = getAnnotationNotesInfo(
     versesToSend,
@@ -1030,7 +1026,6 @@ export const BibleDOMWrapper = ({
         chapter={chapter}
         isSelectionMode={isSelectionMode}
         selectedCode={selectedCode}
-        comments={computedComments}
         dispatch={dispatch}
         translations={translations}
         chapterEntityTranslations={chapterEntityTranslations}

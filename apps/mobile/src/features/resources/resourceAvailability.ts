@@ -17,7 +17,11 @@ import {
 } from '~helpers/databaseTypes'
 import { resourceDatabaseRequiredTables } from '~helpers/resourceDatabaseSchema'
 import { restoreOrphanedResourceBackup } from '~helpers/atomicResourceFile'
-import { createOfflineCopyId, type OfflineCopyIdentity } from '~helpers/offlineCopyId'
+import {
+  createOfflineCopyId,
+  getOfflineCopyCatalogId,
+  type OfflineCopyIdentity,
+} from '~helpers/offlineCopyId'
 import {
   getStrongBibleSidecarAvailability,
   type StrongBibleSidecarAvailability,
@@ -95,6 +99,7 @@ type ResourceAvailabilityDependencies = {
     language: ResourceLanguage,
     path: string
   ) => Promise<boolean>
+  validateStandaloneResource: (kind: 'dictionary' | 'commentary', path: string) => Promise<boolean>
 }
 
 const validateDatabaseResource = async (
@@ -128,6 +133,32 @@ const validateDatabaseResource = async (
   }
 }
 
+const validateStandaloneResource = async (
+  kind: 'dictionary' | 'commentary',
+  path: string
+): Promise<boolean> => {
+  const fileName = path.split('/').pop()!
+  const directory = path.slice(0, -(fileName.length + 1))
+  let database: Awaited<ReturnType<typeof openSQLiteDatabase>> | undefined
+  try {
+    database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+    const integrity = await database.getFirstAsync<Record<string, string>>('PRAGMA quick_check')
+    if (!integrity || !Object.values(integrity).includes('ok')) return false
+    const tables = await database.getAllAsync<{ name: string }>(
+      `SELECT name FROM sqlite_schema WHERE type = 'table'`
+    )
+    const tableNames = new Set(tables.map(table => table.name.toLowerCase()))
+    return kind === 'dictionary'
+      ? tableNames.has('dictionnaire')
+      : tableNames.has('commentaires') ||
+          (tableNames.has('commentary_documents') && tableNames.has('commentary_verse_documents'))
+  } catch {
+    return false
+  } finally {
+    await database?.closeAsync()
+  }
+}
+
 const defaultDependencies: ResourceAvailabilityDependencies = {
   getFileInfo: path => FileSystem.getInfoAsync(path),
   initSQLiteDir,
@@ -139,6 +170,7 @@ const defaultDependencies: ResourceAvailabilityDependencies = {
   getInterlinearAvailability: getInterlinearSidecarAvailability,
   getStrongLexiconAvailability: getStrongLexiconModuleAvailability,
   validateDatabaseResource,
+  validateStandaloneResource,
 }
 
 export const getLocalResourceKey = (resource: LocalResourceRef): string =>
@@ -207,9 +239,10 @@ export const probeLocalResourceAvailability = async (
     const expectedPath = getDictionaryDbPath(resource.work, resource.language)
     await dependencies.restoreBackup?.(expectedPath)
     const file = await dependencies.getFileInfo(expectedPath)
-    return file.exists
+    if (!file.exists) return { status: 'missing', resource, expectedPath }
+    return (await dependencies.validateStandaloneResource('dictionary', expectedPath))
       ? { status: 'available', resource }
-      : { status: 'missing', resource, expectedPath }
+      : { status: 'corrupt', resource, reason: 'integrity-check-failed' }
   }
 
   if (resource.kind === 'dictionary-directory') {
@@ -253,9 +286,10 @@ export const probeLocalResourceAvailability = async (
     const expectedPath = getCommentaryDbPath(resource.resourceId, resource.language)
     await dependencies.restoreBackup?.(expectedPath)
     const file = await dependencies.getFileInfo(expectedPath)
-    return file.exists
+    if (!file.exists) return { status: 'missing', resource, expectedPath }
+    return (await dependencies.validateStandaloneResource('commentary', expectedPath))
       ? { status: 'available', resource }
-      : { status: 'missing', resource, expectedPath }
+      : { status: 'corrupt', resource, reason: 'integrity-check-failed' }
   }
 
   await dependencies.initSQLiteDir()
@@ -305,8 +339,8 @@ export type OfflineResourceRegistrySnapshot = {
 
 const getCatalogResourceRefs = (catalog: MobileResourceCatalog): LocalResourceRef[] => {
   const refs: LocalResourceRef[] = []
-  for (const resourceId of Object.keys(catalog.resources)) {
-    const resource = parseRegistryResourceId(resourceId)
+  for (const [resourceId, catalogEntry] of Object.entries(catalog.resources)) {
+    const resource = parseRegistryResourceId(resourceId, catalogEntry)
     if (!resource) continue
 
     refs.push(resource)
@@ -323,7 +357,10 @@ const getCatalogResourceRefs = (catalog: MobileResourceCatalog): LocalResourceRe
   return [...new Map(refs.map(resource => [createOfflineCopyId(resource), resource])).values()]
 }
 
-const parseRegistryResourceId = (id: string): LocalResourceRef | undefined => {
+const parseRegistryResourceId = (
+  id: string,
+  catalogEntry?: MobileResourceCatalog['resources'][string]
+): LocalResourceRef | undefined => {
   if (id === 'dictionary-directory') return { kind: 'dictionary-directory' }
   const parts = id.split(':')
   const language = parts.at(-1) as ResourceLanguage
@@ -341,6 +378,17 @@ const parseRegistryResourceId = (id: string): LocalResourceRef | undefined => {
     return { kind: 'dictionary', work: parts[1], resourceId: parts[2], language }
   }
   if (parts[0] === 'database' && parts[1] && parts.length === 3) {
+    const dictionaryWork =
+      catalogEntry?.resourceRevision?.match(/^dictionary-(.+)-(?:fr|en)-[a-f0-9]+$/u)?.[1] ??
+      catalogEntry?.file.match(/^dictionaries\/dictionary-(.+)-(?:fr|en)\.sqlite\.zip$/u)?.[1]
+    if (dictionaryWork && catalogEntry?.file.startsWith('dictionaries/')) {
+      return {
+        kind: 'dictionary',
+        work: dictionaryWork,
+        resourceId: parts[1],
+        language,
+      }
+    }
     return REGISTRY_DATABASE_IDS.has(parts[1] as DatabaseId)
       ? {
           kind: 'database',
@@ -416,7 +464,7 @@ export class OfflineResourceRegistry {
     }
     for (const resource of catalogResources) {
       const id = createOfflineCopyId(resource)
-      const catalogRevision = catalog.resources[id]?.archiveSha256
+      const catalogRevision = catalog.resources[getOfflineCopyCatalogId(resource)]?.archiveSha256
       const installed = this.dependencies.readPublication(id)
       const previous = this.entries.get(id)
       const availability: LocalResourceAvailability =
@@ -539,7 +587,8 @@ export class OfflineResourceRegistry {
   ): void {
     const id = createOfflineCopyId(resource)
     const installed = this.dependencies.readPublication(id)
-    const catalogRevision = this.dependencies.getCatalog().resources[id]?.archiveSha256
+    const catalogRevision =
+      this.dependencies.getCatalog().resources[getOfflineCopyCatalogId(resource)]?.archiveSha256
     this.entries.set(id, {
       id,
       resource,

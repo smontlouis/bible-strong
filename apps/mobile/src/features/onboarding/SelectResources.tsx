@@ -11,6 +11,7 @@ import { AnimatedBox, HStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
 import useLanguage from '~helpers/useLanguage'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
+import useConnection from '~helpers/useConnection'
 import { selectedResourcesAtom } from './atom'
 import DownloadResources from './DownloadResources'
 import OfflineResourceFolderHero from './components/OfflineResourceFolderHero'
@@ -37,6 +38,7 @@ const SelectResources = (props: SelectResourcesProps) => {
   const insets = useSafeAreaInsets()
   const viewport = useWindowDimensions()
   const reduceMotion = useReducedMotion()
+  const isConnected = useConnection()
   const setSelectedResources = useSetAtom(selectedResourcesAtom)
   const [reviewOpen, setReviewOpen] = useState(false)
   const selection = useOfflineSetupSelection(lang)
@@ -79,7 +81,7 @@ const SelectResources = (props: SelectResourcesProps) => {
   }
 
   const startDownload = () => {
-    if (!selection.availabilityReady) return
+    if (!selection.availabilityReady || !isConnected) return
     setReviewOpen(false)
     setSelectedResources(selection.missingSelections)
     scene.startDownload()

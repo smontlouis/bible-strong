@@ -1,10 +1,9 @@
 import type { Pericope, Verse } from '~common/types'
 import getBiblePericope from '~helpers/getBiblePericope'
-import loadMhyComments from '~helpers/loadMhyComments'
 import { loadRedWords } from '~helpers/loadRedWords'
 import loadTresorReferences from '~helpers/loadTresorReferences'
 import type { VersionCode } from '~state/tabs'
-import { mapLocalResourceError, unwrapLocalResourceResult } from './resourceAccessError'
+import { mapLocalResourceError } from './resourceAccessError'
 import { getLocalResourceAvailability } from './resourceAvailability'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
 import type { ResourceAvailability } from './resourceModel'
@@ -15,9 +14,7 @@ import type { OfflineCopyIdentity } from '~helpers/offlineCopyId'
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import { Schema } from 'effect'
 import { BiblePericopeIndexDto } from './bibleChapterContract'
-import { CommentaryChapterResponseDto, CrossReferenceResponseDto } from './supplementaryContract'
-
-export type BibleChapterComments = { serializedComments: string }
+import { CrossReferenceResponseDto } from './supplementaryContract'
 
 type RedWordsRange = { start: number; end: number }
 export type RedWordsByVerse = Record<string, RedWordsRange[]>
@@ -35,10 +32,8 @@ export type BibleReadingAvailability =
 
 export type BibleReadingResourceAccess = {
   getPericopeAvailability?: (version: VersionCode) => Promise<BibleReadingAvailability>
-  getMhyAvailability?: (language: ResourceLanguage) => Promise<BibleReadingAvailability>
   getRedWordsAvailability?: (version: VersionCode) => Promise<BibleReadingAvailability>
   loadPericope: (version: VersionCode) => Promise<Pericope>
-  loadMhyComments: (book: number, chapter: number) => Promise<BibleChapterComments | undefined>
   loadRedWords: (version: VersionCode) => Promise<RedWordsByVerse | null>
   getTresorAvailability?: (language: ResourceLanguage) => Promise<ResourceAvailability>
   loadTresorReferences: (verse: string) => Promise<TresorReferences | undefined>
@@ -76,10 +71,6 @@ export const localBibleReadingResourceAccess: BibleReadingResourceAccess = {
             }
     )
   },
-  getMhyAvailability: language =>
-    language === 'fr'
-      ? mapReadingAvailability({ kind: 'database', databaseId: 'MHY', language: 'fr' })
-      : Promise.resolve({ status: 'unsupported' }),
   getRedWordsAvailability: version => {
     if (usesCanonicalBibleExtras(version)) return Promise.resolve({ status: 'available' })
     if (!versionHasRedWords(version)) return Promise.resolve({ status: 'unsupported' })
@@ -98,10 +89,6 @@ export const localBibleReadingResourceAccess: BibleReadingResourceAccess = {
     )
   },
   loadPericope: getBiblePericope,
-  loadMhyComments: async (book, chapter) => {
-    const comments = unwrapLocalResourceResult(await loadMhyComments(book, chapter))
-    return comments ? { serializedComments: comments.commentaires } : undefined
-  },
   loadRedWords,
   getTresorAvailability: async language => {
     const availability = await getLocalResourceAvailability({
@@ -147,12 +134,7 @@ export const createHttpBibleReadingResourceAccess = ({
   timeoutMs = 8_000,
 }: HttpBibleReadingOptions): Pick<
   BibleReadingResourceAccess,
-  | 'getPericopeAvailability'
-  | 'loadPericope'
-  | 'getMhyAvailability'
-  | 'loadMhyComments'
-  | 'getTresorAvailability'
-  | 'loadTresorReferences'
+  'getPericopeAvailability' | 'loadPericope' | 'getTresorAvailability' | 'loadTresorReferences'
 > => ({
   getPericopeAvailability: async () =>
     (await isOnline()) ? { status: 'available' } : { status: 'unsupported' },
@@ -176,38 +158,6 @@ export const createHttpBibleReadingResourceAccess = ({
           Headings: [...item.headings] as NonNullable<Verse['Headings']>,
         })) as Verse[]
       )
-    } finally {
-      clearTimeout(timeout)
-    }
-  },
-  getMhyAvailability: async language =>
-    language === 'fr'
-      ? (await isOnline())
-        ? { status: 'available' }
-        : {
-            status: 'unavailable',
-            reason: 'offline-copy-required',
-            recoveryIdentity: { kind: 'database', databaseId: 'MHY', language: 'fr' },
-          }
-      : { status: 'unsupported' },
-  loadMhyComments: async (book, chapter) => {
-    if (!(await isOnline())) throw new Error('COMMENTARY_HTTP_OFFLINE')
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), timeoutMs)
-    try {
-      const response = await fetcher(
-        `${baseUrl.replace(/\/$/, '')}/v1/commentaries/MHY/fr/chapters/${book}/${chapter}`,
-        { headers: { accept: 'application/json' }, signal: controller.signal }
-      )
-      if (!response.ok) {
-        if (response.status === 404) return undefined
-        throw new Error(`COMMENTARY_HTTP_${response.status}`)
-      }
-      const decoded = Schema.decodeUnknownSync(CommentaryChapterResponseDto)(await response.json())
-      if (decoded.book !== book || decoded.chapter !== chapter) {
-        throw new Error('COMMENTARY_HTTP_INTEGRITY')
-      }
-      return { serializedComments: decoded.serializedComments }
     } finally {
       clearTimeout(timeout)
     }
@@ -251,12 +201,7 @@ export const createHttpBibleReadingResourceAccess = ({
 export const createHybridBibleReadingResourceAccess = (options: {
   local: BibleReadingResourceAccess
   online: Pick<BibleReadingResourceAccess, 'getPericopeAvailability' | 'loadPericope'> &
-    Partial<
-      Pick<
-        BibleReadingResourceAccess,
-        'getMhyAvailability' | 'loadMhyComments' | 'getTresorAvailability' | 'loadTresorReferences'
-      >
-    >
+    Partial<Pick<BibleReadingResourceAccess, 'getTresorAvailability' | 'loadTresorReferences'>>
   remotelyReadableVersions: ReadonlySet<string>
   isOnline: () => Promise<boolean>
 }): BibleReadingResourceAccess => ({
@@ -276,22 +221,6 @@ export const createHybridBibleReadingResourceAccess = (options: {
       return options.online.loadPericope(version)
     }
     return options.local.loadPericope(version)
-  },
-  getMhyAvailability: async language => {
-    const local = await options.local.getMhyAvailability?.(language)
-    if (local?.status === 'available') return local
-    if (language === 'fr' && (await options.isOnline()) && options.online.getMhyAvailability) {
-      return options.online.getMhyAvailability(language)
-    }
-    return local ?? { status: 'unsupported' }
-  },
-  loadMhyComments: async (book, chapter) => {
-    const local = await options.local.getMhyAvailability?.('fr')
-    if (local?.status === 'available') return options.local.loadMhyComments(book, chapter)
-    if ((await options.isOnline()) && options.online.loadMhyComments) {
-      return options.online.loadMhyComments(book, chapter)
-    }
-    return options.local.loadMhyComments(book, chapter)
   },
   getTresorAvailability: async language => {
     const local = await options.local.getTresorAvailability?.(language)

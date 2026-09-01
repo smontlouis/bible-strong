@@ -15,7 +15,7 @@ import DownloadableItem from './components/DownloadableItem'
 import StorageSummaryCard from './components/StorageSummaryCard'
 import FilterChipRow, { type StatusFilter, type LangFilter } from './components/FilterChipRow'
 import DownloadSectionHeader from './components/DownloadSectionHeader'
-import GlobalDownloadBar from './components/GlobalDownloadBar'
+import DownloadSubsectionHeader from './components/DownloadSubsectionHeader'
 import BatchActionBar from './components/BatchActionBar'
 
 import { versions, type Version } from '~helpers/bibleVersions'
@@ -56,6 +56,12 @@ import ResourceUnavailableView from '~features/resources/ResourceUnavailableView
 import { buildBibleItems, type UnifiedDownloadItem } from './downloadBibleItems'
 import { getCommentaryCatalogForLanguage } from '@bible-strong/resource-catalog/commentaries'
 import type { DictionaryWork } from '~features/resources/dictionaryAccess'
+import {
+  buildDownloadResourceSections,
+  flattenDownloadSubsections,
+  type DisplayDownloadItem,
+  type DownloadResourceSection,
+} from './downloadResourceSections'
 
 // ---------------------------------------------------------------------------
 // Unified section item type
@@ -63,11 +69,7 @@ import type { DictionaryWork } from '~features/resources/dictionaryAccess'
 
 type UnifiedItem = UnifiedDownloadItem
 
-interface UnifiedSection {
-  key: string
-  title: string
-  data: UnifiedItem[]
-}
+type UnifiedSection = DownloadResourceSection & { data: DisplayDownloadItem[] }
 
 // ---------------------------------------------------------------------------
 // Build unified sections
@@ -113,11 +115,12 @@ function buildDictionaryItems(works: readonly DictionaryWork[]): UnifiedItem[] {
     }
     try {
       const item = createOfflineCopyDownloadItem(identity)
+      const name = work.authors[0] ? `${work.authors[0]} — ${work.title}` : work.title
       return [
         {
           id: item.id,
-          name: work.title,
-          subtitle: `${work.authors.join(', ')} · ${work.edition}`,
+          name,
+          subtitle: [work.description, work.edition].filter(Boolean).join(' · '),
           estimatedSize: item.estimatedSize,
           lang: work.resource.language,
           searchText: [work.title, work.abbreviation, work.source, ...work.authors]
@@ -217,103 +220,48 @@ function buildAllSections(
   dictionaryWorks: readonly DictionaryWork[]
 ): UnifiedSection[] {
   const allVersions = Object.values(versions) as Version[]
-  const bibleSections = buildBibleVersionGroups(allVersions, appLang).map(group => ({
-    key: group.key,
-    title: t(group.titleKey),
-    data: buildBibleItems(group.versions, appLang, t),
-  }))
+  const bibleGroups = new Map(
+    buildBibleVersionGroups(allVersions, appLang).map(group => [
+      group.key,
+      buildBibleItems(group.versions, appLang, t),
+    ])
+  )
   const frenchDictionaries = dictionaryWorks.filter(work => work.resource.language === 'fr')
   const englishDictionaries = dictionaryWorks.filter(work => work.resource.language === 'en')
+  const sharedStudyTools = [...buildStrongLexiconItems(t), ...buildSharedDatabaseItems()]
+  const sections = buildDownloadResourceSections({
+    titles: {
+      french: t('versionCatalog.language.fr'),
+      english: t('versionCatalog.language.en'),
+      original: t('downloads.language.original'),
+      bibles: t('downloads.subsection.bibles'),
+      commentaries: t('downloads.subsection.commentaries'),
+      dictionaries: t('downloads.subsection.dictionaries'),
+      studyTools: t('downloads.subsection.studyTools'),
+      otherResources: t('downloads.subsection.otherResources'),
+    },
+    french: {
+      bibles: bibleGroups.get('bible-fr') ?? [],
+      commentaries: buildCommentaryItems('fr'),
+      dictionaries: buildDictionaryItems(frenchDictionaries),
+      otherResources: buildDatabaseItems('fr', frenchDictionaries.length === 0),
+    },
+    english: {
+      bibles: bibleGroups.get('bible-en') ?? [],
+      commentaries: buildCommentaryItems('en'),
+      dictionaries: buildDictionaryItems(englishDictionaries),
+      otherResources: buildDatabaseItems('en', englishDictionaries.length === 0),
+    },
+    originalBibles: bibleGroups.get('bible-original') ?? [],
+    sharedStudyTools,
+  })
 
-  if (appLang === 'en') {
-    return [
-      {
-        key: 'strong-lexicon',
-        title: t('downloads.section.strongLexicon'),
-        data: buildStrongLexiconItems(t),
-      },
-      {
-        key: 'db-en',
-        title: t('downloads.section.dbEn'),
-        data: buildDatabaseItems('en', englishDictionaries.length === 0),
-      },
-      {
-        key: 'dictionaries-en',
-        title: t('Dictionnaires anglais'),
-        data: buildDictionaryItems(englishDictionaries),
-      },
-      {
-        key: 'commentaries-en',
-        title: t('downloads.section.commentariesEn'),
-        data: buildCommentaryItems('en'),
-      },
-      {
-        key: 'db-shared',
-        title: t('downloads.section.crossReferences'),
-        data: buildSharedDatabaseItems(),
-      },
-      ...bibleSections,
-      {
-        key: 'db-fr',
-        title: t('downloads.section.dbFr'),
-        data: buildDatabaseItems('fr', frenchDictionaries.length === 0),
-      },
-      {
-        key: 'dictionaries-fr',
-        title: t('Dictionnaires français'),
-        data: buildDictionaryItems(frenchDictionaries),
-      },
-      {
-        key: 'commentaries-fr',
-        title: t('downloads.section.commentariesFr'),
-        data: buildCommentaryItems('fr'),
-      },
-    ].filter(s => s.data.length > 0)
-  }
-
-  return [
-    {
-      key: 'strong-lexicon',
-      title: t('downloads.section.strongLexicon'),
-      data: buildStrongLexiconItems(t),
-    },
-    {
-      key: 'db-fr',
-      title: t('downloads.section.dbFr'),
-      data: buildDatabaseItems('fr', frenchDictionaries.length === 0),
-    },
-    {
-      key: 'dictionaries-fr',
-      title: t('Dictionnaires français'),
-      data: buildDictionaryItems(frenchDictionaries),
-    },
-    {
-      key: 'commentaries-fr',
-      title: t('downloads.section.commentariesFr'),
-      data: buildCommentaryItems('fr'),
-    },
-    {
-      key: 'db-shared',
-      title: t('downloads.section.crossReferences'),
-      data: buildSharedDatabaseItems(),
-    },
-    ...bibleSections,
-    {
-      key: 'db-en',
-      title: t('downloads.section.dbEn'),
-      data: buildDatabaseItems('en', englishDictionaries.length === 0),
-    },
-    {
-      key: 'dictionaries-en',
-      title: t('Dictionnaires anglais'),
-      data: buildDictionaryItems(englishDictionaries),
-    },
-    {
-      key: 'commentaries-en',
-      title: t('downloads.section.commentariesEn'),
-      data: buildCommentaryItems('en'),
-    },
-  ].filter(s => s.data.length > 0)
+  return sections
+    .filter(section => section.subsections.length > 0)
+    .map(section => ({
+      ...section,
+      data: flattenDownloadSubsections(section.key, section.subsections),
+    }))
 }
 
 // ---------------------------------------------------------------------------
@@ -390,7 +338,6 @@ const DownloadsScreen = () => {
   const { enqueue, clearCompleted } = useDownloadQueue()
 
   // Local state
-  const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
   const [batchDeletionProgress, setBatchDeletionProgress] = useState<{
     completed: number
@@ -435,14 +382,19 @@ const DownloadsScreen = () => {
     return false
   }
 
-  const itemsToUpdate = allSections.flatMap(section => section.data).filter(itemNeedsUpdate)
+  const uniqueItems = Array.from(
+    new Map(allSections.flatMap(section => section.data).map(item => [item.id, item])).values()
+  )
+  const itemsToUpdate = uniqueItems.filter(itemNeedsUpdate)
 
-  // Initialize all sections as collapsed once we know them
+  // Keep the current app language open and the other language groups compact.
   const allSectionKeys = allSections.map(s => s.key).join(',')
   React.useEffect(() => {
-    setCollapsedSections(new Set(allSections.map(s => s.key)))
+    setCollapsedSections(
+      new Set(allSections.filter(section => section.key !== lang).map(section => section.key))
+    )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSectionKeys])
+  }, [allSectionKeys, lang])
 
   const toggleCollapse = (sectionKey: string) => {
     setCollapsedSections(prev => {
@@ -458,24 +410,39 @@ const DownloadsScreen = () => {
 
   // Filtering logic
   const filteredSections = allSections
-    .map(section => ({
-      ...section,
-      data: section.data.filter(item => {
-        // Search filter
-        if (searchQuery && !item.searchText.includes(searchQuery.toLowerCase())) return false
-        // Status filter (toggle like lang: none selected = show all)
-        if (statusFilter.size > 0) {
-          const isDownloaded = downloadedSet.has(item.id)
-          if (statusFilter.has('downloaded') && !statusFilter.has('notDownloaded') && !isDownloaded)
-            return false
-          if (statusFilter.has('notDownloaded') && !statusFilter.has('downloaded') && isDownloaded)
-            return false
-        }
-        // Language filter
-        if (langFilter.size > 0 && !langFilter.has(item.lang)) return false
-        return true
-      }),
-    }))
+    .filter(section => langFilter.size === 0 || langFilter.has(section.key))
+    .map(section => {
+      const subsections = section.subsections
+        .map(subsection => ({
+          ...subsection,
+          data: subsection.data.filter(item => {
+            if (searchQuery && !item.searchText.includes(searchQuery.toLowerCase())) return false
+            if (statusFilter.size > 0) {
+              const isDownloaded = downloadedSet.has(item.id)
+              if (
+                statusFilter.has('downloaded') &&
+                !statusFilter.has('notDownloaded') &&
+                !isDownloaded
+              )
+                return false
+              if (
+                statusFilter.has('notDownloaded') &&
+                !statusFilter.has('downloaded') &&
+                isDownloaded
+              )
+                return false
+            }
+            return true
+          }),
+        }))
+        .filter(subsection => subsection.data.length > 0)
+
+      return {
+        ...section,
+        subsections,
+        data: flattenDownloadSubsections(section.key, subsections),
+      }
+    })
     .filter(section => section.data.length > 0)
 
   // Build display sections: collapse items when section is collapsed (and no active filters)
@@ -561,7 +528,6 @@ const DownloadsScreen = () => {
 
     if (items.length > 0) {
       enqueue(items)
-      setIsSelectMode(false)
       setSelectedItems(new Set())
     }
   }
@@ -608,7 +574,6 @@ const DownloadsScreen = () => {
               })
             }
             await refreshInstalledStateAfterDeletion()
-            setIsSelectMode(false)
             setSelectedItems(new Set())
           } catch {
             await refreshInstalledStateAfterDeletion().catch(() => undefined)
@@ -752,7 +717,7 @@ const DownloadsScreen = () => {
         title={t('downloads.title')}
         rightComponent={
           <Box row alignItems="center">
-            {itemsToUpdate.length > 0 && !isSelectMode && (
+            {itemsToUpdate.length > 0 && (
               <TouchableOpacity
                 accessibilityRole="button"
                 accessibilityState={{ disabled: !isConnected }}
@@ -768,27 +733,6 @@ const DownloadsScreen = () => {
                 />
               </TouchableOpacity>
             )}
-            <TouchableOpacity
-              accessibilityLabel={
-                isSelectMode
-                  ? t('accessibility.finishSelection')
-                  : t('accessibility.startSelection')
-              }
-              accessibilityRole="button"
-              accessibilityState={{ disabled: batchDeletionProgress !== null }}
-              disabled={batchDeletionProgress !== null}
-              onPress={() => {
-                setIsSelectMode(prev => !prev)
-                if (isSelectMode) setSelectedItems(new Set())
-              }}
-              style={{ paddingHorizontal: 16, padding: 8 }}
-            >
-              <FeatherIcon
-                name={isSelectMode ? 'check' : 'check-square'}
-                size={20}
-                color={isSelectMode ? 'success' : 'primary'}
-              />
-            </TouchableOpacity>
           </Box>
         }
       />
@@ -804,9 +748,9 @@ const DownloadsScreen = () => {
           onRetry={() => void refreshDownloadedItems()}
         />
       ) : (
-        <SectionList<UnifiedItem, UnifiedSection>
+        <SectionList<DisplayDownloadItem, UnifiedSection>
           sections={displaySections}
-          keyExtractor={(item: UnifiedItem) => item.id}
+          keyExtractor={(item: DisplayDownloadItem) => item.occurrenceKey}
           stickySectionHeadersEnabled={false}
           contentContainerStyle={{ paddingBottom: 100 }}
           ListHeaderComponent={
@@ -875,17 +819,26 @@ const DownloadsScreen = () => {
                 onToggleCollapse={() => toggleCollapse(section.key)}
                 downloadedCount={downloadedCount}
                 totalCount={totalCount}
-                isSelectMode={isSelectMode}
+                isSelectMode
                 allSelected={sectionItems.every((i: UnifiedItem) => selectedItems.has(i.id))}
                 onToggleSelectAll={() => toggleSelectAll(sectionItems)}
               />
             )
           }}
-          renderItem={({ item }) => {
+          renderItem={({ item, index, section }) => {
             const isDownloaded = downloadedSet.has(item.id)
             const identity = parseOfflineCopyId(item.id)
             if (!identity) return null
+            const subsectionItems = item.startsSubsection
+              ? (section.subsections.find(({ key }) => key === item.subsectionKey)?.data ?? [])
+              : []
             const isNestedDependency = item.parentItemId !== undefined
+            const hasDependency = section.data.some(
+              sectionItem => sectionItem.parentItemId === item.id
+            )
+            const hasFollowingSibling =
+              item.parentItemId !== undefined &&
+              section.data[index + 1]?.parentItemId === item.parentItemId
             const bibleVersionId = identity.kind === 'bible' ? identity.versionId : undefined
             const resourceIdentity = resourceIdentityFromOfflineCopy(identity)
             const relatedResources = bibleVersionId
@@ -893,52 +846,61 @@ const DownloadsScreen = () => {
               : undefined
 
             return (
-              <DownloadableItem
-                itemId={item.id}
-                relatedResources={relatedResources}
-                name={item.name}
-                subtitle={item.subtitle}
-                estimatedSize={item.estimatedSize}
-                isSelectMode={isSelectMode}
-                isSelected={selectedItems.has(item.id)}
-                onToggleSelect={() => toggleSelect(item.id)}
-                onDownload={() => handleDownloadItem(item)}
-                onDelete={() => handleDeleteItem(item)}
-                onRedownload={() => handleRedownloadItem(item)}
-                onUpdate={() => handleUpdateItem(item)}
-                isDownloaded={isDownloaded}
-                isDefault={false}
-                needsUpdate={itemNeedsUpdate(item)}
-                isInvalid={invalidSet.has(item.id)}
-                variant={isNestedDependency ? 'dependency' : 'standard'}
-                onlineAccessStatus={
-                  resourceIdentity
-                    ? resources.capabilities.getOnlineAccess(resourceIdentity).status
-                    : 'unsupported'
-                }
-                downloadsDisabled={!isConnected}
-              />
+              <>
+                {item.startsSubsection && (
+                  <DownloadSubsectionHeader
+                    title={item.subsectionTitle}
+                    allSelected={subsectionItems.every(subsectionItem =>
+                      selectedItems.has(subsectionItem.id)
+                    )}
+                    onToggleSelectAll={() => toggleSelectAll(subsectionItems)}
+                  />
+                )}
+                <DownloadableItem
+                  itemId={item.id}
+                  relatedResources={relatedResources}
+                  name={item.name}
+                  subtitle={item.subtitle}
+                  estimatedSize={item.estimatedSize}
+                  isSelectMode
+                  isSelected={selectedItems.has(item.id)}
+                  onToggleSelect={() => toggleSelect(item.id)}
+                  onDownload={() => handleDownloadItem(item)}
+                  onDelete={() => handleDeleteItem(item)}
+                  onRedownload={() => handleRedownloadItem(item)}
+                  onUpdate={() => handleUpdateItem(item)}
+                  isDownloaded={isDownloaded}
+                  isDefault={false}
+                  needsUpdate={itemNeedsUpdate(item)}
+                  isInvalid={invalidSet.has(item.id)}
+                  variant={isNestedDependency ? 'dependency' : 'standard'}
+                  hasDependency={hasDependency}
+                  hasFollowingSibling={hasFollowingSibling}
+                  onlineAccessStatus={
+                    resourceIdentity
+                      ? resources.capabilities.getOnlineAccess(resourceIdentity).status
+                      : 'unsupported'
+                  }
+                  downloadsDisabled={!isConnected}
+                />
+              </>
             )
           }}
         />
       )}
 
       {/* Bottom bars */}
-      {!isAvailabilityPending &&
-        !isAvailabilityError &&
-        (isSelectMode ? (
-          <BatchActionBar
-            selectedCount={selectedItems.size}
-            hasDownloadable={selectedDownloadable > 0}
-            hasDeletable={selectedDeletable > 0}
-            onDownload={handleBatchDownload}
-            onDelete={handleBatchDelete}
-            downloadsDisabled={!isConnected}
-            deletionProgress={batchDeletionProgress}
-          />
-        ) : (
-          <GlobalDownloadBar />
-        ))}
+      {!isAvailabilityPending && !isAvailabilityError && (
+        <BatchActionBar
+          selectedCount={selectedItems.size}
+          hasDownloadable={selectedDownloadable > 0}
+          hasDeletable={selectedDeletable > 0}
+          onDownload={handleBatchDownload}
+          onDelete={handleBatchDelete}
+          downloadsDisabled={!isConnected}
+          deletionProgress={batchDeletionProgress}
+        />
+      )}
     </Container>
   )
 }

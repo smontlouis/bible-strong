@@ -10,7 +10,10 @@ import Button from '~common/ui/Button'
 import { FeatherIcon } from '~common/ui/Icon'
 import Progress from '~common/ui/Progress'
 import Text from '~common/ui/Text'
-import { useIsOfflineResourceInstalled } from '~features/resources/useOfflineResourceRegistry'
+import {
+  useIsOfflineResourceInstalled,
+  useOfflineResourceState,
+} from '~features/resources/useOfflineResourceRegistry'
 import {
   createDownloadedItemDeletionPlan,
   deleteDownloadedItem,
@@ -53,6 +56,8 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
   const itemId = identity ? createOfflineCopyId(identity) : undefined
   const queueState = useDownloadItemStatus(itemId)
   const installed = useIsOfflineResourceInstalled(identity)
+  const offlineState = useOfflineResourceState(identity)
+  const corrupt = offlineState?.availability.status === 'corrupt'
   const publicationStatus = useResourcePublicationStatus({
     resourceId: itemId ?? '',
     isInstalled: installed,
@@ -181,22 +186,24 @@ const CommentaryOfflineDetailsSheet = ({ sheetRef, projection }: Props) => {
                   !isConnected || (installed && publicationStatus.status !== 'update-available')
                 }
                 leftIcon={
-                  !installed || publicationStatus.status === 'update-available' ? (
+                  !installed || corrupt || publicationStatus.status === 'update-available' ? (
                     <Box mr={9}>
                       <FeatherIcon name="download" size={18} color="white" />
                     </Box>
                   ) : undefined
                 }
               >
-                {publicationStatus.status === 'update-available'
-                  ? t('commentaries.details.update')
-                  : installed
-                    ? t('commentaries.selector.downloaded')
-                    : t('bibleOfflineDetails.downloadSize', {
-                        size: t('downloads.size.mb', {
-                          value: formatMegabytes(artifact.archiveBytes, i18n.language),
-                        }),
-                      })}
+                {corrupt
+                  ? t('resource.action.repairOfflineCopy')
+                  : publicationStatus.status === 'update-available'
+                    ? t('commentaries.details.update')
+                    : installed
+                      ? t('commentaries.selector.downloaded')
+                      : t('bibleOfflineDetails.downloadSize', {
+                          size: t('downloads.size.mb', {
+                            value: formatMegabytes(artifact.archiveBytes, i18n.language),
+                          }),
+                        })}
               </Button>
             </Box>
             {installed && (

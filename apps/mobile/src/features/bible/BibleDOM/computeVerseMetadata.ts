@@ -516,36 +516,3 @@ export function getStudyRelationsCount(
 
   return counts
 }
-
-/**
- * Transform comment keys so that each comment is associated with the verse
- * number BEFORE the next comment starts (i.e., the last verse of its section).
- */
-export function transformComments(
-  comments: { [key: string]: string } | null,
-  versesLength: number
-): { [key: string]: string } | null {
-  if (!comments) return null
-
-  const entries = Object.entries(comments)
-  const result: { [key: string]: string } = {}
-
-  for (let i = 0; i < entries.length; i++) {
-    const [key, value] = entries[i]
-
-    if (key === '0') {
-      result[key] = value
-      continue
-    }
-
-    const nextEntry = entries[i + 1]
-    if (nextEntry) {
-      const newKey = Number(nextEntry[0]) - 1
-      result[newKey] = value
-    } else {
-      result[versesLength] = value
-    }
-  }
-
-  return result
-}

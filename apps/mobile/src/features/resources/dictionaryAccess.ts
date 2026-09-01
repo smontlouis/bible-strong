@@ -251,20 +251,29 @@ const withInstalledDictionary = async <T>(
   query: (database: Awaited<ReturnType<typeof openSQLiteDatabase>>) => Promise<T>
 ): Promise<T> => {
   const resource = getDictionaryResource(work, language)
-  const availability = resource
-    ? await offlineResourceRegistry.getAvailability(resource)
-    : undefined
+  if (!resource) {
+    throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+  }
+  const availability = await offlineResourceRegistry.getAvailability(resource)
   if (availability?.status !== 'available') {
     throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
   }
   const databasePath = getDictionaryDbPath(work, language)
   const fileName = databasePath.split('/').pop()!
   const directory = databasePath.slice(0, -(fileName.length + 1))
-  const database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+  let database: Awaited<ReturnType<typeof openSQLiteDatabase>> | undefined
   try {
+    database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
     return await query(database)
+  } catch (error) {
+    if (error instanceof ResourceAccessError) throw error
+    offlineResourceRegistry.markCorrupt(resource)
+    throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
+      'acquire-offline-copy',
+      'manage-offline-copies',
+    ])
   } finally {
-    await database.closeAsync()
+    await database?.closeAsync()
   }
 }
 
@@ -280,11 +289,19 @@ const withInstalledDictionaryDirectory = async <T>(
   const databasePath = getDictionaryDirectoryDbPath()
   const fileName = databasePath.split('/').pop()!
   const directory = databasePath.slice(0, -(fileName.length + 1))
-  const database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
+  let database: Awaited<ReturnType<typeof openSQLiteDatabase>> | undefined
   try {
+    database = await openSQLiteDatabase(fileName, { useNewConnection: true }, directory)
     return await query(database)
+  } catch (error) {
+    if (error instanceof ResourceAccessError) throw error
+    offlineResourceRegistry.markCorrupt(dictionaryDirectoryIdentity)
+    throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
+      'acquire-offline-copy',
+      'manage-offline-copies',
+    ])
   } finally {
-    await database.closeAsync()
+    await database?.closeAsync()
   }
 }
 
@@ -579,7 +596,9 @@ export const localDictionaryAccess: DictionaryAccess = {
     const installed = getInstalledDictionaryEntries().filter(
       entry => entry.resource.kind === 'dictionary' && entry.resource.language === language
     )
-    if (installed.length === 0) return []
+    if (installed.length === 0) {
+      throw new ResourceAccessError('OFFLINE_COPY_REQUIRED', ['acquire-offline-copy'])
+    }
     const installedByWork = new Map(
       installed.flatMap(entry =>
         entry.resource.kind === 'dictionary' ? [[entry.resource.work, entry] as const] : []
@@ -1156,22 +1175,16 @@ export const createHybridDictionaryAccess = ({
     remoteOperation: () => Promise<T>
   ): Promise<T> => {
     const local = await directoryAvailability()
-    if (await isOnline()) {
+    if (local.status === 'available') {
       try {
-        return await remoteOperation()
+        return await localOperation()
       } catch (error) {
-        if (
-          local.status === 'available' &&
-          error instanceof ResourceAccessError &&
-          (error.code === 'NETWORK_OFFLINE' || error.code === 'TEMPORARY_UNAVAILABLE')
-        ) {
-          return localOperation()
-        }
-        throw error
+        if (!(error instanceof ResourceAccessError) || error.code !== 'INVALID_OFFLINE_COPY')
+          throw error
       }
     }
-    if (local.status === 'available') return localOperation()
-    if (local.reason === 'invalid-offline-copy') {
+    if (await isOnline()) return remoteOperation()
+    if (local.status !== 'available' && local.reason === 'invalid-offline-copy') {
       throw new ResourceAccessError('INVALID_OFFLINE_COPY', [
         'acquire-offline-copy',
         'manage-offline-copies',
@@ -1186,21 +1199,15 @@ export const createHybridDictionaryAccess = ({
     remoteOperation: () => Promise<T>
   ) => {
     const state = await availability(language, work)
-    if (state.remotelyReadable && (await isOnline())) {
+    if (state.local.status === 'available') {
       try {
-        return await remoteOperation()
+        return await localOperation()
       } catch (error) {
-        if (
-          state.local.status === 'available' &&
-          error instanceof ResourceAccessError &&
-          (error.code === 'NETWORK_OFFLINE' || error.code === 'TEMPORARY_UNAVAILABLE')
-        ) {
-          return localOperation()
-        }
-        throw error
+        if (!(error instanceof ResourceAccessError) || error.code !== 'INVALID_OFFLINE_COPY')
+          throw error
       }
     }
-    if (state.local.status === 'available') return localOperation()
+    if (state.remotelyReadable && (await isOnline())) return remoteOperation()
     if (!state.remotelyReadable) throw localFailure(state)
     throw new ResourceAccessError('NETWORK_OFFLINE')
   }
@@ -1217,7 +1224,9 @@ export const createHybridDictionaryAccess = ({
       } catch (error) {
         if (
           !(error instanceof ResourceAccessError) ||
-          (error.code !== 'NOT_FOUND' && error.code !== 'RESOURCE_UNSUPPORTED')
+          (error.code !== 'NOT_FOUND' &&
+            error.code !== 'RESOURCE_UNSUPPORTED' &&
+            error.code !== 'INVALID_OFFLINE_COPY')
         )
           throw error
       }
@@ -1260,7 +1269,12 @@ export const createHybridDictionaryAccess = ({
             recoveries: ['retry'],
           }
     },
-    getDirectoryAvailability: directoryAvailability,
+    getDirectoryAvailability: async () => {
+      const local = await directoryAvailability()
+      if (local.status === 'available') return local
+      if (await isOnline()) return { status: 'available' }
+      return local
+    },
     listByLetter: (letter, language = 'fr', work) =>
       runSearch(
         language,
@@ -1342,17 +1356,21 @@ export const createHybridDictionaryAccess = ({
         () => online.loadPassageAnchors(verse, language, work)
       ),
     discoverPassageEntries: async (verse, language = 'fr') => {
-      if (remotelyReadableLanguages.has(language) && (await isOnline())) {
+      const localDirectory = await directoryAvailability()
+      if (localDirectory.status === 'available') {
         try {
-          return await online.discoverPassageEntries(verse, language)
+          return await offline.discoverPassageEntries(verse, language)
         } catch (error) {
           if (
             !(error instanceof ResourceAccessError) ||
-            (error.code !== 'NETWORK_OFFLINE' && error.code !== 'TEMPORARY_UNAVAILABLE')
+            (error.code !== 'OFFLINE_COPY_REQUIRED' && error.code !== 'INVALID_OFFLINE_COPY')
           ) {
             throw error
           }
         }
+      }
+      if (remotelyReadableLanguages.has(language) && (await isOnline())) {
+        return online.discoverPassageEntries(verse, language)
       }
       return offline.discoverPassageEntries(verse, language)
     },

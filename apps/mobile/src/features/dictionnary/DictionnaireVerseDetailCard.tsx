@@ -13,6 +13,10 @@ import ResourceVerseContext, {
   useResourceVerseContext,
 } from '~features/bible/resources/ResourceVerseContext'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import {
+  getDefaultDictionaryWork,
+  KNOWN_DICTIONARY_WORKS,
+} from '~features/resources/dictionaryAccess'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { localQueryOptions } from '~helpers/queryOptions'
@@ -39,6 +43,19 @@ const DictionnaireVerseDetailScreen = ({
   const { Livre, Chapitre, Verset } = verse
   const verseKey = `${Livre}-${Chapitre}-${Verset}`
   const resourceLang = useAtomValue(resourcesLanguageAtom).DICTIONNAIRE
+  const defaultDictionary = KNOWN_DICTIONARY_WORKS.find(
+    dictionary =>
+      dictionary.resource.language === resourceLang &&
+      dictionary.resource.work === getDefaultDictionaryWork(resourceLang)
+  )
+  const recoveryIdentity = defaultDictionary
+    ? {
+        kind: 'dictionary' as const,
+        work: defaultDictionary.resource.work,
+        resourceId: defaultDictionary.resourceId,
+        language: resourceLang,
+      }
+    : ({ kind: 'dictionary-directory' as const } as const)
   const verseContext = useResourceVerseContext(verseKey, selectedVersion)
   const [navigationDirection, setNavigationDirection] = React.useState<-1 | 1>(1)
   const navigateVerse = (direction: -1 | 1) => {
@@ -79,7 +96,7 @@ const DictionnaireVerseDetailScreen = ({
         </Box>
       ) : anchorsQuery.isError ? (
         <ResourceUnavailableView
-          identity={{ kind: 'database', databaseId: 'DICTIONNAIRE', language: resourceLang }}
+          identity={recoveryIdentity}
           title={t('Les dictionnaires sont temporairement indisponibles.')}
           fileSize={22}
           failure={resourceFailureFromAccessError(anchorsQuery.error)}

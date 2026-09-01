@@ -19,7 +19,6 @@ import {
 import { BibleError } from '~helpers/bibleErrors'
 import { getBibleDOMErrorPresentation } from './bibleDOMErrorPresentation'
 import ChevronDownIcon from './ChevronDownIcon'
-import Comment from './Comment'
 import {
   ENTER_ANNOTATION_MODE,
   DOWNLOAD_BIBLE_VERSION,
@@ -187,7 +186,6 @@ type Props = Pick<
     dismiss: string
   }
   // Pre-computed metadata from native side
-  comments: { [key: string]: string } | null
   taggedVerses: TaggedVerse[] | null
   versesWithAnnotationNotes: Record<string, boolean>
   annotationNotesCountByVerse: { [key: string]: number }
@@ -534,7 +532,6 @@ const LoadedBibleContent = ({
   parallelColumnWidth = 75,
   parallelDisplayMode = 'horizontal',
   focusVerses,
-  comments,
   selectedVerses,
   highlightedVerses,
   bookmarkedVerses,
@@ -1161,7 +1158,6 @@ const LoadedBibleContent = ({
   }
 
   const isHebreu = version === 'BHS' || (version === 'BHG' && Number(verses[0].Livre) < 40)
-  const introComment = comments?.[0]
   const isParallelVerse = Boolean(parallelVerses?.length)
   const parallelVersionTitles = isParallelVerse
     ? extractParallelVersionTitles(parallelVerses, version)
@@ -1253,9 +1249,6 @@ const LoadedBibleContent = ({
             }
           >
             {isHebreu && <RightDirection settings={settings}>Sens de la lecture ←</RightDirection>}
-            {!!introComment && settings.commentsDisplay && (
-              <Comment isIntro id="comment-0" settings={settings} comment={introComment} />
-            )}
             {!isContextFocused && (
               <PassageMediaThumbnails
                 items={passageMedia.introduction}
@@ -1284,7 +1277,6 @@ const LoadedBibleContent = ({
                 selectedCode={selectedCode}
                 isHebreu={isHebreu}
                 isParallelVerse={isParallelVerse}
-                comments={comments}
                 wordAnnotations={wordAnnotations}
                 wordAnnotationsInOtherVersions={wordAnnotationsInOtherVersions}
                 taggedVerses={taggedVerses}

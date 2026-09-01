@@ -18,7 +18,6 @@ jest.mock('~helpers/redWords', () => ({
   versionHasRedWords: (...args: unknown[]) => mockVersionHasRedWords(...args),
 }))
 jest.mock('~helpers/getBiblePericope', () => jest.fn())
-jest.mock('~helpers/loadMhyComments', () => jest.fn())
 jest.mock('~helpers/loadRedWords', () => ({ loadRedWords: jest.fn() }))
 jest.mock('~helpers/loadTresorReferences', () => jest.fn())
 
@@ -50,13 +49,6 @@ describe('Bible reading secondary-resource availability', () => {
         recoveryIdentity: { kind: 'bible', versionId: 'LSG' },
       }
     )
-  })
-
-  it('keeps the French-only Matthew Henry capability explicit', async () => {
-    await expect(localBibleReadingResourceAccess.getMhyAvailability?.('en')).resolves.toEqual({
-      status: 'unsupported',
-    })
-    expect(mockGetLocalResourceAvailability).not.toHaveBeenCalled()
   })
 
   it('reports invalid legacy presentation data without hiding it as empty content', async () => {

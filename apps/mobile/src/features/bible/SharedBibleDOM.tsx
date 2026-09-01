@@ -100,7 +100,6 @@ const SharedBibleDOM = () => {
     },
     setSelectedCode: noop,
     selectedCode: null,
-    comments: null,
     chapterEntities: [],
     chapterEntitiesLoaded: false,
     chapterEntityModuleStatus: null,

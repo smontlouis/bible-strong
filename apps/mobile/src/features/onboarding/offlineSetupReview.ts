@@ -3,7 +3,10 @@ import {
   type OfflineResourceSizeManifest,
 } from '~helpers/offlineResourceSizeManifest'
 import type { OnboardingResourceSelection } from './onboardingResources'
-import { createDownloadItemFromOnboardingSelection } from './onboardingResources'
+import {
+  createDownloadItemFromOnboardingSelection,
+  createDownloadItemsFromOnboardingSelections,
+} from './onboardingResources'
 import { OFFLINE_SETUP_MOTION } from './offlineSetupMotion'
 import type { OfflineSetupFolderId } from './offlineSetupPresets'
 import type { OfflineSetupFolderVisual, OfflineSetupFrame } from './offlineSetupPresentation'
@@ -100,16 +103,22 @@ export const getOfflineSetupReviewExpandedHeight = (
 export const getOfflineSetupReviewItems = (
   selections: readonly OnboardingResourceSelection[],
   manifest: OfflineResourceSizeManifest,
-  getDisplayName?: (selection: OnboardingResourceSelection) => string
-): OfflineSetupReviewItem[] =>
-  [
+  getDisplayName?: (selection: OnboardingResourceSelection | undefined) => string
+): OfflineSetupReviewItem[] => {
+  const selectionByItemId = new Map(
+    selections.map(selection => [
+      createDownloadItemFromOnboardingSelection(selection).id,
+      selection,
+    ])
+  )
+  const items = [
     ...new Map(
-      selections.map(selection => {
-        const item = createDownloadItemFromOnboardingSelection(selection)
-        return [item.id, { item, selection }]
-      })
+      createDownloadItemsFromOnboardingSelections(selections).map(item => [item.id, item])
     ).values(),
-  ].map(({ item, selection }) => {
+  ]
+
+  return items.map(item => {
+    const selection = selectionByItemId.get(item.id)
     const size = getOfflineResourceSizeEntry(item.id, item.estimatedSize, manifest)
     return {
       id: item.id,
@@ -118,6 +127,7 @@ export const getOfflineSetupReviewItems = (
       installedBytes: size.installedBytes,
     }
   })
+}
 
 export const getOfflineSetupReviewSnapPoint = ({
   progress,

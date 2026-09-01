@@ -20,7 +20,11 @@ import {
   isInterlinearCapableBibleVersion,
 } from './interlinearBiblePublications'
 import type { InterlinearSidecarAvailability } from './interlinearBibleSidecar'
-import { createOfflineCopyId, type OfflineCopyIdentity } from './offlineCopyId'
+import {
+  createOfflineCopyId,
+  getOfflineCopyCatalogId,
+  type OfflineCopyIdentity,
+} from './offlineCopyId'
 import {
   createStrongLexiconModuleDownloadItem,
   createStrongLexiconModuleDownloadPlan,
@@ -275,9 +279,7 @@ export function createDictionaryDownloadItem(
     }
   >
 ): DownloadItem {
-  const catalogArtifact = getMobileResourceCatalogEntry(
-    `database:${identity.resourceId}:${identity.language}`
-  )
+  const catalogArtifact = getMobileResourceCatalogEntry(getOfflineCopyCatalogId(identity))
   return {
     id: createOfflineCopyId(identity),
     type: 'dictionary',

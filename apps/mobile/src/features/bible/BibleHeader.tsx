@@ -7,7 +7,7 @@ import { getDefaultStore, PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
 import { FadeIn, FadeOut } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { isFullScreenBibleAtom } from 'src/state/app'
 import {
   BibleTab,
@@ -44,11 +44,9 @@ import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import generateUUID from '~helpers/generateUUID'
 import truncate from '~helpers/truncate'
 import useDimensions from '~helpers/useDimensions'
-import useLanguage from '~helpers/useLanguage'
 import verseToReference from '~helpers/verseToReference'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { RootState } from '~redux/modules/reducer'
-import { setSettingsCommentaires } from '~redux/modules/user'
 import { makeSelectBookmarkForChapter } from '~redux/selectors/bookmarks'
 import { useBookAndVersionSelector } from './BookSelectorSheet/BookSelectorSheetProvider'
 import PassageExportSheet from './passageExport/PassageExportSheet'
@@ -71,7 +69,6 @@ interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
   isFormSheet?: boolean
   onBibleParamsClick: () => void
-  commentsDisplay?: boolean
   onExitAnnotationMode?: () => void
   annotationModeEnabled?: boolean
   hidePersonalBibleData?: boolean
@@ -83,7 +80,6 @@ const Header = ({
   isFormSheet,
   bibleAtom,
   onBibleParamsClick,
-  commentsDisplay,
   onExitAnnotationMode,
   annotationModeEnabled,
   hidePersonalBibleData = false,
@@ -92,8 +88,6 @@ const Header = ({
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
-  const lang = useLanguage()
-  const dispatch = useDispatch()
   const dimensions = useDimensions()
   const isSmall = dimensions.screen.width < 400
   const actions = useBibleTabActions(bibleAtom)
@@ -230,10 +224,6 @@ const Header = ({
     transitionDuration: 300,
   } as const
 
-  const onOpenCommentaire = () => {
-    dispatch(setSettingsCommentaires(true))
-  }
-
   const openInBibleTab = () => {
     openInNewTab({
       ...bible,
@@ -341,25 +331,6 @@ const Header = ({
 
   const mainMenuActions: MenuAction[] = [
     { id: 'params', title: t('Police et paramêtres'), image: 'textformat' },
-    ...(!commentsDisplay && lang === 'fr'
-      ? [
-          {
-            id: 'comments-on',
-            title: t('Commentaire désactivé'),
-            image: 'bubble.left.and.bubble.right' as const,
-          },
-        ]
-      : []),
-    ...(commentsDisplay && lang === 'fr'
-      ? [
-          {
-            id: 'comments-off',
-            title: t('Commentaire activé'),
-            image: 'bubble.left.and.bubble.right' as const,
-            state: 'on' as const,
-          },
-        ]
-      : []),
     {
       id: 'parallel',
       title: t('Affichage parallèle'),
@@ -813,12 +784,6 @@ const Header = ({
                     switch (nativeEvent.event) {
                       case 'params':
                         onBibleParamsClick()
-                        break
-                      case 'comments-on':
-                        onOpenCommentaire()
-                        break
-                      case 'comments-off':
-                        dispatch(setSettingsCommentaires(false))
                         break
                       case 'parallel':
                         if (isParallel) removeAllParallelVersions()

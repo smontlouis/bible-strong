@@ -8,6 +8,7 @@ import { FeatherIcon } from '~common/ui/Icon'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { MOBILE_RESOURCE_CATALOG } from '~helpers/mobileResourceCatalog'
 import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import { getOfflineCopyCatalogId } from '~helpers/offlineCopyId'
 
 const formatBytes = (
   bytes: number,
@@ -27,30 +28,61 @@ const StorageSummaryCard = () => {
     if (entry.availability.status !== 'available' && entry.availability.status !== 'corrupt') {
       return total
     }
-    return total + (MOBILE_RESOURCE_CATALOG.resources[entry.id]?.installedBytes ?? 0)
+    return (
+      total +
+      (MOBILE_RESOURCE_CATALOG.resources[getOfflineCopyCatalogId(entry.resource)]?.installedBytes ??
+        0)
+    )
   }, 0)
-  const { data: freeBytes = 0 } = useQuery({
-    queryKey: ['storage-free-space', registry.revision],
-    queryFn: () => FileSystem.getFreeDiskStorageAsync(),
+  const { data: deviceStorage = { freeBytes: 0, totalBytes: 0 } } = useQuery({
+    queryKey: ['device-storage-space', registry.revision],
+    queryFn: async () => {
+      const [freeBytes, totalBytes] = await Promise.all([
+        FileSystem.getFreeDiskStorageAsync(),
+        FileSystem.getTotalDiskCapacityAsync(),
+      ])
+      return { freeBytes, totalBytes }
+    },
     ...localQueryOptions,
   })
 
-  const totalAvailable = usedBytes + freeBytes
-  const progressRatio = totalAvailable > 0 ? usedBytes / totalAvailable : 0
+  const totalBytes = deviceStorage.totalBytes
+  const offlineRatio = totalBytes > 0 ? Math.min(usedBytes / totalBytes, 1) : 0
+  const otherUsedBytes = Math.max(totalBytes - deviceStorage.freeBytes - usedBytes, 0)
+  const otherUsedRatio = totalBytes > 0 ? Math.min(otherUsedBytes / totalBytes, 1) : 0
 
   return (
-    <Box mx={16} mt={16} p={16} borderRadius={12} bg="border" row alignItems="center" gap={12}>
-      <FeatherIcon name="hard-drive" size={20} color="tertiary" />
+    <Box
+      mx={16}
+      mt={16}
+      p={16}
+      borderRadius={16}
+      borderWidth={1}
+      borderColor="border"
+      bg="lightGrey"
+      row
+      alignItems="center"
+      gap={14}
+    >
+      <Box size={44} borderRadius={12} bg="lightPrimary" center>
+        <FeatherIcon name="hard-drive" size={21} color="primary" />
+      </Box>
       <Box flex>
-        <Text fontSize={13} color="default">
-          {t('downloads.storageUsed', { used: formatBytes(usedBytes, t) })}
+        <Text fontSize={15} bold color="default">
+          {t('downloads.offlineResourcesSize', { size: formatBytes(usedBytes, t) })}
         </Text>
-        <Box mt={6} height={4} borderRadius={2} bg="reverse" overflow="hidden">
+        <Text fontSize={12} color="tertiary" mt={2}>
+          {t('downloads.storageFree', {
+            free: formatBytes(deviceStorage.freeBytes, t),
+            total: formatBytes(totalBytes, t),
+          })}
+        </Text>
+        <Box mt={10} height={6} borderRadius={3} bg="reverse" overflow="hidden" row>
+          <Box height={6} bg="tertiary" opacity={0.45} width={`${otherUsedRatio * 100}%`} />
           <Box
-            height={4}
-            borderRadius={2}
+            height={6}
             bg="primary"
-            width={`${Math.min(progressRatio * 100, 100)}%`}
+            width={`${Math.max(offlineRatio * 100, usedBytes > 0 ? 0.75 : 0)}%`}
           />
         </Box>
       </Box>

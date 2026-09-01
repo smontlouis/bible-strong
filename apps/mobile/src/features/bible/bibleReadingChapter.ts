@@ -23,7 +23,6 @@ import type {
 } from '~features/resources/bibleContentAccess'
 import type { ParallelVerse } from './BibleDOM/BibleDOMWrapper'
 
-export type CommentsByVerse = Record<string, string>
 export type { RedWordsByVerse }
 
 export interface BibleReadingChapterRequest {
@@ -38,7 +37,6 @@ export interface BibleReadingChapterRequest {
 
 export interface BibleReadingExtrasRequest extends BibleReadingChapterRequest {
   parallelVersions: VersionCode[]
-  commentsDisplay: boolean
   presentation?: BibleChapterPresentationSource
 }
 
@@ -142,18 +140,6 @@ export const loadBibleReadingParallelVerses = async (
       interlinearMode: requests[index]?.interlinearMode,
     }
   })
-}
-
-export const loadBibleReadingComments = async (
-  { book, chapter, commentsDisplay }: BibleReadingExtrasRequest,
-  resourceAccess: ResourceAccessRegistry = defaultResourceAccess
-): Promise<CommentsByVerse | null> => {
-  if (!commentsDisplay) return null
-
-  const comments = await resourceAccess.bibleReading.loadMhyComments(book, chapter)
-  if (!comments) return null
-
-  return JSON.parse(comments.serializedComments) as CommentsByVerse
 }
 
 export const loadBibleReadingRedWords = async (

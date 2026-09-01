@@ -205,6 +205,15 @@ export const deleteDownloadedItem = async (plan: DownloadedItemDeletionPlan): Pr
       idempotent: true,
     })
     await invalidateAndForgetPublication(plan)
+    const hasInstalledDictionary = [
+      ...offlineResourceRegistry.getSnapshot().resources.values(),
+    ].some(
+      entry => entry.resource.kind === 'dictionary' && entry.availability.status === 'available'
+    )
+    if (!hasInstalledDictionary) {
+      await FileSystem.deleteAsync(getDictionaryDirectoryDbPath(), { idempotent: true })
+      await invalidateAndForgetPublication({ kind: 'dictionary-directory' })
+    }
     return
   }
 

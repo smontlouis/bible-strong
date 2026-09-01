@@ -143,7 +143,7 @@ const DictionaryListScreen = ({
   }
   const catalogDictionaries = dictionaryCatalogQuery.data ?? []
   const directoryRequested = dictionaryTab.data.directory ?? true
-  const directoryMode = directoryRequested && isConnected
+  const directoryMode = directoryRequested
   const storedDictionary =
     dictionaryTab.data.work &&
     dictionaryTab.data.resourceId &&
@@ -166,23 +166,32 @@ const DictionaryListScreen = ({
     fallbackDictionary
   const selectedWork = selectedDictionary.resource.work
   const hasDedicatedIdentity = selectedDictionary !== fallbackDictionary
-  const offlineIdentity = hasDedicatedIdentity
-    ? ({
-        kind: 'dictionary' as const,
-        work: selectedWork,
-        resourceId: selectedDictionary.resourceId,
-        language: dictionaryResourceLanguage,
-      } as const)
-    : ({
-        kind: 'database' as const,
-        databaseId: 'DICTIONNAIRE' as const,
-        language: dictionaryResourceLanguage,
-      } as const)
+  const offlineIdentity = directoryMode
+    ? ({ kind: 'dictionary-directory' as const } as const)
+    : hasDedicatedIdentity
+      ? ({
+          kind: 'dictionary' as const,
+          work: selectedWork,
+          resourceId: selectedDictionary.resourceId,
+          language: dictionaryResourceLanguage,
+        } as const)
+      : ({
+          kind: 'database' as const,
+          databaseId: 'DICTIONNAIRE' as const,
+          language: dictionaryResourceLanguage,
+        } as const)
   const availabilityQuery = useQuery({
-    queryKey: ['dictionary-availability', selectedWork, dictionaryResourceLanguage, isConnected],
+    queryKey: [
+      'dictionary-availability',
+      selectedWork,
+      dictionaryResourceLanguage,
+      directoryMode,
+      isConnected,
+    ],
     queryFn: () =>
       directoryMode
-        ? Promise.resolve({ status: 'available' as const })
+        ? (resources.dictionary.getDirectoryAvailability?.() ??
+          Promise.resolve({ status: 'available' as const }))
         : (resources.dictionary.getAvailability?.(dictionaryResourceLanguage, selectedWork) ??
           Promise.resolve({ status: 'available' as const })),
     networkMode: 'always',
@@ -449,16 +458,6 @@ const DictionaryListScreen = ({
               value={searchValue}
               onDelete={() => setSearchValue('')}
             />
-            {directoryRequested && !isConnected ? (
-              <Box mt={10} px={10} py={8} borderRadius={8} bg="lightGrey">
-                <Text fontSize={11} color="tertiary">
-                  {t('Hors ligne')} ·{' '}
-                  {t('Résultats dans {{source}}', {
-                    source: selectedDictionary.abbreviation,
-                  })}
-                </Text>
-              </Box>
-            ) : null}
           </Box>
         </Header>
         <Box flex paddingTop={20}>

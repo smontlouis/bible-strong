@@ -25,5 +25,5 @@ export const useOfflineResourceState = (
 
 export const useIsOfflineResourceInstalled = (resource?: OfflineCopyIdentity | string): boolean => {
   const state = useOfflineResourceState(resource)
-  return state?.availability.status === 'available' || state?.availability.status === 'corrupt'
+  return state?.availability.status === 'available'
 }

@@ -224,6 +224,15 @@ const makeDictionaryAccess = (
           recoveries: ['acquire-offline-copy' as const],
         }
   ),
+  getDirectoryAvailability: jest.fn(async () =>
+    availability === 'available'
+      ? { status: 'available' as const }
+      : {
+          status: 'unavailable' as const,
+          reason: 'offline-copy-required' as const,
+          recoveries: ['acquire-offline-copy' as const],
+        }
+  ),
   listByLetter: jest.fn(async () => [{ ...dictionaryEntry, word: label }]),
   search: jest.fn(async () => [{ ...dictionaryEntry, word: label }]),
   listByLetterPage: jest.fn(async () => ({ entries: [{ ...dictionaryEntry, word: label }] })),
@@ -240,7 +249,12 @@ const makeDictionaryAccess = (
   ]),
   discoverPassageEntries: jest.fn(async () => [
     {
-      resource: { kind: 'dictionary' as const, work: 'westphal', language: 'fr' as const, revision: 'r1' },
+      resource: {
+        kind: 'dictionary' as const,
+        work: 'westphal',
+        language: 'fr' as const,
+        revision: 'r1',
+      },
       resourceId: 'WESTPHAL',
       title: 'Westphal',
       abbreviation: 'Westphal',
@@ -252,6 +266,25 @@ const makeDictionaryAccess = (
 })
 
 describe('hybrid dictionary routing', () => {
+  it('prefers installed search and directory copies while connected', async () => {
+    const offline = makeDictionaryAccess('available', 'offline')
+    const online = makeDictionaryAccess('available', 'online')
+    const access = createHybridDictionaryAccess({
+      offline,
+      online,
+      remotelyReadableLanguages: new Set(['fr']),
+      isOnline: async () => true,
+    })
+
+    await expect(access.searchPage('ange', {}, 'fr')).resolves.toEqual({
+      entries: [{ ...dictionaryEntry, word: 'offline' }],
+    })
+    await access.browseDirectoryPage('a', {}, 'fr')
+
+    expect(online.searchPage).not.toHaveBeenCalled()
+    expect(online.browseDirectoryPage).not.toHaveBeenCalled()
+  })
+
   it('prefers an installed local copy while logically offline', async () => {
     const offline = makeDictionaryAccess('available', 'offline')
     const online = makeDictionaryAccess('available', 'online')

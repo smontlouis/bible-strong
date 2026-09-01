@@ -195,10 +195,8 @@ const SelectedCommentariesHeader = ({ items, max, onRemove, onMove, onReorder }:
   const previousProjectionIdsRef = React.useRef<readonly CommentaryProjectionId[] | undefined>(
     undefined
   )
-  const [removingProjectionId, setRemovingProjectionId] =
-    React.useState<CommentaryProjectionId>()
-  const [draggingProjectionId, setDraggingProjectionId] =
-    React.useState<CommentaryProjectionId>()
+  const [removingProjectionId, setRemovingProjectionId] = React.useState<CommentaryProjectionId>()
+  const [draggingProjectionId, setDraggingProjectionId] = React.useState<CommentaryProjectionId>()
   const sortableItems: SortableCommentaryHeaderItem[] = React.useMemo(
     () =>
       items.map(item => ({

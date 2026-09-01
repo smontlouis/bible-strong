@@ -66,6 +66,32 @@ const catalog = (revision = sha('a')): MobileResourceCatalog => ({
   },
 })
 
+const dictionaryCatalog = (revision = sha('d')): MobileResourceCatalog => ({
+  format: 'bible-strong-mobile-resource-catalog',
+  schemaVersion: 1,
+  generatedAt: '2026-08-31T00:00:00.000Z',
+  resourceCount: 1,
+  resources: {
+    'database:BOST:fr': {
+      id: 'database:BOST:fr',
+      url: 'https://example.test/dictionaries/dictionary-bost-fr.sqlite.zip',
+      file: 'dictionaries/dictionary-bost-fr.sqlite.zip',
+      entry: 'dictionnaire.sqlite',
+      entries: {
+        canonical: { entry: 'dictionnaire.sqlite', sha256: sha('e'), bytes: 1 },
+      },
+      archiveSha256: revision,
+      archiveBytes: 1,
+      contentSha256: sha('e'),
+      contentBytes: 1,
+      resourceRevision: `dictionary-bost-fr-${sha('f').slice(0, 20)}`,
+      installedBytes: 1,
+      peakInstallationBytes: 2,
+      strategy: 'archive-extract',
+    },
+  },
+})
+
 describe('OfflineResourceRegistry', () => {
   const identity = {
     kind: 'commentary' as const,
@@ -139,5 +165,41 @@ describe('OfflineResourceRegistry', () => {
     activeCatalog = catalog(sha('c'))
     registry.syncCatalog(activeCatalog)
     expect(registry.get(identity)?.updateAvailable).toBe(true)
+  })
+
+  it('keeps a downloaded dictionary addressable after catalog reconciliation', async () => {
+    const dictionaryIdentity = {
+      kind: 'dictionary' as const,
+      work: 'bost',
+      resourceId: 'BOST',
+      language: 'fr' as const,
+    }
+    const probe = jest.fn<Promise<LocalResourceAvailability>, [LocalResourceRef]>(
+      async resource => ({ status: 'available', resource })
+    )
+    const registry = new OfflineResourceRegistry({
+      probe,
+      readPublication: resourceId =>
+        resourceId === 'dictionary:bost:BOST:fr'
+          ? {
+              revision: sha('d'),
+              archiveSha256: sha('d'),
+              installedAt: 1,
+              size: 1,
+              sourceUrl: 'https://example.test/dictionaries/dictionary-bost-fr.sqlite.zip',
+            }
+          : undefined,
+      getCatalog: () => dictionaryCatalog(),
+    })
+
+    expect(registry.get(dictionaryIdentity)?.resource).toEqual(dictionaryIdentity)
+    expect(registry.isInstalled(dictionaryIdentity)).toBe(true)
+
+    await registry.reconcileAll(dictionaryCatalog())
+
+    expect(registry.get(dictionaryIdentity)?.availability.status).toBe('available')
+    expect(registry.get(dictionaryIdentity)?.catalogRevision).toBe(sha('d'))
+    expect(registry.get(dictionaryIdentity)?.updateAvailable).toBe(false)
+    expect(probe).toHaveBeenCalledWith(dictionaryIdentity)
   })
 })

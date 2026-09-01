@@ -22,22 +22,22 @@ const DictionaryDetailScreen = () => {
   const word = params.word || ''
 
   const [onTheFlyAtom] = useState(() =>
-      atom<DictionaryTab>({
-        id: `dictionary-${generateUUID()}`,
-        title: 'Dictionary',
-        isRemovable: true,
-        hasBackButton: true,
-        type: 'dictionary',
-        data: {
-          word,
-          work: params.work,
-          resourceId: params.resourceId,
-          dictionaryTitle: params.dictionaryTitle,
-          entryId: params.entryId ? Number(params.entryId) : undefined,
-          correspondenceId: params.correspondenceId,
-          language: params.language,
-        },
-      } as DictionaryTab)
+    atom<DictionaryTab>({
+      id: `dictionary-${generateUUID()}`,
+      title: 'Dictionary',
+      isRemovable: true,
+      hasBackButton: true,
+      type: 'dictionary',
+      data: {
+        word,
+        work: params.work,
+        resourceId: params.resourceId,
+        dictionaryTitle: params.dictionaryTitle,
+        entryId: params.entryId ? Number(params.entryId) : undefined,
+        correspondenceId: params.correspondenceId,
+        language: params.language,
+      },
+    } as DictionaryTab)
   )
 
   return <DictionaryDetailTabScreen dictionaryAtom={onTheFlyAtom} isFormSheet={IS_FORM_SHEET} />

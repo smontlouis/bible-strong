@@ -12,7 +12,6 @@ import {
   WebViewProps,
 } from './BibleDOMWrapper'
 import { ParallelDisplayMode } from 'src/state/tabs'
-import Comment from './Comment'
 import ExternalIcon from './ExternalIcon'
 import Verse from './Verse'
 import { scaleFontSize } from './scaleFontSize'
@@ -109,7 +108,6 @@ export interface UnifiedVersesRendererProps {
   selectedCode: WebViewProps['selectedCode']
   isHebreu: boolean
   isParallelVerse: boolean
-  comments: { [key: string]: string } | null
   wordAnnotations: WebViewProps['wordAnnotations']
   wordAnnotationsInOtherVersions?: Record<string, CrossVersionAnnotation[]>
   taggedVerses: TaggedVerse[] | null
@@ -272,7 +270,6 @@ export function UnifiedVersesRenderer({
   selectedCode,
   isHebreu,
   isParallelVerse,
-  comments,
   wordAnnotations,
   wordAnnotationsInOtherVersions,
   taggedVerses,
@@ -392,7 +389,6 @@ export function UnifiedVersesRenderer({
               .color as keyof RootStyles['settings']['colors'][keyof RootStyles['settings']['colors']])
           : undefined
 
-        const comment = comments?.[Verset]
         const isVerseToScroll = !isContextFocused && verseToScroll == Verset
         const parallelVerse = isParallelVerse
           ? getParallelVerseRows(i, parallelVerses, verse, version, interlinearMode)
@@ -444,9 +440,6 @@ export function UnifiedVersesRenderer({
               passageMedia={passageMediaAfterVerses[verseNumber]}
               passageMediaGallerySections={passageMediaGallerySections}
             />
-            {!!comment && settings.commentsDisplay && (
-              <Comment id={`comment-${verse.Verset}`} settings={settings} comment={comment} />
-            )}
           </Span>
         )
       })}

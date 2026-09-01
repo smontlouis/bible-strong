@@ -17,6 +17,18 @@ jest.mock('../onboardingResources', () => ({
     name: selection.name,
     estimatedSize: 1,
   })),
+  createDownloadItemsFromOnboardingSelections: jest.fn(
+    (selections: { id: string; name: string; kind?: string }[]) => [
+      ...(selections.some(selection => selection.kind === 'dictionary')
+        ? [{ id: 'dictionary-directory', name: 'Dictionary Directory', estimatedSize: 7 }]
+        : []),
+      ...selections.map(selection => ({
+        id: selection.id,
+        name: selection.name,
+        estimatedSize: 1,
+      })),
+    ]
+  ),
 }))
 
 const manifest: OfflineResourceSizeManifest = {
@@ -30,6 +42,16 @@ const manifest: OfflineResourceSizeManifest = {
       contentBytes: 12,
       installedBytes: 12,
       peakInstallationBytes: 14,
+      strategy: 'archive-extract',
+      confidence: 'exact',
+    },
+    'dictionary-directory': {
+      id: 'dictionary-directory',
+      url: 'https://example.com/dictionary-directory',
+      downloadBytes: 7,
+      contentBytes: 23,
+      installedBytes: 23,
+      peakInstallationBytes: 30,
       strategy: 'archive-extract',
       confidence: 'exact',
     },
@@ -78,6 +100,29 @@ describe('offline setup review', () => {
         installedBytes: 12,
       },
     ])
+  })
+
+  it('includes the shared dictionary index in the review size', () => {
+    const selection = {
+      id: 'dictionary:bost:BOST:fr',
+      name: 'Bost',
+      kind: 'dictionary',
+    } as unknown as OnboardingResourceSelection
+
+    expect(
+      getOfflineSetupReviewItems([selection], manifest, selected =>
+        selected ? 'Bost' : 'Shared dictionary index'
+      )
+    ).toEqual(
+      expect.arrayContaining([
+        {
+          id: 'dictionary-directory',
+          name: 'Shared dictionary index',
+          downloadBytes: 7,
+          installedBytes: 23,
+        },
+      ])
+    )
   })
 
   it('uses position and upward momentum to choose the open snap point', () => {

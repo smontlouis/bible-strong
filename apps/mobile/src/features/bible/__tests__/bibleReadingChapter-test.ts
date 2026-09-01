@@ -89,7 +89,6 @@ describe('canonical V4 Bible chapter extras', () => {
         chapter: 1,
         version: 'LSG',
         parallelVersions: ['KJV', 'BSB'],
-        commentsDisplay: false,
         strongMode: 'visible',
         interlinearLocale: 'fr',
         interlinearLocaleAutomatic: true,
@@ -126,7 +125,6 @@ describe('canonical V4 Bible chapter extras', () => {
           chapter: 1,
           version: 'LSG',
           parallelVersions: ['BDS'],
-          commentsDisplay: false,
           strongMode,
           interlinearLocale: 'fr',
           interlinearLocaleAutomatic: true,
@@ -158,7 +156,6 @@ describe('canonical V4 Bible chapter extras', () => {
         chapter: 1,
         version: 'DBY',
         parallelVersions: ['LSG'],
-        commentsDisplay: false,
         strongMode: 'visible',
       },
       resources
@@ -184,7 +181,6 @@ describe('canonical V4 Bible chapter extras', () => {
         chapter: 1,
         version: 'BHG',
         parallelVersions: ['BDS'],
-        commentsDisplay: false,
         interlinearMode: 'interlinear',
       },
       resources
@@ -208,7 +204,6 @@ describe('canonical V4 Bible chapter extras', () => {
         chapter: 1,
         version: 'BHG',
         parallelVersions: ['BHG'],
-        commentsDisplay: false,
         interlinearMode: 'interlinear',
       },
       resources
@@ -239,7 +234,6 @@ describe('canonical V4 Bible chapter extras', () => {
           chapter: 1,
           version: 'LSG',
           parallelVersions: ['BHG'],
-          commentsDisplay: false,
           strongMode,
         },
         resources
@@ -271,7 +265,6 @@ describe('canonical V4 Bible chapter extras', () => {
         chapter: 1,
         version: 'LSG',
         parallelVersions: ['KJV', 'BSB'],
-        commentsDisplay: false,
       },
       resources
     )

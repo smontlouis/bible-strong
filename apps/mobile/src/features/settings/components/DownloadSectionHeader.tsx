@@ -6,7 +6,6 @@ import { EaseView } from 'react-native-ease'
 import Box from '~common/ui/Box'
 import Checkbox from '~common/ui/Checkbox'
 import Text from '~common/ui/Text'
-import Border from '~common/ui/Border'
 import { FeatherIcon } from '~common/ui/Icon'
 
 interface DownloadSectionHeaderProps {
@@ -33,54 +32,62 @@ const DownloadSectionHeader = ({
   const { t } = useTranslation()
 
   return (
-    <Box px={20} mt={20}>
-      <Box row alignItems="center">
-        {isSelectMode && (
-          <TouchableOpacity
-            accessibilityLabel={t('accessibility.selectAllInSection', { section: title })}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: Boolean(allSelected) }}
-            onPress={onToggleSelectAll}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            style={{ marginRight: 8, minWidth: 28, minHeight: 28 }}
-          >
-            <Checkbox checked={Boolean(allSelected)} variant="icon" size={18} />
-          </TouchableOpacity>
-        )}
+    <Box
+      mt={16}
+      minHeight={52}
+      px={20}
+      row
+      alignItems="center"
+      bg="lightGrey"
+      borderTopWidth={1}
+      borderBottomWidth={1}
+      borderColor="border"
+    >
+      {isSelectMode && (
         <TouchableOpacity
-          accessibilityLabel={title}
-          accessibilityRole="button"
-          accessibilityState={{ expanded: !isCollapsed }}
-          onPress={onToggleCollapse}
-          activeOpacity={0.7}
-          style={{ flex: 1 }}
+          accessibilityLabel={t('accessibility.selectAllInSection', { section: title })}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: Boolean(allSelected) }}
+          onPress={onToggleSelectAll}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          style={{
+            marginRight: 8,
+            width: 28,
+            height: 28,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
         >
-          <Box row alignItems="center">
-            <EaseView
-              animate={{ rotate: isCollapsed ? 0 : 90 }}
-              transition={{
-                type: 'timing',
-                duration: 200,
-                easing: [0.455, 0.03, 0.515, 0.955],
-              }}
-              style={{
-                marginRight: 8,
-                width: 18,
-                height: 18,
-              }}
-            >
-              <FeatherIcon name="chevron-right" size={18} color="tertiary" />
-            </EaseView>
-            <Text fontSize={16} bold flex>
-              {title}
-            </Text>
-            <Text fontSize={13} color="tertiary">
-              {downloadedCount}/{totalCount}
-            </Text>
-          </Box>
+          <Checkbox checked={Boolean(allSelected)} variant="icon" size={22} />
         </TouchableOpacity>
-      </Box>
-      <Border marginTop={10} />
+      )}
+      <TouchableOpacity
+        accessibilityLabel={title}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: !isCollapsed }}
+        onPress={onToggleCollapse}
+        activeOpacity={0.7}
+        style={{ flex: 1 }}
+      >
+        <Box row alignItems="center">
+          <Text fontSize={16}>{title}</Text>
+          <EaseView
+            animate={{ rotate: isCollapsed ? 0 : 90 }}
+            transition={{
+              type: 'timing',
+              duration: 200,
+              easing: [0.455, 0.03, 0.515, 0.955],
+            }}
+            style={{ marginLeft: 6, width: 18, height: 18 }}
+          >
+            <FeatherIcon name="chevron-right" size={18} color="tertiary" />
+          </EaseView>
+          <Box flex />
+          <Text fontSize={12} color="tertiary">
+            {downloadedCount}/{totalCount}
+          </Text>
+        </Box>
+      </TouchableOpacity>
     </Box>
   )
 }

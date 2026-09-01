@@ -168,9 +168,7 @@ const CommentarySelectorSheet = ({ sheetRef }: Props) => {
         language: projection.language,
       })
       const availability = resourceRegistry.resources.get(itemId)?.availability
-      return availability?.status === 'available' || availability?.status === 'corrupt'
-        ? [projection.projectionId]
-        : []
+      return availability?.status === 'available' ? [projection.projectionId] : []
     })
   )
   const selectedProjections = React.useMemo(

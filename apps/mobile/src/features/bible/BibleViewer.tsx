@@ -48,7 +48,6 @@ import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
 import { toast } from '~helpers/toast'
 import { useDownloadItemStatus } from '~helpers/useDownloadQueue'
-import { databases } from '~helpers/databases'
 import verseToReference from '~helpers/verseToReference'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { RootState } from '~redux/modules/reducer'
@@ -98,11 +97,7 @@ import {
   type StudyRelationsModalTarget,
 } from './BibleDOM/BibleDOMWrapper'
 import BibleParamsModal from './BibleParamsModal'
-import {
-  loadBibleReadingComments,
-  loadBibleReadingParallelVerses,
-  loadBibleReadingRedWords,
-} from './bibleReadingChapter'
+import { loadBibleReadingParallelVerses, loadBibleReadingRedWords } from './bibleReadingChapter'
 import { getCanonicalChapterPericope } from '~helpers/canonicalBibleHeadings'
 import CrossVersionAnnotationsModal from './CrossVersionAnnotationsModal'
 import BibleFooter from './footer/BibleFooter'
@@ -175,7 +170,6 @@ const selectTaggedVersesInChapter = makeTaggedVersesInChapterSelector()
 
 interface BibleViewerProps {
   bibleAtom: PrimitiveAtom<BibleTab>
-  commentsDisplay?: boolean
   settings: RootState['user']['bible']['settings']
   isFormSheet?: boolean
   isInTab?: boolean
@@ -379,7 +373,6 @@ const BibleViewer = ({
     interlinearLocale: interlinearLocale ?? lang,
     interlinearLocaleAutomatic: !interlinearLocale,
     parallelVersions,
-    commentsDisplay: settings.commentsDisplay,
     presentation: mainChapterData?.presentation,
   }
   const extrasEnabled =
@@ -402,36 +395,6 @@ const BibleViewer = ({
     staleTime: Infinity,
     ...localQueryOptions,
   })
-  const commentsAvailabilityQuery = useQuery({
-    queryKey: [
-      ...resourceQueryKeys.offlineDatabaseAvailability('MHY', 'fr'),
-      resourceRegistry.revision,
-    ],
-    queryFn: () =>
-      resources.bibleReading.getMhyAvailability?.(lang) ??
-      Promise.resolve({ status: 'available' as const }),
-    enabled: extrasEnabled && settings.commentsDisplay && lang === 'fr',
-    networkMode: 'always',
-  })
-  const commentsQuery = useQuery({
-    queryKey: resourceQueryKeys.bibleComments({ book: book.Numero, chapter, language: lang }),
-    queryFn: () => loadBibleReadingComments(extrasRequest, resources),
-    enabled:
-      extrasEnabled &&
-      settings.commentsDisplay &&
-      commentsAvailabilityQuery.data?.status === 'available',
-    staleTime: Infinity,
-    ...localQueryOptions,
-  })
-  const comments = settings.commentsDisplay ? (commentsQuery.data ?? null) : null
-  const commentsUnavailable =
-    commentsAvailabilityQuery.data?.status === 'unavailable'
-      ? (commentsAvailabilityQuery.data as Extract<
-          BibleReadingAvailability,
-          { status: 'unavailable' }
-        >)
-      : undefined
-  const commentsFailureIsTemporary = commentsAvailabilityQuery.isError || commentsQuery.isError
   const redWordsAvailabilityQuery = useQuery({
     queryKey: [
       ...resourceQueryKeys.bibleRedWords(version),
@@ -1249,7 +1212,6 @@ const BibleViewer = ({
     openLink: hidePersonalBibleData ? undefined : openLink,
     setSelectedCode,
     selectedCode,
-    comments,
     removeParallelVersion: actions.removeParallelVersion,
     addParallelVersion: actions.addParallelVersion,
     goToPrevChapter: goToPrevAvailableChapter,
@@ -1377,7 +1339,6 @@ const BibleViewer = ({
       <BibleHeader
         bibleAtom={bibleAtom}
         onBibleParamsClick={bibleParamsModal.open}
-        commentsDisplay={settings.commentsDisplay}
         isFormSheet={isFormSheet}
         isInTab={isInTab}
         onExitAnnotationMode={handleExitAnnotationMode}
@@ -1385,45 +1346,6 @@ const BibleViewer = ({
         hidePersonalBibleData={hidePersonalBibleData}
         onEditFocusTags={editFocusTags}
       />
-      {settings.commentsDisplay && lang === 'fr' && commentsFailureIsTemporary && (
-        <Box bg="reverse" borderBottomWidth={1} borderColor="border">
-          <ResourceUnavailableView
-            identity={{ kind: 'database', databaseId: 'MHY', language: 'fr' }}
-            title={t('resource.commentary.temporarilyUnavailable')}
-            fileSize={Math.round(databases('fr').MHY.fileSize / 1_000_000)}
-            failure={resourceFailureFromAccessError(
-              commentsQuery.error ?? commentsAvailabilityQuery.error
-            )}
-            size="small"
-            onRetry={() => {
-              void commentsAvailabilityQuery.refetch()
-              void commentsQuery.refetch()
-            }}
-          />
-        </Box>
-      )}
-      {settings.commentsDisplay && lang === 'fr' && commentsUnavailable && (
-        <Box bg="reverse" borderBottomWidth={1} borderColor="border">
-          <ResourceUnavailableView
-            identity={commentsUnavailable.recoveryIdentity}
-            title={t('resource.commentary.offlineCopyNeeded')}
-            offlineTitle={t('resource.commentary.temporarilyUnavailable')}
-            fileSize={Math.round(databases('fr').MHY.fileSize / 1_000_000)}
-            failure={resourceFailureFromAvailability({
-              reason: commentsUnavailable.reason,
-              recoveries:
-                commentsUnavailable.reason === 'invalid-offline-copy'
-                  ? ['acquire-offline-copy', 'manage-offline-copies']
-                  : ['acquire-offline-copy'],
-            })}
-            size="small"
-            onRetry={() => {
-              void commentsAvailabilityQuery.refetch()
-              void commentsQuery.refetch()
-            }}
-          />
-        </Box>
-      )}
       {settings.redWordsDisplay && redWordsFailureIsTemporary && (
         <Box bg="reverse" borderBottomWidth={1} borderColor="border">
           <ResourceUnavailableView

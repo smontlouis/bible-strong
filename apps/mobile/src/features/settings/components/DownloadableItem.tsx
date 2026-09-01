@@ -31,6 +31,8 @@ interface DownloadableItemProps {
   isInvalid?: boolean
   relatedResources?: { resourceId: string }[]
   variant?: 'standard' | 'dependency'
+  hasDependency?: boolean
+  hasFollowingSibling?: boolean
   onlineAccessStatus?: 'remotely-readable' | 'temporarily-unavailable' | 'unsupported'
   downloadsDisabled?: boolean
 }
@@ -62,6 +64,8 @@ const DownloadableItem = ({
   isInvalid,
   relatedResources,
   variant = 'standard',
+  hasDependency = false,
+  hasFollowingSibling = false,
   onlineAccessStatus = 'unsupported',
   downloadsDisabled = false,
 }: DownloadableItemProps) => {
@@ -125,17 +129,20 @@ const DownloadableItem = ({
     Boolean(isSelectMode) ||
     ['not-downloaded', 'needs-update', 'invalid', 'failed'].includes(visualState)
   const isMainDisabled =
+    !isSelectMode &&
     downloadsDisabled &&
     ['not-downloaded', 'needs-update', 'invalid', 'failed'].includes(visualState)
 
   return (
     <Animated.View
       style={{
-        paddingRight: 20,
-        paddingLeft: isDependency ? 78 : 45,
-        paddingVertical: isDependency ? 10 : 12,
-        opacity: visualState === 'not-downloaded' ? 0.5 : 1,
+        minHeight: isDependency ? 52 : 76,
+        paddingRight: 12,
+        paddingLeft: isDependency ? 56 : 20,
+        paddingVertical: isDependency ? 8 : 12,
         backgroundColor: visualState === 'selected' ? theme.colors.lightPrimary : 'transparent',
+        borderBottomWidth: hasDependency || hasFollowingSibling ? 0 : 1,
+        borderBottomColor: theme.colors.border,
         borderLeftWidth: ['needs-update', 'invalid'].includes(visualState) ? 4 : 0,
         borderLeftColor:
           visualState === 'needs-update'
@@ -151,9 +158,9 @@ const DownloadableItem = ({
       {isDependency ? (
         <Box
           pos="absolute"
-          top={-14}
-          left={52}
-          width={20}
+          top={-10}
+          left={32}
+          width={16}
           height={36}
           borderLeftWidth={2}
           borderBottomWidth={2}
@@ -161,7 +168,7 @@ const DownloadableItem = ({
           borderColor="border"
         />
       ) : null}
-      <Box row flex alignItems="center">
+      <Box row flex alignItems="flex-start">
         <TouchableOpacity
           accessibilityLabel={name}
           accessibilityRole={isSelectMode ? 'checkbox' : isMainInteractive ? 'button' : 'text'}
@@ -186,25 +193,26 @@ const DownloadableItem = ({
           disabled={isMainDisabled}
           onPress={isMainInteractive ? handlePress : undefined}
           activeOpacity={isActive ? 1 : 0.7}
-          style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+          style={{ flex: 1, flexDirection: 'row', alignItems: 'flex-start' }}
         >
           {/* Checkbox in select mode */}
           {isSelectMode && (
             <Animated.View
               style={{
                 width: 28,
-                marginRight: 12,
+                marginRight: 8,
+                alignItems: 'center',
                 transitionProperty: ['width', 'opacity'],
                 transitionDuration: 200,
               }}
             >
-              <Checkbox checked={Boolean(isSelected)} variant="icon" size={20} />
+              <Checkbox checked={Boolean(isSelected)} variant="icon" size={22} />
             </Animated.View>
           )}
 
           {/* Content */}
           <Box flex>
-            <Text fontSize={isDependency ? 14 : 15} bold numberOfLines={1}>
+            <Text fontSize={isDependency ? 14 : 16} numberOfLines={1}>
               {name}
             </Text>
 
@@ -225,12 +233,12 @@ const DownloadableItem = ({
               </Text>
             )}
             {subtitle && visualState !== 'queued' && visualState !== 'failed' && (
-              <Text fontSize={12} color="tertiary" mt={2} numberOfLines={isDependency ? 3 : 2}>
+              <Text fontSize={10} color="tertiary" mt={2} numberOfLines={isDependency ? 3 : 2}>
                 {subtitle}
               </Text>
             )}
             {visualState !== 'queued' && visualState !== 'failed' && visualState !== 'invalid' && (
-              <Text fontSize={11} color="tertiary" mt={3}>
+              <Text fontSize={10} color="tertiary" mt={2}>
                 {t(
                   onlineAccessStatus === 'remotely-readable'
                     ? 'resource.status.onlineAvailable'

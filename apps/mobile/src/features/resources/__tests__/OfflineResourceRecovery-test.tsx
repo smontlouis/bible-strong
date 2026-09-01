@@ -15,7 +15,7 @@ jest.mock('~helpers/useConnection', () => ({
 jest.mock('~helpers/useDownloadQueue', () => ({ useDownloadItemStatus: () => undefined }))
 jest.mock('~helpers/offlineCopyId', () => ({ createOfflineCopyId: () => 'database:NAVE:fr' }))
 jest.mock('~helpers/downloadItemFactory', () => ({
-  createOfflineCopyDownloadItem: (identity: unknown) => ({ id: 'database:NAVE:fr', identity }),
+  createOfflineCopyDownloadPlan: (identity: unknown) => [{ id: 'database:NAVE:fr', identity }],
 }))
 jest.mock('~helpers/downloadManager', () => ({
   downloadManager: { enqueue: jest.fn(), retry: jest.fn() },
@@ -24,6 +24,9 @@ jest.mock('../resourceAccess', () => ({
   useResourceAccess: () => ({
     capabilities: { getOnlineAccess: () => ({ status: 'unsupported' }) },
   }),
+}))
+jest.mock('../useOfflineResourceRegistry', () => ({
+  useOfflineResourceRegistry: () => ({ resources: new Map() }),
 }))
 jest.mock('~common/Loading', () => () => null)
 jest.mock('~common/ui/Progress', () => () => null)

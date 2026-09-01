@@ -35,6 +35,14 @@ jest.mock('../databases', () => ({
     `file:///documents/SQLite/${language}/dictionaries/${work}.sqlite`,
   getCommentaryDbPath: (resourceId: string, language: string) =>
     `file:///documents/SQLite/${language}/commentaries/${resourceId}.sqlite`,
+  getDictionaryDirectoryDbPath: () => 'file:///documents/SQLite/shared/dictionary-directory.sqlite',
+}))
+
+jest.mock('~features/resources/resourceAvailability', () => ({
+  offlineResourceRegistry: {
+    getSnapshot: jest.fn(() => ({ resources: new Map() })),
+    markMissing: jest.fn(),
+  },
 }))
 
 jest.mock('~helpers/redWords', () => ({
@@ -85,6 +93,7 @@ import { removeStrongLexiconModule } from '../strongLexiconModules'
 import { queryClient } from '../queryClient'
 import { deletePericopeFile } from '../pericopes'
 import { deleteRedWordsFile } from '../redWords'
+import { offlineResourceRegistry } from '~features/resources/resourceAvailability'
 
 const mockGetInfoAsync = jest.mocked(FileSystem.getInfoAsync)
 const mockIsVersionInstalled = jest.mocked(isVersionInstalled)
@@ -96,10 +105,12 @@ const mockGetDatabase = jest.mocked(dbManager.getDB)
 const mockInvalidateQueries = jest.mocked(queryClient.invalidateQueries)
 const mockDeletePericopeFile = jest.mocked(deletePericopeFile)
 const mockDeleteRedWordsFile = jest.mocked(deleteRedWordsFile)
+const mockGetResourceSnapshot = jest.mocked(offlineResourceRegistry.getSnapshot)
 
 describe('deleteDownloadedItem', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockGetResourceSnapshot.mockReturnValue({ resources: new Map() } as never)
     mockIsVersionInstalled.mockResolvedValue(true)
     mockGetInfoAsync.mockResolvedValue({
       exists: false,
@@ -182,6 +193,47 @@ describe('deleteDownloadedItem', () => {
     await deleteDownloadedItem(createDownloadedItemDeletionPlan('strong-lexicon:resources'))
 
     expect(mockRemoveStrongLexiconModule).toHaveBeenCalledWith('resources')
+  })
+
+  it('removes the shared dictionary index with the last installed dictionary', async () => {
+    mockGetResourceSnapshot.mockReturnValue({ resources: new Map() } as never)
+
+    await deleteDownloadedItem(createDownloadedItemDeletionPlan('dictionary:bost:BOST:fr'))
+
+    expect(FileSystem.deleteAsync).toHaveBeenCalledWith(
+      'file:///documents/SQLite/fr/dictionaries/bost.sqlite',
+      { idempotent: true }
+    )
+    expect(FileSystem.deleteAsync).toHaveBeenCalledWith(
+      'file:///documents/SQLite/shared/dictionary-directory.sqlite',
+      { idempotent: true }
+    )
+  })
+
+  it('keeps the shared dictionary index while another dictionary remains installed', async () => {
+    mockGetResourceSnapshot.mockReturnValue({
+      resources: new Map([
+        [
+          'dictionary:westphal:WESTPHAL:fr',
+          {
+            resource: {
+              kind: 'dictionary',
+              work: 'westphal',
+              resourceId: 'WESTPHAL',
+              language: 'fr',
+            },
+            availability: { status: 'available' },
+          },
+        ],
+      ]),
+    } as never)
+
+    await deleteDownloadedItem(createDownloadedItemDeletionPlan('dictionary:bost:BOST:fr'))
+
+    expect(FileSystem.deleteAsync).not.toHaveBeenCalledWith(
+      'file:///documents/SQLite/shared/dictionary-directory.sqlite',
+      expect.anything()
+    )
   })
 
   it('rejects an unknown download item instead of silently reporting success', async () => {

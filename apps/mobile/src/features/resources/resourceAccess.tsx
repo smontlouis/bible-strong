@@ -301,10 +301,6 @@ const onlineBibleReadingAccess = resourceApiBaseUrl
       loadPericope: async () => {
         throw new Error('BIBLE_PERICOPE_HTTP_UNCONFIGURED')
       },
-      getMhyAvailability: async () => ({ status: 'unsupported' as const }),
-      loadMhyComments: async () => {
-        throw new Error('COMMENTARY_HTTP_UNCONFIGURED')
-      },
       getTresorAvailability: async () => ({
         status: 'unavailable' as const,
         reason: 'offline-copy-required' as const,

@@ -42,6 +42,11 @@ jest.mock('~helpers/redWords', () => ({
 
 jest.mock('~helpers/databases', () => ({
   getDbPath: jest.fn(),
+  getDictionaryDbPath: (work: string, language: string) =>
+    `file:///docs/SQLite/${language}/dictionaries/${work}.sqlite`,
+  getDictionaryDirectoryDbPath: () => 'file:///docs/SQLite/shared/dictionary-directory.sqlite',
+  getCommentaryDbPath: (resourceId: string, language: string) =>
+    `file:///docs/SQLite/${language}/commentaries/${resourceId}.sqlite`,
   initLanguageDirs: jest.fn(),
 }))
 
@@ -93,10 +98,12 @@ const createDependencies = ({
   files = new Set<string>(),
   installedVersions = new Set<string>(),
   currentLang = 'fr',
+  standaloneValid = true,
 }: {
   files?: Set<string>
   installedVersions?: Set<string>
   currentLang?: 'fr' | 'en'
+  standaloneValid?: boolean
 } = {}) => ({
   getFileInfo: jest.fn(async (path: string) => ({ exists: files.has(path) })),
   initSQLiteDir: jest.fn(async () => true),
@@ -123,10 +130,35 @@ const createDependencies = ({
     })
   ),
   validateDatabaseResource: jest.fn(async () => true),
+  validateStandaloneResource: jest.fn(async () => standaloneValid),
 })
 
 describe('resourceAvailability', () => {
   beforeEach(() => jest.clearAllMocks())
+
+  it.each([
+    {
+      resource: {
+        kind: 'dictionary' as const,
+        work: 'bost',
+        resourceId: 'BOST',
+        language: 'fr' as const,
+      },
+      path: 'file:///docs/SQLite/fr/dictionaries/bost.sqlite',
+    },
+    {
+      resource: { kind: 'commentary' as const, resourceId: 'barnes', language: 'fr' as const },
+      path: 'file:///docs/SQLite/fr/commentaries/barnes.sqlite',
+    },
+  ])('marks a corrupt standalone $resource.kind copy as invalid', async ({ resource, path }) => {
+    const dependencies = createDependencies({ files: new Set([path]), standaloneValid: false })
+
+    await expect(getLocalResourceAvailability(resource, dependencies)).resolves.toEqual({
+      status: 'corrupt',
+      resource,
+      reason: 'integrity-check-failed',
+    })
+  })
 
   it('reports a regular Bible version available from bibles.sqlite', async () => {
     const dependencies = createDependencies({

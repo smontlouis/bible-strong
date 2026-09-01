@@ -49,10 +49,15 @@ const checkAvailability = async (
   lang: ResourceLanguage
 ): Promise<AvailabilitySummary> => {
   const selections = resolveOfflineSetupFolderOptionIds(folderOptionIds, lang)
+  const dictionaryDirectoryAvailable = selections.some(selection => selection.kind === 'dictionary')
+    ? await isLocalResourceAvailable({ kind: 'dictionary-directory' })
+    : true
   const results = await Promise.all(
     selections.map(async selection => ({
       selection,
-      available: await isLocalResourceAvailable(getOnboardingResourceIdentity(selection)),
+      available:
+        (await isLocalResourceAvailable(getOnboardingResourceIdentity(selection))) &&
+        (selection.kind !== 'dictionary' || dictionaryDirectoryAvailable),
     }))
   )
 
@@ -74,8 +79,12 @@ const useOfflineSetupSelection = (lang: ResourceLanguage) => {
   const selectionKey = JSON.stringify(folderOptionIds)
   const selections = resolveOfflineSetupFolderOptionIds(folderOptionIds, lang)
   const lockedOptionIds = getOfflineSetupLockedOptionIds(folderOptionIds, lang)
-  const getDisplayName = (selection: Parameters<typeof getOnboardingResourceDisplayName>[0]) =>
-    getOnboardingResourceDisplayName(selection, lang, (key, options) => t(key, options))
+  const getDisplayName = (
+    selection: Parameters<typeof getOnboardingResourceDisplayName>[0] | undefined
+  ) =>
+    selection
+      ? getOnboardingResourceDisplayName(selection, lang, (key, options) => t(key, options))
+      : t('offlineSetup.resources.dictionaryDirectory')
   const reviewSummary = getOfflineSetupReviewSummary(
     getOfflineSetupReviewItems(selections, sizeManifest, getDisplayName)
   )
