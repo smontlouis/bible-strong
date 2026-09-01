@@ -66,7 +66,6 @@ const DownloadableItem = ({
   variant = 'standard',
   hasDependency = false,
   hasFollowingSibling = false,
-  onlineAccessStatus = 'unsupported',
   downloadsDisabled = false,
 }: DownloadableItemProps) => {
   const { t } = useTranslation()
@@ -237,24 +236,6 @@ const DownloadableItem = ({
                 {subtitle}
               </Text>
             )}
-            {visualState !== 'queued' && visualState !== 'failed' && visualState !== 'invalid' && (
-              <Text fontSize={10} color="tertiary" mt={2}>
-                {t(
-                  onlineAccessStatus === 'remotely-readable'
-                    ? 'resource.status.onlineAvailable'
-                    : onlineAccessStatus === 'temporarily-unavailable'
-                      ? 'resource.status.onlineTemporary'
-                      : 'resource.status.onlineUnsupported'
-                )}
-                {' · '}
-                {t(
-                  isDownloaded
-                    ? 'resource.status.offlineInstalled'
-                    : 'resource.status.offlineNotInstalled'
-                )}
-              </Text>
-            )}
-
             {/* Progress bar */}
             {(visualState === 'downloading' || visualState === 'inserting') && queueState && (
               <Box mt={6} height={4} borderRadius={2} bg="border" overflow="hidden">
