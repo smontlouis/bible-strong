@@ -17,8 +17,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     links: [
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/images/icon.png' },
-      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-      { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Literata&display=swap' },
     ],
     scripts: [
       { src: 'https://www.googletagmanager.com/gtag/js?id=UA-109677220-2', async: true },
