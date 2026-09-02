@@ -1,3 +1,30 @@
+diff --git a/src/dom/base.ts b/src/dom/base.ts
+index 14191c347..b5fb64447 100644
+--- a/src/dom/base.ts
++++ b/src/dom/base.ts
+@@ -1 +1,22 @@
+ let cachedBaseUrl: string | null = null;
++/**
++ * Resolve a DOM component to its exact local update asset when possible.
++ * Expo Updates exposes a mix of embedded and downloaded assets on iOS, so
++ * deriving the DOM directory from an arbitrary asset is order-dependent.
++ */
++export function getDOMComponentURL(filePath: string): string {
++  const ExpoUpdates = globalThis.expo?.modules?.['ExpoUpdates'] as
++    | import('expo-updates').ExpoUpdatesModule
++    | undefined;
++  if (ExpoUpdates?.isEnabled && !ExpoUpdates.isEmbeddedLaunch) {
++    const normalizedFilePath = `/${filePath.replace(/^\/+/, '')}`;
++    const matchingAsset = Object.values(ExpoUpdates.localAssets ?? {}).find((asset) =>
++      asset.split(/[?#]/, 1)[0].endsWith(normalizedFilePath)
++    );
++    if (matchingAsset) {
++      return matchingAsset;
++    }
++  }
++  return `${getBaseURL()}/${filePath}`;
++}
++
 diff --git a/src/dom/dom-entry.tsx b/src/dom/dom-entry.tsx
 index 46f25f77f998a67a3b560afad7eca2dfc35c8185..2ff61462cf984b3b50a4d8548f7d15cfc5f695ea 100644
 --- a/src/dom/dom-entry.tsx
@@ -48,9 +75,15 @@ index 46f25f77f998a67a3b560afad7eca2dfc35c8185..2ff61462cf984b3b50a4d8548f7d15cf
      return <AppModule {...props} {...(marshalledProps.props || {})} {...proxyActions} />;
    }
 diff --git a/src/dom/webview-wrapper.tsx b/src/dom/webview-wrapper.tsx
-index 1695ebcf983f50949f4b7dce2845669f6b159383..a61d707f29a22ccf049182db4431f8f29bf1bf3c 100644
+index 1695ebcf983f50949f4b7dce2845669f6b159383..8f0110084 100644
 --- a/src/dom/webview-wrapper.tsx
 +++ b/src/dom/webview-wrapper.tsx
+@@ -7 +7 @@
+-import { getBaseURL } from './base';
++import { getDOMComponentURL } from './base';
+@@ -76 +76 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
+-  const source = { uri: overrideUri ?? `${getBaseURL()}/${filePath}` };
++  const source = { uri: overrideUri ?? getDOMComponentURL(filePath) };
 @@ -106,6 +106,16 @@ const RawWebView = React.forwardRef<object, Props>((props, ref) => {
    // Keep `initialProps` stable to prevent webview reloads when
    // `injectedJavaScriptObject` changes.
