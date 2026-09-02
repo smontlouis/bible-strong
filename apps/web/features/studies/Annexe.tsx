@@ -1,12 +1,11 @@
-import { Box, Flex, Text } from '@chakra-ui/react'
-import { Annexe as AnnexeProps } from './helpers.study'
+import type { Annexe as AnnexeProps } from './helpers.study'
 
 interface Props {
   annexe: AnnexeProps
 }
 const Annexe = ({ annexe }: Props) => {
   return (
-    <Box>
+    <div>
       {annexe.map((item, idx) => {
         if (item.type === 'inline-strong') {
           const {
@@ -21,45 +20,41 @@ const Annexe = ({ annexe }: Props) => {
             Code,
           } = item
           return (
-            <Flex key={Code} mb={10}>
-              <Box mr={3}>
-                <Text color="primary">[{idx + 1}]</Text>
-              </Box>
-              <Box data-annexe={Code}>
-                <Text data-title mb={1}>
+            <div className="mb-10 flex" key={Code}>
+              <div className="mr-3 text-primary">[{idx + 1}]</div>
+              <div data-annexe={Code}>
+                <p data-title className="mb-1">
                   {Mot}
-                </Text>
+                </p>
                 <div
                   data-content
                   dangerouslySetInnerHTML={{ __html: Definition }}
                 ></div>
-              </Box>
-            </Flex>
+              </div>
+            </div>
           )
         }
 
         if (item.type === 'inline-verse') {
           const { title, verses, id } = item
           return (
-            <Flex key={title} mb={10}>
-              <Box mr={3}>
-                <Text color="primary">[{idx + 1}]</Text>
-              </Box>
-              <Box data-annexe={id}>
-                <Text data-title mb={1}>
+            <div className="mb-10 flex" key={title}>
+              <div className="mr-3 text-primary">[{idx + 1}]</div>
+              <div data-annexe={id}>
+                <p data-title className="mb-1">
                   {title}
-                </Text>
-                <Text data-content>
+                </p>
+                <p data-content>
                   {verses.map((v) => (
                     <span key={v.id}>{v.content}</span>
                   ))}
-                </Text>
-              </Box>
-            </Flex>
+                </p>
+              </div>
+            </div>
           )
         }
       })}
-    </Box>
+    </div>
   )
 }
 

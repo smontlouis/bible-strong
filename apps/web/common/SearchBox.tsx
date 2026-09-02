@@ -1,40 +1,27 @@
 import { connectSearchBox } from 'react-instantsearch-dom'
 import { SearchBoxProvided } from 'react-instantsearch-core'
 import { AiOutlineSearch } from 'react-icons/ai'
-import {
-  Icon,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputProps,
-} from '@chakra-ui/react'
+import type { InputHTMLAttributes } from 'react'
+import { Input } from '@/components/ui/input'
 
 const SearchBox = ({
   currentRefinement,
   refine,
   ...props
-}: SearchBoxProvided & InputProps) => {
+}: SearchBoxProvided & Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'>) => {
   return (
     <>
-      <InputGroup>
-        <InputLeftElement
-          top="5px"
-          left="10px"
-          pointerEvents="none"
-          children={
-            <Icon as={AiOutlineSearch} fontSize="28px" color="grey_03" />
-          }
-        />
+      <div className="relative">
+        <AiOutlineSearch className="pointer-events-none absolute left-3 top-1/2 size-7 -translate-y-1/2 text-muted-foreground" />
         <Input
-          size="lg"
-          pl="2xl"
+          className="h-12 pl-12"
           type="search"
           placeholder="Rechercher par mot, code, définition..."
           value={currentRefinement}
           onChange={(event) => refine(event.currentTarget.value)}
           {...props}
         />
-      </InputGroup>
+      </div>
     </>
   )
 }

@@ -1,11 +1,4 @@
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-} from '@chakra-ui/react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Annexe as AnnexeProps,
   OpsInlineVerse,
@@ -60,19 +53,18 @@ const VerseModal = ({ inlineItem }: { inlineItem: OpsInlineVerse }) => {
         setIsOpen(true)
       }
     }
-  }, [])
+    return () => { if (itemRef) itemRef.onclick = null }
+  }, [inlineItem.id])
 
   return (
-    <Modal isCentered isOpen={isOpen} onClose={() => setIsOpen(false)}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>{title}</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody data-modal={inlineItem.id} mb={8}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
+        <div data-modal={inlineItem.id} className="mb-8">
           <div dangerouslySetInnerHTML={{ __html: content }} />
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -102,19 +94,18 @@ const StrongModal = ({ inlineItem }: { inlineItem: OpsInlineStrong }) => {
         setIsOpen(true)
       }
     }
-  }, [])
+    return () => { if (itemRef) itemRef.onclick = null }
+  }, [inlineItem.Code])
 
   return (
-    <Modal isCentered isOpen={isOpen} onClose={() => setIsOpen(false)}>
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>{title}</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody data-modal={inlineItem.Code} mb={8}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>{title}</DialogTitle></DialogHeader>
+        <div data-modal={inlineItem.Code} className="mb-8">
           <div dangerouslySetInnerHTML={{ __html: content }} />
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 

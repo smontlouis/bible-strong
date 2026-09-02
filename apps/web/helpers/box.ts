@@ -1,6 +1,6 @@
-import { ChakraProps } from '@chakra-ui/react'
+import type { CSSProperties } from 'react'
 
-export const absoluteFill: Partial<ChakraProps> = {
+export const absoluteFill: CSSProperties = {
   position: 'absolute',
   top: 0,
   left: 0,

@@ -1,89 +1,26 @@
-import { Link } from '@chakra-ui/next-js'
-import { Box, Flex, HStack, Text } from '@chakra-ui/react'
-import NextLink from 'next/link'
-
 import { FaGithub } from 'react-icons/fa'
-import { useI18n, useCurrentLocale } from '../locales'
-import Logo from '../public/images/svg/logo-full.svg'
+import { useCurrentLocale, useI18n } from '../locales'
 
 export default function Home() {
   const t = useI18n()
   const locale = useCurrentLocale()
-
   return (
-    <Flex
-      p="m"
-      height="100vh"
-      alignItems="center"
-      justifyContent="center"
-      flexDir="column"
-      backgroundImage={{ base: 'none', md: "url('/images/background.jpg')" }}
-      style={{
-        backgroundSize: 'contain',
-        backgroundPosition: 'right',
-        backgroundAttachment: 'fixed',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      <Box as={Logo} width="240px" pos="absolute" top={0} left="20px" />
-      <Box>
-        <Text fontSize={60} variant="bold">
-          {t('home.all')}.
-          <br />
-          {t('home.inOne')}.
-        </Text>
-        <Text mt="l" maxW="400px">
-          {t('home.description')}
-        </Text>
-        <Flex alignItems="center" mt="l">
-          <Box
-            as="a"
-            width={160}
-            height="50px"
-            href="https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8"
-            style={{
-              display: 'inline-block',
-              overflow: 'hidden',
-              background: `url(https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/${
-                locale === 'fr' ? 'fr-fr' : 'en-US'
-              }?size=250x83&amp;releaseDate=1562112000) no-repeat`,
-              backgroundSize: 'contain',
-            }}
-          />
-          <Box
-            width={locale === 'fr' ? 165 : 180}
-            height={locale === 'fr' ? 63 : 70}
-            as="a"
-            href="https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1"
-          >
-            <img
-              alt="Disponible sur Google Play"
-              src={`https://play.google.com/intl/en_us/badges/images/generic/${locale}_badge_web_generic.png`}
-              width={locale === 'fr' ? 165 : 180}
-              style={{ marginBottom: 0 }}
-            />
-          </Box>
-        </Flex>
-      </Box>
-      <HStack
-        spacing="m"
-        pos="absolute"
-        bottom={0}
-        left="50%"
-        transform="translate(-50%)"
-        p="m"
-      >
-        <Link as={NextLink} href="/give" color="grey">
-          {t('support')}
-        </Link>
-        <Link
-          href="https://github.com/smontlouis/bible-strong"
-          color="grey"
-          isExternal
-        >
-          <FaGithub style={{ display: 'inline-block' }} /> Github
-        </Link>
-      </HStack>
-    </Flex>
+    <main className="relative flex min-h-screen flex-col items-center justify-center p-4 md:bg-[url('/images/background.jpg')] md:bg-contain md:bg-fixed md:bg-right md:bg-no-repeat">
+      <img src="/images/svg/logo-full.svg" className="absolute left-5 top-0 w-60" alt="Bible Strong" />
+      <section>
+        <h1 className="text-6xl font-bold">{t('home.all')}.<br />{t('home.inOne')}.</h1>
+        <p className="mt-8 max-w-[400px]">{t('home.description')}</p>
+        <div className="mt-8 flex items-center">
+          <a className="inline-block h-[50px] w-40 overflow-hidden bg-contain bg-no-repeat" aria-label="Télécharger dans l’App Store" href="https://apps.apple.com/fr/app/bible-strong/id1454738221?mt=8" style={{ backgroundImage: `url(https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/${locale === 'fr' ? 'fr-fr' : 'en-US'}?size=250x83&releaseDate=1562112000)` }} />
+          <a className={locale === 'fr' ? 'h-[63px] w-[165px]' : 'h-[70px] w-[180px]'} href="https://play.google.com/store/apps/details?id=com.smontlouis.biblestrong&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1">
+            <img alt="Disponible sur Google Play" src={`https://play.google.com/intl/en_us/badges/images/generic/${locale}_badge_web_generic.png`} className="mb-0 w-full" />
+          </a>
+        </div>
+      </section>
+      <nav className="absolute bottom-0 left-1/2 flex -translate-x-1/2 gap-4 p-4 text-muted-foreground">
+        <a href={locale === 'fr' ? '/fr/give' : '/give'}>{t('support')}</a>
+        <a href="https://github.com/smontlouis/bible-strong" className="flex items-center gap-1"><FaGithub /> Github</a>
+      </nav>
+    </main>
   )
 }

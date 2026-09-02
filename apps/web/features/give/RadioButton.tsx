@@ -1,27 +1,16 @@
-import { Button, useRadio, UseRadioProps } from '@chakra-ui/react'
+import type { InputHTMLAttributes } from 'react'
 
-export type TransformControlsMode = 'translate' | 'rotate' | 'scale'
-
-interface RadioCardProps extends UseRadioProps {
+interface RadioCardProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label: string
 }
 
 export const RadioButton = (props: RadioCardProps) => {
-  const { getInputProps, getRadioProps } = useRadio(props)
-  const { label } = props
+  const { label, className = '', ...inputProps } = props
 
   return (
-    <Button
-      as="label"
-      {...getRadioProps()}
-      _checked={{
-        bg: 'blue.600',
-        color: 'white',
-        borderColor: 'blue.600',
-      }}
-    >
+    <label className={`relative inline-flex h-10 cursor-pointer items-center justify-center border border-input px-4 py-2 text-sm font-medium first:rounded-l-md last:rounded-r-md has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground ${className}`}>
       {label}
-      <input {...getInputProps()} />
-    </Button>
+      <input type="radio" className="sr-only" {...inputProps} />
+    </label>
   )
 }

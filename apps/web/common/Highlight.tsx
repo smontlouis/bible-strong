@@ -1,16 +1,14 @@
-import { Box, Text, TextProps } from '@chakra-ui/react'
 import { connectHighlight } from 'react-instantsearch-dom'
 import { HighlightProps } from 'react-instantsearch-core'
-import React from 'react'
+import type { HTMLAttributes } from 'react'
 
 const Highlight = ({
   highlight,
   attribute,
   hit,
-  variant,
   prefix,
   ...props
-}: TextProps & HighlightProps & { prefix?: string }) => {
+}: HTMLAttributes<HTMLSpanElement> & HighlightProps & { prefix?: string }) => {
   const parsedHit = highlight({
     highlightProperty: '_highlightResult',
     attribute,
@@ -18,24 +16,24 @@ const Highlight = ({
   })
 
   return (
-    <Box>
+    <div>
       {parsedHit && (
-        <Text as="span" {...props}>
+        <span {...props}>
           {prefix}
-        </Text>
+        </span>
       )}
       {parsedHit.map((part, index) =>
         part.isHighlighted ? (
-          <Text variant="bold" as="span" key={index} {...props}>
+          <span className="font-bold" key={index} {...props}>
             {part.value}
-          </Text>
+          </span>
         ) : (
-          <Text color="black_050" as="span" key={index} {...props}>
+          <span className="text-foreground" key={index} {...props}>
             {part.value}
-          </Text>
+          </span>
         )
       )}
-    </Box>
+    </div>
   )
 }
 

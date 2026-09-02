@@ -1,40 +1,4 @@
-import styled from '@emotion/styled'
-import Head from 'next/head'
-
-const TextContainer = styled.div(({ theme }) => ({
-  marginTop: 100,
-  maxWidth: 500,
-  margin: '20px auto',
-
-  h1: {
-    margin: '40px 0',
-    fontFamily: theme.fonts.heading,
-    fontSize: theme.fontSizes['4xl'],
-    fontWeight: 'bold',
-  },
-
-  h2: {
-    margin: '20px 0',
-    fontFamily: theme.fonts.heading,
-    fontSize: theme.fontSizes['2xl'],
-    fontWeight: 'bold',
-  },
-
-  h3: {
-    margin: '10px 0',
-    fontFamily: theme.fonts.heading,
-    fontSize: theme.fontSizes['xl'],
-    fontWeight: 'bold',
-  },
-
-  hr: {
-    margin: '20px 0',
-  },
-
-  ul: {
-    padding: 20,
-  },
-}))
+import { LegalTextContainer as TextContainer, PageMetadata as Head } from '../common/LegalPage'
 
 export default function Page() {
   return (

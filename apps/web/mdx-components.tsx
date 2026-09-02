@@ -1,6 +1,4 @@
-import { Box, Heading, Link, Text } from '@chakra-ui/react'
 import type { MDXComponents } from 'mdx/types'
-import Image, { ImageProps } from 'next/image'
 
 // This file allows you to provide custom React components
 // to be used in MDX files. You can import and use any
@@ -10,57 +8,36 @@ import Image, { ImageProps } from 'next/image'
 export function useMDXComponents(components: MDXComponents): MDXComponents {
   return {
     h1: ({ children }) => (
-      <Heading as="h1" size="lg" mt="3">
+      <h1 className="mt-3 text-xl font-bold">
         {children}
-      </Heading>
+      </h1>
     ),
     h2: ({ children }) => (
-      <Heading as="h2" size="md" mt="2">
+      <h2 className="mt-2 text-lg font-semibold">
         {children}
-      </Heading>
+      </h2>
     ),
     h3: ({ children }) => (
-      <Heading as="h3" size="sm" mt="1">
+      <h3 className="mt-1 font-semibold">
         {children}
-      </Heading>
+      </h3>
     ),
     img: (props) => (
-      <Box
-        as="span"
-        display="block"
-        position="relative"
-        height="300px"
-        // width="50vw"
-        // left="50%"
-        // marginLeft="-25vw"
-      >
-        <Image
-          style={{
-            objectFit: 'cover',
-          }}
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw"
-          fill
-          {...(props as ImageProps)}
-        />
-      </Box>
+      <span className="relative block h-[300px]">
+        <img className="size-full object-cover" {...props} alt={props.alt || ''} />
+      </span>
     ),
     p: ({ children }) => (
-      <Text fontSize="sm" color="gray.600">
+      <p className="text-sm text-muted-foreground">
         {children}
-      </Text>
+      </p>
     ),
     blockquote: ({ children }) => (
-      <Text
-        as="blockquote"
-        fontStyle="italic"
-        fontWeight="bold"
-        paddingX="6"
-        paddingY="10"
-      >
+      <blockquote className="px-6 py-10 font-bold italic">
         {children}
-      </Text>
+      </blockquote>
     ),
-    a: (props) => <Link color="blue.600" {...props} />,
+    a: (props) => <a className="text-primary underline" {...props} />,
     ...components,
   }
 }

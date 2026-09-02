@@ -8,12 +8,16 @@
 # testing
 /coverage
 
-# next.js
+# framework build outputs
 /.next/
 /out/
+/.output/
 
 # production
 /build
+
+# TypeScript
+*.tsbuildinfo
 
 # misc
 .DS_Store

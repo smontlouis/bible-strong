@@ -1,4 +1,4 @@
-import { Text, TextProps } from '@chakra-ui/react'
+import type { HTMLAttributes } from 'react'
 import MotionBox from './MotionBox'
 
 export const headingVariants = {
@@ -19,10 +19,10 @@ export const headingVariants = {
   },
 }
 
-const Heading = (props: TextProps) => {
+const Heading = ({ className = '', ...props }: HTMLAttributes<HTMLHeadingElement>) => {
   return (
     <MotionBox variants={headingVariants}>
-      <Text variant="medium" size="3xl" {...props} />
+      <h2 className={`text-3xl font-medium ${className}`} {...props} />
     </MotionBox>
   )
 }

@@ -1,5 +1,3 @@
-import { Heading, Stack } from '@chakra-ui/react'
-
 export const DonationStep = ({
   children,
   label,
@@ -8,35 +6,9 @@ export const DonationStep = ({
   label: string
 }) => {
   return (
-    <Stack
-      gap="4"
-      sx={{
-        counterIncrement: 'donation-steps',
-      }}
-    >
-      <Heading
-        as="h2"
-        size="xs"
-        color="gray.500"
-        fontWeight="semibold"
-        _before={{
-          content: 'counter(donation-steps)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'blue.500',
-          width: '1.2rem',
-          height: '1.2rem',
-          borderRadius: 'full',
-          fontWeight: 'bold',
-          marginRight: '0.5rem',
-          fontSize: 'xs',
-          bg: 'blue.100',
-        }}
-      >
-        {label}
-      </Heading>
+    <section className="donation-step flex flex-col gap-4 [counter-increment:donation-steps]">
+      <h2 className="text-xs font-semibold text-muted-foreground before:mr-2 before:inline-flex before:size-5 before:items-center before:justify-center before:rounded-full before:bg-blue-100 before:text-xs before:font-bold before:text-blue-600 before:content-[counter(donation-steps)]">{label}</h2>
       {children}
-    </Stack>
+    </section>
   )
 }

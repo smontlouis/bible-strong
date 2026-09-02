@@ -1,12 +1,8 @@
-import { Box } from '@chakra-ui/react'
-import React from 'react'
 import { FiChevronLeft } from 'react-icons/fi'
 
 export const PreviousButton = ({ onClick }: { onClick: () => void }) => {
   return (
-    <Box as="button" p="s" borderRadius="full" bg="primary" onClick={onClick}>
-      <Box as={FiChevronLeft} fontSize="18px" color="white" />
-    </Box>
+    <button className="rounded-full bg-primary p-2 text-primary-foreground" onClick={onClick} aria-label="Précédent"><FiChevronLeft className="size-[18px]" /></button>
   )
 }
 

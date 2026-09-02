@@ -1,5 +1,3 @@
-import { Box, Flex, Text } from '@chakra-ui/react'
-import React from 'react'
 import { Study } from './types'
 
 interface Props {
@@ -16,28 +14,21 @@ const TagList = ({ tags, limit = 5 }: Props) => {
     : Object.values(tags)
 
   return (
-    <Flex flexWrap="wrap" alignItems="center" mt="m">
+    <div className="mt-4 flex flex-wrap items-center">
       {array.map((tag) => (
-        <Box
+        <span
           key={tag.id}
-          borderRadius="full"
-          bg="lightPrimary"
-          px={3}
-          py={1}
-          mr="s"
-          mb="s"
+          className="mb-2 mr-2 rounded-full bg-accent px-3 py-1 text-sm text-primary"
         >
-          <Text size="s" color="primary">
-            {tag.name}
-          </Text>
-        </Box>
+          {tag.name}
+        </span>
       ))}
       {!!(Object.values(tags).length - limit > 0) && (
-        <Text ml="s" size="s" color="primary">
+        <span className="ml-2 text-sm text-primary">
           + {Object.values(tags).length - limit}
-        </Text>
+        </span>
       )}
-    </Flex>
+    </div>
   )
 }
 

@@ -16,7 +16,7 @@
     "build": "yarn workspace @bible-strong/api-functions build && yarn workspace @bible-strong/web build",
     "typecheck": "yarn workspace @bible-strong/resource-domain typecheck && yarn workspace @bible-strong/resource-catalog typecheck && yarn workspace @bible-strong/mobile typecheck && yarn workspace @bible-strong/web typecheck && yarn workspace @bible-strong/api-functions typecheck && yarn workspace @bible-strong/resource-studio typecheck && yarn workspace @bible-strong/resource-service typecheck",
     "lint": "yarn workspace @bible-strong/mobile lint && yarn workspace @bible-strong/web lint && yarn workspace @bible-strong/api-functions lint",
-    "test": "yarn workspace @bible-strong/resource-domain test && yarn workspace @bible-strong/resource-catalog test && yarn workspace @bible-strong/mobile test && yarn workspace @bible-strong/resource-service test",
+    "test": "yarn workspace @bible-strong/resource-domain test && yarn workspace @bible-strong/resource-catalog test && yarn workspace @bible-strong/mobile test && yarn workspace @bible-strong/web test && yarn workspace @bible-strong/resource-service test",
     "format:check": "yarn workspace @bible-strong/mobile format:check",
     "resources:test": "yarn workspace @bible-strong/resource-service test",
     "resources:test:integration": "yarn workspace @bible-strong/resource-service test:integration",

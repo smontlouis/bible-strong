@@ -1,7 +1,11 @@
-import { QuillDeltaToHtmlConverter } from '../../lib/quill-to-html/main'
-import firebase from '../../lib/firebase'
+import { QuillDeltaToHtmlConverter } from 'quill-delta-to-html'
+import { firestore } from '../../lib/firebase'
+import {
+  getStudyEntityInlineAttributes,
+  getStudyEntityInlineClasses,
+  renderStudyEntityBlock,
+} from './study-entities'
 // import generateMetaImage from '../../helpers/generateMetaImage'
-import { GetServerSideProps } from 'next'
 
 export interface FirebaseStudy {
   id: string
@@ -50,96 +54,30 @@ export type OpsInline = OpsInlineStrong | OpsInlineVerse
 
 export type Annexe = OpsInline[]
 
-export const getServerStudyProps: GetServerSideProps = async ({ params }) => {
-  const id = params?.id as string
+export interface StudyPageData extends FirebaseStudy {
+  html: string
+  annexe: Annexe
+  imageUrl: string
+  whatsappImageUrl: string
+  updatedAt: number
+}
 
-  const snapshot = await firebase
-    .firestore()
-    .collection('studies')
-    .doc(id)
-    .get()
-
-  let result = snapshot.data() as FirebaseStudy
-
-  if (!result?.published) {
-    return {
-      notFound: true,
-    }
-  }
-
-  const annexe = (
-    await Promise.all(
-      result.content?.ops.map(async (op, idx) => {
-        if (op.insert?.['block-strong']) {
-          const { book, codeStrong } = op.insert['block-strong']
-          const isGrec = book > 39
-
-          const doc = await firebase
-            .firestore()
-            .collection(isGrec ? 'grec' : 'hebreu')
-            .doc(codeStrong.toString())
-            .get()
-          const res = doc.exists ? doc.data() : undefined
-          if (result.content) {
-            result.content.ops[idx].insert['block-strong'].definition =
-              res?.Definition
-          }
-        }
-        if (op.attributes?.['inline-verse']) {
-          let verses: string[] = op.attributes['inline-verse'].verses
-          const title: string = op.attributes['inline-verse'].title
-
-          try {
-            verses = JSON.parse(verses as unknown as string)
-          } catch {}
-
-          const result = await Promise.all(
-            verses.map(async (verse) => {
-              const doc = await firebase
-                .firestore()
-                .collection('bible-lsg-1910')
-                .doc(verse)
-                .get()
-              return doc.exists ? doc.data() : undefined
-            })
-          )
-
-          return <OpsInlineVerse>{
-            type: 'inline-verse',
-            id: verses.toString(),
-            title,
-            verses: result,
-          }
-        }
-
-        if (op.attributes?.['inline-strong']) {
-          const { book, codeStrong } = op.attributes['inline-strong']
-          const isGrec = book > 39
-
-          const doc = await firebase
-            .firestore()
-            .collection(isGrec ? 'grec' : 'hebreu')
-            .doc(codeStrong.toString())
-            .get()
-          const result = doc.exists ? doc.data() : undefined
-
-          return <OpsInlineStrong>{
-            type: 'inline-strong',
-            ...result,
-          }
-        }
-      }) || []
-    )
-  ).filter((v) => v)
-
-  const converter = new QuillDeltaToHtmlConverter(result.content?.ops, {
-    customTag: (format, op) => {
-      if (format === 'inline-verse' || format === 'inline-strong') {
-        return 'a'
+export const convertStudyOpsToHtml = (ops: any[] = []): string => {
+  const converter = new QuillDeltaToHtmlConverter(ops, {
+    customTag: format => {
+      if (
+        format === 'inline-verse' ||
+        format === 'inline-strong' ||
+        format === 'inline-entity'
+      ) {
+        return format === 'inline-entity' ? 'button' : 'a'
       }
     },
-    //@ts-ignore
-    customTagAttributes: (op) => {
+    //@ts-ignore quill-delta-to-html does not expose custom blot attribute types
+    customTagAttributes: op => {
+      if (op.attributes?.['inline-entity']) {
+        return getStudyEntityInlineAttributes(op)
+      }
       if (op.attributes['inline-verse']) {
         return {
           title: op.attributes['inline-verse'].title,
@@ -155,22 +93,18 @@ export const getServerStudyProps: GetServerSideProps = async ({ params }) => {
           ['data-book']: op.attributes['inline-strong'].book,
         }
       }
-      return {
-        title: '',
-      }
+      return { title: '' }
     },
-    customCssClasses: (op) => {
-      if (op.attributes['inline-verse']) {
-        return ['inline-verse']
+    customCssClasses: op => {
+      if (op.attributes?.['inline-entity']) {
+        return getStudyEntityInlineClasses(op)
       }
-
-      if (op.attributes['inline-strong']) {
-        return ['inline-strong']
-      }
+      if (op.attributes['inline-verse']) return ['inline-verse']
+      if (op.attributes['inline-strong']) return ['inline-strong']
     },
   })
 
-  converter.renderCustomWith((customOp, contextOp) => {
+  converter.renderCustomWith(customOp => {
     if (customOp.insert.type === 'block-verse') {
       return `
       <div class="block-verse" data-verses="${customOp.insert.value.verses}">
@@ -193,14 +127,93 @@ export const getServerStudyProps: GetServerSideProps = async ({ params }) => {
     </div>`
     }
 
-    if (customOp.insert.type === 'divider') {
-      return `<div class="divider"></div>`
+    if (customOp.insert.type === 'block-entity') {
+      return renderStudyEntityBlock(customOp.insert.value)
     }
+
+    if (customOp.insert.type === 'divider') return '<div class="divider"></div>'
 
     return `<div>${customOp.insert.type}</div>`
   })
 
-  const html = converter.convert()
+  return converter.convert()
+}
+
+export const getStudy = async (id: string): Promise<StudyPageData | null> => {
+  const snapshot = await firestore
+    .collection('studies')
+    .doc(id)
+    .get()
+
+  let result = snapshot.data() as unknown as FirebaseStudy
+
+  if (!result?.published) {
+    return null
+  }
+
+  const annexe = (
+    await Promise.all(
+      result.content?.ops.map(async (op, idx) => {
+        if (op.insert?.['block-strong']) {
+          const { book, codeStrong } = op.insert['block-strong']
+          const isGrec = book > 39
+
+          const doc = await firestore
+            .collection(isGrec ? 'grec' : 'hebreu')
+            .doc(codeStrong.toString())
+            .get()
+          const res = doc.exists ? doc.data() : undefined
+          if (result.content) {
+            result.content.ops[idx].insert['block-strong'].definition =
+              res?.Definition
+          }
+        }
+        if (op.attributes?.['inline-verse']) {
+          let verses: string[] = op.attributes['inline-verse'].verses
+          const title: string = op.attributes['inline-verse'].title
+
+          try {
+            verses = JSON.parse(verses as unknown as string)
+          } catch {}
+
+          const result = await Promise.all(
+            verses.map(async (verse) => {
+              const doc = await firestore
+                .collection('bible-lsg-1910')
+                .doc(verse)
+                .get()
+              return doc.exists ? doc.data() : undefined
+            })
+          )
+
+          return <OpsInlineVerse>{
+            type: 'inline-verse',
+            id: verses.toString(),
+            title,
+            verses: result,
+          }
+        }
+
+        if (op.attributes?.['inline-strong']) {
+          const { book, codeStrong } = op.attributes['inline-strong']
+          const isGrec = book > 39
+
+          const doc = await firestore
+            .collection(isGrec ? 'grec' : 'hebreu')
+            .doc(codeStrong.toString())
+            .get()
+          const result = doc.exists ? doc.data() : undefined
+
+          return <OpsInlineStrong>{
+            type: 'inline-strong',
+            ...result,
+          }
+        }
+      }) || []
+    )
+  ).filter((value): value is OpsInline => Boolean(value))
+
+  const html = convertStudyOpsToHtml(result.content?.ops)
 
   const { imageUrl, whatsappImageUrl } = { imageUrl: '', whatsappImageUrl: '' }
   // await generateMetaImage(
@@ -217,10 +230,5 @@ export const getServerStudyProps: GetServerSideProps = async ({ params }) => {
     annexe,
   }
 
-  return {
-    props: {
-      ...res,
-      updatedAt: Date.now(),
-    },
-  }
+  return { ...res, updatedAt: Date.now() }
 }

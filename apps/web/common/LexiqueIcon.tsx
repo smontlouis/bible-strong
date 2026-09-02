@@ -1,5 +1,3 @@
-import React from 'react'
-
 const LexiqueIcon = ({ ...props }) => (
   <svg width={22} height={22} viewBox="0 0 18 22" {...props}>
     <g id="Page-1" stroke="none" strokeWidth={1} fill="none" fillRule="evenodd">

@@ -1,18 +1,14 @@
 import { HiArrowLeft } from 'react-icons/hi'
-import { Box, BoxProps } from '@chakra-ui/react'
-import { useRouter } from 'next/router'
+import type { ButtonHTMLAttributes } from 'react'
 
-const GoBackArrow = (props: BoxProps) => {
-  const router = useRouter()
+const GoBackArrow = (props: ButtonHTMLAttributes<HTMLButtonElement>) => {
   return (
-    <Box
-      onClick={() => router.push('../')}
-      role="button"
-      as={HiArrowLeft}
-      fontSize="35px"
-      color="primary"
+    <button
+      onClick={() => window.history.back()}
+      className="text-primary"
+      aria-label="Retour"
       {...props}
-    />
+    ><HiArrowLeft className="size-9" /></button>
   )
 }
 

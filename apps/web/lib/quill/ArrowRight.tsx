@@ -1,4 +1,3 @@
-import React from 'react'
 
 const SvgComponent = ({ color, ...props }: { color: string }) => (
   <svg height={20} width={20} viewBox="0 0 96 96" {...props}>
