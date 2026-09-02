@@ -8,8 +8,8 @@ import {
 } from 'redux-persist'
 import type { PersistedState } from 'redux-persist/es/types'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
-import FilesystemStorage from 'redux-persist-filesystem-storage'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
+import { Platform } from 'react-native'
 
 import firestoreMiddleware from './firestoreMiddleware'
 import { logger, crashReporter } from './logMiddleware'
@@ -48,9 +48,11 @@ function configureStore() {
 
   // MMKV migration
   persistConfig.getStoredState = async config => {
-    const storedState = (await getStoredState(config).catch(() =>
-      getStoredState({ ...config, storage: FilesystemStorage })
-    )) as PersistedState
+    const storedState = (await getStoredState(config).catch(async () => {
+      if (Platform.OS === 'web') return undefined
+      const { default: FilesystemStorage } = await import('redux-persist-filesystem-storage')
+      return getStoredState({ ...config, storage: FilesystemStorage })
+    })) as PersistedState
     tryCaptureLegacyReferenceEvidenceFromReduxState(storedState, storage)
     const legacyCommentarySelection = storage.getString(LEGACY_COMMENTARY_SELECTION_STORAGE_KEY)
     if (legacyCommentarySelection && storedState && typeof storedState === 'object') {

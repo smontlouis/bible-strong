@@ -2,7 +2,7 @@ import { useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useWindowDimensions } from 'react-native'
-import YoutubePlayer from 'react-native-youtube-iframe'
+import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 import type { ShouldStartLoadRequest } from 'react-native-webview/lib/WebViewTypes'
 
 import Header from '~common/Header'
@@ -52,7 +52,7 @@ const PassageMediaPlayerScreen = () => {
                   width={playerWidth}
                   videoId={item.providerId}
                   play
-                  onError={(error: string) => setPlayerError(error || 'unknown')}
+                  onError={error => setPlayerError(error || 'unknown')}
                   onReady={() => setPlayerError(undefined)}
                   initialPlayerParams={{ rel: false }}
                   webViewProps={{

@@ -12,6 +12,7 @@ type Props = {
   description: string
   layout?: 'card' | 'list'
   selected: boolean
+  disabled?: boolean
   onPress: () => void
   downloadRequired?: boolean
   downloading?: boolean
@@ -27,6 +28,7 @@ const BibleDisplayModeCard = ({
   description,
   layout = 'card',
   selected,
+  disabled = false,
   onPress,
   downloadRequired = false,
   downloading = false,
@@ -38,6 +40,7 @@ const BibleDisplayModeCard = ({
 }: Props) => {
   const isList = layout === 'list'
   const showDownloadControl = downloadRequired || downloading
+  const interactionDisabled = disabled || downloading || downloadRequired
 
   return (
     <Box flex={isList ? undefined : 1} height={isList ? 92 : 148} position="relative">
@@ -45,11 +48,11 @@ const BibleDisplayModeCard = ({
         accessibilityRole={isList ? 'radio' : 'button'}
         accessibilityState={
           isList && !showDownloadControl
-            ? { checked: selected, disabled: downloading || downloadRequired }
-            : { selected, disabled: downloading || downloadRequired }
+            ? { checked: selected, disabled: interactionDisabled }
+            : { selected, disabled: interactionDisabled }
         }
         accessibilityLabel={`${label}. ${description}`}
-        disabled={downloading || downloadRequired}
+        disabled={interactionDisabled}
         onPress={onPress}
         style={({ pressed }) => ({ flex: 1, opacity: pressed ? 0.72 : 1 })}
       >
@@ -61,7 +64,7 @@ const BibleDisplayModeCard = ({
           borderColor={isList ? 'border' : selected ? 'primary' : 'border'}
           bg={isList ? 'reverse' : selected ? 'lightPrimary' : 'reverse'}
           bgOpacity="050"
-          opacity={downloadRequired ? 0.72 : 1}
+          opacity={disabled || downloadRequired ? 0.5 : 1}
           row={isList}
           alignItems={isList ? 'center' : undefined}
           gap={isList ? 12 : undefined}

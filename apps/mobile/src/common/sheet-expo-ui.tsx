@@ -1,4 +1,4 @@
-import { useTheme } from '@emotion/react'
+import { Global, useTheme } from '@emotion/react'
 import {
   BottomSheetFlatList,
   BottomSheetModal,
@@ -94,26 +94,42 @@ const withFooterMargin = (style: ViewProps['style'], footerHeight: number) => [
 const getFooterMarginStyle = (footerHeight: number) =>
   footerHeight ? { marginBottom: footerHeight } : undefined
 
+const getHeaderAccessibilityTitle = (header: SheetProps['header']) => {
+  if (!React.isValidElement<{ title?: unknown }>(header)) return undefined
+  return typeof header.props.title === 'string' ? header.props.title : undefined
+}
+
 const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   const {
+    accessibilityDescription,
+    accessibilityLabel,
+    backdrop = true,
     backgroundColor,
     children,
+    cornerRadius = 18,
     dismissible = true,
+    draggable = true,
     footer,
     header,
     initialSnapPoint,
+    maxWidth = 720,
     onClose,
     onDismiss,
+    onDismissStart,
     onOpenChange,
     onPresent,
     snapPoints,
   } = props
   const theme = useTheme()
   const sheetRef = React.useRef<BottomSheetMethods>(null)
+  const isOpenRef = React.useRef(false)
+  const dismissStartedRef = React.useRef(false)
   const [footerHeight, setFooterHeight] = React.useState(0)
   const hasFooter = Boolean(footer)
   const expoSnapPoints = getSnapPoints(snapPoints)
   const initialIndex = initialSnapPoint ? findSnapPointIndex(snapPoints, initialSnapPoint) : 0
+  const dialogTitle = accessibilityLabel || getHeaderAccessibilityTitle(header) || 'Bottom sheet'
+  const dialogDescription = accessibilityDescription || dialogTitle
 
   const renderedFooter = footer
     ? React.createElement(footer as React.ComponentType<SheetFooterProps>)
@@ -130,30 +146,46 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
     }
   }, [hasFooter])
 
-  React.useImperativeHandle(
-    ref,
-    () => ({
+  React.useImperativeHandle(ref, () => {
+    const notifyPresent = () => {
+      if (isOpenRef.current) return
+      isOpenRef.current = true
+      dismissStartedRef.current = false
+      onOpenChange?.(true)
+      onPresent?.()
+    }
+    const dismiss = (force = false) => {
+      if (!isOpenRef.current) return
+      if (!dismissStartedRef.current) {
+        dismissStartedRef.current = true
+        onDismissStart?.()
+      }
+      if (force) sheetRef.current?.forceClose()
+      else sheetRef.current?.dismiss()
+    }
+
+    return {
       present: () => {
-        onOpenChange?.(true)
-        onPresent?.()
+        notifyPresent()
         sheetRef.current?.present()
       },
       presentAt: snapPoint => {
-        onOpenChange?.(true)
-        onPresent?.()
-        sheetRef.current?.present()
+        notifyPresent()
         sheetRef.current?.snapToIndex(findSnapPointIndex(snapPoints, snapPoint))
       },
       resizeTo: snapPoint =>
         sheetRef.current?.snapToIndex(findSnapPointIndex(snapPoints, snapPoint)),
-      dismiss: () => sheetRef.current?.dismiss(),
-      close: () => sheetRef.current?.dismiss(),
-      forceClose: () => sheetRef.current?.forceClose(),
-    }),
-    [onOpenChange, onPresent, snapPoints]
-  )
+      dismiss: () => dismiss(),
+      close: () => dismiss(),
+      forceClose: () => dismiss(true),
+    }
+  }, [onDismissStart, onOpenChange, onPresent, snapPoints])
 
   const handleClose = () => {
+    if (!isOpenRef.current) return
+    if (!dismissStartedRef.current) onDismissStart?.()
+    dismissStartedRef.current = false
+    isOpenRef.current = false
     onOpenChange?.(false)
     onClose?.()
     onDismiss?.()
@@ -162,15 +194,41 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   return (
     <SheetContext.Provider value={{ footerHeight, hasFooter, setFooterHeight }}>
       <BottomSheetModal
+        accessibilityLabel={dialogTitle}
+        accessibilityDescription={dialogDescription}
         ref={sheetRef}
         index={initialIndex}
         snapPoints={expoSnapPoints}
         enableDynamicSizing={!expoSnapPoints}
         enablePanDownToClose={dismissible}
-        backgroundStyle={{ backgroundColor: backgroundColor || theme.colors.reverse }}
+        handleComponent={draggable ? undefined : null}
+        backdropComponent={backdrop ? undefined : null}
+        backgroundStyle={{
+          backgroundColor: backgroundColor || theme.colors.reverse,
+          borderTopLeftRadius: cornerRadius,
+          borderTopRightRadius: cornerRadius,
+          maxWidth,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          ...(backdrop ? undefined : { boxShadow: 'none' }),
+        }}
         onClose={handleClose}
-        onDismiss={handleClose}
       >
+        {!backdrop && (
+          <>
+            <Global
+              styles={`body:has([data-testid="expo-sheet-interactive-background"]) {
+                pointer-events: auto !important;
+              }`}
+            />
+            <Box
+              testID="expo-sheet-interactive-background"
+              position="absolute"
+              width={0}
+              height={0}
+            />
+          </>
+        )}
         {renderedHeader}
         {children}
         {renderedFooter}
@@ -362,6 +420,17 @@ export {
   SheetItem,
   useSheetInternal,
 }
+
+export type {
+  SheetFooterProps,
+  SheetHeaderProps,
+  SheetItemProps,
+  SheetProps,
+  SheetRef,
+  SheetScrollableOptions,
+  SheetSnapPoint,
+  SheetViewProps,
+} from '~common/sheet'
 
 export type {
   FlatListProps as SheetFlatListProps,

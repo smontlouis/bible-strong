@@ -24,6 +24,8 @@ interface YoutubeIframeProps {
   mute?: boolean
   volume?: number
   webViewStyle?: StyleProp<ViewStyle>
+  webviewStyle?: StyleProp<ViewStyle>
+  viewContainerStyle?: StyleProp<ViewStyle>
   webViewProps?: WebViewProps
   playbackRate?: number
   onError?: (err: string | undefined) => void

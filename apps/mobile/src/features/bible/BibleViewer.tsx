@@ -11,7 +11,6 @@ import BibleHeader from './BibleHeader'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import { useTranslation } from 'react-i18next'
-import { PortalHost } from 'react-native-teleport'
 import { type SheetRef } from '~common/sheet'
 import type { Bookmark } from '~common/types'
 import { BibleResource, Pericope, SelectedCode, Verse, VerseIds } from '~common/types'
@@ -119,6 +118,8 @@ import {
 } from './selectedVersesActions'
 import SelectedVersesModal from './SelectedVersesModal'
 import { getBibleDOMDestination } from './SharedBibleDOM'
+import BibleDOMPortalHost from './BibleDOMPortalHost'
+import { shouldUseSharedBibleDOM } from './sharedBibleDOMPlatform'
 import SnapshotPlaceholder from './SnapshotPlaceholder'
 import VerseTagsModal from './VerseTagsModal'
 import CanonicalBibleNoteSheet from './CanonicalBibleNoteSheet'
@@ -530,8 +531,8 @@ const BibleViewer = ({
   const setSharedProps = useSetAtom(sharedBibleDOMPropsAtom)
   const setBibleDOMHostLayouts = useSetAtom(bibleDOMHostLayoutsAtom)
   const isActiveBibleTab = !isFormSheet && activeBibleTabId === bible.id
-  const useSharedDOM = Platform.OS === 'ios' ? false : isInTab
-  const domLayerZIndex = -1
+  const useSharedDOM = shouldUseSharedBibleDOM(Platform.OS, isInTab)
+  const domLayerZIndex = Platform.OS === 'web' ? 0 : -1
   const strongSelectionRenderedContentKey = getStrongSelectionRenderedContentKey(
     verses,
     parallelVerses
@@ -1402,7 +1403,7 @@ const BibleViewer = ({
           // Keep every host mounted so Android only retargets between
           // stable native parents instead of unmounting/remounting hosts.
           <Box flex={1} onLayout={handleBibleDOMHostLayout}>
-            <PortalHost
+            <BibleDOMPortalHost
               name={getBibleDOMDestination(bible.id)}
               style={{ flex: 1, zIndex: domLayerZIndex }}
             />

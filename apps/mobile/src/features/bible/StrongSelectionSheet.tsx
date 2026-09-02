@@ -162,6 +162,7 @@ const StrongSelectionSheet = ({
 
   const openEntry = (stepCode: string, language: 'greek' | 'hebrew', morphologyCodes: string[]) => {
     const identity = createStrongIdentity(stepCode, language)
+    sheetRef.current?.dismiss()
     pushRouteOnce({
       pathname: '/strong',
       params: {

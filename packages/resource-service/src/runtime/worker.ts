@@ -1,4 +1,5 @@
 import { makeResourceWebHandler } from '../http/app'
+import { makeResourcePreflightResponse, parseResourceCorsOrigins } from '../http/cors'
 import type { BibleChapterRepositoryService } from '../domain/bibleChapter'
 import type { BibleSearchRepositoryService } from '../domain/bibleSearch'
 import type { NaveRepositoryService } from '../domain/nave'
@@ -52,18 +53,24 @@ export const makeResourceWorkerHandler = (
   supplementaryRepository?: SupplementaryRepositoryService,
   timelineRepository?: TimelineRepositoryService,
   bibleSearchRepository?: BibleSearchRepositoryService,
-  searchAnalytics?: SearchAnalyticsSinkService
+  searchAnalytics?: SearchAnalyticsSinkService,
+  corsAllowedOrigins: readonly string[] = []
 ) =>
-  makeResourceWebHandler(repository, naveRepository, {
-    bibleSearch: bibleSearchRepository,
-    dictionary: dictionaryRepository,
-    strongBible: strongBibleRepository,
-    interlinearBible: interlinearBibleRepository,
-    strongLexicon: strongLexiconRepository,
-    supplementary: supplementaryRepository,
-    timeline: timelineRepository,
-    searchAnalytics,
-  })
+  makeResourceWebHandler(
+    repository,
+    naveRepository,
+    {
+      bibleSearch: bibleSearchRepository,
+      dictionary: dictionaryRepository,
+      strongBible: strongBibleRepository,
+      interlinearBible: interlinearBibleRepository,
+      strongLexicon: strongLexiconRepository,
+      supplementary: supplementaryRepository,
+      timeline: timelineRepository,
+      searchAnalytics,
+    },
+    { corsAllowedOrigins }
+  )
 
 const analyticsEnabled = (bindings: Env) => bindings.SEARCH_ANALYTICS_ENABLED === 'true'
 
@@ -98,6 +105,9 @@ const writeRuntimeSafely = (
 
 export default {
   async fetch(request: Request, bindings: Env, ctx: ExecutionContext): Promise<Response> {
+    const corsAllowedOrigins = parseResourceCorsOrigins(bindings.RESOURCE_WEB_ORIGINS)
+    const preflight = makeResourcePreflightResponse(request, corsAllowedOrigins)
+    if (preflight) return preflight
     const isSearchAnalyticsRequest = new URL(request.url).pathname === '/v1/search-events'
     const appCheckConfig = createFirebaseAppCheckConfig({
       projectNumber: bindings.FIREBASE_APP_CHECK_PROJECT_NUMBER,
@@ -217,7 +227,12 @@ export default {
       },
       load: async () => {
         if (isSearchAnalyticsRequest) {
-          const analyticsWeb = makeResourceWebHandler(undefined, undefined, { searchAnalytics })
+          const analyticsWeb = makeResourceWebHandler(
+            undefined,
+            undefined,
+            { searchAnalytics },
+            { corsAllowedOrigins }
+          )
           try {
             return await analyticsWeb.handler(request)
           } finally {
@@ -292,7 +307,8 @@ export default {
                 })
               ),
           }),
-          searchAnalytics
+          searchAnalytics,
+          corsAllowedOrigins
         )
 
         try {

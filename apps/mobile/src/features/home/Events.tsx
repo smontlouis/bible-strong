@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { HStack, VStack } from '~common/ui/Box'
 import { FeatherIcon } from '~common/ui/Icon'
 import Text from '~common/ui/Text'
-import { firebaseDb } from '~helpers/firebase'
+import { collection, firebaseDb, getDocs, query, where } from '~helpers/firebase'
 import { useQuery } from '@tanstack/react-query'
 import { remoteQueryOptions } from '~helpers/queryOptions'
 import { getLanguage } from '~i18n'
@@ -19,27 +19,39 @@ import useLanguage from '~helpers/useLanguage'
 type Event = {
   title: string
   description: string
-  startDate?: {
-    _seconds: number
-    _nanoseconds: number
-  }
-  endDate?: {
-    _seconds: number
-    _nanoseconds: number
-  }
+  startDate?: FirestoreTimestamp
+  endDate?: FirestoreTimestamp
   status: 'published' | 'draft'
   lang: 'fr' | 'en'
   img: string
   url: string
 }
 
+type FirestoreTimestamp = {
+  _seconds?: number
+  seconds?: number
+  toDate?: () => Date
+}
+
+export const normalizeEventDate = (value: FirestoreTimestamp | undefined): Date | null => {
+  if (!value) return null
+  const date = typeof value.toDate === 'function' ? value.toDate() : undefined
+  if (date && Number.isFinite(date.getTime())) return date
+  const seconds = value.seconds ?? value._seconds
+  if (typeof seconds !== 'number') return null
+  const normalized = new Date(seconds * 1000)
+  return Number.isFinite(normalized.getTime()) ? normalized : null
+}
+
 const getEvents = async (language: string) => {
-  const events = await firebaseDb
-    .collection('events')
-    .where('status', '==', 'published')
-    .where('lang', '==', language)
-    .get()
-  return events.docs.map(x => x.data() as Event)
+  const events = await getDocs(
+    query(
+      collection(firebaseDb, 'events'),
+      where('status', '==', 'published'),
+      where('lang', '==', language)
+    )
+  )
+  return events.docs.map((x: { data: () => unknown }) => x.data() as Event)
 }
 
 const EventPeriod = ({ event }: { event: Event }) => {
@@ -47,8 +59,8 @@ const EventPeriod = ({ event }: { event: Event }) => {
 
   if (!event.startDate && !event.endDate) return null
 
-  const startDate = event.startDate ? new Date(event.startDate._seconds * 1000) : null
-  const endDate = event.endDate ? new Date(event.endDate._seconds * 1000) : null
+  const startDate = normalizeEventDate(event.startDate)
+  const endDate = normalizeEventDate(event.endDate)
 
   if (startDate && endDate) {
     return (

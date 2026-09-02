@@ -11,7 +11,7 @@ import {
   useKeyboardState,
 } from 'react-native-keyboard-controller'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import YoutubePlayer from 'react-native-youtube-iframe'
+import YoutubePlayer from '~helpers/react-native-youtube-iframe'
 import { useDispatch, useSelector } from 'react-redux'
 
 import EntityChipList from '~common/EntityChipList'
@@ -348,7 +348,7 @@ const BibleLinkScreen = () => {
                         width={playerWidth}
                         videoId={currentLink.videoId}
                         onReady={() => console.log('[BibleLinkScreen] YouTube ready')}
-                        onError={(e: string) => console.log('[BibleLinkScreen] YouTube error:', e)}
+                        onError={e => console.log('[BibleLinkScreen] YouTube error:', e)}
                         viewContainerStyle={{ borderRadius: 10, overflow: 'hidden' }}
                         webviewStyle={{ borderRadius: 10, overflow: 'hidden' }}
                       />

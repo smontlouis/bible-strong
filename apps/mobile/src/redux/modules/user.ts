@@ -14,7 +14,7 @@ import {
   TagsObj,
 } from '~common/types'
 import type { FireAuthProfile } from '~helpers/FireAuth'
-import { firebaseDb } from '~helpers/firebase'
+import { collection, firebaseDb, getDocs, limit, orderBy, query, where } from '~helpers/firebase'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import { getDefaultBibleVersion } from '~helpers/languageUtils'
 import type { StrongBibleVersionId } from '~helpers/strongBiblePublications'
@@ -1564,18 +1564,19 @@ export function getChangelog(): ThunkAction<Promise<void>, RootState, undefined,
   return async (dispatch, getState) => {
     dispatch({ type: GET_CHANGELOG })
     const lastChangelog = getState().user.changelog.lastSeen.toString()
-    const changelogDoc = firebaseDb
-      .collection('changelog')
-      .where('date', '>', lastChangelog)
-      .orderBy('date', 'desc')
-      .limit(20)
+    const changelogQuery = query(
+      collection(firebaseDb, 'changelog'),
+      where('date', '>', lastChangelog),
+      orderBy('date', 'desc'),
+      limit(20)
+    )
 
     try {
-      const querySnapshot = await changelogDoc.get({ source: 'server' })
+      const querySnapshot = await getDocs(changelogQuery)
 
       const changelog: ChangelogItem[] = []
-      querySnapshot.forEach(doc => {
-        changelog.push(doc.data() as ChangelogItem)
+      querySnapshot.forEach((document: { data: () => unknown }) => {
+        changelog.push(document.data() as ChangelogItem)
       })
 
       dispatch(addChangelog(changelog))

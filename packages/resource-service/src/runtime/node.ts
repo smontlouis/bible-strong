@@ -1,4 +1,4 @@
-import { HttpApiBuilder, HttpApiSwagger } from '@effect/platform'
+import { HttpApiBuilder, HttpApiSwagger, HttpMiddleware } from '@effect/platform'
 import * as NodeHttpServer from '@effect/platform-node/NodeHttpServer'
 import * as NodeRuntime from '@effect/platform-node/NodeRuntime'
 import { Effect, Layer } from 'effect'
@@ -26,6 +26,12 @@ import { makeKyselyStrongLexiconRepository } from '../repositories/strongLexicon
 import { makeKyselySupplementaryRepository } from '../repositories/supplementaryRepository'
 import { makeKyselyTimelineRepository } from '../repositories/timelineRepository'
 import { makeHttpTopicEmbeddingProvider } from '../search/topicEmbedding'
+import {
+  parseResourceCorsOrigins,
+  RESOURCE_CORS_ALLOWED_HEADERS,
+  RESOURCE_CORS_ALLOWED_METHODS,
+  RESOURCE_CORS_EXPOSED_HEADERS,
+} from '../http/cors'
 
 const port = Number(process.env.RESOURCE_API_PORT ?? 8787)
 const database = makeLocalDatabase({
@@ -71,7 +77,19 @@ const ApiLive = ResourceApiLive.pipe(Layer.provide(RepositoryLive))
 
 const DocumentationLive = HttpApiSwagger.layer({ path: '/docs' }).pipe(Layer.provide(ApiLive))
 
-const ServerLive = HttpApiBuilder.serve().pipe(
+const configuredOrigins = parseResourceCorsOrigins(process.env.RESOURCE_WEB_ORIGINS)
+const corsAllowedOrigins =
+  configuredOrigins.length > 0 || process.env.NODE_ENV === 'production' ? configuredOrigins : ['*']
+
+const ServerLive = HttpApiBuilder.serve(
+  HttpMiddleware.cors({
+    allowedOrigins: corsAllowedOrigins,
+    allowedMethods: [...RESOURCE_CORS_ALLOWED_METHODS],
+    allowedHeaders: [...RESOURCE_CORS_ALLOWED_HEADERS],
+    exposedHeaders: [...RESOURCE_CORS_EXPOSED_HEADERS],
+    maxAge: 86400,
+  })
+).pipe(
   Layer.provide(Layer.merge(ApiLive, DocumentationLive)),
   Layer.provide(NodeHttpServer.layer(createServer, { host: '0.0.0.0', port }))
 )
