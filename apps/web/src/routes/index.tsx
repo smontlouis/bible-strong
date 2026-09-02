@@ -1,7 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import Home from '@/pages'
+import { getLandingTheme } from '@/lib/landing-theme'
 export const Route = createFileRoute('/')({
-  component: Home,
+  loader: () => getLandingTheme(),
+  component: LandingHome,
   head: () => ({
     meta: [
       { title: 'Bible Strong - One verse, a complete study' },
@@ -16,3 +18,7 @@ export const Route = createFileRoute('/')({
     ],
   }),
 })
+
+function LandingHome() {
+  return <Home initialTheme={Route.useLoaderData()} />
+}

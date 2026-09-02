@@ -2446,6 +2446,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@bible-strong/web@workspace:apps/web"
   dependencies:
+    "@gsap/react": "npm:^2.1.2"
     "@mdx-js/react": "npm:^3.0.0"
     "@mdx-js/rollup": "npm:^3.1.1"
     "@radix-ui/react-dialog": "npm:^1.1.15"
@@ -2471,10 +2472,13 @@ __metadata:
     firebase: "npm:^8.1.1"
     firebaseui: "npm:^4.7.1"
     framer-motion: "npm:^11.0.3"
+    gsap: "npm:^3.15.0"
     husky: "npm:^4.3.0"
     immer: "npm:^9.0.21"
+    lenis: "npm:^1.3.26"
     lodash.isequal: "npm:^4.5.0"
     lucide-react: "npm:^0.323.0"
+    motion: "npm:^13.2.0"
     nitro: "npm:3.0.260610-beta"
     quill-delta-to-html: "npm:^0.12.1"
     react: "npm:^18.2.0"
@@ -5720,6 +5724,16 @@ __metadata:
   bin:
     proto-loader-gen-types: build/bin/proto-loader-gen-types.js
   checksum: 10c0/900814c2cbedd76ce5de083adc0696f746a652a79eeb09e8d04d53b864179e2c9aa127997b9bba8ef5f0ce0c11ee700a0e467732eb6cb1f3efdb952583533ccf
+  languageName: node
+  linkType: hard
+
+"@gsap/react@npm:^2.1.2":
+  version: 2.1.2
+  resolution: "@gsap/react@npm:2.1.2"
+  peerDependencies:
+    gsap: ^3.12.5
+    react: ">=17"
+  checksum: 10c0/d0285391cfd7cef8125e6ddf81a063121bdb92ddf633d76c6144d8b93e3b7f7d837ec75f1fda8fd33d7efac0ad4c1aad89647e81446e9363012ada7db9f67daf
   languageName: node
   linkType: hard
 
@@ -18309,6 +18323,25 @@ __metadata:
   languageName: node
   linkType: hard
 
+"framer-motion@npm:^13.2.0":
+  version: 13.2.0
+  resolution: "framer-motion@npm:13.2.0"
+  dependencies:
+    motion-dom: "npm:^13.2.0"
+    motion-utils: "npm:^13.0.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/b381cf2c6f9def6ae169c096f9f873b0dafc8343fbdc78cc3d27e3ede2e8f682b22e1160a1f8cde07f263993aecab2c94239a43702fe4f06eccaeba109fcff13
+  languageName: node
+  linkType: hard
+
 "freeport-async@npm:^2.0.0":
   version: 2.0.0
   resolution: "freeport-async@npm:2.0.0"
@@ -18896,6 +18929,13 @@ __metadata:
   version: 4.2.11
   resolution: "graceful-fs@npm:4.2.11"
   checksum: 10c0/386d011a553e02bc594ac2ca0bd6d9e4c22d7fa8cfbfc448a6d148c59ea881b092db9dbe3547ae4b88e55f1b01f7c4a2ecc53b310c042793e63aa44cf6c257f2
+  languageName: node
+  linkType: hard
+
+"gsap@npm:^3.15.0":
+  version: 3.15.0
+  resolution: "gsap@npm:3.15.0"
+  checksum: 10c0/5d86de72cb0bd6b20502c34c329a83a7d679979731bb465164407b7a5225aa61d612beee740eea36258622897c116cd2ca35320d530b7cf68bad62522361fcf7
   languageName: node
   linkType: hard
 
@@ -21260,6 +21300,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lenis@npm:^1.3.26":
+  version: 1.3.26
+  resolution: "lenis@npm:1.3.26"
+  peerDependencies:
+    "@nuxt/kit": ">=3.0.0"
+    react: ">=17.0.0"
+    vue: ">=3.0.0"
+  peerDependenciesMeta:
+    "@nuxt/kit":
+      optional: true
+    react:
+      optional: true
+    vue:
+      optional: true
+  checksum: 10c0/0d523ecd7bbbaac64b86de8e7c6641e4a2299065743def53eade177f42c280d1447d36b0fd7a525b7d69b0a889c1af91e85e48bfeec3851975c4858c0823204e
+  languageName: node
+  linkType: hard
+
 "leven@npm:^3.1.0":
   version: 3.1.0
   resolution: "leven@npm:3.1.0"
@@ -23289,6 +23347,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"motion-dom@npm:^13.2.0":
+  version: 13.2.0
+  resolution: "motion-dom@npm:13.2.0"
+  dependencies:
+    motion-utils: "npm:^13.0.0"
+  checksum: 10c0/009725cf822940fcd10e20492cfd0be50f11db9b5f1b374dd2fddbe2bc53db80c7f44d02c8bf68e2b9baaa8335aba45bd2a860176b3c23685ca8b59ca69db6b7
+  languageName: node
+  linkType: hard
+
 "motion-utils@npm:^11.18.1":
   version: 11.18.1
   resolution: "motion-utils@npm:11.18.1"
@@ -23325,6 +23392,24 @@ __metadata:
     react-dom:
       optional: true
   checksum: 10c0/2f974b22929945cf96d0164916fb04c470d993ab81ca9006bd590638edb35d04e202dc3f4e61fede4fd81bc9ef9d8a47555d73c776e428a357e09097e35b2750
+  languageName: node
+  linkType: hard
+
+"motion@npm:^13.2.0":
+  version: 13.2.0
+  resolution: "motion@npm:13.2.0"
+  dependencies:
+    framer-motion: "npm:^13.2.0"
+    tslib: "npm:^2.4.0"
+  peerDependencies:
+    react: ^18.0.0 || ^19.0.0
+    react-dom: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    react:
+      optional: true
+    react-dom:
+      optional: true
+  checksum: 10c0/3943e36a0848f39a3633fb822bc2230966cf8e215fd243d0cd39a62b1799c89ca75fdc07f964b9633b962a3ace845525f4c4b2f63860a7268e9d13cc1667ad4a
   languageName: node
   linkType: hard
 
