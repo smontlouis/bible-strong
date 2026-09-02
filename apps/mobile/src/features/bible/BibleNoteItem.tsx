@@ -18,6 +18,7 @@ import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import { getNoteTitle } from '~helpers/getNoteTitle'
 import type { NoteListRow } from '~features/entityListQuery/noteListRows'
+import { useMountTime } from '~helpers/useMountTime'
 
 const NoteLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   paddingVertical: 20,
@@ -38,8 +39,9 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
+  const mountTime = useMountTime()
 
-  const formattedDate = distanceInWords(Number(item.note.date), Date.now(), {
+  const formattedDate = distanceInWords(Number(item.note.date), mountTime, {
     locale: getDateLocale(lang),
   })
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })

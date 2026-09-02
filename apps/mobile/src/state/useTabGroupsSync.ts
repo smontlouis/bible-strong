@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { getDefaultStore } from 'jotai/vanilla'
 import debounce from 'debounce'
@@ -158,11 +158,7 @@ export const useTabGroupsSync = ({
     []
   )
 
-  // Debounced version
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedSync = useCallback(debounce(syncChangesToFirestore, SYNC_DEBOUNCE_MS), [
-    syncChangesToFirestore,
-  ])
+  const [debouncedSync] = useState(() => debounce(syncChangesToFirestore, SYNC_DEBOUNCE_MS))
 
   /**
    * Handle initial load: migrate local groups to Firestore if needed

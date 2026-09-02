@@ -106,7 +106,7 @@ const BatchActionBar = ({
         )}
       </Box>
 
-      {deletionProgress && (
+      {deletionProgress !== null && (
         <Box mt={12} h={3} bg="border" borderRadius={2} overflow="hidden">
           <Box h={3} width={`${progressPercent}%`} bg="primary" />
         </Box>

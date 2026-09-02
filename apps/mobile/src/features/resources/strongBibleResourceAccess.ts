@@ -242,9 +242,12 @@ export const localStrongBibleResourceAdapter: StrongBibleResourceAdapter = {
     return loadStrongBibleVerseCountsByBookResult(versionId, request.book, request.reference)
   },
   async loadFoundVersesByBook(versionId, request) {
-    const { loadStrongBibleOccurrenceLocations, loadStrongBibleVersesSpans } =
-      await import('~helpers/strongBibleSidecar')
-    const { getMultipleVerses } = await import('~helpers/biblesDb')
+    const [strongBibleSidecar, biblesDb] = await Promise.all([
+      import('~helpers/strongBibleSidecar'),
+      import('~helpers/biblesDb'),
+    ])
+    const { loadStrongBibleOccurrenceLocations, loadStrongBibleVersesSpans } = strongBibleSidecar
+    const { getMultipleVerses } = biblesDb
     const page = await loadStrongBibleOccurrenceLocations(
       versionId,
       request.book,

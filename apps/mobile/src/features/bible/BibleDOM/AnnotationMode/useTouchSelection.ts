@@ -137,25 +137,30 @@ export function useTouchSelection({
   // Store frequently-changing values in refs so the touch listener effect
   // does not need to tear down and re-attach on every change.
   const selectionRef = useRef(selection)
-  selectionRef.current = selection
-
   const versesRef = useRef(verses)
-  versesRef.current = verses
-
   const getTokensRef = useRef(getTokens)
-  getTokensRef.current = getTokens
-
   const getSelectionHandlePositionsRef = useRef(getSelectionHandlePositions)
-  getSelectionHandlePositionsRef.current = getSelectionHandlePositions
-
   const annotationModeRef = useRef(annotationMode)
-  annotationModeRef.current = annotationMode
-
   const setSelectionRef = useRef(setSelection)
-  setSelectionRef.current = setSelection
-
   const callbacksRef = useRef(callbacks)
-  callbacksRef.current = callbacks
+
+  useEffect(() => {
+    selectionRef.current = selection
+    versesRef.current = verses
+    getTokensRef.current = getTokens
+    getSelectionHandlePositionsRef.current = getSelectionHandlePositions
+    annotationModeRef.current = annotationMode
+    setSelectionRef.current = setSelection
+    callbacksRef.current = callbacks
+  }, [
+    annotationMode,
+    callbacks,
+    getSelectionHandlePositions,
+    getTokens,
+    selection,
+    setSelection,
+    verses,
+  ])
 
   // Get word position at a given screen coordinate
   const getWordAtPoint = (clientX: number, clientY: number): WordPosition | null => {

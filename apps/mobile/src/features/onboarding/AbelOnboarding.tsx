@@ -618,20 +618,18 @@ const AbelOnboarding = ({ completionMode = 'handoff', onComplete }: AbelOnboardi
                 }}
               >
                 <Animated.View
-                  style={[
-                    {
-                      position: 'absolute',
-                      left: 0,
-                      top: 0,
-                      bottom: 0,
-                      width: `${progress * 100}%`,
-                      backgroundColor: theme.colors.primary,
-                      transitionProperty: 'width',
-                      transitionDuration: 420,
-                      transitionDelay: delayProgressAfterFinalBack && !reduceMotion ? 520 : 0,
-                      transitionTimingFunction: 'ease-in-out',
-                    },
-                  ]}
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: `${progress * 100}%`,
+                    backgroundColor: theme.colors.primary,
+                    transitionProperty: 'width',
+                    transitionDuration: 420,
+                    transitionDelay: delayProgressAfterFinalBack && !reduceMotion ? 520 : 0,
+                    transitionTimingFunction: 'ease-in-out',
+                  }}
                 />
               </Animated.View>
               {showFinalAction ? (

@@ -147,10 +147,10 @@ const Timeline = ({
       >
         <Box width={width} height={height} lightShadow>
           <Box pos="relative" width={width} height={height} bg="lightGrey">
-            {events.map((event, i) => (
+            {events.map(event => (
               <TimelineEvent
                 x={x}
-                key={i}
+                key={event.id}
                 yearsToPx={yearsToPx}
                 calculateEventWidth={calculateEventWidth}
                 hasDetails={eventDetailSlugs ? eventDetailSlugs.has(event.slug) : true}

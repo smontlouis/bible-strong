@@ -50,6 +50,9 @@ const getItemIcon = (type: TaggedItem['type']): 'edit-3' | 'file-text' | 'link' 
   }
 }
 
+const getTaggedItemKey = (item: TaggedItem): string =>
+  item.type === 'highlight' ? `highlight-${item.verseKey}` : `${item.type}-${item.data.id}`
+
 const TaggedItemRow = ({ item, onEditTags }: { item: TaggedItem; onEditTags: () => void }) => {
   const { t } = useTranslation()
 
@@ -172,9 +175,9 @@ const VerseTagsModal = forwardRef<SheetRef, VerseTagsModalProps>(({ verseKey, ve
             <Text color="grey">{t('Aucun élément avec des étiquettes')}</Text>
           </Box>
         ) : (
-          taggedItems.map((item, index) => (
+          taggedItems.map(item => (
             <TaggedItemRow
-              key={`${item.type}-${index}`}
+              key={getTaggedItemKey(item)}
               item={item}
               onEditTags={() => handleEditTags(item)}
             />

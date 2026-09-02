@@ -10,8 +10,8 @@ import {
   interpolate,
   SharedValue,
   Extrapolation,
-  runOnJS,
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { useTranslation } from 'react-i18next'
 
 import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
@@ -115,10 +115,10 @@ const CreateGroupPage = memo(
       () => createGroupPage.isFullyVisible.get(),
       (isVisible, wasVisible) => {
         if (isVisible && !wasVisible) {
-          runOnJS(onPageVisible)()
+          scheduleOnRN(onPageVisible)
         } else if (!isVisible && wasVisible) {
           // Reset l'état quand on swipe vers un groupe précédent
-          runOnJS(resetState)()
+          scheduleOnRN(resetState)
         }
       }
     )
@@ -165,7 +165,7 @@ const CreateGroupPage = memo(
         paddingTop={insets.top}
       >
         <ScrollView
-          contentContainerStyle={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="always"
           scrollEnabled={false}
         >

@@ -48,9 +48,9 @@ const TimelineEvent = ({
 }: Props) => {
   const pushRouteOnce = usePushRouteOnce()
   const lang = useLanguage()
-  const { current: top } = React.useRef(rowToPx(row))
-  const { current: left } = React.useRef(yearsToPx(start))
-  const { current: width } = React.useRef(calculateEventWidth(start, end, isFixed))
+  const [top] = React.useState(() => rowToPx(row))
+  const [left] = React.useState(() => yearsToPx(start))
+  const [width] = React.useState(() => calculateEventWidth(start, end, isFixed))
 
   const label = calculateLabel(start, end)
 

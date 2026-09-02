@@ -34,13 +34,13 @@ const ReferenceParagraph = ({ children, planLanguage, ...props }: ReferenceParag
     return <Paragraph {...props}>{children}</Paragraph>
   }
 
-  let cursor = 0
+  const lastReferenceEnd = references[references.length - 1].end
 
   return (
     <Paragraph {...props} selectable={false}>
-      {references.map(reference => {
-        const before = children.slice(cursor, reference.start)
-        cursor = reference.end
+      {references.map((reference, index) => {
+        const previousEnd = index === 0 ? 0 : references[index - 1].end
+        const before = children.slice(previousEnd, reference.start)
 
         return (
           <React.Fragment key={`${reference.start}-${reference.end}-${reference.target.osis}`}>
@@ -60,7 +60,7 @@ const ReferenceParagraph = ({ children, planLanguage, ...props }: ReferenceParag
           </React.Fragment>
         )
       })}
-      {children.slice(cursor)}
+      {children.slice(lastReferenceEnd)}
     </Paragraph>
   )
 }

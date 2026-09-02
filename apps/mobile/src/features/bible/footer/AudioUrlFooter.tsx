@@ -184,6 +184,7 @@ const useLoadSound = ({
 
   // Audio init on version or book change
   useEffect(() => {
+    let cancelled = false
     ;(async () => {
       try {
         await TrackPlayer.setupPlayer()
@@ -225,8 +226,12 @@ const useLoadSound = ({
       } catch (e) {
         console.log('[Bible] Silent catch:', e)
       }
-      setIsSetup(true)
+      if (!cancelled) setIsSetup(true)
     })()
+
+    return () => {
+      cancelled = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [version, book.Numero])
 

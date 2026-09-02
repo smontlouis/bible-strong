@@ -2,7 +2,6 @@ import React, { memo, ReactNode, useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import Animated, {
-  runOnJS,
   SharedValue,
   useAnimatedReaction,
   useAnimatedStyle,
@@ -11,6 +10,7 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { wpUI } from '~helpers/utils'
 
 function friction(value: number) {
@@ -407,7 +407,7 @@ export default memo(
           ) {
             x.set(
               withTiming(upperBoundX + wpUI(100), { duration: 300 }, () => {
-                runOnJS(onPrev)()
+                scheduleOnRN(onPrev)
               })
             )
           } else if (
@@ -417,7 +417,7 @@ export default memo(
           ) {
             x.set(
               withTiming(lowerBoundX - wpUI(100), { duration: 300 }, () => {
-                runOnJS(onNext)()
+                scheduleOnRN(onNext)
               })
             )
           } else {

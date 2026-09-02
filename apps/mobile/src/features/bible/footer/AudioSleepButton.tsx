@@ -8,6 +8,7 @@ import Text from '~common/ui/Text'
 import { secondsToMinutes } from '~helpers/secondsToMinutes'
 import { audioSleepMinutesAtom, audioSleepTimeAtom } from './atom'
 import AudioChip from './AudioChip'
+import { useMountTime } from '~helpers/useMountTime'
 
 export type AudioSleepButtonProps = BoxProps
 
@@ -22,6 +23,7 @@ const choices = [
 ]
 
 const AudioSleepButton = (props: AudioSleepButtonProps) => {
+  const mountTime = useMountTime()
   const { t } = useTranslation()
   const [timer, setTimer] = useAtom(audioSleepMinutesAtom)
   const [audioSleepTime, setAudioSleep] = useAtom(audioSleepTimeAtom)
@@ -42,7 +44,7 @@ const AudioSleepButton = (props: AudioSleepButtonProps) => {
     // setAudioSleep(Date.now() + 5000) // For testing purpose only
   }
 
-  const elapsed = audioSleepTime - Date.now()
+  const elapsed = audioSleepTime - mountTime
 
   return (
     <DropdownMenu

@@ -1498,6 +1498,8 @@ export const StrongEntityRelationGraph = ({
     }
 
     const motion = createGraphLayerMotion(request, sourceScene, targetScene, ++nextMotionId.current)
+    const targetZIndex = nextLayerZIndex.current + 1
+    nextLayerZIndex.current = targetZIndex
 
     setMotions(current => [...current, motion])
     setSceneLayers(current => {
@@ -1508,8 +1510,6 @@ export const StrongEntityRelationGraph = ({
         ...sourceLayer.carry,
         ...(sourceLayer.entry ? [sourceLayer.entry] : []),
       ]
-      const targetZIndex = ++nextLayerZIndex.current
-
       return current.map(layer => {
         if (layer.id === sourceLayer.id) {
           return {

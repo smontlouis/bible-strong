@@ -83,8 +83,10 @@ export const classifyInterlinearBibleSidecarSnapshot = (
   for (const [tableName, requiredColumns] of Object.entries(
     INTERLINEAR_BIBLE_REQUIRED_QUERY_INDEXES
   )) {
-    const hasPrefix = (snapshot.indexes[tableName] ?? []).some(columns =>
-      requiredColumns.every((columnName, index) => columns[index] === columnName)
+    const hasPrefix = (snapshot.indexes[tableName] ?? []).some(
+      columns =>
+        columns.length >= requiredColumns.length &&
+        requiredColumns.every((columnName, index) => columns[index] === columnName)
     )
     if (!hasPrefix) return 'incompatible'
   }

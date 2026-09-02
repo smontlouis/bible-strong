@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/react-native'
 import { useAtomValue } from 'jotai/react'
 import { atom } from 'jotai'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { View, StyleSheet } from 'react-native'
 import { Portal, PortalHost } from 'react-native-teleport'
 import { useSelector } from 'react-redux'
@@ -54,15 +54,17 @@ const SharedBibleDOM = () => {
     : '0x0'
 
   const prevDestination = useRef<string | undefined>(undefined)
-  if (prevDestination.current !== destination) {
-    Sentry.addBreadcrumb({
-      category: 'bible-dom',
-      message: 'Portal retarget',
-      data: { from: prevDestination.current ?? null, to: destination },
-      level: 'info',
-    })
-    prevDestination.current = destination
-  }
+  useEffect(() => {
+    if (prevDestination.current !== destination) {
+      Sentry.addBreadcrumb({
+        category: 'bible-dom',
+        message: 'Portal retarget',
+        data: { from: prevDestination.current ?? null, to: destination },
+        level: 'info',
+      })
+      prevDestination.current = destination
+    }
+  }, [destination])
 
   // Default props to pre-warm the WebView (empty verses, no-op callbacks)
   const defaultProps: WebViewProps = {

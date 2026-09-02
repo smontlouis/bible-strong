@@ -85,7 +85,7 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
   const hasBackButton = isFormSheet ? canGoBackInStack : true
 
   const initialBookNumber = params.book ? Number(params.book) : 1
-  const [book, setBook] = useState<Book>(getBook(initialBookNumber) || getBook(1)!)
+  const [book, setBook] = useState<Book>(() => getBook(initialBookNumber) || getBook(1)!)
 
   const availabilityQuery = useQuery({
     queryKey: [

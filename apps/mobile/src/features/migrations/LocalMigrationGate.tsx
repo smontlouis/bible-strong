@@ -428,7 +428,7 @@ const LocalMigrationGate = ({
               >
                 <ProgressBar progress={progress} />
               </View>
-              {currentStep && (
+              {currentStep !== undefined && (
                 <Text color="darkGrey" fontSize={12}>
                   {t(currentStep)}
                   {snapshot.message ? ` · ${t(snapshot.message)}` : ''}

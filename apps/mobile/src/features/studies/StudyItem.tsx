@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import { Study } from '~redux/modules/user'
+import { useMountTime } from '~helpers/useMountTime'
 
 export const LinkBox = Box.withComponent(Link)
 
@@ -45,8 +46,9 @@ const StudyItem = ({
 }: StudyItemProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
+  const mountTime = useMountTime()
 
-  const formattedDate = distanceInWords(Number(study.modified_at), Date.now(), {
+  const formattedDate = distanceInWords(Number(study.modified_at), mountTime, {
     locale: getDateLocale(lang),
   })
   const r = useMediaQueriesArray()

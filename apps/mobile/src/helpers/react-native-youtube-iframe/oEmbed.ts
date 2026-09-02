@@ -25,5 +25,8 @@ export const getYoutubeMeta = async (videoId: string): Promise<YoutubeMeta> => {
   const response = await fetch(
     `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
   )
+  if (!response.ok) {
+    throw new Error(`Failed to load YouTube metadata: HTTP ${response.status}`)
+  }
   return await response.json()
 }

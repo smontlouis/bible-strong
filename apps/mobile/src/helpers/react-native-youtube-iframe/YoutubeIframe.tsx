@@ -82,7 +82,7 @@ const YoutubeIframe = (
   ref: React.Ref<YoutubeIframeRef>
 ) => {
   const webViewRef = useRef<WebView>(null)
-  const eventEmitter = useRef(new EventEmitter())
+  const [eventEmitter] = useState(() => new EventEmitter())
   const [playerReady, setPlayerReady] = useState(false)
 
   useImperativeHandle(
@@ -91,44 +91,44 @@ const YoutubeIframe = (
       getDuration: () => {
         webViewRef.current?.injectJavaScript(PLAYER_FUNCTIONS.durationScript)
         return new Promise(resolve => {
-          eventEmitter.current.once('getDuration', resolve)
+          eventEmitter.once('getDuration', resolve)
         })
       },
       getCurrentTime: () => {
         webViewRef.current?.injectJavaScript(PLAYER_FUNCTIONS.currentTimeScript)
         return new Promise(resolve => {
-          eventEmitter.current.once('getCurrentTime', resolve)
+          eventEmitter.once('getCurrentTime', resolve)
         })
       },
       isMuted: () => {
         webViewRef.current?.injectJavaScript(PLAYER_FUNCTIONS.isMutedScript)
         return new Promise(resolve => {
-          eventEmitter.current.once('isMuted', resolve)
+          eventEmitter.once('isMuted', resolve)
         })
       },
       getVolume: () => {
         webViewRef.current?.injectJavaScript(PLAYER_FUNCTIONS.getVolumeScript)
         return new Promise(resolve => {
-          eventEmitter.current.once('getVolume', resolve)
+          eventEmitter.once('getVolume', resolve)
         })
       },
       getPlaybackRate: () => {
         webViewRef.current?.injectJavaScript(PLAYER_FUNCTIONS.getPlaybackRateScript)
         return new Promise(resolve => {
-          eventEmitter.current.once('getPlaybackRate', resolve)
+          eventEmitter.once('getPlaybackRate', resolve)
         })
       },
       getAvailablePlaybackRates: () => {
         webViewRef.current?.injectJavaScript(PLAYER_FUNCTIONS.getAvailablePlaybackRatesScript)
         return new Promise(resolve => {
-          eventEmitter.current.once('getAvailablePlaybackRates', resolve)
+          eventEmitter.once('getAvailablePlaybackRates', resolve)
         })
       },
       seekTo: (seconds: number, allowSeekAhead: boolean) => {
         webViewRef.current?.injectJavaScript(PLAYER_FUNCTIONS.seekToScript(seconds, allowSeekAhead))
       },
     }),
-    []
+    [eventEmitter]
   )
 
   useEffect(() => {
@@ -176,7 +176,7 @@ const YoutubeIframe = (
             onPlaybackRateChange(Number(message.data))
             break
           default:
-            eventEmitter.current.emit(message.eventType, message.data)
+            eventEmitter.emit(message.eventType, message.data)
             break
         }
       } catch (error) {
@@ -189,6 +189,7 @@ const YoutubeIframe = (
       onPlaybackQualityChange,
       onError,
       onPlaybackRateChange,
+      eventEmitter,
       playListStartIndex,
       playList,
       play,

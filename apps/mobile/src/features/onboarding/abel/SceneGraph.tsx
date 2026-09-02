@@ -183,7 +183,7 @@ type NodeRendererProps = {
   orbitProgress: SharedValue<number>
   metrics: OnboardingStageMetrics
   reduceMotion: boolean
-  geometries: React.MutableRefObject<Map<string, NodeGeometry>>
+  geometries: Map<string, NodeGeometry>
   notifyGeometryChange: React.Dispatch<React.SetStateAction<number>>
 }
 
@@ -408,7 +408,7 @@ const NodeRenderer = ({
   geometries,
   notifyGeometryChange,
 }: NodeRendererProps) => {
-  const initialFrame = useRef(descriptor.frame).current
+  const [initialFrame] = useState(() => descriptor.frame)
   const x = useSharedValue(initialFrame.x)
   const y = useSharedValue(initialFrame.y)
   const dragX = useSharedValue(0)
@@ -424,7 +424,7 @@ const NodeRenderer = ({
   const opacity = useSharedValue(initialFrame.opacity ?? 1)
 
   useLayoutEffect(() => {
-    const geometryRegistry = geometries.current
+    const geometryRegistry = geometries
     const geometry = { x, y, dragX, dragY, width, height, scale, rotation }
     geometryRegistry.set(descriptor.id, geometry)
     notifyGeometryChange(version => version + 1)
@@ -589,9 +589,7 @@ const NodeRenderer = ({
       zIndex: Math.round(backZIndex + depth * (frontZIndex - backZIndex)),
     }
   })
-  const boundsGeometry = descriptor.dragBounds
-    ? geometries.current.get(descriptor.dragBounds)
-    : undefined
+  const boundsGeometry = descriptor.dragBounds ? geometries.get(descriptor.dragBounds) : undefined
   const dragFriction = Math.max(0.05, Math.min(1, descriptor.dragFriction ?? 0.45))
   const dragReturnToOrigin = descriptor.dragReturnToOrigin !== false
   const pressedScale = descriptor.pressScale ?? 0.96
@@ -966,7 +964,7 @@ export const SceneGraph = ({
 }: SceneGraphProps) => {
   const scenes = compileScenes(children)
   const activeScene = scenes.find(scene => scene.id === activeSceneId)
-  const geometries = useRef(new Map<string, NodeGeometry>())
+  const [geometries] = useState(() => new Map<string, NodeGeometry>())
   const [, notifyGeometryChange] = useState(0)
   const orbitProgress = useSharedValue(0)
 
@@ -1036,7 +1034,7 @@ export const SceneGraph = ({
             connection={connection}
             defaultColor={connectionColor}
             nodes={nodesById}
-            geometries={geometries.current}
+            geometries={geometries}
             metrics={metrics}
             reduceMotion={reduceMotion}
           />

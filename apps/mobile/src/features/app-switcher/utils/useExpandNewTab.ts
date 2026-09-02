@@ -17,6 +17,7 @@ export const useExpandNewTab = () => {
   const [tabId, setTabId] = useState<string | null>(null)
 
   useEffect(() => {
+    let cancelled = false
     const isNewTab = tabsCount > prevTabsCount && typeof prevTabsCount !== 'undefined'
     ;(async () => {
       if (isNewTab && tabId) {
@@ -28,8 +29,10 @@ export const useExpandNewTab = () => {
 
         // Wait for scroll + render
         await wait(300)
+        if (cancelled) return
 
         const { pageX, pageY } = await measureTabPreview(index)
+        if (cancelled) return
         expandTab({
           index,
           left: pageX,
@@ -38,6 +41,10 @@ export const useExpandNewTab = () => {
         setTabId(null)
       }
     })()
+
+    return () => {
+      cancelled = true
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabId, tabsCount, prevTabsCount])
 

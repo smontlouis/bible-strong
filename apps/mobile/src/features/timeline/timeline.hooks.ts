@@ -1,4 +1,3 @@
-import React, { MutableRefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { viewportWidth, wp, wpUI } from '~helpers/utils'
 import { mapRange, offset, scrollViewHeight } from './constants'
@@ -21,8 +20,8 @@ export const useTimeline = ({
   const { t } = useTranslation()
   const x = useSharedValue(viewportWidth)
   const y = useSharedValue(0)
-  const { current: ratio } = React.useRef(100 / interval) // 1 year = 1px with ratio = 1
-  const { current: scrollViewWidth } = React.useRef(Math.abs(startYear - endYear) * ratio)
+  const ratio = 100 / interval // 1 year = 1px with ratio = 1
+  const scrollViewWidth = Math.abs(startYear - endYear) * ratio
 
   const width = scrollViewWidth + wp(100)
   const height = scrollViewHeight + 200
@@ -53,33 +52,17 @@ export const useTimeline = ({
     }
   })
 
-  const { current: yearRange }: MutableRefObject<[number, number]> = React.useRef([
-    startYear,
-    endYear,
-  ])
+  const yearRange: [number, number] = [startYear, endYear]
+  const timelineWidth: [number, number] = [0, scrollViewWidth]
 
-  const { current: timelineWidth }: MutableRefObject<[number, number]> = React.useRef([
-    0,
-    scrollViewWidth,
-  ])
+  const yearsToPx = (years: number) => Math.round(mapRange(years, yearRange, timelineWidth))
 
-  const yearsToPx = React.useCallback(
-    (years: number) => Math.round(mapRange(years, yearRange, timelineWidth)),
-    [yearRange, timelineWidth]
-  )
+  const pxToYears = (pixels: number) => Math.round(mapRange(pixels, timelineWidth, yearRange))
 
-  const pxToYears = React.useCallback(
-    (pixels: number) => Math.round(mapRange(pixels, timelineWidth, yearRange)),
-    [yearRange, timelineWidth]
-  )
-
-  const calculateEventWidth = React.useCallback(
-    (yearStart: number, yearEnd: number, isFixed?: boolean) => {
-      const year = Math.abs(yearStart - yearEnd)
-      return isFixed || yearsToPx(yearRange[0] + year) < 200 ? 200 : yearsToPx(yearRange[0] + year)
-    },
-    [yearRange, yearsToPx]
-  )
+  const calculateEventWidth = (yearStart: number, yearEnd: number, isFixed?: boolean) => {
+    const year = Math.abs(yearStart - yearEnd)
+    return isFixed || yearsToPx(yearRange[0] + year) < 200 ? 200 : yearsToPx(yearRange[0] + year)
+  }
 
   return {
     x,

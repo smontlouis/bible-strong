@@ -20,6 +20,7 @@ import type { TagsObj } from '~common/types'
 import { LinkType, Link as LinkModel, Note, Study } from '~redux/modules/user'
 import { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagStrongItemData } from './TagStrongItem'
+import { useMountTime } from '~helpers/useMountTime'
 import type { TagNaveItemData } from './TagNaveItem'
 import type { TagDictionaryItemData } from './TagDictionaryItem'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
@@ -100,11 +101,12 @@ export const NoteItem = ({
   lang: ActiveLanguage
 }) => {
   const pushRouteOnce = usePushRouteOnce()
+  const mountTime = useMountTime()
   const location = getFirstVerseLocation(item.verseKeys)
   const { title } = location
     ? formatVerseContent([location])
     : { title: item.reference || t('Note') }
-  const formattedDate = distanceInWords(Number(item.date), Date.now(), {
+  const formattedDate = distanceInWords(Number(item.date), mountTime, {
     locale: getDateLocale(lang),
   })
   const relativeDate = t('Il y a {{formattedDate}}', { formattedDate })
@@ -160,11 +162,12 @@ export const LinkItem = ({
   lang: ActiveLanguage
 }) => {
   const pushRouteOnce = usePushRouteOnce()
+  const mountTime = useMountTime()
   const location = getFirstVerseLocation(item.verseKeys)
   const { title } = location
     ? formatVerseContent([location])
     : { title: item.reference || t('Lien') }
-  const formattedDate = distanceInWords(Number(item.date), Date.now(), {
+  const formattedDate = distanceInWords(Number(item.date), mountTime, {
     locale: getDateLocale(lang),
   })
   const config = linkTypeConfig[item.linkType as LinkType] || linkTypeConfig.website

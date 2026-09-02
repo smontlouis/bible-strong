@@ -1,6 +1,7 @@
 import { useWindowDimensions } from 'react-native'
 import { Gesture } from 'react-native-gesture-handler'
-import { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { TABS, TAB_CONTAINER_MARGIN, TAB_CONTAINER_PADDING } from '../constants'
 
 interface UseTabSwipeGestureParams {
@@ -71,7 +72,7 @@ const useTabSwipeGesture = ({ activeTabIndex, setActiveTabIndex }: UseTabSwipeGe
       targetIndex = Math.max(0, Math.min(TABS.length - 1, targetIndex))
 
       translateX.set(withSpring(-targetIndex * screenWidth))
-      runOnJS(updateActiveTab)(targetIndex)
+      scheduleOnRN(updateActiveTab, targetIndex)
     })
 
   const animatedStyle = useAnimatedStyle(() => ({

@@ -7,17 +7,13 @@ export const selectRetainedCommentaryContent = <T>(
 ) => (requestedContentReady || lastReadyContent === undefined ? requestedContent : lastReadyContent)
 
 const useRetainedCommentaryContent = <T>(requestedContent: T, requestedContentReady: boolean) => {
-  const lastReadyContentRef = React.useRef<T | undefined>(undefined)
+  const [lastReadyContent, setLastReadyContent] = React.useState<T | undefined>(undefined)
 
   React.useEffect(() => {
-    if (requestedContentReady) lastReadyContentRef.current = requestedContent
+    if (requestedContentReady) setLastReadyContent(requestedContent)
   }, [requestedContent, requestedContentReady])
 
-  return selectRetainedCommentaryContent(
-    lastReadyContentRef.current,
-    requestedContent,
-    requestedContentReady
-  )
+  return selectRetainedCommentaryContent(lastReadyContent, requestedContent, requestedContentReady)
 }
 
 export default useRetainedCommentaryContent

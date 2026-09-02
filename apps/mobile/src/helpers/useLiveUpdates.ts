@@ -91,7 +91,10 @@ const useLiveUpdates = ({ enabled, runBeforeSync, resumeToken }: AccountMigratio
   const migrationRunRef = useRef<Promise<boolean> | undefined>(undefined)
   const migrationRunnerRef = useRef(runBeforeSync)
   const connectionStatus = useConnectionStatus()
-  migrationRunnerRef.current = runBeforeSync
+
+  useEffect(() => {
+    migrationRunnerRef.current = runBeforeSync
+  }, [runBeforeSync])
 
   const isNewlyLogged = isLogged && isLoggedPrev !== isLogged && typeof isLoggedPrev !== 'undefined'
 

@@ -28,8 +28,7 @@ const ForgotPasswordScreen = ({ theme }: { theme: Theme }) => {
       return
     }
     setLoading(true)
-    await FireAuth.resetPassword(email)
-    setLoading(false)
+    await FireAuth.resetPassword(email).finally(() => setLoading(false))
     router.back()
   }
 

@@ -216,6 +216,7 @@ export function useAnnotationHighlights({
   selectionHandlePositions: HandlePositions
 } {
   const [highlightRects, setHighlightRects] = useState<HighlightRect[]>([])
+  const [isRTL, setIsRTL] = useState(false)
   // Track if we're waiting for new rects to be calculated after a chapter change
   const [isPending, setIsPending] = useState(true)
 
@@ -334,9 +335,15 @@ export function useAnnotationHighlights({
       return annotationRects
     }
 
-    requestAnimationFrame(() => {
+    const updateLayoutState = () => {
       const rects = calculateAllRects()
+      const container = containerRef.current
+      setIsRTL(container ? getComputedStyle(container).direction === 'rtl' : false)
       setHighlightRects(rects)
+    }
+
+    requestAnimationFrame(() => {
+      updateLayoutState()
       if (isChapterChange) {
         setIsPending(false)
       }
@@ -344,16 +351,14 @@ export function useAnnotationHighlights({
 
     const handleResize = () => {
       requestAnimationFrame(() => {
-        const rects = calculateAllRects()
-        setHighlightRects(rects)
+        updateLayoutState()
       })
     }
 
     // Listen for layout changes (e.g., VerseTags expand/collapse)
     const handleLayoutChanged = () => {
       requestAnimationFrame(() => {
-        const rects = calculateAllRects()
-        setHighlightRects(rects)
+        updateLayoutState()
       })
     }
 
@@ -381,11 +386,6 @@ export function useAnnotationHighlights({
     if (selectionRects.length === 0) {
       return EMPTY_HANDLE_POSITIONS
     }
-
-    // Read direction from DOM
-    const isRTL = containerRef.current
-      ? getComputedStyle(containerRef.current).direction === 'rtl'
-      : false
 
     // Sort rects by position (top to bottom, then left to right for LTR, right to left for RTL)
     const sortedRects = [...selectionRects].sort((a, b) => {

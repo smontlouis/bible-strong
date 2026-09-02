@@ -10,7 +10,7 @@ type SceneActionButtonProps = {
 }
 
 const SceneActionButton = ({ icon, metrics }: SceneActionButtonProps) => {
-  const [iconSize, setIconSize] = useState(metrics.s(18))
+  const [iconSize, setIconSize] = useState(() => metrics.s(18))
 
   return (
     <Box

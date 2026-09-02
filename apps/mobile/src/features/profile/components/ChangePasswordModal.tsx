@@ -61,8 +61,9 @@ const ChangePasswordModal = ({ modalRef }: ChangePasswordModalProps) => {
     }
 
     setIsLoading(true)
-    const success = await FireAuth.changePassword(currentPassword, newPassword)
-    setIsLoading(false)
+    const success = await FireAuth.changePassword(currentPassword, newPassword).finally(() =>
+      setIsLoading(false)
+    )
 
     if (success) {
       handleClose()

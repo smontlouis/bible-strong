@@ -35,22 +35,18 @@ const Timeline = ({
   const [entrance, setEntrance] = React.useState<0 | 1>(1)
 
   const onPrev = useCallback(() => {
+    const next = current - 1
     setEntrance(0)
-    setCurrent(s => {
-      const next = s - 1
-      onSectionChange?.(next)
-      return next
-    })
-  }, [onSectionChange])
+    setCurrent(next)
+    onSectionChange?.(next)
+  }, [current, onSectionChange])
 
   const onNext = useCallback(() => {
+    const next = current + 1
     setEntrance(1)
-    setCurrent(s => {
-      const next = s + 1
-      onSectionChange?.(next)
-      return next
-    })
-  }, [onSectionChange])
+    setCurrent(next)
+    onSectionChange?.(next)
+  }, [current, onSectionChange])
 
   const { data: events } = useQuery({
     queryKey: ['timeline'],
@@ -73,7 +69,7 @@ const Timeline = ({
             return (
               <TimelineSection
                 {...ev}
-                key={`${i}-${current === i}`}
+                key={`${ev.id}-${current === i}`}
                 entrance={entrance}
                 isCurrent={current === i}
                 isFirst={i === 0}

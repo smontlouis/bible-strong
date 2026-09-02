@@ -284,15 +284,15 @@ const isPersistedExecution = (value: unknown): value is PersistedMigrationExecut
   const cleanupStepIds = value.plan.cleanupSteps?.map(step => step.id) ?? []
   const completedStepIds = value.completedStepIds as string[]
   const completedCleanupStepIds = value.completedCleanupStepIds as string[]
-  const completedStepsArePrefix = completedStepIds.every(
-    (stepId, index) => planStepIds[index] === stepId
-  )
+  const completedStepsArePrefix =
+    completedStepIds.length <= planStepIds.length &&
+    completedStepIds.every((stepId, index) => planStepIds[index] === stepId)
   if (!completedStepsArePrefix || new Set(completedStepIds).size !== completedStepIds.length) {
     return false
   }
-  const completedCleanupStepsArePrefix = completedCleanupStepIds.every(
-    (stepId, index) => cleanupStepIds[index] === stepId
-  )
+  const completedCleanupStepsArePrefix =
+    completedCleanupStepIds.length <= cleanupStepIds.length &&
+    completedCleanupStepIds.every((stepId, index) => cleanupStepIds[index] === stepId)
   if (
     !completedCleanupStepsArePrefix ||
     new Set(completedCleanupStepIds).size !== completedCleanupStepIds.length

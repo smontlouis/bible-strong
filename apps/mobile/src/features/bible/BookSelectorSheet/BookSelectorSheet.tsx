@@ -77,6 +77,8 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
 
   // On écoute les événements de sélection
   useEffect(() => {
+    let openInNewTabTimer: ReturnType<typeof setTimeout> | undefined
+
     const handleSelection = (event: SelectionEvent) => {
       const { type, book, chapter } = event
       if (!bookSelectorActions || !bookSelectorData) {
@@ -100,7 +102,8 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
           return
         }
         sheetRef.current?.dismiss()
-        setTimeout(() => {
+        if (openInNewTabTimer) clearTimeout(openInNewTabTimer)
+        openInNewTabTimer = setTimeout(() => {
           openInNewTab(
             {
               id: `bible-${generateUUID()}`,
@@ -125,6 +128,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     //
     return () => {
       subscription.remove()
+      if (openInNewTabTimer) clearTimeout(openInNewTabTimer)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bookSelectorActions, openInNewTab, t, bookSelectorData, bookSelectorHasVerses])

@@ -204,7 +204,7 @@ const PassageMediaThumbnails = ({
               item={item}
               layoutId={placement === 'introduction' ? `introduction:${index}` : item.editionId}
               layoutDependency={layoutDependency}
-              key={placement === 'introduction' ? `introduction:${index}` : item.editionId}
+              key={placement === 'introduction' ? `introduction:${item.editionId}` : item.editionId}
               loading="lazy"
               transition={{ layout: layoutTransition }}
               style={{

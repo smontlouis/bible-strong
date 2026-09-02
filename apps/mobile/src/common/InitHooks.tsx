@@ -69,6 +69,9 @@ const InitHooks = (_props: InitHooksProps) => {
   })
 
   useEffect(() => {
+    let disposed = false
+    let migrationResetTimer: ReturnType<typeof setTimeout> | undefined
+
     // Initialize bibles.sqlite and run blocking migration if needed
     ensureBiblesDbOpen()
       .then(async () => {
@@ -128,7 +131,8 @@ const InitHooks = (_props: InitHooksProps) => {
           const store = getDefaultStore()
           store.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
 
-          setTimeout(() => {
+          if (disposed) return
+          migrationResetTimer = setTimeout(() => {
             resetMigrationProgressFromOutsideReact()
             console.warn('[InitHooks] Bible migration completed with failures:', failedVersions)
           }, 3000)
@@ -143,7 +147,8 @@ const InitHooks = (_props: InitHooksProps) => {
           store.set(bibleDataRefreshSignalAtom, (c: number) => c + 1)
 
           // Hide modal after showing success message
-          setTimeout(() => {
+          if (disposed) return
+          migrationResetTimer = setTimeout(() => {
             resetMigrationProgressFromOutsideReact()
             console.log('[InitHooks] Bible migration complete, Bible tabs reloaded')
           }, 2000)
@@ -190,6 +195,8 @@ const InitHooks = (_props: InitHooksProps) => {
     })
 
     return () => {
+      disposed = true
+      if (migrationResetTimer) clearTimeout(migrationResetTimer)
       event.remove()
       deferred.cancel()
     }

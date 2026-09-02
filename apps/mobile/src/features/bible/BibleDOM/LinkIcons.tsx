@@ -3,7 +3,6 @@ import React from 'react'
 interface IconProps {
   size?: number
   color?: string
-  onClick?: () => void
 }
 
 // Brand colors from linkTypeConfig
@@ -21,21 +20,21 @@ const COLORS = {
 }
 
 // YouTube icon (brand - filled play button shape)
-export const YouTubeIcon = ({ size = 24, color = COLORS.youtube, onClick }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} onClick={onClick}>
+export const YouTubeIcon = ({ size = 24, color = COLORS.youtube }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
   </svg>
 )
 
 // Twitter/X icon (brand - X shape)
-export const TwitterIcon = ({ size = 24, color = COLORS.twitter, onClick }: IconProps) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color} onClick={onClick}>
+export const TwitterIcon = ({ size = 24, color = COLORS.twitter }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
   </svg>
 )
 
 // Instagram icon (brand - camera outline)
-export const InstagramIcon = ({ size = 24, color = COLORS.instagram, onClick }: IconProps) => (
+export const InstagramIcon = ({ size = 24, color = COLORS.instagram }: IconProps) => (
   <svg
     width={size}
     height={size}
@@ -45,7 +44,6 @@ export const InstagramIcon = ({ size = 24, color = COLORS.instagram, onClick }: 
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    onClick={onClick}
   >
     <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
     <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
@@ -54,7 +52,7 @@ export const InstagramIcon = ({ size = 24, color = COLORS.instagram, onClick }: 
 )
 
 // TikTok icon (Feather music style)
-export const TikTokIcon = ({ size = 24, color = COLORS.tiktok, onClick }: IconProps) => (
+export const TikTokIcon = ({ size = 24, color = COLORS.tiktok }: IconProps) => (
   <svg
     width={size}
     height={size}
@@ -64,7 +62,6 @@ export const TikTokIcon = ({ size = 24, color = COLORS.tiktok, onClick }: IconPr
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    onClick={onClick}
   >
     <path d="M9 18V5l12-2v13" />
     <circle cx="6" cy="18" r="3" />
@@ -73,7 +70,7 @@ export const TikTokIcon = ({ size = 24, color = COLORS.tiktok, onClick }: IconPr
 )
 
 // Vimeo icon (Feather video style)
-export const VimeoIcon = ({ size = 24, color = COLORS.vimeo, onClick }: IconProps) => (
+export const VimeoIcon = ({ size = 24, color = COLORS.vimeo }: IconProps) => (
   <svg
     width={size}
     height={size}
@@ -83,7 +80,6 @@ export const VimeoIcon = ({ size = 24, color = COLORS.vimeo, onClick }: IconProp
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    onClick={onClick}
   >
     <polygon points="23 7 16 12 23 17 23 7" />
     <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
@@ -91,7 +87,7 @@ export const VimeoIcon = ({ size = 24, color = COLORS.vimeo, onClick }: IconProp
 )
 
 // Spotify icon (Feather music style - different from TikTok)
-export const SpotifyIcon = ({ size = 24, color = COLORS.spotify, onClick }: IconProps) => (
+export const SpotifyIcon = ({ size = 24, color = COLORS.spotify }: IconProps) => (
   <svg
     width={size}
     height={size}
@@ -101,7 +97,6 @@ export const SpotifyIcon = ({ size = 24, color = COLORS.spotify, onClick }: Icon
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    onClick={onClick}
   >
     <circle cx="12" cy="12" r="10" />
     <path d="M8 15c4-1.5 8 0 8 0" />
@@ -111,7 +106,7 @@ export const SpotifyIcon = ({ size = 24, color = COLORS.spotify, onClick }: Icon
 )
 
 // Facebook icon (Feather style)
-export const FacebookIcon = ({ size = 24, color = COLORS.facebook, onClick }: IconProps) => (
+export const FacebookIcon = ({ size = 24, color = COLORS.facebook }: IconProps) => (
   <svg
     width={size}
     height={size}
@@ -121,14 +116,13 @@ export const FacebookIcon = ({ size = 24, color = COLORS.facebook, onClick }: Ic
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    onClick={onClick}
   >
     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
   </svg>
 )
 
 // LinkedIn icon (Feather style)
-export const LinkedInIcon = ({ size = 24, color = COLORS.linkedin, onClick }: IconProps) => (
+export const LinkedInIcon = ({ size = 24, color = COLORS.linkedin }: IconProps) => (
   <svg
     width={size}
     height={size}
@@ -138,7 +132,6 @@ export const LinkedInIcon = ({ size = 24, color = COLORS.linkedin, onClick }: Ic
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    onClick={onClick}
   >
     <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
     <rect x="2" y="9" width="4" height="12" />
@@ -147,7 +140,7 @@ export const LinkedInIcon = ({ size = 24, color = COLORS.linkedin, onClick }: Ic
 )
 
 // GitHub icon (Feather style)
-export const GitHubIcon = ({ size = 24, color = COLORS.github, onClick }: IconProps) => (
+export const GitHubIcon = ({ size = 24, color = COLORS.github }: IconProps) => (
   <svg
     width={size}
     height={size}
@@ -157,14 +150,13 @@ export const GitHubIcon = ({ size = 24, color = COLORS.github, onClick }: IconPr
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    onClick={onClick}
   >
     <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
   </svg>
 )
 
 // Link icon (Feather style - generic website)
-export const LinkIcon = ({ size = 24, color = COLORS.website, onClick }: IconProps) => (
+export const LinkIcon = ({ size = 24, color = COLORS.website }: IconProps) => (
   <svg
     width={size}
     height={size}
@@ -174,7 +166,6 @@ export const LinkIcon = ({ size = 24, color = COLORS.website, onClick }: IconPro
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    onClick={onClick}
   >
     <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
     <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />

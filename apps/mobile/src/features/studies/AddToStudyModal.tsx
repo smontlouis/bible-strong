@@ -15,6 +15,7 @@ import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import type { RootState } from '~redux/modules/reducer'
 import type { Study } from '~redux/modules/user'
+import { useMountTime } from '~helpers/useMountTime'
 
 interface AddToStudyModalProps {
   sheetRef: React.RefObject<SheetRef | null>
@@ -26,6 +27,7 @@ interface AddToStudyModalProps {
 const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToStudyModalProps) => {
   const { t } = useTranslation()
   const lang = useLanguage()
+  const mountTime = useMountTime()
 
   const studies = useSelector((state: RootState) => state.user.bible.studies, shallowEqual)
 
@@ -69,7 +71,7 @@ const AddToStudyModal = ({ sheetRef, onSelectStudy, reference, onClose }: AddToS
   )
 
   const renderStudyItem = ({ item }: { item: Study }) => {
-    const formattedDate = distanceInWords(Number(item.modified_at), Date.now(), {
+    const formattedDate = distanceInWords(Number(item.modified_at), mountTime, {
       locale: getDateLocale(lang),
     })
 

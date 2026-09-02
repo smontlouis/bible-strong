@@ -20,6 +20,7 @@ import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
 import { useHighlightColors, useResolvedColor } from '~helpers/useHighlightColors'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
+import { useMountTime } from '~helpers/useMountTime'
 import type { CustomColor, HighlightType } from '~redux/modules/user'
 import type { TagsObj, Verse, VerseIds } from '~common/types'
 
@@ -62,6 +63,7 @@ const VerseComponent = ({
   const { verses, version } = useResolvedBibleVerses(verseIds, sourceVersion)
   const { t } = useTranslation()
   const lang = useLanguage()
+  const mountTime = useMountTime()
 
   const { customHighlightColors, defaultColorTypes } = useHighlightColors()
   const resolvedColor = useResolvedColor(color)
@@ -81,7 +83,7 @@ const VerseComponent = ({
 
   const { title } = formatVerseContent(verseIds)
   const { content } = formatVerseContent(verses)
-  const formattedDate = distanceInWords(Number(date), Date.now(), {
+  const formattedDate = distanceInWords(Number(date), mountTime, {
     locale: getDateLocale(lang),
   })
   const { Livre, Chapitre, Verset } = verseIds[0]

@@ -18,6 +18,7 @@ import { getBook } from '~helpers/bibleBookCatalog'
 import type { GroupedWordAnnotation } from '~redux/selectors/bible'
 import type { TagsObj } from '~common/types'
 import { Chip } from '~common/ui/NewChip'
+import { useMountTime } from '~helpers/useMountTime'
 
 const DateText = styled.Text(({ theme }) => ({
   color: theme.colors.tertiary,
@@ -40,12 +41,13 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
   const pushRouteOnce = usePushRouteOnce()
   const { t } = useTranslation()
   const lang = useLanguage()
+  const mountTime = useMountTime()
 
   const resolvedColor = useResolvedColor(item.color)
 
   const [Livre, Chapitre, Verset] = item.verseKey.split('-').map(Number)
   const { title } = formatVerseContent([{ Livre, Chapitre, Verset }])
-  const formattedDate = distanceInWords(Number(item.date), Date.now(), {
+  const formattedDate = distanceInWords(Number(item.date), mountTime, {
     locale: getDateLocale(lang),
   })
   const bibleViewParams = {

@@ -129,8 +129,8 @@ const CrossVersionAnnotationsModal = ({
         <SheetHeader title={t('bible.crossVersionAnnotations.subtitle')} subTitle={reference} />
       }
     >
-      {versions.map((versionData, index) => (
-        <ItemRow key={index}>
+      {versions.map(versionData => (
+        <ItemRow key={versionData.version}>
           <ItemButton activeOpacity={0.7} onPress={() => handleOpenBibleView(versionData.version)}>
             <IconContainer>
               <FeatherIcon name="edit-3" size={18} color="secondary" />

@@ -35,12 +35,10 @@ const PlanScreen = ({
   const modalRefDetails = React.useRef<SheetRef | null>(null)
 
   const plan = useComputedPlan(id)
-  const {
-    title = planParams?.title,
-    image = planParams?.image,
-    description = planParams?.description,
-    author = planParams?.author,
-  } = plan || {}
+  const title = plan?.title ?? planParams?.title
+  const image = plan?.image ?? planParams?.image
+  const description = plan?.description ?? planParams?.description
+  const author = plan?.author ?? planParams?.author
   const cacheImage = useFireStorage(image)
   const progress = plan?.progress
   const prevProgress: number | undefined = usePrevious<number | undefined>(progress)

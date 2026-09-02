@@ -11,6 +11,7 @@ import useLanguage from '~helpers/useLanguage'
 import { activeGroupIdAtom, TabGroup, tabGroupsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 import TabIcon from '../utils/getIconByTabType'
+import { useMountTime } from '~helpers/useMountTime'
 
 interface TabPreviewGridProps {
   group: TabGroup
@@ -102,6 +103,7 @@ interface GroupCardProps {
 }
 
 const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
+  const mountTime = useMountTime()
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
@@ -110,7 +112,7 @@ const GroupCard = ({ group, isActive, onPress }: GroupCardProps) => {
     if (group.isDefault || group.createdAt === 0) {
       return t('tabs.defaultGroup')
     }
-    const relativeDate = distanceInWords(group.createdAt, Date.now(), {
+    const relativeDate = distanceInWords(group.createdAt, mountTime, {
       locale: getDateLocale(lang),
       addSuffix: true,
     })

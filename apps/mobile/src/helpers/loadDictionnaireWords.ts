@@ -20,7 +20,12 @@ const loadDictionnaireWords = async (v: string): Promise<string[]> =>
       return []
     }
 
-    return (JSON.parse(result[0].ref) as string[]).map(word => word.toLowerCase())
+    const parsed: unknown = JSON.parse(result[0].ref)
+    if (!Array.isArray(parsed)) return []
+
+    return parsed
+      .filter((word): word is string => typeof word === 'string')
+      .map(word => word.toLowerCase())
   })
 
 export default loadDictionnaireWords

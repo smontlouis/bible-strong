@@ -18,6 +18,7 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import { getHistoryStrongReference } from '~helpers/historyStrongReference'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
+import { useMountTime } from '~helpers/useMountTime'
 import {
   deleteHistoryAtom,
   historyAtom,
@@ -37,13 +38,14 @@ const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
 }))
 
 const HistoryItem = ({ item }: { item: HistoryItemType }) => {
+  const mountTime = useMountTime()
   const { t } = useTranslation()
   const lang = useLanguage()
 
   if (item.type === 'strong') {
     const { Hebreu, Grec, Mot, date, book } = item
     const persistedReference = getHistoryStrongReference(item)
-    const ago = distanceInWords(Number(date), Date.now(), {
+    const ago = distanceInWords(Number(date), mountTime, {
       locale: getDateLocale(lang),
     })
     return (
@@ -72,7 +74,7 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
   }
   if (item.type === 'verse') {
     const { book, chapter, verse, version, date } = item
-    const ago = distanceInWords(Number(date), Date.now(), {
+    const ago = distanceInWords(Number(date), mountTime, {
       locale: getDateLocale(lang),
     })
     const bookNumber = Number(book)
@@ -116,7 +118,7 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
   }
   if (item.type === 'word') {
     const { word, date } = item
-    const ago = distanceInWords(Number(date), Date.now(), {
+    const ago = distanceInWords(Number(date), mountTime, {
       locale: getDateLocale(lang),
     })
     return (
@@ -141,7 +143,7 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
 
   if (item.type === 'nave') {
     const { name, name_lower, date } = item
-    const ago = distanceInWords(Number(date), Date.now(), {
+    const ago = distanceInWords(Number(date), mountTime, {
       locale: getDateLocale(lang),
     })
     return (

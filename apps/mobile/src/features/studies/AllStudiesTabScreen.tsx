@@ -67,7 +67,7 @@ const StudiesScreen = ({
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)
   const [studySettingsId, setStudySettingsId] = useState<string | false>(false)
-  const studySettingsModal = useSheet()
+  const { ref: studySettingsModalRef, open: openStudySettingsModal } = useSheet()
   const openEntityRelations = useOpenEntityRelations()
   const renameModalRef = useRef<SheetRef>(null)
   const publicationModalRef = useRef<SheetRef>(null)
@@ -76,7 +76,7 @@ const StudiesScreen = ({
 
   const openStudySettings = (studyId: string) => {
     setStudySettingsId(studyId)
-    studySettingsModal.open()
+    openStudySettingsModal()
   }
 
   const openRenameModal = (data: { id: string; title: string }) => {
@@ -232,7 +232,6 @@ const StudiesScreen = ({
               const endpoint = createStudyEndpoint(item.id, item.title)
               return (
                 <StudyItem
-                  key={item.id}
                   study={item}
                   setStudySettings={openStudySettings}
                   onPress={onStudyPress}
@@ -276,7 +275,7 @@ const StudiesScreen = ({
           />
         )}
         <StudySettingsModal
-          ref={studySettingsModal.ref}
+          ref={studySettingsModalRef}
           studyId={studySettingsId}
           onClosed={() => setStudySettingsId(false)}
           openRenameModal={openRenameModal}

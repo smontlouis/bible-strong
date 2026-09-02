@@ -62,7 +62,7 @@ const useLoadSound = ({
 }: UseLoadSoundProps) => {
   const bibleTab = useAtomValue(bibleAtom)
   const setPlayingBibleTabId = useSetAtom(playingBibleTabIdAtom)
-  const currentVerseIndex = useRef(0)
+  const currentVerseIndexRef = useRef(0)
   const verseKeys = useRef<number[]>([])
   const versesData = useRef<Record<number, string>>({})
   const isPlayingRef = useRef(false)
@@ -70,10 +70,11 @@ const useLoadSound = ({
   const goToNextChapterRef = useRef(goToNextChapter)
   const goToPrevChapterRef = useRef(goToPrevChapter)
   const speakVerseRef = useRef<((index: number) => void) | undefined>(undefined)
-  const [, forceUpdate] = React.useReducer((i: number) => i + 1, 0)
 
   const [isExpanded, setExpandedMode] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [currentVerseIndex, setCurrentVerseIndex] = useState(0)
+  const [displayedVerseKeys, setDisplayedVerseKeys] = useState<number[]>([])
   const [error, setError] = useState(false)
   const selectedVoice = useAtomValue(ttsVoiceAtom)
   const rate = useAtomValue(ttsSpeedAtom)
@@ -81,11 +82,10 @@ const useLoadSound = ({
   const isRepeat = useAtomValue(ttsRepeatAtom)
   const { t } = useTranslation()
 
-  // Sync refs so callbacks always read the latest values
-  isPlayingRef.current = isPlaying
-  isRepeatRef.current = isRepeat
-  goToNextChapterRef.current = goToNextChapter
-  goToPrevChapterRef.current = goToPrevChapter
+  const updateCurrentVerseIndex = (index: number) => {
+    currentVerseIndexRef.current = index
+    setCurrentVerseIndex(index)
+  }
 
   // Speak a verse by index — chains via onDone (no effect re-trigger needed)
   const speakVerse = (index: number) => {
@@ -98,8 +98,7 @@ const useLoadSound = ({
       return
     }
 
-    currentVerseIndex.current = index
-    forceUpdate()
+    updateCurrentVerseIndex(index)
 
     Speech.speak(text, {
       voice: selectedVoice !== 'default' ? selectedVoice : undefined,
@@ -121,7 +120,7 @@ const useLoadSound = ({
           if (isRepeatRef.current) {
             speakVerseRef.current?.(0)
           } else {
-            currentVerseIndex.current = 0
+            updateCurrentVerseIndex(0)
             goToNextChapterRef.current()
           }
           return
@@ -131,15 +130,24 @@ const useLoadSound = ({
       },
     })
   }
-  speakVerseRef.current = speakVerse
+  useEffect(() => {
+    isPlayingRef.current = isPlaying
+    isRepeatRef.current = isRepeat
+    goToNextChapterRef.current = goToNextChapter
+    goToPrevChapterRef.current = goToPrevChapter
+  }, [goToNextChapter, goToPrevChapter, isPlaying, isRepeat])
+
+  useEffect(() => {
+    speakVerseRef.current = speakVerse
+  })
 
   const onNextChapter = () => {
-    currentVerseIndex.current = 0
+    updateCurrentVerseIndex(0)
     goToNextChapter()
   }
 
   const onPrevChapter = () => {
-    currentVerseIndex.current = 0
+    updateCurrentVerseIndex(0)
     goToPrevChapter()
   }
 
@@ -163,13 +171,12 @@ const useLoadSound = ({
   }
 
   const goToNextVerse = () => {
-    if (currentVerseIndex.current < verseKeys.current.length - 1) {
+    if (currentVerseIndexRef.current < verseKeys.current.length - 1) {
       if (isPlayingRef.current) {
         Speech.stop()
-        speakVerseRef.current?.(currentVerseIndex.current + 1)
+        speakVerseRef.current?.(currentVerseIndexRef.current + 1)
       } else {
-        currentVerseIndex.current += 1
-        forceUpdate()
+        updateCurrentVerseIndex(currentVerseIndexRef.current + 1)
       }
     } else {
       onNextChapter()
@@ -177,13 +184,12 @@ const useLoadSound = ({
   }
 
   const goToPrevVerse = () => {
-    if (currentVerseIndex.current > 0) {
+    if (currentVerseIndexRef.current > 0) {
       if (isPlayingRef.current) {
         Speech.stop()
-        speakVerseRef.current?.(currentVerseIndex.current - 1)
+        speakVerseRef.current?.(currentVerseIndexRef.current - 1)
       } else {
-        currentVerseIndex.current -= 1
-        forceUpdate()
+        updateCurrentVerseIndex(currentVerseIndexRef.current - 1)
       }
     } else {
       onPrevChapter()
@@ -192,15 +198,16 @@ const useLoadSound = ({
 
   const bibleVersion = getVersions()[version] as Version
 
-  const currentVerseNum = verseKeys.current[currentVerseIndex.current] ?? 1
+  const currentVerseNum = displayedVerseKeys[currentVerseIndex] ?? 1
   const audioTitle = `${t(book.Nom)} ${chapter}:${currentVerseNum} ${version}`
   const audioSubtitle = bibleVersion?.name
 
   // Keep TTS on the exact chapter already loaded by the reader.
   useEffect(() => {
     let cancelled = false
-    currentVerseIndex.current = 0
+    updateCurrentVerseIndex(0)
     verseKeys.current = []
+    setDisplayedVerseKeys([])
     versesData.current = {}
     if (!chapterVerses) {
       Speech.stop()
@@ -209,6 +216,7 @@ const useLoadSound = ({
 
     const chapterData = createTtsChapterData(chapterVerses)
     verseKeys.current = chapterData.verseKeys
+    setDisplayedVerseKeys(chapterData.verseKeys)
     versesData.current = chapterData.versesByNumber
     ;(async () => {
       try {
@@ -245,7 +253,7 @@ const useLoadSound = ({
           if (cancelled) return
           silentPlayer?.play()
         }
-        speakVerseRef.current?.(currentVerseIndex.current)
+        speakVerseRef.current?.(currentVerseIndexRef.current)
       })()
     }
 
@@ -259,7 +267,7 @@ const useLoadSound = ({
   useEffect(() => {
     if (isPlayingRef.current && verseKeys.current.length > 0) {
       Speech.stop()
-      speakVerseRef.current?.(currentVerseIndex.current)
+      speakVerseRef.current?.(currentVerseIndexRef.current)
     }
   }, [selectedVoice, rate, pitch])
 

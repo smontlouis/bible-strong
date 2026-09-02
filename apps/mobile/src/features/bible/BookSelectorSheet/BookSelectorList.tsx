@@ -51,12 +51,14 @@ export const BookSelectorList = ({
 
   useEffect(() => {
     if (data.length === 0) return
-    setTimeout(() => {
+    const scrollTimer = setTimeout(() => {
       flatListRef.current?.scrollToOffset({
         offset: Math.max(0, itemHeight * (initialScrollIndex - 2)),
         animated: false,
       })
     }, 100)
+
+    return () => clearTimeout(scrollTimer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.length, initialScrollIndex])
 

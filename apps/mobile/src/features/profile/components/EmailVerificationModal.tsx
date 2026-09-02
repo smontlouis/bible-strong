@@ -28,8 +28,7 @@ const EmailVerificationModal = ({ modalRef }: EmailVerificationModalProps) => {
 
   const handleResend = async () => {
     setIsSending(true)
-    await FireAuth.sendEmailVerification()
-    setIsSending(false)
+    await FireAuth.sendEmailVerification().finally(() => setIsSending(false))
   }
 
   return (

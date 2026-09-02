@@ -22,29 +22,43 @@ import PlanProgressCircle from './PlanProgressCircle'
 
 const LinkBox = Box.withComponent(Link)
 
+const readResponseText = async (response: Response): Promise<string> => {
+  if (!response.ok) {
+    throw new Error(`Failed to load bundled plan: HTTP ${response.status}`)
+  }
+  return response.text()
+}
+
+const loadBibleProjectPlan = async (lang: string): Promise<Plan | undefined> => {
+  const [asset] = await Asset.loadAsync(
+    lang === 'fr'
+      ? // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require('~assets/plans/bible-project-plan.txt')
+      : // eslint-disable-next-line @typescript-eslint/no-require-imports
+        require('~assets/plans/bible-project-plan-en.txt')
+  )
+
+  let serialized: string | undefined
+  if (Platform.OS === 'web') {
+    const response = await fetch(asset.uri)
+    serialized = await readResponseText(response)
+  } else if (asset.localUri) {
+    const FileSystem = await import('expo-file-system/legacy')
+    serialized = await FileSystem.readAsStringAsync(asset.localUri)
+  }
+
+  return serialized ? (JSON.parse(serialized) as Plan) : undefined
+}
+
 const useGetFirstPlans = () => {
   const hasPlans = useSelector((state: RootState) => state.plan.myPlans.length)
   const lang = useLanguage()
   const dispatch = useDispatch()
 
   const getBibleProjectPlan = async () => {
-    const [asset] = await Asset.loadAsync(
-      lang === 'fr'
-        ? // eslint-disable-next-line @typescript-eslint/no-require-imports
-          require('~assets/plans/bible-project-plan.txt')
-        : // eslint-disable-next-line @typescript-eslint/no-require-imports
-          require('~assets/plans/bible-project-plan-en.txt')
-    )
     try {
-      let serialized: string | undefined
-      if (Platform.OS === 'web') {
-        serialized = await fetch(asset.uri).then(response => response.text())
-      } else if (asset.localUri) {
-        const FileSystem = await import('expo-file-system/legacy')
-        serialized = await FileSystem.readAsStringAsync(asset.localUri)
-      }
-      if (!serialized) return
-      const plan: Plan = JSON.parse(serialized)
+      const plan = await loadBibleProjectPlan(lang)
+      if (!plan) return
       dispatch(addPlan(plan))
     } catch (error) {
       console.log('[Home] Error loading plan:', error)

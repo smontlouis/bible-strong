@@ -82,12 +82,12 @@ const SortableCommentary = ({
   const { t } = useTranslation()
   const dragProgress = useSharedValue(isDragging ? 1 : 0)
   const dragFeedbackStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(dragProgress.value, [0, 1], [1, 0.86]),
-    transform: [{ scale: interpolate(dragProgress.value, [0, 1], [1, 1.06]) }],
+    opacity: interpolate(dragProgress.get(), [0, 1], [1, 0.86]),
+    transform: [{ scale: interpolate(dragProgress.get(), [0, 1], [1, 1.06]) }],
   }))
 
   React.useEffect(() => {
-    dragProgress.value = withTiming(isDragging ? 1 : 0, { duration: 110 })
+    dragProgress.set(withTiming(isDragging ? 1 : 0, { duration: 110 }))
   }, [dragProgress, isDragging])
 
   return (

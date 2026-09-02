@@ -97,7 +97,7 @@ const FeatureOnboardingModal = () => {
         >
           <FeatherIcon name="x" size={14} color="default" />
         </TouchableBox>
-        {step && <OnboardingStep step={step} />}
+        {step !== null && <OnboardingStep step={step} />}
         <OnboardingFooter />
       </SheetView>
     </Sheet>

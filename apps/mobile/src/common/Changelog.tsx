@@ -18,6 +18,7 @@ import { RootState } from '~redux/modules/reducer'
 import { ChangelogItem, LogType } from './types'
 import { changelogModalAtom } from '~state/app'
 import { isOnboardingCompletedAtom } from '~features/onboarding/atom'
+import { useMountTime } from '~helpers/useMountTime'
 
 const getTagColor = (type: LogType) => {
   switch (type) {
@@ -62,6 +63,7 @@ const findNewLogs = (seenLogs: string[], changeLog: ChangelogItem[]) =>
   changeLog.filter(log => !seenLogs.find(c => c === log.date))
 
 const Changelog = () => {
+  const mountTime = useMountTime()
   const dispatch = useDispatch()
   const { t } = useTranslation()
   const lang = useLanguage()
@@ -122,7 +124,7 @@ const Changelog = () => {
       <SheetScrollView>
         <Box px={20}>
           {visibleLogs.map(log => {
-            const formattedDate = distanceInWords(Number(log.date), Date.now(), {
+            const formattedDate = distanceInWords(Number(log.date), mountTime, {
               locale: getDateLocale(lang),
             })
             return (

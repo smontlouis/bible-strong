@@ -61,7 +61,10 @@ export const useAccountMigrations = ({
   const lastContextRef = useRef<AccountMigrationContext | undefined>(undefined)
   const dismissedScopeRef = useRef<string | undefined>(undefined)
   const activeUserRef = useRef(activeUserId)
-  activeUserRef.current = activeUserId
+
+  useEffect(() => {
+    activeUserRef.current = activeUserId
+  }, [activeUserId])
 
   useEffect(() => {
     lastContextRef.current = undefined

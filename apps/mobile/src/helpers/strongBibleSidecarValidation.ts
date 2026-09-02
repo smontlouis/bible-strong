@@ -133,8 +133,10 @@ const validateRequiredIndexes = (
   requiredIndexes: Record<string, readonly string[]>
 ): void => {
   for (const [tableName, requiredColumns] of Object.entries(requiredIndexes)) {
-    const hasPrefix = (indexes[tableName] ?? []).some(columns =>
-      requiredColumns.every((column, index) => columns[index] === column)
+    const hasPrefix = (indexes[tableName] ?? []).some(
+      columns =>
+        columns.length >= requiredColumns.length &&
+        requiredColumns.every((column, index) => columns[index] === column)
     )
     if (!hasPrefix) {
       throw new Error(`STRONG_BIBLE_INDEX_MISSING:${tableName}(${requiredColumns.join(',')})`)

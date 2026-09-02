@@ -19,6 +19,7 @@ import { getDateLocale } from '~helpers/languageUtils'
 import { FeatherIcon } from '~common/ui/Icon'
 import { Link as LinkType } from '~redux/modules/user'
 import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
+import { useMountTime } from '~helpers/useMountTime'
 
 const LinkItemContainer = styled(Link)(({ theme }: { theme: Theme }) => ({
   paddingVertical: 20,
@@ -55,8 +56,9 @@ const BibleLinkItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
   const { t } = useTranslation()
   const theme = useTheme()
   const lang = useLanguage()
+  const mountTime = useMountTime()
 
-  const formattedDate = distanceInWords(Number(item.link.date), Date.now(), {
+  const formattedDate = distanceInWords(Number(item.link.date), mountTime, {
     locale: getDateLocale(lang),
   })
 
