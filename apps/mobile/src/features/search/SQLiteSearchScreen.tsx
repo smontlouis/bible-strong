@@ -33,12 +33,7 @@ import SearchEmptyState from '~features/search/SearchEmptyState'
 import { useOpenStudyObject } from '~features/studyRelations/useOpenStudyObject'
 import type { RootState } from '~redux/modules/reducer'
 import { useSelector } from 'react-redux'
-import {
-  searchFiltersAtom,
-  SearchItemType,
-  SearchSection,
-  type SearchCanon,
-} from '~state/searchFilters'
+import { searchFiltersAtom, SearchSection, type SearchCanon } from '~state/searchFilters'
 import {
   DEFAULT_BIBLE_VERSION_FILTER,
   resolveSearchVersionFilter,
@@ -100,6 +95,7 @@ import {
   getPublicSearchSources,
   getSearchAnalyticsInputKind,
 } from './searchAnalyticsModel'
+import { createSearchExperienceController } from './searchExperience'
 
 type Props = {
   searchValue: string
@@ -217,48 +213,35 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     enabled: itemFilters.nave,
   })
 
-  const setSection = (v: SearchSection) => {
-    _setSection(v)
-    setGlobalFilters(prev => ({ ...prev, section: v }))
-  }
-  const setBook = (v: number) => {
-    _setBook(v)
-    setGlobalFilters(prev => ({ ...prev, book: v }))
-  }
-  const setSelectedVersion = (v: string) => {
-    const resolvedVersion = resolveSearchVersionFilter(v, defaultBibleVersion)
-    const versionCanon = getBibleVersionCanonId(resolvedVersion)
-    const nextCanon = canon && canon !== versionCanon ? '' : canon
-    const nextBook =
-      book && !getBooksForCanon(versionCanon).some(candidate => candidate.Numero === book)
-        ? 0
-        : book
-
-    _setSelectedVersion(v)
-    if (nextCanon !== canon) _setCanon(nextCanon)
-    if (nextBook !== book) _setBook(nextBook)
-    setGlobalFilters(prev => ({
-      ...prev,
-      selectedVersion: v,
-      canon: nextCanon,
-      book: nextBook,
-    }))
-  }
-  const setSortOrder = (v: SearchSortOrder) => {
-    _setSortOrder(v)
-    setGlobalFilters(prev => ({ ...prev, sortOrder: v }))
-  }
-  const toggleItemFilter = (type: SearchItemType) => {
-    const next = { ...itemFilters, [type]: !itemFilters[type] }
-    if (!searchItemFilterOrder.some(itemType => next[itemType])) return
-
-    _setItemFilters(next)
-    setGlobalFilters(prev => ({ ...prev, itemFilters: next }))
-  }
-  const resetItemFilters = () => {
-    _setItemFilters(allSearchItemFilters)
-    setGlobalFilters(prev => ({ ...prev, itemFilters: allSearchItemFilters }))
-  }
+  const installedVersions = [...resourceRegistry.resources.values()].flatMap(entry =>
+    entry.resource.kind === 'bible' &&
+    (entry.availability.status === 'available' || entry.availability.status === 'corrupt')
+      ? [entry.resource.versionId]
+      : []
+  )
+  const searchExperience = createSearchExperienceController(
+    {
+      readFilters: () => ({ section, canon, book, selectedVersion, sortOrder, itemFilters }),
+      installedVersions: () => installedVersions,
+      defaultBibleVersion: () => defaultBibleVersion,
+      writeSection: _setSection,
+      writeCanon: _setCanon,
+      writeBook: _setBook,
+      writeSelectedVersion: _setSelectedVersion,
+      writeSortOrder: _setSortOrder,
+      writeItemFilters: _setItemFilters,
+      persist: patch => setGlobalFilters(previous => ({ ...previous, ...patch })),
+    },
+    searchItemFilterOrder,
+    allSearchItemFilters
+  )
+  const setSection = searchExperience.setSection
+  const setBook = searchExperience.setBook
+  const setSelectedVersion = searchExperience.selectVersion
+  const setSortOrder = searchExperience.setSortOrder
+  const setCanon = searchExperience.selectCanon
+  const toggleItemFilter = searchExperience.toggleItemFilter
+  const resetItemFilters = searchExperience.resetItemFilters
   const increaseVisibleCount = (sectionId: SearchSectionId) => {
     setVisibleCounts(prev => ({
       ...prev,
@@ -267,12 +250,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }))
   }
 
-  const installedVersions = [...resourceRegistry.resources.values()].flatMap(entry =>
-    entry.resource.kind === 'bible' &&
-    (entry.availability.status === 'available' || entry.availability.status === 'corrupt')
-      ? [entry.resource.versionId]
-      : []
-  )
   const hasInstalledVersions = installedVersions.length > 0
 
   useEffect(() => {
@@ -317,28 +294,6 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const availableCanons = Array.from(
     new Set(installedVersions.map(version => getBibleVersionCanonId(version)))
   )
-  const setCanon = (v: SearchCanon) => {
-    const compatibleVersions = v
-      ? installedVersions.filter(version => getBibleVersionCanonId(version) === v)
-      : installedVersions
-    const nextVersion = compatibleVersions.includes(resolvedSelectedVersion)
-      ? selectedVersion
-      : compatibleVersions.includes(defaultBibleVersion)
-        ? DEFAULT_BIBLE_VERSION_FILTER
-        : compatibleVersions[0] || ''
-    const nextBook =
-      v && book && !getBooksForCanon(v).some(candidate => candidate.Numero === book) ? 0 : book
-
-    _setCanon(v)
-    if (nextVersion !== selectedVersion) _setSelectedVersion(nextVersion)
-    if (nextBook !== book) _setBook(nextBook)
-    setGlobalFilters(prev => ({
-      ...prev,
-      canon: v,
-      selectedVersion: nextVersion,
-      book: nextBook,
-    }))
-  }
   const canonValues: { value: SearchCanon; label: string }[] = [
     { value: '', label: t('Tous les canons') },
     ...availableCanons.map(value => ({ value, label: canonLabels[value] })),
@@ -846,21 +801,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const sourceFilterCount =
     activeItemFilterTypes.length === searchItemFilterOrder.length ? 0 : activeItemFilterTypes.length
 
-  const resetPassageFilters = () => {
-    _setSelectedVersion(DEFAULT_BIBLE_VERSION_FILTER)
-    _setSection('')
-    _setCanon('')
-    _setBook(0)
-    _setSortOrder('relevance')
-    setGlobalFilters(previous => ({
-      ...previous,
-      selectedVersion: DEFAULT_BIBLE_VERSION_FILTER,
-      section: '',
-      canon: '',
-      book: 0,
-      sortOrder: 'relevance',
-    }))
-  }
+  const resetPassageFilters = searchExperience.resetPassageFilters
 
   const updateSearchValue = (value: string, origin: 'typed' | 'example' = 'typed') => {
     searchOriginRef.current = origin

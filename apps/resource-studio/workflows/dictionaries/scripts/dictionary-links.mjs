@@ -1,10 +1,11 @@
-import { bcv_parser } from "../../../../../packages/bible-reference-parser/esm/bcv_parser.js";
-import * as en from "../../../../../packages/bible-reference-parser/esm/lang/en.js";
-import * as fr from "../../../../../packages/bible-reference-parser/esm/lang/fr.js";
+import {
+  BIBLE_REFERENCE_PARSER_VERSION,
+  createBibleReferenceParser
+} from "../../../../../packages/bible-reference-parser/src/referenceParser.js";
 
 export const DICTIONARY_LINK_NORMALIZATION_REVISION =
   "dictionary-links-bible-strong-uri-v2";
-export const DICTIONARY_BCV_PARSER_VERSION = "3.2.0-bible-strong.2";
+export const DICTIONARY_BCV_PARSER_VERSION = BIBLE_REFERENCE_PARSER_VERSION;
 export const TRANSLATION_WORDS_WORK = "unfoldingword-translation-words";
 
 const OSIS_BOOKS = [
@@ -84,19 +85,10 @@ const OSIS_BOOKS = [
 ];
 const bookNumbers = new Map(OSIS_BOOKS.map((book, index) => [book, index + 1]));
 
-const createParser = (language) => {
-  const parser = new bcv_parser(language === "fr" ? fr : en);
-  parser.set_options({
-    book_match_strategy: "strict",
-    consecutive_combination_strategy: "separate",
-    sequence_combination_strategy: "separate",
-    passage_existence_strategy: "bcv",
-    testaments: "ona"
-  });
-  return parser;
+const parsers = {
+  en: createBibleReferenceParser("en"),
+  fr: createBibleReferenceParser("fr")
 };
-
-const parsers = { en: createParser("en"), fr: createParser("fr") };
 const HTML_TOKEN_PATTERN = /<!--[\s\S]*?-->|<[^>]*>/gu;
 const ANCHOR_TOKEN_PATTERN = /^<\/?a(?:\s[^>]*)?>$/iu;
 const REFERENCE_TAIL_PATTERN = /^[\s.,;:()[\]{}—–-]*$/u;
@@ -492,9 +484,6 @@ export const normalizeDictionaryDefinition = ({
   return { html: normalizedHtml, references, stats };
 };
 
-const verseCounts = (book) =>
-  parsers.en.translations.systems.current.chapters?.[book] ?? [];
-
 export const expandOsisToVerseKeys = (osis, maximum = 500) => {
   const keys = [];
   const append = (book, chapter, verse) => {
@@ -511,9 +500,8 @@ export const expandOsisToVerseKeys = (osis, maximum = 500) => {
     const { start, end } = entity;
     if (!start?.b || !start.c || !end?.b || !end.c || start.b !== end.b)
       return [];
-    const counts = verseCounts(start.b);
     for (let chapter = start.c; chapter <= end.c; chapter += 1) {
-      const chapterVerses = counts[chapter - 1];
+      const chapterVerses = parsers.en.lastVerse(start.b, chapter);
       if (!chapterVerses) return [];
       const firstVerse = chapter === start.c && start.v ? start.v : 1;
       const lastVerse = chapter === end.c && end.v ? end.v : chapterVerses;

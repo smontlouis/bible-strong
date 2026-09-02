@@ -3,9 +3,7 @@
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { bcv_parser } from '@bible-strong/bible-reference-parser/esm/bcv_parser.js'
-import * as en from '@bible-strong/bible-reference-parser/esm/lang/en.js'
-import * as fr from '@bible-strong/bible-reference-parser/esm/lang/fr.js'
+import { createBibleReferenceParser } from '@bible-strong/bible-reference-parser/reference-parser'
 
 const ROOT = process.cwd()
 const DATA_DIR = path.join(ROOT, 'docs/research/data/bible-project')
@@ -102,13 +100,7 @@ const researchCandidates = data => {
 }
 
 const createParser = language => {
-  const parser = new bcv_parser(language === 'fr' ? fr : en)
-  parser.set_options({
-    book_match_strategy: 'strict',
-    consecutive_combination_strategy: 'separate',
-    sequence_combination_strategy: 'separate',
-    testaments: 'ona',
-  })
+  const parser = createBibleReferenceParser(language)
   return parser
 }
 

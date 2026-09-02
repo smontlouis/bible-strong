@@ -2,36 +2,10 @@ jest.mock('../../../i18n', () => ({
   getLanguage: jest.fn(() => 'fr'),
 }))
 
-jest.mock('@bible-strong/bible-reference-parser/esm/lang/fr.js', () => ({ language: 'fr' }))
-jest.mock('@bible-strong/bible-reference-parser/esm/lang/en.js', () => ({ language: 'en' }))
-jest.mock('@bible-strong/bible-reference-parser/esm/bcv_parser.js', () => ({
-  bcv_parser: class {
-    language: 'fr' | 'en'
-
-    constructor(languageModule: { language?: 'fr' | 'en' }) {
-      this.language = languageModule.language ?? 'fr'
-    }
-
-    translations = {
-      systems: {
-        default: {
-          order: {
-            Gen: 1,
-            Ps: 19,
-            Acts: 44,
-            Rom: 45,
-            John: 43,
-            '1Cor': 46,
-            Tob: 75,
-            PrMan: 84,
-          },
-          chapters: {},
-        },
-      },
-    }
-
-    set_options = jest.fn()
-
+jest.mock('@bible-strong/bible-reference-parser/reference-parser', () => ({
+  createBibleReferenceParser: (language: 'fr' | 'en') => ({
+    language,
+    lastVerse: () => undefined,
     parse(text: string) {
       return {
         osis_and_indices: () => {
@@ -68,7 +42,7 @@ jest.mock('@bible-strong/bible-reference-parser/esm/bcv_parser.js', () => ({
             ]
           }
 
-          if (this.language === 'en' && text === 'Read Acts 7:59, 60') {
+          if (language === 'en' && text === 'Read Acts 7:59, 60') {
             return [
               { osis: 'Acts.7.59', translations: [''], indices: [5, 14] },
               { osis: 'Acts.7.60', translations: [''], indices: [16, 18] },
@@ -78,8 +52,8 @@ jest.mock('@bible-strong/bible-reference-parser/esm/bcv_parser.js', () => ({
           return []
         },
       }
-    }
-  },
+    },
+  }),
 }))
 
 /* eslint-disable @typescript-eslint/no-require-imports */
@@ -92,13 +66,8 @@ const {
 /* eslint-enable @typescript-eslint/no-require-imports */
 
 describe('bcvParser', () => {
-  it('uses strict book matching for prose extraction', () => {
-    expect(bcv.set_options).toHaveBeenCalledWith({
-      book_match_strategy: 'strict',
-      consecutive_combination_strategy: 'separate',
-      sequence_combination_strategy: 'separate',
-      testaments: 'ona',
-    })
+  it('uses the shared parser interface for the active language', () => {
+    expect(bcv.language).toBe('fr')
   })
 
   describe('parseInlineBibleReferences', () => {

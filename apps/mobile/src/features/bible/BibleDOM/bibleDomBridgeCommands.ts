@@ -2,6 +2,7 @@ import type { Bookmark, StudyNavigateBibleType, Verse } from '~common/types'
 import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import { createStrongSelection, type StrongSelection } from '~helpers/strongSelection'
 import type { RelationEndpoint } from '~features/studyRelations/domain'
+import * as bridgeCommands from './dispatch'
 
 export type StudyRelationsModalTarget =
   | string
@@ -22,6 +23,51 @@ export type BibleDOMBridgeAction = {
   bookCode?: string
   chapter?: string | number
   verse?: string | number
+}
+
+const bridgeCommandTypes = new Set<string>(
+  Object.values(bridgeCommands).filter(value => typeof value === 'string') as string[]
+)
+
+export const decodeBibleDOMBridgeAction = (value: unknown): BibleDOMBridgeAction | undefined => {
+  if (!isRecord(value) || typeof value.type !== 'string' || !bridgeCommandTypes.has(value.type)) {
+    return undefined
+  }
+  if (
+    value.chapter !== undefined &&
+    typeof value.chapter !== 'string' &&
+    typeof value.chapter !== 'number'
+  ) {
+    return undefined
+  }
+  if (
+    value.verse !== undefined &&
+    typeof value.verse !== 'string' &&
+    typeof value.verse !== 'number'
+  ) {
+    return undefined
+  }
+  return value as unknown as BibleDOMBridgeAction
+}
+
+export const routeBibleDOMBridgeAction = async (
+  value: unknown,
+  options: {
+    personalBibleDataEnabled: boolean
+    handle(action: BibleDOMBridgeAction): Promise<void>
+    rejected?(value: unknown): void
+  }
+): Promise<'handled' | 'blocked' | 'rejected'> => {
+  const action = decodeBibleDOMBridgeAction(value)
+  if (!action) {
+    options.rejected?.(value)
+    return 'rejected'
+  }
+  if (!options.personalBibleDataEnabled && bridgeCommands.isPersonalBibleDataAction(action.type)) {
+    return 'blocked'
+  }
+  await options.handle(action)
+  return 'handled'
 }
 
 export const isRecord = (value: unknown): value is Record<string, unknown> =>

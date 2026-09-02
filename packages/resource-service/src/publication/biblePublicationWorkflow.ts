@@ -38,6 +38,11 @@ export type BiblePublicationWorkflowOperations = {
   activateOfflineCatalog: BiblePublicationWorkflowOperation
   deployResourceWorker: BiblePublicationWorkflowOperation
   smokeProduction: BiblePublicationWorkflowOperation
+  compensateProductionActivation: (
+    options: BiblePublicationWorkflowOptions,
+    cause: unknown,
+    completedSteps: readonly BiblePublicationWorkflowStep[]
+  ) => Promise<void>
 }
 
 const requiredValue = (values: Map<string, string>, name: string): string => {
@@ -158,9 +163,16 @@ export const executeBiblePublicationWorkflow = async (
     'smoke-production': operations.smokeProduction,
   }
   const completedSteps: BiblePublicationWorkflowStep[] = []
-  for (const step of plan.steps) {
-    await operationByStep[step](options)
-    completedSteps.push(step)
+  try {
+    for (const step of plan.steps) {
+      await operationByStep[step](options)
+      completedSteps.push(step)
+    }
+  } catch (cause) {
+    if (plan.productionWrites) {
+      await operations.compensateProductionActivation(options, cause, completedSteps)
+    }
+    throw cause
   }
   return { ...plan, completedSteps }
 }

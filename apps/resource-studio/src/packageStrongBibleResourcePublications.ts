@@ -30,6 +30,7 @@ import {
   type ResourcePublicationEnvelope
 } from "./resourcePublicationEnvelope.js";
 import { validateBibleResourcePublication } from "./packageResourcePublication.js";
+import { commitResourcePublicationBundle } from "./resourcePublicationCommit.js";
 import { STRONG_IDENTITY_KINDS as STRONG_KINDS } from "./strongIdentityKinds.js";
 
 const execFileAsync = promisify(execFile);
@@ -135,7 +136,6 @@ export async function buildStrongBibleResourcePublication(options: {
   }
   await assertSingleBoundedZipEntry(archivePath, options.sourceEntry);
   const extractedDir = await mkdtemp(path.join(tmpdir(), "strong-source-"));
-  const staging = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   try {
     await execFileAsync("unzip", [
       "-qq",
@@ -168,95 +168,99 @@ export async function buildStrongBibleResourcePublication(options: {
       );
     }
 
-    const canonicalRelative = `canonical/bible-${options.versionId.toLowerCase()}-strong.json`;
-    const offlineRelative = `offline/bible-${options.versionId.toLowerCase()}-strong.sqlite.zip`;
-    const canonicalPath = path.join(staging, canonicalRelative);
-    const offlinePath = path.join(staging, offlineRelative);
-    await Promise.all([
-      mkdir(path.dirname(canonicalPath), { recursive: true }),
-      mkdir(path.dirname(offlinePath), { recursive: true })
-    ]);
-    await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
-    await copyFile(archivePath, offlinePath);
-    const [canonicalStat, offlineStat] = await Promise.all([
-      stat(canonicalPath),
-      stat(offlinePath)
-    ]);
-    const metadata = await readMetadata(sqlitePath);
-    const manifest: StrongBibleManifest = {
-      format: "bible-strong-resource-publication",
-      schemaVersion: 1,
-      identity: {
-        kind: "strong-bible-index",
-        versionId: options.versionId,
-        datasetId: options.datasetId,
-        language: options.language
+    return await commitResourcePublicationBundle({
+      outputDir,
+      build: async (staging) => {
+        const canonicalRelative = `canonical/bible-${options.versionId.toLowerCase()}-strong.json`;
+        const offlineRelative = `offline/bible-${options.versionId.toLowerCase()}-strong.sqlite.zip`;
+        const canonicalPath = path.join(staging, canonicalRelative);
+        const offlinePath = path.join(staging, offlineRelative);
+        await Promise.all([
+          mkdir(path.dirname(canonicalPath), { recursive: true }),
+          mkdir(path.dirname(offlinePath), { recursive: true })
+        ]);
+        await writeFile(
+          canonicalPath,
+          `${JSON.stringify(canonical)}\n`,
+          "utf8"
+        );
+        await copyFile(archivePath, offlinePath);
+        const [canonicalStat, offlineStat] = await Promise.all([
+          stat(canonicalPath),
+          stat(offlinePath)
+        ]);
+        const metadata = await readMetadata(sqlitePath);
+        const manifest: StrongBibleManifest = {
+          format: "bible-strong-resource-publication",
+          schemaVersion: 1,
+          identity: {
+            kind: "strong-bible-index",
+            versionId: options.versionId,
+            datasetId: options.datasetId,
+            language: options.language
+          },
+          revision: deriveStrongBibleResourceRevision(canonical),
+          canonical: {
+            path: canonicalRelative,
+            mediaType: "application/json",
+            schemaVersion: 1,
+            sha256: await sha256ResourcePublicationFile(canonicalPath),
+            bytes: canonicalStat.size
+          },
+          offlineArtifact: {
+            path: offlineRelative,
+            mediaType: "application/zip",
+            entry: options.sourceEntry,
+            sha256: await sha256ResourcePublicationFile(offlinePath),
+            bytes: offlineStat.size,
+            contentSha256: await sha256ResourcePublicationFile(sqlitePath)
+          },
+          provenance: {
+            generator: "bible-lexicon-maker",
+            sourceVersion: metadata.sourceVersion ?? options.sourceUrl,
+            sourceSha256:
+              metadata.sourceSha256 ?? sha256(await readFile(archivePath)),
+            generatedAt: options.generatedAt
+          },
+          rights: {
+            holder: options.attribution,
+            termsReference: `config/strong-bible-resource-publications.json#${options.versionId}`,
+            attribution: options.attribution,
+            reviewedAt: options.rightsReviewedAt,
+            online: bibleManifest.onlineAccess,
+            offline: bibleManifest.offlineDownload
+          },
+          deliveryCapabilities: {
+            onlineAccess: bibleManifest.onlineAccess,
+            offlineDownload: bibleManifest.offlineDownload,
+            localDevelopmentAccess: true
+          },
+          dependencies: {
+            bible: {
+              resourceIdentity: `bible-text:${options.versionId}`,
+              revision: canonical.textRevision,
+              textSha256: canonical.textSha256,
+              online: "required",
+              offline: "required"
+            },
+            strongLexiconModules: [
+              {
+                resourceIdentity: "strong-lexicon:core",
+                online: "required-for-lexical-details",
+                offline: "required-for-lexical-details"
+              }
+            ]
+          },
+          counts: countCanonical(canonical)
+        };
+        await writeFile(
+          path.join(staging, "manifest.json"),
+          `${JSON.stringify(manifest, null, 2)}\n`
+        );
+        return { outputDir, manifest };
       },
-      revision: deriveStrongBibleResourceRevision(canonical),
-      canonical: {
-        path: canonicalRelative,
-        mediaType: "application/json",
-        schemaVersion: 1,
-        sha256: await sha256ResourcePublicationFile(canonicalPath),
-        bytes: canonicalStat.size
-      },
-      offlineArtifact: {
-        path: offlineRelative,
-        mediaType: "application/zip",
-        entry: options.sourceEntry,
-        sha256: await sha256ResourcePublicationFile(offlinePath),
-        bytes: offlineStat.size,
-        contentSha256: await sha256ResourcePublicationFile(sqlitePath)
-      },
-      provenance: {
-        generator: "bible-lexicon-maker",
-        sourceVersion: metadata.sourceVersion ?? options.sourceUrl,
-        sourceSha256:
-          metadata.sourceSha256 ?? sha256(await readFile(archivePath)),
-        generatedAt: options.generatedAt
-      },
-      rights: {
-        holder: options.attribution,
-        termsReference: `config/strong-bible-resource-publications.json#${options.versionId}`,
-        attribution: options.attribution,
-        reviewedAt: options.rightsReviewedAt,
-        online: bibleManifest.onlineAccess,
-        offline: bibleManifest.offlineDownload
-      },
-      deliveryCapabilities: {
-        onlineAccess: bibleManifest.onlineAccess,
-        offlineDownload: bibleManifest.offlineDownload,
-        localDevelopmentAccess: true
-      },
-      dependencies: {
-        bible: {
-          resourceIdentity: `bible-text:${options.versionId}`,
-          revision: canonical.textRevision,
-          textSha256: canonical.textSha256,
-          online: "required",
-          offline: "required"
-        },
-        strongLexiconModules: [
-          {
-            resourceIdentity: "strong-lexicon:core",
-            online: "required-for-lexical-details",
-            offline: "required-for-lexical-details"
-          }
-        ]
-      },
-      counts: countCanonical(canonical)
-    };
-    await writeFile(
-      path.join(staging, "manifest.json"),
-      `${JSON.stringify(manifest, null, 2)}\n`
-    );
-    await validateStrongBibleResourcePublication(staging);
-    await mkdir(path.dirname(outputDir), { recursive: true });
-    await rename(staging, outputDir);
-    return { outputDir, manifest };
-  } catch (cause) {
-    await rm(staging, { recursive: true, force: true });
-    throw cause;
+      validate: validateStrongBibleResourcePublication
+    });
   } finally {
     await rm(extractedDir, { recursive: true, force: true });
   }

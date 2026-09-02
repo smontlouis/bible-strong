@@ -17,7 +17,7 @@ import StorageSummaryCard from './components/StorageSummaryCard'
 import type { StatusFilter, LangFilter } from './components/FilterChipRow'
 import DownloadSectionHeader from './components/DownloadSectionHeader'
 import DownloadSubsectionHeader from './components/DownloadSubsectionHeader'
-import BatchActionBar from './components/BatchActionBar'
+import DownloadManagementFooter from './components/DownloadManagementFooter'
 import { AvailableUpdatesSheet, AvailableUpdatesWidget } from './components/AvailableUpdatesWidget'
 
 import { versions, type Version } from '~helpers/bibleVersions'
@@ -919,7 +919,7 @@ const DownloadsScreen = () => {
 
       {/* Bottom bars */}
       {!isAvailabilityPending && !isAvailabilityError && (
-        <BatchActionBar
+        <DownloadManagementFooter
           selectedCount={selectedItems.size}
           hasDownloadable={selectedDownloadable > 0}
           hasDeletable={selectedDeletable > 0}

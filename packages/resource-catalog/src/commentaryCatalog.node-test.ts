@@ -16,3 +16,9 @@ test('the commentary catalog exposes 32 works and 36 downloadable language proje
     assert.ok(BUNDLED_MOBILE_RESOURCE_CATALOG.resources[projection], projection)
   }
 })
+
+test('commentary short names do not duplicate their language', () => {
+  for (const commentary of COMMENTARY_CATALOG) {
+    assert.doesNotMatch(commentary.shortName, /(?:\s|[-_])(fr|en)$/i)
+  }
+})

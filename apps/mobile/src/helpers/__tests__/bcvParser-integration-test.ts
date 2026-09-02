@@ -1,25 +1,12 @@
-import { bcv_parser } from '@bible-strong/bible-reference-parser/esm/bcv_parser.js'
-import * as en from '@bible-strong/bible-reference-parser/esm/lang/en.js'
-import * as fr from '@bible-strong/bible-reference-parser/esm/lang/fr.js'
+import { createBibleReferenceParser } from '@bible-strong/bible-reference-parser/reference-parser'
 
 const createFrenchParser = () => {
-  const parser = new bcv_parser(fr)
-  parser.set_options({
-    book_match_strategy: 'strict',
-    consecutive_combination_strategy: 'separate',
-    sequence_combination_strategy: 'separate',
-    testaments: 'ona',
-  })
-  return parser
+  return createBibleReferenceParser('fr')
 }
 
 describe('vendored BCV parser', () => {
   it('rejects short lowercase book false positives in strict mode', () => {
-    const parser = new bcv_parser(en)
-
-    expect(parser.parse('she is 2 cool').osis()).toBe('Isa.2')
-
-    parser.set_options({ book_match_strategy: 'strict' })
+    const parser = createBibleReferenceParser('en')
 
     expect(parser.parse('she is 2 cool').osis()).toBe('')
     expect(parser.parse('Isaiah 2').osis()).toBe('Isa.2')

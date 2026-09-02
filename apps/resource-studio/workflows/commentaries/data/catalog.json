@@ -42,7 +42,7 @@
     },
     {
       "id": "mhy-fr",
-      "shortName": "Henry FR",
+      "shortName": "Henry",
       "title": "Commentaire concis de Matthew Henry",
       "description": {
         "fr": "Édition française du commentaire concis de Matthew Henry, organisée principalement par groupes de versets. Elle propose une lecture réformée, pastorale et pratique, centrée sur le sens spirituel et l’application du passage."
@@ -60,7 +60,7 @@
     },
     {
       "id": "mhcc",
-      "shortName": "Henry EN",
+      "shortName": "Henry",
       "title": "Matthew Henry Concise Commentary",
       "description": {
         "en": "A condensed English edition of Matthew Henry’s work, structured by chapters and verse ranges. It summarizes interpretation, spiritual teaching, and practical application in a substantially shorter form than the complete commentary."

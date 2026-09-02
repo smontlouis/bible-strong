@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import {
@@ -7,7 +7,6 @@ import {
   mkdir,
   mkdtemp,
   readFile,
-  rename,
   rm,
   stat,
   writeFile
@@ -31,6 +30,7 @@ import {
   resolveResourcePublicationPath,
   sha256ResourcePublicationFile
 } from "./resourcePublicationEnvelope.js";
+import { commitResourcePublicationBundle } from "./resourcePublicationCommit.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -184,118 +184,125 @@ export async function buildNaveResourcePublication(
     verseAnchors: source.verseAnchors
   };
 
-  const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
-  const mobileReleaseDir = `${temporaryDir}-mobile`;
   const canonicalRelativePath = `canonical/${resource.stem}.json`;
   const offlineRelativePath = `offline/${resource.entry}.zip`;
-  const canonicalPath = path.join(temporaryDir, canonicalRelativePath);
-  const normalizedSqlitePath = path.join(
-    temporaryDir,
-    `work/${resource.entry}`
-  );
 
-  try {
-    await Promise.all([
-      mkdir(path.dirname(canonicalPath), { recursive: true }),
-      mkdir(path.dirname(normalizedSqlitePath), { recursive: true })
-    ]);
-    await copyFile(sourceSqlitePath, normalizedSqlitePath);
-    await writePublicationMetadata(normalizedSqlitePath, canonical);
-    await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
+  return commitResourcePublicationBundle({
+    outputDir,
+    build: async (temporaryDir) => {
+      const mobileReleaseDir = `${temporaryDir}-mobile`;
+      const canonicalPath = path.join(temporaryDir, canonicalRelativePath);
+      const normalizedSqlitePath = path.join(
+        temporaryDir,
+        `work/${resource.entry}`
+      );
+      try {
+        await Promise.all([
+          mkdir(path.dirname(canonicalPath), { recursive: true }),
+          mkdir(path.dirname(normalizedSqlitePath), { recursive: true })
+        ]);
+        await copyFile(sourceSqlitePath, normalizedSqlitePath);
+        await writePublicationMetadata(normalizedSqlitePath, canonical);
+        await writeFile(
+          canonicalPath,
+          `${JSON.stringify(canonical)}\n`,
+          "utf8"
+        );
 
-    const mobileResult = await buildMobileResourceCatalog({
-      outputDir: mobileReleaseDir,
-      generatedAt: options.generatedAt,
-      inventory: [
-        {
-          id: `database:NAVE:${language}`,
-          artifactUrl: `https://local.invalid/databases/${resource.entry}.zip`,
-          sources: [
+        const mobileResult = await buildMobileResourceCatalog({
+          outputDir: mobileReleaseDir,
+          generatedAt: options.generatedAt,
+          inventory: [
             {
-              role: "canonical",
-              sourceUrl: `https://local.invalid/databases/${resource.entry}`,
-              sourcePath: normalizedSqlitePath,
-              entry: resource.entry
+              id: `database:NAVE:${language}`,
+              artifactUrl: `https://local.invalid/databases/${resource.entry}.zip`,
+              sources: [
+                {
+                  role: "canonical",
+                  sourceUrl: `https://local.invalid/databases/${resource.entry}`,
+                  sourcePath: normalizedSqlitePath,
+                  entry: resource.entry
+                }
+              ],
+              strategy: "archive-extract"
             }
           ],
-          strategy: "archive-extract"
+          requiredIds: [`database:NAVE:${language}`]
+        });
+        const catalog = JSON.parse(
+          await readFile(mobileResult.catalogPath, "utf8")
+        ) as MobileResourceCatalog;
+        const mobileArtifact = catalog.resources[`database:NAVE:${language}`];
+        if (!mobileArtifact)
+          throw new Error("nave-publication-offline-missing");
+
+        const offlineArtifactPath = path.join(
+          temporaryDir,
+          offlineRelativePath
+        );
+        await mkdir(path.dirname(offlineArtifactPath), { recursive: true });
+        await copyFile(
+          path.join(mobileReleaseDir, mobileArtifact.file),
+          offlineArtifactPath
+        );
+        const canonicalStats = await stat(canonicalPath);
+        const offlineStats = await stat(offlineArtifactPath);
+        const canonicalSha256 = await sha256File(canonicalPath);
+        const contentSha256 = await sha256File(normalizedSqlitePath);
+        if (mobileArtifact.entries.canonical?.sha256 !== contentSha256) {
+          throw new Error("nave-publication-offline-content-mismatch");
         }
-      ],
-      requiredIds: [`database:NAVE:${language}`]
-    });
-    const catalog = JSON.parse(
-      await readFile(mobileResult.catalogPath, "utf8")
-    ) as MobileResourceCatalog;
-    const mobileArtifact = catalog.resources[`database:NAVE:${language}`];
-    if (!mobileArtifact) throw new Error("nave-publication-offline-missing");
 
-    const offlineArtifactPath = path.join(temporaryDir, offlineRelativePath);
-    await mkdir(path.dirname(offlineArtifactPath), { recursive: true });
-    await copyFile(
-      path.join(mobileReleaseDir, mobileArtifact.file),
-      offlineArtifactPath
-    );
-    const canonicalStats = await stat(canonicalPath);
-    const offlineStats = await stat(offlineArtifactPath);
-    const canonicalSha256 = await sha256File(canonicalPath);
-    const contentSha256 = await sha256File(normalizedSqlitePath);
-    if (mobileArtifact.entries.canonical?.sha256 !== contentSha256) {
-      throw new Error("nave-publication-offline-content-mismatch");
-    }
-
-    const manifest: NaveResourcePublicationManifest = {
-      format: "bible-strong-resource-publication",
-      schemaVersion: 1,
-      identity: { kind: "nave", resourceId: resource.resourceId, language },
-      revision,
-      canonical: {
-        path: canonicalRelativePath,
-        mediaType: "application/json",
-        schemaVersion: 1,
-        sha256: canonicalSha256,
-        bytes: canonicalStats.size
-      },
-      offlineArtifact: {
-        path: offlineRelativePath,
-        mediaType: "application/zip",
-        entry: resource.entry,
-        sha256: await sha256File(offlineArtifactPath),
-        bytes: offlineStats.size,
-        contentSha256
-      },
-      provenance: {
-        generator: "bible-lexicon-maker",
-        sourceVersion: options.sourceVersion,
-        sourceSha256,
-        generatedAt: options.generatedAt ?? new Date().toISOString()
-      },
-      rights: options.rights,
-      deliveryCapabilities: options.deliveryCapabilities,
-      alphabeticalBrowse: deriveAlphabeticalBrowse(canonical),
-      counts: countCanonical(canonical)
-    };
-    const manifestPath = path.join(temporaryDir, "manifest.json");
-    await writeFile(
-      manifestPath,
-      `${JSON.stringify(manifest, null, 2)}\n`,
-      "utf8"
-    );
-    await validateNaveResourcePublication(temporaryDir);
-    await mkdir(path.dirname(outputDir), { recursive: true });
-    await rename(temporaryDir, outputDir);
-    return {
-      outputDir,
-      manifestPath: path.join(outputDir, "manifest.json"),
-      canonicalPath: path.join(outputDir, canonicalRelativePath),
-      offlineArtifactPath: path.join(outputDir, offlineRelativePath),
-      manifest
-    };
-  } catch (error) {
-    await rm(temporaryDir, { recursive: true, force: true });
-    throw error;
-  } finally {
-    await rm(mobileReleaseDir, { recursive: true, force: true });
-  }
+        const manifest: NaveResourcePublicationManifest = {
+          format: "bible-strong-resource-publication",
+          schemaVersion: 1,
+          identity: { kind: "nave", resourceId: resource.resourceId, language },
+          revision,
+          canonical: {
+            path: canonicalRelativePath,
+            mediaType: "application/json",
+            schemaVersion: 1,
+            sha256: canonicalSha256,
+            bytes: canonicalStats.size
+          },
+          offlineArtifact: {
+            path: offlineRelativePath,
+            mediaType: "application/zip",
+            entry: resource.entry,
+            sha256: await sha256File(offlineArtifactPath),
+            bytes: offlineStats.size,
+            contentSha256
+          },
+          provenance: {
+            generator: "bible-lexicon-maker",
+            sourceVersion: options.sourceVersion,
+            sourceSha256,
+            generatedAt: options.generatedAt ?? new Date().toISOString()
+          },
+          rights: options.rights,
+          deliveryCapabilities: options.deliveryCapabilities,
+          alphabeticalBrowse: deriveAlphabeticalBrowse(canonical),
+          counts: countCanonical(canonical)
+        };
+        const manifestPath = path.join(temporaryDir, "manifest.json");
+        await writeFile(
+          manifestPath,
+          `${JSON.stringify(manifest, null, 2)}\n`,
+          "utf8"
+        );
+        return {
+          outputDir,
+          manifestPath: path.join(outputDir, "manifest.json"),
+          canonicalPath: path.join(outputDir, canonicalRelativePath),
+          offlineArtifactPath: path.join(outputDir, offlineRelativePath),
+          manifest
+        };
+      } finally {
+        await rm(mobileReleaseDir, { recursive: true, force: true });
+      }
+    },
+    validate: validateNaveResourcePublication
+  });
 }
 
 export async function validateNaveResourcePublication(

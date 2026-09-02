@@ -12,10 +12,6 @@ if (getApps().length === 0) {
   })
 }
 
-export { grec } from './grec'
-export { hebreu } from './hebreu'
-export { dictionnaire } from './dictionnaire'
-export { count_verses } from './count_verses'
 export { iaphub } from './iaphub'
 export { exportStudyPDF, deleteStudy } from './studies'
 export { createUser, deleteUser } from './users'

@@ -209,3 +209,101 @@ export const reorderTabGroups = (
     groups: nextGroups,
   }
 }
+
+export interface TabWorkspaceAdapter {
+  readGroups(): TabGroup[]
+  writeGroups(groups: TabGroup[]): void
+  readCachedTabIds(): string[]
+  writeCachedTabIds(tabIds: string[]): void
+  writeActiveGroupId(groupId: string): void
+  cleanupGroup(groupId: string): void
+  createGroupId(): string
+  createDefaultTab(): TabItem
+  now(): number
+  warn(message: string, detail?: string): void
+}
+
+export const createTabWorkspaceController = (adapter: TabWorkspaceAdapter, maxGroups: number) => ({
+  createGroup({ name, color }: { name: string; color: string }): string | null {
+    const groups = adapter.readGroups()
+    const now = adapter.now()
+    const group: TabGroup = {
+      id: adapter.createGroupId(),
+      name,
+      color,
+      isDefault: false,
+      tabs: [adapter.createDefaultTab()],
+      activeTabIndex: 0,
+      createdAt: now,
+      updatedAt: now,
+    }
+    const result = createTabGroup(groups, group, maxGroups)
+    if (!result.ok) {
+      adapter.warn('[TabWorkspace] Maximum group limit reached')
+      return null
+    }
+    adapter.writeGroups(result.groups)
+    return result.value ?? null
+  },
+
+  switchGroup(groupId: string): boolean {
+    const result = switchTabGroup(adapter.readGroups(), groupId)
+    if (!result.ok) {
+      adapter.warn('[TabWorkspace] Group not found', groupId)
+      return false
+    }
+    adapter.writeCachedTabIds(result.cacheTabIds ?? [])
+    adapter.writeActiveGroupId(result.value ?? groupId)
+    return true
+  },
+
+  deleteGroup(groupId: string): boolean {
+    const groups = adapter.readGroups()
+    const result = deleteTabGroup(groups, groupId, adapter.readCachedTabIds())
+    if (!result.ok) {
+      adapter.warn('[TabWorkspace] Group cannot be deleted', groupId)
+      return false
+    }
+    adapter.writeCachedTabIds(result.cacheTabIds ?? [])
+    adapter.cleanupGroup(groupId)
+    adapter.writeGroups(result.groups)
+    return true
+  },
+
+  addTab(groupId: string, tab: TabItem): boolean {
+    const result = addTabToGroup(adapter.readGroups(), groupId, tab, adapter.now())
+    if (!result.ok) {
+      adapter.warn('[TabWorkspace] Group not found', groupId)
+      return false
+    }
+    adapter.writeGroups(result.groups)
+    return true
+  },
+
+  moveTab(tabId: string, fromGroupId: string, toGroupId: string): boolean {
+    const cachedTabIds = adapter.readCachedTabIds()
+    const result = moveTabToGroup(adapter.readGroups(), {
+      tabId,
+      fromGroupId,
+      toGroupId,
+      cacheTabIds: cachedTabIds,
+      updatedAt: adapter.now(),
+    })
+    if (!result.ok) {
+      adapter.warn('[TabWorkspace] Source, target group, or tab not found')
+      return false
+    }
+    adapter.writeGroups(result.groups)
+    if (cachedTabIds.includes(tabId)) {
+      adapter.writeCachedTabIds(result.cacheTabIds ?? cachedTabIds)
+    }
+    return true
+  },
+
+  reorderGroups(fromIndex: number, toIndex: number): boolean {
+    const result = reorderTabGroups(adapter.readGroups(), fromIndex, toIndex)
+    if (!result.ok) return false
+    adapter.writeGroups(result.groups)
+    return true
+  },
+})

@@ -36,6 +36,7 @@ import {
   RETRY_BIBLE_RESOURCE,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
+  DOM_COMPONENT_MOUNTED,
 } from './dispatch'
 import { DispatchProvider } from './DispatchProvider'
 import { TranslationsProvider, BibleDOMTranslations } from './TranslationsContext'
@@ -1507,7 +1508,7 @@ const VersesRendererContent = ({ settings, dispatch, translations, verses, ...re
 
   useEffect(() => {
     dispatch({
-      type: 'DOM_COMPONENT_MOUNTED',
+      type: DOM_COMPONENT_MOUNTED,
     }).catch(console.error)
   }, [])
 

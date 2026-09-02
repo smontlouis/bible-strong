@@ -7,6 +7,7 @@
     "lint": "tslint --project tsconfig.json",
     "build": "tsc",
     "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
     "serve": "yarn build && IS_OFFLINE=true firebase emulators:start",
     "shell": "yarn build && firebase functions:shell",
     "start": "yarn shell",

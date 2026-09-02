@@ -642,6 +642,11 @@ const createOperations = (
       }
     }
   },
+  compensateProductionActivation: async (_options, cause) => {
+    if (state.neonActivated || state.catalogActivated || state.workerDeploymentAttempted) {
+      await compensateProductionActivation(state, cause)
+    }
+  },
 })
 
 const compensateProductionActivation = async (state: WorkflowState, originalCause: unknown) => {
@@ -713,15 +718,7 @@ export const runBiblePublicationWorkflowCli = async (rawArgs: readonly string[])
 
   try {
     const state = await createState(appRoot, options)
-    let result: Awaited<ReturnType<typeof executeBiblePublicationWorkflow>>
-    try {
-      result = await executeBiblePublicationWorkflow(options, createOperations(state, options))
-    } catch (cause) {
-      if (options.activateProduction && (state.neonActivated || state.catalogActivated)) {
-        await compensateProductionActivation(state, cause)
-      }
-      throw cause
-    }
+    const result = await executeBiblePublicationWorkflow(options, createOperations(state, options))
     return {
       ...result,
       workspacePath: state.workspacePath,

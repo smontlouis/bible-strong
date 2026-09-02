@@ -5,7 +5,6 @@ import {
   mkdir,
   open,
   readFile,
-  rename,
   rm,
   stat,
   utimes,
@@ -21,6 +20,10 @@ import {
   sanitizeCommentaryPublicationHtml
 } from "./commentaryPublicationHtml.js";
 import { projectSdabcContent } from "./commentaryPresentation.js";
+import {
+  commitResourcePublicationTransaction,
+  type ResourcePublicationReplacement
+} from "./resourcePublicationCommit.js";
 
 const execFileAsync = promisify(execFile);
 const REPRODUCIBLE_ZIP_TIME = new Date("1980-01-01T00:00:00.000Z");
@@ -128,7 +131,8 @@ type CanonicalNormalizedCommentary = {
   verses: Array<{ verseKey: Passage; documentIds: string[] }>;
 };
 
-type AnyCanonicalCommentary = CanonicalCommentary | CanonicalNormalizedCommentary;
+type AnyCanonicalCommentary =
+  CanonicalCommentary | CanonicalNormalizedCommentary;
 
 type CommentaryManifest = {
   format: "bible-strong-resource-publication";
@@ -231,7 +235,9 @@ const escapeHtmlAttribute = (value: string | null | undefined): string =>
     .replace(/>/gu, "&gt;")
     .replace(/"/gu, "&quot;");
 
-const sourceRevisionToken = (sourceRevision: LibraryIndex["sourceRevision"]): string =>
+const sourceRevisionToken = (
+  sourceRevision: LibraryIndex["sourceRevision"]
+): string =>
   typeof sourceRevision === "string"
     ? sourceRevision
     : `library-${sha256Buffer(JSON.stringify(sourceRevision))}`;
@@ -787,15 +793,16 @@ const buildBundle = async (
   return { bundlePath, manifest, sqliteBytes: sqliteStats.size };
 };
 
-const synchronizeCatalogContracts = async (
+const prepareCatalogContractReplacements = async (
   catalogResources: readonly CatalogResource[],
   publications: readonly {
     catalogResource: CatalogResource;
     language: Language;
     manifest: CommentaryManifest;
     sqliteBytes: number;
-  }[]
-): Promise<void> => {
+  }[],
+  stagingRoot: string
+): Promise<ResourcePublicationReplacement[]> => {
   const mobileCatalog = JSON.parse(
     await readFile(mobileCatalogPath, "utf8")
   ) as MobileCatalog;
@@ -873,14 +880,27 @@ const synchronizeCatalogContracts = async (
   if (knownCatalogIds.size !== catalogResources.length) {
     throw new Error("commentary-catalog-resource-id-duplicate");
   }
+  await mkdir(stagingRoot, { recursive: true });
+  const preparedMobileCatalogPath = path.join(
+    stagingRoot,
+    "mobile-resource-catalog.json"
+  );
+  const preparedInventoryPath = path.join(
+    stagingRoot,
+    "mobile-resource-inventory.json"
+  );
+  const preparedRequiredIdsPath = path.join(
+    stagingRoot,
+    "mobile-resource-required-ids.json"
+  );
   await Promise.all([
     writeFile(
-      mobileCatalogPath,
+      preparedMobileCatalogPath,
       `${JSON.stringify(mobileCatalog, null, 2)}\n`,
       "utf8"
     ),
     writeFile(
-      inventoryPath,
+      preparedInventoryPath,
       `${JSON.stringify(
         [...inventoryById.values()].sort((a, b) => a.id.localeCompare(b.id)),
         null,
@@ -888,8 +908,29 @@ const synchronizeCatalogContracts = async (
       )}\n`,
       "utf8"
     ),
-    writeFile(requiredIdsPath, `${JSON.stringify(required, null, 2)}\n`, "utf8")
+    writeFile(
+      preparedRequiredIdsPath,
+      `${JSON.stringify(required, null, 2)}\n`,
+      "utf8"
+    )
   ]);
+  return [
+    {
+      preparedPath: preparedMobileCatalogPath,
+      targetPath: mobileCatalogPath,
+      replaceExisting: true
+    },
+    {
+      preparedPath: preparedInventoryPath,
+      targetPath: inventoryPath,
+      replaceExisting: true
+    },
+    {
+      preparedPath: preparedRequiredIdsPath,
+      targetPath: requiredIdsPath,
+      replaceExisting: true
+    }
+  ];
 };
 
 const main = async (): Promise<void> => {
@@ -940,6 +981,7 @@ const main = async (): Promise<void> => {
     new Set(selectedCatalogResources.map((resource) => resource.id))
   );
   const stagingRoot = `${outputRoot}.tmp-${process.pid}-${randomUUID()}`;
+  const catalogStagingRoot = `${outputRoot}.catalog-contracts-${process.pid}-${randomUUID()}`;
   await rm(stagingRoot, { recursive: true, force: true });
   await mkdir(stagingRoot, { recursive: true });
   try {
@@ -970,21 +1012,31 @@ const main = async (): Promise<void> => {
         publications.push({ catalogResource, language, ...bundle });
       }
     }
-    await synchronizeCatalogContracts(catalogResources, publications);
-    if (requestedResourceIds.size === 0) {
-      await rm(outputRoot, { recursive: true, force: true });
-      await mkdir(path.dirname(outputRoot), { recursive: true });
-      await rename(stagingRoot, outputRoot);
-    } else {
-      await mkdir(outputRoot, { recursive: true });
-      for (const publication of publications) {
-        const bundleName = path.basename(publication.bundlePath);
-        const target = path.join(outputRoot, bundleName);
-        await rm(target, { recursive: true, force: true });
-        await rename(publication.bundlePath, target);
-      }
-      await rm(stagingRoot, { recursive: true, force: true });
-    }
+    const catalogReplacements = await prepareCatalogContractReplacements(
+      catalogResources,
+      publications,
+      catalogStagingRoot
+    );
+    const bundleReplacements: ResourcePublicationReplacement[] =
+      requestedResourceIds.size === 0
+        ? [
+            {
+              preparedPath: stagingRoot,
+              targetPath: outputRoot,
+              replaceExisting: true
+            }
+          ]
+        : publications.map((publication) => ({
+            preparedPath: publication.bundlePath,
+            targetPath: path.join(
+              outputRoot,
+              path.basename(publication.bundlePath)
+            ),
+            replaceExisting: true
+          }));
+    await commitResourcePublicationTransaction({
+      replacements: [...bundleReplacements, ...catalogReplacements]
+    });
     console.log(
       JSON.stringify(
         {
@@ -1009,9 +1061,11 @@ const main = async (): Promise<void> => {
         2
       )
     );
-  } catch (error) {
-    await rm(stagingRoot, { recursive: true, force: true });
-    throw error;
+  } finally {
+    await Promise.all([
+      rm(stagingRoot, { recursive: true, force: true }),
+      rm(catalogStagingRoot, { recursive: true, force: true })
+    ]);
   }
 };
 

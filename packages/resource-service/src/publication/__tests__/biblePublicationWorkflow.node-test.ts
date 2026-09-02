@@ -84,6 +84,7 @@ describe('Bible publication workflow', () => {
       activateOfflineCatalog: operation('catalog-activate'),
       deployResourceWorker: operation('worker'),
       smokeProduction: operation('smoke'),
+      compensateProductionActivation: operation('compensate'),
     }
 
     const result = await executeBiblePublicationWorkflow(
@@ -107,6 +108,50 @@ describe('Bible publication workflow', () => {
     ])
     assert.equal(result.mode, 'preflight')
     assert.equal(result.completedSteps.length, 5)
+  })
+
+  it('owns compensation after a production activation failure', async () => {
+    const calls: string[] = []
+    const operation = (name: string) => async () => {
+      calls.push(name)
+    }
+    const operations: BiblePublicationWorkflowOperations = {
+      packageBiblePublication: operation('package'),
+      resolveDependentPublications: operation('dependencies'),
+      generateOfflineCatalog: operation('catalog'),
+      validatePublicationSet: operation('publication-set'),
+      validateR2Publication: operation('r2-preflight'),
+      publishR2Artifacts: operation('r2-publish'),
+      activateNeonPublications: operation('neon'),
+      activateOfflineCatalog: async () => {
+        calls.push('catalog-activate')
+        throw new Error('activation-failed')
+      },
+      deployResourceWorker: operation('worker'),
+      smokeProduction: operation('smoke'),
+      compensateProductionActivation: async (_options, cause, completed) => {
+        calls.push('compensate')
+        assert.match(String(cause), /activation-failed/)
+        assert.equal(completed.at(-1), 'activate-neon-publications')
+      },
+    }
+
+    await assert.rejects(
+      executeBiblePublicationWorkflow(
+        parseBiblePublicationWorkflowArgs([
+          '--version',
+          'LSG',
+          '--source',
+          '/editorial/bible-lsg.json',
+          '--activate-production',
+          '--confirm-production',
+          'bible-strong.app',
+        ]),
+        operations
+      ),
+      /activation-failed/
+    )
+    assert.deepEqual(calls.slice(-3), ['neon', 'catalog-activate', 'compensate'])
   })
 
   it('accepts repeated rebuilt dependent bundles and explicit workspace roots', () => {

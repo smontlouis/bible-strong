@@ -1,12 +1,11 @@
 import { execFileSync } from "node:child_process";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import {
   copyFileSync,
   existsSync,
   mkdirSync,
   lstatSync,
   readFileSync,
-  renameSync,
   realpathSync,
   rmSync,
   statSync,
@@ -31,6 +30,7 @@ import {
   sha256ResourcePublicationFile,
   type ResourcePublicationEnvelope
 } from "./resourcePublicationEnvelope.js";
+import { commitResourcePublicationBundle } from "./resourcePublicationCommit.js";
 
 export type StrongLexiconModuleId = "core" | "resources" | "entities";
 
@@ -885,160 +885,172 @@ export async function buildAllStrongLexiconResourcePublications(
     throw new Error(`strong-lexicon-publication-output-exists:${outputDir}`);
   }
   const config = readConfig(configPath);
-  const staging = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
-  const projection = `${staging}-projection`;
-  mkdirSync(path.dirname(staging), { recursive: true });
-  try {
-    packageModularLexicon({
-      root,
-      sourcePath,
-      entitiesPath,
-      outputDir: projection,
-      generatedAt: options.generatedAt
-    });
-    const sourceSha256 = await sha256ResourcePublicationFile(sourcePath);
-    const entitiesSourceSha256 =
-      await sha256ResourcePublicationFile(entitiesPath);
-    const generatedAt = options.generatedAt ?? new Date().toISOString();
-    const tablesByModule = Object.fromEntries(
-      MODULE_IDS.map((moduleId) => [
-        moduleId,
-        readTables(path.join(projection, MODULE_FILES[moduleId]), moduleId)
-      ])
-    ) as Record<StrongLexiconModuleId, Record<string, JsonRow[]>>;
-    validateCrossModuleTables(tablesByModule);
-    const coreRevision = deriveStrongLexiconModuleRevision(
-      "core",
-      tablesByModule.core,
-      []
-    );
-    const coreDependency = [
-      {
-        resourceIdentity: "strong-lexicon:core" as const,
-        revision: coreRevision
-      }
-    ];
-    const revisions = {
-      core: coreRevision,
-      resources: deriveStrongLexiconModuleRevision(
-        "resources",
-        tablesByModule.resources,
-        coreDependency
-      ),
-      entities: deriveStrongLexiconModuleRevision(
-        "entities",
-        tablesByModule.entities,
-        coreDependency
-      )
-    } as Record<StrongLexiconModuleId, string>;
-    const manifests: StrongLexiconResourcePublicationManifest[] = [];
-
-    for (const moduleId of MODULE_IDS) {
-      const bundleDir = path.join(staging, moduleId);
-      const canonicalDir = path.join(bundleDir, "canonical");
-      const offlineDir = path.join(bundleDir, "offline");
-      mkdirSync(canonicalDir, { recursive: true });
-      mkdirSync(offlineDir, { recursive: true });
-      const dependencies =
-        moduleId === "core"
-          ? []
-          : [
-              {
-                resourceIdentity: "strong-lexicon:core" as const,
-                revision: revisions.core
-              }
-            ];
-      const tables = tablesByModule[moduleId];
-      const counts = Object.fromEntries(
-        Object.entries(tables).map(([table, rows]) => [table, rows.length])
-      );
-      const canonical: CanonicalStrongLexiconModule = {
-        format: "bible-strong-canonical-strong-lexicon-module",
-        schemaVersion: CANONICAL_SCHEMA_VERSION,
-        moduleId,
-        revision: revisions[moduleId],
-        dependencies,
-        tables,
-        counts
-      };
-      const canonicalPath = path.join(canonicalDir, `${moduleId}.json`);
-      writeFileSync(canonicalPath, `${JSON.stringify(canonical)}\n`);
-
-      const sqlitePath = path.join(offlineDir, MODULE_FILES[moduleId]);
-      copyFileSync(path.join(projection, MODULE_FILES[moduleId]), sqlitePath);
-      bindRevision(sqlitePath, moduleId, revisions[moduleId], revisions.core);
-      const archivePath = `${sqlitePath}.zip`;
-      createZip(sqlitePath, archivePath);
-      rmSync(sqlitePath);
-
-      const rights = config.modules[moduleId];
-      const manifest: StrongLexiconResourcePublicationManifest = {
-        format: "bible-strong-resource-publication",
-        schemaVersion: 1,
-        identity: {
-          kind: "strong-lexicon-module",
-          moduleId,
-          resourceId: `strong-lexicon:${moduleId}`,
-          language: "mul"
-        },
-        revision: revisions[moduleId],
-        canonical: {
-          path: `canonical/${moduleId}.json`,
-          mediaType: "application/json",
-          schemaVersion: CANONICAL_SCHEMA_VERSION,
-          sha256: await sha256ResourcePublicationFile(canonicalPath),
-          bytes: statSync(canonicalPath).size
-        },
-        offlineArtifact: {
-          path: `offline/${MODULE_FILES[moduleId]}.zip`,
-          mediaType: "application/zip",
-          entry: MODULE_FILES[moduleId],
-          sha256: await sha256ResourcePublicationFile(archivePath),
-          bytes: statSync(archivePath).size,
-          contentSha256: await sha256ZipEntry(
-            archivePath,
-            MODULE_FILES[moduleId]
+  return commitResourcePublicationBundle({
+    outputDir,
+    build: async (staging) => {
+      const projection = `${staging}-projection`;
+      try {
+        packageModularLexicon({
+          root,
+          sourcePath,
+          entitiesPath,
+          outputDir: projection,
+          generatedAt: options.generatedAt
+        });
+        const sourceSha256 = await sha256ResourcePublicationFile(sourcePath);
+        const entitiesSourceSha256 =
+          await sha256ResourcePublicationFile(entitiesPath);
+        const generatedAt = options.generatedAt ?? new Date().toISOString();
+        const tablesByModule = Object.fromEntries(
+          MODULE_IDS.map((moduleId) => [
+            moduleId,
+            readTables(path.join(projection, MODULE_FILES[moduleId]), moduleId)
+          ])
+        ) as Record<StrongLexiconModuleId, Record<string, JsonRow[]>>;
+        validateCrossModuleTables(tablesByModule);
+        const coreRevision = deriveStrongLexiconModuleRevision(
+          "core",
+          tablesByModule.core,
+          []
+        );
+        const coreDependency = [
+          {
+            resourceIdentity: "strong-lexicon:core" as const,
+            revision: coreRevision
+          }
+        ];
+        const revisions = {
+          core: coreRevision,
+          resources: deriveStrongLexiconModuleRevision(
+            "resources",
+            tablesByModule.resources,
+            coreDependency
+          ),
+          entities: deriveStrongLexiconModuleRevision(
+            "entities",
+            tablesByModule.entities,
+            coreDependency
           )
-        },
-        provenance: {
-          generator: "bible-lexicon-maker",
-          sourceVersion: config.sourceVersion,
-          sourceSha256:
-            moduleId === "entities" ? entitiesSourceSha256 : sourceSha256,
-          generatedAt
-        },
-        rights: {
-          holder: rights.holder,
-          termsReference: rights.termsReference,
-          attribution: rights.attribution,
-          reviewedAt: config.rightsReviewedAt,
-          online: rights.online,
-          offline: rights.offline
-        },
-        deliveryCapabilities: {
-          onlineAccess: rights.online,
-          offlineDownload: rights.offline,
-          localDevelopmentAccess: true
-        },
-        dependencies,
-        counts
-      };
-      writeFileSync(
-        path.join(bundleDir, "manifest.json"),
-        `${JSON.stringify(manifest, null, 2)}\n`
+        } as Record<StrongLexiconModuleId, string>;
+        const manifests: StrongLexiconResourcePublicationManifest[] = [];
+
+        for (const moduleId of MODULE_IDS) {
+          const bundleDir = path.join(staging, moduleId);
+          const canonicalDir = path.join(bundleDir, "canonical");
+          const offlineDir = path.join(bundleDir, "offline");
+          mkdirSync(canonicalDir, { recursive: true });
+          mkdirSync(offlineDir, { recursive: true });
+          const dependencies =
+            moduleId === "core"
+              ? []
+              : [
+                  {
+                    resourceIdentity: "strong-lexicon:core" as const,
+                    revision: revisions.core
+                  }
+                ];
+          const tables = tablesByModule[moduleId];
+          const counts = Object.fromEntries(
+            Object.entries(tables).map(([table, rows]) => [table, rows.length])
+          );
+          const canonical: CanonicalStrongLexiconModule = {
+            format: "bible-strong-canonical-strong-lexicon-module",
+            schemaVersion: CANONICAL_SCHEMA_VERSION,
+            moduleId,
+            revision: revisions[moduleId],
+            dependencies,
+            tables,
+            counts
+          };
+          const canonicalPath = path.join(canonicalDir, `${moduleId}.json`);
+          writeFileSync(canonicalPath, `${JSON.stringify(canonical)}\n`);
+
+          const sqlitePath = path.join(offlineDir, MODULE_FILES[moduleId]);
+          copyFileSync(
+            path.join(projection, MODULE_FILES[moduleId]),
+            sqlitePath
+          );
+          bindRevision(
+            sqlitePath,
+            moduleId,
+            revisions[moduleId],
+            revisions.core
+          );
+          const archivePath = `${sqlitePath}.zip`;
+          createZip(sqlitePath, archivePath);
+          rmSync(sqlitePath);
+
+          const rights = config.modules[moduleId];
+          const manifest: StrongLexiconResourcePublicationManifest = {
+            format: "bible-strong-resource-publication",
+            schemaVersion: 1,
+            identity: {
+              kind: "strong-lexicon-module",
+              moduleId,
+              resourceId: `strong-lexicon:${moduleId}`,
+              language: "mul"
+            },
+            revision: revisions[moduleId],
+            canonical: {
+              path: `canonical/${moduleId}.json`,
+              mediaType: "application/json",
+              schemaVersion: CANONICAL_SCHEMA_VERSION,
+              sha256: await sha256ResourcePublicationFile(canonicalPath),
+              bytes: statSync(canonicalPath).size
+            },
+            offlineArtifact: {
+              path: `offline/${MODULE_FILES[moduleId]}.zip`,
+              mediaType: "application/zip",
+              entry: MODULE_FILES[moduleId],
+              sha256: await sha256ResourcePublicationFile(archivePath),
+              bytes: statSync(archivePath).size,
+              contentSha256: await sha256ZipEntry(
+                archivePath,
+                MODULE_FILES[moduleId]
+              )
+            },
+            provenance: {
+              generator: "bible-lexicon-maker",
+              sourceVersion: config.sourceVersion,
+              sourceSha256:
+                moduleId === "entities" ? entitiesSourceSha256 : sourceSha256,
+              generatedAt
+            },
+            rights: {
+              holder: rights.holder,
+              termsReference: rights.termsReference,
+              attribution: rights.attribution,
+              reviewedAt: config.rightsReviewedAt,
+              online: rights.online,
+              offline: rights.offline
+            },
+            deliveryCapabilities: {
+              onlineAccess: rights.online,
+              offlineDownload: rights.offline,
+              localDevelopmentAccess: true
+            },
+            dependencies,
+            counts
+          };
+          writeFileSync(
+            path.join(bundleDir, "manifest.json"),
+            `${JSON.stringify(manifest, null, 2)}\n`
+          );
+          manifests.push(manifest);
+        }
+        return { outputDir, manifests };
+      } finally {
+        rmSync(projection, { recursive: true, force: true });
+      }
+    },
+    validate: async (staging) => {
+      await Promise.all(
+        MODULE_IDS.map((moduleId) =>
+          validateStrongLexiconResourcePublication(path.join(staging, moduleId))
+        )
       );
-      await validateStrongLexiconResourcePublication(bundleDir);
-      manifests.push(manifest);
     }
-    mkdirSync(path.dirname(outputDir), { recursive: true });
-    renameSync(staging, outputDir);
-    return { outputDir, manifests };
-  } catch (cause) {
-    rmSync(staging, { recursive: true, force: true });
-    throw cause;
-  } finally {
-    rmSync(projection, { recursive: true, force: true });
-  }
+  });
 }
 
 export async function validateStrongLexiconResourcePublication(

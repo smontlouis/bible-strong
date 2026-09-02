@@ -1,6 +1,7 @@
-import { bcv_parser } from '@bible-strong/bible-reference-parser/esm/bcv_parser.js'
-import * as en from '@bible-strong/bible-reference-parser/esm/lang/en.js'
-import * as fr from '@bible-strong/bible-reference-parser/esm/lang/fr.js'
+import {
+  createBibleReferenceParser,
+  type BibleReferenceParser,
+} from '@bible-strong/bible-reference-parser/reference-parser'
 
 // import structuredClone from '@ungap/structured-clone'
 import { getLanguage } from '../../i18n'
@@ -12,12 +13,6 @@ import { getSupportedOsisBookNumber, normalizeOsisReference } from './osisRefere
 
 const language = getLanguage()
 export type BcvLanguage = 'fr' | 'en'
-
-interface BcvParserWithTranslations extends bcv_parser {
-  translations: {
-    systems: Record<string, { chapters: Record<string, number[]>; order: Record<string, number> }>
-  }
-}
 
 interface OsisAndIndices {
   osis: string
@@ -40,22 +35,9 @@ export interface InlineBibleReference {
   target: BibleReferenceTarget
 }
 
-const createBcvParser = (parserLanguage: BcvLanguage): BcvParserWithTranslations => {
-  const parser = new bcv_parser(parserLanguage === 'fr' ? fr : en) as BcvParserWithTranslations
-
-  parser.set_options({
-    book_match_strategy: 'strict',
-    consecutive_combination_strategy: 'separate',
-    sequence_combination_strategy: 'separate',
-    testaments: 'ona',
-  })
-
-  return parser
-}
-
-const bcvByLanguage: Record<BcvLanguage, BcvParserWithTranslations> = {
-  fr: createBcvParser('fr'),
-  en: createBcvParser('en'),
+const bcvByLanguage: Record<BcvLanguage, BibleReferenceParser> = {
+  fr: createBibleReferenceParser('fr'),
+  en: createBibleReferenceParser('en'),
 }
 
 const getBcvParser = (parserLanguage: BcvLanguage = language === 'fr' ? 'fr' : 'en') =>
@@ -65,9 +47,10 @@ export const bcv = getBcvParser()
 
 type BookID = string
 
-const trans = 'default'
 function getLastVerseInChapter(book: BookID, chapter: number): number {
-  return getBcvParser().translations.systems[trans].chapters[book][chapter - 1]
+  const verse = getBcvParser().lastVerse(book, chapter)
+  if (verse === undefined) throw new Error(`Unknown Bible chapter: ${book}.${chapter}`)
+  return verse
 }
 
 const getBookNumber = (book: BookID, _parserLanguage?: BcvLanguage): number | undefined =>

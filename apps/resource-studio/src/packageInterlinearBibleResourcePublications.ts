@@ -30,6 +30,7 @@ import {
   resolveResourcePublicationPath,
   sha256ResourcePublicationFile
 } from "./resourcePublicationEnvelope.js";
+import { commitResourcePublicationBundle } from "./resourcePublicationCommit.js";
 import { STRONG_IDENTITY_KINDS as IDENTITY_KINDS } from "./strongIdentityKinds.js";
 
 const execFileAsync = promisify(execFile);
@@ -198,150 +199,152 @@ export async function buildInterlinearBibleResourcePublication(
     texts: decodeBibleTexts(bibleCanonicalValue.verses)
   };
 
-  const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
   const workDir = await mkdtemp(path.join(tmpdir(), "interlinear-build-"));
   const entry = `bible-step-interlinear-${options.language}.sqlite`;
   const normalizedSqlite = path.join(workDir, entry);
   const canonicalRelative = `canonical/bible-bhg-interlinear-${options.language}.json`;
   const offlineRelative = `offline/${entry}.zip`;
-  const canonicalPath = path.join(temporaryDir, canonicalRelative);
-  const offlinePath = path.join(temporaryDir, offlineRelative);
 
   try {
-    await Promise.all([
-      mkdir(workDir, { recursive: true }),
-      mkdir(path.dirname(canonicalPath), { recursive: true }),
-      mkdir(path.dirname(offlinePath), { recursive: true })
-    ]);
-    await copyFile(sourceSqlite, normalizedSqlite);
-    const sourceSha256 = await sha256ResourcePublicationFile(sourceSqlite);
-    const metadata = bindBibleDependency(
-      normalizedSqlite,
-      options.language,
-      bibleCanonical.textRevision,
-      bibleCanonical.textSha256
-    );
-    const content = readCanonicalContent(normalizedSqlite, {
-      language: options.language,
-      textRevision: bibleCanonical.textRevision,
-      textSha256: bibleCanonical.textSha256,
-      bibleTexts: bibleCanonical.texts
-    });
-    const withoutRevision = {
-      format: "bible-strong-canonical-interlinear-index" as const,
-      schemaVersion: 1 as const,
-      applicationVersionId: "BHG" as const,
-      datasetId: "STEP" as const,
-      language: options.language,
-      textRevision: bibleCanonical.textRevision,
-      textSha256: bibleCanonical.textSha256,
-      ...content
-    };
-    const revision = deriveInterlinearBibleResourceRevision(withoutRevision);
-    const canonical: CanonicalInterlinearBiblePublication = {
-      ...withoutRevision,
-      indexRevision: revision
-    };
-    bindIndexRevision(normalizedSqlite, revision);
-    await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
-    await utimes(normalizedSqlite, ZIP_TIME, ZIP_TIME);
-    await execFileAsync("zip", [
-      "-X",
-      "-q",
-      "-j",
-      offlinePath,
-      normalizedSqlite
-    ]);
-
-    const [canonicalStats, offlineStats, sqliteStats] = await Promise.all([
-      stat(canonicalPath),
-      stat(offlinePath),
-      stat(normalizedSqlite)
-    ]);
-    const manifest: InterlinearBiblePublicationManifest = {
-      format: "bible-strong-resource-publication",
-      schemaVersion: 1,
-      identity: {
-        kind: "interlinear-index",
-        versionId: "BHG",
-        datasetId: "STEP",
-        language: options.language
-      },
-      revision,
-      canonical: {
-        path: canonicalRelative,
-        mediaType: "application/json",
-        schemaVersion: 1,
-        sha256: await sha256ResourcePublicationFile(canonicalPath),
-        bytes: canonicalStats.size
-      },
-      offlineArtifact: {
-        path: offlineRelative,
-        mediaType: "application/zip",
-        entry,
-        sha256: await sha256ResourcePublicationFile(offlinePath),
-        bytes: offlineStats.size,
-        contentSha256: await sha256ResourcePublicationFile(normalizedSqlite)
-      },
-      provenance: {
-        generator: "bible-lexicon-maker",
-        sourceVersion: metadata.sourceVersion,
-        sourceSha256,
-        generatedAt: options.generatedAt ?? new Date().toISOString()
-      },
-      rights: {
-        holder: options.attribution,
-        termsReference: "CC BY 4.0",
-        attribution: options.attribution,
-        reviewedAt: options.rightsReviewedAt,
-        online: true,
-        offline: true
-      },
-      deliveryCapabilities: {
-        onlineAccess: true,
-        offlineDownload: true,
-        localDevelopmentAccess: true
-      },
-      dependencies: {
-        bible: {
-          resourceIdentity: "bible-text:BHG",
-          revision: bibleCanonical.textRevision,
+    return await commitResourcePublicationBundle({
+      outputDir,
+      build: async (temporaryDir) => {
+        const canonicalPath = path.join(temporaryDir, canonicalRelative);
+        const offlinePath = path.join(temporaryDir, offlineRelative);
+        await Promise.all([
+          mkdir(workDir, { recursive: true }),
+          mkdir(path.dirname(canonicalPath), { recursive: true }),
+          mkdir(path.dirname(offlinePath), { recursive: true })
+        ]);
+        await copyFile(sourceSqlite, normalizedSqlite);
+        const sourceSha256 = await sha256ResourcePublicationFile(sourceSqlite);
+        const metadata = bindBibleDependency(
+          normalizedSqlite,
+          options.language,
+          bibleCanonical.textRevision,
+          bibleCanonical.textSha256
+        );
+        const content = readCanonicalContent(normalizedSqlite, {
+          language: options.language,
+          textRevision: bibleCanonical.textRevision,
           textSha256: bibleCanonical.textSha256,
-          online: "required",
-          offline: "required"
-        },
-        strongLexiconModules: [
-          {
-            resourceIdentity: "strong-lexicon:core",
-            online: "required-for-lexical-details",
-            offline: "required-for-lexical-details"
+          bibleTexts: bibleCanonical.texts
+        });
+        const withoutRevision = {
+          format: "bible-strong-canonical-interlinear-index" as const,
+          schemaVersion: 1 as const,
+          applicationVersionId: "BHG" as const,
+          datasetId: "STEP" as const,
+          language: options.language,
+          textRevision: bibleCanonical.textRevision,
+          textSha256: bibleCanonical.textSha256,
+          ...content
+        };
+        const revision =
+          deriveInterlinearBibleResourceRevision(withoutRevision);
+        const canonical: CanonicalInterlinearBiblePublication = {
+          ...withoutRevision,
+          indexRevision: revision
+        };
+        bindIndexRevision(normalizedSqlite, revision);
+        await writeFile(
+          canonicalPath,
+          `${JSON.stringify(canonical)}\n`,
+          "utf8"
+        );
+        await utimes(normalizedSqlite, ZIP_TIME, ZIP_TIME);
+        await execFileAsync("zip", [
+          "-X",
+          "-q",
+          "-j",
+          offlinePath,
+          normalizedSqlite
+        ]);
+
+        const [canonicalStats, offlineStats, sqliteStats] = await Promise.all([
+          stat(canonicalPath),
+          stat(offlinePath),
+          stat(normalizedSqlite)
+        ]);
+        const manifest: InterlinearBiblePublicationManifest = {
+          format: "bible-strong-resource-publication",
+          schemaVersion: 1,
+          identity: {
+            kind: "interlinear-index",
+            versionId: "BHG",
+            datasetId: "STEP",
+            language: options.language
+          },
+          revision,
+          canonical: {
+            path: canonicalRelative,
+            mediaType: "application/json",
+            schemaVersion: 1,
+            sha256: await sha256ResourcePublicationFile(canonicalPath),
+            bytes: canonicalStats.size
+          },
+          offlineArtifact: {
+            path: offlineRelative,
+            mediaType: "application/zip",
+            entry,
+            sha256: await sha256ResourcePublicationFile(offlinePath),
+            bytes: offlineStats.size,
+            contentSha256: await sha256ResourcePublicationFile(normalizedSqlite)
+          },
+          provenance: {
+            generator: "bible-lexicon-maker",
+            sourceVersion: metadata.sourceVersion,
+            sourceSha256,
+            generatedAt: options.generatedAt ?? new Date().toISOString()
+          },
+          rights: {
+            holder: options.attribution,
+            termsReference: "CC BY 4.0",
+            attribution: options.attribution,
+            reviewedAt: options.rightsReviewedAt,
+            online: true,
+            offline: true
+          },
+          deliveryCapabilities: {
+            onlineAccess: true,
+            offlineDownload: true,
+            localDevelopmentAccess: true
+          },
+          dependencies: {
+            bible: {
+              resourceIdentity: "bible-text:BHG",
+              revision: bibleCanonical.textRevision,
+              textSha256: bibleCanonical.textSha256,
+              online: "required",
+              offline: "required"
+            },
+            strongLexiconModules: [
+              {
+                resourceIdentity: "strong-lexicon:core",
+                online: "required-for-lexical-details",
+                offline: "required-for-lexical-details"
+              }
+            ]
+          },
+          counts: {
+            verses: canonical.verses.length,
+            tokens: canonical.tokens.length,
+            segments: canonical.segments.length,
+            identities: canonical.segmentIdentities.length
           }
-        ]
+        };
+        if (sqliteStats.size <= 0) throw new Error("interlinear-offline-empty");
+        await writeFile(
+          path.join(temporaryDir, "manifest.json"),
+          `${JSON.stringify(manifest, null, 2)}\n`,
+          "utf8"
+        );
+        return { outputDir, manifest };
       },
-      counts: {
-        verses: canonical.verses.length,
-        tokens: canonical.tokens.length,
-        segments: canonical.segments.length,
-        identities: canonical.segmentIdentities.length
-      }
-    };
-    if (sqliteStats.size <= 0) throw new Error("interlinear-offline-empty");
-    await writeFile(
-      path.join(temporaryDir, "manifest.json"),
-      `${JSON.stringify(manifest, null, 2)}\n`,
-      "utf8"
-    );
-    await validateInterlinearBibleResourcePublication(temporaryDir);
+      validate: validateInterlinearBibleResourcePublication
+    });
+  } finally {
     await rm(workDir, { recursive: true, force: true });
-    await mkdir(path.dirname(outputDir), { recursive: true });
-    await rename(temporaryDir, outputDir);
-    return { outputDir, manifest };
-  } catch (error) {
-    await Promise.all([
-      rm(temporaryDir, { recursive: true, force: true }),
-      rm(workDir, { recursive: true, force: true })
-    ]);
-    throw error;
   }
 }
 

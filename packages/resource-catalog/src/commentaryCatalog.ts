@@ -49,7 +49,7 @@ export const COMMENTARY_CATALOG = [
   commentary({
     id: 'mhy-fr',
     publicationId: 'MHY',
-    shortName: 'Henry FR',
+    shortName: 'Henry',
     title: 'Commentaire concis de Matthew Henry',
     author: 'Matthew Henry',
     languages: ['fr'],
@@ -59,7 +59,7 @@ export const COMMENTARY_CATALOG = [
   }),
   commentary({
     id: 'mhcc',
-    shortName: 'Henry EN',
+    shortName: 'Henry',
     title: 'Matthew Henry Concise Commentary',
     author: 'Matthew Henry',
     languages: ['en'],

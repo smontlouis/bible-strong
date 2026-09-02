@@ -6,6 +6,10 @@
   "main": "esm/",
   "exports": {
     "./esm/*": "./esm/*",
+    "./reference-parser": {
+      "types": "./src/referenceParser.d.ts",
+      "default": "./src/referenceParser.js"
+    },
     "./osis-reference": "./src/osisReference.ts"
   },
   "files": [

@@ -83,6 +83,7 @@ import {
   NAVIGATE_TO_STRONG,
   DOWNLOAD_CHAPTER_ENTITIES,
   DISMISS_CONTEXTUAL_INFORMATION,
+  DOM_COMPONENT_MOUNTED,
   NAVIGATE_TO_BIBLE_VIEW,
   NAVIGATE_TO_PERICOPE,
   NAVIGATE_TO_RELATION_ENDPOINT,
@@ -111,7 +112,6 @@ import {
   SWIPE_RIGHT,
   SWIPE_UP,
   TOGGLE_SELECTED_VERSE,
-  isPersonalBibleDataAction,
 } from './dispatch'
 import {
   getBookmarkPayload,
@@ -124,6 +124,7 @@ import {
   getToastPayload,
   getVerseIdsPayload,
   isRecord,
+  routeBibleDOMBridgeAction,
   type BibleDOMBridgeAction,
   type StudyRelationsModalTarget,
 } from './bibleDomBridgeCommands'
@@ -506,10 +507,9 @@ export const BibleDOMWrapper = ({
     downloadFailed: t('bible.chapterEntities.downloadFailed'),
     dismiss: t('bible.chapterEntities.dismissAccessibility'),
   }
-  const dispatch: Dispatch = async action => {
+  const handleBridgeAction = async (action: BibleDOMBridgeAction) => {
     appLogger.debug('webview', 'bible_dom.dispatch', { actionType: action.type })
     if (__DEV__) console.log('[Bible] DISPATCH:', action.type)
-    if (!personalBibleDataEnabled && isPersonalBibleDataAction(action.type)) return
 
     switch (action.type) {
       case SET_BIBLE_OVERLAY_OPEN: {
@@ -935,7 +935,7 @@ export const BibleDOMWrapper = ({
         break
       }
 
-      case 'DOM_COMPONENT_MOUNTED': {
+      case DOM_COMPONENT_MOUNTED: {
         appLogger.info('webview', 'bible_dom.mounted', {
           version,
           book: book.Numero,
@@ -949,6 +949,20 @@ export const BibleDOMWrapper = ({
         break
       }
     }
+  }
+  const dispatch: Dispatch = async action => {
+    await routeBibleDOMBridgeAction(action, {
+      personalBibleDataEnabled,
+      handle: handleBridgeAction,
+      rejected: value => {
+        appLogger.captureError(
+          'webview',
+          'bible_dom.invalid_action',
+          new Error('BIBLE_DOM_BRIDGE_ACTION_INVALID'),
+          { actionType: isRecord(value) ? value.type : undefined }
+        )
+      },
+    })
   }
 
   // Pre-compute verse metadata on native side (avoids DOM JS thread work)

@@ -1,4 +1,4 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import {
@@ -7,7 +7,6 @@ import {
   mkdir,
   mkdtemp,
   readFile,
-  rename,
   rm,
   stat,
   writeFile
@@ -21,6 +20,7 @@ import {
   type MobileResourceCatalog
 } from "./packageMobileResourceCatalog.js";
 import { sha256ResourcePublicationFile } from "./resourcePublicationEnvelope.js";
+import { commitResourcePublicationBundle } from "./resourcePublicationCommit.js";
 
 const execFileAsync = promisify(execFile);
 const archiveEntry = "dictionary-directory.sqlite" as const;
@@ -153,138 +153,147 @@ export async function buildDictionaryDirectoryResourcePublication(options: {
       `dictionary-directory-publication-output-exists:${outputDir}`
     );
   }
-  const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
-  const mobileReleaseDir = `${temporaryDir}-mobile`;
   const canonicalRelativePath = "canonical/dictionary-directory.json";
   const offlineRelativePath = "offline/dictionary-directory.sqlite.zip";
-  const canonicalPath = path.join(temporaryDir, canonicalRelativePath);
-  try {
-    const metadata = await queryDirectoryMetadata(sqlitePath);
-    const contentSha256 = await sha256ResourcePublicationFile(sqlitePath);
-    const counts: DictionaryDirectoryCounts = {
-      works: metadata.works,
-      entries: metadata.entries,
-      correspondences: metadata.correspondences,
-      passageAnchors: metadata.passageAnchors
-    };
-    const canonical: CanonicalDictionaryDirectoryPublication = {
-      format: "bible-strong-canonical-dictionary-directory",
-      schemaVersion: 1,
-      revision: metadata.revision,
-      contentSha256,
-      counts
-    };
-    await mkdir(path.dirname(canonicalPath), { recursive: true });
-    await writeFile(canonicalPath, `${JSON.stringify(canonical)}\n`, "utf8");
-    const mobile = await buildMobileResourceCatalog({
-      outputDir: mobileReleaseDir,
-      generatedAt: options.generatedAt,
-      inventory: [
-        {
-          id: "dictionary-directory",
-          artifactUrl:
-            "https://local.invalid/dictionaries/dictionary-directory.sqlite.zip",
-          sources: [
+
+  return commitResourcePublicationBundle({
+    outputDir,
+    build: async (temporaryDir) => {
+      const mobileReleaseDir = `${temporaryDir}-mobile`;
+      const canonicalPath = path.join(temporaryDir, canonicalRelativePath);
+      try {
+        const metadata = await queryDirectoryMetadata(sqlitePath);
+        const contentSha256 = await sha256ResourcePublicationFile(sqlitePath);
+        const counts: DictionaryDirectoryCounts = {
+          works: metadata.works,
+          entries: metadata.entries,
+          correspondences: metadata.correspondences,
+          passageAnchors: metadata.passageAnchors
+        };
+        const canonical: CanonicalDictionaryDirectoryPublication = {
+          format: "bible-strong-canonical-dictionary-directory",
+          schemaVersion: 1,
+          revision: metadata.revision,
+          contentSha256,
+          counts
+        };
+        await mkdir(path.dirname(canonicalPath), { recursive: true });
+        await writeFile(
+          canonicalPath,
+          `${JSON.stringify(canonical)}\n`,
+          "utf8"
+        );
+        const mobile = await buildMobileResourceCatalog({
+          outputDir: mobileReleaseDir,
+          generatedAt: options.generatedAt,
+          inventory: [
             {
-              role: "canonical",
-              sourceUrl:
-                "https://local.invalid/dictionaries/dictionary-directory.sqlite",
-              sourcePath: sqlitePath,
-              entry: archiveEntry
+              id: "dictionary-directory",
+              artifactUrl:
+                "https://local.invalid/dictionaries/dictionary-directory.sqlite.zip",
+              sources: [
+                {
+                  role: "canonical",
+                  sourceUrl:
+                    "https://local.invalid/dictionaries/dictionary-directory.sqlite",
+                  sourcePath: sqlitePath,
+                  entry: archiveEntry
+                }
+              ],
+              strategy: "archive-extract",
+              resourceRevision: metadata.revision
             }
           ],
-          strategy: "archive-extract",
-          resourceRevision: metadata.revision
-        }
-      ],
-      requiredIds: ["dictionary-directory"]
-    });
-    const catalog = JSON.parse(
-      await readFile(mobile.catalogPath, "utf8")
-    ) as MobileResourceCatalog;
-    const artifact = catalog.resources["dictionary-directory"];
-    if (!artifact)
-      throw new Error("dictionary-directory-publication-offline-missing");
-    const offlineArtifactPath = path.join(temporaryDir, offlineRelativePath);
-    await mkdir(path.dirname(offlineArtifactPath), { recursive: true });
-    await copyFile(
-      path.join(mobileReleaseDir, artifact.file),
-      offlineArtifactPath
-    );
-    const [canonicalStat, offlineStat] = await Promise.all([
-      stat(canonicalPath),
-      stat(offlineArtifactPath)
-    ]);
-    const manifestWithoutPublicationRevision: Omit<
-      DictionaryDirectoryResourcePublicationManifest,
-      "publicationRevision"
-    > = {
-      format: "bible-strong-resource-publication",
-      schemaVersion: 1,
-      identity: {
-        kind: "dictionary-directory",
-        resourceId: "DICTIONARY_DIRECTORY",
-        language: "mul"
-      },
-      revision: metadata.revision,
-      canonical: {
-        path: canonicalRelativePath,
-        mediaType: "application/json",
-        schemaVersion: 1,
-        sha256: await sha256ResourcePublicationFile(canonicalPath),
-        bytes: canonicalStat.size
-      },
-      offlineArtifact: {
-        path: offlineRelativePath,
-        mediaType: "application/zip",
-        entry: archiveEntry,
-        sha256: await sha256ResourcePublicationFile(offlineArtifactPath),
-        bytes: offlineStat.size,
-        contentSha256
-      },
-      provenance: {
-        generator: "bible-lexicon-maker",
-        sourceVersion: metadata.revision,
-        sourceSha256: contentSha256,
-        generatedAt: options.generatedAt ?? new Date().toISOString()
-      },
-      rights: {
-        holder: "Selon les ressources dictionnaires participantes",
-        termsReference: "Voir les droits de chaque dictionnaire participant.",
-        attribution: "Index de découverte des dictionnaires Bible Strong",
-        online: true,
-        offline: true
-      },
-      deliveryCapabilities: {
-        onlineAccess: true,
-        offlineDownload: true
-      },
-      counts
-    };
-    const manifest: DictionaryDirectoryResourcePublicationManifest = {
-      ...manifestWithoutPublicationRevision,
-      publicationRevision: buildDictionaryDirectoryPublicationRevision(
-        manifestWithoutPublicationRevision
-      )
-    };
-    await writeFile(
-      path.join(temporaryDir, "manifest.json"),
-      `${JSON.stringify(manifest, null, 2)}\n`,
-      "utf8"
-    );
-    await mkdir(path.dirname(outputDir), { recursive: true });
-    await rename(temporaryDir, outputDir);
-    return {
-      outputDir,
-      manifestPath: path.join(outputDir, "manifest.json"),
-      manifest
-    };
-  } catch (error) {
-    await rm(temporaryDir, { recursive: true, force: true });
-    throw error;
-  } finally {
-    await rm(mobileReleaseDir, { recursive: true, force: true });
-  }
+          requiredIds: ["dictionary-directory"]
+        });
+        const catalog = JSON.parse(
+          await readFile(mobile.catalogPath, "utf8")
+        ) as MobileResourceCatalog;
+        const artifact = catalog.resources["dictionary-directory"];
+        if (!artifact)
+          throw new Error("dictionary-directory-publication-offline-missing");
+        const offlineArtifactPath = path.join(
+          temporaryDir,
+          offlineRelativePath
+        );
+        await mkdir(path.dirname(offlineArtifactPath), { recursive: true });
+        await copyFile(
+          path.join(mobileReleaseDir, artifact.file),
+          offlineArtifactPath
+        );
+        const [canonicalStat, offlineStat] = await Promise.all([
+          stat(canonicalPath),
+          stat(offlineArtifactPath)
+        ]);
+        const manifestWithoutPublicationRevision: Omit<
+          DictionaryDirectoryResourcePublicationManifest,
+          "publicationRevision"
+        > = {
+          format: "bible-strong-resource-publication",
+          schemaVersion: 1,
+          identity: {
+            kind: "dictionary-directory",
+            resourceId: "DICTIONARY_DIRECTORY",
+            language: "mul"
+          },
+          revision: metadata.revision,
+          canonical: {
+            path: canonicalRelativePath,
+            mediaType: "application/json",
+            schemaVersion: 1,
+            sha256: await sha256ResourcePublicationFile(canonicalPath),
+            bytes: canonicalStat.size
+          },
+          offlineArtifact: {
+            path: offlineRelativePath,
+            mediaType: "application/zip",
+            entry: archiveEntry,
+            sha256: await sha256ResourcePublicationFile(offlineArtifactPath),
+            bytes: offlineStat.size,
+            contentSha256
+          },
+          provenance: {
+            generator: "bible-lexicon-maker",
+            sourceVersion: metadata.revision,
+            sourceSha256: contentSha256,
+            generatedAt: options.generatedAt ?? new Date().toISOString()
+          },
+          rights: {
+            holder: "Selon les ressources dictionnaires participantes",
+            termsReference:
+              "Voir les droits de chaque dictionnaire participant.",
+            attribution: "Index de découverte des dictionnaires Bible Strong",
+            online: true,
+            offline: true
+          },
+          deliveryCapabilities: {
+            onlineAccess: true,
+            offlineDownload: true
+          },
+          counts
+        };
+        const manifest: DictionaryDirectoryResourcePublicationManifest = {
+          ...manifestWithoutPublicationRevision,
+          publicationRevision: buildDictionaryDirectoryPublicationRevision(
+            manifestWithoutPublicationRevision
+          )
+        };
+        await writeFile(
+          path.join(temporaryDir, "manifest.json"),
+          `${JSON.stringify(manifest, null, 2)}\n`,
+          "utf8"
+        );
+        return {
+          outputDir,
+          manifestPath: path.join(outputDir, "manifest.json"),
+          manifest
+        };
+      } finally {
+        await rm(mobileReleaseDir, { recursive: true, force: true });
+      }
+    },
+    validate: validateDictionaryDirectoryResourcePublication
+  });
 }
 
 export async function validateDictionaryDirectoryResourcePublication(

@@ -1,11 +1,10 @@
-import { createHash, randomUUID } from "node:crypto";
+import { createHash } from "node:crypto";
 import { execFile } from "node:child_process";
 import { createReadStream, existsSync } from "node:fs";
 import {
   copyFile,
   mkdir,
   readFile,
-  rename,
   rm,
   stat,
   writeFile
@@ -28,6 +27,7 @@ import {
   resolveResourcePublicationPath
 } from "./resourcePublicationEnvelope.js";
 import { buildCanonicalBibleFromLegacy } from "./legacyBiblePublication.js";
+import { commitResourcePublicationBundle } from "./resourcePublicationCommit.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -145,138 +145,142 @@ export async function buildBibleResourcePublication(
   const archiveFile = options.offlineArtifact
     ? path.basename(options.offlineArtifact.path)
     : `${canonicalEntry}.zip`;
-  const temporaryDir = `${outputDir}.tmp-${process.pid}-${randomUUID()}`;
-  const mobileReleaseDir = `${temporaryDir}-mobile`;
-
-  try {
-    const mobileResult = options.offlineArtifact
-      ? undefined
-      : await buildMobileResourceCatalog({
-          outputDir: mobileReleaseDir,
-          generatedAt: options.generatedAt,
-          inventory: [
-            {
-              id: `bible:${options.identity.versionId}`,
-              artifactUrl: `https://local.invalid/offline/${archiveFile}`,
-              sources: [
+  return commitResourcePublicationBundle({
+    outputDir,
+    build: async (temporaryDir) => {
+      const mobileReleaseDir = `${temporaryDir}-mobile`;
+      try {
+        const mobileResult = options.offlineArtifact
+          ? undefined
+          : await buildMobileResourceCatalog({
+              outputDir: mobileReleaseDir,
+              generatedAt: options.generatedAt,
+              inventory: [
                 {
-                  role: "canonical",
-                  sourceUrl: `https://local.invalid/canonical/${canonicalEntry}`,
-                  sourcePath: sourceCanonicalPath,
-                  entry: canonicalEntry
+                  id: `bible:${options.identity.versionId}`,
+                  artifactUrl: `https://local.invalid/offline/${archiveFile}`,
+                  sources: [
+                    {
+                      role: "canonical",
+                      sourceUrl: `https://local.invalid/canonical/${canonicalEntry}`,
+                      sourcePath: sourceCanonicalPath,
+                      entry: canonicalEntry
+                    }
+                  ],
+                  strategy: "sqlite-import"
                 }
               ],
-              strategy: "sqlite-import"
-            }
-          ],
-          requiredIds: [`bible:${options.identity.versionId}`]
-        });
-    const mobileCatalog = mobileResult
-      ? (JSON.parse(
-          await readFile(mobileResult.catalogPath, "utf8")
-        ) as MobileResourceCatalog)
-      : undefined;
-    const mobileArtifact =
-      options.offlineArtifact?.catalogEntry ??
-      mobileCatalog?.resources[`bible:${options.identity.versionId}`];
-    if (!mobileArtifact)
-      throw new Error("resource-publication-offline-artifact-missing");
+              requiredIds: [`bible:${options.identity.versionId}`]
+            });
+        const mobileCatalog = mobileResult
+          ? (JSON.parse(
+              await readFile(mobileResult.catalogPath, "utf8")
+            ) as MobileResourceCatalog)
+          : undefined;
+        const mobileArtifact =
+          options.offlineArtifact?.catalogEntry ??
+          mobileCatalog?.resources[`bible:${options.identity.versionId}`];
+        if (!mobileArtifact)
+          throw new Error("resource-publication-offline-artifact-missing");
 
-    const canonicalRelativePath = `canonical/${canonicalEntry}`;
-    const offlineRelativePath = `offline/${archiveFile}`;
-    const bundleCanonicalPath = path.join(temporaryDir, canonicalRelativePath);
-    const offlineArtifactPath = path.join(temporaryDir, offlineRelativePath);
-    await Promise.all([
-      mkdir(path.dirname(bundleCanonicalPath), { recursive: true }),
-      mkdir(path.dirname(offlineArtifactPath), { recursive: true })
-    ]);
-    await Promise.all([
-      copyFile(sourceCanonicalPath, bundleCanonicalPath),
-      copyFile(
-        options.offlineArtifact?.path ??
-          path.join(mobileReleaseDir, mobileArtifact.file),
-        offlineArtifactPath
-      )
-    ]);
+        const canonicalRelativePath = `canonical/${canonicalEntry}`;
+        const offlineRelativePath = `offline/${archiveFile}`;
+        const bundleCanonicalPath = path.join(
+          temporaryDir,
+          canonicalRelativePath
+        );
+        const offlineArtifactPath = path.join(
+          temporaryDir,
+          offlineRelativePath
+        );
+        await Promise.all([
+          mkdir(path.dirname(bundleCanonicalPath), { recursive: true }),
+          mkdir(path.dirname(offlineArtifactPath), { recursive: true })
+        ]);
+        await Promise.all([
+          copyFile(sourceCanonicalPath, bundleCanonicalPath),
+          copyFile(
+            options.offlineArtifact?.path ??
+              path.join(mobileReleaseDir, mobileArtifact.file),
+            offlineArtifactPath
+          )
+        ]);
 
-    const canonicalStats = await stat(bundleCanonicalPath);
-    const offlineStats = await stat(offlineArtifactPath);
-    const canonicalSha256 = await sha256File(bundleCanonicalPath);
-    if (
-      !options.offlineArtifact &&
-      mobileArtifact.entries.canonical?.sha256 !== canonicalSha256
-    ) {
-      throw new Error("resource-publication-offline-content-mismatch");
-    }
+        const canonicalStats = await stat(bundleCanonicalPath);
+        const offlineStats = await stat(offlineArtifactPath);
+        const canonicalSha256 = await sha256File(bundleCanonicalPath);
+        if (
+          !options.offlineArtifact &&
+          mobileArtifact.entries.canonical?.sha256 !== canonicalSha256
+        ) {
+          throw new Error("resource-publication-offline-content-mismatch");
+        }
 
-    const manifestWithoutPublicationRevision: Omit<
-      BibleResourcePublicationManifest,
-      "publicationRevision"
-    > = {
-      format: "bible-strong-resource-publication",
-      schemaVersion: 1,
-      identity: { kind: "bible-text", ...options.identity },
-      revision: canonical.textRevision,
-      canonical: {
-        path: canonicalRelativePath,
-        mediaType: "application/json",
-        schemaVersion: canonical.schemaVersion,
-        sha256: canonicalSha256,
-        bytes: canonicalStats.size
-      },
-      offlineArtifact: {
-        path: offlineRelativePath,
-        mediaType: "application/zip",
-        entry: mobileArtifact.entry,
-        sha256: await sha256File(offlineArtifactPath),
-        bytes: offlineStats.size,
-        contentSha256: mobileArtifact.entries.canonical!.sha256,
-        entries: mobileArtifact.entries
-      },
-      provenance: {
-        generator: "bible-lexicon-maker",
-        sourceVersion: canonical.sourceVersion,
-        sourceSha256: canonical.sourceSha256,
-        generatedAt: options.generatedAt,
-        ...(options.provenanceSources
-          ? { sources: options.provenanceSources }
-          : {})
-      },
-      rights: options.rights,
-      deliveryCapabilities: options.deliveryCapabilities,
-      canon: options.canon,
-      versification: options.versification,
-      coverage: derived.coverage,
-      counts: derived.counts
-    };
-    const manifest: BibleResourcePublicationManifest = {
-      ...manifestWithoutPublicationRevision,
-      publicationRevision: buildBibleResourcePublicationRevision(
-        manifestWithoutPublicationRevision
-      )
-    };
-    const manifestPath = path.join(temporaryDir, "manifest.json");
-    await writeFile(
-      manifestPath,
-      `${JSON.stringify(manifest, null, 2)}\n`,
-      "utf8"
-    );
-    await validateBibleResourcePublication(temporaryDir);
-    await mkdir(path.dirname(outputDir), { recursive: true });
-    await rename(temporaryDir, outputDir);
-    return {
-      outputDir,
-      manifestPath: path.join(outputDir, "manifest.json"),
-      canonicalPath: path.join(outputDir, canonicalRelativePath),
-      offlineArtifactPath: path.join(outputDir, offlineRelativePath),
-      manifest
-    };
-  } catch (error) {
-    await rm(temporaryDir, { recursive: true, force: true });
-    throw error;
-  } finally {
-    await rm(mobileReleaseDir, { recursive: true, force: true });
-  }
+        const manifestWithoutPublicationRevision: Omit<
+          BibleResourcePublicationManifest,
+          "publicationRevision"
+        > = {
+          format: "bible-strong-resource-publication",
+          schemaVersion: 1,
+          identity: { kind: "bible-text", ...options.identity },
+          revision: canonical.textRevision,
+          canonical: {
+            path: canonicalRelativePath,
+            mediaType: "application/json",
+            schemaVersion: canonical.schemaVersion,
+            sha256: canonicalSha256,
+            bytes: canonicalStats.size
+          },
+          offlineArtifact: {
+            path: offlineRelativePath,
+            mediaType: "application/zip",
+            entry: mobileArtifact.entry,
+            sha256: await sha256File(offlineArtifactPath),
+            bytes: offlineStats.size,
+            contentSha256: mobileArtifact.entries.canonical!.sha256,
+            entries: mobileArtifact.entries
+          },
+          provenance: {
+            generator: "bible-lexicon-maker",
+            sourceVersion: canonical.sourceVersion,
+            sourceSha256: canonical.sourceSha256,
+            generatedAt: options.generatedAt,
+            ...(options.provenanceSources
+              ? { sources: options.provenanceSources }
+              : {})
+          },
+          rights: options.rights,
+          deliveryCapabilities: options.deliveryCapabilities,
+          canon: options.canon,
+          versification: options.versification,
+          coverage: derived.coverage,
+          counts: derived.counts
+        };
+        const manifest: BibleResourcePublicationManifest = {
+          ...manifestWithoutPublicationRevision,
+          publicationRevision: buildBibleResourcePublicationRevision(
+            manifestWithoutPublicationRevision
+          )
+        };
+        const manifestPath = path.join(temporaryDir, "manifest.json");
+        await writeFile(
+          manifestPath,
+          `${JSON.stringify(manifest, null, 2)}\n`,
+          "utf8"
+        );
+        return {
+          outputDir,
+          manifestPath: path.join(outputDir, "manifest.json"),
+          canonicalPath: path.join(outputDir, canonicalRelativePath),
+          offlineArtifactPath: path.join(outputDir, offlineRelativePath),
+          manifest
+        };
+      } finally {
+        await rm(mobileReleaseDir, { recursive: true, force: true });
+      }
+    },
+    validate: validateBibleResourcePublication
+  });
 }
 
 export async function validateBibleResourcePublication(

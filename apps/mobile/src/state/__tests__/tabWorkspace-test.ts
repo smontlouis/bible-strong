@@ -1,6 +1,7 @@
 import {
   addTabToGroup,
   clampTabIndex,
+  createTabWorkspaceController,
   createTabGroup,
   deleteTabGroup,
   moveTabToGroup,
@@ -172,5 +173,43 @@ describe('tabWorkspace', () => {
 
     expect(result.ok).toBe(true)
     expect(result.groups.map(group => group.id)).toEqual(['second', 'third', 'default'])
+  })
+
+  it('owns persistence, cache eviction, activation, and cleanup through its adapter', () => {
+    let groups = [makeGroup('default', [makeTab('a')]), makeGroup('other', [makeTab('b')])]
+    let cachedTabIds = ['a', 'b']
+    let activeGroupId = 'default'
+    const cleaned: string[] = []
+    const workspace = createTabWorkspaceController(
+      {
+        readGroups: () => groups,
+        writeGroups: value => {
+          groups = value
+        },
+        readCachedTabIds: () => cachedTabIds,
+        writeCachedTabIds: value => {
+          cachedTabIds = value
+        },
+        writeActiveGroupId: value => {
+          activeGroupId = value
+        },
+        cleanupGroup: id => cleaned.push(id),
+        createGroupId: () => 'created',
+        createDefaultTab: () => makeTab('new'),
+        now: () => 10,
+        warn: jest.fn(),
+      },
+      3
+    )
+
+    expect(workspace.switchGroup('other')).toBe(true)
+    expect(activeGroupId).toBe('other')
+    expect(cachedTabIds).toEqual([])
+
+    cachedTabIds = ['a', 'b']
+    expect(workspace.deleteGroup('other')).toBe(true)
+    expect(groups.map(group => group.id)).toEqual(['default'])
+    expect(cachedTabIds).toEqual(['a'])
+    expect(cleaned).toEqual(['other'])
   })
 })

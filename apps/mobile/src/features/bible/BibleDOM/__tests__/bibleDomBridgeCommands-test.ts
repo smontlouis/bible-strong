@@ -1,4 +1,6 @@
+import { NAVIGATE_TO_BIBLE_NOTE, NAVIGATE_TO_PERICOPE } from '../dispatch'
 import {
+  decodeBibleDOMBridgeAction,
   getCanonicalBibleNotePayload,
   getNoteNavigationPayload,
   getNumberPayload,
@@ -7,9 +9,10 @@ import {
   getStudyRelationsModalTarget,
   getToastPayload,
   getVerseIdsPayload,
+  routeBibleDOMBridgeAction,
 } from '../bibleDomBridgeCommands'
 
-describe('bibleDomBridgeCommands', () => {
+describe('Bible DOM bridge', () => {
   it('parses primitive string and number payloads conservatively', () => {
     expect(getStringPayload('note-1')).toBe('note-1')
     expect(getStringPayload({ value: 'note-1' })).toBeUndefined()
@@ -104,5 +107,34 @@ describe('bibleDomBridgeCommands', () => {
     expect(
       getCanonicalBibleNotePayload({ kind: 'note', markup: 'missing offsets' })
     ).toBeUndefined()
+  })
+
+  it('rejects unknown commands and malformed coordinates at the boundary', () => {
+    expect(decodeBibleDOMBridgeAction({ type: 'EXECUTE_ARBITRARY_CODE' })).toBeUndefined()
+    expect(
+      decodeBibleDOMBridgeAction({ type: NAVIGATE_TO_PERICOPE, chapter: { unsafe: true } })
+    ).toBeUndefined()
+  })
+
+  it('blocks personal data commands before invoking native handlers', async () => {
+    const handle = jest.fn(async () => undefined)
+
+    await expect(
+      routeBibleDOMBridgeAction(
+        { type: NAVIGATE_TO_BIBLE_NOTE, payload: 'note-1' },
+        { personalBibleDataEnabled: false, handle }
+      )
+    ).resolves.toBe('blocked')
+    expect(handle).not.toHaveBeenCalled()
+  })
+
+  it('routes a recognized reading command through the injected native handler', async () => {
+    const handle = jest.fn(async () => undefined)
+    const action = { type: NAVIGATE_TO_PERICOPE }
+
+    await expect(
+      routeBibleDOMBridgeAction(action, { personalBibleDataEnabled: false, handle })
+    ).resolves.toBe('handled')
+    expect(handle).toHaveBeenCalledWith(action)
   })
 })

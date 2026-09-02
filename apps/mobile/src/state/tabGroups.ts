@@ -1,17 +1,8 @@
 import { useAtomValue, useSetAtom } from 'jotai/react'
-import { atom, getDefaultStore } from 'jotai/vanilla'
+import { atom, getDefaultStore, type Getter, type Setter } from 'jotai/vanilla'
 
 import generateUUID from '~helpers/generateUUID'
-import {
-  addTabToGroup,
-  createTabGroup,
-  deleteTabGroup,
-  moveTabToGroup,
-  renameTabGroup,
-  reorderTabGroups,
-  switchTabGroup,
-  updateTabGroup,
-} from './tabWorkspace'
+import { createTabWorkspaceController, renameTabGroup, updateTabGroup } from './tabWorkspace'
 import {
   tabGroupsAtom,
   activeGroupIdAtom,
@@ -32,6 +23,23 @@ import {
 
 export const generateGroupId = () => `group-${generateUUID()}`
 
+const tabWorkspace = (get: Getter, set: Setter) =>
+  createTabWorkspaceController(
+    {
+      readGroups: () => get(tabGroupsAtom),
+      writeGroups: groups => set(tabGroupsAtom, groups),
+      readCachedTabIds: () => get(cachedTabIdsAtom),
+      writeCachedTabIds: tabIds => set(cachedTabIdsAtom, tabIds),
+      writeActiveGroupId: groupId => set(activeGroupIdAtom, groupId),
+      cleanupGroup: cleanupGroupTabsAtomCache,
+      createGroupId: generateGroupId,
+      createDefaultTab: getDefaultBibleTab,
+      now: Date.now,
+      warn: (message, detail) => console.warn(message, detail ?? ''),
+    },
+    MAX_TAB_GROUPS
+  )
+
 // ============================================================================
 // ACTION ATOMS
 // ============================================================================
@@ -43,30 +51,7 @@ export const generateGroupId = () => `group-${generateUUID()}`
 export const createGroupAtom = atom(
   null,
   (get, set, { name, color }: { name: string; color: string }) => {
-    const groups = get(tabGroupsAtom)
-
-    if (groups.length >= MAX_TAB_GROUPS) {
-      console.warn('[TabGroups] Maximum group limit reached')
-      return null
-    }
-
-    const now = Date.now()
-    const newGroup: TabGroup = {
-      id: generateGroupId(),
-      name,
-      color,
-      isDefault: false,
-      tabs: [getDefaultBibleTab()],
-      activeTabIndex: 0,
-      createdAt: now,
-      updatedAt: now,
-    }
-
-    const result = createTabGroup(groups, newGroup, MAX_TAB_GROUPS)
-    if (!result.ok) return null
-
-    set(tabGroupsAtom, result.groups)
-    return result.value ?? null
+    return tabWorkspace(get, set).createGroup({ name, color })
   }
 )
 
@@ -75,21 +60,7 @@ export const createGroupAtom = atom(
  * Clears the cache to unload tabs from the previous group
  */
 export const switchGroupAtom = atom(null, (get, set, groupId: string) => {
-  const groups = get(tabGroupsAtom)
-  const result = switchTabGroup(groups, groupId)
-
-  if (!result.ok) {
-    console.warn('[TabGroups] Group not found:', groupId)
-    return false
-  }
-
-  // Clear cached tab IDs - this will unload tabs from the previous group
-  set(cachedTabIdsAtom, result.cacheTabIds ?? [])
-
-  // Switch to the new group
-  set(activeGroupIdAtom, result.value ?? groupId)
-
-  return true
+  return tabWorkspace(get, set).switchGroup(groupId)
 })
 
 /**
@@ -122,35 +93,7 @@ export const updateGroupAtom = atom(
  * If deleting the active group, switches to the default group
  */
 export const deleteGroupAtom = atom(null, (get, set, groupId: string) => {
-  const groups = get(tabGroupsAtom)
-  const targetGroup = groups.find(g => g.id === groupId)
-
-  if (!targetGroup) {
-    console.warn('[TabGroups] Group not found:', groupId)
-    return false
-  }
-
-  if (targetGroup.isDefault) {
-    console.warn('[TabGroups] Cannot delete the default group')
-    return false
-  }
-
-  const cachedIds = get(cachedTabIdsAtom)
-  const result = deleteTabGroup(groups, groupId, cachedIds)
-  if (!result.ok) return false
-
-  set(cachedTabIdsAtom, result.cacheTabIds ?? cachedIds)
-
-  // Clean up per-group atom cache
-  cleanupGroupTabsAtomCache(groupId)
-
-  // Remove the group
-  set(tabGroupsAtom, result.groups)
-
-  // Note: Navigation après suppression est gérée par l'appelant (GroupActionsPopover)
-  // via groupPager.navigateToPage() qui set aussi activeGroupIdAtom
-
-  return true
+  return tabWorkspace(get, set).deleteGroup(groupId)
 })
 
 /**
@@ -159,17 +102,7 @@ export const deleteGroupAtom = atom(null, (get, set, groupId: string) => {
 export const addTabToGroupAtom = atom(
   null,
   (get, set, { groupId, tab }: { groupId: string; tab: TabItem }) => {
-    const groups = get(tabGroupsAtom)
-    const result = addTabToGroup(groups, groupId, tab)
-
-    if (!result.ok) {
-      console.warn('[TabGroups] Group not found:', groupId)
-      return false
-    }
-
-    set(tabGroupsAtom, result.groups)
-
-    return true
+    return tabWorkspace(get, set).addTab(groupId, tab)
   }
 )
 
@@ -183,19 +116,7 @@ export const moveTabToGroupAtom = atom(
     set,
     { tabId, fromGroupId, toGroupId }: { tabId: string; fromGroupId: string; toGroupId: string }
   ) => {
-    const groups = get(tabGroupsAtom)
-    const cachedIds = get(cachedTabIdsAtom)
-    const result = moveTabToGroup(groups, { tabId, fromGroupId, toGroupId, cacheTabIds: cachedIds })
-    if (!result.ok) {
-      console.warn('[TabGroups] Source, target group, or tab not found')
-      return false
-    }
-
-    set(tabGroupsAtom, result.groups)
-    if (cachedIds.includes(tabId)) {
-      set(cachedTabIdsAtom, result.cacheTabIds ?? cachedIds)
-    }
-    return true
+    return tabWorkspace(get, set).moveTab(tabId, fromGroupId, toGroupId)
   }
 )
 
@@ -205,15 +126,7 @@ export const moveTabToGroupAtom = atom(
 export const reorderGroupsAtom = atom(
   null,
   (get, set, { fromIndex, toIndex }: { fromIndex: number; toIndex: number }) => {
-    const groups = get(tabGroupsAtom)
-
-    const result = reorderTabGroups(groups, fromIndex, toIndex)
-    if (!result.ok) {
-      return false
-    }
-
-    set(tabGroupsAtom, result.groups)
-    return true
+    return tabWorkspace(get, set).reorderGroups(fromIndex, toIndex)
   }
 )
 
@@ -304,17 +217,7 @@ export const getActiveGroup = (): TabGroup => {
 /** Switch to a different group (outside React) */
 export const switchGroupFromOutsideReact = (groupId: string): boolean => {
   const store = getDefaultStore()
-  const groups = store.get(tabGroupsAtom)
-
-  const result = switchTabGroup(groups, groupId)
-  if (!result.ok) {
-    return false
-  }
-
-  store.set(cachedTabIdsAtom, result.cacheTabIds ?? [])
-  store.set(activeGroupIdAtom, result.value ?? groupId)
-
-  return true
+  return tabWorkspace(store.get, store.set).switchGroup(groupId)
 }
 
 /** Create a new group (outside React) */
@@ -323,27 +226,5 @@ export const createGroupFromOutsideReact = (
   color: string = GROUP_COLORS[0]
 ): string | null => {
   const store = getDefaultStore()
-  const groups = store.get(tabGroupsAtom)
-
-  if (groups.length >= MAX_TAB_GROUPS) {
-    return null
-  }
-
-  const now = Date.now()
-  const newGroup: TabGroup = {
-    id: generateGroupId(),
-    name,
-    color,
-    isDefault: false,
-    tabs: [getDefaultBibleTab()],
-    activeTabIndex: 0,
-    createdAt: now,
-    updatedAt: now,
-  }
-
-  const result = createTabGroup(groups, newGroup, MAX_TAB_GROUPS)
-  if (!result.ok) return null
-
-  store.set(tabGroupsAtom, result.groups)
-  return result.value ?? null
+  return tabWorkspace(store.get, store.set).createGroup({ name, color })
 }
