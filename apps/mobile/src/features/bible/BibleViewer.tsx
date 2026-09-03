@@ -818,7 +818,7 @@ const BibleViewer = ({
     if (mainReadingQuery.isPlaceholderData || !mainResult?.success || !mainResult.data) {
       return
     }
-    const historyKey = `${version}:${book.Numero}:${chapter}:${mainReadingQuery.dataUpdatedAt}`
+    const historyKey = `${version}:${book.Numero}:${chapter}:${verse}`
     if (recordedHistoryKeyRef.current === historyKey) return
     recordedHistoryKeyRef.current = historyKey
 
@@ -842,7 +842,6 @@ const BibleViewer = ({
     addHistory,
     book.Numero,
     chapter,
-    mainReadingQuery.dataUpdatedAt,
     mainReadingQuery.isPlaceholderData,
     mainResult,
     verse,

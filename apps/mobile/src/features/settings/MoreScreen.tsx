@@ -175,6 +175,15 @@ export const More = ({ closeMenu }: MoreProps) => {
               {t('settings.resources')}
             </Text>
           </SectionCardHeader>
+          <CardLinkItem route="History">
+            <IconCircle bg="rgba(107, 114, 128, 0.1)">
+              <FeatherIcon name="clock" size={20} color="grey" />
+            </IconCircle>
+            <Text flex fontSize={15}>
+              {t('history.title')}
+            </Text>
+            <FeatherIcon name="chevron-right" size={20} color="grey" />
+          </CardLinkItem>
           <CardLinkItem route="Lexique">
             <IconCircle bg="rgba(59, 130, 246, 0.1)">
               <LexiqueIcon size={20} color="primary" />

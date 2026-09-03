@@ -1,6 +1,7 @@
 import styled from '@emotion/native'
 import distanceInWords from 'date-fns/formatDistance'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { Alert } from 'react-native'
 
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import { Trans, useTranslation } from 'react-i18next'
@@ -18,7 +19,6 @@ import formatVerseContent from '~helpers/formatVerseContent'
 import { getHistoryStrongReference } from '~helpers/historyStrongReference'
 import useLanguage from '~helpers/useLanguage'
 import { getDateLocale } from '~helpers/languageUtils'
-import { useMountTime } from '~helpers/useMountTime'
 import {
   deleteHistoryAtom,
   historyAtom,
@@ -37,15 +37,14 @@ const Chip = styled.View<{ color: string }>(({ theme, color }) => ({
   marginBottom: 5,
 }))
 
-const HistoryItem = ({ item }: { item: HistoryItemType }) => {
-  const mountTime = useMountTime()
+const HistoryItem = ({ item, currentTime }: { item: HistoryItemType; currentTime: number }) => {
   const { t } = useTranslation()
   const lang = useLanguage()
 
   if (item.type === 'strong') {
     const { Hebreu, Grec, Mot, date, book } = item
     const persistedReference = getHistoryStrongReference(item)
-    const ago = distanceInWords(Number(date), mountTime, {
+    const ago = distanceInWords(Number(date), currentTime, {
       locale: getDateLocale(lang),
     })
     return (
@@ -74,7 +73,7 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
   }
   if (item.type === 'verse') {
     const { book, chapter, verse, version, date } = item
-    const ago = distanceInWords(Number(date), mountTime, {
+    const ago = distanceInWords(Number(date), currentTime, {
       locale: getDateLocale(lang),
     })
     const bookNumber = Number(book)
@@ -118,13 +117,31 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
   }
   if (item.type === 'word') {
     const { word, date } = item
-    const ago = distanceInWords(Number(date), mountTime, {
+    const ago = distanceInWords(Number(date), currentTime, {
       locale: getDateLocale(lang),
     })
     return (
-      <Link route="DictionnaryDetail" params={{ word }}>
+      <Link
+        route="DictionnaryDetail"
+        params={{
+          word,
+          entryId: item.entryId,
+          correspondenceId: item.correspondenceId,
+          work: item.work,
+          resourceId: item.resourceId,
+          dictionaryTitle: item.dictionaryTitle,
+          language: item.language,
+        }}
+      >
         <Box padding={20} row alignItems="center">
-          <Text bold>{word}</Text>
+          <Box flex>
+            <Text bold>{word}</Text>
+            {item.dictionaryTitle ? (
+              <Text marginTop={5} color="grey" fontSize={12} numberOfLines={1}>
+                {item.dictionaryTitle}
+              </Text>
+            ) : null}
+          </Box>
           <Box marginLeft="auto">
             <Chip color="secondary">
               <Text bold fontSize={8}>
@@ -143,7 +160,7 @@ const HistoryItem = ({ item }: { item: HistoryItemType }) => {
 
   if (item.type === 'nave') {
     const { name, name_lower, date } = item
-    const ago = distanceInWords(Number(date), mountTime, {
+    const ago = distanceInWords(Number(date), currentTime, {
       locale: getDateLocale(lang),
     })
     return (
@@ -172,16 +189,35 @@ const History = () => {
   const history = useAtomValue(historyAtom)
   const deleteHistory = useSetAtom(deleteHistoryAtom)
   const { t } = useTranslation()
+  const [currentTime, setCurrentTime] = useState(Date.now)
+
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(Date.now()), 60_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const confirmDeleteHistory = () => {
+    Alert.alert(t('history.clearTitle'), t('history.clearMessage', { count: history.length }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('history.clearAction'), style: 'destructive', onPress: deleteHistory },
+    ])
+  }
 
   return (
     <Container>
       <Header
         hasBackButton
-        title={t('Historique')}
+        title={t('history.title')}
         rightComponent={
-          <Link accessibilityLabel={t('Supprimer')} onPress={deleteHistory} padding>
-            <FeatherIcon size={20} name="trash-2" color="quart" />
-          </Link>
+          history.length ? (
+            <Link
+              accessibilityLabel={t('history.clearAction')}
+              onPress={confirmDeleteHistory}
+              padding
+            >
+              <FeatherIcon size={20} name="trash-2" color="quart" />
+            </Link>
+          ) : undefined
         }
       />
       <Box flex>
@@ -189,13 +225,15 @@ const History = () => {
           <FlatList
             removeClippedSubviews
             data={history}
-            keyExtractor={(item: HistoryItemType) => item.date.toString()}
-            renderItem={({ item }: { item: HistoryItemType }) => <HistoryItem item={item} />}
+            keyExtractor={(item: HistoryItemType) => item.id}
+            renderItem={({ item }: { item: HistoryItemType }) => (
+              <HistoryItem item={item} currentTime={currentTime} />
+            )}
           />
         ) : (
           <Empty
             icon={require('~assets/images/empty-state-icons/history.svg')}
-            message="Historique vide..."
+            message={t('history.empty')}
           />
         )}
       </Box>

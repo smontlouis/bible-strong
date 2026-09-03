@@ -208,10 +208,26 @@ const DictionnaryDetailScreen = ({
     if (!word || !dictionnaireItem) return
     addHistory({
       word,
+      entryId,
+      correspondenceId,
+      work,
+      resourceId,
+      dictionaryTitle: resolvedDictionaryTitle,
+      language: dictionaryResourceLanguage,
       type: 'word',
       date: Date.now(),
     })
-  }, [addHistory, dictionnaireItem, word])
+  }, [
+    addHistory,
+    correspondenceId,
+    dictionaryResourceLanguage,
+    dictionnaireItem,
+    entryId,
+    resourceId,
+    resolvedDictionaryTitle,
+    word,
+    work,
+  ])
 
   const openLink = ({ href, type }: HTMLViewLinkPayload) => {
     if (href.startsWith('bible://')) {

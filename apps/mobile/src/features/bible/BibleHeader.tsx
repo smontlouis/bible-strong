@@ -341,7 +341,7 @@ const Header = ({
       image: 'rectangle.split.2x1',
       state: isParallel ? 'on' : 'off',
     },
-    { id: 'history', title: t('Historique'), image: 'clock.arrow.circlepath' },
+    { id: 'history', title: t('history.title'), image: 'clock.arrow.circlepath' },
     ...(!hidePersonalBibleData
       ? [
           {

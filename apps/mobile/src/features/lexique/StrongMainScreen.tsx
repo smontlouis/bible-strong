@@ -42,7 +42,6 @@ const StrongMainScreen = ({
     resources,
     identity,
     coreAvailability,
-    entryQuery,
     entry,
     languageState: { language: resourceLanguage },
   } = entryState
@@ -56,7 +55,7 @@ const StrongMainScreen = ({
   const routeNavigation = useStrongRouteNavigation(activeContext)
   const addHistory = useSetAtom(historyAtom)
   const { t } = useTranslation()
-  const historyDataUpdatedAtRef = useRef(0)
+  const recordedHistoryReferenceRef = useRef<string | undefined>(undefined)
   const defaultStrongBibleVersionId = useSelector(
     (state: RootState) => state.user.bible.settings.defaultStrongBibleVersionId ?? 'LSG'
   )
@@ -172,8 +171,8 @@ const StrongMainScreen = ({
     networkMode: 'always',
   })
   useEffect(() => {
-    if (!entry || historyDataUpdatedAtRef.current === entryQuery.dataUpdatedAt) return
-    historyDataUpdatedAtRef.current = entryQuery.dataUpdatedAt
+    if (!entry || recordedHistoryReferenceRef.current === entry.stepCode) return
+    recordedHistoryReferenceRef.current = entry.stepCode
     addHistory({
       Hebreu: entry.language === 'hebrew' ? entry.original : '',
       Grec: entry.language === 'greek' ? entry.original : '',
@@ -183,7 +182,7 @@ const StrongMainScreen = ({
       date: Date.now(),
       type: 'strong',
     })
-  }, [addHistory, entry, entryQuery.dataUpdatedAt])
+  }, [addHistory, entry])
 
   useEffect(() => {
     if (entry) onTitleChange?.(`${entry.stepCode} · ${entry.gloss}`)

@@ -1,8 +1,12 @@
-import { produce } from 'immer'
 import { atom } from 'jotai/vanilla'
 import { Tag, VerseIds } from '~common/types'
 import atomWithAsyncStorage from '~helpers/atomWithAsyncStorage'
-import { getHistoryStrongReference } from '~helpers/historyStrongReference'
+import {
+  addHistoryItem,
+  HistoryItem,
+  HistoryItemInput,
+  migrateHistoryItems,
+} from '~features/history/historyModel'
 import {
   tabGroupsAtom,
   activeGroupIdAtom,
@@ -73,128 +77,34 @@ export const bibleDataRefreshSignalAtom = atom(0)
 // after first-run resource installation.
 export const bibleDomRemountSignalAtom = atom(0)
 
+export type { HistoryItem } from '~features/history/historyModel'
+
+export const historyBaseAtom = atomWithAsyncStorage<HistoryItem[]>('history', [], {
+  migrate: migrateHistoryItems,
+})
+
+export const historyAtom = atom(
+  get => get(historyBaseAtom),
+  (get, set, newItem: HistoryItemInput) => {
+    const history = get(historyBaseAtom)
+    set(historyBaseAtom, addHistoryItem(history, newItem))
+  }
+)
+
+export const deleteHistoryAtom = atom(null, (_get, set) => {
+  set(historyBaseAtom, [])
+})
+
 export const resetUserAtomsAtom = atom(null, (get, set) => {
   // Reset to a single default group with one Bible tab
   set(tabGroupsAtom, [createDefaultGroup()])
   set(activeGroupIdAtom, DEFAULT_GROUP_ID)
   set(cachedTabIdsAtom, [])
+  set(historyBaseAtom, [])
 
   // Reset app switcher mode to view (first tab expanded)
   set(appSwitcherModeAtom, 'view')
 
   // Trigger animation reset in AppSwitcherProvider
   set(resetTabAnimationTriggerAtom, get(resetTabAnimationTriggerAtom) + 1)
-})
-
-type BaseHistoryItem = {
-  date: number
-}
-export type HistoryStrongItem = BaseHistoryItem & {
-  type: 'strong'
-  Hebreu: string
-  Grec: string
-  Mot: string
-  book: number
-  reference?: string
-  Code?: string | number
-}
-
-export type HistoryVerseItem = BaseHistoryItem & {
-  type: 'verse'
-  book: string | number
-  chapter: string | number
-  verse: string | number
-  version: string
-}
-
-export type HistoryWordItem = BaseHistoryItem & {
-  type: 'word'
-  word: string
-}
-
-export type HistoryNaveItem = BaseHistoryItem & {
-  type: 'nave'
-  name: string
-  name_lower: string
-}
-
-export type HistoryItem = HistoryStrongItem | HistoryVerseItem | HistoryWordItem | HistoryNaveItem
-
-export const checkHistoryItemType = <Type extends HistoryItem>(
-  item: HistoryItem | undefined,
-  type: HistoryItem['type']
-): item is Type => {
-  return item?.type === type
-}
-
-export const historyBaseAtom = atomWithAsyncStorage<HistoryItem[]>('history', [])
-
-export const historyAtom = atom(
-  get => get(historyBaseAtom),
-  (get, set, newItem: HistoryItem) => {
-    const history = get(historyBaseAtom)
-
-    const prevItem = history[0]
-
-    if (prevItem) {
-      if (prevItem.type === newItem.type) {
-        if (
-          checkHistoryItemType<HistoryVerseItem>(prevItem, 'verse') &&
-          checkHistoryItemType<HistoryVerseItem>(newItem, 'verse')
-        ) {
-          if (
-            prevItem.book === newItem.book &&
-            prevItem.chapter === newItem.chapter &&
-            prevItem.verse === newItem.verse
-          ) {
-            return
-          }
-        }
-
-        if (
-          checkHistoryItemType<HistoryStrongItem>(prevItem, 'strong') &&
-          checkHistoryItemType<HistoryStrongItem>(newItem, 'strong')
-        ) {
-          const previousReference = getHistoryStrongReference(prevItem)
-          const nextReference = getHistoryStrongReference(newItem)
-          if (
-            (previousReference && previousReference === nextReference) ||
-            (!previousReference && !nextReference && prevItem.Mot === newItem.Mot)
-          ) {
-            return
-          }
-        }
-
-        if (
-          checkHistoryItemType<HistoryWordItem>(prevItem, 'word') &&
-          checkHistoryItemType<HistoryWordItem>(newItem, 'word')
-        ) {
-          if (prevItem.word === newItem.word) {
-            return
-          }
-        }
-
-        if (
-          checkHistoryItemType<HistoryNaveItem>(prevItem, 'nave') &&
-          checkHistoryItemType<HistoryNaveItem>(newItem, 'nave')
-        ) {
-          if (prevItem.name === newItem.name) {
-            return
-          }
-        }
-      }
-    }
-
-    set(
-      historyBaseAtom,
-      produce(history, draft => {
-        draft.unshift(newItem)
-        draft.slice(0, 50)
-      })
-    )
-  }
-)
-
-export const deleteHistoryAtom = atom(null, (get, set) => {
-  set(historyBaseAtom, [])
 })

@@ -54,6 +54,8 @@
 
 **Tab group** — A persisted collection of Tabs with one active Tab.
 
+**Recently viewed content** — A device-local, bounded list of successfully opened Bible passages and editorial-resource entries. It is independent from Tab persistence and from the Expo Router back stack, and is cleared when the current account session ends.
+
 **Guest session** — A period without an authenticated account in which locally created study data belongs to the device user.
 
 **Guest adoption** — The one-time assignment of eligible Guest-session data to a genuinely new account before account hydration.
