@@ -29,7 +29,10 @@ import {
   type StrongModeAvailabilityState,
 } from './loadStrongModeAvailability'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import {
+  getOfflineResourceQuerySignal,
+  useOfflineResourceRegistry,
+} from '~features/resources/useOfflineResourceRegistry'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -60,7 +63,25 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const strongPreview = isHebrew ? 'H0430' : 'G2316'
   const serifFontFamily = Platform.OS === 'ios' ? 'Georgia' : 'serif'
   const availabilityQuery = useQuery<StrongModeAvailabilityState>({
-    queryKey: ['strong-mode-availability', version, appLanguage, resourceRegistry.revision],
+    queryKey: [
+      'strong-mode-availability',
+      version,
+      appLanguage,
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'strong-bible-index',
+        versionId: version as StrongBibleVersionId,
+      }),
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'interlinear-index',
+        versionId: 'BHG',
+        language: 'fr',
+      }),
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'interlinear-index',
+        versionId: 'BHG',
+        language: 'en',
+      }),
+    ],
     queryFn: () =>
       loadStrongModeAvailability({
         appLanguage,

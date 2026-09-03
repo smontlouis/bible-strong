@@ -35,16 +35,19 @@ export const createSearchExperienceController = (
 
   return {
     setSection(value: SearchSection) {
+      if (adapter.readFilters().section === value) return
       adapter.writeSection(value)
       persist({ section: value })
     },
 
     setBook(value: number) {
+      if (adapter.readFilters().book === value) return
       adapter.writeBook(value)
       persist({ book: value })
     },
 
     setSortOrder(value: SearchSortOrder) {
+      if (adapter.readFilters().sortOrder === value) return
       adapter.writeSortOrder(value)
       persist({ sortOrder: value })
     },
@@ -60,7 +63,11 @@ export const createSearchExperienceController = (
           ? 0
           : current.book
 
-      adapter.writeSelectedVersion(value)
+      if (value === current.selectedVersion && canon === current.canon && book === current.book) {
+        return
+      }
+
+      if (value !== current.selectedVersion) adapter.writeSelectedVersion(value)
       if (canon !== current.canon) adapter.writeCanon(canon)
       if (book !== current.book) adapter.writeBook(book)
       persist({ selectedVersion: value, canon, book })

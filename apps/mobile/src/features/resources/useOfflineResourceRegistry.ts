@@ -14,6 +14,22 @@ export const useOfflineResourceRegistry = (): OfflineResourceRegistrySnapshot =>
     offlineResourceRegistry.getSnapshot
   )
 
+export const getOfflineResourceQuerySignal = (
+  snapshot: OfflineResourceRegistrySnapshot,
+  resource: OfflineCopyIdentity | string
+) => {
+  const id = typeof resource === 'string' ? resource : createOfflineCopyId(resource)
+  const entry = snapshot.resources.get(id)
+
+  return [
+    entry?.availability.status ?? 'unregistered',
+    entry?.verified ?? false,
+    entry?.installedRevision ?? null,
+    entry?.catalogRevision ?? null,
+    entry?.updateAvailable ?? false,
+  ] as const
+}
+
 export const useOfflineResourceState = (
   resource?: OfflineCopyIdentity | string
 ): OfflineResourceRegistryEntry | undefined => {

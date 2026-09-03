@@ -32,7 +32,10 @@ import {
   type InterlinearModeAvailabilityState,
 } from './loadInterlinearModeAvailability'
 import { localQueryOptions } from '~helpers/queryOptions'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import {
+  getOfflineResourceQuerySignal,
+  useOfflineResourceRegistry,
+} from '~features/resources/useOfflineResourceRegistry'
 
 type Props = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -75,7 +78,16 @@ const InterlinearModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   const availabilityQuery = useQuery<InterlinearModeAvailabilityState>({
     queryKey: [
       'interlinear-mode-availability',
-      resourceRegistry.revision,
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'interlinear-index',
+        versionId: 'BHG',
+        language: 'fr',
+      }),
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'interlinear-index',
+        versionId: 'BHG',
+        language: 'en',
+      }),
       englishDownload?.status,
       frenchDownload?.status,
     ],

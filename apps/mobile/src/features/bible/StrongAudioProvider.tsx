@@ -8,6 +8,7 @@ import { useSetAtom } from 'jotai/react'
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 import TrackPlayer, { Event, State, useTrackPlayerEvents } from 'react-native-track-player'
+import { ensureTrackPlayerSetup } from '~features/audio/trackPlayerSetup'
 import { playingBibleTabIdAtom } from './footer/atom'
 
 type StrongAudioState = 'Idle' | 'Loading' | 'Playing'
@@ -94,11 +95,16 @@ const AndroidStrongAudioProvider = ({ children }: { children: React.ReactNode })
   const setPlayingBibleTabId = useSetAtom(playingBibleTabIdAtom)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [status, setStatus] = useState<StrongAudioState>('Idle')
+  const activeIdRef = useRef<string | null>(null)
+  const requestIdRef = useRef(0)
 
   useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackError], event => {
+    if (!activeIdRef.current) return
+
     if (event.type === Event.PlaybackError) {
       console.log('[Bible] Error playing Strong audio:', event.message)
       setActiveId(null)
+      activeIdRef.current = null
       setStatus('Idle')
       return
     }
@@ -110,35 +116,39 @@ const AndroidStrongAudioProvider = ({ children }: { children: React.ReactNode })
         setStatus('Loading')
       } else if (event.state === State.Ended || event.state === State.Stopped) {
         setActiveId(null)
+        activeIdRef.current = null
         setStatus('Idle')
       }
     }
   })
 
   const play = ({ id, url }: PlayStrongAudioParams) => {
-    if (activeId === id && status === 'Playing') return
+    if (activeIdRef.current === id) return
 
+    const requestId = ++requestIdRef.current
     setPlayingBibleTabId('')
     setActiveId(id)
+    activeIdRef.current = id
     setStatus('Loading')
     ;(async () => {
       try {
-        try {
-          await TrackPlayer.setupPlayer()
-        } catch {
-          // The shared app player may already be initialized by Bible audio.
-        }
+        await ensureTrackPlayerSetup()
+        if (requestId !== requestIdRef.current) return
 
         await TrackPlayer.reset()
+        if (requestId !== requestIdRef.current) return
         await TrackPlayer.add({
           id,
           url,
           title: id,
         })
+        if (requestId !== requestIdRef.current) return
         await TrackPlayer.play()
       } catch (error) {
+        if (requestId !== requestIdRef.current) return
         console.log('[Bible] Error playing Strong audio:', error)
         setActiveId(current => (current === id ? null : current))
+        if (activeIdRef.current === id) activeIdRef.current = null
         setStatus('Idle')
       }
     })()

@@ -65,6 +65,7 @@ import InterlinearMark from './InterlinearMark'
 import InterlinearModeSelectorSheet from './InterlinearModeSelectorSheet'
 import StrongModeSelectorSheet from './StrongModeSelectorSheet'
 import { useBibleModeAcquisitionCompletion } from './useBibleModeAcquisitionCompletion'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
 
 interface BibleHeaderProps {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -75,6 +76,7 @@ interface BibleHeaderProps {
   hidePersonalBibleData?: boolean
   onEditFocusTags?: () => void
   isInTab?: boolean
+  coverage?: BibleVersionCoverage
 }
 
 const Header = ({
@@ -86,6 +88,7 @@ const Header = ({
   hidePersonalBibleData = false,
   onEditFocusTags,
   isInTab,
+  coverage,
 }: BibleHeaderProps) => {
   const router = useRouter()
   const { t } = useTranslation()
@@ -709,7 +712,7 @@ const Header = ({
               </TouchableBox>
             </HStack>
 
-            <VerseSelectorPopup bibleAtom={bibleAtom}>
+            <VerseSelectorPopup bibleAtom={bibleAtom} coverage={coverage} preferCoverage>
               <AnimatedBox center width={40} height="100%" style={opacityTransitionStyle}>
                 <FeatherIcon name="chevrons-down" size={20} style={{ opacity: 0.3 }} />
               </AnimatedBox>

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FlatList, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from '~common/KeyboardAwareScrollView'
@@ -184,7 +184,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }),
     networkMode: 'always',
     staleTime: Infinity,
-    enabled: itemFilters.strong,
+    enabled: browseItemType === 'strong',
   })
   const dictionaryAvailabilityQuery = useQuery({
     queryKey: [
@@ -199,7 +199,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       Promise.resolve({ status: 'available' as const }),
     networkMode: 'always',
     staleTime: Infinity,
-    enabled: itemFilters.dictionary,
+    enabled: browseItemType === 'dictionary',
   })
   const naveAvailabilityQuery = useQuery({
     queryKey: [
@@ -211,7 +211,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       Promise.resolve({ status: 'available' as const }),
     networkMode: 'always',
     staleTime: Infinity,
-    enabled: itemFilters.nave,
+    enabled: browseItemType === 'nave',
   })
 
   const installedVersions = [...resourceRegistry.resources.values()].flatMap(entry =>
@@ -220,6 +220,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       ? [entry.resource.versionId]
       : []
   )
+  const installedVersionsKey = installedVersions.join('\u0000')
   const searchExperience = createSearchExperienceController(
     {
       readFilters: () => ({ section, canon, book, selectedVersion, sortOrder, itemFilters }),
@@ -252,20 +253,26 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   }
 
   const hasInstalledVersions = installedVersions.length > 0
+  const reconcileSelectedVersion = useEffectEvent((fallbackVersionFilter: string) => {
+    setSelectedVersion(fallbackVersionFilter)
+  })
 
   useEffect(() => {
+    const currentInstalledVersions = installedVersionsKey
+      ? installedVersionsKey.split('\u0000')
+      : []
     const compatibleVersions = canon
-      ? installedVersions.filter(version => getBibleVersionCanonId(version) === canon)
-      : installedVersions
+      ? currentInstalledVersions.filter(version => getBibleVersionCanonId(version) === canon)
+      : currentInstalledVersions
     if (!resolvedSelectedVersion || !compatibleVersions.includes(resolvedSelectedVersion)) {
       const fallbackVersionFilter = compatibleVersions.includes(defaultBibleVersion)
         ? DEFAULT_BIBLE_VERSION_FILTER
         : compatibleVersions[0] || ''
-      setSelectedVersion(fallbackVersionFilter)
+      if (fallbackVersionFilter !== selectedVersion) {
+        reconcileSelectedVersion(fallbackVersionFilter)
+      }
     }
-    // Reconcile the persisted filter when the inventory or selected canon changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canon, defaultBibleVersion, installedVersions, resolvedSelectedVersion])
+  }, [canon, defaultBibleVersion, installedVersionsKey, resolvedSelectedVersion, selectedVersion])
 
   const canonBooks = getBooksForCanon(canon || getBibleVersionCanonId(resolvedSelectedVersion))
   const books = [
@@ -701,14 +708,16 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     sortOrder,
   ])
   const searchAnalyticsLanguage = resourcesLanguage.NAVE === 'en' ? 'en' : 'fr'
-
-  useEffect(() => {
+  const resetSearchAnalytics = useEffectEvent(() => {
     searchStartedAtRef.current = Date.now()
     searchStartedOnlineRef.current = isConnected
     recordedSearchKeyRef.current = ''
     recordedOpenKeyRef.current = ''
+  })
+
+  useEffect(() => {
+    resetSearchAnalytics()
     // Reconnecting must not upload a search that started offline.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchAnalyticsKey])
 
   const createSearchAnalyticsEvent = (
@@ -776,12 +785,12 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     void resources.searchAnalytics.record(event).catch(() => undefined)
   }
 
+  const recordSettledSearch = useEffectEvent(recordSearchPerformed)
+
   useEffect(() => {
     if (isPublicSearchLoading) return
-    const timeout = setTimeout(recordSearchPerformed, 600)
+    const timeout = setTimeout(recordSettledSearch, 600)
     return () => clearTimeout(timeout)
-    // The analytics key contains every filter that defines a new search interaction.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPublicSearchLoading, searchAnalyticsKey, publicResultCounts.total, publicSearchErrorCount])
   const effectiveSelectedFacet = searchFacets.some(facet => facet.id === selectedFacet)
     ? selectedFacet

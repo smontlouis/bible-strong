@@ -501,7 +501,9 @@ const DictionaryListScreen = ({
                 return <DictionnaireItem word={item.word} onSelect={() => selectWord(item.word)} />
               }}
               removeClippedSubviews
-              maxToRenderPerBatch={100}
+              initialNumToRender={10}
+              maxToRenderPerBatch={10}
+              windowSize={5}
               getItemLayout={(data, index) =>
                 getDictionaryItemLayout((data || []) as DictionarySection[], index)
               }

@@ -94,6 +94,31 @@ describe('interlinear Bible HTTP resource access', () => {
     jest.restoreAllMocks()
   })
 
+  it('shares an in-flight availability lookup for the same locale', async () => {
+    const offline = unavailableAdapter()
+    const online = unavailableAdapter()
+    let resolveOffline: ((value: { status: 'missing' }) => void) | undefined
+    offline.getAvailability.mockImplementation(
+      () => new Promise(resolve => (resolveOffline = resolve))
+    )
+    const hybrid = createHybridInterlinearBibleResourceAdapter({
+      offline,
+      online,
+      remotelyReadableLocales: new Set(['fr', 'en']),
+      isOnline: async () => false,
+    })
+
+    const first = hybrid.getAvailability('fr')
+    const second = hybrid.getAvailability('fr')
+    resolveOffline?.({ status: 'missing' })
+
+    await expect(Promise.all([first, second])).resolves.toEqual([
+      { status: 'missing' },
+      { status: 'missing' },
+    ])
+    expect(offline.getAvailability).toHaveBeenCalledTimes(1)
+  })
+
   it('loads an interlinear chapter over HTTP with zero Offline copy', async () => {
     const fetcher = jest.fn((url: string) =>
       url.endsWith('/coverage')

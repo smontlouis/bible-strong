@@ -504,7 +504,7 @@ export class OfflineResourceRegistry {
     return this.reconcile(resource)
   }
 
-  reconcile(resource: LocalResourceRef): Promise<LocalResourceAvailability> {
+  reconcile(resource: LocalResourceRef, publishResult = true): Promise<LocalResourceAvailability> {
     const id = createOfflineCopyId(resource)
     const currentTask = this.reconciliationTasks.get(id)
     if (currentTask) return currentTask
@@ -512,7 +512,7 @@ export class OfflineResourceRegistry {
     const task = this.dependencies
       .probe(resource)
       .then(availability => {
-        this.setAvailability(resource, availability, true)
+        this.setAvailability(resource, availability, true, publishResult)
         return availability
       })
       .catch(() => {
@@ -521,7 +521,7 @@ export class OfflineResourceRegistry {
           resource,
           reason: 'integrity-check-failed',
         }
-        this.setAvailability(resource, availability, true)
+        this.setAvailability(resource, availability, true, publishResult)
         return availability
       })
       .finally(() => this.reconciliationTasks.delete(id))
@@ -538,7 +538,7 @@ export class OfflineResourceRegistry {
     const reconcileNext = async (): Promise<void> => {
       while (cursor < resources.length) {
         const resource = resources[cursor++]
-        await this.reconcile(resource).catch(() => undefined)
+        await this.reconcile(resource, false).catch(() => undefined)
       }
     }
     const task = Promise.all(
@@ -547,7 +547,7 @@ export class OfflineResourceRegistry {
         reconcileNext
       )
     )
-      .then(() => this.setPhase('ready'))
+      .then(() => this.publishEntries('ready'))
       .finally(() => {
         this.allReconciliationTask = undefined
       })
@@ -592,13 +592,14 @@ export class OfflineResourceRegistry {
   private setAvailability(
     resource: LocalResourceRef,
     availability: LocalResourceAvailability,
-    verified: boolean
+    verified: boolean,
+    publish = true
   ): void {
     const id = createOfflineCopyId(resource)
     const installed = this.dependencies.readPublication(id)
     const catalogRevision =
       this.dependencies.getCatalog().resources[getOfflineCopyCatalogId(resource)]?.archiveSha256
-    this.entries.set(id, {
+    const next: OfflineResourceRegistryEntry = {
       id,
       resource,
       availability,
@@ -608,8 +609,30 @@ export class OfflineResourceRegistry {
       updateAvailable: Boolean(
         installed && catalogRevision && installed.archiveSha256 !== catalogRevision
       ),
-    })
-    this.emit()
+    }
+    const previous = this.entries.get(id)
+    if (
+      previous &&
+      previous.verified === next.verified &&
+      previous.installedRevision === next.installedRevision &&
+      previous.catalogRevision === next.catalogRevision &&
+      previous.updateAvailable === next.updateAvailable &&
+      JSON.stringify(previous.availability) === JSON.stringify(next.availability)
+    ) {
+      return
+    }
+
+    this.entries.set(id, next)
+    if (publish) this.emit()
+  }
+
+  private publishEntries(phase = this.snapshot.phase): void {
+    this.snapshot = {
+      revision: this.snapshot.revision + 1,
+      phase,
+      resources: new Map(this.entries),
+    }
+    this.listeners.forEach(listener => listener())
   }
 
   private setPhase(phase: OfflineResourceRegistrySnapshot['phase']): void {
@@ -620,11 +643,8 @@ export class OfflineResourceRegistry {
 
   private emit(refreshSnapshot = true): void {
     if (refreshSnapshot) {
-      this.snapshot = {
-        revision: this.snapshot.revision + 1,
-        phase: this.snapshot.phase,
-        resources: new Map(this.entries),
-      }
+      this.publishEntries()
+      return
     } else {
       this.snapshot = { ...this.snapshot, revision: this.snapshot.revision + 1 }
     }

@@ -1,5 +1,5 @@
 import { useAtomValue } from 'jotai/react'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 
 import { BackHandler, useWindowDimensions } from 'react-native'
 
@@ -46,11 +46,14 @@ const AppSwitcherScreenWrapper = () => {
   const tabsCount = useAtomValue(tabsCountAtom)
   const isMenuOpen = useRef(false)
   const isHomeOpen = useRef(false)
+  const [hasOpenedMenu, setHasOpenedMenu] = useState(false)
+  const [hasOpenedHome, setHasOpenedHome] = useState(false)
 
   // SharedValue pour la position: -1 (menu), 0 (centre), 1 (home)
   const position = useSharedValue(0)
 
   const openMenu = () => {
+    setHasOpenedMenu(true)
     position.set(withSpring(-1))
     isMenuOpen.current = true
   }
@@ -61,6 +64,7 @@ const AppSwitcherScreenWrapper = () => {
   }
 
   const openHome = () => {
+    setHasOpenedHome(true)
     position.set(withSpring(1))
     isHomeOpen.current = true
   }
@@ -107,17 +111,13 @@ const AppSwitcherScreenWrapper = () => {
         flex={1}
         style={[{ width: drawerWidth * 2 + screenWidth, marginLeft: -drawerWidth }, containerStyle]}
       >
-        <Box width={drawerWidth}>
-          <Home closeHome={closeHome} />
-        </Box>
+        <Box width={drawerWidth}>{hasOpenedHome && <Home closeHome={closeHome} />}</Box>
 
         <Box width={screenWidth}>
           <AppSwitcherScreen openHome={openHome} openMenu={openMenu} />
         </Box>
 
-        <Box width={drawerWidth}>
-          <More closeMenu={closeMenu} />
-        </Box>
+        <Box width={drawerWidth}>{hasOpenedMenu && <More closeMenu={closeMenu} />}</Box>
       </AnimatedBox>
     </Box>
   )

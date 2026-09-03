@@ -25,6 +25,10 @@ import { useOpenEntityRelations } from '~features/studyRelations/useOpenEntityRe
 import { useRelationCount } from '~features/studyRelations/useRelationCount'
 import { createAnnotationEndpoint } from '~features/studyRelations/endpoints'
 import { useResourceAccess } from '~features/resources/resourceAccess'
+import {
+  getOfflineResourceQuerySignal,
+  useOfflineResourceRegistry,
+} from '~features/resources/useOfflineResourceRegistry'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import {
   resourceFailureFromAccessError,
@@ -76,7 +80,6 @@ import { makeSelectBookmarksInChapter } from '~redux/selectors/bookmarks'
 import { selectIsLogged } from '~redux/selectors/user'
 import type { AppDispatch } from '~redux/store'
 import { historyAtom } from '../../state/app'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
 import {
   activeBibleTabIdAtom,
   bibleDOMHostLayoutsAtom,
@@ -400,7 +403,10 @@ const BibleViewer = ({
     queryKey: [
       ...resourceQueryKeys.bibleRedWords(version),
       'availability',
-      resourceRegistry.revision,
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'bible-red-words',
+        versionId: version,
+      }),
     ],
     queryFn: () =>
       resources.bibleReading.getRedWordsAvailability?.(version) ??
@@ -1346,6 +1352,7 @@ const BibleViewer = ({
         annotationModeEnabled={annotationMode.enabled && !hidePersonalBibleData}
         hidePersonalBibleData={hidePersonalBibleData}
         onEditFocusTags={editFocusTags}
+        coverage={coverageData}
       />
       {settings.redWordsDisplay && redWordsFailureIsTemporary && (
         <Box bg="reverse" borderBottomWidth={1} borderColor="border">

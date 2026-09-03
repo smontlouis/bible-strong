@@ -26,7 +26,10 @@ import type { VersionCode } from '~state/tabs'
 import { getBook, getBooksForCanon } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import {
+  getOfflineResourceQuerySignal,
+  useOfflineResourceRegistry,
+} from '~features/resources/useOfflineResourceRegistry'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import {
   resourceFailureFromAccessError,
@@ -91,7 +94,10 @@ const PericopeScreen = ({ isFormSheet = false }: PericopeScreenProps) => {
     queryKey: [
       ...resourceQueryKeys.biblePericope(version),
       'availability',
-      resourceRegistry.revision,
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'bible-pericope',
+        versionId: version,
+      }),
     ],
     queryFn: () =>
       resources.bibleReading.getPericopeAvailability?.(version) ??

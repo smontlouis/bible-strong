@@ -249,7 +249,9 @@ const LexiqueListScreen = ({
                 />
               )}
               removeClippedSubviews
-              maxToRenderPerBatch={100}
+              initialNumToRender={10}
+              maxToRenderPerBatch={10}
+              windowSize={5}
               getItemLayout={(data, index) =>
                 getLexiqueItemLayout((data || []) as LexiqueSection[], index)
               }

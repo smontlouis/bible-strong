@@ -14,7 +14,10 @@ import Loading from '~common/Loading'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import {
+  getOfflineResourceQuerySignal,
+  useOfflineResourceRegistry,
+} from '~features/resources/useOfflineResourceRegistry'
 
 export type EventDetailsProps = Pick<
   TimelineEventProps,
@@ -58,7 +61,11 @@ export const EventDetailsContent = ({
       ...resourceQueryKeys.timeline(resourceLanguage),
       'event',
       slug,
-      resourceRegistry.revision,
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'database',
+        databaseId: 'TIMELINE',
+        language: resourceLanguage,
+      }),
     ],
     queryFn: () => resources.timeline.loadEvent(resourceLanguage, slug),
     networkMode: 'always',

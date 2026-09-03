@@ -11,7 +11,10 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { databases } from '~helpers/databases'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { resourcesLanguageAtom } from '~state/resourcesLanguage'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import {
+  getOfflineResourceQuerySignal,
+  useOfflineResourceRegistry,
+} from '~features/resources/useOfflineResourceRegistry'
 import type { TimelineEventSummary } from '~features/resources/timelineAccess'
 import {
   resourceFailureFromAccessError,
@@ -36,7 +39,14 @@ const TimelineResourceBoundary = ({
   const language = useAtomValue(resourcesLanguageAtom).TIMELINE
   const resourceRegistry = useOfflineResourceRegistry()
   const query = useQuery({
-    queryKey: [...resourceQueryKeys.timeline(language), resourceRegistry.revision],
+    queryKey: [
+      ...resourceQueryKeys.timeline(language),
+      getOfflineResourceQuerySignal(resourceRegistry, {
+        kind: 'database',
+        databaseId: 'TIMELINE',
+        language,
+      }),
+    ],
     queryFn: () => resources.timeline.loadIndex(language),
     networkMode: 'always',
   })

@@ -221,6 +221,7 @@ export const createHybridInterlinearBibleResourceAdapter = ({
   remotelyReadableLocales: ReadonlySet<ResourceLanguage>
   isOnline: () => Promise<boolean>
 }): InterlinearBibleResourceAdapter => {
+  const availabilityTasks = new Map<ResourceLanguage, Promise<InterlinearSidecarAvailability>>()
   const isInvalid = (availability: InterlinearSidecarAvailability) =>
     availability.status === 'corrupt' || availability.status === 'incompatible'
   const invalidOfflineCopy = () =>
@@ -230,11 +231,20 @@ export const createHybridInterlinearBibleResourceAdapter = ({
     ])
 
   return {
-    async getAvailability(locale) {
-      const local = await offline.getAvailability(locale)
-      if (local.status === 'available' || local.status === 'base-incompatible') return local
-      if (!remotelyReadableLocales.has(locale) || !(await isOnline())) return local
-      return online.getAvailability(locale)
+    getAvailability(locale) {
+      const currentTask = availabilityTasks.get(locale)
+      if (currentTask) return currentTask
+
+      const task = (async () => {
+        const local = await offline.getAvailability(locale)
+        if (local.status === 'available' || local.status === 'base-incompatible') return local
+        if (!remotelyReadableLocales.has(locale) || !(await isOnline())) return local
+        return online.getAvailability(locale)
+      })().finally(() => {
+        if (availabilityTasks.get(locale) === task) availabilityTasks.delete(locale)
+      })
+      availabilityTasks.set(locale, task)
+      return task
     },
     async loadChapterTokens(locale, request) {
       const local = await offline.getAvailability(locale)

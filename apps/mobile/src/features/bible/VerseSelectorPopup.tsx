@@ -10,13 +10,22 @@ import Text from '~common/ui/Text'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { useQuery } from '@tanstack/react-query'
 import { bibleChapterQueryOptions } from '~features/resources/resourceQueries'
+import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
+import type { BibleVersionCoverage } from '~helpers/biblesDb'
 
 type VerseSelectorPopupProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
   children: React.ReactNode
+  coverage?: BibleVersionCoverage
+  preferCoverage?: boolean
 }
 
-export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupProps) => {
+export const VerseSelectorPopup = ({
+  bibleAtom,
+  children,
+  coverage,
+  preferCoverage = false,
+}: VerseSelectorPopupProps) => {
   const { t } = useTranslation()
   const { width: windowWidth } = useWindowDimensions()
   const sheetRef = useRef<SheetRef>(null)
@@ -30,7 +39,14 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
 
   const { data: verses } = useQuery({
     ...bibleChapterQueryOptions({ book: book.Numero, chapter, version }, resources),
+    enabled: !preferCoverage,
   })
+  const verseCount = getChapterVerseCountFromCoverage(coverage, book.Numero, chapter)
+  const verseNumbers = verseCount
+    ? Array.from({ length: verseCount }, (_, index) => index + 1)
+    : verses?.success
+      ? verses.data.verses.map(verse => Number(verse.Verset))
+      : []
 
   const ITEM_WIDTH = 40
   const ITEM_GAP = 10
@@ -70,20 +86,20 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
           }}
           showsVerticalScrollIndicator={false}
         >
-          {verses?.success && verses.data.verses.length ? (
-            verses.data.verses.map(verse => (
+          {verseNumbers.length ? (
+            verseNumbers.map(verse => (
               <TouchableBox
-                key={String(verse.Verset)}
+                key={String(verse)}
                 backgroundColor="opacity5"
                 borderRadius={3}
                 w={ITEM_WIDTH}
                 h={40}
                 alignItems="center"
                 justifyContent="center"
-                onPress={() => handleSelect(Number(verse.Verset))}
+                onPress={() => handleSelect(verse)}
                 accessibilityRole="button"
-                accessibilityLabel={`${t('Verset')} ${verse.Verset}`}
-                accessibilityState={{ selected: Number(verse.Verset) === bible.data.selectedVerse }}
+                accessibilityLabel={`${t('Verset')} ${verse}`}
+                accessibilityState={{ selected: verse === bible.data.selectedVerse }}
               >
                 <Box
                   style={{
@@ -94,7 +110,7 @@ export const VerseSelectorPopup = ({ bibleAtom, children }: VerseSelectorPopupPr
                     display: 'flex',
                   }}
                 >
-                  <Text textAlign="center">{verse.Verset}</Text>
+                  <Text textAlign="center">{verse}</Text>
                 </Box>
               </TouchableBox>
             ))

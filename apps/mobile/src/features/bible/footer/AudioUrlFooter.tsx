@@ -24,6 +24,7 @@ import {
 } from '~helpers/bibleCoverage'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 import { appLogger } from '~helpers/agentObservability'
+import { ensureTrackPlayerSetup } from '~features/audio/trackPlayerSetup'
 import { BibleTab, VersionCode } from '../../../state/tabs'
 import AudioBar from './AudioBar'
 import AudioContainer from './AudioContainer'
@@ -187,13 +188,9 @@ const useLoadSound = ({
     let cancelled = false
     ;(async () => {
       try {
-        await TrackPlayer.setupPlayer()
-      } catch (e) {
-        console.log('[Bible] Silent catch:', e)
-      }
+        await ensureTrackPlayerSetup()
 
-      // Reset player and add tracks for current book
-      try {
+        // Reset player and add tracks for current book
         await TrackPlayer.reset()
 
         TrackPlayer.updateOptions({

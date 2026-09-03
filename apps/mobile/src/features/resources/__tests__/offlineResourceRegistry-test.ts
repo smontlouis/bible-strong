@@ -38,6 +38,7 @@ import {
   type LocalResourceRef,
   type LocalResourceAvailability,
 } from '../resourceAvailability'
+import { getOfflineResourceQuerySignal } from '../useOfflineResourceRegistry'
 
 const sha = (value: string) => value.repeat(64).slice(0, 64)
 
@@ -192,6 +193,23 @@ describe('OfflineResourceRegistry', () => {
     expect(registry.get(identity)?.verified).toBe(true)
   })
 
+  it('publishes one batched resource snapshot after reconciling the catalog', async () => {
+    const registry = new OfflineResourceRegistry({
+      probe: async resource => ({ status: 'available', resource }),
+      readPublication: () => undefined,
+      getCatalog: () => catalog(),
+    })
+    const listener = jest.fn()
+    registry.subscribe(listener)
+
+    await registry.reconcileAll(catalog())
+
+    expect(listener).toHaveBeenCalledTimes(2)
+    expect(registry.getSnapshot().phase).toBe('ready')
+    expect(registry.get(identity)?.verified).toBe(true)
+    expect(registry.getSnapshot().resources.get('database:barnes:fr')?.verified).toBe(true)
+  })
+
   it('keeps a downloaded dictionary addressable after catalog reconciliation', async () => {
     const dictionaryIdentity = {
       kind: 'dictionary' as const,
@@ -226,5 +244,54 @@ describe('OfflineResourceRegistry', () => {
     expect(registry.get(dictionaryIdentity)?.catalogRevision).toBe(sha('d'))
     expect(registry.get(dictionaryIdentity)?.updateAvailable).toBe(false)
     expect(probe).toHaveBeenCalledWith(dictionaryIdentity)
+  })
+})
+
+describe('getOfflineResourceQuerySignal', () => {
+  it('ignores unrelated registry revisions but changes with the selected resource', () => {
+    const resource = {
+      kind: 'interlinear-index' as const,
+      versionId: 'BHG' as const,
+      language: 'fr' as const,
+    }
+    const entry = {
+      id: 'bible-interlinear:BHG:fr',
+      resource,
+      availability: { status: 'missing' as const, resource },
+      verified: true,
+      catalogRevision: sha('a'),
+      updateAvailable: false,
+    }
+    const initial = {
+      revision: 1,
+      phase: 'reconciling' as const,
+      resources: new Map([[entry.id, entry]]),
+    }
+    const unrelatedReconciliation = {
+      ...initial,
+      revision: 130,
+      resources: new Map(initial.resources),
+    }
+    const installed = {
+      ...unrelatedReconciliation,
+      revision: 131,
+      resources: new Map([
+        [
+          entry.id,
+          {
+            ...entry,
+            availability: { status: 'available' as const, resource },
+            installedRevision: sha('b'),
+          },
+        ],
+      ]),
+    }
+
+    expect(getOfflineResourceQuerySignal(initial, resource)).toEqual(
+      getOfflineResourceQuerySignal(unrelatedReconciliation, resource)
+    )
+    expect(getOfflineResourceQuerySignal(installed, resource)).not.toEqual(
+      getOfflineResourceQuerySignal(initial, resource)
+    )
   })
 })

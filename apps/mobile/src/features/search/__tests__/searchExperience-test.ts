@@ -30,6 +30,10 @@ const createHarness = (overrides: Partial<SearchFilters> = {}) => {
   const write = <Key extends keyof SearchFilters>(key: Key, value: SearchFilters[Key]) => {
     filters = { ...filters, [key]: value }
   }
+  const persist = jest.fn((patch: Partial<SearchFilters>) => {
+    filters = { ...filters, ...patch }
+  })
+  const writeSelectedVersion = jest.fn((value: string) => write('selectedVersion', value))
   const controller = createSearchExperienceController(
     {
       readFilters: () => filters,
@@ -38,17 +42,15 @@ const createHarness = (overrides: Partial<SearchFilters> = {}) => {
       writeSection: value => write('section', value),
       writeCanon: value => write('canon', value),
       writeBook: value => write('book', value),
-      writeSelectedVersion: value => write('selectedVersion', value),
+      writeSelectedVersion,
       writeSortOrder: value => write('sortOrder', value),
       writeItemFilters: value => write('itemFilters', value),
-      persist: patch => {
-        filters = { ...filters, ...patch }
-      },
+      persist,
     },
     Object.keys(allItemFilters) as (keyof typeof allItemFilters)[],
     allItemFilters
   )
-  return { controller, filters: () => filters }
+  return { controller, filters: () => filters, persist, writeSelectedVersion }
 }
 
 describe('searchExperience', () => {
@@ -62,6 +64,15 @@ describe('searchExperience', () => {
       canon: 'protestant-66',
       book: 0,
     })
+  })
+
+  it('does not write or persist when the selected version transition is unchanged', () => {
+    const harness = createHarness({ selectedVersion: '' })
+
+    harness.controller.selectVersion('')
+
+    expect(harness.writeSelectedVersion).not.toHaveBeenCalled()
+    expect(harness.persist).not.toHaveBeenCalled()
   })
 
   it('never allows the final search source to be disabled', () => {

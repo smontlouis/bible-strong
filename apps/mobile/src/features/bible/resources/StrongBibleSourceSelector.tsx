@@ -37,7 +37,10 @@ import useConnection from '~helpers/useConnection'
 import { toast } from '~helpers/toast'
 import { localQueryOptions } from '~helpers/queryOptions'
 import { loadStrongBibleSourceAvailability } from './loadStrongBibleSourceAvailability'
-import { useOfflineResourceRegistry } from '~features/resources/useOfflineResourceRegistry'
+import {
+  getOfflineResourceQuerySignal,
+  useOfflineResourceRegistry,
+} from '~features/resources/useOfflineResourceRegistry'
 
 type SharedProps = {
   bibleAtom: PrimitiveAtom<BibleTab>
@@ -420,13 +423,37 @@ export const StrongBibleSourceSheet = ({
     setBible(updateStrongBibleSourceVersion(versionId))
   }
 
+  const sourceAvailabilitySignal = [
+    ...sourceGroups.flatMap(group =>
+      group.versionIds.map(versionId =>
+        getOfflineResourceQuerySignal(resourceRegistry, {
+          kind: 'strong-bible-index',
+          versionId,
+        })
+      )
+    ),
+    ...(isBhgBible
+      ? [
+          getOfflineResourceQuerySignal(resourceRegistry, {
+            kind: 'bible',
+            versionId: 'BHG',
+          }),
+          getOfflineResourceQuerySignal(resourceRegistry, {
+            kind: 'interlinear-index',
+            versionId: 'BHG',
+            language: preferredInterlinearLocale,
+          }),
+        ]
+      : []),
+  ]
+
   const availabilityQuery = useQuery({
     queryKey: [
       'strong-bible-source-availability',
       isEnglishBible ? 'en' : 'fr',
       isBhgBible,
       preferredInterlinearLocale,
-      resourceRegistry.revision,
+      sourceAvailabilitySignal,
     ],
     queryFn: () =>
       loadStrongBibleSourceAvailability({
