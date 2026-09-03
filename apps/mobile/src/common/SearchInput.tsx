@@ -11,6 +11,7 @@ interface Props {
   value: string
   placeholder: string
   onDelete: () => void
+  inputRef?: React.RefObject<TextInput | null>
 }
 
 const SearchInput = ({
@@ -18,6 +19,7 @@ const SearchInput = ({
   value,
   placeholder,
   onDelete,
+  inputRef,
   ...props
 }: Props & TextInputProps) => {
   const theme = useTheme()
@@ -43,6 +45,7 @@ const SearchInput = ({
         />
         <Box flex>
           <TextInput
+            ref={inputRef}
             accessibilityLabel={props.accessibilityLabel ?? placeholder}
             placeholder={placeholder}
             placeholderTextColor={theme.colors.grey}

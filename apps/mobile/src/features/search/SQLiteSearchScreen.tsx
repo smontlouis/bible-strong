@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, TouchableOpacity } from 'react-native'
+import { FlatList, Keyboard, TextInput, TouchableOpacity } from 'react-native'
 import { KeyboardAwareScrollView, useKeyboardState } from '~common/KeyboardAwareScrollView'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@emotion/react'
@@ -165,6 +165,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   const recordedOpenKeyRef = useRef('')
   const sourceFiltersRef = useRef<SheetRef>(null)
   const passageFiltersRef = useRef<SheetRef>(null)
+  const searchInputRef = useRef<TextInput>(null)
   const activeItemFilterTypes = searchItemFilterOrder.filter(itemType => itemFilters[itemType])
   const singleActiveItemType =
     activeItemFilterTypes.length === 1 ? activeItemFilterTypes[0] : undefined
@@ -816,6 +817,11 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     setSearchValue(value)
   }
 
+  const dismissSearchInput = () => {
+    searchInputRef.current?.blur()
+    Keyboard.dismiss()
+  }
+
   function renderPassageError(): ReactNode {
     const recoveryIdentity = { kind: 'bible', versionId: defaultBibleVersion } as const
     const recoveryFileSize = Math.max(
@@ -860,6 +866,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
   }
 
   const openSearchItem = (item: SearchEntityResult) => {
+    dismissSearchInput()
     recordResultOpened(item)
     openStudyObject(item)
   }
@@ -1086,7 +1093,10 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
           <ReferenceSearchResultRow
             key={item.id}
             item={item}
-            onOpen={() => recordResultOpened(item)}
+            onOpen={() => {
+              dismissSearchInput()
+              recordResultOpened(item)
+            }}
           />
         ) : (
           <SharedSearchEntityResultRow
@@ -1306,6 +1316,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
         <Box pb={5}>
           <Box px={20}>
             <SearchInput
+              inputRef={searchInputRef}
               placeholder={t('search.placeholder')}
               onChangeText={updateSearchValue}
               value={searchValue}

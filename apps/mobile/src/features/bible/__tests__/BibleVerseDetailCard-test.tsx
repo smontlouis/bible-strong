@@ -12,6 +12,7 @@ const mockGetModuleAvailability = jest.fn()
 const mockGetModuleRecoveryActions = jest.fn()
 const mockScrollTo = jest.fn()
 const mockScrollToOffset = jest.fn()
+const mockScrollToIndex = jest.fn()
 const mockResourceAccess = {
   bibleContent: { loadCoverage: mockLoadCoverage },
   lexiconBible: {
@@ -95,9 +96,15 @@ jest.mock('react-native', () => {
         data?: unknown[]
         renderItem?: (input: { item: unknown; index: number }) => React.ReactNode
       } & Record<string, unknown>,
-      ref: React.ForwardedRef<{ scrollToOffset: typeof mockScrollToOffset }>
+      ref: React.ForwardedRef<{
+        scrollToOffset: typeof mockScrollToOffset
+        scrollToIndex: typeof mockScrollToIndex
+      }>
     ) => {
-      ReactModule.useImperativeHandle(ref, () => ({ scrollToOffset: mockScrollToOffset }))
+      ReactModule.useImperativeHandle(ref, () => ({
+        scrollToOffset: mockScrollToOffset,
+        scrollToIndex: mockScrollToIndex,
+      }))
       return ReactModule.createElement(
         'FlatList',
         props,
@@ -541,10 +548,10 @@ describe('BibleVerseDetailCard', () => {
     })
 
     const cardsList = renderer.root.find(
-      node => String(node.type) === 'FlatList' && node.props.snapToInterval === 64
+      node => String(node.type) === 'FlatList' && node.props.snapToInterval === 74
     )
     expect(cardsList.props).toEqual(
-      expect.objectContaining({ initialNumToRender: 2, maxToRenderPerBatch: 2, windowSize: 3 })
+      expect.objectContaining({ initialNumToRender: 20, maxToRenderPerBatch: 20, windowSize: 3 })
     )
     expect(renderer.root.find(node => String(node.type) === 'StrongCard')).toBeDefined()
   })
@@ -612,14 +619,51 @@ describe('BibleVerseDetailCard', () => {
       renderer.update(renderCard(1))
       await flushQueryUpdates()
     })
-    mockScrollToOffset.mockClear()
+    mockScrollToIndex.mockClear()
 
     const provider = renderer.root.find(
       node => String(node.type) === 'StrongResourceScrollProvider'
     )
     act(() => provider.props.value.scrollToStrongCard('430', 1))
 
-    expect(mockScrollToOffset).toHaveBeenCalledWith({ offset: 64, animated: true })
+    expect(mockScrollToIndex).toHaveBeenCalledWith({ index: 1, animated: true })
+  })
+
+  it('provides fixed card geometry and scrolls directly to a distant tapped occurrence', async () => {
+    mockLoadVerse.mockResolvedValueOnce(
+      makeAvailableVerse(
+        'Dieu '.repeat(10).trim(),
+        Array.from({ length: 10 }, (_, ordinal) => ({
+          ordinal,
+          startOffset: ordinal * 5,
+          length: 4,
+          identities: [{ kind: 'strong' as const, code: 'H0430' }],
+        }))
+      )
+    )
+
+    await act(async () => {
+      renderer = create(renderCard(1))
+      await flushQueryUpdates()
+    })
+    await act(async () => {
+      renderer.update(renderCard(1))
+      await flushQueryUpdates()
+    })
+
+    const cardsList = renderer.root.find(node => String(node.type) === 'FlatList')
+    const provider = renderer.root.find(
+      node => String(node.type) === 'StrongResourceScrollProvider'
+    )
+    mockScrollToIndex.mockClear()
+    act(() => provider.props.value.scrollToStrongCard('430', 9))
+
+    expect(cardsList.props.getItemLayout?.(undefined, 9)).toEqual({
+      index: 9,
+      length: 74,
+      offset: 666,
+    })
+    expect(mockScrollToIndex).toHaveBeenCalledWith({ index: 9, animated: true })
   })
 
   it('scrolls the wrapped verse vertically to the occurrence selected from the Strong cards', async () => {
@@ -653,11 +697,11 @@ describe('BibleVerseDetailCard', () => {
       node => String(node.type) === 'StrongResourceScrollProvider'
     )
     const cardsScrollView = renderer.root.find(
-      node => String(node.type) === 'FlatList' && node.props.snapToInterval === 64
+      node => String(node.type) === 'FlatList' && node.props.snapToInterval === 74
     )
     act(() => provider.props.value.registerStrongWordLayout(1, 180))
     mockScrollTo.mockClear()
-    act(() => cardsScrollView.props.onScroll({ nativeEvent: { contentOffset: { x: 64 } } }))
+    act(() => cardsScrollView.props.onScroll({ nativeEvent: { contentOffset: { x: 74 } } }))
 
     expect(mockScrollTo).toHaveBeenCalledWith({ y: 180, animated: true })
   })

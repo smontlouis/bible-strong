@@ -58,6 +58,8 @@ import {
 const slideWidth = wp(60)
 const itemHorizontalMargin = wp(2)
 const itemWidth = slideWidth + itemHorizontalMargin * 2
+const itemGap = 10
+const carouselStep = itemWidth + itemGap
 
 const VersetWrapper = styled.View(() => ({
   width: 25,
@@ -323,7 +325,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     const index = findRefIndex(ref, occurrenceIndex)
     if (index !== -1) {
       isProgrammaticCardsScrollRef.current = true
-      strongCardsScrollRef.current?.scrollToOffset({ offset: index * itemWidth, animated: true })
+      strongCardsScrollRef.current?.scrollToIndex({ index, animated: true })
       currentStrongCardIndexRef.current = index
       setCurrentStrongCardIndex(index)
     }
@@ -344,7 +346,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     if (isProgrammaticCardsScrollRef.current) return
 
     const index = Math.min(
-      Math.max(0, Math.round(offsetX / itemWidth)),
+      Math.max(0, Math.round(offsetX / carouselStep)),
       Math.max(0, strongCards.length - 1)
     )
     if (index === currentStrongCardIndexRef.current) return
@@ -549,15 +551,21 @@ const BibleVerseDetailCard: React.FC<Props> = ({
             data={strongCards}
             horizontal
             showsHorizontalScrollIndicator={false}
-            snapToInterval={itemWidth}
+            snapToInterval={carouselStep}
             snapToAlignment="start"
             decelerationRate="fast"
-            initialNumToRender={2}
-            maxToRenderPerBatch={2}
+            initialNumToRender={20}
+            maxToRenderPerBatch={20}
             windowSize={3}
             keyExtractor={item =>
               `${item.entry.selectedIdentity.kind}:${item.entry.selectedIdentity.code}:${item.occurrenceIndex}`
             }
+            getItemLayout={(_, index) => ({
+              length: carouselStep,
+              offset: carouselStep * index,
+              index,
+            })}
+            ItemSeparatorComponent={() => <Box width={itemGap} />}
             renderItem={({ item, index }) => (
               <Box width={itemWidth}>{renderStrongCard({ item, index })}</Box>
             )}
@@ -573,7 +581,6 @@ const BibleVerseDetailCard: React.FC<Props> = ({
               paddingLeft: 20,
               paddingRight: 20,
               paddingBottom: insets.bottom + 180,
-              gap: 10,
             }}
           />
         )}
