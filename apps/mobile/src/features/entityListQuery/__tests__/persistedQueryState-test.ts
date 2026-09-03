@@ -6,9 +6,28 @@ import {
   migrateHighlightsListQueryState,
   migrateStudiesListQueryState,
   migrateWordAnnotationsListQueryState,
+  shouldClearPersistedReferenceFilter,
 } from '~state/entityListFilters'
 
 describe('persisted entity list query state', () => {
+  it('keeps a reference filter until its backing collection is authoritative', () => {
+    expect(
+      shouldClearPersistedReferenceFilter({
+        hasReference: true,
+        referenceExists: false,
+        referenceDataReady: false,
+      })
+    ).toBe(false)
+
+    expect(
+      shouldClearPersistedReferenceFilter({
+        hasReference: true,
+        referenceExists: false,
+        referenceDataReady: true,
+      })
+    ).toBe(true)
+  })
+
   it('repairs invalid fields independently without clearing valid query state', () => {
     expect(
       createBasicMigration('newest')({ query: 'grâce', sort: 'unknown', tagId: 'tag-1' })

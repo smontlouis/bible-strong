@@ -30,7 +30,7 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import type { StrongLexiconEntryCard } from '~features/resources/strongLexiconAccess'
 import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
-import { localQueryOptions } from '~helpers/queryOptions'
+import { localQueryOptions, staticResourceQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import {
   getStrongBibleFallbackPriority,
@@ -242,7 +242,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
       return toStrongVerseQueryData(result)
     },
     placeholderData: keepPreviousData,
-    staleTime: Infinity,
+    ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
   const strongVerseBaseData = strongVerseQuery.data
@@ -285,7 +285,7 @@ const BibleVerseDetailCard: React.FC<Props> = ({
     queryKey: resourceQueryKeys.bibleCoverage(provenanceVersionId ?? 'pending'),
     queryFn: () => resources.bibleContent.loadCoverage(provenanceVersionId!),
     enabled: Boolean(provenanceVersionId),
-    staleTime: Infinity,
+    ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
   const strongCards = (strongVerseData?.strongOccurrences ?? []).flatMap(

@@ -2898,6 +2898,48 @@
           ]
         }
       ]
+    },
+    {
+      "type": "rectangle",
+      "id": "XR4Ll",
+      "x": 1736,
+      "y": -1210,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image.png",
+        "mode": "fill"
+      },
+      "width": 1593,
+      "height": 987
+    },
+    {
+      "type": "rectangle",
+      "id": "A3mGSj",
+      "x": 1710,
+      "y": 0,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-1.png",
+        "mode": "fill"
+      },
+      "width": 1594,
+      "height": 987
+    },
+    {
+      "type": "rectangle",
+      "id": "sz5aU",
+      "x": 1710,
+      "y": 1144,
+      "fill": {
+        "type": "image",
+        "enabled": true,
+        "url": "image-2.png",
+        "mode": "fill"
+      },
+      "width": 1597,
+      "height": 985
     }
   ],
   "variables": {

@@ -8,6 +8,16 @@ import type { EntityListSort } from '~features/entityListQuery/entityListQuery'
 import type { HighlightFilters } from '~common/types'
 import { getBook, isBookInTestament } from '~helpers/bibleBookCatalog'
 
+export const shouldClearPersistedReferenceFilter = ({
+  hasReference,
+  referenceExists,
+  referenceDataReady,
+}: {
+  hasReference: boolean
+  referenceExists: boolean
+  referenceDataReady: boolean
+}): boolean => hasReference && referenceDataReady && !referenceExists
+
 export {
   defaultTagListQueryState,
   migrateTagListQueryState,

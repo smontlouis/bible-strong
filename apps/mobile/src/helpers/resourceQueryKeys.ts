@@ -55,6 +55,7 @@ export const resourceQueryKeys = {
   bibleReferences: (verse: string) => [...bibleContent, 'references', verse] as const,
   bibleRedWords: (versionId: string) => [...bibleContent, 'red-words', versionId] as const,
   bibleCoverage: (versionId: string) => [...bibleContent, 'coverage', versionId] as const,
+  commentary: () => commentary,
   commentaryCoverage: (resourceId: string, language: string) =>
     [...commentary, 'coverage', resourceId, language] as const,
   lexiconBible: () => lexiconBible,

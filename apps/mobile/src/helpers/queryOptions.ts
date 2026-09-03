@@ -5,3 +5,7 @@ export const localQueryOptions = {
 export const remoteQueryOptions = {
   networkMode: 'online' as const,
 }
+
+export const staticResourceQueryOptions = {
+  staleTime: Infinity,
+}

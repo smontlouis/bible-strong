@@ -33,7 +33,11 @@ import ChoiceFilterModal from '~common/ChoiceFilterModal'
 import { type SheetRef } from '~common/sheet'
 import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
 import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
-import { defaultLinksListQueryState, linksListQueryAtom } from '~state/entityListFilters'
+import {
+  defaultLinksListQueryState,
+  linksListQueryAtom,
+  shouldClearPersistedReferenceFilter,
+} from '~state/entityListFilters'
 import { linkTypeConfig } from '~helpers/fetchOpenGraphData'
 
 type TLink = {
@@ -63,16 +67,23 @@ const BibleVerseLinks = ({ isFormSheet = false }: BibleVerseLinksProps) => {
   const [linkSettingsId, setLinkSettingsId] = useState<string | null>(null)
   const _links = useSelector(selectLinks)
   const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const tagsReady = useSelector((state: RootState) => !state.user.id || state.user.sync.loaded.tags)
   const selectedChip = queryState.tagId ? tags[queryState.tagId] || null : null
 
   useEffect(() => {
-    if (queryState.tagId && !tags[queryState.tagId]) {
+    if (
+      shouldClearPersistedReferenceFilter({
+        hasReference: Boolean(queryState.tagId),
+        referenceExists: Boolean(queryState.tagId && tags[queryState.tagId]),
+        referenceDataReady: tagsReady,
+      })
+    ) {
       setQueryState(state => ({ ...state, tagId: null }))
     }
     if (queryState.linkType && !Object.hasOwn(linkTypeConfig, queryState.linkType)) {
       setQueryState(state => ({ ...state, linkType: null }))
     }
-  }, [queryState.linkType, queryState.tagId, setQueryState, tags])
+  }, [queryState.linkType, queryState.tagId, setQueryState, tags, tagsReady])
   const relations = useSelector(selectRelations)
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)

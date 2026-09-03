@@ -69,7 +69,7 @@ import {
   type SearchFacetId,
   type SearchSectionId,
 } from './searchResultsModel'
-import { localQueryOptions } from '~helpers/queryOptions'
+import { localQueryOptions, staticResourceQueryOptions } from '~helpers/queryOptions'
 import { getBibleViewParamsForReferenceSegment } from './searchNavigation'
 import ResourceUnavailableView from '~features/resources/ResourceUnavailableView'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
@@ -495,6 +495,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     },
     enabled: shouldSearchPassages,
     retry: false,
+    ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
   const results: SearchResult[] | null = !itemFilters.passages
@@ -559,6 +560,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchStrong,
     retry: false,
+    ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
   const strongResults: StrongLexiconSearchResult[] = shouldSearchStrong
@@ -602,6 +604,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchDictionary,
     retry: false,
+    ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
   const dictionaryResults: DictionaryRow[] = shouldSearchDictionary
@@ -645,6 +648,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     getNextPageParam: page => page.nextCursor,
     enabled: shouldSearchNave,
     retry: false,
+    ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
   const naveResults: NaveRow[] = shouldSearchNave

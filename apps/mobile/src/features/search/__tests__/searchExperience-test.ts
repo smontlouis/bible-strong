@@ -57,8 +57,17 @@ const createHarness = (
 }
 
 describe('searchExperience', () => {
-  it('does not clear the default version when no Offline copy is installed', () => {
-    const harness = createHarness({}, [])
+  it('keeps the persisted version while startup only exposes another Offline copy', () => {
+    const harness = createHarness({ selectedVersion: 'KJV' }, ['BHG'])
+
+    harness.controller.reconcileSelectedVersion()
+
+    expect(harness.filters().selectedVersion).toBe('KJV')
+    expect(harness.persist).not.toHaveBeenCalled()
+  })
+
+  it('keeps the default-version filter while startup only exposes another Offline copy', () => {
+    const harness = createHarness({}, ['BHG'])
 
     harness.controller.reconcileSelectedVersion()
 

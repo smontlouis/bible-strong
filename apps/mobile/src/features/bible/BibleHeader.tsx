@@ -245,6 +245,10 @@ const Header = ({
 
   const isVerticalParallelMode = displayMode === 'vertical'
   const nextColumnWidth = columnWidth === 50 ? 75 : columnWidth === 75 ? 100 : 50
+  const toggleFocusContext = () => {
+    if (isContextFocused) actions.expandContext()
+    else actions.collapseContext()
+  }
 
   const focusMenuActions: MenuAction[] = [
     {
@@ -603,8 +607,7 @@ const Header = ({
                   onPressAction={({ nativeEvent }) => {
                     switch (nativeEvent.event) {
                       case 'toggle-context':
-                        if (isContextFocused) actions.expandContext()
-                        else actions.collapseContext()
+                        toggleFocusContext()
                         break
                       case 'open-tab':
                         openInBibleTab()
@@ -640,6 +643,39 @@ const Header = ({
                     <FeatherIcon name="chevron-down" size={12} color="primary" />
                   </AnimatedBox>
                 </MenuView>
+                <TouchableBox
+                  onPress={toggleFocusContext}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    isContextFocused ? t('tab.readWholeChapter') : t('tab.closeContext')
+                  }
+                  accessibilityState={{ expanded: !isContextFocused }}
+                  center
+                  width={28}
+                  height={28}
+                  bg="lightPrimary"
+                  borderRadius={12}
+                  style={opacityTransitionStyle}
+                >
+                  <FeatherIcon
+                    name={isContextFocused ? 'maximize-2' : 'minimize-2'}
+                    size={14}
+                    color="primary"
+                  />
+                </TouchableBox>
+                <TouchableBox
+                  onPress={() => actions.clearFocusVerses()}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('accessibility.clearFocus')}
+                  center
+                  width={28}
+                  height={28}
+                  bg="lightPrimary"
+                  borderRadius={12}
+                  style={opacityTransitionStyle}
+                >
+                  <FeatherIcon name="x" size={15} color="primary" />
+                </TouchableBox>
               </HStack>
             </AnimatedBox>
           </>

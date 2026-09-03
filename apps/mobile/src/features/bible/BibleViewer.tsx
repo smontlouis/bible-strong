@@ -45,7 +45,7 @@ import type { CanonicalBibleNote } from '~helpers/canonicalBibleNotes'
 import generateUUID from '~helpers/generateUUID'
 import getVersesContent from '~helpers/getVersesContent'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { localQueryOptions } from '~helpers/queryOptions'
+import { localQueryOptions, staticResourceQueryOptions } from '~helpers/queryOptions'
 import type { StrongSelection } from '~helpers/strongSelection'
 import useLanguage from '~helpers/useLanguage'
 import { useSheet } from '~helpers/useSheet'
@@ -298,7 +298,7 @@ const BibleViewer = ({
     queryKey: resourceQueryKeys.bibleCoverage(version),
     queryFn: () => resources.bibleContent.loadCoverage(version),
     enabled: !!version,
-    staleTime: Infinity,
+    ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
   const goToPrevAvailableChapter = () => actions.goToPrevChapter(coverageData)

@@ -7,6 +7,7 @@ import { Slide, Slides } from '~common/ui/Slider'
 import { useQuery } from '@tanstack/react-query'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import BibleSelectTabBar from './BibleSelectTabBar'
 import BookSelector from './BookSelector'
 import ChapterSelector from './ChapterSelector'
@@ -27,6 +28,7 @@ const BibleSelect = ({ bibleAtom, onComplete, onLongPressComplete }: BibleSelect
     queryKey: resourceQueryKeys.bibleCoverage(version),
     queryFn: () => resources.bibleContent.loadCoverage(version),
     enabled: !!version,
+    ...staticResourceQueryOptions,
   })
 
   return (

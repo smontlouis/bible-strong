@@ -19,6 +19,7 @@ import type { SheetRef } from '~common/sheet'
 import { unifiedTagsModalAtom } from '~state/app'
 import {
   defaultWordAnnotationsListQueryState,
+  shouldClearPersistedReferenceFilter,
   wordAnnotationsListQueryAtom,
 } from '~state/entityListFilters'
 import { selectAvailableAnnotationVersions } from '~redux/selectors/bible'
@@ -100,27 +101,40 @@ const WordAnnotationsScreen = () => {
   // Get all annotations from Redux
   const annotations = useSelector((state: RootState) => state.user.bible.wordAnnotations)
   const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const tagsReady = useSelector((state: RootState) => !state.user.id || state.user.sync.loaded.tags)
+  const annotationVersionsReady = useSelector(
+    (state: RootState) => !state.user.id || state.user.sync.loaded.wordAnnotations
+  )
   const versions = useSelector(selectAvailableAnnotationVersions)
   const selectedTag = queryState.tagId ? tags[queryState.tagId] : undefined
   const colorInfo = useColorInfo(queryState.colorId || undefined)
   const books = sections.flatMap(section => section.data)
   useEffect(() => {
-    if (queryState.tagId && !tags[queryState.tagId]) {
+    if (
+      shouldClearPersistedReferenceFilter({
+        hasReference: Boolean(queryState.tagId),
+        referenceExists: Boolean(queryState.tagId && tags[queryState.tagId]),
+        referenceDataReady: tagsReady,
+      })
+    ) {
       setQueryState(state => ({ ...state, tagId: null }))
     }
-    if (queryState.version && !versions.includes(queryState.version)) {
+    if (
+      shouldClearPersistedReferenceFilter({
+        hasReference: Boolean(queryState.version),
+        referenceExists: Boolean(queryState.version && versions.includes(queryState.version)),
+        referenceDataReady: annotationVersionsReady,
+      })
+    ) {
       setQueryState(state => ({ ...state, version: null }))
     }
-    if (queryState.colorId && !colorInfo) {
-      setQueryState(state => ({ ...state, colorId: null }))
-    }
   }, [
-    colorInfo,
-    queryState.colorId,
+    annotationVersionsReady,
     queryState.tagId,
     queryState.version,
     setQueryState,
     tags,
+    tagsReady,
     versions,
   ])
 

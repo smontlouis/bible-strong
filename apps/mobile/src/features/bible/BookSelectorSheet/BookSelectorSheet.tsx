@@ -25,6 +25,7 @@ import { getBooksForCanon, isBibleCanonId } from '~helpers/bibleBookCatalog'
 import { getBibleVersionCanonId } from '~helpers/bibleVersions'
 import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import type { BibleVersionCoverage } from '~helpers/biblesDb'
 interface BookSelectorSheetProps {
   selectedBookNum?: number
@@ -67,6 +68,7 @@ const BookSelectorSheet = ({ sheetRef }: BookSelectorSheetProps) => {
     queryKey: resourceQueryKeys.bibleCoverage(selectedVersion || 'LSG'),
     queryFn: () => resources.bibleContent.loadCoverage(selectedVersion || 'LSG'),
     enabled: !!selectedVersion && !providedCoverage,
+    ...staticResourceQueryOptions,
   })
   const coverageData = providedCoverage ?? bibleCoverageData
   const publishedCanonId = coverageData?.canon?.id

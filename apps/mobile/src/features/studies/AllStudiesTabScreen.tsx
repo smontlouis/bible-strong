@@ -35,6 +35,7 @@ import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
 import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
 import {
   defaultStudiesListQueryState,
+  shouldClearPersistedReferenceFilter,
   studiesListQueryAtom,
   type StudiesListQueryState,
 } from '~state/entityListFilters'
@@ -113,13 +114,20 @@ const StudiesScreen = ({
 
   const [queryState, setQueryState] = useAtom(studiesListQueryAtom)
   const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const tagsReady = useSelector((state: RootState) => !state.user.id || state.user.sync.loaded.tags)
   const selectedChip = queryState.tagId ? tags[queryState.tagId] || null : null
 
   useEffect(() => {
-    if (queryState.tagId && !tags[queryState.tagId]) {
+    if (
+      shouldClearPersistedReferenceFilter({
+        hasReference: Boolean(queryState.tagId),
+        referenceExists: Boolean(queryState.tagId && tags[queryState.tagId]),
+        referenceDataReady: tagsReady,
+      })
+    ) {
       setQueryState(state => ({ ...state, tagId: null }))
     }
-  }, [queryState.tagId, setQueryState, tags])
+  }, [queryState.tagId, setQueryState, tags, tagsReady])
 
   const openTagsModal = () => {
     setUnifiedTagsModal({

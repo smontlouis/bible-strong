@@ -54,7 +54,11 @@ type HttpInterlinearBibleResourceAdapterOptions = {
   isOnline: () => Promise<boolean>
   bibleChapterAdapter: BibleChapterAdapter
   timeoutMs?: number
+  availabilityStaleTimeMs?: number
+  now?: () => number
 }
+
+const INTERLINEAR_BIBLE_AVAILABILITY_STALE_TIME_MS = 6 * 60 * 60 * 1000
 
 const problemCode = (payload: unknown) =>
   payload && typeof payload === 'object' && 'code' in payload ? payload.code : undefined
@@ -95,8 +99,14 @@ export const createHttpInterlinearBibleResourceAdapter = ({
   isOnline,
   bibleChapterAdapter,
   timeoutMs = 10_000,
+  availabilityStaleTimeMs = INTERLINEAR_BIBLE_AVAILABILITY_STALE_TIME_MS,
+  now = Date.now,
 }: HttpInterlinearBibleResourceAdapterOptions): InterlinearBibleResourceAdapter => {
   const normalizedBaseUrl = baseUrl.replace(/\/+$/, '')
+  const availabilityCache = new Map<
+    ResourceLanguage,
+    { expiresAt: number; promise: Promise<InterlinearSidecarAvailability> }
+  >()
   const get = async <A>(path: string, schema: Schema.Schema<A>): Promise<A> => {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), timeoutMs)
@@ -125,43 +135,64 @@ export const createHttpInterlinearBibleResourceAdapter = ({
   const resourcePath = (locale: ResourceLanguage) =>
     `/v1/interlinear-bibles/BHG/languages/${encodeURIComponent(locale)}`
 
-  return {
-    async getAvailability(locale) {
-      try {
-        const coverage = await get(`${resourcePath(locale)}/coverage`, InterlinearBibleCoverageDto)
-        if (coverage.resource.language !== locale) {
-          throw new ResourceAccessError('INTEGRITY_FAILURE')
-        }
-        const bibleCoverage = await bibleChapterAdapter.loadCoverage('BHG')
-        if (bibleCoverage.status !== 'available') {
-          throw resourceAccessErrorFromBibleChapterUnavailable(
-            bibleCoverage.reason,
-            undefined,
-            bibleCoverage.diagnostics
-          )
-        }
-        if (
-          bibleCoverage.textRevision !== coverage.resource.textRevision ||
-          bibleCoverage.textSha256 !== coverage.resource.textSha256
-        ) {
-          warnAboutRecoverableResourceIntegrity('interlinear-bible-coverage-revision-mismatch', {
-            locale,
-            bibleTextRevision: bibleCoverage.textRevision,
-            interlinearTextRevision: coverage.resource.textRevision,
-          })
-        }
-        return {
-          status: 'available',
-          locale,
-          textRevision: coverage.resource.textRevision,
-        }
-      } catch (error) {
-        if (error instanceof ResourceAccessError && error.code === 'RESOURCE_UNSUPPORTED') {
-          return { status: 'missing' }
-        }
-        throw error
+  const loadAvailability = async (
+    locale: ResourceLanguage
+  ): Promise<InterlinearSidecarAvailability> => {
+    try {
+      const coverage = await get(`${resourcePath(locale)}/coverage`, InterlinearBibleCoverageDto)
+      if (coverage.resource.language !== locale) {
+        throw new ResourceAccessError('INTEGRITY_FAILURE')
       }
-    },
+      const bibleCoverage = await bibleChapterAdapter.loadCoverage('BHG')
+      if (bibleCoverage.status !== 'available') {
+        throw resourceAccessErrorFromBibleChapterUnavailable(
+          bibleCoverage.reason,
+          undefined,
+          bibleCoverage.diagnostics
+        )
+      }
+      if (
+        bibleCoverage.textRevision !== coverage.resource.textRevision ||
+        bibleCoverage.textSha256 !== coverage.resource.textSha256
+      ) {
+        warnAboutRecoverableResourceIntegrity('interlinear-bible-coverage-revision-mismatch', {
+          locale,
+          bibleTextRevision: bibleCoverage.textRevision,
+          interlinearTextRevision: coverage.resource.textRevision,
+        })
+      }
+      return {
+        status: 'available',
+        locale,
+        textRevision: coverage.resource.textRevision,
+      }
+    } catch (error) {
+      if (error instanceof ResourceAccessError && error.code === 'RESOURCE_UNSUPPORTED') {
+        return { status: 'missing' }
+      }
+      throw error
+    }
+  }
+
+  const getAvailability = (locale: ResourceLanguage) => {
+    const cached = availabilityCache.get(locale)
+    if (cached && cached.expiresAt > now()) return cached.promise
+
+    const promise = loadAvailability(locale).catch(error => {
+      if (availabilityCache.get(locale)?.promise === promise) {
+        availabilityCache.delete(locale)
+      }
+      throw error
+    })
+    availabilityCache.set(locale, {
+      expiresAt: now() + availabilityStaleTimeMs,
+      promise,
+    })
+    return promise
+  }
+
+  return {
+    getAvailability,
     async loadChapterTokens(locale, request) {
       const [chapter, bibleChapter] = await Promise.all([
         get(

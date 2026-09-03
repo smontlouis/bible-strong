@@ -38,25 +38,11 @@ export const createSearchExperienceController = (
       const current = adapter.readFilters()
       const defaultVersion = adapter.defaultBibleVersion()
       const resolvedVersion = resolveSearchVersionFilter(current.selectedVersion, defaultVersion)
-      const searchableVersions = adapter.searchableVersions()
-      const compatibleVersions = current.canon
-        ? searchableVersions.filter(version => getBibleVersionCanonId(version) === current.canon)
-        : searchableVersions
 
-      // Keep a valid filter even when no source is currently reachable. This lets
-      // the resource boundary explain an Offline-copy requirement instead of
-      // silently disabling passage search with an empty version.
-      if (compatibleVersions.length === 0) {
-        if (!resolvedVersion) this.selectVersion(DEFAULT_BIBLE_VERSION_FILTER)
-        return
-      }
-      if (compatibleVersions.includes(resolvedVersion)) return
-
-      this.selectVersion(
-        compatibleVersions.includes(defaultVersion)
-          ? DEFAULT_BIBLE_VERSION_FILTER
-          : compatibleVersions[0]
-      )
+      // Availability is transient during startup and connectivity changes. The
+      // persisted filter represents user intent, so only repair an empty value;
+      // resource access owns the unavailable/offline presentation.
+      if (!resolvedVersion) this.selectVersion(DEFAULT_BIBLE_VERSION_FILTER)
     },
 
     setSection(value: SearchSection) {

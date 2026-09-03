@@ -6,7 +6,10 @@ import type { SheetRef } from '~common/sheet'
 import type { HighlightFilters, Tag } from '~common/types'
 import { useColorInfo } from './useColorName'
 import { unifiedTagsModalAtom } from '~state/app'
-import { highlightsListQueryAtom } from '~state/entityListFilters'
+import {
+  highlightsListQueryAtom,
+  shouldClearPersistedReferenceFilter,
+} from '~state/entityListFilters'
 import type { RootState } from '~redux/modules/reducer'
 
 interface UseHighlightFiltersReturn {
@@ -42,6 +45,7 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   // Filter state
   const [filters, setFilters] = useAtom(highlightsListQueryAtom)
   const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const tagsReady = useSelector((state: RootState) => !state.user.id || state.user.sync.loaded.tags)
   const selectedTag = filters.tagId ? tags[filters.tagId] : undefined
 
   // Modal refs (imperative API - no booleans)
@@ -55,13 +59,16 @@ export function useHighlightFilters(): UseHighlightFiltersReturn {
   const colorInfo = useColorInfo(filters.colorId)
 
   useEffect(() => {
-    if (filters.tagId && !tags[filters.tagId]) {
+    if (
+      shouldClearPersistedReferenceFilter({
+        hasReference: Boolean(filters.tagId),
+        referenceExists: Boolean(filters.tagId && tags[filters.tagId]),
+        referenceDataReady: tagsReady,
+      })
+    ) {
       setFilters(state => ({ ...state, tagId: undefined }))
     }
-    if (filters.colorId && !colorInfo) {
-      setFilters(state => ({ ...state, colorId: undefined }))
-    }
-  }, [colorInfo, filters.colorId, filters.tagId, setFilters, tags])
+  }, [filters.tagId, setFilters, tags, tagsReady])
 
   // Type filter label
   const getTypeFilterLabel = (): string => {

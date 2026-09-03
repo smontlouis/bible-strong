@@ -27,7 +27,11 @@ import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { useResolveNewTabSelection } from '~features/app-switcher/utils/useResolveNewTabSelection'
 import { useEntityListQueryFilters } from '~common/EntityListQueryFilters'
 import { queryEntityList, type EntityListSort } from '~features/entityListQuery/entityListQuery'
-import { defaultNotesListQueryState, notesListQueryAtom } from '~state/entityListFilters'
+import {
+  defaultNotesListQueryState,
+  notesListQueryAtom,
+  shouldClearPersistedReferenceFilter,
+} from '~state/entityListFilters'
 
 type BibleVerseNotesProps = {
   isFormSheet?: boolean
@@ -52,13 +56,20 @@ const BibleVerseNotes = ({
 
   const notes = useSelector((state: RootState) => selectNoteListRows(state, t('annotation')))
   const tags = useSelector((state: RootState) => state.user.bible.tags)
+  const tagsReady = useSelector((state: RootState) => !state.user.id || state.user.sync.loaded.tags)
   const selectedChip = queryState.tagId ? tags[queryState.tagId] || null : null
 
   useEffect(() => {
-    if (queryState.tagId && !tags[queryState.tagId]) {
+    if (
+      shouldClearPersistedReferenceFilter({
+        hasReference: Boolean(queryState.tagId),
+        referenceExists: Boolean(queryState.tagId && tags[queryState.tagId]),
+        referenceDataReady: tagsReady,
+      })
+    ) {
       setQueryState(state => ({ ...state, tagId: null }))
     }
-  }, [queryState.tagId, setQueryState, tags])
+  }, [queryState.tagId, setQueryState, tags, tagsReady])
   const relationCountsByEndpoint = useSelector(selectRelationCountsByEndpointIdentity)
 
   const setUnifiedTagsModal = useSetAtom(unifiedTagsModalAtom)

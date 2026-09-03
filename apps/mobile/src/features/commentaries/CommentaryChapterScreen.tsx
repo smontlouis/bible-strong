@@ -21,6 +21,7 @@ import { resourceFailureFromAccessError } from '~features/resources/resourceFail
 import { getBook } from '~helpers/bibleBookCatalog'
 import { IS_FORM_SHEET } from '~helpers/constants'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import { getDefaultBibleTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
@@ -142,6 +143,7 @@ const CommentaryChapterScreen = () => {
     enabled: Boolean(parsed),
     networkMode: 'always',
     retry: false,
+    ...staticResourceQueryOptions,
   })
   const coverageQuery = useQuery({
     queryKey: resourceQueryKeys.commentaryCoverage(
@@ -156,6 +158,7 @@ const CommentaryChapterScreen = () => {
     enabled: Boolean(parsed),
     networkMode: 'always',
     retry: false,
+    ...staticResourceQueryOptions,
   })
 
   useEffect(() => {

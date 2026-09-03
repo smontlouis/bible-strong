@@ -119,6 +119,39 @@ describe('interlinear Bible HTTP resource access', () => {
     expect(offline.getAvailability).toHaveBeenCalledTimes(1)
   })
 
+  it('reuses successful HTTP coverage checks until their availability TTL expires', async () => {
+    let now = 0
+    const fetcher = jest.fn((_url: string) =>
+      jsonResponse({
+        resource,
+        books: [1],
+        chaptersByBook: { 1: [1] },
+        verseCountByBookChapter: { '1-1': 1 },
+      })
+    ) as jest.MockedFunction<typeof fetch>
+    const loadCoverage = jest.fn(bibleChapterAdapter.loadCoverage)
+    const online = createHttpInterlinearBibleResourceAdapter({
+      baseUrl: 'http://localhost:8787',
+      fetcher,
+      isOnline: async () => true,
+      bibleChapterAdapter: { ...bibleChapterAdapter, loadCoverage },
+      availabilityStaleTimeMs: 1_000,
+      now: () => now,
+    })
+
+    await online.getAvailability('fr')
+    await online.getAvailability('fr')
+
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(loadCoverage).toHaveBeenCalledTimes(1)
+
+    now = 1_001
+    await online.getAvailability('fr')
+
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    expect(loadCoverage).toHaveBeenCalledTimes(2)
+  })
+
   it('loads an interlinear chapter over HTTP with zero Offline copy', async () => {
     const fetcher = jest.fn((url: string) =>
       url.endsWith('/coverage')

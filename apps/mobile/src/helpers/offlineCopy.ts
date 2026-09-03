@@ -146,6 +146,7 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
         resourceQueryKeys.strongBible(),
         ['bible'],
         ['strong-detail'],
+        ['sqlite-passage-search'],
         ['bible-version-coverage', identity.versionId],
         ['downloaded-bible-version-ids'],
         ['strong-mode-availability', identity.versionId],
@@ -195,7 +196,7 @@ export const getOfflineCopyInvalidationKeys = (identity: OfflineCopyIdentity): Q
         publicationKey,
       ]
     case 'commentary':
-      return [['commentaries'], publicationKey]
+      return [['commentaries'], resourceQueryKeys.commentary(), publicationKey]
     case 'database':
       return [
         ...(identity.databaseId === 'MHY' || identity.databaseId === 'TRESOR'

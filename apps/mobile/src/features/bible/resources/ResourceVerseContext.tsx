@@ -16,7 +16,7 @@ import Text from '~common/ui/Text'
 import Paragraph from '~common/ui/Paragraph'
 import { createOfflineCopyDownloadItem } from '~helpers/downloadItemFactory'
 import { getChapterVerseCountFromCoverage } from '~helpers/bibleCoverage'
-import { localQueryOptions } from '~helpers/queryOptions'
+import { localQueryOptions, staticResourceQueryOptions } from '~helpers/queryOptions'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
 import { useDefaultBibleVersion } from '~state/useDefaultBibleVersion'
 
@@ -96,6 +96,7 @@ export const useResourceVerseContext = (
     queryKey: resourceQueryKeys.bibleCoverage(requestedVersion),
     queryFn: () => resources.bibleContent.loadCoverage(requestedVersion),
     enabled: Number.isSafeInteger(book) && Number.isSafeInteger(chapter),
+    ...staticResourceQueryOptions,
     ...localQueryOptions,
   })
   const versesInCurrentChapter =

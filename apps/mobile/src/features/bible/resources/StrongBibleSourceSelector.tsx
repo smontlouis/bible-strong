@@ -481,20 +481,7 @@ export const StrongBibleSourceSheet = ({
       setPendingSelectionVersionId(undefined)
       return
     }
-
-    if (
-      strongBibleSourceVersionId &&
-      availabilityByVersion.get(strongBibleSourceVersionId)?.status !== 'available'
-    ) {
-      setBible(updateStrongBibleSourceVersion())
-    }
-  }, [
-    availabilityByVersion,
-    availabilityQuery.isSuccess,
-    pendingSelectionVersionId,
-    setBible,
-    strongBibleSourceVersionId,
-  ])
+  }, [availabilityByVersion, availabilityQuery.isSuccess, pendingSelectionVersionId, setBible])
 
   const selectSource = (versionId?: StrongBibleVersionId) => {
     setPendingSelectionVersionId(undefined)

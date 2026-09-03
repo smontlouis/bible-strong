@@ -22,6 +22,7 @@ import { useResourceAccess } from '~features/resources/resourceAccess'
 import { resourceFailureFromAccessError } from '~features/resources/resourceFailure'
 import { getBook } from '~helpers/bibleBookCatalog'
 import { resourceQueryKeys } from '~helpers/resourceQueryKeys'
+import { staticResourceQueryOptions } from '~helpers/queryOptions'
 import { getDefaultBibleTab, type CommentaryResourceTab, useBibleTabActions } from '~state/tabs'
 import { openCommentaryBookSelector } from './commentaryBookSelector'
 import CommentaryEntryNavigation from './CommentaryEntryNavigation'
@@ -102,6 +103,7 @@ const CommentaryResourceTabScreen = ({
     enabled: Boolean(parsed),
     networkMode: 'always',
     retry: false,
+    ...staticResourceQueryOptions,
   })
   const titleSection = tab.data.sectionId
     ? query.data?.sections.find(candidate => candidate.id === tab.data.sectionId)
@@ -141,6 +143,7 @@ const CommentaryResourceTabScreen = ({
     enabled: Boolean(parsed),
     networkMode: 'always',
     retry: false,
+    ...staticResourceQueryOptions,
   })
 
   useEffect(() => {

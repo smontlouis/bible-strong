@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai/react'
 import type { PrimitiveAtom } from 'jotai/vanilla'
 import { useQuery } from '@tanstack/react-query'
-import { type RefObject, useEffect } from 'react'
+import { type RefObject } from 'react'
 import { Platform } from 'react-native'
 import { useTranslation } from 'react-i18next'
 
@@ -100,20 +100,6 @@ const StrongModeSelectorSheet = ({ bibleAtom, sheetRef }: Props) => {
   )
   const reverseInterlinearAvailable = strongAvailable && Boolean(installedInterlinear)
 
-  useEffect(() => {
-    if (!availabilityQuery.isSuccess || !availability.strong || selectedMode === 'hidden') return
-    const selectedModeAvailable =
-      selectedMode === 'visible' ? strongAvailable : reverseInterlinearAvailable
-    if (selectedModeAvailable) return
-    actions.setStrongMode('hidden')
-  }, [
-    actions,
-    availability.strong,
-    availabilityQuery.isSuccess,
-    reverseInterlinearAvailable,
-    selectedMode,
-    strongAvailable,
-  ])
   const getModeDownloadPresentation = (mode: Exclude<StrongMode, 'hidden'>) => {
     return getBibleModeAcquisitionPresentation(
       pendingAcquisition?.mode === mode ? pendingAcquisition : undefined,

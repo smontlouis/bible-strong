@@ -32,7 +32,10 @@ import AnnotationItem from './AnnotationItem'
 import type { VerseIds } from '~common/types'
 import { useCanGoBackInStack } from '~navigation/useCanGoBackInStack'
 import ChoiceFilterModal from '~common/ChoiceFilterModal'
-import { highlightsListQueryAtom } from '~state/entityListFilters'
+import {
+  highlightsListQueryAtom,
+  shouldClearPersistedReferenceFilter,
+} from '~state/entityListFilters'
 import { sections } from '~assets/bible_versions/books-desc'
 import { isBookInTestament } from '~helpers/bibleBookCatalog'
 import {
@@ -69,17 +72,31 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
 
   // Available annotation versions for type filter
   const availableAnnotationVersions = useSelector(selectAvailableAnnotationVersions)
+  const annotationVersionsReady = useSelector(
+    (state: RootState) =>
+      !state.user.id ||
+      (state.user.sync.loaded.highlights && state.user.sync.loaded.wordAnnotations)
+  )
 
   useEffect(() => {
     const typeFilter = persistedFilters.typeFilter
     if (
-      typeFilter &&
-      !['all', 'highlights', 'annotations'].includes(typeFilter) &&
-      !availableAnnotationVersions.includes(typeFilter)
+      shouldClearPersistedReferenceFilter({
+        hasReference: Boolean(
+          typeFilter && !['all', 'highlights', 'annotations'].includes(typeFilter)
+        ),
+        referenceExists: Boolean(typeFilter && availableAnnotationVersions.includes(typeFilter)),
+        referenceDataReady: annotationVersionsReady,
+      })
     ) {
       setPersistedFilters(state => ({ ...state, typeFilter: undefined }))
     }
-  }, [availableAnnotationVersions, persistedFilters.typeFilter, setPersistedFilters])
+  }, [
+    annotationVersionsReady,
+    availableAnnotationVersions,
+    persistedFilters.typeFilter,
+    setPersistedFilters,
+  ])
 
   // Filters hook - encapsulates all filter logic
   const {

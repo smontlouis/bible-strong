@@ -82,6 +82,7 @@ describe('Offline copy identity', () => {
       ['resource', 'strong-bible'],
       ['bible'],
       ['strong-detail'],
+      ['sqlite-passage-search'],
       ['bible-version-coverage', 'DBY'],
       ['downloaded-bible-version-ids'],
       ['strong-mode-availability', 'DBY'],
@@ -129,5 +130,15 @@ describe('Offline copy identity', () => {
     expect(
       getOfflineCopyInvalidationKeys({ kind: 'database', databaseId: 'MHY', language: 'fr' })
     ).toContainEqual(['resource', 'bible-content'])
+  })
+
+  it('invalidates cached commentary coverage when a commentary copy changes', () => {
+    expect(
+      getOfflineCopyInvalidationKeys({
+        kind: 'commentary',
+        resourceId: 'barnes',
+        language: 'fr',
+      })
+    ).toContainEqual(['resource', 'commentary'])
   })
 })
