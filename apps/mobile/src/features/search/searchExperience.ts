@@ -15,7 +15,7 @@ import {
 
 export interface SearchExperienceAdapter {
   readFilters(): SearchFilters
-  installedVersions(): string[]
+  searchableVersions(): string[]
   defaultBibleVersion(): string
   writeSection(value: SearchSection): void
   writeCanon(value: SearchCanon): void
@@ -34,6 +34,31 @@ export const createSearchExperienceController = (
   const persist = (patch: Partial<SearchFilters>) => adapter.persist(patch)
 
   return {
+    reconcileSelectedVersion() {
+      const current = adapter.readFilters()
+      const defaultVersion = adapter.defaultBibleVersion()
+      const resolvedVersion = resolveSearchVersionFilter(current.selectedVersion, defaultVersion)
+      const searchableVersions = adapter.searchableVersions()
+      const compatibleVersions = current.canon
+        ? searchableVersions.filter(version => getBibleVersionCanonId(version) === current.canon)
+        : searchableVersions
+
+      // Keep a valid filter even when no source is currently reachable. This lets
+      // the resource boundary explain an Offline-copy requirement instead of
+      // silently disabling passage search with an empty version.
+      if (compatibleVersions.length === 0) {
+        if (!resolvedVersion) this.selectVersion(DEFAULT_BIBLE_VERSION_FILTER)
+        return
+      }
+      if (compatibleVersions.includes(resolvedVersion)) return
+
+      this.selectVersion(
+        compatibleVersions.includes(defaultVersion)
+          ? DEFAULT_BIBLE_VERSION_FILTER
+          : compatibleVersions[0]
+      )
+    },
+
     setSection(value: SearchSection) {
       if (adapter.readFilters().section === value) return
       adapter.writeSection(value)
@@ -78,8 +103,8 @@ export const createSearchExperienceController = (
       const defaultVersion = adapter.defaultBibleVersion()
       const resolvedVersion = resolveSearchVersionFilter(current.selectedVersion, defaultVersion)
       const compatibleVersions = value
-        ? adapter.installedVersions().filter(version => getBibleVersionCanonId(version) === value)
-        : adapter.installedVersions()
+        ? adapter.searchableVersions().filter(version => getBibleVersionCanonId(version) === value)
+        : adapter.searchableVersions()
       const selectedVersion = compatibleVersions.includes(resolvedVersion)
         ? current.selectedVersion
         : compatibleVersions.includes(defaultVersion)

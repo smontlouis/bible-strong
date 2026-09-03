@@ -85,7 +85,7 @@ import type { SheetRef } from '~common/sheet'
 import SearchSourceFiltersSheet from './SearchSourceFiltersSheet'
 import { parseStrongReference } from '~helpers/bibleSearchInput'
 import { getBooksForCanon } from '~helpers/bibleBookCatalog'
-import { getBibleVersionCanonId } from '~helpers/bibleVersions'
+import { getBibleVersionCanonId, versions } from '~helpers/bibleVersions'
 import { createStrongIdentity } from '~helpers/strongIdentities'
 import { isExactBibleReferenceInput } from '~helpers/bcvParser'
 import {
@@ -220,11 +220,21 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       ? [entry.resource.versionId]
       : []
   )
-  const installedVersionsKey = installedVersions.join('\u0000')
+  const remotelyReadableVersions = isConnected
+    ? Object.keys(versions).filter(
+        versionId =>
+          resources.capabilities.getOnlineAccess({ kind: 'bible-text', versionId }).status ===
+          'remotely-readable'
+      )
+    : []
+  const searchableVersions = Array.from(
+    new Set([...installedVersions, ...remotelyReadableVersions])
+  )
+  const searchableVersionsKey = searchableVersions.join('\u0000')
   const searchExperience = createSearchExperienceController(
     {
       readFilters: () => ({ section, canon, book, selectedVersion, sortOrder, itemFilters }),
-      installedVersions: () => installedVersions,
+      searchableVersions: () => searchableVersions,
       defaultBibleVersion: () => defaultBibleVersion,
       writeSection: _setSection,
       writeCanon: _setCanon,
@@ -252,27 +262,14 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     }))
   }
 
-  const hasInstalledVersions = installedVersions.length > 0
-  const reconcileSelectedVersion = useEffectEvent((fallbackVersionFilter: string) => {
-    setSelectedVersion(fallbackVersionFilter)
+  const hasSearchableVersions = searchableVersions.length > 0
+  const reconcileSelectedVersion = useEffectEvent(() => {
+    searchExperience.reconcileSelectedVersion()
   })
 
   useEffect(() => {
-    const currentInstalledVersions = installedVersionsKey
-      ? installedVersionsKey.split('\u0000')
-      : []
-    const compatibleVersions = canon
-      ? currentInstalledVersions.filter(version => getBibleVersionCanonId(version) === canon)
-      : currentInstalledVersions
-    if (!resolvedSelectedVersion || !compatibleVersions.includes(resolvedSelectedVersion)) {
-      const fallbackVersionFilter = compatibleVersions.includes(defaultBibleVersion)
-        ? DEFAULT_BIBLE_VERSION_FILTER
-        : compatibleVersions[0] || ''
-      if (fallbackVersionFilter !== selectedVersion) {
-        reconcileSelectedVersion(fallbackVersionFilter)
-      }
-    }
-  }, [canon, defaultBibleVersion, installedVersionsKey, resolvedSelectedVersion, selectedVersion])
+    reconcileSelectedVersion()
+  }, [canon, defaultBibleVersion, searchableVersionsKey, resolvedSelectedVersion, selectedVersion])
 
   const canonBooks = getBooksForCanon(canon || getBibleVersionCanonId(resolvedSelectedVersion))
   const books = [
@@ -300,7 +297,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
     'theotex-septuagint': t('search.canon.septuagint'),
   }
   const availableCanons = Array.from(
-    new Set(installedVersions.map(version => getBibleVersionCanonId(version)))
+    new Set(searchableVersions.map(version => getBibleVersionCanonId(version)))
   )
   const canonValues: { value: SearchCanon; label: string }[] = [
     { value: '', label: t('Tous les canons') },
@@ -312,7 +309,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       value: DEFAULT_BIBLE_VERSION_FILTER,
       label: `${t('bibleDefaults.defaultReadingTitle')} (${defaultBibleVersion})`,
     },
-    ...installedVersions.map(v => ({ value: v, label: v })),
+    ...searchableVersions.map(v => ({ value: v, label: v })),
   ]
 
   const sortOrderValues: { value: SearchSortOrder; label: string }[] = [
@@ -842,7 +839,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       )
     }
 
-    if (!hasInstalledVersions) {
+    if (!hasSearchableVersions) {
       return (
         <ResourceUnavailableView
           identity={recoveryIdentity}

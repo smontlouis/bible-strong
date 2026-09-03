@@ -17,7 +17,10 @@ const allItemFilters = {
   nave: true,
 }
 
-const createHarness = (overrides: Partial<SearchFilters> = {}) => {
+const createHarness = (
+  overrides: Partial<SearchFilters> = {},
+  searchableVersions: string[] = ['LSG', 'KJV']
+) => {
   let filters: SearchFilters = {
     section: '',
     canon: '',
@@ -37,7 +40,7 @@ const createHarness = (overrides: Partial<SearchFilters> = {}) => {
   const controller = createSearchExperienceController(
     {
       readFilters: () => filters,
-      installedVersions: () => ['LSG', 'KJV'],
+      searchableVersions: () => searchableVersions,
       defaultBibleVersion: () => 'LSG',
       writeSection: value => write('section', value),
       writeCanon: value => write('canon', value),
@@ -54,6 +57,23 @@ const createHarness = (overrides: Partial<SearchFilters> = {}) => {
 }
 
 describe('searchExperience', () => {
+  it('does not clear the default version when no Offline copy is installed', () => {
+    const harness = createHarness({}, [])
+
+    harness.controller.reconcileSelectedVersion()
+
+    expect(harness.filters().selectedVersion).toBe(DEFAULT_BIBLE_VERSION_FILTER)
+    expect(harness.persist).not.toHaveBeenCalled()
+  })
+
+  it('repairs an empty persisted version so passage search can report availability', () => {
+    const harness = createHarness({ selectedVersion: '' }, [])
+
+    harness.controller.reconcileSelectedVersion()
+
+    expect(harness.filters().selectedVersion).toBe(DEFAULT_BIBLE_VERSION_FILTER)
+  })
+
   it('keeps version, canon, and book filters compatible as one transition', () => {
     const harness = createHarness({ canon: 'protestant-66', book: 67 })
 
