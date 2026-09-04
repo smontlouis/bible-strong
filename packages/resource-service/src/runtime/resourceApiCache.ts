@@ -1,5 +1,6 @@
 import mobileResourceCatalog from '@bible-strong/resource-catalog/catalog'
 import { resourceEtagMatches } from '../http/conditionalRequest'
+import { withResourceCorsHeaders } from '../http/cors'
 import { resourceRequestIdFrom } from '../http/requestId'
 import { BIBLE_SEARCH_CACHE_REVISION } from '../search/bibleSearchRevision'
 import { STRONG_LEXICON_ENTRY_RESPONSE_REVISION } from '../domain/strongLexicon'
@@ -157,7 +158,8 @@ const cacheRequest = (request: Request, cacheEpoch: string): Request => {
 const responseForClient = (
   response: Response,
   status?: 'HIT' | 'MISS',
-  request?: Request
+  request?: Request,
+  corsAllowedOrigins: readonly string[] = []
 ): Response => {
   const headers = new Headers(response.headers)
   headers.set('cache-control', 'private, no-store')
@@ -172,14 +174,21 @@ const responseForClient = (
     const etag = headers.get('etag')
     if (etag && resourceEtagMatches(request.headers.get('if-none-match') ?? undefined, etag)) {
       headers.delete('content-length')
-      return new Response(null, { status: 304, headers })
+      return withResourceCorsHeaders(
+        request,
+        new Response(null, { status: 304, headers }),
+        corsAllowedOrigins
+      )
     }
   }
-  return new Response(response.body, {
+  const clientResponse = new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
     headers,
   })
+  return request
+    ? withResourceCorsHeaders(request, clientResponse, corsAllowedOrigins)
+    : clientResponse
 }
 
 const cacheableResponse = (response: Response, ttlSeconds: number): Response => {
@@ -199,6 +208,7 @@ export const routeResourceApiRequest = async ({
   authorize,
   cache,
   cacheEpoch,
+  corsAllowedOrigins = [],
   waitUntil,
   reportCacheFailure = () => undefined,
   load,
@@ -207,18 +217,21 @@ export const routeResourceApiRequest = async ({
   authorize: (request: Request) => Promise<boolean>
   cache: ResourceApiEdgeCache
   cacheEpoch: string
+  corsAllowedOrigins?: readonly string[]
   waitUntil: (promise: Promise<unknown>) => void
   reportCacheFailure?: (operation: 'match' | 'put', cause: unknown) => void
   load: () => Promise<Response>
 }): Promise<Response> => {
   const appCheckFailure = await enforceResourceApiAppCheck(request, authorize)
-  if (appCheckFailure) return responseForClient(appCheckFailure, undefined, request)
+  if (appCheckFailure) {
+    return responseForClient(appCheckFailure, undefined, request, corsAllowedOrigins)
+  }
 
   const ttlSeconds = cacheTtlSeconds(request)
   if (!ttlSeconds) {
     const response = await load()
     return new URL(request.url).pathname.startsWith('/v1/')
-      ? responseForClient(response, undefined, request)
+      ? responseForClient(response, undefined, request, corsAllowedOrigins)
       : response
   }
 
@@ -229,15 +242,17 @@ export const routeResourceApiRequest = async ({
   } catch (cause) {
     reportCacheFailure('match', cause)
   }
-  if (hit) return responseForClient(hit, 'HIT', request)
+  if (hit) return responseForClient(hit, 'HIT', request, corsAllowedOrigins)
 
   const response = await load()
-  if (response.status !== 200) return responseForClient(response, undefined, request)
+  if (response.status !== 200) {
+    return responseForClient(response, undefined, request, corsAllowedOrigins)
+  }
   const storedResponse = cacheableResponse(response.clone(), ttlSeconds)
   waitUntil(
     cache.put(key, storedResponse).catch(cause => {
       reportCacheFailure('put', cause)
     })
   )
-  return responseForClient(response, 'MISS', request)
+  return responseForClient(response, 'MISS', request, corsAllowedOrigins)
 }

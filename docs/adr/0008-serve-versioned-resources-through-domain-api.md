@@ -42,11 +42,12 @@ prerequisite.
 
 Require Firebase App Check tokens on the custom resource API as the target application-attestation
 mechanism, using App Attest with DeviceCheck fallback on Apple platforms and Play Integrity on
-Android. Every production `/v1` database read and R2 artifact request requires attestation before
-cache or origin access. Only `/health` and the non-sensitive `/v1/offline-catalog` remain public. A
-static client identifier may support telemetry or routing but is not treated as a secret or an
-authorization mechanism. Rate limiting remains necessary because mobile attestation reduces abuse
-but cannot guarantee that a compromised device will never produce valid requests.
+Android, and reCAPTCHA Enterprise on Web. Every production `/v1` database read and R2 artifact
+request requires attestation before cache or origin access. Only `/health` and the non-sensitive
+`/v1/offline-catalog` remain public. A static client identifier may support telemetry or routing but
+is not treated as a secret or an authorization mechanism. Rate limiting remains necessary because
+application attestation reduces abuse but cannot guarantee that a compromised client will never
+produce valid requests.
 
 The minimal resource catalog is operational publication metadata and is not on the critical path of
 every resource read. Failure to refresh the catalog can defer update checks or artifact downloads,

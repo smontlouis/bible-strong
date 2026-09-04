@@ -1,13 +1,14 @@
 import { useAtomValue } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 
-import { BackHandler, useWindowDimensions } from 'react-native'
+import { useWindowDimensions } from 'react-native'
 
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import Box, { AnimatedBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { Home } from '~features/home/HomeScreen'
 import { More } from '~features/settings/MoreScreen'
+import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import { tabsCountAtom } from '../../../state/tabs'
 import SharedBibleDOM from '~features/bible/SharedBibleDOM'
 import CachedTabScreens from '../CachedTabScreens'
@@ -82,7 +83,7 @@ const AppSwitcherScreenWrapper = () => {
   }, [tabsCount])
 
   useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+    return subscribeToHardwareBackPress(() => {
       if (isMenuOpen.current) {
         closeMenu()
         return true
@@ -96,7 +97,6 @@ const AppSwitcherScreenWrapper = () => {
       return false
     })
 
-    return () => backHandler.remove()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 

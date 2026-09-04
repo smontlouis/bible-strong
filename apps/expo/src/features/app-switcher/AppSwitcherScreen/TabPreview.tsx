@@ -134,25 +134,25 @@ const TabPreview = ({ index, tabAtom, groupId, ...props }: TabPreviewProps & Box
             <TabIcon type={type} size={16} />
             <Title tabAtom={tabAtom} />
           </AnimatedBox>
-
-          {isRemovable && (
-            <AnimatedTouchableBox
-              position="absolute"
-              top={0}
-              right={0}
-              width={40}
-              height={40}
-              center
-              style={xStyles}
-              onPress={onClose}
-            >
-              <Box bg="reverse" width={24} height={24} borderRadius={12} center lightShadow>
-                <FeatherIcon name="x" size={16} />
-              </Box>
-            </AnimatedTouchableBox>
-          )}
         </AnimatedBox>
       </AnimatedTouchableBox>
+
+      {isRemovable && (
+        <AnimatedTouchableBox
+          position="absolute"
+          top={0}
+          right={0}
+          width={40}
+          height={40}
+          center
+          style={xStyles}
+          onPress={onClose}
+        >
+          <Box bg="reverse" width={24} height={24} borderRadius={12} center lightShadow>
+            <FeatherIcon name="x" size={16} />
+          </Box>
+        </AnimatedTouchableBox>
+      )}
     </AnimatedBox>
   )
 }

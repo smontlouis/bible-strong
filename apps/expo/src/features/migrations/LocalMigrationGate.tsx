@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ActivityIndicator, BackHandler, ScrollView, View } from 'react-native'
+import { ActivityIndicator, ScrollView, View } from 'react-native'
 import type { TFunction } from 'i18next'
 
 import Box, { HStack, VStack } from '~common/ui/Box'
@@ -9,6 +9,7 @@ import Container from '~common/ui/Container'
 import { FeatherIcon } from '~common/ui/Icon'
 import { ProgressBar } from '~common/ui/ProgressBar'
 import Text from '~common/ui/Text'
+import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import { appLogger } from '~helpers/agentObservability'
 import {
   localMigrationContext,
@@ -236,8 +237,7 @@ const LocalMigrationGate = ({
 
   useEffect(() => {
     if (state.kind === 'ready') return
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => true)
-    return () => subscription.remove()
+    return subscribeToHardwareBackPress(() => true)
   }, [state.kind])
 
   const runMigration = async (onlineOnly = false): Promise<void> => {

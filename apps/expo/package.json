@@ -4,7 +4,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "eas-build-pre-install": "corepack enable",
-    "start": "expo start --dev-client",
+    "start": "expo start --dev-client --port 9090",
     "update:staging": "dotenv -c staging -- npx eas update --channel staging --environment preview",
     "update:production": "dotenv -c production -- npx eas update --channel production --environment production",
     "build:android:dev": "rm -rf \"${TMPDIR}metro-cache\" && dotenv -c development -- eas build -p android --local --profile development --non-interactive",
@@ -51,7 +51,7 @@
     "bible-project:anchors:finalize": "yarn bible-project:aggregate:anchor-proposals && yarn bible-project:derive:associated-resources && yarn bible-project:derive:presentation",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web",
+    "web": "expo start --web --port 9090",
     "web:export": "expo export --platform web"
   },
   "dependencies": {

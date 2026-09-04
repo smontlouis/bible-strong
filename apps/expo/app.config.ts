@@ -32,7 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         data: [
           {
             scheme: 'https',
-            host: 'bible.strong.app',
+            host: 'bible-strong.app',
             pathPrefix: '/',
           },
         ],
@@ -67,7 +67,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'com.apple.developer.devicecheck.appattest-environment': 'production',
     },
     // Deep linking: iOS Universal Links
-    associatedDomains: ['applinks:bible.strong.app'],
+    associatedDomains: ['applinks:bible-strong.app'],
   },
   web: {
     bundler: 'metro',

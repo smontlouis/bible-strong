@@ -48,6 +48,7 @@ import type { LocalResourceRef } from './resourceAvailability'
 import { ONLINE_BIBLE_VERSION_IDS } from '~helpers/ordinaryBibleVersions'
 import { STRONG_BIBLE_FALLBACK_PRIORITY } from '~helpers/strongBiblePublications'
 import type { ResourceLanguage } from '~helpers/databaseTypes'
+import { resourceApiFetch } from '~helpers/resourceAppCheck'
 
 export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
@@ -87,16 +88,21 @@ const strongLexiconModules = new Set(resourceApiBaseUrl ? ['core', 'resources', 
 const commentaryCollections = new Set(resourceApiBaseUrl ? ['MHY'] : [])
 
 const bibleChapter = resourceApiBaseUrl
-  ? createHttpBibleChapterAdapter({ baseUrl: resourceApiBaseUrl, isOnline })
+  ? createHttpBibleChapterAdapter({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch, isOnline })
   : unavailableHttpBibleChapterAdapter
 
 const strongLexicon = resourceApiBaseUrl
-  ? createHttpStrongLexiconAccess({ baseUrl: resourceApiBaseUrl, isOnline })
+  ? createHttpStrongLexiconAccess({
+      baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
+      isOnline,
+    })
   : unavailableAccess<StrongLexiconAccess>()
 
 const strongBibleAdapter = resourceApiBaseUrl
   ? createHttpStrongBibleResourceAdapter({
       baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
       isOnline,
       bibleChapterAdapter: bibleChapter,
     })
@@ -106,6 +112,7 @@ const strongBible = createStrongBibleResourceAccess(strongBibleAdapter)
 const interlinearBible = resourceApiBaseUrl
   ? createHttpInterlinearBibleResourceAdapter({
       baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
       isOnline,
       bibleChapterAdapter: bibleChapter,
     })
@@ -115,7 +122,11 @@ const bibleContent = createBibleContentAccess(bibleChapter, strongBible, interli
 
 const bibleReading: BibleReadingResourceAccess = resourceApiBaseUrl
   ? {
-      ...createHttpBibleReadingResourceAccess({ baseUrl: resourceApiBaseUrl, isOnline }),
+      ...createHttpBibleReadingResourceAccess({
+        baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
+        isOnline,
+      }),
       getRedWordsAvailability: async () => ({ status: 'unsupported' }),
       loadRedWords: async () => null,
     }
@@ -124,24 +135,29 @@ const bibleReading: BibleReadingResourceAccess = resourceApiBaseUrl
 const bibleSearch = resourceApiBaseUrl
   ? createHttpBibleSearchAccess({
       baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
       versions: [...bibleVersions],
       isOnline,
     })
   : unavailableAccess<BibleSearchAccess>()
 
 const dictionary = resourceApiBaseUrl
-  ? createHttpDictionaryAccess({ baseUrl: resourceApiBaseUrl, isOnline })
+  ? createHttpDictionaryAccess({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch, isOnline })
   : unavailableAccess<DictionaryAccess>()
 const nave = resourceApiBaseUrl
-  ? createHttpNaveAccess({ baseUrl: resourceApiBaseUrl, isOnline })
+  ? createHttpNaveAccess({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch, isOnline })
   : unavailableAccess<NaveAccess>()
 const timeline = resourceApiBaseUrl
-  ? createHttpTimelineAccess({ baseUrl: resourceApiBaseUrl, isOnline })
+  ? createHttpTimelineAccess({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch, isOnline })
   : unavailableAccess<TimelineAccess>()
 const commentary = resourceApiBaseUrl
   ? createCommentaryAccess({
       local: unavailableAccess<CommentaryChapterSource>(),
-      remote: createHttpCommentaryChapterSource({ baseUrl: resourceApiBaseUrl, isOnline }),
+      remote: createHttpCommentaryChapterSource({
+        baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
+        isOnline,
+      }),
       isOnline,
     })
   : unavailableAccess<CommentaryAccess>()

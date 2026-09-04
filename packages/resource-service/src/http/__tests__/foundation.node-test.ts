@@ -41,34 +41,39 @@ describe('Resource service foundation', () => {
       undefined,
       {},
       {
-        corsAllowedOrigins: ['https://bible.strong.app'],
+        corsAllowedOrigins: ['https://bible-strong.app'],
       }
     )
 
     try {
       const preflight = await web.handler(
-        new Request('https://resources.bible.strong.app/health', {
+        new Request('https://api.bible-strong.app/health', {
           method: 'OPTIONS',
           headers: {
-            origin: 'https://bible.strong.app',
+            origin: 'https://bible-strong.app',
             'access-control-request-method': 'GET',
+            'access-control-request-headers': 'x-firebase-appcheck',
           },
         })
       )
       assert.equal(preflight.status, 204)
-      assert.equal(preflight.headers.get('access-control-allow-origin'), 'https://bible.strong.app')
+      assert.equal(preflight.headers.get('access-control-allow-origin'), 'https://bible-strong.app')
       assert.match(preflight.headers.get('access-control-allow-methods') ?? '', /GET/)
+      assert.match(
+        preflight.headers.get('access-control-allow-headers') ?? '',
+        /x-firebase-appcheck/
+      )
 
       const response = await web.handler(
-        new Request('https://resources.bible.strong.app/health', {
-          headers: { origin: 'https://bible.strong.app' },
+        new Request('https://api.bible-strong.app/health', {
+          headers: { origin: 'https://bible-strong.app' },
         })
       )
-      assert.equal(response.headers.get('access-control-allow-origin'), 'https://bible.strong.app')
+      assert.equal(response.headers.get('access-control-allow-origin'), 'https://bible-strong.app')
       assert.match(response.headers.get('access-control-expose-headers') ?? '', /x-request-id/)
 
       const rejected = await web.handler(
-        new Request('https://resources.bible.strong.app/health', {
+        new Request('https://api.bible-strong.app/health', {
           headers: { origin: 'https://evil.example' },
         })
       )

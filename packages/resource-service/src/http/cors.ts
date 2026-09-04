@@ -3,6 +3,7 @@ export const RESOURCE_CORS_ALLOWED_HEADERS = [
   'accept',
   'content-type',
   'if-none-match',
+  'x-firebase-appcheck',
   'x-request-id',
 ] as const
 export const RESOURCE_CORS_EXPOSED_HEADERS = [
@@ -32,6 +33,14 @@ const appendVaryOrigin = (headers: Headers) => {
   headers.set('vary', [...values].join(', '))
 }
 
+const RESOURCE_CORS_RESPONSE_HEADERS = [
+  'access-control-allow-origin',
+  'access-control-allow-methods',
+  'access-control-allow-headers',
+  'access-control-expose-headers',
+  'access-control-max-age',
+] as const
+
 export const addResourceCorsHeaders = (
   request: Request,
   headers: Headers,
@@ -48,6 +57,21 @@ export const addResourceCorsHeaders = (
   headers.set('access-control-expose-headers', RESOURCE_CORS_EXPOSED_HEADERS.join(', '))
   headers.set('access-control-max-age', '86400')
   return true
+}
+
+export const withResourceCorsHeaders = (
+  request: Request,
+  response: Response,
+  allowedOrigins: readonly string[]
+): Response => {
+  const headers = new Headers(response.headers)
+  RESOURCE_CORS_RESPONSE_HEADERS.forEach(header => headers.delete(header))
+  addResourceCorsHeaders(request, headers, allowedOrigins)
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  })
 }
 
 export const makeResourcePreflightResponse = (

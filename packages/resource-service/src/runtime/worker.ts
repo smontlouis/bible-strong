@@ -1,5 +1,9 @@
 import { makeResourceWebHandler } from '../http/app'
-import { makeResourcePreflightResponse, parseResourceCorsOrigins } from '../http/cors'
+import {
+  makeResourcePreflightResponse,
+  parseResourceCorsOrigins,
+  withResourceCorsHeaders,
+} from '../http/cors'
 import type { BibleChapterRepositoryService } from '../domain/bibleChapter'
 import type { BibleSearchRepositoryService } from '../domain/bibleSearch'
 import type { NaveRepositoryService } from '../domain/nave'
@@ -108,6 +112,8 @@ export default {
     const corsAllowedOrigins = parseResourceCorsOrigins(bindings.RESOURCE_WEB_ORIGINS)
     const preflight = makeResourcePreflightResponse(request, corsAllowedOrigins)
     if (preflight) return preflight
+    const respond = (response: Response) =>
+      withResourceCorsHeaders(request, response, corsAllowedOrigins)
     const isSearchAnalyticsRequest = new URL(request.url).pathname === '/v1/search-events'
     const appCheckConfig = createFirebaseAppCheckConfig({
       projectNumber: bindings.FIREBASE_APP_CHECK_PROJECT_NUMBER,
@@ -147,7 +153,7 @@ export default {
         )
       },
     })
-    if (protectionFailure) return protectionFailure
+    if (protectionFailure) return respond(protectionFailure)
 
     if (isSearchAnalyticsRequest) {
       const declaredBodyBytes = Number(request.headers.get('content-length'))
@@ -155,17 +161,21 @@ export default {
         Number.isFinite(declaredBodyBytes) &&
         declaredBodyBytes > SEARCH_ANALYTICS_MAX_BODY_BYTES
       ) {
-        return new Response(null, {
-          status: 413,
-          headers: { 'cache-control': 'private, no-store' },
-        })
+        return respond(
+          new Response(null, {
+            status: 413,
+            headers: { 'cache-control': 'private, no-store' },
+          })
+        )
       }
       const body = await request.arrayBuffer()
       if (body.byteLength > SEARCH_ANALYTICS_MAX_BODY_BYTES) {
-        return new Response(null, {
-          status: 413,
-          headers: { 'cache-control': 'private, no-store' },
-        })
+        return respond(
+          new Response(null, {
+            status: 413,
+            headers: { 'cache-control': 'private, no-store' },
+          })
+        )
       }
       request = new Request(request.url, {
         method: request.method,
@@ -192,7 +202,7 @@ export default {
         )
       },
     })
-    if (artifactResponse) return artifactResponse
+    if (artifactResponse) return respond(artifactResponse)
 
     const startedAt = Date.now()
     let sqlStatements = 0
@@ -214,6 +224,7 @@ export default {
       cache: edgeCache,
       cacheEpoch:
         request.method === 'GET' ? await RESOURCE_API_CACHE_REVISION(request) : 'uncached-request',
+      corsAllowedOrigins,
       waitUntil: promise => ctx.waitUntil(promise),
       reportCacheFailure: (operation, cause) => {
         console.error(
@@ -345,6 +356,6 @@ export default {
         success: response.status < 500,
       })
     }
-    return response
+    return respond(response)
   },
 } satisfies ExportedHandler<Env>

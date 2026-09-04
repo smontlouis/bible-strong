@@ -4,8 +4,9 @@ import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { BackHandler, View } from 'react-native'
+import { View } from 'react-native'
 import { useResourceLanguage } from 'src/state/resourcesLanguage'
+import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import {
   Sheet,
   SheetFooter,
@@ -235,14 +236,12 @@ const ResourcesModal = ({
   }
 
   useEffect(() => {
-    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+    return subscribeToHardwareBackPress(() => {
       if (!isOpen) return false
 
       resourceModalRef.current?.close()
       return true
     })
-
-    return () => subscription.remove()
   }, [isOpen, resourceModalRef])
 
   const renderRightComponent = () => {

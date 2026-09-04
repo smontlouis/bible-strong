@@ -3,12 +3,12 @@ import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { BackHandler } from 'react-native'
 
 import Empty from '~common/Empty'
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import { useComputedPlan } from '~features/plans/plan.hooks'
+import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import { PlanTab, useIsCurrentTab } from '~state/tabs'
 import PlanScreen from './PlanScreen/PlanScreen'
 import PlanSliceScreen from './PlanSliceScreen/PlanSliceScreen'
@@ -50,7 +50,7 @@ const PlanTabScreen = ({ planAtom }: Props) => {
   }, [plan, planTab.title, setPlanTab])
 
   React.useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+    return subscribeToHardwareBackPress(() => {
       if (!isCurrentTab(planAtom) || !planTab.data.readingSliceId) return false
 
       setPlanTab(
@@ -60,8 +60,6 @@ const PlanTabScreen = ({ planAtom }: Props) => {
       )
       return true
     })
-
-    return () => backHandler.remove()
   }, [isCurrentTab, planAtom, planTab.data.readingSliceId, setPlanTab])
 
   if (content.type === 'missing-plan') {

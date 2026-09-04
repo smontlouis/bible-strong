@@ -13,6 +13,7 @@ import ErrorBoundary from '~common/ErrorBoundary'
 import FullAppRuntime from '~features/app/FullAppRuntime'
 import { ResourceAccessProvider } from '~features/resources/resourceAccess'
 import { configureQueryManagers, queryClient } from '~helpers/queryClient'
+import { initializeResourceAppCheck } from '~helpers/resourceAppCheck'
 import useCurrentThemeSelector from '~helpers/useCurrentThemeSelector'
 import type { RootState } from '~redux/modules/reducer'
 import { persistor, startPersistence, store } from '~redux/store'
@@ -57,10 +58,12 @@ const RootLayout = () => {
   useEffect(() => {
     let active = true
     configureQueryManagers()
-    setI18n().then(() => {
-      startPersistence()
-      if (active) setReady(true)
-    })
+    initializeResourceAppCheck()
+      .then(() => setI18n())
+      .then(() => {
+        startPersistence()
+        if (active) setReady(true)
+      })
     Sentry.init({
       dsn: process.env.EXPO_PUBLIC_SENTRY_DSN,
       sampleRate: 0.5,

@@ -63,6 +63,37 @@ describe('Resource Worker binding', () => {
     )
   })
 
+  it('adds the current browser origin to a response cached by a native request', async () => {
+    const cache = new MemoryEdgeCache()
+    const backgroundWrites: Promise<unknown>[] = []
+    const route = (request: Request) =>
+      routeResourceApiRequest({
+        request,
+        authorize: async () => true,
+        cache,
+        cacheEpoch: 'catalog-release-1',
+        corsAllowedOrigins: ['http://localhost:9090'],
+        waitUntil: promise => backgroundWrites.push(promise),
+        load: async () => Response.json({ resource: { revision: 'lsg-r1' } }),
+      })
+
+    await route(
+      new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1')
+    )
+    await Promise.all(backgroundWrites)
+    const browserResponse = await route(
+      new Request('https://api.bible-strong.app/v1/bibles/LSG/books/1/chapters/1', {
+        headers: { origin: 'http://localhost:9090' },
+      })
+    )
+
+    assert.equal(browserResponse.headers.get('x-resource-cache'), 'HIT')
+    assert.equal(
+      browserResponse.headers.get('access-control-allow-origin'),
+      'http://localhost:9090'
+    )
+  })
+
   it('caches published lexicon entries at the same protected edge boundary', async () => {
     const cache = new MemoryEdgeCache()
     const backgroundWrites: Promise<unknown>[] = []

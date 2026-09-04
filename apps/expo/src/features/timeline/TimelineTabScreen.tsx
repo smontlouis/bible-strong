@@ -3,9 +3,9 @@ import { useAtom } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { BackHandler } from 'react-native'
 
 import { useQuery } from '@tanstack/react-query'
+import { subscribeToHardwareBackPress } from '~helpers/hardwareBackPress'
 import { TimelineTab, useIsCurrentTab } from '~state/tabs'
 import { usePushRouteOnce } from '~navigation/usePushRouteOnce'
 import { getEvents } from './events'
@@ -67,7 +67,7 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
   }
 
   React.useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+    return subscribeToHardwareBackPress(() => {
       if (!isCurrentTab(timelineAtom)) return false
 
       if (timelineTab.data.eventSlug) {
@@ -82,7 +82,6 @@ const TimelineTabScreen = ({ timelineAtom }: Props) => {
       return false
     })
 
-    return () => backHandler.remove()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCurrentTab, timelineAtom, timelineTab.data.eventSlug, timelineTab.data.sectionIndex])
 

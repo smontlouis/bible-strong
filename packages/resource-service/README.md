@@ -230,14 +230,15 @@ an R2 custom domain. The mobile catalog and all resource artifact URLs use the W
 subsequent publication credentials in the gitignored local operator environment described by
 ADR-0027.
 
-The Worker configuration contains only the non-secret Firebase project number and the six native
-App IDs already declared by the development, staging, and production Firebase application files.
+The Worker configuration contains only the non-secret Firebase project number, the six native App
+IDs declared by the development, staging, and production Firebase application files, and the Web
+App ID.
 It fetches Firebase's rotating public App Check JWKS and keeps tokens out of logs and cache keys.
 The Expo application uses the App Check config plugin, Play Integrity on release Android builds,
-App Attest with DeviceCheck fallback on release Apple builds, and Firebase's debug provider in
-development. Register each release provider and each local debug token in Firebase Console before
-testing protected API reads or artifact downloads. Do not put debug tokens in committed `.env`
-files.
+App Attest with DeviceCheck fallback on release Apple builds, reCAPTCHA Enterprise on Web, and
+Firebase's debug provider in development. Register each release provider and each local debug token
+in Firebase Console before testing protected API reads or artifact downloads. Do not put debug
+tokens in committed `.env` files.
 
 ## Publish one edited Bible end to end
 
