@@ -8,7 +8,7 @@ import {
   type SheetRef,
   SheetView,
 } from '~common/sheet'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TextInput as RNTextInput } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
@@ -47,11 +47,6 @@ const EditGroupModal = ({
   const [name, setName] = useState(initialName)
   const [selectedColor, setSelectedColor] = useState(initialColor)
   const inputRef = React.useRef<RNTextInput>(null)
-
-  useEffect(() => {
-    setName(initialName)
-    setSelectedColor(initialColor || GROUP_COLORS[0])
-  }, [initialName, initialColor])
 
   const scheduleInputFocus = () => {
     inputRef.current?.focus()

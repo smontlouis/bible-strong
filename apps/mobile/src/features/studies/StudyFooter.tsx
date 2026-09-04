@@ -191,15 +191,12 @@ const SelectMore = ({
   const currentColor = colorModal === 'background' ? activeFormats.background : activeFormats.color
   const [selectedColor, setSelectedColor] = useState(currentColor || defaultColor)
 
-  // Reset selectedColor when colorModal changes
-  React.useEffect(() => {
-    if (colorModal) {
-      const newDefault = colorModal === 'background' ? '#ffffff' : '#000000'
-      const newCurrent =
-        colorModal === 'background' ? activeFormats.background : activeFormats.color
-      setSelectedColor(newCurrent || newDefault)
-    }
-  }, [colorModal, activeFormats.background, activeFormats.color])
+  const openColorModal = (mode: 'background' | 'color') => {
+    const nextDefault = mode === 'background' ? '#ffffff' : '#000000'
+    const nextCurrent = mode === 'background' ? activeFormats.background : activeFormats.color
+    setSelectedColor(nextCurrent || nextDefault)
+    setOpenColorModal(mode)
+  }
 
   const handleColorChange = (color: ColorFormatsObject) => {
     setSelectedColor(color.hex)
@@ -272,14 +269,14 @@ const SelectMore = ({
                 <FormatIcon
                   isSelected={Boolean(activeFormats.background)}
                   style={{ marginHorizontal: 10 }}
-                  onPress={() => setOpenColorModal('background')}
+                  onPress={() => openColorModal('background')}
                 >
                   <BackgroundIcon color={activeFormats.background} />
                 </FormatIcon>
                 <FormatIcon
                   isSelected={Boolean(activeFormats.color)}
                   style={{ marginHorizontal: 10 }}
-                  onPress={() => setOpenColorModal('color')}
+                  onPress={() => openColorModal('color')}
                 >
                   <ColorIcon color={activeFormats.color} />
                 </FormatIcon>

@@ -8,9 +8,7 @@ import { useSheet } from '~helpers/useSheet'
 import {
   completeOnboardingAtom,
   featureOnboardingModalAtom,
-  onboardingActionsAtom,
   onboardingCurrentStepAtom,
-  onboardingTotalStepsAtom,
 } from './atoms'
 import OnboardingFooter from './components/OnboardingFooter'
 import OnboardingStep from './components/OnboardingStep'
@@ -25,39 +23,29 @@ const FeatureOnboardingModal = () => {
 
   // Atoms for footer state
   const [currentStep, setCurrentStep] = useAtom(onboardingCurrentStepAtom)
-  const setTotalSteps = useSetAtom(onboardingTotalStepsAtom)
-  const setActions = useSetAtom(onboardingActionsAtom)
 
   const config = modalState ? getOnboardingConfig(modalState.onboardingId as OnboardingId, t) : null
   const totalSteps = config?.steps.length ?? 0
   const step = config?.steps[currentStep] ?? null
   const isLast = currentStep === totalSteps - 1
 
-  // Update totalSteps atom when config changes
-  useEffect(() => {
-    setTotalSteps(totalSteps)
-  }, [totalSteps, setTotalSteps])
+  const handleBack = () => {
+    setCurrentStep(step => Math.max(0, step - 1))
+  }
 
-  // Update actions atom
-  useEffect(() => {
-    const handleBack = () => {
-      setCurrentStep(s => Math.max(0, s - 1))
+  const handleNext = () => {
+    if (isLast && modalState) {
+      completeOnboarding(modalState.onboardingId)
+      close()
+      setModalState(false)
+    } else {
+      setCurrentStep(step => step + 1)
     }
-
-    const handleNext = () => {
-      if (isLast && modalState) {
-        completeOnboarding(modalState.onboardingId)
-        close()
-        setModalState(false)
-      } else {
-        setCurrentStep(s => s + 1)
-      }
-    }
-
-    setActions({ onBack: handleBack, onNext: handleNext })
-  }, [isLast, modalState, completeOnboarding, close, setModalState, setCurrentStep, setActions])
+  }
 
   // Auto-open when modalState changes
+  // The effect synchronizes React state with the imperative native sheet API.
+  // https://react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store
   useEffect(() => {
     if (modalState) {
       setCurrentStep(0)
@@ -98,7 +86,12 @@ const FeatureOnboardingModal = () => {
           <FeatherIcon name="x" size={14} color="default" />
         </TouchableBox>
         {step !== null && <OnboardingStep step={step} />}
-        <OnboardingFooter />
+        <OnboardingFooter
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          onBack={handleBack}
+          onNext={handleNext}
+        />
       </SheetView>
     </Sheet>
   )

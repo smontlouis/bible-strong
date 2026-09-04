@@ -1,23 +1,20 @@
 import { useTheme } from '@emotion/react'
-import { useAtomValue } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
 import { LinearTransition } from 'react-native-reanimated'
 import { AnimatedBox, AnimatedTouchableBox, FadingText } from '~common/ui/Box'
 import Text from '~common/ui/Text'
-import {
-  onboardingActionsAtom,
-  onboardingCurrentStepAtom,
-  onboardingTotalStepsAtom,
-} from '../atoms'
 import PaginationDots from './PaginationDots'
 
-const OnboardingFooter = () => {
+type Props = {
+  currentStep: number
+  totalSteps: number
+  onBack: () => void
+  onNext: () => void
+}
+
+const OnboardingFooter = ({ currentStep, totalSteps, onBack, onNext }: Props) => {
   const { t } = useTranslation()
   const theme = useTheme()
-
-  const currentStep = useAtomValue(onboardingCurrentStepAtom)
-  const totalSteps = useAtomValue(onboardingTotalStepsAtom)
-  const { onBack, onNext } = useAtomValue(onboardingActionsAtom)
 
   const isFirstStep = currentStep === 0
   const isLastStep = currentStep === totalSteps - 1

@@ -2,7 +2,7 @@ import { SheetFlashList, Sheet, SheetHeader, type SheetRef } from '~common/sheet
 import { useTheme } from '@emotion/react'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai/react'
-import { Ref, useDeferredValue, useEffect, useState } from 'react'
+import { Ref, useDeferredValue, useState } from 'react'
 import { ActivityIndicator } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -302,6 +302,11 @@ const CreateEntityRelationModal = ({
   const [itemFilters, setItemFilters] = useState<SearchItemFilters>(() =>
     getSearchItemFiltersForTypes(getAllowedSearchItemTypesFromKey(allowedTypesKey))
   )
+  const [previousAllowedTypesKey, setPreviousAllowedTypesKey] = useState(allowedTypesKey)
+  if (previousAllowedTypesKey !== allowedTypesKey) {
+    setPreviousAllowedTypesKey(allowedTypesKey)
+    setItemFilters(getSearchItemFiltersForTypes(getAllowedSearchItemTypesFromKey(allowedTypesKey)))
+  }
   const [strongLetter, setStrongLetter] = useState('a')
   const [naveLetter, setNaveLetter] = useState('a')
   const [dictionaryLetter, setDictionaryLetter] = useState('a')
@@ -367,10 +372,6 @@ const CreateEntityRelationModal = ({
     const itemType = relationTypeToSearchItemType[type]
     return enabledItemTypes.includes(itemType) && itemFilters[itemType]
   }
-
-  useEffect(() => {
-    setItemFilters(getSearchItemFiltersForTypes(getAllowedSearchItemTypesFromKey(allowedTypesKey)))
-  }, [allowedTypesKey])
 
   const shouldLoadStrongTargets =
     isAllowed('strong') &&

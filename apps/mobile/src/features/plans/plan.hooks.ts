@@ -320,27 +320,16 @@ export const useVersesToContent = (verses: string) => {
 }
 
 export const useFireStorage = (src?: string) => {
-  const [imageUrl, setImageUrl] = React.useState<string>()
   const dispatch = useDispatch<AppDispatch>()
   const cachedUri = useSelector((state: RootState) => src && state.plan.images[src])
+  const imageUrl = src ? cachedUri || cdnUrl(`images/${src}.png`) : undefined
 
+  // Keep the external Redux image cache synchronized with the requested source.
+  // https://react.dev/learn/you-might-not-need-an-effect
   React.useEffect(() => {
-    if (!src) return
-    ;(async () => {
-      if (cachedUri) {
-        setImageUrl(cachedUri)
-        return
-      }
-
-      try {
-        const uri = cdnUrl(`images/${src}.png`)
-        setImageUrl(uri)
-        dispatch(cacheImage({ id: src, value: uri }))
-      } catch {
-        console.log(`[Plans] Can't find: images/${src}`)
-      }
-    })()
-  }, [src, cachedUri, dispatch])
+    if (!src || !imageUrl || cachedUri) return
+    dispatch(cacheImage({ id: src, value: imageUrl }))
+  }, [src, imageUrl, cachedUri, dispatch])
 
   return imageUrl
 }

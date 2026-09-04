@@ -33,31 +33,27 @@ const Timeline = ({
 
   const [current, setCurrent] = React.useState(goTo)
   const [entrance, setEntrance] = React.useState<0 | 1>(1)
-
-  const onPrev = useCallback(() => {
-    const next = current - 1
-    setEntrance(0)
-    setCurrent(next)
-    onSectionChange?.(next)
-  }, [current, onSectionChange])
-
-  const onNext = useCallback(() => {
-    const next = current + 1
-    setEntrance(1)
-    setCurrent(next)
-    onSectionChange?.(next)
-  }, [current, onSectionChange])
-
   const { data: events } = useQuery({
     queryKey: ['timeline'],
     queryFn: getEvents,
   })
+  const currentSectionIndex = events?.length
+    ? Math.min(Math.max(current, 0), events.length - 1)
+    : current
 
-  React.useEffect(() => {
-    if (!events?.length) return
+  const onPrev = useCallback(() => {
+    const next = currentSectionIndex - 1
+    setEntrance(0)
+    setCurrent(next)
+    onSectionChange?.(next)
+  }, [currentSectionIndex, onSectionChange])
 
-    setCurrent(value => Math.min(Math.max(value, 0), events.length - 1))
-  }, [events?.length])
+  const onNext = useCallback(() => {
+    const next = currentSectionIndex + 1
+    setEntrance(1)
+    setCurrent(next)
+    onSectionChange?.(next)
+  }, [currentSectionIndex, onSectionChange])
 
   return (
     <TimelineResourceBoundary hasBackButton={hasBackButton} onBackPress={onBackPress}>
@@ -69,9 +65,9 @@ const Timeline = ({
             return (
               <TimelineSection
                 {...ev}
-                key={`${ev.id}-${current === i}`}
+                key={`${ev.id}-${currentSectionIndex === i}`}
                 entrance={entrance}
-                isCurrent={current === i}
+                isCurrent={currentSectionIndex === i}
                 isFirst={i === 0}
                 isLast={i === events.length - 1}
                 onPrev={onPrev}

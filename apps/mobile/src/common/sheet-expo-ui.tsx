@@ -126,6 +126,7 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   const dismissStartedRef = React.useRef(false)
   const [footerHeight, setFooterHeight] = React.useState(0)
   const hasFooter = Boolean(footer)
+  const effectiveFooterHeight = hasFooter ? footerHeight : 0
   const expoSnapPoints = getSnapPoints(snapPoints)
   const initialIndex = initialSnapPoint ? findSnapPointIndex(snapPoints, initialSnapPoint) : 0
   const dialogTitle = accessibilityLabel || getHeaderAccessibilityTitle(header) || 'Bottom sheet'
@@ -139,12 +140,6 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
       ? header
       : React.createElement(header as React.ComponentType<unknown>)
     : undefined
-
-  React.useEffect(() => {
-    if (!hasFooter) {
-      setFooterHeight(0)
-    }
-  }, [hasFooter])
 
   React.useImperativeHandle(ref, () => {
     const notifyPresent = () => {
@@ -192,7 +187,9 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   }
 
   return (
-    <SheetContext.Provider value={{ footerHeight, hasFooter, setFooterHeight }}>
+    <SheetContext.Provider
+      value={{ footerHeight: effectiveFooterHeight, hasFooter, setFooterHeight }}
+    >
       <BottomSheetModal
         accessibilityLabel={dialogTitle}
         accessibilityDescription={dialogDescription}

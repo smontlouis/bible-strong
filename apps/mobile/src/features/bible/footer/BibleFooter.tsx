@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { useAtomValue } from 'jotai/react'
 import { PrimitiveAtom } from 'jotai/vanilla'
@@ -42,16 +42,18 @@ const BibleFooter = ({
   const bibleTab = useAtomValue(bibleAtom)
   const bibleVersion = getVersions()[version] as Version
   const canSwitch = bibleVersion?.hasAudio
-  const [audioMode, setAudioMode] = React.useState<'url' | 'tts' | undefined>()
+  const [audioPreference, setAudioPreference] = React.useState<{
+    version: VersionCode
+    mode: 'url' | 'tts'
+  }>()
+  const audioMode =
+    audioPreference?.version === version ? audioPreference.mode : canSwitch ? 'url' : 'tts'
+  const setAudioMode = (mode: 'url' | 'tts') => setAudioPreference({ version, mode })
   const playingBibleTabId = useAtomValue(playingBibleTabIdAtom)
   // Use stable tab.id instead of atom.toString()
   const isTabPlaying = playingBibleTabId === bibleTab.id
   const getIsCurrentTab = useIsCurrentTab()
   const isCurrentTab = getIsCurrentTab(bibleAtom)
-
-  useEffect(() => {
-    setAudioMode(canSwitch ? 'url' : 'tts')
-  }, [version, canSwitch])
 
   if (isInTab && !isCurrentTab && !isTabPlaying) {
     return null

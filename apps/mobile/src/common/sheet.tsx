@@ -238,16 +238,11 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   const theme = useTheme()
   const [footerHeight, setFooterHeight] = React.useState(0)
   const hasFooter = Boolean(footer)
+  const effectiveFooterHeight = hasFooter ? footerHeight : 0
 
   const renderedFooter = footer
     ? React.createElement(footer as React.ComponentType<SheetFooterProps>)
     : undefined
-
-  React.useEffect(() => {
-    if (!hasFooter) {
-      setFooterHeight(0)
-    }
-  }, [hasFooter])
 
   React.useImperativeHandle(ref, () => {
     const present = (command: 'present' | 'presentAt', index: number) => {
@@ -293,7 +288,9 @@ const Sheet = forwardRef<SheetRef, SheetProps>((props, ref) => {
   }, [detents, initialDetentIndex])
 
   return (
-    <SheetContext.Provider value={{ footerHeight, hasFooter, setFooterHeight }}>
+    <SheetContext.Provider
+      value={{ footerHeight: effectiveFooterHeight, hasFooter, setFooterHeight }}
+    >
       <TrueSheet
         ref={sheetRef}
         detents={detents}

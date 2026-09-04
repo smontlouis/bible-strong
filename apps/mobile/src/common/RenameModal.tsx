@@ -8,7 +8,7 @@ import {
   SheetView,
   type SheetRef,
 } from '~common/sheet'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TextInput as RNTextInput } from 'react-native'
 import Button from '~common/ui/Button'
@@ -44,10 +44,6 @@ const RenameModal = ({
   const theme = useTheme()
   const [value, setValue] = useState(initialValue)
   const inputRef = React.useRef<RNTextInput>(null)
-
-  useEffect(() => {
-    setValue(initialValue)
-  }, [initialValue])
 
   const scheduleInputFocus = () => {
     inputRef.current?.focus()

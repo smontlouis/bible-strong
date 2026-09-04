@@ -3,7 +3,7 @@ import { type SheetRef, Sheet, SheetView } from '~common/sheet'
 import { TouchableOpacity, type ViewStyle } from 'react-native'
 import { useSetAtom } from 'jotai/react'
 import { useTranslation } from 'react-i18next'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import BackgroundIcon from '~assets/images/BackgroundIcon'
 import CircleSketchIcon from '~assets/images/CircleSketchIcon'
@@ -228,13 +228,19 @@ const AnnotationToolbar = ({
   const { t } = useTranslation()
   const theme = useTheme()
   const disabled = !selectedAnnotation && !hasSelection
-  const [activeAnnotationType, setActiveAnnotationType] = useState<AnnotationType>('background')
+  const [annotationTypeSelection, setAnnotationTypeSelection] = useState<{
+    annotationId?: string
+    type: AnnotationType
+  }>({ annotationId: selectedAnnotation?.id, type: selectedAnnotation?.type ?? 'background' })
+  const activeAnnotationType =
+    annotationTypeSelection.annotationId === selectedAnnotation?.id
+      ? annotationTypeSelection.type
+      : (selectedAnnotation?.type ?? 'background')
+  const setActiveAnnotationType = (type: AnnotationType) => {
+    setAnnotationTypeSelection({ annotationId: selectedAnnotation?.id, type })
+  }
 
   const resolvedColor = useResolvedColor(selectedAnnotation?.color)
-
-  useEffect(() => {
-    setActiveAnnotationType(selectedAnnotation?.type ?? 'background')
-  }, [selectedAnnotation?.id, selectedAnnotation?.type])
 
   const getColor = (type: AnnotationType) => {
     if (activeAnnotationType === type) {

@@ -351,7 +351,6 @@ const DownloadsScreen = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<Set<StatusFilter>>(new Set())
   const [langFilter, setLangFilter] = useState<Set<LangFilter>>(new Set())
-  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(() => new Set())
   const [collapsedSubsections, setCollapsedSubsections] = useState<Set<string>>(() => new Set())
 
   const {
@@ -366,6 +365,18 @@ const DownloadsScreen = () => {
     refreshDownloadedItems,
   } = useDownloadedItems()
   const allSections = buildAllSections(lang, t, dictionaryCatalogQuery.data ?? [])
+  const allSectionKeys = allSections.map(section => section.key).join(',')
+  const collapseSourceKey = `${lang}:${allSectionKeys}`
+  const getDefaultCollapsedSections = () =>
+    new Set(allSections.filter(section => section.key !== lang).map(section => section.key))
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(
+    getDefaultCollapsedSections
+  )
+  const [previousCollapseSourceKey, setPreviousCollapseSourceKey] = useState(collapseSourceKey)
+  if (previousCollapseSourceKey !== collapseSourceKey) {
+    setPreviousCollapseSourceKey(collapseSourceKey)
+    setCollapsedSections(getDefaultCollapsedSections())
+  }
 
   const itemNeedsUpdate = (item: UnifiedItem) => {
     if (updateAvailableSet.has(item.id)) return true
@@ -392,15 +403,6 @@ const DownloadsScreen = () => {
     new Map(allSections.flatMap(section => section.data).map(item => [item.id, item])).values()
   )
   const itemsToUpdate = uniqueItems.filter(itemNeedsUpdate)
-
-  // Keep the current app language open and the other language groups compact.
-  const allSectionKeys = allSections.map(s => s.key).join(',')
-  React.useEffect(() => {
-    setCollapsedSections(
-      new Set(allSections.filter(section => section.key !== lang).map(section => section.key))
-    )
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSectionKeys, lang])
 
   const toggleCollapse = (sectionKey: string) => {
     setCollapsedSections(prev => {

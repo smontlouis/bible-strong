@@ -294,13 +294,23 @@ const VersionSelectorItem = ({
   onOpenOfflineDetails,
 }: Props) => {
   const { t } = useTranslation()
-  const [isStrongIndexAvailable, setStrongIndexAvailable] = React.useState<boolean>()
-  const [isStrongIndexExpanded, setStrongIndexExpanded] = React.useState(false)
+  const [reportedStrongIndexAvailable, setReportedStrongIndexAvailable] = React.useState<boolean>()
+  const [strongExpansion, setStrongExpansion] = React.useState({
+    collapseKey: strongCollapseKey,
+    expanded: false,
+  })
   const [isFrenchInterlinearIndexAvailable, setFrenchInterlinearIndexAvailable] =
     React.useState<boolean>()
   const [isEnglishInterlinearIndexAvailable, setEnglishInterlinearIndexAvailable] =
     React.useState<boolean>()
-  const [isInterlinearIndexExpanded, setInterlinearIndexExpanded] = React.useState(false)
+  const [interlinearExpansion, setInterlinearExpansion] = React.useState({
+    collapseKey: strongCollapseKey,
+    expanded: false,
+  })
+  const isStrongIndexExpanded =
+    strongExpansion.collapseKey === strongCollapseKey && strongExpansion.expanded
+  const isInterlinearIndexExpanded =
+    interlinearExpansion.collapseKey === strongCollapseKey && interlinearExpansion.expanded
   const isConnected = useConnection()
   const resources = useResourceAccess()
 
@@ -328,6 +338,9 @@ const VersionSelectorItem = ({
   const strongSelectionAvailability = requiresStrong
     ? strongUsageAvailability
     : strongOfflineAvailability
+  const isStrongIndexAvailable = requiresStrong
+    ? strongSelectionAvailability?.status === 'available'
+    : reportedStrongIndexAvailable
   const versionNeedsDownload = offlineResourceState
     ? offlineResourceState.availability.status !== 'available'
     : undefined
@@ -360,14 +373,19 @@ const VersionSelectorItem = ({
   const isQueued = activeQueueState?.status === 'queued'
   const downloadProgress = activeQueueState ? getDownloadItemProgress(activeQueueState) : 0
   const showStrongCapability = (showStrongIndex || requiresStrong) && Boolean(strongVersionId)
-  const toggleStrongIndex = () => setStrongIndexExpanded(expanded => !expanded)
+  const toggleStrongIndex = () =>
+    setStrongExpansion({ collapseKey: strongCollapseKey, expanded: !isStrongIndexExpanded })
   const strongToggleLabel = isStrongIndexExpanded
     ? t('versionSelector.hideStrongIndex', { bible: version.id })
     : t('versionSelector.showStrongIndex', { bible: version.id })
   const showInterlinearCapability = showStrongIndex && isInterlinearCapableBibleVersion(version.id)
   const isInterlinearIndexAvailable =
     isFrenchInterlinearIndexAvailable === true || isEnglishInterlinearIndexAvailable === true
-  const toggleInterlinearIndex = () => setInterlinearIndexExpanded(expanded => !expanded)
+  const toggleInterlinearIndex = () =>
+    setInterlinearExpansion({
+      collapseKey: strongCollapseKey,
+      expanded: !isInterlinearIndexExpanded,
+    })
   const interlinearToggleLabel = isInterlinearIndexExpanded
     ? t('versionSelector.hideInterlinearIndex')
     : t('versionSelector.showInterlinearIndex')
@@ -412,12 +430,6 @@ const VersionSelectorItem = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shareFn, version.id])
 
-  React.useEffect(() => {
-    if (requiresStrong) {
-      setStrongIndexAvailable(strongSelectionAvailability?.status === 'available')
-    }
-  }, [requiresStrong, strongSelectionAvailability?.status])
-
   // Watch for Bible-only download completion
   React.useEffect(() => {
     const previousStatus = previousBibleDownloadStatusRef.current
@@ -427,11 +439,6 @@ const VersionSelectorItem = ({
       onDownloadComplete?.(version.id)
     }
   }, [onDownloadComplete, queueState?.status, requiresStrong, version.id])
-
-  React.useEffect(() => {
-    setStrongIndexExpanded(false)
-    setInterlinearIndexExpanded(false)
-  }, [strongCollapseKey])
 
   const updateVersion = async () => {
     await startDownload()
@@ -658,7 +665,7 @@ const VersionSelectorItem = ({
           <StrongIndexSelectorItem
             versionId={strongVersionId}
             expanded={isStrongIndexExpanded}
-            onAvailabilityChange={setStrongIndexAvailable}
+            onAvailabilityChange={setReportedStrongIndexAvailable}
           />
         )}
         {interlinearIndexItems}
@@ -752,7 +759,7 @@ const VersionSelectorItem = ({
         <StrongIndexSelectorItem
           versionId={strongVersionId}
           expanded={isStrongIndexExpanded}
-          onAvailabilityChange={setStrongIndexAvailable}
+          onAvailabilityChange={setReportedStrongIndexAvailable}
         />
       )}
       {interlinearIndexItems}

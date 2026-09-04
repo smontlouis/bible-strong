@@ -8,14 +8,6 @@ export const completedOnboardingsAtom = atomWithAsyncStorage<string[]>('complete
 
 // Onboarding navigation state atoms
 export const onboardingCurrentStepAtom = atom(0)
-export const onboardingTotalStepsAtom = atom(0)
-export const onboardingActionsAtom = atom<{
-  onBack: () => void
-  onNext: () => void
-}>({
-  onBack: () => {},
-  onNext: () => {},
-})
 
 // Action atom to mark an onboarding as completed
 export const completeOnboardingAtom = atom(null, (get, set, onboardingId: string) => {

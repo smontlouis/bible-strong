@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
@@ -78,12 +78,11 @@ const ColorEditModal = ({
   const [chosenName, setChosenName] = useState(initialName)
   const [chosenType, setChosenType] = useState<HighlightType>(initialType)
 
-  // Reset state when modal opens with new initial values
-  useEffect(() => {
+  const handlePresent = () => {
     setChosenHex(initialHex)
     setChosenName(initialName)
     setChosenType(initialType)
-  }, [initialHex, initialName, initialType])
+  }
 
   const handleColorChange = (color: ColorFormatsObject) => {
     setChosenHex(color.hex)
@@ -104,6 +103,7 @@ const ColorEditModal = ({
   return (
     <Sheet
       ref={modalRef}
+      onPresent={handlePresent}
       onDismiss={onClose}
       header={
         <SheetHeader

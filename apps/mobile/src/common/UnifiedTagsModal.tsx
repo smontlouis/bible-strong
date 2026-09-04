@@ -1,6 +1,6 @@
 import { Sheet, SheetHeader, SheetScrollView } from '~common/sheet'
 import { useAtom } from 'jotai/react'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -68,8 +68,6 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
     keys: ['name'],
   })
 
-  const [highlightTitle, setHighlightTitle] = useState('')
-
   // Auto-open when atom changes
   useEffect(() => {
     if (item) {
@@ -107,13 +105,8 @@ export const UnifiedTagsModalInstance = ({ item, setItem }: UnifiedTagsModalInst
     return { currentItems: items, selectedTags: tags }
   })()
 
-  // Generate title for highlights in select mode
-  useEffect(() => {
-    if (item && item.mode === 'select' && 'ids' in item && item.ids) {
-      const title = verseToReference(item.ids)
-      setHighlightTitle(title)
-    }
-  }, [item])
+  const highlightTitle =
+    item && item.mode === 'select' && 'ids' in item && item.ids ? verseToReference(item.ids) : ''
 
   const saveTag = () => {
     if (!keyword.trim()) return

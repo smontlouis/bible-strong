@@ -38,16 +38,13 @@ const PlanSectionList = ({
   onReadingSlicePress,
 }: ComputedPlan & Props) => {
   const listRef = React.useRef<LegendListRef>(null)
-  const [expandedSectionIds, setExpandedSectionIds] = React.useState<string[]>([])
+  const [expandedSectionIds, setExpandedSectionIds] = React.useState<string[]>(() => {
+    const currentSectionId = sections.find(section =>
+      section.data.some(slice => slice.status === 'Next')
+    )?.id
+    return currentSectionId ? [currentSectionId] : []
+  })
   const pendingScrollToSection = React.useRef<string | null>(null)
-
-  React.useEffect(() => {
-    const currentSectionId = sections.find(s => s.data.find(d => d.status === 'Next'))?.id
-    if (currentSectionId) {
-      setExpandedSectionIds([currentSectionId])
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   const toggle = (sectionId: string) => {
     const isExpanding = !expandedSectionIds.includes(sectionId)

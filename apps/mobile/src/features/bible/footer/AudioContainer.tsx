@@ -13,7 +13,7 @@ export interface AudioContainerProps {
   children: React.ReactNode
   onReduce: () => void
   audioMode: 'tts' | 'url'
-  onChangeMode?: React.Dispatch<React.SetStateAction<'tts' | 'url' | undefined>>
+  onChangeMode?: (mode: 'tts' | 'url') => void
 }
 
 type ChipProps = {

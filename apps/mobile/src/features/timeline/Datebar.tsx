@@ -21,16 +21,11 @@ const Datebar = ({
   interval: number
   color: string
 }) => {
-  const [values, setValues] = React.useState<number[]>([])
   const { t } = useTranslation()
-
-  React.useEffect(() => {
-    const array = []
-    for (let i = startYear; i < endYear; i = i + interval) {
-      array.push(i)
-    }
-    setValues(array)
-  }, [startYear, endYear, interval])
+  const values: number[] = []
+  for (let year = startYear; year < endYear; year += interval) {
+    values.push(year)
+  }
 
   return (
     <AnimatedBox

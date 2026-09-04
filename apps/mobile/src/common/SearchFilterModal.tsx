@@ -12,12 +12,12 @@ type Props = {
 
 const SearchFilterModal = forwardRef<SheetRef, Props>(
   ({ title, placeholder, value, onChange }, ref) => {
-    const [draft, setDraft] = useState(value)
+    const [draftState, setDraftState] = useState({ sourceValue: value, draft: value })
+    const draft = draftState.sourceValue === value ? draftState.draft : value
+    const setDraft = (nextDraft: string) => setDraftState({ sourceValue: value, draft: nextDraft })
 
-    useEffect(() => {
-      setDraft(value)
-    }, [value])
-
+    // The delayed callback synchronizes the local input with its external owner.
+    // https://react.dev/learn/you-might-not-need-an-effect#fetching-data
     useEffect(() => {
       if (draft === value) return
 

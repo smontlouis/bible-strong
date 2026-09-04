@@ -7,7 +7,7 @@ import {
   type SheetRef,
   SheetView,
 } from '~common/sheet'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -100,7 +100,6 @@ const BookmarkModal = ({
 
   // Mode: 'select' (choose existing to move), 'create' (new bookmark), 'edit' (modify existing)
   const [mode, setMode] = useState<'select' | 'create' | 'edit'>('select')
-  const isInitializedRef = useRef(false)
   const [name, setName] = useState('')
   const [selectedColor, setSelectedColor] = useState(DEFAULT_BOOKMARK_COLOR)
 
@@ -119,28 +118,7 @@ const BookmarkModal = ({
     return ''
   }, [existingBookmark, book, chapter, verse])
 
-  // Reset state when modal data changes
-  useEffect(() => {
-    if (existingBookmark) {
-      setMode('edit')
-      setName(existingBookmark.name)
-      setSelectedColor(existingBookmark.color)
-    } else if (existingBookmarks.length > 0) {
-      setMode('select')
-      setName('')
-      setSelectedColor(DEFAULT_BOOKMARK_COLOR)
-    } else {
-      setMode('create')
-      setName('')
-      setSelectedColor(DEFAULT_BOOKMARK_COLOR)
-    }
-  }, [existingBookmark, existingBookmarks.length])
-
   const handlePresent = () => {
-    if (isInitializedRef.current) return
-
-    isInitializedRef.current = true
-
     if (existingBookmark) {
       setMode('edit')
       setName(existingBookmark.name)
@@ -154,10 +132,6 @@ const BookmarkModal = ({
       setName('')
       setSelectedColor(DEFAULT_BOOKMARK_COLOR)
     }
-  }
-
-  const handleDismiss = () => {
-    isInitializedRef.current = false
   }
 
   const handleClose = () => {
@@ -242,10 +216,7 @@ const BookmarkModal = ({
   return (
     <Sheet
       ref={sheetRef}
-      onDismiss={() => {
-        handleDismiss()
-        onClose?.()
-      }}
+      onDismiss={onClose}
       onPresent={handlePresent}
       header={<SheetHeader title={t('Marque-page')} subTitle={reference} />}
       footer={props =>

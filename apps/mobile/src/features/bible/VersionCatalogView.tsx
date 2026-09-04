@@ -334,11 +334,16 @@ export const VersionCatalogList = ({
   const listRef = React.useRef<SectionList<VersionCatalogItem, VersionCatalogSection>>(null)
   const listHeightRef = React.useRef(0)
   const previousScrollToTopKeyRef = React.useRef(scrollToTopKey)
-  const [pendingReveal, setPendingReveal] = React.useState(Boolean(revealVersionId))
-
-  React.useEffect(() => {
-    setPendingReveal(Boolean(revealVersionId))
-  }, [revealKey, revealVersionId])
+  const revealRequestKey = `${revealKey}:${revealVersionId ?? ''}`
+  const [revealState, setRevealState] = React.useState({
+    requestKey: revealRequestKey,
+    pending: Boolean(revealVersionId),
+  })
+  if (revealState.requestKey !== revealRequestKey) {
+    setRevealState({ requestKey: revealRequestKey, pending: Boolean(revealVersionId) })
+  }
+  const pendingReveal =
+    revealState.requestKey === revealRequestKey ? revealState.pending : Boolean(revealVersionId)
 
   React.useEffect(() => {
     if (scrollToTopKey === undefined) return
@@ -356,19 +361,19 @@ export const VersionCatalogList = ({
     if (!pendingReveal || !revealVersionId || listHeightRef.current <= 0) return
 
     const frame = scheduleCatalogVersionReveal(listRef.current, sections, revealVersionId, () =>
-      setPendingReveal(false)
+      setRevealState({ requestKey: revealRequestKey, pending: false })
     )
 
     return () => {
       if (frame !== null) cancelAnimationFrame(frame)
     }
-  }, [pendingReveal, revealVersionId, sections])
+  }, [pendingReveal, revealRequestKey, revealVersionId, sections])
 
   function revealSelectedVersion() {
     if (!pendingReveal || !revealVersionId || listHeightRef.current <= 0) return
 
     scheduleCatalogVersionReveal(listRef.current, sections, revealVersionId, () =>
-      setPendingReveal(false)
+      setRevealState({ requestKey: revealRequestKey, pending: false })
     )
   }
 
@@ -395,7 +400,7 @@ export const VersionCatalogList = ({
       }}
       onContentSizeChange={revealSelectedVersion}
       onScrollToIndexFailed={({ averageItemLength, index }) => {
-        setPendingReveal(Boolean(revealVersionId))
+        setRevealState({ requestKey: revealRequestKey, pending: Boolean(revealVersionId) })
         listRef.current?.getScrollResponder()?.scrollTo({
           animated: false,
           y: (averageItemLength || ESTIMATED_CATALOG_ROW_HEIGHT) * index,

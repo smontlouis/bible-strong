@@ -305,7 +305,7 @@ type AudioTTSFooterProps = {
   goToPrevChapter: () => void
   disabled?: boolean
   version: VersionCode
-  onChangeMode?: React.Dispatch<React.SetStateAction<'tts' | 'url' | undefined>>
+  onChangeMode?: (mode: 'tts' | 'url') => void
   bibleAtom: PrimitiveAtom<BibleTab>
   coverage?: BibleVersionCoverage
 }
