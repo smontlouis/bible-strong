@@ -14,65 +14,31 @@ import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from '~helpers/toast'
 
-import VOD from '~assets/bible_versions/bible-vod.json'
-import booksDesc2 from '~assets/bible_versions/books-desc-2'
-import type { VerseRefContent } from '~common/types'
 import extractFirstName from '~helpers/extractFirstName'
-import getVersesContent from '~helpers/getVersesContent'
 import { useResourceAccess } from '~features/resources/resourceAccess'
-import { loadBibleVerseTexts } from '~features/resources/resourceQueries'
 import useLogin from '~helpers/useLogin'
 import { removeBreakLines } from '~helpers/utils'
 import { RootState } from '~redux/modules/reducer'
 import { setNotificationVOD } from '~redux/modules/user'
 import { VersionCode } from '../../state/tabs'
 import { useDefaultBibleVersion } from '../../state/useDefaultBibleVersion'
-import { getDayOfTheYear } from './getDayOfTheYear'
-import { localQueryOptions } from '~helpers/queryOptions'
+import {
+  createVerseOfTheDayQueryOptions,
+  type VerseOfTheDayData as ResolvedVerseOfTheDayData,
+} from './verseOfTheDayQuery'
 
-export type VerseOfTheDayData =
-  | (VerseRefContent & {
-      v: string
-      book: number
-      chapter: number
-      verse: number
-    })
-  | { error: true }
-  | false
-
-const versesOfTheDay = VOD as Record<number, string>
+export type VerseOfTheDayData = ResolvedVerseOfTheDayData | { error: true } | false
 
 const hasVerseContent = (
   verseOfTheDay: VerseOfTheDayData
 ): verseOfTheDay is Exclude<VerseOfTheDayData, false | { error: true }> =>
   !!verseOfTheDay && 'content' in verseOfTheDay
 
-const useGetVerseOfTheDay = (version: VersionCode, addDay: number) => {
+const useGetVerseOfTheDay = (version: VersionCode, addDay: number, enabled = true) => {
   const resources = useResourceAccess()
-  const requestedDay = getDayOfTheYear(addDay) + 1
-  const dayOfTheYear = requestedDay < 1 || requestedDay > 366 ? 1 : requestedDay
   const query = useQuery({
-    queryKey: ['verse-of-the-day', version, dayOfTheYear],
-    queryFn: async () => {
-      const reference = versesOfTheDay[dayOfTheYear]
-      const [bookName, chapter, verse] = reference.split('.')
-      const book = booksDesc2.find(b => b[1] === bookName)?.[0]
-      const vod = await getVersesContent({
-        verses: `${book}-${chapter}-${verse}`,
-        version,
-        loadVerseTexts: (versionId, verseKeys) =>
-          loadBibleVerseTexts(resources, versionId, verseKeys),
-      })
-      return {
-        v: reference,
-        book: Number(book),
-        chapter: Number(chapter),
-        verse: Number(verse),
-        ...vod,
-      }
-    },
-    staleTime: Infinity,
-    ...localQueryOptions,
+    ...createVerseOfTheDayQueryOptions(resources, version, addDay),
+    enabled,
   })
 
   return query.isError ? ({ error: true } as const) : (query.data ?? false)
@@ -90,7 +56,11 @@ export const useVerseOfTheDay = (addDay: number) => {
   const displayName = user?.displayName
   const firstName = extractFirstName(displayName ?? '')
   const verseOfTheDay = useGetVerseOfTheDay(version, addDay)
-  const verseOfTheDayPlus1 = useGetVerseOfTheDay(version, 1 + addDay)
+  const verseOfTheDayPlus1 = useGetVerseOfTheDay(
+    version,
+    1,
+    addDay === 0 && Boolean(verseOfTheDayTime)
+  )
 
   const verseOfTheDayContent = hasVerseContent(verseOfTheDay) ? verseOfTheDay.content : undefined
   const verseOfTheDayReference = hasVerseContent(verseOfTheDay)

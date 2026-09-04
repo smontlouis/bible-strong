@@ -19,7 +19,7 @@ This report is a directional agent-readability score, not a product quality verd
 | `entityListQuery` | 8/10 | 6 | 5 | no | no | no mapped smoke path; no feature README |
 | `feature-onboarding` | 6/10 | 9 | 0 | no | no | no colocated feature tests; no mapped smoke path; no feature README |
 | `history` | 8/10 | 1 | 1 | no | no | no mapped smoke path; no feature README |
-| `home` | 7/10 | 25 | 2 | no | no | no mapped smoke path; no feature README; 3 eslint-disable markers |
+| `home` | 7/10 | 28 | 3 | no | no | no mapped smoke path; no feature README; 3 eslint-disable markers |
 | `lexique` | 8/10 | 41 | 14 | yes | no | no feature README; 1 eslint-disable markers |
 | `migrations` | 8/10 | 2 | 2 | no | no | no mapped smoke path; no feature README |
 | `nave` | 7/10 | 11 | 0 | yes | no | no colocated feature tests; 3 eslint-disable markers |

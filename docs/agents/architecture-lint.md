@@ -40,7 +40,7 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `raw-console` apps/mobile/src/devtools/reduxDevtoolsPolyfill.ts:119 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `feature-firebase-boundary` apps/mobile/src/features/app/FullAppRuntime.tsx:2 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
 - WARNING `deep-relative-import` apps/mobile/src/features/app/FullAppRuntime.tsx:30 - Prefer path aliases or a small public module boundary over deep relative imports.
-- WARNING `raw-console` apps/mobile/src/features/app/FullAppRuntime.tsx:91 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/app/FullAppRuntime.tsx:105 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `deep-relative-import` apps/mobile/src/features/app/FullAppRuntime.web.tsx:20 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `deep-relative-import` apps/mobile/src/features/app/RootLayout.native.tsx:35 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `raw-console` apps/mobile/src/features/app/RootLayout.native.tsx:67 - Prefer appLogger for app-owned diagnostic events that agents should query.
@@ -159,9 +159,9 @@ This is a repo-specific architecture scan for agent work. It is intentionally co
 - WARNING `feature-firebase-boundary` apps/mobile/src/features/home/HomeScreen.tsx:2 - Feature code should prefer a local helper/hook boundary over direct Firebase access.
 - WARNING `raw-console` apps/mobile/src/features/home/PlanHome.tsx:64 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `raw-console` apps/mobile/src/features/home/VerseImageModal.tsx:63 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:167 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:175 - Prefer appLogger for app-owned diagnostic events that agents should query.
-- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:190 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:137 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:145 - Prefer appLogger for app-owned diagnostic events that agents should query.
+- WARNING `raw-console` apps/mobile/src/features/home/useVerseOfTheDay.ts:160 - Prefer appLogger for app-owned diagnostic events that agents should query.
 - WARNING `deep-relative-import` apps/mobile/src/features/migrations/__tests__/AccountMigrationModal-test.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `deep-relative-import` apps/mobile/src/features/migrations/__tests__/LocalMigrationGate-test.tsx:4 - Prefer path aliases or a small public module boundary over deep relative imports.
 - WARNING `raw-console` apps/mobile/src/features/migrations/__tests__/LocalMigrationGate-test.tsx:143 - Prefer appLogger for app-owned diagnostic events that agents should query.

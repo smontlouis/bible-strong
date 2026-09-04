@@ -9,8 +9,9 @@ import Paragraph from '~common/ui/Paragraph'
 import useLogin from '~helpers/useLogin'
 import OfflineNotice from './OfflineNotice'
 import VerseOfTheDay, { VERSE_CARD_HEIGHT } from './VerseOfTheDay'
+import { VISIBLE_VERSE_OF_THE_DAY_OFFSETS } from './verseOfTheDayPolicy'
 
-const vodNb = [...Array(5).keys()]
+const visibleVerseOffsets = [...VISIBLE_VERSE_OF_THE_DAY_OFFSETS]
 
 const Container = styled.View(({ theme }) => ({
   backgroundColor: theme.colors.lightGrey,
@@ -38,7 +39,7 @@ const UserWidget = () => {
         {carouselWidth > 0 && (
           <Carousel
             mode="vertical-stack"
-            data={vodNb}
+            data={visibleVerseOffsets}
             loop={false}
             style={{
               width: carouselWidth,
@@ -59,8 +60,8 @@ const UserWidget = () => {
               rotateZDeg: 0,
               opacityInterval: 0.4,
             }}
-            renderItem={({ item: i }) => <VerseOfTheDay addDay={-(vodNb.length - 1 - i)} />}
-            defaultIndex={vodNb.length - 1}
+            renderItem={({ item: addDay }) => <VerseOfTheDay addDay={addDay} />}
+            defaultIndex={visibleVerseOffsets.length - 1}
           />
         )}
       </Box>
