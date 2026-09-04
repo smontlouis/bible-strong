@@ -1,5 +1,5 @@
 {
-  "name": "@bible-strong/mobile",
+  "name": "@bible-strong/expo",
   "version": "27.0.12",
   "main": "expo-router/entry",
   "scripts": {

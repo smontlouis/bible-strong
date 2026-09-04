@@ -21,7 +21,7 @@ for (const file of await collectTypeScriptFiles(sourceRoot)) {
   const relative = path.relative(root, file)
   const source = await readFile(file, 'utf8')
 
-  if (source.includes('@bible-strong/mobile') || source.includes('apps/mobile')) {
+  if (source.includes('@bible-strong/expo') || source.includes('apps/expo')) {
     violations.push(`${relative}: resource-service must not import the mobile application`)
   }
 

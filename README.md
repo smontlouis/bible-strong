@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">
-  <img width="120" height="120" src="https://raw.githubusercontent.com/smontlouis/bible-strong/master/apps/mobile/assets/images/icon.png"><br>
+  <img width="120" height="120" src="https://raw.githubusercontent.com/smontlouis/bible-strong/master/apps/expo/assets/images/icon.png"><br>
   <a href="https://bible-strong.app"><span>Bible Strong</span></a><br>
 </h1>
 
@@ -142,8 +142,8 @@ Ce repository regroupe les applications, services et packages partages de Bible 
 
 | Workspace | Package | Role |
 |-----------|---------|------|
-| `apps/mobile` | `@bible-strong/mobile` | Application Expo / React Native presentee dans ce README |
-| `apps/web` | `@bible-strong/web` | Application web Bible Strong |
+| `apps/expo` | `@bible-strong/expo` | Application Expo / React Native presentee dans ce README |
+| `apps/site` | `@bible-strong/site` | Site public Bible Strong |
 | `apps/api` | `@bible-strong/api` et `@bible-strong/api-functions` | API et fonctions Firebase |
 | `apps/resource-studio` | `@bible-strong/resource-studio` | Acquisition, transformation et fabrication des ressources |
 | `packages/resource-service` | `@bible-strong/resource-service` | Publication et livraison des ressources bibliques |
@@ -188,8 +188,8 @@ Consultez le [`CONTEXT-MAP.md`](./CONTEXT-MAP.md) pour les contextes metier et [
 
 4. **Configurer les variables d'environnement**
 
-   Les fichiers `.env.*` de `apps/mobile/` sont necessaires pour le fonctionnement de l'app.
-   Utilisez `apps/mobile/.env.example` comme point de depart.
+   Les fichiers `.env.*` de `apps/expo/` sont necessaires pour le fonctionnement de l'app.
+   Utilisez `apps/expo/.env.example` comme point de depart.
    Vous aurez besoin de vos propres cles Firebase pour le developpement local.
 
 5. **Creer un build de developpement**
@@ -198,35 +198,38 @@ Consultez le [`CONTEXT-MAP.md`](./CONTEXT-MAP.md) pour les contextes metier et [
 
    ```bash
    # Pour Android
-   yarn workspace @bible-strong/mobile build:android:dev
+   yarn workspace @bible-strong/expo build:android:dev
 
    # Pour iOS (macOS uniquement)
-   yarn workspace @bible-strong/mobile build:ios:dev
+   yarn workspace @bible-strong/expo build:ios:dev
 
    # Pour le simulateur iOS
-   yarn workspace @bible-strong/mobile build:ios:dev-sim
+   yarn workspace @bible-strong/expo build:ios:dev-sim
    ```
 
 6. **Lancer le serveur de developpement**
    ```bash
-   yarn dev:mobile
+   yarn dev:expo
    ```
 
 7. **Lancer sur un appareil**
    ```bash
    # Android
-   yarn workspace @bible-strong/mobile android
+   yarn workspace @bible-strong/expo android
 
    # iOS
-   yarn workspace @bible-strong/mobile ios
+   yarn workspace @bible-strong/expo ios
    ```
 
 ### Scripts disponibles
 
 | Commande | Description |
 |----------|-------------|
-| `yarn dev:mobile` | Demarre le serveur Expo de l'application mobile |
-| `yarn dev:web` | Demarre l'application web |
+| `yarn dev:expo` | Demarre le serveur de developpement Expo |
+| `yarn dev:expo:web` | Lance l'application Expo sur le Web |
+| `yarn dev:expo:ios` | Lance l'application Expo sur iOS |
+| `yarn dev:expo:android` | Lance l'application Expo sur Android |
+| `yarn dev:site` | Demarre le site public |
 | `yarn dev:api` | Demarre l'API Firebase locale |
 | `yarn dev:studio` | Demarre l'atelier editorial des ressources |
 | `yarn dev:resources` | Demarre le Resource service |
@@ -235,24 +238,24 @@ Consultez le [`CONTEXT-MAP.md`](./CONTEXT-MAP.md) pour les contextes metier et [
 | `yarn test` | Lance les suites de tests du monorepo |
 | `yarn build` | Compile les applications API et web |
 | `yarn format:check` | Verifie le formatage de l'application mobile |
-| `yarn workspace @bible-strong/mobile android` | Lance l'application sur Android |
-| `yarn workspace @bible-strong/mobile ios` | Lance l'application sur iOS |
-| `yarn workspace @bible-strong/mobile lint:fix` | Corrige automatiquement le lint mobile |
-| `yarn workspace @bible-strong/mobile format` | Formate le code mobile avec Prettier |
-| `yarn workspace @bible-strong/mobile clean` | Nettoie et reinstalle les dependances mobiles |
-| `yarn workspace @bible-strong/mobile i18n` | Extrait les chaines de traduction mobiles |
+| `yarn workspace @bible-strong/expo android` | Lance l'application sur Android |
+| `yarn workspace @bible-strong/expo ios` | Lance l'application sur iOS |
+| `yarn workspace @bible-strong/expo lint:fix` | Corrige automatiquement le lint mobile |
+| `yarn workspace @bible-strong/expo format` | Formate le code mobile avec Prettier |
+| `yarn workspace @bible-strong/expo clean` | Nettoie et reinstalle les dependances mobiles |
+| `yarn workspace @bible-strong/expo i18n` | Extrait les chaines de traduction mobiles |
 
 ### Builds de production
 
 ```bash
 # Android
-yarn workspace @bible-strong/mobile build:android:staging    # Build de test interne (APK)
-yarn workspace @bible-strong/mobile build:android:prod       # Build de production (AAB)
-yarn workspace @bible-strong/mobile build:android:prod:apk   # Build de production (APK)
+yarn workspace @bible-strong/expo build:android:staging    # Build de test interne (APK)
+yarn workspace @bible-strong/expo build:android:prod       # Build de production (AAB)
+yarn workspace @bible-strong/expo build:android:prod:apk   # Build de production (APK)
 
 # iOS
-yarn workspace @bible-strong/mobile build:ios:staging        # Build de test interne
-yarn workspace @bible-strong/mobile build:ios:prod           # Build de production
+yarn workspace @bible-strong/expo build:ios:staging        # Build de test interne
+yarn workspace @bible-strong/expo build:ios:prod           # Build de production
 ```
 
 ---
@@ -324,13 +327,13 @@ Les contributions sont les bienvenues ! Bible Strong est un projet open-source e
 
 Vous souhaitez aider a traduire l'application ?
 
-Les fichiers de traduction sont dans `apps/mobile/i18n/locales/` :
-- `apps/mobile/i18n/locales/fr/translation.json` - Francais (langue principale)
-- `apps/mobile/i18n/locales/en/translation.json` - Anglais
+Les fichiers de traduction sont dans `apps/expo/i18n/locales/` :
+- `apps/expo/i18n/locales/fr/translation.json` - Francais (langue principale)
+- `apps/expo/i18n/locales/en/translation.json` - Anglais
 
 Pour ajouter une nouvelle langue :
-1. Creez un nouveau dossier dans `apps/mobile/i18n/locales/`
-2. Copiez `apps/mobile/i18n/locales/fr/translation.json` comme base
+1. Creez un nouveau dossier dans `apps/expo/i18n/locales/`
+2. Copiez `apps/expo/i18n/locales/fr/translation.json` comme base
 3. Traduisez les valeurs (pas les cles)
 4. Ouvrez une PR
 
@@ -341,7 +344,7 @@ Pour ajouter une nouvelle langue :
 ```
 bible-strong/
 ├── apps/
-│   ├── mobile/                         # Application Expo / React Native
+│   ├── expo/                           # Application Expo : iOS, Android et Web
 │   │   ├── app/                        # Routes Expo Router
 │   │   │   └── strong/                 # Entree Strong, concordance, entites et dictionnaire
 │   │   ├── src/
@@ -369,7 +372,7 @@ bible-strong/
 │   │   │   └── assets/                 # Ressources statiques
 │   │   ├── i18n/                       # Traductions
 │   │   └── firebase/                   # Configs Firebase par environnement
-│   ├── web/                            # Application web
+│   ├── site/                           # Site public TanStack Start
 │   ├── api/                            # API et fonctions Firebase
 │   └── resource-studio/                # Atelier de production des ressources
 ├── packages/
@@ -390,7 +393,7 @@ independantes, verifiees puis activees de maniere atomique.
 
 Pour plus de details techniques, consultez [l'index de la documentation](./docs/index.md),
 [l'architecture mobile](./docs/architecture.md), la [carte des contextes](./CONTEXT-MAP.md)
-et le [contexte du domaine mobile](./apps/mobile/CONTEXT.md).
+et le [contexte du domaine mobile](./apps/expo/CONTEXT.md).
 
 ---
 

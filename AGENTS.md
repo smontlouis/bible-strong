@@ -12,14 +12,14 @@ This repository is the shared Yarn workspace for Bible Strong products and suppo
 
 ## Workspace layout
 
-- `apps/mobile` — Expo/React Native application (`@bible-strong/mobile`).
-- `apps/web` — web application (`@bible-strong/web`).
+- `apps/expo` — multiplatform Expo application for iOS, Android, and Web (`@bible-strong/expo`).
+- `apps/site` — public TanStack Start site (`@bible-strong/site`).
 - `apps/api` — API workspace and Firebase functions (`@bible-strong/api-functions`).
 - `apps/resource-studio` — resource authoring application and workflows (`@bible-strong/resource-studio`).
 - `packages/resource-service` — resource publication and delivery service.
 - `packages/bible-reference-parser` — Bible passage reference parser.
 
-App-specific instructions live in nested `AGENTS.md` files. In particular, read `apps/mobile/AGENTS.md` before changing the mobile app.
+App-specific instructions live in nested `AGENTS.md` files. In particular, read `apps/expo/AGENTS.md` before changing the Expo app.
 
 ## Essential commands
 
@@ -31,7 +31,7 @@ yarn test
 yarn build
 ```
 
-Start one product from the root with `yarn dev:mobile`, `yarn dev:web`, `yarn dev:api`, `yarn dev:studio`, or `yarn dev:resources`. Resource-authoring commands use the `resources:<domain>:<action>` prefix; production import, upload, and activation remain owned by the Resource service. Run a workspace-specific command with `yarn workspace <package-name> <script>`.
+Start one product from the root with `yarn dev:expo`, `yarn dev:site`, `yarn dev:api`, `yarn dev:studio`, or `yarn dev:resources`. Resource-authoring commands use the `resources:<domain>:<action>` prefix; production import, upload, and activation remain owned by the Resource service. Run a workspace-specific command with `yarn workspace <package-name> <script>`.
 
 ## Dependency rules
 

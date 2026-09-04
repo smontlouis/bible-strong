@@ -2,7 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const repoRoot = process.cwd()
-const srcDir = path.join(repoRoot, 'apps/mobile/src')
+const srcDir = path.join(repoRoot, 'apps/expo/src')
 const docsDir = path.join(repoRoot, 'docs/agents')
 const scratchDir = path.join(repoRoot, '.scratch/architecture')
 const markdownPath = path.join(docsDir, 'architecture-lint.md')
@@ -13,9 +13,9 @@ const sourceExtensions = new Set(['.ts', '.tsx'])
 const ignoredDirs = new Set(['node_modules', '.git'])
 
 const allowedExpoSqliteFiles = new Set([
-  'apps/mobile/src/helpers/sqlite.ts',
-  'apps/mobile/src/helpers/biblesDb.ts',
-  'apps/mobile/src/helpers/getSQLTransaction.ts',
+  'apps/expo/src/helpers/sqlite.ts',
+  'apps/expo/src/helpers/biblesDb.ts',
+  'apps/expo/src/helpers/getSQLTransaction.ts',
 ])
 
 const getFiles = dir => {
@@ -70,7 +70,7 @@ for (const file of getFiles(srcDir)) {
       )
     }
 
-    if (relativeFile.startsWith('apps/mobile/src/helpers/') && imported.startsWith('~features/')) {
+    if (relativeFile.startsWith('apps/expo/src/helpers/') && imported.startsWith('~features/')) {
       addFinding(
         findings,
         'warning',
@@ -82,7 +82,7 @@ for (const file of getFiles(srcDir)) {
     }
 
     if (
-      relativeFile.startsWith('apps/mobile/src/features/') &&
+      relativeFile.startsWith('apps/expo/src/features/') &&
       (imported.startsWith('@react-native-firebase/') || imported === '~helpers/firebase')
     ) {
       addFinding(
@@ -95,7 +95,7 @@ for (const file of getFiles(srcDir)) {
       )
     }
 
-    if (relativeFile.startsWith('apps/mobile/src/features/') && /^(\.\.\/){3,}/.test(imported)) {
+    if (relativeFile.startsWith('apps/expo/src/features/') && /^(\.\.\/){3,}/.test(imported)) {
       addFinding(
         findings,
         'warning',
@@ -110,7 +110,7 @@ for (const file of getFiles(srcDir)) {
   for (const match of content.matchAll(/\bconsole\.(log|warn|error|debug|info)\b/g)) {
     const line = getLineNumber(content, match.index ?? 0)
 
-    if (relativeFile !== 'apps/mobile/src/helpers/agentObservability.ts') {
+    if (relativeFile !== 'apps/expo/src/helpers/agentObservability.ts') {
       addFinding(
         findings,
         'warning',

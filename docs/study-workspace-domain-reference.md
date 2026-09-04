@@ -1,6 +1,6 @@
 # Mobile Domain Reference
 
-This document preserves detailed product invariants and implementation references for the mobile application. The glossary used by agents is `apps/mobile/CONTEXT.md`.
+This document preserves detailed product invariants and implementation references for the mobile application. The glossary used by agents is `apps/expo/CONTEXT.md`.
 
 Bible Strong is a mobile Bible study application for French-speaking users first, with English support and original-language resources. The product goal is not only reading Bible text; it is an integrated study workspace where the same passage can connect to Strong's definitions, interlinear text, cross references, topical references, personal notes, highlights, links, studies, audio, and reading plans.
 

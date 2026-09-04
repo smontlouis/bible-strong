@@ -1,5 +1,5 @@
 {
-  "name": "@bible-strong/web",
+  "name": "@bible-strong/site",
   "version": "0.1.0",
   "private": true,
   "packageManager": "yarn@4.12.0",

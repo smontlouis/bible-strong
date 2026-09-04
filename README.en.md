@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">
-  <img width="120" height="120" src="https://raw.githubusercontent.com/smontlouis/bible-strong/master/apps/mobile/assets/images/icon.png"><br>
+  <img width="120" height="120" src="https://raw.githubusercontent.com/smontlouis/bible-strong/master/apps/expo/assets/images/icon.png"><br>
   <a href="https://bible-strong.app"><span>Bible Strong</span></a><br>
 </h1>
 
@@ -142,8 +142,8 @@ This repository brings together the Bible Strong applications, services, and sha
 
 | Workspace | Package | Role |
 |-----------|---------|------|
-| `apps/mobile` | `@bible-strong/mobile` | Expo / React Native application presented in this README |
-| `apps/web` | `@bible-strong/web` | Bible Strong web application |
+| `apps/expo` | `@bible-strong/expo` | Expo / React Native application presented in this README |
+| `apps/site` | `@bible-strong/site` | Bible Strong public site |
 | `apps/api` | `@bible-strong/api` and `@bible-strong/api-functions` | API and Firebase functions |
 | `apps/resource-studio` | `@bible-strong/resource-studio` | Resource acquisition, transformation, and packaging |
 | `packages/resource-service` | `@bible-strong/resource-service` | Publication and delivery of Bible resources |
@@ -188,8 +188,8 @@ See [`CONTEXT-MAP.md`](./CONTEXT-MAP.md) for the domain contexts and [`docs/inde
 
 4. **Configure environment variables**
 
-   The `.env.*` files under `apps/mobile/` are required for the app to work.
-   Use `apps/mobile/.env.example` as a starting point.
+   The `.env.*` files under `apps/expo/` are required for the app to work.
+   Use `apps/expo/.env.example` as a starting point.
    You will need your own Firebase keys for local development.
 
 5. **Create a development build**
@@ -198,35 +198,38 @@ See [`CONTEXT-MAP.md`](./CONTEXT-MAP.md) for the domain contexts and [`docs/inde
 
    ```bash
    # For Android
-   yarn workspace @bible-strong/mobile build:android:dev
+   yarn workspace @bible-strong/expo build:android:dev
 
    # For iOS (macOS only)
-   yarn workspace @bible-strong/mobile build:ios:dev
+   yarn workspace @bible-strong/expo build:ios:dev
 
    # For iOS simulator
-   yarn workspace @bible-strong/mobile build:ios:dev-sim
+   yarn workspace @bible-strong/expo build:ios:dev-sim
    ```
 
 6. **Start the development server**
    ```bash
-   yarn dev:mobile
+   yarn dev:expo
    ```
 
 7. **Run on a device**
    ```bash
    # Android
-   yarn workspace @bible-strong/mobile android
+   yarn workspace @bible-strong/expo android
 
    # iOS
-   yarn workspace @bible-strong/mobile ios
+   yarn workspace @bible-strong/expo ios
    ```
 
 ### Available Scripts
 
 | Command | Description |
 |---------|-------------|
-| `yarn dev:mobile` | Start the mobile Expo server |
-| `yarn dev:web` | Start the web application |
+| `yarn dev:expo` | Start the Expo development server |
+| `yarn dev:expo:web` | Run the Expo app on Web |
+| `yarn dev:expo:ios` | Run the Expo app on iOS |
+| `yarn dev:expo:android` | Run the Expo app on Android |
+| `yarn dev:site` | Start the public site |
 | `yarn dev:api` | Start the local Firebase API |
 | `yarn dev:studio` | Start the resource authoring studio |
 | `yarn dev:resources` | Start the Resource service |
@@ -235,24 +238,24 @@ See [`CONTEXT-MAP.md`](./CONTEXT-MAP.md) for the domain contexts and [`docs/inde
 | `yarn test` | Run the monorepo test suites |
 | `yarn build` | Build the API and web applications |
 | `yarn format:check` | Check mobile application formatting |
-| `yarn workspace @bible-strong/mobile android` | Run the mobile app on Android |
-| `yarn workspace @bible-strong/mobile ios` | Run the mobile app on iOS |
-| `yarn workspace @bible-strong/mobile lint:fix` | Automatically fix mobile lint errors |
-| `yarn workspace @bible-strong/mobile format` | Format mobile code with Prettier |
-| `yarn workspace @bible-strong/mobile clean` | Clean and reinstall mobile dependencies |
-| `yarn workspace @bible-strong/mobile i18n` | Extract mobile translation strings |
+| `yarn workspace @bible-strong/expo android` | Run the mobile app on Android |
+| `yarn workspace @bible-strong/expo ios` | Run the mobile app on iOS |
+| `yarn workspace @bible-strong/expo lint:fix` | Automatically fix mobile lint errors |
+| `yarn workspace @bible-strong/expo format` | Format mobile code with Prettier |
+| `yarn workspace @bible-strong/expo clean` | Clean and reinstall mobile dependencies |
+| `yarn workspace @bible-strong/expo i18n` | Extract mobile translation strings |
 
 ### Production Builds
 
 ```bash
 # Android
-yarn workspace @bible-strong/mobile build:android:staging    # Internal test build (APK)
-yarn workspace @bible-strong/mobile build:android:prod       # Production build (AAB)
-yarn workspace @bible-strong/mobile build:android:prod:apk   # Production build (APK)
+yarn workspace @bible-strong/expo build:android:staging    # Internal test build (APK)
+yarn workspace @bible-strong/expo build:android:prod       # Production build (AAB)
+yarn workspace @bible-strong/expo build:android:prod:apk   # Production build (APK)
 
 # iOS
-yarn workspace @bible-strong/mobile build:ios:staging        # Internal test build
-yarn workspace @bible-strong/mobile build:ios:prod           # Production build
+yarn workspace @bible-strong/expo build:ios:staging        # Internal test build
+yarn workspace @bible-strong/expo build:ios:prod           # Production build
 ```
 
 ---
@@ -324,13 +327,13 @@ Contributions are welcome! Bible Strong is an open-source community project.
 
 Want to help translate the app?
 
-Translation files are in `apps/mobile/i18n/locales/`:
-- `apps/mobile/i18n/locales/fr/translation.json` - French (main language)
-- `apps/mobile/i18n/locales/en/translation.json` - English
+Translation files are in `apps/expo/i18n/locales/`:
+- `apps/expo/i18n/locales/fr/translation.json` - French (main language)
+- `apps/expo/i18n/locales/en/translation.json` - English
 
 To add a new language:
-1. Create a new folder in `apps/mobile/i18n/locales/`
-2. Copy `apps/mobile/i18n/locales/fr/translation.json` as a base
+1. Create a new folder in `apps/expo/i18n/locales/`
+2. Copy `apps/expo/i18n/locales/fr/translation.json` as a base
 3. Translate the values (not the keys)
 4. Open a PR
 
@@ -341,7 +344,7 @@ To add a new language:
 ```
 bible-strong/
 ├── apps/
-│   ├── mobile/                         # Expo / React Native application
+│   ├── expo/                           # Expo application: iOS, Android, and Web
 │   │   ├── app/                        # Expo Router routes
 │   │   │   └── strong/                 # Strong entry, concordance, entities, and dictionary
 │   │   ├── src/
@@ -369,7 +372,7 @@ bible-strong/
 │   │   │   └── assets/                 # Static resources
 │   │   ├── i18n/                       # Translations
 │   │   └── firebase/                   # Firebase configs per environment
-│   ├── web/                            # Web application
+│   ├── site/                           # Public TanStack Start site
 │   ├── api/                            # API and Firebase functions
 │   └── resource-studio/                # Resource authoring studio and workflows
 ├── packages/
@@ -390,7 +393,7 @@ activated atomically.
 
 For more technical details, see the [documentation index](./docs/index.md),
 [mobile architecture guide](./docs/architecture.md), [context map](./CONTEXT-MAP.md),
-and [mobile domain context](./apps/mobile/CONTEXT.md).
+and [mobile domain context](./apps/expo/CONTEXT.md).
 
 ---
 

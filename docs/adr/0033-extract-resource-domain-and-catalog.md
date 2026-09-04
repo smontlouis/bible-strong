@@ -34,7 +34,7 @@ must update that file atomically.
 
 ## Consequences
 
-- `@bible-strong/resource-service` no longer depends on `@bible-strong/mobile`.
+- `@bible-strong/resource-service` no longer depends on `@bible-strong/expo`.
 - Server tests use the shared interface or test the server directly; mobile adapter behavior remains
   covered by mobile tests.
 - Shared contracts cannot import platform or infrastructure modules.

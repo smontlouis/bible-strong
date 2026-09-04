@@ -15,8 +15,10 @@ The existing Bible Strong repository becomes a Yarn 4 monorepo with one root `ya
 
 Deployable or independently runnable products live under `apps/`:
 
-- `apps/mobile` — `@bible-strong/mobile`
-- `apps/web` — `@bible-strong/web`
+The current workspace names below incorporate the later rename recorded by ADR-0039.
+
+- `apps/expo` — `@bible-strong/expo`
+- `apps/site` — `@bible-strong/site`
 - `apps/api` — `@bible-strong/api`; its Firebase functions workspace is `@bible-strong/api-functions`
 - `apps/resource-studio` — `@bible-strong/resource-studio` (renamed from Lexicon Editor by ADR-0035)
 

@@ -1,6 +1,6 @@
-# Web Experience
+# Public site context
 
-The Bible Strong web experience makes Bible reading and study content available through a browser while sharing the product language of the mobile study workspace.
+The Bible Strong public site presents the product, legal and support pages, and shared study content through public web routes while sharing the product language of the study workspace.
 
 ## Language
 

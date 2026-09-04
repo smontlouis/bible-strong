@@ -18,8 +18,8 @@
 
 | Path | Package | Purpose |
 |---|---|---|
-| `apps/mobile/` | `@bible-strong/mobile` | Expo/React Native Bible reading and study application. |
-| `apps/web/` | `@bible-strong/web` | Browser Bible Strong experience. |
+| `apps/expo/` | `@bible-strong/expo` | Expo/React Native Bible reading and study application. |
+| `apps/site/` | `@bible-strong/site` | Browser Bible Strong experience. |
 | `apps/api/` | `@bible-strong/api` | API workspace and Firebase deployment boundary. |
 | `apps/api/functions/` | `@bible-strong/api-functions` | Firebase Functions implementation. |
 | `apps/resource-studio/` | `@bible-strong/resource-studio` | Editorial UI and authoring workflows for every Bible Strong resource family. |
@@ -37,11 +37,11 @@ records audits and decisions but does not own production generators.
 | `packages/resource-catalog/` | `@bible-strong/resource-catalog` | Generated artifact catalog and immutable publication metadata. |
 | `packages/bible-reference-parser/` | `@bible-strong/bible-reference-parser` | French and English Bible passage parsing and OSIS conversion. |
 
-## Mobile application
+## Expo application
 
-The mobile routes live in `apps/mobile/app/`; its feature, state, helper, theme, and shared UI code lives in `apps/mobile/src/`. Environment files, Expo configuration, Firebase configuration, native projects, and EAS profiles are also scoped to `apps/mobile/`.
+The Expo routes live in `apps/expo/app/`; its feature, state, helper, theme, and shared UI code lives in `apps/expo/src/`. Environment files, Expo configuration, Firebase configuration, native projects, and EAS profiles are also scoped to `apps/expo/`.
 
-Read `apps/mobile/AGENTS.md` before changing it. Detailed mobile architecture remains in `architecture.md`, `data-models.md`, `app-flows.md`, and `mobile-domain-reference.md`.
+Read `apps/expo/AGENTS.md` before changing it. Detailed mobile architecture remains in `architecture.md`, `data-models.md`, `app-flows.md`, and `study-workspace-domain-reference.md`.
 
 ## Context and decisions
 

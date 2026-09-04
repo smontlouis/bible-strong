@@ -53,7 +53,7 @@ jobs:
 
       - name: Load development environment
         run: |
-          yarn workspace @bible-strong/mobile dotenv -c development -- node -e '
+          yarn workspace @bible-strong/expo dotenv -c development -- node -e '
             const fs = require("node:fs")
             const keys = [
               "ANDROID_GOOGLE_SERVICES_FILE",
@@ -71,4 +71,4 @@ jobs:
         uses: expo/expo-github-action/preview@v8
         with:
           command: eas update --auto
-          working-directory: apps/mobile
+          working-directory: apps/expo

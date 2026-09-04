@@ -2169,9 +2169,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@bible-strong/mobile@workspace:apps/mobile":
+"@bible-strong/expo@workspace:apps/expo":
   version: 0.0.0-use.local
-  resolution: "@bible-strong/mobile@workspace:apps/mobile"
+  resolution: "@bible-strong/expo@workspace:apps/expo"
   dependencies:
     "@alloc/moti": "npm:^54.0.0-beta.8"
     "@babel/core": "npm:^7.29.0"
@@ -2442,9 +2442,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@bible-strong/web@workspace:apps/web":
+"@bible-strong/site@workspace:apps/site":
   version: 0.0.0-use.local
-  resolution: "@bible-strong/web@workspace:apps/web"
+  resolution: "@bible-strong/site@workspace:apps/site"
   dependencies:
     "@gsap/react": "npm:^2.1.2"
     "@mdx-js/react": "npm:^3.0.0"

@@ -1,4 +1,4 @@
-# Mobile study workspace context
+# Study workspace context
 
 ## Glossary
 
@@ -50,7 +50,7 @@
 
 **Resource availability** — The user-relevant state of a resource across independent online-access and Offline-copy dimensions.
 
-**Tab** — One open working surface in the mobile study workspace.
+**Tab** — One open working surface in the study workspace.
 
 **Tab group** — A persisted collection of Tabs with one active Tab.
 
@@ -67,4 +67,4 @@
 - Use **Relation endpoint**, not “relation item” or “linkable thing”.
 - Use **Bible version** for a readable Bible source; reserve **Resource identity** for publication and delivery lifecycle discussions.
 
-Detailed product invariants and implementation references live in `../../docs/mobile-domain-reference.md`.
+Detailed product invariants and implementation references live in `../../docs/study-workspace-domain-reference.md`.

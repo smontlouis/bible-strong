@@ -5,10 +5,10 @@
 Command:
 
 ```bash
-CI=1 npx -y react-doctor@latest apps/mobile --verbose
+CI=1 npx -y react-doctor@latest apps/expo --verbose
 ```
 
-The audit covers the complete `@bible-strong/mobile` workspace, including application code,
+The audit covers the complete `@bible-strong/expo` workspace, including application code,
 tests, scripts, Expo DOM code, and checked-in third-party browser assets.
 
 ## Result

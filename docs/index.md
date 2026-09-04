@@ -16,7 +16,7 @@ This directory is the repo-level reference set for agents and humans working on 
 | `assets/app-flows/data/app-flows.json` | Structured app-flow graph generated from the screenshot manifest and curated flows. |
 | `assets/app-flows/data/screenshots.json` | Versioned screenshot manifest for visual and agent-consumable flow mapping. |
 | `assets/app-flows/capture-notes.md` | Argent capture notes, limitations, state mutations, and remaining capture targets. |
-| `mobile-domain-reference.md` | Detailed mobile product invariants and implementation references; not a glossary. |
+| `study-workspace-domain-reference.md` | Detailed mobile product invariants and implementation references; not a glossary. |
 | `data-models.md` | Persisted state, local databases, Firestore sync, and identifiers. |
 | `relations-architecture.md` | Target architecture for a unified relation graph, query strategy, and denormalized indexes. |
 | `conventions.md` | Coding conventions and project-specific rules. |
