@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import { type SheetRef } from '~common/sheet'
 import { useEffect, useRef, useState } from 'react'
 import { FlatList } from 'react-native'
@@ -234,7 +235,7 @@ const StudiesScreen = ({
             key={r(['xs', 'sm', 'md', 'lg'])}
             numColumns={r([2, 2, 3, 3])}
             data={filteredStudies}
-            contentContainerStyle={{ paddingBottom: 100 }}
+            contentContainerStyle={[pageContentStyle, { paddingBottom: 100 }]}
             keyExtractor={item => item.id}
             renderItem={({ item }) => {
               const endpoint = createStudyEndpoint(item.id, item.title)

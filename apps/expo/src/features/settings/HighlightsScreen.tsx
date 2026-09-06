@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useAtom, useSetAtom } from 'jotai/react'
@@ -411,6 +412,7 @@ const HighlightsScreen = ({ isFormSheet = false }: HighlightsScreenProps) => {
         {/* Content */}
         {unifiedItems.length ? (
           <FlatList
+            contentContainerStyle={pageContentStyle}
             data={unifiedItems}
             keyExtractor={item =>
               item.type === 'highlight'

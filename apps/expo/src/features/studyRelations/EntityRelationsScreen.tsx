@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { ScrollView } from 'react-native'
@@ -50,7 +51,7 @@ const EntityRelationsScreen = () => {
           ) : undefined
         }
       />
-      <ScrollView>
+      <ScrollView contentContainerStyle={pageContentStyle}>
         {endpoint ? (
           <StudyRelationList
             endpoint={endpoint}

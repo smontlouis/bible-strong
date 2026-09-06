@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import * as Sentry from '@sentry/react-native'
 import { useTheme } from '@emotion/react'
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
@@ -474,10 +475,13 @@ ${currentNote.description}
           onScroll={event => {
             scrollOffsetRef.current = event.nativeEvent.contentOffset.y
           }}
-          contentContainerStyle={{
-            padding: 20,
-            paddingBottom: isEditing ? 20 : insets.bottom + 100,
-          }}
+          contentContainerStyle={[
+            pageContentStyle,
+            {
+              padding: 20,
+              paddingBottom: isEditing ? 20 : insets.bottom + 100,
+            },
+          ]}
         >
           <Box gap={20}>
             <EntityChipList
@@ -516,6 +520,7 @@ ${currentNote.description}
               }}
             >
               <NoteEditorDOMComponent
+                standaloneDocument={Platform.OS !== 'web'}
                 key={`${noteId || 'new'}-${editorResetKey}`}
                 encodedDefaultTitle={encodeURIComponent(currentNote?.title || '')}
                 encodedDefaultDescription={encodeURIComponent(currentNote?.description || '')}

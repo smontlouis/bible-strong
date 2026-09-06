@@ -114,6 +114,8 @@ export const AppSwitcherProvider = ({ children }: AppSwitcherProviderProps) => {
     pagerTranslateX,
     pagerScrollX,
     tabsCountShared,
+    tabPreviewCarousel,
+    createGroupPageIsFullyVisible,
   })
 
   const navigateToPage = (pageIndex: number, groupsLength: number) => {

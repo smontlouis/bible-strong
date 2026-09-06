@@ -1,9 +1,9 @@
 import styled from '@emotion/native'
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { TouchableOpacity } from 'react-native'
 import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel'
 import { alphabet } from '~helpers/alphabet'
-import { viewportWidth } from '~helpers/utils'
+import PageContent from '~common/ui/PageContent'
 
 import Border from '~common/ui/Border'
 import Box from '~common/ui/Box'
@@ -29,13 +29,18 @@ type AlphabetListProps = {
 }
 
 const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
+  const [width, setWidth] = useState(0)
   const CarouselAlphabet = useRef<ICarouselInstance>(null)
   const index = alphabet.findIndex(l => l === letter.toUpperCase())
 
   return (
     <Box background paddingBottom={7}>
       <Border />
-      <Box paddingTop={5} height={50}>
+      <PageContent
+        paddingTop={5}
+        height={50}
+        onLayout={event => setWidth(event.nativeEvent.layout.width)}
+      >
         <Carousel
           ref={CarouselAlphabet}
           mode="parallax"
@@ -50,7 +55,7 @@ const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
             gestureChain.activeOffsetX([-10, 10])
           }}
           style={{
-            width: viewportWidth,
+            width,
             justifyContent: 'center',
             alignItems: 'center',
           }}
@@ -84,7 +89,7 @@ const AlphabetList = ({ color, setLetter, letter }: AlphabetListProps) => {
         <Box center>
           <StyledUnderline color={color} />
         </Box>
-      </Box>
+      </PageContent>
     </Box>
   )
 }

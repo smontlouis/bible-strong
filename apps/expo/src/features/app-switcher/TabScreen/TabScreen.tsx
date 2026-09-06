@@ -41,6 +41,7 @@ import {
 } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 import NewTabScreen from './NewTab/NewTabScreen'
+import { useResponsiveWorkspace } from '../utils/useResponsiveWorkspace'
 import useScrollToActiveTab from '../utils/useScrollToActiveTab'
 
 import TabScreenWrapper from './TabScreenWrapper'
@@ -98,6 +99,7 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
   const { activeTabScreen } = useAppSwitcherContext()
   const scrollToActiveTab = useScrollToActiveTab()
 
+  const isWide = useResponsiveWorkspace()
   const tabId = tab.id
   const isAccessibilityVisible = appSwitcherMode === 'view' && activeTabId === tabId
 
@@ -107,7 +109,7 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
   useAnimatedReaction(
     () => activeTabScreen.tabId.get() === tabId,
     (isActive, wasActive) => {
-      if (isActive && !wasActive) {
+      if (!isWide && isActive && !wasActive) {
         runOnJS(scrollToActiveTab)()
       }
     }
@@ -120,10 +122,13 @@ const TabScreen = ({ tabAtom, ref }: TabScreenProps) => {
       left: 0,
       right: 0,
       bottom: 0,
-      opacity: activeTabScreen.opacity.get(),
+      opacity: isWide ? (activeTabId === tabId ? 1 : 0) : activeTabScreen.opacity.get(),
+      pointerEvents: isWide && activeTabId !== tabId ? 'none' : 'auto',
       transform: [
         {
-          translateY: activeTabScreen.tabId.get() === tabId ? 0 : HEIGHT,
+          translateY: (isWide ? activeTabId === tabId : activeTabScreen.tabId.get() === tabId)
+            ? 0
+            : HEIGHT,
         },
       ],
     }

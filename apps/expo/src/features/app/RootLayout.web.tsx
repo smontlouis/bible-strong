@@ -1,3 +1,6 @@
+import { loadWebFonts } from '~helpers/loadWebFonts'
+import { webFontFamily } from '~helpers/webFontFamily'
+import { appLogger } from '~helpers/agentObservability'
 import { ThemeProvider } from '@emotion/react'
 import * as Sentry from '@sentry/react-native'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -34,7 +37,7 @@ const InnerApp = () => {
   const selected = getTheme[selectedTheme] || baseTheme
   const theme = {
     ...selected,
-    fontFamily: { ...selected.fontFamily, paragraph: fontFamily },
+    fontFamily: { ...selected.fontFamily, paragraph: webFontFamily(fontFamily) },
   }
 
   return (
@@ -58,7 +61,10 @@ const RootLayout = () => {
   useEffect(() => {
     let active = true
     configureQueryManagers()
-    initializeResourceAppCheck()
+    Promise.all([
+      initializeResourceAppCheck(),
+      loadWebFonts().catch(error => appLogger.error('startup', 'fonts.failed', { error })),
+    ])
       .then(() => setI18n())
       .then(() => {
         startPersistence()

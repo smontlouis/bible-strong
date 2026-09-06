@@ -5,7 +5,7 @@ import Box from '~common/ui/Box'
 import { Slide, Slides } from '~common/ui/Slider'
 import ExploreScreen from './Explore/ExploreScreen'
 import MyPlanListScreen from './MyPlanListScreen/MyPlanListScreen'
-import { MAX_WIDTH } from '~helpers/useDimensions'
+import { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
 import Header from '~common/Header'
 import Container from '~common/ui/Container'
 import { useTranslation } from 'react-i18next'
@@ -16,7 +16,7 @@ const PlanSelect = () => {
   return (
     <Container>
       <Header hasBackButton title={t('Plans & Méditations')} />
-      <Box maxWidth={MAX_WIDTH} width="100%" flex alignSelf="center">
+      <Box maxWidth={PAGE_CONTENT_MAX_WIDTH} width="100%" flex alignSelf="center">
         <Box flex>
           <SelectTabBar index={index} onChange={setIndex} />
           <Slides index={index}>

@@ -1,3 +1,4 @@
+import { webFontFamily } from '~helpers/webFontFamily'
 import { useTheme } from '@emotion/react'
 import * as Haptics from 'expo-haptics'
 import { useRouter } from 'expo-router'
@@ -451,6 +452,7 @@ export const BibleDOMWrapper = ({
   // Trim settings to only include active theme colors (reduces bridge serialization by ~3.8KB)
   const trimmedSettings = {
     ...settings,
+    fontFamily: Platform.OS === 'web' ? webFontFamily(settings.fontFamily) : settings.fontFamily,
     colors: { [settings.theme]: settings.colors[settings.theme] },
   } as typeof settings
 

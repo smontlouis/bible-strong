@@ -1,7 +1,7 @@
 import React from 'react'
 import { act, create, type ReactTestRenderer } from 'react-test-renderer'
 
-import { Sheet, type SheetRef } from '../sheet.web'
+import { Sheet, useSheetFooterInset, type SheetRef } from '../sheet.web'
 
 jest.mock('react-native', () => {
   const ReactModule = jest.requireActual<typeof React>('react')
@@ -91,6 +91,16 @@ jest.mock('~common/ui/Icon', () => ({ FeatherIcon: () => null }))
 jest.mock('~common/ui/Text', () => ({ __esModule: true, default: 'Text' }))
 
 describe('Sheet on web', () => {
+  it('provides the footer inset hook to screens outside a sheet', () => {
+    const Probe = () => <span>{useSheetFooterInset()}</span>
+    let renderer: ReactTestRenderer
+    act(() => {
+      renderer = create(<Probe />)
+    })
+    expect(renderer!.root.findByType('span').children).toEqual(['0'])
+    act(() => renderer!.unmount())
+  })
+
   it('opens and closes through its public imperative API', () => {
     const ref = React.createRef<SheetRef>()
     const onOpenChange = jest.fn()

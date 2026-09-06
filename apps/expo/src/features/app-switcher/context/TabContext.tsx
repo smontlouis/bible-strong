@@ -1,6 +1,7 @@
 import React, { createContext, useContext } from 'react'
 import { TabContextType } from './type'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useResponsiveWorkspace } from '../utils/useResponsiveWorkspace'
 import { TAB_ICON_SIZE } from '../utils/constants'
 
 const TabContext = createContext<TabContextType>({
@@ -18,7 +19,8 @@ export const useTabContext = () => {
 export const useBottomBarHeightInTab = () => {
   const insets = useSafeAreaInsets()
   const { isInTab } = useTabContext()
-  const bottomBarHeight = isInTab ? TAB_ICON_SIZE + insets.bottom : insets.bottom
+  const isWide = useResponsiveWorkspace()
+  const bottomBarHeight = isInTab && !isWide ? TAB_ICON_SIZE + insets.bottom : insets.bottom
 
   return { bottomBarHeight }
 }

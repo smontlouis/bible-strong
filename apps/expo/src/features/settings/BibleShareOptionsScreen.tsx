@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { ScrollView } from 'react-native'
@@ -73,7 +74,7 @@ const BibleShareOptionsScreen = () => {
   return (
     <Container>
       <Header hasBackButton title={t('bible.settings.shareOptions')} />
-      <ScrollView>
+      <ScrollView contentContainerStyle={pageContentStyle}>
         <Box paddingHorizontal={20} paddingVertical={10} row alignItems="center">
           <Text flex>{t('bible.settings.hasVerseNumbers')}</Text>
           <Switch

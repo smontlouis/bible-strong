@@ -3,6 +3,7 @@ import React, { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { TouchableOpacity } from 'react-native'
 
+import PageContent from '~common/ui/PageContent'
 import Back from '~common/Back'
 import FilterHeaderButton from '~common/FilterHeaderButton'
 import Box, { HStack } from '~common/ui/Box'
@@ -38,33 +39,29 @@ const FiltersHeader = ({ title, hasBackButton, filters, onReset }: Props) => {
 
   return (
     <>
-      <HStack
-        bg="reverse"
-        alignItems="center"
-        minHeight={54}
-        borderBottomWidth={1}
-        borderColor="border"
-      >
-        {hasBackButton ? (
-          <Back padding>
-            <FeatherIcon name="arrow-left" size={20} />
-          </Back>
-        ) : (
-          <Box width={15} />
-        )}
-        <Box flex justifyContent="center">
-          <Text fontSize={16} bold numberOfLines={1}>
-            {title}
-          </Text>
-        </Box>
-        <Box alignItems="flex-end">
-          <FilterHeaderButton
-            activeFilterCount={activeFilterCount}
-            activeFilterIcon={activeFilterIcon}
-            onPress={openFilters}
-          />
-        </Box>
-      </HStack>
+      <Box bg="reverse" borderBottomWidth={1} borderColor="border">
+        <PageContent row alignItems="center" minHeight={54}>
+          {hasBackButton ? (
+            <Back padding>
+              <FeatherIcon name="arrow-left" size={20} />
+            </Back>
+          ) : (
+            <Box width={15} />
+          )}
+          <Box flex justifyContent="center">
+            <Text fontSize={16} bold numberOfLines={1}>
+              {title}
+            </Text>
+          </Box>
+          <Box alignItems="flex-end">
+            <FilterHeaderButton
+              activeFilterCount={activeFilterCount}
+              activeFilterIcon={activeFilterIcon}
+              onPress={openFilters}
+            />
+          </Box>
+        </PageContent>
+      </Box>
       <Sheet
         ref={filtersRef}
         header={

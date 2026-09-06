@@ -1,3 +1,4 @@
+import PageContent from '~common/ui/PageContent'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
@@ -138,7 +139,7 @@ const BibleDefaultsScreen = () => {
     <Container flex>
       <Header hasBackButton title={t('bibleDefaults.title')} />
 
-      <Box flex px={20} pt={24} gap={16}>
+      <PageContent flex px={20} pt={24} gap={16}>
         <DefaultVersionCard
           title={t('bibleDefaults.defaultReadingTitle')}
           description={t('bibleDefaults.defaultVersionDescription')}
@@ -155,7 +156,7 @@ const BibleDefaultsScreen = () => {
           strongAvailable={isDefaultStrongAvailable}
           onPress={() => strongSheetRef.current?.present()}
         />
-      </Box>
+      </PageContent>
 
       <BibleDefaultSelectorSheet
         kind="reading"

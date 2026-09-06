@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useAtomValue } from 'jotai/react'
@@ -131,7 +132,7 @@ const TimelineSearchScreen = () => {
           keyboardDismissMode={IS_FORM_SHEET ? 'interactive' : 'on-drag'}
           keyboardShouldPersistTaps="handled"
           contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={{ flexGrow: 1 }}
+          contentContainerStyle={[pageContentStyle, { flexGrow: 1 }]}
           ItemSeparatorComponent={() => <Border />}
           ListHeaderComponent={
             results.length > 0 ? (

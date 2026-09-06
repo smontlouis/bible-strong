@@ -1,5 +1,6 @@
 import React from 'react'
 
+import PageContent from '~common/ui/PageContent'
 import Back from '~common/Back'
 import Box, { HStack, VStack } from '~common/ui/Box'
 import Text from '~common/ui/Text'
@@ -40,43 +41,45 @@ const Header = ({
       borderBottomWidth={1}
       {...props}
     >
-      <Box minH={children ? 40 : 54} row alignItems="center">
-        {hasBackButton && (
-          <Back onCustomPress={onCustomBackPress} padding>
-            <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
-          </Back>
-        )}
-        <VStack flex pl={hasBackButton ? 0 : 20}>
-          <HStack>
-            <Text
-              accessibilityRole={onTitlePress ? 'button' : 'header'}
-              numberOfLines={1}
-              bold
-              fontSize={fontSize}
-              onPress={onTitlePress}
-              shrink={1}
-            >
-              {title}
-            </Text>
-            {!!detail && (
-              <Text numberOfLines={1} bold fontSize={fontSize} color="grey" shrink={1}>
-                {` ${detail}`}
+      <PageContent>
+        <Box minH={children ? 40 : 54} row alignItems="center">
+          {hasBackButton && (
+            <Back onCustomPress={onCustomBackPress} padding>
+              <FeatherIcon name={isModal ? 'x' : 'arrow-left'} size={20} />
+            </Back>
+          )}
+          <VStack flex pl={hasBackButton ? 0 : 20}>
+            <HStack>
+              <Text
+                accessibilityRole={onTitlePress ? 'button' : 'header'}
+                numberOfLines={1}
+                bold
+                fontSize={fontSize}
+                onPress={onTitlePress}
+                shrink={1}
+              >
+                {title}
+              </Text>
+              {!!detail && (
+                <Text numberOfLines={1} bold fontSize={fontSize} color="grey" shrink={1}>
+                  {` ${detail}`}
+                </Text>
+              )}
+            </HStack>
+            {!!subTitle && (
+              <Text numberOfLines={1} fontSize={13} color="grey">
+                {subTitle}
               </Text>
             )}
-          </HStack>
-          {!!subTitle && (
-            <Text numberOfLines={1} fontSize={13} color="grey">
-              {subTitle}
-            </Text>
+          </VStack>
+          {rightComponent && (
+            <Box justifyContent="center" alignItems="flex-end" overflow="visible">
+              {rightComponent}
+            </Box>
           )}
-        </VStack>
-        {rightComponent && (
-          <Box justifyContent="center" alignItems="flex-end" overflow="visible">
-            {rightComponent}
-          </Box>
-        )}
-      </Box>
-      {children}
+        </Box>
+        {children}
+      </PageContent>
     </Box>
   )
 }

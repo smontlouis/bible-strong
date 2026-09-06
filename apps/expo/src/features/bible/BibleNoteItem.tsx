@@ -48,42 +48,50 @@ const BibleNoteItem = ({ item, onPress, onMenuPress, relationCount, onRelationPr
   const metadataLabel = item.reference ? `${item.reference} - ${relativeDate}` : relativeDate
   const noteTitle = getNoteTitle(item.note, '')
 
+  const hasChips = Boolean(Object.keys(item.note.tags || {}).length || relationCount)
+
   return (
     <Box>
-      <NoteLink onPress={() => onPress(item.noteId)}>
+      <Box row alignItems="center">
         <Box flex>
-          <Box row justifyContent="space-between">
-            <Text color="darkGrey" bold fontSize={11}>
-              {metadataLabel}
-            </Text>
-          </Box>
-          {!!noteTitle && (
-            <Text title fontSize={16}>
-              {noteTitle}
-            </Text>
+          <NoteLink
+            onPress={() => onPress(item.noteId)}
+            style={{ paddingBottom: hasChips ? 8 : 20 }}
+          >
+            <Box flex>
+              <Text color="darkGrey" bold fontSize={11}>
+                {metadataLabel}
+              </Text>
+              {!!noteTitle && (
+                <Text title fontSize={16}>
+                  {noteTitle}
+                </Text>
+              )}
+              {!!item.note.description && item.note.description !== noteTitle && (
+                <Paragraph scale={-3} scaleLineHeight={-1}>
+                  {truncate(item.note.description, 100)}
+                </Paragraph>
+              )}
+            </Box>
+          </NoteLink>
+          {hasChips && (
+            <Box px={20} pb={20}>
+              <EntityChipList
+                tags={item.note.tags}
+                relationCount={relationCount}
+                onRelationPress={onRelationPress}
+              />
+            </Box>
           )}
-          {!!item.note.description && item.note.description !== noteTitle && (
-            <Paragraph scale={-3} scaleLineHeight={-1}>
-              {truncate(item.note.description, 100)}
-            </Paragraph>
-          )}
-          <EntityChipList
-            tags={item.note.tags}
-            relationCount={relationCount}
-            onRelationPress={onRelationPress}
-          />
         </Box>
         <Link
           accessibilityLabel={t('accessibility.options')}
           padding
-          onPress={event => {
-            event?.stopPropagation()
-            onMenuPress(item.noteId)
-          }}
+          onPress={() => onMenuPress(item.noteId)}
         >
           <Icon.Feather name="more-vertical" size={20} color={theme.colors.tertiary} />
         </Link>
-      </NoteLink>
+      </Box>
       <Border marginHorizontal={20} />
     </Box>
   )

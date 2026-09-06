@@ -103,9 +103,9 @@ const VerseComponent = ({
   }
 
   return (
-    <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
-      <Container>
-        <Box row style={{ marginBottom: 10 }} alignItems="center">
+    <Container>
+      <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
+        <Box row style={{ marginBottom: 10 }} pr={32} alignItems="center">
           <Box flex row alignItems="center">
             <HighlightTypeIndicator color={resolvedColor} type={highlightType} size={15} />
             <Text fontSize={14} marginLeft={10} title>
@@ -115,35 +115,38 @@ const VerseComponent = ({
           <DateText style={{ fontSize: 10 }}>
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </DateText>
-          {setSettings && stringIds && (
-            <LinkBox
-              accessibilityLabel={t('accessibility.options')}
-              p={4}
-              ml={10}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              onPress={() =>
-                setSettings({
-                  stringIds,
-                  verseIds,
-                  color,
-                  date,
-                  tags,
-                  version: sourceVersion,
-                })
-              }
-            >
-              <FeatherIcon name="more-vertical" size={20} />
-            </LinkBox>
-          )}
         </Box>
         <Paragraph scale={-2} medium marginBottom={15}>
           {content
             ? truncate(removeBreakLines(content), 200)
             : t('bibleVerse.textUnavailableInstalled')}
         </Paragraph>
-        <EntityChipList tags={tags} />
-      </Container>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      <EntityChipList tags={tags} />
+      {setSettings && stringIds && (
+        <LinkBox
+          accessibilityLabel={t('accessibility.options')}
+          position="absolute"
+          top={0}
+          right={0}
+          p={4}
+          ml={10}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          onPress={() =>
+            setSettings({
+              stringIds,
+              verseIds,
+              color,
+              date,
+              tags,
+              version: sourceVersion,
+            })
+          }
+        >
+          <FeatherIcon name="more-vertical" size={20} />
+        </LinkBox>
+      )}
+    </Container>
   )
 }
 

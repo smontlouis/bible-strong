@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import React from 'react'
 import { Linking, ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -58,7 +59,10 @@ const StrongEntityPage = ({
   return (
     <ScrollView
       style={{ flex: 1 }}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 }}
+      contentContainerStyle={[
+        pageContentStyle,
+        { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+      ]}
     >
       <StrongEntitySummaryCard
         entity={entity}

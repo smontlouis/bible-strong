@@ -1,3 +1,4 @@
+import PageContent from '~common/ui/PageContent'
 import { Global, useTheme } from '@emotion/react'
 import {
   BottomSheetFlatList,
@@ -48,6 +49,12 @@ const SheetContext = React.createContext<SheetContextValue>({
   hasFooter: false,
   setFooterHeight: () => {},
 })
+
+const useSheetFooterInset = () => {
+  const { footerHeight } = React.useContext(SheetContext)
+  const insets = useSafeAreaInsets()
+  return footerHeight + insets.bottom
+}
 
 const toExpoSnapPoint = (snapPoint: SheetSnapPoint): string | number | null => {
   if (snapPoint === 'auto') return null
@@ -265,46 +272,48 @@ const SheetHeader = ({
   rightComponent,
 }: SheetHeaderProps) => (
   <Box borderColor="border" borderBottomWidth={1}>
-    {(title || subTitle || hasBackButton || leftComponent || rightComponent) && (
-      <Box minH={54} row alignItems="center">
-        {hasBackButton ? (
-          <Back
-            onCustomPress={onBackPress}
-            style={{ width: 54, minHeight: 54, alignItems: 'center', justifyContent: 'center' }}
-          >
-            <FeatherIcon name="arrow-left" size={20} />
-          </Back>
-        ) : (
-          leftComponent
-        )}
-        <Box
-          flex
-          paddingLeft={hasBackButton || leftComponent ? 0 : 20}
-          paddingRight={rightComponent ? 0 : 20}
-          justifyContent="center"
-          alignItems={centerTitle ? 'center' : undefined}
-        >
-          {!!title && (
-            <FadingText
-              accessibilityRole="header"
-              numberOfLines={1}
-              bold
-              fontSize={16}
-              textAlign={centerTitle ? 'center' : 'left'}
+    <PageContent>
+      {(title || subTitle || hasBackButton || leftComponent || rightComponent) && (
+        <Box minH={54} row alignItems="center">
+          {hasBackButton ? (
+            <Back
+              onCustomPress={onBackPress}
+              style={{ width: 54, minHeight: 54, alignItems: 'center', justifyContent: 'center' }}
             >
-              {title}
-            </FadingText>
+              <FeatherIcon name="arrow-left" size={20} />
+            </Back>
+          ) : (
+            leftComponent
           )}
-          {!!subTitle && (
-            <Text fontSize={13} color="grey" textAlign={centerTitle ? 'center' : 'left'}>
-              {subTitle}
-            </Text>
-          )}
+          <Box
+            flex
+            paddingLeft={hasBackButton || leftComponent ? 0 : 20}
+            paddingRight={rightComponent ? 0 : 20}
+            justifyContent="center"
+            alignItems={centerTitle ? 'center' : undefined}
+          >
+            {!!title && (
+              <FadingText
+                accessibilityRole="header"
+                numberOfLines={1}
+                bold
+                fontSize={16}
+                textAlign={centerTitle ? 'center' : 'left'}
+              >
+                {title}
+              </FadingText>
+            )}
+            {!!subTitle && (
+              <Text fontSize={13} color="grey" textAlign={centerTitle ? 'center' : 'left'}>
+                {subTitle}
+              </Text>
+            )}
+          </Box>
+          {rightComponent}
         </Box>
-        {rightComponent}
-      </Box>
-    )}
-    {children}
+      )}
+      {children}
+    </PageContent>
   </Box>
 )
 
@@ -404,6 +413,7 @@ const useSheetInternal = () => ({
 export default Sheet
 
 export {
+  useSheetFooterInset,
   Sheet,
   BottomSheetModalProvider as SheetProvider,
   SheetView,

@@ -1,3 +1,4 @@
+import PageContent from '~common/ui/PageContent'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React, { memo, useCallback } from 'react'
@@ -149,13 +150,13 @@ const EditHeader = ({
 
   return (
     <HeaderBox>
-      <Box row height={54} center>
+      <PageContent row height={54} center>
         <Box flex justifyContent="center">
           <Link onPress={setReadOnly} style={{ marginRight: 15 }}>
             <ValidateIcon name="check" size={25} />
           </Link>
         </Box>
-      </Box>
+      </PageContent>
     </HeaderBox>
   )
 }

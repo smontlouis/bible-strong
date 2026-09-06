@@ -1,3 +1,4 @@
+import { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
 import { useEffect, useRef } from 'react'
 
 import { MenuView, type MenuAction } from '~common/ui/MenuView'
@@ -455,7 +456,13 @@ const Header = ({
       >
         {isFormSheet && <FormSheetHandle />}
 
-        <HStack maxWidth={830} mx="auto" alignItems="center" width="100%" overflow="visible">
+        <HStack
+          maxWidth={PAGE_CONTENT_MAX_WIDTH}
+          mx="auto"
+          alignItems="center"
+          width="100%"
+          overflow="visible"
+        >
           {hasBackButton && (
             <Box position="absolute" left={0} top={5} zIndex={2}>
               <Back
@@ -517,7 +524,7 @@ const Header = ({
       >
         {isFormSheet && <FormSheetHandle />}
 
-        <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
+        <HStack maxWidth={PAGE_CONTENT_MAX_WIDTH} mx="auto" alignItems="center" width="100%">
           {hasBackButton && (
             <Back
               onGoBack={() => {
@@ -565,7 +572,7 @@ const Header = ({
     >
       {isFormSheet && <FormSheetHandle />}
 
-      <HStack maxWidth={830} mx="auto" alignItems="center" width="100%">
+      <HStack maxWidth={PAGE_CONTENT_MAX_WIDTH} mx="auto" alignItems="center" width="100%">
         {hasBackButton ? (
           <Back
             onGoBack={() => {

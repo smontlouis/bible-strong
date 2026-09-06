@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import React, { useEffect, useRef } from 'react'
 import { FlatList } from 'react-native'
 import { useSelector } from 'react-redux'
@@ -299,6 +300,7 @@ const WordAnnotationsScreen = () => {
     if (queryState.view === 'verse') {
       return (
         <FlatList
+          contentContainerStyle={pageContentStyle}
           data={groupedByVerse}
           keyExtractor={item => item.verseKey}
           renderItem={({ item }) => (
@@ -318,6 +320,7 @@ const WordAnnotationsScreen = () => {
     if (queryState.view === 'date') {
       return (
         <FlatList
+          contentContainerStyle={pageContentStyle}
           data={groupedByDate}
           keyExtractor={item => item.date}
           renderItem={({ item }) => (
@@ -337,6 +340,7 @@ const WordAnnotationsScreen = () => {
     // Flat list
     return (
       <FlatList
+        contentContainerStyle={pageContentStyle}
         data={annotationsList}
         keyExtractor={item => item.id}
         renderItem={({ item }) => renderAnnotationCard(item)}

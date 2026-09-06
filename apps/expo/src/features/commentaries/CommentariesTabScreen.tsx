@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import { useQuery } from '@tanstack/react-query'
 import { MenuView } from '~common/ui/MenuView'
 import React, { useEffect } from 'react'
@@ -225,7 +226,7 @@ const CommentariesTabScreen = ({
 
       <ScrollView
         style={{ backgroundColor: theme.colors.lightGrey }}
-        contentContainerStyle={{ paddingBottom: scrollBottomInset }}
+        contentContainerStyle={[pageContentStyle, { paddingBottom: scrollBottomInset }]}
         scrollIndicatorInsets={{ right: 1 }}
       >
         <>

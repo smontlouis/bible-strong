@@ -1,17 +1,20 @@
 import { getDefaultStore } from 'jotai/vanilla'
 import { useAtomValue } from 'jotai/react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useWindowDimensions } from 'react-native'
 import { SharedValue } from 'react-native-reanimated'
 import { resetTabAnimationTriggerAtom } from '~state/app'
 import {
   activeGroupIdAtom,
+  activeTabIdAtom,
   activeTabIndexAtom,
   appSwitcherModeAtom,
   tabGroupsAtom,
   tabsAtomsAtom,
   tabsCountAtom,
 } from '~state/tabs'
+
+import { useResponsiveWorkspace } from './useResponsiveWorkspace'
 
 /**
  * Side-effects that keep SharedValues in sync with Jotai atoms.
@@ -24,6 +27,8 @@ export const useProviderEffects = ({
   pagerTranslateX,
   pagerScrollX,
   tabsCountShared,
+  tabPreviewCarousel,
+  createGroupPageIsFullyVisible,
 }: {
   activeTabPreview: {
     index: SharedValue<number>
@@ -41,8 +46,10 @@ export const useProviderEffects = ({
   pagerTranslateX: SharedValue<number>
   pagerScrollX: SharedValue<number>
   tabsCountShared: SharedValue<number>
+  tabPreviewCarousel: { opacity: SharedValue<number>; translateY: SharedValue<number> }
+  createGroupPageIsFullyVisible: SharedValue<boolean>
 }) => {
-  const { width } = useWindowDimensions()
+  const { width, height } = useWindowDimensions()
 
   // Sync tabsCount Jotai atom -> SharedValue (worklets can't read Jotai)
   const tabsCount = useAtomValue(tabsCountAtom)
@@ -54,6 +61,38 @@ export const useProviderEffects = ({
   const appSwitcherMode = useAtomValue(appSwitcherModeAtom)
   const groups = useAtomValue(tabGroupsAtom)
   const activeGroupId = useAtomValue(activeGroupIdAtom)
+  const activeTabId = useAtomValue(activeTabIdAtom)
+  const activeIndex = useAtomValue(activeTabIndexAtom)
+  const isWide = useResponsiveWorkspace()
+  const wasWide = useRef(isWide)
+
+  // Desktop reads the selected atom directly. Keep the mobile animation state
+  // ready when resizing or rotating back, including after group/tab deletion.
+  useEffect(() => {
+    const shouldSync = isWide || wasWide.current
+    wasWide.current = isWide
+    if (!shouldSync) return
+    getDefaultStore().set(appSwitcherModeAtom, activeTabId ? 'view' : 'list')
+    activeTabScreen.tabId.set(activeTabId || null)
+    activeTabScreen.opacity.set(activeTabId ? 1 : 0)
+    activeTabPreview.index.set(activeIndex)
+    activeTabPreview.animationProgress.set(activeTabId ? 1 : 0)
+    activeTabPreview.zIndex.set(1)
+    activeTabPreview.opacity.set(0)
+    tabPreviewCarousel.opacity.set(0)
+    tabPreviewCarousel.translateY.set(height)
+    createGroupPageIsFullyVisible.set(false)
+    const groupIndex = Math.max(
+      0,
+      groups.findIndex(group => group.id === activeGroupId)
+    )
+    activeGroupIndex.set(groupIndex)
+    pagerTranslateX.set(-groupIndex * width)
+    pagerScrollX.set(groupIndex * width)
+    // SharedValue containers are recreated by the provider, but their members are stable.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isWide, activeTabId, activeIndex, activeGroupId, groups.length, width, height])
+
   useEffect(() => {
     if (appSwitcherMode !== 'list') return
 

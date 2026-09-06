@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import React from 'react'
 import { LegendList, LegendListRef } from '@legendapp/list'
 
@@ -151,6 +152,7 @@ const PlanSectionList = ({
 
   return (
     <LegendList
+      contentContainerStyle={pageContentStyle}
       ref={listRef}
       data={flattenedData}
       renderItem={renderItem}

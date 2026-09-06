@@ -1,3 +1,4 @@
+import PageContent from '~common/ui/PageContent'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 
@@ -22,20 +23,22 @@ interface PericopeHeaderProps {
 
 function PericopeHeader({ hasBackButton, title }: PericopeHeaderProps) {
   return (
-    <HeaderBox row overflow="visible">
-      <Box justifyContent="center">
-        {hasBackButton && (
-          <Back padding>
-            <FeatherIcon name="arrow-left" size={20} />
-          </Back>
-        )}
-      </Box>
-      <Box center flex>
-        <Text fontSize={16} title marginLeft={10} marginRight={10}>
-          {title}
-        </Text>
-      </Box>
-      <Box width={30} />
+    <HeaderBox overflow="visible">
+      <PageContent row flex={1} alignItems="center">
+        <Box justifyContent="center">
+          {hasBackButton && (
+            <Back padding>
+              <FeatherIcon name="arrow-left" size={20} />
+            </Back>
+          )}
+        </Box>
+        <Box center flex>
+          <Text fontSize={16} title marginLeft={10} marginRight={10}>
+            {title}
+          </Text>
+        </Box>
+        <Box width={30} />
+      </PageContent>
     </HeaderBox>
   )
 }

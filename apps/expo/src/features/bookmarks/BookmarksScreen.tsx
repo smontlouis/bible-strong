@@ -1,3 +1,4 @@
+import { getBookmarkVerse } from './bookmarkVerse'
 import React, { useState, useRef } from 'react'
 import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
@@ -26,10 +27,11 @@ const getBookName = (bookNumber: number): string => {
 
 const formatReference = (bookmark: Bookmark): string => {
   const bookName = getBookName(bookmark.book)
-  if (bookmark.verse === undefined) {
+  const verse = getBookmarkVerse(bookmark.verse)
+  if (verse === undefined) {
     return `${bookName} ${bookmark.chapter}`
   }
-  return `${bookName} ${bookmark.chapter}:${bookmark.verse}`
+  return `${bookName} ${bookmark.chapter}:${verse}`
 }
 
 type BookmarkItemProps = {
@@ -84,13 +86,14 @@ const BookmarksScreen = ({ isFormSheet = false }: BookmarksScreenProps) => {
   }
 
   const handleNavigate = (bookmark: Bookmark) => {
+    const verse = getBookmarkVerse(bookmark.verse)
     pushRouteOnce({
       pathname: '/bible-view',
       params: {
         contextDisplayMode: 'focused',
         book: String(bookmark.book),
         chapter: String(bookmark.chapter),
-        verse: bookmark.verse !== undefined ? String(bookmark.verse) : undefined,
+        verse: verse !== undefined ? String(verse) : undefined,
         ...(bookmark.version && { version: bookmark.version }),
       },
     })

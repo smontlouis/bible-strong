@@ -1,5 +1,6 @@
+import { pageContentStyle } from './PageContent'
 import styled from '@emotion/native'
-import React, { useMemo } from 'react'
+import React from 'react'
 import {
   FlatList as RNFlatList,
   FlatListProps,
@@ -20,7 +21,6 @@ const FlatList = styled.FlatList<StyledFlatListProps>(({ theme, orientation, bg 
   backgroundColor: bg ? theme.colors[bg as keyof typeof theme.colors] || bg : theme.colors.reverse,
   borderTopLeftRadius: 30,
   borderTopRightRadius: 30,
-  maxWidth: orientation.maxWidth,
   width: '100%',
   marginLeft: 'auto',
   marginRight: 'auto',
@@ -47,14 +47,12 @@ const AnimatedFlatList = <T,>({
 }: AnimatedFlatListProps<T>) => {
   const insets = useSafeAreaInsets()
   const orientation = useDeviceOrientation()
-  const style = useMemo(
-    () => ({
-      paddingBottom: 10 + insets.bottom,
-      ...StyleSheet.flatten(contentContainerStyle),
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
+  const style = {
+    ...pageContentStyle,
+    paddingBottom: 10 + insets.bottom,
+    ...StyleSheet.flatten(contentContainerStyle),
+  }
+
   return (
     <FlatList
       orientation={orientation}

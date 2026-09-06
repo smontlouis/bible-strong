@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import styled from '@emotion/native'
 import { Sheet, type SheetRef } from '~common/sheet'
 import React, { useEffect, useRef, useState } from 'react'
@@ -241,7 +242,7 @@ const TagsScreen = ({ isFormSheet = false }: TagsScreenProps) => {
             data={result}
             renderItem={({ item }) => <TagItem setOpen={setOpen} item={item} />}
             keyExtractor={item => item.id}
-            contentContainerStyle={{ paddingBottom: 70 }}
+            contentContainerStyle={[pageContentStyle, { paddingBottom: 70 }]}
           />
         ) : (
           <Empty

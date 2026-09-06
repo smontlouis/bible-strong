@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import React from 'react'
@@ -93,6 +94,7 @@ const ConcordanceScreen = () => {
       {isPending && <Loading />}
       {isSuccess && (
         <FlatList
+          contentContainerStyle={pageContentStyle}
           style={{ marginTop: 5, padding: 20 }}
           removeClippedSubviews
           data={data}

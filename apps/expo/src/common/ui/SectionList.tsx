@@ -1,5 +1,6 @@
+import { pageContentStyle } from './PageContent'
 import styled from '@emotion/native'
-import React, { useMemo } from 'react'
+import React from 'react'
 import {
   SectionList as RNSectionList,
   SectionListProps,
@@ -18,7 +19,6 @@ const SectionList = styled.SectionList(
     backgroundColor: theme?.colors.reverse,
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    maxWidth: orientation.maxWidth,
     width: '100%',
     marginLeft: 'auto',
     marginRight: 'auto',
@@ -42,14 +42,12 @@ const AnimatedSectionList = <T, S = unknown>({
 }) => {
   const orientation = useDeviceOrientation()
   const insets = useSafeAreaInsets()
-  const style = useMemo(
-    () => ({
-      paddingBottom: 10 + insets.bottom,
-      ...StyleSheet.flatten(contentContainerStyle),
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  )
+  const style = {
+    ...pageContentStyle,
+    paddingBottom: 10 + insets.bottom,
+    ...StyleSheet.flatten(contentContainerStyle),
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <SectionList

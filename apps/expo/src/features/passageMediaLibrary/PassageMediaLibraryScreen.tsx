@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { SectionList, useWindowDimensions } from 'react-native'
@@ -87,14 +88,17 @@ const PassageMediaLibraryScreen = () => {
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{
-          width: '100%',
-          maxWidth: contentWidth,
-          alignSelf: 'center',
-          paddingHorizontal: 20,
-          paddingTop: 24,
-          paddingBottom: 48,
-        }}
+        contentContainerStyle={[
+          pageContentStyle,
+          {
+            width: '100%',
+            maxWidth: contentWidth,
+            alignSelf: 'center',
+            paddingHorizontal: 20,
+            paddingTop: 24,
+            paddingBottom: 48,
+          },
+        ]}
         ListHeaderComponent={
           <VStack mb={22} gap={5}>
             <Text title fontSize={25} lineHeight={31}>

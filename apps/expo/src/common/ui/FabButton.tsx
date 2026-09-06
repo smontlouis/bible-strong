@@ -1,3 +1,5 @@
+import Box from './Box'
+import PageContent from './PageContent'
 import React from 'react'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
@@ -41,21 +43,31 @@ const Fab = ({
 }: FabProps) => {
   const { bottomBarHeight } = useBottomBarHeightInTab()
   return (
-    <StyledLink
-      route={route}
-      params={params}
-      onPress={onPress}
-      accessibilityLabel={accessibilityLabel}
-      style={{
-        bottom: bottomBarHeight + 30,
-      }}
+    <Box
+      position="absolute"
+      left={0}
+      right={0}
+      bottom={bottomBarHeight + 30}
+      pointerEvents="box-none"
     >
-      {Component ? (
-        <Component color="white" />
-      ) : (
-        <StyledIcon name={icon as keyof typeof Icon.Feather.glyphMap} size={18} />
-      )}
-    </StyledLink>
+      <PageContent height={50} pointerEvents="box-none">
+        <StyledLink
+          route={route}
+          params={params}
+          onPress={onPress}
+          accessibilityLabel={accessibilityLabel}
+          style={{
+            bottom: 0,
+          }}
+        >
+          {Component ? (
+            <Component color="white" />
+          ) : (
+            <StyledIcon name={icon as keyof typeof Icon.Feather.glyphMap} size={18} />
+          )}
+        </StyledLink>
+      </PageContent>
+    </Box>
   )
 }
 

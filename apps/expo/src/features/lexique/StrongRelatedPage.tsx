@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import React from 'react'
 import { ScrollView } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -26,7 +27,10 @@ const StrongRelatedPage = ({ entry, readingTypography, onOpenStrong }: Props) =>
   return (
     <ScrollView
       style={{ flex: 1 }}
-      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 }}
+      contentContainerStyle={[
+        pageContentStyle,
+        { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+      ]}
     >
       <StrongEyebrow>
         {entry.original} · {entry.gloss}

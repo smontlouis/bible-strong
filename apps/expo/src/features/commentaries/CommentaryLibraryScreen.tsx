@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import {
   COMMENTARY_CATALOG,
   type CommentaryCatalogEntry,
@@ -216,7 +217,7 @@ const CommentaryLibraryScreen = () => {
           sections={sections}
           stickySectionHeadersEnabled
           keyExtractor={item => createCommentaryProjectionId(item.entry.id, item.language)}
-          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+          contentContainerStyle={[pageContentStyle, { paddingBottom: insets.bottom + 20 }]}
           renderSectionHeader={({ section }) => (
             <Box px={20} py={11} bg="lightGrey" borderBottomWidth={1} borderColor="border">
               <Text bold color="grey" fontSize={13}>

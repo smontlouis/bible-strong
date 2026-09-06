@@ -23,8 +23,8 @@ export const LinkBox = Box.withComponent(Link)
 
 const StudyLink = styled(Link)(({ theme }: { theme: Theme }) => ({
   position: 'relative',
-  flexDirection: 'row',
-  margin: 10,
+  flexDirection: 'column',
+  flex: 1,
 }))
 
 export type StudyItemProps = {
@@ -55,22 +55,22 @@ const StudyItem = ({
 
   return (
     <Box width={r(['50%', '50%', '33%', '33%'])}>
-      <StudyLink
-        {...(onPress
-          ? { onPress: () => onPress(study.id) }
-          : {
-              route: 'EditStudy',
-              params: { studyId: study.id },
-            })}
+      <Box
+        m={10}
+        backgroundColor="reverse"
+        lightShadow
+        padding={10}
+        height={230}
+        borderRadius={8}
+        position="relative"
       >
-        <Box
-          flex
-          backgroundColor="reverse"
-          lightShadow
-          padding={10}
-          height={230}
-          borderRadius={8}
-          position="relative"
+        <StudyLink
+          {...(onPress
+            ? { onPress: () => onPress(study.id) }
+            : {
+                route: 'EditStudy',
+                params: { studyId: study.id },
+              })}
         >
           <Text color="darkGrey" fontSize={10} marginTop={10}>
             {t('Il y a {{formattedDate}}', { formattedDate })}
@@ -97,28 +97,27 @@ const StudyItem = ({
               </Text>
             </>
           )}
-
-          <Box marginTop="auto">
-            <EntityChipList
-              limit={1}
-              tags={study.tags}
-              relationCount={relationCount}
-              onRelationPress={onRelationPress}
-            />
-          </Box>
-          {!!setStudySettings && (
-            <LinkBox
-              position="absolute"
-              right={0}
-              top={0}
-              p={10}
-              onPress={() => setStudySettings(study.id)}
-            >
-              <FeatherIcon color="tertiary" name="more-vertical" size={20} />
-            </LinkBox>
-          )}
+        </StudyLink>
+        <Box marginTop="auto">
+          <EntityChipList
+            limit={1}
+            tags={study.tags}
+            relationCount={relationCount}
+            onRelationPress={onRelationPress}
+          />
         </Box>
-      </StudyLink>
+        {!!setStudySettings && (
+          <LinkBox
+            position="absolute"
+            right={0}
+            top={0}
+            p={10}
+            onPress={() => setStudySettings(study.id)}
+          >
+            <FeatherIcon color="tertiary" name="more-vertical" size={20} />
+          </LinkBox>
+        )}
+      </Box>
     </Box>
   )
 }

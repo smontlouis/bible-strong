@@ -1,10 +1,16 @@
 import { useAtomValue } from 'jotai/react'
 import React, { useEffect, useRef, useState } from 'react'
 
+import { useTranslation } from 'react-i18next'
 import { useWindowDimensions } from 'react-native'
 
 import { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
-import Box, { AnimatedBox } from '~common/ui/Box'
+import Text from '~common/ui/Text'
+import { FeatherIcon } from '~common/ui/Icon'
+import { useOpenInNewTab } from '../utils/useOpenInNewTab'
+import WorkspaceSidebar from '../WorkspaceSidebar'
+import { useResponsiveWorkspace } from '../utils/useResponsiveWorkspace'
+import Box, { AnimatedBox, TouchableBox } from '~common/ui/Box'
 import BottomTabBar from '~features/app-switcher/BottomTabBar/BottomTabBar'
 import { Home } from '~features/home/HomeScreen'
 import { More } from '~features/settings/MoreScreen'
@@ -27,14 +33,64 @@ const DRAWER_WIDTH_PERCENT = 0.95
 const MAX_DRAWER_WIDTH = 450
 
 const AppSwitcherScreen = ({ openHome, openMenu }: AppSwitcherScreenFuncs) => {
+  const isWide = useResponsiveWorkspace()
+  const [sidebarHidden, setSidebarHidden] = useState(false)
+  const { t } = useTranslation()
+  const tabsCount = useAtomValue(tabsCountAtom)
+  const openInNewTab = useOpenInNewTab()
+
   return (
     <TabContextProvider>
-      <Box flex={1} bg="lightGrey">
-        <TabGroupPager />
-        <CachedTabScreens />
-        <SharedBibleDOM />
-        <TabPreviewCarousel />
-        <BottomTabBar openMenu={openMenu} openHome={openHome} />
+      <Box row flex={1} bg="lightGrey">
+        {isWide && !sidebarHidden && (
+          <WorkspaceSidebar
+            onCollapse={() => setSidebarHidden(true)}
+            openHome={openHome}
+            openMenu={openMenu}
+          />
+        )}
+        <Box flex={1} minWidth={0} overflow="hidden">
+          {isWide && sidebarHidden && (
+            <Box row bg="reverse" alignItems="center" px={8}>
+              <TouchableBox
+                size={44}
+                center
+                onPress={() => setSidebarHidden(false)}
+                accessibilityRole="button"
+                accessibilityLabel={t('workspace.showSidebar')}
+              >
+                <FeatherIcon name="sidebar" size={19} color="grey" />
+              </TouchableBox>
+              <Text fontSize={13} color="grey">
+                Bible Strong
+              </Text>
+            </Box>
+          )}
+          <Box flex={1} overflow="hidden">
+            {!isWide && <TabGroupPager />}
+            {isWide && tabsCount === 0 && (
+              <Box flex={1} center bg="reverse" gap={16}>
+                <FeatherIcon name="layers" size={32} color="grey" />
+                <Text color="grey">{t('tabs.noTabs')}</Text>
+                <TouchableBox
+                  px={20}
+                  minHeight={44}
+                  center
+                  bg="primary"
+                  borderRadius={10}
+                  onPress={() => openInNewTab(undefined, { autoRedirect: true })}
+                  accessibilityRole="button"
+                >
+                  <Text color="white">{t('tabs.create')}</Text>
+                </TouchableBox>
+              </Box>
+            )}
+            <CachedTabScreens />
+            <SharedBibleDOM />
+            {!isWide && <TabPreviewCarousel />}
+            {!isWide && <BottomTabBar openMenu={openMenu} openHome={openHome} />}
+          </Box>
+        </Box>
       </Box>
     </TabContextProvider>
   )

@@ -1,3 +1,4 @@
+import PageContent from '~common/ui/PageContent'
 import styled from '@emotion/native'
 import { useAtom } from 'jotai/react'
 import type { JSONValue } from 'expo/build/dom/dom.types'
@@ -405,80 +406,82 @@ const StudyFooter = ({ dispatchToWebView, onInsertEntity, activeFormats }: Study
   const closeMenu = () => setOpenMenu(null)
 
   return (
-    <Box row height={50} backgroundColor="reverse" alignItems="center" overflow="visible">
-      {openMenu && (
-        <TouchableBox
-          position="absolute"
-          left={-1000}
-          right={-1000}
-          bottom={0}
-          top={-1000}
-          zIndex={1}
-          onPress={closeMenu}
-        />
-      )}
-      <Box row flex center paddingLeft={10} overflow="visible">
-        <SelectHeading
-          dispatchToWebView={dispatchToWebView}
-          activeFormats={activeFormats}
-          isOpen={openMenu === 'heading'}
-          onToggle={() => toggleMenu('heading')}
-          onClose={closeMenu}
-        />
-        <FormatIcon
-          isSelected={activeFormats.bold}
-          onPress={() =>
-            dispatchToWebView('TOGGLE_FORMAT', {
-              type: 'BOLD',
-              value: !activeFormats.bold,
-            })
-          }
-          style={{ marginLeft: 10, marginRight: 10 }}
-        >
-          <FeatherIcon color="primary" name="bold" size={16} />
-        </FormatIcon>
-        <FormatIcon
-          isSelected={activeFormats.italic}
-          onPress={() =>
-            dispatchToWebView('TOGGLE_FORMAT', {
-              type: 'ITALIC',
-              value: !activeFormats.italic,
-            })
-          }
-          style={{ marginRight: 10 }}
-        >
-          <FeatherIcon color="primary" name="italic" size={16} />
-        </FormatIcon>
-        <FormatIcon
-          isSelected={activeFormats.underline}
-          onPress={() =>
-            dispatchToWebView('TOGGLE_FORMAT', {
-              type: 'UNDERLINE',
-              value: !activeFormats.underline,
-            })
-          }
-          style={{ marginRight: 10 }}
-        >
-          <FeatherIcon color="primary" name="underline" size={16} />
-        </FormatIcon>
-        <SelectMore
-          dispatchToWebView={dispatchToWebView}
-          activeFormats={activeFormats}
-          isOpen={openMenu === 'more'}
-          onToggle={() => toggleMenu('more')}
-          onClose={closeMenu}
-        />
-        <Box marginLeft="auto" />
-        <SelectBlock
-          onInsertEntity={onInsertEntity}
-          isOpen={openMenu === 'block'}
-          onToggle={() => toggleMenu('block')}
-          onClose={closeMenu}
-        />
-      </Box>
-      <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
-        <MaterialIcon name="keyboard-hide" size={20} color="primary" />
-      </Link>
+    <Box height={50} backgroundColor="reverse" overflow="visible">
+      <PageContent row flex={1} alignItems="center" overflow="visible">
+        {openMenu && (
+          <TouchableBox
+            position="absolute"
+            left={-1000}
+            right={-1000}
+            bottom={0}
+            top={-1000}
+            zIndex={1}
+            onPress={closeMenu}
+          />
+        )}
+        <Box row flex center paddingLeft={10} overflow="visible">
+          <SelectHeading
+            dispatchToWebView={dispatchToWebView}
+            activeFormats={activeFormats}
+            isOpen={openMenu === 'heading'}
+            onToggle={() => toggleMenu('heading')}
+            onClose={closeMenu}
+          />
+          <FormatIcon
+            isSelected={activeFormats.bold}
+            onPress={() =>
+              dispatchToWebView('TOGGLE_FORMAT', {
+                type: 'BOLD',
+                value: !activeFormats.bold,
+              })
+            }
+            style={{ marginLeft: 10, marginRight: 10 }}
+          >
+            <FeatherIcon color="primary" name="bold" size={16} />
+          </FormatIcon>
+          <FormatIcon
+            isSelected={activeFormats.italic}
+            onPress={() =>
+              dispatchToWebView('TOGGLE_FORMAT', {
+                type: 'ITALIC',
+                value: !activeFormats.italic,
+              })
+            }
+            style={{ marginRight: 10 }}
+          >
+            <FeatherIcon color="primary" name="italic" size={16} />
+          </FormatIcon>
+          <FormatIcon
+            isSelected={activeFormats.underline}
+            onPress={() =>
+              dispatchToWebView('TOGGLE_FORMAT', {
+                type: 'UNDERLINE',
+                value: !activeFormats.underline,
+              })
+            }
+            style={{ marginRight: 10 }}
+          >
+            <FeatherIcon color="primary" name="underline" size={16} />
+          </FormatIcon>
+          <SelectMore
+            dispatchToWebView={dispatchToWebView}
+            activeFormats={activeFormats}
+            isOpen={openMenu === 'more'}
+            onToggle={() => toggleMenu('more')}
+            onClose={closeMenu}
+          />
+          <Box marginLeft="auto" />
+          <SelectBlock
+            onInsertEntity={onInsertEntity}
+            isOpen={openMenu === 'block'}
+            onToggle={() => toggleMenu('block')}
+            onClose={closeMenu}
+          />
+        </Box>
+        <Link paddingSmall onPress={() => dispatchToWebView('BLUR_EDITOR')}>
+          <MaterialIcon name="keyboard-hide" size={20} color="primary" />
+        </Link>
+      </PageContent>
     </Box>
   )
 }

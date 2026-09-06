@@ -1,3 +1,4 @@
+import { Platform } from 'react-native'
 import { useSheetInternal } from '~common/sheet'
 import { useTheme } from '@emotion/react'
 import { useState } from 'react'
@@ -60,6 +61,7 @@ export default function NoteEditorSheet({
 
   return (
     <NoteEditorDOMComponent
+      standaloneDocument={Platform.OS !== 'web'}
       encodedDefaultTitle={encodeURIComponent(defaultTitle)}
       encodedDefaultDescription={encodeURIComponent(defaultDescription)}
       resetKey={resetKey}

@@ -3,13 +3,15 @@ import { Sheet, SheetView, type SheetRef } from '~common/sheet'
 import { useAtomValue, useSetAtom } from 'jotai/react'
 import React, { memo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert } from 'react-native'
+import { Alert, type StyleProp, type ViewStyle } from 'react-native'
 import Box, { TouchableBox } from '~common/ui/Box'
 import { useDeleteGroup } from '../../../state/tabGroups'
 import { TabGroup, closeAllTabsAtom, tabGroupsAtom } from '../../../state/tabs'
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 
 interface GroupActionsPopoverProps {
+  triggerStyle?: StyleProp<ViewStyle>
+  onOpen?: () => void
   accessibilityLabel: string
   children: React.ReactNode
   group: TabGroup
@@ -20,6 +22,8 @@ interface GroupActionsPopoverProps {
 
 const GroupActionsPopover = memo(
   ({
+    triggerStyle,
+    onOpen,
     accessibilityLabel,
     children,
     group,
@@ -44,6 +48,7 @@ const GroupActionsPopover = memo(
     }
 
     const handleEdit = () => {
+      closeSheet()
       onEditGroup()
     }
 
@@ -82,7 +87,11 @@ const GroupActionsPopover = memo(
     return (
       <>
         <TouchableBox
-          onPress={() => sheetRef.current?.present()}
+          style={triggerStyle}
+          onPress={() => {
+            onOpen?.()
+            sheetRef.current?.present()
+          }}
           accessibilityRole="button"
           accessibilityLabel={accessibilityLabel}
         >

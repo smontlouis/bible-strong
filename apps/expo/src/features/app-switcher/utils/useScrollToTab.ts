@@ -14,7 +14,7 @@ const useScrollToTab = () => {
     const { animated = false } = options
 
     const flashListRef = flashListRefs.getActiveRef()
-    await flashListRef.current?.scrollToIndex({ index, animated, viewOffset: -200 })
+    await flashListRef?.current?.scrollToIndex({ index, animated, viewOffset: -200 })
   }
 
   return scrollToTab

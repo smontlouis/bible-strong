@@ -2061,5 +2061,9 @@
   "offlineSetup.language.en": "Anglais",
   "resource.status.onlineAvailable": "Disponible en ligne",
   "resource.status.onlineTemporary": "Accès en ligne temporairement indisponible",
-  "resource.status.offlineInstalled": "Copie hors ligne installée"
+  "resource.status.offlineInstalled": "Copie hors ligne installée",
+  "workspace.hideSidebar": "Masquer la barre latérale",
+  "workspace.showSidebar": "Afficher la barre latérale",
+  "workspace.groupActions": "Actions du groupe {{name}}",
+  "workspace.closeTab": "Fermer {{title}}"
 }

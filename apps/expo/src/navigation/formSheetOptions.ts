@@ -12,9 +12,6 @@ const defaultFormSheetOptions = {
   presentation: 'formSheet',
   sheetGrabberVisible: true,
   sheetExpandsWhenScrolledToEdge: false,
-  ...(Platform.OS === 'android' && {
-    sheetCornerRadius: 24,
-  }),
 } satisfies StackScreenOptions
 
 export const createFormSheetOptions = (
@@ -28,6 +25,15 @@ export const createFormSheetOptions = (
 
   if (Platform.OS === 'android') {
     return {}
+  }
+
+  if (Platform.OS === 'web') {
+    return {
+      ...restOverrides,
+      presentation: 'transparentModal',
+      animation: 'none',
+      contentStyle: { backgroundColor: 'transparent' },
+    }
   }
 
   return {

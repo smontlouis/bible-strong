@@ -1,3 +1,4 @@
+import PageContent from '~common/ui/PageContent'
 import styled from '@emotion/native'
 import * as Icon from '@expo/vector-icons'
 import { MenuView } from '~common/ui/MenuView'
@@ -56,55 +57,57 @@ const TimelineHeader = ({
   const topInset = isFormSheet ? 0 : insets.top
 
   return (
-    <HeaderBox row topInset={topInset}>
-      <Box center>
-        {hasBackButton && (
-          <Back padding onCustomPress={onBackPress}>
-            <FeatherIcon name="arrow-left" size={20} />
-          </Back>
-        )}
-      </Box>
-      <Box flex center>
-        <Text title fontSize={fontSize}>
-          {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
-        </Text>
-      </Box>
-      <Box center row>
-        <TouchableBox
-          center
-          height={60}
-          width={44}
-          onPress={onSearchPress}
-          accessibilityRole="button"
-          accessibilityLabel={t('Recherche')}
-        >
-          <FeatherIcon name="search" size={19} />
-        </TouchableBox>
-        <MenuView
-          actions={[
-            { id: 'details', title: t('Détails'), image: 'info.circle' },
-            {
-              id: 'open-tab',
-              title: t('tab.openInNewTab'),
-              image: 'arrow.up.forward.square',
-            },
-          ]}
-          onPressAction={({ nativeEvent }) => {
-            switch (nativeEvent.event) {
-              case 'details':
-                onPress()
-                break
-              case 'open-tab':
-                onOpenInNewTab()
-                break
-            }
-          }}
-        >
-          <Box row center height={60} width={44}>
-            <Icon.Feather name="more-vertical" size={18} />
-          </Box>
-        </MenuView>
-      </Box>
+    <HeaderBox topInset={topInset}>
+      <PageContent row flex={1}>
+        <Box center>
+          {hasBackButton && (
+            <Back padding onCustomPress={onBackPress}>
+              <FeatherIcon name="arrow-left" size={20} />
+            </Back>
+          )}
+        </Box>
+        <Box flex center>
+          <Text title fontSize={fontSize}>
+            {getLegacyLocalizedField(lang, { fr: title, en: titleEn })}
+          </Text>
+        </Box>
+        <Box center row>
+          <TouchableBox
+            center
+            height={60}
+            width={44}
+            onPress={onSearchPress}
+            accessibilityRole="button"
+            accessibilityLabel={t('Recherche')}
+          >
+            <FeatherIcon name="search" size={19} />
+          </TouchableBox>
+          <MenuView
+            actions={[
+              { id: 'details', title: t('Détails'), image: 'info.circle' },
+              {
+                id: 'open-tab',
+                title: t('tab.openInNewTab'),
+                image: 'arrow.up.forward.square',
+              },
+            ]}
+            onPressAction={({ nativeEvent }) => {
+              switch (nativeEvent.event) {
+                case 'details':
+                  onPress()
+                  break
+                case 'open-tab':
+                  onOpenInNewTab()
+                  break
+              }
+            }}
+          >
+            <Box row center height={60} width={44}>
+              <Icon.Feather name="more-vertical" size={18} />
+            </Box>
+          </MenuView>
+        </Box>
+      </PageContent>
     </HeaderBox>
   )
 }

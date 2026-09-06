@@ -1,7 +1,8 @@
+import { webFontFamily } from '~helpers/webFontFamily'
 import { bindStyles } from '~helpers/styledProps'
 import styled from '@emotion/native'
 import { Theme } from '~themes'
-import { TextProps as BaseTextProps, TextStyle, ViewStyle } from 'react-native'
+import { Platform, TextProps as BaseTextProps, TextStyle, ViewStyle } from 'react-native'
 import Animated from 'react-native-reanimated'
 
 export interface TextProps extends BaseTextProps {
@@ -114,12 +115,13 @@ export interface TextProps extends BaseTextProps {
 const Text = styled.Text<TextProps>((props): TextStyle => {
   const theme = props.theme as Theme
   const s = bindStyles(theme)
+  const selectedFont = s.fontFamily(props as unknown as Record<string, unknown>) as
+    | string
+    | undefined
   const backgroundColor = props.backgroundColor ?? props.bg
 
   return {
-    fontFamily: s.fontFamily(
-      props as unknown as Record<string, unknown>
-    ) as TextStyle['fontFamily'],
+    fontFamily: Platform.OS === 'web' ? webFontFamily(selectedFont) : selectedFont,
 
     color:
       theme.colors[props.color as keyof typeof theme.colors] || props.color || theme.colors.default,

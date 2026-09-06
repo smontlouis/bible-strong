@@ -29,6 +29,7 @@ const StyledTextInput = styled(SheetTextInput)(({ theme }) => ({
 
 interface EditGroupModalProps {
   sheetRef: React.RefObject<SheetRef | null>
+  title?: string
   initialName?: string
   initialColor?: string
   onSave: (data: { name: string; color: string }) => void
@@ -37,6 +38,7 @@ interface EditGroupModalProps {
 
 const EditGroupModal = ({
   sheetRef,
+  title,
   initialName = '',
   initialColor = GROUP_COLORS[0],
   onSave,
@@ -79,7 +81,7 @@ const EditGroupModal = ({
       ref={sheetRef}
       onDismiss={handleDismiss}
       onPresent={handlePresent}
-      header={<SheetHeader title={t('tabs.editGroup')} />}
+      header={<SheetHeader title={title ?? t('tabs.editGroup')} />}
       footer={props => (
         <SheetFooter {...props}>
           <HStack justifyContent="flex-end">

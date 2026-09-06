@@ -2034,5 +2034,9 @@
   "offlineSetup.language.en": "English",
   "resource.status.onlineAvailable": "Available online",
   "resource.status.onlineTemporary": "Online access temporarily unavailable",
-  "resource.status.offlineInstalled": "Offline copy installed"
+  "resource.status.offlineInstalled": "Offline copy installed",
+  "workspace.hideSidebar": "Hide sidebar",
+  "workspace.showSidebar": "Show sidebar",
+  "workspace.groupActions": "Actions for {{name}}",
+  "workspace.closeTab": "Close {{title}}"
 }

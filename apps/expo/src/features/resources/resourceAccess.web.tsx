@@ -1,3 +1,8 @@
+import {
+  createHttpSearchAnalyticsAccess,
+  noOpSearchAnalyticsAccess,
+  type SearchAnalyticsAccess,
+} from './searchAnalyticsAccess'
 import Constants from 'expo-constants'
 import { onlineManager } from '@tanstack/react-query'
 import { createContext, useContext, type ReactNode } from 'react'
@@ -54,6 +59,7 @@ export type ResourceAccessRegistry = {
   bibleContent: BibleContentAccess
   bibleReading: BibleReadingResourceAccess
   bibleSearch: BibleSearchAccess
+  searchAnalytics: SearchAnalyticsAccess
   dictionary: DictionaryAccess
   lexiconBible: LexiconBibleResourceAccess
   nave: NaveAccess
@@ -88,7 +94,11 @@ const strongLexiconModules = new Set(resourceApiBaseUrl ? ['core', 'resources', 
 const commentaryCollections = new Set(resourceApiBaseUrl ? ['MHY'] : [])
 
 const bibleChapter = resourceApiBaseUrl
-  ? createHttpBibleChapterAdapter({ baseUrl: resourceApiBaseUrl, fetcher: resourceApiFetch, isOnline })
+  ? createHttpBibleChapterAdapter({
+      baseUrl: resourceApiBaseUrl,
+      fetcher: resourceApiFetch,
+      isOnline,
+    })
   : unavailableHttpBibleChapterAdapter
 
 const strongLexicon = resourceApiBaseUrl
@@ -187,6 +197,13 @@ export const defaultResourceAccess: ResourceAccessRegistry = {
   },
   bibleReading,
   bibleSearch,
+  searchAnalytics: resourceApiBaseUrl
+    ? createHttpSearchAnalyticsAccess({
+        baseUrl: resourceApiBaseUrl,
+        fetcher: resourceApiFetch,
+        isOnline,
+      })
+    : noOpSearchAnalyticsAccess,
   dictionary,
   lexiconBible,
   nave,

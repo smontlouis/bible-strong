@@ -66,9 +66,9 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
   }
 
   return (
-    <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
-      <AnnotationContainer>
-        <Box row style={{ marginBottom: 10 }} alignItems="center">
+    <AnnotationContainer>
+      <TouchableOpacity accessibilityRole="button" activeOpacity={0.7} onPress={openBibleView}>
+        <Box row style={{ marginBottom: 10 }} pr={32} alignItems="center">
           <HStack flex row alignItems="center" gap={10}>
             <HStack>
               <HighlightTypeIndicator
@@ -86,26 +86,29 @@ const AnnotationItem = ({ item, onSettingsPress }: AnnotationItemProps) => {
           <DateText style={{ fontSize: 10 }}>
             {t('Il y a {{formattedDate}}', { formattedDate })}
           </DateText>
-          {onSettingsPress && (
-            <LinkBox
-              accessibilityLabel={t('accessibility.options')}
-              p={4}
-              ml={10}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              onPress={() => onSettingsPress(item)}
-            >
-              <FeatherIcon name="more-vertical" size={20} />
-            </LinkBox>
-          )}
         </Box>
         <Text fontSize={14} marginBottom={15}>
           {`...${item.text}...`}
         </Text>
-        {item.tags && Object.keys(item.tags).length > 0 && (
-          <EntityChipList tags={item.tags as TagsObj} />
-        )}
-      </AnnotationContainer>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      {item.tags && Object.keys(item.tags).length > 0 && (
+        <EntityChipList tags={item.tags as TagsObj} />
+      )}
+      {onSettingsPress && (
+        <LinkBox
+          accessibilityLabel={t('accessibility.options')}
+          position="absolute"
+          top={0}
+          right={0}
+          p={4}
+          ml={10}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          onPress={() => onSettingsPress(item)}
+        >
+          <FeatherIcon name="more-vertical" size={20} />
+        </LinkBox>
+      )}
+    </AnnotationContainer>
   )
 }
 

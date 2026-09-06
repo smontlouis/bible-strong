@@ -63,6 +63,10 @@ const FullAppRuntime = ({ theme }: { theme: Theme }) => {
                   name="(explore)"
                   options={createFormSheetOptions(theme, { sheetAllowedDetents: [0.45, 1] })}
                 />
+                <Stack.Screen
+                  name="(commentary)"
+                  options={createFormSheetOptions(theme, { sheetAllowedDetents: [1] })}
+                />
                 <Stack.Screen name="(library)" />
                 <Stack.Screen
                   name="strong"

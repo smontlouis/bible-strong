@@ -1,3 +1,4 @@
+import PageContent, { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
 import { Image } from 'expo-image'
 import { useTheme } from '@emotion/react'
 import React from 'react'
@@ -56,8 +57,10 @@ export const StrongEditorialSection = ({
     gap={12}
     onLayout={onLayout}
   >
-    <StrongEyebrow>{title}</StrongEyebrow>
-    {children}
+    <PageContent maxWidth={PAGE_CONTENT_MAX_WIDTH - 40} gap={12}>
+      <StrongEyebrow>{title}</StrongEyebrow>
+      {children}
+    </PageContent>
   </VStack>
 )
 

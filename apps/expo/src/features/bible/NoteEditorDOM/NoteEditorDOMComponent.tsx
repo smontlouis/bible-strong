@@ -1,11 +1,13 @@
 'use dom'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, type CSSProperties } from 'react'
+import { noteEditorStyles } from './noteEditorStyles'
 import { scaleFontSize } from '../BibleDOM/scaleFontSize'
 
 const MIN_EDITOR_HEIGHT = 240
 
 interface Props {
+  standaloneDocument?: boolean
   dom?: import('expo/dom').DOMProps
   defaultTitle?: string
   defaultDescription?: string
@@ -30,6 +32,7 @@ interface Props {
 }
 
 export default function NoteEditorDOMComponent({
+  standaloneDocument = false,
   defaultTitle: rawDefaultTitle = '',
   defaultDescription: rawDefaultDescription = '',
   encodedDefaultTitle,
@@ -155,14 +158,18 @@ export default function NoteEditorDOMComponent({
   return (
     <div
       ref={containerRef}
-      style={{
-        fontFamily: 'system-ui',
-        color: textColor,
-        overflow: 'hidden',
-        width: '100%',
-        minHeight: MIN_EDITOR_HEIGHT,
-        animation: 'fade 300ms ease-out',
-      }}
+      className="note-editor"
+      style={
+        {
+          '--note-placeholder-color': placeholderColor,
+          fontFamily: 'system-ui',
+          color: textColor,
+          overflow: 'hidden',
+          width: '100%',
+          minHeight: MIN_EDITOR_HEIGHT,
+          animation: 'note-editor-fade 300ms ease-out',
+        } as CSSProperties
+      }
     >
       {/* Title */}
       <div
@@ -217,25 +224,7 @@ export default function NoteEditorDOMComponent({
       >
         {defaultDescription}
       </div>
-      <style>{`
-        @keyframes fade {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        html, body {
-          margin: 0;
-          padding: 0;
-          height: auto;
-          overflow: hidden;
-        }
-        [contenteditable]:empty:before {
-          content: attr(data-placeholder);
-          color: ${placeholderColor};
-        }
-        [contenteditable]:focus {
-          outline: none;
-        }
-      `}</style>
+      <style>{noteEditorStyles(standaloneDocument)}</style>
     </div>
   )
 }

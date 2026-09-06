@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { LegendList } from '@legendapp/list'
 import React, { useState } from 'react'
@@ -137,7 +138,10 @@ const StrongConcordancePage = ({
       estimatedItemSize={104}
       drawDistance={312}
       recycleItems
-      contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 }}
+      contentContainerStyle={[
+        pageContentStyle,
+        { paddingHorizontal: 20, paddingTop: 22, paddingBottom: 90 },
+      ]}
       keyExtractor={verse => `${verse.Livre}-${verse.Chapitre}-${verse.Verset}`}
       onEndReached={() => {
         if (concordanceQuery.hasNextPage && !concordanceQuery.isFetchingNextPage) {

@@ -1,3 +1,4 @@
+import { webFontFamily } from '~helpers/webFontFamily'
 import type { JSONValue } from 'expo/build/dom/dom.types'
 import { useEffect, useRef, useState } from 'react'
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller'
@@ -275,7 +276,7 @@ export default function StudiesDomWrapper({
   const editor = (
     <StudiesDOMComponent
       ref={ref}
-      fontFamily={fontFamily}
+      fontFamily={Platform.OS === 'web' ? webFontFamily(fontFamily) : fontFamily}
       language={i18n.language}
       encodedContentToDisplay={encodedContentToDisplay}
       isReadOnly={isReadOnly}

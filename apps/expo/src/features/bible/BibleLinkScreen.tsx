@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import styled from '@emotion/native'
 import { useTheme } from '@emotion/react'
 import { MenuView } from '~common/ui/MenuView'
@@ -302,9 +303,12 @@ const BibleLinkScreen = () => {
           <ScrollView
             keyboardShouldPersistTaps="handled"
             style={{ flex: 1 }}
-            contentContainerStyle={{
-              paddingBottom: isEditing ? FOOTER_HEIGHT + keyboardHeight + 20 : 0,
-            }}
+            contentContainerStyle={[
+              pageContentStyle,
+              {
+                paddingBottom: isEditing ? FOOTER_HEIGHT + keyboardHeight + 20 : 0,
+              },
+            ]}
           >
             <VStack gap={10} paddingHorizontal={20}>
               {isEditing && (

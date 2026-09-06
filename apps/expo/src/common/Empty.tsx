@@ -3,6 +3,7 @@ import styled from '@emotion/native'
 import { Image, ImageSource } from 'expo-image'
 import Lottie from 'lottie-react-native'
 import React, { useEffect, useRef } from 'react'
+import PageContent from '~common/ui/PageContent'
 import Box from '~common/ui/Box'
 import Text from '~common/ui/Text'
 
@@ -32,7 +33,7 @@ const Empty = ({ message, source, icon, iconElement, children, ...props }: Props
 
   return (
     <Container {...props}>
-      <Box alignItems="center" justifyContent="center" flex paddingHorizontal={20}>
+      <PageContent alignItems="center" justifyContent="center" flex paddingHorizontal={20}>
         {icon && (
           <Box mb={20}>
             <Image
@@ -61,7 +62,7 @@ const Empty = ({ message, source, icon, iconElement, children, ...props }: Props
           </Text>
         )}
         {children}
-      </Box>
+      </PageContent>
     </Container>
   )
 }

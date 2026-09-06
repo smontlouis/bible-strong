@@ -1,3 +1,4 @@
+import PageContent, { pageContentStyle } from '~common/ui/PageContent'
 import type { ReactNode } from 'react'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -1165,6 +1166,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
       if (soloPaginatedSection) {
         return (
           <FlatList
+            contentContainerStyle={pageContentStyle}
             keyboardShouldPersistTaps="handled"
             renderScrollComponent={props => (
               <KeyboardAwareScrollView
@@ -1207,6 +1209,7 @@ const SQLiteSearchScreen = ({ searchValue, setSearchValue }: Props) => {
 
       return (
         <FlatList
+          contentContainerStyle={pageContentStyle}
           keyboardShouldPersistTaps="handled"
           renderScrollComponent={props => (
             <KeyboardAwareScrollView
@@ -1392,7 +1395,7 @@ const SearchNoResultsState = ({ query }: { query: string }) => {
   const theme = useTheme()
 
   return (
-    <Box flex={1} alignItems="center" justifyContent="center" px={20} py={60}>
+    <PageContent flex={1} alignItems="center" justifyContent="center" px={20} py={60}>
       <Box mb={18}>
         <Image
           source={require('~assets/images/empty-state-icons/search.svg')}
@@ -1407,7 +1410,7 @@ const SearchNoResultsState = ({ query }: { query: string }) => {
       <Text color="tertiary" textAlign="center">
         {t('Aucun résultat trouvé pour "{{query}}"', { query })}
       </Text>
-    </Box>
+    </PageContent>
   )
 }
 

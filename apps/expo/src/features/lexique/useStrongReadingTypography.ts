@@ -1,3 +1,5 @@
+import { Platform } from 'react-native'
+import { webFontFamily } from '~helpers/webFontFamily'
 import { useSelector } from 'react-redux'
 
 import type { RootState } from '~redux/modules/reducer'
@@ -8,7 +10,7 @@ export const useStrongReadingTypography = (): StrongReadingTypography => {
   const settings = useSelector((state: RootState) => state.user.bible.settings)
 
   return {
-    fontFamily,
+    fontFamily: Platform.OS === 'web' ? webFontFamily(fontFamily) : fontFamily,
     fontSizeScale: settings.fontSizeScale,
     lineHeight: settings.lineHeight,
   }

@@ -1,3 +1,4 @@
+import { pageContentStyle } from '~common/ui/PageContent'
 import React, { useState } from 'react'
 import { ScrollView, RefreshControl } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -55,6 +56,7 @@ const ExploreScreen = () => {
   if (status === 'Rejected') {
     return (
       <ScrollView
+        contentContainerStyle={pageContentStyle}
         refreshControl={
           <RefreshControl refreshing={false} onRefresh={() => dispatch(fetchPlans())} />
         }
@@ -75,14 +77,16 @@ const ExploreScreen = () => {
           onRefresh={() => dispatch(fetchPlans())}
         />
       }
-      contentContainerStyle={{
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        maxWidth: 600,
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        width: '100%',
-      }}
+      contentContainerStyle={[
+        pageContentStyle,
+        {
+          flexDirection: 'row',
+          flexWrap: 'wrap',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          width: '100%',
+        },
+      ]}
     >
       <Box row width="100%" p={10}>
         <LangButton isSelected={lang === 'fr'} onPress={() => setLang('fr')}>

@@ -1,3 +1,4 @@
+import PageContent, { PAGE_CONTENT_MAX_WIDTH } from '~common/ui/PageContent'
 import React, { useRef, useState } from 'react'
 import { ScrollView, type ScrollView as ScrollViewType } from 'react-native'
 import { useTranslation } from 'react-i18next'
@@ -217,71 +218,75 @@ const StrongDetailMainPage = ({
         borderBottomWidth={1}
         borderColor="border"
       >
-        <Text color="primary" bold fontSize={12} textTransform="uppercase">
-          {entry.stepCode}
-        </Text>
-        <HStack alignItems="flex-end" gap={16}>
-          <VStack flex gap={5}>
-            <Text
-              accessibilityLanguage={entry.language === 'hebrew' ? 'he-IL' : 'el-GR'}
-              fontWeight="400"
-              style={getScaledStrongTextStyle(
-                isOriginalUnnamed ? 32 : 40,
-                isOriginalUnnamed ? 38 : 45,
-                readingTypography
-              )}
-            >
-              {originalLabel}
-            </Text>
-            <Text fontWeight="500" fontSize={25}>
-              {entry.gloss}
-            </Text>
-            {!isOriginalUnnamed && (entry.transliteration || entry.pronunciation) && (
-              <Text color="tertiary" fontSize={14}>
-                {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
+        <PageContent maxWidth={PAGE_CONTENT_MAX_WIDTH - 40} gap={11}>
+          <Text color="primary" bold fontSize={12} textTransform="uppercase">
+            {entry.stepCode}
+          </Text>
+          <HStack alignItems="flex-end" gap={16}>
+            <VStack flex gap={5}>
+              <Text
+                accessibilityLanguage={entry.language === 'hebrew' ? 'he-IL' : 'el-GR'}
+                fontWeight="400"
+                style={getScaledStrongTextStyle(
+                  isOriginalUnnamed ? 32 : 40,
+                  isOriginalUnnamed ? 38 : 45,
+                  readingTypography
+                )}
+              >
+                {originalLabel}
               </Text>
-            )}
-          </VStack>
-          {!isOriginalUnnamed &&
-            hasStrongAudio(entry.language === 'hebrew' ? 'hebreu' : 'grec', entry.baseCode) && (
-              <Box bg="primary" bgOpacity="010" borderRadius={24} size={48} center>
-                <ListenToStrong
-                  type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
-                  code={entry.baseCode}
-                />
-              </Box>
-            )}
-        </HStack>
+              <Text fontWeight="500" fontSize={25}>
+                {entry.gloss}
+              </Text>
+              {!isOriginalUnnamed && (entry.transliteration || entry.pronunciation) && (
+                <Text color="tertiary" fontSize={14}>
+                  {[entry.transliteration, entry.pronunciation].filter(Boolean).join(' · ')}
+                </Text>
+              )}
+            </VStack>
+            {!isOriginalUnnamed &&
+              hasStrongAudio(entry.language === 'hebrew' ? 'hebreu' : 'grec', entry.baseCode) && (
+                <Box bg="primary" bgOpacity="010" borderRadius={24} size={48} center>
+                  <ListenToStrong
+                    type={entry.language === 'hebrew' ? 'hebreu' : 'grec'}
+                    code={entry.baseCode}
+                  />
+                </Box>
+              )}
+          </HStack>
+        </PageContent>
       </VStack>
 
       <Box mx={-20} py={10} bg="reverse" borderBottomWidth={1} borderColor="border" zIndex={10}>
-        <JumpNavigationContent
-          anchors={[
-            {
-              id: 'context',
-              label: t('strongDetail.jump.context'),
-              visible: Boolean(contextVerse),
-            },
-            { id: 'definition', label: t('strongDetail.jump.definition'), visible: true },
-            {
-              id: 'media',
-              label: t('strongDetail.jump.media'),
-              visible: passageMedia.length > 0,
-            },
-            { id: 'entity', label: entityLabel, visible: Boolean(entry.entity) },
-            {
-              id: 'related',
-              label: t('strongDetail.jump.related'),
-              visible: lexicalRelations.relatedWords.length > 0,
-            },
-            {
-              id: 'concordance',
-              label: t('Concordance'),
-              visible: concordanceCount > 0,
-            },
-          ]}
-          onPress={scrollToAnchor}
-        />
+        <PageContent>
+          <JumpNavigationContent
+            anchors={[
+              {
+                id: 'context',
+                label: t('strongDetail.jump.context'),
+                visible: Boolean(contextVerse),
+              },
+              { id: 'definition', label: t('strongDetail.jump.definition'), visible: true },
+              {
+                id: 'media',
+                label: t('strongDetail.jump.media'),
+                visible: passageMedia.length > 0,
+              },
+              { id: 'entity', label: entityLabel, visible: Boolean(entry.entity) },
+              {
+                id: 'related',
+                label: t('strongDetail.jump.related'),
+                visible: lexicalRelations.relatedWords.length > 0,
+              },
+              {
+                id: 'concordance',
+                label: t('Concordance'),
+                visible: concordanceCount > 0,
+              },
+            ]}
+            onPress={scrollToAnchor}
+          />
+        </PageContent>
       </Box>
 
       {!!contextVerse && (
@@ -315,7 +320,11 @@ const StrongDetailMainPage = ({
         </StrongEditorialSection>
       )}
 
-      {!!contextVerse && <Box width={42} height={3} bg="default" mt={34} mb={2} />}
+      {!!contextVerse && (
+        <PageContent maxWidth={PAGE_CONTENT_MAX_WIDTH - 40}>
+          <Box width={42} height={3} bg="default" mt={34} mb={2} />
+        </PageContent>
+      )}
 
       <StrongEditorialSection
         title={t('strongDetail.definition.title')}
@@ -412,39 +421,41 @@ const StrongDetailMainPage = ({
           gap={14}
           onLayout={event => setAnchor('entity', event.nativeEvent.layout.y)}
         >
-          <StrongEntitySummaryCard
-            entity={entry.entity}
-            plain
-            readingTypography={readingTypography}
-            onOpenBibleReference={onOpenBibleReference}
-            onOpenStrong={onOpenStrong}
-          />
-          <StrongPreviewLink
-            label={t('strongDetail.entity.open', { name: entry.entity.name })}
-            onPress={() => onOpenPage('entity')}
-          />
-          {!!entityRelations?.graph.length && (
-            <VStack mt={7} gap={10}>
-              <Text bold fontSize={17}>
-                {t(
-                  entry.entity.category === 'person'
-                    ? 'strongDetail.entity.personalRelationships'
-                    : 'strongDetail.entity.relationships'
-                )}
-              </Text>
-              <StrongEntityRelationGraph
-                entity={entry.entity}
-                onOpenProfile={onOpenEntityProfile}
+          <PageContent maxWidth={PAGE_CONTENT_MAX_WIDTH - 40} gap={14}>
+            <StrongEntitySummaryCard
+              entity={entry.entity}
+              plain
+              readingTypography={readingTypography}
+              onOpenBibleReference={onOpenBibleReference}
+              onOpenStrong={onOpenStrong}
+            />
+            <StrongPreviewLink
+              label={t('strongDetail.entity.open', { name: entry.entity.name })}
+              onPress={() => onOpenPage('entity')}
+            />
+            {!!entityRelations?.graph.length && (
+              <VStack mt={7} gap={10}>
+                <Text bold fontSize={17}>
+                  {t(
+                    entry.entity.category === 'person'
+                      ? 'strongDetail.entity.personalRelationships'
+                      : 'strongDetail.entity.relationships'
+                  )}
+                </Text>
+                <StrongEntityRelationGraph
+                  entity={entry.entity}
+                  onOpenProfile={onOpenEntityProfile}
+                  onOpenEntity={onOpenEntityRelation}
+                />
+              </VStack>
+            )}
+            {!!entityRelations?.remaining.length && (
+              <StrongEntityRelationList
+                relations={entityRelations.remaining}
                 onOpenEntity={onOpenEntityRelation}
               />
-            </VStack>
-          )}
-          {!!entityRelations?.remaining.length && (
-            <StrongEntityRelationList
-              relations={entityRelations.remaining}
-              onOpenEntity={onOpenEntityRelation}
-            />
-          )}
+            )}
+          </PageContent>
         </VStack>
       ) : null}
 

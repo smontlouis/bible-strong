@@ -7,6 +7,7 @@ import { activeTabIndexAtom, appSwitcherModeAtom, tabsCountAtom } from '../../..
 import { useAppSwitcherContext } from '../AppSwitcherContext'
 import { resolveAndSetTabId, fadeInTabScreen } from './tabHelpers'
 import useTabConstants from './useTabConstants'
+import { useResponsiveWorkspace } from './useResponsiveWorkspace'
 import useTakeActiveTabSnapshot from './useTakeActiveTabSnapshot'
 
 const tabTimingConfig = {
@@ -22,6 +23,7 @@ const switchToViewMode = () => {
 }
 
 export const useTabAnimations = () => {
+  const isWide = useResponsiveWorkspace()
   const setActiveTabIndex = useSetAtom(activeTabIndexAtom)
   const setAppSwitcherMode = useSetAtom(appSwitcherModeAtom)
   const { HEIGHT } = useTabConstants()
@@ -240,6 +242,14 @@ export const useTabAnimations = () => {
    *   4. On completion: resolve tabId, fade out carousel, take snapshot
    */
   const slideToIndex = (index: number) => {
+    if (isWide) {
+      setActiveTabIndex(index)
+      setAppSwitcherMode('view')
+      activeTabPreview.index.set(index)
+      resolveAndSetTabId(activeTabScreen.tabId, index)
+      activeTabScreen.opacity.set(1)
+      return
+    }
     // Cas spécial: en mode 'view' avec le même index (ex: création d'onglet depuis état vide)
     if (activeTabPreview.index.get() === index) {
       const tabsCount = getDefaultStore().get(tabsCountAtom)

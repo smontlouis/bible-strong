@@ -1,3 +1,4 @@
+import { pageContentStyle } from './PageContent'
 import styled from '@emotion/native'
 import React from 'react'
 import { ScrollViewProps, StyleProp, StyleSheet, ViewStyle } from 'react-native'
@@ -16,7 +17,6 @@ const ScrollView = styled.ScrollView<StyledScrollViewProps>(
     backgroundColor: backgroundColor
       ? theme.colors[backgroundColor as keyof typeof theme.colors] || backgroundColor
       : theme.colors.reverse,
-    maxWidth: orientation.maxWidth,
     marginLeft: 'auto',
     marginRight: 'auto',
     width: '100%',
@@ -52,6 +52,7 @@ export const HomeScrollView = ({
       backgroundColor="lightGrey"
       showsVerticalScrollIndicator={showsVerticalScrollIndicator}
       contentContainerStyle={{
+        ...(!props.horizontal && pageContentStyle),
         backgroundColor: theme.colors.lightGrey,
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
@@ -85,6 +86,7 @@ const AppScrollView = ({
       {...props}
       orientation={orientation}
       contentContainerStyle={{
+        ...(!props.horizontal && pageContentStyle),
         paddingTop: 20,
         paddingBottom: 10 + insets.bottom,
         ...StyleSheet.flatten(contentContainerStyle),
