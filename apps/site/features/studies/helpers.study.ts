@@ -5,7 +5,6 @@ import {
   getStudyEntityInlineClasses,
   renderStudyEntityBlock,
 } from './study-entities'
-// import generateMetaImage from '../../helpers/generateMetaImage'
 
 export interface FirebaseStudy {
   id: string
@@ -216,11 +215,6 @@ export const getStudy = async (id: string): Promise<StudyPageData | null> => {
   const html = convertStudyOpsToHtml(result.content?.ops)
 
   const { imageUrl, whatsappImageUrl } = { imageUrl: '', whatsappImageUrl: '' }
-  // await generateMetaImage(
-  //   result.id,
-  //   result.title,
-  //   result.user.displayName
-  // )
 
   const res = {
     ...result,

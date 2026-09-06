@@ -10,13 +10,9 @@ import {
   getDocs,
   updateDoc,
 } from '~helpers/firebase'
-// import { getLangIsFr } from '~i18n'
 import { RootState } from './reducer'
 import { importData, receiveLiveUpdates, USER_LOGOUT } from './user'
 import { markReadingSliceAsRead } from '~features/plans/planProgress'
-
-// const bibleProjectPlan: Plan = require('~assets/plans/bible-project-plan')
-// const bibleProjectPlanEn: Plan = require('~assets/plans/bible-project-plan-en')
 
 type ImageModel = { [key: string]: string }
 

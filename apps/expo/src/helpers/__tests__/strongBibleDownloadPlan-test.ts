@@ -36,10 +36,6 @@ jest.mock('~helpers/databases', () => ({
       : `/documents/SQLite/${lang}/${databaseId.toLowerCase()}.sqlite`,
 }))
 
-jest.mock('~helpers/requireBiblePath', () => ({
-  requireBiblePath: jest.fn(),
-}))
-
 import {
   createInterlinearSidecarDownloadPlan,
   createBibleDownloadItem,

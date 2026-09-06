@@ -30,25 +30,7 @@ describe('resolveBibleTabResources', () => {
     await expect(resolveBibleTabResources(data)).resolves.toEqual(data)
   })
 
-  it('keeps reverse interlinear mode when BHG and either STEP index are installed', async () => {
-    const data = {
-      ...createData('LSG'),
-      strongMode: 'reverse-interlinear' as const,
-    }
-
-    await expect(resolveBibleTabResources(data)).resolves.toEqual(data)
-  })
-
-  it('preserves reverse interlinear mode when its offline BHG or STEP dependency is missing', async () => {
-    const data = {
-      ...createData('LSG'),
-      strongMode: 'reverse-interlinear' as const,
-    }
-
-    await expect(resolveBibleTabResources(data)).resolves.toEqual(data)
-  })
-
-  it('preserves reverse interlinear mode when its offline Strong sidecar is missing', async () => {
+  it('preserves the requested reverse interlinear mode', async () => {
     const data = {
       ...createData('LSG'),
       strongMode: 'reverse-interlinear' as const,

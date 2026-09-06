@@ -81,10 +81,4 @@ export const getLanguage = (): ActiveLanguage => {
   return isActiveLanguage(lang) ? lang : DEFAULT_LANGUAGE
 }
 
-/**
- * @deprecated Use getLanguage() instead
- * This function returns a boolean which doesn't scale for multiple languages
- */
-export const getLangIsFr = () => getLanguage() === 'fr'
-
 export default i18n

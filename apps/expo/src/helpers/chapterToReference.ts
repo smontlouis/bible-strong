@@ -1,11 +1,6 @@
 import { getBook } from '~helpers/bibleBookCatalog'
+import { range } from '~helpers/range'
 import i18n from '~i18n'
-
-const range = (start: number, end: number) => {
-  return Array(end - start + 1)
-    .fill('')
-    .map((_, idx) => start + idx)
-}
 
 export const chapterToReference = (chapters: string[] | string) => {
   // 3|3-5

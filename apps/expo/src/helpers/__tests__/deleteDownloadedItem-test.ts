@@ -20,10 +20,6 @@ jest.mock('../biblesDb', () => ({
   removeBibleVersion: jest.fn(),
 }))
 
-jest.mock('~helpers/requireBiblePath', () => ({
-  requireBiblePath: jest.fn(),
-}))
-
 jest.mock('../sqlite', () => ({
   dbManager: {
     getDB: jest.fn(),
